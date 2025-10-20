@@ -36,11 +36,15 @@ import { FeedbackButtons } from '../shared/feedback_buttons';
 import { CopyToClipboardButton } from '../shared/copy_to_clipboard_button';
 import { useKubernetesFlow } from '../kubernetes/use_kubernetes_flow';
 import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
+import { buildInstallStackCommand } from './build_install_stack_command';
+import {
+  CLUSTER_OVERVIEW_DASHBOARD_ID,
+  OTEL_HELM_CHARTS_REPO,
+  OTEL_STACK_NAMESPACE,
+} from './constants';
+import { buildValuesFileUrl } from './build_values_file_url';
+import { useManagedOtlpServiceAvailability } from '../../shared/use_managed_otlp_service_availability';
 import { usePricingFeature } from '../shared/use_pricing_feature';
-
-const OTEL_HELM_CHARTS_REPO = 'https://open-telemetry.github.io/opentelemetry-helm-charts';
-const OTEL_KUBE_STACK_VERSION = '0.9.1';
-const CLUSTER_OVERVIEW_DASHBOARD_ID = 'kubernetes_otel-cluster-overview';
 
 export const OtelKubernetesPanel: React.FC = () => {
   useFlowBreadcrumb({
@@ -51,19 +55,18 @@ export const OtelKubernetesPanel: React.FC = () => {
   const { data, error, refetch } = useKubernetesFlow('kubernetes_otel');
   const [idSelected, setIdSelected] = useState('nodejs');
   const {
-    services: {
-      share,
-      context: { isServerless },
-    },
+    services: { share },
   } = useKibana<ObservabilityOnboardingAppServices>();
+
   const apmLocator = share.url.locators.get('APM_LOCATOR');
   const dashboardLocator = share.url.locators.get(DASHBOARD_APP_LOCATOR);
   const logsLocator = share.url.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID);
   const theme = useEuiTheme();
   const { onPageReady } = usePerformanceContext();
-  const metricsOnboardingEnabled = usePricingFeature(
+  const isMetricsOnboardingEnabled = usePricingFeature(
     ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING
   );
+  const isManagedOtlpServiceAvailable = useManagedOtlpServiceAvailability();
 
   useEffect(() => {
     if (data) {
@@ -75,34 +78,29 @@ export const OtelKubernetesPanel: React.FC = () => {
     }
   }, [data, onPageReady]);
 
-  const ingestEndpointUrl = isServerless ? data?.managedOtlpServiceUrl : data?.elasticsearchUrl;
-
   if (error) {
     return (
       <EmptyPrompt onboardingFlowType="kubernetes_otel" error={error} onRetryClick={refetch} />
     );
   }
 
-  const elasticEndpointVarName = isServerless ? 'elastic_otlp_endpoint' : 'elastic_endpoint';
-  const valuesFileSubfolder = isServerless ? '/managed_otlp' : '';
-  const valuesFileName =
-    !isServerless || metricsOnboardingEnabled ? 'values.yaml' : 'logs-values.yaml';
-
-  const otelKubeStackValuesFileUrl = data
-    ? `https://raw.githubusercontent.com/elastic/elastic-agent/refs/tags/v${data.elasticAgentVersionInfo.agentBaseVersion}/deploy/helm/edot-collector/kube-stack${valuesFileSubfolder}/${valuesFileName}`
-    : '';
-  const namespace = 'opentelemetry-operator-system';
   const addRepoCommand = `helm repo add open-telemetry '${OTEL_HELM_CHARTS_REPO}' --force-update`;
+  const otelKubeStackValuesFileUrl = data
+    ? buildValuesFileUrl({
+        isMetricsOnboardingEnabled,
+        isManagedOtlpServiceAvailable,
+        agentVersion: data.elasticAgentVersionInfo.agentBaseVersion,
+      })
+    : undefined;
   const installStackCommand = data
-    ? `kubectl create namespace ${namespace}
-kubectl create secret generic elastic-secret-otel \\
-  --namespace ${namespace} \\
-  --from-literal=${elasticEndpointVarName}='${ingestEndpointUrl}' \\
-  --from-literal=elastic_api_key='${data.apiKeyEncoded}'
-helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
-  --namespace ${namespace} \\
-  --values '${otelKubeStackValuesFileUrl}' \\
-  --version '${OTEL_KUBE_STACK_VERSION}'`
+    ? buildInstallStackCommand({
+        isMetricsOnboardingEnabled,
+        isManagedOtlpServiceAvailable,
+        managedOtlpEndpointUrl: data.managedOtlpServiceUrl,
+        elasticsearchUrl: data.elasticsearchUrl,
+        apiKeyEncoded: data.apiKeyEncoded,
+        agentVersion: data.elasticAgentVersionInfo.agentBaseVersion,
+      })
     : undefined;
 
   return (
@@ -200,6 +198,10 @@ helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kub
                       flush="left"
                       target="_blank" // The `download` attribute does not work cross-origin so it's better to open the file in a new tab
                       data-test-subj="observabilityOnboardingOtelKubernetesPanelDownloadValuesFileButton"
+                      aria-label={i18n.translate(
+                        'xpack.observability_onboarding.otelKubernetesPanel.downloadValuesFileAriaLabel',
+                        { defaultMessage: 'Download the values file for OpenTelemetry setup' }
+                      )}
                     >
                       {i18n.translate(
                         'xpack.observability_onboarding.otelKubernetesPanel.downloadValuesFileButtonEmptyLabel',
@@ -213,7 +215,7 @@ helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kub
               <EuiSkeletonText lines={6} />
             ),
           },
-          ...(metricsOnboardingEnabled
+          ...(isMetricsOnboardingEnabled
             ? [
                 {
                   title: i18n.translate(
@@ -274,7 +276,9 @@ helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kub
                       >
                         {i18n.translate(
                           'xpack.observability_onboarding.otelKubernetesPanel.step3a.title',
-                          { defaultMessage: '3(a) - Start with one of these annotations methods:' }
+                          {
+                            defaultMessage: '3(a) - Start with one of these annotations methods:',
+                          }
                         )}
                       </p>
                       <EuiSpacer />
@@ -299,7 +303,7 @@ spec:
   template:
     metadata:
       annotations:
-        instrumentation.opentelemetry.io/inject-${idSelected}: "${namespace}/elastic-instrumentation"
+        instrumentation.opentelemetry.io/inject-${idSelected}: "${OTEL_STACK_NAMESPACE}/elastic-instrumentation"
       ...
     spec:
       containers:
@@ -323,7 +327,7 @@ spec:
                           isCopyable={true}
                           data-test-subj="observabilityOnboardingOtelKubernetesPanelAnnotateAllResourcesSnippet"
                         >
-                          {`kubectl annotate namespace my-namespace instrumentation.opentelemetry.io/inject-${idSelected}="${namespace}/elastic-instrumentation"`}
+                          {`kubectl annotate namespace my-namespace instrumentation.opentelemetry.io/inject-${idSelected}="${OTEL_STACK_NAMESPACE}/elastic-instrumentation"`}
                         </EuiCodeBlock>
                       </EuiAccordion>
                       <EuiSpacer />
@@ -387,13 +391,13 @@ kubectl describe pod <myapp-pod-name> -n my-namespace`}
             children: data ? (
               <>
                 <p>
-                  {metricsOnboardingEnabled && (
+                  {isMetricsOnboardingEnabled && (
                     <FormattedMessage
                       id="xpack.observability_onboarding.otelKubernetesPanel.onceYourKubernetesInfrastructureLabel"
                       defaultMessage="Analyze your Kubernetes cluster’s health and monitor your container workloads."
                     />
                   )}
-                  {!metricsOnboardingEnabled && (
+                  {!isMetricsOnboardingEnabled && (
                     <FormattedMessage
                       id="xpack.observability_onboarding.logsEssentials.otelKubernetesPanel.onceYourKubernetesInfrastructureLabel"
                       defaultMessage="After running the previous command, come back and view your data."
@@ -409,7 +413,7 @@ kubectl describe pod <myapp-pod-name> -n my-namespace`}
                   newTab={false}
                   isLoading={false}
                   actionLinks={
-                    metricsOnboardingEnabled
+                    isMetricsOnboardingEnabled
                       ? [
                           {
                             id: CLUSTER_OVERVIEW_DASHBOARD_ID,

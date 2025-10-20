@@ -8,6 +8,7 @@
 import type { Plugin as PluginClass } from '@kbn/core/public';
 import type { Observable } from 'rxjs';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { StreamsRepositoryClient } from './api';
 import type { StreamsPublicConfig } from '../common/config';
 import type { EnableStreamsResponse, DisableStreamsResponse } from '../server/lib/streams/client';
@@ -39,6 +40,7 @@ export interface StreamsPluginSetupDependencies {
 
 export interface StreamsPluginStartDependencies {
   cloud?: CloudStart;
+  spaces?: SpacesPluginStart;
 }
 
 export type StreamsPluginClass = PluginClass<

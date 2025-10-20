@@ -7,6 +7,14 @@
 
 export { Graph } from './graph/graph';
 export { GraphInvestigation } from './graph_investigation/graph_investigation';
+export {
+  type GraphGroupedNodePreviewPanelProps,
+  GraphGroupedNodePreviewPanel,
+} from './graph_grouped_node_preview_panel';
+export {
+  GraphGroupedNodePreviewPanelKey,
+  GROUP_PREVIEW_BANNER,
+} from './graph_grouped_node_preview_panel/constants';
 export { GraphPopover } from './graph/graph_popover';
 export { useGraphPopover } from './graph/use_graph_popover';
 export type { GraphProps } from './graph/graph';

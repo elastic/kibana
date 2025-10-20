@@ -2,133 +2,17 @@
   "id": "workflowsManagement",
   "client": {
     "classes": [],
-    "functions": [
-      {
-        "parentPluginId": "workflowsManagement",
-        "id": "def-public.WorkflowExecution",
-        "type": "Function",
-        "tags": [],
-        "label": "WorkflowExecution",
-        "description": [],
-        "signature": [
-          "React.LazyExoticComponent<React.LazyExoticComponent<React.FC<",
-          {
-            "pluginId": "workflowsManagement",
-            "scope": "public",
-            "docId": "kibWorkflowsManagementPluginApi",
-            "section": "def-public.WorkflowExecutionProps",
-            "text": "WorkflowExecutionProps"
-          },
-          ">>>"
-        ],
-        "path": "src/platform/plugins/shared/workflows_management/public/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "workflowsManagement",
-            "id": "def-public.WorkflowExecution.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/ts5.0/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ],
-    "interfaces": [
-      {
-        "parentPluginId": "workflowsManagement",
-        "id": "def-public.WorkflowExecutionProps",
-        "type": "Interface",
-        "tags": [],
-        "label": "WorkflowExecutionProps",
-        "description": [],
-        "path": "src/platform/plugins/shared/workflows_management/public/features/workflow_execution_detail/ui/workflow_execution_detail.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "workflowsManagement",
-            "id": "def-public.WorkflowExecutionProps.workflowExecutionId",
-            "type": "string",
-            "tags": [],
-            "label": "workflowExecutionId",
-            "description": [],
-            "path": "src/platform/plugins/shared/workflows_management/public/features/workflow_execution_detail/ui/workflow_execution_detail.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "workflowsManagement",
-            "id": "def-public.WorkflowExecutionProps.workflowYaml",
-            "type": "string",
-            "tags": [],
-            "label": "workflowYaml",
-            "description": [],
-            "path": "src/platform/plugins/shared/workflows_management/public/features/workflow_execution_detail/ui/workflow_execution_detail.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "workflowsManagement",
-            "id": "def-public.WorkflowExecutionProps.fields",
-            "type": "Array",
-            "tags": [],
-            "label": "fields",
-            "description": [],
-            "signature": [
-              "(keyof ",
-              {
-                "pluginId": "@kbn/workflows",
-                "scope": "common",
-                "docId": "kibKbnWorkflowsPluginApi",
-                "section": "def-common.EsWorkflowStepExecution",
-                "text": "EsWorkflowStepExecution"
-              },
-              ")[] | undefined"
-            ],
-            "path": "src/platform/plugins/shared/workflows_management/public/features/workflow_execution_detail/ui/workflow_execution_detail.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "workflowsManagement",
-            "id": "def-public.WorkflowExecutionProps.onClose",
-            "type": "Function",
-            "tags": [],
-            "label": "onClose",
-            "description": [],
-            "signature": [
-              "(() => void) | undefined"
-            ],
-            "path": "src/platform/plugins/shared/workflows_management/public/features/workflow_execution_detail/ui/workflow_execution_detail.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ],
+    "functions": [],
+    "interfaces": [],
     "enums": [],
     "misc": [],
     "objects": [],
     "setup": {
       "parentPluginId": "workflowsManagement",
-      "id": "def-public.WorkflowsPluginSetup",
+      "id": "def-public.WorkflowsPublicPluginSetup",
       "type": "Interface",
       "tags": [],
-      "label": "WorkflowsPluginSetup",
+      "label": "WorkflowsPublicPluginSetup",
       "description": [],
       "path": "src/platform/plugins/shared/workflows_management/public/types.ts",
       "deprecated": false,
@@ -139,10 +23,10 @@
     },
     "start": {
       "parentPluginId": "workflowsManagement",
-      "id": "def-public.WorkflowsPluginStart",
+      "id": "def-public.WorkflowsPublicPluginStart",
       "type": "Interface",
       "tags": [],
-      "label": "WorkflowsPluginStart",
+      "label": "WorkflowsPublicPluginStart",
       "description": [],
       "path": "src/platform/plugins/shared/workflows_management/public/types.ts",
       "deprecated": false,
@@ -161,10 +45,10 @@
     "objects": [],
     "setup": {
       "parentPluginId": "workflowsManagement",
-      "id": "def-server.WorkflowsPluginSetup",
+      "id": "def-server.WorkflowsServerPluginSetup",
       "type": "Interface",
       "tags": [],
-      "label": "WorkflowsPluginSetup",
+      "label": "WorkflowsServerPluginSetup",
       "description": [],
       "path": "src/platform/plugins/shared/workflows_management/server/types.ts",
       "deprecated": false,
@@ -172,7 +56,7 @@
       "children": [
         {
           "parentPluginId": "workflowsManagement",
-          "id": "def-server.WorkflowsPluginSetup.management",
+          "id": "def-server.WorkflowsServerPluginSetup.management",
           "type": "Object",
           "tags": [],
           "label": "management",
@@ -190,10 +74,10 @@
     },
     "start": {
       "parentPluginId": "workflowsManagement",
-      "id": "def-server.WorkflowsPluginStart",
+      "id": "def-server.WorkflowsServerPluginStart",
       "type": "Type",
       "tags": [],
-      "label": "WorkflowsPluginStart",
+      "label": "WorkflowsServerPluginStart",
       "description": [],
       "signature": [
         "{ [x: string]: never; }"
@@ -235,6 +119,21 @@
         "description": [],
         "signature": [
           "\"Workflows\""
+        ],
+        "path": "src/platform/plugins/shared/workflows_management/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workflowsManagement",
+        "id": "def-common.UNSUPPORTED_CONNECTOR_TYPES",
+        "type": "Array",
+        "tags": [],
+        "label": "UNSUPPORTED_CONNECTOR_TYPES",
+        "description": [],
+        "signature": [
+          "string[]"
         ],
         "path": "src/platform/plugins/shared/workflows_management/common/index.ts",
         "deprecated": false,

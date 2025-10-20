@@ -32,6 +32,7 @@ export interface WritableAgentProvider extends Omit<ReadonlyAgentProvider, 'read
 export type AgentProvider = ReadonlyAgentProvider | WritableAgentProvider;
 
 export type AgentProviderFn<ReadOnly extends boolean> = (opts: {
+  space: string;
   request: KibanaRequest;
 }) => MaybePromise<ReadOnly extends true ? ReadonlyAgentProvider : WritableAgentProvider>;
 

@@ -14,7 +14,13 @@ import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
-import { disableStreams, enableStreams, getQueries, putStream } from './helpers/requests';
+import {
+  deleteStream,
+  disableStreams,
+  enableStreams,
+  getQueries,
+  putStream,
+} from './helpers/requests';
 import type { RoleCredentials } from '../../services';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -67,7 +73,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         stream,
         ...emptyAssets,
       });
-      await alertingApi.deleteRules({ roleAuthc });
+    });
+
+    afterEach(async () => {
+      await deleteStream(apiClient, STREAM_NAME);
     });
 
     it('lists empty queries when none are defined on the stream', async () => {
@@ -90,7 +99,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         stream,
         ...emptyAssets,
         queries,
-        rules: [],
       });
       expect(updateStreamResponse).to.have.property('acknowledged', true);
 
@@ -147,7 +155,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream,
           ...emptyAssets,
           queries: [query],
-          rules: [],
         });
         const initialRules = await alertingApi.searchRules(roleAuthc, '');
 
@@ -190,7 +197,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream,
           ...emptyAssets,
           queries: [query],
-          rules: [],
         });
         const initialRules = await alertingApi.searchRules(roleAuthc, '');
 
@@ -236,7 +242,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             kql: { query: "message:'query'" },
           },
         ],
-        rules: [],
       });
 
       const deleteQueryResponse = await apiClient
@@ -283,7 +288,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         stream,
         ...emptyAssets,
         queries: [firstQuery, secondQuery, thirdQuery],
-        rules: [],
       });
       const initialRules = await alertingApi.searchRules(roleAuthc, '');
 

@@ -35,6 +35,7 @@ export const List: StoryFn = () => {
                       hasShadow
                       alt={agentName}
                       src={getAgentIcon(agentName, false)}
+                      tabIndex={0}
                     />
                   </EuiToolTip>
                 }

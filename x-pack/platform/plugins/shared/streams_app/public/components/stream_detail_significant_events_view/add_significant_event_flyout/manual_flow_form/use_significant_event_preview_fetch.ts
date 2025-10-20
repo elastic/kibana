@@ -7,22 +7,31 @@
 
 import { calculateAuto } from '@kbn/calculate-auto';
 import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
-import type { TimeRange } from '@kbn/es-query';
+import type { TimeState } from '@kbn/es-query';
 import type { AbortableAsyncState } from '@kbn/react-hooks';
 import type { SignificantEventsPreviewResponse } from '@kbn/streams-schema';
 import moment from 'moment';
+import type { Condition } from '@kbn/streamlang';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
+import { NO_FEATURE } from '../utils/default_query';
 
 export function useSignificantEventPreviewFetch({
   name,
+  feature,
   kqlQuery,
-  timeRange,
+  timeState,
   isQueryValid,
+  noOfBuckets = 10,
 }: {
+  noOfBuckets?: number;
   name: string;
+  feature?: {
+    name: string;
+    filter: Condition;
+  };
   kqlQuery: string;
-  timeRange: TimeRange;
+  timeState: TimeState;
   isQueryValid: boolean;
 }): AbortableAsyncState<Promise<SignificantEventsPreviewResponse>> {
   const {
@@ -37,11 +46,13 @@ export function useSignificantEventPreviewFetch({
         return Promise.resolve(undefined);
       }
 
-      const { from, to } = getAbsoluteTimeRange(timeRange);
+      const { from, to } = getAbsoluteTimeRange(timeState.timeRange);
 
       const bucketSize = calculateAuto
-        .near(50, moment.duration(moment(to).diff(from)))
+        .near(noOfBuckets, moment.duration(moment(to).diff(from)))
         ?.asSeconds()!;
+
+      const effectiveFeature = feature && feature.name === NO_FEATURE.name ? undefined : feature;
 
       return streams.streamsRepositoryClient.fetch(
         `POST /api/streams/{name}/significant_events/_preview 2023-10-31`,
@@ -59,13 +70,22 @@ export function useSignificantEventPreviewFetch({
             body: {
               query: {
                 kql: { query: kqlQuery },
+                feature: effectiveFeature,
               },
             },
           },
         }
       );
     },
-    [timeRange, name, kqlQuery, streams.streamsRepositoryClient, isQueryValid]
+    [
+      isQueryValid,
+      timeState.timeRange,
+      noOfBuckets,
+      feature,
+      streams.streamsRepositoryClient,
+      name,
+      kqlQuery,
+    ]
   );
 
   return previewFetch;

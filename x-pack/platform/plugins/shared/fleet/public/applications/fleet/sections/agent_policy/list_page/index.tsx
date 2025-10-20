@@ -38,6 +38,7 @@ import {
   useUrlParams,
   useBreadcrumbs,
   useGetAgentPoliciesQuery,
+  useAgentlessResources,
 } from '../../../hooks';
 import { SearchBar } from '../../../components';
 import { AgentPolicySummaryLine } from '../../../../../components';
@@ -56,7 +57,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
 
   // Table and search states
   const { urlParams, toUrlParams } = useUrlParams();
-  const showAgentless = urlParams.showAgentless === 'true';
+  const { showAgentless } = useAgentlessResources();
   const [search, setSearch] = useState<string>(
     Array.isArray(urlParams.kuery)
       ? urlParams.kuery[urlParams.kuery.length - 1]
@@ -85,7 +86,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
     [getPath, history, isCreateAgentPolicyFlyoutOpen, toUrlParams, urlParams]
   );
 
-  // Hide agentless policies by default unless `showAgentless` url param is true
+  // Hide agentless policies by default unless showAgentless toggle is enabled
   const getSearchWithDefaults = (newSearch: string) => {
     if (showAgentless) {
       return newSearch;

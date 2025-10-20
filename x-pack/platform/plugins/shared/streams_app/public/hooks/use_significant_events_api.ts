@@ -6,9 +6,10 @@
  */
 
 import { useAbortController } from '@kbn/react-hooks';
-import type { StreamQueryKql } from '@kbn/streams-schema';
+import type { StreamQueryKql, Feature } from '@kbn/streams-schema';
 import { type SignificantEventsGenerateResponse } from '@kbn/streams-schema';
 import { useKibana } from './use_kibana';
+import { NO_FEATURE } from '../components/stream_detail_significant_events_view/add_significant_event_flyout/utils/default_query';
 
 interface SignificantEventsApiBulkOperationCreate {
   index: StreamQueryKql;
@@ -25,7 +26,8 @@ interface SignificantEventsApi {
   upsertQuery: (query: StreamQueryKql) => Promise<void>;
   removeQuery: (id: string) => Promise<void>;
   bulk: (operations: SignificantEventsApiBulkOperation[]) => Promise<void>;
-  generate: (connectorId: string) => SignificantEventsGenerateResponse;
+  generate: (connectorId: string, feature?: Feature) => SignificantEventsGenerateResponse;
+  abort: () => void;
 }
 
 export function useSignificantEventsApi({
@@ -45,10 +47,11 @@ export function useSignificantEventsApi({
     },
   } = useKibana();
 
-  const { signal } = useAbortController();
+  const { signal, abort, refresh } = useAbortController();
 
   return {
-    upsertQuery: async ({ kql, title, id }) => {
+    upsertQuery: async ({ feature, kql, title, id }) => {
+      const effectiveFeature = feature && feature.name === NO_FEATURE.name ? undefined : feature;
       await streamsRepositoryClient.fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
         signal,
         params: {
@@ -59,6 +62,7 @@ export function useSignificantEventsApi({
           body: {
             kql,
             title,
+            feature: effectiveFeature,
           },
         },
       });
@@ -90,9 +94,9 @@ export function useSignificantEventsApi({
         },
       });
     },
-    generate: (connectorId: string) => {
+    generate: (connectorId: string, feature?: Feature) => {
       return streamsRepositoryClient.stream(
-        `GET /api/streams/{name}/significant_events/_generate 2023-10-31`,
+        `POST /api/streams/{name}/significant_events/_generate 2023-10-31`,
         {
           signal,
           params: {
@@ -104,9 +108,16 @@ export function useSignificantEventsApi({
               from: new Date(start).toString(),
               to: new Date(end).toString(),
             },
+            body: {
+              feature,
+            },
           },
         }
       );
+    },
+    abort: () => {
+      abort();
+      refresh();
     },
   };
 }

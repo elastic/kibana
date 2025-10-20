@@ -8,7 +8,9 @@
 // @ts-ignore
 import mapSavedObjects from './test_resources/sample_map_saved_objects.json';
 import { LayerStatsCollector } from './layer_stats_collector';
-import type { MapAttributes } from '../content_management';
+import type { StoredMapAttributes } from '../../server';
+import { transformMapAttributesOut } from '../content_management/transform_map_attributes_out';
+import type { SavedObject } from '@kbn/core/server';
 
 const expecteds = [
   {
@@ -69,9 +71,11 @@ const expecteds = [
 ];
 
 const testsToRun = mapSavedObjects.map(
-  (savedObject: { attributes: MapAttributes }, index: number) => {
-    const { attributes } = savedObject;
-    return [attributes, expecteds[index]] as const;
+  (savedObject: SavedObject<StoredMapAttributes>, index: number) => {
+    return [
+      transformMapAttributesOut(savedObject.attributes, savedObject.references),
+      expecteds[index],
+    ] as const;
   }
 );
 

@@ -336,7 +336,7 @@
         "label": "FieldPopoverHeader",
         "description": [],
         "signature": [
-          "({ field, closePopover, buttonAddFieldToWorkspaceProps, buttonAddFilterProps, buttonEditFieldProps, buttonDeleteFieldProps, onAddBreakdownField, onAddFieldToWorkspace, onAddFilter, onEditField, onDeleteField, services, }: ",
+          "({ field, closePopover, buttonAddFieldToWorkspaceProps, buttonAddFilterProps, buttonEditFieldProps, buttonDeleteFieldProps, getCustomFieldType, onAddBreakdownField, onAddFieldToWorkspace, onAddFilter, onEditField, onDeleteField, services, }: ",
           {
             "pluginId": "@kbn/unified-field-list",
             "scope": "public",
@@ -355,7 +355,7 @@
             "id": "def-public.FieldPopoverHeader.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  field,\n  closePopover,\n  buttonAddFieldToWorkspaceProps,\n  buttonAddFilterProps,\n  buttonEditFieldProps,\n  buttonDeleteFieldProps,\n  onAddBreakdownField,\n  onAddFieldToWorkspace,\n  onAddFilter,\n  onEditField,\n  onDeleteField,\n  services,\n}",
+            "label": "{\n  field,\n  closePopover,\n  buttonAddFieldToWorkspaceProps,\n  buttonAddFilterProps,\n  buttonEditFieldProps,\n  buttonDeleteFieldProps,\n  getCustomFieldType,\n  onAddBreakdownField,\n  onAddFieldToWorkspace,\n  onAddFilter,\n  onEditField,\n  onDeleteField,\n  services,\n}",
             "description": [],
             "signature": [
               {
@@ -1279,7 +1279,15 @@
             "section": "def-common.DataViewField",
             "text": "DataViewField"
           },
-          ") => boolean) | undefined; onFieldEdited?: ((options?: { removedFieldName?: string | undefined; editedFieldName?: string | undefined; } | undefined) => Promise<void>) | undefined; initialState?: Partial<",
+          ") => boolean) | undefined; onFieldEdited?: ((options: { editedDataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          "; removedFieldName?: string | undefined; editedFieldName?: string | undefined; }) => Promise<void>) | undefined; initialState?: Partial<",
           {
             "pluginId": "@kbn/unified-field-list",
             "scope": "public",
@@ -3396,6 +3404,35 @@
             "signature": [
               "Partial<",
               "EuiButtonIconProps",
+              "> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-field-list/src/components/field_popover/field_popover_header.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-field-list",
+            "id": "def-public.FieldPopoverHeaderProps.getCustomFieldType",
+            "type": "Function",
+            "tags": [],
+            "label": "getCustomFieldType",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-field-list",
+                "scope": "public",
+                "docId": "kibKbnUnifiedFieldListPluginApi",
+                "section": "def-public.GetCustomFieldType",
+                "text": "GetCustomFieldType"
+              },
+              "<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              },
               "> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-field-list/src/components/field_popover/field_popover_header.tsx",
@@ -6087,7 +6124,15 @@
             "section": "def-common.DataViewField",
             "text": "DataViewField"
           },
-          ") => boolean) | undefined; onFieldEdited?: ((options?: { removedFieldName?: string | undefined; editedFieldName?: string | undefined; } | undefined) => Promise<void>) | undefined; initialState?: Partial<",
+          ") => boolean) | undefined; onFieldEdited?: ((options: { editedDataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          "; removedFieldName?: string | undefined; editedFieldName?: string | undefined; }) => Promise<void>) | undefined; initialState?: Partial<",
           {
             "pluginId": "@kbn/unified-field-list",
             "scope": "public",

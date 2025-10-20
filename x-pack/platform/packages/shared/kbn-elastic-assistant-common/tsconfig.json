@@ -21,6 +21,8 @@
     "@kbn/core",
     "@kbn/logging",
     "@kbn/zod",
-    "@kbn/i18n"
+    "@kbn/i18n",
+    "@kbn/management-settings-ids",
+    "@kbn/core-ui-settings-browser"
   ]
 }

@@ -30,6 +30,7 @@ function getConfig(overrides = {}) {
     markdownPlugins: { lens: true },
     files: { maxSize: 1, allowedMimeTypes: ALLOWED_MIME_TYPES },
     stack: { enabled: true },
+    incrementalId: { enabled: true },
     ...overrides,
   };
 }
@@ -153,6 +154,7 @@ describe('Cases Ui Plugin', () => {
           getRuleIdFromEvent: expect.any(Function),
           getUICapabilities: expect.any(Function),
           groupAlertsByRule: expect.any(Function),
+          getObservablesFromEcs: expect.any(Function),
         },
         hooks: {
           useCasesAddToExistingCaseModal: expect.any(Function),

@@ -16,6 +16,7 @@ import {
   isESQLColumnSortable,
   hasTransformationalCommand,
   getCategorizeField,
+  convertTimeseriesCommandToFrom,
 } from '@kbn/esql-utils';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type {
@@ -617,6 +618,7 @@ export class LensVisService {
     const queryInterval = interval ?? computeInterval(timeRange, this.services.data);
     const language = getAggregateQueryMode(query);
     const safeQuery = removeDropCommandsFromESQLQuery(query[language]);
+    const normalizedQuery = convertTimeseriesCommandToFrom(safeQuery);
     const breakdown = breakdownColumn ? `, \`${breakdownColumn.name}\`` : '';
 
     // sort by breakdown column if it's sortable
@@ -625,9 +627,10 @@ export class LensVisService {
         ? ` | sort \`${breakdownColumn.name}\` asc`
         : '';
 
+    const timeBuckets = `${TIMESTAMP_COLUMN} = BUCKET(${dataView.timeFieldName}, ${queryInterval})`;
     return appendToESQLQuery(
-      safeQuery,
-      `| EVAL ${TIMESTAMP_COLUMN}=DATE_TRUNC(${queryInterval}, ${dataView.timeFieldName}) | stats results = count(*) by ${TIMESTAMP_COLUMN}${breakdown}${sortBy}`
+      normalizedQuery,
+      `| STATS results = COUNT(*) BY ${timeBuckets}${breakdown}${sortBy}`
     );
   };
 

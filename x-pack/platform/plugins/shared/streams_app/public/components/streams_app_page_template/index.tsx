@@ -8,20 +8,21 @@
 import React from 'react';
 import type { EuiPageSectionProps } from '@elastic/eui';
 import { EuiPageTemplate } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { useKibana } from '../../hooks/use_kibana';
+import { css } from '@emotion/css';
 
 export function StreamsAppPageTemplate({ children }: { children: React.ReactNode }) {
-  const {
-    services: { PageTemplate },
-  } = useKibana();
-
-  /**
-   * This template wrapper only serves the purpose of adding the o11y sidebar to the app.
-   * Due to the dependency inversion used to get the template and the constrain on the dependencies imports,
-   * we cannot get the right types for this template unless its definition gets moved into a more generic package.
-   */
-  return <PageTemplate>{children}</PageTemplate>;
+  return (
+    <EuiPageTemplate
+      offset={0}
+      minHeight={0}
+      restrictWidth={false}
+      className={css`
+        max-height: 100%;
+      `}
+    >
+      {children}
+    </EuiPageTemplate>
+  );
 }
 
 StreamsAppPageTemplate.Header = EuiPageTemplate.Header;
@@ -32,16 +33,17 @@ StreamsAppPageTemplate.Body = ({
 }: EuiPageSectionProps & { noPadding?: boolean }) => (
   <EuiPageTemplate.Section
     grow
-    css={css`
+    className={css`
       overflow-y: auto;
-      ${noPadding ? 'padding: 0px;' : ''}
+      padding-inline: ${noPadding ? '0px' : '24px'};
     `}
     contentProps={{
-      css: css`
+      className: css`
         display: flex;
         flex-direction: column;
+        flex-grow: 1;
+        padding-block: ${noPadding ? '0px' : '24px'};
         height: 100%;
-        ${noPadding ? 'padding: 0px;' : ''}
       `,
     }}
     {...props}

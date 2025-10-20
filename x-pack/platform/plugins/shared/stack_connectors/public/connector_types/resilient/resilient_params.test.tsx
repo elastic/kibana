@@ -11,6 +11,8 @@ import ResilientParamsFields from './resilient_params';
 import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { ConfigService } from '../../common/config_service';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 jest.mock('./use_get_incident_types');
 jest.mock('./use_get_severity');
@@ -28,20 +30,16 @@ const actionParams = {
       incidentTypes: [1001],
       severityCode: 6,
       externalId: null,
+      additionalFields: null,
     },
     comments: [],
   },
 };
-const connector = {
-  secrets: {},
-  config: {},
+const connector = createMockActionConnector({
   id: 'test',
   actionTypeId: '.test',
   name: 'Test',
-  isPreconfigured: false,
-  isSystemAction: false as const,
-  isDeprecated: false,
-};
+});
 
 const editAction = jest.fn();
 const defaultProps = {
@@ -75,6 +73,7 @@ describe('ResilientParamsFields renders', () => {
     jest.clearAllMocks();
     useGetIncidentTypesMock.mockReturnValue(useGetIncidentTypesResponse);
     useGetSeverityMock.mockReturnValue(useGetSeverityResponse);
+    ConfigService.init({ config: { resilient: { additionalFields: { enabled: true } } } });
   });
 
   test('all params fields are rendered', () => {
@@ -86,6 +85,12 @@ describe('ResilientParamsFields renders', () => {
     expect(wrapper.find('[data-test-subj="nameInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="descriptionTextArea"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="commentsTextArea"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="additionalFields"]').length > 0).toBeTruthy();
+  });
+  test('hides additional fields when turned off', () => {
+    ConfigService.init({ config: { resilient: { additionalFields: { enabled: false } } } });
+    const wrapper = mount(<ResilientParamsFields {...defaultProps} />);
+    expect(wrapper.find('[data-test-subj="additionalFields"]').length === 0).toBeTruthy();
   });
   test('it shows loading when loading incident types', () => {
     useGetIncidentTypesMock.mockReturnValue({ ...useGetIncidentTypesResponse, isLoading: true });

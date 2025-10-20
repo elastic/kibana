@@ -94,6 +94,7 @@ const createStartContractMock = () => {
       getNavigationTreeUi$: jest.fn(),
       changeActiveSolutionNavigation: jest.fn(),
       updateSolutionNavigations: jest.fn(),
+      navigationTourManager: {} as any,
     }),
   });
 

@@ -410,6 +410,21 @@ paths:
                       - status
                   status:
                     $ref: '#/components/schemas/PrivilegeMonitoringEngineStatus'
+                  users:
+                    description: User statistics for privilege monitoring
+                    type: object
+                    properties:
+                      current_count:
+                        description: Current number of privileged users being monitored
+                        type: integer
+                      max_allowed:
+                        description: >-
+                          Maximum number of privileged users allowed to be
+                          monitored
+                        type: integer
+                    required:
+                      - current_count
+                      - max_allowed
                 required:
                   - status
           description: Successful response
@@ -983,6 +998,10 @@ paths:
 
         > Due to technical limitations, not all updates are guaranteed to appear
         in the final list of observed values.
+
+        > Due to technical limitations, create is an async operation. The time
+        for a document to be present in the  > final index depends on the entity
+        store transform and usually takes more than 1 minute.
       operationId: UpsertEntity
       parameters:
         - in: path
@@ -1012,13 +1031,53 @@ paths:
           description: Entity updated or created
         '403':
           description: Operation on a restricted field
-        '404':
-          description: Entity not found
+        '409':
+          description: >-
+            Conflict. The entity was updated while another update was happening
+            in ElasticSearch
         '503':
           description: >-
             Operation on an uninitialized Engine or in a cluster without CRUD
             API Enabled
       summary: Upsert an entity in Entity Store
+      tags:
+        - Security Entity Analytics API
+  /api/entity_store/entities/bulk:
+    put:
+      description: >
+        Update or create many entities in Entity Store.
+
+        If the specified entity already exists, it is updated with the provided
+        values.  If the entity does not exist, a new one is created.
+
+        The creation is asynchronous. The time for a document to be present in
+        the  final index depends on the entity store transform and usually takes
+        more than 1 minute.
+      operationId: UpsertEntitiesBulk
+      parameters:
+        - in: query
+          name: force
+          required: false
+          schema:
+            default: false
+            type: boolean
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EntitiesContainer'
+        description: Schema for the updating many entities
+        required: true
+      responses:
+        '200':
+          description: Entities updated or created
+        '403':
+          description: Operation on a restricted field
+        '503':
+          description: >-
+            Operation on an uninitialized Engine or in a cluster without CRUD
+            API Enabled
+      summary: Upsert many entities in Entity Store
       tags:
         - Security Entity Analytics API
   /api/entity_store/entities/list:
@@ -1176,6 +1235,8 @@ paths:
             schema:
               type: object
               properties:
+                enable_reset_to_zero:
+                  type: boolean
                 exclude_alert_statuses:
                   items:
                     type: string
@@ -1252,6 +1313,28 @@ paths:
         - Security Entity Analytics API
 components:
   schemas:
+    Asset:
+      additionalProperties: false
+      type: object
+      properties:
+        business_unit:
+          type: string
+        criticality:
+          $ref: '#/components/schemas/AssetCriticalityLevel'
+        environment:
+          type: string
+        id:
+          type: string
+        model:
+          type: string
+        name:
+          type: string
+        owner:
+          type: string
+        serial_number:
+          type: string
+        vendor:
+          type: string
     AssetCriticalityBulkUploadErrorItem:
       type: object
       properties:
@@ -1577,6 +1660,15 @@ components:
         - updating
         - error
       type: string
+    EntitiesContainer:
+      type: object
+      properties:
+        entities:
+          items:
+            $ref: '#/components/schemas/EntityContainer'
+          type: array
+      required:
+        - entities
     Entity:
       oneOf:
         - $ref: '#/components/schemas/UserEntity'
@@ -1617,6 +1709,16 @@ components:
       required:
         - has_all_required
         - privileges
+    EntityContainer:
+      type: object
+      properties:
+        record:
+          $ref: '#/components/schemas/Entity'
+        type:
+          $ref: '#/components/schemas/EntityType'
+      required:
+        - type
+        - record
     EntityField:
       additionalProperties: false
       type: object
@@ -1625,11 +1727,24 @@ components:
           additionalProperties: false
           type: object
           properties:
+            asset:
+              type: boolean
+            managed:
+              type: boolean
+            mfa_enabled:
+              type: boolean
             privileged:
               type: boolean
-        behavior:
+        behaviors:
           additionalProperties: false
           type: object
+          properties:
+            brute_force_victim:
+              type: boolean
+            new_country_login:
+              type: boolean
+            used_usb_device:
+              type: boolean
         EngineMetadata:
           $ref: '#/components/schemas/EngineMetadata'
         id:
@@ -1641,8 +1756,71 @@ components:
             first_seen:
               format: date-time
               type: string
+            last_activity:
+              format: date-time
+              type: string
         name:
           type: string
+        relationships:
+          additionalProperties: false
+          type: object
+          properties:
+            accessed_frequently_by:
+              items:
+                type: string
+              type: array
+            accesses_frequently:
+              items:
+                type: string
+              type: array
+            communicates_with:
+              items:
+                type: string
+              type: array
+            dependent_of:
+              items:
+                type: string
+              type: array
+            depends_on:
+              items:
+                type: string
+              type: array
+            owned_by:
+              items:
+                type: string
+              type: array
+            owns:
+              items:
+                type: string
+              type: array
+            supervised_by:
+              items:
+                type: string
+              type: array
+            supervises:
+              items:
+                type: string
+              type: array
+        risk:
+          additionalProperties: false
+          type: object
+          properties:
+            calculated_level:
+              $ref: '#/components/schemas/EntityRiskLevels'
+              description: Lexical description of the entity's risk.
+              example: Critical
+            calculated_score:
+              description: The raw numeric value of the given entity's risk score.
+              format: double
+              type: number
+            calculated_score_norm:
+              description: >-
+                The normalized numeric value of the given entity's risk score.
+                Useful for comparing with other entities.
+              format: double
+              maximum: 100
+              minimum: 0
+              type: number
         source:
           type: string
         sub_type:
@@ -1753,13 +1931,8 @@ components:
           format: date-time
           type: string
         asset:
+          $ref: '#/components/schemas/Asset'
           additionalProperties: false
-          type: object
-          properties:
-            criticality:
-              $ref: '#/components/schemas/AssetCriticalityLevel'
-          required:
-            - criticality
         entity:
           $ref: '#/components/schemas/EntityField'
       required:
@@ -1772,13 +1945,8 @@ components:
           format: date-time
           type: string
         asset:
+          $ref: '#/components/schemas/Asset'
           additionalProperties: false
-          type: object
-          properties:
-            criticality:
-              $ref: '#/components/schemas/AssetCriticalityLevel'
-          required:
-            - criticality
         entity:
           $ref: '#/components/schemas/EntityField'
         event:
@@ -1877,6 +2045,23 @@ components:
                 ingested:
                   format: date-time
                   type: string
+            user:
+              type: object
+              properties:
+                entity:
+                  type: object
+                  properties:
+                    attributes:
+                      type: object
+                      properties:
+                        Privileged:
+                          description: Indicates if the user is privileged.
+                          type: boolean
+                is_privileged:
+                  description: Indicates if the user is privileged.
+                  type: boolean
+                name:
+                  type: string
     MonitoredUserUpdateDoc:
       type: object
       properties:
@@ -1885,14 +2070,7 @@ components:
           properties:
             labels:
               items:
-                type: object
-                properties:
-                  field:
-                    type: string
-                  source:
-                    type: string
-                  value:
-                    type: string
+                $ref: '#/components/schemas/MonitoringLabel'
               type: array
         id:
           type: string
@@ -1937,6 +2115,19 @@ components:
           $ref: '#/components/schemas/PrivilegeMonitoringEngineStatus'
       required:
         - status
+    MonitoringLabel:
+      type: object
+      properties:
+        field:
+          type: string
+        source:
+          type: string
+        value:
+          type: string
+      required:
+        - field
+        - value
+        - source
     PrivilegeMonitoringEngineStatus:
       description: The status of the Privilege Monitoring Engine
       enum:
@@ -2034,13 +2225,8 @@ components:
           format: date-time
           type: string
         asset:
+          $ref: '#/components/schemas/Asset'
           additionalProperties: false
-          type: object
-          properties:
-            criticality:
-              $ref: '#/components/schemas/AssetCriticalityLevel'
-          required:
-            - criticality
         entity:
           $ref: '#/components/schemas/EntityField'
         event:
@@ -2145,13 +2331,8 @@ components:
           format: date-time
           type: string
         asset:
+          $ref: '#/components/schemas/Asset'
           additionalProperties: false
-          type: object
-          properties:
-            criticality:
-              $ref: '#/components/schemas/AssetCriticalityLevel'
-          required:
-            - criticality
         entity:
           $ref: '#/components/schemas/EntityField'
         event:

@@ -29,6 +29,8 @@
     "@kbn/deeplinks-management",
     "@kbn/react-kibana-context-render",
     "@kbn/core-chrome-browser",
+    "@kbn/autoops-promotion-callout",
+    "@kbn/licensing-plugin",
   ],
   "exclude": [
     "target/**/*"

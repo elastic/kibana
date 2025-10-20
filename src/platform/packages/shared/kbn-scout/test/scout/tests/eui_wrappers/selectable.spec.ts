@@ -12,16 +12,20 @@ import { EuiSelectableWrapper } from '../../../../src/playwright/eui_components'
 import { navigateToEuiTestPage } from '../../fixtures/eui_helpers';
 
 test.describe('EUI testing wrapper: EuiSelectable', { tag: ['@svlSecurity', '@ess'] }, () => {
-  test(`selectable with search field`, async ({ page }) => {
+  test(`selectable with search field`, async ({ page, log }) => {
     const selector = {
       locator: 'xpath=//h2[@id="searchable"]/following::div[contains(@class, "euiSelectable")][1]',
     };
-    await navigateToEuiTestPage(page, 'docs/components/forms/selection/selectable/#searchable');
+    await navigateToEuiTestPage(
+      page,
+      'docs/components/forms/selection/selectable/#searchable',
+      log
+    );
 
     await test.step('read selected options', async () => {
       const selectable = new EuiSelectableWrapper(page, selector);
       const selectedOptions = await selectable.getSelectedOptions();
-      expect(selectedOptions, 'Default selected options do not match').toEqual([
+      expect(selectedOptions, 'Default selected options do not match').toStrictEqual([
         'Mimas',
         'Iapetus',
       ]);
@@ -34,7 +38,7 @@ test.describe('EUI testing wrapper: EuiSelectable', { tag: ['@svlSecurity', '@es
       expect(
         selectedOptions,
         'Selected options do not match after the new one was searched and added'
-      ).toEqual(['Mimas', 'Iapetus', 'Rhea']);
+      ).toStrictEqual(['Mimas', 'Iapetus', 'Rhea']);
     });
 
     await test.step('should unselect option', async () => {
@@ -44,7 +48,7 @@ test.describe('EUI testing wrapper: EuiSelectable', { tag: ['@svlSecurity', '@es
       expect(
         selectedOptions,
         'Selected options do not match after the option was unselected'
-      ).toEqual(['Iapetus', 'Rhea']);
+      ).toStrictEqual(['Iapetus', 'Rhea']);
     });
 
     await test.step('should select option', async () => {
@@ -54,7 +58,7 @@ test.describe('EUI testing wrapper: EuiSelectable', { tag: ['@svlSecurity', '@es
       expect(
         selectedOptions,
         'Selected options do not match after the option was selected'
-      ).toEqual(['Titan', 'Iapetus', 'Rhea']);
+      ).toStrictEqual(['Titan', 'Iapetus', 'Rhea']);
     });
   });
 });

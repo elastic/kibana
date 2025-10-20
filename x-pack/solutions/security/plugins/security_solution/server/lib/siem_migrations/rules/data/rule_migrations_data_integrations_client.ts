@@ -9,14 +9,17 @@ import type { PackageList } from '@kbn/fleet-plugin/common';
 import type { RuleMigrationIntegration } from '../types';
 import { SiemMigrationsDataBaseClient } from '../../common/data/siem_migrations_data_base_client';
 
+const INTEGRATION_WEIGHTS = [
+  { ids: ['endpoint'], weight: 1.5 }, // Elastic Defend should be boosted
+];
+
+const EXCLUDED_INTEGRATIONS = ['splunk', 'elastic_security']; // exclude Splunk and Elastic Security integrations since they don't make sense
+
 /* The minimum score required for a integration to be considered correct, might need to change this later */
-const MIN_SCORE = 40 as const;
+const MIN_SCORE = 7 as const;
 /* The number of integrations the RAG will return, sorted by score */
 const RETURNED_INTEGRATIONS = 5 as const;
 
-/* BULK_MAX_SIZE defines the number to break down the bulk operations by.
- * The 500 number was chosen as a reasonable number to avoid large payloads. It can be adjusted if needed.
- */
 export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBaseClient {
   /** Returns the Security integration packages that have "logs" type `data_streams` configured, including pre-release packages */
   public async getSecurityLogsPackages(): Promise<PackageList | undefined> {
@@ -91,14 +94,20 @@ export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBase
   public async semanticSearch(semanticQuery: string): Promise<RuleMigrationIntegration[]> {
     const index = await this.getIndexName();
     const query = {
-      bool: {
-        should: [
-          { semantic: { query: semanticQuery, field: 'elser_embedding', boost: 1.5 } },
-          { multi_match: { query: semanticQuery, fields: ['title^2', 'description'], boost: 3 } },
-        ],
-        // Filter to ensure we only return integrations that have data streams
-        // because there may be integrations without data streams indexed in old migrations
-        filter: { exists: { field: 'data_streams' } },
+      function_score: {
+        query: {
+          bool: {
+            must: { semantic: { query: semanticQuery, field: 'elser_embedding' } },
+            must_not: { ids: { values: EXCLUDED_INTEGRATIONS } },
+            filter: { exists: { field: 'data_streams' } },
+          },
+        },
+        functions: INTEGRATION_WEIGHTS.map(({ ids, weight }) => ({
+          filter: { ids: { values: ids } },
+          weight,
+        })),
+        score_mode: 'multiply' as const,
+        boost_mode: 'multiply' as const,
       },
     };
 

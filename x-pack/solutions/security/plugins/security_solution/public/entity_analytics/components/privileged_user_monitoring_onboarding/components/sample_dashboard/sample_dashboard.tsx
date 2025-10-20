@@ -47,6 +47,10 @@ const PrivilegedUserMonitoringSampleDashboardComponent = () => {
     defaultStackByOption.value
   );
 
+  const stackByLabel = i18n.translate('xpack.securitySolution.genericDashboard.stackBy.label', {
+    defaultMessage: 'Stack by',
+  });
+
   const title = (
     <FormattedMessage
       id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.sampleDashboard.grantedRights.title"
@@ -60,9 +64,8 @@ const PrivilegedUserMonitoringSampleDashboardComponent = () => {
         <EuiSuperSelect
           onChange={setSelectedChartOptionCallback}
           options={GRANTED_RIGHTS_STACK_BY_OPTIONS}
-          prepend={i18n.translate('xpack.securitySolution.genericDashboard.stackBy.label', {
-            defaultMessage: 'Stack by',
-          })}
+          prepend={stackByLabel}
+          aria-label={stackByLabel}
           valueOfSelected={selectedStackByOption}
           hasDividers={true}
           itemLayoutAlign="top"

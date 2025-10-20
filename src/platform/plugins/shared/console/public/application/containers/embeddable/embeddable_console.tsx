@@ -8,7 +8,6 @@
  */
 
 import React, { useReducer, useEffect, useState } from 'react';
-import classNames from 'classnames';
 import useObservable from 'react-use/lib/useObservable';
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
@@ -25,13 +24,14 @@ import {
 import { i18n } from '@kbn/i18n';
 import { dynamic } from '@kbn/shared-ux-utility';
 
+import { Global } from '@emotion/react';
 import type { EmbeddableConsoleDependencies } from '../../../types/embeddable_console';
 import { EmbeddableConsoleView } from '../../../types/embeddable_console';
 
 import * as store from '../../stores/embeddable_console';
 import { setLoadFromParameter, removeLoadFromParameter } from '../../lib/load_from';
+import { useStyles } from './embeddable_console.styles';
 
-import './_index.scss';
 import { EmbeddedConsoleResizeButton, getCurrentConsoleMaxSize } from './console_resize_button';
 
 const KBN_BODY_CONSOLE_CLASS = 'kbnBody--hasEmbeddableConsole';
@@ -77,6 +77,7 @@ export const EmbeddableConsole = ({
 }: EmbeddableConsoleDependencies) => {
   const { euiTheme } = useEuiTheme();
   const { setGlobalCSSVariables } = useEuiThemeCSSVariables();
+  const chromeStyle = useObservable(core.chrome.getChromeStyle$());
   const [consoleHeight, setConsoleHeightState] = useState<number>(
     getInitialConsoleHeight(getConsoleHeight, euiTheme)
   );
@@ -86,7 +87,9 @@ export const EmbeddableConsole = ({
     store.initialValue,
     (value) => ({ ...value })
   );
-  const chromeStyle = useObservable(core.chrome.getChromeStyle$());
+  const isOpen = consoleState.view !== EmbeddableConsoleView.Closed;
+  const styles = useStyles();
+
   useEffect(() => {
     setDispatch(consoleDispatch);
     return () => setDispatch(null);
@@ -110,7 +113,6 @@ export const EmbeddableConsole = ({
     setConsoleHeight(consoleHeight.toString());
   }, [consoleHeight, setGlobalCSSVariables, setConsoleHeight]);
 
-  const isOpen = consoleState.view !== EmbeddableConsoleView.Closed;
   const showConsole =
     consoleState.view !== EmbeddableConsoleView.Closed &&
     (consoleState.view === EmbeddableConsoleView.Console || alternateView === undefined);
@@ -141,87 +143,92 @@ export const EmbeddableConsole = ({
     }
   };
 
-  const classes = classNames('embeddableConsole', {
-    'embeddableConsole-isOpen': isOpen,
-    'embeddableConsole--classicChrome': chromeStyle === 'classic',
-    'embeddableConsole--projectChrome': chromeStyle === 'project',
-    'embeddableConsole--unknownChrome': chromeStyle === undefined,
-    'embeddableConsole--fixed': true,
-  });
-
   return (
-    <EuiPortal>
-      <EuiFocusTrap onClickOutside={toggleConsole} disabled={!isOpen}>
-        <section
-          aria-label={landmarkHeading}
-          className={classes}
-          data-test-subj="consoleEmbeddedSection"
-        >
-          <EuiScreenReaderOnly>
-            <h2>{landmarkHeading}</h2>
-          </EuiScreenReaderOnly>
-          <EuiThemeProvider colorMode={'dark'} wrapperProps={{ cloneElement: true }}>
-            <div>
-              {isOpen && (
-                <EmbeddedConsoleResizeButton
-                  consoleHeight={consoleHeight}
-                  setConsoleHeight={setConsoleHeightState}
-                />
-              )}
-
-              <div className="embeddableConsole__controls">
-                <EuiButtonEmpty
-                  color="text"
-                  iconType={isOpen ? 'arrowUp' : 'arrowDown'}
-                  onClick={toggleConsole}
-                  className="embeddableConsole__controls--button"
-                  data-test-subj="consoleEmbeddedControlBar"
-                  data-telemetry-id="console-embedded-controlbar-button"
-                >
-                  {i18n.translate('console.embeddableConsole.title', {
-                    defaultMessage: 'Console',
-                  })}
-                </EuiButtonEmpty>
-                {alternateView && (
-                  <div className="embeddableConsole__controls--altViewButton-container">
-                    <alternateView.ActivationButton
-                      activeView={showAlternateView}
-                      onClick={clickAlternateViewActivateButton}
-                    />
-                  </div>
+    <>
+      <Global styles={styles.embeddableConsoleGlobal} />
+      <EuiPortal>
+        <EuiFocusTrap onClickOutside={toggleConsole} disabled={!isOpen}>
+          <section
+            aria-label={landmarkHeading}
+            css={[
+              styles.embeddableConsole,
+              isOpen && styles.embeddableConsoleOpen,
+              chromeStyle === 'classic' && styles.embeddableConsoleChromeClassic,
+              chromeStyle === 'project' && styles.embeddableConsoleChromeProject,
+              chromeStyle === undefined && styles.embeddableConsoleChromeDefault,
+              styles.embeddableConsoleFixed,
+            ]}
+            data-test-subj="consoleEmbeddedSection"
+          >
+            <EuiScreenReaderOnly>
+              <h2>{landmarkHeading}</h2>
+            </EuiScreenReaderOnly>
+            <EuiThemeProvider colorMode={'dark'} wrapperProps={{ cloneElement: true }}>
+              <div>
+                {isOpen && (
+                  <EmbeddedConsoleResizeButton
+                    consoleHeight={consoleHeight}
+                    setConsoleHeight={setConsoleHeightState}
+                  />
                 )}
+
+                <div css={styles.embeddableConsoleControls}>
+                  <EuiButtonEmpty
+                    color="text"
+                    iconType={isOpen ? 'arrowUp' : 'arrowDown'}
+                    onClick={toggleConsole}
+                    css={styles.embeddableConsoleControlsButton}
+                    data-test-subj="consoleEmbeddedControlBar"
+                    data-telemetry-id="console-embedded-controlbar-button"
+                    aria-label={i18n.translate('console.embeddableConsole.toggleButtonAriaLabel', {
+                      defaultMessage: 'Toggle console',
+                    })}
+                  >
+                    {i18n.translate('console.embeddableConsole.title', {
+                      defaultMessage: 'Console',
+                    })}
+                  </EuiButtonEmpty>
+                  {alternateView && (
+                    <div css={styles.embeddableControlsAltViewButtonContainer}>
+                      <alternateView.ActivationButton
+                        activeView={showAlternateView}
+                        onClick={clickAlternateViewActivateButton}
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          </EuiThemeProvider>
-          {consoleState.consoleHasBeenOpened ? (
-            <ConsoleWrapper
-              isOpen={showConsole}
-              core={core}
-              dataViews={dataViews}
-              data={data}
-              licensing={licensing}
-              usageCollection={usageCollection}
-              onKeyDown={onKeyDown}
-              isDevMode={isDevMode}
-            />
-          ) : null}
-          {showAlternateView ? (
-            <div className="embeddableConsole__content" data-test-subj="consoleEmbeddedBody">
-              <EuiWindowEvent event="keydown" handler={onKeyDown} />
-              <alternateView.ViewContent />
-            </div>
-          ) : null}
-        </section>
-        <EuiScreenReaderOnly>
-          <p aria-live="assertive">
-            {i18n.translate('console.embeddableConsole.customScreenReaderAnnouncement', {
-              defaultMessage:
-                'There is a new region landmark called {landmarkHeading} with page level controls at the end of the document.',
-              values: { landmarkHeading },
-            })}
-          </p>
-        </EuiScreenReaderOnly>
-      </EuiFocusTrap>
-    </EuiPortal>
+            </EuiThemeProvider>
+            {consoleState.consoleHasBeenOpened ? (
+              <ConsoleWrapper
+                isOpen={showConsole}
+                core={core}
+                dataViews={dataViews}
+                data={data}
+                licensing={licensing}
+                usageCollection={usageCollection}
+                onKeyDown={onKeyDown}
+                isDevMode={isDevMode}
+              />
+            ) : null}
+            {showAlternateView ? (
+              <div css={styles.embeddableConsoleContent} data-test-subj="consoleEmbeddedBody">
+                <EuiWindowEvent event="keydown" handler={onKeyDown} />
+                <alternateView.ViewContent />
+              </div>
+            ) : null}
+          </section>
+          <EuiScreenReaderOnly>
+            <p aria-live="assertive">
+              {i18n.translate('console.embeddableConsole.customScreenReaderAnnouncement', {
+                defaultMessage:
+                  'There is a new region landmark called {landmarkHeading} with page level controls at the end of the document.',
+                values: { landmarkHeading },
+              })}
+            </p>
+          </EuiScreenReaderOnly>
+        </EuiFocusTrap>
+      </EuiPortal>
+    </>
   );
 };

@@ -7,7 +7,6 @@
 
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
-import type { GetIsActiveFn } from '@kbn/core-chrome-browser/src/project_navigation';
 import { i18n } from '@kbn/i18n';
 import agentsIcon from './assets/robot.svg';
 import playgroundIcon from './assets/playground.svg';
@@ -43,9 +42,6 @@ const CONTENT_TITLE = i18n.translate('xpack.serverlessSearch.nav.mngt.content', 
 const OTHER_TITLE = i18n.translate('xpack.serverlessSearch.nav.mngt.other', {
   defaultMessage: 'Other',
 });
-const AGENTS_TITLE = i18n.translate('xpack.serverlessSearch.nav.agents', {
-  defaultMessage: 'Agents',
-});
 const AI_TITLE = i18n.translate('xpack.serverlessSearch.nav.adminAndSettings.ai.title', {
   defaultMessage: 'AI',
 });
@@ -54,13 +50,6 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
   function isAvailable<T>(appId: string, content: T): T[] {
     return isAppRegistered(appId) ? [content] : [];
   }
-
-  const homeGetIsActive: GetIsActiveFn = ({ pathNameSerialized, prepend }) => {
-    return (
-      pathNameSerialized.startsWith(prepend('/app/elasticsearch/home')) ||
-      pathNameSerialized.startsWith(prepend('/app/elasticsearch/start'))
-    );
-  };
 
   return {
     body: [
@@ -74,7 +63,6 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
         breadcrumbStatus: 'hidden',
         children: [
           {
-            getIsActive: homeGetIsActive,
             icon: 'logoElasticsearch',
             link: 'searchHomepage',
             renderAs: 'home',
@@ -88,7 +76,6 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
             }),
             link: 'searchHomepage',
             spaceBefore: 'm',
-            getIsActive: homeGetIsActive,
             sideNavVersion: 'v1',
           },
           {
@@ -102,8 +89,9 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
           },
           {
             iconV2: agentsIcon, // Temp svg until we have icon in EUI
-            title: AGENTS_TITLE,
             link: 'agent_builder',
+            withBadge: true,
+            badgeTypeV2: 'techPreview',
           },
           {
             link: 'workflows',
@@ -242,6 +230,11 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
         id: 'search_project_nav_footer',
         children: [
           {
+            id: 'getting_started',
+            icon: 'launch',
+            link: 'searchGettingStarted',
+          },
+          {
             id: 'dev_tools',
             title: i18n.translate('xpack.serverlessSearch.nav.developerTools', {
               defaultMessage: 'Developer Tools',
@@ -278,7 +271,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                   { link: 'management:data_usage', breadcrumbStatus: 'hidden' },
                 ],
                 title: i18n.translate('xpack.serverlessSearch.nav.ingest.indices.title', {
-                  defaultMessage: 'Indices, data streams and roll ups',
+                  defaultMessage: 'Indices and data streams',
                 }),
               },
               {
@@ -299,11 +292,11 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
               },
             ],
             iconV2: 'database',
-            id: 'ingest_and_data',
+            id: 'data_management',
             sideNavVersion: 'v2',
             renderAs: 'panelOpener',
-            title: i18n.translate('xpack.serverlessSearch.nav.ingestAndData', {
-              defaultMessage: 'Ingest and manage data',
+            title: i18n.translate('xpack.serverlessSearch.nav.dataManagement', {
+              defaultMessage: 'Data management',
             }),
           },
           {

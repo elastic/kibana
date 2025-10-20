@@ -35,7 +35,7 @@ export async function extractMappingsFromPlugins(
     msg$.pipe(
       Rx.map((result) => {
         log.debug('message received from worker', result);
-        proc.kill('SIGILL');
+        proc.kill('SIGKILL');
         return result.mappings;
       }),
       Rx.defaultIfEmpty(undefined)
@@ -43,7 +43,7 @@ export async function extractMappingsFromPlugins(
   );
 
   if (!mappings) {
-    throw new Error('worker exitted without sending mappings');
+    throw new Error('worker exited without sending mappings');
   }
 
   log.info(`Got mappings for ${Object.keys(mappings).length} types from plugins.`);

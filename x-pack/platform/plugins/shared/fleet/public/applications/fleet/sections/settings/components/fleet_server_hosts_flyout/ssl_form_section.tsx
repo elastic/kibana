@@ -93,13 +93,14 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
             placeholder={i18n.translate(
               'xpack.fleet.settings.fleetServerHosts.sslCertificateAuthoritiesInputPlaceholder',
               {
-                defaultMessage: 'Specify certificate authority',
+                defaultMessage:
+                  'Specify the CA certificate(s) that signed the Elastic Agent client certificates connecting to this Fleet Server. Fleet Server trusts these CAs when verifying incoming connections.',
               }
             )}
             label={i18n.translate(
               'xpack.fleet.settings.fleetServerHosts.sslCertificateAuthoritiesInputLabel',
               {
-                defaultMessage: 'Server SSL certificate authorities',
+                defaultMessage: 'Fleet Server > Elastic Agents certificate authorities',
               }
             )}
             multiline={true}
@@ -111,7 +112,7 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
             label={
               <FormattedMessage
                 id="xpack.fleet.settings.fleetServerHosts.sslCertificateInputLabel"
-                defaultMessage="Client SSL certificate"
+                defaultMessage="Fleet Server > SSL server certificate"
               />
             }
             {...inputs.sslCertificateInput.formRowProps}
@@ -123,7 +124,8 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
               placeholder={i18n.translate(
                 'xpack.fleet.settings.fleetServerHosts.sslCertificateInputPlaceholder',
                 {
-                  defaultMessage: 'Specify SSL certificate',
+                  defaultMessage:
+                    'Specify the Fleet Server SSL certificate used to secure communication with incoming Elastic Agent connections.',
                 }
               )}
             />
@@ -134,7 +136,7 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
               label={
                 <FormattedMessage
                   id="xpack.fleet.settings.fleetServerHosts.sslKeyInputLabel"
-                  defaultMessage="Client SSL certificate key"
+                  defaultMessage="Fleet Server > SSL server private key"
                 />
               }
               {...inputs.sslKeyInput.formRowProps}
@@ -149,7 +151,8 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
                 placeholder={i18n.translate(
                   'xpack.fleet.settings.fleetServerHosts.sslKeyInputPlaceholder',
                   {
-                    defaultMessage: 'Specify certificate key',
+                    defaultMessage:
+                      'Specify the Fleet Server SSL key used to secure communication with incoming Elastic Agent connections.',
                   }
                 )}
               />
@@ -160,7 +163,7 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
               title={i18n.translate(
                 'xpack.fleet.settings.fleetServerHosts.sslKeySecretInputTitle',
                 {
-                  defaultMessage: 'Client SSL certificate key',
+                  defaultMessage: 'Fleet Server > SSL server private key',
                 }
               )}
               {...inputs.sslKeySecretInput.formRowProps}
@@ -177,7 +180,8 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
                 placeholder={i18n.translate(
                   'xpack.fleet.settings.fleetServerHosts.sslKeySecretInputPlaceholder',
                   {
-                    defaultMessage: 'Specify certificate key',
+                    defaultMessage:
+                      'Specify the Fleet Server SSL key used to secure communication with incoming Elastic Agent connections.',
                   }
                 )}
               />
@@ -187,13 +191,14 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
             placeholder={i18n.translate(
               'xpack.fleet.settings.fleetServerHosts.sslEsCertificateAuthoritiesInputPlaceholder',
               {
-                defaultMessage: 'Specify Elasticsearch certificate authority',
+                defaultMessage:
+                  'Specify the Elasticsearch CA certificate(s) that Fleet Server should trust when connecting to Elasticsearch.',
               }
             )}
             label={i18n.translate(
               'xpack.fleet.settings.fleetServerHosts.sslEsCertificateAuthoritiesInputLabel',
               {
-                defaultMessage: 'Elasticsearch certificate authorities',
+                defaultMessage: 'Fleet Server > Elasticsearch certificate authorities',
               }
             )}
             multiline={true}
@@ -205,7 +210,7 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
             label={
               <FormattedMessage
                 id="xpack.fleet.settings.fleetServerHosts.sslEsCertificateInputLabel"
-                defaultMessage="SSL certificate for Elasticsearch"
+                defaultMessage="Fleet Server > SSL client certificate for Elasticsearch"
               />
             }
             {...inputs.sslEsCertificateInput.formRowProps}
@@ -217,7 +222,8 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
               placeholder={i18n.translate(
                 'xpack.fleet.settings.fleetServerHosts.sslEsCertificateInputPlaceholder',
                 {
-                  defaultMessage: 'Specify Elasticsearch SSL certificate',
+                  defaultMessage:
+                    'Specify the SSL client certificate that the Fleet Server should use when connecting to Elasticsearch. Only needed for mTLS between Fleet Server and Elasticsearch.',
                 }
               )}
             />
@@ -228,7 +234,7 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
               label={
                 <FormattedMessage
                   id="xpack.fleet.settings.fleetServerHosts.sslEsKeyInputLabel"
-                  defaultMessage="SSL certificate key for Elasticsearch"
+                  defaultMessage="Fleet Server > SSL private key for Elasticsearch"
                 />
               }
               {...inputs.sslESKeyInput.formRowProps}
@@ -243,7 +249,8 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
                 placeholder={i18n.translate(
                   'xpack.fleet.settings.fleetServerHosts.sslKeyInputPlaceholder',
                   {
-                    defaultMessage: 'Specify certificate key',
+                    defaultMessage:
+                      'Specify the SSL key that the Fleet Server should use when connecting to Elasticsearch. Only needed for mTLS between Fleet Server and Elasticsearch.',
                   }
                 )}
               />
@@ -254,7 +261,7 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
               title={i18n.translate(
                 'xpack.fleet.settings.fleetServerHosts.sslEsKeySecretInputTitle',
                 {
-                  defaultMessage: 'SSL certificate key for Elasticsearch',
+                  defaultMessage: 'Fleet Server > SSL private key for Elasticsearch',
                 }
               )}
               {...inputs.sslESKeySecretInput.formRowProps}
@@ -271,7 +278,106 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
                 placeholder={i18n.translate(
                   'xpack.fleet.settings.fleetServerHosts.sslESKeySecretInputPlaceholder',
                   {
-                    defaultMessage: 'Specify certificate key',
+                    defaultMessage:
+                      'Specify the SSL key that the Fleet Server should use when connecting to Elasticsearch. Only needed for mTLS between Fleet Server and Elasticsearch.',
+                  }
+                )}
+              />
+            </SecretFormRow>
+          )}
+          <MultiRowInput
+            placeholder={i18n.translate(
+              'xpack.fleet.settings.fleetServerHosts.sslAgentCertificateAuthoritiesInputPlaceholder',
+              {
+                defaultMessage:
+                  'Specify the Fleet Server CA certificate that Elastic Agents should trust when connecting to Fleet Server.',
+              }
+            )}
+            label={i18n.translate(
+              'xpack.fleet.settings.fleetServerHosts.sslAgentCertificateAuthoritiesInputLabel',
+              {
+                defaultMessage: 'Elastic Agent > Fleet Server certificate authorities',
+              }
+            )}
+            multiline={true}
+            sortable={false}
+            {...inputs.sslAgentCertificateAuthoritiesInput.props}
+          />
+          <EuiFormRow
+            fullWidth
+            label={
+              <FormattedMessage
+                id="xpack.fleet.settings.fleetServerHosts.sslAgentCertificateInputLabel"
+                defaultMessage="Elastic Agent > SSL client certificate for Fleet Server"
+              />
+            }
+            {...inputs.sslAgentCertificateInput.formRowProps}
+          >
+            <EuiTextArea
+              fullWidth
+              rows={5}
+              {...inputs.sslAgentCertificateInput.props}
+              placeholder={i18n.translate(
+                'xpack.fleet.settings.fleetServerHosts.sslAgentCertificateInputPlaceholder',
+                {
+                  defaultMessage:
+                    'Specify the SSL client certificate that Elastic Agents should use when connecting to the Fleet Server. Only needed for mTLS between Elastic Agent and Fleet Server.',
+                }
+              )}
+            />
+          </EuiFormRow>
+          {!useSecretsStorage ? (
+            <SecretFormRow
+              fullWidth
+              label={
+                <FormattedMessage
+                  id="xpack.fleet.settings.fleetServerHosts.sslAgentKeyInputLabel"
+                  defaultMessage="Elastic Agent > SSL private key for Fleet Server"
+                />
+              }
+              {...inputs.sslAgentKeyInput.formRowProps}
+              useSecretsStorage={useSecretsStorage}
+              onToggleSecretStorage={onToggleSecretAndClearValue}
+              disabled={!useSecretsStorage}
+            >
+              <EuiTextArea
+                fullWidth
+                rows={5}
+                {...inputs.sslAgentKeyInput.props}
+                placeholder={i18n.translate(
+                  'xpack.fleet.settings.fleetServerHosts.sslAgentKeyInputPlaceholder',
+                  {
+                    defaultMessage:
+                      'Specify the SSL key that Elastic Agents should use when connecting to Fleet Server. Only needed for mTLS between Elastic Agent and Fleet Server.',
+                  }
+                )}
+              />
+            </SecretFormRow>
+          ) : (
+            <SecretFormRow
+              fullWidth
+              title={i18n.translate(
+                'xpack.fleet.settings.fleetServerHosts.sslAgentKeySecretInputTitle',
+                {
+                  defaultMessage: 'Elastic Agent > SSL private key for Fleet Server',
+                }
+              )}
+              {...inputs.sslAgentKeySecretInput.formRowProps}
+              useSecretsStorage={useSecretsStorage}
+              isConvertedToSecret={isConvertedToSecret.sslKey}
+              onToggleSecretStorage={onToggleSecretAndClearValue}
+              cancelEdit={inputs.sslAgentKeySecretInput.cancelEdit}
+            >
+              <EuiTextArea
+                fullWidth
+                rows={5}
+                {...inputs.sslAgentKeySecretInput.props}
+                data-test-subj="sslAgentKeySecretInput"
+                placeholder={i18n.translate(
+                  'xpack.fleet.settings.fleetServerHosts.sslAgentKeySecretInputPlaceholder',
+                  {
+                    defaultMessage:
+                      'Specify the SSL key that Elastic Agents should use when connecting to Fleet Server. Only needed for mTLS between Elastic Agent and Fleet Server.',
                   }
                 )}
               />

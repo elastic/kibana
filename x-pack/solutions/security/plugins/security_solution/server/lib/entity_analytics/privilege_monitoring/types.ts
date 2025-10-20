@@ -5,10 +5,16 @@
  * 2.0.
  */
 
-export type PrivMonUserSource = 'csv' | 'api' | 'index_sync';
+import type { MonitoringLabel } from '../../../../common/api/entity_analytics';
+
+export type PrivMonUserSource = 'csv' | 'api' | 'index_sync' | 'entity_analytics_integration';
 
 export interface PrivMonBulkUser {
   username: string;
   existingUserId?: string;
   sourceId: string;
+  monitoringLabels?: MonitoringLabel[];
+  isPrivileged: boolean;
 }
+
+export type MonitoringEntitySyncType = 'entity_analytics_integration' | 'index';
