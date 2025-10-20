@@ -234,15 +234,22 @@ export const getDiscoverAppStateContainer = ({
                   (value!.query as AggregateQuery).esql
                 ).groupByFields.map((group) => group.field),
                 get selectedCascadeGroups() {
+                  if (
+                    !currentTabState.uiState.cascade ||
+                    // if the query has changed, reset the cascade groupings to the first group
+                    (currentTabState.initialAppState?.query as AggregateQuery)?.esql !==
+                      (value!.query as AggregateQuery).esql
+                  ) {
+                    return [this.availableCascadeGroups[0]].filter(Boolean);
+                  }
+
                   const validSelectionFromCurrentTab =
-                    currentTabState.uiState.cascade?.selectedCascadeGroups.filter((group) =>
+                    currentTabState.uiState.cascade!.selectedCascadeGroups.filter((group) =>
                       this.availableCascadeGroups.includes(group)
                     );
 
                   // if no valid selection from previous state, select the first group by default
-                  return validSelectionFromCurrentTab?.length
-                    ? validSelectionFromCurrentTab
-                    : [this.availableCascadeGroups[0]].filter(Boolean);
+                  return validSelectionFromCurrentTab;
                 },
               },
             })

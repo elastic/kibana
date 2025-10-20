@@ -99,7 +99,7 @@ export function fetchAll(
     if (
       isEsqlQuery &&
       currentTabState.uiState.layout?.cascadeEnabled !== false &&
-      currentTabState.uiState.cascade?.availableCascadeGroups?.length
+      currentTabState.uiState.cascade?.selectedCascadeGroups?.length
     ) {
       fetchQuery = mutateQueryStatsGrouping(
         query,
