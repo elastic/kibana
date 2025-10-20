@@ -6,7 +6,7 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import qs from 'query-string';
 import { i18n } from '@kbn/i18n';
 import { isEmpty, omit } from 'lodash';
@@ -26,6 +26,7 @@ import {
   EuiPopover,
   EuiBetaBadge,
   EuiToolTip,
+  EuiFilterGroup,
   EuiSelectable,
   EuiFilterButton,
   EuiFlexGroup,
@@ -107,62 +108,6 @@ function isDefaultFilterOptions(options: FilterQueryParams) {
   return options.managed === 'unset' && options.deprecated === 'off';
 }
 
-interface PipelineFilterComponentProps {
-  filterOptions: EuiSelectableOption[];
-  setFilterOptions: (options: EuiSelectableOption[]) => void;
-}
-
-const PipelineFilterComponent = ({
-  filterOptions,
-  setFilterOptions,
-}: PipelineFilterComponentProps) => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
-  const onButtonClick = () => {
-    setIsPopoverOpen((prev) => !prev);
-  };
-
-  const closePopover = () => {
-    setIsPopoverOpen(false);
-  };
-
-  return (
-    <EuiPopover
-      id="popoverID"
-      button={
-        <EuiFilterButton
-          iconType="arrowDown"
-          badgeColor="success"
-          data-test-subj="filtersDropdown"
-          onClick={onButtonClick}
-          isSelected={isPopoverOpen}
-          numFilters={filterOptions.filter((item) => item.checked !== 'off').length}
-          hasActiveFilters={!!filterOptions.find((item) => item.checked === 'on')}
-          numActiveFilters={filterOptions.filter((item) => item.checked === 'on').length}
-        >
-          {i18n.translate('xpack.ingestPipelines.list.table.filtersButtonLabel', {
-            defaultMessage: 'Filters',
-          })}
-        </EuiFilterButton>
-      }
-      isOpen={isPopoverOpen}
-      closePopover={closePopover}
-      panelPaddingSize="none"
-    >
-      <EuiSelectable
-        allowExclusions
-        aria-label={i18n.translate('xpack.ingestPipelines.list.table.filtersAriaLabel', {
-          defaultMessage: 'Filters',
-        })}
-        options={filterOptions as EuiSelectableOption[]}
-        onChange={setFilterOptions}
-      >
-        {(list) => <div style={{ width: 300 }}>{list}</div>}
-      </EuiSelectable>
-    </EuiPopover>
-  );
-};
-
 export const PipelineTable: FunctionComponent<Props> = ({
   pipelines,
   isLoading,
@@ -177,6 +122,8 @@ export const PipelineTable: FunctionComponent<Props> = ({
 
   const { history } = useKibana().services;
   const [selection, setSelection] = useState<Pipeline[]>([]);
+
+  const filterButtonRef = useRef<HTMLButtonElement>(null);
 
   const { pageSize, sorting, onTableChange } = useEuiTablePersist<Pipeline>({
     tableId: 'ingestPipelines',
@@ -248,6 +195,36 @@ export const PipelineTable: FunctionComponent<Props> = ({
     }
   }, [history, queryText, filterOptions]);
 
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const onButtonClick = () => {
+    setIsPopoverOpen(!isPopoverOpen);
+  };
+  const closePopover = () => {
+    setIsPopoverOpen(false);
+    // Return focus to the filter button when popover closes
+    if (filterButtonRef.current) {
+      filterButtonRef.current.focus?.();
+    }
+  };
+
+  const button = (
+    <EuiFilterButton
+      iconType="arrowDown"
+      badgeColor="success"
+      buttonRef={filterButtonRef}
+      data-test-subj="filtersDropdown"
+      onClick={onButtonClick}
+      isSelected={isPopoverOpen}
+      numFilters={filterOptions.filter((item) => item.checked !== 'off').length}
+      hasActiveFilters={!!filterOptions.find((item) => item.checked === 'on')}
+      numActiveFilters={filterOptions.filter((item) => item.checked === 'on').length}
+    >
+      {i18n.translate('xpack.ingestPipelines.list.table.filtersButtonLabel', {
+        defaultMessage: 'Filters',
+      })}
+    </EuiFilterButton>
+  );
+
   const tableProps: EuiInMemoryTableProps<Pipeline> = {
     itemId: 'name',
     'data-test-subj': 'pipelinesTable',
@@ -307,10 +284,29 @@ export const PipelineTable: FunctionComponent<Props> = ({
           type: 'custom_component',
           component: () => {
             return (
-              <PipelineFilterComponent
-                filterOptions={filterOptions}
-                setFilterOptions={setFilterOptions}
-              />
+              <EuiFilterGroup>
+                <EuiPopover
+                  id="popoverID"
+                  button={button}
+                  isOpen={isPopoverOpen}
+                  closePopover={closePopover}
+                  panelPaddingSize="none"
+                >
+                  <EuiSelectable
+                    allowExclusions
+                    aria-label={i18n.translate(
+                      'xpack.ingestPipelines.list.table.filtersAriaLabel',
+                      {
+                        defaultMessage: 'Filters',
+                      }
+                    )}
+                    options={filterOptions as EuiSelectableOption[]}
+                    onChange={setFilterOptions}
+                  >
+                    {(list) => <div style={{ width: 300 }}>{list}</div>}
+                  </EuiSelectable>
+                </EuiPopover>
+              </EuiFilterGroup>
             );
           },
         },
