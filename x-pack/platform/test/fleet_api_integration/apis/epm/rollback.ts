@@ -270,7 +270,7 @@ export default function (providerContext: FtrProviderContext) {
       it('should fail when rollback TTL expired', async () => {
         await upgradePackage(pkgName, oldPkgVersion, newPkgVersion, policyIds, true);
 
-        await new Promise((resolve) => setTimeout(resolve, 10001));
+        await new Promise((resolve) => setTimeout(resolve, 30001));
 
         const res = await supertest
           .post(`/api/fleet/epm/packages/${pkgName}/rollback`)

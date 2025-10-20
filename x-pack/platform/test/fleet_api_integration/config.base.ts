@@ -90,7 +90,7 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
           enablePackageRollback: true,
           enableAgentPrivilegeLevelChange: true,
         })}`,
-        `--xpack.fleet.integrationRollbackTTL=10s`,
+        `--xpack.fleet.integrationRollbackTTL=30s`,
         `--xpack.fleet.agentless.enabled=true`,
         `--xpack.fleet.agentless.api.url=http://localhost:8089/agentless-api`,
         `--xpack.fleet.agentless.api.tls.certificate=${KBN_CERT_PATH}`,
