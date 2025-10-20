@@ -510,7 +510,7 @@ function DiscoverDocumentsComponent({
             initialState={dataGridUiState}
             onInitialStateChange={onInitialStateChange}
             viewModeToggle={viewModeToggle}
-            isCascadeLayoutSelected={isCascadeLayoutSelected}
+            isCascadeLayoutSelected={isEsqlMode && isCascadeLayoutSelected}
             cascadeConfig={cascadeConfig}
             onCascadeGroupingChange={stateContainer.actions.onCascadeGroupingChange}
           />

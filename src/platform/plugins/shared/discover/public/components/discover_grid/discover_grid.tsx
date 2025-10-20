@@ -121,7 +121,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
     );
   }, [cascadeConfig, customExternalAdditionalControls, groupBySelectorRenderer]);
 
-  return isCascadeLayoutSelected && Boolean(cascadeConfig?.availableCascadeGroups?.length) ? (
+  return isCascadeLayoutSelected && Boolean(cascadeConfig?.selectedCascadeGroups?.length) ? (
     <ESQLDataCascade
       {...props}
       dataView={dataView}
