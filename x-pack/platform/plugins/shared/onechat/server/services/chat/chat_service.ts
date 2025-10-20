@@ -6,19 +6,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import {
-  filter,
-  of,
-  defer,
-  shareReplay,
-  forkJoin,
-  switchMap,
-  merge,
-  throwError,
-  map,
-  take,
-  EMPTY,
-} from 'rxjs';
+import { filter, of, defer, shareReplay, switchMap, merge, map, take, EMPTY } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
@@ -30,7 +18,6 @@ import type { AgentsServiceStart } from '../agents';
 import {
   generateTitle$,
   handleCancellation,
-  getChatModel$,
   executeAgent$,
   getConversation$,
   conversationExists$,
@@ -39,10 +26,10 @@ import {
   convertErrors,
 } from './utils';
 import { createConversationIdSetEvent } from './utils/events';
-import { resolveSelectedConnectorId } from './utils/resolve_selected_connector_id';
 import type { ChatService, ChatConverseParams } from './types';
+import { resolveServices } from './resolve_services';
 
-interface ChatServiceOptions {
+interface ChatServiceDeps {
   logger: Logger;
   inference: InferenceServerStart;
   conversationService: ConversationService;
@@ -51,32 +38,15 @@ interface ChatServiceOptions {
   savedObjects: SavedObjectsServiceStart;
 }
 
-export const createChatService = (options: ChatServiceOptions): ChatService => {
+export const createChatService = (options: ChatServiceDeps): ChatService => {
   return new ChatServiceImpl(options);
 };
 
 class ChatServiceImpl implements ChatService {
-  private readonly inference: InferenceServerStart;
-  private readonly logger: Logger;
-  private readonly conversationService: ConversationService;
-  private readonly agentService: AgentsServiceStart;
-  private readonly uiSettings: UiSettingsServiceStart;
-  private readonly savedObjects: SavedObjectsServiceStart;
+  private readonly dependencies: ChatServiceDeps;
 
-  constructor({
-    inference,
-    logger,
-    conversationService,
-    agentService,
-    uiSettings,
-    savedObjects,
-  }: ChatServiceOptions) {
-    this.inference = inference;
-    this.logger = logger;
-    this.conversationService = conversationService;
-    this.agentService = agentService;
-    this.uiSettings = uiSettings;
-    this.savedObjects = savedObjects;
+  constructor(deps: ChatServiceDeps) {
+    this.dependencies = deps;
   }
 
   converse({
@@ -92,38 +62,17 @@ class ChatServiceImpl implements ChatService {
     const isNewConversation = !conversationId;
 
     return withConverseSpan({ agentId, conversationId }, (span) => {
-      return defer(() =>
-        resolveSelectedConnectorId({
-          uiSettings: this.uiSettings,
-          savedObjects: this.savedObjects,
-          request,
+      return defer(() => {
+        return resolveServices({
+          agentId,
           connectorId,
-          inference: this.inference,
-        })
-      ).pipe(
-        switchMap((selectedConnectorId) => {
-          if (!selectedConnectorId) {
-            return throwError(() => new Error('No connector available for chat execution'));
-          }
+          request,
+          ...this.dependencies,
+        });
+      }).pipe(
+        switchMap(({ conversationClient, chatModel, selectedConnectorId }) => {
+          span?.setAttribute('elastic.connector.id', selectedConnectorId);
 
-          return forkJoin({
-            conversationClient: defer(async () =>
-              this.conversationService.getScopedClient({ request })
-            ),
-            agent: defer(async () => {
-              const agentRegistry = await this.agentService.getRegistry({ request });
-              return agentRegistry.get(agentId);
-            }),
-            chatModel: getChatModel$({
-              connectorId: selectedConnectorId,
-              request,
-              inference: this.inference,
-              span,
-            }),
-            selectedConnectorId: of(selectedConnectorId),
-          });
-        }),
-        switchMap(({ conversationClient, chatModel, agent, selectedConnectorId }) => {
           const shouldCreateNewConversation$ = isNewConversation
             ? of(true)
             : autoCreateConversationWithId
@@ -158,7 +107,7 @@ class ChatServiceImpl implements ChatService {
             nextInput,
             capabilities,
             abortSignal,
-            agentService: this.agentService,
+            agentService: this.dependencies.agentService,
             defaultConnectorId: selectedConnectorId,
           });
 
@@ -201,7 +150,7 @@ class ChatServiceImpl implements ChatService {
 
           return merge(conversationIdSetEvent$, agentEvents$, saveOrUpdateAndEmit$).pipe(
             handleCancellation(abortSignal),
-            convertErrors({ logger: this.logger }),
+            convertErrors({ logger: this.dependencies.logger }),
             shareReplay()
           );
         })

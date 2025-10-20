@@ -25,7 +25,7 @@ export const getChatModel$ = ({
   span?: Span;
 }): Observable<InferenceChatModel> => {
   return defer(async () => {
-    span?.setAttribute('elastic.connector.id', connectorId);
+    span?.setAttribute('elastic.connector.id', connectorId); // TODO: move
     return inference.getChatModel({
       request,
       connectorId,
