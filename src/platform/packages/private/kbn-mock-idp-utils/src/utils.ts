@@ -30,6 +30,8 @@ import {
   MOCK_IDP_ROLE_MAPPING_NAME,
   MOCK_IDP_UIAM_SIGNING_SECRET,
 } from './constants';
+import { encode } from './jwt-codecs/encoder-checksum';
+import { prefixWithEssuDev } from './jwt-codecs/encoder-prefix';
 
 /**
  * Creates XML metadata for our mock identity provider.
@@ -291,9 +293,8 @@ function createUiamSessionTokens({
 
       nbf: iat,
       // 1H
-      exp: iat + 3600,
+      exp: iat + 60,
       iat,
-
       jti: randomBytes(16).toString('hex'),
     })
   ).toString('base64url');
@@ -310,7 +311,7 @@ function createUiamSessionTokens({
       // 3D
       exp: iat + 3600 * 24 * 3,
       iat,
-
+      session_created: iat,
       jti: randomBytes(16).toString('hex'),
     })
   ).toString('base64url');
@@ -318,17 +319,31 @@ function createUiamSessionTokens({
   const tokenHeader = Buffer.from(JSON.stringify({ typ: 'JWT', alg: 'HS256' })).toString(
     'base64url'
   );
+
   const accessToken = `${tokenHeader}.${accessTokenBody}`;
+
   const refreshToken = `${tokenHeader}.${refreshTokenBody}`;
 
   return {
-    accessToken: `${accessToken}.${createHmac('sha256', MOCK_IDP_UIAM_SIGNING_SECRET)
-      .update(accessToken)
-      .digest('base64url')}`,
+    accessToken: prepareJwtForUiam(accessToken),
     accessTokenExpiresAt: (iat + 3600) * 1000,
-    refreshToken: `${refreshToken}.${createHmac('sha256', MOCK_IDP_UIAM_SIGNING_SECRET)
-      .update(refreshToken)
-      .digest('base64url')}`,
+    refreshToken: prepareJwtForUiam(refreshToken),
     refreshTokenExpiresAt: (iat + 3600) * 1000,
   };
+}
+
+function prepareJwtForUiam(unsignedJwt: string): string {
+  const signedAccessToken = signJwt(unsignedJwt);
+  return wrapSignedJwt(signedAccessToken);
+}
+
+function signJwt(unsignedJwt: string): string {
+  return `${unsignedJwt}.${createHmac('sha256', MOCK_IDP_UIAM_SIGNING_SECRET)
+    .update(unsignedJwt)
+    .digest('base64url')}`;
+}
+
+function wrapSignedJwt(signedJwt: string): string {
+  const accessTokenEncodedWithChecksum = encode(signedJwt);
+  return prefixWithEssuDev(accessTokenEncodedWithChecksum);
 }

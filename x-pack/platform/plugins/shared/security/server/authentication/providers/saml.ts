@@ -247,7 +247,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
   }
 
   /**
-   * Invalidates SAML access token if it exists.
+   * Invalidates SAML/UIAM access token if it exists.
    * @param request Request instance.
    * @param state State value previously stored by the provider.
    */
@@ -422,6 +422,8 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         : AuthenticationResult.failed(err);
     }
 
+    this.logger.debug(JSON.stringify(result, null, 2));
+
     // IdP can pass `RelayState` with the deep link in Kibana during IdP initiated login and
     // depending on the configuration we may need to redirect user to this URL.
     let redirectURLFromRelayState;
@@ -520,7 +522,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
 
   /**
    * Validates whether user retrieved using session is the same as the user defined in the SAML payload.
-   * If we can successfully exchange this SAML payload to access and refresh tokens, then we'll
+   * If we can successfully exchange this SAML payload for access and refresh tokens, then we'll
    * invalidate tokens from the existing session and use the new ones instead.
    *
    * The tokens are stored in the state and user is redirected to the default Kibana location, unless
@@ -593,12 +595,16 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       return AuthenticationResult.notHandled();
     }
 
+    this.logger.debug(`AccessToken via state: ${accessToken}`);
+
     const authHeaders: Record<string, string> | undefined = this.useUiam
       ? this.options.uiam?.getAuthenticationHeaders(accessToken)
       : { authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString() };
 
     try {
+      this.logger.debug('Just about to get User');
       const user = await this.getUser(request, authHeaders);
+
       this.logger.debug('Request has been authenticated via state.');
       return AuthenticationResult.succeeded(user, { authHeaders });
     } catch (err) {
@@ -612,7 +618,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
   /**
    * This method is only called when authentication via access token stored in the state failed because of expired
    * token. So we should use refresh token, that is also stored in the state, to extend expired access token and
-   * authenticate user with it.
+   * authenticated user with it.
    * @param request Request instance.
    * @param state State value previously stored by the provider.
    */
@@ -625,8 +631,45 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     let refreshTokenResult: RefreshTokenResult;
+
     try {
-      refreshTokenResult = await this.options.tokens.refresh(state.refreshToken);
+      if (this.useUiam && this.options.uiam) {
+        this.logger.debug('Refreshing tokens via UIAM service.');
+
+        const { accessToken, refreshToken } = await this.options.uiam?.refreshSessionTokens(
+          state.refreshToken
+        );
+
+        const uiamAuthenticationInfo = await this.options.uiam.authenticate(accessToken);
+
+        this.logger.debug(`Refreshed AccessToken: ${accessToken}`);
+        this.logger.debug(`Refreshed RefreshToken: ${refreshToken}`);
+        this.logger.debug(`Uiam Authentication Info: ${JSON.stringify(uiamAuthenticationInfo)}`);
+
+        refreshTokenResult = {
+          accessToken,
+          refreshToken,
+          authenticationInfo: uiamAuthenticationInfo,
+        };
+
+        // refreshTokenResult = {
+        //   accessToken,
+        //   refreshToken,
+        //   authenticationInfo: {
+        //     authentication_realm: {
+        //       name: '"cloud-saml-kibana',
+        //       type: 'saml',
+        //     },
+        //     authentication_type: 'token',
+        //     lookup_realm: { name: '"cloud-saml-kibana', type: 'saml' },
+        //     username: '12345',
+        //     roles: ['viewer'],
+        //     enabled: true,
+        //   },
+        // };
+      } else {
+        refreshTokenResult = await this.options.tokens.refresh(state.refreshToken);
+      }
     } catch (err) {
       // When user has neither valid access nor refresh token, the only way to resolve this issue is to get new
       // SAML LoginResponse and exchange it for a new access/refresh token pair. To do that we initiate a new SAML
@@ -656,6 +699,9 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         authHeaders: {
           authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
         },
+        ...(this.useUiam && {
+          userProfileGrant: this.options.uiam?.getUserProfileGrant(accessToken),
+        }),
         state: { accessToken, refreshToken, realm: this.realm || state.realm },
       }
     );

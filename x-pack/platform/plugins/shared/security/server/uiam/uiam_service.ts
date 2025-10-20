@@ -14,8 +14,44 @@ import type { Logger } from '@kbn/core/server';
 import { HTTPAuthorizationHeader } from '..';
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../common/constants';
 import type { UiamConfigType } from '../config';
-import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
+import type { AuthenticationInfo } from '../elasticsearch';
+import { getDetailedErrorMessage } from '../errors';
 import type { UserProfileGrant } from '../user_profile';
+
+/**
+ * Response structure from UIAM _authenticate endpoint
+ */
+interface UiamAuthenticateResponse {
+  type: string;
+  user_id: string;
+  email: string;
+  first_name: string | null;
+  last_name: string | null;
+  organization_id: string | null;
+  contexts: Array<{
+    type: string;
+    project_id: string;
+    project_type: string;
+    project_organization_id: string;
+    application_roles: string[];
+  }> | null;
+  credentials: {
+    id: string;
+    type: 'api-key' | 'token';
+    creation: string;
+    expiration: string | null;
+    internal: boolean;
+  };
+  token: string | null;
+  role_assignments: {
+    platform?: unknown[] | null;
+    organization?: unknown[] | null;
+    deployment?: unknown[] | null;
+    project?: Record<string, unknown> | null;
+    user?: unknown[] | null;
+    cloud_connected?: unknown[] | null;
+  } | null;
+}
 
 /**
  * The service that integrates with UIAM for user authentication and session management.
@@ -32,6 +68,12 @@ export interface UiamServicePublic {
    * @param accessToken UIAM session access token.
    */
   getUserProfileGrant(accessToken: string): UserProfileGrant;
+
+  /**
+   * Authenticates the user with UIAM and returns authentication information.
+   * @param accessToken UIAM session access token.
+   */
+  authenticate(accessToken: string): Promise<AuthenticationInfo>;
 
   /**
    * Refreshes the UIAM user session and returns new access and refresh session tokens.
@@ -91,12 +133,93 @@ export class UiamService implements UiamServicePublic {
   /**
    * See {@link UiamServicePublic.getUserProfileGrant}.
    */
-  getUserProfileGrant(accessToken: string) {
+  getUserProfileGrant(accessToken: string): UserProfileGrant {
     return {
       type: 'uiamAccessToken' as const,
       accessToken,
       sharedSecret: this.#config.sharedSecret,
     };
+  }
+
+  /**
+   * See {@link UiamServicePublic.authenticate}.
+   */
+  async authenticate(accessToken: string): Promise<AuthenticationInfo> {
+    try {
+      const response: UiamAuthenticateResponse = await UiamService.#parseUiamResponse(
+        await fetch(
+          `${
+            this.#config.url
+          }/uiam/api/v1/authentication/_authenticate?include_role_assignments=true`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
+              Authorization: `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify({
+              contexts: [
+                {
+                  project_id: 'abcdef1234567890abcdef1234567890',
+                  project_organization_id: '1234567890',
+                  project_type: 'observability',
+                  type: 'project',
+                },
+              ],
+            }),
+            // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+            dispatcher: this.#dispatcher,
+          }
+        )
+      );
+
+      this.#logger.debug(`UIAM Authentication response: ${JSON.stringify(response)}`);
+
+      this.#logger.debug('User successfully authenticated with UIAM.');
+
+      // Extract roles from contexts
+      const roles =
+        response.contexts?.flatMap(
+          (context: {
+            type: string;
+            project_id: string;
+            project_type: string;
+            project_organization_id: string;
+            application_roles: string[];
+          }) => context.application_roles
+        ) || [];
+
+      // Map UIAM response to AuthenticationInfo
+      return {
+        username: response.user_id,
+        email: response.email,
+        full_name:
+          response.first_name || response.last_name
+            ? [response.first_name, response.last_name].filter(Boolean).join(' ')
+            : undefined,
+        roles,
+        enabled: true,
+        authentication_realm: { name: 'uiam', type: 'uiam' },
+        lookup_realm: { name: 'uiam', type: 'uiam' },
+        authentication_type: response.credentials.type === 'api-key' ? 'api_key' : 'token',
+        metadata: {
+          _reserved: false,
+        },
+        ...(response.credentials.type === 'api-key'
+          ? {
+              api_key: {
+                id: response.credentials.id,
+                name: response.credentials.id,
+              },
+            }
+          : {}),
+      };
+    } catch (err) {
+      this.#logger.error(() => `Failed to authenticate user: ${getDetailedErrorMessage(err)}`);
+
+      throw err;
+    }
   }
 
   /**
@@ -116,11 +239,14 @@ export class UiamService implements UiamServicePublic {
           dispatcher: this.#dispatcher,
         })
       );
+
+      this.#logger.debug('UIAM tokens successfully refreshed.');
+
       return { accessToken: tokens.access_token, refreshToken: tokens.refresh_token };
     } catch (err) {
-      // TODO: Temporarily rethrow all errors as `401` (UIAM service doesn't support token refresh yet).
       this.#logger.error(() => `Failed to refresh session tokens: ${getDetailedErrorMessage(err)}`);
-      throw Boom.unauthorized(`UIAM service doesn't support token refresh yet.`);
+
+      throw err;
     }
   }
 
@@ -128,40 +254,28 @@ export class UiamService implements UiamServicePublic {
    * See {@link UiamServicePublic.invalidateSessionTokens}.
    */
   async invalidateSessionTokens(accessToken: string, refreshToken: string) {
-    let invalidatedTokensCount;
     try {
-      invalidatedTokensCount = (
-        await UiamService.#parseUiamResponse(
-          await fetch(`${this.#config.url}/uiam/api/v1/tokens/_invalidate`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
-            body: JSON.stringify({ token: accessToken, refresh_token: refreshToken }),
-            // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
-            dispatcher: this.#dispatcher,
-          })
-        )
-      ).invalidated_tokens;
+      await UiamService.#parseUiamResponse(
+        await fetch(`${this.#config.url}/uiam/api/v1/tokens/_invalidate`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({ tokens: [accessToken, refreshToken] }),
+          // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+          dispatcher: this.#dispatcher,
+        })
+      );
+
+      this.#logger.debug('UIAM tokens successfully invalidated.');
     } catch (err) {
       this.#logger.error(
         () => `Failed to invalidate session tokens: ${getDetailedErrorMessage(err)}`
       );
 
-      // TODO: Temporarily swallow the 500 errors (UIAM service doesn't support token invalidation yet).
-      if (getErrorStatusCode(err) === 500) {
-        return;
-      }
-
       throw err;
-    }
-
-    if (invalidatedTokensCount === 0) {
-      this.#logger.debug('Session tokens were already invalidated.');
-    } else if (invalidatedTokensCount === 2) {
-      this.#logger.debug('All session tokens were successfully invalidated.');
-    } else {
-      this.#logger.warn(
-        `${invalidatedTokensCount} refresh tokens were invalidated, this is unexpected.`
-      );
     }
   }
 
@@ -200,16 +314,22 @@ export class UiamService implements UiamServicePublic {
    */
   static async #parseUiamResponse(response: Response) {
     if (response.ok) {
+      if (response.status === 204) {
+        return;
+      }
+
       return await response.json();
     }
 
     const payload = await response.json();
     const err = new Boom.Boom(payload?.error?.message || 'Unknown error');
+
     err.output = {
       statusCode: response.status,
       payload,
       headers: Object.fromEntries(response.headers.entries()),
     };
+
     throw err;
   }
 }
