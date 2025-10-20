@@ -17,9 +17,8 @@ import type {
   ObservabilityAgentPluginStart,
   ObservabilityAgentPluginStartDependencies,
 } from '../types';
-import { getApmIndices } from '../utils/get_apm_indices';
-import { getLogsIndices } from '../utils/get_logs_indices';
 import { timeRangeSchema } from '../utils/tool_schemas';
+import { getIndexPatterns } from '../utils/get_index_patterns';
 
 export const OBSERVABILITY_GET_SERVICES_TOOL_ID = 'observability.get_services';
 
@@ -62,11 +61,11 @@ export async function createObservabilityGetServicesTool({
   plugins: ObservabilityAgentPluginSetupDependencies;
   logger: Logger;
 }) {
-  const apmIndices = await getApmIndices({ core, plugins, logger });
-  const apmIndexPatterns = Object.values(apmIndices);
-  const logIndexPatterns = await getLogsIndices({ core, logger });
-  const metricIndexPatterns = ['metrics-*'];
-
+  const { apmIndexPatterns, logIndexPatterns, metricIndexPatterns } = await getIndexPatterns({
+    core,
+    plugins,
+    logger,
+  });
   const defaultIndexPatterns = [...apmIndexPatterns, ...logIndexPatterns, ...metricIndexPatterns];
   const serviceInventorySchema = createServiceInventorySchema(defaultIndexPatterns);
 
