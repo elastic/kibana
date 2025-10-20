@@ -293,7 +293,43 @@ export function getConnectorType(params: GetConnectorTypeParams): EmailConnector
     },
     renderParameterTemplates,
     executor: curry(executor)({ publicBaseUrl }),
+    applyParamConstraints,
   };
+}
+
+// if trimming message, leave some room for other bits added later,
+// and our "the message has been trimmed".
+const TrimmedMessageExtraRoom = 1000;
+
+function applyParamConstraints(
+  logger: Logger,
+  params: ActionParamsType,
+  validatorServices: ValidatorServices
+): ActionParamsType {
+  const { message, messageHTML } = params;
+  const { configurationUtilities } = validatorServices;
+
+  const maxLength = configurationUtilities.getMaxEmailBodyLength();
+
+  if (message.length > maxLength) {
+    const warningMessage = `message length exceeds ${maxLength} bytes and has been trimmed`;
+    const trimmedMessage = message.slice(0, maxLength - TrimmedMessageExtraRoom);
+    params = {
+      ...params,
+      message: `${warningMessage}\n${trimmedMessage}`,
+    };
+  }
+
+  if (messageHTML && messageHTML.length > maxLength) {
+    const warningMessage = `messageHTML length exceeds ${maxLength} bytes and has been trimmed`;
+    const trimmedMessage = message.slice(0, maxLength - TrimmedMessageExtraRoom);
+    params = {
+      ...params,
+      messageHTML: `${warningMessage}\n${trimmedMessage}`,
+    };
+  }
+
+  return params;
 }
 
 function renderParameterTemplates(

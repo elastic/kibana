@@ -109,9 +109,10 @@ export interface InMemoryConnector<
 export type FindActionResult = ConnectorWithExtraFindData;
 
 export type ParamConstraintsApplicatorType<Config extends Record<string, unknown>, Params> = (
-  config: Config,
-  params: Params
-) => Promise<Params>;
+  logger: Logger,
+  params: Params,
+  validatorServices: ValidatorServices
+) => Params;
 
 // signature of the action type executor function
 export type ExecutorType<
