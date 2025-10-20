@@ -14,6 +14,7 @@ import { keys } from '@elastic/eui';
 import { useMetricsGridState } from '../../../hooks';
 import { DimensionsSelector } from '../dimensions_selector';
 import { ValuesSelector } from '../values_selector';
+import { MAX_DIMENSIONS_SELECTIONS } from '../../../common/constants';
 
 interface UseToolbarActionsProps
   extends Pick<ChartSectionProps, 'requestParams' | 'renderToggleActions'> {
@@ -105,6 +106,7 @@ export const useToolbarActions = ({
         onChange={onDimensionsChange}
         selectedDimensions={dimensions}
         onClear={onClearAllDimensions}
+        singleSelection={MAX_DIMENSIONS_SELECTIONS === 1}
       />,
       dimensions.length > 0 ? (
         <ValuesSelector
