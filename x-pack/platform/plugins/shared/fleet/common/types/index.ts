@@ -111,6 +111,7 @@ export interface FleetConfigType {
   integrationsHomeOverride?: string;
   prereleaseEnabledByDefault?: boolean;
   hideDashboards?: boolean;
+  installIntegrationsKnowledge?: boolean;
 }
 
 // Calling Object.entries(PackagesGroupedByStatus) gave `status: string`
