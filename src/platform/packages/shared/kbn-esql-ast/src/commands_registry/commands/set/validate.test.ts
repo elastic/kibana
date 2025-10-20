@@ -10,7 +10,7 @@
 import { getMockCallbacks, mockContext } from '../../../__tests__/context_fixtures';
 import { validate } from './validate';
 import { Parser } from '../../../parser';
-import type { ESQLCommand, ESQLMessage } from '../../../types';
+import type { ESQLMessage } from '../../../types';
 import type { ICommandCallbacks } from '../../types';
 
 const setExpectErrors = (
@@ -20,7 +20,7 @@ const setExpectErrors = (
   callbacks: ICommandCallbacks = getMockCallbacks()
 ) => {
   const { root } = Parser.parse(query);
-  const command = root.header?.find((cmd) => cmd.name === 'set') as unknown as ESQLCommand;
+  const command = root.header?.find((cmd) => cmd.name === 'set');
   if (!command) {
     throw new Error(`SET command not found in the parsed query`);
   }
@@ -37,7 +37,6 @@ const setExpectErrors = (
 describe('SET Validation', () => {
   describe('SET <setting> = <value>', () => {
     test('no errors on valid setting names', () => {
-      // Test with the current valid setting
       setExpectErrors('set time_zone = "value"', []);
       setExpectErrors('SET time_zone = "value"', []);
       setExpectErrors('set time_zone="value"', []);
@@ -55,7 +54,7 @@ describe('SET Validation', () => {
 
     test('errors on serverless-only settings in non-serverless mode', () => {
       setExpectErrors('set project_routing = 10', [
-        'The setting project_routing is only available in serverless.',
+        'The project_routing setting is only useful in serverless',
       ]);
     });
 

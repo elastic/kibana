@@ -68,7 +68,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
     case 'serverlessSetting':
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.serverlessSetting', {
-          defaultMessage: 'The {name} setting is only available in serverless.',
+          defaultMessage: 'The {name} setting is only useful in serverless',
           values: { name: out.name },
         }),
         type: 'warning',
