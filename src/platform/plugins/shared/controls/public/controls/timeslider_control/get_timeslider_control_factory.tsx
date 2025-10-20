@@ -101,7 +101,11 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
         timeRangePercentage.setTimeRangePercentage(timeslice, timeRangeMeta$.value);
         const { timesliceStartAsPercentageOfTimeRange, timesliceEndAsPercentageOfTimeRange } =
           timeRangePercentage.getLatestState();
-        if (timesliceStartAsPercentageOfTimeRange && timesliceEndAsPercentageOfTimeRange) {
+
+        if (
+          typeof timesliceStartAsPercentageOfTimeRange !== 'undefined' &&
+          typeof timesliceEndAsPercentageOfTimeRange !== 'undefined'
+        ) {
           timeslice$.next(
             getTimesliceSyncedWithTimeRangePercentage(
               timesliceStartAsPercentageOfTimeRange,
@@ -294,24 +298,35 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
 
       const timeRangeMetaSubscription = timeRangeMeta$
         .pipe(pairwise())
-        .subscribe(([{ timeRange: prevTimeRangeLength }, { timeRange: nextTimeRangeLength }]) => {
-          // If auto apply filters is disabled, only sync the timeslice if the timerange length has changed.
-          // This prevents the timeslice from getting shifted forward immediately after applying the filters
-          // when using a relative time range, thus triggering another dirty state that needs to be applied
-          if (
-            apiPublishesSettings(parentApi) &&
-            !parentApi.settings.autoApplyFilters$.value &&
-            nextTimeRangeLength === prevTimeRangeLength
-          )
-            return;
+        .subscribe(
+          ([
+            { timeRange: prevTimeRangeLength, stepSize: prevStepSize },
+            { timeRange: nextTimeRangeLength, stepSize: nextStepSize },
+          ]) => {
+            // If auto apply filters is disabled, only sync the timeslice if the user has actually changed the timeRange.
+            // This prevents the timeslice from getting shifted forward immediately after applying the filters
+            // when using a relative time range, thus triggering another dirty state that needs to be applied.
+            // Doing a simple check of nextTimeRangeLength !== prevTimeRangeLength will give us a false positive
+            // if the relative timerange is set to "round to the nearest," which is why we compare the change to the
+            // step size.
+            const timeRangeHasChanged =
+              nextStepSize !== prevStepSize ||
+              Math.abs(nextTimeRangeLength - prevTimeRangeLength) > nextStepSize;
+            if (
+              apiPublishesSettings(parentApi) &&
+              !parentApi.settings.autoApplyFilters$.value &&
+              !timeRangeHasChanged
+            )
+              return;
 
-          const { timesliceStartAsPercentageOfTimeRange, timesliceEndAsPercentageOfTimeRange } =
-            timeRangePercentage.getLatestState();
-          syncTimesliceWithTimeRangePercentage(
-            timesliceStartAsPercentageOfTimeRange,
-            timesliceEndAsPercentageOfTimeRange
-          );
-        });
+            const { timesliceStartAsPercentageOfTimeRange, timesliceEndAsPercentageOfTimeRange } =
+              timeRangePercentage.getLatestState();
+            syncTimesliceWithTimeRangePercentage(
+              timesliceStartAsPercentageOfTimeRange,
+              timesliceEndAsPercentageOfTimeRange
+            );
+          }
+        );
 
       return {
         api,
