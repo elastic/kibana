@@ -70,8 +70,11 @@ const AiAssistantLabelAppendComponent: React.FC<AiAssistantProps> = ({
       return `${acc}"${key}": "${value}",\n`;
     }, '');
 
+    const errors = field.errors.map((error) => error.message).join(', ');
+
     return `
 Value of field ${fieldName} in Detection rule is "${fieldValue}". \n
+${errors ? `Current validation errors on form for this field: "${errors}". \n` : ''}
 \n
 Additional relevant rule configuration:
 \n
