@@ -8,9 +8,9 @@
  */
 
 import { useEffect, useRef } from 'react';
-import type { monaco } from '@kbn/monaco';
 import type { Document, Pair, Scalar } from 'yaml';
 import { isPair, isScalar } from 'yaml';
+import type { monaco } from '@kbn/monaco';
 import { getTriggerNodesWithType } from '../../../../../common/lib/yaml_utils';
 
 interface UseTriggerTypeDecorationsProps {

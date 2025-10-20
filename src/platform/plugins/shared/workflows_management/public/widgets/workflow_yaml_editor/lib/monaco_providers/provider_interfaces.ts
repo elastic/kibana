@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { monaco } from '@kbn/monaco';
 import type YAML from 'yaml';
+import type { monaco } from '@kbn/monaco';
 
 /**
  * Context information for hover providers

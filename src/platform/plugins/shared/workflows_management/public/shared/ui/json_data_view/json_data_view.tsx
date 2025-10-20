@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiButtonGroup, EuiSpacer, EuiFieldSearch } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiButtonGroup, EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { debounce } from 'lodash';
+import React, { useCallback, useMemo, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { i18n } from '@kbn/i18n';
 import { JsonDataCode } from './json_data_code';
 import { JSONDataTable } from './json_data_table';
 

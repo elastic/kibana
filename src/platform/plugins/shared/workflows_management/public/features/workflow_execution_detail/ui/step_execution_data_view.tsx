@@ -8,8 +8,8 @@
  */
 
 import React, { useMemo } from 'react';
-import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
+import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { JSONDataView } from '../../../shared/ui/json_data_view';
 
 const Titles = {
@@ -77,3 +77,5 @@ export const StepExecutionDataView = React.memo<StepExecutionDataViewProps>(
     );
   }
 );
+
+StepExecutionDataView.displayName = 'StepExecutionDataView';

@@ -19,7 +19,7 @@ interface WorkflowExecutionLogEntry {
   stepName?: string;
   connectorType?: string;
   duration?: number;
-  additionalData?: Record<string, any>;
+  additionalData?: Record<string, unknown>;
 }
 
 interface WorkflowExecutionLogsResponse {

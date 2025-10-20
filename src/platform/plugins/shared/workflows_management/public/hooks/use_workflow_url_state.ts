@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { parse, stringify } from 'query-string';
 import { useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { parse, stringify } from 'query-string';
 
 export type WorkflowUrlStateTabType = 'workflow' | 'executions';
 

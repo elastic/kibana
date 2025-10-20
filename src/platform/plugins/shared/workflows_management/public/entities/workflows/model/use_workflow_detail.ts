@@ -8,8 +8,8 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import type { WorkflowDetailDto } from '@kbn/workflows';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { WorkflowDetailDto } from '@kbn/workflows';
 
 export function useWorkflowDetail(id: string | null) {
   const { http } = useKibana().services;

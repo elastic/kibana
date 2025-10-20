@@ -11,11 +11,11 @@ import type { WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import type { NodeTypes, ReactFlowInstance } from '@xyflow/react';
 import { Background, Controls, ReactFlow } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import React, { useEffect, useMemo, useRef } from 'react';
 import { useResizeObserver } from '@elastic/eui';
-import { getLayoutedNodesAndEdges } from '../lib/get_layouted_nodes_and_edges';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { WorkflowGraphEdge } from './workflow_edge';
 import { WorkflowGraphNode } from './workflow_node';
+import { getLayoutedNodesAndEdges } from '../lib/get_layouted_nodes_and_edges';
 
 const nodeTypes = {
   trigger: WorkflowGraphNode,

@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { CoreStart, KibanaRequest } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { StackFrame, StepContext, WorkflowContext } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { KibanaRequest, CoreStart } from '@kbn/core/server';
 import type { WorkflowExecutionState } from './workflow_execution_state';
+import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { RunStepResult } from '../step/node_implementation';
 import { buildStepExecutionId } from '../utils';
-import { WorkflowScopeStack } from './workflow_scope_stack';
 
 export interface ContextManagerInit {
   // New properties for logging

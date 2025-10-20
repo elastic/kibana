@@ -13,8 +13,8 @@ import type {
   EsWorkflowStepExecution,
   WorkflowExecutionDto,
 } from '@kbn/workflows';
-import { stringifyWorkflowDefinition } from '../../../common/lib/yaml_utils';
 import { searchStepExecutions } from './search_step_executions';
+import { stringifyWorkflowDefinition } from '../../../common/lib/yaml_utils';
 
 interface GetWorkflowExecutionParams {
   esClient: ElasticsearchClient;

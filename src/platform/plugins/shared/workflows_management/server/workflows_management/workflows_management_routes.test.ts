@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defineRoutes } from './routes';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { mockRouter as createMockRouter } from '@kbn/core-http-router-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import { defineRoutes } from './routes';
 import type { WorkflowsManagementApi } from './workflows_management_api';
 
 // Use Kibana's built-in mock utilities where available

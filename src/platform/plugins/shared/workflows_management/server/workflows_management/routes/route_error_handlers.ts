@@ -21,14 +21,23 @@ import {
  * @param options - Optional configuration for error handling
  * @returns Appropriate error response
  */
-export function handleRouteError(response: any, error: any, options?: { checkNotFound?: boolean }) {
+export function handleRouteError(
+  response: unknown,
+  error: unknown,
+  options?: { checkNotFound?: boolean }
+) {
+  const res = response as {
+    notFound: () => unknown;
+    badRequest: (args: { body: unknown }) => unknown;
+    customError: (args: { statusCode: number; body: unknown }) => unknown;
+  };
   // Check for specific error types that need special handling
   if (options?.checkNotFound && error instanceof WorkflowExecutionNotFoundError) {
-    return response.notFound();
+    return res.notFound();
   }
 
   if (error instanceof InvalidYamlSyntaxError || error instanceof InvalidYamlSchemaError) {
-    return response.badRequest({
+    return res.badRequest({
       body: {
         message: `Invalid workflow yaml: ${error.message}`,
       },
@@ -36,13 +45,13 @@ export function handleRouteError(response: any, error: any, options?: { checkNot
   }
 
   if (isWorkflowValidationError(error)) {
-    return response.badRequest({
+    return res.badRequest({
       body: error.toJSON(),
     });
   }
 
   // Generic error handler
-  return response.customError({
+  return res.customError({
     statusCode: 500,
     body: {
       message: `Internal server error: ${error}`,

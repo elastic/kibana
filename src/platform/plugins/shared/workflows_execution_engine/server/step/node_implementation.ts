@@ -11,8 +11,8 @@
 // import { evaluate } from '@marcbachmann/cel-js'
 import type { ConnectorExecutor } from '../connector_executor';
 import { WorkflowTemplatingEngine } from '../templating_engine';
-import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
+import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 
 export interface RunStepResult {
   input: any;

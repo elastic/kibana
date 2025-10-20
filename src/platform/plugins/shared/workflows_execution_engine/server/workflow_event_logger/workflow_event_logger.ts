@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { merge } from 'lodash';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 export interface WorkflowLogEvent {
   '@timestamp'?: string;

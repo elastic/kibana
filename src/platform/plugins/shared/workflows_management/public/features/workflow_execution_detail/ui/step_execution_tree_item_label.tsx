@@ -9,10 +9,10 @@
 
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, euiFontSize } from '@elastic/eui';
-import { ExecutionStatus, isDangerousStatus } from '@kbn/workflows';
-import React from 'react';
 import { css } from '@emotion/react';
+import React from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { ExecutionStatus, isDangerousStatus } from '@kbn/workflows';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations';
 

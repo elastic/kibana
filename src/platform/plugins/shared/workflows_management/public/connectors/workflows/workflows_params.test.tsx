@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { WorkflowsActionParams } from './types';
 import WorkflowsParamsFields from './workflows_params';
 

@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { validate as validateUuid } from 'uuid';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
-import { validate as validateUuid } from 'uuid';
 
 export class ConnectorExecutor {
   constructor(private actionsClient: IUnsecuredActionsClient) {}

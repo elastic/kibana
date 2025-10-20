@@ -7,29 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
-  EuiText,
-  EuiTabs,
-  EuiTab,
-  EuiSkeletonText,
-  EuiStat,
-  EuiPanel,
   EuiHorizontalRule,
+  EuiPanel,
+  EuiSkeletonText,
   EuiSpacer,
+  EuiStat,
+  EuiTab,
+  EuiTabs,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
-import { StatusBadge } from '../../../shared/ui';
-import { StepExecutionTimelineStateful } from './step_execution_timeline_stateful';
 import { StepExecutionDataView } from './step_execution_data_view';
-import { useGetFormattedDateTime } from '../../../shared/ui/use_formatted_date';
+import { StepExecutionTimelineStateful } from './step_execution_timeline_stateful';
 import { formatDuration } from '../../../shared/lib/format_duration';
+import { StatusBadge } from '../../../shared/ui';
+import { useGetFormattedDateTime } from '../../../shared/ui/use_formatted_date';
 
 interface WorkflowStepExecutionDetailsProps {
   workflowExecutionId: string;

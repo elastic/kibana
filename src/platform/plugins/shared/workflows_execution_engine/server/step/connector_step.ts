@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { BaseStep, RunStepResult } from './node_implementation';
+import { BaseAtomicNodeImplementation } from './node_implementation';
 import type { ConnectorExecutor } from '../connector_executor';
+import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
-import type { RunStepResult, BaseStep } from './node_implementation';
-import { BaseAtomicNodeImplementation } from './node_implementation';
-import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 
 // Extend BaseStep for connector-specific properties
 export interface ConnectorStep extends BaseStep {

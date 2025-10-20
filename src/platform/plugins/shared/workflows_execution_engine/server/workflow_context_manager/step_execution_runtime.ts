@@ -10,11 +10,11 @@
 import type { EsWorkflowStepExecution, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
+import type { WorkflowContextManager } from './workflow_context_manager';
+import type { WorkflowExecutionState } from './workflow_execution_state';
+import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { RunStepResult } from '../step/node_implementation';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
-import type { WorkflowExecutionState } from './workflow_execution_state';
-import type { WorkflowContextManager } from './workflow_context_manager';
-import { WorkflowScopeStack } from './workflow_scope_stack';
 
 interface StepExecutionRuntimeInit {
   contextManager: WorkflowContextManager;

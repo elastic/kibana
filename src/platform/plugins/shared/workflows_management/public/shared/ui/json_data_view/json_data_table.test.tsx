@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
+import React from 'react';
+import { usePager } from '@kbn/discover-utils';
 import { I18nProvider } from '@kbn/i18n-react';
 import { JSONDataTable } from './json_data_table';
-import { usePager } from '@kbn/discover-utils';
 
 // Helper function to render with I18n provider
 const renderWithIntl = (component: React.ReactElement) => {

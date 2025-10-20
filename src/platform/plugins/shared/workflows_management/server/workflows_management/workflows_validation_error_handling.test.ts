@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WorkflowValidationError, isWorkflowValidationError } from '../../common/lib/errors';
+import { isWorkflowValidationError, WorkflowValidationError } from '../../common/lib/errors';
 
 describe('WorkflowValidationError', () => {
   it('should create a validation error with proper properties', () => {

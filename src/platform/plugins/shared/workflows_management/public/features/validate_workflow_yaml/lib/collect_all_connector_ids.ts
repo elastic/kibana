@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { visit, type Document, isPair, isScalar, type LineCounter } from 'yaml';
-import type { ConnectorIdItem } from '../model/types';
+import { type Document, isPair, isScalar, type LineCounter, visit } from 'yaml';
 import { getPathFromAncestors } from '../../../../common/lib/yaml_utils';
+import type { ConnectorIdItem } from '../model/types';
 
 export function collectAllConnectorIds(
   yamlDocument: Document,

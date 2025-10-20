@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowYaml } from '@kbn/workflows';
-import type { VariableItem, YamlValidationResult } from '../model/types';
+import { WorkflowGraph } from '@kbn/workflows/graph';
 import { validateVariables } from './validate_variables';
+import type { VariableItem, YamlValidationResult } from '../model/types';
 
 // Mock the imports
 jest.mock('../../workflow_context/lib/get_context_for_path');

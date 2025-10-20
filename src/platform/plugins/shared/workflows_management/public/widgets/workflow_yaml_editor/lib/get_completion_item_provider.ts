@@ -27,6 +27,11 @@ import {
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import { z } from '@kbn/zod';
 import { getCachedAllConnectors } from './connectors_cache';
+import {
+  createLiquidBlockKeywordCompletions,
+  createLiquidFilterCompletions,
+  createLiquidSyntaxCompletions,
+} from './liquid_completions';
 import { generateBuiltInStepSnippet } from './snippets/generate_builtin_step_snippet';
 import {
   connectorTypeRequiresConnectorId,
@@ -42,19 +47,14 @@ import {
   generateTriggerSnippet,
 } from './snippets/generate_trigger_snippet';
 import {
-  createLiquidFilterCompletions,
-  createLiquidSyntaxCompletions,
-  createLiquidBlockKeywordCompletions,
-} from './liquid_completions';
-import {
-  LIQUID_FILTER_REGEX,
+  LIQUID_BLOCK_END_REGEX,
   LIQUID_BLOCK_FILTER_REGEX,
   LIQUID_BLOCK_KEYWORD_REGEX,
   LIQUID_BLOCK_START_REGEX,
-  LIQUID_BLOCK_END_REGEX,
-  VARIABLE_REGEX_GLOBAL,
+  LIQUID_FILTER_REGEX,
   PROPERTY_PATH_REGEX,
   UNFINISHED_VARIABLE_REGEX_GLOBAL,
+  VARIABLE_REGEX_GLOBAL,
 } from '../../../../common/lib/regex';
 import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import { getDetailedTypeDescription, getSchemaAtPath, parsePath } from '../../../../common/lib/zod';

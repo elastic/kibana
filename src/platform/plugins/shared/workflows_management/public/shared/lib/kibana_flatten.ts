@@ -24,7 +24,7 @@ export function kibanaFlatten(
 
   // recursively merge object
   (function flatten(_obj, keyPrefix = '') {
-    keyPrefix = keyPrefix ? keyPrefix + '.' : '';
+    keyPrefix = keyPrefix ? `${keyPrefix}.` : '';
     _.forOwn(_obj, function (val, key) {
       key = keyPrefix + key;
 

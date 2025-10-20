@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TriggerType } from '@kbn/workflows';
 import type { ToStringOptions } from 'yaml';
 import { stringify } from 'yaml';
+import type { TriggerType } from '@kbn/workflows';
 
 interface GenerateTriggerSnippetOptions {
   full?: boolean;

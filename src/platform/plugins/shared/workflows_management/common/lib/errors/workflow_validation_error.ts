@@ -26,6 +26,6 @@ export class WorkflowValidationError extends Error {
   }
 }
 
-export function isWorkflowValidationError(error: any): error is WorkflowValidationError {
+export function isWorkflowValidationError(error: unknown): error is WorkflowValidationError {
   return Boolean(error && error.isWorkflowValidationError === true);
 }

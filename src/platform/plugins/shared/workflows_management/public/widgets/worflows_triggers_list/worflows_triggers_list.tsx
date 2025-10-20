@@ -10,9 +10,9 @@
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 import capitalize from 'lodash/capitalize';
 import React from 'react';
+import { PopoverItems } from './popover_items';
 import * as i18n from '../../../common/translations';
 import type { WorkflowTrigger } from '../../../server/lib/schedule_utils';
-import { PopoverItems } from './popover_items';
 interface WorkflowsTriggersListProps {
   triggers: WorkflowTrigger[];
 }

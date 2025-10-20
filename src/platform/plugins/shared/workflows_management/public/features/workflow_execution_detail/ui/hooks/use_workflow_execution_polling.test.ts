@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { renderHook } from '@testing-library/react';
 import type { UseQueryResult } from '@tanstack/react-query';
+import { renderHook } from '@testing-library/react';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
-import { useWorkflowExecution } from '../../../../entities/workflows/model/use_workflow_execution';
 import { PollingIntervalMs, useWorkflowExecutionPolling } from './use_workflow_execution_polling';
+import { useWorkflowExecution } from '../../../../entities/workflows/model/use_workflow_execution';
 
 // Mock the useWorkflowExecution hook
 jest.mock('../../../../entities/workflows/model/use_workflow_execution');

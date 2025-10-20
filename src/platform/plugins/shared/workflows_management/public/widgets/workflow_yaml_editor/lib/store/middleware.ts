@@ -8,8 +8,8 @@
  */
 
 import type { AnyAction, Dispatch, Middleware, MiddlewareAPI } from '@reduxjs/toolkit';
-import type { RootState } from './types';
 import { setYamlString } from './slice';
+import type { RootState } from './types';
 import { performComputation } from './utils/computation';
 
 // Debounced computation function

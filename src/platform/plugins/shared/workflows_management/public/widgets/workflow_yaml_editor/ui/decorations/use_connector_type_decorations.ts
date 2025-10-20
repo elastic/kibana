@@ -8,13 +8,13 @@
  */
 
 import { useCallback, useEffect, useRef } from 'react';
-import type { monaco } from '@kbn/monaco';
 import type { Document, Pair, Scalar } from 'yaml';
 import { isPair, isScalar } from 'yaml';
+import type { monaco } from '@kbn/monaco';
 import { isBuiltInStepType } from '@kbn/workflows';
-import { getBaseConnectorType } from '../../../../shared/ui/step_icons/get_base_connector_type';
-import { getCachedAllConnectorsMap } from '../../../../../common/schema';
 import { getStepNodesWithType } from '../../../../../common/lib/yaml_utils';
+import { getCachedAllConnectorsMap } from '../../../../../common/schema';
+import { getBaseConnectorType } from '../../../../shared/ui/step_icons/get_base_connector_type';
 
 interface UseConnectorTypeDecorationsProps {
   editor: monaco.editor.IStandaloneCodeEditor | null;

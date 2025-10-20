@@ -9,7 +9,7 @@
 
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression } from '@kbn/es-query';
-import type { KqlLiteralNode, KqlFunctionNode } from '@kbn/es-query/src/kuery/node_types';
+import type { KqlFunctionNode, KqlLiteralNode } from '@kbn/es-query/src/kuery/node_types';
 import { KQL_NODE_TYPE_WILDCARD } from '@kbn/es-query/src/kuery/node_types';
 
 export function evaluateKql(kql: string, context: Record<string, any>): boolean {

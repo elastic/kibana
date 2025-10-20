@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Client } from '@elastic/elasticsearch';
+import { v4 as generateUuid } from 'uuid';
+import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type {
   CoreSetup,
   CoreStart,
@@ -14,17 +17,18 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
-import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
-
-import type { Client } from '@elastic/elasticsearch';
-import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { v4 as generateUuid } from 'uuid';
+import { ExecutionStatus } from '@kbn/workflows';
+import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/workflows';
+import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowsExecutionEngineConfig } from './config';
 
+import { ConnectorExecutor } from './connector_executor';
+import { UrlValidator } from './lib/url_validator';
+import { StepExecutionRepository } from './repositories/step_execution_repository';
+import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
+import { NodesFactory } from './step/nodes_factory';
 import type {
   ExecuteWorkflowStepResponse,
   WorkflowsExecutionEnginePluginSetup,
@@ -32,13 +36,7 @@ import type {
   WorkflowsExecutionEnginePluginStart,
   WorkflowsExecutionEnginePluginStartDeps,
 } from './types';
-
-import { WORKFLOWS_EXECUTION_LOGS_INDEX } from '../common';
-import { ConnectorExecutor } from './connector_executor';
-import { UrlValidator } from './lib/url_validator';
-import { StepExecutionRepository } from './repositories/step_execution_repository';
-import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
-import { NodesFactory } from './step/nodes_factory';
+import { StepExecutionRuntimeFactory } from './workflow_context_manager/step_execution_runtime_factory';
 import { WorkflowExecutionRuntimeManager } from './workflow_context_manager/workflow_execution_runtime_manager';
 import { WorkflowExecutionState } from './workflow_context_manager/workflow_execution_state';
 import { WorkflowEventLogger } from './workflow_event_logger/workflow_event_logger';
@@ -48,7 +46,7 @@ import type {
   StartWorkflowExecutionParams,
 } from './workflow_task_manager/types';
 import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
-import { StepExecutionRuntimeFactory } from './workflow_context_manager/step_execution_runtime_factory';
+import { WORKFLOWS_EXECUTION_LOGS_INDEX } from '../common';
 
 export class WorkflowsExecutionEnginePlugin
   implements Plugin<WorkflowsExecutionEnginePluginSetup, WorkflowsExecutionEnginePluginStart>
