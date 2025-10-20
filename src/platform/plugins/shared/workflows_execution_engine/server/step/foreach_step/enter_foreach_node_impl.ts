@@ -125,7 +125,11 @@ export class EnterForeachNodeImpl implements NodeImplementation {
 
       resolvedValue = result.value;
     } else {
-      resolvedValue = this.tryParseJSON(renderedForeachExpression);
+      resolvedValue = renderedForeachExpression; // renderedForeachExpression could be a JSON array string
+    }
+
+    if (typeof resolvedValue === 'string') {
+      resolvedValue = this.tryParseJSON(resolvedValue);
     }
 
     if (resolvedValue) {
