@@ -9,7 +9,7 @@ import { screen, within, act } from '@testing-library/react';
 import './mocks';
 import { getAutoFollowPatternMock } from './fixtures/auto_follow_pattern';
 import { setupEnvironment, pageHelpers, getRandomString } from './helpers';
-import { getTableCellsValues, getTableRows } from './helpers/eui_table';
+import { EuiTableTestHarness } from '@kbn/test-eui-helpers';
 
 const { setup } = pageHelpers.autoFollowPatternList;
 
@@ -92,7 +92,8 @@ describe('<AutoFollowPatternList />', () => {
     test('pagination works', async () => {
       await actions.clickPaginationNextButton();
 
-      const tableCellsValues = getTableCellsValues('autoFollowPatternListTable');
+      const table = new EuiTableTestHarness('autoFollowPatternListTable');
+      const tableCellsValues = table.cellValues;
       // Pagination defaults to 20 auto-follow patterns per page. We loaded 30 auto-follow patterns,
       // so the second page should have 10.
       expect(tableCellsValues.length).toBe(10);
@@ -101,7 +102,8 @@ describe('<AutoFollowPatternList />', () => {
     test('search works', async () => {
       await actions.search('unique');
 
-      const tableCellsValues = getTableCellsValues('autoFollowPatternListTable');
+      const table = new EuiTableTestHarness('autoFollowPatternListTable');
+      const tableCellsValues = table.cellValues;
       expect(tableCellsValues.length).toBe(1);
     });
   });
@@ -143,7 +145,8 @@ describe('<AutoFollowPatternList />', () => {
     });
 
     test('should list the auto-follow patterns in the table', () => {
-      const tableCellsValues = getTableCellsValues('autoFollowPatternListTable');
+      const table = new EuiTableTestHarness('autoFollowPatternListTable');
+      const tableCellsValues = table.cellValues;
       expect(tableCellsValues.length).toEqual(autoFollowPatterns.length);
       // Check key columns (status includes non-breaking space from EUI component)
       expect(tableCellsValues.length).toBe(2);
@@ -192,7 +195,8 @@ describe('<AutoFollowPatternList />', () => {
 
       test('should remove the auto-follow pattern from the table after delete is complete', async () => {
         // Make sure that we have our 2 auto-follow patterns in the table
-        let tableCellsValues = getTableCellsValues('autoFollowPatternListTable');
+        const table = new EuiTableTestHarness('autoFollowPatternListTable');
+        let tableCellsValues = table.cellValues;
         expect(tableCellsValues.length).toBe(2);
 
         // We will delete the *first* auto-follow pattern in the table
@@ -208,7 +212,7 @@ describe('<AutoFollowPatternList />', () => {
         await actions.clickBulkDeleteButton();
         await actions.clickConfirmModalDeleteAutoFollowPattern();
 
-        tableCellsValues = getTableCellsValues('autoFollowPatternListTable');
+        tableCellsValues = table.cellValues;
         expect(tableCellsValues.length).toBe(1);
         expect(tableCellsValues[0][1]).toEqual(autoFollowPattern2.name);
       });
@@ -216,8 +220,8 @@ describe('<AutoFollowPatternList />', () => {
 
     describe('table row actions', () => {
       test('should have a "pause", "delete" and "edit" action button on each row', async () => {
-        const rows = getTableRows('autoFollowPatternListTable');
-        const actionsCell = within(rows[0]).getAllByRole('cell').pop();
+        const table = new EuiTableTestHarness('autoFollowPatternListTable');
+        const actionsCell = within(table.rows[0]).getAllByRole('cell').pop();
         const contextMenuButton = within(actionsCell).getByRole('button');
 
         await user.click(contextMenuButton);
@@ -230,8 +234,8 @@ describe('<AutoFollowPatternList />', () => {
       test('should open a confirmation modal when clicking on "delete" button', async () => {
         expect(screen.queryByTestId('deleteAutoFollowPatternConfirmation')).not.toBeInTheDocument();
 
-        const rows = getTableRows('autoFollowPatternListTable');
-        const actionsCell = within(rows[0]).getAllByRole('cell').pop();
+        const table = new EuiTableTestHarness('autoFollowPatternListTable');
+        const actionsCell = within(table.rows[0]).getAllByRole('cell').pop();
         const contextMenuButton = within(actionsCell).getByRole('button');
         await user.click(contextMenuButton);
 

@@ -7,7 +7,7 @@
 
 import { screen, within, act } from '@testing-library/react';
 import { renderWithRouter } from './render';
-import { getTableRows } from './eui_table';
+import { EuiTableTestHarness } from '@kbn/test-eui-helpers';
 import { AutoFollowPatternList } from '../../../app/sections/home/auto_follow_pattern_list';
 import { createCrossClusterReplicationStore } from '../../../app/store';
 import { routing } from '../../../app/services/routing';
@@ -36,8 +36,8 @@ export const setup = (props = {}) => {
     // Helper actions for this specific page
     actions: {
       async selectAutoFollowPatternAt(index) {
-        const rows = getTableRows('autoFollowPatternListTable');
-        const checkbox = within(rows[index]).getByRole('checkbox');
+        const table = new EuiTableTestHarness('autoFollowPatternListTable');
+        const checkbox = within(table.rows[index]).getByRole('checkbox');
         await result.user.click(checkbox);
       },
 

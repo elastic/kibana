@@ -7,7 +7,7 @@
 
 import { screen, within } from '@testing-library/react';
 import { renderWithRouter } from './render';
-import { getTableRows } from './eui_table';
+import { EuiTableTestHarness } from '@kbn/test-eui-helpers';
 import { FollowerIndicesList } from '../../../app/sections/home/follower_indices_list';
 import { createCrossClusterReplicationStore } from '../../../app/store';
 import { routing } from '../../../app/services/routing';
@@ -34,8 +34,8 @@ export const setup = (props = {}) => {
     ...result,
     actions: {
       async selectFollowerIndexAt(index) {
-        const rows = getTableRows('followerIndexListTable');
-        const checkbox = within(rows[index]).getByRole('checkbox');
+        const table = new EuiTableTestHarness('followerIndexListTable');
+        const checkbox = within(table.rows[index]).getByRole('checkbox');
         await result.user.click(checkbox);
       },
 
@@ -51,8 +51,8 @@ export const setup = (props = {}) => {
       },
 
       async openTableRowContextMenuAt(index) {
-        const rows = getTableRows('followerIndexListTable');
-        const actionsCell = within(rows[index]).getAllByRole('cell').pop();
+        const table = new EuiTableTestHarness('followerIndexListTable');
+        const actionsCell = within(table.rows[index]).getAllByRole('cell').pop();
         const btn = within(actionsCell).getByRole('button');
         await result.user.click(btn);
       },
