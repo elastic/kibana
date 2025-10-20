@@ -42,9 +42,6 @@ const useDimensionsQueryMock = hooks.useDimensionsQuery as jest.MockedFunction<
 const useMetricsGridFullScreenMock = hooks.useMetricsGridFullScreen as jest.MockedFunction<
   typeof hooks.useMetricsGridFullScreen
 >;
-const useFullScreenStylesMock = hooks.useFullScreenStyles as jest.MockedFunction<
-  typeof hooks.useFullScreenStyles
->;
 
 const usePaginatedFieldsMock = hooks.usePaginatedFields as jest.MockedFunction<
   typeof hooks.usePaginatedFields
@@ -93,6 +90,10 @@ describe('MetricsExperienceGrid', () => {
     isComponentVisible: true,
   };
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -107,14 +108,13 @@ describe('MetricsExperienceGrid', () => {
       onClearAllDimensions: jest.fn(),
       isFullscreen: false,
       searchTerm: '',
-      onClearSearchTerm: () => {},
       onSearchTermChange: () => {},
       onToggleFullscreen: () => {},
     });
 
     usePaginatedFieldsMock.mockReturnValue({
       totalPages: 1,
-      filteredFieldsBySearch: [allFields[0]],
+      filteredFieldsCount: 1,
       currentPageFields: [allFields[0]],
     });
 
@@ -132,12 +132,15 @@ describe('MetricsExperienceGrid', () => {
       metricsGridId: 'test-metrics-grid-id',
       metricsGridWrapper: null,
       setMetricsGridWrapper: jest.fn(),
+      styles: {
+        'metricsExperienceGrid--fullScreen': 'mock-fullscreen-class',
+        'metricsExperienceGrid--restrictBody': 'mock-restrict-body-class',
+      },
     });
+  });
 
-    useFullScreenStylesMock.mockReturnValue({
-      'metricsExperienceGrid--fullScreen': 'mock-fullscreen-class',
-      'metricsExperienceGrid--restrictBody': 'mock-restrict-body-class',
-    });
+  afterAll(() => {
+    jest.useRealTimers();
   });
 
   it('renders the <MetricsGrid />', async () => {
@@ -191,7 +194,7 @@ describe('MetricsExperienceGrid', () => {
     usePaginatedFieldsMock.mockReturnValue({
       totalPages: 0,
       currentPageFields: [],
-      filteredFieldsBySearch: [],
+      filteredFieldsCount: 0,
     });
 
     const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
@@ -229,7 +232,6 @@ describe('MetricsExperienceGrid', () => {
       onClearAllDimensions: jest.fn(),
       isFullscreen: false,
       searchTerm: '',
-      onClearSearchTerm: () => {},
       onSearchTermChange: () => {},
       onToggleFullscreen: () => {},
     });
@@ -257,7 +259,6 @@ describe('MetricsExperienceGrid', () => {
       onClearAllDimensions: jest.fn(),
       isFullscreen: false,
       searchTerm: '',
-      onClearSearchTerm: jest.fn(),
       onSearchTermChange,
       onToggleFullscreen: jest.fn(),
     });
@@ -272,9 +273,8 @@ describe('MetricsExperienceGrid', () => {
 
     const inputButton = getByTestId('metricsExperienceToolbarSearch');
 
-    await act(async () => {
+    act(() => {
       inputButton.click();
-      await new Promise((resolve) => setTimeout(resolve, 0));
     });
 
     const input = getByTestId('metricsExperienceGridToolbarSearch');
@@ -286,6 +286,7 @@ describe('MetricsExperienceGrid', () => {
 
     act(() => {
       fireEvent.change(input, { target: { value: 'cpu' } });
+      jest.advanceTimersByTime(300);
     });
 
     expect(onSearchTermChange).toHaveBeenCalledWith('cpu');
@@ -306,7 +307,6 @@ describe('MetricsExperienceGrid', () => {
       onClearAllDimensions: jest.fn(),
       isFullscreen,
       searchTerm: '',
-      onClearSearchTerm: jest.fn(),
       onSearchTermChange: jest.fn(),
       onToggleFullscreen,
     });
@@ -315,9 +315,7 @@ describe('MetricsExperienceGrid', () => {
       wrapper: IntlProvider,
     });
 
-    await waitFor(() => {
-      expect(getByTestId('metricsExperienceToolbarFullScreen')).toBeInTheDocument();
-    });
+    expect(getByTestId('metricsExperienceToolbarFullScreen')).toBeInTheDocument();
 
     const fullscreenButton = getByTestId('metricsExperienceToolbarFullScreen');
 
@@ -351,14 +349,13 @@ describe('MetricsExperienceGrid', () => {
       onClearAllDimensions: jest.fn(),
       isFullscreen: false,
       searchTerm: 'cpu',
-      onClearSearchTerm: jest.fn(),
       onSearchTermChange,
       onToggleFullscreen: jest.fn(),
     });
 
     usePaginatedFieldsMock.mockReturnValue({
       totalPages: 2,
-      filteredFieldsBySearch: allFieldsSomeWithCpu.filter((f) => f.name.includes('cpu')),
+      filteredFieldsCount: allFieldsSomeWithCpu.filter((f) => f.name.includes('cpu')).length,
       currentPageFields: allFieldsSomeWithCpu.filter((f) => f.name.includes('cpu')).slice(0, 5),
     });
 
