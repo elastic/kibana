@@ -39,12 +39,6 @@ export const allowedExperimentalValues = Object.freeze({
   socTrendsEnabled: false,
 
   /**
-   * Enables the ability to send Response actions to Crowdstrike and persist the results
-   * in ES.
-   */
-  responseActionsCrowdstrikeManualHostIsolationEnabled: true,
-
-  /**
    * `runscript` response actions for SentinelOne hosts.
    *
    * Release: 9.2.0 (earlier for serverless)
@@ -199,11 +193,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Release: 8.18/9.0
    */
   responseActionsMSDefenderEndpointEnabled: true,
-
-  /**
-   * Enables banner for informing users about changes in data collection.
-   */
-  eventCollectionDataReductionBannerEnabled: true,
 
   /** Enables new Data View Picker */
   newDataViewPickerEnabled: true,
