@@ -32,6 +32,14 @@ export type ScoutPage = Page & {
    */
   waitForLoadingIndicatorHidden: () => ReturnType<Page['waitForSelector']>;
   /**
+   * Presses a key until the element with the provided selector is in focus.
+   * Uses the playwright keyboard api https://playwright.dev/docs/api/class-keyboard.
+   * @param selector - The selector for the input element (supports 'data-test-subj' attributes).
+   * @param key The key to press for keyboard navigation, defaults to Tab if none specified.
+   * @returns A Promise that resolves once the text has been typed.
+   */
+  keyTo: (selector: string, key?: string) => Promise<void>;
+  /**
    * Simplified API to interact with elements using Kibana's 'data-test-subj' attribute.
    */
   testSubj: {
@@ -98,14 +106,6 @@ export type ScoutPage = Page & {
      * @returns A Promise that resolves once the text has been cleared.
      */
     clearInput: (selector: string) => Promise<void>;
-    /**
-     * Presses a key until the element with the provided selector is in focus.
-     * Uses the playwright keyboard api https://playwright.dev/docs/api/class-keyboard.
-     * @param selector - The selector for the input element (supports 'data-test-subj' attributes).
-     * @param key The key to press for keyboard navigation, defaults to Tab if none specified.
-     * @returns A Promise that resolves once the text has been typed.
-     */
-    keyTo: (selector: string, key?: string) => Promise<void>;
   };
 };
 

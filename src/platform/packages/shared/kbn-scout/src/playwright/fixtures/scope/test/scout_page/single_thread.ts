@@ -40,7 +40,6 @@ function extendPageWithTestSubject(page: Page): ScoutPage['testSubj'] {
   const extendedMethods: Partial<Record<keyof Page, Function>> & {
     typeWithDelay?: ScoutPage['testSubj']['typeWithDelay'];
     clearInput?: ScoutPage['testSubj']['clearInput'];
-    keyTo?: ScoutPage['testSubj']['keyTo'];
   } = {};
 
   for (const method of methods) {
@@ -74,11 +73,6 @@ function extendPageWithTestSubject(page: Page): ScoutPage['testSubj'] {
     await page.locator(testSubjSelector).fill('');
   };
 
-  // custom method to press a key until an element with the provided selector is in focus.
-  extendedMethods.keyTo = async (selector: string, key: string = 'Tab') => {
-    return await keyToElement(page, selector, key);
-  };
-
   return extendedMethods as ScoutPage['testSubj'];
 }
 
@@ -100,6 +94,10 @@ export function extendPlaywrightPage({
     extendedPage.testSubj.waitForSelector('globalLoadingIndicator-hidden', {
       state: 'attached',
     });
+  // Method to press a key until an element with the provided selector is in focus.
+  extendedPage.keyTo = async (selector: string, key: string = 'Tab') => {
+    return await keyToElement(page, selector, key);
+  };
   return extendedPage;
 }
 

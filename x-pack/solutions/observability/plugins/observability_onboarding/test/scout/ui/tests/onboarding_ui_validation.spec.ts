@@ -176,8 +176,19 @@ test.describe('Onboarding UI Validation', () => {
     }
   );
 
-  test('keyboard functionality', { tag: ['@ess'] }, async ({ pageObjects, page }) => {
-    await pageObjects.onboarding.keyToExploreDemoLink();
+  test('keyboard functionality', { tag: ['@ess'] }, async ({ page }) => {
+    // this element is not on the page and should throw an error with a useful message
+    // await page.keyTo('[data-test-subj="fake-test-subject"]');
+
+    // this should have multiple elements matching the selector and throw an error with a useful message
+    // await page.keyTo('button');
+
+    // this element is not focusable and should result in a tab cycle error
+    // await page.keyTo('[data-test-subj="obltOnboardingHomeTitle"]');
+
+    // happy path - this element is focusable and should result in focus ending on the provided element
+    await page.keyTo('[data-test-subj="observabilityOnboardingFooterExploreDemoLink"]');
+
     await expect(
       page.locator('[data-test-subj="observabilityOnboardingFooterExploreDemoLink"]')
     ).toBeFocused();
