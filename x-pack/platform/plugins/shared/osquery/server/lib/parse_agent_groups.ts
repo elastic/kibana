@@ -131,7 +131,10 @@ export const parseAgentSelection = async (
     .getAgentService()
     ?.asInternalScopedUser(agentSelection.spaceId);
   const packagePolicyService = context.service.getPackagePolicyService();
-  const kueryFragments = ['status:online'];
+  // Explicitly allow only online and degraded agents for Osquery queries
+  // - online: Agent is healthy and checking in regularly
+  // - degraded: Agent is checking in but has issues with other integrations
+  const kueryFragments: string[] = ['(status:online OR status:degraded)'];
 
   if (agentService && packagePolicyService) {
     const osqueryPolicies = await aggregateResults(

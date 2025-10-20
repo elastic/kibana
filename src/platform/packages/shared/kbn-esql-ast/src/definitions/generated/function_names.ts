@@ -121,6 +121,7 @@ export const esqlFunctionNames = [
   'MV_ZIP',
   'NOW',
   'PERCENTILE',
+  'PERCENTILE_OVER_TIME',
   'PI',
   'POW',
   'PRESENT',
