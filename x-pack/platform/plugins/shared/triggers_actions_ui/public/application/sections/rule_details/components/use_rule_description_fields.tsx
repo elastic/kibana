@@ -14,17 +14,26 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { HttpResponse, HttpSetup } from '@kbn/core/public';
 import type { PrebuildFieldsMap, RuleDefinitionProps } from '../../../../types';
 
-/* usage:
- * <AsyncField<dataType>
- *   queryKey={['react-query-key']}
- *   queryFn={async () => { // your async function }}
- * >
- *   {(data: dataType) => (
- *     // render something with data
- *   )}
- * </AsyncField>
- */
-const AsyncField = <T,>({
+// needed by the AsyncField
+class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <span data-test-subj="rule-description-field-error-boundary">-</span>;
+    }
+    return this.props.children;
+  }
+}
+
+export const AsyncField = <T,>({
   queryKey,
   queryFn,
   children,
@@ -34,20 +43,29 @@ const AsyncField = <T,>({
   children: (data: T) => React.ReactNode;
 }) => {
   const AsyncContent = () => {
-    const { data } = useQuery<HttpResponse<T>, Error>(queryKey, queryFn, { suspense: true });
+    const { data } = useQuery<HttpResponse<T>, Error>(queryKey, queryFn, {
+      suspense: true,
+    });
     return <>{children(data as T)}</>;
   };
 
   return (
-    <Suspense fallback="Loading...">
-      <AsyncContent />
-    </Suspense>
+    <ErrorBoundary>
+      <Suspense fallback="Loading...">
+        <AsyncContent />
+      </Suspense>
+    </ErrorBoundary>
   );
 };
 
 const IndexPattern = ({ patterns }: { patterns: string[] }) => {
   return (
-    <EuiFlexGroup responsive={false} gutterSize="xs" wrap>
+    <EuiFlexGroup
+      responsive={false}
+      gutterSize="xs"
+      wrap
+      data-test-subj="rule-descriptiont-index-patterns"
+    >
       {patterns.map((pattern) => (
         <EuiBadge key={pattern} color="hollow">
           {pattern}
@@ -65,7 +83,7 @@ const CodeBlock = ({ children, border }: { children: React.ReactNode; border: st
   );
 };
 
-const createPrebuildFields = ({
+export const createPrebuildFields = ({
   border,
   http,
 }: {
@@ -85,7 +103,6 @@ const createPrebuildFields = ({
       }),
       description: <CodeBlock border={border}>{query}</CodeBlock>,
     }),
-
     [RULE_DETAIL_DESCRIPTION_FIELD_TYPES.ESQL_QUERY]: (query: string) => ({
       title: i18n.translate('xpack.triggersActionsUI.ruleDetails.esqlQueryTitle', {
         defaultMessage: 'ES|QL query',
@@ -123,7 +140,21 @@ const createPrebuildFields = ({
           }}
         >
           {(data) => {
-            return data ? <div>{data.result.result.item.attributes.title}</div> : <div>-</div>;
+            if (!data) {
+              return <div data-test-subj="description-detail-data-view-pattern-error">-</div>;
+            }
+
+            try {
+              const dataViewIndexPattern = data.result.result.item.attributes.title;
+              return (
+                <IndexPattern
+                  patterns={[dataViewIndexPattern]}
+                  data-test-subj="description-detail-data-view-pattern"
+                />
+              );
+            } catch (e) {
+              return <div data-test-subj="description-detail-data-view-pattern-error">-</div>;
+            }
           }}
         </AsyncField>
       ),

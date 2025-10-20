@@ -23,53 +23,20 @@ export const getDescriptionFields: GetDescriptionFieldsFn = ({ rule, prebuildFie
 
   if (rule.params.searchType === 'esqlQuery') {
     return [
-      // {
-      //   type: RULE_DETAIL_DESCRIPTION_FIELD_TYPES.ESQL_QUERY,
-      //   value: (rule.params.esqlQuery as { esql: string }).esql,
-      //   description: (
-      //     <CodeBlockWrapper>{(rule.params.esqlQuery as { esql: string }).esql}</CodeBlockWrapper>
-      //   ),
-      // },
+      prebuildFields[RULE_DETAIL_DESCRIPTION_FIELD_TYPES.ESQL_QUERY](
+        (rule.params.esqlQuery as { esql: string }).esql
+      ),
     ];
   }
 
   if (rule.params.searchType === 'searchSource' && rule.params.searchConfiguration) {
     return [
-      // {
-      //   type: RULE_DETAIL_DESCRIPTION_FIELD_TYPES.DATA_VIEW_ID,
-      //   description: <span>{(rule.params.searchConfiguration as { index: string[] }).index}</span>,
-      // },
-      // {
-      //   type: RULE_DETAIL_DESCRIPTION_FIELD_TYPES.DATA_VIEW_INDEX_PATTERN,
-      //   description: (
-      //     <AsyncField<{
-      //       result: {
-      //         result: { item: { id: string; attributes: { title: string; name: string } } };
-      //       };
-      //     }>
-      //       queryKey={['esQueryRuleDescriptionDataViewDetails']}
-      //       queryFn={() =>
-      //         http.post('/api/content_management/rpc/get', {
-      //           body: JSON.stringify({
-      //             contentTypeId: 'index-pattern',
-      //             id: (rule.params.searchConfiguration as { index: string }).index,
-      //             version: '1',
-      //           }),
-      //         })
-      //       }
-      //     >
-      //       {(data) => <div>{data.result.result.item.attributes.title}</div>}
-      //     </AsyncField>
-      //   ),
-      // },
-      // {
-      //   type: RULE_DETAIL_DESCRIPTION_FIELD_TYPES.CUSTOM_QUERY,
-      //   description: (
-      //     <CodeBlockWrapper>
-      //       {(rule.params.searchConfiguration as { query: { query: string } }).query.query}
-      //     </CodeBlockWrapper>
-      //   ),
-      // },
+      prebuildFields[RULE_DETAIL_DESCRIPTION_FIELD_TYPES.DATA_VIEW_INDEX_PATTERN](
+        (rule.params.searchConfiguration as { index: string }).index
+      ),
+      prebuildFields[RULE_DETAIL_DESCRIPTION_FIELD_TYPES.CUSTOM_QUERY](
+        (rule.params.searchConfiguration as { query: { query: string } }).query.query
+      ),
     ];
   }
 
