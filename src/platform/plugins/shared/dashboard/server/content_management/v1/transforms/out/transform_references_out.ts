@@ -8,11 +8,39 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core/server';
+import { DashboardAttributes, DashboardPanel } from '../../types';
+import { isDashboardSection } from '../../../../../common';
+import { embeddableService } from '../../../../kibana_services';
+import { getPanelIdFromReference } from '../../../../../common/reference_utils';
 
-export function transformReferencesOut(references: SavedObjectReference[]): SavedObjectReference[] {
-  return references.map((ref) => {
-    return isLegacySavedObjectRef(ref) ? transformLegacySavedObjectRef(ref) : ref;
+export function transformReferencesOut(references: SavedObjectReference[], panels: DashboardAttributes['panels']): SavedObjectReference[] {
+  // key: panel uid
+  // value: boolean indicating if panel type handles references in transform functions
+  const handlesRefsMap: Record<string, boolean> = {};
+  function setHandlesRefs(panel: DashboardPanel) {
+    if (!panel.uid) return;
+    const { transformHandlesReferences } = embeddableService?.getTransforms(panel.type) ?? {};
+    handlesRefsMap[panel.uid] = typeof transformHandlesReferences === 'boolean' ? transformHandlesReferences : false;
+  }
+  panels.forEach((panel) => {
+    if (isDashboardSection(panel)) {
+      panel.panels.forEach((panelInSection) => setHandlesRefs(panelInSection));
+    } else {
+      setHandlesRefs(panel);
+    }
   });
+
+  return references
+    .map((ref) => {
+      return isLegacySavedObjectRef(ref) ? transformLegacySavedObjectRef(ref) : ref;
+    })
+    .filter((ref) => {
+      const panelId = getPanelIdFromReference(ref);
+      return panelId && handlesRefsMap[panelId]
+        // drop references for panels that handle references on server
+        ? false
+        : true;
+    });
 }
 
 // < 9.2 legach saved object ref name shape `${panelId}:panel_${panelId}`

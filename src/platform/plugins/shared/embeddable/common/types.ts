@@ -15,6 +15,11 @@ export type EmbeddableTransforms<
   EmbeddableState extends object = object
 > = {
   /**
+   * Temporary flag indicating transforms inject/extract references
+   * TODO: remove once all reference injection and extraction are done in server
+   */
+  transformHandlesReferences?: boolean;
+  /**
    * Converts StoredEmbeddableState and injects references into EmbeddableState
    */
   transformOut?: (storedState: StoredEmbeddableState, references?: Reference[]) => EmbeddableState;
