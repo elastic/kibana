@@ -12,6 +12,7 @@ import { euiShadow } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { SOURCES_TYPES } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import type { ILicense } from '@kbn/licensing-types';
 import { monaco } from '@kbn/monaco';
@@ -211,7 +212,8 @@ export const getIndicesList = async (dataViews: DataViewsPublicPluginStart) => {
   return indices.map((index) => {
     const [tag] = index?.tags ?? [];
     const mode = index?.item?.mode;
-    const type = mode === 'time_series' ? 'Timeseries' : tag?.name ?? 'Index';
+    const type =
+      mode === 'time_series' ? SOURCES_TYPES.TIMESERIES : tag?.name ?? SOURCES_TYPES.INDEX;
     return { name: index.name, hidden: index.name.startsWith('.'), type };
   });
 };
@@ -236,7 +238,8 @@ export const getRemoteIndicesList = async (
   return finalIndicesList.map((source) => {
     const [tag] = source?.tags ?? [];
     const mode = source?.item?.mode;
-    const type = mode === 'time_series' ? 'Timeseries' : tag?.name ?? 'Index';
+    const type =
+      mode === 'time_series' ? SOURCES_TYPES.TIMESERIES : tag?.name ?? SOURCES_TYPES.INDEX;
     return { name: source.name, hidden: false, type };
   });
 };
@@ -278,7 +281,7 @@ const getIntegrations = async (core: Pick<CoreStart, 'application' | 'http'>) =>
         hidden: false,
         title: source.title,
         dataStreams: source.dataStreams,
-        type: 'Integration',
+        type: SOURCES_TYPES.INTEGRATION,
       })) ?? []
   );
 };

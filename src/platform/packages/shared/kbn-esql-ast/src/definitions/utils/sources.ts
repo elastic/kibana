@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { IndexAutocompleteItem, ESQLSourceResult } from '@kbn/esql-types';
+import { SOURCES_TYPES } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import type { ESQLAstAllCommands, ESQLSource } from '../../types';
 import type { ISuggestionItem } from '../../commands_registry/types';
@@ -54,10 +55,11 @@ export const buildSourcesDefinitions = (
 ): ISuggestionItem[] =>
   sources.map(({ name, isIntegration, title, type }) => {
     let text = getSafeInsertSourceText(name);
-    const isTimeseries = type === 'Timeseries';
+    const isTimeseries = type === SOURCES_TYPES.TIMESERIES;
     let rangeToReplace: { start: number; end: number } | undefined;
 
     // If this is a timeseries source we should replace FROM with TS
+    // With TS users can benefit from the timeseries optimizations
     if (isTimeseries && queryString) {
       text = `TS ${text}`;
       rangeToReplace = {
@@ -73,12 +75,12 @@ export const buildSourcesDefinitions = (
       kind: isIntegration ? 'Class' : 'Issue',
       detail: isIntegration
         ? i18n.translate('kbn-esql-ast.esql.autocomplete.integrationDefinition', {
-            defaultMessage: `Integration`,
+            defaultMessage: SOURCES_TYPES.INTEGRATION,
           })
         : i18n.translate('kbn-esql-ast.esql.autocomplete.sourceDefinition', {
             defaultMessage: '{type}',
             values: {
-              type: type ?? 'Index',
+              type: type ?? SOURCES_TYPES.INDEX,
             },
           }),
       sortText: 'A',

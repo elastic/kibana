@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { SOURCES_TYPES } from '@kbn/esql-types';
 import { joinIndices, timeseriesIndices } from '../../__tests__/context_fixtures';
 
 import {
@@ -153,8 +154,8 @@ describe('sourceExists', () => {
 describe('buildSourcesDefinitions with timeseries', () => {
   test('converts timeseries sources with FROM->TS replacement', () => {
     const sources = [
-      { name: 'my_timeseries_index', isIntegration: false, type: 'Timeseries' },
-      { name: 'regular_index', isIntegration: false, type: 'Index' },
+      { name: 'my_timeseries_index', isIntegration: false, type: SOURCES_TYPES.TIMESERIES },
+      { name: 'regular_index', isIntegration: false, type: SOURCES_TYPES.INDEX },
     ];
 
     const suggestions = buildSourcesDefinitions(sources, 'FROM ');
