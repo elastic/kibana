@@ -157,7 +157,7 @@ export class EnterForeachNodeImpl implements NodeImplementation {
 
     throw new Error(
       `Foreach expression must be a valid JSON array or a context path. ` +
-        `Got: ${renderedForeachExpression}.`
+        `Got: ${renderedForeachExpression}`
     );
   }
 
