@@ -3,7 +3,7 @@
 This guide provides prompts to help you migrate existing FTR tests to the [Scout](https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-scout) framework.
 
 > [!WARNING]
-> These prompts are experimental. Please carefully review all AI-generated code for mistakes before merging. We also highly encourage to make sure the tests you're migrating should be functional tests. If they
+> These prompts are experimental. Please carefully review all AI-generated code for mistakes before merging. We also highly encourage to make sure the tests you're migrating should be functional tests.
 
 ## ⚠️ Before migrating a test
 
@@ -13,8 +13,8 @@ First, it's **crucial** to determine if your FTR test should be migrated to a Sc
 
 Let's suppose you have an FTR test that validates a data table.
 
-- **Avoid** testing the specific contents of the cells. A test asserting that the table has exactly 15 rows and the value in row 3, column 2 is 'Complete' is a data validation test, not a UI functional test. Write an API test instead.
-- **Do** test that the table component renders and is interactive. A good functional test would assert that the table is visible, contains column headers, and displays at least one row of data. This confirms the UI is functioning correctly without being tightly coupled to the data itself.
+- **Do** test that the table component renders and is interactive. A good functional test would assert that the table is visible, contains column headers, and displays at least one row of data. This confirms the UI is functioning correctly without being tightly coupled to the data itself. If you'd like to test that the pagination works correctly, you can also check the number of rows is what you expect.
+- **Avoid** testing the specific contents of the cells. Write an API test instead.
 
 ## Recommended tools
 
@@ -71,29 +71,27 @@ Instructions:
 
 If your FTR tests rely on API helpers to prepare the test environment, use this prompt to create or update Scout API helpers.
 
-First you may use the Semantic code search MCP server to find existing API helpers:
+First you may use the Semantic code search MCP server to find existing API tests:
 
 ```
-Use semantic code search to find existing data views API helpers.
+Use semantic code search to find existing data views API tests.
 ```
 
-Alternatively, you can search for these files manually, or attempt to have the AI assistant search them for you (without semantic search).
-
-Then, use a similar prompt:
+Alternatively, you can search for these files manually. Then, use a similar prompt:
 
 ```
 Can you generate a Scout API helper based on these existing files:
 
-@src/platform/plugins/shared/data_views/server/routes.ts - Main route registration file
-@src/platform/plugins/shared/data_views/server/rest_api_routes/public/index.ts - Public routes index
-@src/platform/plugins/shared/data_views/server/constants.ts - Path constants
-@src/platform/plugins/shared/data_views/common/constants.ts - Common constants including internal paths
-@src/platform/plugins/shared/data_views/server/rest_api_routes/internal/existing_indices.ts - Existing indices endpoint
-@src/platform/plugins/shared/data_views/server/rest_api_routes/internal/fields_for.ts - Fields for wildcard endpoint
-@src/platform/plugins/shared/data_views/server/rest_api_routes/internal/fields.ts - Fields endpoint
-@src/platform/plugins/shared/data_views/server/rest_api_routes/internal/has_es_data.ts - Has ES data endpoint
+   * src/platform/test/api_integration/apis/data_views/data_views_crud/create_data_view/mai
+     n.ts
+   * src/platform/test/api_integration/apis/data_views/data_views_crud/get_data_view/main.t
+     s
+   * x-pack/platform/test/serverless/api_integration/test_suites/data_views/data_views_crud
+     /create_data_view/main.ts
+   * src/platform/plugins/shared/data_views/public/data_views/data_views_api_client.test.ts
 
 Guidelines:
+
 - Don't import existing interfaces. Rather, create a separate `types.ts` file which contains all the interfaces and types that the API helper needs.
 - Take inspiration from the existing Scout platform API helpers: `src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/apis`, and add them there (follow the same structure).
 - Add support for all the available endpoints, and design the API service to be intuitive to use.
@@ -111,6 +109,7 @@ With the boilerplate and page objects in place, you can now fill in the test log
 Remember to update the file paths in the prompt.
 
 ```
+
 The following path contains Scout boilerplate tests:
 
 @x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests
@@ -125,10 +124,10 @@ Use the original FTR test as a reference:
 @x-pack/solutions/observability/test/functional/apps/uptime/index.ts
 
 Guidelines:
+
 - Each test must have assertions.
 - The end goal is to create working tests. Pay special attention to semantics. You MUST use methods that exist. If you need an API helper, import it rather than creating it (unless absolutely necessary).
 - The TODO comments are guides, not prescriptive rules.
-```
 
 **Checkpoint**: the LLM should now populate the Scout test files from Step 1 with implementation code based on the original FTR tests.
 
@@ -139,3 +138,5 @@ Finally, run your new Scout tests. We recommend using the `--ui` mode to easily 
 > [!IMPORTANT]
 > Some tests may fail because they rely on an **advanced setting** being set to enable a specific feature or set a specific timezone (e.g., `UTC`). This means the failure isn't specific to the test file itself. Take a careful look at the FTR test config of the original tests to see which setting must be enabled.
 > At this time, Scout doesn't support overriding the Kibana configuration per test config file, but you can take a look at the current [stateful](https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-scout/src/config/stateful) and [serverless](https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-scout/src/config/serverless) config files that apply to all Scout test configs.
+> To apply configuration overrides in your tests, use the `apiServices.core` API helper to access the `PUT kbn:/internal/core/_settings` endpoint, which is available only in test environments.
+```
