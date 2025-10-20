@@ -572,8 +572,7 @@ describe('validateEmailAddresses()', () => {
     });
   });
 
-  describe('maximum_body_length', () => {
-  });
+  describe('maximum_body_length', () => {});
 });
 
 describe('getMaxAttempts()', () => {
