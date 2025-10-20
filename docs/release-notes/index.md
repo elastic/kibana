@@ -32,17 +32,17 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Adds a table list view mode to the space selection screen for a more scalable design when a user has access to many spaces [#229046]({{kib-pull}}229046).
 
 **Alerting**:
-* Enable cases numerical id service [#238555]({{kib-pull}}238555).
+* Enables incremental human-readable case IDs [#238555]({{kib-pull}}238555).
 * Create case analytics indexes per solution per space [#234125]({{kib-pull}}234125).
 * Revert incremental id and add multifield [#230278]({{kib-pull}}230278).
-* Show image thumbnail [#226004]({{kib-pull}}226004).
-* Adds a new Connector for Jira Service Management [#235408]({{kib-pull}}235408).
-* Adds `xpack.actions.email.recipient_allowlist` kibana config [#220058]({{kib-pull}}220058).
-* Adds OAuth2 Client Credentials authentication support to Kibana Webhook connectors [#218442]({{kib-pull}}218442).
-* Allows to add additional fields to IBM resilient connector [#236144]({{kib-pull}}236144).
+* Shows thumbnail image of attached case file [#226004]({{kib-pull}}226004).
+* Adds a new Jira Service Management connector [#235408]({{kib-pull}}235408).
+* Adds `xpack.actions.email.recipient_allowlist` alert action setting, which lets you specify a list of allowed email recipient patterns (`to`, `cc`, or `bcc`) that can be used with email connectors [#220058]({{kib-pull}}220058).
+* Adds support for OAuth 2.0 authentication to the Webhook connector [#218442]({{kib-pull}}218442).
+* Allows you to specify additional fields for the IBM Resilient connector [#236144]({{kib-pull}}236144).
 * Maintenance windows are now generally available [#233870]({{kib-pull}}233870).
 * Adds support for encrypted headers in the Webhook connector [#233695]({{kib-pull}}233695).
-* Automatically copy source data into the alerts-as-data documents for other ES Query rule types [#230010]({{kib-pull}}230010).
+* Automatically copies source data into the alerts-as-data documents for other {{es}} query rule types [#230010]({{kib-pull}}230010).
 * You can now add filters to maintenance windows based on alert fields from all solutions, without needing to select a category first [#227888]({{kib-pull}}227888).
 
 **Dashboards and Visualizations**:
