@@ -5,11 +5,6 @@
  * 2.0.
  */
 import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
-
-export const severityThresholdSchema = schema.object({
-  min: schema.number(),
-  max: schema.maybe(schema.number()),
-});
+import type { severityThresholdSchema } from '../../server/embeddable/schemas';
 
 export type SeverityThreshold = TypeOf<typeof severityThresholdSchema>;
