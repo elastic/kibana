@@ -1384,6 +1384,39 @@ describe('MS Defender response actions client', () => {
       ).rejects.toThrow('Microsoft Defender cancel API error');
     });
 
+    it('should throw validation error when attempting to cancel a cancel action', async () => {
+      // Mock getActionDetailsById to return a cancel action
+      getActionDetailsByIdMock.mockResolvedValueOnce(
+        new EndpointActionGenerator('seed').generateActionDetails({
+          id: 'cancel-action-id',
+          command: 'cancel',
+          isCompleted: false,
+          wasSuccessful: false,
+          agents: ['1-2-3'],
+        })
+      );
+
+      await expect(
+        msClientMock.cancel({
+          endpoint_ids: ['1-2-3'],
+          comment: 'trying to cancel a cancel action',
+          parameters: { id: 'cancel-action-id' },
+        })
+      ).rejects.toMatchObject({
+        message: 'Cannot cancel a cancel action.',
+        statusCode: 400,
+      });
+
+      // Verify that the connector was NOT called since validation should fail first
+      expect(connectorActionsMock.execute).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            subAction: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.CANCEL_ACTION,
+          }),
+        })
+      );
+    });
+
     it('should handle MDE error when action status is not Pending or InProgress', async () => {
       const mdeError = new Error(
         'Attempt to send [cancelAction] to Microsoft Defender for Endpoint failed: Status code: 400. Message: API Error: [Bad Request] Request failed with status code 400\n' +
