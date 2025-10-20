@@ -179,7 +179,7 @@ describe('autocomplete.suggest', () => {
     test('suggests `?multiValue` option', async () => {
       const { suggest } = await setup();
 
-      const suggestions = await suggest('FROM index_a | WHERE MV_CONTAINS(/', {
+      const suggestions = await suggest('FROM index_a | WHERE MV_CONTAINS( /', {
         callbacks: {
           canSuggestVariables: () => true,
           getVariables: () => [
