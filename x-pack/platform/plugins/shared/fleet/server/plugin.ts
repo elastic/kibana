@@ -358,7 +358,10 @@ export class FleetPlugin
 
     core.status.set(this.fleetStatus$.asObservable());
 
-    const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental ?? []);
+    const experimentalFeatures = parseExperimentalConfigValue(
+      config.enableExperimental ?? [],
+      config.experimentalFeatures || {}
+    );
     const requireAllSpaces = experimentalFeatures.useSpaceAwareness ? false : true;
 
     registerSavedObjects(core.savedObjects, {
@@ -741,7 +744,8 @@ export class FleetPlugin
       configInitialValue: this.configInitialValue,
       config$: this.config$,
       experimentalFeatures: parseExperimentalConfigValue(
-        this.configInitialValue.enableExperimental || []
+        this.configInitialValue.enableExperimental || [],
+        this.configInitialValue.experimentalFeatures || {}
       ),
       savedObjects: core.savedObjects,
       savedObjectsTagging: plugins.savedObjectsTagging,
@@ -923,9 +927,8 @@ export class FleetPlugin
       },
       getPackageSpecTagId,
       async createOutputClient(request: KibanaRequest) {
-        const soClient = appContextService.getSavedObjects().getScopedClient(request);
         const authz = await getAuthzFromRequest(request);
-        return new OutputClient(soClient, authz);
+        return new OutputClient(authz);
       },
       cloudConnectorService,
       runWithCache,
