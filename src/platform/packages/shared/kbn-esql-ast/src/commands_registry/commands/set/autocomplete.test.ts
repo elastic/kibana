@@ -38,19 +38,19 @@ const testSetAutocomplete = async (
 describe('SET Autocomplete', () => {
   describe('Setting name suggestions', () => {
     it('suggests available settings after SET command', async () => {
-      await testSetAutocomplete('SET ', ['project_routing = ']);
+      await testSetAutocomplete('SET ', ['project_routing = ', 'time_zone = ']);
     });
 
     it('suggests available settings with multiple spaces', async () => {
-      await testSetAutocomplete('SET   ', ['project_routing = ']);
+      await testSetAutocomplete('SET   ', ['project_routing = ', 'time_zone = ']);
     });
 
     it('suggests available settings with tab characters', async () => {
-      await testSetAutocomplete('SET\t', ['project_routing = ']);
+      await testSetAutocomplete('SET\t', ['project_routing = ', 'time_zone = ']);
     });
 
     it('suggests settings for partial setting name', async () => {
-      await testSetAutocomplete('SET project', ['project_routing = ']);
+      await testSetAutocomplete('SET project', ['project_routing = ', 'time_zone = ']);
     });
   });
 
