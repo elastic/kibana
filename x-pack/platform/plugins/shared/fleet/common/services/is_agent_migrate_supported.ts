@@ -12,5 +12,12 @@ import type { Agent } from '../types';
 export const MINIMUM_MIGRATE_AGENT_VERSION = '9.2.0';
 
 export const isAgentMigrationSupported = (agent: Agent) => {
-  return !agent.agent?.version || semverGte(agent.agent.version, MINIMUM_MIGRATE_AGENT_VERSION);
+  // Check if agent meets minimum version requirement
+  const meetsVersionRequirement =
+    !agent.agent?.version || semverGte(agent.agent.version, MINIMUM_MIGRATE_AGENT_VERSION);
+
+  // Check if agent is not containerized (containerized agents have upgradeable: false)
+  const isNotContainerized = agent.local_metadata?.elastic?.agent?.upgradeable !== false;
+
+  return meetsVersionRequirement && isNotContainerized;
 };

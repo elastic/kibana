@@ -1318,7 +1318,7 @@
     "nunjucks": "^3.2.4",
     "oas": "^28.1.0",
     "object-hash": "^3.0.0",
-    "object-path-immutable": "^3.1.1",
+    "object-path-immutable": "^4.1.2",
     "oniguruma-to-es": "^4.1.0",
     "openai": "^4.72.0",
     "openpgp": "5.11.3",
