@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Type } from '@kbn/config-schema';
 import type { Reference } from '@kbn/content-management-utils';
 
 export type EmbeddableTransforms<
@@ -24,4 +25,13 @@ export type EmbeddableTransforms<
     state: StoredEmbeddableState;
     references?: Reference[];
   };
+  /**
+   * Embeddable containers that include embeddable state in REST APIs, such as dashboard,
+   * use schemas to
+   * 1) Include embeddable state schemas in OpenAPI Specification (OAS) documenation.
+   * 2) Validate embeddable state, failing requests when schema validation fails.
+   *
+   * When schema is provided, EmbeddableState is expected to be TypeOf<typeof schema>
+   */
+  schema?: Type<object>;
 };

@@ -11,8 +11,8 @@
 // import { evaluate } from '@marcbachmann/cel-js'
 import type { ConnectorExecutor } from '../connector_executor';
 import { WorkflowTemplatingEngine } from '../templating_engine';
-import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
+import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 
 export interface RunStepResult {
   input: any;
@@ -42,26 +42,26 @@ export interface NodeWithErrorCatching {
 }
 
 export interface MonitorableNode {
-  monitor(monitoredContext: WorkflowContextManager): Promise<void>;
+  monitor(monitoredContext: StepExecutionRuntime): Promise<void>;
 }
 
 export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
   implements NodeImplementation
 {
   protected step: TStep;
-  protected contextManager: WorkflowContextManager;
+  protected stepExecutionRuntime: StepExecutionRuntime;
   protected templatingEngine: WorkflowTemplatingEngine;
   protected connectorExecutor: ConnectorExecutor;
   protected workflowExecutionRuntime: WorkflowExecutionRuntimeManager;
 
   constructor(
     step: TStep,
-    contextManager: WorkflowContextManager,
+    stepExecutionRuntime: StepExecutionRuntime,
     connectorExecutor: ConnectorExecutor | undefined,
     workflowExecutionRuntime: WorkflowExecutionRuntimeManager
   ) {
     this.step = step;
-    this.contextManager = contextManager;
+    this.stepExecutionRuntime = stepExecutionRuntime;
     this.templatingEngine = new WorkflowTemplatingEngine();
     this.connectorExecutor = connectorExecutor as any;
     this.workflowExecutionRuntime = workflowExecutionRuntime;
@@ -76,18 +76,25 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
   }
 
   public async run(): Promise<void> {
-    await this.workflowExecutionRuntime.startStep();
-
     const input = this.getInput();
+    await this.stepExecutionRuntime.startStep(input);
 
     try {
       const result = await this._run(input);
-      await this.workflowExecutionRuntime.setCurrentStepResult(result);
+
+      // Don't update step execution runtime if abort was initiated
+      if (this.stepExecutionRuntime.abortController.signal.aborted) {
+        return;
+      }
+
+      if (result.error) {
+        await this.stepExecutionRuntime.failStep(result.error);
+      } else {
+        await this.stepExecutionRuntime.finishStep(result.output);
+      }
     } catch (error) {
       const result = await this.handleFailure(input, error);
-      await this.workflowExecutionRuntime.setCurrentStepResult(result);
-    } finally {
-      await this.workflowExecutionRuntime.finishStep();
+      await this.stepExecutionRuntime.failStep(result.error);
     }
 
     this.workflowExecutionRuntime.navigateToNextNode();

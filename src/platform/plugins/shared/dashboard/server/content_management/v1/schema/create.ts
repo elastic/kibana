@@ -9,7 +9,7 @@
 import { schema } from '@kbn/config-schema';
 import { createOptionsSchemas, referenceSchema } from '@kbn/content-management-utils';
 
-import { dashboardDataSchema, dashboardMetaSchema, dashboardResolveMetaSchema } from './common';
+import { getDashboardDataSchema, dashboardMetaSchema, dashboardResolveMetaSchema } from './common';
 
 export const dashboardCreateOptionsSchema = schema.object({
   id: schema.maybe(createOptionsSchemas.id),
@@ -18,12 +18,14 @@ export const dashboardCreateOptionsSchema = schema.object({
   initialNamespaces: schema.maybe(createOptionsSchemas.initialNamespaces),
 });
 
-export const dashboardStorageCreateResultSchema = schema.object(
-  {
-    id: schema.string(),
-    type: schema.string(),
-    data: dashboardDataSchema,
-    meta: dashboardMetaSchema.extends(dashboardResolveMetaSchema),
-  },
-  { unknowns: 'forbid' }
-);
+export function getDashboardStorageCreateResultSchema() {
+  return schema.object(
+    {
+      id: schema.string(),
+      type: schema.string(),
+      data: getDashboardDataSchema(),
+      meta: dashboardMetaSchema.extends(dashboardResolveMetaSchema),
+    },
+    { unknowns: 'forbid' }
+  );
+}
