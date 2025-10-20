@@ -350,7 +350,7 @@ export function ControlSelectionType({
   const {
     services: { docLinks },
   } = useKibana<ServiceDeps>();
-  const multiValuesGuideLink = docLinks.links.query.queryESQLMultiValueControls;
+  const multiValuesGuideLink = docLinks?.links.query.queryESQLMultiValueControls ?? '';
   return (
     <>
       <EuiSpacer size="m" />
