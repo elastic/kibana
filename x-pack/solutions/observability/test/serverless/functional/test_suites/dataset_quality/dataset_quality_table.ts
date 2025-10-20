@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import originalExpect from 'expect';
+import { IndexTemplateName } from '@kbn/apm-synthtrace/src/lib/logs/custom_logsdb_index_templates';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import {
   datasetNames,
@@ -14,6 +15,7 @@ import {
   getInitialTestLogs,
   getLogsForDataset,
   productionNamespace,
+  processors,
 } from './data';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -35,6 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     name: 'apache',
     version: '1.14.0',
   };
+  const testSubjects = getService('testSubjects');
 
   describe('Dataset quality table', function () {
     before(async () => {
@@ -173,6 +176,77 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.datasetQuality.toggleShowInactiveDatasets();
       const rows = await PageObjects.datasetQuality.getDatasetTableRows();
       expect(rows.length).to.eql(activeDatasets.length);
+    });
+
+    describe('Failed docs', () => {
+      before(async () => {
+        await synthtrace.createCustomPipeline(processors, 'synth.no-fs@pipeline');
+        await synthtrace.createComponentTemplate({
+          name: 'synth.no-fs@custom',
+          dataStreamOptions: {
+            failure_store: {
+              enabled: false,
+            },
+          },
+        });
+        await synthtrace.createIndexTemplate(IndexTemplateName.NoFailureStore);
+
+        await synthtrace.index([getLogsForDataset({ to, count: 5, dataset: 'synth.no-fs' })]);
+
+        await PageObjects.datasetQuality.navigateTo();
+        await PageObjects.datasetQuality.waitUntilTableLoaded();
+      });
+
+      after(async () => {
+        await synthtrace.clean();
+        await synthtrace.deleteIndexTemplate(IndexTemplateName.NoFailureStore);
+        await synthtrace.deleteComponentTemplate('synth.no-fs@custom');
+        await synthtrace.deleteCustomPipeline('synth.no-fs@pipeline');
+      });
+      it('changes link text on hover when failure store is not enabled', async () => {
+        const links = await testSubjects.findAll(
+          PageObjects.datasetQuality.testSubjectSelectors.enableFailureStoreFromTableButton
+        );
+        expect(links.length).to.be.greaterThan(0);
+        const link = links[links.length - 1];
+
+        expect(await link.getVisibleText()).to.eql('N/A');
+
+        await link.moveMouseTo();
+
+        await retry.try(async () => {
+          expect(await link.getVisibleText()).to.eql('Set failure store');
+        });
+
+        const table = await PageObjects.datasetQuality.getDatasetsTable();
+        await table.moveMouseTo();
+      });
+
+      it('enables failure store through modal and removes link from table', async () => {
+        const {
+          editFailureStoreModal,
+          failureStoreModalSaveButton,
+          enableFailureStoreToggle,
+          enableFailureStoreFromTableButton,
+        } = PageObjects.datasetQuality.testSubjectSelectors;
+
+        const originalLinks = await testSubjects.findAll(enableFailureStoreFromTableButton);
+        expect(originalLinks.length).to.be.greaterThan(0);
+
+        const link = originalLinks[0];
+        await link.click();
+
+        await testSubjects.existOrFail(editFailureStoreModal);
+
+        const saveModalButton = await testSubjects.find(failureStoreModalSaveButton);
+        await testSubjects.click(enableFailureStoreToggle);
+        expect(await saveModalButton.isEnabled()).to.be(true);
+        await testSubjects.click(failureStoreModalSaveButton);
+        await testSubjects.missingOrFail(editFailureStoreModal);
+
+        const updatedLinks = await testSubjects.findAll(enableFailureStoreFromTableButton);
+        expect(updatedLinks.length).to.be.lessThan(originalLinks.length);
+      });
     });
   });
 }

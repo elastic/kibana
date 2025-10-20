@@ -33,6 +33,8 @@ import {
   fetchFailedStatsFailedNotifier,
   fetchIntegrationsFailedNotifier,
   fetchTotalDocsFailedNotifier,
+  updateFailureStoreFailedNotifier,
+  updateFailureStoreSuccessNotifier,
 } from './notifications';
 import type {
   DatasetQualityControllerContext,
@@ -351,6 +353,31 @@ export const createPureDatasetQualityControllerStateMachine = (
                 },
               },
             },
+            failureStoreUpdate: {
+              initial: 'idle',
+              states: {
+                idle: {
+                  on: {
+                    UPDATE_FAILURE_STORE: {
+                      target: 'updating',
+                    },
+                  },
+                },
+                updating: {
+                  invoke: {
+                    src: 'updateFailureStore',
+                    onDone: {
+                      target: '#DatasetQualityController.main.stats.datasets.fetching',
+                      actions: ['notifyUpdateFailureStoreSuccess'],
+                    },
+                    onError: {
+                      target: 'idle',
+                      actions: ['notifyUpdateFailureStoreFailed'],
+                    },
+                  },
+                },
+              },
+            },
           },
         },
       },
@@ -587,6 +614,9 @@ export const createDatasetQualityControllerStateMachine = ({
         fetchTotalDocsFailedNotifier(toasts, event.data, meta),
       notifyFetchFailedStatsFailed: (_context, event: DoneInvokeEvent<Error>) =>
         fetchFailedStatsFailedNotifier(toasts, event.data),
+      notifyUpdateFailureStoreSuccess: () => updateFailureStoreSuccessNotifier(toasts),
+      notifyUpdateFailureStoreFailed: (_context, event: DoneInvokeEvent<Error>) =>
+        updateFailureStoreFailedNotifier(toasts, event.data),
     },
     services: {
       loadDatasetTypesPrivileges: () => {
@@ -656,6 +686,20 @@ export const createDatasetQualityControllerStateMachine = ({
       },
       loadIntegrations: () => {
         return dataStreamStatsClient.getIntegrations();
+      },
+      updateFailureStore: (_context, event) => {
+        if (
+          'dataStream' in event &&
+          event.dataStream &&
+          event.dataStream.hasFailureStore !== undefined
+        ) {
+          return dataStreamStatsClient.updateFailureStore({
+            dataStream: event.dataStream.rawName,
+            failureStoreEnabled: event.dataStream.hasFailureStore,
+            customRetentionPeriod: event.dataStream.customRetentionPeriod,
+          });
+        }
+        return Promise.resolve();
       },
     },
   });
