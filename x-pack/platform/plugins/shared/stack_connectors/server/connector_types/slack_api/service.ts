@@ -122,7 +122,9 @@ export const createExternalService = (
 ): SlackApiService => {
   const { token } = secrets;
   const { allowedChannels } = config || { allowedChannels: [] };
-  const allowedChannelIds = allowedChannels?.map((ac) => ac.id);
+  const allowedChannelIds = allowedChannels
+    ?.map((ac) => ac.id)
+    .filter((id): id is string => id !== undefined);
   const allowedChannelNames = allowedChannels?.map((ac) => ac.name);
 
   if (!token) {
@@ -188,6 +190,18 @@ export const createExternalService = (
     }
   };
 
+  const validateChannels = (channels?: string[], allowedList?: string[]) => {
+    if (!channels?.length || !allowedList?.length) return;
+
+    const hasDisallowedChannel = channels?.some((name) => !allowedList.includes(name));
+
+    if (hasDisallowedChannel) {
+      throw new Error(
+        `One or more provided channel names are not included in the allowed channels list`
+      );
+    }
+  };
+
   const getChannelToUse = ({
     channels,
     channelIds = [],
@@ -197,49 +211,36 @@ export const createExternalService = (
     channelIds?: string[];
     channelNames?: string[];
   }): string => {
-    let channelToUse = '';
+    const hasChannels =
+      channelNames.length > 0 || channelIds.length > 0 || (channels?.length ?? 0) > 0;
 
-    const mappedChannelNames = channelNames.length ? channelNames : channels ?? [];
-
-    if (mappedChannelNames.length > 0) {
-      if (
-        allowedChannelNames &&
-        allowedChannelNames.length &&
-        !mappedChannelNames.every((name) => allowedChannelNames?.includes(name))
-      ) {
-        throw new Error(
-          `One or more provided channel names are not included in the allowed channels list`
-        );
-      }
-      // For now, we only allow one channel but we wanted
-      // to have a array in case we need to allow multiple channels
-      // in one action
-      channelToUse = mappedChannelNames[0];
-    } else if (channelIds.length > 0) {
-      if (
-        allowedChannelIds &&
-        allowedChannelIds.length > 0 &&
-        !channelIds.every((cId) => allowedChannelIds?.includes(cId))
-      ) {
-        throw new Error(
-          `One of channel ids "${channelIds.join()}" is not included in the allowed channels list "${allowedChannelIds?.join()}"`
-        );
-      }
-      channelToUse = channelIds[0];
-    } else {
+    if (!hasChannels) {
       throw new Error(`The channel is empty`);
     }
+    // priority: channelNames > channelIds
+    if (channelNames.length > 0) {
+      validateChannels(channelNames, allowedChannelNames);
+      return channelNames[0];
+    }
 
-    return channelToUse;
+    if (channelIds.length > 0) {
+      validateChannels(channelIds, allowedChannelIds);
+      return channelIds[0];
+    }
+
+    if (channels && channels.length > 0) {
+      return channels[0];
+    }
+
+    throw new Error(`The channel is empty`);
   };
+
   const postMessage = async ({
     channels,
     channelIds = [],
     channelNames = [],
     text,
-  }: PostMessageSubActionParams & { channelNames?: string[] }): Promise<
-    ConnectorTypeExecutorResult<unknown>
-  > => {
+  }: PostMessageSubActionParams): Promise<ConnectorTypeExecutorResult<unknown>> => {
     try {
       validateChannelNames(channelNames);
       const channelToUse = getChannelToUse({ channels, channelIds, channelNames });
@@ -266,9 +267,7 @@ export const createExternalService = (
     channelIds = [],
     channelNames = [],
     text,
-  }: PostBlockkitSubActionParams & { channelNames?: string[] }): Promise<
-    ConnectorTypeExecutorResult<unknown>
-  > => {
+  }: PostBlockkitSubActionParams): Promise<ConnectorTypeExecutorResult<unknown>> => {
     try {
       validateChannelNames(channelNames);
       const channelToUse = getChannelToUse({ channels, channelIds, channelNames });

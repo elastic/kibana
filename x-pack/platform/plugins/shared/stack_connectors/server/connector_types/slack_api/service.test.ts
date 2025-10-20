@@ -289,6 +289,31 @@ describe('Slack API service', () => {
       });
     });
 
+    test('should call request with channelNames and channelIds arguments', async () => {
+      requestMock.mockImplementation(() => postMessageResponse);
+
+      await service.postMessage({
+        channelNames: ['#general'],
+        channelIds: ['QWEERTYU987'],
+        text: 'a message',
+      });
+
+      expect(requestMock).toHaveBeenCalledTimes(1);
+      expect(requestMock).toHaveBeenNthCalledWith(1, {
+        axios,
+        headers: {
+          Authorization: 'Bearer token',
+          'Content-type': 'application/json; charset=UTF-8',
+        },
+        logger,
+        configurationUtilities,
+        method: 'post',
+        url: 'https://slack.com/api/chat.postMessage',
+        data: { channel: '#general', text: 'a message' },
+        connectorUsageCollector,
+      });
+    });
+
     test('should throw an error if request to slack fail', async () => {
       requestMock.mockImplementation(() => {
         throw new Error('request fail');
@@ -334,7 +359,7 @@ describe('Slack API service', () => {
       requestMock.mockImplementation(() => postBlockkitResponse);
 
       await service.postBlockkit({
-        channels: ['#general', '#private'],
+        channels: ['general', 'private'],
         channelIds: ['QWEERTYU987', 'POIUYT123'],
         text: JSON.stringify(testBlock),
       });
@@ -350,7 +375,7 @@ describe('Slack API service', () => {
         configurationUtilities,
         method: 'post',
         url: 'https://slack.com/api/chat.postMessage',
-        data: { channel: '#general', blocks: testBlock.blocks },
+        data: { channel: 'QWEERTYU987', blocks: testBlock.blocks },
         connectorUsageCollector,
       });
     });
@@ -403,6 +428,31 @@ describe('Slack API service', () => {
       });
     });
 
+    test('should call request with channelNames and channelIds arguments', async () => {
+      requestMock.mockImplementation(() => postBlockkitResponse);
+
+      await service.postBlockkit({
+        channelNames: ['#general'],
+        channelIds: ['QWEERTYU987'],
+        text: JSON.stringify(testBlock),
+      });
+
+      expect(requestMock).toHaveBeenCalledTimes(1);
+      expect(requestMock).toHaveBeenNthCalledWith(1, {
+        axios,
+        logger,
+        headers: {
+          Authorization: 'Bearer token',
+          'Content-type': 'application/json; charset=UTF-8',
+        },
+        configurationUtilities,
+        method: 'post',
+        url: 'https://slack.com/api/chat.postMessage',
+        data: { channel: '#general', blocks: testBlock.blocks },
+        connectorUsageCollector,
+      });
+    });
+
     test('should throw an error if text is invalid JSON', async () => {
       expect(
         await service.postBlockkit({
@@ -436,8 +486,8 @@ describe('Slack API service', () => {
     });
   });
 
-  describe('channel names validation', () => {
-    const allowedChannels = [{ id: 'C024BE91L', name: '#channel-1' }];
+  describe('Post message or blockkit using channelNames', () => {
+    const allowedChannels = [{ id: 'channel-id-1', name: '#channel-1' }];
     let serviceWithAllowedChannels: SlackApiService;
 
     beforeAll(() => {
@@ -452,13 +502,13 @@ describe('Slack API service', () => {
       );
     });
 
-    test('should not throw an error if channelNames are included in allowedChannel.name when postMessage', async () => {
+    test('should use the channel name in the request if it is included in allowedChannels when postMessage', async () => {
       requestMock.mockImplementation(() => postMessageResponse);
 
       await expect(
         serviceWithAllowedChannels.postMessage({
           channelNames: ['#channel-1'],
-          channelIds: ['C024BE91L'],
+          channelIds: ['channel-id-1'],
           text: 'hello',
         })
       ).resolves.not.toThrow();
@@ -484,7 +534,7 @@ describe('Slack API service', () => {
       await expect(
         serviceWithAllowedChannels.postMessage({
           channelNames: ['#channel-2'],
-          channelIds: ['B564BH93M'],
+          channelIds: ['channel-id-1'],
           text: 'hello',
         })
       ).resolves.toEqual({
@@ -498,12 +548,12 @@ describe('Slack API service', () => {
       expect(requestMock).not.toHaveBeenCalled();
     });
 
-    test('should not throw an error if channelNames are included in allowedChannel.name when postBlockkit', async () => {
+    test('should use the channel name in the request if it is included in allowedChannels when postBlockkit', async () => {
       requestMock.mockImplementation(() => postBlockkitResponse);
 
       await service.postBlockkit({
         channelNames: ['#channel-1'],
-        channelIds: ['C024BE91L'],
+        channelIds: ['channel-id-1'],
         text: JSON.stringify(testBlock),
       });
 
@@ -527,7 +577,7 @@ describe('Slack API service', () => {
       await expect(
         serviceWithAllowedChannels.postBlockkit({
           channelNames: ['#channel-2'],
-          channelIds: ['B564BH93M'],
+          channelIds: ['channel-id-1'],
           text: JSON.stringify(testBlock),
         })
       ).resolves.toEqual({

@@ -35,10 +35,14 @@ export const ValidChannelIdParamsSchema = schema.object({
 export const PostMessageSubActionParamsSchema = schema.object({
   /**
    * @deprecated Use `channelNames` or `channelIds` instead
+   * Note:
+   * - `channelNames` takes priority over `channelIds` and `channels`
    */
   channels: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1 })),
   channelIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1 })),
-  channelNames: schema.maybe(schema.arrayOf(schema.string({ validate: validateChannelName }))),
+  channelNames: schema.maybe(
+    schema.arrayOf(schema.string({ validate: validateChannelName }), { maxSize: 1 })
+  ),
   text: schema.string({ minLength: 1 }),
 });
 
@@ -54,8 +58,11 @@ export function validateBlockkit(text: string) {
   }
 }
 
-export function validateChannelName(value: string) {
-  if (value && value.length && !value.startsWith('#')) {
+export function validateChannelName(value?: string) {
+  if (!value || value.length === 0) {
+    return 'Channel name cannot be empty';
+  }
+  if (!value.startsWith('#')) {
     return 'Channel name must start with #';
   }
 }
@@ -63,10 +70,14 @@ export function validateChannelName(value: string) {
 export const PostBlockkitSubActionParamsSchema = schema.object({
   /**
    * @deprecated Use `channelNames` or `channelIds` instead
+   * Note:
+   * - `channelNames` takes priority over `channelIds` and `channels`
    */
   channels: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1 })),
   channelIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1 })),
-  channelNames: schema.maybe(schema.arrayOf(schema.string({ validate: validateChannelName }))),
+  channelNames: schema.maybe(
+    schema.arrayOf(schema.string({ validate: validateChannelName }), { maxSize: 1 })
+  ),
   text: schema.string({ validate: validateBlockkit }),
 });
 

@@ -57,5 +57,11 @@ describe('Slack schema validations', () => {
       expect(validateChannelName('#test-team')).toBeUndefined();
       expect(validateChannelName('#incident-*')).toBeUndefined();
     });
+    test('should return error for empty strings', () => {
+      expect(validateChannelName('')).toBe('Channel name cannot be empty');
+    });
+    test('should return error for undefined values', () => {
+      expect(validateChannelName(undefined)).toBe('Channel name cannot be empty');
+    });
   });
 });

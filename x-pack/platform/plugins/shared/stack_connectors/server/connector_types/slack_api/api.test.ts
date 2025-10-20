@@ -107,18 +107,16 @@ describe('api', () => {
   });
 
   test('postMessage with channelNames params', async () => {
-    const res = await api.postMessage({
+    await api.postMessage({
       externalService,
-      params: { channelIds: ['general'], channelNames: ['#general'], text: 'a message' },
+      params: { channelNames: ['#general'], text: 'a message' },
     });
 
-    expect(res).toEqual({
-      channel: 'general',
-      message: {
-        text: 'a message',
-        type: 'message',
-      },
-      ok: true,
+    expect(externalService.postMessage).toHaveBeenCalledWith({
+      channelIds: undefined,
+      channelNames: ['#general'],
+      channels: undefined,
+      text: 'a message',
     });
   });
 
@@ -138,16 +136,16 @@ describe('api', () => {
   });
 
   test('postBlockkit with channelNames params', async () => {
-    const res = await api.postBlockkit({
+    await api.postBlockkit({
       externalService,
-      params: { channelIds: ['general'], channelNames: ['#general'], text: 'a blockkit message' },
+      params: { channelNames: ['#general'], text: 'a blockkit message' },
     });
-    expect(res).toEqual({
-      channel: 'general',
-      message: {
-        text: 'a blockkit message',
-      },
-      ok: true,
+
+    expect(externalService.postBlockkit).toHaveBeenCalledWith({
+      channelId: undefined,
+      channelNames: ['#general'],
+      channels: undefined,
+      text: 'a blockkit message',
     });
   });
 });
