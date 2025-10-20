@@ -35,7 +35,6 @@ export const getMonacoWorkflowOverridesStyles = (euiThemeContext: UseEuiTheme) =
       width: 100%;
       min-width: 500px;
       max-width: 800px;
-      padding: 12px 16px;
     }
 
     .monaco-editor
@@ -101,6 +100,10 @@ export const getMonacoWorkflowOverridesStyles = (euiThemeContext: UseEuiTheme) =
       font-size: 12px;
       overflow: auto;
       max-height: 120px;
+    }
+
+    .monaco-editor .monaco-hover {
+      ${euiShadow(euiThemeContext, 'm')}
     }
 
     .monaco-editor .suggest-widget {
