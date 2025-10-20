@@ -13,7 +13,7 @@ export const steps = {
 };
 
 export const tags = {
-  onechatAgent: 'onechat-agent',
+  agent: 'agent',
   researchAgent: 'research-agent',
   answerAgent: 'answer-agent',
 };

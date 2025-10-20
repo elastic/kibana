@@ -70,7 +70,9 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   });
 
   const cycleLimit = 10;
-  const graphRecursionLimit = cycleLimit * 2 + 8; // 2 steps per cycle + 3 additional steps + some extra buffer
+  // langchain's recursionLimit is basically the number of nodes we can traverse before hitting a recursion limit error
+  // we have two steps per cycle (agent node + tool call node), and then a few other steps (prepare + answering), and some extra buffer
+  const graphRecursionLimit = cycleLimit * 2 + 8;
 
   const initialMessages = conversationToLangchainMessages({
     nextInput,

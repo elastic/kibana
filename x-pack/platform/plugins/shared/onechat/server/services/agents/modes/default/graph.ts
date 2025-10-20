@@ -38,7 +38,7 @@ export const createAgentGraph = ({
   const toolNode = new ToolNode<typeof StateAnnotation.State.addedMessages>(tools);
 
   const researcherModel = chatModel.bindTools(tools).withConfig({
-    tags: [tags.onechatAgent, tags.researchAgent],
+    tags: [tags.agent, tags.researchAgent],
   });
 
   const researchAgent = async (state: StateType) => {
@@ -89,7 +89,7 @@ export const createAgentGraph = ({
   };
 
   const answeringModel = chatModel.withConfig({
-    tags: [tags.onechatAgent, tags.answerAgent],
+    tags: [tags.agent, tags.answerAgent],
   });
 
   const answerAgent = async (state: StateType) => {
