@@ -217,6 +217,7 @@ class DataTableFormatClass extends Component<
   }
 }
 
+// @ts-expect-error upgrade typescript v5.9.3
 export const DataTableFormat = withEuiTablePersist(DataTableFormatClass, {
   tableId: 'inspectorDataTable',
   pageSizeOptions: PAGE_SIZE_OPTIONS,
