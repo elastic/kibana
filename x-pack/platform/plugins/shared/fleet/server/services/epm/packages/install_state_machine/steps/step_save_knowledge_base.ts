@@ -23,6 +23,7 @@ import {
 import { updateEsAssetReferences } from '../../es_assets_reference';
 import type { KnowledgeBaseItem } from '../../../../../../common/types/models/epm';
 import { licenseService } from '../../../../license';
+import { appContextService } from '@kbn/fleet-plugin/server/services/app_context';
 export const KNOWLEDGE_BASE_PATH = 'docs/knowledge_base/';
 
 /**
@@ -67,6 +68,22 @@ export async function stepSaveKnowledgeBase(context: InstallContext): Promise<vo
   logger.debug(
     `Knowledge base step: Starting for package ${packageInfo.name}@${packageInfo.version}`
   );
+
+  const cloud = appContextService.getCloud();
+  const isEch = cloud?.isCloudEnabled && !cloud?.isServerlessEnabled;
+
+  if (isEch) {
+    const nodesResponse = await esClient.nodes.info();
+
+    const hasMlNode = Object.values(nodesResponse.nodes).some((node) => {
+      return node.roles?.includes('ml');
+    });
+
+    if (!hasMlNode) {
+      logger.debug('Knowledge base step: Skipping knowledge base save - no ML node detected for ECH deployment');
+      return;
+    }
+  }
 
   // Check if user has appropriate license for knowledge base functionality
   // You can adjust the license requirement as needed (e.g., isGoldPlus(), isPlatinum(), isEnterprise())

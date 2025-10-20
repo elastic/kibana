@@ -12,7 +12,10 @@ import type { ArchiveIterator, ArchiveEntry } from '../../../../../../common/typ
 import { saveKnowledgeBaseContentToIndex } from '../../knowledge_base_index';
 import type { InstallContext } from '../_state_machine_package_install';
 
+import { appContextService } from "../../../../app_context"
+
 import { stepSaveKnowledgeBase, cleanupKnowledgeBaseStep } from './step_save_knowledge_base';
+
 
 // Mock the app context service
 jest.mock('../../../../app_context', () => ({
@@ -23,6 +26,7 @@ jest.mock('../../../../app_context', () => ({
       info: jest.fn(),
       debug: jest.fn(),
     }),
+    getCloud: jest.fn()
   },
 }));
 
@@ -48,6 +52,7 @@ jest.mock('../../../../license', () => ({
 
 let esClient: jest.Mocked<ElasticsearchClient>;
 let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
 
 describe('stepSaveKnowledgeBase', () => {
   beforeEach(() => {
@@ -599,6 +604,84 @@ describe('stepSaveKnowledgeBase', () => {
       const { updateEsAssetReferences } = jest.requireMock('../../es_assets_reference');
       expect(updateEsAssetReferences).toHaveBeenCalled();
     });
+  });
+
+  describe('ML node gate in ECH', () => {
+    it('should skip knowledge base processing when no ML node is detected in ECH deployment', async () => {
+      (mockedAppContextService.getCloud as any).mockReturnValue({
+        isCloudEnabled: true,
+        isServerlessEnabled: false,
+      });
+
+      esClient.nodes.info = jest.fn().mockResolvedValue({
+        nodes: {
+          node1: { roles: ['data'] },
+          node2: { roles: ['ingest'] },
+        },
+      });
+
+      const entries: ArchiveEntry[] = [
+        {
+          path: 'test-package-1.0.0/docs/knowledge_base/guide.md',
+          buffer: Buffer.from('# User Guide\n\nThis is a comprehensive guide.', 'utf8'),
+        },
+      ];
+
+      const mockArchiveIterator = createMockArchiveIterator(entries);
+      const context = createMockContext(mockArchiveIterator);
+
+      await stepSaveKnowledgeBase(context);
+
+      // Verify that saveKnowledgeBaseContentToIndex was NOT called due to no ML node
+      expect(saveKnowledgeBaseContentToIndex).not.toHaveBeenCalled();
+
+      // Verify that updateEsAssetReferences was NOT called
+      const { updateEsAssetReferences } = jest.requireMock('../../es_assets_reference');
+      expect(updateEsAssetReferences).not.toHaveBeenCalled();
+    });
+  })
+
+  it('should proceed with knowledge base processing when ML node is detected in ECH deployment', async () => {
+    (mockedAppContextService.getCloud as any).mockReturnValue({
+      isCloudEnabled: true,
+      isServerlessEnabled: false,
+    });
+
+    esClient.nodes.info = jest.fn().mockResolvedValue({
+      nodes: {
+        node1: { roles: ['data', 'ml'] },
+        node2: { roles: ['ingest'] },
+      },
+    });
+
+    const entries: ArchiveEntry[] = [
+      {
+        path: 'test-package-1.0.0/docs/knowledge_base/guide.md',
+        buffer: Buffer.from('# User Guide\n\nThis is a comprehensive guide.', 'utf8'),
+      },
+    ];
+
+    const mockArchiveIterator = createMockArchiveIterator(entries);
+    const context = createMockContext(mockArchiveIterator);
+
+    await stepSaveKnowledgeBase(context);
+
+    // Verify that saveKnowledgeBaseContentToIndex WAS called with Enterprise license
+    expect(saveKnowledgeBaseContentToIndex).toHaveBeenCalledWith({
+      esClient,
+      pkgName: 'test-package',
+      pkgVersion: '1.0.0',
+      knowledgeBaseContent: [
+        {
+          fileName: 'guide.md',
+          content: '# User Guide\n\nThis is a comprehensive guide.',
+        },
+      ],
+    });
+
+    // Verify that updateEsAssetReferences WAS called
+    const { updateEsAssetReferences } = jest.requireMock('../../es_assets_reference');
+    expect(updateEsAssetReferences).toHaveBeenCalled();
   });
 });
 
