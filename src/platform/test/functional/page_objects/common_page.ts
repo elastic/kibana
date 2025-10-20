@@ -278,103 +278,97 @@ export class CommonPageObject extends FtrService {
       insertTimestamp = true,
       retryOnFatalError = true,
     } = {}
-  ) {
-    let appUrl: string;
+  ): Promise<void> {
+    // Phase 1: Get the app URL.
+    // Check if app has custom config (for apps with special routing needs)
+    const hasCustomConfig = this.config.has(['apps', appName]);
+    const appConfig = hasCustomConfig ? this.config.get(['apps', appName]) : null;
 
-    // See https://github.com/elastic/kibana/pull/164376
-    if (appName === 'canvas' && !path) {
-      throw new Error(
-        'This causes flaky test failures. Use Canvas page object goToListingPage instead'
-      );
-    }
+    const pathSuffix = path ? `/${path}` : '';
 
-    if (this.config.has(['apps', appName])) {
-      // Legacy applications
-      const appConfig = this.config.get(['apps', appName]);
-      appUrl = getUrl.noAuth(this.config.get('servers.kibana'), {
-        pathname: `${basePath}${appConfig.pathname}${path ? `/${path}` : ''}`,
-        hash: hash || appConfig.hash,
-        search,
-      });
-    } else {
-      appUrl = getUrl.noAuth(this.config.get('servers.kibana'), {
-        pathname: `${basePath}/app/${appName}` + (path ? `/${path}` : ''),
-        hash,
-        search,
-      });
-    }
+    const pathname = hasCustomConfig
+      ? `${basePath}${appConfig.pathname}${pathSuffix}`
+      : `${basePath}/app/${appName}${pathSuffix}`;
+
+    const appUrl = getUrl.noAuth(this.config.get('servers.kibana'), {
+      pathname,
+      hash: hash || appConfig?.hash || '',
+      search,
+    });
 
     this.log.debug('navigating to ' + appName + ' url: ' + appUrl);
 
-    await this.retry.tryForTime(this.defaultTryTimeout * 2, async () => {
-      let lastUrl = await this.retry.try(async () => {
-        // since we're using hash URLs, always reload first to force re-render
-        this.log.debug('navigate to: ' + appUrl);
-        await this.browser.get(appUrl, insertTimestamp);
-        // accept alert if it pops up
-        const alert = await this.browser.getAlert();
-        await alert?.accept();
+    // Check if we're already on the target URL
+    const currentUrlBeforeNav = await this.browser.getCurrentUrl();
+
+    const normalizedCurrentUrl = this.normalizeUrlForComparison(currentUrlBeforeNav);
+    const normalizedAppUrl = this.normalizeUrlForComparison(appUrl);
+
+    if (normalizedCurrentUrl.startsWith(normalizedAppUrl)) {
+      this.log.debug(`Already in the target app for ${appName}, skipping navigation.`);
+      return;
+    }
+
+    // Phase 2: Navigate to the app and verify it loaded successfully
+    const finalUrl = await this.retry.tryForTime(this.defaultTryTimeout, async () => {
+      this.log.debug('navigate to: ' + appUrl);
+
+      await this.browser.get(appUrl, insertTimestamp);
+
+      // accept alert if it pops up
+      const alert = await this.browser.getAlert();
+
+      if (alert) {
+        this.log.debug('alert found, accepting');
+        await alert.accept();
         await this.sleep(700);
-        this.log.debug('returned from get, calling refresh');
-        await this.browser.refresh();
-        let currentUrl = shouldLoginIfPrompted
-          ? await this.loginIfPrompted(appUrl, insertTimestamp, disableWelcomePrompt)
-          : await this.browser.getCurrentUrl();
+      }
 
-        if (currentUrl.includes('app/kibana')) {
-          await this.testSubjects.find('kibanaChrome');
-        }
+      let currentUrl = shouldLoginIfPrompted
+        ? await this.loginIfPrompted(appUrl, insertTimestamp, disableWelcomePrompt)
+        : await this.browser.getCurrentUrl();
 
-        // If navigating to the `home` app, and we want to skip the Welcome page, but the chrome is still hidden,
-        // set the relevant localStorage key to skip the Welcome page and throw an error to try to navigate again.
-        if (
-          appName === 'home' &&
-          currentUrl.includes('app/home') &&
-          disableWelcomePrompt &&
-          (await this.isWelcomeScreen())
-        ) {
-          await this.browser.setLocalStorageItem('home:welcome:show', 'false');
-          const msg = `Failed to skip the Welcome page when navigating the app ${appName}`;
-          this.log.debug(msg);
-          throw new Error(msg);
-        }
+      // Check if home welcome screen needs to be disabled
+      await this.handleHomeWelcomeScreen(appName, currentUrl, disableWelcomePrompt);
 
-        currentUrl = (await this.browser.getCurrentUrl()).replace(/\/\/\w+:\w+@/, '//');
-        const decodedAppUrl = decodeURIComponent(appUrl);
-        const decodedCurrentUrl = decodeURIComponent(currentUrl);
+      currentUrl = await this.browser.getCurrentUrl();
 
-        const navSuccessful = decodedCurrentUrl
-          .replace(':80/', '/')
-          .replace(':443/', '/')
-          .startsWith(decodedAppUrl.replace(':80/', '/').replace(':443/', '/'));
+      const normalizedAppUrlForValidation = this.normalizeUrlForComparison(appUrl);
+      const normalizedCurrentUrlForValidation = this.normalizeUrlForComparison(currentUrl);
 
-        if (!navSuccessful) {
-          const msg = `App failed to load: ${appName} in ${this.defaultFindTimeout}ms appUrl=${decodedAppUrl} currentUrl=${decodedCurrentUrl}`;
-          this.log.debug(msg);
-          throw new Error(msg);
-        }
+      const navSuccessful = normalizedCurrentUrlForValidation.startsWith(
+        normalizedAppUrlForValidation
+      );
 
-        if (retryOnFatalError && (await this.isFatalErrorScreen())) {
-          const msg = `Fatal error screen shown. Let's try refreshing the page once more.`;
-          this.log.debug(msg);
-          throw new Error(msg);
-        }
+      if (!navSuccessful) {
+        const msg = `App failed to load: ${appName} in ${this.defaultFindTimeout}ms appUrl=${normalizedAppUrlForValidation} currentUrl=${normalizedCurrentUrlForValidation}`;
+        this.log.debug(msg);
+        throw new Error(msg);
+      }
 
-        if (appName === 'discover') {
-          await this.browser.setLocalStorageItem('data.autocompleteFtuePopover', 'true');
-        }
-        return currentUrl;
-      });
+      if (retryOnFatalError && (await this.isFatalErrorScreen())) {
+        const msg = `Fatal error screen shown. Let's try refreshing the page once more.`;
+        this.log.debug(msg);
+        throw new Error(msg);
+      }
 
-      await this.retry.tryForTime(this.defaultFindTimeout, async () => {
-        await this.sleep(501);
-        const currentUrl = await this.browser.getCurrentUrl();
-        this.log.debug('in navigateTo url = ' + currentUrl);
-        if (lastUrl !== currentUrl) {
-          lastUrl = currentUrl;
-          throw new Error('URL changed, waiting for it to settle');
-        }
-      });
+      return currentUrl;
+    });
+
+    let lastUrl = finalUrl;
+
+    // Phase 3: Wait for URL to stabilize (no more redirects)
+    await this.retry.tryForTime(this.defaultFindTimeout, async () => {
+      const currentUrl = await this.browser.getCurrentUrl();
+
+      this.log.debug('in navigateTo url = ' + currentUrl);
+
+      if (lastUrl !== currentUrl) {
+        const msg = `URL changed from "${lastUrl}" to "${currentUrl}", waiting for it to settle`;
+        this.log.debug(msg);
+        lastUrl = currentUrl;
+        throw new Error(msg);
+      }
     });
   }
 
@@ -604,6 +598,41 @@ export class CommonPageObject extends FtrService {
 
   async unsetTime() {
     await this.kibanaServer.uiSettings.unset('timepicker:timeDefaults');
+  }
+
+  /**
+   * Normalizes a URL for comparison by:
+   * - Decoding URI components
+   * - Removing credentials (username:password@)
+   * - Removing default HTTP/HTTPS ports (:80 and :443)
+   */
+  private normalizeUrlForComparison(url: string): string {
+    return decodeURIComponent(url)
+      .replace(/\/\/\w+:\w+@/, '//')
+      .replace(':80/', '/')
+      .replace(':443/', '/');
+  }
+
+  /**
+   * Checks if navigating to the home app with welcome screen showing.
+   * If so, disables the welcome screen and throws an error to trigger a retry.
+   */
+  private async handleHomeWelcomeScreen(
+    appName: string,
+    currentUrl: string,
+    disableWelcomePrompt: boolean
+  ): Promise<void> {
+    if (
+      appName === 'home' &&
+      currentUrl.includes('app/home') &&
+      disableWelcomePrompt &&
+      (await this.isWelcomeScreen())
+    ) {
+      await this.browser.setLocalStorageItem('home:welcome:show', 'false');
+      const msg = `Failed to skip the Welcome page when navigating the app ${appName}`;
+      this.log.debug(msg);
+      throw new Error(msg);
+    }
   }
 }
 export interface TimeStrings extends Record<string, any> {
