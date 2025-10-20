@@ -894,16 +894,6 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   ): Promise<
     ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithProcessData>
   > {
-    if (
-      !this.options.endpointService.experimentalFeatures
-        .responseActionsSentinelOneKillProcessEnabled
-    ) {
-      throw new ResponseActionsClientError(
-        `kill-process not supported for ${this.agentType} agent type. Feature disabled`,
-        400
-      );
-    }
-
     const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
       ResponseActionParametersWithProcessName,
       KillProcessActionOutputContent,
