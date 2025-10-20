@@ -25,7 +25,8 @@ import { ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_URL } from '../../../urls/n
 
 const sourceIndexName = 'test_index';
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/237554
+describe.skip(
   'Privileged User Monitoring - Index onboarding',
   {
     tags: ['@ess'],
