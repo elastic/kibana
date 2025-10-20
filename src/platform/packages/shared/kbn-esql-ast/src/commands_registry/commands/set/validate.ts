@@ -10,14 +10,8 @@ import { getMessageFromId } from '../../../definitions/utils';
 import { settings } from '../../../definitions/generated/settings';
 import { isBinaryExpression, isIdentifier } from '../../../ast/is';
 import type { ESQLAstAllCommands, ESQLCommand, ESQLIdentifier, ESQLMessage } from '../../../types';
-import type { ICommandCallbacks, ICommandContext } from '../../types';
 
-export const validate = (
-  command: ESQLAstAllCommands,
-  commands: ESQLCommand[],
-  context?: ICommandContext,
-  callbacks?: ICommandCallbacks
-): ESQLMessage[] => {
+export const validate = (command: ESQLAstAllCommands, commands: ESQLCommand[]): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
 
   const settingNameIdentifier = getSettingNameIdentifier(command);
@@ -39,17 +33,6 @@ export const validate = (
       })
     );
     return messages;
-  }
-
-  // Check serverless-only restriction
-  if (setting.serverlessOnly && !callbacks?.isServerless) {
-    messages.push(
-      getMessageFromId({
-        messageId: 'serverlessSetting',
-        values: { name: settingNameIdentifier.text },
-        locations: settingNameIdentifier.location,
-      })
-    );
   }
 
   return messages;

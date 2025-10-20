@@ -6,26 +6,18 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import { getMockCallbacks, mockContext } from '../../../__tests__/context_fixtures';
 import { validate } from './validate';
 import { Parser } from '../../../parser';
 import type { ESQLMessage } from '../../../types';
-import type { ICommandCallbacks } from '../../types';
 
-const setExpectErrors = (
-  query: string,
-  expectedErrors: string[],
-  context = mockContext,
-  callbacks: ICommandCallbacks = getMockCallbacks()
-) => {
+const setExpectErrors = (query: string, expectedErrors: string[]) => {
   const { root } = Parser.parse(query);
   const command = root.header?.find((cmd) => cmd.name === 'set');
   if (!command) {
     throw new Error(`SET command not found in the parsed query`);
   }
 
-  const result = validate(command, root.commands, context, callbacks) as ESQLMessage[];
+  const result = validate(command, root.commands) as ESQLMessage[];
 
   const errors: string[] = [];
   result.forEach((error) => {
@@ -50,21 +42,6 @@ describe('SET Validation', () => {
 
     test('errors on unknown setting names', () => {
       setExpectErrors('set unknown_setting = "value"', ['Unknown setting unknown_setting']);
-    });
-
-    test('errors on serverless-only settings in non-serverless mode', () => {
-      setExpectErrors('set project_routing = 10', [
-        'The project_routing setting is only useful in serverless',
-      ]);
-    });
-
-    test('serverless only setting should not throw error in serverless mode', () => {
-      const callbacks = {
-        ...getMockCallbacks(),
-        isServerless: true,
-      };
-
-      setExpectErrors('set project_routing = 10', [], mockContext, callbacks);
     });
   });
 
