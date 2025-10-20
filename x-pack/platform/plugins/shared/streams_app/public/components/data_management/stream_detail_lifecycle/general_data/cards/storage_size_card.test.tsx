@@ -35,9 +35,7 @@ describe('StorageSizeCard', () => {
     it('renders size (formatted) and document count when stats available', () => {
       const stats = createMockStats(500, 2048576); // 2MB
 
-      renderWithI18n(
-        <StorageSizeCard canManageFailureStore={true} hasMonitorPrivilegas={true} stats={stats} />
-      );
+      renderWithI18n(<StorageSizeCard hasMonitorPrivileges={true} stats={stats} />);
 
       expect(screen.getByTestId('storageSize-title')).toBeInTheDocument();
       expect(screen.getByTestId('storageSize-metric')).toHaveTextContent(/2\.0\s?MB/);
@@ -49,26 +47,18 @@ describe('StorageSizeCard', () => {
       const error = new Error('Failed to fetch stats');
 
       renderWithI18n(
-        <StorageSizeCard
-          canManageFailureStore={true}
-          hasMonitorPrivilegas={true}
-          stats={stats}
-          statsError={error}
-        />
+        <StorageSizeCard hasMonitorPrivileges={true} stats={stats} statsError={error} />
       );
 
       expect(screen.getByTestId('storageSize-metric')).toHaveTextContent('-');
     });
 
-    // TODO: check if correct behavior
-    it('handles zero sizeBytes & totalDocs gracefully (dash values)', () => {
+    it('renders zero sizeBytes & totalDocs', () => {
       const stats = createMockStats(0, 0);
 
-      renderWithI18n(
-        <StorageSizeCard canManageFailureStore={true} hasMonitorPrivilegas={true} stats={stats} />
-      );
-      expect(screen.getByTestId('storageSize-metric')).toHaveTextContent('-');
-      expect(screen.getByTestId('storageSize-metric-subtitle')).toHaveTextContent('- documents');
+      renderWithI18n(<StorageSizeCard hasMonitorPrivileges={true} stats={stats} />);
+      expect(screen.getByTestId('storageSize-metric')).toHaveTextContent('0.0 B');
+      expect(screen.getByTestId('storageSize-metric-subtitle')).toHaveTextContent('0 documents');
     });
   });
 
@@ -76,9 +66,7 @@ describe('StorageSizeCard', () => {
     it('shows warning icon without monitor privilege', () => {
       const stats = createMockStats(100);
 
-      renderWithI18n(
-        <StorageSizeCard canManageFailureStore={true} hasMonitorPrivilegas={false} stats={stats} />
-      );
+      renderWithI18n(<StorageSizeCard hasMonitorPrivileges={false} stats={stats} />);
 
       expect(screen.getByTestId('storageSize-metric')).toBeInTheDocument();
       // Should show warning icons when lacking privileges
@@ -88,9 +76,7 @@ describe('StorageSizeCard', () => {
     it('falls back to dash for document count when totalDocs missing', () => {
       const stats = createMockStats(undefined);
 
-      renderWithI18n(
-        <StorageSizeCard canManageFailureStore={true} hasMonitorPrivilegas={true} stats={stats} />
-      );
+      renderWithI18n(<StorageSizeCard hasMonitorPrivileges={true} stats={stats} />);
 
       expect(screen.getByTestId('storageSize-metric')).toHaveTextContent(/1\.0\s?MB/);
       expect(screen.getByTestId('storageSize-metric-subtitle')).toHaveTextContent('- documents');

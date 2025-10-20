@@ -52,8 +52,16 @@ export const IngestionCard = ({
   const metrics = [
     {
       data: (
-        <PrivilegesWarningIconWrapper hasPrivileges={hasPrivileges} title="ingestionDaily">
-          {statsError || !stats || !stats.bytesPerDay ? '-' : formatBytes(stats.bytesPerDay)}
+        <PrivilegesWarningIconWrapper
+          hasPrivileges={hasPrivileges}
+          title={i18n.translate(
+            'xpack.streams.ingestionCard.privilegesWarningIconWrapper.ingestiondailyLabel',
+            { defaultMessage: 'ingestionDaily' }
+          )}
+        >
+          {statsError || !stats || stats.bytesPerDay === undefined
+            ? '-'
+            : formatBytes(stats.bytesPerDay)}
         </PrivilegesWarningIconWrapper>
       ),
 
@@ -67,8 +75,16 @@ export const IngestionCard = ({
     },
     {
       data: (
-        <PrivilegesWarningIconWrapper hasPrivileges={hasPrivileges} title="ingestionMonthly">
-          {statsError || !stats || !stats.bytesPerDay ? '-' : formatBytes(stats.bytesPerDay * 30)}
+        <PrivilegesWarningIconWrapper
+          hasPrivileges={hasPrivileges}
+          title={i18n.translate(
+            'xpack.streams.ingestionCard.privilegesWarningIconWrapper.ingestionmonthlyLabel',
+            { defaultMessage: 'ingestionMonthly' }
+          )}
+        >
+          {statsError || !stats || stats.bytesPerDay === undefined
+            ? '-'
+            : formatBytes(stats.bytesPerDay * 30)}
         </PrivilegesWarningIconWrapper>
       ),
       subtitle: i18n.translate(

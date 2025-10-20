@@ -31,8 +31,14 @@ export const StorageSizeCard = ({
   const metric = [
     {
       data: (
-        <PrivilegesWarningIconWrapper hasPrivileges={hasPrivileges} title="storageSize">
-          {statsError || !stats || !stats.size ? '-' : formatBytes(stats.size)}
+        <PrivilegesWarningIconWrapper
+          hasPrivileges={hasPrivileges}
+          title={i18n.translate(
+            'xpack.streams.storageSizeCard.privilegesWarningIconWrapper.storagesizeLabel',
+            { defaultMessage: 'storageSize' }
+          )}
+        >
+          {statsError || !stats || stats.size === undefined ? '-' : formatBytes(stats.size)}
         </PrivilegesWarningIconWrapper>
       ),
       subtitle: hasPrivileges
@@ -42,7 +48,9 @@ export const StorageSizeCard = ({
               defaultMessage: '{docsCount} documents',
               values: {
                 docsCount:
-                  statsError || !stats || !stats.count ? '-' : formatNumber(stats.count, '0,0'),
+                  statsError || !stats || stats.count === undefined
+                    ? '-'
+                    : formatNumber(stats.count, '0,0'),
               },
             }
           )

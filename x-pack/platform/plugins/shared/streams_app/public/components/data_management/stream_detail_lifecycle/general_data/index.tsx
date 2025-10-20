@@ -123,15 +123,13 @@ export const StreamDetailGeneralData = ({
         </EuiFlexItem>
         <EuiFlexItem>
           <StorageSizeCard
-            canManageFailureStore={definition.privileges?.manage_failure_store}
-            hasMonitorPrivilegas={definition.privileges?.manage_failure_store}
+            hasMonitorPrivileges={definition.privileges?.monitor}
             stats={data.stats?.ds.stats}
             statsError={data.error}
           />
         </EuiFlexItem>
         <EuiFlexItem>
           <IngestionCard
-            canManageFailureStore={definition.privileges?.manage_failure_store}
             hasMonitorPrivileges={definition.privileges?.monitor}
             stats={data.stats?.ds.stats}
             statsError={data.error}

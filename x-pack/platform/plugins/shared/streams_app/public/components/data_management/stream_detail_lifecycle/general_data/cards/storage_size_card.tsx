@@ -15,28 +15,38 @@ import type { DataStreamStats } from '../../hooks/use_data_stream_stats';
 import { PrivilegesWarningIconWrapper } from '../../../../insufficient_privileges/insufficient_privileges';
 
 export const StorageSizeCard = ({
-  hasMonitorPrivilegas,
-  canManageFailureStore,
+  hasMonitorPrivileges,
   stats,
   statsError,
 }: {
-  hasMonitorPrivilegas: boolean;
-  canManageFailureStore: boolean;
+  hasMonitorPrivileges: boolean;
   stats?: DataStreamStats;
   statsError?: Error;
 }) => {
   const metric = [
     {
       data: (
-        <PrivilegesWarningIconWrapper hasPrivileges={hasMonitorPrivilegas} title="storageSize">
-          {statsError || !stats || !stats.sizeBytes ? '-' : formatBytes(stats.sizeBytes)}
+        <PrivilegesWarningIconWrapper
+          hasPrivileges={hasMonitorPrivileges}
+          title={i18n.translate(
+            'xpack.streams.storageSizeCard.privilegesWarningIconWrapper.storagesizeLabel',
+            { defaultMessage: 'storageSize' }
+          )}
+        >
+          {stats?.sizeBytes}
+          {statsError || !stats || stats.sizeBytes === undefined
+            ? '-'
+            : formatBytes(stats.sizeBytes)}
         </PrivilegesWarningIconWrapper>
       ),
-      subtitle: hasMonitorPrivilegas
+      subtitle: hasMonitorPrivileges
         ? i18n.translate('xpack.streams.streamDetailLifecycle.storageSize.docs', {
             defaultMessage: '{totalDocs} documents',
             values: {
-              totalDocs: stats && stats.totalDocs ? formatNumber(stats.totalDocs, '0,0') : '-',
+              totalDocs:
+                statsError || !stats || stats.totalDocs === undefined
+                  ? '-'
+                  : formatNumber(stats.totalDocs, '0,0'),
             },
           })
         : null,
@@ -44,7 +54,9 @@ export const StorageSizeCard = ({
     },
   ];
 
-  const inaccurateMetric = Boolean(stats?.hasFailureStore && !canManageFailureStore);
+  const inaccurateMetric = Boolean(
+    stats?.hasFailureStore && !stats.userPrivileges.canManageFailureStore
+  );
   const title = (
     <FormattedMessage
       id="xpack.streams.streamDetailLifecycle.storageSize.title"

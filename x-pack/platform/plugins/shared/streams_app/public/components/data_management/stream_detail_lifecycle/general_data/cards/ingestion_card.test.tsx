@@ -36,13 +36,7 @@ describe('IngestionCard', () => {
   });
 
   it('renders daily & monthly averages with stats and privileges', () => {
-    renderWithI18n(
-      <IngestionCard
-        canManageFailureStore={true}
-        hasMonitorPrivileges={true}
-        stats={createMockStats(1048576)}
-      />
-    ); // 1MB per day ;
+    renderWithI18n(<IngestionCard hasMonitorPrivileges={true} stats={createMockStats(1048576)} />); // 1MB per day ;
 
     expect(screen.getByTestId('ingestionCard-title')).toBeInTheDocument();
     expect(screen.getByTestId('ingestion-daily-metric')).toHaveTextContent(/1(\.0)?\s?MB/);
@@ -56,7 +50,7 @@ describe('IngestionCard', () => {
   });
 
   it('shows dash for both metrics when stats missing', () => {
-    renderWithI18n(<IngestionCard canManageFailureStore={true} hasMonitorPrivileges={true} />);
+    renderWithI18n(<IngestionCard hasMonitorPrivileges={true} />);
 
     expect(screen.getByTestId('ingestion-daily-metric')).toHaveTextContent('-');
     expect(screen.getByTestId('ingestion-monthly-metric')).toHaveTextContent('-');
@@ -65,7 +59,6 @@ describe('IngestionCard', () => {
   it('shows dash when statsError present even if stats provided', () => {
     renderWithI18n(
       <IngestionCard
-        canManageFailureStore={true}
         hasMonitorPrivileges={true}
         stats={createMockStats(2048)}
         statsError={new Error('boom')}
@@ -77,39 +70,22 @@ describe('IngestionCard', () => {
   });
 
   it('shows dash when stats provided but bytesPerDay missing', () => {
-    renderWithI18n(
-      <IngestionCard
-        canManageFailureStore={true}
-        hasMonitorPrivileges={true}
-        stats={{ someOther: 1 } as any}
-      />
-    );
+    renderWithI18n(<IngestionCard hasMonitorPrivileges={true} stats={{ someOther: 1 } as any} />);
 
     expect(screen.getByTestId('ingestion-daily-metric')).toHaveTextContent('-');
     expect(screen.getByTestId('ingestion-monthly-metric')).toHaveTextContent('-');
   });
 
-  // TODO: check if correct behavior
-  it('renders dash placeholders when daily bytes is zero', () => {
-    renderWithI18n(
-      <IngestionCard
-        canManageFailureStore={true}
-        hasMonitorPrivileges={true}
-        stats={createMockStats(0)}
-      />
-    );
+  it('renders zero when daily bytes is zero', () => {
+    renderWithI18n(<IngestionCard hasMonitorPrivileges={true} stats={createMockStats(0)} />);
 
-    expect(screen.getByTestId('ingestion-daily-metric')).toHaveTextContent('-');
-    expect(screen.getByTestId('ingestion-monthly-metric')).toHaveTextContent('-');
+    expect(screen.getByTestId('ingestion-daily-metric')).toHaveTextContent('0.0 B');
+    expect(screen.getByTestId('ingestion-monthly-metric')).toHaveTextContent('0.0 B');
   });
 
   it('formats large ingestion rates (GB scale)', () => {
     renderWithI18n(
-      <IngestionCard
-        canManageFailureStore={true}
-        hasMonitorPrivileges={true}
-        stats={createMockStats(1073741824)}
-      />
+      <IngestionCard hasMonitorPrivileges={true} stats={createMockStats(1073741824)} />
     ); // 1GB per day
 
     expect(screen.getByTestId('ingestion-daily-metric')).toHaveTextContent(/1(\.0)?\s?GB/);
@@ -117,13 +93,7 @@ describe('IngestionCard', () => {
   });
 
   it('shows warning icon without monitor privilege', () => {
-    renderWithI18n(
-      <IngestionCard
-        canManageFailureStore={true}
-        hasMonitorPrivileges={false}
-        stats={createMockStats(1000)}
-      />
-    );
+    renderWithI18n(<IngestionCard hasMonitorPrivileges={false} stats={createMockStats(1000)} />);
 
     // Should show warning icons when lacking privileges
     expect(screen.getByTestId('streamsInsufficientPrivileges-ingestionDaily')).toBeInTheDocument();
