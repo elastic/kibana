@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/logging';
 import type { Observable } from 'rxjs';
 import {
   filter,
@@ -15,26 +14,17 @@ import {
   forkJoin,
   switchMap,
   merge,
-  catchError,
   throwError,
   map,
   take,
   EMPTY,
 } from 'rxjs';
-import type { KibanaRequest } from '@kbn/core-http-server';
+import type { Logger } from '@kbn/logging';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { AgentCapabilities } from '@kbn/onechat-common';
-import {
-  type RoundInput,
-  type ChatEvent,
-  oneChatDefaultAgentId,
-  isRoundCompleteEvent,
-  isOnechatError,
-  createInternalError,
-} from '@kbn/onechat-common';
-import { withConverseSpan, getCurrentTraceId } from '../../tracing';
+import { type ChatEvent, oneChatDefaultAgentId, isRoundCompleteEvent } from '@kbn/onechat-common';
+import { withConverseSpan } from '../../tracing';
 import type { ConversationService } from '../conversation';
 import type { AgentsServiceStart } from '../agents';
 import {
@@ -46,9 +36,11 @@ import {
   conversationExists$,
   updateConversation$,
   createConversation$,
+  convertErrors,
 } from './utils';
 import { createConversationIdSetEvent } from './utils/events';
 import { resolveSelectedConnectorId } from './utils/resolve_selected_connector_id';
+import type { ChatService, ChatConverseParams } from './types';
 
 interface ChatServiceOptions {
   logger: Logger;
@@ -57,54 +49,6 @@ interface ChatServiceOptions {
   agentService: AgentsServiceStart;
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
-}
-
-export interface ChatService {
-  converse(params: ChatConverseParams): Observable<ChatEvent>;
-}
-
-/**
- * Parameters for {@link ChatService.converse}
- */
-export interface ChatConverseParams {
-  /**
-   * Id of the conversational agent to converse with.
-   * If empty, will use the default agent id.
-   */
-  agentId?: string;
-  /**
-   * Id of the genAI connector to use.
-   * If empty, will use the default connector.
-   */
-  connectorId?: string;
-  /**
-   * Id of the conversation to continue.
-   * If empty, will create a new conversation instead.
-   */
-  conversationId?: string;
-  /**
-   * Set of capabilities to use for this round.
-   * Defaults to all capabilities being disabled.
-   */
-  capabilities?: AgentCapabilities;
-  /**
-   * Create conversation with specified ID if not found.
-   * Defaults to false. Has no effect when conversationId is not provided.
-   */
-  autoCreateConversationWithId?: boolean;
-  /**
-   * Optional abort signal to handle cancellation.
-   * Canceled rounds will not be persisted.
-   */
-  abortSignal?: AbortSignal;
-  /**
-   * Next user input to start the round.
-   */
-  nextInput: RoundInput;
-  /**
-   * Request bound to this call.
-   */
-  request: KibanaRequest;
 }
 
 export const createChatService = (options: ChatServiceOptions): ChatService => {
@@ -145,7 +89,6 @@ class ChatServiceImpl implements ChatService {
     nextInput,
     autoCreateConversationWithId = false,
   }: ChatConverseParams): Observable<ChatEvent> {
-    const { inference } = this;
     const isNewConversation = !conversationId;
 
     return withConverseSpan({ agentId, conversationId }, (span) => {
@@ -174,7 +117,7 @@ class ChatServiceImpl implements ChatService {
             chatModel: getChatModel$({
               connectorId: selectedConnectorId,
               request,
-              inference,
+              inference: this.inference,
               span,
             }),
             selectedConnectorId: of(selectedConnectorId),
@@ -258,24 +201,7 @@ class ChatServiceImpl implements ChatService {
 
           return merge(conversationIdSetEvent$, agentEvents$, saveOrUpdateAndEmit$).pipe(
             handleCancellation(abortSignal),
-            catchError((err) => {
-              this.logger.error(`Error executing agent: ${err.stack}`);
-              return throwError(() => {
-                const traceId = getCurrentTraceId();
-                if (isOnechatError(err)) {
-                  err.meta = {
-                    ...err.meta,
-                    traceId,
-                  };
-                  return err;
-                } else {
-                  return createInternalError(`Error executing agent: ${err.message}`, {
-                    statusCode: 500,
-                    traceId,
-                  });
-                }
-              });
-            }),
+            convertErrors({ logger: this.logger }),
             shareReplay()
           );
         })

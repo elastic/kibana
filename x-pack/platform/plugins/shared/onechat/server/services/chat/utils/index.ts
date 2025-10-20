@@ -17,3 +17,4 @@ export {
   updateConversation$,
   createConversation$,
 } from './conversations';
+export { convertErrors } from './convert_errors';
