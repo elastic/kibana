@@ -7,7 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { LazyUnifiedMetricsExperienceGrid as UnifiedMetricsExperienceGrid } from './src/components/lazy_unified_metrics_experience_grid';
-export { LazyTraceMetricsGrid as TraceMetricsGrid } from './src/components/trace_metrics_grid/lazy_trace_metrics_grid';
-export type { DataSource } from './src/components/trace_metrics_grid';
-export type { UnifiedMetricsGridRestorableState } from './src/restorable_state';
+export { MetricsExperienceClientProvider } from './metrics_experience_client_provider';
+export { useMetricsExperienceClient } from './use_metrics_experience_client';

@@ -8,7 +8,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { useMetricsExperience } from './use_metrics_experience';
+import { useMetricsExperienceClient } from '../context/metrics_experience_client_provider/use_metrics_experience_client';
 
 export const useDimensionsQuery = (params: {
   dimensions: string[];
@@ -16,7 +16,7 @@ export const useDimensionsQuery = (params: {
   from?: string;
   to?: string;
 }) => {
-  const { client } = useMetricsExperience();
+  const { client } = useMetricsExperienceClient();
 
   return useQuery({
     queryKey: ['dimensionValues', params],

@@ -13,7 +13,7 @@ import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import type { LensProps } from './hooks/use_lens_props';
 import { useLensExtraActions } from './hooks/use_lens_extra_actions';
 import { ChartTitle } from './chart_title';
-import { useMetricsGridState } from '../../hooks';
+import { useMetricsExperienceState } from '../../context/metrics_experience_state_provider';
 
 export type LensWrapperProps = {
   lensProps: LensProps;
@@ -38,7 +38,7 @@ export function LensWrapper({
 }: LensWrapperProps) {
   const { euiTheme } = useEuiTheme();
 
-  const { searchTerm } = useMetricsGridState();
+  const { searchTerm } = useMetricsExperienceState();
 
   const { EmbeddableComponent } = services.lens;
 

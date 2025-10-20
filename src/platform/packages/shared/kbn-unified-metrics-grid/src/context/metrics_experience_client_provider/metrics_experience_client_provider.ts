@@ -8,10 +8,10 @@
  */
 
 import { createContext } from 'react';
-import type { MetricsExperienceService } from '../types';
+import type { MetricsExperienceService } from '../../types';
 
-export const MetricsExperienceContext = createContext<MetricsExperienceService | undefined>(
+export const MetricsExperienceClientContext = createContext<MetricsExperienceService | undefined>(
   undefined
 );
 
-export const MetricsExperienceProvider = MetricsExperienceContext.Provider;
+export const MetricsExperienceClientProvider = MetricsExperienceClientContext.Provider;
