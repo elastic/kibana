@@ -27,7 +27,8 @@ export const LIQUID_FILTERS = [
     name: 'array_to_sentence_string',
     description: 'Converts an array to a sentence format',
     insertText: 'array_to_sentence_string',
-    example: '{{ ["apple", "banana", "cherry"] | array_to_sentence_string }} => "apple, banana, and cherry"',
+    example:
+      '{{ ["apple", "banana", "cherry"] | array_to_sentence_string }} => "apple, banana, and cherry"',
   },
   {
     name: 'at_least',
@@ -147,13 +148,15 @@ export const LIQUID_FILTERS = [
     name: 'group_by',
     description: 'Groups array items by a property',
     insertText: 'group_by: "${1:property}"',
-    example: '{{ products | group_by: "category" }} => [{"name": "Electronics", "items": [...]}, {"name": "Books", "items": [...]}]',
+    example:
+      '{{ products | group_by: "category" }} => [{"name": "Electronics", "items": [...]}, {"name": "Books", "items": [...]}]',
   },
   {
     name: 'group_by_exp',
     description: 'Groups array items by an expression',
     insertText: 'group_by_exp: "${1:expression}"',
-    example: '{{ products | group_by_exp: "item.price > 100" }} => [{"name": "true", "items": [...]}, {"name": "false", "items": [...]}]',
+    example:
+      '{{ products | group_by_exp: "item.price > 100" }} => [{"name": "true", "items": [...]}, {"name": "false", "items": [...]}]',
   },
   {
     name: 'join',
@@ -341,7 +344,8 @@ export const LIQUID_FILTERS = [
   },
   {
     name: 'sort_natural',
-    description: 'Sorts the items in an array in case-insensitive alphabetical order (optionally by a given property)',
+    description:
+      'Sorts the items in an array in case-insensitive alphabetical order (optionally by a given property)',
     insertText: 'sort_natural: "${1:property}"',
     example: '{{ array | sort_natural: "name" }}',
   },
@@ -433,7 +437,8 @@ export const LIQUID_FILTERS = [
     name: 'where_exp',
     description: 'Filters an array using an expression to test each item',
     insertText: 'where_exp: "${1:expression}"',
-    example: '{{ products | where_exp: "item.price > 100" }} => [filtered products where price > 100]',
+    example:
+      '{{ products | where_exp: "item.price > 100" }} => [filtered products where price > 100]',
   },
   {
     name: 'xml_escape',
