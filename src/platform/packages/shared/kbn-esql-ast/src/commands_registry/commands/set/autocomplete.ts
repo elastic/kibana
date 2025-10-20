@@ -42,7 +42,7 @@ export async function autocomplete(
     if (hasSettingLeftSide) {
       return [{ ...assignCompletionItem, detail: '' }];
     } else {
-      return getSettingsCompletionItems(callbacks?.buildFlavor);
+      return getSettingsCompletionItems(callbacks?.isServerless);
     }
   }
 

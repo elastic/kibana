@@ -287,7 +287,7 @@ async function getSuggestionsWithinCommandExpression(
         : undefined,
       hasMinimumLicenseRequired,
       canCreateLookupIndex: callbacks?.canCreateLookupIndex,
-      buildFlavor: callbacks?.buildFlavor,
+      isServerless: callbacks?.isServerless,
     },
     context,
     offset

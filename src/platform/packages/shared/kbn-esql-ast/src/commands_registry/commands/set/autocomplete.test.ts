@@ -39,7 +39,7 @@ const testSetAutocomplete = async (
 
 describe('SET Autocomplete', () => {
   describe('Setting name suggestions -- Serverless', () => {
-    const mockCallbacks = { ...getMockCallbacks(), buildFlavor: 'serverless' as const };
+    const mockCallbacks = { ...getMockCallbacks(), isServerless: true };
 
     it('suggests available settings after SET command', async () => {
       await testSetAutocomplete('SET ', ['project_routing = '], undefined, mockCallbacks);

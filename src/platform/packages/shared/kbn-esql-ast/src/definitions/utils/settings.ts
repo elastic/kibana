@@ -7,16 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { BuildFlavor } from '@kbn/config';
 import { withAutoSuggest } from '../../..';
 import type { ISuggestionItem } from '../../commands_registry/types';
 import { settings } from '../generated/settings';
 
-export function getSettingsCompletionItems(buildFlavor?: BuildFlavor): ISuggestionItem[] {
+export function getSettingsCompletionItems(isServerless?: boolean): ISuggestionItem[] {
   return (
     settings
       // Filter out serverless-only settings if not in serverless mode, if not flavour is provided don't return serverlessOnly settings.
-      .filter((setting) => !setting.serverlessOnly || buildFlavor === 'serverless')
+      .filter((setting) => !setting.serverlessOnly || isServerless)
       .map((setting) =>
         withAutoSuggest({
           label: setting.name,

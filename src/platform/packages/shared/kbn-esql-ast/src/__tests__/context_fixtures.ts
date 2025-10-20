@@ -223,6 +223,6 @@ export const getMockCallbacks = (): MockedICommandCallbacks => {
     getColumnsForQuery: jest.fn(),
     hasMinimumLicenseRequired: jest.fn().mockReturnValue(true),
     canCreateLookupIndex: jest.fn().mockReturnValue(true),
-    buildFlavor: 'traditional',
+    isServerless: false,
   };
 };
