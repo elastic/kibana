@@ -138,6 +138,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       'config.taskType',
       'config.inferenceId',
       'config.contextWindowLength',
+      'config.temperature',
       'config.provider',
       'config.providerConfig',
     ],

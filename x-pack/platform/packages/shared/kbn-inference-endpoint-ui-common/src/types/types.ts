@@ -28,6 +28,7 @@ export interface Config {
   provider: string;
   providerConfig?: Record<string, unknown>;
   contextWindowLength?: number;
+  temperature?: number;
 }
 
 export interface Secrets {

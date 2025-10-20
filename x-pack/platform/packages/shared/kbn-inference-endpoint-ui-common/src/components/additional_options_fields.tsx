@@ -175,6 +175,98 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
     ]
   );
 
+  const temperatureSettings = useMemo(
+    () => (
+      <>
+        <EuiTitle size="xxs" data-test-subj="temperature-details-label">
+          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <h4>
+                <FormattedMessage
+                  id="xpack.inferenceEndpointUICommon.components.additionalInfo.temperatureLabel"
+                  defaultMessage="Temperature"
+                />
+              </h4>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText color="subdued" size="xs">
+                {LABELS.OPTIONALTEXT}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiTitle>
+        <EuiText size="xs" color="subdued">
+          <FormattedMessage
+            id="xpack.inferenceEndpointUICommon.components.additionalInfo.temperatureHelpInfo"
+            defaultMessage="Controls the randomness of the model's output. Lower values make the output more deterministic, while higher values make it more creative."
+          />
+        </EuiText>
+        <EuiSpacer size="m" />
+        <UseField
+          path="config.temperature"
+          config={{
+            validations: [
+              {
+                validator: ({ value, path }) => {
+                  if (value !== undefined && value !== null && value !== '') {
+                    const numValue = Number(value);
+                    if (isNaN(numValue) || numValue < 0 || numValue > 1) {
+                      return {
+                        code: 'ERR_FIELD_INVALID',
+                        path,
+                        message: LABELS.TEMPERATURE_VALIDATION_MESSAGE,
+                      };
+                    }
+                  }
+                },
+                isBlocking: true,
+              },
+            ],
+          }}
+        >
+          {(field) => {
+            const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+            return (
+              <EuiFormRow
+                id="temperatureSettings"
+                label={LABELS.TEMPERATURE_LABEL}
+                fullWidth
+                isInvalid={isInvalid}
+                error={errorMessage}
+                data-test-subj={'configuration-formrow-temperatureSettings'}
+              >
+                <EuiFormControlLayout
+                  fullWidth
+                  clear={{
+                    onClick: (e) => {
+                      setFieldValue('config.temperature', undefined);
+                    },
+                  }}
+                >
+                  <EuiFieldNumber
+                    min={0}
+                    max={1}
+                    step={0.1}
+                    fullWidth
+                    data-test-subj={'temperatureSettingsNumber'}
+                    value={config.temperature ?? ''}
+                    isInvalid={isInvalid}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setFieldValue('config.temperature', value === '' ? undefined : value);
+                    }}
+                  />
+                </EuiFormControlLayout>
+              </EuiFormRow>
+            );
+          }}
+        </UseField>
+        <EuiSpacer size="m" />
+      </>
+    ),
+    [setFieldValue, config.temperature]
+  );
+
   const taskTypeSettings = useMemo(
     () =>
       selectedTaskType || config.taskType?.length ? (
@@ -289,6 +381,12 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
             return (
               <EuiFormRow
                 id="inferenceId"
+                label={
+                  <FormattedMessage
+                    id="xpack.inferenceEndpointUICommon.components.additionalInfo.inferenceIdLabel"
+                    defaultMessage="Inference ID"
+                  />
+                }
                 isInvalid={isInvalid}
                 error={errorMessage}
                 fullWidth
@@ -338,6 +436,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
         </UseField>
         <EuiSpacer size="m" />
         {contextWindowLengthSettings}
+        {temperatureSettings}
       </EuiPanel>
     </EuiAccordion>
   );

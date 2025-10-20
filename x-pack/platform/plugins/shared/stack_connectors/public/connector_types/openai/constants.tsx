@@ -10,7 +10,7 @@ import type { ConfigFieldSchema, SecretsFieldSchema } from '@kbn/triggers-action
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiText } from '@elastic/eui';
 import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from '../../../common/openai/constants';
-import { contextWindowLengthField } from '../../common/genai_connectors';
+import { contextWindowLengthField, temperatureField } from '../../common/genai_connectors';
 import * as commonI18n from '../../common/genai_connectors/translations';
 import * as i18n from './translations';
 import type { Config } from './types';
@@ -93,6 +93,7 @@ export const openAiConfig: ConfigFieldSchema[] = [
     defaultValue: DEFAULT_OPENAI_MODEL,
   },
   contextWindowLengthField,
+  temperatureField,
   {
     id: 'organizationId',
     label: i18n.ORG_ID_LABEL,
@@ -162,6 +163,7 @@ export const azureAiConfig: ConfigFieldSchema[] = [
     ),
   },
   contextWindowLengthField,
+  temperatureField,
 ];
 
 export const otherOpenAiConfig: ConfigFieldSchema[] = [
@@ -199,6 +201,7 @@ export const otherOpenAiConfig: ConfigFieldSchema[] = [
     ),
   },
   contextWindowLengthField,
+  temperatureField,
 ];
 
 export const openAiSecrets: SecretsFieldSchema[] = [
