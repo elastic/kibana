@@ -201,7 +201,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
             activeTab={activeTab}
             canRunWorkflow={canRunWorkflow}
             canSaveWorkflow={canSaveWorkflow}
-            isValid={workflow?.valid ?? true}
+            isValid={Boolean(definitionFromCurrentYaml)}
             isEnabled={workflow?.enabled ?? false}
             handleRunClick={handleRun}
             handleSave={handleSave}
