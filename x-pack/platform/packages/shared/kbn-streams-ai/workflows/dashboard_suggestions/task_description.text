@@ -22,7 +22,9 @@ A dashboard is a collection of visualizations, filters, and layout configuration
 You have access to these tools:
 
 1. `probe_data(query=string)` - Execute ESQL queries to explore data structure, patterns, and content
-2. `generate_dashboard(dashboard=Dashboard)` - Generate and validate a dashboard definition
+2. `get_documentation(commands=string[], functions=string[])` - Get documentation about specific ES|QL commands or functions
+3. `generate_dashboard(dashboard=Dashboard)` - Generate and validate a dashboard definition
+4. `commit_dashboard(message=string)` - Commit the validated dashboard and complete the workflow
 
 **Important: Query Validation**:
 When you call `generate_dashboard`, each panel's ESQL query will be automatically validated against the actual data stream. If any queries are invalid or fail to execute, you will receive detailed error messages for each failed panel. Use this feedback to:
@@ -31,16 +33,47 @@ When you call `generate_dashboard`, each panel's ESQL query will be automaticall
 - Adjust queries based on actual data structure
 - Re-test queries using `probe_data` before including them in the dashboard
 
+**Critical: Panel Dimensions**:
+Each panel MUST specify a `dimensions` object that maps the query result columns to the visual dimensions of the chart:
+- **Bar/Line/Area Charts**: Must have `x` (dimension column) and `y` (metric column)
+- **Pie Charts**: Must have `partition` (dimension column) and `value` (metric column)
+- **Data Tables**: Must have `columns` (array of column names to display)
+
+The column names in `dimensions` must exactly match the column names returned by the ESQL query. Validation will fail if:
+- The query returns no results
+- Any specified dimension column is missing from the query results
+
+Example: If your query is `FROM logs | STATS count() BY host.name`, the result columns are `count()` and `host.name`. 
+For a bar chart, you would set: `dimensions: { x: "host.name", y: "count()" }`
+
+**Timeseries Visualization Example**:
+To create timeseries charts (line/area charts showing data over time), use the BUCKET function to group data into time intervals:
+```
+FROM <index> | STATS count=count() BY window=BUCKET(@timestamp, 300 seconds) | SORT window
+```
+This creates columns `count` and `window`. For a line chart showing count over time, use: `dimensions: { x: "window", y: "count" }`
+The BUCKET function creates time buckets (e.g., 300 seconds = 5 minutes). Always SORT by the time bucket column.
+
+**Dashboard Layout**:
+The dashboard uses a grid layout system with a total width of **48 units**. When positioning panels:
+- Each panel's `position` object must specify: `x` (horizontal position), `y` (vertical position), `width`, and `height`
+- `x` values range from 0 to 47 (total width is 48)
+- Panels can be arranged side-by-side (e.g., two panels with width 24 each)
+- Common layouts:
+  - Full width: `x: 0, width: 48`
+  - Half width: `x: 0, width: 24` or `x: 24, width: 24`
+  - Third width: `x: 0, width: 16`, `x: 16, width: 16`, `x: 32, width: 16`
+  - Quarter width: `x: 0, width: 12`, etc.
+- Arrange panels logically: most important visualizations at the top, related panels grouped together
+
 **Workflow**:
 1. **Explore**: Use `probe_data` to understand the data structure, field types, common values, and patterns
 2. **Analyze**: Identify the most relevant metrics, dimensions, and use cases for the data
 3. **Design**: Create visualizations that provide meaningful insights
-4. **Validate**: Call `generate_dashboard` to validate all queries - fix any validation errors
-5. **Generate**: Call `generate_dashboard` with the complete, validated dashboard definition
+4. **Validate**: Call `generate_dashboard` to validate all queries - fix any validation errors if they occur
+5. **Commit**: Once `generate_dashboard` succeeds, call `commit_dashboard` to finalize the workflow
 
 The dashboard schema is referenced below as `dashboard_schema`.
-
-After calling `complete`, you MUST finalize the process by calling the `generate_dashboard` tool once more with the finalized dashboard definition.
 
 `dashboard_schema`:
 ```json

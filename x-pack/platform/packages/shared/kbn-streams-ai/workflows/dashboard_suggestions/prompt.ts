@@ -33,9 +33,30 @@ export const SuggestStreamDashboardPrompt = createPrompt({
       },
     },
     tools: {
+      get_documentation: {
+        description: 'Get documentation about specific ES|QL commands or functions',
+        schema: {
+          type: 'object',
+          properties: {
+            commands: {
+              type: 'array',
+              items: {
+                type: 'string',
+              },
+            },
+            functions: {
+              type: 'array',
+              items: {
+                type: 'string',
+              },
+            },
+          },
+          required: ['commands', 'functions'],
+        },
+      } as const,
       probe_data: {
         description:
-          'Execute ESQL queries to explore and analyze the data stream structure and content.',
+          'Execute ESQL queries to explore and analyze the data stream structure and content. Try to always close with a LIMIT 10 to keep it quick.',
         schema: {
           type: 'object',
           properties: {
@@ -48,7 +69,8 @@ export const SuggestStreamDashboardPrompt = createPrompt({
         },
       } as const,
       generate_dashboard: {
-        description: 'Generate and validate a dashboard definition based on the data analysis.',
+        description:
+          'Generate and validate a dashboard definition based on the data analysis. This tool will validate all panel queries. If validation succeeds, proceed to commit_dashboard.',
         schema: {
           type: 'object',
           properties: {
@@ -68,14 +90,61 @@ export const SuggestStreamDashboardPrompt = createPrompt({
                     properties: {
                       id: { type: 'string', description: 'Panel identifier' },
                       title: { type: 'string', description: 'Panel title' },
-                      type: { type: 'string', description: 'Type of visualization' },
+                      type: {
+                        type: 'string',
+                        description:
+                          'Type of visualization: line_chart, area_chart, bar_chart, pie_chart, data_table',
+                      },
                       query: { type: 'string', description: 'ESQL query for the panel' },
+                      dimensions: {
+                        type: 'object',
+                        description:
+                          'Mapping of query result columns to visual dimensions. For bar/line/area charts: x (dimension) and y (metric). For pie charts: partition (dimension) and value (metric). For data tables: columns (array of column names).',
+                        properties: {
+                          x: {
+                            type: 'string',
+                            description: 'Column name for X axis (bar/line/area charts)',
+                          },
+                          y: {
+                            type: 'string',
+                            description: 'Column name for Y axis/metric (bar/line/area charts)',
+                          },
+                          partition: {
+                            type: 'string',
+                            description: 'Column name for partitions (pie chart)',
+                          },
+                          value: {
+                            type: 'string',
+                            description: 'Column name for values/metric (pie chart)',
+                          },
+                          columns: {
+                            type: 'array',
+                            items: { type: 'string' },
+                            description: 'Column names to display (data table)',
+                          },
+                        },
+                      },
                       position: {
                         type: 'object',
-                        description: 'Panel position and size',
+                        description:
+                          'Panel position and size in grid units. Grid width is 48 units total (x: 0-47). Common widths: 48 (full), 24 (half), 16 (third), 12 (quarter).',
                         properties: {
-                          x: { type: 'number', description: 'X position in grid columns' },
-                          y: { type: 'number', description: 'Y position in grid rows' },
+                          x: {
+                            type: 'number',
+                            description: 'X position in grid columns (0-47, grid width is 48)',
+                          },
+                          y: {
+                            type: 'number',
+                            description: 'Y position in grid rows',
+                          },
+                          width: {
+                            type: 'number',
+                            description: 'Panel width in grid units (max 48)',
+                          },
+                          height: {
+                            type: 'number',
+                            description: 'Panel height in grid units',
+                          },
                         },
                       },
                       config: {
@@ -95,6 +164,19 @@ export const SuggestStreamDashboardPrompt = createPrompt({
             },
           },
           required: ['dashboard'],
+        },
+      } as const,
+      commit_dashboard: {
+        description:
+          'Commit the validated dashboard as the final result. Call this after generate_dashboard succeeds to complete the workflow.',
+        schema: {
+          type: 'object',
+          properties: {
+            message: {
+              type: 'string',
+              description: 'Optional commit message summarizing the dashboard',
+            },
+          },
         },
       } as const,
     },

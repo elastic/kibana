@@ -29,6 +29,7 @@ const wiredStreamManagementSubTabs = [
   'significantEvents',
   'dataQuality',
   'references',
+  'dashboardGeneration',
 ] as const;
 
 type WiredStreamManagementSubTab = (typeof wiredStreamManagementSubTabs)[number];

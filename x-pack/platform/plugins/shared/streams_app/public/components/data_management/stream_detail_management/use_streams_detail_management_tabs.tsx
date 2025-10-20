@@ -11,6 +11,7 @@ import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { StreamDetailSignificantEventsView } from '../../stream_detail_significant_events_view';
 import { StreamDetailEnrichment } from '../stream_detail_enrichment';
 import { StreamDetailReferencesView } from '../../stream_detail_references_view/stream_detail_references_view';
+import { StreamDetailDashboardGeneration } from './stream_detail_dashboard_generation';
 
 export function useStreamsDetailManagementTabs({
   definition,
@@ -35,6 +36,10 @@ export function useStreamsDetailManagementTabs({
       label: i18n.translate('xpack.streams.streamDetailView.processingTab', {
         defaultMessage: 'Processing',
       }),
+    },
+    dashboardGeneration: {
+      content: <StreamDetailDashboardGeneration definition={definition} />,
+      label: 'Dashboard generation',
     },
     ...(groupStreams?.enabled
       ? {
