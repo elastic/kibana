@@ -40,6 +40,7 @@ describe('DetectionRulesClient.createPrebuiltRule', () => {
 
     const savedObjectsClient = savedObjectsClientMock.create();
     detectionRulesClient = createDetectionRulesClient({
+      // @ts-expect-error upgrade typescript v5.9.3
       actionsClient,
       rulesClient,
       mlAuthz,

@@ -33,6 +33,7 @@ export const BorderConnection: FC<Props> = ({ transformMatrix, width, height }) 
 
 BorderConnection.propTypes = {
   height: PropTypes.number.isRequired,
+  // @ts-expect-error upgrade typescript v5.9.3
   transformMatrix: PropTypes.arrayOf(PropTypes.number).isRequired,
   width: PropTypes.number.isRequired,
 };

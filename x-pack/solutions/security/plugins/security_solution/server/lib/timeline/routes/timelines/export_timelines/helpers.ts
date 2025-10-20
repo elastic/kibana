@@ -83,6 +83,7 @@ const getTimelinesFromObjects = async (
     return acc;
   }, []);
 
+  // @ts-expect-error upgrade typescript v5.9.3
   return [...myResponse, ...errors] ?? [];
 };
 

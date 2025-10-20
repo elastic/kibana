@@ -97,7 +97,7 @@ export default function ({ getService }: FtrProviderContext) {
         ),
       ]);
 
-      scheduledReportIds = results.map((report) => {
+      scheduledReportIds = results.map((report: any) => {
         expect(report.status).to.eql(200);
         return report.body.job.id;
       });

@@ -856,6 +856,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         redirectAway();
       })
       .catch(() => {
+        // @ts-expect-error upgrade typescript v5.9.3
         if (oldField) {
           indexPattern.fields.update(oldField);
         } else {

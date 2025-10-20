@@ -65,6 +65,7 @@ export const AIConnectorCard: OnboardingCardComponent<AIConnectorCardMetadata> =
       return false;
     }
     const connector = checkCompleteMetadata.connectors.find((c) => c.id === storedConnectorId);
+    // @ts-expect-error upgrade typescript v5.9.3
     return connector?.actionTypeId === '.inference' ?? false;
   }, [checkCompleteMetadata, storedConnectorId]);
 

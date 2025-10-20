@@ -158,6 +158,7 @@ export function root(tree: IndexedProcessTree) {
     return null;
   }
   // any node will do
+  // @ts-expect-error upgrade typescript v5.9.3
   let current: ResolverNode = tree.idToNode.values().next().value;
 
   // iteratively swap current w/ its parent

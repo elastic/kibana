@@ -183,7 +183,9 @@ describe('BurnRateRuleExecutor', () => {
         done: jest.fn(),
         alertLimit: { getValue: jest.fn(), setLimitReached: jest.fn() },
       },
+      // @ts-expect-error upgrade typescript v5.9.3
       getSearchSourceClient: jest.fn().mockResolvedValue(searchSourceClientMock),
+      // @ts-expect-error upgrade typescript v5.9.3
       uiSettingsClient: uiSettingsClientMock,
       shouldWriteAlerts: jest.fn(),
       shouldStopExecution: jest.fn(),

@@ -55,6 +55,7 @@ describe('when calling the Action state route handler', () => {
         () => superUser
       );
 
+      // @ts-expect-error upgrade typescript v5.9.3
       const ctx = createRouteHandlerContext(mockScopedEsClient, mockSavedObjectClient);
 
       ctx.securitySolution.getEndpointAuthz.mockResolvedValue(

@@ -26,6 +26,7 @@ export const BorderResizeHandle: FC<Props> = ({ transformMatrix, zoomScale = 1 }
 );
 
 BorderResizeHandle.propTypes = {
+  // @ts-expect-error upgrade typescript v5.9.3
   transformMatrix: PropTypes.arrayOf(PropTypes.number).isRequired,
   zoomScale: PropTypes.number,
 };

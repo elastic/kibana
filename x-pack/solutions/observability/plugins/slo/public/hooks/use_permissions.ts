@@ -15,12 +15,16 @@ export function usePermissions() {
 
   const { data: globalDiagnosis, isLoading } = useFetchSloGlobalDiagnosis();
 
+  // @ts-expect-error upgrade typescript v5.9.3
   const hasRequiredReadCapabilities = !!capabilities[sloFeatureId].read ?? false;
+  // @ts-expect-error upgrade typescript v5.9.3
   const hasRequiredWriteCapabilities = !!capabilities[sloFeatureId].write ?? false;
 
   const hasRequiredReadPrivileges =
+    // @ts-expect-error upgrade typescript v5.9.3
     !!globalDiagnosis?.userPrivileges.read.has_all_requested ?? false;
   const hasRequiredWritePrivileges =
+    // @ts-expect-error upgrade typescript v5.9.3
     !!globalDiagnosis?.userPrivileges.write.has_all_requested ?? false;
 
   return {

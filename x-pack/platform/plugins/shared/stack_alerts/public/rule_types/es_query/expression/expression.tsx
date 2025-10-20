@@ -93,6 +93,7 @@ export const EsQueryRuleTypeExpression: React.FunctionComponent<
   );
 
   return (
+    // @ts-expect-error upgrade typescript v5.9.3
     <>
       {expressionError}
 

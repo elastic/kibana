@@ -145,6 +145,7 @@ ExtendedTemplate.displayName = 'SeriesStyleArgAdvancedInput';
 ExtendedTemplate.propTypes = {
   onValueChange: PropTypes.func.isRequired,
   argValue: PropTypes.any.isRequired,
+  // @ts-expect-error upgrade typescript v5.9.3
   typeInstance: PropTypes.object,
   resolved: PropTypes.shape({
     labels: PropTypes.array.isRequired,

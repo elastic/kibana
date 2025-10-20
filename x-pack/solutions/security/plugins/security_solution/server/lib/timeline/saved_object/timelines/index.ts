@@ -191,7 +191,7 @@ export const getExistingPrepackagedTimelines = async (
       ? {
           perPage: 1,
           page: 1,
-        }
+        } // @ts-expect-error upgrade typescript v5.9.3
       : { perPage: pageInfo?.pageSize, page: pageInfo?.pageIndex } ?? {};
   const elasticTemplateTimelineOptions = {
     type: timelineSavedObjectType,

@@ -105,6 +105,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             bool: {
               should: [
                 { term: { 'kibana.alert.rule.uuid': ruleId } },
+                // @ts-expect-error upgrade typescript v5.9.3
                 ...(dependencyRuleId
                   ? [{ term: { 'kibana.alert.rule.uuid': dependencyRuleId } }]
                   : []),

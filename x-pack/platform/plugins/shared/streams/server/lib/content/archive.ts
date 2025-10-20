@@ -47,7 +47,9 @@ export async function parseArchive(archive: Readable): Promise<ContentPack> {
   });
 
   const rootDir = getRootDir(zip.getEntries());
+  // @ts-expect-error upgrade typescript v5.9.3
   const manifest = await extractManifest(rootDir, zip);
+  // @ts-expect-error upgrade typescript v5.9.3
   const entries = await extractEntries(rootDir, zip);
 
   return { ...manifest, entries };

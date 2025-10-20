@@ -275,7 +275,9 @@ function mergeCheckGroups(prev: CheckGroupResult, curr: Partial<CheckGroupResult
 function getCheckGroupChecksum(checkGroupResults: CheckGroupResult[]) {
   return checkGroupResults.reduce((acc, cur) => {
     return (
+      // @ts-expect-error upgrade typescript v5.9.3
       acc + cur?.journeyDoc?._id ??
+      // @ts-expect-error upgrade typescript v5.9.3
       '' + cur?.summaryDoc?._id ??
       '' + (cur?.steps ?? []).reduce((stepAcc, { _id }) => stepAcc + _id, '')
     );

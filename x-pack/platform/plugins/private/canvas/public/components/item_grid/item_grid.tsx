@@ -67,7 +67,9 @@ export const ItemGrid: ItemGridType = function ItemGridFunc<T>({
 };
 
 ItemGrid.propTypes = {
+  // @ts-expect-error upgrade typescript v5.9.3
   items: PropTypes.array,
+  // @ts-expect-error upgrade typescript v5.9.3
   itemsPerRow: PropTypes.number,
   children: PropTypes.func.isRequired,
 };
