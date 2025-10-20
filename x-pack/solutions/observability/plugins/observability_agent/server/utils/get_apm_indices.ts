@@ -8,6 +8,7 @@
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import type {
   ObservabilityAgentPluginSetupDependencies,
   ObservabilityAgentPluginStart,
@@ -22,17 +23,16 @@ export async function getApmIndices({
   core: CoreSetup<ObservabilityAgentPluginStartDependencies, ObservabilityAgentPluginStart>;
   plugins: ObservabilityAgentPluginSetupDependencies;
   logger: Logger;
-}): Promise<string[]> {
+}): Promise<APMIndices> {
   const [coreStart] = await core.getStartServices();
   const savedObjectsClient = new SavedObjectsClient(
     coreStart.savedObjects.createInternalRepository()
   );
 
   try {
-    const apmIndices = await plugins.apmDataAccess.getApmIndices(savedObjectsClient);
-    return Object.values(apmIndices);
+    return plugins.apmDataAccess.getApmIndices(savedObjectsClient);
   } catch (error) {
     logger.warn(`Failed to resolve APM indices for Observability Agent: ${error.message}`);
-    return [];
+    throw error;
   }
 }

@@ -10,7 +10,7 @@ import { ToolType } from '@kbn/onechat-common';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import type { CoreSetup, Logger } from '@kbn/core/server';
-import { buildKqlFilter, buildTimeRangeFilter } from '../utils/dsl_filters';
+import { kqlFilter, timeRangeFilter } from '../utils/dsl_filters';
 import { getTypedSearch } from '../utils/get_typed_search';
 import type {
   ObservabilityAgentPluginSetupDependencies,
@@ -62,7 +62,8 @@ export async function createObservabilityGetServicesTool({
   plugins: ObservabilityAgentPluginSetupDependencies;
   logger: Logger;
 }) {
-  const apmIndexPatterns = await getApmIndices({ core, plugins, logger });
+  const apmIndices = await getApmIndices({ core, plugins, logger });
+  const apmIndexPatterns = Object.values(apmIndices);
   const logIndexPatterns = await getLogsIndices({ core, logger });
   const metricIndexPatterns = ['metrics-*'];
 
@@ -93,8 +94,8 @@ export async function createObservabilityGetServicesTool({
         query: {
           bool: {
             filter: [
-              buildTimeRangeFilter(timeField, { start: timeRange.start, end: timeRange.end }),
-              ...buildKqlFilter(query),
+              ...timeRangeFilter(timeField, { start: timeRange.start, end: timeRange.end }),
+              ...kqlFilter(query),
               { exists: { field: 'service.name' } },
             ],
           },

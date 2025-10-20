@@ -9,25 +9,47 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { isEmpty } from 'lodash';
 
-export function buildTimeRangeFilter(
+export function timeRangeFilter(
   timeField: string,
   { start, end }: { start: string; end: string }
-): QueryDslQueryContainer {
-  return {
-    range: {
-      [timeField]: {
-        gte: start,
-        lt: end,
+): QueryDslQueryContainer[] {
+  return [
+    {
+      range: {
+        [timeField]: {
+          gte: start,
+          lt: end,
+        },
       },
     },
-  };
+  ];
 }
 
-export function buildKqlFilter(kuery?: string): QueryDslQueryContainer[] {
+export function kqlFilter(kuery?: string): QueryDslQueryContainer[] {
   const hasKuery = !isEmpty(kuery?.trim());
   if (hasKuery) {
     return [toElasticsearchQuery(fromKueryExpression(kuery!))];
   }
 
   return [];
+}
+
+export function environmentFilter(environment?: string) {
+  if (!environment) {
+    return [];
+  }
+  return [{ term: { 'service.environment': environment } }];
+}
+
+// { term: { 'metricset.name': 'service_transaction' } },
+
+export function termFilter<T extends string>(
+  field: T,
+  value: string | boolean | number | undefined | null
+): QueryDslQueryContainer[] {
+  if (!value) {
+    return [];
+  }
+
+  return [{ term: { [field]: value } }];
 }
