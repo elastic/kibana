@@ -15,10 +15,8 @@ import { isEmpty } from 'lodash';
  * to add dynamic headers to the form. The UseArray component formats the fields
  * as an array of objects. The schema for the headers of the webhook connector
  * is Record<string, string>. We need to transform the UseArray format to the one
- * accepted by the backend. At the moment, the UseArray does not accepts
- * a serializer and deserializer so it has to be done on the form level. When issue #133107
- * is resolved we should move the serializer and deserializer functions to the
- * webhook connector.
+ * accepted by the backend. At the moment, the UseArray does not accept
+ * a serializer and deserializer so it has to be done on the form level.
  */
 
 export const formDeserializer = (data: ConnectorFormSchema): InternalConnectorForm => {
