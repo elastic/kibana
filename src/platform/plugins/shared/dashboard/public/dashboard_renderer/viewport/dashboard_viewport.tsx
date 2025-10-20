@@ -82,19 +82,6 @@ export const DashboardViewport = () => {
     };
   }, [controlGroupApi]);
 
-  const [controlsReady, setControlsReady] = useState(false);
-  useEffect(() => {
-    let ignore = false;
-    dashboardInternalApi.untilControlsInitialized().then(() => {
-      if (!ignore) {
-        setControlsReady(true);
-      }
-    });
-    return () => {
-      ignore = true;
-    };
-  }, [dashboardInternalApi]);
-
   const styles = useMemoCss(dashboardViewportStyles);
 
   return (
@@ -137,11 +124,7 @@ export const DashboardViewport = () => {
         data-shared-items-count={visiblePanelCount}
         data-test-subj={'dshDashboardViewport'}
       >
-        {panelCount === 0 && sectionCount === 0 ? (
-          <DashboardEmptyScreen />
-        ) : viewMode === 'print' || controlsReady ? (
-          <DashboardGrid />
-        ) : null}
+        {panelCount === 0 && sectionCount === 0 ? <DashboardEmptyScreen /> : <DashboardGrid />}
       </div>
     </div>
   );
