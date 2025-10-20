@@ -28,13 +28,15 @@ export function RollbackButton({ packageInfo, isCustomPackage }: RollbackButtonP
   const canRollbackPackages = useAuthz().integrations.installPackages;
   const licenseService = useLicense();
   const hasPreviousVersion = !!packageInfo?.installationInfo?.previous_version;
+  const isRollbackTTLExpired = !!packageInfo.installationInfo?.is_rollback_ttl_expired;
   const isUploadedPackage = packageInfo.installationInfo?.install_source === 'upload';
   const isDisabled =
     !canRollbackPackages ||
     !hasPreviousVersion ||
     isUploadedPackage ||
     isCustomPackage ||
-    !licenseService.isEnterprise();
+    !licenseService.isEnterprise() ||
+    isRollbackTTLExpired;
   const {
     actions: { bulkRollbackIntegrationsWithConfirmModal },
   } = useInstalledIntegrationsActions();
@@ -95,6 +97,11 @@ export function RollbackButton({ packageInfo, isCustomPackage }: RollbackButtonP
               <FormattedMessage
                 id="xpack.fleet.integrations.rollbackPackage.licenseTooltip"
                 defaultMessage="Rollback integrations requires an enterprise license."
+              />
+            ) : isRollbackTTLExpired ? (
+              <FormattedMessage
+                id="xpack.fleet.integrations.rollbackPackage.rollbackTTLExpiredTooltip"
+                defaultMessage="The rollback is no longer allowed for this integration."
               />
             ) : null
           }
