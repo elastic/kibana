@@ -107,7 +107,7 @@ export function initializeSettingsManager(initialState: DashboardState) {
             return {
               ...(description && { description }),
               ...(tags && { tags }),
-              ...(timeRestore && { timeRestore }),
+              ...(typeof timeRestore === 'boolean' && { timeRestore }),
               ...(title && { title }),
               ...(options && { options }),
             };

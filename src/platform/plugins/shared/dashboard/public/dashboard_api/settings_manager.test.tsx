@@ -14,10 +14,9 @@ import { initializeSettingsManager } from './settings_manager';
 
 describe('initializeSettingsManager', () => {
   describe('startComparing$', () => {
-    const lastSavedState$ = new BehaviorSubject<DashboardState>(getSampleDashboardState());
-    const settingsManager = initializeSettingsManager(lastSavedState$.value);
-
     test('Should return no changes when there are no changes', (done) => {
+      const lastSavedState$ = new BehaviorSubject<DashboardState>(getSampleDashboardState());
+      const settingsManager = initializeSettingsManager(lastSavedState$.value);
       settingsManager.internalApi.startComparing$(lastSavedState$).subscribe((changes) => {
         expect(changes).toMatchInlineSnapshot(`Object {}`);
         done();
@@ -25,6 +24,11 @@ describe('initializeSettingsManager', () => {
     });
 
     test('Should return only changed keys when there are changes', (done) => {
+      const lastSavedState$ = new BehaviorSubject<DashboardState>({
+        ...getSampleDashboardState(),
+        timeRestore: true,
+      });
+      const settingsManager = initializeSettingsManager(lastSavedState$.value);
       settingsManager.internalApi.startComparing$(lastSavedState$).subscribe((changes) => {
         expect(changes).toMatchInlineSnapshot(`
           Object {
@@ -35,6 +39,7 @@ describe('initializeSettingsManager', () => {
               "syncTooltips": false,
               "useMargins": true,
             },
+            "timeRestore": false,
             "title": "updated title",
           }
         `);
@@ -45,6 +50,7 @@ describe('initializeSettingsManager', () => {
         ...currentSettings,
         title: 'updated title',
         hidePanelTitles: !currentSettings.hidePanelTitles,
+        timeRestore: false,
       });
     });
   });
