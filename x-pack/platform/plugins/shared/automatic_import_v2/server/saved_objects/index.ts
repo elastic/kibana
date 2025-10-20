@@ -9,5 +9,5 @@
 
 export { dataStreamSavedObjectType } from './data_stream';
 export { integrationSavedObjectType } from './integration';
-export { AUTOMATIC_IMPORT_INTEGRATION_SAVED_OBJECT_TYPE, AUTOMATIC_IMPORT_DATA_STREAM_SAVED_OBJECT_TYPE } from './constants';
+export { INTEGRATION_SAVED_OBJECT_TYPE, DATA_STREAM_SAVED_OBJECT_TYPE } from './constants';
 export type { IntegrationAttributes, DataStreamAttributes } from './schemas/types';

@@ -9,10 +9,10 @@
 
 import { SavedObjectsType } from "@kbn/core/server";
 import { integrationSchemaV1 } from "./schemas/integration_schema";
-import { AUTOMATIC_IMPORT_INTEGRATION_SAVED_OBJECT_TYPE } from "./constants";
+import { INTEGRATION_SAVED_OBJECT_TYPE } from "./constants";
 
 export const integrationSavedObjectType: SavedObjectsType = {
-  name: AUTOMATIC_IMPORT_INTEGRATION_SAVED_OBJECT_TYPE,
+  name: INTEGRATION_SAVED_OBJECT_TYPE,
   hidden: false,
   namespaceType: "multiple-isolated",
   mappings: {
@@ -25,8 +25,8 @@ export const integrationSavedObjectType: SavedObjectsType = {
         type: "object",
         properties: {
           title: { type: 'keyword', index: false },
+          version: { type: 'integer', index: false },
           description: { type: 'text', index: false },
-          updated_at: { type: 'date', index: false },
           created_at: { type: 'date', index: false },
         },
       },

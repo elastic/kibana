@@ -9,10 +9,10 @@
 
 import { SavedObjectsType } from "@kbn/core/server";
 import { dataStreamSchemaV1 } from "./schemas/data_stream_schema";
-import { AUTOMATIC_IMPORT_DATA_STREAM_SAVED_OBJECT_TYPE } from "./constants";
+import { DATA_STREAM_SAVED_OBJECT_TYPE } from "./constants";
 
 export const dataStreamSavedObjectType: SavedObjectsType = {
-  name: AUTOMATIC_IMPORT_DATA_STREAM_SAVED_OBJECT_TYPE,
+  name: DATA_STREAM_SAVED_OBJECT_TYPE,
   hidden: false,
   namespaceType: "multiple-isolated",
   mappings: {
@@ -43,8 +43,8 @@ export const dataStreamSavedObjectType: SavedObjectsType = {
       metadata: {
         properties: {
           sample_count: { type: 'integer', index: false },
+          version: { type: 'integer', index: false },
           created_at: { type: 'date', index: false },
-          updated_at: { type: 'date', index: false },
         },
       },
       result: {
@@ -54,7 +54,7 @@ export const dataStreamSavedObjectType: SavedObjectsType = {
             type: 'text', index: false,
           },
           field_mapping: {
-            type: 'text', index: false,
+            type: "flattened"
           },
         },
       },

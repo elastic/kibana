@@ -19,64 +19,18 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { AutomaticImportSavedObjectService } from './saved_objects_service';
 import type { IntegrationAttributes, DataStreamAttributes } from './schemas/types';
 import {
-  AUTOMATIC_IMPORT_DATA_STREAM_SAVED_OBJECT_TYPE,
-  AUTOMATIC_IMPORT_INTEGRATION_SAVED_OBJECT_TYPE,
+  DATA_STREAM_SAVED_OBJECT_TYPE,
+  INTEGRATION_SAVED_OBJECT_TYPE,
+  TASK_STATUSES,
 } from './constants';
+import { mockDataStreamData, mockDataStreamSavedObject, mockIntegrationData, mockSavedObject } from '../__mocks__/saved_objects';
 
 describe('AutomaticImportSavedObjectService', () => {
   let service: AutomaticImportSavedObjectService;
   let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   let mockLogger: jest.Mocked<Logger>;
 
-  const mockIntegrationData: IntegrationAttributes = {
-    integration_id: 'test-integration-id',
-    data_stream_count: 2,
-    status: 'active',
-    metadata: {
-      title: 'Test Integration',
-      description: 'A test integration',
-      created_at: '2024-01-01T00:00:00.000Z',
-      updated_at: '2024-01-01T00:00:00.000Z',
-    },
-  };
-
-  const mockDataStreamData: DataStreamAttributes = {
-    integration_id: 'test-integration-id',
-    data_stream_id: 'test-data-stream-id',
-    job_info: {
-      job_id: 'test-job-id',
-      job_type: 'test-job-type',
-      status: 'pending',
-    },
-    metadata: {
-      sample_count: 100,
-      created_at: '2024-01-01T00:00:00.000Z',
-      updated_at: '2024-01-01T00:00:00.000Z',
-    },
-    result: {
-      ingest_pipeline: 'test-pipeline',
-      field_mapping: 'test-mapping',
-    },
-  };
-
-  const mockSavedObject: SavedObject<IntegrationAttributes> = {
-    id: 'test-integration-id',
-    type: AUTOMATIC_IMPORT_INTEGRATION_SAVED_OBJECT_TYPE,
-    attributes: mockIntegrationData,
-    references: [],
-    version: '1',
-  };
-
-  const mockDataStreamSavedObject: SavedObject<DataStreamAttributes> = {
-    id: 'test-data-stream-id',
-    type: AUTOMATIC_IMPORT_DATA_STREAM_SAVED_OBJECT_TYPE,
-    attributes: mockDataStreamData,
-    references: [],
-    version: '1',
-  };
-
   beforeEach(() => {
-    // Use Kibana's built-in mocks - much simpler and automatically handles all methods
     mockSavedObjectsClient = savedObjectsClientMock.create();
     mockLogger = loggerMock.create();
 
@@ -85,45 +39,43 @@ describe('AutomaticImportSavedObjectService', () => {
       logger: mockLogger,
     });
 
-    // Reset all mocks before each test
     jest.clearAllMocks();
   });
 
   describe('Integration Operations', () => {
-    describe('upsertIntegration', () => {
-      it('should successfully create/update an integration', async () => {
-        const mockUpdateResponse: SavedObjectsUpdateResponse<IntegrationAttributes> = {
+    describe('insertIntegration', () => {
+      it('should successfully create an integration', async () => {
+        const mockCreateResponse: SavedObject<IntegrationAttributes> = {
           id: 'test-integration-id',
-          type: AUTOMATIC_IMPORT_INTEGRATION_SAVED_OBJECT_TYPE,
+          type: INTEGRATION_SAVED_OBJECT_TYPE,
           attributes: mockIntegrationData,
           references: [],
           version: '1',
         };
 
-        mockSavedObjectsClient.update.mockResolvedValue(mockUpdateResponse);
+        mockSavedObjectsClient.create.mockResolvedValue(mockCreateResponse);
 
-        const result = await service.upsertIntegration(mockIntegrationData);
+        const result = await service.insertIntegration(mockIntegrationData);
 
-        expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
-          AUTOMATIC_IMPORT_INTEGRATION_SAVED_OBJECT_TYPE,
-          'test-integration-id',
+        expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
+          INTEGRATION_SAVED_OBJECT_TYPE,
           expect.objectContaining({
             integration_id: 'test-integration-id',
             data_stream_count: 2,
-            status: 'active',
+            status: TASK_STATUSES.pending,
             metadata: expect.objectContaining({
               title: 'Test Integration',
               description: 'A test integration',
               created_at: expect.any(String),
-              updated_at: expect.any(String),
+              version: 0,
             }),
           }),
           expect.objectContaining({
-            upsert: expect.any(Object),
+            id: 'test-integration-id',
           })
         );
 
-        expect(result).toEqual(mockUpdateResponse);
+        expect(result).toEqual(mockCreateResponse);
       });
 
       it('should handle default data_stream_count when not provided', async () => {
@@ -132,21 +84,20 @@ describe('AutomaticImportSavedObjectService', () => {
           data_stream_count: undefined,
         } as any;
 
-        const mockUpdateResponse: SavedObjectsUpdateResponse<IntegrationAttributes> = {
+        const mockCreateResponse: SavedObject<IntegrationAttributes> = {
           id: 'test-integration-id',
-          type: AUTOMATIC_IMPORT_INTEGRATION_SAVED_OBJECT_TYPE,
+          type: INTEGRATION_SAVED_OBJECT_TYPE,
           attributes: mockIntegrationData,
           references: [],
           version: '1',
         };
 
-        mockSavedObjectsClient.update.mockResolvedValue(mockUpdateResponse);
+        mockSavedObjectsClient.create.mockResolvedValue(mockCreateResponse);
 
-        await service.upsertIntegration(integrationDataWithoutCount);
+        await service.insertIntegration(integrationDataWithoutCount);
 
-        expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
-          AUTOMATIC_IMPORT_INTEGRATION_SAVED_OBJECT_TYPE,
-          'test-integration-id',
+        expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
+          INTEGRATION_SAVED_OBJECT_TYPE,
           expect.objectContaining({
             data_stream_count: 0,
           }),
@@ -156,36 +107,80 @@ describe('AutomaticImportSavedObjectService', () => {
 
       it('should handle errors and log them', async () => {
         const error = new Error('Database error');
-        mockSavedObjectsClient.update.mockRejectedValue(error);
+        mockSavedObjectsClient.create.mockRejectedValue(error);
 
-        await expect(service.upsertIntegration(mockIntegrationData)).rejects.toThrow(
+        await expect(service.insertIntegration(mockIntegrationData)).rejects.toThrow(
           'Database error'
         );
       });
 
       it('should pass through additional options', async () => {
         const options = { namespace: 'custom-namespace' };
-        const mockUpdateResponse: SavedObjectsUpdateResponse<IntegrationAttributes> = {
+        const mockCreateResponse: SavedObject<IntegrationAttributes> = {
           id: 'test-integration-id',
-          type: AUTOMATIC_IMPORT_INTEGRATION_SAVED_OBJECT_TYPE,
+          type: INTEGRATION_SAVED_OBJECT_TYPE,
           attributes: mockIntegrationData,
           references: [],
           version: '1',
         };
 
-        mockSavedObjectsClient.update.mockResolvedValue(mockUpdateResponse);
+        mockSavedObjectsClient.create.mockResolvedValue(mockCreateResponse);
 
-        await service.upsertIntegration(mockIntegrationData, options);
+        await service.insertIntegration(mockIntegrationData, options);
 
-        expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
-          AUTOMATIC_IMPORT_INTEGRATION_SAVED_OBJECT_TYPE,
-          'test-integration-id',
+        expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
+          INTEGRATION_SAVED_OBJECT_TYPE,
           expect.any(Object),
           expect.objectContaining({
             namespace: 'custom-namespace',
-            upsert: expect.any(Object),
+            id: 'test-integration-id',
           })
         );
+      });
+    });
+
+    describe('updateIntegration', () => {
+      it('should successfully update an integration', async () => {
+        const mockUpdateResponse: SavedObjectsUpdateResponse<IntegrationAttributes> = {
+          id: 'test-integration-id',
+          type: INTEGRATION_SAVED_OBJECT_TYPE,
+          attributes: mockIntegrationData,
+          references: [],
+          version: '2',
+        };
+
+        mockSavedObjectsClient.get.mockResolvedValue(mockSavedObject);
+        mockSavedObjectsClient.update.mockResolvedValue(mockUpdateResponse);
+
+        const result = await service.updateIntegration(mockIntegrationData);
+
+        expect(mockSavedObjectsClient.get).toHaveBeenCalledWith(
+          INTEGRATION_SAVED_OBJECT_TYPE,
+          'test-integration-id'
+        );
+
+        expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+          INTEGRATION_SAVED_OBJECT_TYPE,
+          'test-integration-id',
+          expect.objectContaining({
+            integration_id: 'test-integration-id',
+            data_stream_count: 2,
+            status: 'active',
+            metadata: expect.objectContaining({
+              version: 2,
+            }),
+          }),
+          expect.any(Object)
+        );
+
+        expect(result).toEqual(mockUpdateResponse);
+      });
+
+      it('should throw error if integration not found', async () => {
+        const error = new Error('Not found');
+        mockSavedObjectsClient.get.mockRejectedValue(error);
+
+        await expect(service.updateIntegration(mockIntegrationData)).rejects.toThrow('Not found');
       });
     });
 
@@ -196,7 +191,7 @@ describe('AutomaticImportSavedObjectService', () => {
         const result = await service.getIntegration('test-integration-id');
 
         expect(mockSavedObjectsClient.get).toHaveBeenCalledWith(
-          AUTOMATIC_IMPORT_INTEGRATION_SAVED_OBJECT_TYPE,
+          INTEGRATION_SAVED_OBJECT_TYPE,
           'test-integration-id'
         );
         expect(result).toEqual(mockSavedObject);
@@ -224,7 +219,7 @@ describe('AutomaticImportSavedObjectService', () => {
         const result = await service.getAllIntegrations();
 
         expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
-          type: AUTOMATIC_IMPORT_INTEGRATION_SAVED_OBJECT_TYPE,
+          type: INTEGRATION_SAVED_OBJECT_TYPE,
         });
         expect(result).toEqual(mockFindResponse);
       });
@@ -245,7 +240,7 @@ describe('AutomaticImportSavedObjectService', () => {
         const result = await service.deleteIntegration('test-integration-id');
 
         expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith(
-          AUTOMATIC_IMPORT_INTEGRATION_SAVED_OBJECT_TYPE,
+          INTEGRATION_SAVED_OBJECT_TYPE,
           'test-integration-id',
           undefined
         );
@@ -260,7 +255,7 @@ describe('AutomaticImportSavedObjectService', () => {
         await service.deleteIntegration('test-integration-id', options);
 
         expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith(
-          AUTOMATIC_IMPORT_INTEGRATION_SAVED_OBJECT_TYPE,
+          INTEGRATION_SAVED_OBJECT_TYPE,
           'test-integration-id',
           options
         );
@@ -278,11 +273,11 @@ describe('AutomaticImportSavedObjectService', () => {
   });
 
   describe('Data Stream Operations', () => {
-    describe('upsertDataStream', () => {
-      it('should successfully create/update a data stream', async () => {
-        const mockUpdateResponse: SavedObjectsUpdateResponse<DataStreamAttributes> = {
+    describe('insertDataStream', () => {
+      it('should successfully create a data stream', async () => {
+        const mockCreateResponse: SavedObject<DataStreamAttributes> = {
           id: 'test-data-stream-id',
-          type: AUTOMATIC_IMPORT_DATA_STREAM_SAVED_OBJECT_TYPE,
+          type: DATA_STREAM_SAVED_OBJECT_TYPE,
           attributes: mockDataStreamData,
           references: [],
           version: '1',
@@ -290,35 +285,34 @@ describe('AutomaticImportSavedObjectService', () => {
 
         // Mock the integration exists
         mockSavedObjectsClient.get.mockResolvedValue(mockSavedObject);
-        mockSavedObjectsClient.update.mockResolvedValue(mockUpdateResponse);
+        mockSavedObjectsClient.create.mockResolvedValue(mockCreateResponse);
 
-        const result = await service.upsertDataStream(mockDataStreamData);
+        const result = await service.insertDataStream(mockDataStreamData);
 
         expect(mockSavedObjectsClient.get).toHaveBeenCalledWith(
-          AUTOMATIC_IMPORT_INTEGRATION_SAVED_OBJECT_TYPE,
+          INTEGRATION_SAVED_OBJECT_TYPE,
           'test-integration-id'
         );
 
-        expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
-          AUTOMATIC_IMPORT_DATA_STREAM_SAVED_OBJECT_TYPE,
-          'test-data-stream-id',
+        expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
+          DATA_STREAM_SAVED_OBJECT_TYPE,
           expect.objectContaining({
             integration_id: 'test-integration-id',
             data_stream_id: 'test-data-stream-id',
             job_info: mockDataStreamData.job_info,
             metadata: expect.objectContaining({
               sample_count: 100,
+              version: 0,
               created_at: expect.any(String),
-              updated_at: expect.any(String),
             }),
             result: mockDataStreamData.result,
           }),
           expect.objectContaining({
-            upsert: expect.any(Object),
+            id: 'test-data-stream-id',
           })
         );
 
-        expect(result).toEqual(mockUpdateResponse);
+        expect(result).toEqual(mockCreateResponse);
       });
 
       it('should handle missing result object', async () => {
@@ -327,22 +321,21 @@ describe('AutomaticImportSavedObjectService', () => {
           result: undefined,
         } as any;
 
-        const mockUpdateResponse: SavedObjectsUpdateResponse<DataStreamAttributes> = {
+        const mockCreateResponse: SavedObject<DataStreamAttributes> = {
           id: 'test-data-stream-id',
-          type: AUTOMATIC_IMPORT_DATA_STREAM_SAVED_OBJECT_TYPE,
+          type: DATA_STREAM_SAVED_OBJECT_TYPE,
           attributes: mockDataStreamData,
           references: [],
           version: '1',
         };
 
         mockSavedObjectsClient.get.mockResolvedValue(mockSavedObject);
-        mockSavedObjectsClient.update.mockResolvedValue(mockUpdateResponse);
+        mockSavedObjectsClient.create.mockResolvedValue(mockCreateResponse);
 
-        await service.upsertDataStream(dataStreamWithoutResult);
+        await service.insertDataStream(dataStreamWithoutResult);
 
-        expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
-          AUTOMATIC_IMPORT_DATA_STREAM_SAVED_OBJECT_TYPE,
-          'test-data-stream-id',
+        expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
+          DATA_STREAM_SAVED_OBJECT_TYPE,
           expect.objectContaining({
             result: {},
           }),
@@ -354,44 +347,106 @@ describe('AutomaticImportSavedObjectService', () => {
         const error = new Error('Not found');
         mockSavedObjectsClient.get.mockRejectedValue(error);
 
-        await expect(service.upsertDataStream(mockDataStreamData)).rejects.toThrow('Not found');
+        await expect(service.insertDataStream(mockDataStreamData)).rejects.toThrow('Not found');
       });
 
-      it('should handle data stream update errors', async () => {
+      it('should handle data stream create errors', async () => {
         mockSavedObjectsClient.get.mockResolvedValue(mockSavedObject);
 
-        const error = new Error('Update failed');
-        mockSavedObjectsClient.update.mockRejectedValue(error);
+        const error = new Error('Create failed');
+        mockSavedObjectsClient.create.mockRejectedValue(error);
 
-        await expect(service.upsertDataStream(mockDataStreamData)).rejects.toThrow(
-          'Update failed'
+        await expect(service.insertDataStream(mockDataStreamData)).rejects.toThrow(
+          'Create failed'
         );
       });
 
       it('should pass through additional options', async () => {
         const options = { namespace: 'custom-namespace' };
-        const mockUpdateResponse: SavedObjectsUpdateResponse<DataStreamAttributes> = {
+        const mockCreateResponse: SavedObject<DataStreamAttributes> = {
           id: 'test-data-stream-id',
-          type: AUTOMATIC_IMPORT_DATA_STREAM_SAVED_OBJECT_TYPE,
+          type: DATA_STREAM_SAVED_OBJECT_TYPE,
           attributes: mockDataStreamData,
           references: [],
           version: '1',
         };
 
         mockSavedObjectsClient.get.mockResolvedValue(mockSavedObject);
-        mockSavedObjectsClient.update.mockResolvedValue(mockUpdateResponse);
+        mockSavedObjectsClient.create.mockResolvedValue(mockCreateResponse);
 
-        await service.upsertDataStream(mockDataStreamData, options);
+        await service.insertDataStream(mockDataStreamData, options);
 
-        expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
-          AUTOMATIC_IMPORT_DATA_STREAM_SAVED_OBJECT_TYPE,
-          'test-data-stream-id',
+        expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
+          DATA_STREAM_SAVED_OBJECT_TYPE,
           expect.any(Object),
           expect.objectContaining({
             namespace: 'custom-namespace',
-            upsert: expect.any(Object),
+            id: 'test-data-stream-id',
           })
         );
+      });
+    });
+
+    describe('updateDataStream', () => {
+      it('should successfully update a data stream', async () => {
+        const mockUpdateResponse: SavedObjectsUpdateResponse<DataStreamAttributes> = {
+          id: 'test-data-stream-id',
+          type: DATA_STREAM_SAVED_OBJECT_TYPE,
+          attributes: mockDataStreamData,
+          references: [],
+          version: '2',
+        };
+
+        mockSavedObjectsClient.get
+          .mockResolvedValueOnce(mockSavedObject)
+          .mockResolvedValueOnce(mockDataStreamSavedObject);
+        mockSavedObjectsClient.update.mockResolvedValue(mockUpdateResponse);
+
+        const result = await service.updateDataStream(mockDataStreamData);
+
+        expect(mockSavedObjectsClient.get).toHaveBeenNthCalledWith(1,
+          INTEGRATION_SAVED_OBJECT_TYPE,
+          'test-integration-id'
+        );
+
+        expect(mockSavedObjectsClient.get).toHaveBeenNthCalledWith(2,
+          DATA_STREAM_SAVED_OBJECT_TYPE,
+          'test-data-stream-id'
+        );
+
+        expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+          DATA_STREAM_SAVED_OBJECT_TYPE,
+          'test-data-stream-id',
+          expect.objectContaining({
+            integration_id: 'test-integration-id',
+            data_stream_id: 'test-data-stream-id',
+            job_info: mockDataStreamData.job_info,
+            metadata: expect.objectContaining({
+              sample_count: 100,
+              version: 2,
+            }),
+            result: mockDataStreamData.result,
+          }),
+          expect.any(Object)
+        );
+
+        expect(result).toEqual(mockUpdateResponse);
+      });
+
+      it('should throw error if integration not found', async () => {
+        const error = new Error('Integration not found');
+        mockSavedObjectsClient.get.mockRejectedValue(error);
+
+        await expect(service.updateDataStream(mockDataStreamData)).rejects.toThrow('Integration not found');
+      });
+
+      it('should throw error if data stream not found', async () => {
+        const error = new Error('Data stream not found');
+        mockSavedObjectsClient.get
+          .mockResolvedValueOnce(mockSavedObject)
+          .mockRejectedValueOnce(error);
+
+        await expect(service.updateDataStream(mockDataStreamData)).rejects.toThrow('Data stream not found');
       });
     });
 
@@ -402,7 +457,7 @@ describe('AutomaticImportSavedObjectService', () => {
         const result = await service.getDataStream('test-data-stream-id');
 
         expect(mockSavedObjectsClient.get).toHaveBeenCalledWith(
-          AUTOMATIC_IMPORT_DATA_STREAM_SAVED_OBJECT_TYPE,
+          DATA_STREAM_SAVED_OBJECT_TYPE,
           'test-data-stream-id'
         );
         expect(result).toEqual(mockDataStreamSavedObject);
@@ -430,7 +485,7 @@ describe('AutomaticImportSavedObjectService', () => {
         const result = await service.getAllDataStreams();
 
         expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
-          type: AUTOMATIC_IMPORT_DATA_STREAM_SAVED_OBJECT_TYPE,
+          type: DATA_STREAM_SAVED_OBJECT_TYPE,
         });
         expect(result).toEqual(mockFindResponse);
       });
@@ -457,8 +512,8 @@ describe('AutomaticImportSavedObjectService', () => {
         const result = await service.findAllDataStreamsByIntegrationId('test-integration-id');
 
         expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
-          type: AUTOMATIC_IMPORT_DATA_STREAM_SAVED_OBJECT_TYPE,
-          filter: `${AUTOMATIC_IMPORT_DATA_STREAM_SAVED_OBJECT_TYPE}.attributes.integration_id: "test-integration-id"`,
+          type: DATA_STREAM_SAVED_OBJECT_TYPE,
+          filter: `${DATA_STREAM_SAVED_OBJECT_TYPE}.attributes.integration_id: "test-integration-id"`,
         });
         expect(result).toEqual(mockFindResponse);
       });
@@ -481,7 +536,7 @@ describe('AutomaticImportSavedObjectService', () => {
         const result = await service.deleteDataStream('test-data-stream-id');
 
         expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith(
-          AUTOMATIC_IMPORT_DATA_STREAM_SAVED_OBJECT_TYPE,
+          DATA_STREAM_SAVED_OBJECT_TYPE,
           'test-data-stream-id',
           undefined
         );
@@ -496,7 +551,7 @@ describe('AutomaticImportSavedObjectService', () => {
         await service.deleteDataStream('test-data-stream-id', options);
 
         expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith(
-          AUTOMATIC_IMPORT_DATA_STREAM_SAVED_OBJECT_TYPE,
+          DATA_STREAM_SAVED_OBJECT_TYPE,
           'test-data-stream-id',
           options
         );

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from "@kbn/config-schema";
+import { schema, Type } from "@kbn/config-schema";
+import { TASK_STATUSES } from "../constants";
 
 export const dataStreamSchemaV1 = schema.object({
   integration_id: schema.string({ maxLength: 50, minLength: 1 }),
@@ -15,20 +16,15 @@ export const dataStreamSchemaV1 = schema.object({
   job_info: schema.object({
     job_id: schema.string({ maxLength: 50, minLength: 1 }),
     job_type: schema.string({ maxLength: 50, minLength: 1 }), // TODO: Add Enum
-    status: schema.oneOf([
-      schema.literal('pending'),
-      schema.literal('processing'),
-      schema.literal('completed'),
-      schema.literal('failed')
-    ]),
+    status: schema.oneOf(Object.values(TASK_STATUSES).map(status => schema.literal(status)) as [Type<string>]),
   }),
   metadata: schema.object({
     sample_count: schema.number(),
+    version: schema.number(),
     created_at: schema.maybe(schema.string({ minLength: 1 })),
-    updated_at: schema.maybe(schema.string({ minLength: 1 })),
   }, { unknowns: 'allow' }),
   result: schema.object({
     ingest_pipeline: schema.maybe(schema.string()),
-    field_mapping: schema.maybe(schema.string()),
+    field_mapping: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   }),
 });
