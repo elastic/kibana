@@ -64,6 +64,7 @@ export interface ESQLCallbacks {
   getLicense?: () => Promise<Pick<ILicense, 'hasAtLeast'> | undefined>;
   getActiveProduct?: () => PricingProduct | undefined;
   canCreateLookupIndex?: (indexName: string) => Promise<boolean>;
+  isServerless?: boolean;
 }
 
 export type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFunction';

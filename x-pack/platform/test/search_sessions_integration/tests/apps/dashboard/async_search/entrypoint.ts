@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('when in edit mode', () => {
       describe('when clicking the open background search flyout button', () => {
         it('opens the background search flyout', async () => {
-          await dashboard.gotoDashboardEditMode(dashboardName);
+          await dashboard.loadDashboardInEditMode(dashboardName);
 
           await searchSessions.openFlyout();
           await searchSessions.expectManagementTable();
