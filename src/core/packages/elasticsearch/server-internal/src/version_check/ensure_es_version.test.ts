@@ -129,16 +129,10 @@ describe('mapNodesVersionCompatibility', () => {
 });
 describe('pollEsNodesVersion', () => {
   let internalClient: ReturnType<typeof elasticsearchClientMock.createInternalClient>;
-  let subscriptions: Array<{ unsubscribe: () => void }> = [];
 
   beforeEach(() => {
     jest.clearAllMocks();
     internalClient = elasticsearchClientMock.createInternalClient();
-  });
-
-  afterEach(() => {
-    subscriptions.forEach((sub) => sub.unsubscribe());
-    subscriptions = [];
   });
 
   const nodeInfosSuccessOnce = (infos: NodesInfo) => {
@@ -162,7 +156,7 @@ describe('pollEsNodesVersion', () => {
     // poll cycle 3
     nodeInfosSuccessOnce(createNodes('5.1.0', '5.2.0', '5.1.1-Beta1')); // emit compatible
 
-    const subscription = pollEsNodesVersion({
+    pollEsNodesVersion({
       internalClient,
       healthCheckInterval: 1,
       ignoreVersionMismatch: false,
@@ -178,7 +172,6 @@ describe('pollEsNodesVersion', () => {
         complete: done,
         error: done,
       });
-    subscriptions.push(subscription);
   });
 
   it('returns the error from a failed nodes.info poll attempt when all the retries are exhausted', (done) => {
@@ -192,7 +185,7 @@ describe('pollEsNodesVersion', () => {
     nodeInfosErrorOnce('mock request error'); // initial
     nodeInfosErrorOnce('mock request error'); // retry emit
 
-    const subscription = pollEsNodesVersion({
+    pollEsNodesVersion({
       internalClient,
       healthCheckInterval: 1,
       ignoreVersionMismatch: false,
@@ -209,7 +202,6 @@ describe('pollEsNodesVersion', () => {
         complete: done,
         error: done,
       });
-    subscriptions.push(subscription);
   });
 
   it('only emits if the error from a failed nodes.info call changed from the previous poll', (done) => {
@@ -230,7 +222,7 @@ describe('pollEsNodesVersion', () => {
     nodeInfosErrorOnce('mock request error 2'); // initial
     nodeInfosErrorOnce('mock request error 2'); // retry emit changed error
 
-    const subscription = pollEsNodesVersion({
+    pollEsNodesVersion({
       internalClient,
       healthCheckInterval: 1,
       ignoreVersionMismatch: false,
@@ -247,7 +239,6 @@ describe('pollEsNodesVersion', () => {
         complete: done,
         error: done,
       });
-    subscriptions.push(subscription);
   });
 
   it('returns isCompatible=false and keeps polling when requests fail, only emitting again if the error message has changed', (done) => {
@@ -274,7 +265,7 @@ describe('pollEsNodesVersion', () => {
     nodeInfosErrorOnce('mock request error'); // poll 5
     nodeInfosErrorOnce('mock request error'); // retry emit
 
-    const subscription = pollEsNodesVersion({
+    pollEsNodesVersion({
       internalClient,
       healthCheckInterval: 1,
       ignoreVersionMismatch: false,
@@ -291,7 +282,6 @@ describe('pollEsNodesVersion', () => {
         complete: done,
         error: done,
       });
-    subscriptions.push(subscription);
   });
 
   it('returns compatibility results', (done) => {
@@ -300,7 +290,7 @@ describe('pollEsNodesVersion', () => {
 
     nodeInfosSuccessOnce(nodes);
 
-    const subscription = pollEsNodesVersion({
+    pollEsNodesVersion({
       internalClient,
       healthCheckInterval: 1,
       ignoreVersionMismatch: false,
@@ -316,7 +306,6 @@ describe('pollEsNodesVersion', () => {
         complete: done,
         error: done,
       });
-    subscriptions.push(subscription);
   });
 
   it('only emits when node versions changed since the previous poll', (done) => {
@@ -328,7 +317,7 @@ describe('pollEsNodesVersion', () => {
     nodeInfosSuccessOnce(createNodes('5.1.1', '5.1.2', '5.1.3')); // ignore
     nodeInfosSuccessOnce(createNodes('5.0.0', '5.1.0', '5.2.0')); // emit, different from previous version
 
-    const subscription = pollEsNodesVersion({
+    pollEsNodesVersion({
       internalClient,
       healthCheckInterval: 1,
       ignoreVersionMismatch: false,
@@ -342,19 +331,19 @@ describe('pollEsNodesVersion', () => {
         complete: done,
         error: done,
       });
-    subscriptions.push(subscription);
   });
 
   // rewritten from marble tests to use real timers instead of fake timers
   describe('timing and interval behavior', () => {
     it('starts first poll immediately and then polls every healthCheckInterval', (done) => {
+      expect.assertions(3);
       const timestamps: number[] = [];
       const startTime = Date.now();
 
       nodeInfosSuccessOnce(createNodes('5.1.0', '5.2.0', '5.0.0'));
       nodeInfosSuccessOnce(createNodes('5.1.1', '5.2.0', '5.0.0'));
 
-      const subscription = pollEsNodesVersion({
+      pollEsNodesVersion({
         internalClient,
         healthCheckInterval: 50,
         ignoreVersionMismatch: false,
@@ -370,17 +359,17 @@ describe('pollEsNodesVersion', () => {
           complete: () => {
             // First emission should be immediate (within 10ms)
             expect(timestamps[0]).toBeLessThan(10);
-            // Second emission should be after healthCheckInterval (50ms +/- 20ms tolerance)
+            // Second emission should be after healthCheckInterval (50ms +/- 10ms tolerance)
             expect(timestamps[1]).toBeGreaterThanOrEqual(40);
-            expect(timestamps[1]).toBeLessThan(80);
+            expect(timestamps[1]).toBeLessThan(60);
             done();
           },
           error: done,
         });
-      subscriptions.push(subscription);
     });
 
     it('waits for each poll cycle (including retries) to complete before scheduling the next poll', (done) => {
+      expect.assertions(2);
       const callTimes: number[] = [];
       let callCount = 0;
 
@@ -399,7 +388,7 @@ describe('pollEsNodesVersion', () => {
         } as any;
       });
 
-      const subscription = pollEsNodesVersion({
+      pollEsNodesVersion({
         internalClient,
         healthCheckInterval: 10,
         ignoreVersionMismatch: false,
@@ -419,10 +408,10 @@ describe('pollEsNodesVersion', () => {
           },
           error: done,
         });
-      subscriptions.push(subscription);
     });
 
     it('switches from startup interval to normal interval after first successful poll with compatible status', (done) => {
+      expect.assertions(1);
       let emissionCount = 0;
 
       nodeInfosSuccessOnce(createNodes('6.3.0'));
@@ -430,7 +419,7 @@ describe('pollEsNodesVersion', () => {
       nodeInfosSuccessOnce(createNodes('5.2.0'));
       nodeInfosSuccessOnce(createNodes('5.3.0'));
 
-      const subscription = pollEsNodesVersion({
+      pollEsNodesVersion({
         internalClient,
         healthCheckInterval: 50,
         healthCheckStartupInterval: 10,
@@ -450,7 +439,6 @@ describe('pollEsNodesVersion', () => {
           },
           error: done,
         });
-      subscriptions.push(subscription);
     });
   });
 });
