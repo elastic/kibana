@@ -6,6 +6,7 @@
  */
 
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
+import { EuiComboBoxWrapper } from '@kbn/scout-oblt';
 
 export class AnomalyDetectionPage {
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
@@ -40,8 +41,8 @@ export class AnomalyDetectionPage {
   }
 
   async selectEnvironment(environmentName: string) {
-    const option = this.page.getByRole('option', { name: environmentName });
-    await option.click();
+    const environmentComboBox = new EuiComboBoxWrapper(this.page, { locator: '.euiComboBox' });
+    await environmentComboBox.setCustomMultiOption(environmentName);
   }
 
   async clickCreateJobsButton() {

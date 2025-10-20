@@ -8,15 +8,13 @@
 import { expect } from '@kbn/scout-oblt';
 import { test } from '../../fixtures';
 
-test.describe('General Settings - Viewer', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsViewer();
-  });
-
-  test('should not be able to modify settings', async ({
+test.describe('General Settings', { tag: ['@ess', '@svlOblt'] }, () => {
+  test('Viewer should not be able to modify settings', async ({
     page,
     pageObjects: { generalSettingsPage },
+    browserAuth,
   }) => {
+    await browserAuth.loginAsViewer();
     await generalSettingsPage.goto();
 
     const inspectButton = await generalSettingsPage.getInspectEsQueriesButton();
@@ -25,17 +23,13 @@ test.describe('General Settings - Viewer', { tag: ['@ess', '@svlOblt'] }, () => 
     const saveButton = await generalSettingsPage.getSaveChangesButton();
     await expect(saveButton).toBeHidden();
   });
-});
 
-test.describe('General Settings - Privileged User', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsPrivilegedUser();
-  });
-
-  test('should be able to modify settings', async ({
+  test('Privileged User should be able to modify settings', async ({
     page,
     pageObjects: { generalSettingsPage },
+    browserAuth,
   }) => {
+    await browserAuth.loginAsPrivilegedUser();
     await generalSettingsPage.goto();
 
     const inspectButton = await generalSettingsPage.getInspectEsQueriesButton();

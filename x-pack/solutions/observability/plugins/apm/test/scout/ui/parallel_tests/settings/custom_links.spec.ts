@@ -8,14 +8,12 @@
 import { expect } from '@kbn/scout-oblt';
 import { test } from '../../fixtures';
 
-test.describe('Custom links - Viewer', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsViewer();
-  });
-
-  test('shows disabled create button and no edit button', async ({
+test.describe('Custom links', { tag: ['@ess', '@svlOblt'] }, () => {
+  test('Viewer should show disabled create button and no edit button', async ({
     pageObjects: { customLinksPage },
+    browserAuth,
   }) => {
+    await browserAuth.loginAsViewer();
     await customLinksPage.goto();
 
     const createButton = await customLinksPage.getCreateCustomLinkButton();
@@ -24,17 +22,13 @@ test.describe('Custom links - Viewer', { tag: ['@ess', '@svlOblt'] }, () => {
     const editButton = await customLinksPage.getEditCustomLinkButton();
     await expect(editButton).toBeHidden();
   });
-});
 
-test.describe('Custom links - Privileged User', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsPrivilegedUser();
-  });
-
-  test('creates custom link and deletes the created custom link', async ({
+  test('Privileged User should be able to create custom link and delete the created custom link', async ({
     page,
     pageObjects: { customLinksPage },
+    browserAuth,
   }) => {
+    await browserAuth.loginAsPrivilegedUser();
     await customLinksPage.goto();
 
     await customLinksPage.clickCreateCustomLink();

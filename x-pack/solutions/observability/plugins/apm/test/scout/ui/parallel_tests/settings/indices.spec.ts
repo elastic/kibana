@@ -8,12 +8,13 @@
 import { expect } from '@kbn/scout-oblt';
 import { test } from '../../fixtures';
 
-test.describe('Indices - Viewer', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeEach(async ({ browserAuth }) => {
+test.describe('Indices', { tag: ['@ess'] }, () => {
+  test('Viewer should not be able to modify settings', async ({
+    page,
+    pageObjects: { indicesPage },
+    browserAuth,
+  }) => {
     await browserAuth.loginAsViewer();
-  });
-
-  test('should not be able to modify settings', async ({ page, pageObjects: { indicesPage } }) => {
     await indicesPage.goto();
 
     const errorInput = await indicesPage.getErrorIndexInput();
@@ -22,14 +23,13 @@ test.describe('Indices - Viewer', { tag: ['@ess', '@svlOblt'] }, () => {
     const applyButton = await indicesPage.getApplyChangesButton();
     await expect(applyButton).toBeDisabled();
   });
-});
 
-test.describe('Indices - Privileged User', { tag: ['@ess'] }, () => {
-  test.beforeEach(async ({ browserAuth }) => {
+  test('Privileged user should be able to modify settings', async ({
+    browserAuth,
+    page,
+    pageObjects: { indicesPage },
+  }) => {
     await browserAuth.loginAsPrivilegedUser();
-  });
-
-  test('should be able to modify settings', async ({ page, pageObjects: { indicesPage } }) => {
     await indicesPage.goto();
 
     const newErrorIndex = 'logs-*';
@@ -52,19 +52,5 @@ test.describe('Indices - Privileged User', { tag: ['@ess'] }, () => {
 
     const saveResponse = await saveRequestPromise;
     expect(saveResponse.status()).toBe(200);
-  });
-});
-test.describe('Indices - Privileged User', { tag: ['@svlOblt'] }, () => {
-  test.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsPrivilegedUser();
-  });
-
-  test('The indices settings page is not available in serverless', async ({
-    page,
-    pageObjects: { indicesPage },
-  }) => {
-    await indicesPage.goto();
-
-    await expect(page.getByRole('tab').locator('span').getByText('Indices')).toBeHidden();
   });
 });

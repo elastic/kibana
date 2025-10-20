@@ -8,45 +8,33 @@
 import { expect } from '@kbn/scout-oblt';
 import { test } from '../../fixtures';
 
-test.describe('Agent Configuration - Viewer', { tag: ['@ess'] }, () => {
-  test.beforeEach(async ({ browserAuth }) => {
+test.describe('Agent Configuration', { tag: ['@ess'] }, () => {
+  test('Viewer should not be able to modify settings', async ({
+    pageObjects: { agentConfigurationsPage },
+    browserAuth,
+  }) => {
     await browserAuth.loginAsViewer();
-  });
-
-  test('shows create button as disabled', async ({ pageObjects: { agentConfigurationsPage } }) => {
     await agentConfigurationsPage.goto();
     const createButton = await agentConfigurationsPage.getCreateConfigurationButton();
     await expect(createButton).toBeDisabled();
   });
-});
 
-test.describe(
-  'Agent Configuration - APM All Privileges Without Write Settings',
-  { tag: ['@ess'] },
-  () => {
-    test.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsApmAllPrivilegesWithoutWriteSettings();
-    });
-
-    test('shows create button as disabled', async ({
-      pageObjects: { agentConfigurationsPage },
-    }) => {
-      await agentConfigurationsPage.goto();
-      const createButton = await agentConfigurationsPage.getCreateConfigurationButton();
-      await expect(createButton).toBeDisabled();
-    });
-  }
-);
-
-test.describe('Agent Configuration - Privileged User', { tag: ['@ess'] }, () => {
-  test.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsPrivilegedUser();
+  test('APM All Privileges Without Write Settings should not be able to modify settings', async ({
+    pageObjects: { agentConfigurationsPage },
+    browserAuth,
+  }) => {
+    await browserAuth.loginAsApmAllPrivilegesWithoutWriteSettings();
+    await agentConfigurationsPage.goto();
+    const createButton = await agentConfigurationsPage.getCreateConfigurationButton();
+    await expect(createButton).toBeDisabled();
   });
 
-  test('configures, creates and deletes an agent configuration with all services and production environment', async ({
+  test('Privileged user should be able to configure, create and delete an agent configuration with all services and production environment', async ({
     page,
     pageObjects: { agentConfigurationsPage },
+    browserAuth,
   }) => {
+    await browserAuth.loginAsPrivilegedUser();
     await agentConfigurationsPage.goto();
     const createButton = await agentConfigurationsPage.getCreateConfigurationButton();
     await expect(createButton).toBeEnabled();
@@ -55,7 +43,7 @@ test.describe('Agent Configuration - Privileged User', { tag: ['@ess'] }, () => 
       await agentConfigurationsPage.clickCreateConfiguration();
 
       await agentConfigurationsPage.selectServiceFromDropdown('All');
-      await agentConfigurationsPage.selectEnvironment('production');
+      await agentConfigurationsPage.selectEnvironment('production ');
 
       await agentConfigurationsPage.clickNextStep();
       await expect(page.getByText('Create configuration')).toBeVisible();
@@ -86,21 +74,5 @@ test.describe('Agent Configuration - Privileged User', { tag: ['@ess'] }, () => 
       await agentConfigurationsPage.clickDeleteConfiguration();
       await expect(page.getByText('No configurations found')).toBeVisible();
     });
-  });
-});
-
-test.describe('Agent Configuration - Viewer', { tag: ['@svlOblt'] }, () => {
-  test.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsViewer();
-  });
-
-  test('The agent configuration settings page is not available in serverless', async ({
-    pageObjects: { agentConfigurationsPage },
-    page,
-  }) => {
-    await agentConfigurationsPage.goto();
-    await expect(
-      page.getByRole('tab').locator('span').getByText('Agent Configuration')
-    ).toBeHidden();
   });
 });

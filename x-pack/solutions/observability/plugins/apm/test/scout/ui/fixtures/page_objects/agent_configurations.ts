@@ -13,6 +13,7 @@
  */
 
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
+import { EuiComboBoxWrapper } from '@kbn/scout-oblt';
 
 export class AgentConfigurationsPage {
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
@@ -66,54 +67,19 @@ export class AgentConfigurationsPage {
   }
 
   async selectService(serviceName: string) {
-    await this.page.testSubj.locator('serviceNameComboBox').locator('input').click();
-    await this.page.testSubj.locator('serviceNameComboBox').locator('input').fill(serviceName);
-    await this.page.testSubj.locator('serviceNameComboBox').locator('input').press('Enter');
+    const serviceComboBox = new EuiComboBoxWrapper(this.page, 'serviceNameComboBox');
+    await serviceComboBox.setCustomSingleOption(serviceName);
   }
 
   async selectServiceFromDropdown(serviceName: string) {
-    // Click the input to open dropdown
-    await this.page.testSubj.locator('serviceNameComboBox').locator('input').click();
-
-    // Wait for the dropdown options to appear
-    await this.page.testSubj
-      .locator('comboBoxOptionsList serviceNameComboBox-optionsList')
-      .waitFor({
-        state: 'visible',
-        timeout: 15000,
-      });
-
-    // Use a more generic approach - find any option containing the service name
-    const option = this.page.locator(`[role="option"]:has-text("${serviceName}")`);
-
-    // Wait for the specific option to be visible
-    await option.waitFor({ state: 'visible', timeout: 5000 });
-    await option.click();
+    const serviceComboBox = new EuiComboBoxWrapper(this.page, 'serviceNameComboBox');
+    await serviceComboBox.selectSingleOption(serviceName);
     return serviceName;
   }
 
   async selectEnvironment(environmentName: string) {
-    const environmentComboBox = this.page.testSubj
-      .locator('serviceEnvironmentComboBox')
-      .locator('input');
-
-    await environmentComboBox.isVisible();
-    await environmentComboBox.click();
-
-    // Wait for options list to appear
-    const optionsList = this.page.testSubj.locator(
-      'comboBoxOptionsList serviceEnvironmentComboBox-optionsList'
-    );
-    await optionsList.waitFor({
-      state: 'visible',
-      timeout: 5000,
-    });
-
-    // Use generic option selector
-    const option = this.page.locator(`[role="option"]:has-text("${environmentName}")`);
-
-    await option.waitFor({ state: 'visible', timeout: 3000 });
-    await option.click();
+    const environmentComboBox = new EuiComboBoxWrapper(this.page, 'serviceEnvironmentComboBox');
+    await environmentComboBox.selectSingleOption(environmentName);
   }
 
   async clickNextStep() {
