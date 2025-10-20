@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export function extractNunjucksVariables(template: string): string[] {
+export function extractTemplateVariables(template: string): string[] {
   const variables: string[] = [];
   const seen = new Set<string>();
 
@@ -52,7 +52,7 @@ export function extractNunjucksVariables(template: string): string[] {
   // Process all patterns in order of appearance
   let match;
   while ((match = allPatternsRegex.exec(template)) !== null) {
-    let expression: string;
+    let expression: string | undefined;
 
     if (match[1]) {
       // Variable output: {{ variable }}
@@ -60,17 +60,17 @@ export function extractNunjucksVariables(template: string): string[] {
     } else if (match[3]) {
       // Control statement: {% keyword expression %}
       expression = match[3];
-    } else {
-      continue;
     }
 
-    const vars = extractVariableFromExpression(expression);
-    vars.forEach((variable) => {
-      if (!seen.has(variable)) {
-        seen.add(variable);
-        variables.push(variable);
-      }
-    });
+    if (expression) {
+      const vars = extractVariableFromExpression(expression);
+      vars.forEach((variable) => {
+        if (!seen.has(variable)) {
+          seen.add(variable);
+          variables.push(variable);
+        }
+      });
+    }
   }
 
   return variables;

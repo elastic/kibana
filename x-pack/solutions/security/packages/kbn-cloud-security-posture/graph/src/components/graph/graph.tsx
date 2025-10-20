@@ -129,6 +129,7 @@ export const Graph = memo<GraphProps>(
     const [isGraphInteractive, _setIsGraphInteractive] = useState(interactive);
     const [nodesState, setNodes, onNodesChange] = useNodesState<Node<NodeViewModel>>([]);
     const [edgesState, setEdges, onEdgesChange] = useEdgesState<Edge<EdgeViewModel>>([]);
+    const [reactFlowKey, setReactFlowKey] = useState(0);
 
     // Filter the ids of those nodes that are origin events
     const originNodeIds = useMemo(
@@ -151,8 +152,15 @@ export const Graph = memo<GraphProps>(
         const { initialNodes, initialEdges } = processGraph(nodes, edges, isGraphInteractive);
         const { nodes: layoutedNodes } = layoutGraph(initialNodes, initialEdges);
 
-        setNodes(layoutedNodes);
-        setEdges(initialEdges);
+        // Force ReactFlow to remount by changing the key first
+        setReactFlowKey((prev) => prev + 1);
+
+        // Then set nodes and edges after a microtask to ensure ReactFlow has remounted
+        setTimeout(() => {
+          setNodes(layoutedNodes);
+          setEdges(initialEdges);
+        }, 0);
+
         currNodesRef.current = nodes;
         currEdgesRef.current = edges;
 
@@ -173,7 +181,6 @@ export const Graph = memo<GraphProps>(
         };
 
         setTimeout(() => {
-          // If this is the initial render, skip centering behavior
           if (isInitialRenderRef.current) {
             isInitialRenderRef.current = false;
             return;
@@ -242,6 +249,7 @@ export const Graph = memo<GraphProps>(
       <div {...rest}>
         <SvgDefsMarker />
         <ReactFlow
+          key={reactFlowKey}
           data-test-subj={GRAPH_ID}
           fitView={true}
           onInit={onInitCallback}
