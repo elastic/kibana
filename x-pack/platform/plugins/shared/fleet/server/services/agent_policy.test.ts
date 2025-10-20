@@ -448,7 +448,7 @@ describe('Agent policy', () => {
         updated_by: 'system',
         schema_version: '1.1.1',
         is_protected: false,
-        fleet_server_host_id: 'fleet-default-fleet-server-host',
+        fleet_server_host_id: 'internal-agentless-fleet-server',
       });
     });
 
@@ -1799,6 +1799,69 @@ describe('Agent policy', () => {
           id: 'test-agentless-policy',
         })
       );
+    });
+
+    it('should throw on error during agentless API calls for agentless policies', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      jest
+        .mocked(agentlessAgentService.createAgentlessAgent)
+        .mockRejectedValueOnce(new Error('createAgentlessAgent error'));
+      mockedAppContextService.getInternalUserESClient.mockReturnValue(esClient);
+      mockedOutputService.getDefaultDataOutputId.mockResolvedValueOnce('default-output');
+      mockedGetFullAgentPolicy.mockResolvedValue({
+        id: 'policy123',
+        revision: 1,
+        namespaces: ['mySpace'],
+        inputs: [
+          {
+            id: 'input-123',
+          },
+        ],
+      } as FullAgentPolicy);
+      const mockFleetServerHost = {
+        id: 'id1',
+        name: 'fleet server 1',
+        host_urls: ['https://host1.fr:8220', 'https://host2-with-a-longer-name.fr:8220'],
+        is_default: false,
+        is_preconfigured: false,
+      };
+      soClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'existing-fleet-server-host',
+            type: 'fleet-fleet-server-host',
+            score: 1,
+            references: [],
+            version: '1.0.0',
+            attributes: mockFleetServerHost,
+          },
+        ],
+        page: 0,
+        per_page: 0,
+        total: 0,
+      });
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            attributes: {
+              supports_agentless: true,
+            },
+            references: [],
+            id: 'test-agentless-policy',
+            type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+          },
+        ],
+      });
+
+      jest.spyOn(agentlessAgentService, 'createAgentlessAgent');
+
+      await expect(
+        agentPolicyService.deployPolicy(soClient, 'test-agentless-policy', undefined, {
+          throwOnAgentlessError: true,
+        })
+      ).rejects.toThrow('createAgentlessAgent error');
     });
   });
 
