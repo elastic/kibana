@@ -23,7 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  describe.only('Data streams', function () {
+  describe('Data streams', function () {
     // see details: https://github.com/elastic/kibana/issues/187372
     this.tags(['failsOnMKI']);
     before(async () => {
