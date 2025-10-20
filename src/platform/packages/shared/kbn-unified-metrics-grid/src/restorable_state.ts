@@ -10,19 +10,19 @@
 import { createRestorableStateProvider } from '@kbn/restorable-state';
 
 export interface MetricsExperienceRestorableState {
-  // Pagination state
+  // Pagination page index
   currentPage: number;
 
-  // Search state
+  // User search query
   searchTerm: string;
 
-  // UI state
+  // Fullscreen mode state
   isFullscreen: boolean;
 
-  // Dimension state
+  // Metric grouping dimensions
   dimensions: string[];
 
-  // Values state
+  // Metric value filters
   valueFilters: string[];
 }
 

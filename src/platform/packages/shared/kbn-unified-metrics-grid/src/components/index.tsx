@@ -27,8 +27,6 @@ const queryClient = new QueryClient({
   },
 });
 
-export const MetricsExperienceGridMemo = React.memo(MetricsExperienceGrid);
-
 const InternalUnifiedMetricsExperienceGrid = (
   props: ChartSectionProps & { client?: MetricsExperienceClient }
 ) => {
@@ -40,7 +38,7 @@ const InternalUnifiedMetricsExperienceGrid = (
     <MetricsExperienceClientProvider value={{ client: props.client }}>
       <MetricsExperienceStateProvider>
         <QueryClientProvider client={queryClient}>
-          <MetricsExperienceGridMemo {...props} />
+          <MetricsExperienceGrid {...props} />
         </QueryClientProvider>
       </MetricsExperienceStateProvider>
     </MetricsExperienceClientProvider>
@@ -51,15 +49,5 @@ const UnifiedMetricsExperienceGridWithRestorableState = withRestorableState(
   InternalUnifiedMetricsExperienceGrid
 );
 
-type UnifiedMetricsExperienceGridPropsWithRestorableState = React.ComponentProps<
-  typeof UnifiedMetricsExperienceGridWithRestorableState
->;
-
-const UnifiedMetricsExperienceGrid = (
-  props: UnifiedMetricsExperienceGridPropsWithRestorableState
-) => {
-  return <UnifiedMetricsExperienceGridWithRestorableState {...props} />;
-};
-
 // eslint-disable-next-line import/no-default-export
-export default UnifiedMetricsExperienceGrid;
+export default UnifiedMetricsExperienceGridWithRestorableState;
