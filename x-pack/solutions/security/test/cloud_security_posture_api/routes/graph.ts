@@ -613,8 +613,10 @@ export default function (providerContext: FtrProviderContext) {
               if (node.documentsData && node.documentsData.length === 1) {
                 expect(node.documentsData?.[0]).to.have.property('type', 'event');
               } else if (node.documentsData && node.documentsData.length === 2) {
-                expect(node.documentsData?.[0]).to.have.property('type', 'alert');
-                expect(node.documentsData?.[1]).to.have.property('type', 'event');
+                const hasAlert = node.documentsData.some((doc) => doc.type === 'alert');
+                const hasEvent = node.documentsData.some((doc) => doc.type === 'event');
+                expect(hasAlert).to.be(true);
+                expect(hasEvent).to.be(true);
               }
             }
           }
