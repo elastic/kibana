@@ -65,6 +65,8 @@ describe('isPropertyAccess', () => {
 
     it('should return true for array indices', () => {
       expect(isPropertyAccess('steps.analysis.output.0.result')).toBe(true);
+      expect(isPropertyAccess(`steps.analysis.output['0']`)).toBe(true);
+      expect(isPropertyAccess(`steps.analysis.output[0]`)).toBe(true);
       expect(isPropertyAccess(`steps.analysis.output['0'].result`)).toBe(true);
       expect(isPropertyAccess(`steps.analysis.output["10"].result`)).toBe(true);
     });
@@ -100,9 +102,9 @@ describe('isPropertyAccess', () => {
       expect(isPropertyAccess('user[]')).toBe(false);
     });
 
-    it('should return false for bracket notation without quotes', () => {
+    it('should return false for bracket notation with non-numeric identifiers without quotes', () => {
       expect(isPropertyAccess('user[name]')).toBe(false);
-      expect(isPropertyAccess('user[0]')).toBe(false);
+      expect(isPropertyAccess('user[variableName]')).toBe(false);
     });
 
     it('should return false for mismatched quotes', () => {
