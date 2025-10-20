@@ -40,7 +40,7 @@ import {
 } from '@kbn/dev-utils';
 import { getServerlessNodeArgs, maybeCreateDockerNetwork, verifyDockerInstalled } from '@kbn/es';
 import { resolve } from 'path';
-import { SERVICE_NAMESPACE } from '@kbn/test-services';
+import { ELASTIC_DOCKER_NETWORK_NAME } from '@kbn/test-services';
 import { isServerlessKibanaFlavor } from '../../../../common/endpoint/utils/kibana_status';
 import { captureCallingStack, dump, prefixedOutputLogger } from '../utils';
 import { createToolingLogger } from '../../../../common/endpoint/data_loaders/utils';
@@ -468,7 +468,7 @@ const getFleetServerManagedDockerArgs = ({
     'no',
 
     '--net',
-    `elastic-${SERVICE_NAMESPACE}`,
+    ELASTIC_DOCKER_NETWORK_NAME,
 
     '--add-host',
     'host.docker.internal:host-gateway',
@@ -525,8 +525,7 @@ const getFleetServerStandAloneDockerArgs = async ({
     'no',
 
     '--net',
-    'elastic',
-
+    ELASTIC_DOCKER_NETWORK_NAME,
     '--add-host',
     'host.docker.internal:host-gateway',
 

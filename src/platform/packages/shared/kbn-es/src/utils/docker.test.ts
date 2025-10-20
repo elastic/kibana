@@ -45,6 +45,7 @@ import {
 import * as waitClusterUtil from './wait_until_cluster_ready';
 import * as waitForSecurityIndexUtil from './wait_for_security_index';
 import * as mockIdpPluginUtil from '@kbn/mock-idp-utils';
+import { ELASTIC_DOCKER_NETWORK_NAME } from '@kbn/test-services';
 
 jest.mock('execa');
 const execa = jest.requireMock('execa');
@@ -263,7 +264,7 @@ describe('maybeCreateDockerNetwork()', () => {
           Array [
             "network",
             "create",
-            "elastic",
+            "elastic-default",
           ],
         ],
       ]
@@ -271,7 +272,7 @@ describe('maybeCreateDockerNetwork()', () => {
 
     expect(logWriter.messages).toMatchInlineSnapshot(`
       Array [
-        " [34minfo[39m [1mChecking status of elastic Docker network.[22m",
+        " [34minfo[39m [1mChecking status of elastic-default Docker network.[22m",
         "   │ [34minfo[39m Created new network.",
       ]
     `);
@@ -279,14 +280,14 @@ describe('maybeCreateDockerNetwork()', () => {
 
   test('should use an existing network', async () => {
     execa.mockImplementationOnce(() =>
-      Promise.reject({ message: 'network with name elastic already exists' })
+      Promise.reject({ message: `network with name ${ELASTIC_DOCKER_NETWORK_NAME} already exists` })
     );
 
     await maybeCreateDockerNetwork(log);
 
     expect(logWriter.messages).toMatchInlineSnapshot(`
       Array [
-        " [34minfo[39m [1mChecking status of elastic Docker network.[22m",
+        " [34minfo[39m [1mChecking status of elastic-default Docker network.[22m",
         "   │ [34minfo[39m Using existing network.",
       ]
     `);
@@ -749,7 +750,7 @@ describe('runServerlessEsNode()', () => {
         'run',
         '--detach',
         '--net',
-        'elastic',
+        ELASTIC_DOCKER_NETWORK_NAME,
       ])
     );
   });
@@ -772,7 +773,6 @@ describe('runServerlessCluster()', () => {
     // docker inspect (1)
     // docker run (3)
     // docker ps (1)
-    // docker logs (1)
     const commandsWithFirstArg = execa.mock.calls.map((call: (string | string[])[]) =>
       call.flat().slice(0, 2).flat().join(' ')
     );
@@ -788,7 +788,6 @@ describe('runServerlessCluster()', () => {
       'docker run',
       'docker run',
       'docker ps',
-      'docker logs',
     ]);
   });
 

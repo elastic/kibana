@@ -48,3 +48,5 @@ export const FLEET_PACKAGE_REGISTRY_PORT = process.env.FLEET_PACKAGE_REGISTRY_PO
   : undefined;
 
 export const SERVICE_NAMESPACE = 'default';
+
+export const ELASTIC_DOCKER_NETWORK_NAME = `elastic-${SERVICE_NAMESPACE}`;

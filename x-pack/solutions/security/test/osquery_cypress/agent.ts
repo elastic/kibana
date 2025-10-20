@@ -16,6 +16,7 @@ import {
 import chalk from 'chalk';
 import { Manager } from './resource_manager';
 import { generateRandomString, getLatestAvailableAgentVersion } from './utils';
+import { ELASTIC_DOCKER_NETWORK_NAME } from '../../../../../src/platform/packages/shared/kbn-test-services';
 
 export class AgentManager extends Manager {
   private readonly log: ToolingLog;
@@ -54,7 +55,7 @@ export class AgentManager extends Manager {
     const dockerArgs = [
       'run',
       '--net',
-      'elastic',
+      ELASTIC_DOCKER_NETWORK_NAME,
       '--detach',
       '--add-host',
       'host.docker.internal:host-gateway',

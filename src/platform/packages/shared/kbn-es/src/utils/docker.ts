@@ -37,6 +37,7 @@ import {
 
 import { range } from 'lodash';
 import {
+  ELASTIC_DOCKER_NETWORK_NAME,
   SERVICE_NAMESPACE,
   TEST_ES_02_PORT,
   TEST_ES_02_TRANSPORT_PORT,
@@ -153,8 +154,6 @@ const DEFAULT_MEM = `-Xms1024m -Xmx1024m`;
 
 const MORE_MEM = `-Xms1536m -Xmx1536m`;
 
-const NETWORK_NAME = `elastic-${SERVICE_NAMESPACE}`;
-
 function getEsContainerName(idx: number) {
   return ['es', SERVICE_NAMESPACE, idx.toString().padStart(2, '0')].join('-');
 }
@@ -165,7 +164,7 @@ const getDockerBaseCmd = (options: DockerOptions) => [
   '-t',
 
   '--net',
-  NETWORK_NAME,
+  ELASTIC_DOCKER_NETWORK_NAME,
   '--name',
   `${getEsContainerName(1)}`,
   '-p',
@@ -182,7 +181,7 @@ const getSharedServerlessParams = (masterNodes: string[]) => [
   '--tty',
 
   '--net',
-  NETWORK_NAME,
+  ELASTIC_DOCKER_NETWORK_NAME,
   '--env',
   'path.repo=/objectstore',
 
@@ -433,12 +432,12 @@ export async function verifyDockerInstalled(log: ToolingLog) {
  * Setup elastic Docker network if needed
  */
 export async function maybeCreateDockerNetwork(log: ToolingLog) {
-  log.info(chalk.bold('Checking status of elastic Docker network.'));
+  log.info(chalk.bold(`Checking status of ${ELASTIC_DOCKER_NETWORK_NAME} Docker network.`));
   log.indent(4);
 
-  const process = await execa('docker', ['network', 'create', NETWORK_NAME]).catch(
+  const process = await execa('docker', ['network', 'create', ELASTIC_DOCKER_NETWORK_NAME]).catch(
     ({ message }) => {
-      if (message.includes(`network with name ${NETWORK_NAME} already exists`)) {
+      if (message.includes(`network with name ${ELASTIC_DOCKER_NETWORK_NAME} already exists`)) {
         log.info('Using existing network.');
       } else {
         throw createCliError(message);

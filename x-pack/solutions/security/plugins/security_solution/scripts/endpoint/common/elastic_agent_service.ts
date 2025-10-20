@@ -17,6 +17,7 @@ import {
   getAgentVersionMatchingCurrentStack,
   waitForHostToEnroll,
 } from './fleet_services';
+import { ELASTIC_DOCKER_NETWORK_NAME } from '../../../../../../../../src/platform/packages/shared/kbn-test-services';
 
 interface StartedElasticAgent {
   /** The type of virtualization used to start the agent */
@@ -160,7 +161,7 @@ const getElasticAgentDockerArgs = ({
   return [
     'run',
     '--net',
-    'elastic',
+    ELASTIC_DOCKER_NETWORK_NAME,
     '--detach',
     '--add-host',
     'host.docker.internal:host-gateway',
