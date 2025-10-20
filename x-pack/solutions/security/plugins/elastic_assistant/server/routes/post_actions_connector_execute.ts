@@ -21,6 +21,7 @@ import {
   ExecuteConnectorRequestQuery,
   POST_ACTIONS_CONNECTOR_EXECUTE,
   INFERENCE_CHAT_MODEL_DISABLED_FEATURE_FLAG,
+  ASSISTANT_INTERRUPTS_ENABLED_FEATURE_FLAG,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
@@ -136,7 +137,12 @@ export const postActionsConnectorExecuteRoute = (
           const isOssModel = isOpenSourceModel(connector);
 
           const conversationsDataClient =
-            await assistantContext.getAIAssistantConversationsDataClient();
+            await assistantContext.getAIAssistantConversationsDataClient({
+              assistantInterruptsEnabled: await coreContext.featureFlags.getBooleanValue(
+                ASSISTANT_INTERRUPTS_ENABLED_FEATURE_FLAG,
+                false
+              ),
+            });
           if (conversationId) {
             const conversation = await conversationsDataClient?.getConversation({
               id: conversationId,

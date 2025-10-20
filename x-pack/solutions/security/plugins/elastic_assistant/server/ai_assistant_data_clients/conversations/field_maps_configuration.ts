@@ -122,16 +122,6 @@ export const conversationsFieldMap: FieldMap = {
     array: false,
     required: false,
   },
-  'messages.metadata.interrupt_value': {
-    type: 'flattened',
-    array: false,
-    required: false,
-  },
-  'messages.metadata.interrupt_resume_value': {
-    type: 'flattened',
-    array: false,
-    required: false,
-  },
   replacements: {
     type: 'object',
     array: false,
@@ -199,6 +189,20 @@ export const conversationsFieldMap: FieldMap = {
   },
   'api_config.model': {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+} as const;
+
+export const conversationsAssistantInterruptsFieldMap: FieldMap = {
+  ...conversationsFieldMap,
+  'messages.metadata.interrupt_value': {
+    type: 'flattened',
+    array: false,
+    required: false,
+  },
+  'messages.metadata.interrupt_resume_value': {
+    type: 'flattened',
     array: false,
     required: false,
   },
