@@ -103,7 +103,7 @@ export function SloManagementTable() {
       };
     } else {
       return {
-        label: 'Unhealthy',
+        label: 'Needs attention',
         color: 'danger',
       };
     }
@@ -283,7 +283,7 @@ export function SloManagementTable() {
                 <>
                   {i18n.translate('xpack.slo.sloManagementTable.columns.stateTooltipEnabled', {
                     defaultMessage:
-                      'An SLO is unhealthy when its transforms are not operating as expected.',
+                      "An SLO needs attention when its transforms are not operating as expected. Click on the SLO's name to view the problem in greater detail.",
                   })}
                 </>
               }
