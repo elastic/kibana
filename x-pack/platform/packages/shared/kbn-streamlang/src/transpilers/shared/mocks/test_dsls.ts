@@ -24,6 +24,7 @@ export const comprehensiveTestDSL: StreamlangDSL = {
       action: 'convert',
       from: 'http.status_code',
       type: 'string',
+      to: 'http.status_code_str',
       where: {
         field: 'http.error',
         eq: 404,

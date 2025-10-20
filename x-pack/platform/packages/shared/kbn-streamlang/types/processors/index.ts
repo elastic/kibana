@@ -200,21 +200,36 @@ export const appendProcessorSchema = processorBaseWithWhereSchema.extend({
  * Convert processor
  */
 
-export interface ConvertProcessor extends ProcessorBaseWithWhere {
+export interface BaseConvertProcessor extends ProcessorBase {
   action: 'convert';
   from: string;
-  to?: string;
   type: ConvertType;
   ignore_missing?: boolean;
 }
 
-export const convertProcessorSchema = processorBaseWithWhereSchema.extend({
-  action: z.literal('convert'),
-  from: StreamlangSourceField,
-  to: z.optional(StreamlangTargetField),
-  type: z.enum(convertTypes),
-  ignore_missing: z.optional(z.boolean()),
-}) satisfies z.Schema<ConvertProcessor>;
+export type ConvertProcessor = BaseConvertProcessor &
+  (
+    | {
+        to?: string;
+      }
+    | {
+        to: string;
+        where: Condition;
+      }
+  );
+
+export const convertProcessorSchema = processorBaseWithWhereSchema
+  .extend({
+    action: z.literal('convert'),
+    from: StreamlangSourceField,
+    to: z.optional(StreamlangTargetField),
+    type: z.enum(convertTypes),
+    ignore_missing: z.optional(z.boolean()),
+  })
+  .refine((obj) => (obj.where && obj.to) || !obj.where, {
+    message: 'Convert processor must have the "to" parameter when there is a "where" condition.',
+    path: ['to', 'where'],
+  }) satisfies z.Schema<ConvertProcessor>;
 
 export type StreamlangProcessorDefinition =
   | DateProcessor
@@ -233,7 +248,7 @@ export const streamlangProcessorSchema = z.discriminatedUnion('action', [
   renameProcessorSchema,
   setProcessorSchema.innerType(),
   appendProcessorSchema,
-  convertProcessorSchema,
+  convertProcessorSchema.innerType(),
   manualIngestPipelineProcessorSchema,
 ]);
 
