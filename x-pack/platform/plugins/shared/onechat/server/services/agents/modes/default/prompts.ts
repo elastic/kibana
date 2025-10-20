@@ -171,9 +171,10 @@ Your role is to be the **final answering agent** in a multi-agent flow. Your **O
 The previous agent has completed its research and provided the following handover note:
 ---
 ${
-  handoverNote ?? searchInterrupted
+  handoverNote ??
+  (searchInterrupted
     ? 'Research was interrupted, please answer to the user as best as you can with the collected information'
-    : 'No handover note was provided.'
+    : 'No handover note was provided.')
 }
 ---
 Use the context above to inform your final answer.
