@@ -55,6 +55,7 @@ export async function analyzeFile(
       updatePipelineTimezone(pipeline);
       const reader = getReader(results);
       const arrayBuffer = new Uint8Array(Buffer.from(data));
+      // @ts-expect-error upgrade typescript v5.9.3
       const docs = reader.read(arrayBuffer).slice(0, PREVIEW_DOC_LIMIT);
       if (results.format === FILE_FORMATS.NDJSON) {
         previewDocs = {

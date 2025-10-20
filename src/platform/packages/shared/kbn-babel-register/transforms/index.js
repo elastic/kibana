@@ -12,6 +12,9 @@ const { dotTextTransform } = require('./dot_text');
 const { babelTransform } = require('./babel');
 
 module.exports = {
+  /**
+   * @type {Record<string, import('./types').Transform>}
+   */
   TRANSFORMS: {
     '.peggy': peggyTransform,
     '.text': dotTextTransform,

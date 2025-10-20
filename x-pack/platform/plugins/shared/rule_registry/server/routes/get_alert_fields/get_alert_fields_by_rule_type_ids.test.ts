@@ -19,6 +19,7 @@ describe('getAlertFieldsByRuleTypeIds', () => {
 
   beforeEach(async () => {
     server = serverMock.create();
+    // @ts-expect-error upgrade typescript v5.9.3
     IndexPatternsFetcher.prototype.getFieldsForWildcard = getFieldsForWildcardMock;
     getAlertFieldsByRuleTypeIds(server.router);
   });

@@ -29,6 +29,7 @@ export const defaultToEmptyTag = <T extends unknown>(item: T): JSX.Element => {
   } else if (isString(item) && item === '') {
     return getEmptyStringTag();
   } else {
+    // @ts-expect-error upgrade typescript v5.9.3
     return <>{item}</>;
   }
 };

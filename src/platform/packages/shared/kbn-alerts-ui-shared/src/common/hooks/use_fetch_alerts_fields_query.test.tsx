@@ -82,6 +82,7 @@ describe('useFetchAlertsFieldsQuery', () => {
 
     expect(useQuerySpy).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }));
 
+    // @ts-expect-error upgrade typescript v5.9.3
     rerender({ ruleTypeIds: ['apm'] });
 
     expect(useQuerySpy).toHaveBeenCalledWith(expect.objectContaining({ enabled: true }));

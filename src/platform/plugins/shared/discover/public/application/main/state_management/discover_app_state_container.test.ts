@@ -46,6 +46,7 @@ describe('Test discover app state container', () => {
     const toasts = discoverServiceMock.core.notifications.toasts;
     stateStorage = createKbnUrlStateStorage({
       useHash: storeInSessionStorage,
+      // @ts-expect-error upgrade typescript v5.9.3
       history,
       ...(toasts && withNotifyOnErrors(toasts)),
     });

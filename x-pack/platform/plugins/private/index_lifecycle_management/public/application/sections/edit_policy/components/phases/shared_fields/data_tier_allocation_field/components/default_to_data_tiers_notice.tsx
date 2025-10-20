@@ -19,6 +19,7 @@ import {
 const i18nTexts = {
   body: {
     warm: (
+      // @ts-expect-error upgrade typescript v5.9.3
       <>
         <p>
           {i18n.translate(
@@ -31,6 +32,7 @@ const i18nTexts = {
       </>
     ),
     cold: (
+      // @ts-expect-error upgrade typescript v5.9.3
       <>
         <p>
           {i18n.translate(

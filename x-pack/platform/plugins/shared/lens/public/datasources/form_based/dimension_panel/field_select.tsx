@@ -82,6 +82,7 @@ export function FieldSelect({
     }
 
     function fieldNamesToOptions(items: string[]): FieldOption[] {
+      // @ts-expect-error upgrade typescript v5.9.3
       return items
         .filter((field) => currentIndexPattern.getFieldByName(field)?.displayName)
         .map((field) => {

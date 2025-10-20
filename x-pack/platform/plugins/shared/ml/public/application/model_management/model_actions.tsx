@@ -203,6 +203,7 @@ export function useModelActions({
           await navigateToPath(path, false);
         },
       },
+      // @ts-expect-error upgrade typescript v5.9.3
       {
         name: i18n.translate('xpack.ml.inference.modelsList.startModelDeploymentActionLabel', {
           defaultMessage: 'Start deployment',
@@ -367,6 +368,7 @@ export function useModelActions({
           return canStartStopTrainedModels;
         },
       },
+      // @ts-expect-error upgrade typescript v5.9.3
       {
         name: i18n.translate('xpack.ml.inference.modelsList.testModelActionLabel', {
           defaultMessage: 'Test',
@@ -426,6 +428,7 @@ export function useModelActions({
           await navigateToPath(path, false);
         },
       },
+      // @ts-expect-error upgrade typescript v5.9.3
       {
         name: (model) => {
           return isModelDownloadItem(model) && model.state === MODEL_STATE.DOWNLOADING ? (
