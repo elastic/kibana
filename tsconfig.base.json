@@ -2110,8 +2110,6 @@
       "@kbn/stack-connectors-plugin/*": ["x-pack/platform/plugins/shared/stack_connectors/*"],
       "@kbn/stack-management-usage-test-plugin": ["x-pack/platform/test/usage_collection/plugins/stack_management_usage_test"],
       "@kbn/stack-management-usage-test-plugin/*": ["x-pack/platform/test/usage_collection/plugins/stack_management_usage_test/*"],
-      "@kbn/standalone-packaging-utils": ["src/platform/packages/shared/kbn-standalone-packaging-utils"],
-      "@kbn/standalone-packaging-utils/*": ["src/platform/packages/shared/kbn-standalone-packaging-utils/*"],
       "@kbn/state-containers-examples-plugin": ["examples/state_containers_examples"],
       "@kbn/state-containers-examples-plugin/*": ["examples/state_containers_examples/*"],
       "@kbn/status-plugin-a-plugin": ["src/platform/test/server_integration/plugins/status_plugin_a"],

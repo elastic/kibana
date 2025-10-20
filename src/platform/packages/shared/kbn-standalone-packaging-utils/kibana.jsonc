@@ -1,8 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/standalone-packaging-utils",
-  "owner": "@elastic/kibana-management",
-  "group": "platform",
-  "visibility": "private",
-  "devOnly": true
-}

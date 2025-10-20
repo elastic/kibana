@@ -1656,7 +1656,6 @@
     "@kbn/shared-ux-storybook-mock": "link:src/platform/packages/shared/shared-ux/storybook/mock",
     "@kbn/some-dev-log": "link:src/platform/packages/private/kbn-some-dev-log",
     "@kbn/sort-package-json": "link:packages/kbn-sort-package-json",
-    "@kbn/standalone-packaging-utils": "link:src/platform/packages/shared/kbn-standalone-packaging-utils",
     "@kbn/stdio-dev-helpers": "link:src/platform/packages/private/kbn-stdio-dev-helpers",
     "@kbn/storybook": "link:src/platform/packages/shared/kbn-storybook",
     "@kbn/streamlang-tests": "link:x-pack/platform/packages/shared/kbn-streamlang-tests",
