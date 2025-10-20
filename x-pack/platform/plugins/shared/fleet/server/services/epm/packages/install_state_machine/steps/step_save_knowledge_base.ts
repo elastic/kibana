@@ -7,6 +7,7 @@
 
 import path from 'path';
 
+import { appContextService } from '../../../../app_context';
 import { FleetError } from '../../../../../errors';
 import {
   saveKnowledgeBaseContentToIndex,
@@ -67,6 +68,24 @@ export async function stepSaveKnowledgeBase(context: InstallContext): Promise<vo
   logger.debug(
     `Knowledge base step: Starting for package ${packageInfo.name}@${packageInfo.version}`
   );
+
+  const cloud = appContextService.getCloud();
+  const isEch = cloud?.isCloudEnabled && !cloud?.isServerlessEnabled;
+
+  if (isEch) {
+    const nodesResponse = await esClient.nodes.info();
+
+    const hasMlNode = Object.values(nodesResponse.nodes).some((node) => {
+      return node.roles?.includes('ml');
+    });
+
+    if (!hasMlNode) {
+      logger.debug(
+        'Knowledge base step: Skipping knowledge base save - no ML node detected for ECH deployment'
+      );
+      return;
+    }
+  }
 
   // Check if user has appropriate license for knowledge base functionality
   // You can adjust the license requirement as needed (e.g., isGoldPlus(), isPlatinum(), isEnterprise())
