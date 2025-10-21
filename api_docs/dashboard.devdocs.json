@@ -1450,6 +1450,14 @@
           },
           ") => void; } & ",
           {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesPauseFetch",
+            "text": "PublishesPauseFetch"
+          },
+          " & ",
+          {
             "pluginId": "@kbn/presentation-containers",
             "scope": "public",
             "docId": "kibKbnPresentationContainersPluginApi",

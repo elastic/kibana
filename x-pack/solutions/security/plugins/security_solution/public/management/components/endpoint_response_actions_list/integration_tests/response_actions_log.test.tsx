@@ -1895,7 +1895,6 @@ describe('Response actions history', () => {
 
     it('should show a list of agents and action types when opened in page view', async () => {
       mockedContext.setExperimentalFlag({
-        responseActionsCrowdstrikeManualHostIsolationEnabled: true,
         responseActionsMSDefenderEndpointEnabled: true,
       });
       render({ isFlyout: false });
