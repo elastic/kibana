@@ -41,7 +41,7 @@ export interface AzureCloudConnectorVars extends BaseCloudConnectorVars {
   azure_credentials_cloud_connector_id: CloudConnectorVar;
 }
 
-type CloudConnectorVars = AwsCloudConnectorVars | AzureCloudConnectorVars;
+export type CloudConnectorVars = AwsCloudConnectorVars | AzureCloudConnectorVars;
 
 export interface CloudConnector {
   id: string;

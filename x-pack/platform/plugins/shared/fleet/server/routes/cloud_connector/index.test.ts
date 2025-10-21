@@ -8,7 +8,11 @@
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 import type { FleetRequestHandlerContext } from '../../types';
-import type { CloudProvider, CloudConnector } from '../../../common/types/models/cloud_connector';
+import type {
+  CloudProvider,
+  CloudConnector,
+  AwsCloudConnectorVars,
+} from '../../../common/types/models/cloud_connector';
 
 import { cloudConnectorService } from '../../services';
 
@@ -105,7 +109,7 @@ describe('Cloud Connector API', () => {
           id: 'test-id',
           name: 'test-connector',
           cloudProvider: 'aws' as CloudProvider,
-          vars: {},
+          vars: {} as unknown as AwsCloudConnectorVars,
           packagePolicyCount: 1,
           created_at: '2023-01-01T00:00:00.000Z',
           updated_at: '2023-01-01T00:00:00.000Z',
@@ -153,7 +157,7 @@ describe('Cloud Connector API', () => {
             id: 'test-id',
             name: 'test-connector',
             cloudProvider: 'aws' as CloudProvider,
-            vars: {},
+            vars: {} as unknown as AwsCloudConnectorVars,
             packagePolicyCount: 1,
             created_at: '2023-01-01T00:00:00.000Z',
             updated_at: '2023-01-01T00:00:00.000Z',

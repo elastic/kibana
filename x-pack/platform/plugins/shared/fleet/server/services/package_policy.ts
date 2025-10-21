@@ -81,7 +81,7 @@ import type {
   CloudProvider,
   CloudConnector,
   CloudConnectorSecretVar,
-  AwsCloudConnectorVars,
+  CloudConnectorVars,
   PackagePolicyConfigRecord,
 } from '../../common/types';
 import {
@@ -275,7 +275,7 @@ const extractPackagePolicyVars = (
   cloudProvider: CloudProvider,
   packagePolicy: NewPackagePolicy,
   logger: Logger
-): AwsCloudConnectorVars | undefined => {
+): CloudConnectorVars | undefined => {
   logger.get('extract package policy vars');
 
   if (packagePolicy.supports_cloud_connector && cloudProvider === 'aws') {
@@ -295,7 +295,7 @@ const extractPackagePolicyVars = (
           : vars[AWS_CREDENTIALS_EXTERNAL_ID_VAR_NAME]
       ) as CloudConnectorSecretVar;
 
-      const awsCloudConnectorVars: AwsCloudConnectorVars = {
+      const awsCloudConnectorVars: CloudConnectorVars = {
         role_arn: { type: 'text', value: roleArn },
         external_id: externalId,
       };
