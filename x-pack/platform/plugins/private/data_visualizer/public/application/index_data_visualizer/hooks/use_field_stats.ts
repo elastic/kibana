@@ -14,6 +14,7 @@ import { mergeMap, switchMap } from 'rxjs';
 import { Comparators } from '@elastic/eui';
 import type { ISearchOptions } from '@kbn/search-types';
 import { getSafeAggregationName } from '@kbn/ml-query-utils';
+import { useCurrentTabSelector } from '@kbn/discover-plugin/public';
 import { buildFilterCriteria } from '../../../../common/utils/build_query_filters';
 import type {
   DataStatsFetchProgress,
@@ -84,6 +85,7 @@ export function useFieldStatsSearchStrategy(
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef<Subscription>();
   const retries$ = useRef<Subscription>();
+  const compareQuery = useCurrentTabSelector((tab) => tab.compareQuery);
 
   const startFetch = useCallback(() => {
     searchSubscription$.current?.unsubscribe();
@@ -153,7 +155,6 @@ export function useFieldStatsSearchStrategy(
       searchStrategyParams.latest,
       searchStrategyParams.searchQuery
     );
-
     const params: FieldStatsCommonRequestParams = {
       index: searchStrategyParams.index,
       timeFieldName: searchStrategyParams.timeFieldName,

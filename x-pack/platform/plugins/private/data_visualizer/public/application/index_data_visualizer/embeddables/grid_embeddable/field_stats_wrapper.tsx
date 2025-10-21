@@ -176,6 +176,8 @@ const FieldStatisticsWrapper = (props: FieldStatisticTableEmbeddableProps) => {
     [servicesWithOverrides]
   );
 
+  console.log("CCCC");
+
   return (
     <KibanaRenderContextProvider {...kibanaRenderServices}>
       <KibanaContextProvider services={servicesWithOverrides}>

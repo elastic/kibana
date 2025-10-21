@@ -55,6 +55,7 @@ export interface TabState extends TabItem {
   esqlVariables: ESQLControlVariable[] | undefined;
   forceFetchOnSelect: boolean;
   isDataViewLoading: boolean;
+  compareQuery: string | undefined;
   dataRequestParams: InternalStateDataRequestParams;
   overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saved search saving
   resetDefaultProfileState: {
@@ -86,6 +87,7 @@ export interface DiscoverInternalState {
   initializationState: { hasESData: boolean; hasUserDataView: boolean };
   userId: string | undefined;
   spaceId: string | undefined;
+  compareMode: boolean;
   persistedDiscoverSession: DiscoverSession | undefined;
   hasUnsavedChanges: boolean;
   savedDataViews: DataViewListItem[];

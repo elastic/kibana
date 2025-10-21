@@ -10,7 +10,11 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { type DataView, DataViewType } from '@kbn/data-views-plugin/public';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
-import type { DataViewPickerProps, UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
+import {
+  QueryStringInput,
+  type DataViewPickerProps,
+  type UnifiedSearchDraft,
+} from '@kbn/unified-search-plugin/public';
 import { ControlGroupRenderer, type ControlGroupRendererApi } from '@kbn/controls-plugin/public';
 import {
   DiscoverFlyouts,
@@ -18,6 +22,7 @@ import {
   prepareDataViewForEditing,
 } from '@kbn/discover-utils';
 import { css } from '@emotion/react';
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
@@ -38,6 +43,7 @@ import {
 } from '../../state_management/redux';
 import { onSaveDiscoverSession } from './save_discover_session';
 import { DiscoverTopNavMenu } from './discover_topnav_menu';
+import { useIsCompareMode } from '../../hooks/use_is_compare_mode';
 
 export interface DiscoverTopNavProps {
   savedQuery?: string;
@@ -73,6 +79,7 @@ export const DiscoverTopNav = ({
 
   const { savedDataViews, adHocDataViews } = useDataViewsForPicker();
   const dataView = useCurrentDataView();
+  const compareMode = useIsCompareMode();
   const isESQLToDataViewTransitionModalVisible = useInternalStateSelector(
     (state) => state.isESQLToDataViewTransitionModalVisible
   );
@@ -320,9 +327,72 @@ export const DiscoverTopNav = ({
       {isESQLToDataViewTransitionModalVisible && (
         <ESQLToDataViewTransitionModal onClose={onESQLToDataViewTransitionModalClose} />
       )}
+      {compareMode && <CompareModeQueryInput stateContainer={stateContainer} />}
     </span>
   );
 };
+
+function CompareModeQueryInput({ stateContainer }: { stateContainer: DiscoverStateContainer }) {
+  const compareQuery = useCurrentTabSelector((tab) => tab.compareQuery);
+  const dispatch = useInternalStateDispatch();
+  const currentTabId = useCurrentTabSelector((tab) => tab.id);
+  const [query, setQuery] = useState(compareQuery || '');
+  const dataView = useCurrentDataView();
+  const services = useDiscoverServices();
+  return (
+    <EuiFlexGroup>
+      <QueryStringInput
+        dataTestSubj="compare-mode-input"
+        size="s"
+        disableAutoFocus
+        isInvalid={false}
+        bubbleSubmitEvent={false}
+        indexPatterns={[dataView]}
+        query={{
+          query,
+          language: 'kuery',
+        }}
+        onChange={(newQuery) => {
+          if (newQuery.query !== query) {
+            setQuery(newQuery.query as string);
+          }
+        }}
+        onSubmit={() => {
+          /* Execute comparison logic */
+          dispatch(
+            internalStateActions.setCompareQuery({ compareQuery: query, tabId: currentTabId })
+          );
+          stateContainer.dataState.fetch();
+        }}
+        appName={'compare mode'}
+        deps={{
+          unifiedSearch: services.unifiedSearch,
+          notifications: services.notifications,
+          http: services.http,
+          docLinks: services.docLinks,
+          uiSettings: services.uiSettings,
+          data: services.data,
+          storage: services.storage,
+          dataViews: services.dataViews,
+        }}
+      />
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          disabled={query.trim() === ''}
+          onClick={() => {
+            /* Execute comparison logic */
+            dispatch(
+              internalStateActions.setCompareQuery({ compareQuery: query, tabId: currentTabId })
+            );
+            stateContainer.dataState.fetch();
+          }}
+        >
+          Run
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+}
 
 // ToDo: Remove when the new layout lands https://github.com/elastic/kibana/issues/234854
 const floatingActionStyles = css({

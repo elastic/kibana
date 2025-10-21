@@ -25,6 +25,7 @@ import {
   selectTabRuntimeState,
   useInternalStateSelector,
   useRuntimeState,
+  useCurrentTabSelector,
 } from '../../state_management/redux';
 import type { DiscoverMainContentProps } from '../layout/discover_main_content';
 import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
@@ -186,6 +187,8 @@ const UnifiedHistogramWrapper = ({ stateContainer, panelsToggle }: UnifiedHistog
     panelsToggle,
   });
 
+  const compareQuery = useCurrentTabSelector((tab) => tab.compareQuery);
+
   if (!unifiedHistogram.isInitialized || (!restProps.searchSessionId && !isEsqlMode)) {
     return null;
   }
@@ -193,6 +196,7 @@ const UnifiedHistogramWrapper = ({ stateContainer, panelsToggle }: UnifiedHistog
   return (
     <UnifiedHistogramChart
       {...unifiedHistogram.chartProps}
+      compareQuery={compareQuery}
       renderCustomChartToggleActions={renderCustomChartToggleActions}
     />
   );

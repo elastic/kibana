@@ -18,6 +18,8 @@ import type {
   EmbeddableComponentProps,
   LensEmbeddableInput,
   LensEmbeddableOutput,
+  XYDataLayerConfig,
+  XYState,
 } from '@kbn/lens-plugin/public';
 import type {
   Datatable,
@@ -94,6 +96,7 @@ export interface UnifiedHistogramChartProps {
   columns?: DatatableColumn[];
   esqlVariables?: ESQLControlVariable[];
   controlsState?: ControlPanelsState<ESQLControlState>;
+  compareQuery?: string;
 }
 
 const RequestStatusError: typeof RequestStatus.ERROR = 2;
@@ -123,6 +126,7 @@ export function UnifiedHistogramChart({
   onChartLoad,
   columns,
   controlsState,
+  compareQuery,
   ...histogramProps
 }: UnifiedHistogramChartProps) {
   const lensVisServiceCurrentSuggestionContext = useObservable(
@@ -223,6 +227,39 @@ export function UnifiedHistogramChart({
     visContext,
     onLoad,
   });
+
+  if (
+    compareQuery &&
+    lensPropsContext?.lensProps &&
+    lensPropsContext.lensProps.attributes.state.datasourceStates.formBased
+  ) {
+    lensPropsContext.lensProps.attributes.state.datasourceStates.formBased.layers.unifiedHistogram.columns.count_column_compare =
+      {
+        filter: {
+          query: compareQuery,
+          language: 'kuery',
+        },
+        ...lensPropsContext.lensProps.attributes.state.datasourceStates.formBased.layers
+          .unifiedHistogram.columns.count_column,
+        label: 'Compare query',
+        customLabel: true,
+      };
+    if (
+      !lensPropsContext.lensProps.attributes.state.datasourceStates.formBased.layers.unifiedHistogram.columnOrder.includes(
+        'count_column_compare'
+      )
+    ) {
+      lensPropsContext.lensProps.attributes.state.datasourceStates.formBased.layers.unifiedHistogram.columnOrder.push(
+        'count_column_compare'
+      );
+    }
+    const xyLayer = (lensPropsContext.lensProps.attributes.state.visualization as XYState)
+      .layers[0] as XYDataLayerConfig;
+    xyLayer.seriesType = 'line';
+    if (!xyLayer.accessors.includes('count_column_compare')) {
+      xyLayer.accessors.push('count_column_compare');
+    }
+  }
 
   const { chartToolbarCss, histogramCss } = useChartStyles(chartVisible);
 

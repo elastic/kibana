@@ -34,6 +34,16 @@ export interface FieldVisConfig {
   isUnsupportedType?: boolean;
   deletable?: boolean;
   supportedAggs?: SupportedAggs;
+  compareStats?: {
+    fieldName: string;
+    stats?: {
+      cardinality?: number;
+      count?: number;
+      sampleCount?: number;
+    };
+    existsInDocs: boolean;
+    secondaryType?: SupportedFieldType;
+  };
 }
 
 export interface FileBasedFieldVisConfig {
@@ -43,6 +53,16 @@ export interface FileBasedFieldVisConfig {
   secondaryType?: string;
   stats?: FieldVisStats;
   format?: string;
+  compareStats?: {
+    fieldName: string;
+    stats?: {
+      cardinality?: number;
+      count?: number;
+      sampleCount?: number;
+    };
+    existsInDocs: boolean;
+    secondaryType?: SupportedFieldType;
+  };
 }
 
 export interface FileBasedUnknownFieldVisConfig {

@@ -43,3 +43,6 @@ export {
 export type { DiscoverServices } from './build_services';
 
 export const loadSharingDataHelpers = () => import('./utils/get_sharing_data');
+
+export { useCurrentTabSelector } from './application/main/state_management/redux';
+export { useIsCompareMode } from './application/main/hooks/use_is_compare_mode';

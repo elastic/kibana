@@ -28,6 +28,7 @@ import type { EuiTableComputedColumnType } from '@elastic/eui/src/components/bas
 import { throttle } from 'lodash';
 import { css } from '@emotion/react';
 import useMountedState from 'react-use/lib/useMountedState';
+import { useIsCompareMode } from '@kbn/discover-plugin/public';
 import { SUPPORTED_FIELD_TYPES } from '../../../../../common/constants';
 import type { SupportedFieldType, DataVisualizerTableState } from '../../../../../common/types';
 import { DocumentStat } from './components/field_data_row/document_stats';
@@ -43,6 +44,7 @@ import { DistinctValues } from './components/field_data_row/distinct_values';
 import { FieldTypeIcon } from '../field_type_icon';
 import type { FieldStatisticTableEmbeddableProps } from '../../../index_data_visualizer/embeddables/grid_embeddable/types';
 import type { DataVisualizerTableItem } from './types';
+import type { OverallStats } from '../../../index_data_visualizer/types/overall_stats';
 
 const FIELD_NAME = 'fieldName';
 
@@ -51,6 +53,7 @@ export type ItemIdToExpandedRowMap = Record<string, JSX.Element>;
 interface DataVisualizerTableProps<T extends object> {
   items: T[];
   pageState: DataVisualizerTableState;
+  compareOverallStats?: OverallStats;
   updatePageState: (update: DataVisualizerTableState) => void;
   getItemIdToExpandedRowMap: (itemIds: string[], items: T[]) => ItemIdToExpandedRowMap;
   extendedColumns?: Array<EuiBasicTableColumn<T>>;
@@ -74,6 +77,7 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
   showPreviewByDefault,
   onChange,
   loading,
+  compareOverallStats,
   totalCount,
   overallStatsRunning,
   renderFieldName,
@@ -81,6 +85,9 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
   isEsql = false,
 }: DataVisualizerTableProps<T>) => {
   const { euiTheme } = useEuiTheme();
+
+  console.log('render visualizer stats table', items);
+  const isCompareMode = useIsCompareMode();
 
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<string[]>([]);
   const [expandAll, setExpandAll] = useState<boolean>(false);
@@ -234,6 +241,13 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
             {i18n.translate('xpack.dataVisualizer.dataGrid.documentsCountColumnName', {
               defaultMessage: 'Documents (%)',
             })}
+            {isCompareMode && (
+              <span style={{ marginLeft: 4 }}>
+                {i18n.translate('xpack.dataVisualizer.dataGrid.documentsCountBaselineLabel', {
+                  defaultMessage: '(baseline)',
+                })}
+              </span>
+            )}
             <EuiIconTip
               content={i18n.translate('xpack.dataVisualizer.dataGrid.documentsCountColumnTooltip', {
                 defaultMessage:
@@ -262,11 +276,80 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
         'data-test-subj': 'dataVisualizerTableColumnDocumentsCount',
         width: dimensions.docCount,
       },
+      ...(isCompareMode
+        ? [
+            {
+              field: 'compareDocCount' as const,
+              name: (
+                <div className={'columnHeader__title'}>
+                  {i18n.translate('xpack.dataVisualizer.dataGrid.documentsCountColumnName', {
+                    defaultMessage: 'Documents (%)',
+                  })}
+                  <span style={{ marginLeft: 4 }}>
+                    {i18n.translate('xpack.dataVisualizer.dataGrid.documentsCountCompareLabel', {
+                      defaultMessage: '(compare)',
+                    })}
+                  </span>
+                  <EuiIconTip
+                    content={i18n.translate(
+                      'xpack.dataVisualizer.dataGrid.documentsCountColumnTooltip',
+                      {
+                        defaultMessage:
+                          'Document count found is based on a smaller set of sampled records.',
+                      }
+                    )}
+                    type="question"
+                  />
+                </div>
+              ),
+              render: (value: number | undefined, item: DataVisualizerTableItem) => {
+                if (overallStatsRunning) {
+                  return (
+                    <EuiText textAlign="center">
+                      <EuiLoadingSpinner size="s" />
+                    </EuiText>
+                  );
+                }
+
+                if (!item.compareStats) {
+                  return <EuiText size="xs">-</EuiText>;
+                }
+
+                return (
+                  <DocumentStat
+                    config={{
+                      ...item,
+                      stats: item.compareStats.stats,
+                      existsInDocs: item.compareStats.existsInDocs,
+                    }}
+                    showIcon={false}
+                    totalCount={totalCount}
+                  />
+                );
+              },
+              sortable: (item: DataVisualizerTableItem) => item?.compareStats?.stats?.count,
+              align: LEFT_ALIGNMENT as HorizontalAlignment,
+              'data-test-subj': 'dataVisualizerTableColumnDocumentsCountCompare',
+              width: dimensions.docCount,
+            },
+          ]
+        : []),
       {
         field: 'cardinality',
-        name: i18n.translate('xpack.dataVisualizer.dataGrid.distinctValuesColumnName', {
-          defaultMessage: 'Distinct values',
-        }),
+        name: (
+          <div>
+            {i18n.translate('xpack.dataVisualizer.dataGrid.distinctValuesColumnName', {
+              defaultMessage: 'Distinct values',
+            })}
+            {isCompareMode && (
+              <span style={{ marginLeft: 4 }}>
+                {i18n.translate('xpack.dataVisualizer.dataGrid.distinctValuesBaselineLabel', {
+                  defaultMessage: '(baseline)',
+                })}
+              </span>
+            )}
+          </div>
+        ),
         render: (_: undefined, item: DataVisualizerTableItem) => {
           if (overallStatsRunning) {
             return (
@@ -283,6 +366,53 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
         'data-test-subj': 'dataVisualizerTableColumnDistinctValues',
         width: dimensions.distinctValues,
       },
+      ...(isCompareMode
+        ? [
+            {
+              field: 'compareCardinality' as const,
+              name: (
+                <div>
+                  {i18n.translate('xpack.dataVisualizer.dataGrid.distinctValuesColumnName', {
+                    defaultMessage: 'Distinct values',
+                  })}
+                  <span style={{ marginLeft: 4 }}>
+                    {i18n.translate('xpack.dataVisualizer.dataGrid.distinctValuesCompareLabel', {
+                      defaultMessage: '(compare)',
+                    })}
+                  </span>
+                </div>
+              ),
+              render: (_: undefined, item: DataVisualizerTableItem) => {
+                if (overallStatsRunning) {
+                  return (
+                    <EuiText textAlign="center">
+                      <EuiLoadingSpinner size="s" />
+                    </EuiText>
+                  );
+                }
+
+                if (!item.compareStats) {
+                  return <EuiText size="xs">-</EuiText>;
+                }
+
+                return (
+                  <DistinctValues
+                    config={{
+                      ...item,
+                      stats: item.compareStats.stats,
+                      existsInDocs: item.compareStats.existsInDocs,
+                    }}
+                    showIcon={false}
+                  />
+                );
+              },
+              sortable: (item: DataVisualizerTableItem) => item?.compareStats?.stats?.cardinality,
+              align: LEFT_ALIGNMENT as HorizontalAlignment,
+              'data-test-subj': 'dataVisualizerTableColumnDistinctValuesCompare',
+              width: dimensions.distinctValues,
+            },
+          ]
+        : []),
       {
         name: (
           <div className={'columnHeader__title'}>
@@ -292,6 +422,13 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
             {i18n.translate('xpack.dataVisualizer.dataGrid.distributionsColumnName', {
               defaultMessage: 'Distributions',
             })}
+            {isCompareMode && (
+              <span style={{ marginLeft: 4 }}>
+                {i18n.translate('xpack.dataVisualizer.dataGrid.distinctValuesBaselineLabel', {
+                  defaultMessage: '(baseline)',
+                })}
+              </span>
+            )}
             {
               <EuiToolTip
                 content={
@@ -369,6 +506,113 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
         align: LEFT_ALIGNMENT as HorizontalAlignment,
         'data-test-subj': 'dataVisualizerTableColumnDistribution',
       },
+      ...(isCompareMode
+        ? [
+            {
+              name: (
+                <div className={'columnHeader__title'}>
+                  {dimensions.showIcon ? (
+                    <EuiIcon type={'visBarVertical'} className={'columnHeader__icon'} />
+                  ) : null}
+                  {i18n.translate('xpack.dataVisualizer.dataGrid.distributionsColumnName', {
+                    defaultMessage: 'Distributions',
+                  })}
+                  {"(comparison)"}
+                  {
+                    <EuiToolTip
+                      content={
+                        !showDistributions
+                          ? i18n.translate(
+                              'xpack.dataVisualizer.dataGrid.showDistributionsTooltip',
+                              {
+                                defaultMessage: 'Show distributions',
+                              }
+                            )
+                          : i18n.translate(
+                              'xpack.dataVisualizer.dataGrid.hideDistributionsTooltip',
+                              {
+                                defaultMessage: 'Hide distributions',
+                              }
+                            )
+                      }
+                      disableScreenReaderOutput={true}
+                    >
+                      <EuiButtonIcon
+                        style={{ marginLeft: 4 }}
+                        size={'s'}
+                        iconType={!showDistributions ? 'eye' : 'eyeClosed'}
+                        onClick={() => toggleShowDistribution()}
+                        aria-label={
+                          !showDistributions
+                            ? i18n.translate(
+                                'xpack.dataVisualizer.dataGrid.showDistributionsAriaLabel',
+                                {
+                                  defaultMessage: 'Show distributions',
+                                }
+                              )
+                            : i18n.translate(
+                                'xpack.dataVisualizer.dataGrid.hideDistributionsAriaLabel',
+                                {
+                                  defaultMessage: 'Hide distributions',
+                                }
+                              )
+                        }
+                      />
+                    </EuiToolTip>
+                  }
+                </div>
+              ),
+              render: (item: DataVisualizerTableItem) => {
+                if (item === undefined || showDistributions === false) return null;
+
+                if ('loading' in item && item.loading === true) {
+                  return (
+                    <EuiText textAlign="center">
+                      <EuiLoadingSpinner size="s" />
+                    </EuiText>
+                  );
+                }
+
+                if (!item.compareStats) {
+                  return <EuiText size="xs">-</EuiText>;
+                }
+
+                if (
+                  (item.type === SUPPORTED_FIELD_TYPES.KEYWORD ||
+                    item.type === SUPPORTED_FIELD_TYPES.IP) &&
+                  item.stats?.topValues !== undefined
+                ) {
+                  return <TopValuesPreview config={item} />;
+                }
+
+                if (
+                  item.type === SUPPORTED_FIELD_TYPES.NUMBER ||
+                  item.secondaryType === SUPPORTED_FIELD_TYPES.NUMBER
+                ) {
+                  if (isIndexBasedFieldVisConfig(item) && item.stats?.distribution !== undefined) {
+                    // If the cardinality is only low, show the top values instead of a distribution chart
+                    return item.stats?.distribution?.percentiles.length <= 2 ? (
+                      <TopValuesPreview config={item} isNumeric={true} />
+                    ) : (
+                      <IndexBasedNumberContentPreview config={item} />
+                    );
+                  } else {
+                    return <FileBasedNumberContentPreview config={item} />;
+                  }
+                }
+
+                if (item.type === SUPPORTED_FIELD_TYPES.BOOLEAN) {
+                  return <BooleanContentPreview config={item} />;
+                }
+
+                return null;
+              },
+              width: dimensions.distributions,
+              align: LEFT_ALIGNMENT as HorizontalAlignment,
+              'data-test-subj': 'dataVisualizerTableColumnDistribution',
+            },
+          ]
+        : []),
     ];
     return extendedColumns ? [...baseColumns, ...extendedColumns] : baseColumns;
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -380,6 +624,7 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
     dimensions.breakPoint,
     toggleExpandAll,
     overallStatsRunning,
+    isCompareMode,
   ]);
 
   const itemIdToExpandedRowMap = useMemo(() => {
