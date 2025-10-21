@@ -6,10 +6,8 @@
  */
 
 import type { FC } from 'react';
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
-import type { MlPages } from '../../../locator';
-import { ML_PAGES } from '../../../locator';
 import { useMlKibana } from '../../contexts/kibana';
 import { useEnabledFeatures } from '../../contexts/ml';
 
@@ -19,17 +17,11 @@ import { FeatureFeedbackButton } from './feature_feedback_button';
 
 interface Props {
   jobIds: string[];
-  page: MlPages;
 }
-
-const FORM_IDS = {
-  SINGLE_METRIC_VIEWER: '1FAIpQLSdlMYe3wuJh2KtBLajI4EVoUljAhGjJwjZI7zUY_Kn_Sr2lug',
-  ANOMALY_EXPLORER: '1FAIpQLSfF1Ry561b4lYrY7iiyXhuZpxFzAmy2c9BFUT3J2AJUevY1iw',
-};
 
 const MATCHED_CREATED_BY_TAGS = ['ml-module-metrics-ui-hosts'];
 
-export const FeedBackButton: FC<Props> = ({ jobIds, page }) => {
+export const FeedBackButton: FC<Props> = ({ jobIds }) => {
   const { jobs: getJobs } = useJobsApiService();
   const {
     services: { kibanaVersion },
@@ -45,8 +37,10 @@ export const FeedBackButton: FC<Props> = ({ jobIds, page }) => {
   const [jobIdsString, setJobIdsString] = useState<string | null>(null);
   const [showButton, setShowButton] = useState(false);
 
-  const formId = useMemo(() => getFormId(page), [page]);
   const isMounted = useMountedState();
+
+  // TODO: Change the feedback URL
+  const HOSTS_ANOMALY_DETECTION_FEEDBACK_URL = 'https://ela.st/anomaly-explorer-feedback';
 
   useEffect(() => {
     const tempJobIdsString = jobIds.join(',');
@@ -65,32 +59,14 @@ export const FeedBackButton: FC<Props> = ({ jobIds, page }) => {
     });
   }, [jobIds, getJobs, jobIdsString, isMounted]);
 
-  if (showButton === false || formId === null) {
-    return null;
-  }
-
-  return (
+  return showButton === false ? null : (
     <FeatureFeedbackButton
       data-test-subj="mlFeatureFeedbackButton"
-      formUrl={getFormUrl(formId)}
+      formUrl={HOSTS_ANOMALY_DETECTION_FEEDBACK_URL}
       kibanaVersion={kibanaVersion}
       isCloudEnv={isCloud}
       isServerlessEnv={showNodeInfo === false}
+      sanitizedPath={window.location.pathname}
     />
   );
 };
-
-function getFormId(page: MlPages) {
-  switch (page) {
-    case ML_PAGES.SINGLE_METRIC_VIEWER:
-      return FORM_IDS.SINGLE_METRIC_VIEWER;
-    case ML_PAGES.ANOMALY_EXPLORER:
-      return FORM_IDS.ANOMALY_EXPLORER;
-    default:
-      return null;
-  }
-}
-
-function getFormUrl(formId: string) {
-  return `https://docs.google.com/forms/d/e/${formId}/viewform?usp=pp_url`;
-}
