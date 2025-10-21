@@ -61,8 +61,6 @@ export class FileUploadTelemetryService {
       this.analytics.reportEvent(eventType, eventData);
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.error('Failed to report telemetry event', error);
-      // eslint-disable-next-line no-console
       console.log('Failed to report telemetry event', error);
     }
   }
