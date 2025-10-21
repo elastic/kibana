@@ -9,5 +9,5 @@
 
 export type { AggBasedColumn } from './lib/convert/types';
 export * from './types';
-// export * from './constants';
+export * from './constants';
 export * from './utils';

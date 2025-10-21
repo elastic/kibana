@@ -81,5 +81,8 @@ export type {
   Column,
   GenericColumnWithMeta,
   ColumnWithMeta,
+  PercentageModeConfigWithMinMax,
+  PercentageModeConfig,
 } from './convert_to_lens';
+export { Operations } from './convert_to_lens';
 export { convertToSchemaConfig } from './vis_schemas';
