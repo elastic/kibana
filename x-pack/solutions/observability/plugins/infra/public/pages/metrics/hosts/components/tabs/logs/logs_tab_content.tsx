@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
-import { buildEsQuery } from '@kbn/es-query';
+import { buildEsQuery, fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import React, { useMemo } from 'react';
 import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
 import { buildCombinedAssetFilter } from '../../../../../../utils/filters/build';
@@ -38,32 +38,42 @@ export const LogsTabContent = () => {
   // These would be passed to Elasticsearch as well to filter by the logs component,
   // but I don't care because the data is already filtered at that point
   const topSearchFilters = useMemo(() => {
-    const hasQuery = searchCriteria.query && searchCriteria.query.query;
-    const hasFilters = searchCriteria.filters && searchCriteria.filters.length > 0;
-    const hasPanelFilters = searchCriteria.panelFilters && searchCriteria.panelFilters.length > 0;
+    const hasQuery = searchCriteria?.query?.query;
+    const hasFilters = searchCriteria?.filters?.length > 0;
+    const hasPanelFilters = searchCriteria?.panelFilters?.length > 0;
 
     if (!hasQuery && !hasFilters && !hasPanelFilters) {
       return [];
     }
 
-    return [
-      buildEsQuery(
-        undefined,
-        searchCriteria.query,
-        [...(searchCriteria.filters || []), ...(searchCriteria.panelFilters || [])],
-        getEsQueryConfig(uiSettings)
-      ),
-    ];
+    try {
+      return [
+        buildEsQuery(
+          undefined,
+          searchCriteria.query,
+          [...(searchCriteria.filters ?? []), ...(searchCriteria.panelFilters ?? [])],
+          getEsQueryConfig(uiSettings)
+        ),
+      ];
+    } catch (err) {
+      // Invalid/incomplete query, return empty array to avoid breaking the component
+      return [];
+    }
   }, [searchCriteria.query, searchCriteria.filters, searchCriteria.panelFilters, uiSettings]);
 
   // Logs search bar filters - these should be highlighted
-  const logsSearchFilters = useMemo(
-    () =>
-      filterQuery && filterQuery.query
-        ? [buildEsQuery(undefined, filterQuery, [], getEsQueryConfig(uiSettings))]
-        : [],
-    [filterQuery, uiSettings]
-  );
+  const logsSearchFilters = useMemo(() => {
+    if (!filterQuery || !filterQuery.query) {
+      return [];
+    }
+
+    try {
+      return [toElasticsearchQuery(fromKueryExpression(filterQuery.query))];
+    } catch (err) {
+      // Invalid/incomplete query, return empty array to avoid breaking the component
+      return [];
+    }
+  }, [filterQuery]);
 
   // Combine all user search filters (from both search bars)
   const documentLogFilters = useMemo(

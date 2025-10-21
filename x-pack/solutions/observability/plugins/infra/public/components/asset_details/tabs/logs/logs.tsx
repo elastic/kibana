@@ -16,8 +16,12 @@ import moment from 'moment';
 import { LazySavedSearchComponent } from '@kbn/saved-search-component';
 import useAsync from 'react-use/lib/useAsync';
 import { Global, css } from '@emotion/react';
-import { getEsQueryConfig } from '@kbn/data-plugin/public';
-import { buildEsQuery, buildCustomFilter, FilterStateStore } from '@kbn/es-query';
+import {
+  buildCustomFilter,
+  FilterStateStore,
+  fromKueryExpression,
+  toElasticsearchQuery,
+} from '@kbn/es-query';
 import type { Filter } from '@kbn/es-query';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
@@ -44,7 +48,6 @@ export const Logs = () => {
         search: { searchSource },
       },
       share: { url },
-      uiSettings,
     },
   } = useKibanaContextForPlugin();
   const logsLocator = getLogsLocatorFromUrlService(url)!;
@@ -73,17 +76,11 @@ export const Logs = () => {
   // Entity context filter - should NOT be highlighted
   const entityContextFilter = useMemo(
     () => [
-      buildEsQuery(
-        undefined,
-        {
-          query: `${findInventoryFields(entity.type).id}: "${entity.id}"`,
-          language: 'kuery',
-        },
-        [],
-        getEsQueryConfig(uiSettings)
+      toElasticsearchQuery(
+        fromKueryExpression(`${findInventoryFields(entity.type).id}: "${entity.id}"`)
       ),
     ],
-    [entity.type, entity.id, uiSettings]
+    [entity.type, entity.id]
   );
 
   // User search filter - should be highlighted
@@ -93,25 +90,23 @@ export const Logs = () => {
     }
 
     try {
-      return [
-        buildEsQuery(
-          undefined,
-          { query: textQueryDebounced, language: 'kuery' },
-          [],
-          getEsQueryConfig(uiSettings)
-        ),
-      ];
-    } catch (error) {
+      return [toElasticsearchQuery(fromKueryExpression(textQueryDebounced))];
+    } catch (err) {
       // Invalid/incomplete query, return empty array to avoid breaking the component
       return [];
     }
-  }, [textQueryDebounced, uiSettings]);
+  }, [textQueryDebounced]);
 
   const savedSearchFilters = useMemo<Filter[]>(() => {
+    // Exit early if no log sources
+    if (!logSources.value) {
+      return [];
+    }
+
     const filters: Filter[] = [];
 
     // Add entity context filter (skip highlighting)
-    if (logSources.value && entityContextFilter.length > 0) {
+    if (entityContextFilter.length > 0) {
       filters.push(
         buildCustomFilter(
           logSources.value,
@@ -126,7 +121,7 @@ export const Logs = () => {
     }
 
     // Add user search filter (enable highlighting)
-    if (logSources.value && userSearchFilter.length > 0) {
+    if (userSearchFilter.length > 0) {
       filters.push(
         buildCustomFilter(
           logSources.value,

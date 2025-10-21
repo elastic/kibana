@@ -645,10 +645,10 @@ export class SearchSource {
       case 'filter':
         return addToRoot(
           'filters',
-          (typeof data.filters === 'function' ? data.filters() : data.filters || []).concat(val)
+          (typeof data.filters === 'function' ? data.filters() : data.filters ?? []).concat(val)
         );
       case 'query':
-        return addToRoot(key, (data.query || []).concat(val));
+        return addToRoot(key, (data.query ?? []).concat(val));
       case 'fields':
         // This will pass the passed in parameters to the new fields API.
         // Also if will only return scripted fields that are part of the specified

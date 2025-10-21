@@ -60,17 +60,26 @@ export function ServiceLogs() {
   }, [assetFilter]);
 
   const documentLogFilters = useMemo(() => {
-    return [
-      buildEsQuery(
-        undefined,
-        {
-          language: 'kuery',
-          query: kuery,
-        },
-        [],
-        getEsQueryConfig(uiSettings)
-      ),
-    ];
+    if (!kuery) {
+      return [];
+    }
+
+    try {
+      return [
+        buildEsQuery(
+          undefined,
+          {
+            language: 'kuery',
+            query: kuery,
+          },
+          [],
+          getEsQueryConfig(uiSettings)
+        ),
+      ];
+    } catch (err) {
+      // Invalid/incomplete query, return empty array to avoid breaking the component
+      return [];
+    }
   }, [kuery, uiSettings]);
 
   if (
