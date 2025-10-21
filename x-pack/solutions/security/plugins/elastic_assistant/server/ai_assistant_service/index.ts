@@ -885,7 +885,7 @@ export class AIAssistantService {
     }
   }
 
-  public async createDefaultAnonymizationFields(spaceId: string) {
+  public async createDefaultAnonymizationFields(spaceId: string): Promise<void> {
     const dataClient = new AIAssistantDataClient({
       logger: this.options.logger,
       elasticsearchClientPromise: this.options.elasticsearchClientPromise,
