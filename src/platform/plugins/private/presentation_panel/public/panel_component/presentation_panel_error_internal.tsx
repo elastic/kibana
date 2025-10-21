@@ -39,6 +39,13 @@ export const PresentationPanelErrorInternal = ({ api, error }: PresentationPanel
     [api, isEditable]
   );
 
+  useEffect(() => {
+    if (error) {
+      // eslint-disable-next-line no-console
+      console.error(error);
+    }
+  }, [error]);
+
   const [label, setLabel] = useState('');
   useEffect(() => {
     if (!isEditable) {
