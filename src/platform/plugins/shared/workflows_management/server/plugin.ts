@@ -30,7 +30,7 @@ import type {
   WorkflowsServerPluginStart,
 } from './types';
 import { WorkflowsManagementApi } from './workflows_management/workflows_management_api';
-import { defineRoutes } from './workflows_management/workflows_management_routes';
+import { defineRoutes } from './workflows_management/routes';
 import { WorkflowsService } from './workflows_management/workflows_management_service';
 // Import the workflows connector
 import {
