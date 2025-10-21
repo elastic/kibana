@@ -86,6 +86,9 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
   const hasPreviousVersion = (item: InstalledPackageUIPackageListItem) => {
     return !!item.installationInfo?.previous_version;
   };
+  const isRollbackTTLExpired = (item: InstalledPackageUIPackageListItem) => {
+    return !!item.installationInfo?.is_rollback_ttl_expired;
+  };
 
   return (
     <>
@@ -332,7 +335,9 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
 
                         onClick: (item) => bulkRollbackIntegrationsWithConfirmModal([item]),
                         enabled: (item) =>
-                          hasPreviousVersion(item) && !!licenseService.isEnterprise(),
+                          hasPreviousVersion(item) &&
+                          !!licenseService.isEnterprise() &&
+                          !isRollbackTTLExpired(item),
                         description: (item) =>
                           !hasPreviousVersion(item)
                             ? i18n.translate(
@@ -348,6 +353,14 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                                 {
                                   defaultMessage:
                                     'Rollback integrations requires an enterprise license.',
+                                }
+                              )
+                            : isRollbackTTLExpired(item)
+                            ? i18n.translate(
+                                'xpack.fleet.epmInstalledIntegrations.rollbackIntegrationsTTLExpiredLabel',
+                                {
+                                  defaultMessage:
+                                    'Rollback is no longer allowed for this integration.',
                                 }
                               )
                             : i18n.translate(
