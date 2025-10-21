@@ -20,7 +20,7 @@ to make sure your hosts support our latest build of Chromium. For the most relia
 installing {kib} using <<docker, Docker>>, or using <<set-up-on-cloud, Elastic Cloud>>.
 ============
 
-For security, you can grant role access to the {report-features} and secure communication between clusters using {ref}/remote-clusters-cert.html[TLS certificate authentication]. Additionally, you can install graphical packages into the operating system to enable the {kib} server to have screenshotting capabilities.
+To secure reporting features, you must grant users role access to reporting functionality and protect the reporting endpoints with {ref}/remote-clusters-cert.html[TLS certificate authentication]. Additionally, you can install graphical packages into the operating system to enable the {kib} server to have screenshotting capabilities.
 
 NOTE: In cross-cluster search environments, you can use {ref}/remote-clusters-api-key.html[API key authentication] or {ref}/remote-clusters-cert.html[TLS certificate authentication] to create secure connections between local (self-managed) and remote clusters.
 
