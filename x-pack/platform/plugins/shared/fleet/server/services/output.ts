@@ -84,6 +84,7 @@ import {
 } from './secrets';
 import { findAgentlessPolicies } from './outputs/helpers';
 import { patchUpdateDataWithRequireEncryptedAADFields } from './outputs/so_helpers';
+
 import {
   canEnableSyncIntegrations,
   createOrUpdateFleetSyncedIntegrationsIndex,
@@ -388,12 +389,16 @@ async function remoteSyncIntegrationsCheck(
 }
 
 class OutputService {
-  private get encryptedSoClient() {
+  private get soClient() {
     return appContextService.getInternalUserSOClient(fakeRequest);
   }
 
+  private get encryptedSoClient() {
+    return appContextService.getEncryptedSavedObjects();
+  }
+
   private async _getDefaultDataOutputsSO() {
-    const outputs = await this.encryptedSoClient.find<OutputSOAttributes>({
+    const outputs = await this.soClient.find<OutputSOAttributes>({
       type: OUTPUT_SAVED_OBJECT_TYPE,
       searchFields: ['is_default'],
       search: 'true',
@@ -411,8 +416,8 @@ class OutputService {
     return outputs;
   }
 
-  private async _getDefaultMonitoringOutputsSO(soClient: SavedObjectsClientContract) {
-    const outputs = await this.encryptedSoClient.find<OutputSOAttributes>({
+  private async _getDefaultMonitoringOutputsSO() {
+    const outputs = await this.soClient.find<OutputSOAttributes>({
       type: OUTPUT_SAVED_OBJECT_TYPE,
       searchFields: ['is_default_monitoring'],
       search: 'true',
@@ -431,12 +436,11 @@ class OutputService {
   }
 
   private async _updateDefaultOutput(
-    soClient: SavedObjectsClientContract,
     defaultDataOutputId: string,
     updateData: { is_default: boolean } | { is_default_monitoring: boolean },
     fromPreconfiguration: boolean
   ) {
-    const originalOutput = await this.get(soClient, defaultDataOutputId);
+    const originalOutput = await this.get(defaultDataOutputId);
     this._validateFieldsAreEditable(
       originalOutput,
       updateData,
@@ -451,7 +455,7 @@ class OutputService {
       savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
     });
 
-    return await this.encryptedSoClient.update<Nullable<OutputSOAttributes>>(
+    return await this.soClient.update<Nullable<OutputSOAttributes>>(
       SAVED_OBJECT_TYPE,
       outputIdToUuid(defaultDataOutputId),
       updateData
@@ -500,7 +504,7 @@ class OutputService {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient
   ) {
-    const outputs = await this.list(soClient);
+    const outputs = await this.list();
 
     const defaultOutput = outputs.items.find((o) => o.is_default);
     const defaultMonitoringOutput = outputs.items.find((o) => o.is_default_monitoring);
@@ -535,7 +539,7 @@ class OutputService {
     return cloudHosts || flagHosts || DEFAULT_ES_HOSTS;
   }
 
-  public async getDefaultDataOutputId(soClient: SavedObjectsClientContract) {
+  public async getDefaultDataOutputId() {
     const outputs = await this._getDefaultDataOutputsSO();
 
     if (!outputs.saved_objects.length) {
@@ -545,8 +549,8 @@ class OutputService {
     return outputSavedObjectToOutput(outputs.saved_objects[0]).id;
   }
 
-  public async getDefaultMonitoringOutputId(soClient: SavedObjectsClientContract) {
-    const outputs = await this._getDefaultMonitoringOutputsSO(soClient);
+  public async getDefaultMonitoringOutputId() {
+    const outputs = await this._getDefaultMonitoringOutputsSO();
 
     if (!outputs.saved_objects.length) {
       return null;
@@ -584,7 +588,7 @@ class OutputService {
       }
     }
 
-    const defaultDataOutputId = await this.getDefaultDataOutputId(soClient);
+    const defaultDataOutputId = await this.getDefaultDataOutputId();
 
     if (output.type === outputType.Logstash) {
       await validateLogstashOutputNotUsedInAPMPolicy(undefined, data.is_default);
@@ -613,7 +617,6 @@ class OutputService {
     if (data.is_default) {
       if (defaultDataOutputId && defaultDataOutputId !== options?.id) {
         await this._updateDefaultOutput(
-          soClient,
           defaultDataOutputId,
           { is_default: false },
           options?.fromPreconfiguration ?? false
@@ -621,10 +624,9 @@ class OutputService {
       }
     }
     if (data.is_default_monitoring) {
-      const defaultMonitoringOutputId = await this.getDefaultMonitoringOutputId(soClient);
+      const defaultMonitoringOutputId = await this.getDefaultMonitoringOutputId();
       if (defaultMonitoringOutputId && defaultMonitoringOutputId !== options?.id) {
         await this._updateDefaultOutput(
-          soClient,
           defaultMonitoringOutputId,
           { is_default_monitoring: false },
           options?.fromPreconfiguration ?? false
@@ -749,16 +751,21 @@ class OutputService {
       name: data.name,
       savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
     });
-    const newSo = await this.encryptedSoClient.create<OutputSOAttributes>(SAVED_OBJECT_TYPE, data, {
+    const newSo = await this.soClient.create<OutputSOAttributes>(SAVED_OBJECT_TYPE, data, {
       overwrite: options?.overwrite || options?.fromPreconfiguration,
       id,
     });
     logger.debug(`Created new output ${id}`);
-    return outputSavedObjectToOutput(newSo);
+    // soClient.create doesn't return the decrypted attributes, so we need to fetch it again.
+    const retrievedSo = await this.encryptedSoClient.getDecryptedAsInternalUser<OutputSOAttributes>(
+      SAVED_OBJECT_TYPE,
+      newSo.id
+    );
+    return outputSavedObjectToOutput(retrievedSo);
   }
 
   public async bulkGet(ids: string[], { ignoreNotFound = false } = { ignoreNotFound: true }) {
-    const res = await this.encryptedSoClient.bulkGet<OutputSOAttributes>(
+    const res = await this.soClient.bulkGet<OutputSOAttributes>(
       ids.map((id) => ({ id: outputIdToUuid(id), type: SAVED_OBJECT_TYPE }))
     );
 
@@ -776,16 +783,33 @@ class OutputService {
       .filter((output): output is Output => typeof output !== 'undefined');
   }
 
-  public async list(soClient: SavedObjectsClientContract) {
-    const outputs = await this.encryptedSoClient.find<OutputSOAttributes>({
-      type: SAVED_OBJECT_TYPE,
-      page: 1,
-      perPage: SO_SEARCH_LIMIT,
-      sortField: 'is_default',
-      sortOrder: 'desc',
-    });
+  public async list() {
+    const outputsFinder =
+      await this.encryptedSoClient.createPointInTimeFinderDecryptedAsInternalUser<OutputSOAttributes>(
+        {
+          type: SAVED_OBJECT_TYPE,
+          perPage: SO_SEARCH_LIMIT,
+          sortField: 'is_default',
+          sortOrder: 'desc',
+        }
+      );
 
-    for (const output of outputs.saved_objects) {
+    let outputs: SavedObject<OutputSOAttributes>[] = [];
+    let total = 0;
+    let page = 0;
+    let perPage = 0;
+
+    for await (const result of outputsFinder.find()) {
+      outputs = result.saved_objects;
+      total = result.total;
+      page = result.page;
+      perPage = result.per_page;
+      break; // Return first page;
+    }
+
+    await outputsFinder.close();
+
+    for (const output of outputs) {
       auditLoggingService.writeCustomSoAuditLog({
         action: 'get',
         id: output.id,
@@ -795,15 +819,15 @@ class OutputService {
     }
 
     return {
-      items: outputs.saved_objects.map<Output>(outputSavedObjectToOutput),
-      total: outputs.total,
-      page: outputs.page,
-      perPage: outputs.per_page,
+      items: outputs.map<Output>(outputSavedObjectToOutput),
+      total,
+      page,
+      perPage,
     };
   }
 
-  public async listAllForProxyId(soClient: SavedObjectsClientContract, proxyId: string) {
-    const outputs = await this.encryptedSoClient.find<OutputSOAttributes>({
+  public async listAllForProxyId(proxyId: string) {
+    const outputs = await this.soClient.find<OutputSOAttributes>({
       type: SAVED_OBJECT_TYPE,
       page: 1,
       perPage: SO_SEARCH_LIMIT,
@@ -828,8 +852,8 @@ class OutputService {
     };
   }
 
-  public async get(soClient: SavedObjectsClientContract, id: string): Promise<Output> {
-    const outputSO = await this.encryptedSoClient.get<OutputSOAttributes>(
+  public async get(id: string): Promise<Output> {
+    const outputSO = await this.encryptedSoClient.getDecryptedAsInternalUser<OutputSOAttributes>(
       SAVED_OBJECT_TYPE,
       outputIdToUuid(id)
     );
@@ -849,7 +873,6 @@ class OutputService {
   }
 
   public async delete(
-    soClient: SavedObjectsClientContract,
     id: string,
     { fromPreconfiguration = false }: { fromPreconfiguration?: boolean } = {
       fromPreconfiguration: false,
@@ -858,7 +881,7 @@ class OutputService {
     const logger = appContextService.getLogger();
     logger.debug(`Deleting output ${id}`);
 
-    const originalOutput = await this.get(soClient, id);
+    const originalOutput = await this.get(id);
 
     if (originalOutput.is_preconfigured && !fromPreconfiguration) {
       throw new OutputUnauthorizedError(
@@ -893,7 +916,7 @@ class OutputService {
       savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
     });
 
-    const soDeleteResult = this.encryptedSoClient.delete(SAVED_OBJECT_TYPE, outputIdToUuid(id));
+    const soDeleteResult = this.soClient.delete(SAVED_OBJECT_TYPE, outputIdToUuid(id));
 
     await deleteOutputSecrets({
       esClient: appContextService.getInternalUserESClient(),
@@ -919,7 +942,7 @@ class OutputService {
     logger.debug(`Updating output ${id}`);
 
     let secretsToDelete: SecretReference[] = [];
-    const originalOutput = await this.get(soClient, id);
+    const originalOutput = await this.get(id);
 
     this._validateFieldsAreEditable(originalOutput, data, id, fromPreconfiguration);
     if (
@@ -948,7 +971,7 @@ class OutputService {
 
     const mergedType = data.type ?? originalOutput.type;
     const mergedIsDefault = data.is_default ?? originalOutput.is_default;
-    const defaultDataOutputId = await this.getDefaultDataOutputId(soClient);
+    const defaultDataOutputId = await this.getDefaultDataOutputId();
     if (mergedType !== originalOutput.type || originalOutput.is_default !== mergedIsDefault) {
       await validateTypeChanges(
         esClient,
@@ -1092,7 +1115,6 @@ class OutputService {
     if (data.is_default) {
       if (defaultDataOutputId && defaultDataOutputId !== id) {
         await this._updateDefaultOutput(
-          soClient,
           defaultDataOutputId,
           { is_default: false },
           fromPreconfiguration
@@ -1100,11 +1122,10 @@ class OutputService {
       }
     }
     if (data.is_default_monitoring) {
-      const defaultMonitoringOutputId = await this.getDefaultMonitoringOutputId(soClient);
+      const defaultMonitoringOutputId = await this.getDefaultMonitoringOutputId();
 
       if (defaultMonitoringOutputId && defaultMonitoringOutputId !== id) {
         await this._updateDefaultOutput(
-          soClient,
           defaultMonitoringOutputId,
           { is_default_monitoring: false },
           fromPreconfiguration
@@ -1187,7 +1208,7 @@ class OutputService {
       savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
     });
 
-    const outputSO = await this.encryptedSoClient.update<Nullable<OutputSOAttributes>>(
+    const outputSO = await this.soClient.update<Nullable<OutputSOAttributes>>(
       SAVED_OBJECT_TYPE,
       outputIdToUuid(id),
       updateData
@@ -1211,7 +1232,7 @@ class OutputService {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient
   ) {
-    const outputs = await this.list(soClient);
+    const outputs = await this.list();
 
     await pMap(
       outputs.items.filter((output) => outputTypeSupportPresets(output.type) && !output.preset),
@@ -1273,7 +1294,7 @@ class OutputService {
   }
 
   async getOutputLastUpdateTime(id: string): Promise<string | undefined> {
-    const outputSO = await this.encryptedSoClient.get<OutputSOAttributes>(
+    const outputSO = await this.soClient.get<OutputSOAttributes>(
       SAVED_OBJECT_TYPE,
       outputIdToUuid(id)
     );
