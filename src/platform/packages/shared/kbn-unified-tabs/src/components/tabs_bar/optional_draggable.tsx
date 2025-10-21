@@ -32,9 +32,8 @@ export interface OptionalDraggableProps {
  *
  * When drag-and-drop is disabled, renders children with isDragging=false.
  * When enabled, wraps children with EuiDraggable and injects drag handle props.
- * The render prop pattern makes data flow explicit and follows React best practices
- * by avoiding cloneElement, which can make prop dependencies hard to trace.
- * See React docs: https://react.dev/reference/react/cloneElement#passing-data-with-a-render-prop
+ * Using render prop pattern to make data flow explicit, see React docs:
+ * https://react.dev/reference/react/cloneElement#passing-data-with-a-render-prop
  */
 export const OptionalDraggable = ({
   children,
