@@ -46,7 +46,6 @@
     "@kbn/es-query",
     "@kbn/coloring",
     "@kbn/inspector-plugin",
-    "@kbn/core-doc-links-browser",
     "@kbn/interpreter",
     "@kbn/i18n-react",
     "@kbn/shared-ux-page-analytics-no-data",
@@ -120,7 +119,6 @@
     "@kbn/esql-types",
     "@kbn/react-kibana-context-theme",
     "@kbn/fields-metadata-plugin",
-    "@kbn/alerts-ui-shared",
     "@kbn/deeplinks-analytics",
     "@kbn/core-http-server",
     "@kbn/presentation-util",
@@ -130,6 +128,8 @@
     "@kbn/controls-constants",
     "@kbn/visualizations-common",
     "@kbn/css-utils",
+    "@kbn/lens-common",
+    "@kbn/react-kibana-context-common",
   ],
   "exclude": ["target/**/*"]
 }
