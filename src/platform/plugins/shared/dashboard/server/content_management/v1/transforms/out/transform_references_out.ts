@@ -20,12 +20,12 @@ export function transformReferencesOut(
   // key: panel uid
   // value: boolean indicating to drop references for panel
   // because transformOut injected references serverside
+  // TODO - remove when all references are handled on server
   const dropRefsForPanel: Record<string, boolean> = {};
   function setDropRefsForPanel(panel: DashboardPanel) {
     if (!panel.uid) return;
     const { transformOutInjectsReferences } = embeddableService?.getTransforms(panel.type) ?? {};
-    dropRefsForPanel[panel.uid] =
-      typeof transformOutInjectsReferences === 'boolean' ? transformOutInjectsReferences : false;
+    dropRefsForPanel[panel.uid] = Boolean(transformOutInjectsReferences);
   }
   (panels ?? []).forEach((panel) => {
     if (isDashboardSection(panel)) {
