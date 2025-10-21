@@ -2209,7 +2209,7 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              " | undefined) => { error: string; } | Record<\"disabled\" | \"enabled\", { kuery: ",
+              " | undefined) => { error: string; } | Record<\"enabled\" | \"disabled\", { kuery: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -9972,6 +9972,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/entity_analytics/lens_attributes/risk_score_summary.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/metric/breakdown.mock.ts"
               }
             ]
           }
@@ -12933,6 +12937,45 @@
               {
                 "parentPluginId": "lens",
                 "id": "def-public.Visualization.ToolbarComponent.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "VisualizationToolbarProps",
+                  "<T>"
+                ],
+                "path": "x-pack/platform/plugins/shared/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.Visualization.FlyoutToolbarComponent",
+            "type": "Function",
+            "tags": [],
+            "label": "FlyoutToolbarComponent",
+            "description": [
+              "\nOptional flyout toolbar component that renders visualization-specific controls\nin a flyout panel. Provides configuration options for style, legend and filters."
+            ],
+            "signature": [
+              "((props: ",
+              "VisualizationToolbarProps",
+              "<T>) => React.ReactElement<",
+              "VisualizationToolbarProps",
+              "<T>, string | React.JSXElementConstructor<any>> | null) | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.FlyoutToolbarComponent.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "props",

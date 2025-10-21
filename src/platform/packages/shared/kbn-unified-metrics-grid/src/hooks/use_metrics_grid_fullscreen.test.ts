@@ -35,7 +35,7 @@ const mockUseMutationObserver = useMutationObserver as jest.MockedFunction<
 describe('useMetricsGridFullScreen', () => {
   beforeEach(() => {
     mockUseEuiTheme.mockReturnValue({
-      euiTheme: { levels: { header: 1000 } },
+      euiTheme: { levels: { header: 1000 }, colors: { backgroundBasePlain: '#000' } },
       colorMode: 'LIGHT',
       highContrastMode: false,
       modifications: undefined,

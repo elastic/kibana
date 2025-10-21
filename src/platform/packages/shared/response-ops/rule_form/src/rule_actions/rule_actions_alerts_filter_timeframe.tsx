@@ -155,6 +155,10 @@ export const RuleActionsAlertsFilterTimeframe: React.FC<RuleActionsAlertsFilterT
 
   const [startH, startM] = useMemo(() => timeframe.hours.start.split(':').map(Number), [timeframe]);
   const [endH, endM] = useMemo(() => timeframe.hours.end.split(':').map(Number), [timeframe]);
+  const timezoneLabel = i18n.translate(
+    'responseOpsRuleForm.ruleForm.ruleActionsAlertsFilterTimeframeTimezoneLabel',
+    { defaultMessage: 'Timezone' }
+  );
 
   return (
     <>
@@ -218,10 +222,8 @@ export const RuleActionsAlertsFilterTimeframe: React.FC<RuleActionsAlertsFilterT
             </EuiFlexItem>
             <EuiFlexItem grow={1}>
               <EuiComboBox
-                prepend={i18n.translate(
-                  'responseOpsRuleForm.ruleForm.ruleActionsAlertsFilterTimeframeTimezoneLabel',
-                  { defaultMessage: 'Timezone' }
-                )}
+                aria-label={timezoneLabel}
+                prepend={timezoneLabel}
                 singleSelection={{ asPlainText: true }}
                 options={TIMEZONE_OPTIONS}
                 selectedOptions={selectedTimezone}

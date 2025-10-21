@@ -26,13 +26,6 @@ export const exporters = {
   CSV_MIME_TYPE,
 };
 
-/*
- * Index patterns:
- */
-
-export type { FieldDescriptor, DataViewsServerPluginStart } from './data_views';
-export { IndexPatternsFetcher, getCapabilitiesForRollupIndices } from './data_views';
-
 export {
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,

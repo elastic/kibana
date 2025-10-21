@@ -449,7 +449,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
           pageIndex: search.page - 1,
         }}
       />
-      {executeWorkflow && (
+      {executeWorkflow?.definition && (
         <WorkflowExecuteModal
           definition={executeWorkflow.definition}
           onClose={() => setExecuteWorkflow(null)}
