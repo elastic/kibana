@@ -139,7 +139,6 @@ const unifiedTracesByIdRoute = createApmServerRoute({
     resources
   ): Promise<{
     traceItems: TraceItem[];
-    isFiltered: boolean;
   }> => {
     const [apmEventClient, logsClient] = await Promise.all([
       getApmEventClient(resources),
@@ -163,7 +162,6 @@ const unifiedTracesByIdRoute = createApmServerRoute({
 
     return {
       traceItems: unifiedItems.traceItems,
-      isFiltered: !!serviceName,
     };
   },
 });

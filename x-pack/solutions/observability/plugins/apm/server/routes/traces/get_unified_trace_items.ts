@@ -178,26 +178,25 @@ export async function getUnifiedTraceItems({
       .map((hit) => {
         const event = hit.fields;
         const apmDuration =
-          getFieldValue(SPAN_DURATION, event) || getFieldValue(TRANSACTION_DURATION, event);
-        const id = getFieldValue(SPAN_ID, event) || getFieldValue(TRANSACTION_ID, event);
+          getFieldValue<number>(SPAN_DURATION, event) ||
+          getFieldValue<number>(TRANSACTION_DURATION, event);
+        const id =
+          getFieldValue<string>(SPAN_ID, event) || getFieldValue<string>(TRANSACTION_ID, event);
 
         if (!id) {
           return undefined;
         }
 
-        const docErrors = errorsByDocId[id as string] || [];
+        const docErrors = errorsByDocId[id] || [];
 
         return {
           id,
           timestampUs:
             getFieldValue(TIMESTAMP_US, event) ??
-            toMicroseconds(getFieldValue(AT_TIMESTAMP, event) as string),
+            toMicroseconds(getFieldValue(AT_TIMESTAMP, event)),
           name: getFieldValue(SPAN_NAME, event) ?? getFieldValue(TRANSACTION_NAME, event),
           traceId: getFieldValue(TRACE_ID, event),
-          duration: resolveDuration(
-            apmDuration as number,
-            getFieldValue(DURATION, event) as string
-          ),
+          duration: resolveDuration(apmDuration, getFieldValue(DURATION, event)),
           ...(getFieldValue(EVENT_OUTCOME, event) || getFieldValue(STATUS_CODE, event)
             ? {
                 status: {
@@ -213,9 +212,9 @@ export async function getUnifiedTraceItems({
             getFieldValue(SPAN_SUBTYPE, event) ||
             getFieldValue(SPAN_TYPE, event) ||
             getFieldValue(KIND, event),
-        } as unknown as TraceItem;
+        } satisfies TraceItem;
       })
-      .filter((item): item is TraceItem => !!item),
+      .filter((item) => !!item) as TraceItem[],
     unifiedTraceErrors,
   };
 }
