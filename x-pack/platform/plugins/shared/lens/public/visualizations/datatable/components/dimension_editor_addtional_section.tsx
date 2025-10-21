@@ -12,7 +12,7 @@ import { EuiFormRow, EuiFieldText, EuiText, useEuiTheme, EuiComboBox } from '@el
 import type { PaletteRegistry } from '@kbn/coloring';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import type { VisualizationDimensionEditorProps } from '@kbn/lens-common';
-import type {  DatatableVisualizationState } from '@kbn/lens-common';
+import type { DatatableVisualizationState } from '@kbn/lens-common';
 
 import type { ColumnState } from '../../../../common/expressions';
 

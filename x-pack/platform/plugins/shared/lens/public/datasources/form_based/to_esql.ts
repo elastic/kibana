@@ -18,10 +18,10 @@ import type {
   IndexPattern,
   ValueFormatConfig,
 } from '@kbn/lens-common';
+import type { GenericIndexPatternColumn } from '@kbn/lens-common';
 import { isColumnOfType } from './operations/definitions/helpers';
 import { convertToAbsoluteDateRange } from '../../utils';
 import type { OriginalColumn } from '../../../common/types';
-import type { GenericIndexPatternColumn } from '@kbn/lens-common';
 import { operationDefinitionMap } from './operations';
 import { resolveTimeShift } from './time_shift_utils';
 

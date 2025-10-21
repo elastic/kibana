@@ -128,8 +128,8 @@
     "@kbn/controls-constants",
     "@kbn/visualizations-common",
     "@kbn/css-utils",
-    "@kbn/react-kibana-context-common",
     "@kbn/lens-common",
+    "@kbn/react-kibana-context-common",
   ],
   "exclude": ["target/**/*"]
 }

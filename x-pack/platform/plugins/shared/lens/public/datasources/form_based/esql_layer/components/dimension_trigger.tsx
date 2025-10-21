@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { DimensionTrigger } from '@kbn/visualization-ui-components';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { DatasourceDimensionTriggerProps } from '@kbn/lens-common';
-import type { TextBasedPrivateState }  from '@kbn/lens-common';
+import type { TextBasedPrivateState } from '@kbn/lens-common';
 
 export type TextBasedDimensionTrigger = DatasourceDimensionTriggerProps<TextBasedPrivateState> & {
   columnLabelMap: Record<string, string>;

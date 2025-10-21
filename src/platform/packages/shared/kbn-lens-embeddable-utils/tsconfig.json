@@ -17,7 +17,7 @@
     "@kbn/config-schema",
     "@kbn/coloring",
     "@kbn/content-management-utils",
-    "@kbn/chart-expressions-common",
     "@kbn/lens-common",
+    "@kbn/chart-expressions-common",
   ]
 }

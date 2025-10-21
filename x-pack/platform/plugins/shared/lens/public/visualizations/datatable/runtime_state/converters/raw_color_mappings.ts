@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { GeneralDatasourceStates } from '@kbn/lens-common';
+import type { DatatableVisualizationState } from '@kbn/lens-common';
 import type { ColumnState } from '../../../../../common/expressions';
 import type { DeprecatedColorMappingConfig } from '../../../../runtime_state/converters/raw_color_mappings';
 import {
@@ -12,8 +14,6 @@ import {
   getColumnMetaFn,
   isDeprecatedColorMapping,
 } from '../../../../runtime_state/converters/raw_color_mappings';
-import { GeneralDatasourceStates } from '@kbn/lens-common';
-import { DatatableVisualizationState } from '@kbn/lens-common';
 
 /** @deprecated */
 interface DeprecatedColorMappingColumn extends Omit<ColumnState, 'colorMapping'> {

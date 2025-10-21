@@ -9,8 +9,8 @@ import React from 'react';
 
 import type { CoreStart } from '@kbn/core/public';
 import type { Visualization } from '..';
-import type { DataViewsState }  from '@kbn/lens-common';
-import type { Datasource, UserMessage  } from '@kbn/lens-common';
+import type { DataViewsState } from '@kbn/lens-common';
+import type { Datasource, UserMessage } from '@kbn/lens-common';
 import type { UserMessageGetterProps } from './get_application_user_messages';
 import {
   filterAndSortUserMessages,

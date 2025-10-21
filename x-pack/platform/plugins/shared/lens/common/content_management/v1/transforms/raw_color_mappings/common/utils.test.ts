@@ -10,7 +10,7 @@ import type {
   FormBasedPersistedState,
   TextBasedPersistedState,
 } from '../../../../../../public';
-import type { TextBasedLayer  } from '@kbn/lens-common';
+import type { TextBasedLayer } from '@kbn/lens-common';
 import type { StructuredDatasourceStates } from '@kbn/lens-common';
 import type { ColumnMeta } from './utils';
 import { getColumnMetaFn } from './utils';

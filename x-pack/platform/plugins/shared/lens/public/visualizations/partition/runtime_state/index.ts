@@ -11,9 +11,9 @@ import type { GeneralDatasourceStates } from '@kbn/lens-common';
 import { getRuntimeConverters } from './converters';
 
 export function convertToRuntimeState(
-  state: LensPartitionVisualizationState ,
+  state: LensPartitionVisualizationState,
   datasourceStates?: Readonly<GeneralDatasourceStates>
-): LensPartitionVisualizationState  {
+): LensPartitionVisualizationState {
   return getRuntimeConverters(datasourceStates).reduce(
     (newState, fn) => fn(newState),
     structuredClone(state)

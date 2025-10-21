@@ -10,7 +10,7 @@ import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { onDrop } from './on_drop';
 import { column1, column2, column3, emptyDimensionTarget, defaultProps, fieldList } from './mocks';
 import type { DatasourceDimensionDropHandlerProps } from '@kbn/lens-common';
-import type { TextBasedPrivateState }  from '@kbn/lens-common';
+import type { TextBasedPrivateState } from '@kbn/lens-common';
 import { addColumnsToCache } from '../fieldlist_cache';
 
 describe('onDrop', () => {
