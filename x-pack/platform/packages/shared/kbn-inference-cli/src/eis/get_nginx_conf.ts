@@ -9,12 +9,12 @@ import dedent from 'dedent';
 import type { EisGatewayConfig } from './get_eis_gateway_config';
 
 export function getNginxConf({ eisGatewayConfig }: { eisGatewayConfig: EisGatewayConfig }) {
-  return dedent(`error_log /dev/stderr error;
+  return dedent(`error_log /dev/stderr error; 
 events {}
 
 http {
   access_log off;
-
+  
   upstream eis_gateway {
     server eis-gateway:${eisGatewayConfig.ports[0]};
   }
