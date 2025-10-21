@@ -18,6 +18,8 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { InferencePublicStart } from '@kbn/inference-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
+import type { OverlayRef } from '@kbn/core-mount-utils-browser';
+import type { OpenConversationFlyoutOptions } from './flyout/types';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -52,4 +54,26 @@ export interface OnechatPluginStart {
    * Tool service contract, can be used to list or execute tools.
    */
   tools: ToolServiceStartContract;
+  /**
+   * Opens a conversation flyout.
+   *
+   * @param options - Configuration options for the flyout
+   * @returns An object containing the flyout reference and a promise that resolves when the flyout is closed
+   *
+   * @example
+   * ```tsx
+   * // Open a new conversation
+   * const { flyoutRef, promise } = plugins.onechat.openConversationFlyout({});
+   *
+   * // Programmatically close the flyout
+   * flyoutRef.close();
+   *
+   * // Wait for the flyout to close
+   * await promise;
+   * ```
+   */
+  openConversationFlyout: (options: OpenConversationFlyoutOptions) => {
+    flyoutRef: OverlayRef;
+    promise: Promise<void>;
+  };
 }
