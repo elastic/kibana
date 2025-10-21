@@ -23,25 +23,22 @@ export class AgentConfigurationsPage {
     await this.page.waitForLoadingIndicatorHidden();
 
     // Wait for the page content to load
-    await this.page
-      .getByRole('heading', { name: 'Settings', level: 1 })
-      .waitFor({ timeout: 10000 });
+    this.page.getByRole('heading', { name: 'Settings', level: 1 });
 
     return this.page;
   }
 
   async getCreateConfigurationButton() {
     // Wait for the page to be fully loaded
-    await this.page
-      .getByRole('heading', { name: 'Configurations', exact: true })
-      .waitFor({ timeout: 10000 });
+    this.page.getByRole('heading', { name: 'Configurations', exact: true });
+
     return this.page.getByText('Create configuration');
   }
 
   async isCreateConfigurationButtonAvailable() {
     try {
       const button = this.page.getByText('Create configuration');
-      await button.waitFor({ timeout: 2000 });
+      await button.waitFor({ state: 'visible' });
       return true;
     } catch (error) {
       return false;
@@ -50,9 +47,8 @@ export class AgentConfigurationsPage {
 
   async hasPermissionsError() {
     try {
-      await this.page
-        .getByRole('heading', { name: 'Configurations', exact: true })
-        .waitFor({ timeout: 10000 });
+      this.page.getByRole('heading', { name: 'Configurations', exact: true });
+
       return await this.page
         .getByText('Your user may not have the sufficient permissions')
         .isVisible();

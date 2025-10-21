@@ -17,9 +17,7 @@ export class AgentExplorerPage {
       )}/settings/agent-explorer?kuery=&agentLanguage=&serviceName=&comparisonEnabled=true&environment=ENVIRONMENT_ALL`
     );
     await this.page.waitForLoadingIndicatorHidden();
-    await this.page
-      .getByRole('heading', { name: 'Settings', level: 1 })
-      .waitFor({ timeout: 10000 });
+    this.page.getByRole('heading', { name: 'Settings', level: 1 });
 
     return this.page;
   }

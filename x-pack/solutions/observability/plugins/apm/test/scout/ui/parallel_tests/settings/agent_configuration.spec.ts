@@ -43,7 +43,7 @@ test.describe('Agent Configuration', { tag: ['@ess'] }, () => {
       await agentConfigurationsPage.clickCreateConfiguration();
 
       await agentConfigurationsPage.selectServiceFromDropdown('All');
-      await agentConfigurationsPage.selectEnvironment('production ');
+      await agentConfigurationsPage.selectEnvironment('All ');
 
       await agentConfigurationsPage.clickNextStep();
       await expect(page.getByText('Create configuration')).toBeVisible();

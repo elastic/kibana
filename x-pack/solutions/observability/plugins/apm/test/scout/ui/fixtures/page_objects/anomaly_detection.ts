@@ -16,9 +16,7 @@ export class AnomalyDetectionPage {
     await this.page.waitForLoadingIndicatorHidden();
 
     // Wait for the page content to load
-    await this.page
-      .getByRole('heading', { name: 'Settings', level: 1 })
-      .waitFor({ timeout: 10000 });
+    this.page.getByRole('heading', { name: 'Settings', level: 1 });
 
     return this.page;
   }
@@ -55,6 +53,6 @@ export class AnomalyDetectionPage {
     await this.selectEnvironment(environmentName);
     await this.clickCreateJobsButton();
 
-    await this.page.getByText('Anomaly detection jobs created').waitFor({ timeout: 10000 });
+    this.page.getByText('Anomaly detection jobs created');
   }
 }

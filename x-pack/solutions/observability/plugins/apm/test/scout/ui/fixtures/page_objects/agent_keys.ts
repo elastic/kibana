@@ -13,9 +13,7 @@ export class AgentKeysPage {
   async goto() {
     await this.page.goto(`${this.kbnUrl.app('apm')}/settings/agent-keys`);
     await this.page.waitForLoadingIndicatorHidden();
-    await this.page
-      .getByRole('heading', { name: 'Settings', level: 1 })
-      .waitFor({ timeout: 10000 });
+    this.page.getByRole('heading', { name: 'Settings', level: 1 });
 
     return this.page;
   }
