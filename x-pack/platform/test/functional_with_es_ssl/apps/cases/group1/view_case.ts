@@ -43,6 +43,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   // https://github.com/elastic/kibana/pull/190690
   // fails after missing `awaits` were added
   // Failing: See https://github.com/elastic/kibana/issues/239759
+  // Failing: See https://github.com/elastic/kibana/issues/239774
   describe.skip('View case', () => {
     describe('page', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
