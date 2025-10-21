@@ -11,7 +11,7 @@
   .maplibregl-ctrl-group:not(:empty) {
     @include euiBottomShadowLarge;
     @include mapToolbarButtonGroupBorderRadius;
-    background-color: $euiColorEmptyShade;
+    background-color: $euiColorBackgroundBasePlain;
     transition: transform $euiAnimSpeedNormal ease-in-out;
 
     &:hover {
@@ -20,9 +20,19 @@
 
     > button {
       @include size($euiSizeXL);
+      margin: $euiColorBorderBaseFloating;
+      border: $euiBorderWidthThin solid $euiColorBorderBaseFloating;
+      border-radius: inherit;
+
+      &:not(:last-child) {
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+      }
 
       + button {
-        border: none;
+        border-top: none;
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
       }
     }
   }
