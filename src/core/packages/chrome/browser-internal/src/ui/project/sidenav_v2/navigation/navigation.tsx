@@ -10,7 +10,7 @@
 import React, { useMemo } from 'react';
 import { Navigation as NavigationComponent } from '@kbn/core-chrome-navigation';
 import type { Observable } from 'rxjs';
-import { combineLatest, EMPTY } from 'rxjs';
+import { combineLatest, debounceTime, EMPTY } from 'rxjs';
 import classnames from 'classnames';
 import type {
   ChromeNavLink,
@@ -96,8 +96,8 @@ const useNavigationItems = (
   props: Pick<ChromeNavigationProps, 'navigationTree$' | 'navLinks$' | 'activeNodes$' | 'basePath'>
 ): NavigationItems | null => {
   const state$ = useMemo(
-    () => combineLatest([props.navigationTree$, props.navLinks$, props.activeNodes$]),
-    [props.navigationTree$, props.navLinks$, props.activeNodes$]
+    () => combineLatest([props.navigationTree$, props.activeNodes$]).pipe(debounceTime(0)),
+    [props.navigationTree$, props.activeNodes$]
   );
   const state = useObservable(state$);
 
@@ -106,8 +106,8 @@ const useNavigationItems = (
 
   const memoizedItems = useMemo(() => {
     if (!state) return null;
-    const [navigationTree, navLinks, activeNodes] = state;
-    return toNavigationItems(navigationTree, navLinks, activeNodes, panelStateManager);
+    const [navigationTree, activeNodes] = state;
+    return toNavigationItems(navigationTree, activeNodes, panelStateManager);
   }, [state, panelStateManager]);
 
   return memoizedItems;
