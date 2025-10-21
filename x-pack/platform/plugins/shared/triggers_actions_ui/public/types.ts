@@ -10,7 +10,7 @@ import type React from 'react';
 import type { Moment } from 'moment';
 import type { EuiSuperSelectOption } from '@elastic/eui';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { DocLinksStart, HttpResponse } from '@kbn/core/public';
+import type { DocLinksStart } from '@kbn/core/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -298,17 +298,6 @@ export interface RuleTypeParamsExpressionProps<
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
-}
-
-export interface RuleDescriptionFieldWrappers {
-  indexPattern: React.ComponentType<{ children: React.ReactNode }>;
-  indexPatternItem: React.ComponentType<{ children: React.ReactNode }>;
-  codeBlock: React.ComponentType<{ children: React.ReactNode }>;
-  asyncField: <T>(props: {
-    queryKey: string[];
-    queryFn: () => Promise<HttpResponse<T>>;
-    children: (data: T) => React.ReactNode;
-  }) => React.ReactElement;
 }
 
 export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
