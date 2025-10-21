@@ -41,7 +41,7 @@ export const createTimeSliderAction = (): ActionDefinition<EmbeddableApiContext>
       serializedState: {
         rawState: {
           grow: true,
-          width: 'large',
+          width: 'medium',
         },
       },
     });
