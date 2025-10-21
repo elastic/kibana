@@ -635,7 +635,6 @@ describe('ResponseActionsClientImpl base class', () => {
         );
       });
     });
-
   });
 
   describe('#writeActionResponseToEndpointIndex()', () => {
