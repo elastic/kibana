@@ -32,10 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const checkIfDashboardRendered = async (spaceId: string) => {
-    await PageObjects.common.navigateToUrl('dashboard', undefined, {
-      basePath: getSpacePrefix(spaceId),
-      shouldUseHashForSubUrl: false,
-    });
+    await PageObjects.common.navigateToApp('dashboards');
     await PageObjects.dashboard.loadSavedDashboard('multi_space_import_8.0.0_export');
     // dashboard should load properly
     await PageObjects.dashboard.expectOnDashboard('multi_space_import_8.0.0_export');
