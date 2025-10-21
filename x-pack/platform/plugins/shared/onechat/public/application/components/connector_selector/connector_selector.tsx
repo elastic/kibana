@@ -19,7 +19,7 @@ import { useNavigation } from '../../hooks/use_navigation';
 
 interface ConnectorSelectorProps {
   connectors: InferenceConnector[];
-  selectedConnectorId: string | undefined;
+  selectedConnectorId?: string;
   onSelectConnector: (connectorId: string) => void;
   isLoading?: boolean;
   defaultConnectorId?: string;
