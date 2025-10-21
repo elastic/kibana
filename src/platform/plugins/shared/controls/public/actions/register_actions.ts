@@ -16,6 +16,7 @@ import {
   ACTION_CREATE_CONTROL,
   ACTION_CREATE_ESQL_CONTROL,
   ACTION_CREATE_TIME_SLIDER,
+  ACTION_EDIT_CONTROL_DISPLAY_SETTINGS,
   ACTION_PIN_CONTROL,
   OPTIONS_LIST_ACTION,
   RANGE_SLIDER_ACTION,
@@ -37,6 +38,12 @@ export function registerActions(uiActions: UiActionsStart) {
   });
   uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_PIN_CONTROL);
   uiActions.attachAction(CONTROL_HOVER_TRIGGER_ID, ACTION_PIN_CONTROL);
+
+  uiActions.registerActionAsync(ACTION_EDIT_CONTROL_DISPLAY_SETTINGS, async () => {
+    const { EditControlDisplaySettingsAction } = await import('../controls_module');
+    return new EditControlDisplaySettingsAction();
+  });
+  uiActions.attachAction(CONTROL_HOVER_TRIGGER_ID, ACTION_EDIT_CONTROL_DISPLAY_SETTINGS);
 
   uiActions.attachAction(CONTROL_HOVER_TRIGGER_ID, ACTION_REMOVE_PANEL);
   uiActions.attachAction(CONTROL_HOVER_TRIGGER_ID, ACTION_EDIT_PANEL);
