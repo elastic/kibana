@@ -196,6 +196,17 @@ export function getZodTypeName(schema: z.ZodType) {
       return 'unknown';
     case 'ZodLiteral':
       return 'literal';
+    case 'ZodUnion': {
+      // Check if all union members are arrays - if so, treat as array type
+      const unionSchema = unwrappedSchema as z.ZodUnion<any>;
+      const allMembersAreArrays = unionSchema.options.every(
+        (option: z.ZodType) => option instanceof z.ZodArray
+      );
+      if (allMembersAreArrays) {
+        return 'array';
+      }
+      return 'union';
+    }
     default:
       return 'unknown';
   }

@@ -83,6 +83,9 @@ function getBasicTypeName(schema: z.ZodType): string {
     case 'ZodOptional':
       const optionalInner = (schema as z.ZodOptional<any>).unwrap();
       return `${getBasicTypeName(optionalInner)}?`;
+    case 'ZodDefault':
+      const defaultInner = (schema as z.ZodDefault<any>).removeDefault();
+      return getBasicTypeName(defaultInner);
     case 'ZodDate':
       return 'date';
     case 'ZodLiteral':
@@ -208,6 +211,18 @@ function generateDetailedDescription(
       });
       // Only add ? if showOptional is true
       return showOptional ? `${innerType}?` : innerType;
+    }
+
+    case 'ZodDefault': {
+      const defaultSchema = schema as z.ZodDefault<any>;
+      const innerType = generateDetailedDescription(defaultSchema.removeDefault(), currentDepth, {
+        maxDepth,
+        showOptional,
+        includeDescriptions,
+        indentSpacesNumber,
+        singleLine,
+      });
+      return innerType;
     }
 
     case 'ZodDiscriminatedUnion': {

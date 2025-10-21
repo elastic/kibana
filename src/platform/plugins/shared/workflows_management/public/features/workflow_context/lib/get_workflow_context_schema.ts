@@ -43,15 +43,27 @@ export function getWorkflowContextSchema(definition: WorkflowYaml) {
               }
               break;
             case 'array': {
-              const elemMap = {
-                string: z.string(),
-                number: z.number(),
-                boolean: z.boolean(),
-              } as const;
-              const itemType = (input as any).items || 'string';
-              let schema = z.array(elemMap[itemType as keyof typeof elemMap]);
-              if ((input as any).minItems != null) schema = schema.min((input as any).minItems);
-              if ((input as any).maxItems != null) schema = schema.max((input as any).maxItems);
+              // Create a union of all possible array types to show comprehensive type information
+              // This allows the type description to show "string[] | number[] | boolean[]"
+              let stringArray = z.array(z.string());
+              let numberArray = z.array(z.number());
+              let booleanArray = z.array(z.boolean());
+
+              // Apply minItems constraint to all array types if specified
+              if ((input as any).minItems != null) {
+                stringArray = stringArray.min((input as any).minItems);
+                numberArray = numberArray.min((input as any).minItems);
+                booleanArray = booleanArray.min((input as any).minItems);
+              }
+
+              // Apply maxItems constraint to all array types if specified
+              if ((input as any).maxItems != null) {
+                stringArray = stringArray.max((input as any).maxItems);
+                numberArray = numberArray.max((input as any).maxItems);
+                booleanArray = booleanArray.max((input as any).maxItems);
+              }
+
+              const schema = z.union([stringArray, numberArray, booleanArray]);
               valueSchema = schema;
               break;
             }

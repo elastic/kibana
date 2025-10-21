@@ -174,7 +174,7 @@ describe('getZodTypeName', () => {
 
   it('should return unknown for truly unknown types', () => {
     // Create a custom schema that doesn't match any known types
-    const customSchema = z.union([z.string(), z.number()]);
+    const customSchema = z.tuple([z.string(), z.number()]);
     expect(getZodTypeName(customSchema)).toBe('unknown');
   });
 });
