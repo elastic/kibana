@@ -11,6 +11,7 @@ import _ from 'lodash';
 import expect from '@kbn/expect';
 
 import '@kbn/core-provider-plugin/types';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { PluginFunctionalProviderContext } from '../../services';
 
 declare global {
@@ -48,26 +49,18 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
   };
 
   const getInjectedMetadata = () =>
-    retry.tryForTime(5000, () =>
-      browser.execute(() => {
-        const injectedMetadata = document.querySelector('kbn-injected-metadata');
-        // null/hasAttribute check and explicit error for better future troublehsooting
-        // (see https://github.com/elastic/kibana/issues/167142)
-        // The 'kbn-injected-metadata' tag that we're relying on here gets removed
-        // some time after navigation (e.g. to /render/core). It appears that
-        // occasionally this test fails to read the tag before it is removed.
-        if (!injectedMetadata?.hasAttribute('data')) {
-          throw new Error(`'kbn-injected-metadata.data' not found.`);
-        }
-        return JSON.parse(injectedMetadata.getAttribute('data')!);
-      })
-    );
-
-  const getUserSettings = async () => {
-    const injectedMetadata = await getInjectedMetadata();
-    return injectedMetadata.legacyMetadata.uiSettings.user;
-  };
-
+    browser.execute(() => {
+      const injectedMetadata = document.querySelector('kbn-injected-metadata');
+      // null/hasAttribute check and explicit error for better future troublehsooting
+      // (see https://github.com/elastic/kibana/issues/167142)
+      // The 'kbn-injected-metadata' tag that we're relying on here gets removed
+      // some time after navigation (e.g. to /render/core). It appears that
+      // occasionally this test fails to read the tag before it is removed.
+      if (!injectedMetadata?.hasAttribute('data')) {
+        throw new Error(`'kbn-injected-metadata.data' not found.`);
+      }
+      return JSON.parse(injectedMetadata.getAttribute('data')!);
+    });
   const exists = (selector: string) => testSubjects.exists(selector, { timeout: 5000 });
   const findLoadingMessage = () => testSubjects.find('kbnLoadingMessage', 5000);
   const getRenderingSession = () =>
@@ -496,31 +489,45 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
     });
 
     it('renders "core" application', async () => {
-      await navigateTo('/render/core');
-
-      const [loadingMessage, userSettings] = await Promise.all([
-        findLoadingMessage(),
-        getUserSettings(),
-      ]);
+      // This retry loop to get the injectedMetadata is to overcome flakiness
+      // (see comment in getInjectedMetadata)
+      let injectedMetadata: Partial<{ legacyMetadata: any }> = { legacyMetadata: undefined };
+      let loadingMessage: WebElementWrapper | null = null;
+      await retry.waitFor('injectedMetadata', async () => {
+        await navigateTo('/render/core');
+        injectedMetadata = await getInjectedMetadata();
+        loadingMessage = await findLoadingMessage();
+        return !!injectedMetadata;
+      });
+      const userSettings = injectedMetadata!.legacyMetadata?.uiSettings?.user;
 
       expect(userSettings).to.not.be.empty();
+      expect(loadingMessage).to.not.be.empty();
 
-      await find.waitForElementStale(loadingMessage);
+      await find.waitForElementStale(loadingMessage!);
 
       expect(await exists('renderingHeader')).to.be(true);
     });
 
     it('renders "core" application without user settings', async () => {
-      await navigateTo('/render/core?isAnonymousPage=true');
+      // This retry loop to get the injectedMetadata is to overcome flakiness
+      // (see comment in getInjectedMetadata)
+      let injectedMetadata: Partial<{ legacyMetadata: any }> = { legacyMetadata: undefined };
+      let loadingMessage: WebElementWrapper | null = null;
+      await retry.waitFor('injectedMetadata', async () => {
+        await navigateTo('/render/core?isAnonymousPage=true');
+        injectedMetadata = await getInjectedMetadata();
+        loadingMessage = await findLoadingMessage();
+        return !!injectedMetadata;
+      });
+      const userSettings = injectedMetadata!.legacyMetadata?.uiSettings?.user;
 
-      const [loadingMessage, userSettings] = await Promise.all([
-        findLoadingMessage(),
-        getUserSettings(),
-      ]);
+      expect(userSettings).to.be.empty();
+      expect(loadingMessage).to.not.be.empty();
 
       expect(userSettings).to.be.empty();
 
-      await find.waitForElementStale(loadingMessage);
+      await find.waitForElementStale(loadingMessage!);
 
       expect(await exists('renderingHeader')).to.be(true);
     });
