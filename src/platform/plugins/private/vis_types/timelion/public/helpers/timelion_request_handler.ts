@@ -154,7 +154,7 @@ export function getTimelionRequestHandler({
       searchTracker?.complete();
       return visData;
     } catch (e) {
-      searchTracker?.error(e);
+      searchTracker?.error();
 
       if (e && e.body) {
         const err = new Error(

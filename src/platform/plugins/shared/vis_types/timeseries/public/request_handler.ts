@@ -105,7 +105,7 @@ export const metricsRequestHandler = async ({
 
         return visData;
       } catch (e) {
-        searchTracker?.error(e);
+        searchTracker?.error();
         throw e;
       } finally {
         expressionAbortSignal.removeEventListener('abort', expressionAbortHandler);
