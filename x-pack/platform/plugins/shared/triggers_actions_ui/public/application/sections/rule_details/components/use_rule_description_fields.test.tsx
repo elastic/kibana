@@ -10,7 +10,7 @@ import { AsyncField, createPrebuildFields } from './use_rule_description_fields'
 import { screen, render } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { HttpSetup } from '@kbn/core/public';
-import { RULE_DETAIL_DESCRIPTION_FIELD_TYPES } from '@kbn/triggers-actions-ui-types/rule_detail_description_type';
+import { RULE_DETAIL_DESCRIPTION_FIELD_TYPES } from './rule_detail_description_type';
 
 describe('use_rule_description_fields', () => {
   let queryClient: QueryClient;

@@ -1114,12 +1114,12 @@ describe('rule_details', () => {
       return [
         {
           title: 'my title',
-          description: <div>Generated Test Description Field</div>,
+          description: <div>Generated Test Description Field - {rule.ruleTypeId}</div>,
         },
       ];
     };
 
-    const ruleTypeWithDescriptionFields: RuleType = {
+    const ruleTypeWithDescriptionFields = {
       ...ruleType,
       id: '.noop-with-description-fields',
       name: 'No Op with description fields',
@@ -1167,7 +1167,9 @@ describe('rule_details', () => {
         </QueryClientProvider>
       );
 
-      expect(await screen.findByText('Generated Test Description Field')).toBeInTheDocument();
+      expect(
+        await screen.findByText('Generated Test Description Field - .noop-with-description-fields')
+      ).toBeInTheDocument();
     });
   });
 
