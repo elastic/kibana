@@ -50,13 +50,23 @@ export const OptionalDroppable: FC<DroppableWrapperProps> = ({
 }) => {
   // When drag-and-drop is disabled, render children in a plain flex container
   if (!enableDragAndDrop) {
-    return <div css={droppableCss}>{children}</div>;
+    return (
+      <div css={droppableCss} data-test-subj="unifiedTabs_droppable_disabled">
+        {children}
+      </div>
+    );
   }
 
   // When enabled, provide drag-drop context and droppable zone
   return (
     <EuiDragDropContext onDragEnd={onDragEnd}>
-      <EuiDroppable droppableId={DROPPABLE_ID} direction="horizontal" css={droppableCss} grow>
+      <EuiDroppable
+        droppableId={DROPPABLE_ID}
+        direction="horizontal"
+        css={droppableCss}
+        grow
+        data-test-subj="unifiedTabs_droppable_enabled"
+      >
         {() => <>{children}</>}
       </EuiDroppable>
     </EuiDragDropContext>
