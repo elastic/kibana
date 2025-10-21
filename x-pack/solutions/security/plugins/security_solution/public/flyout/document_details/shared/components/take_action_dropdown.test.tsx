@@ -377,8 +377,8 @@ describe('take action dropdown', () => {
       const mockUseEndpointExceptionsCapability = useEndpointExceptionsCapability as jest.Mock;
 
       test('should enable the "Add Endpoint exception" button if provided endpoint alert and has right privileges', async () => {
-        set(defaultProps.dataAsNestedObject, 'kibana.alert.original_event.kind', ['alert']);
-        set(defaultProps.dataAsNestedObject, 'kibana.alert.original_event.module', ['endpoint']);
+        set(defaultProps, 'dataAsNestedObject.kibana.alert.original_event.kind', ['alert']);
+        set(defaultProps, 'dataAsNestedObject.kibana.alert.original_event.module', ['endpoint']);
         mockUseEndpointExceptionsCapability.mockReturnValue(true);
 
         render();
@@ -391,8 +391,8 @@ describe('take action dropdown', () => {
       });
 
       test('should disable the "Add Endpoint exception" button if user has no endpoint exception write privilege', async () => {
-        set(defaultProps.dataAsNestedObject, 'kibana.alert.original_event.kind', ['alert']);
-        set(defaultProps.dataAsNestedObject, 'kibana.alert.original_event.module', ['endpoint']);
+        set(defaultProps, 'dataAsNestedObject.kibana.alert.original_event.kind', ['alert']);
+        set(defaultProps, 'dataAsNestedObject.kibana.alert.original_event.module', ['endpoint']);
         mockUseEndpointExceptionsCapability.mockReturnValue(false);
 
         render();
@@ -405,8 +405,8 @@ describe('take action dropdown', () => {
       });
 
       test('should disable the "Add Endpoint exception" button if event kind is not alert', async () => {
-        set(defaultProps.dataAsNestedObject, 'kibana.alert.original_event.kind', ['event']);
-        set(defaultProps.dataAsNestedObject, 'kibana.alert.original_event.module', ['endpoint']);
+        set(defaultProps, 'dataAsNestedObject.kibana.alert.original_event.kind', ['event']);
+        set(defaultProps, 'dataAsNestedObject.kibana.alert.original_event.module', ['endpoint']);
         mockUseEndpointExceptionsCapability.mockReturnValue(true);
 
         render();
@@ -419,8 +419,8 @@ describe('take action dropdown', () => {
       });
 
       test('should disable the "Add Endpoint exception" button if module is not endpoint', async () => {
-        set(defaultProps.dataAsNestedObject, 'kibana.alert.original_event.kind', ['alert']);
-        set(defaultProps.dataAsNestedObject, 'kibana.alert.original_event.module', ['filebeat']);
+        set(defaultProps, 'dataAsNestedObject.kibana.alert.original_event.kind', ['alert']);
+        set(defaultProps, 'dataAsNestedObject.kibana.alert.original_event.module', ['filebeat']);
         mockUseEndpointExceptionsCapability.mockReturnValue(true);
 
         render();
