@@ -14,22 +14,40 @@ import { EuiDraggable } from '@elastic/eui';
 import type { TabItem } from '../../types';
 
 export interface OptionalDraggableProps {
+  /**
+   * Render function that receives drag-related props and returns the draggable element.
+   * Uses the render prop pattern to conditionally pass drag props without cloneElement.
+   */
   children: (props: { dragHandleProps?: any; isDragging: boolean }) => React.ReactElement;
+  /** The tab item being rendered */
   item: TabItem;
+  /** Index position in the tabs list, used for drag-drop ordering */
   index: number;
+  /** When true, wraps children with EuiDraggable; when false, renders children directly */
   enableDragAndDrop: boolean;
 }
 
+/**
+ * OptionalDraggable - Conditionally wraps content with drag-and-drop functionality
+ *
+ * When drag-and-drop is disabled, renders children with isDragging=false.
+ * When enabled, wraps children with EuiDraggable and injects drag handle props.
+ * The render prop pattern makes data flow explicit and follows React best practices
+ * by avoiding cloneElement, which can make prop dependencies hard to trace.
+ * See React docs: https://react.dev/reference/react/cloneElement#passing-data-with-a-render-prop
+ */
 export const OptionalDraggable = ({
   children,
   item,
   index,
   enableDragAndDrop,
 }: OptionalDraggableProps) => {
+  // When drag-and-drop is disabled, render children without drag props
   if (!enableDragAndDrop) {
     return children({ isDragging: false });
   }
 
+  // When enabled, wrap with EuiDraggable to provide drag functionality
   return (
     <EuiDraggable
       key={item.id}

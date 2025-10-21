@@ -277,14 +277,25 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
           <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false} css={growingFlexItemCss}>
               <div ref={setTabsContainerElement} role="tablist" css={tabsContainerCss}>
+                {/*
+                  OptionalDroppable provides the drag-drop context wrapper.
+                  When enableDragAndDrop=true, it sets up EuiDragDropContext and EuiDroppable.
+                  When false, it renders a plain flex container with consistent styling.
+                  This eliminates conditional rendering logic from this file.
+                */}
                 <OptionalDroppable enableDragAndDrop={enableDragAndDrop} onDragEnd={onDragEnd}>
+                  {/* Render each tab, optionally wrapped with drag functionality */}
                   {items.map((item, index) => (
+                    /*
+                      OptionalDraggable uses render prop pattern to conditionally wrap each tab with EuiDraggable.
+                    */
                     <OptionalDraggable
                       item={item}
                       index={index}
                       enableDragAndDrop={enableDragAndDrop}
                       key={item.id}
                     >
+                      {/* Render prop receives drag-related props when drag is enabled */}
                       {({ dragHandleProps, isDragging }) => (
                         <Tab
                           item={item}

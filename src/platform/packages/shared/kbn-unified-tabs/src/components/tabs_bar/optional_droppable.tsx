@@ -13,8 +13,13 @@ import { css } from '@emotion/react';
 import type { DropResult } from '@elastic/eui';
 import { EuiDragDropContext, EuiDroppable } from '@elastic/eui';
 
+/** Unique identifier for the droppable zone containing tabs */
 const DROPPABLE_ID = 'unifiedTabsOrder';
 
+/**
+ * Styling for the droppable container.
+ * Uses flexbox to align tabs horizontally without wrapping.
+ */
 const droppableCss = css`
   display: flex;
   align-items: center;
@@ -22,20 +27,33 @@ const droppableCss = css`
 `;
 
 interface DroppableWrapperProps {
+  /** Content to render inside the droppable zone */
   children: React.ReactNode;
+  /** When true, wraps children with drag-drop context; when false, renders as plain div */
   enableDragAndDrop: boolean;
+  /** Callback fired when a drag operation completes with new ordering */
   onDragEnd: (result: DropResult) => void;
 }
 
+/**
+ * OptionalDroppable - Conditionally provides drag-and-drop context for the tabs
+ *
+ * When drag-and-drop is disabled, renders children in a plain div with consistent styling.
+ * When enabled, wraps children with EuiDragDropContext and EuiDroppable.
+ * Used as the parent container for OptionalDraggable items. The droppable context
+ * enables reordering of tabs when drag-and-drop is enabled.
+ */
 export const OptionalDroppable: FC<DroppableWrapperProps> = ({
   children,
   enableDragAndDrop,
   onDragEnd,
 }) => {
+  // When drag-and-drop is disabled, render children in a plain flex container
   if (!enableDragAndDrop) {
     return <div css={droppableCss}>{children}</div>;
   }
 
+  // When enabled, provide drag-drop context and droppable zone
   return (
     <EuiDragDropContext onDragEnd={onDragEnd}>
       <EuiDroppable droppableId={DROPPABLE_ID} direction="horizontal" css={droppableCss} grow>
