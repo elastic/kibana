@@ -95,9 +95,17 @@ describe('EditLifecycleModal', () => {
 
       render(<EditLifecycleModal {...defaultProps} definition={definition} />);
 
-      expect(screen.getByTestId('editLifecycleModalTitle')).toBeInTheDocument();
+      expect(screen.getByTestId('editLifecycleModalTitle')).toHaveTextContent(
+        'Edit data retention'
+      );
       expect(screen.getByTestId('streamsAppModalFooterCancelButton')).toBeInTheDocument();
       expect(screen.getByTestId('streamsAppModalFooterButton')).toBeInTheDocument();
+
+      // Verify that the retention options are rendered
+      expect(screen.getByTestId('dataRetentionButtonGroup')).toBeInTheDocument();
+      expect(screen.getByTestId('indefiniteRetentionButton')).toBeInTheDocument();
+      expect(screen.getByTestId('customRetentionButton')).toBeInTheDocument();
+      expect(screen.getByTestId('ilmRetentionButton')).toBeInTheDocument();
     });
 
     it('should call closeModal when cancel button is clicked', async () => {
