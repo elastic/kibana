@@ -131,7 +131,7 @@ export function initializeESQLControlSelections(
     const selectedValues = selectedOptions$.value;
 
     // For single select, return the first value; for multi-select, return the array
-    let value: string | number | (string | number)[];
+    let value: ESQLControlVariable['value'];
 
     if (isSingleSelect) {
       // Single select: return the first value or empty string if none selected
