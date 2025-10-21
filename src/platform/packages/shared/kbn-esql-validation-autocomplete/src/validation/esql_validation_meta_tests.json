@@ -109,6 +109,16 @@
       "userDefined": false
     },
     {
+      "name": "aggregateMetricDoubleField",
+      "type": "aggregate_metric_double",
+      "userDefined": false
+    },
+    {
+      "name": "denseVectorField",
+      "type": "dense_vector",
+      "userDefined": false
+    },
+    {
       "name": "any#Char$Field",
       "type": "double",
       "userDefined": false
@@ -658,6 +668,26 @@
       "error": [
         {
           "sample": "SyntaxError:",
+          "inverse": false
+        }
+      ],
+      "warning": []
+    },
+    {
+      "query": "SET time_zone = \"CEST\";",
+      "error": [
+        {
+          "sample": "SyntaxError:",
+          "inverse": false
+        }
+      ],
+      "warning": []
+    },
+    {
+      "query": "SET invalid_setting = \"_alias:_origin\"; FROM index",
+      "error": [
+        {
+          "sample": "Unknown setting invalid_setting",
           "inverse": false
         }
       ],
