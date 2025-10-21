@@ -28,9 +28,6 @@ const storageSettings = {
       config: types.object({ properties: {}, dynamic: false }),
       created_at: types.date({}),
       updated_at: types.date({}),
-      // legacy field - configuration was introduced as dynamic: true
-      // so we introduced the config field later
-      configuration: types.object({ dynamic: true }),
     },
   },
 } satisfies IndexStorageSettings;
