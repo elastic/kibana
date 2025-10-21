@@ -36,7 +36,6 @@ import {
 } from '../../../../test_helpers';
 import type { ReportingRequestHandlerContext, ScheduledReportType } from '../../../../types';
 import { EventTracker } from '../../../../usage';
-import { registerScheduledRoutesInternal } from '../scheduled';
 import type {
   KibanaRequest,
   SavedObject,
@@ -45,6 +44,7 @@ import type {
 } from '@kbn/core/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { registerScheduledReportsRoutesInternal } from '..';
 
 const fakeRawRequest = {
   headers: {
@@ -275,7 +275,7 @@ describe(`Reporting Schedule Management Routes: Internal`, () => {
 
   describe('list scheduled reports', () => {
     it('correct lists scheduled reports', async () => {
-      registerScheduledRoutesInternal(reportingCore, mockLogger);
+      registerScheduledReportsRoutesInternal(reportingCore, mockLogger);
 
       await server.start();
       await supertest(httpSetup.server.listener)
@@ -352,7 +352,7 @@ describe(`Reporting Schedule Management Routes: Internal`, () => {
         mockConfigSchema
       );
       reportingCore = await createMockReportingCore(mockConfigSchema, mockSetupDeps, mockStartDeps);
-      registerScheduledRoutesInternal(reportingCore, mockLogger);
+      registerScheduledReportsRoutesInternal(reportingCore, mockLogger);
 
       await server.start();
 
@@ -383,7 +383,7 @@ describe(`Reporting Schedule Management Routes: Internal`, () => {
         mockConfigSchema
       );
       reportingCore = await createMockReportingCore(mockConfigSchema, mockSetupDeps, mockStartDeps);
-      registerScheduledRoutesInternal(reportingCore, mockLogger);
+      registerScheduledReportsRoutesInternal(reportingCore, mockLogger);
 
       await server.start();
 
@@ -400,7 +400,7 @@ describe(`Reporting Schedule Management Routes: Internal`, () => {
 
   describe('disable scheduled reports', () => {
     it('correct disables scheduled reports', async () => {
-      registerScheduledRoutesInternal(reportingCore, mockLogger);
+      registerScheduledReportsRoutesInternal(reportingCore, mockLogger);
 
       await server.start();
       await supertest(httpSetup.server.listener)
@@ -435,7 +435,7 @@ describe(`Reporting Schedule Management Routes: Internal`, () => {
         mockConfigSchema
       );
       reportingCore = await createMockReportingCore(mockConfigSchema, mockSetupDeps, mockStartDeps);
-      registerScheduledRoutesInternal(reportingCore, mockLogger);
+      registerScheduledReportsRoutesInternal(reportingCore, mockLogger);
 
       await server.start();
 
@@ -469,7 +469,7 @@ describe(`Reporting Schedule Management Routes: Internal`, () => {
         mockConfigSchema
       );
       reportingCore = await createMockReportingCore(mockConfigSchema, mockSetupDeps, mockStartDeps);
-      registerScheduledRoutesInternal(reportingCore, mockLogger);
+      registerScheduledReportsRoutesInternal(reportingCore, mockLogger);
 
       await server.start();
 
