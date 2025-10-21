@@ -72,14 +72,6 @@ describe('Orphan response action APIs', () => {
       });
     });
 
-    it('should return not found error if feature flag is disabled', async () => {
-      await readHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
-
-      expect(httpResponseMock.notFound).toHaveBeenCalledWith({
-        body: expect.objectContaining({ message: 'Space awareness feature is disabled' }),
-      });
-    });
-
     it('should return expected response', async () => {
       await readHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
 
@@ -111,14 +103,6 @@ describe('Orphan response action APIs', () => {
 
       expect(httpResponseMock.forbidden).toHaveBeenCalledWith({
         body: expect.objectContaining({ message: 'Endpoint authorization failure' }),
-      });
-    });
-
-    it('should return not found error if feature flag is disabled', async () => {
-      await writeHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
-
-      expect(httpResponseMock.notFound).toHaveBeenCalledWith({
-        body: expect.objectContaining({ message: 'Space awareness feature is disabled' }),
       });
     });
 

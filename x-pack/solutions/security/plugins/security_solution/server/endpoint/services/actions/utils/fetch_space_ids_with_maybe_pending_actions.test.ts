@@ -7,7 +7,6 @@
 
 import { createMockEndpointAppContextService } from '../../../mocks';
 import { fetchSpaceIdsWithMaybePendingActions, getUnExpiredActionsEsQuery } from '../..';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { applyEsClientSearchMock } from '../../../mocks/utils.mock';
 import { ENDPOINT_ACTIONS_INDEX } from '../../../../../common/endpoint/constants';
 import { BaseDataGenerator } from '../../../../../common/endpoint/data_generators/base_data_generator';
@@ -32,14 +31,6 @@ describe('fetchSpaceIdsWithMaybePendingActions()', () => {
         },
       }),
     });
-  });
-
-  it('should return array with default space id if space awareness feature is disabled', async () => {
-    await expect(
-      fetchSpaceIdsWithMaybePendingActions(endpointServiceMock, 'endpoint')
-    ).resolves.toEqual([DEFAULT_SPACE_ID]);
-
-    expect(endpointServiceMock.getInternalEsClient().search).not.toHaveBeenCalled();
   });
 
   it('should return an array of space ids', async () => {

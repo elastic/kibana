@@ -114,7 +114,7 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
     );
   });
 
-  it('should initialize form with a per-policy artifact when user does not have global artifact privilege and spaces is enabeld', async () => {
+  it('should initialize form with a per-policy artifact when user does not have global artifact privilege', async () => {
     useUserPrivileges.mockReturnValue({
       ...useUserPrivileges(),
       endpointPrivileges: getEndpointPrivilegesInitialStateMock({

@@ -46,12 +46,6 @@ describe('useArtifactRestrictedPolicyAssignments()', () => {
     });
   });
 
-  it('should return empty array when no policies are inaccessible', () => {
-    const { result } = renderHook();
-
-    expect(result.current).toEqual({ isLoading: false, policyIds: [] });
-  });
-
   it('should set loading property to true while fetching policies', async () => {
     const { result } = renderHook();
 

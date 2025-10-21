@@ -332,14 +332,6 @@ describe.each([
       authzMock.reset();
     });
 
-    it('should render menu', () => {
-      render({ actions });
-
-      expect(
-        (renderResult.getByTestId('testCard-header-actions-button') as HTMLButtonElement).disabled
-      ).toBe(false);
-    });
-
     it('should disable card actions menu for global artifacts when user does not have global artifact privilege', () => {
       render({ actions });
 

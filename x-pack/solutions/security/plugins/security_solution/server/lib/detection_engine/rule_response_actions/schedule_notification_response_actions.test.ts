@@ -105,26 +105,6 @@ describe('ScheduleNotificationResponseActions', () => {
       );
     });
 
-    it('should use default space id when space awareness is disabled', () => {
-      const signals = getSignals();
-      scheduleNotificationResponseActions({
-        signals,
-        signalsCount: signals.length,
-        responseActions: [
-          {
-            actionTypeId: ResponseActionTypesEnum['.osquery'],
-            params: { ...defaultQueryParams, queries: [{ id: 'query-1', query: simpleQuery }] },
-          } as RuleResponseAction,
-        ],
-      });
-      expect(osqueryActionMock.create).toHaveBeenCalledWith(
-        expect.any(Object),
-        expect.objectContaining({
-          space: { id: DEFAULT_SPACE_ID },
-        })
-      );
-    });
-
     it('should log error if space awareness is enabled and space id is missing', () => {
       const signals = [{ ...getSignals()[0], [SPACE_IDS]: undefined }];
       scheduleNotificationResponseActions({
@@ -399,29 +379,7 @@ describe('ScheduleNotificationResponseActions', () => {
       expect(response).toBeUndefined();
     });
 
-    it('should use default space id when space awareness is disabled', async () => {
-      await scheduleNotificationResponseActions({
-        signals: getSignals(),
-        signalsCount: 2,
-        responseActions: [
-          {
-            actionTypeId: ResponseActionTypesEnum['.endpoint'],
-            params: {
-              command: 'isolate',
-              comment: 'test process comment',
-            },
-          },
-        ],
-      });
-
-      expect(endpointServiceMock.getInternalResponseActionsClient).toHaveBeenCalledWith(
-        expect.objectContaining({ spaceId: DEFAULT_SPACE_ID })
-      );
-    });
-
     describe('and when space awareness is enabled', () => {
-      beforeEach(() => {});
-
       it('should initialize a response action client with the alert space id when space awareness is enabled', async () => {
         const signals = getSignals();
         signals[0][SPACE_IDS] = ['foo'];

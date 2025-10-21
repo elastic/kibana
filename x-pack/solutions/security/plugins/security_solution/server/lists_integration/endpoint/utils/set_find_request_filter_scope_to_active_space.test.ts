@@ -46,16 +46,6 @@ describe('Artifacts: setFindRequestFilterScopeToActiveSpace()', () => {
     };
   });
 
-  it('should nothing if feature flag is disabled', async () => {
-    await setFindRequestFilterScopeToActiveSpace(
-      endpointAppContextServices,
-      kibanaRequest,
-      findOptionsMock
-    );
-
-    expect(findOptionsMock.filter).toBeUndefined();
-  });
-
   it('should inject additional filtering into find request', async () => {
     await setFindRequestFilterScopeToActiveSpace(
       endpointAppContextServices,

@@ -530,12 +530,6 @@ describe('SecurityWorkflowInsightsService', () => {
     });
 
     describe('ensureAgentIdsInCurrentSpace', () => {
-      it('should not call fleetServices.ensureInCurrentSpace when the experimental feature is disabled', async () => {
-        await securityWorkflowInsightsService.ensureAgentIdsInCurrentSpace(request, ['agent-1']);
-
-        expect(mockEndpointAppContextService.getInternalFleetServices).not.toHaveBeenCalled();
-      });
-
       it('should call fleetServices.ensureInCurrentSpace with correct agent IDs when feature is enabled', async () => {
         const { ensureInCurrentSpace } = setupWithMockFleet();
 

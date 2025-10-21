@@ -65,19 +65,7 @@ describe('ensureActionRequestsIndexIsConfigured()', () => {
     );
   });
 
-  it(`should do nothing if space awareness feature is disabled`, async () => {
-    await expect(
-      ensureActionRequestsIndexIsConfigured(endpointServiceMock)
-    ).resolves.toBeUndefined();
-
-    expect(
-      endpointServiceMock.getInternalEsClient().indices.getFieldMapping
-    ).not.toHaveBeenCalled();
-  });
-
   describe('and space awareness feature is enabled', () => {
-    beforeEach(() => {});
-
     it('should add mappings to DS index if they are missing', async () => {
       await expect(
         ensureActionRequestsIndexIsConfigured(endpointServiceMock)

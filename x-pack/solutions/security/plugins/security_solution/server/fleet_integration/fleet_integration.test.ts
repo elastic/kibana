@@ -1553,12 +1553,6 @@ describe('Fleet integrations', () => {
           });
       });
 
-      it('should not update response actions if spaces feature is disabled', async () => {
-        await invokeDeleteCallback();
-
-        expect(endpointServicesMock.getInternalEsClient().updateByQuery).not.toHaveBeenCalled();
-      });
-
       it('should check only policies whose package.name matches a package that supports response actions', async () => {
         await invokeDeleteCallback();
 

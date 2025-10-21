@@ -80,12 +80,6 @@ describe('Space awareness migration', () => {
     });
   });
 
-  it('should do nothing if feature flag is disabled', async () => {
-    await expect(migrateEndpointDataToSupportSpaces(endpointServiceMock)).resolves.toBeUndefined();
-    expect(endpointServiceMock.getInternalFleetServices).not.toHaveBeenCalled();
-    expect(endpointServiceMock.getInternalEsClient).not.toHaveBeenCalled();
-  });
-
   describe('for Artifacts', () => {
     let artifactMigrationState: MigrationStateReferenceData;
     let findExceptionsResultData: ExceptionListItemSchema[];

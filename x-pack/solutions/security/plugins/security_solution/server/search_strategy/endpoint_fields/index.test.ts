@@ -139,11 +139,6 @@ describe('Endpoint fields', () => {
     });
 
     describe('when space awareness feature is enabled', () => {
-      beforeEach(() => {
-        // @ts-expect-error write to readonly property
-        endpointAppContextService.experimentalFeatures = {};
-      });
-
       it('should use space-aware index pattern when feature flag is enabled', async () => {
         const spaceId = 'custom-space';
         const mockIntegrationNamespaces = { endpoint: ['custom-namespace'] };
