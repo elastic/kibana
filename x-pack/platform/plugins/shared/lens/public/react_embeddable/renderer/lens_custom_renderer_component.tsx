@@ -106,9 +106,8 @@ export function LensRenderer({
         ...props.attributes,
       });
       lensApi.updateOverrides(props.overrides);
-      lensApi.updateAbortController(props.abortController);
     }
-  }, [lensApi, props.attributes, props.overrides, props.abortController]);
+  }, [lensApi, props.attributes, props.overrides]);
 
   useEffect(() => {
     if (syncColors != null && settings.syncColors$.getValue() !== syncColors) {
