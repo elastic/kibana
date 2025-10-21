@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
+import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt';
 
 export class CustomLinksPage {
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
+  public saveButton: Locator;
+  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+    this.saveButton = this.page.testSubj.locator('apmCustomLinkFlyoutFooterSaveButton');
+  }
 
   async goto() {
     await this.page.goto(`${this.kbnUrl.app('apm')}/settings/custom-links`);
@@ -40,7 +43,7 @@ export class CustomLinksPage {
 
   async clickSave() {
     // Wait for save button to be enabled (after filling required fields)
-    const saveButton = this.page.getByTestId('apmCustomLinkFlyoutFooterSaveButton');
+    const saveButton = this.saveButton;
     await saveButton.waitFor({ state: 'visible' });
     await expect(saveButton).toBeEnabled();
     await saveButton.click();
