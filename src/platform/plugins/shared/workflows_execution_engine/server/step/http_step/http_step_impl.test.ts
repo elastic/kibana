@@ -41,6 +41,14 @@ describe('HttpStepImpl', () => {
       renderValueAccordingToContext: jest.fn(<T>(value: T): T => value),
       abortController: stepContextAbortController,
     } as any;
+    mockContextManager.renderValueAccordingToContext.mockReturnValue({
+      url: 'rendered({{baseUrl}}/users)',
+      method: 'rendered(POST)',
+      headers: { Authorization: 'rendered(Bearer {{authToken}})' },
+      body: {
+        id: 'rendered({{userId}})',
+      },
+    });
 
     mockStepExecutionRuntime = {
       contextManager: mockContextManager,
@@ -75,8 +83,13 @@ describe('HttpStepImpl', () => {
         type: 'http',
         with: {
           url: 'https://api.example.com/data',
-          method: 'GET',
-          headers: {},
+          method: 'POST',
+          headers: {
+            Authorization: 'Bearer {{authToken}}',
+          },
+          body: {
+            id: '{{userId}}',
+          },
           timeout: '30s',
         },
       },
@@ -96,78 +109,31 @@ describe('HttpStepImpl', () => {
   afterEach(() => (mockedAxios as unknown as jest.Mock).mockReset());
 
   describe('getInput', () => {
-    it('should render URL with context', () => {
-      mockContextManager.renderValueAccordingToContext.mockImplementation((value: any) => {
-        if (value === '{{baseUrl}}/users') {
-          return 'https://api.example.com/users';
-        }
-        return value;
-      });
+    it('should render http step context', () => {
       mockStep.configuration.with.url = '{{baseUrl}}/users';
 
-      const input = httpStep.getInput();
-
-      expect(mockContextManager.renderValueAccordingToContext).toHaveBeenCalledWith(
-        '{{baseUrl}}/users'
-      );
-      expect(input.url).toBe('https://api.example.com/users');
-    });
-
-    it('should render headers with context', () => {
-      mockContextManager.renderValueAccordingToContext.mockImplementation((value: any) => {
-        if (typeof value === 'object' && value.Authorization) {
-          return {
-            Authorization: 'Bearer bearer-token-123',
-            'Content-Type': 'application/json',
-          };
-        }
-        return value;
-      });
-      mockStep.configuration.with.headers = {
-        Authorization: 'Bearer {{authToken}}',
-        'Content-Type': 'application/json',
-      };
-
-      const input = httpStep.getInput();
+      httpStep.getInput();
 
       expect(mockContextManager.renderValueAccordingToContext).toHaveBeenCalledWith({
-        Authorization: 'Bearer {{authToken}}',
-        'Content-Type': 'application/json',
-      });
-      expect(input.headers).toEqual({
-        Authorization: 'Bearer bearer-token-123',
-        'Content-Type': 'application/json',
+        url: '{{baseUrl}}/users',
+        method: 'POST',
+        headers: { Authorization: 'Bearer {{authToken}}' },
+        body: {
+          id: '{{userId}}',
+        },
       });
     });
 
-    it('should render body with context', () => {
-      mockContextManager.renderValueAccordingToContext.mockImplementation((value: any) => {
-        if (typeof value === 'object' && value.id && value.name) {
-          return {
-            id: '123',
-            name: 'John Doe',
-            active: true,
-          };
-        }
-        return value;
-      });
-      mockStep.configuration.with.body = {
-        id: '{{userId}}',
-        name: '{{name}}',
-        active: true,
-      };
+    it('should return rendered inputs', () => {
+      const inputs = httpStep.getInput();
 
-      const input = httpStep.getInput();
-
-      expect(mockContextManager.renderValueAccordingToContext).toHaveBeenCalledWith({
-        id: '{{userId}}',
-        name: '{{name}}',
-        active: true,
-      });
-      expect(input.body).toEqual({
-        id: '123',
-        name: 'John Doe',
-        active: true,
+      expect(inputs).toEqual({
+        url: 'rendered({{baseUrl}}/users)',
+        method: 'rendered(POST)',
+        headers: { Authorization: 'rendered(Bearer {{authToken}})' },
+        body: {
+          id: 'rendered({{userId}})',
+        },
       });
     });
 
@@ -175,9 +141,13 @@ describe('HttpStepImpl', () => {
       (mockStep.configuration.with as any).method = undefined;
       (mockStep.configuration.with as any).timeout = undefined;
 
-      const input = httpStep.getInput();
+      httpStep.getInput();
 
-      expect(input.method).toBe('GET');
+      expect(mockContextManager.renderValueAccordingToContext).toHaveBeenCalledWith(
+        expect.objectContaining({
+          method: 'GET',
+        })
+      );
     });
   });
 
@@ -292,6 +262,15 @@ describe('HttpStepImpl', () => {
   });
 
   describe('run', () => {
+    beforeEach(() => {
+      mockContextManager.renderValueAccordingToContext = jest.fn().mockReturnValue({
+        url: 'https://api.example.com/users',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: { name: 'John Doe' },
+      });
+    });
+
     it('should execute the full workflow step lifecycle', async () => {
       const mockResponse = {
         status: 200,
@@ -304,10 +283,10 @@ describe('HttpStepImpl', () => {
       await httpStep.run();
 
       expect(mockStepExecutionRuntime.startStep).toHaveBeenCalledWith({
-        url: 'https://api.example.com/data',
-        method: 'GET',
-        headers: {},
-        body: undefined,
+        url: 'https://api.example.com/users',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: { name: 'John Doe' },
       });
       expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith({
         status: 200,
@@ -341,7 +320,20 @@ describe('HttpStepImpl', () => {
   });
 
   describe('URL validation', () => {
+    let renderedInput: any;
+
+    beforeEach(() => {
+      mockContextManager.renderValueAccordingToContext = jest
+        .fn()
+        .mockImplementation(() => mockStep.configuration.with);
+    });
+
     it('should allow requests to permitted hosts', async () => {
+      mockStep.configuration.with = {
+        ...mockStep.configuration.with,
+        url: 'https://api.example.com/data',
+        method: 'GET',
+      };
       mockUrlValidator = new UrlValidator({ allowedHosts: ['api.example.com'] });
       httpStep = new HttpStepImpl(
         mockStep,
@@ -365,19 +357,14 @@ describe('HttpStepImpl', () => {
 
     it('should block requests to non-permitted hosts', async () => {
       mockUrlValidator = new UrlValidator({ allowedHosts: ['api.example.com'] });
+      mockStep.configuration.with = {
+        url: 'https://malicious.com/test',
+        method: 'GET',
+        headers: {},
+        timeout: '30s',
+      };
       httpStep = new HttpStepImpl(
-        {
-          ...mockStep,
-          configuration: {
-            ...mockStep.configuration,
-            with: {
-              url: 'https://malicious.com/test',
-              method: 'GET',
-              headers: {},
-              timeout: '30s',
-            },
-          },
-        },
+        mockStep,
         mockStepExecutionRuntime,
         mockWorkflowLogger,
         mockUrlValidator,
@@ -407,20 +394,15 @@ describe('HttpStepImpl', () => {
     });
 
     it('should allow all hosts when wildcard is configured', async () => {
+      mockStep.configuration.with = {
+        url: 'https://any-host.com/test',
+        method: 'GET',
+        headers: {},
+        timeout: '30s',
+      };
       mockUrlValidator = new UrlValidator({ allowedHosts: ['*'] });
       httpStep = new HttpStepImpl(
-        {
-          ...mockStep,
-          configuration: {
-            ...mockStep.configuration,
-            with: {
-              url: 'https://any-host.com/test',
-              method: 'GET',
-              headers: {},
-              timeout: '30s',
-            },
-          },
-        },
+        mockStep,
         mockStepExecutionRuntime,
         mockWorkflowLogger,
         mockUrlValidator,

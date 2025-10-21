@@ -53,12 +53,12 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
   public getInput() {
     const { url, method = 'GET', headers = {}, body } = this.step.with;
 
-    return {
-      url: this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(url),
+    return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext({
+      url,
       method,
-      headers: this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(headers),
-      body: this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(body),
-    };
+      headers,
+      body,
+    });
   }
 
   protected async _run(input: any): Promise<RunStepResult> {
