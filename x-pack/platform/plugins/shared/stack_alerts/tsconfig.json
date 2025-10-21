@@ -52,7 +52,7 @@
     "@kbn/response-ops-rule-params",
     "@kbn/object-utils",
     "@kbn/esql-ast",
-    "@kbn/alerting-types",
+    "@kbn/triggers-actions-ui-types",
   ],
   "exclude": ["target/**/*"]
 }
