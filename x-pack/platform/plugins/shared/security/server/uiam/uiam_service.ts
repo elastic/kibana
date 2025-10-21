@@ -120,9 +120,7 @@ export class UiamService implements UiamServicePublic {
       );
       return { accessToken: tokens.access_token, refreshToken: tokens.refresh_token };
     } catch (err) {
-      this.#logger.error(
-        () => `Failed to refresh session tokens: ${getDetailedErrorMessage(err)}`
-      );
+      this.#logger.error(() => `Failed to refresh session tokens: ${getDetailedErrorMessage(err)}`);
 
       throw err;
     }
