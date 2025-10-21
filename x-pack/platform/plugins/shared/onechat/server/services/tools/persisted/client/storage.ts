@@ -21,13 +21,16 @@ const storageSettings = {
       type: types.keyword({}),
       space: types.keyword({}),
       description: types.text({}),
-      configuration: types.object({
-        dynamic: false,
-        properties: {},
-      }),
+      config: types.object({ properties: {}, dynamic: false }),
       tags: types.keyword({}),
       created_at: types.date({}),
       updated_at: types.date({}),
+      // legacy field - configuration was introduced as dynamic: true
+      // so we introduced the config field later
+      configuration: types.object({
+        dynamic: true,
+        properties: {},
+      }),
     },
   },
 } satisfies IndexStorageSettings;
@@ -37,10 +40,12 @@ export interface ToolProperties<TConfig extends object = Record<string, unknown>
   type: ToolType;
   space: string;
   description: string;
-  configuration: TConfig;
+  config: TConfig;
   tags: string[];
   created_at: string;
   updated_at: string;
+  // deprecated fields
+  configuration?: TConfig;
 }
 
 export type ToolStorageSettings = typeof storageSettings;

@@ -25,7 +25,7 @@ const storageSettings = {
       labels: types.keyword({}),
       avatar_color: types.keyword({}),
       avatar_symbol: types.keyword({}),
-      config: types.object({ dynamic: false }),
+      config: types.object({ properties: {}, dynamic: false }),
       created_at: types.date({}),
       updated_at: types.date({}),
       // legacy field - configuration was introduced as dynamic: true
