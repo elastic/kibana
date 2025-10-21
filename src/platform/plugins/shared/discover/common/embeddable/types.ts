@@ -34,24 +34,22 @@ type SearchEmbeddableBaseState = SerializedTitles &
     nonPersistedDisplayOptions?: NonPersistedDisplayOptions;
   };
 
-export type SearchEmbeddableByValueSerializedState = SearchEmbeddableBaseState & {
+export type SearchEmbeddableByValueState = SearchEmbeddableBaseState & {
   attributes: SavedSearchByValueAttributes;
 };
 
-export type SearchEmbeddableByReferenceSerializedState = SearchEmbeddableBaseState & {
+export type SearchEmbeddableByReferenceState = SearchEmbeddableBaseState & {
   savedObjectId: string;
 };
 
-export type SearchEmbeddableSerializedState =
-  | SearchEmbeddableByValueSerializedState
-  | SearchEmbeddableByReferenceSerializedState;
+export type SearchEmbeddableState = SearchEmbeddableByValueState | SearchEmbeddableByReferenceState;
 
 export type StoredSearchEmbeddableByValueState = SearchEmbeddableBaseState & {
   attributes: SavedSearchByValueAttributes;
 };
 
 export type StoredSearchEmbeddableByReferenceState = Omit<
-  SearchEmbeddableByReferenceSerializedState,
+  SearchEmbeddableByReferenceState,
   'nonPersistedDisplayOptions' | 'savedObjectId'
 >;
 

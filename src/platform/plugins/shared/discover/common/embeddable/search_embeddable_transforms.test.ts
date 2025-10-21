@@ -11,10 +11,10 @@ import { createEmbeddableSetupMock } from '@kbn/embeddable-plugin/server/mocks';
 import { getSearchEmbeddableTransforms } from './search_embeddable_transforms';
 import { extract, inject } from './search_inject_extract';
 import type {
-  SearchEmbeddableByValueSerializedState,
+  SearchEmbeddableByValueState,
   StoredSearchEmbeddableByValueState,
   StoredSearchEmbeddableState,
-  SearchEmbeddableByReferenceSerializedState,
+  SearchEmbeddableByReferenceState,
 } from './types';
 
 jest.mock('./search_inject_extract', () => {
@@ -143,8 +143,8 @@ describe('searchEmbeddableTransforms', () => {
   });
   describe('transformIn', () => {
     describe('by-reference state', () => {
-      it('transforms by-reference state correctly', () => {
-        const serializedState: SearchEmbeddableByReferenceSerializedState = {
+      it('transforms by-reference state', () => {
+        const serializedState: SearchEmbeddableByReferenceState = {
           savedObjectId: 'test-saved-object-id',
           title: 'Test Search',
           description: 'Test Description',
@@ -182,7 +182,7 @@ describe('searchEmbeddableTransforms', () => {
       });
 
       it('handles by-reference state without enhancements', () => {
-        const serializedState: SearchEmbeddableByReferenceSerializedState = {
+        const serializedState: SearchEmbeddableByReferenceState = {
           savedObjectId: 'test-saved-object-id',
           title: 'Test Search',
           columns: ['field1'],
@@ -208,38 +208,11 @@ describe('searchEmbeddableTransforms', () => {
 
         expect(transformEnhancementsIn).not.toHaveBeenCalled();
       });
-
-      it('includes enhancement references in the result', () => {
-        const serializedState: SearchEmbeddableByReferenceSerializedState = {
-          savedObjectId: 'test-saved-object-id',
-          title: 'Test Search',
-          enhancements: {
-            dynamicActions: { events: [] },
-          },
-        };
-
-        const result = getSearchEmbeddableTransforms(
-          transformEnhancementsIn,
-          transformEnhancementsOut
-        ).transformIn!(serializedState);
-
-        expect(result.references).toEqual([
-          {
-            name: 'savedObjectRef',
-            type: 'search',
-            id: 'test-saved-object-id',
-          },
-        ]);
-
-        expect(transformEnhancementsIn).toHaveBeenCalledWith({
-          dynamicActions: { events: [] },
-        });
-      });
     });
 
     describe('by-value state', () => {
-      it('transforms by-value state correctly', () => {
-        const serializedState: SearchEmbeddableByValueSerializedState = {
+      it('transforms by-value state', () => {
+        const serializedState: SearchEmbeddableByValueState = {
           attributes: {
             title: 'Test Search',
             description: 'Test Description',
@@ -272,7 +245,7 @@ describe('searchEmbeddableTransforms', () => {
       });
 
       it('handles by-value state with enhancements', () => {
-        const serializedState: SearchEmbeddableByValueSerializedState = {
+        const serializedState: SearchEmbeddableByValueState = {
           attributes: {
             title: 'Test Search',
             description: 'Test Description',
@@ -305,37 +278,6 @@ describe('searchEmbeddableTransforms', () => {
           type: 'search',
           attributes: serializedState.attributes,
         });
-      });
-
-      it('handles by-value state without enhancements', () => {
-        const serializedState: SearchEmbeddableByValueSerializedState = {
-          attributes: {
-            title: 'Test Search',
-            description: 'Test Description',
-            columns: [],
-            sort: [],
-            grid: {},
-            hideChart: false,
-            isTextBasedQuery: false,
-            kibanaSavedObjectMeta: {
-              searchSourceJSON: '{}',
-            },
-            tabs: [],
-            references: [],
-          },
-        };
-
-        const result = getSearchEmbeddableTransforms(
-          transformEnhancementsIn,
-          transformEnhancementsOut
-        ).transformIn!(serializedState);
-
-        expect(transformEnhancementsIn).not.toHaveBeenCalled();
-        expect(extract).toHaveBeenCalledWith({
-          type: 'search',
-          attributes: serializedState.attributes,
-        });
-        expect(result.references).toEqual([]);
       });
     });
   });

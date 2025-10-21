@@ -11,8 +11,8 @@ import { SavedSearchType } from '@kbn/saved-search-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
 import type {
-  SearchEmbeddableByReferenceSerializedState,
-  SearchEmbeddableSerializedState,
+  SearchEmbeddableByReferenceState,
+  SearchEmbeddableState,
   StoredSearchEmbeddableByReferenceState,
   StoredSearchEmbeddableState,
 } from './types';
@@ -20,14 +20,12 @@ import { extract } from './search_inject_extract';
 
 export const SAVED_SEARCH_SAVED_OBJECT_REF_NAME = 'savedObjectRef';
 
-function isByRefState(
-  state: SearchEmbeddableSerializedState
-): state is SearchEmbeddableByReferenceSerializedState {
+function isByRefState(state: SearchEmbeddableState): state is SearchEmbeddableByReferenceState {
   return 'savedObjectId' in state;
 }
 
 export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['transformIn']) {
-  function transformIn(state: SearchEmbeddableSerializedState): {
+  function transformIn(state: SearchEmbeddableState): {
     state: StoredSearchEmbeddableState;
     references: SavedObjectReference[];
   } {
@@ -62,6 +60,7 @@ export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['tr
     return {
       state: {
         ...state,
+        ...(enhancementsState ? { enhancements: enhancementsState } : {}),
         attributes: {
           ...state.attributes,
           ...extractedState.attributes,

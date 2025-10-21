@@ -20,7 +20,4 @@ export type {
 
 export type { DiscoverESQLLocator, DiscoverESQLLocatorParams } from './esql_locator';
 
-export type {
-  NonPersistedDisplayOptions,
-  SearchEmbeddableSerializedState,
-} from './embeddable/types';
+export type { NonPersistedDisplayOptions, SearchEmbeddableState } from './embeddable/types';

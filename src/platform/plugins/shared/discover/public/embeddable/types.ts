@@ -36,7 +36,7 @@ import type {
 import type {
   EditableSavedSearchAttributes,
   NonPersistedDisplayOptions,
-  SearchEmbeddableSerializedState,
+  SearchEmbeddableState,
 } from '../../common/embeddable/types';
 
 export type SearchEmbeddableState = Pick<
@@ -78,7 +78,7 @@ export type SearchEmbeddableRuntimeState = SearchEmbeddableSerializedAttributes 
     nonPersistedDisplayOptions?: NonPersistedDisplayOptions;
   };
 
-export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableSerializedState> &
+export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableState> &
   PublishesSavedObjectId &
   PublishesDataLoading &
   PublishesBlockingError &

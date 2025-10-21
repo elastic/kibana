@@ -14,8 +14,8 @@ import type { SerializedPanelState } from '@kbn/presentation-publishing';
 import { toSavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import { discoverServiceMock } from '../../__mocks__/services';
 import type {
-  SearchEmbeddableByValueSerializedState,
-  SearchEmbeddableSerializedState,
+  SearchEmbeddableByValueState,
+  SearchEmbeddableState,
 } from '../../../common/embeddable/types';
 import { deserializeState, serializeState } from './serialization_utils';
 import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/server';
@@ -40,7 +40,7 @@ describe('Serialization utils', () => {
       },
     },
   ];
-  const mockedSavedSearchAttributes: SearchEmbeddableByValueSerializedState['attributes'] = {
+  const mockedSavedSearchAttributes: SearchEmbeddableByValueState['attributes'] = {
     kibanaSavedObjectMeta: {
       searchSourceJSON: '{"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
     },
@@ -64,7 +64,7 @@ describe('Serialization utils', () => {
 
   describe('deserialize state', () => {
     test('by value', async () => {
-      const serializedState: SerializedPanelState<SearchEmbeddableSerializedState> = {
+      const serializedState: SerializedPanelState<SearchEmbeddableState> = {
         rawState: {
           attributes: mockedSavedSearchAttributes,
           title: 'test panel title',
@@ -102,7 +102,7 @@ describe('Serialization utils', () => {
         )),
       });
 
-      const serializedState: SerializedPanelState<SearchEmbeddableSerializedState> = {
+      const serializedState: SerializedPanelState<SearchEmbeddableState> = {
         rawState: {
           title: 'test panel title',
           sort: [['order_date', 'asc']], // overwrite the saved object sort

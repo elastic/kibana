@@ -8,7 +8,7 @@
  */
 
 import type { Trigger } from '@kbn/ui-actions-plugin/public';
-import type { SearchEmbeddableSerializedState } from '../../common/embeddable/types';
+import type { SearchEmbeddableState } from '../../common/embeddable/types';
 
 export { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 
@@ -29,7 +29,7 @@ export const ACTION_VIEW_SAVED_SEARCH = 'ACTION_VIEW_SAVED_SEARCH';
 export const DEFAULT_HEADER_ROW_HEIGHT_LINES = 3;
 
 /** This constant refers to the dashboard panel specific state */
-export const EDITABLE_PANEL_KEYS: Readonly<Array<keyof SearchEmbeddableSerializedState>> = [
+export const EDITABLE_PANEL_KEYS: Readonly<Array<keyof SearchEmbeddableState>> = [
   'title', // panel title
   'description', // panel description
   'timeRange', // panel custom time range

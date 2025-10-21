@@ -19,9 +19,9 @@ import { toSavedSearchAttributes, type SavedSearch } from '@kbn/saved-search-plu
 import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import { EDITABLE_SAVED_SEARCH_KEYS } from '../../../common/embeddable/constants';
 import type {
-  SearchEmbeddableByReferenceSerializedState,
-  SearchEmbeddableByValueSerializedState,
-  SearchEmbeddableSerializedState,
+  SearchEmbeddableByReferenceState,
+  SearchEmbeddableByValueState,
+  SearchEmbeddableState,
 } from '../../../common/embeddable/types';
 import type { DiscoverServices } from '../../build_services';
 import { EDITABLE_PANEL_KEYS, SEARCH_EMBEDDABLE_TYPE } from '../constants';
@@ -31,14 +31,14 @@ export const deserializeState = async ({
   serializedState,
   discoverServices,
 }: {
-  serializedState: SerializedPanelState<SearchEmbeddableSerializedState>;
+  serializedState: SerializedPanelState<SearchEmbeddableState>;
   discoverServices: DiscoverServices;
 }): Promise<SearchEmbeddableRuntimeState> => {
   const panelState = pick(serializedState.rawState, EDITABLE_PANEL_KEYS);
   const savedObjectRef = findSavedObjectRef(SEARCH_EMBEDDABLE_TYPE, serializedState.references);
   const savedObjectId = savedObjectRef
     ? savedObjectRef.id
-    : (serializedState.rawState as SearchEmbeddableByReferenceSerializedState).savedObjectId;
+    : (serializedState.rawState as SearchEmbeddableByReferenceState).savedObjectId;
   if (savedObjectId) {
     // by reference
     const { get } = discoverServices.savedSearch;
@@ -64,7 +64,7 @@ export const deserializeState = async ({
     const { byValueToSavedSearch } = discoverServices.savedSearch;
 
     const savedSearch = await byValueToSavedSearch(
-      serializedState.rawState as SearchEmbeddableByValueSerializedState,
+      serializedState.rawState as SearchEmbeddableByValueState,
       true
     );
     return {
@@ -91,7 +91,7 @@ export const serializeState = ({
   serializeTimeRange: () => SerializedTimeRange;
   serializeDynamicActions: (() => DynamicActionsSerializedState) | undefined;
   savedObjectId?: string;
-}): SerializedPanelState<SearchEmbeddableSerializedState> => {
+}): SerializedPanelState<SearchEmbeddableState> => {
   const searchSource = savedSearch.searchSource;
   const { searchSourceJSON, references: originalReferences } = searchSource.serialize();
   const savedSearchAttributes = toSavedSearchAttributes(savedSearch, searchSourceJSON);

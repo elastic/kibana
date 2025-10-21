@@ -11,15 +11,15 @@ import { extractTabs, SavedSearchType } from '@kbn/saved-search-plugin/common';
 import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type {
-  SearchEmbeddableByReferenceSerializedState,
-  SearchEmbeddableByValueSerializedState,
+  SearchEmbeddableByReferenceState,
+  SearchEmbeddableByValueState,
   StoredSearchEmbeddableByValueState,
   StoredSearchEmbeddableState,
 } from './types';
 import { inject } from './search_inject_extract';
 import { SAVED_SEARCH_SAVED_OBJECT_REF_NAME } from './get_transform_in';
 
-function isStoredSearchEmbeddableByValueState(
+function isByValue(
   state: StoredSearchEmbeddableState
 ): state is StoredSearchEmbeddableByValueState {
   return (
@@ -36,7 +36,7 @@ export function getTransformOut(transformEnhancementsOut: EnhancementsRegistry['
 
     const enhancements = enhancementsState ? { enhancements: enhancementsState } : {};
 
-    if (isStoredSearchEmbeddableByValueState(state)) {
+    if (isByValue(state)) {
       const tabsState = {
         ...state,
         attributes: extractTabs((state as StoredSearchEmbeddableByValueState).attributes),
@@ -46,7 +46,7 @@ export function getTransformOut(transformEnhancementsOut: EnhancementsRegistry['
         ...state,
         attributes,
         ...enhancements,
-      } as SearchEmbeddableByValueSerializedState;
+      } as SearchEmbeddableByValueState;
     }
 
     const savedObjectRef = (references ?? []).find(
@@ -56,7 +56,7 @@ export function getTransformOut(transformEnhancementsOut: EnhancementsRegistry['
       ...state,
       ...enhancements,
       ...(savedObjectRef?.id ? { savedObjectId: savedObjectRef.id } : {}),
-    } as SearchEmbeddableByReferenceSerializedState;
+    } as SearchEmbeddableByReferenceState;
   }
   return transformOut;
 }
