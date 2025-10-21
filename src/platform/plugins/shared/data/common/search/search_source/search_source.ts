@@ -683,13 +683,14 @@ export class SearchSource {
       case 'projectRouting':
         // TEMPORARY WORKAROUND: Use filters until project_routing parameter is supported
         // This allows testing the projectRouting field without breaking on non-serverless ES
+
+          console.log('SearchSource: Adding dummy filter for projectRouting:', val);
         if (val) {
           // Add a dummy filter based on the routing type to validate the field works
           // When project_routing is supported, replace this with:
           // const projectRoutingValue = this.serializeProjectRouting(val);
           // return addToBody('project_routing', projectRoutingValue);
 
-          console.log('SearchSource: Adding dummy filter for projectRouting:', val);
 
           const dummyFilter = this.createProjectRoutingDummyFilter(val);
           if (dummyFilter) {
@@ -1197,6 +1198,7 @@ export class SearchSource {
       ...searchSourceFields,
     };
 
+    console.log('SearchSource: Serializing projectRouting field:', projectRouting);
     // Only include projectRouting if it's not the default 'all' type
     if (projectRouting && projectRouting.type !== 'all') {
       serializedSearchSourceFields.projectRouting = projectRouting;

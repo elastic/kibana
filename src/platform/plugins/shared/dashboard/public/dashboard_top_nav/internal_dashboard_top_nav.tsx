@@ -353,13 +353,10 @@ export function InternalDashboardTopNav({
   const onProjectRoutingChange = useCallback(
     (newProjectRouting: ProjectRouting) => {
       // Treat 'all' as undefined (default) to avoid storing explicit default values
-      const normalizedNewValue = newProjectRouting.type === 'all' ? undefined : newProjectRouting;
-      const currentRouting: ProjectRouting | undefined = projectRouting as ProjectRouting | undefined;
-      const normalizedCurrentValue =
-        !currentRouting || currentRouting.type === 'all' ? undefined : currentRouting;
-
+      const normalizedNewValue = newProjectRouting?.type === 'all' ? undefined : newProjectRouting;
+      const normalizedCurrentValue = projectRouting?.type === 'all' ? undefined : projectRouting;
       if (!isEqual(normalizedNewValue, normalizedCurrentValue)) {
-        dashboardApi.setProjectRouting(normalizedNewValue);
+        dashboardApi.setProjectRouting(newProjectRouting);
         // Force refresh to trigger a new search with the updated project routing
         dashboardApi.forceRefresh();
       }

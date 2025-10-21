@@ -109,6 +109,8 @@ export const handleRequest = ({
     requestSearchSource.setField('filter', filters);
     requestSearchSource.setField('query', query);
 
+    console.log('esaggs', projectRouting)
+
     requestSearchSource.setField('projectRouting', projectRouting);
 
 
