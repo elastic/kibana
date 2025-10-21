@@ -507,13 +507,11 @@ describe('validation logic', () => {
     });
 
     describe('settings', () => {
-      testErrorsAndWarnings(`SET project_routing = "_alias:_origin"; FROM index`, []);
+      testErrorsAndWarnings(`SET time_zone = "CEST"; FROM index`, []);
       // Should return error if there is no query following SET
-      testErrorsAndWarnings(`SET project_routing = "_alias:_origin";`, [
-        expect.stringContaining('SyntaxError:'),
-      ]);
-      testErrorsAndWarnings(`SET ivalid_setting = "_alias:_origin"; FROM index`, [
-        expect.stringContaining('Unknown setting ivalid_setting'),
+      testErrorsAndWarnings(`SET time_zone = "CEST";`, [expect.stringContaining('SyntaxError:')]);
+      testErrorsAndWarnings(`SET invalid_setting = "_alias:_origin"; FROM index`, [
+        expect.stringContaining('Unknown setting invalid_setting'),
       ]);
     });
 

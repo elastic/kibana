@@ -674,7 +674,12 @@
       "warning": []
     },
     {
-      "query": "SET project_routing = \"_alias:_origin\";",
+      "query": "SET time_zone = \"CEST\"; FROM index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "SET time_zone = \"CEST\";",
       "error": [
         {
           "sample": "SyntaxError:",
@@ -684,15 +689,10 @@
       "warning": []
     },
     {
-      "query": "SET project_routing = \"_alias:_origin\"; FROM index",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "SET ivalid_setting = \"_alias:_origin\"; FROM index",
+      "query": "SET invalid_setting = \"_alias:_origin\"; FROM index",
       "error": [
         {
-          "sample": "Unknown setting ivalid_setting",
+          "sample": "Unknown setting invalid_setting",
           "inverse": false
         }
       ],
