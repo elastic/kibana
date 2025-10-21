@@ -139,8 +139,6 @@ export function DashboardApp({
    * Create options to pass into the dashboard renderer
    */
   const getCreationOptions = useCallback((): Promise<DashboardCreationOptions> => {
-    const searchSessionIdFromURL = getSearchSessionIdFromURL(history);
-
     const getInitialInput = () => {
       let stateFromLocator: Partial<DashboardState> = {};
       try {
@@ -184,7 +182,6 @@ export function DashboardApp({
       useSearchSessionsIntegration: true,
       searchSessionSettings: {
         createSessionRestorationDataProvider,
-        sessionIdToRestore: searchSessionIdFromURL,
         getSearchSessionIdFromURL: () => getSearchSessionIdFromURL(history),
         removeSessionIdFromUrl: () => removeSearchSessionIdFromURL(kbnUrlStateStorage),
       },

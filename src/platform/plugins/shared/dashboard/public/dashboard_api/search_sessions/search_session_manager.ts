@@ -23,24 +23,19 @@ export function initializeSearchSessionManager(
 
   let stopSearchSessionIntegration: (() => void) | undefined;
   if (searchSessionSettings) {
-    const { sessionIdToRestore } = searchSessionSettings;
-
     // if this incoming embeddable has a session, continue it.
     incomingEmbeddables?.forEach((embeddablePackage) => {
       if (embeddablePackage.searchSessionId) {
         dataService.search.session.continue(embeddablePackage.searchSessionId);
       }
     });
-    if (sessionIdToRestore) {
-      dataService.search.session.restore(sessionIdToRestore);
-    }
+
     const existingSession = dataService.search.session.getSessionId();
 
     const initialSearchSessionId =
-      sessionIdToRestore ??
-      (existingSession && incomingEmbeddables?.length
+      existingSession && incomingEmbeddables?.length
         ? existingSession
-        : dataService.search.session.start());
+        : dataService.search.session.start();
     searchSessionId$.next(initialSearchSessionId);
 
     stopSearchSessionIntegration = startDashboardSearchSessionIntegration(
