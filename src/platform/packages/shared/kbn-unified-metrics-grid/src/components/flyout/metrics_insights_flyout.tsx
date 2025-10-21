@@ -72,7 +72,8 @@ export const MetricInsightsFlyout = ({
     <EuiPortal>
       <EuiFlyoutResizable
         onClose={onClose}
-        type="overlay"
+        type="push"
+        pushMinBreakpoint="xl"
         size={flyoutWidth}
         onKeyDown={onKeyDown}
         data-test-subj="metricsExperienceFlyout"
