@@ -18,22 +18,7 @@
     "@kbn/share-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/config-schema",
-    "@kbn/analytics",
-    "@kbn/cloud-plugin",
-    "@kbn/kibana-utils-plugin",
-    "@kbn/core-http-server",
-    "@kbn/search-navigation",
-    "@kbn/search-api-keys-components",
-    "@kbn/logging",
-    "@kbn/sample-data-ingest",
-    "@kbn/core-elasticsearch-server",
-    "@kbn/search-shared-ui",
-    "@kbn/search-code-examples",
-    "@kbn/try-in-console",
-    "@kbn/management-settings-ids",
-    "@kbn/deeplinks-search",
-    "@kbn/licensing-types",
-    "@kbn/licensing-plugin"
+    "@kbn/search-shared-ui"
   ],
   "exclude": ["target/**/*"]
 }

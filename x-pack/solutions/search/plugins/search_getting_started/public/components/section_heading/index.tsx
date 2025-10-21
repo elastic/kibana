@@ -7,8 +7,6 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle, EuiIcon } from '@elastic/eui';
 
-import { css } from '@emotion/react';
-
 interface Props {
   title: string;
   icon: string;
@@ -16,19 +14,13 @@ interface Props {
 
 export const SearchGettingStartedSectionHeading = ({ title, icon }: Props) => {
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="stretch">
-      <EuiFlexItem style={{ alignSelf: 'center' }} grow={false}>
-        <EuiPanel
-          color="subdued"
-          paddingSize="s"
-          css={css`
-            display: inline-block;
-          `}
-        >
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiPanel color="subdued" paddingSize="s" grow={false}>
           <EuiIcon type={icon} size="m" />
         </EuiPanel>
       </EuiFlexItem>
-      <EuiFlexItem style={{ alignSelf: 'center' }}>
+      <EuiFlexItem>
         <EuiTitle size="xs">
           <h2>{title}</h2>
         </EuiTitle>
