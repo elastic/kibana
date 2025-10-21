@@ -20,6 +20,7 @@ import type { ILicense } from '@kbn/licensing-types';
 import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
+import { CallbackIds } from '@kbn/elastic-assistant-plugin/server/types';
 import { migrateEndpointDataToSupportSpaces } from './endpoint/migrations/space_awareness_migration';
 import { SavedObjectsClientFactory } from './endpoint/services/saved_objects';
 import { registerEntityStoreDataViewRefreshTask } from './lib/entity_analytics/entity_store/tasks/data_view_refresh/data_view_refresh_task';
@@ -190,6 +191,11 @@ export class Plugin implements ISecuritySolutionPlugin {
 
   private isServerless: boolean;
 
+  private knowledgeBaseToolsRegistered: boolean = false;
+  private registerKnowledgeBaseTools: (() => void) | undefined;
+  private securityLabsKnowledgeToolRegistered: boolean = false;
+  private registerSecurityLabsKnowledgeTool: (() => void) | undefined;
+
   constructor(context: PluginInitializerContext) {
     const serverConfig = createConfig(context);
 
@@ -277,15 +283,6 @@ export class Plugin implements ISecuritySolutionPlugin {
         alertCountsInternalTool(core.getStartServices, savedObjectsClient)
       );
       plugins.onechat.tools.register(
-        knowledgeBaseRetrievalInternalTool(core.getStartServices, savedObjectsClient, plugins.ml)
-      );
-      plugins.onechat.tools.register(
-        knowledgeBaseWriteInternalTool(core.getStartServices, savedObjectsClient, plugins.ml)
-      );
-      plugins.onechat.tools.register(
-        securityLabsKnowledgeInternalTool(core.getStartServices, savedObjectsClient, plugins.ml)
-      );
-      plugins.onechat.tools.register(
         entityRiskScoreToolInternal(core.getStartServices, savedObjectsClient)
       );
       plugins.onechat.tools.register(
@@ -300,6 +297,39 @@ export class Plugin implements ISecuritySolutionPlugin {
 
       // Now register the agent after all tools are registered
       plugins.onechat.agents.register(siemAgentCreator());
+    };
+
+    // Method to register knowledge base tools after knowledge base is initialized
+    this.registerKnowledgeBaseTools = async () => {
+      if (this.knowledgeBaseToolsRegistered) return;
+
+      const [coreStart] = await core.getStartServices();
+      const savedObjectsClient =
+        coreStart.savedObjects.createInternalRepository() as unknown as SavedObjectsClientContract;
+
+      // Register knowledge base tools that need savedObjectsClient for getLlmDescription
+      plugins.onechat.tools.register(
+        knowledgeBaseRetrievalInternalTool(core.getStartServices, savedObjectsClient, plugins.ml)
+      );
+      plugins.onechat.tools.register(
+        knowledgeBaseWriteInternalTool(core.getStartServices, savedObjectsClient, plugins.ml)
+      );
+
+      this.knowledgeBaseToolsRegistered = true;
+    };
+
+    this.registerSecurityLabsKnowledgeTool = async () => {
+      if (this.securityLabsKnowledgeToolRegistered) return;
+
+      const [coreStart] = await core.getStartServices();
+      const savedObjectsClient =
+        coreStart.savedObjects.createInternalRepository() as unknown as SavedObjectsClientContract;
+
+      plugins.onechat.tools.register(
+        securityLabsKnowledgeInternalTool(core.getStartServices, savedObjectsClient, plugins.ml)
+      );
+
+      this.securityLabsKnowledgeToolRegistered = true;
     };
 
     // Start the async registration process
@@ -929,6 +959,22 @@ export class Plugin implements ISecuritySolutionPlugin {
       });
     } else {
       this.logger.warn('Task Manager not available, health diagnostic task not started.');
+    }
+
+    if (this.registerKnowledgeBaseTools) {
+      // Register the knowledge base initialization callback
+      plugins.elasticAssistant.registerCallback(
+        CallbackIds.KnowledgeBaseInitialized,
+        this.registerKnowledgeBaseTools
+      );
+    }
+
+    if (this.registerSecurityLabsKnowledgeTool) {
+      // Register the knowledge base initialization callback
+      plugins.elasticAssistant.registerCallback(
+        CallbackIds.SecurityLabsContentLoaded,
+        this.registerSecurityLabsKnowledgeTool
+      );
     }
 
     return {};

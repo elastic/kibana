@@ -22,6 +22,8 @@ export enum CallbackIds {
   DefendInsightsPostCreate = 'defend-insights:post-create',
   DefendInsightsPreCreate = 'defend-insights:pre-create',
   DefendInsightsPostFetch = 'defend-insights:post-fetch',
+  KnowledgeBaseInitialized = 'knowledge-base:initialized',
+  SecurityLabsContentLoaded = 'security-labs-content:loaded',
 }
 export type RegisteredCallbacks = Map<CallbackIds, Function[]>;
 
