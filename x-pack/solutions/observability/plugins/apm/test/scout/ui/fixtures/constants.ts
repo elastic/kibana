@@ -57,19 +57,19 @@ export const APM_ROLES = {
 
   apmMonitor: {
     elasticsearch: {
+      cluster: ['monitor'],
       indices: [
         {
           names: ['traces-apm*', 'logs-apm*', 'metrics-apm*', 'apm-*'],
-          privileges: ['monitor', 'read'],
+          privileges: ['monitor', 'read', 'view_index_metadata'],
         },
       ],
-      cluster: ['monitor'],
     },
     kibana: [
       {
         base: [],
         feature: {
-          apm: ['all', 'read'],
+          apm: ['minimal_all', 'read', 'settings_save'],
         },
         spaces: ['*'],
       },

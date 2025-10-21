@@ -68,8 +68,13 @@ export class AgentConfigurationsPage {
   }
 
   async selectEnvironment(environmentName: string) {
-    const environmentComboBox = new EuiComboBoxWrapper(this.page, 'serviceEnvironmentComboBox');
-    return await environmentComboBox.selectSingleOption(environmentName);
+    // Use direct input approach that we know works
+    const environmentInput = this.page.testSubj
+      .locator('serviceEnvironmentComboBox')
+      .locator('input');
+    await environmentInput.click();
+    await environmentInput.fill(environmentName);
+    await this.page.keyboard.press('Enter');
   }
 
   async clickNextStep() {
