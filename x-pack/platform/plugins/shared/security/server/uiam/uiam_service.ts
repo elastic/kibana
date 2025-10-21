@@ -104,7 +104,7 @@ export class UiamService implements UiamServicePublic {
    */
   async refreshSessionTokens(refreshToken: string) {
     try {
-      this.#logger.debug('Attempting to refresh session tokens with UIAM.');
+      this.#logger.debug('Attempting to refresh session tokens.');
 
       const tokens = await UiamService.#parseUiamResponse(
         await fetch(`${this.#config.url}/uiam/api/v1/tokens/_refresh`, {
