@@ -9,7 +9,7 @@
 
 import { isFunctionExpression, isOptionNode } from '../ast/is';
 import { within } from '../ast/location';
-import type { ESQLAst, ESQLCommand, ESQLSingleAstItem } from '../types';
+import type { ESQLAst, ESQLAstAllCommands, ESQLSingleAstItem } from '../types';
 import { Walker } from '../walker';
 import { Location } from './types';
 
@@ -62,7 +62,7 @@ const getLocationFromCommandOrOptionName = (name: string) => commandOptionNameTo
  */
 export function getLocationInfo(
   position: ESQLSingleAstItem | number,
-  parentCommand: ESQLCommand,
+  parentCommand: ESQLAstAllCommands,
   ast: ESQLAst,
   withinAggFunction: boolean
 ): { id: Location; displayName: string } {
