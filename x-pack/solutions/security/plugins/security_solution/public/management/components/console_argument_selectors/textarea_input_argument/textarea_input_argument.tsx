@@ -161,7 +161,7 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
         valueText,
         store: {
           ...state,
-          isPopoverOpen: true,
+          isPopoverOpen: !state.isPopoverOpen,
         },
       });
     }, [onChange, state, value, valueText]);
@@ -206,7 +206,6 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
                 iconType="pencil"
                 size="xs"
                 onClick={handleOpenPopover}
-                disabled={state.isPopoverOpen}
                 title={openLabel}
                 aria-label={openLabel}
               />

@@ -56,7 +56,7 @@ export const CrowdstrikeScriptInputParams = memo<
         { defaultMessage: 'Script command line arguments' }
       ),
       textareaPlaceholderLabel: i18n.translate(
-        'xpack.securitySolution.crowdstrikeScriptInputParams.',
+        'xpack.securitySolution.crowdstrikeScriptInputParams.textareaPlaceholderLabel',
         {
           defaultMessage: 'Enter command line arguments for {scriptName}',
           values: {

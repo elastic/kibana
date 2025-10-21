@@ -6,10 +6,36 @@
  */
 
 import React, { memo, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
+import type { MicrosoftDefenderEndpointRunScriptActionParameters } from '../../endpoint_responder/command_render_components/run_script_action';
 import type { TextareaInputArgumentProps } from '../textarea_input_argument';
 import { TextareaInputArgument } from '../textarea_input_argument';
+import type { ResponseActionScript } from '../../../../../common/endpoint/types';
 
-export const MicrosoftScriptInputParams = memo<TextareaInputArgumentProps>((props) => {
+export const MicrosoftScriptInputParams = memo<
+  TextareaInputArgumentProps<
+    MicrosoftDefenderEndpointRunScriptActionParameters,
+    { ScriptName: { selectedOption: ResponseActionScript } }
+  >
+>((props) => {
+  const args = props.command.args;
+
+  const scriptName = useMemo(() => {
+    if (args.hasArg('ScriptName')) {
+      return args.args.ScriptName[0];
+    }
+
+    return '';
+  }, [args]);
+
+  const scriptHelp = useMemo(() => {
+    if (args.hasArg('ScriptName')) {
+      return props.command.argState?.ScriptName?.at(0)?.store?.selectedOption?.description;
+    }
+
+    return '';
+  }, [args, props.command.argState?.ScriptName]);
+
   const customizedProps: Pick<
     TextareaInputArgumentProps,
     | 'helpContent'
@@ -18,8 +44,28 @@ export const MicrosoftScriptInputParams = memo<TextareaInputArgumentProps>((prop
     | 'textareaLabel'
     | 'textareaPlaceholderLabel'
   > = useMemo(() => {
-    return {};
-  }, []);
+    return {
+      helpContent: scriptHelp || undefined,
+
+      textareaLabel: i18n.translate(
+        'xpack.securitySolution.microsoftScriptInputParams.textareaLabel',
+        { defaultMessage: 'Script arguments' }
+      ),
+      textareaPlaceholderLabel: i18n.translate(
+        'xpack.securitySolution.microsoftScriptInputParams.textareaPlaceholderLabel',
+        {
+          defaultMessage: 'Enter command line arguments for {scriptName}',
+          values: {
+            scriptName:
+              scriptName ||
+              i18n.translate('xpack.securitySolution.microsoftScriptInputParams.script', {
+                defaultMessage: 'script',
+              }),
+          },
+        }
+      ),
+    };
+  }, [scriptHelp, scriptName]);
 
   return <TextareaInputArgument {...props} {...customizedProps} />;
 });
