@@ -173,8 +173,7 @@ describe('EnterForeachNodeImpl', () => {
         });
         await expect(underTest.run()).rejects.toThrowError(
           `Foreach expression must evaluate to an array. ` +
-            `Expression "steps.testStep.arrayRendered" resolved to object: {"key":"value"}. ` +
-            `Please ensure the expression references an array variable or update the configuration.`
+            `Expression "steps.testStep.arrayRendered" resolved to object: {"key":"value"}. `
         );
       });
     });
@@ -229,7 +228,7 @@ describe('EnterForeachNodeImpl', () => {
       node.configuration.foreach = JSON.stringify({ key: 'value' });
 
       await expect(underTest.run()).rejects.toThrowError(
-        'Foreach expression must evaluate to an array. Got object: {"key":"value"}'
+        'Foreach expression must evaluate to an array. Expression "{"key":"value"}" resolved to object: {"key":"value"}.'
       );
       expect(stepExecutionRuntime.startStep).toHaveBeenCalledTimes(1);
       expect(workflowExecutionRuntimeManager.navigateToNextNode).not.toHaveBeenCalled();

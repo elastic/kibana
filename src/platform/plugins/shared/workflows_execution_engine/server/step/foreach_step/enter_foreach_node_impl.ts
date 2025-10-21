@@ -147,8 +147,7 @@ export class EnterForeachNodeImpl implements NodeImplementation {
               : `: ${JSON.stringify(resolvedValue).substring(0, 100)}${
                   JSON.stringify(resolvedValue).length > 100 ? '...' : ''
                 }`
-          }. ` +
-          `Please ensure the expression references an array variable or update the configuration.`
+          }. `
       );
     }
 
