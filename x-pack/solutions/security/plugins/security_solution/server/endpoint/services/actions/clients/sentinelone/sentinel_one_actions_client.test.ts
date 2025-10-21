@@ -1950,24 +1950,10 @@ describe('SentinelOneActionsClient class', () => {
     let killProcessActionRequest: KillOrSuspendProcessRequestBody;
 
     beforeEach(() => {
-      // @ts-expect-error readonly prop assignment
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneKillProcessEnabled =
-        true;
-
       killProcessActionRequest = responseActionsClientMock.createKillProcessOptions({
         // @ts-expect-error TS2322 due to type being overloaded to handle kill/suspend process and specific option for S1
         parameters: { process_name: 'foo' },
       });
-    });
-
-    it('should throw an error if feature flag is disabled', async () => {
-      // @ts-expect-error readonly prop assignment
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneKillProcessEnabled =
-        false;
-
-      await expect(s1ActionsClient.killProcess(killProcessActionRequest)).rejects.toThrow(
-        `kill-process not supported for sentinel_one agent type. Feature disabled`
-      );
     });
 
     it('should throw an error if `process_name` is not defined (manual mode)', async () => {
