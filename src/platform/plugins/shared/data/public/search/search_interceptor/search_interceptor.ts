@@ -386,11 +386,7 @@ export class SearchInterceptor {
         id = response.id;
 
         if (!isRunningResponse(response)) {
-          searchTracker?.complete({
-            runtimeMs: response.rawResponse.took,
-            resultsCount: response.rawResponse.values_loaded,
-            resultsBytesSize: Buffer.byteLength(JSON.stringify(response.rawResponse)),
-          });
+          searchTracker?.complete(response);
         }
       }),
       map((response) => {
