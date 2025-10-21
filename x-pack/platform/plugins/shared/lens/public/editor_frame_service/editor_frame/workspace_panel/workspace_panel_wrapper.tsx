@@ -64,15 +64,13 @@ const getAspectRatioStyles = ({ x, y }: { x: number; y: number }) => {
   };
 };
 
-export function VisualizationToolbarWrapper(props: {
-  framePublicAPI: FramePublicAPI;
-  visualizationMap: VisualizationMap;
-}) {
+export function VisualizationToolbarWrapper(props: { framePublicAPI: FramePublicAPI }) {
+  const { visualizationMap } = useEditorFrameService();
   const { framePublicAPI } = props;
   const visualization = useLensSelector(selectVisualization);
 
   const activeVisualization = visualization.activeId
-    ? props.visualizationMap[visualization.activeId]
+    ? visualizationMap[visualization.activeId]
     : null;
 
   return activeVisualization && visualization.state ? (
