@@ -1226,7 +1226,6 @@
     "constate": "^3.3.3",
     "copy-to-clipboard": "^3.3.3",
     "core-js": "^3.45.1",
-    "crc": "^4.3.2",
     "cronstrue": "^3.0.0",
     "css-box-model": "^1.2.1",
     "css.escape": "^1.5.1",

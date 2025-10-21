@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { crc32 } from 'crc';
+import { crc32 } from 'zlib';
 
 /**
  * Encodes a string by appending a CRC32 checksum and base64 encoding the result.

@@ -8,7 +8,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { crc32 } = require('crc');
+const { crc32 } = require('zlib');
 
 /* eslint-disable no-console */
 
@@ -109,4 +109,3 @@ try {
   console.error('Error decoding token:', error instanceof Error ? error.message : error);
   process.exit(1);
 }
-
