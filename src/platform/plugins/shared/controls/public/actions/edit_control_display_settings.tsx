@@ -95,8 +95,8 @@ export class EditControlDisplaySettingsAction
       [layoutState, embeddable.uuid]
     );
 
-    const [grow, setGrow] = useState(layoutEntry.grow ?? false);
-    const [width, setWidth] = useState(layoutEntry.width ?? 'medium');
+    const grow = useMemo(() => layoutEntry.grow ?? false, [layoutEntry]);
+    const width = useMemo(() => layoutEntry.width ?? 'medium', [layoutEntry]);
 
     const applyNextLayout = useCallback(
       (nextGrow: boolean, nextWidth: string) => {
@@ -121,9 +121,7 @@ export class EditControlDisplaySettingsAction
         embeddable.lockHoverActions(false);
       }
       setIsPopoverOpen(false);
-
-      applyNextLayout(grow, width);
-    }, [embeddable, applyNextLayout, grow, width]);
+    }, [embeddable]);
     const onClickButton = useCallback(() => {
       if (isPopoverOpen) onClose();
       else if (apiCanLockHoverActions(embeddable)) {
@@ -134,15 +132,12 @@ export class EditControlDisplaySettingsAction
 
     const onMinimumSizeChange = useCallback(
       (id: string) => {
-        setWidth(id);
-        // Size change only takes immediate effect if grow is disabled
-        if (!grow) applyNextLayout(grow, id);
+        applyNextLayout(grow, id);
       },
       [applyNextLayout, grow]
     );
     const onGrowChange = useCallback(
       (e: EuiSwitchEvent) => {
-        setGrow(e.target.checked);
         applyNextLayout(e.target.checked, width);
       },
       [applyNextLayout, width]
@@ -224,7 +219,6 @@ export class EditControlDisplaySettingsAction
             onChange={(id) => onMinimumSizeChange(id)}
             type="single"
             isFullWidth
-            data-test-subj="esqlControlMinimumWidth"
           />
         </EuiFormRow>
         <EuiSpacer size="m" />
@@ -237,9 +231,8 @@ export class EditControlDisplaySettingsAction
             }
           )}
           color="primary"
-          checked={grow ?? false}
+          checked={grow}
           onChange={(e) => onGrowChange(e)}
-          data-test-subj="esqlControlGrow"
         />
       </EuiPopover>
     );
