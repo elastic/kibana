@@ -14,7 +14,6 @@
     ],
   },
   "kbn_references": [
-    "@kbn/security-solution-plugin",
     "@kbn/security-plugin",
     "@kbn/securitysolution-list-constants",
     "@kbn/fleet-plugin",
