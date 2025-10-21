@@ -26,7 +26,7 @@ import {
 } from '@kbn/elastic-assistant-common';
 
 import type { User } from '../../../utils/auth/types';
-import { routeWithNamespace } from '../../../../../config/services/detections_response';
+import { routeWithNamespace } from '@kbn/security-solution-detections-response-service-fixture';
 
 const configureTest = (test: SuperTest.Test, user: User | undefined) => {
   const configuredTest = test

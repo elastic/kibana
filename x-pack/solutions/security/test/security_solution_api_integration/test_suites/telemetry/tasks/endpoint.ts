@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
-import { getSecurityTelemetryStats } from '../../detections_response/utils';
+import { getSecurityTelemetryStats } from '@kbn/security-solution-detections-response-service-fixture/utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const logger = getService('log');

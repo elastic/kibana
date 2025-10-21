@@ -11,7 +11,7 @@ import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '@kbn/security-solution-plugi
 import {
   createAlertsIndex,
   deleteAllAlerts,
-} from '../../../../../../config/services/detections_response';
+} from '@kbn/security-solution-detections-response-service-fixture';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {

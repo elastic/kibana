@@ -9,7 +9,7 @@ import path from 'path';
 import type { FtrConfigProviderContext } from '@kbn/test';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import type { FtrProviderContext } from '../../ftr_provider_context';
-import { installMockPrebuiltRulesPackage } from '../../test_suites/detections_response/utils';
+import { installMockPrebuiltRulesPackage } from '@kbn/security-solution-detections-response-service-fixture/utils';
 import { PRECONFIGURED_ACTION_CONNECTORS } from '../shared';
 import { services } from './services';
 

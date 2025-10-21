@@ -1,0 +1,8 @@
+{
+  "type": "test-helper",
+  "id": "@kbn/security-solution-detections-response-service-fixture",
+  "owner": "@elastic/security-solution",
+  "group": "platform",
+  "visibility": "private",
+  "devOnly": true
+}

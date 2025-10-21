@@ -15,14 +15,10 @@
   ],
   "exclude": [
     "target/**/*",
-    "config/services/detections_response/**/*"
   ],
   "kbn_references": [
     {
       "path": "../security_solution_endpoint/tsconfig.json"
-    },
-    {
-      "path": "config/services/detections_response/tsconfig.json"
     },
     "@kbn/dev-utils",
     "@kbn/test",

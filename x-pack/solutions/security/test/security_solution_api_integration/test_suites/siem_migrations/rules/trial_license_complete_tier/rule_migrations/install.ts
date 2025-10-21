@@ -13,7 +13,7 @@ import type {
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/rule_migration.gen';
 import { MigrationTranslationResult } from '@kbn/security-solution-plugin/common/siem_migrations/constants';
 import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { deleteAllRules } from '../../../../../config/services/detections_response';
+import { deleteAllRules } from '@kbn/security-solution-detections-response-service-fixture';
 import {
   createMigrationRules,
   defaultElasticRule,
@@ -28,7 +28,7 @@ import {
   createRuleAssetSavedObject,
   deleteAllPrebuiltRuleAssets,
   deleteAllTimelines,
-} from '../../../../detections_response/utils';
+} from '@kbn/security-solution-detections-response-service-fixture/utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');

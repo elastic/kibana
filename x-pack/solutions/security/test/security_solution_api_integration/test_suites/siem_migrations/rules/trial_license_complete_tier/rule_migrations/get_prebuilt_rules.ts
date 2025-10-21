@@ -9,7 +9,7 @@ import expect from 'expect';
 import { v4 as uuidv4 } from 'uuid';
 import { MigrationTranslationResult } from '@kbn/security-solution-plugin/common/siem_migrations/constants';
 import type { RuleMigrationRuleData } from '@kbn/security-solution-plugin/common/siem_migrations/model/rule_migration.gen';
-import { deleteAllRules } from '../../../../../config/services/detections_response';
+import { deleteAllRules } from '@kbn/security-solution-detections-response-service-fixture';
 import {
   createMigrationRules,
   defaultElasticRule,
@@ -23,7 +23,7 @@ import {
   createRuleAssetSavedObject,
   deleteAllPrebuiltRuleAssets,
   deleteAllTimelines,
-} from '../../../../detections_response/utils';
+} from '@kbn/security-solution-detections-response-service-fixture/utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');

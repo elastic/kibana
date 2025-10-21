@@ -17,7 +17,7 @@ import {
   waitForSavedObjectToBeGone,
   waitForRiskScoresToBeGone,
 } from '../../utils';
-import { dataGeneratorFactory } from '../../../detections_response/utils';
+import { dataGeneratorFactory } from '@kbn/security-solution-detections-response-service-fixture/utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

@@ -17,7 +17,7 @@ import {
   installPrebuiltRules,
   installFleetPackage,
 } from '../../../../../utils';
-import { deleteAllRules } from '../../../../../../../config/services/detections_response';
+import { deleteAllRules } from '@kbn/security-solution-detections-response-service-fixture';
 import {
   MOCK_BETA_PKG_VERSION,
   MOCK_PKG_VERSION,

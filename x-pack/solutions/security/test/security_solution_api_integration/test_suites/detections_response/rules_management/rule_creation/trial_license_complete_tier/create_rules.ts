@@ -36,7 +36,7 @@ import {
   waitForAlertsToBePresent,
   waitForRulePartialFailure,
   deleteAllAlerts,
-} from '../../../../../config/services/detections_response';
+} from '@kbn/security-solution-detections-response-service-fixture';
 import { createUserAndRole, deleteUserAndRole } from '../../../../../config/services/common';
 
 export default ({ getService }: FtrProviderContext) => {

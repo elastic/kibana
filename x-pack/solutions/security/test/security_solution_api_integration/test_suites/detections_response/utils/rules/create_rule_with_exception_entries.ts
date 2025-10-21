@@ -18,7 +18,7 @@ import {
   createContainerWithEntries,
   createContainerWithEndpointEntries,
 } from '../exception_list_and_item';
-import { createRule } from '../../../../config/services/detections_response';
+import { createRule } from '@kbn/security-solution-detections-response-service-fixture';
 
 /**
  * Convenience testing function where you can pass in just the entries and you will

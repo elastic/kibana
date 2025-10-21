@@ -15,7 +15,7 @@ import {
   createPrebuiltRuleAssetSavedObjects,
   installPrebuiltRules,
 } from '../../../utils';
-import { deleteAllRules } from '../../../../../config/services/detections_response';
+import { deleteAllRules } from '@kbn/security-solution-detections-response-service-fixture';
 
 /**
  * Test suite for detection rule customization status telemetry.

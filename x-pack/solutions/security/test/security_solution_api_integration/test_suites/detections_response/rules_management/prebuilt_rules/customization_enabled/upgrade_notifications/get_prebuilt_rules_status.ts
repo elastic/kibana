@@ -14,7 +14,7 @@ import {
   createPrebuiltRuleAssetSavedObjects,
   installPrebuiltRules,
 } from '../../../../utils';
-import { deleteAllRules } from '../../../../../../config/services/detections_response';
+import { deleteAllRules } from '@kbn/security-solution-detections-response-service-fixture';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');

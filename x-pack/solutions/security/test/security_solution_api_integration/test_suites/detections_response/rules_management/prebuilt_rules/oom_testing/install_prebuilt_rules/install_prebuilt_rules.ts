@@ -24,7 +24,7 @@ import {
   deleteEndpointFleetPackage,
   deletePrebuiltRulesFleetPackage,
 } from '../../../../utils/rules/prebuilt_rules/delete_fleet_packages';
-import { deleteAllRules, waitFor } from '../../../../../../config/services/detections_response';
+import { deleteAllRules, waitFor } from '@kbn/security-solution-detections-response-service-fixture';
 
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');

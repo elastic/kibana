@@ -34,14 +34,14 @@ import {
   removeServerGeneratedProperties,
   updateUsername,
 } from '../../../utils';
-import { createRule, deleteAllRules } from '../../../../../config/services/detections_response';
+import { createRule, deleteAllRules } from '@kbn/security-solution-detections-response-service-fixture';
 import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
 
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { deleteAllGaps } from '../../../utils/event_log/delete_all_gaps';
 import type { GapEvent } from '../../../utils/event_log/generate_gaps_for_rule';
 import { generateGapsForRule } from '../../../utils/event_log/generate_gaps_for_rule';
-import { getGapsByRuleId } from '../../../../../config/services/detections_response/rules/get_gaps_by_rule_id';
+import { getGapsByRuleId } from '@kbn/security-solution-detections-response-service-fixture/rules/get_gaps_by_rule_id';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');

@@ -10,7 +10,7 @@ import expect from 'expect';
 import type { BaseDefaultableFields } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { binaryToString, getCustomQueryRuleParams, parseNdJson } from '../../../utils';
-import { deleteAllRules } from '../../../../../config/services/detections_response';
+import { deleteAllRules } from '@kbn/security-solution-detections-response-service-fixture';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');

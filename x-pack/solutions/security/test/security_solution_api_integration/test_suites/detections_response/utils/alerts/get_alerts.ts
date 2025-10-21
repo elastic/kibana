@@ -13,7 +13,7 @@ import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/ap
 import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 import { refreshIndex } from '..';
-import { getAlertsByIds, waitForRuleStatus } from '../../../../config/services/detections_response';
+import { getAlertsByIds, waitForRuleStatus } from '@kbn/security-solution-detections-response-service-fixture';
 
 export type GetAlerts = (
   supertest: SuperTest.Agent,

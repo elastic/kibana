@@ -13,7 +13,7 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 
-import { getStatsUrl } from '../../detections_response/utils/get_stats_url';
+import { getStatsUrl } from '@kbn/security-solution-detections-response-service-fixture/utils/get_stats_url';
 import { getRiskEngineMetricsFromBody } from './get_risk_engine_metrics_from_body';
 
 /**

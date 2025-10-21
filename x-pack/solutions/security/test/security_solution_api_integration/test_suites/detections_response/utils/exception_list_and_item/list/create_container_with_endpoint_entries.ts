@@ -16,7 +16,7 @@ import type {
 
 import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 import { createExceptionListItem } from '../item/create_exception_list_item';
-import { waitFor } from '../../../../../config/services/detections_response';
+import { waitFor } from '@kbn/security-solution-detections-response-service-fixture';
 import { createExceptionList } from './create_exception_list';
 
 /**

@@ -27,7 +27,7 @@ import {
   deleteAllAlerts,
   deleteAllAnomalies,
   deleteAllRules,
-} from '../../../../../../config/services/detections_response';
+} from '@kbn/security-solution-detections-response-service-fixture';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

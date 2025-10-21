@@ -16,7 +16,7 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import {
   countDownTest,
   routeWithNamespace,
-} from '../../../../../config/services/detections_response';
+} from '@kbn/security-solution-detections-response-service-fixture';
 import { getAttackDiscoverySchedulesApis } from './apis';
 import { getSimpleAttackDiscoverySchedule } from '../mocks';
 

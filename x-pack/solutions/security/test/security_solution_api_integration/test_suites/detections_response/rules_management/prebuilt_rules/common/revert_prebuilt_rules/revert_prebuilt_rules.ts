@@ -10,7 +10,7 @@ import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common
 import {
   deleteAllRules,
   waitForRulePartialFailure,
-} from '../../../../../../config/services/detections_response';
+} from '@kbn/security-solution-detections-response-service-fixture';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   createPrebuiltRuleAssetSavedObjects,

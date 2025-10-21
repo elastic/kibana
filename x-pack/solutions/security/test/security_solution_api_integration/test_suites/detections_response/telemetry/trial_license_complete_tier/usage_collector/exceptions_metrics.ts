@@ -14,7 +14,7 @@ import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/c
 import type { ExceptionMetricsSchema } from '@kbn/security-solution-plugin/server/usage/exceptions/types';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { deleteAllEventLogExecutionEvents } from '../../../utils';
-import { createRule, deleteAllRules } from '../../../../../config/services/detections_response';
+import { createRule, deleteAllRules } from '@kbn/security-solution-detections-response-service-fixture';
 import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
 import { getCustomQueryRuleParams } from '../../../utils';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';

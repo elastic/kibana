@@ -12,7 +12,7 @@ import {
   SECURITY_FEATURE_ID,
 } from '@kbn/security-solution-plugin/common/constants';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
-import { deleteAllAlerts } from '../../../../../config/services/detections_response';
+import { deleteAllAlerts } from '@kbn/security-solution-detections-response-service-fixture';
 
 const roleToAccessSecuritySolution = {
   name: 'sec_all_spaces',

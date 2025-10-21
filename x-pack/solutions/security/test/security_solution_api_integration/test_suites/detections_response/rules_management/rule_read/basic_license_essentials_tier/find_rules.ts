@@ -16,7 +16,7 @@ import {
   removeServerGeneratedProperties,
   updateUsername,
 } from '../../../utils';
-import { createRule, deleteAllRules } from '../../../../../config/services/detections_response';
+import { createRule, deleteAllRules } from '@kbn/security-solution-detections-response-service-fixture';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');

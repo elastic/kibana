@@ -14,7 +14,7 @@ import {
   deleteAllPrebuiltRuleAssets,
   performUpgradePrebuiltRules,
 } from '../../../../utils';
-import { deleteAllRules } from '../../../../../../config/services/detections_response';
+import { deleteAllRules } from '@kbn/security-solution-detections-response-service-fixture';
 import { setUpRuleUpgrade } from '../../../../utils/rules/prebuilt_rules/set_up_rule_upgrade';
 import { createMlRuleThroughAlertingEndpoint } from '../utils';
 

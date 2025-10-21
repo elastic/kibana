@@ -11,8 +11,8 @@ import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { RISK_SCORE_ENTITY_CALCULATION_URL } from '@kbn/security-solution-plugin/common/constants';
 import { v4 as uuidv4 } from 'uuid';
 import type { EntityRiskScoreRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics/common';
-import { dataGeneratorFactory } from '../../../detections_response/utils';
-import { deleteAllAlerts, deleteAllRules } from '../../../../config/services/detections_response';
+import { dataGeneratorFactory } from '@kbn/security-solution-detections-response-service-fixture/utils';
+import { deleteAllAlerts, deleteAllRules } from '@kbn/security-solution-detections-response-service-fixture';
 import {
   buildDocument,
   createAndSyncRuleAndAlertsFactory,

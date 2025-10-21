@@ -23,7 +23,7 @@ import {
   deleteAllRules,
   createRule,
   deleteRule,
-} from '../../../../../../config/services/detections_response';
+} from '@kbn/security-solution-detections-response-service-fixture';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');

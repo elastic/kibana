@@ -16,7 +16,7 @@ import {
   updateUsername,
   removeServerGeneratedProperties,
 } from '../../../utils';
-import { createRule, deleteAllRules } from '../../../../../config/services/detections_response';
+import { createRule, deleteAllRules } from '@kbn/security-solution-detections-response-service-fixture';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {

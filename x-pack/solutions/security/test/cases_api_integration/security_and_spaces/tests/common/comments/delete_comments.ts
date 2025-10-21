@@ -55,7 +55,7 @@ import {
   createAlertsIndex,
   deleteAllAlerts,
   deleteAllRules,
-} from '../../../../../security_solution_api_integration/config/services/detections_response';
+} from '@kbn/security-solution-detections-response-service-fixture';
 import {
   createSecuritySolutionAlerts,
   getSecuritySolutionAlerts,

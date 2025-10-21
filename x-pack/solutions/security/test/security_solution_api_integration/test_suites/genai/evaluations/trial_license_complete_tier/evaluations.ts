@@ -19,7 +19,7 @@ import {
   setupKnowledgeBase,
 } from '../../knowledge_base/entries/utils/helpers';
 
-import { routeWithNamespace } from '../../../../config/services/detections_response';
+import { routeWithNamespace } from '@kbn/security-solution-detections-response-service-fixture';
 import { loadEvalKnowledgeBaseEntries } from '../data/kb_entries';
 import { waitForEvaluationComplete } from './utils';
 

@@ -18,7 +18,7 @@ import {
   createAlertsIndex,
   deleteAllAlerts,
   waitFor,
-} from '../../../../../../../config/services/detections_response';
+} from '@kbn/security-solution-detections-response-service-fixture';
 import { createUserAndRole } from '../../../../../../../config/services/common';
 
 interface CreateResponse {

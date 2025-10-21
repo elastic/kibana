@@ -30,7 +30,7 @@ import {
   getAlertsByIds,
   waitForRuleSuccess,
   getRuleForAlertTesting,
-} from '../../../../../../config/services/detections_response';
+} from '@kbn/security-solution-detections-response-service-fixture';
 import { createUserAndRole, deleteUserAndRole } from '../../../../../../config/services/common';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';

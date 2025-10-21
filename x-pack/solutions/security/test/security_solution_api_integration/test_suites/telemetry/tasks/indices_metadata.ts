@@ -19,7 +19,7 @@ import {
   randomIngestPipeline,
   taskHasRun,
   waitFor,
-} from '../../../config/services/detections_response';
+} from '@kbn/security-solution-detections-response-service-fixture';
 
 const TASK_ID = 'security:indices-metadata-telemetry:1.0.0';
 const NUM_INDICES = 5;

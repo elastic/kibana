@@ -27,7 +27,7 @@ import {
   createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
-} from '../../../../../config/services/detections_response';
+} from '@kbn/security-solution-detections-response-service-fixture';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { getWebHookConnectorParams } from '../../../utils/connectors/get_web_hook_connector_params';
 import { createConnector } from '../../../utils/connectors';

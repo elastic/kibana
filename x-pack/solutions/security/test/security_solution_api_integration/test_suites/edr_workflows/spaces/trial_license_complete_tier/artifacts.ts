@@ -27,7 +27,7 @@ import type {
 import type { Role } from '@kbn/security-plugin-types-common';
 import { GLOBAL_ARTIFACT_TAG } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts';
 import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common/constants';
-import { binaryToString } from '../../../detections_response/utils';
+import { binaryToString } from '@kbn/security-solution-detections-response-service-fixture/utils';
 import type { PolicyTestResourceInfo } from '../../../../../security_solution_endpoint/services/endpoint_policy';
 import { createSupertestErrorLogger } from '../../utils';
 import type { ArtifactTestData } from '../../../../../security_solution_endpoint/services/endpoint_artifacts';
