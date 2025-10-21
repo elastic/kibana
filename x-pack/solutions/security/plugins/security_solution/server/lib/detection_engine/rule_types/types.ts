@@ -303,7 +303,8 @@ export type SimpleHit = BaseHit<{ '@timestamp'?: string }>;
 
 export type WrapSuppressedHits = (
   hits: Array<estypes.SearchHit<SignalSource>>,
-  buildReasonMessage: BuildReasonMessage
+  buildReasonMessage: BuildReasonMessage,
+  searchAfter?: estypes.SortResults
 ) => Array<WrappedAlert<DetectionAlertLatest & SuppressionFieldsLatest>>;
 
 export type SecurityRuleServices = RuleExecutorServices<

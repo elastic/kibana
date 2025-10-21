@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import objectHash from 'object-hash';
 import { v4 as uuid } from 'uuid';
 
@@ -32,10 +33,12 @@ export const wrapSuppressedAlerts = ({
   events,
   buildReasonMessage,
   sharedParams,
+  searchAfter,
 }: {
   events: SignalSourceHit[];
   buildReasonMessage: BuildReasonMessage;
   sharedParams: SecuritySharedParams<MachineLearningRuleParams | EqlRuleParams | ThreatRuleParams>;
+  searchAfter?: estypes.SortResults;
 }): Array<WrappedAlert<DetectionAlertLatest & SuppressionFieldsLatest>> => {
   const { completeRule, spaceId, primaryTimestamp, secondaryTimestamp } = sharedParams;
   const searchId = uuid();
@@ -62,6 +65,7 @@ export const wrapSuppressedAlerts = ({
       buildReasonMessage,
       alertUuid: id,
       searchId,
+      searchAfter,
     });
 
     return {

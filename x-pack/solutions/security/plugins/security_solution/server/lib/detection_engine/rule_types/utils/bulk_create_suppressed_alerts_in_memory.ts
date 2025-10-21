@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import type { EqlHitsSequence } from '@elastic/elasticsearch/lib/api/types';
 
@@ -46,6 +47,7 @@ export interface BulkCreateSuppressedAlertsParams {
   toReturn: SearchAfterAndBulkCreateReturnType;
   mergeSourceAndFields?: boolean;
   maxNumberOfAlertsMultiplier?: number;
+  searchAfter?: estypes.SortResults;
 }
 
 export interface BulkCreateSuppressedSequencesParams {
@@ -71,6 +73,7 @@ export const bulkCreateSuppressedAlertsInMemory = async ({
   wrapSuppressedHits,
   mergeSourceAndFields = false,
   maxNumberOfAlertsMultiplier,
+  searchAfter,
 }: BulkCreateSuppressedAlertsParams) => {
   const suppressOnMissingFields =
     (alertSuppression?.missingFieldsStrategy ?? DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY) ===
@@ -91,7 +94,11 @@ export const bulkCreateSuppressedAlertsInMemory = async ({
     suppressibleEvents = partitionedEvents[0];
   }
 
-  const suppressibleWrappedDocs = wrapSuppressedHits(suppressibleEvents, buildReasonMessage);
+  const suppressibleWrappedDocs = wrapSuppressedHits(
+    suppressibleEvents,
+    buildReasonMessage,
+    searchAfter
+  );
 
   return executeBulkCreateAlerts({
     sharedParams,

@@ -34,6 +34,7 @@ export interface TransformHitToAlertProps {
   buildReasonMessage: BuildReasonMessage;
   alertUuid: string;
   searchId: string;
+  searchAfter?: estypes.SortResults;
 }
 
 /**
@@ -52,6 +53,7 @@ export const transformHitToAlert = ({
   buildReasonMessage,
   alertUuid,
   searchId,
+  searchAfter,
 }: TransformHitToAlertProps): DetectionAlertLatest => {
   const mergedDoc = getMergeStrategy(sharedParams.mergeStrategy)({
     doc,
@@ -136,6 +138,7 @@ export const transformHitToAlert = ({
         id: doc._id,
         index: doc._index,
         searchId,
+        searchAfter,
       },
     ];
     return validatedSource as DetectionAlertLatest;

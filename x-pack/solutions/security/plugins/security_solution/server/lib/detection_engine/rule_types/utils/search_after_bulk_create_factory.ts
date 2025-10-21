@@ -54,6 +54,7 @@ export interface SearchAfterAndBulkCreateFactoryParams extends SearchAfterAndBul
   bulkCreateExecutor: (params: {
     enrichedEvents: SignalSourceHit[];
     toReturn: SearchAfterAndBulkCreateReturnType;
+    searchAfter?: estypes.SortResults;
   }) => Promise<GenericBulkCreateResponse<DetectionAlertLatest>>;
   getWarningMessage: () => string;
 }
@@ -185,6 +186,7 @@ export const searchAfterAndBulkCreateFactory = async ({
           const bulkCreateResult = await bulkCreateExecutor({
             enrichedEvents,
             toReturn,
+            searchAfter: sortIds,
           });
 
           ruleExecutionLogger.debug(

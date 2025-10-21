@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { getSuppressionMaxSignalsWarning } from './utils';
 import type {
   SearchAfterAndBulkCreateParams,
@@ -16,6 +17,7 @@ import type { AlertSuppressionCamel } from '../../../../../common/api/detection_
 interface SearchAfterAndBulkCreateSuppressedAlertsParams extends SearchAfterAndBulkCreateParams {
   wrapSuppressedHits: WrapSuppressedHits;
   alertSuppression: AlertSuppressionCamel;
+  searchAfter?: estypes.SortResults;
 }
 
 import type { SearchAfterAndBulkCreateFactoryParams } from './search_after_bulk_create_factory';
@@ -35,6 +37,7 @@ export const searchAfterAndBulkCreateSuppressedAlerts = async (
   const bulkCreateExecutor: SearchAfterAndBulkCreateFactoryParams['bulkCreateExecutor'] = async ({
     enrichedEvents,
     toReturn,
+    searchAfter,
   }) => {
     return bulkCreateSuppressedAlertsInMemory({
       sharedParams,
@@ -44,6 +47,7 @@ export const searchAfterAndBulkCreateSuppressedAlerts = async (
       wrapSuppressedHits,
       enrichedEvents,
       toReturn,
+      searchAfter,
     });
   };
 

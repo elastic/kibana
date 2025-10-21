@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { INDICATOR_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 
@@ -63,12 +64,14 @@ export const createIndicatorMatchAlertType = (): SecurityAlertType<ThreatRulePar
 
       const wrapSuppressedHits = (
         events: SignalSourceHit[],
-        buildReasonMessage: BuildReasonMessage
+        buildReasonMessage: BuildReasonMessage,
+        searchAfter?: estypes.SortResults
       ) =>
         wrapSuppressedAlerts({
           events,
           buildReasonMessage,
           sharedParams,
+          searchAfter,
         });
 
       const result = await indicatorMatchExecutor({
