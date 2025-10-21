@@ -181,8 +181,6 @@ describe('When displaying Endpoint Response Actions', () => {
 
   describe('for agent type microsoft defender for endpoint', () => {
     beforeEach(() => {
-      (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({});
-
       commands = getEndpointConsoleCommands({
         agentType: 'microsoft_defender_endpoint',
         endpointAgentId: '123',
