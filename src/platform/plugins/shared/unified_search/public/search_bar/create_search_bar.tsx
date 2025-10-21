@@ -280,6 +280,9 @@ export function createSearchBar({
             onEsqlEditorInitialStateChange={props.onEsqlEditorInitialStateChange}
             esqlVariablesConfig={props.esqlVariablesConfig}
             useBackgroundSearchButton={props.useBackgroundSearchButton}
+            showProjectPicker={props.showProjectPicker}
+            projectRouting={props.projectRouting}
+            onProjectRoutingChange={props.onProjectRoutingChange}
           />
         </core.i18n.Context>
       </KibanaContextProvider>

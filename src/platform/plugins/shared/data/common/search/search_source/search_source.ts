@@ -680,6 +680,28 @@ export class SearchSource {
         return addToBody(key, sort);
       case 'pit':
         return addToRoot(key, val);
+      case 'projectRouting':
+        // TEMPORARY WORKAROUND: Use filters until project_routing parameter is supported
+        // This allows testing the projectRouting field without breaking on non-serverless ES
+
+          console.log('SearchSource: Adding dummy filter for projectRouting:', val);
+
+          // Add a dummy filter based on the routing type to validate the field works
+          // When project_routing is supported, replace this with:
+          // const projectRoutingValue = this.serializeProjectRouting(val);
+          // return addToBody('project_routing', projectRoutingValue);
+
+
+          const dummyFilter = val ? this.createProjectRoutingDummyFilter(val) :  this.createProjectRoutingDummyFilter({
+            type: 'all',
+          }) ;
+          if (dummyFilter) {
+            // Add to filters array in the root
+            const existingFilters =
+              typeof data.filters === 'function' ? data.filters() : data.filters || [];
+            addToRoot('filters', existingFilters.concat(dummyFilter));
+          }
+        return;
       case 'aggs':
         if ((val as unknown) instanceof AggConfigs) {
           return addToBody('aggs', val.toDsl());
@@ -714,6 +736,79 @@ export class SearchSource {
 
   private getDataView(index?: DataView | string): DataView | undefined {
     return typeof index !== 'string' ? index : undefined;
+  }
+
+  /**
+   * TEMPORARY: Creates a dummy filter for testing projectRouting field
+   * This is a workaround until project_routing parameter is supported
+   * @param config - The project routing configuration
+   * @returns A filter that serves as a placeholder
+   */
+  private createProjectRoutingDummyFilter(
+    config: NonNullable<SearchSourceFields['projectRouting']>
+  ): Filter | null {
+    switch (config.type) {
+      case 'origin':
+        // For origin: no-op filter (doesn't affect results)
+        // Uses a filter that always matches
+        return null; // Don't add any filter for origin
+      case 'all':
+        // For all: add a filter that checks if _id exists (all docs have _id)
+        // This is a dummy filter that doesn't actually filter anything out
+        return {
+          meta: {
+            disabled: false,
+            negate: false,
+            alias: 'Project Routing: All (testing)',
+            key: '_id',
+            type: 'exists',
+            value: 'exists',
+          },
+          query: {
+            exists: {
+              field: '_id',
+            },
+          },
+        };
+      case 'custom':
+        // For custom: similar dummy filter with custom label
+        return {
+          meta: {
+            disabled: false,
+            negate: false,
+            alias: `Project Routing: Custom [${config.projects.join(', ')}] (testing)`,
+            key: '_id',
+            type: 'exists',
+            value: 'exists',
+          },
+          query: {
+            exists: {
+              field: '_id',
+            },
+          },
+        };
+    }
+  }
+
+  /**
+   * Serializes a ProjectRouting configuration to the Elasticsearch project_routing parameter format.
+   * This will be used when project_routing parameter is supported.
+   * @param config - The project routing configuration
+   * @returns The Elasticsearch-compatible project_routing parameter value
+   */
+  private serializeProjectRouting(
+    config: NonNullable<SearchSourceFields['projectRouting']>
+  ): string {
+    switch (config.type) {
+      case 'origin':
+        return '_alias:_origin';
+      case 'all':
+        return '_alias:*';
+      case 'custom':
+        // For custom, join the project IDs
+        // Format: "_alias:project1,project2,project3"
+        return `_alias:${config.projects.join(',')}`;
+    }
   }
 
   private readonly getFieldName = (fld: SearchFieldValue): string =>
@@ -1096,12 +1191,19 @@ export class SearchSource {
       size: _size, // omit it
       sort,
       index,
+      projectRouting,
       ...searchSourceFields
     } = this.getFields();
 
     let serializedSearchSourceFields: SerializedSearchSourceFields = {
       ...searchSourceFields,
     };
+
+    console.log('SearchSource: Serializing projectRouting field:', projectRouting);
+    // Only include projectRouting if it's not the default 'all' type
+    if (projectRouting && projectRouting.type !== 'all') {
+      serializedSearchSourceFields.projectRouting = projectRouting;
+    }
     if (index) {
       serializedSearchSourceFields.index = index.isPersisted() ? index.id : index.toMinimalSpec();
     }

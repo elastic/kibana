@@ -12,7 +12,7 @@ import { schema } from '@kbn/config-schema';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { controlsGroupSchema } from '@kbn/controls-schemas';
 import { referenceSchema } from '@kbn/content-management-utils';
-import { filterSchema, querySchema, timeRangeSchema } from '@kbn/es-query-server';
+import { filterSchema, projectRoutingSchema, querySchema, timeRangeSchema } from '@kbn/es-query-server';
 import { embeddableService } from '../../../kibana_services';
 
 import {
@@ -152,6 +152,7 @@ export function getDashboardStateSchema() {
     panels: schema.arrayOf(schema.oneOf([getPanelSchema(), getSectionSchema()]), {
       defaultValue: [],
     }),
+    projectRouting: schema.maybe(projectRoutingSchema),
     query: schema.maybe(querySchema),
     refreshInterval: schema.maybe(refreshIntervalSchema),
     tags: schema.maybe(
