@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/solutions/workplace_ai/packages/wci-common'],
+import React from 'react';
+import type { ConversationFlyoutProps } from './types';
+
+export const ConversationFlyout = ({ onClose }: ConversationFlyoutProps) => {
+  return <div>Agent Builder Conversation Flyout</div>;
 };

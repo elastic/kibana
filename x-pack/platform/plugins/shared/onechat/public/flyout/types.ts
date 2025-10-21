@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export const baseToolsProviderId = 'base_tools';
+export interface ConversationFlyoutProps {
+  onClose: () => void;
+}
+
+export interface OpenConversationFlyoutOptions {
+  onClose?: () => void;
+}
