@@ -127,7 +127,7 @@ export const getActionResultsRoute = (
               // Check if actionId is a child query action_id
               const queries = actionDetails._source.queries || [];
               const matchingQuery = queries.find(
-                (q: any) => q.action_id === request.params.actionId
+                (q) => q.action_id === request.params.actionId
               );
 
               // Use query-specific agents if found, otherwise use parent action's agents
