@@ -689,6 +689,8 @@ export class SearchSource {
           // const projectRoutingValue = this.serializeProjectRouting(val);
           // return addToBody('project_routing', projectRoutingValue);
 
+          console.log('SearchSource: Adding dummy filter for projectRouting:', val);
+
           const dummyFilter = this.createProjectRoutingDummyFilter(val);
           if (dummyFilter) {
             // Add to filters array in the root
