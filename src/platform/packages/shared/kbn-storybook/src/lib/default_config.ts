@@ -83,7 +83,10 @@ export const defaultConfig: StorybookConfig = {
                     const req = JSON.stringify(
                       loaderContext.utils.contextify(
                         loaderContext.context || loaderContext.rootContext,
-                        resolve(REPO_ROOT, 'src/core/public/styles/core_app/_globals_v8light.scss')
+                        resolve(
+                          REPO_ROOT,
+                          'src/core/public/styles/core_app/_globals_borealislight.scss'
+                        )
                       )
                     );
                     return `@import ${req};\n${content}`;
