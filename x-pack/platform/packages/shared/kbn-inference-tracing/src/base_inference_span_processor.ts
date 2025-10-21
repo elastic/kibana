@@ -35,8 +35,6 @@ export abstract class BaseInferenceSpanProcessor implements tracing.SpanProcesso
 
   onEnd(span: tracing.ReadableSpan): void {
     if (span.attributes._should_track) {
-      delete span.attributes._should_track;
-
       // if this is the "root" inference span, but has a parent,
       // drop the parent context as Phoenix only shows root spans
       if (span.attributes[IS_ROOT_INFERENCE_SPAN_ATTRIBUTE_NAME] && span.parentSpanContext) {
@@ -46,8 +44,6 @@ export abstract class BaseInferenceSpanProcessor implements tracing.SpanProcesso
           parentSpanContext: undefined,
         };
       }
-
-      delete span.attributes[IS_ROOT_INFERENCE_SPAN_ATTRIBUTE_NAME];
 
       span = this.processInferenceSpan(span);
 

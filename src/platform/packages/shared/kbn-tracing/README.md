@@ -2,7 +2,7 @@
 
 OpenTelemetry tracing bootstrap for Kibana Node processes.
 
-`initTracing()` wires up the global `NodeTracerProvider`, sampling, context propagation and registers inference-tracing exporters (Phoenix / Langfuse) when configured in `kibana.yml`. OpenTelemetry tracing is disabled by default and should not be enabled in conjuction with Elastic APM.
+`initTracing()` wires up the global `NodeTracerProvider`, sampling, context propagation and registers inference-tracing exporters (Phoenix / Langfuse / OTLP) when configured in `kibana.yml`. OpenTelemetry tracing is disabled by default and should not be enabled in conjuction with Elastic APM.
 
 ---
 
@@ -28,14 +28,35 @@ telemetry.tracing.exporters:
       public_key: '${LANGFUSE_PUBLIC_KEY}'
       secret_key: '${LANGFUSE_SECRET_KEY}'
       scheduled_delay: 2000
+
+  # OTLP exporter (for APM Server, OpenTelemetry Collector, or other OTLP backends)
+  - otlp:
+      url: 'http://localhost:4318/v1/traces' # OTLP receiver endpoint
+      protocol: 'http' # or 'grpc'
+      headers:
+        Authorization: 'Bearer ${SECRET_TOKEN}' # optional
+      scheduled_delay: 2000
 ```
 
 The YAML follows the schema exported from `@kbn/inference-tracing-config`:
 
 - `InferenceTracingPhoenixExportConfig`
 - `InferenceTracingLangfuseExportConfig`
+- `InferenceTracingOTLPExportConfig`
 
 See those types for a full list of allowed fields.
+
+### OTLP Backend Compatibility
+
+The OTLP exporter works with any OTLP-compatible receiver, including:
+
+- **OpenTelemetry Collector** (recommended for flexibility and fan-out capabilities)
+- APM Server (for viewing in Kibana APM UI)
+- Jaeger with OTLP receiver
+- Grafana Tempo
+- Any other OTLP-compatible observability backend
+
+Using an OpenTelemetry Collector as an intermediary is recommended as it allows you to forward traces to multiple backends, apply processing/filtering, and handle backpressure.
 
 ---
 
@@ -49,6 +70,6 @@ See those types for a full list of allowed fields.
    - creates a `NodeTracerProvider` with resource attributes derived from the Elastic APM config,
    - for each entry under `telemetry.tracing.exporters` instantiates the corresponding span processor from `@kbn/inference-tracing` and registers it.
 
-After this, any code using the helpers from `@kbn/inference-tracing` (`withActiveInferenceSpan`, `withChatCompleteSpan`, …) will produce spans that are forwarded to Phoenix / Langfuse.
+After this, any code using the helpers from `@kbn/inference-tracing` (`withActiveInferenceSpan`, `withChatCompleteSpan`, …) will produce spans that are forwarded to Phoenix / Langfuse / OTLP backends.
 
 No additional application code is needed—configuration alone enables exporting.
