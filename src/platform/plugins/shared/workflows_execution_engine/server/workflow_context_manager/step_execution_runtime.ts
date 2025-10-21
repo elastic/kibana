@@ -133,7 +133,7 @@ export class StepExecutionRuntime {
     await this.workflowExecutionState.flushStepChanges();
   }
 
-  public async updateStepInput({ input }: { input: Record<string, any>; }): Promise<void> {
+  public async setInput(input: Record<string, any>): Promise<void> {
     this.workflowExecutionState.upsertStep({
       id: this.stepExecutionId,
       input,
