@@ -21,7 +21,7 @@ import type { LinksState } from './content_management';
 import { LinksStorage } from './content_management';
 import { linksSavedObjectType } from './saved_objects';
 import { transforms } from '../common/embeddable/transforms/transforms';
-import { linksEmbeddableSchema } from './schemas';
+import { linksEmbeddableSchema } from './embeddable_schemas';
 
 export class LinksServerPlugin implements Plugin<object, object> {
   private readonly logger: Logger;
