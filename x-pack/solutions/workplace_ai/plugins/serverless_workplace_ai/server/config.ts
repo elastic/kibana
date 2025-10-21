@@ -21,4 +21,4 @@ export const config: PluginConfigDescriptor<ConfigType> = {
   schema: configSchema,
 };
 
-export type ServerlessChatConfig = TypeOf<typeof configSchema>;
+export type ServerlessWorkplaceAIConfig = TypeOf<typeof configSchema>;
