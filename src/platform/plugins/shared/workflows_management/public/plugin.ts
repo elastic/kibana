@@ -49,6 +49,7 @@ export class WorkflowsPlugin
     // Register the connector type immediately but load it lazily
     registerConnectorType();
 
+    // Check if workflows UI is enabled
     const isWorkflowsUiEnabled = core.uiSettings.get<boolean>(WORKFLOWS_UI_SETTING_ID, false);
 
     if (isWorkflowsUiEnabled) {
