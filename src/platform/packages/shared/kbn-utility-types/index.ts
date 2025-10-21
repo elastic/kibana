@@ -178,3 +178,5 @@ export type RecursivePartial<T> = {
     : RecursivePartial<T[P]>;
 };
 type NonAny = number | boolean | string | symbol | null;
+
+export { maybe } from './src/maybe';

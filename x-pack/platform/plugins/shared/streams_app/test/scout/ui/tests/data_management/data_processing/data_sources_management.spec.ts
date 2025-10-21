@@ -94,7 +94,7 @@ test.describe(
       await pageObjects.streams.addDataSource('kql');
       await page.getByRole('textbox', { name: 'Name' }).fill('Kql Samples');
 
-      page.reload();
+      await page.reload();
 
       // Assert that the data sources are still present
       await expect(await pageObjects.streams.getDataSourcesListItems()).toHaveCount(2);

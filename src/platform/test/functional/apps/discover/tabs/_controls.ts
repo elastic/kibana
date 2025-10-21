@@ -10,13 +10,20 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 const savedSession = 'my ESQL session';
+const savedChart = 'ESQLChartWithControls';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { discover, dashboardControls } = getPageObjects(['discover', 'dashboardControls']);
+  const { discover, dashboardControls, dashboard, header } = getPageObjects([
+    'discover',
+    'dashboardControls',
+    'dashboard',
+    'header',
+  ]);
   const retry = getService('retry');
   const esql = getService('esql');
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
+  const dashboardAddPanel = getService('dashboardAddPanel');
 
   describe('discover - ES|QL controls', function () {
     it('should add an ES|QL value control', async () => {
@@ -95,6 +102,41 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await discover.revertUnsavedChanges();
       await testSubjects.missingOrFail('unsavedChangesBadge');
+    });
+
+    it('should open the histogram in a dashboard', async () => {
+      // load saved search
+      await discover.loadSavedSearch(savedSession);
+      await discover.waitUntilTabIsLoaded();
+
+      // Save the histogram
+      await testSubjects.click('unifiedHistogramSaveVisualization');
+      await discover.waitUntilTabIsLoaded();
+      await discover.saveHistogramToDashboard(savedChart);
+
+      // Check control is present
+      await retry.try(async () => {
+        const controlGroupVisible = await testSubjects.exists('controls-group-wrapper');
+        expect(controlGroupVisible).to.be(true);
+      });
+    });
+
+    it('should open the saved session in a dashboard', async () => {
+      // Navigate to dashboard
+      await dashboard.navigateToApp();
+      await dashboard.gotoDashboardLandingPage();
+      await dashboard.clickNewDashboard();
+
+      // Add saved search
+      await dashboardAddPanel.addSavedSearch(savedSession);
+      await header.waitUntilLoadingHasFinished();
+      await dashboard.waitForRenderComplete();
+
+      // Check control is present
+      await retry.try(async () => {
+        const controlGroupVisible = await testSubjects.exists('controls-group-wrapper');
+        expect(controlGroupVisible).to.be(true);
+      });
     });
   });
 }

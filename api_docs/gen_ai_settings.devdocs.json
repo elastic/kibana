@@ -50,7 +50,7 @@
         "label": "GenAiSettingsConfigType",
         "description": [],
         "signature": [
-          "{ readonly showAiBreadcrumb: boolean; readonly showSpacesIntegration: boolean; }"
+          "{ readonly showAiBreadcrumb: boolean; readonly showSpacesIntegration: boolean; readonly showAiAssistantsVisibilitySetting: boolean; }"
         ],
         "path": "x-pack/platform/plugins/private/gen_ai_settings/common/config.ts",
         "deprecated": false,

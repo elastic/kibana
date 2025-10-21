@@ -39,15 +39,6 @@ export const ELASTIC_COMMON_SCHEMA = i18n.translate(
   }
 );
 
-export const SECURITY_SOLUTION_DEFAULT_INDEX_TOOLTIP = (settingName: string) =>
-  i18n.translate(
-    'xpack.securitySolution.dataQualityDashboard.securitySolutionDefaultIndexTooltip',
-    {
-      values: { settingName },
-      defaultMessage: `Indices and patterns from the {settingName} setting`,
-    }
-  );
-
 export const EVENTS = i18n.translate('xpack.securitySolution.overview.eventsTitle', {
   defaultMessage: 'Event count',
 });
@@ -88,12 +79,5 @@ export const DETECTION_RESPONSE_TITLE = i18n.translate(
   'xpack.securitySolution.detectionResponse.pageTitle',
   {
     defaultMessage: 'Detection & Response',
-  }
-);
-
-export const TECHNICAL_PREVIEW = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.technicalPreviewLabel',
-  {
-    defaultMessage: 'Technical Preview',
   }
 );

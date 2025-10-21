@@ -56,6 +56,12 @@ export const EditableResult: React.FC<EditableResultProps> = ({
   const [isExpanded, setIsExpanded] = React.useState(false);
   const [documentId, setDocumentId] = React.useState(initialDocId);
   const [index, setIndex] = React.useState(initialIndex);
+  const selectIndexPlaceholder = i18n.translate(
+    'xpack.sharedKbnSearchIndexDocuments.editableResult.selectIndexPlaceholder',
+    {
+      defaultMessage: 'Select index',
+    }
+  );
   return (
     <EuiSplitPanel.Outer hasBorder={true}>
       <EuiSplitPanel.Inner paddingSize="s" color="plain">
@@ -86,12 +92,8 @@ export const EditableResult: React.FC<EditableResultProps> = ({
                 <EuiFlexItem grow={5}>
                   <EuiComboBox
                     data-test-subj="editableResultIndexSelector"
-                    placeholder={i18n.translate(
-                      'xpack.sharedKbnSearchIndexDocuments.editableResult.selectIndexPlaceholder',
-                      {
-                        defaultMessage: 'Select index',
-                      }
-                    )}
+                    placeholder={selectIndexPlaceholder}
+                    aria-label={selectIndexPlaceholder}
                     singleSelection={{ asPlainText: true }}
                     options={indices.map((i) => ({ label: i, value: 'index' }))}
                     isClearable={false}
@@ -128,7 +130,21 @@ export const EditableResult: React.FC<EditableResultProps> = ({
                       size="xs"
                       iconType={isExpanded ? 'fold' : 'unfold'}
                       color="primary"
-                      aria-label={isExpanded ? 'Collapse fields' : 'Expand fields'}
+                      aria-label={
+                        isExpanded
+                          ? i18n.translate(
+                              'xpack.sharedKbnSearchIndexDocuments.editableResult.collapseFieldsButtonAriaLabel',
+                              {
+                                defaultMessage: 'Collapse fields',
+                              }
+                            )
+                          : i18n.translate(
+                              'xpack.sharedKbnSearchIndexDocuments.editableResult.expandFieldsButtonAriaLabel',
+                              {
+                                defaultMessage: 'Expand fields',
+                              }
+                            )
+                      }
                       onClick={() => {
                         if (onExpand && !isExpanded) {
                           onExpand();
@@ -143,7 +159,12 @@ export const EditableResult: React.FC<EditableResultProps> = ({
                   iconType="trash"
                   color="danger"
                   onClick={onDeleteDocument}
-                  aria-label="Delete document"
+                  aria-label={i18n.translate(
+                    'xpack.sharedKbnSearchIndexDocuments.editableResult.deleteDocumentButtonAriaLabel',
+                    {
+                      defaultMessage: 'Delete document',
+                    }
+                  )}
                   data-test-subj="editableResultDeleteButton"
                 />
               </EuiFlexItem>

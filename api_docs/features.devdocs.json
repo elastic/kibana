@@ -64,15 +64,7 @@
                     "section": "def-common.SubFeaturePrivilegeGroupType",
                     "text": "SubFeaturePrivilegeGroupType"
                   },
-                  "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"none\" | \"read\" | \"all\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; replacedBy?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; assign?: readonly string[] | undefined; }> | undefined; disabled?: boolean | undefined; ui: readonly string[]; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; app?: readonly string[] | undefined; catalogue?: readonly string[] | undefined; requireAllSpaces?: boolean | undefined; api?: readonly string[] | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]; description?: string | undefined; }>[] | undefined; privilegesTooltip?: string | undefined; reserved?: Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; requireAllSpaces?: boolean | undefined; disabled?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; assign?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; composedOf?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | undefined; replacedBy?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | Readonly<{ default: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; minimal: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; }> | undefined; }>; }>[]; }> | undefined; hidden?: boolean | undefined; scope?: readonly ",
-                  {
-                    "pluginId": "features",
-                    "scope": "common",
-                    "docId": "kibFeaturesPluginApi",
-                    "section": "def-common.KibanaFeatureScope",
-                    "text": "KibanaFeatureScope"
-                  },
-                  "[] | undefined; readonly deprecated?: Readonly<{ readonly notice: string; readonly replacedBy?: readonly string[] | undefined; }> | undefined; }>"
+                  "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"none\" | \"read\" | \"all\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; replacedBy?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; assign?: readonly string[] | undefined; }> | undefined; disabled?: boolean | undefined; ui: readonly string[]; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; app?: readonly string[] | undefined; catalogue?: readonly string[] | undefined; requireAllSpaces?: boolean | undefined; api?: readonly string[] | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]; description?: string | undefined; }>[] | undefined; privilegesTooltip?: string | undefined; reserved?: Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; requireAllSpaces?: boolean | undefined; disabled?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; assign?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; composedOf?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | undefined; replacedBy?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | Readonly<{ default: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; minimal: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; }> | undefined; }>; }>[]; }> | undefined; hidden?: boolean | undefined; readonly deprecated?: Readonly<{ readonly notice: string; readonly replacedBy?: readonly string[] | undefined; }> | undefined; }>"
                 ],
                 "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
                 "deprecated": false,
@@ -292,28 +284,6 @@
             "description": [],
             "signature": [
               "Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; requireAllSpaces?: boolean | undefined; disabled?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; assign?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; composedOf?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | undefined; replacedBy?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | Readonly<{ default: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; minimal: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; }> | undefined; }>; }>[]; }> | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "features",
-            "id": "def-public.KibanaFeature.scope",
-            "type": "Object",
-            "tags": [],
-            "label": "scope",
-            "description": [],
-            "signature": [
-              "readonly ",
-              {
-                "pluginId": "features",
-                "scope": "common",
-                "docId": "kibFeaturesPluginApi",
-                "section": "def-common.KibanaFeatureScope",
-                "text": "KibanaFeatureScope"
-              },
-              "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
@@ -910,30 +880,6 @@
           },
           {
             "parentPluginId": "features",
-            "id": "def-public.KibanaFeatureConfig.scope",
-            "type": "Object",
-            "tags": [],
-            "label": "scope",
-            "description": [
-              "\nIndicates whether the feature is available in Security Feature Privileges and the Spaces Visibility Toggles."
-            ],
-            "signature": [
-              "readonly ",
-              {
-                "pluginId": "features",
-                "scope": "common",
-                "docId": "kibFeaturesPluginApi",
-                "section": "def-common.KibanaFeatureScope",
-                "text": "KibanaFeatureScope"
-              },
-              "[] | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "features",
             "id": "def-public.KibanaFeatureConfig.deprecated",
             "type": "Object",
             "tags": [],
@@ -1169,22 +1115,7 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [
-      {
-        "parentPluginId": "features",
-        "id": "def-public.KibanaFeatureScope",
-        "type": "Enum",
-        "tags": [],
-        "label": "KibanaFeatureScope",
-        "description": [
-          "\nEnum for allowed feature scope values.\nsecurity - The feature is available in Security Feature Privileges.\nspaces - The feature is available in the Spaces Visibility Toggles."
-        ],
-        "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "enums": [],
     "misc": [],
     "objects": [],
     "setup": {
@@ -1476,15 +1407,7 @@
                     "section": "def-common.SubFeaturePrivilegeGroupType",
                     "text": "SubFeaturePrivilegeGroupType"
                   },
-                  "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"none\" | \"read\" | \"all\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; replacedBy?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; assign?: readonly string[] | undefined; }> | undefined; disabled?: boolean | undefined; ui: readonly string[]; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; app?: readonly string[] | undefined; catalogue?: readonly string[] | undefined; requireAllSpaces?: boolean | undefined; api?: readonly string[] | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]; description?: string | undefined; }>[] | undefined; privilegesTooltip?: string | undefined; reserved?: Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; requireAllSpaces?: boolean | undefined; disabled?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; assign?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; composedOf?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | undefined; replacedBy?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | Readonly<{ default: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; minimal: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; }> | undefined; }>; }>[]; }> | undefined; hidden?: boolean | undefined; scope?: readonly ",
-                  {
-                    "pluginId": "features",
-                    "scope": "common",
-                    "docId": "kibFeaturesPluginApi",
-                    "section": "def-common.KibanaFeatureScope",
-                    "text": "KibanaFeatureScope"
-                  },
-                  "[] | undefined; readonly deprecated?: Readonly<{ readonly notice: string; readonly replacedBy?: readonly string[] | undefined; }> | undefined; }>"
+                  "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"none\" | \"read\" | \"all\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; replacedBy?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; assign?: readonly string[] | undefined; }> | undefined; disabled?: boolean | undefined; ui: readonly string[]; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; app?: readonly string[] | undefined; catalogue?: readonly string[] | undefined; requireAllSpaces?: boolean | undefined; api?: readonly string[] | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]; description?: string | undefined; }>[] | undefined; privilegesTooltip?: string | undefined; reserved?: Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; requireAllSpaces?: boolean | undefined; disabled?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; assign?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; composedOf?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | undefined; replacedBy?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | Readonly<{ default: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; minimal: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; }> | undefined; }>; }>[]; }> | undefined; hidden?: boolean | undefined; readonly deprecated?: Readonly<{ readonly notice: string; readonly replacedBy?: readonly string[] | undefined; }> | undefined; }>"
                 ],
                 "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
                 "deprecated": false,
@@ -1704,28 +1627,6 @@
             "description": [],
             "signature": [
               "Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; requireAllSpaces?: boolean | undefined; disabled?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; assign?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; composedOf?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | undefined; replacedBy?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | Readonly<{ default: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; minimal: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; }> | undefined; }>; }>[]; }> | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "features",
-            "id": "def-server.KibanaFeature.scope",
-            "type": "Object",
-            "tags": [],
-            "label": "scope",
-            "description": [],
-            "signature": [
-              "readonly ",
-              {
-                "pluginId": "features",
-                "scope": "common",
-                "docId": "kibFeaturesPluginApi",
-                "section": "def-common.KibanaFeatureScope",
-                "text": "KibanaFeatureScope"
-              },
-              "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
@@ -3160,30 +3061,6 @@
           },
           {
             "parentPluginId": "features",
-            "id": "def-server.KibanaFeatureConfig.scope",
-            "type": "Object",
-            "tags": [],
-            "label": "scope",
-            "description": [
-              "\nIndicates whether the feature is available in Security Feature Privileges and the Spaces Visibility Toggles."
-            ],
-            "signature": [
-              "readonly ",
-              {
-                "pluginId": "features",
-                "scope": "common",
-                "docId": "kibFeaturesPluginApi",
-                "section": "def-common.KibanaFeatureScope",
-                "text": "KibanaFeatureScope"
-              },
-              "[] | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "features",
             "id": "def-server.KibanaFeatureConfig.deprecated",
             "type": "Object",
             "tags": [],
@@ -3560,15 +3437,7 @@
                     "section": "def-common.SubFeaturePrivilegeGroupType",
                     "text": "SubFeaturePrivilegeGroupType"
                   },
-                  "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"none\" | \"read\" | \"all\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; replacedBy?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; assign?: readonly string[] | undefined; }> | undefined; disabled?: boolean | undefined; ui: readonly string[]; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; app?: readonly string[] | undefined; catalogue?: readonly string[] | undefined; requireAllSpaces?: boolean | undefined; api?: readonly string[] | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]; description?: string | undefined; }>[] | undefined; privilegesTooltip?: string | undefined; reserved?: Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; requireAllSpaces?: boolean | undefined; disabled?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; assign?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; composedOf?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | undefined; replacedBy?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | Readonly<{ default: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; minimal: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; }> | undefined; }>; }>[]; }> | undefined; hidden?: boolean | undefined; scope?: readonly ",
-                  {
-                    "pluginId": "features",
-                    "scope": "common",
-                    "docId": "kibFeaturesPluginApi",
-                    "section": "def-common.KibanaFeatureScope",
-                    "text": "KibanaFeatureScope"
-                  },
-                  "[] | undefined; readonly deprecated?: Readonly<{ readonly notice: string; readonly replacedBy?: readonly string[] | undefined; }> | undefined; }>"
+                  "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"none\" | \"read\" | \"all\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; replacedBy?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; assign?: readonly string[] | undefined; }> | undefined; disabled?: boolean | undefined; ui: readonly string[]; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; app?: readonly string[] | undefined; catalogue?: readonly string[] | undefined; requireAllSpaces?: boolean | undefined; api?: readonly string[] | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]; description?: string | undefined; }>[] | undefined; privilegesTooltip?: string | undefined; reserved?: Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; requireAllSpaces?: boolean | undefined; disabled?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; assign?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; composedOf?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | undefined; replacedBy?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | Readonly<{ default: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; minimal: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; }> | undefined; }>; }>[]; }> | undefined; hidden?: boolean | undefined; readonly deprecated?: Readonly<{ readonly notice: string; readonly replacedBy?: readonly string[] | undefined; }> | undefined; }>"
                 ],
                 "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
                 "deprecated": false,
@@ -3788,28 +3657,6 @@
             "description": [],
             "signature": [
               "Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; requireAllSpaces?: boolean | undefined; disabled?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; assign?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; composedOf?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | undefined; replacedBy?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | Readonly<{ default: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; minimal: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; }> | undefined; }>; }>[]; }> | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "features",
-            "id": "def-common.KibanaFeature.scope",
-            "type": "Object",
-            "tags": [],
-            "label": "scope",
-            "description": [],
-            "signature": [
-              "readonly ",
-              {
-                "pluginId": "features",
-                "scope": "common",
-                "docId": "kibFeaturesPluginApi",
-                "section": "def-common.KibanaFeatureScope",
-                "text": "KibanaFeatureScope"
-              },
-              "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,
@@ -4763,30 +4610,6 @@
           },
           {
             "parentPluginId": "features",
-            "id": "def-common.KibanaFeatureConfig.scope",
-            "type": "Object",
-            "tags": [],
-            "label": "scope",
-            "description": [
-              "\nIndicates whether the feature is available in Security Feature Privileges and the Spaces Visibility Toggles."
-            ],
-            "signature": [
-              "readonly ",
-              {
-                "pluginId": "features",
-                "scope": "common",
-                "docId": "kibFeaturesPluginApi",
-                "section": "def-common.KibanaFeatureScope",
-                "text": "KibanaFeatureScope"
-              },
-              "[] | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "features",
             "id": "def-common.KibanaFeatureConfig.deprecated",
             "type": "Object",
             "tags": [],
@@ -5078,22 +4901,7 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [
-      {
-        "parentPluginId": "features",
-        "id": "def-common.KibanaFeatureScope",
-        "type": "Enum",
-        "tags": [],
-        "label": "KibanaFeatureScope",
-        "description": [
-          "\nEnum for allowed feature scope values.\nsecurity - The feature is available in Security Feature Privileges.\nspaces - The feature is available in the Spaces Visibility Toggles."
-        ],
-        "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "enums": [],
     "misc": [
       {
         "parentPluginId": "features",

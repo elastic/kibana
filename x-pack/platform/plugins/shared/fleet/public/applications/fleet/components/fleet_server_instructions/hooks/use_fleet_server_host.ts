@@ -69,6 +69,18 @@ export const useFleetServerHost = (): FleetServerHostForm => {
     undefined
   );
 
+  const sslAgentCertificateAuthoritiesInput = useComboInput(
+    'sslAgentCertificateAuthoritiesComboxBox',
+    fleetServerHost?.ssl?.agent_certificate_authorities ?? [],
+    undefined,
+    undefined
+  );
+  const sslAgentCertificateInput = useInput(
+    fleetServerHost?.ssl?.agent_certificate ?? '',
+    () => undefined,
+    undefined
+  );
+
   const sslClientAuthInput = useRadioInput(
     fleetServerHost?.ssl?.client_auth ?? clientAuth.None,
     undefined
@@ -76,6 +88,7 @@ export const useFleetServerHost = (): FleetServerHostForm => {
 
   const sslKeyInput = useInput(fleetServerHost?.ssl?.key ?? '', undefined, undefined);
   const sslESKeyInput = useInput(fleetServerHost?.ssl?.es_key ?? '', undefined, undefined);
+  const sslAgentKeyInput = useInput(fleetServerHost?.ssl?.agent_key ?? '', undefined, undefined);
 
   const sslKeySecretInput = useSecretInput(
     (fleetServerHost as FleetServerHost)?.secrets?.ssl?.key,
@@ -85,6 +98,12 @@ export const useFleetServerHost = (): FleetServerHostForm => {
 
   const sslESKeySecretInput = useSecretInput(
     (fleetServerHost as FleetServerHost)?.secrets?.ssl?.es_key,
+    undefined,
+    undefined
+  );
+
+  const sslAgentKeySecretInput = useSecretInput(
+    (fleetServerHost as FleetServerHost)?.secrets?.ssl?.agent_key,
     undefined,
     undefined
   );
@@ -103,6 +122,10 @@ export const useFleetServerHost = (): FleetServerHostForm => {
       sslKeySecretInput,
       sslESKeySecretInput,
       sslClientAuthInput,
+      sslAgentCertificateAuthoritiesInput,
+      sslAgentCertificateInput,
+      sslAgentKeyInput,
+      sslAgentKeySecretInput,
     }),
     [
       nameInput,
@@ -117,6 +140,10 @@ export const useFleetServerHost = (): FleetServerHostForm => {
       sslKeySecretInput,
       sslESKeySecretInput,
       sslClientAuthInput,
+      sslAgentCertificateAuthoritiesInput,
+      sslAgentCertificateInput,
+      sslAgentKeyInput,
+      sslAgentKeySecretInput,
     ]
   );
 
@@ -156,16 +183,23 @@ export const useFleetServerHost = (): FleetServerHostForm => {
         es_certificate_authorities: sslEsCertificateAuthoritiesInput.value.filter(
           (val) => val !== ''
         ),
+        agent_certificate: sslAgentCertificateInput.value,
+        agent_key: sslAgentKeyInput.value || undefined,
+        agent_certificate_authorities: sslAgentCertificateAuthoritiesInput.value.filter(
+          (val) => val !== ''
+        ),
         ...(sslClientAuthInput.value !== clientAuth.None && {
           client_auth: sslClientAuthInput.value as ValueOf<ClientAuth>,
         }),
       },
       ...(((!sslKeyInput.value && sslKeySecretInput.value) ||
-        (!sslESKeyInput.value && sslESKeySecretInput.value)) && {
+        (!sslESKeyInput.value && sslESKeySecretInput.value) ||
+        (!sslAgentKeyInput.value && sslAgentKeySecretInput.value)) && {
         secrets: {
           ssl: {
             key: sslKeySecretInput.value || undefined,
             es_key: sslESKeySecretInput.value || undefined,
+            agent_key: sslAgentKeySecretInput.value || undefined,
           },
         },
       }),
@@ -197,6 +231,10 @@ export const useFleetServerHost = (): FleetServerHostForm => {
     sslClientAuthInput.value,
     sslKeySecretInput.value,
     sslESKeySecretInput.value,
+    sslAgentCertificateInput.value,
+    sslAgentKeyInput.value,
+    sslAgentCertificateAuthoritiesInput.value,
+    sslAgentKeySecretInput.value,
     refreshGetFleetServerHosts,
   ]);
 

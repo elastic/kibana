@@ -138,6 +138,7 @@ describe('AI Assistant Service', () => {
       taskManager: taskManagerMock.createSetup(),
       productDocManager: Promise.resolve({
         getStatus: jest.fn(),
+        getStatuses: jest.fn(),
         install: jest.fn(),
         update: jest.fn(),
         updateAll: jest.fn(),

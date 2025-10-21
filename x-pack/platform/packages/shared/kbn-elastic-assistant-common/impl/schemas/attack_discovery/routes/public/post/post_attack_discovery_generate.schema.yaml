@@ -1,0 +1,123 @@
+openapi: 3.0.0
+info:
+  title: Post Attack discovery generate API endpoint
+  version: '2023-10-31'
+paths:
+  /api/attack_discovery/_generate:
+    post:
+      x-codegen-enabled: true
+      x-code-samples:
+        - lang: curl
+          label: Example request
+          source: |
+            curl \
+             --request POST 'http://localhost:5601/api/attack_discovery/_generate' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json" \
+             --header "elastic-api-version: 2023-10-31" \
+             --data '{
+               "alertsIndexPattern": ".alerts-security.alerts-default",
+               "anonymizationFields": [
+                 {
+                   "field": "host.name",
+                   "allowed": true,
+                   "anonymized": true
+                 },
+                 {
+                   "field": "user.name",
+                   "allowed": true,
+                   "anonymized": true
+                 },
+                 {
+                   "field": "_id",
+                   "allowed": true,
+                   "anonymized": false
+                 },
+                 {
+                   "field": "source.ip",
+                   "allowed": true,
+                   "anonymized": false
+                 },
+                 {
+                   "field": "destination.ip",
+                   "allowed": true,
+                   "anonymized": false
+                 },
+                 {
+                   "field": "rule.name",
+                   "allowed": true,
+                   "anonymized": false
+                 },
+                 {
+                   "field": "kibana.alert.risk_score",
+                   "allowed": true,
+                   "anonymized": false
+                 }
+               ],
+               "apiConfig": {
+                 "connectorId": "my-connector-id",
+                 "actionTypeId": ".gen-ai"
+               },
+               "connectorName": "GPT-4 Chat",
+               "size": 100,
+               "subAction": "invokeAI",
+               "start": "now-24h",
+               "end": "now"
+             }'
+      x-labels: [ess, serverless]
+      operationId: PostAttackDiscoveryGenerate
+      summary: Generate attack discoveries from alerts
+      description: >-
+        Initiates the generation of attack discoveries by analyzing security alerts using AI.
+        Returns an execution UUID that can be used to track the generation progress and
+        retrieve results. Results may also be retrieved via the find endpoint.
+      tags:
+        - Attack discovery API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../../../common_attributes.schema.yaml#/components/schemas/AttackDiscoveryGenerationConfig'
+      responses:
+        '200':
+          description: Attack discovery generation initiated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  execution_uuid:
+                    $ref: '../../../../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+                    description: >-
+                      The unique identifier for the attack discovery generation process.
+                      Use this UUID to track the generation progress and retrieve results
+                      via the find endpoint.
+                    example: "edd26039-0990-4d9f-9829-2a1fcacb77b5"
+                required:
+                  - execution_uuid
+        '400':
+          description: Bad request - Invalid input parameters or configuration
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status_code:
+                    type: number
+                    description: HTTP status code
+                    example: 400
+                  error:
+                    type: string
+                    description: Error type
+                    example: "Bad Request"
+                  message:
+                    type: string
+                    description: Human-readable error message describing what went wrong
+                    example: "Invalid request parameters"
+                required:
+                  - status_code
+                  - error
+                  - message
+components:
+  x-codegen-enabled: true

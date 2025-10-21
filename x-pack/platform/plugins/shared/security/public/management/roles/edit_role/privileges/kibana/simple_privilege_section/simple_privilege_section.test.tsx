@@ -6,7 +6,7 @@
  */
 
 import type { EuiButtonGroupProps } from '@elastic/eui';
-import { EuiButtonGroup, EuiComboBox, EuiSuperSelect } from '@elastic/eui';
+import { EuiButtonGroup, EuiComboBox, EuiProvider, EuiSuperSelect } from '@elastic/eui';
 import React from 'react';
 
 import type { Role } from '@kbn/security-plugin-types-common';
@@ -15,6 +15,12 @@ import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { SimplePrivilegeSection } from './simple_privilege_section';
 import { UnsupportedSpacePrivilegesWarning } from './unsupported_space_privileges_warning';
+
+const shallowWithThemeProvider = (node: React.ReactElement) =>
+  shallowWithIntl(<EuiProvider>{node}</EuiProvider>);
+
+const mountWithThemeProvider = (node: React.ReactElement) =>
+  mountWithIntl(<EuiProvider>{node}</EuiProvider>);
 
 const buildProps = (customProps: any = {}) => {
   const features = [
@@ -83,12 +89,14 @@ const buildProps = (customProps: any = {}) => {
 
 describe('<SimplePrivilegeForm>', () => {
   it('renders without crashing', () => {
-    expect(shallowWithIntl(<SimplePrivilegeSection {...buildProps()} />)).toMatchSnapshot();
+    expect(
+      shallowWithThemeProvider(<SimplePrivilegeSection {...buildProps()} />)
+    ).toMatchSnapshot();
   });
 
   it('displays "none" when no privilege is selected', () => {
     const props = buildProps();
-    const wrapper = shallowWithIntl(<SimplePrivilegeSection {...props} />);
+    const wrapper = mountWithThemeProvider(<SimplePrivilegeSection {...props} />);
     const selector = wrapper.find(EuiSuperSelect);
     expect(selector.props()).toMatchObject({
       valueOfSelected: 'none',
@@ -111,7 +119,7 @@ describe('<SimplePrivilegeForm>', () => {
         ],
       },
     });
-    const wrapper = shallowWithIntl(<SimplePrivilegeSection {...props} />);
+    const wrapper = mountWithThemeProvider(<SimplePrivilegeSection {...props} />);
     const selector = wrapper.find(EuiSuperSelect);
     expect(selector.props()).toMatchObject({
       valueOfSelected: 'custom',
@@ -132,7 +140,7 @@ describe('<SimplePrivilegeForm>', () => {
         ],
       },
     });
-    const wrapper = shallowWithIntl(<SimplePrivilegeSection {...props} />);
+    const wrapper = mountWithThemeProvider(<SimplePrivilegeSection {...props} />);
     const selector = wrapper.find(EuiSuperSelect);
     expect(selector.props()).toMatchObject({
       valueOfSelected: 'read',
@@ -154,7 +162,7 @@ describe('<SimplePrivilegeForm>', () => {
         ],
       },
     });
-    const wrapper = shallowWithIntl(<SimplePrivilegeSection {...props} />);
+    const wrapper = mountWithThemeProvider(<SimplePrivilegeSection {...props} />);
     const selector = wrapper.find(EuiComboBox);
     expect(selector.props()).toMatchObject({
       isDisabled: true,
@@ -165,7 +173,7 @@ describe('<SimplePrivilegeForm>', () => {
 
   it('fires its onChange callback when the privilege changes', () => {
     const props = buildProps();
-    const wrapper = mountWithIntl(<SimplePrivilegeSection {...props} />);
+    const wrapper = mountWithThemeProvider(<SimplePrivilegeSection {...props} />);
     const selector = wrapper.find(EuiSuperSelect);
     (selector.props() as any).onChange('all');
 
@@ -188,8 +196,17 @@ describe('<SimplePrivilegeForm>', () => {
           role,
         });
       },
+      role: {
+        kibana: [
+          {
+            spaces: ['*'],
+            base: [],
+            feature: {},
+          },
+        ],
+      },
     });
-    const wrapper = mountWithIntl(<SimplePrivilegeSection {...props} />);
+    const wrapper = mountWithThemeProvider(<SimplePrivilegeSection {...props} />);
     const selector = wrapper.find(EuiSuperSelect);
     (selector.props() as any).onChange('custom');
 
@@ -242,7 +259,7 @@ describe('<SimplePrivilegeForm>', () => {
         ],
       },
     });
-    const wrapper = mountWithIntl(<SimplePrivilegeSection {...props} />);
+    const wrapper = mountWithThemeProvider(<SimplePrivilegeSection {...props} />);
     expect(wrapper.find(UnsupportedSpacePrivilegesWarning)).toHaveLength(1);
   });
 });

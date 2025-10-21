@@ -186,69 +186,6 @@ export const AttackDiscoveryResponse = z.object({
   failureReason: z.string().optional(),
 });
 
-export type AttackDiscoveryUpdateProps = z.infer<typeof AttackDiscoveryUpdateProps>;
-export const AttackDiscoveryUpdateProps = z.object({
-  id: NonEmptyString,
-  /**
-   * LLM API configuration.
-   */
-  apiConfig: ApiConfig.optional(),
-  /**
-   * The number of alerts in the context.
-   */
-  alertsContextCount: z.number().int().optional(),
-  /**
-   * The attack discoveries.
-   */
-  attackDiscoveries: AttackDiscoveries.optional(),
-  /**
-   * The status of the attack discovery.
-   */
-  status: AttackDiscoveryStatus.optional(),
-  replacements: Replacements.optional(),
-  /**
-   * The most 5 recent generation intervals
-   */
-  generationIntervals: z.array(GenerationInterval).optional(),
-  /**
-   * The backing index required for update requests.
-   */
-  backingIndex: z.string(),
-  /**
-   * The reason for a status of failed.
-   */
-  failureReason: z.string().optional(),
-  /**
-   * The last time attack discovery was viewed in the browser.
-   */
-  lastViewedAt: z.string().optional(),
-});
-
-export type AttackDiscoveryCreateProps = z.infer<typeof AttackDiscoveryCreateProps>;
-export const AttackDiscoveryCreateProps = z.object({
-  /**
-   * The attack discovery id.
-   */
-  id: z.string().optional(),
-  /**
-   * The status of the attack discovery.
-   */
-  status: AttackDiscoveryStatus,
-  /**
-   * The number of alerts in the context.
-   */
-  alertsContextCount: z.number().int().optional(),
-  /**
-   * The attack discoveries.
-   */
-  attackDiscoveries: AttackDiscoveries,
-  /**
-   * LLM API configuration.
-   */
-  apiConfig: ApiConfig,
-  replacements: Replacements.optional(),
-});
-
 export type CreateAttackDiscoveryAlertsParams = z.infer<typeof CreateAttackDiscoveryAlertsParams>;
 export const CreateAttackDiscoveryAlertsParams = z.object({
   /**
@@ -278,6 +215,10 @@ export const CreateAttackDiscoveryAlertsParams = z.object({
    */
   connectorName: z.string(),
   /**
+   * Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack discovery views within Kibana. Defaults to `false`.
+   */
+  enableFieldRendering: z.boolean(),
+  /**
    * The generation ID of the run that created the attack discovery
    */
   generationUuid: z.string(),
@@ -285,6 +226,10 @@ export const CreateAttackDiscoveryAlertsParams = z.object({
    * Replacements enable anonymization of data sent to the LLM. When Attack discoveries are added to an assistant conversation, replacements must be provided at the same time.
    */
   replacements: Replacements.optional(),
+  /**
+   * When true, return the created Attack discoveries with text replacements applied to the detailsMarkdown, entitySummaryMarkdown, summaryMarkdown, and title fields.
+   */
+  withReplacements: z.boolean(),
 });
 
 export type FindAttackDiscoveryAlertsParams = z.infer<typeof FindAttackDiscoveryAlertsParams>;
@@ -298,9 +243,17 @@ export const FindAttackDiscoveryAlertsParams = z.object({
    */
   connectorNames: z.array(z.string()).optional(),
   /**
+   * Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack discovery views within Kibana. Defaults to `false`.
+   */
+  enableFieldRendering: z.boolean(),
+  /**
    * filter by end date (relative or absolute)
    */
   end: z.string().optional(),
+  /**
+   * filter by execution UUID
+   */
+  executionUuid: z.string().optional(),
   /**
    * whether to include attack alert IDs in the response
    */
@@ -329,6 +282,10 @@ export const FindAttackDiscoveryAlertsParams = z.object({
    * filter by kibana.alert.workflow.status
    */
   status: z.array(z.string()).optional(),
+  /**
+   * When true, return the created Attack discoveries with text replacements applied to the detailsMarkdown, entitySummaryMarkdown, summaryMarkdown, and title fields.
+   */
+  withReplacements: z.boolean(),
 });
 
 export type AttackDiscoveryGenerationConfig = z.infer<typeof AttackDiscoveryGenerationConfig>;

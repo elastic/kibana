@@ -37,8 +37,9 @@ import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experime
 import { useSourcererDataView } from '../../sourcerer/containers';
 import { HeaderPage } from '../../common/components/header_page';
 import { useEntityAnalyticsRoutes } from '../api/api';
-import { usePrivilegedMonitoringEngineStatus } from '../api/hooks/use_privileged_monitoring_engine_status';
+import { usePrivilegedMonitoringEngineStatus } from '../hooks/use_privileged_monitoring_health';
 import { PrivilegedUserMonitoringManageDataSources } from '../components/privileged_user_monitoring_manage_data_sources';
+import { UserLimitCallOut } from '../components/user_limit_callout';
 import { EmptyPrompt } from '../../common/components/empty_prompt';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { PageLoader } from '../../common/components/page_loader';
@@ -128,6 +129,7 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
 
   const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataViewSpec;
   const engineStatus = usePrivilegedMonitoringEngineStatus();
+
   const initEngineCallBack = useCallback(
     async (userCount: number) => {
       dispatch({ type: 'INITIALIZING_ENGINE', userCount });
@@ -233,7 +235,15 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
 
         {state.type === 'onboarding' && (
           <>
-            <PrivilegedUserMonitoringOnboardingPanel onComplete={initEngineCallBack} />
+            <EuiFlexGroup alignItems="center" justifyContent="center">
+              <EuiFlexItem
+                style={{
+                  maxWidth: '1144px',
+                }}
+              >
+                <PrivilegedUserMonitoringOnboardingPanel onComplete={initEngineCallBack} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
             <EuiSpacer size="l" />
             <PrivilegedUserMonitoringSampleDashboardsPanel />
           </>
@@ -325,6 +335,11 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
                 </EuiButtonEmpty>,
               ]}
             />
+            <EuiFlexGroup direction="column">
+              <EuiFlexItem>
+                <UserLimitCallOut onManageDataSources={onManageUserClicked} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
             <PrivilegedUserMonitoring
               callout={state.onboardingCallout}
               error={state.error}

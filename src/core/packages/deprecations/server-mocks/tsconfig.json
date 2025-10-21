@@ -13,7 +13,8 @@
   "kbn_references": [
     "@kbn/utility-types",
     "@kbn/core-deprecations-server",
-    "@kbn/core-deprecations-server-internal"
+    "@kbn/core-deprecations-server-internal",
+    "@kbn/lazy-object"
   ],
   "exclude": [
     "target/**/*",

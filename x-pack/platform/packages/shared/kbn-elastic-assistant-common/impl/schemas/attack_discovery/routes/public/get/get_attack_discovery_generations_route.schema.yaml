@@ -1,0 +1,80 @@
+openapi: 3.0.0
+info:
+  title: Get attack discovery generations API endpoint
+  version: '2023-10-31'
+paths:
+  /api/attack_discovery/generations:
+    get:
+      x-codegen-enabled: true
+      x-code-samples:
+        - lang: curl
+          label: Example request
+          source: |
+            curl \
+             --request GET 'http://localhost:5601/api/attack_discovery/generations?size=50&start=now-24h&end=now' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json"
+      x-labels: [ess, serverless]
+      operationId: GetAttackDiscoveryGenerations
+      description: Get the latest attack discovery generations (that are not dismissed) for the current user. This endpoint retrieves generation metadata including execution status and statistics for Attack discovery generations.
+      summary: Get the latest attack discovery generations (that are not dismissed) for the current user
+      tags:
+        - attack_discovery
+        - attack_discovery_generations
+      parameters:
+        - name: end
+          in: query
+          required: false
+          schema:
+            type: string
+          description: End of the time range for filtering generations. Accepts absolute timestamps (ISO 8601) or relative date math (e.g. "now", "now-24h").
+          example: "now"
+        - name: size
+          in: query
+          required: true
+          schema:
+            type: number
+            minimum: 1
+          description: The maximum number of generations to retrieve
+          example: 50
+        - name: start
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Start of the time range for filtering generations. Accepts absolute timestamps (ISO 8601) or relative date math (e.g. "now-7d").
+          example: "now-24h"
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - generations
+                properties:
+                  generations:
+                    type: array
+                    description: List of attack discovery generations
+                    items:
+                      $ref: '../../../generation.schema.yaml#/components/schemas/AttackDiscoveryGeneration'
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status_code:
+                    type: number
+                    description: HTTP status code
+                    example: 400
+                  error:
+                    type: string
+                    description: Error type
+                    example: "Bad Request"
+                  message:
+                    type: string
+                    description: Human-readable error message
+                    example: "Invalid size parameter. Must be a positive number."

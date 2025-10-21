@@ -65,8 +65,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
             },
             {
               link: { navId: 'agent_builder' },
-              breadcrumbs: ['Agent Chat'],
-              pageTestSubject: 'onechatPageConversations',
+              breadcrumbs: [],
+              pageTestSubject: 'agentBuilderWrapper',
             },
             {
               link: { deepLinkId: 'discover' },
@@ -272,9 +272,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       if (isV2) {
         await solutionNavigation.sidenav.expectLinkExists({ text: 'Agents' });
         await solutionNavigation.sidenav.expectLinkExists({ text: 'Machine Learning' });
-        await solutionNavigation.sidenav.expectLinkExists({ text: 'Maps' });
-        await solutionNavigation.sidenav.expectLinkExists({ text: 'Visualize library' });
-        await solutionNavigation.sidenav.expectLinkExists({ text: 'Ingest and manage data' });
+        await solutionNavigation.sidenav.expectLinkExists({ text: 'Data management' });
         await solutionNavigation.sidenav.expectLinkExists({ text: 'Admin and Settings' });
       }
 
@@ -317,11 +315,9 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
             'dashboards',
             'searchPlayground',
             'machine_learning',
-            'maps',
-            'visualize',
             // footer:
             'dev_tools',
-            'ingest_and_data',
+            'data_management',
             'admin_and_settings',
           ],
           { checkOrder: false }

@@ -61,7 +61,7 @@ type ServiceProviderKeysType = keyof typeof ServiceProviderKeys;
 export interface OverrideFieldsContentType {
   serverlessOnly?: boolean;
   hidden?: string[];
-  additional: FieldsConfiguration[];
+  additional?: FieldsConfiguration[];
 }
 export type InternalOverrideFieldsType = {
   [Key in ServiceProviderKeysType | string]?: OverrideFieldsContentType;

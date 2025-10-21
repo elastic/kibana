@@ -1,0 +1,88 @@
+openapi: 3.0.0
+info:
+  title: Get Attack discovery generation API endpoint
+  version: '2023-10-31'
+paths:
+  /api/attack_discovery/generations/{execution_uuid}:
+    get:
+      x-codegen-enabled: true
+      x-code-samples:
+        - lang: curl
+          label: Example request
+          source: |
+            curl \
+             --request GET 'http://localhost:5601/api/attack_discovery/generations/2e13f386-46cf-4d65-9e2b-68609e132ba5' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json"
+      x-labels: [ess, serverless]
+      operationId: GetAttackDiscoveryGeneration
+      summary: Get a single Attack discovery generation, including its discoveries and (optional) generation metadata
+      description: Returns a specific Attack discovery generation, including all generated Attack discoveries and associated metadata, including execution status and statistics.
+      tags:
+        - Attack discovery API
+      parameters:
+        - name: execution_uuid
+          in: path
+          required: true
+          description: The unique identifier for the Attack discovery generation execution. This UUID is returned at the start of an Attack discovery generation.
+          schema:
+            $ref: '../../../../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+          example: "2e13f386-46cf-4d65-9e2b-68609e132ba5"
+        - name: 'enable_field_rendering'
+          description: Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack discovery views within Kibana. Defaults to `false`.
+          in: query
+          required: false
+          schema:
+            default: false
+            type: boolean
+          example: false
+        - name: with_replacements
+          in: query
+          required: false
+          description: When true, return the created Attack discoveries with text replacements applied to the detailsMarkdown, entitySummaryMarkdown, summaryMarkdown, and title fields. Defaults to `true`.
+          schema:
+            type: boolean
+            default: true
+          example: true
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    description: Array of Attack discoveries generated during this execution.
+                    type: array
+                    items:
+                      $ref: '../../../attack_discovery_api_alert.schema.yaml#/components/schemas/AttackDiscoveryApiAlert'
+                  generation:
+                    description: Optional metadata about the attack discovery generation process, metadata including execution status and statistics. This metadata may not be available for all generations.
+                    $ref: '../../../generation.schema.yaml#/components/schemas/AttackDiscoveryGeneration'
+                required:
+                  - data
+        400:
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status_code:
+                    type: number
+                    description: HTTP status code
+                    example: 400
+                  error:
+                    type: string
+                    description: Error type
+                    example: "Bad Request"
+                  message:
+                    type: string
+                    description: Human-readable error message describing what went wrong with the request
+                    example: "Invalid request parameters"
+                required:
+                  - status_code
+                  - error
+                  - message
+

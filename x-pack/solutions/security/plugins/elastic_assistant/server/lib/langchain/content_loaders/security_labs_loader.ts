@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { glob } from 'fs/promises';
+import { globSync } from 'fs';
+import normalizePath from 'normalize-path';
 import type { Logger } from '@kbn/core/server';
 import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
 import { resolve } from 'path';
@@ -73,12 +74,9 @@ export const loadSecurityLabs = async (
 
 export const getSecurityLabsDocsCount = async ({ logger }: { logger: Logger }): Promise<number> => {
   try {
-    // @ts-expect-error incorrect type for Array.fromAsync
-    const files = await Array.fromAsync(
-      glob(ENCODED_FILE_MICROMATCH_PATTERN, {
-        cwd: resolve(__dirname, '../../../knowledge_base/security_labs'),
-      })
-    );
+    const files = globSync(ENCODED_FILE_MICROMATCH_PATTERN, {
+      cwd: resolve(__dirname, '../../../knowledge_base/security_labs'),
+    }).map((p) => normalizePath(p));
 
     return files.length;
   } catch (e) {

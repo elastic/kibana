@@ -191,7 +191,10 @@ export class ElasticsearchService
     }
 
     return {
-      client: this.client!,
+      client: {
+        asInternalUser: this.client!.asInternalUser,
+        asScoped: this.client!.asScoped.bind(this.client!),
+      },
       createClient: (type, clientConfig) => this.createClusterClient(type, config, clientConfig),
       getCapabilities: () => capabilities,
       metrics: {

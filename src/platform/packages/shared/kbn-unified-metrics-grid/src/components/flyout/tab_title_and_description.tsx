@@ -7,41 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiTitle,
-  EuiText,
-  EuiSpacer,
-  EuiDescriptionList,
-  EuiDescriptionListDescription,
-} from '@elastic/eui';
+import { EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 
 interface OverviewTabProps {
   metric: MetricField;
+  description?: string;
 }
 
-export const TabTitleAndDescription = ({ metric }: OverviewTabProps) => {
+export const TabTitleAndDescription = ({ metric, description }: OverviewTabProps) => {
   return (
     <>
       <EuiSpacer />
-      <EuiDescriptionList data-test-subj="metricsExperienceFlyoutSummaryItem" compressed>
-        <EuiTitle size="s" id="metric-flyout-title">
-          <h2>
-            <strong>{metric.name}</strong>
-          </h2>
-        </EuiTitle>
+      <EuiTitle size="xs" data-test-subj="metricsExperienceFlyoutMetricName">
+        <strong>
+          <strong>{metric.name}</strong>
+        </strong>
+      </EuiTitle>
 
-        <EuiSpacer size="s" />
-        {metric.description && (
-          <EuiDescriptionListDescription>
-            <EuiText size="s" color="subdued">
-              {metric.description}
-            </EuiText>
-          </EuiDescriptionListDescription>
-        )}
-      </EuiDescriptionList>
-      <EuiSpacer />
+      {description && (
+        <>
+          <EuiSpacer size="xs" />
+          <EuiText
+            size="s"
+            color="subdued"
+            data-test-subj="metricsExperienceFlyoutMetricDescription"
+          >
+            {description}
+          </EuiText>
+        </>
+      )}
+      <EuiSpacer size="m" />
     </>
   );
 };

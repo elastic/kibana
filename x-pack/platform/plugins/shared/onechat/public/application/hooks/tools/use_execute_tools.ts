@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { UseMutationOptions } from '@tanstack/react-query';
 import { useMutation } from '@tanstack/react-query';
 import type { ExecuteToolResponse } from '../../../../common/http_api/tools';
 import { useOnechatServices } from '../use_onechat_service';
@@ -14,15 +15,20 @@ export interface ExecuteToolParams {
   toolParams: Record<string, unknown>;
 }
 
-export type ExecuteToolSuccessCallback = (data: ExecuteToolResponse) => void;
-export type ExecuteToolErrorCallback = (error: Error) => void;
+type ExecuteToolMutationOptions = UseMutationOptions<ExecuteToolResponse, Error, ExecuteToolParams>;
+
+export type ExecuteToolSuccessCallback = NonNullable<ExecuteToolMutationOptions['onSuccess']>;
+export type ExecuteToolErrorCallback = NonNullable<ExecuteToolMutationOptions['onError']>;
+export type ExecuteToolSettledCallback = NonNullable<ExecuteToolMutationOptions['onSettled']>;
 
 export const useExecuteTool = ({
   onSuccess,
   onError,
+  onSettled,
 }: {
   onSuccess?: ExecuteToolSuccessCallback;
   onError?: ExecuteToolErrorCallback;
+  onSettled?: ExecuteToolSettledCallback;
 } = {}) => {
   const { toolsService } = useOnechatServices();
 
@@ -36,6 +42,7 @@ export const useExecuteTool = ({
   >(mutationFn, {
     onSuccess,
     onError,
+    onSettled,
   });
 
   return {

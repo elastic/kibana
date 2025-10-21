@@ -7,14 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { schema } from '@kbn/config-schema';
-import { dashboardAPIItemSchema, searchResultsAttributes } from './common';
+import { getDashboardAPIItemSchema, getDashboardStateSchema } from './common';
 
-// These are the attributes that are returned in search results
-export const searchResultsAttributesSchema = schema.object(searchResultsAttributes);
-
-export const dashboardSearchResultsSchema = dashboardAPIItemSchema.extends({
-  attributes: searchResultsAttributesSchema,
-});
+export function getDashboardSearchResultsSchema() {
+  const {
+    title: titleSchema,
+    description: descriptionSchema,
+    tags: tagsSchema,
+  } = getDashboardStateSchema();
+  return getDashboardAPIItemSchema().extends({
+    attributes: schema.object({
+      title: titleSchema,
+      description: descriptionSchema,
+      tags: tagsSchema,
+    }),
+  });
+}
 
 export const dashboardSearchOptionsSchema = schema.maybe(
   schema.object(
