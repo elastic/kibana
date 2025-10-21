@@ -8,6 +8,14 @@
 import React from 'react';
 import type { ConversationFlyoutProps } from './types';
 
-export const ConversationFlyout = ({ onClose }: ConversationFlyoutProps) => {
-  return <div>Agent Builder Conversation Flyout</div>;
+export const ConversationFlyout = ({
+  onClose,
+  ConversationComponent,
+  ...embeddableProps
+}: ConversationFlyoutProps) => {
+  return (
+    <div>
+      <ConversationComponent {...embeddableProps} />
+    </div>
+  );
 };

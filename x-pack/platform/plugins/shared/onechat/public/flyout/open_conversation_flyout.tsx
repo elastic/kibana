@@ -14,11 +14,13 @@ import type { OpenConversationFlyoutOptions } from './types';
 import type { OnechatInternalService } from '../services';
 import type { OnechatStartDependencies, ConversationFlyoutRef } from '../types';
 import { OnechatServicesContext } from '../application/context/onechat_services_context';
+import type { EmbeddableConversationProps } from '../embeddable/types';
 
 interface OpenConversationFlyoutParams {
   coreStart: CoreStart;
   services: OnechatInternalService;
   startDependencies: OnechatStartDependencies;
+  ConversationComponent: React.FC<EmbeddableConversationProps>;
 }
 
 /**
@@ -30,7 +32,7 @@ interface OpenConversationFlyoutParams {
  */
 export function openConversationFlyout(
   options: OpenConversationFlyoutOptions,
-  { coreStart, services, startDependencies }: OpenConversationFlyoutParams
+  { coreStart, services, startDependencies, ConversationComponent }: OpenConversationFlyoutParams
 ): { flyoutRef: ConversationFlyoutRef } {
   const { overlays, application, ...startServices } = coreStart;
 
@@ -44,7 +46,11 @@ export function openConversationFlyout(
     toMountPoint(
       <KibanaContextProvider services={kibanaServices}>
         <OnechatServicesContext.Provider value={services}>
-          <ConversationFlyout {...options} onClose={() => flyoutRef.close()} />
+          <ConversationFlyout
+            {...options}
+            onClose={() => flyoutRef.close()}
+            ConversationComponent={ConversationComponent}
+          />
         </OnechatServicesContext.Provider>
       </KibanaContextProvider>,
       startServices
