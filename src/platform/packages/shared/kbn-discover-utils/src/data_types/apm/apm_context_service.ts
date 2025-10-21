@@ -19,21 +19,33 @@ export interface ApmContextService {
   errorsService: ErrorsContextService;
 }
 
+let indicesPromise: Promise<Readonly<APMIndices> | null> | null = null;
+
+const getCachedApmIndices = (
+  apmSourcesAccess: ApmSourceAccessPluginStart
+): Promise<Readonly<APMIndices> | null> => {
+  if (indicesPromise) {
+    return indicesPromise;
+  }
+
+  indicesPromise = (async () => {
+    try {
+      return await apmSourcesAccess.getApmIndices();
+    } catch (error) {
+      indicesPromise = null;
+      return null;
+    }
+  })();
+
+  return indicesPromise;
+};
+
 export const createApmContextService = async ({
   apmSourcesAccess,
 }: {
   apmSourcesAccess?: ApmSourceAccessPluginStart;
 }): Promise<ApmContextService> => {
-  // Fetch indices once
-  let indices: Readonly<APMIndices> | null = null;
-
-  if (apmSourcesAccess) {
-    try {
-      indices = await apmSourcesAccess.getApmIndices();
-    } catch (error) {
-      indices = null;
-    }
-  }
+  const indices = apmSourcesAccess ? await getCachedApmIndices(apmSourcesAccess) : null;
 
   return {
     tracesService: createTracesContextService({ indices }),
