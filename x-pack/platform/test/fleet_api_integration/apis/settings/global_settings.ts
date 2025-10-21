@@ -40,11 +40,11 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should allow to save settings', async function () {
       await apiClient.putSettings({
-        has_seen_add_data_notice: true,
+        prerelease_integrations_enabled: true,
       });
 
       const updatedSettings = await apiClient.getSettings();
-      expect(updatedSettings.item.has_seen_add_data_notice).to.be(true);
+      expect(updatedSettings.item.prerelease_integrations_enabled).to.be(true);
 
       // it should not bump revision
       const updatedAgentPolicy = await apiClient.getAgentPolicy(agentPolicy.item.id);
