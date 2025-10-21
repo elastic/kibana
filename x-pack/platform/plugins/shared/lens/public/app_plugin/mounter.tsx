@@ -29,7 +29,7 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
 
-import type { MainHistoryLocationState } from '@kbn/lens-common';
+import type { LensSerializedState, MainHistoryLocationState } from '@kbn/lens-common';
 import { LENS_SHARE_STATE_ACTION } from '@kbn/lens-common';
 import type { LensAppLocator } from '@kbn/lens-common/lens/locator_types';
 import type {
@@ -48,9 +48,9 @@ import { makeConfigureStore, navigateAway, loadInitial, setState } from '../stat
 import { getPreloadedState } from '../state_management/lens_slice';
 import { getLensInspectorService } from '../lens_inspector_service';
 import { LensDocumentService } from '../persistence';
-import type { LensSerializedState } from '..';
 import type { LensAttributesService } from '../lens_attribute_service';
 import type { LensPluginStartDependencies } from '../plugin';
+import { EditorFrameServiceProvider } from '../editor_frame_service/editor_frame_service_context';
 
 function getInitialContext(history: AppMountParameters['history']) {
   const historyLocationState = history.location.state as
@@ -219,17 +219,19 @@ export async function mountApp(
     if (stateTransfer && props?.state) {
       const { state: rawState, isCopied } = props;
       const { references } = extract(rawState as unknown as EmbeddableStateWithType);
-      stateTransfer.navigateToWithEmbeddablePackage<LensSerializedState>(mergedOriginatingApp, {
+      stateTransfer.navigateToWithEmbeddablePackages<LensSerializedState>(mergedOriginatingApp, {
         path: embeddableEditorIncomingState?.originatingPath,
-        state: {
-          embeddableId: isCopied ? undefined : embeddableId,
-          type: LENS_EMBEDDABLE_TYPE,
-          serializedState: {
-            references,
-            rawState,
+        state: [
+          {
+            embeddableId: isCopied ? undefined : embeddableId,
+            type: LENS_EMBEDDABLE_TYPE,
+            serializedState: {
+              references,
+              rawState,
+            },
+            searchSessionId: data.search.session.getSessionId(),
           },
-          searchSessionId: data.search.session.getSessionId(),
-        },
+        ],
       });
     } else {
       coreStart.application.navigateToApp(mergedOriginatingApp, {
@@ -358,23 +360,26 @@ export async function mountApp(
 
       return (
         <Provider store={lensStore}>
-          <App
-            incomingState={embeddableEditorIncomingState}
-            editorFrame={instance}
-            initialInput={initialInput}
-            redirectTo={redirectCallback}
-            redirectToOrigin={redirectToOrigin}
-            onAppLeave={params.onAppLeave}
-            setHeaderActionMenu={params.setHeaderActionMenu}
-            history={props.history}
+          <EditorFrameServiceProvider
             datasourceMap={datasourceMap}
             visualizationMap={visualizationMap}
-            initialContext={initialContext}
-            contextOriginatingApp={originatingApp}
-            topNavMenuEntryGenerators={topNavMenuEntryGenerators}
-            theme$={core.theme.theme$}
-            coreStart={coreStart}
-          />
+          >
+            <App
+              incomingState={embeddableEditorIncomingState}
+              editorFrame={instance}
+              initialInput={initialInput}
+              redirectTo={redirectCallback}
+              redirectToOrigin={redirectToOrigin}
+              onAppLeave={params.onAppLeave}
+              setHeaderActionMenu={params.setHeaderActionMenu}
+              history={props.history}
+              initialContext={initialContext}
+              contextOriginatingApp={originatingApp}
+              topNavMenuEntryGenerators={topNavMenuEntryGenerators}
+              theme$={core.theme.theme$}
+              coreStart={coreStart}
+            />
+          </EditorFrameServiceProvider>
         </Provider>
       );
     }

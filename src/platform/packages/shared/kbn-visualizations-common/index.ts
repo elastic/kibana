@@ -11,12 +11,7 @@ export { getTimeZone } from './timezone';
 export { prepareLogTable } from './prepare_log_table';
 export { PersistedState } from './vis_persisted_state';
 export { VisualizationContainer, VisualizationNoResults, VisualizationError } from './components';
-export {
-  visualizeStyle,
-  visualizeClassName,
-  visContainerStyle,
-  visContainerClassName,
-} from './vis.styles';
+export { visualizeClassName, visContainerStyle } from './vis.styles';
 export {
   VISUALIZE_APP_NAME,
   SAVED_OBJECTS_LIMIT_SETTING,

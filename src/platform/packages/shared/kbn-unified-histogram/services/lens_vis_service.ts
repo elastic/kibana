@@ -619,7 +619,7 @@ export class LensVisService {
     const language = getAggregateQueryMode(query);
     const safeQuery = removeDropCommandsFromESQLQuery(query[language]);
     const normalizedQuery = convertTimeseriesCommandToFrom(safeQuery);
-    const breakdown = breakdownColumn ? `, \`${breakdownColumn.name}\`` : '';
+    const breakdown = breakdownColumn ? `\`${breakdownColumn.name}\`, ` : '';
 
     // sort by breakdown column if it's sortable
     const sortBy =
@@ -630,7 +630,7 @@ export class LensVisService {
     const timeBuckets = `${TIMESTAMP_COLUMN} = BUCKET(${dataView.timeFieldName}, ${queryInterval})`;
     return appendToESQLQuery(
       normalizedQuery,
-      `| STATS results = COUNT(*) BY ${timeBuckets}${breakdown}${sortBy}`
+      `| STATS results = COUNT(*) BY ${breakdown}${timeBuckets}${sortBy}`
     );
   };
 

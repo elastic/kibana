@@ -137,6 +137,7 @@ import {
 import { downloadCsvLensShareProvider } from './app_plugin/csv_download_provider/csv_download_provider';
 import type { Visualization, LensSerializedState, TypedLensByValueInput, Suggestion } from '.';
 import type { LensEmbeddableStartServices } from './react_embeddable/types';
+import type { EditorFrameServiceValue } from './editor_frame_service/editor_frame_service_context';
 
 export type { SaveProps } from './app_plugin';
 
@@ -307,10 +308,10 @@ export class LensPlugin {
   private visualizationMap: VisualizationMap | undefined;
 
   // Note: this method will be overwritten in the setup flow
-  private initEditorFrameService = async (): Promise<{
-    datasourceMap: DatasourceMap;
-    visualizationMap: VisualizationMap;
-  }> => ({ datasourceMap: {}, visualizationMap: {} });
+  private initEditorFrameService = async (): Promise<EditorFrameServiceValue> => ({
+    datasourceMap: {},
+    visualizationMap: {},
+  });
 
   setup(
     core: CoreSetup<LensPluginStartDependencies, void>,

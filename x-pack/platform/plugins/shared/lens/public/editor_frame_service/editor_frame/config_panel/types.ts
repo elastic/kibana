@@ -15,8 +15,6 @@ import type {
   Visualization,
   FramePublicAPI,
   DatasourceDimensionEditorProps,
-  DatasourceMap,
-  VisualizationMap,
   UserMessagesGetter,
   AddLayerFunction,
   RegisterLibraryAnnotationGroupFunction,
@@ -27,17 +25,12 @@ import type {
 import type { LensInspector } from '@kbn/lens-common';
 import type { IndexPatternServiceAPI } from '../../../data_views_service/service';
 
-export interface ConfigPanelWrapperProps {
+export interface LensConfigPanelBaseProps {
   framePublicAPI: FramePublicAPI;
-  datasourceMap: DatasourceMap;
-  visualizationMap: VisualizationMap;
   core: DatasourceDimensionEditorProps['core'];
-  dataViews: DataViewsPublicPluginStart;
   data: DataPublicPluginStart;
   indexPatternService?: IndexPatternServiceAPI;
-  uiActions: UiActionsStart;
   getUserMessages?: UserMessagesGetter;
-  hideLayerHeader?: boolean;
   setIsInlineFlyoutVisible?: (status: boolean) => void;
   onlyAllowSwitchToSubtypes?: boolean;
   attributes?: TypedLensSerializedState['attributes'];
@@ -55,21 +48,14 @@ export interface ConfigPanelWrapperProps {
   editorContainer?: HTMLElement;
 }
 
-export interface LayerPanelProps {
-  attributes?: TypedLensSerializedState['attributes'];
-  /** Embeddable output observable, useful for dashboard flyout  */
-  dataLoading$?: PublishingSubject<boolean | undefined>;
-  /** Contains the active data, necessary for some panel configuration such as coloring */
-  lensAdapters?: ReturnType<LensInspector['getInspectorAdapters']>;
-  data: DataPublicPluginStart;
-  updateSuggestion?: (attrs: TypedLensSerializedState['attributes']) => void;
-  /** Set the attributes state */
-  setCurrentAttributes?: (attrs: TypedLensSerializedState['attributes']) => void;
+export interface ConfigPanelWrapperProps extends LensConfigPanelBaseProps {
+  dataViews: DataViewsPublicPluginStart;
+  uiActions: UiActionsStart;
+  hideLayerHeader?: boolean;
+}
+
+export interface LayerPanelProps extends LensConfigPanelBaseProps {
   visualizationState: unknown;
-  datasourceMap: DatasourceMap;
-  visualizationMap: VisualizationMap;
-  framePublicAPI: FramePublicAPI;
-  core: DatasourceDimensionEditorProps['core'];
   activeVisualization: Visualization;
   dimensionGroups: VisualizationDimensionGroupConfig[];
   layerId: string;
@@ -106,16 +92,7 @@ export interface LayerPanelProps {
     datasourceId?: string;
     visualizationId?: string;
   }) => void;
-  indexPatternService?: IndexPatternServiceAPI;
-  getUserMessages?: UserMessagesGetter;
   displayLayerSettings: boolean;
-  setIsInlineFlyoutVisible?: (status: boolean) => void;
-  onlyAllowSwitchToSubtypes?: boolean;
-  panelId?: string;
-  parentApi?: unknown;
-  closeFlyout?: () => void;
-  canEditTextBasedQuery?: boolean;
-  editorContainer?: HTMLElement;
 }
 
 export interface LayerDatasourceDropProps {

@@ -32,6 +32,7 @@ export interface RowHeightSettingsProps {
   onChangeRowHeight: (newHeightMode: RowHeightModeType | undefined) => void;
   onChangeLineCountInput: (newRowHeightLines: number, isValid: boolean) => void;
   'data-test-subj'?: string;
+  fullWidth?: boolean;
 }
 
 const idPrefix = htmlIdGenerator()();
@@ -44,6 +45,7 @@ export function RowHeightSettings({
   onChangeLineCountInput,
   maxRowHeight = 20,
   ['data-test-subj']: dataTestSubj,
+  fullWidth,
 }: RowHeightSettingsProps) {
   const rowHeightModeOptions = [
     {
@@ -69,6 +71,7 @@ export function RowHeightSettings({
         aria-label={label}
         display="columnCompressed"
         data-test-subj={dataTestSubj}
+        fullWidth
       >
         <EuiFlexGroup gutterSize="s" responsive={false}>
           <EuiButtonGroup

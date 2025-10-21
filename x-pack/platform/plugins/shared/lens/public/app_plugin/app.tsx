@@ -54,6 +54,7 @@ import {
   useNavigateBackToApp,
   useShortUrlService,
 } from './app_helpers';
+import { useEditorFrameService } from '../editor_frame_service/editor_frame_service_context';
 
 export type SaveProps = Simplify<
   Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
@@ -75,8 +76,6 @@ export function App({
   incomingState,
   redirectToOrigin,
   setHeaderActionMenu,
-  datasourceMap,
-  visualizationMap,
   contextOriginatingApp,
   topNavMenuEntryGenerators,
   initialContext,
@@ -84,6 +83,8 @@ export function App({
 }: LensAppProps) {
   const confirmModalTitleId = useGeneratedHtmlId();
   const lensAppServices = useKibana<LensAppServices>().services;
+
+  const { datasourceMap, visualizationMap } = useEditorFrameService();
 
   const {
     data,
@@ -453,8 +454,6 @@ export function App({
           setIsSaveModalVisible={setIsSaveModalVisible}
           setHeaderActionMenu={setHeaderActionMenu}
           indicateNoData={indicateNoData}
-          datasourceMap={datasourceMap}
-          visualizationMap={visualizationMap}
           title={persistedDoc?.title}
           lensInspector={lensInspector}
           currentDoc={currentDoc}

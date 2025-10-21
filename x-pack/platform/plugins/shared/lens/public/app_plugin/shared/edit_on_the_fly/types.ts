@@ -7,15 +7,9 @@
 import type { CoreStart } from '@kbn/core/public';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { TypedLensSerializedState } from '@kbn/lens-common';
-import type {
-  DatasourceMap,
-  VisualizationMap,
-  FramePublicAPI,
-  UserMessagesGetter,
-  LensDocument,
-} from '@kbn/lens-common';
-import type { LensPluginStartDependencies } from '../../../plugin';
+import type { FramePublicAPI, UserMessagesGetter, LensDocument } from '@kbn/lens-common';
 import type { LensInspector } from '@kbn/lens-common';
+import type { LensPluginStartDependencies } from '../../../plugin';
 
 export interface FlyoutWrapperProps {
   children: JSX.Element;
@@ -35,8 +29,6 @@ export interface FlyoutWrapperProps {
 export interface EditConfigPanelProps {
   coreStart: CoreStart;
   startDependencies: LensPluginStartDependencies;
-  visualizationMap: VisualizationMap;
-  datasourceMap: DatasourceMap;
   /** The attributes of the Lens embeddable */
   attributes: TypedLensSerializedState['attributes'];
   /** Callback for updating the visualization and datasources state.*/
@@ -105,8 +97,6 @@ export interface LayerConfigurationProps {
   lensAdapters?: ReturnType<LensInspector['getInspectorAdapters']>;
   coreStart: CoreStart;
   startDependencies: LensPluginStartDependencies;
-  visualizationMap: VisualizationMap;
-  datasourceMap: DatasourceMap;
   datasourceId: 'formBased' | 'textBased';
   framePublicAPI: FramePublicAPI;
   hasPadding?: boolean;

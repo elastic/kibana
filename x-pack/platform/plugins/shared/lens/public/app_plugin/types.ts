@@ -17,11 +17,9 @@ import type {
 import type { ACTION_CONVERT_TO_LENS } from '@kbn/visualizations-plugin/public';
 import type { EmbeddableEditorState } from '@kbn/embeddable-plugin/public';
 import type {
-  DatasourceMap,
   LensAppLocatorParams,
   LensSerializedState,
   UserMessagesGetter,
-  VisualizationMap,
   LensStartServices as StartServices,
 } from '@kbn/lens-common';
 import type {
@@ -29,7 +27,7 @@ import type {
   VisualizeEditorContext,
   LensTopNavMenuEntryGenerator,
   LensDocument,
-} from '@kbn/lens-common/lens/types';
+} from '@kbn/lens-common';
 import type { LensInspector } from '@kbn/lens-common';
 import type { IndexPatternServiceAPI } from '../data_views_service/service';
 
@@ -51,8 +49,6 @@ export interface LensAppProps {
 
   // State passed in by the container which is used to determine the id of the Originating App.
   incomingState?: EmbeddableEditorState;
-  datasourceMap: DatasourceMap;
-  visualizationMap: VisualizationMap;
   initialContext?: VisualizeEditorContext | VisualizeFieldContext;
   contextOriginatingApp?: string;
   topNavMenuEntryGenerators: LensTopNavMenuEntryGenerator[];
@@ -85,8 +81,6 @@ export interface LensTopNavMenuProps {
   indicateNoData: boolean;
   setIsSaveModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   runSave: RunSave;
-  datasourceMap: DatasourceMap;
-  visualizationMap: VisualizationMap;
   title?: string;
   lensInspector: LensInspector;
   goBackToOriginatingApp?: () => void;

@@ -17,7 +17,7 @@ import type { AppMountParameters } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { visualizeStyle } from '@kbn/visualizations-common';
+import { css as cssReact } from '@emotion/react';
 import { VisualizeTopNav } from './visualize_top_nav';
 import { ExperimentalVisInfo } from './experimental_vis_info';
 import { urlFor } from '../..';
@@ -36,6 +36,12 @@ import {
   CHARTS_TO_BE_DEPRECATED,
   isSplitChart as isSplitChartFn,
 } from '../utils/split_chart_warning_helpers';
+
+const visualizeStyle = cssReact(`
+    display: flex;
+    flex: 1 1 100%;
+    overflow: hidden;
+  `);
 
 const flexParentStyle = css({
   flex: '1 1 auto',

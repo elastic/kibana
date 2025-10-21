@@ -34,6 +34,7 @@ import type {
   PublishesDataLoading,
   PublishesDataViews,
   PublishesDescription,
+  PublishesPauseFetch,
   PublishesSavedObjectId,
   PublishesTitle,
   PublishesUnifiedSearch,
@@ -115,6 +116,7 @@ export type DashboardApi = CanExpandPanels &
   PublishesUnifiedSearch &
   PublishesViewMode &
   PublishesWritableViewMode &
+  PublishesPauseFetch &
   TrackContentfulRender &
   TracksOverlays & {
     asyncResetToLastSavedState: () => Promise<void>;
@@ -173,5 +175,4 @@ export interface DashboardInternalApi {
     controlGroupInput: ControlsGroupState | undefined;
     controlGroupReferences: Reference[];
   };
-  untilControlsInitialized: () => Promise<void>;
 }

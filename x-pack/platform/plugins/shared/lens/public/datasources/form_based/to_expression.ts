@@ -491,7 +491,7 @@ function getExpressionForLayer(
           index: buildExpression([
             buildExpressionFunction<IndexPatternLoadExpressionFunctionDefinition>(
               'indexPatternLoad',
-              { id: indexPattern.id }
+              { id: indexPattern.id, includeFields: false }
             ),
           ]),
           aggs,
