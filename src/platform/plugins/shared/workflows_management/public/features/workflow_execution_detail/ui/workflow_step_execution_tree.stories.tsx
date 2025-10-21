@@ -137,12 +137,10 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
           stepExecutionIndex: 0,
           workflowRunId: 'db38b255-ec34-4048-8b77-776081cb3a97',
           workflowId: '61025f92-5e23-4327-9e39-b1fb8585b710',
-          output: [
-            {
-              result:
-                '[{"name":"Brad","surname":"Pitt"},{"name":"Angelina","surname":"Jolie"},{"name":"Leonardo","surname":"DiCaprio"},{"name":"Scarlett","surname":"Johansson"}]',
-            },
-          ],
+          output: {
+            result:
+              '[{"name":"Brad","surname":"Pitt"},{"name":"Angelina","surname":"Jolie"},{"name":"Leonardo","surname":"DiCaprio"},{"name":"Scarlett","surname":"Johansson"}]',
+          },
           input: {
             input:
               '- Output JSON array with multiple object\n- Each item in the array must follow { "name": "Luisa", "surname": "Sampton" } structure\n- Generate random count of elements from 3 to 5\n- Generate some famous name and surname (Brad Pitt, etc)\n- Don\'t include anything else except JSON into the response\n- It MUST!!! be just raw JSON string, no formatting, no anything else\n',
