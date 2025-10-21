@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, Component, type ReactNode } from 'react';
 import { EuiTourStep, EuiButton, EuiButtonEmpty, findElementBySelectorOrRef } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -18,7 +18,7 @@ export interface TourProps {
   tourManager: TourManager;
 }
 
-export const Tour: React.FC<TourProps> = ({ tourManager }) => {
+function TourContent({ tourManager }: TourProps) {
   const state = useObservable(tourManager.state$);
 
   if (!state) return null;
@@ -33,6 +33,14 @@ export const Tour: React.FC<TourProps> = ({ tourManager }) => {
   if (!currentStep) return null;
 
   return <ActiveTour state={state} tourManager={tourManager} />;
+}
+
+export const Tour: React.FC<TourProps> = (props) => {
+  return (
+    <TourErrorBoundary>
+      <TourContent {...props} />
+    </TourErrorBoundary>
+  );
 };
 
 function ActiveTour({ state, tourManager }: { state: TourState; tourManager: TourManager }) {
@@ -144,4 +152,21 @@ function WaitingTour({ state, tourManager }: { state: TourState; tourManager: To
   }, [state.steps, tourManager]);
 
   return null;
+}
+
+/**
+ * We want to make sure that if the tour crashes for any reason, it doesn't break the whole app.
+ * So we use an error boundary to catch any errors and simply don't render the tour in that case.
+ */
+class TourErrorBoundary extends Component<{ children: ReactNode }> {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  render() {
+    if (this.state.hasError) return null;
+    return this.props.children;
+  }
 }

@@ -17,12 +17,7 @@ import type {
 } from './app_locator';
 import type { DiscoverAppState } from '../public';
 import { createDataViewDataSource, createEsqlDataSource } from './data_sources';
-import {
-  APP_STATE_URL_KEY,
-  GLOBAL_STATE_URL_KEY,
-  NEW_TAB_ID,
-  TAB_STATE_URL_KEY,
-} from './constants';
+import { APP_STATE_URL_KEY, GLOBAL_STATE_URL_KEY, TAB_STATE_URL_KEY } from './constants';
 
 export const appLocatorGetLocationCommon = async (
   {
@@ -61,7 +56,7 @@ export const appLocatorGetLocationCommon = async (
   if (tab?.id) {
     path = setStateToKbnUrl(
       TAB_STATE_URL_KEY,
-      { tabId: tab.id, tabLabel: tab.id === NEW_TAB_ID && 'label' in tab ? tab.label : undefined },
+      { tabId: tab.id, tabLabel: 'label' in tab ? tab.label : undefined },
       { useHash },
       path
     );
@@ -91,6 +86,8 @@ export const parseAppLocatorParams = (params: DiscoverAppLocatorParams) => {
     viewMode,
     hideAggregatedPreview,
     breakdownField,
+    hideChart,
+    sampleSize,
     isAlertResults,
   } = params;
 
@@ -114,6 +111,8 @@ export const parseAppLocatorParams = (params: DiscoverAppLocatorParams) => {
   if (viewMode) appState.viewMode = viewMode;
   if (hideAggregatedPreview) appState.hideAggregatedPreview = hideAggregatedPreview;
   if (breakdownField) appState.breakdownField = breakdownField;
+  if (typeof hideChart === 'boolean') appState.hideChart = hideChart;
+  if (typeof sampleSize === 'number' && sampleSize > 0) appState.sampleSize = sampleSize;
 
   const state: MainHistoryLocationState = {};
 

@@ -16,7 +16,6 @@ describe('serializeLayout', () => {
         '1': {
           grid: {
             h: 6,
-            i: '1',
             w: 6,
             x: 0,
             y: 0,
@@ -26,7 +25,6 @@ describe('serializeLayout', () => {
         '3': {
           grid: {
             h: 6,
-            i: '3',
             sectionId: 'section1',
             w: 6,
             x: 0,
@@ -39,9 +37,9 @@ describe('serializeLayout', () => {
         section1: {
           collapsed: true,
           grid: {
-            i: 'section1',
             y: 6,
           },
+          uid: 'section1',
           title: 'Section One',
         },
       },
@@ -76,7 +74,6 @@ describe('serializeLayout', () => {
           },
           "grid": Object {
             "h": 6,
-            "i": "1",
             "w": 6,
             "x": 0,
             "y": 0,
@@ -87,7 +84,6 @@ describe('serializeLayout', () => {
         Object {
           "collapsed": true,
           "grid": Object {
-            "i": "section1",
             "y": 6,
           },
           "panels": Array [
@@ -97,7 +93,6 @@ describe('serializeLayout', () => {
               },
               "grid": Object {
                 "h": 6,
-                "i": "3",
                 "w": 6,
                 "x": 0,
                 "y": 0,
@@ -107,6 +102,7 @@ describe('serializeLayout', () => {
             },
           ],
           "title": "Section One",
+          "uid": "section1",
         },
       ]
     `);

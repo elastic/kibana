@@ -25,11 +25,12 @@ export function transformPanelsOut(
   const sectionsMap: { [uuid: string]: DashboardSection } = {};
   sections.forEach((section) => {
     const { gridData: grid, ...restOfSection } = section;
-    const { i: sectionId } = grid;
+    const { i: sectionId, ...restOfGrid } = grid;
     sectionsMap[sectionId] = {
       ...restOfSection,
-      grid,
+      grid: restOfGrid,
       panels: [],
+      uid: sectionId,
     };
   });
 
@@ -59,7 +60,7 @@ function transformPanelProperties(
   }: SavedDashboardPanel,
   references?: SavedObjectReference[]
 ) {
-  const { sectionId, ...rest } = gridData; // drop section ID, if it exists
+  const { sectionId, i, ...restOfGrid } = gridData;
 
   const matchingReference =
     panelRefName && references
@@ -92,7 +93,7 @@ function transformPanelProperties(
   }
 
   return {
-    grid: rest,
+    grid: restOfGrid,
     config: transformedPanelConfig ? transformedPanelConfig : config,
     uid: panelIndex,
     type: panelType,

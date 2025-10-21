@@ -15,6 +15,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import byteSize from 'byte-size';
 import { SectionLoading } from '../../shared_imports';
@@ -467,7 +468,13 @@ export const SessionView = ({
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon onClick={toggleDetailPanel} iconType="list" />
+            <EuiButtonIcon
+              onClick={toggleDetailPanel}
+              iconType="list"
+              aria-label={i18n.translate('xpack.sessionView.detailsPanelButton.ariaLabel', {
+                defaultMessage: 'Open details panel',
+              })}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>

@@ -43,7 +43,7 @@ export const AnalysisOverrides: FC<Props> = ({ fileStatus, analyzeFileWithOverri
           iconType="gear"
           size="xs"
           color="text"
-          data-test-subj={`mlFileUploadOverrideSettingsButton_${index}`}
+          data-test-subj={`mlFileUploadOverrideSettingsButton-${index}`}
           aria-label={i18n.translate(
             'xpack.dataVisualizer.file.analysisSummary.overrideSettingsAriaLabel',
             {

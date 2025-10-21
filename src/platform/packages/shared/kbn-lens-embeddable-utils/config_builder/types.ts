@@ -14,7 +14,10 @@ import type {
 } from '@kbn/lens-plugin/public';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import type { DataViewsCommon } from './config_builder';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { XYLegendValue } from '@kbn/visualizations-plugin/common';
+
+export type DataViewsCommon = Pick<DataViewsService, 'get' | 'create'>;
 
 export type LensAttributes = TypedLensByValueInput['attributes'];
 export const DEFAULT_LAYER_ID = 'layer_0';
@@ -120,6 +123,7 @@ export interface LensYBoundsConfig {
 export interface LensLegendConfig {
   show?: boolean;
   position?: 'top' | 'left' | 'bottom' | 'right';
+  legendStats?: XYLegendValue[];
 }
 
 export interface LensBreakdownDateHistogramConfig {
@@ -288,7 +292,7 @@ export type LensSeriesLayer = Identity<
   LensBaseXYLayer & {
     type: 'series';
     breakdown?: LensBreakdownConfig;
-    xAxis: LensBreakdownConfig;
+    xAxis?: LensBreakdownConfig;
     seriesType: 'line' | 'bar' | 'area';
   }
 >;
