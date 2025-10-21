@@ -8,6 +8,7 @@
  */
 
 import type { RuleType as CommonRuleType } from '@kbn/alerting-types';
+import type { Rule } from '@kbn/alerts-ui-shared';
 import type { HttpSetup } from '@kbn/core/public';
 import type { ReactNode } from 'react';
 import type { ActionVariables } from './action_variable_types';
@@ -26,7 +27,7 @@ export interface PrebuildFieldsMap {
   [RULE_DETAIL_DESCRIPTION_FIELD_TYPES.DATA_VIEW_INDEX_PATTERN]: PrebuildField<string>;
 }
 
-export type GetDescriptionFieldsFn<Rule> = ({
+export type GetDescriptionFieldsFn = ({
   rule,
   prebuildFields,
   http,
