@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { TEST_FLEET_HOST, TEST_FLEET_PORT, TEST_ES_HOST, TEST_ES_PORT } from '@kbn/test-services';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 const defaultFleetServerHostId = 'default-fleet-server';
@@ -57,7 +56,7 @@ export const kbnServerArgs = [
     id: defaultFleetServerHostId,
     name: 'Default Fleet Server',
     is_default: true,
-    host_urls: [`https://${TEST_FLEET_HOST}:${TEST_FLEET_PORT}`],
+    host_urls: [`https://localhost:8200`],
   })}]`,
   `--xpack.fleet.outputs=[${JSON.stringify({
     id: defaultElasticsearchOutputId,
@@ -65,6 +64,6 @@ export const kbnServerArgs = [
     type: 'elasticsearch',
     is_default: true,
     is_default_monitoring: true,
-    hosts: [`https://${TEST_ES_HOST}:${TEST_ES_PORT}`],
+    hosts: [`https://localhost:9200`],
   })}]`,
 ];

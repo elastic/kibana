@@ -210,6 +210,8 @@ export function createTestEsCluster<
     ...(nodes.length > 1
       ? [
           'discovery.type=multi-node',
+          // cluster.initial_master_nodes should only be set on clusters that are new
+          // archive = existing
           ...(!hasDataArchive
             ? [`cluster.initial_master_nodes=${nodes.map((n) => n.name).join(',')}`]
             : []),

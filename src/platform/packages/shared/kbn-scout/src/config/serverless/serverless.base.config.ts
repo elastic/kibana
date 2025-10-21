@@ -23,8 +23,6 @@ import {
   FLEET_PACKAGE_REGISTRY_PORT,
   TEST_ES_HOST,
   TEST_ES_PORT,
-  TEST_FLEET_HOST,
-  TEST_FLEET_PORT,
   TEST_KIBANA_HOST,
   TEST_KIBANA_PORT,
 } from '@kbn/test-services';
@@ -184,7 +182,7 @@ export const defaultConfig: ScoutServerConfig = {
           id: 'default-fleet-server',
           name: 'Default Fleet Server',
           is_default: true,
-          host_urls: [`https://${TEST_FLEET_HOST}:${TEST_FLEET_PORT}`],
+          host_urls: [`https://localhost:8220`],
         },
       ])}`,
       `--xpack.fleet.outputs=${JSON.stringify([
@@ -194,7 +192,7 @@ export const defaultConfig: ScoutServerConfig = {
           type: 'elasticsearch',
           is_default: true,
           is_default_monitoring: true,
-          hosts: [`https://${TEST_ES_HOST}:${TEST_ES_PORT}`],
+          hosts: [`https://localhost:9200`],
         },
       ])}`,
     ],
