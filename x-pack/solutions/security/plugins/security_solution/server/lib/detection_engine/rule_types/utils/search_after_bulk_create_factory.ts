@@ -212,7 +212,7 @@ export const searchAfterAndBulkCreateFactory = async ({
         // when negative sort id used in subsequent request it fails, so when negative sort value found we don't do next request
         const hasNegativeNumber = lastSortIds?.some((val) => Number(val) < 0);
         if (lastSortIds != null && lastSortIds.length !== 0 && !hasNegativeNumber) {
-          sortIds = lastSortIds;
+          sortIds = getSafeSortIds(searchResult.hits.hits[searchResult.hits.hits.length - 1]?.sort);
         } else {
           ruleExecutionLogger.debug(`[${cycleNum}] Unable to fetch last event cursor`);
           break;
