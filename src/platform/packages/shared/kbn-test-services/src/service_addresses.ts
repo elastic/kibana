@@ -29,6 +29,9 @@ export const TEST_REMOTE_KIBANA_PORT = Number(
 export const TEST_ES_HOST = parsedEsUrlParts?.hostname || process.env.TEST_ES_HOST || 'localhost';
 export const TEST_ES_PORT = Number(parsedEsUrlParts?.port || process.env.TEST_ES_PORT || 9220);
 
+export const TEST_REMOTE_ES_HOST = TEST_ES_HOST;
+export const TEST_REMOTE_ES_PORT = Number(process.env.TEST_REMOTE_ES_PORT || TEST_ES_PORT + 1);
+
 export const TEST_ES_TRANSPORT_PORT = Number(process.env.TEST_ES_TRANSPORT_PORT || 9300);
 
 export const TEST_ES_02_PORT = TEST_ES_PORT + 2;

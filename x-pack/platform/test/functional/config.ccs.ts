@@ -6,6 +6,7 @@
  */
 
 import type { FtrConfigProviderContext } from '@kbn/test';
+import { TEST_REMOTE_ES_HOST, TEST_REMOTE_ES_PORT } from '@kbn/test-services';
 import { RemoteEsArchiverProvider } from './services/remote_es/remote_es_archiver';
 import { RemoteEsProvider } from './services/remote_es/remote_es';
 
@@ -48,8 +49,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ccs: {
         remoteClusterUrl:
           process.env.REMOTE_CLUSTER_URL ??
-          'http://elastic:changeme@localhost:' +
-            `${functionalConfig.get('servers.elasticsearch.port') + 1}`,
+          `http://elastic:changeme@${TEST_REMOTE_ES_HOST}:${TEST_REMOTE_ES_PORT}`,
       },
     },
     services: {
