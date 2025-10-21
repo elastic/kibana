@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { XYDataLayerConfig, XYLayerConfig, XYState } from '../../../../../public';
 import type { GeneralDatasourceStates } from '@kbn/lens-common';
+import type { XYDataLayerConfig, XYLayerConfig, XYState } from '../../../../../public';
 import {
   convertToRawColorMappings,
   getColumnMetaFn,

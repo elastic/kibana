@@ -15,7 +15,7 @@ import { isQueryAnnotationConfig } from '@kbn/event-annotation-components';
 import { i18n } from '@kbn/i18n';
 import fastIsEqual from 'fast-deep-equal';
 import { validateQuery } from '@kbn/visualization-ui-components';
-import type { DataViewsState }  from '@kbn/lens-common';
+import type { DataViewsState } from '@kbn/lens-common';
 import type { FramePublicAPI, DatasourcePublicAPI, UserMessage } from '@kbn/lens-common';
 import type {
   XYLayerConfig,

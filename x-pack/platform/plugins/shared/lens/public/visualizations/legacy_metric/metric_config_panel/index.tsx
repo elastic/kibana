@@ -7,8 +7,8 @@
 
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { VisualizationToolbarProps } from '@kbn/lens-common';
-import { LegacyMetricState } from '@kbn/lens-common';
+import type { VisualizationToolbarProps } from '@kbn/lens-common';
+import type { LegacyMetricState } from '@kbn/lens-common';
 import { TitlesAndTextOptionsPopover } from './titles_and_text_options_popover';
 
 export const MetricToolbar = memo(function MetricToolbar({

@@ -9,15 +9,15 @@ import type { MiddlewareAPI } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
 import type { History } from 'history';
 import type { LensStoreDeps, LensAppState, VisualizationState } from '@kbn/lens-common';
-import { setState, initExisting, initEmpty } from '..';
-import { type InitialAppState, disableAutoApply, getPreloadedState } from '../lens_slice';
 import type { SharingSavedObjectProps } from '@kbn/lens-common';
-import { getInitialDatasourceId, getInitialDataViewsObject } from '../../utils';
-import { initializeSources } from '../../editor_frame_service/editor_frame';
 import type { LensAppServices } from '@kbn/lens-common';
-import { getEditPath, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../../common/constants';
 import type { LensDocument } from '@kbn/lens-common';
 import type { LensSerializedState } from '@kbn/lens-common';
+import { setState, initExisting, initEmpty } from '..';
+import { type InitialAppState, disableAutoApply, getPreloadedState } from '../lens_slice';
+import { getInitialDatasourceId, getInitialDataViewsObject } from '../../utils';
+import { initializeSources } from '../../editor_frame_service/editor_frame';
+import { getEditPath, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../../common/constants';
 
 interface PersistedDoc {
   doc: LensDocument;

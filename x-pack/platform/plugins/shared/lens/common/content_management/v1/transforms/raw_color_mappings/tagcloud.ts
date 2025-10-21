@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { TagcloudState } from '../../../../../public';
 import type { GeneralDatasourceStates } from '@kbn/lens-common';
+import type { TagcloudState } from '../../../../../public';
 import {
   convertToRawColorMappings,
   getColumnMetaFn,

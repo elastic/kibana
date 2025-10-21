@@ -22,7 +22,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { getTime } from '@kbn/data-plugin/common';
 import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { TypedLensSerializedState }  from '@kbn/lens-common';
+import type { TypedLensSerializedState } from '@kbn/lens-common';
 import type { DatasourceMap, VisualizationMap } from '@kbn/lens-common';
 import { suggestionsApi } from '../../../lens_suggestions_api';
 import { readUserChartTypeFromSessionStorage } from '../../../chart_type_session_storage';

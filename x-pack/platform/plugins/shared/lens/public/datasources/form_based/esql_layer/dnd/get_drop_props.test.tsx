@@ -16,7 +16,7 @@ import {
   notNumericDraggedField,
   numericDraggedField,
 } from './mocks';
-import type { TextBasedPrivateState }  from '@kbn/lens-common';
+import type { TextBasedPrivateState } from '@kbn/lens-common';
 import { addColumnsToCache } from '../fieldlist_cache';
 
 const defaultProps = {

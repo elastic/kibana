@@ -6,7 +6,7 @@
  */
 
 import type { GeneralDatasourceStates } from '@kbn/lens-common';
-import { DatatableVisualizationState } from '@kbn/lens-common';
+import type { DatatableVisualizationState } from '@kbn/lens-common';
 import { getRuntimeConverters } from './converters';
 
 export function convertToRuntimeState(
