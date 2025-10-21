@@ -9,6 +9,7 @@ import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { EuiButtonEmpty, EuiIconTip } from '@elastic/eui';
 import { useAssistantContext } from '@kbn/elastic-assistant';
+import { css } from '@emotion/react';
 
 import { UPDATE_FIELD_IN_FORM_TOOLTIP } from './translations';
 
@@ -87,6 +88,9 @@ export const UpdateFieldInFormButton: FC<PropsWithChildren<UpdateFieldInFormButt
       color="text"
       flush="both"
       size="xs"
+      css={css`
+        width: 100%;
+      `}
     >
       <EuiIconTip content={UPDATE_FIELD_IN_FORM_TOOLTIP} position="right" type="documentEdit" />
     </EuiButtonEmpty>
