@@ -201,6 +201,16 @@ export const useCasesColumns = ({
             : getEmptyCellValue(),
         width: !isSelectorView ? '70px' : '55px',
       },
+      totalEvents: {
+        field: casesColumnsConfig.totalEvents.field,
+        name: casesColumnsConfig.totalEvents.name,
+        align: RIGHT_ALIGNMENT,
+        render: (totalEvents: CaseUI['totalEvents']) =>
+          totalEvents != null
+            ? renderStringField(`${totalEvents}`, `case-table-column-eventsCount`)
+            : getEmptyCellValue(),
+        width: !isSelectorView ? '70px' : '55px',
+      },
       totalComment: {
         field: casesColumnsConfig.totalComment.field,
         name: casesColumnsConfig.totalComment.name,
