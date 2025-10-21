@@ -495,8 +495,10 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       let loadingMessage: WebElementWrapper | null = null;
       await retry.waitFor('injectedMetadata', async () => {
         await navigateTo('/render/core');
-        injectedMetadata = await getInjectedMetadata();
-        loadingMessage = await findLoadingMessage();
+        [injectedMetadata, loadingMessage] = await Promise.all([
+          getInjectedMetadata(),
+          findLoadingMessage(),
+        ]);
         return !!injectedMetadata;
       });
       const userSettings = injectedMetadata!.legacyMetadata?.uiSettings?.user;
@@ -516,8 +518,10 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       let loadingMessage: WebElementWrapper | null = null;
       await retry.waitFor('injectedMetadata', async () => {
         await navigateTo('/render/core?isAnonymousPage=true');
-        injectedMetadata = await getInjectedMetadata();
-        loadingMessage = await findLoadingMessage();
+        [injectedMetadata, loadingMessage] = await Promise.all([
+          getInjectedMetadata(),
+          findLoadingMessage(),
+        ]);
         return !!injectedMetadata;
       });
       const userSettings = injectedMetadata!.legacyMetadata?.uiSettings?.user;
