@@ -118,7 +118,7 @@ export const useLensProps = ({
   const updateLensPropsContext = useStableCallback(() => setLensPropsContext(buildLensProps()));
 
   useEffect(() => {
-    const attributesCurrent = attributes$.current;
+    const attributesCurrent$ = attributes$.current;
     const chartRefCurrent = chartRef?.current;
 
     // progressively load Lens when the chart becomes visible
@@ -143,18 +143,21 @@ export const useLensProps = ({
       // Emit the current attributes value immediately to handle cases where
       // attributes are already set but discoverFetch$ emitted before this hook mounted.
       // This ensures we don't miss an update that occurred between unmount and mount.
-      attributesCurrent.pipe(startWith(attributesCurrent.value)),
+      attributesCurrent$.pipe(startWith(attributesCurrent$.value)),
       intersecting$
     )
       .pipe(
         // prevent rapid successive updates
         debounceTime(100),
-        withLatestFrom(attributesCurrent, intersecting$),
+        withLatestFrom(attributesCurrent$, intersecting$),
         filter(([, attr, isIntersecting]) => {
           return !!attr && isIntersecting;
         })
       )
-      .subscribe(() => updateLensPropsContext());
+      .subscribe(() =>
+        // schedule update in the next animation frame to ensure React state updates have completed
+        requestAnimationFrame(() => updateLensPropsContext())
+      );
 
     return () => {
       subscription.unsubscribe();
