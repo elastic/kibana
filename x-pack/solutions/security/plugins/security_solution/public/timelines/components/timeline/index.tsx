@@ -12,6 +12,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { isTab } from '@kbn/timelines-plugin/public';
+import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { timelineActions, timelineSelectors } from '../../store';
 import { timelineDefaults } from '../../store/defaults';
@@ -140,6 +141,14 @@ const StatefulTimelineComponent: React.FC<Props> = ({
       // don't update if no change
       (selectedDataViewIdTimeline === selectedDataViewId &&
         selectedPatternsTimeline.sort().join() === selectedPatterns.sort().join())
+    ) {
+      return;
+    }
+    // TODO: newDataViewPickerEnabled: With the new data view picker, we should not update the selected patterns
+    // on timeline, as that prevents us from guiding the user to duplicate the data view or using the new alerts only dv
+    if (
+      selectedPatternsTimeline.length === 1 &&
+      selectedPatternsTimeline[0].includes(DEFAULT_ALERTS_INDEX)
     ) {
       return;
     }

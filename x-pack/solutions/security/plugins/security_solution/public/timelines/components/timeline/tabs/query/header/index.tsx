@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  useEuiTheme,
+} from '@elastic/eui';
 import React, { useMemo } from 'react';
 import type { FilterManager } from '@kbn/data-plugin/public';
 import { InPortal } from 'react-reverse-portal';
@@ -25,9 +32,16 @@ import * as i18n from './translations';
 import { StatefulSearchOrFilter } from '../../../search_or_filter';
 import { DataProviders } from '../../../data_providers';
 import { EventsCountBadge, StyledEuiFlyoutHeader, TabHeaderContainer } from '../../shared/layout';
+import {
+  useGetDuplicateDataViewWithAlertsOnly,
+  useShouldShowAlertsOnlyMigrationMessage,
+  useTimelineSelectAlertsOnlyDataView,
+} from './use_show_alerts_only_migration_helpers';
 
 interface Props {
   activeTab: TimelineTabs;
+  currentIndices: string[];
+  dataViewId: string | null;
   filterManager: FilterManager;
   show: boolean;
   showCallOutUnauthorizedMsg: boolean;
@@ -61,6 +75,8 @@ const useStyles = (shouldShowQueryBuilder: boolean) => {
 
 const QueryTabHeaderComponent: React.FC<Props> = ({
   activeTab,
+  currentIndices,
+  dataViewId,
   filterManager,
   show,
   showCallOutUnauthorizedMsg,
@@ -89,6 +105,14 @@ const QueryTabHeaderComponent: React.FC<Props> = ({
   );
   const dataProviderStyles = useStyles(shouldShowQueryBuilder);
 
+  const showAlertsOnlyMigrationMessage = useShouldShowAlertsOnlyMigrationMessage({
+    currentTimelineIndices: currentIndices,
+    dataViewId,
+  });
+
+  const selectAlertsDataView = useTimelineSelectAlertsOnlyDataView();
+  const openEditor = useGetDuplicateDataViewWithAlertsOnly({ dataViewId });
+
   return (
     <StyledEuiFlyoutHeader data-test-subj={`${activeTab}-tab-flyout-header`} hasBorder={false}>
       <InPortal node={timelineEventsCountPortalNode}>
@@ -103,6 +127,34 @@ const QueryTabHeaderComponent: React.FC<Props> = ({
               <EuiFlexItem>
                 <StatefulSearchOrFilter filterManager={filterManager} timelineId={timelineId} />
               </EuiFlexItem>
+              {showAlertsOnlyMigrationMessage && (
+                <EuiFlexItem>
+                  <EuiCallOut
+                    announceOnMount
+                    data-test-subj="timelineCallOutAlertsOnlyMigrationMessage"
+                    title={i18n.CALL_OUT_ALERTS_ONLY_MIGRATION_TITLE}
+                    color="warning"
+                    iconType="warning"
+                    size="m"
+                  >
+                    <EuiFlexGroup gutterSize="s" alignItems="flexStart">
+                      <EuiFlexItem grow={false}>
+                        <EuiButton color="warning" onClick={openEditor} fill>
+                          {'Duplicate data view'}
+                        </EuiButton>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonEmpty
+                          aria-label="Switch to alerts data view"
+                          onClick={selectAlertsDataView}
+                        >
+                          {'Switch to alerts data view'}
+                        </EuiButtonEmpty>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiCallOut>
+                </EuiFlexItem>
+              )}
               {showCallOutUnauthorizedMsg && (
                 <EuiFlexItem>
                   <EuiCallOut
