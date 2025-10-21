@@ -613,7 +613,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
   /**
    * This method is only called when authentication via access token stored in the state failed because of expired
    * token. So we should use refresh token, that is also stored in the state, to extend expired access token and
-   * authenticated user with it.
+   * authenticate user with it.
    * @param request Request instance.
    * @param state State value previously stored by the provider.
    */
