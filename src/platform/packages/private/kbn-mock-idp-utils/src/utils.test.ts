@@ -214,7 +214,7 @@ describe('mock-idp-utils', () => {
           )
         );
         expect(accessTokenMatch).toBeTruthy();
-        const accessToken = accessTokenMatch[1];
+        const accessToken = accessTokenMatch![1];
         expect(accessToken).toMatch(/^essu_dev_/);
       });
 
@@ -228,7 +228,7 @@ describe('mock-idp-utils', () => {
             's'
           )
         );
-        const wrappedToken = accessTokenMatch[1];
+        const wrappedToken = accessTokenMatch![1];
 
         // Unwrap the token
         const unprefixed = removePrefixEssuDev(wrappedToken);
@@ -323,7 +323,7 @@ describe('mock-idp-utils', () => {
         transport: {
           request: jest.fn().mockResolvedValue({}),
         },
-      };
+      } as any;
 
       await ensureSAMLRoleMapping(mockClient);
 
@@ -357,7 +357,7 @@ describe('mock-idp-utils', () => {
         transport: {
           request: jest.fn().mockRejectedValue(mockError),
         },
-      };
+      } as any;
 
       await expect(ensureSAMLRoleMapping(mockClient)).rejects.toThrow('Elasticsearch error');
     });
