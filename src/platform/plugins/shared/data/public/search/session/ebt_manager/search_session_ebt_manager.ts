@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup } from '@kbn/core/public';
+import type { CoreSetup, PluginInitializerContext } from '@kbn/core/public';
 import { isOfAggregateQueryType, type AggregateQuery, type Query } from '@kbn/es-query';
 import type { PublicContract } from '@kbn/utility-types';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
+import type { Logger } from '@kbn/logging';
+import type { ConfigSchema } from '../../../../server/config';
 import type { SearchSessionSavedObject } from '../sessions_client';
 import {
   BG_SEARCH_CANCEL,
@@ -25,14 +28,26 @@ export type ISearchSessionEBTManager = PublicContract<SearchSessionEBTManager>;
 
 export class SearchSessionEBTManager {
   private reportEventCore: CoreSetup['analytics']['reportEvent'];
+  private logger: Logger;
 
-  constructor({ core }: { core: CoreSetup }) {
+  constructor({
+    core,
+    initializerContext,
+  }: {
+    core: CoreSetup;
+    initializerContext: PluginInitializerContext<ConfigSchema>;
+  }) {
     this.reportEventCore = core.analytics.reportEvent;
+    this.logger = initializerContext.logger.get();
   }
 
   private reportEvent(...args: Parameters<CoreSetup['analytics']['reportEvent']>) {
     if (!this.reportEventCore) return;
-    this.reportEventCore(...args);
+    try {
+      this.reportEventCore(...args);
+    } catch (e) {
+      this.logger.error(e);
+    }
   }
 
   public trackBgsStarted({
@@ -55,14 +70,10 @@ export class SearchSessionEBTManager {
   }
 
   public trackBgsCompleted({
-    trackingData,
+    response,
     session,
   }: {
-    trackingData: {
-      runtimeMs: number;
-      resultsCount: number;
-      resultsBytesSize: number;
-    };
+    response: IKibanaSearchResponse;
     session: SearchSessionSavedObject;
   }) {
     this.reportEvent(BG_SEARCH_COMPLETE, {
@@ -70,9 +81,9 @@ export class SearchSessionEBTManager {
         session.attributes.restoreState?.query as Query | AggregateQuery | undefined
       ),
       session_id: session.id,
-      runtime_ms: trackingData.runtimeMs,
-      result_rows_bucket: trackingData.resultsCount,
-      result_bytes_bucket: trackingData.resultsBytesSize,
+      runtime_ms: response.rawResponse.took,
+      result_rows_bucket: response.rawResponse.hits.total || response.rawResponse.hits.length || 0,
+      result_bytes_bucket: Buffer.byteLength(JSON.stringify(response.rawResponse)),
     });
   }
 

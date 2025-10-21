@@ -118,7 +118,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     this.sessionsClient = new SessionsClient({ http });
 
     registerSearchSessionEBTManagerAnalytics(core);
-    this.searchSessionEBTManager = new SearchSessionEBTManager({ core });
+    this.searchSessionEBTManager = new SearchSessionEBTManager({
+      core,
+      initializerContext: this.initializerContext,
+    });
 
     this.sessionService = new SessionService(
       this.initializerContext,

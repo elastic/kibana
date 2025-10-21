@@ -29,7 +29,7 @@ import type {
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import type { ISearchOptions } from '@kbn/search-types';
+import type { IKibanaSearchResponse, ISearchOptions } from '@kbn/search-types';
 import { LRUCache } from 'lru-cache';
 import type { Logger } from '@kbn/logging';
 import type { SearchUsageCollector } from '../..';
@@ -105,11 +105,7 @@ interface TrackSearchHandler {
   /**
    * Transition search into "complete" status
    */
-  complete(trackingData?: {
-    runtimeMs: number;
-    resultsCount: number;
-    resultsBytesSize: number;
-  }): void;
+  complete(response?: IKibanaSearchResponse): void;
 
   /**
    * Transition search into "error" status
@@ -373,7 +369,7 @@ export class SessionService {
     });
 
     return {
-      complete: (trackingData) => {
+      complete: (response) => {
         const state = this.isCurrentSession(sessionId)
           ? this.state
           : this.sessionSnapshots.get(sessionId!);
@@ -390,9 +386,9 @@ export class SessionService {
         // trigger polling once again to save search into a session and extend its keep_alive
         if (this.isStored(state)) {
           const searchSessionSavedObject = state.get().searchSessionSavedObject;
-          if (searchSessionSavedObject && trackingData) {
+          if (searchSessionSavedObject && response) {
             this.searchSessionEBTManager?.trackBgsCompleted({
-              trackingData,
+              response,
               session: searchSessionSavedObject,
             });
           }
