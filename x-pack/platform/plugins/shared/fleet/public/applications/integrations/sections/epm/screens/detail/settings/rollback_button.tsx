@@ -101,7 +101,7 @@ export function RollbackButton({ packageInfo, isCustomPackage }: RollbackButtonP
             ) : isRollbackTTLExpired ? (
               <FormattedMessage
                 id="xpack.fleet.integrations.rollbackPackage.rollbackTTLExpiredTooltip"
-                defaultMessage="The rollback is no longer allowed for this integration."
+                defaultMessage="You can no longer roll back this integration."
               />
             ) : null
           }
