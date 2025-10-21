@@ -16,6 +16,7 @@ export class AlertsTablePage {
   public alertsTable: Locator;
 
   constructor(private readonly page: ScoutPage) {
+    // Use the table container to check if alerts by rule section has loaded
     this.detectionsAlertsWrapper = this.page.testSubj.locator('alerts-by-rule-table');
     this.alertRow = this.page.locator('div.euiDataGridRow');
     this.alertsTable = this.page.testSubj.locator('alertsTableIsLoaded'); // Search for loaded Alerts table
@@ -37,8 +38,15 @@ export class AlertsTablePage {
     return row.locator(`[data-test-subj='expand-event']`).click();
   }
 
-  async waitForDetectionsAlertsWrapper() {
-    // Increased timeout to 20 seconds because this page sometimes takes longer to load
-    return this.detectionsAlertsWrapper.waitFor({ state: 'visible', timeout: 20_000 });
+  async waitForDetectionsAlertsWrapper(ruleName?: string) {
+    // Wait for the alerts-by-rule table to be visible
+    await this.detectionsAlertsWrapper.waitFor({ state: 'visible', timeout: 20_000 });
+
+    // If a specific rule name is provided, wait for it to appear in the table
+    if (ruleName) {
+      await this.detectionsAlertsWrapper
+        .getByText(ruleName)
+        .waitFor({ state: 'visible', timeout: 20_000 });
+    }
   }
 }

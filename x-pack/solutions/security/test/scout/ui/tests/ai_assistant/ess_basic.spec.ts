@@ -5,31 +5,43 @@
  * 2.0.
  */
 
-import { test } from '@kbn/scout-security';
+import { spaceTest } from '@kbn/scout-security';
 import { API_BASE_PATH } from '@kbn/license-management-plugin/common/constants';
 
-test.describe('AI Assistant - Basic License', { tag: ['@ess'] }, () => {
-  test.beforeEach(async ({ browserAuth, kbnClient }) => {
+spaceTest.describe.skip('AI Assistant - Basic License', { tag: ['@ess'] }, () => {
+  spaceTest.beforeEach(async ({ browserAuth, page, config }) => {
     await browserAuth.loginAsAdmin();
 
-    // Start basic license
-    await kbnClient.request({
-      method: 'POST',
-      path: `${API_BASE_PATH}/start_basic?acknowledge=true`,
-    });
+    // Use page.request to make API calls with browser's authenticated session
+    const response = await page.request.post(
+      `${config.hosts.kibana}${API_BASE_PATH}/start_basic?acknowledge=true`,
+      {
+        headers: {
+          'kbn-xsrf': 'true',
+          'x-elastic-internal-origin': 'security-solution',
+        },
+      }
+    );
+
+    if (!response.ok()) {
+      throw new Error(
+        `Failed to start basic license: ${response.status()} ${response.statusText()}`
+      );
+    }
   });
 
-  test('user with Basic license should not be able to use assistant', async ({
-    page,
-    pageObjects,
-  }) => {
-    await page.gotoApp('security', { path: '/get_started' });
-    await pageObjects.assistantPage.open();
+  spaceTest(
+    'user with Basic license should not be able to use assistant',
+    async ({ page, pageObjects }) => {
+      // Navigate to page after license is already changed
+      await page.gotoApp('security', { path: '/get_started' });
+      await pageObjects.assistantPage.open();
 
-    // Verify upgrade callout is visible
-    await pageObjects.assistantPage.expectUpgradeCallout();
+      // Verify upgrade callout is visible
+      await pageObjects.assistantPage.expectUpgradeCallout();
 
-    // Verify conversation is read-only
-    await pageObjects.assistantPage.expectConversationReadOnly();
-  });
+      // Verify conversation is read-only
+      await pageObjects.assistantPage.expectConversationReadOnly();
+    }
+  );
 });

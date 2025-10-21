@@ -111,14 +111,16 @@ export const spaceTest = securityParallelFixtures.extend<
     {
       page,
       scoutSpace,
+      config,
     }: {
       page: SecurityParallelTestFixtures['page'];
       scoutSpace: SecurityParallelWorkerFixtures['scoutSpace'];
+      config: SecurityParallelWorkerFixtures['config'];
     },
     use
   ) => {
     await use({
-      assistant: getBrowserScopedAssistantService({ page, scoutSpace }),
+      assistant: getBrowserScopedAssistantService({ page, kbnUrl: config.hosts.kibana, scoutSpace }),
     });
   },
 });

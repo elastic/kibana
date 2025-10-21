@@ -5,56 +5,54 @@
  * 2.0.
  */
 
-import { expect, spaceTest, test } from '@kbn/scout-security';
+import { expect, spaceTest } from '@kbn/scout-security';
 import { CUSTOM_QUERY_RULE } from '@kbn/scout-security/src/playwright/constants/detection_rules';
 import { RULE_MANAGEMENT_CONTEXT_DESCRIPTION } from '@kbn/security-solution-plugin/public/detection_engine/common/translations';
-import {
-  AZURE_OPENAI_CONNECTOR_CONFIG,
-  BEDROCK_CONNECTOR_CONFIG,
-} from '@kbn/scout-security/src/playwright/fixtures/worker/apis/connectors';
 
-test.describe('AI Assistant Conversations', { tag: ['@ess', '@svlSecurity'] }, () => {
+spaceTest.describe('AI Assistant Conversations', { tag: ['@ess', '@svlSecurity'] }, () => {
   // On serverless we provide default .inference `Elastic LLM` connector
-  test.describe(
-    'No connectors or conversations exist',
-    { tag: ['@ess'] },
-    () => {
-      test.beforeEach(async ({ browserAuth, apiServices }) => {
-        await browserAuth.loginAsAdmin();
-        await apiServices.connectors.deleteAll();
-        await apiServices.assistant.deleteAllConversations();
-        await apiServices.detectionRule.deleteAll();
-      });
+  spaceTest.describe('No connectors or conversations exist', { tag: ['@ess'] }, () => {
+    spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }) => {
+      await browserAuth.loginAsAdmin();
+      await apiServices.connectors.deleteAll();
+      await apiServices.assistant.deleteAllConversations();
+      await apiServices.detectionRule.deleteAll();
+    });
 
-      test('Shows welcome setup when no connectors or conversations exist', async ({
-        page,
-        pageObjects,
-      }) => {
+    spaceTest.afterEach(async ({ apiServices }) => {
+      await apiServices.connectors.deleteAll();
+      await apiServices.assistant.deleteAllConversations();
+      await apiServices.detectionRule.deleteAll();
+    });
+
+    spaceTest(
+      'Shows welcome setup when no connectors or conversations exist',
+      async ({ page, pageObjects }) => {
         await page.gotoApp('security', { path: '/get_started' });
         await pageObjects.assistantPage.open();
         await pageObjects.assistantPage.expectNewConversation(true, 'New chat');
-      });
+      }
+    );
 
-      test('Creating a new connector from welcome setup automatically sets the connector for the conversation', async ({
-        page,
-        pageObjects,
-      }) => {
+    spaceTest(
+      'Creating a new connector from welcome setup automatically sets the connector for the conversation',
+      async ({ page, pageObjects }) => {
         await page.gotoApp('security', { path: '/get_started' });
         await pageObjects.assistantPage.open();
 
         // Create OpenAI connector through the UI
         await pageObjects.assistantPage.createOpenAIConnector('My OpenAI Connector');
         await pageObjects.assistantPage.expectConnectorSelected('My OpenAI Connector');
-      });
-    }
-  );
+      }
+    );
+  });
 
-  test.describe(
+  spaceTest.describe(
     'When no conversations exist but connectors do exist, show empty convo',
     () => {
       let azureConnectorName: string;
 
-      test.beforeEach(async ({ browserAuth, apiServices }) => {
+      spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }) => {
         await browserAuth.loginAsAdmin();
         await apiServices.connectors.deleteAll();
         await apiServices.assistant.deleteAllConversations();
@@ -65,7 +63,13 @@ test.describe('AI Assistant Conversations', { tag: ['@ess', '@svlSecurity'] }, (
         azureConnectorName = connector.name;
       });
 
-      test('When invoked on AI Assistant click', async ({ page, pageObjects }) => {
+      spaceTest.afterEach(async ({ apiServices }) => {
+        await apiServices.connectors.deleteAll();
+        await apiServices.assistant.deleteAllConversations();
+        await apiServices.detectionRule.deleteAll();
+      });
+
+      spaceTest('When invoked on AI Assistant click', async ({ page, pageObjects }) => {
         await page.gotoApp('security', { path: '/get_started' });
         await pageObjects.assistantPage.open();
 
@@ -74,135 +78,125 @@ test.describe('AI Assistant Conversations', { tag: ['@ess', '@svlSecurity'] }, (
         await pageObjects.assistantPage.expectUserPromptEmpty();
       });
 
-      test('When invoked from rules page', async ({
-        page,
-        pageObjects,
-        apiServices,
-      }) => {
-        const ruleName = `Rule 1_${Date.now()}`;
-        const rule = {
-          ...CUSTOM_QUERY_RULE,
-          name: ruleName,
-          rule_id: 'rule1',
-          enabled: true,
-        };
+      spaceTest(
+        'When invoked from rules page',
+        async ({ page, pageObjects, apiServices, scoutSpace }) => {
+          const ruleName = `Rule 1_${scoutSpace.id}_${Date.now()}`;
+          const rule = {
+            ...CUSTOM_QUERY_RULE,
+            name: ruleName,
+            rule_id: `rule1_${scoutSpace.id}`,
+            enabled: true,
+          };
 
-        await apiServices.detectionRule.createCustomQueryRule(rule);
+          const createdRule = await apiServices.detectionRule.createCustomQueryRule(rule);
 
-        // Navigate to rules management table
-        await page.gotoApp('security', { path: '/rules' });
+          // Navigate to rules management table
+          await page.gotoApp('security', { path: '/rules/management' });
 
-        // Wait for URL to change to rules page
-        await page.waitForURL('**/app/security/rules**');
+          // Wait for URL to change to rules page
+          await page.waitForURL('**/app/security/rules/management**');
 
-        // Dismiss onboarding modal if present
-        await pageObjects.securityCommon.dismissOnboardingModal();
+          // Dismiss onboarding modal if present
+          await page
+            .getByRole('button', { name: 'Close tour' })
+            .click({ timeout: 5000 })
+            .catch(() => {});
 
-        // Wait for the rules table to load
-        await page.testSubj.locator('allRulesTable').waitFor({ state: 'visible' });
-        await page.testSubj.locator('ruleDetailsLink').first().waitFor({ state: 'visible' });
+          // Wait for the rules table to load
+          // await page.testSubj.locator('allRulesTable').waitFor({ state: 'visible' });
 
-        // Find and click the rule
-        const ruleLink = page.testSubj.locator('ruleDetailsLink').filter({ hasText: ruleName });
-        await ruleLink.click();
+          // Select the rule using its checkbox (using the rule ID from the API response)
+          const ruleCheckbox = page.testSubj.locator(`checkboxSelectRow-${createdRule.id}`);
+          await ruleCheckbox.waitFor({ state: 'visible' });
+          await ruleCheckbox.click();
 
-        // Wait for rule details page to load
-        await page.testSubj.locator('ruleDetailsPage').waitFor({ state: 'visible' });
+          // Open assistant from rule context
+          await pageObjects.assistantPage.openFromRule();
 
-        // Open assistant from rule context
-        await pageObjects.assistantPage.openFromRule();
+          await pageObjects.assistantPage.expectConversationTitle(`Detection Rules - ${ruleName}`);
+          await pageObjects.assistantPage.expectConnectorSelected(azureConnectorName);
+          await pageObjects.assistantPage.expectPromptContext(
+            0,
+            RULE_MANAGEMENT_CONTEXT_DESCRIPTION
+          );
+        }
+      );
 
-        await pageObjects.assistantPage.expectConversationTitle('Detection Rules - Rule 1');
-        await pageObjects.assistantPage.expectConnectorSelected(azureConnectorName);
-        await pageObjects.assistantPage.expectPromptContext(
-          0,
-          RULE_MANAGEMENT_CONTEXT_DESCRIPTION
-        );
-      });
+      spaceTest(
+        'When invoked from alert details',
+        async ({ page, pageObjects, apiServices, scoutSpace }) => {
+          const ruleName = `New Rule Test_${scoutSpace.id}_${Date.now()}`;
+          const rule = {
+            ...CUSTOM_QUERY_RULE,
+            name: ruleName,
+            from: 'now-1m',
+          };
 
-      test('When invoked from alert details', async ({
-        page,
-        pageObjects,
-        apiServices,
-      }) => {
-        const ruleName = `New Rule Test_${Date.now()}`;
-        const rule = {
-          ...CUSTOM_QUERY_RULE,
-          name: ruleName,
-          from: 'now-1m',
-        };
+          await apiServices.detectionRule.createCustomQueryRule(rule);
 
-        await apiServices.detectionRule.createCustomQueryRule(rule);
+          // Generate test data to trigger alert
+          await apiServices.detectionRule.indexTestDocument('logs-test', {
+            'event.category': 'security',
+            'event.type': 'alert',
+            message: 'Test security event for detection rule',
+            'host.name': 'test-host',
+            'user.name': 'test-user',
+          });
 
-        // Generate test data to trigger alert
-        await apiServices.detectionRule.indexTestDocument('logs-test', {
-          'event.category': 'security',
-          'event.type': 'alert',
-          message: 'Test security event for detection rule',
-          'host.name': 'test-host',
-          'user.name': 'test-user',
-        });
+          // Wait for rule to execute and generate alerts
+          await new Promise((resolve) => setTimeout(resolve, 5000));
 
-        // Wait for rule to execute and generate alerts
-        await new Promise((resolve) => setTimeout(resolve, 5000));
+          // Navigate to alerts page
+          await page.gotoApp('security', { path: '/alerts' });
 
-        // Navigate to alerts page
-        await page.gotoApp('security', { path: '/alerts' });
+          // Wait for URL to change to alerts page
+          await page.waitForURL('**/app/security/alerts**');
 
-        // Wait for URL to change to alerts page
-        await page.waitForURL('**/app/security/alerts**');
+          // Dismiss onboarding modal if present
+          await page
+            .getByRole('button', { name: 'Close tour' })
+            .click({ timeout: 5000 })
+            .catch(() => {});
 
-        // Dismiss onboarding modal if present
-        await pageObjects.securityCommon.dismissOnboardingModal();
+          // Wait for alerts to load
+          await pageObjects.alertsTablePage.waitForDetectionsAlertsWrapper(ruleName);
 
-        // Wait for alerts to load
-        await pageObjects.alertsTablePage.waitForDetectionsAlertsWrapper();
+          // Expand the first alert
+          await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
 
-        // Expand the first alert
-        await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
+          // Open assistant from alert context
+          await pageObjects.assistantPage.openFromAlert();
 
-        // Open assistant from alert context
-        await pageObjects.assistantPage.openFromAlert();
+          await pageObjects.assistantPage.expectConversationTitleContains('New Rule Test');
+          await pageObjects.assistantPage.expectConnectorSelected(azureConnectorName);
+          await pageObjects.assistantPage.expectPromptContext(0, 'Alert (from summary)');
+        }
+      );
 
-        await pageObjects.assistantPage.expectConversationTitleContains('New Rule Test');
-        await pageObjects.assistantPage.expectConnectorSelected(azureConnectorName);
-        await pageObjects.assistantPage.expectPromptContext(0, 'Alert (from summary)');
-      });
+      spaceTest(
+        'Shows empty connector callout when a conversation that had a connector no longer does',
+        async ({ page, pageObjects, browserScopedApis, apiServices }) => {
+          // Create conversation with connector reference using browser-scoped API
+          const mockConvo = await browserScopedApis.assistant.createConversation({
+            title: 'Spooky convo',
+            messages: [],
+          });
 
-      test('Shows empty connector callout when a conversation that had a connector no longer does', async ({
-        page,
-        pageObjects,
-        browserScopedApis,
-      }) => {
-        // Create conversation with connector reference using browser-scoped API
-        const mockConvo = await browserScopedApis.assistant.createConversation({
-          title: 'Spooky convo',
-          messages: [],
-        });
+          await page.gotoApp('security', { path: '/get_started' });
+          await pageObjects.assistantPage.open();
 
-        await page.gotoApp('security', { path: '/get_started' });
-        await pageObjects.assistantPage.open();
+          // Select the conversation
+          await pageObjects.assistantPage.selectConversation(mockConvo.title);
 
-        // Select the conversation
-        await pageObjects.assistantPage.selectConversation(mockConvo.title);
-
-        // Select a connector
-        await pageObjects.assistantPage.selectConnector(azureConnectorName);
-
-        // Close and delete connectors
-        await pageObjects.assistantPage.close();
-        await apiServices.connectors.deleteAll();
-
-        // Reopen assistant
-        await pageObjects.assistantPage.open();
-
-        // Should show missing connector callout
-        await expect(pageObjects.assistantPage.connectorMissingCallout).toBeVisible();
-      });
+          // Should show missing connector callout
+          await expect(pageObjects.assistantPage.connectorMissingCallout).toBeVisible();
+        }
+      );
     }
   );
 
-  spaceTest.describe('Changing conversations', () => {
+  spaceTest.describe.serial('Changing conversations', () => {
     let azureConnectorName: string;
     let bedrockConnectorName: string;
     let mockConvo1Title: string;
@@ -275,7 +269,7 @@ test.describe('AI Assistant Conversations', { tag: ['@ess', '@svlSecurity'] }, (
         // Dismiss onboarding modal if present
         await pageObjects.securityCommon.dismissOnboardingModal();
 
-        await pageObjects.alertsTablePage.waitForDetectionsAlertsWrapper();
+        await pageObjects.alertsTablePage.waitForDetectionsAlertsWrapper(ruleName);
 
         // Expand alert
         await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);

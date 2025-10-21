@@ -93,9 +93,12 @@ export const test = securityFixtures.extend<SecurityTestFixtures, SecurityWorker
     },
     { scope: 'worker' },
   ],
-  browserScopedApis: async ({ page }: { page: SecurityTestFixtures['page'] }, use) => {
+  browserScopedApis: async (
+    { page, config }: { page: SecurityTestFixtures['page']; config: SecurityWorkerFixtures['config'] },
+    use
+  ) => {
     await use({
-      assistant: getBrowserScopedAssistantService({ page }),
+      assistant: getBrowserScopedAssistantService({ page, kbnUrl: config.hosts.kibana }),
     });
   },
 });

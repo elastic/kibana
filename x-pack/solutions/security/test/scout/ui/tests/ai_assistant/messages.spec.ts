@@ -6,9 +6,9 @@
  */
 
 import type { MessageRole } from '@kbn/elastic-assistant-common';
-import { expect, test } from '@kbn/scout-security';
+import { expect, spaceTest } from '@kbn/scout-security';
 
-test.describe('AI Assistant Messages', { tag: ['@ess', '@svlSecurity'] }, () => {
+spaceTest.describe('AI Assistant Messages', { tag: ['@ess', '@svlSecurity'] }, () => {
   const mockTimelineQuery = 'host.risk.keyword: "high"';
   const mockConvo = {
     id: 'spooky',
@@ -35,83 +35,91 @@ test.describe('AI Assistant Messages', { tag: ['@ess', '@svlSecurity'] }, () => 
     ],
   };
 
-  test.beforeEach(async ({ apiServices, browserAuth, browserScopedApis, page, config }) => {
-    // Login - use admin on serverless to match Cypress behavior, otherwise ESS default
-    if (config.serverless) {
-      await browserAuth.loginAsAdmin();
-    } else {
-      // On ESS, login as admin to match the authenticated user
-      await browserAuth.loginAs('admin');
-    }
+  spaceTest.beforeEach(
+    async ({ apiServices, browserAuth, browserScopedApis, page, config, scoutSpace }) => {
+      // Login - use admin on serverless to match Cypress behavior, otherwise ESS default
+      if (config.serverless) {
+        await browserAuth.loginAsAdmin();
+      } else {
+        // On ESS, login as admin to match the authenticated user
+        await browserAuth.loginAs('admin');
+      }
 
-    // Clean up existing data using worker-scoped services (OK for delete operations)
+      // Clean up existing data using worker-scoped services (OK for delete operations)
+      await apiServices.connectors.deleteAll();
+      await apiServices.assistant.deleteAllConversations();
+      await apiServices.assistant.deleteAllPrompts();
+
+      // Navigate to Security Get Started page
+      await page.gotoApp('security/get_started');
+
+      // Create test connector (global resource, can use worker-scoped service)
+      const connector = await apiServices.connectors.createAzureOpenAI();
+
+      // Create conversation using browser-scoped API service
+      // This ensures the conversation is created with the logged-in browser user's context
+      await browserScopedApis.assistant.createConversation({
+        id: `${mockConvo.id}_${scoutSpace.id}`,
+        title: mockConvo.title,
+        excludeFromLastConversationStorage: false,
+        messages: mockConvo.messages,
+        replacements: {},
+        category: 'assistant',
+        apiConfig: {
+          actionTypeId: '.gen-ai',
+          connectorId: connector.id,
+          defaultSystemPromptId: 'default-system-prompt',
+          model: 'test-model',
+          provider: 'Azure OpenAI',
+        },
+      });
+
+      // Reload the page to ensure conversation list UI is refreshed
+      await page.reload();
+
+      // Wait for page to be fully loaded after reload
+      await page.waitForLoadState('networkidle');
+    }
+  );
+
+  spaceTest.afterEach(async ({ apiServices }) => {
     await apiServices.connectors.deleteAll();
     await apiServices.assistant.deleteAllConversations();
     await apiServices.assistant.deleteAllPrompts();
-
-    // Navigate to Security Get Started page
-    await page.gotoApp('security/get_started');
-
-    // Create test connector (global resource, can use worker-scoped service)
-    const connector = await apiServices.connectors.createAzureOpenAI();
-
-    // Create conversation using browser-scoped API service
-    // This ensures the conversation is created with the logged-in browser user's context
-    await browserScopedApis.assistant.createConversation({
-      id: mockConvo.id,
-      title: mockConvo.title,
-      excludeFromLastConversationStorage: false,
-      messages: mockConvo.messages,
-      replacements: {},
-      category: 'assistant',
-      apiConfig: {
-        actionTypeId: '.gen-ai',
-        connectorId: connector.id,
-        defaultSystemPromptId: 'default-system-prompt',
-        model: 'test-model',
-        provider: 'Azure OpenAI',
-      },
-    });
-
-    // Reload the page to ensure conversation list UI is refreshed
-    await page.reload();
-
-    // Wait for page to be fully loaded after reload
-    await page.waitForLoadState('networkidle');
   });
 
-  test('A message with a kql query can be used in the timeline only from pages with timeline', async ({
-    pageObjects,
-    page,
-  }) => {
-    const { assistantPage } = pageObjects;
+  spaceTest(
+    'A message with a kql query can be used in the timeline only from pages with timeline',
+    async ({ pageObjects, page }) => {
+      const { assistantPage } = pageObjects;
 
-    // Open assistant from Get Started page
-    await assistantPage.open();
+      // Open assistant from Get Started page
+      await assistantPage.open();
 
-    // Select the conversation with the KQL query
-    await assistantPage.selectConversation(mockConvo.title);
+      // Select the conversation with the KQL query
+      await assistantPage.selectConversation(mockConvo.title);
 
-    // Verify "Send to Timeline" button is disabled on Get Started page
-    await expect(assistantPage.sendToTimelineButton).toBeDisabled();
+      // Verify "Send to Timeline" button is disabled on Get Started page
+      await expect(assistantPage.sendToTimelineButton).toBeDisabled();
 
-    // Navigate to Cases page (which has timeline)
-    await page.gotoApp('security/cases');
+      // Navigate to Cases page (which has timeline)
+      await page.gotoApp('security/cases');
 
-    // Wait for URL to change to cases page
-    await page.waitForURL('**/app/security/cases**');
+      // Wait for URL to change to cases page
+      await page.waitForURL('**/app/security/cases**');
 
-    // Dismiss onboarding modal if present
-    await pageObjects.securityCommon.dismissOnboardingModal();
+      // Dismiss onboarding modal if present
+      await pageObjects.securityCommon.dismissOnboardingModal();
 
-    // Open assistant again
-    await assistantPage.open();
+      // Open assistant again
+      await assistantPage.open();
 
-    // Send the query to timeline
-    await assistantPage.sendQueryToTimeline();
+      // Send the query to timeline
+      await assistantPage.sendQueryToTimeline();
 
-    // Verify the timeline query is populated with the expected query
-    const timelineQuery = page.testSubj.locator('timelineQueryInput');
-    await expect(timelineQuery).toHaveText(mockTimelineQuery);
-  });
+      // Verify the timeline query is populated with the expected query
+      const timelineQuery = page.testSubj.locator('timelineQueryInput');
+      await expect(timelineQuery).toHaveText(mockTimelineQuery);
+    }
+  );
 });

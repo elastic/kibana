@@ -225,6 +225,28 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     describe('when creating private and public conversations', () => {
       before(async () => {
+        // Clean up any existing conversations first
+        async function deleteConversations(username: 'editor' | 'admin') {
+          const response = await observabilityAIAssistantAPIClient[username]({
+            endpoint: 'POST /internal/observability_ai_assistant/conversations',
+          });
+
+          for (const conversation of response.body.conversations) {
+            await observabilityAIAssistantAPIClient[username]({
+              endpoint: `DELETE /internal/observability_ai_assistant/conversation/{conversationId}`,
+              params: {
+                path: {
+                  conversationId: conversation.conversation.id,
+                },
+              },
+            });
+          }
+        }
+
+        await deleteConversations('editor');
+        await deleteConversations('admin');
+
+        // Create test conversations
         const promises = [
           {
             username: 'editor' as const,

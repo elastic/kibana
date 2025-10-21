@@ -71,6 +71,7 @@ export type {
   ScoutTestConfig,
   KibanaRole,
   ElasticsearchRoleDescriptor,
+  PathOptions,
 } from './src/types';
 
 // Authentication types

@@ -9,5 +9,5 @@ import { createPlaywrightConfig } from '@kbn/scout-security';
 
 export default createPlaywrightConfig({
   testDir: './tests',
-  workers: 1,
+  workers: 2,
 });

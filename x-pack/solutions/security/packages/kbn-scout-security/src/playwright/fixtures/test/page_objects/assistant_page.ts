@@ -125,8 +125,8 @@ export class AssistantPage {
     return this.page.testSubj.locator('connector-selector');
   }
 
-  get connectorMissingCallout() {
-    return this.page.testSubj.locator('connectorMissingCallout');
+  public get connectorMissingCallout() {
+    return this.page.getByTestId('connectorMissingCallout');
   }
 
   get addNewConnectorButton() {
@@ -297,7 +297,7 @@ export class AssistantPage {
   // Locators - Licensing & Upgrade
   // ========================================
 
-  get upgradeCallout() {
+  public get upgradeCallout() {
     return this.page.testSubj.locator('upgradeLicenseCallToAction');
   }
 
@@ -305,19 +305,19 @@ export class AssistantPage {
   // Locators - Modal Actions
   // ========================================
 
-  get modalSaveButton() {
+  public get modalSaveButton() {
     return this.page.testSubj.locator('save-button');
   }
 
-  get chatIcon() {
+  public get chatIcon() {
     return this.page.testSubj.locator('newChat');
   }
 
-  get chatIconSmall() {
+  public get chatIconSmall() {
     return this.page.testSubj.locator('newChatByTitle');
   }
 
-  get chatContextMenu() {
+  public get chatContextMenu() {
     return this.page.testSubj.locator('chat-context-menu');
   }
 
@@ -469,9 +469,13 @@ export class AssistantPage {
    */
   async selectConnector(connectorName: string) {
     await this.connectorSelector.click();
-    await this.connectorOption(connectorName).click();
+    // eslint-disable-next-line playwright/no-wait-for-timeout
+    await this.page.waitForTimeout(2000);
+    // Use .first() to handle multiple connectors with same name (from test pollution)
+    await this.connectorOption(connectorName).first().click();
     await expect(this.connectorSelector).toHaveText(connectorName);
     // Wait for connector to be ready
+    // eslint-disable-next-line playwright/no-wait-for-timeout
     await this.page.waitForTimeout(2000);
   }
 
@@ -516,12 +520,18 @@ export class AssistantPage {
   async createSystemPrompt(title: string, content: string, defaultConversations?: string[]) {
     await this.systemPromptSelect.click();
     await this.createSystemPromptButton.click();
-    await this.systemPromptTitleInput.fill(`${title}{enter}`);
+    await this.systemPromptTitleInput.fill(title);
+    await this.systemPromptTitleInput.press('Enter');
+
+    // Wait for the body input to become enabled after title confirmation
+    await expect(this.systemPromptBodyInput).toBeEnabled({ timeout: 5000 });
+
     await this.systemPromptBodyInput.fill(content);
 
     if (defaultConversations && defaultConversations.length > 0) {
       for (const conversation of defaultConversations) {
-        await this.conversationMultiSelector.fill(`${conversation}{enter}`);
+        await this.conversationMultiSelector.fill(conversation);
+        await this.conversationMultiSelector.press('Enter');
       }
     }
 
@@ -540,12 +550,14 @@ export class AssistantPage {
    */
   async createQuickPrompt(title: string, content: string, contexts?: string[]) {
     await this.addQuickPromptButton.click();
-    await this.quickPromptTitleInput.fill(`${title}{enter}`);
+    await this.quickPromptTitleInput.fill(title);
+    await this.quickPromptTitleInput.press('Enter');
     await this.quickPromptBodyInput.fill(content);
 
     if (contexts && contexts.length > 0) {
       for (const context of contexts) {
-        await this.promptContextSelector.fill(`${context}{enter}`);
+        await this.promptContextSelector.fill(context);
+        await this.promptContextSelector.press('Enter');
       }
     }
 
@@ -853,8 +865,7 @@ export class AssistantPage {
    * Asserts that the conversation is read-only (for license/permission restrictions)
    */
   async expectConversationReadOnly() {
-    // Title should not be editable
-    await this.conversationTitleHeading.click();
+    // Verify title is not editable (input should not exist in read-only mode)
     await expect(this.conversationTitleInput).not.toBeVisible();
 
     // Controls should be disabled

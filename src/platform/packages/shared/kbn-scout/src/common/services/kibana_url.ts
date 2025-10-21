@@ -12,6 +12,10 @@ import type { ScoutLogger } from './logger';
 
 export interface PathOptions {
   /**
+   * Additional path to append to the base URL
+   */
+  path?: string;
+  /**
    * Query string parameters
    */
   params?: Record<string, string>;
@@ -59,7 +63,9 @@ export class KibanaUrl {
    * @param options optional modifications to apply to the URL
    */
   app(appName: string, options?: { space?: string; pathOptions?: PathOptions }) {
-    const relPath = options?.space ? `s/${options.space}/app/${appName}` : `/app/${appName}`;
+    const additionalPath = options?.pathOptions?.path ?? '';
+    const appPath = `${appName}${additionalPath}`;
+    const relPath = options?.space ? `s/${options.space}/app/${appPath}` : `/app/${appPath}`;
     return this.get(relPath, options?.pathOptions);
   }
 

@@ -5,21 +5,17 @@
  * 2.0.
  */
 
-import { expect, test } from '@kbn/scout-security';
+import { expect, spaceTest } from '@kbn/scout-security';
 
-test.describe(
-  'App Features for Security Essentials',
-  { tag: ['@svlSecurity'] },
-  () => {
-    test.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsAdmin();
-    });
+spaceTest.describe('App Features for Security Essentials', { tag: ['@svlSecurity'] }, () => {
+  spaceTest.beforeEach(async ({ browserAuth }) => {
+    await browserAuth.loginAsAdmin();
+  });
 
-    test('should not have AI Assistant available', async ({ page, pageObjects }) => {
-      await page.gotoApp('security', { path: '/get_started' });
+  spaceTest('should not have AI Assistant available', async ({ page, pageObjects }) => {
+    await page.gotoApp('security', { path: '/get_started' });
 
-      // AI Assistant button should not be visible in Security Essentials tier
-      await expect(pageObjects.assistantPage.assistantButton).not.toBeVisible();
-    });
-  }
-);
+    // AI Assistant button should not be visible in Security Essentials tier
+    await expect(pageObjects.assistantPage.assistantButton).not.toBeVisible();
+  });
+});

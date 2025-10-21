@@ -6,68 +6,66 @@
  */
 
 import type { MessageRole } from '@kbn/elastic-assistant-common';
-import { expect, test } from '@kbn/scout-security';
+import { expect, spaceTest } from '@kbn/scout-security';
 
 const userRole: MessageRole = 'user';
 const assistantRole: MessageRole = 'assistant';
 
 // TODO: Skipped due to https://github.com/elastic/kibana/issues/235416
-test.describe.skip(
-  'Assistant Conversation Sharing',
-  { tag: ['@ess', '@svlSecurity'] },
-  () => {
-    // User roles - these will be used for multi-user testing
-    let primaryUser: string;
-    let secondaryUser: string;
-    let connector: any;
+spaceTest.describe.skip('Assistant Conversation Sharing', { tag: ['@ess', '@svlSecurity'] }, () => {
+  // User roles - these will be used for multi-user testing
+  let primaryUser: string;
+  let secondaryUser: string;
+  let connector: any;
 
-    // Mock conversation data
-    const mockConvo1 = {
-      id: 'spooky',
-      title: 'Spooky convo',
-      messages: [
-        {
-          timestamp: '2025-08-14T21:08:24.923Z',
-          content: 'Hi spooky robot',
-          role: userRole,
-        },
-        {
-          timestamp: '2025-08-14T21:08:25.349Z',
-          content: 'Hello spooky person',
-          role: assistantRole,
-        },
-      ],
-    };
+  // Mock conversation data
+  const mockConvo1 = {
+    id: 'spooky',
+    title: 'Spooky convo',
+    messages: [
+      {
+        timestamp: '2025-08-14T21:08:24.923Z',
+        content: 'Hi spooky robot',
+        role: userRole,
+      },
+      {
+        timestamp: '2025-08-14T21:08:25.349Z',
+        content: 'Hello spooky person',
+        role: assistantRole,
+      },
+    ],
+  };
 
-    const mockConvo2 = {
-      id: 'silly',
-      title: 'Silly convo',
-      messages: [
-        {
-          timestamp: '2025-08-14T21:08:24.923Z',
-          content: 'Hi silly robot',
-          role: userRole,
-        },
-        {
-          timestamp: '2025-08-14T21:08:25.349Z',
-          content: 'Hello silly person',
-          role: assistantRole,
-        },
-      ],
-    };
+  const mockConvo2 = {
+    id: 'silly',
+    title: 'Silly convo',
+    messages: [
+      {
+        timestamp: '2025-08-14T21:08:24.923Z',
+        content: 'Hi silly robot',
+        role: userRole,
+      },
+      {
+        timestamp: '2025-08-14T21:08:25.349Z',
+        content: 'Hello silly person',
+        role: assistantRole,
+      },
+    ],
+  };
 
-    test.beforeAll(async ({ config }) => {
-      // Determine user roles based on deployment type
-      if (config.serverless) {
-        primaryUser = 'admin'; // elastic_admin equivalent
-        secondaryUser = 'elastic_serverless'; // This user needs to be configured
-      } else {
-        primaryUser = 'system_indices_superuser';
-        secondaryUser = 'editor'; // elastic equivalent
-      }
-    });
+  spaceTest.beforeAll(async ({ config }) => {
+    // Determine user roles based on deployment type
+    if (config.serverless) {
+      primaryUser = 'admin'; // elastic_admin equivalent
+      secondaryUser = 'elastic_serverless'; // This user needs to be configured
+    } else {
+      primaryUser = 'system_indices_superuser';
+      secondaryUser = 'editor'; // elastic equivalent
+    }
+  });
 
-    test.beforeEach(async ({ page, browserAuth, apiServices, browserScopedApis }) => {
+  spaceTest.beforeEach(
+    async ({ page, browserAuth, apiServices, browserScopedApis, scoutSpace }) => {
       // Login as primary user
       await browserAuth.loginAsAdmin();
 
@@ -80,7 +78,7 @@ test.describe.skip(
 
       // Create mock conversations with messages using browser-scoped API
       await browserScopedApis.assistant.createConversation({
-        id: mockConvo1.id,
+        id: `${mockConvo1.id}_${scoutSpace.id}`,
         title: mockConvo1.title,
         apiConfig: {
           actionTypeId: '.gen-ai',
@@ -96,7 +94,7 @@ test.describe.skip(
       });
 
       await browserScopedApis.assistant.createConversation({
-        id: mockConvo2.id,
+        id: `${mockConvo2.id}_${scoutSpace.id}`,
         title: mockConvo2.title,
         apiConfig: {
           actionTypeId: '.gen-ai',
@@ -113,18 +111,18 @@ test.describe.skip(
 
       // Navigate to the Security app
       await page.gotoApp('security', { path: '/get_started' });
-    });
+    }
+  );
 
-    test.afterEach(async ({ apiServices }) => {
-      // Clean up after each test
-      await apiServices.assistant.deleteAllConversations();
-      await apiServices.connectors.deleteAll();
-    });
+  spaceTest.afterEach(async ({ apiServices }) => {
+    // Clean up after each test
+    await apiServices.assistant.deleteAllConversations();
+    await apiServices.connectors.deleteAll();
+  });
 
-    test('Share modal works to not share, share globally, and share selected', async ({
-      page,
-      pageObjects,
-    }) => {
+  spaceTest(
+    'Share modal works to not share, share globally, and share selected',
+    async ({ page, pageObjects }) => {
       const { assistantPage } = pageObjects;
 
       await assistantPage.open();
@@ -199,14 +197,12 @@ test.describe.skip(
 
       await assistantPage.toggleConversationSideMenu();
       await assistantPage.expectSharedConversationIcon(mockConvo2.title);
-    });
+    }
+  );
 
-    test('Shared conversations appear for the user they were shared with', async ({
-      page,
-      pageObjects,
-      browserAuth,
-      context,
-    }) => {
+  spaceTest(
+    'Shared conversations appear for the user they were shared with',
+    async ({ page, pageObjects, browserAuth, context }) => {
       const { assistantPage } = pageObjects;
 
       // Share conversations as primary user
@@ -245,14 +241,12 @@ test.describe.skip(
 
       // Ensure we can view messages in the shared conversation
       await assistantPage.expectMessageSent(mockConvo1.messages[0].content);
-    });
+    }
+  );
 
-    test('Dismissed callout remains dismissed when conversation is unselected and selected again', async ({
-      page,
-      pageObjects,
-      browserAuth,
-      context,
-    }) => {
+  spaceTest(
+    'Dismissed callout remains dismissed when conversation is unselected and selected again',
+    async ({ page, pageObjects, browserAuth, context }) => {
       const { assistantPage } = pageObjects;
 
       // Share both conversations globally
@@ -284,14 +278,12 @@ test.describe.skip(
       // Switch back to first conversation - callout should remain dismissed
       await assistantPage.selectConversation(mockConvo1.title);
       await assistantPage.expectNoSharedCallout();
-    });
+    }
+  );
 
-    test('Duplicate conversation allows user to continue a shared conversation', async ({
-      page,
-      pageObjects,
-      browserAuth,
-      context,
-    }) => {
+  spaceTest(
+    'Duplicate conversation allows user to continue a shared conversation',
+    async ({ page, pageObjects, browserAuth, context }) => {
       const { assistantPage } = pageObjects;
 
       // Share conversation globally
@@ -317,24 +309,23 @@ test.describe.skip(
       // Verify message users
       await assistantPage.expectMessageUser(primaryUser, 0);
       await assistantPage.expectMessageUser(secondaryUser, 2);
-    });
+    }
+  );
 
-    test('Duplicate conversation from conversation menu creates a duplicate', async ({
-      pageObjects,
-    }) => {
+  spaceTest(
+    'Duplicate conversation from conversation menu creates a duplicate',
+    async ({ pageObjects }) => {
       const { assistantPage } = pageObjects;
 
       await assistantPage.open();
       await assistantPage.selectConversation(mockConvo1.title);
       await assistantPage.duplicateFromMenu(mockConvo1.title);
-    });
+    }
+  );
 
-    test('Duplicate conversation from conversation side menu creates a duplicate and secondary user cannot access', async ({
-      page,
-      pageObjects,
-      browserAuth,
-      context,
-    }) => {
+  spaceTest(
+    'Duplicate conversation from conversation side menu creates a duplicate and secondary user cannot access',
+    async ({ page, pageObjects, browserAuth, context }) => {
       const { assistantPage } = pageObjects;
 
       await assistantPage.open();
@@ -351,55 +342,57 @@ test.describe.skip(
       await assistantPage.toggleConversationSideMenu();
       await expect(page.locator(`text=${mockConvo2.title}`)).not.toBeVisible();
       await expect(page.locator(`text=[Duplicate] ${mockConvo2.title}`)).not.toBeVisible();
-    });
+    }
+  );
 
-    test('Copy URL copies the proper url from conversation menu', async ({ pageObjects }) => {
-      const { assistantPage } = pageObjects;
+  spaceTest('Copy URL copies the proper url from conversation menu', async ({ pageObjects }) => {
+    const { assistantPage } = pageObjects;
 
-      await assistantPage.open();
-      await assistantPage.selectConversation(mockConvo1.title);
-      await assistantPage.selectConnector(connector.name);
-      await assistantPage.copyUrlFromMenu();
-      // Note: Playwright clipboard verification is flaky, skipping assertion
-    });
+    await assistantPage.open();
+    await assistantPage.selectConversation(mockConvo1.title);
+    await assistantPage.selectConnector(connector.name);
+    await assistantPage.copyUrlFromMenu();
+    // Note: Playwright clipboard verification is flaky, skipping assertion
+  });
 
-    test('Copy URL copies the proper url from conversation side menu', async ({
-      pageObjects,
-    }) => {
+  spaceTest(
+    'Copy URL copies the proper url from conversation side menu',
+    async ({ pageObjects }) => {
       const { assistantPage } = pageObjects;
 
       await assistantPage.open();
       await assistantPage.toggleConversationSideMenu();
       await assistantPage.copyUrlFromConversationSideContextMenu();
       // Note: Playwright clipboard verification is flaky, skipping assertion
-    });
+    }
+  );
 
-    test('Copy URL copies the proper url from share modal', async ({ pageObjects }) => {
-      const { assistantPage } = pageObjects;
+  spaceTest('Copy URL copies the proper url from share modal', async ({ pageObjects }) => {
+    const { assistantPage } = pageObjects;
 
-      await assistantPage.open();
-      await assistantPage.selectConversation(mockConvo1.title);
-      await assistantPage.selectConnector(connector.name);
-      await assistantPage.copyUrlFromShareModal();
-      // Note: Playwright clipboard verification is flaky, skipping assertion
-    });
+    await assistantPage.open();
+    await assistantPage.selectConversation(mockConvo1.title);
+    await assistantPage.selectConnector(connector.name);
+    await assistantPage.copyUrlFromShareModal();
+    // Note: Playwright clipboard verification is flaky, skipping assertion
+  });
 
-    test('Visiting a URL with the assistant param opens the assistant to the proper conversation', async ({
-      page,
-      pageObjects,
-    }) => {
+  spaceTest(
+    'Visiting a URL with the assistant param opens the assistant to the proper conversation',
+    async ({ page, pageObjects, scoutSpace }) => {
       const { assistantPage } = pageObjects;
 
       const origin = new URL(page.url()).origin;
-      await page.goto(`${origin}/app/security/get_started?assistant=${mockConvo1.id}`);
+      await page.goto(
+        `${origin}/app/security/get_started?assistant=${mockConvo1.id}_${scoutSpace.id}`
+      );
       await assistantPage.expectConversationTitle(mockConvo1.title);
-    });
+    }
+  );
 
-    test('Visiting a URL with the assistant param shows access error when user does not have access to the conversation', async ({
-      page,
-      browserAuth,
-      context,
-    }) => {
+  spaceTest(
+    'Visiting a URL with the assistant param shows access error when user does not have access to the conversation',
+    async ({ page, browserAuth, context, scoutSpace }) => {
       // Logout and login as secondary user
       await context.clearCookies();
       await browserAuth.loginAs(secondaryUser);
@@ -407,7 +400,9 @@ test.describe.skip(
       const origin = new URL(page.url()).origin;
 
       // Try to access conversation that doesn't belong to secondary user
-      await page.goto(`${origin}/app/security/get_started?assistant=${mockConvo1.id}`);
+      await page.goto(
+        `${origin}/app/security/get_started?assistant=${mockConvo1.id}_${scoutSpace.id}`
+      );
 
       // Assert access error toast appears
       const accessErrorToast = page.testSubj.locator('errorComment');
@@ -419,6 +414,6 @@ test.describe.skip(
       // Assert generic conversation error toast appears
       const genericErrorToast = page.testSubj.locator('errorComment');
       await expect(genericErrorToast).toBeVisible();
-    });
-  }
-);
+    }
+  );
+});

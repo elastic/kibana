@@ -16,7 +16,7 @@ const DETECTION_ENGINE_RULES_FIND_URL = '/api/detection_engine/rules/_find';
 const DETECTION_ENGINE_RULES_BULK_ACTION = '/api/detection_engine/rules/_bulk_action';
 
 export interface DetectionRuleApiService {
-  createCustomQueryRule: (body: CustomQueryRule) => Promise<void>;
+  createCustomQueryRule: (body: CustomQueryRule) => Promise<{ id: string; rule_id: string }>;
   deleteAll: () => Promise<void>;
   waitForRuleExecution: (ruleId: string, afterDate?: Date) => Promise<void>;
   indexTestDocument: (index: string, document: Record<string, unknown>) => Promise<void>;
@@ -37,7 +37,7 @@ export const getDetectionRuleApiService = ({
 
   return {
     createCustomQueryRule: async (body = CUSTOM_QUERY_RULE) => {
-      await measurePerformanceAsync(
+      return measurePerformanceAsync(
         log,
         'security.detectionRule.createCustomQueryRule',
         async () => {
@@ -76,6 +76,8 @@ export const getDetectionRuleApiService = ({
           log.debug(
             `[DETECTION RULE API] Rule verified as indexed after ${pollResult.attempts} attempts (${pollResult.totalWaitMs}ms)`
           );
+
+          return pollResult.data;
         }
       );
     },

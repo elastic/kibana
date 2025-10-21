@@ -108,23 +108,25 @@ export const getAssistantCleanupService = ({
  * conversations or prompts that need to be visible in the UI.
  *
  * @param page - Playwright Page object (inherits browser authentication)
+ * @param kbnUrl - Kibana base URL (from config.hosts.kibana)
  * @param scoutSpace - Optional space configuration for multi-space tests
  * @returns Full Assistant API service using browser user context
  */
 export const getBrowserScopedAssistantService = ({
   page,
+  kbnUrl,
   scoutSpace,
 }: {
   page: Page;
+  kbnUrl: string;
   scoutSpace?: ScoutParallelWorkerFixtures['scoutSpace'];
 }): AssistantApiService => {
   const basePath = scoutSpace?.id ? `/s/${scoutSpace.id}` : '';
 
   return {
     createConversation: async (body = {}) => {
-      const baseUrl = new URL(page.url()).origin;
       const response = await page.request.post(
-        `${baseUrl}${basePath}${ASSISTANT_CONVERSATIONS_API}`,
+        `${kbnUrl}${basePath}${ASSISTANT_CONVERSATIONS_API}`,
         {
           headers: {
             'kbn-xsrf': 'true',
@@ -152,9 +154,8 @@ export const getBrowserScopedAssistantService = ({
     },
 
     getConversation: async (id: string) => {
-      const baseUrl = new URL(page.url()).origin;
       const response = await page.request.get(
-        `${baseUrl}${basePath}${ASSISTANT_CONVERSATIONS_API}/${id}`,
+        `${kbnUrl}${basePath}${ASSISTANT_CONVERSATIONS_API}/${id}`,
         {
           headers: {
             'kbn-xsrf': 'true',
@@ -173,9 +174,8 @@ export const getBrowserScopedAssistantService = ({
     },
 
     createPrompts: async (prompts: Array<Partial<PromptCreateProps>>) => {
-      const baseUrl = new URL(page.url()).origin;
       const response = await page.request.post(
-        `${baseUrl}${basePath}${ASSISTANT_PROMPTS_BULK_API}`,
+        `${kbnUrl}${basePath}${ASSISTANT_PROMPTS_BULK_API}`,
         {
           headers: {
             'kbn-xsrf': 'true',
