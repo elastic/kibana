@@ -110,7 +110,7 @@ interface TrackSearchHandler {
   /**
    * Transition search into "error" status
    */
-  error(error: Error): void;
+  error(error?: Error): void;
 
   /**
    * Call to notify when search is about to be polled to get current search state to build `searchOptions` from (mainly isSearchStored),
@@ -413,7 +413,7 @@ export class SessionService {
         }
 
         const searchSessionSavedObject = state.get().searchSessionSavedObject;
-        if (searchSessionSavedObject) {
+        if (searchSessionSavedObject && error) {
           this.searchSessionEBTManager?.trackBgsError({
             session: searchSessionSavedObject,
             error,
