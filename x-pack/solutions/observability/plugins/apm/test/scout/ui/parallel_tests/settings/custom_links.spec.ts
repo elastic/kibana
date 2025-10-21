@@ -32,8 +32,8 @@ test.describe('Custom links', { tag: ['@ess', '@svlOblt'] }, () => {
     await customLinksPage.goto();
 
     await customLinksPage.clickCreateCustomLink();
-    await expect(page.getByText('Create link')).toBeVisible();
-    await expect(page.getByText('Save')).toBeDisabled();
+    await expect(page.getByRole('heading', { name: 'Create link', level: 2 })).toBeVisible();
+    await expect(page.testSubj.locator('apmCustomLinkFlyoutFooterSaveButton')).toBeDisabled();
 
     // Create a link with unique name to avoid conflicts
     const uniqueLabel = `test-link-${Date.now()}`;
