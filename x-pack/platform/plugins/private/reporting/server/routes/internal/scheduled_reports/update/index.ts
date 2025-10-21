@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import { KibanaResponse } from '@kbn/core-http-router-server-internal';
-import { scheduleRruleSchemaV2 } from '@kbn/task-manager-plugin/server';
 import type { ReportingCore } from '../../../..';
 import { ScheduledReportsService } from '../../../../services/scheduled_reports';
 import type { ReportingPluginRouter } from '../../../../types';
 import { authorizedUserPreRouting, getCounters } from '../../../common';
 import { handleUnavailable } from '../../../common/request_handler';
 import { validateReportingLicense } from '../utils';
+import { updateScheduledReportBodySchema, updateScheduledReportParamsSchema } from './schemas';
 
 const { SCHEDULE_PREFIX } = INTERNAL_ROUTES;
 const path = `${SCHEDULE_PREFIX}/{id}`;
@@ -40,13 +39,8 @@ export const registerInternalUpdateScheduledReportRoute = ({
         },
       },
       validate: {
-        params: schema.object({
-          id: schema.string(),
-        }),
-        body: schema.object({
-          title: schema.maybe(schema.string()),
-          schedule: schema.maybe(scheduleRruleSchemaV2),
-        }),
+        params: updateScheduledReportParamsSchema,
+        body: updateScheduledReportBodySchema,
       },
       options: { access: 'internal' },
     },
@@ -60,6 +54,7 @@ export const registerInternalUpdateScheduledReportRoute = ({
         validateReportingLicense({ reporting, responseFactory });
 
         const { id } = request.params;
+
         const counters = getCounters(request.route.method, path, reporting.getUsageCounter());
         const scheduledReportsService = await ScheduledReportsService.build({
           logger,
@@ -68,7 +63,11 @@ export const registerInternalUpdateScheduledReportRoute = ({
           responseFactory,
         });
 
-        const results = await scheduledReportsService.update({ user, id });
+        const results = await scheduledReportsService.update({
+          user,
+          id,
+          updateParams: request.body,
+        });
 
         counters.usageCounter();
 

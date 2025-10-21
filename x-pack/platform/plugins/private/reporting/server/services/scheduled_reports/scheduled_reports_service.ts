@@ -23,7 +23,7 @@ import type { ReportingCore } from '../..';
 import type {
   ListScheduledReportApiJSON,
   ReportingUser,
-  ScheduledReportApiJSON,
+  ScheduledReportApiJson,
   ScheduledReportType,
 } from '../../types';
 import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from '../../saved_objects';
@@ -36,6 +36,8 @@ import { DEFAULT_SCHEDULED_REPORT_LIST_SIZE } from './constants';
 import { transformBulkDeleteResponse, transformListResponse } from './transforms';
 import type { BulkOperationError } from './types';
 import { transformSingleResponse } from './transforms';
+import type { UpdateScheduledReportParams } from './types/update';
+import { updateScheduledReportSchema } from './schemas/update';
 
 const SCHEDULED_REPORT_ID_FIELD = 'scheduled_report_id';
 const CREATED_AT_FIELD = 'created_at';
@@ -103,25 +105,36 @@ export class ScheduledReportsService {
   public async update({
     user,
     id,
+    updateParams,
   }: {
     user: ReportingUser;
     id: string;
-  }): Promise<ScheduledReportApiJSON> {
+    updateParams: UpdateScheduledReportParams;
+  }): Promise<ScheduledReportApiJson> {
     try {
-      const username = this.getUsername(user);
-      const response = await this.savedObjectsClient.get<ScheduledReportType>(
+      updateScheduledReportSchema.validate(updateParams);
+    } catch (error) {
+      throw this.responseFactory.badRequest({
+        body: `Error validating params for update scheduled report - ${error.message}`,
+      });
+    }
+
+    if (!this._canUpdateReport({ id, user })) {
+      throw this.responseFactory.forbidden();
+    }
+
+    try {
+      const { title, schedule } = updateParams;
+
+      await this._updateScheduledReportSavedObject({ id, title, schedule });
+      await this._updateScheduledReportTaskSchedule({ id, schedule });
+
+      const updatedReport = await this.savedObjectsClient.get<ScheduledReportType>(
         SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
         id
       );
 
-      if (!this.userCanManageReporting && response.attributes.createdBy !== username) {
-        // TODO
-        return this.responseFactory.forbidden({
-          body: `The current user is not allowed to update the scheduled report with id: ${id}.`,
-        });
-      }
-
-      return transformSingleResponse(this.logger, response);
+      return transformSingleResponse(this.logger, updatedReport);
     } catch (error) {
       throw this.responseFactory.customError({
         statusCode: 500,
@@ -546,5 +559,45 @@ export class ScheduledReportsService {
         error,
       })
     );
+  }
+
+  private async _updateScheduledReportSavedObject({
+    id,
+    title,
+    schedule,
+  }: { id: string } & UpdateScheduledReportParams) {
+    await this.savedObjectsClient.update<ScheduledReportType>(
+      SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
+      id,
+      {
+        title,
+        schedule,
+      }
+    );
+  }
+
+  private async _updateScheduledReportTaskSchedule({
+    id,
+    schedule,
+  }: { id: string } & UpdateScheduledReportParams) {
+    if (schedule) await this.taskManager.bulkUpdateSchedules([id], schedule);
+  }
+
+  private async _canUpdateReport({
+    user,
+    id,
+  }: {
+    user: ReportingUser;
+    id: string;
+  }): Promise<Boolean> {
+    if (this.userCanManageReporting) return true;
+
+    const username = this.getUsername(user);
+    const reportToUpdate = await this.savedObjectsClient.get<ScheduledReportType>(
+      SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
+      id
+    );
+
+    return reportToUpdate.attributes.createdBy === username;
   }
 }
