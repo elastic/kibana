@@ -314,7 +314,9 @@ export class CommonPageObject extends FtrService {
       }
     };
 
-    if (urlHasState(appUrl)) {
+    const targetHasState = urlHasState(appUrl);
+
+    if (targetHasState) {
       const currentUrlBeforeNav = await this.browser.getCurrentUrl();
       const normalizedCurrentUrl = this.normalizeUrlForComparison(currentUrlBeforeNav);
       const normalizedAppUrl = this.normalizeUrlForComparison(appUrl);
@@ -327,7 +329,7 @@ export class CommonPageObject extends FtrService {
       }
     } else {
       this.log.debug(
-        `Navigating to base app URL for ${appName} (no state params), always reloading for fresh state.`
+        `Navigating to base app URL for ${appName} (no state params), will refresh to ensure clean state.`
       );
     }
 
@@ -336,6 +338,13 @@ export class CommonPageObject extends FtrService {
       this.log.debug('navigate to: ' + appUrl);
 
       await this.browser.get(appUrl, insertTimestamp);
+
+      // For base URLs (no state params), do a hard refresh to clear stale app state
+      // (localStorage, React state, etc.) that might persist from previous tests.
+      // For URLs with state params, skip refresh since the state is intentional.
+      if (!targetHasState) {
+        await this.browser.refresh();
+      }
 
       // accept alert if it pops up
       const alert = await this.browser.getAlert();
