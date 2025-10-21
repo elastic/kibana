@@ -22,3 +22,11 @@ export const CALL_OUT_IMMUTABLE = i18n.translate(
       'This prebuilt timeline template cannot be modified. To make changes, please duplicate this template and make modifications to the duplicate template.',
   }
 );
+
+export const CALL_OUT_ALERTS_ONLY_MIGRATION_TITLE = i18n.translate(
+  'xpack.securitySolution.timeline.callOut.alertsOnlyMigration.message.description',
+  {
+    defaultMessage:
+      'Show detection alerts option has been removed. Duplicate your current data view to maintain runtime fields or use the security alerts data view.',
+  }
+);
