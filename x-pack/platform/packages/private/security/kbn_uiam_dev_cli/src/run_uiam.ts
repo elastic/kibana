@@ -119,7 +119,7 @@ services:
     environment:
       - quarkus.http.ssl.certificate.key-store-provider=JKS
       - quarkus.http.ssl.certificate.trust-store-provider=SUN
-      - quarkus.log.category."co".level=DEBUG
+      - quarkus.log.category."co".level=${env.UIAM_LOGGING_LEVEL}
       - quarkus.log.category."io".level=${env.UIAM_LOGGING_LEVEL}
       - quarkus.log.category."org".level=${env.UIAM_LOGGING_LEVEL}
       - quarkus.log.console.json.enabled=false
