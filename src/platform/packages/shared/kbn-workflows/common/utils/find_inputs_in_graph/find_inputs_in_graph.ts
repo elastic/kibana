@@ -11,6 +11,18 @@ import type { AtomicGraphNode, EnterForeachNode, EnterIfNode, WorkflowGraph } fr
 import { extractPropertyPathsFromKql } from '../extract_property_paths_from_kql/extract_property_paths_from_kql';
 import { extractTemplateVariables } from '../extract_template_variables/extract_template_variables';
 
+function recursive(obj: unknown): string[] {
+  if (typeof obj === 'string') {
+    return extractTemplateVariables(obj);
+  }
+
+  if (typeof obj === 'object') {
+    return Object.values(obj as Object).flatMap((value) => recursive(value));
+  }
+
+  return [];
+}
+
 export function findInputsInGraph(workflowGraph: WorkflowGraph): Record<string, string[]> {
   const inputsInSteps: Record<string, string[]> = {};
   const nodes = workflowGraph.topologicalOrder.map((nodeId) => workflowGraph.getNode(nodeId));
@@ -44,17 +56,12 @@ export function findInputsInGraph(workflowGraph: WorkflowGraph): Record<string, 
         stepInputs.push((node as EnterForeachNode).configuration.foreach);
         stepInputsKey = enterForeachNode.stepId;
       }
-    }
-    if ((node as AtomicGraphNode).type === 'atomic') {
-      const atomicNode = node as AtomicGraphNode;
-      stepInputsKey = atomicNode.stepId;
-      Object.values(atomicNode.configuration.with).forEach((input) => {
-        if (typeof input !== 'string') {
-          return;
-        }
-
-        extractTemplateVariables(input).forEach((variable) => stepInputs.push(variable));
-      });
+    } else {
+      // We try to scan the whole node, because otherwise, we would need a special case for each node type such as http, kibana, elasticsearch, etc
+      // Not good, mostlikely and other nodes will need to be subset of atomic node, or somehting else
+      const genericNode = node as AtomicGraphNode;
+      stepInputsKey = genericNode.stepId;
+      stepInputs.push(...recursive(genericNode));
     }
 
     if (isInForeach) {
