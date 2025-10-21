@@ -39,7 +39,7 @@ describe('extractTemplateVariables', () => {
       {{order.items[0].name}}
       {% if   user.isAdmin %}
         Admin Panel Access  {% endif %}
-        {{   user.getFullName()   }}
+        {{   user.getFullName   }}
     `;
 
     const variables = extractTemplateVariables(template);
@@ -47,11 +47,11 @@ describe('extractTemplateVariables', () => {
       'user.profile.firstName',
       'order.items[0].name',
       'user.isAdmin',
-      'user.getFullName()',
+      'user.getFullName',
     ]);
   });
 
-  it('should handle complex templates with loops and conditions', () => {
+  it('should return only input variables filtering local variables in foreach', () => {
     const template = `
       {% for item in order.items %}
         {{ item.name }} - {{ item.price }}
@@ -63,12 +63,6 @@ describe('extractTemplateVariables', () => {
     `;
 
     const variables = extractTemplateVariables(template);
-    expect(variables).toEqual([
-      'order.items',
-      'item.name',
-      'item.price',
-      'item.onSale',
-      'order.total',
-    ]);
+    expect(variables).toEqual(['order.items', 'order.total']);
   });
 });

@@ -7,71 +7,76 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export function extractTemplateVariables(template: string): string[] {
-  const variables: string[] = [];
-  const seen = new Set<string>();
+import {
+  Liquid,
+  Template,
+  IfTag,
+  Output,
+  TokenKind,
+  Expression,
+  Value,
+  ForTag,
+  Token,
+} from 'liquidjs';
 
-  // Combined regex to match all Nunjucks patterns in order of appearance
-  const allPatternsRegex = /\{\{\s*([^}]+?)\s*\}\}|\{\%\s*(if|elif|for|set)\s+([^%]+?)\s*\%\}/g;
+const liquidEngine = new Liquid({
+  strictFilters: true,
+  strictVariables: false,
+});
 
-  // Function to extract variable names from expressions
-  function extractVariableFromExpression(expression: string): string[] {
-    const vars: string[] = [];
-
-    // Handle 'for' loops: "item in collection" -> extract "collection"
-    const forMatch = expression.match(/^\s*(\w+)\s+in\s+(.+)$/);
-    if (forMatch) {
-      const [, , collection] = forMatch;
-      vars.push(collection.trim());
-      return vars;
-    }
-
-    // For other expressions, extract all variable-like patterns
-    // This pattern matches:
-    // - Simple variables: user, name
-    // - Nested properties: user.name, user.profile.firstName
-    // - Array access: items[0], user.items[0].name
-    // - Function calls: user.getFullName()
-    const variablePattern =
-      /\b([a-zA-Z_$][a-zA-Z0-9_$]*(?:\.[a-zA-Z_$][a-zA-Z0-9_$]*|\[[^\]]+\]|\(\))*)/g;
-
-    let match;
-    while ((match = variablePattern.exec(expression)) !== null) {
-      const variable = match[1];
-      // Skip common keywords and operators
-      if (
-        !['in', 'and', 'or', 'not', 'is', 'true', 'false', 'null', 'undefined'].includes(variable)
-      ) {
-        vars.push(variable);
-      }
-    }
-
-    return vars;
+function visitLiquidAST(node: unknown, localVariablesSet: Set<string>): string[] {
+  if (node instanceof Output) {
+    return visitLiquidAST(node.value.initial, localVariablesSet);
   }
 
-  // Process all patterns in order of appearance
-  let match;
-  while ((match = allPatternsRegex.exec(template)) !== null) {
-    let expression: string | undefined;
+  if (node instanceof Expression) {
+    return node.postfix.flatMap((token) => visitLiquidAST(token, localVariablesSet));
+  }
 
-    if (match[1]) {
-      // Variable output: {{ variable }}
-      expression = match[1];
-    } else if (match[3]) {
-      // Control statement: {% keyword expression %}
-      expression = match[3];
-    }
+  if (node instanceof IfTag) {
+    return node.branches.flatMap((branch) => {
+      return visitLiquidAST(branch.value.initial, localVariablesSet);
+    });
+  }
 
-    if (expression) {
-      const vars = extractVariableFromExpression(expression);
-      vars.forEach((variable) => {
-        if (!seen.has(variable)) {
-          seen.add(variable);
-          variables.push(variable);
+  if (node instanceof ForTag) {
+    localVariablesSet.add(node.variable);
+    const fromCollection = visitLiquidAST(node.collection, localVariablesSet);
+    const fromBody = node.templates
+      .flatMap((template) => visitLiquidAST(template, localVariablesSet))
+      .filter((x) => !localVariablesSet.has(x.split('.')[0]));
+    localVariablesSet.delete(node.variable);
+    return fromCollection.concat(fromBody);
+  }
+
+  if (node instanceof Token) {
+    let path = '';
+
+    if (node.kind === TokenKind.PropertyAccess) {
+      const props: [] = (node as any).props;
+      props.forEach((prop) => {
+        const kind: TokenKind = (prop as any).kind;
+
+        if (kind === TokenKind.Word) {
+          const wordContent = (prop as any).content;
+          path += path ? `.${wordContent}` : wordContent;
+        } else if (kind === TokenKind.Number) {
+          path += `[${(prop as any).content}]`;
         }
       });
     }
+
+    if (path) {
+      return [path];
+    }
   }
 
-  return variables;
+  return [];
+}
+
+export function extractTemplateVariables(template: string): string[] {
+  const ast: Template[] = liquidEngine.parse(template); // Pre-parse to ensure syntax is valid
+  const foundVariables: string[] = ast.flatMap((node) => visitLiquidAST(node, new Set<string>()));
+  const distictVariables = Array.from(new Set(foundVariables));
+  return distictVariables;
 }
