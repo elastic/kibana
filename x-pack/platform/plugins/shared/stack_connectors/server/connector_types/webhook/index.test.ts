@@ -1111,7 +1111,7 @@ describe('execute()', () => {
   test('body is undefined when executing DELETE operation', async () => {
     const config: ConnectorTypeConfigType = {
       url: 'https://abc.def/my-webhook',
-      method: WebhookMethods.GET,
+      method: WebhookMethods.DELETE,
       headers: {
         aheader: 'a value',
       },
