@@ -96,11 +96,16 @@ export const generateConversationTitle = async ({
       savedObjectsClient,
     });
 
+    // Create the full prompt with the user's first message
+    const fullPrompt = `${titlePrompt}\n\nUser's first message: "${
+      messages[0]?.content || 'New conversation'
+    }"\nPlease create the title in ${responseLanguage || 'English'}.`;
+
     const titleResult = await onechatServices.agents.execute({
       request,
       agentId: 'siem-security-analyst',
       agentParams: {
-        nextInput: { message: `${titlePrompt}\nPlease create the title in ${responseLanguage}` },
+        nextInput: { message: fullPrompt },
         conversation: [],
         capabilities: {},
       },
