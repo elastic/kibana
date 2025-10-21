@@ -116,8 +116,7 @@ export class StepExecutionRuntime {
     });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async startStep(input?: Record<string, any>): Promise<void> {
+  public async startStep(): Promise<void> {
     const stepId = this.node.stepId;
     const stepStartedAt = new Date();
 
@@ -129,13 +128,20 @@ export class StepExecutionRuntime {
       topologicalIndex: this.topologicalOrder.indexOf(this.node.id),
       status: ExecutionStatus.RUNNING,
       startedAt: stepStartedAt.toISOString(),
-      input,
     } as Partial<EsWorkflowStepExecution>;
 
     this.workflowExecutionState.upsertStep(stepExecution);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.logStepStart(stepId, stepExecution.id!);
     await this.workflowExecutionState.flushStepChanges();
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public async setInput(input: Record<string, any>): Promise<void> {
+    this.workflowExecutionState.upsertStep({
+      id: this.stepExecutionId,
+      input,
+    });
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

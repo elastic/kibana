@@ -79,10 +79,12 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
   }
 
   public async run(): Promise<void> {
-    const input = this.getInput();
-    await this.stepExecutionRuntime.startStep(input);
+    let input: any;
+    await this.stepExecutionRuntime.startStep();
 
     try {
+      input = await this.getInput();
+      await this.stepExecutionRuntime.setInput(input);
       const result = await this._run(input);
 
       // Don't update step execution runtime if abort was initiated

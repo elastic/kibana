@@ -5,5 +5,10 @@
  * 2.0.
  */
 
-export { createChatService } from './chat_service';
-export type { ChatService, ChatConverseParams } from './types';
+import { PLUGIN_ID } from '../../common';
+import { useKibana } from './use_kibana';
+
+export const useAssetBasePath = () => {
+  const { http } = useKibana().services;
+  return http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets`);
+};
