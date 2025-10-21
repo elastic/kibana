@@ -14,8 +14,8 @@ import type {
   DatasourceMap,
   VisualizationMap,
   LensAppLocatorParams,
+  LensAppServices,
 } from '@kbn/lens-common';
-import type { LensAppServices } from '@kbn/lens-common/lens/types';
 import { extractReferencesFromState, getResolvedDateRange } from '../utils';
 import { getEditPath } from '../../common/constants';
 

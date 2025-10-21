@@ -13,8 +13,7 @@ import {
   UPDATE_FILTER_REFERENCES_ACTION,
   UPDATE_FILTER_REFERENCES_TRIGGER,
 } from '@kbn/unified-search-plugin/public';
-import type { IndexPattern, IndexPatternMap } from '@kbn/lens-common';
-import type { DataViewsState } from '@kbn/lens-common';
+import type { IndexPattern, IndexPatternMap, DataViewsState } from '@kbn/lens-common';
 import { ensureIndexPattern, loadIndexPatterns } from './loader';
 import { generateId } from '../id_generator';
 

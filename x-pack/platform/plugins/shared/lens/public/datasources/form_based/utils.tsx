@@ -46,8 +46,8 @@ import type {
   MaxIndexPatternColumn,
   MinIndexPatternColumn,
   FieldBasedIndexPatternColumn,
+  StateSetter,
 } from '@kbn/lens-common';
-import type { StateSetter } from '@kbn/lens-common/lens/types';
 import { renewIDs } from '../../utils';
 
 import type { GenericOperationDefinition } from './operations';

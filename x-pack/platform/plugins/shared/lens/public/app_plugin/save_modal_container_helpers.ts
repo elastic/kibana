@@ -16,8 +16,7 @@ import {
   CONTROLS_GROUP_TYPE,
 } from '@kbn/controls-constants';
 import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
-import type { LensAppServices } from '@kbn/lens-common/lens/types';
-import type { LensSerializedState } from '@kbn/lens-common';
+import type { LensAppServices, LensSerializedState } from '@kbn/lens-common';
 import { LENS_EMBEDDABLE_TYPE } from '../../common/constants';
 import { extract } from '../../common/embeddable_factory';
 

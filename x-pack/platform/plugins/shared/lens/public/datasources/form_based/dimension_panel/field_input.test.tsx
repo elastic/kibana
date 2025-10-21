@@ -12,7 +12,15 @@ import { act } from 'react-dom/test-utils';
 import { EuiComboBox } from '@elastic/eui';
 import userEvent from '@testing-library/user-event';
 import type { GenericOperationDefinition } from '../operations';
-import type { FieldBasedIndexPatternColumn } from '@kbn/lens-common';
+import type {
+  FieldBasedIndexPatternColumn,
+  GenericIndexPatternColumn,
+  FormBasedLayer,
+  FormBasedPrivateState,
+  ReferenceBasedIndexPatternColumn,
+  IndexPattern,
+  VisualizationDimensionGroupConfig,
+} from '@kbn/lens-common';
 import type { FieldInputProps } from '../operations/definitions';
 import {
   averageOperation,
@@ -25,14 +33,7 @@ import {
 import { FieldInput, getErrorMessage } from './field_input';
 import { createMockedIndexPattern, createMockedIndexPatternWithAdditionalFields } from '../mocks';
 import { getOperationSupportMatrix } from '.';
-import type {
-  GenericIndexPatternColumn,
-  FormBasedLayer,
-  FormBasedPrivateState,
-} from '@kbn/lens-common';
-import type { ReferenceBasedIndexPatternColumn } from '@kbn/lens-common';
 import { FieldSelect } from './field_select';
-import type { IndexPattern, VisualizationDimensionGroupConfig } from '@kbn/lens-common';
 
 function getStringBasedOperationColumn(field = 'source') {
   return {

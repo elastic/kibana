@@ -36,7 +36,6 @@ import {
   EDITOR_UNKNOWN_VIS_TYPE,
 } from '../user_messages_ids';
 import { nonNullable } from '../utils';
-import type {} from '@kbn/lens-common';
 
 export interface UserMessageGetterProps {
   visualizationType: string | null | undefined;

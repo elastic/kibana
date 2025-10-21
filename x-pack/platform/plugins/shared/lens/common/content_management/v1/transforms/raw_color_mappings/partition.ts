@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import type { GeneralDatasourceStates } from '@kbn/lens-common';
-import type { LensPartitionLayerState, LensPartitionVisualizationState } from '@kbn/lens-common';
+import type {
+  GeneralDatasourceStates,
+  LensPartitionLayerState,
+  LensPartitionVisualizationState,
+} from '@kbn/lens-common';
 import {
   convertToRawColorMappings,
   getColumnMetaFn,

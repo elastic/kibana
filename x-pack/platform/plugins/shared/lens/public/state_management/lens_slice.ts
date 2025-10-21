@@ -31,11 +31,8 @@ import type {
   DragDropOperation,
   LensAppServices,
   IndexPattern,
-} from '@kbn/lens-common/lens/types';
-import type {
-  LensEditEvent,
-  LensEditContextMapping,
-} from '@kbn/lens-common/lens/visualizations/types';
+} from '@kbn/lens-common';
+import type { LensEditEvent, LensEditContextMapping } from '@kbn/lens-common';
 import { getInitialDatasourceId, getResolvedDateRange, getRemoveOperation } from '../utils';
 import { generateId } from '../id_generator';
 import { getVisualizeFieldSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';

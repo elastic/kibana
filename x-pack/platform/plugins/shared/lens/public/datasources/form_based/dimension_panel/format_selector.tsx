@@ -28,10 +28,12 @@ import {
 } from '@kbn/field-formats-plugin/common';
 import { css } from '@emotion/react';
 import type { DocLinksStart } from '@kbn/core/public';
-import type { ValueFormatConfig } from '@kbn/lens-common';
-import type { TextBasedLayerColumn } from '@kbn/lens-common';
-import type { LensAppServices } from '@kbn/lens-common';
-import type { GenericIndexPatternColumn } from '@kbn/lens-common';
+import type {
+  ValueFormatConfig,
+  TextBasedLayerColumn,
+  LensAppServices,
+  GenericIndexPatternColumn,
+} from '@kbn/lens-common';
 import { isColumnFormatted } from '../operations/definitions/helpers';
 import { DurationRowInputs } from './formatting/duration_input';
 import { Prepend, PrependWidthProvider } from '../../../shared_components/prepend_provider';

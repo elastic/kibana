@@ -31,15 +31,16 @@ import type {
   Suggestion,
   SuggestionRequest,
   VisualizationSuggestion,
+  DatatableVisualizationState,
+  Visualization,
 } from '@kbn/lens-common';
-import { type DatatableVisualizationState, type Visualization } from '@kbn/lens-common';
 import {
   DEFAULT_HEADER_ROW_HEIGHT,
   DEFAULT_ROW_HEIGHT_LINES,
   DEFAULT_HEADER_ROW_HEIGHT_LINES,
   LENS_ROW_HEIGHT_MODE,
   LENS_DATAGRID_DENSITY,
-} from '@kbn/lens-common/lens/visualizations/datatable/constants';
+} from '@kbn/lens-common';
 import { TableDimensionDataExtraEditor, TableDimensionEditor } from './components/dimension_editor';
 import { TableDimensionEditorAdditionalSection } from './components/dimension_editor_addtional_section';
 import type { FormatFactory } from '../../../common/types';

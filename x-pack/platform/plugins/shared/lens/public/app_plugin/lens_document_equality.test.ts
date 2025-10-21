@@ -8,8 +8,8 @@
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { isLensEqual } from './lens_document_equality';
-import type { LensDocument } from '@kbn/lens-common';
 import type {
+  LensDocument,
   AnnotationGroups,
   Datasource,
   DatasourceMap,

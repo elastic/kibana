@@ -7,8 +7,12 @@
 
 import { isEqual, intersection, union } from 'lodash';
 import type { FilterManager } from '@kbn/data-plugin/public';
-import type { LensDocument } from '@kbn/lens-common';
-import type { AnnotationGroups, DatasourceMap, VisualizationMap } from '@kbn/lens-common';
+import type {
+  LensDocument,
+  AnnotationGroups,
+  DatasourceMap,
+  VisualizationMap,
+} from '@kbn/lens-common';
 import { removePinnedFilters } from './save_modal_container';
 
 const removeNonSerializable = (obj: Parameters<JSON['stringify']>[0]) =>

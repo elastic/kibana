@@ -91,6 +91,7 @@ export type {
   CheckDuplicateTitleOptions,
   CheckDuplicateTitleProps,
   LensSaveResult,
+  DatasourceFixAction,
 } from './types';
 export type {
   FormBasedLayer,
@@ -173,6 +174,7 @@ export type {
   TriggerEvent,
   RegisterLibraryAnnotationGroupFunction,
   AxesSettingsConfig,
+  LensEditContextMapping,
 } from './visualizations/types';
 export type {
   LensDatatableSortingState,
@@ -297,6 +299,7 @@ export {
   LENS_LAYER_TYPES,
   LEGEND_SIZE,
   LENS_LEGEND_LAYOUT,
+  LENS_COLLAPSE_FUNCTIONS,
 } from './visualizations/constants';
 export {
   LENS_DATATABLE_ID,

@@ -6,8 +6,7 @@
  */
 
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
-import type { DataViewsState } from '@kbn/lens-common';
-import type { IndexPattern } from '@kbn/lens-common';
+import type { DataViewsState, IndexPattern } from '@kbn/lens-common';
 import { documentField } from '../datasources/form_based/document_field';
 import {
   createMockedIndexPattern,

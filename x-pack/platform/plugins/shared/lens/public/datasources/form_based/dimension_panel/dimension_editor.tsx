@@ -29,8 +29,8 @@ import type {
   LensLayerType as LayerType,
   IndexPattern,
   IndexPatternField,
+  FormBasedLayer,
 } from '@kbn/lens-common';
-import type { FormBasedLayer } from '@kbn/lens-common';
 import type { FormBasedDimensionEditorProps } from './dimension_panel';
 import type { OperationSupportMatrix } from './operation_support';
 import { deleteColumn } from '../form_based';

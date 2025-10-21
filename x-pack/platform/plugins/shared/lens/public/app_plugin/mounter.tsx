@@ -29,15 +29,16 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
 
-import type { LensSerializedState, MainHistoryLocationState } from '@kbn/lens-common';
-import { LENS_SHARE_STATE_ACTION } from '@kbn/lens-common';
-import type { LensAppLocator } from '@kbn/lens-common/lens/locator_types';
 import type {
+  LensSerializedState,
+  MainHistoryLocationState,
+  LensAppLocator,
   VisualizeEditorContext,
   LensAppServices,
   EditorFrameStart,
   LensTopNavMenuEntryGenerator,
 } from '@kbn/lens-common';
+import { LENS_SHARE_STATE_ACTION } from '@kbn/lens-common';
 import { App } from './app';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
 import { extract } from '../../common/embeddable_factory';

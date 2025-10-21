@@ -21,14 +21,12 @@ import type {
   LensSerializedState,
   UserMessagesGetter,
   LensStartServices as StartServices,
-} from '@kbn/lens-common';
-import type {
   EditorFrameInstance,
   VisualizeEditorContext,
   LensTopNavMenuEntryGenerator,
   LensDocument,
+  LensInspector,
 } from '@kbn/lens-common';
-import type { LensInspector } from '@kbn/lens-common';
 import type { IndexPatternServiceAPI } from '../data_views_service/service';
 
 export interface RedirectToOriginProps {

@@ -19,9 +19,9 @@ import type {
   AddUserMessages,
   EditorFrameInstance,
   UserMessagesGetter,
+  LensInspector,
 } from '@kbn/lens-common';
 import type { Simplify } from '@kbn/chart-expressions-common';
-import type { LensInspector } from '@kbn/lens-common';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { LensAppProps } from './types';
 import { LensTopNavMenu } from './lens_top_nav';

@@ -31,6 +31,7 @@ import type {
   SumIndexPatternColumn,
   AvgIndexPatternColumn,
   MedianIndexPatternColumn,
+  GenericIndexPatternColumn,
 } from '@kbn/lens-common';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -41,7 +42,6 @@ import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-p
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import type { TinymathAST } from '@kbn/tinymath';
-import type { GenericIndexPatternColumn } from '@kbn/lens-common';
 import { getFormBasedDatasource } from './form_based';
 import { getFieldByNameFactory } from './pure_helpers';
 import { operationDefinitionMap, getErrorMessages } from './operations';

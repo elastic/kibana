@@ -10,8 +10,8 @@ import type {
   DatasourceDimensionProps,
   IndexPatternMap,
   OperationMetadata,
+  FormBasedPrivateState,
 } from '@kbn/lens-common';
-import type { FormBasedPrivateState } from '@kbn/lens-common';
 import type { OperationType } from '../form_based';
 import type { OperationFieldTuple } from '../operations';
 import { memoizedGetAvailableOperationsByMetadata } from '../operations';

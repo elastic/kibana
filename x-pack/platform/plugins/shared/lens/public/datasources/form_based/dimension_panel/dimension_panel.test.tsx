@@ -30,11 +30,11 @@ import type {
   FiltersIndexPatternColumn,
   GenericIndexPatternColumn,
   TermsIndexPatternColumn,
+  OperationMetadata,
+  DateHistogramIndexPatternColumn,
 } from '@kbn/lens-common';
 import { replaceColumn } from '../operations';
 import { documentField } from '../document_field';
-import type { OperationMetadata } from '@kbn/lens-common';
-import type { DateHistogramIndexPatternColumn } from '@kbn/lens-common';
 import { getFieldByNameFactory } from '../pure_helpers';
 import { Filtering, setFilter } from './filtering';
 import { TimeShift } from './time_shift';

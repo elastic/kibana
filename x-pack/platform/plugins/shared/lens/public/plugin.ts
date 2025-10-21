@@ -58,13 +58,11 @@ import type {
   LensAppLocator,
   DatasourceMap,
   VisualizationMap,
-} from '@kbn/lens-common';
-import type {
   LensTopNavMenuEntryGenerator,
   VisualizeEditorContext,
   EditorFrameSetup,
   LensDocument,
-} from '@kbn/lens-common/lens/types';
+} from '@kbn/lens-common';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';

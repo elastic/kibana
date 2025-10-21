@@ -15,17 +15,9 @@ import type {
   XYLayerConfig,
   XYByValueAnnotationLayerConfig,
 } from '@kbn/lens-common';
-import { LENS_COLLAPSE_FUNCTIONS } from '@kbn/lens-common/lens/visualizations/constants';
+import { LENS_COLLAPSE_FUNCTIONS } from '@kbn/lens-common';
 import type { SupportedMetric } from './lib/convert/supported_metrics';
 import type { Column, ColumnWithMeta } from './types';
-// import type {
-//   CollapseFunction,
-//   Column,
-//   ColumnWithMeta,
-//   Layer,
-//   XYAnnotationsLayerConfig,
-//   XYLayerConfig,
-// } from './types';
 
 export const isAnnotationsLayer = (
   layer: Pick<XYLayerConfig, 'layerType'>

@@ -16,7 +16,7 @@ import type {
   DatasourceMap,
   DocumentToExpressionReturnType,
 } from '@kbn/lens-common';
-import type { LensDocument } from '@kbn/lens-common/lens/types';
+import type { LensDocument } from '@kbn/lens-common';
 import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 import type { RecursiveReadonly } from '@kbn/utility-types';
 import type { LensAttributesService } from '../lens_attribute_service';

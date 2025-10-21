@@ -12,8 +12,11 @@ import type { Query } from '@kbn/es-query';
 // import { QueryInput } from '../../../../shared_components/query_input';
 import { isQueryValid, QueryInput } from '@kbn/visualization-ui-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { LensAggFilterValue as FilterValue, IndexPattern } from '@kbn/lens-common';
-import type { LensAppServices } from '@kbn/lens-common/lens/types';
+import type {
+  LensAggFilterValue as FilterValue,
+  IndexPattern,
+  LensAppServices,
+} from '@kbn/lens-common';
 import { LENS_APP_NAME } from '../../../../../../common/constants';
 import { defaultLabel } from './filters';
 import { LabelInput } from '../shared_components';

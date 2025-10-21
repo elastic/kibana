@@ -7,6 +7,7 @@
 
 import { LensPlugin } from './plugin';
 
+// Embeddable types
 export { isLensApi } from './react_embeddable/type_guards';
 export { type EmbeddableComponent } from './react_embeddable/renderer/lens_custom_renderer_component';
 export type {
@@ -22,17 +23,7 @@ export type {
   LensRendererProps as EmbeddableComponentProps,
 } from '@kbn/lens-common';
 
-export type {
-  XYState,
-  XYReferenceLineLayerConfig,
-  XYLayerConfig,
-  ValidLayer,
-  XYDataLayerConfig,
-  XYAnnotationLayerConfig,
-  YAxisMode,
-  SeriesType,
-  YConfig,
-} from './visualizations/xy/types';
+// Datasource and User message types
 export type {
   DatasourcePublicAPI,
   DataType,
@@ -43,22 +34,7 @@ export type {
   VisualizationSuggestion,
   Suggestion,
   UserMessage,
-} from '@kbn/lens-common';
-export type {
-  LegacyMetricState as MetricState,
-  ValueLabelConfig,
-  LensPartitionVisualizationState as PieVisualizationState,
-  LensPartitionLayerState,
-  SharedPartitionLayerState as SharedLensPartitionLayerState,
-  LensLayerType as LayerType,
-} from '@kbn/lens-common';
-
-export type { DatatableVisualizationState } from '@kbn/lens-common';
-export type { HeatmapVisualizationState } from '@kbn/lens-common';
-export type { GaugeVisualizationState } from '@kbn/lens-common';
-export type { MetricVisualizationState } from '@kbn/lens-common';
-export type { LensTagcloudState as TagcloudState } from '@kbn/lens-common';
-export type {
+  TextBasedPersistedState,
   FormBasedPersistedState,
   PersistedIndexPatternLayer,
   OperationType,
@@ -92,7 +68,31 @@ export type {
   TimeScaleIndexPatternColumn,
   FormBasedLayer,
 } from '@kbn/lens-common';
-export type { TextBasedPersistedState } from '@kbn/lens-common';
+
+// Chart types
+export type {
+  XYState,
+  XYReferenceLineLayerConfig,
+  XYLayerConfig,
+  ValidLayer,
+  XYDataLayerConfig,
+  XYAnnotationLayerConfig,
+  YAxisMode,
+  SeriesType,
+  YConfig,
+  LegacyMetricState as MetricState,
+  ValueLabelConfig,
+  LensPartitionVisualizationState as PieVisualizationState,
+  LensPartitionLayerState,
+  SharedPartitionLayerState as SharedLensPartitionLayerState,
+  LensLayerType as LayerType,
+  DatatableVisualizationState,
+  HeatmapVisualizationState,
+  GaugeVisualizationState,
+  MetricVisualizationState,
+  LensTagcloudState as TagcloudState,
+} from '@kbn/lens-common';
+
 export type {
   XYArgs,
   XYRender,

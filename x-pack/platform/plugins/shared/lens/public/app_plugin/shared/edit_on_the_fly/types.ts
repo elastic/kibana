@@ -6,9 +6,13 @@
  */
 import type { CoreStart } from '@kbn/core/public';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
-import type { TypedLensSerializedState } from '@kbn/lens-common';
-import type { FramePublicAPI, UserMessagesGetter, LensDocument } from '@kbn/lens-common';
-import type { LensInspector } from '@kbn/lens-common';
+import type {
+  TypedLensSerializedState,
+  FramePublicAPI,
+  UserMessagesGetter,
+  LensDocument,
+  LensInspector,
+} from '@kbn/lens-common';
 import type { LensPluginStartDependencies } from '../../../plugin';
 
 export interface FlyoutWrapperProps {

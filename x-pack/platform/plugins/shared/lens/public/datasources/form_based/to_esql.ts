@@ -17,8 +17,8 @@ import type {
   FormBasedLayer,
   IndexPattern,
   ValueFormatConfig,
+  GenericIndexPatternColumn,
 } from '@kbn/lens-common';
-import type { GenericIndexPatternColumn } from '@kbn/lens-common';
 import { isColumnOfType } from './operations/definitions/helpers';
 import { convertToAbsoluteDateRange } from '../../utils';
 import type { OriginalColumn } from '../../../common/types';

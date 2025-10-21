@@ -6,7 +6,7 @@
  */
 
 import type { Dispatch, MiddlewareAPI, Action } from '@reduxjs/toolkit';
-import type { LensStoreDeps } from '@kbn/lens-common/lens/types';
+import type { LensStoreDeps } from '@kbn/lens-common';
 import type { LensGetState } from '.';
 
 import { setToggleFullscreen } from './lens_slice';

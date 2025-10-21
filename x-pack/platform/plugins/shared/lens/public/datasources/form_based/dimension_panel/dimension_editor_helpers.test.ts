@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { TermsIndexPatternColumn } from '@kbn/lens-common';
-import type { FormBasedLayer } from '@kbn/lens-common';
+import type { TermsIndexPatternColumn, FormBasedLayer } from '@kbn/lens-common';
 import { isLayerChangingDueToOtherBucketChange } from './dimensions_editor_helpers';
 
 describe('isLayerChangingDueToOtherBucketChange', () => {
