@@ -15,6 +15,7 @@ import React, {
   useState,
   forwardRef,
   useImperativeHandle,
+  type FC,
 } from 'react';
 import useLatest from 'react-use/lib/useLatest';
 import { i18n } from '@kbn/i18n';
@@ -286,56 +287,15 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
           <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false} css={growingFlexItemCss}>
               <div ref={setTabsContainerElement} role="tablist" css={tabsContainerCss}>
-                {enableDragAndDrop ? (
-                  <EuiDragDropContext onDragEnd={onDragEnd}>
-                    <EuiDroppable
-                      droppableId={DROPPABLE_ID}
-                      direction="horizontal"
-                      css={droppableCss}
-                      grow
+                <OptionalDroppable enableDragAndDrop={enableDragAndDrop} onDragEnd={onDragEnd}>
+                  {items.map((item, index) => (
+                    <OptionalDraggable
+                      item={item}
+                      index={index}
+                      enableDragAndDrop={enableDragAndDrop}
+                      key={item.id}
                     >
-                      {() =>
-                        items.map((item, index) => (
-                          <EuiDraggable
-                            key={item.id}
-                            draggableId={item.id}
-                            index={index}
-                            usePortal
-                            hasInteractiveChildren
-                            customDragHandle="custom"
-                          >
-                            {({ dragHandleProps }, { isDragging }) => (
-                              <Tab
-                                key={item.id}
-                                item={item}
-                                isSelected={selectedItem?.id === item.id}
-                                isUnsaved={unsavedItemIds?.includes(item.id)}
-                                isDragging={isDragging}
-                                dragHandleProps={dragHandleProps}
-                                tabContentId={tabContentId}
-                                tabsSizeConfig={tabsSizeConfig}
-                                services={services}
-                                getTabMenuItems={getTabMenuItems}
-                                getPreviewData={getPreviewData}
-                                onLabelEdited={onLabelEdited}
-                                onSelect={onSelect}
-                                onSelectedTabKeyDown={onSelectedTabKeyDown}
-                                onClose={items.length > 1 ? onClose : undefined} // prevents closing the last tab
-                                enableInlineLabelEditing={enableInlineLabelEditing}
-                                enablePreview={enablePreview}
-                                enableDragAndDrop={enableDragAndDrop}
-                              />
-                            )}
-                          </EuiDraggable>
-                        ))
-                      }
-                    </EuiDroppable>
-                  </EuiDragDropContext>
-                ) : (
-                  <div css={droppableCss}>
-                    {items.map((item) => (
                       <Tab
-                        key={item.id}
                         item={item}
                         isSelected={selectedItem?.id === item.id}
                         isUnsaved={unsavedItemIds?.includes(item.id)}
@@ -352,9 +312,9 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
                         enablePreview={enablePreview}
                         enableDragAndDrop={enableDragAndDrop}
                       />
-                    ))}
-                  </div>
-                )}
+                    </OptionalDraggable>
+                  ))}
+                </OptionalDroppable>
               </div>
             </EuiFlexItem>
             {!!scrollLeftButton && <EuiFlexItem grow={false}>{scrollLeftButton}</EuiFlexItem>}
@@ -399,3 +359,61 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
     );
   }
 );
+
+interface DroppableWrapperProps {
+  children: React.ReactNode;
+  enableDragAndDrop: boolean;
+  onDragEnd: (result: DropResult) => void;
+}
+
+export const OptionalDroppable: FC<DroppableWrapperProps> = ({
+  children,
+  enableDragAndDrop,
+  onDragEnd,
+}) => {
+  if (!enableDragAndDrop) {
+    return <div css={droppableCss}>{children}</div>;
+  }
+
+  return (
+    <EuiDragDropContext onDragEnd={onDragEnd}>
+      <EuiDroppable droppableId={DROPPABLE_ID} direction="horizontal" css={droppableCss} grow>
+        {() => <>{children}</>}
+      </EuiDroppable>
+    </EuiDragDropContext>
+  );
+};
+
+interface OptionalDraggableProps {
+  children: React.ReactElement;
+  item: TabItem;
+  index: number;
+  enableDragAndDrop: boolean;
+}
+
+export const OptionalDraggable = ({
+  children,
+  item,
+  index,
+  enableDragAndDrop,
+}: OptionalDraggableProps) => {
+  if (!enableDragAndDrop) return children;
+
+  return (
+    <EuiDraggable
+      key={item.id}
+      draggableId={item.id}
+      index={index}
+      usePortal
+      hasInteractiveChildren
+      customDragHandle="custom"
+    >
+      {({ dragHandleProps }, { isDragging }) =>
+        React.cloneElement(children, {
+          dragHandleProps,
+          isDragging,
+        } as React.Attributes)
+      }
+    </EuiDraggable>
+  );
+};
