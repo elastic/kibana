@@ -1964,6 +1964,8 @@
       "@kbn/session-view-plugin/*": ["x-pack/solutions/security/plugins/session_view/*"],
       "@kbn/set-map": ["packages/kbn-set-map"],
       "@kbn/set-map/*": ["packages/kbn-set-map/*"],
+      "@kbn/setup-node-env": ["src/setup_node_env"],
+      "@kbn/setup-node-env/*": ["src/setup_node_env/*"],
       "@kbn/share-examples-plugin": ["examples/share_examples"],
       "@kbn/share-examples-plugin/*": ["examples/share_examples/*"],
       "@kbn/share-plugin": ["src/platform/plugins/shared/share"],

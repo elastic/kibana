@@ -12,9 +12,7 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    {
-      "path": "../../../../../src/setup_node_env/tsconfig.json"
-    },
+    "@kbn/setup-node-env",
     // optionalPlugins from ./kibana.json
     "@kbn/lens-plugin",
     "@kbn/security-plugin",

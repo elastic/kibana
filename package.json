@@ -974,6 +974,7 @@
     "@kbn/serverless-workplace-ai-settings": "link:src/platform/packages/shared/serverless/settings/workplace_ai_project",
     "@kbn/session-notifications-plugin": "link:src/platform/test/plugin_functional/plugins/session_notifications",
     "@kbn/session-view-plugin": "link:x-pack/solutions/security/plugins/session_view",
+    "@kbn/setup-node-env": "link:src/setup_node_env",
     "@kbn/share-examples-plugin": "link:examples/share_examples",
     "@kbn/share-plugin": "link:src/platform/plugins/shared/share",
     "@kbn/shared-svg": "link:src/platform/packages/shared/kbn-shared-svg",

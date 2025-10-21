@@ -17,7 +17,7 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    { "path": "../../../../../src/setup_node_env/tsconfig.json" },
+    "@kbn/setup-node-env",
     // add references to other TypeScript projects the plugin depends on
 
     // requiredPlugins from ./kibana.json

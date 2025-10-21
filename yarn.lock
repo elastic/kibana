@@ -8133,6 +8133,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/setup-node-env@link:src/setup_node_env":
+  version "0.0.0"
+  uid ""
+
 "@kbn/share-examples-plugin@link:examples/share_examples":
   version "0.0.0"
   uid ""
