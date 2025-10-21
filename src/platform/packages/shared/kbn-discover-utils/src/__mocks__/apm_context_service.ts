@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createApmErrorsContextServiceMock } from './apm_errors_context_service';
+import { createErrorsContextServiceMock } from './apm_errors_context_service';
 import { createTracesContextServiceMock } from './traces_context_service';
 
 export const createApmContextServiceMock = () => ({
   tracesService: createTracesContextServiceMock(),
-  errorsService: createApmErrorsContextServiceMock(),
+  errorsService: createErrorsContextServiceMock(),
 });
