@@ -9,6 +9,7 @@ import type { ActionsConfig } from './config';
 import { configSchema, getValidatedConfig } from './config';
 import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { DEFAULT_EMAIL_BODY_LENGTH } from '../common';
 
 const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
@@ -280,6 +281,22 @@ describe('config validation', () => {
         'foo.*@b.com',
         '*@d.e.f.com',
       ]);
+    });
+  });
+
+  describe('email.maximum_body_length', () => {
+    test('validates that default returns the default value', () => {
+      const validatedConfig = configSchema.validate({});
+      expect(validatedConfig.email?.maximum_body_length).toBe(undefined);
+    });
+
+    test('validates email config with value set', () => {
+      const validatedConfig = configSchema.validate({
+        email: {
+          maximum_body_length: 42,
+        },
+      });
+      expect(validatedConfig.email?.maximum_body_length).toBe(42);
     });
   });
 
