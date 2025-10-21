@@ -35,7 +35,11 @@ import {
   OMIT_FIELDS,
   SUPPORTED_FIELD_TYPES,
 } from '../../../../common/constants';
-import type { FieldRequestConfig, SupportedFieldType } from '../../../../common/types';
+import type {
+  FieldRequestConfig,
+  SupportedFieldType,
+  FieldVisStats,
+} from '../../../../common/types';
 import { kbnTypeToSupportedType } from '../../common/util/field_types_utils';
 import { getActions } from '../../common/components/field_data_row/action_menu';
 import { useFieldStatsSearchStrategy } from './use_field_stats';
@@ -302,20 +306,24 @@ export const useDataVisualizerGridData = (
     const esQuery = toElasticsearchQuery(kqlAst, undefined, {
       dateFormatTZ: 'UTC',
     });
-    const query = cloneDeep(
-      fieldStatsRequest?.searchQuery || {
-        bool: {
-          must: [],
-          filter: [],
-          should: [],
-          must_not: [],
-        },
-      }
-    );
-    if (compareQuery) {
+
+    const baseQuery =
+      typeof fieldStatsRequest?.searchQuery === 'object'
+        ? fieldStatsRequest.searchQuery
+        : {
+            bool: {
+              must: [],
+              filter: [],
+              should: [],
+              must_not: [],
+            },
+          };
+
+    const query = cloneDeep(baseQuery);
+
+    if (compareQuery && 'bool' in query && query.bool) {
       query.bool.filter.push(esQuery);
     }
-    console.log(query);
     return {
       ...fieldStatsRequest,
       searchQuery: query,
@@ -371,6 +379,38 @@ export const useDataVisualizerGridData = (
     probability
   );
 
+  const compareConfigsWithoutStats = useMemo(() => {
+    if (overallStatsProgress.loaded < 100 || compareQuery === undefined) return;
+    const existMetricFields = metricConfigs
+      .map((config) => {
+        return {
+          ...config,
+          cardinality: config.compareStats?.stats?.cardinality,
+        };
+      })
+      .filter((c) => c !== undefined) as FieldRequestConfig[];
+
+    // Pass the field name, type and cardinality in the request.
+    // Top values will be obtained on a sample if cardinality > 100000.
+    const existNonMetricFields: FieldRequestConfig[] = nonMetricConfigs
+      .map((config) => {
+        return {
+          ...config,
+          cardinality: config.compareStats?.stats?.cardinality,
+        };
+      })
+      .filter((c) => c !== undefined) as FieldRequestConfig[];
+
+    return { metricConfigs: existMetricFields, nonMetricConfigs: existNonMetricFields };
+  }, [metricConfigs, nonMetricConfigs, overallStatsProgress.loaded, compareQuery]);
+
+  const compareStrategyResponse = useFieldStatsSearchStrategy(
+    compareFieldStatsRequest,
+    compareConfigsWithoutStats,
+    dataVisualizerListState,
+    probability
+  );
+
   const combinedProgress = useMemo(
     () => overallStatsProgress.loaded * 0.2 + strategyResponse.progress.loaded * 0.8,
     [overallStatsProgress.loaded, strategyResponse.progress.loaded]
@@ -393,8 +433,6 @@ export const useDataVisualizerGridData = (
       timeUpdateSubscription.unsubscribe();
     };
   });
-
-  console.log(compareOverallStats);
 
   const createMetricCards = useCallback(() => {
     const configs: FieldVisConfig[] = [];
@@ -601,6 +639,7 @@ export const useDataVisualizerGridData = (
   const configs = useMemo(
     () => {
       const fieldStats = strategyResponse.fieldStats;
+      const compareFieldStats = compareStrategyResponse.fieldStats;
       let combinedConfigs = [...nonMetricConfigs, ...metricConfigs];
 
       combinedConfigs = filterFields(
@@ -621,6 +660,28 @@ export const useDataVisualizerGridData = (
             : c;
         });
       }
+
+      if (compareFieldStats) {
+        combinedConfigs = combinedConfigs.map((c) => {
+          const loadedCompareStats = compareFieldStats.get(c.fieldName);
+          if (loadedCompareStats && c.compareStats) {
+            // Destructure to separate fieldName from the rest of the stats
+            const { fieldName, ...statsWithoutFieldName } = loadedCompareStats;
+            return {
+              ...c,
+              compareStats: {
+                ...c.compareStats,
+                stats: {
+                  ...c.compareStats.stats,
+                  ...statsWithoutFieldName,
+                } as FieldVisStats,
+              },
+            };
+          }
+          return c;
+        });
+      }
+
       return combinedConfigs;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -630,6 +691,7 @@ export const useDataVisualizerGridData = (
       visibleFieldTypes,
       visibleFieldNames,
       strategyResponse.progress.loaded,
+      compareStrategyResponse.progress.loaded,
       dataVisualizerListState.pageIndex,
       dataVisualizerListState.pageSize,
     ]

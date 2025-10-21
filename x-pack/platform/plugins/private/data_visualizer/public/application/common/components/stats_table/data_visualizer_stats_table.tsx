@@ -86,7 +86,6 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
 }: DataVisualizerTableProps<T>) => {
   const { euiTheme } = useEuiTheme();
 
-  console.log('render visualizer stats table', items);
   const isCompareMode = useIsCompareMode();
 
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<string[]>([]);
@@ -517,7 +516,11 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
                   {i18n.translate('xpack.dataVisualizer.dataGrid.distributionsColumnName', {
                     defaultMessage: 'Distributions',
                   })}
-                  {"(comparison)"}
+                  <span style={{ marginLeft: 4 }}>
+                    {i18n.translate('xpack.dataVisualizer.dataGrid.distributionsComparisonLabel', {
+                      defaultMessage: '(comparison)',
+                    })}
+                  </span>
                   {
                     <EuiToolTip
                       content={
@@ -577,32 +580,42 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
                   return <EuiText size="xs">-</EuiText>;
                 }
 
+                // Create a temporary config with compare stats mapped to main stats for rendering
+                const compareConfig = {
+                  ...item,
+                  stats: item.compareStats.stats,
+                  existsInDocs: item.compareStats.existsInDocs,
+                };
+
                 if (
                   (item.type === SUPPORTED_FIELD_TYPES.KEYWORD ||
                     item.type === SUPPORTED_FIELD_TYPES.IP) &&
-                  item.stats?.topValues !== undefined
+                  compareConfig.stats?.topValues !== undefined
                 ) {
-                  return <TopValuesPreview config={item} />;
+                  return <TopValuesPreview config={compareConfig} />;
                 }
 
                 if (
                   item.type === SUPPORTED_FIELD_TYPES.NUMBER ||
                   item.secondaryType === SUPPORTED_FIELD_TYPES.NUMBER
                 ) {
-                  if (isIndexBasedFieldVisConfig(item) && item.stats?.distribution !== undefined) {
+                  if (
+                    isIndexBasedFieldVisConfig(compareConfig) &&
+                    compareConfig.stats?.distribution !== undefined
+                  ) {
                     // If the cardinality is only low, show the top values instead of a distribution chart
-                    return item.stats?.distribution?.percentiles.length <= 2 ? (
-                      <TopValuesPreview config={item} isNumeric={true} />
+                    return compareConfig.stats?.distribution?.percentiles.length <= 2 ? (
+                      <TopValuesPreview config={compareConfig} isNumeric={true} />
                     ) : (
-                      <IndexBasedNumberContentPreview config={item} />
+                      <IndexBasedNumberContentPreview config={compareConfig} />
                     );
                   } else {
-                    return <FileBasedNumberContentPreview config={item} />;
+                    return <FileBasedNumberContentPreview config={compareConfig} />;
                   }
                 }
 
                 if (item.type === SUPPORTED_FIELD_TYPES.BOOLEAN) {
-                  return <BooleanContentPreview config={item} />;
+                  return <BooleanContentPreview config={compareConfig} />;
                 }
 
                 return null;

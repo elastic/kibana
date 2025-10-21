@@ -36,11 +36,7 @@ export interface FieldVisConfig {
   supportedAggs?: SupportedAggs;
   compareStats?: {
     fieldName: string;
-    stats?: {
-      cardinality?: number;
-      count?: number;
-      sampleCount?: number;
-    };
+    stats?: FieldVisStats;
     existsInDocs: boolean;
     secondaryType?: SupportedFieldType;
   };
@@ -55,11 +51,7 @@ export interface FileBasedFieldVisConfig {
   format?: string;
   compareStats?: {
     fieldName: string;
-    stats?: {
-      cardinality?: number;
-      count?: number;
-      sampleCount?: number;
-    };
+    stats?: FieldVisStats;
     existsInDocs: boolean;
     secondaryType?: SupportedFieldType;
   };
