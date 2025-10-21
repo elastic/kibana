@@ -11,7 +11,6 @@ import {
   SIEM_MIGRATIONS_FEATURE_ID,
 } from '@kbn/security-solution-features/constants';
 import {
-  SECURITY_FEATURE_ID,
   SIEM_MIGRATIONS_DASHBOARDS_PATH,
   SIEM_MIGRATIONS_LANDING_PATH,
   SIEM_MIGRATIONS_RULES_PATH,
@@ -32,7 +31,7 @@ const subLinks: LinkItem[] = [
     }),
     landingIcon: IconRules,
     path: SIEM_MIGRATIONS_RULES_PATH,
-    capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${SIEM_MIGRATIONS_FEATURE_ID}.all`]],
+    capabilities: [[RULES_UI_READ_PRIVILEGE, `${SIEM_MIGRATIONS_FEATURE_ID}.all`]],
     skipUrlState: true,
     hideTimeline: true,
     hideWhenExperimentalKey: 'siemMigrationsDisabled',
@@ -50,7 +49,7 @@ const subLinks: LinkItem[] = [
     ),
     landingIcon: IconDashboards,
     path: SIEM_MIGRATIONS_DASHBOARDS_PATH,
-    capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${SIEM_MIGRATIONS_FEATURE_ID}.all`]],
+    capabilities: [[RULES_UI_READ_PRIVILEGE, `${SIEM_MIGRATIONS_FEATURE_ID}.all`]],
     skipUrlState: true,
     hideTimeline: true,
     hideWhenExperimentalKey: 'siemMigrationsDisabled',

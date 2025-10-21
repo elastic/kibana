@@ -7,9 +7,9 @@
 
 import type { Capabilities } from '@kbn/core/public';
 import {
-  SECURITY_UI_CRUD_PRIVILEGE,
-  SECURITY_UI_SHOW_PRIVILEGE,
   SIEM_MIGRATIONS_FEATURE_ID,
+  RULES_UI_READ_PRIVILEGE,
+  RULES_UI_EDIT_PRIVILEGE,
 } from '@kbn/security-solution-features/constants';
 import { i18n } from '@kbn/i18n';
 import { CapabilitiesChecker } from '../../../common/lib/capabilities';
@@ -21,10 +21,10 @@ export interface MissingCapability {
 
 const minimumCapabilities: MissingCapability[] = [
   {
-    capability: SECURITY_UI_SHOW_PRIVILEGE,
+    capability: RULES_UI_READ_PRIVILEGE,
     description: i18n.translate(
-      'xpack.securitySolution.siemMigrations.service.capabilities.securityAll',
-      { defaultMessage: 'Security > Security: Read' }
+      'xpack.securitySolution.siemMigrations.service.capabilities.rulesRead',
+      { defaultMessage: 'Security > Rules: Read' }
     ),
   },
   {
@@ -38,10 +38,10 @@ const minimumCapabilities: MissingCapability[] = [
 
 const allCapabilities: MissingCapability[] = [
   {
-    capability: SECURITY_UI_CRUD_PRIVILEGE,
+    capability: RULES_UI_EDIT_PRIVILEGE,
     description: i18n.translate(
-      'xpack.securitySolution.siemMigrations.service.capabilities.securityAll',
-      { defaultMessage: 'Security > Security: All' }
+      'xpack.securitySolution.siemMigrations.service.capabilities.rulesAll',
+      { defaultMessage: 'Security > Rules: All' }
     ),
   },
   {
