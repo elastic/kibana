@@ -21,6 +21,7 @@
     "@kbn/es-query",
     "@kbn/core-elasticsearch-server",
     "@kbn/cloud-plugin",
+    "@kbn/utility-types",
   ],
   "exclude": [
     "target/**/*"
