@@ -28,8 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await home.addSampleDataSet('flights');
       await common.navigateToApp('dashboard');
-      await dashboard.loadSavedDashboard('[Flights] Global Flight Dashboard');
-      await dashboard.switchToEditMode();
+      await dashboard.loadDashboardInEditMode('[Flights] Global Flight Dashboard');
     });
 
     after(async () => {
