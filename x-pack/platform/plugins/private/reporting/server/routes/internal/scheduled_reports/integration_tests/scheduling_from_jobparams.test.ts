@@ -25,7 +25,7 @@ import {
   createMockReportingCore,
 } from '../../../../test_helpers';
 import type { ReportingRequestHandlerContext } from '../../../../types';
-import { registerScheduleRoutesInternal } from '../schedule_from_jobparams';
+import { registerScheduledReportsRoutesInternal } from '..';
 import type { FakeRawRequest, KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { EventTracker } from '../../../../usage';
@@ -126,7 +126,7 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
   });
 
   it('returns 400 if there are no job params', async () => {
-    registerScheduleRoutesInternal(reportingCore, mockLogger);
+    registerScheduledReportsRoutesInternal(reportingCore, mockLogger);
 
     await server.start();
 
@@ -141,7 +141,7 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
   });
 
   it('returns 400 if job params body is invalid', async () => {
-    registerScheduleRoutesInternal(reportingCore, mockLogger);
+    registerScheduledReportsRoutesInternal(reportingCore, mockLogger);
 
     await server.start();
 
@@ -153,7 +153,7 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
   });
 
   it('returns 400 export type is invalid', async () => {
-    registerScheduleRoutesInternal(reportingCore, mockLogger);
+    registerScheduledReportsRoutesInternal(reportingCore, mockLogger);
 
     await server.start();
 
@@ -170,7 +170,7 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
   });
 
   it('returns 400 on invalid browser timezone', async () => {
-    registerScheduleRoutesInternal(reportingCore, mockLogger);
+    registerScheduledReportsRoutesInternal(reportingCore, mockLogger);
 
     await server.start();
 
@@ -187,7 +187,7 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
   });
 
   it('returns 400 on invalid rrule', async () => {
-    registerScheduleRoutesInternal(reportingCore, mockLogger);
+    registerScheduledReportsRoutesInternal(reportingCore, mockLogger);
 
     await server.start();
 
@@ -209,7 +209,7 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
   });
 
   it('returns 400 on invalid rrule.dtstart date', async () => {
-    registerScheduleRoutesInternal(reportingCore, mockLogger);
+    registerScheduledReportsRoutesInternal(reportingCore, mockLogger);
 
     await server.start();
 
@@ -231,7 +231,7 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
   });
 
   it('returns 400 on invalid notification list', async () => {
-    registerScheduleRoutesInternal(reportingCore, mockLogger);
+    registerScheduledReportsRoutesInternal(reportingCore, mockLogger);
 
     await server.start();
 
@@ -255,7 +255,7 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
   });
 
   it('returns 400 on empty notification list', async () => {
-    registerScheduleRoutesInternal(reportingCore, mockLogger);
+    registerScheduledReportsRoutesInternal(reportingCore, mockLogger);
 
     await server.start();
 
@@ -284,7 +284,7 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
       hasPermanentEncryptionKey: false,
       areNotificationsEnabled: false,
     });
-    registerScheduleRoutesInternal(reportingCore, mockLogger);
+    registerScheduledReportsRoutesInternal(reportingCore, mockLogger);
 
     await server.start();
 
@@ -308,7 +308,7 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
       hasPermanentEncryptionKey: true,
       areNotificationsEnabled: false,
     });
-    registerScheduleRoutesInternal(reportingCore, mockLogger);
+    registerScheduledReportsRoutesInternal(reportingCore, mockLogger);
 
     await server.start();
 
@@ -329,7 +329,7 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
   it('returns 500 if job handler throws an error', async () => {
     soClient.create = jest.fn().mockRejectedValue('silly');
 
-    registerScheduleRoutesInternal(reportingCore, mockLogger);
+    registerScheduledReportsRoutesInternal(reportingCore, mockLogger);
 
     await server.start();
 
@@ -343,7 +343,7 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
   });
 
   it(`returns 200 if job handler doesn't error`, async () => {
-    registerScheduleRoutesInternal(reportingCore, mockLogger);
+    registerScheduledReportsRoutesInternal(reportingCore, mockLogger);
 
     await server.start();
 
