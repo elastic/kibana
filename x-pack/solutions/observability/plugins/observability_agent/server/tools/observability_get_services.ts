@@ -10,6 +10,7 @@ import { ToolType } from '@kbn/onechat-common';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import type { CoreSetup, Logger } from '@kbn/core/server';
+import datemath from '@elastic/datemath';
 import { kqlFilter, timeRangeFilter } from '../utils/dsl_filters';
 import { getTypedSearch } from '../utils/get_typed_search';
 import type {
@@ -19,6 +20,8 @@ import type {
 } from '../types';
 import { timeRangeSchema } from '../utils/tool_schemas';
 import { getIndexPatterns } from '../utils/get_index_patterns';
+import { toISOString } from '../utils/time';
+import { getApmIndices } from '../utils/get_apm_indices';
 
 export const OBSERVABILITY_GET_SERVICES_TOOL_ID = 'observability.get_services';
 
@@ -46,7 +49,7 @@ const createServiceInventorySchema = (indexPatterns: string[]) =>
       .min(1)
       .default('@timestamp')
       .describe(`Timestamp field used when filtering by time. Defaults to: @timestamp.`),
-    query: z
+    kqlQuery: z
       .string()
       .optional()
       .describe('Optional KQL query to further scope the search before aggregating services.'),
@@ -66,7 +69,8 @@ export async function createObservabilityGetServicesTool({
     plugins,
     logger,
   });
-  const defaultIndexPatterns = [...apmIndexPatterns, ...logIndexPatterns, ...metricIndexPatterns];
+  const apmIndices = await getApmIndices({ core, plugins, logger });
+  const defaultIndexPatterns = [...apmIndices.metric, ...logIndexPatterns, ...metricIndexPatterns];
   const serviceInventorySchema = createServiceInventorySchema(defaultIndexPatterns);
 
   const toolDefinition: BuiltinToolDefinition<typeof serviceInventorySchema> = {
@@ -76,16 +80,19 @@ export async function createObservabilityGetServicesTool({
       'Retrieve a deduplicated list of services observed in the supplied indices, grouped by service.name.',
     schema: serviceInventorySchema,
     tags: ['observability', 'inventory', 'services'],
-    handler: async ({ timeRange, index, size, query, timeField }, { esClient }) => {
+    handler: async ({ timeRange, index, size, kqlQuery, timeField }, { esClient }) => {
       const indexPatterns = index ? index.split(',') : defaultIndexPatterns;
+
+      const startTimestamp = datemath.parse(timeRange.start)?.valueOf()!;
+      const endTimestamp = datemath.parse(timeRange.end)?.valueOf()!;
 
       logger.debug(
         `observabilityGetServicesTool: querying indices [${indexPatterns}] for service inventory`
       );
 
       const typedSearch = getTypedSearch(esClient.asCurrentUser);
-      const response = await typedSearch({
-        index: indexPatterns,
+      const dslQuery = {
+        index: apmIndexPatterns,
         allow_no_indices: true,
         ignore_unavailable: true,
         size: 0,
@@ -93,8 +100,8 @@ export async function createObservabilityGetServicesTool({
         query: {
           bool: {
             filter: [
-              ...timeRangeFilter(timeField, { start: timeRange.start, end: timeRange.end }),
-              ...kqlFilter(query),
+              ...timeRangeFilter(timeField, { start: startTimestamp, end: endTimestamp }),
+              ...kqlFilter(kqlQuery),
               { exists: { field: 'service.name' } },
             ],
           },
@@ -104,15 +111,13 @@ export async function createObservabilityGetServicesTool({
             terms: {
               field: 'service.name',
               size,
-              order: {
-                _count: 'desc',
-              },
+              order: { _count: 'desc' as const },
             },
             aggs: {
               by_type: {
                 terms: {
                   field: 'data_stream.type',
-                  size: 6,
+                  size: 10,
                 },
               },
               environments: {
@@ -120,6 +125,12 @@ export async function createObservabilityGetServicesTool({
                   field: 'service.environment',
                   size: 10,
                   missing: 'unknown',
+                },
+              },
+              log_levels: {
+                terms: {
+                  field: 'log.level',
+                  size: 10,
                 },
               },
               last_seen: {
@@ -130,7 +141,8 @@ export async function createObservabilityGetServicesTool({
             },
           },
         },
-      });
+      };
+      const response = await typedSearch(dslQuery);
 
       const servicesAgg = response.aggregations?.services;
       const buckets = servicesAgg?.buckets ?? [];
@@ -138,6 +150,7 @@ export async function createObservabilityGetServicesTool({
       const services = buckets.map((bucket) => {
         const byType = bucket.by_type?.buckets ?? [];
         const environments = bucket.environments?.buckets ?? [];
+        const logLevels = bucket.log_levels.buckets ?? [];
 
         return {
           serviceName: bucket.key,
@@ -150,7 +163,11 @@ export async function createObservabilityGetServicesTool({
             environment: env.key,
             documents: env.doc_count,
           })),
-          lastSeen: normalizeEpochToIso(bucket.last_seen?.value),
+          logLevels: logLevels.map((levelBucket) => ({
+            level: levelBucket.key,
+            documents: levelBucket.doc_count,
+          })),
+          lastSeen: toISOString(bucket.last_seen?.value),
         };
       });
 
@@ -158,26 +175,11 @@ export async function createObservabilityGetServicesTool({
         results: [
           {
             type: ToolResultType.other,
-            data: {
-              index,
-              indices: indexPatterns,
-              timeRange: { start: timeRange.start, end: timeRange.end },
-              query,
-              totalServices: services.length,
-              services,
-            },
+            data: { dslQuery, services },
           },
         ],
       };
     },
   };
   return toolDefinition;
-}
-
-function normalizeEpochToIso(value: number | null) {
-  if (!value) {
-    return undefined;
-  }
-
-  return new Date(value).toISOString();
 }

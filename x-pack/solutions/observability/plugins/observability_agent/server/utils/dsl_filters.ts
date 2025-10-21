@@ -11,7 +11,7 @@ import { isEmpty } from 'lodash';
 
 export function timeRangeFilter(
   timeField: string,
-  { start, end }: { start: string; end: string }
+  { start, end }: { start: number; end: number }
 ): QueryDslQueryContainer[] {
   return [
     {

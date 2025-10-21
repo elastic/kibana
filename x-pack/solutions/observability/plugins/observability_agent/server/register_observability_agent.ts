@@ -29,6 +29,7 @@ const OBSERVABILITY_AGENT_TOOL_IDS = [
   platformCoreTools.listIndices,
   platformCoreTools.getIndexMapping,
   platformCoreTools.getDocumentById,
+  platformCoreTools.generateEsql,
 
   // Observability tools
   OBSERVABILITY_GET_SERVICES_TOOL_ID,

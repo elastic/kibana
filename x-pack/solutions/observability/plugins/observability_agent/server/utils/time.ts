@@ -11,3 +11,10 @@ export function toMilliseconds(us: number | null): number | undefined {
     return us / 1000;
   }
 }
+
+// convert epoch milliseconds to ISO string
+export function toISOString(epoch: number | null) {
+  if (epoch) {
+    return new Date(epoch).toISOString();
+  }
+}

@@ -10,12 +10,8 @@ import { z } from '@kbn/zod';
 export const timeRangeSchema = z.object({
   start: z
     .string()
-    .describe(
-      'Start of the time range (inclusive) in ISO 8601 format, for example 2024-06-18T09:00:00.000Z'
-    ),
+    .describe('The start of the time range, in Elasticsearch date math, like `now`.'),
   end: z
     .string()
-    .describe(
-      'End of the time range (exclusive) in ISO 8601 format, for example 2024-06-18T10:00:00.000Z'
-    ),
+    .describe('The end of the time range, in Elasticsearch date math, like `now-24h`.'),
 });
