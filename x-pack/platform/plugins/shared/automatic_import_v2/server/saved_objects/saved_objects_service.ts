@@ -46,7 +46,7 @@ export class AutomaticImportSavedObjectService {
    * @param options - The options for the create
    * @returns The saved object
    */
-  async insertIntegration(data: IntegrationAttributes, options?: SavedObjectsCreateOptions): Promise<SavedObject<IntegrationAttributes>> {
+  public async insertIntegration(data: IntegrationAttributes, options?: SavedObjectsCreateOptions): Promise<SavedObject<IntegrationAttributes>> {
     const { integration_id, data_stream_count = 0, metadata = {} } = data;
 
     if (!integration_id) {
@@ -91,10 +91,13 @@ export class AutomaticImportSavedObjectService {
   /**
   * Create or update an integration
   * @param data - The integration data. Must include an integration_id.
-  * @param options - The options for the update
+  * @param options - The options for the update. Version is required to handle optimistic concurrency control.
   * @returns The saved object
   */
-  async updateIntegration(data: IntegrationAttributes, options?: SavedObjectsUpdateOptions<IntegrationAttributes>): Promise<SavedObjectsUpdateResponse<IntegrationAttributes>> {
+  public async updateIntegration(
+    data: IntegrationAttributes,
+    options: SavedObjectsUpdateOptions<IntegrationAttributes> & { version: string }
+  ): Promise<SavedObjectsUpdateResponse<IntegrationAttributes>> {
     const { integration_id, data_stream_count = 0, status, metadata = {} } = data;
 
     if (!integration_id) {
@@ -127,6 +130,8 @@ export class AutomaticImportSavedObjectService {
         integrationsData,
         {
           ...options,
+          // pass the internal version to the update operation to handle optimistic concurrency control
+          version: options.version,
         }
       );
     } catch (error) {
@@ -140,7 +145,7 @@ export class AutomaticImportSavedObjectService {
    * @param integrationId - The ID of the integration
    * @returns The integration
    */
-  async getIntegration(integrationId: string): Promise<SavedObject<IntegrationAttributes>> {
+  public async getIntegration(integrationId: string): Promise<SavedObject<IntegrationAttributes>> {
     try {
       this.logger.debug(`Getting integration: ${integrationId}`);
       return await this.savedObjectsClient.get<IntegrationAttributes>(
@@ -156,7 +161,7 @@ export class AutomaticImportSavedObjectService {
   /**
    * @returns All integrations
    */
-  async getAllIntegrations(): Promise<SavedObjectsFindResponse<IntegrationAttributes>> {
+  public async getAllIntegrations(): Promise<SavedObjectsFindResponse<IntegrationAttributes>> {
     try {
       this.logger.debug('Getting all integrations');
       return await this.savedObjectsClient.find<IntegrationAttributes>({
@@ -175,7 +180,7 @@ export class AutomaticImportSavedObjectService {
    * @param options - The options for the delete
    * @returns The deleted integration
    */
-  async deleteIntegration(integrationId: string, options?: SavedObjectsDeleteOptions): Promise<{}> {
+  public async deleteIntegration(integrationId: string, options?: SavedObjectsDeleteOptions): Promise<{}> {
     try {
       this.logger.debug(`Deleting integration with id:${integrationId}`)
       return await this.savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, integrationId, options)
@@ -197,7 +202,7 @@ export class AutomaticImportSavedObjectService {
    * @param options - The options for the create
    * @returns The created data stream
    */
-  async insertDataStream(
+  public async insertDataStream(
     data: DataStreamAttributes,
     options?: SavedObjectsCreateOptions
   ): Promise<SavedObject<DataStreamAttributes>> {
@@ -211,14 +216,18 @@ export class AutomaticImportSavedObjectService {
       throw new Error('Data stream ID is required');
     }
 
+    let existingIntegration: SavedObject<IntegrationAttributes> | null = null;
+    // Check for existing integration
+    try {
+      existingIntegration = await this.getIntegration(integration_id);
+      this.logger.debug(`Integration ${integration_id} found, will update count after data stream creation`);
+    } catch (error) {
+      this.logger.debug(`Integration ${integration_id} not found, will create after data stream creation`);
+    }
+
+    // Create the data stream first since we need it before we need to create a missing integration
     try {
       this.logger.debug(`Creating data stream: ${data.data_stream_id}`);
-
-      // A Data Stream must always be associated with an Integration
-      const integrationTarget = await this.getIntegration(integration_id);
-      if (!integrationTarget) {
-        throw new Error(`Integration associated with this data stream ${integration_id} not found`);
-      }
 
       const dataStreamData: DataStreamAttributes = {
         integration_id,
@@ -226,21 +235,55 @@ export class AutomaticImportSavedObjectService {
         job_info,
         metadata: {
           ...metadata,
-          version: 0,
           created_at: new Date().toISOString(),
         },
         result: result || {},
       };
 
-      return await this.savedObjectsClient.create<DataStreamAttributes>(
+      // Create automatically checks if there is an existing data stream with the same id and will throw an error if so
+      const createdDataStream = await this.savedObjectsClient.create<DataStreamAttributes>(
         DATA_STREAM_SAVED_OBJECT_TYPE,
         dataStreamData,
         {
-          // overwrite id that is default generated by the saved objects service
-          id: data_stream_id,
           ...options,
+          id: data_stream_id,
         }
       );
+
+      // After successful data stream creation, update data stream count in the integration
+      // or create a new integration if it doesn't exist
+      try {
+        if (existingIntegration) {
+          this.logger.debug(`Data stream created successfully, incrementing integration ${integration_id} count`);
+
+          const updatedIntegrationData: IntegrationAttributes = {
+            ...existingIntegration.attributes,
+            data_stream_count: existingIntegration.attributes.data_stream_count + 1,
+          };
+
+          await this.updateIntegration(updatedIntegrationData, { version: existingIntegration.version! });
+        } else {
+          this.logger.debug(`Data stream created successfully, creating new integration ${integration_id}`);
+
+          const defaultIntegrationData: IntegrationAttributes = {
+            integration_id,
+            data_stream_count: 1,
+            status: TASK_STATUSES.pending,
+            metadata: {
+              created_at: new Date().toISOString(),
+              version: 0,
+              title: `Auto-generated integration ${integration_id}`,
+            },
+          };
+
+          await this.insertIntegration(defaultIntegrationData);
+        }
+      } catch (integrationError) {
+        this.logger.error(`Failed to update/create integration ${integration_id} after creating data stream ${data_stream_id}: ${integrationError}`);
+      }
+
+      return createdDataStream;
+
     } catch (error) {
       if (SavedObjectsErrorHelpers.isConflictError(error)) {
         throw new Error(`Data stream ${data_stream_id} already exists`);
@@ -252,12 +295,12 @@ export class AutomaticImportSavedObjectService {
   /**
    * Update a data stream
    * @param data - The data stream data. Must include an integration_id and data_stream_id.
-   * @param options - The options for the update. Pass the internal version to the update operation to handle optimistic concurrency control.
+   * @param options - The options for the update. Version is required to handle optimistic concurrency control.
    * @returns The updated data stream
    */
-  async updateDataStream(
+  public async updateDataStream(
     data: DataStreamAttributes,
-    options?: SavedObjectsUpdateOptions<DataStreamAttributes>
+    options: SavedObjectsUpdateOptions<DataStreamAttributes> & { version: string }
   ): Promise<SavedObjectsUpdateResponse<DataStreamAttributes>> {
     const { integration_id, data_stream_id, job_info, metadata = { sample_count: 0 }, result = {} } = data;
 
@@ -278,22 +321,12 @@ export class AutomaticImportSavedObjectService {
         throw new Error(`Integration associated with this data stream ${integration_id} not found`);
       }
 
-      const dataStreamTarget = await this.getDataStream(data_stream_id);
-      if (!dataStreamTarget) {
-        throw new Error(`Data stream ${data_stream_id} not found`);
-      }
-
-      // Use the SO internal version to handle optimistic concurrency control.
-      const internalVersion = options?.version ?? dataStreamTarget.version;
-
-      const currentVersion = dataStreamTarget.attributes.metadata?.version || 0;
       const dataStreamData: DataStreamAttributes = {
         integration_id,
         data_stream_id,
         job_info,
         metadata: {
           ...metadata,
-          version: currentVersion + 1,
         },
         result: result || {},
       };
@@ -305,7 +338,7 @@ export class AutomaticImportSavedObjectService {
         {
           ...options,
           // pass the internal version to the update operation to handle optimistic concurrency control
-          version: internalVersion,
+          version: options.version,
         }
       );
     } catch (error) {
@@ -322,7 +355,7 @@ export class AutomaticImportSavedObjectService {
    * @param dataStreamId - The ID of the data stream
    * @returns The data stream
    */
-  async getDataStream(dataStreamId: string): Promise<SavedObject<DataStreamAttributes>> {
+  public async getDataStream(dataStreamId: string): Promise<SavedObject<DataStreamAttributes>> {
     try {
       this.logger.debug(`Getting data stream: ${dataStreamId}`);
       return await this.savedObjectsClient.get<DataStreamAttributes>(
@@ -339,7 +372,7 @@ export class AutomaticImportSavedObjectService {
    * Get all data streams
    * @returns All data streams
    */
-  async getAllDataStreams(): Promise<SavedObjectsFindResponse<DataStreamAttributes>> {
+  public async getAllDataStreams(): Promise<SavedObjectsFindResponse<DataStreamAttributes>> {
     try {
       this.logger.debug('Getting all data streams');
       return await this.savedObjectsClient.find<DataStreamAttributes>({
@@ -357,7 +390,7 @@ export class AutomaticImportSavedObjectService {
    * @param integrationId - The ID of the integration
    * @returns All data streams for the integration
    */
-  async findAllDataStreamsByIntegrationId(integrationId: string): Promise<SavedObjectsFindResponse<DataStreamAttributes>> {
+  public async findAllDataStreamsByIntegrationId(integrationId: string): Promise<SavedObjectsFindResponse<DataStreamAttributes>> {
     try {
       this.logger.debug(`Finding all data streams for integration: ${integrationId}`);
 
@@ -377,7 +410,7 @@ export class AutomaticImportSavedObjectService {
    * @param options - The options for the delete
    * @returns The deleted data stream
    */
-  async deleteDataStream(dataStreamId: string, options?: SavedObjectsDeleteOptions): Promise<{}> {
+  public async deleteDataStream(dataStreamId: string, options?: SavedObjectsDeleteOptions): Promise<{}> {
     try {
       this.logger.debug(`Deleting data stream with id:${dataStreamId}`);
       return await this.savedObjectsClient.delete(DATA_STREAM_SAVED_OBJECT_TYPE, dataStreamId, options);

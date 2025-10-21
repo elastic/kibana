@@ -20,11 +20,11 @@ export const dataStreamSchemaV1 = schema.object({
   }),
   metadata: schema.object({
     sample_count: schema.number(),
-    version: schema.number(),
     created_at: schema.maybe(schema.string({ minLength: 1 })),
   }, { unknowns: 'allow' }),
   result: schema.object({
     ingest_pipeline: schema.maybe(schema.string()),
     field_mapping: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+    connector: schema.maybe(schema.string())
   }),
 });

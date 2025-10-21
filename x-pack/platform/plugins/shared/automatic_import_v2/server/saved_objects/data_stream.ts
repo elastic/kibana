@@ -43,7 +43,6 @@ export const dataStreamSavedObjectType: SavedObjectsType = {
       metadata: {
         properties: {
           sample_count: { type: 'integer', index: false },
-          version: { type: 'integer', index: false },
           created_at: { type: 'date', index: false },
         },
       },
