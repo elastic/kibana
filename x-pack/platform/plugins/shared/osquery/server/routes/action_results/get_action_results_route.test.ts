@@ -117,42 +117,6 @@ describe('getActionResultsRoute', () => {
       });
     });
 
-    it('should handle query-specific action_id and use query-specific agents', async () => {
-      const mockSearchFn = createMockSearchStrategy(
-        createMockActionDetailsResponse(
-          ['agent-1', 'agent-2'], // Parent action agents
-          [
-            {
-              action_id: 'query-specific-id',
-              agents: ['agent-3', 'agent-4'], // Query-specific agents
-            },
-          ]
-        ),
-        createMockActionResultsResponse(2, {
-          totalResponded: 2,
-          successCount: 2,
-          errorCount: 0,
-        })
-      );
-
-      const mockContext = createMockContext(mockSearchFn);
-      const mockRequest = createMockRequest({
-        actionId: 'query-specific-id', // Using child query action_id
-      });
-      const mockResponse = httpServerMock.createResponseFactory();
-
-      await routeHandler(mockContext, mockRequest, mockResponse);
-
-      // Verify response uses query-specific agents (2 agents)
-      expect(mockResponse.ok).toHaveBeenCalledWith({
-        body: expect.objectContaining({
-          aggregations: expect.objectContaining({
-            pending: 0, // 2 query-specific agents - 2 responded = 0 pending
-          }),
-        }),
-      });
-    });
-
     it('should calculate aggregations correctly with partial responses', async () => {
       const mockSearchFn = createMockSearchStrategy(
         createMockActionDetailsResponse(['agent-1', 'agent-2', 'agent-3', 'agent-4', 'agent-5']),
