@@ -60,7 +60,7 @@ export const executeStreaming = async ({
       });
     }
     if (onLlmResponse) {
-      onLlmResponse(finalResponse, {}, isError).catch(() => {});
+      onLlmResponse({ content: finalResponse, isError }).catch(() => {});
     }
     streamEnd();
     didEnd = true;
@@ -252,7 +252,7 @@ export const executeNonStreaming = async ({
 
   // Call onLlmResponse with the final processed content
   if (onLlmResponse) {
-    await onLlmResponse(finalResponse, {}, false);
+    await onLlmResponse({content: finalResponse, isError: false));
   }
 
   // Report telemetry with required fields

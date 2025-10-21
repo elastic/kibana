@@ -20,6 +20,7 @@ import type {
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { PublicMethodsOf, AwaitedProperties } from '@kbn/utility-types';
 import type { OnechatPluginStart } from '@kbn/onechat-plugin/server';
+import type { OnLlmResponse } from '../langchain/executors/types';
 import type { ElasticAssistantRequestHandlerContext } from '../../types';
 
 // Extended request type to store tool replacements temporarily
@@ -48,11 +49,7 @@ export interface AgentBuilderExecuteParams {
   request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
   logger: Logger;
   conversationId?: string;
-  onLlmResponse?: (
-    content: string,
-    traceData?: Message['traceData'],
-    isError?: boolean
-  ) => Promise<void>;
+  onLlmResponse?: OnLlmResponse;
   response: KibanaResponseFactory;
   responseLanguage?: string;
   isStream?: boolean;
@@ -71,11 +68,7 @@ export interface StreamingExecutionParams {
   abortSignal: AbortSignal;
   contentReferencesStore: ContentReferencesStore;
   onNewReplacements: (newReplacements: Replacements) => void;
-  onLlmResponse?: (
-    content: string,
-    traceData?: Message['traceData'],
-    isError?: boolean
-  ) => Promise<void>;
+  onLlmResponse?: OnLlmResponse;
   telemetry: AnalyticsServiceSetup;
   actionTypeId: string;
   startTime: number;
@@ -93,11 +86,7 @@ export interface NonStreamingExecutionParams {
   abortSignal: AbortSignal;
   contentReferencesStore: ContentReferencesStore;
   onNewReplacements: (newReplacements: Replacements) => void;
-  onLlmResponse?: (
-    content: string,
-    traceData?: Message['traceData'],
-    isError?: boolean
-  ) => Promise<void>;
+  onLlmResponse?: OnLlmResponse;
   telemetry: AnalyticsServiceSetup;
   actionTypeId: string;
   startTime: number;

@@ -128,7 +128,7 @@ export async function agentBuilderExecute({
     logger.error('Agent builder execution failed:', error);
 
     if (onLlmResponse) {
-      await onLlmResponse(error.message, {}, true);
+      await onLlmResponse({ content: error.message, isError: true });
     }
 
     throw error;

@@ -7,6 +7,7 @@
 
 import type { Message } from '@kbn/elastic-assistant-common';
 import {
+  ASSISTANT_INTERRUPTS_ENABLED_FEATURE_FLAG,
   getIsConversationOwner,
   INFERENCE_CHAT_MODEL_DISABLED_FEATURE_FLAG,
   AGENT_BUILDER_ASSISTANT_ENABLED_FEATURE_FLAG,
@@ -21,6 +22,7 @@ import { getSystemPromptFromUserConversation } from './helpers';
 export interface FeatureFlags {
   inferenceChatModelDisabled: boolean;
   agentBuilderEnabled: boolean;
+  assistantInterruptsEnabled: boolean;
 }
 
 export interface ConversationMessageParams {
@@ -55,8 +57,13 @@ export const getFeatureFlags = async (coreContext: {
       AGENT_BUILDER_ASSISTANT_ENABLED_FEATURE_FLAG,
       false
     )) ?? false;
+  const assistantInterruptsEnabled =
+    (await coreContext?.featureFlags?.getBooleanValue(
+      ASSISTANT_INTERRUPTS_ENABLED_FEATURE_FLAG,
+      false
+    )) ?? false;
 
-  return { inferenceChatModelDisabled, agentBuilderEnabled };
+  return { assistantInterruptsEnabled, inferenceChatModelDisabled, agentBuilderEnabled };
 };
 
 export const prepareConversationMessages = async ({

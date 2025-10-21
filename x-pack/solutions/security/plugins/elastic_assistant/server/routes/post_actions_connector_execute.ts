@@ -19,7 +19,6 @@ import {
   pruneContentReferences,
   ExecuteConnectorRequestQuery,
   POST_ACTIONS_CONNECTOR_EXECUTE,
-  ASSISTANT_INTERRUPTS_ENABLED_FEATURE_FLAG,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
@@ -88,14 +87,8 @@ export const postActionsConnectorExecuteRoute = (
         let onLlmResponse: OnLlmResponse | undefined;
 
         const coreContext = await context.core;
-        const { inferenceChatModelDisabled, agentBuilderEnabled } = await getFeatureFlags(
-          coreContext
-        );
-        const assistantInterruptsEnabled =
-          (await coreContext?.featureFlags?.getBooleanValue(
-            ASSISTANT_INTERRUPTS_ENABLED_FEATURE_FLAG,
-            false
-          )) ?? false;
+        const { assistantInterruptsEnabled, inferenceChatModelDisabled, agentBuilderEnabled } =
+          await getFeatureFlags(coreContext);
 
         try {
           const checkResponse = await performChecks({
