@@ -7,18 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiMarkdownAstNode, EuiMarkdownParseError } from '@elastic/eui';
 import { EuiMarkdownEditor } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback } from 'react';
+import React from 'react';
 
 interface Props {
   setRuleParams: (v: { investigation_guide: { blob: string } }) => void;
   value: string;
 }
 
-export function InvestigationGuideEditor({ setRuleParams, value }: Props) { 
+export function InvestigationGuideEditor({ setRuleParams, value }: Props) {
   return (
     <EuiMarkdownEditor
       aria-label={i18n.translate(

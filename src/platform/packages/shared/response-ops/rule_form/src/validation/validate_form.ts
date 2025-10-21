@@ -18,7 +18,6 @@ import {
   INTERVAL_REQUIRED_TEXT,
   INTERVAL_MINIMUM_TEXT,
   RULE_ALERT_DELAY_BELOW_MINIMUM_TEXT,
-  RULE_INVESTIGATION_GUIDE_TOO_LONG_TEXT,
 } from '../translations';
 import type {
   MinimumScheduleInterval,
