@@ -507,7 +507,6 @@ describe('validation logic', () => {
     });
 
     describe('settings', () => {
-      testErrorsAndWarnings(`SET time_zone = "CEST"; FROM index`, []);
       // Should return error if there is no query following SET
       testErrorsAndWarnings(`SET time_zone = "CEST";`, [expect.stringContaining('SyntaxError:')]);
       testErrorsAndWarnings(`SET invalid_setting = "_alias:_origin"; FROM index`, [

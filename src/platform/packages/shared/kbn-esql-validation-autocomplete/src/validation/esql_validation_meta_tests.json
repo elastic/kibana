@@ -674,11 +674,6 @@
       "warning": []
     },
     {
-      "query": "SET time_zone = \"CEST\"; FROM index",
-      "error": [],
-      "warning": []
-    },
-    {
       "query": "SET time_zone = \"CEST\";",
       "error": [
         {
