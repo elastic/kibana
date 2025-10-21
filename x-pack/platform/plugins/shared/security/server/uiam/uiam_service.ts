@@ -149,7 +149,7 @@ export class UiamService implements UiamServicePublic {
         })
       );
 
-      this.#logger.debug('Successfully invalidated session tokens with UIAM.');
+      this.#logger.debug('Successfully invalidated session tokens.');
     } catch (err) {
       this.#logger.error(
         () => `Failed to invalidate session tokens: ${getDetailedErrorMessage(err)}`
