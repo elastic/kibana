@@ -20,7 +20,6 @@ import {
   EuiButtonIcon,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EXTRACT_OBSERVABLES_LABEL } from '../create/translations';
 import * as i18n from './translations';
 
@@ -40,6 +39,10 @@ const HASH_FIELDS = [
 const HASH_PARENTS = ['dll', 'file', 'process'] as const;
 
 const defaultObservableTypes = [
+  {
+    label: i18n.AGENT_ID,
+    value: ['agent.id'],
+  },
   {
     label: i18n.HOST_NAME,
     value: ['host.name'],
@@ -91,12 +94,7 @@ export const DefaultObservableTypesModal = () => {
           </EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody data-test-subj="default-observable-types-modal-body">
-          <EuiText size="s">
-            <FormattedMessage
-              id="xpack.cases.caseView.observables.observablesTable.popoverDescription"
-              defaultMessage="These ECS fields are automatically extracted if auto-extract observerable is turned on."
-            />
-          </EuiText>
+          <EuiText size="s">{i18n.DEFAULT_OBSERVABLE_TYPES_MODAL_DESCRIPTION}</EuiText>
           <EuiSpacer size="s" />
           <EuiFlexGroup direction="column" gutterSize="s">
             {defaultObservableTypes.map((observableType) => (

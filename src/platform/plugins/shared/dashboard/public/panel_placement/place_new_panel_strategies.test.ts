@@ -108,7 +108,7 @@ describe('new panel placement strategies', () => {
       const panels = {
         ...getMockLayout().panels,
         '1': {
-          grid: { x: 6, y: 0, w: 6, h: 6, i: '1' },
+          grid: { x: 6, y: 0, w: 6, h: 6 },
           type: 'lens',
         },
       };
@@ -130,7 +130,7 @@ describe('new panel placement strategies', () => {
       const panels = {
         ...getMockLayoutWithSections().panels,
         '5': {
-          grid: { x: 6, y: 0, w: 42, h: 6, i: '5' },
+          grid: { x: 6, y: 0, w: 42, h: 6 },
           type: 'lens',
         },
       };
@@ -151,19 +151,19 @@ describe('new panel placement strategies', () => {
       const panels = {
         ...getMockLayoutWithSections().panels,
         '1': {
-          grid: { x: 0, y: 0, w: 6, h: 100, i: '1' },
+          grid: { x: 0, y: 0, w: 6, h: 100 },
           type: 'lens',
         },
         '2': {
-          grid: { x: 6, y: 6, w: 42, h: 100, i: '2' },
+          grid: { x: 6, y: 6, w: 42, h: 100 },
           type: 'lens',
         },
         '6': {
-          grid: { x: 0, y: 6, w: 6, h: 6, i: '6', sectionId: 'section1' },
+          grid: { x: 0, y: 6, w: 6, h: 6, sectionId: 'section1' },
           type: 'lens',
         },
         '7': {
-          grid: { x: 6, y: 0, w: 42, h: 12, i: '7', sectionId: 'section1' },
+          grid: { x: 6, y: 0, w: 42, h: 12, sectionId: 'section1' },
           type: 'lens',
         },
       };

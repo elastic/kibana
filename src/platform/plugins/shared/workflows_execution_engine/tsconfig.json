@@ -9,7 +9,8 @@
     "public/**/*",
     "server/**/*",
     "../../../../../typings/**/*",
-    ".storybook/**/*"
+    ".storybook/**/*",
+    "integration_tests/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -17,7 +18,6 @@
     "@kbn/actions-plugin",
     "@kbn/workflows",
     "@kbn/task-manager-plugin",
-    "@kbn/apm-utils",
     "@kbn/es-query",
     "@kbn/core-elasticsearch-server",
   ],

@@ -19,8 +19,6 @@ import type {
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import type { CreateRulePropsRewrites } from './types';
 
-const ccsRemoteName: string = Cypress.env('CCS_REMOTE_NAME');
-
 export const getIndexPatterns = (): string[] => [
   'apm-*-transaction*',
   'auditbeat-*',
@@ -234,48 +232,6 @@ export const getBuildingBlockRule = (
   ...rewrites,
 });
 
-export const getUnmappedRule = (
-  rewrites?: CreateRulePropsRewrites<QueryRuleCreateProps>
-): QueryRuleCreateProps => ({
-  type: 'query',
-  query: '*:*',
-  index: ['auditbeat-unmapped*'],
-  name: 'Rule with unmapped fields',
-  description: 'The new rule description.',
-  severity: 'high',
-  risk_score: 17,
-  tags: ['test', 'newRule'],
-  references: ['http://example.com/', 'https://example.com/'],
-  false_positives: ['False1', 'False2'],
-  threat: [getMitre1(), getMitre2()],
-  note: '# test markdown',
-  interval: '100m',
-  from: '1900-01-01T00:00:00.000Z',
-  max_signals: 100,
-  ...rewrites,
-});
-
-export const getUnmappedCCSRule = (
-  rewrites?: CreateRulePropsRewrites<QueryRuleCreateProps>
-): QueryRuleCreateProps => ({
-  type: 'query',
-  query: '*:*',
-  index: [`${ccsRemoteName}:unmapped*`],
-  name: 'Rule with unmapped fields',
-  description: 'The new rule description.',
-  severity: 'high',
-  risk_score: 17,
-  tags: ['test', 'newRule'],
-  references: ['http://example.com/', 'https://example.com/'],
-  false_positives: ['False1', 'False2'],
-  threat: [getMitre1(), getMitre2()],
-  note: '# test markdown',
-  interval: '100m',
-  from: '1900-01-01T00:00:00.000Z',
-  max_signals: 100,
-  ...rewrites,
-});
-
 export const getExistingRule = (
   rewrites?: CreateRulePropsRewrites<QueryRuleCreateProps>
 ): QueryRuleCreateProps => ({
@@ -445,28 +401,6 @@ export const getEsqlRule = (
   ...rewrites,
 });
 
-export const getCCSEqlRule = (
-  rewrites?: CreateRulePropsRewrites<EqlRuleCreateProps>
-): EqlRuleCreateProps => ({
-  type: 'eql',
-  language: 'eql',
-  query: 'any where process.name == "run-parts"',
-  name: 'New EQL Rule',
-  index: [`${ccsRemoteName}:run-parts`],
-  description: 'New EQL rule description.',
-  severity: 'high',
-  risk_score: 17,
-  tags: ['test', 'newRule'],
-  references: ['http://example.com/', 'https://example.com/'],
-  false_positives: ['False1', 'False2'],
-  threat: [getMitre1(), getMitre2()],
-  note: '# test markdown',
-  interval: '100m',
-  from: '1900-01-01T00:00:00.000Z',
-  max_signals: 100,
-  ...rewrites,
-});
-
 export const getEqlSequenceRule = (
   rewrites?: CreateRulePropsRewrites<EqlRuleCreateProps>
 ): EqlRuleCreateProps => ({
@@ -536,8 +470,6 @@ export const indicatorRuleMatchingDoc = {
   matchedId: '84cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb74f',
   matchedIndex: 'logs-ti_abusech.malware',
 };
-
-export const getSeveritiesOverride = (): string[] => ['Low', 'Medium', 'High', 'Critical'];
 
 export const getEditedRule = (): QueryRuleCreateProps =>
   getExistingRule({

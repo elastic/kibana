@@ -25,13 +25,21 @@ export const TinesStoriesActionResponseSchema = schema.object({
 
 // Webhooks action schema
 export const TinesWebhooksActionParamsSchema = schema.object({ storyId: schema.number() });
-export const TinesWebhookObjectSchema = schema.object({
-  id: schema.number(),
-  name: schema.string(),
-  storyId: schema.number(),
+export const TinesWebhookObjectSchema = schema.object(
+  {
+    id: schema.number(),
+    name: schema.string(),
+    storyId: schema.number(),
+  },
+  { unknowns: 'ignore' }
+);
+
+// Webhooks action configuration schema
+export const TinesWebhookActionConfigSchema = schema.object({
   path: schema.string(),
   secret: schema.string(),
 });
+
 export const TinesWebhooksActionResponseSchema = schema.object({
   webhooks: schema.arrayOf(TinesWebhookObjectSchema),
   incompleteResponse: schema.boolean(),

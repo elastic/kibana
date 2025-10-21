@@ -14,7 +14,7 @@ import {
 } from '@kbn/onechat-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ModelProvider, ScopedRunner, ToolProvider } from '../runner';
+import type { ModelProvider, ScopedRunner, ToolProvider, WritableToolResultStore } from '../runner';
 
 export type AgentHandlerFn = (
   params: AgentHandlerParams,
@@ -60,6 +60,10 @@ export interface AgentHandlerContext {
    * Can be used to run other workchat primitive as part of the tool execution.
    */
   runner: ScopedRunner;
+  /**
+   * Result store to access and add tool results during execution.
+   */
+  resultStore: WritableToolResultStore;
   /**
    * Event emitter that can be used to emits custom events
    */

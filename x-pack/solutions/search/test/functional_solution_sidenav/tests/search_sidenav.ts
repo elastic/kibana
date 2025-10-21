@@ -35,7 +35,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('sidenav & breadcrumbs', () => {
       it('renders the correct nav and navigate to links', async () => {
         const isV2 = await solutionNavigation.sidenav.isV2();
-        const expectNoPageReload = await solutionNavigation.createNoPageReloadCheck();
 
         await solutionNavigation.expectExists();
         await solutionNavigation.breadcrumbs.expectExists();
@@ -92,13 +91,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await solutionNavigation.sidenav.expectLinkActive({
           deepLinkId: 'searchHomepage',
         });
-
-        // Redirected to Onboarding Page to Create Index
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-          text: 'Create your first index',
-        });
-
-        await expectNoPageReload();
       });
 
       it('renders a feedback callout', async function () {
@@ -108,6 +100,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await solutionNavigation.sidenav.feedbackCallout.expectMissing();
         await browser.refresh();
         await solutionNavigation.sidenav.feedbackCallout.expectMissing();
+      });
+
+      it('renders tour', async () => {
+        await solutionNavigation.sidenav.tour.reset();
+        await solutionNavigation.sidenav.tour.expectTourStepVisible('sidenav-home');
+        await solutionNavigation.sidenav.tour.nextStep();
+        await solutionNavigation.sidenav.tour.expectTourStepVisible('sidenav-manage-data');
+        await solutionNavigation.sidenav.tour.nextStep();
+        await solutionNavigation.sidenav.tour.expectHidden();
+        await browser.refresh();
+        await solutionNavigation.sidenav.tour.expectHidden();
       });
     });
   });

@@ -27,7 +27,13 @@ beforeAll(() => {
 });
 
 beforeEach(() => {
+  jest.useFakeTimers();
   mockedScrollIntoView.mockClear();
+});
+
+afterEach(() => {
+  jest.runOnlyPendingTimers();
+  jest.useRealTimers();
 });
 
 afterAll(() => {

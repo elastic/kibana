@@ -12,10 +12,11 @@ import type { IconType } from '@elastic/eui';
 import { EuiButton, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import { css } from '@emotion/react';
-// import { useScrollToActive } from '../../hooks/use_scroll_to_active';
+import { useScrollToActive } from '../../hooks/use_scroll_to_active';
 
 import type { SecondaryMenuItem } from '../../../types';
 import { BetaBadge } from '../beta_badge';
+import { useHighContrastModeStyles } from '../../hooks/use_high_contrast_mode_styles';
 
 export interface SecondaryMenuItemProps extends SecondaryMenuItem {
   children: ReactNode;
@@ -45,8 +46,9 @@ export const SecondaryMenuItemComponent = ({
 }: SecondaryMenuItemProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
 
-  // TODO: the "scroll to active" behavior was disabled because it causes a scroll in the main container
-  // const activeItemRef = useScrollToActive<HTMLLIElement>(isHighlighted);
+  // TODO: remove once the fix is available on EUI side
+  const highContrastModeStyles = useHighContrastModeStyles();
+  const activeItemRef = useScrollToActive<HTMLLIElement>(isCurrent);
 
   const iconSide = iconType ? 'left' : 'right';
   const iconProps = {
@@ -56,7 +58,7 @@ export const SecondaryMenuItemComponent = ({
     ...(isExternal && { target: '_blank' }),
   };
 
-  const styles = css`
+  const buttonStyles = css`
     font-weight: ${isHighlighted ? euiTheme.font.weight.semiBold : euiTheme.font.weight.regular};
     // 6px comes from Figma, no token
     padding: 6px ${euiTheme.size.s};
@@ -69,6 +71,11 @@ export const SecondaryMenuItemComponent = ({
     svg:not(.euiBetaBadge__icon) {
       color: ${euiTheme.colors.textDisabled};
     }
+
+    --high-contrast-hover-indicator-color: ${isHighlighted
+      ? euiTheme.colors.textPrimary
+      : euiTheme.colors.textParagraph};
+    ${highContrastModeStyles};
   `;
 
   const labelAndBadgeStyles = css`
@@ -85,11 +92,11 @@ export const SecondaryMenuItemComponent = ({
   );
 
   return (
-    <li /* ref={activeItemRef} */>
+    <li ref={activeItemRef}>
       {isHighlighted ? (
         <EuiButton
           aria-current={isCurrent ? 'page' : undefined}
-          css={styles}
+          css={buttonStyles}
           data-highlighted="true"
           data-test-subj={`${testSubjPrefix}-${id}`}
           fullWidth
@@ -103,7 +110,7 @@ export const SecondaryMenuItemComponent = ({
       ) : (
         <EuiButtonEmpty
           aria-current={isCurrent ? 'page' : undefined}
-          css={styles}
+          css={buttonStyles}
           color="text"
           data-highlighted="false"
           data-test-subj={`${testSubjPrefix}-${id}`}
