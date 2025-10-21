@@ -882,7 +882,7 @@ export class SearchSource {
     const allFilters =
       typeof searchRequest.filters === 'function'
         ? searchRequest.filters()
-        : searchRequest.filters || [];
+        : searchRequest.filters ?? [];
 
     const builtQuery = this.getBuiltEsQuery({
       index: searchRequest.index,
