@@ -252,7 +252,7 @@ export const executeNonStreaming = async ({
 
   // Call onLlmResponse with the final processed content
   if (onLlmResponse) {
-    await onLlmResponse({content: finalResponse, isError: false));
+    await onLlmResponse({ content: finalResponse, isError: false });
   }
 
   // Report telemetry with required fields
