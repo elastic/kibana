@@ -25,10 +25,10 @@ export const recursiveRecord: z.ZodType<RecursiveRecord> = z.lazy(() =>
   z.record(z.union([primitive, z.array(primitive), recursiveRecord]))
 );
 
-export type FlattenRecord = Record<PropertyKey, Primitive | Primitive[]>;
+export type FlattenRecord = Record<PropertyKey, Primitive | Primitive[] | unknown[]>;
 
 export const flattenRecord: z.ZodType<FlattenRecord> = z.record(
-  z.union([primitive, z.array(primitive)])
+  z.union([primitive, z.array(primitive), z.array(z.unknown())])
 );
 
 export const sampleDocument = recursiveRecord;
