@@ -96,7 +96,7 @@ export function RollbackButton({ packageInfo, isCustomPackage }: RollbackButtonP
             ) : !licenseService.isEnterprise() ? (
               <FormattedMessage
                 id="xpack.fleet.integrations.rollbackPackage.licenseTooltip"
-                defaultMessage="Rollback integrations requires an enterprise license."
+                defaultMessage="Rolling back integrations requires an Enterprise license."
               />
             ) : isRollbackTTLExpired ? (
               <FormattedMessage
