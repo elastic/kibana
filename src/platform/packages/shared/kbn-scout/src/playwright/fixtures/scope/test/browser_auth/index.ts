@@ -92,7 +92,9 @@ export const browserAuthFixture = coreWorkerFixtures.extend<{ browserAuth: Brows
         if (error?.statusCode === 409) {
           log.debug(`[browserAuth] Profile already activated for role: ${role}`);
         } else {
-          log.debug(`[browserAuth] Profile activation skipped for role ${role}: ${error?.message || error}`);
+          log.debug(
+            `[browserAuth] Profile activation skipped for role ${role}: ${error?.message || error}`
+          );
         }
       }
     };

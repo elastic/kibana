@@ -94,7 +94,10 @@ export const test = securityFixtures.extend<SecurityTestFixtures, SecurityWorker
     { scope: 'worker' },
   ],
   browserScopedApis: async (
-    { page, config }: { page: SecurityTestFixtures['page']; config: SecurityWorkerFixtures['config'] },
+    {
+      page,
+      config,
+    }: { page: SecurityTestFixtures['page']; config: SecurityWorkerFixtures['config'] },
     use
   ) => {
     await use({

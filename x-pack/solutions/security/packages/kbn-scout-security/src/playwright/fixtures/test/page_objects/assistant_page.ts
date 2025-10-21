@@ -170,7 +170,9 @@ export class AssistantPage {
   }
 
   get systemPromptTitleInput() {
-    return this.page.testSubj.locator('systemPromptSelector').locator('[data-test-subj="comboBoxSearchInput"]');
+    return this.page.testSubj
+      .locator('systemPromptSelector')
+      .locator('[data-test-subj="comboBoxSearchInput"]');
   }
 
   get systemPromptBodyInput() {
@@ -178,7 +180,9 @@ export class AssistantPage {
   }
 
   get conversationMultiSelector() {
-    return this.page.testSubj.locator('conversationMultiSelector').locator('[data-test-subj="comboBoxSearchInput"]');
+    return this.page.testSubj
+      .locator('conversationMultiSelector')
+      .locator('[data-test-subj="comboBoxSearchInput"]');
   }
 
   systemPromptOption(promptName: string) {
@@ -194,7 +198,9 @@ export class AssistantPage {
   }
 
   get quickPromptTitleInput() {
-    return this.page.testSubj.locator('quickPromptSelector').locator('[data-test-subj="comboBoxSearchInput"]');
+    return this.page.testSubj
+      .locator('quickPromptSelector')
+      .locator('[data-test-subj="comboBoxSearchInput"]');
   }
 
   get quickPromptBodyInput() {
@@ -202,7 +208,9 @@ export class AssistantPage {
   }
 
   get promptContextSelector() {
-    return this.page.testSubj.locator('promptContextSelector').locator('[data-test-subj="comboBoxSearchInput"]');
+    return this.page.testSubj
+      .locator('promptContextSelector')
+      .locator('[data-test-subj="comboBoxSearchInput"]');
   }
 
   quickPromptBadge(promptName: string) {

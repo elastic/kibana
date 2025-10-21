@@ -40,11 +40,7 @@ export async function retryApiCall<T>(
   options: RetryOptions = {},
   log?: ScoutLogger
 ): Promise<T> {
-  const {
-    maxAttempts = 3,
-    delayMs = 2000,
-    exponentialBackoff = false,
-  } = options;
+  const { maxAttempts = 3, delayMs = 2000, exponentialBackoff = false } = options;
 
   let lastError: Error | undefined;
 
@@ -83,10 +79,15 @@ export async function retryApiCall<T>(
  *
  * @returns Poll configuration with intervalMs, timeoutMs, and maxAttempts
  */
-function getPollConfig(options: PollOptions = {}): Required<Omit<PollOptions, 'exponentialBackoff'>> & { exponentialBackoff: boolean } {
-  const intervalMs = options.intervalMs ?? parseInt(process.env.SCOUT_POLL_INTERVAL_MS || '5000', 10);
+function getPollConfig(
+  options: PollOptions = {}
+): Required<Omit<PollOptions, 'exponentialBackoff'>> & { exponentialBackoff: boolean } {
+  const intervalMs =
+    options.intervalMs ?? parseInt(process.env.SCOUT_POLL_INTERVAL_MS || '5000', 10);
   const timeoutMs = options.timeoutMs ?? parseInt(process.env.SCOUT_POLL_TIMEOUT_MS || '15000', 10);
-  const maxAttempts = options.maxAttempts ?? parseInt(process.env.SCOUT_POLL_MAX_ATTEMPTS || String(Math.ceil(timeoutMs / intervalMs)), 10);
+  const maxAttempts =
+    options.maxAttempts ??
+    parseInt(process.env.SCOUT_POLL_MAX_ATTEMPTS || String(Math.ceil(timeoutMs / intervalMs)), 10);
   const exponentialBackoff = options.exponentialBackoff ?? false;
 
   return { intervalMs, timeoutMs, maxAttempts, exponentialBackoff };
@@ -121,7 +122,9 @@ export async function pollUntilAvailable<T>(
 ): Promise<PollResult<T>> {
   const { intervalMs, timeoutMs, maxAttempts, exponentialBackoff } = getPollConfig(options);
 
-  log?.debug(`[POLL] Starting poll with interval=${intervalMs}ms, timeout=${timeoutMs}ms, maxAttempts=${maxAttempts}`);
+  log?.debug(
+    `[POLL] Starting poll with interval=${intervalMs}ms, timeout=${timeoutMs}ms, maxAttempts=${maxAttempts}`
+  );
 
   let lastError: Error | undefined;
   const startTime = Date.now();
@@ -133,7 +136,9 @@ export async function pollUntilAvailable<T>(
     if (elapsedMs >= timeoutMs) {
       log?.error(`[POLL] Timeout after ${elapsedMs}ms (${attempt} attempts)`);
       throw new Error(
-        `Poll timeout after ${elapsedMs}ms (${attempt} attempts). Last error: ${lastError?.message || 'Unknown'}`
+        `Poll timeout after ${elapsedMs}ms (${attempt} attempts). Last error: ${
+          lastError?.message || 'Unknown'
+        }`
       );
     }
 
@@ -165,7 +170,7 @@ export async function pollUntilAvailable<T>(
       }
 
       // If this isn't the last attempt and we haven't timed out, wait before retrying
-      if (attempt < maxAttempts && (Date.now() - startTime) < timeoutMs) {
+      if (attempt < maxAttempts && Date.now() - startTime < timeoutMs) {
         const delay = exponentialBackoff ? intervalMs * Math.pow(2, attempt - 1) : intervalMs;
         const actualDelay = Math.min(delay, timeoutMs - (Date.now() - startTime));
 
@@ -180,7 +185,9 @@ export async function pollUntilAvailable<T>(
   const totalWaitMs = Date.now() - startTime;
   log?.error(`[POLL] All ${maxAttempts} attempts failed after ${totalWaitMs}ms`);
   throw new Error(
-    `Poll failed after ${maxAttempts} attempts (${totalWaitMs}ms). Last error: ${lastError?.message || 'Unknown'}`
+    `Poll failed after ${maxAttempts} attempts (${totalWaitMs}ms). Last error: ${
+      lastError?.message || 'Unknown'
+    }`
   );
 }
 

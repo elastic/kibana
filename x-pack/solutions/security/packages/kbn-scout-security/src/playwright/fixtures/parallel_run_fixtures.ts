@@ -20,7 +20,11 @@ import {
 } from './worker';
 import { extendPageObjects, securityBrowserAuthFixture } from './test';
 
-const securityParallelFixtures = mergeTests(baseTest, securityBrowserAuthFixture, userProfilesFixture);
+const securityParallelFixtures = mergeTests(
+  baseTest,
+  securityBrowserAuthFixture,
+  userProfilesFixture
+);
 
 /**
  * Should be used test spec files, running in parallel in isolated spaces agaist the same Kibana instance.
@@ -120,7 +124,11 @@ export const spaceTest = securityParallelFixtures.extend<
     use
   ) => {
     await use({
-      assistant: getBrowserScopedAssistantService({ page, kbnUrl: config.hosts.kibana, scoutSpace }),
+      assistant: getBrowserScopedAssistantService({
+        page,
+        kbnUrl: config.hosts.kibana,
+        scoutSpace,
+      }),
     });
   },
 });

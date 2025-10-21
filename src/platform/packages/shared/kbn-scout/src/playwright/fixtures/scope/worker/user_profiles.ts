@@ -67,7 +67,9 @@ async function activateProfile(
         password,
       });
 
-      log.debug(`Successfully activated profile for "${response.user.username}" (uid: ${response.uid})`);
+      log.debug(
+        `Successfully activated profile for "${response.user.username}" (uid: ${response.uid})`
+      );
 
       return {
         uid: response.uid,
@@ -90,7 +92,9 @@ async function activateProfile(
         }
 
         const delay = (MAX_RETRIES - retriesLeft) * RETRY_DELAY_MS;
-        log.debug(`Profile activation conflict for "${username}", retrying in ${delay}ms (${retriesLeft} retries left)`);
+        log.debug(
+          `Profile activation conflict for "${username}", retrying in ${delay}ms (${retriesLeft} retries left)`
+        );
         await new Promise((resolve) => setTimeout(resolve, delay));
       } else {
         log.error(`Failed to activate profile for "${username}": ${err}`);
@@ -109,7 +113,10 @@ async function activateProfile(
  * - User-scoped saved objects
  * - Collaboration features
  */
-export const userProfilesFixture = coreWorkerFixtures.extend<{}, { userProfiles: UserProfilesFixture }>({
+export const userProfilesFixture = coreWorkerFixtures.extend<
+  {},
+  { userProfiles: UserProfilesFixture }
+>({
   userProfiles: [
     async ({ esClient, config, log }, use) => {
       const activateUserProfile = async (username: string, password: string) => {
