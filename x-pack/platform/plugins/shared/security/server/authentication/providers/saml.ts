@@ -422,8 +422,6 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         : AuthenticationResult.failed(err);
     }
 
-    this.logger.debug(JSON.stringify(result, null, 2));
-
     // IdP can pass `RelayState` with the deep link in Kibana during IdP initiated login and
     // depending on the configuration we may need to redirect user to this URL.
     let redirectURLFromRelayState;

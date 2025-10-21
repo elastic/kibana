@@ -45,7 +45,8 @@ function decode(encoded) {
   const calculatedCrc = crc32(originalBytes);
 
   // Verify checksum
-  if (BigInt(calculatedCrc) !== storedCrc) {
+  const storedCrcAsNumber = Number(storedCrc);
+  if (calculatedCrc !== storedCrcAsNumber) {
     throw new Error('Invalid checksum: data may be corrupted');
   }
 
