@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { Logger } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { KibanaResponse } from '@kbn/core-http-router-server-internal';
+import type { Logger } from '@kbn/core/server';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
+import { KibanaResponse } from '@kbn/core-http-router-server-internal';
 import type { ReportingCore } from '../../../..';
 import { ScheduledReportsService } from '../../../../services/scheduled_reports';
 import type { ReportingPluginRouter } from '../../../../types';
@@ -17,7 +16,7 @@ import { handleUnavailable } from '../../../common/request_handler';
 
 const { SCHEDULED } = INTERNAL_ROUTES;
 
-export const registerInternalBulkDisableRoute = ({
+export const registerInternalBulkDeleteRoute = ({
   logger,
   router,
   reporting,
@@ -26,10 +25,9 @@ export const registerInternalBulkDisableRoute = ({
   router: ReportingPluginRouter;
   reporting: ReportingCore;
 }) => {
-  // allow scheduled reports to be disabled
-  const path = SCHEDULED.BULK_DISABLE;
+  const path = SCHEDULED.BULK_DELETE;
 
-  router.patch(
+  router.delete(
     {
       path,
       security: {
@@ -40,7 +38,7 @@ export const registerInternalBulkDisableRoute = ({
       },
       validate: {
         body: schema.object({
-          ids: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 1000 }),
+          ids: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 50 }),
         }),
       },
       options: { access: 'internal' },
@@ -71,7 +69,7 @@ export const registerInternalBulkDisableRoute = ({
           responseFactory: res,
         });
 
-        const results = await scheduledReportsService.bulkDisable({ user, ids });
+        const results = await scheduledReportsService.bulkDelete({ user, ids });
 
         counters.usageCounter();
 

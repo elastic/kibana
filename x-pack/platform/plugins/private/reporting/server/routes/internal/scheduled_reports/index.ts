@@ -7,15 +7,17 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { ReportingCore } from '../../..';
-import { registerInternalGetList } from './list';
-import { registerInternalPatchBulkDisable } from './bulk_disable';
-import { registerInternalPostScheduleEndpoint } from './post';
+import { registerInternalListRoute } from './list';
+import { registerInternalBulkDisableRoute } from './bulk_disable';
+import { registerInternalPostScheduleRoute } from './post';
+import { registerInternalBulkDeleteRoute } from './bulk_delete';
 
 export function registerScheduledReportsRoutesInternal(reporting: ReportingCore, logger: Logger) {
   const setupDeps = reporting.getPluginSetupDeps();
   const { router } = setupDeps;
 
-  registerInternalGetList({ logger, router, reporting });
-  registerInternalPatchBulkDisable({ logger, router, reporting });
-  registerInternalPostScheduleEndpoint({ logger, router, reporting });
+  registerInternalListRoute({ logger, router, reporting });
+  registerInternalBulkDisableRoute({ logger, router, reporting });
+  registerInternalPostScheduleRoute({ logger, router, reporting });
+  registerInternalBulkDeleteRoute({ logger, router, reporting });
 }

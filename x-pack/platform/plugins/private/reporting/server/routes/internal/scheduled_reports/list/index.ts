@@ -21,7 +21,7 @@ import { handleUnavailable } from '../../../common/request_handler';
 
 const { SCHEDULED } = INTERNAL_ROUTES;
 
-export const registerInternalGetList = ({
+export const registerInternalListRoute = ({
   logger,
   router,
   reporting,
