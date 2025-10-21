@@ -1894,14 +1894,14 @@ describe('SAMLAuthenticationProvider', () => {
         );
 
         const refreshFailureReason = new Boom.Boom('Authentication failed');
-        mockOptions.uiam.refreshSessionTokens.mockRejectedValue(refreshFailureReason);
+        mockOptions.uiam?.refreshSessionTokens.mockRejectedValue(refreshFailureReason);
 
         await expect(provider.authenticate(request, state)).resolves.toEqual(
           AuthenticationResult.failed(refreshFailureReason as any)
         );
 
-        expect(mockOptions.uiam.refreshSessionTokens).toHaveBeenCalledTimes(1);
-        expect(mockOptions.uiam.refreshSessionTokens).toHaveBeenCalledWith(state.refreshToken);
+        expect(mockOptions.uiam?.refreshSessionTokens).toHaveBeenCalledTimes(1);
+        expect(mockOptions.uiam?.refreshSessionTokens).toHaveBeenCalledWith(state.refreshToken);
 
         expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
           headers: { authorization, [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret' },
