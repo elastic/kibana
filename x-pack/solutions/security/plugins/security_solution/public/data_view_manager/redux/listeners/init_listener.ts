@@ -31,7 +31,7 @@ import { createExploreDataView } from '../../utils/create_explore_data_view';
  * and that state is not reset for slices that already have selections.
  *
  * @param dependencies - Core and plugin services required for data view creation and retrieval.
- * @param attacksAlertAlignment - Prevent attacks dataview creation if feature flag is not enabled.
+ * @param attacksAlertsAlignmentEnabled - Prevent attacks dataview creation if feature flag is not enabled.
  * @returns An object with the actionCreator and effect for Redux listener middleware.
  */
 export const createInitListener = (
@@ -42,7 +42,7 @@ export const createInitListener = (
     dataViews: DataViewsServicePublic;
     spaces: SpacesPluginStart;
   },
-  attacksAlertAlignment: boolean
+  attacksAlertsAlignmentEnabled: boolean
 ) => {
   return {
     actionCreator: sharedDataViewManagerSlice.actions.init,
@@ -58,7 +58,7 @@ export const createInitListener = (
           spaces: dependencies.spaces,
           application: dependencies.application,
           http: dependencies.http,
-          attacksAlertAlignment,
+          attacksAlertsAlignmentEnabled,
         });
 
         const exploreDataView = await createExploreDataView(

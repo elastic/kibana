@@ -42,7 +42,7 @@ export const useInitDataViewManager = () => {
   const dispatch = useDispatch();
   const services = useKibana().services;
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const attacksAlertAlignment = useIsExperimentalFeatureEnabled('attacksAlertAlignment');
+  const attacksAlertsAlignmentEnabled = useIsExperimentalFeatureEnabled('attacksAlertsAlignment');
 
   const {
     loading: loadingSignalIndex,
@@ -89,7 +89,7 @@ export const useInitDataViewManager = () => {
         application: services.application,
         spaces: services.spaces,
       },
-      attacksAlertAlignment
+      attacksAlertsAlignmentEnabled
     );
 
     dispatch(addListener(dataViewsLoadingListener));
@@ -121,7 +121,7 @@ export const useInitDataViewManager = () => {
       });
     };
   }, [
-    attacksAlertAlignment,
+    attacksAlertsAlignmentEnabled,
     dispatch,
     newDataViewPickerEnabled,
     services.application,

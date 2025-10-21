@@ -31,7 +31,7 @@ export interface CreateDefaultDataViewDependencies {
   /**
    * If true, will create the attack data view along with the default and alert data views.
    */
-  attacksAlertAlignment?: boolean;
+  attacksAlertsAlignmentEnabled?: boolean;
 }
 
 export const createDefaultDataView = async ({
@@ -41,7 +41,7 @@ export const createDefaultDataView = async ({
   skip = false,
   http,
   application,
-  attacksAlertAlignment = false,
+  attacksAlertsAlignmentEnabled = false,
 }: CreateDefaultDataViewDependencies) => {
   const configPatternList = uiSettings.get(DEFAULT_INDEX_KEY);
   let defaultDataView: SourcererModel['defaultDataView'];
@@ -85,7 +85,7 @@ export const createDefaultDataView = async ({
         dataViewId: `${DEFAULT_ALERT_DATA_VIEW_ID}-${currentSpaceId}`,
         indexName: signal.name ?? undefined,
       },
-      ...(attacksAlertAlignment && {
+      ...(attacksAlertsAlignmentEnabled && {
         attackDetails: {
           dataViewId: `${DEFAULT_ATTACK_DATA_VIEW_ID}-${currentSpaceId}`,
           patternList: [
