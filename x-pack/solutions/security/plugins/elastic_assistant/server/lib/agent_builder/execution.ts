@@ -11,7 +11,7 @@ import { streamFactory } from '@kbn/ml-response-stream/server';
 import type { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
 import { isEmpty } from 'lodash';
 import { pruneContentReferences } from '@kbn/elastic-assistant-common';
-import { INVOKE_ASSISTANT_SUCCESS_EVENT } from '../../lib/telemetry/event_based_telemetry';
+import { INVOKE_ASSISTANT_SUCCESS_EVENT } from '../telemetry/event_based_telemetry';
 import type {
   StreamingExecutionParams,
   NonStreamingExecutionParams,
@@ -84,7 +84,7 @@ export const executeStreaming = async ({
           'core.security.ask_about_esql': 'AskAboutESQLTool',
           'core.security.entity_risk_score': 'EntityRiskScoreTool',
           'core.security.integration_knowledge': 'IntegrationKnowledgeTool',
-          'core.security.security_labs_knowledge': 'SecurityLabsKnowledgeTool',
+          'core.security.security_labs_knowledge': 'SecurityLabsKnowledgeBaseTool',
         };
         return toolMapping[toolName] || 'CustomTool';
       };
