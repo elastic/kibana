@@ -7,11 +7,61 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import fs from 'fs';
 import type { ExistingFailedTestIssue } from './existing_failed_test_issues';
 import type { TestFailure } from './get_failures';
 import type { ScoutTestFailureExtended } from './get_scout_failures';
 import type { GithubApi } from './github_api';
 import { getIssueMetadata, updateIssueMetadata } from './issue_metadata';
+
+/**
+ * Helper function to embed screenshots in GitHub issue body using base64
+ */
+function embedScreenshotsInIssueBody(
+  attachments: Array<{ name: string; path?: string; contentType: string }>,
+  maxFileSize: number = 1024 * 1024 // 1MB limit per file
+): string[] {
+  const embeddedImages: string[] = [];
+
+  if (!attachments || attachments.length === 0) {
+    return embeddedImages;
+  }
+
+  // Filter for image attachments
+  const imageAttachments = attachments.filter(
+    (attachment) =>
+      attachment.contentType.startsWith('image/') &&
+      attachment.path &&
+      fs.existsSync(attachment.path)
+  );
+
+  for (const attachment of imageAttachments) {
+    try {
+      const fileStats = fs.statSync(attachment.path!);
+
+      // Skip files that are too large
+      if (fileStats.size > maxFileSize) {
+        // eslint-disable-next-line no-console
+        console.warn(`Skipping large screenshot: ${attachment.name} (${fileStats.size} bytes)`);
+        continue;
+      }
+
+      // Read file and convert to base64
+      const fileBuffer = fs.readFileSync(attachment.path!);
+      const base64Data = fileBuffer.toString('base64');
+      const dataUrl = `data:${attachment.contentType};base64,${base64Data}`;
+
+      // Create markdown image with caption
+      const imageMarkdown = `![${attachment.name}](${dataUrl})`;
+      embeddedImages.push(imageMarkdown);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(`Failed to embed screenshot ${attachment.name}:`, error);
+    }
+  }
+
+  return embeddedImages;
+}
 
 export async function createFailureIssue(
   buildUrl: string,
@@ -74,6 +124,16 @@ export async function createFailureIssue(
         : '',
       ''
     );
+
+    // Embed screenshots if available
+    if (scoutFailure.attachments && scoutFailure.attachments.length > 0) {
+      const embeddedScreenshots = embedScreenshotsInIssueBody(scoutFailure.attachments);
+      if (embeddedScreenshots.length > 0) {
+        bodyContent.push('**Screenshots:**', '');
+        bodyContent.push(...embeddedScreenshots);
+        bodyContent.push('');
+      }
+    }
   }
 
   const body = updateIssueMetadata(bodyContent.join('\n'), {
