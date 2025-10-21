@@ -9,11 +9,12 @@
 
 import { noSearchSessionStorageCapabilityMessage } from '@kbn/data-plugin/public';
 
-import { dataService } from '../../services/kibana_services';
+import { combineLatest, filter } from 'rxjs';
 import type { DashboardApi, DashboardCreationOptions } from '../..';
-import { newSession$ } from './new_session';
+import { dataService } from '../../services/kibana_services';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import type { DashboardInternalApi } from '../types';
+import { newSession$ } from './new_session';
 
 /**
  * Enables dashboard search sessions.
@@ -45,30 +46,37 @@ export function startDashboardSearchSessionIntegration(
     }
   );
 
-  const newSessionSubscription = newSession$(dashboardApi).subscribe(() => {
-    const currentSearchSessionId = dashboardApi.searchSessionId$.value;
+  const newSessionSubscription = combineLatest([
+    newSession$(dashboardApi),
+    dashboardApi.isFetchPaused$,
+  ])
+    .pipe(
+      filter(([, isFetchPaused]) => !isFetchPaused) // don't generate new search session until fetch is unpaused
+    )
+    .subscribe(() => {
+      const currentSearchSessionId = dashboardApi.searchSessionId$.value;
 
-    const updatedSearchSessionId: string | undefined = (() => {
-      let searchSessionIdFromURL = getSearchSessionIdFromURL();
-      if (searchSessionIdFromURL) {
-        if (
-          dataService.search.session.isRestore() &&
-          dataService.search.session.isCurrentSession(searchSessionIdFromURL)
-        ) {
-          // we had previously been in a restored session but have now changed state so remove the session id from the URL.
-          removeSessionIdFromUrl();
-          searchSessionIdFromURL = undefined;
-        } else {
-          dataService.search.session.restore(searchSessionIdFromURL);
+      const updatedSearchSessionId: string | undefined = (() => {
+        let searchSessionIdFromURL = getSearchSessionIdFromURL();
+        if (searchSessionIdFromURL) {
+          if (
+            dataService.search.session.isRestore() &&
+            dataService.search.session.isCurrentSession(searchSessionIdFromURL)
+          ) {
+            // we had previously been in a restored session but have now changed state so remove the session id from the URL.
+            removeSessionIdFromUrl();
+            searchSessionIdFromURL = undefined;
+          } else {
+            dataService.search.session.restore(searchSessionIdFromURL);
+          }
         }
-      }
-      return searchSessionIdFromURL ?? dataService.search.session.start();
-    })();
+        return searchSessionIdFromURL ?? dataService.search.session.start();
+      })();
 
-    if (updatedSearchSessionId && updatedSearchSessionId !== currentSearchSessionId) {
-      setSearchSessionId(updatedSearchSessionId);
-    }
-  });
+      if (updatedSearchSessionId && updatedSearchSessionId !== currentSearchSessionId) {
+        setSearchSessionId(updatedSearchSessionId);
+      }
+    });
 
   return () => {
     newSessionSubscription.unsubscribe();

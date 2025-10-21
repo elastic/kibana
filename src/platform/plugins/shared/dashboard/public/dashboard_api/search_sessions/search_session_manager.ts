@@ -23,7 +23,8 @@ export function initializeSearchSessionManager(
 
   let stopSearchSessionIntegration: (() => void) | undefined;
   if (searchSessionSettings) {
-    const initialSearchSessionId = dataService.search.session.start();
+    const { sessionIdToRestore } = searchSessionSettings;
+    const initialSearchSessionId = sessionIdToRestore ?? dataService.search.session.start();
     searchSessionId$.next(initialSearchSessionId);
 
     stopSearchSessionIntegration = startDashboardSearchSessionIntegration(
