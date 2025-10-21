@@ -32,98 +32,53 @@ export function formatFunctionSignature(functionDef: FunctionDefinition): string
     return `${functionDef.name}()`;
   }
 
-  const returnTypes = collectReturnTypes(functionDef.signatures);
-  const bestSignature = findMostComprehensiveSignature(functionDef.signatures);
-  const formattedParams = formatParameters(bestSignature, functionDef.signatures);
-
-  return buildSignatureString(functionDef.name, formattedParams, returnTypes);
-}
-
-/**
- * Collects all unique return types from the function signatures
- */
-function collectReturnTypes(signatures: FunctionDefinition['signatures']): Set<string> {
+  // Single pass to collect all data we need
   const returnTypes = new Set<string>();
-  signatures.forEach((signature) => {
-    returnTypes.add(signature.returnType);
-  });
-  return returnTypes;
-}
-
-/**
- * Finds the signature with the most parameters (most complete parameter structure)
- */
-function findMostComprehensiveSignature(
-  signatures: FunctionDefinition['signatures']
-): FunctionDefinition['signatures'][0] {
-  let bestSignature = signatures[0];
+  const parameterTypeMap = new Map<string, Set<string>>();
+  let bestSignature = functionDef.signatures[0];
   let maxParams = bestSignature.params.length;
 
-  for (const signature of signatures) {
+  // Single iteration to collect return types, parameter types, and find best signature
+  functionDef.signatures.forEach((signature) => {
+    // Collect return types
+    returnTypes.add(signature.returnType);
+
+    // Find signature with most parameters
     if (signature.params.length > maxParams) {
       maxParams = signature.params.length;
       bestSignature = signature;
     }
-  }
 
-  return bestSignature;
-}
-
-/**
- * Gets all unique types for a parameter with the given name across all signatures
- */
-function getUniqueTypesForParameter(
-  paramName: string,
-  signatures: FunctionDefinition['signatures']
-): Set<string> {
-  const types = new Set<string>();
-
-  signatures.forEach((signature) => {
-    const matchingParam = signature.params.find((p) => p.name === paramName);
-    if (matchingParam) {
-      types.add(matchingParam.type);
-    }
+    // Collect parameter types in a single pass
+    signature.params.forEach((param) => {
+      if (!parameterTypeMap.has(param.name)) {
+        parameterTypeMap.set(param.name, new Set());
+      }
+      parameterTypeMap.get(param.name)!.add(param.type);
+    });
   });
 
-  return types;
-}
-
-/**
- * Formats all parameters from the best signature, merging types from all signatures
- */
-function formatParameters(
-  bestSignature: FunctionDefinition['signatures'][0],
-  allSignatures: FunctionDefinition['signatures']
-): string[] {
-  return bestSignature.params.map((param) => {
-    const allTypes = getUniqueTypesForParameter(param.name, allSignatures);
-    const typesList = Array.from(allTypes).sort().join(' | ');
+  // Format parameters using pre-collected data
+  const formattedParams = bestSignature.params.map((param) => {
+    const types = parameterTypeMap.get(param.name)!;
+    const typesList = Array.from(types).sort().join(' | ');
     const optionalMarker = param.optional ? '?' : '';
-
     return `${param.name}${optionalMarker}: ${typesList}`;
   });
-}
 
-/**
- * Builds the final formatted signature string
- */
-function buildSignatureString(
-  functionName: string,
-  formattedParams: string[],
-  returnTypes: Set<string>
-): string {
+  // Build final string
   const returnTypesList = Array.from(returnTypes).sort().join(' | ');
 
   if (formattedParams.length > 0) {
     const paramsString = formattedParams.join(',  \n  ');
     return `\`\`\`none
-${functionName}(
+${functionDef.name}(
   ${paramsString}
 ): ${returnTypesList}
 \`\`\``;
   } else {
     return `\`\`\`none
-${functionName}(): ${returnTypesList}
+${functionDef.name}(): ${returnTypesList}
 \`\`\``;
   }
 }
