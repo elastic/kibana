@@ -18,11 +18,11 @@ export const primitive: z.ZodType<Primitive> = z.union([
 ]);
 
 export interface RecursiveRecord {
-  [key: PropertyKey]: Primitive | Primitive[] | RecursiveRecord;
+  [key: PropertyKey]: Primitive | Primitive[] | unknown[] | RecursiveRecord;
 }
 
 export const recursiveRecord: z.ZodType<RecursiveRecord> = z.lazy(() =>
-  z.record(z.union([primitive, z.array(primitive), recursiveRecord]))
+  z.record(z.union([primitive, z.array(primitive), z.array(z.unknown()), recursiveRecord]))
 );
 
 export type FlattenRecord = Record<PropertyKey, Primitive | Primitive[] | unknown[]>;
