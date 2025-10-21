@@ -113,7 +113,6 @@ For the Elastic Security 9.2.0 release information, refer to [Elastic Security S
 * Adds a check to validate whether your newly uploaded index is searchable [#231614]({{kib-pull}}231614).
 * Displays document count chart for ES|QL categorize queries [#231459]({{kib-pull}}231459).
 * UX enhancements for editing fields in the AI Connector flyout [#231037]({{kib-pull}}231037).
-* AI Connector: Adds ability to filter providers by solution type [#228116]({{kib-pull}}228116).
 
 **Kibana platform and management**:
 * Data views managed by Elastic are now clearly identified in the UI. You can no longer edit them and instead have to duplicate them to apply any changes while preserving the original data view [#223451]({{kib-pull}}223451).
