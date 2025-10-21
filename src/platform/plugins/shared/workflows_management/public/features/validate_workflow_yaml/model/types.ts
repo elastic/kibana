@@ -78,6 +78,11 @@ interface YamlValidationResultMonacoYaml extends YamlValidationResultBase {
   hoverMessage: null;
 }
 
+interface YamlValidationResultLiquidTemplate extends YamlValidationResultBase {
+  severity: YamlValidationErrorSeverity;
+  message: string;
+  owner: 'liquid-template-validation';
+}
 interface YamlValidationResultConnectorIdValid extends YamlValidationResultBase {
   severity: null;
   message: null;
@@ -94,6 +99,7 @@ export function isYamlValidationMarkerOwner(owner: string): owner is YamlValidat
   return [
     'step-name-validation',
     'variable-validation',
+    'liquid-template-validation',
     'yaml',
     'connector-id-validation',
   ].includes(owner);
@@ -104,5 +110,6 @@ export type YamlValidationResult =
   | YamlValidationResultVariableError
   | YamlValidationResultVariableValid
   | YamlValidationResultMonacoYaml
+  | YamlValidationResultLiquidTemplate
   | YamlValidationResultConnectorIdError
   | YamlValidationResultConnectorIdValid;

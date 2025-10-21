@@ -6,11 +6,13 @@
  */
 
 import { difference, isEqual, isEqualWith } from 'lodash';
+import { performance } from 'perf_hooks';
 
 import type { IClusterClient, Logger } from '@kbn/core/server';
 import type { PrivilegesService } from '@kbn/security-authorization-core';
 
 import { serializePrivileges } from './privileges_serializer';
+import { securityTelemetry } from '../otel/instrumentation';
 
 export async function registerPrivilegesWithCluster(
   logger: Logger,
@@ -18,6 +20,8 @@ export async function registerPrivilegesWithCluster(
   application: string,
   clusterClient: IClusterClient
 ) {
+  const startTime = performance.now();
+
   const arePrivilegesEqual = (
     existingPrivileges: Record<string, unknown>,
     expectedPrivileges: Record<string, unknown>
@@ -85,10 +89,22 @@ export async function registerPrivilegesWithCluster(
 
     await clusterClient.asInternalUser.security.putPrivileges({ body: expectedPrivileges });
     logger.debug(`Updated Kibana Privileges with Elasticsearch for ${application}`);
+
+    securityTelemetry.recordPrivilegeRegistrationDuration(performance.now() - startTime, {
+      application,
+      outcome: 'success',
+      deletedPrivileges: privilegesToDelete.length,
+    });
   } catch (err) {
     logger.error(
       `Error registering Kibana Privileges with Elasticsearch for ${application}: ${err.message}`
     );
+
+    securityTelemetry.recordPrivilegeRegistrationDuration(performance.now() - startTime, {
+      application,
+      outcome: 'failure',
+    });
+
     throw err;
   }
 }

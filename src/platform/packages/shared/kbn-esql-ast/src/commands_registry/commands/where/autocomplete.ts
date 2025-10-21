@@ -8,7 +8,7 @@
  */
 import { isFunctionExpression } from '../../../ast/is';
 import { within } from '../../../ast/location';
-import type { ESQLCommand, ESQLSingleAstItem } from '../../../types';
+import type { ESQLAstAllCommands, ESQLSingleAstItem } from '../../../types';
 import { pipeCompleteItem } from '../../complete_items';
 import { suggestForExpression } from '../../../definitions/utils';
 import { isExpressionComplete, getExpressionType } from '../../../definitions/utils/expressions';
@@ -17,7 +17,7 @@ import { type ISuggestionItem, type ICommandContext, Location } from '../../type
 
 export async function autocomplete(
   query: string,
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
   cursorPosition: number = query.length
