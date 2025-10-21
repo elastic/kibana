@@ -13,12 +13,9 @@ const KIBANA_VERSION_QUERY_PARAM = 'version';
 const KIBANA_DEPLOYMENT_TYPE_PARAM = 'deployment_type';
 const SANITIZED_PATH_PARAM = 'path';
 const ML_JOB_TYPE = 'ml_job_type';
-const FEEDBACK_BUTTON_DEFAULT_TEXT = i18n.translate(
-  'xpack.observabilityShared.featureFeedbackButton.defaultText',
-  {
-    defaultMessage: 'Give feedback',
-  }
-);
+const FEEDBACK_BUTTON_DEFAULT_TEXT = i18n.translate('xpack.ml.featureFeedbackButton.defaultText', {
+  defaultMessage: 'Give feedback',
+});
 
 export type NodeType = 'host' | 'pod';
 

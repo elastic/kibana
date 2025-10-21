@@ -39,8 +39,7 @@ export const FeedBackButton: FC<Props> = ({ jobIds }) => {
 
   const isMounted = useMountedState();
 
-  // TODO: Change the feedback URL
-  const HOSTS_ANOMALY_DETECTION_FEEDBACK_URL = 'https://ela.st/anomaly-explorer-feedback';
+  const HOSTS_ANOMALY_DETECTION_FEEDBACK_URL = 'https://ela.st/anomaly-detection-feedback';
 
   useEffect(() => {
     const tempJobIdsString = jobIds.join(',');
