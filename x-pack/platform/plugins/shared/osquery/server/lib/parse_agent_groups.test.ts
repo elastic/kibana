@@ -8,8 +8,84 @@
 import { aggregateResults, parseAgentSelection } from './parse_agent_groups';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
+import type { Agent } from '@kbn/fleet-plugin/common/types/models/agent';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
 import type { OsqueryAppContext } from './osquery_app_context_services';
-import type { AgentSelection } from './parse_agent_groups';
+
+function createPaginatedMockResponse(totalAgents: number, chunkSize = 9000) {
+  const agentIds = Array.from({ length: totalAgents }, (_, i) => `agent-${i + 1}`);
+
+  return jest.fn(
+    ({
+      searchAfter,
+    }: {
+      searchAfter?: SortResults;
+      kuery?: string;
+      showInactive?: boolean;
+      pitId?: string;
+      perPage?: number;
+      page?: number;
+    }): Promise<{ agents: Agent[]; total: number }> => {
+      const start = searchAfter ? (searchAfter[0] as number) + 1 : 0;
+      const end = Math.min(start + chunkSize, agentIds.length);
+      const chunk = agentIds.slice(start, end);
+
+      return Promise.resolve({
+        agents: chunk.map((id, index) => ({
+          id,
+          sort: [start + index],
+        })) as Agent[],
+        total: agentIds.length,
+      });
+    }
+  );
+}
+
+function createSimpleMockResponse(agentIds: string[]) {
+  return jest.fn().mockResolvedValue({
+    agents: agentIds.map((id, index) => ({
+      id,
+      sort: [index],
+    })) as Agent[],
+    total: agentIds.length,
+  });
+}
+
+function createMockContext(
+  mockAgentService: {
+    listAgents: jest.MockedFunction<
+      (params: {
+        searchAfter?: SortResults;
+        kuery?: string;
+        showInactive?: boolean;
+        pitId?: string;
+        perPage?: number;
+        page?: number;
+      }) => Promise<{ agents: Agent[]; total: number }>
+    >;
+  },
+  mockPackagePolicyService: {
+    list: jest.MockedFunction<
+      (
+        soClient: SavedObjectsClientContract,
+        options: { kuery?: string; perPage?: number; page?: number }
+      ) => Promise<{ items: PackagePolicy[]; total: number }>
+    >;
+  },
+  serviceOverrides: Partial<OsqueryAppContext['service']> = {}
+) {
+  return {
+    logFactory: mockLogFactory,
+    service: {
+      getAgentService: jest.fn().mockReturnValue({
+        asInternalScopedUser: jest.fn().mockReturnValue(mockAgentService),
+      }),
+      getPackagePolicyService: jest.fn().mockReturnValue(mockPackagePolicyService),
+      ...serviceOverrides,
+    },
+  } as unknown as OsqueryAppContext;
+}
 
 const mockOpenPointInTime = jest.fn().mockResolvedValue({ id: 'mockedPitId' });
 const mockClosePointInTime = jest.fn();
@@ -40,7 +116,7 @@ describe('aggregateResults', () => {
 
     const result = await aggregateResults(generatorMock, mockElasticsearchClient, mockContext);
 
-    expect(generatorMock).toHaveBeenCalledWith(1, expect.any(Number)); // 1st page, PER_PAGE
+    expect(generatorMock).toHaveBeenCalledWith(1, expect.any(Number));
     expect(mockOpenPointInTime).not.toHaveBeenCalled();
     expect(mockClosePointInTime).not.toHaveBeenCalled();
 
@@ -92,8 +168,26 @@ describe('aggregateResults', () => {
 
 describe('parseAgentSelection', () => {
   let mockSoClient: jest.Mocked<SavedObjectsClientContract>;
-  let mockAgentService: any;
-  let mockPackagePolicyService: any;
+  let mockAgentService: {
+    listAgents: jest.MockedFunction<
+      (params: {
+        searchAfter?: SortResults;
+        kuery?: string;
+        showInactive?: boolean;
+        pitId?: string;
+        perPage?: number;
+        page?: number;
+      }) => Promise<{ agents: Agent[]; total: number }>
+    >;
+  };
+  let mockPackagePolicyService: {
+    list: jest.MockedFunction<
+      (
+        soClient: SavedObjectsClientContract,
+        options: { kuery?: string; perPage?: number; page?: number }
+      ) => Promise<{ items: PackagePolicy[]; total: number }>
+    >;
+  };
   let mockContextWithServices: OsqueryAppContext;
 
   beforeEach(() => {
@@ -109,209 +203,99 @@ describe('parseAgentSelection', () => {
 
     mockPackagePolicyService = {
       list: jest.fn().mockResolvedValue({
-        items: [{ policy_ids: ['policy-1', 'policy-2'] }, { policy_ids: ['policy-3'] }],
+        items: [
+          { policy_ids: ['policy-1', 'policy-2'] } as PackagePolicy,
+          { policy_ids: ['policy-3'] } as PackagePolicy,
+        ],
         total: 2,
       }),
     };
 
-    mockContextWithServices = {
-      ...mockContext,
-      service: {
-        getAgentService: jest.fn().mockReturnValue({
-          asInternalScopedUser: jest.fn().mockReturnValue(mockAgentService),
-        }),
-        getPackagePolicyService: jest.fn().mockReturnValue(mockPackagePolicyService),
-      },
-    } as unknown as OsqueryAppContext;
+    mockContextWithServices = createMockContext(mockAgentService, mockPackagePolicyService);
   });
 
   describe('with 10k+ agents (scalability tests)', () => {
-    it('should successfully handle 15,000 agents without validation errors', async () => {
-      // Generate 15,000 agent IDs
-      const agentIds = Array.from({ length: 15000 }, (_, i) => `agent-${i + 1}`);
+    it.each([
+      {
+        count: 15000,
+        selection: { allAgentsSelected: true },
+        expectedKuery: null,
+        expectedCalls: 3,
+      },
+      {
+        count: 20000,
+        selection: { platformsSelected: ['linux', 'darwin'] },
+        expectedKuery: 'local_metadata.os.platform:(linux or darwin)',
+        expectedCalls: 4,
+      },
+      {
+        count: 12000,
+        selection: { policiesSelected: ['policy-1', 'policy-2'] },
+        expectedKuery: 'policy_id:(policy-1 or policy-2)',
+        expectedCalls: 3,
+      },
+    ])(
+      'should handle $count agents with filters',
+      async ({ count, selection, expectedKuery, expectedCalls }) => {
+        mockAgentService.listAgents = createPaginatedMockResponse(count);
 
-      // Mock listAgents to return results in chunks (simulating PIT pagination)
-      const chunkSize = 9000;
-      mockAgentService.listAgents.mockImplementation(({ searchAfter }: any) => {
-        const start = searchAfter ? searchAfter[0] + 1 : 0;
-        const end = Math.min(start + chunkSize, agentIds.length);
-        const chunk = agentIds.slice(start, end);
+        const result = await parseAgentSelection(
+          mockSoClient,
+          mockElasticsearchClient,
+          mockContextWithServices,
+          { ...selection, spaceId: 'default' }
+        );
 
-        return Promise.resolve({
-          agents: chunk.map((id, index) => ({
-            id,
-            sort: [start + index],
-          })),
-          total: agentIds.length,
-        });
-      });
+        expect(result).toHaveLength(count);
+        expect(mockAgentService.listAgents).toHaveBeenCalledTimes(expectedCalls);
 
-      const agentSelection: AgentSelection = {
-        allAgentsSelected: true,
-        spaceId: 'default',
-      };
-
-      const result = await parseAgentSelection(
-        mockSoClient,
-        mockElasticsearchClient,
-        mockContextWithServices,
-        agentSelection
-      );
-
-      // Should return all 15,000 agents without hitting max_result_window limit
-      expect(result).toHaveLength(15000);
-      expect(result).toEqual(agentIds);
-      // Should have used PIT pagination (3 calls: initial, refetch with PIT, page 2)
-      expect(mockAgentService.listAgents).toHaveBeenCalledTimes(3);
-    });
-
-    it('should handle 20,000 agents with platform filtering', async () => {
-      const agentIds = Array.from({ length: 20000 }, (_, i) => `agent-${i + 1}`);
-
-      const chunkSize = 9000;
-      mockAgentService.listAgents.mockImplementation(({ searchAfter }: any) => {
-        // Determine starting position based on searchAfter
-        const start = searchAfter ? searchAfter[0] + 1 : 0;
-        const end = Math.min(start + chunkSize, agentIds.length);
-        const chunk = agentIds.slice(start, end);
-
-        return Promise.resolve({
-          agents: chunk.map((id, index) => ({
-            id,
-            sort: [start + index],
-          })),
-          total: agentIds.length,
-        });
-      });
-
-      const agentSelection: AgentSelection = {
-        platformsSelected: ['linux', 'darwin'],
-        spaceId: 'default',
-      };
-
-      const result = await parseAgentSelection(
-        mockSoClient,
-        mockElasticsearchClient,
-        mockContextWithServices,
-        agentSelection
-      );
-
-      expect(result).toHaveLength(20000);
-      // Verify that the kuery includes platform filtering
-      const firstCall = mockAgentService.listAgents.mock.calls[0][0];
-      expect(firstCall.kuery).toContain('local_metadata.os.platform:(linux or darwin)');
-    });
-
-    it('should handle 12,000 agents with policy filtering', async () => {
-      const agentIds = Array.from({ length: 12000 }, (_, i) => `agent-${i + 1}`);
-
-      const chunkSize = 9000;
-      mockAgentService.listAgents.mockImplementation(({ searchAfter }: any) => {
-        // Determine starting position based on searchAfter
-        const start = searchAfter ? searchAfter[0] + 1 : 0;
-        const end = Math.min(start + chunkSize, agentIds.length);
-        const chunk = agentIds.slice(start, end);
-
-        return Promise.resolve({
-          agents: chunk.map((id, index) => ({
-            id,
-            sort: [start + index],
-          })),
-          total: agentIds.length,
-        });
-      });
-
-      const agentSelection: AgentSelection = {
-        policiesSelected: ['policy-1', 'policy-2'],
-        spaceId: 'default',
-      };
-
-      const result = await parseAgentSelection(
-        mockSoClient,
-        mockElasticsearchClient,
-        mockContextWithServices,
-        agentSelection
-      );
-
-      expect(result).toHaveLength(12000);
-      const firstCall = mockAgentService.listAgents.mock.calls[0][0];
-      expect(firstCall.kuery).toContain('policy_id:(policy-1 or policy-2)');
-    });
+        if (expectedKuery) {
+          const firstCall = mockAgentService.listAgents.mock.calls[0][0];
+          expect(firstCall.kuery).toContain(expectedKuery);
+        }
+      }
+    );
   });
 
   describe('PIT-based pagination verification', () => {
-    it('should use PIT when results exceed one page', async () => {
-      const agentIds = Array.from({ length: 18000 }, (_, i) => `agent-${i + 1}`);
+    it('should use PIT with searchAfter for multi-page results', async () => {
+      mockAgentService.listAgents = createPaginatedMockResponse(18000);
 
-      mockAgentService.listAgents.mockImplementation(({ searchAfter }: any) => {
-        // Determine starting position based on searchAfter
-        const start = searchAfter ? searchAfter[0] + 1 : 0;
-        const end = Math.min(start + 9000, agentIds.length);
-        const chunk = agentIds.slice(start, end);
-
-        return Promise.resolve({
-          agents: chunk.map((id, index) => ({
-            id,
-            sort: [start + index],
-          })),
-          total: agentIds.length,
-        });
-      });
-
-      const agentSelection: AgentSelection = {
-        allAgentsSelected: true,
-        spaceId: 'default',
-      };
-
-      await parseAgentSelection(
+      const result = await parseAgentSelection(
         mockSoClient,
         mockElasticsearchClient,
         mockContextWithServices,
-        agentSelection
+        { allAgentsSelected: true, spaceId: 'default' }
       );
 
-      // Verify PIT was opened and closed
+      expect(result).toHaveLength(18000);
+
       expect(mockOpenPointInTime).toHaveBeenCalledWith({
         index: '.fleet-agents',
         keep_alive: '10m',
       });
       expect(mockClosePointInTime).toHaveBeenCalledWith({ id: 'mockedPitId' });
-    });
 
-    it('should use searchAfter for subsequent pages', async () => {
-      const agentIds = Array.from({ length: 18000 }, (_, i) => `agent-${i + 1}`);
-
-      mockAgentService.listAgents.mockImplementation(({ searchAfter }: any) => {
-        // Determine starting position based on searchAfter
-        const start = searchAfter ? searchAfter[0] + 1 : 0;
-        const end = Math.min(start + 9000, agentIds.length);
-        const chunk = agentIds.slice(start, end);
-
-        return Promise.resolve({
-          agents: chunk.map((id, index) => ({
-            id,
-            sort: [start + index],
-          })),
-          total: agentIds.length,
-        });
-      });
-
-      const agentSelection: AgentSelection = {
-        allAgentsSelected: true,
-        spaceId: 'default',
-      };
-
-      await parseAgentSelection(
-        mockSoClient,
-        mockElasticsearchClient,
-        mockContextWithServices,
-        agentSelection
-      );
-
-      // Verify searchAfter was used for second page (third call overall)
       const thirdCall = mockAgentService.listAgents.mock.calls[2][0];
       expect(thirdCall.searchAfter).toBeDefined();
       expect(thirdCall.pitId).toBe('mockedPitId');
+    });
+
+    it('should continue even if PIT close fails', async () => {
+      mockAgentService.listAgents = createPaginatedMockResponse(18000);
+      mockClosePointInTime.mockRejectedValueOnce(new Error('PIT close failed'));
+
+      const result = await parseAgentSelection(
+        mockSoClient,
+        mockElasticsearchClient,
+        mockContextWithServices,
+        { allAgentsSelected: true, spaceId: 'default' }
+      );
+
+      expect(result).toHaveLength(18000);
+      expect(mockLogFactory.get().warn).toHaveBeenCalledWith(
+        expect.stringContaining('Error closing point in time')
+      );
     });
   });
 
@@ -322,67 +306,56 @@ describe('parseAgentSelection', () => {
         total: 0,
       });
 
-      const agentSelection: AgentSelection = {
-        allAgentsSelected: true,
-        spaceId: 'default',
-      };
-
       const result = await parseAgentSelection(
         mockSoClient,
         mockElasticsearchClient,
         mockContextWithServices,
-        agentSelection
+        { allAgentsSelected: true, spaceId: 'default' }
       );
 
       expect(result).toEqual([]);
     });
 
-    it('should handle service unavailability (no agent service)', async () => {
-      const contextWithoutService = {
-        ...mockContext,
-        service: {
-          getAgentService: jest.fn().mockReturnValue(undefined),
-          getPackagePolicyService: jest.fn().mockReturnValue(undefined),
-        },
-      } as unknown as OsqueryAppContext;
-
-      const agentSelection: AgentSelection = {
-        allAgentsSelected: true,
-        spaceId: 'default',
-      };
-
+    it('should handle empty agents array', async () => {
       const result = await parseAgentSelection(
         mockSoClient,
         mockElasticsearchClient,
-        contextWithoutService,
-        agentSelection
+        mockContextWithServices,
+        { agents: [], spaceId: 'default' }
       );
 
-      // Should return empty array when services unavailable
       expect(result).toEqual([]);
     });
 
-    it('should handle package policy service unavailability', async () => {
-      const contextWithoutPackageService = {
-        ...mockContext,
-        service: {
+    it.each([
+      {
+        name: 'agent service unavailable',
+        serviceOverrides: {
+          getAgentService: jest.fn().mockReturnValue(undefined),
+          getPackagePolicyService: jest.fn().mockReturnValue(undefined),
+        },
+      },
+      {
+        name: 'package policy service unavailable',
+        serviceOverrides: {
           getAgentService: jest.fn().mockReturnValue({
             asInternalScopedUser: jest.fn().mockReturnValue(mockAgentService),
           }),
           getPackagePolicyService: jest.fn().mockReturnValue(undefined),
         },
-      } as unknown as OsqueryAppContext;
-
-      const agentSelection: AgentSelection = {
-        allAgentsSelected: true,
-        spaceId: 'default',
-      };
+      },
+    ])('should return empty array when $name', async ({ serviceOverrides }) => {
+      const contextWithoutService = createMockContext(
+        mockAgentService,
+        mockPackagePolicyService,
+        serviceOverrides
+      );
 
       const result = await parseAgentSelection(
         mockSoClient,
         mockElasticsearchClient,
-        contextWithoutPackageService,
-        agentSelection
+        contextWithoutService,
+        { allAgentsSelected: true, spaceId: 'default' }
       );
 
       expect(result).toEqual([]);
@@ -391,63 +364,39 @@ describe('parseAgentSelection', () => {
 
   describe('agent ID deduplication', () => {
     it('should deduplicate agent IDs from multiple sources', async () => {
-      mockAgentService.listAgents.mockResolvedValue({
-        agents: [
-          { id: 'agent-1', sort: [1] },
-          { id: 'agent-2', sort: [2] },
-          { id: 'agent-3', sort: [3] },
-        ],
-        total: 3,
-      });
-
-      const agentSelection: AgentSelection = {
-        agents: ['agent-1', 'agent-4', 'agent-1'], // Duplicates
-        platformsSelected: ['linux'],
-        spaceId: 'default',
-      };
+      mockAgentService.listAgents = createSimpleMockResponse(['agent-1', 'agent-2', 'agent-3']);
 
       const result = await parseAgentSelection(
         mockSoClient,
         mockElasticsearchClient,
         mockContextWithServices,
-        agentSelection
+        {
+          agents: ['agent-1', 'agent-4', 'agent-1'],
+          platformsSelected: ['linux'],
+          spaceId: 'default',
+        }
       );
 
-      // Should contain unique agents: agent-1, agent-2, agent-3, agent-4
       expect(result).toHaveLength(4);
-      expect(result).toContain('agent-1');
-      expect(result).toContain('agent-2');
-      expect(result).toContain('agent-3');
-      expect(result).toContain('agent-4');
-      // Verify no duplicates
+      expect(result).toEqual(expect.arrayContaining(['agent-1', 'agent-2', 'agent-3', 'agent-4']));
       expect(new Set(result).size).toBe(result.length);
     });
 
     it('should deduplicate when same agents appear in different filter results', async () => {
-      // Simulate overlapping results from platform and policy filters
-      mockAgentService.listAgents.mockResolvedValue({
-        agents: [
-          { id: 'agent-1', sort: [1] },
-          { id: 'agent-2', sort: [2] },
-        ],
-        total: 2,
-      });
-
-      const agentSelection: AgentSelection = {
-        agents: ['agent-1', 'agent-2'], // Same as filter results
-        platformsSelected: ['linux'],
-        policiesSelected: ['policy-1'],
-        spaceId: 'default',
-      };
+      mockAgentService.listAgents = createSimpleMockResponse(['agent-1', 'agent-2']);
 
       const result = await parseAgentSelection(
         mockSoClient,
         mockElasticsearchClient,
         mockContextWithServices,
-        agentSelection
+        {
+          agents: ['agent-1', 'agent-2'],
+          platformsSelected: ['linux'],
+          policiesSelected: ['policy-1'],
+          spaceId: 'default',
+        }
       );
 
-      // Should deduplicate to 2 unique agents
       expect(result).toHaveLength(2);
       expect(new Set(result).size).toBe(2);
     });
@@ -468,24 +417,13 @@ describe('parseAgentSelection', () => {
         },
       } as unknown as OsqueryAppContext;
 
-      mockAgentService.listAgents.mockResolvedValue({
-        agents: [{ id: 'agent-1', sort: [1] }],
-        total: 1,
-      });
+      mockAgentService.listAgents = createSimpleMockResponse(['agent-1']);
 
-      const agentSelection: AgentSelection = {
+      await parseAgentSelection(mockSoClient, mockElasticsearchClient, contextWithSpaceService, {
         allAgentsSelected: true,
         spaceId,
-      };
+      });
 
-      await parseAgentSelection(
-        mockSoClient,
-        mockElasticsearchClient,
-        contextWithSpaceService,
-        agentSelection
-      );
-
-      // Verify space-scoped service was requested
       expect(mockAsInternalScopedUser).toHaveBeenCalledWith(spaceId);
     });
 
@@ -508,91 +446,55 @@ describe('parseAgentSelection', () => {
         total: 0,
       });
 
-      const agentSelection: AgentSelection = {
-        agents: ['agent-from-space-B'], // Potentially from different space
-        spaceId,
-      };
-
       const result = await parseAgentSelection(
         mockSoClient,
         mockElasticsearchClient,
         contextWithSpaceService,
-        agentSelection
+        { agents: ['agent-from-space-B'], spaceId }
       );
 
-      // Agent IDs are accepted, but space service ensures they can only be queried
-      // if they belong to the correct space (enforced at query execution time)
       expect(result).toContain('agent-from-space-B');
       expect(mockAsInternalScopedUser).toHaveBeenCalledWith(spaceId);
     });
   });
 
   describe('filters and kuery construction', () => {
-    it('should always include online status and Osquery policy filters', async () => {
-      mockAgentService.listAgents.mockResolvedValue({
-        agents: [{ id: 'agent-1', sort: [1] }],
-        total: 1,
+    it.each([
+      {
+        name: 'always includes base filters',
+        selection: { allAgentsSelected: true },
+        expectedFragments: ['status:online', 'policy_id:(policy-1 or policy-2 or policy-3)'],
+      },
+      {
+        name: 'combines platform and policy filters',
+        selection: { platformsSelected: ['linux', 'darwin'], policiesSelected: ['policy-1'] },
+        expectedFragments: [
+          'status:online',
+          'local_metadata.os.platform:(linux or darwin)',
+          'policy_id:(policy-1)',
+        ],
+      },
+    ])('$name', async ({ selection, expectedFragments }) => {
+      mockAgentService.listAgents = createSimpleMockResponse(['agent-1']);
+
+      await parseAgentSelection(mockSoClient, mockElasticsearchClient, mockContextWithServices, {
+        ...selection,
+        spaceId: 'default',
       });
 
-      const agentSelection: AgentSelection = {
-        allAgentsSelected: true,
-        spaceId: 'default',
-      };
-
-      await parseAgentSelection(
-        mockSoClient,
-        mockElasticsearchClient,
-        mockContextWithServices,
-        agentSelection
-      );
-
       const kueryCall = mockAgentService.listAgents.mock.calls[0][0].kuery;
-      expect(kueryCall).toContain('status:online');
-      expect(kueryCall).toContain('policy_id:(policy-1 or policy-2 or policy-3)');
-    });
-
-    it('should correctly combine platform and policy filters', async () => {
-      mockAgentService.listAgents.mockResolvedValue({
-        agents: [{ id: 'agent-1', sort: [1] }],
-        total: 1,
+      expectedFragments.forEach((fragment) => {
+        expect(kueryCall).toContain(fragment);
       });
-
-      const agentSelection: AgentSelection = {
-        platformsSelected: ['linux', 'darwin'],
-        policiesSelected: ['policy-1'],
-        spaceId: 'default',
-      };
-
-      await parseAgentSelection(
-        mockSoClient,
-        mockElasticsearchClient,
-        mockContextWithServices,
-        agentSelection
-      );
-
-      const kueryCall = mockAgentService.listAgents.mock.calls[0][0].kuery;
-      expect(kueryCall).toContain('status:online');
-      expect(kueryCall).toContain('local_metadata.os.platform:(linux or darwin)');
-      expect(kueryCall).toContain('policy_id:(policy-1)');
     });
 
     it('should set showInactive to false', async () => {
-      mockAgentService.listAgents.mockResolvedValue({
-        agents: [{ id: 'agent-1', sort: [1] }],
-        total: 1,
-      });
+      mockAgentService.listAgents = createSimpleMockResponse(['agent-1']);
 
-      const agentSelection: AgentSelection = {
+      await parseAgentSelection(mockSoClient, mockElasticsearchClient, mockContextWithServices, {
         allAgentsSelected: true,
         spaceId: 'default',
-      };
-
-      await parseAgentSelection(
-        mockSoClient,
-        mockElasticsearchClient,
-        mockContextWithServices,
-        agentSelection
-      );
+      });
 
       const callArgs = mockAgentService.listAgents.mock.calls[0][0];
       expect(callArgs.showInactive).toBe(false);
@@ -601,16 +503,11 @@ describe('parseAgentSelection', () => {
 
   describe('explicitly provided agent IDs', () => {
     it('should include explicitly provided agent IDs even without filters', async () => {
-      const agentSelection: AgentSelection = {
-        agents: ['agent-explicit-1', 'agent-explicit-2'],
-        spaceId: 'default',
-      };
-
       const result = await parseAgentSelection(
         mockSoClient,
         mockElasticsearchClient,
         mockContextWithServices,
-        agentSelection
+        { agents: ['agent-explicit-1', 'agent-explicit-2'], spaceId: 'default' }
       );
 
       expect(result).toHaveLength(2);
@@ -619,25 +516,20 @@ describe('parseAgentSelection', () => {
     });
 
     it('should merge explicitly provided agent IDs with filtered results', async () => {
-      mockAgentService.listAgents.mockResolvedValue({
-        agents: [
-          { id: 'agent-filtered-1', sort: [1] },
-          { id: 'agent-filtered-2', sort: [2] },
-        ],
-        total: 2,
-      });
-
-      const agentSelection: AgentSelection = {
-        agents: ['agent-explicit-1'],
-        platformsSelected: ['linux'],
-        spaceId: 'default',
-      };
+      mockAgentService.listAgents = createSimpleMockResponse([
+        'agent-filtered-1',
+        'agent-filtered-2',
+      ]);
 
       const result = await parseAgentSelection(
         mockSoClient,
         mockElasticsearchClient,
         mockContextWithServices,
-        agentSelection
+        {
+          agents: ['agent-explicit-1'],
+          platformsSelected: ['linux'],
+          spaceId: 'default',
+        }
       );
 
       expect(result).toHaveLength(3);
