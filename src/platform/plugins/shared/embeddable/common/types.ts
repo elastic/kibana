@@ -15,10 +15,11 @@ export type EmbeddableTransforms<
   EmbeddableState extends object = object
 > = {
   /**
-   * Temporary flag indicating transforms inject/extract references
-   * TODO: remove once all reference injection and extraction are done in server
+   * Temporary flag indicating transformOut injects references
+   * When true, container REST API responses will drop references for panels that use transformOut
+   * TODO: remove once all reference injection is done in server
    */
-  transformHandlesReferences?: boolean;
+  transformOutInjectsReferences?: boolean;
   /**
    * Converts StoredEmbeddableState and injects references into EmbeddableState
    */

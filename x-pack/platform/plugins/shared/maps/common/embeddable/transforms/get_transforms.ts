@@ -14,7 +14,7 @@ export function getTransforms(
   transformEnhancementsOut: EnhancementsRegistry['transformOut']
 ) {
   return {
-    transformHandlesReferences: true,
+    transformOutInjectsReferences: true,
     transformIn: getTransformIn(transformEnhancementsIn),
     transformOut: getTransformOut(transformEnhancementsOut),
   };

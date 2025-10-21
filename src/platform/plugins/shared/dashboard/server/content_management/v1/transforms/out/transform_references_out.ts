@@ -18,19 +18,20 @@ export function transformReferencesOut(
   panels?: DashboardAttributes['panels']
 ): SavedObjectReference[] {
   // key: panel uid
-  // value: boolean indicating if panel type handles references in transform functions
-  const handlesRefsMap: Record<string, boolean> = {};
-  function setHandlesRefs(panel: DashboardPanel) {
+  // value: boolean indicating to drop references for panel
+  // because transformOut injected references serverside
+  const dropRefsForPanel: Record<string, boolean> = {};
+  function setDropRefsForPanel(panel: DashboardPanel) {
     if (!panel.uid) return;
-    const { transformHandlesReferences } = embeddableService?.getTransforms(panel.type) ?? {};
-    handlesRefsMap[panel.uid] =
-      typeof transformHandlesReferences === 'boolean' ? transformHandlesReferences : false;
+    const { transformOutInjectsReferences } = embeddableService?.getTransforms(panel.type) ?? {};
+    dropRefsForPanel[panel.uid] =
+      typeof transformOutInjectsReferences === 'boolean' ? transformOutInjectsReferences : false;
   }
   (panels ?? []).forEach((panel) => {
     if (isDashboardSection(panel)) {
-      panel.panels.forEach((panelInSection) => setHandlesRefs(panelInSection));
+      panel.panels.forEach((panelInSection) => setDropRefsForPanel(panelInSection));
     } else {
-      setHandlesRefs(panel);
+      setDropRefsForPanel(panel);
     }
   });
 
@@ -40,8 +41,8 @@ export function transformReferencesOut(
     })
     .filter((ref) => {
       const panelId = getPanelIdFromReference(ref);
-      return panelId && handlesRefsMap[panelId]
-        ? // drop references for panels that handle references on server
+      return panelId && dropRefsForPanel[panelId]
+        ? // drop references for panels that inject references on server
           false
         : true;
     });
