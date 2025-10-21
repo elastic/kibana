@@ -179,11 +179,11 @@ module.exports = {
             'Use `react-dom` instead of `react-dom/client` until upgraded to React 18',
         },
         {
-          from: '@tanstack/query-client',
-          to: '@kbn/query-client',
+          from: '@tanstack/react-query',
+          to: '@kbn/react-query',
           exact: true,
           disallowedMessage:
-            'Use `@kbn/query-client` instead of `@tanstack/query-client`, as it defaults to networkMode="always"',
+            'Use `@kbn/react-query` instead of `@tanstack/react-query`, as it defaults to networkMode="always"',
         },
       ],
     ],
