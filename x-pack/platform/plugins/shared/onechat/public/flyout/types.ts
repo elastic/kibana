@@ -9,5 +9,6 @@ export interface ConversationFlyoutProps {
   onClose: () => void;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface OpenConversationFlyoutOptions {}
+export interface OpenConversationFlyoutOptions {
+  onClose?: () => void;
+}

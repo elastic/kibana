@@ -6,15 +6,13 @@
  */
 
 import React from 'react';
-import { distinctUntilChanged, from, skip, takeUntil } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import { ConversationFlyout } from './conversation_flyout';
 import type { OpenConversationFlyoutOptions } from './types';
 import type { OnechatInternalService } from '../services';
-import type { OnechatStartDependencies } from '../types';
+import type { OnechatStartDependencies, ConversationFlyoutRef } from '../types';
 import { OnechatServicesContext } from '../application/context/onechat_services_context';
 
 interface OpenConversationFlyoutParams {
@@ -28,17 +26,13 @@ interface OpenConversationFlyoutParams {
  *
  * @param options - Configuration options for the flyout
  * @param params - Internal parameters (services, core, etc.)
- * @returns An object with flyoutRef to close it programmatically and a promise that resolves when closed
+ * @returns An object with flyoutRef to close it programmatically
  */
 export function openConversationFlyout(
   options: OpenConversationFlyoutOptions,
   { coreStart, services, startDependencies }: OpenConversationFlyoutParams
-): { flyoutRef: OverlayRef; promise: Promise<void> } {
-  const {
-    overlays,
-    application: { currentAppId$ },
-    ...startServices
-  } = coreStart;
+): { flyoutRef: ConversationFlyoutRef } {
+  const { overlays, application, ...startServices } = coreStart;
 
   // Prepare Kibana services context
   const kibanaServices = {
@@ -58,20 +52,19 @@ export function openConversationFlyout(
     {
       'data-test-subj': 'onechat-conversation-flyout-wrapper',
       ownFocus: true,
-      onClose: () => flyoutRef.close(),
+      onClose: () => {
+        flyoutRef.close();
+        options.onClose?.();
+      },
       isResizable: true,
     }
   );
 
-  // Close the flyout when user navigates out of the current plugin
-  currentAppId$
-    .pipe(skip(1), takeUntil(from(flyoutRef.onClose)), distinctUntilChanged())
-    .subscribe(() => {
-      flyoutRef.close();
-    });
+  const conversationFlyoutRef: ConversationFlyoutRef = {
+    close: () => flyoutRef.close(),
+  };
 
   return {
-    flyoutRef,
-    promise: flyoutRef.onClose.then(() => {}),
+    flyoutRef: conversationFlyoutRef,
   };
 }
