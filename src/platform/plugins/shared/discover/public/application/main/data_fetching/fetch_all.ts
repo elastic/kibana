@@ -64,6 +64,8 @@ export function fetchAll(
     reset: boolean;
     getCurrentTab: () => TabState;
     onFetchRecordsComplete?: () => Promise<void>;
+    internalState?: InternalStateStore;
+    tabState?: TabState;
   }
 ): Promise<void> {
   const {
@@ -79,15 +81,22 @@ export function fetchAll(
     abortController,
     getCurrentTab,
     onFetchRecordsComplete,
+    internalState,
+    tabState,
   } = params;
   const { data, expressions } = services;
 
   try {
     const searchSource = savedSearch.searchSource.createChild();
     const dataView = searchSource.getField('index')!;
-    const { query, sort } = appStateContainer.getState();
+    const { query, sort, viewMode } = appStateContainer.getState();
+    const { compareMode } = internalState.getState();
     const isEsqlQuery = isOfAggregateQueryType(query);
     const currentTab = getCurrentTab();
+
+    if (compareMode && tabState?.compareQuery && viewMode === 'compare_documents') {
+      searchSource.setField('query', { language: 'kuery', query: tabState.compareQuery });
+    }
 
     if (reset) {
       sendResetMsg(dataSubjects, initialFetchStatus);

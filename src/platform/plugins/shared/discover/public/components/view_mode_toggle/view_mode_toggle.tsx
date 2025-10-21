@@ -18,6 +18,7 @@ import { VIEW_MODE } from '../../../common/constants';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
 import { HitsCounter, HitsCounterMode } from '../hits_counter';
+import { useIsCompareMode } from '../../application/main/hooks/use_is_compare_mode';
 
 export const DocumentViewModeToggle = ({
   viewMode,
@@ -107,6 +108,8 @@ export const DocumentViewModeToggle = ({
     }
   }, [viewMode, isEsqlMode, setDiscoverViewMode]);
 
+  const isCompareMode = useIsCompareMode();
+
   return (
     <EuiFlexGroup
       direction="row"
@@ -134,7 +137,10 @@ export const DocumentViewModeToggle = ({
           <EuiTabs size="m" css={tabsCss} data-test-subj="dscViewModeToggle" bottomBorder={false}>
             <EuiTab
               isSelected={viewMode === VIEW_MODE.DOCUMENT_LEVEL}
-              onClick={() => setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL)}
+              onClick={() => {
+                setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL);
+                stateContainer.dataState.fetch();
+              }}
               data-test-subj="dscViewModeDocumentButton"
             >
               {isEsqlMode ? (
@@ -147,6 +153,19 @@ export const DocumentViewModeToggle = ({
               )}
               <HitsCounter mode={HitsCounterMode.appended} stateContainer={stateContainer} />
             </EuiTab>
+
+            {isCompareMode && (
+              <EuiTab
+                isSelected={viewMode === VIEW_MODE.COMPARE_LEVEL}
+                onClick={() => {
+                  setDiscoverViewMode(VIEW_MODE.COMPARE_LEVEL);
+                  stateContainer.dataState.fetch();
+                }}
+                data-test-subj="dscViewModeDocumentButton"
+              >
+                {'Compare documents'}
+              </EuiTab>
+            )}
 
             {showPatternAnalysisTab ? (
               <EuiTab
