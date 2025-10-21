@@ -164,7 +164,16 @@ export function expectZodSchemaEqual(a: z.ZodType, b: z.ZodType) {
 }
 
 export function getZodTypeName(schema: z.ZodType) {
-  const typedSchema = schema as ZodFirstPartySchemaTypes;
+  // Unwrap ZodOptional and ZodDefault to get the actual schema type
+  let unwrappedSchema = schema;
+  if (unwrappedSchema instanceof z.ZodOptional) {
+    unwrappedSchema = unwrappedSchema.unwrap();
+  }
+  if (unwrappedSchema instanceof z.ZodDefault) {
+    unwrappedSchema = unwrappedSchema.removeDefault();
+  }
+
+  const typedSchema = unwrappedSchema as ZodFirstPartySchemaTypes;
   const def = typedSchema._def;
   switch (def.typeName) {
     case 'ZodString':
