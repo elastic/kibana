@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useMemo } from 'react';
 import { Parser, Walker } from '@kbn/esql-ast';
+import { useMemo } from 'react';
+import { extractFilters } from '../utils/extract_filters';
 
 export interface EsqlQueryInfo {
   metricField: string | undefined;
   columns: string[];
   indices: string[];
   dimensions: string[];
+  filters: string[];
 }
 
 export const useEsqlQueryInfo = ({ query }: { query: string }): EsqlQueryInfo => {
@@ -22,6 +24,7 @@ export const useEsqlQueryInfo = ({ query }: { query: string }): EsqlQueryInfo =>
     const ast = Parser.parse(query);
     const fieldsByCommand = new Map<string, string[]>();
     const indices = new Set<string>();
+    const filters: string[] = extractFilters(query);
 
     // Extract stats fields
     const statsNodes = Walker.matchAll(ast.root, { type: 'command', name: 'stats' });
@@ -50,6 +53,7 @@ export const useEsqlQueryInfo = ({ query }: { query: string }): EsqlQueryInfo =>
       columns: metricFields,
       dimensions,
       indices: Array.from(indices),
+      filters,
     };
   }, [query]);
 };

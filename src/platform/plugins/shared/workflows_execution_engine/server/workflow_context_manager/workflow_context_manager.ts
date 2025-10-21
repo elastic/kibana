@@ -37,8 +37,6 @@ export class WorkflowContextManager {
 
   private stackFrames: StackFrame[];
   public readonly node: GraphNodeUnion;
-  public readonly stepExecutionId: string;
-  public readonly abortController = new AbortController();
 
   public get scopeStack(): WorkflowScopeStack {
     return WorkflowScopeStack.fromStackFrames(this.stackFrames);
@@ -52,11 +50,6 @@ export class WorkflowContextManager {
     this.coreStart = init.coreStart;
     this.node = init.node;
     this.stackFrames = init.stackFrames;
-    this.stepExecutionId = buildStepExecutionId(
-      this.workflowExecutionState.getWorkflowExecution().id,
-      this.node.stepId,
-      this.stackFrames
-    );
   }
 
   // Any change here should be reflected in the 'getContextSchemaForPath' function for frontend validation to work
@@ -93,8 +86,8 @@ export class WorkflowContextManager {
       }
     });
 
-    this.enrichStepContextWithMockedData(stepContext);
     this.enrichStepContextAccordingToStepScope(stepContext);
+    this.enrichStepContextWithMockedData(stepContext);
     return stepContext;
   }
 

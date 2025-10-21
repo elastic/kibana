@@ -26,40 +26,34 @@ import moment from 'moment';
 import React, { useMemo } from 'react';
 import { orderIlmPhases } from '../helpers/helpers';
 import { formatBytes } from '../helpers/format_bytes';
-import type { DataStreamStats } from '../hooks/use_data_stream_stats';
 import { useIlmPhasesColorAndDescription } from '../hooks/use_ilm_phases_color_and_description';
+import type { StreamAggregations } from '../hooks/use_ingestion_rate';
 import { useIngestionRate, useIngestionRatePerTier } from '../hooks/use_ingestion_rate';
-import type { FailureStoreStats } from '../hooks/use_failure_store_stats';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
+import type { CalculatedStats } from '../helpers/get_calculated_stats';
 
-interface BaseChartComponentProps {
+interface ChartComponentProps {
   definition: Streams.ingest.all.GetResponse;
   timeState: TimeState;
   isLoadingStats: boolean;
+  stats?: CalculatedStats;
+  aggregations?: StreamAggregations;
+  statsError: Error | undefined;
 }
-
-interface MainStreamChartProps extends BaseChartComponentProps {
-  stats?: DataStreamStats;
-}
-
-interface FailureStoreChartProps extends BaseChartComponentProps {
-  stats?: FailureStoreStats;
-}
-
-type ChartComponentProps = MainStreamChartProps | FailureStoreChartProps;
-type ChartPhasesComponentProps = MainStreamChartProps | FailureStoreChartProps;
 
 export function ChartBarSeries({
-  definition,
   stats,
   timeState,
   isLoadingStats,
+  aggregations,
+  statsError,
 }: ChartComponentProps) {
-  // Use the appropriate hook based on isFailureStore flag
   const mainStreamResult = useIngestionRate({
-    definition,
-    stats,
+    calculatedStats: stats,
     timeState,
+    aggregations,
+    isLoading: isLoadingStats,
+    error: statsError,
   });
 
   const formatAsBytes = !!stats;
@@ -83,17 +77,18 @@ export function ChartBarSeries({
 }
 
 export function FailureStoreChartBarSeries({
-  definition,
   stats,
   timeState,
   isLoadingStats,
+  aggregations,
+  statsError,
 }: ChartComponentProps) {
-  // Use the appropriate hook based on isFailureStore flag
   const failureStoreResult = useIngestionRate({
-    definition,
-    stats,
+    calculatedStats: stats,
     timeState,
-    isFailureStore: true,
+    aggregations,
+    isLoading: isLoadingStats,
+    error: statsError,
   });
 
   const formatAsBytes = !!stats;
@@ -137,7 +132,7 @@ export function ChartBarSeriesBase({
 
   return ingestionRateError ? (
     'Failed to load ingestion rate'
-  ) : isLoadingStats || isLoadingIngestionRate || !ingestionRate ? (
+  ) : !ingestionRate && (isLoadingStats || isLoadingIngestionRate || !ingestionRate) ? (
     <EuiLoadingChart />
   ) : (
     <>
@@ -201,7 +196,7 @@ function ChartBarPhasesSeriesBase({
 
   return ingestionRateError ? (
     'Failed to load ingestion rate'
-  ) : isLoadingStats || isLoadingIngestionRate || !ingestionRate ? (
+  ) : !ingestionRate && (isLoadingStats || isLoadingIngestionRate || !ingestionRate) ? (
     <EuiLoadingChart />
   ) : (
     <>
@@ -252,14 +247,14 @@ export function ChartBarPhasesSeries({
   stats,
   timeState,
   isLoadingStats,
-}: ChartPhasesComponentProps) {
+}: ChartComponentProps) {
   const { timeState: defaultTimeState } = useTimefilter();
   const currentTimeState = timeState || defaultTimeState;
 
   // Use the appropriate hook based on isFailureStore flag
   const mainStreamResult = useIngestionRatePerTier({
     definition,
-    stats,
+    calculatedStats: stats,
     timeState: currentTimeState,
   });
 

@@ -18,7 +18,7 @@ export const MetricsGrid = () => {
   const { metricsView } = useMetricsDataViewContext();
   const { searchCriteria } = useUnifiedSearchContext();
   const charts = useMetricsCharts({
-    dataViewId: metricsView?.dataViewReference.id,
+    indexPattern: metricsView?.dataViewReference.getIndexPattern(),
     schema: searchCriteria.preferredSchema,
   });
 

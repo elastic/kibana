@@ -9,7 +9,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
-  EuiBetaBadge,
   useEuiTheme,
   EuiButton,
   EuiFlexItem,
@@ -22,8 +21,6 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
-import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { isEmpty } from 'lodash';
 import type { OverlayRef } from '@kbn/core/public';
@@ -49,20 +46,10 @@ export function StreamListView() {
     dependencies: {
       start: {
         streams: { streamsRepositoryClient },
-        share,
       },
     },
     core,
-    isServerless,
   } = context;
-  const onboardingLocator = share.url.locators.get<ObservabilityOnboardingLocatorParams>(
-    OBSERVABILITY_ONBOARDING_LOCATOR
-  );
-  const handleAddData = onboardingLocator
-    ? () => {
-        onboardingLocator.navigate({});
-      }
-    : undefined;
 
   const { timeState } = useTimefilter();
   const streamsListFetch = useStreamsAppFetch(
@@ -81,8 +68,6 @@ export function StreamListView() {
     features: { groupStreams },
   } = useStreamsPrivileges();
 
-  // Always show settings flyout button if not serverless
-  const showSettingsFlyoutButton = isServerless === false;
   const overlayRef = React.useRef<OverlayRef | null>(null);
 
   const [isSettingsFlyoutOpen, setIsSettingsFlyoutOpen] = React.useState(false);
@@ -127,22 +112,6 @@ export function StreamListView() {
                 {i18n.translate('xpack.streams.streamsListView.pageHeaderTitle', {
                   defaultMessage: 'Streams',
                 })}
-                {isServerless && (
-                  <EuiBetaBadge
-                    label={i18n.translate('xpack.streams.streamsListView.betaBadgeLabel', {
-                      defaultMessage: 'Technical Preview',
-                    })}
-                    tooltipContent={i18n.translate(
-                      'xpack.streams.streamsListView.betaBadgeDescription',
-                      {
-                        defaultMessage:
-                          'This functionality is experimental and not supported. It may change or be removed at any time.',
-                      }
-                    )}
-                    alignment="middle"
-                    size="s"
-                  />
-                )}
               </EuiFlexGroup>
             </EuiFlexItem>
             {groupStreams?.enabled && (
@@ -154,22 +123,20 @@ export function StreamListView() {
                 </EuiButton>
               </EuiFlexItem>
             )}
-            {showSettingsFlyoutButton && (
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  iconType="gear"
-                  size="s"
-                  onClick={() => setIsSettingsFlyoutOpen(true)}
-                  aria-label={i18n.translate('xpack.streams.streamsListView.settingsButtonLabel', {
-                    defaultMessage: 'Settings',
-                  })}
-                >
-                  {i18n.translate('xpack.streams.streamsListView.settingsButtonLabel', {
-                    defaultMessage: 'Settings',
-                  })}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            )}
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                iconType="gear"
+                size="s"
+                onClick={() => setIsSettingsFlyoutOpen(true)}
+                aria-label={i18n.translate('xpack.streams.streamsListView.settingsButtonLabel', {
+                  defaultMessage: 'Settings',
+                })}
+              >
+                {i18n.translate('xpack.streams.streamsListView.settingsButtonLabel', {
+                  defaultMessage: 'Settings',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
             <FeedbackButton />
           </EuiFlexGroup>
         }
@@ -187,7 +154,7 @@ export function StreamListView() {
             }
           />
         ) : !streamsListFetch.loading && isEmpty(streamsListFetch.value?.streams) ? (
-          <StreamsListEmptyPrompt onAddData={handleAddData} />
+          <StreamsListEmptyPrompt />
         ) : (
           <>
             <WelcomePanel />

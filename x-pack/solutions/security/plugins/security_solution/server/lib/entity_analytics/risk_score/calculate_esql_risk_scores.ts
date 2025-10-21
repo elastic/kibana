@@ -35,8 +35,11 @@ import type {
   RiskScoreCompositeBuckets,
 } from '../types';
 import { RIEMANN_ZETA_S_VALUE, RIEMANN_ZETA_VALUE } from './constants';
-import { filterFromRange, processScores } from './calculate_risk_scores';
-
+import {
+  filterFromRange,
+  getGlobalWeightForIdentifierType,
+  processScores,
+} from './calculate_risk_scores';
 type ESQLResults = Array<
   [EntityType, { scores: EntityRiskScoreRecord[]; afterKey: EntityAfterKey }, string[]]
 >;
@@ -50,7 +53,17 @@ export const calculateScoresWithESQL = async (
   } & CalculateScoresParams
 ): Promise<CalculateResults> =>
   withSecuritySpan('calculateRiskScores', async () => {
-    const { identifierType, logger, esClient } = params;
+    const {
+      afterKeys,
+      alertSampleSizePerShard,
+      assetCriticalityService,
+      esClient,
+      identifierType,
+      index,
+      logger,
+      pageSize,
+      weights,
+    } = params;
     const now = new Date().toISOString();
 
     const filter = getFilters(params);
@@ -98,27 +111,33 @@ export const calculateScoresWithESQL = async (
           ] satisfies ESQLResults[number]);
         }
         const bounds = {
-          lower: params.afterKeys[entityType]?.[EntityTypeToIdentifierField[entityType]],
+          lower: afterKeys[entityType]?.[EntityTypeToIdentifierField[entityType]],
           upper: afterKey?.[EntityTypeToIdentifierField[entityType]],
         };
 
-        const query = getESQL(
-          entityType as EntityType,
+        const weight = getGlobalWeightForIdentifierType(entityType as EntityType, weights) || 1;
+
+        const query = getESQL({
+          entityType: entityType as EntityType,
           bounds,
-          params.alertSampleSizePerShard || 10000,
-          params.pageSize
-        );
+          sampleSize: alertSampleSizePerShard || 10000,
+          pageSize,
+          index,
+          weight,
+        });
 
         return esClient.esql
           .query({
             query,
             filter: { bool: { filter } },
           })
-          .then((rs) => rs.values.map(buildRiskScoreBucket(entityType as EntityType, params.index)))
+          .then((rs) =>
+            rs.values.map(buildRiskScoreBucket(entityType as EntityType, index, weight))
+          )
 
           .then((riskScoreBuckets) => {
             return processScores({
-              assetCriticalityService: params.assetCriticalityService,
+              assetCriticalityService,
               buckets: riskScoreBuckets,
               identifierField: EntityTypeToIdentifierField[entityType],
               logger,
@@ -193,11 +212,12 @@ export const getCompositeQuery = (
   filter: QueryDslQueryContainer[],
   params: CalculateScoresParams
 ) => {
+  const { index, pageSize, runtimeMappings, afterKeys } = params;
   return {
     size: 0,
-    index: params.index,
+    index,
     ignore_unavailable: true,
-    runtime_mappings: params.runtimeMappings,
+    runtime_mappings: runtimeMappings,
     query: {
       function_score: {
         query: {
@@ -221,9 +241,9 @@ export const getCompositeQuery = (
         ...aggs,
         [entityType]: {
           composite: {
-            size: params.pageSize,
+            size: pageSize,
             sources: [{ [idField]: { terms: { field: idField } } }],
-            after: params.afterKeys[entityType],
+            after: afterKeys[entityType],
           },
         },
       };
@@ -231,26 +251,37 @@ export const getCompositeQuery = (
   };
 };
 
-export const getESQL = (
-  entityType: EntityType,
-  afterKeys: {
+export interface GetESQLParams {
+  bounds: {
     lower?: string;
     upper?: string;
-  },
-  sampleSize: number,
-  pageSize: number
-) => {
+  };
+  entityType: EntityType;
+  index: string;
+  pageSize: number;
+  sampleSize: number;
+  weight: number;
+}
+
+export const getESQL = ({
+  entityType,
+  bounds,
+  sampleSize,
+  pageSize,
+  index,
+  weight,
+}: GetESQLParams) => {
   const identifierField = EntityTypeToIdentifierField[entityType];
 
-  const lower = afterKeys.lower ? `${identifierField} >= ${afterKeys.lower}` : undefined;
-  const upper = afterKeys.upper ? `${identifierField} <= ${afterKeys.upper}` : undefined;
+  const lower = bounds.lower ? `${identifierField} > ${bounds.lower}` : undefined;
+  const upper = bounds.upper ? `${identifierField} <= ${bounds.upper}` : undefined;
   if (!lower && !upper) {
     throw new Error('Either lower or upper after key must be provided for pagination');
   }
   const rangeClause = [lower, upper].filter(Boolean).join(' and ');
 
-  const query = /* SQL */ `
-  FROM .alerts-security.alerts-default METADATA _index
+  const query = /* ESQL */ `
+  FROM ${index} METADATA _index
     | WHERE kibana.alert.risk_score IS NOT NULL AND KQL("${rangeClause}")
     | RENAME kibana.alert.risk_score as risk_score,
              kibana.alert.rule.name as rule_name,
@@ -261,10 +292,10 @@ export const getESQL = (
     | EVAL input = CONCAT(""" {"score": """", risk_score::keyword, """", "time": """", time::keyword, """", "index": """", _index, """", "rule_name": """", rule_name, """\", "category": """", category, """\", "id": \"""", alert_id, """\" } """)
     | STATS
         alert_count = count(risk_score),
-        scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${sampleSize}, "desc"), ${RIEMANN_ZETA_S_VALUE}),
+        scores = ${weight} * MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${sampleSize}, "desc"), ${RIEMANN_ZETA_S_VALUE}),
         risk_inputs = TOP(input, 10, "desc")
     BY ${identifierField}
-    | SORT scores DESC
+    | SORT scores DESC, ${identifierField} ASC
     | LIMIT ${pageSize}
   `;
 
@@ -272,7 +303,7 @@ export const getESQL = (
 };
 
 export const buildRiskScoreBucket =
-  (entityType: EntityType, index: string) =>
+  (entityType: EntityType, index: string, weight: number = 1) =>
   (row: FieldValue[]): RiskScoreBucket => {
     const [count, score, _inputs, entity] = row as [
       number,
@@ -303,8 +334,8 @@ export const buildRiskScoreBucket =
             score,
             normalized_score: score / RIEMANN_ZETA_VALUE, // normalize value to be between 0-100
             notes: [],
-            category_1_score: score / RIEMANN_ZETA_VALUE, // normalize value to be between 0-100
-            category_1_count: 1,
+            category_1_score: score / weight, // category score before global weight applied and normalization
+            category_1_count: count,
             risk_inputs: inputs,
           },
         },
