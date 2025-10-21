@@ -642,6 +642,8 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
           this.options.uiam?.getAuthenticationHeaders(accessToken)!
         );
 
+        this.logger.debug('SAML provider successfully refreshed tokens via UIAM service.');
+
         refreshTokenResult = {
           accessToken,
           refreshToken,

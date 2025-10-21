@@ -118,9 +118,6 @@ export class UiamService implements UiamServicePublic {
           dispatcher: this.#dispatcher,
         })
       );
-
-      this.#logger.debug('Successfully refreshed session tokens with UIAM.');
-
       return { accessToken: tokens.access_token, refreshToken: tokens.refresh_token };
     } catch (err) {
       this.#logger.error(

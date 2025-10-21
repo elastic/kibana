@@ -14,12 +14,6 @@ Run the script directly with Node.js:
 node src/platform/packages/private/kbn-mock-idp-utils/scripts/decode_token.js "essu_dev_YOUR_TOKEN_HERE"
 ```
 
-Or make it executable:
-
-```bash
-chmod +x src/platform/packages/private/kbn-mock-idp-utils/scripts/decode_token.js
-./src/platform/packages/private/kbn-mock-idp-utils/scripts/decode_token.js "essu_dev_YOUR_TOKEN_HERE"
-```
 
 ### What it does
 
@@ -59,17 +53,6 @@ Payload:
 Signature: signature
 ```
 
-### Programmatic Usage
-
-If you need to decode tokens programmatically in your code, use the `decodeToken` function from the package:
-
-```typescript
-import { decodeToken } from '@kbn/mock-idp-utils';
-
-const jwt = decodeToken("essu_dev_abc123...");
-console.log(jwt); // Outputs the original JWT
-```
-
 ### Error Handling
 
 The script will exit with an error if:
@@ -77,7 +60,3 @@ The script will exit with an error if:
 - The token doesn't start with the `essu_dev_` prefix
 - The checksum verification fails (data corruption)
 - The token format is invalid
-
-### Dependencies
-
-The script requires the `crc` npm package, which should already be installed in the Kibana project.
