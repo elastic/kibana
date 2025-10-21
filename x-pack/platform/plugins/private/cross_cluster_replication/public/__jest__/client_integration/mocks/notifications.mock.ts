@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { ccrStore, createCrossClusterReplicationStore } from './store';
+jest.mock('../../../app/services/notifications', () => ({
+  getFatalErrors: () => ({
+    add: jest.fn(),
+  }),
+}));
