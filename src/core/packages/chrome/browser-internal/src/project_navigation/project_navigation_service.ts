@@ -66,6 +66,7 @@ export class ProjectNavigationService {
   private logger: Logger | undefined;
   private projectHome$ = new BehaviorSubject<string | undefined>(undefined);
   private projectName$ = new BehaviorSubject<string | undefined>(undefined);
+  private deploymentType$ = new BehaviorSubject<string | undefined>(undefined);
   private navigationTree$ = new BehaviorSubject<ChromeProjectNavigationNode[] | undefined>(
     undefined
   );
@@ -142,11 +143,17 @@ export class ProjectNavigationService {
 
         this.cloudLinks$.next(getCloudLinks(cloudUrls));
       },
+      setDeploymentType: (deploymentType: 'serverless' | 'ech' | 'local') => {
+        this.deploymentType$.next(deploymentType);
+      },
       setProjectName: (projectName: string) => {
         this.projectName$.next(projectName);
       },
       getProjectName$: () => {
         return this.projectName$.asObservable();
+      },
+      getDeploymentType$: () => {
+        return this.deploymentType$.asObservable();
       },
       initNavigation: <LinkId extends AppDeepLinkId = AppDeepLinkId>(
         id: SolutionId,

@@ -115,6 +115,8 @@ export class NavigationPublicPlugin
 
           chrome.project.setCloudUrls({ ...privilegedUrls, ...cloud.getUrls() }); // Merge the privileged URLs once available
         });
+        const deploymentType = isServerless ? 'serverless' : cloud.isCloudEnabled ? 'ech' : 'local';
+        chrome.project.setDeploymentType(deploymentType);
       }
     };
 

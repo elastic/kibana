@@ -28,6 +28,7 @@ import type { NavigationItems } from './to_navigation_items';
 import { toNavigationItems } from './to_navigation_items';
 import { PanelStateManager } from './panel_state_manager';
 import { NavigationFeedbackSnippet } from './navigation_feedback_snippet';
+import type { NavigationFeedbackSnippetProps } from './navigation_feedback_snippet';
 
 export interface ChromeNavigationProps {
   // sidenav state
@@ -52,17 +53,28 @@ export interface ChromeNavigationProps {
   isFeedbackBtnVisible$: Observable<boolean>;
   loadingCount$: Observable<number>;
   dataTestSubj$?: Observable<string | undefined>;
+
+  // feedback URL params
+  deploymentType$: Observable<string | undefined>;
+  kibanaVersion: string;
 }
 
 export const Navigation = (props: ChromeNavigationProps) => {
   const state = useNavigationItems(props);
   const dataTestSubj = useObservable(props.dataTestSubj$ ?? EMPTY, undefined);
+  const deploymentType = useObservable(props.deploymentType$ ?? EMPTY, undefined);
 
   if (!state) {
     return null;
   }
 
   const { navItems, logoItem, activeItemId, solutionId } = state;
+
+  const feedbackProps: NavigationFeedbackSnippetProps = {
+    solutionId,
+    kibanaVersion: props.kibanaVersion,
+    deploymentType,
+  };
 
   return (
     <>
@@ -77,7 +89,7 @@ export const Navigation = (props: ChromeNavigationProps) => {
         <NavigationComponent
           items={navItems}
           logo={logoItem}
-          sidePanelFooter={<NavigationFeedbackSnippet solutionId={solutionId} />}
+          sidePanelFooter={<NavigationFeedbackSnippet {...feedbackProps} />}
           isCollapsed={props.isCollapsed}
           setWidth={props.setWidth}
           activeItemId={activeItemId}

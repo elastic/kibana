@@ -37,6 +37,7 @@ const setup = ({
   const unifiedSearch = unifiedSearchPluginMock.createStartContract();
   const cloud = cloudMock.createStart();
   const spaces = spacesPluginMock.createStartContract();
+  const setDeploymentType = jest.fn();
 
   const getGlobalSetting$ = jest.fn();
   const settingsGlobalClient = {
@@ -45,6 +46,7 @@ const setup = ({
   };
   coreStart.settings.globalClient = settingsGlobalClient;
   coreStart.chrome.setChromeStyle = setChromeStyle;
+  coreStart.chrome.project.setDeploymentType = setDeploymentType;
 
   return {
     plugin,
@@ -53,6 +55,7 @@ const setup = ({
     cloud,
     spaces,
     setChromeStyle,
+    setDeploymentType,
   };
 };
 
@@ -328,6 +331,48 @@ describe('Navigation Plugin', () => {
 
       const isEnabled = await firstValueFrom(isSolutionNavEnabled$);
       expect(isEnabled).toBe(false);
+    });
+  });
+  describe('set deployment type', () => {
+    it('should set the deployment type to "serverless" when on serverless', async () => {
+      const { plugin, coreStart, unifiedSearch, cloud, spaces } = setup({
+        buildFlavor: 'serverless',
+      });
+      spaces.getActiveSpace$ = jest
+        .fn()
+        .mockReturnValue(of({ solution: 'es' } as Pick<Space, 'solution'>));
+      plugin.start(coreStart, { unifiedSearch, cloud, spaces });
+      await new Promise((resolve) => setTimeout(resolve));
+      expect(coreStart.chrome.project.setDeploymentType).toHaveBeenCalledWith('serverless');
+    });
+    it('should set the deployment type to "ech" when on cloud', async () => {
+      const { plugin, coreStart, unifiedSearch, cloud, spaces } = setup({});
+      spaces.isSolutionViewEnabled = true;
+      spaces.getActiveSpace$ = jest
+        .fn()
+        .mockReturnValue(of({ solution: 'es' } as Pick<Space, 'solution'>));
+      cloud.isCloudEnabled = true;
+      plugin.start(coreStart, { unifiedSearch, cloud, spaces });
+      await new Promise((resolve) => setTimeout(resolve));
+      expect(coreStart.chrome.project.setDeploymentType).toHaveBeenCalledWith('ech');
+    });
+    it('should set the deployment type to "local" when on local', async () => {
+      const { plugin, coreStart, unifiedSearch, cloud, spaces } = setup();
+      spaces.isSolutionViewEnabled = true;
+      spaces.getActiveSpace$ = jest
+        .fn()
+        .mockReturnValue(of({ solution: 'es' } as Pick<Space, 'solution'>));
+      cloud.isCloudEnabled = false;
+      plugin.start(coreStart, { unifiedSearch, cloud, spaces });
+      await new Promise((resolve) => setTimeout(resolve));
+      expect(coreStart.chrome.project.setDeploymentType).toHaveBeenCalledWith('local');
+    });
+    it('should not set the deployment type when isSolutionViewEnabled is false', async () => {
+      const { plugin, coreStart, unifiedSearch, cloud, spaces } = setup();
+      spaces.isSolutionViewEnabled = false;
+      plugin.start(coreStart, { unifiedSearch, cloud, spaces });
+      await new Promise((resolve) => setTimeout(resolve));
+      expect(coreStart.chrome.project.setDeploymentType).not.toHaveBeenCalled();
     });
   });
 });
