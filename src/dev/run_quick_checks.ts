@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { execFile, execFileSync } from 'child_process';
+import { execFile } from 'child_process';
 import { availableParallelism } from 'os';
 import { isAbsolute, join } from 'path';
 import { existsSync, readdirSync, readFileSync } from 'fs';
@@ -19,8 +19,14 @@ import type { ToolingLog } from '@kbn/tooling-log';
 
 const MAX_PARALLELISM = availableParallelism();
 const buildkiteQuickchecksFolder = join('.buildkite', 'scripts', 'steps', 'checks');
-const quickChecksList = join(buildkiteQuickchecksFolder, 'quick_checks.txt');
+const quickChecksList = join(buildkiteQuickchecksFolder, 'quick_checks.json');
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+interface QuickCheck {
+  script: string;
+  mayChangeFiles?: boolean;
+  // Additional properties can be added here in the future
+}
 
 interface CheckResult {
   success: boolean;
@@ -52,30 +58,29 @@ let logger: ToolingLog;
 void run(async ({ log, flagsReader }) => {
   logger = log;
 
-  const scriptsToRun = collectScriptsToRun({
+  const checksToRun = collectScriptsToRun({
     targetFile: flagsReader.string('file'),
     targetDir: flagsReader.string('dir'),
     checks: flagsReader.string('checks'),
-  }).map((script) => (isAbsolute(script) ? script : join(REPO_ROOT, script)));
+  });
+
+  // Partition checks based on mayChangeFiles flag
+  const fileChangingChecks = checksToRun
+    .filter((check) => check.mayChangeFiles)
+    .map((check) => (isAbsolute(check.script) ? check.script : join(REPO_ROOT, check.script)));
+
+  const regularChecks = checksToRun
+    .filter((check) => !check.mayChangeFiles)
+    .map((check) => (isAbsolute(check.script) ? check.script : join(REPO_ROOT, check.script)));
 
   logger.write(
-    `--- Running ${scriptsToRun.length} checks, with parallelism ${MAX_PARALLELISM}...`,
-    scriptsToRun
+    `--- Running ${checksToRun.length} checks (${fileChangingChecks.length} file-changing with parallelism=1, ${regularChecks.length} regular with parallelism=${MAX_PARALLELISM})...`
   );
   const startTime = Date.now();
-  const results = await runAllChecks(scriptsToRun);
+  const results = await runPartitionedChecks(fileChangingChecks, regularChecks);
 
   logger.write('--- All checks finished.');
   printResults(startTime, results);
-
-  logger.write('--- Committing any stashed changes...');
-  const commitsMade = await commitStashedContents();
-  if (commitsMade > 0) {
-    logger.info(`Committed ${commitsMade} stashed change(s), pushing...`);
-    await pushCommits();
-  } else {
-    logger.info('No stashed changes to commit.');
-  }
 
   const failedChecks = results.filter((check) => !check.success);
   if (failedChecks.length > 0) {
@@ -92,7 +97,7 @@ function collectScriptsToRun(inputOptions: {
   targetFile: string | undefined;
   targetDir: string | undefined;
   checks: string | undefined;
-}) {
+}): QuickCheck[] {
   const { targetFile, targetDir, checks } = inputOptions;
   if ([targetFile, targetDir, checks].filter(Boolean).length > 1) {
     throw new Error('Only one of --file, --dir, or --checks can be used at a time.');
@@ -100,31 +105,55 @@ function collectScriptsToRun(inputOptions: {
 
   if (targetDir) {
     const targetDirAbsolute = isAbsolute(targetDir) ? targetDir : join(REPO_ROOT, targetDir);
-    return readdirSync(targetDirAbsolute).map((file) => join(targetDir, file));
+    return readdirSync(targetDirAbsolute).map((file) => ({ script: join(targetDir, file) }));
   } else if (checks) {
     return checks
       .trim()
       .split(/[,\n]/)
-      .map((script) => script.trim());
+      .map((script) => ({ script: script.trim() }));
   } else {
     const targetFileWithDefault = targetFile || quickChecksList;
     const targetFileAbsolute = isAbsolute(targetFileWithDefault)
       ? targetFileWithDefault
       : join(REPO_ROOT, targetFileWithDefault);
 
-    return readFileSync(targetFileAbsolute, 'utf-8')
-      .trim()
-      .split('\n')
-      .map((line) => line.trim());
+    const fileContent = readFileSync(targetFileAbsolute, 'utf-8');
+
+    // Support both JSON and legacy plain text formats for backward compatibility
+    if (targetFileAbsolute.endsWith('.json')) {
+      return JSON.parse(fileContent) as QuickCheck[];
+    } else {
+      // Legacy plain text format
+      return fileContent
+        .trim()
+        .split('\n')
+        .map((line) => ({ script: line.trim() }));
+    }
   }
 }
 
-async function runAllChecks(scriptsToRun: string[]): Promise<CheckResult[]> {
+async function runPartitionedChecks(
+  fileChangingChecks: string[],
+  regularChecks: string[]
+): Promise<CheckResult[]> {
+  // Run both partitions concurrently, but with different parallelism
+  const [fileChangingResults, regularResults] = await Promise.all([
+    runAllChecks(fileChangingChecks, 1), // File-changing checks run one at a time
+    runAllChecks(regularChecks, MAX_PARALLELISM), // Regular checks run with full parallelism
+  ]);
+
+  return [...fileChangingResults, ...regularResults];
+}
+
+async function runAllChecks(
+  scriptsToRun: string[],
+  parallelism = MAX_PARALLELISM
+): Promise<CheckResult[]> {
   const checksRunning: Array<Promise<any>> = [];
   const checksFinished: CheckResult[] = [];
 
   while (scriptsToRun.length > 0 || checksRunning.length > 0) {
-    while (scriptsToRun.length > 0 && checksRunning.length < MAX_PARALLELISM) {
+    while (scriptsToRun.length > 0 && checksRunning.length < parallelism) {
       const script = scriptsToRun.shift();
       if (!script) {
         continue;
@@ -163,7 +192,7 @@ async function runCheckAsync(script: string): Promise<CheckResult> {
     const scriptProcess = execFile('bash', [script], {
       env: {
         ...process.env,
-        STASH_QUICKCHECK_CHANGES: 'true',
+        COLLECT_QUICK_CHECK_CHANGES: true,
       },
     });
     let output = '';
@@ -236,58 +265,6 @@ function validateScriptPath(scriptPath: string) {
   } else {
     return;
   }
-}
-
-async function commitStashedContents() {
-  let commitsMade = 0;
-  let stashMessage;
-  const configGitOnce = (() => {
-    let configured = false;
-    return () => {
-      if (configured) return;
-      configured = true;
-      execFileSync('git', ['config', 'user.name', 'kibanamachine']);
-      execFileSync('git', [
-        'config',
-        'user.email',
-        '42973632+kibanamachine@users.noreply.github.com',
-      ]);
-      return true;
-    };
-  })();
-  while ((stashMessage = execFileSync('git', ['stash', 'list', '-1']).toString().trim())) {
-    configGitOnce();
-    const messageWithoutContext = stashMessage.split(': ').slice(2).join(': ');
-    logger.info('Committing: ' + messageWithoutContext);
-    execFileSync('git', ['stash', 'pop'], { stdio: 'inherit' });
-    execFileSync('git', ['commit', '-am', `"${messageWithoutContext}"`], {
-      stdio: 'inherit',
-    });
-    commitsMade++;
-  }
-  return commitsMade;
-}
-
-async function pushCommits() {
-  return new Promise<void>((resolve, reject) => {
-    const gitProcess = execFile('git', ['push']);
-    let output = '';
-    const appendToOutput = (data: string | Buffer) => (output += data.toString());
-
-    gitProcess.stdout?.on('data', appendToOutput);
-    gitProcess.stderr?.on('data', appendToOutput);
-
-    gitProcess.on('exit', (code) => {
-      if (code === 0) {
-        logger.info('Pushed commits to remote.');
-        resolve();
-      } else {
-        logger.error('Failed to push commits:');
-        logger.error(output);
-        reject(new Error('Failed to push commits'));
-      }
-    });
-  });
 }
 
 function stripRoot(script: string) {

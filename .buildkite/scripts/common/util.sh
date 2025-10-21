@@ -26,21 +26,6 @@ is_auto_commit_disabled() {
   is_pr_with_label "ci:no-auto-commit"
 }
 
-stash_changed_files() {
-  SCRIPT_NAME="$1"
-  SHOULD_STASH="${2:-true}"
-  GIT_STASH_MESSAGE="${3:-Stashed files from $SCRIPT_NAME}"
-
-  GIT_CHANGES="$(git status --porcelain -- . ':!:config/node.options' ':!config/kibana.yml')"
-
-  if [ "$GIT_CHANGES" ] && [[ "$SHOULD_STASH" == "true" && "${BUILDKITE_PULL_REQUEST:-false}" != "false" ]]; then
-    echo "'$1' caused changes to the following files, stashing them now:"
-    echo "$GIT_CHANGES"
-    git add .
-    git stash push -am "$GIT_STASH_MESSAGE"
-  fi
-}
-
 check_for_changed_files() {
   RED='\033[0;31m'
   YELLOW='\033[0;33m'
@@ -50,21 +35,20 @@ check_for_changed_files() {
   CUSTOM_FIX_MESSAGE="${3:-}"
   GIT_CHANGES="$(git status --porcelain -- . ':!:config/node.options' ':!config/kibana.yml')"
 
-  if [[ "${STASH_QUICKCHECK_CHANGES:-}" == "true" ]]; then
-    stash_changed_files "$1" "$SHOULD_AUTO_COMMIT_CHANGES" "$CUSTOM_FIX_MESSAGE"
+  if [[  "$GIT_CHANGES" && "${COLLECT_QUICK_CHECK_CHANGES:-}" == "true" ]]; then
+    echo "'$1' caused changes to the following files:"
+    echo "$GIT_CHANGES"
+    echo ""
+    echo "Committing these changes (will be pushed after all checks complete)."
+
+    git config --global user.name kibanamachine
+    git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
+    git add -A -- . ':!config/node.options' ':!config/kibana.yml'
+
+    git commit -m "$CUSTOM_FIX_MESSAGE"
+    exit 0
   elif [ "$GIT_CHANGES" ]; then
     if ! is_auto_commit_disabled && [[ "$SHOULD_AUTO_COMMIT_CHANGES" == "true" && "${BUILDKITE_PULL_REQUEST:-false}" != "false" ]]; then
-      NEW_COMMIT_MESSAGE="[CI] Auto-commit changed files from '$1'"
-      PREVIOUS_COMMIT_MESSAGE="$(git log -1 --pretty=%B)"
-
-      if [[ "$NEW_COMMIT_MESSAGE" == "$PREVIOUS_COMMIT_MESSAGE" ]]; then
-        echo -e "\n${RED}ERROR: '$1' caused changes to the following files:${C_RESET}\n"
-        echo -e "$GIT_CHANGES\n"
-        echo -e "CI already attempted to commit these changes, but the file(s) seem to have changed again."
-        echo -e "Please review and fix manually."
-        exit 1
-      fi
-
       echo "'$1' caused changes to the following files:"
       echo "$GIT_CHANGES"
       echo ""
@@ -75,14 +59,8 @@ check_for_changed_files() {
       gh pr checkout "${BUILDKITE_PULL_REQUEST}"
       git add -A -- . ':!config/node.options' ':!config/kibana.yml'
 
-      git commit -m "$NEW_COMMIT_MESSAGE"
+      git commit -m "$CUSTOM_FIX_MESSAGE"
       git push
-
-      # After the git push, the new commit will trigger a new build within a few seconds and this build should get cancelled
-      # So, let's just sleep to give the build time to cancel itself without an error
-      # If it doesn't get cancelled for some reason, then exit with an error, because we don't want this build to be green (we just don't want it to generate an error either)
-      sleep 300
-      exit 1
     else
       echo -e "\n${RED}ERROR: '$1' caused changes to the following files:${C_RESET}\n"
       echo -e "$GIT_CHANGES\n"
