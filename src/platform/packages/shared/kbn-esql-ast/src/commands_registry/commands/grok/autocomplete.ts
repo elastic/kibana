@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import type { ESQLAstAllCommands } from '../../../types';
-import { pipeCompleteItem } from '../../complete_items';
+import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 import type { ICommandCallbacks } from '../../types';
 import type { ISuggestionItem, ICommandContext } from '../../types';
 import { buildConstantsDefinitions } from '../../../definitions/utils/literals';
@@ -81,19 +81,7 @@ export async function autocomplete(
   if (hasPatterns) {
     return [
       withAutoSuggest(pipeCompleteItem),
-      {
-        label: ',',
-        text: ', ',
-        kind: 'Operator',
-        detail: i18n.translate('kbn-esql-ast.esql.autocomplete.anotherPattern', {
-          defaultMessage: 'Add another pattern',
-        }),
-        sortText: '1',
-        command: {
-          title: 'Trigger suggestions',
-          id: 'editor.action.triggerSuggest',
-        },
-      },
+      withAutoSuggest({ ...commaCompleteItem, text: ', ' }),
     ];
   }
 
