@@ -8,11 +8,7 @@
  */
 
 import type { Payload } from '@hapi/boom';
-import type {
-  DecoratedError,
-  AuthorizeCreateObject,
-  SavedObjectsRawDoc,
-} from '@kbn/core-saved-objects-server';
+import type { AuthorizeCreateObject, SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectsErrorHelpers,
   type SavedObject,
@@ -23,6 +19,7 @@ import type {
   SavedObjectsCreateOptions,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkResponse,
+  SavedObjectAccessControl,
 } from '@kbn/core-saved-objects-api-server';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
 import type { Either } from './utils';
@@ -41,6 +38,7 @@ import {
 import { getSavedObjectNamespaces } from './utils';
 import type { PreflightCheckForCreateObject } from './internals/preflight_check_for_create';
 import type { ApiExecutionContext } from './types';
+import { setAccessControl } from './utils/internal_utils';
 
 export interface PerformBulkCreateParams<T = unknown> {
   objects: Array<SavedObjectsBulkCreateObject<T>>;
@@ -51,7 +49,10 @@ type ExpectedResult = Either<
   { type: string; id?: string; error: Payload },
   {
     method: 'index' | 'create';
-    object: SavedObjectsBulkCreateObject & { id: string };
+    object: Omit<SavedObjectsBulkCreateObject, 'accessControl'> & {
+      id: string;
+      accessControl?: SavedObjectAccessControl;
+    };
     preflightCheckIndex?: number;
   }
 >;
@@ -91,29 +92,52 @@ export const performBulkCreate = async <T>(
   const updatedBy = createdBy;
 
   let preflightCheckIndexCounter = 0;
+
   const expectedResults = objects.map<ExpectedResult>((object) => {
     const { type, id: requestId, initialNamespaces, version, managed } = object;
-    let error: DecoratedError | undefined;
+
     let id: string = ''; // Assign to make TS happy, the ID will be validated (or randomly generated if needed) during getValidId below
     const objectManaged = managed;
     if (!allowedTypes.includes(type)) {
-      error = SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
+      const error = SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
+      return left({ id: requestId, type, error: errorContent(error) });
     } else {
       try {
         id = commonHelper.getValidId(type, requestId, version, overwrite);
         validationHelper.validateInitialNamespaces(type, initialNamespaces);
         validationHelper.validateOriginId(type, object);
       } catch (e) {
-        error = e;
+        return left({ id: requestId, type, error: errorContent(e) });
       }
     }
-
-    if (error) {
-      return left({ id: requestId, type, error: errorContent(error) });
-    }
-
     const method = requestId && overwrite ? 'index' : 'create';
     const requiresNamespacesCheck = requestId && registry.isMultiNamespace(type);
+    const typeSupportsAccessControl = registry.supportsAccessControl(type);
+    const paramsIncludeAccessControl =
+      !!object.accessControl?.accessMode || !!options.accessControl?.accessMode;
+
+    if (!createdBy && typeSupportsAccessControl && paramsIncludeAccessControl) {
+      return left({
+        id,
+        type,
+        error: {
+          ...errorContent(
+            SavedObjectsErrorHelpers.createBadRequestError(
+              `Cannot create a saved object of type "${type}" with an access mode because Kibana could not determine the user profile ID for the caller. This access mode requires an identifiable user profile.`
+            )
+          ),
+        },
+      });
+    }
+
+    const accessMode =
+      object.accessControl?.accessMode ?? options.accessControl?.accessMode ?? 'default';
+
+    const accessControlToWrite = setAccessControl({
+      typeSupportsAccessControl,
+      createdBy,
+      accessMode,
+    });
 
     return right({
       method,
@@ -121,6 +145,7 @@ export const performBulkCreate = async <T>(
         ...object,
         id,
         managed: setManaged({ optionsManaged, objectManaged }),
+        accessControl: accessControlToWrite,
       },
       ...(requiresNamespacesCheck && { preflightCheckIndex: preflightCheckIndexCounter++ }),
     }) as ExpectedResult;
@@ -150,8 +175,16 @@ export const performBulkCreate = async <T>(
   );
 
   const authObjects: AuthorizeCreateObject[] = validObjects.map((element) => {
-    const { object, preflightCheckIndex: index } = element.value;
-    const preflightResult = index !== undefined ? preflightCheckResponse[index] : undefined;
+    const { object, preflightCheckIndex } = element.value;
+
+    const preflightResult =
+      preflightCheckIndex !== undefined ? preflightCheckResponse[preflightCheckIndex] : undefined;
+
+    const existingAccessControl = preflightResult?.existingDocument?._source?.accessControl;
+
+    const accessControlToWrite = existingAccessControl
+      ? existingAccessControl
+      : object.accessControl;
 
     return {
       type: object.type,
@@ -159,6 +192,7 @@ export const performBulkCreate = async <T>(
       initialNamespaces: object.initialNamespaces,
       existingNamespaces: preflightResult?.existingDocument?._source.namespaces ?? [],
       name: SavedObjectsUtils.getName(registry.getNameAttribute(object.type), object),
+      ...(accessControlToWrite && { accessControl: accessControlToWrite }),
     };
   });
 
@@ -183,6 +217,7 @@ export const performBulkCreate = async <T>(
       let savedObjectNamespaces: string[] | undefined;
       let existingOriginId: string | undefined;
       let versionProperties;
+      let accessControl: SavedObjectAccessControl | undefined;
       const {
         preflightCheckIndex,
         object: { initialNamespaces, version, ...object },
@@ -206,6 +241,7 @@ export const performBulkCreate = async <T>(
           initialNamespaces || getSavedObjectNamespaces(namespace, existingDocument);
         versionProperties = getExpectedVersionProperties(version);
         existingOriginId = existingDocument?._source?.originId;
+        accessControl = existingDocument?._source?.accessControl;
       } else {
         if (registry.isSingleNamespace(object.type)) {
           savedObjectNamespace = initialNamespaces
@@ -216,7 +252,7 @@ export const performBulkCreate = async <T>(
         }
         versionProperties = getExpectedVersionProperties(version);
       }
-
+      const accessControlToWrite = accessControl ? accessControl : object.accessControl;
       // 1. If the originId has been *explicitly set* in the options (defined or undefined), respect that.
       // 2. Otherwise, preserve the originId of the existing object that is being overwritten, if any.
       const originId = Object.keys(object).includes('originId')
@@ -237,6 +273,7 @@ export const performBulkCreate = async <T>(
         ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
         ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
         managed: setManaged({ optionsManaged, objectManaged: object.managed }),
+        ...(accessControlToWrite && { accessControl: accessControlToWrite }),
         updated_at: time,
         created_at: time,
         ...(createdBy && { created_by: createdBy }),

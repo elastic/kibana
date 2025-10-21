@@ -62,7 +62,18 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
         `Type '${type.name}' can't be used because it's been added to the legacy types`
       );
     }
+
+    if (
+      type.supportsAccessControl &&
+      type.namespaceType !== 'multiple' &&
+      type.namespaceType !== 'multiple-isolated'
+    ) {
+      throw new Error(
+        `Type ${type.name}: Cannot specify 'supportsAccessControl' as 'true' unless 'namespaceType' is either 'multiple' or 'multiple-isolated'.`
+      );
+    }
     const supportsAccessControl = this.accessControlEnabled ? type.supportsAccessControl : false;
+
     const typeWithAccessControl = { ...type, supportsAccessControl };
 
     validateType(type);

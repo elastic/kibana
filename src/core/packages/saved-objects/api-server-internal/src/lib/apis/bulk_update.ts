@@ -191,12 +191,18 @@ export const performBulkUpdate = async <T>(
       attributes: documentToSave[type] as SavedObject<T>,
     });
 
+    const accessControl = registry.supportsAccessControl(type)
+      ? // @ts-expect-error MultiGetHit._source is optional
+        preflightResult._source?.accessControl
+      : undefined;
+
     if (registry.isMultiNamespace(type)) {
       return {
         type,
         id,
         objectNamespace,
         name,
+        ...(accessControl && { accessControl }),
         // @ts-expect-error MultiGetHit._source is optional
         existingNamespaces: preflightResult._source?.namespaces ?? [],
       };
@@ -206,6 +212,7 @@ export const performBulkUpdate = async <T>(
         id,
         objectNamespace,
         name,
+        ...(accessControl && { accessControl }),
         existingNamespaces: [],
       };
     }
@@ -317,6 +324,7 @@ export const performBulkUpdate = async <T>(
         attributes: updatedAttributes,
         updated_at: time,
         updated_by: updatedBy,
+        ...(migrated.accessControl ? { accessControl: migrated.accessControl } : {}),
         ...(Array.isArray(documentToSave.references) && { references: documentToSave.references }),
       });
       const updatedMigratedDocumentToSave = serializer.savedObjectToRaw(
@@ -397,6 +405,9 @@ export const performBulkUpdate = async <T>(
         ...(originId && { originId }),
         updated_at,
         updated_by,
+        ...(registry.supportsAccessControl(type) && {
+          accessControl: rawMigratedUpdatedDoc._source.accessControl,
+        }),
         version: encodeVersion(seqNo, primaryTerm),
         attributes,
         references,
