@@ -15,7 +15,7 @@ describe('Package policy name helper', () => {
   describe('increment package name', () => {
     it('should return 1 if no existing policies', async () => {
       packagePolicyService.list = jest.fn().mockResolvedValue(undefined);
-      const newName = await incrementPackageName(savedObjectsClientMock.create(), 'apache');
+      const newName = await incrementPackageName('apache', ['default']);
       expect(newName).toEqual('apache-1');
     });
 
@@ -28,7 +28,7 @@ describe('Package policy name helper', () => {
           { name: 'apache-9' },
         ],
       });
-      const newName = await incrementPackageName(savedObjectsClientMock.create(), 'apache');
+      const newName = await incrementPackageName('apache', ['default']);
       expect(newName).toEqual('apache-11');
     });
   });

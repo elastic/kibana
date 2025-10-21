@@ -21,7 +21,6 @@ import { setupTestUsers, testUsers } from '../test_users';
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const supertestWithAuth = getService('supertest');
   const esClient = getService('es');
   const kibanaServer = getService('kibanaServer');
   const spaces = getService('spaces');
