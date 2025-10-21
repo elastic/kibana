@@ -493,10 +493,11 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       // (see comment in getInjectedMetadata)
       let injectedMetadata: Partial<{ legacyMetadata: any }> = { legacyMetadata: undefined };
       let loadingMessage: WebElementWrapper | null = null;
+      await navigateTo('/render/core');
       await retry.tryWithRetries(
         'injectedMetadata',
         async () => {
-          await navigateTo('/render/core');
+          await browser.refresh();
           [injectedMetadata, loadingMessage] = await Promise.all([
             getInjectedMetadata(),
             findLoadingMessage(),
@@ -520,10 +521,11 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       // (see comment in getInjectedMetadata)
       let injectedMetadata: Partial<{ legacyMetadata: any }> = { legacyMetadata: undefined };
       let loadingMessage: WebElementWrapper | null = null;
+      await navigateTo('/render/core?isAnonymousPage=true');
       await retry.tryWithRetries(
         'injectedMetadata',
         async () => {
-          await navigateTo('/render/core?isAnonymousPage=true');
+          await browser.refresh();
           [injectedMetadata, loadingMessage] = await Promise.all([
             getInjectedMetadata(),
             findLoadingMessage(),
