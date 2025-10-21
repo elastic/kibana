@@ -8,7 +8,7 @@
  */
 
 import type { Reducer, RefObject } from 'react';
-import { useRef, useEffect, useLayoutEffect, useReducer, useCallback } from 'react';
+import { useRef, useEffect, useLayoutEffect, useReducer } from 'react';
 import type { Observable } from 'rxjs';
 import { filter } from 'rxjs';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
@@ -81,16 +81,12 @@ export function useExpressionRenderer(
   // will call done() in LayoutEffect when done with rendering custom error state
   const errorRenderHandlerRef = useRef<IInterpreterRenderHandlers | null>(null);
 
-  const abortListener = useCallback(() => {
-    expressionLoaderRef.current?.cancel();
-  }, [expressionLoaderRef]);
-
   useEffect(() => {
-    abortController?.signal.addEventListener('abort', abortListener);
-    return () => {
-      abortController?.signal.removeEventListener('abort', abortListener);
-    };
-  }, [abortController, abortListener]);
+    if (abortController?.signal)
+      abortController.signal.onabort = () => {
+        expressionLoaderRef.current?.cancel();
+      };
+  }, [abortController]);
 
   /* eslint-disable react-hooks/exhaustive-deps */
   // OK to ignore react-hooks/exhaustive-deps because options update is handled by calling .update()
