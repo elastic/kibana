@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
 import type {
+  AwsCloudConnectorVars,
   CloudConnector,
   CloudConnectorListOptions,
   CloudConnectorSecretReference,
@@ -94,7 +95,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         vars: {
           ...(vars.role_arn?.value && { role_arn: vars.role_arn }),
           ...(vars.external_id?.value && { external_id: vars.external_id }),
-        },
+        } as AwsCloudConnectorVars,
         packagePolicyCount: 1,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
@@ -216,7 +217,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         updateAttributes.vars = {
           ...(updates.vars.role_arn?.value && { role_arn: updates.vars.role_arn }),
           ...(updates.vars.external_id?.value && { external_id: updates.vars.external_id }),
-        };
+        } as AwsCloudConnectorVars;
       }
 
       // Update the saved object

@@ -8,6 +8,8 @@
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { loggerMock } from '@kbn/logging-mocks';
 
+import type { AwsCloudConnectorVars } from '../../public';
+
 import { CLOUD_CONNECTOR_SAVED_OBJECT_TYPE } from '../../common/constants';
 
 import { createSavedObjectClientMock } from '../mocks';
@@ -147,7 +149,7 @@ describe('CloudConnectorService', () => {
       const emptyVarsRequest: CreateCloudConnectorRequest = {
         name: 'test-connector',
         cloudProvider: 'aws',
-        vars: {},
+        vars: {} as AwsCloudConnectorVars,
       };
 
       await expect(service.create(mockSoClient, emptyVarsRequest)).rejects.toThrow(
@@ -181,7 +183,7 @@ describe('CloudConnectorService', () => {
             },
             type: 'password',
           },
-        },
+        } as AwsCloudConnectorVars,
       };
 
       await expect(service.create(mockSoClient, invalidRequest)).rejects.toThrow(
@@ -198,7 +200,7 @@ describe('CloudConnectorService', () => {
             value: 'arn:aws:iam::123456789012:role/TestRole',
             type: 'text',
           },
-        },
+        } as AwsCloudConnectorVars,
       };
 
       await expect(service.create(mockSoClient, invalidRequest)).rejects.toThrow(
@@ -618,7 +620,7 @@ describe('CloudConnectorService', () => {
           type: 'text' as const,
         },
         // Missing external_id
-      };
+      } as AwsCloudConnectorVars;
 
       await expect(
         service.update(mockSoClient, 'cloud-connector-123', {
@@ -876,7 +878,7 @@ describe('CloudConnectorService', () => {
               },
               type: 'password',
             },
-          },
+          } as AwsCloudConnectorVars,
         };
 
         expect(() => (service as any).validateCloudConnectorDetails(invalidRequest)).toThrow(
@@ -917,7 +919,7 @@ describe('CloudConnectorService', () => {
               value: 'arn:aws:iam::123456789012:role/TestRole',
               type: 'text',
             },
-          },
+          } as AwsCloudConnectorVars,
         };
 
         expect(() => (service as any).validateCloudConnectorDetails(invalidRequest)).toThrow(

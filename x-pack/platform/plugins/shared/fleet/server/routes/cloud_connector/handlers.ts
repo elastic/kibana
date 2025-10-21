@@ -16,6 +16,8 @@ import type {
   CreateCloudConnectorResponse,
   UpdateCloudConnectorResponse,
   DeleteCloudConnectorResponse,
+  CreateCloudConnectorRequest,
+  UpdateCloudConnectorRequest,
 } from '../../../common/types/rest_spec/cloud_connector';
 import type {
   CreateCloudConnectorRequestSchema,
@@ -25,6 +27,23 @@ import type {
   DeleteCloudConnectorRequestSchema,
 } from '../../types/rest_spec/cloud_connector';
 
+const validateCreateCloudConnectorRequest = (
+  body: TypeOf<typeof CreateCloudConnectorRequestSchema.body>
+): CreateCloudConnectorRequest => {
+  // Runtime check for AWS
+  if (body.cloudProvider === 'aws') {
+    if (!body.vars.role_arn || !body.vars.external_id) {
+      throw new Error('AWS cloud connector requires role_arn and external_id');
+    }
+  }
+
+  // Runtime check for Azure
+  if (body.cloudProvider === 'azure') {
+    throw new Error('Azure cloud connector reusability not implemented');
+  }
+
+  return body as CreateCloudConnectorRequest;
+};
 export const createCloudConnectorHandler: FleetRequestHandler<
   undefined,
   undefined,
@@ -38,7 +57,8 @@ export const createCloudConnectorHandler: FleetRequestHandler<
 
   try {
     logger.info('Creating cloud connector');
-    const cloudConnector = await cloudConnectorService.create(internalSoClient, request.body);
+    const validatedRequest = validateCreateCloudConnectorRequest(request.body);
+    const cloudConnector = await cloudConnectorService.create(internalSoClient, validatedRequest);
     logger.info(`Successfully created cloud connector ${cloudConnector.id}`);
     const body: CreateCloudConnectorResponse = {
       item: cloudConnector,
@@ -119,6 +139,13 @@ export const getCloudConnectorHandler: FleetRequestHandler<
   }
 };
 
+function validateUpdateCloudConnectorRequest(
+  body: TypeOf<typeof UpdateCloudConnectorRequestSchema.body>
+): Partial<UpdateCloudConnectorRequest> {
+  // Update requests only contain changed fields (name and/or vars)
+  return body as Partial<UpdateCloudConnectorRequest>;
+}
+
 export const updateCloudConnectorHandler: FleetRequestHandler<
   TypeOf<typeof UpdateCloudConnectorRequestSchema.params>,
   undefined,
@@ -133,10 +160,11 @@ export const updateCloudConnectorHandler: FleetRequestHandler<
 
   try {
     logger.info(`Updating cloud connector ${cloudConnectorId}`);
+    const validatedRequest = validateUpdateCloudConnectorRequest(request.body);
     const result = await cloudConnectorService.update(
       internalSoClient,
       cloudConnectorId,
-      request.body
+      validatedRequest
     );
     logger.info(`Successfully updated cloud connector ${cloudConnectorId}`);
     const body: UpdateCloudConnectorResponse = {
