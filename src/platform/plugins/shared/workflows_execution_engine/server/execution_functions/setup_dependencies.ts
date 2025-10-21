@@ -27,6 +27,7 @@ import { WorkflowEventLogger } from '../workflow_event_logger/workflow_event_log
 import { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 import type { LogsRepository } from '../repositories/logs_repository/logs_repository';
 import { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
+import type { ContextDependencies } from '../workflow_context_manager/types';
 
 export async function setupDependencies(
   workflowRunId: string,
@@ -39,6 +40,7 @@ export async function setupDependencies(
   workflowExecutionRepository: WorkflowExecutionRepository,
   stepExecutionRepository: StepExecutionRepository,
   logsRepository: LogsRepository,
+  dependencies: ContextDependencies,
   fakeRequest?: any, // KibanaRequest from task manager
   coreStart?: any // CoreStart for creating esClientAsUser
 ) {
@@ -110,6 +112,7 @@ export async function setupDependencies(
     esClient,
     fakeRequest,
     coreStart,
+    dependencies,
   });
 
   const nodesFactory = new NodesFactory(
