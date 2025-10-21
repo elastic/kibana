@@ -44,11 +44,15 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     agentId,
     abortSignal,
   },
-  { logger, request, modelProvider, toolProvider, events }
+  context
 ) => {
+  const { logger, request, modelProvider, toolProvider, events } = context;
   const model = await modelProvider.getDefaultModel();
   const resolvedCapabilities = resolveCapabilities(capabilities);
-  const resolvedConfiguration = resolveConfiguration(agentConfiguration);
+  const resolvedConfiguration = await resolveConfiguration({
+    configuration: agentConfiguration,
+    context,
+  });
   logger.debug(`Running chat agent with connector: ${model.connector.name}, runId: ${runId}`);
 
   const selectedTools = await selectProviderTools({

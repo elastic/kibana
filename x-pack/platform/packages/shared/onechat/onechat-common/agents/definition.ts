@@ -79,7 +79,10 @@ export interface AgentConfiguration {
    * List of tools exposed to the agent
    */
   tools: ToolSelection[];
-
+  /**
+   * Optional list of skills associated with the agent.
+   */
+  skills?: string[];
   /**
    * Custom configuration for the research step of the agent.
    */

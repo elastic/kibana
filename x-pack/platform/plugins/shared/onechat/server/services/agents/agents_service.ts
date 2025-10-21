@@ -25,6 +25,7 @@ import {
 } from './builtin';
 import { createPersistedProviderFn } from './persisted';
 import { createAgentRegistry } from './agent_registry';
+import { createAgentKnowledgeRegistry, type AgentKnowledgeRegistry } from './knowledge_registry';
 
 export interface AgentsServiceSetupDeps {
   logger: Logger;
@@ -40,11 +41,13 @@ export interface AgentsServiceStartDeps {
 
 export class AgentsService {
   private builtinRegistry: BuiltinAgentRegistry;
+  private knowledgeRegistry: AgentKnowledgeRegistry;
 
   private setupDeps?: AgentsServiceSetupDeps;
 
   constructor() {
     this.builtinRegistry = createBuiltinAgentRegistry();
+    this.knowledgeRegistry = createAgentKnowledgeRegistry();
   }
 
   setup(setupDeps: AgentsServiceSetupDeps): AgentsServiceSetup {
@@ -59,6 +62,9 @@ export class AgentsService {
              Please add it to the list of allowed built-in agents in the "@kbn/onechat-server/allow_lists.ts" file.`);
         }
         this.builtinRegistry.register(agent);
+      },
+      registerKnowledge: (knowledge) => {
+        return this.knowledgeRegistry.register(knowledge);
       },
     };
   }
@@ -91,6 +97,7 @@ export class AgentsService {
 
     return {
       getRegistry,
+      getKnowledgeRegistry: async () => this.knowledgeRegistry,
       execute: async (args) => {
         return getRunner().runAgent(args);
       },

@@ -13,7 +13,7 @@ import type { CloudStart, CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import type { BuiltInAgentDefinition } from '@kbn/onechat-server/agents';
+import type { BuiltInAgentDefinition, AgentKnowledge } from '@kbn/onechat-server/agents';
 import type { ToolsServiceSetup, ToolRegistry } from './services/tools';
 
 export interface OnechatSetupDependencies {
@@ -60,6 +60,11 @@ export interface AgentsSetup {
    * Register a built-in agent to be available in onechat.
    */
   register: (definition: BuiltInAgentDefinition) => void;
+  /**
+   * Register an agent skill to be available in onechat.
+   * @param knowledge
+   */
+  registerKnowledge: (knowledge: AgentKnowledge) => void;
 }
 
 /**

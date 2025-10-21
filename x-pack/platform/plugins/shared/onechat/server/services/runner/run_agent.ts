@@ -13,7 +13,7 @@ import type {
 import { withAgentSpan } from '../../tracing';
 import { registryToProvider } from '../tools/utils';
 import { createAgentHandler } from '../agents/modes/create_handler';
-import { createAgentEventEmitter, forkContextForAgentRun } from './utils';
+import { createAgentEventEmitter, forkContextForAgentRun, createAgentService } from './utils';
 import type { RunnerManager } from './runner';
 
 export const createAgentHandlerContext = async <TParams = Record<string, unknown>>({
@@ -30,6 +30,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     elasticsearch,
     modelProviderFactory,
     toolsService,
+    agentsService,
     resultStore,
     logger,
   } = manager.deps;
@@ -44,6 +45,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
       getRunner: manager.getRunner,
       request,
     }),
+    agentService: await createAgentService({ agentsStart: agentsService }),
     resultStore,
     events: createAgentEventEmitter({ eventHandler: onEvent, context: manager.context }),
   };

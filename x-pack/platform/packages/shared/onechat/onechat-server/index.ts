@@ -58,5 +58,10 @@ export type {
   AgentEventEmitter,
   AgentEventEmitterFn,
   RunAgentOnEventFn,
+  AgentKnowledge,
+  KnowledgeConfiguration,
+  AgentKnowledgeResolverContext,
+  KnowledgePerStepInstructions,
+  KnowledgeConfigurationProvider,
 } from './agents';
 export { chatSystemIndex, chatSystemIndexPrefix } from './indices';

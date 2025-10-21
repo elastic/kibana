@@ -15,6 +15,7 @@ import { sanitizeToolId } from '@kbn/onechat-genai-utils/langchain';
 import { visualizationElement } from '@kbn/onechat-common/tools/tool_result';
 import { ChartType } from '@kbn/visualization-utils';
 import { customInstructionsBlock, formatDate } from '../utils/prompt_helpers';
+import type { ResolvedAgentKnowledge } from '../types';
 
 const tools = {
   indexExplorer: sanitizeToolId(platformCoreTools.indexExplorer),
@@ -24,13 +25,19 @@ const tools = {
 
 export const getActPrompt = ({
   customInstructions,
-  capabilities,
+  knowledge,
   messages,
 }: {
   customInstructions?: string;
   capabilities: ResolvedAgentCapabilities;
+  knowledge: ResolvedAgentKnowledge[];
   messages: BaseMessageLike[];
 }): BaseMessageLike[] => {
+  const knowledgeInstructions = knowledge
+    .map((entry) => entry.configuration.researchInstructions)
+    .filter(Boolean)
+    .join('\n');
+
   return [
     [
       'system',
@@ -122,6 +129,8 @@ Constraints:
 
 ${customInstructionsBlock(customInstructions)}
 
+${knowledgeInstructions}
+
 ## ADDITIONAL INFO
 - Current date: ${formatDate()}
 
@@ -139,13 +148,21 @@ export const getAnswerPrompt = ({
   discussion,
   handoverNote,
   capabilities,
+  knowledge,
 }: {
   customInstructions?: string;
   discussion: BaseMessageLike[];
   handoverNote?: string;
   capabilities: ResolvedAgentCapabilities;
+  knowledge: ResolvedAgentKnowledge[];
 }): BaseMessageLike[] => {
   const visEnabled = capabilities.visualizations;
+
+  const knowledgeInstructions = knowledge
+    .map((entry) => entry.configuration.answerInstructions)
+    .filter(Boolean)
+    .join('\n');
+
   return [
     [
       'system',
@@ -174,6 +191,8 @@ Use the context above to inform your final answer.
 - Do not mention internal reasoning or tool names unless user explicitly asks.
 
 ${customInstructionsBlock(customInstructions)}
+
+${knowledgeInstructions}
 
 ## OUTPUT STYLE
 - Clear, direct, and scoped. No extraneous commentary.

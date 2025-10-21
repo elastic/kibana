@@ -12,3 +12,4 @@ export {
 } from './run_context';
 export { createToolEventEmitter, createAgentEventEmitter } from './events';
 export { extractConversationToolResults } from './extract_conversation_tool_results';
+export { createAgentService } from './agent_service';

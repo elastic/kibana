@@ -76,6 +76,7 @@ export class OnechatPlugin
       },
       agents: {
         register: serviceSetups.agents.register.bind(serviceSetups.agents),
+        registerKnowledge: serviceSetups.agents.registerKnowledge.bind(serviceSetups.agents),
       },
     };
   }

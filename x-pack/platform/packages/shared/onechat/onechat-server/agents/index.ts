@@ -22,3 +22,10 @@ export type {
   RunAgentOnEventFn,
 } from './runner';
 export type { BuiltInAgentDefinition, BuiltInAgentConfiguration } from './builtin_definition';
+export type {
+  AgentKnowledge,
+  KnowledgeConfiguration,
+  AgentKnowledgeResolverContext,
+  KnowledgePerStepInstructions,
+  KnowledgeConfigurationProvider,
+} from './knowledge';

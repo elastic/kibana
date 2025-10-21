@@ -14,7 +14,13 @@ import {
 } from '@kbn/onechat-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ModelProvider, ScopedRunner, ToolProvider, WritableToolResultStore } from '../runner';
+import type {
+  ModelProvider,
+  ScopedRunner,
+  ToolProvider,
+  WritableToolResultStore,
+  AgentService,
+} from '../runner';
 
 export type AgentHandlerFn = (
   params: AgentHandlerParams,
@@ -68,6 +74,10 @@ export interface AgentHandlerContext {
    * Event emitter that can be used to emits custom events
    */
   events: AgentEventEmitter;
+  /**
+   * Services to interact with the agent system.
+   */
+  agentService: AgentService;
   /**
    * Logger scoped to this execution
    */

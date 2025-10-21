@@ -65,6 +65,7 @@ export const createAgentGraph = ({
     const response = await model.invoke(
       getActPrompt({
         customInstructions: configuration.research.instructions,
+        knowledge: configuration.knowledge,
         capabilities,
         messages: [...state.initialMessages, ...state.addedMessages],
       })
@@ -106,6 +107,7 @@ export const createAgentGraph = ({
     const response = await answeringModel.invoke(
       getAnswerPrompt({
         customInstructions: configuration.answer.instructions,
+        knowledge: configuration.knowledge,
         capabilities,
         handoverNote: state.handoverNote,
         discussion: [...state.initialMessages, ...state.addedMessages],

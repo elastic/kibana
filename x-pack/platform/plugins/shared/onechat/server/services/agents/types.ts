@@ -7,14 +7,17 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { RunAgentFn } from '@kbn/onechat-server';
-import type { BuiltInAgentDefinition } from '@kbn/onechat-server/agents';
+import type { BuiltInAgentDefinition, AgentKnowledge } from '@kbn/onechat-server/agents';
 import type { AgentRegistry } from './agent_registry';
+import type { AgentKnowledgeRegistry } from './knowledge_registry';
 
 export interface AgentsServiceSetup {
   register(agent: BuiltInAgentDefinition): void;
+  registerKnowledge(knowledge: AgentKnowledge): void;
 }
 
 export interface AgentsServiceStart {
   execute: RunAgentFn;
   getRegistry: (opts: { request: KibanaRequest }) => Promise<AgentRegistry>;
+  getKnowledgeRegistry: () => Promise<AgentKnowledgeRegistry>;
 }

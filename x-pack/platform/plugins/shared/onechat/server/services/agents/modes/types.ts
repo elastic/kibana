@@ -9,6 +9,7 @@ import type {
   AgentAnswerStepConfiguration,
   AgentResearchStepConfiguration,
 } from '@kbn/onechat-common';
+import type { AgentKnowledge } from '@kbn/onechat-server/agents';
 
 export type ResolvedAnswerStepConfiguration = Required<AgentAnswerStepConfiguration>;
 export type ResolvedResearchStepConfiguration = Required<AgentResearchStepConfiguration>;
@@ -16,4 +17,15 @@ export type ResolvedResearchStepConfiguration = Required<AgentResearchStepConfig
 export interface ResolvedConfiguration {
   research: ResolvedResearchStepConfiguration;
   answer: ResolvedAnswerStepConfiguration;
+  knowledge: ResolvedAgentKnowledge[];
+}
+
+export type ResolvedAgentKnowledge = Omit<AgentKnowledge, 'configuration'> & {
+  configuration: ResolvedAgentKnowledgeConfiguration;
+};
+
+export interface ResolvedAgentKnowledgeConfiguration {
+  researchInstructions?: string;
+  answerInstructions?: string;
+  context?: string;
 }
