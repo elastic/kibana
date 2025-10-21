@@ -19,7 +19,11 @@ export type {
   StoredLinksState,
 } from './content_management';
 
-export type { LinksByValueState, LinksByReferenceState, LinksEmbeddableState } from './embeddable_schemas';
+export type {
+  LinksByValueState,
+  LinksByReferenceState,
+  LinksEmbeddableState,
+} from './embeddable_schemas';
 
 export const plugin = async (initContext: PluginInitializerContext) => {
   const { LinksServerPlugin } = await import('./plugin');
