@@ -27,6 +27,7 @@ export interface InternalStateDataRequestParams {
   timeRangeAbsolute: TimeRange | undefined;
   timeRangeRelative: TimeRange | undefined;
   searchSessionId: string | undefined;
+  isSearchSessionRestored: boolean;
 }
 
 export interface TabStateGlobalState {
@@ -41,6 +42,7 @@ export interface TabState extends TabItem {
     serializedSearchSource?: SerializedSearchSourceFields;
     visContext?: UnifiedHistogramVisContext | {};
     controlGroupJson?: string;
+    searchSessionId?: string;
   };
   initialAppState?: DiscoverAppState;
 
@@ -51,6 +53,7 @@ export interface TabState extends TabItem {
    * ESQL query variables
    */
   esqlVariables: ESQLControlVariable[] | undefined;
+  forceFetchOnSelect: boolean;
   isDataViewLoading: boolean;
   dataRequestParams: InternalStateDataRequestParams;
   overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saved search saving
@@ -84,6 +87,7 @@ export interface DiscoverInternalState {
   userId: string | undefined;
   spaceId: string | undefined;
   persistedDiscoverSession: DiscoverSession | undefined;
+  hasUnsavedChanges: boolean;
   savedDataViews: DataViewListItem[];
   defaultProfileAdHocDataViewIds: string[];
   expandedDoc: DataTableRecord | undefined;
@@ -92,8 +96,10 @@ export interface DiscoverInternalState {
   tabsBarVisibility: TabsBarVisibility;
   tabs: {
     areInitializing: boolean;
-    byId: Record<string, TabState | RecentlyClosedTabState>;
+    byId: Record<string, TabState>;
     allIds: string[];
+    unsavedIds: string[];
+    recentlyClosedTabsById: Record<string, RecentlyClosedTabState>;
     recentlyClosedTabIds: string[];
     /**
      * WARNING: You probably don't want to use this property.

@@ -9,11 +9,11 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSuperDatePicker, EuiTitle } fro
 import DateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import React from 'react';
+import moment from 'moment';
+import React, { useState } from 'react';
 import { ErrorRateChart } from '../../../../components/slo/error_rate_chart';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { toDuration } from '../../../../utils/slo/duration';
-import { useUrlAppState } from './hooks/use_url_app_state';
 import type { TimeBounds } from '../../types';
 import { EventsChartPanel } from '../events_chart_panel/events_chart_panel';
 import { HistoricalDataCharts } from '../historical_data_charts';
@@ -21,14 +21,32 @@ import { CalendarPeriodPicker } from './calendar_period_picker';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
+  isAutoRefreshing: boolean;
 }
 
-export function SloDetailsHistory({ slo }: Props) {
+export function SloDetailsHistory({ slo, isAutoRefreshing }: Props) {
   const { uiSettings } = useKibana().services;
-  const { state, updateState } = useUrlAppState(slo);
+
+  const [range, setRange] = useState<TimeBounds>(() => {
+    if (slo.timeWindow.type === 'calendarAligned') {
+      const now = moment();
+      const duration = toDuration(slo.timeWindow.duration);
+      const unit = duration.unit === 'w' ? 'isoWeek' : 'month';
+
+      return {
+        from: moment.utc(now).startOf(unit).toDate(),
+        to: moment.utc(now).endOf(unit).toDate(),
+      };
+    }
+
+    return {
+      from: new Date(DateMath.parse(`now-${slo.timeWindow.duration}`)!.valueOf()),
+      to: new Date(DateMath.parse('now', { roundUp: true })!.valueOf()),
+    };
+  });
 
   const onBrushed = ({ from, to }: TimeBounds) => {
-    updateState({ range: { from, to } });
+    setRange({ from, to });
   };
 
   return (
@@ -37,24 +55,21 @@ export function SloDetailsHistory({ slo }: Props) {
         <EuiFlexItem grow css={{ maxWidth: 500 }}>
           {slo.timeWindow.type === 'calendarAligned' ? (
             <CalendarPeriodPicker
-              period={toDuration(slo.timeWindow.duration).unit === 'w' ? 'week' : 'month'}
-              range={state.range}
+              slo={slo}
               onChange={(updatedRange: TimeBounds) => {
-                updateState({ range: updatedRange });
+                setRange(updatedRange);
               }}
             />
           ) : (
             <EuiSuperDatePicker
               isLoading={false}
-              start={state.range.from.toISOString()}
-              end={state.range.to.toISOString()}
+              start={range.from.toISOString()}
+              end={range.to.toISOString()}
               onTimeChange={(val: OnTimeChangeProps) => {
-                const newRange = {
+                setRange({
                   from: new Date(DateMath.parse(val.start)!.valueOf()),
                   to: new Date(DateMath.parse(val.end, { roundUp: true })!.valueOf()),
-                };
-
-                updateState({ range: newRange });
+                });
               }}
               width="full"
               showUpdateButton={false}
@@ -83,7 +98,7 @@ export function SloDetailsHistory({ slo }: Props) {
           </EuiFlexItem>
           <ErrorRateChart
             slo={slo}
-            dataTimeRange={state.range}
+            dataTimeRange={range}
             onBrushed={onBrushed}
             variant={['VIOLATED', 'DEGRADING'].includes(slo.summary.status) ? 'danger' : 'success'}
           />
@@ -93,17 +108,12 @@ export function SloDetailsHistory({ slo }: Props) {
       <HistoricalDataCharts
         slo={slo}
         hideMetadata={true}
-        isAutoRefreshing={false}
-        range={state.range}
+        isAutoRefreshing={isAutoRefreshing}
+        range={range}
         onBrushed={onBrushed}
       />
 
-      <EventsChartPanel
-        slo={slo}
-        range={state.range}
-        hideRangeDurationLabel
-        onBrushed={onBrushed}
-      />
+      <EventsChartPanel slo={slo} range={range} hideRangeDurationLabel onBrushed={onBrushed} />
     </EuiFlexGroup>
   );
 }

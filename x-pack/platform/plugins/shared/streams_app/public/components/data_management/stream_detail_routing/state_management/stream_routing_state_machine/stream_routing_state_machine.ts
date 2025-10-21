@@ -5,11 +5,12 @@
  * 2.0.
  */
 import type { MachineImplementationsFrom, ActorRefFrom } from 'xstate5';
-import { assign, and, enqueueActions, setup, sendTo } from 'xstate5';
+import { assign, and, enqueueActions, setup, sendTo, assertEvent } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { Streams } from '@kbn/streams-schema';
 import { isSchema, routingDefinitionListSchema } from '@kbn/streams-schema';
 import { ALWAYS_CONDITION } from '@kbn/streamlang';
+import type { RoutingDefinition } from '@kbn/streams-schema';
 import type {
   StreamRoutingContext,
   StreamRoutingEvent,
@@ -62,6 +63,11 @@ export const streamRoutingMachine = setup({
         routing: [...context.routing, newRule],
       };
     }),
+    appendRoutingRules: assign(({ context }, params: { definitions: RoutingDefinition[] }) => {
+      return {
+        routing: [...context.routing, ...params.definitions.map(routingConverter.toUIDefinition)],
+      };
+    }),
     patchRule: assign(
       ({ context }, params: { routingRule: Partial<RoutingDefinitionWithUIAttributes> }) => ({
         routing: context.routing.map((rule) =>
@@ -93,6 +99,12 @@ export const streamRoutingMachine = setup({
     storeDefinition: assign((_, params: { definition: Streams.WiredStream.GetResponse }) => ({
       definition: params.definition,
     })),
+    storeSuggestedRuleId: assign((_, params: { id: StreamRoutingContext['suggestedRuleId'] }) => ({
+      suggestedRuleId: params.id,
+    })),
+    resetSuggestedRuleId: assign(() => ({
+      suggestedRuleId: null,
+    })),
   },
   guards: {
     canForkStream: and(['hasManagePrivileges', 'isValidRouting']),
@@ -113,6 +125,7 @@ export const streamRoutingMachine = setup({
     definition: input.definition,
     initialRouting: [],
     routing: [],
+    suggestedRuleId: null,
   }),
   initial: 'initializing',
   states: {
@@ -130,6 +143,35 @@ export const streamRoutingMachine = setup({
           target: '#ready',
           actions: [{ type: 'storeDefinition', params: ({ event }) => event }],
           reenter: true,
+        },
+        'routingSamples.setDocumentMatchFilter': {
+          actions: sendTo('routingSamplesMachine', ({ event }) => ({
+            type: 'routingSamples.setDocumentMatchFilter',
+            filter: event.filter,
+          })),
+        },
+        'suggestion.preview': {
+          target: '#idle',
+          actions: [
+            sendTo('routingSamplesMachine', ({ event }) => ({
+              type: 'routingSamples.setSelectedPreview',
+              preview: event.toggle
+                ? { type: 'suggestion', name: event.name, index: event.index }
+                : undefined,
+            })),
+            sendTo('routingSamplesMachine', ({ event }) => ({
+              type: 'routingSamples.updateCondition',
+              condition: event.toggle ? event.condition : undefined,
+            })),
+            sendTo('routingSamplesMachine', {
+              type: 'routingSamples.setDocumentMatchFilter',
+              filter: 'matched',
+            }),
+          ],
+        },
+        'routingRule.reviewSuggested': {
+          target: '#ready.reviewSuggestedRule',
+          actions: [{ type: 'storeSuggestedRuleId', params: ({ event }) => event }],
         },
       },
       invoke: {
@@ -162,9 +204,23 @@ export const streamRoutingMachine = setup({
         },
         creatingNewRule: {
           id: 'creatingNewRule',
-          entry: [{ type: 'addNewRoutingRule' }],
+          entry: [
+            { type: 'addNewRoutingRule' },
+            sendTo('routingSamplesMachine', {
+              type: 'routingSamples.setSelectedPreview',
+              preview: { type: 'createStream' },
+            }),
+            sendTo('routingSamplesMachine', {
+              type: 'routingSamples.updateCondition',
+              condition: { always: {} },
+            }),
+          ],
           exit: [
             { type: 'resetRoutingChanges' },
+            sendTo('routingSamplesMachine', {
+              type: 'routingSamples.setSelectedPreview',
+              preview: undefined,
+            }),
             sendTo('routingSamplesMachine', {
               type: 'routingSamples.updateCondition',
               condition: undefined,
@@ -180,7 +236,13 @@ export const streamRoutingMachine = setup({
               on: {
                 'routingRule.cancel': {
                   target: '#idle',
-                  actions: [{ type: 'resetRoutingChanges' }],
+                  actions: [
+                    { type: 'resetRoutingChanges' },
+                    sendTo('routingSamplesMachine', {
+                      type: 'routingSamples.setDocumentMatchFilter',
+                      filter: 'matched',
+                    }),
+                  ],
                 },
                 'routingRule.change': {
                   actions: enqueueActions(({ enqueue, event }) => {
@@ -203,14 +265,6 @@ export const streamRoutingMachine = setup({
                 'routingRule.fork': {
                   guard: 'canForkStream',
                   target: 'forking',
-                },
-                'routingSamples.setDocumentMatchFilter': {
-                  actions: enqueueActions(({ enqueue, event }) => {
-                    enqueue.sendTo('routingSamplesMachine', {
-                      type: 'routingSamples.setDocumentMatchFilter',
-                      filter: event.filter,
-                    });
-                  }),
                 },
               },
             },
@@ -243,6 +297,12 @@ export const streamRoutingMachine = setup({
         editingRule: {
           id: 'editingRule',
           initial: 'changing',
+          entry: [
+            sendTo('routingSamplesMachine', {
+              type: 'routingSamples.setSelectedPreview',
+              preview: { type: 'updateStream' },
+            }),
+          ],
           exit: [{ type: 'resetRoutingChanges' }],
           states: {
             changing: {
@@ -253,7 +313,13 @@ export const streamRoutingMachine = setup({
                 },
                 'routingRule.cancel': {
                   target: '#idle',
-                  actions: [{ type: 'resetRoutingChanges' }],
+                  actions: [
+                    { type: 'resetRoutingChanges' },
+                    sendTo('routingSamplesMachine', {
+                      type: 'routingSamples.setDocumentMatchFilter',
+                      filter: 'matched',
+                    }),
+                  ],
                 },
                 'routingRule.change': {
                   actions: [{ type: 'patchRule', params: ({ event }) => event }],
@@ -317,6 +383,12 @@ export const streamRoutingMachine = setup({
         reorderingRules: {
           id: 'reorderingRules',
           initial: 'reordering',
+          entry: [
+            sendTo('routingSamplesMachine', {
+              type: 'routingSamples.setSelectedPreview',
+              preview: { type: 'updateStream' },
+            }),
+          ],
           states: {
             reordering: {
               on: {
@@ -347,6 +419,53 @@ export const streamRoutingMachine = setup({
                 },
                 onError: {
                   target: 'reordering',
+                  actions: [{ type: 'notifyStreamFailure' }],
+                },
+              },
+            },
+          },
+        },
+        reviewSuggestedRule: {
+          id: 'reviewSuggestedRule',
+          initial: 'reviewing',
+          states: {
+            reviewing: {
+              on: {
+                'routingRule.fork': {
+                  guard: 'canForkStream',
+                  target: 'forking',
+                },
+                'routingRule.cancel': {
+                  target: '#idle',
+                  actions: [{ type: 'resetSuggestedRuleId' }],
+                },
+              },
+            },
+            forking: {
+              invoke: {
+                id: 'forkStreamActor',
+                src: 'forkStream',
+                input: ({ context, event }) => {
+                  assertEvent(event, 'routingRule.fork');
+
+                  const { routingRule } = event;
+                  if (!routingRule) {
+                    throw new Error('No routing rule to fork');
+                  }
+
+                  return {
+                    definition: context.definition,
+                    destination: routingRule.destination,
+                    where: routingRule.where,
+                    status: 'enabled',
+                  };
+                },
+                onDone: {
+                  target: '#idle',
+                  actions: [{ type: 'refreshDefinition' }, { type: 'resetSuggestedRuleId' }],
+                },
+                onError: {
+                  target: 'reviewing',
                   actions: [{ type: 'notifyStreamFailure' }],
                 },
               },

@@ -7,11 +7,12 @@
 
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
-import { EuiFlexGroup, EuiTitle, EuiBetaBadge, EuiLoadingSpinner, EuiLink } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { ContentFrameworkSection } from '@kbn/unified-doc-viewer-plugin/public';
 import type { StreamsAppLocator } from '../../common/locators';
 import { useResolvedDefinitionName } from './use_resolved_definition_name';
 
@@ -25,33 +26,14 @@ export interface DiscoverFlyoutStreamFieldProps {
 export function DiscoverFlyoutStreamField(props: DiscoverFlyoutStreamFieldProps) {
   return (
     <RedirectAppLinks coreStart={{ application: props.coreApplication }}>
-      <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
-        <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
-          <EuiTitle size="xxxs">
-            <span>
-              {i18n.translate('xpack.streams.discoverFlyoutStreamField.title', {
-                defaultMessage: 'Stream',
-              })}
-            </span>
-          </EuiTitle>
-          <EuiBetaBadge
-            size="s"
-            label={i18n.translate('xpack.streams.betaBadgeLabel', {
-              defaultMessage: 'Streams is currently in tech preview',
-            })}
-            color="hollow"
-            iconType="beaker"
-          />
-        </EuiFlexGroup>
-        <EuiFlexGroup
-          responsive={false}
-          alignItems="center"
-          justifyContent="flexStart"
-          gutterSize="xs"
-        >
-          <DiscoverFlyoutStreamFieldContent {...props} />
-        </EuiFlexGroup>
-      </EuiFlexGroup>
+      <ContentFrameworkSection
+        id="discoverFlyoutStreamField"
+        title={i18n.translate('xpack.streams.discoverFlyoutStreamField.title', {
+          defaultMessage: 'Stream',
+        })}
+      >
+        <DiscoverFlyoutStreamFieldContent {...props} />
+      </ContentFrameworkSection>
     </RedirectAppLinks>
   );
 }
@@ -70,5 +52,9 @@ function DiscoverFlyoutStreamFieldContent({
 
   if (!value || error) return <span>-</span>;
 
-  return <EuiLink href={locator.getRedirectUrl({ name: value })}>{value}</EuiLink>;
+  return (
+    <EuiLink href={locator.getRedirectUrl({ name: value })}>
+      <EuiText size="xs">{value}</EuiText>
+    </EuiLink>
+  );
 }

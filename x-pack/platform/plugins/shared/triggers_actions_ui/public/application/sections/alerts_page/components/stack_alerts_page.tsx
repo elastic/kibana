@@ -255,9 +255,9 @@ const PageContentComponent: React.FC<PageContentProps> = ({
             ruleTypeIds={ruleTypeIds}
             consumers={consumers}
             query={esQuery}
-            initialSort={defaultAlertsTableSort}
+            sort={defaultAlertsTableSort}
             showAlertStatusWithFlapping
-            initialPageSize={20}
+            pageSize={20}
             showInspectButton
             renderActionsCell={AlertActionsCell}
             services={{

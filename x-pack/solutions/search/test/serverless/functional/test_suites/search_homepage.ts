@@ -13,7 +13,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects([
     'svlCommonPage',
     'svlCommonNavigation',
-    'svlSearchHomePage',
+    'searchHomePage',
     'embeddedConsole',
     'common',
   ]);
@@ -47,18 +47,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('has search homepage with Home sidenav', async () => {
-        await pageObjects.svlSearchHomePage.expectToBeOnHomepage();
-        await pageObjects.svlSearchHomePage.expectHomepageHeader();
+        await pageObjects.searchHomePage.expectToBeOnHomepage();
+        await pageObjects.searchHomePage.expectHomepageHeader();
         // Navigate to another page
         await pageObjects.svlCommonNavigation.sidenav.clickLink({
-          deepLinkId: 'serverlessConnectors',
+          deepLinkId: 'discover',
         });
-        await pageObjects.svlSearchHomePage.expectToNotBeOnHomepage();
+        await pageObjects.searchHomePage.expectToNotBeOnHomepage();
         // Click Home in Side nav
         await pageObjects.svlCommonNavigation.sidenav.clickLink({
           deepLinkId: 'searchHomepage',
         });
-        await pageObjects.svlSearchHomePage.expectToBeOnHomepage();
+        await pageObjects.searchHomePage.expectToBeOnHomepage();
       });
 
       it('has embedded dev console', async () => {
@@ -77,12 +77,36 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('renders the "Upload a file" card with copy link', async () => {
           await testSubjects.existOrFail('uploadFileButton');
           await testSubjects.click('uploadFileButton');
-          await pageObjects.svlSearchHomePage.expectToBeOnUploadDataPage();
+          // TODO: Should this retry to allow time for new page to load?
+          await pageObjects.searchHomePage.expectToBeOnUploadDataPage();
         });
 
         it('does not render the "Add sample data" card', async () => {
           await testSubjects.missingOrFail('sampleDataSection');
         });
+      });
+      describe('Get started with API', function () {
+        it('clicking on search basics tutorial open console', async () => {
+          await testSubjects.existOrFail('console_tutorials_search_basics');
+          await testSubjects.click('console_tutorials_search_basics');
+          await testSubjects.existOrFail('consoleEditorContainer');
+        });
+        it('clicking on semantic search tutorial open console', async () => {
+          await testSubjects.existOrFail('console_tutorials_semantic_search');
+          await testSubjects.click('console_tutorials_semantic_search');
+          await testSubjects.existOrFail('consoleEditorContainer');
+        });
+        it('clicking on esql tutorial open console', async () => {
+          await testSubjects.existOrFail('console_tutorials_esql');
+          await testSubjects.click('console_tutorials_esql');
+          await testSubjects.existOrFail('consoleEditorContainer');
+        });
+        // TODO:  uncomment below lines when we are ready to show TSDS tutorial. review https://github.com/elastic/kibana/pull/237384#issuecomment-3411670210
+        // it('clicking on tsds tutorial open console', async () => {
+        //   await testSubjects.existOrFail('console_tutorials_tsds');
+        //   await testSubjects.click('console_tutorials_tsds');
+        //   await testSubjects.existOrFail('consoleEditorContainer');
+        // });
       });
 
       describe('Alternate Solutions', function () {
@@ -90,25 +114,25 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await testSubjects.existOrFail('observabilitySection');
           await testSubjects.existOrFail('exploreLogstashAndBeatsLink');
           await testSubjects.click('exploreLogstashAndBeatsLink');
-          await pageObjects.svlSearchHomePage.expectToBeOnObservabilityPage();
+          await pageObjects.searchHomePage.expectToBeOnObservabilityPage();
         });
 
         it('renders SIEM link', async () => {
           await testSubjects.existOrFail('setupSiemLink');
           await testSubjects.click('setupSiemLink');
-          await pageObjects.svlSearchHomePage.expectToBeOnIngestDataToSecurityPage();
+          await pageObjects.searchHomePage.expectToBeOnIngestDataToSecurityPage();
         });
 
         it('renders Elastic Defend link', async () => {
           await testSubjects.existOrFail('setupElasticDefendLink');
           await testSubjects.click('setupElasticDefendLink');
-          await pageObjects.svlSearchHomePage.expectToBeOnInstallElasticDefendPage();
+          await pageObjects.searchHomePage.expectToBeOnInstallElasticDefendPage();
         });
 
         it('renders Cloud Security Posture Management link', async () => {
           await testSubjects.existOrFail('cloudSecurityPostureManagementLink');
           await testSubjects.click('cloudSecurityPostureManagementLink');
-          await pageObjects.svlSearchHomePage.expectToBeOnCloudSecurityPosturePage();
+          await pageObjects.searchHomePage.expectToBeOnCloudSecurityPosturePage();
         });
       });
 
@@ -117,21 +141,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await testSubjects.existOrFail('searchLabsSection');
           await testSubjects.existOrFail('searchLabsButton');
           await testSubjects.click('searchLabsButton');
-          await pageObjects.svlSearchHomePage.expectToBeOnSearchLabsPage();
+          await pageObjects.searchHomePage.expectToBeOnSearchLabsPage();
         });
 
         it('renders Open Notebooks content', async () => {
           await testSubjects.existOrFail('pythonNotebooksSection');
           await testSubjects.existOrFail('openNotebooksButton');
           await testSubjects.click('openNotebooksButton');
-          await pageObjects.svlSearchHomePage.expectToBeOnNotebooksExamplesPage();
+          await pageObjects.searchHomePage.expectToBeOnNotebooksExamplesPage();
         });
 
         it('renders Elasticsearch Documentation content', async () => {
           await testSubjects.existOrFail('elasticsearchDocumentationSection');
           await testSubjects.existOrFail('viewDocumentationButton');
           await testSubjects.click('viewDocumentationButton');
-          await pageObjects.svlSearchHomePage.expectToBeOnGetStartedDocumentationPage();
+          await pageObjects.searchHomePage.expectToBeOnGetStartedDocumentationPage();
         });
       });
 
@@ -139,13 +163,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('displays the community link', async () => {
           await testSubjects.existOrFail('elasticCommunityLink');
           await testSubjects.click('elasticCommunityLink');
-          await pageObjects.svlSearchHomePage.expectToBeOnCommunityPage();
+          await pageObjects.searchHomePage.expectToBeOnCommunityPage();
         });
 
         it('displays the feedbacks link', async () => {
           await testSubjects.existOrFail('giveFeedbackLink');
           await testSubjects.click('giveFeedbackLink');
-          await pageObjects.svlSearchHomePage.expectToBeOnGiveFeedbackPage();
+          await pageObjects.searchHomePage.expectToBeOnGiveFeedbackPage();
         });
       });
     });
@@ -160,15 +184,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await deleteAllTestIndices();
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/225446
-      it.skip('goes to the start page if there exists no index', async () => {
-        await pageObjects.common.navigateToApp('searchHomepage');
-        await pageObjects.svlSearchHomePage.expectToBeOnStartpage();
-      });
-
       it('goes to the home page if there exists at least one index', async () => {
         await pageObjects.common.navigateToApp('searchHomepage');
-        await pageObjects.svlSearchHomePage.expectToBeOnHomepage();
+        await pageObjects.searchHomePage.expectToBeOnHomepage();
       });
 
       describe('Elasticsearch endpoint and API Keys', function () {
@@ -183,8 +201,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await testSubjects.existOrFail('activeApiKeysBadge');
         });
         it('opens API keys management page on clicking Manage API Keys', async () => {
-          await pageObjects.svlSearchHomePage.clickManageApiKeysLink();
-          await pageObjects.svlSearchHomePage.expectToBeOnManageApiKeysPage();
+          await pageObjects.searchHomePage.clickManageApiKeysLink();
+          await pageObjects.searchHomePage.expectToBeOnManageApiKeysPage();
         });
       });
 
@@ -222,15 +240,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await deleteAllTestIndices();
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/225446
-      it.skip('goes to the start page if there exists no index', async () => {
-        await pageObjects.common.navigateToApp('searchHomepage');
-        await pageObjects.svlSearchHomePage.expectToBeOnStartpage();
-      });
-
       it('goes to the home page if there exists at least one index', async () => {
         await pageObjects.common.navigateToApp('searchHomepage');
-        await pageObjects.svlSearchHomePage.expectToBeOnHomepage();
+        await pageObjects.searchHomePage.expectToBeOnHomepage();
       });
 
       describe('Elasticsearch endpoint and API Keys', function () {
@@ -245,8 +257,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await testSubjects.existOrFail('activeApiKeysBadge');
         });
         it('opens API keys management page on clicking Manage API Keys', async () => {
-          await pageObjects.svlSearchHomePage.clickManageApiKeysLink();
-          await pageObjects.svlSearchHomePage.expectToBeOnManageApiKeysPage();
+          await pageObjects.searchHomePage.clickManageApiKeysLink();
+          await pageObjects.searchHomePage.expectToBeOnManageApiKeysPage();
         });
       });
 

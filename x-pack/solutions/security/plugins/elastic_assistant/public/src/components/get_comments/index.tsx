@@ -17,6 +17,7 @@ import {
 } from '@kbn/elastic-assistant-common';
 import styled from '@emotion/styled';
 import type { EuiPanelProps } from '@elastic/eui/src/components/panel';
+import type { ResumeGraphFunction } from '@kbn/elastic-assistant/impl/assistant_context/types';
 import { SecurityUserAvatar, SecurityUserName } from './user_avatar';
 import { StreamComment } from './stream';
 import * as i18n from './translations';
@@ -74,6 +75,8 @@ export const getComments: GetComments =
     resumeGraph,
   }) => {
     if (!currentConversation) return [];
+
+    const mockResumeGraph: ResumeGraphFunction = (threadId, resumeValue) => Promise.resolve(); // TODO: Replace with actual implementation
 
     const regenerateMessageOfConversation = () => {
       regenerateMessage(currentConversation.id);

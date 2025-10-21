@@ -17,12 +17,14 @@ export interface EnabledFeatures {
   showSpacesIntegration: boolean;
   isPermissionsBased: boolean;
   showAiBreadcrumb: boolean;
+  showAiAssistantsVisibilitySetting: boolean;
 }
 
 export const EnabledFeaturesContext = createContext<EnabledFeatures>({
   showSpacesIntegration: true,
   isPermissionsBased: false,
   showAiBreadcrumb: true,
+  showAiAssistantsVisibilitySetting: true,
 });
 
 interface Props {
@@ -44,10 +46,15 @@ export const EnabledFeaturesContextProvider: FC<PropsWithChildren<Props>> = ({
 
   const contextFeatures = useMemo(() => {
     const isSolutionView = Boolean(activeSpace?.solution && activeSpace.solution !== 'classic');
+
+    const showAiAssistantsVisibilitySetting =
+      config.showAiAssistantsVisibilitySetting === false ? false : !isSolutionView;
+
     return {
       showSpacesIntegration: config.showSpacesIntegration,
       showAiBreadcrumb: config.showAiBreadcrumb,
       isPermissionsBased: isSolutionView,
+      showAiAssistantsVisibilitySetting,
     };
   }, [config, activeSpace]);
 

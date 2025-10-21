@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiButtonProps } from '@elastic/eui';
 import {
   EuiAccordion,
   EuiButton,
@@ -64,6 +65,7 @@ import { notificationService } from '../../../../services/notification';
 import { SemanticTextBanner } from './semantic_text_banner';
 import { TrainedModelsDeploymentModal } from './trained_models_deployment_modal';
 import { parseMappings } from '../../../../shared/parse_mappings';
+import { EmptyMappingsContent } from './details_page_empty_mappings';
 
 const isInferencePreconfigured = (inferenceId: string) => inferenceId.startsWith('.');
 
@@ -76,9 +78,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   hasUpdateMappingsPrivilege?: boolean;
 }> = ({ index, data, jsonData, refetchMapping, showAboutMappings, hasUpdateMappingsPrivilege }) => {
   const {
-    services: { extensionsService },
     core: {
-      getUrlForApp,
       application: { capabilities, navigateToUrl },
       http,
     },
@@ -113,6 +113,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   };
 
   const state = useMappingsState();
+  const hasMappings = state.mappingViewFields.rootLevelFields.length > 0;
   const dispatch = useDispatch();
 
   const indexName = index.name;
@@ -228,6 +229,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
       let inferenceToModelIdMap = state.inferenceToModelIdMap;
       setIsUpdatingMappings(true);
       try {
+        await ml?.mlApi?.savedObjects.syncSavedObjects();
         if (isSemanticTextEnabled && hasMLPermissions && hasSemanticText && !forceSaveMappings) {
           inferenceToModelIdMap = await fetchInferenceToModelIdMap();
         }
@@ -387,6 +389,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   const errorSavingMappings = saveMappingError && (
     <EuiFlexItem grow={false}>
       <EuiCallOut
+        announceOnMount
         color="danger"
         data-test-subj="indexDetailsSaveMappingsError"
         iconType="error"
@@ -419,13 +422,59 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     }
   `;
 
+  const saveMappingsButton = (
+    <EuiButton
+      onClick={() => updateMappings()}
+      color="success"
+      fill
+      disabled={newFieldsLength === 0}
+      data-test-subj="indexDetailsMappingsSaveMappings"
+    >
+      <FormattedMessage
+        id="xpack.idxMgmt.indexDetails.mappings.saveMappings"
+        defaultMessage="Save mapping"
+      />
+    </EuiButton>
+  );
+
+  const AddFieldButton: React.FC<EuiButtonProps> = ({ color }) => {
+    const isDisabled = hasUpdateMappingsPrivilege === false;
+    return (
+      <EuiToolTip
+        position="bottom"
+        data-test-subj="indexDetailsMappingsAddFieldTooltip"
+        content={
+          isDisabled
+            ? i18n.translate('xpack.idxMgmt.indexDetails.mappings.addNewFieldToolTip', {
+                defaultMessage: 'You do not have permission to add fields in an Index',
+              })
+            : undefined
+        }
+      >
+        <EuiButton
+          onClick={addFieldButtonOnClick}
+          iconType="plusInCircle"
+          color={color}
+          size="m"
+          data-test-subj="indexDetailsMappingsAddField"
+          isDisabled={isDisabled}
+        >
+          <FormattedMessage
+            id="xpack.idxMgmt.indexDetails.mappings.addNewField"
+            defaultMessage="Add field"
+          />
+        </EuiButton>
+      </EuiToolTip>
+    );
+  };
+
   return (
     // using "rowReverse" to keep docs links on the top of the mappings code block on smaller screen
     <>
       <EuiFlexGroup wrap direction="rowReverse" css={mappingsWrapperStyles}>
-        {showAboutMappings && (
+        {showAboutMappings && hasMappings && (
           <EuiFlexItem grow={false} css={showAboutMappingsStyles}>
-            <EuiPanel grow={false} paddingSize="l" color="subdued">
+            <EuiPanel grow={false} paddingSize="l" hasShadow={false} hasBorder>
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <EuiIcon type="info" />
@@ -465,114 +514,122 @@ export const DetailsPageMappingsContent: FunctionComponent<{
                 />
               </EuiLink>
             </EuiPanel>
-            {extensionsService.indexMappingsContent && (
-              <>
-                <EuiSpacer />
-                {extensionsService.indexMappingsContent.renderContent({ index, getUrlForApp })}
-              </>
-            )}
+            <EuiSpacer size="l" />
+            <EuiPanel grow={false} paddingSize="l" hasShadow={false} hasBorder>
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="info" />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiTitle size="xs">
+                    <h3>
+                      <FormattedMessage
+                        id="xpack.idxMgmt.indexDetails.mappings.transform.title"
+                        defaultMessage="Transform your searchable content"
+                      />
+                    </h3>
+                  </EuiTitle>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+
+              <EuiSpacer size="s" />
+              <EuiText>
+                <p>
+                  <FormattedMessage
+                    id="xpack.idxMgmt.indexDetails.mappings.transform.description"
+                    defaultMessage="Want to add custom fields, or use trained ML models 
+            to analyze and enrich your indexed documents? Use index-specific ingest pipelines 
+            to customize documents to your needs."
+                  />
+                </p>
+              </EuiText>
+              <EuiSpacer size="s" />
+              <EuiLink
+                data-test-subj="indexDetailsMappingsLearnMoreLink"
+                href={documentationService.docLinks.enterpriseSearch.ingestPipelines}
+                target="_blank"
+                external
+              >
+                <FormattedMessage
+                  id="xpack.idxMgmt.indexDetails.mappings.transform.docLink"
+                  defaultMessage="Learn more"
+                />
+              </EuiLink>
+            </EuiPanel>
           </EuiFlexItem>
         )}
         <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <MappingsFilter
-                isAddingFields={isAddingFields}
-                isJSONVisible={isJSONVisible}
-                previousState={previousState}
-                setPreviousState={setPreviousState}
-                state={state}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>{fieldSearchComponent}</EuiFlexItem>
-            {!index.hidden && (
-              <EuiFlexItem grow={false}>
-                {!isAddingFields ? (
-                  <EuiToolTip
-                    position="bottom"
-                    data-test-subj="indexDetailsMappingsAddFieldTooltip"
-                    content={
-                      /* for serverless search users hasUpdateMappingsPrivilege flag indicates if user has privilege to update index mappings, for stack hasUpdateMappingsPrivilege would be undefined */
-                      hasUpdateMappingsPrivilege === false
-                        ? i18n.translate('xpack.idxMgmt.indexDetails.mappings.addNewFieldToolTip', {
-                            defaultMessage: 'You do not have permission to add fields in an Index',
-                          })
-                        : undefined
-                    }
-                  >
-                    <EuiButton
-                      onClick={addFieldButtonOnClick}
-                      iconType="plusInCircle"
-                      color="text"
-                      size="m"
-                      data-test-subj="indexDetailsMappingsAddField"
-                      isDisabled={hasUpdateMappingsPrivilege === false}
-                    >
-                      <FormattedMessage
-                        id="xpack.idxMgmt.indexDetails.mappings.addNewField"
-                        defaultMessage="Add field"
-                      />
-                    </EuiButton>
-                  </EuiToolTip>
-                ) : (
-                  <EuiButton
-                    onClick={() => updateMappings()}
-                    color="success"
-                    fill
-                    disabled={newFieldsLength === 0}
-                    data-test-subj="indexDetailsMappingsSaveMappings"
-                  >
-                    <FormattedMessage
-                      id="xpack.idxMgmt.indexDetails.mappings.saveMappings"
-                      defaultMessage="Save mapping"
-                    />
-                  </EuiButton>
-                )}
-              </EuiFlexItem>
-            )}
-
-            <EuiFlexItem grow={false}>
-              <EuiFilterGroup
-                data-test-subj="indexDetailsMappingsToggleViewButton"
-                aria-label={i18n.translate(
-                  'xpack.idxMgmt.indexDetails.mappings.mappingsViewButtonGroupAriaLabel',
-                  {
-                    defaultMessage: 'Mappings View Button Group',
-                  }
-                )}
-                onClick={onToggleChange}
-              >
-                <EuiFilterButton
-                  isToggle
-                  isSelected={!isJSONVisible}
-                  hasActiveFilters={!isJSONVisible}
-                  withNext
-                >
-                  <FormattedMessage
-                    id="xpack.idxMgmt.indexDetails.mappings.tableView"
-                    defaultMessage="List"
-                  />
-                </EuiFilterButton>
-                <EuiFilterButton
-                  isToggle
-                  isSelected={isJSONVisible}
-                  hasActiveFilters={isJSONVisible}
-                >
-                  <FormattedMessage
-                    id="xpack.idxMgmt.indexDetails.mappings.json"
-                    defaultMessage="JSON"
-                  />
-                </EuiFilterButton>
-              </EuiFilterGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
           {hasMLPermissions && !hasSemanticText && (
-            <EuiFlexItem grow={true}>
+            <EuiFlexItem grow={false}>
               <SemanticTextBanner
                 isSemanticTextEnabled={isSemanticTextEnabled}
                 isPlatinumLicense={isPlatinumLicense}
               />
             </EuiFlexItem>
+          )}
+          {!hasMappings &&
+            (!isAddingFields ? (
+              <EuiFlexItem grow={false}>
+                <EmptyMappingsContent addFieldButton={AddFieldButton} />
+              </EuiFlexItem>
+            ) : (
+              <EuiFlexItem grow={false}>
+                <span>{saveMappingsButton}</span>
+              </EuiFlexItem>
+            ))}
+          {hasMappings && (
+            <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <MappingsFilter
+                  isAddingFields={isAddingFields}
+                  isJSONVisible={isJSONVisible}
+                  previousState={previousState}
+                  setPreviousState={setPreviousState}
+                  state={state}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>{fieldSearchComponent}</EuiFlexItem>
+              {!index.hidden && (
+                <EuiFlexItem grow={false}>
+                  {!isAddingFields ? <AddFieldButton color={'text'} /> : saveMappingsButton}
+                </EuiFlexItem>
+              )}
+
+              <EuiFlexItem grow={false}>
+                <EuiFilterGroup
+                  data-test-subj="indexDetailsMappingsToggleViewButton"
+                  aria-label={i18n.translate(
+                    'xpack.idxMgmt.indexDetails.mappings.mappingsViewButtonGroupAriaLabel',
+                    {
+                      defaultMessage: 'Mappings View Button Group',
+                    }
+                  )}
+                  onClick={onToggleChange}
+                >
+                  <EuiFilterButton
+                    isToggle
+                    isSelected={!isJSONVisible}
+                    hasActiveFilters={!isJSONVisible}
+                    withNext
+                  >
+                    <FormattedMessage
+                      id="xpack.idxMgmt.indexDetails.mappings.tableView"
+                      defaultMessage="List"
+                    />
+                  </EuiFilterButton>
+                  <EuiFilterButton
+                    isToggle
+                    isSelected={isJSONVisible}
+                    hasActiveFilters={isJSONVisible}
+                  >
+                    <FormattedMessage
+                      id="xpack.idxMgmt.indexDetails.mappings.json"
+                      defaultMessage="JSON"
+                    />
+                  </EuiFilterButton>
+                </EuiFilterGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           )}
           {errorSavingMappings}
           {isAddingFields && (
@@ -628,18 +685,19 @@ export const DetailsPageMappingsContent: FunctionComponent<{
               </EuiPanel>
             </EuiFlexItem>
           )}
-
-          <EuiFlexItem
-            grow={false}
-            css={css`
-              min-width: 600px;
-              height: 100%;
-            `}
-          >
-            <EuiPanel hasShadow={false} paddingSize="none">
-              {isJSONVisible ? jsonBlock : treeViewBlock}
-            </EuiPanel>
-          </EuiFlexItem>
+          {hasMappings && (
+            <EuiFlexItem
+              grow={false}
+              css={css`
+                min-width: 600px;
+                height: 100%;
+              `}
+            >
+              <EuiPanel hasShadow={false} paddingSize="none">
+                {isJSONVisible ? jsonBlock : treeViewBlock}
+              </EuiPanel>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlexGroup>
       {isSemanticTextEnabled && isAddingFields && hasSavedFields && (

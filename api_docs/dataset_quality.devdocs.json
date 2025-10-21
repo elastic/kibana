@@ -136,9 +136,15 @@
         "label": "DatasetQualityIndicator",
         "description": [],
         "signature": [
-          "({ isLoading, quality, }: { isLoading: boolean; quality: ",
-          "QualityIndicators",
-          "; }) => React.JSX.Element"
+          "({ isLoading, quality, verbose, dataTestSubj, }: { isLoading: boolean; quality: ",
+          {
+            "pluginId": "datasetQuality",
+            "scope": "common",
+            "docId": "kibDatasetQualityPluginApi",
+            "section": "def-common.QualityIndicators",
+            "text": "QualityIndicators"
+          },
+          "; verbose?: boolean | undefined; dataTestSubj?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "x-pack/platform/plugins/shared/dataset_quality/public/components/quality_indicator/dataset_quality_indicator.tsx",
         "deprecated": false,
@@ -149,7 +155,7 @@
             "id": "def-public.DatasetQualityIndicator.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  isLoading,\n  quality,\n}",
+            "label": "{\n  isLoading,\n  quality,\n  verbose = false,\n  dataTestSubj,\n}",
             "description": [],
             "path": "x-pack/platform/plugins/shared/dataset_quality/public/components/quality_indicator/dataset_quality_indicator.tsx",
             "deprecated": false,
@@ -175,6 +181,34 @@
                 "description": [],
                 "signature": [
                   "\"good\" | \"poor\" | \"degraded\""
+                ],
+                "path": "x-pack/platform/plugins/shared/dataset_quality/public/components/quality_indicator/dataset_quality_indicator.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "datasetQuality",
+                "id": "def-public.DatasetQualityIndicator.$1.verbose",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "verbose",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/dataset_quality/public/components/quality_indicator/dataset_quality_indicator.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "datasetQuality",
+                "id": "def-public.DatasetQualityIndicator.$1.dataTestSubj",
+                "type": "string",
+                "tags": [],
+                "label": "dataTestSubj",
+                "description": [],
+                "signature": [
+                  "string | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/dataset_quality/public/components/quality_indicator/dataset_quality_indicator.tsx",
                 "deprecated": false,
@@ -625,7 +659,13 @@
         "description": [],
         "signature": [
           "(percentages: number[]) => ",
-          "QualityIndicators"
+          {
+            "pluginId": "datasetQuality",
+            "scope": "common",
+            "docId": "kibDatasetQualityPluginApi",
+            "section": "def-common.QualityIndicators",
+            "text": "QualityIndicators"
+          }
         ],
         "path": "x-pack/platform/plugins/shared/dataset_quality/common/utils/quality_helpers.ts",
         "deprecated": false,
@@ -1736,8 +1776,60 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "datasetQuality",
+        "id": "def-common.QualityIndicators",
+        "type": "Type",
+        "tags": [],
+        "label": "QualityIndicators",
+        "description": [],
+        "signature": [
+          "\"good\" | \"poor\" | \"degraded\""
+        ],
+        "path": "x-pack/platform/plugins/shared/dataset_quality/common/types/quality_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "datasetQuality",
+        "id": "def-common.DEFAULT_DATEPICKER_REFRESH",
+        "type": "Object",
+        "tags": [],
+        "label": "DEFAULT_DATEPICKER_REFRESH",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/dataset_quality/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "datasetQuality",
+            "id": "def-common.DEFAULT_DATEPICKER_REFRESH.value",
+            "type": "number",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/dataset_quality/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "datasetQuality",
+            "id": "def-common.DEFAULT_DATEPICKER_REFRESH.pause",
+            "type": "boolean",
+            "tags": [],
+            "label": "pause",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/dataset_quality/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   }
 }

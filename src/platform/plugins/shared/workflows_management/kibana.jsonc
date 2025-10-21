@@ -20,8 +20,17 @@
       "security",
       "triggersActionsUi",
       "spaces",
+      "esUiShared",
+      "stackConnectors",
+      "data",
+      "dataViews",
+      "fieldFormats",
+      "unifiedSearch",
       "embeddable"
     ],
-    "optionalPlugins": ["alerting"]
+    "optionalPlugins": [
+      "alerting",
+      "serverless"
+    ]
   }
 }

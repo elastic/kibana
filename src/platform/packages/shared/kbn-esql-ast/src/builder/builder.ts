@@ -45,6 +45,8 @@ import type {
   ESQLMapEntry,
   ESQLTimeDurationLiteral,
   ESQLDatePeriodLiteral,
+  ESQLAstHeaderCommand,
+  ESQLAstSetHeaderCommand,
 } from '../types';
 import type { AstNodeParserFields, AstNodeTemplate, PartialFields } from './types';
 
@@ -103,10 +105,12 @@ export namespace Builder {
   export namespace expression {
     export const query = (
       commands: ESQLAstQueryExpression['commands'] = [],
-      fromParser?: Partial<AstNodeParserFields>
+      fromParser?: Partial<AstNodeParserFields>,
+      header?: ESQLAstHeaderCommand[]
     ): ESQLAstQueryExpression => {
       return {
         ...Builder.parserFields(fromParser),
+        header,
         commands,
         type: 'query',
         name: '',
@@ -640,5 +644,47 @@ export namespace Builder {
         return Builder.param.named({ ...options, paramKind, value }, fromParser);
       }
     };
+  }
+
+  export namespace header {
+    export interface HeaderCommandBuilder {
+      <Name extends string>(
+        template: PartialFields<AstNodeTemplate<ESQLAstHeaderCommand<Name>>, 'args'>,
+        fromParser?: Partial<AstNodeParserFields>
+      ): ESQLAstHeaderCommand<Name>;
+
+      set: (
+        args: ESQLAstSetHeaderCommand['args'],
+        template?: Omit<PartialFields<AstNodeTemplate<ESQLAstSetHeaderCommand>, 'args'>, 'name'>,
+        fromParser?: Partial<AstNodeParserFields>
+      ) => ESQLAstSetHeaderCommand;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-shadow
+    export const command: HeaderCommandBuilder = Object.assign(
+      <Name extends string>(
+        template: PartialFields<AstNodeTemplate<ESQLAstHeaderCommand<Name>>, 'args'>,
+        fromParser?: Partial<AstNodeParserFields>
+      ): ESQLAstHeaderCommand<Name> => {
+        return {
+          ...template,
+          ...Builder.parserFields(fromParser),
+          args: template.args ?? [],
+          type: 'header-command',
+        };
+      },
+      {
+        set: (
+          args: ESQLAstSetHeaderCommand['args'],
+          template?: Omit<PartialFields<AstNodeTemplate<ESQLAstSetHeaderCommand>, 'args'>, 'name'>,
+          fromParser?: Partial<AstNodeParserFields>
+        ): ESQLAstSetHeaderCommand => {
+          return Builder.header.command(
+            { args, ...template, name: 'set' },
+            fromParser
+          ) as ESQLAstSetHeaderCommand;
+        },
+      }
+    );
   }
 }

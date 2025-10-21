@@ -7,7 +7,7 @@
 
 import { ONBOARDING_CALLOUT } from '../../../screens/privileged_user_monitoring';
 import { createDocument, createIndex, deleteIndex } from '../../../tasks/api_calls/elasticsearch';
-import { togglePrivilegedUserMonitoring } from '../../../tasks/entity_analytics/enable_privmon';
+import { togglePrivilegedUserMonitoring } from '../../../tasks/entity_analytics/privmon';
 
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
@@ -25,7 +25,9 @@ import { ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_URL } from '../../../urls/n
 
 const sourceIndexName = 'test_index';
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/237554
+// Failing: See https://github.com/elastic/kibana/issues/237553
+describe.skip(
   'Privileged User Monitoring - Index onboarding',
   {
     tags: ['@ess'],

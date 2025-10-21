@@ -8,13 +8,16 @@
  */
 
 import type { DataStreamsStart, DataStreamsSetup } from '@kbn/core-data-streams-server';
+import { lazyObject } from '@kbn/lazy-object';
 
 export const dataStreamServiceMock = {
-  createSetupContract: (): jest.Mocked<DataStreamsSetup> => ({
-    registerDataStream: jest.fn(),
-  }),
+  createSetupContract: (): jest.Mocked<DataStreamsSetup> =>
+    lazyObject({
+      registerDataStream: jest.fn(),
+    }),
 
-  createStartContract: (): jest.Mocked<DataStreamsStart> => ({
-    getClient: jest.fn(), // TODO improve this
-  }),
+  createStartContract: (): jest.Mocked<DataStreamsStart> =>
+    lazyObject({
+      getClient: jest.fn(), // TODO improve this
+    }),
 };

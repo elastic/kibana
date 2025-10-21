@@ -15,22 +15,32 @@ import {
   MONITORING_ENGINE_SCHEDULE_NOW_URL,
   MONITORING_USERS_CSV_UPLOAD_URL,
 } from '@kbn/security-solution-plugin/common/constants';
-import type { ListPrivMonUsersResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics';
+import type {
+  ListEntitySourcesResponse,
+  ListPrivMonUsersResponse,
+  MonitoringEntitySource,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics';
 import type { TaskStatus } from '@kbn/task-manager-plugin/server';
 import moment from 'moment';
 import { routeWithNamespace, waitFor } from '../../../../../config/services/detections_response';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 type PrivmonUser = ListPrivMonUsersResponse[number];
+// Default within last month so included in first run range of now-1M
+const DEFAULT_INTEGRATIONS_RELATIVE_TIMESTAMP = new Date(
+  Date.now() - 3.5 * 7 * 24 * 60 * 60 * 1000
+).toISOString();
+
 export const PrivMonUtils = (
   getService: FtrProviderContext['getService'],
   namespace: string = 'default'
 ) => {
   const TASK_ID = 'entity_analytics:monitoring:privileges:engine:default:1.0.0';
-  const api = getService('securitySolutionApi');
+  const entityAnalyticsApi = getService('entityAnalyticsApi');
   const log = getService('log');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const api = getService('entityAnalyticsApi');
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
   const retry = getService('retry');
@@ -183,10 +193,12 @@ export const PrivMonUtils = (
   const assertIsPrivileged = (user: PrivmonUser | undefined, isPrivileged: boolean) => {
     if (isPrivileged) {
       expect(user?.user?.is_privileged).toEqual(true);
+      expect(user?.user?.entity?.attributes?.Privileged).toEqual(true);
     } else {
       expect(user?.user?.is_privileged).toEqual(false);
       expect(user?.labels?.source_ids).toEqual([]);
       expect(user?.labels?.sources).toEqual([]);
+      expect(user?.user?.entity?.attributes?.Privileged).toEqual(false);
     }
   };
 
@@ -197,7 +209,7 @@ export const PrivMonUtils = (
     let lastSeenLength = -1;
 
     return retry.waitForWithTimeout('users to be synced', 90000, async () => {
-      const res = await api.listPrivMonUsers({ query: {} });
+      const res = await entityAnalyticsApi.listPrivMonUsers({ query: {} });
       const currentLength = res.body.length;
 
       if (currentLength !== lastSeenLength) {
@@ -217,12 +229,153 @@ export const PrivMonUtils = (
     await scheduleMonitoringEngineNow({ ignoreConflict: true });
     await waitForSyncTaskRun();
     await _waitForPrivMonUsersToBeSynced(expectedCount);
+    const res = await entityAnalyticsApi.listPrivMonUsers({ query: {} });
 
-    const res = await api.listPrivMonUsers({ query: {} });
     return res.body;
   };
 
+  async function runSync() {
+    await scheduleMonitoringEngineNow({ ignoreConflict: true });
+    await waitForSyncTaskRun();
+  }
+
+  async function setTimestamp(id: string, ts: string, indexPattern: string) {
+    return updateIntegrationsUserTimeStamp({
+      id,
+      timestamp: ts,
+      indexPattern,
+    });
+  }
+
+  const expectUserCount = async (n: number) => {
+    const users = (await api.listPrivMonUsers({ query: {} })).body;
+    expect(users.length).toBe(n);
+    return users;
+  };
+
+  async function getLastProcessedMarker(indexPattern: string) {
+    const res = await api.listEntitySources({ query: {} });
+    const integration = res.body.find(
+      (i: any) => i?.type === 'entity_analytics_integration' && i?.indexPattern === indexPattern
+    );
+    return integration?.integrations?.syncData?.lastUpdateProcessed as string | undefined;
+  }
+
+  const setIntegrationUserPrivilege = async ({
+    id,
+    isPrivileged,
+    indexPattern,
+  }: {
+    id: string;
+    isPrivileged: boolean;
+    indexPattern: string;
+  }) => {
+    const rolesParam = isPrivileged ? ['Help Desk Administrator'] : [];
+    await es.updateByQuery({
+      index: indexPattern,
+      refresh: true,
+      conflicts: 'proceed',
+      query: { ids: { values: [id] } },
+      script: {
+        lang: 'painless',
+        source: `
+      if (ctx._source.user == null) ctx._source.user = new HashMap();
+      ctx._source.user.is_privileged = params.new_privileged_status;
+      ctx._source.user.entity = ctx._source.user.entity != null ? ctx._source.user.entity : new HashMap();
+      ctx._source.user.entity.attributes = ctx._source.user.entity.attributes != null ? ctx._source.user.entity.attributes : new HashMap();
+      ctx._source.user.entity.attributes.Privileged = params.new_privileged_status;
+      ctx._source.user.roles = params.roles;      
+    `,
+        params: { new_privileged_status: isPrivileged, roles: rolesParam },
+      },
+    });
+  };
+
+  const getIntegrationMonitoringSource = async (
+    integrationName: string
+  ): Promise<MonitoringEntitySource> => {
+    const res = await entityAnalyticsApi.listEntitySources({
+      query: {},
+    });
+
+    const sources = res.body as ListEntitySourcesResponse;
+    const source = sources.find((s) => s.integrationName === integrationName);
+    if (!source) {
+      throw new Error(`No monitoring source found for integration ${integrationName}`);
+    }
+    return source;
+  };
+
+  const updateIntegrationsUsersWithRelativeTimestamps = async ({
+    indexPattern,
+    relativeTimeStamp,
+  }: {
+    indexPattern: string;
+    relativeTimeStamp?: string;
+  }) => {
+    if (!relativeTimeStamp) {
+      // Default to 3.5 weeks ago (within 1M range, e.g. onboarding)
+      relativeTimeStamp = DEFAULT_INTEGRATIONS_RELATIVE_TIMESTAMP;
+    }
+    await es.updateByQuery({
+      index: indexPattern,
+      refresh: true,
+      conflicts: 'proceed',
+      query: { match_all: {} },
+      script: {
+        lang: 'painless',
+        source: "ctx._source['@timestamp'] = params.newTimestamp",
+        params: { newTimestamp: relativeTimeStamp },
+      },
+    });
+  };
+
+  const updateIntegrationsUserTimeStamp = async ({
+    id,
+    timestamp,
+    indexPattern,
+  }: {
+    id: string;
+    timestamp: string;
+    indexPattern: string;
+  }) => {
+    await es.updateByQuery({
+      index: indexPattern,
+      refresh: true,
+      conflicts: 'proceed',
+      query: { ids: { values: [id] } },
+      script: {
+        lang: 'painless',
+        source: "ctx._source['@timestamp'] = params.newTimestamp",
+        params: { newTimestamp: timestamp },
+      },
+    });
+  };
+
+  const dateOffsetFromNow = async ({ days, months }: { days?: number; months?: number }) => {
+    const d = new Date();
+    if (months) {
+      d.setMonth(d.getMonth() - months);
+    }
+    if (days) {
+      d.setDate(d.getDate() - days);
+    }
+    return d.toISOString();
+  };
+
+  const integrationsSync = {
+    setTimestamp,
+    getLastProcessedMarker,
+    setIntegrationUserPrivilege,
+    updateIntegrationsUsersWithRelativeTimestamps,
+    updateIntegrationsUserTimeStamp,
+    DEFAULT_INTEGRATIONS_RELATIVE_TIMESTAMP,
+    dateOffsetFromNow,
+    expectUserCount,
+  };
+
   return {
+    runSync,
     assertIsPrivileged,
     bulkUploadUsersCsv,
     expectTimestampsHaveBeenUpdated,
@@ -233,5 +386,7 @@ export const PrivMonUtils = (
     setPrivmonTaskStatus,
     waitForSyncTaskRun,
     scheduleEngineAndWaitForUserCount,
+    getIntegrationMonitoringSource,
+    integrationsSync,
   };
 };

@@ -46,8 +46,8 @@ apiTest.describe(`Alerting Rules helpers`, { tag: ['@svlSecurity', '@ess'] }, ()
     const fetchedResponse = await apiServices.alerting.rules.get(ruleId);
     expect(fetchedResponse.status).toBe(200);
     expect(fetchedResponse.data.enabled).toBe(false);
-    expect(fetchedResponse.data.name).toEqual(alertName);
-    expect(fetchedResponse.data.rule_type_id).toEqual(ruleTypeId);
+    expect(fetchedResponse.data.name).toBe(alertName);
+    expect(fetchedResponse.data.rule_type_id).toBe(ruleTypeId);
   });
 
   apiTest(`should update alert with 'alerting.rules.update'`, async ({ apiServices }) => {
@@ -55,7 +55,7 @@ apiTest.describe(`Alerting Rules helpers`, { tag: ['@svlSecurity', '@ess'] }, ()
       name: updatedAlertName,
     });
     expect(updatedResponse.status).toBe(200);
-    expect(updatedResponse.data.name).toEqual(updatedAlertName);
+    expect(updatedResponse.data.name).toBe(updatedAlertName);
   });
 
   apiTest('should enable/disable rule', async ({ apiServices }) => {

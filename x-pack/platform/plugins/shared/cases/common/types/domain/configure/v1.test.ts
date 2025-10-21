@@ -82,6 +82,7 @@ describe('configure', () => {
       },
       settings: {
         syncAlerts: true,
+        extractObservables: true,
       },
     },
   };

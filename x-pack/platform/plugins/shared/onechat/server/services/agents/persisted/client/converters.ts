@@ -38,15 +38,18 @@ export const fromEs = (document: Document): PersistedAgentDefinition => {
 
 export const createRequestToEs = ({
   profile,
+  space,
   creationDate,
 }: {
   profile: AgentCreateRequest;
+  space: string;
   creationDate: Date;
 }): AgentProperties => {
   return {
     id: profile.id,
     name: profile.name,
     type: defaultAgentType,
+    space,
     description: profile.description,
     labels: profile.labels,
     avatar_color: profile.avatar_color,

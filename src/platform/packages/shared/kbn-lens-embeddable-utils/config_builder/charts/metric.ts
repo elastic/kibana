@@ -19,8 +19,7 @@ import {
   addLayerColumn,
   addLayerFormulaColumns,
   buildDatasourceStates,
-  buildReferences,
-  getAdhocDataviews,
+  extractReferences,
   mapToFormula,
 } from '../utils';
 import {
@@ -29,7 +28,6 @@ import {
   getHistogramColumn,
   getValueColumn,
 } from '../columns';
-import type { LensApiState } from '../schema';
 
 const ACCESSOR = 'metric_formula_accessor';
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
@@ -209,34 +207,19 @@ export async function buildMetric(
     getValueColumns,
     dataViewsAPI
   );
+  const { references, internalReferences, adHocDataViews } = extractReferences(dataviews);
+
   return {
     title: config.title,
     visualizationType: 'lnsMetric',
-    references: buildReferences(dataviews),
+    references,
     state: {
       datasourceStates,
-      internalReferences: [],
+      internalReferences,
       filters: [],
       query: { language: 'kuery', query: '' },
       visualization: buildVisualizationState(config),
-      // Getting the spec from a data view is a heavy operation, that's why the result is cached.
-      adHocDataViews: getAdhocDataviews(dataviews),
+      adHocDataViews,
     },
   };
-}
-
-export function fromMetricLegacyToAPI(
-  config: LensAttributes,
-  { dataViewsAPI }: BuildDependencies
-): Extract<LensApiState, { type: 'metric' }> {
-  return {
-    type: 'metric',
-    dataset: {
-      type: 'dataView',
-      name: '',
-    },
-    metric: {
-      operation: 'count',
-    },
-  } as Extract<LensApiState, { type: 'metric' }>;
 }

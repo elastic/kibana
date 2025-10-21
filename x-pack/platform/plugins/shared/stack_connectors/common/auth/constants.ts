@@ -18,7 +18,10 @@ export enum SSLCertType {
 
 export enum WebhookMethods {
   PATCH = 'patch',
+  DELETE = 'delete',
   POST = 'post',
   PUT = 'put',
   GET = 'get',
 }
+
+export const MAX_HEADERS: number = 20;

@@ -55,7 +55,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(text).to.eql([
         'Discover\nAll\nRead\nNone',
         'Dashboard\nAll\nRead\nNone',
-        'Streams\nAll\nRead\nNone',
         'Logs\nAll\nRead\nNone',
         'Infrastructure\nAll\nRead\nNone',
         'Applications\nAll\nRead\nNone',
@@ -64,6 +63,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         'Cases\nAll\nRead\nNone',
         'Machine Learning\nAll\nRead\nNone',
         'SLOs\nAll\nRead\nNone',
+        'Workflows\nAll\nRead\nNone',
         'Observability AI Assistant\nAll\nNone',
       ]);
     });

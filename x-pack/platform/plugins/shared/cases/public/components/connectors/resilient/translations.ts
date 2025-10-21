@@ -38,3 +38,10 @@ export const INCIDENT_TYPES_LABEL = i18n.translate(
 export const SEVERITY_LABEL = i18n.translate('xpack.cases.connectors.resilient.severityLabel', {
   defaultMessage: 'Severity',
 });
+
+export const ADDITIONAL_FIELDS_LABEL = i18n.translate(
+  'xpack.cases.connectors.resilient.additionalFieldsLabel',
+  {
+    defaultMessage: 'Additional Fields',
+  }
+);

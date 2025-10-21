@@ -18,7 +18,10 @@ export type {
   Provider,
   ProviderInput,
   RunWorkflowCommand,
+  RunStepCommand,
   RunWorkflowResponseDto,
+  TestWorkflowResponseDto,
+  TestWorkflowCommand,
   StackFrame,
   UpdatedWorkflowResponseDto,
   // dtos
@@ -33,8 +36,20 @@ export type {
   WorkflowListDto,
   WorkflowListItemAction,
   WorkflowListItemDto,
+  WorkflowAggsDto,
+  WorkflowStatsDto,
+  // enums
   ExecutionStatusUnion,
   ExecutionTypeUnion,
+  // connector types
+  ConnectorSubAction,
+  ConnectorInstance,
+  ConnectorTypeInfo,
+  ConnectorTypeInfoMinimal,
+  ConnectorContractUnion,
+  EnhancedInternalConnectorContract,
+  InternalConnectorContract,
+  DynamicConnectorContract,
 } from './v1';
 
 // exported full to use enum as values

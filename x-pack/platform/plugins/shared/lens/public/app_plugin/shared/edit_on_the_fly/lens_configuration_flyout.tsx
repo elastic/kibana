@@ -29,6 +29,7 @@ import { LayerConfiguration } from './layer_configuration_section';
 import type { EditConfigPanelProps } from './types';
 import { FlyoutWrapper } from './flyout_wrapper';
 import { SuggestionPanel } from '../../../editor_frame_service/editor_frame/suggestion_panel';
+import { useEditorFrameService } from '../../../editor_frame_service/editor_frame_service_context';
 import { useApplicationUserMessages } from '../../get_application_user_messages';
 import { trackSaveUiCounterEvents } from '../../../lens_ui_telemetry';
 import { useCurrentAttributes } from './use_current_attributes';
@@ -38,8 +39,6 @@ export function LensEditConfigurationFlyout({
   attributes,
   coreStart,
   startDependencies,
-  visualizationMap,
-  datasourceMap,
   datasourceId,
   updatePanelState,
   updateSuggestion,
@@ -60,9 +59,12 @@ export function LensEditConfigurationFlyout({
   isReadOnly,
   parentApi,
   panelId,
+  applyButtonLabel,
 }: EditConfigPanelProps) {
   const euiTheme = useEuiTheme();
   const previousAttributes = useRef<TypedLensSerializedState['attributes']>(attributes);
+
+  const { datasourceMap, visualizationMap } = useEditorFrameService();
 
   const [isInlineFlyoutVisible, setIsInlineFlyoutVisible] = useState(true);
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
@@ -169,8 +171,6 @@ export function LensEditConfigurationFlyout({
   const currentAttributes = useCurrentAttributes({
     textBasedMode,
     initialAttributes: attributes,
-    datasourceMap,
-    visualizationMap,
   });
 
   const onApply = useCallback(() => {
@@ -292,6 +292,7 @@ export function LensEditConfigurationFlyout({
           isNewPanel={isNewPanel}
           isSaveable={isSaveable}
           isReadOnly={isReadOnly}
+          applyButtonLabel={applyButtonLabel}
         >
           <LayerConfiguration
             // TODO: remove this once we support switching to any chart in Discover
@@ -300,8 +301,6 @@ export function LensEditConfigurationFlyout({
             attributes={attributes}
             coreStart={coreStart}
             startDependencies={startDependencies}
-            visualizationMap={visualizationMap}
-            datasourceMap={datasourceMap}
             datasourceId={datasourceId}
             hasPadding
             framePublicAPI={framePublicAPI}
@@ -332,6 +331,7 @@ export function LensEditConfigurationFlyout({
         language={textBasedMode ? getLanguageDisplayName('esql') : ''}
         isNewPanel={isNewPanel}
         isReadOnly={isReadOnly}
+        applyButtonLabel={applyButtonLabel}
       >
         <EuiFlexGroup
           css={css`
@@ -435,8 +435,6 @@ export function LensEditConfigurationFlyout({
                   getUserMessages={getUserMessages}
                   coreStart={coreStart}
                   startDependencies={startDependencies}
-                  visualizationMap={visualizationMap}
-                  datasourceMap={datasourceMap}
                   datasourceId={datasourceId}
                   framePublicAPI={framePublicAPI}
                   setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
@@ -468,8 +466,6 @@ export function LensEditConfigurationFlyout({
           >
             <SuggestionPanel
               ExpressionRenderer={startDependencies.expressions.ReactExpressionRenderer}
-              datasourceMap={datasourceMap}
-              visualizationMap={visualizationMap}
               frame={framePublicAPI}
               core={coreStart}
               nowProvider={startDependencies.data.nowProvider}

@@ -69,6 +69,7 @@ import {
   GetKnowledgeBaseResponseSchema,
   BulkRollbackPackagesRequestSchema,
   BulkRollbackPackagesResponseSchema,
+  InstallRuleAssetsRequestSchema,
 } from '../../types';
 import type { FleetConfigType } from '../../config';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
@@ -100,7 +101,8 @@ import { getFileHandler } from './file_handler';
 import {
   deletePackageKibanaAssetsHandler,
   installPackageKibanaAssetsHandler,
-} from './kibana_assets_handler';
+  installRuleAssetsHandler,
+} from './install_assets_handler';
 import {
   postBulkUpgradePackagesHandler,
   postBulkUninstallPackagesHandler,
@@ -143,7 +145,10 @@ export const READ_PACKAGE_INFO_SECURITY: RouteSecurity = {
 };
 
 export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
-  const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental);
+  const experimentalFeatures = parseExperimentalConfigValue(
+    config.enableExperimental || [],
+    config.experimentalFeatures || {}
+  );
 
   router.versioned
     .get({
@@ -447,9 +452,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           response: {
             200: {
               body: () => InstallPackageResponseSchema,
+              description: 'OK',
             },
             400: {
               body: genericErrorResponse,
+              description: 'Bad Request',
             },
           },
         },
@@ -457,6 +464,34 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       installPackageFromRegistryHandler
     );
 
+  router.versioned
+    .post({
+      path: EPM_API_ROUTES.INSTALL_RULE_ASSETS_PATTERN,
+      security: INSTALL_PACKAGES_SECURITY,
+      summary: `Install Kibana alert rule for a package`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: InstallRuleAssetsRequestSchema,
+          response: {
+            200: {
+              body: () => InstallKibanaAssetsResponseSchema,
+              description: 'OK',
+            },
+            400: {
+              body: genericErrorResponse,
+              description: 'Bad Request',
+            },
+          },
+        },
+      },
+      installRuleAssetsHandler
+    );
   router.versioned
     .post({
       path: EPM_API_ROUTES.INSTALL_KIBANA_ASSETS_PATTERN,
@@ -474,9 +509,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           response: {
             200: {
               body: () => InstallKibanaAssetsResponseSchema,
+              description: 'OK',
             },
             400: {
               body: genericErrorResponse,
+              description: 'Bad Request',
             },
           },
         },
@@ -501,9 +538,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           response: {
             200: {
               body: () => InstallKibanaAssetsResponseSchema,
+              description: 'OK',
             },
             400: {
               body: genericErrorResponse,
+              description: 'Bad Request',
             },
           },
         },
@@ -529,9 +568,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
             response: {
               200: {
                 body: () => BulkUpgradePackagesResponseSchema,
+                description: 'OK',
               },
               400: {
                 body: genericErrorResponse,
+                description: 'Bad Request',
               },
             },
           },
@@ -556,9 +597,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
             response: {
               200: {
                 body: () => BulkUpgradePackagesResponseSchema,
+                description: 'OK',
               },
               400: {
                 body: genericErrorResponse,
+                description: 'Bad Request',
               },
             },
           },
@@ -643,9 +686,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
             response: {
               200: {
                 body: () => GetOneBulkOperationPackagesResponseSchema,
+                description: 'OK',
               },
               400: {
                 body: genericErrorResponse,
+                description: 'Bad Request',
               },
             },
           },
@@ -670,9 +715,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
             response: {
               200: {
                 body: () => GetOneBulkOperationPackagesResponseSchema,
+                description: 'OK',
               },
               400: {
                 body: genericErrorResponse,
+                description: 'Bad Request',
               },
             },
           },
@@ -698,9 +745,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           response: {
             200: {
               body: () => BulkInstallPackagesFromRegistryResponseSchema,
+              description: 'OK',
             },
             400: {
               body: genericErrorResponse,
+              description: 'Bad Request',
             },
           },
         },

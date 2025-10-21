@@ -11,7 +11,10 @@ import type {
   ElasticsearchServiceStart,
   KibanaRequest,
 } from '@kbn/core/server';
+import { isAllowedBuiltinAgent } from '@kbn/onechat-server/allow_lists';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { Runner } from '@kbn/onechat-server';
+import { getCurrentSpaceId } from '../../utils/spaces';
 import type { AgentsServiceSetup, AgentsServiceStart } from './types';
 import type { ToolsServiceStart } from '../tools';
 import {
@@ -29,6 +32,7 @@ export interface AgentsServiceSetupDeps {
 
 export interface AgentsServiceStartDeps {
   security: SecurityServiceStart;
+  spaces?: SpacesPluginStart;
   elasticsearch: ElasticsearchServiceStart;
   getRunner: () => Runner;
   toolsService: ToolsServiceStart;
@@ -49,7 +53,13 @@ export class AgentsService {
     registerBuiltinAgents({ registry: this.builtinRegistry });
 
     return {
-      register: (agent) => this.builtinRegistry.register(agent),
+      register: (agent) => {
+        if (!isAllowedBuiltinAgent(agent.id)) {
+          throw new Error(`Built-in agent with id "${agent.id}" is not in the list of allowed built-in agents.
+             Please add it to the list of allowed built-in agents in the "@kbn/onechat-server/allow_lists.ts" file.`);
+        }
+        this.builtinRegistry.register(agent);
+      },
     };
   }
 
@@ -59,7 +69,7 @@ export class AgentsService {
     }
 
     const { logger } = this.setupDeps;
-    const { getRunner, security, elasticsearch, toolsService } = startDeps;
+    const { getRunner, security, elasticsearch, spaces, toolsService } = startDeps;
 
     const builtinProviderFn = createBuiltinProviderFn({ registry: this.builtinRegistry });
     const persistedProviderFn = createPersistedProviderFn({
@@ -70,10 +80,12 @@ export class AgentsService {
     });
 
     const getRegistry = async ({ request }: { request: KibanaRequest }) => {
+      const space = getCurrentSpaceId({ request, spaces });
       return createAgentRegistry({
         request,
-        builtinProvider: await builtinProviderFn({ request }),
-        persistedProvider: await persistedProviderFn({ request }),
+        space,
+        builtinProvider: await builtinProviderFn({ request, space }),
+        persistedProvider: await persistedProviderFn({ request, space }),
       });
     };
 

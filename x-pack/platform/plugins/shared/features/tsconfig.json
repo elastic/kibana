@@ -16,6 +16,7 @@
     "@kbn/config-schema",
     "@kbn/i18n",
     "@kbn/licensing-types",
+    "@kbn/lazy-object",
   ],
   "exclude": [
     "target/**/*",

@@ -21,7 +21,7 @@ export const typedInterrupt = async <T extends InterruptValue['type'] = Interrup
     throw new Error('typedInterrupt is only available on the server side');
   }
 
-  const { interrupt } = await import('@langchain/langgraph');
+  const { interrupt } = await import('@langchain/langgraph'); // Ensures this is only imported server side.
 
   const result = interrupt(interruptValue);
 

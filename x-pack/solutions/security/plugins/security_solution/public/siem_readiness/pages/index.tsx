@@ -6,47 +6,38 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiPageHeader, EuiPageSection, EuiEmptyPrompt, EuiText } from '@elastic/eui';
+import { EuiPageHeader, EuiPageSection } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { ReadinessPillarCards } from './readiness_pillar_cards';
 import { ReadinessTasksTable } from './readiness_tasks_table';
+import { ReadinessSummary } from './readiness_summary';
 
 const SiemReadinessDashboard = () => {
   return (
-    <>
-      <EuiPageHeader pageTitle="SIEM Readiness" bottomBorder={true} />
+    <div>
+      <EuiPageHeader
+        pageTitle={i18n.translate('xpack.securitySolution.siemReadiness.pageTitle', {
+          defaultMessage: 'SIEM Readiness',
+        })}
+        bottomBorder={true}
+      />
       <EuiPageSection>
-        <EuiEmptyPrompt
-          iconType="managementApp"
-          title={
-            <h2>
-              <FormattedMessage
-                id="xpack.securitySolution.siemReadiness.wipTitle"
-                defaultMessage="Work in Progress"
-              />
-            </h2>
-          }
-          body={
-            <EuiText>
-              <p>
-                <FormattedMessage
-                  id="xpack.securitySolution.siemReadiness.wipUpperBody"
-                  defaultMessage="This page is a placeholder for the SIEM Readiness Dashboard, which is currently under development."
-                />
-              </p>
-              <p>
-                <FormattedMessage
-                  id="xpack.securitySolution.siemReadiness.wipLowerBody"
-                  defaultMessage="It will help you get a comprehensive view of your security posture and guide you through key steps to improve your readiness."
-                />
-              </p>
-            </EuiText>
-          }
-        />
+        <ReadinessSummary />
+      </EuiPageSection>
+      <EuiPageSection
+        // removes redundant padding around the middle cards
+        contentProps={{
+          style: {
+            paddingBlock: '0',
+          },
+        }}
+      >
+        <ReadinessPillarCards />
       </EuiPageSection>
       <EuiPageSection>
         <ReadinessTasksTable />
       </EuiPageSection>
-    </>
+    </div>
   );
 };
 

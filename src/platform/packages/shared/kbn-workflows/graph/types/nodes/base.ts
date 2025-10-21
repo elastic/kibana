@@ -9,10 +9,10 @@
 
 import { z } from '@kbn/zod';
 import {
-  HttpStepSchema,
-  WaitStepSchema,
   ElasticsearchStepSchema,
+  HttpStepSchema,
   KibanaStepSchema,
+  WaitStepSchema,
 } from '../../../spec/schema';
 
 export const GraphNodeSchema = z.object({
@@ -21,7 +21,6 @@ export const GraphNodeSchema = z.object({
   stepId: z.string(),
   stepType: z.string(),
 });
-export type GraphNode = z.infer<typeof GraphNodeSchema>;
 
 export const AtomicGraphNodeSchema = GraphNodeSchema.extend({
   id: z.string(),

@@ -17,15 +17,15 @@ const inlinestatsExpectErrors = (
   expectedErrors: string[],
   context = mockContext
 ) => {
-  return expectErrors(query, expectedErrors, context, 'inlinestats', validate);
+  return expectErrors(query, expectedErrors, context, 'inline stats', validate);
 };
 
-describe('INLINESTATS Validation', () => {
+describe('INLINE STATS Validation', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  describe('INLINESTATS <aggregates> [ BY <grouping> ]', () => {
+  describe('INLINE STATS <aggregates> [ BY <grouping> ]', () => {
     const newColumns = new Map(mockContext.columns);
     newColumns.set('doubleField * 3.281', {
       name: 'doubleField * 3.281',
@@ -42,26 +42,29 @@ describe('INLINESTATS Validation', () => {
 
     describe('... <aggregates> ...', () => {
       test('no errors on correct usage', () => {
-        inlinestatsExpectErrors('from a_index | inlinestats avg(doubleField) by 1', []);
-        inlinestatsExpectErrors('from a_index | inlinestats count(`doubleField`)', []);
-        inlinestatsExpectErrors('from a_index | inlinestats count(*)', []);
-        inlinestatsExpectErrors('from a_index | inlinestats count()', []);
-        inlinestatsExpectErrors('from a_index | inlinestats col0 = count(*)', []);
-        inlinestatsExpectErrors('from a_index | inlinestats col0 = count()', []);
-        inlinestatsExpectErrors('from a_index | inlinestats col0 = avg(doubleField), count(*)', []);
-        inlinestatsExpectErrors(`from a_index | inlinestats sum(case(false, 0, 1))`, []);
-        inlinestatsExpectErrors(`from a_index | inlinestats col0 = sum( case(false, 0, 1))`, []);
-        inlinestatsExpectErrors('from a_index | inlinestats ??func(doubleField)', []);
-        inlinestatsExpectErrors('from a_index | inlinestats avg(??field)', []);
+        inlinestatsExpectErrors('from a_index | INLINE STATS avg(doubleField) by 1', []);
+        inlinestatsExpectErrors('from a_index | INLINE STATS count(`doubleField`)', []);
+        inlinestatsExpectErrors('from a_index | INLINE STATS count(*)', []);
+        inlinestatsExpectErrors('from a_index | INLINE STATS count()', []);
+        inlinestatsExpectErrors('from a_index | INLINE STATS col0 = count(*)', []);
+        inlinestatsExpectErrors('from a_index | INLINE STATS col0 = count()', []);
+        inlinestatsExpectErrors(
+          'from a_index | INLINE STATS col0 = avg(doubleField), count(*)',
+          []
+        );
+        inlinestatsExpectErrors(`from a_index | INLINE STATS sum(case(false, 0, 1))`, []);
+        inlinestatsExpectErrors(`from a_index | INLINE STATS col0 = sum( case(false, 0, 1))`, []);
+        inlinestatsExpectErrors('from a_index | INLINE STATS ??func(doubleField)', []);
+        inlinestatsExpectErrors('from a_index | INLINE STATS avg(??field)', []);
 
         // "or" must accept "null"
-        inlinestatsExpectErrors('from a_index | inlinestats count(textField == "a" or null)', []);
+        inlinestatsExpectErrors('from a_index | INLINE STATS count(textField == "a" or null)', []);
       });
 
       test('sub-command can reference aggregated field', () => {
         for (const subCommand of ['keep', 'drop', 'eval']) {
           inlinestatsExpectErrors(
-            'from a_index | inlinestats count(`doubleField`) | ' +
+            'from a_index | INLINE STATS count(`doubleField`) | ' +
               subCommand +
               ' `count(``doubleField``)` ',
             []
@@ -69,51 +72,86 @@ describe('INLINESTATS Validation', () => {
         }
       });
 
+      test('sub-command can reference aggregated field from WHERE clause', () => {
+        inlinestatsExpectErrors(
+          'from a_index | INLINE STATS top10count = sum(doubleField) WHERE textField == "a" | EVAL result = top10count + 1',
+          []
+        );
+      });
+
+      test('CASE function can reference aggregated field from WHERE clause', () => {
+        inlinestatsExpectErrors(
+          'from a_index | INLINE STATS top10count = sum(doubleField) WHERE textField == "a" | EVAL result = CASE(textField == "b", top10count, 0)',
+          []
+        );
+      });
+
       test('errors when input is not an aggregate function', () => {
-        inlinestatsExpectErrors('from a_index | inlinestats doubleField ', [
+        inlinestatsExpectErrors('from a_index | INLINE STATS doubleField ', [
           'Expected an aggregate function or group but got "doubleField" of type FieldAttribute',
         ]);
       });
 
       test('various errors', () => {
-        inlinestatsExpectErrors('from a_index | inlinestats avg(doubleField) by wrongField', [
+        inlinestatsExpectErrors('from a_index | INLINE STATS avg(doubleField) by wrongField', [
           'Unknown column "wrongField"',
         ]);
-        inlinestatsExpectErrors('from a_index | inlinestats avg(doubleField) by wrongField + 1', [
+        inlinestatsExpectErrors('from a_index | INLINE STATS avg(doubleField) by wrongField + 1', [
           'Unknown column "wrongField"',
         ]);
         inlinestatsExpectErrors(
-          'from a_index | inlinestats avg(doubleField) by col0 = wrongField + 1',
+          'from a_index | INLINE STATS avg(doubleField) by col0 = wrongField + 1',
           ['Unknown column "wrongField"']
         );
-        inlinestatsExpectErrors('from a_index | inlinestats col0 = avg(fn(number)), count(*)', [
+        inlinestatsExpectErrors('from a_index | INLINE STATS col0 = avg(fn(number)), count(*)', [
           'Unknown function FN',
         ]);
       });
 
       test('allows WHERE clause', () => {
-        inlinestatsExpectErrors('FROM a_index | INLINESTATS col0 = avg(doubleField) WHERE 123', []);
+        inlinestatsExpectErrors(
+          'FROM a_index | INLINE STATS col0 = avg(doubleField) WHERE 123',
+          []
+        );
+      });
+
+      test('allows IN operator in WHERE clause', () => {
+        inlinestatsExpectErrors(
+          'FROM a_index | INLINE STATS col0 = avg(doubleField) WHERE textField IN ("a", "b")',
+          []
+        );
+        inlinestatsExpectErrors(
+          'FROM a_index | INLINE STATS col0 = avg(doubleField) WHERE doubleField IN (doubleField, doubleField)',
+          []
+        );
+      });
+
+      test('allows NOT IN operator in WHERE clause', () => {
+        inlinestatsExpectErrors(
+          'FROM a_index | INLINE STATS col0 = avg(doubleField) WHERE textField NOT IN ("a", "b")',
+          []
+        );
       });
     });
 
     describe('... BY <grouping>', () => {
       test('no errors on correct usage', () => {
         inlinestatsExpectErrors(
-          'from a_index | inlinestats avg(doubleField), percentile(doubleField, 50) by ipField',
+          'from a_index | INLINE STATS avg(doubleField), percentile(doubleField, 50) by ipField',
           []
         );
         inlinestatsExpectErrors(
-          'from a_index | inlinestats avg(doubleField), percentile(doubleField, 50) BY ipField',
+          'from a_index | INLINE STATS avg(doubleField), percentile(doubleField, 50) BY ipField',
           []
         );
         inlinestatsExpectErrors(
-          'from a_index | inlinestats avg(doubleField), percentile(doubleField, 50) + 1 by ipField',
+          'from a_index | INLINE STATS avg(doubleField), percentile(doubleField, 50) + 1 by ipField',
           []
         );
-        inlinestatsExpectErrors('from a_index | inlinestats avg(doubleField) by ??field', []);
+        inlinestatsExpectErrors('from a_index | INLINE STATS avg(doubleField) by ??field', []);
         for (const op of ['+', '-', '*', '/', '%']) {
           inlinestatsExpectErrors(
-            `from a_index | inlinestats avg(doubleField) ${op} percentile(doubleField, 50) BY ipField`,
+            `from a_index | INLINE STATS avg(doubleField) ${op} percentile(doubleField, 50) BY ipField`,
             []
           );
         }
@@ -121,11 +159,11 @@ describe('INLINESTATS Validation', () => {
 
       test('various errors', () => {
         inlinestatsExpectErrors(
-          'from a_index | inlinestats avg(doubleField) by percentile(doubleField, 90)',
+          'from a_index | INLINE STATS avg(doubleField) by percentile(doubleField, 90)',
           ['Function PERCENTILE not allowed in BY']
         );
         inlinestatsExpectErrors(
-          'from a_index | inlinestats avg(doubleField) by textField, percentile(doubleField, 90) by ipField',
+          'from a_index | INLINE STATS avg(doubleField) by textField, percentile(doubleField, 90) by ipField',
           ['Function PERCENTILE not allowed in BY']
         );
       });
@@ -133,17 +171,17 @@ describe('INLINESTATS Validation', () => {
       describe('constant-only parameters', () => {
         test('no errors', () => {
           inlinestatsExpectErrors(
-            'from index | inlinestats by bucket(dateField, 1 + 30 / 10, "", "")',
+            'from index | INLINE STATS by bucket(dateField, 1 + 30 / 10, "", "")',
             []
           );
           inlinestatsExpectErrors(
-            'from index | inlinestats by bucket(dateField, 1 + 30 / 10, concat("", ""), "")',
+            'from index | INLINE STATS by bucket(dateField, 1 + 30 / 10, concat("", ""), "")',
             []
           );
         });
 
         test('errors', () => {
-          inlinestatsExpectErrors('from index | inlinestats by bucket(dateField, pi(), "", "")', [
+          inlinestatsExpectErrors('from index | INLINE STATS by bucket(dateField, pi(), "", "")', [
             getNoValidCallSignatureError('bucket', ['date', 'double', 'keyword', 'keyword']),
           ]);
         });
@@ -163,11 +201,11 @@ describe('INLINESTATS Validation', () => {
 
             test('no errors', () => {
               inlinestatsExpectErrors(
-                `from a_index | inlinestats 5 + avg(doubleField) ${operatorsWrapping}`,
+                `from a_index | INLINE STATS 5 + avg(doubleField) ${operatorsWrapping}`,
                 []
               );
               inlinestatsExpectErrors(
-                `from a_index | inlinestats 5 ${operatorsWrapping} + avg(doubleField)`,
+                `from a_index | INLINE STATS 5 ${operatorsWrapping} + avg(doubleField)`,
                 []
               );
             });
@@ -179,31 +217,31 @@ describe('INLINESTATS Validation', () => {
 
             test('no errors', () => {
               inlinestatsExpectErrors(
-                `from a_index | inlinestats ${evalWrapping} sum(doubleField) ${closingWrapping}`,
+                `from a_index | INLINE STATS ${evalWrapping} sum(doubleField) ${closingWrapping}`,
                 []
               );
               inlinestatsExpectErrors(
-                `from a_index | inlinestats ${evalWrapping} sum(doubleField) ${closingWrapping} + ${evalWrapping} sum(doubleField) ${closingWrapping}`,
+                `from a_index | INLINE STATS ${evalWrapping} sum(doubleField) ${closingWrapping} + ${evalWrapping} sum(doubleField) ${closingWrapping}`,
                 []
               );
               inlinestatsExpectErrors(
-                `from a_index | inlinestats ${evalWrapping} sum(doubleField + doubleField) ${closingWrapping}`,
+                `from a_index | INLINE STATS ${evalWrapping} sum(doubleField + doubleField) ${closingWrapping}`,
                 []
               );
               inlinestatsExpectErrors(
-                `from a_index | inlinestats ${evalWrapping} sum(doubleField + round(doubleField)) ${closingWrapping}`,
+                `from a_index | INLINE STATS ${evalWrapping} sum(doubleField + round(doubleField)) ${closingWrapping}`,
                 []
               );
               inlinestatsExpectErrors(
-                `from a_index | inlinestats ${evalWrapping} sum(doubleField + round(doubleField)) ${closingWrapping} + ${evalWrapping} sum(doubleField + round(doubleField)) ${closingWrapping}`,
+                `from a_index | INLINE STATS ${evalWrapping} sum(doubleField + round(doubleField)) ${closingWrapping} + ${evalWrapping} sum(doubleField + round(doubleField)) ${closingWrapping}`,
                 []
               );
               inlinestatsExpectErrors(
-                `from a_index | inlinestats sum(${evalWrapping} doubleField ${closingWrapping} )`,
+                `from a_index | INLINE STATS sum(${evalWrapping} doubleField ${closingWrapping} )`,
                 []
               );
               inlinestatsExpectErrors(
-                `from a_index | inlinestats sum(${evalWrapping} doubleField ${closingWrapping} ) + sum(${evalWrapping} doubleField ${closingWrapping} )`,
+                `from a_index | INLINE STATS sum(${evalWrapping} doubleField ${closingWrapping} ) + sum(${evalWrapping} doubleField ${closingWrapping} )`,
                 []
               );
             });
@@ -212,9 +250,9 @@ describe('INLINESTATS Validation', () => {
       }
     });
 
-    test('grammar: INLINESTATS BY without aggregate yields parse errors', () => {
+    test('grammar: INLINE STATS BY without aggregate yields parse errors', () => {
       const { errors } = Parser.parse(
-        'FROM index | INLINESTATS BY bucket(dateField, 1 + 30 / 10, "", "")'
+        'FROM index | INLINE STATS BY bucket(dateField, 1 + 30 / 10, "", "")'
       );
       expect(errors.length).toBeGreaterThan(0);
     });

@@ -13,3 +13,4 @@ export { YamlEditor } from './yaml_editor';
 export { JSONDataTable, type JSONDataTableProps } from './json_data_view/json_data_table';
 export { WorkflowStatus } from './workflow_status';
 export { getRunWorkflowTooltipContent } from './workflow_action_buttons/get_run_workflow_tooltip_content';
+export { FormattedRelativeEnhanced } from './formatted_relative_enhanced/formatted_relative_enhanced';

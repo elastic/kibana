@@ -6,6 +6,7 @@
  */
 
 import { validateAgentId, agentIdRegexp, agentIdMaxLength } from './agent_ids';
+import { protectedNamespaces } from '../base/namespaces';
 
 describe('validateAgentId', () => {
   test('returns undefined for valid id (non built-in)', () => {
@@ -49,7 +50,27 @@ describe('validateAgentId', () => {
   test('fails on agentId exceeding max length', () => {
     const overMax = 'a'.repeat(agentIdMaxLength + 1);
     const error = validateAgentId({ agentId: overMax, builtIn: false });
-    expect(error).toBe(`Tool ids are limited to ${agentIdMaxLength} characters.`);
+    expect(error).toBe(`Agent ids are limited to ${agentIdMaxLength} characters.`);
+  });
+
+  test('fails when agentId equals a protected namespace name', () => {
+    const protectedNamespaceName = protectedNamespaces[0];
+    const error = validateAgentId({ agentId: protectedNamespaceName, builtIn: false });
+    expect(error).toBe('Agent id cannot have the same name as a reserved namespace.');
+  });
+
+  test('fails when non built-in agent uses a protected namespace', () => {
+    const protectedNamespaceName = protectedNamespaces[0];
+    const agentId = `${protectedNamespaceName}.agent`;
+    const error = validateAgentId({ agentId, builtIn: false });
+    expect(error).toBe('Agent id is using a protected namespace.');
+  });
+
+  test('allows built-in agent to use a protected namespace', () => {
+    const protectedNamespaceName = protectedNamespaces[0];
+    const agentId = `${protectedNamespaceName}.internal_agent`;
+    const error = validateAgentId({ agentId, builtIn: true });
+    expect(error).toBeUndefined();
   });
 });
 

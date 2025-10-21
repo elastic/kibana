@@ -83,6 +83,7 @@ const mockUseKibanaReturnValue = {
           reopenCase: true,
         }),
         getRuleIdFromEvent: jest.fn(),
+        getObservablesFromEcs: jest.fn().mockReturnValue([]),
       },
     },
   },
@@ -112,7 +113,7 @@ const addToExistingCaseButton = 'add-to-existing-case-action';
 const addToNewCaseButton = 'add-to-new-case-action';
 const markAsOpenButton = 'open-alert-status';
 const markAsAcknowledgedButton = 'acknowledged-alert-status';
-const markAsClosedButton = 'close-alert-status';
+const markAsClosedButton = 'alert-close-context-menu-item';
 const addEndpointEventFilterButton = 'add-event-filter-menu-item';
 const applyAlertTagsButton = 'alert-tags-context-menu-item';
 const applyAlertAssigneesButton = 'alert-assignees-context-menu-item';

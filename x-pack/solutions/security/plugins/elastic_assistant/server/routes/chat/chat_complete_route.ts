@@ -254,16 +254,7 @@ export const chatCompleteRoute = (
               onNewReplacements,
               replacements: latestReplacements,
               contentReferencesStore,
-              request: {
-                ...request,
-                // TODO: clean up after empty tools will be available to use
-                body: {
-                  ...request.body,
-                  replacements: {},
-                  size: 10,
-                  alertsIndexPattern: '.alerts-security.alerts-default',
-                },
-              },
+              request,
               response,
               telemetry,
               responseLanguage: request.body.responseLanguage,

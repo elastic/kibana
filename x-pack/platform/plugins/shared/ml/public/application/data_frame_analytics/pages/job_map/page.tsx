@@ -23,6 +23,8 @@ import type { AnalyticsSelectorIds } from '../components/analytics_selector';
 import { AnalyticsIdSelector, AnalyticsIdSelectorControls } from '../components/analytics_selector';
 import { AnalyticsEmptyPrompt } from '../analytics_management/components/empty_prompt';
 import { PageTitle } from '../../../components/page_title';
+import { JobInfoFlyoutsProvider } from '../../../jobs/components/job_details_flyout/job_details_flyout_context';
+import { AnalyticsDetailFlyout } from '../analytics_exploration/components/analytics_detail_flyout';
 
 export const Page: FC = () => {
   const [globalState, setGlobalState] = useUrlState('_g');
@@ -102,7 +104,8 @@ export const Page: FC = () => {
   };
 
   return (
-    <>
+    <JobInfoFlyoutsProvider>
+      <AnalyticsDetailFlyout />
       <AnalyticsIdSelectorControls
         setIsIdSelectorFlyoutVisible={setIsIdSelectorFlyoutVisible}
         selectedId={jobId ?? modelId}
@@ -171,6 +174,6 @@ export const Page: FC = () => {
         getEmptyState()
       )}
       <HelpMenu docLink={helpLink} />
-    </>
+    </JobInfoFlyoutsProvider>
   );
 };

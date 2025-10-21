@@ -10,7 +10,10 @@ import type { ENDPOINT_PRIVILEGES, FleetAuthz } from '@kbn/fleet-plugin/common';
 import { omit } from 'lodash';
 import type { Capabilities } from '@kbn/core-capabilities-common';
 import type { ProductFeaturesService } from '../../../../server/lib/product_features_service';
-import { RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ } from '../response_actions/constants';
+import {
+  RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ,
+  CANCELLABLE_RESPONSE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ,
+} from '../response_actions/constants';
 import type { LicenseService } from '../../../license';
 import type { EndpointAuthz } from '../../types/authz';
 import type { MaybeImmutable } from '../../types';
@@ -146,6 +149,7 @@ export const calculateEndpointAuthz = (
     canSuspendProcess: canWriteProcessOperations && isEnterpriseLicense,
     canGetRunningProcesses: canWriteProcessOperations && isEnterpriseLicense,
     canAccessResponseConsole: false, // set further below
+    canCancelAction: false, // set further below
     canWriteExecuteOperations: canWriteExecuteOperations && isEnterpriseLicense,
     canWriteFileOperations: canWriteFileOperations && isEnterpriseLicense,
     canWriteScanOperations: canWriteScanOperations && isEnterpriseLicense,
@@ -177,7 +181,7 @@ export const calculateEndpointAuthz = (
   };
 
   // Response console is only accessible when license is Enterprise and user has access to any
-  // of the response actions except `release`. Sole access to `release` is something
+  // of the response actions except `release``. Sole access to `release` is something
   // that is supported for a user in a license downgrade scenario, and in that case, we don't want
   // to allow access to Response Console.
   authz.canAccessResponseConsole =
@@ -187,6 +191,15 @@ export const calculateEndpointAuthz = (
         return authz[responseActionAuthzKey];
       }
     );
+
+  // Cancel actions are accessible when user has access to any cancellable response action.
+  // This follows the same pattern as canAccessResponseConsole, ensuring users can only cancel
+  // actions they have permission to execute.
+  authz.canCancelAction = Object.values(
+    CANCELLABLE_RESPONSE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ
+  ).some((responseActionAuthzKey) => {
+    return authz[responseActionAuthzKey];
+  });
 
   return authz;
 };
@@ -215,6 +228,7 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
     canSuspendProcess: false,
     canGetRunningProcesses: false,
     canAccessResponseConsole: false,
+    canCancelAction: false,
     canWriteFileOperations: false,
     canWriteExecuteOperations: false,
     canWriteScanOperations: false,

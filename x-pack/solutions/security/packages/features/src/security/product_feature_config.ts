@@ -167,4 +167,8 @@ export const securityDefaultProductFeaturesConfig: SecurityProductFeaturesConfig
       SecuritySubFeatureId.globalArtifactManagement,
     ],
   },
+
+  [ProductFeatureSecurityKey.endpointExceptions]: {
+    subFeatureIds: [SecuritySubFeatureId.endpointExceptions],
+  },
 };

@@ -17,7 +17,8 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import { esIndicesStateCheck, getReindexWarnings } from '@kbn/upgrade-assistant-pkg-server';
 import type { Version } from '@kbn/upgrade-assistant-pkg-common';
-import { ReindexStatus, ReindexStep } from '../../../common';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
+import { ReindexStep } from '../../../common';
 import type { IndexSettings, IndexWarning, ReindexArgs } from '../../../common';
 import type { ReindexSavedObject } from './types';
 import type { CreateReindexOpArgs } from './reindex_actions';
@@ -541,10 +542,6 @@ export const reindexServiceFactory = (
             names,
             allow_restricted_indices: true,
             privileges: ['all'],
-          },
-          {
-            names: ['.tasks'],
-            privileges: ['read'],
           },
         ],
       });

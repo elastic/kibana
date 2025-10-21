@@ -23,6 +23,7 @@ import type {
   MetricsServiceSetup,
   MetricsServiceStart,
 } from '@kbn/core-metrics-server';
+import { lazyObject } from '@kbn/lazy-object';
 
 export const sampleEsClientMetrics: ElasticsearchClientsMetrics = {
   totalActiveSockets: 25,
@@ -31,32 +32,31 @@ export const sampleEsClientMetrics: ElasticsearchClientsMetrics = {
 };
 
 const createInternalSetupContractMock = () => {
-  const setupContract: jest.Mocked<InternalMetricsServiceSetup> = {
-    collectionInterval: 30000,
-    getEluMetrics$: jest.fn(),
-    getOpsMetrics$: jest.fn(),
-  };
-
   const processMock = collectorMock.createOpsProcessMetrics();
 
-  setupContract.getOpsMetrics$.mockReturnValue(
-    new BehaviorSubject({
-      collected_at: new Date('2020-01-01 01:00:00'),
-      process: processMock,
-      processes: [processMock],
-      os: {
-        platform: 'darwin' as const,
-        platformRelease: 'test',
-        load: { '1m': 1, '5m': 1, '15m': 1 },
-        memory: { total_in_bytes: 1, free_in_bytes: 1, used_in_bytes: 1 },
-        uptime_in_millis: 1,
-      },
-      elasticsearch_client: sampleEsClientMetrics,
-      response_times: { avg_in_millis: 1, max_in_millis: 1 },
-      requests: { disconnects: 1, total: 1, statusCodes: { '200': 1 } },
-      concurrent_connections: 1,
-    })
-  );
+  const setupContract: jest.Mocked<InternalMetricsServiceSetup> = lazyObject({
+    collectionInterval: 30000,
+    getEluMetrics$: jest.fn(),
+    getOpsMetrics$: jest.fn().mockReturnValue(
+      new BehaviorSubject({
+        collected_at: new Date('2020-01-01 01:00:00'),
+        process: processMock,
+        processes: [processMock],
+        os: {
+          platform: 'darwin' as const,
+          platformRelease: 'test',
+          load: { '1m': 1, '5m': 1, '15m': 1 },
+          memory: { total_in_bytes: 1, free_in_bytes: 1, used_in_bytes: 1 },
+          uptime_in_millis: 1,
+        },
+        elasticsearch_client: sampleEsClientMetrics,
+        response_times: { avg_in_millis: 1, max_in_millis: 1 },
+        requests: { disconnects: 1, total: 1, statusCodes: { '200': 1 } },
+        concurrent_connections: 1,
+      })
+    ),
+  });
+
   return setupContract;
 };
 
@@ -78,11 +78,11 @@ const createStartContractMock = () => {
 type MetricsServiceContract = PublicMethodsOf<MetricsService>;
 
 const createMock = () => {
-  const mocked: jest.Mocked<MetricsServiceContract> = {
+  const mocked: jest.Mocked<MetricsServiceContract> = lazyObject({
     setup: jest.fn().mockReturnValue(createSetupContractMock()),
     start: jest.fn().mockReturnValue(createStartContractMock()),
     stop: jest.fn(),
-  };
+  });
   return mocked;
 };
 

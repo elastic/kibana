@@ -18,6 +18,7 @@ import type { TopNavCustomization } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
 import { SolutionsViewBadge } from './solutions_view_badge';
 import { onSaveDiscoverSession } from './save_discover_session';
+import { internalStateActions } from '../../state_management/redux';
 
 /**
  * Helper function to build the top nav badges
@@ -59,7 +60,14 @@ export const getTopNavBadges = ({
       getTopNavUnsavedChangesBadge({
         onRevert: async () => {
           dismissFlyouts([DiscoverFlyouts.lensEdit]);
-          await stateContainer.actions.undoSavedSearchChanges();
+
+          const { persistedDiscoverSession } = stateContainer.internalState.getState();
+
+          if (persistedDiscoverSession) {
+            await stateContainer.internalState
+              .dispatch(internalStateActions.resetDiscoverSession())
+              .unwrap();
+          }
         },
         onSave:
           services.capabilities.discover_v2.save && !isManaged

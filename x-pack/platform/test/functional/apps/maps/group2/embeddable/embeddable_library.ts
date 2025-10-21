@@ -53,7 +53,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await dashboardPanelActions.unlinkFromLibrary(mapTitle);
       await dashboardPanelActions.expectNotLinkedToLibrary(mapTitle);
 
-      await dashboardAddPanel.clickOpenAddPanel();
+      await dashboardAddPanel.clickAddFromLibrary();
       await dashboardAddPanel.filterEmbeddableNames(mapTitle);
       await find.existsByLinkText(mapTitle);
       await dashboardAddPanel.closeAddPanel();

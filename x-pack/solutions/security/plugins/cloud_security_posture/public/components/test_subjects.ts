@@ -36,10 +36,10 @@ export const THIRD_PARTY_INTEGRATIONS_NO_MISCONFIGURATIONS_FINDINGS_PROMPT =
   '3p-integrations-no-misconfigurations-findings-prompt';
 export const THIRD_PARTY_INTEGRATIONS_NO_VULNERABILITIES_FINDINGS_PROMPT =
   '3p-integrations-no-vulnerabilities-findings-prompt';
-export const THIRD_PARTY_NO_MISCONFIGURATIONS_FINDINGS_PROMPT_WIZ_INTEGRATION_BUTTON =
-  '3p-no-misconfigurations-findings-prompt-wiz-integration-button';
-export const THIRD_PARTY_NO_VULNERABILITIES_FINDINGS_PROMPT_WIZ_INTEGRATION_BUTTON =
-  '3p-no-vulnerabilities-findings-prompt-wiz-integration-button';
+export const THIRD_PARTY_NO_MISCONFIGURATIONS_FINDINGS_PROMPT_INTEGRATION_BUTTON =
+  '3p-no-misconfigurations-findings-prompt-integration-button';
+export const THIRD_PARTY_NO_VULNERABILITIES_FINDINGS_PROMPT_INTEGRATION_BUTTON =
+  '3p-no-vulnerabilities-findings-prompt-integration-button';
 export const VULNERABILITIES_CONTAINER_TEST_SUBJ = 'vulnerabilities_container';
 
 export const TAKE_ACTION_SUBJ = 'csp:take_action';

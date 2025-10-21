@@ -62,10 +62,7 @@ export const MigrationPanelTitle = React.memo(function MigrationPanelTitle({
     setName(migrationStats.name); // revert visual name; toast handled in hook
   }, [migrationStats.name]);
 
-  const { mutate: deleteMigration, isLoading: isDeleting } = useDeleteMigration(
-    migrationStats.id,
-    migrationType
-  );
+  const { mutate: deleteMigration, isLoading: isDeleting } = useDeleteMigration(migrationType);
   const { mutate: updateMigration, isLoading: isUpdating } = useUpdateSiemMigration(migrationType, {
     onError: onRenameError,
   });
@@ -97,9 +94,9 @@ export const MigrationPanelTitle = React.memo(function MigrationPanelTitle({
   );
 
   const confirmDelete = useCallback(() => {
-    deleteMigration();
+    deleteMigration(migrationStats.id);
     closeDeleteModal();
-  }, [deleteMigration, closeDeleteModal]);
+  }, [deleteMigration, migrationStats.id, closeDeleteModal]);
 
   const stopPropagation = useCallback((e: React.MouseEvent) => {
     e.stopPropagation(); // prevent click events from bubbling up and toggle the collapsible panel
@@ -162,7 +159,7 @@ export const MigrationPanelTitle = React.memo(function MigrationPanelTitle({
                   data-test-subj="deleteMigrationItem"
                 >
                   <EuiToolTip content={isDeletable ? undefined : i18n.NOT_DELETABLE_MIGRATION_TEXT}>
-                    <span>{i18n.DELETE_BUTTON_TEXT}</span>
+                    <span tabIndex={0}>{i18n.DELETE_BUTTON_TEXT}</span>
                   </EuiToolTip>
                 </EuiContextMenuItem>
               </EuiContextMenuPanel>
