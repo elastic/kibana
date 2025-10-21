@@ -68,9 +68,7 @@ export const transformDashboardIn = ({
       ...(controlGroupInput && {
         controlGroupInput: transformControlGroupIn(controlGroupInput),
       }),
-      ...(options && {
-        optionsJSON: JSON.stringify(options),
-      }),
+      optionsJSON: JSON.stringify(options ?? {}),
       ...(panels && {
         panelsJSON,
       }),
