@@ -74,6 +74,9 @@ xpack.security.authc.providers.<provider-type>.<provider-name>.hint ![logo cloud
 xpack.security.authc.providers.<provider-type>.<provider-name>.icon ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Custom icon for the provider entry displayed on the Login Selector UI.
 
+xpack.security.authc.providers.<provider-type>.<provider-name>.origin ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+:   TODO
+
 xpack.security.authc.providers.<provider-type>.<provider-name>.showInSelector ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Flag that indicates if the provider should have an entry on the Login Selector UI. Setting this to `false` doesn’t remove the provider from the authentication chain.
 

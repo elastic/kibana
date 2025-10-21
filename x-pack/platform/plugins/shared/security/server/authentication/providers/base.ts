@@ -41,6 +41,7 @@ export interface AuthenticationProviderOptions {
     loggedOut: (request: KibanaRequest) => string;
   };
   isElasticCloudDeployment: () => boolean;
+  origin?: string | string[];
 }
 
 /**
@@ -146,5 +147,12 @@ export abstract class BaseAuthenticationProvider {
         authenticationInfo.authentication_realm.type === 'saml' &&
         authenticationInfo.authentication_realm.name === ELASTIC_CLOUD_SSO_REALM_NAME,
     } as AuthenticatedUser);
+  }
+
+  /**
+   * Returns the origin option associated with the provider.
+   */
+  getOrigin(): string | string[] | undefined {
+    return this.options.origin;
   }
 }

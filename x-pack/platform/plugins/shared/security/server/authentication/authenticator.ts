@@ -276,6 +276,7 @@ export class Authenticator {
               name,
               logger: options.loggers.get(type, name),
               urls: { loggedOut: (request: KibanaRequest) => this.getLoggedOutURL(request, type) },
+              origin: this.options.config.authc.providers[type]?.[name].origin,
             }),
             this.options.config.authc.providers[type]?.[name]
           ),
@@ -335,6 +336,31 @@ export class Authenticator {
             ? `name ${attempt.provider.name}`
             : `type "${(attempt.provider as Record<string, string>).type}"`
         } is detected, but it isn't enabled.`
+      );
+      return AuthenticationResult.notHandled();
+    }
+
+    const { origin: originHeader } = request.headers;
+
+    const filteredProviders = providers.filter(([name, provider]) => {
+      const providerOrigin = provider.getOrigin();
+
+      return (
+        !originHeader ||
+        !providerOrigin ||
+        (Array.isArray(providerOrigin)
+          ? providerOrigin.includes(originHeader as string)
+          : providerOrigin === originHeader)
+      );
+    });
+
+    if (filteredProviders.length === 0) {
+      this.logger.warn(
+        `Login attempt for provider with ${
+          isLoginAttemptWithProviderName(attempt)
+            ? `name ${attempt.provider.name}`
+            : `type "${(attempt.provider as Record<string, string>).type}"`
+        } is detected, but originated from an invalid origin.`
       );
       return AuthenticationResult.notHandled();
     }
