@@ -694,7 +694,7 @@ function generateElasticsearchConnectors(): EnhancedInternalConnectorContract[] 
   const {
     GENERATED_ELASTICSEARCH_CONNECTORS,
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-  } = require('@kbn/workflows/common/generated_es_connectors');
+  } = require('@kbn/workflows/common/generated/elasticsearch_connectors');
 
   const {
     ENHANCED_ELASTICSEARCH_CONNECTORS,
@@ -714,7 +714,7 @@ function generateKibanaConnectors(): InternalConnectorContract[] {
   const {
     GENERATED_KIBANA_CONNECTORS,
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-  } = require('@kbn/workflows/common/generated_kibana_connectors');
+  } = require('@kbn/workflows/common/generated/kibana_connectors');
 
   // Return the pre-generated Kibana connectors (build-time generated, browser-safe)
   return GENERATED_KIBANA_CONNECTORS;

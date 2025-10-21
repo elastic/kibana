@@ -129,4 +129,6 @@ export function getBeforeSetup(
   );
 
   rulesClientParams.isSystemAction.mockImplementation((id) => id === 'system_action-id');
+
+  ruleTypeRegistry.list.mockReturnValue(new Map());
 }

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
-import type { ESQLCommand, ESQLAstRerankCommand, ESQLSingleAstItem } from '../../../types';
+import type { ESQLAstRerankCommand, ESQLSingleAstItem, ESQLAstAllCommands } from '../../../types';
 import type { ICommandCallbacks, ISuggestionItem, ICommandContext } from '../../types';
 import { Location } from '../../types';
 import { getPosition, CaretPosition } from './utils';
@@ -36,7 +36,7 @@ const FIELD_LIST_TYPES = ['keyword', 'text', 'boolean', 'integer', 'double', 'lo
 
 export async function autocomplete(
   query: string,
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
   cursorPosition: number = query.length
@@ -196,7 +196,7 @@ async function handleOnExpression({
   insideFunction,
 }: {
   query: string;
-  command: ESQLCommand;
+  command: ESQLAstAllCommands;
   cursorPosition: number;
   callbacks: ICommandCallbacks;
   context: ICommandContext | undefined;

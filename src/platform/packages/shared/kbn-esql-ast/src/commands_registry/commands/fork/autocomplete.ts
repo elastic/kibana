@@ -8,7 +8,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
-import type { ESQLCommand } from '../../../types';
+import type { ESQLAstAllCommands, ESQLCommand } from '../../../types';
 import { pipeCompleteItem, getCommandAutocompleteDefinitions } from '../../complete_items';
 import { pipePrecedesCurrentWord } from '../../../definitions/utils/shared';
 import type { ICommandCallbacks } from '../../types';
@@ -37,7 +37,7 @@ const FORK_AVAILABLE_COMMANDS = [
 
 export async function autocomplete(
   query: string,
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
   cursorPosition: number = query.length
@@ -96,7 +96,7 @@ const newBranchSuggestion: ISuggestionItem = withAutoSuggest({
   asSnippet: true,
 });
 
-const getActiveBranch = (command: ESQLCommand) => {
+const getActiveBranch = (command: ESQLAstAllCommands) => {
   const finalBranch = command.args[command.args.length - 1];
 
   if (Array.isArray(finalBranch) || finalBranch.type !== 'query') {

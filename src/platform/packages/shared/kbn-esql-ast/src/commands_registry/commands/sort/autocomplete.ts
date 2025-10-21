@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { ESQLAstAllCommands } from '../../../types';
 import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import {
   columnExists as _columnExists,
@@ -13,7 +14,6 @@ import {
 } from '../../../definitions/utils/autocomplete/helpers';
 import { suggestForExpression } from '../../../definitions/utils';
 import { getExpressionType, isExpressionComplete } from '../../../definitions/utils/expressions';
-import type { ESQLCommand } from '../../../types';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 import type { ICommandCallbacks } from '../../types';
 import { Location, type ICommandContext, type ISuggestionItem } from '../../types';
@@ -27,7 +27,7 @@ import {
 
 export async function autocomplete(
   query: string,
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
   cursorPosition: number = query.length
