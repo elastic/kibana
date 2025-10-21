@@ -18,6 +18,9 @@ import {
   WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
 } from '@kbn/workflows';
 import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
+import { selectWorkflowGraph } from '../../../widgets/workflow_yaml_editor/lib/store';
+import { selectWorkflowDefinition } from '../../../widgets/workflow_yaml_editor/lib/store/selectors';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { ExecutionGraph } from '../../../features/debug-graph/execution_graph';
 import type { WorkflowUrlStateTabType } from '../../../hooks/use_workflow_url_state';
@@ -75,12 +78,22 @@ export function WorkflowEditor({
 
   const [testStepId, setTestStepId] = useState<string | null>(null);
   const [contextOverride, setContextOverride] = useState<ContextOverrideData | null>(null);
+  const workflowGraph = useSelector(selectWorkflowGraph);
+  const workflowDefinition = useSelector(selectWorkflowDefinition);
 
   const yamlValue = selectedExecutionId && execution ? execution.yaml : workflowYaml;
 
   const handleStepRun = async (params: { stepId: string; actionType: string }) => {
+    if (!workflowGraph || !workflowDefinition) {
+      return;
+    }
+
     if (params.actionType === 'run') {
-      const contextOverrideData = buildContextOverrideForStep(workflowYaml, params.stepId);
+      const contextOverrideData = buildContextOverrideForStep(
+        workflowGraph,
+        workflowDefinition,
+        params.stepId
+      );
 
       if (!Object.keys(contextOverrideData.stepContext).length) {
         submitStepRun(params.stepId, {});
