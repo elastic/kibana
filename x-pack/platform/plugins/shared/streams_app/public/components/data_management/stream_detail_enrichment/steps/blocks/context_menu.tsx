@@ -44,7 +44,14 @@ const moveDownItemText = i18n.translate(
 const editItemText = i18n.translate(
   'xpack.streams.streamDetailView.managementTab.enrichment.editItemButtonText',
   {
-    defaultMessage: 'Edit item',
+    defaultMessage: 'Edit',
+  }
+);
+
+const duplicateItemText = i18n.translate(
+  'xpack.streams.streamDetailView.managementTab.enrichment.duplicateItemButtonText',
+  {
+    defaultMessage: 'Duplicate',
   }
 );
 
@@ -66,8 +73,11 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
   isFirstStepInLevel,
   isLastStepInLevel,
 }) => {
-  const { reorderStep } = useStreamEnrichmentEvents();
+  const { reorderStep, duplicateProcessor } = useStreamEnrichmentEvents();
   const canEdit = useStreamEnrichmentSelector((snapshot) => snapshot.can({ type: 'step.edit' }));
+  const canDuplicate = useStreamEnrichmentSelector((snapshot) =>
+    snapshot.can({ type: 'step.duplicateProcessor', processorStepId: stepRef.id })
+  );
   const canReorder = useStreamEnrichmentSelector(
     (snapshot) =>
       snapshot.can({ type: 'step.reorder', stepId: stepRef.id, direction: 'up' }) ||
@@ -91,6 +101,10 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
 
   const handleEdit = () => {
     stepRef.send({ type: 'step.edit' });
+  };
+
+  const handleDuplicate = () => {
+    duplicateProcessor(stepRef.id);
   };
 
   const getChildStepsLength = () => {
@@ -152,6 +166,22 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
     >
       {editItemText}
     </EuiContextMenuItem>,
+    ...(!isWhere
+      ? [
+          <EuiContextMenuItem
+            data-test-subj="stepContextMenuDuplicateItem"
+            key="duplicateStep"
+            icon="copy"
+            disabled={!canDuplicate}
+            onClick={() => {
+              togglePopover(false);
+              handleDuplicate();
+            }}
+          >
+            {duplicateItemText}
+          </EuiContextMenuItem>,
+        ]
+      : []),
     <EuiContextMenuItem
       data-test-subj="stepContextMenuDeleteItem"
       key="deleteStep"

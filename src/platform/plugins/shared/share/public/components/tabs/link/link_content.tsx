@@ -23,6 +23,8 @@ import React, { useCallback, useState, useRef, useEffect } from 'react';
 import { TimeTypeSection } from './time_type_section';
 import type { IShareContext } from '../../context';
 import type { LinkShareConfig, LinkShareUIConfig } from '../../../types';
+import type { DraftModeCalloutProps } from '../../common/draft_mode_callout';
+import { DraftModeCallout } from '../../common/draft_mode_callout';
 
 type LinkProps = Pick<
   IShareContext,
@@ -61,7 +63,17 @@ export const LinkContent = ({
   const copiedTextToolTipCleanupIdRef = useRef<ReturnType<typeof setTimeout>>();
   const timeRange = shareableUrlLocatorParams?.params?.timeRange;
 
-  const { delegatedShareUrlHandler, draftModeCallOut: DraftModeCallout } = objectConfig;
+  const { delegatedShareUrlHandler, draftModeCallOut } = objectConfig;
+  // TODO Remove node override logic https://github.com/elastic/kibana/issues/238877
+  const isValidCalloutOverride = React.isValidElement(draftModeCallOut);
+  const draftModeCalloutContent = isValidCalloutOverride
+    ? // Retro-compatible case
+      { node: draftModeCallOut }
+    : typeof draftModeCallOut === 'object'
+    ? // Custom content callout
+      (draftModeCallOut as DraftModeCalloutProps)
+    : // Default content callout
+      {};
 
   const getUrlWithUpdatedParams = useCallback((tempUrl: string): string => {
     const urlWithUpdatedParams = urlParamsRef.current
@@ -138,10 +150,10 @@ export const LinkContent = ({
           isAbsoluteTime={isAbsoluteTime}
           changeTimeType={changeTimeType}
         />
-        {isDirty && DraftModeCallout && (
+        {isDirty && draftModeCallOut && (
           <>
             <EuiSpacer size="m" />
-            {DraftModeCallout}
+            <DraftModeCallout {...draftModeCalloutContent} />
           </>
         )}
         <EuiSpacer size="l" />

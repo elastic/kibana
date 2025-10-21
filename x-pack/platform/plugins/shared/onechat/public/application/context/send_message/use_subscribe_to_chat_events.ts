@@ -55,6 +55,7 @@ export const useSubscribeToChatEvents = ({
             conversationActions.addReasoningStep({
               step: createReasoningStep({
                 reasoning: event.data.reasoning,
+                transient: event.data.transient,
               }),
             });
             setAgentReasoning(event.data.reasoning);

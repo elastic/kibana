@@ -275,7 +275,7 @@ export const useDashboardMenuItems = ({
         // TODO: Replace when the backgroundTask icon is available in EUI
         iconType: EuiIconBackgroundTask,
         iconOnly: true,
-        testId: 'backgroundSearchButton',
+        testId: 'openBackgroundSearchFlyoutButton',
         run: () =>
           dataService.search.showSearchSessionsFlyout({
             appId,

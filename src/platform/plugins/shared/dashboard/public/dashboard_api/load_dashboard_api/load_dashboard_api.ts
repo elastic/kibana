@@ -29,7 +29,7 @@ export async function loadDashboardApi({
 }) {
   const creationStartTime = performance.now();
   const creationOptions = await getCreationOptions?.();
-  const incomingEmbeddable = creationOptions?.getIncomingEmbeddable?.();
+  const incomingEmbeddables = creationOptions?.getIncomingEmbeddables?.();
   const [savedObjectResult, user, isAccessControlEnabled] = await Promise.all([
     getDashboardContentManagementService().loadDashboardState({
       id: savedObjectId,
@@ -84,7 +84,7 @@ export async function loadDashboardApi({
   // --------------------------------------------------------------------------------------
   const { api, cleanup, internalApi } = getDashboardApi({
     creationOptions,
-    incomingEmbeddable,
+    incomingEmbeddables,
     initialState: {
       ...combinedSessionState,
       ...overrideState,
@@ -100,7 +100,7 @@ export async function loadDashboardApi({
     creationStartTime,
   });
 
-  if (savedObjectId && !incomingEmbeddable) {
+  if (savedObjectId && !incomingEmbeddables?.length) {
     // We count a new view every time a user opens a dashboard, both in view or edit mode
     // We don't count views when a user is editing a dashboard and is returning from an editor after saving
     // however, there is an edge case that we now count a new view when a user is editing a dashboard and is returning from an editor by canceling

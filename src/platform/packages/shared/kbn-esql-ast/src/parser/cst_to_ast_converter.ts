@@ -149,21 +149,22 @@ export class CstToAstConverter {
     const setCommandCtxs = ctx.setCommand_list();
     const singleStatement = ctx.singleStatement();
 
+    let header: ast.ESQLAstSetHeaderCommand[] | undefined;
+    // Process SET instructions and create header if they exist
+    if (setCommandCtxs && setCommandCtxs.length > 0) {
+      header = this.fromSetCommands(setCommandCtxs);
+    }
+
     // Get the main query from singleStatement
     const query = this.fromSingleStatement(singleStatement);
 
     if (!query) {
-      return undefined;
+      const emptyQuery = Builder.expression.query([], this.getParserFields(ctx), header);
+      emptyQuery.incomplete = true;
+      return emptyQuery;
     }
 
-    // Process SET instructions and create header if they exist
-    if (setCommandCtxs && setCommandCtxs.length > 0) {
-      const header = this.fromSetCommands(setCommandCtxs);
-
-      if (header && header.length > 0) {
-        query.header = header;
-      }
-    }
+    query.header = header;
 
     return query;
   }
@@ -271,18 +272,29 @@ export class CstToAstConverter {
 
   private fromSetCommand(ctx: cst.SetCommandContext): ast.ESQLAstSetHeaderCommand {
     const setFieldCtx = ctx.setField();
-    const arg = this.fromSetFieldContext(setFieldCtx);
-    const command = Builder.header.command.set([arg], {}, this.getParserFields(ctx));
+    const binaryExpression = this.fromSetFieldContext(setFieldCtx);
+
+    const args = binaryExpression ? [binaryExpression] : [];
+    const command = Builder.header.command.set(args, {}, this.getParserFields(ctx));
 
     return command;
   }
 
-  private fromSetFieldContext(ctx: cst.SetFieldContext): ast.ESQLBinaryExpression<'='> {
+  private fromSetFieldContext(ctx: cst.SetFieldContext): ast.ESQLBinaryExpression<'='> | null {
     const leftCtx = ctx.identifier();
     const rightCtx = ctx.constant();
+
+    if (!leftCtx || !rightCtx) {
+      return null;
+    }
+
     const left = this.toIdentifierFromContext(leftCtx);
     const right = this.fromConstant(rightCtx) as ast.ESQLLiteral;
     const expression = this.toBinaryExpression('=', ctx, [left, right]);
+
+    if (left.incomplete || right.incomplete) {
+      expression.incomplete = true;
+    }
 
     return expression;
   }
@@ -886,21 +898,24 @@ export class CstToAstConverter {
   private fromGrokCommand(ctx: cst.GrokCommandContext): ast.ESQLCommand<'grok'> {
     const command = this.createCommand('grok', ctx);
     const primaryExpression = this.visitPrimaryExpression(ctx.primaryExpression());
-    const stringContext = ctx.string_();
-    const pattern = stringContext.getToken(cst.default.QUOTED_STRING, 0);
-    const doParseStringAndOptions = pattern && textExistsAndIsValid(pattern.getText());
 
     command.args.push(primaryExpression);
 
-    if (doParseStringAndOptions) {
-      const stringNode = this.toStringLiteral(stringContext);
+    const stringContexts = ctx.string__list();
 
-      command.args.push(stringNode);
+    for (let i = 0; i < stringContexts.length; i++) {
+      const stringContext = stringContexts[i];
+      const pattern = stringContext.getToken(cst.default.QUOTED_STRING, 0);
+      const doParseStringAndOptions = pattern && textExistsAndIsValid(pattern.getText());
+
+      if (doParseStringAndOptions) {
+        const stringNode = this.toStringLiteral(stringContext);
+        command.args.push(stringNode);
+      }
     }
 
     return command;
   }
-
   // ------------------------------------------------------------------- ENRICH
 
   private fromEnrichCommand(ctx: cst.EnrichCommandContext): ast.ESQLCommand<'enrich'> {
@@ -1523,15 +1538,17 @@ export class CstToAstConverter {
 
   // --------------------------------------------------------------------- FUSE
 
-  private fromFuseCommand(ctx: cst.FuseCommandContext): ast.ESQLCommand<'fuse'> {
+  private fromFuseCommand(ctx: cst.FuseCommandContext): ast.ESQLAstFuseCommand {
     const fuseTypeCtx = ctx.identifier();
 
     const args: ast.ESQLAstItem[] = [];
     let incomplete = false;
 
+    const fuseType = fuseTypeCtx ? this.fromIdentifier(fuseTypeCtx) : undefined;
+
     // FUSE <fuse_method>
-    if (fuseTypeCtx) {
-      args.push(this.fromIdentifier(fuseTypeCtx));
+    if (fuseType) {
+      args.push(fuseType);
     }
 
     // FUSE SCORE BY <score_column> GROUP BY <group_column> KEY BY <key_columns> WITH <options>
@@ -1543,7 +1560,16 @@ export class CstToAstConverter {
       incomplete ||= configurationItemCommandOption?.incomplete ?? true;
     }
 
-    return this.createCommand('fuse', ctx, { args, incomplete });
+    const fuseCommand = this.createCommand<'fuse', ast.ESQLAstFuseCommand>('fuse', ctx, {
+      args,
+      incomplete,
+    });
+
+    if (fuseType) {
+      fuseCommand.fuseType = fuseType;
+    }
+
+    return fuseCommand;
   }
 
   private fromFuseConfigurationItem(
@@ -1569,7 +1595,7 @@ export class CstToAstConverter {
     const keyCtx = configCtx.KEY();
     if (keyCtx && byContext) {
       const args = this.fromFields(configCtx.fields());
-      const incomplete = args.length === 0;
+      const incomplete = args.length === 0 || args.some((arg) => arg.incomplete);
       return this.toOption('key by', configCtx, args, incomplete);
     }
 
@@ -1598,7 +1624,8 @@ export class CstToAstConverter {
         args.push(map);
       }
 
-      const incomplete = args.length === 0 || map.incomplete;
+      const incomplete =
+        args.length === 0 || map.incomplete || !textExistsAndIsValid(configCtx.getText());
       return this.toOption('with', configCtx, args, incomplete);
     }
 
