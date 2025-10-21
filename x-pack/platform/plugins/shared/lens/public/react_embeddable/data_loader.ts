@@ -151,18 +151,14 @@ export function loadEmbeddableData(
     }
 
     // Print performance data in TSV format for Google Sheets
-    const tsvHeader = 'Measure\t' + measures.map((m) => m.name).join('\t');
-    const tsvDurations = 'Duration (ms)\t' + measures.map((m) => m.duration.toFixed(2)).join('\t');
-    const tsvPercentages =
-      'Percentage\t' +
-      measures
-        .map((m) => {
-          const percentage = totalTime > 0 ? ((m.duration / totalTime) * 100).toFixed(1) : '0.0';
-          return percentage;
-        })
-        .join('\t');
+    let tsvOutput = '';
+    for (let i = 0; i < measures.length; i++) {
+      const measure = measures[i];
+      const percentage = totalTime > 0 ? ((measure.duration / totalTime) * 100).toFixed(1) : '0.0';
+      tsvOutput += `${measure.name}\t${measure.duration.toFixed(2)}\t${percentage}\n`;
+    }
 
-    console.log(`Performance TSV:\n${tsvHeader}\n${tsvDurations}\n${tsvPercentages}`);
+    console.log(`Performance TSV:\nMeasure\tDuration (ms)\tPercentage\n${tsvOutput}`);
 
     performance.clearMarks();
     performance.clearMeasures();
