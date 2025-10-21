@@ -12,9 +12,9 @@ import type {
   ServiceNowActionParams,
   JiraActionParams,
   WebhookActionParams,
-  EmailActionParams,
   SlackApiActionParams,
 } from '@kbn/stack-connectors-plugin/server/connector_types';
+import type { ActionParamsType as EmailActionParams } from '@kbn/connector-schemas/email';
 import type { RuleAction as RuleActionOrig } from '@kbn/alerting-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
 

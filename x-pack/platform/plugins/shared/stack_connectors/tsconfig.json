@@ -49,6 +49,7 @@
     "@kbn/core-http-server-mocks",
     "@kbn/usage-collection-plugin",
     "@kbn/zod",
+    "@kbn/connector-schemas",
   ],
   "exclude": [
     "target/**/*",

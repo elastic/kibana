@@ -47,8 +47,6 @@ export { ConnectorTypeId as JiraConnectorTypeId } from './jira';
 export type { ActionParamsType as JiraActionParams } from './jira';
 export { ServiceNowITSMConnectorTypeId } from './servicenow_itsm';
 export { ServiceNowSIRConnectorTypeId } from './servicenow_sir';
-export { ConnectorTypeId as EmailConnectorTypeId } from './email';
-export type { ActionParamsType as EmailActionParams } from './email';
 export { ConnectorTypeId as IndexConnectorTypeId } from './es_index';
 export type { ActionParamsType as IndexActionParams } from './es_index';
 export { ConnectorTypeId as PagerDutyConnectorTypeId } from './pagerduty';

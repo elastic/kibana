@@ -88,7 +88,8 @@
     "@kbn/traced-es-client",
     "@kbn/licensing-types",
     "@kbn/utility-types-jest",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/connector-schemas"
   ],
   "exclude": ["target/**/*"]
 }

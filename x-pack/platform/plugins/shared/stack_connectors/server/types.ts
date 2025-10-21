@@ -13,8 +13,6 @@ export type { SwimlanePublicConfigurationType } from './connector_types/swimlane
 export type {
   CasesWebhookConnectorTypeId,
   CasesWebhookActionParams,
-  EmailConnectorTypeId,
-  EmailActionParams,
   IndexConnectorTypeId,
   IndexActionParams,
   PagerDutyConnectorTypeId,

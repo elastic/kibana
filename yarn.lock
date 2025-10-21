@@ -4657,6 +4657,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/connector-schemas@link:src/platform/packages/shared/kbn-connector-schemas":
+  version "0.0.0"
+  uid ""
+
 "@kbn/console-plugin@link:src/platform/plugins/shared/console":
   version "0.0.0"
   uid ""

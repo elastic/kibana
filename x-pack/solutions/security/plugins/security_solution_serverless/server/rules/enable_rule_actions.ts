@@ -8,8 +8,9 @@ import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys'
 import {
   IndexConnectorTypeId,
   SlackWebhookConnectorTypeId,
-  EmailConnectorTypeId,
 } from '@kbn/stack-connectors-plugin/server/connector_types';
+import { CONNECTOR_ID as EmailConnectorTypeId } from '@kbn/connector-schemas/email';
+
 import { EnabledActionTypes } from '@kbn/actions-plugin/server/config';
 import type { ProductFeatureKeys } from '@kbn/security-solution-features';
 
