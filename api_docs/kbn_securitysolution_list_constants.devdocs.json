@@ -751,10 +751,6 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/tasks/security_lists.test.ts"
           },
           {
