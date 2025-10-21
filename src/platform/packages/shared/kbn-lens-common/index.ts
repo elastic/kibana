@@ -217,6 +217,11 @@ export type {
   PartitionChartType,
   EmptySizeRatiosType,
 } from './lens/visualizations/partition/types';
+export type {
+  ChoroplethChartState,
+  ChoroplethChartConfig,
+  ChoroplethChartProps,
+} from './lens/visualizations/region_map/types';
 export type { LensTagcloudState, LensTagcloudConfig } from './lens/visualizations/tagcloud/types';
 export type {
   YAxisMode,
