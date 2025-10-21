@@ -22,6 +22,7 @@ import type {
 } from '@kbn/lens-common';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../utils';
 import { MessageList } from './message_list';
+// import type { DatasourceStates } from '../../../state_management';
 import {
   useLensDispatch,
   updateVisualizationState,
@@ -32,18 +33,18 @@ import {
   selectVisualization,
   selectVisualizationState,
 } from '../../../state_management';
+// import type { LensInspector } from '../../../lens_inspector_service';
 import { WorkspaceTitle } from './title';
-import { useEditorFrameService } from '../../editor_frame_service_context';
 
 export const AUTO_APPLY_DISABLED_STORAGE_KEY = 'autoApplyDisabled';
 
 export interface WorkspacePanelWrapperProps {
   children: React.ReactNode | React.ReactNode[];
-  framePublicAPI: FramePublicAPI;
-  visualizationId: string | null;
-  datasourceStates: DatasourceStates;
+  // framePublicAPI: FramePublicAPI;
+  // visualizationId: string | null;
+  // datasourceStates: DatasourceStates;
   isFullscreen: boolean;
-  lensInspector: LensInspector;
+  // lensInspector: LensInspector;
   getUserMessages: UserMessagesGetter;
   displayOptions: ChartSizeSpec | undefined;
 }
@@ -135,14 +136,10 @@ export function VisualizationToolbar(props: {
 
 export function WorkspacePanelWrapper({
   children,
-  framePublicAPI,
-  visualizationId,
   isFullscreen,
   getUserMessages,
   displayOptions,
 }: WorkspacePanelWrapperProps) {
-  const { visualizationMap } = useEditorFrameService();
-
   const dispatchLens = useLensDispatch();
 
   const euiThemeContext = useEuiTheme();
@@ -151,7 +148,6 @@ export function WorkspacePanelWrapper({
   const changesApplied = useLensSelector(selectChangesApplied);
   const autoApplyEnabled = useLensSelector(selectAutoApplyEnabled);
 
-  const activeVisualization = visualizationId ? visualizationMap[visualizationId] : null;
   const userMessages = getUserMessages('toolbar');
 
   const aspectRatio = displayOptions?.aspectRatio;
@@ -212,17 +208,6 @@ export function WorkspacePanelWrapper({
             `}
             responsive={false}
           >
-            {!isFullscreen && (
-              <EuiFlexItem>
-                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
-                  <VisualizationToolbar
-                    activeVisualization={activeVisualization}
-                    framePublicAPI={framePublicAPI}
-                  />
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            )}
-
             <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                 {userMessages?.length ? (

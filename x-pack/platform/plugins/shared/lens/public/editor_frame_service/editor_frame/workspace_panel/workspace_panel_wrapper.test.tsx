@@ -39,11 +39,11 @@ describe('workspace_panel_wrapper', () => {
         datasourceMap={{}}
       >
         <WorkspacePanelWrapper
-          framePublicAPI={mockFrameAPI}
-          visualizationId="myVis"
-          datasourceStates={{}}
+          // framePublicAPI={mockFrameAPI}
+          // visualizationId="myVis"
+          // datasourceStates={{}}
           isFullscreen={false}
-          lensInspector={{} as unknown as LensInspector}
+          // lensInspector={{} as unknown as LensInspector}
           getUserMessages={() => []}
           children={<span />}
           displayOptions={undefined}

@@ -678,11 +678,11 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
   return (
     <WorkspacePanelWrapper
-      framePublicAPI={framePublicAPI}
-      visualizationId={visualization.activeId}
-      datasourceStates={datasourceStates}
+      // framePublicAPI={framePublicAPI}
+      // visualizationId={visualization.activeId}
+      // datasourceStates={datasourceStates}
       isFullscreen={isFullscreen}
-      lensInspector={lensInspector}
+      // lensInspector={lensInspector}
       getUserMessages={getUserMessages}
       displayOptions={chartSizeSpec}
     >
