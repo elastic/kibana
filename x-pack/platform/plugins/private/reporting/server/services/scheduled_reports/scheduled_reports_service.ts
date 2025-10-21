@@ -120,10 +120,7 @@ export class ScheduledReportsService {
     }
 
     if (!(await this._canUpdateReport({ id, user }))) {
-      throw this.responseFactory.customError({
-        statusCode: 404,
-        body: 'Not found.',
-      });
+      this._throw404({ user, id, action: ScheduledReportAuditAction.UPDATE });
     }
 
     try {
@@ -137,11 +134,17 @@ export class ScheduledReportsService {
         id
       );
 
+      this.auditLog({
+        action: ScheduledReportAuditAction.UPDATE,
+        id,
+        name: updatedReport.attributes.title,
+      });
+
       return transformSingleResponse(this.logger, updatedReport);
     } catch (error) {
       throw this.responseFactory.customError({
         statusCode: 500,
-        body: `Error listing scheduled reports: ${error.message}`,
+        body: `Error updating scheduled reports: ${error.message}`,
       });
     }
   }
@@ -602,5 +605,29 @@ export class ScheduledReportsService {
     );
 
     return reportToUpdate.attributes.createdBy === username;
+  }
+
+  private _throw404({
+    user,
+    id,
+    action,
+  }: {
+    user: ReportingUser;
+    id: string;
+    action: ScheduledReportAuditAction;
+  }) {
+    const username = this.getUsername(user);
+    this.logger.warn(
+      `User "${username}" attempted to update scheduled report "${id}" without sufficient privileges.`
+    );
+    this.auditLog({
+      action,
+      id,
+      error: new Error('Not found.'),
+    });
+    throw this.responseFactory.customError({
+      statusCode: 404,
+      body: 'Not found.',
+    });
   }
 }
