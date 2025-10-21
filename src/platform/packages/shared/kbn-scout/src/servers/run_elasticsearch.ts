@@ -133,7 +133,7 @@ async function startEsNode({
     ssl: config.ssl,
     log,
     writeLogsToPath: logsDir ? resolve(logsDir, `es-cluster-${name}.log`) : undefined,
-    basePath: resolve(REPO_ROOT, '.es'),
+    basePath: resolve(REPO_ROOT, '.es', SERVICE_NAMESPACE),
     nodes: [
       {
         name,

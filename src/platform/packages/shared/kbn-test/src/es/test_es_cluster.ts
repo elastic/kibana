@@ -39,7 +39,7 @@ interface TestEsClusterNodesOptions {
 }
 
 export interface ICluster {
-  ports: number[];
+  ports: [number, number | string][];
   nodes: Cluster[];
   getStartTimeout: () => number;
   start: () => Promise<void>;
@@ -180,25 +180,42 @@ export function createTestEsCluster<
     esJavaOpts,
     ssl,
     clusterName: customClusterName = `test-cluster`,
-    transportPort,
+    transportPort: initialTransportPort,
     onEarlyExit,
     files,
   } = options;
 
   const clusterName = `es-${SERVICE_NAMESPACE}-${customClusterName}`;
 
+  const transportPort = initialTransportPort ?? esTestConfig.getTransportPort();
+
+  const hasDataArchive = !!dataArchive || nodes.some((node) => !!node.dataArchive);
+
+  const ports: [number, number | string][] = [];
+
+  for (let i = 0; i < nodes.length; i++) {
+    // If this isn't the first node, we increment the port of the last node
+    // if transportPort is a range (e.g. 9300-9400) we leave as is
+    const transportPortForNode =
+      typeof transportPort === 'string' && transportPort.includes(':')
+        ? transportPort
+        : Number(transportPort) + i;
+
+    ports.push([port + i, transportPortForNode]);
+  }
+
   const defaultEsArgs = [
     `cluster.name=${clusterName}`,
-    `transport.port=${transportPort ?? esTestConfig.getTransportPort()}`,
     // For multi-node clusters, we make all nodes master-eligible by default.
     ...(nodes.length > 1
       ? [
           'discovery.type=multi-node',
-          `cluster.initial_master_nodes=${nodes.map((n) => n.name).join(',')}`,
+          ...(!hasDataArchive
+            ? [`cluster.initial_master_nodes=${nodes.map((n) => n.name).join(',')}`]
+            : []),
         ]
       : ['discovery.type=single-node']),
   ];
-
   const esArgs = assignArgs(defaultEsArgs, customEsArgs);
 
   // Use 'trial' license if FIPS mode is enabled, otherwise use the provided license or default to 'basic'
@@ -215,15 +232,13 @@ export function createTestEsCluster<
     resources: files,
   };
 
-  return new (class TestCluster {
-    ports: number[] = [];
+  class TestCluster {
+    ports = ports.concat();
     nodes: Cluster[] = [];
 
     constructor() {
       for (let i = 0; i < nodes.length; i++) {
         this.nodes.push(new Cluster({ log, ssl }));
-        // If this isn't the first node, we increment the port of the last node
-        this.ports.push(i === 0 ? port : port + i);
       }
     }
 
@@ -259,7 +274,7 @@ export function createTestEsCluster<
         }
         await firstNode.runServerless({
           basePath,
-          esArgs: customEsArgs,
+          esArgs: assignArgs(customEsArgs, [`transport.port=${ports[0][1]}`]),
           dataPath: `stateless-${clusterName}`,
           ...esServerlessOptions,
           port,
@@ -283,10 +298,24 @@ export function createTestEsCluster<
 
       for (let i = 0; i < this.nodes.length; i++) {
         const node = nodes[i];
-        const nodePort = this.ports[i];
-        const overriddenArgs = [`node.name=${node.name}`, `http.port=${nodePort}`];
+        const [nodePort, nodeTransportPort] = ports[i];
+
+        const seedHosts = nodes.flatMap((n, idx) => {
+          if (idx === i) {
+            return [];
+          }
+          return [`127.0.0.1:${ports[idx][1]}`];
+        });
+
+        const overriddenArgs = [
+          `node.name=${node.name}`,
+          `http.port=${nodePort}`,
+          `transport.port=${nodeTransportPort}`,
+          ...(seedHosts.length ? [`discovery.seed_hosts=${seedHosts.join(',')}`] : []),
+        ];
 
         const archive = node.dataArchive || dataArchive;
+
         if (archive) {
           extractDirectoryPromises.push(async () => {
             const nodeDataDirectory = node.dataArchive ? `data-${node.name}` : 'data';
@@ -318,9 +347,8 @@ export function createTestEsCluster<
       }
 
       await Promise.all(extractDirectoryPromises.map((extract) => extract()));
-      for (const start of nodeStartPromises) {
-        await start();
-      }
+
+      await Promise.all(nodeStartPromises.map((start) => start()));
     }
 
     async stop() {
@@ -441,9 +469,11 @@ export function createTestEsCluster<
      * in this list.
      */
     getHostUrls(): string[] {
-      return this.ports.map((p) => format({ ...esTestConfig.getUrlParts(), port: p }));
+      return ports.map((p) => format({ ...esTestConfig.getUrlParts(), port: p[0] }));
     }
-  })() as EsTestCluster<Options>;
+  }
+
+  return new TestCluster() as EsTestCluster<Options>;
 }
 
 /**
