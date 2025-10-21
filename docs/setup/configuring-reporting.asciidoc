@@ -20,7 +20,7 @@ to make sure your hosts support our latest build of Chromium. For the most relia
 installing {kib} using <<docker, Docker>>, or using <<set-up-on-cloud, Elastic Cloud>>.
 ============
 
-For security, you grant users access to the {report-features} and secure the reporting endpoints with TLS/SSL encryption. Additionally, you can install graphical packages into the operating systemto enable the {kib} server to have screenshotting capabilities.
+For security, you grant users access to the {report-features} and secure the reporting endpoints with TLS/SSL encryption. Additionally, you can install graphical packages into the operating system to enable the {kib} server to have screenshotting capabilities.
 
 [NOTE]
 ============
