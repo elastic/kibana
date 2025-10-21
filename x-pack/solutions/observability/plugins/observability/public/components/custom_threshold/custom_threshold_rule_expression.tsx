@@ -40,6 +40,8 @@ import type { SearchBarProps } from '@kbn/unified-search-plugin/public';
 
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import moment from 'moment';
+import type { MinimumTimeSize } from '@kbn/triggers-actions-ui-plugin/public/common/expression_items/for_the_last';
 import { useKibana } from '../../utils/kibana_react';
 import {
   Aggregators,
@@ -72,7 +74,7 @@ export const defaultExpression: MetricExpression = {
     },
   ],
   threshold: [100],
-  timeSize: 1,
+  timeSize: 5,
   timeUnit: 'm',
 };
 
@@ -97,7 +99,7 @@ export default function Expressions(props: Props) {
     [ruleParams.groupBy]
   );
 
-  const [timeSize, setTimeSize] = useState<number | undefined>(1);
+  const [timeSize, setTimeSize] = useState<number | undefined>(5);
   const [timeUnit, setTimeUnit] = useState<TimeUnitChar | undefined>('m');
   const [dataView, setDataView] = useState<DataView>();
   const [dataViewTimeFieldError, setDataViewTimeFieldError] = useState<string>();
@@ -117,6 +119,12 @@ export default function Expressions(props: Props) {
     }),
     [dataView]
   );
+
+  const showMinimumTimeWarning = useShowMinimumTimeSize({
+    timeSize,
+    timeUnit,
+    minimumTimeSize: { value: 5, unit: 'm' },
+  });
 
   const initSearchSource = async (resetDataView: boolean, thisData: DataPublicPluginStart) => {
     let initialSearchConfiguration = resetDataView ? undefined : ruleParams.searchConfiguration;
@@ -467,6 +475,7 @@ export default function Expressions(props: Props) {
       {!!paramsWarning && (
         <>
           <EuiCallOut
+            announceOnMount
             title={i18n.translate(
               'xpack.observability.customThreshold.rule.alertFlyout.warning.title',
               {
@@ -492,7 +501,12 @@ export default function Expressions(props: Props) {
       </EuiTitle>
       <EuiSpacer size="s" />
       {paramsError && !triggerResetDataView ? (
-        <EuiCallOut color="danger" iconType="warning" data-test-subj="thresholdRuleExpressionError">
+        <EuiCallOut
+          announceOnMount
+          color="danger"
+          iconType="warning"
+          data-test-subj="thresholdRuleExpressionError"
+        >
           <p>
             {i18n.translate('xpack.observability.customThreshold.rule.alertFlyout.error.message', {
               defaultMessage: 'Error fetching search source',
@@ -629,6 +643,7 @@ export default function Expressions(props: Props) {
         onChangeWindowSize={updateTimeSize}
         onChangeWindowUnit={updateTimeUnit}
         display="fullWidth"
+        isTimeLimit={showMinimumTimeWarning}
       />
 
       <EuiSpacer size="m" />
@@ -729,4 +744,37 @@ export default function Expressions(props: Props) {
       <EuiSpacer size="m" />
     </>
   );
+}
+
+interface MinimumTimeSize {
+  value: number;
+  unit: TimeUnitChar;
+}
+
+function useShowMinimumTimeSize({
+  timeSize,
+  timeUnit,
+  minimumTimeSize,
+}: {
+  timeSize?: number;
+  timeUnit?: TimeUnitChar;
+  minimumTimeSize?: MinimumTimeSize;
+}) {
+  const [showMinimumTimeSizeWarning, setShowMinimumTimeSizeWarning] = useState(false);
+
+  useEffect(() => {
+    if (timeSize === undefined || minimumTimeSize === undefined) {
+      return;
+    }
+
+    const currentTimeSize = moment.duration(timeSize, timeUnit).asMilliseconds();
+    const minimumWindowSizeAsMillis = moment
+      .duration(minimumTimeSize.value, minimumTimeSize.unit)
+      .asMilliseconds();
+
+    const shouldShow = currentTimeSize < minimumWindowSizeAsMillis;
+    setShowMinimumTimeSizeWarning(shouldShow);
+  }, [timeSize, timeUnit, minimumTimeSize]);
+
+  return showMinimumTimeSizeWarning;
 }

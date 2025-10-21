@@ -16,7 +16,9 @@ import {
   EuiFormRow,
   EuiFlexItem,
   EuiFieldNumber,
+  EuiCallOut,
 } from '@elastic/eui';
+import type { TimeUnitChar } from '@kbn/response-ops-rule-params/common/utils';
 import { getTimeUnitLabel } from '../lib/get_time_unit_label';
 import type { TIME_UNITS } from '../../application/constants';
 import { getTimeOptions } from '../lib/get_time_options';
@@ -28,6 +30,7 @@ export interface ForLastExpressionProps {
   timeWindowSize?: number;
   timeWindowUnit?: string;
   errors: IErrorObject;
+  isTimeLimit?: boolean;
   onChangeWindowSize: (selectedWindowSize: number | undefined) => void;
   onChangeWindowUnit: (selectedWindowUnit: string) => void;
   popupPosition?:
@@ -60,6 +63,7 @@ export const ForLastExpression = ({
   onChangeWindowSize,
   onChangeWindowUnit,
   popupPosition,
+  isTimeLimit = false,
   description = FOR_LAST_LABEL,
 }: ForLastExpressionProps) => {
   const [alertDurationPopoverOpen, setAlertDurationPopoverOpen] = useState(false);
@@ -134,6 +138,7 @@ export const ForLastExpression = ({
             />
           </EuiFlexItem>
         </EuiFlexGroup>
+        {isTimeLimit && <MinimumTimeSizeWarning />}
       </div>
     </EuiPopover>
   );
@@ -141,3 +146,20 @@ export const ForLastExpression = ({
 
 // eslint-disable-next-line import/no-default-export
 export { ForLastExpression as default };
+
+function MinimumTimeSizeWarning() {
+  const description = i18n.translate('xpack.observability.alertTypes.minimumTimeSize.description', {
+    defaultMessage:
+      'Recommended minimum value is 5 minutes. This is to ensure, that the alert has enough data to evaluate. If you choose a lower values, the alert may not work as expected.',
+  });
+
+  return (
+    <EuiCallOut
+      title={`Value is too low, possible alerting noise`}
+      color="warning"
+      iconType="warning"
+    >
+      <p>{description}</p>
+    </EuiCallOut>
+  );
+}
