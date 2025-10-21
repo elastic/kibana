@@ -26,7 +26,7 @@ const sourceIndexName = 'test_index';
 
 // Failing: See https://github.com/elastic/kibana/issues/237554
 // Failing: See https://github.com/elastic/kibana/issues/237553
-describe.skip(
+describe(
   'Privileged User Monitoring - Index onboarding',
   {
     tags: ['@ess'],
