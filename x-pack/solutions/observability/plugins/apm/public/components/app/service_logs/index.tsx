@@ -7,8 +7,7 @@
 
 import React, { useMemo } from 'react';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { buildEsQuery } from '@kbn/es-query';
-import { getEsQueryConfig } from '@kbn/data-plugin/public';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { CONTAINER_ID, SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
@@ -19,7 +18,7 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 
 export function ServiceLogs() {
   const {
-    services: { logsShared, uiSettings },
+    services: { logsShared },
   } = useKibana();
 
   const { serviceName } = useApmServiceContext();
@@ -65,22 +64,12 @@ export function ServiceLogs() {
     }
 
     try {
-      return [
-        buildEsQuery(
-          undefined,
-          {
-            language: 'kuery',
-            query: kuery,
-          },
-          [],
-          getEsQueryConfig(uiSettings)
-        ),
-      ];
+      return [toElasticsearchQuery(fromKueryExpression(kuery))];
     } catch (err) {
       // Invalid/incomplete query, return empty array to avoid breaking the component
       return [];
     }
-  }, [kuery, uiSettings]);
+  }, [kuery]);
 
   if (
     status === FETCH_STATUS.SUCCESS ||
