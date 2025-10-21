@@ -295,23 +295,27 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
                       enableDragAndDrop={enableDragAndDrop}
                       key={item.id}
                     >
-                      <Tab
-                        item={item}
-                        isSelected={selectedItem?.id === item.id}
-                        isUnsaved={unsavedItemIds?.includes(item.id)}
-                        tabContentId={tabContentId}
-                        tabsSizeConfig={tabsSizeConfig}
-                        services={services}
-                        getTabMenuItems={getTabMenuItems}
-                        getPreviewData={getPreviewData}
-                        onLabelEdited={onLabelEdited}
-                        onSelect={onSelect}
-                        onSelectedTabKeyDown={onSelectedTabKeyDown}
-                        onClose={items.length > 1 ? onClose : undefined} // prevents closing the last tab
-                        enableInlineLabelEditing={enableInlineLabelEditing}
-                        enablePreview={enablePreview}
-                        enableDragAndDrop={enableDragAndDrop}
-                      />
+                      {({ dragHandleProps, isDragging }) => (
+                        <Tab
+                          item={item}
+                          isSelected={selectedItem?.id === item.id}
+                          isUnsaved={unsavedItemIds?.includes(item.id)}
+                          isDragging={isDragging}
+                          dragHandleProps={dragHandleProps}
+                          tabContentId={tabContentId}
+                          tabsSizeConfig={tabsSizeConfig}
+                          services={services}
+                          getTabMenuItems={getTabMenuItems}
+                          getPreviewData={getPreviewData}
+                          onLabelEdited={onLabelEdited}
+                          onSelect={onSelect}
+                          onSelectedTabKeyDown={onSelectedTabKeyDown}
+                          onClose={items.length > 1 ? onClose : undefined} // prevents closing the last tab
+                          enableInlineLabelEditing={enableInlineLabelEditing}
+                          enablePreview={enablePreview}
+                          enableDragAndDrop={enableDragAndDrop}
+                        />
+                      )}
                     </OptionalDraggable>
                   ))}
                 </OptionalDroppable>
@@ -385,7 +389,7 @@ export const OptionalDroppable: FC<DroppableWrapperProps> = ({
 };
 
 interface OptionalDraggableProps {
-  children: React.ReactElement;
+  children: (props: { dragHandleProps?: any; isDragging: boolean }) => React.ReactElement;
   item: TabItem;
   index: number;
   enableDragAndDrop: boolean;
@@ -397,7 +401,9 @@ export const OptionalDraggable = ({
   index,
   enableDragAndDrop,
 }: OptionalDraggableProps) => {
-  if (!enableDragAndDrop) return children;
+  if (!enableDragAndDrop) {
+    return children({ isDragging: false });
+  }
 
   return (
     <EuiDraggable
@@ -408,12 +414,7 @@ export const OptionalDraggable = ({
       hasInteractiveChildren
       customDragHandle="custom"
     >
-      {({ dragHandleProps }, { isDragging }) =>
-        React.cloneElement(children, {
-          dragHandleProps,
-          isDragging,
-        } as React.Attributes)
-      }
+      {({ dragHandleProps }, { isDragging }) => children({ dragHandleProps, isDragging })}
     </EuiDraggable>
   );
 };
