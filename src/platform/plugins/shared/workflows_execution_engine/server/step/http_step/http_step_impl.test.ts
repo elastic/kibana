@@ -44,6 +44,7 @@ describe('HttpStepImpl', () => {
       startStep: jest.fn().mockResolvedValue(undefined),
       finishStep: jest.fn().mockResolvedValue(undefined),
       failStep: jest.fn().mockResolvedValue(undefined),
+      setInput: jest.fn().mockResolvedValue(undefined),
       getCurrentStepState: jest.fn(),
       setCurrentStepState: jest.fn().mockResolvedValue(undefined),
       stepExecutionId: 'test-step-exec-id',
@@ -103,7 +104,7 @@ describe('HttpStepImpl', () => {
       mockContextManager.getContext.mockReturnValue(context as any);
       mockStep.configuration.with.url = '{{baseUrl}}/users';
 
-      const input = httpStep.getInput();
+      const input = httpStep._getInput();
 
       expect(input.url).toBe('https://api.example.com/users');
     });
@@ -121,7 +122,7 @@ describe('HttpStepImpl', () => {
         'Content-Type': 'application/json',
       };
 
-      const input = httpStep.getInput();
+      const input = httpStep._getInput();
 
       expect(input.headers).toEqual({
         Authorization: 'Bearer bearer-token-123',
@@ -144,7 +145,7 @@ describe('HttpStepImpl', () => {
         active: true,
       };
 
-      const input = httpStep.getInput();
+      const input = httpStep._getInput();
 
       expect(input.body).toEqual({
         id: '123',
@@ -163,7 +164,7 @@ describe('HttpStepImpl', () => {
       (mockStep.configuration.with as any).method = undefined;
       (mockStep.configuration.with as any).timeout = undefined;
 
-      const input = httpStep.getInput();
+      const input = httpStep._getInput();
 
       expect(input.method).toBe('GET');
     });
@@ -178,7 +179,7 @@ describe('HttpStepImpl', () => {
       // Use a filter that will throw an error (e.g., accessing undefined property)
       mockStep.configuration.with.url = '{{ nonexistent | upper }}';
 
-      expect(() => httpStep.getInput()).toThrow();
+      expect(() => httpStep._getInput()).toThrow();
     });
 
     it('should throw error when template rendering fails in headers', () => {
@@ -192,7 +193,7 @@ describe('HttpStepImpl', () => {
         Authorization: '{{ invalidFilter | nonExistentFilter }}',
       };
 
-      expect(() => httpStep.getInput()).toThrow();
+      expect(() => httpStep._getInput()).toThrow();
     });
   });
 
@@ -324,7 +325,7 @@ describe('HttpStepImpl', () => {
 
       await httpStep.run();
 
-      expect(mockStepExecutionRuntime.startStep).toHaveBeenCalledWith({
+      expect(mockStepExecutionRuntime.setInput).toHaveBeenCalledWith({
         url: 'https://api.example.com/data',
         method: 'GET',
         headers: {},
@@ -375,8 +376,11 @@ describe('HttpStepImpl', () => {
       // Should not make HTTP request
       expect(mockedAxios).not.toHaveBeenCalled();
 
+      // should start the step once
+      expect(mockStepExecutionRuntime.startStep).toHaveBeenCalled();
+
       // Should start the step with undefined input
-      expect(mockStepExecutionRuntime.startStep).toHaveBeenCalledWith(undefined);
+      expect(mockStepExecutionRuntime.setInput).not.toHaveBeenCalled();
 
       // Should fail the step with a clear error message
       expect(mockStepExecutionRuntime.failStep).toHaveBeenCalledWith(

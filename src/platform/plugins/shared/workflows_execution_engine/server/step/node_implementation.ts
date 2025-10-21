@@ -71,27 +71,26 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
     return this.step.name;
   }
 
-  public getInput(): any {
+  public _getInput(): any {
     return {};
+  }
+
+  public async getInput(): Promise<any> {
+    try {
+      return await this._getInput();
+    } catch (error) {
+      const errorDetails = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to get input for step: ${errorDetails}`);
+    }
   }
 
   public async run(): Promise<void> {
     let input: any;
 
     try {
-      // Wrap in try-catch to handle errors during input preparation
-      input = this.getInput();
-    } catch (error) {
-      await this.stepExecutionRuntime.startStep(undefined);
-      // If input preparation fails, record the error and fail the step
-      const errorDetails = error instanceof Error ? error.message : String(error);
-      await this.stepExecutionRuntime.failStep('Error preparing step inputs: ' + errorDetails);
-      this.workflowExecutionRuntime.navigateToNextNode();
-      return;
-    }
-
-    try {
-      await this.stepExecutionRuntime.startStep(input);
+      await this.stepExecutionRuntime.startStep();
+      input = await this.getInput();
+      await this.stepExecutionRuntime.setInput(input);
       const result = await this._run(input);
 
       // Don't update step execution runtime if abort was initiated

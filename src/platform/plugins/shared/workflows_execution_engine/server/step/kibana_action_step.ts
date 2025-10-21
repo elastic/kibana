@@ -30,7 +30,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
     super(step, stepExecutionRuntime, undefined, workflowRuntime);
   }
 
-  public getInput() {
+  public _getInput() {
     // Get current context for templating
     const context = this.stepExecutionRuntime.contextManager.getContext();
     // Render inputs from 'with' - support both direct step.with and step.configuration.with
