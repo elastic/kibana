@@ -19,6 +19,40 @@ import type {
 } from './types';
 import { processToolResults } from './processors';
 
+// Helper function to extract tool usage from agent result
+const extractToolUsage = (agentResult: {
+  result?: { round?: { steps?: Array<{ type: string; tool_id?: string }> } };
+}): Record<string, number> => {
+  const toolsInvoked: Record<string, number> = {};
+
+  // Helper function to map tool names to telemetry format
+  const mapToolNameToTelemetry = (toolName: string): string => {
+    const toolMapping: Record<string, string> = {
+      'core.security.product_documentation': 'ProductDocumentationTool',
+      'core.security.knowledge_base_retrieval': 'KnowledgeBaseRetrievalTool',
+      'core.security.knowledge_base_write': 'KnowledgeBaseWriteTool',
+      'core.security.open_and_acknowledged_alerts': 'OpenAndAcknowledgedAlertsTool',
+      'core.security.alert_counts': 'AlertCountsTool',
+      'core.security.ask_about_esql': 'AskAboutESQLTool',
+      'core.security.entity_risk_score': 'EntityRiskScoreTool',
+      'core.security.integration_knowledge': 'IntegrationKnowledgeTool',
+      'core.security.security_labs_knowledge': 'SecurityLabsKnowledgeBaseTool',
+    };
+    return toolMapping[toolName] || 'CustomTool';
+  };
+
+  if (agentResult?.result?.round?.steps) {
+    for (const step of agentResult.result.round.steps) {
+      if (step.type === 'tool_call' && step.tool_id) {
+        const telemetryToolName = mapToolNameToTelemetry(step.tool_id);
+        toolsInvoked[telemetryToolName] = (toolsInvoked[telemetryToolName] || 0) + 1;
+      }
+    }
+  }
+
+  return toolsInvoked;
+};
+
 // Helper function to handle streaming execution
 export const executeStreaming = async ({
   onechatServices,
@@ -52,7 +86,7 @@ export const executeStreaming = async ({
     if (isError) {
       telemetry.reportEvent('invoke_assistant_error', {
         actionTypeId,
-        model: 'unknown',
+        model: (request.body as { model?: string }).model || 'unknown',
         errorMessage: finalResponse,
         assistantStreamingEnabled: true,
         isEnabledKnowledgeBase: false,
@@ -157,13 +191,17 @@ export const executeStreaming = async ({
 
       // Report telemetry
       const durationMs = Date.now() - startTime;
+      // Use the helper function for consistency with non-streaming execution
+      const finalToolsInvoked = finalRoundData
+        ? extractToolUsage({ result: { round: finalRoundData } })
+        : toolsInvoked;
       telemetry.reportEvent('invoke_assistant_success', {
         assistantStreamingEnabled: true,
         actionTypeId,
         isEnabledKnowledgeBase,
         durationMs,
-        toolsInvoked,
-        model: 'unknown', // TODO: Get this from the response
+        toolsInvoked: finalToolsInvoked,
+        model: (request.body as { model?: string }).model || 'unknown',
       });
 
       // Apply content references pruning if needed
@@ -257,8 +295,15 @@ export const executeNonStreaming = async ({
 
   // Report telemetry with required fields
   const durationMs = Date.now() - startTime;
-  const toolsInvoked: Record<string, number> = {};
-
+  const toolsInvoked = extractToolUsage(agentResult);
+  console.log('report telemetry ==>', {
+    actionTypeId,
+    model: (request.body as { model?: string }).model,
+    assistantStreamingEnabled: false,
+    isEnabledKnowledgeBase,
+    durationMs,
+    toolsInvoked,
+  });
   telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
     actionTypeId,
     model: (request.body as { model?: string }).model,
