@@ -9,6 +9,7 @@ import type { MlEntityField } from '@kbn/ml-anomaly-utils';
 import type { TypeOf } from '@kbn/config-schema';
 import type {
   singleMetricViewerEmbeddableCustomInputSchema,
+  singleMetricViewerEmbeddableInputSchema,
   singleMetricViewerEmbeddableStateSchema,
   singleMetricViewerEmbeddableUserInputSchema,
 } from '../../../server/embeddable/single_metric_viewer/single_metric_viewer';
@@ -25,4 +26,8 @@ export type SingleMetricViewerEmbeddableCustomInput = TypeOf<
 
 export type SingleMetricViewerEmbeddableState = TypeOf<
   typeof singleMetricViewerEmbeddableStateSchema
+>;
+
+export type SingleMetricViewerEmbeddableInput = TypeOf<
+  typeof singleMetricViewerEmbeddableInputSchema
 >;

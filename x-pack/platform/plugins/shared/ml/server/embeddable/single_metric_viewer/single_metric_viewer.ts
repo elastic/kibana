@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { filterSchema, querySchema, timeRangeSchema } from '@kbn/es-query-server';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
-import { serializedTitlesSchema } from '../schemas';
+import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 
 const baseUserInputProps = schema.object({
   forecastId: schema.maybe(schema.string()),

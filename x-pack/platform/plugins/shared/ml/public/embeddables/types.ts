@@ -19,7 +19,6 @@ import type {
   PublishesTimeRange,
   PublishesWritableTitle,
   PublishesDataViews,
-  SerializedTitles,
 } from '@kbn/presentation-publishing';
 import { type BehaviorSubject } from 'rxjs';
 import type { TypeOf } from '@kbn/config-schema';
@@ -51,7 +50,6 @@ import type {
   anomalySwimlaneEmbeddableCustomInputViewBySchema,
   anomalySwimlaneEmbeddableUserInputSchema,
   anomalySwimlaneInitialInputSchema,
-  singleMetricViewerEmbeddableInputSchema,
 } from '../../server/embeddable/schemas';
 import type {
   MlEntity,
@@ -176,11 +174,6 @@ export interface AnomalyChartsAttachmentApi extends AnomalyChartsApi {
     timeRange$: BehaviorSubject<TimeRange | undefined>;
   };
 }
-
-/** Manual input by the user */
-export type SingleMetricViewerEmbeddableInput = TypeOf<
-  typeof singleMetricViewerEmbeddableInputSchema
->;
 
 /**
  * Persisted state for the Single Metric Embeddable.
