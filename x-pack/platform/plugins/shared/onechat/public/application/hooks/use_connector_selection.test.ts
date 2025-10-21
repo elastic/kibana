@@ -19,22 +19,23 @@ jest.mock('./use_kibana', () => ({
   useKibana: jest.fn(),
 }));
 
-jest.mock('./use_toasts', () => ({
-  useToasts: jest.fn(() => ({
-    addErrorToast: jest.fn(),
-    addSuccessToast: jest.fn(),
-  })),
+jest.mock('react-use/lib/useLocalStorage', () => ({
+  __esModule: true,
+  default: jest.fn(),
 }));
 
 import { useKibana } from './use_kibana';
 import { storageKeys } from '../storage_keys';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseLocalStorage = useLocalStorage as jest.MockedFunction<typeof useLocalStorage>;
 
 describe('useConnectorSelection', () => {
   let mockGetConnectors: jest.Mock;
   let mockUiSettingsGet: jest.Mock;
   let mockConnectors: InferenceConnector[];
+  let localStorageState: { [key: string]: string | undefined };
 
   beforeEach(() => {
     mockConnectors = [
@@ -58,6 +59,19 @@ describe('useConnectorSelection', () => {
     mockGetConnectors = jest.fn().mockResolvedValue(mockConnectors);
     mockUiSettingsGet = jest.fn();
 
+    // Mock localStorage state
+    localStorageState = {};
+    mockUseLocalStorage.mockImplementation((key: string) => {
+      const value = localStorageState[key];
+      const setValue = (newValue: any) => {
+        localStorageState[key] = newValue;
+      };
+      const remove = () => {
+        delete localStorageState[key];
+      };
+      return [value, setValue, remove];
+    });
+
     mockUseKibana.mockReturnValue({
       services: {
         plugins: {
@@ -70,13 +84,10 @@ describe('useConnectorSelection', () => {
         },
       },
     } as any);
-
-    localStorage.clear();
   });
 
   afterEach(() => {
     jest.clearAllMocks();
-    localStorage.clear();
   });
 
   describe('initial loading', () => {
@@ -167,7 +178,7 @@ describe('useConnectorSelection', () => {
         return false;
       });
 
-      localStorage.setItem(storageKeys.lastUsedConnector, 'connector-3');
+      localStorageState[storageKeys.lastUsedConnector] = 'connector-3';
 
       const { result } = renderHook(() => useConnectorSelection());
 
@@ -186,7 +197,7 @@ describe('useConnectorSelection', () => {
         return false;
       });
 
-      localStorage.setItem(storageKeys.lastUsedConnector, 'connector-2');
+      localStorageState[storageKeys.lastUsedConnector] = 'connector-2';
 
       const { result } = renderHook(() => useConnectorSelection());
 
@@ -209,7 +220,7 @@ describe('useConnectorSelection', () => {
         return false;
       });
 
-      localStorage.setItem(storageKeys.lastUsedConnector, 'non-existent-connector');
+      localStorageState[storageKeys.lastUsedConnector] = 'non-existent-connector';
 
       const { result } = renderHook(() => useConnectorSelection());
 
@@ -223,7 +234,7 @@ describe('useConnectorSelection', () => {
     it('should fallback to first connector when stored connector becomes unavailable', async () => {
       mockUiSettingsGet.mockReturnValue(NO_DEFAULT_CONNECTOR);
 
-      localStorage.setItem(storageKeys.lastUsedConnector, 'removed-connector');
+      localStorageState[storageKeys.lastUsedConnector] = 'removed-connector';
 
       const { result } = renderHook(() => useConnectorSelection());
 
@@ -274,7 +285,7 @@ describe('useConnectorSelection', () => {
         return false;
       });
 
-      localStorage.setItem(storageKeys.lastUsedConnector, 'connector-3');
+      localStorageState[storageKeys.lastUsedConnector] = 'connector-3';
 
       const { result } = renderHook(() => useConnectorSelection());
 
@@ -333,7 +344,7 @@ describe('useConnectorSelection', () => {
         result.current.selectConnector('connector-3');
       });
 
-      expect(localStorage.getItem(storageKeys.lastUsedConnector)).toBeNull();
+      expect(localStorageState[storageKeys.lastUsedConnector]).toBeUndefined();
     });
   });
 
@@ -352,26 +363,7 @@ describe('useConnectorSelection', () => {
       });
 
       expect(result.current.selectedConnector).toBe('connector-2');
-      expect(localStorage.getItem(storageKeys.lastUsedConnector)).toBe('connector-2');
-    });
-
-    it('should handle localStorage read errors gracefully', async () => {
-      mockUiSettingsGet.mockReturnValue(NO_DEFAULT_CONNECTOR);
-
-      const originalGetItem = localStorage.getItem;
-      localStorage.getItem = jest.fn(() => {
-        throw new Error('Storage access denied');
-      });
-
-      const { result } = renderHook(() => useConnectorSelection());
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
-
-      expect(result.current.selectedConnector).toBe('connector-1');
-
-      localStorage.getItem = originalGetItem;
+      expect(localStorageState[storageKeys.lastUsedConnector]).toBe('connector-2');
     });
   });
 
@@ -481,7 +473,7 @@ describe('useConnectorSelection', () => {
 
     it('should maintain selection stability across re-renders', async () => {
       mockUiSettingsGet.mockReturnValue(NO_DEFAULT_CONNECTOR);
-      localStorage.setItem(storageKeys.lastUsedConnector, 'connector-2');
+      localStorageState[storageKeys.lastUsedConnector] = 'connector-2';
 
       const { result, rerender } = renderHook(() => useConnectorSelection());
 
@@ -513,7 +505,7 @@ describe('useConnectorSelection', () => {
       });
 
       expect(result.current.selectedConnector).toBe('connector-3');
-      expect(localStorage.getItem(storageKeys.lastUsedConnector)).toBe('connector-3');
+      expect(localStorageState[storageKeys.lastUsedConnector]).toBe('connector-3');
     });
   });
 });

@@ -7,14 +7,13 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import type { InferenceConnector } from '@kbn/inference-common';
-import { i18n } from '@kbn/i18n';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
 } from '@kbn/management-settings-ids';
 import { useKibana } from './use_kibana';
-import { useToasts } from './use_toasts';
 import { storageKeys } from '../storage_keys';
 
 const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR'; // TODO: Import from gen-ai-settings-plugin (package) once available
@@ -36,12 +35,15 @@ export function useConnectorSelection(): UseConnectorSelectionResult {
       uiSettings,
     },
   } = useKibana();
-  const { addErrorToast } = useToasts();
 
   const [connectors, setConnectors] = useState<InferenceConnector[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [userSelectedConnector, setUserSelectedConnector] = useState<string | null>(null);
+
+  const [lastUsedConnector, setLastUsedConnector] = useLocalStorage<string>(
+    storageKeys.lastUsedConnector
+  );
 
   const defaultConnector = uiSettings?.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
   const defaultConnectorOnly = uiSettings?.get<boolean>(
@@ -51,32 +53,6 @@ export function useConnectorSelection(): UseConnectorSelectionResult {
 
   const isConnectorSelectionRestricted =
     defaultConnectorOnly && defaultConnector !== NO_DEFAULT_CONNECTOR;
-
-  const getLastUsedConnector = useCallback((): string | null => {
-    try {
-      return localStorage.getItem(storageKeys.lastUsedConnector);
-    } catch {
-      return null;
-    }
-  }, []);
-
-  const setLastUsedConnector = useCallback(
-    (connectorId: string) => {
-      try {
-        localStorage.setItem(storageKeys.lastUsedConnector, connectorId);
-      } catch (err) {
-        addErrorToast({
-          title: i18n.translate('xpack.onechat.connectorSelection.saveErrorTitle', {
-            defaultMessage: 'Failed to save connector selection',
-          }),
-          text: i18n.translate('xpack.onechat.connectorSelection.saveErrorMessage', {
-            defaultMessage: 'Error when saving connector preference',
-          }),
-        });
-      }
-    },
-    [addErrorToast]
-  );
 
   const selectedConnector = useMemo(() => {
     // If admin restricted to default only, always use default
@@ -90,9 +66,8 @@ export function useConnectorSelection(): UseConnectorSelectionResult {
     }
 
     // Check localStorage first
-    const storedConnector = getLastUsedConnector();
-    if (storedConnector && connectors.some((c) => c.connectorId === storedConnector)) {
-      return storedConnector;
+    if (lastUsedConnector && connectors.some((c) => c.connectorId === lastUsedConnector)) {
+      return lastUsedConnector;
     }
 
     // Fall back to default connector if set
@@ -107,7 +82,7 @@ export function useConnectorSelection(): UseConnectorSelectionResult {
     defaultConnector,
     connectors,
     userSelectedConnector,
-    getLastUsedConnector,
+    lastUsedConnector,
   ]);
 
   // Load connectors
