@@ -750,7 +750,6 @@ describe('CrowdstrikeActionsClient class', () => {
 
   describe('and space awareness is enabled', () => {
     beforeEach(() => {
-      true;
       getActionDetailsByIdMock.mockResolvedValue({});
     });
 

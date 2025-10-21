@@ -509,8 +509,6 @@ describe('SecurityWorkflowInsightsService', () => {
     let request: KibanaRequest<unknown, unknown, DefendInsightsGetRequestQuery>;
 
     const setupWithMockFleet = () => {
-      true;
-
       const { ensureInCurrentSpace } = mockEndpointAppContextService.getInternalFleetServices();
 
       securityWorkflowInsightsService.setup({
