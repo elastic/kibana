@@ -24037,7 +24037,7 @@ paths:
           name: product_name
   /api/fleet/agent_policies/{agentPolicyId}/download:
     get:
-      description: 'Download an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read AND fleet-setup.'
+      description: 'Download an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-setup.'
       operationId: get-fleet-agent-policies-agentpolicyid-download
       parameters:
         - in: path
@@ -29692,6 +29692,8 @@ paths:
                               type: array
                             installed_kibana_space_id:
                               type: string
+                            is_rollback_ttl_expired:
+                              type: boolean
                             latest_executed_state:
                               additionalProperties: true
                               type: object
@@ -30925,6 +30927,8 @@ paths:
                             type: array
                           installed_kibana_space_id:
                             type: string
+                          is_rollback_ttl_expired:
+                            type: boolean
                           latest_executed_state:
                             additionalProperties: true
                             type: object
@@ -31587,6 +31591,8 @@ paths:
                             type: array
                           installed_kibana_space_id:
                             type: string
+                          is_rollback_ttl_expired:
+                            type: boolean
                           latest_executed_state:
                             additionalProperties: true
                             type: object
@@ -33551,7 +33557,7 @@ paths:
           name: product_name
   /api/fleet/kubernetes:
     get:
-      description: '[Required authorization] Route required privileges: fleet-agent-policies-read AND fleet-setup.'
+      description: '[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-setup.'
       operationId: get-fleet-kubernetes
       parameters:
         - in: query
@@ -33609,7 +33615,7 @@ paths:
           name: product_name
   /api/fleet/kubernetes/download:
     get:
-      description: '[Required authorization] Route required privileges: fleet-agent-policies-read AND fleet-setup.'
+      description: '[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-setup.'
       operationId: get-fleet-kubernetes-download
       parameters:
         - in: query
@@ -52722,6 +52728,8 @@ paths:
                                                                     nullable: true
                                                                   - not: {}
                                                               type: array
+                                                            - items: {}
+                                                              type: array
                                                             - {}
                                                         type: object
                                                       - anyOf:
@@ -56265,6 +56273,8 @@ paths:
                                                                       - 'null'
                                                                     nullable: true
                                                                   - not: {}
+                                                              type: array
+                                                            - items: {}
                                                               type: array
                                                             - {}
                                                         type: object
@@ -59992,6 +60002,8 @@ paths:
                                                     nullable: true
                                                   - not: {}
                                               type: array
+                                            - items: {}
+                                              type: array
                                             - {}
                                         type: object
                                       - anyOf:
@@ -61637,6 +61649,8 @@ paths:
                                                       - 'null'
                                                     nullable: true
                                                   - not: {}
+                                              type: array
+                                            - items: {}
                                               type: array
                                             - {}
                                         type: object
@@ -68435,6 +68449,35 @@ components:
       required:
         - id
         - type
+    Security_AI_Assistant_API_BaseInterruptResumeValue:
+      description: The basis of an interrupt resume value
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_InterruptType'
+          description: Type of the resume value
+          example: SELECT_OPTION
+      required:
+        - type
+    Security_AI_Assistant_API_BaseInterruptValue:
+      description: The basis of an agent interrupt
+      type: object
+      properties:
+        expired:
+          description: Whether the interrupt has expired and can no longer be resumed.
+          example: false
+          type: boolean
+        threadId:
+          description: Thread ID of the graph execution that produced this message.
+          example: <UUID>
+          type: string
+        type:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_InterruptType'
+          description: Type of the interrupt
+          example: SELECT_OPTION
+      required:
+        - type
+        - threadId
     Security_AI_Assistant_API_BulkCrudActionSummary:
       type: object
       properties:
@@ -69054,6 +69097,65 @@ components:
           - fieldType
           - description
       type: array
+    Security_AI_Assistant_API_InputTextInterruptResumeValue:
+      allOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_BaseInterruptResumeValue'
+        - type: object
+          properties:
+            type:
+              enum:
+                - INPUT_TEXT
+              example: INPUT_TEXT
+              type: string
+            value:
+              description: Text value used to resume the graph execution with.
+              example: .logs*
+              type: string
+          required:
+            - value
+            - type
+      description: A resume value for input text
+    Security_AI_Assistant_API_InputTextInterruptValue:
+      allOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_BaseInterruptValue'
+        - type: object
+          properties:
+            description:
+              description: Description of action required
+              example: What is the index you would like to use for the query.
+              type: string
+            placeholder:
+              description: Placeholder text for the input field
+              example: Enter index pattern here...
+              type: string
+            type:
+              enum:
+                - INPUT_TEXT
+              example: INPUT_TEXT
+              type: string
+          required:
+            - type
+      description: Interrupt that requests user to provide text input
+    Security_AI_Assistant_API_InterruptResumeValue:
+      description: Union of the interrupt resume values
+      oneOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_SelectOptionInterruptResumeValue'
+          additionalProperties: false
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_InputTextInterruptResumeValue'
+          additionalProperties: false
+    Security_AI_Assistant_API_InterruptType:
+      description: The type of interrupt
+      enum:
+        - SELECT_OPTION
+        - INPUT_TEXT
+      type: string
+    Security_AI_Assistant_API_InterruptValue:
+      description: Union of the interrupt values
+      oneOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_SelectOptionInterruptValue'
+          additionalProperties: false
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_InputTextInterruptValue'
+          additionalProperties: false
     Security_AI_Assistant_API_KnowledgeBaseEntryBulkActionSkipReason:
       description: Reason why a Knowledge Base Entry was skipped during the bulk action.
       enum:
@@ -69333,6 +69435,12 @@ components:
         contentReferences:
           $ref: '#/components/schemas/Security_AI_Assistant_API_ContentReferences'
           description: Data referred to by the message content.
+        interruptResumeValue:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_InterruptResumeValue'
+          description: When the agent is resumed after an interrupt, this field is populated with the details of the resume value.
+        interruptValue:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_InterruptValue'
+          description: When the agent is interrupted (for example, when user input is required), this field is populated with the details of the interrupt. Messages containing interruptValues in the metadata are excluded from the LLM context.
     Security_AI_Assistant_API_MessageRole:
       description: Message role.
       enum:
@@ -69757,6 +69865,77 @@ components:
           required:
             - type
       description: References the security alerts page
+    Security_AI_Assistant_API_SelectOptionInterruptOption:
+      description: A request approval option
+      type: object
+      properties:
+        buttonColor:
+          enum:
+            - text
+            - accent
+            - accentSecondary
+            - primary
+            - success
+            - warning
+            - danger
+            - neutral
+            - risk
+          example: danger
+          type: string
+        label:
+          example: Option 1
+          type: string
+        value:
+          example: option_1
+          type: string
+      required:
+        - label
+        - value
+    Security_AI_Assistant_API_SelectOptionInterruptResumeValue:
+      allOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_BaseInterruptResumeValue'
+        - type: object
+          properties:
+            type:
+              enum:
+                - SELECT_OPTION
+              example: SELECT_OPTION
+              type: string
+            value:
+              description: The value of the selected option to resume the graph execution with
+              example: option_1
+              type: string
+          required:
+            - value
+            - type
+      description: A request approval resume schema
+    Security_AI_Assistant_API_SelectOptionInterruptValue:
+      allOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_BaseInterruptValue'
+        - type: object
+          properties:
+            description:
+              description: Description of action required
+              example: Select one of the options
+              type: string
+            options:
+              description: List of actions to choose from
+              example:
+                - label: Option 1
+                - label: Option 2
+              items:
+                $ref: '#/components/schemas/Security_AI_Assistant_API_SelectOptionInterruptOption'
+              type: array
+            type:
+              enum:
+                - SELECT_OPTION
+              example: SELECT_OPTION
+              type: string
+          required:
+            - type
+            - description
+            - options
+      description: Interrupt that requests user to select one of the provided options
     Security_AI_Assistant_API_SortOrder:
       description: The order in which results are sorted.
       enum:
@@ -70019,27 +70198,9 @@ components:
         - schedule
         - actions
     Security_Attack_discovery_API_AttackDiscoveryApiScheduleAction:
-      type: object
-      properties:
-        action_type_id:
-          description: The action type used for sending notifications.
-          type: string
-        alerts_filter:
-          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionAlertsFilter'
-        frequency:
-          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionFrequency'
-        group:
-          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionGroup'
-        id:
-          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionId'
-        params:
-          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionParams'
-        uuid:
-          $ref: '#/components/schemas/Security_Attack_discovery_API_NonEmptyString'
-      required:
-        - action_type_id
-        - id
-        - params
+      oneOf:
+        - $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleGeneralAction'
+        - $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleSystemAction'
     Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionAlertsFilter:
       additionalProperties: true
       type: object
@@ -70135,6 +70296,29 @@ components:
         - unknown
         - warning
       type: string
+    Security_Attack_discovery_API_AttackDiscoveryApiScheduleGeneralAction:
+      type: object
+      properties:
+        action_type_id:
+          description: The action type used for sending notifications.
+          type: string
+        alerts_filter:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionAlertsFilter'
+        frequency:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionFrequency'
+        group:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionGroup'
+        id:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionId'
+        params:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionParams'
+        uuid:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_NonEmptyString'
+      required:
+        - action_type_id
+        - group
+        - id
+        - params
     Security_Attack_discovery_API_AttackDiscoveryApiScheduleParams:
       description: An attack discovery schedule params
       type: object
@@ -70170,6 +70354,22 @@ components:
         - alerts_index_pattern
         - api_config
         - size
+    Security_Attack_discovery_API_AttackDiscoveryApiScheduleSystemAction:
+      type: object
+      properties:
+        action_type_id:
+          description: The action type used for sending notifications.
+          type: string
+        id:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionId'
+        params:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionParams'
+        uuid:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_NonEmptyString'
+      required:
+        - action_type_id
+        - id
+        - params
     Security_Attack_discovery_API_AttackDiscoveryApiScheduleUpdateProps:
       description: An attack discovery schedule update properties
       type: object

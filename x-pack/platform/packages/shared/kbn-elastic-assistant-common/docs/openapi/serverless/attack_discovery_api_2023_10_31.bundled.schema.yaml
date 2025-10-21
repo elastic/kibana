@@ -2558,27 +2558,9 @@ components:
         - schedule
         - actions
     AttackDiscoveryApiScheduleAction:
-      type: object
-      properties:
-        action_type_id:
-          description: The action type used for sending notifications.
-          type: string
-        alerts_filter:
-          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionAlertsFilter'
-        frequency:
-          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionFrequency'
-        group:
-          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionGroup'
-        id:
-          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionId'
-        params:
-          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionParams'
-        uuid:
-          $ref: '#/components/schemas/NonEmptyString'
-      required:
-        - action_type_id
-        - id
-        - params
+      oneOf:
+        - $ref: '#/components/schemas/AttackDiscoveryApiScheduleGeneralAction'
+        - $ref: '#/components/schemas/AttackDiscoveryApiScheduleSystemAction'
     AttackDiscoveryApiScheduleActionAlertsFilter:
       additionalProperties: true
       type: object
@@ -2684,6 +2666,29 @@ components:
         - unknown
         - warning
       type: string
+    AttackDiscoveryApiScheduleGeneralAction:
+      type: object
+      properties:
+        action_type_id:
+          description: The action type used for sending notifications.
+          type: string
+        alerts_filter:
+          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionAlertsFilter'
+        frequency:
+          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionFrequency'
+        group:
+          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionGroup'
+        id:
+          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionId'
+        params:
+          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionParams'
+        uuid:
+          $ref: '#/components/schemas/NonEmptyString'
+      required:
+        - action_type_id
+        - group
+        - id
+        - params
     AttackDiscoveryApiScheduleParams:
       description: An attack discovery schedule params
       type: object
@@ -2719,6 +2724,22 @@ components:
         - alerts_index_pattern
         - api_config
         - size
+    AttackDiscoveryApiScheduleSystemAction:
+      type: object
+      properties:
+        action_type_id:
+          description: The action type used for sending notifications.
+          type: string
+        id:
+          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionId'
+        params:
+          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionParams'
+        uuid:
+          $ref: '#/components/schemas/NonEmptyString'
+      required:
+        - action_type_id
+        - id
+        - params
     AttackDiscoveryApiScheduleUpdateProps:
       description: An attack discovery schedule update properties
       type: object
