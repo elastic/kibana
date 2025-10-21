@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 import { AgentType } from '@kbn/onechat-common';
 import type { AgentCreateRequest, AgentUpdateRequest } from '../../../../../common/agents';
@@ -78,12 +77,16 @@ export const updateRequestToEs = ({
   update: AgentUpdateRequest;
   updateDate: Date;
 }): AgentProperties => {
+  const currentConfig = currentProps.configuration ?? currentProps.config;
+
   const updated: AgentProperties = {
-    ...omit(currentProps, 'configuration'),
-    ...omit(update, 'configuration'),
+    ...currentProps,
+    ...update,
     id: agentId,
+    // Explicitly omit configuration to ensure migration
+    configuration: undefined,
     config: {
-      ...(currentProps.configuration ?? currentProps.config),
+      ...currentConfig,
       ...update.configuration,
     },
     updated_at: updateDate.toISOString(),

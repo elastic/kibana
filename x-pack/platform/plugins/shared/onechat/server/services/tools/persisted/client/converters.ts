@@ -60,7 +60,6 @@ export const updateDocument = ({
   update: ToolTypeUpdateParams;
   updateDate?: Date;
 }): ToolProperties => {
-  // Migration: read from legacy 'configuration' or new 'config', write to 'config'
   const currentConfig = current.configuration ?? current.config;
 
   return {
