@@ -89,6 +89,7 @@ export function getDashboardApi({
   );
 
   const controlGroupManager = initializeControlGroupManager(mergedControlGroupState, getReferences);
+
   const dataLoadingManager = initializeDataLoadingManager(layoutManager.api.children$);
   const dataViewsManager = initializeDataViewsManager(
     controlGroupManager.api.controlGroupApi$,
@@ -235,7 +236,6 @@ export function getDashboardApi({
     dashboardContainerRef$,
     setDashboardContainerRef: (ref: HTMLElement | null) => dashboardContainerRef$.next(ref),
     serializeControls: () => controlGroupManager.internalApi.serializeControlGroup(),
-    untilControlsInitialized: controlGroupManager.internalApi.untilControlsInitialized,
   };
 
   const searchSessionManager = initializeSearchSessionManager(
