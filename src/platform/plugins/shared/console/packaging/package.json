@@ -8,7 +8,7 @@
     "@elastic/eui": "102.2.0",
     "@emotion/css": "^11.11.0",
     "@emotion/react": "^11.0.0",
-    "classnames": "2.2.6",
+    "classnames": "2.5.1",
     "react": "^17",
     "react-markdown": "^6.0.3",
     "react-dom": "~18.2.0",
