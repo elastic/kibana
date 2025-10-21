@@ -296,5 +296,7 @@ function fixBrokenSchemaReferencesAndEnforceStrictValidation(schema: any): any {
 }
 
 export function getStepId(stepName: string): string {
-  return stepName.toLowerCase().replace(/\s+/g, '-');
+  // Using step name as is, don't do any escaping to match the workflow engine behavior
+  // Leaving this function in case we'd to change behaviour in future.
+  return stepName;
 }
