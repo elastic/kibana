@@ -12,8 +12,10 @@ import {
   GCP_SINGLE_ACCOUNT_TEST_SUBJ,
   GCP_INPUT_FIELDS_TEST_SUBJECTS,
 } from '@kbn/cloud-security-posture-common';
+import { TEST_AGENTLESS_PORT } from '@kbn/test';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { setupMockServer } from './mock_agentless_api';
+
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'svlCommonPage', 'cisAddIntegration', 'header']);
 
@@ -29,7 +31,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     let mockApiServer: http.Server;
 
     before(async () => {
-      mockApiServer = mockAgentlessApiService.listen(8089);
+      mockApiServer = mockAgentlessApiService.listen(TEST_AGENTLESS_PORT);
       await pageObjects.svlCommonPage.loginAsAdmin();
       cisIntegration = pageObjects.cisAddIntegration;
       cisIntegrationGcp = pageObjects.cisAddIntegration.cisGcp;

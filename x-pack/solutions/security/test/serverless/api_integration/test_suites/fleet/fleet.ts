@@ -10,6 +10,7 @@ import {
   expectDefaultElasticsearchOutput,
   expectDefaultFleetServer,
 } from '@kbn/test-suites-xpack-platform/serverless/api_integration/services/default_fleet_setup';
+import { TEST_FLEET_HOST, TEST_FLEET_PORT } from '@kbn/test';
 import type { RoleCredentials } from '../../services';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -44,7 +45,7 @@ export default function (ctx: FtrProviderContext) {
         .set(roleAuthc.apiKeyHeader)
         .send({
           name: 'test',
-          host_urls: ['https://localhost:8221'],
+          host_urls: [`https://${TEST_FLEET_HOST}:${TEST_FLEET_PORT + 1}`],
         });
 
       // in a non-serverless environment this would succeed with a 200

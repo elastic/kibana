@@ -6,6 +6,7 @@
  */
 
 import { journey, step, expect, before, after } from '@elastic/synthetics';
+import { TEST_KIBANA_HOST, TEST_KIBANA_PORT } from '@kbn/test';
 import { byTestId } from '../../helpers/utils';
 import {
   addTestMonitor,
@@ -20,7 +21,7 @@ journey(`MonitorManagementList`, async ({ page, params }) => {
   const testMonitor2 = 'Test monitor 2';
   const testMonitor3 = 'Test monitor 3';
 
-  const pageBaseUrl = 'http://localhost:5620/app/synthetics/monitors';
+  const pageBaseUrl = `http://${TEST_KIBANA_HOST}:${TEST_KIBANA_PORT}/app/synthetics/monitors`;
   const searchBarInput = page.locator(
     '[placeholder="Search by name, URL, host, tag, project or location"]'
   );

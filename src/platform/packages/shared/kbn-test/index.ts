@@ -13,7 +13,7 @@ export { KbnClientRequesterError } from './src/kbn_client/kbn_client_requester_e
 export { startServersCli, startServers } from './src/functional_tests/start_servers';
 
 // @internal
-export { runTestsCli, runTests } from './src/functional_tests/run_tests';
+export { runTestsCli, runTests, runTestsCliParallel } from './src/functional_tests/run_tests';
 export {
   runElasticsearch,
   runKibanaServer,
@@ -87,3 +87,20 @@ export { getDockerFileMountPath } from '@kbn/es';
 export const fleetPackageRegistryDockerImage =
   process.env.FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE ||
   'docker.elastic.co/kibana-ci/package-registry-distribution:lite';
+
+export {
+  TEST_ES_PORT,
+  TEST_ES_HOST,
+  TEST_ES_TRANSPORT_PORT,
+  TEST_ES_02_PORT,
+  TEST_ES_02_TRANSPORT_PORT,
+  TEST_ES_03_PORT,
+  TEST_ES_03_TRANSPORT_PORT,
+  TEST_KIBANA_PORT,
+  TEST_KIBANA_HOST,
+  TEST_FLEET_HOST,
+  TEST_FLEET_PORT,
+  TEST_AGENTLESS_HOST,
+  TEST_AGENTLESS_PORT,
+  FLEET_PACKAGE_REGISTRY_PORT,
+} from './src/service_addresses';

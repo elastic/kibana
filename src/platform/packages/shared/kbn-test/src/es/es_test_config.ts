@@ -10,6 +10,8 @@
 import { kibanaPackageJson as pkg } from '@kbn/repo-info';
 import Url from 'url';
 import { systemIndicesSuperuser } from '../kbn';
+import { TEST_ES_PORT, TEST_ES_TRANSPORT_PORT } from '../..';
+import { getUrlParts } from '../get_url_parts';
 
 class EsTestConfig {
   getVersion() {
@@ -33,33 +35,20 @@ class EsTestConfig {
   }
 
   getTransportPort() {
-    return process.env.TEST_ES_TRANSPORT_PORT || '9300-9400';
+    return TEST_ES_TRANSPORT_PORT;
   }
 
   getUrlParts() {
     // Allow setting one complete TEST_ES_URL for Es like https://elastic:changeme@myCloudInstance:9200
     if (process.env.TEST_ES_URL) {
-      const testEsUrl = Url.parse(process.env.TEST_ES_URL);
-      if (!testEsUrl.port) {
-        throw new Error(
-          `process.env.TEST_ES_URL must contain port. given: ${process.env.TEST_ES_URL}`
-        );
-      }
-      return {
-        // have to remove the ":" off protocol
-        protocol: testEsUrl.protocol?.slice(0, -1),
-        hostname: testEsUrl.hostname,
-        port: parseInt(testEsUrl.port, 10),
-        username: testEsUrl.auth?.split(':')[0],
-        password: testEsUrl.auth?.split(':')[1],
-        auth: testEsUrl.auth,
-      };
+      const testEsUrlParts = getUrlParts(process.env.TEST_ES_URL);
+      return testEsUrlParts;
     }
 
     const username = process.env.TEST_ES_USERNAME || systemIndicesSuperuser.username;
     const password = process.env.TEST_ES_PASSWORD || systemIndicesSuperuser.password;
 
-    const port = process.env.TEST_ES_PORT ? parseInt(process.env.TEST_ES_PORT, 10) : 9220;
+    const port = TEST_ES_PORT;
 
     if (Number.isNaN(port)) {
       throw new Error(

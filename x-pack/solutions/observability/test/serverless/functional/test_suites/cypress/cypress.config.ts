@@ -34,7 +34,7 @@ export default defineCypressConfig({
     runMode: 1,
   },
   e2e: {
-    baseUrl: 'https://localhost:5620',
+    baseUrl: `https://localhost:5620`,
     supportFile: './support/e2e.ts',
     specPattern: './e2e/**/*.cy.ts',
   },

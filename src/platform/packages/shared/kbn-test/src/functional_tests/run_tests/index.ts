@@ -9,3 +9,4 @@
 
 export { runTestsCli } from './cli';
 export { runTests } from './run_tests';
+export { runTestsCliParallel } from './parallel/cli_parallel';

@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { resolve } from 'path';
 import Fs from 'fs';
 
 import * as Rx from 'rxjs';
@@ -25,8 +24,7 @@ import { Executor } from 'selenium-webdriver/lib/http';
 // @ts-ignore internal modules are not typed
 import { getLogger } from 'selenium-webdriver/lib/logging';
 import { installDriver } from 'ms-chromium-edge-driver';
-
-import { REPO_ROOT } from '@kbn/repo-info';
+import { mkdtempSync } from 'fs';
 import { FINAL_LOG_ENTRY_PREFIX, pollForLogEntry$ } from './poll_for_log_entry';
 import { createStdoutSocket } from './create_stdout_stream';
 import { preventParallelCalls } from './prevent_parallel_calls';
@@ -49,7 +47,7 @@ const now = Date.now();
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;
 const NO_QUEUE_COMMANDS = ['getLog', 'getStatus', 'newSession', 'quit'];
-const downloadDir = resolve(REPO_ROOT, 'target/functional-tests/downloads');
+const downloadDir = mkdtempSync('functional-tests-download');
 let runtimeEnvVariables: Configuration | undefined;
 
 // ENV variables may be injected dynamically by the test runner CLI script

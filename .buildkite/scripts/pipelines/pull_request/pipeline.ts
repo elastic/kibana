@@ -62,8 +62,9 @@ const getPipeline = (filename: string, removeSteps = true) => {
       return;
     }
 
-    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
+    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/pre_build.yml', false));
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/pick_test_groups.yml'));
+    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml'));
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/scout_tests.yml'));
 
     if (await doAnyChangesMatch([/^src\/platform\/packages\/private\/kbn-handlebars/])) {

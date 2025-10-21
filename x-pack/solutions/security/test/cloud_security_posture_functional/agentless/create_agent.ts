@@ -12,6 +12,7 @@ import {
   AWS_PROVIDER_TEST_SUBJ,
   AWS_SINGLE_ACCOUNT_TEST_SUBJ,
 } from '@kbn/cloud-security-posture-common';
+import { TEST_AGENTLESS_PORT } from '@kbn/test';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_VERSION } from '../constants';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { setupMockServer } from './mock_agentless_api';
@@ -38,7 +39,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     before(async () => {
       cisIntegration = pageObjects.cisAddIntegration;
       cisIntegrationAws = pageObjects.cisAddIntegration.cisAws;
-      mockApiServer = await mockAgentlessApiService.listen(8089); // Start the usage api mock server on port 8081
+      mockApiServer = await mockAgentlessApiService.listen(TEST_AGENTLESS_PORT); // Start the usage api mock server on port 8081
     });
 
     after(async () => {

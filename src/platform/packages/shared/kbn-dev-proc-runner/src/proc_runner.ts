@@ -48,6 +48,10 @@ export class ProcRunner {
     });
   }
 
+  names() {
+    return this.procs.map((proc) => proc.name);
+  }
+
   /**
    *  Start a process, tracking it by `name`
    */

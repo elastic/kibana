@@ -10,6 +10,7 @@ import {
   getKibanaCliLoggers,
   type FtrConfigProviderContext,
   type GenericFtrProviderContext,
+  TEST_FLEET_PORT,
 } from '@kbn/test';
 import { CLOUD_SECURITY_PLUGIN_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
 import {
@@ -76,7 +77,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.fleet.packages.0.name=cloud_security_posture`,
         `--xpack.fleet.packages.0.version=${CLOUD_SECURITY_PLUGIN_VERSION}`,
         // `--xpack.fleet.registryUrl=https://localhost:8080`,
-        `--xpack.fleet.agents.fleet_server.hosts=["https://ftr.kibana:8220"]`,
+        `--xpack.fleet.agents.fleet_server.hosts=["https://ftr.kibana:${TEST_FLEET_PORT}"]`,
         `--xpack.fleet.internal.fleetServerStandalone=true`,
         `--xpack.fleet.internal.registry.kibanaVersionCheckEnabled=false`,
         // Required for telemetry e2e tests

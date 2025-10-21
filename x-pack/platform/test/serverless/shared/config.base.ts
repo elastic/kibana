@@ -15,6 +15,7 @@ import {
   kbnTestConfig,
   kibanaTestSuperuserServerless,
   getDockerFileMountPath,
+  FLEET_PACKAGE_REGISTRY_PORT,
 } from '@kbn/test';
 import { CA_CERT_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
 import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
@@ -32,7 +33,7 @@ export default async () => {
    * will spin up a local docker package registry locally for you
    * if this is defined it takes precedence over the `packageRegistryOverride` variable
    */
-  const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
+  const dockerRegistryPort = FLEET_PACKAGE_REGISTRY_PORT;
 
   const servers = {
     kibana: {

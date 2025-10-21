@@ -21,14 +21,17 @@ import { parseRawFlags, getArgValue, remapPluginPaths } from './kibana_cli_args'
 export async function runKibanaServer(options: {
   procs: ProcRunner;
   config: Config;
+  name?: string;
   installDir?: string;
   extraKbnOpts?: string[];
   logsDir?: string;
   onEarlyExit?: (msg: string) => void;
   inspect?: boolean;
   remote?: boolean;
-}) {
+}): Promise<string[]> {
   const { config, procs } = options;
+  const name = options.name ?? 'ftr';
+
   const runOptions = options.config.get('kbnTestServer.runOptions');
   const installDir = runOptions.alwaysUseSource ? undefined : options.installDir;
   const devMode = !installDir;
@@ -75,7 +78,12 @@ export async function runKibanaServer(options: {
     kbnFlags = remapPluginPaths(kbnFlags, installDir);
   }
 
-  const mainName = (useTaskRunner ? 'kbn-ui' : 'kibana') + (options.remote ? '-remote' : '');
+  const mainName = `${name}-${
+    (useTaskRunner ? 'kbn-ui' : 'kibana') + (options.remote ? '-remote' : '')
+  }`;
+
+  const processNames: string[] = [];
+
   const promises = [
     // main process
     procs.run(mainName, {
@@ -98,9 +106,11 @@ export async function runKibanaServer(options: {
     }),
   ];
 
+  processNames.push(mainName);
+
   if (useTaskRunner) {
     const mainUuid = getArgValue(kbnFlags, 'server.uuid');
-    const tasksProcName = 'kbn-tasks' + (options.remote ? '-remote' : '');
+    const tasksProcName = `${name}-${'kbn-tasks' + (options.remote ? '-remote' : '')}`;
 
     // dedicated task runner
     promises.push(
@@ -124,7 +134,11 @@ export async function runKibanaServer(options: {
         ],
       })
     );
+
+    processNames.push(tasksProcName);
   }
 
   await Promise.all(promises);
+
+  return processNames;
 }

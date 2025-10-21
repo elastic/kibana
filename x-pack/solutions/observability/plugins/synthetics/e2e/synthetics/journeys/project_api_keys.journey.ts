@@ -8,6 +8,7 @@
 import { journey, step, expect, before } from '@elastic/synthetics';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { recordVideo } from '@kbn/observability-synthetics-test-data';
+import { TEST_KIBANA_HOST, TEST_KIBANA_PORT } from '@kbn/test';
 import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 
 journey('ProjectAPIKeys', async ({ page, params }) => {
@@ -34,12 +35,14 @@ journey('ProjectAPIKeys', async ({ page, params }) => {
     });
   });
 
-  step('Go to http://localhost:5620/login?next=%2Fapp%2Fsynthetics%2Fsettings', async () => {
+  step('Go to /login?next=%2Fapp%2Fsynthetics%2Fsettings', async () => {
     await syntheticsApp.navigateToSettings(true);
   });
   step('Click text=Project API Keys', async () => {
     await page.click('text=Project API Keys');
-    expect(page.url()).toBe('http://localhost:5620/app/synthetics/settings/api-keys');
+    expect(page.url()).toBe(
+      `http://${TEST_KIBANA_HOST}:${TEST_KIBANA_PORT}/app/synthetics/settings/api-keys`
+    );
     await page.click('button:has-text("Generate Project API key")');
     await page.click(
       'text=This API key will only be shown once. Please keep a copy for your own records.'
@@ -51,20 +54,26 @@ journey('ProjectAPIKeys', async ({ page, params }) => {
   });
   step('Click text=Log out', async () => {
     await page.click('text=Log out');
-    expect(page.url()).toBe('http://localhost:5620/login?msg=LOGGED_OUT');
+    expect(page.url()).toBe(`http://${TEST_KIBANA_HOST}:${TEST_KIBANA_PORT}/login?msg=LOGGED_OUT`);
     await page.fill('input[name="username"]', 'viewer');
     await page.press('input[name="username"]', 'Tab');
     await page.fill('input[name="password"]', 'changeme');
     await Promise.all([
-      page.waitForNavigation({ url: 'http://localhost:5620/app/home' }),
+      page.waitForNavigation({ url: `http://${TEST_KIBANA_HOST}:${TEST_KIBANA_PORT}/app/home` }),
       page.click('button:has-text("Log in")'),
     ]);
-    await page.goto('http://localhost:5620/app/synthetics/settings/api-keys', {
-      waitUntil: 'networkidle',
-    });
+    await page.goto(
+      `http://${TEST_KIBANA_HOST}:${TEST_KIBANA_PORT}/app/synthetics/settings/api-keys`,
+      {
+        waitUntil: 'networkidle',
+      }
+    );
   });
+
   step('Click text=Synthetics', async () => {
-    expect(page.url()).toBe('http://localhost:5620/app/synthetics/settings/api-keys');
+    expect(page.url()).toBe(
+      `http://${TEST_KIBANA_HOST}:${TEST_KIBANA_PORT}/app/synthetics/settings/api-keys`
+    );
     await page.isDisabled('button:has-text("Generate Project API key")');
   });
 });

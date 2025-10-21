@@ -17,4 +17,6 @@ const num = process.env.CI_PARALLEL_PROCESS_NUMBER
  * is an empty string outside of CI, so it can be safely injected
  * into strings as a prefix
  */
+
+export const CI_PARALLEL_PROCESS_NUMBER = process.env.CI_PARALLEL_PROCESS_NUMBER || '';
 export const CI_PARALLEL_PROCESS_PREFIX = `${job}${num}`;

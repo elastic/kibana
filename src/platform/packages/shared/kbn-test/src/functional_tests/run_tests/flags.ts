@@ -19,7 +19,15 @@ import { EsVersion } from '../../functional_test_runner';
 export type RunTestsOptions = ReturnType<typeof parseFlags>;
 
 export const FLAG_OPTIONS: FlagOptions = {
-  boolean: ['bail', 'logToFile', 'dry-run', 'updateBaselines', 'updateSnapshots', 'updateAll'],
+  boolean: [
+    'bail',
+    'logToFile',
+    'dry-run',
+    'updateBaselines',
+    'updateSnapshots',
+    'updateAll',
+    'pause',
+  ],
   string: [
     'config',
     'journey',
@@ -32,6 +40,7 @@ export const FLAG_OPTIONS: FlagOptions = {
     'include',
     'exclude',
     'writeLogsToPath',
+    'base-path',
   ],
   alias: {
     updateAll: 'u',
@@ -54,6 +63,8 @@ export const FLAG_OPTIONS: FlagOptions = {
     --updateBaselines    Replace baseline screenshots with whatever is generated from the test
     --updateSnapshots    Replace inline and file snapshots with whatever is generated from the test
     --updateAll, -u      Replace both baseline screenshots and snapshots
+    --pause              Pause and wait for a message after starting services before continuing
+    --base-path          The base path for Elasticsearch files (defaults to .es)
   `,
   examples: `
 Run the latest verified, kibana-compatible ES Serverless image:
@@ -87,6 +98,7 @@ export function parseFlags(flags: FlagsReader) {
     esVersion: esVersionString ? new EsVersion(esVersionString) : EsVersion.getDefault(),
     bail: flags.boolean('bail'),
     dryRun: flags.boolean('dry-run'),
+    pause: flags.boolean('pause'),
     updateBaselines: flags.boolean('updateBaselines') || flags.boolean('updateAll'),
     updateSnapshots: flags.boolean('updateSnapshots') || flags.boolean('updateAll'),
     logsDir,
@@ -102,5 +114,6 @@ export function parseFlags(flags: FlagsReader) {
       include: flags.arrayOfPaths('include') ?? [],
       exclude: flags.arrayOfPaths('exclude') ?? [],
     },
+    basePath: flags.string('base-path'),
   };
 }
