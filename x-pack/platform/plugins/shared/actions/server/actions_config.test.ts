@@ -11,6 +11,8 @@ import {
   DEFAULT_MICROSOFT_EXCHANGE_URL,
   DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
   DEFAULT_MICROSOFT_GRAPH_API_URL,
+  MAX_EMAIL_BODY_LENGTH,
+  DEFAULT_EMAIL_BODY_LENGTH,
 } from '../common';
 import {
   getActionsConfigurationUtilities,
@@ -571,8 +573,45 @@ describe('validateEmailAddresses()', () => {
       );
     });
   });
+});
 
-  describe('maximum_body_length', () => {});
+describe('getMaxEmailBodyLength() ', () => {
+  function getAcu(maxEmailBodyLength?: number) {
+    if (maxEmailBodyLength == null) {
+      return getActionsConfigurationUtilities(defaultActionsConfig);
+    }
+
+    return getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      email: {
+        maximum_body_length: maxEmailBodyLength,
+      },
+    });
+  }
+
+  test('default value is as expected', async () => {
+    const acu = getAcu();
+    const actual = acu.getMaxEmailBodyLength();
+    expect(actual).toBe(DEFAULT_EMAIL_BODY_LENGTH);
+  });
+
+  test('value coerced to minimum of range if below', async () => {
+    const acu = getAcu(-100);
+    const actual = acu.getMaxEmailBodyLength();
+    expect(actual).toBe(0);
+  });
+
+  test('value coerced to maximum of range if above', async () => {
+    const acu = getAcu(MAX_EMAIL_BODY_LENGTH + 100);
+    const actual = acu.getMaxEmailBodyLength();
+    expect(actual).toBe(MAX_EMAIL_BODY_LENGTH);
+  });
+
+  test('value within range is passed through', async () => {
+    const acu = getAcu(100);
+    const actual = acu.getMaxEmailBodyLength();
+    expect(actual).toBe(100);
+  });
 });
 
 describe('getMaxAttempts()', () => {
