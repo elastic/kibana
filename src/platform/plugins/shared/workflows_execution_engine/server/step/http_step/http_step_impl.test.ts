@@ -320,8 +320,6 @@ describe('HttpStepImpl', () => {
   });
 
   describe('URL validation', () => {
-    let renderedInput: any;
-
     beforeEach(() => {
       mockContextManager.renderValueAccordingToContext = jest
         .fn()
