@@ -63,6 +63,8 @@
     "@kbn/rison",
     "@kbn/core-chrome-browser",
     "@kbn/management-settings-ids",
-    "@kbn/scout-security"
+    "@kbn/scout-security",
+    "@kbn/license-management-plugin",
+    "@kbn/elastic-assistant-common"
   ]
 }
