@@ -13,6 +13,8 @@ import { GaugeShapes } from '@kbn/expression-gauge-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { LensLayerType as LayerType } from '@kbn/lens-common';
 
+export type { GaugeVisualizationState } from '@kbn/lens-common';
+
 export const LENS_GAUGE_ID = 'lnsGauge';
 
 export const GROUP_ID = {
@@ -21,18 +23,6 @@ export const GROUP_ID = {
   MAX: 'max',
   GOAL: 'goal',
 } as const;
-
-type GaugeState = Omit<GaugeStateOriginal, 'metric' | 'goal' | 'min' | 'max'> & {
-  metricAccessor?: string;
-  minAccessor?: string;
-  maxAccessor?: string;
-  goalAccessor?: string;
-};
-
-export type GaugeVisualizationState = GaugeState & {
-  layerId: string;
-  layerType: LayerType;
-};
 
 export type GaugeExpressionState = GaugeStateOriginal & {
   layerId: string;
