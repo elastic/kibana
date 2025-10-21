@@ -144,19 +144,25 @@ export function loadEmbeddableData(
       if (b.name === 'total') return -1;
       return a.startTime - b.startTime;
     });
-    const totalTime = measures.reduce((sum, m) => sum + m.duration, 0);
 
-    const maxNameLength = Math.max(...measures.map((m) => m.name.length)) + 5;
-    const header = `${'Measure'.padEnd(maxNameLength)} | Duration  | Percentage`;
-    const separator = `${'-'.repeat(maxNameLength)}-|-----------|-----------`;
-    const rows = measures.map((m) => {
-      const percentage = totalTime > 0 ? ((m.duration / totalTime) * 100).toFixed(1) : '0.0';
-      return `${('`' + m.name + '`').padEnd(maxNameLength)} | ${m.duration
-        .toFixed(2)
-        .padStart(7)}ms | ${percentage.padStart(8)}%`;
-    });
+    let totalTime = 0;
+    for (const measure of measures) {
+      totalTime += measure.duration;
+    }
 
-    console.log(`Performance:\n${header}\n${separator}\n${rows.join('\n')}`);
+    // Print performance data in TSV format for Google Sheets
+    const tsvHeader = 'Measure\t' + measures.map((m) => m.name).join('\t');
+    const tsvDurations = 'Duration (ms)\t' + measures.map((m) => m.duration.toFixed(2)).join('\t');
+    const tsvPercentages =
+      'Percentage\t' +
+      measures
+        .map((m) => {
+          const percentage = totalTime > 0 ? ((m.duration / totalTime) * 100).toFixed(1) : '0.0';
+          return percentage;
+        })
+        .join('\t');
+
+    console.log(`Performance TSV:\n${tsvHeader}\n${tsvDurations}\n${tsvPercentages}`);
 
     performance.clearMarks();
     performance.clearMeasures();
