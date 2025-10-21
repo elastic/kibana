@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAst, ESQLCommand, ESQLMessage } from '@kbn/esql-ast';
+import type { ESQLCommand, ESQLMessage } from '@kbn/esql-ast';
 import { EsqlQuery, esqlCommandRegistry, walk } from '@kbn/esql-ast';
 import type {
   ESQLFieldWithMetadata,
@@ -202,7 +202,7 @@ function validateCommand(
   };
 
   if (commandDefinition.methods.validate) {
-    const allErrors = commandDefinition.methods.validate(command, ast, context, callbacks);
+    const allErrors = commandDefinition.methods.validate(command, rootCommands, context, callbacks);
 
     const filteredErrors = allErrors.filter((error) => {
       if (error.errorType === 'semantic' && error.requiresCallback) {
