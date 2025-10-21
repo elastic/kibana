@@ -48,23 +48,26 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
   };
 
   const getInjectedMetadata = () =>
-    browser.execute(() => {
-      const injectedMetadata = document.querySelector('kbn-injected-metadata');
-      // null/hasAttribute check and explicit error for better future troublehsooting
-      // (see https://github.com/elastic/kibana/issues/167142)
-      // The 'kbn-injected-metadata' tag that we're relying on here gets removed
-      // some time after navigation (e.g. to /render/core). It appears that
-      // occasionally this test fails to read the tag before it is removed.
-      if (!injectedMetadata?.hasAttribute('data')) {
-        throw new Error(`'kbn-injected-metadata.data' not found.`);
-      }
-      return JSON.parse(injectedMetadata.getAttribute('data')!);
-    });
-  const getUserSettings = () =>
-    browser.execute(() => {
-      return JSON.parse(document.querySelector('kbn-injected-metadata')!.getAttribute('data')!)
-        .legacyMetadata.uiSettings.user;
-    });
+    retry.tryForTime(5000, () =>
+      browser.execute(() => {
+        const injectedMetadata = document.querySelector('kbn-injected-metadata');
+        // null/hasAttribute check and explicit error for better future troublehsooting
+        // (see https://github.com/elastic/kibana/issues/167142)
+        // The 'kbn-injected-metadata' tag that we're relying on here gets removed
+        // some time after navigation (e.g. to /render/core). It appears that
+        // occasionally this test fails to read the tag before it is removed.
+        if (!injectedMetadata?.hasAttribute('data')) {
+          throw new Error(`'kbn-injected-metadata.data' not found.`);
+        }
+        return JSON.parse(injectedMetadata.getAttribute('data')!);
+      })
+    );
+
+  const getUserSettings = async () => {
+    const injectedMetadata = await getInjectedMetadata();
+    return injectedMetadata.legacyMetadata.uiSettings.user;
+  };
+
   const exists = (selector: string) => testSubjects.exists(selector, { timeout: 5000 });
   const findLoadingMessage = () => testSubjects.find('kbnLoadingMessage', 5000);
   const getRenderingSession = () =>
