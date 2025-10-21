@@ -1227,6 +1227,12 @@ Object {
         "contextWindowLength": Object {
           "type": "number",
         },
+        "headers": Object {
+          "additionalProperties": Object {
+            "type": "string",
+          },
+          "type": "object",
+        },
         "inferenceId": Object {
           "type": "string",
         },
