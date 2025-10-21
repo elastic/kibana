@@ -10,7 +10,7 @@
 import type { MetricArguments as LegacyMetricArguments } from '@kbn/expression-legacy-metric-vis-plugin/common';
 import type { $Values } from '@kbn/utility-types';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-import type { Simplify } from '../../utils';
+import type { Simplify } from '@kbn/chart-expressions-common';
 import type { LensLayerType } from '../types';
 import type { LEGACY_METRIC_LABEL_POSITION } from './constants';
 

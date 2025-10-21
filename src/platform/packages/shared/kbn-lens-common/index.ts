@@ -91,7 +91,7 @@ export type {
   CheckDuplicateTitleOptions,
   CheckDuplicateTitleProps,
   LensSaveResult,
-} from './lens/types';
+} from './types';
 export type {
   FormBasedLayer,
   FormBasedPersistedState,
@@ -112,7 +112,7 @@ export type {
   DatasourceStates,
   DatasourceState,
   TextBasedField,
-} from './lens/datasources/types';
+} from './datasources/types';
 
 export type {
   TermsIndexPatternColumn,
@@ -155,7 +155,7 @@ export type {
   LensConstantContextValues,
   ConstantsIndexPatternColumn,
   OverallMetricIndexPatternColumn,
-} from './lens/datasources/operations';
+} from './datasources/operations';
 export type {
   CategoryDisplayType,
   NumberDisplayType,
@@ -173,7 +173,7 @@ export type {
   TriggerEvent,
   RegisterLibraryAnnotationGroupFunction,
   AxesSettingsConfig,
-} from './lens/visualizations/types';
+} from './visualizations/types';
 export type {
   LensDatatableSortingState,
   LensDatatablePagingState,
@@ -192,37 +192,34 @@ export type {
   LensSortAction,
   LensToggleAction,
   LensPagesizeAction,
-} from './lens/visualizations/datatable/types';
-export type { GaugeAccessors, GaugeVisualizationState } from './lens/visualizations/gauge/types';
-export type {
-  HeatmapPalette,
-  HeatmapVisualizationState,
-} from './lens/visualizations/heatmap/types';
+} from './visualizations/datatable/types';
+export type { GaugeAccessors, GaugeVisualizationState } from './visualizations/gauge/types';
+export type { HeatmapPalette, HeatmapVisualizationState } from './visualizations/heatmap/types';
 export type {
   LegacyMetricState,
   LegacyMetricLabelPositionType,
   LegacyMetricAlignment,
-} from './lens/visualizations/legacy_metric/types';
+} from './visualizations/legacy_metric/types';
 export type {
   ValueFontMode,
   SecondaryTrendType,
   SecondaryTrend,
   MetricVisualizationState,
   MetricVisualizationStateOptionals,
-} from './lens/visualizations/metric/types';
+} from './visualizations/metric/types';
 export type {
   SharedPartitionLayerState,
   LensPartitionLayerState,
   LensPartitionVisualizationState,
   PartitionChartType,
   EmptySizeRatiosType,
-} from './lens/visualizations/partition/types';
+} from './visualizations/partition/types';
 export type {
   ChoroplethChartState,
   ChoroplethChartConfig,
   ChoroplethChartProps,
-} from './lens/visualizations/region_map/types';
-export type { LensTagcloudState, LensTagcloudConfig } from './lens/visualizations/tagcloud/types';
+} from './visualizations/region_map/types';
+export type { LensTagcloudState, LensTagcloudConfig } from './visualizations/tagcloud/types';
 export type {
   YAxisMode,
   SeriesType,
@@ -239,7 +236,7 @@ export type {
   ValidLayer,
   XYState,
   State,
-} from './lens/visualizations/xy/types';
+} from './visualizations/xy/types';
 export type {
   LensEmbeddableInput,
   TypedLensByValueInput,
@@ -276,14 +273,14 @@ export type {
   TypedLensSerializedState,
   LensEmbeddableOutput,
   ESQLVariablesCompatibleDashboardApi,
-} from './lens/embeddable/types';
+} from './embeddable/types';
 export type {
   LensAppLocatorParams,
   MainHistoryLocationState,
   LensShareableState,
   LensAppLocator,
-} from './lens/locator_types';
-export type { NavigateToLensLayer, NavigateToLensContext } from './lens/convert_to_lens_types';
+} from './locator_types';
+export type { NavigateToLensLayer, NavigateToLensContext } from './convert_to_lens_types';
 
 /**
  * Constants are used by both the expression language and the lens code
@@ -292,7 +289,7 @@ export {
   INDEX_PATTERN_TYPE,
   LENS_DOCUMENT_FIELD_NAME,
   LENS_RANGE_MODES,
-} from './lens/datasources/constants';
+} from './datasources/constants';
 export {
   LENS_CATEGORY_DISPLAY,
   LENS_NUMBER_DISPLAY,
@@ -300,7 +297,7 @@ export {
   LENS_LAYER_TYPES,
   LEGEND_SIZE,
   LENS_LEGEND_LAYOUT,
-} from './lens/visualizations/constants';
+} from './visualizations/constants';
 export {
   LENS_DATATABLE_ID,
   LENS_DATATABLE_COLUMN,
@@ -315,7 +312,7 @@ export {
   DEFAULT_ROW_HEIGHT,
   DEFAULT_ROW_HEIGHT_LINES,
   ROW_HEIGHT_LINES_KEYS,
-} from './lens/visualizations/datatable/constants';
+} from './visualizations/datatable/constants';
 export {
   LENS_GAUGE_ID,
   GAUGE_SHAPES,
@@ -325,7 +322,7 @@ export {
   GAUGE_COLOR_MODES,
   LENS_GAUGE_GROUP_ID,
   GAUGE_TITLES_BY_TYPE,
-} from './lens/visualizations/gauge/constants';
+} from './visualizations/gauge/constants';
 export {
   LENS_HEATMAP_ID,
   LENS_HEATMAP_CHART_SHAPES,
@@ -336,13 +333,13 @@ export {
   HEATMAP_GRID_NAME,
   LENS_HEATMAP_DEFAULT_PALETTE_NAME,
   LENS_HEATMAP_DEFAULT_PALETTE_PARAMS,
-} from './lens/visualizations/heatmap/constants';
+} from './visualizations/heatmap/constants';
 export {
   LEGACY_METRIC_LABEL_POSITION,
   LENS_LEGACY_METRIC_DEFAULT_TITLE_POSITION,
   LENS_LEGACY_METRIC_DEFAULT_TITLE_SIZE,
   LENS_LEGACY_METRIC_DEFAULT_TEXT_ALIGNMENT,
-} from './lens/visualizations/legacy_metric/constants';
+} from './visualizations/legacy_metric/constants';
 export {
   LENS_METRIC_ID,
   LENS_METRIC_GROUP_ID,
@@ -354,24 +351,24 @@ export {
   LENS_METRIC_SECONDARY_BASELINE_DEFAULT_VALUE,
   LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS,
   LENS_METRIC_AVAILABLE_METRIC_ICONS,
-} from './lens/visualizations/metric/constants';
+} from './visualizations/metric/constants';
 export {
   PARTITION_CHART_TYPES,
   PARTITION_EMPTY_SIZE_RADIUS,
   PARTITION_LABEL_POSITIONS,
   PARTITION_VALUE_FORMATS,
   LENS_PARTITION_DEFAULT_PERCENT_DECIMALS,
-} from './lens/visualizations/partition/constants';
+} from './visualizations/partition/constants';
 export {
   TAGCLOUD_ORIENTATION,
   TAGCLOUD_SCALE_OPTIONS,
   LENS_TAGCLOUD_DEFAULT_STATE,
-} from './lens/visualizations/tagcloud/constants';
+} from './visualizations/tagcloud/constants';
 export {
   YAxisModes,
   SeriesTypes,
   visualizationSubtypes,
   visualizationTypes,
-} from './lens/visualizations/xy/constants';
-export { LENS_SHARE_STATE_ACTION } from './lens/locator_types';
-export { defaultSeriesType } from './lens/visualizations/xy/types';
+} from './visualizations/xy/constants';
+export { LENS_SHARE_STATE_ACTION } from './locator_types';
+export { defaultSeriesType } from './visualizations/xy/types';
