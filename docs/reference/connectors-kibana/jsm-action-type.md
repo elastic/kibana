@@ -163,30 +163,32 @@ Use the [Action configuration settings](/reference/configuration-reference/alert
 
 After obtaining an Jira Service Management instance, configure the API integration. For details, refer to the [Jira Service Management documentation](https://support.atlassian.com/jira-service-management-cloud/docs/set-up-an-api-integration/#Set-up-the-integration).
 
-Go to the `Operations` > `Overview` dashboard, then select the appropriate team.
+1. Go to the **Operations** > **Overview** dashboard, then select the appropriate team.
 
-:::{image} ../images/jsm-operations-overview.png
-:alt: Jira Service Management Operations overview
-:screenshot:
-:::
+   :::{image} ../images/jsm-operations-overview.png
+   :alt: Jira Service Management Operations overview
+   :screenshot:
+   :::
 
-Select the `Integrations` menu item, then select `Add integration`.
+2. Select the **Integrations** menu item, then select **Add integration**.
 
-:::{image} ../images/jsm-integrations.png
-:alt: Jira Service Management integrations
-:screenshot:
-:::
+   :::{image} ../images/jsm-integrations.png
+   :alt: Jira Service Management integrations
+   :screenshot:
+   :::
 
-Search for `API` and select the `API` integration.
+3. Search for `API` and select the **API** integration.
 
-:::{image} ../images/jsm-add-api-integration.png
-:alt: Jira Service Management API integration
-:screenshot:
-:::
+   :::{image} ../images/jsm-add-api-integration.png
+   :alt: Jira Service Management API integration
+   :screenshot:
+   :::
 
-Configure the integration, continue, and ensure you record the `API Key`. This key will be used to populate the `API Key` field when creating the Kibana Jira Service Management connector. Click `Turn on integration` after you finish configuring the integration.
+4. Configure the integration. Ensure you record the **API Key**. You will later use this key to populate the **API Key** field when creating the Kibana Jira Service Management connector. 
 
-:::{image} ../images/jsm-turn-on-integration.png
-:alt: Jira Service Management turn on integration
-:screenshot:
-:::
+5. Select **Turn on integration** after you finish configuring the integration.
+
+   :::{image} ../images/jsm-turn-on-integration.png
+   :alt: Jira Service Management turn on integration
+   :screenshot:
+   :::
