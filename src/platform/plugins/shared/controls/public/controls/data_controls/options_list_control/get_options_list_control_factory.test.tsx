@@ -242,7 +242,32 @@ describe('Options List Control Api', () => {
           { value: 'woof', docCount: 10 },
           { value: 'bark', docCount: 15 },
           { value: 'meow', docCount: 12 },
+          { value: '', docCount: 20 },
         ],
+      });
+    });
+
+    test('renders a "(blank)" option', async () => {
+      const { Component } = await factory.buildControl({
+        initialState: {
+          dataViewId: 'myDataViewId',
+          fieldName: 'myFieldName',
+          existsSelected: true,
+        },
+        finalizeApi,
+        uuid,
+        controlGroupApi,
+      });
+
+      const control = render(<Component className={'controlPanel'} />);
+      await userEvent.click(control.getByTestId(`optionsList-control-${uuid}`));
+      await waitFor(() => {
+        expect(control.getAllByRole('option').length).toBe(5);
+      });
+      const option = control.getByTestId('optionsList-control-selection-');
+      await userEvent.click(option);
+      await waitFor(async () => {
+        expect(option).toBeChecked();
       });
     });
 
@@ -261,7 +286,7 @@ describe('Options List Control Api', () => {
       const control = render(<Component className={'controlPanel'} />);
       await userEvent.click(control.getByTestId(`optionsList-control-${uuid}`));
       await waitFor(() => {
-        expect(control.getAllByRole('option').length).toBe(4);
+        expect(control.getAllByRole('option').length).toBe(5);
       });
 
       expect(control.getByTestId('optionsList-control-selection-exists')).toBeChecked();
@@ -290,7 +315,7 @@ describe('Options List Control Api', () => {
       const control = render(<Component className={'controlPanel'} />);
       await userEvent.click(control.getByTestId(`optionsList-control-${uuid}`));
       await waitFor(() => {
-        expect(control.getAllByRole('option').length).toEqual(4);
+        expect(control.getAllByRole('option').length).toEqual(5);
       });
 
       const existsOption = control.getByTestId('optionsList-control-selection-exists');
@@ -324,7 +349,7 @@ describe('Options List Control Api', () => {
       const control = render(<Component className={'controlPanel'} />);
       await userEvent.click(control.getByTestId(`optionsList-control-${uuid}`));
       await waitFor(() => {
-        expect(control.getAllByRole('option').length).toEqual(4);
+        expect(control.getAllByRole('option').length).toEqual(5);
       });
       await userEvent.click(control.getByTestId('optionsList-control-show-only-selected'));
 
@@ -386,7 +411,7 @@ describe('Options List Control Api', () => {
 
       await userEvent.click(control.getByTestId(`optionsList-control-${uuid}`));
       await waitFor(() => {
-        expect(control.getAllByRole('option').length).toEqual(4);
+        expect(control.getAllByRole('option').length).toEqual(5);
       });
       expect(control.getByTestId('optionsList-control-selection-woof')).toBeChecked();
       expect(control.queryByTestId('optionsList-control-selection-bark')).not.toBeChecked();
