@@ -6,7 +6,6 @@
  */
 
 export const generateTitleMock = jest.fn();
-export const getChatModelMock$ = jest.fn();
 export const executeAgentMock$ = jest.fn();
 export const getConversationMock = jest.fn();
 export const conversationExistsMock = jest.fn();
