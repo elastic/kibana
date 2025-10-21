@@ -44,7 +44,7 @@ export const generateConversationTitle = async ({
   conversationId: string;
   isEnabledKnowledgeBase?: boolean;
   isStream?: boolean;
-  llmType: string;
+  llmType?: string;
   logger: Logger;
   messages: Array<Pick<Message, 'content' | 'role'>>;
   request: KibanaRequest;
@@ -122,7 +122,7 @@ export const generateConversationTitle = async ({
   } catch (error) {
     // Report telemetry event for error
     telemetry.reportEvent(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
-      actionTypeId: getActionTypeId(llmType),
+      actionTypeId: getActionTypeId(llmType ?? 'openai'),
       model: llmType,
       errorMessage: error.message ?? error.toString(),
       assistantStreamingEnabled: isStream ?? true,
