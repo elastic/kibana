@@ -15,7 +15,6 @@ import React, {
   useState,
   forwardRef,
   useImperativeHandle,
-  type FC,
 } from 'react';
 import useLatest from 'react-use/lib/useLatest';
 import { i18n } from '@kbn/i18n';
@@ -23,9 +22,6 @@ import { css } from '@emotion/react';
 import type { DropResult } from '@elastic/eui';
 import {
   EuiButtonIcon,
-  EuiDragDropContext,
-  EuiDraggable,
-  EuiDroppable,
   EuiFlexGroup,
   EuiFlexItem,
   EuiToolTip,
@@ -41,17 +37,11 @@ import { useResponsiveTabs } from '../../hooks/use_responsive_tabs';
 import { TabsBarWithBackground } from '../tabs_visual_glue_to_header/tabs_bar_with_background';
 import { TabsBarMenu, type TabsBarMenuProps } from '../tabs_bar_menu';
 import { TabsEventDataKeys } from '../../event_data_keys';
-
-const DROPPABLE_ID = 'unifiedTabsOrder';
+import { OptionalDraggable } from './optional_draggable';
+import { OptionalDroppable } from './optional_droppable';
 
 const growingFlexItemCss = css`
   min-width: 0;
-`;
-
-const droppableCss = css`
-  display: flex;
-  align-items: center;
-  wrap: no-wrap;
 `;
 
 enum shortcutActions {
@@ -363,58 +353,3 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
     );
   }
 );
-
-interface DroppableWrapperProps {
-  children: React.ReactNode;
-  enableDragAndDrop: boolean;
-  onDragEnd: (result: DropResult) => void;
-}
-
-export const OptionalDroppable: FC<DroppableWrapperProps> = ({
-  children,
-  enableDragAndDrop,
-  onDragEnd,
-}) => {
-  if (!enableDragAndDrop) {
-    return <div css={droppableCss}>{children}</div>;
-  }
-
-  return (
-    <EuiDragDropContext onDragEnd={onDragEnd}>
-      <EuiDroppable droppableId={DROPPABLE_ID} direction="horizontal" css={droppableCss} grow>
-        {() => <>{children}</>}
-      </EuiDroppable>
-    </EuiDragDropContext>
-  );
-};
-
-interface OptionalDraggableProps {
-  children: (props: { dragHandleProps?: any; isDragging: boolean }) => React.ReactElement;
-  item: TabItem;
-  index: number;
-  enableDragAndDrop: boolean;
-}
-
-export const OptionalDraggable = ({
-  children,
-  item,
-  index,
-  enableDragAndDrop,
-}: OptionalDraggableProps) => {
-  if (!enableDragAndDrop) {
-    return children({ isDragging: false });
-  }
-
-  return (
-    <EuiDraggable
-      key={item.id}
-      draggableId={item.id}
-      index={index}
-      usePortal
-      hasInteractiveChildren
-      customDragHandle="custom"
-    >
-      {({ dragHandleProps }, { isDragging }) => children({ dragHandleProps, isDragging })}
-    </EuiDraggable>
-  );
-};
