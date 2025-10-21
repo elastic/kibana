@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup, PluginInitializerContext } from '@kbn/core/public';
+import type { CoreSetup } from '@kbn/core/public';
 import { isOfAggregateQueryType, type AggregateQuery, type Query } from '@kbn/es-query';
 import type { PublicContract } from '@kbn/utility-types';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { Logger } from '@kbn/logging';
-import type { ConfigSchema } from '../../../../server/config';
 import type { SearchSessionSavedObject } from '../sessions_client';
 import {
   BG_SEARCH_CANCEL,
@@ -30,15 +29,9 @@ export class SearchSessionEBTManager {
   private reportEventCore: CoreSetup['analytics']['reportEvent'];
   private logger: Logger;
 
-  constructor({
-    core,
-    initializerContext,
-  }: {
-    core: CoreSetup;
-    initializerContext: PluginInitializerContext<ConfigSchema>;
-  }) {
+  constructor({ core, logger }: { core: CoreSetup; logger: Logger }) {
     this.reportEventCore = core.analytics.reportEvent;
-    this.logger = initializerContext.logger.get();
+    this.logger = logger;
   }
 
   private reportEvent(...args: Parameters<CoreSetup['analytics']['reportEvent']>) {

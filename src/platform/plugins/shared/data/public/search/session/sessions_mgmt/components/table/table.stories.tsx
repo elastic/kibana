@@ -49,7 +49,10 @@ const Component = ({
   const sessionsClient = new SessionsClient({
     http: mockCoreSetup.http,
   });
-  const ebtManager = new SearchSessionEBTManager({ core: mockCoreSetup });
+  const ebtManager = new SearchSessionEBTManager({
+    core: mockCoreSetup,
+    logger: coreMock.createPluginInitializerContext().logger.get(),
+  });
 
   const mockConfig = {
     defaultExpiration: moment.duration('7d'),

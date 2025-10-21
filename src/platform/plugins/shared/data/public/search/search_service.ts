@@ -120,7 +120,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     registerSearchSessionEBTManagerAnalytics(core);
     this.searchSessionEBTManager = new SearchSessionEBTManager({
       core,
-      initializerContext: this.initializerContext,
+      logger: this.initializerContext.logger.get(),
     });
 
     this.sessionService = new SessionService(
