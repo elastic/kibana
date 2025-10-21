@@ -68473,7 +68473,10 @@ components:
           type: boolean
         id:
           description: ID of the interrupt
+          type: string
         threadId:
+          description: Thread ID of the graph execution that produced this message.
+          example: <UUID>
           type: string
         type:
           $ref: '#/components/schemas/Security_AI_Assistant_API_InterruptType'
