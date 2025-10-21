@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
+import { Coerced } from '../../../../common/lib';
 import { MAX_ADDITIONAL_FIELDS_LENGTH } from '../../../../common/servicenow/constants';
 import { validateRecordMaxKeys } from '../validators';
 import { DEFAULT_ALERTS_GROUPING_KEY } from './config';
@@ -64,23 +65,25 @@ const CommonAttributes = {
   subcategory: z.string().nullable().default(null),
   correlation_id: z.string().nullable().default(DEFAULT_ALERTS_GROUPING_KEY),
   correlation_display: z.string().nullable().default(null),
-  additional_fields: z
-    .record(
-      z.string().superRefine((value, ctx) => {
-        validateOtherFieldsKeys(value, ctx);
-      }),
-      z.any()
-    )
-    .superRefine((val, ctx) =>
-      validateRecordMaxKeys({
-        record: val,
-        ctx,
-        maxNumberOfFields: MAX_ADDITIONAL_FIELDS_LENGTH,
-        fieldName: 'additional_fields',
-      })
-    )
-    .nullable()
-    .default(null),
+  additional_fields: Coerced(
+    z
+      .record(
+        z.string().superRefine((value, ctx) => {
+          validateOtherFieldsKeys(value, ctx);
+        }),
+        z.any()
+      )
+      .superRefine((val, ctx) =>
+        validateRecordMaxKeys({
+          record: val,
+          ctx,
+          maxNumberOfFields: MAX_ADDITIONAL_FIELDS_LENGTH,
+          fieldName: 'additional_fields',
+        })
+      )
+      .nullable()
+      .default(null)
+  ),
 };
 
 export const commonIncidentSchemaObjectProperties = Object.keys(CommonAttributes);

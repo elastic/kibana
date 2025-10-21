@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
+import { Coerced } from '../../../common/lib';
 import { validateKeysAllowed, validateRecordMaxKeys } from '../lib/validators';
 
 export const ExternalIncidentServiceConfiguration = {
@@ -29,23 +30,25 @@ export const ExternalIncidentServiceSecretConfigurationSchema = z
 const MAX_ADDITIONAL_FIELDS_LENGTH = 50;
 
 const AdditionalFields = {
-  additionalFields: z
-    .record(
-      z.string().superRefine((value, ctx) => {
-        validateOtherFieldsKeys(value, ctx);
-      }),
-      z.any()
-    )
-    .superRefine((val, ctx) =>
-      validateRecordMaxKeys({
-        record: val,
-        ctx,
-        maxNumberOfFields: MAX_ADDITIONAL_FIELDS_LENGTH,
-        fieldName: 'additionalFields',
-      })
-    )
-    .nullable()
-    .default(null),
+  additionalFields: Coerced(
+    z
+      .record(
+        z.string().superRefine((value, ctx) => {
+          validateOtherFieldsKeys(value, ctx);
+        }),
+        z.any()
+      )
+      .superRefine((val, ctx) =>
+        validateRecordMaxKeys({
+          record: val,
+          ctx,
+          maxNumberOfFields: MAX_ADDITIONAL_FIELDS_LENGTH,
+          fieldName: 'additionalFields',
+        })
+      )
+      .nullable()
+      .default(null)
+  ),
 };
 
 const CommonIncidentAttributes = {
