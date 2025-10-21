@@ -125,6 +125,12 @@ export type { ChartInfo } from './chart_info_api';
 export { layerTypes } from '../common/layer_types';
 export { LENS_EMBEDDABLE_TYPE } from '../common/constants';
 
+export {
+  EditorFrameServiceProvider,
+  useEditorFrameService,
+} from './editor_frame_service/editor_frame_service_context';
+export type { EditorFrameServiceProviderProps } from './editor_frame_service/editor_frame_service_context';
+
 export type { LensPublicStart, LensPublicSetup, LensSuggestionsApi } from './plugin';
 
 export const plugin = () => new LensPlugin();
