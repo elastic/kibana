@@ -54,7 +54,7 @@ export const NoPermissionsTooltip = ({
   if (!isServiceAllowed) {
     return (
       <EuiToolTip content={SERVICE_NOT_ALLOWED}>
-        <span>{children}</span>
+        <span tabIndex={0}>{children}</span>
       </EuiToolTip>
     );
   }
@@ -62,7 +62,7 @@ export const NoPermissionsTooltip = ({
   if (disabledMessage) {
     return (
       <EuiToolTip content={disabledMessage}>
-        <span>{children}</span>
+        <span tabIndex={0}>{children}</span>
       </EuiToolTip>
     );
   }
@@ -70,7 +70,7 @@ export const NoPermissionsTooltip = ({
   if (content) {
     return (
       <EuiToolTip content={content}>
-        <span>{children}</span>
+        <span tabIndex={0}>{children}</span>
       </EuiToolTip>
     );
   }

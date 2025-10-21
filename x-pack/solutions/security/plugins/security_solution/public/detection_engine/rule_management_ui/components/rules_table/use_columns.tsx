@@ -246,6 +246,7 @@ const MODIFIED_COLUMN: TableColumn = {
     return (
       <EuiToolTip content={i18n.MODIFIED_TOOLTIP}>
         <EuiBadge
+          tabIndex={0}
           color="hollow"
           data-test-subj="rulesTableModifiedColumnBadge"
           aria-label={i18n.MODIFIED_LABEL}

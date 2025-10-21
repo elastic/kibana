@@ -28,7 +28,7 @@ export const UpdatedAtField: FC<{ dateTime?: string; DateFormatterComp?: DateFor
           defaultMessage: 'Last updated unknown',
         })}
       >
-        <span>-</span>
+        <span tabIndex={0}>-</span>
       </EuiToolTip>
     );
   }
@@ -39,7 +39,7 @@ export const UpdatedAtField: FC<{ dateTime?: string; DateFormatterComp?: DateFor
       <DateFormatterComp value={new Date(dateTime).getTime()}>
         {(formattedDate: string) => (
           <EuiToolTip content={updatedAt.format('LL LT')}>
-            <span>{formattedDate}</span>
+            <span tabIndex={0}>{formattedDate}</span>
           </EuiToolTip>
         )}
       </DateFormatterComp>
@@ -47,7 +47,7 @@ export const UpdatedAtField: FC<{ dateTime?: string; DateFormatterComp?: DateFor
   }
   return (
     <EuiToolTip content={updatedAt.format('LL LT')}>
-      <span>{updatedAt.format('ll')}</span>
+      <span tabIndex={0}>{updatedAt.format('ll')}</span>
     </EuiToolTip>
   );
 };

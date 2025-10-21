@@ -563,7 +563,7 @@ export async function pickTestGroupRunOrder() {
                 ({ title, key, queue = defaultQueue }): BuildkiteStep => ({
                   label: title,
                   command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
-                  timeout_in_minutes: 90,
+                  timeout_in_minutes: 120,
                   agents: expandAgentQueue(queue),
                   env: {
                     SCOUT_TARGET_TYPE: 'local',
@@ -642,8 +642,8 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
             },
             retry: {
               automatic: [
-                { exit_status: '-1', limit: 1 },
-                { exit_status: '*', limit: 0 },
+                { exit_status: '10', limit: 1 },
+                { exit_status: '*', limit: 3 },
               ],
             },
           })

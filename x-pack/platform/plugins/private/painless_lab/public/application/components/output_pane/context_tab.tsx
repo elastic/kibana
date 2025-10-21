@@ -42,7 +42,7 @@ export const ContextTab: FunctionComponent = () => {
               defaultMessage: 'Different contexts provide different functions on the ctx object',
             })}
           >
-            <span>
+            <span tabIndex={0}>
               <FormattedMessage
                 id="xpack.painlessLab.contextFieldLabel"
                 defaultMessage="Execution context"
@@ -81,7 +81,7 @@ export const ContextTab: FunctionComponent = () => {
                 defaultMessage: `Index mappings must be compatible with the sample document's fields`,
               })}
             >
-              <span>
+              <span tabIndex={0}>
                 <FormattedMessage
                   id="xpack.painlessLab.indexFieldLabel"
                   defaultMessage="Index name"
@@ -123,7 +123,7 @@ export const ContextTab: FunctionComponent = () => {
                   'Use query to specify that that _score will be used to calculate score.',
               })}
             >
-              <span>
+              <span tabIndex={0}>
                 <FormattedMessage id="xpack.painlessLab.queryFieldLabel" defaultMessage="Query" />{' '}
                 <EuiIcon type="question" color="subdued" />
               </span>
@@ -166,7 +166,7 @@ export const ContextTab: FunctionComponent = () => {
                 defaultMessage: "Your script can access this document's fields",
               })}
             >
-              <span>
+              <span tabIndex={0}>
                 <FormattedMessage
                   id="xpack.painlessLab.documentFieldLabel"
                   defaultMessage="Sample document (JSON)"

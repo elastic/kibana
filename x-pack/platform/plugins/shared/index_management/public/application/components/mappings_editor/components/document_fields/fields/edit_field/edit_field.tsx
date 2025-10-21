@@ -212,7 +212,7 @@ export const EditField = React.memo(
                         )}
                         position="top"
                       >
-                        <span>
+                        <span tabIndex={0}>
                           <EuiTextColor color="subdued">
                             {i18n.translate(
                               'xpack.idxMgmt.mappingsEditor.editFieldFlyout.formCompletionGuide',

@@ -52,6 +52,16 @@ export class ScoutPlaywrightReporter implements Reporter {
   private baseTestRunInfo: ScoutTestRunInfo;
   private readonly codeOwnersEntries: CodeOwnersEntry[];
 
+  private readonly testStats: {
+    passes: number;
+    failures: number;
+    pending: number;
+  } = {
+    passes: 0,
+    failures: 0,
+    pending: 0,
+  };
+
   constructor(private reporterOptions: ScoutPlaywrightReporterOptions = {}) {
     this.log = new ToolingLog({
       level: 'info',
@@ -231,6 +241,26 @@ export class ScoutPlaywrightReporter implements Reporter {
   }
 
   onTestEnd(test: TestCase, result: TestResult) {
+    switch (result.status) {
+      case 'failed':
+        this.testStats.failures++;
+        break;
+      case 'interrupted':
+        this.testStats.failures++;
+        break;
+      case 'timedOut':
+        this.testStats.failures++;
+        break;
+
+      case 'passed':
+        this.testStats.passes++;
+        break;
+
+      case 'skipped':
+        this.testStats.pending++;
+        break;
+    }
+
     this.report.logEvent({
       ...environmentMetadata,
       reporter: {
@@ -273,9 +303,18 @@ export class ScoutPlaywrightReporter implements Reporter {
         ...this.baseTestRunInfo,
         status: result.status,
         duration: result.duration,
+        tests: {
+          failures: this.testStats.failures,
+          passes: this.testStats.passes,
+          pending: this.testStats.pending,
+          total: this.testStats.failures + this.testStats.passes + this.testStats.pending,
+        },
       },
       event: {
         action: ScoutReportEventAction.RUN_END,
+      },
+      process: {
+        uptime: Math.floor(process.uptime() * 1000),
       },
     });
 

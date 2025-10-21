@@ -218,6 +218,7 @@ export function VariableName({
           data-test-subj="esqlVariableName"
           fullWidth
           compressed
+          tabIndex={0}
         />
       </EuiToolTip>
     </EuiFormRow>
@@ -340,6 +341,7 @@ export function Header({ isInEditMode }: { isInEditMode: boolean }) {
               label=""
               iconType="beaker"
               size="s"
+              tabIndex={0}
               css={css`
                 vertical-align: middle;
               `}

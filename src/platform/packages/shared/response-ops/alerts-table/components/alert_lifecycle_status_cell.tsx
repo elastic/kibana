@@ -45,6 +45,7 @@ export const AlertLifecycleStatusCell: CellComponent = memo((props) => {
           >
             <EuiBadge
               iconType="bellSlash"
+              tabIndex={0}
               css={css`
                 padding-inline: ${euiTheme.size.xs};
               `}
