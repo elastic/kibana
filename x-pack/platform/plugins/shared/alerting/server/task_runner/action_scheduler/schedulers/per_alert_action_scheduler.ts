@@ -262,14 +262,15 @@ export class PerAlertActionScheduler<
         },
       });
 
+      const allActionUuids = this.actions.map((a) => a.uuid!);
+      alert.clearThrottlingLastScheduledActions(allActionUuids);
+
       if (!this.isRecoveredAction(actionGroup)) {
         if (isActionOnInterval(action)) {
-          const allActionUuids = this.actions.map((a) => a.uuid!);
           alert.updateLastScheduledActions(
             action.group as ActionGroupIds,
             generateActionHash(action),
-            action.uuid,
-            allActionUuids
+            action.uuid
           );
         } else {
           alert.updateLastScheduledActions(action.group as ActionGroupIds);

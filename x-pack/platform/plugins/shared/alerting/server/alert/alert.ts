@@ -220,12 +220,16 @@ export class Alert<
     return this;
   }
 
-  updateLastScheduledActions(
-    group: ActionGroupIds,
-    actionHash?: string | null,
-    uuid?: string,
-    allActionUuids: string[] = []
-  ) {
+  clearThrottlingLastScheduledActions(allActionUuids: string[]) {
+    const throttlingActions = this.meta.lastScheduledActions?.actions || {};
+    Object.keys(throttlingActions).forEach((id) => {
+      if (!allActionUuids.includes(id)) {
+        delete throttlingActions[id];
+      }
+    });
+  }
+
+  updateLastScheduledActions(group: ActionGroupIds, actionHash?: string | null, uuid?: string) {
     if (!this.meta.lastScheduledActions) {
       this.meta.lastScheduledActions = {} as LastScheduledActions;
     }
@@ -241,14 +245,6 @@ export class Alert<
       if (!this.meta.lastScheduledActions.actions) {
         this.meta.lastScheduledActions.actions = {};
       }
-
-      // clear out any action ids that are not in the current list of action ids
-      Object.keys(this.meta.lastScheduledActions.actions).forEach((id) => {
-        if (!allActionUuids.includes(id)) {
-          delete this.meta.lastScheduledActions!.actions![id];
-        }
-      });
-
       // remove deprecated actionHash
       if (!!actionHash && this.meta.lastScheduledActions.actions[actionHash]) {
         delete this.meta.lastScheduledActions.actions[actionHash];
