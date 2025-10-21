@@ -43,6 +43,7 @@ import { auditLoggerMock, auditServiceMock } from '../audit/mocks';
 import { ConfigSchema, createConfig } from '../config';
 import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
 import { securityMock } from '../mocks';
+import { securityTelemetry } from '../otel/instrumentation';
 import {
   SessionConcurrencyLimitError,
   type SessionError,
@@ -54,6 +55,13 @@ import {
 import { sessionMock } from '../session_management/index.mock';
 import type { UserProfileGrant } from '../user_profile';
 import { userProfileServiceMock } from '../user_profile/user_profile_service.mock';
+jest.mock('../otel/instrumentation', () => ({
+  securityTelemetry: {
+    recordLoginDuration: jest.fn(),
+    recordSessionCreationDuration: jest.fn(),
+    recordUserProfileActivationDuration: jest.fn(),
+  },
+}));
 
 let auditLogger: AuditLogger;
 function getMockOptions({
@@ -448,6 +456,11 @@ describe('Authenticator', () => {
           state: {},
         })
       );
+
+      expect(securityTelemetry.recordLoginDuration).toHaveBeenCalledWith(expect.any(Number), {
+        providerType: 'basic',
+        outcome: 'success',
+      });
       expectAuditEvents({ action: 'user_login', outcome: 'success' });
     });
 
@@ -472,6 +485,76 @@ describe('Authenticator', () => {
           profile_uid: 'PROFILE_ID',
         })
       );
+    });
+
+    describe('security telemetry', () => {
+      it('records login duration when successful', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        const user = mockAuthenticatedUser();
+        mockBasicAuthenticationProvider.login.mockResolvedValue(
+          AuthenticationResult.succeeded(user, { state: { authorization: 'Basic .....' } })
+        );
+        await authenticator.login(request, { provider: { type: 'basic' }, value: {} });
+        expect(securityTelemetry.recordLoginDuration).toHaveBeenCalledWith(expect.any(Number), {
+          providerType: 'basic',
+          outcome: 'success',
+        });
+      });
+
+      it('records login duration when not successful', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        mockBasicAuthenticationProvider.login.mockResolvedValue(AuthenticationResult.notHandled());
+        await authenticator.login(request, { provider: { type: 'basic' }, value: {} });
+        expect(securityTelemetry.recordLoginDuration).toHaveBeenCalledWith(expect.any(Number), {
+          providerType: 'basic',
+          outcome: 'failure',
+        });
+      });
+
+      it('records session creation duration when successful', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        const user = mockAuthenticatedUser();
+        mockBasicAuthenticationProvider.login.mockResolvedValue(
+          AuthenticationResult.succeeded(user, { state: { authorization: 'Basic .....' } })
+        );
+        await authenticator.login(request, { provider: { type: 'basic' }, value: {} });
+        expect(securityTelemetry.recordSessionCreationDuration).toHaveBeenCalledWith(
+          expect.any(Number),
+          {
+            providerType: 'basic',
+            outcome: 'success',
+          }
+        );
+      });
+
+      it('records user profile activation duration when successful', async () => {
+        const user = mockAuthenticatedUser();
+        const request = httpServerMock.createKibanaRequest();
+        const authorization = `Basic ${Buffer.from('foo:bar').toString('base64')}`;
+        const userProfileGrant: UserProfileGrant = {
+          type: 'password',
+          username: 'some-user',
+          password: 'some-password',
+        };
+
+        mockBasicAuthenticationProvider.login.mockResolvedValue(
+          AuthenticationResult.succeeded(user, { userProfileGrant, state: { authorization } })
+        );
+
+        await expect(
+          authenticator.login(request, { provider: { type: 'basic' }, value: {} })
+        ).resolves.toEqual(
+          AuthenticationResult.succeeded(user, { userProfileGrant, state: { authorization } })
+        );
+
+        expect(securityTelemetry.recordUserProfileActivationDuration).toHaveBeenCalledWith(
+          expect.any(Number),
+          {
+            providerType: 'basic',
+            outcome: 'success',
+          }
+        );
+      });
     });
 
     describe('user_login audit events', () => {

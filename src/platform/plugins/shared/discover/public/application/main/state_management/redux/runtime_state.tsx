@@ -103,6 +103,14 @@ export const useRuntimeState = <T,>(stateSubject$: BehaviorSubject<T>) =>
 export const selectTabRuntimeState = (runtimeStateManager: RuntimeStateManager, tabId: string) =>
   runtimeStateManager.tabs.byId[tabId];
 
+export const selectIsDataViewUsedInMultipleRuntimeTabStates = (
+  runtimeStateManager: RuntimeStateManager,
+  dataViewId: string
+) =>
+  Object.values(runtimeStateManager.tabs.byId).filter(
+    (tab) => tab.currentDataView$.getValue()?.id === dataViewId
+  ).length > 1;
+
 export const selectTabRuntimeAppState = (
   runtimeStateManager: RuntimeStateManager,
   tabId: string
