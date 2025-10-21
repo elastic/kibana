@@ -9,8 +9,8 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
 import type { ConversationRound } from '@kbn/onechat-common';
 import type { Message } from '@kbn/elastic-assistant-common';
-import type { ElasticAssistantRequestHandlerContext } from '../../types';
 import type { AwaitedProperties } from '@kbn/utility-types';
+import type { ElasticAssistantRequestHandlerContext } from '../../types';
 
 // Helper function to generate conversation title
 export const generateConversationTitle = async (
@@ -32,6 +32,31 @@ export const generateConversationTitle = async (
 
     if (!conversationsDataClient) return;
 
+    // Get the current conversation to check if it already has a title
+    let conversation;
+    try {
+      conversation = await conversationsDataClient.getConversation({
+        id: conversationId,
+      });
+    } catch (error) {
+      logger.debug(
+        `Failed to get conversation ${conversationId}: ${error.message}, skipping title generation`
+      );
+      return;
+    }
+
+    if (!conversation) {
+      logger.debug('No conversation found, skipping chat title generation');
+      return;
+    }
+    // Check if conversation already has a meaningful title
+    // Only generate title if the current title is empty (new conversation)
+    if (conversation.title && conversation.title.trim() !== '') {
+      return;
+    }
+
+    logger.debug('Generating new conversation title...');
+
     const titlePrompt = `Generate a concise, descriptive title (max 60 characters) for this conversation based on the user's first message: "${
       messages[0]?.content || 'New conversation'
     }"`;
@@ -49,12 +74,16 @@ export const generateConversationTitle = async (
     });
 
     const generatedTitle = titleResult.result.round.response.message;
+    logger.debug(`Generated title: "${generatedTitle}"`);
+
     await conversationsDataClient.updateConversation({
       conversationUpdateProps: {
         id: conversationId,
         title: generatedTitle.slice(0, 60),
       },
     });
+
+    logger.debug('Conversation title updated successfully');
   } catch (error) {
     logger.error(`Failed to generate chat title: ${error.message}`);
   }
