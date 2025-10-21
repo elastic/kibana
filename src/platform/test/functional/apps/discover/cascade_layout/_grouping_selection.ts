@@ -15,6 +15,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const monacoEditor = getService('monacoEditor');
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
+  const browser = getService('browser');
 
   describe('grouping selection', function () {
     it('should display grouping selector for valid supported ES|QL queries', async () => {
@@ -71,6 +73,56 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilTabIsLoaded();
 
       expect(await testSubjects.exists('data-cascade')).not.to.be(true);
+    });
+
+    it('should display row action context menu when row context action button is clicked', async () => {
+      await discover.selectTextBaseLang();
+      await discover.waitUntilTabIsLoaded();
+
+      // Type in an ESQL query that will trigger the cascade layout
+      const statsQuery =
+        'FROM logstash-* | STATS count = COUNT(bytes), average = AVG(memory) BY clientip, extension';
+      await monacoEditor.setCodeEditorValue(statsQuery);
+      await testSubjects.click('querySubmitButton');
+      await discover.waitUntilTabIsLoaded();
+
+      expect(await testSubjects.exists('data-cascade')).to.be(true);
+      expect(await testSubjects.exists('discoverEnableCascadeLayoutSwitch')).to.be(true);
+
+      // click the first group row context action button
+      await find.clickByCssSelector('[data-test-subj*="dscCascadeRowContextActionButton"]');
+      expect(await testSubjects.exists('dscCascadeRowContextActionMenu')).to.be(true);
+    });
+
+    it('should copy to clipboard when copy to clipboard context menu item is clicked', async () => {
+      await discover.selectTextBaseLang();
+      await discover.waitUntilTabIsLoaded();
+
+      // Type in an ESQL query that will trigger the cascade layout
+      const statsQuery =
+        'FROM logstash-* | STATS count = COUNT(bytes), average = AVG(memory) BY clientip, extension';
+      await monacoEditor.setCodeEditorValue(statsQuery);
+      await testSubjects.click('querySubmitButton');
+      await discover.waitUntilTabIsLoaded();
+
+      expect(await testSubjects.exists('data-cascade')).to.be(true);
+      expect(await testSubjects.exists('discoverEnableCascadeLayoutSwitch')).to.be(true);
+
+      // click the first group row context action button
+      await find.clickByCssSelector('[data-test-subj*="dscCascadeRowContextActionButton"]');
+      expect(await testSubjects.exists('dscCascadeRowContextActionMenu')).to.be(true);
+
+      // click the copy to clipboard context menu item
+      await testSubjects.click('dscCascadeRowContextActionCopyToClipboard');
+      expect(await testSubjects.exists('dscCascadeRowContextActionMenu')).to.be(false);
+
+      const canReadClipboard = await browser.checkBrowserPermission('clipboard-read');
+
+      if (canReadClipboard) {
+        const clipboardText = await browser.getClipboardValue();
+        // expect the clipboard text to be a valid IP address pattern
+        expect(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(clipboardText)).to.be(true);
+      }
     });
   });
 }
