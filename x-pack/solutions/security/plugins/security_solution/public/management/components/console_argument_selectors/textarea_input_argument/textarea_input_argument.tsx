@@ -193,7 +193,7 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
         button={
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
             <EuiFlexItem grow={false} className="eui-textTruncate" onClick={handleOpenPopover}>
-              <div className="eui-textTruncate">
+              <div className="eui-textTruncate" data-test-subj={testId('selectionDisplay')}>
                 {valueText || (
                   <EuiText color="subdued" size="xs">
                     {noInputEnteredMessage}
