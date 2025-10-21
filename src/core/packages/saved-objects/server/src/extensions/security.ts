@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { type Either } from '@kbn/core-saved-objects-api-server-internal/src/lib/apis/utils';
+
 import type {
   SavedObjectAccessControl,
   SavedObjectReferenceWithContext,
@@ -15,6 +17,7 @@ import type {
 } from '@kbn/core-saved-objects-api-server';
 import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
+import type { Payload } from '@hapi/boom';
 import type { SavedObject, BulkResolveError } from '../..';
 
 /**
@@ -604,4 +607,15 @@ export interface ISavedObjectsSecurityExtension {
   setAccessControlToWrite: (
     params: SetAccessControlToWriteParams
   ) => SavedObjectAccessControl | undefined;
+
+  /**
+   * Filters bulk operation expected results array to filter inaccessible object left
+   */
+  filterInaccessibleObjectsForBulkAction<
+    L extends { type: string; id: string; error: Payload },
+    R extends { type: string; id: string; esRequestIndex: number }
+  >(
+    expectedResults: Array<Either<L, R>>,
+    inaccessibleObjects: Array<{ type: string; id: string }>
+  ): Promise<Array<Either<L, R>>>;
 }

@@ -283,7 +283,7 @@ describe('#authorize (unpublished by interface)', () => {
             bulk_update: { authorizedSpaces: ['x', 'y'] },
             ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
           }),
-          inaccessibleObjects: new Set(),
+        inaccessibleObjects: new Set(),
       });
     });
 
@@ -340,7 +340,7 @@ describe('#authorize (unpublished by interface)', () => {
             create: { authorizedSpaces: ['x'] },
             ['login:']: { authorizedSpaces: ['x', 'y'] },
           }),
-          inaccessibleObjects: new Set(),
+        inaccessibleObjects: new Set(),
       });
     });
 
@@ -1773,7 +1773,7 @@ describe('#create', () => {
             bulk_create: { authorizedSpaces: ['x', 'y'] },
             ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
           }),
-          inaccessibleObjects: new Set(),
+        inaccessibleObjects: new Set(),
       });
       expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
     });
@@ -2295,7 +2295,7 @@ describe('update', () => {
             bulk_update: { authorizedSpaces: ['x', 'y'] },
             ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
           }),
-          inaccessibleObjects: new Set(),
+        inaccessibleObjects: new Set(),
       });
       expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
     });
@@ -2775,7 +2775,7 @@ describe('delete', () => {
             bulk_delete: { authorizedSpaces: ['x'] },
             ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
           }),
-          inaccessibleObjects: new Set(),
+        inaccessibleObjects: new Set(),
       });
       expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
     });
@@ -3348,7 +3348,7 @@ describe('get', () => {
             bulk_get: { authorizedSpaces: ['x', 'z'] },
             ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
           }),
-          inaccessibleObjects: new Set(),
+        inaccessibleObjects: new Set(),
       });
       expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
     });
@@ -3677,7 +3677,7 @@ describe(`#authorizeCheckConflicts`, () => {
           bulk_create: { authorizedSpaces: ['x'] },
           ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
         }),
-        inaccessibleObjects: new Set(),
+      inaccessibleObjects: new Set(),
     });
     expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
   });
@@ -5561,7 +5561,7 @@ describe('#authorizeUpdateSpaces', () => {
           share_to_space: { authorizedSpaces: ['x', ...spacesToAdd, ...spacesToRemove] },
           ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
         }),
-        inaccessibleObjects: new Set(),
+      inaccessibleObjects: new Set(),
     });
     expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
   });

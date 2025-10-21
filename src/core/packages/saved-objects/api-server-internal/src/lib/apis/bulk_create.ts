@@ -174,8 +174,6 @@ export const performBulkCreate = async <T>(
     preflightCheckObjects
   );
 
-  console.log(`**** PREFLIGHT RESPONSE: ${JSON.stringify(preflightCheckResponse)}`);
-
   const authObjects: AuthorizeCreateObject[] = validObjects.map((element) => {
     const { object, preflightCheckIndex } = element.value;
 
@@ -202,8 +200,6 @@ export const performBulkCreate = async <T>(
     namespace,
     objects: authObjects,
   });
-
-  console.log(`**** authorizationResult: ${JSON.stringify(authorizationResult)}`);
 
   const inaccessibleObjects = authorizationResult?.inaccessibleObjects
     ? Array.from(authorizationResult.inaccessibleObjects)

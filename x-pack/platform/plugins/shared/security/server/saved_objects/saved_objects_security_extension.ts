@@ -6,6 +6,7 @@
  */
 
 import type { EcsEvent } from '@elastic/ecs';
+import type { Payload } from '@hapi/boom';
 
 import type {
   SavedObjectAccessControl,
@@ -15,6 +16,12 @@ import type {
 } from '@kbn/core-saved-objects-api-server';
 import type { SavedObjectsClient } from '@kbn/core-saved-objects-api-server-internal';
 import { isBulkResolveError } from '@kbn/core-saved-objects-api-server-internal/src/lib/apis/internals/internal_bulk_resolve';
+import {
+  type Either,
+  errorContent,
+  isLeft,
+  left,
+} from '@kbn/core-saved-objects-api-server-internal/src/lib/apis/utils';
 import { LEGACY_URL_ALIAS_TYPE } from '@kbn/core-saved-objects-base-server-internal';
 import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
@@ -604,27 +611,22 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     );
   }
 
-   private allRequestedObjectAreInaccessible(
+  private allRequestedObjectAreInaccessible(
     typesAndSpaces: Map<string, Set<string>>,
-    unauthorizedTypes: Set<string>,
     inaccessibleTypes: Set<string>,
     allAccessControlObjects: ObjectRequiringPrivilegeCheckResult[],
     inaccessibleObjects: Set<ObjectRequiringPrivilegeCheckResult>
-   ): boolean {
+  ): boolean {
     const allTypes = [...typesAndSpaces.keys()];
-
-    console.log(`**** All types: ${JSON.stringify(allTypes)}`);
-    console.log(`**** Inaccessible types: ${JSON.stringify(Array.from(inaccessibleTypes))}`);
 
     const allAccessControlObjectsAreInaccessible = this.allAccessControlObjectsAreInaccessible(
       allAccessControlObjects,
       inaccessibleObjects
     );
-     
-    console.log(`**** allAccessControlObjectsAreInaccessible: ${JSON.stringify(allAccessControlObjectsAreInaccessible)}`);
 
     return (
-      allAccessControlObjectsAreInaccessible && allTypes.length === inaccessibleTypes.size &&
+      allAccessControlObjectsAreInaccessible &&
+      allTypes.length === inaccessibleTypes.size &&
       allTypes.every((type) => inaccessibleTypes.has(type))
     );
   }
@@ -679,7 +681,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         ) {
           inaccessibleTypes.add(type);
           accessControlObjectsToCheck
-            ?.filter((obj) => obj.type === type)
+            ?.filter((obj) => obj.type === type && obj.requiresManageAccessControl)
             .forEach((obj) => inaccessibleObjects.add(obj));
         }
       }
@@ -687,13 +689,10 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
     const allRequestedObjectAreInaccessible = this.allRequestedObjectAreInaccessible(
       typesAndSpaces,
-      unauthorizedTypes,
       inaccessibleTypes,
       allAccessControlObjects,
       inaccessibleObjects
     );
-
-    console.log(`**** allRequestedObjectAreInaccessible: ${JSON.stringify(allRequestedObjectAreInaccessible)}`);
 
     if (unauthorizedTypes.size > 0 || allRequestedObjectAreInaccessible) {
       const uniqueTypes = new Set([...unauthorizedTypes, ...inaccessibleTypes]);
@@ -1754,6 +1753,57 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       });
 
     return accessControlToWrite;
+  }
+
+  /**
+   * Filters out objects that are inaccessible due to access control restrictions during bulk actions.
+   * If an object is found in the `inaccessibleObjects` array, returns a left error result for that object.
+   * Otherwise, returns the original expected result with an updated esRequestIndex.
+   *
+   * @template L - Left (error) type
+   * @template R - Right (success) type
+   * @param expectedResults - Array of Either<L, R> results (left: error, right: valid object)
+   * @param inaccessibleObjects - Array of objects that are inaccessible due to access control
+   * @returns Array of Either<L, R> with inaccessible objects converted to error results
+   */
+  async filterInaccessibleObjectsForBulkAction<
+    L extends { type: string; id: string; error: Payload },
+    R extends { type: string; id: string; esRequestIndex: number }
+  >(
+    expectedResults: Array<Either<L, R>>,
+    inaccessibleObjects: Array<{ type: string; id: string }>
+  ): Promise<Array<Either<L, R>>> {
+    let reIndexCounter = 0;
+    return Promise.all(
+      expectedResults.map(async (result) => {
+        if (isLeft<L, R>(result)) {
+          return result;
+        }
+        if (
+          inaccessibleObjects.find(
+            (obj) => obj.type === result.value.type && obj.id === result.value.id
+          )
+        ) {
+          return left({
+            id: result.value.id,
+            type: result.value.type,
+            error: {
+              ...errorContent(
+                SavedObjectsErrorHelpers.decorateForbiddenError(
+                  new Error(
+                    `Deleting objects in read-only mode that are owned by another user requires the manage_access_control privilege.`
+                  )
+                )
+              ),
+            },
+          } as L);
+        }
+        return {
+          ...result,
+          value: { ...result.value, esRequestIndex: reIndexCounter++ },
+        } as Either<L, R>;
+      })
+    );
   }
 }
 

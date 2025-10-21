@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { parse as parseCookie } from 'tough-cookie';
 
 import expect from '@kbn/expect';
-import { READ_ONLY_TYPE } from '@kbn/read-only-objects-test-plugin/server';
+import { NON_READ_ONLY_TYPE, READ_ONLY_TYPE } from '@kbn/read-only-objects-test-plugin/server';
 import { adminTestUser } from '@kbn/test';
 
 import type { FtrProviderContext } from '../../../../functional/ftr_provider_context';
@@ -269,7 +270,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('cookie', otherOwnerCookie.cookieString())
           .send({ id: objectId, type: READ_ONLY_TYPE, isReadOnly: true })
           .expect(403);
-        
+
         expect(overwriteResponse.body).to.have.property('error', 'Forbidden');
         expect(overwriteResponse.body).to.have.property(
           'message',
@@ -279,242 +280,452 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('#bulk_create', () => {
-      it('should create read only objects', async () => {
-        const { cookie: objectOwnerCookie, profileUid: objectOwnerProfileUid } =
-          await loginAsObjectOwner('test_user', 'changeme');
+      describe('success', () => {
+        it('should create read only objects', async () => {
+          const { cookie: objectOwnerCookie, profileUid: objectOwnerProfileUid } =
+            await loginAsObjectOwner('test_user', 'changeme');
 
-        const bulkCreateResponse = await supertestWithoutAuth
-          .post('/read_only_objects/bulk_create')
-          .set('kbn-xsrf', 'true')
-          .set('cookie', objectOwnerCookie.cookieString())
-          .send({
-            objects: [
-              { type: READ_ONLY_TYPE, isReadOnly: true },
-              { type: READ_ONLY_TYPE, isReadOnly: true },
-            ],
+          const bulkCreateResponse = await supertestWithoutAuth
+            .post('/read_only_objects/bulk_create')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', objectOwnerCookie.cookieString())
+            .send({
+              objects: [
+                { type: READ_ONLY_TYPE, isReadOnly: true },
+                { type: READ_ONLY_TYPE, isReadOnly: true },
+              ],
+            });
+          expect(bulkCreateResponse.body.saved_objects).to.have.length(2);
+          for (const { accessControl } of bulkCreateResponse.body.saved_objects) {
+            expect(accessControl).to.have.property('owner', objectOwnerProfileUid);
+            expect(accessControl).to.have.property('accessMode', 'read_only');
+          }
+        });
+
+        it('allows owner to overwrite objects they own', async () => {
+          const { cookie: objectOwnerCookie, profileUid: objectOwnerProfileUid } =
+            await loginAsObjectOwner('test_user', 'changeme');
+          const firstObject = await supertestWithoutAuth
+            .post('/read_only_objects/create')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', objectOwnerCookie.cookieString())
+            .send({ type: READ_ONLY_TYPE, isReadOnly: true })
+            .expect(200);
+          const { id: objectId1, type: type1 } = firstObject.body;
+          expect(firstObject.body.accessControl).to.have.property('owner', objectOwnerProfileUid);
+
+          const secondObject = await supertestWithoutAuth
+            .post('/read_only_objects/create')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', objectOwnerCookie.cookieString())
+            .send({ type: READ_ONLY_TYPE, isReadOnly: true })
+            .expect(200);
+          const { id: objectId2, type: type2 } = secondObject.body;
+          expect(secondObject.body.accessControl).to.have.property('owner', objectOwnerProfileUid);
+
+          const objects = [
+            {
+              id: objectId1,
+              type: type1,
+            },
+            {
+              id: objectId2,
+              type: type2,
+            },
+          ];
+
+          const res = await supertestWithoutAuth
+            .post('/read_only_objects/bulk_create?overwrite=true')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', objectOwnerCookie.cookieString())
+            .send({
+              objects,
+            })
+            .expect(200);
+          for (const { id, accessControl } of res.body.saved_objects) {
+            const object = objects.find((obj) => obj.id === id);
+            expect(object).to.not.be(undefined);
+            expect(accessControl).to.have.property('owner', objectOwnerProfileUid);
+            expect(accessControl).to.have.property('accessMode', 'read_only');
+          }
+        });
+
+        it('allows non-owner to overwrite objects in default mode', async () => {
+          const { cookie: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin();
+
+          const firstObject = await supertestWithoutAuth
+            .post('/read_only_objects/create')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', adminCookie.cookieString())
+            .send({ type: READ_ONLY_TYPE, isReadOnly: false })
+            .expect(200);
+          const { id: objectId1, type: type1 } = firstObject.body;
+          expect(firstObject.body.accessControl).to.have.property('owner', adminProfileUid);
+
+          const secondObject = await supertestWithoutAuth
+            .post('/read_only_objects/create')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', adminCookie.cookieString())
+            .send({ type: READ_ONLY_TYPE, isReadOnly: false })
+            .expect(200);
+          const { id: objectId2, type: type2 } = secondObject.body;
+          expect(secondObject.body.accessControl).to.have.property('owner', adminProfileUid);
+
+          const objects = [
+            {
+              id: objectId1,
+              type: type1,
+            },
+            {
+              id: objectId2,
+              type: type2,
+            },
+          ];
+
+          const { cookie: notObjectOwnerCookieCookie } = await loginAsNotObjectOwner(
+            'test_user',
+            'changeme'
+          );
+
+          const res = await supertestWithoutAuth
+            .post('/read_only_objects/bulk_create?overwrite=true')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', notObjectOwnerCookieCookie.cookieString())
+            .send({
+              objects,
+            })
+            .expect(200);
+
+          expect(res.body.saved_objects.length).to.be(2);
+          expect(res.body.saved_objects[0].accessControl).to.have.property(
+            'owner',
+            adminProfileUid
+          );
+          expect(res.body.saved_objects[0].accessControl).to.have.property('accessMode', 'default');
+          expect(res.body.saved_objects[1].accessControl).to.have.property(
+            'owner',
+            adminProfileUid
+          );
+          expect(res.body.saved_objects[1].accessControl).to.have.property('accessMode', 'default');
+        });
+
+        it('allows admin to overwrite objects they do not own', async () => {
+          const { cookie: objectOwnerCookie, profileUid: objectOwnerProfileUid } =
+            await loginAsObjectOwner('test_user', 'changeme');
+          const firstObject = await supertestWithoutAuth
+            .post('/read_only_objects/create')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', objectOwnerCookie.cookieString())
+            .send({ type: READ_ONLY_TYPE, isReadOnly: true })
+            .expect(200);
+          const { id: objectId1, type: type1 } = firstObject.body;
+          expect(firstObject.body.accessControl).to.have.property('owner', objectOwnerProfileUid);
+
+          const secondObject = await supertestWithoutAuth
+            .post('/read_only_objects/create')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', objectOwnerCookie.cookieString())
+            .send({ type: READ_ONLY_TYPE, isReadOnly: true })
+            .expect(200);
+          const { id: objectId2, type: type2 } = secondObject.body;
+          expect(secondObject.body.accessControl).to.have.property('owner', objectOwnerProfileUid);
+
+          const objects = [
+            {
+              id: objectId1,
+              type: type1,
+            },
+            {
+              id: objectId2,
+              type: type2,
+            },
+          ];
+
+          const { cookie: adminCookie } = await loginAsKibanaAdmin();
+
+          const res = await supertestWithoutAuth
+            .post('/read_only_objects/bulk_create?overwrite=true')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', adminCookie.cookieString())
+            .send({
+              objects,
+            })
+            .expect(200);
+          for (const { id, accessControl } of res.body.saved_objects) {
+            const object = objects.find((obj) => obj.id === id);
+            expect(object).to.not.be(undefined);
+            expect(accessControl).to.have.property('owner', objectOwnerProfileUid);
+            expect(accessControl).to.have.property('accessMode', 'read_only');
+          }
+        });
+      });
+
+      describe('failure modes', () => {
+        it('rejects when overwriting and all objects are read-only', async () => {
+          const { cookie: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin();
+
+          const firstObject = await supertestWithoutAuth
+            .post('/read_only_objects/create')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', adminCookie.cookieString())
+            .send({ type: READ_ONLY_TYPE, isReadOnly: true })
+            .expect(200);
+          const { id: objectId1, type: type1 } = firstObject.body;
+          expect(firstObject.body.accessControl).to.have.property('owner', adminProfileUid);
+
+          const secondObject = await supertestWithoutAuth
+            .post('/read_only_objects/create')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', adminCookie.cookieString())
+            .send({ type: READ_ONLY_TYPE, isReadOnly: true })
+            .expect(200);
+          const { id: objectId2, type: type2 } = secondObject.body;
+          expect(secondObject.body.accessControl).to.have.property('owner', adminProfileUid);
+
+          const objects = [
+            {
+              id: objectId1,
+              type: type1,
+            },
+            {
+              id: objectId2,
+              type: type2,
+            },
+          ];
+
+          const { cookie: notObjectOwnerCookieCookie } = await loginAsNotObjectOwner(
+            'test_user',
+            'changeme'
+          );
+
+          const res = await supertestWithoutAuth
+            .post('/read_only_objects/bulk_create?overwrite=true')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', notObjectOwnerCookieCookie.cookieString())
+            .send({
+              objects,
+            })
+            .expect(403);
+
+          expect(res.body).to.have.property('error', 'Forbidden');
+          expect(res.body).to.have.property('message');
+          expect(res.body.message).to.contain(
+            `Unable to bulk_create read_only_type, access control restrictions for`
+          );
+          expect(res.body.message).to.contain(`read_only_type:${objectId1}`); // order is not guaranteed
+          expect(res.body.message).to.contain(`read_only_type:${objectId2}`);
+
+          const getResponse = await supertestWithoutAuth
+            .get(`/read_only_objects/${objectId1}`)
+            .set('kbn-xsrf', 'true')
+            .set('cookie', adminCookie.cookieString())
+            .expect(200);
+          expect(getResponse.body.accessControl).to.have.property('owner', adminProfileUid);
+          expect(getResponse.body.accessControl).to.have.property('accessMode', 'read_only');
+
+          const getResponse2 = await supertestWithoutAuth
+            .get(`/read_only_objects/${objectId2}`)
+            .set('kbn-xsrf', 'true')
+            .set('cookie', adminCookie.cookieString())
+            .expect(200);
+          expect(getResponse2.body.accessControl).to.have.property('owner', adminProfileUid);
+          expect(getResponse2.body.accessControl).to.have.property('accessMode', 'read_only');
+        });
+
+        it('return status when overwriting objects and some objects are owned by current user', async () => {
+          const { cookie: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin();
+
+          const firstObject = await supertestWithoutAuth
+            .post('/read_only_objects/create')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', adminCookie.cookieString())
+            .send({ type: READ_ONLY_TYPE, isReadOnly: true })
+            .expect(200);
+          const { id: objectId1, type: type1 } = firstObject.body;
+          expect(firstObject.body).to.have.property('accessControl');
+          expect(firstObject.body.accessControl).to.have.property('owner', adminProfileUid);
+
+          const { cookie: notObjectOwnerCookieCookie, profileUid: nonAdminProfileUid } =
+            await loginAsNotObjectOwner('test_user', 'changeme');
+
+          const secondObject = await supertestWithoutAuth
+            .post('/read_only_objects/create')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', notObjectOwnerCookieCookie.cookieString())
+            .send({ type: READ_ONLY_TYPE, isReadOnly: true })
+            .expect(200);
+          const { id: objectId2, type: type2 } = secondObject.body;
+          expect(secondObject.body).to.have.property('accessControl');
+          expect(secondObject.body.accessControl).to.have.property('owner', nonAdminProfileUid);
+
+          const objects = [
+            {
+              id: objectId1,
+              type: type1,
+            },
+            {
+              id: objectId2,
+              type: type2,
+            },
+          ];
+
+          const res = await supertestWithoutAuth
+            .post('/read_only_objects/bulk_create?overwrite=true')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', notObjectOwnerCookieCookie.cookieString())
+            .send({
+              objects,
+            })
+            .expect(200);
+
+          expect(res.body).to.have.property('saved_objects');
+          expect(res.body.saved_objects).to.be.an('array');
+          expect(res.body.saved_objects).to.have.length(2);
+          expect(res.body.saved_objects[0]).to.eql({
+            id: objectId1,
+            type: READ_ONLY_TYPE,
+            error: {
+              statusCode: 403,
+              error: 'Forbidden',
+              message:
+                'Overwriting objects in read-only mode that are owned by another user requires the manage_access_control privilege.',
+            },
           });
-        expect(bulkCreateResponse.body.saved_objects).to.have.length(2);
-        for (const { accessControl } of bulkCreateResponse.body.saved_objects) {
-          expect(accessControl).to.have.property('owner', objectOwnerProfileUid);
-          expect(accessControl).to.have.property('accessMode', 'read_only');
-        }
-      });
+          expect(res.body.saved_objects[1]).to.have.property('type', READ_ONLY_TYPE);
+          expect(res.body.saved_objects[1]).to.have.property('id', objectId2);
+          expect(res.body.saved_objects[1]).not.to.have.property('error');
+        });
 
-      it('should allow overwriting objects owned by current user', async () => {
-        const { cookie: objectOwnerCookie, profileUid: objectOwnerProfileUid } =
-          await loginAsObjectOwner('test_user', 'changeme');
-        const firstObject = await supertestWithoutAuth
-          .post('/read_only_objects/create')
-          .set('kbn-xsrf', 'true')
-          .set('cookie', objectOwnerCookie.cookieString())
-          .send({ type: READ_ONLY_TYPE, isReadOnly: true })
-          .expect(200);
-        const { id: objectId1, type: type1 } = firstObject.body;
-        expect(firstObject.body.accessControl).to.have.property('owner', objectOwnerProfileUid);
+        it('return status when overwriting objects and some objects are in default mode', async () => {
+          const { cookie: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin();
 
-        const secondObject = await supertestWithoutAuth
-          .post('/read_only_objects/create')
-          .set('kbn-xsrf', 'true')
-          .set('cookie', objectOwnerCookie.cookieString())
-          .send({ type: READ_ONLY_TYPE, isReadOnly: true })
-          .expect(200);
-        const { id: objectId2, type: type2 } = secondObject.body;
-        expect(secondObject.body.accessControl).to.have.property('owner', objectOwnerProfileUid);
+          const firstObject = await supertestWithoutAuth
+            .post('/read_only_objects/create')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', adminCookie.cookieString())
+            .send({ type: READ_ONLY_TYPE, isReadOnly: true })
+            .expect(200);
+          const { id: objectId1, type: type1 } = firstObject.body;
+          expect(firstObject.body).to.have.property('accessControl');
+          expect(firstObject.body.accessControl).to.have.property('owner', adminProfileUid);
 
-        const objects = [
-          {
+          const secondObject = await supertestWithoutAuth
+            .post('/read_only_objects/create')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', adminCookie.cookieString())
+            .send({ type: READ_ONLY_TYPE, isReadOnly: false })
+            .expect(200);
+          const { id: objectId2, type: type2 } = secondObject.body;
+          expect(secondObject.body).to.have.property('accessControl');
+          expect(secondObject.body.accessControl).to.have.property('owner', adminProfileUid);
+
+          const { cookie: notObjectOwnerCookieCookie } = await loginAsNotObjectOwner(
+            'test_user',
+            'changeme'
+          );
+
+          const objects = [
+            {
+              id: objectId1,
+              type: type1,
+            },
+            {
+              id: objectId2,
+              type: type2,
+            },
+          ];
+
+          const res = await supertestWithoutAuth
+            .post('/read_only_objects/bulk_create?overwrite=true')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', notObjectOwnerCookieCookie.cookieString())
+            .send({
+              objects,
+            })
+            .expect(200);
+
+          expect(res.body).to.have.property('saved_objects');
+          expect(res.body.saved_objects).to.be.an('array');
+          expect(res.body.saved_objects).to.have.length(2);
+          expect(res.body.saved_objects[0]).to.eql({
             id: objectId1,
-            type: type1,
-          },
-          {
-            id: objectId2,
-            type: type2,
-          },
-        ];
+            type: READ_ONLY_TYPE,
+            error: {
+              statusCode: 403,
+              error: 'Forbidden',
+              message:
+                'Overwriting objects in read-only mode that are owned by another user requires the manage_access_control privilege.',
+            },
+          });
+          expect(res.body.saved_objects[1]).to.have.property('type', READ_ONLY_TYPE);
+          expect(res.body.saved_objects[1]).to.have.property('id', objectId2);
+          expect(res.body.saved_objects[1]).not.to.have.property('error');
+        });
 
-        const res = await supertestWithoutAuth
-          .post('/read_only_objects/bulk_create?overwrite=true')
-          .set('kbn-xsrf', 'true')
-          .set('cookie', objectOwnerCookie.cookieString())
-          .send({
-            objects,
-          })
-          .expect(200);
-        for (const { id, accessControl } of res.body.saved_objects) {
-          const object = objects.find((obj) => obj.id === id);
-          expect(object).to.not.be(undefined);
-          expect(accessControl).to.have.property('owner', objectOwnerProfileUid);
-          expect(accessControl).to.have.property('accessMode', 'read_only');
-        }
-      });
+        it('return stauts when overwriting and some types do not support access control', async () => {
+          const { cookie: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin();
 
-      it('should allow overwriting objects owned by another user if admin', async () => {
-        const { cookie: objectOwnerCookie, profileUid: objectOwnerProfileUid } =
-          await loginAsObjectOwner('test_user', 'changeme');
-        const firstObject = await supertestWithoutAuth
-          .post('/read_only_objects/create')
-          .set('kbn-xsrf', 'true')
-          .set('cookie', objectOwnerCookie.cookieString())
-          .send({ type: READ_ONLY_TYPE, isReadOnly: true })
-          .expect(200);
-        const { id: objectId1, type: type1 } = firstObject.body;
-        expect(firstObject.body.accessControl).to.have.property('owner', objectOwnerProfileUid);
+          const firstObject = await supertestWithoutAuth
+            .post('/read_only_objects/create')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', adminCookie.cookieString())
+            .send({ type: READ_ONLY_TYPE, isReadOnly: true })
+            .expect(200);
+          const { id: objectId1, type: type1 } = firstObject.body;
+          expect(firstObject.body).to.have.property('accessControl');
+          expect(firstObject.body.accessControl).to.have.property('owner', adminProfileUid);
 
-        const secondObject = await supertestWithoutAuth
-          .post('/read_only_objects/create')
-          .set('kbn-xsrf', 'true')
-          .set('cookie', objectOwnerCookie.cookieString())
-          .send({ type: READ_ONLY_TYPE, isReadOnly: true })
-          .expect(200);
-        const { id: objectId2, type: type2 } = secondObject.body;
-        expect(secondObject.body.accessControl).to.have.property('owner', objectOwnerProfileUid);
+          const secondObject = await supertestWithoutAuth
+            .post('/read_only_objects/create')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', adminCookie.cookieString())
+            .send({ type: NON_READ_ONLY_TYPE })
+            .expect(200);
+          const { id: objectId2, type: type2 } = secondObject.body;
+          expect(secondObject.body).not.to.have.property('accessControl');
 
-        const objects = [
-          {
+          const objects = [
+            {
+              id: objectId1,
+              type: type1,
+            },
+            {
+              id: objectId2,
+              type: type2,
+            },
+          ];
+
+          const { cookie: notObjectOwnerCookieCookie } = await loginAsNotObjectOwner(
+            'test_user',
+            'changeme'
+          );
+
+          const res = await supertestWithoutAuth
+            .post('/read_only_objects/bulk_create?overwrite=true')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', notObjectOwnerCookieCookie.cookieString())
+            .send({
+              objects,
+            })
+            .expect(200);
+
+          expect(res.body).to.have.property('saved_objects');
+          expect(res.body.saved_objects).to.be.an('array');
+          expect(res.body.saved_objects).to.have.length(2);
+          expect(res.body.saved_objects[0]).to.eql({
             id: objectId1,
-            type: type1,
-          },
-          {
-            id: objectId2,
-            type: type2,
-          },
-        ];
-
-        const { cookie: adminCookie } = await loginAsKibanaAdmin();
-
-        const res = await supertestWithoutAuth
-          .post('/read_only_objects/bulk_create?overwrite=true')
-          .set('kbn-xsrf', 'true')
-          .set('cookie', adminCookie.cookieString())
-          .send({
-            objects,
-          })
-          .expect(200);
-        for (const { id, accessControl } of res.body.saved_objects) {
-          const object = objects.find((obj) => obj.id === id);
-          expect(object).to.not.be(undefined);
-          expect(accessControl).to.have.property('owner', objectOwnerProfileUid);
-          expect(accessControl).to.have.property('accessMode', 'read_only');
-        }
-      });
-
-      it('should allow overwriting objects owned by another user if in default mode', async () => {
-        const { cookie: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin();
-
-        const firstObject = await supertestWithoutAuth
-          .post('/read_only_objects/create')
-          .set('kbn-xsrf', 'true')
-          .set('cookie', adminCookie.cookieString())
-          .send({ type: READ_ONLY_TYPE, isReadOnly: false })
-          .expect(200);
-        const { id: objectId1, type: type1 } = firstObject.body;
-        expect(firstObject.body.accessControl).to.have.property('owner', adminProfileUid);
-
-        const secondObject = await supertestWithoutAuth
-          .post('/read_only_objects/create')
-          .set('kbn-xsrf', 'true')
-          .set('cookie', adminCookie.cookieString())
-          .send({ type: READ_ONLY_TYPE, isReadOnly: false })
-          .expect(200);
-        const { id: objectId2, type: type2 } = secondObject.body;
-        expect(secondObject.body.accessControl).to.have.property('owner', adminProfileUid);
-
-        const objects = [
-          {
-            id: objectId1,
-            type: type1,
-          },
-          {
-            id: objectId2,
-            type: type2,
-          },
-        ];
-
-        const { cookie: notObjectOwnerCookieCookie } = await loginAsNotObjectOwner(
-          'test_user',
-          'changeme'
-        );
-
-        const res = await supertestWithoutAuth
-          .post('/read_only_objects/bulk_create?overwrite=true')
-          .set('kbn-xsrf', 'true')
-          .set('cookie', notObjectOwnerCookieCookie.cookieString())
-          .send({
-            objects,
-          })
-          .expect(200);
-
-        expect(res.body.saved_objects.length).to.be(2);
-        expect(res.body.saved_objects[0].accessControl).to.have.property('owner', adminProfileUid);
-        expect(res.body.saved_objects[0].accessControl).to.have.property('accessMode', 'default');
-        expect(res.body.saved_objects[1].accessControl).to.have.property('owner', adminProfileUid);
-        expect(res.body.saved_objects[1].accessControl).to.have.property('accessMode', 'default');
-      });
-
-      it('should reject when attempting to overwrite objects owned by another user if not admin', async () => {
-        const { cookie: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin();
-
-        const firstObject = await supertestWithoutAuth
-          .post('/read_only_objects/create')
-          .set('kbn-xsrf', 'true')
-          .set('cookie', adminCookie.cookieString())
-          .send({ type: READ_ONLY_TYPE, isReadOnly: true })
-          .expect(200);
-        const { id: objectId1, type: type1 } = firstObject.body;
-        expect(firstObject.body.accessControl).to.have.property('owner', adminProfileUid);
-
-        const secondObject = await supertestWithoutAuth
-          .post('/read_only_objects/create')
-          .set('kbn-xsrf', 'true')
-          .set('cookie', adminCookie.cookieString())
-          .send({ type: READ_ONLY_TYPE, isReadOnly: true })
-          .expect(200);
-        const { id: objectId2, type: type2 } = secondObject.body;
-        expect(secondObject.body.accessControl).to.have.property('owner', adminProfileUid);
-
-        const objects = [
-          {
-            id: objectId1,
-            type: type1,
-          },
-          {
-            id: objectId2,
-            type: type2,
-          },
-        ];
-
-        const { cookie: notObjectOwnerCookieCookie } = await loginAsNotObjectOwner(
-          'test_user',
-          'changeme'
-        );
-
-        const res = await supertestWithoutAuth
-          .post('/read_only_objects/bulk_create?overwrite=true')
-          .set('kbn-xsrf', 'true')
-          .set('cookie', notObjectOwnerCookieCookie.cookieString())
-          .send({
-            objects,
-          })
-          .expect(403);
-
-        expect(res.body).to.have.property('error', 'Forbidden');
-        expect(res.body).to.have.property('message', `Unable to bulk_create read_only_type, access control restrictions for read_only_type:${objectId2},read_only_type:${objectId1}`); // ToDo: figure out why this is always backwards
-
-        const getResponse = await supertestWithoutAuth
-          .get(`/read_only_objects/${objectId1}`)
-          .set('kbn-xsrf', 'true')
-          .set('cookie', adminCookie.cookieString())
-          .expect(200);
-        expect(getResponse.body.accessControl).to.have.property('owner', adminProfileUid);
-        expect(getResponse.body.accessControl).to.have.property('accessMode', 'read_only');
-
-        const getResponse2 = await supertestWithoutAuth
-          .get(`/read_only_objects/${objectId2}`)
-          .set('kbn-xsrf', 'true')
-          .set('cookie', adminCookie.cookieString())
-          .expect(200);
-        expect(getResponse2.body.accessControl).to.have.property('owner', adminProfileUid);
-        expect(getResponse2.body.accessControl).to.have.property('accessMode', 'read_only');
+            type: READ_ONLY_TYPE,
+            error: {
+              statusCode: 403,
+              error: 'Forbidden',
+              message:
+                'Overwriting objects in read-only mode that are owned by another user requires the manage_access_control privilege.',
+            },
+          });
+          expect(res.body.saved_objects[1]).to.have.property('type', NON_READ_ONLY_TYPE);
+          expect(res.body.saved_objects[1]).to.have.property('id', objectId2);
+          expect(res.body.saved_objects[1]).not.to.have.property('error');
+        });
       });
     });
 
@@ -908,196 +1119,436 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('#bulk_delete', () => {
       describe('bulk delete ownable objects', () => {
-        it('allow owner to bulk delete objects marked as read only', async () => {
-          const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
-          const firstObject = await supertestWithoutAuth
-            .post('/read_only_objects/create')
-            .set('kbn-xsrf', 'true')
-            .set('cookie', objectOwnerCookie.cookieString())
-            .send({ type: 'read_only_type', isReadOnly: true })
-            .expect(200);
-          const { id: objectId1, type: type1 } = firstObject.body;
+        describe('success', () => {
+          it('allows owner to bulk delete objects in read-only mode', async () => {
+            const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
+            const firstObject = await supertestWithoutAuth
+              .post('/read_only_objects/create')
+              .set('kbn-xsrf', 'true')
+              .set('cookie', objectOwnerCookie.cookieString())
+              .send({ type: 'read_only_type', isReadOnly: true })
+              .expect(200);
+            const { id: objectId1, type: type1 } = firstObject.body;
 
-          const secondObject = await supertestWithoutAuth
-            .post('/read_only_objects/create')
-            .set('kbn-xsrf', 'true')
-            .set('cookie', objectOwnerCookie.cookieString())
-            .send({ type: 'read_only_type', isReadOnly: true })
-            .expect(200);
-          const { id: objectId2, type: type2 } = secondObject.body;
+            const secondObject = await supertestWithoutAuth
+              .post('/read_only_objects/create')
+              .set('kbn-xsrf', 'true')
+              .set('cookie', objectOwnerCookie.cookieString())
+              .send({ type: 'read_only_type', isReadOnly: true })
+              .expect(200);
+            const { id: objectId2, type: type2 } = secondObject.body;
 
-          const objects = [
-            {
-              id: objectId1,
-              type: type1,
-            },
-            {
-              id: objectId2,
-              type: type2,
-            },
-          ];
+            const objects = [
+              {
+                id: objectId1,
+                type: type1,
+              },
+              {
+                id: objectId2,
+                type: type2,
+              },
+            ];
 
-          const res = await supertestWithoutAuth
-            .post('/read_only_objects/bulk_delete')
-            .set('kbn-xsrf', 'true')
-            .set('cookie', objectOwnerCookie.cookieString())
-            .send({
-              objects,
-            })
-            .expect(200);
+            const res = await supertestWithoutAuth
+              .post('/read_only_objects/bulk_delete')
+              .set('kbn-xsrf', 'true')
+              .set('cookie', objectOwnerCookie.cookieString())
+              .send({
+                objects,
+              })
+              .expect(200);
 
-          for (const { id, success } of res.body.statuses) {
-            const object = objects.find((obj) => obj.id === id);
-            expect(object).to.not.be(undefined);
-            expect(success).to.be(true);
-          }
+            for (const { id, success } of res.body.statuses) {
+              const object = objects.find((obj) => obj.id === id);
+              expect(object).to.not.be(undefined);
+              expect(success).to.be(true);
+            }
+          });
+
+          it('allows non-owner to bulk delete objects in default mode', async () => {
+            const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
+
+            const firstObject = await supertestWithoutAuth
+              .post('/read_only_objects/create')
+              .set('kbn-xsrf', 'true')
+              .set('cookie', objectOwnerCookie.cookieString())
+              .send({ type: READ_ONLY_TYPE })
+              .expect(200);
+            const { id: objectId1, type: type1 } = firstObject.body;
+
+            const secondObject = await supertestWithoutAuth
+              .post('/read_only_objects/create')
+              .set('kbn-xsrf', 'true')
+              .set('cookie', objectOwnerCookie.cookieString())
+              .send({ type: READ_ONLY_TYPE })
+              .expect(200);
+            const { id: objectId2, type: type2 } = secondObject.body;
+
+            const objects = [
+              {
+                id: objectId1,
+                type: type1,
+              },
+              {
+                id: objectId2,
+                type: type2,
+              },
+            ];
+            await createSimpleUser(['kibana_savedobjects_editor']);
+            const { cookie: notOwnerCookie } = await loginAsNotObjectOwner(
+              'simple_user',
+              'changeme'
+            );
+
+            await supertestWithoutAuth
+              .post('/read_only_objects/bulk_delete')
+              .set('kbn-xsrf', 'true')
+              .set('cookie', notOwnerCookie.cookieString())
+              .send({ objects })
+              .expect(200);
+
+            await supertestWithoutAuth
+              .get(`/read_only_objects/${objectId1}`)
+              .set('kbn-xsrf', 'true')
+              .set('cookie', notOwnerCookie.cookieString())
+              .expect(404);
+
+            await supertestWithoutAuth
+              .get(`/read_only_objects/${objectId2}`)
+              .set('kbn-xsrf', 'true')
+              .set('cookie', notOwnerCookie.cookieString())
+              .expect(404);
+          });
+
+          it('allows admin to bulk delete objects they do not own', async () => {
+            const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
+            const firstObject = await supertestWithoutAuth
+              .post('/read_only_objects/create')
+              .set('kbn-xsrf', 'true')
+              .set('cookie', objectOwnerCookie.cookieString())
+              .send({ type: 'read_only_type', isReadOnly: true })
+              .expect(200);
+            const { id: objectId1, type: type1 } = firstObject.body;
+
+            const secondObject = await supertestWithoutAuth
+              .post('/read_only_objects/create')
+              .set('kbn-xsrf', 'true')
+              .set('cookie', objectOwnerCookie.cookieString())
+              .send({ type: 'read_only_type', isReadOnly: true })
+              .expect(200);
+            const { id: objectId2, type: type2 } = secondObject.body;
+
+            const { cookie: adminCookie } = await loginAsKibanaAdmin();
+
+            const objects = [
+              {
+                id: objectId1,
+                type: type1,
+              },
+              {
+                id: objectId2,
+                type: type2,
+              },
+            ];
+
+            const res = await supertestWithoutAuth
+              .post('/read_only_objects/bulk_delete')
+              .set('kbn-xsrf', 'true')
+              .set('cookie', adminCookie.cookieString())
+              .send({
+                objects,
+              })
+              .expect(200);
+            for (const { id, success } of res.body.statuses) {
+              const object = objects.find((obj) => obj.id === id);
+              expect(object).to.not.be(undefined);
+              expect(success).to.be(true);
+            }
+          });
         });
 
-        it('allow admin to bulk delete objects marked as read only', async () => {
-          const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
-          const firstObject = await supertestWithoutAuth
-            .post('/read_only_objects/create')
-            .set('kbn-xsrf', 'true')
-            .set('cookie', objectOwnerCookie.cookieString())
-            .send({ type: 'read_only_type', isReadOnly: true })
-            .expect(200);
-          const { id: objectId1, type: type1 } = firstObject.body;
+        describe('failure modes', () => {
+          it('rejects if all objects are read-only', async () => {
+            const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
+            const firstObject = await supertestWithoutAuth
+              .post('/read_only_objects/create')
+              .set('kbn-xsrf', 'true')
+              .set('cookie', objectOwnerCookie.cookieString())
+              .send({ type: 'read_only_type', isReadOnly: true })
+              .expect(200);
+            const { id: objectId1, type: type1 } = firstObject.body;
 
-          const secondObject = await supertestWithoutAuth
-            .post('/read_only_objects/create')
-            .set('kbn-xsrf', 'true')
-            .set('cookie', objectOwnerCookie.cookieString())
-            .send({ type: 'read_only_type', isReadOnly: true })
-            .expect(200);
-          const { id: objectId2, type: type2 } = secondObject.body;
+            const secondObject = await supertestWithoutAuth
+              .post('/read_only_objects/create')
+              .set('kbn-xsrf', 'true')
+              .set('cookie', objectOwnerCookie.cookieString())
+              .send({ type: 'read_only_type', isReadOnly: true })
+              .expect(200);
+            const { id: objectId2, type: type2 } = secondObject.body;
 
-          const { cookie: adminCookie } = await loginAsKibanaAdmin();
+            await createSimpleUser(['kibana_savedobjects_editor']);
+            const { cookie: notOwnerCookie } = await loginAsNotObjectOwner(
+              'simple_user',
+              'changeme'
+            );
 
-          const objects = [
-            {
-              id: objectId1,
-              type: type1,
-            },
-            {
-              id: objectId2,
-              type: type2,
-            },
-          ];
+            const objects = [
+              {
+                id: objectId1,
+                type: type1,
+              },
+              {
+                id: objectId2,
+                type: type2,
+              },
+            ];
 
-          const res = await supertestWithoutAuth
-            .post('/read_only_objects/bulk_delete')
-            .set('kbn-xsrf', 'true')
-            .set('cookie', adminCookie.cookieString())
-            .send({
-              objects,
-            })
-            .expect(200);
-          for (const { id, success } of res.body.statuses) {
-            const object = objects.find((obj) => obj.id === id);
-            expect(object).to.not.be(undefined);
-            expect(success).to.be(true);
-          }
-        });
+            const res = await supertestWithoutAuth
+              .post('/read_only_objects/bulk_delete')
+              .set('kbn-xsrf', 'true')
+              .set('cookie', notOwnerCookie.cookieString())
+              .send({
+                objects,
+              })
+              .expect(403);
+            expect(res.body).to.have.property('message');
+            expect(res.body.message).to.contain(
+              `Unable to bulk_delete read_only_type, access control restrictions for`
+            );
+            expect(res.body.message).to.contain(`read_only_type:${objectId1}`); // order is not guaranteed
+            expect(res.body.message).to.contain(`read_only_type:${objectId2}`);
+          });
 
-        it('does not allow non-owner to bulk delete objects marked as read only', async () => {
-          await activateSimpleUserProfile();
-          const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
-          const firstObject = await supertestWithoutAuth
-            .post('/read_only_objects/create')
-            .set('kbn-xsrf', 'true')
-            .set('cookie', objectOwnerCookie.cookieString())
-            .send({ type: 'read_only_type', isReadOnly: true })
-            .expect(200);
-          const { id: objectId1, type: type1 } = firstObject.body;
+          it('returns status if some objects are owned by the current user', async () => {
+            await activateSimpleUserProfile();
+            const { cookie: object1OwnerCookie, profileUid: obj1OwnerId } =
+              await loginAsObjectOwner('test_user', 'changeme');
+            const firstObject = await supertestWithoutAuth
+              .post('/read_only_objects/create')
+              .set('kbn-xsrf', 'true')
+              .set('cookie', object1OwnerCookie.cookieString())
+              .send({ type: READ_ONLY_TYPE, isReadOnly: true })
+              .expect(200);
+            const { id: objectId1, type: type1 } = firstObject.body;
+            expect(firstObject.body).to.have.property('accessControl');
+            expect(firstObject.body.accessControl).to.have.property('owner', obj1OwnerId);
+            expect(firstObject.body.accessControl).to.have.property('accessMode', 'read_only');
 
-          const secondObject = await supertestWithoutAuth
-            .post('/read_only_objects/create')
-            .set('kbn-xsrf', 'true')
-            .set('cookie', objectOwnerCookie.cookieString())
-            .send({ type: 'read_only_type', isReadOnly: true })
-            .expect(200);
-          const { id: objectId2, type: type2 } = secondObject.body;
+            await createSimpleUser(['kibana_savedobjects_editor']);
+            const { cookie: object2OwnerCookie, profileUid: obj2OwnerId } =
+              await loginAsNotObjectOwner('simple_user', 'changeme');
 
-          const { cookie: notOwnerCookie } = await loginAsNotObjectOwner('simple_user', 'changeme');
+            const secondObject = await supertestWithoutAuth
+              .post('/read_only_objects/create')
+              .set('kbn-xsrf', 'true')
+              .set('cookie', object2OwnerCookie.cookieString())
+              .send({ type: READ_ONLY_TYPE, isReadOnly: true })
+              .expect(200);
+            const { id: objectId2, type: type2 } = secondObject.body;
+            expect(secondObject.body).to.have.property('accessControl');
+            expect(secondObject.body.accessControl).to.have.property('owner', obj2OwnerId);
+            expect(secondObject.body.accessControl).to.have.property('accessMode', 'read_only');
 
-          const objects = [
-            {
-              id: objectId1,
-              type: type1,
-            },
-            {
-              id: objectId2,
-              type: type2,
-            },
-          ];
+            const objects = [
+              {
+                id: objectId1,
+                type: type1,
+              },
+              {
+                id: objectId2,
+                type: type2,
+              },
+            ];
 
-          const res = await supertestWithoutAuth
-            .post('/read_only_objects/bulk_delete')
-            .set('kbn-xsrf', 'true')
-            .set('cookie', notOwnerCookie.cookieString())
-            .send({
-              objects,
-            })
-            .expect(403);
-          expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('message', `Unable to bulk_delete read_only_type, access control restrictions for read_only_type:${objectId2},read_only_type:${objectId1}`); // ToDo: figure out why this is always backwards
-        });
+            const res = await supertestWithoutAuth
+              .post('/read_only_objects/bulk_delete')
+              .set('kbn-xsrf', 'true')
+              .set('cookie', object2OwnerCookie.cookieString())
+              .send({
+                objects,
+              })
+              .expect(200);
 
-        it('allows non-owner non-admin to bulk delete objects in default mode', async () => {
-          const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
+            expect(res.body).to.have.property('statuses');
+            expect(res.body.statuses).to.be.an('array');
+            expect(res.body.statuses).to.have.length(2);
+            expect(res.body.statuses).to.eql([
+              {
+                id: objectId1,
+                type: READ_ONLY_TYPE,
+                success: false,
+                error: {
+                  statusCode: 403,
+                  error: 'Forbidden',
+                  message:
+                    'Deleting objects in read-only mode that are owned by another user requires the manage_access_control privilege.',
+                },
+              },
+              {
+                id: objectId2,
+                type: READ_ONLY_TYPE,
+                success: true,
+              },
+            ]);
+          });
 
-          const firstObject = await supertestWithoutAuth
-            .post('/read_only_objects/create')
-            .set('kbn-xsrf', 'true')
-            .set('cookie', objectOwnerCookie.cookieString())
-            .send({ type: 'read_only_type' })
-            .expect(200);
-          const { id: objectId1, type: type1 } = firstObject.body;
+          it('returns status if some objects are in default mode', async () => {
+            await activateSimpleUserProfile();
+            const { cookie: objectOwnerCookie, profileUid: obj1OwnerId } = await loginAsObjectOwner(
+              'test_user',
+              'changeme'
+            );
+            const firstObject = await supertestWithoutAuth
+              .post('/read_only_objects/create')
+              .set('kbn-xsrf', 'true')
+              .set('cookie', objectOwnerCookie.cookieString())
+              .send({ type: READ_ONLY_TYPE, isReadOnly: true })
+              .expect(200);
+            const { id: objectId1, type: type1 } = firstObject.body;
+            expect(firstObject.body).to.have.property('accessControl');
+            expect(firstObject.body.accessControl).to.have.property('owner', obj1OwnerId);
+            expect(firstObject.body.accessControl).to.have.property('accessMode', 'read_only');
 
-          const secondObject = await supertestWithoutAuth
-            .post('/read_only_objects/create')
-            .set('kbn-xsrf', 'true')
-            .set('cookie', objectOwnerCookie.cookieString())
-            .send({ type: 'read_only_type' })
-            .expect(200);
-          const { id: objectId2, type: type2 } = secondObject.body;
+            const secondObject = await supertestWithoutAuth
+              .post('/read_only_objects/create')
+              .set('kbn-xsrf', 'true')
+              .set('cookie', objectOwnerCookie.cookieString())
+              .send({ type: READ_ONLY_TYPE, isReadOnly: false })
+              .expect(200);
+            const { id: objectId2, type: type2 } = secondObject.body;
+            expect(secondObject.body).to.have.property('accessControl');
+            expect(secondObject.body.accessControl).to.have.property('owner', obj1OwnerId);
+            expect(secondObject.body.accessControl).to.have.property('accessMode', 'default');
 
-          const objects = [
-            {
-              id: objectId1,
-              type: type1,
-            },
-            {
-              id: objectId2,
-              type: type2,
-            },
-          ];
-          await createSimpleUser(['kibana_savedobjects_editor']);
-          const { cookie: notOwnerCookie } = await loginAsNotObjectOwner('simple_user', 'changeme');
+            await createSimpleUser(['kibana_savedobjects_editor']);
+            const { cookie: notOwnerCookie } = await loginAsNotObjectOwner(
+              'simple_user',
+              'changeme'
+            );
 
-          await supertestWithoutAuth
-            .post('/read_only_objects/bulk_delete')
-            .set('kbn-xsrf', 'true')
-            .set('cookie', notOwnerCookie.cookieString())
-            .send({ objects })
-            .expect(200);
+            const objects = [
+              {
+                id: objectId1,
+                type: type1,
+              },
+              {
+                id: objectId2,
+                type: type2,
+              },
+            ];
 
-          await supertestWithoutAuth
-            .get(`/read_only_objects/${objectId1}`)
-            .set('kbn-xsrf', 'true')
-            .set('cookie', notOwnerCookie.cookieString())
-            .expect(404);
+            const res = await supertestWithoutAuth
+              .post('/read_only_objects/bulk_delete')
+              .set('kbn-xsrf', 'true')
+              .set('cookie', notOwnerCookie.cookieString())
+              .send({
+                objects,
+              })
+              .expect(200);
 
-          await supertestWithoutAuth
-            .get(`/read_only_objects/${objectId2}`)
-            .set('kbn-xsrf', 'true')
-            .set('cookie', notOwnerCookie.cookieString())
-            .expect(404);
+            expect(res.body).to.have.property('statuses');
+            expect(res.body.statuses).to.be.an('array');
+            expect(res.body.statuses).to.have.length(2);
+            expect(res.body.statuses).to.eql([
+              {
+                id: objectId1,
+                type: READ_ONLY_TYPE,
+                success: false,
+                error: {
+                  statusCode: 403,
+                  error: 'Forbidden',
+                  message:
+                    'Deleting objects in read-only mode that are owned by another user requires the manage_access_control privilege.',
+                },
+              },
+              {
+                id: objectId2,
+                type: READ_ONLY_TYPE,
+                success: true,
+              },
+            ]);
+          });
+
+          it('returns status if some types do not support access control', async () => {
+            await activateSimpleUserProfile();
+            const { cookie: objectOwnerCookie, profileUid: obj1OwnerId } = await loginAsObjectOwner(
+              'test_user',
+              'changeme'
+            );
+            const firstObject = await supertestWithoutAuth
+              .post('/read_only_objects/create')
+              .set('kbn-xsrf', 'true')
+              .set('cookie', objectOwnerCookie.cookieString())
+              .send({ type: READ_ONLY_TYPE, isReadOnly: true })
+              .expect(200);
+            const { id: objectId1, type: type1 } = firstObject.body;
+            expect(firstObject.body).to.have.property('accessControl');
+            expect(firstObject.body.accessControl).to.have.property('owner', obj1OwnerId);
+            expect(firstObject.body.accessControl).to.have.property('accessMode', 'read_only');
+
+            const secondObject = await supertestWithoutAuth
+              .post('/read_only_objects/create')
+              .set('kbn-xsrf', 'true')
+              .set('cookie', objectOwnerCookie.cookieString())
+              .send({ type: NON_READ_ONLY_TYPE })
+              .expect(200);
+            const { id: objectId2, type: type2 } = secondObject.body;
+            expect(secondObject.body).not.to.have.property('accessControl');
+
+            const { cookie: notOwnerCookie } = await loginAsNotObjectOwner(
+              'simple_user',
+              'changeme'
+            );
+
+            const objects = [
+              {
+                id: objectId1,
+                type: type1,
+              },
+              {
+                id: objectId2,
+                type: type2,
+              },
+            ];
+
+            const res = await supertestWithoutAuth
+              .post('/read_only_objects/bulk_delete')
+              .set('kbn-xsrf', 'true')
+              .set('cookie', notOwnerCookie.cookieString())
+              .send({
+                objects,
+              })
+              .expect(200);
+
+            expect(res.body).to.have.property('statuses');
+            expect(res.body.statuses).to.be.an('array');
+            expect(res.body.statuses).to.have.length(2);
+            expect(res.body.statuses).to.eql([
+              {
+                id: objectId1,
+                type: READ_ONLY_TYPE,
+                success: false,
+                error: {
+                  statusCode: 403,
+                  error: 'Forbidden',
+                  message:
+                    'Deleting objects in read-only mode that are owned by another user requires the manage_access_control privilege.',
+                },
+              },
+              {
+                id: objectId2,
+                type: NON_READ_ONLY_TYPE,
+                success: true,
+              },
+            ]);
+          });
         });
       });
 
       describe('force bulk delete ownable objects', () => {
-        it('allow owner to bulk delete objects marked as read only', async () => {
+        // Note: force is only required on objects that exist in multiple spaces. If we want to test this
+        // case against read-only objects, we should set them up to exist in multiple spaces.
+        it('allows owner to bulk delete objects marked as read only', async () => {
           const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
           const firstObject = await supertestWithoutAuth
             .post('/read_only_objects/create')
@@ -1143,7 +1594,7 @@ export default function ({ getService }: FtrProviderContext) {
           }
         });
 
-        it('allow admin to bulk delete objects marked as read only', async () => {
+        it('allows admin to bulk delete objects marked as read only', async () => {
           const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
           const firstObject = await supertestWithoutAuth
             .post('/read_only_objects/create')
@@ -1189,6 +1640,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(success).to.be(true);
           }
         });
+
         it('does not allow non-owner to bulk delete objects marked as read only', async () => {
           await activateSimpleUserProfile();
           const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
@@ -1231,7 +1683,11 @@ export default function ({ getService }: FtrProviderContext) {
             })
             .expect(403);
           expect(res.body).to.have.property('message');
-          expect(res.body).to.have.property('message', `Unable to bulk_delete read_only_type, access control restrictions for read_only_type:${objectId2},read_only_type:${objectId1}`); //ToDo: figure out why this is always backwards
+          expect(res.body.message).to.contain(
+            `Unable to bulk_delete read_only_type, access control restrictions for`
+          );
+          expect(res.body.message).to.contain(`read_only_type:${objectId1}`); // order is not guaranteed
+          expect(res.body.message).to.contain(`read_only_type:${objectId2}`);
         });
       });
     });
