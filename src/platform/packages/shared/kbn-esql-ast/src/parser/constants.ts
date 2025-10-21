@@ -12,6 +12,7 @@ import { Token } from 'antlr4';
 export const DEFAULT_CHANNEL: number = +(Token as any).DEFAULT_CHANNEL;
 export const HIDDEN_CHANNEL: number = +(Token as any).HIDDEN_CHANNEL;
 
+export const HEADER_COMMANDS = new Set<string>(['SET']);
 export const SOURCE_COMMANDS = new Set<string>(['FROM', 'ROW', 'SHOW', 'TS', 'EXPLAIN']);
 
 // FROM https://github.com/elastic/elasticsearch/blob/a2dbb7b9174b109d89fa2da87645ecd4d4e8de14/x-pack/plugin/esql/src/main/java/org/elasticsearch/xpack/esql/type/EsqlDataTypeConverter.java#L174
