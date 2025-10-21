@@ -63,6 +63,7 @@ export function openConversationFlyout(
         options.onClose?.();
       },
       isResizable: true,
+      size: '1000px',
     }
   );
 

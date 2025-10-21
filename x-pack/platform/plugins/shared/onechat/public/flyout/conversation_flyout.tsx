@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { ConversationFlyoutProps } from './types';
 
 export const ConversationFlyout = ({
@@ -14,8 +15,10 @@ export const ConversationFlyout = ({
   ...embeddableProps
 }: ConversationFlyoutProps) => {
   return (
-    <div>
-      <ConversationComponent {...embeddableProps} />
-    </div>
+    <EuiFlexGroup direction="column" gutterSize="l">
+      <EuiFlexItem>
+        <ConversationComponent {...embeddableProps} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
