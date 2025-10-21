@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ComponentType, ReactNode } from 'react';
+import type { ComponentType } from 'react';
 import type React from 'react';
 import type { Moment } from 'moment';
 import type { EuiSuperSelectOption } from '@elastic/eui';
@@ -43,7 +43,6 @@ import type {
   RuleTypeParams,
 } from '@kbn/alerting-plugin/common';
 import type { BulkOperationError } from '@kbn/alerting-plugin/server';
-import type { RuleType, RuleTypeIndex } from '@kbn/triggers-actions-ui-types';
 import type {
   ValidationResult,
   UserConfiguredActionConnector,
@@ -51,7 +50,11 @@ import type {
   ActionTypeRegistryContract,
 } from '@kbn/alerts-ui-shared/src/common/types';
 import type { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
-import type { RULE_DETAIL_DESCRIPTION_FIELD_TYPES } from '@kbn/alerting-types/rule_detail_description_type';
+import type {
+  GetDescriptionFieldsFn,
+  RuleType,
+  RuleTypeIndex,
+} from '@kbn/triggers-actions-ui-types/rule_types';
 import type { ComponentOpts as RuleStatusDropdownProps } from './application/sections/rules_list/components/rule_status_dropdown';
 import type { RuleTagFilterProps } from './application/sections/rules_list/components/rule_tag_filter';
 import type { RuleStatusFilterProps } from './application/sections/rules_list/components/rule_status_filter';
@@ -287,29 +290,6 @@ export interface RuleDescriptionFieldWrappers {
     children: (data: T) => React.ReactNode;
   }) => React.ReactElement;
 }
-
-type PrebuildField<T> = (props: T) => {
-  title: string;
-  description: NonNullable<React.ReactNode>;
-};
-
-export interface PrebuildFieldsMap {
-  [RULE_DETAIL_DESCRIPTION_FIELD_TYPES.INDEX_PATTERN]: PrebuildField<string[]>;
-  [RULE_DETAIL_DESCRIPTION_FIELD_TYPES.CUSTOM_QUERY]: PrebuildField<string>;
-  [RULE_DETAIL_DESCRIPTION_FIELD_TYPES.ESQL_QUERY]: PrebuildField<string>;
-  [RULE_DETAIL_DESCRIPTION_FIELD_TYPES.DATA_VIEW_ID]: PrebuildField<string>;
-  [RULE_DETAIL_DESCRIPTION_FIELD_TYPES.DATA_VIEW_INDEX_PATTERN]: PrebuildField<string>;
-}
-
-export type GetDescriptionFieldsFn = ({
-  rule,
-  prebuildFields,
-  http,
-}: {
-  rule: Rule;
-  prebuildFields: PrebuildFieldsMap | undefined;
-  http: HttpSetup | undefined;
-}) => { title: string; description: NonNullable<ReactNode> }[];
 
 export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
   id: string;

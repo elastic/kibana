@@ -8,7 +8,6 @@
  */
 
 import type { LicenseType } from '@kbn/licensing-types';
-import type { GetDescriptionFieldsFn } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type { RecoveredActionGroupId, DefaultActionGroupId } from './builtin_action_groups_types';
 import type { ActionGroup } from './action_group_types';
 import type { ActionVariable } from './action_variable';
@@ -42,7 +41,6 @@ export interface RuleType<
   enabledInLicense: boolean;
   authorizedConsumers: Record<string, ConsumerPrivileges>;
   autoRecoverAlerts?: boolean;
-  getDescriptionFields?: GetDescriptionFieldsFn;
 }
 
 export type ActionGroupIdsOf<T> = T extends ActionGroup<infer groups>

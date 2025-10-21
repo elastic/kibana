@@ -7,14 +7,14 @@
 
 import React, { Suspense, useMemo } from 'react';
 import { EuiBadge, EuiCodeBlock, EuiFlexGroup, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
-import { RULE_DETAIL_DESCRIPTION_FIELD_TYPES } from '@kbn/alerting-types/rule_detail_description_type';
+import { RULE_DETAIL_DESCRIPTION_FIELD_TYPES } from '@kbn/triggers-actions-ui-types/rule_detail_description_type';
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { HttpResponse, HttpSetup } from '@kbn/core/public';
-import type { PrebuildFieldsMap, RuleDefinitionProps } from '../../../../types';
+import type { PrebuildFieldsMap } from '@kbn/triggers-actions-ui-types/rule_types';
+import type { RuleDefinitionProps } from '../../../../types';
 
-// needed by the AsyncField
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
   constructor(props: { children: React.ReactNode }) {
     super(props);
