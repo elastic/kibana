@@ -25,9 +25,12 @@ const storageSettings = {
       labels: types.keyword({}),
       avatar_color: types.keyword({}),
       avatar_symbol: types.keyword({}),
-      configuration: types.object({ dynamic: false }),
+      config: types.object({ dynamic: false }),
       created_at: types.date({}),
       updated_at: types.date({}),
+      // legacy field - configuration was introduced as dynamic: true
+      // so we introduced the config field later
+      configuration: types.object({ dynamic: true }),
     },
   },
 } satisfies IndexStorageSettings;
@@ -41,12 +44,16 @@ export interface AgentProperties {
   labels?: string[];
   avatar_color?: string;
   avatar_symbol?: string;
-  configuration: {
-    instructions?: string;
-    tools: ToolSelection[];
-  };
+  config: AgentConfigurationProperties;
   created_at: string;
   updated_at: string;
+  // deprecated fields
+  configuration?: AgentConfigurationProperties;
+}
+
+export interface AgentConfigurationProperties {
+  instructions?: string;
+  tools: ToolSelection[];
 }
 
 export type AgentProfileStorageSettings = typeof storageSettings;
