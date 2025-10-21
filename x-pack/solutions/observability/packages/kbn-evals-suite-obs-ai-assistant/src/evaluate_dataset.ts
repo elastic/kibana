@@ -89,27 +89,24 @@ export function createEvaluateObservabilityAIAssistantDataset({
             metadata,
           };
 
+          const result: any = {
+            errors: response.errors,
+            messages: response.messages,
+          };
+
           if (useQualitativeEvaluators) {
-            // Running correctness and groundedness evaluators as part of the task since their respective quantitative evaluators need their output
             const [correctnessResult, groundednessResult] = await Promise.all([
               evaluators.correctnessAnalysis().evaluate(qualitativeAnalysisInput),
               evaluators.groundednessAnalysis().evaluate(qualitativeAnalysisInput),
             ]);
-            const correctnessAnalysis = correctnessResult.metadata ?? undefined;
-            const groundednessAnalysis = groundednessResult.metadata ?? undefined;
 
-            return {
-              errors: response.errors,
-              messages: response.messages,
-              correctnessAnalysis,
-              groundednessAnalysis,
-            };
-          } else {
-            return {
-              errors: response.errors,
-              messages: response.messages,
-            };
+            if (correctnessResult?.metadata)
+              result.correctnessAnalysis = correctnessResult.metadata;
+            if (groundednessResult?.metadata)
+              result.groundednessAnalysis = groundednessResult.metadata;
           }
+
+          return result;
         },
       },
       [
