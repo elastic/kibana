@@ -40,12 +40,14 @@ import {
   registerLibraryAnnotationGroup,
 } from '../../../state_management';
 import { getRemoveOperation } from '../../../utils';
+import { useEditorFrameService } from '../../editor_frame_service_context';
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
+  const { visualizationMap } = useEditorFrameService();
   const visualization = useLensSelector(selectVisualization);
 
   const activeVisualization = visualization.activeId
-    ? props.visualizationMap[visualization.activeId]
+    ? visualizationMap[visualization.activeId]
     : null;
 
   return activeVisualization && visualization.state ? (
@@ -58,7 +60,8 @@ export function LayerPanels(
     activeVisualization: Visualization;
   }
 ) {
-  const { activeVisualization, datasourceMap, indexPatternService } = props;
+  const { datasourceMap } = useEditorFrameService();
+  const { activeVisualization, indexPatternService } = props;
   const { activeDatasourceId, visualization, datasourceStates, query } = useLensSelector(
     (state) => state.lens
   );

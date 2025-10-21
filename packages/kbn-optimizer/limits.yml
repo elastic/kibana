@@ -21,12 +21,12 @@ pageLoadAssetSize:
   contentConnectors: 33014
   contentManagement: 8350
   controls: 12234
-  core: 575460
+  core: 574609
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 19000
   dashboardEnhanced: 12500
-  dashboardMarkdown: 5124
+  dashboardMarkdown: 5072
   data: 453742
   dataQuality: 11469
   datasetQuality: 49315
@@ -58,7 +58,7 @@ pageLoadAssetSize:
   expressionLegacyMetricVis: 11834
   expressionMetricVis: 17490
   expressionPartitionVis: 29826
-  expressions: 105121
+  expressions: 105113
   expressionTagcloud: 12643
   expressionXY: 45000
   features: 4145
@@ -72,7 +72,7 @@ pageLoadAssetSize:
   globalSearch: 6890
   globalSearchBar: 26986
   globalSearchProviders: 4646
-  graph: 10010
+  graph: 10006
   grokdebugger: 5484
   home: 13621
   imageEmbeddable: 6000
@@ -109,14 +109,14 @@ pageLoadAssetSize:
   navigation: 11684
   newsfeed: 12371
   noDataPage: 1749
-  observability: 109690
-  observabilityAIAssistant: 52565
+  observability: 109574
+  observabilityAIAssistant: 52556
   observabilityAIAssistantApp: 18553
   observabilityAiAssistantManagement: 6438
   observabilityLogsExplorer: 4918
   observabilityOnboarding: 12872
-  observabilityShared: 75256
-  onechat: 19088
+  observabilityShared: 75115
+  onechat: 20161
   osquery: 47422
   painlessLab: 6299
   presentationPanel: 11484
@@ -139,6 +139,7 @@ pageLoadAssetSize:
   screenshotMode: 2351
   screenshotting: 3252
   searchAssistant: 6150
+  searchGettingStarted: 5453
   searchHomepage: 7962
   searchIndices: 9992
   searchInferenceEndpoints: 8071
@@ -149,20 +150,20 @@ pageLoadAssetSize:
   searchQueryRules: 6689
   searchSynonyms: 6371
   security: 79987
-  securitySolution: 119881
+  securitySolution: 119434
   securitySolutionEss: 43319
   securitySolutionServerless: 62964
   serverless: 7854
-  serverlessChat: 5133
-  serverlessObservability: 25098
+  serverlessObservability: 24297
   serverlessSearch: 33338
+  serverlessWorkplaceAI: 5513
   sessionView: 47912
   share: 58677
   slo: 36645
   snapshotRestore: 22068
   spaces: 32135
   stackAlerts: 31499
-  stackConnectors: 68838
+  stackConnectors: 74000
   streams: 9000
   streamsApp: 17000
   synthetics: 31571
@@ -181,7 +182,7 @@ pageLoadAssetSize:
   urlForwarding: 7349
   usageCollection: 5655
   ux: 8376
-  visDefaultEditor: 35092
+  visDefaultEditor: 35080
   visTypeGauge: 13006
   visTypeHeatmap: 12457
   visTypeMarkdown: 8817
@@ -191,10 +192,10 @@ pageLoadAssetSize:
   visTypeTagcloud: 7876
   visTypeTimelion: 12512
   visTypeTimeseries: 19665
-  visTypeVega: 38540
+  visTypeVega: 38538
   visTypeVislib: 14679
   visTypeXy: 32342
   visualizations: 41000
   watcher: 10485
-  workchatApp: 5780
-  workflowsManagement: 6555
+  workflowsManagement: 7267
+  workplaceAIApp: 5822

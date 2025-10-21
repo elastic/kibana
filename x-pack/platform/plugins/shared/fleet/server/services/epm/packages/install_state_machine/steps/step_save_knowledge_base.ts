@@ -23,6 +23,7 @@ import {
 import { updateEsAssetReferences } from '../../es_assets_reference';
 import type { KnowledgeBaseItem } from '../../../../../../common/types/models/epm';
 import { licenseService } from '../../../../license';
+import { appContextService } from '../../../../app_context';
 export const KNOWLEDGE_BASE_PATH = 'docs/knowledge_base/';
 
 /**
@@ -67,6 +68,15 @@ export async function stepSaveKnowledgeBase(context: InstallContext): Promise<vo
   logger.debug(
     `Knowledge base step: Starting for package ${packageInfo.name}@${packageInfo.version}`
   );
+
+  // Check if knowledge base installation is enabled via experimental feature flag
+  const experimentalFeatures = appContextService.getExperimentalFeatures();
+  if (!experimentalFeatures.installIntegrationsKnowledge) {
+    logger.debug(
+      `Knowledge base step: Skipping knowledge base save - installIntegrationsKnowledge experimental feature is disabled`
+    );
+    return;
+  }
 
   // Check if user has appropriate license for knowledge base functionality
   // You can adjust the license requirement as needed (e.g., isGoldPlus(), isPlatinum(), isEnterprise())
