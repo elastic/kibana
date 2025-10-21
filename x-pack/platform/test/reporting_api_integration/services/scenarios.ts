@@ -353,13 +353,27 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     return res.body;
   };
 
-  const disableScheduledReports = async (
+  const disableReportSchedules = async (
     ids: string[],
     username = 'elastic',
     password = process.env.TEST_KIBANA_PASS || 'changeme'
   ) => {
     const { body } = await supertestWithoutAuth
       .patch(INTERNAL_ROUTES.SCHEDULED.BULK_DISABLE)
+      .auth(username, password)
+      .set('kbn-xsrf', 'xxx')
+      .send({ ids })
+      .expect(200);
+    return body;
+  };
+
+  const deleteReportSchedules = async (
+    ids: string[],
+    username = 'elastic',
+    password = process.env.TEST_KIBANA_PASS || 'changeme'
+  ) => {
+    const { body } = await supertestWithoutAuth
+      .delete(INTERNAL_ROUTES.SCHEDULED.BULK_DELETE)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
       .send({ ids })
@@ -546,7 +560,8 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     getTask,
     deleteTasks,
     listScheduledReports,
-    disableScheduledReports,
+    disableReportSchedules,
+    deleteReportSchedules,
     runTelemetryTask,
   };
 }
