@@ -74,9 +74,10 @@ export const columnsAfter = (
     },
   });
 
+  const uniqueColumns = uniqBy(columns, 'name');
   return [
     ...previousColumns,
-    ...columns.map(
+    ...uniqueColumns.map(
       (column) =>
         ({
           name: column.name,
