@@ -26374,6 +26374,114 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/fleet/agents/{agentId}/migrate:
+    post:
+      description: 'Migrate a single agent to another cluster.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.'
+      operationId: post-fleet-agents-agentid-migrate
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                enrollment_token:
+                  type: string
+                settings:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    ca_sha256:
+                      type: string
+                    certificate_authorities:
+                      type: string
+                    elastic_agent_cert:
+                      type: string
+                    elastic_agent_cert_key:
+                      type: string
+                    elastic_agent_cert_key_passphrase:
+                      type: string
+                    headers:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    insecure:
+                      type: boolean
+                    proxy_disabled:
+                      type: boolean
+                    proxy_headers:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    proxy_url:
+                      type: string
+                    replace_token:
+                      type: string
+                    staging:
+                      type: string
+                    tags:
+                      items:
+                        type: string
+                      type: array
+                uri:
+                  format: uri
+                  type: string
+              required:
+                - uri
+                - enrollment_token
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  actionId:
+                    type: string
+                required:
+                  - actionId
+          description: OK
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+      summary: Migrate a single agent
+      tags:
+        - Elastic Agents
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/fleet/agents/{agentId}/reassign:
     post:
       description: '[Required authorization] Route required privileges: fleet-agents-all.'
@@ -26991,6 +27099,116 @@ paths:
                   - message
                   - attributes
       summary: Get available agent versions
+      tags:
+        - Elastic Agents
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/fleet/agents/bulk_migrate:
+    post:
+      description: 'Bulk migrate agents to another cluster.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.'
+      operationId: post-fleet-agents-bulk-migrate
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                agents:
+                  anyOf:
+                    - items:
+                        type: string
+                      type: array
+                    - type: string
+                batchSize:
+                  type: number
+                enrollment_token:
+                  type: string
+                settings:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    ca_sha256:
+                      type: string
+                    certificate_authorities:
+                      type: string
+                    elastic_agent_cert:
+                      type: string
+                    elastic_agent_cert_key:
+                      type: string
+                    elastic_agent_cert_key_passphrase:
+                      type: string
+                    headers:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    insecure:
+                      type: boolean
+                    proxy_disabled:
+                      type: boolean
+                    proxy_headers:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    proxy_url:
+                      type: string
+                    staging:
+                      type: string
+                    tags:
+                      items:
+                        type: string
+                      type: array
+                uri:
+                  format: uri
+                  type: string
+              required:
+                - agents
+                - uri
+                - enrollment_token
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  actionId:
+                    type: string
+                required:
+                  - actionId
+          description: OK
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+      summary: Migrate multiple agents
       tags:
         - Elastic Agents
       x-metaTags:
@@ -69624,27 +69842,9 @@ components:
         - schedule
         - actions
     Security_Attack_discovery_API_AttackDiscoveryApiScheduleAction:
-      type: object
-      properties:
-        action_type_id:
-          description: The action type used for sending notifications.
-          type: string
-        alerts_filter:
-          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionAlertsFilter'
-        frequency:
-          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionFrequency'
-        group:
-          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionGroup'
-        id:
-          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionId'
-        params:
-          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionParams'
-        uuid:
-          $ref: '#/components/schemas/Security_Attack_discovery_API_NonEmptyString'
-      required:
-        - action_type_id
-        - id
-        - params
+      oneOf:
+        - $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleGeneralAction'
+        - $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleSystemAction'
     Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionAlertsFilter:
       additionalProperties: true
       type: object
@@ -69740,6 +69940,29 @@ components:
         - unknown
         - warning
       type: string
+    Security_Attack_discovery_API_AttackDiscoveryApiScheduleGeneralAction:
+      type: object
+      properties:
+        action_type_id:
+          description: The action type used for sending notifications.
+          type: string
+        alerts_filter:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionAlertsFilter'
+        frequency:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionFrequency'
+        group:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionGroup'
+        id:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionId'
+        params:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionParams'
+        uuid:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_NonEmptyString'
+      required:
+        - action_type_id
+        - group
+        - id
+        - params
     Security_Attack_discovery_API_AttackDiscoveryApiScheduleParams:
       description: An attack discovery schedule params
       type: object
@@ -69775,6 +69998,22 @@ components:
         - alerts_index_pattern
         - api_config
         - size
+    Security_Attack_discovery_API_AttackDiscoveryApiScheduleSystemAction:
+      type: object
+      properties:
+        action_type_id:
+          description: The action type used for sending notifications.
+          type: string
+        id:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionId'
+        params:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionParams'
+        uuid:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_NonEmptyString'
+      required:
+        - action_type_id
+        - id
+        - params
     Security_Attack_discovery_API_AttackDiscoveryApiScheduleUpdateProps:
       description: An attack discovery schedule update properties
       type: object
