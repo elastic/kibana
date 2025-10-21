@@ -17,7 +17,6 @@ import type {
 } from '../../../types';
 import type { EndpointAppContext } from '../../types';
 import { withEndpointAuthz } from '../with_endpoint_authz';
-import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import { getAgentStatusClient } from '../../services';
 
 export const registerAgentStatusRoute = (

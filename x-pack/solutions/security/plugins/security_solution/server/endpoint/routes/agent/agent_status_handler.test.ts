@@ -10,7 +10,6 @@ import { createHttpApiTestSetupMock } from '../../mocks';
 import { sentinelOneMock } from '../../services/actions/clients/sentinelone/mocks';
 import { registerAgentStatusRoute } from './agent_status_handler';
 import { AGENT_STATUS_ROUTE } from '../../../../common/endpoint/constants';
-import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import type { EndpointAgentStatusRequestQueryParams } from '../../../../common/api/endpoint/agent/get_agent_status_route';
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../common/endpoint/service/response_actions/constants';
