@@ -47,7 +47,7 @@ export type {
 export type {
   LegacyMetricState as MetricState,
   ValueLabelConfig,
-  LensPartitionVisualizationState,
+  LensPartitionVisualizationState as PieVisualizationState,
   LensPartitionLayerState,
   SharedPartitionLayerState as SharedLensPartitionLayerState,
   LensLayerType as LayerType,

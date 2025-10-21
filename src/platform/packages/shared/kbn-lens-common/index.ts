@@ -367,7 +367,7 @@ export {
   TAGCLOUD_SCALE_OPTIONS,
   LENS_TAGCLOUD_DEFAULT_STATE,
 } from './lens/visualizations/tagcloud/constants';
-export type {
+export {
   YAxisModes,
   SeriesTypes,
   visualizationSubtypes,

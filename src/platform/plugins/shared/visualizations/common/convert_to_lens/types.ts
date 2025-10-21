@@ -106,7 +106,9 @@ export type CardinalityColumn = ToBaseColumnFormat<CardinalityIndexPatternColumn
 export type PercentileColumn = ToBaseColumnFormat<PercentileIndexPatternColumn>;
 export type PercentileRanksColumn = ToBaseColumnFormat<PercentileRanksIndexPatternColumn>;
 export type CountColumn = ToBaseColumnFormat<CountIndexPatternColumn>;
-export type LastValueColumn = ToBaseColumnFormat<LastValueIndexPatternColumn>;
+export type LastValueColumn = Omit<ToBaseColumnFormat<LastValueIndexPatternColumn>, 'params'> & {
+  params: Omit<LastValueIndexPatternColumn['params'], 'sortField'> & { sortField?: string };
+};
 
 export type CumulativeSumColumn = ToBaseColumnFormat<CumulativeSumIndexPatternColumn>;
 export type CounterRateColumn = ToBaseColumnFormat<CounterRateIndexPatternColumn>;

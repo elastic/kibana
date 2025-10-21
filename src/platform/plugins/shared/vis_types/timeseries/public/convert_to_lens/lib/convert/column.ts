@@ -107,7 +107,7 @@ export const isColumnWithMeta = (column: Column): column is ColumnWithMeta => {
   return false;
 };
 
-export const excludeMetaFromColumn = (column: Column) => {
+export const excludeMetaFromColumn = <T extends Column>(column: T) => {
   if (isColumnWithMeta(column)) {
     const { meta, ...rest } = column;
     return rest;

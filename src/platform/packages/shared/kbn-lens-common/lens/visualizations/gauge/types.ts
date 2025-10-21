@@ -17,7 +17,7 @@ export type GaugeAccessors = Pick<GaugeExpressionArgs, 'metric' | 'goal' | 'min'
 
 export type GaugeVisualizationState = Omit<
   GaugeExpressionArgs,
-  'metric' | 'goal' | 'min' | 'max' | 'palette'
+  'metric' | 'goal' | 'min' | 'max' | 'palette' | 'colorMode'
 > & {
   metricAccessor?: string;
   minAccessor?: string;

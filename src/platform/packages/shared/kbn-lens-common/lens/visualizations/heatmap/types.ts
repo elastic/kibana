@@ -82,7 +82,7 @@ export interface HeatmapExpressionLayerState {
   ariaLabel?: string;
 }
 
-export type HeatmapVisualizationState = HeatmapExpressionLayerState & {
+export type HeatmapVisualizationState = Omit<HeatmapExpressionLayerState, 'palette'> & {
   xAccessor?: string;
   yAccessor?: string;
   valueAccessor?: string;

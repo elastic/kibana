@@ -119,7 +119,7 @@ export const convertToLens: ConvertXYToLensVisualization = async (vis, timefilte
     dataLayers.length > 1 &&
     dataLayers.some((l) =>
       l.columns.some(
-        (c) => c.isSplit && 'orderBy' in c.params && c.params.orderBy.type === 'column'
+        (c) => c.isSplit && c.params && 'orderBy' in c.params && c.params.orderBy.type === 'column'
       )
     )
   ) {
