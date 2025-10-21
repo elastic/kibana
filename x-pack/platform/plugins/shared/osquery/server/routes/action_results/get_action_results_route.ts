@@ -6,6 +6,7 @@
  */
 
 import { lastValueFrom } from 'rxjs';
+import { reverse, uniqBy, flatten } from 'lodash';
 import type { IRouter } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
@@ -126,9 +127,7 @@ export const getActionResultsRoute = (
             if (actionDetails?._source) {
               // Check if actionId is a child query action_id
               const queries = actionDetails._source.queries || [];
-              const matchingQuery = queries.find(
-                (q) => q.action_id === request.params.actionId
-              );
+              const matchingQuery = queries.find((q) => q.action_id === request.params.actionId);
 
               // Use query-specific agents if found, otherwise use parent action's agents
               agentIds = matchingQuery?.agents || actionDetails._source.agents || [];
@@ -183,10 +182,29 @@ export const getActionResultsRoute = (
             pending: Math.max(0, agentIds.length - totalResponded),
           };
 
+          let processedEdges = res.edges;
+
+          // Only process edges for internal UI (when agentIds NOT provided in request)
+          if (!requestedAgentIds && agentIds.length > 0) {
+            // Create placeholder edges for ALL agents
+            const placeholderEdges = agentIds.map((agentId) => ({
+              _index: '.logs-osquery_manager.action.responses-default',
+              _id: `placeholder-${agentId}`,
+              _source: {},
+              fields: { agent_id: [agentId] },
+            }));
+
+            // Merge real results with placeholders, keeping real results when duplicates exist
+            // reverse() ensures proper ordering, uniqBy keeps first occurrence (real data)
+            processedEdges = reverse(
+              uniqBy(flatten([res.edges, placeholderEdges]), 'fields.agent_id[0]')
+            ) as typeof res.edges;
+          }
+
           return response.ok({
             body: {
-              edges: res.edges,
-              total: res.total,
+              edges: processedEdges,
+              total: processedEdges.length,
               aggregations,
               inspect: res.inspect,
             },

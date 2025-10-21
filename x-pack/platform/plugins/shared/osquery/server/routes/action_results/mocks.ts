@@ -15,10 +15,11 @@ import {
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-import { Direction, OsqueryQueries } from '../../../common/search_strategy';
+import { OsqueryQueries } from '../../../common/search_strategy';
 import type {
   ActionDetailsStrategyResponse,
   ActionResultsStrategyResponse,
+  Direction,
 } from '../../../common/search_strategy';
 
 /**
@@ -66,6 +67,7 @@ export const createMockOsqueryContext = (): OsqueryAppContext => {
  */
 export const createMockRouter = () => {
   const httpService = httpServiceMock.createSetupContract();
+
   return httpService.createRouter();
 };
 
@@ -79,8 +81,8 @@ export const createMockRouter = () => {
 export const createMockActionDetailsResponse = (
   agents: string[],
   queries?: Array<{ action_id: string; agents: string[] }>
-): ActionDetailsStrategyResponse => {
-  return {
+): ActionDetailsStrategyResponse =>
+  ({
     actionDetails: {
       _id: 'test-action-id',
       _index: '.logs-osquery_manager.actions',
@@ -98,18 +100,17 @@ export const createMockActionDetailsResponse = (
       },
     },
     rawResponse: {},
-  } as unknown as ActionDetailsStrategyResponse;
-};
+  } as unknown as ActionDetailsStrategyResponse);
 
 /**
  * Factory to create mock action results response.
  *
- * @param edges - Number of result edges to generate
+ * @param edges - Number of result edges to generate OR array of specific agent IDs
  * @param aggregations - Optional aggregation values for the response
  * @returns Mocked ActionResultsStrategyResponse
  */
 export const createMockActionResultsResponse = (
-  edges: number = 10,
+  edges: number | string[] = 10,
   aggregations?: {
     totalResponded?: number;
     totalRowCount?: number;
@@ -124,15 +125,28 @@ export const createMockActionResultsResponse = (
     errorCount = 2,
   } = aggregations || {};
 
-  return {
-    edges: Array(edges)
-      .fill(null)
-      .map((_, i) => ({
+  // Support both number of edges and specific agent IDs
+  const edgeArray = Array.isArray(edges)
+    ? edges.map((agentId, i) => ({
         _id: `result-${i}`,
         _index: '.logs-osquery_manager.action.responses',
         _source: {},
-      })),
-    total: edges,
+        fields: { agent_id: [agentId] },
+      }))
+    : Array(edges)
+        .fill(null)
+        .map((_, i) => ({
+          _id: `result-${i}`,
+          _index: '.logs-osquery_manager.action.responses',
+          _source: {},
+          fields: { agent_id: [`agent-${i}`] },
+        }));
+
+  const edgeCount = Array.isArray(edges) ? edges.length : edges;
+
+  return {
+    edges: edgeArray,
+    total: edgeCount,
     rawResponse: {
       aggregations: {
         aggs: {
@@ -170,12 +184,11 @@ export const createMockRequest = (params: {
     sortOrder?: Direction;
     startDate?: string;
   };
-}) => {
-  return httpServerMock.createKibanaRequest({
+}) =>
+  httpServerMock.createKibanaRequest({
     params: { actionId: params.actionId },
     query: params.query || {},
   });
-};
 
 /**
  * Helper to create mock search strategy that responds to different query types.
@@ -187,8 +200,8 @@ export const createMockRequest = (params: {
 export const createMockSearchStrategy = (
   actionDetailsResponse?: ActionDetailsStrategyResponse,
   actionResultsResponse?: ActionResultsStrategyResponse
-) => {
-  return jest.fn(
+) =>
+  jest.fn(
     (
       request: { factoryQueryType: string; [key: string]: unknown },
       options: { abortSignal?: AbortSignal; strategy: string }
@@ -196,13 +209,14 @@ export const createMockSearchStrategy = (
       if (request.factoryQueryType === OsqueryQueries.actionDetails) {
         return of(actionDetailsResponse || createMockActionDetailsResponse(['agent-1', 'agent-2']));
       }
+
       if (request.factoryQueryType === OsqueryQueries.actionResults) {
         return of(actionResultsResponse || createMockActionResultsResponse());
       }
+
       throw new Error(`Unexpected query type: ${request.factoryQueryType}`);
     }
   );
-};
 
 /**
  * Helper to create mock context with properly structured core and search.
