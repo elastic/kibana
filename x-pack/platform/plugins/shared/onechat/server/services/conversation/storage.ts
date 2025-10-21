@@ -24,7 +24,7 @@ const storageSettings = {
       title: types.text({}),
       created_at: types.date({}),
       updated_at: types.date({}),
-      rounds: types.object({ dynamic: true }),
+      rounds: types.object({ dynamic: false }),
     },
   },
 } satisfies IndexStorageSettings;

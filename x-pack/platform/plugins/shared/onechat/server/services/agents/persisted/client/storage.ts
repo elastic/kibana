@@ -25,7 +25,7 @@ const storageSettings = {
       labels: types.keyword({}),
       avatar_color: types.keyword({}),
       avatar_symbol: types.keyword({}),
-      configuration: types.object({ dynamic: true }),
+      configuration: types.object({ dynamic: false }),
       created_at: types.date({}),
       updated_at: types.date({}),
     },
