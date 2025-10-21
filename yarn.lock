@@ -8921,18 +8921,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/wci-browser@link:x-pack/solutions/workplace_ai/packages/wci-browser":
-  version "0.0.0"
-  uid ""
-
-"@kbn/wci-common@link:x-pack/solutions/workplace_ai/packages/wci-common":
-  version "0.0.0"
-  uid ""
-
-"@kbn/wci-server@link:x-pack/solutions/workplace_ai/packages/wci-server":
-  version "0.0.0"
-  uid ""
-
 "@kbn/web-worker-stub@link:packages/kbn-web-worker-stub":
   version "0.0.0"
   uid ""
