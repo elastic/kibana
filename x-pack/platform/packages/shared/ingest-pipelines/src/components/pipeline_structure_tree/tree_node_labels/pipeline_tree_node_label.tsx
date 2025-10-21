@@ -14,6 +14,7 @@ interface PipelineTreeNodeLabelProps {
   pipelineName: string;
   isManaged: boolean;
   isDeprecated: boolean;
+  isSelected?: boolean;
   onClick: () => void;
 }
 
@@ -21,6 +22,7 @@ export const PipelineTreeNodeLabel = ({
   pipelineName,
   isManaged,
   isDeprecated,
+  isSelected,
   onClick,
 }: PipelineTreeNodeLabelProps) => {
   return (
@@ -55,6 +57,7 @@ export const PipelineTreeNodeLabel = ({
               }
             )}
             type="lock"
+            color={isSelected ? 'primary' : 'subdued'}
           />
         </EuiFlexItem>
       )}
@@ -68,6 +71,7 @@ export const PipelineTreeNodeLabel = ({
               }
             )}
             type="warning"
+            color={isSelected ? 'primary' : 'subdued'}
           />
         </EuiFlexItem>
       )}

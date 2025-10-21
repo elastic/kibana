@@ -17,7 +17,6 @@ import {
   EuiDescriptionListDescription,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiBetaBadge,
   EuiCodeBlock,
   EuiToolTip,
   EuiText,
@@ -30,6 +29,10 @@ import {
   EuiButton,
   EuiButtonEmpty,
   useEuiTheme,
+  EuiBadge,
+  EuiSkeletonTitle,
+  EuiSkeletonText,
+  EuiSkeletonRectangle,
 } from '@elastic/eui';
 
 import type { Pipeline } from '../../../../../common/types';
@@ -40,6 +43,7 @@ import { stringifyJson } from '../../../lib/utils';
 
 export interface Props {
   pipeline: Pipeline;
+  isLoading: boolean;
   onEditClick: (pipelineName: string) => void;
   onCloneClick: (pipelineName: string) => void;
   onDeleteClick: (pipelineName: Pipeline[]) => void;
@@ -58,11 +62,20 @@ const useStyles = () => {
     contextMenu: css`
       width: 150px;
     `,
+    badge: css`
+      margin-left: ${euiTheme.size.s};
+      border-radius: 999px;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      font-weight: ${euiTheme.font.weight.medium};
+      padding: 0 ${euiTheme.size.m};
+    `,
   };
 };
 
 export const DetailsPanel: FunctionComponent<Props> = ({
   pipeline,
+  isLoading,
   onEditClick,
   onCloneClick,
   onDeleteClick,
@@ -119,36 +132,42 @@ export const DetailsPanel: FunctionComponent<Props> = ({
     <EuiSplitPanel.Inner grow={true} paddingSize="none">
       <EuiSplitPanel.Outer hasShadow={false} grow={true} css={{ height: '100%' }}>
         <EuiSplitPanel.Inner style={{ overflowY: 'auto' }} paddingSize="l" grow={true}>
-          <EuiTitle id="pipelineDetailsFlyoutTitle" data-test-subj="detailsPanelTitle">
-            <h2>{pipeline.name}</h2>
-          </EuiTitle>
+          <EuiSkeletonTitle isLoading={isLoading}>
+            <EuiTitle id="pipelineDetailsFlyoutTitle" data-test-subj="detailsPanelTitle">
+              <h2>{pipeline.name}</h2>
+            </EuiTitle>
+          </EuiSkeletonTitle>
 
           <EuiSpacer size="s" />
 
-          <EuiFlexGroup alignItems="center" gutterSize="m">
+          <EuiFlexGroup alignItems="center" gutterSize="none">
             {/* Pipeline version */}
             {pipeline.version && (
               <EuiFlexItem grow={false}>
-                <EuiText color="subdued" size="s">
-                  {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.versionTitle', {
-                    defaultMessage: 'Version',
-                  })}{' '}
-                  {String(pipeline.version)}
-                </EuiText>
+                <EuiSkeletonText isLoading={isLoading} lines={1} size="s">
+                  <EuiText color="subdued" size="s">
+                    {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.versionTitle', {
+                      defaultMessage: 'Version',
+                    })}{' '}
+                    {String(pipeline.version)}
+                  </EuiText>
+                </EuiSkeletonText>
               </EuiFlexItem>
             )}
 
             {/* Managed badge*/}
             {pipeline.isManaged && (
               <EuiFlexItem grow={false}>
-                <EuiBetaBadge
-                  label={i18n.translate(
-                    'xpack.ingestPipelines.list.pipelineDetails.managedBadgeLabel',
-                    { defaultMessage: 'Managed' }
-                  )}
-                  size="s"
-                  color="hollow"
-                />
+                <EuiSkeletonText isLoading={isLoading} lines={1} size="s">
+                  <EuiBadge color="hollow" css={styles.badge}>
+                    {i18n.translate(
+                      'xpack.ingestPipelines.list.pipelineDetails.managedBadgeLabel',
+                      {
+                        defaultMessage: 'Managed',
+                      }
+                    )}
+                  </EuiBadge>
+                </EuiSkeletonText>
               </EuiFlexItem>
             )}
 
@@ -156,13 +175,11 @@ export const DetailsPanel: FunctionComponent<Props> = ({
             {pipeline.deprecated && (
               <EuiFlexItem grow={false}>
                 <EuiToolTip content={deprecatedPipelineBadge.badgeTooltip}>
-                  <EuiBetaBadge
-                    label={deprecatedPipelineBadge.badge}
-                    size="s"
-                    color="subdued"
-                    data-test-subj="isDeprecatedBadge"
-                    tabIndex={0}
-                  />
+                  <EuiSkeletonText isLoading={isLoading} lines={1} size="s">
+                    <EuiBadge color="hollow" css={styles.badge}>
+                      {deprecatedPipelineBadge.badge}
+                    </EuiBadge>
+                  </EuiSkeletonText>
                 </EuiToolTip>
               </EuiFlexItem>
             )}
@@ -176,34 +193,44 @@ export const DetailsPanel: FunctionComponent<Props> = ({
               <>
                 <EuiDescriptionListTitle />
                 <EuiDescriptionListDescription>
-                  {pipeline.description}
+                  <EuiSkeletonText isLoading={isLoading} lines={1} size="s">
+                    {pipeline.description}
+                  </EuiSkeletonText>
                 </EuiDescriptionListDescription>
               </>
             )}
 
             {/* Processors JSON */}
             <EuiDescriptionListTitle>
-              {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.processorsTitle', {
-                defaultMessage: 'Processors',
-              })}
+              <EuiSkeletonText isLoading={isLoading} lines={1} size="s">
+                {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.processorsTitle', {
+                  defaultMessage: 'Processors',
+                })}
+              </EuiSkeletonText>
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
-              <PipelineDetailsJsonBlock json={pipeline.processors} />
+              <EuiSkeletonRectangle isLoading={isLoading} height={1}>
+                <PipelineDetailsJsonBlock json={pipeline.processors} />
+              </EuiSkeletonRectangle>
             </EuiDescriptionListDescription>
 
             {/* On Failure Processor JSON */}
             {pipeline.on_failure?.length && (
               <>
                 <EuiDescriptionListTitle>
-                  {i18n.translate(
-                    'xpack.ingestPipelines.list.pipelineDetails.failureProcessorsTitle',
-                    {
-                      defaultMessage: 'Failure processors',
-                    }
-                  )}
+                  <EuiSkeletonText isLoading={isLoading} lines={1} size="s">
+                    {i18n.translate(
+                      'xpack.ingestPipelines.list.pipelineDetails.failureProcessorsTitle',
+                      {
+                        defaultMessage: 'Failure processors',
+                      }
+                    )}
+                  </EuiSkeletonText>
                 </EuiDescriptionListTitle>
                 <EuiDescriptionListDescription>
-                  <PipelineDetailsJsonBlock json={pipeline.on_failure} />
+                  <EuiSkeletonRectangle isLoading={isLoading} height={1}>
+                    <PipelineDetailsJsonBlock json={pipeline.on_failure} />
+                  </EuiSkeletonRectangle>
                 </EuiDescriptionListDescription>
               </>
             )}
@@ -212,86 +239,92 @@ export const DetailsPanel: FunctionComponent<Props> = ({
             {pipeline._meta && (
               <>
                 <EuiDescriptionListTitle data-test-subj="metaTitle">
-                  <FormattedMessage
-                    id="xpack.ingestPipelines.list.pipelineDetails.metaDescriptionListTitle"
-                    defaultMessage="Metadata"
-                  />
+                  <EuiSkeletonText isLoading={isLoading} lines={1} size="s">
+                    <FormattedMessage
+                      id="xpack.ingestPipelines.list.pipelineDetails.metaDescriptionListTitle"
+                      defaultMessage="Metadata"
+                    />
+                  </EuiSkeletonText>
                 </EuiDescriptionListTitle>
                 <EuiDescriptionListDescription>
-                  <EuiCodeBlock language="json">
-                    {stringifyJson(pipeline._meta, false)}
-                  </EuiCodeBlock>
+                  <EuiSkeletonRectangle isLoading={isLoading} height={1}>
+                    <EuiCodeBlock language="json">
+                      {stringifyJson(pipeline._meta, false)}
+                    </EuiCodeBlock>
+                  </EuiSkeletonRectangle>
                 </EuiDescriptionListDescription>
               </>
             )}
           </EuiDescriptionList>
         </EuiSplitPanel.Inner>
 
-        <EuiSplitPanel.Inner color="subdued" grow={false}>
-          <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
-            {renderViewTreeButton && (
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  onClick={onViewTreeClick}
-                  flush="left"
-                  data-test-subj="viewTreeButton"
+        <EuiSkeletonRectangle isLoading={isLoading} height={1}>
+          <EuiSplitPanel.Inner color="subdued" grow={false}>
+            <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
+              {renderViewTreeButton && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    onClick={onViewTreeClick}
+                    flush="left"
+                    data-test-subj="viewTreeButton"
+                  >
+                    {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.viewTreeLabel', {
+                      defaultMessage: 'View full hierarchy',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              )}
+              {renderActions && (
+                <EuiFlexGroup
+                  gutterSize="s"
+                  alignItems="center"
+                  justifyContent="flexEnd"
+                  responsive={false}
                 >
-                  {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.viewTreeLabel', {
-                    defaultMessage: 'View full hierarchy',
-                  })}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            )}
-            {renderActions && (
-              <EuiFlexGroup
-                gutterSize="s"
-                alignItems="center"
-                justifyContent="flexEnd"
-                responsive={false}
-              >
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    data-test-subj="editPipelineButton"
-                    aria-label={i18n.translate(
-                      'xpack.ingestPipelines.list.pipelineDetails.editPipelineActionsAriaLabel',
-                      {
-                        defaultMessage: 'Edit pipeline',
-                      }
-                    )}
-                    onClick={() => onEditClick(pipeline.name)}
-                  >
-                    {i18n.translate(
-                      'xpack.ingestPipelines.list.pipelineDetails.editPipelineButtonLabel',
-                      {
-                        defaultMessage: 'Edit pipeline',
-                      }
-                    )}
-                  </EuiButton>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiPopover
-                    isOpen={showPopover}
-                    closePopover={() => setShowPopover(false)}
-                    button={actionsPopoverButton}
-                    panelPaddingSize="none"
-                    repositionOnScroll
-                  >
-                    <EuiContextMenu
-                      initialPanelId={0}
-                      panels={[
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      data-test-subj="editPipelineButton"
+                      aria-label={i18n.translate(
+                        'xpack.ingestPipelines.list.pipelineDetails.editPipelineActionsAriaLabel',
                         {
-                          id: 0,
-                          items: popoverActions,
-                        },
-                      ]}
-                      css={styles.contextMenu}
-                    />
-                  </EuiPopover>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            )}
-          </EuiFlexGroup>
-        </EuiSplitPanel.Inner>
+                          defaultMessage: 'Edit pipeline',
+                        }
+                      )}
+                      onClick={() => onEditClick(pipeline.name)}
+                    >
+                      {i18n.translate(
+                        'xpack.ingestPipelines.list.pipelineDetails.editPipelineButtonLabel',
+                        {
+                          defaultMessage: 'Edit pipeline',
+                        }
+                      )}
+                    </EuiButton>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiPopover
+                      isOpen={showPopover}
+                      closePopover={() => setShowPopover(false)}
+                      button={actionsPopoverButton}
+                      panelPaddingSize="none"
+                      repositionOnScroll
+                    >
+                      <EuiContextMenu
+                        initialPanelId={0}
+                        panels={[
+                          {
+                            id: 0,
+                            items: popoverActions,
+                          },
+                        ]}
+                        css={styles.contextMenu}
+                      />
+                    </EuiPopover>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              )}
+            </EuiFlexGroup>
+          </EuiSplitPanel.Inner>
+        </EuiSkeletonRectangle>
       </EuiSplitPanel.Outer>
     </EuiSplitPanel.Inner>
   );

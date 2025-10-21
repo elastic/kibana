@@ -29,6 +29,7 @@ export const createTreeNodesFromPipelines = (
         pipelineName={treeNode.pipelineName}
         isManaged={treeNode.isManaged}
         isDeprecated={treeNode.isDeprecated}
+        isSelected={treeNode.pipelineName === selectedPipeline}
         onClick={() => clickTreeNode(treeNode.pipelineName)}
       />
     ),

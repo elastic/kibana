@@ -11,13 +11,15 @@ import type { EuiThemeComputed } from '@elastic/eui';
 export const getStyles = (euiTheme: EuiThemeComputed) => css`
   [class*='cssTreeNode-'] {
     background-color: ${euiTheme.colors.backgroundBasePlain};
-    padding: ${euiTheme.size.base} ${euiTheme.size.m};
-    border: ${euiTheme.border.thin};
-    margin: ${euiTheme.size.base} 0;
+    padding: ${euiTheme.size.xs} ${euiTheme.size.xs};
+    border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain};
+    margin: ${euiTheme.size.l} 0;
+    border-radius: ${euiTheme.border.radius.medium};
+    height: ${euiTheme.size.xxl};
   }
 
   [class*='cssTreeNode-']:hover {
-    background-color: ${euiTheme.colors.backgroundTransparentPrimary};
+    background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
   }
 
   [class*='cssTreeNode-level'] {
@@ -33,8 +35,8 @@ export const getStyles = (euiTheme: EuiThemeComputed) => css`
 
   .cssTreeNode-root--active,
   .cssTreeNode-children--active {
-    background-color: ${euiTheme.colors.backgroundLightPrimary} !important;
-    border: ${euiTheme.border.width.thick} solid ${euiTheme.colors.borderBasePrimary};
+    background-color: ${euiTheme.colors.backgroundBasePrimary} !important;
+    border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderStrongPrimary};
   }
 
   .cssTreeNode-morePipelines {

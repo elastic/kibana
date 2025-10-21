@@ -7,11 +7,10 @@
 import type { FunctionComponent } from 'react';
 import React, { useState, useEffect } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlyout, EuiSplitPanel, useIsWithinBreakpoints } from '@elastic/eui';
 import { DetailsPanel, TreePanel, NotFoundPanel } from './flyout_content';
 import type { Pipeline } from '../../../../common/types';
-import { SectionLoading, useKibana } from '../../../shared_imports';
+import { useKibana } from '../../../shared_imports';
 
 export interface Props {
   ingestPipeline: string;
@@ -65,7 +64,7 @@ export const PipelineFlyout: FunctionComponent<Props> = ({
       aria-labelledby="pipelineDetailsFlyoutTitle"
       data-test-subj="pipelineDetails"
       size="l"
-      maxWidth={pipelineTree ? 1000 : 550}
+      maxWidth={pipelineTree ? 1000 : 500}
     >
       <EuiSplitPanel.Outer
         direction="row"
@@ -90,14 +89,7 @@ export const PipelineFlyout: FunctionComponent<Props> = ({
         )}
 
         {(!isResponsiveFlyout || responsiveFlyoutContent === DETAILS_VIEW) &&
-          (isLoading ? (
-            <SectionLoading>
-              <FormattedMessage
-                id="xpack.ingestPipelines.list.pipelineDetails.loading"
-                defaultMessage="Loading pipeline…"
-              />
-            </SectionLoading>
-          ) : error ? (
+          (error && !isLoading ? (
             <NotFoundPanel
               pipelineName={pipelineName}
               onCreatePipeline={() => onCreateClick(pipelineName)}
@@ -108,6 +100,7 @@ export const PipelineFlyout: FunctionComponent<Props> = ({
             pipeline && (
               <DetailsPanel
                 pipeline={pipeline}
+                isLoading={isLoading}
                 onEditClick={onEditClick}
                 onCloneClick={onCloneClick}
                 onDeleteClick={onDeleteClick}
