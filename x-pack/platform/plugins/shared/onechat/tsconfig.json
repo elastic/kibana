@@ -78,5 +78,6 @@
     "@kbn/licensing-types",
     "@kbn/licensing-plugin",
     "@kbn/react-kibana-mount",
+    "@kbn/core-mount-utils-browser",
   ]
 }
