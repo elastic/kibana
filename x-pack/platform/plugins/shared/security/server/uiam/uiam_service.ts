@@ -133,7 +133,7 @@ export class UiamService implements UiamServicePublic {
    */
   async invalidateSessionTokens(accessToken: string, refreshToken: string) {
     try {
-      this.#logger.debug('Attempting to invalidate session tokens with UIAM.');
+      this.#logger.debug('Attempting to invalidate session tokens.');
 
       await UiamService.#parseUiamResponse(
         await fetch(`${this.#config.url}/uiam/api/v1/tokens/_invalidate`, {
