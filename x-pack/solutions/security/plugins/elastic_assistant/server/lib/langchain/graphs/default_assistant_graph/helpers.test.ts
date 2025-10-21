@@ -189,7 +189,6 @@ describe('streamGraph', () => {
             traceData: { transactionId: 'transactionId', traceId: 'traceId' },
             isError: false,
           });
-
         });
       });
 
