@@ -8,12 +8,11 @@
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { loggerMock } from '@kbn/logging-mocks';
 
-import type { AwsCloudConnectorVars } from '../../public';
-
 import { CLOUD_CONNECTOR_SAVED_OBJECT_TYPE } from '../../common/constants';
 
 import { createSavedObjectClientMock } from '../mocks';
 import type { CreateCloudConnectorRequest } from '../../common/types/rest_spec/cloud_connector';
+import type { AwsCloudConnectorVars } from '../../common/types/models/cloud_connector';
 
 import { CloudConnectorService } from './cloud_connector';
 import { appContextService } from './app_context';
@@ -149,7 +148,7 @@ describe('CloudConnectorService', () => {
       const emptyVarsRequest: CreateCloudConnectorRequest = {
         name: 'test-connector',
         cloudProvider: 'aws',
-        vars: {} as AwsCloudConnectorVars,
+        vars: {},
       };
 
       await expect(service.create(mockSoClient, emptyVarsRequest)).rejects.toThrow(
@@ -183,7 +182,7 @@ describe('CloudConnectorService', () => {
             },
             type: 'password',
           },
-        } as AwsCloudConnectorVars,
+        },
       };
 
       await expect(service.create(mockSoClient, invalidRequest)).rejects.toThrow(
@@ -200,7 +199,7 @@ describe('CloudConnectorService', () => {
             value: 'arn:aws:iam::123456789012:role/TestRole',
             type: 'text',
           },
-        } as AwsCloudConnectorVars,
+        },
       };
 
       await expect(service.create(mockSoClient, invalidRequest)).rejects.toThrow(
@@ -484,15 +483,9 @@ describe('CloudConnectorService', () => {
 
       expect(result.name).toEqual('updated-name');
       expect(result.id).toEqual('cloud-connector-123');
-      expect(result.vars?.role_arn?.value).toEqual('arn:aws:iam::123456789012:role/OriginalRole');
-
-      const externalIdValue = result.vars?.external_id?.value;
-      expect(externalIdValue).toHaveProperty('id');
-
-      // check is for type checking, the previous expectation would fail guarateeing one would fail
-      if (externalIdValue && typeof externalIdValue === 'object' && 'id' in externalIdValue) {
-        expect(externalIdValue.id).toEqual('ORIGINALEXTERNALID12');
-      }
+      const awsVars = result.vars as AwsCloudConnectorVars;
+      expect(awsVars.role_arn?.value).toEqual('arn:aws:iam::123456789012:role/OriginalRole');
+      expect(awsVars.external_id?.value?.id).toEqual('ORIGINALEXTERNALID12');
     });
 
     it('should update cloud connector vars successfully', async () => {
@@ -535,15 +528,9 @@ describe('CloudConnectorService', () => {
         }
       );
 
-      expect(result.vars?.role_arn?.value).toEqual('arn:aws:iam::123456789012:role/UpdatedRole');
-
-      const externalIdValue = result.vars?.external_id?.value;
-      expect(externalIdValue).toHaveProperty('id');
-
-      // check is for type checking, the previous expectation would fail guarateeing one would fail
-      if (externalIdValue && typeof externalIdValue === 'object' && 'id' in externalIdValue) {
-        expect(externalIdValue.id).toEqual('UPDATEDEXTERNALID123');
-      }
+      const awsVars = result.vars as AwsCloudConnectorVars;
+      expect(awsVars.role_arn?.value).toEqual('arn:aws:iam::123456789012:role/UpdatedRole');
+      expect(awsVars.external_id?.value?.id).toEqual('UPDATEDEXTERNALID123');
     });
 
     it('should update both name and vars successfully', async () => {
@@ -580,9 +567,8 @@ describe('CloudConnectorService', () => {
       });
 
       expect(result.name).toEqual('fully-updated-connector');
-      expect(result.vars?.role_arn?.value).toEqual(
-        'arn:aws:iam::123456789012:role/FullyUpdatedRole'
-      );
+      const awsVars = result.vars as AwsCloudConnectorVars;
+      expect(awsVars.role_arn?.value).toEqual('arn:aws:iam::123456789012:role/FullyUpdatedRole');
     });
 
     it('should validate vars when provided', async () => {
@@ -620,7 +606,7 @@ describe('CloudConnectorService', () => {
           type: 'text' as const,
         },
         // Missing external_id
-      } as AwsCloudConnectorVars;
+      };
 
       await expect(
         service.update(mockSoClient, 'cloud-connector-123', {
@@ -878,7 +864,7 @@ describe('CloudConnectorService', () => {
               },
               type: 'password',
             },
-          } as AwsCloudConnectorVars,
+          },
         };
 
         expect(() => (service as any).validateCloudConnectorDetails(invalidRequest)).toThrow(
@@ -919,7 +905,7 @@ describe('CloudConnectorService', () => {
               value: 'arn:aws:iam::123456789012:role/TestRole',
               type: 'text',
             },
-          } as AwsCloudConnectorVars,
+          },
         };
 
         expect(() => (service as any).validateCloudConnectorDetails(invalidRequest)).toThrow(

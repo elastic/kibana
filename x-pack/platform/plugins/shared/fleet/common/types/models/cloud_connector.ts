@@ -24,30 +24,28 @@ export interface CloudConnectorSecretVar {
   frozen?: boolean;
 }
 
-interface BaseCloudConnectorVars {
-  [key: string]: CloudConnectorVar | CloudConnectorSecretVar | undefined;
-}
-
-export interface AwsCloudConnectorVars extends BaseCloudConnectorVars {
+export interface AwsCloudConnectorVars {
   role_arn: CloudConnectorVar;
   external_id: CloudConnectorSecretVar;
 }
 
-// TODO:  The attribute types will be replaced to secrets in
-// https://github.com/elastic/security-team/issues/14130
-export interface AzureCloudConnectorVars extends BaseCloudConnectorVars {
+export interface AzureCloudConnectorVars {
   tenant_id: CloudConnectorVar;
   client_id: CloudConnectorVar;
   azure_credentials_cloud_connector_id: CloudConnectorVar;
 }
 
-type CloudConnectorVars = AwsCloudConnectorVars | AzureCloudConnectorVars;
+export type CloudConnectorVars =
+  | AwsCloudConnectorVars
+  | AzureCloudConnectorVars
+  // TODO: Remove Record<string, unknown> in https://github.com/elastic/security-team/issues/14284
+  | Record<string, unknown>;
 
 export interface CloudConnector {
   id: string;
   name: string;
   cloudProvider: CloudProvider;
-  vars: AwsCloudConnectorVars | AzureCloudConnectorVars;
+  vars: CloudConnectorVars;
   packagePolicyCount: number;
   created_at: string;
   updated_at: string;

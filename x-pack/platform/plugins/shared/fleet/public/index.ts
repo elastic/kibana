@@ -26,6 +26,7 @@ export type {
   CloudConnector,
   CloudConnectorListOptions,
   CreateCloudConnectorRequest,
+  CloudConnectorVars,
   CloudProvider,
   CloudConnectorSecretVar,
   AwsCloudConnectorVars,
