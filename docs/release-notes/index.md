@@ -46,18 +46,17 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 **Dashboards and Visualizations**:
 * Adds the ability to configure index settings when importing geospatial files in Maps [#232308]({{kib-pull}}232308).
-* Adds a new inline Markdown editor to edit your text while switching between **Editing** and **Preview** modes [#229191]({{kib-pull}}229191).
-* Updates the toolbar popover for Metric charts, which is now called **Appearance** [#233992]({{kib-pull}}233992).
+* Adds a new inline Markdown editor to edit your text without leaving the dashboard. [#229191]({{kib-pull}}229191).
+* Updates the toolbar popover for Metric charts, which is now called **Appearance**, with reorganized settings into clearer sections and new Primary position, Primary alignment, Secondary alignment, and Font weight settings [#233992]({{kib-pull}}233992).
 * Improves ES|QL suggestions logic when an {{esql}} visualization query changes [#231767]({{kib-pull}}231767).
-* Adds a new **Add** menu to the toolbar that lets you populate your dashboard with visualizations, panels, sections, and controls [#230324]({{kib-pull}}230324).
+* Adds a new **Add** menu to the toolbar that lets you populate your dashboard with visualizations, panels, sections, and controls. This menu replaces and combines the various buttons that previously allowed you to perform these actions [#230324]({{kib-pull}}230324).
 * Improves perceived performance of dashboard flyouts [#226052]({{kib-pull}}226052).
-* Adds the **Select all** functionality for Options list controls [#221010]({{kib-pull}}221010).
+* Adds the ability to **Select all** to Options list controls [#221010]({{kib-pull}}221010).
 
 **Data ingestion and Fleet**:
 * Adds a toggle on the {{es}} output configuration page that grants agents permission to write to the `logs` and `logs.*` data streams [#233374]({{kib-pull}}233374).
 * Completes OTel configuration pipelines with an exporter [#233090]({{kib-pull}}233090).
 * Enables feature to auto-install content packages when data is ingested for datasets that match the datasets defined in the packages' `discovery` fields [#232668]({{kib-pull}}232668).
-* Adds support for indexing package knowledge base docs into the `.integration_knowledge` system index, allowing AI assistants used by integration developers to have greater context relevant to specific packages [#230107]({{kib-pull}}230107).
 * Adds the `MIGRATE` action to the `SIGNED_ACTIONS` set [#228566]({{kib-pull}}228566).
 * Adds a **Show agentless resources** toggle on the Fleet > Settings page to allow for debugging and diagnostics [#237528]({{kib-pull}}237528).
 * Updates the maximum supported version of package spec to 3.5 [#235942]({{kib-pull}}235942).
@@ -108,7 +107,7 @@ For the Elastic Security 9.2.0 release information, refer to [Elastic Security S
 * Inference endpoints UI: Adds tech preview for rerank preconfig endpoint [#235222]({{kib-pull}}235222).
 * Improves the layout for custom URLs list in the data frame analytics form [#232575]({{kib-pull}}232575).
 * AI Connector/Inference endpoints creation UI: Adds icon for AI21 labs and Llama Stack [#232098]({{kib-pull}}232098).
-* Ensures ELSER and E5 product docs are appropriately updated [#231884]({{kib-pull}}231884).
+* Ensures ELSER and E5 product docs are appropriately updated when Kibana is upgraded [#231884]({{kib-pull}}231884).
 * Improves layout for custom URLs when creating a {{ml}} job [#231751]({{kib-pull}}231751).
 * Adds a check to validate whether your newly uploaded index is searchable [#231614]({{kib-pull}}231614).
 * Displays document count chart for ES|QL categorize queries [#231459]({{kib-pull}}231459).
