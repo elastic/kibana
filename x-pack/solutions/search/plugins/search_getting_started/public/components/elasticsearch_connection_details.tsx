@@ -10,9 +10,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiIconTip, EuiButtonEmpty } from 
 
 import { i18n } from '@kbn/i18n';
 import { openWiredConnectionDetails } from '@kbn/cloud/connection_details';
-import { FormInfoField } from './api_form/custom_form_info_field';
+import { ApiKeyForm } from '@kbn/search-api-keys-components';
+import { FormInfoField } from '@kbn/search-shared-ui';
 import { useElasticsearchUrl } from '../hooks/use_elasticsearch_url';
-import { ApiKeyForm } from './api_form/getting_started_api_key_form';
 
 export const ElasticsearchConnectionDetails = () => {
   const elasticsearchUrl = useElasticsearchUrl();
@@ -48,7 +48,7 @@ export const ElasticsearchConnectionDetails = () => {
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
+        <EuiFlexGroup alignItems="center" gutterSize="m" wrap>
           <EuiFlexItem grow={false} style={{ minWidth: '300px' }}>
             <FormInfoField
               value={elasticsearchUrl}
@@ -57,31 +57,33 @@ export const ElasticsearchConnectionDetails = () => {
               copyValueDataTestSubj="copyEndpointButton"
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false} style={{ minWidth: '250px' }}>
-            <ApiKeyForm />
+          <EuiFlexItem grow={false} style={{ minWidth: '300px' }}>
+            <ApiKeyForm hasTitle={false} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="viewConnectionDetailsLink"
-              iconType="plugs"
-              iconSide="left"
-              target="_blank"
-              onClick={() => openWiredConnectionDetails()}
-              color="text"
-              aria-label={i18n.translate(
-                'xpack.search.gettingStarted.elasticsearchConnectionDetails.viewDetails',
-                {
-                  defaultMessage: 'View connection details',
-                }
-              )}
-            >
-              {i18n.translate(
-                'xpack.search.gettingStarted.elasticsearchConnectionDetails.viewDetails',
-                {
-                  defaultMessage: 'View connection details',
-                }
-              )}
-            </EuiButtonEmpty>
+            <div>
+              <EuiButtonEmpty
+                data-test-subj="viewConnectionDetailsLink"
+                iconType="plugs"
+                iconSide="left"
+                target="_blank"
+                onClick={() => openWiredConnectionDetails()}
+                color="text"
+                aria-label={i18n.translate(
+                  'xpack.search.gettingStarted.elasticsearchConnectionDetails.viewDetails',
+                  {
+                    defaultMessage: 'View connection details',
+                  }
+                )}
+              >
+                {i18n.translate(
+                  'xpack.search.gettingStarted.elasticsearchConnectionDetails.viewDetails',
+                  {
+                    defaultMessage: 'View connection details',
+                  }
+                )}
+              </EuiButtonEmpty>
+            </div>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
