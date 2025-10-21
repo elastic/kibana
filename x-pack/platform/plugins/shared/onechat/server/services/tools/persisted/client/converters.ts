@@ -15,16 +15,12 @@ export const fromEs = <TConfig extends object = {}>(
   if (!document._source) {
     throw new Error('No source found on get conversation response');
   }
-
-  // Migration: prefer legacy 'configuration' field, fallback to new 'config' field
-  const configuration = document._source.configuration ?? document._source.config;
-
   return {
     id: document._source.id,
     type: document._source.type,
     description: document._source.description,
     tags: document._source.tags,
-    configuration: configuration as TConfig,
+    configuration: document._source.configuration as TConfig,
     updated_at: document._source.updated_at,
     created_at: document._source.created_at,
   };
@@ -45,7 +41,7 @@ export const createAttributes = ({
     space,
     description: createRequest.description ?? '',
     tags: createRequest.tags ?? [],
-    config: createRequest.configuration,
+    configuration: createRequest.configuration,
     created_at: creationDate.toISOString(),
     updated_at: creationDate.toISOString(),
   };
@@ -60,15 +56,11 @@ export const updateDocument = ({
   update: ToolTypeUpdateParams;
   updateDate?: Date;
 }): ToolProperties => {
-  const currentConfig = current.configuration ?? current.config;
-
   return {
     ...current,
     ...update,
-    // Explicitly omit configuration to ensure migration
-    configuration: undefined,
-    config: {
-      ...currentConfig,
+    configuration: {
+      ...current.configuration,
       ...update.configuration,
     },
     updated_at: updateDate.toISOString(),

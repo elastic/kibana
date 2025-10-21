@@ -21,7 +21,10 @@ const storageSettings = {
       type: types.keyword({}),
       space: types.keyword({}),
       description: types.text({}),
-      config: types.object({ properties: {}, dynamic: false }),
+      configuration: types.object({
+        dynamic: false,
+        properties: {},
+      }),
       tags: types.keyword({}),
       created_at: types.date({}),
       updated_at: types.date({}),
@@ -34,12 +37,10 @@ export interface ToolProperties<TConfig extends object = Record<string, unknown>
   type: ToolType;
   space: string;
   description: string;
-  config: TConfig;
+  configuration: TConfig;
   tags: string[];
   created_at: string;
   updated_at: string;
-  // deprecated fields
-  configuration?: TConfig;
 }
 
 export type ToolStorageSettings = typeof storageSettings;

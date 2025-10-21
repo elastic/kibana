@@ -15,7 +15,7 @@ const creationDate = '2024-09-04T06:44:17.944Z';
 const updateDate = '2025-08-04T06:44:19.123Z';
 
 describe('fromEs', () => {
-  it('converts a tool document with new config field to its definition format', () => {
+  it('converts a tool document to its definition format', () => {
     const document: ToolDocument = {
       _id: '_id',
       _source: {
@@ -23,7 +23,7 @@ describe('fromEs', () => {
         type: ToolType.esql,
         space: 'space',
         description: 'description',
-        config: {
+        configuration: {
           configProp: 'dolly',
         },
         tags: [],
@@ -46,48 +46,10 @@ describe('fromEs', () => {
       updated_at: '2025-08-04T06:44:19.123Z',
     });
   });
-
-  it('converts a tool document with legacy configuration field to its definition format', () => {
-    const document: ToolDocument = {
-      _id: '_id',
-      _source: {
-        id: 'id',
-        type: ToolType.esql,
-        space: 'space',
-        description: 'description',
-        config: {
-          configProp: 'default',
-        },
-        tags: [],
-        created_at: creationDate,
-        updated_at: updateDate,
-      },
-    };
-
-    // @ts-ignore simulating legacy document
-    delete document._source.config;
-    document._source!.configuration = {
-      configProp: 'legacy value',
-    };
-
-    const definition = fromEs(document);
-
-    expect(definition).toEqual({
-      id: 'id',
-      type: ToolType.esql,
-      description: 'description',
-      configuration: {
-        configProp: 'legacy value',
-      },
-      tags: [],
-      created_at: '2024-09-04T06:44:17.944Z',
-      updated_at: '2025-08-04T06:44:19.123Z',
-    });
-  });
 });
 
 describe('createAttributes', () => {
-  it('converts the creation request to attributes using new config field', () => {
+  it('converts the creation request to attributes', () => {
     const actualCreationDate = new Date();
     const createRequest: ToolCreateParams = {
       id: 'id',
@@ -109,7 +71,7 @@ describe('createAttributes', () => {
       type: ToolType.esql,
       space: 'some-space',
       description: 'foo',
-      config: {
+      configuration: {
         hello: 'world',
       },
       tags: [],
@@ -120,7 +82,7 @@ describe('createAttributes', () => {
 });
 
 describe('updateDocument', () => {
-  it('migrates legacy document with configuration field to new config field', () => {
+  it('merges the existing and update attributes', () => {
     const actualUpdateDate = new Date();
 
     const currentProps: ToolProperties = {
@@ -128,10 +90,6 @@ describe('updateDocument', () => {
       type: ToolType.esql,
       space: 'some-space',
       description: 'foo',
-      config: {
-        hello: 'world',
-        foo: 'bar',
-      },
       configuration: {
         hello: 'world',
         foo: 'bar',
@@ -160,7 +118,7 @@ describe('updateDocument', () => {
       type: ToolType.esql,
       space: 'some-space',
       description: 'new desc',
-      config: {
+      configuration: {
         anotherProp: 'foo',
         foo: 'bar',
         hello: 'dolly',
@@ -169,55 +127,5 @@ describe('updateDocument', () => {
       created_at: creationDate,
       updated_at: actualUpdateDate.toISOString(),
     });
-    // Verify configuration is not present
-    expect(merged.configuration).toBeUndefined();
-  });
-
-  it('updates document with new config field and keeps using config', () => {
-    const actualUpdateDate = new Date();
-
-    const currentProps: ToolProperties = {
-      id: 'id',
-      type: ToolType.esql,
-      space: 'some-space',
-      description: 'foo',
-      config: {
-        hello: 'world',
-        foo: 'bar',
-      },
-      tags: ['tag1'],
-      created_at: creationDate,
-      updated_at: updateDate,
-    };
-
-    const update: ToolTypeUpdateParams = {
-      description: 'new desc',
-      configuration: {
-        hello: 'dolly',
-        anotherProp: 'foo',
-      },
-    };
-
-    const merged = updateDocument({
-      current: currentProps,
-      update,
-      updateDate: actualUpdateDate,
-    });
-
-    expect(merged).toEqual({
-      id: 'id',
-      type: ToolType.esql,
-      space: 'some-space',
-      description: 'new desc',
-      config: {
-        anotherProp: 'foo',
-        foo: 'bar',
-        hello: 'dolly',
-      },
-      tags: ['tag1'],
-      created_at: creationDate,
-      updated_at: actualUpdateDate.toISOString(),
-    });
-    expect(merged.configuration).toBeUndefined();
   });
 });
