@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { BehaviorSubject, combineLatest, map } from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
@@ -31,22 +31,40 @@ import {
 import type { FrequentCompatibilityChangeAction } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError, type Action } from '@kbn/ui-actions-plugin/public';
 
-import { EuiButtonIcon, EuiFlexGroup, EuiPopover, EuiToolTip } from '@elastic/eui';
+import type { EuiSwitchEvent } from '@elastic/eui';
+import {
+  EuiButtonGroup,
+  EuiButtonIcon,
+  EuiFormRow,
+  EuiPopover,
+  EuiSpacer,
+  EuiSwitch,
+  EuiToolTip,
+} from '@elastic/eui';
 import { ACTION_EDIT_CONTROL_DISPLAY_SETTINGS } from './constants';
 import { type PublishesControlsLayout, apiPublishesControlsLayout } from './types';
 
 type PinnableControlApi = HasType &
   HasUniqueId &
   IsPinnable &
-  HasParentApi<PresentationContainer & HasType & CanPinPanel & PublishesControlsLayout>;
+  HasParentApi<PinnableControlParentApi>;
+
+type PinnableControlParentApi = PresentationContainer &
+  HasType &
+  CanPinPanel &
+  PublishesControlsLayout;
+
+const parentCompatibilityCheck = (
+  parentApi: unknown | null
+): parentApi is PinnableControlParentApi =>
+  Boolean(apiPublishesControlsLayout(parentApi) && apiCanPinPanel(parentApi));
 
 const compatibilityCheck = (api: unknown | null): api is PinnableControlApi =>
   Boolean(
     apiHasUniqueId(api) &&
       apiCanBePinned(api) &&
       apiHasParentApi(api) &&
-      apiPublishesControlsLayout(api.parentApi) &&
-      apiCanPinPanel(api.parentApi) &&
+      parentCompatibilityCheck(api.parentApi) &&
       api.parentApi.panelIsPinned(api.uuid)
   );
 
@@ -61,23 +79,79 @@ export class EditControlDisplaySettingsAction
 
   public readonly MenuItem = ({ context }: { context: EmbeddableApiContext }) => {
     const { embeddable } = context;
-    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-    const onOpen = useCallback(() => {
-      if (apiCanLockHoverActions(embeddable)) {
-        embeddable.lockHoverActions(true);
-      }
-      setIsPopoverOpen(true);
-    }, [embeddable]);
+    if (!compatibilityCheck(embeddable)) throw new IncompatibleActionError();
+    // When the user changes a setting and the new layout is applied, the popover gets destroyed and re-rendered
+    // Make sure it reopens if the user hasn't closed it
+    const isPopoverOpenInitialState = useMemo(
+      () => (apiCanLockHoverActions(embeddable) ? embeddable.hasLockedHoverActions$.value : false),
+      [embeddable]
+    );
+
+    const [isPopoverOpen, setIsPopoverOpen] = useState(isPopoverOpenInitialState);
+
+    const layoutState = embeddable.parentApi.layout$.value;
+    const layoutEntry = useMemo(
+      () => layoutState.controls[embeddable.uuid],
+      [layoutState, embeddable.uuid]
+    );
+
+    const [grow, setGrow] = useState(layoutEntry.grow ?? false);
+    const [width, setWidth] = useState(layoutEntry.width ?? 'medium');
+
+    const applyNextLayout = useCallback(
+      (nextGrow: boolean, nextWidth: string) => {
+        const currentLayout = embeddable.parentApi.layout$.getValue();
+        embeddable.parentApi.layout$.next({
+          ...currentLayout,
+          controls: {
+            ...currentLayout.controls,
+            [embeddable.uuid]: {
+              ...layoutEntry,
+              grow: nextGrow,
+              width: nextWidth,
+            },
+          },
+        });
+      },
+      [embeddable.parentApi.layout$, embeddable.uuid, layoutEntry]
+    );
+
     const onClose = useCallback(() => {
       if (apiCanLockHoverActions(embeddable)) {
         embeddable.lockHoverActions(false);
       }
       setIsPopoverOpen(false);
-    }, [embeddable]);
+
+      applyNextLayout(grow, width);
+    }, [embeddable, applyNextLayout, grow, width]);
+    const onClickButton = useCallback(() => {
+      if (isPopoverOpen) onClose();
+      else if (apiCanLockHoverActions(embeddable)) {
+        embeddable.lockHoverActions(true);
+      }
+      setIsPopoverOpen(true);
+    }, [embeddable, isPopoverOpen, onClose]);
+
+    const onMinimumSizeChange = useCallback(
+      (id: string) => {
+        setWidth(id);
+        // Size change only takes immediate effect if grow is disabled
+        if (!grow) applyNextLayout(grow, id);
+      },
+      [applyNextLayout, grow]
+    );
+    const onGrowChange = useCallback(
+      (e: EuiSwitchEvent) => {
+        setGrow(e.target.checked);
+        applyNextLayout(e.target.checked, width);
+      },
+      [applyNextLayout, width]
+    );
+
     return (
       <EuiPopover
         repositionOnScroll
-        panelPaddingSize="s"
+        panelPaddingSize="m"
         anchorPosition="downRight"
         button={
           <EuiToolTip disableScreenReaderOutput content={this.getDisplayName()}>
@@ -85,7 +159,7 @@ export class EditControlDisplaySettingsAction
               iconType={this.getIconType()}
               color="text"
               aria-label={this.getDisplayName()}
-              onClick={onOpen}
+              onClick={onClickButton}
             />
           </EuiToolTip>
         }
@@ -96,8 +170,74 @@ export class EditControlDisplaySettingsAction
           clickOutsideDisables: false,
           onClickOutside: onClose,
         }}
+        panelStyle={
+          /* Prevent popover from visually bouncing if it's being re-rendered already open */
+          isPopoverOpenInitialState ? { transform: 'none' } : undefined
+        }
       >
-        <EuiFlexGroup></EuiFlexGroup>
+        <EuiFormRow
+          label={i18n.translate(
+            'controls.controlGroup.floatingActions.editDisplaySettings.minimumWidth.label',
+            {
+              defaultMessage: 'Minimum width',
+            }
+          )}
+          fullWidth
+        >
+          <EuiButtonGroup
+            legend={i18n.translate(
+              'controls.controlGroup.floatingActions.editDisplaySettings.minimumWidth.label',
+              {
+                defaultMessage: 'Minimum width',
+              }
+            )}
+            options={[
+              {
+                id: `small`,
+                label: i18n.translate(
+                  'controls.controlGroup.floatingActions.editDisplaySettings..minimumWidth.small',
+                  {
+                    defaultMessage: 'Small',
+                  }
+                ),
+              },
+              {
+                id: `medium`,
+                label: i18n.translate(
+                  'controls.controlGroup.floatingActions.editDisplaySettings..minimumWidth.medium',
+                  {
+                    defaultMessage: 'Medium',
+                  }
+                ),
+              },
+              {
+                id: `large`,
+                label: i18n.translate(
+                  'controls.controlGroup.floatingActions.editDisplaySettings..minimumWidth.large',
+                  {
+                    defaultMessage: 'Large',
+                  }
+                ),
+              },
+            ]}
+            idSelected={width}
+            onChange={(id) => onMinimumSizeChange(id)}
+            type="single"
+            isFullWidth
+            data-test-subj="esqlControlMinimumWidth"
+          />
+        </EuiFormRow>
+        <EuiSpacer size="m" />
+        <EuiSwitch
+          compressed
+          label={i18n.translate('esql.flyout.grow.label', {
+            defaultMessage: 'Expand width to fit available space',
+          })}
+          color="primary"
+          checked={grow ?? false}
+          onChange={(e) => onGrowChange(e)}
+          data-test-subj="esqlControlGrow"
+        />
       </EuiPopover>
     );
   };
@@ -129,12 +269,7 @@ export class EditControlDisplaySettingsAction
     return compatibilityCheck(embeddable) && getInheritedViewMode(embeddable) === 'edit';
   }
 
-  public async execute({ embeddable }: EmbeddableApiContext) {
-    if (!compatibilityCheck(embeddable)) throw new IncompatibleActionError();
-    // if (embeddable.parentApi.panelIsPinned(embeddable.uuid)) {
-    //   embeddable.parentApi.unpinPanel(embeddable.uuid);
-    // } else {
-    //   embeddable.parentApi.pinPanel(embeddable.uuid);
-    // }
+  public async execute() {
+    // Intentionally left blank; all execution is handled in the MenuItem
   }
 }
