@@ -195,7 +195,7 @@ export class EditControlDisplaySettingsAction
               {
                 id: `small`,
                 label: i18n.translate(
-                  'controls.controlGroup.floatingActions.editDisplaySettings..minimumWidth.small',
+                  'controls.controlGroup.floatingActions.editDisplaySettings.minimumWidth.small',
                   {
                     defaultMessage: 'Small',
                   }
@@ -204,7 +204,7 @@ export class EditControlDisplaySettingsAction
               {
                 id: `medium`,
                 label: i18n.translate(
-                  'controls.controlGroup.floatingActions.editDisplaySettings..minimumWidth.medium',
+                  'controls.controlGroup.floatingActions.editDisplaySettings.minimumWidth.medium',
                   {
                     defaultMessage: 'Medium',
                   }
@@ -213,7 +213,7 @@ export class EditControlDisplaySettingsAction
               {
                 id: `large`,
                 label: i18n.translate(
-                  'controls.controlGroup.floatingActions.editDisplaySettings..minimumWidth.large',
+                  'controls.controlGroup.floatingActions.editDisplaySettings.minimumWidth.large',
                   {
                     defaultMessage: 'Large',
                   }
@@ -230,9 +230,12 @@ export class EditControlDisplaySettingsAction
         <EuiSpacer size="m" />
         <EuiSwitch
           compressed
-          label={i18n.translate('esql.flyout.grow.label', {
-            defaultMessage: 'Expand width to fit available space',
-          })}
+          label={i18n.translate(
+            'controls.controlGroup.floatingActions.editDisplaySettings.grow.label',
+            {
+              defaultMessage: 'Expand width to fit available space',
+            }
+          )}
           color="primary"
           checked={grow ?? false}
           onChange={(e) => onGrowChange(e)}
