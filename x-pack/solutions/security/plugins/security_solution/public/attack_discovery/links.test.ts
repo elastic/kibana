@@ -7,12 +7,12 @@
 
 import { ATTACK_DISCOVERY_FEATURE_ID } from '../../common/constants';
 import { links } from './links';
-import { SECURITY_UI_SHOW_PRIVILEGE } from '@kbn/security-solution-features/constants';
+import { RULES_UI_READ_PRIVILEGE } from '@kbn/security-solution-features/constants';
 
 describe('links', () => {
   it('for serverless, it specifies capabilities as an AND condition, via a nested array', () => {
     expect(links.capabilities).toEqual<string[][]>([
-      [SECURITY_UI_SHOW_PRIVILEGE, `${ATTACK_DISCOVERY_FEATURE_ID}.attack-discovery`],
+      [RULES_UI_READ_PRIVILEGE, `${ATTACK_DISCOVERY_FEATURE_ID}.attack-discovery`],
     ]);
   });
 
