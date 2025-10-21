@@ -12,12 +12,12 @@ import type { CoreStart } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { StackFrame } from '@kbn/workflows';
-import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { buildStepExecutionId } from '../utils';
 import { StepExecutionRuntime } from './step_execution_runtime';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 import { WorkflowContextManager } from './workflow_context_manager';
+import type { ContextDependencies } from './types';
 
 /**
  * Factory class responsible for creating StepExecutionRuntime instances.
@@ -53,7 +53,7 @@ export class StepExecutionRuntimeFactory {
       esClient: ElasticsearchClient; // ES client (user-scoped if available, fallback otherwise)
       fakeRequest?: KibanaRequest;
       coreStart?: CoreStart;
-      cloudSetup?: CloudSetup; // For using Cloud services
+      dependencies: ContextDependencies;
     }
   ) {}
 
@@ -82,7 +82,7 @@ export class StepExecutionRuntimeFactory {
       esClient: this.params.esClient,
       fakeRequest: this.params.fakeRequest,
       coreStart: this.params.coreStart,
-      cloudSetup: this.params.cloudSetup,
+      dependencies: this.params.dependencies,
     });
     return new StepExecutionRuntime({
       stepExecutionId,

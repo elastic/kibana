@@ -119,7 +119,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
       return coreStart.http.basePath.publicBaseUrl;
     }
     // Get Kibana URL from cloud.kibanaUrl config if available
-    const cloudSetup = this.stepExecutionRuntime.contextManager.getCloudSetup();
+    const { cloudSetup } = this.stepExecutionRuntime.contextManager.getDependencies();
     if (cloudSetup?.kibanaUrl) {
       return cloudSetup.kibanaUrl;
     }
