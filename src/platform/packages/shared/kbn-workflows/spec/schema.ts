@@ -523,7 +523,7 @@ export const WorkflowContextSchema = z.object({
         z.string(),
         z.number(),
         z.boolean(),
-        z.array(z.union([z.string(), z.number(), z.boolean()])),
+        z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]),
       ])
     )
     .optional(),
