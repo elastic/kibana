@@ -251,9 +251,15 @@ function formDeserializer(formData: LogisticsForm): LogisticsFormInternal {
 
 function getformSerializer(initialTemplateData: LogisticsForm = {}) {
   return (formData: LogisticsFormInternal): LogisticsForm => {
-    const { addMeta, doCreateDataStream, setIndexMode, ...rest } = formData;
+    const {
+      addMeta,
+      doCreateDataStream,
+      setIndexMode,
+      indexMode: indexModeValue,
+      ...rest
+    } = formData;
     const dataStream = doCreateDataStream ? initialTemplateData.dataStream ?? {} : undefined;
-    const indexMode = setIndexMode ? rest.indexMode : undefined;
+    const indexMode = setIndexMode ? indexModeValue : undefined;
     return { ...rest, dataStream, indexMode };
   };
 }
@@ -488,7 +494,12 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
                   componentProps={{
                     'data-test-subj': 'toggleIndexMode',
                     euiFieldProps: {
-                      label: 'Set index mode',
+                      label: i18n.translate(
+                        'xpack.idxMgmt.templateForm.stepLogistics.toggleIndexModeLabel',
+                        {
+                          defaultMessage: 'Set index mode',
+                        }
+                      ),
                     },
                   }}
                 />
