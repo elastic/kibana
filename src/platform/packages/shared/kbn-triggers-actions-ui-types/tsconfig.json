@@ -18,5 +18,6 @@
   "kbn_references": [
     "@kbn/alerting-types",
     "@kbn/core",
+    "@kbn/alerts-ui-shared",
   ]
 }
