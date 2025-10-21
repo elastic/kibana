@@ -107,5 +107,10 @@ xpack.ml.nlp:
         max: 128
 xpack.ml.compatibleModuleType: 'observability'
 
+xpack.profiling.enabled: true
+
 # Disable the embedded Dev Console
 console.ui.embeddedEnabled: false
+
+# Disable role management (custom roles)
+xpack.security.roleManagementEnabled: false

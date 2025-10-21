@@ -9,27 +9,6 @@ import type { PartialSetupState, ProfilingSetupOptions } from './setup';
 
 export const MAX_BUCKETS = 150000;
 
-export async function validateMaximumBuckets({
-  client,
-}: ProfilingSetupOptions): Promise<PartialSetupState> {
-  try {
-    const settings = await client.getEsClient().cluster.getSettings({});
-    const maxBuckets = settings.persistent.search?.max_buckets;
-    return {
-      settings: {
-        configured: maxBuckets === MAX_BUCKETS.toString(),
-      },
-    };
-  } catch (error) {
-    // If we can't get cluster settings, assume they're not configured
-    return {
-      settings: {
-        configured: false,
-      },
-    };
-  }
-}
-
 export async function validateResourceManagement({
   client,
 }: ProfilingSetupOptions): Promise<PartialSetupState> {
