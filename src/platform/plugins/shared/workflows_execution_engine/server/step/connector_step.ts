@@ -84,7 +84,8 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
         stepType,
         step['connector-id']!,
         renderedInputs,
-        step.spaceId
+        step.spaceId,
+        this.stepExecutionRuntime.abortController
       );
 
       const { data, status, message } = output;
