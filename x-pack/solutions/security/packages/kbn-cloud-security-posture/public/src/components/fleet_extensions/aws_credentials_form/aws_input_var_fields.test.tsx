@@ -21,8 +21,11 @@ const mockPackageInfo = {
 } as unknown as PackageInfo;
 
 jest.mock('@kbn/fleet-plugin/public', () => ({
-  LazyPackagePolicyInputVarField: ({ value }: { value: string }) => (
-    <div data-test-subj="mocked-input-field">{value ? `Value: ${value}` : 'No value'}</div>
+  LazyPackagePolicyInputVarField: ({ value, errors }: { value: string; errors?: string[] }) => (
+    <div data-test-subj="mocked-input-field" data-value={value || ''}>
+      {value ? `Value: ${value}` : ''}
+      {errors && errors.length > 0 && <div data-test-subj="field-error">{errors.join(', ')}</div>}
+    </div>
   ),
 }));
 
@@ -85,8 +88,14 @@ describe('AwsInputVarFields', () => {
     // Password fields rendered as mocked components
     const mockedFields = screen.getAllByTestId('mocked-input-field');
     expect(mockedFields).toHaveLength(2);
+
+    // Secret access key has a value
     expect(screen.getByText('Value: test-secret-key')).toBeInTheDocument();
-    expect(screen.getByText('No value')).toBeInTheDocument(); // Empty session token
+
+    // Session token has empty value
+    const emptyField = mockedFields.find((field) => field.getAttribute('data-value') === '');
+    expect(emptyField).toBeDefined();
+    expect(emptyField).toHaveTextContent('');
   });
 
   it('handles validation errors and field variations', () => {
@@ -103,10 +112,17 @@ describe('AwsInputVarFields', () => {
         hasInvalidRequiredVars={true}
       />
     );
+    // Text field shows error message
+    expect(screen.getByText('Access Key ID is required')).toBeInTheDocument();
 
-    // Component renders with validation errors
-    expect(screen.getByText('Access Key ID')).toBeInTheDocument();
-    expect(screen.getAllByRole('textbox')).toHaveLength(1); // Text field for access key
-    expect(screen.getAllByText('No value')).toHaveLength(2); // Password fields only
+    // Text field input is marked as invalid
+    const textInput = screen.getByTestId('aws-access-key-input');
+    expect(textInput).toHaveAttribute('aria-invalid', 'true');
+
+    // Password fields show error messages
+    const passwordErrors = screen.getAllByTestId('field-error');
+    expect(passwordErrors).toHaveLength(2); // Both password fields have errors
+    expect(screen.getByText('Secret Access Key is required')).toBeInTheDocument();
+    expect(screen.getByText('Session Token is required')).toBeInTheDocument();
   });
 });

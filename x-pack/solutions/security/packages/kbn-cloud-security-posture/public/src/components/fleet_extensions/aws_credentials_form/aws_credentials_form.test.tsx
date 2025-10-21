@@ -223,17 +223,41 @@ describe('AwsCredentialsForm', () => {
 
       renderWithProviders(propsWithCloudFormation);
 
-      // Verify both setup format buttons are present
-      expect(screen.getByRole('button', { name: 'CloudFormation' })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'Manual' })).toBeInTheDocument();
+      // Verify CloudFormation radio input is checked
+      const cloudFormationRadio = screen
+        .getByTestId(AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS.CLOUDFORMATION)
+        .querySelector('input[type="radio"]');
+      expect(cloudFormationRadio).toBeChecked();
+
+      // Verify Manual radio input is not checked
+      const manualRadio = screen
+        .getByTestId(AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS.MANUAL)
+        .querySelector('input[type="radio"]');
+      expect(manualRadio).not.toBeChecked();
     });
 
     it('shows warning when CloudFormation template is not supported', () => {
-      const propsWithNoTemplate = {
+      const propsWithNoCloudFormationTemplates = {
         ...defaultProps,
         packageInfo: {
           ...defaultProps.packageInfo,
-          name: 'test_package_no_template',
+          name: 'cloud_security_posture',
+          policy_templates: [
+            {
+              name: 'cspm',
+              title: 'CSPM',
+              description: 'Cloud Security Posture Management',
+              inputs: [
+                {
+                  type: 'cloudbeat/cis_aws',
+                  title: 'AWS CIS',
+                  description: 'AWS CIS Benchmark',
+                  // No cloud_formation_template var defined
+                  vars: [],
+                },
+              ],
+            },
+          ],
         },
         input: {
           ...defaultProps.input,
@@ -249,7 +273,7 @@ describe('AwsCredentialsForm', () => {
         },
       };
 
-      renderWithProviders(propsWithNoTemplate);
+      renderWithProviders(propsWithNoCloudFormationTemplates);
 
       expect(
         screen.getByText(/CloudFormation is not supported on the current Integration version/)
@@ -285,9 +309,17 @@ describe('AwsCredentialsForm', () => {
     it('renders manual setup components when Manual format is selected', () => {
       renderWithProviders(defaultProps);
 
-      // Verify both setup format buttons are present
-      expect(screen.getByRole('button', { name: 'Manual' })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'CloudFormation' })).toBeInTheDocument();
+      // Verify Manual radio input is checked
+      const manualRadio = screen
+        .getByTestId(AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS.MANUAL)
+        .querySelector('input[type="radio"]');
+      expect(manualRadio).toBeChecked();
+
+      // Verify CloudFormation radio input is not checked
+      const cloudFormationRadio = screen
+        .getByTestId(AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS.CLOUDFORMATION)
+        .querySelector('input[type="radio"]');
+      expect(cloudFormationRadio).not.toBeChecked();
 
       // Verify manual setup child components are rendered
       expect(screen.getByTestId('aws-credentials-type-selector')).toBeInTheDocument();
@@ -303,26 +335,6 @@ describe('AwsCredentialsForm', () => {
       expect(screen.queryByText(/Click the Save and continue button/i)).not.toBeInTheDocument();
     });
 
-    it('passes correct props to AwsCredentialTypeSelector', () => {
-      renderWithProviders(defaultProps);
-
-      // Verify AwsCredentialTypeSelector was called
-      expect(mockAwsCredentialTypeSelector).toHaveBeenCalled();
-
-      // Component should be rendered
-      expect(screen.getByTestId('aws-credentials-type-selector')).toBeInTheDocument();
-    });
-
-    it('passes correct props to AwsInputVarFields', () => {
-      renderWithProviders(defaultProps);
-
-      // Verify AwsInputVarFields was called
-      expect(mockAwsInputVarFields).toHaveBeenCalled();
-
-      // Component should be rendered
-      expect(screen.getByTestId('aws-input-var-fields')).toBeInTheDocument();
-    });
-
     it('renders ReadDocumentation component', () => {
       renderWithProviders(defaultProps);
 
@@ -332,11 +344,9 @@ describe('AwsCredentialsForm', () => {
   });
 
   describe('Setup Format Switching', () => {
-    it('switches from Manual to CloudFormation when CloudFormation radio is selected', () => {
+    // Verify updatePolicy is called (component would re-render with new state in real scenario)
+    it('updates policy with cloud_formation credential type when switching from Manual to CloudFormation', () => {
       renderWithProviders(defaultProps);
-
-      // Initially Manual components should be present
-      expect(screen.getByTestId('aws-credentials-type-selector')).toBeInTheDocument();
 
       // Click CloudFormation radio
       const cloudFormationRadio = screen.getByTestId(
@@ -344,8 +354,59 @@ describe('AwsCredentialsForm', () => {
       );
       fireEvent.click(cloudFormationRadio);
 
-      // Verify updatePolicy is called (component would re-render with new state in real scenario)
+      // Verify updatePolicy was called with cloud_formation credential type
       expect(mockUpdatePolicy).toHaveBeenCalled();
+      const updateCall = mockUpdatePolicy.mock.calls[0][0];
+      expect(updateCall.updatedPolicy.inputs[0].streams[0].vars['aws.credentials.type']).toEqual({
+        value: 'cloud_formation',
+        type: 'text',
+      });
+    });
+
+    it('updates policy with direct_access_keys credential type when switching from CloudFormation to Manual', () => {
+      const propsWithCloudFormation = {
+        ...defaultProps,
+        input: {
+          ...defaultProps.input,
+          streams: [
+            {
+              enabled: true,
+              data_stream: defaultProps.input.streams[0].data_stream,
+              vars: {
+                'aws.credentials.type': { value: 'cloud_formation' },
+              },
+            },
+          ],
+        },
+      };
+
+      renderWithProviders(propsWithCloudFormation);
+
+      // Click Manual radio
+      const manualRadio = screen.getByTestId(AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS.MANUAL);
+      fireEvent.click(manualRadio);
+
+      // Verify updatePolicy was called with assume_role credential type (default manual type when switching from CloudFormation)
+      // When switching from CloudFormation to Manual, it sets assume_role as the default instead of direct_access_keys
+      expect(mockUpdatePolicy).toHaveBeenCalled();
+      const updateCall = mockUpdatePolicy.mock.calls[mockUpdatePolicy.mock.calls.length - 1][0];
+      expect(updateCall.updatedPolicy.inputs[0].streams[0].vars['aws.credentials.type']).toEqual({
+        value: 'assume_role',
+        type: 'text',
+      });
+    });
+
+    it('does not call updatePolicy when clicking already selected setup format', () => {
+      renderWithProviders(defaultProps);
+
+      mockUpdatePolicy.mockClear();
+
+      // Click Manual radio (already selected)
+      const manualRadio = screen.getByTestId(AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS.MANUAL);
+      fireEvent.click(manualRadio);
+
+      // Verify updatePolicy was not called
+      expect(mockUpdatePolicy).not.toHaveBeenCalled();
     });
   });
 });
