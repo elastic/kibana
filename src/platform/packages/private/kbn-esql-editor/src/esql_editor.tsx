@@ -229,7 +229,14 @@ const ESQLEditorInternal = function ESQLEditor({
         onTextLangQuerySubmit({ esql: currentValue } as AggregateQuery, abc);
       }
     },
-    [isQueryLoading, isLoading, allowQueryCancellation, abortController, onTextLangQuerySubmit]
+    [
+      isQueryLoading,
+      isLoading,
+      allowQueryCancellation,
+      abortController,
+      onTextLangQuerySubmit,
+      telemetryService,
+    ]
   );
 
   const onCommentLine = useCallback(() => {
@@ -528,7 +535,7 @@ const ESQLEditorInternal = function ESQLEditor({
       telemetryService.trackQueryHistoryOpened(isOpen);
       setIsHistoryOpen(isOpen);
     },
-    [telemetryService]
+    [telemetryService, setIsHistoryOpen]
   );
 
   const esqlCallbacks = useMemo<ESQLCallbacks>(() => {

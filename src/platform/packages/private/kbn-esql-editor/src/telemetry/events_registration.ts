@@ -100,25 +100,6 @@ export const registerESQLEditorAnalyticsEvents = once((analytics: AnalyticsServi
         type: 'keyword',
         _meta: { description: 'The number of lines in the query.' },
       },
-      // query_modified_before_run: {
-      //   type: 'boolean',
-      //   _meta: { description: 'Whether the query was modified before execution.' },
-      // },
-      // query_edit_delta_bucket: {
-      //   type: 'keyword',
-      //   _meta: { description: 'The edit delta bucket for the query.' },
-      // },
-      // schema_context: {
-      //   type: 'keyword',
-      //   _meta: {
-      //     description:
-      //       'The context of the query. Possible values are: logs|metrics|traces|security|mixed|unknown',
-      //   },
-      // },
-      // exec_result_size_bucket: {
-      //   type: 'keyword',
-      //   _meta: { description: 'The size of the execution result.' },
-      // },
       anti_limit_before_aggregate: {
         type: 'boolean',
         _meta: { description: 'Whether the query had a limit before the aggregate.' },

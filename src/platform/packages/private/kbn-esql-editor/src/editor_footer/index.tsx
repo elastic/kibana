@@ -116,7 +116,7 @@ export const EditorFooter = memo(function EditorFooter({
         runQuery(source);
       }, 300);
     },
-    [runQuery, updateQuery]
+    [runQuery, updateQuery, telemetryService]
   );
 
   const toggleHistoryComponent = useCallback(() => {
