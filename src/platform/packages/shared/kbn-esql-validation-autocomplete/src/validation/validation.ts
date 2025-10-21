@@ -16,6 +16,7 @@ import type {
 import { getMessageFromId } from '@kbn/esql-ast/src/definitions/utils';
 import type { LicenseType } from '@kbn/licensing-types';
 
+import type { ESQLAstAllCommands } from '@kbn/esql-ast/src/types';
 import { QueryColumns } from '../shared/resources_helpers';
 import type { ESQLCallbacks } from '../shared/types';
 import { retrievePolicies, retrieveSources } from './resources';
@@ -57,6 +58,9 @@ async function validateAst(
   const messages: ESQLMessage[] = [];
 
   const parsingResult = EsqlQuery.fromSrc(queryString);
+
+  const headerCommands = parsingResult.ast.header ?? [];
+
   const rootCommands = parsingResult.ast.commands;
 
   const [sources, availablePolicies, joinIndices] = await Promise.all([
@@ -85,6 +89,23 @@ async function validateAst(
 
   const license = await callbacks?.getLicense?.();
   const hasMinimumLicenseRequired = license?.hasAtLeast;
+
+  // Validate the header commands
+  for (const command of headerCommands) {
+    const references: ReferenceMaps = {
+      sources,
+      columns: new Map(), // no columns available in header
+      policies: availablePolicies,
+      query: queryString,
+      joinIndices: joinIndices?.indices || [],
+    };
+
+    const commandMessages = validateCommand(command, references, rootCommands, {
+      ...callbacks,
+      hasMinimumLicenseRequired,
+    });
+    messages.push(...commandMessages);
+  }
 
   /**
    * Even though we are validating single commands, we work with subqueries.
@@ -139,9 +160,9 @@ async function validateAst(
 }
 
 function validateCommand(
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   references: ReferenceMaps,
-  ast: ESQLAst,
+  rootCommands: ESQLCommand[],
   callbacks?: ICommandCallbacks
 ): ESQLMessage[] {
   const messages: ESQLMessage[] = [];
@@ -200,10 +221,13 @@ function validateCommand(
   return messages;
 }
 
-function validateUnsupportedTypeFields(fields: Map<string, ESQLFieldWithMetadata>, ast: ESQLAst) {
+function validateUnsupportedTypeFields(
+  fields: Map<string, ESQLFieldWithMetadata>,
+  commands: ESQLAstAllCommands[]
+) {
   const usedColumnsInQuery: string[] = [];
 
-  walk(ast, {
+  walk(commands, {
     visitColumn: (node) => usedColumnsInQuery.push(node.name),
   });
   const messages: ESQLMessage[] = [];
