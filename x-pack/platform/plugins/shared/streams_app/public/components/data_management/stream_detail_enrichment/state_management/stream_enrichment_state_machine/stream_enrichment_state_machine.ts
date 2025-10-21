@@ -94,6 +94,9 @@ export const streamEnrichmentMachine = setup({
     notifyUpsertStreamSuccess: getPlaceholderFor(createUpsertStreamSuccessNofitier),
     notifyUpsertStreamFailure: getPlaceholderFor(createUpsertStreamFailureNofitier),
     refreshDefinition: () => {},
+    // Placeholders for URL processor consumption actions; implementations provided below
+    consumeProcessorsFromUrl: () => {},
+    stripProcessorsFromUrl: () => {},
     /* URL state actions */
     storeUrlState: assign((_, params: { urlState: EnrichmentUrlState }) => ({
       urlState: params.urlState,
@@ -328,7 +331,6 @@ export const streamEnrichmentMachine = setup({
         'url.initialized': {
           actions: [
             { type: 'storeUrlState', params: ({ event }) => event },
-            { type: 'syncUrlState' },
           ],
           target: 'setupGrokCollection',
         },
@@ -349,7 +351,13 @@ export const streamEnrichmentMachine = setup({
     ready: {
       id: 'ready',
       type: 'parallel',
-      entry: [{ type: 'setupSteps' }, { type: 'setupDataSources' }],
+      entry: [
+        { type: 'setupSteps' },
+        { type: 'setupDataSources' },
+        { type: 'consumeProcessorsFromUrl', params: () => ({}) },
+        { type: 'stripProcessorsFromUrl', params: () => ({}) },
+        { type: 'syncUrlState' },
+      ],
       on: {
         'stream.received': {
           target: '#ready',
@@ -626,6 +634,34 @@ export const createStreamEnrichmentMachineImplementations = ({
     }),
     notifyUpsertStreamFailure: createUpsertStreamFailureNofitier({
       toasts: core.notifications.toasts,
+    }),
+    consumeProcessorsFromUrl: assign(({ context, spawn, self }) => {
+      const urlState = context.urlState as any;
+      const processors: any[] | undefined = urlState && urlState.v === 2 ? urlState.processorsToAppend : undefined;
+
+      if (!processors || processors.length === 0) {
+        return {};
+      }
+
+      const appendedRefs = processors.map((processor) => {
+        const converted = stepConverter.toUIDefinition(processor, { parentId: null });
+        return spawnStep(converted, { spawn, self }, { isNew: true });
+      });
+
+      return {
+        stepRefs: [...context.stepRefs, ...appendedRefs],
+      };
+    }),
+    stripProcessorsFromUrl: assign(({ context }) => {
+      const urlState = context.urlState as any;
+      if (!urlState || urlState.v !== 2 || !urlState.processorsToAppend) {
+        return {};
+      }
+
+      const { processorsToAppend, ...rest } = urlState;
+      return {
+        urlState: { ...rest },
+      };
     }),
   },
 });

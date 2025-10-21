@@ -47,3 +47,6 @@ export const transpile = (
     commands: commandsArray,
   };
 };
+
+// Re-export reverse translation utilities (to be implemented alongside) for external consumers
+export * as reverse from './reverse';

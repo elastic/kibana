@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { ENABLE_ESQL, getInitialESQLQuery } from '@kbn/esql-utils';
+import { ENABLE_ESQL, getInitialESQLQuery, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import {
   AppMenuRegistry,
   type AppMenuItemPrimary,
@@ -27,6 +27,8 @@ import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import type { DiscoverServices } from '../../../../build_services';
+import { STREAMS_APP_LOCATOR_ID } from '@kbn/deeplinks-observability';
+import { esqlReverse } from '@kbn/streamlang';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import type { AppMenuDiscoverParams } from './app_menu_actions';
 import {
@@ -229,12 +231,55 @@ export const useTopNavLinks = ({
   }, [getAppMenuAccessor, discoverParams, appMenuPrimaryAndSecondaryItems]);
 
   return useMemo(() => {
+    // Compute ES|QL materialization eligibility and navigation
+    const esqlQuery: string | undefined = isEsqlMode
+      ? ((state.appState.getState()?.query as any)?.esql as string | undefined)
+      : undefined;
+    const indexPattern = esqlQuery ? getIndexPatternFromESQLQuery(esqlQuery) : '';
+    const isSingleTarget = Boolean(indexPattern) && !indexPattern.includes(',') && !indexPattern.includes('*') && !indexPattern.includes(' ');
+    const processors = esqlQuery ? esqlReverse.esqlToStreamlangProcessors(esqlQuery) : [];
+    const hasMaterializable = processors.length > 0;
+    const isEligible = Boolean(isEsqlMode && isSingleTarget && hasMaterializable);
+
     const entries = appMenuRegistry.getSortedItems().map((appMenuItem) =>
       convertAppMenuItemToTopNavItem({
         appMenuItem,
         services,
       })
     );
+
+    // Add Streams materialize button in ES|QL mode
+    if (isEsqlMode) {
+      entries.push({
+        id: 'materialize-streams',
+        label: i18n.translate('discover.localMenu.materializeInStreams', {
+          defaultMessage: 'Materialize in Streams',
+        }),
+        description: i18n.translate('discover.localMenu.materializeInStreams.description', {
+          defaultMessage: 'Translate ES|QL to processors and open Streams processing',
+        }),
+        testId: 'discoverMaterializeInStreamsButton',
+        iconType: 'indexEdit',
+        run: async () => {
+          if (!isEligible) return;
+          const locator = services.share?.url.locators.get(STREAMS_APP_LOCATOR_ID);
+          if (!locator) return;
+          const url = await locator.getRedirectUrl({
+            name: indexPattern,
+            managementTab: 'processing',
+            pageState: { v: 2, dataSources: [], processorsToAppend: processors as any },
+          } as any);
+          services.application.navigateToUrl(url);
+        },
+        disableButton: !isEligible,
+        tooltip: !isEligible
+          ? i18n.translate('discover.localMenu.materializeInStreams.disabled', {
+              defaultMessage:
+                'Enabled when a single stream target is detected and GROK/DISSECT are present',
+            })
+          : undefined,
+      });
+    }
 
     if (services.uiSettings.get(ENABLE_ESQL)) {
       /**
