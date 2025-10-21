@@ -10,7 +10,7 @@ import { registerConnectorTypes } from '..';
 import type { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { experimentalFeaturesMock, registrationServicesMock } from '../../mocks';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
-import { MAX_ADDITIONAL_FIELDS_LENGTH } from '../../../common/servicenow/constants';
+import { MAX_ADDITIONAL_FIELDS_LENGTH } from '@kbn/connector-schemas/servicenow';
 
 const SERVICENOW_SIR_CONNECTOR_TYPE_ID = '.servicenow-sir';
 let connectorTypeRegistry: TypeRegistry<ConnectorTypeModel>;

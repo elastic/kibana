@@ -18,14 +18,13 @@ import {
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
-import { validate } from './validators';
 import {
+  CONNECTOR_ID,
+  CONNECTOR_NAME,
   ExternalIncidentServiceConfigurationSchema,
   ExternalIncidentServiceSecretConfigurationSchema,
   ExecutorParamsSchema,
-} from './schema';
-import { createExternalService } from './service';
-import { api } from './api';
+} from '@kbn/connector-schemas/jira';
 import type {
   ExecutorParams,
   ExecutorSubActionPushParams,
@@ -37,8 +36,10 @@ import type {
   ExecutorSubActionGetIssuesParams,
   ExecutorSubActionGetIssueParams,
   ExecutorSubActionGetIncidentParams,
-} from './types';
-import * as i18n from './translations';
+} from '@kbn/connector-schemas/jira';
+import { validate } from './validators';
+import { createExternalService } from './service';
+import { api } from './api';
 
 export type ActionParamsType = z.infer<typeof ExecutorParamsSchema>;
 
@@ -52,7 +53,6 @@ const supportedSubActions: string[] = [
   'issue',
 ];
 
-export const ConnectorTypeId = '.jira';
 // connector type definition
 export function getConnectorType(): ConnectorType<
   JiraPublicConfigurationType,
@@ -61,9 +61,9 @@ export function getConnectorType(): ConnectorType<
   JiraExecutorResultData | {}
 > {
   return {
-    id: ConnectorTypeId,
+    id: CONNECTOR_ID,
     minimumLicenseRequired: 'gold',
-    name: i18n.NAME,
+    name: CONNECTOR_NAME,
     supportedFeatureIds: [
       AlertingConnectorFeatureId,
       CasesConnectorFeatureId,

@@ -12,11 +12,12 @@ import type {
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { ALERT_HISTORY_PREFIX } from '@kbn/triggers-actions-ui-plugin/public';
+import { CONNECTOR_ID } from '@kbn/connector-schemas/es_index';
 import type { EsIndexConfig, IndexActionParams } from '../types';
 
 export function getConnectorType(): ConnectorTypeModel<EsIndexConfig, unknown, IndexActionParams> {
   return {
-    id: '.index',
+    id: CONNECTOR_ID,
     iconClass: 'indexOpen',
     selectMessage: i18n.translate('xpack.stackConnectors.components.index.selectMessageText', {
       defaultMessage: 'Index data into Elasticsearch.',

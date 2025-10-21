@@ -10,7 +10,7 @@ import { registerConnectorTypes } from '..';
 import type { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { experimentalFeaturesMock, registrationServicesMock } from '../../mocks';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
-import { MAX_OTHER_FIELDS_LENGTH } from '../../../common/jira/constants';
+import { MAX_OTHER_FIELDS_LENGTH } from '@kbn/connector-schemas/jira';
 
 const CONNECTOR_TYPE_ID = '.jira';
 let connectorTypeModel: ConnectorTypeModel;

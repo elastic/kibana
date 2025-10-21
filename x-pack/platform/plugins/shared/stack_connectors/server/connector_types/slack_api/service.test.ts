@@ -12,8 +12,8 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { createExternalService } from './service';
 import type { SlackApiService } from '../../../common/slack_api/types';
-import { SLACK_API_CONNECTOR_ID } from '../../../common/slack_api/constants';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import { CONNECTOR_ID } from '@kbn/connector-schemas/slack_api';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
@@ -157,7 +157,7 @@ describe('Slack API service', () => {
       requestMock.mockImplementation(() => getValidChannelIdResponse);
       const res = await service.validChannelId('channel_id_1');
       expect(res).toEqual({
-        actionId: SLACK_API_CONNECTOR_ID,
+        actionId: CONNECTOR_ID,
         data: {
           ok: true,
           channel,
@@ -190,7 +190,7 @@ describe('Slack API service', () => {
       });
 
       expect(await service.validChannelId('channel_id_1')).toEqual({
-        actionId: SLACK_API_CONNECTOR_ID,
+        actionId: CONNECTOR_ID,
         message: 'error posting slack message',
         serviceMessage: 'request fail',
         status: 'error',
@@ -274,7 +274,7 @@ describe('Slack API service', () => {
       expect(
         await service.postMessage({ channels: ['general', 'privat'], text: 'a message' })
       ).toEqual({
-        actionId: SLACK_API_CONNECTOR_ID,
+        actionId: CONNECTOR_ID,
         message: 'error posting slack message',
         serviceMessage: 'request fail',
         status: 'error',
@@ -363,7 +363,7 @@ describe('Slack API service', () => {
           text: 'abc',
         })
       ).toEqual({
-        actionId: SLACK_API_CONNECTOR_ID,
+        actionId: CONNECTOR_ID,
         message: 'error posting slack message',
         serviceMessage: 'Unexpected token \'a\', "abc" is not valid JSON',
         status: 'error',
@@ -381,7 +381,7 @@ describe('Slack API service', () => {
           text: JSON.stringify(testBlock),
         })
       ).toEqual({
-        actionId: SLACK_API_CONNECTOR_ID,
+        actionId: CONNECTOR_ID,
         message: 'error posting slack message',
         serviceMessage: 'request fail',
         status: 'error',

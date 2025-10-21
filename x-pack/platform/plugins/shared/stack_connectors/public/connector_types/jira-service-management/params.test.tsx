@@ -10,19 +10,19 @@ import { screen, render, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import JiraServiceManagementParamFields from './params';
 import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
-import type { JiraServiceManagementActionParams } from '../../../server/connector_types';
-import { JiraServiceManagementSubActions } from '../../../common/jira-service-management/constants';
+import type { Params } from '@kbn/connector-schemas/jira-service-management';
+import { SUB_ACTION } from '@kbn/connector-schemas/jira-service-management';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 describe('JiraServiceManagementParamFields', () => {
   const editAction = jest.fn();
-  const createAlertActionParams: JiraServiceManagementActionParams = {
-    subAction: JiraServiceManagementSubActions.CreateAlert,
+  const createAlertActionParams: Params = {
+    subAction: SUB_ACTION.CreateAlert,
     subActionParams: { message: 'hello', alias: '123' },
   };
 
-  const closeAlertActionParams: JiraServiceManagementActionParams = {
-    subAction: JiraServiceManagementSubActions.CloseAlert,
+  const closeAlertActionParams: Params = {
+    subAction: SUB_ACTION.CloseAlert,
     subActionParams: { alias: '456' },
   };
 
@@ -221,7 +221,6 @@ describe('JiraServiceManagementParamFields', () => {
     expect(screen.getByDisplayValue('123')).toBeInTheDocument();
 
     rerender(
-      // @ts-expect-error upgrade typescript v4.9.5
       <JiraServiceManagementParamFields
         {...{
           ...defaultCloseAlertProps,
@@ -257,7 +256,6 @@ describe('JiraServiceManagementParamFields', () => {
     expect(screen.getByDisplayValue('456')).toBeInTheDocument();
 
     rerender(
-      // @ts-expect-error upgrade typescript v4.9.5
       <JiraServiceManagementParamFields
         {...{
           ...defaultCreateAlertProps,
@@ -297,7 +295,6 @@ describe('JiraServiceManagementParamFields', () => {
     expect(editAction).toBeCalledTimes(1);
 
     rerender(
-      // @ts-expect-error upgrade typescript v4.9.5
       <JiraServiceManagementParamFields
         {...{
           ...defaultCloseAlertProps,

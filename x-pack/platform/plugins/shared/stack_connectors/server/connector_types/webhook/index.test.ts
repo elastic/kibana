@@ -19,16 +19,9 @@ import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
 import { loggerMock } from '@kbn/logging-mocks';
 import { getOAuthClientCredentialsAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token';
 
-import type {
-  ConnectorTypeConfigType,
-  ConnectorTypeSecretsType,
-  WebhookConnectorType,
-  WebhookConnectorTypeExecutorOptions,
-} from './types';
+import type { WebhookConnectorType, WebhookConnectorTypeExecutorOptions } from './types';
 
 import { getConnectorType } from '.';
-import { AuthType, SSLCertType, WebhookMethods } from '../../../common/auth/constants';
-import { PFX_FILE, CRT_FILE, KEY_FILE } from '../../../common/auth/mocks';
 import { TaskErrorSource, createTaskRunError } from '@kbn/task-manager-plugin/server';
 
 jest.mock('axios', () => ({
@@ -37,6 +30,12 @@ jest.mock('axios', () => ({
   AxiosError: jest.requireActual('axios').AxiosError,
 }));
 import axios from 'axios';
+import { CRT_FILE, KEY_FILE, PFX_FILE } from '@kbn/connector-schemas/common/auth/mocks';
+import { AuthType, SSLCertType, WebhookMethods } from '@kbn/connector-schemas/common/auth';
+import type {
+  ConnectorTypeConfigType,
+  ConnectorTypeSecretsType,
+} from '@kbn/connector-schemas/webhook';
 const createAxiosInstanceMock = axios.create as jest.Mock;
 const axiosInstanceMock = {
   interceptors: {

@@ -11,7 +11,7 @@ import type {
   GenericValidationResult,
   ActionTypeModel as ConnectorTypeModel,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { MAX_OTHER_FIELDS_LENGTH } from '../../../common/jira/constants';
+import { MAX_OTHER_FIELDS_LENGTH } from '@kbn/connector-schemas/jira';
 import type { JiraConfig, JiraSecrets, JiraActionParams } from './types';
 import { validateJSON } from '../lib/validate_json';
 

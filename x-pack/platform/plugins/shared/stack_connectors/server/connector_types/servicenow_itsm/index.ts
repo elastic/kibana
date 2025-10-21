@@ -6,7 +6,6 @@
  */
 
 import { curry } from 'lodash';
-import type { z } from '@kbn/zod';
 
 import type {
   ActionType as ConnectorType,
@@ -19,41 +18,40 @@ import {
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
-import { validate } from '../lib/servicenow/validators';
 import {
-  ExecutorParamsSchemaITSM,
-  ExternalIncidentServiceConfigurationSchema,
   ExternalIncidentServiceSecretConfigurationSchema,
-} from '../lib/servicenow/schema';
+  ExternalIncidentServiceConfigurationSchema,
+} from '@kbn/connector-schemas/servicenow';
+import type {
+  ServiceNowPublicConfigurationBaseType,
+  ServiceNowSecretConfigurationType,
+  ExecutorSubActionGetChoicesParams,
+  ExecutorSubActionCloseIncidentParams,
+  ExecutorSubActionCommonFieldsParams,
+  ServiceNowPublicConfigurationType,
+} from '@kbn/connector-schemas/servicenow';
+import {
+  CONNECTOR_ID,
+  CONNECTOR_NAME,
+  ExecutorParamsSchemaITSM,
+} from '@kbn/connector-schemas/servicenow_itsm';
+import { validate } from '../lib/servicenow/validators';
 import { createExternalService } from './service';
 import { api as apiITSM } from './api';
-import * as i18n from '../lib/servicenow/translations';
 import type {
   ExecutorParams,
   ExecutorSubActionPushParams,
   ServiceFactory,
   ExternalServiceAPI,
-  ServiceNowPublicConfigurationBaseType,
   ExternalService,
-  ExecutorSubActionCommonFieldsParams,
-  ExecutorSubActionGetChoicesParams,
   PushToServiceResponse,
   ServiceNowExecutorResultData,
-  ServiceNowPublicConfigurationType,
-  ServiceNowSecretConfigurationType,
-  ExecutorSubActionCloseIncidentParams,
 } from '../lib/servicenow/types';
-import {
-  ServiceNowITSMConnectorTypeId,
-  serviceNowITSMTable,
-  snExternalServiceConfig,
-} from '../lib/servicenow/config';
+import { serviceNowITSMTable, snExternalServiceConfig } from '../lib/servicenow/config';
 import { throwIfSubActionIsNotSupported } from '../lib/servicenow/utils';
 import { createServiceWrapper } from '../lib/servicenow/create_service_wrapper';
 
-export { ServiceNowITSMConnectorTypeId, serviceNowITSMTable };
-
-export type ActionParamsType = z.infer<typeof ExecutorParamsSchemaITSM>;
+export { serviceNowITSMTable };
 
 export type ServiceNowConnectorType<
   C extends Record<string, unknown> = ServiceNowPublicConfigurationBaseType,
@@ -71,9 +69,9 @@ export function getServiceNowITSMConnectorType(): ServiceNowConnectorType<
   ExecutorParams
 > {
   return {
-    id: ServiceNowITSMConnectorTypeId,
+    id: CONNECTOR_ID,
     minimumLicenseRequired: 'platinum',
-    name: i18n.SERVICENOW_ITSM,
+    name: CONNECTOR_NAME,
     supportedFeatureIds: [
       AlertingConnectorFeatureId,
       CasesConnectorFeatureId,
@@ -95,7 +93,7 @@ export function getServiceNowITSMConnectorType(): ServiceNowConnectorType<
       },
     },
     executor: curry(executor)({
-      actionTypeId: ServiceNowITSMConnectorTypeId,
+      actionTypeId: CONNECTOR_ID,
       createService: createExternalService,
       api: apiITSM,
     }),
