@@ -18,6 +18,7 @@ import { CasesService } from './cases_service';
 import type { CasesClient } from '../../client';
 import {
   CasesConnectorError,
+  createTaskUserError,
   isCasesClientError,
   isCasesConnectorError,
 } from './cases_connector_error';
@@ -148,8 +149,9 @@ export class CasesConnector extends SubActionConnector<
 
   private handleError(error: Error) {
     if (isCasesConnectorError(error)) {
-      this.logError(error);
-      throw error;
+      const userError = createTaskUserError(error);
+      this.logError(userError);
+      throw userError;
     }
 
     if (isCasesClientError(error)) {
@@ -158,8 +160,9 @@ export class CasesConnector extends SubActionConnector<
         error.boomify().output.statusCode
       );
 
-      this.logError(caseConnectorError);
-      throw caseConnectorError;
+      const userError = createTaskUserError(caseConnectorError);
+      this.logError(userError);
+      throw userError;
     }
 
     if (Boom.isBoom(error)) {
@@ -168,9 +171,10 @@ export class CasesConnector extends SubActionConnector<
         error.output.statusCode
       );
 
-      this.logError(caseConnectorError);
+      const userError = createTaskUserError(caseConnectorError);
+      this.logError(userError);
 
-      throw caseConnectorError;
+      throw userError;
     }
 
     const caseConnectorError = new CasesConnectorError(error.message, 500);
