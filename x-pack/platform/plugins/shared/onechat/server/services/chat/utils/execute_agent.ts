@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
+import { Observable, shareReplay } from 'rxjs';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
   RoundInput,
@@ -60,5 +60,5 @@ export const executeAgent$ = ({
       );
 
     return () => {};
-  });
+  }).pipe(shareReplay());
 };
