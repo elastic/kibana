@@ -312,7 +312,8 @@ function applyParamConstraints(
   const maxLength = configurationUtilities.getMaxEmailBodyLength();
 
   if (message.length > maxLength) {
-    const warningMessage = `message length exceeds ${maxLength} bytes and has been trimmed`;
+    const warningMessage = `email message length exceeds ${maxLength} bytes and has been trimmed`;
+    logger.warn(warningMessage);
     const trimmedMessage = message.slice(0, maxLength - TrimmedMessageExtraRoom);
     params = {
       ...params,
@@ -321,7 +322,8 @@ function applyParamConstraints(
   }
 
   if (messageHTML && messageHTML.length > maxLength) {
-    const warningMessage = `messageHTML length exceeds ${maxLength} bytes and has been trimmed`;
+    const warningMessage = `email messageHTML length exceeds ${maxLength} bytes and has been trimmed`;
+    logger.warn(warningMessage);
     const trimmedMessage = message.slice(0, maxLength - TrimmedMessageExtraRoom);
     params = {
       ...params,

@@ -12,7 +12,6 @@ import {
   DEFAULT_MICROSOFT_EXCHANGE_URL,
   DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
   DEFAULT_MICROSOFT_GRAPH_API_URL,
-  MAX_EMAIL_BODY_LENGTH,
   DEFAULT_EMAIL_BODY_LENGTH,
 } from '../common';
 
@@ -146,11 +145,7 @@ export const configSchema = schema.object({
         domain_allowlist: schema.maybe(schema.arrayOf(schema.string())),
         recipient_allowlist: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
         maximum_body_length: schema.maybe(
-          schema.number({
-            min: 0,
-            max: MAX_EMAIL_BODY_LENGTH,
-            defaultValue: DEFAULT_EMAIL_BODY_LENGTH,
-          })
+          schema.number({ defaultValue: DEFAULT_EMAIL_BODY_LENGTH })
         ),
         services: schema.maybe(
           schema.object(

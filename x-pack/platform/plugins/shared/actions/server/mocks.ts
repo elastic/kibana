@@ -22,10 +22,12 @@ import type { Services, UnsecuredServices } from './types';
 import { actionsAuthorizationMock } from './authorization/actions_authorization.mock';
 import { ConnectorTokenClient } from './lib/connector_token_client';
 import { unsecuredActionsClientMock } from './unsecured_actions_client/unsecured_actions_client.mock';
+import { actionsConfigMock } from './actions_config.mock';
 export { actionsAuthorizationMock };
 export { actionsClientMock };
 export type { ActionsClientMock };
 
+const mockAcu = actionsConfigMock.create();
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 const createSetupMock = () => {
@@ -74,6 +76,7 @@ export function renderActionParameterTemplatesDefault<RecordType>(
   return renderActionParameterTemplates(
     logger,
     undefined,
+    mockAcu,
     actionTypeId,
     actionId,
     params,
