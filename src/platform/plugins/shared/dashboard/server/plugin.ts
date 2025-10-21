@@ -85,7 +85,6 @@ export class DashboardPlugin
         migrationDeps: {
           embeddable: plugins.embeddable,
         },
-        isAccessControlEnabled: core.savedObjects.isAccessControlEnabled(),
       })
     );
 
