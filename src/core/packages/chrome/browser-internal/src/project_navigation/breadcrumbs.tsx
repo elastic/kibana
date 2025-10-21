@@ -38,7 +38,7 @@ export function buildBreadcrumbs({
   activeNodes,
   chromeBreadcrumbs,
   isServerless,
-  deploymentName,
+  echDeploymentName,
 }: {
   projectName?: string;
   projectBreadcrumbs: {
@@ -49,13 +49,13 @@ export function buildBreadcrumbs({
   cloudLinks: CloudLinks;
   activeNodes: ChromeProjectNavigationNode[][];
   isServerless: boolean;
-  deploymentName?: string;
+  echDeploymentName?: string;
 }): ChromeBreadcrumb[] {
   const rootCrumb = buildRootCrumb({
     projectName,
     cloudLinks,
     isServerless,
-    deploymentName,
+    echDeploymentName,
   });
 
   if (projectBreadcrumbs.params.absolute) {
@@ -108,12 +108,12 @@ function buildRootCrumb({
   projectName,
   cloudLinks,
   isServerless,
-  deploymentName,
+  echDeploymentName,
 }: {
   projectName?: string;
   cloudLinks: CloudLinks;
   isServerless: boolean;
-  deploymentName?: string;
+  echDeploymentName?: string;
 }): ChromeBreadcrumb | undefined {
   if (isServerless) {
     return {
@@ -149,8 +149,8 @@ function buildRootCrumb({
 
   if (cloudLinks.deployment || cloudLinks.deployments) {
     return {
-      text: deploymentName ? (
-        <EuiTextTruncate text={deploymentName} width={96} />
+      text: echDeploymentName ? (
+        <EuiTextTruncate text={echDeploymentName} width={96} />
       ) : (
         i18n.translate('core.ui.primaryNav.cloud.deploymentLabel', {
           defaultMessage: 'Deployment',

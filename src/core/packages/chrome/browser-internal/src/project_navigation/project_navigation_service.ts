@@ -138,10 +138,10 @@ export class ProjectNavigationService {
 
     this.echDeploymentName$ = this.cloudLinks$.pipe(
       switchMap((cloudLinks: CloudLinks) => {
-        const shouldFetchDeploymentName = !this.isServerless && cloudLinks.deployments;
+        const hasDeploymentLink = Boolean(cloudLinks.deployment || cloudLinks.deployments);
+        const shouldFetchDeploymentName = !this.isServerless && hasDeploymentLink;
         return shouldFetchDeploymentName ? this.getEchDeploymentName$() : of(undefined);
-      }),
-      shareReplay(1)
+      })
     );
 
     return {
@@ -197,7 +197,7 @@ export class ProjectNavigationService {
               chromeBreadcrumbs,
               projectName,
               cloudLinks,
-              deploymentName,
+              echDeploymentName,
             ]) => {
               return buildBreadcrumbs({
                 projectName,
@@ -206,7 +206,7 @@ export class ProjectNavigationService {
                 chromeBreadcrumbs,
                 cloudLinks,
                 isServerless: this.isServerless,
-                deploymentName,
+                echDeploymentName,
               });
             }
           )
@@ -491,28 +491,20 @@ export class ProjectNavigationService {
     return this._http;
   }
 
-  private getEchDeploymentName$() {
+  private getEchDeploymentName$(): Observable<string | undefined> {
     if (!this._http) {
       return of(undefined);
     }
 
-    try {
-      const response = this._http.get<{
-        resourceData: { deployment?: { name?: string } };
-      }>('/internal/cloud/solution', { version: '1' });
+    const cloudData = this._http.get<{
+      resourceData?: { deployment?: { name?: string } };
+    }>('/internal/cloud/solution', { version: '1' });
 
-      if (!response) {
-        return of(undefined);
-      }
-
-      return from(response).pipe(
-        map(({ resourceData }) => resourceData?.deployment?.name),
-        catchError(() => of(undefined)),
-        shareReplay(1)
-      );
-    } catch (e) {
-      return of(undefined);
-    }
+    return from(cloudData).pipe(
+      map((data) => data?.resourceData?.deployment?.name),
+      catchError(() => of(undefined)),
+      shareReplay(1)
+    );
   }
 
   public stop() {

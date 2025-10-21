@@ -134,7 +134,7 @@ describe('buildBreadcrumbs', () => {
       activeNodes: [],
       chromeBreadcrumbs: [],
       isServerless: false,
-      deploymentName: 'My Custom Deployment',
+      echDeploymentName: 'My Custom Deployment',
     });
 
     expect(result).toHaveLength(1);
