@@ -119,8 +119,11 @@ export class ScheduledReportsService {
       });
     }
 
-    if (!this._canUpdateReport({ id, user })) {
-      throw this.responseFactory.forbidden();
+    if (!(await this._canUpdateReport({ id, user }))) {
+      throw this.responseFactory.customError({
+        statusCode: 404,
+        body: 'Not found.',
+      });
     }
 
     try {
