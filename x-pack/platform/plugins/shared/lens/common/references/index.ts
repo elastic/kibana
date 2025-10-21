@@ -34,7 +34,6 @@ export const injectLensReferences = (
     });
   }
 
-  // Keep refs on attributes for now, need to clean this up.
   clonedState.attributes.references = matchedReferences;
 
   return clonedState;
@@ -48,6 +47,6 @@ export const extractLensReferences = (
 } => {
   return {
     state,
-    references: state.references ?? state.attributes?.references ?? [],
+    references: state.attributes?.references ?? state.references ?? [],
   };
 };

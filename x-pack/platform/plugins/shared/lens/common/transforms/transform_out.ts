@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
+import type { LensTransformDependencies } from '.';
 import type { LensByValueSerializedState } from '../../public/react_embeddable/types';
 import { LENS_ITEM_VERSION_V1, transformToV1LensItemAttributes } from '../content_management/v1';
 import { injectLensReferences } from '../references';
@@ -13,16 +15,29 @@ import type {
   LensByValueTransformOutResult,
   LensTransformOut,
 } from './types';
-import { isByRefLensState } from './utils';
+import { findLensReference, isByRefLensState } from './utils';
 
 /**
  * Transform from Lens Serialized State to Lens API format
  */
-export const getTransformOut = (): LensTransformOut => {
+export const getTransformOut = ({
+  transformEnhancementsOut,
+}: LensTransformDependencies): LensTransformOut => {
   return function transformOut(state, references) {
-    if (isByRefLensState(state)) {
+    const enhancements = state.enhancements
+      ? transformEnhancementsOut?.(state.enhancements, references ?? [])
+      : undefined;
+    const enhancementsState = (
+      enhancements ? { enhancements } : {}
+    ) as DynamicActionsSerializedState;
+
+    const savedObjectRef = findLensReference(references);
+
+    if (savedObjectRef && isByRefLensState(state)) {
       return {
         ...state,
+        ...enhancementsState,
+        savedObjectId: savedObjectRef.id,
       } satisfies LensByRefTransformOutResult;
     }
 
@@ -30,6 +45,7 @@ export const getTransformOut = (): LensTransformOut => {
     const injectedState = injectLensReferences(
       {
         ...state,
+        ...enhancementsState,
         attributes: migratedAttributes,
       },
       references

@@ -5,25 +5,49 @@
  * 2.0.
  */
 
+import type { LensTransformDependencies } from '.';
+import { DOC_TYPE } from '../constants';
 import { extractLensReferences } from '../references';
 import type {
   LensByRefTransformInResult,
   LensByValueTransformInResult,
   LensTransformIn,
 } from './types';
-import { isByRefLensState } from './utils';
+import { LENS_SAVED_OBJECT_REF_NAME, isByRefLensState } from './utils';
 
 /**
  * Transform from Lens API format to Lens Serialized State
  */
-export const getTransformIn = (): LensTransformIn => {
+export const getTransformIn = ({
+  transformEnhancementsIn,
+}: LensTransformDependencies): LensTransformIn => {
   return function transformIn(state) {
+    const { enhancementsState: enhancements = null, enhancementsReferences = [] } =
+      state.enhancements ? transformEnhancementsIn?.(state.enhancements) ?? {} : {};
+    const enhancementsState = enhancements ? { enhancements } : {};
+
     if (isByRefLensState(state)) {
+      const { savedObjectId: id, ...rest } = state;
       return {
-        state,
+        state: rest,
+        ...enhancementsState,
+        references: [
+          {
+            name: LENS_SAVED_OBJECT_REF_NAME,
+            type: DOC_TYPE,
+            id: id!,
+          },
+          ...enhancementsReferences,
+        ],
       } satisfies LensByRefTransformInResult;
     }
 
-    return extractLensReferences(state) satisfies LensByValueTransformInResult;
+    const { state: lensState, references: lensReferences } = extractLensReferences(state);
+
+    return {
+      state: lensState,
+      ...enhancementsState,
+      references: [...lensReferences, ...enhancementsReferences],
+    } satisfies LensByValueTransformInResult;
   };
 };

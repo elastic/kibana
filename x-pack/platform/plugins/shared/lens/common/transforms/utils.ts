@@ -5,8 +5,19 @@
  * 2.0.
  */
 
+import type { Reference } from '@kbn/content-management-utils';
+
 import type { LensSerializedState } from '../../public';
 import type { LensByRefSerializedState } from '../../public/react_embeddable/types';
+import { DOC_TYPE } from '../constants';
+
+export const LENS_SAVED_OBJECT_REF_NAME = 'savedObjectRef';
+
+export function findLensReference(references?: Reference[]) {
+  return references
+    ? references.find((ref) => ref.type === DOC_TYPE && ref.name === LENS_SAVED_OBJECT_REF_NAME)
+    : undefined;
+}
 
 export function isByRefLensState(state: LensSerializedState): state is LensByRefSerializedState {
   return !state.attributes;

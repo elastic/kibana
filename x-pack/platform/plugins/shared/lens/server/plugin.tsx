@@ -115,7 +115,13 @@ export class LensServerPlugin
       lensEmbeddableFactory() as unknown as EmbeddableRegistryDefinition
     );
 
-    plugins.embeddable.registerTransforms(LENS_EMBEDDABLE_TYPE, getLensTransforms());
+    plugins.embeddable.registerTransforms(
+      LENS_EMBEDDABLE_TYPE,
+      getLensTransforms({
+        transformEnhancementsIn: plugins.embeddable.transformEnhancementsIn,
+        transformEnhancementsOut: plugins.embeddable.transformEnhancementsOut,
+      })
+    );
 
     registerLensAPIRoutes({
       http: core.http,

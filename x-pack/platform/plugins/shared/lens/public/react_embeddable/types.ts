@@ -186,6 +186,9 @@ interface ContentManagementProps {
 }
 
 interface LensWithReferences {
+  /**
+   * @deprecated use `state.attributes.references`
+   */
   references?: Reference[];
 }
 

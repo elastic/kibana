@@ -65,11 +65,7 @@ export const createLensEmbeddableFactory = (
         initialState
       );
 
-      const initialRuntimeState = await deserializeState(
-        services,
-        initialState.rawState,
-        initialState.references
-      );
+      const initialRuntimeState = await deserializeState(services, initialState.rawState);
 
       /**
        * Observables and functions declared here are used internally to store mutating state values
@@ -119,11 +115,7 @@ export const createLensEmbeddableFactory = (
         parentApi
       );
 
-      const integrationsConfig = initializeIntegrations(
-        getLatestState,
-        dynamicActionsManager?.serializeState,
-        internalApi
-      );
+      const integrationsConfig = initializeIntegrations(getLatestState, internalApi);
       const actionsConfig = initializeActionApi(
         uuid,
         initialRuntimeState,
@@ -173,11 +165,7 @@ export const createLensEmbeddableFactory = (
           dashboardConfig.reinitializeState(lastSaved?.rawState);
           searchContextConfig.reinitializeState(lastSaved?.rawState);
           if (!lastSaved) return;
-          const lastSavedRuntimeState = await deserializeState(
-            services,
-            lastSaved.rawState,
-            lastSaved.references
-          );
+          const lastSavedRuntimeState = await deserializeState(services, lastSaved.rawState);
           stateConfig.reinitializeRuntimeState(lastSavedRuntimeState);
         },
       });

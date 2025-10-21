@@ -5,13 +5,22 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
+import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
+
 import type { LensTransforms } from './types';
 import { getTransformIn } from './transform_in';
 import { getTransformOut } from './transform_out';
 
-export function getLensTransforms(): LensTransforms {
+export interface LensTransformDependencies {
+  transformEnhancementsIn?: EnhancementsRegistry['transformIn'];
+  transformEnhancementsOut?: EnhancementsRegistry['transformOut'];
+}
+
+export function getLensTransforms(deps: LensTransformDependencies): LensTransforms {
   return {
-    transformIn: getTransformIn(),
-    transformOut: getTransformOut(),
+    transformIn: getTransformIn(deps),
+    transformOut: getTransformOut(deps),
+    schema: schema.any(),
   };
 }
