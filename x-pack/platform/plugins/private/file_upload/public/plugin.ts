@@ -7,7 +7,7 @@
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { registerFileUploadAnalyticsEvents } from '@kbn/file-upload-common';
+import { registerFileUploadAnalyticsEvents } from '@kbn/file-upload-common/src/telemetry/register_telemetry';
 import type { FileUploadStartApi } from './api';
 import {
   FileUploadComponent,
