@@ -92,6 +92,7 @@ export function createEvaluateDataset({
         messages: response.messages,
         correctnessAnalysis,
         groundednessAnalysis,
+        traceId: response.traceId,
       };
     };
 
