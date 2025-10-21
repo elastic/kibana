@@ -28,7 +28,6 @@ import type {
   RuleTypeModel,
   RuleUiAction,
 } from '../common';
-import { MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH } from '../constants';
 
 export const validateAction = ({ action }: { action: RuleUiAction }): RuleFormActionsErrors => {
   const errors = {
@@ -95,16 +94,6 @@ export function validateRuleBase({
 
   if (!formData.alertDelay || isNaN(formData.alertDelay.active) || formData.alertDelay.active < 1) {
     errors.alertDelay.push(RULE_ALERT_DELAY_BELOW_MINIMUM_TEXT);
-  }
-
-  const investigationGuideLength = formData.artifacts?.investigation_guide?.blob.length ?? 0;
-  if (investigationGuideLength > MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH) {
-    errors.artifacts.push(
-      RULE_INVESTIGATION_GUIDE_TOO_LONG_TEXT(
-        investigationGuideLength,
-        MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH
-      )
-    );
   }
 
   return errors;

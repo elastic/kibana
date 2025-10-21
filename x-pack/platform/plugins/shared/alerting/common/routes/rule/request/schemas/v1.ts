@@ -10,16 +10,13 @@ import { rRuleRequestSchemaV1 } from '../../../r_rule';
 import { validateSnoozeScheduleV1 } from '../../validation';
 
 export const MAX_ARTIFACTS_DASHBOARDS_LENGTH = 10;
-export const MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH = 1000;
 
 export const dashboardsSchema = schema.arrayOf(schema.object({ id: schema.string() }), {
   maxSize: MAX_ARTIFACTS_DASHBOARDS_LENGTH,
 });
 
 export const investigationGuideSchema = schema.object({
-  blob: schema.string({
-    maxLength: MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH, // with validation
-  }),
+  blob: schema.string(),
 });
 
 export const artifactsSchema = schema.object({

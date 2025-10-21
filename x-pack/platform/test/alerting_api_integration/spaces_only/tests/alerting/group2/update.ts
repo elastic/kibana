@@ -10,10 +10,7 @@ import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { SavedObject } from '@kbn/core/server';
 import type { RawRule } from '@kbn/alerting-plugin/server/types';
-import {
-  MAX_ARTIFACTS_DASHBOARDS_LENGTH,
-  MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH,
-} from '@kbn/alerting-plugin/common/routes/rule/request/schemas/v1';
+import { MAX_ARTIFACTS_DASHBOARDS_LENGTH } from '@kbn/alerting-plugin/common/routes/rule/request/schemas/v1';
 import { Spaces } from '../../../scenarios';
 import {
   checkAAD,
@@ -573,7 +570,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           .send(getTestRuleData())
           .expect(200);
 
-        const longInvestigationGuideBlob = 'a'.repeat(MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH + 1);
+        const longInvestigationGuideBlob = 'a';
         await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createResponse.body.id}`)
           .set('kbn-xsrf', 'foo')

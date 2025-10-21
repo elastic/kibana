@@ -28,7 +28,6 @@ import { useRuleFormState, useRuleFormDispatch } from '../hooks';
 import { OptionalFieldLabel } from '../optional_field_label';
 import { InvestigationGuideEditor } from './rule_investigation_guide_editor';
 import { RuleDashboards } from './rule_dashboards';
-import { MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH } from '../constants';
 import { LabelWithTooltip } from './label_with_tooltip';
 
 export const RULE_DETAIL_MIN_ROW_WIDTH = 600;
@@ -150,10 +149,6 @@ export const RuleDetails = () => {
           />
         }
         labelAppend={OptionalFieldLabel}
-        isInvalid={
-          (formData.artifacts?.investigation_guide?.blob?.length ?? 0) >
-          MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH
-        }
       >
         <InvestigationGuideEditor
           setRuleParams={onSetArtifacts}
