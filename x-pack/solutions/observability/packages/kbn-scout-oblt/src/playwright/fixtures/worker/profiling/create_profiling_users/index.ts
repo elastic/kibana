@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { asyncForEach } from '@kbn/std';
-import type { SecurityService } from '@kbn/ftr-common-functional-services';
 import { ProfilingUsername, profilingUsers } from './authentication';
 import { AbortError, callKibana } from './helpers/call_kibana';
 import { createOrUpdateUser } from './helpers/create_or_update_user';
@@ -27,7 +26,7 @@ export async function createProfilingUsers({
 }: {
   kibana: Kibana;
   elasticsearch: Elasticsearch;
-  securityService: SecurityService;
+  securityService: Security.API;
 }) {
   const isCredentialsValid = await getIsCredentialsValid({
     elasticsearch,

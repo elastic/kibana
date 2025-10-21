@@ -178,35 +178,43 @@ export const defaultConfig: ScoutServerConfig = {
       '--xpack.ruleRegistry.write.enabled=true',
       '--xpack.ruleRegistry.write.enabled=true',
       '--xpack.ruleRegistry.write.cache.enabled=false',
-      '--xpack.profiling.enabled=true',
-      // `--xpack.fleet.packages='[{"name":"apm","version":"latest"}]'`,
-      // `--xpack.fleet.agentPolicies='[
-      //   {
-      //     "name":"Elastic APM",
-      //     "id":"policy-elastic-agent-on-cloud",
-      //     "package_policies":[
-      //       {
-      //         "name":"Elastic APM",
-      //         "id":"elastic-cloud-apm",
-      //         "package":{"name":"apm"},
-      //         "inputs":[
-      //           {
-      //             "type":"apm",
-      //             "keep_enabled":true,
-      //             "vars":[
-      //               {"name":"api_key_enabled","value":true},
-      //               {"name":"host","value":"0.0.0.0:8200","frozen":true},
-      //               {"name":"secret_token","value":"foo"},
-      //               {"name":"profiling.enabled","value":true},
-      //               {"name":"profiling.metrics.elasticsearch","value":["https://elasticsearch:9200"]}
-      //             ]
-      //           }
-      //         ]
-      //       }
-      //     ]
-      //   }
-      // ]'`,
       '--monitoring_collection.opentelemetry.metrics.prometheus.enabled=true',
+      '--xpack.profiling.enabled=true',
+      `--xpack.fleet.packages=${JSON.stringify([
+        {
+          name: 'apm',
+          version: 'latest',
+        },
+      ])}`,
+      `--xpack.fleet.agentPolicies=${JSON.stringify([
+        {
+          name: 'Elastic APM',
+          id: 'policy-elastic-agent-on-cloud',
+          package_policies: [
+            {
+              name: 'Elastic APM',
+              id: 'elastic-cloud-apm',
+              package: { name: 'apm' },
+              inputs: [
+                {
+                  type: 'apm',
+                  keep_enabled: true,
+                  vars: [
+                    { name: 'api_key_enabled', value: true },
+                    { name: 'host', value: '0.0.0.0:8200', frozen: true },
+                    { name: 'secret_token', value: 'foo' },
+                    { name: 'profiling.enabled', value: true },
+                    {
+                      name: 'profiling.metrics.elasticsearch',
+                      value: ['https://elasticsearch:9200'],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ])}`,
       // SAML configuration
       ...(isRunOnCI ? [] : ['--mockIdpPlugin.enabled=true']),
       // This ensures that we register the Security SAML API endpoints.

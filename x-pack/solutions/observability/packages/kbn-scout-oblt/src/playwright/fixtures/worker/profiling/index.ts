@@ -9,12 +9,19 @@ import { coreWorkerFixtures } from '@kbn/scout/src/playwright/fixtures/scope/wor
 import supertest from 'supertest';
 import type request from 'superagent';
 import { format as formatUrl } from 'url';
-import type { ProfilingUsername } from './create_profiling_users/authentication';
+import { ProfilingUsername } from './create_profiling_users/authentication';
 import { PROFILING_TEST_PASSWORD } from './create_profiling_users/authentication';
 import { createProfilingApiClient } from './api_supertest';
-
 export interface ProfilingClientFixture {
   adminUser(options: {
+    endpoint: string;
+    params?: { query?: any; path?: any };
+  }): Promise<request.Response>;
+  viewerUser(options: {
+    endpoint: string;
+    params?: { query?: any; path?: any };
+  }): Promise<request.Response>;
+  NoAccessUser(options: {
     endpoint: string;
     params?: { query?: any; path?: any };
   }): Promise<request.Response>;
@@ -24,8 +31,21 @@ export const profilingClientFixture = coreWorkerFixtures.extend<
   { profilingClient: ProfilingClientFixture }
 >({
   profilingClient: [
-    async ({ config, log }, use) => {
+    async ({ config, log, esClient }, use) => {
+      await esClient.security.putUser({
+        username: 'viewer',
+        password: 'changeme',
+        roles: ['viewer'],
+      });
+
+      await esClient.security.putUser({
+        username: 'no_access_user',
+        password: 'changeme',
+        roles: [],
+      });
+
       const kibanaServer = config.metadata.config.servers.kibana;
+
       function getProfilingApiClient({ username }: { username: ProfilingUsername | 'elastic' }) {
         const url = formatUrl({
           ...kibanaServer,
@@ -35,6 +55,8 @@ export const profilingClientFixture = coreWorkerFixtures.extend<
       }
       await use({
         adminUser: getProfilingApiClient({ username: 'elastic' }),
+        viewerUser: getProfilingApiClient({ username: ProfilingUsername.viewerUser }),
+        NoAccessUser: getProfilingApiClient({ username: ProfilingUsername.noAccessUser }),
       });
     },
     { scope: 'worker' },

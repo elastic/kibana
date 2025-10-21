@@ -5,178 +5,199 @@
  * 2.0.
  */
 
-import { expect, test } from '@kbn/scout-oblt';
-
-import Path from 'path';
-import fs from 'fs';
+import { expect, apiTest, test } from '@kbn/scout-oblt';
+import type { ScoutTestConfig } from '@kbn/scout-oblt';
+import { format as formatUrl } from 'url';
+import supertest from 'supertest';
 import { getRoutePaths } from '../../../../common';
-// These helpers are reused from the api_integration tests. Paths are relative to this file.
-// import {
-//   cleanUpProfilingData,
-//   loadProfilingData,
-//   setupProfiling,
-// } from '../../../api_integration/profiling/tests/utils/profiling_data';
-// import {
-//   deletePackagePolicy,
-//   getProfilingPackagePolicyIds,
-// } from '../../../api_integration/profiling/tests/utils/fleet';
+import { getProfilingPackagePolicyIds, deletePackagePolicy } from '../../common/utils/fleet';
+import {
+  cleanUpProfilingData,
+  loadProfilingData,
+  setupProfiling,
+} from '../../common/utils/profiling_data';
 
 const profilingRoutePaths = getRoutePaths();
 
-const esArchiversPath = Path.posix.join(
-  __dirname,
-  '..',
-  '..',
-  'common',
-  'fixtures',
-  'es_archiver',
-  'profiling'
-);
-
-test.describe('Profiling status check (scout)', { tag: ['@svlOblt'] }, () => {
-  test.beforeAll(async ({ esClient }) => {
-    const indices = await esClient.cat.indices({ format: 'json' });
-    const content = fs.readFileSync(`${esArchiversPath}/data.json`, 'utf8');
-    await esClient.bulk({ operations: content.split('\n'), refresh: 'wait_for' });
+function getSupertest(config: ScoutTestConfig) {
+  const kibanaServer = config.metadata.config.servers.kibana;
+  const url = formatUrl({
+    ...kibanaServer,
+    auth: 'elastic:changeme',
   });
-  // fixtures provided by scout environment:
-  // - profilingApiClient: { adminUser(), readUser() }
-  // - es, logger
-  // - bettertest may be created from supertest; here we create a small adapter when needed via profilingApiClient
-  test('Profiling lifecycle checks', async ({ profilingClient, log }) => {
-    // 1) Not set up and no data
-    // await cleanUpProfilingData({ es, logger, bettertest: profilingApiClient /* adapter used by helpers */ });
-    // Admin
+  return supertest(url);
+}
+
+apiTest.describe('Profiling is not setup and no data is loaded', { tag: ['@svlOblt'] }, () => {
+  apiTest.beforeAll(async ({ esClient, log, config }) => {
+    await cleanUpProfilingData({
+      es: esClient,
+      st: getSupertest(config),
+      logger: log,
+    });
+  });
+
+  test('Admin user', async ({ profilingClient }) => {
     const adminRes = await profilingClient.adminUser({
       endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
     });
 
-    // const adminRes = await profilingApiClient.adminUser({
-    //   endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
-    // });
+    const adminStatus = adminRes.body;
+    expect(adminStatus.has_setup).toBe(false);
+    expect(adminStatus.has_data).toBe(false);
+    expect(adminStatus.pre_8_9_1_data).toBe(false);
+    // viewer users
+    const readRes = await profilingClient.viewerUser({
+      endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
+    });
+
+    const readStatus = readRes.body;
+    expect(readStatus.has_setup).toBe(false);
+    expect(readStatus.has_data).toBe(false);
+    expect(readStatus.pre_8_9_1_data).toBe(false);
+    expect(readStatus.has_required_role).toBe(false);
+  });
+});
+
+test.describe('APM integration not installed but setup completed', { tag: ['@svlOblt'] }, () => {
+  test.beforeEach(async ({ esClient, config, log }) => {
+    const st = getSupertest(config);
+    await setupProfiling(st, log);
+  });
+  test('Admin user', async ({ profilingClient }) => {
+    const adminRes = await profilingClient.adminUser({
+      endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
+    });
 
     const adminStatus = adminRes.body;
+    expect(adminStatus.has_setup).toBe(true);
+    expect(adminStatus.has_data).toBe(false);
+    expect(adminStatus.pre_8_9_1_data).toBe(false);
 
+    const readRes = await profilingClient.viewerUser({
+      endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
+    });
+
+    const readStatus = readRes.body;
+    expect(readStatus.has_setup).toBe(true);
+    expect(readStatus.has_data).toBe(false);
+    expect(readStatus.pre_8_9_1_data).toBe(false);
+    expect(readStatus.has_required_role).toBe(false);
+  });
+});
+
+test.describe('Profiling is setup', { tag: ['@svlOblt'] }, () => {
+  test.beforeAll(async ({ esClient, config, log }) => {
+    const st = getSupertest(config);
+    await cleanUpProfilingData({
+      es: esClient,
+      st,
+      logger: log,
+    });
+    await setupProfiling(st, log);
+  });
+  test.afterAll(async ({ esClient, config, log }) => {
+    const st = getSupertest(config);
+    await cleanUpProfilingData({
+      es: esClient,
+      st,
+      logger: log,
+    });
+  });
+  test('without data', async ({ profilingClient }) => {
+    const adminRes = await profilingClient.adminUser({
+      endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
+    });
+    const adminStatus = adminRes.body;
+    expect(adminStatus.has_setup).toBe(true);
+    expect(adminStatus.has_data).toBe(false);
+    expect(adminStatus.pre_8_9_1_data).toBe(false);
+
+    const readRes = await profilingClient.viewerUser({
+      endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
+    });
+    const readStatus = readRes.body;
+    expect(readStatus.has_setup).toBe(true);
+    expect(readStatus.has_data).toBe(false);
+    expect(readStatus.pre_8_9_1_data).toBe(false);
+    expect(readStatus.has_required_role).toBe(false);
+  });
+
+  test('admin user with data', async ({ esClient, profilingClient, log }) => {
+    await loadProfilingData(esClient, log);
+    const adminRes = await profilingClient.adminUser({
+      endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
+    });
+    const adminStatus = adminRes.body;
+    expect(adminStatus.has_setup).toBe(true);
+    expect(adminStatus.has_data).toBe(true);
+    expect(adminStatus.pre_8_9_1_data).toBe(false);
+
+    const readRes = await profilingClient.viewerUser({
+      endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
+    });
+    const readStatus = readRes.body;
+    expect(readStatus.has_setup).toBe(true);
+    expect(readStatus.has_data).toBe(true);
+    expect(readStatus.pre_8_9_1_data).toBe(false);
+    expect(readStatus.has_required_role).toBe(false);
+  });
+});
+
+test.describe('Collector integration is not installed', { tag: ['@svlOblt'] }, () => {
+  test.beforeAll(async ({ esClient, config, log }) => {
+    const st = getSupertest(config);
+    await setupProfiling(st, log);
+  });
+  test('Collector integration missing', async ({ profilingClient, log, config }) => {
+    const st = getSupertest(config);
+    const ids = await getProfilingPackagePolicyIds(st);
+    const collectorId = ids.collectorId;
+    await deletePackagePolicy(st, collectorId);
+
+    expect(collectorId).toBeDefined();
+
+    const adminRes = await profilingClient.adminUser({
+      endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
+    });
+    const adminStatus = adminRes.body;
     expect(adminStatus.has_setup).toBe(false);
     expect(adminStatus.has_data).toBe(false);
     expect(adminStatus.pre_8_9_1_data).toBe(false);
 
-    // // Viewer / read user
-    // const readRes = await apiClient.get(`${profilingRoutePaths.HasSetupESResources}`);
-    // // = await profilingApiClient.readUser({
-    // //   endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
-    // // });
-    // const readStatus: ProfilingStatus = readRes.body;
-    // expect(readStatus.has_setup).toBe(false);
-    // expect(readStatus.has_data).toBe(false);
-    // expect(readStatus.pre_8_9_1_data).toBe(false);
-    // expect(readStatus.has_required_role).toBe(false);
+    const readRes = await profilingClient.viewerUser({
+      endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
+    });
+    const readStatus = readRes.body;
+    expect(readStatus.has_setup).toBe(false);
+    expect(readStatus.has_data).toBe(false);
+    expect(readStatus.pre_8_9_1_data).toBe(false);
+    expect(readStatus.has_required_role).toBe(false);
   });
 
-  // 2) APM integration not installed but setup run
-  // await test.step('APM integration not installed but setup completed', async () => {
-  //   await setupProfiling(profilingApiClient /* bettertest */, logger);
+  test('Symbolizer integration is not installed', async ({ profilingClient, config }) => {
+    const st = getSupertest(config);
+    const ids = await getProfilingPackagePolicyIds(st);
 
-  //   const adminRes = await profilingApiClient.adminUser({
-  //     endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
-  //   });
-  //   const adminStatus: ProfilingStatus = adminRes.body;
-  //   expect(adminStatus.has_setup).toBe(true);
-  //   expect(adminStatus.has_data).toBe(false);
-  //   expect(adminStatus.pre_8_9_1_data).toBe(false);
+    const symbolizerId = ids.symbolizerId;
+    await deletePackagePolicy(st, symbolizerId);
+    expect(symbolizerId).toBeDefined();
 
-  //   const readRes = await profilingApiClient.readUser({
-  //     endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
-  //   });
-  //   const readStatus: ProfilingStatus = readRes.body;
-  //   expect(readStatus.has_setup).toBe(true);
-  //   expect(readStatus.has_data).toBe(false);
-  //   expect(readStatus.pre_8_9_1_data).toBe(false);
-  //   expect(readStatus.has_required_role).toBe(false);
-  // });
+    const adminRes = await profilingClient.adminUser({
+      endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
+    });
+    const adminStatus = adminRes.body;
+    expect(adminStatus.has_setup).toBe(false);
+    expect(adminStatus.has_data).toBe(false);
+    expect(adminStatus.pre_8_9_1_data).toBe(false);
 
-  // 3) Profiling set up, without data
-  // await test.step('Profiling set up without data', async () => {
-  //   await cleanUpProfilingData({ es, logger, bettertest: profilingApiClient });
-  //   await setupProfiling(profilingApiClient /* bettertest */, logger);
-
-  //   const adminRes = await profilingApiClient.adminUser({
-  //     endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
-  //   });
-  //   const adminStatus: ProfilingStatus = adminRes.body;
-  //   expect(adminStatus.has_setup).toBe(true);
-  //   expect(adminStatus.has_data).toBe(false);
-  //   expect(adminStatus.pre_8_9_1_data).toBe(false);
-
-  //   const readRes = await profilingApiClient.readUser({
-  //     endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
-  //   });
-  //   const readStatus: ProfilingStatus = readRes.body;
-  //   expect(readStatus.has_setup).toBe(true);
-  //   expect(readStatus.has_data).toBe(false);
-  //   expect(readStatus.pre_8_9_1_data).toBe(false);
-  //   expect(readStatus.has_required_role).toBe(false);
-  // });
-
-  // 4) Profiling set up with data
-  // await test.step('Profiling set up with data', async () => {
-  //   await loadProfilingData(es, logger);
-
-  //   const adminRes = await profilingApiClient.adminUser({
-  //     endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
-  //   });
-  //   const adminStatus: ProfilingStatus = adminRes.body;
-  //   expect(adminStatus.has_setup).toBe(true);
-  //   expect(adminStatus.has_data).toBe(true);
-  //   expect(adminStatus.pre_8_9_1_data).toBe(false);
-
-  //   const readRes = await profilingApiClient.readUser({
-  //     endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
-  //   });
-  //   const readStatus: ProfilingStatus = readRes.body;
-  //   expect(readStatus.has_setup).toBe(true);
-  //   expect(readStatus.has_data).toBe(true);
-  //   expect(readStatus.pre_8_9_1_data).toBe(false);
-  //   expect(readStatus.has_required_role).toBe(false);
-  // });
-
-  // 5) Collector integration missing
-  // await test.step('Collector integration missing', async () => {
-  //   await setupProfiling(profilingApiClient /* bettertest */, logger);
-  //   const ids = await getProfilingPackagePolicyIds(profilingApiClient /* bettertest */);
-  //   const collectorId = ids.collectorId;
-  //   if (collectorId) {
-  //     await deletePackagePolicy(profilingApiClient /* bettertest */, collectorId);
-  //   }
-
-  //   expect(collectorId).not.toBe(undefined);
-
-  //   const adminRes = await profilingApiClient.adminUser({
-  //     endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
-  //   });
-  //   const adminStatus: ProfilingStatus = adminRes.body;
-  //   expect(adminStatus.has_setup).toBe(false);
-  //   expect(adminStatus.has_data).toBe(false);
-  //   expect(adminStatus.pre_8_9_1_data).toBe(false);
-  // });
-
-  // 6) Symbolizer integration missing
-  // await test.step('Symbolizer integration missing', async () => {
-  //   await setupProfiling(profilingApiClient /* bettertest */, logger);
-  //   const ids = await getProfilingPackagePolicyIds(profilingApiClient /* bettertest */);
-  //   const symbolizerId = ids.symbolizerId;
-  //   if (symbolizerId) {
-  //     await deletePackagePolicy(profilingApiClient /* bettertest */, symbolizerId);
-  //   }
-
-  //   expect(symbolizerId).not.toBe(undefined);
-
-  //   const adminRes = await profilingApiClient.adminUser({
-  //     endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
-  //   });
-  //   const adminStatus: ProfilingStatus = adminRes.body;
-  //   expect(adminStatus.has_setup).toBe(false);
-  //   expect(adminStatus.has_data).toBe(false);
-  //   expect(adminStatus.pre_8_9_1_data).toBe(false);
-  // });
+    const readRes = await profilingClient.viewerUser({
+      endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
+    });
+    const readStatus = readRes.body;
+    expect(readStatus.has_setup).toBe(false);
+    expect(readStatus.has_data).toBe(false);
+    expect(readStatus.pre_8_9_1_data).toBe(false);
+    expect(readStatus.has_required_role).toBe(false);
+  });
 });
