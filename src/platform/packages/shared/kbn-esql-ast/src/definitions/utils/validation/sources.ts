@@ -10,7 +10,7 @@
 import type { ESQLMessage, ESQLSource } from '../../../types';
 import type { ICommandContext } from '../../../commands_registry/types';
 import { sourceExists } from '../sources';
-import { getMessageFromId, tagSemanticError } from '../errors';
+import { errors } from '../errors';
 
 function hasWildcard(name: string) {
   return /\*/.test(name);
@@ -51,30 +51,12 @@ export function validateSources(sources: ESQLSource[], context?: ICommandContext
   }
 
   unknownIndexNames.forEach((source) => {
-    messages.push(
-      tagSemanticError(
-        getMessageFromId({
-          messageId: 'unknownIndex',
-          values: { name: source.name },
-          locations: source.location,
-        }),
-        'getSources'
-      )
-    );
+    messages.push(errors.unknownIndex(source));
   });
 
   if (knownIndexNames.length + unknownIndexNames.length + knownIndexPatterns.length === 0) {
     unknownIndexPatterns.forEach((source) => {
-      messages.push(
-        tagSemanticError(
-          getMessageFromId({
-            messageId: 'unknownIndex',
-            values: { name: source.name },
-            locations: source.location,
-          }),
-          'getSources'
-        )
-      );
+      messages.push(errors.unknownIndex(source));
     });
   }
 
