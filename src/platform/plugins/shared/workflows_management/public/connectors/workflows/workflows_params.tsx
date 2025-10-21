@@ -10,9 +10,6 @@
 import {
   EuiBadge,
   EuiBadgeGroup,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFormRow,
   EuiHighlight,
   EuiIcon,
@@ -20,8 +17,10 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiPopover,
+  EuiPopoverFooter,
   EuiSelectable,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -107,6 +106,7 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
   const [inputValue, setInputValue] = useState('');
   const [isSearching, setIsSearching] = useState(true);
   const { http, application } = useKibana().services;
+  const { euiTheme } = useEuiTheme();
 
   // Custom render function for workflow options
   const renderWorkflowOption = useCallback((option: WorkflowOption, searchValue: string) => {
@@ -179,27 +179,12 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
     }
   }, [workflowId, workflows, isSearching]);
 
-  const handleCreateNewWorkflow = useCallback(() => {
+  const handleOpenWorkflowManagementApp = useCallback(() => {
     const url = application?.getUrlForApp
       ? application.getUrlForApp('workflows')
       : '/app/workflows';
     window.open(url, '_blank');
   }, [application]);
-
-  const handleOpenWorkflow = useCallback(
-    (workflowIdToOpen: string, event: React.MouseEvent | React.KeyboardEvent) => {
-      // Prevent the click from selecting the workflow option
-      event.stopPropagation();
-      event.preventDefault();
-      event.nativeEvent.stopImmediatePropagation();
-
-      const url = application?.getUrlForApp
-        ? application.getUrlForApp('workflows', { path: `/${workflowIdToOpen}` })
-        : `/app/workflows/${workflowIdToOpen}`;
-      window.open(url, '_blank');
-    },
-    [application]
-  );
 
   // Fetch workflows from internal Kibana API
   useEffect(() => {
@@ -252,37 +237,6 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
 
           const workflowTags = workflow.definition?.tags || [];
 
-          const appendElement = (
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              {workflowTags.length > 0 && (
-                <EuiFlexItem grow={false}>
-                  <TagsBadge tags={workflowTags} />
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="popout"
-                  aria-label={i18n.OPEN_WORKFLOW_LINK}
-                  title={i18n.OPEN_WORKFLOW_LINK}
-                  size="s"
-                  color="text"
-                  style={{ flexShrink: 0 }}
-                  onMouseDown={(event: React.MouseEvent) => {
-                    event.stopPropagation();
-                    event.preventDefault();
-                    event.nativeEvent.stopImmediatePropagation();
-                  }}
-                  onClick={(event: React.MouseEvent) => {
-                    event.stopPropagation();
-                    event.preventDefault();
-                    event.nativeEvent.stopImmediatePropagation();
-                    handleOpenWorkflow(workflow.id, event);
-                  }}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          );
-
           return {
             workflowOption: {
               id: workflow.id,
@@ -294,7 +248,7 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
               disabled: isDisabled,
               checked: isSelected ? 'on' : undefined,
               prepend: prependElement,
-              append: appendElement,
+              append: <TagsBadge tags={workflowTags} />,
               data: {
                 secondaryContent: workflow.description,
               },
@@ -329,7 +283,7 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
     };
 
     fetchWorkflows();
-  }, [http, workflowId, handleOpenWorkflow]);
+  }, [http, workflowId]);
 
   // Update input value when workflowId changes
   useEffect(() => {
@@ -371,7 +325,7 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
     <EuiFormRow
       label={i18n.WORKFLOW_ID_LABEL}
       labelAppend={
-        <EuiLink onClick={handleCreateNewWorkflow} external>
+        <EuiLink onClick={handleOpenWorkflowManagementApp} external>
           {i18n.CREATE_NEW_WORKFLOW} <EuiIcon type="plusInCircle" size="s" />
         </EuiLink>
       }
@@ -430,6 +384,16 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
               fullWidth
             >
               {list}
+              <EuiPopoverFooter
+                paddingSize="s"
+                css={{ backgroundColor: euiTheme.colors.backgroundBaseSubdued }}
+              >
+                <EuiText size="s" textAlign="right">
+                  <EuiLink onClick={handleOpenWorkflowManagementApp} external>
+                    View all workflows <EuiIcon type="popout" size="s" />
+                  </EuiLink>
+                </EuiText>
+              </EuiPopoverFooter>
             </EuiInputPopover>
           )}
         </EuiSelectable>
