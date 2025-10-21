@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ComponentType } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 import type React from 'react';
 import type { Moment } from 'moment';
 import type { EuiSuperSelectOption } from '@elastic/eui';
@@ -50,11 +50,8 @@ import type {
   ActionTypeRegistryContract,
 } from '@kbn/alerts-ui-shared/src/common/types';
 import type { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
-import type {
-  GetDescriptionFieldsFn,
-  RuleType,
-  RuleTypeIndex,
-} from '@kbn/triggers-actions-ui-types/rule_types';
+import type { RuleType, RuleTypeIndex } from '@kbn/triggers-actions-ui-types/rule_types';
+import type { RULE_DETAIL_DESCRIPTION_FIELD_TYPES } from './application/sections/rule_details/components/rule_detail_description_type';
 import type { ComponentOpts as RuleStatusDropdownProps } from './application/sections/rules_list/components/rule_status_dropdown';
 import type { RuleTagFilterProps } from './application/sections/rules_list/components/rule_tag_filter';
 import type { RuleStatusFilterProps } from './application/sections/rules_list/components/rule_status_filter';
@@ -122,6 +119,29 @@ type ResolvedRule = Omit<
   ruleTypeId: ResolvedSanitizedRule['alertTypeId'];
   actions: RuleUiAction[];
 };
+
+type PrebuildField<T> = (props: T) => {
+  title: string;
+  description: NonNullable<React.ReactNode>;
+};
+
+export interface PrebuildFieldsMap {
+  [RULE_DETAIL_DESCRIPTION_FIELD_TYPES.INDEX_PATTERN]: PrebuildField<string[]>;
+  [RULE_DETAIL_DESCRIPTION_FIELD_TYPES.CUSTOM_QUERY]: PrebuildField<string>;
+  [RULE_DETAIL_DESCRIPTION_FIELD_TYPES.ESQL_QUERY]: PrebuildField<string>;
+  [RULE_DETAIL_DESCRIPTION_FIELD_TYPES.DATA_VIEW_ID]: PrebuildField<string>;
+  [RULE_DETAIL_DESCRIPTION_FIELD_TYPES.DATA_VIEW_INDEX_PATTERN]: PrebuildField<string>;
+}
+
+export type GetDescriptionFieldsFn = ({
+  rule,
+  prebuildFields,
+  http,
+}: {
+  rule: Rule;
+  prebuildFields: PrebuildFieldsMap | undefined;
+  http: HttpSetup | undefined;
+}) => { title: string; description: NonNullable<ReactNode> }[];
 
 export {
   ALERT_HISTORY_PREFIX,

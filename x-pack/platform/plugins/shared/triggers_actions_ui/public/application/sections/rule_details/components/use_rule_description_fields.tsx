@@ -12,8 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { HttpResponse, HttpSetup } from '@kbn/core/public';
-import type { PrebuildFieldsMap } from '@kbn/triggers-actions-ui-types/rule_types';
-import type { RuleDefinitionProps } from '../../../../types';
+import type { PrebuildFieldsMap, RuleDefinitionProps } from '../../../../types';
 
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
   constructor(props: { children: React.ReactNode }) {

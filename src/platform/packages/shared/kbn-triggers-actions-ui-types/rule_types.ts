@@ -8,34 +8,7 @@
  */
 
 import type { RuleType as CommonRuleType } from '@kbn/alerting-types';
-import type { Rule } from '@kbn/alerts-ui-shared';
-import type { HttpSetup } from '@kbn/core/public';
-import type { ReactNode } from 'react';
 import type { ActionVariables } from './action_variable_types';
-import type { RULE_DETAIL_DESCRIPTION_FIELD_TYPES } from './rule_detail_description_type';
-
-type PrebuildField<T> = (props: T) => {
-  title: string;
-  description: NonNullable<React.ReactNode>;
-};
-
-export interface PrebuildFieldsMap {
-  [RULE_DETAIL_DESCRIPTION_FIELD_TYPES.INDEX_PATTERN]: PrebuildField<string[]>;
-  [RULE_DETAIL_DESCRIPTION_FIELD_TYPES.CUSTOM_QUERY]: PrebuildField<string>;
-  [RULE_DETAIL_DESCRIPTION_FIELD_TYPES.ESQL_QUERY]: PrebuildField<string>;
-  [RULE_DETAIL_DESCRIPTION_FIELD_TYPES.DATA_VIEW_ID]: PrebuildField<string>;
-  [RULE_DETAIL_DESCRIPTION_FIELD_TYPES.DATA_VIEW_INDEX_PATTERN]: PrebuildField<string>;
-}
-
-export type GetDescriptionFieldsFn = ({
-  rule,
-  prebuildFields,
-  http,
-}: {
-  rule: Rule;
-  prebuildFields: PrebuildFieldsMap | undefined;
-  http: HttpSetup | undefined;
-}) => { title: string; description: NonNullable<ReactNode> }[];
 
 export interface RuleType<
   ActionGroupIds extends string = string,
@@ -61,7 +34,6 @@ export interface RuleType<
   enabledInLicense: boolean;
   hasAlertsMappings?: boolean;
   isInternallyManaged: boolean;
-  getDescriptionFields?: GetDescriptionFieldsFn;
 }
 
 export type RuleTypeIndex = Map<string, RuleType>;
