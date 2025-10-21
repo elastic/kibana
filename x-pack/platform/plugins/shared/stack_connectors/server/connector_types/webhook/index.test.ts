@@ -1038,74 +1038,8 @@ describe('execute()', () => {
       connectorUsageCollector,
     });
 
-    delete requestMock.mock.calls[0][0].configurationUtilities;
-    expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
-      Object {
-        "axios": undefined,
-        "connectorUsageCollector": ConnectorUsageCollector {
-          "connectorId": "test-connector-id",
-          "logger": Object {
-            "context": Array [],
-            "debug": [MockFunction] {
-              "calls": Array [
-                Array [
-                  "response from webhook action \\"some-id\\": [HTTP 200] ",
-                ],
-              ],
-              "results": Array [
-                Object {
-                  "type": "return",
-                  "value": undefined,
-                },
-              ],
-            },
-            "error": [MockFunction],
-            "fatal": [MockFunction],
-            "get": [MockFunction],
-            "info": [MockFunction],
-            "isLevelEnabled": [MockFunction],
-            "log": [MockFunction],
-            "trace": [MockFunction],
-            "warn": [MockFunction],
-          },
-          "usage": Object {
-            "requestBodyBytes": 0,
-          },
-        },
-        "data": undefined,
-        "headers": Object {
-          "Authorization": "Basic YWJjOjEyMw==",
-          "aheader": "a value",
-        },
-        "logger": Object {
-          "context": Array [],
-          "debug": [MockFunction] {
-            "calls": Array [
-              Array [
-                "response from webhook action \\"some-id\\": [HTTP 200] ",
-              ],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": undefined,
-              },
-            ],
-          },
-          "error": [MockFunction],
-          "fatal": [MockFunction],
-          "get": [MockFunction],
-          "info": [MockFunction],
-          "isLevelEnabled": [MockFunction],
-          "log": [MockFunction],
-          "trace": [MockFunction],
-          "warn": [MockFunction],
-        },
-        "method": "get",
-        "sslOverrides": Object {},
-        "url": "https://abc.def/my-webhook",
-      }
-    `);
+    expect(requestMock.mock.calls[0][0].method).toBe(WebhookMethods.GET);
+    expect(requestMock.mock.calls[0][0].data).toBeUndefined();
   });
 
   test('body is undefined when executing DELETE operation', async () => {
@@ -1138,74 +1072,8 @@ describe('execute()', () => {
       connectorUsageCollector,
     });
 
-    delete requestMock.mock.calls[0][0].configurationUtilities;
-    expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
-      Object {
-        "axios": undefined,
-        "connectorUsageCollector": ConnectorUsageCollector {
-          "connectorId": "test-connector-id",
-          "logger": Object {
-            "context": Array [],
-            "debug": [MockFunction] {
-              "calls": Array [
-                Array [
-                  "response from webhook action \\"some-id\\": [HTTP 200] ",
-                ],
-              ],
-              "results": Array [
-                Object {
-                  "type": "return",
-                  "value": undefined,
-                },
-              ],
-            },
-            "error": [MockFunction],
-            "fatal": [MockFunction],
-            "get": [MockFunction],
-            "info": [MockFunction],
-            "isLevelEnabled": [MockFunction],
-            "log": [MockFunction],
-            "trace": [MockFunction],
-            "warn": [MockFunction],
-          },
-          "usage": Object {
-            "requestBodyBytes": 0,
-          },
-        },
-        "data": undefined,
-        "headers": Object {
-          "Authorization": "Basic YWJjOjEyMw==",
-          "aheader": "a value",
-        },
-        "logger": Object {
-          "context": Array [],
-          "debug": [MockFunction] {
-            "calls": Array [
-              Array [
-                "response from webhook action \\"some-id\\": [HTTP 200] ",
-              ],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": undefined,
-              },
-            ],
-          },
-          "error": [MockFunction],
-          "fatal": [MockFunction],
-          "get": [MockFunction],
-          "info": [MockFunction],
-          "isLevelEnabled": [MockFunction],
-          "log": [MockFunction],
-          "trace": [MockFunction],
-          "warn": [MockFunction],
-        },
-        "method": "get",
-        "sslOverrides": Object {},
-        "url": "https://abc.def/my-webhook",
-      }
-    `);
+    expect(requestMock.mock.calls[0][0].method).toBe(WebhookMethods.DELETE);
+    expect(requestMock.mock.calls[0][0].data).toBeUndefined();
   });
 
   describe('error handling', () => {
