@@ -1969,7 +1969,9 @@ export const runActionTestSuite = ({
       });
     });
 
-    it('resolves left cluster_shard_limit_exceeded when the action would exceed the maximum normal open shards', async () => {
+    // The errors in the issue show something else, but it's tracked:
+    // https://github.com/elastic/kibana/issues/188963
+    it.skip('resolves left cluster_shard_limit_exceeded when the action would exceed the maximum normal open shards', async () => {
       // Set the max shards per node really low so that any new index that's created would exceed the maximum open shards for this cluster
       await client.cluster.putSettings({ persistent: { cluster: { max_shards_per_node: 1 } } });
       const createIndexPromise = createIndex({
