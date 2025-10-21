@@ -28,6 +28,7 @@ import type { ESQLCallbacks } from '../shared/types';
 import { getColumnsByTypeRetriever } from '../autocomplete/autocomplete';
 import { getPolicyHelper } from '../shared/resources_helpers';
 import { getVariablesHoverContent } from './helpers';
+import { formatFunctionSignature } from './helpers-2';
 
 interface HoverContent {
   contents: Array<{ value: string }>;
@@ -117,12 +118,14 @@ export async function getHoverItem(fullText: string, offset: number, callbacks?:
 
   if (node.type === 'function') {
     const fnDefinition = getFunctionDefinition(node.name);
-
     if (fnDefinition) {
       hoverContent.contents.push(
         ...[
-          { value: getFunctionSignatures(fnDefinition)[0].declaration },
+          {
+            value: formatFunctionSignature(fnDefinition),
+          },
           { value: fnDefinition.description },
+          { value: `[Open documentation](command:esql.control.functions.create)`, isTrusted: true },
         ]
       );
     }

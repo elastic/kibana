@@ -9,7 +9,7 @@
   },
   "include": [
     "src/**/*",
-    "**/*.ts",
+    "**/*.ts", "../kbn-esql-validation-autocomplete/src/hover/helpers-2.ts",
   ],
   "kbn_references": [
     "@kbn/i18n",
