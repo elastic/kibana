@@ -41,7 +41,7 @@ export async function agentBuilderExecute({
 
   // Start title generation immediately (non-blocking)
   if (conversationId && messages.length > 0) {
-    generateConversationTitle({
+    void generateConversationTitle({
       actionsClient,
       connectorId,
       context,
