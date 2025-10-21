@@ -11,7 +11,7 @@
  * Stress Test Mappings Script -- generated almost entirely by gemini-pro-2.5 via gemini-cli.
  */
 
-require('../../../../../../src/setup_node_env');
+require('@kbn/setup-node-env');
 const http = require('http');
 const https = require('https');
 const readline = require('readline');

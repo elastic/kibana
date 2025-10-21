@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('../src/setup_node_env/root');
-require('../src/setup_node_env/node_version_validator');
+require('@kbn/setup-node-env/root');
+require('@kbn/setup-node-env/node_version_validator');
 import('../kbn_pm/src/cli.mjs').catch(function (error) {
   console.error('UNHANDLED EXCEPTION:', error.stack);
   process.exit(1);
