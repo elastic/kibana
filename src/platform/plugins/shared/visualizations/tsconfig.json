@@ -80,6 +80,7 @@
     "@kbn/core-saved-objects-api-server",
     "@kbn/css-utils",
     "@kbn/visualizations-common",
+    "@kbn/lens-common",
   ],
   "exclude": ["target/**/*"]
 }

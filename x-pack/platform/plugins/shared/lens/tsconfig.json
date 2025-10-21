@@ -129,6 +129,7 @@
     "@kbn/visualizations-common",
     "@kbn/css-utils",
     "@kbn/react-kibana-context-common",
+    "@kbn/lens-common",
   ],
   "exclude": ["target/**/*"]
 }

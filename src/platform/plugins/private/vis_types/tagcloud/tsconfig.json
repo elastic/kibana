@@ -22,6 +22,7 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/data-views-plugin",
     "@kbn/chart-expressions-common",
+    "@kbn/lens-common",
   ],
   "exclude": [
     "target/**/*",
