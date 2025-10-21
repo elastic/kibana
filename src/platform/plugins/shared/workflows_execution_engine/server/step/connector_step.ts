@@ -31,7 +31,7 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
     super(step, stepExecutionRuntime, connectorExecutor, workflowState);
   }
 
-  public _getInput() {
+  public getInput() {
     // Get current context for templating
     const context = this.stepExecutionRuntime.contextManager.getContext();
     // Render inputs from 'with'

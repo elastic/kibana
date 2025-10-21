@@ -71,24 +71,15 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
     return this.step.name;
   }
 
-  public _getInput(): any {
+  public getInput(): any {
     return {};
-  }
-
-  public async getInput(): Promise<any> {
-    try {
-      return await this._getInput();
-    } catch (error) {
-      const errorDetails = error instanceof Error ? error.message : String(error);
-      throw new Error(`Failed to get input for step: ${errorDetails}`);
-    }
   }
 
   public async run(): Promise<void> {
     let input: any;
+    await this.stepExecutionRuntime.startStep();
 
     try {
-      await this.stepExecutionRuntime.startStep();
       input = await this.getInput();
       await this.stepExecutionRuntime.setInput(input);
       const result = await this._run(input);

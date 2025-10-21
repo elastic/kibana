@@ -104,7 +104,7 @@ describe('HttpStepImpl', () => {
       mockContextManager.getContext.mockReturnValue(context as any);
       mockStep.configuration.with.url = '{{baseUrl}}/users';
 
-      const input = httpStep._getInput();
+      const input = httpStep.getInput();
 
       expect(input.url).toBe('https://api.example.com/users');
     });
@@ -122,7 +122,7 @@ describe('HttpStepImpl', () => {
         'Content-Type': 'application/json',
       };
 
-      const input = httpStep._getInput();
+      const input = httpStep.getInput();
 
       expect(input.headers).toEqual({
         Authorization: 'Bearer bearer-token-123',
@@ -145,7 +145,7 @@ describe('HttpStepImpl', () => {
         active: true,
       };
 
-      const input = httpStep._getInput();
+      const input = httpStep.getInput();
 
       expect(input.body).toEqual({
         id: '123',
@@ -164,7 +164,7 @@ describe('HttpStepImpl', () => {
       (mockStep.configuration.with as any).method = undefined;
       (mockStep.configuration.with as any).timeout = undefined;
 
-      const input = httpStep._getInput();
+      const input = httpStep.getInput();
 
       expect(input.method).toBe('GET');
     });
@@ -179,7 +179,7 @@ describe('HttpStepImpl', () => {
       // Use a filter that will throw an error (e.g., accessing undefined property)
       mockStep.configuration.with.url = '{{ nonexistent | upper }}';
 
-      expect(() => httpStep._getInput()).toThrow();
+      expect(() => httpStep.getInput()).toThrow();
     });
 
     it('should throw error when template rendering fails in headers', () => {
@@ -193,7 +193,7 @@ describe('HttpStepImpl', () => {
         Authorization: '{{ invalidFilter | nonExistentFilter }}',
       };
 
-      expect(() => httpStep._getInput()).toThrow();
+      expect(() => httpStep.getInput()).toThrow();
     });
   });
 

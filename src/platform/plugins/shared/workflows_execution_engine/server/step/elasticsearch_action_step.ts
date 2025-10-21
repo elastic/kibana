@@ -30,7 +30,7 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<El
     super(step, contextManager, undefined, workflowRuntime);
   }
 
-  public _getInput() {
+  public getInput() {
     // Get current context for templating
     const context = this.stepExecutionRuntime.contextManager.getContext();
     // Render inputs from 'with' - support both direct step.with and step.configuration.with

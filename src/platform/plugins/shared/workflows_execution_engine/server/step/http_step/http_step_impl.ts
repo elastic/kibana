@@ -50,7 +50,7 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
     );
   }
 
-  public _getInput() {
+  public getInput() {
     const context = this.stepExecutionRuntime.contextManager.getContext();
     const { url, method = 'GET', headers = {}, body } = this.step.with;
 
