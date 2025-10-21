@@ -11,7 +11,10 @@ import { streamFactory } from '@kbn/ml-response-stream/server';
 import type { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
 import { isEmpty } from 'lodash';
 import { pruneContentReferences } from '@kbn/elastic-assistant-common';
-import { INVOKE_ASSISTANT_SUCCESS_EVENT } from '../telemetry/event_based_telemetry';
+import {
+  INVOKE_ASSISTANT_ERROR_EVENT,
+  INVOKE_ASSISTANT_SUCCESS_EVENT,
+} from '../telemetry/event_based_telemetry';
 import type {
   StreamingExecutionParams,
   NonStreamingExecutionParams,
@@ -19,27 +22,28 @@ import type {
 } from './types';
 import { processToolResults } from './processors';
 
+// Helper function to map tool names to telemetry format
+const mapToolNameToTelemetry = (toolName: string): string => {
+  const toolMapping: Record<string, string> = {
+    'core.security.product_documentation': 'ProductDocumentationTool',
+    'core.security.knowledge_base_retrieval': 'KnowledgeBaseRetrievalTool',
+    'core.security.knowledge_base_write': 'KnowledgeBaseWriteTool',
+    'core.security.open_and_acknowledged_alerts': 'OpenAndAcknowledgedAlertsTool',
+    'core.security.alert_counts': 'AlertCountsTool',
+    'core.security.ask_about_esql': 'AskAboutESQLTool',
+    'core.security.entity_risk_score': 'EntityRiskScoreTool',
+    'core.security.integration_knowledge': 'IntegrationKnowledgeTool',
+    'core.security.security_labs_knowledge': 'SecurityLabsKnowledgeBaseTool',
+    'core.security.assistant_settings': 'AssistantSettingsTool',
+  };
+  return toolMapping[toolName] || 'CustomTool';
+};
+
 // Helper function to extract tool usage from agent result
 const extractToolUsage = (agentResult: {
   result?: { round?: { steps?: Array<{ type: string; tool_id?: string }> } };
 }): Record<string, number> => {
   const toolsInvoked: Record<string, number> = {};
-
-  // Helper function to map tool names to telemetry format
-  const mapToolNameToTelemetry = (toolName: string): string => {
-    const toolMapping: Record<string, string> = {
-      'core.security.product_documentation': 'ProductDocumentationTool',
-      'core.security.knowledge_base_retrieval': 'KnowledgeBaseRetrievalTool',
-      'core.security.knowledge_base_write': 'KnowledgeBaseWriteTool',
-      'core.security.open_and_acknowledged_alerts': 'OpenAndAcknowledgedAlertsTool',
-      'core.security.alert_counts': 'AlertCountsTool',
-      'core.security.ask_about_esql': 'AskAboutESQLTool',
-      'core.security.entity_risk_score': 'EntityRiskScoreTool',
-      'core.security.integration_knowledge': 'IntegrationKnowledgeTool',
-      'core.security.security_labs_knowledge': 'SecurityLabsKnowledgeBaseTool',
-    };
-    return toolMapping[toolName] || 'CustomTool';
-  };
 
   if (agentResult?.result?.round?.steps) {
     for (const step of agentResult.result.round.steps) {
@@ -84,7 +88,7 @@ export const executeStreaming = async ({
       return;
     }
     if (isError) {
-      telemetry.reportEvent('invoke_assistant_error', {
+      telemetry.reportEvent(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
         actionTypeId,
         model: (request.body as { model?: string }).model || 'unknown',
         errorMessage: finalResponse,
@@ -105,23 +109,6 @@ export const executeStreaming = async ({
     try {
       let accumulatedContent = '';
       let finalRoundData: RoundCompleteEventData | null = null;
-      const toolsInvoked: Record<string, number> = {};
-
-      // Helper function to map tool names to telemetry format
-      const mapToolNameToTelemetry = (toolName: string): string => {
-        const toolMapping: Record<string, string> = {
-          'core.security.product_documentation': 'ProductDocumentationTool',
-          'core.security.knowledge_base_retrieval': 'KnowledgeBaseRetrievalTool',
-          'core.security.knowledge_base_write': 'KnowledgeBaseWriteTool',
-          'core.security.open_and_acknowledged_alerts': 'OpenAndAcknowledgedAlertsTool',
-          'core.security.alert_counts': 'AlertCountsTool',
-          'core.security.ask_about_esql': 'AskAboutESQLTool',
-          'core.security.entity_risk_score': 'EntityRiskScoreTool',
-          'core.security.integration_knowledge': 'IntegrationKnowledgeTool',
-          'core.security.security_labs_knowledge': 'SecurityLabsKnowledgeBaseTool',
-        };
-        return toolMapping[toolName] || 'CustomTool';
-      };
 
       // Use agents.execute with onEvent callback for fake streaming
       const agentResult = await onechatServices.agents.execute({
@@ -146,10 +133,8 @@ export const executeStreaming = async ({
             // Store the final round data for processing
             finalRoundData = event.data as RoundCompleteEventData;
           } else if (isToolCallEvent(event)) {
-            // Track tool usage for telemetry
-            const toolId = event.data.tool_id;
-            const telemetryToolName = mapToolNameToTelemetry(toolId);
-            toolsInvoked[telemetryToolName] = (toolsInvoked[telemetryToolName] || 0) + 1;
+            // Tool call events are handled by extractToolUsage for consistency
+            // No need for real-time tracking since we extract from the final result
           }
         },
       });
@@ -191,11 +176,12 @@ export const executeStreaming = async ({
 
       // Report telemetry
       const durationMs = Date.now() - startTime;
+
       // Use the helper function for consistency with non-streaming execution
-      const finalToolsInvoked = finalRoundData
-        ? extractToolUsage({ result: { round: finalRoundData } })
-        : toolsInvoked;
-      telemetry.reportEvent('invoke_assistant_success', {
+      // Always use agentResult since it has the correct structure with steps
+      const finalToolsInvoked = extractToolUsage(agentResult);
+
+      telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
         assistantStreamingEnabled: true,
         actionTypeId,
         isEnabledKnowledgeBase,
@@ -296,14 +282,7 @@ export const executeNonStreaming = async ({
   // Report telemetry with required fields
   const durationMs = Date.now() - startTime;
   const toolsInvoked = extractToolUsage(agentResult);
-  console.log('report telemetry ==>', {
-    actionTypeId,
-    model: (request.body as { model?: string }).model,
-    assistantStreamingEnabled: false,
-    isEnabledKnowledgeBase,
-    durationMs,
-    toolsInvoked,
-  });
+
   telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
     actionTypeId,
     model: (request.body as { model?: string }).model,
