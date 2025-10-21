@@ -588,7 +588,7 @@ export interface ESQLMessage {
   text: string;
   location: ESQLLocation;
   code: string;
-  errorType?: 'syntax' | 'semantic';
+  errorType?: 'semantic';
   requiresCallback?: 'getColumnsFor' | 'getSources' | 'getPolicies' | 'getJoinIndices' | string;
 }
 

@@ -184,14 +184,11 @@ function validateCommand(
     const allErrors = commandDefinition.methods.validate(command, ast, context, callbacks);
 
     const filteredErrors = allErrors.filter((error) => {
-      if (error.errorType === 'syntax' || !error.errorType) {
-        return true;
-      }
-
       if (error.errorType === 'semantic' && error.requiresCallback) {
         return shouldValidateCallback(callbacks, error.requiresCallback as keyof ESQLCallbacks);
       }
 
+      // All other errors pass through (syntax errors, untagged errors, etc.)
       return true;
     });
 

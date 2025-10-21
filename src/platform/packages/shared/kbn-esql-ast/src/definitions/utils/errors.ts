@@ -363,10 +363,6 @@ export function tagSemanticError(error: ESQLMessage, requiresCallback: string): 
   return { ...error, errorType: 'semantic', requiresCallback };
 }
 
-export function tagSyntaxError(error: ESQLMessage): ESQLMessage {
-  return { ...error, errorType: 'syntax' };
-}
-
 export const errors = {
   unexpected: (
     location: ESQLLocation,
@@ -389,7 +385,7 @@ export const errors = {
     }),
 
   unknownFunction: (fn: ESQLFunction): ESQLMessage =>
-    tagSyntaxError(errors.byId('unknownFunction', fn.location, fn)),
+    errors.byId('unknownFunction', fn.location, fn),
 
   unknownColumn: (column: ESQLColumn | ESQLIdentifier): ESQLMessage =>
     tagSemanticError(
@@ -398,7 +394,7 @@ export const errors = {
     ),
 
   tooManyForks: (command: ESQLCommand): ESQLMessage =>
-    tagSyntaxError(errors.byId('tooManyForks', command.location, {})),
+    errors.byId('tooManyForks', command.location, {}),
 
   nestedAggFunction: (fn: ESQLFunction, parentName: string): ESQLMessage =>
     errors.byId('nestedAggFunction', fn.location, {
