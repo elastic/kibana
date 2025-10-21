@@ -102,12 +102,10 @@ For the Elastic Security 9.2.0 release information, refer to [Elastic Security S
 **Machine Learning**:
 * Sets the default retention period for results from the logs anomaly detection configurations to 120 days [#231080]({{kib-pull}}231080).
 * Redesigns the file upload UX and adds the ability to upload multiple files and existing indices [#232923]({{kib-pull}}232923).
-* Adds an `AI` section to `Stack Management` for AI feature settings  [#227289]({{kib-pull}}227289).
-* AI Connector/Inference endpoints creation UI: Adds icon for Contextual AI [#236951]({{kib-pull}}236951).
-* Inference endpoints UI: Adds tech preview for rerank preconfig endpoint [#235222]({{kib-pull}}235222).
-* Adds a default placeholder icon for future AI connectors [#235166]({{kib-pull}}235166).
+* Adds a **GenAI Settings** page to **Stack Management** that lets you manage AI feature access for your deployment [#227289]({{kib-pull}}227289), [#233727]({{kib-pull}}233727).
+* Introduces a new connector in technical preview, the AI Connector, which provides a single interface for connecting to a range of large language model providers [#235166]({{kib-pull}}235166), [#236951]({{kib-pull}}236951), [#228116]({{kib-pull}}228116).
 * Inference endpoints UI: Adds tech preview for e5 preconfig endpoint [#234811]({{kib-pull}}234811).
-* Allows you to choose which AI Assistant to show on non-solution pages and moves  the **AI Assistant visibility** setting to new **GenAI Settings** management page [#233727]({{kib-pull}}233727).
+* Inference endpoints UI: Adds tech preview for rerank preconfig endpoint [#235222]({{kib-pull}}235222).
 * Improves the layout for custom URLs list in the data frame analytics form [#232575]({{kib-pull}}232575).
 * AI Connector/Inference endpoints creation UI: Adds icon for AI21 labs and Llama Stack [#232098]({{kib-pull}}232098).
 * Ensures ELSER and E5 product docs are appropriately updated [#231884]({{kib-pull}}231884).
