@@ -213,14 +213,9 @@ export class SpaceTestApiClient {
 
     expectStatusCode200(res);
   }
-  async getAgentPolicy(
-    policyId: string,
-    spaceId?: string,
-    opts: { full: boolean } = { full: false }
-  ): Promise<GetOneAgentPolicyResponse> {
-    const fullSegment = opts.full ? `/full` : '';
+  async getAgentPolicy(policyId: string, spaceId?: string): Promise<GetOneAgentPolicyResponse> {
     const res = await this.supertest
-      .get(`${this.getBaseUrl(spaceId)}/api/fleet/agent_policies/${policyId}${fullSegment}`)
+      .get(`${this.getBaseUrl(spaceId)}/api/fleet/agent_policies/${policyId}`)
       .auth(this.auth.username, this.auth.password);
 
     expectStatusCode200(res);
@@ -723,6 +718,7 @@ export class SpaceTestApiClient {
   ): Promise<GetOneOutputResponse> {
     const res = await this.supertest
       .post(`${this.getBaseUrl(spaceId)}/api/fleet/outputs`)
+      .auth(this.auth.username, this.auth.password)
       .set('kbn-xsrf', 'xxxx')
       .send(data);
 

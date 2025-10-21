@@ -21,6 +21,7 @@ import { setupTestUsers, testUsers } from '../test_users';
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const supertestWithAuth = getService('supertest');
   const esClient = getService('es');
   const kibanaServer = getService('kibanaServer');
   const spaces = getService('spaces');
@@ -57,7 +58,7 @@ export default function (providerContext: FtrProviderContext) {
       await cleanFleetIndices(esClient);
 
       await apiClient.postEnableSpaceAwareness();
-
+      await apiClient.setup();
       await createTestSpace(providerContext, TEST_SPACE_1);
       const [
         _defaultSpacePolicy1,
@@ -187,39 +188,40 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should correctly increment package policy names when creating agent policy with system package across multiple spaces', async () => {
-        await supertestWithoutAuth
-          .post(`/api/fleet/fleet_server_hosts`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            id: 'test-default-123',
-            name: 'Default',
-            is_default: true,
-            host_urls: ['https://test.fr:8080'],
-          })
-          .expect(200);
-
+        const res = await apiClient.postOutput(
+          {
+            name: `test output ${Date.now()}`,
+            type: 'elasticsearch',
+            is_default: false,
+            is_default_monitoring: false,
+            hosts: ['https://test.fr'],
+          },
+          TEST_SPACE_1
+        );
+        const outputId = res.item.id;
         await apiClient.installPackage({ pkgName: 'system', force: true, pkgVersion: '1.54.0' });
 
         await apiClient.createAgentPolicy('default', {}, { sys_monitoring: true });
 
-        const multiSpacePolicy = await apiClient.createAgentPolicy(
+        const newMultiSpacePolicy = await apiClient.createAgentPolicy(
           TEST_SPACE_1,
           {
             space_ids: ['default', TEST_SPACE_1],
+            data_output_id: outputId,
+            monitoring_output_id: outputId,
           },
           { sys_monitoring: true }
         );
 
-        const fullMultiSpacePolicy = await apiClient.getAgentPolicy(
-          multiSpacePolicy.item.id,
-          'default',
-          { full: true }
+        const multiSpacePolicy = await apiClient.getAgentPolicy(
+          newMultiSpacePolicy.item.id,
+          'default'
         );
 
-        const systemPackage = fullMultiSpacePolicy.item.package_policies?.find(
+        const systemPackagePolicy = multiSpacePolicy.item.package_policies?.find(
           (packagePolicy) => packagePolicy.package?.name === 'system'
         );
-        expect(systemPackage?.name).to.eql('system-2');
+        expect(systemPackagePolicy?.name).to.be('system-2');
       });
 
       it('should prevent creating agent policy for multiple spaces with same name as policy in non-current namespace', async () => {

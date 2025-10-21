@@ -340,6 +340,28 @@ export default function (providerContext: FtrProviderContext) {
           /409 "Conflict" Agent Policy\s.* already exists with name\s.*$/i
         );
       });
+
+      it('should prevent updating agent policy name already in multiple spaces when name conflicts exist', async () => {
+        const testSpaceOnlyPolicy = await apiClient.createAgentPolicy(TEST_SPACE_1);
+
+        const multiSpacePolicy = await apiClient.createAgentPolicy('default', {
+          name: `test policy ${Date.now()}}`,
+          space_ids: ['default', TEST_SPACE_1],
+        });
+
+        await expectToRejectWithError(
+          () =>
+            apiClient.putAgentPolicy(
+              multiSpacePolicy.item.id,
+              {
+                name: testSpaceOnlyPolicy.item.name,
+                namespace: 'default',
+              },
+              'default'
+            ),
+          /409 "Conflict" Agent Policy\s.* already exists with name\s.*$/i
+        );
+      });
     });
 
     describe('DELETE /agent_policies/{id}', () => {
