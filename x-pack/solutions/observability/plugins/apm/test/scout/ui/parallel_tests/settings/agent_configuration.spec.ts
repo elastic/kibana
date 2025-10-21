@@ -43,7 +43,7 @@ test.describe('Agent Configuration', { tag: ['@ess'] }, () => {
       await agentConfigurationsPage.clickCreateConfiguration();
 
       await agentConfigurationsPage.selectServiceFromDropdown('All');
-      await agentConfigurationsPage.selectEnvironment('All ');
+      await agentConfigurationsPage.selectEnvironment('production ');
 
       await agentConfigurationsPage.clickNextStep();
       await expect(page.getByText('Create configuration')).toBeVisible();
@@ -53,8 +53,8 @@ test.describe('Agent Configuration', { tag: ['@ess'] }, () => {
       await agentConfigurationsPage.clickEdit();
       const environmentInput = page.testSubj.locator('serviceEnvironmentComboBox').locator('input');
       await environmentInput.isVisible();
-      // Environment should persist (either 'production' or 'All' depending on what was selected)
-      await expect(environmentInput).not.toHaveValue('');
+      // Environment should persist as 'production ' since that's what we selected
+      await expect(environmentInput).toHaveValue('production ');
       await agentConfigurationsPage.clickNextStep();
     });
 
@@ -68,7 +68,7 @@ test.describe('Agent Configuration', { tag: ['@ess'] }, () => {
     await test.step('verify configuration created and removed', async () => {
       await expect(page).toHaveURL(/.*apm\/settings\/agent-configuration/);
       await expect(page.getByText('Configurations')).toBeVisible();
-      await agentConfigurationsPage.checkConfigurationExists('All', 'production');
+      await agentConfigurationsPage.checkConfigurationExists('All', 'production ');
 
       // Delete the configuration
       await agentConfigurationsPage.clickDeleteConfiguration();

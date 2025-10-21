@@ -62,20 +62,14 @@ export class AgentConfigurationsPage {
     await button.click();
   }
 
-  async selectService(serviceName: string) {
-    const serviceComboBox = new EuiComboBoxWrapper(this.page, 'serviceNameComboBox');
-    await serviceComboBox.setCustomSingleOption(serviceName);
-  }
-
   async selectServiceFromDropdown(serviceName: string) {
     const serviceComboBox = new EuiComboBoxWrapper(this.page, 'serviceNameComboBox');
-    await serviceComboBox.selectSingleOption(serviceName);
-    return serviceName;
+    return await serviceComboBox.selectSingleOption(serviceName);
   }
 
   async selectEnvironment(environmentName: string) {
     const environmentComboBox = new EuiComboBoxWrapper(this.page, 'serviceEnvironmentComboBox');
-    await environmentComboBox.selectSingleOption(environmentName);
+    return await environmentComboBox.selectSingleOption(environmentName);
   }
 
   async clickNextStep() {
