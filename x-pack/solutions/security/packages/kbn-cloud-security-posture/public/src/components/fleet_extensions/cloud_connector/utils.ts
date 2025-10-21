@@ -17,6 +17,7 @@ import semver from 'semver';
 import type {
   AwsCloudConnectorVars,
   AzureCloudConnectorVars,
+  CloudConnectorVars,
 } from '@kbn/fleet-plugin/common/types';
 import type {
   AwsCloudConnectorCredentials,
@@ -49,7 +50,7 @@ export type AwsCloudConnectorFieldNames =
   (typeof AWS_CLOUD_CONNECTOR_FIELD_NAMES)[keyof typeof AWS_CLOUD_CONNECTOR_FIELD_NAMES];
 
 export const isAwsCloudConnectorVars = (
-  vars: AwsCloudConnectorVars | AzureCloudConnectorVars | PackagePolicyConfigRecord,
+  vars: CloudConnectorVars,
   provider: string
 ): vars is AwsCloudConnectorVars => {
   return (
@@ -66,7 +67,7 @@ export function isAwsCredentials(
 }
 
 export const isAzureCloudConnectorVars = (
-  vars: AwsCloudConnectorVars | AzureCloudConnectorVars | PackagePolicyConfigRecord,
+  vars: CloudConnectorVars,
   provider: string
 ): vars is AzureCloudConnectorVars => {
   return (
