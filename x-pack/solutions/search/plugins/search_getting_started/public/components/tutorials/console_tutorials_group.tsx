@@ -29,11 +29,11 @@ export const ConsoleTutorialsGroup = () => {
   const { application, console: consolePlugin, share } = useKibana().services;
   const tutorials: TutorialMetadata[] = [
     {
-      title: i18n.translate('xpack.searchHomepage.consoleTutorials.basicsTitle', {
+      title: i18n.translate('xpack.searchGettingStarted.consoleTutorials.basicsTitle', {
         defaultMessage: 'Search basics',
       }),
       dataTestSubj: 'console_tutorials_search_basics',
-      description: i18n.translate('xpack.searchHomepage.consoleTutorials.basicsDescription', {
+      description: i18n.translate('xpack.searchGettingStarted.consoleTutorials.basicsDescription', {
         defaultMessage: 'Learn how to create an index, add documents, and basic search techniques.',
       }),
       request: consoleTutorials.basics,
@@ -41,24 +41,27 @@ export const ConsoleTutorialsGroup = () => {
       buttonRef: useRef<HTMLButtonElement>(null),
     },
     {
-      title: i18n.translate('xpack.searchHomepage.consoleTutorials.semanticTitle', {
+      title: i18n.translate('xpack.searchGettingStarted.consoleTutorials.semanticTitle', {
         defaultMessage: 'Intro to semantic search',
       }),
       dataTestSubj: 'console_tutorials_semantic_search',
-      description: i18n.translate('xpack.searchHomepage.consoleTutorials.semanticDescription', {
-        defaultMessage:
-          'Learn semantic search techniques to understand intent and deliver more accurate, relevant results.',
-      }),
+      description: i18n.translate(
+        'xpack.searchGettingStarted.consoleTutorials.semanticDescription',
+        {
+          defaultMessage:
+            'Learn semantic search techniques to understand intent and deliver more accurate, relevant results.',
+        }
+      ),
       request: consoleTutorials.semanticSearch,
       image: searchResultsIllustration,
       buttonRef: useRef<HTMLButtonElement>(null),
     },
     {
-      title: i18n.translate('xpack.searchHomepage.consoleTutorials.esqlTitle', {
+      title: i18n.translate('xpack.searchGettingStarted.consoleTutorials.esqlTitle', {
         defaultMessage: 'ES|QL fundamentals',
       }),
       dataTestSubj: 'console_tutorials_esql',
-      description: i18n.translate('xpack.searchHomepage.consoleTutorials.esqlDescription', {
+      description: i18n.translate('xpack.searchGettingStarted.consoleTutorials.esqlDescription', {
         defaultMessage:
           "Learn how to use Elastic's piped query language to simplify data investigations.",
       }),
@@ -66,6 +69,20 @@ export const ConsoleTutorialsGroup = () => {
       image: searchObserveIllustration,
       buttonRef: useRef<HTMLButtonElement>(null),
     },
+    // TODO:  uncomment below lines when we are ready to show TSDS tutorial. review https://github.com/elastic/kibana/pull/237384#issuecomment-3411670210
+    // {
+    //   title: i18n.translate('xpack.searchGettingStarted.consoleTutorials.tsdsTitle', {
+    //     defaultMessage: 'Time series data streams',
+    //   }),
+    //   dataTestSubj: 'console_tutorials_tsds',
+    //   description: i18n.translate('xpack.searchHomepage.consoleTutorials.tsdsDescription', {
+    //     defaultMessage:
+    //       'Learn how to use a time series data stream (TSDS) to store timestamped metrics data.',
+    //   }),
+    //   request: consoleTutorials.timeSeriesDataStreams,
+    //   image: null,
+    //   buttonRef: useRef<HTMLButtonElement>(null),
+    // },
   ];
 
   return (
@@ -73,7 +90,7 @@ export const ConsoleTutorialsGroup = () => {
       <EuiFlexGroup gutterSize="xs" direction={'column'} justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <SearchGettingStartedSectionHeading
-            title={i18n.translate('xpack.searchHomepage.consoleTutorials.label', {
+            title={i18n.translate('xpack.searchGettingStarted.consoleTutorials.label', {
               defaultMessage: 'Explore the API',
             })}
             icon={commandLineIllustration}
@@ -82,7 +99,7 @@ export const ConsoleTutorialsGroup = () => {
         <EuiFlexItem grow={false}>
           <EuiText color="subdued" size="s">
             <FormattedMessage
-              id="xpack.searchHomepage.consoleTutorials.description"
+              id="xpack.searchGettingStarted.consoleTutorials.description"
               defaultMessage="Choose a tutorial and use Console to quickly start interacting with the elasticsearch API."
             />
           </EuiText>
@@ -114,7 +131,7 @@ export const ConsoleTutorialsGroup = () => {
                     buttonProps={{ buttonRef: tutorial.buttonRef }}
                     content={
                       <FormattedMessage
-                        id="xpack.searchHomepage.consoleTutorials.runInConsole"
+                        id="xpack.searchGettingStarted.consoleTutorials.runInConsole"
                         defaultMessage="Open in Console"
                       />
                     }

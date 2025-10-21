@@ -10,7 +10,6 @@ import React, { useEffect } from 'react';
 import { AnalyticsEvents } from '../../common';
 import { useUsageTracker } from '../contexts/usage_tracker_context';
 import { SearchGettingStartedPageTemplate } from '../layout/page_template';
-import { SearchGettingStartedHeader } from './header';
 import { ConsoleTutorialsGroup } from './tutorials/console_tutorials_group';
 
 export const SearchGettingStartedPage: React.FC = () => {
@@ -22,9 +21,6 @@ export const SearchGettingStartedPage: React.FC = () => {
 
   return (
     <SearchGettingStartedPageTemplate>
-      <EuiPageTemplate.Section paddingSize="xl">
-        <SearchGettingStartedHeader />
-      </EuiPageTemplate.Section>
       <EuiPageTemplate.Section paddingSize="xl">
         <ConsoleTutorialsGroup />
       </EuiPageTemplate.Section>
