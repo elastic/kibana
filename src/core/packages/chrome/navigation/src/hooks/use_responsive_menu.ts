@@ -8,11 +8,12 @@
  */
 
 import type { MutableRefObject } from 'react';
-import { useCallback, useRef, useState, useLayoutEffect } from 'react';
+import { useCallback, useRef, useState, useLayoutEffect, useMemo } from 'react';
 
 import type { MenuItem } from '../../types';
 import { MAX_MENU_ITEMS } from '../constants';
 import { getStyleProperty } from '../utils/get_style_property';
+import { useRafDebouncedCallback } from './use_raf_debounced';
 
 /**
  * Utility function to cache the heights of the menu items in a ref.
@@ -95,9 +96,13 @@ interface ResponsiveMenuState {
 export function useResponsiveMenu(isCollapsed: boolean, items: MenuItem[]): ResponsiveMenuState {
   const primaryMenuRef = useRef<HTMLElement | null>(null);
   const heightsCacheRef = useRef<number[]>([]);
+  const lastComputedCountRef = useRef<number | null>(null);
 
-  const [visibleMenuItems, setVisibleMenuItems] = useState<MenuItem[]>(items);
-  const [overflowMenuItems, setOverflowMenuItems] = useState<MenuItem[]>([]);
+  const [visibleCount, setVisibleCount] = useState<number>(items.length);
+
+  const visibleMenuItems = useMemo(() => items.slice(0, visibleCount), [items, visibleCount]);
+  const overflowMenuItems = useMemo(() => items.slice(visibleCount), [items, visibleCount]);
+  const stableHeightItems = useStableHeightItems(items);
 
   const recalculateMenuLayout = useCallback(() => {
     if (!primaryMenuRef.current) return;
@@ -107,7 +112,7 @@ export function useResponsiveMenu(isCollapsed: boolean, items: MenuItem[]): Resp
     const menuHeight = menu.clientHeight;
 
     // 1. Cache the heights of all children
-    cacheHeights(heightsCacheRef, menu, items);
+    cacheHeights(heightsCacheRef, menu, stableHeightItems);
 
     if (heightsCacheRef.current.length === 0) return;
 
@@ -116,36 +121,67 @@ export function useResponsiveMenu(isCollapsed: boolean, items: MenuItem[]): Resp
     const childrenGap = getStyleProperty(menu, 'gap');
 
     // 2. Calculate the number of visible menu items
-    const visibleCount = countVisibleItems(childrenHeights, childrenGap, menuHeight);
+    const nextVisibleCount = countVisibleItems(childrenHeights, childrenGap, menuHeight);
 
-    // 3. Update the visible and overflow menu items
-    setVisibleMenuItems(items.slice(0, visibleCount));
-    setOverflowMenuItems(items.slice(visibleCount));
-  }, [items]);
+    // 3. Update the visible count if needed
+    if (lastComputedCountRef.current !== nextVisibleCount) {
+      lastComputedCountRef.current = nextVisibleCount;
+      setVisibleCount(nextVisibleCount);
+    }
+  }, [stableHeightItems]);
+
+  const [scheduleRecalc, cancelRecalc] = useRafDebouncedCallback(recalculateMenuLayout);
 
   useLayoutEffect(() => {
-    setVisibleMenuItems(items);
-    setOverflowMenuItems([]);
-
     // Invalidate the cache when items change
+    setVisibleCount(stableHeightItems.length);
     heightsCacheRef.current = [];
+    lastComputedCountRef.current = null;
 
-    const observer = new ResizeObserver(recalculateMenuLayout);
+    const observer = new ResizeObserver(() => {
+      scheduleRecalc();
+    });
 
     if (primaryMenuRef.current) {
       observer.observe(primaryMenuRef.current);
     }
 
-    return () => observer.disconnect();
-  }, [isCollapsed, items, recalculateMenuLayout]);
+    // Initial calculation
+    scheduleRecalc();
 
-  useLayoutEffect(() => {
-    recalculateMenuLayout();
-  }, [isCollapsed, recalculateMenuLayout]);
+    return () => {
+      observer.disconnect();
+      cancelRecalc();
+    };
+  }, [isCollapsed, stableHeightItems, scheduleRecalc, cancelRecalc]);
 
   return {
     primaryMenuRef,
     visibleMenuItems,
     overflowMenuItems,
   };
+}
+
+export function useStableHeightItems(items: MenuItem[]): MenuItem[] {
+  const ref = useRef<MenuItem[]>(items);
+  const out = isItemsHeightsEqual(ref.current, items) ? ref.current : items;
+
+  // don’t write to a ref during render
+  useLayoutEffect(() => {
+    if (!isItemsHeightsEqual(ref.current, items)) {
+      ref.current = items;
+    }
+  }, [items]);
+
+  return out;
+}
+
+function isItemsHeightsEqual(prev: MenuItem[], next: MenuItem[]): boolean {
+  if (prev === next) return true;
+  if (prev.length !== next.length) return false;
+  for (let i = 0; i < prev.length; i++) {
+    // Only compare properties that might affect height
+    if (prev[i].label !== next[i].label) return false;
+  }
+  return true;
 }
