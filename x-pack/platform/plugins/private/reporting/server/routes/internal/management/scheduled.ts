@@ -167,6 +167,68 @@ export function registerScheduledRoutesInternal(reporting: ReportingCore, logger
     );
   };
 
+  const registerInternalDeleteBulkDelete = () => {
+    // allow scheduled reports to be deleted
+    const path = SCHEDULED.BULK_DELETE;
+
+    router.delete(
+      {
+        path,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: {
+          body: schema.object({
+            ids: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 50 }),
+          }),
+        },
+        options: { access: 'internal' },
+      },
+      authorizedUserPreRouting(reporting, async (user, context, req, res) => {
+        try {
+          const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
+
+          // ensure the async dependencies are loaded
+          if (!context.reporting) {
+            return handleUnavailable(res);
+          }
+
+          // check license
+          const licenseInfo = await reporting.getLicenseInfo();
+          const licenseResults = licenseInfo.scheduledReports;
+
+          if (!licenseResults.enableLinks) {
+            return res.forbidden({ body: licenseResults.message });
+          }
+
+          const { ids } = req.body;
+
+          const scheduledReportsService = await ScheduledReportsService.build({
+            logger,
+            reportingCore: reporting,
+            request: req,
+            responseFactory: res,
+          });
+
+          const results = await scheduledReportsService.bulkDelete({ user, ids });
+
+          counters.usageCounter();
+
+          return res.ok({ body: results, headers: { 'content-type': 'application/json' } });
+        } catch (err) {
+          if (err instanceof KibanaResponse) {
+            return err;
+          }
+          throw err;
+        }
+      })
+    );
+  };
+
   registerInternalGetList();
   registerInternalPatchBulkDisable();
+  registerInternalDeleteBulkDelete();
 }

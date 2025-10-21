@@ -137,6 +137,9 @@ const ALERT_RULE_UUID = `${ALERT_RULE_NAMESPACE}.uuid` as const;
 // kibana.alert.rule.execution.type - rule execution type for rule that generated this alert (manual /scheduled)
 const ALERT_RULE_EXECUTION_TYPE = `${ALERT_RULE_NAMESPACE}.execution.type` as const;
 
+// kibana.alert.index_pattern - index pattern for the alert
+const ALERT_INDEX_PATTERN = `${ALERT_NAMESPACE}.index_pattern` as const;
+
 const namespaces = {
   KIBANA_NAMESPACE,
   ALERT_NAMESPACE,
@@ -154,6 +157,7 @@ export const fields = {
   ALERT_PENDING_RECOVERED_COUNT,
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_INSTANCE_ID,
+  ALERT_INDEX_PATTERN,
   ALERT_LAST_DETECTED,
   ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_REASON,
@@ -204,6 +208,7 @@ export {
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_PENDING_RECOVERED_COUNT,
   ALERT_INSTANCE_ID,
+  ALERT_INDEX_PATTERN,
   ALERT_LAST_DETECTED,
   ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_REASON,

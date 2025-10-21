@@ -59,6 +59,7 @@ export interface FleetConfigType {
   agentIdVerificationEnabled?: boolean;
   eventIngestedEnabled?: boolean;
   enableExperimental?: string[];
+  experimentalFeatures?: { [k: string]: boolean };
   enableManagedLogsAndMetricsDataviews?: boolean;
   packageVerification?: {
     gpgKeyPath?: string;
@@ -110,6 +111,7 @@ export interface FleetConfigType {
   integrationsHomeOverride?: string;
   prereleaseEnabledByDefault?: boolean;
   hideDashboards?: boolean;
+  installIntegrationsKnowledge?: boolean;
 }
 
 // Calling Object.entries(PackagesGroupedByStatus) gave `status: string`
