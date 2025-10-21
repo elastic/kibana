@@ -37,7 +37,6 @@ const setup = ({
   const unifiedSearch = unifiedSearchPluginMock.createStartContract();
   const cloud = cloudMock.createStart();
   const spaces = spacesPluginMock.createStartContract();
-  const setDeploymentType = jest.fn();
 
   const getGlobalSetting$ = jest.fn();
   const settingsGlobalClient = {
@@ -46,7 +45,6 @@ const setup = ({
   };
   coreStart.settings.globalClient = settingsGlobalClient;
   coreStart.chrome.setChromeStyle = setChromeStyle;
-  coreStart.chrome.project.setDeploymentType = setDeploymentType;
 
   return {
     plugin,
@@ -55,7 +53,6 @@ const setup = ({
     cloud,
     spaces,
     setChromeStyle,
-    setDeploymentType,
   };
 };
 
