@@ -304,8 +304,8 @@ export class CommonPageObject extends FtrService {
     const urlHasState = (url: string) => {
       try {
         const parsed = new URL(url);
-        // Check if there's a meaningful hash (not just '#' or empty)
-        const hasHash = parsed.hash && parsed.hash.length > 1;
+        // Check if there's a meaningful hash (not just '#', '#/', or empty)
+        const hasHash = parsed.hash && parsed.hash.length > 2 && parsed.hash !== '#/';
         // Check if there are search params
         const hasSearch = parsed.search && parsed.search.length > 1;
         return hasHash || hasSearch;
