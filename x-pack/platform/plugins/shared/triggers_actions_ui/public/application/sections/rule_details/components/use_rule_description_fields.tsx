@@ -6,7 +6,7 @@
  */
 
 import React, { Suspense, useMemo } from 'react';
-import { EuiBadge, EuiCodeBlock, EuiFlexGroup, useEuiTheme } from '@elastic/eui';
+import { EuiBadge, EuiCodeBlock, EuiFlexGroup, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import { RULE_DETAIL_DESCRIPTION_FIELD_TYPES } from '@kbn/alerting-types/rule_detail_description_type';
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
@@ -51,7 +51,7 @@ export const AsyncField = <T,>({
 
   return (
     <ErrorBoundary>
-      <Suspense fallback="Loading...">
+      <Suspense fallback={<EuiLoadingSpinner size="m" />}>
         <AsyncContent />
       </Suspense>
     </ErrorBoundary>
