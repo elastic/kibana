@@ -13,6 +13,7 @@ import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
 import { getCompletionItemProvider, parseLineForCompletion } from './get_completion_item_provider';
 import { performComputation } from './store/utils/computation';
 import { getWorkflowZodSchemaLoose } from '../../../../common/schema';
+import { z } from '@kbn/zod';
 
 // Mock Monaco editor model
 const createMockModel = (value: string, cursorOffset: number) => {
