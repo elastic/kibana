@@ -3,7 +3,7 @@ navigation_title: "Jira Service Management"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/jsm-action-type.html
 applies_to:
-  stack: all
+  stack: ga 9.2
   serverless:
     observability: ga
     security: ga
