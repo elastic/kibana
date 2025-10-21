@@ -6,6 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+// TODO: remove eslint exceptions once we have a better way to handle this
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { JsonSchema7Type } from 'zod-to-json-schema';
 import type { KibanaRequest } from '@kbn/core/server';
@@ -62,7 +64,7 @@ export interface WorkflowExecutionLogEntry {
   stepName?: string;
   connectorType?: string;
   duration?: number;
-  additionalData?: Record<string, unknown>;
+  additionalData?: Record<string, any>;
 }
 
 export interface WorkflowExecutionLogsDto {
@@ -180,7 +182,7 @@ export class WorkflowsManagementApi {
   public async runWorkflow(
     workflow: WorkflowExecutionEngineModel,
     spaceId: string,
-    inputs: Record<string, unknown>,
+    inputs: Record<string, any>,
     request: KibanaRequest
   ): Promise<string> {
     const { event, ...manualInputs } = inputs;
@@ -200,7 +202,7 @@ export class WorkflowsManagementApi {
 
   public async testWorkflow(
     workflowYaml: string,
-    inputs: Record<string, unknown>,
+    inputs: Record<string, any>,
     spaceId: string,
     request: KibanaRequest
   ): Promise<string> {
@@ -253,7 +255,7 @@ export class WorkflowsManagementApi {
   public async testStep(
     workflowYaml: string,
     stepId: string,
-    contextOverride: Record<string, unknown>,
+    contextOverride: Record<string, any>,
     spaceId: string,
     request: KibanaRequest
   ): Promise<string> {
@@ -320,12 +322,10 @@ export class WorkflowsManagementApi {
     }
 
     // Transform the logs to match our API format
-    type RawLog = LogSearchResult['logs'][number];
-
     return {
       logs: result.logs
-        .filter((log): log is RawLog => Boolean(log))
-        .map((log: RawLog) => ({
+        .filter((log: any) => log) // Filter out undefined/null logs
+        .map((log: any) => ({
           id:
             log.id ||
             `${log['@timestamp']}-${log.workflow?.execution_id}-${

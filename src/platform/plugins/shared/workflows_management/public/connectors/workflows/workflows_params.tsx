@@ -43,7 +43,7 @@ interface WorkflowOption {
   data?: {
     secondaryContent?: string;
   };
-  [key: string]: unknown;
+  [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<WorkflowsActionParams>> = ({
@@ -349,8 +349,8 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
       ) : (
         <EuiSelectable
           aria-label="Select workflow"
-          options={workflowOptions as unknown}
-          onChange={onWorkflowChange as unknown}
+          options={workflowOptions as any} // eslint-disable-line @typescript-eslint/no-explicit-any
+          onChange={onWorkflowChange}
           singleSelection
           searchable
           searchProps={{
@@ -389,7 +389,7 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
               disableFocusTrap
               closeOnScroll
               isOpen={isPopoverOpen}
-              input={search}
+              input={search!} // eslint-disable-line @typescript-eslint/no-non-null-assertion
               panelPaddingSize="none"
               fullWidth
             >

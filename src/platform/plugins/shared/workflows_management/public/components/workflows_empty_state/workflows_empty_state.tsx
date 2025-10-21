@@ -21,8 +21,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-
+import { useKibana } from '../../hooks/use_kibana';
 interface WorkflowsEmptyStateProps {
   onCreateWorkflow?: () => void;
   canCreateWorkflow?: boolean;

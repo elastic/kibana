@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { KibanaResponseFactory } from '@kbn/core/server';
 import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
 import {
   InvalidYamlSchemaError,
@@ -22,22 +23,17 @@ import {
  * @returns Appropriate error response
  */
 export function handleRouteError(
-  response: unknown,
+  response: KibanaResponseFactory,
   error: Error,
   options?: { checkNotFound?: boolean }
 ) {
-  const res = response as {
-    notFound: () => unknown;
-    badRequest: (args: { body: unknown }) => unknown;
-    customError: (args: { statusCode: number; body: unknown }) => unknown;
-  };
   // Check for specific error types that need special handling
   if (options?.checkNotFound && error instanceof WorkflowExecutionNotFoundError) {
-    return res.notFound();
+    return response.notFound();
   }
 
   if (error instanceof InvalidYamlSyntaxError || error instanceof InvalidYamlSchemaError) {
-    return res.badRequest({
+    return response.badRequest({
       body: {
         message: `Invalid workflow yaml: ${error.message}`,
       },
@@ -45,13 +41,13 @@ export function handleRouteError(
   }
 
   if (isWorkflowValidationError(error)) {
-    return res.badRequest({
+    return response.badRequest({
       body: error.toJSON(),
     });
   }
 
   // Generic error handler
-  return res.customError({
+  return response.customError({
     statusCode: 500,
     body: {
       message: `Internal server error: ${error}`,

@@ -8,8 +8,8 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { WorkflowDetailDto } from '@kbn/workflows';
+import { useKibana } from '../../../hooks/use_kibana';
 
 export function useWorkflowDetail(id: string | null) {
   const { http } = useKibana().services;
@@ -19,8 +19,8 @@ export function useWorkflowDetail(id: string | null) {
     enabled: !!id,
     queryKey: ['workflows', id],
     refetchOnWindowFocus: false,
-    queryFn: () => {
-      return http?.get<WorkflowDetailDto>(`/api/workflows/${id}`).then((res) => {
+    queryFn: async () => {
+      return http.get<WorkflowDetailDto>(`/api/workflows/${id}`).then((res) => {
         return {
           ...res,
           lastUpdatedAt: new Date(res.lastUpdatedAt),

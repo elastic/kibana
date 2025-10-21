@@ -27,7 +27,7 @@ export interface EnhancedConnectorDefinition {
   /** Example usage snippets for autocomplete */
   examples?: {
     /** Example parameter values for autocomplete */
-    params?: Record<string, unknown>;
+    params?: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
     /** Full example workflow step */
     snippet?: string;
   };

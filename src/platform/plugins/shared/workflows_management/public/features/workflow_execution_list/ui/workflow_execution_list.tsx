@@ -7,16 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
+import type { EuiEmptyPromptProps, UseEuiTheme } from '@elastic/eui';
+import {
   EuiEmptyPrompt,
-  type EuiEmptyPromptProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiLoadingSpinner,
   EuiText,
   EuiTitle,
-  UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useEffect, useRef } from 'react';

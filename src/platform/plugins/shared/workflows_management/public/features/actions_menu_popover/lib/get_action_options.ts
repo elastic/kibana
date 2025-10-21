@@ -11,7 +11,8 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getAllConnectors } from '../../../../common/schema';
 import { getStepIconType } from '../../../shared/ui/step_icons/get_step_icon_type';
-import type { ActionConnectorGroup, type ActionOptionData, isActionGroup } from '../types';
+import type { ActionConnectorGroup, ActionOptionData } from '../types';
+import { isActionGroup } from '../types';
 
 export function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptionData[] {
   const connectors = getAllConnectors();

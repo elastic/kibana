@@ -8,30 +8,27 @@
  */
 
 import type {
+  EuiEmptyPromptProps,
+  EuiThemeComputed,
+  EuiTreeViewProps,
+  UseEuiTheme,
+} from '@elastic/eui';
+import {
   EuiEmptyPrompt,
-  type EuiEmptyPromptProps,
   EuiIcon,
   EuiLoadingSpinner,
   EuiText,
-  EuiThemeComputed,
   EuiTreeView,
-  EuiTreeViewProps,
   logicalCSS,
   useEuiTheme,
-  UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  isDangerousStatus,
-  type WorkflowExecutionDto,
-  WorkflowStepExecutionDto,
-  WorkflowYaml,
-} from '@kbn/workflows';
-import { ExecutionStatus, isInProgressStatus } from '@kbn/workflows';
+import type { WorkflowExecutionDto, WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
+import { ExecutionStatus, isDangerousStatus, isInProgressStatus } from '@kbn/workflows';
 import type { StepExecutionTreeItem } from './build_step_executions_tree';
 import { buildStepExecutionsTree } from './build_step_executions_tree';
 import { StepExecutionTreeItemLabel } from './step_execution_tree_item_label';

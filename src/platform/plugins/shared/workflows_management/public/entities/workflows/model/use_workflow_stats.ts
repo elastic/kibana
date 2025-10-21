@@ -9,8 +9,8 @@
 
 import type { EuiSelectableOption } from '@elastic/eui';
 import { useQuery } from '@tanstack/react-query';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { WorkflowStatsDto } from '@kbn/workflows/types/v1';
+import { useKibana } from '../../../hooks/use_kibana';
 
 export function useWorkflowStats() {
   const { http } = useKibana().services;
@@ -18,7 +18,7 @@ export function useWorkflowStats() {
   return useQuery<WorkflowStatsDto>({
     networkMode: 'always',
     queryKey: ['workflows', 'stats'],
-    queryFn: () => http?.get(`/api/workflows/stats`),
+    queryFn: () => http.get(`/api/workflows/stats`),
   });
 }
 
@@ -28,6 +28,6 @@ export function useWorkflowFiltersOptions(fields: string[]) {
   return useQuery<Record<string, Array<EuiSelectableOption>>>({
     networkMode: 'always',
     queryKey: ['workflows', 'aggs', fields],
-    queryFn: () => http?.get(`/api/workflows/aggs`, { query: { fields } }),
+    queryFn: () => http.get(`/api/workflows/aggs`, { query: { fields } }),
   });
 }
