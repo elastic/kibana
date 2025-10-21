@@ -4545,6 +4545,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/cleanup-before-exit@link:src/platform/packages/shared/kbn-cleanup-before-exit":
+  version "0.0.0"
+  uid ""
+
 "@kbn/cli-dev-mode@link:packages/kbn-cli-dev-mode":
   version "0.0.0"
   uid ""
