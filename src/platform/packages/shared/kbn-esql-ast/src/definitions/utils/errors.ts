@@ -9,6 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type {
+  ESQLAstAllCommands,
   ESQLColumn,
   ESQLCommand,
   ESQLFunction,
@@ -55,6 +56,13 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
         message: i18n.translate('kbn-esql-ast.esql.validation.missingFunction', {
           defaultMessage: 'Unknown function {name}',
           values: { name: out.name.toUpperCase() },
+        }),
+      };
+    case 'unknownSetting':
+      return {
+        message: i18n.translate('kbn-esql-ast.esql.validation.unknownSetting', {
+          defaultMessage: 'Unknown setting {name}',
+          values: { name: out.name },
         }),
       };
     case 'noMatchingCallSignature':
@@ -502,10 +510,10 @@ export const errors = {
   dropTimestampWarning: ({ location }: ESQLColumn): ESQLMessage =>
     errors.byId('dropTimestampWarning', location, {}),
 
-  forkTooManyBranches: (command: ESQLCommand): ESQLMessage =>
+  forkTooManyBranches: (command: ESQLAstAllCommands): ESQLMessage =>
     errors.byId('forkTooManyBranches', command.location, {}),
 
-  forkTooFewBranches: (command: ESQLCommand): ESQLMessage =>
+  forkTooFewBranches: (command: ESQLAstAllCommands): ESQLMessage =>
     errors.byId('forkTooFewBranches', command.location, {}),
 };
 

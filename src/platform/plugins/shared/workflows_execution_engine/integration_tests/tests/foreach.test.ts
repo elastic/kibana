@@ -10,6 +10,7 @@
 import { ExecutionStatus } from '@kbn/workflows';
 import { FakeConnectors } from '../mocks/actions_plugin_mock';
 import { WorkflowRunFixture } from '../workflow_run_fixture';
+import type { JsonObject } from '@kbn/utility-types';
 
 describe('workflow with foreach', () => {
   let workflowRunFixture: WorkflowRunFixture;
@@ -73,7 +74,7 @@ steps:
       ).filter((se) => se.stepId === 'outerForeachChildConnectorStep');
       expect(outerForeachChildConnectorStepExecutions.length).toBe(2);
       outerArray.forEach((item, index) => {
-        expect(outerForeachChildConnectorStepExecutions[index].input?.message).toBe(
+        expect((outerForeachChildConnectorStepExecutions[index].input as JsonObject).message).toBe(
           `Foreach item: ${item}; Foreach index: ${index}; Foreach total: 2`
         );
         expect(outerForeachChildConnectorStepExecutions[index].status).toBe(
