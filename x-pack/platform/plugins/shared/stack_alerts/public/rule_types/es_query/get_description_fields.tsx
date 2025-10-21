@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { RULE_DETAIL_DESCRIPTION_FIELD_TYPES } from '@kbn/triggers-actions-ui-plugin/public/application/sections/rule_details/components/rule_detail_description_type';
 import type { GetDescriptionFieldsFn } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { RULE_DETAIL_DESCRIPTION_FIELD_TYPES } from '@kbn/triggers-actions-ui-plugin/public';
 
 export const getDescriptionFields: GetDescriptionFieldsFn = ({ rule, prebuildFields }) => {
   if (!rule || !prebuildFields) return [];

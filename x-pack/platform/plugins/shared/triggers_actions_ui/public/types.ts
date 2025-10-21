@@ -43,6 +43,7 @@ import type {
   RuleTypeParams,
 } from '@kbn/alerting-plugin/common';
 import type { BulkOperationError } from '@kbn/alerting-plugin/server';
+import type { RuleType, RuleTypeIndex } from '@kbn/triggers-actions-ui-types';
 import type {
   ValidationResult,
   UserConfiguredActionConnector,
@@ -50,7 +51,6 @@ import type {
   ActionTypeRegistryContract,
 } from '@kbn/alerts-ui-shared/src/common/types';
 import type { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
-import type { RuleType, RuleTypeIndex } from '@kbn/triggers-actions-ui-types/rule_types';
 import type { RULE_DETAIL_DESCRIPTION_FIELD_TYPES } from './application/sections/rule_details/components/rule_detail_description_type';
 import type { ComponentOpts as RuleStatusDropdownProps } from './application/sections/rules_list/components/rule_status_dropdown';
 import type { RuleTagFilterProps } from './application/sections/rules_list/components/rule_tag_filter';
