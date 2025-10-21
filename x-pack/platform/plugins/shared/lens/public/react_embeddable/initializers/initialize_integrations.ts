@@ -19,7 +19,6 @@ import type {
   LensByValueSerializedState,
   LensRuntimeState,
   LensSerializedState,
-  LensInternalApi,
 } from '../types';
 import type { IntegrationCallbacks } from '../types';
 
@@ -29,10 +28,7 @@ function cleanupSerializedState(state: LensRuntimeState) {
   return cleanedState;
 }
 
-export function initializeIntegrations(
-  getLatestState: GetStateType,
-  internalApi: LensInternalApi
-): {
+export function initializeIntegrations(getLatestState: GetStateType): {
   api: Omit<
     IntegrationCallbacks,
     | 'updateState'
@@ -82,9 +78,6 @@ export function initializeIntegrations(
         }
         const language = getAggregateQueryMode(query);
         return getLanguageDisplayName(language).toUpperCase();
-      },
-      updateAbortController: (abortController) => {
-        internalApi.updateAbortController(abortController);
       },
     },
   };
