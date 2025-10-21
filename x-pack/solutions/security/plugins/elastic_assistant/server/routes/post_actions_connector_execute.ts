@@ -92,6 +92,12 @@ export const postActionsConnectorExecuteRoute = (
             false
           )) ?? false;
 
+        const assistantInterruptsEnabled =
+          (await coreContext?.featureFlags?.getBooleanValue(
+            ASSISTANT_INTERRUPTS_ENABLED_FEATURE_FLAG,
+            false
+          )) ?? false;
+
         try {
           const checkResponse = await performChecks({
             context: ctx,
@@ -138,10 +144,7 @@ export const postActionsConnectorExecuteRoute = (
 
           const conversationsDataClient =
             await assistantContext.getAIAssistantConversationsDataClient({
-              assistantInterruptsEnabled: await coreContext.featureFlags.getBooleanValue(
-                ASSISTANT_INTERRUPTS_ENABLED_FEATURE_FLAG,
-                false
-              ),
+              assistantInterruptsEnabled,
             });
           if (conversationId) {
             const conversation = await conversationsDataClient?.getConversation({
