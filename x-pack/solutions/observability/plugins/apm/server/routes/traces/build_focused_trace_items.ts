@@ -112,3 +112,47 @@ export function buildFocusedTraceItems({
     focusedTraceTree,
   };
 }
+
+export function flattenChildren(children: FocusedTraceItems['focusedTraceTree']) {
+  function convert(
+    child: FocusedTraceItems['focusedTraceTree'][0]
+  ): Array<FocusedTraceItems['rootDoc']> {
+    const convertedChildren = child.children?.length ? child.children.flatMap(convert) : [];
+    return [child.traceDoc, ...convertedChildren];
+  }
+
+  return children.flatMap(convert);
+}
+
+export function reparentDocumentToRoot(items: FocusedTraceItems) {
+  if (!items) {
+    return undefined;
+  }
+  const clonedItems = structuredClone(items);
+  const rootDocId = clonedItems.rootDoc.id;
+
+  if (rootDocId === clonedItems.focusedTraceDoc.id || rootDocId === clonedItems.parentDoc?.id) {
+    return clonedItems;
+  }
+
+  if (clonedItems.parentDoc) {
+    clonedItems.parentDoc.parentId = rootDocId;
+  } else {
+    clonedItems.focusedTraceDoc.parentId = rootDocId;
+  }
+  return clonedItems;
+}
+
+export function getFocusedTraceItems(items: FocusedTraceItems) {
+  const children = items.focusedTraceTree || [];
+  const childrenItems = flattenChildren(children);
+
+  const traceItems = [
+    items.rootDoc,
+    items.parentDoc?.id === items.rootDoc.id ? undefined : items.parentDoc,
+    items.focusedTraceDoc.id === items.rootDoc.id ? undefined : items.focusedTraceDoc,
+    ...childrenItems,
+  ].filter(Boolean) as TraceItem[];
+
+  return traceItems;
+}

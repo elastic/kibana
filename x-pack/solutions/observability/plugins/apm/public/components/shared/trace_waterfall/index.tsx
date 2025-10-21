@@ -23,6 +23,7 @@ import { WaterfallLegends } from './waterfall_legends';
 
 export interface Props {
   traceItems: TraceItem[];
+  traceParentChildrenMap: Record<string, TraceItem[]>;
   showAccordion?: boolean;
   highlightedTraceId?: string;
   onClick?: OnNodeClick;
@@ -37,6 +38,7 @@ export interface Props {
 
 export function TraceWaterfall({
   traceItems,
+  traceParentChildrenMap,
   showAccordion = true,
   highlightedTraceId,
   onClick,
@@ -46,11 +48,11 @@ export function TraceWaterfall({
   isEmbeddable = false,
   showLegend = false,
   serviceName,
-  filterByServiceName = false,
 }: Props) {
   return (
     <TraceWaterfallContextProvider
       traceItems={traceItems}
+      traceParentChildrenMap={traceParentChildrenMap}
       showAccordion={showAccordion}
       highlightedTraceId={highlightedTraceId}
       onClick={onClick}
@@ -60,7 +62,6 @@ export function TraceWaterfall({
       isEmbeddable={isEmbeddable}
       showLegend={showLegend}
       serviceName={serviceName}
-      filterByServiceName={filterByServiceName}
     >
       <TraceWarning>
         <TraceWaterfallComponent />

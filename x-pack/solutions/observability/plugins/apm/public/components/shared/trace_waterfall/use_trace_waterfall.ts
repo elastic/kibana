@@ -21,22 +21,18 @@ export interface TraceWaterfallItem extends TraceItem {
 
 export function useTraceWaterfall({
   traceItems,
-  serviceName,
-  filterByServiceName,
+  traceParentChildrenMap,
 }: {
   traceItems: TraceItem[];
-  serviceName?: string;
-  filterByServiceName: boolean;
+  traceParentChildrenMap: Record<string, TraceItem[]>;
 }) {
   const waterfall = useMemo(() => {
-    const isFilteredTrace = !!serviceName && filterByServiceName;
     const legends = getLegends(traceItems);
     const colorBy =
       legends.filter(({ type }) => type === WaterfallLegendType.ServiceName).length > 1
         ? WaterfallLegendType.ServiceName
         : WaterfallLegendType.Type;
     const colorMap = createColorLookupMap(legends);
-    const traceParentChildrenMap = getTraceParentChildrenMap(traceItems, isFilteredTrace);
     const { rootItem, traceState, orphans } = getRootItemOrFallback(
       traceParentChildrenMap,
       traceItems
@@ -61,7 +57,7 @@ export function useTraceWaterfall({
       legends,
       colorBy,
     };
-  }, [traceItems, serviceName, filterByServiceName]);
+  }, [traceItems, traceParentChildrenMap]);
 
   return waterfall;
 }
@@ -97,38 +93,6 @@ export function getLegends(traceItems: TraceItem[]): IWaterfallLegend[] {
 
 export function createColorLookupMap(legends: IWaterfallLegend[]): Map<string, string> {
   return new Map(legends.map((legend) => [`${legend.type}:${legend.value}`, legend.color]));
-}
-
-export function getTraceParentChildrenMap(traceItems: TraceItem[], filteredTrace: boolean) {
-  if (traceItems.length === 0) {
-    return {};
-  }
-
-  const traceMap: Record<string, TraceItem[]> = {};
-
-  traceItems.reduce<Record<string, TraceItem[]>>((acc, item) => {
-    if (item.parentId) {
-      (acc[item.parentId] ??= []).push(item);
-    } else {
-      (acc.root ??= [])[0] = item;
-    }
-    return acc;
-  }, traceMap);
-
-  // If filtered trace, elect the earliest arriving span as the root if there is no root found already
-  if (filteredTrace && !traceMap.root) {
-    const root = traceItems
-      .slice(1)
-      .reduce(
-        (acc, span) =>
-          acc.timestampUs <= span.timestampUs || acc.id === span.parentId ? acc : span,
-        traceItems[0]
-      );
-
-    traceMap.root = [root];
-  }
-
-  return traceMap;
 }
 
 export enum TraceDataState {

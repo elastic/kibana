@@ -47,7 +47,6 @@ export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
   legends: [],
   colorBy: WaterfallLegendType.ServiceName,
   showLegend: false,
-  serviceName: '',
 });
 
 export type OnNodeClick = (id: string) => void;
@@ -61,6 +60,7 @@ export type OnErrorClick = (params: {
 interface Props {
   children: React.ReactNode;
   traceItems: TraceItem[];
+  traceParentChildrenMap: Record<string, TraceItem[]>;
   showAccordion: boolean;
   highlightedTraceId?: string;
   onClick?: OnNodeClick;
@@ -70,12 +70,12 @@ interface Props {
   isEmbeddable: boolean;
   showLegend: boolean;
   serviceName?: string;
-  filterByServiceName: boolean;
 }
 
 export function TraceWaterfallContextProvider({
   children,
   traceItems,
+  traceParentChildrenMap,
   showAccordion,
   highlightedTraceId,
   onClick,
@@ -85,13 +85,11 @@ export function TraceWaterfallContextProvider({
   isEmbeddable,
   showLegend,
   serviceName,
-  filterByServiceName,
 }: Props) {
   const { duration, traceWaterfall, maxDepth, rootItem, legends, colorBy, traceState } =
     useTraceWaterfall({
       traceItems,
-      serviceName,
-      filterByServiceName,
+      traceParentChildrenMap,
     });
 
   const left = TOGGLE_BUTTON_WIDTH + ACCORDION_PADDING_LEFT * maxDepth;

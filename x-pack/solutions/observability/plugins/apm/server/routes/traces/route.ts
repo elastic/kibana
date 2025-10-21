@@ -24,8 +24,12 @@ import {
   getRootTransactionByTraceId,
   type TransactionDetailRedirectInfo,
 } from '../transactions/get_transaction_by_trace';
-import type { FocusedTraceItems } from './build_focused_trace_items';
-import { buildFocusedTraceItems, findRootItem } from './build_focused_trace_items';
+import {
+  buildFocusedTraceItems,
+  findRootItem,
+  reparentDocumentToRoot,
+  getFocusedTraceItems,
+} from './build_focused_trace_items';
 import type { TopTracesPrimaryStatsResponse } from './get_top_traces_primary_stats';
 import { getTopTracesPrimaryStats } from './get_top_traces_primary_stats';
 import type { TraceItems } from './get_trace_items';
@@ -33,7 +37,7 @@ import { getTraceItems } from './get_trace_items';
 import type { TraceSamplesResponse } from './get_trace_samples_by_query';
 import { getTraceSamplesByQuery } from './get_trace_samples_by_query';
 import { getTraceSummaryCount } from './get_trace_summary_count';
-import { getUnifiedTraceItems } from './get_unified_trace_items';
+import { getTraceParentChildrenMap, getUnifiedTraceItems } from './get_unified_trace_items';
 import { getUnifiedTraceErrors } from './get_unified_trace_errors';
 import { createLogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
 import { normalizeErrors } from './normalize_errors';
@@ -139,6 +143,7 @@ const unifiedTracesByIdRoute = createApmServerRoute({
     resources
   ): Promise<{
     traceItems: TraceItem[];
+    traceParentChildrenMap: Record<string, TraceItem[]>;
   }> => {
     const [apmEventClient, logsClient] = await Promise.all([
       getApmEventClient(resources),
@@ -162,6 +167,7 @@ const unifiedTracesByIdRoute = createApmServerRoute({
 
     return {
       traceItems: unifiedItems.traceItems,
+      traceParentChildrenMap: getTraceParentChildrenMap(unifiedItems.traceItems, !!serviceName),
     };
   },
 });
@@ -178,7 +184,9 @@ const unifiedTracesByIdSummaryRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    traceItems?: FocusedTraceItems;
+    traceItems: TraceItem[];
+    traceParentChildrenMap: Record<string, TraceItem[]>;
+    highlightId?: string;
     summary: { services: number; traceEvents: number; errors: number };
   }> => {
     const [apmEventClient, logsClient] = await Promise.all([
@@ -208,8 +216,13 @@ const unifiedTracesByIdSummaryRoute = createApmServerRoute({
       ? buildFocusedTraceItems({ traceItems: unifiedItems.traceItems, docId: focusedDocId })
       : undefined;
 
+    const reparentedItems = focusedTraceItems && reparentDocumentToRoot(focusedTraceItems);
+    const traceItems = reparentedItems ? getFocusedTraceItems(reparentedItems) : [];
+
     return {
-      traceItems: focusedTraceItems,
+      traceItems,
+      traceParentChildrenMap: focusedTraceItems ? getTraceParentChildrenMap(traceItems, false) : {},
+      highlightId: reparentedItems?.focusedTraceDoc.id,
       summary: { ...traceSummaryCount, errors: unifiedItems.unifiedTraceErrors.totalErrors },
     };
   },

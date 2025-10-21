@@ -103,11 +103,14 @@ export async function getUnifiedTraceItems({
   end: number;
   config: APMConfig;
   serviceName?: string;
-}): Promise<{ traceItems: TraceItem[]; unifiedTraceErrors: UnifiedTraceErrors }> {
+}): Promise<{
+  traceItems: TraceItem[];
+  unifiedTraceErrors: UnifiedTraceErrors;
+}> {
   const maxTraceItems = maxTraceItemsFromUrlParam ?? config.ui.maxTraceItems;
   const size = Math.min(maxTraceItems, MAX_ITEMS_PER_PAGE);
 
-  const traceErrorsSearch = getUnifiedTraceErrors({
+  const traceErrorsPromise = getUnifiedTraceErrors({
     apmEventClient,
     logsClient,
     traceId,
@@ -117,7 +120,7 @@ export async function getUnifiedTraceItems({
 
   const serviceNameQuery = serviceName ? termQuery(SERVICE_NAME, serviceName) : [];
 
-  const traceItemSearch = apmEventClient.search(
+  const traceItemPromise = apmEventClient.search(
     'get_unified_trace_items',
     {
       apm: {
@@ -167,56 +170,90 @@ export async function getUnifiedTraceItems({
   );
 
   const [unifiedTraceErrors, unifiedTraces] = await Promise.all([
-    traceErrorsSearch,
-    traceItemSearch,
+    traceErrorsPromise,
+    traceItemPromise,
   ]);
 
   const errorsByDocId = getErrorsByDocId(unifiedTraceErrors);
 
+  const traceItems = unifiedTraces.hits.hits
+    .map((hit) => {
+      const event = hit.fields;
+      const apmDuration =
+        getFieldValue<number>(SPAN_DURATION, event) ||
+        getFieldValue<number>(TRANSACTION_DURATION, event);
+      const id =
+        getFieldValue<string>(SPAN_ID, event) || getFieldValue<string>(TRANSACTION_ID, event);
+
+      if (!id) {
+        return undefined;
+      }
+
+      const docErrors = errorsByDocId[id] || [];
+
+      return {
+        id,
+        timestampUs:
+          getFieldValue(TIMESTAMP_US, event) ?? toMicroseconds(getFieldValue(AT_TIMESTAMP, event)),
+        name: getFieldValue(SPAN_NAME, event) ?? getFieldValue(TRANSACTION_NAME, event),
+        traceId: getFieldValue(TRACE_ID, event),
+        duration: resolveDuration(apmDuration, getFieldValue(DURATION, event)),
+        ...(getFieldValue(EVENT_OUTCOME, event) || getFieldValue(STATUS_CODE, event)
+          ? {
+              status: {
+                fieldName: getFieldValue(EVENT_OUTCOME, event) ? EVENT_OUTCOME : STATUS_CODE,
+                value: getFieldValue(EVENT_OUTCOME, event) || getFieldValue(STATUS_CODE, event),
+              },
+            }
+          : {}),
+        errors: docErrors,
+        parentId: getFieldValue(PARENT_ID, event),
+        serviceName: getFieldValue(SERVICE_NAME, event),
+        type:
+          getFieldValue(SPAN_SUBTYPE, event) ||
+          getFieldValue(SPAN_TYPE, event) ||
+          getFieldValue(KIND, event),
+      } satisfies TraceItem as TraceItem;
+    })
+    .filter((item): item is TraceItem => !!item);
+
   return {
-    traceItems: unifiedTraces.hits.hits
-      .map((hit) => {
-        const event = hit.fields;
-        const apmDuration =
-          getFieldValue<number>(SPAN_DURATION, event) ||
-          getFieldValue<number>(TRANSACTION_DURATION, event);
-        const id =
-          getFieldValue<string>(SPAN_ID, event) || getFieldValue<string>(TRANSACTION_ID, event);
-
-        if (!id) {
-          return undefined;
-        }
-
-        const docErrors = errorsByDocId[id] || [];
-
-        return {
-          id,
-          timestampUs:
-            getFieldValue(TIMESTAMP_US, event) ??
-            toMicroseconds(getFieldValue(AT_TIMESTAMP, event)),
-          name: getFieldValue(SPAN_NAME, event) ?? getFieldValue(TRANSACTION_NAME, event),
-          traceId: getFieldValue(TRACE_ID, event),
-          duration: resolveDuration(apmDuration, getFieldValue(DURATION, event)),
-          ...(getFieldValue(EVENT_OUTCOME, event) || getFieldValue(STATUS_CODE, event)
-            ? {
-                status: {
-                  fieldName: getFieldValue(EVENT_OUTCOME, event) ? EVENT_OUTCOME : STATUS_CODE,
-                  value: getFieldValue(EVENT_OUTCOME, event) || getFieldValue(STATUS_CODE, event),
-                },
-              }
-            : {}),
-          errors: docErrors,
-          parentId: getFieldValue(PARENT_ID, event),
-          serviceName: getFieldValue(SERVICE_NAME, event),
-          type:
-            getFieldValue(SPAN_SUBTYPE, event) ||
-            getFieldValue(SPAN_TYPE, event) ||
-            getFieldValue(KIND, event),
-        } satisfies TraceItem;
-      })
-      .filter((item) => !!item) as TraceItem[],
+    traceItems,
     unifiedTraceErrors,
   };
+}
+
+export function getTraceParentChildrenMap<T extends TraceItem>(
+  traceItems: T[],
+  filteredTrace: boolean
+) {
+  if (traceItems.length === 0) {
+    return {};
+  }
+
+  const traceMap = traceItems.reduce<Record<string, TraceItem[]>>((acc, item) => {
+    if (item.parentId) {
+      (acc[item.parentId] ??= []).push(item);
+    } else {
+      (acc.root ??= [])[0] = item;
+    }
+    return acc;
+  }, {});
+
+  // If filtered trace, elect the earliest arriving span as the root if there is no root found already
+  if (filteredTrace && !traceMap.root) {
+    const root = traceItems
+      .slice(1)
+      .reduce(
+        (acc, span) =>
+          acc.timestampUs <= span.timestampUs || acc.id === span.parentId ? acc : span,
+        traceItems[0]
+      );
+
+    traceMap.root = [root];
+  }
+
+  return traceMap;
 }
 
 /**
