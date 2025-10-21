@@ -77,6 +77,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         customRetentionPeriod: undefined,
       });
       expect(resp.status).to.be(200);
+      const requestBody = JSON.parse(resp.body.meta.request.params.body);
+      expect(requestBody).to.have.property('failure_store');
+      expect(requestBody.failure_store).to.have.property('enabled', true);
+      expect(requestBody.failure_store).to.have.property('lifecycle');
+      expect(requestBody.failure_store.lifecycle).not.to.have.property('data_retention');
     });
 
     it('should disable failure store successfully', async () => {
@@ -86,6 +91,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         customRetentionPeriod: undefined,
       });
       expect(resp.status).to.be(200);
+      const requestBody = JSON.parse(resp.body.meta.request.params.body);
+      expect(requestBody).to.have.property('failure_store');
+      expect(requestBody.failure_store).to.have.property('enabled', false);
+      expect(requestBody.failure_store).to.have.property('lifecycle');
+      expect(requestBody.failure_store.lifecycle).not.to.have.property('data_retention');
     });
 
     it('should enable failure store with custom retention period', async () => {
@@ -95,6 +105,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         customRetentionPeriod: '30d',
       });
       expect(resp.status).to.be(200);
+      const requestBody = JSON.parse(resp.body.meta.request.params.body);
+      expect(requestBody).to.have.property('failure_store');
+      expect(requestBody.failure_store).to.have.property('enabled', true);
+      expect(requestBody.failure_store).to.have.property('lifecycle');
+      expect(requestBody.failure_store.lifecycle).to.have.property('data_retention', '30d');
+      expect(requestBody.failure_store.lifecycle).to.have.property('enabled', true);
     });
   });
 }
