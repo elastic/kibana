@@ -30,6 +30,7 @@ import {
 } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
+import { createMockConnectorType } from '@kbn/actions-plugin/server/application/connector/mocks';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const queryClient = new QueryClient({
@@ -445,16 +446,12 @@ describe('rule_details', () => {
         });
 
         const actionTypes: ActionType[] = [
-          {
+          createMockConnectorType({
             id: '.server-log',
             name: 'Server log',
-            enabled: true,
-            enabledInConfig: true,
-            enabledInLicense: true,
             minimumLicenseRequired: 'basic',
             supportedFeatureIds: ['alerting'],
-            isSystemActionType: false,
-          },
+          }),
         ];
 
         const wrapper = mountWithIntl(
@@ -491,26 +488,18 @@ describe('rule_details', () => {
           ],
         });
         const actionTypes: ActionType[] = [
-          {
+          createMockConnectorType({
             id: '.server-log',
             name: 'Server log',
-            enabled: true,
-            enabledInConfig: true,
-            enabledInLicense: true,
             minimumLicenseRequired: 'basic',
             supportedFeatureIds: ['alerting'],
-            isSystemActionType: false,
-          },
-          {
+          }),
+          createMockConnectorType({
             id: '.email',
             name: 'Send email',
-            enabled: true,
-            enabledInConfig: true,
-            enabledInLicense: true,
             minimumLicenseRequired: 'basic',
             supportedFeatureIds: ['alerting'],
-            isSystemActionType: false,
-          },
+          }),
         ];
 
         const details = mountWithIntl(
@@ -574,16 +563,12 @@ describe('rule_details', () => {
 
   describe('edit button', () => {
     const actionTypes: ActionType[] = [
-      {
+      createMockConnectorType({
         id: '.server-log',
         name: 'Server log',
-        enabled: true,
-        enabledInConfig: true,
-        enabledInLicense: true,
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
-        isSystemActionType: false,
-      },
+      }),
     ];
     ruleTypeRegistry.has.mockReturnValue(true);
     const ruleTypeR: RuleTypeModel = {
@@ -714,6 +699,7 @@ describe('rule_details', () => {
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
         isSystemActionType: false,
+        isDeprecated: false,
       },
     ];
     ruleTypeRegistry.has.mockReturnValue(true);

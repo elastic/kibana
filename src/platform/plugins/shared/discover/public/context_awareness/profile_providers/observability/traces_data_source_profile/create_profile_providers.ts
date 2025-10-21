@@ -20,8 +20,8 @@ export const createObservabilityTracesDataSourceProfileProviders = (
   const tracesDataSourceProfileProvider = createTracesDataSourceProfileProvider(providerServices);
 
   return [
-    createTracesAPMDataSourceProfileProvider(tracesDataSourceProfileProvider, providerServices),
-    createTracesOtelDataSourceProfileProvider(tracesDataSourceProfileProvider, providerServices),
+    createTracesAPMDataSourceProfileProvider(tracesDataSourceProfileProvider),
+    createTracesOtelDataSourceProfileProvider(tracesDataSourceProfileProvider),
     tracesDataSourceProfileProvider,
   ];
 };
