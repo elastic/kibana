@@ -62,14 +62,18 @@ export function shouldSuggestComma(context: CommaContext): boolean {
   return handler(context, isExpressionHeavyFunction);
 }
 
-function handleAfterComplete(context: CommaContext): boolean {
-  const { typeMatches, hasMoreParams } = context;
+function handleAfterComplete(context: CommaContext, isExpressionHeavy: boolean): boolean {
+  const { typeMatches, hasMoreParams, isVariadic } = context;
 
   if (!hasMoreParams) {
     return false;
   }
 
-  if (!typeMatches) {
+  if (isExpressionHeavy && !typeMatches) {
+    return false;
+  }
+
+  if (!typeMatches && !isVariadic) {
     return false;
   }
 

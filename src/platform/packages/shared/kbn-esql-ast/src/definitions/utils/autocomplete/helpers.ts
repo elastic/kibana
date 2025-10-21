@@ -451,10 +451,18 @@ export function getValidSignaturesAndTypesToSuggestNext(
     argIndex -= 1;
   }
 
+  // For signature filtering: check ALL arguments to eliminate incompatible signatures
+  // BUT only for functions with multiple signatures (overloaded functions like BUCKET)
+  // For single-signature or variadic functions, use the original behavior
+  const isVariadic = fnDefinition.signatures.some((sig) => sig.minParams != null);
+  const hasMultipleSignatures = fnDefinition.signatures.length > 1;
+  const argsToCheckForFiltering =
+    isVariadic || shouldGetNextArgument || !hasMultipleSignatures ? argIndex : enrichedArgs.length;
+
   const validSignatures = getValidFunctionSignaturesForPreviousArgs(
     fnDefinition,
     enrichedArgs,
-    argIndex
+    argsToCheckForFiltering
   );
   // Retrieve unique of types that are compatiable for the current arg
   const compatibleParamDefs = getCompatibleParamDefs(fnDefinition, enrichedArgs, argIndex);

@@ -287,6 +287,32 @@ describe('functions arg suggestions', () => {
       expect(labels).toEqual(expect.arrayContaining(arithmetic));
     });
 
+    it('ROUND second param (decimals) is constantOnly: should NOT suggest fields/functions', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM index | EVAL result = ROUND(doubleField, /)');
+      const labels = suggestions.map(({ label }) => label);
+
+      expect(labels).not.toContain('doubleField');
+      expect(labels).not.toContain('integerField');
+      expect(labels).not.toContain('longField');
+      expect(labels).not.toContain('ABS');
+      expect(labels).not.toContain('CEIL');
+      expect(labels).not.toContain('FLOOR');
+    });
+
+    it('ROUND_TO second param (points) is constantOnly: should NOT suggest fields/functions', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM index | EVAL result = ROUND_TO(doubleField, /)');
+      const labels = suggestions.map(({ label }) => label);
+
+      expect(labels).not.toContain('doubleField');
+      expect(labels).not.toContain('integerField');
+      expect(labels).not.toContain('longField');
+      expect(labels).not.toContain('ABS');
+      expect(labels).not.toContain('CEIL');
+      expect(labels).not.toContain('FLOOR');
+    });
+
     it('nested functions: excludes parent function names from suggestions to prevent recursion', async () => {
       const { suggest } = await setup();
       const suggestions = await suggest('FROM index | EVAL result = CEIL(FLOOR(ABS(/)');
@@ -1096,6 +1122,12 @@ describe('functions arg suggestions', () => {
           expectContains: ['AND', 'OR'],
         },
         {
+          name: 'after arithmetic expression: comma and arithmetic operators',
+          query: 'FROM index | EVAL result = COALESCE(integerField + integerField /)',
+          expectComma: true,
+          expectContains: ['+', '-', '*', '/'],
+        },
+        {
           name: 'second param string: no comma, string functions',
           query: 'FROM index | EVAL result = COALESCE(textField, /)',
           expectComma: false,
@@ -1170,6 +1202,29 @@ describe('functions arg suggestions', () => {
           'dateField',
         ])
       );
+    });
+
+    it('CONCAT variadic: after second param should suggest comma', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest(
+        'FROM index | EVAL result = CONCAT(textField, keywordField /)'
+      );
+      const labels = suggestions.map(({ label }) => label);
+
+      // Should suggest comma for continuing with more params (variadic function)
+      expect(labels).toContain(',');
+    });
+
+    it('CONCAT variadic: after comma should suggest fields for third param', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest(
+        'FROM index | EVAL result = CONCAT(textField, keywordField, /)'
+      );
+      const labels = suggestions.map(({ label }) => label);
+
+      // Should suggest fields for third parameter (variadic accepts more params)
+      expect(labels).toContain('textField');
+      expect(labels).toContain('keywordField');
     });
   });
 

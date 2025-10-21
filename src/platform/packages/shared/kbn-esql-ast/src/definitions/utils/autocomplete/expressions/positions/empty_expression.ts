@@ -151,27 +151,33 @@ function buildLiteralSuggestions(
   config: ReturnType<typeof getParamSuggestionConfig>
 ): ISuggestionItem[] {
   const { paramDefinitions, functionDefinition } = functionParamContext;
-  const { location, context, command } = ctx;
+  const { location, command } = ctx;
 
   const hasMoreMandatoryArgs = Boolean(functionParamContext.hasMoreMandatoryArgs);
   const suggestions: ISuggestionItem[] = [];
+  const hasConstantOnlyParams = paramDefinitions.some(({ constantOnly }) => constantOnly);
 
   // Constant-only literals (true, false, null, string/number literals)
-  suggestions.push(
-    ...buildConstantOnlyLiteralSuggestions(
-      paramDefinitions,
-      context,
-      config.shouldAddComma,
-      hasMoreMandatoryArgs
-    )
+  const constantOnlySuggestions = buildConstantOnlyLiteralSuggestions(
+    paramDefinitions,
+    ctx.context,
+    config.shouldAddComma,
+    hasMoreMandatoryArgs
   );
+  suggestions.push(...constantOnlySuggestions);
 
-  // Date literals (now(), 1 hour, 2 days) except for FTS functions and BUCKET in STATS
+  // Date literals (now(), 1 hour, 2 days, ?_tstart, ?_tend) - only add if not already added by constantOnly path
+  // Skip for:
+  // - FTS functions
+  // - BUCKET first parameter (field) in STATS
+  // - When constantOnly params exist (already added via getCompatibleLiterals)
   const isFtsFunction = FULL_TEXT_SEARCH_FUNCTIONS.includes(functionDefinition!.name);
-  const isBucketInStatsBy =
-    matchesSpecialFunction(functionDefinition!.name, 'bucket') && command.name === 'stats';
+  const isBucketFirstParam =
+    matchesSpecialFunction(functionDefinition!.name, 'bucket') &&
+    command.name === 'stats' &&
+    (functionParamContext.currentParameterIndex ?? 0) === 0;
 
-  if (!isFtsFunction && !isBucketInStatsBy) {
+  if (!isFtsFunction && !isBucketFirstParam && !hasConstantOnlyParams) {
     const dateItems = getLiteralsSuggestions(
       paramDefinitions.map(({ type }) => type),
       location,
@@ -203,12 +209,20 @@ async function buildFieldAndFunctionSuggestions(
   // Suggest fields when:
   // - there is at least one non-constant parameter, OR
   // - param definitions are empty (variadic/unknown position, e.g., CONCAT third+ arg)
-  const hasNonConstantParam = paramDefinitions.some(({ constantOnly }) => !constantOnly);
-  const isVariadicOrUnknownPosition = paramDefinitions.length === 0;
-  if (hasNonConstantParam || isVariadicOrUnknownPosition) {
+  // const hasNonConstantParam = paramDefinitions.some(({ constantOnly }) => !constantOnly);
+  // const isVariadicOrUnknownPosition = paramDefinitions.length === 0;
+  // if (hasNonConstantParam || isVariadicOrUnknownPosition) {
+
+  const hasConstantOnlyParam = paramDefinitions.some(({ constantOnly }) => constantOnly);
+  const hasFieldsOnlyParam = paramDefinitions.some(({ fieldsOnly }) => fieldsOnly);
+
+  // constantOnly params require literal values, not fields
+  // (variadic functions work correctly: empty paramDefinitions → hasConstantOnlyParam = false)
+  if (!hasConstantOnlyParam) {
     const canBeMultiValue = paramDefinitions.some(
       (t) => t && (t.supportsMultiValues === true || t.name === 'values')
     );
+
     await builder.addFields({
       types: config.acceptedTypes,
       ignoredColumns,
@@ -218,9 +232,8 @@ async function buildFieldAndFunctionSuggestions(
     });
   }
 
-  // Always allow functions unless explicitly fieldsOnly, even for constant-only params.
-  // Functions can produce constant values (e.g., ABS(10)), which are valid for constant-only arguments.
-  if (paramDefinitions.every(({ fieldsOnly }) => !fieldsOnly)) {
+  // constantOnly params require literal values, not function results
+  if (!hasFieldsOnlyParam && !hasConstantOnlyParam) {
     builder.addFunctions({
       types: config.acceptedTypes,
       ignoredFunctions: functionParamContext.functionsToIgnore || [],

@@ -142,9 +142,7 @@ export class SignatureAnalyzer {
    * Examples: CONCAT, COALESCE, CASE
    */
   public get isVariadic(): boolean {
-    return this.signatures.some(
-      (sig) => sig.minParams != null && sig.minParams < sig.params.length
-    );
+    return this.signatures.some((sig) => sig.minParams != null);
   }
 
   /**

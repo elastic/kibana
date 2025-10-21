@@ -250,34 +250,8 @@ describe('EVAL Autocomplete', () => {
     (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
       expectedDoubleIntegerFields.map((name) => ({ label: name, text: name }))
     );
-    await evalExpectSuggestions(
-      'from a | eval a=round(doubleField, ',
-      [
-        ...expectedDoubleIntegerFields,
-        ...getFunctionSignaturesByReturnType(
-          Location.EVAL,
-          ['integer', 'long'],
-          { scalar: true },
-          undefined,
-          ['round']
-        ),
-      ],
-      mockCallbacks
-    );
-    await evalExpectSuggestions(
-      'from a | eval round(doubleField, ',
-      [
-        ...expectedDoubleIntegerFields,
-        ...getFunctionSignaturesByReturnType(
-          Location.EVAL,
-          ['integer', 'long'],
-          { scalar: true },
-          undefined,
-          ['round']
-        ),
-      ],
-      mockCallbacks
-    );
+    await evalExpectSuggestions('from a | eval a=round(doubleField, ', [], mockCallbacks);
+    await evalExpectSuggestions('from a | eval round(doubleField, ', [], mockCallbacks);
     const expectedAny = getFieldNamesByType('any');
     (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
       expectedAny.map((name) => ({ label: name, text: name }))
@@ -506,32 +480,47 @@ describe('EVAL Autocomplete', () => {
 
     test('suggests operators after initial column based on type', async () => {
       // case( field ) suggests all appropriate operators for that field type
+      // Note: CASE is expression-heavy, comma is not automatically suggested after fields
       await evalExpectSuggestions('from a | eval case( textField ', [
-        ...getFunctionSignaturesByReturnType(
-          Location.EVAL,
-          'any',
-          { operators: true, skipAssign: true, agg: false, scalar: false },
-          ['text']
-        ),
+        'IN $0',
+        'IS NOT NULL',
+        'IS NULL',
+        'LIKE $0',
+        'NOT IN $0',
+        'NOT LIKE $0',
+        'NOT RLIKE $0',
+        'RLIKE $0',
       ]);
 
       await evalExpectSuggestions('from a | eval case( doubleField ', [
-        ...getFunctionSignaturesByReturnType(
-          Location.EVAL,
-          'any',
-          { operators: true, skipAssign: true, agg: false, scalar: false },
-          ['double']
-        ),
+        '!= $0',
+        '% $0',
+        '* $0',
+        '+ $0',
+        '- $0',
+        '/ $0',
+        '< $0',
+        '<= $0',
+        '== $0',
+        '> $0',
+        '>= $0',
+        'IN $0',
+        'IS NOT NULL',
+        'IS NULL',
+        'NOT IN $0',
       ]);
 
       await evalExpectSuggestions('from a | eval case( booleanField ', [
-        ...getFunctionSignaturesByReturnType(
-          Location.EVAL,
-          'any',
-          { operators: true, skipAssign: true, agg: false, scalar: false },
-          ['boolean']
-        ),
+        '!= $0',
         ',',
+        '== $0',
+        'AND $0',
+        'IN $0',
+        'IS NOT NULL',
+        'IS NULL',
+        'NOT',
+        'NOT IN $0',
+        'OR $0',
       ]);
     });
 
