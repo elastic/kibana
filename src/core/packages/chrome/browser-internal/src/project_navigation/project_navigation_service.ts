@@ -500,6 +500,10 @@ export class ProjectNavigationService {
       resourceData?: { deployment?: { name?: string } };
     }>('/internal/cloud/solution', { version: '1' });
 
+    if (!cloudData) {
+      return of(undefined);
+    }
+
     return from(cloudData).pipe(
       map((data) => data?.resourceData?.deployment?.name),
       catchError(() => of(undefined)),
