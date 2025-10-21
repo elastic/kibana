@@ -11,6 +11,10 @@ import { i18n } from '@kbn/i18n';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import type { EuiTableSortingType, EuiSelectableOption } from '@elastic/eui';
 import {
+  getRuleDetailsRoute,
+  triggersActionsRoute,
+} from '@kbn/rule-data-utils/src/routes/stack_rule_paths';
+import {
   EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
@@ -406,13 +410,15 @@ export const RulesListTable = (props: RulesListTableProps) => {
         render: (name: string, rule: RuleTableItem) => {
           const ruleType = ruleTypesState.data.get(rule.ruleTypeId);
           const checkEnabledResult = checkRuleTypeEnabled(ruleType);
+          const pathToRuleDetails = `${triggersActionsRoute}${getRuleDetailsRoute(rule.id)}`;
+
           const link = (
             <>
               <EuiFlexGroup direction="column" gutterSize="xs">
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup gutterSize="xs">
                     <EuiFlexItem grow={false}>
-                      <EuiLink title={name} onClick={() => onRuleClick(rule)}>
+                      <EuiLink title={name} href={pathToRuleDetails}>
                         {name}
                       </EuiLink>
                     </EuiFlexItem>
@@ -866,7 +872,6 @@ export const RulesListTable = (props: RulesListTableProps) => {
     isLoadingMap,
     isRuleTypeEditableInContext,
     onRuleChanged,
-    onRuleClick,
     onRuleDeleteClick,
     onRuleEditClick,
     onSnoozeRule,
