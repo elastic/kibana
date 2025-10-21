@@ -19,7 +19,12 @@ import { getEditPath } from '../../common/constants';
 export interface ShareableConfiguration
   extends Pick<
     LensAppState,
-    'activeDatasourceId' | 'datasourceStates' | 'visualization' | 'filters' | 'query'
+    | 'activeDatasourceId'
+    | 'datasourceStates'
+    | 'visualization'
+    | 'filters'
+    | 'query'
+    | 'projectRouting'
   > {
   datasourceMap: DatasourceMap;
   visualizationMap: VisualizationMap;
@@ -65,6 +70,7 @@ export function getLocatorParams(
     visualization,
     adHocDataViews,
     currentDoc,
+    projectRouting,
   }: ShareableConfiguration,
   isDirty: boolean
 ) {
@@ -93,6 +99,7 @@ export function getLocatorParams(
   const snapshotParams: LensAppLocatorParams = {
     filters,
     query,
+    projectRouting,
     resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
     visualization: serializableVisualization,
     datasourceStates: serializableDatasourceStates,

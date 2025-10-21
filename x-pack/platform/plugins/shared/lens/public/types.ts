@@ -14,7 +14,7 @@ import type { ColorMapping, PaletteOutput } from '@kbn/coloring';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { MutableRefObject, ReactElement } from 'react';
-import type { Query, AggregateQuery, Filter, TimeRange } from '@kbn/es-query';
+import type { Query, AggregateQuery, Filter, TimeRange, ProjectRouting } from '@kbn/es-query';
 import type {
   ExpressionAstExpression,
   IInterpreterRenderHandlers,
@@ -965,6 +965,7 @@ export type DatasourceLayers = Partial<Record<string, DatasourcePublicAPI>>;
 export interface FramePublicAPI {
   query: Query | AggregateQuery;
   filters: Filter[];
+  projectRouting?: ProjectRouting;
   datasourceLayers: DatasourceLayers;
   dateRange: DateRange;
   absDateRange: DateRange;

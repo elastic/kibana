@@ -12,6 +12,7 @@ import type { SerializableRecord, Writable } from '@kbn/utility-types';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import type { RefreshInterval } from '@kbn/data-plugin/public';
 import type { ControlsGroupState } from '@kbn/controls-schemas';
+import type { ProjectRouting } from '@kbn/es-query';
 
 import type { DashboardAttributes, DashboardOptions } from '../server/content_management';
 
@@ -37,6 +38,7 @@ export type DashboardSettings = Writable<DashboardOptions> & {
 export interface DashboardState extends DashboardSettings {
   query?: DashboardAttributes['query'];
   filters?: DashboardAttributes['filters'];
+  projectRouting?: ProjectRouting;
   timeRange?: DashboardAttributes['timeRange'];
   refreshInterval?: RefreshInterval;
   panels: DashboardAttributes['panels'];

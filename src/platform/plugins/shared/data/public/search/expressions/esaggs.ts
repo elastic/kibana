@@ -72,6 +72,7 @@ export function getFunctionDefinition({
             abortSignal,
             aggs: aggConfigs,
             filters: args.ignoreGlobalFilters ? undefined : get(input, 'filters', undefined),
+            projectRouting: get(input, 'projectRouting', undefined),
             indexPattern,
             inspectorAdapters,
             query: args.ignoreGlobalFilters ? undefined : (get(input, 'query', undefined) as any),

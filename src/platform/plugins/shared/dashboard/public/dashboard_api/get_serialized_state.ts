@@ -52,6 +52,7 @@ export const getSerializedState = ({
     query,
     title,
     filters,
+    projectRouting,
     timeRestore,
     description,
 
@@ -103,6 +104,7 @@ export const getSerializedState = ({
     controlGroupInput: controlGroupInput as DashboardAttributes['controlGroupInput'],
     description: description ?? '',
     ...(filters ? { filters } : {}),
+    ...(projectRouting ? { projectRouting } : {}),
     ...(query ? { query } : {}),
     refreshInterval,
     timeRange,

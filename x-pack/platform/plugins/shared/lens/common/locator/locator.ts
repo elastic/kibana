@@ -10,7 +10,7 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import { LENS_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
-import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import type { AggregateQuery, Filter, ProjectRouting, Query } from '@kbn/es-query';
 import type { Reference } from '@kbn/content-management-utils';
 import type { DataViewSpec, SavedQuery } from '@kbn/data-plugin/common';
 import type { DateRange } from '../types';
@@ -27,6 +27,9 @@ interface LensShareableState {
    * Optionally set a query.
    */
   query?: Query | AggregateQuery;
+
+  // TODO: should this be shareable?
+  projectRouting?: ProjectRouting;
 
   /**
    * Optionally set the date range in the date picker.
@@ -89,6 +92,8 @@ export interface LensAppLocatorParams extends SerializableRecord {
    * Optionally set a query.
    */
   query?: Query | AggregateQuery;
+
+  projectRouting?: ProjectRouting;
 
   /**
    * Optionally set the date range in the date picker.
@@ -179,13 +184,17 @@ export class LensAppLocatorDefinition implements LocatorDefinition<LensAppLocato
   public readonly id = LENS_APP_LOCATOR;
 
   public readonly getLocation = async (params: LensAppLocatorParams) => {
-    const { filters, query, savedObjectId, resolvedDateRange, searchSessionId } = params;
+    const { filters, query, savedObjectId, resolvedDateRange, searchSessionId, projectRouting } =
+      params;
     const appState = getStateFromParams(params);
     const queryState: GlobalQueryStateFromUrl = {};
     const { isFilterPinned } = await import('@kbn/es-query');
 
     if (query) {
       appState.query = query;
+    }
+    if (projectRouting) {
+      appState.projectRouting = projectRouting;
     }
     if (resolvedDateRange) {
       appState.resolvedDateRange = resolvedDateRange;
