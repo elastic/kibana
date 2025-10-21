@@ -111,7 +111,7 @@ export const handleRequest = ({
 
     console.log('esaggs', projectRouting)
 
-    requestSearchSource.setField('projectRouting', projectRouting);
+    requestSearchSource.setField('projectRouting', projectRouting ? projectRouting : { type: 'all' });
 
 
     return { allTimeFields, forceNow, requestSearchSource };

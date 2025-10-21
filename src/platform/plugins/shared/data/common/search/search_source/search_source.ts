@@ -685,21 +685,22 @@ export class SearchSource {
         // This allows testing the projectRouting field without breaking on non-serverless ES
 
           console.log('SearchSource: Adding dummy filter for projectRouting:', val);
-        if (val) {
+
           // Add a dummy filter based on the routing type to validate the field works
           // When project_routing is supported, replace this with:
           // const projectRoutingValue = this.serializeProjectRouting(val);
           // return addToBody('project_routing', projectRoutingValue);
 
 
-          const dummyFilter = this.createProjectRoutingDummyFilter(val);
+          const dummyFilter = val ? this.createProjectRoutingDummyFilter(val) :  this.createProjectRoutingDummyFilter({
+            type: 'all',
+          }) ;
           if (dummyFilter) {
             // Add to filters array in the root
             const existingFilters =
               typeof data.filters === 'function' ? data.filters() : data.filters || [];
             addToRoot('filters', existingFilters.concat(dummyFilter));
           }
-        }
         return;
       case 'aggs':
         if ((val as unknown) instanceof AggConfigs) {
