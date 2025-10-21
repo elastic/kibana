@@ -18,9 +18,10 @@ export type StartServerOptions = ReturnType<typeof parseServerFlags>;
 
 export const SERVER_FLAG_OPTIONS: FlagOptions = {
   string: ['serverless', 'esFrom', 'kibana-install-dir'],
-  boolean: ['stateful', 'logToFile'],
+  boolean: ['stateful', 'profiling', 'logToFile'],
   help: `
     --stateful           Start Elasticsearch and Kibana with default ESS configuration
+    --profiling          Start Elasticsearch and Kibana with profiling configuration
     --serverless         Start Elasticsearch and Kibana with serverless project configuration: es | oblt | oblt-logs-essentials | security
     --esFrom             Build Elasticsearch from source or run snapshot or serverless. Default: $TEST_ES_FROM or "snapshot"
     --kibana-install-dir Run Kibana from existing install directory instead of from source
@@ -36,14 +37,18 @@ export function parseServerFlags(flags: FlagsReader) {
     'security',
   ]);
   const isStateful = flags.boolean('stateful');
+  const isProfiling = flags.boolean('profiling');
 
-  if (!(serverlessType || isStateful) || (serverlessType && isStateful)) {
-    throw createFlagError(`Expected exactly one of --serverless=<type> or --stateful flag`);
+  const flagsCount = [serverlessType, isStateful, isProfiling].filter(Boolean).length;
+  if (flagsCount !== 1) {
+    throw createFlagError(`Expected exactly one of --serverless=<type>, --stateful, or --profiling flag`);
   }
 
   const mode: CliSupportedServerModes = serverlessType
     ? `serverless=${serverlessType}`
-    : 'stateful';
+    : isStateful
+    ? 'stateful'
+    : 'profiling';
 
   const esFrom = flags.enum('esFrom', ['source', 'snapshot', 'serverless']);
   const installDir = flags.string('kibana-install-dir');

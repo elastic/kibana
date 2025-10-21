@@ -192,6 +192,7 @@ export function HostsTable({ data = [], hasDistinctProbabilisticValues }: Props)
 
   return (
     <EuiInMemoryTable
+      data-test-subj="profilingStorageExplorerHostsTable"
       items={data}
       columns={columns}
       sorting={sorting}
