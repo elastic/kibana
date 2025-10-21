@@ -60,6 +60,12 @@ export function createEvaluateObservabilityAIAssistantDataset({
       examples,
     } satisfies EvaluationDataset;
 
+    /**
+     * We're still defaulting our reporting to criteria only. Correctness and groundedness don't work reliably with our
+     * current LLM judge of choice (Gemini 2.5 Pro), causing timeouts and occasional malformed tool calls.
+     */
+    const useQualitativeEvaluators = process.env.USE_QUALITATIVE_EVALUATORS === 'true';
+
     await phoenixClient.runExperiment(
       {
         dataset,
@@ -83,28 +89,39 @@ export function createEvaluateObservabilityAIAssistantDataset({
             metadata,
           };
 
-          // Running correctness and groundedness evaluators as part of the task since their respective quantitative evaluators need their output
-          const [correctnessResult, groundednessResult] = await Promise.all([
-            evaluators.correctnessAnalysis().evaluate(qualitativeAnalysisInput),
-            evaluators.groundednessAnalysis().evaluate(qualitativeAnalysisInput),
-          ]);
-          const correctnessAnalysis = correctnessResult.metadata ?? undefined;
-          const groundednessAnalysis = groundednessResult.metadata ?? undefined;
+          if (useQualitativeEvaluators) {
+            // Running correctness and groundedness evaluators as part of the task since their respective quantitative evaluators need their output
+            const [correctnessResult, groundednessResult] = await Promise.all([
+              evaluators.correctnessAnalysis().evaluate(qualitativeAnalysisInput),
+              evaluators.groundednessAnalysis().evaluate(qualitativeAnalysisInput),
+            ]);
+            const correctnessAnalysis = correctnessResult.metadata ?? undefined;
+            const groundednessAnalysis = groundednessResult.metadata ?? undefined;
 
-          return {
-            errors: response.errors,
-            messages: response.messages,
-            correctnessAnalysis,
-            groundednessAnalysis,
-          };
+            return {
+              errors: response.errors,
+              messages: response.messages,
+              correctnessAnalysis,
+              groundednessAnalysis,
+            };
+          } else {
+            return {
+              errors: response.errors,
+              messages: response.messages,
+            };
+          }
         },
       },
       [
         createCriteriaEvaluator({
           evaluators,
         }),
-        createQuantitativeGroundednessEvaluator(),
-        ...createQuantitativeCorrectnessEvaluators(),
+        ...(useQualitativeEvaluators
+          ? [
+              createQuantitativeGroundednessEvaluator(),
+              ...createQuantitativeCorrectnessEvaluators(),
+            ]
+          : []),
       ]
     );
   };

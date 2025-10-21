@@ -23,20 +23,40 @@ node scripts/scout.js start-server --stateful
 Then run the evaluations:
 
 ```bash
-# Run all Observability AI Assistant evaluations for all available connectors and specify LLM judge (we evaluate all LLMs with  Gemini 2.5 Pro judge)
-EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts
+# Run all Observability AI Assistant evaluations for all available connectors and specify LLM judge (we evaluate all LLMs with Gemini 2.5 Pro judge)
+EVALUATION_CONNECTOR_ID=llm-judge-connector-id \
+  node scripts/playwright test \
+  --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts
 
 # Evaluate specific scenarios
-EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts evals/alerts/alerts.spec.ts
+EVALUATION_CONNECTOR_ID=llm-judge-connector-id \
+  node scripts/playwright test \
+  --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts \
+  evals/alerts/alerts.spec.ts
 
 # Run with specific connector (specify --project)
-EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts --project="my-connector"
+EVALUATION_CONNECTOR_ID=llm-judge-connector-id \
+  node scripts/playwright test \
+  --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts \
+  --project="my-connector"
 
 # Repeatedly evaluate every example by specifying the number of repetitions
-EVALUATION_REPETITIONS=3 EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts
+EVALUATION_REPETITIONS=3 \
+EVALUATION_CONNECTOR_ID=llm-judge-connector-id \
+  node scripts/playwright test \
+  --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts
+
+# Enable additional evaluators for Correctness (Factuality, Relevance, Sequence Accuracy) and Groundedness (Hallucination)
+USE_QUALITATIVE_EVALUATORS=true \
+EVALUATION_CONNECTOR_ID=llm-judge-connector-id \
+  node scripts/playwright test \
+  --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts
 
 # Enable scenario-grouped reporting (aggregates datasets by scenario prefix)
-SCENARIO_REPORTING=true EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts
+SCENARIO_REPORTING=true \
+EVALUATION_CONNECTOR_ID=llm-judge-connector-id \
+  node scripts/playwright test \
+  --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts
 ```
 
 ### Evaluation Reporting
