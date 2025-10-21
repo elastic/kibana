@@ -298,7 +298,7 @@ export const processToolResult = ({
     );
   }
 
-  if (isKnowledgeBaseRetrievalResult(step, result, logger)) {
+  if (isKnowledgeBaseRetrievalResult(step, result)) {
     return processKnowledgeBaseRetrievalResults(
       result as {
         data: {

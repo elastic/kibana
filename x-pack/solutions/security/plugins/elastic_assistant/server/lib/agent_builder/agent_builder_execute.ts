@@ -10,6 +10,7 @@ import type { AgentBuilderExecuteParams } from './types';
 import { generateConversationTitle, convertMessagesToConversationRounds } from './helpers';
 import { executeStreaming, executeNonStreaming } from './execution';
 import { getIsKnowledgeBaseAvailable } from '../../routes/helpers';
+import { getLlmType } from '../../routes/utils';
 
 export async function agentBuilderExecute({
   messages,
@@ -41,9 +42,28 @@ export async function agentBuilderExecute({
 }: AgentBuilderExecuteParams) {
   const startTime = Date.now();
 
+  // Check if knowledge base is available for telemetry (needed for title generation)
+  const assistantContext = context.elasticAssistant;
+  const kbDataClient = await assistantContext.getAIAssistantKnowledgeBaseDataClient();
+  const isEnabledKnowledgeBase = await getIsKnowledgeBaseAvailable(kbDataClient);
+
   // Start title generation immediately (non-blocking)
   if (conversationId && messages.length > 0) {
-    generateConversationTitle(conversationId, messages, request, connectorId, context, logger);
+    generateConversationTitle({
+      conversationId,
+      messages,
+      request,
+      connectorId,
+      context,
+      logger,
+      actionsClient,
+      savedObjectsClient,
+      telemetry,
+      llmType: getLlmType(actionTypeId),
+      responseLanguage,
+      isStream,
+      isEnabledKnowledgeBase,
+    });
   }
 
   // Get the last message as the next input
@@ -65,15 +85,11 @@ export async function agentBuilderExecute({
 
   try {
     // Convert existing messages to conversation rounds for onechat
-    const conversationRounds = convertMessagesToConversationRounds(messages);
+    // De-anonymize conversation history using replacements if provided
+    const conversationRounds = convertMessagesToConversationRounds(messages, replacements);
 
     // Get the onechat services
-    const assistantContext = context.elasticAssistant;
     const onechatServices = assistantContext.getOnechatServices();
-
-    // Check if knowledge base is available for telemetry
-    const kbDataClient = await assistantContext.getAIAssistantKnowledgeBaseDataClient();
-    const isEnabledKnowledgeBase = await getIsKnowledgeBaseAvailable(kbDataClient);
 
     // Execute based on streaming preference
     if (isStream) {

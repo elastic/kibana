@@ -8,21 +8,50 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
 import type { ConversationRound } from '@kbn/onechat-common';
-import type { Message } from '@kbn/elastic-assistant-common';
+import type { Message, Replacements } from '@kbn/elastic-assistant-common';
+import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
 import type { AwaitedProperties } from '@kbn/utility-types';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { ElasticAssistantRequestHandlerContext } from '../../types';
+import { INVOKE_ASSISTANT_ERROR_EVENT } from '../telemetry/event_based_telemetry';
+import { getPrompt, promptDictionary } from '../prompt';
+import { promptGroupId } from '../prompt/local_prompt_object';
+import { getActionTypeId } from '../../routes/utils';
 
 // Helper function to generate conversation title
-export const generateConversationTitle = async (
-  conversationId: string,
-  messages: Array<Pick<Message, 'content' | 'role'>>,
-  request: KibanaRequest,
-  connectorId: string,
+export const generateConversationTitle = async ({
+  actionsClient,
+  connectorId,
+  context,
+  conversationId,
+  isEnabledKnowledgeBase,
+  isStream,
+  llmType,
+  logger,
+  messages,
+  request,
+  responseLanguage,
+  savedObjectsClient,
+  telemetry,
+}: {
+  connectorId: string;
   context: AwaitedProperties<
     Pick<ElasticAssistantRequestHandlerContext, 'elasticAssistant' | 'licensing' | 'core'>
-  >,
-  logger: Logger
-) => {
+  >;
+  actionsClient: ActionsClient;
+  conversationId: string;
+  isEnabledKnowledgeBase?: boolean;
+  isStream?: boolean;
+  llmType: string;
+  logger: Logger;
+  messages: Array<Pick<Message, 'content' | 'role'>>;
+  request: KibanaRequest;
+  responseLanguage?: string;
+  savedObjectsClient: SavedObjectsClientContract;
+  telemetry: AnalyticsServiceSetup;
+}) => {
   if (!conversationId || messages.length === 0) return;
 
   try {
@@ -57,15 +86,21 @@ export const generateConversationTitle = async (
 
     logger.debug('Generating new conversation title...');
 
-    const titlePrompt = `Generate a concise, descriptive title (max 60 characters) for this conversation based on the user's first message: "${
-      messages[0]?.content || 'New conversation'
-    }"`;
+    // Get the model-specific prompt for title generation
+    const titlePrompt = await getPrompt({
+      actionsClient,
+      connectorId,
+      promptId: promptDictionary.chatTitle,
+      promptGroupId: promptGroupId.aiAssistant,
+      provider: llmType,
+      savedObjectsClient,
+    });
 
     const titleResult = await onechatServices.agents.execute({
       request,
       agentId: 'siem-security-analyst',
       agentParams: {
-        nextInput: { message: titlePrompt },
+        nextInput: { message: `${titlePrompt}\nPlease create the title in ${responseLanguage}` },
         conversation: [],
         capabilities: {},
       },
@@ -85,13 +120,41 @@ export const generateConversationTitle = async (
 
     logger.debug('Conversation title updated successfully');
   } catch (error) {
+    // Report telemetry event for error
+    telemetry.reportEvent(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
+      actionTypeId: getActionTypeId(llmType),
+      model: llmType,
+      errorMessage: error.message ?? error.toString(),
+      assistantStreamingEnabled: isStream ?? true,
+      isEnabledKnowledgeBase: isEnabledKnowledgeBase ?? false,
+      errorLocation: 'generateConversationTitle',
+    });
+
+    // Update conversation with error title
+    try {
+      const assistantContext = context.elasticAssistant;
+      const conversationsDataClient =
+        await assistantContext.getAIAssistantConversationsDataClient();
+      if (conversationsDataClient) {
+        await conversationsDataClient.updateConversation({
+          conversationUpdateProps: {
+            id: conversationId,
+            title: (error.name ?? error.message ?? error.toString()).slice(0, 60),
+          },
+        });
+      }
+    } catch (updateError) {
+      logger.error(`Failed to update conversation with error title: ${updateError.message}`);
+    }
+
     logger.error(`Failed to generate chat title: ${error.message}`);
   }
 };
 
 // Helper function to convert messages to conversation rounds
 export const convertMessagesToConversationRounds = (
-  messages: Array<Pick<Message, 'content' | 'role'>>
+  messages: Array<Pick<Message, 'content' | 'role'>>,
+  replacements?: Replacements
 ): ConversationRound[] => {
   const conversationRounds: ConversationRound[] = [];
   for (let i = 0; i < messages.length - 1; i += 2) {
@@ -99,11 +162,26 @@ export const convertMessagesToConversationRounds = (
     const assistantMessage = messages[i + 1];
 
     if (userMessage.role === 'user' && assistantMessage.role === 'assistant') {
+      // De-anonymize message content using replacements if provided
+      const deAnonymizedUserContent = replacements
+        ? replaceAnonymizedValuesWithOriginalValues({
+            messageContent: userMessage.content,
+            replacements,
+          })
+        : userMessage.content;
+
+      const deAnonymizedAssistantContent = replacements
+        ? replaceAnonymizedValuesWithOriginalValues({
+            messageContent: assistantMessage.content,
+            replacements,
+          })
+        : assistantMessage.content;
+
       conversationRounds.push({
         id: `round-${i}`,
-        input: { message: userMessage.content },
+        input: { message: deAnonymizedUserContent },
         steps: [],
-        response: { message: assistantMessage.content },
+        response: { message: deAnonymizedAssistantContent },
       });
     }
   }
@@ -160,8 +238,7 @@ export const isOpenAndAcknowledgedAlertsResult = (
 // Helper function to check if result is knowledge base retrieval
 export const isKnowledgeBaseRetrievalResult = (
   step: { tool_id?: string },
-  result: { data?: unknown },
-  logger: Logger
+  result: { data?: unknown }
 ): boolean => {
   const isMatch = Boolean(
     'tool_id' in step &&
@@ -171,17 +248,6 @@ export const isKnowledgeBaseRetrievalResult = (
       'query' in result.data &&
       ('content' in result.data || 'message' in result.data)
   );
-
-  // Debug logging
-  if ('tool_id' in step && step.tool_id === 'core.security.knowledge_base_retrieval') {
-    logger.debug(
-      `🔍 [KB_RETRIEVAL] Checking knowledge base retrieval result: toolId=${
-        step.tool_id
-      }, hasData=${!!result.data}, dataType=${typeof result.data}, dataKeys=[${
-        result.data && typeof result.data === 'object' ? Object.keys(result.data).join(', ') : ''
-      }], isMatch=${isMatch}`
-    );
-  }
 
   return isMatch;
 };
