@@ -75,26 +75,25 @@ export function createEvaluateObservabilityAIAssistantDataset({
             scope: input.scope,
           });
 
-          const qualitativeAnalysisInput = {
-            input,
-            expected: {
-              expected: output.criteria.join('\n'),
-            },
-            output: {
-              messages: [response.messages[response.messages.length - 1]].map((message) => ({
-                message: message.content ?? '',
-              })),
-              steps: response.messages,
-            },
-            metadata,
-          };
-
           const result: any = {
             errors: response.errors,
             messages: response.messages,
           };
 
           if (useQualitativeEvaluators) {
+            const qualitativeAnalysisInput = {
+              input,
+              expected: {
+                expected: output.criteria.join('\n'),
+              },
+              output: {
+                messages: [response.messages[response.messages.length - 1]].map((message) => ({
+                  message: message.content ?? '',
+                })),
+                steps: response.messages,
+              },
+              metadata,
+            };
             const [correctnessResult, groundednessResult] = await Promise.all([
               evaluators.correctnessAnalysis().evaluate(qualitativeAnalysisInput),
               evaluators.groundednessAnalysis().evaluate(qualitativeAnalysisInput),
