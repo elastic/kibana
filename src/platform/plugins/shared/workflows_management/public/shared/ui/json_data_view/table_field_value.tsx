@@ -19,7 +19,7 @@ import {
   useResizeObserver,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { Fragment, useCallback, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { IgnoredReason } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';

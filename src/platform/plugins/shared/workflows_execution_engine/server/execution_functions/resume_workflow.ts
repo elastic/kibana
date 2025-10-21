@@ -8,15 +8,15 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
-import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
-import { workflowExecutionLoop } from '../workflow_execution_loop';
-import type { WorkflowsExecutionEnginePluginStartDeps } from '../types';
-import type { WorkflowsExecutionEngineConfig } from '../config';
+import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import { setupDependencies } from './setup_dependencies';
-import type { StepExecutionRepository } from '../repositories/step_execution_repository';
+import type { WorkflowsExecutionEngineConfig } from '../config';
 import type { LogsRepository } from '../repositories/logs_repository/logs_repository';
+import type { StepExecutionRepository } from '../repositories/step_execution_repository';
+import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import type { WorkflowsExecutionEnginePluginStartDeps } from '../types';
+import { workflowExecutionLoop } from '../workflow_execution_loop';
 
 export async function resumeWorkflow({
   workflowRunId,
@@ -68,8 +68,8 @@ export async function resumeWorkflow({
     workflowExecutionRepository,
     stepExecutionRepository,
     logsRepository,
-    fakeRequest, // Provided by Task Manager's first-class API key support
-    coreStart
+    coreStart,
+    fakeRequest // Provided by Task Manager's first-class API key support
   );
   await workflowRuntime.resume();
 

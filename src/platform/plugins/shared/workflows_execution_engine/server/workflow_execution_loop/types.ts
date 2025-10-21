@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Client } from '@elastic/elasticsearch';
-import type { CoreStart, KibanaRequest } from '@kbn/core/server';
+import type { CoreStart, ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import type { NodesFactory } from '../step/nodes_factory';
@@ -25,7 +24,7 @@ export interface WorkflowExecutionLoopParams {
   workflowLogger: WorkflowEventLogger;
   workflowExecutionRepository: WorkflowExecutionRepository;
   nodesFactory: NodesFactory;
-  esClient: Client;
+  esClient: ElasticsearchClient;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fakeRequest: KibanaRequest<unknown, unknown, unknown, any>;
   coreStart: CoreStart;

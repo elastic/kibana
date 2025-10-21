@@ -10,15 +10,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, react/display-name */
 
 import type {
-  copyToClipboard,
-  EuiDataGrid,
   EuiDataGridColumnCellAction,
-  type EuiDataGridProps,
+  EuiDataGridProps,
   EuiDataGridRefProps,
-  EuiEmptyPrompt,
-  type UseEuiTheme,
-  useResizeObserver,
+  UseEuiTheme,
 } from '@elastic/eui';
+import { copyToClipboard, EuiDataGrid, EuiEmptyPrompt, useResizeObserver } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';

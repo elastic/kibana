@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 // TODO: remove eslint exception and use i18n for strings
-/* eslint-disable react/jsx-no-literals */
+/* eslint-disable react/jsx-no-literals, @typescript-eslint/no-explicit-any */
 
 import { useEuiTheme } from '@elastic/eui';
 import type { Node, NodeTypes } from '@xyflow/react';
@@ -31,7 +31,7 @@ const nodeTypes = [...mainScopeNodes, ...secondaryScopeNodes, ...atomicNodes].re
     acc[nodeType] = ExecutionGraphNode;
     return acc;
   },
-  {} as Record<string, React.FC<unknown>>
+  {} as Record<string, React.FC<any>>
 );
 const edgeTypes = {
   default: ExecutionGraphEdge,
@@ -41,9 +41,9 @@ const edgeTypes = {
 // Wrapper component to handle ReactFlow initialization timing
 const ReactFlowWrapper: React.FC<{
   nodes: Node[];
-  edges: unknown[];
-  nodeTypesMap: unknown;
-  edgeTypesMap: unknown;
+  edges: any[];
+  nodeTypesMap: any;
+  edgeTypesMap: any;
 }> = ({ nodes, edges, nodeTypesMap, edgeTypesMap }) => {
   const [isReady, setIsReady] = React.useState(false);
 
@@ -56,7 +56,7 @@ const ReactFlowWrapper: React.FC<{
     return () => clearTimeout(timer);
   }, [nodes, edges]);
 
-  const onInit = React.useCallback((reactFlowInstance: unknown) => {
+  const onInit = React.useCallback((reactFlowInstance: any) => {
     // Fit view once the instance is ready
     setTimeout(() => {
       reactFlowInstance.fitView({ padding: 0.1 });
@@ -86,7 +86,7 @@ export const ExecutionGraph: React.FC<ExecutionGraphProps> = ({ workflowYaml }) 
   const { euiTheme } = useEuiTheme();
   const workflowGraph = useSelector(selectWorkflowGraph);
 
-  const layoutResult: { result: unknown; error: string } | null = useMemo(() => {
+  const layoutResult: { result: any; error: string } | null = useMemo(() => {
     if (!workflowGraph) {
       return null;
     }

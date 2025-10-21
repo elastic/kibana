@@ -23,7 +23,7 @@ import {
  */
 export function handleRouteError(
   response: unknown,
-  error: unknown,
+  error: Error,
   options?: { checkNotFound?: boolean }
 ) {
   const res = response as {

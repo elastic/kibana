@@ -129,19 +129,19 @@ export function inferZodType(
 
   if (type === 'string') {
     if (isConst) {
-      return z.literal(obj);
+      return z.literal(obj as string);
     }
     return z.string();
   }
   if (type === 'number') {
     if (isConst) {
-      return z.literal(obj);
+      return z.literal(obj as number);
     }
     return z.number();
   }
   if (type === 'boolean') {
     if (isConst) {
-      return z.literal(obj);
+      return z.literal(obj as boolean);
     }
     return z.boolean();
   }
