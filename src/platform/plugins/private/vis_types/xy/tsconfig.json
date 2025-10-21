@@ -26,6 +26,7 @@
     "@kbn/css-utils",
     "@kbn/chart-expressions-common",
     "@kbn/visualizations-common",
+    "@kbn/expression-xy-plugin",
   ],
   "exclude": [
     "target/**/*",

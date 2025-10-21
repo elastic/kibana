@@ -16,7 +16,6 @@
     "@kbn/lens-embeddable-utils",
     "@kbn/core",
     "@kbn/es-query",
-    "@kbn/lens-plugin",
     "@kbn/zod",
     "@kbn/data-views-plugin",
     "@kbn/streams-schema"

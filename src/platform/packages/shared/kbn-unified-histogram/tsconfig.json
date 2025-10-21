@@ -31,7 +31,6 @@
     "@kbn/shared-ux-utility",
     "@kbn/resizable-layout",
     "@kbn/visualization-utils",
-    "@kbn/visualizations-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/lens-embeddable-utils",
     "@kbn/esql-types",
