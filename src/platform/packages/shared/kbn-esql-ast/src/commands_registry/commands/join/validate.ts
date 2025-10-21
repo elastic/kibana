@@ -8,7 +8,7 @@
  */
 import type {
   ESQLAstJoinCommand,
-  ESQLCommand,
+  ESQLAstAllCommands,
   ESQLMessage,
   ESQLProperNode,
   ESQLSource,
@@ -20,7 +20,7 @@ import type { ICommandContext } from '../../types';
 import { errors } from '../../../definitions/utils/errors';
 
 export const validate = (
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   ast: ESQLAst,
   context?: ICommandContext
 ): ESQLMessage[] => {
