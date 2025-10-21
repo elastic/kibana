@@ -18,6 +18,8 @@ Start Scout server:
 node scripts/scout.js start-server --stateful
 ```
 
+> You can access the Scout server Kibana instance by accessing <http://localhost:5620>. This may be useful if you want to query evaluation results for further analysis.
+
 ### Run Evaluations
 
 Then run the evaluations:
@@ -68,3 +70,56 @@ The evaluation framework supports two reporting modes:
 
 **Dataset Naming Convention**: For scenario-grouped reporting to work properly, datasets should follow the pattern `"scenario: dataset-name"` (e.g., "alerts: critical", "esql: simple queries"). Datasets not following this pattern will be grouped under "Other".
 When creating new test cases, follow the dataset naming format so the new evaluations are reported on correctly.
+
+#### Retrieving Evaluation Scores from Elasticseach
+
+Evaluation results are stored in `.kibana-evaluations` data stream on the Elasticsearch cluster your Scout configuration is pointing too (default being <http://localhost:9220> and you can use <http://localhost:5620> to access Kibana). You can query the data stream if you wish to analyze evaluation results a run on-demand.
+
+##### Useful Queries
+
+> You will need to replace the ${run_id} parameter in the queries with an actual evaluation run id to get the data.
+
+**Get evaluator scores per dataset (replicating in-terminal evaluation results):**
+
+```bash
+POST /_query?format=csv
+{
+  "query": """
+FROM .kibana-evaluations
+| WHERE run_id == "${run_id}"
+| EVAL mean_dataset_score = MV_AVG(evaluator.scores)
+| STATS
+    criteria_score = AVG(mean_dataset_score) WHERE evaluator.name == "Criteria",
+    groundedness_score = AVG(mean_dataset_score) WHERE evaluator.name == "Groundedness",
+    factuality_score = AVG(mean_dataset_score) WHERE evaluator.name == "Factuality",
+    relevance_score = AVG(mean_dataset_score) WHERE evaluator.name == "Relevance",
+    sequence_accuracy_score = AVG(mean_dataset_score) WHERE evaluator.name == "Sequence Accuracy"
+    BY run_id, dataset.name
+| SORT dataset.name
+| LIMIT 100
+    """
+}
+```
+
+**Get evaluator scores per scenario (replicating in-terminal results when `SCENARIO_REPORTING=true`):**
+
+```bash
+POST /_query?format=csv
+{
+  "query": """
+FROM .kibana-evaluations
+| WHERE run_id == "${run_id}"
+| DISSECT dataset.name "%{scenario}: %{rest}"
+| EVAL mean_dataset_score = MV_AVG(evaluator.scores)
+| STATS
+    criteria_score = AVG(mean_dataset_score) WHERE evaluator.name == "Criteria",
+    groundedness_score = AVG(mean_dataset_score) WHERE evaluator.name == "Groundedness",
+    factuality_score = AVG(mean_dataset_score) WHERE evaluator.name == "Factuality",
+    relevance_score = AVG(mean_dataset_score) WHERE evaluator.name == "Relevance",
+    sequence_accuracy_score = AVG(mean_dataset_score) WHERE evaluator.name == "Sequence Accuracy"
+    BY run_id, scenario
+| SORT scenario
+| LIMIT 100
+    """
+}
+```
