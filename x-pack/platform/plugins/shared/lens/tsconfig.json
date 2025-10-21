@@ -129,6 +129,7 @@
     "@kbn/controls-schemas",
     "@kbn/controls-constants",
     "@kbn/visualizations-common",
+    "@kbn/css-utils",
   ],
   "exclude": ["target/**/*"]
 }
