@@ -45,6 +45,9 @@ export class DiscoverApp {
   }
 
   async waitForHistogramRendered() {
-    await this.page.testSubj.waitForSelector('unifiedHistogramRendered');
+    await this.page.testSubj.waitForSelector('unifiedHistogramRendered', {
+      state: 'visible',
+      timeout: 20_000,
+    });
   }
 }
