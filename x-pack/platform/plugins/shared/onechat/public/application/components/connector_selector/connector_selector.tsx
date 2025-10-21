@@ -9,9 +9,13 @@ import React, { useMemo } from 'react';
 import { EuiPopover, EuiButtonEmpty, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { ConnectorSelectable } from '@kbn/ai-assistant-connector-selector-action';
+import {
+  ConnectorSelectable,
+  type ConnectorSelectableComponentProps,
+} from '@kbn/ai-assistant-connector-selector-action';
 import type { InferenceConnector } from '@kbn/inference-common';
 import { InferenceConnectorType } from '@kbn/inference-common';
+import { useNavigation } from '../../hooks/use_navigation';
 
 interface ConnectorSelectorProps {
   connectors: InferenceConnector[];
@@ -29,6 +33,7 @@ export const ConnectorSelector: React.FC<ConnectorSelectorProps> = ({
   defaultConnectorId,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const { navigateToManageConnectors } = useNavigation();
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
 
   const togglePopover = () => setIsPopoverOpen(!isPopoverOpen);
@@ -40,8 +45,8 @@ export const ConnectorSelector: React.FC<ConnectorSelectorProps> = ({
 
   // Split connectors into preconfigured and custom
   const { preConfiguredConnectors, customConnectors } = useMemo(() => {
-    const preConfigured: Array<{ value: string; label: string }> = [];
-    const custom: Array<{ value: string; label: string }> = [];
+    const preConfigured: ConnectorSelectableComponentProps['preConfiguredConnectors'] = [];
+    const custom: ConnectorSelectableComponentProps['customConnectors'] = [];
 
     connectors.forEach((connector) => {
       const option = {
@@ -93,7 +98,7 @@ export const ConnectorSelector: React.FC<ConnectorSelectorProps> = ({
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       panelPaddingSize="none"
-      anchorPosition="upRight"
+      anchorPosition="upLeft"
     >
       <ConnectorSelectable
         value={selectedConnectorId}
@@ -105,14 +110,7 @@ export const ConnectorSelector: React.FC<ConnectorSelectorProps> = ({
         preConfiguredConnectors={preConfiguredConnectors}
         defaultConnectorId={defaultConnectorId}
         data-test-subj="onechatConnectorSelector"
-        onAddConnectorClick={() => {
-          // TODO: Open connector flyout if needed
-          closePopover();
-        }}
-        onManageConnectorsClick={() => {
-          // TODO: Navigate to connectors management if needed
-          closePopover();
-        }}
+        onAddConnectorClick={() => navigateToManageConnectors()}
       />
     </EuiPopover>
   );

@@ -29,7 +29,12 @@ export const ConversationInputActions: React.FC<ConversationInputActionsProps> =
 
   return (
     <EuiFlexItem grow={false}>
-      <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center" justifyContent="flexEnd">
+      <EuiFlexGroup
+        gutterSize="s"
+        responsive={false}
+        alignItems="center"
+        justifyContent="spaceBetween"
+      >
         <EuiFlexItem grow={false}>
           <ConnectorSelector
             connectors={connectorSelection.connectors}
@@ -40,14 +45,18 @@ export const ConversationInputActions: React.FC<ConversationInputActionsProps> =
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <ConversationAgentSelector agentId={agentId} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <ConversationActionButton
-            onSubmit={onSubmit}
-            isSubmitDisabled={isSubmitDisabled}
-            resetToPendingMessage={resetToPendingMessage}
-          />
+          <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+            <EuiFlexItem grow={false}>
+              <ConversationAgentSelector agentId={agentId} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <ConversationActionButton
+                onSubmit={onSubmit}
+                isSubmitDisabled={isSubmitDisabled}
+                resetToPendingMessage={resetToPendingMessage}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexItem>

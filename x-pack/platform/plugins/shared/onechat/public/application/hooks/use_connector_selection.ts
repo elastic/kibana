@@ -7,15 +7,17 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import type { InferenceConnector } from '@kbn/inference-common';
+import { i18n } from '@kbn/i18n';
 
 import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
 } from '@kbn/management-settings-ids';
 import { useKibana } from './use_kibana';
+import { useToasts } from './use_toasts';
+import { storageKeys } from '../storage_keys';
 
-const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
-const STORAGE_KEY = 'xpack.onechat.lastUsedConnector';
+const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR'; // TODO: Import from gen-ai-settings-plugin (package) once available
 
 export interface UseConnectorSelectionResult {
   connectors: InferenceConnector[];
@@ -34,13 +36,13 @@ export function useConnectorSelection(): UseConnectorSelectionResult {
       uiSettings,
     },
   } = useKibana();
+  const { addErrorToast } = useToasts();
 
   const [connectors, setConnectors] = useState<InferenceConnector[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [userSelectedConnector, setUserSelectedConnector] = useState<string | null>(null);
 
-  // Get default connector settings
   const defaultConnector = uiSettings?.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
   const defaultConnectorOnly = uiSettings?.get<boolean>(
     GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
@@ -50,24 +52,32 @@ export function useConnectorSelection(): UseConnectorSelectionResult {
   const isConnectorSelectionRestricted =
     defaultConnectorOnly && defaultConnector !== NO_DEFAULT_CONNECTOR;
 
-  // Get last used connector from localStorage
-  const getStoredConnector = useCallback((): string | null => {
+  const getLastUsedConnector = useCallback((): string | null => {
     try {
-      return localStorage.getItem(STORAGE_KEY);
+      return localStorage.getItem(storageKeys.lastUsedConnector);
     } catch {
       return null;
     }
   }, []);
 
-  const setStoredConnector = useCallback((connectorId: string) => {
-    try {
-      localStorage.setItem(STORAGE_KEY, connectorId);
-    } catch {
-      // Ignore storage errors
-    }
-  }, []);
+  const setLastUsedConnector = useCallback(
+    (connectorId: string) => {
+      try {
+        localStorage.setItem(storageKeys.lastUsedConnector, connectorId);
+      } catch (err) {
+        addErrorToast({
+          title: i18n.translate('xpack.onechat.connectorSelection.saveErrorTitle', {
+            defaultMessage: 'Failed to save connector selection',
+          }),
+          text: i18n.translate('xpack.onechat.connectorSelection.saveErrorMessage', {
+            defaultMessage: 'Error when saving connector preference',
+          }),
+        });
+      }
+    },
+    [addErrorToast]
+  );
 
-  // Determine the selected connector
   const selectedConnector = useMemo(() => {
     // If admin restricted to default only, always use default
     if (isConnectorSelectionRestricted) {
@@ -80,7 +90,7 @@ export function useConnectorSelection(): UseConnectorSelectionResult {
     }
 
     // Check localStorage first
-    const storedConnector = getStoredConnector();
+    const storedConnector = getLastUsedConnector();
     if (storedConnector && connectors.some((c) => c.connectorId === storedConnector)) {
       return storedConnector;
     }
@@ -97,12 +107,13 @@ export function useConnectorSelection(): UseConnectorSelectionResult {
     defaultConnector,
     connectors,
     userSelectedConnector,
-    getStoredConnector,
+    getLastUsedConnector,
   ]);
 
   // Load connectors
   const loadConnectors = useCallback(async () => {
     if (!inference) {
+      setIsLoading(false);
       return;
     }
 
@@ -110,14 +121,13 @@ export function useConnectorSelection(): UseConnectorSelectionResult {
     setError(null);
 
     try {
-      let allConnectors = await inference.getConnectors();
+      let fetchedConnectors = await inference.getConnectors();
 
-      // If admin restricted connector selection, only show the default connector
       if (isConnectorSelectionRestricted && defaultConnector) {
-        allConnectors = allConnectors.filter((c) => c.connectorId === defaultConnector);
+        fetchedConnectors = fetchedConnectors.filter((c) => c.connectorId === defaultConnector);
       }
 
-      setConnectors(allConnectors);
+      setConnectors(fetchedConnectors);
     } catch (err) {
       setError(err as Error);
       setConnectors([]);
@@ -138,10 +148,10 @@ export function useConnectorSelection(): UseConnectorSelectionResult {
 
       // Store selection in localStorage (unless restricted)
       if (!isConnectorSelectionRestricted) {
-        setStoredConnector(connectorId);
+        setLastUsedConnector(connectorId);
       }
     },
-    [isConnectorSelectionRestricted, setStoredConnector]
+    [isConnectorSelectionRestricted, setLastUsedConnector]
   );
 
   return {
