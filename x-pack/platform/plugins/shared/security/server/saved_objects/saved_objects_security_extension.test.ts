@@ -6399,13 +6399,13 @@ describe('#authorizeChangeAccessControl', () => {
       type: 'dashboard',
       id: '1',
       existingNamespaces: [],
-      accessControl: { owner: 'fake_owner_id', accessMode: 'read_only' as const },
+      accessControl: { owner: 'fake_owner_id', accessMode: 'write_restricted' as const },
     },
     {
       type: 'visualization',
       id: '2',
       existingNamespaces: [],
-      accessControl: { owner: 'fake_owner_id', accessMode: 'read_only' as const },
+      accessControl: { owner: 'fake_owner_id', accessMode: 'write_restricted' as const },
     },
   ];
 
@@ -6571,13 +6571,13 @@ describe('#authorizeChangeAccessControl', () => {
         type: 'non_read_only',
         id: '1',
         existingNamespaces: [],
-        accessControl: { owner: 'fake_owner_id', accessMode: 'read_only' as const },
+        accessControl: { owner: 'fake_owner_id', accessMode: 'write_restricted' as const },
       },
       {
         type: 'visualization',
         id: '2',
         existingNamespaces: [],
-        accessControl: { owner: 'fake_owner_id', accessMode: 'read_only' as const },
+        accessControl: { owner: 'fake_owner_id', accessMode: 'write_restricted' as const },
       },
     ];
 

@@ -33,13 +33,13 @@ describe('AccessControlService', () => {
       service = new AccessControlService({ typeRegistry });
     });
 
-    it('returns type if object is read_only, has owner, and user is not owner', () => {
+    it('returns type if object is write_restricted, has owner, and user is not owner', () => {
       service.setUserForOperation(makeUser('bob'));
       const objects = [
         {
           type: 'dashboard',
           id: 'id_1',
-          accessControl: { accessMode: 'read_only' as const, owner: 'alice' },
+          accessControl: { accessMode: 'write_restricted' as const, owner: 'alice' },
         },
       ];
       const { typesRequiringAccessControl, results } = service.getTypesRequiringPrivilegeCheck({
@@ -62,7 +62,7 @@ describe('AccessControlService', () => {
         {
           type: 'dashboard',
           id: 'id_1',
-          accessControl: { accessMode: 'read_only' as const, owner: 'alice' },
+          accessControl: { accessMode: 'write_restricted' as const, owner: 'alice' },
         },
       ];
       const { typesRequiringAccessControl, results } = service.getTypesRequiringPrivilegeCheck({
@@ -107,7 +107,7 @@ describe('AccessControlService', () => {
         {
           id: '1',
           type: 'visualization',
-          accessControl: { accessMode: 'read_only' as const, owner: 'alice' },
+          accessControl: { accessMode: 'write_restricted' as const, owner: 'alice' },
         },
       ];
       const { typesRequiringAccessControl, results } = service.getTypesRequiringPrivilegeCheck({
@@ -130,7 +130,7 @@ describe('AccessControlService', () => {
         {
           id: '1',
           type: 'dashboard',
-          accessControl: { accessMode: 'read_only' as const, owner: 'alice' },
+          accessControl: { accessMode: 'write_restricted' as const, owner: 'alice' },
         },
       ];
       const { typesRequiringAccessControl, results } = service.getTypesRequiringPrivilegeCheck({
@@ -153,17 +153,17 @@ describe('AccessControlService', () => {
         {
           type: 'dashboard',
           id: 'id_1',
-          accessControl: { accessMode: 'read_only' as const, owner: 'alice' },
+          accessControl: { accessMode: 'write_restricted' as const, owner: 'alice' },
         },
         {
           type: 'dashboard',
           id: 'id_2',
-          accessControl: { accessMode: 'read_only' as const, owner: 'charlie' },
+          accessControl: { accessMode: 'write_restricted' as const, owner: 'charlie' },
         },
         {
           type: 'visualization',
           id: 'id_3',
-          accessControl: { accessMode: 'read_only' as const, owner: 'alice' },
+          accessControl: { accessMode: 'write_restricted' as const, owner: 'alice' },
         },
         {
           type: 'dashboard',
@@ -177,7 +177,7 @@ describe('AccessControlService', () => {
         {
           type: 'dashboard',
           id: 'id_6',
-          accessControl: { accessMode: 'read_only' as const, owner: 'bob' }, // user is owner
+          accessControl: { accessMode: 'write_restricted' as const, owner: 'bob' }, // user is owner
         },
       ];
       const { typesRequiringAccessControl, results } = service.getTypesRequiringPrivilegeCheck({

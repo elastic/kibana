@@ -1149,7 +1149,7 @@ describe('#bulkCreate', () => {
             references: [{ name: 'ref_0', type: 'test', id: '2' }],
           };
           await bulkCreateSuccess(client, repository, [obj1NoAccessControl, obj2AccessControl], {
-            accessControl: { accessMode: 'read_only' },
+            accessControl: { accessMode: 'write_restricted' },
           });
 
           expect(securityExtension.authorizeBulkCreate).toHaveBeenCalledWith(
@@ -1171,7 +1171,7 @@ describe('#bulkCreate', () => {
                   initialNamespace: undefined,
                   accessControl: {
                     owner: CURRENT_USER_PROFILE_ID,
-                    accessMode: 'read_only',
+                    accessMode: 'write_restricted',
                   },
                 },
               ]),
@@ -1186,7 +1186,7 @@ describe('#bulkCreate', () => {
             attributes: { title: 'Test One' },
             references: [{ name: 'ref_0', type: 'test', id: '1' }],
             accessControl: {
-              accessMode: 'read_only',
+              accessMode: 'write_restricted',
             } as Pick<SavedObjectAccessControl, 'accessMode'>,
           };
           const obj2AccessControl = {
@@ -1209,7 +1209,7 @@ describe('#bulkCreate', () => {
             repository,
             [obj1NoAccessControl, obj2AccessControl, obj3AccessControl],
             {
-              accessControl: { accessMode: 'read_only' },
+              accessControl: { accessMode: 'write_restricted' },
             }
           );
 
@@ -1243,7 +1243,7 @@ describe('#bulkCreate', () => {
                   initialNamespace: undefined,
                   accessControl: {
                     owner: CURRENT_USER_PROFILE_ID,
-                    accessMode: 'read_only', // explicitly confirm the mode is NOT overriden
+                    accessMode: 'write_restricted', // explicitly confirm the mode is NOT overriden
                   },
                 },
               ]),
@@ -1267,7 +1267,7 @@ describe('#bulkCreate', () => {
             references: [{ name: 'ref_0', type: 'test', id: '2' }],
           };
           await bulkCreateSuccess(client, repository, [obj1NoAccessControl, obj2AccessControl], {
-            accessControl: { accessMode: 'read_only' },
+            accessControl: { accessMode: 'write_restricted' },
           });
 
           expect(securityExtension.authorizeBulkCreate).toHaveBeenCalledWith(

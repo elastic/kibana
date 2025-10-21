@@ -109,7 +109,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(accessControl).to.have.property('owner');
 
         const { owner, accessMode } = accessControl;
-        expect(accessMode).to.be('read_only');
+        expect(accessMode).to.be('write_restricted');
         expect(owner).to.be(profileUid);
       });
 
@@ -139,7 +139,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(400);
         expect(response.body).to.have.property('message');
         expect(response.body.message).to.contain(
-          'Unable to create "read_only" "read_only_type" saved object. User profile ID not found.: Bad Request'
+          'Unable to create "write_restricted" "read_only_type" saved object. User profile ID not found.: Bad Request'
         );
       });
 
@@ -165,7 +165,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(accessControl).to.have.property('owner');
 
           const { owner, accessMode } = accessControl;
-          expect(accessMode).to.be('read_only');
+          expect(accessMode).to.be('write_restricted');
           expect(owner).to.be(profileUid);
         }
 
@@ -178,7 +178,10 @@ export default function ({ getService }: FtrProviderContext) {
 
         const overwriteId = overwriteResponse.body.id;
         expect(createResponse.body).to.have.property('id', overwriteId);
-        expect(createResponse.body.accessControl).to.have.property('accessMode', 'read_only');
+        expect(createResponse.body.accessControl).to.have.property(
+          'accessMode',
+          'write_restricted'
+        );
         expect(createResponse.body.accessControl).to.have.property('owner', profileUid);
       });
 
@@ -194,7 +197,10 @@ export default function ({ getService }: FtrProviderContext) {
 
         const objectId = createResponse.body.id;
         expect(createResponse.body.attributes).to.have.property('description', 'test');
-        expect(createResponse.body.accessControl).to.have.property('accessMode', 'read_only');
+        expect(createResponse.body.accessControl).to.have.property(
+          'accessMode',
+          'write_restricted'
+        );
         expect(createResponse.body.accessControl).to.have.property('owner', objectOnwerProfileUid);
 
         const { cookie: adminCookie } = await loginAsKibanaAdmin();
@@ -208,7 +214,10 @@ export default function ({ getService }: FtrProviderContext) {
 
         const overwriteId = overwriteResponse.body.id;
         expect(createResponse.body).to.have.property('id', overwriteId);
-        expect(createResponse.body.accessControl).to.have.property('accessMode', 'read_only');
+        expect(createResponse.body.accessControl).to.have.property(
+          'accessMode',
+          'write_restricted'
+        );
         expect(createResponse.body.accessControl).to.have.property('owner', objectOnwerProfileUid);
       });
 
@@ -258,7 +267,10 @@ export default function ({ getService }: FtrProviderContext) {
 
         const objectId = createResponse.body.id;
         expect(createResponse.body.attributes).to.have.property('description', 'test');
-        expect(createResponse.body.accessControl).to.have.property('accessMode', 'read_only');
+        expect(createResponse.body.accessControl).to.have.property(
+          'accessMode',
+          'write_restricted'
+        );
         expect(createResponse.body.accessControl).to.have.property('owner', adminUid);
 
         const { cookie: otherOwnerCookie } = await loginAsNotObjectOwner('test_user', 'changeme');
@@ -296,7 +308,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(bulkCreateResponse.body.saved_objects).to.have.length(2);
         for (const { accessControl } of bulkCreateResponse.body.saved_objects) {
           expect(accessControl).to.have.property('owner', objectOwnerProfileUid);
-          expect(accessControl).to.have.property('accessMode', 'read_only');
+          expect(accessControl).to.have.property('accessMode', 'write_restricted');
         }
       });
 
@@ -344,7 +356,7 @@ export default function ({ getService }: FtrProviderContext) {
           const object = objects.find((obj) => obj.id === id);
           expect(object).to.not.be(undefined);
           expect(accessControl).to.have.property('owner', objectOwnerProfileUid);
-          expect(accessControl).to.have.property('accessMode', 'read_only');
+          expect(accessControl).to.have.property('accessMode', 'write_restricted');
         }
       });
 
@@ -394,7 +406,7 @@ export default function ({ getService }: FtrProviderContext) {
           const object = objects.find((obj) => obj.id === id);
           expect(object).to.not.be(undefined);
           expect(accessControl).to.have.property('owner', objectOwnerProfileUid);
-          expect(accessControl).to.have.property('accessMode', 'read_only');
+          expect(accessControl).to.have.property('accessMode', 'write_restricted');
         }
       });
 
@@ -507,7 +519,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('cookie', adminCookie.cookieString())
           .expect(200);
         expect(getResponse.body.accessControl).to.have.property('owner', adminProfileUid);
-        expect(getResponse.body.accessControl).to.have.property('accessMode', 'read_only');
+        expect(getResponse.body.accessControl).to.have.property('accessMode', 'write_restricted');
 
         const getResponse2 = await supertestWithoutAuth
           .get(`/read_only_objects/${objectId2}`)
@@ -515,7 +527,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('cookie', adminCookie.cookieString())
           .expect(200);
         expect(getResponse2.body.accessControl).to.have.property('owner', adminProfileUid);
-        expect(getResponse2.body.accessControl).to.have.property('accessMode', 'read_only');
+        expect(getResponse2.body.accessControl).to.have.property('accessMode', 'write_restricted');
       });
     });
 
@@ -534,7 +546,10 @@ export default function ({ getService }: FtrProviderContext) {
 
         const objectId = createResponse.body.id;
         expect(createResponse.body.attributes).to.have.property('description', 'test');
-        expect(createResponse.body.accessControl).to.have.property('accessMode', 'read_only');
+        expect(createResponse.body.accessControl).to.have.property(
+          'accessMode',
+          'write_restricted'
+        );
         expect(createResponse.body.accessControl).to.have.property('owner', profileUid);
 
         const updateResponse = await supertestWithoutAuth
@@ -561,7 +576,10 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
         const objectId = createResponse.body.id;
         expect(createResponse.body.attributes).to.have.property('description', 'test');
-        expect(createResponse.body.accessControl).to.have.property('accessMode', 'read_only');
+        expect(createResponse.body.accessControl).to.have.property(
+          'accessMode',
+          'write_restricted'
+        );
         expect(createResponse.body.accessControl).to.have.property('owner', adminProfileUid);
 
         const { cookie: notOwnerCookie } = await loginAsNotObjectOwner('test_user', 'changeme');
@@ -670,7 +688,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(object).to.not.be(undefined);
           expect(attributes).to.have.property('description', 'updated description');
           expect(accessControl).to.have.property('owner', objectOwnerProfileUid);
-          expect(accessControl).to.have.property('accessMode', 'read_only');
+          expect(accessControl).to.have.property('accessMode', 'write_restricted');
         }
       });
 
@@ -717,7 +735,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(object).to.not.be(undefined);
           expect(attributes).to.have.property('description', 'updated description');
           expect(accessControl).to.have.property('owner', objectOwnerProfileUid);
-          expect(accessControl).to.have.property('accessMode', 'read_only');
+          expect(accessControl).to.have.property('accessMode', 'write_restricted');
         }
       });
 
@@ -1467,7 +1485,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('cookie', adminCookie.cookieString())
           .send({
             objects: [{ id: objectId, type: 'read_only_type' }],
-            newAccessMode: 'read_only',
+            newAccessMode: 'write_restricted',
           })
           .expect(200);
         expect(response.body.objects).to.have.length(1);
@@ -1480,7 +1498,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('cookie', ownerCookie.cookieString())
           .expect(200);
 
-        expect(getResponse.body.accessControl).to.have.property('accessMode', 'read_only');
+        expect(getResponse.body.accessControl).to.have.property('accessMode', 'write_restricted');
       });
 
       it('allow owner to update object data after access mode change', async () => {
@@ -1504,7 +1522,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('cookie', ownerCookie.cookieString())
           .send({
             objects: [{ id: objectId, type: 'read_only_type' }],
-            newAccessMode: 'read_only',
+            newAccessMode: 'write_restricted',
           })
           .expect(200);
         expect(response.body.objects).to.have.length(1);
@@ -1517,7 +1535,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('cookie', adminCookie.cookieString())
           .expect(200);
 
-        expect(getResponse.body.accessControl).to.have.property('accessMode', 'read_only');
+        expect(getResponse.body.accessControl).to.have.property('accessMode', 'write_restricted');
 
         const updateResponse = await supertestWithoutAuth
           .put('/read_only_objects/update')
@@ -1555,7 +1573,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('cookie', notOwnerCookie.cookieString())
           .send({
             objects: [{ id: objectId, type: 'read_only_type' }],
-            newAccessMode: 'read_only',
+            newAccessMode: 'write_restricted',
           })
           .expect(403);
         expect(updateResponse.body).to.have.property('message');

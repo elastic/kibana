@@ -46,7 +46,7 @@ const baseSchema = schema.object<SavedObjectSanitizedDocSchema>({
   accessControl: schema.maybe(
     schema.object({
       owner: schema.string(),
-      accessMode: schema.oneOf([schema.literal('read_only'), schema.literal('default')]),
+      accessMode: schema.oneOf([schema.literal('write_restricted'), schema.literal('default')]),
     })
   ),
   attributes: schema.recordOf(schema.string(), schema.maybe(schema.any())),

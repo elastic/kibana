@@ -862,7 +862,7 @@ describe('#create', () => {
             id,
             namespace,
             accessControl: {
-              accessMode: 'read_only',
+              accessMode: 'write_restricted',
             },
           })
         ).rejects.toThrowError(
@@ -878,7 +878,7 @@ describe('#create', () => {
           mockAuthenticatedUser({ profile_uid: 'u_test_user_version' })
         );
         const accessControl = {
-          accessMode: 'read_only' as const,
+          accessMode: 'write_restricted' as const,
         };
 
         const result = await repository.create(ACCESS_CONTROL_TYPE, attributes, {
@@ -901,7 +901,7 @@ describe('#create', () => {
           updated_by: 'u_test_user_version',
           created_by: 'u_test_user_version',
           accessControl: {
-            accessMode: 'read_only',
+            accessMode: 'write_restricted',
             owner: 'u_test_user_version',
           },
         });
@@ -915,12 +915,12 @@ describe('#create', () => {
             namespace,
             references,
             accessControl: {
-              accessMode: 'read_only',
+              accessMode: 'write_restricted',
             },
           })
         ).rejects.toThrowError(
           createBadRequestErrorPayload(
-            `Unable to create \"read_only\" \"accessControlType\" saved object. User profile ID not found.`
+            `Unable to create \"write_restricted\" \"accessControlType\" saved object. User profile ID not found.`
           )
         );
         expect(client.create).not.toHaveBeenCalled();
