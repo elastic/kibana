@@ -145,6 +145,12 @@ export const transformToUpdateScheme = (
                     ...(message.metadata.contentReferences
                       ? { content_references: message.metadata.contentReferences }
                       : {}),
+                    ...(message.metadata.interruptValue
+                      ? { interrupt_value: message.metadata.interruptValue }
+                      : {}),
+                    ...(message.metadata.interruptResumeValue
+                      ? { interrupt_resume_value: message.metadata.interruptResumeValue }
+                      : {}),
                   },
                 }
               : {}),
