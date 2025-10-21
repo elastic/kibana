@@ -35,7 +35,7 @@ import {
   type DataTableRecord,
 } from './blocks';
 import { esqlCascadeStyles } from './esql_data_cascade.styles';
-import type { CascadeDocumentsRestorableState } from './esql_data_cascade_restorable_state';
+import { type CascadeDocumentsRestorableState } from './esql_data_cascade_restorable_state';
 
 export { getESQLStatsQueryMeta };
 export { useGetGroupBySelectorRenderer as useGroupBySelectorRenderer } from './blocks/use_table_header_components';
@@ -47,7 +47,7 @@ export interface ESQLDataCascadeProps extends Omit<UnifiedDataTableProps, 'ref'>
   cascadeConfig: CascadeDocumentsRestorableState;
 }
 
-export const ESQLDataCascade = React.memo(
+const ESQLDataCascadeInternal = React.memo(
   ({
     rows: initialData,
     dataView,
@@ -216,3 +216,5 @@ export const ESQLDataCascade = React.memo(
     );
   }
 );
+
+export const ESQLDataCascade = ESQLDataCascadeInternal;

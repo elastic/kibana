@@ -66,6 +66,7 @@ const contextRowActions: Array<
       defaultMessage: 'Copy to clipboard',
     }),
     icon: 'copy',
+    'data-test-subj': 'dscCascadeRowContextActionCopyToClipboard',
     onClick(this: RowClickActionContext) {
       copyToClipboard(this.rowContext.groupValue as string);
       this.closeActionMenu();
@@ -76,6 +77,7 @@ const contextRowActions: Array<
       defaultMessage: 'Filter in',
     }),
     icon: 'plusInCircle',
+    'data-test-subj': 'dscCascadeRowContextActionFilterIn',
     onClick(this: RowClickActionContext) {
       const updatedQuery = appendWhereClauseToESQLQuery(
         this.editorQuery.esql,
@@ -98,6 +100,7 @@ const contextRowActions: Array<
       defaultMessage: 'Filter out',
     }),
     icon: 'minusInCircle',
+    'data-test-subj': 'dscCascadeRowContextActionFilterOut',
     onClick(this: RowClickActionContext) {
       const updatedQuery = appendWhereClauseToESQLQuery(
         this.editorQuery.esql,
@@ -121,6 +124,7 @@ const contextRowActions: Array<
     }),
     icon: 'discoverApp',
     renderFor: 'categorize',
+    'data-test-subj': 'dscCascadeRowContextActionOpenInNewTab',
     onClick(this: RowClickActionContext, e) {
       e.preventDefault();
 
@@ -189,7 +193,13 @@ const ContextMenu = React.memo(
       ];
     }, [close, editorQuery, globalState, groupType, openInNewTab, row, services]);
 
-    return <EuiContextMenu initialPanelId={panels[0].id} panels={panels} />;
+    return (
+      <EuiContextMenu
+        data-test-subj="dscCascadeRowContextActionMenu"
+        initialPanelId={panels[0].id}
+        panels={panels}
+      />
+    );
   }
 );
 
@@ -329,9 +339,16 @@ export function useEsqlDataCascadeRowHeaderComponents(
   );
 
   const rowContextActionClickHandler = useCallback(
-    function showPopover(this: RowContext, e: React.MouseEvent<Element>) {
-      popoverRef.current = e.currentTarget as HTMLButtonElement;
-      setPopoverRowData(this);
+    function togglePopover(this: RowContext, e: React.MouseEvent<Element>) {
+      setPopoverRowData((prev) => {
+        if (prev?.groupId === this.groupId) {
+          popoverRef.current = null;
+          return null;
+        }
+
+        popoverRef.current = e.currentTarget as HTMLButtonElement;
+        return this;
+      });
     },
     [setPopoverRowData]
   );
@@ -346,8 +363,8 @@ export function useEsqlDataCascadeRowHeaderComponents(
       return [
         {
           iconType: 'boxesVertical',
-          'aria-label': `${rowData.id}-row-actions`,
-          'data-test-subj': 'dscCascadeRowContextActionButton',
+          'aria-label': `${rowData.id}-cascade-row-actions`,
+          'data-test-subj': `${rowData.id}-dscCascadeRowContextActionButton`,
           onClick: rowContextActionClickHandler.bind({ groupId, groupValue }),
         },
       ];
