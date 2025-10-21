@@ -24,14 +24,12 @@ export const isAgentTypeAndActionSupported = (
 ): boolean => {
   const features = ExperimentalFeaturesService.get();
   const isSentinelOneRunScriptEnabled = features.responseActionsSentinelOneRunScriptEnabled;
-  const isCrowdstrikeHostIsolationEnabled =
-    features.responseActionsCrowdstrikeManualHostIsolationEnabled;
 
   const isAgentTypeSupported =
     agentType === 'endpoint' ||
     agentType === 'sentinel_one' ||
-    agentType === 'microsoft_defender_endpoint' ||
-    (agentType === 'crowdstrike' && isCrowdstrikeHostIsolationEnabled);
+    agentType === 'crowdstrike' ||
+    agentType === 'microsoft_defender_endpoint';
 
   let isActionNameSupported: boolean =
     !actionName || isActionSupportedByAgentType(agentType, actionName, actionType);

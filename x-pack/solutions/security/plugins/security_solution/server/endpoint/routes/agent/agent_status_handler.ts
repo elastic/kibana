@@ -68,20 +68,6 @@ export const getAgentStatusRouteHandler = (
       `Retrieving status for: agentType [${agentType}], agentIds: [${agentIds.join(', ')}]`
     );
 
-    // Note: because our API schemas are defined as module static variables (as opposed to a
-    //        `getter` function), we need to include this additional validation here, since
-    //        `agent_type` is included in the schema independent of the feature flag
-    if (
-      agentType === 'crowdstrike' &&
-      !endpointContext.experimentalFeatures.responseActionsCrowdstrikeManualHostIsolationEnabled
-    ) {
-      return errorHandler(
-        logger,
-        response,
-        new CustomHttpRequestError(`[request query.agent_type]: feature is disabled`, 400)
-      );
-    }
-
     try {
       const [securitySolutionPlugin, corePlugin, actionsPlugin] = await Promise.all([
         context.securitySolution,

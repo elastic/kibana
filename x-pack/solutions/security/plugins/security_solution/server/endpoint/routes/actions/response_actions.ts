@@ -435,12 +435,5 @@ function isThirdPartyFeatureDisabled(
     return true;
   }
 
-  if (
-    agentType === 'crowdstrike' &&
-    !experimentalFeatures.responseActionsCrowdstrikeManualHostIsolationEnabled
-  ) {
-    return true;
-  }
-
   return false;
 }

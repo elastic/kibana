@@ -60,29 +60,7 @@ describe('Agent Status API route handler', () => {
       (await apiTestSetup.httpHandlerContextMock.actions).getActionsClient as jest.Mock
     ).mockReturnValue(sentinelOneMock.createConnectorActionsClient());
 
-    apiTestSetup.endpointAppContextMock.experimentalFeatures = {
-      ...apiTestSetup.endpointAppContextMock.experimentalFeatures,
-      responseActionsCrowdstrikeManualHostIsolationEnabled: true,
-    };
-
     registerAgentStatusRoute(apiTestSetup.routerMock, apiTestSetup.endpointAppContextMock);
-  });
-
-  it('should error if the crowdstrike feature flag is turned off', async () => {
-    apiTestSetup.endpointAppContextMock.experimentalFeatures = {
-      ...apiTestSetup.endpointAppContextMock.experimentalFeatures,
-      responseActionsCrowdstrikeManualHostIsolationEnabled: false,
-    };
-    httpRequestMock.query.agentType = 'crowdstrike';
-
-    await apiTestSetup
-      .getRegisteredVersionedRoute('get', AGENT_STATUS_ROUTE, '1')
-      .routeHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
-
-    expect(httpResponseMock.customError).toHaveBeenCalledWith({
-      statusCode: 400,
-      body: expect.any(CustomHttpRequestError),
-    });
   });
 
   it.each(RESPONSE_ACTION_AGENT_TYPE)('should accept agent type of %s', async (agentType) => {

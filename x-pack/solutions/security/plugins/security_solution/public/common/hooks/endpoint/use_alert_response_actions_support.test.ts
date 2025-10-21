@@ -62,11 +62,6 @@ describe('When using `useAlertResponseActionsSupport()` hook', () => {
   beforeEach(() => {
     appContextMock = createAppRootMockRenderer();
 
-    // Enable feature flags by default
-    appContextMock.setExperimentalFlag({
-      responseActionsCrowdstrikeManualHostIsolationEnabled: true,
-    });
-
     alertDetailItemData = endpointAlertDataMock.generateEndpointAlertDetailsItemData();
     renderHook = () =>
       appContextMock.renderHook(() => useAlertResponseActionsSupport(alertDetailItemData));
@@ -168,22 +163,6 @@ describe('When using `useAlertResponseActionsSupport()` hook', () => {
         },
         { noAgentSupport: true }
       )
-    );
-  });
-
-  it('should set `isSupported` to `false` for crowdstrike if feature flag is disabled', () => {
-    appContextMock.setExperimentalFlag({
-      responseActionsCrowdstrikeManualHostIsolationEnabled: false,
-    });
-
-    alertDetailItemData =
-      endpointAlertDataMock.generateAlertDetailsItemDataForAgentType('crowdstrike');
-
-    expect(renderHook().result.current).toEqual(
-      getExpectedResult({
-        isSupported: false,
-        details: { agentType: 'crowdstrike' },
-      })
     );
   });
 });
