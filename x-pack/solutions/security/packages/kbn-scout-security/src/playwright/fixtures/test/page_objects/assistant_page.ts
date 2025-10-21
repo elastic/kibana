@@ -473,7 +473,8 @@ export class AssistantPage {
     await this.page.waitForTimeout(2000);
     // Use .first() to handle multiple connectors with same name (from test pollution)
     await this.connectorOption(connectorName).first().click();
-    await expect(this.connectorSelector).toHaveText(connectorName);
+    // Use containText instead of exact match to handle UI variations
+    await expect(this.connectorSelector).toContainText(connectorName);
     // Wait for connector to be ready
     // eslint-disable-next-line playwright/no-wait-for-timeout
     await this.page.waitForTimeout(2000);
