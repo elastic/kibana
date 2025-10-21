@@ -41,7 +41,7 @@ import { getMlNodeCount } from '@kbn/ml-plugin/server/lib/node_utils';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { AIAssistantDataClientParams } from '..';
 import { AIAssistantDataClient } from '..';
-import type { GetElser } from '../../types';
+import { CallbackIds, type GetElser } from '../../types';
 import {
   createKnowledgeBaseEntry,
   getUpdateScript,
@@ -82,6 +82,7 @@ import { ASSISTANT_ELSER_INFERENCE_ID } from './field_maps_configuration';
 import type { BulkOperationError } from '../../lib/data_stream/documents_data_writer';
 import { AUDIT_OUTCOME, KnowledgeBaseAuditAction, knowledgeBaseAuditEvent } from './audit_events';
 import { findDocuments } from '../find';
+import { appContextService } from '../../services/app_context';
 
 /**
  * Params for when creating KbDataClient in Request Context Factory. Useful if needing to modify
@@ -331,6 +332,11 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
 
           docLoaderPromises.push(loadSecurityLabs(this, this.options.logger));
         } else {
+          try {
+            appContextService.getRegisteredCallbacks(CallbackIds.SecurityLabsContentLoaded)[0]();
+          } catch (e) {
+            this.options.logger.error(e);
+          }
           this.options.logger.debug(`Security Labs Knowledge Base docs already loaded!`);
         }
       }
@@ -372,6 +378,11 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       if (docLoaderPromises.length > 0) {
         void Promise.all(docLoaderPromises).then(() => {
           this.options.setIsKBSetupInProgress(this.spaceId, false);
+          try {
+            appContextService.getRegisteredCallbacks(CallbackIds.SecurityLabsContentLoaded)[0]();
+          } catch (e) {
+            this.options.logger.error(e);
+          }
         });
       }
 

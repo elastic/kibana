@@ -34,7 +34,7 @@ import { ElasticSearchSaver } from '@kbn/langgraph-checkpoint-saver/server/elast
 import { alertSummaryFieldsFieldMap } from '../ai_assistant_data_clients/alert_summary/field_maps_configuration';
 import { defendInsightsFieldMap } from '../lib/defend_insights/persistence/field_maps_configuration';
 import { getDefaultAnonymizationFields } from '../../common/anonymization';
-import type { AssistantResourceNames, GetElser } from '../types';
+import { CallbackIds, type AssistantResourceNames, type GetElser } from '../types';
 import type { GetAIAssistantConversationsDataClientParams } from '../ai_assistant_data_clients/conversations';
 import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
 import type {
@@ -72,6 +72,7 @@ import {
   ANONYMIZATION_FIELDS_RESOURCE,
 } from './constants';
 import { getIndexTemplateAndPattern } from '../lib/data_stream/helpers';
+import { appContextService } from '../services/app_context';
 
 const TOTAL_FIELDS_LIMIT = 2500;
 
@@ -514,6 +515,13 @@ export class AIAssistantService {
     }
     this.initialized = true;
     this.isInitializing = false;
+
+    try {
+      appContextService.getRegisteredCallbacks(CallbackIds.KnowledgeBaseInitialized)[0]();
+    } catch (e) {
+      this.options.logger.error(e);
+    }
+
     return successResult();
   }
 
