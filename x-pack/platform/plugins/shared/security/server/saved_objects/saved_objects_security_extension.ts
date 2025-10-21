@@ -1767,13 +1767,20 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
    * @returns Array of Either<L, R> with inaccessible objects converted to error results
    */
   async filterInaccessibleObjectsForBulkAction<
-    L extends { type: string; id: string; error: Payload },
-    R extends { type: string; id: string; esRequestIndex: number }
+    L extends { type: string; id?: string; error: Payload },
+    R extends { type: string; id: string; esRequestIndex?: number }
   >(
     expectedResults: Array<Either<L, R>>,
-    inaccessibleObjects: Array<{ type: string; id: string }>
+    inaccessibleObjects: Array<{ type: string; id: string }>,
+    action: 'bulk_create' | 'bulk_update' | 'bulk_delete',
+    reindex?: boolean
   ): Promise<Array<Either<L, R>>> {
     let reIndexCounter = 0;
+    const verbMap = new Map([
+      ['bulk_create', 'Overwriting'], // inaccessible objects during create can only be a result of overwriting
+      ['bulk_update', 'Updating'],
+      ['bulk_delete', 'Deleting'],
+    ]);
     return Promise.all(
       expectedResults.map(async (result) => {
         if (isLeft<L, R>(result)) {
@@ -1791,7 +1798,9 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
               ...errorContent(
                 SavedObjectsErrorHelpers.decorateForbiddenError(
                   new Error(
-                    `Deleting objects in read-only mode that are owned by another user requires the manage_access_control privilege.`
+                    `${
+                      verbMap.get(action) ?? 'Affecting'
+                    } objects in read-only mode that are owned by another user requires the manage_access_control privilege.`
                   )
                 )
               ),
@@ -1800,7 +1809,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         }
         return {
           ...result,
-          value: { ...result.value, esRequestIndex: reIndexCounter++ },
+          ...(reindex && { value: { ...result.value, esRequestIndex: reIndexCounter++ } }),
         } as Either<L, R>;
       })
     );

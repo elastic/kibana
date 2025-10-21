@@ -136,7 +136,9 @@ export const performBulkDelete = async <T>(
 
     expectedResults = await securityExtension.filterInaccessibleObjectsForBulkAction(
       expectedMultiNamespaceResults,
-      inaccessibleObjects
+      inaccessibleObjects,
+      'bulk_delete',
+      true // reindex of esRequestIndex field needed to map subsequent bulk delete results below
     );
   } else expectedResults = expectedMultiNamespaceResults;
 

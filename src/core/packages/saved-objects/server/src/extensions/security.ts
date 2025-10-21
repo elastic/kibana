@@ -612,10 +612,12 @@ export interface ISavedObjectsSecurityExtension {
    * Filters bulk operation expected results array to filter inaccessible object left
    */
   filterInaccessibleObjectsForBulkAction<
-    L extends { type: string; id: string; error: Payload },
-    R extends { type: string; id: string; esRequestIndex: number }
+    L extends { type: string; id?: string; error: Payload },
+    R extends { type: string; id: string; esRequestIndex?: number }
   >(
     expectedResults: Array<Either<L, R>>,
-    inaccessibleObjects: Array<{ type: string; id: string }>
+    inaccessibleObjects: Array<{ type: string; id: string }>,
+    action: 'bulk_create' | 'bulk_update' | 'bulk_delete', // could alternatively move the SecurityAction definition to a core package to reference here
+    reindex?: boolean // will re-index the esRequestIndex field (used only in bulk_delete)
   ): Promise<Array<Either<L, R>>>;
 }

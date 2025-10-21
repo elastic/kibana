@@ -84,7 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/read_only_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', adminCookie.cookieString())
-          .send({ type: 'read_only_type' })
+          .send({ type: READ_ONLY_TYPE })
           .expect(200);
         expect(response.body).to.have.property('accessControl');
         expect(response.body.accessControl).to.have.property('accessMode', 'default');
@@ -99,10 +99,10 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/read_only_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', adminCookie.cookieString())
-          .send({ type: 'read_only_type', isReadOnly: true })
+          .send({ type: READ_ONLY_TYPE, isReadOnly: true })
           .expect(200);
 
-        expect(response.body.type).to.eql('read_only_type');
+        expect(response.body.type).to.eql(READ_ONLY_TYPE);
         expect(response.body).to.have.property('accessControl');
 
         const { accessControl } = response.body;
@@ -124,19 +124,19 @@ export default function ({ getService }: FtrProviderContext) {
               'base64'
             )}`
           )
-          .send({ type: 'read_only_type' })
+          .send({ type: READ_ONLY_TYPE })
           .expect(200);
         expect(response.body).not.to.have.property('accessControl');
         expect(response.body).to.have.property('type');
         const { type } = response.body;
-        expect(type).to.be('read_only_type');
+        expect(type).to.be(READ_ONLY_TYPE);
       });
 
       it('should throw when trying to create read only object with no user', async () => {
         const response = await supertest
           .post('/read_only_objects/create')
           .set('kbn-xsrf', 'true')
-          .send({ type: 'read_only_type', isReadOnly: true })
+          .send({ type: READ_ONLY_TYPE, isReadOnly: true })
           .expect(400);
         expect(response.body).to.have.property('message');
         expect(response.body.message).to.contain(
@@ -461,7 +461,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       describe('failure modes', () => {
-        it('rejects when overwriting and all objects are read-only', async () => {
+        it('rejects when overwriting and all objects are read-only and inaccessible', async () => {
           const { cookie: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin();
 
           const firstObject = await supertestWithoutAuth
@@ -532,7 +532,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(getResponse2.body.accessControl).to.have.property('accessMode', 'read_only');
         });
 
-        it('return status when overwriting objects and some objects are owned by current user', async () => {
+        it('return status when overwriting objects and all objects are read-only but some are owned by current user', async () => {
           const { cookie: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin();
 
           const firstObject = await supertestWithoutAuth
@@ -662,7 +662,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(res.body.saved_objects[1]).not.to.have.property('error');
         });
 
-        it('return stauts when overwriting and some types do not support access control', async () => {
+        it('return stauts when overwriting and some authorized types do not support access control', async () => {
           const { cookie: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin();
 
           const firstObject = await supertestWithoutAuth
@@ -739,7 +739,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/read_only_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', objectOwnerCookie.cookieString())
-          .send({ type: 'read_only_type', isReadOnly: true })
+          .send({ type: READ_ONLY_TYPE, isReadOnly: true })
           .expect(200);
 
         const objectId = createResponse.body.id;
@@ -751,7 +751,7 @@ export default function ({ getService }: FtrProviderContext) {
           .put('/read_only_objects/update')
           .set('kbn-xsrf', 'true')
           .set('cookie', objectOwnerCookie.cookieString())
-          .send({ objectId, type: 'read_only_type' })
+          .send({ objectId, type: READ_ONLY_TYPE })
           .expect(200);
 
         expect(updateResponse.body.id).to.eql(objectId);
@@ -767,7 +767,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/read_only_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', adminCookie.cookieString())
-          .send({ type: 'read_only_type', isReadOnly: true })
+          .send({ type: READ_ONLY_TYPE, isReadOnly: true })
           .expect(200);
         const objectId = createResponse.body.id;
         expect(createResponse.body.attributes).to.have.property('description', 'test');
@@ -779,7 +779,7 @@ export default function ({ getService }: FtrProviderContext) {
           .put('/read_only_objects/update')
           .set('kbn-xsrf', 'true')
           .set('cookie', notOwnerCookie.cookieString())
-          .send({ objectId, type: 'read_only_type' })
+          .send({ objectId, type: READ_ONLY_TYPE })
           .expect(403);
         expect(updateResponse.body).to.have.property('message');
         expect(updateResponse.body.message).to.contain('Unable to update read_only_type');
@@ -791,7 +791,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/read_only_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', adminCookie.cookieString())
-          .send({ type: 'read_only_type' })
+          .send({ type: READ_ONLY_TYPE })
           .expect(200);
         const objectId = response.body.id;
 
@@ -801,7 +801,7 @@ export default function ({ getService }: FtrProviderContext) {
           .put('/read_only_objects/update')
           .set('kbn-xsrf', 'true')
           .set('cookie', notOwnerCookie.cookieString())
-          .send({ objectId, type: 'read_only_type' });
+          .send({ objectId, type: READ_ONLY_TYPE });
 
         expect(updateResponse.body.id).to.eql(objectId);
         expect(updateResponse.body.attributes).to.have.property(
@@ -816,7 +816,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/read_only_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', ownerCookie.cookieString())
-          .send({ type: 'read_only_type', isReadOnly: true })
+          .send({ type: READ_ONLY_TYPE, isReadOnly: true })
           .expect(200);
         const objectId = createResponse.body.id;
 
@@ -825,7 +825,7 @@ export default function ({ getService }: FtrProviderContext) {
           .put('/read_only_objects/update')
           .set('kbn-xsrf', 'true')
           .set('cookie', adminCookie.cookieString())
-          .send({ objectId, type: 'read_only_type' })
+          .send({ objectId, type: READ_ONLY_TYPE })
           .expect(200);
 
         expect(updateResponse.body.id).to.eql(objectId);
@@ -837,188 +837,403 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('#bulk_update', () => {
-      it('allow owner to bulk update objects marked as read only', async () => {
-        const { cookie: objectOwnerCookie, profileUid: objectOwnerProfileUid } =
-          await loginAsObjectOwner('test_user', 'changeme');
-        const firstObject = await supertestWithoutAuth
-          .post('/read_only_objects/create')
-          .set('kbn-xsrf', 'true')
-          .set('cookie', objectOwnerCookie.cookieString())
-          .send({ type: 'read_only_type', isReadOnly: true })
-          .expect(200);
-        const { id: objectId1, type: type1 } = firstObject.body;
+      describe('success', () => {
+        it('allows owner to bulk update objects marked as read only', async () => {
+          const { cookie: objectOwnerCookie, profileUid: objectOwnerProfileUid } =
+            await loginAsObjectOwner('test_user', 'changeme');
+          const firstObject = await supertestWithoutAuth
+            .post('/read_only_objects/create')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', objectOwnerCookie.cookieString())
+            .send({ type: READ_ONLY_TYPE, isReadOnly: true })
+            .expect(200);
+          const { id: objectId1, type: type1 } = firstObject.body;
 
-        const secondObject = await supertestWithoutAuth
-          .post('/read_only_objects/create')
-          .set('kbn-xsrf', 'true')
-          .set('cookie', objectOwnerCookie.cookieString())
-          .send({ type: 'read_only_type', isReadOnly: true })
-          .expect(200);
-        const { id: objectId2, type: type2 } = secondObject.body;
+          const secondObject = await supertestWithoutAuth
+            .post('/read_only_objects/create')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', objectOwnerCookie.cookieString())
+            .send({ type: READ_ONLY_TYPE, isReadOnly: true })
+            .expect(200);
+          const { id: objectId2, type: type2 } = secondObject.body;
 
-        const objects = [
-          {
-            id: objectId1,
-            type: type1,
-          },
-          {
-            id: objectId2,
-            type: type2,
-          },
-        ];
+          const objects = [
+            {
+              id: objectId1,
+              type: type1,
+            },
+            {
+              id: objectId2,
+              type: type2,
+            },
+          ];
 
-        const res = await supertestWithoutAuth
-          .post('/read_only_objects/bulk_update')
-          .set('kbn-xsrf', 'true')
-          .set('cookie', objectOwnerCookie.cookieString())
-          .send({
-            objects,
-          })
-          .expect(200);
-        for (const { id, attributes, accessControl } of res.body.saved_objects) {
-          const object = objects.find((obj) => obj.id === id);
-          expect(object).to.not.be(undefined);
-          expect(attributes).to.have.property('description', 'updated description');
-          expect(accessControl).to.have.property('owner', objectOwnerProfileUid);
-          expect(accessControl).to.have.property('accessMode', 'read_only');
-        }
+          const res = await supertestWithoutAuth
+            .post('/read_only_objects/bulk_update')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', objectOwnerCookie.cookieString())
+            .send({
+              objects,
+            })
+            .expect(200);
+          for (const { id, attributes, accessControl } of res.body.saved_objects) {
+            const object = objects.find((obj) => obj.id === id);
+            expect(object).to.not.be(undefined);
+            expect(attributes).to.have.property('description', 'updated description');
+            expect(accessControl).to.have.property('owner', objectOwnerProfileUid);
+            expect(accessControl).to.have.property('accessMode', 'read_only');
+          }
+        });
+
+        it('allows admin to bulk update objects marked as read only', async () => {
+          const { cookie: objectOwnerCookie, profileUid: objectOwnerProfileUid } =
+            await loginAsObjectOwner('test_user', 'changeme');
+          const firstObject = await supertestWithoutAuth
+            .post('/read_only_objects/create')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', objectOwnerCookie.cookieString())
+            .send({ type: READ_ONLY_TYPE, isReadOnly: true })
+            .expect(200);
+          const { id: objectId1, type: type1 } = firstObject.body;
+
+          const secondObject = await supertestWithoutAuth
+            .post('/read_only_objects/create')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', objectOwnerCookie.cookieString())
+            .send({ type: READ_ONLY_TYPE, isReadOnly: true })
+            .expect(200);
+          const { id: objectId2, type: type2 } = secondObject.body;
+
+          const objects = [
+            {
+              id: objectId1,
+              type: type1,
+            },
+            {
+              id: objectId2,
+              type: type2,
+            },
+          ];
+          const { cookie: adminCookie } = await loginAsKibanaAdmin();
+          const res = await supertestWithoutAuth
+            .post('/read_only_objects/bulk_update')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', adminCookie.cookieString())
+            .send({
+              objects,
+            })
+            .expect(200);
+          for (const { id, attributes, accessControl } of res.body.saved_objects) {
+            const object = objects.find((obj) => obj.id === id);
+            expect(object).to.not.be(undefined);
+            expect(attributes).to.have.property('description', 'updated description');
+            expect(accessControl).to.have.property('owner', objectOwnerProfileUid);
+            expect(accessControl).to.have.property('accessMode', 'read_only');
+          }
+        });
+
+        it('allows non-owner non-admin to bulk update objects in default mode ', async () => {
+          const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
+          const firstObject = await supertestWithoutAuth
+            .post('/read_only_objects/create')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', objectOwnerCookie.cookieString())
+            .send({ type: READ_ONLY_TYPE })
+            .expect(200);
+          const { id: objectId1, type: type1 } = firstObject.body;
+
+          const secondObject = await supertestWithoutAuth
+            .post('/read_only_objects/create')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', objectOwnerCookie.cookieString())
+            .send({ type: READ_ONLY_TYPE })
+            .expect(200);
+          const { id: objectId2, type: type2 } = secondObject.body;
+
+          const objects = [
+            {
+              id: objectId1,
+              type: type1,
+            },
+            {
+              id: objectId2,
+              type: type2,
+            },
+          ];
+
+          await createSimpleUser(['kibana_savedobjects_editor']);
+          const { cookie: notOwnerCookie } = await loginAsNotObjectOwner('simple_user', 'changeme');
+
+          const res = await supertestWithoutAuth
+            .post('/read_only_objects/bulk_update')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', notOwnerCookie.cookieString())
+            .send({
+              objects,
+            })
+            .expect(200);
+          for (const { id, attributes, accessControl } of res.body.saved_objects) {
+            const object = objects.find((obj) => obj.id === id);
+            expect(object).to.not.be(undefined);
+            expect(attributes).to.have.property('description', 'updated description');
+            expect(accessControl).to.have.property('accessMode', 'default');
+          }
+        });
       });
 
-      it('allow admin to bulk update objects marked as read only', async () => {
-        const { cookie: objectOwnerCookie, profileUid: objectOwnerProfileUid } =
-          await loginAsObjectOwner('test_user', 'changeme');
-        const firstObject = await supertestWithoutAuth
-          .post('/read_only_objects/create')
-          .set('kbn-xsrf', 'true')
-          .set('cookie', objectOwnerCookie.cookieString())
-          .send({ type: 'read_only_type', isReadOnly: true })
-          .expect(200);
-        const { id: objectId1, type: type1 } = firstObject.body;
+      describe('failuere modes', () => {
+        it('rejects if all objects are read-only and inaccessible', async () => {
+          await activateSimpleUserProfile();
+          const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
+          const firstObject = await supertestWithoutAuth
+            .post('/read_only_objects/create')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', objectOwnerCookie.cookieString())
+            .send({ type: READ_ONLY_TYPE, isReadOnly: true })
+            .expect(200);
+          const { id: objectId1, type: type1 } = firstObject.body;
 
-        const secondObject = await supertestWithoutAuth
-          .post('/read_only_objects/create')
-          .set('kbn-xsrf', 'true')
-          .set('cookie', objectOwnerCookie.cookieString())
-          .send({ type: 'read_only_type', isReadOnly: true })
-          .expect(200);
-        const { id: objectId2, type: type2 } = secondObject.body;
+          const secondObject = await supertestWithoutAuth
+            .post('/read_only_objects/create')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', objectOwnerCookie.cookieString())
+            .send({ type: READ_ONLY_TYPE, isReadOnly: true })
+            .expect(200);
+          const { id: objectId2, type: type2 } = secondObject.body;
 
-        const objects = [
-          {
+          const objects = [
+            {
+              id: objectId1,
+              type: type1,
+            },
+            {
+              id: objectId2,
+              type: type2,
+            },
+          ];
+          const { cookie: nonOwnerCookie } = await loginAsNotObjectOwner('simple_user', 'changeme');
+          const res = await supertestWithoutAuth
+            .post('/read_only_objects/bulk_update')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', nonOwnerCookie.cookieString())
+            .send({
+              objects,
+            })
+            .expect(403);
+          expect(res.body).to.have.property('message');
+          expect(res.body.message).to.contain('Unable to bulk_update read_only_type');
+        });
+
+        it('returns status if all objects are read-only but some are owned by the current user', async () => {
+          await activateSimpleUserProfile();
+          const { cookie: object1OwnerCookie, profileUid: obj1OwnerId } = await loginAsObjectOwner(
+            'test_user',
+            'changeme'
+          );
+          const firstObject = await supertestWithoutAuth
+            .post('/read_only_objects/create')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', object1OwnerCookie.cookieString())
+            .send({ type: READ_ONLY_TYPE, isReadOnly: true })
+            .expect(200);
+          const { id: objectId1, type: type1 } = firstObject.body;
+          expect(firstObject.body).to.have.property('accessControl');
+          expect(firstObject.body.accessControl).to.have.property('owner', obj1OwnerId);
+          expect(firstObject.body.accessControl).to.have.property('accessMode', 'read_only');
+
+          await createSimpleUser(['kibana_savedobjects_editor']);
+          const { cookie: object2OwnerCookie, profileUid: obj2OwnerId } =
+            await loginAsNotObjectOwner('simple_user', 'changeme');
+
+          const secondObject = await supertestWithoutAuth
+            .post('/read_only_objects/create')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', object2OwnerCookie.cookieString())
+            .send({ type: READ_ONLY_TYPE, isReadOnly: true })
+            .expect(200);
+          const { id: objectId2, type: type2 } = secondObject.body;
+          expect(secondObject.body).to.have.property('accessControl');
+          expect(secondObject.body.accessControl).to.have.property('owner', obj2OwnerId);
+          expect(secondObject.body.accessControl).to.have.property('accessMode', 'read_only');
+
+          const objects = [
+            {
+              id: objectId1,
+              type: type1,
+            },
+            {
+              id: objectId2,
+              type: type2,
+            },
+          ];
+
+          const res = await supertestWithoutAuth
+            .post('/read_only_objects/bulk_update')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', object2OwnerCookie.cookieString())
+            .send({
+              objects,
+            })
+            .expect(200);
+
+          expect(res.body).to.have.property('saved_objects');
+          expect(res.body.saved_objects).to.be.an('array');
+          expect(res.body.saved_objects).to.have.length(2);
+          expect(res.body.saved_objects[0]).to.eql({
             id: objectId1,
-            type: type1,
-          },
-          {
-            id: objectId2,
-            type: type2,
-          },
-        ];
-        const { cookie: adminCookie } = await loginAsKibanaAdmin();
-        const res = await supertestWithoutAuth
-          .post('/read_only_objects/bulk_update')
-          .set('kbn-xsrf', 'true')
-          .set('cookie', adminCookie.cookieString())
-          .send({
-            objects,
-          })
-          .expect(200);
-        for (const { id, attributes, accessControl } of res.body.saved_objects) {
-          const object = objects.find((obj) => obj.id === id);
-          expect(object).to.not.be(undefined);
-          expect(attributes).to.have.property('description', 'updated description');
-          expect(accessControl).to.have.property('owner', objectOwnerProfileUid);
-          expect(accessControl).to.have.property('accessMode', 'read_only');
-        }
-      });
+            type: READ_ONLY_TYPE,
+            error: {
+              statusCode: 403,
+              error: 'Forbidden',
+              message:
+                'Updating objects in read-only mode that are owned by another user requires the manage_access_control privilege.',
+            },
+          });
+          expect(res.body.saved_objects[1]).to.have.property('id', objectId2);
+          expect(res.body.saved_objects[1]).to.have.property('type', type2);
+          expect(res.body.saved_objects[1]).to.have.property('updated_by', obj2OwnerId);
+          expect(res.body.saved_objects[1]).not.to.have.property('error');
+        });
 
-      it('does not allow non-owner to bulk update objects marked as read only if not admin', async () => {
-        await activateSimpleUserProfile();
-        const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
-        const firstObject = await supertestWithoutAuth
-          .post('/read_only_objects/create')
-          .set('kbn-xsrf', 'true')
-          .set('cookie', objectOwnerCookie.cookieString())
-          .send({ type: 'read_only_type', isReadOnly: true })
-          .expect(200);
-        const { id: objectId1, type: type1 } = firstObject.body;
+        it('returns status if some objects are in default mode', async () => {
+          await activateSimpleUserProfile();
+          const { cookie: object1OwnerCookie, profileUid: obj1OwnerId } = await loginAsObjectOwner(
+            'test_user',
+            'changeme'
+          );
+          const firstObject = await supertestWithoutAuth
+            .post('/read_only_objects/create')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', object1OwnerCookie.cookieString())
+            .send({ type: READ_ONLY_TYPE, isReadOnly: true })
+            .expect(200);
+          const { id: objectId1, type: type1 } = firstObject.body;
+          expect(firstObject.body).to.have.property('accessControl');
+          expect(firstObject.body.accessControl).to.have.property('owner', obj1OwnerId);
+          expect(firstObject.body.accessControl).to.have.property('accessMode', 'read_only');
 
-        const secondObject = await supertestWithoutAuth
-          .post('/read_only_objects/create')
-          .set('kbn-xsrf', 'true')
-          .set('cookie', objectOwnerCookie.cookieString())
-          .send({ type: 'read_only_type', isReadOnly: true })
-          .expect(200);
-        const { id: objectId2, type: type2 } = secondObject.body;
+          const secondObject = await supertestWithoutAuth
+            .post('/read_only_objects/create')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', object1OwnerCookie.cookieString())
+            .send({ type: READ_ONLY_TYPE, isReadOnly: false })
+            .expect(200);
+          const { id: objectId2, type: type2 } = secondObject.body;
+          expect(secondObject.body).to.have.property('accessControl');
+          expect(secondObject.body.accessControl).to.have.property('owner', obj1OwnerId);
+          expect(secondObject.body.accessControl).to.have.property('accessMode', 'default');
 
-        const objects = [
-          {
+          await createSimpleUser(['kibana_savedobjects_editor']);
+          const { cookie: object2OwnerCookie, profileUid: obj2OwnerId } =
+            await loginAsNotObjectOwner('simple_user', 'changeme');
+
+          const objects = [
+            {
+              id: objectId1,
+              type: type1,
+            },
+            {
+              id: objectId2,
+              type: type2,
+            },
+          ];
+
+          const res = await supertestWithoutAuth
+            .post('/read_only_objects/bulk_update')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', object2OwnerCookie.cookieString())
+            .send({
+              objects,
+            })
+            .expect(200);
+
+          expect(res.body).to.have.property('saved_objects');
+          expect(res.body.saved_objects).to.be.an('array');
+          expect(res.body.saved_objects).to.have.length(2);
+          expect(res.body.saved_objects[0]).to.eql({
             id: objectId1,
-            type: type1,
-          },
-          {
-            id: objectId2,
-            type: type2,
-          },
-        ];
-        const { cookie: nonOwnerCookie } = await loginAsNotObjectOwner('simple_user', 'changeme');
-        const res = await supertestWithoutAuth
-          .post('/read_only_objects/bulk_update')
-          .set('kbn-xsrf', 'true')
-          .set('cookie', nonOwnerCookie.cookieString())
-          .send({
-            objects,
-          })
-          .expect(403);
-        expect(res.body).to.have.property('message');
-        expect(res.body.message).to.contain('Unable to bulk_update read_only_type');
-      });
+            type: READ_ONLY_TYPE,
+            error: {
+              statusCode: 403,
+              error: 'Forbidden',
+              message:
+                'Updating objects in read-only mode that are owned by another user requires the manage_access_control privilege.',
+            },
+          });
+          expect(res.body.saved_objects[1]).to.have.property('id', objectId2);
+          expect(res.body.saved_objects[1]).to.have.property('type', type2);
+          expect(res.body.saved_objects[1]).to.have.property('updated_by', obj2OwnerId);
+          expect(res.body.saved_objects[1]).not.to.have.property('error');
+        });
 
-      it('allows non-owner non-admin to bulk update objects in default mode ', async () => {
-        const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
-        const firstObject = await supertestWithoutAuth
-          .post('/read_only_objects/create')
-          .set('kbn-xsrf', 'true')
-          .set('cookie', objectOwnerCookie.cookieString())
-          .send({ type: 'read_only_type' })
-          .expect(200);
-        const { id: objectId1, type: type1 } = firstObject.body;
+        it('returns status if some authorized types do not support access control', async () => {
+          await activateSimpleUserProfile();
+          const { cookie: object1OwnerCookie, profileUid: obj1OwnerId } = await loginAsObjectOwner(
+            'test_user',
+            'changeme'
+          );
+          const firstObject = await supertestWithoutAuth
+            .post('/read_only_objects/create')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', object1OwnerCookie.cookieString())
+            .send({ type: READ_ONLY_TYPE, isReadOnly: true })
+            .expect(200);
+          const { id: objectId1, type: type1 } = firstObject.body;
+          expect(firstObject.body).to.have.property('accessControl');
+          expect(firstObject.body.accessControl).to.have.property('owner', obj1OwnerId);
+          expect(firstObject.body.accessControl).to.have.property('accessMode', 'read_only');
 
-        const secondObject = await supertestWithoutAuth
-          .post('/read_only_objects/create')
-          .set('kbn-xsrf', 'true')
-          .set('cookie', objectOwnerCookie.cookieString())
-          .send({ type: 'read_only_type' })
-          .expect(200);
-        const { id: objectId2, type: type2 } = secondObject.body;
+          const secondObject = await supertestWithoutAuth
+            .post('/read_only_objects/create')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', object1OwnerCookie.cookieString())
+            .send({ type: NON_READ_ONLY_TYPE })
+            .expect(200);
+          const { id: objectId2, type: type2 } = secondObject.body;
+          expect(secondObject.body).not.to.have.property('accessControl');
 
-        const objects = [
-          {
+          await createSimpleUser(['kibana_savedobjects_editor']);
+          const { cookie: object2OwnerCookie, profileUid: obj2OwnerId } =
+            await loginAsNotObjectOwner('simple_user', 'changeme');
+
+          const objects = [
+            {
+              id: objectId1,
+              type: type1,
+            },
+            {
+              id: objectId2,
+              type: type2,
+            },
+          ];
+
+          const res = await supertestWithoutAuth
+            .post('/read_only_objects/bulk_update')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', object2OwnerCookie.cookieString())
+            .send({
+              objects,
+            })
+            .expect(200);
+
+          expect(res.body).to.have.property('saved_objects');
+          expect(res.body.saved_objects).to.be.an('array');
+          expect(res.body.saved_objects).to.have.length(2);
+          expect(res.body.saved_objects[0]).to.eql({
             id: objectId1,
-            type: type1,
-          },
-          {
-            id: objectId2,
-            type: type2,
-          },
-        ];
-
-        await createSimpleUser(['kibana_savedobjects_editor']);
-        const { cookie: notOwnerCookie } = await loginAsNotObjectOwner('simple_user', 'changeme');
-
-        const res = await supertestWithoutAuth
-          .post('/read_only_objects/bulk_update')
-          .set('kbn-xsrf', 'true')
-          .set('cookie', notOwnerCookie.cookieString())
-          .send({
-            objects,
-          })
-          .expect(200);
-        for (const { id, attributes, accessControl } of res.body.saved_objects) {
-          const object = objects.find((obj) => obj.id === id);
-          expect(object).to.not.be(undefined);
-          expect(attributes).to.have.property('description', 'updated description');
-          expect(accessControl).to.have.property('accessMode', 'default');
-        }
+            type: READ_ONLY_TYPE,
+            error: {
+              statusCode: 403,
+              error: 'Forbidden',
+              message:
+                'Updating objects in read-only mode that are owned by another user requires the manage_access_control privilege.',
+            },
+          });
+          expect(res.body.saved_objects[1]).to.have.property('id', objectId2);
+          expect(res.body.saved_objects[1]).to.have.property('type', type2);
+          expect(res.body.saved_objects[1]).to.have.property('updated_by', obj2OwnerId);
+          expect(res.body.saved_objects[1]).not.to.have.property('error');
+        });
       });
     });
 
@@ -1032,7 +1247,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/read_only_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', objectOwnerCookie.cookieString())
-          .send({ type: 'read_only_type', isReadOnly: true })
+          .send({ type: READ_ONLY_TYPE, isReadOnly: true })
           .expect(200);
         const objectId = createResponse.body.id;
         expect(createResponse.body.accessControl).to.have.property('owner', profileUid);
@@ -1053,7 +1268,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/read_only_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', objectOwnerCookie.cookieString())
-          .send({ type: 'read_only_type', isReadOnly: true })
+          .send({ type: READ_ONLY_TYPE, isReadOnly: true })
           .expect(200);
         const objectId = createResponse.body.id;
         expect(createResponse.body.accessControl).to.have.property('owner', profileUid);
@@ -1082,7 +1297,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/read_only_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', adminCookie.cookieString())
-          .send({ type: 'read_only_type', isReadOnly: true })
+          .send({ type: READ_ONLY_TYPE, isReadOnly: true })
           .expect(200);
         const objectId = createResponse.body.id;
         expect(createResponse.body.accessControl).to.have.property('owner', adminProfileUid);
@@ -1103,7 +1318,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/read_only_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', ownerCookie.cookieString())
-          .send({ type: 'read_only_type' })
+          .send({ type: READ_ONLY_TYPE })
           .expect(200);
 
         const objectId = createResponse.body.id;
@@ -1126,7 +1341,7 @@ export default function ({ getService }: FtrProviderContext) {
               .post('/read_only_objects/create')
               .set('kbn-xsrf', 'true')
               .set('cookie', objectOwnerCookie.cookieString())
-              .send({ type: 'read_only_type', isReadOnly: true })
+              .send({ type: READ_ONLY_TYPE, isReadOnly: true })
               .expect(200);
             const { id: objectId1, type: type1 } = firstObject.body;
 
@@ -1134,7 +1349,7 @@ export default function ({ getService }: FtrProviderContext) {
               .post('/read_only_objects/create')
               .set('kbn-xsrf', 'true')
               .set('cookie', objectOwnerCookie.cookieString())
-              .send({ type: 'read_only_type', isReadOnly: true })
+              .send({ type: READ_ONLY_TYPE, isReadOnly: true })
               .expect(200);
             const { id: objectId2, type: type2 } = secondObject.body;
 
@@ -1226,7 +1441,7 @@ export default function ({ getService }: FtrProviderContext) {
               .post('/read_only_objects/create')
               .set('kbn-xsrf', 'true')
               .set('cookie', objectOwnerCookie.cookieString())
-              .send({ type: 'read_only_type', isReadOnly: true })
+              .send({ type: READ_ONLY_TYPE, isReadOnly: true })
               .expect(200);
             const { id: objectId1, type: type1 } = firstObject.body;
 
@@ -1234,7 +1449,7 @@ export default function ({ getService }: FtrProviderContext) {
               .post('/read_only_objects/create')
               .set('kbn-xsrf', 'true')
               .set('cookie', objectOwnerCookie.cookieString())
-              .send({ type: 'read_only_type', isReadOnly: true })
+              .send({ type: READ_ONLY_TYPE, isReadOnly: true })
               .expect(200);
             const { id: objectId2, type: type2 } = secondObject.body;
 
@@ -1268,13 +1483,13 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         describe('failure modes', () => {
-          it('rejects if all objects are read-only', async () => {
+          it('rejects if all objects are read-only and inaccessible', async () => {
             const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
             const firstObject = await supertestWithoutAuth
               .post('/read_only_objects/create')
               .set('kbn-xsrf', 'true')
               .set('cookie', objectOwnerCookie.cookieString())
-              .send({ type: 'read_only_type', isReadOnly: true })
+              .send({ type: READ_ONLY_TYPE, isReadOnly: true })
               .expect(200);
             const { id: objectId1, type: type1 } = firstObject.body;
 
@@ -1282,7 +1497,7 @@ export default function ({ getService }: FtrProviderContext) {
               .post('/read_only_objects/create')
               .set('kbn-xsrf', 'true')
               .set('cookie', objectOwnerCookie.cookieString())
-              .send({ type: 'read_only_type', isReadOnly: true })
+              .send({ type: READ_ONLY_TYPE, isReadOnly: true })
               .expect(200);
             const { id: objectId2, type: type2 } = secondObject.body;
 
@@ -1319,7 +1534,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(res.body.message).to.contain(`read_only_type:${objectId2}`);
           });
 
-          it('returns status if some objects are owned by the current user', async () => {
+          it('returns status if all objects are read-only but some objects are owned by the current user', async () => {
             await activateSimpleUserProfile();
             const { cookie: object1OwnerCookie, profileUid: obj1OwnerId } =
               await loginAsObjectOwner('test_user', 'changeme');
@@ -1469,7 +1684,7 @@ export default function ({ getService }: FtrProviderContext) {
             ]);
           });
 
-          it('returns status if some types do not support access control', async () => {
+          it('returns status if some authorized types do not support access control', async () => {
             await activateSimpleUserProfile();
             const { cookie: objectOwnerCookie, profileUid: obj1OwnerId } = await loginAsObjectOwner(
               'test_user',
@@ -1554,7 +1769,7 @@ export default function ({ getService }: FtrProviderContext) {
             .post('/read_only_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', objectOwnerCookie.cookieString())
-            .send({ type: 'read_only_type', isReadOnly: true })
+            .send({ type: READ_ONLY_TYPE, isReadOnly: true })
             .expect(200);
           const { id: objectId1, type: type1 } = firstObject.body;
 
@@ -1562,7 +1777,7 @@ export default function ({ getService }: FtrProviderContext) {
             .post('/read_only_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', objectOwnerCookie.cookieString())
-            .send({ type: 'read_only_type', isReadOnly: true })
+            .send({ type: READ_ONLY_TYPE, isReadOnly: true })
             .expect(200);
           const { id: objectId2, type: type2 } = secondObject.body;
 
@@ -1600,7 +1815,7 @@ export default function ({ getService }: FtrProviderContext) {
             .post('/read_only_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', objectOwnerCookie.cookieString())
-            .send({ type: 'read_only_type', isReadOnly: true })
+            .send({ type: READ_ONLY_TYPE, isReadOnly: true })
             .expect(200);
           const { id: objectId1, type: type1 } = firstObject.body;
 
@@ -1608,7 +1823,7 @@ export default function ({ getService }: FtrProviderContext) {
             .post('/read_only_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', objectOwnerCookie.cookieString())
-            .send({ type: 'read_only_type', isReadOnly: true })
+            .send({ type: READ_ONLY_TYPE, isReadOnly: true })
             .expect(200);
           const { id: objectId2, type: type2 } = secondObject.body;
 
@@ -1648,7 +1863,7 @@ export default function ({ getService }: FtrProviderContext) {
             .post('/read_only_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', objectOwnerCookie.cookieString())
-            .send({ type: 'read_only_type', isReadOnly: true })
+            .send({ type: READ_ONLY_TYPE, isReadOnly: true })
             .expect(200);
           const { id: objectId1, type: type1 } = firstObject.body;
 
@@ -1656,7 +1871,7 @@ export default function ({ getService }: FtrProviderContext) {
             .post('/read_only_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', objectOwnerCookie.cookieString())
-            .send({ type: 'read_only_type', isReadOnly: true })
+            .send({ type: READ_ONLY_TYPE, isReadOnly: true })
             .expect(200);
           const { id: objectId2, type: type2 } = secondObject.body;
 
@@ -1705,7 +1920,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/read_only_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', ownerCookie.cookieString())
-          .send({ type: 'read_only_type', isReadOnly: true })
+          .send({ type: READ_ONLY_TYPE, isReadOnly: true })
           .expect(200);
         const objectId = createResponse.body.id;
         expect(createResponse.body.accessControl).to.have.property('owner', profileUid);
@@ -1715,7 +1930,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'true')
           .set('cookie', ownerCookie.cookieString())
           .send({
-            objects: [{ id: objectId, type: 'read_only_type' }],
+            objects: [{ id: objectId, type: READ_ONLY_TYPE }],
             newOwnerProfileUid: simpleUserProfileUid,
           })
           .expect(200);
@@ -1736,7 +1951,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/read_only_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', adminCookie.cookieString())
-          .send({ type: 'read_only_type', isReadOnly: true })
+          .send({ type: READ_ONLY_TYPE, isReadOnly: true })
           .expect(200);
         const objectId = createResponse.body.id;
 
@@ -1748,7 +1963,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'true')
           .set('cookie', notOwnerCookie.cookieString())
           .send({
-            objects: [{ id: objectId, type: 'read_only_type' }],
+            objects: [{ id: objectId, type: READ_ONLY_TYPE }],
             newOwnerProfileUid: simpleUserProfileUid,
           })
           .expect(403);
@@ -1769,7 +1984,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/read_only_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', ownerCookie.cookieString())
-          .send({ type: 'read_only_type', isReadOnly: true })
+          .send({ type: READ_ONLY_TYPE, isReadOnly: true })
           .expect(200);
         const objectId = createResponse.body.id;
 
@@ -1781,7 +1996,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'true')
           .set('cookie', adminCookie.cookieString())
           .send({
-            objects: [{ id: objectId, type: 'read_only_type' }],
+            objects: [{ id: objectId, type: READ_ONLY_TYPE }],
             newOwnerProfileUid: simpleUserProfileUid,
           })
           .expect(200);
@@ -1803,7 +2018,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/read_only_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', ownerCookie.cookieString())
-          .send({ type: 'read_only_type', isReadOnly: true })
+          .send({ type: READ_ONLY_TYPE, isReadOnly: true })
           .expect(200);
         const firstObjectId = firstCreate.body.id;
 
@@ -1811,7 +2026,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/read_only_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', ownerCookie.cookieString())
-          .send({ type: 'read_only_type', isReadOnly: true })
+          .send({ type: READ_ONLY_TYPE, isReadOnly: true })
           .expect(200);
         const secondObjectId = secondCreate.body.id;
 
@@ -1854,7 +2069,7 @@ export default function ({ getService }: FtrProviderContext) {
             .post('/read_only_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', ownerCookie.cookieString())
-            .send({ type: 'read_only_type', isReadOnly: true })
+            .send({ type: READ_ONLY_TYPE, isReadOnly: true })
             .expect(200);
           const firstObjectId = firstCreate.body.id;
 
@@ -1862,7 +2077,7 @@ export default function ({ getService }: FtrProviderContext) {
             .post('/read_only_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', ownerCookie.cookieString())
-            .send({ type: 'non_read_only_type' })
+            .send({ type: NON_READ_ONLY_TYPE })
             .expect(200);
           const secondObjectId = secondCreate.body.id;
 
@@ -1881,10 +2096,10 @@ export default function ({ getService }: FtrProviderContext) {
           expect(transferResponse.body.objects).to.have.length(2);
           transferResponse.body.objects.forEach(
             (object: { id: string; type: string; error?: any }) => {
-              if (object.type === 'read_only_type') {
+              if (object.type === READ_ONLY_TYPE) {
                 expect(object).to.have.property('id', firstObjectId);
               }
-              if (object.type === 'non_read_only_type') {
+              if (object.type === NON_READ_ONLY_TYPE) {
                 expect(object).to.have.property('id', secondObjectId);
                 expect(object).to.have.property('error');
                 expect(object.error).to.have.property('output');
@@ -1910,7 +2125,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/read_only_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', ownerCookie.cookieString())
-          .send({ type: 'read_only_type', isReadOnly: false })
+          .send({ type: READ_ONLY_TYPE, isReadOnly: false })
           .expect(200);
         const objectId = createResponse.body.id;
         expect(createResponse.body.accessControl).to.have.property('owner', profileUid);
@@ -1921,13 +2136,13 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'true')
           .set('cookie', adminCookie.cookieString())
           .send({
-            objects: [{ id: objectId, type: 'read_only_type' }],
+            objects: [{ id: objectId, type: READ_ONLY_TYPE }],
             newAccessMode: 'read_only',
           })
           .expect(200);
         expect(response.body.objects).to.have.length(1);
         expect(response.body.objects[0].id).to.eql(objectId);
-        expect(response.body.objects[0].type).to.eql('read_only_type');
+        expect(response.body.objects[0].type).to.eql(READ_ONLY_TYPE);
 
         const getResponse = await supertestWithoutAuth
           .get(`/read_only_objects/${objectId}`)
@@ -1947,7 +2162,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/read_only_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', ownerCookie.cookieString())
-          .send({ type: 'read_only_type', isReadOnly: false })
+          .send({ type: READ_ONLY_TYPE, isReadOnly: false })
           .expect(200);
         const objectId = createResponse.body.id;
         expect(createResponse.body.accessControl).to.have.property('owner', profileUid);
@@ -1958,13 +2173,13 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'true')
           .set('cookie', ownerCookie.cookieString())
           .send({
-            objects: [{ id: objectId, type: 'read_only_type' }],
+            objects: [{ id: objectId, type: READ_ONLY_TYPE }],
             newAccessMode: 'read_only',
           })
           .expect(200);
         expect(response.body.objects).to.have.length(1);
         expect(response.body.objects[0].id).to.eql(objectId);
-        expect(response.body.objects[0].type).to.eql('read_only_type');
+        expect(response.body.objects[0].type).to.eql(READ_ONLY_TYPE);
 
         const getResponse = await supertestWithoutAuth
           .get(`/read_only_objects/${objectId}`)
@@ -1978,7 +2193,7 @@ export default function ({ getService }: FtrProviderContext) {
           .put('/read_only_objects/update')
           .set('kbn-xsrf', 'true')
           .set('cookie', ownerCookie.cookieString())
-          .send({ objectId, type: 'read_only_type' })
+          .send({ objectId, type: READ_ONLY_TYPE })
           .expect(200);
         expect(updateResponse.body.id).to.eql(objectId);
         expect(updateResponse.body.attributes).to.have.property(
@@ -1996,7 +2211,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/read_only_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', ownerCookie.cookieString())
-          .send({ type: 'read_only_type', isReadOnly: true })
+          .send({ type: READ_ONLY_TYPE, isReadOnly: true })
           .expect(200);
 
         const objectId = createResponse.body.id;
@@ -2009,7 +2224,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'true')
           .set('cookie', notOwnerCookie.cookieString())
           .send({
-            objects: [{ id: objectId, type: 'read_only_type' }],
+            objects: [{ id: objectId, type: READ_ONLY_TYPE }],
             newAccessMode: 'read_only',
           })
           .expect(403);
@@ -2028,7 +2243,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/read_only_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', ownerCookie.cookieString())
-          .send({ type: 'read_only_type', isReadOnly: true })
+          .send({ type: READ_ONLY_TYPE, isReadOnly: true })
           .expect(200);
         const objectId = createResponse.body.id;
         expect(createResponse.body.accessControl).to.have.property('owner', profileUid);
@@ -2038,7 +2253,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'true')
           .set('cookie', ownerCookie.cookieString())
           .send({
-            objects: [{ id: objectId, type: 'read_only_type' }],
+            objects: [{ id: objectId, type: READ_ONLY_TYPE }],
             newAccessMode: 'default',
           })
           .expect(200);
@@ -2050,7 +2265,7 @@ export default function ({ getService }: FtrProviderContext) {
           .put('/read_only_objects/update')
           .set('kbn-xsrf', 'true')
           .set('cookie', notOwnerCookie.cookieString())
-          .send({ objectId, type: 'read_only_type' })
+          .send({ objectId, type: READ_ONLY_TYPE })
           .expect(200);
         expect(updateResponse.body.id).to.eql(objectId);
         expect(updateResponse.body.attributes).to.have.property(
