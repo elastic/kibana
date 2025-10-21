@@ -70019,27 +70019,9 @@ components:
         - schedule
         - actions
     Security_Attack_discovery_API_AttackDiscoveryApiScheduleAction:
-      type: object
-      properties:
-        action_type_id:
-          description: The action type used for sending notifications.
-          type: string
-        alerts_filter:
-          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionAlertsFilter'
-        frequency:
-          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionFrequency'
-        group:
-          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionGroup'
-        id:
-          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionId'
-        params:
-          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionParams'
-        uuid:
-          $ref: '#/components/schemas/Security_Attack_discovery_API_NonEmptyString'
-      required:
-        - action_type_id
-        - id
-        - params
+      oneOf:
+        - $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleGeneralAction'
+        - $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleSystemAction'
     Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionAlertsFilter:
       additionalProperties: true
       type: object
@@ -70135,6 +70117,29 @@ components:
         - unknown
         - warning
       type: string
+    Security_Attack_discovery_API_AttackDiscoveryApiScheduleGeneralAction:
+      type: object
+      properties:
+        action_type_id:
+          description: The action type used for sending notifications.
+          type: string
+        alerts_filter:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionAlertsFilter'
+        frequency:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionFrequency'
+        group:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionGroup'
+        id:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionId'
+        params:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionParams'
+        uuid:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_NonEmptyString'
+      required:
+        - action_type_id
+        - group
+        - id
+        - params
     Security_Attack_discovery_API_AttackDiscoveryApiScheduleParams:
       description: An attack discovery schedule params
       type: object
@@ -70170,6 +70175,22 @@ components:
         - alerts_index_pattern
         - api_config
         - size
+    Security_Attack_discovery_API_AttackDiscoveryApiScheduleSystemAction:
+      type: object
+      properties:
+        action_type_id:
+          description: The action type used for sending notifications.
+          type: string
+        id:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionId'
+        params:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionParams'
+        uuid:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_NonEmptyString'
+      required:
+        - action_type_id
+        - id
+        - params
     Security_Attack_discovery_API_AttackDiscoveryApiScheduleUpdateProps:
       description: An attack discovery schedule update properties
       type: object
