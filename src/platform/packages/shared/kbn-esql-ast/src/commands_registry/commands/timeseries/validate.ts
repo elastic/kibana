@@ -8,7 +8,7 @@
  */
 import type {
   ESQLAst,
-  ESQLCommand,
+  ESQLAstAllCommands,
   ESQLMessage,
   ESQLCommandOption,
   ESQLSource,
@@ -20,7 +20,7 @@ import { getMessageFromId } from '../../../definitions/utils';
 import { validateSources } from '../../../definitions/utils/validation/sources';
 
 export const validate = (
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   ast: ESQLAst,
   context?: ICommandContext
 ): ESQLMessage[] => {
