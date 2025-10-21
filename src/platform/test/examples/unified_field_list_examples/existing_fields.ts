@@ -90,6 +90,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
     describe('existence', () => {
       it('should find which fields exist in the sample documents', async () => {
+        await PageObjects.common.sleep(8000);
+
         const sidebarFields = await PageObjects.unifiedFieldList.getAllFieldNames();
         expect(sidebarFields.sort()).to.eql([...metaFields, ...fieldsWithData].sort());
       });
