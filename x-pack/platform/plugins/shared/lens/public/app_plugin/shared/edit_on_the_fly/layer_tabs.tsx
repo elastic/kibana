@@ -10,7 +10,7 @@ import React, { memo, useCallback, useMemo, useRef } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { getLensLayerTypeDisplayName } from '@kbn/lens-common';
+import { getLensLayerTypeTabDisplayName } from '@kbn/lens-common';
 import type { AddLayerFunction, LayerAction, Visualization } from '@kbn/lens-common';
 import {
   UPDATE_FILTER_REFERENCES_ACTION,
@@ -148,7 +148,7 @@ export function LayerTabs(
     for (const config of visibleLayerConfigs) {
       const layerType = config.layerType || '';
       const typeCount = typeCounters.get(layerType) || 0;
-      const formattedLayerType = getLensLayerTypeDisplayName(config.layerType);
+      const formattedLayerType = getLensLayerTypeTabDisplayName(config.layerType);
       const layerCountForId = countsByLayerId.get(config.layerId) || 1;
       const displayName =
         typeCount > 1 ? `${formattedLayerType} ${layerCountForId}` : formattedLayerType;
@@ -359,8 +359,6 @@ export function LayerTabs(
     visualization.state,
   ]);
 
-  console.log('managedItems', managedItems);
-
   return !hideAddLayerButton ? (
     <>
       <EuiSpacer size="s" />
@@ -374,8 +372,6 @@ export function LayerTabs(
           core: { chrome: coreStart.chrome },
         }}
         onChanged={(updatedState) => {
-          console.log('onChanged', updatedState);
-
           // Create a set of the updated item ids for easy lookup
           const updatedItemIds = new Set(updatedState.items.map((item) => item.id));
 
