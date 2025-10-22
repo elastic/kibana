@@ -24,13 +24,11 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
   private readonly apiRoutes: ApiRoutes;
   private readonly indexDataEnricher: IndexDataEnricher;
   private readonly config: IndexManagementConfig;
-  private readonly isServerless: boolean;
 
   constructor(initContext: PluginInitializerContext) {
     this.apiRoutes = new ApiRoutes();
     this.indexDataEnricher = new IndexDataEnricher();
     this.config = initContext.config.get();
-    this.isServerless = initContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
   setup({ http }: CoreSetup, { features, security }: Dependencies): IndexManagementPluginSetup {
@@ -69,7 +67,6 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
         isDataStreamStatsEnabled: this.config.enableDataStreamStats,
         enableMappingsSourceFieldSection: this.config.enableMappingsSourceFieldSection,
         enableTogglingDataRetention: this.config.enableTogglingDataRetention,
-        isServerless: this.isServerless,
       },
       indexDataEnricher: this.indexDataEnricher,
       lib: {

@@ -12,325 +12,214 @@ import { RouterMock, routeDependencies } from '../../../test/helpers';
 import { registerPutDataStreamFailureStore } from './register_put_route';
 
 describe('registerPutDataStreamFailureStore', () => {
-  describe('non-serverless', () => {
-    let router: RouterMock;
-    let updateDataStreamOptions: jest.Mock;
+  let router: RouterMock;
+  let updateDataStreamOptions: jest.Mock;
 
-    beforeEach(() => {
-      router = new RouterMock();
-      const mockDependencies = {
-        ...routeDependencies,
-        config: {
-          ...routeDependencies.config,
-          isServerless: false,
-        },
-        router,
-      };
+  beforeEach(() => {
+    router = new RouterMock();
+    const mockDependencies = {
+      ...routeDependencies,
+      router,
+    };
 
-      registerPutDataStreamFailureStore(mockDependencies);
-      updateDataStreamOptions = router.getMockESApiFn('indices.putDataStreamOptions');
-    });
+    registerPutDataStreamFailureStore(mockDependencies);
+    updateDataStreamOptions = router.getMockESApiFn('indices.putDataStreamOptions');
+  });
 
-    afterEach(() => {
-      jest.resetAllMocks();
-    });
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
 
-    it('should enable failure store with custom retention period', async () => {
-      const mockRequest: RequestMock = {
-        method: 'put',
-        path: addBasePath('/data_streams/configure_failure_store'),
-        body: { dataStreams: ['test-stream'], dsFailureStore: true, customRetentionPeriod: '7d' },
-      };
+  it('should enable failure store with custom retention period', async () => {
+    const mockRequest: RequestMock = {
+      method: 'put',
+      path: addBasePath('/data_streams/configure_failure_store'),
+      body: { dataStreams: ['test-stream'], dsFailureStore: true, customRetentionPeriod: '7d' },
+    };
 
-      updateDataStreamOptions.mockResolvedValue({ success: true });
+    updateDataStreamOptions.mockResolvedValue({ success: true });
 
-      const res = await router.runRequest(mockRequest);
+    const res = await router.runRequest(mockRequest);
 
-      expect(updateDataStreamOptions).toHaveBeenCalledWith(
-        {
-          name: 'test-stream',
-          failure_store: {
-            enabled: true,
-            lifecycle: {
-              data_retention: '7d',
-              enabled: true,
-            },
-          },
-        },
-        { meta: true }
-      );
-
-      expect(res).toEqual({
-        body: { success: true },
-      });
-    });
-
-    it('should disable failure store', async () => {
-      const mockRequest: RequestMock = {
-        method: 'put',
-        path: addBasePath('/data_streams/configure_failure_store'),
-        body: { dataStreams: ['test-stream'], dsFailureStore: false },
-      };
-
-      updateDataStreamOptions.mockResolvedValue({ success: true });
-
-      const res = await router.runRequest(mockRequest);
-
-      expect(updateDataStreamOptions).toHaveBeenCalledWith(
-        {
-          name: 'test-stream',
-          failure_store: {
-            enabled: false,
-          },
-        },
-        { meta: true }
-      );
-
-      expect(res).toEqual({
-        body: { success: true },
-      });
-    });
-
-    it('should handle requests without custom retention period', async () => {
-      const mockRequest: RequestMock = {
-        method: 'put',
-        path: addBasePath('/data_streams/configure_failure_store'),
-        body: { dataStreams: ['test-stream'], dsFailureStore: true },
-      };
-
-      updateDataStreamOptions.mockResolvedValue({ success: true });
-
-      const res = await router.runRequest(mockRequest);
-
-      expect(updateDataStreamOptions).toHaveBeenCalledWith(
-        {
-          name: 'test-stream',
-          failure_store: {
+    expect(updateDataStreamOptions).toHaveBeenCalledWith(
+      {
+        name: 'test-stream',
+        failure_store: {
+          enabled: true,
+          lifecycle: {
+            data_retention: '7d',
             enabled: true,
           },
         },
-        { meta: true }
-      );
+      },
+      { meta: true }
+    );
 
-      expect(res).toEqual({
-        body: { success: true },
-      });
-    });
-
-    it('should handle multiple data streams', async () => {
-      const mockRequest: RequestMock = {
-        method: 'put',
-        path: addBasePath('/data_streams/configure_failure_store'),
-        body: {
-          dataStreams: ['stream-1', 'stream-2'],
-          dsFailureStore: true,
-          customRetentionPeriod: '14d',
-        },
-      };
-
-      updateDataStreamOptions.mockResolvedValue({ success: true });
-
-      const res = await router.runRequest(mockRequest);
-
-      expect(updateDataStreamOptions).toHaveBeenCalledTimes(2);
-      expect(updateDataStreamOptions).toHaveBeenNthCalledWith(
-        1,
-        {
-          name: 'stream-1',
-          failure_store: {
-            enabled: true,
-            lifecycle: {
-              data_retention: '14d',
-              enabled: true,
-            },
-          },
-        },
-        { meta: true }
-      );
-      expect(updateDataStreamOptions).toHaveBeenNthCalledWith(
-        2,
-        {
-          name: 'stream-2',
-          failure_store: {
-            enabled: true,
-            lifecycle: {
-              data_retention: '14d',
-              enabled: true,
-            },
-          },
-        },
-        { meta: true }
-      );
-
-      expect(res).toEqual({
-        body: { success: true },
-      });
-    });
-
-    it('should handle ES warning headers in response', async () => {
-      const mockRequest: RequestMock = {
-        method: 'put',
-        path: addBasePath('/data_streams/configure_failure_store'),
-        body: { dataStreams: ['test-stream'], dsFailureStore: true, customRetentionPeriod: '7d' },
-      };
-
-      const mockHeaders = {
-        warning: '299 Elasticsearch-123456 "This is a warning message"',
-      };
-      updateDataStreamOptions.mockResolvedValue({ headers: mockHeaders });
-
-      const res = await router.runRequest(mockRequest);
-
-      expect(res).toEqual({
-        body: { success: true, warning: 'This is a warning message' },
-      });
-    });
-
-    it('should handle multiple warnings from multiple data streams', async () => {
-      const mockRequest: RequestMock = {
-        method: 'put',
-        path: addBasePath('/data_streams/configure_failure_store'),
-        body: {
-          dataStreams: ['stream-1', 'stream-2'],
-          dsFailureStore: true,
-          customRetentionPeriod: '7d',
-        },
-      };
-
-      const mockHeaders1 = {
-        warning: '299 Elasticsearch-123456 "Warning for stream 1"',
-      };
-      const mockHeaders2 = {
-        warning: '299 Elasticsearch-789012 "Warning for stream 2"',
-      };
-
-      updateDataStreamOptions
-        .mockResolvedValueOnce({ headers: mockHeaders1 })
-        .mockResolvedValueOnce({ headers: mockHeaders2 });
-
-      const res = await router.runRequest(mockRequest);
-
-      expect(res).toEqual({
-        body: { success: true, warning: 'Warning for stream 1; Warning for stream 2' },
-      });
-    });
-
-    it('should return an error if ES client fails', async () => {
-      const mockRequest: RequestMock = {
-        method: 'put',
-        path: addBasePath('/data_streams/configure_failure_store'),
-        body: { dataStreams: ['test-stream'], dsFailureStore: true, customRetentionPeriod: '7d' },
-      };
-
-      const error = new Error('Elasticsearch error');
-      updateDataStreamOptions.mockRejectedValue(error);
-
-      await expect(router.runRequest(mockRequest)).rejects.toThrowError(error);
+    expect(res).toEqual({
+      body: { success: true },
     });
   });
 
-  describe('serverless environment', () => {
-    let router: RouterMock;
-    let updateDataStreamOptions: jest.Mock;
+  it('should disable failure store', async () => {
+    const mockRequest: RequestMock = {
+      method: 'put',
+      path: addBasePath('/data_streams/configure_failure_store'),
+      body: { dataStreams: ['test-stream'], dsFailureStore: false },
+    };
 
-    beforeEach(() => {
-      router = new RouterMock();
-      const mockDependencies = {
-        ...routeDependencies,
-        config: {
-          ...routeDependencies.config,
-          isServerless: true,
+    updateDataStreamOptions.mockResolvedValue({ success: true });
+
+    const res = await router.runRequest(mockRequest);
+
+    expect(updateDataStreamOptions).toHaveBeenCalledWith(
+      {
+        name: 'test-stream',
+        failure_store: {
+          enabled: false,
         },
-        router,
-      };
+      },
+      { meta: true }
+    );
 
-      registerPutDataStreamFailureStore(mockDependencies);
-      updateDataStreamOptions = router.getMockESApiFn('indices.putDataStreamOptions');
+    expect(res).toEqual({
+      body: { success: true },
     });
+  });
 
-    afterEach(() => {
-      jest.resetAllMocks();
-    });
+  it('should handle requests without custom retention period', async () => {
+    const mockRequest: RequestMock = {
+      method: 'put',
+      path: addBasePath('/data_streams/configure_failure_store'),
+      body: { dataStreams: ['test-stream'], dsFailureStore: true },
+    };
 
-    it('should enable failure store with custom retention period', async () => {
-      const mockRequest: RequestMock = {
-        method: 'put',
-        path: addBasePath('/data_streams/configure_failure_store'),
-        body: { dataStreams: ['test-stream'], dsFailureStore: true, customRetentionPeriod: '7d' },
-      };
+    updateDataStreamOptions.mockResolvedValue({ success: true });
 
-      updateDataStreamOptions.mockResolvedValue({ success: true });
+    const res = await router.runRequest(mockRequest);
 
-      const res = await router.runRequest(mockRequest);
-
-      expect(updateDataStreamOptions).toHaveBeenCalledWith(
-        {
-          name: 'test-stream',
-          failure_store: {
-            enabled: true,
-            lifecycle: {
-              data_retention: '7d',
-            },
-          },
+    expect(updateDataStreamOptions).toHaveBeenCalledWith(
+      {
+        name: 'test-stream',
+        failure_store: {
+          enabled: true,
         },
-        { meta: true }
-      );
+      },
+      { meta: true }
+    );
 
-      expect(res).toEqual({
-        body: { success: true },
-      });
+    expect(res).toEqual({
+      body: { success: true },
     });
+  });
 
-    it('should disable failure store with custom retention period', async () => {
-      const mockRequest: RequestMock = {
-        method: 'put',
-        path: addBasePath('/data_streams/configure_failure_store'),
-        body: { dataStreams: ['test-stream'], dsFailureStore: false },
-      };
+  it('should handle multiple data streams', async () => {
+    const mockRequest: RequestMock = {
+      method: 'put',
+      path: addBasePath('/data_streams/configure_failure_store'),
+      body: {
+        dataStreams: ['stream-1', 'stream-2'],
+        dsFailureStore: true,
+        customRetentionPeriod: '14d',
+      },
+    };
 
-      updateDataStreamOptions.mockResolvedValue({ success: true });
+    updateDataStreamOptions.mockResolvedValue({ success: true });
 
-      const res = await router.runRequest(mockRequest);
+    const res = await router.runRequest(mockRequest);
 
-      expect(updateDataStreamOptions).toHaveBeenCalledWith(
-        {
-          name: 'test-stream',
-          failure_store: {
-            enabled: false,
-          },
-        },
-        { meta: true }
-      );
-
-      expect(res).toEqual({
-        body: { success: true },
-      });
-    });
-
-    it('should handle requests without custom retention period in serverless', async () => {
-      const mockRequest: RequestMock = {
-        method: 'put',
-        path: addBasePath('/data_streams/configure_failure_store'),
-        body: { dataStreams: ['test-stream'], dsFailureStore: true },
-      };
-
-      updateDataStreamOptions.mockResolvedValue({ success: true });
-
-      const res = await router.runRequest(mockRequest);
-
-      expect(updateDataStreamOptions).toHaveBeenCalledWith(
-        {
-          name: 'test-stream',
-          failure_store: {
+    expect(updateDataStreamOptions).toHaveBeenCalledTimes(2);
+    expect(updateDataStreamOptions).toHaveBeenNthCalledWith(
+      1,
+      {
+        name: 'stream-1',
+        failure_store: {
+          enabled: true,
+          lifecycle: {
+            data_retention: '14d',
             enabled: true,
           },
         },
-        { meta: true }
-      );
+      },
+      { meta: true }
+    );
+    expect(updateDataStreamOptions).toHaveBeenNthCalledWith(
+      2,
+      {
+        name: 'stream-2',
+        failure_store: {
+          enabled: true,
+          lifecycle: {
+            data_retention: '14d',
+            enabled: true,
+          },
+        },
+      },
+      { meta: true }
+    );
 
-      expect(res).toEqual({
-        body: { success: true },
-      });
+    expect(res).toEqual({
+      body: { success: true },
     });
+  });
+
+  it('should handle ES warning headers in response', async () => {
+    const mockRequest: RequestMock = {
+      method: 'put',
+      path: addBasePath('/data_streams/configure_failure_store'),
+      body: { dataStreams: ['test-stream'], dsFailureStore: true, customRetentionPeriod: '7d' },
+    };
+
+    const mockHeaders = {
+      warning: '299 Elasticsearch-123456 "This is a warning message"',
+    };
+    updateDataStreamOptions.mockResolvedValue({ headers: mockHeaders });
+
+    const res = await router.runRequest(mockRequest);
+
+    expect(res).toEqual({
+      body: { success: true, warning: 'This is a warning message' },
+    });
+  });
+
+  it('should handle multiple warnings from multiple data streams', async () => {
+    const mockRequest: RequestMock = {
+      method: 'put',
+      path: addBasePath('/data_streams/configure_failure_store'),
+      body: {
+        dataStreams: ['stream-1', 'stream-2'],
+        dsFailureStore: true,
+        customRetentionPeriod: '7d',
+      },
+    };
+
+    const mockHeaders1 = {
+      warning: '299 Elasticsearch-123456 "Warning for stream 1"',
+    };
+    const mockHeaders2 = {
+      warning: '299 Elasticsearch-789012 "Warning for stream 2"',
+    };
+
+    updateDataStreamOptions
+      .mockResolvedValueOnce({ headers: mockHeaders1 })
+      .mockResolvedValueOnce({ headers: mockHeaders2 });
+
+    const res = await router.runRequest(mockRequest);
+
+    expect(res).toEqual({
+      body: { success: true, warning: 'Warning for stream 1; Warning for stream 2' },
+    });
+  });
+
+  it('should return an error if ES client fails', async () => {
+    const mockRequest: RequestMock = {
+      method: 'put',
+      path: addBasePath('/data_streams/configure_failure_store'),
+      body: { dataStreams: ['test-stream'], dsFailureStore: true, customRetentionPeriod: '7d' },
+    };
+
+    const error = new Error('Elasticsearch error');
+    updateDataStreamOptions.mockRejectedValue(error);
+
+    await expect(router.runRequest(mockRequest)).rejects.toThrowError(error);
   });
 });

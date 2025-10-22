@@ -82,7 +82,6 @@ export function registerPutDataRetention({ router, lib: { handleEsError } }: Rou
 export function registerPutDataStreamFailureStore({
   router,
   lib: { handleEsError },
-  config: { isServerless },
 }: RouteDependencies) {
   const bodySchema = schema.object({
     dataStreams: schema.arrayOf(schema.string()),
@@ -116,11 +115,11 @@ export function registerPutDataStreamFailureStore({
               name: dataStreamName,
               failure_store: {
                 enabled: dsFailureStore,
-                ...(customRetentionPeriod
+                ...(customRetentionPeriod && dsFailureStore
                   ? {
                       lifecycle: {
                         data_retention: customRetentionPeriod,
-                        ...(isServerless ? {} : { enabled: dsFailureStore }),
+                        enabled: true,
                       },
                     }
                   : {}),
