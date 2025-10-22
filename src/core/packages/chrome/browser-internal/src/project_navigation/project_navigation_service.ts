@@ -34,10 +34,6 @@ import {
   type Observable,
   type Subscription,
   timer,
-  from,
-  catchError,
-  shareReplay,
-  switchMap,
 } from 'rxjs';
 import { type Location, createLocation } from 'history';
 import deepEqual from 'react-fast-compare';
@@ -69,7 +65,7 @@ interface StartDeps {
 export class ProjectNavigationService {
   private logger: Logger | undefined;
   private projectHome$ = new BehaviorSubject<string | undefined>(undefined);
-  private projectName$ = new BehaviorSubject<string | undefined>(undefined);
+  private kibanaName$ = new BehaviorSubject<string | undefined>(undefined);
   private navigationTree$ = new BehaviorSubject<ChromeProjectNavigationNode[] | undefined>(
     undefined
   );
@@ -98,7 +94,6 @@ export class ProjectNavigationService {
   private readonly location$ = new BehaviorSubject<Location>(createLocation('/'));
   private deepLinksMap$: Observable<Record<string, ChromeNavLink>> = of({});
   private cloudLinks$ = new BehaviorSubject<CloudLinks>({});
-  private echDeploymentName$: Observable<string | undefined> = of(undefined);
   private application?: InternalApplicationStart;
   private featureFlags?: FeatureFlagsStart;
   private navLinksService?: ChromeNavLinks;
@@ -136,13 +131,7 @@ export class ProjectNavigationService {
       })
     );
 
-    this.echDeploymentName$ = this.cloudLinks$.pipe(
-      switchMap((cloudLinks: CloudLinks) => {
-        const hasDeploymentLink = Boolean(cloudLinks.deployment || cloudLinks.deployments);
-        const shouldFetchDeploymentName = !this.isServerless && hasDeploymentLink;
-        return shouldFetchDeploymentName ? this.getEchDeploymentName$() : of(undefined);
-      })
-    );
+
 
     return {
       setProjectHome: this.setProjectHome.bind(this),
@@ -155,11 +144,11 @@ export class ProjectNavigationService {
 
         this.cloudLinks$.next(getCloudLinks(cloudUrls));
       },
-      setProjectName: (projectName: string) => {
-        this.projectName$.next(projectName);
+      setKibanaName: (kibanaName: string) => {
+        this.kibanaName$.next(kibanaName);
       },
-      getProjectName$: () => {
-        return this.projectName$.asObservable();
+      getKibanaName$: () => {
+        return this.kibanaName$.asObservable();
       },
       initNavigation: <LinkId extends AppDeepLinkId = AppDeepLinkId>(
         id: SolutionId,
@@ -186,27 +175,24 @@ export class ProjectNavigationService {
           this.projectBreadcrumbs$,
           this.activeNodes$,
           chromeBreadcrumbs$,
-          this.projectName$,
+          this.kibanaName$,
           this.cloudLinks$,
-          this.echDeploymentName$,
         ]).pipe(
           map(
             ([
               projectBreadcrumbs,
               activeNodes,
               chromeBreadcrumbs,
-              projectName,
+              kibanaName,
               cloudLinks,
-              echDeploymentName,
             ]) => {
               return buildBreadcrumbs({
-                projectName,
+                kibanaName,
                 projectBreadcrumbs,
                 activeNodes,
                 chromeBreadcrumbs,
                 cloudLinks,
                 isServerless: this.isServerless,
-                echDeploymentName,
               });
             }
           )
@@ -489,26 +475,6 @@ export class ProjectNavigationService {
       throw new Error('Http service not provided.');
     }
     return this._http;
-  }
-
-  private getEchDeploymentName$(): Observable<string | undefined> {
-    if (!this._http) {
-      return of(undefined);
-    }
-
-    const cloudData = this._http.get<{
-      resourceData?: { deployment?: { name?: string } };
-    }>('/internal/cloud/solution', { version: '1' });
-
-    if (!cloudData) {
-      return of(undefined);
-    }
-
-    return from(cloudData).pipe(
-      map((data) => data?.resourceData?.deployment?.name),
-      catchError(() => of(undefined)),
-      shareReplay(1)
-    );
   }
 
   public stop() {

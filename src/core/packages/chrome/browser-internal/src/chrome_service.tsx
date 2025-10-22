@@ -405,9 +405,8 @@ export class ChromeService {
       projectNavigation.setProjectHome(homeHref);
     };
 
-    const setProjectName = (projectName: string) => {
-      validateChromeStyle();
-      projectNavigation.setProjectName(projectName);
+    const setKibanaName = (kibanaName: string) => {
+      projectNavigation.setKibanaName(kibanaName);
     };
 
     const setIsSideNavCollapsed = (isCollapsed: boolean) => {
@@ -786,7 +785,7 @@ export class ChromeService {
       project: {
         setHome: setProjectHome,
         setCloudUrls: projectNavigation.setCloudUrls.bind(projectNavigation),
-        setProjectName,
+        setKibanaName,
         initNavigation: initProjectNavigation,
         getNavigationTreeUi$: () => projectNavigation.getNavigationTreeUi$(),
         setBreadcrumbs: setProjectBreadcrumbs,

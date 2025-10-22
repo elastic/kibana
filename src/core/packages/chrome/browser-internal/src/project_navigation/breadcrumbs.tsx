@@ -32,15 +32,14 @@ function prependRootCrumb(rootCrumb: ChromeBreadcrumb | undefined, rest: ChromeB
 }
 
 export function buildBreadcrumbs({
-  projectName,
+  kibanaName,
   cloudLinks,
   projectBreadcrumbs,
   activeNodes,
   chromeBreadcrumbs,
   isServerless,
-  echDeploymentName,
 }: {
-  projectName?: string;
+  kibanaName?: string;
   projectBreadcrumbs: {
     breadcrumbs: ChromeBreadcrumb[];
     params: ChromeSetProjectBreadcrumbsParams;
@@ -49,13 +48,11 @@ export function buildBreadcrumbs({
   cloudLinks: CloudLinks;
   activeNodes: ChromeProjectNavigationNode[][];
   isServerless: boolean;
-  echDeploymentName?: string;
 }): ChromeBreadcrumb[] {
   const rootCrumb = buildRootCrumb({
-    projectName,
+    kibanaName,
     cloudLinks,
     isServerless,
-    echDeploymentName,
   });
 
   if (projectBreadcrumbs.params.absolute) {
@@ -105,20 +102,18 @@ export function buildBreadcrumbs({
 }
 
 function buildRootCrumb({
-  projectName,
+  kibanaName,
   cloudLinks,
   isServerless,
-  echDeploymentName,
 }: {
-  projectName?: string;
+  kibanaName?: string;
   cloudLinks: CloudLinks;
   isServerless: boolean;
-  echDeploymentName?: string;
 }): ChromeBreadcrumb | undefined {
   if (isServerless) {
     return {
       text:
-        projectName ??
+        kibanaName ??
         i18n.translate('core.ui.primaryNav.cloud.projectLabel', {
           defaultMessage: 'Project',
         }),
@@ -149,8 +144,8 @@ function buildRootCrumb({
 
   if (cloudLinks.deployment || cloudLinks.deployments) {
     return {
-      text: echDeploymentName ? (
-        <EuiTextTruncate text={echDeploymentName} width={96} />
+      text: kibanaName ? (
+        <EuiTextTruncate text={kibanaName} width={96} />
       ) : (
         i18n.translate('core.ui.primaryNav.cloud.deploymentLabel', {
           defaultMessage: 'Deployment',
