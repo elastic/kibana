@@ -16,6 +16,10 @@ import {
   OBSERVABILITY_GET_SERVICES_TOOL_ID,
   createObservabilityGetServicesTool,
 } from './tools/observability_get_services';
+import {
+  OBSERVABILITY_RECALL_KNOWLEDGE_BASE_TOOL_ID,
+  createObservabilityRecallKnowledgeBaseTool,
+} from './tools/observability_recall_knowledge_base';
 
 export const OBSERVABILITY_AGENT_ID = 'platform.core.observability';
 
@@ -33,6 +37,7 @@ const OBSERVABILITY_AGENT_TOOL_IDS = [
 
   // Observability tools
   OBSERVABILITY_GET_SERVICES_TOOL_ID,
+  OBSERVABILITY_RECALL_KNOWLEDGE_BASE_TOOL_ID,
 ];
 
 export async function registerObservabilityAgent({
@@ -50,8 +55,13 @@ export async function registerObservabilityAgent({
     logger,
   });
 
+  const observabilityRecallKnowledgeBaseTool = await createObservabilityRecallKnowledgeBaseTool({
+    logger,
+  });
+
   // register tools
   plugins.onechat.tools.register(observabilityGetServicesTool);
+  plugins.onechat.tools.register(observabilityRecallKnowledgeBaseTool);
 
   // register agent
   plugins.onechat.agents.register({
