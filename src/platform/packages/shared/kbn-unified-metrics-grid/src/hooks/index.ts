@@ -14,7 +14,7 @@ export { useEsqlQueryInfo } from './use_esql_query_info';
 export { useMetricsExperience } from './use_metrics_experience';
 export { useMetricsGridState } from './use_metrics_grid_state';
 export { usePaginatedFields } from './use_paginated_fields';
-export { useFullScreenStyles, useMetricsGridFullScreen } from './use_metrics_grid_fullscreen';
+export { useMetricsGridFullScreen } from './use_metrics_grid_fullscreen';
 export { useGridNavigation } from './use_grid_navigation';
 export {
   METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS,
