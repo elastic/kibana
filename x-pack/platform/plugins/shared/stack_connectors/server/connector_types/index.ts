@@ -45,8 +45,6 @@ export { ConnectorTypeId as CasesWebhookConnectorTypeId } from './cases_webhook'
 export type { ActionParamsType as CasesWebhookActionParams } from './cases_webhook';
 export { ServiceNowITSMConnectorTypeId } from './servicenow_itsm';
 export { ServiceNowSIRConnectorTypeId } from './servicenow_sir';
-export { ConnectorTypeId as IndexConnectorTypeId } from './es_index';
-export type { ActionParamsType as IndexActionParams } from './es_index';
 export { ConnectorTypeId as PagerDutyConnectorTypeId } from './pagerduty';
 export type { ActionParamsType as PagerDutyActionParams } from './pagerduty';
 export { ConnectorTypeId as ServerLogConnectorTypeId } from './server_log';

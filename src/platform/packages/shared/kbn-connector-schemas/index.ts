@@ -8,4 +8,5 @@
  */
 
 export { CONNECTOR_ID as EmailConnectorTypeId } from './email';
+export { CONNECTOR_ID as EsIndexConnectorTypeId } from './es_index';
 export { CONNECTOR_ID as JiraConnectorTypeId } from './jira';

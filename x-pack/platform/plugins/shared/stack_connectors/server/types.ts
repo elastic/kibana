@@ -12,8 +12,6 @@ export type { SwimlanePublicConfigurationType } from './connector_types/swimlane
 export type {
   CasesWebhookConnectorTypeId,
   CasesWebhookActionParams,
-  IndexConnectorTypeId,
-  IndexActionParams,
   PagerDutyConnectorTypeId,
   PagerDutyActionParams,
   ServerLogConnectorTypeId,
