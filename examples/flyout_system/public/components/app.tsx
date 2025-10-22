@@ -71,7 +71,7 @@ const AppContent: React.FC<AppContentDeps> = ({ overlays, rendering }) => {
       case FLYOUT_FROM_COMPONENTS:
         return <FlyoutWithComponent />;
       case FLYOUT_WITH_OVERLAYS:
-        return <FlyoutWithOverlays overlays={overlays} rendering={rendering} />;
+        return <FlyoutWithOverlays overlays={overlays} />;
       default:
         return null;
     }
@@ -98,7 +98,7 @@ const AppContent: React.FC<AppContentDeps> = ({ overlays, rendering }) => {
             isSelected={selectedTabId === FLYOUT_WITH_OVERLAYS}
             onClick={() => handleTabClick(FLYOUT_WITH_OVERLAYS)}
           >
-            Render with overlays.openFlyout
+            Render with overlays.openSystemFlyout
           </EuiTab>
         </EuiTabs>
         <EuiSpacer />

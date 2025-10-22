@@ -26,7 +26,7 @@ export const createMainFlyoutProps = (config: FlyoutConfig): Partial<EuiFlyoutPr
 
   return {
     id: `mainFlyout-${title}`,
-    session: true,
+    session: 'start',
     flyoutMenuProps: {
       title: `${title} - Main${useConditionalRendering ? ' (without isOpen)' : ''}`,
     },

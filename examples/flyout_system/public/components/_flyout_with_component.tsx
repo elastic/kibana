@@ -11,12 +11,14 @@ import React, { useCallback, useState } from 'react';
 
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiCode,
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiSpacer,
   EuiSwitch,
   EuiText,
@@ -133,6 +135,15 @@ const FlyoutSessionFromComponents: React.FC<FlyoutSessionFromComponents> = React
               )}
             </EuiText>
           </EuiFlyoutBody>
+          <EuiFlyoutFooter>
+            <EuiFlexGroup justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty onClick={mainFlyoutOnClose} aria-label="Close">
+                  Close
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutFooter>
           {childSize && isChildFlyoutVisible && (
             <EuiFlyout
               id={`childFlyout-${title}`}
@@ -168,6 +179,15 @@ const FlyoutSessionFromComponents: React.FC<FlyoutSessionFromComponents> = React
                   />
                 </EuiText>
               </EuiFlyoutBody>
+              <EuiFlyoutFooter>
+                <EuiFlexGroup justifyContent="flexEnd">
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty onClick={childFlyoutOnClose} aria-label="Close">
+                      Close
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlyoutFooter>
             </EuiFlyout>
           )}
         </EuiFlyout>
@@ -222,6 +242,7 @@ const NonSessionFlyout: React.FC = () => {
           type={flyoutType}
           size="s"
           side="left"
+          ownFocus={false}
           session="never"
         >
           <EuiFlyoutBody>
@@ -232,6 +253,15 @@ const NonSessionFlyout: React.FC = () => {
               </p>
             </EuiText>
           </EuiFlyoutBody>
+          <EuiFlyoutFooter>
+            <EuiFlexGroup justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty onClick={flyoutOnClose} aria-label="Close">
+                  Close
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutFooter>
         </EuiFlyout>
       )}
     </>
