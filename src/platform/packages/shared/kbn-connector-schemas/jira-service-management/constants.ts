@@ -8,18 +8,21 @@
  */
 import { i18n } from '@kbn/i18n';
 
-export const CONNECTOR_ID = '.d3security';
-export const CONNECTOR_NAME = i18n.translate('connectors.d3Security.title', {
-  defaultMessage: 'D3 Security',
+export const CONNECTOR_ID = '.jira-service-management';
+export const CONNECTOR_NAME = i18n.translate('connectors.jiraServiceManagement.title', {
+  defaultMessage: 'Jira Service Management',
 });
 
+export const MESSAGE_NON_EMPTY = i18n.translate(
+  'xpack.stackConnectors.jiraServiceManagement.nonEmptyMessageField',
+  {
+    defaultMessage: 'must be populated with a value other than just whitespace',
+  }
+);
+
+export const RULE_TAGS_TEMPLATE = `{{rule.tags}}`;
+
 export enum SUB_ACTION {
-  RUN = 'run',
-  TEST = 'test',
-}
-export enum D3SecuritySeverity {
-  EMPTY = '',
-  HIGH = 'high',
-  MEDIUM = 'medium',
-  LOW = 'low',
+  CreateAlert = 'createAlert',
+  CloseAlert = 'closeAlert',
 }

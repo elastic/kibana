@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { z } from '@kbn/zod';
 import { isEmpty } from 'lodash';
-import * as i18n from './translations';
+import { MESSAGE_NON_EMPTY } from '../constants';
 
 export const ConfigSchema = z
   .object({
@@ -57,7 +59,7 @@ export const CreateAlertParamsSchema = z
         if (isEmpty(message.trim())) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: i18n.MESSAGE_NON_EMPTY,
+            message: MESSAGE_NON_EMPTY,
           });
         }
       }),

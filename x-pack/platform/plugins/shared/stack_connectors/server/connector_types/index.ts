@@ -60,16 +60,6 @@ export type {
   OpsgenieCreateAlertParams,
 } from './opsgenie';
 
-export type {
-  JiraServiceManagementActionConfig,
-  JiraServiceManagementActionSecrets,
-  JiraServiceManagementActionParams,
-  JiraServiceManagementCloseAlertSubActionParams,
-  JiraServiceManagementCreateAlertSubActionParams,
-  JiraServiceManagementCloseAlertParams,
-  JiraServiceManagementCreateAlertParams,
-} from './jira-service-management';
-
 export type ServiceNowActionParams = ServiceNowITSMActionParams | ServiceNowSIRActionParams;
 
 export { getConnectorType as getSwimlaneConnectorType } from './swimlane';

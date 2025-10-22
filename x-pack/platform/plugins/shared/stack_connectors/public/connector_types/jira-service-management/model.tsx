@@ -13,13 +13,10 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { isEmpty } from 'lodash';
 import {
-  JiraServiceManagementSubActions,
+  SUB_ACTION,
   RULE_TAGS_TEMPLATE,
-} from '../../../common/jira-service-management/constants';
-import type {
-  JiraServiceManagementActionConfig,
-  JiraServiceManagementActionSecrets,
-} from '../../../server/connector_types';
+} from '@kbn/connector-schemas/jira-service-management/constants';
+import type { Config, Secrets } from '@kbn/connector-schemas/jira-service-management';
 import type { JiraServiceManagementConnectorTypeParams, ValidationParams } from './types';
 import { DEFAULT_ALIAS } from './constants';
 
@@ -38,8 +35,8 @@ const TITLE = i18n.translate(
 );
 
 export const getConnectorType = (): ConnectorTypeModel<
-  JiraServiceManagementActionConfig,
-  JiraServiceManagementActionSecrets,
+  Config,
+  Secrets,
   JiraServiceManagementConnectorTypeParams
 > => {
   return {
@@ -51,14 +48,14 @@ export const getConnectorType = (): ConnectorTypeModel<
     actionConnectorFields: lazy(() => import('./connector_params')),
     actionParamsFields: lazy(() => import('./params')),
     defaultActionParams: {
-      subAction: JiraServiceManagementSubActions.CreateAlert,
+      subAction: SUB_ACTION.CreateAlert,
       subActionParams: {
         alias: DEFAULT_ALIAS,
         tags: [RULE_TAGS_TEMPLATE],
       },
     },
     defaultRecoveredActionParams: {
-      subAction: JiraServiceManagementSubActions.CloseAlert,
+      subAction: SUB_ACTION.CloseAlert,
       subActionParams: {
         alias: DEFAULT_ALIAS,
       },
@@ -80,7 +77,7 @@ const validateParams = async (
     errors,
   };
 
-  if (actionParams.subAction === JiraServiceManagementSubActions.CreateAlert) {
+  if (actionParams.subAction === SUB_ACTION.CreateAlert) {
     if (!actionParams?.subActionParams?.message?.length) {
       errors['subActionParams.message'].push(translations.MESSAGE_IS_REQUIRED);
     } else if (isEmpty(actionParams?.subActionParams?.message?.trim())) {
@@ -88,7 +85,7 @@ const validateParams = async (
     }
   }
   if (
-    actionParams.subAction === JiraServiceManagementSubActions.CloseAlert &&
+    actionParams.subAction === SUB_ACTION.CloseAlert &&
     !actionParams?.subActionParams?.alias?.length
   ) {
     errors['subActionParams.alias'].push(translations.ALIAS_IS_REQUIRED);

@@ -6,20 +6,4 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { i18n } from '@kbn/i18n';
-
-export const CONNECTOR_ID = '.d3security';
-export const CONNECTOR_NAME = i18n.translate('connectors.d3Security.title', {
-  defaultMessage: 'D3 Security',
-});
-
-export enum SUB_ACTION {
-  RUN = 'run',
-  TEST = 'test',
-}
-export enum D3SecuritySeverity {
-  EMPTY = '',
-  HIGH = 'high',
-  MEDIUM = 'medium',
-  LOW = 'low',
-}
+export * from './v1';

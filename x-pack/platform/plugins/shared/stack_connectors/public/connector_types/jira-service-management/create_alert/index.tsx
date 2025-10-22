@@ -22,9 +22,9 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 import type {
-  JiraServiceManagementActionParams,
-  JiraServiceManagementCreateAlertParams,
-} from '../../../../server/connector_types';
+  Params as JiraServiceManagementActionParams,
+  CreateAlertParams as JiraServiceManagementCreateAlertParams,
+} from '@kbn/connector-schemas/jira-service-management';
 import * as i18n from './translations';
 import type { EditActionCallback } from '../types';
 import { DisplayMoreOptions } from '../display_more_options';
