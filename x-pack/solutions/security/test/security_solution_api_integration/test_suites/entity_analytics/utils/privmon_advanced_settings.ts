@@ -26,6 +26,7 @@ export const disablePrivmonSetting = async (kibanaServer: KbnClient, space: stri
   );
 };
 
+// TODO: delete this if  tests working after removing usage.
 export const toggleIntegrationsSyncFlag = async (kibanaServer: KbnClient, enable: boolean) => {
   await kibanaServer.uiSettings.update({
     'securitySolution:entityAnalytics:privilegeMonitoring:enableIntegrations': enable,
