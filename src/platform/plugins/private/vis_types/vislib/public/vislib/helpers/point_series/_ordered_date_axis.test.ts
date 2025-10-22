@@ -10,7 +10,7 @@
 import moment from 'moment';
 import _ from 'lodash';
 
-import type { DateHistogramParams } from '@kbn/visualizations-plugin/public';
+import type { DateHistogramParams } from '@kbn/chart-expressions-common';
 
 import { orderedDateAxis } from './_ordered_date_axis';
 import type { OrderedChart } from './point_series';

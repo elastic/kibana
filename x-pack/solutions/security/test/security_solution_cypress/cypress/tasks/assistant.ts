@@ -129,6 +129,7 @@ export const submitMessage = () => {
 };
 
 export const typeAndSendMessage = (message: string) => {
+  cy.get(USER_PROMPT).click();
   cy.get(USER_PROMPT).type(message);
   submitMessage();
 };
@@ -137,6 +138,7 @@ export const typeAndSendMessage = (message: string) => {
 export const createAndTitleConversation = (newTitle = 'Something else') => {
   createNewChat();
   assertNewConversation(false, 'New chat');
+  selectConnector(azureConnectorAPIPayload.name);
   assertConnectorSelected(azureConnectorAPIPayload.name);
   typeAndSendMessage('hello');
   assertMessageSent('hello');
