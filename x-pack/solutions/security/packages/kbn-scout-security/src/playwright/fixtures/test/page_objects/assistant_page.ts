@@ -7,6 +7,7 @@
 
 import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@playwright/test';
+import { TIMEOUTS } from '../../../constants/timeouts';
 
 /**
  * Page Object for the AI Assistant flyout in Kibana Security Solution
@@ -388,7 +389,7 @@ export class AssistantPage {
 
     // Wait for the conversation to appear in the list before clicking
     const conversationButton = this.conversationSelectButton(conversationTitle);
-    await conversationButton.waitFor({ state: 'visible', timeout: 15000 });
+    await conversationButton.waitFor({ state: 'visible', timeout: TIMEOUTS.UI_ELEMENT_EXTRA_LONG });
     await conversationButton.click();
 
     await expect(this.conversationTitleHeading).toHaveText(conversationTitle);
@@ -479,15 +480,14 @@ export class AssistantPage {
   async selectConnector(connectorName: string) {
     await this.connectorSelector.click();
     // eslint-disable-next-line playwright/no-wait-for-timeout
-    await this.page.waitForTimeout(2000);
+    await this.page.waitForTimeout(TIMEOUTS.UI_ELEMENT_STANDARD);
     // Use .first() to handle multiple connectors with same name (from test pollution)
     // eslint-disable-next-line playwright/no-nth-methods
     await this.connectorOption(connectorName).first().click();
     // Use containText instead of exact match to handle UI variations
     await expect(this.connectorSelector).toContainText(connectorName);
-    // Wait for connector to be ready
     // eslint-disable-next-line playwright/no-wait-for-timeout
-    await this.page.waitForTimeout(2000);
+    await this.page.waitForTimeout(TIMEOUTS.UI_ELEMENT_STANDARD);
   }
 
   /**
@@ -535,7 +535,7 @@ export class AssistantPage {
     await this.systemPromptTitleInput.press('Enter');
 
     // Wait for the body input to become enabled after title confirmation
-    await expect(this.systemPromptBodyInput).toBeEnabled({ timeout: 5000 });
+    await expect(this.systemPromptBodyInput).toBeEnabled({ timeout: TIMEOUTS.UI_ELEMENT_STANDARD });
 
     await this.systemPromptBodyInput.fill(content);
 

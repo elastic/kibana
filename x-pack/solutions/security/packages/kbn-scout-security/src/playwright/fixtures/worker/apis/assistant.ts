@@ -78,8 +78,26 @@ export const getAssistantCleanupService = ({
         },
         refresh: true,
       });
-      // Wait for ES refresh to propagate
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // Poll to verify deletion completed (with exponential backoff)
+      let attempts = 0;
+      const maxAttempts = 10;
+      while (attempts < maxAttempts) {
+        try {
+          const result = await esClient.count({
+            index: indexPattern,
+            ignore_unavailable: true,
+          });
+          if (result.count === 0) {
+            break;
+          }
+        } catch (error) {
+          // Index might not exist - that's fine
+          break;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 100 * Math.pow(2, attempts)));
+        attempts++;
+      }
     },
 
     deleteAllPrompts: async () => {
@@ -92,8 +110,26 @@ export const getAssistantCleanupService = ({
         },
         refresh: true,
       });
-      // Wait for ES refresh to propagate
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // Poll to verify deletion completed (with exponential backoff)
+      let attempts = 0;
+      const maxAttempts = 10;
+      while (attempts < maxAttempts) {
+        try {
+          const result = await esClient.count({
+            index: indexPattern,
+            ignore_unavailable: true,
+          });
+          if (result.count === 0) {
+            break;
+          }
+        } catch (error) {
+          // Index might not exist - that's fine
+          break;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 100 * Math.pow(2, attempts)));
+        attempts++;
+      }
     },
   };
 };

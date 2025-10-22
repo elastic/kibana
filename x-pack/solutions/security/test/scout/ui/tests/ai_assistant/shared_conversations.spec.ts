@@ -218,10 +218,7 @@ spaceTest.describe.skip('Assistant Conversation Sharing', { tag: ['@ess', '@svlS
       await assistantPage.selectConnector(connector.name);
       await assistantPage.shareConversation(secondaryUser);
 
-      // Logout primary user
-      await context.clearCookies();
-
-      // Login as secondary user
+      // Login as secondary user (automatically clears cookies)
       await browserAuth.loginAs(secondaryUser);
       await page.gotoApp('security', { path: '/get_started' });
       await assistantPage.open();
@@ -260,8 +257,7 @@ spaceTest.describe.skip('Assistant Conversation Sharing', { tag: ['@ess', '@svlS
       await assistantPage.selectConnector(connector.name);
       await assistantPage.shareConversation('global');
 
-      // Logout and login as secondary user
-      await context.clearCookies();
+      // Login as secondary user (automatically clears cookies)
       await browserAuth.loginAs(secondaryUser);
       await page.gotoApp('security', { path: '/get_started' });
       await assistantPage.open();
@@ -292,8 +288,7 @@ spaceTest.describe.skip('Assistant Conversation Sharing', { tag: ['@ess', '@svlS
       await assistantPage.selectConnector(connector.name);
       await assistantPage.shareConversation('global');
 
-      // Logout and login as secondary user
-      await context.clearCookies();
+      // Login as secondary user (automatically clears cookies)
       await browserAuth.loginAs(secondaryUser);
       await page.gotoApp('security', { path: '/get_started' });
       await assistantPage.open();
@@ -332,8 +327,7 @@ spaceTest.describe.skip('Assistant Conversation Sharing', { tag: ['@ess', '@svlS
       await assistantPage.toggleConversationSideMenu();
       await assistantPage.duplicateFromConversationSideContextMenu(mockConvo2.title);
 
-      // Logout and login as secondary user
-      await context.clearCookies();
+      // Login as secondary user (automatically clears cookies)
       await browserAuth.loginAs(secondaryUser);
       await page.gotoApp('security', { path: '/get_started' });
       await assistantPage.open();
@@ -392,9 +386,8 @@ spaceTest.describe.skip('Assistant Conversation Sharing', { tag: ['@ess', '@svlS
 
   spaceTest(
     'Visiting a URL with the assistant param shows access error when user does not have access to the conversation',
-    async ({ page, browserAuth, context, scoutSpace }) => {
-      // Logout and login as secondary user
-      await context.clearCookies();
+    async ({ page, browserAuth, scoutSpace }) => {
+      // Login as secondary user (automatically clears cookies)
       await browserAuth.loginAs(secondaryUser);
 
       const origin = new URL(page.url()).origin;

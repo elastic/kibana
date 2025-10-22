@@ -6,6 +6,7 @@
  */
 
 import type { ScoutPage } from '@kbn/scout';
+import { TIMEOUTS } from '../../../constants/timeouts';
 
 /**
  * Common Security Solution page utilities
@@ -24,20 +25,14 @@ export class SecurityCommonPage {
    * ```
    */
   async dismissOnboardingModal() {
-    try {
-      // Look for the modal OK button with a short timeout
-      const modalOkButton = this.page.getByRole('button', { name: 'OK' });
-      const isVisible = await modalOkButton.isVisible({ timeout: 2000 });
-
-      if (isVisible) {
-        await modalOkButton.click();
-        // Wait for modal to close
-        await modalOkButton.waitFor({ state: 'hidden', timeout: 2000 });
-      }
-    } catch (error) {
-      // Modal not present or already dismissed - this is fine
-      // Continue without error
+    // Check if modal is present without throwing
+    const modalOkButton = this.page.getByRole('button', { name: 'OK' });
+    if (await modalOkButton.isVisible({ timeout: TIMEOUTS.UI_ELEMENT_SHORT })) {
+      await modalOkButton.click();
+      // Wait for modal to close
+      await modalOkButton.waitFor({ state: 'hidden', timeout: TIMEOUTS.UI_ELEMENT_SHORT });
     }
+    // If modal is not present, continue silently
   }
 
   /**
@@ -45,19 +40,15 @@ export class SecurityCommonPage {
    * Useful after operations that show success/error toasts.
    */
   async dismissToasts() {
-    try {
-      const toastCloseButtons = this.page.testSubj.locator('euiToastCloseButton');
-      const count = await toastCloseButtons.count();
+    const toastCloseButtons = this.page.testSubj.locator('euiToastCloseButton');
+    const count = await toastCloseButtons.count();
 
-      for (let i = 0; i < count; i++) {
-        // eslint-disable-next-line playwright/no-nth-methods
-        const button = toastCloseButtons.nth(i);
-        if (await button.isVisible({ timeout: 1000 })) {
-          await button.click();
-        }
+    for (let i = 0; i < count; i++) {
+      // eslint-disable-next-line playwright/no-nth-methods
+      const button = toastCloseButtons.nth(i);
+      if (await button.isVisible({ timeout: 1000 })) {
+        await button.click();
       }
-    } catch (error) {
-      // No toasts present - this is fine
     }
   }
 }

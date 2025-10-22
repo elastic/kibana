@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { spaceTest } from '@kbn/scout-security';
+import { TIMEOUTS, spaceTest } from '@kbn/scout-security';
 import type { PromptCreateProps } from '@kbn/elastic-assistant-common/impl/schemas';
 
 const testPrompt = {
@@ -326,32 +326,24 @@ spaceTest.describe('AI Assistant Prompts', { tag: ['@ess', '@svlSecurity'] }, ()
         // Dismiss onboarding modal if present
         await pageObjects.securityCommon.dismissOnboardingModal();
 
-        // Wait for alerts to populate
-        // Note: In test environment, we may not have actual alerts, but we can still test the UI
-        await page.waitForTimeout(2000);
+        // Wait for alerts page to be fully loaded
+        await page.waitForTimeout(TIMEOUTS.NETWORK_IDLE);
 
         // Expand first alert if available, otherwise skip
         const firstAlert = page.testSubj.locator('expand-event');
-        const alertCount = await firstAlert.count();
+        await firstAlert.first().click();
 
-        if (alertCount > 0) {
-          await firstAlert.first().click();
+        // Open assistant from alert context
+        await pageObjects.assistantPage.openFromAlert();
 
-          // Open assistant from alert context
-          await pageObjects.assistantPage.openFromAlert();
+        // Verify the quick prompt badge IS visible in alert context
+        await pageObjects.assistantPage.expectQuickPromptVisible(testPrompt.name);
 
-          // Verify the quick prompt badge IS visible in alert context
-          await pageObjects.assistantPage.expectQuickPromptVisible(testPrompt.name);
+        // Click the quick prompt badge
+        await pageObjects.assistantPage.quickPromptBadge(testPrompt.name).click();
 
-          // Click the quick prompt badge
-          await pageObjects.assistantPage.quickPromptBadge(testPrompt.name).click();
-
-          // Verify the prompt content is in the user prompt textarea
-          await pageObjects.assistantPage.expectUserPromptText(testPrompt.content);
-        } else {
-          // If no alerts are generated, log and skip verification
-          console.log('No alerts generated in test environment - skipping context verification');
-        }
+        // Verify the prompt content is in the user prompt textarea
+        await pageObjects.assistantPage.expectUserPromptText(testPrompt.content);
       }
     );
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect, spaceTest } from '@kbn/scout-security';
+import { expect, spaceTest, TIMEOUTS } from '@kbn/scout-security';
 import { CUSTOM_QUERY_RULE } from '@kbn/scout-security/src/playwright/constants/detection_rules';
 import { RULE_MANAGEMENT_CONTEXT_DESCRIPTION } from '@kbn/security-solution-plugin/public/detection_engine/common/translations';
 
@@ -100,7 +100,7 @@ spaceTest.describe('AI Assistant Conversations', { tag: ['@ess', '@svlSecurity']
           // Dismiss onboarding modal if present
           await page
             .getByRole('button', { name: 'Close tour' })
-            .click({ timeout: 5000 })
+            .click({ timeout: TIMEOUTS.UI_ELEMENT_STANDARD })
             .catch(() => {});
 
           // Wait for the rules table to load
@@ -144,9 +144,6 @@ spaceTest.describe('AI Assistant Conversations', { tag: ['@ess', '@svlSecurity']
             'user.name': 'test-user',
           });
 
-          // Wait for rule to execute and generate alerts
-          await new Promise((resolve) => setTimeout(resolve, 5000));
-
           // Navigate to alerts page
           await page.gotoApp('security', { path: '/alerts' });
 
@@ -156,10 +153,10 @@ spaceTest.describe('AI Assistant Conversations', { tag: ['@ess', '@svlSecurity']
           // Dismiss onboarding modal if present
           await page
             .getByRole('button', { name: 'Close tour' })
-            .click({ timeout: 5000 })
+            .click({ timeout: TIMEOUTS.UI_ELEMENT_STANDARD })
             .catch(() => {});
 
-          // Wait for alerts to load
+          // Wait for alerts to load (rule execution + indexing)
           await pageObjects.alertsTablePage.waitForDetectionsAlertsWrapper(ruleName);
 
           // Expand the first alert
@@ -256,9 +253,6 @@ spaceTest.describe('AI Assistant Conversations', { tag: ['@ess', '@svlSecurity']
           'host.name': 'test-host',
           'user.name': 'test-user',
         });
-
-        // Wait for alerts to be generated
-        await new Promise((resolve) => setTimeout(resolve, 5000));
 
         // Navigate to alerts page
         await page.gotoApp('security', { path: '/alerts' });
