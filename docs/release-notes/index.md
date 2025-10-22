@@ -62,7 +62,7 @@ For the Elastic Observability 9.1.6 release information, refer to [Elastic Obser
 For the Elastic Security 9.1.6 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
 
 **Search**:
-* Fixes visual issues with the document metadata popup that happened when the document ID was too long. Also added a tooltip and copy button to improve the user experience [#239768]({{kib-pull}}239768).
+* Fixes visual issues with the document metadata popup that happened when the document ID was too long. Also adds a tooltip and copy button to improve the user experience [#239768]({{kib-pull}}239768).
 
 ## 9.1.5 [kibana-9.1.5-release-notes]
 
