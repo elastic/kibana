@@ -67,8 +67,8 @@ export const getStepDescription = (step: StreamlangProcessorDefinitionWithUIAttr
         {
           defaultMessage: 'Converts {field} field value to "{type}" type',
           values: {
-            type: step.to,
             field: step.from,
+            type: step.type,
           },
         }
       );
