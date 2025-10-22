@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WorkflowTaskScheduler } from './workflow_task_scheduler';
 import type { Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { EsWorkflow } from '@kbn/workflows';
+import { WorkflowTaskScheduler } from './workflow_task_scheduler';
 
 // Mock logger
 const mockLogger: Logger = {

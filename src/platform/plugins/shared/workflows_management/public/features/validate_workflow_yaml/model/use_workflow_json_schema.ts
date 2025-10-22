@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// TODO: Remove the eslint-disable comments to use the proper types.
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import type { JSONSchema7 } from 'json-schema';
 import { useMemo } from 'react';
 import { getJsonSchemaFromYamlSchema } from '@kbn/workflows';
-import type { JSONSchema7 } from 'json-schema';
-import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
 import { getWorkflowZodSchema, getWorkflowZodSchemaLoose } from '../../../../common/schema';
+import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
 
 const WorkflowSchemaUriStrict = 'file:///workflow-schema.json';
 const WorkflowSchemaUriStrictWithDynamicConnectors =
