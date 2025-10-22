@@ -103,7 +103,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       );
       await retry.waitFor(
         'Create Rule button is enabled',
-        async () => await testSubjects.isEnabled('createRuleButton')
+        async () => await testSubjects.isEuiEnabled('createRuleButton')
       );
       await observability.alerts.rulesPage.clickCreateRuleButton();
       await retry.waitFor(
@@ -350,7 +350,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         );
         await retry.waitFor(
           'Create rule button is enabled',
-          async () => await testSubjects.isEnabled('createRuleButton')
+          async () => await testSubjects.isEuiEnabled('createRuleButton')
         );
       });
 
@@ -401,7 +401,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
           );
           await retry.waitFor(
             'Create rule button is disabled',
-            async () => !(await testSubjects.isEnabled('createRuleButton'))
+            async () => !(await testSubjects.isEuiEnabled('createRuleButton'))
           );
           await observability.users.restoreDefaultTestUserRole();
         });

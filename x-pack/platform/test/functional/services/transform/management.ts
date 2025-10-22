@@ -37,7 +37,7 @@ export function TransformManagementProvider({ getService }: FtrProviderContext) 
     },
 
     async assertCreateFirstTransformButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('transformCreateFirstButton');
+      const isEnabled = await testSubjects.isEuiEnabled('transformCreateFirstButton');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "Create first transform" button to be '${
@@ -51,7 +51,7 @@ export function TransformManagementProvider({ getService }: FtrProviderContext) 
     },
 
     async assertCreateNewTransformButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('transformButtonCreate');
+      const isEnabled = await testSubjects.isEuiEnabled('transformButtonCreate');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "Create a transform" button to be '${

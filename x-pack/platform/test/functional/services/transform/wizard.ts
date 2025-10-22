@@ -1052,7 +1052,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async assertCreateAndStartButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('transformWizardCreateAndStartButton');
+      const isEnabled = await testSubjects.isEuiEnabled('transformWizardCreateAndStartButton');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected 'Create and start' button to be '${
@@ -1070,7 +1070,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async assertCreateButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('transformWizardCreateButton');
+      const isEnabled = await testSubjects.isEuiEnabled('transformWizardCreateButton');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected 'Create' button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
@@ -1088,7 +1088,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async assertCopyToClipboardButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('transformWizardCopyToClipboardButton');
+      const isEnabled = await testSubjects.isEuiEnabled('transformWizardCopyToClipboardButton');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected 'Copy to clipboard' button to be '${
@@ -1109,7 +1109,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
 
     async assertStartButtonEnabled(expectedValue: boolean) {
       await retry.tryForTime(5000, async () => {
-        const isEnabled = await testSubjects.isEnabled('transformWizardStartButton');
+        const isEnabled = await testSubjects.isEuiEnabled('transformWizardStartButton');
         expect(isEnabled).to.eql(
           expectedValue,
           `Expected 'Start' button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${

@@ -358,7 +358,7 @@ export function MachineLearningJobTableProvider(
 
     async assertJobActionStartDatafeedButtonEnabled(jobId: string, expectedValue: boolean) {
       await this.ensureJobActionsMenuOpen(jobId);
-      const isEnabled = await testSubjects.isEnabled('mlActionButtonStartDatafeed');
+      const isEnabled = await testSubjects.isEuiEnabled('mlActionButtonStartDatafeed');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "start datafeed" action button for AD job '${jobId}' to be '${
@@ -369,7 +369,7 @@ export function MachineLearningJobTableProvider(
 
     async assertJobActionResetJobButtonEnabled(jobId: string, expectedValue: boolean) {
       await this.ensureJobActionsMenuOpen(jobId);
-      const isEnabled = await testSubjects.isEnabled('mlActionButtonResetJob');
+      const isEnabled = await testSubjects.isEuiEnabled('mlActionButtonResetJob');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "reset job" action button for AD job '${jobId}' to be '${
@@ -380,7 +380,7 @@ export function MachineLearningJobTableProvider(
 
     async assertJobActionCloneJobButtonEnabled(jobId: string, expectedValue: boolean) {
       await this.ensureJobActionsMenuOpen(jobId);
-      const isEnabled = await testSubjects.isEnabled('mlActionButtonCloneJob');
+      const isEnabled = await testSubjects.isEuiEnabled('mlActionButtonCloneJob');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "clone job" action button for AD job '${jobId}' to be '${
@@ -391,7 +391,7 @@ export function MachineLearningJobTableProvider(
 
     async assertJobActionViewDatafeedCountsButtonEnabled(jobId: string, expectedValue: boolean) {
       await this.ensureJobActionsMenuOpen(jobId);
-      const isEnabled = await testSubjects.isEnabled('mlActionButtonViewDatafeedChart');
+      const isEnabled = await testSubjects.isEuiEnabled('mlActionButtonViewDatafeedChart');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "view datafeed counts" action button for AD job '${jobId}' to be '${
@@ -402,7 +402,7 @@ export function MachineLearningJobTableProvider(
 
     async assertJobActionEditJobButtonEnabled(jobId: string, expectedValue: boolean) {
       await this.ensureJobActionsMenuOpen(jobId);
-      const isEnabled = await testSubjects.isEnabled('mlActionButtonEditJob');
+      const isEnabled = await testSubjects.isEuiEnabled('mlActionButtonEditJob');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "edit job" action button for AD job '${jobId}' to be '${
@@ -413,7 +413,7 @@ export function MachineLearningJobTableProvider(
 
     async assertJobActionDeleteJobButtonEnabled(jobId: string, expectedValue: boolean) {
       await this.ensureJobActionsMenuOpen(jobId);
-      const isEnabled = await testSubjects.isEnabled('mlActionButtonDeleteJob');
+      const isEnabled = await testSubjects.isEuiEnabled('mlActionButtonDeleteJob');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "delete job" action button for AD job '${jobId}' to be '${
@@ -591,7 +591,9 @@ export function MachineLearningJobTableProvider(
 
     async assertMultiSelectDeleteJobActionButtonEnabled(expectedValue: boolean) {
       await this.ensureMultiSelectManagementActionsMenuOpen();
-      const isEnabled = await testSubjects.isEnabled('mlADJobListMultiSelectDeleteJobActionButton');
+      const isEnabled = await testSubjects.isEuiEnabled(
+        'mlADJobListMultiSelectDeleteJobActionButton'
+      );
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected AD jobs multi select "management actions" button to be '${

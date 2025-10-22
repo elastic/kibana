@@ -94,7 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.loadSavedDashboard('links 001');
         await dashboard.waitForRenderComplete();
         expect(await testSubjects.exists('dashboardLink--link004--error')).to.be(true);
-        expect(await testSubjects.isEnabled('dashboardLink--link004--error')).to.be(false);
+        expect(await testSubjects.isEuiEnabled('dashboardLink--link004--error')).to.be(false);
       });
 
       it('useCurrentFilters should pass filter pills and query', async () => {

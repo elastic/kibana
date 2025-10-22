@@ -93,7 +93,7 @@ export function TrainedModelsProvider({ getService }: FtrProviderContext, mlComm
     },
 
     async assertTestButtonEnabled(expectedValue: boolean = false) {
-      const isEnabled = await testSubjects.isEnabled('mlTestModelTestButton');
+      const isEnabled = await testSubjects.isEuiEnabled('mlTestModelTestButton');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected trained model "Test" button to be '${

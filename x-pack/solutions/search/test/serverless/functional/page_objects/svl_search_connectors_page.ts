@@ -135,7 +135,7 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
         await retry.try(async () => {
           await fieldText.type(connectorNameToBeDeleted);
         });
-        const isEnabled = await testSubjects.isEnabled('confirmModalConfirmButton');
+        const isEnabled = await testSubjects.isEuiEnabled('confirmModalConfirmButton');
         expect(isEnabled).to.be(true);
         await retry.try(async () => await testSubjects.click('confirmModalConfirmButton'));
       },
@@ -145,7 +145,7 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
         await retry.try(async () => {
           await fieldText.type(incorrectName);
         });
-        const isEnabled = await testSubjects.isEnabled('confirmModalConfirmButton');
+        const isEnabled = await testSubjects.isEuiEnabled('confirmModalConfirmButton');
         expect(isEnabled).to.be(false);
       },
       async getConnectorsList() {

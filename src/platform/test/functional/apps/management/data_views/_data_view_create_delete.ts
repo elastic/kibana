@@ -280,7 +280,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         await PageObjects.settings.selectTimeFieldOption('@timestamp');
 
-        expect(await testSubjects.isEnabled('saveIndexPatternButton')).to.be(true);
+        expect(await testSubjects.isEuiEnabled('saveIndexPatternButton')).to.be(true);
         await (await PageObjects.settings.getSaveDataViewButtonActive()).click();
 
         // wait for the confirmation modal to open
@@ -289,7 +289,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         // while the confirmation modal is open, we can check that the form button has actually become disabled
-        expect(await testSubjects.isEnabled('saveIndexPatternButton')).to.be(false);
+        expect(await testSubjects.isEuiEnabled('saveIndexPatternButton')).to.be(false);
 
         await testSubjects.click('confirmModalConfirmButton');
         await PageObjects.header.waitUntilLoadingHasFinished();

@@ -249,7 +249,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await comboBox.set('tines-storySelector', tinesStory1.name);
 
           await retry.waitFor('webhooks to load values', async () =>
-            testSubjects.isEnabled('tines-webhookSelector')
+            testSubjects.isEuiEnabled('tines-webhookSelector')
           );
           await comboBox.set('tines-webhookSelector', tinesAgentWebhook.name);
 

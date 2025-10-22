@@ -95,7 +95,7 @@ export function MachineLearningAlertingProvider(
     },
 
     async assertPreviewButtonState(expectedEnabled: boolean) {
-      const isEnabled = await testSubjects.isEnabled('mlAnomalyAlertPreviewButton');
+      const isEnabled = await testSubjects.isEuiEnabled('mlAnomalyAlertPreviewButton');
       expect(isEnabled).to.eql(
         expectedEnabled,
         `Expected data frame analytics "create" button to be '${

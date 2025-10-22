@@ -18,7 +18,7 @@ export function MachineLearningSettingsProvider({ getService }: FtrProviderConte
     },
 
     async assertManageCalendarsLinkEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('mlCalendarsMngButton');
+      const isEnabled = await testSubjects.isEuiEnabled('mlCalendarsMngButton');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "manage calendars" button to be '${
@@ -32,7 +32,7 @@ export function MachineLearningSettingsProvider({ getService }: FtrProviderConte
     },
 
     async assertCreateCalendarLinkEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('mlCalendarsCreateButton');
+      const isEnabled = await testSubjects.isEuiEnabled('mlCalendarsCreateButton');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "create calendars" button to be '${
@@ -46,7 +46,7 @@ export function MachineLearningSettingsProvider({ getService }: FtrProviderConte
     },
 
     async assertManageFilterListsLinkEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('mlFilterListsMngButton');
+      const isEnabled = await testSubjects.isEuiEnabled('mlFilterListsMngButton');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "manage filter lists" button to be '${
@@ -60,7 +60,7 @@ export function MachineLearningSettingsProvider({ getService }: FtrProviderConte
     },
 
     async assertCreateFilterListLinkEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('mlFilterListsCreateButton');
+      const isEnabled = await testSubjects.isEuiEnabled('mlFilterListsCreateButton');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "create filter lists" button to be '${

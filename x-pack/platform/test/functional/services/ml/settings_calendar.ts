@@ -127,7 +127,7 @@ export function MachineLearningSettingsCalendarProvider(
     },
 
     async assertCreateCalendarButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('mlCalendarButtonCreate');
+      const isEnabled = await testSubjects.isEuiEnabled('mlCalendarButtonCreate');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "create calendar" button to be '${
@@ -137,7 +137,7 @@ export function MachineLearningSettingsCalendarProvider(
     },
 
     async assertDeleteCalendarButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('mlCalendarButtonDelete');
+      const isEnabled = await testSubjects.isEuiEnabled('mlCalendarButtonDelete');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "delete calendar" button to be '${
@@ -152,7 +152,7 @@ export function MachineLearningSettingsCalendarProvider(
     },
 
     async assertApplyToAllJobsSwitchEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('mlCalendarApplyToAllJobsSwitch');
+      const isEnabled = await testSubjects.isEuiEnabled('mlCalendarApplyToAllJobsSwitch');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "apply calendar to all jobs" switch to be '${
@@ -186,7 +186,7 @@ export function MachineLearningSettingsCalendarProvider(
     },
 
     async assertNewEventButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('mlCalendarNewEventButton');
+      const isEnabled = await testSubjects.isEuiEnabled('mlCalendarNewEventButton');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "new event" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
@@ -196,7 +196,7 @@ export function MachineLearningSettingsCalendarProvider(
     },
 
     async assertImportEventsButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('mlCalendarImportEventsButton');
+      const isEnabled = await testSubjects.isEuiEnabled('mlCalendarImportEventsButton');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "imports events" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${

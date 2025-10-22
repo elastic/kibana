@@ -172,7 +172,7 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
 
     async clickAddDatabaseButton() {
       await retry.waitFor('Add button to be enabled', async () => {
-        return await testSubjects.isEnabled('addGeoipDatabaseSubmit');
+        return await testSubjects.isEuiEnabled('addGeoipDatabaseSubmit');
       });
       await testSubjects.click('addGeoipDatabaseSubmit');
     },

@@ -132,7 +132,7 @@ export function MachineLearningAnomaliesTableProvider({ getService }: FtrProvide
 
     async assertAnomalyActionViewSeriesButtonEnabled(rowIndex: number, expectedValue: boolean) {
       await this.ensureAnomalyActionsMenuOpen(rowIndex);
-      const isEnabled = await testSubjects.isEnabled('mlAnomaliesListRowActionViewSeriesButton');
+      const isEnabled = await testSubjects.isEuiEnabled('mlAnomaliesListRowActionViewSeriesButton');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "view series" action button for anomalies list entry  #${rowIndex} to be '${

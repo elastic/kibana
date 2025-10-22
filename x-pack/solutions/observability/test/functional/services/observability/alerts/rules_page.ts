@@ -24,7 +24,7 @@ export function ObservabilityAlertsRulesProvider({ getService }: FtrProviderCont
     await testSubjects.existOrFail('createRuleButton');
     await retry.waitFor(
       'Create Rule button is enabled',
-      async () => await testSubjects.isEnabled('createRuleButton')
+      async () => await testSubjects.isEuiEnabled('createRuleButton')
     );
     const createRuleButton = await testSubjects.find('createRuleButton');
     log.debug(`clicking on ${await createRuleButton.getAttribute('innerText')}`);

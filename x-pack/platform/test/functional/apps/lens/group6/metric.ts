@@ -553,8 +553,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'lnsMetric_secondaryMetricDimensionPanel > lns-dimensionTrigger'
       );
       // Check the compare to has changed to static value and baseline input is visible
-      expect(await testSubjects.isEnabled('lnsMetric_secondary_trend_baseline_static')).to.be(true);
-      expect(await testSubjects.isEnabled('lnsMetric_secondary_trend_baseline_primary')).to.be(
+      expect(await testSubjects.isEuiEnabled('lnsMetric_secondary_trend_baseline_static')).to.be(
+        true
+      );
+      expect(await testSubjects.isEuiEnabled('lnsMetric_secondary_trend_baseline_primary')).to.be(
         false
       );
       expect(await testSubjects.isDisplayed('lnsMetric_secondary_trend_baseline_input')).to.be(

@@ -137,7 +137,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await find.clickByCssSelector('[data-test-subj="testConnectorTab"]');
 
-        expect(await testSubjects.isEnabled('executeActionButton')).to.be(false);
+        expect(await testSubjects.isEuiEnabled('executeActionButton')).to.be(false);
       });
 
       describe('test page', () => {
@@ -252,7 +252,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               message: '',
             });
 
-            expect(await testSubjects.isEnabled('executeActionButton')).to.be(false);
+            expect(await testSubjects.isEuiEnabled('executeActionButton')).to.be(false);
           });
         });
 

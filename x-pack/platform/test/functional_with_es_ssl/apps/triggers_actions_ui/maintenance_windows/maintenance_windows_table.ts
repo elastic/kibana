@@ -282,9 +282,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const listedOnFirstPageMWs = await testSubjects.findAll('list-item');
       expect(listedOnFirstPageMWs.length).to.be(10);
 
-      await testSubjects.isEnabled('pagination-button-1');
+      await testSubjects.isEuiEnabled('pagination-button-1');
       await testSubjects.click('pagination-button-1');
-      await testSubjects.isEnabled('pagination-button-0');
+      await testSubjects.isEuiEnabled('pagination-button-0');
 
       await retry.try(async () => {
         const listedOnSecondPageMWs = await testSubjects.findAll('list-item');

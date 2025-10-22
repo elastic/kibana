@@ -36,7 +36,7 @@ export function MachineLearningDataFrameAnalyticsProvider(
     },
 
     async assertCreateNewAnalyticsButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('mlAnalyticsButtonCreate');
+      const isEnabled = await testSubjects.isEuiEnabled('mlAnalyticsButtonCreate');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected data frame analytics "create" button to be '${

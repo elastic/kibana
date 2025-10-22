@@ -81,7 +81,7 @@ export function MachineLearningStackManagementJobsProvider(
     },
 
     async assertSyncFlyoutSyncButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('mlJobMgmtSyncFlyoutSyncButton');
+      const isEnabled = await testSubjects.isEuiEnabled('mlJobMgmtSyncFlyoutSyncButton');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected Stack Management job sync flyout "Synchronize" button to be '${

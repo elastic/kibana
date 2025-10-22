@@ -122,7 +122,7 @@ export function MachineLearningSettingsFilterListProvider(
     },
 
     async assertCreateFilterListButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('mlFilterListsButtonCreate');
+      const isEnabled = await testSubjects.isEuiEnabled('mlFilterListsButtonCreate');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "create filter list" button to be '${
@@ -136,7 +136,7 @@ export function MachineLearningSettingsFilterListProvider(
     },
 
     async assertDeleteFilterListButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('mlFilterListsDeleteButton');
+      const isEnabled = await testSubjects.isEuiEnabled('mlFilterListsDeleteButton');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "delete filter list" button to be '${
@@ -161,7 +161,7 @@ export function MachineLearningSettingsFilterListProvider(
     },
 
     async assertEditDescriptionButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('mlFilterListEditDescriptionButton');
+      const isEnabled = await testSubjects.isEuiEnabled('mlFilterListEditDescriptionButton');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "edit filter list description" button to be '${
@@ -171,7 +171,7 @@ export function MachineLearningSettingsFilterListProvider(
     },
 
     async assertOpenNewItemsPopoverButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('mlFilterListOpenNewItemsPopoverButton');
+      const isEnabled = await testSubjects.isEuiEnabled('mlFilterListOpenNewItemsPopoverButton');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "add item" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
@@ -181,7 +181,7 @@ export function MachineLearningSettingsFilterListProvider(
     },
 
     async assertAddItemsButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('mlFilterListOpenNewItemsPopoverButton');
+      const isEnabled = await testSubjects.isEuiEnabled('mlFilterListOpenNewItemsPopoverButton');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "add" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
@@ -191,7 +191,7 @@ export function MachineLearningSettingsFilterListProvider(
     },
 
     async assertDeleteItemButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('mlFilterListDeleteItemButton');
+      const isEnabled = await testSubjects.isEuiEnabled('mlFilterListDeleteItemButton');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "delete item" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
@@ -201,7 +201,7 @@ export function MachineLearningSettingsFilterListProvider(
     },
 
     async assertSaveFilterListButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('mlFilterListSaveButton');
+      const isEnabled = await testSubjects.isEuiEnabled('mlFilterListSaveButton');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "save filter list" button to be '${

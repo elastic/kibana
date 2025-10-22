@@ -1934,17 +1934,17 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async isShareable() {
-      return await testSubjects.isEnabled('lnsApp_shareButton');
+      return await testSubjects.isEuiEnabled('lnsApp_shareButton');
     },
 
     isExportActionEnabled() {
-      return testSubjects.isEnabled('lnsApp_exportButton');
+      return testSubjects.isEuiEnabled('lnsApp_exportButton');
     },
 
     async isShareActionEnabled(action: 'link') {
       switch (action) {
         case 'link':
-          return await testSubjects.isEnabled('tabbedModal-link-content');
+          return await testSubjects.isEuiEnabled('tabbedModal-link-content');
         default:
           return await testSubjects.isEnabled(`tabbedModal-${action}-content`);
       }

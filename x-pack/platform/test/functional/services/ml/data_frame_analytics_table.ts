@@ -295,7 +295,7 @@ export function MachineLearningDataFrameAnalyticsTableProvider({
 
     public async assertJobActionStartButtonEnabled(analyticsId: string, expectedValue: boolean) {
       await this.ensureJobActionsMenuOpen(analyticsId);
-      const isEnabled = await testSubjects.isEnabled('mlAnalyticsJobStartButton');
+      const isEnabled = await testSubjects.isEuiEnabled('mlAnalyticsJobStartButton');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "start" action menu button for DFA job '${analyticsId}' to be '${
@@ -306,7 +306,7 @@ export function MachineLearningDataFrameAnalyticsTableProvider({
 
     public async assertJobActionEditButtonEnabled(analyticsId: string, expectedValue: boolean) {
       await this.ensureJobActionsMenuOpen(analyticsId);
-      const isEnabled = await testSubjects.isEnabled('mlAnalyticsJobEditButton');
+      const isEnabled = await testSubjects.isEuiEnabled('mlAnalyticsJobEditButton');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "edit" action menu button for DFA job '${analyticsId}' to be '${
@@ -317,7 +317,7 @@ export function MachineLearningDataFrameAnalyticsTableProvider({
 
     public async assertJobActionCloneButtonEnabled(analyticsId: string, expectedValue: boolean) {
       await this.ensureJobActionsMenuOpen(analyticsId);
-      const isEnabled = await testSubjects.isEnabled('mlAnalyticsJobCloneButton');
+      const isEnabled = await testSubjects.isEuiEnabled('mlAnalyticsJobCloneButton');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "clone" action menu button for DFA job '${analyticsId}' to be '${
@@ -328,7 +328,7 @@ export function MachineLearningDataFrameAnalyticsTableProvider({
 
     public async assertJobActionDeleteButtonEnabled(analyticsId: string, expectedValue: boolean) {
       await this.ensureJobActionsMenuOpen(analyticsId);
-      const isEnabled = await testSubjects.isEnabled('mlAnalyticsJobDeleteButton');
+      const isEnabled = await testSubjects.isEuiEnabled('mlAnalyticsJobDeleteButton');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "delete" action menu button for DFA job '${analyticsId}' to be '${

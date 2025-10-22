@@ -79,11 +79,11 @@ export function SearchInferenceManagementPageProvider({ getService }: FtrProvide
         expect(index.includes('elser_index')).to.be(true);
         expect(pipeline.includes('endpoint-1')).to.be(true);
 
-        expect(await testSubjects.isEnabled('confirmModalConfirmButton')).to.be(false);
+        expect(await testSubjects.isEuiEnabled('confirmModalConfirmButton')).to.be(false);
 
         await testSubjects.click('warningCheckbox');
 
-        expect(await testSubjects.isEnabled('confirmModalConfirmButton')).to.be(true);
+        expect(await testSubjects.isEuiEnabled('confirmModalConfirmButton')).to.be(true);
         await testSubjects.click('confirmModalConfirmButton');
 
         await testSubjects.existOrFail('inferenceEndpointTable');
@@ -120,7 +120,7 @@ export function SearchInferenceManagementPageProvider({ getService }: FtrProvide
           'cohere-completion'
         );
 
-        expect(await testSubjects.isEnabled('inference-endpoint-submit-button')).to.be(true);
+        expect(await testSubjects.isEuiEnabled('inference-endpoint-submit-button')).to.be(true);
       },
     },
 

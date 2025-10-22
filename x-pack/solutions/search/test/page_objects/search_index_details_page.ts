@@ -160,14 +160,14 @@ export function SearchIndexDetailPageProvider({ getService }: FtrProviderContext
     },
     async expectDeleteIndexButtonToBeDisabled() {
       await testSubjects.existOrFail('moreOptionsDeleteIndex');
-      const deleteIndexButton = await testSubjects.isEnabled('moreOptionsDeleteIndex');
+      const deleteIndexButton = await testSubjects.isEuiEnabled('moreOptionsDeleteIndex');
       expect(deleteIndexButton).to.be(false);
       await testSubjects.moveMouseTo('moreOptionsDeleteIndex');
       await testSubjects.existOrFail('moreOptionsDeleteIndexTooltip');
     },
     async expectDeleteIndexButtonToBeEnabled() {
       await testSubjects.existOrFail('moreOptionsDeleteIndex');
-      const deleteIndexButton = await testSubjects.isEnabled('moreOptionsDeleteIndex');
+      const deleteIndexButton = await testSubjects.isEuiEnabled('moreOptionsDeleteIndex');
       expect(deleteIndexButton).to.be(true);
     },
     async expectDeleteIndexButtonExistsInMoreOptions() {
@@ -305,7 +305,7 @@ export function SearchIndexDetailPageProvider({ getService }: FtrProviderContext
       await testSubjects.existOrFail('documentMetadataButton');
       await testSubjects.click('documentMetadataButton');
       await testSubjects.existOrFail('deleteDocumentButton');
-      const isDeleteDocumentEnabled = await testSubjects.isEnabled('deleteDocumentButton');
+      const isDeleteDocumentEnabled = await testSubjects.isEuiEnabled('deleteDocumentButton');
       expect(isDeleteDocumentEnabled).to.be(false);
       await testSubjects.moveMouseTo('deleteDocumentButton');
       await testSubjects.existOrFail('deleteDocumentButtonToolTip');
@@ -314,7 +314,7 @@ export function SearchIndexDetailPageProvider({ getService }: FtrProviderContext
       await testSubjects.existOrFail('documentMetadataButton');
       await testSubjects.click('documentMetadataButton');
       await testSubjects.existOrFail('deleteDocumentButton');
-      const isDeleteDocumentEnabled = await testSubjects.isEnabled('deleteDocumentButton');
+      const isDeleteDocumentEnabled = await testSubjects.isEuiEnabled('deleteDocumentButton');
       expect(isDeleteDocumentEnabled).to.be(true);
     },
 
@@ -353,7 +353,9 @@ export function SearchIndexDetailPageProvider({ getService }: FtrProviderContext
 
     async expectAddFieldToBeDisabled() {
       await testSubjects.existOrFail('indexDetailsMappingsAddField');
-      const isMappingsFieldEnabled = await testSubjects.isEnabled('indexDetailsMappingsAddField');
+      const isMappingsFieldEnabled = await testSubjects.isEuiEnabled(
+        'indexDetailsMappingsAddField'
+      );
       expect(isMappingsFieldEnabled).to.be(false);
       await testSubjects.moveMouseTo('indexDetailsMappingsAddField');
       await testSubjects.existOrFail('indexDetailsMappingsAddFieldTooltip');
@@ -361,7 +363,9 @@ export function SearchIndexDetailPageProvider({ getService }: FtrProviderContext
 
     async expectAddFieldToBeEnabled() {
       await testSubjects.existOrFail('indexDetailsMappingsAddField');
-      const isMappingsFieldEnabled = await testSubjects.isEnabled('indexDetailsMappingsAddField');
+      const isMappingsFieldEnabled = await testSubjects.isEuiEnabled(
+        'indexDetailsMappingsAddField'
+      );
       expect(isMappingsFieldEnabled).to.be(true);
     },
 

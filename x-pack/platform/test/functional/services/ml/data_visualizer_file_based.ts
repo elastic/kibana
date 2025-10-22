@@ -113,7 +113,7 @@ export function MachineLearningDataVisualizerFileBasedProvider(
 
     async assertImportButtonEnabled(expectedValue: boolean) {
       await retry.tryForTime(60 * 1000, async () => {
-        const isEnabled = await testSubjects.isEnabled('fileUploadImportButton');
+        const isEnabled = await testSubjects.isEuiEnabled('fileUploadImportButton');
         expect(isEnabled).to.eql(
           expectedValue,
           `Expected "import" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${

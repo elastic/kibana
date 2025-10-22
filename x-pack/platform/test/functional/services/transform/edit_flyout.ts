@@ -138,7 +138,7 @@ export function TransformEditFlyoutProvider({ getService }: FtrProviderContext) 
     },
 
     async assertUpdateTransformButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('transformEditFlyoutUpdateButton');
+      const isEnabled = await testSubjects.isEuiEnabled('transformEditFlyoutUpdateButton');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "Update" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${

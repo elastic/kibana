@@ -417,7 +417,7 @@ export class CommonPageObject extends FtrService {
     await this.testSubjects.exists('confirmModalTitleText');
     // make sure button is enabled before clicking it
     // (and conveniently give UI enough time to bind a handler to it)
-    const isEnabled = await this.testSubjects.isEnabled('confirmModalConfirmButton');
+    const isEnabled = await this.testSubjects.isEuiEnabled('confirmModalConfirmButton');
     if (!isEnabled) {
       throw new Error('Modal confirm button is not enabled');
     }

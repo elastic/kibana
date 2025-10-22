@@ -226,7 +226,7 @@ export function MachineLearningDataDriftProvider({
 
     async assertRunAnalysisButtonState(disabled: boolean) {
       await retry.tryForTime(5000, async () => {
-        const isDisabled = !(await testSubjects.isEnabled('runDataDriftAnalysis'));
+        const isDisabled = !(await testSubjects.isEuiEnabled('runDataDriftAnalysis'));
         expect(isDisabled).to.equal(
           disabled,
           `Expect runDataDriftAnalysis button disabled state to be ${disabled} (got ${isDisabled})`
@@ -307,7 +307,9 @@ export function MachineLearningDataDriftProvider({
 
     async assertAnalyzeWithoutSavingButtonState(disabled = true) {
       await retry.tryForTime(5000, async () => {
-        const isDisabled = !(await testSubjects.isEnabled('analyzeDataDriftWithoutSavingButton'));
+        const isDisabled = !(await testSubjects.isEuiEnabled(
+          'analyzeDataDriftWithoutSavingButton'
+        ));
         expect(isDisabled).to.equal(
           disabled,
           `Expect analyze without saving button disabled state to be ${disabled} (got ${isDisabled})`
@@ -317,7 +319,7 @@ export function MachineLearningDataDriftProvider({
 
     async assertAnalyzeDataDriftButtonState(disabled = true) {
       await retry.tryForTime(5000, async () => {
-        const isDisabled = !(await testSubjects.isEnabled('analyzeDataDriftButton'));
+        const isDisabled = !(await testSubjects.isEuiEnabled('analyzeDataDriftButton'));
         expect(isDisabled).to.equal(
           disabled,
           `Expect analyze data drift button disabled state to be ${disabled} (got ${isDisabled})`

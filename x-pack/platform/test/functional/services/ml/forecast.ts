@@ -109,7 +109,9 @@ export function MachineLearningForecastProvider({ getPageObject, getService }: F
 
     async assertForecastModalRunButtonEnabled(expectedValue: boolean) {
       await headerPage.waitUntilLoadingHasFinished();
-      const isEnabled = await testSubjects.isEnabled('mlModalForecast > mlModalForecastButtonRun');
+      const isEnabled = await testSubjects.isEuiEnabled(
+        'mlModalForecast > mlModalForecastButtonRun'
+      );
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected forecast "run" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${

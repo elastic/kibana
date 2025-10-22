@@ -29,7 +29,7 @@ export function MachineLearningDataVisualizerProvider({ getService }: FtrProvide
     },
 
     async assertSelectIndexButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('mlDataVisualizerSelectIndexButton');
+      const isEnabled = await testSubjects.isEuiEnabled('mlDataVisualizerSelectIndexButton');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "select index" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
@@ -39,7 +39,7 @@ export function MachineLearningDataVisualizerProvider({ getService }: FtrProvide
     },
 
     async assertUploadFileButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('mlDataVisualizerUploadFileButton');
+      const isEnabled = await testSubjects.isEuiEnabled('mlDataVisualizerUploadFileButton');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "upload file" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
@@ -49,7 +49,7 @@ export function MachineLearningDataVisualizerProvider({ getService }: FtrProvide
     },
 
     async assertStartTrialButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('mlDataVisualizerStartTrialButton');
+      const isEnabled = await testSubjects.isEuiEnabled('mlDataVisualizerStartTrialButton');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "start trial" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${

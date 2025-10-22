@@ -33,7 +33,7 @@ export function MachineLearningJobManagementProvider(
     },
 
     async assertCreateNewJobButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('mlCreateNewJobButton');
+      const isEnabled = await testSubjects.isEuiEnabled('mlCreateNewJobButton');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected AD "Create job" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${

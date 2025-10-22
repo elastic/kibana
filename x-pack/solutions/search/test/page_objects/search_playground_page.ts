@@ -191,9 +191,9 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
 
       async expectPlaygroundHeaderComponentsToDisabled() {
         expect(await testSubjects.getAttribute('viewModeSelector', 'disabled')).to.be('true');
-        expect(await testSubjects.isEnabled('uploadFileButton')).to.be(true);
-        expect(await testSubjects.isEnabled('dataSourceActionButton')).to.be(false);
-        expect(await testSubjects.isEnabled('viewCodeActionButton')).to.be(false);
+        expect(await testSubjects.isEuiEnabled('uploadFileButton')).to.be(true);
+        expect(await testSubjects.isEuiEnabled('dataSourceActionButton')).to.be(false);
+        expect(await testSubjects.isEuiEnabled('viewCodeActionButton')).to.be(false);
       },
 
       async expectCreateIndexButtonToExists() {
@@ -214,11 +214,11 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       },
       async expectCreateIndexButtonToBeEnabled() {
         await testSubjects.existOrFail('createIndexBtn');
-        expect(await testSubjects.isEnabled('createIndexBtn')).equal(true);
+        expect(await testSubjects.isEuiEnabled('createIndexBtn')).equal(true);
       },
       async clickCreateIndexButton() {
         await testSubjects.existOrFail('createIndexBtn');
-        expect(await testSubjects.isEnabled('createIndexBtn')).equal(true);
+        expect(await testSubjects.isEuiEnabled('createIndexBtn')).equal(true);
         await testSubjects.click('createIndexBtn');
       },
 
@@ -239,7 +239,7 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await testSubjects.existOrFail('selectIndicesFlyout');
         await testSubjects.click('sourceIndex-0');
         await testSubjects.existOrFail('NoIndicesFieldsMessage');
-        expect(await testSubjects.isEnabled('saveButton')).to.be(false);
+        expect(await testSubjects.isEuiEnabled('saveButton')).to.be(false);
       },
       async clickConnectLLMButton() {
         await testSubjects.existOrFail('connectLLMButton');
@@ -273,7 +273,7 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       },
       async clickCreateIndex() {
         await testSubjects.existOrFail('createIndexButton');
-        expect(await testSubjects.isEnabled('createIndexButton')).equal(true);
+        expect(await testSubjects.isEuiEnabled('createIndexButton')).equal(true);
         await testSubjects.click('createIndexButton');
       },
 
@@ -333,23 +333,23 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       },
       async expectChatWindowLoaded() {
         expect(await testSubjects.getAttribute('viewModeSelector', 'disabled')).to.be(null);
-        expect(await testSubjects.isEnabled('dataSourceActionButton')).to.equal(
+        expect(await testSubjects.isEuiEnabled('dataSourceActionButton')).to.equal(
           true,
           'dataSourceActionButton isEnabled should be true'
         );
-        expect(await testSubjects.isEnabled('viewCodeActionButton')).to.equal(
+        expect(await testSubjects.isEuiEnabled('viewCodeActionButton')).to.equal(
           true,
           'viewCodeActionButton isEnabled should be true'
         );
-        expect(await testSubjects.isEnabled('regenerateActionButton')).to.equal(
+        expect(await testSubjects.isEuiEnabled('regenerateActionButton')).to.equal(
           false,
           'regenerateActionButton isEnabled should be false'
         );
-        expect(await testSubjects.isEnabled('clearChatActionButton')).to.equal(
+        expect(await testSubjects.isEuiEnabled('clearChatActionButton')).to.equal(
           false,
           'clearChatActionButton isEnabled should be false'
         );
-        expect(await testSubjects.isEnabled('sendQuestionButton')).to.equal(
+        expect(await testSubjects.isEuiEnabled('sendQuestionButton')).to.equal(
           false,
           'sendQuestionButton isEnabled should be false'
         );
@@ -375,7 +375,7 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       },
       async clearChat() {
         await testSubjects.existOrFail('clearChatActionButton');
-        expect(await testSubjects.isEnabled('clearChatActionButton')).to.be(true);
+        expect(await testSubjects.isEuiEnabled('clearChatActionButton')).to.be(true);
         await (await testSubjects.find('clearChatActionButton')).click();
 
         const userMessageElement = await testSubjects.find('systemMessage');
@@ -525,14 +525,14 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       },
       async expectSaveButtonToBeDisabled() {
         await testSubjects.existOrFail('playground-save-button');
-        expect(await testSubjects.isEnabled('playground-save-button')).to.equal(
+        expect(await testSubjects.isEuiEnabled('playground-save-button')).to.equal(
           false,
           'Playground save button should be disabled'
         );
       },
       async expectSaveButtonToBeEnabled() {
         await testSubjects.existOrFail('playground-save-button');
-        expect(await testSubjects.isEnabled('playground-save-button')).to.equal(
+        expect(await testSubjects.isEuiEnabled('playground-save-button')).to.equal(
           true,
           'Playground save button should be enabled'
         );
@@ -771,14 +771,14 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       },
       async expectSavedPlaygroundButtonToBeEnabled() {
         await testSubjects.existOrFail('saved-playground-save-button');
-        expect(await testSubjects.isEnabled('saved-playground-save-button')).to.equal(
+        expect(await testSubjects.isEuiEnabled('saved-playground-save-button')).to.equal(
           true,
           'Playground save button should be enabled'
         );
       },
       async expectSavedPlaygroundButtonToBeDisabled() {
         await testSubjects.existOrFail('saved-playground-save-button');
-        expect(await testSubjects.isEnabled('saved-playground-save-button')).to.equal(
+        expect(await testSubjects.isEuiEnabled('saved-playground-save-button')).to.equal(
           false,
           'Playground save button should be disabled'
         );

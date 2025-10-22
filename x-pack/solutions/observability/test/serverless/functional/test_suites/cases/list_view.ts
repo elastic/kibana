@@ -204,9 +204,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.missingOrFail('pagination-button-1');
         await testSubjects.click('tablePaginationPopoverButton');
         await testSubjects.click('tablePagination-10-rows');
-        await testSubjects.isEnabled('pagination-button-1');
+        await testSubjects.isEuiEnabled('pagination-button-1');
         await testSubjects.click('pagination-button-1');
-        await testSubjects.isEnabled('pagination-button-0');
+        await testSubjects.isEuiEnabled('pagination-button-0');
       });
     });
 

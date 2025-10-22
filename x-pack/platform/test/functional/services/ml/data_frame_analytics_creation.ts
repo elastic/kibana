@@ -705,7 +705,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async isCreateButtonDisabled() {
-      const isEnabled = await testSubjects.isEnabled('mlAnalyticsCreateJobWizardCreateButton');
+      const isEnabled = await testSubjects.isEuiEnabled('mlAnalyticsCreateJobWizardCreateButton');
       return !isEnabled;
     },
 

@@ -561,7 +561,7 @@ export class VisualBuilderPageObject extends FtrService {
     await this.toggleIndexPatternSelectionModePopover(true);
     let isEnabled;
     await this.testSubjects.retry.tryForTime(2000, async () => {
-      isEnabled = await this.testSubjects.isEnabled('switchIndexPatternSelectionMode');
+      isEnabled = await this.testSubjects.isEuiEnabled('switchIndexPatternSelectionMode');
     });
     await this.toggleIndexPatternSelectionModePopover(false);
     return isEnabled;

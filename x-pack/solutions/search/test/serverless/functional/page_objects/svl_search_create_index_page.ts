@@ -54,15 +54,15 @@ export function SvlSearchCreateIndexPageProvider({ getService }: FtrProviderCont
     },
     async expectCreateIndexButtonToBeEnabled() {
       await testSubjects.existOrFail('createIndexBtn');
-      expect(await testSubjects.isEnabled('createIndexBtn')).equal(true);
+      expect(await testSubjects.isEuiEnabled('createIndexBtn')).equal(true);
     },
     async expectCreateIndexButtonToBeDisabled() {
       await testSubjects.existOrFail('createIndexBtn');
-      expect(await testSubjects.isEnabled('createIndexBtn')).equal(false);
+      expect(await testSubjects.isEuiEnabled('createIndexBtn')).equal(false);
     },
     async clickCreateIndexButton() {
       await testSubjects.existOrFail('createIndexBtn');
-      expect(await testSubjects.isEnabled('createIndexBtn')).equal(true);
+      expect(await testSubjects.isEuiEnabled('createIndexBtn')).equal(true);
       await testSubjects.click('createIndexBtn');
     },
     async expectCreateIndexCodeView() {

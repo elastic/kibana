@@ -379,7 +379,7 @@ export class SavedObjectsPageObject extends FtrService {
   }
 
   async canBeDeleted() {
-    return await this.testSubjects.isEnabled('savedObjectsManagementDelete');
+    return await this.testSubjects.isEuiEnabled('savedObjectsManagementDelete');
   }
 
   async clickDelete({ confirmDelete = true }: { confirmDelete?: boolean } = {}) {

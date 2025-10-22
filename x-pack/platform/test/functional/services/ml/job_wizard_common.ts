@@ -288,7 +288,7 @@ export function MachineLearningJobWizardCommonProvider(
     },
 
     async assertModelPlotSwitchEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('mlJobWizardSwitchModelPlot');
+      const isEnabled = await testSubjects.isEuiEnabled('mlJobWizardSwitchModelPlot');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected model plot switch to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
