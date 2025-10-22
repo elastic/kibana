@@ -189,12 +189,7 @@ async function runCheckAsync(script: string): Promise<CheckResult> {
 
   return new Promise((resolve) => {
     validateScriptPath(script);
-    const scriptProcess = execFile('bash', [script], {
-      env: {
-        ...process.env,
-        COLLECT_QUICK_CHECK_CHANGES: true,
-      },
-    });
+    const scriptProcess = execFile('bash', [script]);
     let output = '';
     const appendToOutput = (data: string | Buffer) => (output += data.toString());
 
