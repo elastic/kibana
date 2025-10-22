@@ -25,7 +25,11 @@ jest.mock('../../components/contexts/profiling_dependencies/use_profiling_depend
 }));
 
 // Test component that mimics the storage explorer warning logic
-function StorageExplorerWarningLogic({ totalNumberOfDistinctProbabilisticValues }: { totalNumberOfDistinctProbabilisticValues: number }) {
+function StorageExplorerWarningLogic({
+  totalNumberOfDistinctProbabilisticValues,
+}: {
+  totalNumberOfDistinctProbabilisticValues: number;
+}) {
   const hasDistinctProbabilisticValues = totalNumberOfDistinctProbabilisticValues > 1;
 
   return (
@@ -47,25 +51,29 @@ function StorageExplorerWarningLogic({ totalNumberOfDistinctProbabilisticValues 
 describe('Storage Explorer Warning Logic', () => {
   it('shows warning when totalNumberOfDistinctProbabilisticValues > 1', () => {
     render(<StorageExplorerWarningLogic totalNumberOfDistinctProbabilisticValues={2} />);
-    
+
     expect(screen.getByTestId('warning-logic')).toHaveTextContent('Warning should be shown');
     expect(
-      screen.getByText("We've identified 2 distinct probabilistic profiling values. Make sure to update them.")
+      screen.getByText(
+        "We've identified 2 distinct probabilistic profiling values. Make sure to update them."
+      )
     ).toBeInTheDocument();
   });
 
   it('shows warning when totalNumberOfDistinctProbabilisticValues = 3', () => {
     render(<StorageExplorerWarningLogic totalNumberOfDistinctProbabilisticValues={3} />);
-    
+
     expect(screen.getByTestId('warning-logic')).toHaveTextContent('Warning should be shown');
     expect(
-      screen.getByText("We've identified 3 distinct probabilistic profiling values. Make sure to update them.")
+      screen.getByText(
+        "We've identified 3 distinct probabilistic profiling values. Make sure to update them."
+      )
     ).toBeInTheDocument();
   });
 
   it('does not show warning when totalNumberOfDistinctProbabilisticValues = 1', () => {
     render(<StorageExplorerWarningLogic totalNumberOfDistinctProbabilisticValues={1} />);
-    
+
     expect(screen.getByTestId('warning-logic')).toHaveTextContent('Warning should be hidden');
     expect(
       screen.queryByText(/We've identified \d+ distinct probabilistic profiling values/)
@@ -74,7 +82,7 @@ describe('Storage Explorer Warning Logic', () => {
 
   it('does not show warning when totalNumberOfDistinctProbabilisticValues = 0', () => {
     render(<StorageExplorerWarningLogic totalNumberOfDistinctProbabilisticValues={0} />);
-    
+
     expect(screen.getByTestId('warning-logic')).toHaveTextContent('Warning should be hidden');
     expect(
       screen.queryByText(/We've identified \d+ distinct probabilistic profiling values/)
@@ -83,7 +91,7 @@ describe('Storage Explorer Warning Logic', () => {
 
   it('does not show warning when totalNumberOfDistinctProbabilisticValues is negative', () => {
     render(<StorageExplorerWarningLogic totalNumberOfDistinctProbabilisticValues={-1} />);
-    
+
     expect(screen.getByTestId('warning-logic')).toHaveTextContent('Warning should be hidden');
     expect(
       screen.queryByText(/We've identified \d+ distinct probabilistic profiling values/)

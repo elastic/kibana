@@ -26,11 +26,13 @@ jest.mock('../../components/contexts/profiling_dependencies/use_profiling_depend
 describe('DistinctProbabilisticValuesWarning', () => {
   it('shows warning when totalNumberOfDistinctProbabilisticValues > 1', () => {
     render(<DistinctProbabilisticValuesWarning totalNumberOfDistinctProbabilisticValues={2} />);
-    
+
     expect(
-      screen.getByText("We've identified 2 distinct probabilistic profiling values. Make sure to update them.")
+      screen.getByText(
+        "We've identified 2 distinct probabilistic profiling values. Make sure to update them."
+      )
     ).toBeInTheDocument();
-    
+
     expect(screen.getByText('Learn how')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Learn how' })).toHaveAttribute(
       'href',
@@ -40,31 +42,37 @@ describe('DistinctProbabilisticValuesWarning', () => {
 
   it('shows warning with correct count for multiple values', () => {
     render(<DistinctProbabilisticValuesWarning totalNumberOfDistinctProbabilisticValues={5} />);
-    
+
     expect(
-      screen.getByText("We've identified 5 distinct probabilistic profiling values. Make sure to update them.")
+      screen.getByText(
+        "We've identified 5 distinct probabilistic profiling values. Make sure to update them."
+      )
     ).toBeInTheDocument();
   });
 
   it('shows warning when totalNumberOfDistinctProbabilisticValues = 1', () => {
     render(<DistinctProbabilisticValuesWarning totalNumberOfDistinctProbabilisticValues={1} />);
-    
+
     expect(
-      screen.getByText("We've identified 1 distinct probabilistic profiling values. Make sure to update them.")
+      screen.getByText(
+        "We've identified 1 distinct probabilistic profiling values. Make sure to update them."
+      )
     ).toBeInTheDocument();
   });
 
   it('shows warning when totalNumberOfDistinctProbabilisticValues = 0', () => {
     render(<DistinctProbabilisticValuesWarning totalNumberOfDistinctProbabilisticValues={0} />);
-    
+
     expect(
-      screen.getByText("We've identified 0 distinct probabilistic profiling values. Make sure to update them.")
+      screen.getByText(
+        "We've identified 0 distinct probabilistic profiling values. Make sure to update them."
+      )
     ).toBeInTheDocument();
   });
 
   it('displays the description text', () => {
     render(<DistinctProbabilisticValuesWarning totalNumberOfDistinctProbabilisticValues={2} />);
-    
+
     expect(
       screen.getByText(
         'We recommend using a consistent probabilistic value for each project for more efficient storage, cost management, and to maintain good statistical accuracy.'
@@ -74,7 +82,7 @@ describe('DistinctProbabilisticValuesWarning', () => {
 
   it('has correct test subject for learn how button', () => {
     render(<DistinctProbabilisticValuesWarning totalNumberOfDistinctProbabilisticValues={2} />);
-    
+
     expect(
       screen.getByTestId('profilingDistinctProbabilisticValuesWarningLearnHowButton')
     ).toBeInTheDocument();
