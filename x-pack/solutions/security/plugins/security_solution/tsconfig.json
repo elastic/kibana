@@ -266,7 +266,6 @@
     "@kbn/object-utils",
     "@kbn/core-ui-settings-common",
     "@kbn/scout-security",
-    "@kbn/security-solution-plugin",
     "@kbn/license-management-plugin",
   ]
 }
