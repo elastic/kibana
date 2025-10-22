@@ -81,7 +81,7 @@ export class SearchSessionEBTManager {
   }
 
   public trackBgsError({ session, error }: { session: SearchSessionSavedObject; error: Error }) {
-    const errorType = 'attributes' in error ? (error as any).attributes.error?.type : undefined;
+    const errorType = 'attributes' in error ? (error as any).attributes.error?.type : '';
     const httpStatus = 'attributes' in error ? (error as any).attributes.rawResponse?.status : -1;
 
     this.reportEvent(BG_SEARCH_ERROR, {
