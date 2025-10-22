@@ -20,6 +20,7 @@ import type {
   IconPosition,
   FillStyle,
   YAxisConfig,
+  PointVisibility,
 } from '@kbn/expression-xy-plugin/common';
 import type { ColorMapping, PaletteOutput } from '@kbn/coloring';
 import type {
@@ -147,6 +148,7 @@ export interface XYState {
   minBarHeight?: number;
   hideEndzones?: boolean;
   showCurrentTimeMarker?: boolean;
+  pointVisibility?: PointVisibility;
 }
 
 export type State = XYState;

@@ -25,7 +25,7 @@ import type {
 } from '@kbn/lens-formula-docs';
 import type { Range } from '@kbn/expressions-plugin/public';
 import type { TinymathAST } from '@kbn/tinymath';
-import type { Query } from '@kbn/es-query';
+import type { QueryFilter } from '@kbn/data-plugin/common';
 import type { DateRange, ValueFormatConfig } from '../types';
 import type {
   BaseIndexPatternColumn,
@@ -259,16 +259,10 @@ export interface RangeIndexPatternColumn extends FieldBasedIndexPatternColumn {
   };
 }
 
-// references types from src/plugins/data/common/search/aggs/buckets/filters.ts
-export interface LensAggFilter {
-  input: Query;
-  label: string;
-}
+export type LensAggFilter = QueryFilter & { label: string };
 
-export interface LensAggFilterValue {
+export interface LensAggFilterValue extends LensAggFilter {
   id: string;
-  input: Query;
-  label: string;
 }
 
 export interface FiltersIndexPatternColumn extends BaseIndexPatternColumn {

@@ -8,7 +8,6 @@
  */
 
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-// import { CollapseFunctions } from './constants';
 import type {
   CollapseFunction,
   NavigateToLensLayer,

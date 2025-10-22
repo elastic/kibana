@@ -21,9 +21,9 @@ import type {
   CountColumn,
   MaxColumn,
   DateHistogramColumn,
-  Meta,
   AggBasedColumn,
 } from '../../common/convert_to_lens/lib';
+import type { AnyMetricColumnWithSourceFieldWithMeta, Meta } from '../../common/convert_to_lens';
 import {
   getBucketCollapseFn,
   getBucketColumns,
@@ -705,7 +705,7 @@ describe('getColumnIds', () => {
             { columnId: 'col-3', meta: { aggId: '3' } },
             { columnId: 'col-4', meta: { aggId: '4' } },
             { columnId: 'col-5', meta: { aggId: '5' } },
-          ] as AggBasedColumn[],
+          ] as AnyMetricColumnWithSourceFieldWithMeta[],
           dataView,
           [metric1, metric2]
         )

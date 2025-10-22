@@ -19,7 +19,24 @@ import {
   IconChartBarHorizontal,
 } from '@kbn/chart-icons';
 
-import { SeriesTypes, type VisualizationType } from '@kbn/lens-common';
+export type {
+  XYLayerConfig,
+  XYState,
+  XYState as State,
+  XYByValueAnnotationLayerConfig,
+  XYByReferenceAnnotationLayerConfig,
+  XYAnnotationLayerConfig,
+  XYDataLayerConfig,
+  XYReferenceLineLayerConfig,
+  SeriesType,
+  YConfig,
+  AxisConfig,
+  ValidXYDataLayerConfig,
+  YAxisMode,
+} from '@kbn/lens-common';
+
+import type { VisualizationType } from '@kbn/lens-common';
+import { SeriesTypes } from '@kbn/lens-common';
 
 export const defaultSeriesType = SeriesTypes.BAR_STACKED;
 

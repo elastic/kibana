@@ -22,8 +22,6 @@ import type {
 } from './convert';
 import { convertToSchemaConfig } from '../../vis_schemas';
 
-type UnwrapArray<T> = T extends Array<infer P> ? P : T;
-
 export const getLabel = (agg: SchemaConfig) => {
   return agg.aggParams && 'customLabel' in agg.aggParams
     ? agg.aggParams.customLabel ?? agg.label
@@ -36,13 +34,11 @@ export const getLabelForPercentile = (agg: SchemaConfig) => {
     : '';
 };
 
-export const getValidColumns = (
-  columns: Array<AggBasedColumn | null> | AggBasedColumn | null | undefined
-) => {
+export const getValidColumns = <T extends AggBasedColumn | null>(
+  columns: T[] | T | undefined
+): Array<NonNullable<T>> | null => {
   if (columns && Array.isArray(columns)) {
-    const nonNullColumns = columns.filter(
-      (c): c is Exclude<UnwrapArray<typeof columns>, null> => c !== null
-    );
+    const nonNullColumns = columns.filter(<C extends T>(c: C): c is NonNullable<C> => c !== null);
 
     if (nonNullColumns.length !== columns.length) {
       return null;

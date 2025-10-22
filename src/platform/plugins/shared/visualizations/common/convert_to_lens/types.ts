@@ -170,14 +170,30 @@ export type AnyColumnWithReferences =
   | FormulaColumn
   | StaticValueColumn;
 
+type AnyMetricColumn = AnyMetricColumnWithSourceField | AnyColumnWithReferences;
+
 export type Column = AnyColumnWithReferences | AnyColumnWithSourceField | FiltersColumn;
 
 export type GenericColumnWithMeta<
   Col extends Column | {},
-  Meta extends {} | unknown = undefined
-> = Col & (Meta extends undefined ? undefined : { meta: Meta });
+  MetaData extends {} | unknown = undefined
+> = Col & (MetaData extends undefined ? undefined : { meta: MetaData });
 
-export type ColumnWithMeta = GenericColumnWithMeta<Column, unknown>;
+export type AggId = `${string}`;
+export interface Meta {
+  aggId: AggId;
+}
+
+export type ColumnWithMeta = GenericColumnWithMeta<Column, Meta>;
+export type AnyMetricColumnAndMeta = GenericColumnWithMeta<AnyMetricColumn, Meta>;
+export type AnyMetricColumnWithSourceFieldWithMeta = GenericColumnWithMeta<
+  AnyMetricColumnWithSourceField,
+  Meta
+>;
+export type AnyBucketColumnWithMeta = GenericColumnWithMeta<
+  DateHistogramColumn | TermsColumn | FiltersColumn | RangeColumn,
+  Meta
+>;
 
 export type Operation = $Values<typeof Operations>;
 export type OperationWithSourceField = $Values<typeof OperationsWithSourceField>;

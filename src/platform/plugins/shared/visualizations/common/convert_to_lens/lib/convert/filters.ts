@@ -9,7 +9,6 @@
 
 import type { AggParamsFilters } from '@kbn/data-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
-import type { LensAggFilter } from '@kbn/lens-common';
 import type { FiltersColumn } from './types';
 
 export const convertToFiltersColumn = (
@@ -28,7 +27,7 @@ export const convertToFiltersColumn = (
     isBucketed: true,
     isSplit,
     params: {
-      filters: (aggParams.filters as NonNullable<LensAggFilter>[]) ?? [],
+      filters: aggParams.filters.map(({ label, input }) => ({ label: label ?? '', input })) ?? [],
     },
     timeShift: aggParams.timeShift,
     meta: { aggId },

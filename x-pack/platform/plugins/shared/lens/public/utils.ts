@@ -35,7 +35,6 @@ import type {
   VisualizationState,
   TriggerEvent,
 } from '@kbn/lens-common';
-import type {} from './types';
 import {
   isOperation,
   isLensBrushEvent,

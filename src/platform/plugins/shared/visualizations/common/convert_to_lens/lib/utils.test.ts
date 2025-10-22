@@ -118,7 +118,9 @@ describe('getValidColumns', () => {
       isBucketed: true,
     },
   ];
-  test.each<[string, Parameters<typeof getValidColumns>, AggBasedColumn[] | null]>([
+  test.each<
+    [string, Parameters<typeof getValidColumns>, AggBasedColumn | (AggBasedColumn | null)[] | null]
+  >([
     ['null if array contains null', [[null, ...columns]], null],
     ['null if columns is null', [null], null],
     ['null if columns is undefined', [undefined], null],
