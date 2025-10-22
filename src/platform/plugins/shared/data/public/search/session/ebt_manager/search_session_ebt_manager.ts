@@ -12,6 +12,8 @@ import { isOfAggregateQueryType, type AggregateQuery, type Query } from '@kbn/es
 import type { PublicContract } from '@kbn/utility-types';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { Logger } from '@kbn/logging';
+import type { ESQLSearchResponse } from '@kbn/es-types';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { SearchSessionSavedObject } from '../sessions_client';
 import {
   BG_SEARCH_CANCEL,
@@ -66,7 +68,7 @@ export class SearchSessionEBTManager {
     response,
     session,
   }: {
-    response: IKibanaSearchResponse;
+    response: IKibanaSearchResponse<SearchResponse> | IKibanaSearchResponse<ESQLSearchResponse>;
     session: SearchSessionSavedObject;
   }) {
     this.reportEvent(BG_SEARCH_COMPLETE, {
@@ -75,7 +77,7 @@ export class SearchSessionEBTManager {
       ),
       session_id: session.id,
       runtime_ms: response.rawResponse.took,
-      result_rows_bucket: response.rawResponse.hits.total || response.rawResponse.hits.length || 0,
+      result_rows_bucket: this.getResultsCount(response),
       result_bytes_bucket: Buffer.byteLength(JSON.stringify(response.rawResponse)),
     });
   }
@@ -123,6 +125,18 @@ export class SearchSessionEBTManager {
     this.reportEvent(BG_SEARCH_LIST_VIEW, {
       entry_point: entryPoint,
     });
+  }
+
+  private getResultsCount(
+    response: IKibanaSearchResponse<SearchResponse> | IKibanaSearchResponse<ESQLSearchResponse>
+  ) {
+    if ('documents_found' in response.rawResponse) {
+      return response.rawResponse.documents_found || 0;
+    } else if ('hits' in response.rawResponse) {
+      if (response.rawResponse.hits.total) return response.rawResponse.hits.total;
+      return response.rawResponse.hits.hits.length;
+    }
+    return 0;
   }
 
   private getQueryLanguage(query: Query | AggregateQuery | undefined) {
