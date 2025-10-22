@@ -1008,6 +1008,74 @@ describe('execute()', () => {
     expect(params.body).toBe(`{"x": "double-quote:\\"; line-break->\\n"}`);
   });
 
+  test('body is undefined when executing GET operation', async () => {
+    const config: ConnectorTypeConfigType = {
+      url: 'https://abc.def/my-webhook',
+      method: WebhookMethods.GET,
+      headers: {
+        aheader: 'a value',
+      },
+      authType: AuthType.Basic,
+      hasAuth: true,
+    };
+
+    await connectorType.executor({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: {
+        user: 'abc',
+        password: '123',
+        key: null,
+        crt: null,
+        pfx: null,
+        clientSecret: null,
+        secretHeaders: null,
+      },
+      params: { body: 'some data' },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    expect(requestMock.mock.calls[0][0].method).toBe(WebhookMethods.GET);
+    expect(requestMock.mock.calls[0][0].data).toBeUndefined();
+  });
+
+  test('body is undefined when executing DELETE operation', async () => {
+    const config: ConnectorTypeConfigType = {
+      url: 'https://abc.def/my-webhook',
+      method: WebhookMethods.DELETE,
+      headers: {
+        aheader: 'a value',
+      },
+      authType: AuthType.Basic,
+      hasAuth: true,
+    };
+
+    await connectorType.executor({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: {
+        user: 'abc',
+        password: '123',
+        key: null,
+        crt: null,
+        pfx: null,
+        clientSecret: null,
+        secretHeaders: null,
+      },
+      params: { body: 'some data' },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    expect(requestMock.mock.calls[0][0].method).toBe(WebhookMethods.DELETE);
+    expect(requestMock.mock.calls[0][0].data).toBeUndefined();
+  });
+
   describe('error handling', () => {
     test.each([400, 404, 405, 406, 410, 411, 414, 428, 431])(
       'forwards user error source in result for %s error responses',
@@ -1059,44 +1127,6 @@ describe('execute()', () => {
         });
 
         expect(result.errorSource).toBe('user');
-      }
-    );
-
-    test.each([WebhookMethods.GET, WebhookMethods.DELETE])(
-      'throws if body is defined when trying to execute %s operation',
-      async (method: WebhookMethods) => {
-        const config: ConnectorTypeConfigType = {
-          url: 'https://abc.def/my-webhook',
-          method,
-          headers: {
-            aheader: 'a value',
-          },
-          authType: AuthType.Basic,
-          hasAuth: true,
-        };
-
-        const result = await connectorType.executor({
-          actionId: 'some-id',
-          services,
-          config,
-          secrets: {
-            user: 'abc',
-            password: '123',
-            key: null,
-            crt: null,
-            pfx: null,
-            clientSecret: null,
-            secretHeaders: null,
-          },
-          params: { body: 'some data' },
-          configurationUtilities,
-          logger: mockedLogger,
-          connectorUsageCollector,
-        });
-
-        expect(result.message).toBe(
-          `error calling webhook, ${method} operation should not define a body`
-        );
       }
     );
 
