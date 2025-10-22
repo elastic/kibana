@@ -7,8 +7,6 @@
 import axios from 'axios';
 import expect from '@kbn/expect';
 import {
-  TEST_ES_HOST,
-  TEST_ES_PORT,
   TEST_ES_TRANSPORT_PORT,
   TEST_KIBANA_HOST,
   TEST_REMOTE_ES_HOST,
@@ -105,7 +103,7 @@ export default ({ getService }: FtrProviderContext) => {
           id: 'es',
           type: 'elasticsearch',
           name: 'Local ES Output',
-          hosts: [`http://${TEST_ES_HOST}:${TEST_ES_PORT}`],
+          hosts: [`http://${TEST_REMOTE_ES_HOST}:${TEST_REMOTE_ES_PORT}`],
         },
         {
           auth: { username: 'elastic', password: 'changeme' },
