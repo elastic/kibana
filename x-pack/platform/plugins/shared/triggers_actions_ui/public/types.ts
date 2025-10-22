@@ -51,7 +51,7 @@ import type {
   ActionTypeRegistryContract,
 } from '@kbn/alerts-ui-shared/src/common/types';
 import type { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
-import type { RULE_DETAIL_DESCRIPTION_FIELD_TYPES } from '../common/rule_detail_description_type';
+import type { RULE_DETAIL_DESCRIPTION_FIELD_TYPES } from '../common';
 import type { ComponentOpts as RuleStatusDropdownProps } from './application/sections/rules_list/components/rule_status_dropdown';
 import type { RuleTagFilterProps } from './application/sections/rules_list/components/rule_tag_filter';
 import type { RuleStatusFilterProps } from './application/sections/rules_list/components/rule_status_filter';
