@@ -3,5 +3,5 @@
   "id": "@kbn/setup-node-env",
   "owner": "@elastic/kibana-operations",
   "group": "platform",
-  "visibility": "private"
+  "visibility": "shared"
 }
