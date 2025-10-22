@@ -35,7 +35,6 @@ import type {
   OnechatStartDependencies,
 } from './types';
 import { openConversationFlyout } from './flyout/open_conversation_flyout';
-import { createEmbeddableConversation } from './embeddable/create_embeddable_conversation';
 
 export class OnechatPlugin
   implements
@@ -129,11 +128,6 @@ export class OnechatPlugin
 
     this.internalServices = internalServices;
 
-    const ConversationComponent = createEmbeddableConversation({
-      services: internalServices,
-      coreStart: core,
-    });
-
     return {
       tools: createPublicToolContract({ toolsService }),
       openConversationFlyout: (options) =>
@@ -141,7 +135,6 @@ export class OnechatPlugin
           coreStart: core,
           services: internalServices,
           startDependencies,
-          ConversationComponent,
         }),
     };
   }

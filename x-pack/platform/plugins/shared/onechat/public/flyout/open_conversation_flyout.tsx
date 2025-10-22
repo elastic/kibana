@@ -14,13 +14,12 @@ import type { OpenConversationFlyoutOptions } from './types';
 import type { OnechatInternalService } from '../services';
 import type { OnechatStartDependencies, ConversationFlyoutRef } from '../types';
 import { OnechatServicesContext } from '../application/context/onechat_services_context';
-import type { EmbeddableConversationProps } from '../embeddable/types';
+import { createEmbeddableConversation } from '../embeddable/create_embeddable_conversation';
 
 interface OpenConversationFlyoutParams {
   coreStart: CoreStart;
   services: OnechatInternalService;
   startDependencies: OnechatStartDependencies;
-  ConversationComponent: React.FC<EmbeddableConversationProps>;
 }
 
 /**
@@ -32,7 +31,7 @@ interface OpenConversationFlyoutParams {
  */
 export function openConversationFlyout(
   options: OpenConversationFlyoutOptions,
-  { coreStart, services, startDependencies, ConversationComponent }: OpenConversationFlyoutParams
+  { coreStart, services, startDependencies }: OpenConversationFlyoutParams
 ): { flyoutRef: ConversationFlyoutRef } {
   const { overlays, application, ...startServices } = coreStart;
 
@@ -41,6 +40,11 @@ export function openConversationFlyout(
     ...coreStart,
     plugins: startDependencies,
   };
+
+  const ConversationComponent = createEmbeddableConversation({
+    services,
+    coreStart,
+  });
 
   const flyoutRef = overlays.openFlyout(
     toMountPoint(
