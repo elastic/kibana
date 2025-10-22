@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { SchemasSettings } from 'monaco-yaml';
@@ -209,8 +211,7 @@ export const WorkflowYAMLEditor = ({
       {
         fileMatch: ['*'],
         // casting here because zod-to-json-schema returns a more complex type than JSONSchema7 expected by monaco-yaml
-
-        schema: workflowJsonSchemaStrict as any,
+        schema: workflowJsonSchemaStrict as SchemasSettings['schema'],
         uri: workflowSchemaUriStrict,
       },
     ];

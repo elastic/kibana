@@ -10,7 +10,7 @@
 import { tagcloudFunction } from './tagcloud_function';
 
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
-import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/public';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
 import type { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
 import { ScaleOptions, Orientation } from '../constants';
 import type { ExecutionContext } from '@kbn/expressions-plugin/common';
