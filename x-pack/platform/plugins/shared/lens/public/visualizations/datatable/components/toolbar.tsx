@@ -7,7 +7,7 @@
 
 /**
  * TODO: Remove this file after migration to flyout toolbar
- * See:
+ * See: https://github.com/elastic/kibana/issues/240088
  */
 
 import React from 'react';
