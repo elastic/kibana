@@ -36,7 +36,8 @@ import type {
   TranslatedEntryNestedEntry,
   TranslatedExceptionListItem,
   WrappedTranslatedExceptionList,
-  TranslatedEntriesOfDescendantOf,
+  TranslatedEntriesOfProcessDescendants,
+  TranslatedEntryTrustDescendants,
 } from '../../schemas';
 import {
   translatedPerformantEntries as translatedPerformantEntriesType,
@@ -219,10 +220,10 @@ function translateProcessDescendantEventFilter(
   schemaVersion: string,
   entry: ExceptionListItemSchema
 ): TranslatedExceptionListItem {
-  const translatedEntries: TranslatedEntriesOfDescendantOf = translateItem(schemaVersion, {
+  const translatedEntries: TranslatedEntriesOfProcessDescendants = translateItem(schemaVersion, {
     ...entry,
     entries: [...entry.entries, PROCESS_DESCENDANT_EXTRA_ENTRY],
-  }) as TranslatedEntriesOfDescendantOf;
+  }) as TranslatedEntriesOfProcessDescendants;
 
   return {
     type: entry.type,
@@ -241,23 +242,16 @@ function translateProcessDescendantEventFilter(
 function translateProcessDescendantTrustedApp(
   schemaVersion: string,
   entry: ExceptionListItemSchema
-): TranslatedExceptionListItem {
-  const translatedEntries: TranslatedEntriesOfDescendantOf = translateItem(schemaVersion, {
+): TranslatedEntryTrustDescendants {
+  const translatedEntries: TranslatedEntriesOfProcessDescendants = translateItem(schemaVersion, {
     ...entry,
     entries: [...entry.entries, PROCESS_DESCENDANT_EXTRA_ENTRY],
-  }) as TranslatedEntriesOfDescendantOf;
+  }) as TranslatedEntriesOfProcessDescendants;
 
   return {
     type: entry.type,
     trust_descendants: true,
-    entries: [
-      {
-        operator: 'included',
-        value: {
-          entries: [translatedEntries],
-        },
-      },
-    ],
+    entries: translatedEntries.entries,
   };
 }
 
