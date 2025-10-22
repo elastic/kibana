@@ -140,4 +140,40 @@ describe('TabsBar', () => {
     // Verify onAdd is not called (only custom handler should be called)
     expect(onAdd).not.toHaveBeenCalled();
   });
+
+  it('does not render tabs bar menu when enableTabsBarMenu=false', () => {
+    const selectedItem = items[0];
+
+    render(
+      <TabsBar
+        tabContentId={tabContentId}
+        items={items}
+        recentlyClosedItems={recentlyClosedItems}
+        selectedItem={selectedItem}
+        services={servicesMock}
+        onAdd={onAdd}
+        onLabelEdited={onLabelEdited}
+        onSelect={onSelect}
+        onSelectRecentlyClosed={onSelectRecentlyClosed}
+        onClearRecentlyClosed={onClearRecentlyClosed}
+        onClose={onClose}
+        onReorder={onReorder}
+        getPreviewData={getPreviewData}
+        onEBTEvent={onEBTEvent}
+        enableTabsBarMenu={false}
+      />
+    );
+
+    // Verify tabs are still rendered
+    const tabs = screen.getAllByRole('tab');
+    expect(tabs).toHaveLength(items.length);
+
+    // Verify tabs bar menu is not rendered
+    const tabsBarMenu = screen.queryByTestId('unifiedTabs_tabsBarMenu');
+    expect(tabsBarMenu).not.toBeInTheDocument();
+
+    // Verify menu button is not rendered
+    const menuButton = screen.queryByTestId('unifiedTabs_tabsBarMenuButton');
+    expect(menuButton).not.toBeInTheDocument();
+  });
 });
