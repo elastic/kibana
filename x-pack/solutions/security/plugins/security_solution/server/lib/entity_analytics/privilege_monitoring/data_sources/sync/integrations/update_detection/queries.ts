@@ -51,6 +51,7 @@ export const buildMatcherScript = (matcher?: Matcher): estypes.Script => {
 export const buildPrivilegedSearchBody = (
   script: estypes.Script,
   timeGte: string,
+  matchersField: string,
   afterKey?: AfterKey,
   pageSize: number = 100
 ): Omit<estypes.SearchRequest, 'index'> => ({
@@ -71,7 +72,7 @@ export const buildPrivilegedSearchBody = (
             size: 1,
             sort: [{ '@timestamp': { order: 'desc' as estypes.SortOrder } }],
             script_fields: { 'user.is_privileged': { script } },
-            _source: { includes: ['user', 'roles', '@timestamp'] },
+            _source: { includes: ['user', matchersField, '@timestamp'] },
           },
         },
       },
@@ -97,12 +98,14 @@ export const applyPrivilegedUpdates = async ({
     for (let start = 0; start < users.length; start += chunkSize) {
       const chunk = users.slice(start, start + chunkSize);
       const operations = opsForIntegration(chunk, source);
-      const resp = await esClient.bulk({
-        refresh: 'wait_for',
-        body: operations,
-      });
-      const errors = getErrorFromBulkResponse(resp);
-      dataClient.log('error', errorsMsg(errors));
+      if (operations.length > 0) {
+        const resp = await esClient.bulk({
+          refresh: 'wait_for',
+          body: operations,
+        });
+        const errors = getErrorFromBulkResponse(resp);
+        dataClient.log('error', errorsMsg(errors));
+      }
     }
   } catch (error) {
     dataClient.log('error', `Error applying privileged updates: ${error.message}`);

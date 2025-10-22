@@ -11,18 +11,25 @@ import type { DynamicStepContextSchema } from '@kbn/workflows';
 import { getStepId } from '@kbn/workflows';
 import { isEnterForeach, type WorkflowGraph } from '@kbn/workflows/graph';
 import { z } from '@kbn/zod';
-import { getOutputSchemaForStepType } from '../../../../common/schema';
 import { getForeachStateSchema } from './get_foreach_state_schema';
+import { getOutputSchemaForStepType } from '../../../../common/schema';
 
 export function getStepsCollectionSchema(
   stepContextSchema: typeof DynamicStepContextSchema,
   workflowExecutionGraph: WorkflowGraph,
   stepName: string
 ) {
+  const stepId = getStepId(stepName);
+  const stepNode =
+    workflowExecutionGraph.getNode(stepId) ||
+    workflowExecutionGraph.getNode(`enterForeach_${stepId}`) ||
+    workflowExecutionGraph.getNode(`enterCondition_${stepId}`);
+
+  if (!stepNode) {
+    throw new Error(`Step with id ${stepId} not found in the workflow graph.`);
+  }
   // reverse predecessors so the earliest steps are first and will be available when we reach the later ones
-  const predecessors = [
-    ...workflowExecutionGraph.getAllPredecessors(getStepId(stepName)),
-  ].reverse();
+  const predecessors = [...workflowExecutionGraph.getAllPredecessors(stepNode.id)].reverse();
 
   if (predecessors.length === 0) {
     return z.object({});
@@ -32,6 +39,7 @@ export function getStepsCollectionSchema(
   for (const node of predecessors) {
     // Excluding triggers from the context for now. Maybe they should be included under 'triggers' key?
     if (node.type === 'trigger') {
+      // eslint-disable-next-line no-continue
       continue;
     }
 

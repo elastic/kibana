@@ -53,6 +53,7 @@ jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
     patch: jest.fn(),
   };
 });
+
 jest.mock('@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token', () => ({
   getOAuthClientCredentialsAccessToken: jest.fn(),
 }));
@@ -228,7 +229,10 @@ describe('config validation', () => {
     }).toThrowErrorMatchingInlineSnapshot(`
       "error validating action type config: [method]: types that failed validation:
       - [method.0]: expected value to equal [post]
-      - [method.1]: expected value to equal [put]"
+      - [method.1]: expected value to equal [put]
+      - [method.2]: expected value to equal [patch]
+      - [method.3]: expected value to equal [get]
+      - [method.4]: expected value to equal [delete]"
     `);
   });
 
@@ -1004,58 +1008,169 @@ describe('execute()', () => {
     expect(params.body).toBe(`{"x": "double-quote:\\"; line-break->\\n"}`);
   });
 
-  test.each([400, 404, 405, 406, 410, 411, 414, 428, 431])(
-    'forwards user error source in result for %s error responses',
-    async (status) => {
-      const config: ConnectorTypeConfigType = {
-        url: 'https://abc.def/my-webhook',
-        method: WebhookMethods.POST,
-        headers: {
-          aheader: 'a value',
-        },
-        authType: AuthType.Basic,
-        hasAuth: true,
-      };
+  test('body is undefined when executing GET operation', async () => {
+    const config: ConnectorTypeConfigType = {
+      url: 'https://abc.def/my-webhook',
+      method: WebhookMethods.GET,
+      headers: {
+        aheader: 'a value',
+      },
+      authType: AuthType.Basic,
+      hasAuth: true,
+    };
 
-      requestMock.mockRejectedValueOnce(
-        createTaskRunError(
-          {
-            tag: 'err',
-            isAxiosError: true,
-            response: {
-              status,
-              statusText: 'Not Found',
-              data: {
-                message:
-                  'The requested webhook "b946082a-a623-4353-bd99-ed35e5fa4fce" is not registered.',
+    await connectorType.executor({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: {
+        user: 'abc',
+        password: '123',
+        key: null,
+        crt: null,
+        pfx: null,
+        clientSecret: null,
+        secretHeaders: null,
+      },
+      params: { body: 'some data' },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    expect(requestMock.mock.calls[0][0].method).toBe(WebhookMethods.GET);
+    expect(requestMock.mock.calls[0][0].data).toBeUndefined();
+  });
+
+  test('body is undefined when executing DELETE operation', async () => {
+    const config: ConnectorTypeConfigType = {
+      url: 'https://abc.def/my-webhook',
+      method: WebhookMethods.DELETE,
+      headers: {
+        aheader: 'a value',
+      },
+      authType: AuthType.Basic,
+      hasAuth: true,
+    };
+
+    await connectorType.executor({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: {
+        user: 'abc',
+        password: '123',
+        key: null,
+        crt: null,
+        pfx: null,
+        clientSecret: null,
+        secretHeaders: null,
+      },
+      params: { body: 'some data' },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    expect(requestMock.mock.calls[0][0].method).toBe(WebhookMethods.DELETE);
+    expect(requestMock.mock.calls[0][0].data).toBeUndefined();
+  });
+
+  describe('error handling', () => {
+    test.each([400, 404, 405, 406, 410, 411, 414, 428, 431])(
+      'forwards user error source in result for %s error responses',
+      async (status) => {
+        const config: ConnectorTypeConfigType = {
+          url: 'https://abc.def/my-webhook',
+          method: WebhookMethods.POST,
+          headers: {
+            aheader: 'a value',
+          },
+          authType: AuthType.Basic,
+          hasAuth: true,
+        };
+
+        requestMock.mockRejectedValueOnce(
+          createTaskRunError(
+            {
+              tag: 'err',
+              isAxiosError: true,
+              response: {
+                status,
+                statusText: 'Not Found',
+                data: {
+                  message:
+                    'The requested webhook "b946082a-a623-4353-bd99-ed35e5fa4fce" is not registered.',
+                },
               },
-            },
-          } as unknown as Error,
-          TaskErrorSource.USER
-        )
+            } as unknown as Error,
+            TaskErrorSource.USER
+          )
+        );
+        const result = await connectorType.executor({
+          actionId: 'some-id',
+          services,
+          config,
+          secrets: {
+            user: 'abc',
+            password: '123',
+            key: null,
+            crt: null,
+            pfx: null,
+            clientSecret: null,
+            secretHeaders: null,
+          },
+          params: { body: 'some data' },
+          configurationUtilities,
+          logger: mockedLogger,
+          connectorUsageCollector,
+        });
+
+        expect(result.errorSource).toBe('user');
+      }
+    );
+
+    it('should log an error if refreshing access token fails', async () => {
+      const errorMessage = 'Invalid client or Invalid client credentials';
+      (getOAuthClientCredentialsAccessToken as jest.Mock).mockRejectedValueOnce(
+        new Error(errorMessage)
       );
-      const result = await connectorType.executor({
-        actionId: 'some-id',
-        services,
-        config,
+      createAxiosInstanceMock.mockReturnValue(axiosInstanceMock);
+
+      const execOptions: WebhookConnectorTypeExecutorOptions = {
+        actionId: 'test-id',
+        config: {
+          method: WebhookMethods.POST,
+          url: 'https://test.com',
+          hasAuth: true,
+          authType: AuthType.OAuth2ClientCredentials,
+          accessTokenUrl: 'https://token.url',
+          clientId: 'client',
+          headers: { 'X-Custom': 'value' },
+        },
+        params: { body: '{}' },
         secrets: {
-          user: 'abc',
-          password: '123',
+          clientSecret: 'secret',
           key: null,
+          user: null,
+          password: null,
           crt: null,
           pfx: null,
-          clientSecret: null,
           secretHeaders: null,
         },
-        params: { body: 'some data' },
         configurationUtilities,
         logger: mockedLogger,
+        services,
         connectorUsageCollector,
-      });
+      };
 
-      expect(result.errorSource).toBe('user');
-    }
-  );
+      await connectorType.executor(execOptions);
+
+      expect(mockedLogger.error.mock.calls[0][0]).toMatchInlineSnapshot(
+        `"ConnectorId \\"test-id\\": error \\"Unable to retrieve/refresh the access token: Invalid client or Invalid client credentials\\""`
+      );
+    });
+  });
 
   describe('oauth2 client credentials', () => {
     it('throws if refresh token fails', async () => {
@@ -1172,46 +1287,5 @@ describe('execute()', () => {
       expect(headers.Authorization).toBe(accessToken);
       expect(headers['X-Custom']).toBe('value');
     });
-  });
-
-  it('should log an error if refreshing access token fails', async () => {
-    const errorMessage = 'Invalid client or Invalid client credentials';
-    (getOAuthClientCredentialsAccessToken as jest.Mock).mockRejectedValueOnce(
-      new Error(errorMessage)
-    );
-    createAxiosInstanceMock.mockReturnValue(axiosInstanceMock);
-
-    const execOptions: WebhookConnectorTypeExecutorOptions = {
-      actionId: 'test-id',
-      config: {
-        method: WebhookMethods.POST,
-        url: 'https://test.com',
-        hasAuth: true,
-        authType: AuthType.OAuth2ClientCredentials,
-        accessTokenUrl: 'https://token.url',
-        clientId: 'client',
-        headers: { 'X-Custom': 'value' },
-      },
-      params: { body: '{}' },
-      secrets: {
-        clientSecret: 'secret',
-        key: null,
-        user: null,
-        password: null,
-        crt: null,
-        pfx: null,
-        secretHeaders: null,
-      },
-      configurationUtilities,
-      logger: mockedLogger,
-      services,
-      connectorUsageCollector,
-    };
-
-    await connectorType.executor(execOptions);
-
-    expect(mockedLogger.error.mock.calls[0][0]).toMatchInlineSnapshot(
-      `"ConnectorId \\"test-id\\": error \\"Unable to retrieve/refresh the access token: Invalid client or Invalid client credentials\\""`
-    );
   });
 });

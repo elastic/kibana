@@ -60,7 +60,11 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
       defaultUrlState,
     },
   }) =>
-  async (dispatch, getState, { services, runtimeStateManager, urlStateStorage }) => {
+  async (
+    dispatch,
+    getState,
+    { services, runtimeStateManager, urlStateStorage, searchSessionManager }
+  ) => {
     dispatch(disconnectTab({ tabId }));
     dispatch(internalStateSlice.actions.resetOnSavedSearchChange({ tabId }));
 
@@ -221,6 +225,17 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
       globalState: initialGlobalState,
       services,
     });
+
+    // Push the tab's initial search session ID to the URL if one exists,
+    // unless it should be overridden by a search session ID already in the URL
+    if (
+      tabInitialInternalState?.searchSessionId &&
+      !searchSessionManager.hasSearchSessionIdInURL()
+    ) {
+      searchSessionManager.pushSearchSessionIdToURL(tabInitialInternalState.searchSessionId, {
+        replace: true,
+      });
+    }
 
     /**
      * Sync global services

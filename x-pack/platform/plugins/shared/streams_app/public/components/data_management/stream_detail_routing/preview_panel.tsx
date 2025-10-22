@@ -50,7 +50,10 @@ export function PreviewPanel() {
     routingSnapshot.matches({ ready: 'reorderingRules' })
   ) {
     content = <EditingPanel />;
-  } else if (routingSnapshot.matches({ ready: 'creatingNewRule' })) {
+  } else if (
+    routingSnapshot.matches({ ready: 'creatingNewRule' }) ||
+    routingSnapshot.matches({ ready: 'reviewSuggestedRule' })
+  ) {
     content = <SamplePreviewPanel enableActions />;
   }
 
@@ -133,10 +136,6 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
 
     return buildCellActions(documents, createNewRule, changeRule);
   }, [enableActions, documents, createNewRule, changeRule]);
-
-  const matchedDocumentPercentage = isNaN(parseFloat(approximateMatchingPercentage ?? ''))
-    ? Number.NaN
-    : parseFloat(approximateMatchingPercentage!);
 
   const [sorting, setSorting] = useState<{
     fieldName?: string;
@@ -228,10 +227,8 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
       <EuiFlexGroup gutterSize="m" direction="column">
         <DocumentMatchFilterControls
           onFilterChange={setDocumentMatchFilter}
-          matchedDocumentPercentage={
-            isNaN(matchedDocumentPercentage) ? undefined : Math.round(matchedDocumentPercentage)
-          }
-          isDisabled={!!documentsError || !condition}
+          matchedDocumentPercentage={approximateMatchingPercentage}
+          isDisabled={!!documentsError || !condition || (condition && !isProcessedCondition)}
         />
         {content}
       </EuiFlexGroup>

@@ -22,6 +22,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import useMountedState from 'react-use/lib/useMountedState';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
@@ -195,6 +196,10 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
         <EuiFlexGroup justifyContent={'spaceBetween'}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              aria-label={i18n.translate(
+                'xpack.ml.singleMetricViewerEmbeddable.setupModal.cancelButtonAriaLabel',
+                { defaultMessage: 'Cancel' }
+              )}
               onClick={onCancel}
               data-test-subj="mlsingleMetricViewerInitializerCancelButton"
             >

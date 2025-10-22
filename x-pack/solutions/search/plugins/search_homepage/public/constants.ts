@@ -16,5 +16,3 @@ export enum QueryKeys {
   SearchDocuments = 'searchDocuments',
   ApiKey = 'apiKey',
 }
-
-export const ELASTICSEARCH_URL_PLACEHOLDER = 'https://your_deployment_url';

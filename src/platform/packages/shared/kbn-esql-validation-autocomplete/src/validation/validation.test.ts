@@ -262,22 +262,11 @@ describe('validation logic', () => {
       testErrorsAndWarnings('     ', []);
     });
 
-    describe('ESQL query should start with a source command', () => {
-      ['eval', 'stats', 'rename', 'limit', 'keep', 'drop', 'mv_expand', 'dissect', 'grok'].map(
-        (command) =>
-          testErrorsAndWarnings(command, [
-            `SyntaxError: mismatched input '${command}' expecting {'row', 'from', 'ts', 'show'}`,
-          ])
-      );
-    });
-
     describe('FROM <sources> [ METADATA <indices> ]', () => {
       test('errors on invalid command start', async () => {
         const { expectErrors } = await setup();
 
-        await expectErrors('f', [
-          "SyntaxError: mismatched input 'f' expecting {'row', 'from', 'ts', 'show'}",
-        ]);
+        await expectErrors('f', [expect.any(String)]);
         await expectErrors('from ', [
           "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}",
         ]);
@@ -514,6 +503,14 @@ describe('validation logic', () => {
       ]);
       testErrorsAndWarnings(`from a_index | enrich policy with `, [
         expect.stringContaining('SyntaxError:'),
+      ]);
+    });
+
+    describe('settings', () => {
+      // Should return error if there is no query following SET
+      testErrorsAndWarnings(`SET time_zone = "CEST";`, [expect.stringContaining('SyntaxError:')]);
+      testErrorsAndWarnings(`SET invalid_setting = "_alias:_origin"; FROM index`, [
+        expect.stringContaining('Unknown setting invalid_setting'),
       ]);
     });
 

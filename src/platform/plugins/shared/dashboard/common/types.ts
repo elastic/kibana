@@ -8,13 +8,12 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { SerializableRecord, Writable } from '@kbn/utility-types';
-import type { Filter, Query } from '@kbn/es-query';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import type { RefreshInterval } from '@kbn/data-plugin/public';
 import type { ControlsGroupState } from '@kbn/controls-schemas';
 
-import type { DashboardAttributes, DashboardOptions } from '../server/content_management';
+import type { DashboardAttributes } from '../server/content_management';
 
 export interface DashboardCapabilities {
   showWriteControls: boolean;
@@ -28,16 +27,14 @@ export interface DashboardAttributesAndReferences {
   references: Reference[];
 }
 
-export type DashboardSettings = Writable<DashboardOptions> & {
+export interface DashboardState {
+  options?: DashboardAttributes['options'];
   description?: DashboardAttributes['description'];
-  tags: string[];
+  tags?: DashboardAttributes['tags'];
   timeRestore: DashboardAttributes['timeRestore'];
   title: DashboardAttributes['description'];
-};
-
-export interface DashboardState extends DashboardSettings {
-  query?: Query;
-  filters?: Filter[];
+  query?: DashboardAttributes['query'];
+  filters?: DashboardAttributes['filters'];
   timeRange?: DashboardAttributes['timeRange'];
   refreshInterval?: RefreshInterval;
   panels: DashboardAttributes['panels'];

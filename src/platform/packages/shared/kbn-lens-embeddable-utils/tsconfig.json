@@ -8,7 +8,6 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/data-plugin",
     "@kbn/data-views-plugin",
     "@kbn/lens-plugin",
     "@kbn/maps-plugin",
@@ -19,5 +18,8 @@
     "@kbn/core-saved-objects-common",
     "@kbn/esql-utils",
     "@kbn/config-schema",
+    "@kbn/coloring",
+    "@kbn/content-management-utils",
+    "@kbn/chart-expressions-common",
   ]
 }

@@ -55,6 +55,47 @@
           "path": "x-pack/platform/plugins/shared/onechat/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "onechat",
+          "id": "def-public.OnechatPluginStart.openConversationFlyout",
+          "type": "Function",
+          "tags": [],
+          "label": "openConversationFlyout",
+          "description": [
+            "\nOpens a conversation flyout.\n"
+          ],
+          "signature": [
+            "(options: ",
+            "OpenConversationFlyoutOptions",
+            ") => ",
+            "OpenConversationFlyoutReturn"
+          ],
+          "path": "x-pack/platform/plugins/shared/onechat/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "onechat",
+              "id": "def-public.OnechatPluginStart.openConversationFlyout.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "options",
+              "description": [
+                "- Configuration options for the flyout"
+              ],
+              "signature": [
+                "OpenConversationFlyoutOptions"
+              ],
+              "path": "x-pack/platform/plugins/shared/onechat/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": [
+            "An object containing the flyout reference"
+          ]
         }
       ],
       "lifecycle": "start",
@@ -93,8 +134,8 @@
                 "pluginId": "@kbn/onechat-server",
                 "scope": "common",
                 "docId": "kibKbnOnechatServerPluginApi",
-                "section": "def-common.BuiltinToolDefinition",
-                "text": "BuiltinToolDefinition"
+                "section": "def-common.StaticToolRegistration",
+                "text": "StaticToolRegistration"
               },
               "<RunInput>) => void"
             ],
@@ -106,11 +147,35 @@
               {
                 "parentPluginId": "onechat",
                 "id": "def-server.ToolsSetup.register.$1",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "tool",
                 "description": [],
                 "signature": [
+                  {
+                    "pluginId": "@kbn/onechat-server",
+                    "scope": "common",
+                    "docId": "kibKbnOnechatServerPluginApi",
+                    "section": "def-common.StaticEsqlTool",
+                    "text": "StaticEsqlTool"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "@kbn/onechat-server",
+                    "scope": "common",
+                    "docId": "kibKbnOnechatServerPluginApi",
+                    "section": "def-common.StaticIndexSearchTool",
+                    "text": "StaticIndexSearchTool"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "@kbn/onechat-server",
+                    "scope": "common",
+                    "docId": "kibKbnOnechatServerPluginApi",
+                    "section": "def-common.StaticWorkflowTool",
+                    "text": "StaticWorkflowTool"
+                  },
+                  " | ",
                   {
                     "pluginId": "@kbn/onechat-server",
                     "scope": "common",
@@ -192,7 +257,7 @@
                   },
                   "<TParams>"
                 ],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-server/src/runner.ts",
+                "path": "x-pack/platform/packages/shared/onechat/onechat-server/runner/runner.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }

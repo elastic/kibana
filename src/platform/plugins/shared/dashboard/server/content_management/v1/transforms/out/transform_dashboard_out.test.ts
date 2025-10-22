@@ -21,7 +21,6 @@ import type {
 } from '../../../../dashboard_saved_object';
 import type { DashboardAttributes } from '../../types';
 import { transformDashboardOut } from './transform_dashboard_out';
-import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../../common/content_management';
 
 describe('transformDashboardOut', () => {
   const controlGroupInputControlsSo = {
@@ -42,7 +41,7 @@ describe('transformDashboardOut', () => {
     },
   ];
 
-  test('should set default values if not provided', () => {
+  test('should not supply defaults for missing properties', () => {
     const input: DashboardSavedObjectAttributes = {
       controlGroupInput: {
         panelsJSON: JSON.stringify({ foo: controlGroupInputControlsSo }),
@@ -73,9 +72,7 @@ describe('transformDashboardOut', () => {
         ],
       },
       description: 'my description',
-      kibanaSavedObjectMeta: {},
       options: {
-        ...DEFAULT_DASHBOARD_OPTIONS,
         hidePanelTitles: false,
       },
       panels: [
@@ -85,7 +82,7 @@ describe('transformDashboardOut', () => {
             savedObjectId: '1',
             title: 'title1',
           },
-          grid: { x: 0, y: 0, w: 10, h: 10, i: '1' },
+          grid: { x: 0, y: 0, w: 10, h: 10 },
           uid: '1',
           type: 'type1',
           version: '2',
@@ -171,9 +168,7 @@ describe('transformDashboardOut', () => {
         ],
       },
       description: 'description',
-      kibanaSavedObjectMeta: {
-        searchSource: { query: { query: 'test', language: 'KQL' } },
-      },
+      query: { query: 'test', language: 'KQL' },
       options: {
         hidePanelTitles: true,
         useMargins: false,
@@ -193,7 +188,6 @@ describe('transformDashboardOut', () => {
             y: 0,
             w: 10,
             h: 10,
-            i: '1',
           },
           uid: '1',
           type: 'type1',

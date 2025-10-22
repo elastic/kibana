@@ -8,8 +8,8 @@
  */
 
 import type { StoryObj } from '@storybook/react';
-import { kibanaReactDecorator } from '../../../../.storybook/decorators';
 import { WorkflowDetailHeader } from './workflow_detail_header';
+import { kibanaReactDecorator } from '../../../../.storybook/decorators';
 
 export default {
   component: WorkflowDetailHeader,
@@ -31,7 +31,6 @@ export const Default: Story = {
     handleRunClick: () => {},
     handleSave: () => {},
     handleToggleWorkflow: () => {},
-    handleTestClick: () => {},
     handleTabChange: () => {},
     hasUnsavedChanges: false,
   },
@@ -49,7 +48,6 @@ export const JustNow: Story = {
     handleRunClick: () => {},
     handleSave: () => {},
     handleToggleWorkflow: () => {},
-    handleTestClick: () => {},
     handleTabChange: () => {},
     hasUnsavedChanges: false,
   },
@@ -66,7 +64,6 @@ export const Loading: Story = {
     handleRunClick: () => {},
     handleSave: () => {},
     handleToggleWorkflow: () => {},
-    handleTestClick: () => {},
     handleTabChange: () => {},
     hasUnsavedChanges: false,
   },
@@ -84,7 +81,6 @@ export const LongTitle: Story = {
     handleRunClick: () => {},
     handleSave: () => {},
     handleToggleWorkflow: () => {},
-    handleTestClick: () => {},
     handleTabChange: () => {},
   },
 };
@@ -101,7 +97,6 @@ export const UnsavedChanges: Story = {
     handleRunClick: () => {},
     handleSave: () => {},
     handleToggleWorkflow: () => {},
-    handleTestClick: () => {},
     handleTabChange: () => {},
     hasUnsavedChanges: true,
   },

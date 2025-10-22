@@ -131,6 +131,10 @@ export function isOneChatDataset(datasetName: string): boolean {
   return datasetName.startsWith('onechat/') && datasetName.split('/').length === 3;
 }
 
+export function isOneChatWildcard(datasetName: string): boolean {
+  return isOneChatDataset(datasetName) && datasetName.endsWith('/*');
+}
+
 /**
  * Lists all available OneChat datasets for a specific directory
  */

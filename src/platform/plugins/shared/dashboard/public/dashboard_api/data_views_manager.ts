@@ -16,7 +16,6 @@ import { apiPublishesDataViews } from '@kbn/presentation-publishing';
 import { uniqBy } from 'lodash';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, combineLatest, of, switchMap } from 'rxjs';
-import { dataService } from '../services/kibana_services';
 
 export function initializeDataViewsManager(
   controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>,
@@ -40,20 +39,7 @@ export function initializeDataViewsManager(
   const dataViewsSubscription = combineLatest([controlGroupDataViewsPipe, childDataViewsPipe])
     .pipe(
       switchMap(async ([controlGroupDataViews, childDataViews]) => {
-        const allDataViews = [...(controlGroupDataViews ?? []), ...childDataViews].filter(
-          (dataView) => dataView.isPersisted()
-        );
-
-        if (allDataViews.length === 0) {
-          try {
-            const defaultDataView = await dataService.dataViews.getDefaultDataView();
-            if (defaultDataView) {
-              allDataViews.push(defaultDataView);
-            }
-          } catch (error) {
-            // ignore error getting default data view
-          }
-        }
+        const allDataViews = [...(controlGroupDataViews ?? []), ...childDataViews];
         return uniqBy(allDataViews, 'id');
       })
     )

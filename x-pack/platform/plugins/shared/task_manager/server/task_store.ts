@@ -116,6 +116,7 @@ export interface FetchResult {
 
 export interface BulkUpdateOpts {
   validate: boolean;
+  mergeAttributes?: boolean;
 }
 
 export type BulkUpdateResult = Result<ConcreteTaskInstance, ErrorOutput>;
@@ -518,7 +519,7 @@ export class TaskStore {
    */
   public async bulkUpdate(
     docs: ConcreteTaskInstance[],
-    { validate }: BulkUpdateOpts
+    { validate, mergeAttributes = true }: BulkUpdateOpts
   ): Promise<BulkUpdateResult[]> {
     const newDocs = docs.reduce(
       (acc: Map<string, SavedObjectsBulkUpdateObject<SerializedConcreteTaskInstance>>, doc) => {
@@ -531,6 +532,7 @@ export class TaskStore {
             id: doc.id,
             version: doc.version,
             attributes: taskInstanceToAttributes(taskInstance, doc.id),
+            mergeAttributes,
           });
         } catch (e) {
           this.logger.error(

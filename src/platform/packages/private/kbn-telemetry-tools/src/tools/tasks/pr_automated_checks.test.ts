@@ -9,7 +9,6 @@
 
 jest.mock('fs/promises');
 
-import { UPSTREAM_BRANCH } from '@kbn/repo-info';
 import { prAutomatedChecks } from './pr_automated_checks';
 import { createTaskContext, type TelemetryRoot } from './task_context';
 
@@ -22,7 +21,7 @@ const BASE_ROOT: TelemetryRoot = {
 };
 
 describe('prAutomatedChecks', () => {
-  const context = createTaskContext();
+  const context = createTaskContext('06102025MERGEBASESHA');
 
   beforeEach(() => {
     context.reporter.errors.length = 0; // Empty the errors
@@ -30,7 +29,40 @@ describe('prAutomatedChecks', () => {
   });
 
   describe('Download schema from main branch', () => {
-    test(`downloads the file from the ${UPSTREAM_BRANCH} branch`, async () => {
+    test(`fails the comparison if called without a SHA`, async () => {
+      const missingSha = createTaskContext();
+      missingSha.roots.push({ ...BASE_ROOT });
+      const [downloadSchemas] = prAutomatedChecks(missingSha);
+
+      expect(missingSha.roots[0].upstreamMapping).toBeUndefined();
+
+      // @ts-expect-error We know that the method doesn't use the arguments
+      await expect(downloadSchemas.task()).rejects.toMatchInlineSnapshot(
+        `[Error: Cannot fetch the baseline for comparison, no SHA specified.]`
+      );
+    });
+
+    test(`fails to download the merge-base commit version of the file from the Kibana repo`, async () => {
+      const fetchSpy = jest.spyOn(global, 'fetch');
+
+      context.roots.push({ ...BASE_ROOT });
+      const [downloadSchemas] = prAutomatedChecks(context);
+
+      expect(context.roots[0].upstreamMapping).toBeUndefined();
+
+      fetchSpy.mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+        statusText: 'Who checks the checker?',
+      } as Partial<Response> as Response);
+
+      // @ts-expect-error We know that the method doesn't use the arguments
+      await expect(downloadSchemas.task()).rejects.toMatchInlineSnapshot(
+        `[Error: Failed to fetch https://raw.githubusercontent.com/elastic/kibana/06102025MERGEBASESHA/test.json: 404 Who checks the checker?]`
+      );
+    });
+
+    test(`downloads the merge-base commit version of the file from the Kibana repo`, async () => {
       const fetchSpy = jest.spyOn(global, 'fetch');
 
       context.roots.push({ ...BASE_ROOT });
@@ -49,26 +81,6 @@ describe('prAutomatedChecks', () => {
       await downloadSchemas.task();
 
       expect(context.roots[0].upstreamMapping).toEqual(upstreamMappings);
-    });
-
-    test(`fails to download the file from the ${UPSTREAM_BRANCH} branch`, async () => {
-      const fetchSpy = jest.spyOn(global, 'fetch');
-
-      context.roots.push({ ...BASE_ROOT });
-      const [downloadSchemas] = prAutomatedChecks(context);
-
-      expect(context.roots[0].upstreamMapping).toBeUndefined();
-
-      fetchSpy.mockResolvedValueOnce({
-        ok: false,
-        status: 404,
-        statusText: 'Who checks the checker?',
-      } as Partial<Response> as Response);
-
-      // @ts-expect-error We know that the method doesn't use the arguments
-      await expect(downloadSchemas.task()).rejects.toMatchInlineSnapshot(
-        `[Error: Failed to fetch https://raw.githubusercontent.com/elastic/kibana/refs/heads/main/test.json: 404 Who checks the checker?]`
-      );
     });
   });
   describe('Schema PR checks', () => {
@@ -116,7 +128,7 @@ describe('prAutomatedChecks', () => {
         ErrorReporter {
           "errors": Array [
             "[37m[41m TELEMETRY ERROR [49m[39m Error in test.json
-        The _meta.description of properties.myCollector.properties.some_field is missing. Please add it.",
+        The _meta.description of properties.myCollector.properties.some_field is missing. Please add it in the '.ts' file where you added the new field, and then run the 'scripts/telemetry_check --fix' to automatically update the JSON files.",
           ],
         }
       `);
@@ -376,11 +388,11 @@ describe('prAutomatedChecks', () => {
         ErrorReporter {
           "errors": Array [
             "[37m[41m TELEMETRY ERROR [49m[39m Error in test.json
-        The _meta.description of properties.myCollector.properties.compatible_modification_without_description is missing. Please add it.",
+        The _meta.description of properties.myCollector.properties.compatible_modification_without_description is missing. Please add it in the '.ts' file where you updated the field, and then run the 'scripts/telemetry_check --fix' to automatically update the JSON files.",
             "[37m[41m TELEMETRY ERROR [49m[39m Error in test.json
         Incompatible change in key \\"properties.myCollector.properties.string_to_number\\": it has been changed from a non-numeric type \\"text\\" to a numeric type \\"long\\".",
             "[37m[41m TELEMETRY ERROR [49m[39m Error in test.json
-        The _meta.description of properties.myCollector.properties.string_to_number is missing. Please add it.",
+        The _meta.description of properties.myCollector.properties.string_to_number is missing. Please add it in the '.ts' file where you updated the field, and then run the 'scripts/telemetry_check --fix' to automatically update the JSON files.",
             "[37m[41m TELEMETRY ERROR [49m[39m Error in test.json
         Incompatible change in key \\"properties.myCollector.properties.string_to_boolean\\": it has been changed from a non-boolean type \\"text\\" to a \\"boolean\\" type.",
             "[37m[41m TELEMETRY ERROR [49m[39m Error in test.json

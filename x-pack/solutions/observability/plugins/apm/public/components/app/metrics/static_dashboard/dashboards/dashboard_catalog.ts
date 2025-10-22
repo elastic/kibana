@@ -8,18 +8,19 @@
 // The new dashboard file names should be added here
 export const existingDashboardFileNames = new Set([
   'classic_apm-apm-nodejs',
-  'classic_apm-apm-java',
+  'classic_apm-edot-nodejs',
   'classic_apm-otel_other-nodejs',
+  'otel_native-edot-nodejs',
+  'otel_native-otel_other-nodejs',
+  'classic_apm-apm-java',
   'classic_apm-otel_other-java',
   'classic_apm-otel_other-dotnet',
-  'classic_apm-edot-nodejs',
   'classic_apm-edot-java',
   'otel_native-edot-java',
   'otel_native-otel_other-java',
   'classic_apm-edot-dotnet',
   'otel_native-edot-python',
   'otel_native-otel_other-python',
-  'otel_native-edot-nodejs',
   'classic_apm-otel_other-go',
   'otel_native-otel_other-go',
 ]);
@@ -46,6 +47,18 @@ export async function loadDashboardFile(filename: string) {
       return import(
         /* webpackChunkName: "lazyNodeJsOtelNativeDashboard" */
         './opentelemetry_nodejs.json'
+      );
+    }
+    case 'otel_native-otel_other-nodejs': {
+      return import(
+        /* webpackChunkName: "lazyNodeJsOtelNativeEdotDashboard" */
+        './otel_native-otel_other-nodejs.json'
+      );
+    }
+    case 'otel_native-edot-nodejs': {
+      return import(
+        /* webpackChunkName: "lazyNodeJsOtelNativeEdotDashboard" */
+        './otel_native-edot-nodejs.json'
       );
     }
     case 'classic_apm-apm-java': {
@@ -100,12 +113,6 @@ export async function loadDashboardFile(filename: string) {
       return import(
         /* webpackChunkName: "lazyPythonOtelNativeEdotDashboard" */
         './otel_native-edot-python.json'
-      );
-    }
-    case 'otel_native-edot-nodejs': {
-      return import(
-        /* webpackChunkName: "lazyNodeJsOtelNativeEdotDashboard" */
-        './otel_native-edot-nodejs.json'
       );
     }
     case 'otel_native-otel_other-go':

@@ -36,9 +36,10 @@ export const transformDashboardIn = ({
   try {
     const {
       controlGroupInput,
-      kibanaSavedObjectMeta,
       options,
+      filters,
       panels,
+      query,
       tags,
       timeRange,
       timeRestore,
@@ -57,26 +58,24 @@ export const transformDashboardIn = ({
 
     const { panelsJSON, sections, references: panelReferences } = transformPanelsIn(panels);
 
-    const { searchSourceJSON, references: searchSourceReferences } =
-      transformSearchSourceIn(kibanaSavedObjectMeta);
+    const { searchSourceJSON, references: searchSourceReferences } = transformSearchSourceIn(
+      filters,
+      query
+    );
 
     const attributes = {
       ...rest,
       ...(controlGroupInput && {
         controlGroupInput: transformControlGroupIn(controlGroupInput),
       }),
-      ...(options && {
-        optionsJSON: JSON.stringify(options),
-      }),
+      optionsJSON: JSON.stringify(options ?? {}),
       ...(panels && {
         panelsJSON,
       }),
       ...(sections?.length && { sections }),
       timeRestore,
       ...(timeRange && timeRestore && { timeFrom: timeRange.from, timeTo: timeRange.to }),
-      ...(kibanaSavedObjectMeta && {
-        kibanaSavedObjectMeta: { searchSourceJSON },
-      }),
+      kibanaSavedObjectMeta: { searchSourceJSON },
     };
     return {
       attributes,

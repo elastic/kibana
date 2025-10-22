@@ -68,10 +68,10 @@ processingCommand
     | forkCommand
     | rerankCommand
     | inlineStatsCommand
+    | fuseCommand
     // in development
     | {this.isDevVersion()}? lookupCommand
     | {this.isDevVersion()}? insistCommand
-    | {this.isDevVersion()}? fuseCommand
     ;
 
 whereCommand
@@ -253,7 +253,7 @@ commandNamedParameters
     ;
 
 grokCommand
-    : GROK primaryExpression string
+    : GROK primaryExpression string (COMMA string)*
     ;
 
 mvExpandCommand
@@ -328,6 +328,17 @@ inlineStatsCommand
     | INLINESTATS stats=aggFields (BY grouping=fields)?
     ;
 
+fuseCommand
+    : FUSE (fuseType=identifier)? (fuseConfiguration)*
+    ;
+
+fuseConfiguration
+    : SCORE BY score=qualifiedName
+    | KEY BY key=fields
+    | GROUP BY group=qualifiedName
+    | WITH options=mapExpression
+    ;
+
 //
 // In development
 //
@@ -337,17 +348,6 @@ lookupCommand
 
 insistCommand
     : DEV_INSIST qualifiedNamePatterns
-    ;
-
-fuseCommand
-    : DEV_FUSE (fuseType=identifier)? (fuseConfiguration)*
-    ;
-
-fuseConfiguration
-    : SCORE BY score=qualifiedName
-    | KEY BY key=fields
-    | GROUP BY group=qualifiedName
-    | WITH options=mapExpression
     ;
 
 setCommand

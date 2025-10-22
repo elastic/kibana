@@ -20,7 +20,7 @@ import {
   getWebhookServer,
 } from '@kbn/actions-simulators-plugin/server/plugin';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import { getEventLog } from '../../../../../common/lib';
+import { getEventLog, ObjectRemover } from '../../../../../common/lib';
 
 const defaultValues: Record<string, any> = {
   headers: null,
@@ -40,6 +40,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const configService = getService('config');
   const retry = getService('retry');
+  const objectRemover = new ObjectRemover(supertest);
 
   async function createWebhookAction(
     webhookSimulatorURL: string,
@@ -101,7 +102,9 @@ export default function webhookTest({ getService }: FtrProviderContext) {
       );
     });
 
-    it('should return 200 when creating a webhook action successfully', async () => {
+    afterEach(() => objectRemover.removeAll());
+
+    it('should return 200 when creating a webhook connector successfully', async () => {
       const { body: createdAction } = await supertest
         .post('/api/actions/connector')
         .set('kbn-xsrf', 'test')
@@ -130,6 +133,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
           ...defaultValues,
           url: webhookSimulatorURL,
         },
+        is_connector_type_deprecated: false,
       });
 
       expect(typeof createdAction.id).to.be('string');
@@ -150,6 +154,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
           ...defaultValues,
           url: webhookSimulatorURL,
         },
+        is_connector_type_deprecated: false,
       });
     });
 
@@ -188,6 +193,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
             someHeader: '123',
           },
         },
+        is_connector_type_deprecated: false,
       });
 
       await supertest
@@ -227,6 +233,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
             someOtherHeader: '456',
           },
         },
+        is_connector_type_deprecated: false,
       });
     });
 
@@ -251,6 +258,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         { method: 'post' },
         kibanaURL
       );
+      objectRemover.add('default', webhookActionId, 'connector', 'actions', false);
       const { body: result } = await supertest
         .post(`/api/actions/connector/${webhookActionId}/_execute`)
         .set('kbn-xsrf', 'test')
@@ -287,6 +295,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         { method: 'put' },
         kibanaURL
       );
+      objectRemover.add('default', webhookActionId, 'connector', 'actions', false);
       const { body: result } = await supertest
         .post(`/api/actions/connector/${webhookActionId}/_execute`)
         .set('kbn-xsrf', 'test')
@@ -295,6 +304,60 @@ export default function webhookTest({ getService }: FtrProviderContext) {
             body: 'success_put_method',
           },
         })
+        .expect(200);
+
+      expect(proxyHaveBeenCalled).to.equal(true);
+      expect(result.status).to.eql('ok');
+    });
+
+    it('should support the PATCH method against webhook target', async () => {
+      const webhookActionId = await createWebhookAction(
+        webhookSimulatorURL,
+        { method: 'patch' },
+        kibanaURL
+      );
+      const { body: result } = await supertest
+        .post(`/api/actions/connector/${webhookActionId}/_execute`)
+        .set('kbn-xsrf', 'test')
+        .send({
+          params: {
+            body: 'success_patch_method',
+          },
+        })
+        .expect(200);
+
+      expect(proxyHaveBeenCalled).to.equal(true);
+      expect(result.status).to.eql('ok');
+    });
+
+    it('should support the GET method against webhook target', async () => {
+      const webhookActionId = await createWebhookAction(
+        webhookSimulatorURL,
+        { method: 'get' },
+        kibanaURL
+      );
+      objectRemover.add('default', webhookActionId, 'connector', 'actions', false);
+      const { body: result } = await supertest
+        .post(`/api/actions/connector/${webhookActionId}/_execute`)
+        .set('kbn-xsrf', 'test')
+        .send({ params: {} })
+        .expect(200);
+
+      expect(proxyHaveBeenCalled).to.equal(true);
+      expect(result.status).to.eql('ok');
+    });
+
+    it('should support the DELETE method against webhook target', async () => {
+      const webhookActionId = await createWebhookAction(
+        webhookSimulatorURL,
+        { method: 'delete' },
+        kibanaURL
+      );
+      objectRemover.add('default', webhookActionId, 'connector', 'actions', false);
+      const { body: result } = await supertest
+        .post(`/api/actions/connector/${webhookActionId}/_execute`)
+        .set('kbn-xsrf', 'test')
+        .send({ params: {} })
         .expect(200);
 
       expect(proxyHaveBeenCalled).to.equal(true);

@@ -17,7 +17,6 @@ import { accumulateUpsertResults } from './bulk/utils';
 import { queryExistingUsers } from './bulk/query_existing_users';
 
 import { softDeleteOmittedUsers } from './bulk/soft_delete_omitted_users';
-import { createPrivmonIndexService } from '../engine/elasticsearch/indices';
 import type { BulkProcessingResults } from './bulk/types';
 
 export const createPrivilegedUsersCsvService = (dataClient: PrivilegeMonitoringDataClient) => {
@@ -28,8 +27,6 @@ export const createPrivilegedUsersCsvService = (dataClient: PrivilegeMonitoringD
     stream: HapiReadableStream,
     options: { retries: number; flushBytes: number }
   ) => {
-    await checkAndInitPrivilegedMonitoringResources();
-
     const csvStream = Papa.parse(Papa.NODE_STREAM_INPUT, {
       header: false,
       dynamicTyping: true,
@@ -69,22 +66,6 @@ export const createPrivilegedUsersCsvService = (dataClient: PrivilegeMonitoringD
           softDeletedResults.deleted.successful,
       },
     };
-  };
-
-  /**
-   * Checks and initializes the privilege monitoring resources if they do not exist.
-   * We only need this for the CSV upload scenario
-   */
-  const checkAndInitPrivilegedMonitoringResources = async () => {
-    const IndexService = createPrivmonIndexService(dataClient);
-
-    await IndexService.createIngestPipelineIfDoesNotExist();
-    const found = await IndexService.doesIndexExist();
-    if (!found) {
-      dataClient.log('info', 'Privilege monitoring index does not exist, initialising.');
-      await IndexService.upsertIndex();
-      dataClient.log('info', 'Privilege monitoring resources installed');
-    }
   };
 
   return { bulkUpload };

@@ -8,21 +8,21 @@
  */
 
 import type { EnterForeachNode } from '@kbn/workflows/graph';
-import type { NodeImplementation } from '../node_implementation';
+import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
-import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
+import type { NodeImplementation } from '../node_implementation';
 
 export class EnterForeachNodeImpl implements NodeImplementation {
   constructor(
     private node: EnterForeachNode,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
-    private contextManager: WorkflowContextManager,
+    private stepExecutionRuntime: StepExecutionRuntime,
     private workflowLogger: IWorkflowEventLogger
   ) {}
 
   public async run(): Promise<void> {
-    if (!this.wfExecutionRuntimeManager.getCurrentStepState()) {
+    if (!this.stepExecutionRuntime.getCurrentStepState()) {
       await this.enterForeach();
     } else {
       await this.advanceIteration();
@@ -30,8 +30,8 @@ export class EnterForeachNodeImpl implements NodeImplementation {
   }
 
   private async enterForeach(): Promise<void> {
-    let foreachState = this.wfExecutionRuntimeManager.getCurrentStepState();
-    await this.wfExecutionRuntimeManager.startStep();
+    let foreachState = this.stepExecutionRuntime.getCurrentStepState();
+    await this.stepExecutionRuntime.startStep();
     const evaluatedItems = this.getItems();
 
     if (evaluatedItems.length === 0) {
@@ -41,11 +41,11 @@ export class EnterForeachNodeImpl implements NodeImplementation {
           workflow: { step_id: this.node.stepId },
         }
       );
-      await this.wfExecutionRuntimeManager.setCurrentStepState({
+      await this.stepExecutionRuntime.setCurrentStepState({
         items: [],
         total: 0,
       });
-      await this.wfExecutionRuntimeManager.finishStep();
+      await this.stepExecutionRuntime.finishStep();
       this.wfExecutionRuntimeManager.navigateToNode(this.node.exitNodeId);
       return;
     }
@@ -65,14 +65,16 @@ export class EnterForeachNodeImpl implements NodeImplementation {
       total: evaluatedItems.length,
     };
 
-    await this.wfExecutionRuntimeManager.setCurrentStepState(foreachState);
+    await this.stepExecutionRuntime.setCurrentStepState(foreachState);
     // Enter a new scope for the first iteration
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.wfExecutionRuntimeManager.enterScope(foreachState.index!.toString());
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 
   private async advanceIteration(): Promise<void> {
-    let foreachState = this.wfExecutionRuntimeManager.getCurrentStepState()!;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    let foreachState = this.stepExecutionRuntime.getCurrentStepState()!;
     // Update items and index if they have changed
     const items = foreachState.items;
     const index = foreachState.index + 1;
@@ -85,12 +87,15 @@ export class EnterForeachNodeImpl implements NodeImplementation {
       total,
     };
     // Enter a new scope for the new iteration
-    await this.wfExecutionRuntimeManager.setCurrentStepState(foreachState);
+    await this.stepExecutionRuntime.setCurrentStepState(foreachState);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.wfExecutionRuntimeManager.enterScope(foreachState.index!.toString());
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private getItems(): any[] {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let items: any[] = [];
 
     if (!this.node.configuration.foreach) {
@@ -100,7 +105,7 @@ export class EnterForeachNodeImpl implements NodeImplementation {
     try {
       items = JSON.parse(this.node.configuration.foreach);
     } catch (error) {
-      const { value, pathExists } = this.contextManager.readContextPath(
+      const { value, pathExists } = this.stepExecutionRuntime.contextManager.readContextPath(
         this.node.configuration.foreach
       );
 

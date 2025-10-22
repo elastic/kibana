@@ -8,9 +8,9 @@
  */
 
 import { WorkflowContextSchema } from '@kbn/workflows';
+import { z } from '@kbn/zod';
 import { getWorkflowContextSchema } from './get_workflow_context_schema';
 import { expectZodSchemaEqual } from '../../../../common/lib/zod/zod_utils';
-import { z } from '@kbn/zod';
 
 describe('getWorkflowContextSchema', () => {
   it('should return the workflow context schema with empty inputs and consts', () => {
@@ -82,12 +82,12 @@ describe('getWorkflowContextSchema', () => {
       WorkflowContextSchema.extend({
         inputs: z.object({}),
         consts: z.object({
-          test: z.string(),
-          test2: z.number(),
-          test3: z.boolean(),
-          test4: z.array(z.string()).length(2),
+          test: z.literal('test'),
+          test2: z.literal(1),
+          test3: z.literal(true),
+          test4: z.array(z.literal('option1')).length(2),
           test5: z.object({
-            test6: z.string(),
+            test6: z.literal('test'),
           }),
         }),
       })

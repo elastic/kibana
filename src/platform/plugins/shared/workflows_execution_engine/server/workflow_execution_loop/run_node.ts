@@ -7,11 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { GraphNodeUnion } from '@kbn/workflows/graph';
-import { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
-import type { WorkflowExecutionLoopParams } from './types';
-import { runStackMonitor } from './run_stack_monitor';
 import { catchError } from './catch_error';
+import { runStackMonitor } from './run_stack_monitor';
+import type { WorkflowExecutionLoopParams } from './types';
 
 /**
  * Executes a single step in the workflow execution process.
@@ -40,21 +38,23 @@ import { catchError } from './catch_error';
  * @throws Will catch and handle errors through the workflow runtime's error handling mechanism
  */
 export async function runNode(params: WorkflowExecutionLoopParams): Promise<void> {
-  const currentNode = params.workflowRuntime.getCurrentNode();
-  const stepContext = new WorkflowContextManager({
-    workflowExecutionGraph: params.workflowExecutionGraph,
-    workflowExecutionState: params.workflowExecutionState,
-    esClient: params.esClient,
-    fakeRequest: params.fakeRequest,
-    coreStart: params.coreStart,
-    node: currentNode as GraphNodeUnion,
+  const node = params.workflowRuntime.getCurrentNode();
+
+  if (!node) {
+    return;
+  }
+
+  params.workflowRuntime.exitScope();
+  const stepExecutionRuntime = params.stepExecutionRuntimeFactory.createStepExecutionRuntime({
+    nodeId: node.id,
     stackFrames: params.workflowRuntime.getCurrentNodeScope(),
   });
-  const nodeImplementation = params.nodesFactory.create(stepContext);
+
+  const nodeImplementation = params.nodesFactory.create(stepExecutionRuntime);
   const monitorAbortController = new AbortController();
 
   // The order of these promises is important - we want to stop monitoring
-  const runMonitorPromise = runStackMonitor(params, stepContext, monitorAbortController);
+  const runMonitorPromise = runStackMonitor(params, stepExecutionRuntime, monitorAbortController);
   let runStepPromise: Promise<void> = Promise.resolve();
 
   // Sometimes monitoring can prevent the step from running, e.g. when the workflow is cancelled, timeout occured right before running step, etc.
@@ -64,12 +64,13 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
 
   try {
     await Promise.race([runMonitorPromise, runStepPromise]);
+    params.workflowRuntime.enterScope();
     monitorAbortController.abort();
   } catch (error) {
     params.workflowRuntime.setWorkflowError(error);
   } finally {
     monitorAbortController.abort();
-    await catchError(params, stepContext);
+    await catchError(params, stepExecutionRuntime);
     await params.workflowRuntime.saveState(); // Ensure state is updated after each step
   }
 }

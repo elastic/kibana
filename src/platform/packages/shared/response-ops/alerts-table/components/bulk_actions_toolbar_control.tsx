@@ -42,20 +42,15 @@ const selectedIdsToTimelineItemMapper = (
 ): TimelineItem[] => {
   return Array.from(rowSelection.keys()).map((rowIndex: number) => {
     const alert = alerts[rowIndex];
-    const data = Object.entries(alert).map(([key, value]) => ({
+    const data = Object.entries({
+      [ALERT_CASE_IDS]: null,
+      [ALERT_WORKFLOW_TAGS]: null,
+      [ALERT_WORKFLOW_ASSIGNEE_IDS]: null,
+      ...alert,
+    }).map(([key, value]) => ({
       field: key,
       value: value ? (value as string[]) : [],
     }));
-    if (!data.some((item) => item.field === ALERT_CASE_IDS)) {
-      data.push({ field: ALERT_CASE_IDS, value: [] });
-    }
-    if (!data.some((item) => item.field === ALERT_WORKFLOW_TAGS)) {
-      data.push({ field: ALERT_WORKFLOW_TAGS, value: [] });
-    }
-    if (!data.some((item) => item.field === ALERT_WORKFLOW_ASSIGNEE_IDS)) {
-      data.push({ field: ALERT_WORKFLOW_ASSIGNEE_IDS, value: [] });
-    }
-
     return {
       _id: alert._id,
       _index: alert._index,

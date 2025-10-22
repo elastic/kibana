@@ -8,21 +8,21 @@
  */
 
 import type { ExitForeachNode } from '@kbn/workflows/graph';
-import type { NodeImplementation } from '../node_implementation';
+import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
+import type { NodeImplementation } from '../node_implementation';
 
 export class ExitForeachNodeImpl implements NodeImplementation {
   constructor(
     private node: ExitForeachNode,
+    private stepExecutionRuntime: StepExecutionRuntime,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger
   ) {}
 
   public async run(): Promise<void> {
-    // Exit the scope of the current iteration
-    this.wfExecutionRuntimeManager.exitScope();
-    const foreachState = this.wfExecutionRuntimeManager.getCurrentStepState();
+    const foreachState = this.stepExecutionRuntime.getCurrentStepState();
 
     if (!foreachState) {
       throw new Error(`Foreach state for step ${this.node.stepId} not found`);
@@ -33,7 +33,7 @@ export class ExitForeachNodeImpl implements NodeImplementation {
       return;
     }
 
-    await this.wfExecutionRuntimeManager.finishStep();
+    await this.stepExecutionRuntime.finishStep();
     this.workflowLogger.logDebug(
       `Exiting foreach step ${this.node.stepId} after processing all items.`,
       {
