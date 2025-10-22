@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('@kbn/react-query', () => {
-  const actual = jest.requireActual('@kbn/react-query');
+jest.mock('..', () => {
+  const actual = jest.requireActual('..');
   return {
     ...actual,
     useMutation: jest.fn(actual.useMutation),
