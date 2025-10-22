@@ -298,15 +298,35 @@ export class CommonPageObject extends FtrService {
 
     this.log.debug('navigating to ' + appName + ' url: ' + appUrl);
 
-    // Check if we're already on the target URL
-    const currentUrlBeforeNav = await this.browser.getCurrentUrl();
+    // Fast-path optimization: Skip navigation if already on exact target URL
+    // BUT only if the URL has meaningful state (hash or search params).
+    // Base app URLs without params should always reload to ensure fresh state.
+    const urlHasState = (url: string) => {
+      try {
+        const parsed = new URL(url);
+        // Check if there's a meaningful hash (not just '#', '#/', or empty)
+        const hasHash = parsed.hash && parsed.hash.length > 2 && parsed.hash !== '#/';
+        // Check if there are search params
+        const hasSearch = parsed.search && parsed.search.length > 1;
+        return hasHash || hasSearch;
+      } catch {
+        return false;
+      }
+    };
 
-    const normalizedCurrentUrl = this.normalizeUrlForComparison(currentUrlBeforeNav);
-    const normalizedAppUrl = this.normalizeUrlForComparison(appUrl);
+    const targetHasState = urlHasState(appUrl);
 
-    if (normalizedCurrentUrl.startsWith(normalizedAppUrl)) {
-      this.log.debug(`Already in the target app for ${appName}, skipping navigation.`);
-      return;
+    if (targetHasState) {
+      const currentUrlBeforeNav = await this.browser.getCurrentUrl();
+      const normalizedCurrentUrl = this.normalizeUrlForComparison(currentUrlBeforeNav);
+      const normalizedAppUrl = this.normalizeUrlForComparison(appUrl);
+
+      if (normalizedCurrentUrl === normalizedAppUrl) {
+        this.log.debug(
+          `Already on exact target URL with state for ${appName}, skipping navigation.`
+        );
+        return;
+      }
     }
 
     // Phase 2: Navigate to the app and verify it loaded successfully
