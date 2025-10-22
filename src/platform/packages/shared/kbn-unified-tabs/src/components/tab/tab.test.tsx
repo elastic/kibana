@@ -377,4 +377,74 @@ describe('Tab', () => {
     const closeButton = screen.queryByTestId(`unifiedTabs_closeTabBtn_${tabItem.id}`);
     expect(closeButton).not.toBeInTheDocument();
   });
+
+  it('renders default menu button when customMenuButton is not provided', () => {
+    const getTabMenuItems = jest.fn(() => [
+      {
+        'data-test-subj': 'test-menu-item',
+        name: 'test-item',
+        label: 'Test Item',
+        onClick: jest.fn(),
+      },
+    ]);
+
+    render(
+      <Tab
+        tabContentId={tabContentId}
+        tabsSizeConfig={tabsSizeConfig}
+        item={tabItem}
+        isSelected={false}
+        services={servicesMock}
+        getTabMenuItems={getTabMenuItems}
+        getPreviewData={getPreviewDataMock}
+        onLabelEdited={jest.fn()}
+        onSelect={jest.fn()}
+        onClose={jest.fn()}
+      />
+    );
+
+    // Default menu button should be present
+    const defaultMenuButton = screen.getByTestId(`unifiedTabs_tabMenuBtn_${tabItem.id}`);
+    expect(defaultMenuButton).toBeInTheDocument();
+  });
+
+  it('renders custom menu button when customMenuButton is provided', () => {
+    const customButton = <button data-test-subj="custom-menu-button">Custom Menu</button>;
+    const tabItemWithCustomButton = {
+      ...tabItem,
+      customMenuButton: customButton,
+    };
+    const getTabMenuItems = jest.fn(() => [
+      {
+        'data-test-subj': 'test-menu-item',
+        name: 'test-item',
+        label: 'Test Item',
+        onClick: jest.fn(),
+      },
+    ]);
+
+    render(
+      <Tab
+        tabContentId={tabContentId}
+        tabsSizeConfig={tabsSizeConfig}
+        item={tabItemWithCustomButton}
+        isSelected={false}
+        services={servicesMock}
+        getTabMenuItems={getTabMenuItems}
+        getPreviewData={getPreviewDataMock}
+        onLabelEdited={jest.fn()}
+        onSelect={jest.fn()}
+        onClose={jest.fn()}
+      />
+    );
+
+    // Custom menu button should be present
+    const customMenuButton = screen.getByTestId('custom-menu-button');
+    expect(customMenuButton).toBeInTheDocument();
+    expect(customMenuButton).toHaveTextContent('Custom Menu');
+
+    // Default menu button should NOT be present
+    const defaultMenuButton = screen.queryByTestId(`unifiedTabs_tabMenuBtn_${tabItem.id}`);
+    expect(defaultMenuButton).not.toBeInTheDocument();
+  });
 });
