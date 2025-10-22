@@ -10,8 +10,8 @@
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useEffect, useMemo } from 'react';
-import { monaco } from '@kbn/monaco';
 import { useSelector } from 'react-redux';
+import { monaco } from '@kbn/monaco';
 import {
   selectHighlightedStepId,
   selectStepExecutions,
