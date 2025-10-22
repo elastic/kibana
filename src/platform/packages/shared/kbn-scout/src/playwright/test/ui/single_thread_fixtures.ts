@@ -30,11 +30,12 @@ import type {
   ProfilingFixture,
 } from '../../fixtures/scope/worker';
 import {
+  pageContextFixture,
   scoutPageFixture,
   browserAuthFixture,
   pageObjectsFixture,
   validateTagsFixture,
-  persistentContext,
+  persistentContextFixture,
   perfTrackerFixture,
 } from '../../fixtures/scope/test';
 import type {
@@ -56,6 +57,7 @@ export const scoutFixtures = mergeTests(
   // api fixtures
   apiServicesFixture,
   // test scope fixtures
+  pageContextFixture,
   browserAuthFixture,
   scoutPageFixture,
   pageObjectsFixture,
@@ -85,4 +87,8 @@ export interface ScoutWorkerFixtures extends ApiServicesFixture {
   profilingSetup: ProfilingFixture['profilingSetup'];
 }
 
-export const lighthouseFixtures = mergeTests(scoutFixtures, persistentContext, lighthouseFixture);
+export const lighthouseFixtures = mergeTests(
+  scoutFixtures,
+  persistentContextFixture,
+  lighthouseFixture
+);
