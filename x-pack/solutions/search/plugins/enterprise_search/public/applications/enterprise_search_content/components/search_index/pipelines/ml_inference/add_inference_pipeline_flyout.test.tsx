@@ -407,7 +407,7 @@ describe('AddInferencePipelineFlyout', () => {
       const contBtn = wrapper.find(EuiButton);
       expect(contBtn).toHaveLength(1);
       expect(contBtn.prop('children')).toBe('Continue');
-      expect(contBtn.prop('disabled')).toBe(false);
+      expect(contBtn.props()).not.toHaveEuiDisabledProp();
       contBtn.prop('onClick')!({} as any);
       expect(actions.onAddInferencePipelineStepChange).toHaveBeenCalledWith(
         AddInferencePipelineSteps.Fields
@@ -420,7 +420,7 @@ describe('AddInferencePipelineFlyout', () => {
       );
       expect(wrapper.find(EuiButton)).toHaveLength(1);
       expect(wrapper.find(EuiButton).prop('children')).toBe('Continue');
-      expect(wrapper.find(EuiButton).prop('disabled')).toBe(true);
+      expect(wrapper.find(EuiButton).props()).toHaveEuiDisabledProp();
     });
     it('renders continue button on fields step', () => {
       setMockValues({
@@ -436,7 +436,7 @@ describe('AddInferencePipelineFlyout', () => {
       const contBtn = wrapper.find(EuiButton);
       expect(contBtn).toHaveLength(1);
       expect(contBtn.prop('children')).toBe('Continue');
-      expect(contBtn.prop('disabled')).toBe(false);
+      expect(contBtn.props()).not.toHaveEuiDisabledProp();
       contBtn.prop('onClick')!({} as any);
       expect(actions.onAddInferencePipelineStepChange).toHaveBeenCalledWith(
         AddInferencePipelineSteps.Test
@@ -456,7 +456,7 @@ describe('AddInferencePipelineFlyout', () => {
       const contBtn = wrapper.find(EuiButton);
       expect(contBtn).toHaveLength(1);
       expect(contBtn.prop('children')).toBe('Continue');
-      expect(contBtn.prop('disabled')).toBe(false);
+      expect(contBtn.props()).not.toHaveEuiDisabledProp();
       contBtn.prop('onClick')!({} as any);
       expect(actions.onAddInferencePipelineStepChange).toHaveBeenCalledWith(
         AddInferencePipelineSteps.Review

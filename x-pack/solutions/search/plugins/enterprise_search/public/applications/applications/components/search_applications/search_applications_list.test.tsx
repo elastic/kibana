@@ -74,7 +74,7 @@ describe('SearchApplicationsList', () => {
     expect(wrapper.find(EmptySearchApplicationsPrompt)).toHaveLength(1);
     expect(wrapper.find(SearchApplicationsListTable)).toHaveLength(0);
     expect(wrapper.find(CreateSearchApplicationButton)).toHaveLength(1);
-    expect(wrapper.find(CreateSearchApplicationButton).prop('disabled')).toBeFalsy();
+    expect(wrapper.find(CreateSearchApplicationButton).props()).not.toHaveEuiDisabledProp();
   });
 
   it('renders with search applications data ', async () => {
@@ -101,7 +101,7 @@ describe('SearchApplicationsList', () => {
     expect(wrapper.find(EmptySearchApplicationsPrompt)).toHaveLength(1);
     expect(wrapper.find(LicensingCallout)).toHaveLength(1);
     expect(wrapper.find(CreateSearchApplicationButton)).toHaveLength(1);
-    expect(wrapper.find(CreateSearchApplicationButton).prop('disabled')).toBeTruthy();
+    expect(wrapper.find(CreateSearchApplicationButton).props()).toHaveEuiDisabledProp();
   });
 
   it('Does not render Platinum license callout when Cloud', async () => {

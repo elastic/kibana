@@ -275,7 +275,7 @@ describe('Flyout', () => {
       const cancelButton = await component.find(
         'EuiButtonEmpty[data-test-subj="importSavedObjectsCancelBtn"]'
       );
-      expect(cancelButton.prop('disabled')).toBe(true);
+      expect(cancelButton.props()).toHaveEuiDisabledProp();
     });
   });
 });

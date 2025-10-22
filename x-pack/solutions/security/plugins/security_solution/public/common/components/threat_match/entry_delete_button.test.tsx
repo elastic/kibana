@@ -103,7 +103,7 @@ describe('EntryDeleteButtonComponent', () => {
 
     const button = wrapper.find('[data-test-subj="firstRowDeleteButton"] button').at(0);
 
-    expect(button.prop('disabled')).toBeTruthy();
+    expect(button.props()).toHaveEuiDisabledProp();
   });
 
   test('it does not disable button if it is the only entry left and field has been selected', () => {
@@ -119,6 +119,6 @@ describe('EntryDeleteButtonComponent', () => {
 
     const button = wrapper.find('[data-test-subj="deleteButton"] button').at(0);
 
-    expect(button.prop('disabled')).toBeFalsy();
+    expect(button.props()).not.toHaveEuiDisabledProp();
   });
 });

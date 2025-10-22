@@ -71,7 +71,7 @@ describe('LogicButtons', () => {
 
     const andButton = wrapper.find('[data-test-subj="andButton"] button').at(0);
 
-    expect(andButton.prop('disabled')).toBeTruthy();
+    expect(andButton.props()).toHaveEuiDisabledProp();
   });
 
   test('it disables "or" button if "isOrDisabled" is "true"', () => {
@@ -86,6 +86,6 @@ describe('LogicButtons', () => {
 
     const orButton = wrapper.find('[data-test-subj="orButton"] button').at(0);
 
-    expect(orButton.prop('disabled')).toBeTruthy();
+    expect(orButton.props()).toHaveEuiDisabledProp();
   });
 });

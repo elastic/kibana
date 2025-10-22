@@ -217,8 +217,12 @@ describe('EmailActionConnectorFields', () => {
     await waitForComponentToUpdate();
 
     wrapper.update();
-    expect(wrapper.find('[data-test-subj="emailHostInput"]').first().prop('disabled')).toBe(true);
-    expect(wrapper.find('[data-test-subj="emailPortInput"]').first().prop('disabled')).toBe(true);
+    expect(
+      wrapper.find('[data-test-subj="emailHostInput"]').first().props()
+    ).toHaveEuiDisabledProp();
+    expect(
+      wrapper.find('[data-test-subj="emailPortInput"]').first().props()
+    ).toHaveEuiDisabledProp();
     expect(wrapper.find('[data-test-subj="emailSecureSwitch"]').first().prop('disabled')).toBe(
       true
     );
@@ -259,8 +263,12 @@ describe('EmailActionConnectorFields', () => {
 
     await waitForComponentToUpdate();
 
-    expect(wrapper.find('[data-test-subj="emailHostInput"]').first().prop('disabled')).toBe(false);
-    expect(wrapper.find('[data-test-subj="emailPortInput"]').first().prop('disabled')).toBe(false);
+    expect(
+      wrapper.find('[data-test-subj="emailHostInput"]').first().props()
+    ).not.toHaveEuiDisabledProp();
+    expect(
+      wrapper.find('[data-test-subj="emailPortInput"]').first().props()
+    ).not.toHaveEuiDisabledProp();
     expect(wrapper.find('[data-test-subj="emailSecureSwitch"]').first().prop('disabled')).toBe(
       false
     );

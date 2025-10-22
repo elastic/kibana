@@ -121,28 +121,30 @@ describe('PalettePicker', function () {
   it('disables the highlight range switch for the elastic charts implementation', async () => {
     component = mountWithIntl(<HeatmapOptions {...props} />);
     await act(async () => {
-      expect(findTestSubject(component, 'heatmapHighlightRange').prop('disabled')).toBeTruthy();
+      expect(findTestSubject(component, 'heatmapHighlightRange').props()).toHaveEuiDisabledProp();
     });
   });
 
   it('enables the highlight range switch for the vislib implementation', async () => {
     component = mountWithIntl(<HeatmapOptions {...props} showElasticChartsOptions={false} />);
     await act(async () => {
-      expect(findTestSubject(component, 'heatmapHighlightRange').prop('disabled')).toBeFalsy();
+      expect(
+        findTestSubject(component, 'heatmapHighlightRange').props()
+      ).not.toHaveEuiDisabledProp();
     });
   });
 
   it('disables the color scale dropdown for the elastic charts implementation', async () => {
     component = mountWithIntl(<HeatmapOptions {...props} />);
     await act(async () => {
-      expect(findTestSubject(component, 'heatmapColorScale').prop('disabled')).toBeTruthy();
+      expect(findTestSubject(component, 'heatmapColorScale').props()).toHaveEuiDisabledProp();
     });
   });
 
   it('enables the color scale dropdown for the vislib implementation', async () => {
     component = mountWithIntl(<HeatmapOptions {...props} showElasticChartsOptions={false} />);
     await act(async () => {
-      expect(findTestSubject(component, 'heatmapColorScale').prop('disabled')).toBeFalsy();
+      expect(findTestSubject(component, 'heatmapColorScale').props()).not.toHaveEuiDisabledProp();
     });
   });
 
@@ -163,14 +165,14 @@ describe('PalettePicker', function () {
   it('disables the labels rotate for the elastic charts implementation', async () => {
     component = mountWithIntl(<HeatmapOptions {...props} />);
     await act(async () => {
-      expect(findTestSubject(component, 'heatmapLabelsRotate').prop('disabled')).toBeTruthy();
+      expect(findTestSubject(component, 'heatmapLabelsRotate').props()).toHaveEuiDisabledProp();
     });
   });
 
   it('enables the labels rotate for the vislib implementation', async () => {
     component = mountWithIntl(<HeatmapOptions {...props} showElasticChartsOptions={false} />);
     await act(async () => {
-      expect(findTestSubject(component, 'heatmapLabelsRotate').prop('disabled')).toBeFalsy();
+      expect(findTestSubject(component, 'heatmapLabelsRotate').props()).not.toHaveEuiDisabledProp();
     });
   });
 
@@ -195,14 +197,14 @@ describe('PalettePicker', function () {
   it('disables the color picker for the elastic charts implementation', async () => {
     component = mountWithIntl(<HeatmapOptions {...props} />);
     await act(async () => {
-      expect(findTestSubject(component, 'heatmapLabelsColor').prop('disabled')).toBeTruthy();
+      expect(findTestSubject(component, 'heatmapLabelsColor').props()).toHaveEuiDisabledProp();
     });
   });
 
   it('enables the color picker for the vislib implementation', async () => {
     component = mountWithIntl(<HeatmapOptions {...props} showElasticChartsOptions={false} />);
     await act(async () => {
-      expect(findTestSubject(component, 'heatmapLabelsColor').prop('disabled')).toBeFalsy();
+      expect(findTestSubject(component, 'heatmapLabelsColor').props()).not.toHaveEuiDisabledProp();
     });
   });
 });

@@ -51,7 +51,7 @@ describe('ClosureOptionsRadio', () => {
       wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
     });
 
-    expect(newWrapper.find('input[id="close-by-user"]').prop('disabled')).toEqual(true);
+    expect(newWrapper.find('input[id="close-by-user"]').props()).toHaveEuiDisabledProp();
   });
 
   test('it disables correctly the close by pushing radio button', () => {
@@ -59,7 +59,7 @@ describe('ClosureOptionsRadio', () => {
       wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
     });
 
-    expect(newWrapper.find('input[id="close-by-pushing"]').prop('disabled')).toEqual(true);
+    expect(newWrapper.find('input[id="close-by-pushing"]').props()).toHaveEuiDisabledProp();
   });
 
   test('it selects the correct radio button', () => {

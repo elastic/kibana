@@ -117,11 +117,11 @@ describe('RuleCommonExpressions', () => {
     );
     expect(excludeHitsButton.exists()).toBeTruthy();
     expect(excludeHitsButton.first().prop('checked')).toBeTruthy();
-    expect(excludeHitsButton.first().prop('disabled')).toBe(false);
+    expect(excludeHitsButton.first().props()).not.toHaveEuiDisabledProp();
 
     const testQueryButton = wrapper.find('EuiButton[data-test-subj="testQuery"]');
     expect(testQueryButton.exists()).toBeTruthy();
-    expect(testQueryButton.prop('disabled')).toBe(false);
+    expect(testQueryButton.props()).not.toHaveEuiDisabledProp();
   });
 
   test(`should render RuleCommonExpressions with expected components when aggType does require field`, async () => {
@@ -141,7 +141,7 @@ describe('RuleCommonExpressions', () => {
 
     const testQueryButton = wrapper.find('EuiButton[data-test-subj="testQuery"]');
     expect(testQueryButton.exists()).toBeTruthy();
-    expect(testQueryButton.prop('disabled')).toBe(false);
+    expect(testQueryButton.props()).not.toHaveEuiDisabledProp();
   });
 
   test(`should set default rule common params when params are undefined`, async () => {
@@ -296,6 +296,6 @@ describe('RuleCommonExpressions', () => {
     const wrapper = await setup({ ruleParams: getCommonParams(), hasValidationErrors: true });
     const testQueryButton = wrapper.find('EuiButton[data-test-subj="testQuery"]');
     expect(testQueryButton.exists()).toBeTruthy();
-    expect(testQueryButton.prop('disabled')).toBe(true);
+    expect(testQueryButton.props()).toHaveEuiDisabledProp();
   });
 });

@@ -74,12 +74,16 @@ describe('OpenAlertsPopover', () => {
   describe('Dataview mode', () => {
     it('should render with the create search threshold rule button disabled if the data view has no time field', () => {
       const component = mount();
-      expect(findTestSubject(component, 'discoverCreateAlertButton').prop('disabled')).toBeTruthy();
+      expect(
+        findTestSubject(component, 'discoverCreateAlertButton').props()
+      ).toHaveEuiDisabledProp();
     });
 
     it('should render with the create search threshold rule button enabled if the data view has a time field', () => {
       const component = mount(dataViewWithTimefieldMock);
-      expect(findTestSubject(component, 'discoverCreateAlertButton').prop('disabled')).toBeFalsy();
+      expect(
+        findTestSubject(component, 'discoverCreateAlertButton').props()
+      ).not.toHaveEuiDisabledProp();
     });
 
     it('should render the manage rules and connectors link', () => {
@@ -91,17 +95,23 @@ describe('OpenAlertsPopover', () => {
   describe('ES|QL mode', () => {
     it('should render with the create search threshold rule button enabled if the data view has no timeFieldName but at least one time field', () => {
       const component = mount(dataViewMock, true);
-      expect(findTestSubject(component, 'discoverCreateAlertButton').prop('disabled')).toBeFalsy();
+      expect(
+        findTestSubject(component, 'discoverCreateAlertButton').props()
+      ).not.toHaveEuiDisabledProp();
     });
 
     it('should render with the create search threshold rule button enabled if the data view has a time field', () => {
       const component = mount(dataViewWithTimefieldMock, true);
-      expect(findTestSubject(component, 'discoverCreateAlertButton').prop('disabled')).toBeFalsy();
+      expect(
+        findTestSubject(component, 'discoverCreateAlertButton').props()
+      ).not.toHaveEuiDisabledProp();
     });
 
     it('should render with the create search threshold rule button disabled if the data view has no time fields at all', () => {
       const component = mount(dataViewWithNoTimefieldMock, true);
-      expect(findTestSubject(component, 'discoverCreateAlertButton').prop('disabled')).toBeTruthy();
+      expect(
+        findTestSubject(component, 'discoverCreateAlertButton').props()
+      ).toHaveEuiDisabledProp();
     });
 
     it('should render the manage rules and connectors link', () => {

@@ -264,7 +264,9 @@ describe('<EditRolePage />', () => {
 
       await waitForRender(wrapper);
 
-      expect(wrapper.find('input[data-test-subj="roleFormNameInput"]').prop('disabled')).toBe(true);
+      expect(
+        wrapper.find('input[data-test-subj="roleFormNameInput"]').props()
+      ).toHaveEuiDisabledProp();
       expectReadOnlyFormButtons(wrapper);
     });
 
@@ -290,7 +292,9 @@ describe('<EditRolePage />', () => {
       expect(wrapper.find('EuiIconTip[data-test-subj="reservedRoleBadgeTooltip"]')).toHaveLength(1);
       expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
       expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
-      expect(wrapper.find('input[data-test-subj="roleFormNameInput"]').prop('disabled')).toBe(true);
+      expect(
+        wrapper.find('input[data-test-subj="roleFormNameInput"]').props()
+      ).toHaveEuiDisabledProp();
       expect(wrapper.find('IndexPrivileges[indexType="indices"]')).toHaveLength(1);
       expect(wrapper.find('IndexPrivileges[indexType="remote_indices"]')).toHaveLength(1);
       expectReadOnlyFormButtons(wrapper);
@@ -318,7 +322,9 @@ describe('<EditRolePage />', () => {
       expect(wrapper.find('[data-test-subj="reservedRoleBadgeTooltip"]')).toHaveLength(0);
       expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
       expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
-      expect(wrapper.find('input[data-test-subj="roleFormNameInput"]').prop('disabled')).toBe(true);
+      expect(
+        wrapper.find('input[data-test-subj="roleFormNameInput"]').props()
+      ).toHaveEuiDisabledProp();
       expect(wrapper.find('IndexPrivileges[indexType="indices"]')).toHaveLength(1);
       expect(wrapper.find('IndexPrivileges[indexType="remote_indices"]')).toHaveLength(1);
       expectSaveFormButtons(wrapper);
@@ -484,7 +490,9 @@ describe('<EditRolePage />', () => {
 
       await waitForRender(wrapper);
 
-      expect(wrapper.find('input[data-test-subj="roleFormNameInput"]').prop('disabled')).toBe(true);
+      expect(
+        wrapper.find('input[data-test-subj="roleFormNameInput"]').props()
+      ).toHaveEuiDisabledProp();
       expectReadOnlyFormButtons(wrapper);
     });
 
@@ -511,7 +519,9 @@ describe('<EditRolePage />', () => {
       expect(wrapper.find('EuiIconTip[data-test-subj="reservedRoleBadgeTooltip"]')).toHaveLength(1);
       expect(wrapper.find(SimplePrivilegeSection)).toHaveLength(1);
       expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
-      expect(wrapper.find('input[data-test-subj="roleFormNameInput"]').prop('disabled')).toBe(true);
+      expect(
+        wrapper.find('input[data-test-subj="roleFormNameInput"]').props()
+      ).toHaveEuiDisabledProp();
       expect(wrapper.find('IndexPrivileges[indexType="indices"]')).toHaveLength(1);
       expect(wrapper.find('IndexPrivileges[indexType="remote_indices"]')).toHaveLength(1);
       expectReadOnlyFormButtons(wrapper);
@@ -540,7 +550,9 @@ describe('<EditRolePage />', () => {
       expect(wrapper.find('[data-test-subj="reservedRoleBadgeTooltip"]')).toHaveLength(0);
       expect(wrapper.find(SimplePrivilegeSection)).toHaveLength(1);
       expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
-      expect(wrapper.find('input[data-test-subj="roleFormNameInput"]').prop('disabled')).toBe(true);
+      expect(
+        wrapper.find('input[data-test-subj="roleFormNameInput"]').props()
+      ).toHaveEuiDisabledProp();
       expect(wrapper.find('IndexPrivileges[indexType="indices"]')).toHaveLength(1);
       expect(wrapper.find('IndexPrivileges[indexType="remote_indices"]')).toHaveLength(1);
       expectSaveFormButtons(wrapper);
@@ -805,7 +817,9 @@ describe('<EditRolePage />', () => {
     expect(wrapper.find('[data-test-subj="reservedRoleBadgeTooltip"]')).toHaveLength(0);
     expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
     expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
-    expect(wrapper.find('input[data-test-subj="roleFormNameInput"]').prop('disabled')).toBe(true);
+    expect(
+      wrapper.find('input[data-test-subj="roleFormNameInput"]').props()
+    ).toHaveEuiDisabledProp();
     expect(wrapper.find('ElasticsearchPrivileges').prop('buildFlavor')).toBe('serverless');
     expect(wrapper.find('IndexPrivileges[indexType="indices"]')).toHaveLength(1);
     expect(wrapper.find('IndexPrivileges[indexType="remote_indices"]')).toHaveLength(0);

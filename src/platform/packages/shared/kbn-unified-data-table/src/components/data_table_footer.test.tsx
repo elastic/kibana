@@ -170,7 +170,7 @@ describe('UnifiedDataTableFooter', function () {
 
     const button = findTestSubject(component, 'dscGridSampleSizeFetchMoreLink');
     expect(button.exists()).toBe(true);
-    expect(button.prop('disabled')).toBe(true);
+    expect(button.props()).toHaveEuiDisabledProp();
 
     button.simulate('click');
 

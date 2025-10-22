@@ -81,7 +81,7 @@ describe('Color Ranges', () => {
     ];
     const component = renderColorRanges({ ...props, paletteConfiguration: { maxSteps: 5 } });
 
-    expect(pageObjects.getAddColorRangeButton(component).prop('disabled')).toBe(true);
+    expect(pageObjects.getAddColorRangeButton(component).props()).toHaveEuiDisabledProp();
   });
 
   it('should add a new range with default color and reasonable distance from last one', () => {

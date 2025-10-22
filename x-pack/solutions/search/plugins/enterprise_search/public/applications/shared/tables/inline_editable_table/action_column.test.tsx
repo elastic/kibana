@@ -86,7 +86,7 @@ describe('ActionColumn', () => {
 
       it('which is disabled if data is loading', () => {
         const wrapper = shallow(<ActionColumn {...activelyEditingParams} isLoading />);
-        expect(subject(wrapper).prop('disabled')).toBe(true);
+        expect(subject(wrapper).props()).toHaveEuiDisabledProp();
       });
 
       it('which is disabled if there are field errors', () => {
@@ -96,7 +96,7 @@ describe('ActionColumn', () => {
         });
 
         const wrapper = shallow(<ActionColumn {...activelyEditingParams} />);
-        expect(subject(wrapper).prop('disabled')).toBe(true);
+        expect(subject(wrapper).props()).toHaveEuiDisabledProp();
       });
 
       it('which is disabled if there are row errors', () => {
@@ -106,7 +106,7 @@ describe('ActionColumn', () => {
         });
 
         const wrapper = shallow(<ActionColumn {...activelyEditingParams} />);
-        expect(subject(wrapper).prop('disabled')).toBe(true);
+        expect(subject(wrapper).props()).toHaveEuiDisabledProp();
       });
 
       it('which is disabled if the item value contains an empty property', () => {
@@ -116,7 +116,7 @@ describe('ActionColumn', () => {
         });
 
         const wrapper = shallow(<ActionColumn {...activelyEditingParams} />);
-        expect(subject(wrapper).prop('disabled')).toBe(true);
+        expect(subject(wrapper).props()).toHaveEuiDisabledProp();
       });
 
       it('which calls saveNewItem when clicked if the user is editing an unsaved item', () => {
@@ -147,7 +147,7 @@ describe('ActionColumn', () => {
 
       it('which is disabled if data is loading', () => {
         const wrapper = shallow(<ActionColumn {...activelyEditingParams} isLoading />);
-        expect(subject(wrapper).prop('disabled')).toBe(true);
+        expect(subject(wrapper).props()).toHaveEuiDisabledProp();
       });
 
       it('which calls doneEditing when clicked', () => {

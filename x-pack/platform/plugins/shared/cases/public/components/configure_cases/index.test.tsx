@@ -195,12 +195,12 @@ describe('ConfigureCases', () => {
     test('it renders with correct props', () => {
       // Connector
       expect(wrapper.find(Connectors).prop('connectors')).toEqual(connectors);
-      expect(wrapper.find(Connectors).prop('disabled')).toBe(false);
+      expect(wrapper.find(Connectors).props()).not.toHaveEuiDisabledProp();
       expect(wrapper.find(Connectors).prop('isLoading')).toBe(false);
       expect(wrapper.find(Connectors).prop('selectedConnector').id).toBe('servicenow-1');
 
       // ClosureOptions
-      expect(wrapper.find(ClosureOptions).prop('disabled')).toBe(false);
+      expect(wrapper.find(ClosureOptions).props()).not.toHaveEuiDisabledProp();
       expect(wrapper.find(ClosureOptions).prop('closureTypeSelected')).toBe('close-by-user');
 
       // Flyouts
@@ -282,7 +282,7 @@ describe('ConfigureCases', () => {
     });
 
     test('it disables correctly ClosureOptions when loading connectors', () => {
-      expect(wrapper.find(ClosureOptions).prop('disabled')).toBe(true);
+      expect(wrapper.find(ClosureOptions).props()).toHaveEuiDisabledProp();
     });
 
     test('it hides the update connector button when loading the connectors', () => {
@@ -341,7 +341,7 @@ describe('ConfigureCases', () => {
     });
 
     test('it disables correctly Connector when saving configuration', () => {
-      expect(wrapper.find(Connectors).prop('disabled')).toBe(true);
+      expect(wrapper.find(Connectors).props()).toHaveEuiDisabledProp();
     });
 
     test('it disables correctly ClosureOptions when saving configuration', () => {

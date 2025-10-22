@@ -67,8 +67,8 @@ describe('CategoryAxisPanel component', () => {
     const filterLabelOption = labelOptions.find({ paramName: 'filter' });
     const truncateLabelOption = labelOptions.find(TruncateLabelsOption);
 
-    expect(rotateLabelsOption.prop('disabled')).toBe(true);
-    expect(filterLabelOption.prop('disabled')).toBe(true);
-    expect(truncateLabelOption.prop('disabled')).toBe(true);
+    expect(rotateLabelsOption.props()).toHaveEuiDisabledProp();
+    expect(filterLabelOption.props()).toHaveEuiDisabledProp();
+    expect(truncateLabelOption.props()).toHaveEuiDisabledProp();
   });
 });

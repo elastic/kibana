@@ -41,7 +41,7 @@ describe('DeployModel', () => {
     );
     expect(wrapper.find(EuiButton).length).toBe(1);
     const button = wrapper.find(EuiButton);
-    expect(button.prop('disabled')).toBe(false);
+    expect(button.props()).not.toHaveEuiDisabledProp();
   });
   it('renders disabled deploy button if it is set to disabled', () => {
     const wrapper = shallow(
@@ -54,7 +54,7 @@ describe('DeployModel', () => {
     );
     expect(wrapper.find(EuiButton).length).toBe(1);
     const button = wrapper.find(EuiButton);
-    expect(button.prop('disabled')).toBe(true);
+    expect(button.props()).toHaveEuiDisabledProp();
   });
   it('renders dismiss button if it is set to dismissable', () => {
     const wrapper = shallow(

@@ -57,6 +57,6 @@ describe('DeleteInferencePipelineButton', () => {
 
     const btn = wrapper.find(EuiButtonEmpty);
     expect(btn).toHaveLength(1);
-    expect(btn.prop('disabled')).toBe(true);
+    expect(btn.props()).toHaveEuiDisabledProp();
   });
 });

@@ -132,7 +132,9 @@ describe('ResilientParamsFields renders', () => {
 
     const wrapper = mount(<ResilientParamsFields {...defaultProps} />);
 
-    expect(wrapper.find('[data-test-subj="severitySelect"]').first().prop('disabled')).toBeTruthy();
+    expect(
+      wrapper.find('[data-test-subj="severitySelect"]').first().props()
+    ).toHaveEuiDisabledProp();
   });
   test('If name has errors, form row is invalid', () => {
     const newProps = {

@@ -57,9 +57,9 @@ describe('ImportModeControl', () => {
   it('should disable the Overwrite switch when `createNewCopies` is enabled', async () => {
     const wrapper = mountWithIntl(<ImportModeControl {...props} />);
 
-    expect(getOverwriteRadio(wrapper).prop('disabled')).toBe(false);
+    expect(getOverwriteRadio(wrapper).props()).not.toHaveEuiDisabledProp();
     getCreateNewCopiesEnabled(wrapper).simulate('change');
-    expect(getOverwriteRadio(wrapper).prop('disabled')).toBe(true);
+    expect(getOverwriteRadio(wrapper).props()).toHaveEuiDisabledProp();
   });
 
   it('should allow the user to toggle `createNewCopies`', async () => {

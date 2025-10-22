@@ -759,7 +759,7 @@ describe('action_form', () => {
       );
 
       expect(actionOption.exists()).toBeTruthy();
-      expect(actionOption.at(1).prop('disabled')).toBe(false);
+      expect(actionOption.at(1).props()).not.toHaveEuiDisabledProp();
     });
 
     it('disables the system action type if it is already selected', async () => {
@@ -771,7 +771,7 @@ describe('action_form', () => {
         `[data-test-subj="${systemActionType.id}-alerting-ActionTypeSelectOption"]`
       );
 
-      expect(actionOption.at(1).prop('disabled')).toBe(true);
+      expect(actionOption.at(1).props()).toHaveEuiDisabledProp();
     });
   });
 });

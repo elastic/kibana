@@ -49,16 +49,16 @@ describe('TestQueryRow', () => {
     const component = mountWithIntl(
       <TestQueryRow fetch={onFetch} copyQuery={onCopyQuery} hasValidationErrors={true} />
     );
-    expect(findTestSubject(component, 'testQuery').prop('disabled')).toBe(true);
-    expect(findTestSubject(component, 'copyQuery').prop('disabled')).toBe(true);
+    expect(findTestSubject(component, 'testQuery').props()).toHaveEuiDisabledProp();
+    expect(findTestSubject(component, 'copyQuery').props()).toHaveEuiDisabledProp();
   });
 
   it('should not disable the test query and copy query buttons if hasValidationErrors is false', () => {
     const component = mountWithIntl(
       <TestQueryRow fetch={onFetch} copyQuery={onCopyQuery} hasValidationErrors={false} />
     );
-    expect(findTestSubject(component, 'testQuery').prop('disabled')).toBe(false);
-    expect(findTestSubject(component, 'copyQuery').prop('disabled')).toBe(false);
+    expect(findTestSubject(component, 'testQuery').props()).not.toHaveEuiDisabledProp();
+    expect(findTestSubject(component, 'copyQuery').props()).not.toHaveEuiDisabledProp();
   });
 
   it('should call the fetch callback when the test query button is clicked', async () => {

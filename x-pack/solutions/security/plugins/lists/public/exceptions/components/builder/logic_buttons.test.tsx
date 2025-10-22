@@ -136,7 +136,7 @@ describe('BuilderLogicButtons', () => {
 
     const andButton = wrapper.find('[data-test-subj="exceptionsAndButton"] button').at(0);
 
-    expect(andButton.prop('disabled')).toBeTruthy();
+    expect(andButton.props()).toHaveEuiDisabledProp();
   });
 
   test('it disables "or" button if "isOrDisabled" is "true"', () => {
@@ -156,7 +156,7 @@ describe('BuilderLogicButtons', () => {
 
     const orButton = wrapper.find('[data-test-subj="exceptionsOrButton"] button').at(0);
 
-    expect(orButton.prop('disabled')).toBeTruthy();
+    expect(orButton.props()).toHaveEuiDisabledProp();
   });
 
   test('it disables "add nested" button if "isNestedDisabled" is "true"', () => {
@@ -176,7 +176,7 @@ describe('BuilderLogicButtons', () => {
 
     const nestedButton = wrapper.find('[data-test-subj="exceptionsNestedButton"] button').at(0);
 
-    expect(nestedButton.prop('disabled')).toBeTruthy();
+    expect(nestedButton.props()).toHaveEuiDisabledProp();
   });
 
   test('it invokes "onNestedClicked" when "isNested" is "false" and "nested" button is clicked', () => {

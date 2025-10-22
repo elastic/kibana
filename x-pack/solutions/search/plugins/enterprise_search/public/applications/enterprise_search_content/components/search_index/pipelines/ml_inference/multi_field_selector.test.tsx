@@ -77,7 +77,7 @@ describe('MultiFieldMapping', () => {
 
     expect(wrapper.find(EuiButton)).toHaveLength(1);
     const button = wrapper.find(EuiButton);
-    expect(button.prop('disabled')).toBe(true);
+    expect(button.props()).toHaveEuiDisabledProp();
   });
   it('enables add mapping button if some fields are selected', () => {
     setMockValues({
@@ -91,7 +91,7 @@ describe('MultiFieldMapping', () => {
 
     expect(wrapper.find(EuiButton)).toHaveLength(1);
     const button = wrapper.find(EuiButton);
-    expect(button.prop('disabled')).toBe(false);
+    expect(button.props()).not.toHaveEuiDisabledProp();
   });
   it('disables target field text field if no source fields are selected', () => {
     setMockValues(DEFAULT_VALUES);
@@ -99,7 +99,7 @@ describe('MultiFieldMapping', () => {
 
     expect(wrapper.find(EuiFieldText)).toHaveLength(1);
     const textField = wrapper.find(EuiFieldText);
-    expect(textField.prop('disabled')).toBe(true);
+    expect(textField.props()).toHaveEuiDisabledProp();
   });
   it('disables target field text field if multiple source fields are selected', () => {
     setMockValues({
@@ -113,7 +113,7 @@ describe('MultiFieldMapping', () => {
 
     expect(wrapper.find(EuiFieldText)).toHaveLength(1);
     const textField = wrapper.find(EuiFieldText);
-    expect(textField.prop('disabled')).toBe(true);
+    expect(textField.props()).toHaveEuiDisabledProp();
   });
   it('disables target field text field if text expansion model is selected', () => {
     setMockValues({
@@ -124,7 +124,7 @@ describe('MultiFieldMapping', () => {
 
     expect(wrapper.find(EuiFieldText)).toHaveLength(1);
     const textField = wrapper.find(EuiFieldText);
-    expect(textField.prop('disabled')).toBe(true);
+    expect(textField.props()).toHaveEuiDisabledProp();
   });
   it('enables target field text field if a single source field is selected', () => {
     setMockValues({
@@ -138,7 +138,7 @@ describe('MultiFieldMapping', () => {
 
     expect(wrapper.find(EuiFieldText)).toHaveLength(1);
     const textField = wrapper.find(EuiFieldText);
-    expect(textField.prop('disabled')).toBe(false);
+    expect(textField.props()).not.toHaveEuiDisabledProp();
   });
 });
 

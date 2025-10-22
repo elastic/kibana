@@ -502,7 +502,9 @@ describe.skip('Sourcerer component', () => {
     );
     wrapper.find('[data-test-subj="sourcerer-trigger"]').first().simulate('click');
     wrapper.find('[data-test-subj="comboBoxClearButton"]').first().simulate('click');
-    expect(wrapper.find('[data-test-subj="sourcerer-save"]').first().prop('disabled')).toBeTruthy();
+    expect(
+      wrapper.find('[data-test-subj="sourcerer-save"]').first().props()
+    ).toHaveEuiDisabledProp();
   });
   it('Does display signals index on timeline sourcerer', async () => {
     /*

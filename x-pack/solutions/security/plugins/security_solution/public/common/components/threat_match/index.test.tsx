@@ -146,8 +146,8 @@ describe('ThreatMatchComponent', () => {
       </ThemeProvider>
     );
 
-    expect(wrapper.find('[data-test-subj="andButton"] button').prop('disabled')).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="orButton"] button').prop('disabled')).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="andButton"] button').props()).not.toHaveEuiDisabledProp();
+    expect(wrapper.find('[data-test-subj="orButton"] button').props()).not.toHaveEuiDisabledProp();
   });
 
   test('it adds an entry when "and" clicked', async () => {

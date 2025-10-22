@@ -219,7 +219,7 @@ describe('NotePreviews', () => {
       }
     );
 
-    expect(wrapper.find('[data-test-subj="delete-note"] button').prop('disabled')).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="delete-note"] button').props()).toHaveEuiDisabledProp();
   });
 
   test('it should enable the delete button if the savedObjectId exists', () => {
@@ -244,7 +244,9 @@ describe('NotePreviews', () => {
       }
     );
 
-    expect(wrapper.find('[data-test-subj="delete-note"] button').prop('disabled')).toBeFalsy();
+    expect(
+      wrapper.find('[data-test-subj="delete-note"] button').props()
+    ).not.toHaveEuiDisabledProp();
   });
 
   test('should render toggle event details action by default', () => {

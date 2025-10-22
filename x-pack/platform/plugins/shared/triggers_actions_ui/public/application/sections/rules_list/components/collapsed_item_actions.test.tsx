@@ -222,11 +222,15 @@ describe('CollapsedItemActions', () => {
         wrapper.update();
       });
 
-      expect(wrapper.find(`[data-test-subj="disableButton"] button`).prop('disabled')).toBeFalsy();
+      expect(
+        wrapper.find(`[data-test-subj="disableButton"] button`).props()
+      ).not.toHaveEuiDisabledProp();
       expect(wrapper.find(`[data-test-subj="disableButton"] button`).text()).toEqual('Disable');
-      expect(wrapper.find(`[data-test-subj="editRule"] button`).prop('disabled')).toBeTruthy();
+      expect(wrapper.find(`[data-test-subj="editRule"] button`).props()).toHaveEuiDisabledProp();
       expect(wrapper.find(`[data-test-subj="editRule"] button`).text()).toEqual('Edit rule');
-      expect(wrapper.find(`[data-test-subj="deleteRule"] button`).prop('disabled')).toBeFalsy();
+      expect(
+        wrapper.find(`[data-test-subj="deleteRule"] button`).props()
+      ).not.toHaveEuiDisabledProp();
       expect(wrapper.find(`[data-test-subj="deleteRule"] button`).text()).toEqual('Delete rule');
     });
   });
@@ -288,12 +292,18 @@ describe('CollapsedItemActions', () => {
         wrapper.find('[data-test-subj="selectActionButton"]').first().props().disabled
       ).toBeFalsy();
 
-      expect(wrapper.find(`[data-test-subj="disableButton"] button`).prop('disabled')).toBeFalsy();
+      expect(
+        wrapper.find(`[data-test-subj="disableButton"] button`).props()
+      ).not.toHaveEuiDisabledProp();
       expect(wrapper.find(`[data-test-subj="disableButton"] button`).text()).toEqual('Disable');
       expect(wrapper.find(`[data-test-subj="snoozeButton"] button`).text()).toEqual('Snooze');
-      expect(wrapper.find(`[data-test-subj="editRule"] button`).prop('disabled')).toBeFalsy();
+      expect(
+        wrapper.find(`[data-test-subj="editRule"] button`).props()
+      ).not.toHaveEuiDisabledProp();
       expect(wrapper.find(`[data-test-subj="editRule"] button`).text()).toEqual('Edit rule');
-      expect(wrapper.find(`[data-test-subj="deleteRule"] button`).prop('disabled')).toBeFalsy();
+      expect(
+        wrapper.find(`[data-test-subj="deleteRule"] button`).props()
+      ).not.toHaveEuiDisabledProp();
       expect(wrapper.find(`[data-test-subj="deleteRule"] button`).text()).toEqual('Delete rule');
       expect(wrapper.find(`[data-test-subj="updateApiKey"] button`).text()).toEqual(
         'Update API key'
@@ -399,11 +409,17 @@ describe('CollapsedItemActions', () => {
       });
 
       expect(wrapper.find(`[data-test-subj="snoozeButton"] button`).exists()).toBeFalsy();
-      expect(wrapper.find(`[data-test-subj="disableButton"] button`).prop('disabled')).toBeFalsy();
+      expect(
+        wrapper.find(`[data-test-subj="disableButton"] button`).props()
+      ).not.toHaveEuiDisabledProp();
       expect(wrapper.find(`[data-test-subj="disableButton"] button`).text()).toEqual('Enable');
-      expect(wrapper.find(`[data-test-subj="editRule"] button`).prop('disabled')).toBeFalsy();
+      expect(
+        wrapper.find(`[data-test-subj="editRule"] button`).props()
+      ).not.toHaveEuiDisabledProp();
       expect(wrapper.find(`[data-test-subj="editRule"] button`).text()).toEqual('Edit rule');
-      expect(wrapper.find(`[data-test-subj="deleteRule"] button`).prop('disabled')).toBeFalsy();
+      expect(
+        wrapper.find(`[data-test-subj="deleteRule"] button`).props()
+      ).not.toHaveEuiDisabledProp();
       expect(wrapper.find(`[data-test-subj="deleteRule"] button`).text()).toEqual('Delete rule');
     });
 
@@ -417,12 +433,20 @@ describe('CollapsedItemActions', () => {
         wrapper.update();
       });
 
-      expect(wrapper.find(`[data-test-subj="snoozeButton"] button`).prop('disabled')).toBeTruthy();
-      expect(wrapper.find(`[data-test-subj="disableButton"] button`).prop('disabled')).toBeTruthy();
+      expect(
+        wrapper.find(`[data-test-subj="snoozeButton"] button`).props()
+      ).toHaveEuiDisabledProp();
+      expect(
+        wrapper.find(`[data-test-subj="disableButton"] button`).props()
+      ).toHaveEuiDisabledProp();
       expect(wrapper.find(`[data-test-subj="disableButton"] button`).text()).toEqual('Disable');
-      expect(wrapper.find(`[data-test-subj="editRule"] button`).prop('disabled')).toBeFalsy();
+      expect(
+        wrapper.find(`[data-test-subj="editRule"] button`).props()
+      ).not.toHaveEuiDisabledProp();
       expect(wrapper.find(`[data-test-subj="editRule"] button`).text()).toEqual('Edit rule');
-      expect(wrapper.find(`[data-test-subj="deleteRule"] button`).prop('disabled')).toBeFalsy();
+      expect(
+        wrapper.find(`[data-test-subj="deleteRule"] button`).props()
+      ).not.toHaveEuiDisabledProp();
       expect(wrapper.find(`[data-test-subj="deleteRule"] button`).text()).toEqual('Delete rule');
     });
 
@@ -439,11 +463,17 @@ describe('CollapsedItemActions', () => {
       expect(wrapper.find('[data-test-subj="snoozeButton"] button').text()).toEqual(
         'Snoozed indefinitely'
       );
-      expect(wrapper.find(`[data-test-subj="disableButton"] button`).prop('disabled')).toBeFalsy();
+      expect(
+        wrapper.find(`[data-test-subj="disableButton"] button`).props()
+      ).not.toHaveEuiDisabledProp();
       expect(wrapper.find(`[data-test-subj="disableButton"] button`).text()).toEqual('Disable');
-      expect(wrapper.find(`[data-test-subj="editRule"] button`).prop('disabled')).toBeFalsy();
+      expect(
+        wrapper.find(`[data-test-subj="editRule"] button`).props()
+      ).not.toHaveEuiDisabledProp();
       expect(wrapper.find(`[data-test-subj="editRule"] button`).text()).toEqual('Edit rule');
-      expect(wrapper.find(`[data-test-subj="deleteRule"] button`).prop('disabled')).toBeFalsy();
+      expect(
+        wrapper.find(`[data-test-subj="deleteRule"] button`).props()
+      ).not.toHaveEuiDisabledProp();
       expect(wrapper.find(`[data-test-subj="deleteRule"] button`).text()).toEqual('Delete rule');
     });
 
@@ -484,7 +514,7 @@ describe('CollapsedItemActions', () => {
         />
       );
       wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
-      expect(wrapper.find(`[data-test-subj="cloneRule"] button`).prop('disabled')).toBeTruthy();
+      expect(wrapper.find(`[data-test-subj="cloneRule"] button`).props()).toHaveEuiDisabledProp();
     });
 
     test('handles case when clone rule is clicked', async () => {

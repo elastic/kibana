@@ -114,7 +114,7 @@ describe('SyncsContextMenu', () => {
 
     const lastButton = menuItems.last();
 
-    expect(lastButton.prop('disabled')).toEqual(false);
+    expect(lastButton.props()).not.toHaveEuiDisabledProp();
     expect(lastButton.text()).toEqual('Cancel Syncs');
 
     menuItems.last().simulate('click');
@@ -192,6 +192,6 @@ describe('SyncsContextMenu', () => {
     const button = wrapper.find(
       'button[data-telemetry-id="entSearchContent-connector-header-sync-openSyncMenu"]'
     );
-    expect(button.prop('disabled')).toEqual(true);
+    expect(button.props()).toHaveEuiDisabledProp();
   });
 });

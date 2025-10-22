@@ -52,9 +52,9 @@ describe('CopyModeControl', () => {
   it('should enable the Overwrite switch when `createNewCopies` is disabled', async () => {
     const wrapper = mountWithIntl(<CopyModeControl {...props} />);
 
-    expect(getOverwriteRadio(wrapper).prop('disabled')).toBe(true);
+    expect(getOverwriteRadio(wrapper).props()).toHaveEuiDisabledProp();
     getCreateNewCopiesDisabled(wrapper).simulate('change');
-    expect(getOverwriteRadio(wrapper).prop('disabled')).toBe(false);
+    expect(getOverwriteRadio(wrapper).props()).not.toHaveEuiDisabledProp();
   });
 
   it('should allow the user to toggle `createNewCopies`', async () => {

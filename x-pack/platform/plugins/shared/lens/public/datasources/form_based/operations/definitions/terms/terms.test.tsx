@@ -1977,7 +1977,7 @@ describe('terms', () => {
         .find('[data-test-subj="indexPattern-terms-missing-bucket"]')
         .find(EuiSwitch);
 
-      expect(select.prop('disabled')).toEqual(true);
+      expect(select.props()).toHaveEuiDisabledProp();
     });
 
     it('should enable missing bucket setting as long as other bucket is set', () => {
@@ -2004,7 +2004,7 @@ describe('terms', () => {
         .find('[data-test-subj="indexPattern-terms-missing-bucket"]')
         .find(EuiSwitch);
 
-      expect(select.prop('disabled')).toEqual(false);
+      expect(select.props()).not.toHaveEuiDisabledProp();
     });
 
     it('should disable missing bucket and other bucket setting for rarity sorting', () => {
@@ -2029,13 +2029,13 @@ describe('terms', () => {
         .find('[data-test-subj="indexPattern-terms-missing-bucket"]')
         .find(EuiSwitch);
 
-      expect(select1.prop('disabled')).toEqual(true);
+      expect(select1.props()).toHaveEuiDisabledProp();
 
       const select2 = instance
         .find('[data-test-subj="indexPattern-terms-other-bucket"]')
         .find(EuiSwitch);
 
-      expect(select2.prop('disabled')).toEqual(true);
+      expect(select2.props()).toHaveEuiDisabledProp();
     });
 
     it('should disable missing bucket and other bucket setting when ordered by significance', () => {
@@ -2060,13 +2060,13 @@ describe('terms', () => {
         .find('[data-test-subj="indexPattern-terms-missing-bucket"]')
         .find(EuiSwitch);
 
-      expect(select1.prop('disabled')).toEqual(true);
+      expect(select1.props()).toHaveEuiDisabledProp();
 
       const select2 = instance
         .find('[data-test-subj="indexPattern-terms-other-bucket"]')
         .find(EuiSwitch);
 
-      expect(select2.prop('disabled')).toEqual(true);
+      expect(select2.props()).toHaveEuiDisabledProp();
     });
 
     describe('accuracy mode', () => {
@@ -2098,22 +2098,22 @@ describe('terms', () => {
       it('should be checked when enabled and not rare terms', () => {
         const switchComponent = getSwitchComponent(true, false);
         expect(switchComponent.prop('checked')).toEqual(true);
-        expect(switchComponent.prop('disabled')).toEqual(false);
+        expect(switchComponent.props()).not.toHaveEuiDisabledProp();
       });
 
       it('should NOT be checked when NOT enabled and not rare terms', () => {
         const switchComponent = getSwitchComponent(false, false);
         expect(switchComponent.prop('checked')).toEqual(false);
-        expect(switchComponent.prop('disabled')).toEqual(false);
+        expect(switchComponent.props()).not.toHaveEuiDisabledProp();
       });
 
       it('should always be unchecked and disabled when rare terms', () => {
         const switchWithAccuracyEnabled = getSwitchComponent(true, true);
-        expect(switchWithAccuracyEnabled.prop('disabled')).toEqual(true);
+        expect(switchWithAccuracyEnabled.props()).toHaveEuiDisabledProp();
         expect(switchWithAccuracyEnabled.prop('checked')).toEqual(false);
 
         const switchWithAccuracyDisabled = getSwitchComponent(false, true);
-        expect(switchWithAccuracyDisabled.prop('disabled')).toEqual(true);
+        expect(switchWithAccuracyDisabled.props()).toHaveEuiDisabledProp();
         expect(switchWithAccuracyDisabled.prop('checked')).toEqual(false);
       });
     });
@@ -2187,8 +2187,8 @@ describe('terms', () => {
 
       expect(numberInputs).toHaveLength(2);
 
-      expect(numberInputs.first().prop('disabled')).toBeTruthy();
-      expect(numberInputs.last().prop('disabled')).toBeFalsy();
+      expect(numberInputs.first().props()).toHaveEuiDisabledProp();
+      expect(numberInputs.last().props()).not.toHaveEuiDisabledProp();
       expect(numberInputs.last().prop('value')).toEqual(3);
     });
 
@@ -2217,7 +2217,7 @@ describe('terms', () => {
         .find('[data-test-subj="indexPattern-terms-missing-bucket"]')
         .find(EuiSwitch);
 
-      expect(select.prop('disabled')).toEqual(true);
+      expect(select.props()).toHaveEuiDisabledProp();
     });
 
     it('should update state when clicking other bucket toggle', () => {
