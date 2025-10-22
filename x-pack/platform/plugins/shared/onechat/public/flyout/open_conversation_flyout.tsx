@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { ConversationFlyout } from './conversation_flyout';
 import type { OpenConversationFlyoutOptions } from './types';
 import type { OnechatInternalService } from '../services';
 import type { OnechatStartDependencies, ConversationFlyoutRef } from '../types';
 import { OnechatServicesContext } from '../application/context/onechat_services_context';
-import { createEmbeddableConversation } from '../embeddable/create_embeddable_conversation';
 
 interface OpenConversationFlyoutParams {
   coreStart: CoreStart;
@@ -41,20 +41,30 @@ export function openConversationFlyout(
     plugins: startDependencies,
   };
 
-  const ConversationComponent = createEmbeddableConversation({
-    services,
-    coreStart,
+  const LazyConversationComponent = lazy(async () => {
+    const { createEmbeddableConversation } = await import(
+      '../embeddable/create_embeddable_conversation'
+    );
+    const ConversationComponent = createEmbeddableConversation({
+      services,
+      coreStart,
+    });
+    return {
+      default: ConversationComponent,
+    };
   });
 
   const flyoutRef = overlays.openFlyout(
     toMountPoint(
       <KibanaContextProvider services={kibanaServices}>
         <OnechatServicesContext.Provider value={services}>
-          <ConversationFlyout
-            {...options}
-            onClose={() => flyoutRef.close()}
-            ConversationComponent={ConversationComponent}
-          />
+          <Suspense fallback={<EuiLoadingSpinner size="l" />}>
+            <ConversationFlyout
+              {...options}
+              onClose={() => flyoutRef.close()}
+              ConversationComponent={LazyConversationComponent}
+            />
+          </Suspense>
         </OnechatServicesContext.Provider>
       </KibanaContextProvider>,
       startServices
