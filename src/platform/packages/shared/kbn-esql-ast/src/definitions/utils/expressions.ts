@@ -206,6 +206,32 @@ export function getMatchingSignatures(
 }
 
 /**
+ * Returns all signatures matching the given types
+ * As difference with getMatchingSignatures, it returns all signatures that
+ * STARTS with the given parameters.
+ * @param definition
+ * @param types
+ */
+export function getPartiallyMatchingSignatures(
+  signatures: Signature[],
+  givenTypes: Array<SupportedDataType | 'unknown'>,
+  // a boolean array indicating which args are literals
+  literalMask: boolean[],
+  acceptUnknown: boolean
+): Signature[] {
+  return signatures.filter((sig) => {
+    return givenTypes.every((givenType, index) => {
+      const param = getParamAtPosition(sig, index);
+      if (!param) {
+        return false;
+      }
+      const expectedType = unwrapArrayOneLevel(param.type);
+      return argMatchesParamType(givenType, expectedType, literalMask[index], acceptUnknown);
+    });
+  });
+}
+
+/**
  * Checks if the given type matches the expected parameter type
  *
  * @param givenType

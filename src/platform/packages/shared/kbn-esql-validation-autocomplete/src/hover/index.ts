@@ -255,7 +255,6 @@ ${formattedSignature}
 \`\`\``,
       },
       { value: fnDefinition.description },
-      { value: `[Open documentation](command:esql.control.functions.create)`, isTrusted: true },
     ];
   } else {
     return [];

@@ -30,7 +30,11 @@ import { getSafeInsertText, getControlSuggestion } from './autocomplete/helpers'
 import type { ESQLAstItem, ESQLFunction } from '../../types';
 import { removeFinalUnknownIdentiferArg } from './shared';
 import { getTestFunctions } from './test_functions';
-import { getExpressionType, getMatchingSignatures } from './expressions';
+import {
+  getExpressionType,
+  getMatchingSignatures,
+  getPartiallyMatchingSignatures,
+} from './expressions';
 import { isLiteral } from '../../ast/is';
 
 const techPreviewLabel = i18n.translate('kbn-esql-ast.esql.autocomplete.techPreviewLabel', {
@@ -465,7 +469,7 @@ export function getFormattedFunctionSignature(
     const argTypes = fnNode.args.map((arg) => getExpressionType(arg, columns));
     const literalMask = fnNode.args.map((arg) => isLiteral(arg));
 
-    const matchingSignatures = getMatchingSignatures(
+    const matchingSignatures = getPartiallyMatchingSignatures(
       functionDef.signatures,
       argTypes,
       literalMask,
