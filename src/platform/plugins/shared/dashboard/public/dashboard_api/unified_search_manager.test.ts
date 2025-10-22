@@ -20,7 +20,7 @@ describe('initializeUnifiedSearchManager', () => {
       const unifiedSearchManager = initializeUnifiedSearchManager(
         lastSavedState$.value,
         new BehaviorSubject<ControlGroupApi | undefined>(undefined),
-        new BehaviorSubject<boolean>(false),
+        new BehaviorSubject<boolean | undefined>(false),
         new Subject<void>(),
         () => lastSavedState$.value,
         {
@@ -39,7 +39,7 @@ describe('initializeUnifiedSearchManager', () => {
         const unifiedSearchManager = initializeUnifiedSearchManager(
           lastSavedState$.value,
           new BehaviorSubject<ControlGroupApi | undefined>(undefined),
-          new BehaviorSubject<boolean>(false),
+          new BehaviorSubject<boolean | undefined>(false),
           new Subject<void>(),
           () => lastSavedState$.value,
           {
@@ -65,7 +65,7 @@ describe('initializeUnifiedSearchManager', () => {
         const unifiedSearchManager = initializeUnifiedSearchManager(
           lastSavedState$.value,
           new BehaviorSubject<ControlGroupApi | undefined>(undefined),
-          new BehaviorSubject<boolean>(true),
+          new BehaviorSubject<boolean | undefined>(true),
           new Subject<void>(),
           () => lastSavedState$.value,
           {
@@ -92,7 +92,7 @@ describe('initializeUnifiedSearchManager', () => {
 
       test('Should not return timeRanage change when timeRestore resets to false', async () => {
         const lastSavedState$ = new BehaviorSubject<DashboardState>(getSampleDashboardState());
-        const timeRestore$ = new BehaviorSubject<boolean>(false);
+        const timeRestore$ = new BehaviorSubject<boolean | undefined>(false);
         const unifiedSearchManager = initializeUnifiedSearchManager(
           lastSavedState$.value,
           new BehaviorSubject<ControlGroupApi | undefined>(undefined),
