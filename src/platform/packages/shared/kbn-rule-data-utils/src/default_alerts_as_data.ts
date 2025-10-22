@@ -139,6 +139,7 @@ const ALERT_RULE_EXECUTION_TYPE = `${ALERT_RULE_NAMESPACE}.execution.type` as co
 
 // kibana.alert.index_pattern - index pattern for the alert
 const ALERT_INDEX_PATTERN = `${ALERT_NAMESPACE}.index_pattern` as const;
+const ALERT_ATTACK_IDS = `${ALERT_NAMESPACE}.attack_ids` as const;
 
 const namespaces = {
   KIBANA_NAMESPACE,
@@ -186,6 +187,7 @@ export const fields = {
   ALERT_WORKFLOW_ASSIGNEE_IDS,
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_TAGS,
+  ALERT_ATTACK_IDS,
   SPACE_IDS,
   TIMESTAMP,
   VERSION,
@@ -240,6 +242,7 @@ export {
   SPACE_IDS,
   TIMESTAMP,
   VERSION,
+  ALERT_ATTACK_IDS,
 };
 
 export type DefaultAlertFieldName = ValuesType<typeof fields & typeof namespaces>;

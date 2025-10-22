@@ -7,6 +7,7 @@
 
 import { alertsFieldMap8180 } from '../8.18.0';
 import {
+  ALERT_ATTACK_IDS,
   ALERT_ORIGINAL_DATA_STREAM_DATASET,
   ALERT_ORIGINAL_DATA_STREAM_NAMESPACE,
   ALERT_ORIGINAL_DATA_STREAM_TYPE,
@@ -33,6 +34,11 @@ export const alertsFieldMap8190 = {
   [ALERT_ORIGINAL_DATA_STREAM_TYPE]: {
     type: 'keyword',
     array: false,
+    required: false,
+  },
+  [ALERT_ATTACK_IDS]: {
+    type: 'keyword',
+    array: true,
     required: false,
   },
 } as const;

@@ -139,6 +139,30 @@ export const generateAndUpdateAttackDiscoveries = async ({
       createAttackDiscoveryAlertsParams,
     });
 
+    for (const attack of storedAttackDiscoveries) {
+      await esClient.updateByQuery({
+        index: '.alerts-security.alerts-default',
+        query: {
+          ids: {
+            values: attack.alert_ids,
+          },
+        },
+        script: {
+          source: `
+            if (ctx._source.attack_ids == null) {
+              ctx._source.attack_ids = [params.attack_id];
+            } else if (!ctx._source.attack_ids.contains(params.attack_id)) {
+              ctx._source.attack_ids.add(params.attack_id);
+            }
+          `,
+          lang: 'painless',
+          params: {
+            attack_id: attack.id,
+          },
+        },
+      });
+    }
+
     return {
       anonymizedAlerts,
       attackDiscoveries: storedAttackDiscoveries,
