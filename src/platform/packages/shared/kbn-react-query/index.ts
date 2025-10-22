@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable @kbn/eslint/module_migration */
 import type { QueryClientConfig } from '@tanstack/react-query';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { QueryClient as TanstackQueryClient } from '@tanstack/query-core';
