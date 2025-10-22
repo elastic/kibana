@@ -10,6 +10,7 @@
 import { ExecutionStatus } from '@kbn/workflows';
 import { FakeConnectors } from '../mocks/actions_plugin_mock';
 import { WorkflowRunFixture } from '../workflow_run_fixture';
+import type { JsonObject } from '@kbn/utility-types';
 
 describe('workflow with if condition', () => {
   let workflowRunFixture: WorkflowRunFixture;
@@ -79,7 +80,7 @@ steps:
       ).filter((se) => se.stepId === 'thenStep');
       expect(thenStepExecutions.length).toBe(1);
       expect(thenStepExecutions[0].status).toBe(ExecutionStatus.COMPLETED);
-      expect(thenStepExecutions[0].input?.message).toBe('Condition was true!');
+      expect((thenStepExecutions[0].input as JsonObject).message).toBe('Condition was true!');
     });
 
     it('should not execute elseStep when condition is true', async () => {
@@ -185,7 +186,7 @@ steps:
       ).filter((se) => se.stepId === 'elseStep');
       expect(elseStepExecutions.length).toBe(1);
       expect(elseStepExecutions[0].status).toBe(ExecutionStatus.COMPLETED);
-      expect(elseStepExecutions[0].input?.message).toBe('Condition was false!');
+      expect((elseStepExecutions[0].input as JsonObject).message).toBe('Condition was false!');
     });
 
     it('should execute finalStep after conditional branch', async () => {
