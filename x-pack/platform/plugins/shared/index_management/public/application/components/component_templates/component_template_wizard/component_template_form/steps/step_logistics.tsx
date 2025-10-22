@@ -17,18 +17,18 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import type { Forms } from '../../../shared_imports';
 import {
   useForm,
   Form,
   getUseField,
   getFormRow,
   Field,
-  Forms,
   NumericField,
   JsonEditorField,
   useFormData,
 } from '../../../shared_imports';
-import { DataRetention } from '../../../../../../../common';
+import type { DataRetention } from '../../../../../../../common';
 import { UnitField, timeUnits } from '../../../../shared';
 import { useComponentTemplatesContext } from '../../../component_templates_context';
 import { logisticsFormSchema } from './step_logistics_schema';

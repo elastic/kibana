@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticAgentVersionInfo } from '../../../../common/types';
+import type { ElasticAgentVersionInfo } from '../../../../common/types';
 
 interface Params {
   encodedApiKey: string;

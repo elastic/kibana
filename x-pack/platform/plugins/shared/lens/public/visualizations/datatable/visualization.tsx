@@ -7,14 +7,13 @@
 
 import React from 'react';
 
-import { Ast } from '@kbn/interpreter';
+import type { Ast } from '@kbn/interpreter';
 import { i18n } from '@kbn/i18n';
-import { ThemeServiceStart } from '@kbn/core/public';
+import type { ThemeServiceStart } from '@kbn/core/public';
+import type { PaletteRegistry, PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import {
-  PaletteRegistry,
   CUSTOM_PALETTE,
-  PaletteOutput,
-  CustomPaletteParams,
+  DEFAULT_COLOR_MAPPING_CONFIG,
   applyPaletteParams,
   getOverridePaletteStops,
 } from '@kbn/coloring';
@@ -64,6 +63,8 @@ import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_te
 import { DatatableInspectorTables } from '../../../common/expressions/defs/datatable/datatable';
 import { getSimpleColumnType } from './components/table_actions';
 import { convertToRuntimeState } from './runtime_state';
+import { FlyoutToolbar } from '../../shared_components/flyout_toolbar';
+import { DatatableAppearanceSettings } from './components/toolbar/appearance_settings';
 
 export interface DatatableVisualizationState {
   columns: ColumnState[];
@@ -156,12 +157,25 @@ export const getDatatableVisualization = ({
 
     const hasTransposedColumn = state.columns.some(({ isTransposed }) => isTransposed);
     const columns = state.columns.map((column) => {
-      const accessor = column.columnId;
+      const newColumn = { ...column };
+      const accessor = newColumn.columnId;
       const { isNumeric, isCategory: isBucketable } = getAccessorType(datasource, accessor);
-      if (column.palette && (isNumeric || isBucketable)) {
+
+      if (newColumn.palette && (isNumeric || isBucketable)) {
         const showColorByTerms = isBucketable;
+
+        if (!showColorByTerms && newColumn.colorMapping) {
+          // switched from terms to values
+          delete newColumn.colorMapping;
+        }
+
+        if (showColorByTerms && !newColumn.colorMapping) {
+          // switched from values to terms
+          newColumn.colorMapping = DEFAULT_COLOR_MAPPING_CONFIG;
+        }
+
         const currentData = frame?.activeData?.[state.layerId];
-        const palette = paletteMap.get(column.palette?.name ?? '');
+        const palette = paletteMap.get(newColumn.palette?.name ?? '');
         const columnsToCheck = hasTransposedColumn
           ? currentData?.columns
               .filter(({ id }) => getOriginalId(id) === accessor)
@@ -175,7 +189,7 @@ export const getDatatableVisualization = ({
             name: defaultPaletteParams.name,
           };
           return {
-            ...column,
+            ...newColumn,
             palette: {
               ...newPalette,
               params: {
@@ -186,7 +200,7 @@ export const getDatatableVisualization = ({
         }
       }
 
-      return column;
+      return newColumn;
     });
 
     return {
@@ -696,6 +710,10 @@ export const getDatatableVisualization = ({
 
   ToolbarComponent(props) {
     return <DataTableToolbar {...props} />;
+  },
+
+  FlyoutToolbarComponent(props) {
+    return <FlyoutToolbar {...props} contentMap={{ style: DatatableAppearanceSettings }} />;
   },
 
   onEditAction(state, event) {

@@ -24,6 +24,7 @@ import { TransactionTabs } from './transaction_tabs';
 import type { Environment } from '../../../../../common/environment_rt';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import type { WaterfallFetchResult } from '../use_waterfall_fetcher';
+import { OpenInDiscoverButton } from '../../../shared/links/discover_links/open_in_discover_button';
 
 interface Props<TSample extends {}> {
   waterfallFetchResult: WaterfallFetchResult['waterfall'];
@@ -127,14 +128,17 @@ export function WaterfallWithSummary<TSample extends {}>({
                 activePage={samplePageIndex}
                 onPageClick={goToSample}
                 compressed
+                aria-label={i18n.translate(
+                  'xpack.apm.transactionDetails.traceSamplePaginationLabel',
+                  {
+                    defaultMessage: 'Trace sample pages',
+                  }
+                )}
               />
             )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup justifyContent="flexEnd">
-              <EuiFlexItem grow={false}>
-                <TransactionActionMenu isLoading={isLoading} transaction={entryTransaction} />
-              </EuiFlexItem>
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="m">
               <EuiFlexItem grow={false}>
                 <MaybeViewTraceLink
                   isLoading={isLoading}
@@ -142,6 +146,12 @@ export function WaterfallWithSummary<TSample extends {}>({
                   waterfall={waterfallFetchResult}
                   environment={environment}
                 />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <OpenInDiscoverButton dataTestSubj="apmWaterfallOpenInDiscoverButton" />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <TransactionActionMenu isLoading={isLoading} transaction={entryTransaction} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

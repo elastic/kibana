@@ -9,62 +9,47 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexItem, EuiIcon, useEuiTheme, EuiLink, EuiToolTip, EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexItem, useEuiTheme, EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FEEDBACK_LINK } from '@kbn/esql-utils';
 
 export function SubmitFeedbackComponent({ isSpaceReduced }: { isSpaceReduced?: boolean }) {
   const { euiTheme } = useEuiTheme();
+  const feedbackLabel = i18n.translate('esqlEditor.query.feedback', {
+    defaultMessage: 'Feedback',
+  });
   return (
     <>
       {isSpaceReduced && (
         <EuiFlexItem grow={false}>
-          <EuiLink
-            href={FEEDBACK_LINK}
-            external={false}
-            target="_blank"
-            data-test-subj="ESQLEditor-feedback-link"
-          >
-            <EuiToolTip
-              position="top"
-              content={i18n.translate('esqlEditor.query.feedback', {
-                defaultMessage: 'Feedback',
-              })}
-            >
-              <EuiIcon
-                type="editorComment"
-                color="primary"
-                size="m"
-                css={css`
-                  margin-right: ${euiTheme.size.s};
-                `}
-              />
-            </EuiToolTip>
-          </EuiLink>
+          <EuiToolTip position="top" content={feedbackLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              href={FEEDBACK_LINK}
+              iconType="editorComment"
+              target="_blank"
+              data-test-subj="ESQLEditor-feedback-link"
+              aria-label={feedbackLabel}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       )}
       {!isSpaceReduced && (
-        <EuiLink
+        <EuiButtonEmpty
+          size="xs"
+          color="primary"
+          flush="both"
           href={FEEDBACK_LINK}
-          external={false}
           target="_blank"
           css={css`
-            font-size: 12px;
             margin-right: ${euiTheme.size.m};
           `}
+          iconType="editorComment"
           data-test-subj="ESQLEditor-feedback-link"
         >
-          <EuiFlexGroup gutterSize="s" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="editorComment" color="primary" size="s" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {i18n.translate('esqlEditor.query.submitFeedback', {
-                defaultMessage: 'Submit feedback',
-              })}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiLink>
+          {i18n.translate('esqlEditor.query.submitFeedback', {
+            defaultMessage: 'Submit feedback',
+          })}
+        </EuiButtonEmpty>
       )}
     </>
   );

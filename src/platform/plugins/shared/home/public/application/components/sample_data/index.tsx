@@ -14,7 +14,8 @@
  */
 
 import React from 'react';
-import { EuiCard, EuiButton, EuiButtonEmpty, UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiCard, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';

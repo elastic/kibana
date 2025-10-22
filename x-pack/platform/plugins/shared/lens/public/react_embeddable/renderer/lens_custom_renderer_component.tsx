@@ -77,6 +77,7 @@ export function LensRenderer({
   const viewMode$ = useObservableVariable(viewMode);
   const searchSessionId$ = useObservableVariable(searchSessionId);
   const hideTitle$ = useObservableVariable(hidePanelTitles);
+  const esqlVariables$ = useObservableVariable(props.esqlVariables);
 
   // Lens API will be set once, but when set trigger a reflow to adopt the latest attributes
   const [lensApi, setLensApi] = useState<LensApi | undefined>(undefined);
@@ -140,6 +141,7 @@ export function LensRenderer({
     <EmbeddableRenderer<LensSerializedState, LensApi>
       type={LENS_EMBEDDABLE_TYPE}
       maybeId={id}
+      // TODO type this ParentApi, all these are untyped and some unused
       getParentApi={() => ({
         // forward the Lens components to the embeddable
         ...props,
@@ -159,6 +161,7 @@ export function LensRenderer({
           attributes: props.attributes,
         }),
         forceDSL,
+        esqlVariables$,
         hideTitle$,
         reload$, // trigger a reload (replacement for deprepcated searchSessionId)
       })}

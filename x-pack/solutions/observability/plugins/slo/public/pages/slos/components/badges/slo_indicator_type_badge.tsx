@@ -7,14 +7,14 @@
 
 import { EuiBadge, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { SLODefinitionResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import {
   ALL_VALUE,
-  SLODefinitionResponse,
-  SLOWithSummaryResponse,
   apmTransactionDurationIndicatorSchema,
   apmTransactionErrorRateIndicatorSchema,
 } from '@kbn/slo-schema';
-import React, { MouseEvent } from 'react';
+import type { MouseEvent } from 'react';
+import React from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { SLOS_PATH } from '../../../../../common/locators/paths';
 import { useKibana } from '../../../../hooks/use_kibana';

@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLCommand, synth } from '../../../..';
-import { SortPosition, getSortPos as _getSortPos } from './utils';
+import type { ESQLCommand } from '../../../..';
+import { synth } from '../../../..';
+import type { SortPosition } from './utils';
+import { getSortPos as _getSortPos } from './utils';
 
 export const getSortPos = (query: string) => {
   const commandText = query.split('|').pop()?.trim() || '';
@@ -17,7 +19,7 @@ export const getSortPos = (query: string) => {
   }
 
   const command: ESQLCommand = synth.cmd(commandText);
-  return _getSortPos(query, command);
+  return _getSortPos(query, command, query.length).position;
 };
 
 test('returns correct position on complete modifier matches', () => {

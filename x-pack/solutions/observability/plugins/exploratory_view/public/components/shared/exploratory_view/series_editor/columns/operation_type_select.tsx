@@ -9,9 +9,9 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSuperSelect } from '@elastic/eui';
 
-import { OperationType } from '@kbn/lens-plugin/public';
+import type { OperationType } from '@kbn/lens-plugin/public';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
-import { SeriesUrl } from '../../types';
+import type { SeriesUrl } from '../../types';
 
 export function OperationTypeSelect({
   seriesId,
@@ -127,6 +127,9 @@ export function OperationTypeComponent({
       valueOfSelected={operationType}
       options={options}
       onChange={onChange}
+      aria-label={i18n.translate('xpack.exploratoryView.expView.operationTypeSelect.ariaLabel', {
+        defaultMessage: 'Operation type',
+      })}
     />
   );
 }

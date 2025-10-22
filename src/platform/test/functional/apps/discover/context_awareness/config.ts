@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 import path from 'path';
 import {
   KibanaEBTUIProvider,
@@ -35,6 +35,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           __dirname,
           '../../../../analytics/plugins/analytics_ftr_helpers'
         )}`,
+        '--feature_flags.overrides.discover.tabsEnabled=true',
       ],
     },
     services: {

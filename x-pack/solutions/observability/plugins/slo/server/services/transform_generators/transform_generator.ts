@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import {
+import type {
   MappingRuntimeFields,
   TransformPutTransformRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
 import { ALL_VALUE, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
-import { TransformSettings } from '../../assets/transform_templates/slo_transform_template';
-import { SLODefinition } from '../../domain/models';
+import type { TransformSettings } from '../../assets/transform_templates/slo_transform_template';
+import type { SLODefinition } from '../../domain/models';
 
 export abstract class TransformGenerator {
   constructor(

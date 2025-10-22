@@ -8,8 +8,8 @@
 import { functionWrapper } from '@kbn/presentation-util-plugin/test_helpers';
 import { getFunctionErrors } from '../../../i18n';
 import { csv } from './csv';
-import { Datatable, ExecutionContext } from '@kbn/expressions-plugin/common';
-import { Adapters } from '@kbn/inspector-plugin/common';
+import type { Datatable, ExecutionContext } from '@kbn/expressions-plugin/common';
+import type { Adapters } from '@kbn/inspector-plugin/common';
 
 const errors = getFunctionErrors().csv;
 

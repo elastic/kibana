@@ -9,7 +9,7 @@ import { TestProvider } from '../../../../common/test_utils';
 import { render, type RenderResult } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { ChartsFilter, type ChartsFilterProps } from './charts_filter';
-import { FilterName } from '../../hooks';
+import type { FilterName } from '../../hooks';
 import { mockUseKibana, generateDataStreams } from '../../mocks';
 
 const mockUseLocation = jest.fn(() => ({ pathname: '/' }));

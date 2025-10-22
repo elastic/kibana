@@ -9,7 +9,6 @@ import type { EuiCheckboxProps } from '@elastic/eui';
 import React from 'react';
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/public';
 import { findTestSubject, mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test-jest-helpers';
 
@@ -19,7 +18,6 @@ const features: KibanaFeatureConfig[] = [
   {
     id: 'feature-1',
     name: 'Feature 1',
-    scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
     app: [],
     category: DEFAULT_APP_CATEGORIES.kibana,
     privileges: null,
@@ -27,7 +25,14 @@ const features: KibanaFeatureConfig[] = [
   {
     id: 'feature-2',
     name: 'Feature 2',
-    scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
+    app: [],
+    category: DEFAULT_APP_CATEGORIES.kibana,
+    privileges: null,
+  },
+  {
+    id: 'feature-3',
+    name: 'Feature 3 (hidden)',
+    hidden: true,
     app: [],
     category: DEFAULT_APP_CATEGORIES.kibana,
     privileges: null,

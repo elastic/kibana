@@ -10,15 +10,16 @@
 import { EuiButtonEmpty, EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { ErrorLike } from '@kbn/expressions-plugin/common';
-import { EmbeddableApiContext, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import type { ErrorLike } from '@kbn/expressions-plugin/common';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { renderSearchError } from '@kbn/search-errors';
 import { Markdown } from '@kbn/shared-ux-markdown';
 import { BehaviorSubject, Subscription, switchMap } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { useErrorTextStyle } from '@kbn/react-hooks';
-import { ActionExecutionMeta } from '@kbn/ui-actions-plugin/public';
-import { DefaultPresentationPanelApi } from './types';
+import type { ActionExecutionMeta } from '@kbn/ui-actions-plugin/public';
+import type { DefaultPresentationPanelApi } from './types';
 import { uiActions } from '../kibana_services';
 import { executeEditPanelAction } from '../panel_actions/edit_panel_action/execute_edit_action';
 import { ACTION_EDIT_PANEL } from '../panel_actions/edit_panel_action/constants';
@@ -37,6 +38,13 @@ export const PresentationPanelErrorInternal = ({ api, error }: PresentationPanel
     () => (isEditable ? () => executeEditPanelAction(api) : undefined),
     [api, isEditable]
   );
+
+  useEffect(() => {
+    if (error) {
+      // eslint-disable-next-line no-console
+      console.error(error);
+    }
+  }, [error]);
 
   const [label, setLabel] = useState('');
   useEffect(() => {

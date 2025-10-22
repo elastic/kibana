@@ -6,7 +6,7 @@
  */
 
 import { SemanticConventions } from '@arizeai/openinference-semantic-conventions';
-import { tracing } from '@elastic/opentelemetry-node/sdk';
+import type { tracing } from '@elastic/opentelemetry-node/sdk';
 import { ElasticGenAIAttributes } from '../types';
 
 export function getExecuteToolSpan(span: tracing.ReadableSpan) {

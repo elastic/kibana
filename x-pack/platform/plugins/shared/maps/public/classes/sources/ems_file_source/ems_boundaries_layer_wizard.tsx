@@ -8,13 +8,13 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { GeoJsonVectorLayer } from '../../layers/vector_layer';
-import { LayerWizard, RenderWizardArguments } from '../../layers';
+import type { LayerWizard, RenderWizardArguments } from '../../layers';
 import { EMSFileCreateSourceEditor } from './create_source_editor';
 import { EMSFileSource, getSourceTitle } from './ems_file_source';
 
 // @ts-ignore
 import { getEMSSettings } from '../../../kibana_services';
-import { EMSFileSourceDescriptor } from '../../../../common/descriptor_types';
+import type { EMSFileSourceDescriptor } from '../../../../common/descriptor_types';
 import { LAYER_WIZARD_CATEGORY, WIZARD_ID } from '../../../../common/constants';
 import { EMSBoundariesLayerIcon } from '../../layers/wizards/icons/ems_boundaries_layer_icon';
 

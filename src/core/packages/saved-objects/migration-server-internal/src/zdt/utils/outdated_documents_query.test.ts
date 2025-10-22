@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
 import { getOutdatedDocumentsQuery } from './outdated_documents_query';
 import { createType } from '../test_helpers/saved_object_type';
 

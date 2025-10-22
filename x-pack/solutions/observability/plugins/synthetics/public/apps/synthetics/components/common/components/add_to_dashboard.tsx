@@ -14,21 +14,19 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
+import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
 import {
   LazySavedObjectSaveModalDashboard,
-  SaveModalDashboardProps,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useSelector } from 'react-redux';
-import { OverviewStatsEmbeddableCustomState } from '../../../../embeddables/stats_overview/stats_overview_embeddable_factory';
-import { ClientPluginsStart } from '../../../../../plugin';
-import {
-  SYNTHETICS_MONITORS_EMBEDDABLE,
-  SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
-} from '../../../../embeddables/constants';
+import type { OverviewStatsEmbeddableCustomState } from '../../../../embeddables/stats_overview/stats_overview_embeddable_factory';
+import type { ClientPluginsStart } from '../../../../../plugin';
+import type { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../../embeddables/constants';
+import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../../../../embeddables/constants';
 import { selectOverviewState } from '../../../state';
-import { OverviewMonitorsEmbeddableCustomState } from '../../../../embeddables/monitors_overview/monitors_embeddable_factory';
+import type { OverviewMonitorsEmbeddableCustomState } from '../../../../embeddables/monitors_overview/monitors_embeddable_factory';
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
@@ -59,7 +57,7 @@ export const useAddToDashboard = ({
   const { embeddable } = useKibana<ClientPluginsStart>().services;
 
   const handleAttachToDashboardSave: SaveModalDashboardProps['onSave'] = useCallback(
-    ({ dashboardId }) => {
+    async ({ dashboardId }) => {
       const stateTransfer = embeddable.getStateTransfer();
 
       const state = {
@@ -69,8 +67,8 @@ export const useAddToDashboard = ({
 
       const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
 
-      stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
-        state,
+      stateTransfer.navigateToWithEmbeddablePackages('dashboards', {
+        state: [state],
         path,
       });
     },
@@ -96,10 +94,12 @@ export const useAddToDashboard = ({
 
 export const AddToDashboard = ({
   type,
+  isLoading,
   asButton = false,
 }: {
   type: typeof SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE | typeof SYNTHETICS_MONITORS_EMBEDDABLE;
   asButton?: boolean;
+  isLoading?: boolean;
 }) => {
   const { view } = useSelector(selectOverviewState);
 
@@ -127,6 +127,7 @@ export const AddToDashboard = ({
           data-test-subj="syntheticsEmbeddablePanelWrapperButton"
           iconType="dashboardApp"
           onClick={() => setDashboardAttachmentReady(true)}
+          isLoading={isLoading}
         >
           {i18n.translate('xpack.synthetics.embeddablePanelWrapper.shareButtonLabel', {
             defaultMessage: 'Add to dashboard',
@@ -146,6 +147,7 @@ export const AddToDashboard = ({
                   defaultMessage: 'Add to dashboard',
                 }
               )}
+              isLoading={isLoading}
             />
           }
           isOpen={isPopoverOpen}

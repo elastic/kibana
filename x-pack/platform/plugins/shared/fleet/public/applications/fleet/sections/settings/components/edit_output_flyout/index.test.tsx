@@ -23,6 +23,7 @@ jest.mock('@kbn/code-editor', () => ({
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
+  EuiIconTip: () => '',
   useGeneratedHtmlId: () => 'mocked-id',
 }));
 
@@ -93,7 +94,12 @@ describe('EditOutputFlyout', () => {
         },
       },
       docLinks: {
-        links: { fleet: {}, logstash: {}, kibana: {} },
+        links: {
+          fleet: {},
+          logstash: {},
+          kibana: {},
+          observability: {},
+        },
       },
       cloud: {
         isServerlessEnabled,

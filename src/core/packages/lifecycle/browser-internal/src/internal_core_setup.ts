@@ -9,6 +9,7 @@
 
 import type { CoreSetup } from '@kbn/core-lifecycle-browser';
 import type { InternalApplicationSetup } from '@kbn/core-application-browser-internal';
+import type { InternalCoreDiServiceSetup } from '@kbn/core-di-internal';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import type { InternalHttpSetup } from '@kbn/core-http-browser-internal';
 import type { InternalSecurityServiceSetup } from '@kbn/core-security-browser-internal';
@@ -19,11 +20,18 @@ import type { FeatureFlagsSetup } from '@kbn/core-feature-flags-browser';
 export interface InternalCoreSetup
   extends Omit<
     CoreSetup,
-    'application' | 'plugins' | 'getStartServices' | 'http' | 'security' | 'userProfile'
+    | 'application'
+    | 'injection'
+    | 'plugins'
+    | 'getStartServices'
+    | 'http'
+    | 'security'
+    | 'userProfile'
   > {
   application: InternalApplicationSetup;
   featureFlags: FeatureFlagsSetup;
   injectedMetadata: InternalInjectedMetadataSetup;
+  injection: InternalCoreDiServiceSetup;
   http: InternalHttpSetup;
   security: InternalSecurityServiceSetup;
   userProfile: InternalUserProfileServiceSetup;

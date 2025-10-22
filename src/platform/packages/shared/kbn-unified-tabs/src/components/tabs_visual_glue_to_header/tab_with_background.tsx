@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { HTMLAttributes } from 'react';
+import type { HTMLAttributes } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme, euiSlightShadowHover } from '@elastic/eui';
 import { getTabsShadowGradient } from './get_tabs_shadow_gradient';
@@ -38,7 +39,9 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
         // tab main background and another background color on hover
         css={css`
           display: inline-block;
-          background: ${isSelected ? selectedTabBackgroundColor : euiTheme.colors.lightestShade};
+          background: ${isSelected || isDragging
+            ? selectedTabBackgroundColor
+            : euiTheme.colors.lightestShade};
           transition: background ${euiTheme.animation.fast};
           ${isDragging
             ? `

@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLCommand } from '../../../types';
+import type { ESQLAstAllCommands } from '../../../types';
 import { pipeCompleteItem, commaCompleteItem } from '../../complete_items';
 import {
   getSourcesFromCommands,
@@ -16,12 +16,13 @@ import {
 import { metadataSuggestion, getMetadataSuggestions } from '../../options/metadata';
 import { getRecommendedQueriesSuggestions } from '../../options/recommended_queries';
 import { withinQuotes } from '../../../definitions/utils/autocomplete/helpers';
-import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
+import type { ICommandCallbacks } from '../../types';
+import { type ISuggestionItem, type ICommandContext } from '../../types';
 import { getOverlapRange, isRestartingExpression } from '../../../definitions/utils/shared';
 
 export async function autocomplete(
   query: string,
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
   cursorPosition?: number
@@ -47,7 +48,8 @@ export async function autocomplete(
     suggestions.push(
       ...getSourceSuggestions(
         context?.sources ?? [],
-        indexes.map(({ name }) => name)
+        indexes.map(({ name }) => name),
+        innerText
       )
     );
   }

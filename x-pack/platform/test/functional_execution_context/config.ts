@@ -6,7 +6,8 @@
  */
 import Path from 'path';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import { FtrConfigProviderContext, getKibanaCliLoggers, findTestPluginPaths } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
+import { getKibanaCliLoggers, findTestPluginPaths } from '@kbn/test';
 import { logFilePath } from './test_utils';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {

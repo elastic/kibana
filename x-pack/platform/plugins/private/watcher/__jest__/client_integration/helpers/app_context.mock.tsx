@@ -6,7 +6,7 @@
  */
 
 import { of } from 'rxjs';
-import { LocationDescriptorObject } from 'history';
+import type { LocationDescriptorObject } from 'history';
 
 import {
   coreMock,
@@ -17,8 +17,8 @@ import {
 } from '@kbn/core/public/mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
-import { AppDeps } from '../../../public/application/app';
-import { LicenseStatus } from '../../../common/types/license_status';
+import type { AppDeps } from '../../../public/application/app';
+import type { LicenseStatus } from '../../../common/types/license_status';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
 class MockTimeBuckets {

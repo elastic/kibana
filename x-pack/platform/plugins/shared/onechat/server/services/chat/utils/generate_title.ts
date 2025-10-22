@@ -5,37 +5,37 @@
  * 2.0.
  */
 
-import { defer, shareReplay, switchMap, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { defer, shareReplay } from 'rxjs';
 import { z } from '@kbn/zod';
-import { BaseMessageLike } from '@langchain/core/messages';
+import type { BaseMessageLike } from '@langchain/core/messages';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import { ElasticGenAIAttributes, withInferenceSpan } from '@kbn/inference-tracing';
+import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-tracing';
 import type { Conversation, ConversationRound, RoundInput } from '@kbn/onechat-common';
 import { conversationToLangchainMessages } from '../../agents/modes/utils';
 
-export const generateTitle$ = ({
-  chatModel,
-  conversation$,
+/**
+ * Generates a title for a conversation
+ */
+export const generateTitle = ({
   nextInput,
+  conversation,
+  chatModel,
 }: {
-  chatModel: InferenceChatModel;
-  conversation$: Observable<Conversation>;
   nextInput: RoundInput;
+  conversation: Conversation;
+  chatModel: InferenceChatModel;
 }): Observable<string> => {
-  return conversation$.pipe(
-    switchMap((conversation) => {
-      return defer(async () =>
-        generateConversationTitle({
-          previousRounds: conversation.rounds,
-          nextInput,
-          chatModel,
-        })
-      ).pipe(shareReplay());
-    })
-  );
+  return defer(async () => {
+    return generateConversationTitle({
+      previousRounds: conversation.rounds,
+      nextInput,
+      chatModel,
+    });
+  }).pipe(shareReplay());
 };
 
-export const generateConversationTitle = async ({
+const generateConversationTitle = async ({
   previousRounds,
   nextInput,
   chatModel,
@@ -44,21 +44,35 @@ export const generateConversationTitle = async ({
   nextInput: RoundInput;
   chatModel: InferenceChatModel;
 }) => {
-  return withInferenceSpan(
-    { name: 'generate_title', [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN' },
+  return withActiveInferenceSpan(
+    'GenerateTitle',
+    { attributes: { [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN' } },
     async (span) => {
       const structuredModel = chatModel.withStructuredOutput(
-        z.object({
-          title: z.string().describe('The title for the conversation'),
-        })
+        z
+          .object({
+            title: z.string().describe('The title for the conversation'),
+          })
+          .describe('Tool to use to provide the title for the conversation'),
+        { name: 'set_title' }
       );
 
       const prompt: BaseMessageLike[] = [
         [
           'system',
-          "'You are a helpful assistant. Assume the following messages is the start of a conversation between you and a user; give this conversation a title based on the content below",
+          `You are a title-generation utility. Your ONLY purpose is to create a short, relevant title for the provided conversation.
+
+You MUST call the 'set_title' tool to provide the title. Do NOT respond with plain text or any other conversational language.
+
+Here is an example:
+Conversation:
+- User: "Hey, can you help me find out how to configure a new role in Kibana for read-only access to dashboards?"
+- Assistant: "Of course! To create a read-only role..."
+=> Your response MUST be a call to the 'set_title' tool like this: {"title": "Kibana Read-Only Role Configuration"}
+
+Now, generate a title for the following conversation.`,
         ],
-        ...conversationToLangchainMessages({ previousRounds, nextInput }),
+        ...conversationToLangchainMessages({ previousRounds, nextInput, ignoreSteps: true }),
       ];
 
       const { title } = await structuredModel.invoke(prompt);

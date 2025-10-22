@@ -9,13 +9,13 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { encode } from '@kbn/rison';
 
-import { useEnableExperimental } from '../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
 import {
   RULE_FROM_EQL_URL_PARAM,
   RULE_FROM_TIMELINE_URL_PARAM,
-} from '../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
+} from '../../../detections/hooks/use_rule_from_timeline';
 import { useNavigation } from '../../../common/lib/kibana';
 import { SecurityPageName } from '../../../../common/constants';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
@@ -162,7 +162,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
 
     const { dataViewId: oldDataViewId, selectedPatterns: oldSelectedPatterns } =
       useSourcererDataView(SourcererScopeName.timeline);
-    const { newDataViewPickerEnabled } = useEnableExperimental();
+    const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
     const { dataView: experimentalDataView } = useDataView(SourcererScopeName.timeline);
     const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);

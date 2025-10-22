@@ -7,9 +7,10 @@
 import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 import { expect as rawExpect } from 'expect';
-import { RoleCredentials } from '@kbn/ftr-common-functional-services';
-import { PackagePolicy } from '@kbn/fleet-plugin/common';
-import { ProjectMonitorsRequest, ConfigKey } from '@kbn/synthetics-plugin/common/runtime_types';
+import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { ProjectMonitorsRequest } from '@kbn/synthetics-plugin/common/runtime_types';
+import { ConfigKey } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { syntheticsMonitorSavedObjectType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { REQUEST_TOO_LARGE } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/project_monitor/add_monitor_project';
@@ -22,7 +23,7 @@ import {
   getTestProjectSyntheticsPolicy,
   getTestProjectSyntheticsPolicyLightweight,
 } from './sample_data/test_project_monitor_policy';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
 import { PrivateLocationTestService } from '../../services/synthetics_private_location';
 import { SyntheticsMonitorTestService } from '../../services/synthetics_monitor';
@@ -31,6 +32,8 @@ import { comparePolicies } from './sample_data/test_policy';
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('AddProjectMonitorsPrivateLocations', function () {
     const supertestWithoutAuth = getService('supertestWithoutAuth');
+    // TODO: Replace with roleScopedSupertest for deployment-agnostic compatibility
+    // eslint-disable-next-line @kbn/eslint/deployment_agnostic_test_context
     const supertestWithAuth = getService('supertest');
     const kibanaServer = getService('kibanaServer');
     const samlAuth = getService('samlAuth');

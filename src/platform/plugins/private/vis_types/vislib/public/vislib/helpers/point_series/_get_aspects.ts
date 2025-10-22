@@ -10,8 +10,8 @@
 import type { Dimensions } from '@kbn/vis-type-xy-plugin/public';
 
 import { makeFakeXAspect } from './_fake_x_aspect';
-import { Aspects } from './point_series';
-import { Table } from '../../types';
+import type { Aspects } from './point_series';
+import type { Table } from '../../types';
 
 /**
  * Identify and group the columns based on the aspect of the pointSeries

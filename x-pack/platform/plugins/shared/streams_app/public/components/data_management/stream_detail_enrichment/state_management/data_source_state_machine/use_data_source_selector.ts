@@ -6,7 +6,7 @@
  */
 
 import { useSelector } from '@xstate5/react';
-import { DataSourceActorRef, DataSourceActorSnapshot } from './data_source_state_machine';
+import type { DataSourceActorRef, DataSourceActorSnapshot } from './data_source_state_machine';
 import { useStreamEnrichmentSelector } from '../stream_enrichment_state_machine';
 
 export function useDataSourceSelector<T>(

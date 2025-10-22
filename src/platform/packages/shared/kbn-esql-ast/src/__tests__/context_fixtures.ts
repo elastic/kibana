@@ -6,11 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { IndexAutocompleteItem, InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
+import type { IndexAutocompleteItem, InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
 import type {
-  ESQLFieldWithMetadata,
+  ESQLColumnData,
   ESQLPolicy,
-  ESQLUserDefinedColumn,
   ICommandCallbacks,
   ICommandContext,
 } from '../commands_registry/types';
@@ -115,84 +114,79 @@ export const editorExtensions = {
 };
 
 export const mockContext: ICommandContext = {
-  userDefinedColumns: new Map<string, ESQLUserDefinedColumn[]>([
+  columns: new Map<string, ESQLColumnData>([
     [
       'var0',
-      [
-        {
-          name: 'var0',
-          type: 'double',
-          location: { min: 0, max: 10 },
-        },
-      ],
+      {
+        name: 'var0',
+        type: 'double',
+        location: { min: 0, max: 10 },
+        userDefined: true,
+      },
     ],
     [
       'col0',
-      [
-        {
-          name: 'col0',
-          type: 'double',
-          location: { min: 0, max: 10 },
-        },
-      ],
+      {
+        name: 'col0',
+        type: 'double',
+        location: { min: 0, max: 10 },
+        userDefined: true,
+      },
     ],
     [
       'prompt',
-      [
-        {
-          name: 'prompt',
-          type: 'keyword',
-          location: { min: 0, max: 10 },
-        },
-      ],
+      {
+        name: 'prompt',
+        type: 'keyword',
+        location: { min: 0, max: 10 },
+        userDefined: true,
+      },
     ],
     [
       'integerPrompt',
-      [
-        {
-          name: 'integerPrompt',
-          type: 'integer',
-          location: { min: 0, max: 10 },
-        },
-      ],
+      {
+        name: 'integerPrompt',
+        type: 'integer',
+        location: { min: 0, max: 10 },
+        userDefined: true,
+      },
     ],
     [
       'ipPrompt',
-      [
-        {
-          name: 'ipPrompt',
-          type: 'ip',
-          location: { min: 0, max: 10 },
-        },
-      ],
+      {
+        name: 'ipPrompt',
+        type: 'ip',
+        location: { min: 0, max: 10 },
+        userDefined: true,
+      },
     ],
     [
       'renamedField',
-      [
-        {
-          name: 'renamedField',
-          type: 'keyword',
-          location: { min: 0, max: 10 },
-        },
-      ],
+      {
+        name: 'renamedField',
+        type: 'keyword',
+        location: { min: 0, max: 10 },
+        userDefined: true,
+      },
     ],
-  ]),
-  fields: new Map<string, ESQLFieldWithMetadata>([
-    ['keywordField', { name: 'keywordField', type: 'keyword' }],
-    ['any#Char$Field', { name: 'any#Char$Field', type: 'keyword' }],
-    ['textField', { name: 'textField', type: 'text' }],
-    ['doubleField', { name: 'doubleField', type: 'double' }],
-    ['integerField', { name: 'integerField', type: 'integer' }],
-    ['counterIntegerField', { name: 'counterIntegerField', type: 'counter_integer' }],
-    ['dateField', { name: 'dateField', type: 'date' }],
-    ['dateNanosField', { name: 'dateNanosField', type: 'date_nanos' }],
-    ['@timestamp', { name: '@timestamp', type: 'date' }],
-    ['ipField', { name: 'ipField', type: 'ip' }],
-    ['booleanField', { name: 'booleanField', type: 'boolean' }],
-    ['geoPointField', { name: 'geoPointField', type: 'geo_point' }],
-    ['geoShapeField', { name: 'geoShapeField', type: 'geo_shape' }],
-    ['versionField', { name: 'versionField', type: 'version' }],
-    ['longField', { name: 'longField', type: 'long' }],
+    ['keywordField', { name: 'keywordField', type: 'keyword', userDefined: false }],
+    ['any#Char$Field', { name: 'any#Char$Field', type: 'keyword', userDefined: false }],
+    ['textField', { name: 'textField', type: 'text', userDefined: false }],
+    ['doubleField', { name: 'doubleField', type: 'double', userDefined: false }],
+    ['integerField', { name: 'integerField', type: 'integer', userDefined: false }],
+    [
+      'counterIntegerField',
+      { name: 'counterIntegerField', type: 'counter_integer', userDefined: false },
+    ],
+    ['dateField', { name: 'dateField', type: 'date', userDefined: false }],
+    ['dateNanosField', { name: 'dateNanosField', type: 'date_nanos', userDefined: false }],
+    ['@timestamp', { name: '@timestamp', type: 'date', userDefined: false }],
+    ['ipField', { name: 'ipField', type: 'ip', userDefined: false }],
+    ['booleanField', { name: 'booleanField', type: 'boolean', userDefined: false }],
+    ['geoPointField', { name: 'geoPointField', type: 'geo_point', userDefined: false }],
+    ['geoShapeField', { name: 'geoShapeField', type: 'geo_shape', userDefined: false }],
+    ['versionField', { name: 'versionField', type: 'version', userDefined: false }],
+    ['longField', { name: 'longField', type: 'long', userDefined: false }],
   ]),
   policies: new Map<string, ESQLPolicy>(policies.map((policy) => [policy.name, policy])),
   sources: indexes.map((name) => ({
@@ -204,15 +198,31 @@ export const mockContext: ICommandContext = {
   timeSeriesSources: timeseriesIndices,
   inferenceEndpoints,
   histogramBarTarget: 50,
+  activeProduct: {
+    type: 'observability',
+    tier: 'complete',
+  },
 };
 
-export const getMockCallbacks = (): ICommandCallbacks => {
+export type MockedICommandCallbacks = {
+  [key in keyof ICommandCallbacks]: jest.Mocked<ICommandCallbacks[key]>;
+};
+
+export const getMockCallbacks = (): MockedICommandCallbacks => {
   const expectedFields = getFieldNamesByType('any');
   return {
-    getByType: jest
-      .fn()
-      .mockResolvedValue(expectedFields.map((name) => ({ label: name, text: name }))),
+    getByType: jest.fn().mockImplementation(async (types, ignoredColumns = []) => {
+      return (
+        expectedFields
+          // Exclude columns already used (e.g., used in STATS BY or parent function scope)
+          .filter((name) => !ignoredColumns.includes(name))
+          .map((name) => ({ label: name, text: name }))
+      );
+    }),
     getSuggestedUserDefinedColumnName: jest.fn(),
     getColumnsForQuery: jest.fn(),
+    hasMinimumLicenseRequired: jest.fn().mockReturnValue(true),
+    canCreateLookupIndex: jest.fn().mockReturnValue(true),
+    isServerless: false,
   };
 };

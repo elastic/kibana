@@ -9,7 +9,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { EsQuerySortValue } from './types';
+import type { EsQuerySortValue } from './types';
 
 type FieldSortOptions = estypes.FieldSort &
   estypes.ScoreSort &

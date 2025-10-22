@@ -7,16 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, CoreStart } from '@kbn/core/public';
+import type { CoreSetup, CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { DataViewsContract } from '@kbn/data-views-plugin/common';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/common';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import { managementPluginMock } from '@kbn/management-plugin/public/mocks';
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 import type { MockedKeys } from '@kbn/utility-types-jest';
-import { SearchService, SearchServiceSetupDependencies } from './search_service';
-import { ISearchStart } from './types';
+import type { SearchServiceSetupDependencies } from './search_service';
+import { SearchService } from './search_service';
+import type { ISearchStart } from './types';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 
 describe('Search service', () => {
   let searchService: SearchService;
@@ -59,16 +61,20 @@ describe('Search service', () => {
       } as unknown as SearchServiceSetupDependencies);
       data = searchService.start(mockCoreStart, {
         fieldFormats: {} as FieldFormatsStart,
-        indexPatterns: {} as DataViewsContract,
+        dataViews: {} as DataViewsContract,
         inspector: {} as InspectorStartContract,
         screenshotMode: screenshotModePluginMock.createStartContract(),
         scriptedFieldsEnabled: true,
+        share: {} as SharePluginStart,
       });
     });
 
     it('exposes proper contract', async () => {
       expect(data).toHaveProperty('aggs');
       expect(data).toHaveProperty('search');
+      expect(data).toHaveProperty('showSearchSessionsFlyout');
+      expect(data).toHaveProperty('isBackgroundSearchEnabled');
+      expect(data).toHaveProperty('showWarnings');
       expect(data).toHaveProperty('showError');
       expect(data).toHaveProperty('searchSource');
       expect(data).toHaveProperty('sessionsClient');

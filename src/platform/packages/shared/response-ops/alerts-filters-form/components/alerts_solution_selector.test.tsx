@@ -12,7 +12,7 @@ import { render, screen } from '@testing-library/react';
 import { AlertsSolutionSelector } from './alerts_solution_selector';
 import { SOLUTION_SELECTOR_SUBJ } from '../constants';
 import userEvent from '@testing-library/user-event';
-import { RuleTypeSolution } from '@kbn/alerting-types';
+import type { RuleTypeSolution } from '@kbn/alerting-types';
 
 const availableSolutions: RuleTypeSolution[] = ['observability', 'stack', 'security'];
 

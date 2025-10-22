@@ -59,9 +59,9 @@ export async function selectEuiComboBoxOption({
         fireEvent.click(optionToSelect);
       } else {
         throw new Error(
-          `Could not find option with text "${optionText}". Available options: ${options
+          `Could not find option with text "${optionText}". Available options: [${options
             .map((option) => option.textContent)
-            .join(', ')}`
+            .join(', ')}]`
         );
       }
     } else {

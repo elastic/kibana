@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TemplateDeserialized, LegacyTemplateSerialized, TemplateSerialized } from '../types';
+import type { TemplateDeserialized, LegacyTemplateSerialized, TemplateSerialized } from '../types';
 
 /**
  * Helper to know if a template has the legacy format or not

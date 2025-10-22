@@ -17,14 +17,14 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { createPackagePolicyMock, deletePackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { CspPlugin } from './plugin';
-import { CspServerPluginStartDeps } from './types';
-import {
+import type { CspServerPluginStartDeps } from './types';
+import type {
   Installation,
   ListResult,
   PackagePolicy,
   UpdatePackagePolicy,
 } from '@kbn/fleet-plugin/common';
-import {
+import type {
   PostPackagePolicyPostDeleteCallback,
   PostPackagePolicyPostCreateCallback,
 } from '@kbn/fleet-plugin/server';
@@ -32,7 +32,7 @@ import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
 import Chance from 'chance';
 import type { AwaitedProperties } from '@kbn/utility-types';
 import { createIndexPatternsStartMock } from '@kbn/data-views-plugin/server/mocks';
-import {
+import type {
   ElasticsearchClient,
   RequestHandlerContext,
   SavedObjectsClientContract,
@@ -48,79 +48,155 @@ const mockRouteContext = {
 
 describe('Cloud Security Posture Plugin', () => {
   describe('start()', () => {
-    const fleetMock = createFleetStartContractMock();
-    const mockPlugins: CspServerPluginStartDeps = {
-      fleet: fleetMock,
-      data: dataPluginMock.createStartContract(),
-      taskManager: taskManagerMock.createStart(),
-      security: securityMock.createStart(),
-      licensing: licensingMock.createStart(),
-      dataViews: createIndexPatternsStartMock(),
-    };
-
-    const contextMock = coreMock.createCustomRequestHandlerContext(mockRouteContext);
-    const findMock = mockRouteContext.core.savedObjects.client.find as jest.Mock;
-    findMock.mockReturnValue(
-      Promise.resolve({
-        saved_objects: [
-          {
-            type: 'csp_rule',
-            attributes: {
-              metadata: {
-                rego_rule_id: 'cis_1_1_1',
-                benchmark: { id: 'cis_k8s' },
-              },
-            },
-          },
-        ],
-        total: 1,
-        per_page: 10,
-        page: 1,
-      })
-    );
-
+    let fleetMock: ReturnType<typeof createFleetStartContractMock>;
+    let mockPlugins: CspServerPluginStartDeps;
+    let contextMock: ReturnType<typeof coreMock.createCustomRequestHandlerContext>;
+    let findMock: jest.Mock;
     let plugin: CspPlugin;
 
-    beforeEach(() => jest.clearAllMocks());
+    beforeEach(() => {
+      jest.clearAllMocks();
+
+      fleetMock = createFleetStartContractMock();
+      mockPlugins = {
+        fleet: fleetMock,
+        data: dataPluginMock.createStartContract(),
+        taskManager: taskManagerMock.createStart(),
+        security: securityMock.createStart(),
+        licensing: licensingMock.createStart(),
+        dataViews: createIndexPatternsStartMock(),
+      };
+
+      contextMock = coreMock.createCustomRequestHandlerContext(mockRouteContext);
+      findMock = mockRouteContext.core.savedObjects.client.find as jest.Mock;
+      findMock.mockReturnValue(
+        Promise.resolve({
+          saved_objects: [
+            {
+              type: 'csp_rule',
+              attributes: {
+                metadata: {
+                  rego_rule_id: 'cis_1_1_1',
+                  benchmark: { id: 'cis_k8s' },
+                },
+              },
+            },
+          ],
+          total: 1,
+          per_page: 10,
+          page: 1,
+        })
+      );
+    });
 
     it('should initialize when package installed', async () => {
-      fleetMock.packageService.asInternalUser.getInstallation.mockImplementationOnce(
-        async (): Promise<Installation | undefined> => {
-          return {} as jest.Mocked<Installation>;
-        }
-      );
+      fleetMock.packageService.asInternalUser.getInstallation.mockResolvedValue({
+        install_version: '1.0.0',
+      } as jest.Mocked<Installation>);
 
       const context = coreMock.createPluginInitializerContext<unknown>();
       plugin = new CspPlugin(context);
-      const spy = jest.spyOn(plugin, 'initialize').mockImplementation();
+      const spy = jest.spyOn(plugin, 'initialize').mockResolvedValue(undefined);
 
-      // Act
       await plugin.start(coreMock.createStart(), mockPlugins);
       await mockPlugins.fleet.fleetSetupCompleted();
 
-      // Assert
-      expect(fleetMock.packageService.asInternalUser.getInstallation).toHaveBeenCalledTimes(1);
+      // Wait for any microtasks that might have been scheduled
+      await new Promise((resolve) => setImmediate(resolve));
+
       expect(spy).toHaveBeenCalledTimes(1);
+      expect(spy).toHaveBeenCalledWith(expect.anything(), expect.anything(), '1.0.0');
     });
 
     it('should not initialize when package is not installed', async () => {
-      fleetMock.packageService.asInternalUser.getInstallation.mockImplementationOnce(
+      fleetMock.packageService.asInternalUser.getInstallation.mockResolvedValue(undefined);
+
+      const context = coreMock.createPluginInitializerContext<unknown>();
+      plugin = new CspPlugin(context);
+      const spy = jest.spyOn(plugin, 'initialize').mockResolvedValue(undefined);
+
+      await plugin.start(coreMock.createStart(), mockPlugins);
+      await mockPlugins.fleet.fleetSetupCompleted();
+
+      // Wait for any microtasks that might have been scheduled
+      await new Promise((resolve) => setImmediate(resolve));
+
+      expect(fleetMock.packageService.asInternalUser.getInstallation).toHaveBeenCalled();
+      expect(spy).toHaveBeenCalledTimes(0);
+    });
+
+    it('should retry getInstallation on failures', async () => {
+      jest.useFakeTimers();
+
+      let callCount = 0;
+      fleetMock.packageService.asInternalUser.getInstallation.mockImplementation(
         async (): Promise<Installation | undefined> => {
-          return;
+          callCount++;
+          if (callCount < 3) {
+            throw new Error(`ES connection failed ${callCount}`);
+          }
+          return { install_version: '1.0.0' } as jest.Mocked<Installation>;
         }
       );
 
       const context = coreMock.createPluginInitializerContext<unknown>();
       plugin = new CspPlugin(context);
-      const spy = jest.spyOn(plugin, 'initialize').mockImplementation();
+      const spy = jest.spyOn(plugin, 'initialize').mockResolvedValue(undefined);
+      const loggerWarnSpy = jest.spyOn(context.logger.get(), 'warn');
 
-      // Act
       await plugin.start(coreMock.createStart(), mockPlugins);
+
+      // Fast-forward through all pending timers multiple times to ensure
+      // all retry attempts have a chance to execute
+      for (let i = 0; i < 5; i++) {
+        jest.runAllTimers();
+        // Allow any pending promises to resolve
+        await Promise.resolve();
+      }
+
       await mockPlugins.fleet.fleetSetupCompleted();
 
-      // Assert
-      expect(fleetMock.packageService.asInternalUser.getInstallation).toHaveBeenCalledTimes(1);
+      jest.useRealTimers();
+
+      expect(loggerWarnSpy).toHaveBeenCalled();
+      expect(loggerWarnSpy.mock.calls[0][0]).toMatch(/failed and will be retried/);
+
+      expect(callCount).toBeGreaterThan(1);
+
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(spy).toHaveBeenCalledWith(expect.anything(), expect.anything(), '1.0.0');
+    });
+
+    it('should handle getInstallation complete failure after retries', async () => {
+      jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate'] });
+
+      const testError = new Error('ES connection failed persistently');
+      fleetMock.packageService.asInternalUser.getInstallation.mockRejectedValue(testError);
+
+      const context = coreMock.createPluginInitializerContext<unknown>();
+      plugin = new CspPlugin(context);
+      const spy = jest.spyOn(plugin, 'initialize').mockResolvedValue(undefined);
+      const loggerErrorSpy = jest.spyOn(context.logger.get(), 'error');
+
+      await plugin.start(coreMock.createStart(), mockPlugins);
+
+      // Fast-forward through all pending timers to trigger all retry attempts
+      for (let i = 0; i < 10; i++) {
+        jest.runOnlyPendingTimers();
+        await Promise.resolve();
+      }
+
+      await mockPlugins.fleet.fleetSetupCompleted();
+
+      jest.useRealTimers();
+
+      expect(fleetMock.packageService.asInternalUser.getInstallation).toHaveBeenCalled();
       expect(spy).toHaveBeenCalledTimes(0);
+
+      expect(loggerErrorSpy).toHaveBeenCalledWith(
+        'CSP plugin getInstallation operation failed after all retries',
+        testError
+      );
     });
 
     it('should not initialize when other package is created', async () => {
@@ -136,10 +212,14 @@ describe('Cloud Security Posture Plugin', () => {
       const packageMock = createPackagePolicyMock();
       packageMock.package!.name = chance.word();
 
+      // Reset any previous mock implementations first to avoid interference
+      fleetMock.registerExternalCallback.mockReset();
+
       const packagePolicyPostCreateCallbacks: PostPackagePolicyPostCreateCallback[] = [];
       fleetMock.registerExternalCallback.mockImplementation((...args) => {
         if (args[0] === 'packagePolicyPostCreate') {
           packagePolicyPostCreateCallbacks.push(args[1]);
+          return;
         }
       });
 
@@ -149,7 +229,14 @@ describe('Cloud Security Posture Plugin', () => {
 
       // Act
       await plugin.start(coreMock.createStart(), mockPlugins);
+
       await mockPlugins.fleet.fleetSetupCompleted();
+
+      // Allow any microtasks from promise chain to complete
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(fleetMock.registerExternalCallback).toHaveBeenCalled();
+      expect(packagePolicyPostCreateCallbacks.length).toBeGreaterThan(0);
 
       // Assert
       expect(fleetMock.packageService.asInternalUser.getInstallation).toHaveBeenCalledTimes(1);
@@ -193,10 +280,14 @@ describe('Cloud Security Posture Plugin', () => {
       packageMock.package!.name = CLOUD_SECURITY_POSTURE_PACKAGE_NAME;
       packageMock.vars = { runtimeCfg: { type: 'foo' } };
 
+      // Reset any previous mock implementations first to avoid interference
+      fleetMock.registerExternalCallback.mockReset();
+
       const packagePolicyPostCreateCallbacks: PostPackagePolicyPostCreateCallback[] = [];
       fleetMock.registerExternalCallback.mockImplementation((...args) => {
         if (args[0] === 'packagePolicyPostCreate') {
           packagePolicyPostCreateCallbacks.push(args[1]);
+          return;
         }
       });
 
@@ -206,7 +297,14 @@ describe('Cloud Security Posture Plugin', () => {
 
       // Act
       await plugin.start(coreMock.createStart(), mockPlugins);
+
       await mockPlugins.fleet.fleetSetupCompleted();
+
+      // Allow any microtasks from promise chain to complete
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(fleetMock.registerExternalCallback).toHaveBeenCalled();
+      expect(packagePolicyPostCreateCallbacks.length).toBeGreaterThan(0);
 
       // Assert
       expect(fleetMock.packageService.asInternalUser.getInstallation).toHaveBeenCalledTimes(1);
@@ -254,10 +352,14 @@ describe('Cloud Security Posture Plugin', () => {
         const deletedPackagePolicyMock = deletePackagePolicyMock();
         deletedPackagePolicyMock[0].package!.name = CLOUD_SECURITY_POSTURE_PACKAGE_NAME;
 
+        // Reset any previous mock implementations first to avoid interference
+        fleetMock.registerExternalCallback.mockReset();
+
         const packagePolicyPostDeleteCallbacks: PostPackagePolicyPostDeleteCallback[] = [];
         fleetMock.registerExternalCallback.mockImplementation((...args) => {
           if (args[0] === 'packagePolicyPostDelete') {
             packagePolicyPostDeleteCallbacks.push(args[1]);
+            return;
           }
         });
 
@@ -268,7 +370,14 @@ describe('Cloud Security Posture Plugin', () => {
 
         // Act
         await plugin.start(coreStart, mockPlugins);
+
         await mockPlugins.fleet.fleetSetupCompleted();
+
+        // Allow any microtasks from promise chain to complete
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        expect(fleetMock.registerExternalCallback).toHaveBeenCalled();
+        expect(packagePolicyPostDeleteCallbacks.length).toBeGreaterThan(0);
 
         // Assert
         expect(fleetMock.packageService.asInternalUser.getInstallation).toHaveBeenCalledTimes(1);

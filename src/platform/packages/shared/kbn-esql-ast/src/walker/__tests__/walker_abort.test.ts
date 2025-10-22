@@ -8,7 +8,7 @@
  */
 
 import { EsqlQuery } from '../../query';
-import { ESQLIntegerLiteral } from '../../types';
+import type { ESQLIntegerLiteral } from '../../types';
 import { Walker } from '../walker';
 
 describe('aborting traversal', () => {

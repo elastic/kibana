@@ -14,7 +14,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { getPackages, type Package, type ParsedPackageJson } from '@kbn/repo-packages';
 import { exports as resolvePackageExports } from 'resolve.exports';
 import { safeStat, readFileSync } from './helpers/fs';
-import { ResolveResult } from './resolve_result';
+import type { ResolveResult } from './resolve_result';
 import { getRelativeImportReq } from './helpers/import_req';
 import { memoize } from './helpers/memoize';
 
@@ -153,6 +153,10 @@ export class ImportResolver {
     // We should be able to remove this once we support cjs/esm interop.
     if (req.startsWith('@elastic/opentelemetry-node/sdk')) {
       return Path.resolve(REPO_ROOT, `node_modules/@elastic/opentelemetry-node/lib/sdk.js`);
+    }
+
+    if (req.startsWith('@typescript-eslint/parser')) {
+      return Path.resolve(REPO_ROOT, `node_modules/@typescript-eslint/parser/dist/index.js`);
     }
 
     // turn root-relative paths into relative paths

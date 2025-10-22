@@ -8,7 +8,7 @@
  */
 
 import { set } from '@kbn/safer-lodash-set';
-import { DedotObject } from '@kbn/utility-types';
+import type { DedotObject } from '@kbn/utility-types';
 
 export function unflattenObject<T extends Record<string, any>>(
   source: T,

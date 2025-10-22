@@ -13,7 +13,8 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { BuildFlavor } from '@kbn/config';
 import { i18n } from '@kbn/i18n';
 import { EMSClient } from '@elastic/ems-client';
-import { EMS_APP_NAME, EMSSettings, DEFAULT_EMS_REST_VERSION } from '../../common';
+import type { EMSSettings } from '../../common';
+import { EMS_APP_NAME, DEFAULT_EMS_REST_VERSION } from '../../common';
 
 export function createEMSClient(
   emsSettings: EMSSettings,

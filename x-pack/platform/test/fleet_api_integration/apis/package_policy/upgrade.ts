@@ -5,12 +5,12 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import {
+import type {
   UpgradePackagePolicyDryRunResponse,
   UpgradePackagePolicyResponse,
 } from '@kbn/fleet-plugin/common/types';
 import { sortBy } from 'lodash';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { getInstallationInfo } from './helper';
 
@@ -51,7 +51,8 @@ export default function (providerContext: FtrProviderContext) {
     }
   };
 
-  describe('Package Policy - upgrade', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/238960
+  describe.skip('Package Policy - upgrade', function () {
     skipIfNoDockerRegistry(providerContext);
     let agentPolicyId: string;
     let packagePolicyId: string;

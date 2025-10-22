@@ -5,15 +5,16 @@
  * 2.0.
  */
 import pLimit from 'p-limit';
-import { PhoenixClient, createClient } from '@arizeai/phoenix-client';
-import { RanExperiment, TaskOutput } from '@arizeai/phoenix-client/dist/esm/types/experiments';
-import { DatasetInfo, Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
-import { SomeDevLog } from '@kbn/some-dev-log';
-import { withInferenceSpan } from '@kbn/inference-tracing';
-import { Model } from '@kbn/inference-common';
-import { Evaluator, EvaluationDataset, ExperimentTask } from '../types';
+import type { PhoenixClient } from '@arizeai/phoenix-client';
+import { createClient } from '@arizeai/phoenix-client';
+import type { RanExperiment, TaskOutput } from '@arizeai/phoenix-client/dist/esm/types/experiments';
+import type { DatasetInfo, Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
+import type { SomeDevLog } from '@kbn/some-dev-log';
+import type { Model } from '@kbn/inference-common';
+import { withInferenceContext } from '@kbn/inference-tracing';
+import type { Evaluator, EvaluationDataset, ExperimentTask } from '../types';
 import { upsertDataset } from './upsert_dataset';
-import { PhoenixConfig } from '../utils/get_phoenix_config';
+import type { PhoenixConfig } from '../utils/get_phoenix_config';
 
 export class KibanaPhoenixClient {
   private readonly phoenixClient: PhoenixClient;
@@ -26,6 +27,7 @@ export class KibanaPhoenixClient {
       log: SomeDevLog;
       model: Model;
       runId: string;
+      repetitions?: number;
     }
   ) {
     this.phoenixClient = createClient({
@@ -84,9 +86,11 @@ export class KibanaPhoenixClient {
   async runExperiment<TEvaluationDataset extends EvaluationDataset, TTaskOutput extends TaskOutput>(
     {
       dataset,
+      metadata,
       task,
     }: {
       dataset: TEvaluationDataset;
+      metadata?: Record<string, unknown>;
       task: ExperimentTask<TEvaluationDataset['examples'][number], TTaskOutput>;
     },
     evaluators: Array<Evaluator<TEvaluationDataset['examples'][number], TTaskOutput>>
@@ -96,13 +100,15 @@ export class KibanaPhoenixClient {
     {
       dataset,
       task,
+      metadata: experimentMetadata,
     }: {
       dataset: EvaluationDataset;
       task: ExperimentTask<Example, TaskOutput>;
+      metadata?: Record<string, unknown>;
     },
     evaluators: Evaluator[]
   ): Promise<RanExperiment> {
-    return await withInferenceSpan('run_experiment', async (span) => {
+    return withInferenceContext(async () => {
       const { datasetId } = await this.syncDataSet(dataset);
 
       const experiments = await import('@arizeai/phoenix-client/experiments');
@@ -110,8 +116,10 @@ export class KibanaPhoenixClient {
       const ranExperiment = await experiments.runExperiment({
         client: this.phoenixClient,
         dataset: { datasetId },
+        experimentName: `Run ID: ${this.options.runId} - Dataset: ${dataset.name}`,
         task,
         experimentMetadata: {
+          ...experimentMetadata,
           model: this.options.model,
           runId: this.options.runId,
         },
@@ -134,6 +142,7 @@ export class KibanaPhoenixClient {
           info: this.options.log.info.bind(this.options.log),
           log: this.options.log.info.bind(this.options.log),
         },
+        repetitions: this.options.repetitions ?? 1,
       });
 
       this.experiments.push(ranExperiment);

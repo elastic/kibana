@@ -9,11 +9,10 @@
 
 import { cloneDeep } from 'lodash';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { ApplicationStart, PublicAppInfo } from '@kbn/core/public';
+import type { ApplicationStart, PublicAppInfo } from '@kbn/core/public';
+import type { EmbeddableEditorState, EmbeddablePackageState } from './types';
 import {
-  EmbeddableEditorState,
   isEmbeddableEditorState,
-  EmbeddablePackageState,
   isEmbeddablePackageState,
   EMBEDDABLE_PACKAGE_STATE_KEY,
   EMBEDDABLE_EDITOR_STATE_KEY,
@@ -62,7 +61,7 @@ export class EmbeddableStateTransfer {
     appId: string,
     removeAfterFetch?: boolean
   ): EmbeddableEditorState | undefined {
-    return this.getIncomingState<EmbeddableEditorState>(
+    const states = this.getIncomingPackagesState<EmbeddableEditorState>(
       isEmbeddableEditorState,
       appId,
       EMBEDDABLE_EDITOR_STATE_KEY,
@@ -70,6 +69,12 @@ export class EmbeddableStateTransfer {
         keysToRemoveAfterFetch: removeAfterFetch ? [EMBEDDABLE_EDITOR_STATE_KEY] : undefined,
       }
     );
+    // warn if states are longer than 1
+    if (states && states.length > 1) {
+      // eslint-disable-next-line no-console
+      console.warn(`Multiple incoming editor states found for appId ${appId}:`, states);
+    }
+    return states?.[0];
   }
 
   /**
@@ -99,8 +104,8 @@ export class EmbeddableStateTransfer {
   public getIncomingEmbeddablePackage(
     appId: string,
     removeAfterFetch?: boolean
-  ): EmbeddablePackageState | undefined {
-    return this.getIncomingState<EmbeddablePackageState>(
+  ): EmbeddablePackageState[] | undefined {
+    return this.getIncomingPackagesState<EmbeddablePackageState>(
       isEmbeddablePackageState,
       appId,
       EMBEDDABLE_PACKAGE_STATE_KEY,
@@ -124,21 +129,22 @@ export class EmbeddableStateTransfer {
     }
   ): Promise<void> {
     this.isTransferInProgress = true;
-    await this.navigateToWithState<EmbeddableEditorState>(appId, EMBEDDABLE_EDITOR_STATE_KEY, {
+    await this.navigateToWithState<EmbeddableEditorState[]>(appId, EMBEDDABLE_EDITOR_STATE_KEY, {
       ...options,
+      state: options?.state ? [options.state] : undefined,
     });
   }
 
   /**
    * A wrapper around the {@link ApplicationStart.navigateToApp} method which navigates to the specified appId
-   * with {@link EmbeddablePackageState | embeddable package state}
+   * with multiple {@link EmbeddablePackageState | embeddable package state}
    */
-  public async navigateToWithEmbeddablePackage<SerializedStateType extends object = object>(
+  public async navigateToWithEmbeddablePackages<SerializedStateType extends object = object>(
     appId: string,
-    options?: { path?: string; state: EmbeddablePackageState<SerializedStateType> }
+    options?: { path?: string; state: Array<EmbeddablePackageState<SerializedStateType>> }
   ): Promise<void> {
     this.isTransferInProgress = true;
-    await this.navigateToWithState<EmbeddablePackageState<SerializedStateType>>(
+    await this.navigateToWithState<Array<EmbeddablePackageState<SerializedStateType>>>(
       appId,
       EMBEDDABLE_PACKAGE_STATE_KEY,
       {
@@ -147,25 +153,60 @@ export class EmbeddableStateTransfer {
     );
   }
 
-  private getIncomingState<IncomingStateType>(
+  private removeKeysFromStorage(
+    state: Record<string, any>,
+    options?: {
+      keysToRemoveAfterFetch?: string[];
+    }
+  ): void {
+    if (options?.keysToRemoveAfterFetch?.length) {
+      const stateReplace = { ...state };
+      options.keysToRemoveAfterFetch.forEach((keyToRemove: string) => {
+        delete stateReplace[keyToRemove];
+      });
+      this.storage.set(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY, stateReplace);
+    }
+  }
+
+  /**
+   * Retrieves incoming embeddable package states from session storage, handling arrays.
+   * Always returns an array format. Filters results using the provided type guard.
+   *
+   * @param guard - Type guard function to validate state items
+   * @param appId - The application ID to fetch state for
+   * @param key - The storage key to retrieve state from
+   * @param options - Optional configuration including keys to remove after fetch
+   * @returns Array of valid package states, or undefined if no valid states found
+   */
+  private getIncomingPackagesState<IncomingStateType>(
     guard: (state: unknown) => state is IncomingStateType,
     appId: string,
     key: string,
     options?: {
       keysToRemoveAfterFetch?: string[];
     }
-  ): IncomingStateType | undefined {
-    const incomingState = this.storage.get(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY)?.[key]?.[appId];
-    const castState =
-      !guard || guard(incomingState) ? (cloneDeep(incomingState) as IncomingStateType) : undefined;
-    if (castState && options?.keysToRemoveAfterFetch) {
-      const stateReplace = { ...this.storage.get(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY) };
-      options.keysToRemoveAfterFetch.forEach((keyToRemove: string) => {
-        delete stateReplace[keyToRemove];
-      });
-      this.storage.set(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY, stateReplace);
+  ): IncomingStateType[] | undefined {
+    const embeddableState = this.storage.get(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY);
+    if (!embeddableState) {
+      return undefined;
     }
-    return castState;
+
+    const incomingState = embeddableState[key]?.[appId];
+
+    if (!incomingState) {
+      return undefined;
+    }
+
+    if (Array.isArray(incomingState)) {
+      const validStates = incomingState.filter((item) => guard(item));
+      if (validStates.length > 0) {
+        this.removeKeysFromStorage(embeddableState, options);
+        return validStates.map((item) => cloneDeep(item) as IncomingStateType);
+      }
+      return undefined;
+    }
+
+    return undefined;
   }
 
   private async navigateToWithState<OutgoingStateType = unknown>(

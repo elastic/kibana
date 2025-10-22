@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
-import { Connector, fetchConnectors } from '@kbn/search-connectors';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { Connector } from '@kbn/search-connectors';
+import { fetchConnectors } from '@kbn/search-connectors';
 
 import { isNotNullish } from '../../../common/utils/is_not_nullish';
 
@@ -25,6 +26,7 @@ export const fetchUnattachedIndices = async (
   let connectors: Connector[] = [];
   try {
     connectors = await fetchConnectors(client.asCurrentUser, indexNames);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     connectors = [];
   }

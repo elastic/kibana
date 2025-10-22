@@ -9,7 +9,7 @@ import pRetry from 'p-retry';
 import { Subject } from 'rxjs';
 import { LicenseService } from '../../../../common/license';
 import { PolicyWatcher } from './license_watch';
-import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import type { ILicense } from '@kbn/licensing-types';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';

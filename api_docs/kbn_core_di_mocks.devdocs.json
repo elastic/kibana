@@ -1,0 +1,152 @@
+{
+  "id": "@kbn/core-di-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-di-mocks",
+        "id": "def-common.injectionServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "injectionServiceMock",
+        "description": [
+          "\nMocks for the Dependency Injection service."
+        ],
+        "path": "src/core/packages/di/mocks/src/service.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-di-mocks",
+            "id": "def-common.injectionServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [
+              "/**\n   * Creates a mocked instance of the dependency-injection service.\n   */"
+            ],
+            "signature": [
+              "() => jest.Mocked<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.PublicMethodsOf",
+                "text": "PublicMethodsOf"
+              },
+              "<",
+              "CoreInjectionService",
+              ">>"
+            ],
+            "path": "src/core/packages/di/mocks/src/service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-di-mocks",
+            "id": "def-common.injectionServiceMock.createSetupContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createSetupContract",
+            "description": [
+              "/**\n   * Creates a mocked instance of the setup contract.\n   */"
+            ],
+            "signature": [
+              "() => jest.MockedObjectDeep<",
+              "CoreDiServiceSetup",
+              ">"
+            ],
+            "path": "src/core/packages/di/mocks/src/service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-di-mocks",
+            "id": "def-common.injectionServiceMock.createStartContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createStartContract",
+            "description": [
+              "/**\n   * Creates a mocked instance of the start contract.\n   */"
+            ],
+            "signature": [
+              "() => jest.MockedObjectDeep<",
+              "CoreDiServiceStart",
+              ">"
+            ],
+            "path": "src/core/packages/di/mocks/src/service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-di-mocks",
+            "id": "def-common.injectionServiceMock.createInternalSetupContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createInternalSetupContract",
+            "description": [
+              "/**\n   * Creates a mocked instance of the internal setup contract.\n   * @internal\n   */"
+            ],
+            "signature": [
+              "() => jest.MockedObjectDeep<",
+              "InternalCoreDiServiceSetup",
+              ">"
+            ],
+            "path": "src/core/packages/di/mocks/src/service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-di-mocks",
+            "id": "def-common.injectionServiceMock.createInternalStartContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createInternalStartContract",
+            "description": [
+              "/**\n   * Creates a mocked instance of the internal start contract.\n   * @internal\n   */"
+            ],
+            "signature": [
+              "() => jest.MockedObjectDeep<",
+              "InternalCoreDiServiceStart",
+              ">"
+            ],
+            "path": "src/core/packages/di/mocks/src/service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

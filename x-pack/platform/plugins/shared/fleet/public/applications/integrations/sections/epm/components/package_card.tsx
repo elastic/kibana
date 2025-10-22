@@ -32,8 +32,8 @@ import {
 import { CardIcon } from '../../../../../components/package_icon';
 import type { IntegrationCardItem } from '../screens/home';
 
-import { InlineReleaseBadge, WithGuidedOnboardingTour } from '../../../components';
-import { useStartServices, useIsGuidedOnboardingActive } from '../../../hooks';
+import { InlineReleaseBadge } from '../../../components';
+import { useStartServices } from '../../../hooks';
 import { INTEGRATIONS_BASE_PATH, INTEGRATIONS_PLUGIN_ID } from '../../../constants';
 
 import {
@@ -69,6 +69,7 @@ export function PackageCard({
   isCollectionCard = false,
   titleLineClamp,
   titleBadge,
+  titleSize = 'xs',
   descriptionLineClamp,
   maxCardHeight,
   minCardHeight,
@@ -116,8 +117,13 @@ export function PackageCard({
             display="inlineBlock"
             content={DEFERRED_ASSETS_WARNING_MSG}
             title={DEFERRED_ASSETS_WARNING_LABEL}
+            css={css`
+              width: 100%;
+            `}
           >
-            <EuiBadge color="warning">{DEFERRED_ASSETS_WARNING_LABEL} </EuiBadge>
+            <EuiBadge color="warning" tabIndex={0}>
+              {DEFERRED_ASSETS_WARNING_LABEL}{' '}
+            </EuiBadge>
           </EuiToolTip>
         </span>
       </EuiFlexItem>
@@ -177,7 +183,6 @@ export function PackageCard({
   }
 
   const { application } = useStartServices();
-  const isGuidedOnboardingActive = useIsGuidedOnboardingActive(name);
 
   const onCardClick = () => {
     if (url.startsWith(INTEGRATIONS_BASE_PATH)) {
@@ -192,86 +197,104 @@ export function PackageCard({
     }
   };
 
+  const installationStatusVisible = shouldShowInstallationStatus({
+    installStatus,
+    showInstallationStatus,
+    isActive: hasDataStreams,
+  });
+
   const testid = `integration-card:${id}`;
   return (
-    <WithGuidedOnboardingTour
-      packageKey={name}
-      isTourVisible={isGuidedOnboardingActive}
-      tourType={'integrationCard'}
-      tourOffset={10}
-    >
-      <TrackApplicationView viewId={testid}>
-        <EuiCard
-          // EUI TODO: Custom component CSS
-          // Min-height is roughly 3 lines of content.
-          // This keeps the cards from looking overly unbalanced because of content differences.
-          css={css`
-            position: relative;
-            [class*='euiCard__content'] {
-              display: flex;
-              flex-direction: column;
-              block-size: 100%;
-            }
-
-            [class*='euiCard__description'] {
-              flex-grow: 1;
-              ${descriptionLineClamp
-                ? shouldShowInstallationStatus({
-                    installStatus,
-                    showInstallationStatus,
-                    isActive: hasDataStreams,
-                  })
-                  ? getLineClampStyles(1) // Show only one line of description if installation status is shown
-                  : getLineClampStyles(descriptionLineClamp)
-                : ''}
-            }
-
-            [class*='euiCard__titleButton'] {
-              width: 100%;
-              ${getLineClampStyles(titleLineClamp)}
-            }
-
-            min-height: ${minCardHeight ? `${minCardHeight}px` : '127px'};
-            border-color: ${isQuickstart ? theme.euiTheme.colors.accent : null};
-            max-height: ${maxCardHeight ? `${maxCardHeight}px` : null};
-            overflow: ${maxCardHeight ? 'hidden' : null};
-          `}
-          data-test-subj={testid}
-          betaBadgeProps={quickstartBadge(isQuickstart)}
-          layout="horizontal"
-          title={<CardTitle title={title} titleBadge={titleBadge} />}
-          titleSize="xs"
-          description={showDescription ? description : ''}
-          hasBorder
-          icon={
-            <CardIcon
-              icons={icons}
-              packageName={name}
-              integrationName={integration}
-              version={version}
-              size={showDescription ? 'xl' : 'xxl'}
-            />
+    <TrackApplicationView viewId={testid}>
+      <EuiCard
+        // EUI TODO: Custom component CSS
+        // Min-height is roughly 3 lines of content.
+        // This keeps the cards from looking overly unbalanced because of content differences.
+        css={css`
+          position: relative;
+          [class*='euiCard__content'] {
+            display: flex;
+            flex-direction: column;
+            block-size: 100%;
+            overflow: hidden;
           }
-          onClick={onClickProp ?? onCardClick}
+
+          [class*='euiCard__description'] {
+            flex-grow: 1;
+            ${descriptionLineClamp
+              ? installationStatusVisible
+                ? getLineClampStyles(1) // Show only one line of description if installation status is shown
+                : getLineClampStyles(descriptionLineClamp)
+              : ''}
+          }
+
+          [class*='euiCard__titleButton'] {
+            width: ${installationStatusVisible
+              ? `calc(100% - ${theme.euiTheme.base * 4}px)`
+              : '100%'};
+            ${getLineClampStyles(titleLineClamp)}
+          }
+
+          min-height: ${minCardHeight ? `${minCardHeight}px` : '127px'};
+          border-color: ${isQuickstart ? theme.euiTheme.colors.accent : null};
+          max-height: ${maxCardHeight ? `${maxCardHeight}px` : null};
+          overflow: ${maxCardHeight ? 'hidden' : null};
+        `}
+        data-test-subj={testid}
+        betaBadgeProps={quickstartBadge(isQuickstart)}
+        layout="horizontal"
+        title={<CardTitle title={title} titleBadge={titleBadge} />}
+        titleSize={titleSize}
+        description={showDescription ? description : ''}
+        hasBorder
+        icon={
+          <CardIcon
+            icons={icons}
+            packageName={name}
+            integrationName={integration}
+            version={version}
+            size={showDescription ? 'xl' : 'xxl'}
+          />
+        }
+        onClick={onClickProp ?? onCardClick}
+      >
+        <EuiFlexGroup
+          gutterSize="xs"
+          wrap={true}
+          css={css`
+            width: ${installationStatusVisible
+              ? `calc(100% - ${theme.euiTheme.base * 4}px)`
+              : '100%'};
+            overflow-x: hidden;
+            text-overflow: ellipsis;
+
+            & > .euiFlexItem {
+              min-width: 0;
+            }
+
+            ${isCollectionCard
+              ? `& > .euiFlexItem:last-child {
+              min-width: auto;
+            }`
+              : ''}
+          `}
         >
-          <EuiFlexGroup gutterSize="xs" wrap={true}>
-            {showLabels && extraLabelsBadges ? extraLabelsBadges : null}
-            {verifiedBadge}
-            {updateAvailableBadge}
-            {contentBadge}
-            {releaseBadge}
-            {hasDeferredInstallationsBadge}
-            {collectionButton}
-            <InstallationStatus
-              installStatus={installStatus}
-              showInstallationStatus={showInstallationStatus}
-              compressed={showCompressedInstallationStatus}
-              hasDataStreams={hasDataStreams}
-            />
-          </EuiFlexGroup>
-        </EuiCard>
-      </TrackApplicationView>
-    </WithGuidedOnboardingTour>
+          {showLabels && extraLabelsBadges ? extraLabelsBadges : null}
+          {verifiedBadge}
+          {updateAvailableBadge}
+          {contentBadge}
+          {releaseBadge}
+          {hasDeferredInstallationsBadge}
+          {collectionButton}
+          <InstallationStatus
+            installStatus={installStatus}
+            showInstallationStatus={showInstallationStatus}
+            compressed={showCompressedInstallationStatus}
+            hasDataStreams={hasDataStreams}
+          />
+        </EuiFlexGroup>
+      </EuiCard>
+    </TrackApplicationView>
   );
 }
 
@@ -289,7 +312,7 @@ const CardTitle = React.memo<Pick<IntegrationCardItem, 'title' | 'titleBadge'>>(
         responsive={false}
       >
         <EuiFlexItem>
-          <EuiTitle size="xs">
+          <EuiTitle>
             <h3>{title}</h3>
           </EuiTitle>
         </EuiFlexItem>

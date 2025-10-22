@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { ServiceProviderKeys } from '../../constants';
+import type { FieldsConfiguration } from '../types';
+
 export interface SelectOption {
   label: string;
   value: string;
@@ -53,3 +56,13 @@ export interface ConfigEntryView extends ConfigEntry {
   validationErrors: string[];
   value: string | number | boolean | null;
 }
+
+type ServiceProviderKeysType = keyof typeof ServiceProviderKeys;
+export interface OverrideFieldsContentType {
+  serverlessOnly?: boolean;
+  hidden?: string[];
+  additional?: FieldsConfiguration[];
+}
+export type InternalOverrideFieldsType = {
+  [Key in ServiceProviderKeysType | string]?: OverrideFieldsContentType;
+};

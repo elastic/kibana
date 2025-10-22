@@ -10,7 +10,7 @@ import { asset } from './asset';
 import { filtersFunctionFactory } from './filters';
 import { timelionFunctionFactory } from './timelion';
 import { toFunctionFactory } from './to';
-import { CanvasSetupDeps, CoreSetup } from '../plugin';
+import type { CanvasSetupDeps, CoreSetup } from '../plugin';
 import { plotFunctionFactory } from './plot';
 import { pieFunctionFactory } from './pie';
 

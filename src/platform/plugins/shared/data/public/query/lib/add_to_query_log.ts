@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IUiSettingsClient } from '@kbn/core/public';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { Query } from '../../../common';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { Query } from '../../../common';
 import { getQueryLog } from './get_query_log';
 
 interface AddToQueryLogDependencies {

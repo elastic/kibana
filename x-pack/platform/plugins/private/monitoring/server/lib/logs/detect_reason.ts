@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LegacyRequest } from '../../types';
+import type { LegacyRequest } from '../../types';
 import { createTimeFilter } from '../create_query';
 import { elasticsearchLogsFilter } from './logs_filter';
 

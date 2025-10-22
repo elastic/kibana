@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/types';
 
 export const nycTaxisIndexCreateRequest: IndicesCreateRequest = {
   index: 'nyc_taxis-[environment].evaluations.[date]',

@@ -9,8 +9,8 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { AppPluginSetupDependencies, AppPluginStartDependencies } from './types';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { AppPluginSetupDependencies, AppPluginStartDependencies } from './types';
 import { ScreenshotModeExampleApp } from './components/app';
 
 export const renderApp = (

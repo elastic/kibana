@@ -111,29 +111,26 @@ describe('convertRequestToMetricsAPIOptions', () => {
     });
   });
 
-  it('should work with filterQuery json string', () => {
-    const filter = { bool: { filter: [{ match: { 'host.name': 'example-01' } }] } };
+  it('should work with kuery string', () => {
     expect(
       convertRequestToMetricsAPIOptions({
         ...BASE_REQUEST,
-        filterQuery: JSON.stringify(filter),
+        kuery: "'host.name': 'example-01'",
       })
     ).toEqual({
       ...BASE_METRICS_UI_OPTIONS,
-      filters: [filter],
-    });
-  });
-
-  it('should work with filterQuery as Lucene expressions', () => {
-    const filter = `host.name: 'example-01'`;
-    expect(
-      convertRequestToMetricsAPIOptions({
-        ...BASE_REQUEST,
-        filterQuery: filter,
-      })
-    ).toEqual({
-      ...BASE_METRICS_UI_OPTIONS,
-      filters: [{ query_string: { query: filter, analyze_wildcard: true } }],
+      filters: {
+        bool: {
+          filter: [
+            {
+              bool: {
+                minimum_should_match: 1,
+                should: [{ match: { "'host.name'": "'example-01'" } }],
+              },
+            },
+          ],
+        },
+      },
     });
   });
 

@@ -7,22 +7,13 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiPopover, EuiContextMenuPanel } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { RunTestManuallyContextItem } from './run_test_manually';
 import { EditMonitorContextItem } from './monitor_summary/edit_monitor_link';
 import { RefreshContextItem } from '../common/components/refresh_button';
-import { AddToCaseContextItem } from './add_to_case_action';
-import { ClientPluginsStart } from '../../../../plugin';
 
 export function Actions() {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const handleActionsClick = () => setIsPopoverOpen((value) => !value);
-  const {
-    services: { observabilityShared },
-  } = useKibana<ClientPluginsStart>();
-  const isAddToCaseEnabled =
-    observabilityShared.config?.unsafe?.investigativeExperienceEnabled || false;
-
   const closePopover = () => setIsPopoverOpen(false);
   return (
     <EuiPopover
@@ -47,10 +38,10 @@ export function Actions() {
       <EuiContextMenuPanel
         size="m"
         items={[
-          <EditMonitorContextItem />,
-          <RefreshContextItem />,
-          <RunTestManuallyContextItem />,
-        ].concat(isAddToCaseEnabled ? [<AddToCaseContextItem />] : [])}
+          <EditMonitorContextItem key="edit-monitor" />,
+          <RefreshContextItem key="refresh-monitor" />,
+          <RunTestManuallyContextItem key="run-test-manually" />,
+        ]}
       />
     </EuiPopover>
   );

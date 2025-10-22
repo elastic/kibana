@@ -27,7 +27,9 @@ export type ManagementState = CombinedState<{
 export enum AdministrationSubTab {
   endpoints = 'endpoints',
   policies = 'policy',
+  endpointExceptions = 'endpoint_exceptions',
   trustedApps = 'trusted_apps',
+  trustedDevices = 'trusted_devices',
   eventFilters = 'event_filters',
   hostIsolationExceptions = 'host_isolation_exceptions',
   blocklist = 'blocklist',

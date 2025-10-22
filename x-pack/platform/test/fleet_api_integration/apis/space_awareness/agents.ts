@@ -6,12 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  AGENTS_INDEX,
-  CreateAgentPolicyResponse,
-  GetAgentsResponse,
-} from '@kbn/fleet-plugin/common';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { CreateAgentPolicyResponse, GetAgentsResponse } from '@kbn/fleet-plugin/common';
+import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { SpaceTestApiClient } from './api_helper';
 import {
@@ -19,6 +16,7 @@ import {
   cleanFleetAgents,
   cleanFleetIndices,
   createFleetAgent,
+  createTestSpace,
   makeAgentsUpgradeable,
 } from './helpers';
 import { pollResult } from '../agents/update_agent_tags';
@@ -31,7 +29,8 @@ export default function (providerContext: FtrProviderContext) {
   const spaces = getService('spaces');
   let TEST_SPACE_1: string;
 
-  describe('agents', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/236095
+  describe.skip('agents', function () {
     skipIfNoDockerRegistry(providerContext);
     const apiClient = new SpaceTestApiClient(supertest);
 
@@ -53,7 +52,7 @@ export default function (providerContext: FtrProviderContext) {
         space: TEST_SPACE_1,
       });
       await cleanFleetIndices(esClient);
-      await spaces.createTestSpace(TEST_SPACE_1);
+      await createTestSpace(providerContext, TEST_SPACE_1);
 
       await apiClient.postEnableSpaceAwareness();
 

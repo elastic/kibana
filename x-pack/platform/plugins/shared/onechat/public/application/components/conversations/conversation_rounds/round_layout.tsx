@@ -7,12 +7,17 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 interface RoundLayoutProps {
   input: ReactNode;
+  outputIcon: ReactNode;
   output: ReactNode;
+  isResponseLoading: boolean;
+  isCurrentRound: boolean;
+  scrollContainerHeight: number;
 }
 
 const labels = {
@@ -24,7 +29,24 @@ const labels = {
   }),
 };
 
-export const RoundLayout: React.FC<RoundLayoutProps> = ({ input, output }) => {
+export const RoundLayout: React.FC<RoundLayoutProps> = ({
+  input,
+  outputIcon,
+  output,
+  isResponseLoading,
+  isCurrentRound,
+  scrollContainerHeight,
+}) => {
+  const [roundContainerMinHeight, setRoundContainerMinHeight] = useState(0);
+
+  useEffect(() => {
+    if (isCurrentRound && isResponseLoading) {
+      setRoundContainerMinHeight(scrollContainerHeight);
+    } else if (!isCurrentRound) {
+      setRoundContainerMinHeight(0);
+    }
+  }, [isCurrentRound, isResponseLoading, scrollContainerHeight]);
+
   const { euiTheme } = useEuiTheme();
   const inputContainerStyles = css`
     width: 100%;
@@ -33,8 +55,17 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({ input, output }) => {
     background-color: ${euiTheme.colors.backgroundBasePrimary};
   `;
 
+  const roundContainerStyles = css`
+    ${roundContainerMinHeight > 0 ? `min-height: ${roundContainerMinHeight}px;` : ''}
+  `;
+
   return (
-    <EuiFlexGroup direction="column" gutterSize="l" aria-label={labels.container}>
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="l"
+      aria-label={labels.container}
+      css={roundContainerStyles}
+    >
       <EuiFlexItem grow={false}>
         <EuiPanel
           css={inputContainerStyles}
@@ -47,7 +78,12 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({ input, output }) => {
         </EuiPanel>
       </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>{output}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup direction="row" gutterSize="m">
+          <EuiFlexItem grow={false}>{outputIcon}</EuiFlexItem>
+          <EuiFlexItem>{output}</EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

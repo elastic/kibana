@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-export * from './data_view_permissions';
-export * from './alerts';
-export * from './uptime.journey';
-export * from './step_duration.journey';
-export * from './monitor_details';
-export * from './locations';
+export type * from './data_view_permissions';
+export type * from './alerts';
+export type * from './uptime.journey';
+export type * from './step_duration.journey';
+export type * from './monitor_details';
+export type * from './locations';

@@ -22,8 +22,8 @@ import {
 import { NUMERICAL_COLOR_PALETTES } from '../../styles/color_palettes';
 // @ts-ignore
 import { CreateSourceEditor } from './create_source_editor';
-import { LayerWizard, RenderWizardArguments } from '../../layers';
-import {
+import type { LayerWizard, RenderWizardArguments } from '../../layers';
+import type {
   ColorDynamicOptions,
   ESPewPewSourceDescriptor,
   SizeDynamicOptions,

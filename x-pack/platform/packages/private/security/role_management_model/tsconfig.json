@@ -11,6 +11,6 @@
     "@kbn/security-plugin-types-common",
     "@kbn/security-authorization-core",
     "@kbn/security-authorization-core-common",
-    "@kbn/licensing-plugin",
+    "@kbn/licensing-types",
   ]
 }

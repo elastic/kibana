@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MonitoringCore } from '../../../../types';
+import type { MonitoringCore } from '../../../../types';
 import { beatsListingRoute } from './beats';
 import { beatsDetailRoute } from './beat_detail';
 import { beatsOverviewRoute } from './overview';

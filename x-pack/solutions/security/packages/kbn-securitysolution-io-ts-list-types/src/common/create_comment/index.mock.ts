@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CreateComment, CreateCommentsArray } from '.';
+import type { CreateComment, CreateCommentsArray } from '.';
 
 export const getCreateCommentsMock = (): CreateComment => ({
   comment: 'some comments',

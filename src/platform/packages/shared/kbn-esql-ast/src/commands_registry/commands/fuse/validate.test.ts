@@ -6,10 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { mockContext } from '../../../__tests__/context_fixtures';
-import { validate } from './validate';
-import { expectErrors } from '../../../__tests__/validation';
 import { METADATA_FIELDS } from '../../../..';
+import { mockContext } from '../../../__tests__/context_fixtures';
+import { expectErrors } from '../../../__tests__/validation';
+import { validate } from './validate';
 
 const fuseExpectErrors = (query: string, expectedErrors: string[], context = mockContext) => {
   return expectErrors(query, expectedErrors, context, 'fuse', validate);
@@ -22,13 +22,13 @@ describe('FUSE Validation', () => {
 
   describe('FUSE', () => {
     test('no errors for valid command', () => {
-      const newFields = new Map(mockContext.fields);
+      const newColumns = new Map(mockContext.columns);
       METADATA_FIELDS.forEach((fieldName) => {
-        newFields.set(fieldName, { name: fieldName, type: 'keyword' });
+        newColumns.set(fieldName, { name: fieldName, type: 'keyword', userDefined: false });
       });
       const context = {
         ...mockContext,
-        fields: newFields,
+        columns: newColumns,
       };
       fuseExpectErrors(
         `FROM index METADATA _id, _score, _index

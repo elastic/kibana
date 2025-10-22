@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { Filter, Query, TimeRange } from '@kbn/es-query';
-import { DataViewsContract, ISearchStartSearchSource } from '@kbn/data-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { ISearchStartSearchSource } from '@kbn/data-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { NonPersistedDisplayOptions } from '@kbn/discover-plugin/public';
-import { CSSProperties } from 'react';
+import type { CSSProperties } from 'react';
 
 export interface SavedSearchComponentDependencies {
   embeddable: EmbeddableStart;

@@ -92,7 +92,7 @@ export function initControlsManager(
   }
 
   async function addNewPanel(
-    { panelType, serializedState }: PanelPackage<DefaultControlState>,
+    { panelType, serializedState, maybePanelId }: PanelPackage<DefaultControlState>,
     index: number
   ) {
     if ((serializedState?.rawState as DefaultDataControlState)?.dataViewId) {
@@ -105,7 +105,7 @@ export function initControlsManager(
       lastUsedGrow$.next(serializedState.rawState.grow);
     }
 
-    const id = generateId();
+    const id = maybePanelId ?? generateId();
     const nextControlsInOrder = [...controlsInOrder$.value];
     nextControlsInOrder.splice(index, 0, {
       id,

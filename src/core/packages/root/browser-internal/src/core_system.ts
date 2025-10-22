@@ -31,7 +31,6 @@ import { DeprecationsService } from '@kbn/core-deprecations-browser-internal';
 import { IntegrationsService } from '@kbn/core-integrations-browser-internal';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { OverlayService } from '@kbn/core-overlays-browser-internal';
-import { SavedObjectsService } from '@kbn/core-saved-objects-browser-internal';
 import { NotificationsService } from '@kbn/core-notifications-browser-internal';
 import { ChromeService } from '@kbn/core-chrome-browser-internal';
 import { ApplicationService } from '@kbn/core-application-browser-internal';
@@ -45,6 +44,7 @@ import { SecurityService } from '@kbn/core-security-browser-internal';
 import { UserProfileService } from '@kbn/core-user-profile-browser-internal';
 import { version as REACT_VERSION } from 'react';
 import { muteLegacyRootWarning } from '@kbn/react-mute-legacy-root-warning';
+import { CoreInjectionService } from '@kbn/core-di-browser-internal';
 import { KBN_LOAD_MARKS } from './events';
 import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
 import {
@@ -91,10 +91,10 @@ export class CoreSystem {
   private readonly fatalErrors: FatalErrorsService;
   private readonly featureFlags: FeatureFlagsService;
   private readonly injectedMetadata: InjectedMetadataService;
+  private readonly injection: CoreInjectionService;
   private readonly notifications: NotificationsService;
   private readonly http: HttpService;
   private readonly httpRateLimiter: HttpRateLimiterService;
-  private readonly savedObjects: SavedObjectsService;
   private readonly uiSettings: UiSettingsService;
   private readonly settings: SettingsService;
   private readonly chrome: ChromeService;
@@ -148,6 +148,7 @@ export class CoreSystem {
       // Stop Core before rendering any fatal errors into the DOM
       this.stop();
     });
+    this.injection = new CoreInjectionService();
     this.featureFlags = new FeatureFlagsService(this.coreContext);
     this.security = new SecurityService(this.coreContext);
     this.userProfile = new UserProfileService(this.coreContext);
@@ -155,7 +156,6 @@ export class CoreSystem {
     this.notifications = new NotificationsService();
     this.http = new HttpService();
     this.httpRateLimiter = new HttpRateLimiterService();
-    this.savedObjects = new SavedObjectsService();
     this.uiSettings = new UiSettingsService();
     this.settings = new SettingsService();
     this.overlay = new OverlayService();
@@ -261,6 +261,7 @@ export class CoreSystem {
         executionContext,
       });
       this.httpRateLimiter.setup({ fatalErrors: this.fatalErrorsSetup, http });
+      const injection = this.injection.setup();
       const security = this.security.setup();
       const userProfile = this.userProfile.setup();
       this.chrome.setup({ analytics });
@@ -279,6 +280,7 @@ export class CoreSystem {
         featureFlags,
         http,
         injectedMetadata,
+        injection,
         notifications,
         theme,
         uiSettings,
@@ -314,11 +316,11 @@ export class CoreSystem {
       const security = this.security.start();
       const userProfile = this.userProfile.start();
       const injectedMetadata = this.injectedMetadata.start();
+      const injection = this.injection.start();
       const uiSettings = this.uiSettings.start();
       const settings = this.settings.start();
       const docLinks = this.docLinks.start({ injectedMetadata });
       const http = this.http.start();
-      const savedObjects = await this.savedObjects.start({ http });
       const i18n = this.i18n.start();
       const fatalErrors = this.fatalErrors.start();
       const theme = this.theme.start();
@@ -366,6 +368,8 @@ export class CoreSystem {
         rendering,
       });
 
+      const featureFlags = await this.featureFlags.start();
+
       const chrome = await this.chrome.start({
         application,
         docLinks,
@@ -378,6 +382,7 @@ export class CoreSystem {
         userProfile,
         uiSettings,
         analytics,
+        featureFlags,
       });
       const deprecations = this.deprecations.start({ http });
 
@@ -393,7 +398,6 @@ export class CoreSystem {
         userProfile,
       });
 
-      const featureFlags = await this.featureFlags.start();
       const pricing = await this.pricing.start({ http });
 
       const core: InternalCoreStart = {
@@ -405,9 +409,9 @@ export class CoreSystem {
         featureFlags,
         http,
         theme,
-        savedObjects,
         i18n,
         injectedMetadata,
+        injection,
         notifications,
         overlays,
         uiSettings,

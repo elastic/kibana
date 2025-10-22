@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { asyncForEach } from '../../helpers';
 
 const TOTAL_ALERTS_CELL_COUNT = 440;

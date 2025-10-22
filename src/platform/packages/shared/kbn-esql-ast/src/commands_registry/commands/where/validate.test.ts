@@ -9,6 +9,7 @@
 import { mockContext } from '../../../__tests__/context_fixtures';
 import { validate } from './validate';
 import { expectErrors } from '../../../__tests__/validation';
+import { getNoValidCallSignatureError } from '../../../definitions/utils/validation/utils';
 
 const NESTING_LEVELS = 4;
 const NESTED_DEPTHS = Array(NESTING_LEVELS)
@@ -24,8 +25,10 @@ describe('WHERE Validation', () => {
     jest.clearAllMocks();
   });
 
+  // @TODO - this test is largely about function/operator validation, which is not the focus of this file.
+  // consider merging with the functions validation tests (src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/__tests__/functions.test.ts).
   test('validates the WHERE command', () => {
-    whereExpectErrors('from a_index | where b', ['Unknown column [b]']);
+    whereExpectErrors('from a_index | where b', ['Unknown column "b"']);
     for (const cond of ['true', 'false']) {
       whereExpectErrors(`from a_index | where ${cond}`, []);
       whereExpectErrors(`from a_index | where NOT ${cond}`, []);
@@ -46,10 +49,7 @@ describe('WHERE Validation', () => {
           `from a_index | where ${type}Field ${op} ${type}Field`,
           type !== 'boolean' || ['==', '!='].includes(op)
             ? []
-            : [
-                `Argument of [${op}] must be [date], found value [${type}Field] type [${type}]`,
-                `Argument of [${op}] must be [date], found value [${type}Field] type [${type}]`,
-              ]
+            : [getNoValidCallSignatureError(op, [type, type])]
         );
       }
     }
@@ -89,21 +89,21 @@ describe('WHERE Validation', () => {
       whereExpectErrors(`from a_index | where NOT textField ${op} "?a"`, []);
       whereExpectErrors(`from a_index | where NOT textField NOT ${op} "?a"`, []);
       whereExpectErrors(`from a_index | where doubleField ${op} "?a"`, [
-        `Argument of [${op}] must be [keyword], found value [doubleField] type [double]`,
+        getNoValidCallSignatureError(op, ['double', 'keyword']),
       ]);
       whereExpectErrors(`from a_index | where doubleField NOT ${op} "?a"`, [
-        `Argument of [not ${op}] must be [keyword], found value [doubleField] type [double]`,
+        getNoValidCallSignatureError(`not ${op}`, ['double', 'keyword']),
       ]);
       whereExpectErrors(`from a_index | where NOT doubleField ${op} "?a"`, [
-        `Argument of [${op}] must be [keyword], found value [doubleField] type [double]`,
+        getNoValidCallSignatureError(op, ['double', 'keyword']),
       ]);
       whereExpectErrors(`from a_index | where NOT doubleField NOT ${op} "?a"`, [
-        `Argument of [not ${op}] must be [keyword], found value [doubleField] type [double]`,
+        getNoValidCallSignatureError(`not ${op}`, ['double', 'keyword']),
       ]);
     }
 
     whereExpectErrors(`from a_index | where cidr_match(ipField)`, [
-      `Error: [cidr_match] function expects at least 2 arguments, got 1.`,
+      `CIDR_MATCH expected at least 2 arguments, but got 1.`,
     ]);
     whereExpectErrors(
       `from a_index | eval keywordField = "172.0.0.1/30" | where cidr_match(ipField, "172.0.0.1/30", keywordField)`,

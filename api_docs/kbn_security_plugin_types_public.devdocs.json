@@ -873,6 +873,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/reports/links.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/management/links.ts"
               },
               {
@@ -882,6 +886,14 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/kibana/hooks.ts"
+              },
+              {
+                "plugin": "securitySolutionServerless",
+                "path": "x-pack/solutions/security/plugins/security_solution_serverless/public/navigation/navigation_tree.ts"
+              },
+              {
+                "plugin": "securitySolutionServerless",
+                "path": "x-pack/solutions/security/plugins/security_solution_serverless/public/navigation/navigation.test.ts"
               }
             ]
           },
@@ -972,16 +984,16 @@
                 "path": "x-pack/platform/plugins/shared/cases/public/containers/user_profiles/api.test.ts"
               },
               {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/public/hooks/use_user_profile.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/user_profiles/use_bulk_get_user_profiles.tsx"
               },
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/user_profiles/use_get_current_user_profile.tsx"
-              },
-              {
-                "plugin": "searchPlayground",
-                "path": "x-pack/solutions/search/plugins/search_playground/public/hooks/use_user_profile.ts"
               }
             ]
           }

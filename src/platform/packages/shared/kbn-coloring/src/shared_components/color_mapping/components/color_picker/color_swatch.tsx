@@ -18,10 +18,10 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { IKbnPalette, KbnPalettes } from '@kbn/palettes';
+import type { IKbnPalette, KbnPalettes } from '@kbn/palettes';
 import { ColorPicker } from './color_picker';
 import { getAssignmentColor } from '../../color/color_handling';
-import { ColorMapping } from '../../config';
+import type { ColorMapping } from '../../config';
 import { removeGradientColorStep } from '../../state/color_mapping';
 
 import { selectColorPickerVisibility } from '../../state/selectors';
@@ -102,7 +102,7 @@ export const ColorSwatch = ({
               border-radius: 50%;
               top: 8px;
               border: 3px solid ${euiTheme.euiTheme.colors.emptyShade};
-              ${euiShadowSmall(euiTheme)};
+              ${euiShadowSmall(euiTheme, { border: 'none' })};
               backgroundcolor: ${colorHex};
               cursor: pointer;
             `}

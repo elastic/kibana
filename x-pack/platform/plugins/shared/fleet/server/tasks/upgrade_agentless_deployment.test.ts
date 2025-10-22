@@ -89,6 +89,7 @@ describe('Upgrade Agentless Deployments', () => {
   let mockTask: UpgradeAgentlessDeploymentsTask;
   let mockCore: ReturnType<typeof coreSetupMock>;
   let mockTaskManagerSetup: ReturnType<typeof tmSetupMock>;
+  let abortController: AbortController;
 
   const getMockAgentPolicyFetchAllAgentPolicies = (items: AgentPolicy[]) =>
     jest.fn().mockResolvedValue(
@@ -98,6 +99,7 @@ describe('Upgrade Agentless Deployments', () => {
     );
 
   beforeEach(() => {
+    abortController = new AbortController();
     mockContract = createAppContextStartContractMock();
     appContextService.start(mockContract);
     mockCore = coreSetupMock();
@@ -138,7 +140,7 @@ describe('Upgrade Agentless Deployments', () => {
         mockTaskManagerSetup.registerTaskDefinitions.mock.calls[0][0][
           UPGRADE_AGENTLESS_DEPLOYMENTS_TASK_TYPE
         ].createTaskRunner;
-      const taskRunner = createTaskRunner({ taskInstance });
+      const taskRunner = createTaskRunner({ taskInstance, abortController });
       return taskRunner.run();
     };
 
@@ -286,15 +288,14 @@ describe('Upgrade Agentless Deployments', () => {
     });
 
     it('should throw an error if task is aborted', async () => {
-      mockTask.abortController = new AbortController();
-      mockTask.abortController.signal.throwIfAborted = jest.fn(() => {
+      abortController.signal.throwIfAborted = jest.fn(() => {
         throw new Error('Task aborted!');
       });
 
-      mockTask.abortController.abort();
+      abortController.abort();
       await runTask();
 
-      expect(mockTask.abortController.signal.throwIfAborted).toHaveBeenCalled();
+      expect(abortController.signal.throwIfAborted).toHaveBeenCalled();
     });
 
     it('should not call upgrade agentless api to upgrade when agent policy is not found', async () => {

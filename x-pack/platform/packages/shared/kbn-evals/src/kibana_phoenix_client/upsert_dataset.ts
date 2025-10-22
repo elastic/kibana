@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { PhoenixClient } from '@arizeai/phoenix-client';
-import { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
-import { ExampleWithId } from '../types';
+import type { PhoenixClient } from '@arizeai/phoenix-client';
+import type { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
+import type { ExampleWithId } from '../types';
 import { diffExamples } from './diff_examples';
 
 const UPSERT_DATASET = /* GraphQL */ `

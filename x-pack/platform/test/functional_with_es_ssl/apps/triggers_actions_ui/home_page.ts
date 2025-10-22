@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { ObjectRemover } from '../../lib/object_remover';
 import { getTestAlertData } from '../../lib/get_test_data';
 
@@ -17,6 +17,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const log = getService('log');
   const browser = getService('browser');
   const supertest = getService('supertest');
+  const retry = getService('retry');
   const objectRemover = new ObjectRemover(supertest);
 
   describe('Home page', function () {
@@ -114,7 +115,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(createdRule.name);
 
           // Verify url
-          expect(await browser.getCurrentUrl()).to.contain(`/rule/${createdRule.id}`);
+          await retry.try(async () =>
+            expect(await browser.getCurrentUrl()).to.contain(`/rule/${createdRule.id}`)
+          );
         });
       });
     });

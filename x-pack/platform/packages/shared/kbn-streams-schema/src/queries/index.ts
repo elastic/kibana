@@ -6,8 +6,10 @@
  */
 
 import { z } from '@kbn/zod';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { NonEmptyString } from '@kbn/zod-helpers';
+import type { Condition } from '@kbn/streamlang';
+import { conditionSchema } from '@kbn/streamlang';
 import { primitive } from '../shared/record_types';
 import { createIsNarrowSchema } from '../shared/type_guards';
 
@@ -17,6 +19,10 @@ interface StreamQueryBase {
 }
 
 export interface StreamQueryKql extends StreamQueryBase {
+  feature?: {
+    name: string;
+    filter: Condition;
+  };
   kql: {
     query: string;
   };
@@ -32,6 +38,12 @@ const streamQueryBaseSchema: z.Schema<StreamQueryBase> = z.object({
 export const streamQueryKqlSchema: z.Schema<StreamQueryKql> = z.intersection(
   streamQueryBaseSchema,
   z.object({
+    feature: z
+      .object({
+        name: NonEmptyString,
+        filter: conditionSchema,
+      })
+      .optional(),
     kql: z.object({
       query: z.string(),
     }),
@@ -46,6 +58,12 @@ export const streamQuerySchema: z.Schema<StreamQuery> = streamQueryKqlSchema;
 
 export const upsertStreamQueryRequestSchema = z.object({
   title: NonEmptyString,
+  feature: z
+    .object({
+      name: NonEmptyString,
+      filter: conditionSchema,
+    })
+    .optional(),
   kql: z.object({
     query: z.string(),
   }),

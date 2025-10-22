@@ -8,7 +8,7 @@
  */
 
 import { BasicPrettyPrinter } from '@kbn/esql-ast';
-import { Query, QueryPipeline, QueryRequest } from '../types';
+import type { Query, QueryPipeline, QueryRequest } from '../types';
 import { buildQueryAst } from './build_query_ast';
 import { replaceParameters } from './replace_parameters';
 

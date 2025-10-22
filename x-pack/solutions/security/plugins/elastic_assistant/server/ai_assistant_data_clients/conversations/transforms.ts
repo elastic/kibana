@@ -6,13 +6,87 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import {
-  ConversationResponse,
-  Replacements,
-  replaceOriginalValuesWithUuidValues,
-} from '@kbn/elastic-assistant-common';
+import type { ConversationResponse, Replacements } from '@kbn/elastic-assistant-common';
+import { replaceOriginalValuesWithUuidValues } from '@kbn/elastic-assistant-common';
 import _ from 'lodash';
-import { EsConversationSchema } from './types';
+import type { EsConversationSchema } from './types';
+
+export const transformESToConversation = (
+  conversationSchema: EsConversationSchema
+): ConversationResponse => {
+  const replacements = conversationSchema.replacements?.reduce((acc: Record<string, string>, r) => {
+    acc[r.uuid] = r.value;
+    return acc;
+  }, {}) as Replacements;
+  const conversation: ConversationResponse = {
+    timestamp: conversationSchema['@timestamp'],
+    createdAt: conversationSchema.created_at,
+    createdBy: conversationSchema.created_by,
+    users:
+      conversationSchema.users?.map((user) => ({
+        id: user.id,
+        name: user.name,
+      })) ?? [],
+    title: conversationSchema.title,
+    category: conversationSchema.category,
+    ...(conversationSchema.api_config
+      ? {
+          apiConfig: {
+            actionTypeId: conversationSchema.api_config.action_type_id,
+            connectorId: conversationSchema.api_config.connector_id,
+            defaultSystemPromptId: conversationSchema.api_config.default_system_prompt_id,
+            model: conversationSchema.api_config.model,
+            provider: conversationSchema.api_config.provider,
+          },
+        }
+      : {}),
+    excludeFromLastConversationStorage: conversationSchema.exclude_from_last_conversation_storage,
+    messages:
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      conversationSchema.messages?.map((message: Record<string, any>) => ({
+        timestamp: message['@timestamp'],
+        ...(message.id ? { id: message.id } : {}),
+        // always return anonymized data from the client
+        content: replaceOriginalValuesWithUuidValues({
+          messageContent: message.content,
+          replacements,
+        }),
+        ...(message.is_error ? { isError: message.is_error } : {}),
+        ...(message.reader ? { reader: message.reader } : {}),
+        ...(message.user ? { user: message.user } : {}),
+        role: message.role,
+        ...(message.metadata
+          ? {
+              metadata: {
+                ...(message.metadata.content_references
+                  ? { contentReferences: message.metadata.content_references }
+                  : {}),
+                ...(message.metadata.interrupt_value
+                  ? { interruptValue: message.metadata.interrupt_value }
+                  : {}),
+                ...(message.metadata.interrupt_resume_value
+                  ? { interruptResumeValue: message.metadata.interrupt_resume_value }
+                  : {}),
+              },
+            }
+          : {}),
+        ...(message.trace_data
+          ? {
+              traceData: {
+                traceId: message.trace_data?.trace_id,
+                transactionId: message.trace_data?.transaction_id,
+              },
+            }
+          : {}),
+      })),
+    updatedAt: conversationSchema.updated_at,
+    replacements,
+    namespace: conversationSchema.namespace,
+    id: conversationSchema.id,
+  };
+
+  return conversation;
+};
 
 export const transformESSearchToConversations = (
   response: estypes.SearchResponse<EsConversationSchema>
@@ -22,145 +96,18 @@ export const transformESSearchToConversations = (
     .map((hit) => {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const conversationSchema = hit._source!;
-      const conversation: ConversationResponse = {
-        timestamp: conversationSchema['@timestamp'],
-        createdAt: conversationSchema.created_at,
-        users:
-          conversationSchema.users?.map((user) => ({
-            id: user.id,
-            name: user.name,
-          })) ?? [],
-        title: conversationSchema.title,
-        category: conversationSchema.category,
-        summary: conversationSchema.summary,
-        ...(conversationSchema.api_config
-          ? {
-              apiConfig: {
-                connectorId: conversationSchema.api_config.connector_id,
-                actionTypeId: conversationSchema.api_config.action_type_id,
-                defaultSystemPromptId: conversationSchema.api_config.default_system_prompt_id,
-                model: conversationSchema.api_config.model,
-                provider: conversationSchema.api_config.provider,
-              },
-            }
-          : {}),
-        excludeFromLastConversationStorage:
-          conversationSchema.exclude_from_last_conversation_storage,
-        messages:
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          conversationSchema.messages?.map((message: Record<string, any>) => ({
-            timestamp: message['@timestamp'],
-            // always return anonymized data from the client
-            content: conversationSchema.replacements
-              ? replaceOriginalValuesWithUuidValues({
-                  messageContent: message.content,
-                  replacements: conversationSchema.replacements?.reduce(
-                    (acc: Record<string, string>, r) => {
-                      acc[r.uuid] = r.value;
-                      return acc;
-                    },
-                    {}
-                  ),
-                })
-              : message.content,
-            ...(message.is_error ? { isError: message.is_error } : {}),
-            ...(message.reader ? { reader: message.reader } : {}),
-            role: message.role,
-            ...(message.metadata
-              ? {
-                  metadata: {
-                    ...(message.metadata.content_references
-                      ? { contentReferences: message.metadata.content_references }
-                      : {}),
-                  },
-                }
-              : {}),
-            ...(message.trace_data
-              ? {
-                  traceData: {
-                    traceId: message.trace_data?.trace_id,
-                    transactionId: message.trace_data?.transaction_id,
-                  },
-                }
-              : {}),
-          })) ?? [],
-        updatedAt: conversationSchema.updated_at,
-        replacements: conversationSchema.replacements?.reduce((acc: Record<string, string>, r) => {
-          acc[r.uuid] = r.value;
-          return acc;
-        }, {}),
-        namespace: conversationSchema.namespace,
+      return transformESToConversation({
+        ...conversationSchema,
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         id: hit._id!,
-      };
-
-      return conversation;
+      });
     });
 };
 
 export const transformESToConversations = (
   response: EsConversationSchema[]
 ): ConversationResponse[] => {
-  return response.map((conversationSchema) => {
-    const replacements = conversationSchema.replacements?.reduce(
-      (acc: Record<string, string>, r) => {
-        acc[r.uuid] = r.value;
-        return acc;
-      },
-      {}
-    ) as Replacements;
-    const conversation: ConversationResponse = {
-      timestamp: conversationSchema['@timestamp'],
-      createdAt: conversationSchema.created_at,
-      users:
-        conversationSchema.users?.map((user) => ({
-          id: user.id,
-          name: user.name,
-        })) ?? [],
-      title: conversationSchema.title,
-      category: conversationSchema.category,
-      summary: conversationSchema.summary,
-      ...(conversationSchema.api_config
-        ? {
-            apiConfig: {
-              actionTypeId: conversationSchema.api_config.action_type_id,
-              connectorId: conversationSchema.api_config.connector_id,
-              defaultSystemPromptId: conversationSchema.api_config.default_system_prompt_id,
-              model: conversationSchema.api_config.model,
-              provider: conversationSchema.api_config.provider,
-            },
-          }
-        : {}),
-      excludeFromLastConversationStorage: conversationSchema.exclude_from_last_conversation_storage,
-      messages:
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        conversationSchema.messages?.map((message: Record<string, any>) => ({
-          timestamp: message['@timestamp'],
-          // always return anonymized data from the client
-          content: replaceOriginalValuesWithUuidValues({
-            messageContent: message.content,
-            replacements,
-          }),
-          ...(message.is_error ? { isError: message.is_error } : {}),
-          ...(message.reader ? { reader: message.reader } : {}),
-          role: message.role,
-          ...(message.trace_data
-            ? {
-                traceData: {
-                  traceId: message.trace_data?.trace_id,
-                  transactionId: message.trace_data?.transaction_id,
-                },
-              }
-            : {}),
-        })),
-      updatedAt: conversationSchema.updated_at,
-      replacements,
-      namespace: conversationSchema.namespace,
-      id: conversationSchema.id,
-    };
-
-    return conversation;
-  });
+  return response.map((conversationSchema) => transformESToConversation(conversationSchema));
 };
 
 export const transformFieldNamesToSourceScheme = (fields: string[]) => {
@@ -170,6 +117,8 @@ export const transformFieldNamesToSourceScheme = (fields: string[]) => {
         return '@timestamp';
       case 'apiConfig':
         return 'api_config';
+      case 'createdBy':
+        return 'created_by';
       case 'apiConfig.actionTypeId':
         return 'api_config.action_type_id';
       case 'apiConfig.connectorId':

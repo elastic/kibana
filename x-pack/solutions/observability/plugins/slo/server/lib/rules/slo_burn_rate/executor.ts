@@ -7,9 +7,10 @@
 
 import numeral from '@elastic/numeral';
 import { flattenObject } from '@kbn/object-utils';
-import { AlertsClientError, ExecutorType, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
-import { ObservabilitySloAlert } from '@kbn/alerts-as-data-utils';
-import { IBasePath } from '@kbn/core/server';
+import type { ExecutorType, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
+import { AlertsClientError } from '@kbn/alerting-plugin/server';
+import type { ObservabilitySloAlert } from '@kbn/alerts-as-data-utils';
+import type { IBasePath } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { getFormattedGroups, getEcsGroupsFromFlattenGrouping } from '@kbn/alerting-rule-utils';
 import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
@@ -22,6 +23,7 @@ import {
 } from '@kbn/rule-data-utils';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { upperCase } from 'lodash';
 import {
   ALERT_ACTION,
@@ -34,15 +36,15 @@ import {
   SLO_ID_FIELD,
   SLO_INSTANCE_ID_FIELD,
   SLO_REVISION_FIELD,
+  SLO_DATA_VIEW_ID_FIELD,
 } from '../../../../common/field_names/slo';
-import { Duration } from '../../../domain/models';
+import type { Duration, SLODefinition } from '../../../domain/models';
 import { KibanaSavedObjectsSLORepository } from '../../../services';
 import { evaluate } from './lib/evaluate';
 import { evaluateDependencies } from './lib/evaluate_dependencies';
 import { shouldSuppressInstanceId } from './lib/should_suppress_instance_id';
 import { getSloSummary } from './lib/summary_repository';
-import {
-  AlertStates,
+import type {
   BurnRateAlertContext,
   BurnRateAlertState,
   BurnRateAllowedActionGroups,
@@ -51,6 +53,7 @@ import {
   Group,
   WindowSchema,
 } from './types';
+import { AlertStates } from './types';
 
 export type BurnRateAlert = Omit<ObservabilitySloAlert, 'kibana.alert.group'> & {
   [ALERT_GROUP]?: Group[];
@@ -84,7 +87,17 @@ export const getRuleExecutor = (basePath: IBasePath) =>
     }
 
     const sloRepository = new KibanaSavedObjectsSLORepository(soClient, logger);
-    const slo = await sloRepository.findById(params.sloId);
+    let slo: SLODefinition;
+    try {
+      slo = await sloRepository.findById(params.sloId);
+    } catch (err) {
+      throw createTaskRunError(
+        new Error(
+          `Rule "${options.rule.name}" ${options.rule.id} is referencing an SLO which cannot be found: "${params.sloId}": ${err.message}`
+        ),
+        TaskErrorSource.USER
+      );
+    }
 
     if (!slo.enabled) {
       return { state: {} };
@@ -174,6 +187,7 @@ export const getRuleExecutor = (basePath: IBasePath) =>
               [SLO_ID_FIELD]: slo.id,
               [SLO_REVISION_FIELD]: slo.revision,
               [SLO_INSTANCE_ID_FIELD]: instanceId,
+              [SLO_DATA_VIEW_ID_FIELD]: slo.indicator.params.dataViewId,
               ...getEcsGroupsFromFlattenGrouping(groupingsFlattened),
             },
           });

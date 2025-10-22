@@ -18,6 +18,7 @@ export interface CloudUsageCollectorConfig {
   projectType: string | undefined;
   productTier: string | undefined;
   orchestratorTarget: string | undefined;
+  organizationInTrial: boolean | undefined;
 }
 
 interface CloudUsage {
@@ -47,6 +48,7 @@ export function createCloudUsageCollector(
     projectType,
     productTier,
     orchestratorTarget,
+    organizationInTrial,
   } = config;
   const trialEndDateMs = trialEndDate ? new Date(trialEndDate).getTime() : undefined;
   return usageCollection.makeUsageCollector<CloudUsage>({
@@ -99,7 +101,11 @@ export function createCloudUsageCollector(
         isElasticStaffOwned,
         organizationId,
         trialEndDate,
-        ...(trialEndDateMs ? { inTrial: Date.now() <= trialEndDateMs } : {}),
+        ...(organizationInTrial
+          ? { inTrial: true }
+          : trialEndDateMs
+          ? { inTrial: Date.now() <= trialEndDateMs }
+          : {}),
         deploymentId,
         projectId,
         projectType,

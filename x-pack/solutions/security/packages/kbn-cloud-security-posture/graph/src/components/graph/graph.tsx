@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useEffect, useRef, memo } from 'react';
+import React, { useState, useCallback, useEffect, useRef, memo, useMemo } from 'react';
 import { size, isEmpty, isEqual, xorWith } from 'lodash';
 import {
   Background,
@@ -30,11 +30,14 @@ import {
 } from '../node';
 import { layoutGraph } from './layout_graph';
 import { DefaultEdge } from '../edge';
+import { Minimap } from '../minimap/minimap';
 import type { EdgeViewModel, NodeViewModel } from '../types';
 import { ONLY_RENDER_VISIBLE_ELEMENTS, GRID_SIZE } from '../constants';
 
 import '@xyflow/react/dist/style.css';
+import { GlobalGraphStyles } from './styles';
 import { Controls } from '../controls/controls';
+import { GRAPH_ID } from '../test_ids';
 
 export interface GraphProps extends CommonProps {
   /**
@@ -55,9 +58,24 @@ export interface GraphProps extends CommonProps {
    */
   isLocked?: boolean;
   /**
+   * Determines whether the minimap is visible or not in interactive graphs
+   */
+  showMinimap?: boolean;
+  /**
    * Additional children to be rendered inside the graph component.
    */
   children?: React.ReactNode;
+  /**
+   * Callback invoked when the graph is updated with new nodes.
+   * Receives one argument with the list of newly added nodes.
+   * When callback is undefined, graph will center on new nodes (default behavior).
+   * Based on the return value of this callback:
+   * - Returning undefined will center the graph on new nodes (default behavior)
+   * - Returning "fit-view" will fit entire graph into view
+   * - Returning empty array or list of non-existent node ids will keep the graph with its current position
+   * - Returning list of existent node ids will center the graph on those nodes
+   */
+  onCenterGraphAfterRefresh?: (newNodes: NodeViewModel[]) => 'fit-view' | string[] | void;
 }
 
 const nodeTypes = {
@@ -93,14 +111,31 @@ const fitViewOptions: FitViewOptions<Node<NodeViewModel>> = {
  * @returns {JSX.Element} The rendered Graph component.
  */
 export const Graph = memo<GraphProps>(
-  ({ nodes, edges, interactive, isLocked = false, children, ...rest }: GraphProps) => {
+  ({
+    nodes,
+    edges,
+    interactive,
+    isLocked = false,
+    showMinimap = false,
+    children,
+    onCenterGraphAfterRefresh,
+    ...rest
+  }: GraphProps) => {
     const backgroundId = useGeneratedHtmlId();
     const fitViewRef = useRef<FitView<Node<NodeViewModel>> | null>(null);
     const currNodesRef = useRef<NodeViewModel[]>([]);
     const currEdgesRef = useRef<EdgeViewModel[]>([]);
+    const isInitialRenderRef = useRef(true);
     const [isGraphInteractive, _setIsGraphInteractive] = useState(interactive);
     const [nodesState, setNodes, onNodesChange] = useNodesState<Node<NodeViewModel>>([]);
     const [edgesState, setEdges, onEdgesChange] = useEdgesState<Edge<EdgeViewModel>>([]);
+    const [reactFlowKey, setReactFlowKey] = useState(0);
+
+    // Filter the ids of those nodes that are origin events
+    const originNodeIds = useMemo(
+      () => nodes.filter((node) => node.isOrigin || node.isOriginAlert).map((node) => node.id),
+      [nodes]
+    );
 
     useEffect(() => {
       // On nodes or edges changes reset the graph and re-layout
@@ -108,18 +143,90 @@ export const Graph = memo<GraphProps>(
         !isArrayOfObjectsEqual(nodes, currNodesRef.current) ||
         !isArrayOfObjectsEqual(edges, currEdgesRef.current)
       ) {
+        // Identify new nodes by comparing node IDs
+        const previousNodeIds = new Set<NodeViewModel['id']>(
+          currNodesRef.current.map((node) => node.id)
+        );
+        const newNodes = nodes.filter((node) => !previousNodeIds.has(node.id));
+
         const { initialNodes, initialEdges } = processGraph(nodes, edges, isGraphInteractive);
         const { nodes: layoutedNodes } = layoutGraph(initialNodes, initialEdges);
 
-        setNodes(layoutedNodes);
-        setEdges(initialEdges);
+        // Force ReactFlow to remount by changing the key first
+        setReactFlowKey((prev) => prev + 1);
+
+        // Then set nodes and edges after a microtask to ensure ReactFlow has remounted
+        setTimeout(() => {
+          setNodes(layoutedNodes);
+          setEdges(initialEdges);
+        }, 0);
+
         currNodesRef.current = nodes;
         currEdgesRef.current = edges;
+
+        const fitIntoView = () => {
+          fitViewRef.current?.(fitViewOptions);
+        };
+
+        const centerGraphOn = async (nodeIds: string[]) => {
+          await fitViewRef.current?.({
+            ...fitViewOptions,
+            nodes: nodeIds.map((nodeId) => ({ id: nodeId })),
+          });
+        };
+
+        const filterExistingNodeIds = (nodeIds: string[]) => {
+          const existingNodeIds = new Set(nodes.map((node) => node.id));
+          return nodeIds.filter((nodeId) => existingNodeIds.has(nodeId));
+        };
+
         setTimeout(() => {
-          fitViewRef.current?.();
+          if (isInitialRenderRef.current) {
+            isInitialRenderRef.current = false;
+            return;
+          }
+
+          // If nodes haven't changed, do nothing
+          if (newNodes.length === 0) {
+            return;
+          }
+
+          // If nodes have changed but callback is undefined, default to center on new nodes
+          if (!onCenterGraphAfterRefresh) {
+            centerGraphOn(newNodes.map((node) => node.id));
+            return;
+          }
+
+          // Get node IDs given by consumer to center the graph on
+          const callbackRetValue = onCenterGraphAfterRefresh(newNodes);
+
+          // If callback returns undefined, default to center on new nodes
+          if (callbackRetValue === undefined) {
+            centerGraphOn(newNodes.map((node) => node.id));
+            return;
+          }
+
+          if (callbackRetValue === 'fit-view') {
+            fitIntoView();
+            return;
+          }
+
+          if (!Array.isArray(callbackRetValue) || callbackRetValue.length === 0) {
+            // With empty array or non-array return value, do nothing
+            return;
+          }
+
+          const nodeIdsToCenterOn = filterExistingNodeIds(callbackRetValue);
+
+          // if client specified only node ids that do not exist, do nothing
+          // Otherwise, center graph on given nodes
+          if (nodeIdsToCenterOn.length > 0) {
+            // Center graph on specified nodes by client
+            centerGraphOn(nodeIdsToCenterOn);
+          }
         }, 30);
       }
-    }, [nodes, edges, setNodes, setEdges, isGraphInteractive]);
+    }, [nodes, edges, setNodes, setEdges, isGraphInteractive, onCenterGraphAfterRefresh]);
 
     const onInitCallback = useCallback(
       (xyflow: ReactFlowInstance<Node<NodeViewModel>, Edge<EdgeViewModel>>) => {
@@ -142,6 +249,8 @@ export const Graph = memo<GraphProps>(
       <div {...rest}>
         <SvgDefsMarker />
         <ReactFlow
+          key={reactFlowKey}
+          data-test-subj={GRAPH_ID}
           fitView={true}
           onInit={onInitCallback}
           nodeTypes={nodeTypes}
@@ -167,12 +276,16 @@ export const Graph = memo<GraphProps>(
         >
           {interactive && (
             <Panel position="bottom-right">
-              <Controls fitViewOptions={fitViewOptions} showCenter={false} />
+              <Controls fitViewOptions={fitViewOptions} nodeIdsToCenterOn={originNodeIds} />
             </Panel>
           )}
           {children}
           <Background id={backgroundId} />
+          {interactive && showMinimap && (
+            <Minimap zoomable={!isLocked} pannable={!isLocked} nodesState={nodesState} />
+          )}
         </ReactFlow>
+        <GlobalGraphStyles />
       </div>
     );
   }

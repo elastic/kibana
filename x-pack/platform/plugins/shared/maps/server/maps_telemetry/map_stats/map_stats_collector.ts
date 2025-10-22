@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { MapAttributes } from '../../../common/content_management';
-import {
+import type { MapAttributes } from '../..';
+import type {
   EMS_BASEMAP_KEYS,
   JOIN_KEYS,
   LAYER_KEYS,
@@ -16,7 +16,7 @@ import {
 import { LayerStatsCollector } from '../../../common/telemetry/layer_stats_collector';
 import { MapSettingsCollector } from '../../../common/telemetry/map_settings_collector';
 
-import { ClusterCountStats, MapStats } from './types';
+import type { ClusterCountStats, MapStats } from './types';
 
 /*
  * Use MapStatsCollector instance to track map saved object stats.
@@ -39,7 +39,7 @@ export class MapStatsCollector {
   private _sourceCountStats: ClusterCountStats | undefined;
 
   push(attributes: MapAttributes) {
-    if (!attributes || !attributes.mapStateJSON || !attributes.layerListJSON) {
+    if (!attributes) {
       return;
     }
 

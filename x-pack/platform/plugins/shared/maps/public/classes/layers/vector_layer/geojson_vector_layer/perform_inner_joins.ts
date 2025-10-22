@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { FeatureCollection } from 'geojson';
+import type { FeatureCollection } from 'geojson';
 import { asyncForEach } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
 import { FEATURE_VISIBLE_PROPERTY_NAME } from '../../../../../common/constants';
-import { DataRequestContext } from '../../../../actions';
-import { JoinState } from '../types';
+import type { DataRequestContext } from '../../../../actions';
+import type { JoinState } from '../types';
 import { isTermJoinSource, type ITermJoinSource } from '../../../sources/join_sources';
 
 interface SourceResult {

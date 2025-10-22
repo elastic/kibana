@@ -30,6 +30,7 @@ import { licenseService } from '../../../../../common/hooks/use_license';
 import { forceHTMLElementOffsetWidth } from '../../../../components/effected_policy_select/test_utils';
 import type { TrustedAppConditionEntry } from '../../../../../../common/endpoint/types';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
+import { TRUSTED_PROCESS_DESCENDANTS_TAG } from '../../../../../../common/endpoint/service/artifacts/constants';
 
 jest.mock('../../../../../common/components/user_privileges');
 jest.mock('../../../../../common/containers/source');
@@ -303,7 +304,6 @@ describe('Trusted apps form', () => {
         (label) => (label.textContent || '').trim()
       );
       expect(labels).toEqual(['Field', 'Operator', 'Value', '']);
-      expect(formProps.onChange).not.toHaveBeenCalled();
     });
 
     it('should not allow the entry to be removed if its the only one displayed', () => {
@@ -405,7 +405,7 @@ describe('Trusted apps form', () => {
         const andButton = getConditionBuilderAndButton();
         await userEvent.click(andButton);
         // re-render with updated `newTrustedApp`
-        formProps.item = formProps.onChange.mock.calls[0][0].item;
+        formProps.item = (formProps.onChange as jest.Mock).mock.calls.at(-1)[0].item;
         rerender();
       });
 
@@ -442,7 +442,7 @@ describe('Trusted apps form', () => {
         expect(formProps.onChange).toHaveBeenCalledWith(expected);
 
         // update TA to show toggle change
-        formProps.item = formProps.onChange.mock.calls[0][0].item;
+        formProps.item = (formProps.onChange as jest.Mock).mock.calls.at(-1)[0].item;
         rerender();
         expect(
           getAdvancedModeToggle().classList.contains('euiButtonGroupButton-isSelected')
@@ -525,8 +525,79 @@ describe('Trusted apps form', () => {
         const expectedAfterSwitchToBasicMode = createOnChangeArgs({
           item: createItem(propsItem3),
         });
-        expect(formProps.onChange).toHaveBeenCalledTimes(3);
         expect(formProps.onChange).toHaveBeenCalledWith(expectedAfterSwitchToBasicMode);
+      });
+
+      describe('Process Descendants', () => {
+        beforeEach(() => {
+          mockedContext.setExperimentalFlag({
+            filterProcessDescendantsForTrustedAppsEnabled: true,
+          });
+        });
+
+        it('should not display button when feature flag is disabled', () => {
+          mockedContext.setExperimentalFlag({
+            filterProcessDescendantsForTrustedAppsEnabled: false,
+          });
+          const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+            tags: ['policy:all', 'form_mode:advanced'],
+          };
+
+          formProps.item = { ...formProps.item, ...propsItem };
+          render();
+
+          expect(
+            renderResult.queryByTestId('trustedApps-processDescendantsSelector')
+          ).not.toBeInTheDocument();
+        });
+
+        it('should not display button in basic mode', () => {
+          render();
+
+          expect(
+            renderResult.queryByTestId('trustedApps-processDescendantsSelector')
+          ).not.toBeInTheDocument();
+        });
+
+        it('should add the tag "trust_process_descendants" when the button is selected', async () => {
+          const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+            tags: ['policy:all', 'form_mode:advanced'],
+          };
+
+          formProps.item = { ...formProps.item, ...propsItem };
+          render();
+          await userEvent.click(
+            renderResult.getByTestId('trustedApps-filterProcessDescendantsButton')
+          );
+
+          const propsItem2: Partial<ArtifactFormComponentProps['item']> = {
+            tags: ['policy:all', 'form_mode:advanced', TRUSTED_PROCESS_DESCENDANTS_TAG],
+          };
+          const expected = createOnChangeArgs({
+            item: createItem(propsItem2),
+          });
+          expect(formProps.onChange).toHaveBeenCalledWith(expected);
+        });
+
+        it('should remove the tag "trust_process_descendants" when the button is not selected', async () => {
+          // Start with the tag present
+          const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+            tags: ['policy:all', 'form_mode:advanced', TRUSTED_PROCESS_DESCENDANTS_TAG],
+          };
+
+          formProps.item = { ...formProps.item, ...propsItem };
+          render();
+
+          // Click the "Events" button to deselect "Process Descendants"
+          await userEvent.click(renderResult.getByTestId('trustedApps-filterEventsButton'));
+
+          // The tag should be removed from the tags array
+          const expectedTags = ['policy:all', 'form_mode:advanced'];
+          const expected = createOnChangeArgs({
+            item: createItem({ tags: expectedTags }),
+          });
+          expect(formProps.onChange).toHaveBeenCalledWith(expected);
+        });
       });
     });
   });

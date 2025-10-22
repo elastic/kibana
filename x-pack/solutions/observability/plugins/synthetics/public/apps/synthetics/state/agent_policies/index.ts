@@ -6,8 +6,8 @@
  */
 
 import { createReducer } from '@reduxjs/toolkit';
-import { AgentPolicyInfo } from '../../../../../common/types';
-import { IHttpSerializedFetchError } from '..';
+import type { AgentPolicyInfo } from '../../../../../common/types';
+import type { IHttpSerializedFetchError } from '..';
 import { getAgentPoliciesAction } from './actions';
 
 export interface AgentPoliciesState {

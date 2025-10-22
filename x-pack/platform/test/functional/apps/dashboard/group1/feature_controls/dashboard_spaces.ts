@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -35,7 +35,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
         await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/dashboard/feature_controls/custom_space',
+          'x-pack/platform/test/functional/fixtures/kbn_archives/dashboard/feature_controls/custom_space',
           { space: customSpace }
         );
       });
@@ -102,7 +102,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
         await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/dashboard/feature_controls/custom_space',
+          'x-pack/platform/test/functional/fixtures/kbn_archives/dashboard/feature_controls/custom_space',
           { space: customSpace }
         );
       });

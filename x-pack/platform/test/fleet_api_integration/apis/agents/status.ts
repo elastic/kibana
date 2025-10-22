@@ -7,10 +7,8 @@
 
 import expect from '@kbn/expect';
 
-import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
@@ -20,27 +18,19 @@ export default function ({ getService }: FtrProviderContext) {
   describe('fleet_agents_status', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/fleet/agents');
-      await es.create({
-        id: 'ingest-agent-policies:policy-inactivity-timeout',
-        index: INGEST_SAVED_OBJECT_INDEX,
-        refresh: 'wait_for',
-        document: {
-          type: 'ingest-agent-policies',
-          'ingest-agent-policies': {
-            name: 'Test policy',
-            namespace: 'default',
-            description: 'Policy with inactivity timeout',
-            status: 'active',
-            is_default: true,
-            monitoring_enabled: ['logs', 'metrics'],
-            revision: 2,
-            updated_at: '2020-05-07T19:34:42.533Z',
-            updated_by: 'system',
-            inactivity_timeout: 60,
-          },
-          typeMigrationVersion: '7.10.0',
-        },
-      });
+      await supertest
+        .post(`/api/fleet/agent_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          id: 'policy-inactivity-timeout',
+          name: 'Test policy inactivity timeout',
+          namespace: 'default',
+          description: 'Policy with inactivity timeout',
+          is_default: true,
+          monitoring_enabled: ['logs', 'metrics'],
+          inactivity_timeout: 60,
+        })
+        .expect(200);
       // 2 agents online
       await es.update({
         id: 'agent1',
@@ -263,27 +253,19 @@ export default function ({ getService }: FtrProviderContext) {
 
       await Promise.all(
         policiesToAdd.map((policyId) =>
-          es.create({
-            id: 'ingest-agent-policies:' + policyId,
-            index: INGEST_SAVED_OBJECT_INDEX,
-            refresh: 'wait_for',
-            document: {
-              type: 'ingest-agent-policies',
-              'ingest-agent-policies': {
-                name: policyId,
-                namespace: 'default',
-                description: 'Policy with inactivity timeout',
-                status: 'active',
-                is_default: true,
-                monitoring_enabled: ['logs', 'metrics'],
-                revision: 2,
-                updated_at: '2020-05-07T19:34:42.533Z',
-                updated_by: 'system',
-                inactivity_timeout: 60,
-              },
-              typeMigrationVersion: '7.10.0',
-            },
-          })
+          supertest
+            .post(`/api/fleet/agent_policies`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              id: 'fleet-agent-policies:' + policyId,
+              name: policyId,
+              namespace: 'default',
+              description: 'Policy with inactivity timeout',
+              is_default: true,
+              monitoring_enabled: ['logs', 'metrics'],
+              inactivity_timeout: 60,
+            })
+            .expect(200)
         )
       );
       const { body: apiResponse } = await supertest.get(`/api/fleet/agent_status`).expect(200);

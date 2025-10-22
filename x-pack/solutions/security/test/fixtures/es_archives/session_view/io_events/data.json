@@ -249,7 +249,7 @@
     "index": "logs-endpoint.events.process",
     "id": "5",
     "source": {
-      "@timestamp": "2022-05-08T13:44:33.570Z",
+      "@timestamp": "2022-05-08T13:44:00.13Z",
       "message": "hello world security",
       "event": {
         "action": "text_output"
@@ -422,6 +422,74 @@
         "executable": "/bin/bash",
         "entry_leader": {
           "entity_id": "MDEwMTAxMDEtMDEwMS0wMTAxLTAxMDEtMDEwMTAxMDEwMTAxLTUyMDU3LTEzMjk2NDkxMDQwLjEzMDAwMDAwMA==",
+          "tty": {
+            "char_device": {
+              "major": 4,
+              "minor": 1
+            },
+            "rows": 66,
+            "columns": 280
+          }
+        },
+        "io": {
+          "type": "tty",
+          "total_bytes_captured": 1024,
+          "total_bytes_skipped": 0,
+          "bytes_skipped": [],
+          "text": "\u001bkroot@staging-host:~\u001b\\\b\b\b\b\u001b[1P\b\b\b\b\u001b[1P\b\b\b\b\u001b[1P\b\b\b\b\b\b\b\b\b\n\u001bkroot@staging-host:~\u001b\\\b\u001b[K\b\u001b[K\b\u001b[K\n,\n22/05/26 09:24:09 rack-na/cl_md (md), Cluster ********\n[root@staging-host:~] vi -R /usr/local/bin/script_one.sh\u0007\n22/05/26 09:25:32 rack-na/cl_md (md), Cluster ********\n[root@staging-host:~] vi -R /usr/local/bin/script_one.sh.sh.sh.sho.shp.sh\n22/05/26 09:30:08 rack-na/cl_md (md), Cluster ********\n[root@staging-host:~] exi\u0007\u0007\u0007exitlogout\n,\u001bec2-user@staging-host:~\u001b\\\n\u001bec2-user@staging-host:~\u001b\\\n,\n22/05/26 09:24:01 rack-na/cl_md (md), Cluster ********\n[ec2-user@staging-host:~] sudo -i\n22/05/26 10:11:37 rack-na/cl_md (md), Cluster ********\n[ec2-user@staging-host:~] exitlogout\n\n"
+        },
+        "tty": {
+          "char_device": {
+            "major": 4,
+            "minor": 1
+          },
+          "rows": 66,
+          "columns": 280
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "logs-endpoint.events.process",
+    "id": "9",
+    "source": {
+      "@timestamp": "2022-05-08T00:00:00.570Z",
+      "message": "hello world security",
+      "event": {
+        "action": "text_output"
+      },
+      "host": {
+        "id": "00000000-0000-0000-0000-000000000000",
+        "boot": {
+          "id": "1234"
+        }
+      },
+      "process": {
+        "entity_id": "1",
+        "name": "bash",
+        "executable": "/bin/bash",
+        "args": "single-arg",
+        "parent": {
+          "entity_id": "MDEwMTAxMDEtMDEwMS0wMTAxLTAxMDEtMDEwMTAxMDEwMTAxLTUyMDU3LTEzMjk2NDkxMDQwLjEzMDAwMDAwMA==",
+          "args": "single-arg",
+          "executable": "/bin/bash",
+          "name": "bash"
+        },
+        "session_leader": {
+          "entity_id": "MDEwMTAxMDEtMDEwMS0wMTAxLTAxMDEtMDEwMTAxMDEwMTAxLTUyMDU3LTEzMjk2NDkxMDQwLjEzMDAwMDAwMA==",
+          "args": "single-arg",
+          "executable": "/bin/session-leader",
+          "name": "session-leader"
+        },
+        "entry_leader": {
+          "entity_id": "MDEwMTAxMDEtMDEwMS0wMTAxLTAxMDEtMDEwMTAxMDEwMTAxLTUyMDU3LTEzMjk2NDkxMDQwLjEzMDAwMDAwMA==",
+          "args": "single-arg",
+          "executable": "/bin/entry-leader",
+          "name": "entry-leader",
           "tty": {
             "char_device": {
               "major": 4,

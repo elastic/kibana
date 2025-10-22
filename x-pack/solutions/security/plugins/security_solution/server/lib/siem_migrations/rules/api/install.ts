@@ -14,10 +14,10 @@ import {
   InstallMigrationRulesRequestParams,
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { SiemMigrationAuditLogger } from '../../common/utils/audit';
+import { SiemMigrationAuditLogger } from '../../common/api/util/audit';
 import { installTranslated } from './util/installation';
-import { authz } from '../../common/utils/authz';
-import { withLicense } from '../../common/utils/with_license';
+import { authz } from '../../common/api/util/authz';
+import { withLicense } from '../../common/api/util/with_license';
 
 export const registerSiemRuleMigrationsInstallRoute = (
   router: SecuritySolutionPluginRouter,
@@ -43,7 +43,10 @@ export const registerSiemRuleMigrationsInstallRoute = (
         async (context, req, res): Promise<IKibanaResponse<InstallMigrationRulesResponse>> => {
           const { migration_id: migrationId } = req.params;
           const { ids, enabled = false } = req.body;
-          const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
+          const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
+            context.securitySolution,
+            'rules'
+          );
 
           try {
             const ctx = await context.resolve(['core', 'alerting', 'securitySolution']);

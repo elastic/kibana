@@ -29,4 +29,5 @@ export enum SecurityGroupName {
   assets = 'securityGroup:assets',
   entityAnalytics = 'securityGroup:entityAnalytics',
   machineLearning = 'securityGroup:machineLearning',
+  launchpad = 'securityGroup:launchpad',
 }

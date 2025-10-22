@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SerializedPanelState, StateComparators } from '@kbn/presentation-publishing';
-import { DynamicActionsState } from '@kbn/ui-actions-enhanced-plugin/public';
-import { Observable } from 'rxjs';
-import { HasDynamicActions } from './interfaces/has_dynamic_actions';
+import type { SerializedPanelState, StateComparators } from '@kbn/presentation-publishing';
+import type { DynamicActionsState } from '@kbn/ui-actions-enhanced-plugin/public';
+import type { Observable } from 'rxjs';
+import type { HasDynamicActions } from './interfaces/has_dynamic_actions';
 
 export interface EmbeddableDynamicActionsManager {
   api: HasDynamicActions;

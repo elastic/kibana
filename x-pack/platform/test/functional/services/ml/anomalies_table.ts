@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export function MachineLearningAnomaliesTableProvider({ getService }: FtrProviderContext) {
   const retry = getService('retry');
@@ -122,6 +122,12 @@ export function MachineLearningAnomaliesTableProvider({ getService }: FtrProvide
           expectedValue ? 'enabled' : 'disabled'
         }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
       );
+    },
+
+    async clickConfigureRulesButton(rowIndex: number) {
+      await this.ensureAnomalyActionsMenuOpen(rowIndex);
+      await testSubjects.click('mlAnomaliesListRowActionConfigureRulesButton');
+      await testSubjects.existOrFail('mlRuleEditorFlyout');
     },
 
     async assertAnomalyActionViewSeriesButtonEnabled(rowIndex: number, expectedValue: boolean) {

@@ -10,12 +10,12 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { useActions, useValues } from 'kea';
 
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiBadge,
   EuiFlexItem,
   EuiIcon,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiText,
   useEuiTheme,
@@ -32,7 +32,7 @@ import {
 } from '../../../../../shared/constants';
 import { KibanaLogic } from '../../../../../shared/kibana';
 import { NewConnectorLogic } from '../../../new_index/method_connector/new_connector_logic';
-import { SelfManagePreference } from '../create_connector';
+import type { SelfManagePreference } from '../create_connector';
 
 interface ChooseConnectorSelectableProps {
   selfManaged: SelfManagePreference;

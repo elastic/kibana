@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MonitorSummary, Ping } from '../../../../../common/runtime_types';
+import type { MonitorSummary, Ping } from '../../../../../common/runtime_types';
 import { addBasePath } from './add_base_path';
 import { buildHref } from './build_href';
 

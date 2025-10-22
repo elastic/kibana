@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const testIndex = 'test-index';
 const testQuery = {
@@ -22,59 +22,31 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const es = getService('es');
   const log = getService('log');
 
-  // Failing: See https://github.com/elastic/kibana/issues/186126
-  describe.skip('Search Profiler Editor', () => {
+  describe('Search Profiler Editor', () => {
     before(async () => {
       await security.testUser.setRoles(['global_devtools_read']);
       await PageObjects.common.navigateToApp('searchProfiler');
+      await es.indices.create({ index: testIndex });
+      await es.index({
+        index: testIndex,
+        id: '1',
+        body: {
+          test: 'sample value',
+        },
+      });
+
       expect(await PageObjects.searchProfiler.editorExists()).to.be(true);
     });
 
     after(async () => {
       await security.testUser.restoreDefaults();
-    });
-
-    it('correctly parses triple quotes in JSON', async () => {
-      // The below inputs are written to work _with_ ace's autocomplete unlike console's unit test
-      // counterparts in src/legacy/core_platform/plugins/shared/console/public/tests/src/editor.test.js
-
-      const okInputs = [
-        `{
-    "query": {
-    "match_all": {}`,
-        `{
-    "query": {
-    "match_all": {
-    "test": """{ "more": "json" }"""`,
-      ];
-
-      const notOkInputs = [
-        `{
-    "query": {
-    "match_all": {
-    "test": """{ "more": "json" }""`,
-        `{
-    "query": {
-    "match_all": {
-    "test": """{ "more": "json" }""'`,
-      ];
-
-      const expectHasParseErrorsToBe = (expectation: boolean) => async (inputs: string[]) => {
-        for (const input of inputs) {
-          await PageObjects.searchProfiler.setQuery(input);
-
-          await retry.waitFor(
-            `parser errors to match expectation: HAS ${expectation ? 'ERRORS' : 'NO ERRORS'}`,
-            async () => {
-              const actual = await PageObjects.searchProfiler.editorHasParseErrors();
-              return expectation === actual?.length > 0;
-            }
-          );
+      if (await es.indices.exists({ index: testIndex })) {
+        try {
+          await es.indices.delete({ index: testIndex });
+        } catch (error) {
+          log.error(`Error deleting index ${testIndex}: ${error}`);
         }
-      };
-
-      await expectHasParseErrorsToBe(false)(okInputs);
-      await expectHasParseErrorsToBe(true)(notOkInputs);
+      }
     });
 
     it('supports pre-configured search query', async () => {
@@ -126,6 +98,62 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
+    describe('With a test index', () => {
+      it('profiles a simple query', async () => {
+        await PageObjects.searchProfiler.setIndexName(testIndex);
+        await PageObjects.searchProfiler.setQuery(testQuery);
+
+        await PageObjects.searchProfiler.clickProfileButton();
+
+        const content = await PageObjects.searchProfiler.getProfileContent();
+        expect(content).to.contain(testIndex);
+      });
+    });
+
+    describe('triple quotes in JSON parsing', () => {
+      const testCases = [
+        {
+          shouldHaveErrors: false,
+          input: `{ "query": { "match_all": {} } }`,
+          description: 'valid JSON without triple quotes',
+        },
+        {
+          shouldHaveErrors: false,
+          input: `{ "query": { "match": { "test": """{"more": "json"}""" } } }`,
+          description: 'valid JSON with triple quotes',
+        },
+        {
+          shouldHaveErrors: true,
+          input: `{"query": {"match": {"test": """{ "more": "json" }"" } } }`,
+          description: 'invalid JSON with mismatched triple quotes',
+        },
+        {
+          shouldHaveErrors: true,
+          input: `{"query": {"match": {"test": """{ "more": "json" }""' } } }`,
+          description: 'invalid JSON with mixed quote types',
+        },
+      ];
+
+      testCases.forEach(({ shouldHaveErrors, input, description }) => {
+        it(`${
+          shouldHaveErrors ? 'should show error toast' : 'should not show error toast'
+        } for ${description}`, async () => {
+          await PageObjects.searchProfiler.setStringQuery(input);
+          await PageObjects.searchProfiler.clickProfileButton();
+
+          await retry.waitFor(
+            `parser errors to match expectation: ${
+              shouldHaveErrors ? 'HAS ERROR TOAST' : 'NO ERROR TOAST'
+            }`,
+            async () => {
+              const actual = await PageObjects.searchProfiler.editorHasJsonParseErrorNotification();
+              return shouldHaveErrors === actual;
+            }
+          );
+        });
+      });
+    });
+
     describe('No indices', () => {
       before(async () => {
         // Delete any existing indices that were not properly cleaned up
@@ -155,26 +183,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await retry.waitFor('notification renders', async () => {
           return await PageObjects.searchProfiler.editorHasErrorNotification();
         });
-      });
-    });
-
-    describe('With a test index', () => {
-      before(async () => {
-        await es.indices.create({ index: testIndex });
-      });
-
-      after(async () => {
-        await es.indices.delete({ index: testIndex });
-      });
-
-      it('profiles a simple query', async () => {
-        await PageObjects.searchProfiler.setIndexName(testIndex);
-        await PageObjects.searchProfiler.setQuery(testQuery);
-
-        await PageObjects.searchProfiler.clickProfileButton();
-
-        const content = await PageObjects.searchProfiler.getProfileContent();
-        expect(content).to.contain(testIndex);
       });
     });
   });

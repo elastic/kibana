@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLColumn, ESQLIdentifier, ESQLMessage } from '../../../types';
-import { ICommandContext } from '../../../commands_registry/types';
+import type { ICommandContext } from '../../../commands_registry/types';
 import { errors } from '../errors';
 import { getColumnExists } from '../columns';
 import { isParametrized } from '../../../ast/is';
@@ -17,14 +17,32 @@ export function validateColumnForCommand(
   commandName: string,
   context: ICommandContext
 ): ESQLMessage[] {
-  const messages: ESQLMessage[] = [];
-  if (commandName === 'row') {
-    if (!context.userDefinedColumns.has(column.name) && !isParametrized(column)) {
-      messages.push(errors.unknownColumn(column));
+  return new ColumnValidator(column, context, commandName).validate();
+}
+
+export class ColumnValidator {
+  constructor(
+    private readonly column: ESQLColumn | ESQLIdentifier,
+    private readonly context: ICommandContext,
+    private readonly commandName: string
+  ) {}
+
+  validate(): ESQLMessage[] {
+    if (!this.exists) {
+      return [errors.unknownColumn(this.column)];
     }
-  } else if (!getColumnExists(column, context) && !isParametrized(column)) {
-    messages.push(errors.unknownColumn(column));
+
+    return [];
   }
 
-  return messages;
+  private get exists(): boolean {
+    if (
+      !isParametrized(this.column) &&
+      !getColumnExists(this.column, this.context, this.commandName === 'row')
+    ) {
+      return false;
+    }
+
+    return true;
+  }
 }

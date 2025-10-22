@@ -20,6 +20,7 @@ import {
   validatePackagePolicy,
   validatePackagePolicyConfig,
   validationHasErrors,
+  parseDuration,
 } from './validate_package_policy';
 import { AWS_PACKAGE, INVALID_AWS_POLICY, VALID_AWS_POLICY } from './fixtures/aws_package';
 
@@ -628,135 +629,6 @@ describe('Fleet - validatePackagePolicy()', () => {
           },
         },
         vars: {},
-      });
-    });
-
-    // TODO enable when https://github.com/elastic/kibana/issues/125655 is fixed
-    it.skip('returns package policy validation error if input var does not exist', () => {
-      expect(
-        validatePackagePolicy(
-          {
-            description: 'Linux Metrics',
-            enabled: true,
-            inputs: [
-              {
-                enabled: true,
-                streams: [
-                  {
-                    data_stream: {
-                      dataset: 'linux.memory',
-                      type: 'metrics',
-                    },
-                    enabled: true,
-                  },
-                ],
-                type: 'linux/metrics',
-                vars: {
-                  period: {
-                    type: 'string',
-                    value: '1s',
-                  },
-                },
-              },
-            ],
-            name: 'linux-3d13ada6-a9ae-46df-8e57-ff5050f4b671',
-            namespace: 'default',
-            package: {
-              name: 'linux',
-              title: 'Linux Metrics',
-              version: '0.6.2',
-            },
-            policy_id: 'b25cb6e0-8347-11ec-96f9-6590c25bacf9',
-            policy_ids: ['b25cb6e0-8347-11ec-96f9-6590c25bacf9'],
-          },
-          {
-            ...mockPackage,
-            name: 'linux',
-            policy_templates: [
-              {
-                name: 'system',
-                title: 'Linux kernel metrics',
-                description: 'Collect system metrics from Linux operating systems',
-                inputs: [
-                  {
-                    title: 'Collect system metrics from Linux instances',
-                    vars: [
-                      {
-                        name: 'system.hostfs',
-                        type: 'text',
-                        title: 'Proc Filesystem Directory',
-                        multi: false,
-                        required: false,
-                        show_user: true,
-                        description: 'The proc filesystem base directory.',
-                      },
-                    ],
-                    type: 'system/metrics',
-                    description:
-                      'Collecting Linux entropy, Network Summary, RAID, service, socket, and users metrics',
-                  },
-                  {
-                    title: 'Collect low-level system metrics from Linux instances',
-                    vars: [],
-                    type: 'linux/metrics',
-                    description: 'Collecting Linux conntrack, ksm, pageinfo metrics.',
-                  },
-                ],
-                multiple: true,
-              },
-            ],
-            data_streams: [
-              {
-                dataset: 'linux.memory',
-                package: 'linux',
-                path: 'memory',
-                streams: [
-                  {
-                    input: 'linux/metrics',
-                    title: 'Linux memory metrics',
-                    vars: [
-                      {
-                        name: 'period',
-                        type: 'text',
-                        title: 'Period',
-                        multi: false,
-                        required: true,
-                        show_user: true,
-                        default: '10s',
-                      },
-                    ],
-                    template_path: 'stream.yml.hbs',
-                    description: 'Linux paging and memory management metrics',
-                  },
-                ],
-                title: 'Linux-only memory metrics',
-                release: 'experimental',
-                type: 'metrics',
-              },
-            ],
-          },
-          load
-        )
-      ).toEqual({
-        description: null,
-        additional_datastreams_permissions: null,
-        inputs: {
-          'linux/metrics': {
-            streams: {
-              'linux.memory': {
-                vars: {
-                  period: ['Period is required'],
-                },
-              },
-            },
-            vars: {
-              period: ['period var definition does not exist'],
-            },
-          },
-        },
-        vars: {},
-        name: null,
-        namespace: null,
       });
     });
   });
@@ -1395,6 +1267,82 @@ describe('Fleet - validationHasErrors()', () => {
 });
 
 describe('Fleet - validatePackagePolicyConfig', () => {
+  describe('Text', () => {
+    it('should return required error message for undefined variable', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'text',
+          value: undefined,
+        },
+        {
+          name: 'myvariable',
+          type: 'text',
+          multi: false,
+          required: true,
+        },
+        'myvariable',
+        load
+      );
+
+      expect(res).toEqual(['myvariable is required']);
+    });
+
+    it('should accept empty string', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'text',
+          value: '',
+        },
+        {
+          name: 'myvariable',
+          type: 'text',
+          multi: false,
+          required: true,
+        },
+        'myvariable',
+        load
+      );
+
+      expect(res).toBeNull();
+    });
+    it('should accept blank spaces', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'text',
+          value: '  ',
+        },
+        {
+          name: 'myvariable',
+          type: 'text',
+          multi: false,
+          required: true,
+        },
+        'myvariable',
+        load
+      );
+
+      expect(res).toBeNull();
+    });
+
+    it('should accept string', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'text',
+          value: 'some text',
+        },
+        {
+          name: 'myvariable',
+          type: 'text',
+          multi: false,
+          required: true,
+        },
+        'myvariable',
+        load
+      );
+
+      expect(res).toBeNull();
+    });
+  });
   describe('Multi Text', () => {
     it('should return required error message for empty string', () => {
       const res = validatePackagePolicyConfig(
@@ -1694,6 +1642,203 @@ describe('Fleet - validatePackagePolicyConfig', () => {
     });
   });
 
+  describe('Duration', () => {
+    it('should validate a valid duration format', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'duration',
+          value: '1h30m45s',
+        },
+        {
+          name: 'timeout',
+          type: 'duration',
+        },
+        'timeout',
+        load
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should validate a valid duration with milliseconds', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'duration',
+          value: '2h15m30s500ms',
+        },
+        {
+          name: 'timeout',
+          type: 'duration',
+        },
+        'timeout',
+        load
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should validate a valid duration with a single unit', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'duration',
+          value: '60s',
+        },
+        {
+          name: 'timeout',
+          type: 'duration',
+        },
+        'timeout',
+        load
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should return error for invalid duration format', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'duration',
+          value: 'invalid',
+        },
+        {
+          name: 'timeout',
+          type: 'duration',
+        },
+        'timeout',
+        load
+      );
+
+      expect(res).toContain('Invalid duration format. Expected format like "1h30m45s"');
+    });
+
+    it('should validate duration with min_duration constraint (valid)', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'duration',
+          value: '1h30m',
+        },
+        {
+          name: 'timeout',
+          type: 'duration',
+          min_duration: '1h',
+        },
+        'timeout',
+        load
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should return error for duration below min_duration', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'duration',
+          value: '30m',
+        },
+        {
+          name: 'timeout',
+          type: 'duration',
+          min_duration: '1h',
+        },
+        'timeout',
+        load
+      );
+
+      expect(res).toContain('Duration is below the minimum allowed value of 1h');
+    });
+
+    it('should validate duration with max_duration constraint (valid)', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'duration',
+          value: '1h30m',
+        },
+        {
+          name: 'timeout',
+          type: 'duration',
+          max_duration: '2h',
+        },
+        'timeout',
+        load
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should return error for duration above max_duration', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'duration',
+          value: '3h',
+        },
+        {
+          name: 'timeout',
+          type: 'duration',
+          max_duration: '2h',
+        },
+        'timeout',
+        load
+      );
+
+      expect(res).toContain('Duration is above the maximum allowed value of 2h');
+    });
+
+    it('should validate duration with both min and max constraints (valid)', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'duration',
+          value: '1h30m',
+        },
+        {
+          name: 'timeout',
+          type: 'duration',
+          min_duration: '1h',
+          max_duration: '2h',
+        },
+        'timeout',
+        load
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should return error for invalid min_duration specification', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'duration',
+          value: '1h30m',
+        },
+        {
+          name: 'timeout',
+          type: 'duration',
+          min_duration: 'invalid',
+        },
+        'timeout',
+        load
+      );
+
+      expect(res).toContain('Invalid min_duration specification');
+    });
+
+    it('should return error for invalid max_duration specification', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'duration',
+          value: '1h30m',
+        },
+        {
+          name: 'timeout',
+          type: 'duration',
+          max_duration: 'invalid',
+        },
+        'timeout',
+        load
+      );
+
+      expect(res).toContain('Invalid max_duration specification');
+    });
+  });
+
   describe('Dataset', () => {
     const datasetError = 'Dataset contains invalid characters';
 
@@ -1832,5 +1977,239 @@ describe('Fleet - validatePackagePolicyConfig', () => {
 
       expect(res).toEqual(['Dataset contains invalid characters']);
     });
+  });
+
+  describe('URL validation', () => {
+    it('should not return an error message for a valid URL', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'url',
+          value: 'https://example.com',
+        },
+        {
+          name: 'test_url',
+          type: 'url',
+        },
+        'test_url',
+        load
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should not return an error message for a valid URL with port', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'url',
+          value: 'https://example.com:8080',
+        },
+        {
+          name: 'test_url',
+          type: 'url',
+        },
+        'test_url',
+        load
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should not return an error message for a valid URL with userinfo', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'url',
+          value: 'https://foo:bar@example.com',
+        },
+        {
+          name: 'test_url',
+          type: 'url',
+        },
+        'test_url',
+        load
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should not return an error message for a valid URL with path', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'url',
+          value: 'phony://example.com/path',
+        },
+        {
+          name: 'test_url',
+          type: 'url',
+        },
+        'test_url',
+        load
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should not return an error message for a valid URL with query params', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'url',
+          value: 'https://example.com/?foo=bar',
+        },
+        {
+          name: 'test_url',
+          type: 'url',
+        },
+        'test_url',
+        load
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should not return an error message for a valid URL with IPv4', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'url',
+          value: 'https://192.0.2.1',
+        },
+        {
+          name: 'test_url',
+          type: 'url',
+        },
+        'test_url',
+        load
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should not return an error message for a valid URL with IPv6', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'url',
+          value: 'https://[2001:db8::1]:443',
+        },
+        {
+          name: 'test_url',
+          type: 'url',
+        },
+        'test_url',
+        load
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should return an error message for an invalid URL', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'url',
+          value: 'not-a-valid-url',
+        },
+        {
+          name: 'test_url',
+          type: 'url',
+        },
+        'test_url',
+        load
+      );
+
+      expect(res).toEqual([expect.stringContaining('Invalid URL format')]);
+    });
+
+    it('should not return an error message for a URL with allowed scheme', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'url',
+          value: 'https://example.com',
+        },
+        {
+          name: 'test_url',
+          type: 'url',
+          url_allowed_schemes: ['https', 'http'],
+        },
+        'test_url',
+        load
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should return an error message for a URL with disallowed scheme', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'url',
+          value: 'ftp://example.com',
+        },
+        {
+          name: 'test_url',
+          type: 'url',
+          url_allowed_schemes: ['https', 'http'],
+        },
+        'test_url',
+        load
+      );
+
+      expect(res).toEqual([expect.stringContaining('URL scheme "ftp" is not allowed')]);
+    });
+
+    it('should not validate empty URL values', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'url',
+          value: '',
+        },
+        {
+          name: 'test_url',
+          type: 'url',
+        },
+        'test_url',
+        load
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should validate required URL values', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'url',
+          value: undefined,
+        },
+        {
+          name: 'test_url',
+          type: 'url',
+          required: true,
+        },
+        'test_url',
+        load
+      );
+
+      expect(res).toEqual([expect.stringContaining('is required')]);
+    });
+  });
+});
+
+describe('Fleet - parseDuration()', () => {
+  it('correctly calculates nanoseconds for a valid duration string', () => {
+    const result = parseDuration('1h30m45s500ms');
+
+    const expectedNs =
+      3_600_000_000_000 + // 1 hour
+      1_800_000_000_000 + // 30 minutes
+      45_000_000_000 + // 45 seconds
+      500_000_000; // 500 milliseconds
+
+    expect(result.isValid).toBe(true);
+    expect(result.valueNs).toBe(expectedNs);
+    expect(result.errors).toHaveLength(0);
+  });
+
+  it('produces an error when given an invalid duration', () => {
+    // Test with an invalid duration format
+    const result = parseDuration('invalid');
+
+    expect(result.isValid).toBe(false);
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]).toContain('Invalid duration format');
   });
 });

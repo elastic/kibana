@@ -13,7 +13,7 @@ import { useHistory } from 'react-router-dom';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { usePolicyListContext } from './policy_list_context';
 import { useIsReadOnly } from '../../lib/use_is_read_only';
-import { PolicyFromES } from '../../../../common/types';
+import type { PolicyFromES } from '../../../../common/types';
 import { getPoliciesListPath, getPolicyCreatePath } from '../../services/navigation';
 import { PolicyTable, ListActionHandler } from './components';
 import { ViewPolicyFlyout } from './policy_flyout';

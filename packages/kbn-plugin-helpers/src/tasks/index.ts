@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './bazel_packages';
+export * from './build_webpack_packages';
 export * from './brotli_compress_bundles';
 export * from './clean';
 export * from './create_archive';

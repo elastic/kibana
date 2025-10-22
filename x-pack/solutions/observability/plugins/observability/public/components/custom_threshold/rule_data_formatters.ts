@@ -6,7 +6,7 @@
  */
 
 import { ALERT_REASON } from '@kbn/rule-data-utils';
-import { ObservabilityRuleTypeFormatter } from '../..';
+import type { ObservabilityRuleTypeFormatter } from '../..';
 
 // Putting undefined value in the link will hide the View In App button as requested in to https://github.com/elastic/kibana/issues/159782
 export const LINK_TO_THRESHOLD_EXPLORER = undefined;

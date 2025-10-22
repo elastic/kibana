@@ -16,6 +16,7 @@ import { notesTelemetryEvents } from './notes';
 import { onboardingHubTelemetryEvents } from './onboarding';
 import { previewRuleTelemetryEvents } from './preview_rule';
 import { siemMigrationsTelemetryEvents } from './siem_migrations';
+import { ruleUpgradeTelemetryEvents } from './rule_upgrade';
 
 export const telemetryEvents = [
   ...alertsTelemetryEvents,
@@ -25,6 +26,7 @@ export const telemetryEvents = [
   ...documentTelemetryEvents,
   ...onboardingHubTelemetryEvents,
   ...manualRuleRunTelemetryEvents,
+  ...ruleUpgradeTelemetryEvents,
   ...bulkFillRuleGapsTelemetryEvents,
   ...eventLogTelemetryEvents,
   ...notesTelemetryEvents,

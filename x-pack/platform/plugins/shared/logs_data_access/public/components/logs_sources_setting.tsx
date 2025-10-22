@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { EuiDescribedFormGroup, EuiFieldText, EuiFormRow, EuiLink } from '@elastic/eui';
-import { ApplicationStart } from '@kbn/core-application-browser';
+import type { ApplicationStart } from '@kbn/core-application-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 

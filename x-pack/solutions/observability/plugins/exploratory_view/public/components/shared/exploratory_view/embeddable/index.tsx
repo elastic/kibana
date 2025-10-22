@@ -10,8 +10,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { AnalyticsServiceSetup, CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import styled from '@emotion/styled';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { FormulaPublicApi } from '@kbn/lens-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { FormulaPublicApi } from '@kbn/lens-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useAppDataView } from './use_app_data_view';
@@ -133,7 +133,6 @@ export function getExploratoryViewEmbeddable(
             {...embedProps}
             dataViewState={dataViews}
             lens={lens}
-            lensFormulaHelper={lensHelper?.formula}
             searchSessionId={services.data.search.session.getSessionId()}
             onLoad={onLensLoaded}
             analytics={analytics}

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { testUsers } from '../test_users';
 
 export default function (providerContext: FtrProviderContext) {
@@ -196,7 +196,7 @@ export default function (providerContext: FtrProviderContext) {
             expect(agent.policy_id).to.eql('policy2');
           });
         };
-
+        // TODO: use helper function `checkBulkAgentAction`
         await new Promise((resolve, reject) => {
           let attempts = 0;
           const intervalId = setInterval(async () => {

@@ -20,7 +20,6 @@ import type {
   ESQLLiteral,
   ESQLParamLiteral,
   ESQLProperNode,
-  ESQLTimeInterval,
 } from '../../../types';
 import * as generic from '../../generic';
 import { isColumn, isFunctionExpression, isParamLiteral } from '../../../ast/is';
@@ -111,7 +110,7 @@ export interface StatsFieldSummary {
   /**
    * A list of terminal nodes that were found in the definition.
    */
-  terminals: Array<ESQLColumn | ESQLLiteral | ESQLList | ESQLTimeInterval>;
+  terminals: Array<ESQLColumn | ESQLLiteral | ESQLList>;
 
   /**
    * A formatted list of field names which were used for new field
@@ -170,9 +169,6 @@ const summarizeField = (query: EsqlQuery, arg: ESQLProperNode): StatsFieldSummar
     visitListLiteral(node) {
       terminals.push(node);
     },
-    visitTimeIntervalLiteral(node) {
-      terminals.push(node);
-    },
   });
 
   const summary: StatsFieldSummary = {
@@ -219,7 +215,12 @@ export const summarizeCommand = (query: EsqlQuery, command: ESQLCommand): StatsC
     .on('visitExpression', (ctx) => {
       const node = ctx.node;
       const summary = summarizeField(query, node);
-      newFields.add(summary.field);
+
+      if (isFunctionExpression(summary.arg)) {
+        // only mark as new field if the arg is a function expression
+        newFields.add(summary.field);
+      }
+
       for (const field of summary.usedFields) usedFields.add(field);
       grouping[summary.field] = summary;
     })

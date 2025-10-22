@@ -7,4 +7,4 @@
 
 export * from './log_views_client';
 export * from './log_views_service';
-export * from './types';
+export type * from './types';

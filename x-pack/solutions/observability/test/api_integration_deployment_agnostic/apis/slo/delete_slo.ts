@@ -7,17 +7,18 @@
 
 import { cleanup, generate } from '@kbn/data-forge';
 import expect from '@kbn/expect';
-import { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import {
   SLI_DESTINATION_INDEX_PATTERN,
   SUMMARY_DESTINATION_INDEX_PATTERN,
   getSLOSummaryTransformId,
   getSLOTransformId,
 } from '@kbn/slo-plugin/common/constants';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { DEFAULT_SLO } from './fixtures/slo';
 import { DATA_FORGE_CONFIG } from './helpers/dataforge';
-import { TransformHelper, createTransformHelper } from './helpers/transform';
+import type { TransformHelper } from './helpers/transform';
+import { createTransformHelper } from './helpers/transform';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esClient = getService('es');

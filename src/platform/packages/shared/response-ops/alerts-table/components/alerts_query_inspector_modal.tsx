@@ -20,6 +20,7 @@ import {
   EuiModalFooter,
   EuiSpacer,
   EuiTabbedContent,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { isEmpty } from 'lodash';
@@ -75,6 +76,7 @@ const AlertsQueryInspectorModalComponent = ({
   const parsedResponse: Response = parse(response[0]);
   const formattedRequest = stringify(parsedRequest);
   const formattedResponse = stringify(parsedResponse);
+  const modalTitleId = useGeneratedHtmlId();
 
   const statistics: Array<{
     title: NonNullable<ReactNode | string>;
@@ -193,9 +195,10 @@ const AlertsQueryInspectorModalComponent = ({
           max-width: 718px;
         }
       `}
+      aria-labelledby={modalTitleId}
     >
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           {i18n.INSPECT} {title}
         </EuiModalHeaderTitle>
       </EuiModalHeader>

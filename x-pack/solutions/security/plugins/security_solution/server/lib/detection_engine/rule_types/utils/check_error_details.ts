@@ -11,6 +11,7 @@ const USER_ERRORS_EXCEPTIONS = [
   'status_exception',
   'verification_exception',
   'parsing_exception',
+  'x_content_parse_exception',
 ];
 
 /**

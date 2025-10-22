@@ -7,15 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ArrayEntry, ArrayNode } from '@elastic/charts';
-import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
-import { BucketColumns, ChartTypes } from '../../../common/types';
+import type { ArrayEntry, ArrayNode } from '@elastic/charts';
+
+import type { BucketColumns } from '../../../common/types';
+import { ChartTypes } from '../../../common/types';
 import { createMockPieParams, createMockVisData } from '../../mocks';
 import { getPaletteRegistry } from '../../__mocks__/palettes';
 import { getLayers } from './get_layers';
 import { getKbnPalettes } from '@kbn/palettes';
+import { generateFormatters } from '../formatters';
+import { getFieldFormatsRegistry } from '@kbn/field-formats-plugin/public/mocks';
+import { type CoreSetup } from '@kbn/core/public';
+import { getAggsFormats } from '@kbn/data-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
+import { EMPTY_LABEL, MISSING_TOKEN, NULL_LABEL } from '@kbn/field-formats-common';
 
 describe('getLayers', () => {
+  // use the current fieldFormatRegistry
+  const fieldFormatsRegistry = getFieldFormatsRegistry({
+    uiSettings: { get: jest.fn() },
+  } as unknown as CoreSetup);
+
+  // attach the required aggsFormats to allow formatting special charts in esaggs
+  fieldFormatsRegistry.register(
+    getAggsFormats((serializedFieldFormat) =>
+      fieldFormatsRegistry.deserialize(serializedFieldFormat)
+    )
+  );
+
   const palettes = getKbnPalettes({ name: 'amsterdam', darkMode: false });
 
   it('preserves slice order for multi-metric layer', () => {
@@ -48,7 +67,7 @@ describe('getLayers', () => {
       getPaletteRegistry(),
       palettes,
       {},
-      fieldFormatsMock,
+      fieldFormatsRegistry,
       false,
       false
     );
@@ -118,56 +137,72 @@ describe('getLayers', () => {
   });
 
   it('should handle empty slices with default label', () => {
-    const visData = createMockVisData();
-    const visDataWithNullValues = {
-      ...visData,
-      rows: [
+    const visDataWithNullValues: Datatable = {
+      type: 'datatable',
+      columns: [
         {
-          'col-0-2': 'Null Airways',
-          'col-1-1': null,
-          'col-2-3': null,
-          'col-3-1': null,
+          id: 'category',
+          name: 'Category',
+          meta: {
+            type: 'string',
+            params: {
+              id: 'terms',
+              params: {
+                id: 'string',
+                otherBucketLabel: 'Passed other label',
+                missingBucket: true,
+                missingBucketLabel: 'Passed missing label',
+              },
+            },
+          },
         },
+        {
+          id: 'value',
+          name: 'Value',
+          meta: { type: 'number', params: { id: 'number' } },
+        },
+      ],
+      rows: [
+        { category: '', value: 10 },
+        { category: null, value: 10 },
+        { category: MISSING_TOKEN, value: 10 },
+        { category: '__other__', value: 10 },
       ],
     };
 
-    const columns: BucketColumns[] = [
-      {
-        id: 'col-0-0',
-        name: 'Normal column',
-        meta: { type: 'murmur3' },
-      },
-      {
-        id: 'col-0-0',
-        name: 'multi-metric column',
-        meta: {
-          type: 'number',
-          sourceParams: {
-            consolidatedMetricsColumn: true,
-          },
-        },
-      },
-    ];
     const visParams = createMockPieParams();
+    const formatters = generateFormatters(visDataWithNullValues, fieldFormatsRegistry.deserialize);
     const layers = getLayers(
       ChartTypes.PIE,
-      columns,
+      [visDataWithNullValues.columns[0]], // only the bucket column
       visParams,
       visDataWithNullValues,
       {},
       [],
       getPaletteRegistry(),
       palettes,
-      {},
-      fieldFormatsMock,
+      formatters,
+      fieldFormatsRegistry,
       false,
       false
     );
-
     for (const layer of layers) {
-      expect(layer.groupByRollup(visDataWithNullValues.rows[0], 0)).toEqual('(empty)');
-      expect(layer.showAccessor?.(visDataWithNullValues.rows[0]['col-0-2'])).toEqual(true);
-      expect(layer.nodeLabel?.(visDataWithNullValues.rows[0]['col-0-2'])).toEqual('Null Airways');
+      expect(layer.showAccessor?.(visDataWithNullValues.rows[0].category)).toEqual(true);
+      expect(layer.nodeLabel?.(visDataWithNullValues.rows[0].category)).toEqual(EMPTY_LABEL);
+
+      expect(layer.showAccessor?.(visDataWithNullValues.rows[1].category)).toEqual(true);
+      expect(layer.nodeLabel?.(visDataWithNullValues.rows[1].category)).toEqual(NULL_LABEL);
+
+      // this tests the missingBucketLabel property used only in visualize
+      expect(layer.showAccessor?.(visDataWithNullValues.rows[2].category)).toEqual(true);
+      expect(layer.nodeLabel?.(visDataWithNullValues.rows[2].category)).toEqual(
+        'Passed missing label'
+      );
+
+      expect(layer.showAccessor?.(visDataWithNullValues.rows[3].category)).toEqual(true);
+      expect(layer.nodeLabel?.(visDataWithNullValues.rows[3].category)).toEqual(
+        'Passed other label'
+      );
     }
   });
 });

@@ -27,15 +27,7 @@ export const createTracesDataSourceProfileProvider = ({
   profile: {
     getDefaultAppState: (prev) => (params) => ({
       ...prev(params),
-      columns: [
-        {
-          name: '@timestamp',
-          width: 212,
-        },
-        {
-          name: '_source',
-        },
-      ],
+      columns: [{ name: '@timestamp', width: 212 }, { name: '_source' }],
       rowHeight: 5,
     }),
     getCellRenderers,
@@ -44,7 +36,7 @@ export const createTracesDataSourceProfileProvider = ({
   resolve: (params) => {
     if (
       params.rootContext.solutionType === SolutionType.Observability &&
-      tracesContextService.containsTracesIndexPattern(extractIndexPatternFrom(params))
+      tracesContextService.isTracesIndexPattern(extractIndexPatternFrom(params))
     ) {
       return {
         isMatch: true,

@@ -12,7 +12,7 @@ import { dump } from 'js-yaml';
 
 import { isEmpty } from 'lodash';
 
-import { inputsFormat } from '../../../common/constants';
+import { FIPS_AGENT_KUERY, inputsFormat } from '../../../common/constants';
 
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
@@ -97,7 +97,15 @@ export async function populateAssignedAgentsCount(
           kuery: `${AGENTS_PREFIX}.policy_id:"${agentPolicy.id}" and ${UNPRIVILEGED_AGENT_KUERY}`,
         })
         .then(({ total }) => (agentPolicy.unprivileged_agents = total));
-      return Promise.all([totalAgents, unprivilegedAgents]);
+      const fipsAgents = agentClient
+        .listAgents({
+          showInactive: true,
+          perPage: 0,
+          page: 1,
+          kuery: `${AGENTS_PREFIX}.policy_id:"${agentPolicy.id}" and ${FIPS_AGENT_KUERY}`,
+        })
+        .then(({ total }) => (agentPolicy.fips_agents = total));
+      return Promise.all([totalAgents, unprivilegedAgents, fipsAgents]);
     },
     { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10 }
   );
@@ -370,6 +378,7 @@ export const createAgentPolicyHandler: FleetRequestHandler<
     const agentPolicy = await createAgentPolicyWithPackages({
       soClient,
       esClient,
+      agentPolicyService,
       newPolicy,
       hasFleetServer,
       withSysMonitoring,
@@ -539,6 +548,8 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
   logger.debug(`updating policy [${request.params.agentPolicyId}] in space [${spaceId}]`);
 
   try {
+    const authzFleetAgentsAll = fleetContext.authz.fleet.allAgents;
+
     const requestSpaceId = spaceId;
 
     if (spaceIds?.length) {
@@ -566,7 +577,14 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
       esClient,
       request.params.agentPolicyId,
       data,
-      { force, bumpRevision, user, spaceId, requestSpaceId }
+      {
+        force,
+        bumpRevision,
+        user,
+        spaceId,
+        requestSpaceId,
+        isRequiredVersionsAuthorized: authzFleetAgentsAll,
+      }
     );
 
     let item: any = agentPolicy;
@@ -842,7 +860,7 @@ export const GetAgentPolicyOutputsHandler: FleetRequestHandler<
       body: { message: 'Agent policy not found' },
     });
   }
-  const outputs = await agentPolicyService.getAllOutputsForPolicy(soClient, agentPolicy);
+  const outputs = await agentPolicyService.getAllOutputsForPolicy(agentPolicy);
 
   const body: GetAgentPolicyOutputsResponse = {
     item: outputs,
@@ -870,7 +888,7 @@ export const GetListAgentPolicyOutputsHandler: FleetRequestHandler<
     withPackagePolicies: true,
   });
 
-  const outputsList = await agentPolicyService.listAllOutputsForPolicies(soClient, agentPolicies);
+  const outputsList = await agentPolicyService.listAllOutputsForPolicies(agentPolicies);
 
   const body: GetListAgentPolicyOutputsResponse = {
     items: outputsList,

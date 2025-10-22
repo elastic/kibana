@@ -4,13 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IUiSettingsClient } from '@kbn/core/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
-import { DiscoverStart } from '@kbn/discover-plugin/public';
-import { Filter, FilterStateStore, TimeRange } from '@kbn/es-query';
+import type { DiscoverStart } from '@kbn/discover-plugin/public';
+import type { Filter, TimeRange } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { buildEsQuery } from '@kbn/observability-plugin/public';
-import { kqlWithFiltersSchema, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { kqlWithFiltersSchema } from '@kbn/slo-schema';
 import { isEmpty } from 'lodash';
 import { v4 } from 'uuid';
 

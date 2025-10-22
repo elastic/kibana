@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { PropertyName, MappingProperty } from 'elasticsearch-8.x/lib/api/types'; // Switch to `@elastic/elasticsearch` when the CI cluster is upgraded.
+import type { PropertyName, MappingProperty } from 'elasticsearch-8.x/lib/api/types'; // Switch to `@elastic/elasticsearch` when the CI cluster is upgraded.
 
 export const buildkiteProperties: Record<PropertyName, MappingProperty> = {
   branch: {
@@ -139,6 +139,23 @@ export const testRunProperties: Record<PropertyName, MappingProperty> = {
   },
   duration: {
     type: 'long',
+  },
+  tests: {
+    type: 'object',
+    properties: {
+      passes: {
+        type: 'long',
+      },
+      failures: {
+        type: 'long',
+      },
+      pending: {
+        type: 'long',
+      },
+      total: {
+        type: 'long',
+      },
+    },
   },
   config: {
     type: 'object',

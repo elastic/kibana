@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
-import { CoreSetup } from '@kbn/core/server';
-import { Logger } from '@kbn/logging';
-import { ObservabilityAIAssistantConfig } from '@kbn/observability-ai-assistant-plugin/server/config';
-import { ObservabilityAIAssistantPluginStartDependencies } from '@kbn/observability-ai-assistant-plugin/server/types';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { Client } from '@elastic/elasticsearch';
+import type { CoreSetup } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
+import type { ObservabilityAIAssistantConfig } from '@kbn/observability-ai-assistant-plugin/server/config';
+import type { ObservabilityAIAssistantPluginStartDependencies } from '@kbn/observability-ai-assistant-plugin/server/types';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 export function getLoggerMock(toolingLog: ToolingLog) {
   return {

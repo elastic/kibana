@@ -37,7 +37,7 @@ import type {
 } from '../../../../../common/types';
 import { TSVB_DEFAULT_COLOR } from '../../../../../common/constants';
 
-import { DragHandleProps } from '../../../../types';
+import type { DragHandleProps } from '../../../../types';
 import { PercentileHdr } from '../percentile_hdr';
 
 const RESTRICT_FIELDS = [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.HISTOGRAM];

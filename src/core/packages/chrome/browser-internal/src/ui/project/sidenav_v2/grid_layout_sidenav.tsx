@@ -10,26 +10,17 @@
 import useObservable from 'react-use/lib/useObservable';
 import { useLayoutUpdate } from '@kbn/core-chrome-layout-components';
 import React, { useCallback } from 'react';
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import { css, Global } from '@emotion/react';
-import { Navigation as NavigationComponent } from '@kbn/core-chrome-navigation';
-import {
-  LOGO,
-  PRIMARY_MENU_FOOTER_ITEMS,
-  PRIMARY_MENU_ITEMS,
-  // eslint-disable-next-line @kbn/imports/no_boundary_crossing
-} from '@kbn/core-chrome-navigation/src/mocks/observability';
-
-const demoItems = {
-  primaryItems: PRIMARY_MENU_ITEMS,
-  footerItems: PRIMARY_MENU_FOOTER_ITEMS,
-};
+import { Navigation } from './navigation';
+import type { NavigationProps } from './types';
 
 export interface Props {
   isCollapsed$: BehaviorSubject<boolean>;
+  navProps: NavigationProps;
 }
 
-export const GridLayoutProjectSideNavV2 = ({ isCollapsed$ }: Props) => {
+export const GridLayoutProjectSideNavV2 = ({ isCollapsed$, navProps }: Props) => {
   const isCollapsed = useObservable(isCollapsed$, isCollapsed$.getValue());
   const updateLayout = useLayoutUpdate();
   const setWidth = useCallback(
@@ -49,13 +40,7 @@ export const GridLayoutProjectSideNavV2 = ({ isCollapsed$ }: Props) => {
           }
         `}
       />
-      <NavigationComponent
-        isCollapsed={isCollapsed}
-        items={demoItems}
-        logoLabel={LOGO.label}
-        logoType={LOGO.logoType}
-        setWidth={setWidth}
-      />
+      <Navigation isCollapsed={isCollapsed} setWidth={setWidth} {...navProps} />
     </>
   );
 };

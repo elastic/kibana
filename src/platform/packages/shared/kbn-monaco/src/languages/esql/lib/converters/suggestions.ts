@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ISuggestionItem } from '@kbn/esql-ast/src/commands_registry/types';
+import type { ISuggestionItem } from '@kbn/esql-ast/src/commands_registry/types';
 import { monaco } from '../../../../monaco_imports';
-import { MonacoAutocompleteCommandDefinition } from '../types';
+import type { MonacoAutocompleteCommandDefinition } from '../types';
 import { offsetRangeToMonacoRange } from '../shared/utils';
 
 function escapeForStringLiteral(str: string): string {
@@ -21,8 +21,10 @@ export function wrapAsMonacoSuggestions(
   fullText: string,
   defineRange: boolean = true,
   escapeSpecialChars: boolean = false
-): MonacoAutocompleteCommandDefinition[] {
-  return suggestions.map<MonacoAutocompleteCommandDefinition>(
+): monaco.languages.CompletionList {
+  let hasAnIncompleteSuggestion = false;
+
+  const monacoSuggestions = suggestions.map<MonacoAutocompleteCommandDefinition>(
     ({
       label,
       text,
@@ -34,7 +36,12 @@ export function wrapAsMonacoSuggestions(
       filterText,
       command,
       rangeToReplace,
+      incomplete,
     }) => {
+      if (incomplete) {
+        hasAnIncompleteSuggestion = true;
+      }
+
       const monacoSuggestion: MonacoAutocompleteCommandDefinition = {
         label,
         insertText: escapeSpecialChars ? escapeForStringLiteral(text) : text,
@@ -58,4 +65,9 @@ export function wrapAsMonacoSuggestions(
       return monacoSuggestion;
     }
   );
+  return {
+    incomplete: hasAnIncompleteSuggestion,
+    // @ts-expect-error because of range typing: https://github.com/microsoft/monaco-editor/issues/4638
+    suggestions: monacoSuggestions,
+  };
 }

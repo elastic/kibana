@@ -9,4 +9,4 @@ export * from './endpoint/endpoint_agent_status_client';
 export * from './sentinel_one/sentinel_one_agent_status_client';
 export * from './get_agent_status_client';
 
-export * from './lib/types';
+export type * from './lib/types';

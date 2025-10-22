@@ -26,11 +26,8 @@ import { useDataView } from './use_data_view';
 import { environmentQuery } from './queries';
 import { useUxUrlParams } from '../../../../context/url_params_context/use_ux_url_params';
 
-import {
-  uxFiltersByName,
-  UxLocalUIFilterName,
-  uxLocalUIFilterNames,
-} from '../../../../../common/ux_ui_filter';
+import type { UxLocalUIFilterName } from '../../../../../common/ux_ui_filter';
+import { uxFiltersByName, uxLocalUIFilterNames } from '../../../../../common/ux_ui_filter';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { TRANSACTION_PAGE_LOAD } from '../../../../../common/transaction_types';
 import { SERVICE_NAME, TRANSACTION_TYPE } from '../../../../../common/elasticsearch_fieldnames';

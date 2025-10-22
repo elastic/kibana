@@ -16,7 +16,7 @@ import {
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
-import { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
+import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
 
 type ConnectorSelectorBaseProps = UseGenAIConnectorsResult;
 
@@ -87,6 +87,12 @@ export function ConnectorSelectorBase(props: ConnectorSelectorBaseProps) {
     >
       <EuiFlexItem grow>
         <EuiSuperSelect
+          aria-label={i18n.translate(
+            'xpack.observabilityAiAssistant.connectorSelector.connectorSelectAriaLabel',
+            {
+              defaultMessage: 'Connector',
+            }
+          )}
           compressed
           valueOfSelected={props.selectedConnector}
           options={props.connectors.map((connector) => ({

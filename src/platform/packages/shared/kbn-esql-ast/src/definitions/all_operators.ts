@@ -14,9 +14,25 @@ import { operatorFunctionDefinitions } from './generated/operators';
 
 // Retrieve the definitions from the operatorFunctionDefinitions. In the operatorFunctionDefinitions there is no distinction between
 // other operators and the comparison ones, so we do this here.
+export const arithmeticOperators: FunctionDefinition[] = operatorFunctionDefinitions.filter(
+  ({ name }) => name === '+' || name === '-' || name === '*' || name === '/' || name === '%'
+);
+
 export const comparisonFunctions: FunctionDefinition[] = operatorFunctionDefinitions.filter(
   ({ name }) =>
     name === '==' || name === '!=' || name === '<' || name === '>' || name === '<=' || name === '>='
+);
+
+export const nullCheckOperators: FunctionDefinition[] = operatorFunctionDefinitions.filter(
+  ({ name }) => name === 'is null' || name === 'is not null'
+);
+
+export const inOperators: FunctionDefinition[] = operatorFunctionDefinitions.filter(
+  ({ name }) => name === 'in' || name === 'not in'
+);
+
+export const patternMatchOperators: FunctionDefinition[] = operatorFunctionDefinitions.filter(
+  ({ name }) => name === 'like' || name === 'not like' || name === 'rlike' || name === 'not rlike'
 );
 
 export const logicalOperators: FunctionDefinition[] = [
@@ -41,8 +57,10 @@ export const logicalOperators: FunctionDefinition[] = [
     Location.WHERE,
     Location.ROW,
     Location.SORT,
+    Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.RERANK,
   ],
   signatures: [
     {
@@ -69,6 +87,7 @@ const otherDefinitions: FunctionDefinition[] = [
       Location.SORT,
       Location.STATS_BY,
       Location.STATS_WHERE,
+      Location.RERANK,
     ],
     signatures: [
       {
@@ -94,6 +113,7 @@ const otherDefinitions: FunctionDefinition[] = [
       Location.DISSECT,
       Location.COMPLETION,
       Location.RENAME,
+      Location.RERANK,
     ],
     signatures: [
       {
@@ -129,6 +149,7 @@ const otherDefinitions: FunctionDefinition[] = [
       defaultMessage: 'WHERE operator',
     }),
     locationsAvailable: [Location.STATS],
+    ignoreAsSuggestion: true,
     signatures: [
       {
         params: [

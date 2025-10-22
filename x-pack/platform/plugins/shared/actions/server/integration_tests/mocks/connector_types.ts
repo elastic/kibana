@@ -23,6 +23,7 @@ export const connectorTypes: string[] = [
   '.teams',
   '.torq',
   '.opsgenie',
+  '.jira-service-management',
   '.tines',
   '.gen-ai',
   '.bedrock',
@@ -36,5 +37,6 @@ export const connectorTypes: string[] = [
   '.inference',
   '.microsoft_defender_endpoint',
   '.cases',
+  '.workflows',
   '.observability-ai-assistant',
 ];

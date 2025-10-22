@@ -9,18 +9,14 @@ import React from 'react';
 
 import { useValues, useActions } from 'kea';
 
-import {
-  CriteriaWithPagination,
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiButtonEmpty,
-} from '@elastic/eui';
+import type { CriteriaWithPagination, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTable, EuiButtonEmpty } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { Page } from '../../../../../../../common/types/pagination';
-import { EnterpriseSearchApplication } from '../../../../../../../common/types/search_applications';
+import type { Page } from '../../../../../../../common/types/pagination';
+import type { EnterpriseSearchApplication } from '../../../../../../../common/types/search_applications';
 
 import { MANAGE_BUTTON_LABEL } from '../../../../../shared/constants';
 
@@ -56,7 +52,7 @@ export const SearchApplicationsListTable: React.FC<SearchApplicationsListTablePr
     {
       field: 'name',
       name: i18n.translate('xpack.enterpriseSearch.searchApplications.list.table.column.name', {
-        defaultMessage: 'Search Application Name',
+        defaultMessage: 'Search application name',
       }),
       mobileOptions: {
         header: true,

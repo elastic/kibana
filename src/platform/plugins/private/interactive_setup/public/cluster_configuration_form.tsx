@@ -32,6 +32,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React, { useState } from 'react';
@@ -414,6 +415,7 @@ export interface CertificateChainProps {
 }
 const CertificateChain: FunctionComponent<CertificateChainProps> = ({ certificateChain }) => {
   const [showModal, setShowModal] = useState(false);
+  const modalTitleId = useGeneratedHtmlId();
 
   return (
     <>
@@ -423,9 +425,13 @@ const CertificateChain: FunctionComponent<CertificateChainProps> = ({ certificat
         compressed
       />
       {showModal && (
-        <EuiModal onClose={() => setShowModal(false)} maxWidth={euiThemeVars.euiBreakpoints.s}>
+        <EuiModal
+          aria-labelledby={modalTitleId}
+          onClose={() => setShowModal(false)}
+          maxWidth={euiThemeVars.euiBreakpoints.s}
+        >
           <EuiModalHeader>
-            <EuiModalHeaderTitle>
+            <EuiModalHeaderTitle id={modalTitleId}>
               <FormattedMessage
                 id="interactiveSetup.certificateChain.title"
                 defaultMessage="Certificate chain"

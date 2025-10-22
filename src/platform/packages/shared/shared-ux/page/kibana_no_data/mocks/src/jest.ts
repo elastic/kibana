@@ -8,7 +8,7 @@
  */
 
 import { getNoDataCardServicesMock } from '@kbn/shared-ux-card-no-data-mocks';
-import { KibanaNoDataPageServices } from '@kbn/shared-ux-page-kibana-no-data-types';
+import type { KibanaNoDataPageServices } from '@kbn/shared-ux-page-kibana-no-data-types';
 import { getNoDataViewsPromptServicesMock } from '@kbn/shared-ux-prompt-no-data-views-mocks';
 
 interface Params {

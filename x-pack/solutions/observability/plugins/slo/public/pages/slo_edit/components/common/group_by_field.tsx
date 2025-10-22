@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
-import { QuerySchema } from '@kbn/slo-schema';
+import type { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
+import type { QuerySchema } from '@kbn/slo-schema';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
-import { CreateSLOForm } from '../../types';
+import { EuiSpacer } from '@elastic/eui';
+import type { CreateSLOForm } from '../../types';
 import { GroupByCardinality } from './group_by_cardinality';
 import { GroupByFieldSelector } from './group_by_field_selector';
 
@@ -28,14 +29,15 @@ export function GroupByField({
   const index = watch('indicator.params.index');
 
   return (
-    <>
+    <div style={{ paddingRight: 34 }}>
       <GroupByFieldSelector
         indexFields={groupByFields}
         isLoading={!!index && isLoading}
         isDisabled={!index}
       />
+      <EuiSpacer size="m" />
       <GroupByCardinality customFilters={filters} />
-    </>
+    </div>
   );
 }
 

@@ -14,11 +14,12 @@ import type {
   QueryDslGeoShapeQuery,
 } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
-import { Feature, Geometry, MultiPolygon, Polygon, Position } from 'geojson';
+import type { Feature, Geometry, MultiPolygon, Polygon, Position } from 'geojson';
 // @ts-expect-error
 import turfCircle from '@turf/circle';
-import { Filter, FilterMeta, FILTERS } from '@kbn/es-query';
-import { MapExtent } from '../descriptor_types';
+import type { Filter, FilterMeta } from '@kbn/es-query';
+import { FILTERS } from '@kbn/es-query';
+import type { MapExtent } from '../descriptor_types';
 import { getEsSpatialRelationLabel } from '../i18n_getters';
 import { makeESBbox } from './elasticsearch_geo_utils';
 

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { useAbortableAsync } from '@kbn/react-hooks';
-import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
+import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 
 export function useResolvedDefinitionName({
   streamsRepositoryClient,

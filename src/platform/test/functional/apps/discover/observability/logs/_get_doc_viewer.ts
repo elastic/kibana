@@ -9,8 +9,8 @@
 
 import moment from 'moment/moment';
 import { log, timerange } from '@kbn/apm-synthtrace-client';
-import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { MORE_THAN_1024_CHARS, STACKTRACE_MESSAGE } from '../const';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -59,7 +59,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await queryBar.setQuery('error.stack_trace : * and _ignored : *');
       await queryBar.submitQuery();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await PageObjects.discover.waitUntilTabIsLoaded();
     });
 
     after(async () => {
@@ -96,7 +96,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should open the flyout with stacktrace accordion open and quality issues accordion closed when stacktrace icon is clicked', async () => {
-        await dataGrid.clickStacktraceLeadingControl(0);
+        await dataGrid.clickStacktraceLeadingControl(1);
 
         // Ensure Log overview flyout is open
         await testSubjects.existOrFail('docViewerTab-doc_view_logs_overview');
@@ -119,7 +119,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should open the flyout with stacktrace accordion closed and quality issues accordion open when quality issues icon is clicked', async () => {
-        await dataGrid.clickQualityIssueLeadingControl(0);
+        await dataGrid.clickQualityIssueLeadingControl(2);
 
         // Ensure Log overview flyout is open
         await testSubjects.existOrFail('docViewerTab-doc_view_logs_overview');

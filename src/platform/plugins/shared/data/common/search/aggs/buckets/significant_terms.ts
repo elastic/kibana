@@ -14,7 +14,7 @@ import { isStringType, migrateIncludeExcludeFormat } from './migrate_include_exc
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { aggSignificantTermsFnName } from './significant_terms_fn';
 import { KBN_FIELD_TYPES } from '../../..';
-import { BaseAggParams } from '../types';
+import type { BaseAggParams } from '../types';
 
 const significantTermsTitle = i18n.translate('data.search.aggs.buckets.significantTermsTitle', {
   defaultMessage: 'Significant Terms',

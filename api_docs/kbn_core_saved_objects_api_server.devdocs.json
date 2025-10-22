@@ -1853,18 +1853,6 @@
             "references": [
               {
                 "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/browser-internal/src/simple_saved_object.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/browser-internal/src/simple_saved_object.ts"
-              },
-              {
-                "plugin": "@kbn/core",
                 "path": "src/core/packages/saved-objects/api-server-internal/src/lib/apis/utils/internal_utils.ts"
               },
               {
@@ -1882,10 +1870,6 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/browser-mocks/src/simple_saved_object.mock.ts"
               },
               {
                 "plugin": "graph",
@@ -2129,6 +2113,30 @@
           },
           {
             "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
+          },
+          {
+            "plugin": "actions",
             "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/types/types.ts"
           },
           {
@@ -2153,18 +2161,6 @@
           },
           {
             "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
-          },
-          {
-            "plugin": "actions",
             "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/create.ts"
           },
           {
@@ -2176,24 +2172,12 @@
             "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/create.ts"
           },
           {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
+            "plugin": "alerting",
+            "path": "x-pack/platform/plugins/shared/alerting/server/saved_objects/geo_containment/migrations.ts"
           },
           {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
-          },
-          {
-            "plugin": "savedSearch",
-            "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search_migrations.ts"
-          },
-          {
-            "plugin": "savedSearch",
-            "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search_migrations.ts"
+            "plugin": "alerting",
+            "path": "x-pack/platform/plugins/shared/alerting/server/saved_objects/geo_containment/migrations.ts"
           },
           {
             "plugin": "alerting",
@@ -2212,12 +2196,12 @@
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/platform/plugins/shared/alerting/server/saved_objects/geo_containment/migrations.ts"
+            "plugin": "savedSearch",
+            "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search_migrations.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/platform/plugins/shared/alerting/server/saved_objects/geo_containment/migrations.ts"
+            "plugin": "savedSearch",
+            "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search_migrations.ts"
           },
           {
             "plugin": "canvas",
@@ -2260,6 +2244,18 @@
             "path": "x-pack/platform/plugins/shared/task_manager/server/task_store.test.ts"
           },
           {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/solutions/search/plugins/enterprise_search/server/collectors/lib/telemetry.ts"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/solutions/search/plugins/enterprise_search/server/collectors/lib/telemetry.ts"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/solutions/search/plugins/enterprise_search/server/collectors/lib/telemetry.ts"
+          },
+          {
             "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_types.ts"
           },
@@ -2274,18 +2270,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_migrations.ts"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/solutions/search/plugins/enterprise_search/server/collectors/lib/telemetry.ts"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/solutions/search/plugins/enterprise_search/server/collectors/lib/telemetry.ts"
-          },
-          {
-            "plugin": "enterpriseSearch",
-            "path": "x-pack/solutions/search/plugins/enterprise_search/server/collectors/lib/telemetry.ts"
           },
           {
             "plugin": "alerting",

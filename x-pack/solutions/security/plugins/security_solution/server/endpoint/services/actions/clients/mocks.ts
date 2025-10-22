@@ -11,7 +11,8 @@ import type { ActionsClientMock } from '@kbn/actions-plugin/server/actions_clien
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 import type { DeepPartial } from 'utility-types';
-import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import { type ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import { createMockConnectorFindResult } from '@kbn/actions-plugin/server/application/connector/mocks';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { CasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 import { createCasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
@@ -55,6 +56,7 @@ import type {
   UploadActionApiRequestBody,
   ScanActionRequestBody,
   RunScriptActionRequestBody,
+  CancelActionRequestBody,
 } from '../../../../../common/api/endpoint';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../../common/endpoint/service/response_actions/constants';
@@ -84,6 +86,7 @@ const createResponseActionClientMock = (): jest.Mocked<ResponseActionsClient> =>
     scan: jest.fn().mockReturnValue(Promise.resolve()),
     runscript: jest.fn().mockReturnValue(Promise.resolve()),
     getCustomScripts: jest.fn().mockReturnValue(Promise.resolve()),
+    cancel: jest.fn().mockReturnValue(Promise.resolve()),
   };
 };
 
@@ -351,9 +354,11 @@ const createScanOptionsMock = (
   return merge(options, overrides);
 };
 
-const createRunScriptOptionsMock = (
-  overrides: Partial<RunScriptActionRequestBody> = {}
-): RunScriptActionRequestBody => {
+const createRunScriptOptionsMock = <
+  TParams extends RunScriptActionRequestBody['parameters'] = RunScriptActionRequestBody['parameters']
+>(
+  overrides: Partial<RunScriptActionRequestBody<TParams>> = {}
+): RunScriptActionRequestBody<TParams> => {
   const options: RunScriptActionRequestBody = {
     ...createNoParamsResponseActionOptionsMock(),
     parameters: {
@@ -363,21 +368,27 @@ const createRunScriptOptionsMock = (
   return merge(options, overrides);
 };
 
+const createCancelActionOptionsMock = (
+  overrides: Partial<CancelActionRequestBody> = {}
+): CancelActionRequestBody => {
+  const options: CancelActionRequestBody = {
+    ...createNoParamsResponseActionOptionsMock(),
+    parameters: {
+      id: 'test-action-id-123',
+    },
+  };
+  return merge(options, overrides);
+};
+
 const createConnectorMock = (
   overrides: DeepPartial<ConnectorWithExtraFindData> = {}
 ): ConnectorWithExtraFindData => {
   return merge(
-    {
+    createMockConnectorFindResult({
       id: 'connector-mock-id-1',
       actionTypeId: '.some-type',
       name: 'some mock name',
-      isMissingSecrets: false,
-      config: {},
-      isPreconfigured: false,
-      isDeprecated: false,
-      isSystemAction: false,
-      referencedByCount: 0,
-    },
+    }),
     overrides
   );
 };
@@ -525,6 +536,9 @@ const getOptionsForResponseActionMethod = (method: ResponseActionsClientMethods)
     case 'getFile':
       return createGetFileOptionsMock();
 
+    case 'cancel':
+      return createCancelActionOptionsMock();
+
     default:
       throw new Error(`Mock options are not defined for response action method [${method}]`);
   }
@@ -547,6 +561,7 @@ export const responseActionsClientMock = Object.freeze({
   createUploadOptions: createUploadOptionsMock,
   createScanOptions: createScanOptionsMock,
   createRunScriptOptions: createRunScriptOptionsMock,
+  createCancelActionOptions: createCancelActionOptionsMock,
 
   createIndexedResponse: createEsIndexTransportResponseMock,
 

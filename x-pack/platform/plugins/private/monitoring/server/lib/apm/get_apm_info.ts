@@ -11,9 +11,9 @@ import { createQuery } from '../create_query';
 import { getDiffCalculation } from '../beats/_beats_stats';
 import { ApmMetric } from '../metrics';
 import { getTimeOfLastEvent } from './_get_time_of_last_event';
-import { LegacyRequest } from '../../types';
-import { ElasticsearchResponse } from '../../../common/types/es';
-import { MonitoringConfig } from '../../config';
+import type { LegacyRequest } from '../../types';
+import type { ElasticsearchResponse } from '../../../common/types/es';
+import type { MonitoringConfig } from '../../config';
 
 export function handleResponse(
   response: ElasticsearchResponse,

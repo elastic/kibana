@@ -11,7 +11,7 @@ import {
 } from '@kbn/core-http-common';
 import expect from '@kbn/expect';
 import type { GetAgentsResponse } from '@kbn/fleet-plugin/common';
-import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry, generateAgent } from '../helpers';
 
 const AGENT_COUNT_WAIT_ATTEMPTS = 3;
@@ -31,17 +31,6 @@ export default function (providerContext: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
       await fleetAndAgents.setup();
-    });
-
-    after(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
-      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
-      if (pkgVersion) {
-        await supertest.delete(`/api/fleet/epm/packages/fleet_server/${pkgVersion}`);
-      }
-    });
-
-    before(async () => {
       // we must first force install the fleet_server package to override package verification error on policy create
       // https://github.com/elastic/kibana/issues/137450
       const getPkRes = await supertest
@@ -124,6 +113,14 @@ export default function (providerContext: FtrProviderContext) {
         `agent-${++agentCount}`,
         agentPolicy.id
       );
+    });
+
+    after(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
+      if (pkgVersion) {
+        await supertest.delete(`/api/fleet/epm/packages/fleet_server/${pkgVersion}`);
+      }
     });
 
     async function waitForAgents(

@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { RoleCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
-import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import type { RoleCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
 const RULE_TYPE_ID = '.es-query';
 

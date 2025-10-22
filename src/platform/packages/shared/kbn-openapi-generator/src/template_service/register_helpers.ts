@@ -6,9 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
 import type Handlebars from '@kbn/handlebars';
-import { HelperOptions } from 'handlebars';
+import type { HelperOptions } from '@kbn/handlebars';
 import { snakeCase, camelCase, upperCase } from 'lodash';
 
 export function registerHelpers(handlebarsInstance: typeof Handlebars) {

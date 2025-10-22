@@ -99,6 +99,7 @@ describe('IBM Resilient connector', () => {
     },
     PushToServiceIncidentSchema
   );
+
   beforeAll(() => {
     jest.useFakeTimers();
   });
@@ -107,6 +108,7 @@ describe('IBM Resilient connector', () => {
     jest.useRealTimers();
   });
 
+  let getFieldsSpy: jest.SpyInstance = jest.fn();
   beforeEach(() => {
     jest.resetAllMocks();
     jest.setSystemTime(TIMESTAMP);
@@ -114,6 +116,11 @@ describe('IBM Resilient connector', () => {
       logger,
       connectorId: 'test-connector-id',
     });
+    getFieldsSpy = jest.spyOn(connector, 'getFields').mockResolvedValue(resilientFields);
+  });
+
+  afterEach(() => {
+    getFieldsSpy.mockRestore();
   });
 
   describe('getIncident', () => {
@@ -174,6 +181,7 @@ describe('IBM Resilient connector', () => {
       description: 'desc',
       incidentTypes: [1001],
       severityCode: 6,
+      additionalFields: null,
     };
 
     beforeEach(() => {
@@ -202,7 +210,10 @@ describe('IBM Resilient connector', () => {
     });
 
     it('should call request with correct arguments', async () => {
-      await connector.createIncident(incidentMock, connectorUsageCollector);
+      await connector.createIncident(
+        { ...incidentMock, additionalFields: { customField1: 'testing' } },
+        connectorUsageCollector
+      );
 
       expect(requestMock).toHaveBeenCalledWith({
         ...ignoredRequestFields,
@@ -216,6 +227,7 @@ describe('IBM Resilient connector', () => {
           discovered_date: TIMESTAMP,
           incident_type_ids: [{ id: 1001 }],
           severity_code: { id: 6 },
+          properties: { customField1: 'testing' },
         },
         url: `${apiUrl}rest/orgs/${orgId}/incidents?text_content_output_format=objects_convert`,
         headers: {
@@ -238,6 +250,7 @@ describe('IBM Resilient connector', () => {
             description: 'desc',
             incidentTypes: [1001],
             severityCode: 6,
+            additionalFields: null,
           },
           connectorUsageCollector
         )
@@ -263,6 +276,7 @@ describe('IBM Resilient connector', () => {
         description: 'desc',
         incidentTypes: [1001],
         severityCode: 6,
+        additionalFields: null,
       },
     };
     it('updates the incident correctly', async () => {
@@ -288,6 +302,7 @@ describe('IBM Resilient connector', () => {
             description: 'desc_updated',
             incidentTypes: [1001],
             severityCode: 5,
+            additionalFields: { customField1: 'customValue1' },
           },
         },
         connectorUsageCollector
@@ -303,6 +318,11 @@ describe('IBM Resilient connector', () => {
         method: 'PATCH',
         data: {
           changes: [
+            {
+              field: { name: 'customField1' },
+              old_value: {},
+              new_value: { text: 'customValue1' },
+            },
             {
               field: { name: 'name' },
               old_value: { text: 'title' },
@@ -559,6 +579,7 @@ describe('IBM Resilient connector', () => {
 
   describe('getFields', () => {
     beforeEach(() => {
+      getFieldsSpy.mockRestore();
       requestMock.mockImplementation(() =>
         createAxiosResponse({
           data: resilientFields,

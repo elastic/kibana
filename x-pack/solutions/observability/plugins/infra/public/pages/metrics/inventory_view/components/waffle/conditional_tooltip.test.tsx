@@ -10,7 +10,6 @@ import { render, screen } from '@testing-library/react';
 import { ConditionalToolTip } from './conditional_tooltip';
 import type { SnapshotNodeResponse } from '../../../../../../common/http_api';
 import type { InfraWaffleMapNode } from '../../../../../common/inventory/types';
-import { usePluginConfig } from '../../../../../containers/plugin_config_context';
 
 jest.mock('../../../../../containers/metrics_source', () => ({
   useSourceContext: () => ({ sourceId: 'default' }),
@@ -82,11 +81,6 @@ const mockedUseWaffleOptionsContextReturnValue = {
 
 describe('ConditionalToolTip', () => {
   const currentTime = Date.now();
-  const usePluginConfigMock = usePluginConfig as jest.MockedFunction<typeof usePluginConfig>;
-
-  usePluginConfigMock.mockReturnValue({
-    featureFlags: { hostOtelEnabled: false },
-  } as unknown as ReturnType<typeof usePluginConfig>);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -137,13 +131,6 @@ describe('ConditionalToolTip', () => {
     const tooltip = screen.getByTestId('conditionalTooltipContent-host-01');
     expect(tooltip).toBeInTheDocument();
 
-    const expectedQuery = JSON.stringify({
-      bool: {
-        filter: {
-          match_phrase: { 'host.name': 'host-01' },
-        },
-      },
-    });
     const expectedMetrics = [
       { type: 'cpuV2' },
       { type: 'memory' },
@@ -168,7 +155,7 @@ describe('ConditionalToolTip', () => {
     ];
 
     expect(mockedUseSnapshot).toHaveBeenCalledWith({
-      filterQuery: expectedQuery,
+      kuery: '"host.name": host-01',
       metrics: expectedMetrics,
       groupBy: [],
       nodeType: 'host',

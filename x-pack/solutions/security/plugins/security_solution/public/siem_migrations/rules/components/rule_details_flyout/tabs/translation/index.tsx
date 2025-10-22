@@ -18,14 +18,14 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RuleTranslationResult } from '../../../../../../../common/siem_migrations/constants';
+import { MigrationTranslationResult } from '../../../../../../../common/siem_migrations/constants';
 import type { RuleResponse } from '../../../../../../../common/api/detection_engine';
 import type { RuleMigrationRule } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
 import {
   convertTranslationResultIntoColor,
   convertTranslationResultIntoText,
-} from '../../../../utils/translation_results';
+} from '../../../../../common/utils';
 import { TranslationCallOut } from './callout';
 import { OriginalRuleQuery, TranslatedRuleQuery } from './query_details';
 
@@ -100,11 +100,13 @@ export const TranslationTab: React.FC<TranslationTabProps> = React.memo(
             </EuiSplitPanel.Inner>
           </EuiSplitPanel.Outer>
         </EuiFlexItem>
-        {migrationRule.translation_result === RuleTranslationResult.FULL &&
+        {migrationRule.translation_result === MigrationTranslationResult.FULL &&
           !migrationRule.elastic_rule?.id && (
             <>
               <EuiSpacer size="m" />
               <EuiCallOut
+                announceOnMount
+                data-test-subj="fullyTranslatedRuleInfo"
                 color={'primary'}
                 title={i18n.CALLOUT_TRANSLATED_RULE_INFO_TITLE}
                 iconType={'info'}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SearchResult } from '@elastic/search-ui';
+import type { SearchResult } from '@elastic/search-ui';
 
 export interface FieldValue {
   raw?: unknown;

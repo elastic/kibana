@@ -7,9 +7,9 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useResizeObserver } from '@elastic/eui';
-import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
+import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
-import { NodeDimensions } from '../types';
+import type { NodeDimensions } from '../types';
 import { LazyDebugComponent } from '.';
 
 const Debug = withSuspense(LazyDebugComponent);

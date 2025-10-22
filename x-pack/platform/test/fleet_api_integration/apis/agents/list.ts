@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import * as http from 'http';
+import type * as http from 'http';
 import expect from '@kbn/expect';
 import { type Agent, FLEET_ELASTIC_AGENT_PACKAGE, AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { setupMockServer } from './helpers/mock_agentless_api';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -99,6 +99,13 @@ export default function ({ getService }: FtrProviderContext) {
       expect(apiResponse.total).to.eql(1);
       const agent = apiResponse.items[0];
       expect(agent.access_api_key_id).to.eql('api-key-2');
+    });
+
+    it('should return a 400 when given an invalid "sortField" value', async () => {
+      await supertest
+        .get(`/api/fleet/agents?sortField=invalid_field`)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(400);
     });
 
     it('should return a 200 when given sort options', async () => {

@@ -9,8 +9,8 @@ import expect from '@kbn/expect';
 import { isEmpty, sortBy } from 'lodash';
 
 import { JOB_STATE, DATAFEED_STATE } from '@kbn/ml-plugin/common/constants/states';
-import { Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
 import { getCommonRequestHeader } from '../../../services/ml/common_api';
 

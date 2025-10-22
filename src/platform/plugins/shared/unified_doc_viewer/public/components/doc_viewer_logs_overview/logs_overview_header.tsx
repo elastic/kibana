@@ -12,42 +12,50 @@ import {
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
   EuiText,
-  EuiAccordion,
   useGeneratedHtmlId,
-  EuiTitle,
 } from '@elastic/eui';
-import {
-  DataTableRecord,
-  LogDocumentOverview,
-  fieldConstants,
-  getMessageFieldWithFallbacks,
-} from '@kbn/discover-utils';
+import type { LogDocumentOverview } from '@kbn/discover-utils';
+import { fieldConstants, getMessageFieldWithFallbacks } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
-import { ObservabilityStreamsFeature } from '@kbn/discover-shared-plugin/public';
+import type { ObservabilityStreamsFeature } from '@kbn/discover-shared-plugin/public';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import { ContentFrameworkSection } from '../..';
 import { Timestamp } from './sub_components/timestamp';
 import { HoverActionPopover } from './sub_components/hover_popover_action';
 import { LogLevel } from './sub_components/log_level';
+import { LogsOverviewHighlights } from './logs_overview_highlights';
 
 export const contentLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.label.content', {
   defaultMessage: 'Content breakdown',
 });
 
-export function LogsOverviewHeader({
-  doc,
-  formattedDoc,
-  renderFlyoutStreamProcessingLink,
-}: {
+interface LogsOverviewHeaderProps
+  extends Pick<
+    DocViewRenderProps,
+    'filter' | 'onAddColumn' | 'onRemoveColumn' | 'hit' | 'dataView'
+  > {
   formattedDoc: LogDocumentOverview;
-  doc: DataTableRecord;
   renderFlyoutStreamProcessingLink?: ObservabilityStreamsFeature['renderFlyoutStreamProcessingLink'];
-}) {
+}
+
+export function LogsOverviewHeader({
+  hit,
+  formattedDoc,
+  dataView,
+  filter,
+  onAddColumn,
+  onRemoveColumn,
+  renderFlyoutStreamProcessingLink,
+}: LogsOverviewHeaderProps) {
   const hasLogLevel = Boolean(formattedDoc[fieldConstants.LOG_LEVEL_FIELD]);
   const hasTimestamp = Boolean(formattedDoc[fieldConstants.TIMESTAMP_FIELD]);
   const { field, value, formattedValue } = getMessageFieldWithFallbacks(formattedDoc, {
     includeFormattedValue: true,
   });
-  const rawFieldValue = doc && field ? doc.flattened[field] : undefined;
+  const rawFieldValue = hit && field ? hit.flattened[field] : undefined;
   const messageCodeBlockProps = formattedValue
     ? { language: 'json', children: formattedValue }
     : { language: 'txt', dangerouslySetInnerHTML: { __html: value ?? '' } };
@@ -59,17 +67,11 @@ export function LogsOverviewHeader({
     prefix: contentLabel,
   });
 
-  const accordionTitle = (
-    <EuiTitle size="xxs">
-      <p>{contentLabel}</p>
-    </EuiTitle>
-  );
-
   const badges = hasBadges && (
-    <EuiFlexGroup responsive={false} gutterSize="m" alignItems="center">
+    <EuiFlexGroup responsive={false} gutterSize="m" alignItems="center" wrap={true}>
       {hasMessageField &&
         renderFlyoutStreamProcessingLink &&
-        renderFlyoutStreamProcessingLink({ doc })}
+        renderFlyoutStreamProcessingLink({ doc: hit })}
       {formattedDoc[fieldConstants.LOG_LEVEL_FIELD] && (
         <HoverActionPopover
           value={formattedDoc[fieldConstants.LOG_LEVEL_FIELD]}
@@ -118,15 +120,31 @@ export function LogsOverviewHeader({
     </EuiFlexGroup>
   );
 
-  return hasFlyoutHeader ? (
-    <EuiAccordion
+  return (
+    <ContentFrameworkSection
       id={accordionId}
-      buttonContent={accordionTitle}
-      paddingSize="m"
-      initialIsOpen={true}
+      title={contentLabel}
       data-test-subj="unifiedDocViewLogsOverviewHeader"
+      hasBorder={false}
+      hasPadding={false}
     >
-      {hasMessageField ? contentField : badges}
-    </EuiAccordion>
-  ) : null;
+      {hasFlyoutHeader ? (
+        <>
+          <EuiPanel hasBorder={true} hasShadow={false} paddingSize="s">
+            {hasMessageField ? contentField : badges}
+          </EuiPanel>
+          <EuiSpacer size="m" />
+        </>
+      ) : null}
+
+      <LogsOverviewHighlights
+        formattedDoc={formattedDoc}
+        hit={hit}
+        dataView={dataView}
+        filter={filter}
+        onAddColumn={onAddColumn}
+        onRemoveColumn={onRemoveColumn}
+      />
+    </ContentFrameworkSection>
+  );
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useAbortController } from '@kbn/react-hooks';
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import { useCallback } from 'react';
 import { useKibana } from './use_kibana';
 

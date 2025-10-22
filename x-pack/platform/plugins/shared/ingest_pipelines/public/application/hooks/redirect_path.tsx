@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { History } from 'history';
+import type { History } from 'history';
 import { useCallback, useMemo } from 'react';
 
 import { useKibana } from '../../shared_imports';

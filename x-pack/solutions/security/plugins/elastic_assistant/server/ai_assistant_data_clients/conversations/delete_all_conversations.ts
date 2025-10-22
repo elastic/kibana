@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 export interface DeleteAllConversationsParams {
   esClient: ElasticsearchClient;

@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactChild } from 'react';
+import type { ReactChild } from 'react';
+import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
-import { I18nStart } from '@kbn/core-i18n-browser';
+import type { I18nStart } from '@kbn/core-i18n-browser';
 
 import { createFormServicesMock } from '@kbn/management-settings-components-form/mocks';
 import { Subscription } from 'rxjs';
@@ -22,11 +23,12 @@ import {
   getGlobalSettingsMock,
   getSettingsMock,
 } from '@kbn/management-settings-utilities/mocks/settings.mock';
-import { UiSettingsScope } from '@kbn/core-ui-settings-common';
+import type { UiSettingsScope } from '@kbn/core-ui-settings-common';
 import { getSettingsCapabilitiesMock } from '@kbn/management-settings-utilities/mocks/capabilities.mock';
-import { UiSettingsSolutions } from '@kbn/core-ui-settings-common';
-import { SolutionView } from '@kbn/spaces-plugin/common';
-import { SettingsApplicationProvider, SettingsApplicationServices } from '../services';
+import type { UiSettingsSolutions } from '@kbn/core-ui-settings-common';
+import type { SolutionView } from '@kbn/spaces-plugin/common';
+import type { SettingsApplicationServices } from '../services';
+import { SettingsApplicationProvider } from '../services';
 
 const createRootMock = () => {
   const analytics = analyticsServiceMock.createAnalyticsServiceStart();

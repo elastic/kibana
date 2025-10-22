@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UseAssistantContext } from '@kbn/elastic-assistant/impl/assistant_context';
+import type { UseAssistantContext } from '@kbn/elastic-assistant/impl/assistant_context';
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs';
 

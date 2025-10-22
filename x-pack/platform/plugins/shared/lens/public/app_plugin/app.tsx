@@ -10,20 +10,20 @@ import { i18n } from '@kbn/i18n';
 import type { TimeRange } from '@kbn/es-query';
 import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
-import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { css } from '@emotion/react';
-import { LensAppProps, LensAppServices } from './types';
+import type { LensAppProps, LensAppServices } from './types';
 import { LensTopNavMenu } from './lens_top_nav';
-import { AddUserMessages, EditorFrameInstance, Simplify, UserMessagesGetter } from '../types';
-import { LensDocument } from '../persistence';
+import type { AddUserMessages, EditorFrameInstance, Simplify, UserMessagesGetter } from '../types';
+import type { LensDocument } from '../persistence';
 
+import type { LensAppState } from '../state_management';
 import {
   setState,
   applyChanges,
   useLensSelector,
   useLensDispatch,
-  LensAppState,
   selectSavedObjectFormat,
   updateIndexPatterns,
   selectActiveDatasourceId,
@@ -31,7 +31,7 @@ import {
   selectIsManaged,
 } from '../state_management';
 import { SaveModalContainer, runSaveLensVisualization } from './save_modal_container';
-import { LensInspector } from '../lens_inspector_service';
+import type { LensInspector } from '../lens_inspector_service';
 import { getEditPath } from '../../common/constants';
 import { isLensEqual } from './lens_document_equality';
 import {
@@ -48,6 +48,7 @@ import {
   useNavigateBackToApp,
   useShortUrlService,
 } from './app_helpers';
+import { useEditorFrameService } from '../editor_frame_service/editor_frame_service_context';
 
 export type SaveProps = Simplify<
   Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
@@ -69,8 +70,6 @@ export function App({
   incomingState,
   redirectToOrigin,
   setHeaderActionMenu,
-  datasourceMap,
-  visualizationMap,
   contextOriginatingApp,
   topNavMenuEntryGenerators,
   initialContext,
@@ -78,6 +77,8 @@ export function App({
 }: LensAppProps) {
   const confirmModalTitleId = useGeneratedHtmlId();
   const lensAppServices = useKibana<LensAppServices>().services;
+
+  const { datasourceMap, visualizationMap } = useEditorFrameService();
 
   const {
     data,
@@ -447,8 +448,6 @@ export function App({
           setIsSaveModalVisible={setIsSaveModalVisible}
           setHeaderActionMenu={setHeaderActionMenu}
           indicateNoData={indicateNoData}
-          datasourceMap={datasourceMap}
-          visualizationMap={visualizationMap}
           title={persistedDoc?.title}
           lensInspector={lensInspector}
           currentDoc={currentDoc}

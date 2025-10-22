@@ -66,7 +66,7 @@ describe.skip('Import rules route', () => {
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
     );
     mockPrebuiltRuleAssetsClient = createPrebuiltRuleAssetsClientMock();
-    importRulesRoute(server.router, config);
+    importRulesRoute(server.router, config, clients.logger);
   });
 
   describe('status codes', () => {

@@ -20,12 +20,16 @@ import {
   EuiBetaBadge,
   EuiText,
   EuiCallOut,
+  useEuiTheme,
 } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FlyoutWrapperProps } from './types';
+
+const applyAndCloseLabel = i18n.translate('xpack.lens.config.applyFlyoutLabel', {
+  defaultMessage: 'Apply and close',
+});
 
 export const FlyoutWrapper = ({
   children,
@@ -39,7 +43,9 @@ export const FlyoutWrapper = ({
   navigateToLensEditor,
   onApply,
   isReadOnly,
+  applyButtonLabel = applyAndCloseLabel,
 }: FlyoutWrapperProps) => {
+  const { euiTheme } = useEuiTheme();
   return (
     <>
       {isInlineFlyoutVisible && displayFlyoutHeader && (
@@ -47,7 +53,7 @@ export const FlyoutWrapper = ({
           hasBorder
           css={css`
             pointer-events: auto;
-            background-color: ${euiThemeVars.euiColorEmptyShade};
+            background-color: ${euiTheme.colors.emptyShade};
           `}
           data-test-subj="editFlyoutHeader"
         >
@@ -75,6 +81,7 @@ export const FlyoutWrapper = ({
                         )}
                       >
                         <EuiBetaBadge
+                          tabIndex={0}
                           label=""
                           iconType="beaker"
                           size="s"
@@ -104,6 +111,7 @@ export const FlyoutWrapper = ({
       )}
       {isInlineFlyoutVisible && isReadOnly ? (
         <EuiCallOut
+          announceOnMount
           title={i18n.translate('xpack.lens.config.readOnly', {
             defaultMessage: 'Read-only: Changes will be reverted on close',
           })}
@@ -118,8 +126,8 @@ export const FlyoutWrapper = ({
         css={css`
           // styles needed to display extra drop targets that are outside of the config panel main area
           overflow-y: auto;
-          padding-left: ${euiThemeVars.euiFormMaxWidth};
-          margin-left: -${euiThemeVars.euiFormMaxWidth};
+          padding-left: ${euiTheme.components.forms.maxWidth};
+          margin-left: -${euiTheme.components.forms.maxWidth};
           pointer-events: none;
           .euiFlyoutBody__overflow {
             transform: initial;
@@ -169,10 +177,7 @@ export const FlyoutWrapper = ({
                   iconType="check"
                   data-test-subj="applyFlyoutButton"
                 >
-                  <FormattedMessage
-                    id="xpack.lens.config.applyFlyoutLabel"
-                    defaultMessage="Apply and close"
-                  />
+                  {applyButtonLabel}
                 </EuiButton>
               </EuiFlexItem>
             )}

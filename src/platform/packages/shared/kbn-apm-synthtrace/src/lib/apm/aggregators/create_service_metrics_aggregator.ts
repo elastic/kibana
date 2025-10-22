@@ -8,7 +8,8 @@
  */
 
 import { pick } from 'lodash';
-import { hashKeysOf, ApmFields } from '@kbn/apm-synthtrace-client';
+import type { ApmFields } from '@kbn/apm-synthtrace-client';
+import { hashKeysOf } from '@kbn/apm-synthtrace-client';
 import { createLosslessHistogram } from '../../utils/create_lossless_histogram';
 import { createApmMetricAggregator } from './create_apm_metric_aggregator';
 

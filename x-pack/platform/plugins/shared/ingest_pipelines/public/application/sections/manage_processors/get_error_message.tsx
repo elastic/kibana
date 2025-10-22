@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiCode } from '@elastic/eui';
-import { ResponseErrorBody } from '@kbn/core-http-browser';
+import type { ResponseErrorBody } from '@kbn/core-http-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export const getErrorMessage = (error: ResponseErrorBody) => {

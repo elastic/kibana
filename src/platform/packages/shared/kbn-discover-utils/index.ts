@@ -33,6 +33,7 @@ export {
   createLogsContextService,
   createTracesContextService,
   createApmErrorsContextService,
+  createMetricsContextService,
   createDegradedDocsControl,
   createStacktraceControl,
   fieldConstants,
@@ -40,8 +41,8 @@ export {
   formatHit,
   getDocId,
   getLogDocumentOverview,
-  getTransactionDocumentOverview,
-  getSpanDocumentOverview,
+  getTraceDocumentOverview,
+  getFlattenedTraceDocumentOverview,
   getIgnoredReason,
   getMessageFieldWithFallbacks,
   getShouldShowFieldHandler,
@@ -59,6 +60,7 @@ export {
   AppMenuRegistry,
   dismissAllFlyoutsExceptFor,
   dismissFlyouts,
+  prepareDataViewForEditing,
   LogLevelBadge,
   getDefaultSort,
   getSort,
@@ -73,6 +75,7 @@ export type {
   LogsContextService,
   TracesContextService,
   ApmErrorsContextService,
+  MetricsContextService,
   SortOrder,
   SortInput,
   SortPair,
@@ -81,3 +84,16 @@ export type {
 export * from './src/types';
 
 export * from './src/data_types/logs/constants';
+
+export {
+  ALL_RECOMMENDED_FIELDS_FOR_ESQL,
+  APACHE_ERROR_LOGS_PROFILE,
+  DEFAULT_LOGS_PROFILE,
+  KUBERNETES_CONTAINER_LOGS_PROFILE,
+} from './src/data_types/logs';
+
+export type {
+  ApacheErrorLogsProfile,
+  DefaultLogsProfile,
+  KubernetesContainerLogsProfile,
+} from './src/data_types/logs';

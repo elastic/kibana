@@ -6,15 +6,14 @@
  */
 
 import type { HttpHandler } from '@kbn/core/public';
-import {
+import type {
   ChatCompleteAPI,
   ChatCompleteCompositeResponse,
   ChatCompleteOptions,
   ChatCompleteResponse,
-  ToolOptions,
 } from '@kbn/inference-common';
 import { defer, from, lastValueFrom } from 'rxjs';
-import { ChatCompleteRequestBody } from '../http_apis';
+import type { ChatCompleteRequestBody } from '../http_apis';
 import { retryWithExponentialBackoff } from '../utils/retry_with_exponential_backoff';
 import { getRetryFilter } from '../utils/error_retry_filter';
 import { combineSignal } from '../utils/combine_signal';
@@ -84,7 +83,7 @@ export function createChatCompleteRestApi({ fetch, signal }: CreatePublicChatCom
     } else {
       return lastValueFrom(
         defer(() =>
-          fetch<ChatCompleteResponse<ToolOptions<string>>>('/internal/inference/chat_complete', {
+          fetch<ChatCompleteResponse>('/internal/inference/chat_complete', {
             method: 'POST',
             body: JSON.stringify(body),
             signal: combineSignal(signal, abortSignal),

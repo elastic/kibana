@@ -6,13 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import http from 'http';
+import type http from 'http';
 
-import { UsageMetricsRequestBody } from '@kbn/data-usage-plugin/common/rest_types';
+import type { UsageMetricsRequestBody } from '@kbn/data-usage-plugin/server/routes/internal/usage_metrics';
 import { DATA_USAGE_METRICS_API_ROUTE } from '@kbn/data-usage-plugin/common';
 import { transformMetricsData } from '@kbn/data-usage-plugin/server/routes/internal/usage_metrics_handler';
-import { SupertestWithRoleScopeType } from '../../../services';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { SupertestWithRoleScopeType } from '../../../services';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { setupMockServer } from '../mock_api';
 import { mockAutoOpsResponse } from '../mock_data';
 

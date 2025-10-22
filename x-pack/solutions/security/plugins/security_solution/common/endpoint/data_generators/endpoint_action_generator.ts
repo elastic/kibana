@@ -9,9 +9,12 @@ import type { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
 import { isProcessesAction } from '../service/response_actions/type_guards';
-import { ENDPOINT_ACTION_RESPONSES_DS, ENDPOINT_ACTIONS_DS } from '../constants';
+import {
+  ACTION_AGENT_FILE_DOWNLOAD_ROUTE,
+  ENDPOINT_ACTION_RESPONSES_DS,
+  ENDPOINT_ACTIONS_DS,
+} from '../constants';
 import { BaseDataGenerator } from './base_data_generator';
-import type { GetProcessesActionOutputContent } from '../types';
 import {
   type ActionDetails,
   type ActionResponseOutput,
@@ -21,6 +24,7 @@ import {
   type EndpointActivityLogAction,
   type EndpointActivityLogActionResponse,
   type EndpointPendingActions,
+  type GetProcessesActionOutputContent,
   type LogsEndpointAction,
   type LogsEndpointActionResponse,
   type ProcessesEntry,
@@ -313,6 +317,10 @@ export class EndpointActionGenerator extends BaseDataGenerator {
             content: {
               code: 'ra_get-file_success',
               zip_size: 123,
+              downloadUri: ACTION_AGENT_FILE_DOWNLOAD_ROUTE.replace(
+                `{action_id}`,
+                details.id
+              ).replace(`{file_id}`, agentId),
               contents: [
                 {
                   path: '/some/file/txt',

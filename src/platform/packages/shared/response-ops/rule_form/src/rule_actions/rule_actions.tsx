@@ -8,10 +8,10 @@
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiImage, EuiSpacer, EuiText } from '@elastic/eui';
-import { RuleSystemAction } from '@kbn/alerting-types';
+import type { RuleSystemAction } from '@kbn/alerting-types';
 import React, { useCallback, useMemo, useState } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
-import { RuleAction } from '../common/types';
+import type { RuleAction } from '../common/types';
 import { MULTI_CONSUMER_RULE_TYPE_IDS } from '../constants';
 import { useRuleFormState, useRuleFormScreenContext } from '../hooks';
 import {

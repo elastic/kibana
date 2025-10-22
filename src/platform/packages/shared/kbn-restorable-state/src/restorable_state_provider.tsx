@@ -7,16 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { PropsWithChildren, SetStateAction, Dispatch } from 'react';
 import React, {
   useContext,
   useState,
   useRef,
   createContext,
-  PropsWithChildren,
   forwardRef,
   useImperativeHandle,
-  SetStateAction,
-  Dispatch,
   useMemo,
   useEffect,
   type ComponentProps,
@@ -104,18 +102,41 @@ export const createRestorableStateProvider = <TState extends object>() => {
   ) => {
     const ComponentMemoized = React.memo(Component);
     type TProps = ComponentProps<typeof ComponentMemoized>;
+    type TRef = React.ElementRef<TComponent>;
 
     return forwardRef<
-      RestorableStateProviderApi,
+      TRef & RestorableStateProviderApi,
       TProps & Pick<RestorableStateProviderProps<TState>, 'initialState' | 'onInitialStateChange'>
     >(function RestorableStateProviderHOC({ initialState, onInitialStateChange, ...props }, ref) {
+      const restorableStateProviderRef = useRef<RestorableStateProviderApi>(null);
+      const componentRef = useRef<TRef>(null);
+
+      useImperativeHandle(
+        ref,
+        () =>
+          ({
+            ...(componentRef.current || {}),
+            ...(restorableStateProviderRef.current || {}),
+          } as TRef & RestorableStateProviderApi)
+      );
+
+      // Function components cannot forward refs and show a warning if you try to do so.
+      // When a component is a class component or a forwardRef component, we can safely forward the ref.
+      const canForwardRef =
+        typeof Component !== 'function' || Component.prototype?.isReactComponent;
+
+      const componentProps = {
+        ...props,
+        ...(canForwardRef ? { ref: componentRef } : {}),
+      } as TProps;
+
       return (
         <RestorableStateProvider
-          ref={ref}
+          ref={restorableStateProviderRef}
           initialState={initialState}
           onInitialStateChange={onInitialStateChange}
         >
-          <ComponentMemoized {...(props as TProps)} />
+          <ComponentMemoized {...componentProps} />
         </RestorableStateProvider>
       );
     });

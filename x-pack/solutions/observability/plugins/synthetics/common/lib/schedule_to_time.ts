@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ScheduleUnit, SyntheticsMonitorSchedule } from '../runtime_types';
+import type { SyntheticsMonitorSchedule } from '../runtime_types';
+import { ScheduleUnit } from '../runtime_types';
 
 export function scheduleToMilli(schedule: SyntheticsMonitorSchedule): number {
   const timeValue = parseInt(schedule.number, 10);

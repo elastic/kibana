@@ -11,7 +11,7 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
+import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import { SwitchOption } from './switch';
 import { SelectOption } from './select';
 

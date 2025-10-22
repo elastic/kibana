@@ -7,26 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
+  EuiButtonEmpty,
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiPopover,
-  EuiDescriptionList,
-  EuiDescriptionListDescription,
-  EuiButtonEmpty,
-  euiTextBreakWord,
   EuiSwitch,
   EuiText,
+  euiTextBreakWord,
   useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { css as classNameCss } from '@emotion/css';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { filterDataErrors, type MonacoMessage } from '../helpers';
-import { DataErrorsControl } from '../types';
+import React, { useCallback, useMemo } from 'react';
+import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
+import { filterDataErrors } from '../helpers';
+import type { DataErrorsControl } from '../types';
 
 interface TypeConsts {
   color: 'danger' | 'warning' | 'text';
@@ -71,8 +72,8 @@ function ErrorsWarningsContent({
   const { euiTheme } = useEuiTheme();
   const { color } = getConstsByType(type, items.length);
   return (
-    <div style={{ width: 500, padding: euiTheme.size.s }}>
-      <EuiDescriptionList>
+    <div style={{ width: 500, padding: euiTheme.size.s, maxHeight: 300, overflow: 'auto' }}>
+      <EuiDescriptionList data-test-subj="ESQLEditor-errors-warnings-content">
         {items.map((item, index) => {
           return (
             <EuiDescriptionListDescription
@@ -81,6 +82,7 @@ function ErrorsWarningsContent({
                                 &:hover {
                                   cursor: pointer;
                                 }
+                                white-space: pre-line;
                               `}
               onClick={() => onErrorClick(item)}
             >

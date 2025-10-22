@@ -7,21 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ObservabilityOnboardingPricingFeature } from '../../../common/pricing_features';
 import { PageTemplate } from './template';
 import { CustomHeader } from '../header';
 import { OtelLogsPanel } from '../quickstart_flows/otel_logs';
-import { type ObservabilityOnboardingAppServices } from '../..';
 import { usePricingFeature } from '../quickstart_flows/shared/use_pricing_feature';
 
 export const OtelLogsPage = () => {
-  const {
-    services: {
-      context: { isServerless },
-    },
-  } = useKibana<ObservabilityOnboardingAppServices>();
-
   const metricsOnboardingEnabled = usePricingFeature(
     ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING
   );
@@ -54,7 +46,6 @@ export const OtelLogsPage = () => {
                   }
                 )
           }
-          isTechnicalPreview={isServerless}
         />
       }
     >

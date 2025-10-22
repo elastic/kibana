@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { initializeTitleManager } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { merge } from 'rxjs';
 import { DOC_TYPE } from '../../common/constants';
-import {
+import type {
   LensApi,
   LensEmbeddableStartServices,
   LensRuntimeState,
@@ -35,6 +35,7 @@ import { initializeActionApi } from './initializers/initialize_actions';
 import { initializeIntegrations } from './initializers/initialize_integrations';
 import { initializeStateManagement } from './initializers/initialize_state_management';
 import { LensEmbeddableComponent } from './renderer/lens_embeddable_component';
+import { EditorFrameServiceProvider } from '../editor_frame_service/editor_frame_service_context';
 
 export const createLensEmbeddableFactory = (
   services: LensEmbeddableStartServices
@@ -223,7 +224,12 @@ export const createLensEmbeddableFactory = (
       return {
         api,
         Component: () => (
-          <LensEmbeddableComponent api={api} internalApi={internalApi} onUnmount={onUnmount} />
+          <EditorFrameServiceProvider
+            visualizationMap={services.visualizationMap}
+            datasourceMap={services.datasourceMap}
+          >
+            <LensEmbeddableComponent api={api} internalApi={internalApi} onUnmount={onUnmount} />
+          </EditorFrameServiceProvider>
         ),
       };
     },

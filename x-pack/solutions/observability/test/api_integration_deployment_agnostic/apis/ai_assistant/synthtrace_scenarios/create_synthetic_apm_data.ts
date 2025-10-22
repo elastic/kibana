@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
 export const createSyntheticApmData = async ({
   getService,

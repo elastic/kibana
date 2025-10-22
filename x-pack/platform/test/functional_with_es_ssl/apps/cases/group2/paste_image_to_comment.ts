@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { WebDriver } from 'selenium-webdriver';
+import type { WebDriver } from 'selenium-webdriver';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');

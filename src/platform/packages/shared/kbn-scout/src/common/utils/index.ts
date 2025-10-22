@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import * as Rx from 'rxjs';
 
 export async function silence(log: ToolingLog, milliseconds: number) {
@@ -60,3 +60,5 @@ export const measurePerformanceAsync = async <T>(
 
   return result;
 };
+
+export { validateAndProcessTestFiles, type TestFilesValidationResult } from './test_files';

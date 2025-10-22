@@ -120,6 +120,7 @@ import { getPackagePolicySavedObjectType, packagePolicyService } from './package
 import { incrementPackagePolicyCopyName } from './package_policies';
 import { outputService } from './output';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
+import { createAgentPolicyWithPackages } from './agent_policy_create';
 import { escapeSearchQueryPhrase, normalizeKuery as _normalizeKuery } from './saved_object';
 import {
   getFullAgentPolicy,
@@ -504,6 +505,130 @@ class AgentPolicyService {
     return { id: newSo.id, ...newSo.attributes };
   }
 
+  public async createWithPackagePolicies({
+    soClient,
+    esClient,
+    agentPolicy,
+    packagePolicies,
+    options: {
+      hasFleetServer,
+      withSysMonitoring,
+      monitoringEnabled,
+      spaceId,
+      user,
+      authorizationHeader,
+      force,
+      forcePackagePolicyCreation,
+    },
+  }: {
+    soClient: SavedObjectsClientContract;
+    esClient: ElasticsearchClient;
+    agentPolicy: NewAgentPolicy;
+    packagePolicies: Array<Omit<NewPackagePolicy, 'policy_id' | 'policy_ids'>>;
+    options: {
+      hasFleetServer?: boolean;
+      withSysMonitoring: boolean;
+      monitoringEnabled?: string[];
+      spaceId: string;
+      user?: AuthenticatedUser;
+      authorizationHeader?: HTTPAuthorizationHeader | null;
+      /** Pass force to all following calls: package install, policy creation */
+      force?: boolean;
+      /** Pass force only to package policy creation */
+      forcePackagePolicyCreation?: boolean;
+    };
+  }) {
+    const logger = appContextService.getLogger().get('createWithPackagePolicies');
+
+    logger.debug(`Creating agent policy ${agentPolicy.name} with package policies`);
+
+    const newAgentPolicy = await createAgentPolicyWithPackages({
+      soClient,
+      esClient,
+      agentPolicyService: this,
+      newPolicy: agentPolicy,
+      hasFleetServer,
+      withSysMonitoring,
+      monitoringEnabled,
+      spaceId,
+      user,
+      authorizationHeader,
+      force,
+      forcePackagePolicyCreation,
+    });
+
+    const createdPackagePolicyIds = [];
+
+    try {
+      for (const packagePolicy of packagePolicies) {
+        const newPackagePolicy: NewPackagePolicy = {
+          ...packagePolicy,
+          policy_ids: [newAgentPolicy.id],
+        };
+
+        logger.debug(
+          `Creating package policy ${packagePolicy.name} for agent policy ${newAgentPolicy.name}`
+        );
+
+        const createdPackagePolicy = await packagePolicyService.create(
+          soClient,
+          esClient,
+          newPackagePolicy,
+          {
+            spaceId,
+            user,
+            bumpRevision: false,
+            authorizationHeader,
+            force,
+          }
+        );
+
+        createdPackagePolicyIds.push(createdPackagePolicy.id);
+      }
+
+      const agentPolicyWithPackagePolicies = await this.get(soClient, newAgentPolicy.id);
+
+      if (!agentPolicyWithPackagePolicies) {
+        throw new AgentPolicyNotFoundError(
+          `Could not retrieve created agent policy ${newAgentPolicy.id} after creating its package policies`
+        );
+      }
+
+      return agentPolicyWithPackagePolicies;
+    } catch (e) {
+      logger.error(
+        `Error creating package policies for agent policy ${newAgentPolicy.id}: ${e.message}`
+      );
+      logger.debug(
+        `Rolling back policy creation: Deleting agent policy ${
+          newAgentPolicy.id
+        } and package policies ${createdPackagePolicyIds.join(', ')}`
+      );
+
+      // If there is an error creating package policies, delete any created package policy
+      // and the parent agent policy
+      const internalSOClient = appContextService.getInternalUserSOClient();
+      const internalESClient = appContextService.getInternalUserESClient();
+
+      if (createdPackagePolicyIds.length > 0) {
+        await packagePolicyService.delete(
+          internalSOClient,
+          internalESClient,
+          createdPackagePolicyIds,
+          {
+            force: true,
+            skipUnassignFromAgentPolicies: true,
+          }
+        );
+      }
+      await this.delete(internalSOClient, internalESClient, newAgentPolicy.id, {
+        force: true,
+      });
+
+      throw e;
+    }
+  }
+
   public async requireUniqueName(
     soClient: SavedObjectsClientContract,
     givenPolicy: { id?: string; name: string; supports_agentless?: boolean | null }
@@ -835,6 +960,7 @@ class AgentPolicyService {
       skipValidation?: boolean;
       bumpRevision?: boolean;
       requestSpaceId?: string;
+      isRequiredVersionsAuthorized?: boolean;
     }
   ): Promise<AgentPolicy> {
     const logger = this.getLogger('update');
@@ -853,13 +979,20 @@ class AgentPolicyService {
         namespace: agentPolicy.namespace,
       });
     }
-    validateRequiredVersions(agentPolicy.name ?? id, agentPolicy.required_versions);
 
     const existingAgentPolicy = await this.get(soClient, id, true);
 
     if (!existingAgentPolicy) {
       throw new AgentPolicyNotFoundError('Agent policy not found');
     }
+
+    validateRequiredVersions(
+      agentPolicy.name ?? id,
+      agentPolicy.required_versions,
+      existingAgentPolicy.required_versions,
+      options?.isRequiredVersionsAuthorized
+    );
+
     try {
       await this.runExternalCallbacks('agentPolicyUpdate', agentPolicy);
     } catch (error) {
@@ -1487,15 +1620,22 @@ class AgentPolicyService {
   public async deployPolicy(
     soClient: SavedObjectsClientContract,
     agentPolicyId: string,
-    agentPolicy?: AgentPolicy | null
+    agentPolicy?: AgentPolicy | null,
+    options?: { throwOnAgentlessError?: boolean }
   ) {
-    await this.deployPolicies(soClient, [agentPolicyId], agentPolicy ? [agentPolicy] : undefined);
+    await this.deployPolicies(
+      soClient,
+      [agentPolicyId],
+      agentPolicy ? [agentPolicy] : undefined,
+      options
+    );
   }
 
   public async deployPolicies(
     soClient: SavedObjectsClientContract,
     agentPolicyIds: string[],
-    agentPolicies?: AgentPolicy[]
+    agentPolicies?: AgentPolicy[],
+    options?: { throwOnAgentlessError?: boolean }
   ) {
     const logger = this.getLogger('deployPolicies');
     logger.debug(
@@ -1507,7 +1647,7 @@ class AgentPolicyService {
 
     // Use internal ES client so we have permissions to write to .fleet* indices
     const esClient = appContextService.getInternalUserESClient();
-    const defaultOutputId = await outputService.getDefaultDataOutputId(soClient);
+    const defaultOutputId = await outputService.getDefaultDataOutputId();
 
     if (!defaultOutputId) {
       logger.debug(`Deployment canceled!! Default output ID is not defined.`);
@@ -1616,6 +1756,27 @@ class AgentPolicyService {
       logger.warn(
         `Failed to index documents during policy deployment: ${JSON.stringify(erroredDocuments)}`
       );
+    }
+
+    for (const agentPolicy of policies) {
+      if (!agentPolicy.supports_agentless) {
+        continue;
+      }
+      try {
+        await agentlessAgentService.createAgentlessAgent(esClient, soClient, agentPolicy);
+        logger.debug(
+          `[Agentless API] Successfully deployed agentless deployment for single agent policy id ${agentPolicy.id}`
+        );
+      } catch (error) {
+        // Swallow errors
+        logger.error(
+          `[Agentless API] Error deploying agentless deployment for single agent policy id ${agentPolicy.id}`,
+          { error }
+        );
+        if (options?.throwOnAgentlessError) {
+          throw error;
+        }
+      }
     }
 
     const filteredFleetServerPolicies = fleetServerPolicies.filter((fleetServerPolicy) => {
@@ -2040,15 +2201,12 @@ class AgentPolicyService {
   }
 
   // Get all the outputs per agent policy
-  public async getAllOutputsForPolicy(
-    soClient: SavedObjectsClientContract,
-    agentPolicy: AgentPolicy
-  ) {
+  public async getAllOutputsForPolicy(agentPolicy: AgentPolicy) {
     const logger = this.getLogger('getAllOutputsForPolicy');
 
     const [defaultDataOutputId, defaultMonitoringOutputId] = await Promise.all([
-      outputService.getDefaultDataOutputId(soClient),
-      outputService.getDefaultMonitoringOutputId(soClient),
+      outputService.getDefaultDataOutputId(),
+      outputService.getDefaultMonitoringOutputId(),
     ]);
 
     if (!defaultDataOutputId) {
@@ -2078,7 +2236,7 @@ class AgentPolicyService {
         async (pkgPolicy) => {
           if (pkgPolicy?.output_id) {
             try {
-              const output = await outputService.get(soClient, pkgPolicy.output_id);
+              const output = await outputService.get(pkgPolicy.output_id);
               return { integrationPolicyName: pkgPolicy?.name, id: output.id, name: output.name };
             } catch (error) {
               logger.error(
@@ -2111,14 +2269,11 @@ class AgentPolicyService {
     return outputs;
   }
 
-  public async listAllOutputsForPolicies(
-    soClient: SavedObjectsClientContract,
-    agentPolicies: AgentPolicy[]
-  ) {
+  public async listAllOutputsForPolicies(agentPolicies: AgentPolicy[]) {
     const allOutputs: OutputsForAgentPolicy[] = await pMap(
       agentPolicies,
       async (agentPolicy) => {
-        const output = await this.getAllOutputsForPolicy(soClient, agentPolicy);
+        const output = await this.getAllOutputsForPolicy(agentPolicy);
         return { agentPolicyId: agentPolicy.id, ...output };
       },
       {

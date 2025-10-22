@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { dashboard, header, maps, timePicker } = getPageObjects([
@@ -72,8 +72,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('edit existing map', () => {
       beforeEach(async () => {
         await dashboard.navigateToApp();
-        await dashboard.loadSavedDashboard('map embeddable example');
-        await dashboard.switchToEditMode();
+        await dashboard.loadDashboardInEditMode('map embeddable example');
         await dashboardPanelActions.editPanelByTitle('join example');
         await header.waitUntilLoadingHasFinished();
         await maps.waitForLayersToLoad();

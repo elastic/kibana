@@ -8,48 +8,53 @@
  */
 
 import React from 'react';
-import { ReactWrapper } from 'enzyme';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-
-import { NoDataViewsPromptServices } from '@kbn/shared-ux-prompt-no-data-views-types';
+import type { NoDataViewsPromptServices } from '@kbn/shared-ux-prompt-no-data-views-types';
 import { getNoDataViewsPromptServicesMock } from '@kbn/shared-ux-prompt-no-data-views-mocks';
 
 import { NoDataViewsPrompt } from './no_data_views';
 import { NoDataViewsPromptProvider } from './services';
 
-describe('<NoDataViewsPromptTest />', () => {
+describe('NoDataViewsPrompt', () => {
   let services: NoDataViewsPromptServices;
-  let mount: (element: JSX.Element) => ReactWrapper;
+  const user = userEvent.setup();
 
   beforeEach(() => {
     services = getNoDataViewsPromptServicesMock();
-    mount = (element: JSX.Element) =>
-      mountWithIntl(<NoDataViewsPromptProvider {...services}>{element}</NoDataViewsPromptProvider>);
   });
 
   afterEach(() => {
     jest.resetAllMocks();
   });
 
-  test('on dataView created', () => {
-    const component = mount(<NoDataViewsPrompt onDataViewCreated={jest.fn()} />);
+  const renderComponent = (props = {}) => {
+    return render(
+      <NoDataViewsPromptProvider {...services}>
+        <NoDataViewsPrompt onDataViewCreated={jest.fn()} {...props} />
+      </NoDataViewsPromptProvider>
+    );
+  };
+
+  it('calls openDataViewEditor when create data view button is clicked', async () => {
+    renderComponent();
 
     expect(services.openDataViewEditor).not.toHaveBeenCalled();
-    component.find('button[data-test-subj="createDataViewButton"]').simulate('click');
 
-    component.unmount();
+    const createButton = screen.getByTestId('createDataViewButton');
+    await user.click(createButton);
 
     expect(services.openDataViewEditor).toHaveBeenCalled();
   });
 
-  test('on ES|QL try', () => {
-    const component = mount(<NoDataViewsPrompt onDataViewCreated={jest.fn()} />);
+  it('calls onTryESQL when try ESQL button is clicked', async () => {
+    renderComponent();
 
     expect(services.onTryESQL).not.toHaveBeenCalled();
-    component.find('button[data-test-subj="tryESQLLink"]').simulate('click');
 
-    component.unmount();
+    const tryESQLButton = screen.getByTestId('tryESQLLink');
+    await user.click(tryESQLButton);
 
     expect(services.onTryESQL).toHaveBeenCalled();
   });

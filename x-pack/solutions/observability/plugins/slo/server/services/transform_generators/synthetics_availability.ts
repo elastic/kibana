@@ -6,12 +6,12 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { SyntheticsAvailabilityIndicator } from '@kbn/slo-schema';
 import {
   ALL_VALUE,
   occurrencesBudgetingMethodSchema,
-  SyntheticsAvailabilityIndicator,
   syntheticsAvailabilityIndicatorSchema,
 } from '@kbn/slo-schema';
 import { getElasticsearchQueryOrThrow, TransformGenerator } from '.';
@@ -23,7 +23,7 @@ import {
   SYNTHETICS_INDEX_PATTERN,
 } from '../../../common/constants';
 import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
-import { SLODefinition } from '../../domain/models';
+import type { SLODefinition } from '../../domain/models';
 import { InvalidTransformError } from '../../errors';
 import { getFilterRange } from './common';
 

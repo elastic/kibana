@@ -8,7 +8,7 @@
  */
 
 import type { Ast, AstFunction } from '@kbn/interpreter';
-import { ExpressionValue, ExpressionValueError } from '../expression_types';
+import type { ExpressionValue, ExpressionValueError } from '../expression_types';
 
 export type ExpressionAstNode =
   | ExpressionAstExpression

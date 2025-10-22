@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { Fragment, FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { getId } from '../../lib/get_id';
 import { Tag } from '../tag';
-import { TagSpec } from '../../lib/tag';
+import type { TagSpec } from '../../lib/tag';
 
 export interface Props {
   /**

@@ -9,12 +9,12 @@
 
 import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 import type { ControlWidth, ControlsChainingSystem } from '@kbn/controls-schemas';
-import { OptionsListSearchTechnique } from '@kbn/controls-plugin/common/options_list/suggestions_searching';
-import { OptionsListSortingType } from '@kbn/controls-plugin/common/options_list/suggestions_sorting';
+import type { OptionsListSearchTechnique } from '@kbn/controls-plugin/common/options_list/suggestions_searching';
+import type { OptionsListSortingType } from '@kbn/controls-plugin/common/options_list/suggestions_sorting';
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
 
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
 interface OptionsListAdditionalSettings {
@@ -48,6 +48,8 @@ export class DashboardPageControls extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly browser = this.ctx.getService('browser');
   private readonly testSubjects = this.ctx.getService('testSubjects');
+  private readonly dashboardAddPanel = this.ctx.getService('dashboardAddPanel');
+  private readonly panelActions = this.ctx.getService('dashboardPanelActions');
 
   private readonly common = this.ctx.getPageObject('common');
 
@@ -99,6 +101,7 @@ export class DashboardPageControls extends FtrService {
   public async openControlsMenu() {
     const isOpen = await this.testSubjects.exists(`controls-create-button`, { timeout: 2500 });
     if (!isOpen) {
+      await this.dashboardAddPanel.clickTopNavAddMenu();
       await this.testSubjects.click('dashboard-controls-menu-button');
     }
   }
@@ -399,10 +402,14 @@ export class DashboardPageControls extends FtrService {
     return isPopoverOpen;
   }
 
-  public async optionsListOpenPopover(controlId: string) {
+  public async optionsListOpenPopover(controlId: string, ignoreTopOffsetOrOptions?: boolean) {
     this.log.debug(`Opening popover for Options List: ${controlId}`);
     await this.retry.try(async () => {
-      await this.testSubjects.click(`optionsList-control-${controlId}`);
+      await this.testSubjects.click(
+        `optionsList-control-${controlId}`,
+        500,
+        !ignoreTopOffsetOrOptions ? await this.panelActions.getContainerTopOffset() : undefined
+      );
       await this.retry.waitForWithTimeout('popover to open', 500, async () => {
         return await this.testSubjects.exists(`optionsList-control-popover`);
       });

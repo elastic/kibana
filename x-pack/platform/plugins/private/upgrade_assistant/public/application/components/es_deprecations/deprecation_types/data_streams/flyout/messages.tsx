@@ -8,10 +8,8 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import {
-  DataStreamMigrationStatus,
-  DataStreamResolutionType,
-} from '../../../../../../../common/types';
+import type { DataStreamResolutionType } from '../../../../../../../common/types';
+import { DataStreamMigrationStatus } from '../../../../../../../common/types';
 
 export const getPrimaryButtonLabel = (
   status?: DataStreamMigrationStatus,

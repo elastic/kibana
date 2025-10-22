@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFormRow, EuiButtonGroup, htmlIdGenerator, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AxisExtentMode, YScaleType, XScaleType } from '@kbn/expression-xy-plugin/common';
+import type { AxisExtentMode, YScaleType, XScaleType } from '@kbn/expression-xy-plugin/common';
 import { RangeInputField } from '../../range_input_field';
 import { validateExtent } from './helpers';
 import type { UnifiedAxisExtentConfig } from './types';

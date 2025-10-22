@@ -5,14 +5,19 @@
  * 2.0.
  */
 
-import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { cloneDeep } from 'lodash';
-import { MaintenanceWindow } from '@kbn/alerting-plugin/server/application/maintenance_window/types';
+import type { MaintenanceWindow } from '@kbn/alerting-plugin/server/application/maintenance_window/types';
 import { processorsFormatter } from './processors_formatter';
 import { LegacyConfigKey } from '../../../../common/constants/monitor_management';
-import { ConfigKey, MonitorTypeEnum, MonitorFields } from '../../../../common/runtime_types';
+import type { MonitorTypeEnum, MonitorFields } from '../../../../common/runtime_types';
+import { ConfigKey } from '../../../../common/runtime_types';
 import { throttlingFormatter } from './browser_formatters';
-import { formatMWs, replaceStringWithParams } from '../formatting_utils';
+import {
+  formatMWs,
+  handleMultilineStringFormatter,
+  replaceStringWithParams,
+} from '../formatting_utils';
 import { syntheticsPolicyFormatters } from './formatters';
 import { PARAMS_KEYS_TO_SKIP } from '../common';
 
@@ -55,9 +60,6 @@ export const formatSyntheticsPolicy = (
     dataStream.enabled = true;
   }
 
-  // / filter out disabled inputs
-  formattedPolicy.inputs = formattedPolicy.inputs.filter((input) => input.enabled);
-
   configKeys.forEach((key) => {
     const configItem = dataStream?.vars?.[key];
     if (configItem) {
@@ -70,6 +72,10 @@ export const formatSyntheticsPolicy = (
       }
       if (!PARAMS_KEYS_TO_SKIP.includes(key)) {
         configItem.value = replaceStringWithParams(configItem.value, params);
+      }
+      // if value contains a new line we need to add extra \n to escape it
+      if (typeof configItem.value === 'string' && configItem.value.includes('\n')) {
+        configItem.value = handleMultilineStringFormatter(configItem.value);
       }
     }
   });

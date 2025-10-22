@@ -15,29 +15,26 @@ import {
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { ILicense } from '@kbn/licensing-plugin/public';
-import {
-  ClientConfigType,
-  InternalApiClientProvider,
-  Job,
-  ReportingAPIClient,
-} from '@kbn/reporting-public';
+import type { ILicense } from '@kbn/licensing-types';
+import type { ClientConfigType } from '@kbn/reporting-public';
+import { InternalApiClientProvider, Job, ReportingAPIClient } from '@kbn/reporting-public';
 import type { LocatorPublic, SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { registerTestBed } from '@kbn/test-jest-helpers';
-import { SerializableRecord } from '@kbn/utility-types';
+import type { SerializableRecord } from '@kbn/utility-types';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { EuiThemeProvider } from '@elastic/eui';
 
-import { RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
 import { createLocation, createMemoryHistory } from 'history';
-import { ListingProps as Props, ReportingTabs } from '..';
+import type { ListingProps as Props } from '..';
+import { ReportingTabs } from '..';
 import { mockJobs } from '../../../common/test';
 import { IlmPolicyStatusContextProvider } from '../../lib/ilm_policy_status_context';
 import { ReportDiagnostic } from '../components';
-import { MatchParams } from '../components/reporting_tabs';
+import type { MatchParams } from '../components/reporting_tabs';
 
 export interface TestDependencies {
   http: ReturnType<typeof httpServiceMock.createSetupContract>;

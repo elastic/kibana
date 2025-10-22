@@ -16,7 +16,7 @@ jest.mock('../../capabilities/check_capabilities', () => ({
   checkPermission: (privilege) => mockCheckPermission(privilege),
 }));
 
-jest.mock('../../contexts/kibana', () => ({
+jest.mock('../../contexts/kibana/use_create_url', () => ({
   useCreateAndNavigateToManagementMlLink: jest.fn().mockReturnValue(jest.fn()),
 }));
 

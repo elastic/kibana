@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, PropsWithChildren, useContext, useMemo } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useContext, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { EventTracker } from './analytics';
 
-import { NavigationChromeDependencies, NavigationServices } from './types';
+import type { NavigationChromeDependencies, NavigationServices } from './types';
 
 const Context = React.createContext<NavigationServices | null>(null);
 

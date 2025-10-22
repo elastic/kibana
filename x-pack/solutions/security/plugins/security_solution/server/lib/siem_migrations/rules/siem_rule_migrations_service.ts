@@ -62,7 +62,13 @@ export class SiemRuleMigrationsService {
       esScopedClient,
       dependencies,
     });
-    const taskClient = this.taskService.createClient({ currentUser, dataClient, dependencies });
+
+    const taskClient = this.taskService.createClient({
+      request,
+      currentUser,
+      dataClient,
+      dependencies,
+    });
 
     return { data: dataClient, task: taskClient };
   }

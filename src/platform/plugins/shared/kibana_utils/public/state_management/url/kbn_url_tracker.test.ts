@@ -8,10 +8,12 @@
  */
 
 import { StubBrowserStorage } from '@kbn/test-jest-helpers';
-import { createMemoryHistory, History } from 'history';
-import { createKbnUrlTracker, KbnUrlTracker } from './kbn_url_tracker';
+import type { History } from 'history';
+import { createMemoryHistory } from 'history';
+import type { KbnUrlTracker } from './kbn_url_tracker';
+import { createKbnUrlTracker } from './kbn_url_tracker';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { App, AppUpdater, ToastsSetup } from '@kbn/core/public';
+import type { App, AppUpdater, ToastsSetup } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { unhashUrl } from './hash_unhash_url';
 

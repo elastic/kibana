@@ -44,7 +44,6 @@ interface UpgradeAgentlessDeploymentsTaskStartContract {
 export class UpgradeAgentlessDeploymentsTask {
   private logger: Logger;
   private startedTaskRunner: boolean = false;
-  public abortController = new AbortController();
 
   constructor(setupContract: UpgradeAgentlessDeploymentsTaskSetupContract) {
     const { core, taskManager, logFactory } = setupContract;
@@ -54,14 +53,18 @@ export class UpgradeAgentlessDeploymentsTask {
       [UPGRADE_AGENTLESS_DEPLOYMENTS_TASK_TYPE]: {
         title: TITLE,
         timeout: TIMEOUT,
-        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
+        createTaskRunner: ({
+          taskInstance,
+          abortController,
+        }: {
+          taskInstance: ConcreteTaskInstance;
+          abortController: AbortController;
+        }) => {
           return {
             run: async () => {
-              return this.runTask(taskInstance, core);
+              return this.runTask(taskInstance, core, abortController);
             },
-            cancel: async () => {
-              this.abortController.abort(`${TITLE} timed out`);
-            },
+            cancel: async () => {},
           };
         },
       },
@@ -103,9 +106,11 @@ export class UpgradeAgentlessDeploymentsTask {
     {
       agentlessPolicies,
       agents,
+      abortController,
     }: {
       agentlessPolicies: AgentPolicy[];
       agents: Agent[];
+      abortController: AbortController;
     },
     batchSize: number,
     processFunction: (agentPolicy: AgentPolicy, agentlessAgent: Agent) => void
@@ -131,24 +136,25 @@ export class UpgradeAgentlessDeploymentsTask {
             `${LOGGER_SUBJECT} processing agentless agent ${JSON.stringify(agentlessAgent.agent)}`
           );
 
-          if (this.abortController.signal.aborted) {
+          if (abortController.signal.aborted) {
             this.logger.info(`${LOGGER_SUBJECT} Task runner canceled!`);
-            this.abortController.signal.throwIfAborted();
+            abortController.signal.throwIfAborted();
           }
           return processFunction(agentPolicy, agentlessAgent);
         })
       );
 
-      if (this.abortController.signal.aborted) {
+      if (abortController.signal.aborted) {
         this.logger.info(`${LOGGER_SUBJECT} Task runner canceled!`);
-        this.abortController.signal.throwIfAborted();
+        abortController.signal.throwIfAborted();
       }
     }
   };
 
   private processUpgradeAgentlessDeployments = async (
     esClient: ElasticsearchClient,
-    soClient: SavedObjectsClient
+    soClient: SavedObjectsClient,
+    abortController: AbortController
   ) => {
     const SAVED_OBJECT_TYPE = 'fleet-agent-policies';
 
@@ -191,6 +197,7 @@ export class UpgradeAgentlessDeploymentsTask {
             {
               agentlessPolicies,
               agents: res.agents,
+              abortController,
             },
             BATCH_SIZE,
             this.upgradeAgentlessDeployments
@@ -199,9 +206,9 @@ export class UpgradeAgentlessDeploymentsTask {
           this.logger.error(`${LOGGER_SUBJECT} Failed to get agentless agents error: ${e}`);
         }
 
-        if (this.abortController.signal.aborted) {
+        if (abortController.signal.aborted) {
           this.logger.info(`${LOGGER_SUBJECT} Task runner canceled!`);
-          this.abortController.signal.throwIfAborted();
+          abortController.signal.throwIfAborted();
         }
       }
     } catch (e) {
@@ -237,7 +244,11 @@ export class UpgradeAgentlessDeploymentsTask {
     }
   };
 
-  public runTask = async (taskInstance: ConcreteTaskInstance, core: CoreSetup) => {
+  public runTask = async (
+    taskInstance: ConcreteTaskInstance,
+    core: CoreSetup,
+    abortController: AbortController
+  ) => {
     const cloudSetup = appContextService.getCloud();
     if (!this.startedTaskRunner) {
       this.logger.info(`${LOGGER_SUBJECT} runTask Aborted. Task not started yet`);
@@ -265,6 +276,6 @@ export class UpgradeAgentlessDeploymentsTask {
     const [coreStart] = await core.getStartServices();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     const soClient = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
-    await this.processUpgradeAgentlessDeployments(esClient, soClient);
+    await this.processUpgradeAgentlessDeployments(esClient, soClient, abortController);
   };
 }

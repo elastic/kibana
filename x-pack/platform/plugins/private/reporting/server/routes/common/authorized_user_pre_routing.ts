@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { RequestHandler, RouteMethod } from '@kbn/core/server';
-import { AuthenticatedUser } from '@kbn/security-plugin/server';
+import type { RequestHandler, RouteMethod } from '@kbn/core/server';
+import type { AuthenticatedUser } from '@kbn/security-plugin/server';
 
-import { ReportingCore } from '../../core';
-import { ReportingRequestHandlerContext } from '../../types';
+import type { ReportingCore } from '../../core';
+import type { ReportingRequestHandlerContext } from '../../types';
 import { getUser } from './get_user';
 
 type ReportingRequestUser = AuthenticatedUser | false;

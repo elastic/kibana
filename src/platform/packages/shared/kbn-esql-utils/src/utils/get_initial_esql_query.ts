@@ -40,7 +40,11 @@ const getFinalWhereClause = (timeFilter?: string, queryFilter?: string) => {
  * If there is no @timestamp and there is a dataView timeFieldName, we add the WHERE clause with the timeFieldName
  * @param dataView
  */
-export function getInitialESQLQuery(dataView: DataView, query?: Query): string {
+export function getInitialESQLQuery(
+  dataView: DataView,
+  removeLimit?: boolean,
+  query?: Query
+): string {
   const hasAtTimestampField = dataView?.fields?.getByName?.('@timestamp')?.type === 'date';
   const timeFieldName = dataView?.timeFieldName;
   const filterByTimeParams =
@@ -51,5 +55,5 @@ export function getInitialESQLQuery(dataView: DataView, query?: Query): string {
   const filterBySearchText = getFilterBySearchText(query);
 
   const whereClause = getFinalWhereClause(filterByTimeParams, filterBySearchText);
-  return `FROM ${dataView.getIndexPattern()}${whereClause} | LIMIT 10`;
+  return `FROM ${dataView.getIndexPattern()}${whereClause}${removeLimit ? '' : ' | LIMIT 10'}`;
 }

@@ -12,13 +12,13 @@ import { escape, memoize } from 'lodash';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { getHighlightHtml } from '../utils';
 import { FieldFormat } from '../field_format';
-import {
+import type {
   TextContextTypeConvert,
   HtmlContextTypeConvert,
   FieldFormatMetaParams,
-  FIELD_FORMAT_IDS,
   FieldFormatParams,
 } from '../types';
+import { FIELD_FORMAT_IDS } from '../types';
 
 const templateMatchRE = /{{([\s\S]+?)}}/g;
 const allowedUrlSchemes = ['http://', 'https://', 'mailto:'];

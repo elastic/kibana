@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import moment from 'moment/moment';
 import { generateShortId, log, timerange } from '@kbn/apm-synthtrace-client';
-import { DatasetQualityFtrProviderContext } from './config';
+import type { DatasetQualityFtrProviderContext } from './config';
 import {
   createDegradedFieldsRecord,
   defaultNamespace,
@@ -31,6 +31,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   const synthtrace = getService('logSynthtraceEsClient');
   const esClient = getService('es');
   const retry = getService('retry');
+  const queryBar = getService('queryBar');
   const to = new Date().toISOString();
   const type = 'logs';
   const degradedDatasetName = 'synth.degraded';
@@ -105,6 +106,21 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         );
 
         await PageObjects.datasetQuality.closeFlyout();
+      });
+
+      it('should go to discover page when the open in discover button is clicked', async () => {
+        await PageObjects.datasetQuality.navigateToDetails({
+          dataStream: degradedDataStreamName,
+          expandedDegradedField: 'test_field',
+        });
+
+        await testSubjects.click('datasetQualityDetailsDegradedFieldFlyoutTitleLinkToDiscover');
+
+        await retry.tryForTime(5000, async () => {
+          const queryText = await queryBar.getQueryString();
+
+          expect(queryText).to.be('_ignored: test_field');
+        });
       });
     });
 
@@ -476,7 +492,6 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         it('should display count from latest backing index when current issues toggle is on in the table and in the flyout', async () => {
           await PageObjects.datasetQuality.navigateToDetails({
             dataStream: degradedDatasetWithLimitDataStreamName,
-            expandedDegradedField: 'test_field',
             showCurrentQualityIssues: true,
           });
 
@@ -486,6 +501,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           expect(await countColumn.getCellTexts()).to.eql(['5', '5', '5']);
 
           // Check value in Flyout
+          await PageObjects.datasetQuality.openDegradedFieldFlyout('test_field');
           await retry.tryForTime(5000, async () => {
             const countValue = await PageObjects.datasetQuality.doesTextExist(
               'datasetQualityDetailsDegradedFieldFlyoutFieldsList-docCount',
@@ -493,6 +509,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
             );
             expect(countValue).to.be(true);
           });
+          await PageObjects.datasetQuality.closeFlyout();
 
           // Toggle the switch
           await testSubjects.click(
@@ -506,6 +523,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           expect(await newCountColumn.getCellTexts()).to.eql(['15', '15', '5', '5']);
 
           // Check value in Flyout
+          await PageObjects.datasetQuality.openDegradedFieldFlyout('test_field');
           await retry.tryForTime(5000, async () => {
             const newCountValue = await PageObjects.datasetQuality.doesTextExist(
               'datasetQualityDetailsDegradedFieldFlyoutFieldsList-docCount',
@@ -549,7 +567,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       });
 
       describe('character limit exceeded', () => {
-        it('should display cause as "field character limit exceeded" when a field is ignored due to character limit issue', async () => {
+        it('should display cause as "Field character limit exceeded" when a field is ignored due to character limit issue', async () => {
           await PageObjects.datasetQuality.navigateToDetails({
             dataStream: degradedDatasetWithLimitDataStreamName,
             expandedDegradedField: 'test_field',
@@ -558,7 +576,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           await retry.tryForTime(5000, async () => {
             const fieldIgnoredMessageExists = await PageObjects.datasetQuality.doesTextExist(
               'datasetQualityDetailsDegradedFieldFlyoutFieldValue-cause',
-              'field character limit exceeded'
+              'Field character limit exceeded'
             );
             expect(fieldIgnoredMessageExists).to.be(true);
           });
@@ -566,7 +584,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           await PageObjects.datasetQuality.closeFlyout();
         });
 
-        it('should display values when cause is "field character limit exceeded"', async () => {
+        it('should display values when cause is "Field character limit exceeded"', async () => {
           await PageObjects.datasetQuality.navigateToDetails({
             dataStream: degradedDatasetWithLimitDataStreamName,
             expandedDegradedField: 'test_field',
@@ -597,7 +615,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           await PageObjects.datasetQuality.closeFlyout();
         });
 
-        it('should display the maximum character limit when cause is "field character limit exceeded"', async () => {
+        it('should display the maximum character limit when cause is "Field character limit exceeded"', async () => {
           await PageObjects.datasetQuality.navigateToDetails({
             dataStream: degradedDatasetWithLimitDataStreamName,
             expandedDegradedField: 'test_field',
@@ -738,7 +756,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       });
 
       describe('past field limit exceeded', () => {
-        it('should display cause as "field limit exceeded" when a field is ignored due to field limit issue', async () => {
+        it('should display cause as "Field limit exceeded" when a field is ignored due to field limit issue', async () => {
           await PageObjects.datasetQuality.navigateToDetails({
             dataStream: degradedDatasetWithLimitDataStreamName,
             expandedDegradedField: 'cloud',
@@ -747,7 +765,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           await retry.tryForTime(5000, async () => {
             const fieldLimitMessageExists = await PageObjects.datasetQuality.doesTextExist(
               'datasetQualityDetailsDegradedFieldFlyoutFieldValue-cause',
-              'field limit exceeded'
+              'Field limit exceeded'
             );
             expect(fieldLimitMessageExists).to.be(true);
           });
@@ -755,7 +773,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           await PageObjects.datasetQuality.closeFlyout();
         });
 
-        it('should display the current field limit when the cause is "field limit exceeded"', async () => {
+        it('should display the current field limit when the cause is "Field limit exceeded"', async () => {
           await PageObjects.datasetQuality.navigateToDetails({
             dataStream: degradedDatasetWithLimitDataStreamName,
             expandedDegradedField: 'cloud',
@@ -990,8 +1008,12 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
             ).to.be(true);
           });
 
+          await PageObjects.datasetQuality.closeFlyout();
+
           // Refresh the time range to get the latest data
           await PageObjects.datasetQuality.refreshDetailsPageData();
+
+          await PageObjects.datasetQuality.openDegradedFieldFlyout('cloud.project.id');
 
           // The page should now handle this as ignore_malformed issue and show a warning
           await testSubjects.existOrFail(

@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiBadge, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
@@ -28,7 +28,7 @@ export function SloStateBadge({ slo }: Props) {
           defaultMessage: 'This SLO is disabled. Enable it to start processing data.',
         })}
       >
-        <EuiBadge color="default">
+        <EuiBadge color="default" tabIndex={0}>
           {i18n.translate('xpack.slo.sloStateBadge.disabled.label', {
             defaultMessage: 'Disabled',
           })}

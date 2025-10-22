@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 // The euiTour shows with a small delay, so with 1s we should be safe
 const DELAY_FOR = 1000;

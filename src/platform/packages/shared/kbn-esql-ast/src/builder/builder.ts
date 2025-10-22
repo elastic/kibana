@@ -10,8 +10,9 @@
 /* eslint-disable @typescript-eslint/no-namespace */
 
 import { isStringLiteral } from '../ast/is';
+import { TIME_DURATION_UNITS } from '../parser/constants';
 import { LeafPrinter } from '../pretty_print';
-import {
+import type {
   ESQLAstComment,
   ESQLAstCommentMultiLine,
   ESQLAstCommentSingleLine,
@@ -36,15 +37,18 @@ import {
   ESQLStringLiteral,
   ESQLBinaryExpression,
   ESQLUnaryExpression,
-  ESQLTimeInterval,
   ESQLBooleanLiteral,
   ESQLNullLiteral,
   BinaryExpressionOperator,
   ESQLParamKinds,
   ESQLMap,
   ESQLMapEntry,
+  ESQLTimeDurationLiteral,
+  ESQLDatePeriodLiteral,
+  ESQLAstHeaderCommand,
+  ESQLAstSetHeaderCommand,
 } from '../types';
-import { AstNodeParserFields, AstNodeTemplate, PartialFields } from './types';
+import type { AstNodeParserFields, AstNodeTemplate, PartialFields } from './types';
 
 export namespace Builder {
   /**
@@ -101,10 +105,12 @@ export namespace Builder {
   export namespace expression {
     export const query = (
       commands: ESQLAstQueryExpression['commands'] = [],
-      fromParser?: Partial<AstNodeParserFields>
+      fromParser?: Partial<AstNodeParserFields>,
+      header?: ESQLAstHeaderCommand[]
     ): ESQLAstQueryExpression => {
       return {
         ...Builder.parserFields(fromParser),
+        header,
         commands,
         type: 'query',
         name: '',
@@ -443,20 +449,22 @@ export namespace Builder {
       };
 
       /**
-       * Constructs "time interval" literal node.
-       *
-       * @example 1337 milliseconds
+       * Constructs AST nodes from timespan literals (e.g. 1 day, 2s)
        */
-      export const qualifiedInteger = (
-        quantity: ESQLTimeInterval['quantity'],
-        unit: ESQLTimeInterval['unit'],
+      export const timespan = (
+        quantity: ESQLTimeDurationLiteral['quantity'],
+        unit: ESQLTimeDurationLiteral['unit'],
         fromParser?: Partial<AstNodeParserFields>
-      ): ESQLTimeInterval => {
+      ): ESQLTimeDurationLiteral | ESQLDatePeriodLiteral => {
         return {
           ...Builder.parserFields(fromParser),
-          type: 'timeInterval',
+          type: 'literal',
+          literalType: TIME_DURATION_UNITS.has(unit.toLowerCase())
+            ? 'time_duration'
+            : 'date_period',
           unit,
           quantity,
+          value: `${quantity} ${unit}`,
           name: `${quantity} ${unit}`,
         };
       };
@@ -636,5 +644,47 @@ export namespace Builder {
         return Builder.param.named({ ...options, paramKind, value }, fromParser);
       }
     };
+  }
+
+  export namespace header {
+    export interface HeaderCommandBuilder {
+      <Name extends string>(
+        template: PartialFields<AstNodeTemplate<ESQLAstHeaderCommand<Name>>, 'args'>,
+        fromParser?: Partial<AstNodeParserFields>
+      ): ESQLAstHeaderCommand<Name>;
+
+      set: (
+        args: ESQLAstSetHeaderCommand['args'],
+        template?: Omit<PartialFields<AstNodeTemplate<ESQLAstSetHeaderCommand>, 'args'>, 'name'>,
+        fromParser?: Partial<AstNodeParserFields>
+      ) => ESQLAstSetHeaderCommand;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-shadow
+    export const command: HeaderCommandBuilder = Object.assign(
+      <Name extends string>(
+        template: PartialFields<AstNodeTemplate<ESQLAstHeaderCommand<Name>>, 'args'>,
+        fromParser?: Partial<AstNodeParserFields>
+      ): ESQLAstHeaderCommand<Name> => {
+        return {
+          ...template,
+          ...Builder.parserFields(fromParser),
+          args: template.args ?? [],
+          type: 'header-command',
+        };
+      },
+      {
+        set: (
+          args: ESQLAstSetHeaderCommand['args'],
+          template?: Omit<PartialFields<AstNodeTemplate<ESQLAstSetHeaderCommand>, 'args'>, 'name'>,
+          fromParser?: Partial<AstNodeParserFields>
+        ): ESQLAstSetHeaderCommand => {
+          return Builder.header.command(
+            { args, ...template, name: 'set' },
+            fromParser
+          ) as ESQLAstSetHeaderCommand;
+        },
+      }
+    );
   }
 }

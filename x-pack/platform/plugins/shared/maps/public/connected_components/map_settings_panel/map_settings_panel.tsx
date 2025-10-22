@@ -21,7 +21,7 @@ import { NavigationPanel } from './navigation_panel';
 import { SpatialFiltersPanel } from './spatial_filters_panel';
 import { DisplayPanel } from './display_panel';
 import { CustomIconsPanel } from './custom_icons_panel';
-import { CustomIcon, MapCenter, MapSettings } from '../../../common/descriptor_types';
+import type { CustomIcon, MapCenter, MapSettings } from '../../../common/descriptor_types';
 import { panelStrings } from '../panel_strings';
 
 export interface Props {

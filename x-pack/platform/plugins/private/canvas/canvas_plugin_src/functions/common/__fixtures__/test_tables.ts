@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Datatable } from '../../../../types';
+import type { Datatable } from '../../../../types';
 
 const emptyTable: Datatable = {
   type: 'datatable',

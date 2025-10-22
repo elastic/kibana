@@ -7,17 +7,17 @@
 
 import { EuiNotificationBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { paths } from '../../../../common/locators/paths';
 import { useFetchActiveAlerts } from '../../../hooks/use_fetch_active_alerts';
 import { useKibana } from '../../../hooks/use_kibana';
+import type { SloTabId } from '../components/slo_details';
 import {
   ALERTS_TAB_ID,
   DEFINITION_TAB_ID,
   HISTORY_TAB_ID,
   OVERVIEW_TAB_ID,
-  SloTabId,
 } from '../components/slo_details';
 
 interface Props {
@@ -118,7 +118,7 @@ export const useSloDetailsTabs = ({
           })}
           position="right"
         >
-          <>{ALERTS_LABEL}</>
+          <span tabIndex={0}>{ALERTS_LABEL}</span>
         </EuiToolTip>
       ) : (
         ALERTS_LABEL

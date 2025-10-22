@@ -10,11 +10,11 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import { IndexPatternAdapter, IndexAdapter } from '@kbn/index-adapter';
 import { Subject } from 'rxjs';
+import type { SiemMigrationsClientDependencies } from '../../common/types';
 import type { RuleMigrationIndexNameProviders } from '../types';
 import type { SetupParams } from './rule_migrations_data_service';
-import { INDEX_PATTERN, RuleMigrationsDataService } from './rule_migrations_data_service';
+import { RuleMigrationsDataService } from './rule_migrations_data_service';
 import { RuleMigrationIndexMigrator } from '../index_migrators';
-import type { SiemMigrationsClientDependencies } from '../../common/types';
 
 jest.mock('../index_migrators');
 
@@ -27,6 +27,9 @@ jest.mock('./rule_migrations_data_client', () => ({
     mockIndexNameProviders = indexNameProviders;
   }),
 }));
+
+// @ts-expect-error accessing protected property
+const INDEX_PATTERN = new RuleMigrationsDataService().baseIndexName;
 
 const MockedIndexPatternAdapter = IndexPatternAdapter as unknown as jest.MockedClass<
   typeof IndexPatternAdapter

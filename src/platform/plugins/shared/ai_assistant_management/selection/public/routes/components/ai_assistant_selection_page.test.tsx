@@ -24,9 +24,12 @@ describe('AiAssistantSelectionPage', () => {
     ({
       observabilityAIAssistant: { show: hasPermission },
       management: {
-        kibana: {
+        ai: {
           aiAssistantManagementSelection: hasPermission,
         },
+      },
+      securitySolutionAssistant: {
+        'ai-assistant': hasPermission,
       },
     } as unknown as CoreStart['application']['capabilities']);
 
@@ -57,7 +60,7 @@ describe('AiAssistantSelectionPage', () => {
     renderComponent(testCapabilities);
     expect(setBreadcrumbs).toHaveBeenCalledWith([
       {
-        text: 'AI Assistant',
+        text: 'AI Assistants',
       },
     ]);
   });
@@ -95,7 +98,7 @@ describe('AiAssistantSelectionPage', () => {
         renderComponent(testCapabilities);
         fireEvent.click(screen.getByTestId('pluginsAiAssistantSelectionPageButton'));
         expect(navigateToApp).toHaveBeenCalledWith('management', {
-          path: 'kibana/observabilityAiAssistantManagement',
+          path: 'ai/observabilityAiAssistantManagement',
         });
       });
 
@@ -116,7 +119,9 @@ describe('AiAssistantSelectionPage', () => {
         expect(
           screen.getByTestId('pluginsAiAssistantSelectionPageSecurityDocumentationCallout')
         ).toBeInTheDocument();
-        expect(screen.getByTestId('pluginsAiAssistantSelectionSecurityPageButton')).toBeDisabled();
+        expect(
+          screen.queryByTestId('pluginsAiAssistantSelectionSecurityPageButton')
+        ).not.toBeInTheDocument();
       });
     });
 
@@ -139,7 +144,7 @@ describe('AiAssistantSelectionPage', () => {
         renderComponent(testCapabilities);
         fireEvent.click(screen.getByTestId('pluginsAiAssistantSelectionSecurityPageButton'));
         expect(navigateToApp).toHaveBeenCalledWith('management', {
-          path: 'kibana/securityAiAssistantManagement',
+          path: 'ai/securityAiAssistantManagement',
         });
       });
 

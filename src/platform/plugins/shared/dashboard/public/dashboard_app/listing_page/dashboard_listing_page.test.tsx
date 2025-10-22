@@ -13,7 +13,8 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { render, waitFor } from '@testing-library/react';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
-import { DashboardListingPage, DashboardListingPageProps } from './dashboard_listing_page';
+import type { DashboardListingPageProps } from './dashboard_listing_page';
+import { DashboardListingPage } from './dashboard_listing_page';
 
 // Mock child components. The Dashboard listing page mostly passes down props to shared UX components which are tested in their own packages.
 import { DashboardListing } from '../../dashboard_listing/dashboard_listing';

@@ -7,6 +7,7 @@ Utility library for Security AI Prompt management.
 1. Update prompts in Kibana, located in either:
   - `x-pack/solutions/security/plugins/elastic_assistant/server/lib/prompt/local_prompt_object.ts`
   - `x-pack/solutions/security/plugins/elastic_assistant/server/lib/prompt/tool_prompts.ts`
+  - `x-pack/solutions/security/plugins/elastic_assistant/server/lib/prompt/defend_insight_prompts.ts`
 
 2. Uninstall the Security AI Prompts integration in Kibana. This will remove the saved objects from Kibana. The local prompts will be used, so now you can test your changes.
 3. Once you've confirmed your changes, post your PR and run the evaluations in CI to confirm there are no regressions due to your prompt changes. The evals should be run with the prompt specific label in order to ensure the local prompts are used in the eval. The label is `ci:security-genai-run-evals-local-prompts`.

@@ -18,8 +18,8 @@ import * as fixtures from '../../../test/fixtures';
 import { setupEnvironment } from '../helpers';
 import { notificationService } from '../../../public/application/services/notification';
 
+import type { DataStreamsTabTestBed } from './data_streams_tab.helpers';
 import {
-  DataStreamsTabTestBed,
   setup,
   createDataStreamPayload,
   createDataStreamBackingIndex,
@@ -211,7 +211,7 @@ describe('Data Streams tab', () => {
 
       expect(tableCellsValues).toEqual([
         ['', 'dataStream1', 'green', '1', 'Standard', '7 days', 'Delete'],
-        ['', 'dataStream2', 'green', '1', 'Standard', '5 days ', 'Delete'],
+        ['', 'dataStream2', 'green', '1', 'Standard', '5 days Info', 'Delete'],
       ]);
     });
 
@@ -271,7 +271,7 @@ describe('Data Streams tab', () => {
           '1kb',
           '1',
           'Standard',
-          '5 days ',
+          '5 days Info',
           'Delete',
         ],
       ]);
@@ -308,7 +308,7 @@ describe('Data Streams tab', () => {
           '1kb',
           '1',
           'Standard',
-          '5 days ',
+          '5 days Info',
           'Delete',
         ],
       ]);
@@ -356,7 +356,7 @@ describe('Data Streams tab', () => {
       const { tableCellsValues } = table.getMetaData('dataStreamTable');
       expect(tableCellsValues).toEqual([
         ['', 'dataStream1', 'green', '156kb', '10000', '1', 'Standard', '7 days', 'Delete'],
-        ['', 'dataStream2', 'green', '156kb', '10000', '1', 'Standard', '5 days ', 'Delete'],
+        ['', 'dataStream2', 'green', '156kb', '10000', '1', 'Standard', '5 days Info', 'Delete'],
       ]);
     });
 
@@ -399,7 +399,7 @@ describe('Data Streams tab', () => {
           '1kb',
           '1',
           'Standard',
-          '5 days ',
+          '5 days Info',
           'Delete',
         ],
       ]);
@@ -732,7 +732,7 @@ describe('Data Streams tab', () => {
 
           expect(tableCellsValues).toEqual([
             ['', 'dataStream1', 'green', '1', 'Standard', 'Disabled', 'Delete'],
-            ['', 'dataStream2', 'green', '1', 'Standard', '', 'Delete'],
+            ['', 'dataStream2', 'green', '1', 'Standard', 'Info', 'Delete'],
           ]);
 
           await actions.clickNameAt(0);

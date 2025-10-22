@@ -35,7 +35,7 @@ export const AlertsSummaryContent = ({
 }) => {
   const { featureFlags } = usePluginConfig();
   const [isAlertFlyoutVisible, { toggle: toggleAlertFlyout }] = useBoolean(false);
-  const { overrides } = useAssetDetailsRenderPropsContext();
+  const { overrides, schema } = useAssetDetailsRenderPropsContext();
   const [collapsibleStatus, setCollapsibleStatus] =
     useState<EuiAccordionProps['forceState']>('open');
   const [activeAlertsCount, setActiveAlertsCount] = useState<number | undefined>(undefined);
@@ -94,6 +94,7 @@ export const AlertsSummaryContent = ({
         <AlertFlyout
           filter={`${entityIdField}: "${entityId}"`}
           nodeType={entityType}
+          schema={schema}
           setVisible={toggleAlertFlyout}
           visible={isAlertFlyoutVisible}
           options={overrides?.alertRule?.options}

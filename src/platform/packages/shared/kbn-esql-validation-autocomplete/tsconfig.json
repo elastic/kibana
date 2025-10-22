@@ -14,6 +14,9 @@
   "kbn_references": [
     "@kbn/esql-ast",
     "@kbn/esql-types",
+    "@kbn/core-pricing-common",
+    "@kbn/licensing-types",
+    "@kbn/i18n",
   ],
   "exclude": [
     "target/**/*",

@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { schema } from '@kbn/config-schema';
-import { IRouter, StartServicesAccessor } from '@kbn/core/server';
-import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import { DataViewsService } from '../../../../common';
+import type { IRouter, StartServicesAccessor } from '@kbn/core/server';
+import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { DataViewsService } from '../../../../common';
 import { handleErrors } from '../util/handle_errors';
 import { serializedFieldFormatSchema } from '../../../schemas';
 import { MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH } from '../../../../common/constants';
 import { dataViewSpecSchema } from '../../schema';
-import { DataViewSpecRestResponse } from '../../route_types';
+import type { DataViewSpecRestResponse } from '../../route_types';
 import type {
   DataViewsServerPluginStartDependencies,
   DataViewsServerPluginStart,
@@ -29,6 +29,7 @@ import {
   INITIAL_REST_VERSION,
   UPDATE_DATA_VIEW_FIELDS_DESCRIPTION,
 } from '../../../constants';
+import { toApiSpec } from '../util/to_api_spec';
 
 interface UpdateFieldsArgs {
   dataViewsService: DataViewsService;
@@ -196,7 +197,7 @@ const updateFieldsActionRouteFactory = (path: string, serviceKey: string, descri
             });
 
             const body: Record<string, DataViewSpecRestResponse> = {
-              [serviceKey]: await dataView.toSpec({ fieldParams: { fieldName: ['*'] } }),
+              [serviceKey]: toApiSpec(await dataView.toSpec({ fieldParams: { fieldName: ['*'] } })),
             };
 
             return res.ok({

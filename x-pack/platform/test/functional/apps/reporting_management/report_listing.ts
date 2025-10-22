@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { REPORT_TABLE_ID } from '@kbn/reporting-common';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'reporting', 'settings', 'console']);
@@ -22,7 +22,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Listing of Reports', function () {
     const kbnArchive =
-      'x-pack/test/functional/fixtures/kbn_archiver/reporting/view_in_console_index_pattern.json';
+      'x-pack/platform/test/functional/fixtures/kbn_archives/reporting/view_in_console_index_pattern.json';
 
     before(async () => {
       await security.testUser.setRoles([

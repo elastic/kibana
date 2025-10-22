@@ -11,11 +11,13 @@ import type { LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
 import type {
   AggregationConfigMap,
   ChartsConfigMap,
+  DataSchemaFormat,
   FormulasConfigMap,
   InventoryMetricsConfig,
 } from './shared/metrics/types';
+import type { HOST_METRICS_RECEIVER_OTEL, SYSTEM_INTEGRATION } from '../constants';
 
-export { DataSchemaFormat } from './shared/metrics/types';
+export { DataSchemaFormatEnum, type DataSchemaFormat } from './shared/metrics/types';
 export const ItemTypeRT = rt.keyof({
   host: null,
   pod: null,
@@ -252,7 +254,14 @@ export const SnapshotMetricTypeRT = rt.keyof(SnapshotMetricTypeKeys);
 
 export type SnapshotMetricType = rt.TypeOf<typeof SnapshotMetricTypeRT>;
 
-type Modules = 'aws' | 'docker' | 'system' | 'kubernetes';
+type BeatsIntegrations = 'aws' | 'docker' | typeof SYSTEM_INTEGRATION | 'kubernetes';
+type OtelReceivers = typeof HOST_METRICS_RECEIVER_OTEL;
+type Integrations =
+  | {
+      beats: BeatsIntegrations;
+      otel: OtelReceivers;
+    }
+  | BeatsIntegrations;
 
 export interface InventoryModel<
   TEntityType extends InventoryItemType,
@@ -263,7 +272,7 @@ export interface InventoryModel<
   id: TEntityType;
   displayName: string;
   singularDisplayName: string;
-  requiredModule: Modules;
+  requiredIntegration: Integrations;
   fields: {
     id: string;
     name: string;
@@ -278,6 +287,7 @@ export interface InventoryModel<
     uptime: boolean;
   };
   metrics: InventoryMetricsConfig<TAggregations, TFormulas, TCharts>;
-  nodeFilter?: object[];
+  nodeFilter?: (args?: { schema?: DataSchemaFormat }) => estypes.QueryDslQueryContainer[];
 }
+
 export type LensConfigWithId = LensConfig & { id: string };

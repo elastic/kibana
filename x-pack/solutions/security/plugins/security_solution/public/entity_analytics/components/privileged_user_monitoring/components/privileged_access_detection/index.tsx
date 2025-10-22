@@ -136,7 +136,7 @@ export const PrivilegedAccessDetectionsPanel: React.FC<{ spaceId: string }> = ({
                   <PrivilegedAccessInfoPopover />
                 </>
               }
-              titleSize="s"
+              titleSize="m"
               outerDirection="column"
               hideSubtitle
             >

@@ -8,7 +8,7 @@
 import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { NotificationService, NotifyArgs } from './types';
-import { ReportingCore } from '../..';
+import type { ReportingCore } from '../..';
 import { getContentStream } from '../../lib';
 
 export interface Attachment {

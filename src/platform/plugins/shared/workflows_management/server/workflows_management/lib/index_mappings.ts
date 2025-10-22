@@ -13,6 +13,9 @@ import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 export const WORKFLOWS_INDEX_MAPPINGS: MappingTypeMapping = {
   dynamic: false,
   properties: {
+    spaceId: {
+      type: 'keyword',
+    },
     id: {
       type: 'keyword',
     },
@@ -65,6 +68,9 @@ export const WORKFLOWS_INDEX_MAPPINGS: MappingTypeMapping = {
 export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
   dynamic: false,
   properties: {
+    spaceId: {
+      type: 'keyword',
+    },
     id: {
       type: 'keyword',
     },
@@ -106,6 +112,9 @@ export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
 export const WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
   dynamic: false,
   properties: {
+    spaceId: {
+      type: 'keyword',
+    },
     id: {
       type: 'keyword',
     },

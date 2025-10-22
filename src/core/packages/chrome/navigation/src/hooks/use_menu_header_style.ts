@@ -25,13 +25,15 @@ export function useMenuHeaderStyle() {
     colorMode === 'DARK' ? `calc(${euiTheme.size.base} - var(--border-width))` : euiTheme.size.base;
 
   return css`
-    --border-width: 1px;
+    --border-width: ${euiTheme.border.width.thin};
     // 20px is forced by section dividers
     --horizontal-padding: calc(20px - var(--border-width));
+
     position: sticky;
     top: ${colorMode === 'DARK' ? 'var(--border-width)' : '0'};
     z-index: 1;
     padding: ${paddingTop} var(--horizontal-padding) ${euiTheme.size.xs} var(--horizontal-padding);
     margin: 0 1px;
+    height: var(--secondary-menu-header-height);
   `;
 }

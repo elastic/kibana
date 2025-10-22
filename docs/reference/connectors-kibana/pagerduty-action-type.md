@@ -100,7 +100,7 @@ Links
 :   An optional list of links to add to the event. You must provide a URL and plain text description for each link.
 
 Severity
-:   The perceived severity of on the affected system. This can be one of `Critical`, `Error`, `Warning` or `Info`(default).
+:   The perceived severity of on the affected system. This can be one of `critical`, `error`, `warning` or `info`(default).
 
 Source
 :   An optional value indicating the affected system, preferably a hostname or fully qualified domain name. Defaults to the {{kib}} saved object id of the action.

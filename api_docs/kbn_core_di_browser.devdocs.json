@@ -1,0 +1,455 @@
+{
+  "id": "@kbn/core-di-browser",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-di-browser",
+        "id": "def-public.CoreSetup",
+        "type": "Function",
+        "tags": [],
+        "label": "CoreSetup",
+        "description": [
+          "\nThe service identifier of {@link CoreSetupContext}."
+        ],
+        "signature": [
+          "<K extends keyof ",
+          "CoreSetup",
+          "<{}, unknown>>(key: K) => ",
+          "ServiceIdentifier",
+          "<",
+          "CoreSetup",
+          "<{}, unknown>[K]>"
+        ],
+        "path": "src/core/packages/di/browser/src/services/lifecycle.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-di-browser",
+            "id": "def-public.CoreSetup.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "key",
+            "description": [
+              "The service key in the context."
+            ],
+            "signature": [
+              "K"
+            ],
+            "path": "src/core/packages/di/common-internal/src/modules/lifecycle.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-di-browser",
+        "id": "def-public.CoreStart",
+        "type": "Function",
+        "tags": [],
+        "label": "CoreStart",
+        "description": [
+          "\nThe service identifier of {@link CoreStartContext}."
+        ],
+        "signature": [
+          "<K extends keyof ",
+          "CoreStart",
+          ">(key: K) => ",
+          "ServiceIdentifier",
+          "<",
+          "CoreStart",
+          "[K]>"
+        ],
+        "path": "src/core/packages/di/browser/src/services/lifecycle.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-di-browser",
+            "id": "def-public.CoreStart.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "key",
+            "description": [
+              "The service key in the context."
+            ],
+            "signature": [
+              "K"
+            ],
+            "path": "src/core/packages/di/common-internal/src/modules/lifecycle.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-di-browser",
+        "id": "def-public.PluginInitializer",
+        "type": "Function",
+        "tags": [],
+        "label": "PluginInitializer",
+        "description": [
+          "\nThe service identifier of {@link PluginInitializerContext}."
+        ],
+        "signature": [
+          "<K extends keyof ",
+          "PluginInitializerContext",
+          "<object>>(key: K) => ",
+          "ServiceIdentifier",
+          "<",
+          "PluginInitializerContext",
+          "<object>[K]>"
+        ],
+        "path": "src/core/packages/di/browser/src/services/lifecycle.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-di-browser",
+            "id": "def-public.PluginInitializer.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "key",
+            "description": [
+              "The service key in the context."
+            ],
+            "signature": [
+              "K"
+            ],
+            "path": "src/core/packages/di/common-internal/src/modules/lifecycle.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-di-browser",
+        "id": "def-public.useContainer",
+        "type": "Function",
+        "tags": [
+          "see"
+        ],
+        "label": "useContainer",
+        "description": [
+          "\nThe `useContainer` hook is used to retrieve the dependency injection container from the context."
+        ],
+        "signature": [
+          "() => ",
+          "Container",
+          " | undefined"
+        ],
+        "path": "src/core/packages/di/browser/src/react.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-di-browser",
+        "id": "def-public.useService",
+        "type": "Function",
+        "tags": [
+          "see"
+        ],
+        "label": "useService",
+        "description": [
+          "\nThe `useService` hook is used to retrieve a service from the dependency injection container."
+        ],
+        "signature": [
+          "(service: ",
+          "ServiceIdentifier",
+          "<T>, options: ",
+          "GetOptions",
+          " | undefined) => T"
+        ],
+        "path": "src/core/packages/di/browser/src/react.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-di-browser",
+            "id": "def-public.useService.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "service",
+            "description": [
+              "The service identifier to resolve."
+            ],
+            "signature": [
+              "ServiceIdentifier",
+              "<T>"
+            ],
+            "path": "src/core/packages/di/browser/src/react.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-di-browser",
+            "id": "def-public.useService.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [
+              "InverisfyJS options to pass to the `get` method."
+            ],
+            "signature": [
+              "GetOptions",
+              " | undefined"
+            ],
+            "path": "src/core/packages/di/browser/src/react.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-di-browser",
+        "id": "def-public.useService",
+        "type": "Function",
+        "tags": [
+          "see"
+        ],
+        "label": "useService",
+        "description": [
+          "\nThe `useService` hook is used to retrieve a service from the dependency injection container."
+        ],
+        "signature": [
+          "(service: ",
+          "ServiceIdentifier",
+          "<T>, options: ",
+          "OptionalGetOptions",
+          ") => T | undefined"
+        ],
+        "path": "src/core/packages/di/browser/src/react.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-di-browser",
+            "id": "def-public.useService.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "service",
+            "description": [
+              "The service identifier to resolve."
+            ],
+            "signature": [
+              "ServiceIdentifier",
+              "<T>"
+            ],
+            "path": "src/core/packages/di/browser/src/react.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-di-browser",
+            "id": "def-public.useService.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [
+              "InverisfyJS options to pass to the `get` method."
+            ],
+            "signature": [
+              "OptionalGetOptions"
+            ],
+            "path": "src/core/packages/di/browser/src/react.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-di-browser",
+        "id": "def-public.ApplicationDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "ApplicationDefinition",
+        "description": [
+          "\nThe browser application definition."
+        ],
+        "signature": [
+          "ApplicationDefinition",
+          "<HistoryLocationState> extends Omit<",
+          "App",
+          "<HistoryLocationState>, \"mount\">,",
+          "Newable",
+          "<",
+          "ApplicationHandler",
+          "<HistoryLocationState>, any[]>"
+        ],
+        "path": "src/core/packages/di/browser/src/services/application.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-di-browser",
+        "id": "def-public.ApplicationHandler",
+        "type": "Interface",
+        "tags": [],
+        "label": "ApplicationHandler",
+        "description": [
+          "\nThe browser application mount handler."
+        ],
+        "signature": [
+          "ApplicationHandler",
+          "<HistoryLocationState>"
+        ],
+        "path": "src/core/packages/di/browser/src/services/application.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-di-browser",
+            "id": "def-public.ApplicationHandler.mount",
+            "type": "Function",
+            "tags": [],
+            "label": "mount",
+            "description": [
+              "\nThe mount function that will be called when the application is mounted.\nThe mount parameters can be injected using {@link ApplicationParameters}."
+            ],
+            "signature": [
+              "() => ",
+              "AppUnmount",
+              " | Promise<",
+              "AppUnmount",
+              ">"
+            ],
+            "path": "src/core/packages/di/browser/src/services/application.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-di-browser",
+        "id": "def-public.Application",
+        "type": "CompoundType",
+        "tags": [],
+        "label": "Application",
+        "description": [
+          "\nThe service identifier that is used to register the application."
+        ],
+        "signature": [
+          "string | symbol | Function | ",
+          "Newable",
+          "<",
+          "ApplicationDefinition",
+          "<unknown> & (Function | ",
+          "Newable",
+          "<",
+          "ApplicationHandler",
+          "<unknown>, any[]> | ",
+          "AbstractNewable",
+          "<",
+          "ApplicationHandler",
+          "<unknown>, any[]>), any[]> | ",
+          "AbstractNewable",
+          "<",
+          "ApplicationDefinition",
+          "<unknown> & (Function | ",
+          "Newable",
+          "<",
+          "ApplicationHandler",
+          "<unknown>, any[]> | ",
+          "AbstractNewable",
+          "<",
+          "ApplicationHandler",
+          "<unknown>, any[]>), any[]>"
+        ],
+        "path": "src/core/packages/di/browser/src/services/application.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-di-browser",
+        "id": "def-public.ApplicationParameters",
+        "type": "CompoundType",
+        "tags": [],
+        "label": "ApplicationParameters",
+        "description": [
+          "\nThe service identifier of the application mount parameters."
+        ],
+        "signature": [
+          "string | symbol | Function | ",
+          "Newable",
+          "<",
+          "AppMountParameters",
+          "<unknown>, any[]> | ",
+          "AbstractNewable",
+          "<",
+          "AppMountParameters",
+          "<unknown>, any[]>"
+        ],
+        "path": "src/core/packages/di/browser/src/services/application.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-di-browser",
+        "id": "def-public.Context",
+        "type": "Object",
+        "tags": [],
+        "label": "Context",
+        "description": [
+          "\nThe React context to provide the dependency injection container."
+        ],
+        "signature": [
+          "React.Context<",
+          "Container",
+          " | undefined>"
+        ],
+        "path": "src/core/packages/di/browser/src/react.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

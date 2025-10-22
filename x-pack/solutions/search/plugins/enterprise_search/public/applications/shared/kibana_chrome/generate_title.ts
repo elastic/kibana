@@ -10,8 +10,8 @@ import { i18n } from '@kbn/i18n';
 import {
   ANALYTICS_PLUGIN,
   ENTERPRISE_SEARCH_DATA_PLUGIN,
-  SEARCH_EXPERIENCES_PLUGIN,
   SEARCH_PRODUCT_NAME,
+  SEARCH_APPS_TITLE,
 } from '../../../../common/constants';
 
 /**
@@ -44,16 +44,8 @@ export const elasticsearchTitle = (page: Title = []) =>
     }),
   ]);
 
-export const searchExperiencesTitle = (page: Title = []) =>
-  generateTitle([...page, SEARCH_EXPERIENCES_PLUGIN.NAME]);
-
 export const enterpriseSearchContentTitle = (page: Title = []) =>
   generateTitle([...page, ENTERPRISE_SEARCH_DATA_PLUGIN.NAME]);
 
 export const searchApplicationsTitle = (page: Title = []) =>
-  generateTitle([
-    ...page,
-    i18n.translate('xpack.enterpriseSearch.titles.searchApplications', {
-      defaultMessage: 'Search Applications',
-    }),
-  ]);
+  generateTitle([...page, SEARCH_APPS_TITLE]);

@@ -9,10 +9,8 @@
 
 import React from 'react';
 
-import {
-  NoDataViewsPromptStorybookMock,
-  NoDataViewsPromptStorybookParams,
-} from '@kbn/shared-ux-prompt-no-data-views-mocks';
+import type { NoDataViewsPromptStorybookParams } from '@kbn/shared-ux-prompt-no-data-views-mocks';
+import { NoDataViewsPromptStorybookMock } from '@kbn/shared-ux-prompt-no-data-views-mocks';
 
 import { NoDataViewsPrompt as Component } from './no_data_views';
 import { NoDataViewsPromptProvider } from './services';
@@ -31,7 +29,22 @@ export default {
 
 const mock = new NoDataViewsPromptStorybookMock();
 
-export const CreateDataView = {
+export const CanCreateDataView = {
+  render: (params: NoDataViewsPromptStorybookParams) => {
+    return (
+      <NoDataViewsPromptProvider {...mock.getServices(params)}>
+        <Component {...mock.getProps()} />
+      </NoDataViewsPromptProvider>
+    );
+  },
+  args: {
+    canCreateNewDataView: true, // Enable data view creation button
+  },
+
+  argTypes: mock.getArgumentTypes(),
+};
+
+export const CannotCreateDataView = {
   render: (params: NoDataViewsPromptStorybookParams) => {
     return (
       <NoDataViewsPromptProvider {...mock.getServices(params)}>

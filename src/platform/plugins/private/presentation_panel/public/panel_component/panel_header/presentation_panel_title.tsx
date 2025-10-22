@@ -19,11 +19,9 @@ import React, { useCallback, useMemo } from 'react';
 
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { ViewMode } from '@kbn/presentation-publishing';
-import {
-  CustomizePanelActionApi,
-  isApiCompatibleWithCustomizePanelAction,
-} from '../../panel_actions/customize_panel_action';
+import type { ViewMode } from '@kbn/presentation-publishing';
+import type { CustomizePanelActionApi } from '../../panel_actions/customize_panel_action';
+import { isApiCompatibleWithCustomizePanelAction } from '../../panel_actions/customize_panel_action';
 import { openCustomizePanelFlyout } from '../../panel_actions/customize_panel_action/open_customize_panel';
 
 export const PresentationPanelTitle = ({
@@ -111,6 +109,7 @@ export const PresentationPanelTitle = ({
             column-gap: ${euiTheme.size.xs};
             align-items: center;
           `}
+          tabIndex={0}
         >
           {!hideTitle ? (
             <h2

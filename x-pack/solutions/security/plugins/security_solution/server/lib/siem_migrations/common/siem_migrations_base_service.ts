@@ -5,21 +5,28 @@
  * 2.0.
  */
 
-import type { FieldMap } from '@kbn/index-adapter';
+import type { FieldMap, InstallParams } from '@kbn/index-adapter';
 import { IndexAdapter, IndexPatternAdapter } from '@kbn/index-adapter';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { SiemMigrationsIndexNameProvider } from './types';
 
 const TOTAL_FIELDS_LIMIT = 2500;
+
+export interface SetupParams extends Omit<InstallParams, 'logger'> {
+  esClient: ElasticsearchClient;
+}
 
 interface CreateAdapterParams {
   name: string;
   fieldMap: FieldMap;
 }
 
-export class SiemMigrationsBaseDataService {
+export abstract class SiemMigrationsBaseDataService {
+  protected abstract readonly baseIndexName: string;
+
   constructor(protected kibanaVersion: string) {}
 
-  public createIndexPatternAdapter({ name, fieldMap }: CreateAdapterParams) {
+  protected createIndexPatternAdapter({ name, fieldMap }: CreateAdapterParams) {
     const adapter = new IndexPatternAdapter(name, {
       kibanaVersion: this.kibanaVersion,
       totalFieldsLimit: TOTAL_FIELDS_LIMIT,
@@ -29,7 +36,7 @@ export class SiemMigrationsBaseDataService {
     return adapter;
   }
 
-  public createIndexAdapter({ name, fieldMap }: CreateAdapterParams) {
+  protected createIndexAdapter({ name, fieldMap }: CreateAdapterParams) {
     const adapter = new IndexAdapter(name, {
       kibanaVersion: this.kibanaVersion,
       totalFieldsLimit: TOTAL_FIELDS_LIMIT,
@@ -39,7 +46,11 @@ export class SiemMigrationsBaseDataService {
     return adapter;
   }
 
-  public createIndexNameProvider(
+  protected getAdapterIndexName(adapterId: string) {
+    return `${this.baseIndexName}-${adapterId}`;
+  }
+
+  protected createIndexNameProvider(
     adapter: IndexPatternAdapter,
     spaceId: string
   ): SiemMigrationsIndexNameProvider {

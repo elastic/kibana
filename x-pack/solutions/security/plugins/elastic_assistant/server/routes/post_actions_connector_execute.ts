@@ -5,28 +5,30 @@
  * 2.0.
  */
 
-import { IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
+import type { IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 
 import { schema } from '@kbn/config-schema';
+import type { Message, Replacements } from '@kbn/elastic-assistant-common';
+import { v4 as uuidv4 } from 'uuid';
 import {
+  getIsConversationOwner,
   API_VERSIONS,
   newContentReferencesStore,
   ExecuteConnectorRequestBody,
-  Message,
-  Replacements,
   pruneContentReferences,
   ExecuteConnectorRequestQuery,
   POST_ACTIONS_CONNECTOR_EXECUTE,
   INFERENCE_CHAT_MODEL_DISABLED_FEATURE_FLAG,
+  ASSISTANT_INTERRUPTS_ENABLED_FEATURE_FLAG,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { getPrompt } from '../lib/prompt';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../lib/telemetry/event_based_telemetry';
 import { buildResponse } from '../lib/build_response';
-import { ElasticAssistantRequestHandlerContext } from '../types';
+import type { ElasticAssistantRequestHandlerContext } from '../types';
 import {
   appendAssistantMessageToConversation,
   getIsKnowledgeBaseInstalled,
@@ -35,7 +37,8 @@ import {
   performChecks,
 } from './helpers';
 import { isOpenSourceModel } from './utils';
-import { ConfigSchema } from '../config_schema';
+import type { ConfigSchema } from '../config_schema';
+import type { OnLlmResponse } from '../lib/langchain/executors/types';
 
 export const postActionsConnectorExecuteRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
@@ -80,12 +83,18 @@ export const postActionsConnectorExecuteRoute = (
         const assistantContext = ctx.elasticAssistant;
         const logger: Logger = assistantContext.logger;
         const telemetry = assistantContext.telemetry;
-        let onLlmResponse;
+        let onLlmResponse: OnLlmResponse | undefined;
 
         const coreContext = await context.core;
         const inferenceChatModelDisabled =
           (await coreContext?.featureFlags?.getBooleanValue(
             INFERENCE_CHAT_MODEL_DISABLED_FEATURE_FLAG,
+            false
+          )) ?? false;
+
+        const assistantInterruptsEnabled =
+          (await coreContext?.featureFlags?.getBooleanValue(
+            ASSISTANT_INTERRUPTS_ENABLED_FEATURE_FLAG,
             false
           )) ?? false;
 
@@ -105,7 +114,7 @@ export const postActionsConnectorExecuteRoute = (
             latestReplacements = { ...latestReplacements, ...newReplacements };
           };
 
-          let messages;
+          const threadId = uuidv4();
           let newMessage: Pick<Message, 'content' | 'role'> | undefined;
           const conversationId = request.body.conversationId;
           const actionTypeId = request.body.actionTypeId;
@@ -134,17 +143,38 @@ export const postActionsConnectorExecuteRoute = (
           const isOssModel = isOpenSourceModel(connector);
 
           const conversationsDataClient =
-            await assistantContext.getAIAssistantConversationsDataClient();
+            await assistantContext.getAIAssistantConversationsDataClient({
+              assistantInterruptsEnabled,
+            });
+          if (conversationId) {
+            const conversation = await conversationsDataClient?.getConversation({
+              id: conversationId,
+            });
+            if (
+              conversation &&
+              !getIsConversationOwner(conversation, {
+                name: checkResponse.currentUser?.username,
+                id: checkResponse.currentUser?.profile_uid,
+              })
+            ) {
+              return resp.error({
+                body: `Updating a conversation is only allowed for the owner of the conversation.`,
+                statusCode: 403,
+              });
+            }
+          }
+
           const promptsDataClient = await assistantContext.getAIAssistantPromptsDataClient();
           const contentReferencesStore = newContentReferencesStore({
             disabled: request.query.content_references_disabled,
           });
 
-          onLlmResponse = async (
-            content: string,
-            traceData: Message['traceData'] = {},
-            isError = false
-          ): Promise<void> => {
+          onLlmResponse = async ({
+            content,
+            traceData,
+            isError,
+            interruptValue,
+          }): Promise<void> => {
             if (conversationsDataClient && conversationId) {
               const { prunedContent, prunedContentReferencesStore } = pruneContentReferences(
                 content,
@@ -159,6 +189,7 @@ export const postActionsConnectorExecuteRoute = (
                 isError,
                 traceData,
                 contentReferences: prunedContentReferencesStore,
+                interruptValue,
               });
             }
           };
@@ -201,6 +232,7 @@ export const postActionsConnectorExecuteRoute = (
               actionsClient,
               actionTypeId,
               connectorId,
+              threadId,
               contentReferencesStore,
               isOssModel,
               inferenceChatModelDisabled,
@@ -208,7 +240,7 @@ export const postActionsConnectorExecuteRoute = (
               context: ctx,
               logger,
               inference,
-              messages: (newMessage ? [newMessage] : messages) ?? [],
+              messages: newMessage ? [newMessage] : [],
               onLlmResponse,
               onNewReplacements,
               replacements: latestReplacements,
@@ -226,7 +258,11 @@ export const postActionsConnectorExecuteRoute = (
           logger.error(err);
           const error = transformError(err);
           if (onLlmResponse) {
-            await onLlmResponse(error.message, {}, true);
+            await onLlmResponse({
+              content: error.message,
+              traceData: {},
+              isError: true,
+            });
           }
 
           const kbDataClient =

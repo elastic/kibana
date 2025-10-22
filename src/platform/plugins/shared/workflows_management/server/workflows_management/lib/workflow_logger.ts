@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { GetExecutionLogsParams, GetStepLogsParams } from '../workflows_management_api';
 
 // Simple interfaces for workflow logging
 export interface IWorkflowEventLogger {
@@ -32,9 +33,14 @@ export interface LogSearchResult {
   }>;
 }
 
-// Simple logger implementation with console support
+// Simple logger implementation with console support and log search capabilities
 export class SimpleWorkflowLogger implements IWorkflowEventLogger {
-  constructor(private logger: Logger, private enableConsoleLogging: boolean = false) {}
+  constructor(
+    private logger: Logger,
+    private esClient: ElasticsearchClient,
+    private logsIndex: string,
+    private enableConsoleLogging: boolean = false
+  ) {}
 
   logInfo(message: string, meta?: any): void {
     if (this.enableConsoleLogging) {
@@ -45,6 +51,71 @@ export class SimpleWorkflowLogger implements IWorkflowEventLogger {
   logError(message: string, error?: Error, meta?: any): void {
     if (this.enableConsoleLogging) {
       this.logger.error(`🔄 WORKFLOW: ${message}`, { error, ...meta });
+    }
+  }
+
+  async searchLogs(
+    params: GetExecutionLogsParams | GetStepLogsParams,
+    spaceId?: string
+  ): Promise<LogSearchResult> {
+    try {
+      const { limit = 100, offset = 0, sortField = '@timestamp', sortOrder = 'desc' } = params;
+
+      // Map API field names to Elasticsearch field names
+      const fieldMapping: Record<string, string> = {
+        timestamp: '@timestamp',
+        '@timestamp': '@timestamp',
+      };
+      const mappedSortField = fieldMapping[sortField] || sortField;
+
+      const mustQueries: any[] = [];
+
+      if ('executionId' in params) {
+        mustQueries.push({
+          term: { 'workflow.execution_id.keyword': params.executionId },
+        });
+      }
+
+      if ('stepExecutionId' in params && params.stepExecutionId) {
+        mustQueries.push({
+          term: { 'workflow.step_execution_id.keyword': params.stepExecutionId },
+        });
+      }
+
+      if ('stepId' in params && params.stepId) {
+        mustQueries.push({
+          term: { 'workflow.step_id.keyword': params.stepId },
+        });
+      }
+
+      if (spaceId) {
+        mustQueries.push({
+          term: { 'spaceId.keyword': spaceId },
+        });
+      }
+
+      const response = await this.esClient.search({
+        index: this.logsIndex,
+        size: limit,
+        from: offset,
+        query: {
+          bool: {
+            must: mustQueries,
+          },
+        },
+        sort: [{ [mappedSortField]: { order: sortOrder } }],
+      });
+
+      const logs = response.hits.hits.map((hit: any) => hit._source);
+      const total =
+        typeof response.hits.total === 'number'
+          ? response.hits.total
+          : response.hits.total?.value || 0;
+
+      return { total, logs };
+    } catch (error) {
+      this.logger.error('Failed to search workflow logs', error);
+      return { total: 0, logs: [] };
     }
   }
 }

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
 
 export function validate(opts: any): ValidationResult {
   const validationResult = { errors: {} };

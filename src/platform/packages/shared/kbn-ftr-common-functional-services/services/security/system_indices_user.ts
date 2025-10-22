@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Client } from '@elastic/elasticsearch';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { Client } from '@elastic/elasticsearch';
+import type { ToolingLog } from '@kbn/tooling-log';
 import {
   systemIndicesSuperuser,
   createEsClientForFtrConfig,
   createRemoteEsClientForFtrConfig,
 } from '@kbn/test';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 const SYSTEM_INDICES_SUPERUSER_ROLE = 'system_indices_superuser';
 

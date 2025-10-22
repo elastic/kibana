@@ -26,13 +26,11 @@ import { Toolbar } from './toolbars/toolbar';
 import { ViewSwitcher } from './waffle/view_switcher';
 import { createInventoryMetricFormatter } from '../lib/create_inventory_metric_formatter';
 import { createLegend } from '../lib/create_legend';
-import { useWaffleViewState } from '../hooks/use_waffle_view_state';
 import { BottomDrawer } from './bottom_drawer';
 import { LegendControls } from './waffle/legend_controls';
 
 interface Props {
   currentView?: InventoryView | null;
-  reload: () => void;
   interval: string;
   nodes: SnapshotNode[];
   loading: boolean;
@@ -44,7 +42,7 @@ interface LegendControlOptions {
   legend: WaffleLegendOptions;
 }
 
-export const Layout = React.memo(({ currentView, reload, interval, nodes, loading }: Props) => {
+export const Layout = React.memo(({ interval, nodes, loading }: Props) => {
   const [showLoading, setShowLoading] = useState(true);
   const {
     metric,
@@ -93,20 +91,18 @@ export const Layout = React.memo(({ currentView, reload, interval, nodes, loadin
     (val: string | number) => createInventoryMetricFormatter(options.metric)(val),
     [options.metric]
   );
-  const { onViewChange } = useWaffleViewState();
 
-  useEffect(() => {
-    if (currentView) {
-      onViewChange(currentView);
-    }
-  }, [currentView, onViewChange]);
-
-  useEffect(() => {
-    // load snapshot data after default view loaded, unless we're not loading a view
-    if (currentView != null) {
-      reload();
-    }
-  }, [currentView, reload]);
+  const onDrilldown = useCallback(
+    (expression: string) => {
+      applyFilterQuery({
+        query: {
+          language: 'kuery',
+          query: expression,
+        },
+      });
+    },
+    [applyFilterQuery]
+  );
 
   useEffect(() => {
     setShowLoading(true);
@@ -174,8 +170,7 @@ export const Layout = React.memo(({ currentView, reload, interval, nodes, loadin
                   nodeType={nodeType}
                   loading={loading}
                   showLoading={showLoading}
-                  reload={reload}
-                  onDrilldown={applyFilterQuery}
+                  onDrilldown={onDrilldown}
                   currentTime={currentTime}
                   view={view}
                   autoBounds={autoBounds}

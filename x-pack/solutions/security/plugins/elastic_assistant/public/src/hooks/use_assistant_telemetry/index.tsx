@@ -8,14 +8,14 @@
 import { type AssistantTelemetry } from '@kbn/elastic-assistant';
 import { useCallback, useMemo } from 'react';
 import { useKibana } from '../../context/typed_kibana_context/typed_kibana_context';
-import {
-  AssistantEventTypes,
+import type {
   ReportAssistantInvokedParams,
   ReportAssistantMessageSentParams,
   ReportAssistantQuickPromptParams,
   ReportAssistantStarterPromptParams,
   ReportAssistantSettingToggledParams,
 } from '../../common/lib/telemetry/events/ai_assistant/types';
+import { AssistantEventTypes } from '../../common/lib/telemetry/events/ai_assistant/types';
 
 export const useAssistantTelemetry = (): AssistantTelemetry => {
   const {

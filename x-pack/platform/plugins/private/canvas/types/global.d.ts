@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { i18n as I18N } from '@kbn/i18n';
+import type { i18n as I18N } from '@kbn/i18n';
 
 declare global {
   const canvas: {

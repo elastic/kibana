@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { api, tracing } from '@elastic/opentelemetry-node/sdk';
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
+import type { api } from '@elastic/opentelemetry-node/sdk';
+import { tracing } from '@elastic/opentelemetry-node/sdk';
+import type { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
 import { isInInferenceContext } from './is_in_inference_context';
 import { IS_ROOT_INFERENCE_SPAN_ATTRIBUTE_NAME } from './root_inference_span';
 
@@ -37,7 +38,7 @@ export abstract class BaseInferenceSpanProcessor implements tracing.SpanProcesso
       delete span.attributes._should_track;
 
       // if this is the "root" inference span, but has a parent,
-      // drop the parent context and Langfuse only shows root spans
+      // drop the parent context as Phoenix only shows root spans
       if (span.attributes[IS_ROOT_INFERENCE_SPAN_ATTRIBUTE_NAME] && span.parentSpanContext) {
         span = {
           ...span,
@@ -49,6 +50,12 @@ export abstract class BaseInferenceSpanProcessor implements tracing.SpanProcesso
       delete span.attributes[IS_ROOT_INFERENCE_SPAN_ATTRIBUTE_NAME];
 
       span = this.processInferenceSpan(span);
+
+      // Phoenix does not show resource attributes, so we move them under `attributes.resource.*`
+      Object.entries(span.resource.attributes).forEach(([name, value]) => {
+        span.attributes[`resource.${name}`] = value;
+      });
+
       this.delegate.onEnd(span);
     }
   }

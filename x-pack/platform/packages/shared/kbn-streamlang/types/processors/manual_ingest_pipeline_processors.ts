@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 
 export type ElasticsearchProcessorType = keyof IngestProcessorContainer;
 

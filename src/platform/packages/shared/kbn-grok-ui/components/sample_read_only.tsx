@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactNode, useEffect, useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme, EuiToolTip } from '@elastic/eui';
 import { combineLatest, debounceTime } from 'rxjs';
-import { DraftGrokExpression, FieldDefinition, GrokCollection } from '../models';
+import type { DraftGrokExpression, FieldDefinition, GrokCollection } from '../models';
 import { colourToClassName } from './utils';
 import { semanticNameLabel, patternNameLabel, typeNameLabel } from './constants';
 
@@ -34,8 +35,8 @@ export const Sample = ({
   );
 
   const colourPaletteStyles = useMemo(() => {
-    return grokCollection.getColourPaletteStyles();
-  }, [grokCollection]);
+    return grokCollection.getColourPaletteStyles(eui.euiTheme);
+  }, [eui.euiTheme, grokCollection]);
 
   useEffect(() => {
     const subscription = combineLatest(draftGrokExpressions.map((draft) => draft.getExpression$()))
@@ -45,6 +46,10 @@ export const Sample = ({
       });
     return () => subscription.unsubscribe();
   }, [draftGrokExpressions, sample]);
+
+  if (sample === '') {
+    return <>&nbsp;</>;
+  }
 
   return (
     <>

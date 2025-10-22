@@ -15,9 +15,9 @@ jest.mock('../kibana_services', () => ({
   },
 }));
 
-import { TooltipState } from '../../common/descriptor_types';
+import type { TooltipState } from '../../common/descriptor_types';
 import { openOnClickTooltip } from './tooltip_actions';
-import { MapStoreState } from '../reducers/store';
+import type { MapStoreState } from '../reducers/store';
 
 describe('openOnClickTooltip', () => {
   const newTooltip = {

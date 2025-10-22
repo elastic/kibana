@@ -17,7 +17,7 @@ import { duration } from 'moment';
 import { coreMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { MAJOR_VERSION } from '../../../../../common/constants';
 import { ProxyConfigCollection } from '../../../../lib';
-import { RouteDependencies, ProxyDependencies } from '../../..';
+import type { RouteDependencies, ProxyDependencies } from '../../..';
 import { EsLegacyConfigService, SpecDefinitionsService } from '../../../../services';
 import { handleEsError } from '../../../../shared_imports';
 

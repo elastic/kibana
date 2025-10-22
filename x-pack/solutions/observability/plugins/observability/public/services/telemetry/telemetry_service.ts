@@ -8,7 +8,7 @@
 import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import { TelemetryClient } from './telemetry_client';
 import { events } from './telemetry_events';
-import { ITelemetryClient, TelemetryEventParams } from './types';
+import type { ITelemetryClient, TelemetryEventParams } from './types';
 
 export class TelemetryService {
   private initialized = false;

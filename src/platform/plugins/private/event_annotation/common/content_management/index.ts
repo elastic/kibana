@@ -31,4 +31,4 @@ export type {
   EventAnnotationGroupCrudTypes,
 } from './latest';
 
-export * as EventAnnotationGroupV1 from './v1';
+export type * as EventAnnotationGroupV1 from './v1';

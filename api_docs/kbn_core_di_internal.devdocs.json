@@ -1,0 +1,53 @@
+{
+  "id": "@kbn/core-di-internal",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-di-internal",
+        "id": "def-common.Global",
+        "type": "CompoundType",
+        "tags": [],
+        "label": "Global",
+        "description": [
+          "\nThe service identifier for the global service references."
+        ],
+        "signature": [
+          "string | symbol | Function | ",
+          "Newable",
+          "<",
+          "ServiceIdentifier",
+          "<unknown>, any[]> | ",
+          "AbstractNewable",
+          "<",
+          "ServiceIdentifier",
+          "<unknown>, any[]>"
+        ],
+        "path": "src/core/packages/di/common-internal/src/modules/plugin.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

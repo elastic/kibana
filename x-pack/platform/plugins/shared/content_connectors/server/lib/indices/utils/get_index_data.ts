@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import {
+import type {
   ExpandWildcard,
   IndicesGetResponse,
   IndicesIndexState,
 } from '@elastic/elasticsearch/lib/api/types';
 
-import { IScopedClusterClient } from '@kbn/core/server';
-import { AlwaysShowPattern } from '../../../types/indices';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { AlwaysShowPattern } from '../../../types/indices';
 
 export const getSearchIndexData = async (
   client: IScopedClusterClient,

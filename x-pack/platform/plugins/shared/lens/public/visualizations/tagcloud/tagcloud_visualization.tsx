@@ -8,21 +8,19 @@
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { CoreTheme, ThemeServiceStart } from '@kbn/core/public';
+import type { CoreTheme, ThemeServiceStart } from '@kbn/core/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { ExpressionTagcloudFunctionDefinition } from '@kbn/expression-tagcloud-plugin/common';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import {
-  buildExpression,
-  buildExpressionFunction,
-  ExpressionFunctionTheme,
-} from '@kbn/expressions-plugin/common';
-import { PaletteRegistry, getColorsFromMapping } from '@kbn/coloring';
+import type { ExpressionFunctionTheme } from '@kbn/expressions-plugin/common';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
+import type { PaletteRegistry } from '@kbn/coloring';
+import { getColorsFromMapping } from '@kbn/coloring';
 import { IconChartTagcloud } from '@kbn/chart-icons';
-import { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
+import type { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
 import { getKbnPalettes } from '@kbn/palettes';
-import { FormatFactory } from '@kbn/visualization-ui-components';
+import type { FormatFactory } from '@kbn/visualization-ui-components';
 import type { OperationMetadata, Visualization } from '../..';
 import { getColorMappingDefaults } from '../../utils';
 import type { TagcloudState } from './types';
@@ -32,6 +30,8 @@ import { TagsDimensionEditor } from './tags_dimension_editor';
 import { DEFAULT_STATE, TAGCLOUD_LABEL } from './constants';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
 import { convertToRuntimeState } from './runtime_state';
+import { FlyoutToolbar } from '../../shared_components/flyout_toolbar';
+import { TagcloudAppearanceSettings } from './tagcloud_toolbar/appearance_settings';
 
 const TAG_GROUP_ID = 'tags';
 const METRIC_GROUP_ID = 'metric';
@@ -329,6 +329,11 @@ export const getTagcloudVisualization = ({
   ToolbarComponent(props) {
     return <TagcloudToolbar {...props} />;
   },
+
+  FlyoutToolbarComponent(props) {
+    return <FlyoutToolbar {...props} contentMap={{ style: TagcloudAppearanceSettings }} />;
+  },
+
   getTelemetryEventsOnSave(state, prevState) {
     return getColorMappingTelemetryEvents(state?.colorMapping, prevState?.colorMapping);
   },

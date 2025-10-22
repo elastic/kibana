@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
-import { Version } from '@kbn/securitysolution-io-ts-types';
+import type { Version } from '@kbn/securitysolution-io-ts-types';
 import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
-import {
-  ENDPOINT_LIST_DESCRIPTION,
-  ENDPOINT_LIST_ID,
-  ENDPOINT_LIST_NAME,
-} from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 
-import { ExceptionListSoSchema } from '../../schemas/saved_objects';
+import type { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
 import { transformSavedObjectToExceptionList } from './utils';
 
@@ -42,15 +39,15 @@ export const createEndpointList = async ({
         comments: undefined,
         created_at: dateNow,
         created_by: user,
-        description: ENDPOINT_LIST_DESCRIPTION,
+        description: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.description,
         entries: undefined,
         expire_time: undefined,
         immutable: false,
         item_id: undefined,
-        list_id: ENDPOINT_LIST_ID,
+        list_id: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
         list_type: 'list',
         meta: undefined,
-        name: ENDPOINT_LIST_NAME,
+        name: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.name,
         os_types: [],
         tags: [],
         tie_breaker_id: tieBreaker ?? uuidv4(),
@@ -60,7 +57,7 @@ export const createEndpointList = async ({
       },
       {
         // We intentionally hard coding the id so that there can only be one exception list within the space
-        id: ENDPOINT_LIST_ID,
+        id: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
       }
     );
     return transformSavedObjectToExceptionList({ savedObject });

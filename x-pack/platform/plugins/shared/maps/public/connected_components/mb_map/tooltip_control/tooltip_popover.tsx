@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import React, { Component, RefObject } from 'react';
+import type { RefObject } from 'react';
+import React, { Component } from 'react';
 import { EuiPopover, EuiText } from '@elastic/eui';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
-import { GeoJsonProperties, Geometry } from 'geojson';
+import type { GeoJsonProperties, Geometry } from 'geojson';
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import { Filter } from '@kbn/es-query';
-import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
+import type { Filter } from '@kbn/es-query';
+import type { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import { FeaturesTooltip } from './features_tooltip';
-import { LAT_INDEX, LON_INDEX, RawValue } from '../../../../common/constants';
-import { IVectorLayer } from '../../../classes/layers/vector_layer';
-import { TooltipFeature } from '../../../../common/descriptor_types';
-import { RenderToolTipContent } from '../../../classes/tooltips/tooltip_property';
+import type { RawValue } from '../../../../common/constants';
+import { LAT_INDEX, LON_INDEX } from '../../../../common/constants';
+import type { IVectorLayer } from '../../../classes/layers/vector_layer';
+import type { TooltipFeature } from '../../../../common/descriptor_types';
+import type { RenderToolTipContent } from '../../../classes/tooltips/tooltip_property';
 
 const noop = () => {};
 

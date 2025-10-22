@@ -194,8 +194,7 @@ export const CREATE_FORM_SCOPED_QUERY_TITLE = i18n.translate(
 export const CREATE_FORM_SCOPED_QUERY_DESCRIPTION = i18n.translate(
   'xpack.alerting.maintenanceWindows.createForm.scopedQuery.description',
   {
-    defaultMessage:
-      'Add filters that refine the scope of the maintenance window. You can select only one solution when filters are enabled.',
+    defaultMessage: 'Add filters that refine the scope of the maintenance window.',
   }
 );
 
@@ -406,7 +405,7 @@ export const SOLUTION_CONFIG_REMOVAL_WARNING_SUBTITLE = i18n.translate(
   'xpack.alerting.maintenanceWindows.solutionConfigRemovalWarning.subtitle',
   {
     defaultMessage:
-      'When you save the changes, the maintenance window will affect rules in all solutions.',
+      'When you save the changes, the maintenance window will affect all rules that meet the filtering criteria.',
   }
 );
 
@@ -442,22 +441,7 @@ export const ARCHIVE_CALLOUT_SUBTITLE = i18n.translate(
   'xpack.alerting.maintenanceWindows.archiveCallout.subtitle',
   {
     defaultMessage:
-      'The changes you have made here will not be saved. Are you sure you want to discard these unsaved changes and archive this maintenance window?',
-  }
-);
-
-export const EXPERIMENTAL_LABEL = i18n.translate(
-  'xpack.alerting.maintenanceWindows.badge.experimentalLabel',
-  {
-    defaultMessage: 'Technical preview',
-  }
-);
-
-export const EXPERIMENTAL_DESCRIPTION = i18n.translate(
-  'xpack.alerting.maintenanceWindows.badge.experimentalDescription',
-  {
-    defaultMessage:
-      'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+      'Upcoming maintenance window events will be canceled, and the window will be queued for deletion. Any other changes made here will not be saved. Are you sure you want to discard changes and archive this maintenance window?',
   }
 );
 
@@ -500,17 +484,4 @@ export const REFRESH = i18n.translate('xpack.alerting.maintenanceWindows.refresh
 export const SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.alerting.maintenanceWindows.searchPlaceholder',
   { defaultMessage: 'Search' }
-);
-
-export const NO_AVAILABLE_SOLUTIONS_WARNING_TITLE = i18n.translate(
-  'xpack.alerting.maintenanceWindows.noAvailableSolutionsWarning.title',
-  { defaultMessage: 'Limited permissions detected.' }
-);
-
-export const NO_AVAILABLE_SOLUTIONS_WARNING_SUBTITLE = i18n.translate(
-  'xpack.alerting.maintenanceWindows.noAvailableSolutionsWarning.subtitle',
-  {
-    defaultMessage:
-      "You don't have access to all solution types required for alert filtering. If you save, your alert filter settings will be reset.",
-  }
 );

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Request, Stream } from './types';
+import type { Request, Stream } from './types';
 
 export const getTime = (date: string) => new Date(date).getTime();
 

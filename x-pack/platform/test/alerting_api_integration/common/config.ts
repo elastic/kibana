@@ -57,6 +57,7 @@ const enabledActionTypes = [
   '.servicenow-sir',
   '.servicenow-itom',
   '.jira',
+  '.jira-service-management',
   '.resilient',
   '.gen-ai',
   '.d3security',
@@ -87,6 +88,7 @@ const enabledActionTypes = [
   'test.system-action-kibana-privileges',
   'test.system-action-connector-adapter',
   'test.connector-with-hooks',
+  'test.deprecated',
 ];
 
 export const getPreConfiguredActions = (

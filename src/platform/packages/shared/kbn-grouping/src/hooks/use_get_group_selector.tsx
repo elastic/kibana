@@ -8,12 +8,13 @@
  */
 
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
-import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
+import type { UiCounterMetricType } from '@kbn/analytics';
+import { METRIC_TYPE } from '@kbn/analytics';
 import React, { useCallback, useEffect, useMemo } from 'react';
 
 import { groupActions, groupByIdSelector } from './state';
-import type { GroupOption } from './types';
-import { Action, defaultGroup, GroupMap } from './types';
+import type { GroupOption, Action, GroupMap } from './types';
+import { defaultGroup } from './types';
 import { GroupSelector, isNoneGroup } from '..';
 import { getTelemetryEvent } from '../telemetry/const';
 
@@ -36,6 +37,11 @@ export interface UseGetGroupSelectorArgs {
     count?: number | undefined
   ) => void;
   title?: string;
+  onOpenTracker?: (
+    type: UiCounterMetricType,
+    event: string | string[],
+    count?: number | undefined
+  ) => void;
 }
 
 interface UseGetGroupSelectorStateless
@@ -93,6 +99,7 @@ export const useGetGroupSelector = ({
   onOptionsChange,
   tracker,
   title,
+  onOpenTracker,
 }: UseGetGroupSelectorArgs) => {
   const { activeGroups: selectedGroups, options } =
     groupByIdSelector({ groups: groupingState }, groupingId) ?? defaultGroup;
@@ -213,8 +220,18 @@ export const useGetGroupSelector = ({
           maxGroupingLevels,
           options,
           title,
+          onOpenTracker,
         }}
       />
     );
-  }, [groupingId, fields, maxGroupingLevels, onChange, selectedGroups, options, title]);
+  }, [
+    groupingId,
+    selectedGroups,
+    onChange,
+    fields,
+    maxGroupingLevels,
+    options,
+    title,
+    onOpenTracker,
+  ]);
 };

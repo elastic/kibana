@@ -12,10 +12,10 @@ import type {
   PerformanceMetrics as ScreenshotMetrics,
 } from '@kbn/screenshotting-plugin/common';
 import type { ConcreteTaskInstance, RruleSchedule } from '@kbn/task-manager-plugin/server';
-import { JOB_STATUS } from './constants';
+import type { JOB_STATUS } from './constants';
 import type { LocatorParams } from './url';
 
-export * from './url';
+export type * from './url';
 
 export interface CsvMetrics {
   rows: number;

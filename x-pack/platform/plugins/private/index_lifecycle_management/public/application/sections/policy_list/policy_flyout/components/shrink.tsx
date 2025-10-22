@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { SerializedHotPhase, SerializedWarmPhase } from '../../../../../../common/types';
+import type { SerializedHotPhase, SerializedWarmPhase } from '../../../../../../common/types';
 import { i18nTexts } from '../../../edit_policy/i18n_texts';
 import { i18nTexts as i18nTextsFlyout } from './i18n_texts';
 import type { ActionComponentProps } from './types';

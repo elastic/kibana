@@ -51,6 +51,7 @@ export function wrapAsMonacoMessages(
       ? offsetToRowColumn(queryString, e.location.max || 0)
       : fallbackPosition;
     return {
+      code: e.code,
       message: e.text,
       startColumn: startPosition.column,
       startLineNumber: startPosition.lineNumber,
@@ -58,7 +59,6 @@ export function wrapAsMonacoMessages(
       endLineNumber: endPosition.lineNumber,
       severity: convertSeverityToMonacoKind(e.type),
       _source: 'client' as const,
-      code: e.code,
     };
   });
 }

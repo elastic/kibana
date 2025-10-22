@@ -22,3 +22,11 @@ export const EVENT_PREVIEW_BANNER = {
   backgroundColor: 'warning',
   textColor: 'warning',
 };
+
+export const GENERIC_ENTITY_PREVIEW_BANNER = {
+  title: i18n.translate('xpack.securitySolution.flyout.preview.genericEntityPreviewTitle', {
+    defaultMessage: 'Preview entity details',
+  }),
+  backgroundColor: 'warning',
+  textColor: 'warning',
+};

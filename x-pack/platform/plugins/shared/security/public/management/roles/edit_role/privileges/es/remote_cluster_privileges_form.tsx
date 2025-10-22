@@ -152,7 +152,7 @@ export const RemoteClusterPrivilegesForm: React.FunctionComponent<Props> = ({
                     isDisabled={isRoleReadOnly}
                     placeholder={i18n.translate(
                       'xpack.security.management.editRole.remoteClusterPrivilegeForm.privilegesPlaceholder',
-                      { defaultMessage: 'Add an action…' }
+                      { defaultMessage: 'Add a privilege…' }
                     )}
                     fullWidth
                   />

@@ -8,16 +8,15 @@
  */
 
 import React from 'react';
-import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import { EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart, HttpStart } from '@kbn/core/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SearchSessionsMgmtAPI } from '../lib/api';
 import type { AsyncSearchIntroDocumentation } from '../lib/documentation';
 import { SearchSessionsMgmtTable } from './table';
-import { SearchSessionsDeprecatedWarning } from '../../search_sessions_deprecation_message';
 import type { SearchSessionsConfigSchema } from '../../../../../server/config';
-import { SearchUsageCollector } from '../../../collectors';
-import { BACKGROUND_SEARCH_ENABLED } from '../../constants';
+import type { SearchUsageCollector } from '../../../collectors';
 
 interface Props {
   documentation: AsyncSearchIntroDocumentation;
@@ -27,70 +26,35 @@ interface Props {
   timezone: string;
   config: SearchSessionsConfigSchema;
   kibanaVersion: string;
+  share: SharePluginStart;
   searchUsageCollector: SearchUsageCollector;
 }
 
-export function SearchSessionsMgmtMain({ documentation, ...tableProps }: Props) {
-  if (BACKGROUND_SEARCH_ENABLED) {
-    return (
-      <>
-        <EuiPageHeader
-          pageTitle={
-            <FormattedMessage
-              id="data.mgmt.searchSessions.main.backgroundSearchSectionTitle"
-              defaultMessage="Background Search"
-            />
-          }
-          description={
-            <FormattedMessage
-              id="data.mgmt.searchSessions.main.backgroundSearchSectionDescription"
-              defaultMessage="Manage your background searches."
-            />
-          }
-          bottomBorder
-        />
-
-        <EuiSpacer size="l" />
-        <SearchSessionsMgmtTable data-test-subj="search-sessions-mgmt-table" {...tableProps} />
-      </>
-    );
-  }
-
+export function SearchSessionsMgmtMain({ documentation, share, ...tableProps }: Props) {
   return (
     <>
       <EuiPageHeader
         pageTitle={
           <FormattedMessage
-            id="data.mgmt.searchSessions.main.sectionTitle"
-            defaultMessage="Search Sessions"
+            id="data.mgmt.searchSessions.main.backgroundSearchSectionTitle"
+            defaultMessage="Background Search"
           />
         }
         description={
           <FormattedMessage
-            id="data.mgmt.searchSessions.main.sectionDescription"
-            defaultMessage="Manage your saved search sessions."
+            id="data.mgmt.searchSessions.main.backgroundSearchSectionDescription"
+            defaultMessage="Manage your background searches."
           />
         }
         bottomBorder
-        rightSideItems={[
-          <EuiButtonEmpty
-            href={documentation.getElasticsearchDocLink()}
-            target="_blank"
-            iconType="question"
-          >
-            <FormattedMessage
-              id="data.mgmt.searchSessions.main.backgroundSessionsDocsLinkText"
-              defaultMessage="Documentation"
-            />
-          </EuiButtonEmpty>,
-        ]}
       />
 
       <EuiSpacer size="l" />
-      <SearchSessionsDeprecatedWarning />
-
-      <EuiSpacer size="l" />
-      <SearchSessionsMgmtTable data-test-subj="search-sessions-mgmt-table" {...tableProps} />
+      <SearchSessionsMgmtTable
+        data-test-subj="search-sessions-mgmt-table"
+        locators={share.url.locators}
+        {...tableProps}
+      />
     </>
   );
 }

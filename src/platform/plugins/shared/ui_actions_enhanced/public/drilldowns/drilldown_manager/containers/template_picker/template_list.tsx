@@ -9,11 +9,9 @@
 
 import { EuiTitle, EuiSpacer } from '@elastic/eui';
 import * as React from 'react';
-import {
-  DrilldownTemplateTable,
-  DrilldownTemplateTableItem,
-} from '../../components/drilldown_template_table';
-import { DrilldownTemplate } from '../../types';
+import type { DrilldownTemplateTableItem } from '../../components/drilldown_template_table';
+import { DrilldownTemplateTable } from '../../components/drilldown_template_table';
+import type { DrilldownTemplate } from '../../types';
 import { useDrilldownManager } from '../context';
 import { txtLabel } from './i18n';
 

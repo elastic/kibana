@@ -8,7 +8,7 @@
  */
 
 import { SearchSessionStatus } from '../../../../../common';
-import { UISession } from '../types';
+import type { UISession } from '../types';
 
 export function getUiSessionMock(overrides: Partial<UISession> = {}): UISession {
   return {

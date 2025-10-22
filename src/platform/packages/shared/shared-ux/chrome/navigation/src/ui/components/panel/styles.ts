@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Theme, css } from '@emotion/react';
+import type { Theme } from '@emotion/react';
+import { css } from '@emotion/react';
 
 const PANEL_WIDTH = '248px';
 
@@ -28,4 +29,8 @@ export const navPanelStyles = ({ euiTheme }: Theme) => css`
   background-color: ${euiTheme.colors.backgroundBaseSubdued};
   height: 100%;
   width: ${PANEL_WIDTH};
+  /* unset default panel floating border */
+  border: none;
+  /* add custom floating border */
+  border-inline-end: 1px solid ${euiTheme.colors.borderBaseFloating};
 `;

@@ -10,13 +10,14 @@
 import { RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
+  const retry = getService('retry');
 
   const { dashboardControls, discover, timePicker, dashboard } = getPageObjects([
     'dashboardControls',
@@ -114,13 +115,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const valueAfter = await dashboardControls.getTimeSliceFromTimeSlider();
         expect(valueBefore).to.not.equal(valueAfter);
 
-        await dashboard.clickCancelOutOfEditMode();
-        const valueNow = await dashboardControls.getTimeSliceFromTimeSlider();
-        expect(valueNow).to.equal(valueBefore);
+        await dashboard.clickDiscardChanges();
+
+        // valueNow maybe grabbed before timeslider has reset
+        await retry.try(async () => {
+          const valueNow = await dashboardControls.getTimeSliceFromTimeSlider();
+          expect(valueNow).to.equal(valueBefore);
+        });
       });
 
       it('dashboard does not load with unsaved changes when changes are discarded', async () => {
-        await dashboard.switchToEditMode();
+        await dashboard.loadDashboardInEditMode('test time slider control');
         await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
       });
 

@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import moment from 'moment';
 
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { testUsers } from '../test_users';
 
@@ -104,7 +104,7 @@ export default function (providerContext: FtrProviderContext) {
         .expect(200);
 
       const actionId = body.actionId;
-
+      // TODO: use helper function `checkBulkAgentAction`
       await new Promise((resolve, reject) => {
         let attempts = 0;
         const intervalId = setInterval(async () => {

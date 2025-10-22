@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { composeStories } from '@storybook/react';
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import * as stories from './graph_layout.stories';
 
 const { GraphLargeStackedEdgeCases } = composeStories(stories);
@@ -53,10 +53,16 @@ jest.mock('./constants', () => ({
 }));
 
 describe('GraphLargeStackedEdgeCases story', () => {
-  it('all labels should be visible', async () => {
-    const { getAllByText } = render(<GraphLargeStackedEdgeCases />);
+  it('all labels should be visible and nodes should have correct icons', async () => {
+    const { getAllByText, container } = render(<GraphLargeStackedEdgeCases />);
 
     const labels = GraphLargeStackedEdgeCases.args?.nodes?.filter((node) => node.shape === 'label');
+
+    // Wait for nodes to be rendered
+    await waitFor(() => {
+      const nodeElements = container.querySelectorAll('.react-flow__node');
+      expect(nodeElements.length).toBeGreaterThan(0);
+    });
 
     // With JSDOM toBeVisible can't check if elements are visually obscured by other overlapping elements
     // This is a workaround which gives a rough estimation of a label's bounding rectangle and check for intersections
@@ -65,10 +71,13 @@ describe('GraphLargeStackedEdgeCases story', () => {
 
     for (const { label } of labels ?? []) {
       // Get all label nodes that contains the label's text
-      const allLabelElements = getAllByText((_content, element) => element?.textContent === label, {
-        exact: true,
-        selector: 'div.react-flow__node-label',
-      });
+      const allLabelElements = getAllByText(
+        (_content, element) => element?.textContent?.includes(label ?? '') || false,
+        {
+          exact: true,
+          selector: 'div.react-flow__node-label',
+        }
+      );
       expect(allLabelElements.length).toBeGreaterThan(0);
 
       for (const labelElm of allLabelElements) {
@@ -91,6 +100,30 @@ describe('GraphLargeStackedEdgeCases story', () => {
         }
 
         labelsBoundingRect.push(labelRect!);
+      }
+    }
+    // test some nodes icons rendering
+    const expectedNodes = [
+      { id: 'siem-windows', expectedIcon: 'storage' },
+      { id: '213.180.204.3', expectedIcon: 'globe' },
+      { id: 'user', expectedIcon: 'user' },
+    ];
+
+    // Get all nodes in the rendered component
+    const nodeElements = container.querySelectorAll('.react-flow__node');
+
+    // Verify each expected node has the correct icon
+    for (const { id, expectedIcon } of expectedNodes) {
+      // Find the DOM element for this node
+      const nodeElement = Array.from(nodeElements).find((el) => el.getAttribute('data-id') === id);
+
+      expect(nodeElement).not.toBeNull();
+
+      if (nodeElement) {
+        const iconElement = nodeElement.querySelector(`[data-euiicon-type="${expectedIcon}"]`);
+
+        expect(iconElement).not.toBeNull();
+        expect(iconElement?.getAttribute('data-euiicon-type')).toBe(expectedIcon);
       }
     }
   });

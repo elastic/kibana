@@ -6,11 +6,12 @@
  */
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { ActionParamsProps, ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { eventActionOptions } from './constants';
 import { SUB_ACTION, TheHiveSeverity } from '../../../common/thehive/constants';
-import { ExecutorParams } from '../../../common/thehive/types';
+import type { ExecutorParams } from '../../../common/thehive/types';
 import { TheHiveParamsAlertFields } from './params_alert';
 import { TheHiveParamsCaseFields } from './params_case';
 import * as translations from './translations';

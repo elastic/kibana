@@ -9,7 +9,7 @@
 import { mockContext } from '../../../__tests__/context_fixtures';
 import { autocomplete } from './autocomplete';
 import { expectSuggestions, getFieldNamesByType } from '../../../__tests__/autocomplete';
-import { ICommandCallbacks } from '../../types';
+import type { ICommandCallbacks } from '../../types';
 import { ESQL_STRING_TYPES } from '../../../definitions/types';
 
 const grokExpectSuggestions = (
@@ -66,7 +66,24 @@ describe('GROK Autocomplete', () => {
     );
   });
 
-  it('suggests a pipe after a pattern', async () => {
-    await grokExpectSuggestions(`from a | grok keywordField ${constantPattern} /`, ['| ']);
+  it('suggests pipe or comma after multiple patterns', async () => {
+    const result = await autocomplete(
+      `from a | grok keywordField "%{IP:ip}", "%{WORD:method}" /`,
+      {
+        type: 'command',
+        name: 'grok',
+        args: [
+          { type: 'column', name: 'keywordField' },
+          { type: 'literal', value: '"%{IP:ip}"' },
+          { type: 'literal', value: '"%{WORD:method}"' },
+        ],
+      } as any,
+      mockCallbacks
+    );
+
+    const suggestions = result.map(({ text }) => text);
+
+    expect(suggestions).toContain('| ');
+    expect(suggestions).toContain(', ');
   });
 });

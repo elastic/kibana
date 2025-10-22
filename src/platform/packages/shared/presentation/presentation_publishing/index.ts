@@ -30,7 +30,12 @@ export {
   apiCanLockHoverActions,
   type CanLockHoverActions,
 } from './interfaces/can_lock_hover_actions';
-export { fetch$, useFetchContext, type FetchContext } from './interfaces/fetch/fetch';
+export { fetch$, useFetchContext } from './interfaces/fetch/fetch';
+export type { FetchContext } from './interfaces/fetch/fetch_context';
+export {
+  type PublishesPauseFetch,
+  apiPublishesPauseFetch,
+} from './interfaces/fetch/publishes_pause_fetch';
 export {
   initializeTimeRangeManager,
   timeRangeComparators,
@@ -62,6 +67,10 @@ export {
   type HasDisableTriggers,
 } from './interfaces/has_disable_triggers';
 export { hasEditCapabilities, type HasEditCapabilities } from './interfaces/has_edit_capabilities';
+export {
+  canOverrideHoverActions,
+  type CanOverrideHoverActions,
+} from './interfaces/can_override_hover_actions';
 export {
   hasReadOnlyCapabilities,
   type HasReadOnlyCapabilities,

@@ -17,15 +17,19 @@
  * COMMAND arg1, arg2, arg3
  * ```
  *
- * But there are some commands (namely `grok` and `dissect`) which don't
+ * But there are some commands (namely `dissect`) which don't
  * use commas to separate their arguments.
  *
  * ```
- * GROK input "pattern"
  * DISSECT input "pattern"
+ * GROK input "pattern1", "pattern2", "pattern3"
  * ```
  */
-export const commandsWithNoCommaArgSeparator = new Set(['grok', 'dissect', 'sample']);
+export const commandsWithNoCommaArgSeparator = new Set(['dissect', 'sample', 'fork']);
+
+export const commandsWithSpecialCommaRules = new Map<string, (argIndex: number) => boolean>([
+  ['grok', (argIndex: number) => argIndex > 1], // Comma before patterns starting from index 2
+]);
 
 /**
  * This set tracks command options which use an equals sign to separate
@@ -37,6 +41,9 @@ export const commandsWithNoCommaArgSeparator = new Set(['grok', 'dissect', 'samp
  * ```
  * COMMAND arg1, arg2, arg3 OPTION option
  * FROM index METADATA _id
+ *                    |
+ *                    |
+ *                    space
  * ```
  *
  * However, the `APPEND_SEPARATOR` in the `DISSECT` command uses an equals

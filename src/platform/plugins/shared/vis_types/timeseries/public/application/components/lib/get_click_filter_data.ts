@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { XYChartSeriesIdentifier, GeometryValue } from '@elastic/charts';
-import { ValueClickContext } from '@kbn/embeddable-plugin/public';
+import type { XYChartSeriesIdentifier, GeometryValue } from '@elastic/charts';
+import type { ValueClickContext } from '@kbn/embeddable-plugin/public';
 import { X_ACCESSOR_INDEX } from '../../visualizations/constants';
 import { BUCKET_TYPES } from '../../../../common/enums';
-import { TimeseriesVisParams } from '../../../types';
+import type { TimeseriesVisParams } from '../../../types';
 import type { TSVBTables } from './types';
 import { SERIES_SEPARATOR } from '../../../../common/constants';
 
