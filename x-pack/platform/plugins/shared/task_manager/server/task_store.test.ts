@@ -23,7 +23,7 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import type { SearchOpts, AggregationOpts } from './task_store';
 import { TaskStore, taskInstanceToAttributes } from './task_store';
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
-import type { SavedObjectAttributes } from '@kbn/core/server';
+import type { SavedObjectAttributes, IBasePath } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { mockLogger } from './test_utils';
@@ -64,6 +64,8 @@ const adHocTaskCounter = new AdHocTaskCounter();
 const randomId = () => `id-${_.random(1, 20)}`;
 
 const coreStart = coreMock.createStart();
+
+const basePathMock = { get: () => '/', serverBasePath: '/' } as unknown as IBasePath;
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -136,6 +138,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
 
       store.registerEncryptedSavedObjectsClient(esoClient);
@@ -264,6 +267,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => false,
+        basePath: basePathMock,
       });
 
       store.registerEncryptedSavedObjectsClient(esoClient);
@@ -371,7 +375,12 @@ describe('TaskStore', () => {
         }
       );
 
-      expect(getApiKeyAndUserScope).toHaveBeenCalledWith([task], request, coreStart.security);
+      expect(getApiKeyAndUserScope).toHaveBeenCalledWith(
+        [task],
+        request,
+        coreStart.security,
+        basePathMock
+      );
 
       expect(savedObjectsClient.create).not.toHaveBeenCalled();
 
@@ -412,6 +421,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         canEncryptSavedObjects: false,
         getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
 
       const task = {
@@ -534,6 +544,7 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
     });
 
@@ -660,6 +671,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
 
       esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest.fn().mockResolvedValue({
@@ -846,6 +858,7 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
     });
 
@@ -973,6 +986,7 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
     });
 
@@ -1172,6 +1186,7 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
     });
 
@@ -1400,6 +1415,7 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
     });
 
@@ -1951,6 +1967,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
 
       esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest.fn().mockResolvedValue({
@@ -2072,6 +2089,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
 
       esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest.fn().mockResolvedValue({
@@ -2143,6 +2161,7 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
     });
 
@@ -2209,6 +2228,7 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
     });
 
@@ -2310,6 +2330,7 @@ describe('TaskStore', () => {
             savedObjectsService: coreStart.savedObjects,
             security: coreStart.security,
             getIsSecurityEnabled: () => true,
+            basePath: basePathMock,
           });
 
           expect(await store.getLifecycle(task.id)).toEqual(status);
@@ -2338,6 +2359,7 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
 
       expect(await store.getLifecycle(randomId())).toEqual(TaskLifecycleResult.NotFound);
@@ -2364,6 +2386,7 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
 
       return expect(store.getLifecycle(randomId())).rejects.toThrow('Bad Request');
@@ -2392,6 +2415,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
 
       store.registerEncryptedSavedObjectsClient(esoClient);
@@ -2600,7 +2624,8 @@ describe('TaskStore', () => {
       expect(getApiKeyAndUserScope).toHaveBeenCalledWith(
         [task1, task2],
         request,
-        coreStart.security
+        coreStart.security,
+        basePathMock
       );
 
       expect(savedObjectsClient.create).not.toHaveBeenCalled();
@@ -2663,6 +2688,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         canEncryptSavedObjects: false,
         getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
 
       const task1 = {
@@ -2697,6 +2723,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => false,
+        basePath: basePathMock,
       });
 
       store.registerEncryptedSavedObjectsClient(esoClient);
@@ -2954,6 +2981,7 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
 
       savedObjectsClient.create.mockImplementation(async (type: string, attributes: unknown) => ({
@@ -3005,6 +3033,7 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
 
       savedObjectsClient.create.mockImplementation(async (type: string, attributes: unknown) => ({
@@ -3052,6 +3081,7 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
     });
     test('should pass requestTimeout and retryOnTimeout', async () => {
@@ -3088,6 +3118,7 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
     });
 
@@ -3204,6 +3235,7 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
     });
 
