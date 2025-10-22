@@ -30,7 +30,7 @@ import { getSafeInsertText, getControlSuggestion } from './autocomplete/helpers'
 import type { ESQLAstItem, ESQLFunction } from '../../types';
 import { removeFinalUnknownIdentiferArg } from './shared';
 import { getTestFunctions } from './test_functions';
-import { getExpressionType, getMatchingSignatures } from './expressions';
+import { getMatchingSignatures, getExpressionType as extractExpressionType } from './expressions';
 import { isLiteral } from '../../ast/is';
 
 const techPreviewLabel = i18n.translate('kbn-esql-ast.esql.autocomplete.techPreviewLabel', {
@@ -49,7 +49,7 @@ function getFilteredSignatures(
   let signatures = functionDef.signatures;
 
   if (fnNode && columns && fnNode.args.length > 0) {
-    const argTypes = fnNode.args.map((arg) => getExpressionType(arg, columns));
+    const argTypes = fnNode.args.map((arg) => extractExpressionType(arg, columns));
     const literalMask = fnNode.args.map((arg) => isLiteral(arg));
 
     const matchingSignatures = getMatchingSignatures(
@@ -327,7 +327,7 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
 
 export function checkFunctionInvocationComplete(
   func: ESQLFunction,
-  scopedGetExpressionType: (expression: ESQLAstItem) => SupportedDataType | 'unknown'
+  getExpressionType: (expression: ESQLAstItem) => SupportedDataType | 'unknown'
 ): {
   complete: boolean;
   reason?: 'tooFewArgs' | 'wrongTypes';
@@ -337,7 +337,7 @@ export function checkFunctionInvocationComplete(
     return { complete: false };
   }
 
-  const cleanedArgs = removeFinalUnknownIdentiferArg(func.args, scopedGetExpressionType);
+  const cleanedArgs = removeFinalUnknownIdentiferArg(func.args, getExpressionType);
 
   const argLengthCheck = fnDefinition.signatures.some((def) => {
     if (def.minParams && cleanedArgs.length >= def.minParams) {
@@ -368,7 +368,7 @@ export function checkFunctionInvocationComplete(
   }
 
   // If the function is complete, check that the types of the arguments match the function definition
-  const givenTypes = func.args.map((arg) => scopedGetExpressionType(arg));
+  const givenTypes = func.args.map((arg) => getExpressionType(arg));
   const literalMask = func.args.map((arg) => isLiteral(Array.isArray(arg) ? arg[0] : arg));
 
   const hasCorrectTypes = !!getMatchingSignatures(
