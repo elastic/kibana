@@ -1,0 +1,312 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { RoundCompleteEventData } from '@kbn/onechat-common';
+import { isMessageChunkEvent, isRoundCompleteEvent, isToolCallEvent } from '@kbn/onechat-common';
+import { streamFactory } from '@kbn/ml-response-stream/server';
+import type { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
+import { isEmpty } from 'lodash';
+import { pruneContentReferences } from '@kbn/elastic-assistant-common';
+import {
+  INVOKE_ASSISTANT_ERROR_EVENT,
+  INVOKE_ASSISTANT_SUCCESS_EVENT,
+} from '../telemetry/event_based_telemetry';
+import type {
+  StreamingExecutionParams,
+  NonStreamingExecutionParams,
+  ExtendedKibanaRequest,
+} from './types';
+import { processToolResults } from './processors';
+
+// Helper function to map tool names to telemetry format
+const mapToolNameToTelemetry = (toolName: string): string => {
+  const toolMapping: Record<string, string> = {
+    'core.security.product_documentation': 'ProductDocumentationTool',
+    'core.security.knowledge_base_retrieval': 'KnowledgeBaseRetrievalTool',
+    'core.security.knowledge_base_write': 'KnowledgeBaseWriteTool',
+    'core.security.open_and_acknowledged_alerts': 'OpenAndAcknowledgedAlertsTool',
+    'core.security.alert_counts': 'AlertCountsTool',
+    'core.security.ask_about_esql': 'AskAboutESQLTool',
+    'core.security.entity_risk_score': 'EntityRiskScoreTool',
+    'core.security.integration_knowledge': 'IntegrationKnowledgeTool',
+    'core.security.security_labs_knowledge': 'SecurityLabsKnowledgeBaseTool',
+    'core.security.assistant_settings': 'AssistantSettingsTool',
+  };
+  return toolMapping[toolName] || 'CustomTool';
+};
+
+// Helper function to extract tool usage from agent result
+const extractToolUsage = (agentResult: {
+  result?: { round?: { steps?: Array<{ type: string; tool_id?: string }> } };
+}): Record<string, number> => {
+  const toolsInvoked: Record<string, number> = {};
+
+  if (agentResult?.result?.round?.steps) {
+    for (const step of agentResult.result.round.steps) {
+      if (step.type === 'tool_call' && step.tool_id) {
+        const telemetryToolName = mapToolNameToTelemetry(step.tool_id);
+        toolsInvoked[telemetryToolName] = (toolsInvoked[telemetryToolName] || 0) + 1;
+      }
+    }
+  }
+
+  return toolsInvoked;
+};
+
+// Helper function to handle streaming execution
+export const executeStreaming = async ({
+  onechatServices,
+  connectorId,
+  conversationRounds,
+  nextInput,
+  request,
+  abortSignal,
+  contentReferencesStore,
+  onNewReplacements,
+  onLlmResponse,
+  telemetry,
+  actionTypeId,
+  startTime,
+  logger,
+  isEnabledKnowledgeBase,
+  assistantContext,
+}: StreamingExecutionParams): Promise<StreamResponseWithHeaders> => {
+  // Initialize stream factory and get response headers
+  const {
+    end: streamEnd,
+    push,
+    responseWithHeaders,
+  } = streamFactory<{ type: string; payload: string }>(request.headers, logger, false, false);
+
+  let didEnd = false;
+  const handleStreamEnd = (finalResponse: string, isError = false) => {
+    if (didEnd) {
+      return;
+    }
+    if (isError) {
+      telemetry.reportEvent(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
+        actionTypeId,
+        model: (request.body as { model?: string }).model || 'unknown',
+        errorMessage: finalResponse,
+        assistantStreamingEnabled: true,
+        isEnabledKnowledgeBase: false,
+        errorLocation: 'handleStreamEnd',
+      });
+    }
+    if (onLlmResponse) {
+      onLlmResponse({ content: finalResponse, isError }).catch(() => {});
+    }
+    streamEnd();
+    didEnd = true;
+  };
+
+  // Set up streaming asynchronously (fire and forget)
+  const pushStreamUpdate = async () => {
+    try {
+      let accumulatedContent = '';
+      let finalRoundData: RoundCompleteEventData | null = null;
+
+      // Use agents.execute with onEvent callback for fake streaming
+      const agentResult = await onechatServices.agents.execute({
+        request,
+        agentId: 'siem-security-analyst',
+        agentParams: {
+          nextInput,
+          conversation: conversationRounds,
+          capabilities: {},
+        },
+        abortSignal,
+        defaultConnectorId: connectorId,
+        onEvent: (event) => {
+          if (isMessageChunkEvent(event)) {
+            // Stream message chunks as they arrive
+            const chunk = event.data.text_chunk;
+            accumulatedContent += chunk;
+            if (!didEnd) {
+              push({ payload: chunk, type: 'content' });
+            }
+          } else if (isRoundCompleteEvent(event)) {
+            // Store the final round data for processing
+            finalRoundData = event.data as RoundCompleteEventData;
+          } else if (isToolCallEvent(event)) {
+            // Tool call events are handled by extractToolUsage for consistency
+            // No need for real-time tracking since we extract from the final result
+          }
+        },
+      });
+
+      logger.debug(
+        `🚀 [AGENT_BUILDER] Agent execution completed: ${JSON.stringify(agentResult, null, 2)}`
+      );
+
+      let finalContent = accumulatedContent;
+
+      // Process final round data for content references and replacements
+      if (finalRoundData) {
+        // Process tool results to add content references
+        const processedContent = processToolResults({
+          agentResult: { result: { round: (finalRoundData as RoundCompleteEventData).round } },
+          contentReferencesStore,
+          logger,
+          assistantContext,
+        });
+
+        // Use the processed content (which contains reference text) for saving to conversation
+        // This allows pruneContentReferences to extract the content references properly
+        finalContent = processedContent;
+      } else {
+        // Fallback to processing the agent result directly if no round data
+        finalContent = processToolResults({
+          agentResult,
+          contentReferencesStore,
+          logger,
+          assistantContext,
+        });
+      }
+
+      // Collect replacements from tools that stored them in request context
+      const toolReplacements = (request as ExtendedKibanaRequest).__toolReplacements;
+      if (toolReplacements && typeof toolReplacements === 'object') {
+        onNewReplacements(toolReplacements);
+      }
+
+      // Report telemetry
+      const durationMs = Date.now() - startTime;
+
+      // Use the helper function for consistency with non-streaming execution
+      // Always use agentResult since it has the correct structure with steps
+      const finalToolsInvoked = extractToolUsage(agentResult);
+
+      telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
+        assistantStreamingEnabled: true,
+        actionTypeId,
+        isEnabledKnowledgeBase,
+        durationMs,
+        toolsInvoked: finalToolsInvoked,
+        model: (request.body as { model?: string }).model || 'unknown',
+      });
+
+      // Apply content references pruning if needed
+      let processedFinalContent = finalContent;
+      if (contentReferencesStore) {
+        const { prunedContent } = pruneContentReferences(finalContent, contentReferencesStore);
+        processedFinalContent = prunedContent;
+      }
+
+      handleStreamEnd(processedFinalContent);
+    } catch (error) {
+      logger.error(`Failed to execute agent: ${error.message}`);
+      logger.error(`Agent execution error stack: ${error.stack}`);
+      handleStreamEnd(error.message, true);
+    }
+  };
+
+  // Start streaming asynchronously (fire and forget)
+  pushStreamUpdate().catch((err) => {
+    logger.error(`Error streaming: ${err}`);
+    handleStreamEnd(err.message, true);
+  });
+
+  // Return the response with headers immediately
+  return responseWithHeaders;
+};
+
+// Helper function to handle non-streaming execution
+export const executeNonStreaming = async ({
+  onechatServices,
+  connectorId,
+  conversationRounds,
+  nextInput,
+  request,
+  abortSignal,
+  contentReferencesStore,
+  onNewReplacements,
+  onLlmResponse,
+  telemetry,
+  actionTypeId,
+  startTime,
+  logger,
+  response,
+  conversationId,
+  isEnabledKnowledgeBase,
+  assistantContext,
+}: NonStreamingExecutionParams) => {
+  const agentResult = await onechatServices.agents.execute({
+    request,
+    agentId: 'siem-security-analyst',
+    agentParams: {
+      nextInput,
+      conversation: conversationRounds,
+      capabilities: {},
+    },
+    abortSignal,
+    defaultConnectorId: connectorId,
+  });
+
+  logger.debug(
+    `🚀 [AGENT_BUILDER] Agent execution completed: ${JSON.stringify(agentResult, null, 2)}`
+  );
+
+  // Process tool results to add content references
+  const accumulatedContent = processToolResults({
+    agentResult,
+    contentReferencesStore,
+    logger,
+    assistantContext,
+  });
+
+  // Process the final response with content references and anonymization
+  let finalResponse = accumulatedContent;
+
+  // Apply content references pruning if needed
+  if (contentReferencesStore) {
+    const { prunedContent } = pruneContentReferences(finalResponse, contentReferencesStore);
+    finalResponse = prunedContent;
+  }
+
+  // Collect replacements from tools that stored them in request context
+  const toolReplacements = (request as ExtendedKibanaRequest).__toolReplacements;
+  if (toolReplacements && typeof toolReplacements === 'object') {
+    onNewReplacements(toolReplacements);
+  }
+
+  // Call onLlmResponse with the final processed content
+  if (onLlmResponse) {
+    await onLlmResponse({ content: finalResponse, isError: false });
+  }
+
+  // Report telemetry with required fields
+  const durationMs = Date.now() - startTime;
+  const toolsInvoked = extractToolUsage(agentResult);
+
+  telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
+    actionTypeId,
+    model: (request.body as { model?: string }).model,
+    assistantStreamingEnabled: false,
+    isEnabledKnowledgeBase,
+    durationMs,
+    toolsInvoked,
+  });
+
+  const contentReferences = contentReferencesStore.getStore();
+  const metadata = !isEmpty(contentReferences) ? { contentReferences } : {};
+
+  return response.ok({
+    body: {
+      connector_id: connectorId,
+      data: finalResponse,
+      trace_data: {},
+      replacements: toolReplacements || {},
+      status: 'ok',
+      ...(conversationId ? { conversationId } : {}),
+      ...(!isEmpty(metadata) ? { metadata } : {}),
+    },
+    headers: {
+      'content-type': 'application/json',
+    },
+  });
+};

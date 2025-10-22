@@ -202,6 +202,9 @@ export class ElasticAssistantPlugin
       registerCallback: (callbackId: CallbackIds, callback: Function) => {
         return appContextService.registerCallback(callbackId, callback);
       },
+      kibanaVersion: this.kibanaVersion,
+      getAnonymizationFieldsResourceName: () =>
+        this.assistantService!.getResourceNames().aliases.anonymizationFields,
     };
   }
 

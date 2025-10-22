@@ -87,6 +87,7 @@ export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
   durationMs: number;
   toolsInvoked: {
     AlertCountsTool?: number;
+    AssistantSettingsTool?: number;
     GenerateESQLTool?: number;
     AskAboutESQLTool?: number;
     KnowledgeBaseRetrievalTool?: number;
@@ -144,6 +145,7 @@ export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
     toolsInvoked: {
       properties: {
         AlertCountsTool: toolCountSchema,
+        AssistantSettingsTool: toolCountSchema,
         GenerateESQLTool: toolCountSchema,
         AskAboutESQLTool: toolCountSchema,
         ProductDocumentationTool: toolCountSchema,

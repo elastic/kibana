@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { RunToolFn } from '@kbn/onechat-server';
+import type { RunToolFn, RunAgentFn } from '@kbn/onechat-server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { CloudStart, CloudSetup } from '@kbn/cloud-plugin/server';
@@ -84,4 +84,10 @@ export interface OnechatPluginStart {
    * Tools service, to manage or execute tools.
    */
   tools: ToolsStart;
+  /**
+   * Agents service, to execute agents.
+   */
+  agents: {
+    execute: RunAgentFn;
+  };
 }

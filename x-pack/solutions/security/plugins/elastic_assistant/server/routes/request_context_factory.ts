@@ -229,6 +229,9 @@ export class RequestContextFactory implements IRequestContextFactory {
           currentUser,
         });
       }),
+      getOnechatServices: () => {
+        return startPlugins.onechat;
+      },
     };
   }
 }

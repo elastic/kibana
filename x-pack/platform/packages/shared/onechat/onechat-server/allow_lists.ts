@@ -9,13 +9,28 @@
  * This is a manually maintained list of all built-in tools registered in Agent Builder.
  * The intention is to force a code review from the Agent Builder team when any team adds a new tool.
  */
-export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [];
+export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
+  // Security Solution tools
+  'core.security.assistant_settings', // New assistant settings tool
+  'core.security.open_and_acknowledged_alerts',
+  'core.security.alert_counts',
+  'core.security.knowledge_base_retrieval',
+  'core.security.product_documentation',
+  'core.security.security_labs_knowledge',
+  'core.security.knowledge_base_write',
+  'core.security.entity_risk_score',
+  'core.security.ask_about_esql',
+  'core.security.integration_knowledge',
+];
 
 /**
  * This is a manually maintained list of all built-in agents registered in Agent Builder.
  * The intention is to force a code review from the Agent Builder team when any team adds a new agent.
  */
-export const AGENT_BUILDER_BUILTIN_AGENTS: string[] = [];
+export const AGENT_BUILDER_BUILTIN_AGENTS: string[] = [
+  // Security Solution agents
+  'siem-security-analyst',
+];
 
 export const isAllowedBuiltinTool = (toolName: string) => {
   return AGENT_BUILDER_BUILTIN_TOOLS.includes(toolName);

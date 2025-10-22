@@ -167,3 +167,6 @@ export const ELASTIC_AI_ASSISTANT_CHECKPOINT_SAVER_ENABLED_FEATURE_FLAG =
 
 export const ASSISTANT_INTERRUPTS_ENABLED_FEATURE_FLAG =
   'securitySolution.assistantInterruptsEnabled' as const;
+
+export const AGENT_BUILDER_ASSISTANT_ENABLED_FEATURE_FLAG =
+  'securitySolution.agentBuilderAssistantEnabled' as const;

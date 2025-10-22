@@ -1,0 +1,221 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { z } from '@kbn/zod';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import {
+  getAnonymizedValue,
+  getOpenAndAcknowledgedAlertsQuery,
+  getRawDataOrDefault,
+  sizeIsOutOfRange,
+  transformRawData,
+  type Replacements,
+} from '@kbn/elastic-assistant-common';
+import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import type { BuiltinToolDefinition } from '@kbn/onechat-server';
+import { ToolType } from '@kbn/onechat-common';
+import type { StartServicesAccessor } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { getLlmDescriptionHelper } from '../helpers/get_llm_description_helper';
+import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
+import type { ToolCitation } from '../types';
+
+// Extended request type to store tool replacements temporarily
+interface ExtendedKibanaRequest {
+  __toolReplacements?: Replacements;
+}
+
+// Type for anonymization fields
+interface AnonymizationField {
+  id: string;
+  field: string;
+  allowed: boolean;
+  anonymized: boolean;
+  timestamp: string;
+  createdAt: string;
+  updatedAt?: string;
+  namespace: string;
+}
+
+// Schema for configuration parameters
+const openAndAcknowledgedAlertsToolSchema = z.object({
+  alertsIndexPattern: z
+    .string()
+    .optional()
+    .describe('The index pattern for alerts (e.g., ".alerts-security.alerts-default")'),
+  size: z
+    .number()
+    .min(1)
+    .max(1000)
+    .optional()
+    .describe('Number of alerts to retrieve (default: 100)'),
+  anonymizationFields: z
+    .array(
+      z.object({
+        id: z.string(),
+        field: z.string(),
+        allowed: z.boolean(),
+        anonymized: z.boolean(),
+        timestamp: z.string(),
+        createdAt: z.string(),
+        updatedAt: z.string().optional(),
+        namespace: z.string(),
+      })
+    )
+    .optional()
+    .describe('Anonymization fields configuration'),
+});
+
+// Default anonymization fields
+const DEFAULT_ANONYMIZATION_FIELDS: AnonymizationField[] = [
+  {
+    id: 'host-name',
+    field: 'host.name',
+    allowed: true,
+    anonymized: true,
+    timestamp: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    namespace: 'default',
+  },
+  {
+    id: 'user-name',
+    field: 'user.name',
+    allowed: true,
+    anonymized: true,
+    timestamp: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    namespace: 'default',
+  },
+  {
+    id: 'source-ip',
+    field: 'source.ip',
+    allowed: true,
+    anonymized: true,
+    timestamp: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    namespace: 'default',
+  },
+  {
+    id: 'destination-ip',
+    field: 'destination.ip',
+    allowed: true,
+    anonymized: true,
+    timestamp: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    namespace: 'default',
+  },
+];
+
+const OPEN_AND_ACKNOWLEDGED_ALERTS_INTERNAL_TOOL_ID = 'core.security.open_and_acknowledged_alerts';
+export const OPEN_AND_ACKNOWLEDGED_ALERTS_INTERNAL_TOOL_DESCRIPTION =
+  'Call this for knowledge about the latest n open and acknowledged alerts (sorted by `kibana.alert.risk_score`) in the environment, or when answering questions about open alerts. Do not call this tool for alert count or quantity. The output is an array of the latest n open and acknowledged alerts. ' +
+  'IMPORTANT: This tool accepts optional configuration parameters (alertsIndexPattern, size, anonymizationFields). If not provided, sensible defaults will be used. ' +
+  'WORKFLOW: First call the assistant_settings tool with toolId="core.security.open_and_acknowledged_alerts" to get current configuration, then call this tool with the retrieved settings.';
+
+/**
+ * Returns a tool for querying open and acknowledged alerts using the InternalToolDefinition pattern.
+ */
+export const openAndAcknowledgedAlertsInternalTool = (
+  getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies>,
+  savedObjectsClient: SavedObjectsClientContract
+): BuiltinToolDefinition<typeof openAndAcknowledgedAlertsToolSchema> => {
+  return {
+    id: OPEN_AND_ACKNOWLEDGED_ALERTS_INTERNAL_TOOL_ID,
+    type: ToolType.builtin,
+    description: OPEN_AND_ACKNOWLEDGED_ALERTS_INTERNAL_TOOL_DESCRIPTION,
+    schema: openAndAcknowledgedAlertsToolSchema,
+    getLlmDescription: async ({ config, description }, context) => {
+      return getLlmDescriptionHelper({
+        description,
+        context: context as unknown as Parameters<typeof getLlmDescriptionHelper>[0]['context'],
+        promptId: 'OpenAndAcknowledgedAlertsTool',
+        promptGroupId: 'builtin-security-tools',
+        getStartServices,
+        savedObjectsClient,
+      });
+    },
+    handler: async (params, context) => {
+      // Use provided parameters or fall back to defaults
+      const {
+        alertsIndexPattern = '.alerts-security.alerts-default',
+        size = 100,
+        anonymizationFields = DEFAULT_ANONYMIZATION_FIELDS,
+      } = params;
+
+      // Validate size is within range
+      if (sizeIsOutOfRange(size)) {
+        throw new Error(`Size ${size} is out of range`);
+      }
+
+      const query = getOpenAndAcknowledgedAlertsQuery({
+        alertsIndexPattern,
+        anonymizationFields,
+        size,
+      });
+
+      const result = await context.esClient.asCurrentUser.search<SearchResponse>(query);
+
+      // Process the alerts with anonymization
+      // For A2A compatibility, we don't handle replacements here - they should be handled at the agent level
+      let localReplacements: Replacements = {};
+      const localOnNewReplacements = (newReplacements: Replacements) => {
+        localReplacements = { ...localReplacements, ...newReplacements };
+        return Promise.resolve(localReplacements);
+      };
+
+      const citationId = 'security-alerts-page';
+
+      const content = result.hits?.hits?.map((hit) => {
+        const rawData = getRawDataOrDefault(hit.fields);
+
+        const transformed = transformRawData({
+          anonymizationFields,
+          currentReplacements: localReplacements,
+          getAnonymizedValue,
+          onNewReplacements: localOnNewReplacements,
+          rawData,
+        });
+
+        // Return the transformed string content for the LLM to see
+        // The _id is stored separately for citation handling
+        return transformed;
+      });
+
+      // Embed citation in the content by prepending it to the alerts array
+      const contentWithCitation = content
+        ? [`{reference(${citationId})}`, ...content]
+        : [`{reference(${citationId})}`];
+
+      const toolResult = {
+        results: [
+          {
+            type: ToolResultType.other,
+            data: {
+              alerts: contentWithCitation,
+              citations: [
+                {
+                  id: citationId,
+                  type: 'SecurityAlertsPage',
+                  metadata: {},
+                },
+              ] as ToolCitation[],
+              // Note: replacements are NOT included in the data sent to LLM
+              // They are collected separately and used at the conversation level
+            },
+          },
+        ],
+      };
+
+      // Store replacements in request context for agent execution to access
+      // This is a temporary solution until onechat provides a proper way to pass replacements
+      (context.request as ExtendedKibanaRequest).__toolReplacements = localReplacements;
+
+      return toolResult;
+    },
+    tags: ['alerts', 'open-and-acknowledged-alerts', 'security'],
+  };
+};

@@ -11,6 +11,7 @@ import type { EsqlToolDefinition } from '@kbn/onechat-common/tools/types/esql';
 import type { IndexSearchToolDefinition } from '@kbn/onechat-common/tools/types/index_search';
 import type { WorkflowToolDefinition } from '@kbn/onechat-common/tools/types/workflow';
 import type { ToolHandlerFn } from './handler';
+import type { LlmDescriptionHandler } from '../runner/tool_provider';
 
 /**
  * Built-in tool, as registered as static tool.
@@ -29,6 +30,11 @@ export interface BuiltinToolDefinition<RunInput extends ZodObject<any> = ZodObje
    * Handler to call to execute the tool.
    */
   handler: ToolHandlerFn<z.infer<RunInput>>;
+  /**
+   * Optional handler to add additional instructions to the LLM
+   * when specified, this will fully replace the description when converting to LLM tools.
+   */
+  getLlmDescription?: LlmDescriptionHandler<{}>;
 }
 
 type StaticToolRegistrationMixin<T extends ToolDefinition> = Omit<T, 'readonly'>;

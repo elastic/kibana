@@ -24,3 +24,5 @@ export type {
   AssistantTool,
   AssistantToolParams,
 } from './types';
+
+export { AIAssistantDataClient } from './ai_assistant_data_clients';

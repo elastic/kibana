@@ -25,6 +25,9 @@ const createStartContractMock = (): jest.Mocked<OnechatPluginStart> => {
       execute: jest.fn(),
       getRegistry: jest.fn().mockImplementation(() => createToolRegistryMock()),
     },
+    agents: {
+      execute: jest.fn(),
+    },
   };
 };
 

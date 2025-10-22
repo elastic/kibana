@@ -13,29 +13,30 @@ import { schema } from '@kbn/config-schema';
 import type { Message, Replacements } from '@kbn/elastic-assistant-common';
 import { v4 as uuidv4 } from 'uuid';
 import {
-  getIsConversationOwner,
   API_VERSIONS,
   newContentReferencesStore,
   ExecuteConnectorRequestBody,
   pruneContentReferences,
   ExecuteConnectorRequestQuery,
   POST_ACTIONS_CONNECTOR_EXECUTE,
-  INFERENCE_CHAT_MODEL_DISABLED_FEATURE_FLAG,
-  ASSISTANT_INTERRUPTS_ENABLED_FEATURE_FLAG,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
-import { getPrompt } from '../lib/prompt';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../lib/telemetry/event_based_telemetry';
 import { buildResponse } from '../lib/build_response';
 import type { ElasticAssistantRequestHandlerContext } from '../types';
 import {
   appendAssistantMessageToConversation,
   getIsKnowledgeBaseInstalled,
-  getSystemPromptFromUserConversation,
   langChainExecute,
   performChecks,
 } from './helpers';
+import {
+  getFeatureFlags,
+  prepareConversationMessages,
+  prepareSystemPrompt,
+} from './execute_helpers';
+import { agentBuilderExecute } from '../lib/agent_builder';
 import { isOpenSourceModel } from './utils';
 import type { ConfigSchema } from '../config_schema';
 import type { OnLlmResponse } from '../lib/langchain/executors/types';
@@ -86,17 +87,8 @@ export const postActionsConnectorExecuteRoute = (
         let onLlmResponse: OnLlmResponse | undefined;
 
         const coreContext = await context.core;
-        const inferenceChatModelDisabled =
-          (await coreContext?.featureFlags?.getBooleanValue(
-            INFERENCE_CHAT_MODEL_DISABLED_FEATURE_FLAG,
-            false
-          )) ?? false;
-
-        const assistantInterruptsEnabled =
-          (await coreContext?.featureFlags?.getBooleanValue(
-            ASSISTANT_INTERRUPTS_ENABLED_FEATURE_FLAG,
-            false
-          )) ?? false;
+        const { assistantInterruptsEnabled, inferenceChatModelDisabled, agentBuilderEnabled } =
+          await getFeatureFlags(coreContext);
 
         try {
           const checkResponse = await performChecks({
@@ -146,22 +138,23 @@ export const postActionsConnectorExecuteRoute = (
             await assistantContext.getAIAssistantConversationsDataClient({
               assistantInterruptsEnabled,
             });
-          if (conversationId) {
-            const conversation = await conversationsDataClient?.getConversation({
-              id: conversationId,
+
+          // Get conversation messages for agent builder BEFORE saving the new message
+          let conversationMessages: Array<Pick<Message, 'content' | 'role'>> = [];
+          try {
+            conversationMessages = await prepareConversationMessages({
+              agentBuilderEnabled,
+              conversationId,
+              newMessage,
+              conversationsDataClient: conversationsDataClient ?? undefined,
+              currentUser: checkResponse.currentUser,
             });
-            if (
-              conversation &&
-              !getIsConversationOwner(conversation, {
-                name: checkResponse.currentUser?.username,
-                id: checkResponse.currentUser?.profile_uid,
-              })
-            ) {
-              return resp.error({
-                body: `Updating a conversation is only allowed for the owner of the conversation.`,
-                statusCode: 403,
-              });
-            }
+          } catch (error) {
+            return resp.error({
+              body:
+                error instanceof Error ? error.message : 'Error preparing conversation messages',
+              statusCode: 403,
+            });
           }
 
           const promptsDataClient = await assistantContext.getAIAssistantPromptsDataClient();
@@ -186,36 +179,23 @@ export const postActionsConnectorExecuteRoute = (
                 conversationsDataClient,
                 messageContent: prunedContent,
                 replacements: latestReplacements,
-                isError,
-                traceData,
+                isError: isError ?? false,
+                traceData: traceData || {},
                 contentReferences: prunedContentReferencesStore,
                 interruptValue,
               });
             }
           };
           const promptIds = request.body.promptIds;
-          let systemPrompt;
-          if (conversationsDataClient && promptsDataClient && conversationId) {
-            systemPrompt = await getSystemPromptFromUserConversation({
-              conversationsDataClient,
-              conversationId,
-              promptsDataClient,
-            });
-          }
-          if (promptIds) {
-            const additionalSystemPrompt = await getPrompt({
-              actionsClient,
-              connectorId,
-              // promptIds is promptId and promptGroupId
-              ...promptIds,
-              savedObjectsClient,
-            });
-
-            systemPrompt =
-              systemPrompt && systemPrompt.length
-                ? `${systemPrompt}\n\n${additionalSystemPrompt}`
-                : additionalSystemPrompt;
-          }
+          const systemPrompt = await prepareSystemPrompt({
+            conversationsDataClient: conversationsDataClient ?? undefined,
+            promptsDataClient: promptsDataClient ?? undefined,
+            conversationId,
+            promptIds,
+            actionsClient,
+            connectorId,
+            savedObjectsClient,
+          });
 
           const timeout = new Promise((_, reject) => {
             setTimeout(() => {
@@ -225,8 +205,14 @@ export const postActionsConnectorExecuteRoute = (
             }, config?.responseTimeout as number);
           }) as unknown as IKibanaResponse;
 
+          // Choose execution method based on feature flag
+          const executeFunction = agentBuilderEnabled ? agentBuilderExecute : langChainExecute;
+
+          logger.debug(`🚀 [ROUTE] agentBuilderEnabled: ${agentBuilderEnabled}`);
+          logger.debug(`🚀 [ROUTE] isStream: ${request.body.subAction !== 'invokeAI'}`);
+
           return await Promise.race([
-            langChainExecute({
+            executeFunction({
               abortSignal,
               isStream: request.body.subAction !== 'invokeAI',
               actionsClient,
@@ -240,7 +226,7 @@ export const postActionsConnectorExecuteRoute = (
               context: ctx,
               logger,
               inference,
-              messages: newMessage ? [newMessage] : [],
+              messages: conversationMessages,
               onLlmResponse,
               onNewReplacements,
               replacements: latestReplacements,
