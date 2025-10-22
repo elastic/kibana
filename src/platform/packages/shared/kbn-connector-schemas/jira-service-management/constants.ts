@@ -20,8 +20,6 @@ export const MESSAGE_NON_EMPTY = i18n.translate(
   }
 );
 
-export const RULE_TAGS_TEMPLATE = `{{rule.tags}}`;
-
 export enum SUB_ACTION {
   CreateAlert = 'createAlert',
   CloseAlert = 'closeAlert',

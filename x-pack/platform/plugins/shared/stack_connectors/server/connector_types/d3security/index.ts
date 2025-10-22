@@ -9,8 +9,12 @@ import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_acti
 import { ValidatorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
 import { AlertingConnectorFeatureId, SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
-import { D3SecurityConfigSchema, D3SecuritySecretsSchema } from '@kbn/connector-schemas/d3security';
-import { CONNECTOR_ID, CONNECTOR_NAME } from '@kbn/connector-schemas/d3security/constants';
+import {
+  CONNECTOR_ID,
+  CONNECTOR_NAME,
+  D3SecurityConfigSchema,
+  D3SecuritySecretsSchema,
+} from '@kbn/connector-schemas/d3security';
 import type { D3SecurityConfig, D3SecuritySecrets } from '@kbn/connector-schemas/d3security';
 import { renderParameterTemplates } from './render';
 import { D3SecurityConnector } from './d3security';

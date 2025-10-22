@@ -7,8 +7,7 @@
 
 import { D3SecurityConnector } from './d3security';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
-import { D3SecurityRunActionResponseSchema } from '@kbn/connector-schemas/d3security';
-import { CONNECTOR_ID } from '@kbn/connector-schemas/d3security/constants';
+import { CONNECTOR_ID, D3SecurityRunActionResponseSchema } from '@kbn/connector-schemas/d3security';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';

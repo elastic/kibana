@@ -42,8 +42,8 @@ import {
 } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
 import {
   SUB_ACTION as D3SECURITY_SUB_ACTION,
-  D3_SECURITY_CONNECTOR_ID,
-} from '@kbn/stack-connectors-plugin/common/d3security/constants';
+  CONNECTOR_ID as D3_SECURITY_CONNECTOR_ID,
+} from '@kbn/connector-schemas/d3security/constants';
 import {
   SUB_ACTION as CROWDSTRIKE_SUB_ACTION,
   CROWDSTRIKE_CONNECTOR_ID,
@@ -53,9 +53,9 @@ import {
   MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID,
 } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/constants';
 import {
-  JiraServiceManagementSubActions,
-  JIRA_SERVICE_MANAGEMENT_CONNECTOR_TYPE_ID,
-} from '@kbn/stack-connectors-plugin/common/jira-service-management/constants';
+  SUB_ACTION as JiraServiceManagementSubActions,
+  CONNECTOR_ID as JIRA_SERVICE_MANAGEMENT_CONNECTOR_TYPE_ID,
+} from '@kbn/connector-schemas/jira-service-management/constants';
 import {
   OpsgenieSubActions,
   OpsgenieConnectorTypeId,

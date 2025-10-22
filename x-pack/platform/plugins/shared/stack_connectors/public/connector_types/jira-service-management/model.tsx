@@ -12,11 +12,9 @@ import type {
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { isEmpty } from 'lodash';
-import {
-  SUB_ACTION,
-  RULE_TAGS_TEMPLATE,
-} from '@kbn/connector-schemas/jira-service-management/constants';
+import { SUB_ACTION } from '@kbn/connector-schemas/jira-service-management/constants';
 import type { Config, Secrets } from '@kbn/connector-schemas/jira-service-management';
+import { RULE_TAGS_TEMPLATE } from '../../../common/jira-service-management/constants';
 import type { JiraServiceManagementConnectorTypeParams, ValidationParams } from './types';
 import { DEFAULT_ALIAS } from './constants';
 

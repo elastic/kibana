@@ -10,8 +10,9 @@ import type { ExecutorParams } from '@kbn/actions-plugin/server/sub_action_frame
 import type { RenderParameterTemplates } from '@kbn/actions-plugin/server/types';
 import { set } from '@kbn/safer-lodash-set';
 import { cloneDeep, get, isString } from 'lodash';
-import { SUB_ACTION, RULE_TAGS_TEMPLATE } from '@kbn/connector-schemas/jira-service-management';
+import { SUB_ACTION } from '@kbn/connector-schemas/jira-service-management';
 import type { CreateAlertSubActionParams } from '@kbn/connector-schemas/jira-service-management';
+import { RULE_TAGS_TEMPLATE } from '../../../common/jira-service-management/constants';
 
 export const renderParameterTemplates: RenderParameterTemplates<ExecutorParams> = (
   logger,

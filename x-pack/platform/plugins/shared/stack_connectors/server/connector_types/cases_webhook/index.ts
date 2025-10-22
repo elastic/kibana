@@ -20,11 +20,12 @@ import type {
   ExecutorSubActionPushParams,
 } from '@kbn/connector-schemas/cases_webhook';
 import {
+  CONNECTOR_ID,
+  CONNECTOR_NAME,
   ExecutorParamsSchema,
   ExternalIncidentServiceConfigurationSchema,
   ExternalIncidentServiceSecretConfigurationSchema,
 } from '@kbn/connector-schemas/cases_webhook';
-import { CONNECTOR_ID, CONNECTOR_NAME } from '@kbn/connector-schemas/cases_webhook/constants';
 import { createExternalService } from './service';
 import { api } from './api';
 import { validateCasesWebhookConfig, validateConnector } from './validators';

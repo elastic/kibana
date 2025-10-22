@@ -17,8 +17,8 @@ import {
   mergeConfigHeadersWithSecretHeaders,
 } from '@kbn/actions-plugin/server/lib';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
-import { CONNECTOR_NAME } from '@kbn/connector-schemas/cases_webhook/constants';
-import { WebhookMethods } from '@kbn/connector-schemas/common/auth/constants';
+import { CONNECTOR_NAME } from '@kbn/connector-schemas/cases_webhook';
+import { WebhookMethods } from '@kbn/connector-schemas/common/auth';
 import type {
   CasesWebhookPublicConfigurationType,
   ExternalServiceIncidentResponse,

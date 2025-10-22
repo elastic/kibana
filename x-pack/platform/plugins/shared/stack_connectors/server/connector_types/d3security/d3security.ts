@@ -10,11 +10,11 @@ import { SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import {
+  SUB_ACTION,
   D3SecuritySeverity,
   D3SecurityRunActionParamsSchema,
   D3SecurityRunActionResponseSchema,
 } from '@kbn/connector-schemas/d3security';
-import { SUB_ACTION } from '@kbn/connector-schemas/d3security/constants';
 import type {
   D3SecurityConfig,
   D3SecuritySecrets,
