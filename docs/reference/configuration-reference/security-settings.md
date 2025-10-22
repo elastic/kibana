@@ -75,7 +75,21 @@ xpack.security.authc.providers.<provider-type>.<provider-name>.icon ![logo cloud
 :   Custom icon for the provider entry displayed on the Login Selector UI.
 
 xpack.security.authc.providers.<provider-type>.<provider-name>.origin ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
-:   TODO
+:   Specifies a list of allowed origins for authentication requests initiated from the UI. Each origin must be a valid URI and is matched against the browser’s `origin` header when fulfilling an authentication request. Providers not matching the browser's location do not appear in the UI. By default, requests are not restricted to specific origins.
+
+    For example:
+
+    ```yaml
+    xpack.security.authc:
+      providers:
+        basic.basic1:
+          origin: [http://localhost:5601, http://127.0.0.1:5601]
+          ...
+    
+        saml.saml1:
+          origin: https://elastic.co
+          ...
+    ```
 
 xpack.security.authc.providers.<provider-type>.<provider-name>.showInSelector ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Flag that indicates if the provider should have an entry on the Login Selector UI. Setting this to `false` doesn’t remove the provider from the authentication chain.

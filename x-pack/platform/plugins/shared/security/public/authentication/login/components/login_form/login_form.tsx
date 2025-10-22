@@ -173,7 +173,9 @@ export class LoginForm extends Component<LoginFormProps, State> {
         (this.availableProviders.length === 0
           ? {
               type: MessageType.Danger,
-              content: 'No authentication providers have been configured for this domain.',
+              content: i18n.translate('xpack.security.noAuthProvidersForDomain', {
+                defaultMessage: 'No authentication providers have been configured for this domain.',
+              }),
             }
           : { type: MessageType.None }),
       mode,
