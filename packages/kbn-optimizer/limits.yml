@@ -57,7 +57,7 @@ pageLoadAssetSize:
   expressionGauge: 15748
   expressionHeatmap: 17563
   expressionLegacyMetricVis: 11834
-  expressionMetricVis: 17490
+  expressionMetricVis: 17559
   expressionPartitionVis: 29826
   expressions: 105113
   expressionTagcloud: 12643
@@ -151,13 +151,13 @@ pageLoadAssetSize:
   searchQueryRules: 6689
   searchSynonyms: 6371
   security: 79987
-  securitySolution: 119517
+  securitySolution: 119669
   securitySolutionEss: 43319
   securitySolutionServerless: 62964
   serverless: 7854
   serverlessObservability: 23996
   serverlessSearch: 33338
-  serverlessWorkplaceAI: 5513
+  serverlessWorkplaceAI: 5425
   sessionView: 47912
   share: 58677
   slo: 36645
