@@ -7,8 +7,12 @@
 
 export default function loadTests({ loadTestFile }) {
   describe('Settings Endpoints', () => {
+<<<<<<< HEAD
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./update'));
+=======
+    loadTestFile(require.resolve('./global_settings'));
+>>>>>>> f0912d36b34 ([Fleet] Remove agent policies revision bump after updating settings (#239977))
     loadTestFile(require.resolve('./enrollment'));
     loadTestFile(require.resolve('./enrollment_privileges'));
   });
