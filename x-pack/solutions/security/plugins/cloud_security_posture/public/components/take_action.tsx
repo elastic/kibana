@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -46,25 +46,12 @@ interface TakeActionProps {
 }
 
 const ErrorAnnouncement = ({ error }: { error: Error }) => {
-  const liveRegionRef = useRef<HTMLDivElement>(null);
+  const announcement = kbnI18n.translate('xpack.csp.takeAction.createRuleErrorAnnouncement', {
+    defaultMessage: 'Error: Unable to create detection rule. {errorMessage}',
+    values: { errorMessage: error.message },
+  });
 
-  useEffect(() => {
-    if (liveRegionRef.current) {
-      liveRegionRef.current.textContent = kbnI18n.translate(
-        'xpack.csp.takeAction.createRuleErrorAnnouncement',
-        {
-          defaultMessage: 'Error: Unable to create detection rule. {errorMessage}',
-          values: { errorMessage: error.message },
-        }
-      );
-    }
-  }, [error]);
-
-  return (
-    <EuiLiveAnnouncer>
-      <div aria-live="assertive" aria-atomic="true" ref={liveRegionRef} role="alert" />
-    </EuiLiveAnnouncer>
-  );
+  return <EuiLiveAnnouncer>{announcement}</EuiLiveAnnouncer>;
 };
 
 export const showCreateDetectionRuleErrorToast = (
