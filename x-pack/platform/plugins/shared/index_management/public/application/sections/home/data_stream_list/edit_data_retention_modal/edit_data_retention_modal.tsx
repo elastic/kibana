@@ -203,10 +203,11 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
       onClose={() => onClose()}
       data-test-subj="editDataRetentionModal"
       css={{ width: 650 }}
+      aria-labelledby="editDataRetentionModalTitle"
     >
       <Form form={form} data-test-subj="editDataRetentionForm">
         <EuiModalHeader>
-          <EuiModalHeaderTitle>
+          <EuiModalHeaderTitle id="editDataRetentionModalTitle">
             {isBulkEdit ? (
               <FormattedMessage
                 id="xpack.idxMgmt.dataStreams.editDataRetentionModal.bulkEdit.modalTitleText"
@@ -353,6 +354,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
 
           {affectedDataStreams.length > 0 && !formData.infiniteRetentionPeriod && (
             <EuiCallOut
+              id="dataRetentionDeletionWarning"
               title={i18n.translate(
                 'xpack.idxMgmt.dataStreams.editDataRetentionModal.affectedDataStreamsCalloutTitle',
                 {
@@ -361,6 +363,8 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
               )}
               color="danger"
               iconType="warning"
+              role="alert"
+              aria-live="assertive"
               data-test-subj="reducedDataRetentionCallout"
             >
               <p>
@@ -410,6 +414,11 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
             disabled={disableSubmit}
             data-test-subj="saveButton"
             onClick={onSubmitForm}
+            aria-describedby={
+              affectedDataStreams.length > 0 && !formData.infiniteRetentionPeriod
+                ? 'dataRetentionDeletionWarning'
+                : undefined
+            }
           >
             <FormattedMessage
               id="xpack.idxMgmt.dataStreams.editDataRetentionModal.saveButtonLabel"
