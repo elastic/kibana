@@ -172,5 +172,7 @@
     "@kbn/onechat-plugin",
     "@kbn/field-formats-common",
     "@kbn/reporting-test-routes",
+    "@kbn/alerting-types",
+    "@kbn/es-types",
   ]
 }
