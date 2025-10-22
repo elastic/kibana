@@ -166,7 +166,7 @@ describe('changeObjectAccessControl', () => {
         );
       });
 
-      it('returns error if no read-only objects are specified', async () => {
+      it('returns error if no access control objects are specified', async () => {
         const params = setup({
           objects: [
             { type: NON_ACCESS_CONTROL_TYPE, id: 'id-1' },
@@ -276,7 +276,7 @@ describe('changeObjectAccessControl', () => {
         );
       });
 
-      it('returns error if no read-only objects are specified', async () => {
+      it('returns error if no access control objects are specified', async () => {
         const params = setup({
           objects: [{ type: NON_ACCESS_CONTROL_TYPE, id: 'id-1' }],
         });
