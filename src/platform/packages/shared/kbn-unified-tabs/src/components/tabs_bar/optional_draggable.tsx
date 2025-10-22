@@ -23,8 +23,8 @@ export interface OptionalDraggableProps {
   item: TabItem;
   /** Index position in the tabs list, used for drag-drop ordering */
   index: number;
-  /** When true, wraps children with EuiDraggable; when false, renders children directly */
-  enableDragAndDrop: boolean;
+  /** When false, wraps children with EuiDraggable; when true, renders children directly */
+  disableDragAndDrop: boolean;
 }
 
 /**
@@ -39,10 +39,10 @@ export const OptionalDraggable = ({
   children,
   item,
   index,
-  enableDragAndDrop,
+  disableDragAndDrop,
 }: OptionalDraggableProps) => {
   // When drag-and-drop is disabled, render children without drag props
-  if (!enableDragAndDrop) {
+  if (disableDragAndDrop) {
     return children({ isDragging: false });
   }
 

@@ -21,14 +21,14 @@ import { OptionalDroppable } from './optional_droppable';
 
 const mockOnDragEnd = jest.fn();
 
-const renderOptionalDroppable = (enableDragAndDrop: boolean) => {
+const renderOptionalDroppable = (disableDragAndDrop: boolean) => {
   render(
-    <OptionalDroppable enableDragAndDrop={enableDragAndDrop} onDragEnd={mockOnDragEnd}>
+    <OptionalDroppable disableDragAndDrop={disableDragAndDrop} onDragEnd={mockOnDragEnd}>
       <div data-test-subj="test-content">Test Content</div>
     </OptionalDroppable>
   );
 
-  const testId = enableDragAndDrop
+  const testId = !disableDragAndDrop
     ? 'unifiedTabs_droppable_enabled'
     : 'unifiedTabs_droppable_disabled';
   const container = screen.getByTestId(testId);

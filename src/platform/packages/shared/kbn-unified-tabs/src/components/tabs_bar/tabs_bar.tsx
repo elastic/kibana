@@ -60,9 +60,9 @@ export type TabsBarProps = Pick<
   | 'onSelect'
   | 'onClose'
   | 'tabContentId'
-  | 'enableInlineLabelEditing'
-  | 'enablePreview'
-  | 'enableDragAndDrop'
+  | 'disableInlineLabelEditing'
+  | 'disablePreview'
+  | 'disableDragAndDrop'
 > & {
   items: TabItem[];
   selectedItem: TabItem | null;
@@ -76,7 +76,7 @@ export type TabsBarProps = Pick<
   onEBTEvent: (event: TabsEBTEvent) => void;
   onClearRecentlyClosed: TabsBarMenuProps['onClearRecentlyClosed'];
   createItemElement?: React.ReactElement;
-  enableTabsBarMenu?: boolean; // defaults to `true`
+  disableTabsBarMenu?: boolean; // defaults to `true`
 };
 
 export interface TabsBarApi {
@@ -104,10 +104,10 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
       getPreviewData,
       onEBTEvent,
       createItemElement,
-      enableInlineLabelEditing = true,
-      enablePreview = true,
-      enableDragAndDrop = true,
-      enableTabsBarMenu = true,
+      disableInlineLabelEditing = false,
+      disablePreview = false,
+      disableDragAndDrop = false,
+      disableTabsBarMenu = false,
     },
     componentRef
   ) => {
@@ -279,11 +279,11 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
               <div ref={setTabsContainerElement} role="tablist" css={tabsContainerCss}>
                 {/*
                   OptionalDroppable provides the drag-drop context wrapper.
-                  When enableDragAndDrop=true, it sets up EuiDragDropContext and EuiDroppable.
+                  When disableDragAndDrop=false, it sets up EuiDragDropContext and EuiDroppable.
                   When false, it renders a plain flex container with consistent styling.
                   This eliminates conditional rendering logic from this file.
                 */}
-                <OptionalDroppable enableDragAndDrop={enableDragAndDrop} onDragEnd={onDragEnd}>
+                <OptionalDroppable disableDragAndDrop={disableDragAndDrop} onDragEnd={onDragEnd}>
                   {/* Render each tab, optionally wrapped with drag functionality */}
                   {items.map((item, index) => (
                     /*
@@ -292,7 +292,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
                     <OptionalDraggable
                       item={item}
                       index={index}
-                      enableDragAndDrop={enableDragAndDrop}
+                      disableDragAndDrop={disableDragAndDrop}
                       key={item.id}
                     >
                       {/* Render prop receives drag-related props when drag is enabled */}
@@ -312,9 +312,9 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
                           onSelect={onSelect}
                           onSelectedTabKeyDown={onSelectedTabKeyDown}
                           onClose={items.length > 1 ? onClose : undefined} // prevents closing the last tab
-                          enableInlineLabelEditing={enableInlineLabelEditing}
-                          enablePreview={enablePreview}
-                          enableDragAndDrop={enableDragAndDrop}
+                          disableInlineLabelEditing={disableInlineLabelEditing}
+                          disablePreview={disablePreview}
+                          disableDragAndDrop={disableDragAndDrop}
                         />
                       )}
                     </OptionalDraggable>
@@ -342,7 +342,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
             )}
           </EuiFlexGroup>
         </EuiFlexItem>
-        {enableTabsBarMenu && (
+        {!disableTabsBarMenu && (
           <EuiFlexItem grow={false}>
             <TabsBarMenu
               items={items}

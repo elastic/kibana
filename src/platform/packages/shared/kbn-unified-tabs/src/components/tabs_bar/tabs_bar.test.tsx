@@ -141,7 +141,7 @@ describe('TabsBar', () => {
     expect(onAdd).not.toHaveBeenCalled();
   });
 
-  it('does not render tabs bar menu when enableTabsBarMenu=false', () => {
+  it('does not render tabs bar menu when disableTabsBarMenu=true', () => {
     const selectedItem = items[0];
 
     render(
@@ -160,7 +160,7 @@ describe('TabsBar', () => {
         onReorder={onReorder}
         getPreviewData={getPreviewData}
         onEBTEvent={onEBTEvent}
-        enableTabsBarMenu={false}
+        disableTabsBarMenu={true}
       />
     );
 

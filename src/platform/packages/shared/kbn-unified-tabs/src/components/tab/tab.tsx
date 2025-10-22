@@ -50,9 +50,9 @@ export interface TabProps {
   onSelect: (item: TabItem) => Promise<void>;
   onClose: ((item: TabItem) => Promise<void>) | undefined;
   onSelectedTabKeyDown?: (event: KeyboardEvent<HTMLDivElement>) => Promise<void>;
-  enableInlineLabelEditing?: boolean;
-  enablePreview?: boolean;
-  enableDragAndDrop?: boolean;
+  disableInlineLabelEditing?: boolean;
+  disablePreview?: boolean;
+  disableDragAndDrop?: boolean;
 }
 
 const closeButtonLabel = i18n.translate('unifiedTabs.closeTabButton', {
@@ -79,9 +79,9 @@ export const Tab: React.FC<TabProps> = (props) => {
     onSelect,
     onClose,
     onSelectedTabKeyDown,
-    enableInlineLabelEditing = true,
-    enablePreview = true,
-    enableDragAndDrop = true,
+    disableInlineLabelEditing = false,
+    disablePreview = false,
+    disableDragAndDrop = false,
   } = props;
   const { euiTheme } = useEuiTheme();
   const tabLabelId = useGeneratedHtmlId({ prefix: 'tabLabel' });
@@ -134,13 +134,13 @@ export const Tab: React.FC<TabProps> = (props) => {
   const onDoubleClick = useCallback(
     (event?: MouseEvent<HTMLDivElement>) => {
       event?.stopPropagation();
-      if (enableInlineLabelEditing) {
+      if (!disableInlineLabelEditing) {
         hidePreview();
         setActionPopover(false);
         setIsInlineEditActive(true);
       }
     },
-    [setIsInlineEditActive, hidePreview, setActionPopover, enableInlineLabelEditing]
+    [setIsInlineEditActive, hidePreview, setActionPopover, disableInlineLabelEditing]
   );
 
   const onEnterRenaming = useCallback(async () => {
@@ -192,7 +192,7 @@ export const Tab: React.FC<TabProps> = (props) => {
     <div css={getTabContainerCss(euiTheme, tabsSizeConfig, isSelected, isDragging)}>
       <div
         ref={tabInteractiveElementRef}
-        {...(enableDragAndDrop ? dragHandleProps : {})}
+        {...(!disableDragAndDrop ? dragHandleProps : {})}
         {...getTabAttributes(item, tabContentId)}
         data-test-subj={`unifiedTabs_selectTabBtn_${item.id}`}
         aria-labelledby={tabLabelId}
@@ -294,7 +294,7 @@ export const Tab: React.FC<TabProps> = (props) => {
 
   return (
     <TabPreview
-      showPreview={enablePreview && showPreview}
+      showPreview={!disablePreview && showPreview}
       setShowPreview={setShowPreview}
       stopPreviewOnHover={isInlineEditActive || isActionPopoverOpen}
       tabItem={item}

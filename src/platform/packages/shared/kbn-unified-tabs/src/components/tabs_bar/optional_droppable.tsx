@@ -29,8 +29,8 @@ const droppableCss = css`
 interface DroppableWrapperProps {
   /** Content to render inside the droppable zone */
   children: React.ReactNode;
-  /** When true, wraps children with drag-drop context; when false, renders as plain div */
-  enableDragAndDrop: boolean;
+  /** When false, wraps children with drag-drop context; when true, renders as plain div */
+  disableDragAndDrop: boolean;
   /** Callback fired when a drag operation completes with new ordering */
   onDragEnd: (result: DropResult) => void;
 }
@@ -45,11 +45,11 @@ interface DroppableWrapperProps {
  */
 export const OptionalDroppable: FC<DroppableWrapperProps> = ({
   children,
-  enableDragAndDrop,
+  disableDragAndDrop,
   onDragEnd,
 }) => {
   // When drag-and-drop is disabled, render children in a plain flex container
-  if (!enableDragAndDrop) {
+  if (disableDragAndDrop) {
     return (
       <div css={droppableCss} data-test-subj="unifiedTabs_droppable_disabled">
         {children}

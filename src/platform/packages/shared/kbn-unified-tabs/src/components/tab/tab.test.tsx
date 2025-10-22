@@ -226,7 +226,7 @@ describe('Tab', () => {
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
   });
 
-  it('does not trigger inline editing when enableInlineLabelEditing is false', async () => {
+  it('does not trigger inline editing when disableInlineLabelEditing is true', async () => {
     const user = userEvent.setup({ delay: null, advanceTimers: jest.advanceTimersByTime });
     const onLabelEdited = jest.fn();
     const onSelect = jest.fn();
@@ -243,7 +243,7 @@ describe('Tab', () => {
         onLabelEdited={onLabelEdited}
         onSelect={onSelect}
         onClose={onClose}
-        enableInlineLabelEditing={false}
+        disableInlineLabelEditing={true}
       />
     );
 
@@ -273,7 +273,7 @@ describe('Tab', () => {
         onLabelEdited={onLabelEdited}
         onSelect={onSelect}
         onClose={onClose}
-        enablePreview={true}
+        disablePreview={false}
       />
     );
 
@@ -293,7 +293,7 @@ describe('Tab', () => {
     });
   });
 
-  it('does not show preview when enablePreview is false', async () => {
+  it('does not show preview when disablePreview is true', async () => {
     const user = userEvent.setup({ delay: null, advanceTimers: jest.advanceTimersByTime });
     const onLabelEdited = jest.fn();
     const onSelect = jest.fn();
@@ -310,7 +310,7 @@ describe('Tab', () => {
         onLabelEdited={onLabelEdited}
         onSelect={onSelect}
         onClose={onClose}
-        enablePreview={false}
+        disablePreview={true}
       />
     );
 

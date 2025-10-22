@@ -36,10 +36,10 @@ export interface TabbedContentProps
     | 'unsavedItemIds'
     | 'maxItemsCount'
     | 'onClearRecentlyClosed'
-    | 'enableInlineLabelEditing'
-    | 'enablePreview'
-    | 'enableDragAndDrop'
-    | 'enableTabsBarMenu'
+    | 'disableInlineLabelEditing'
+    | 'disablePreview'
+    | 'disableDragAndDrop'
+    | 'disableTabsBarMenu'
   > {
   items: TabItem[];
   selectedItemId?: string;
@@ -75,10 +75,10 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   getPreviewData,
   onEBTEvent,
   createItemElement,
-  enableInlineLabelEditing = true,
-  enablePreview = true,
-  enableDragAndDrop = true,
-  enableTabsBarMenu = true,
+  disableInlineLabelEditing = false,
+  disablePreview = false,
+  disableDragAndDrop = false,
+  disableTabsBarMenu = false,
 }) => {
   const tabsBarApi = useRef<TabsBarApi | null>(null);
   const [tabContentId] = useState(() => htmlIdGenerator()());
@@ -348,10 +348,10 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
             getPreviewData={getPreviewData}
             onEBTEvent={onEBTEvent}
             createItemElement={createItemElement}
-            enableInlineLabelEditing={enableInlineLabelEditing}
-            enablePreview={enablePreview}
-            enableDragAndDrop={enableDragAndDrop}
-            enableTabsBarMenu={enableTabsBarMenu}
+            disableInlineLabelEditing={disableInlineLabelEditing}
+            disablePreview={disablePreview}
+            disableDragAndDrop={disableDragAndDrop}
+            disableTabsBarMenu={disableTabsBarMenu}
           />
         </EuiFlexItem>
       )}

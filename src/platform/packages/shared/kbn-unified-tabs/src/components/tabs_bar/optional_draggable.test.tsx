@@ -20,16 +20,16 @@ import { render, screen } from '@testing-library/react';
 import { OptionalDraggable } from './optional_draggable';
 import { OptionalDroppable } from './optional_droppable';
 
-const renderDraggableWithDroppable = (enableDragAndDrop: boolean = true) =>
+const renderDraggableWithDroppable = (disableDragAndDrop: boolean = false) =>
   render(
-    <OptionalDroppable enableDragAndDrop={enableDragAndDrop} onDragEnd={jest.fn()}>
+    <OptionalDroppable disableDragAndDrop={disableDragAndDrop} onDragEnd={jest.fn()}>
       <OptionalDraggable
         item={{
           id: 'test-tab-1',
           label: 'Test Tab',
         }}
         index={0}
-        enableDragAndDrop={enableDragAndDrop}
+        disableDragAndDrop={disableDragAndDrop}
       >
         {({ dragHandleProps, isDragging }) => (
           <>
@@ -49,14 +49,14 @@ describe('OptionalDraggable', () => {
   });
 
   it('renders noDragProps when drag-and-drop is disabled', () => {
-    renderDraggableWithDroppable(false);
+    renderDraggableWithDroppable(true);
 
     expect(screen.getByTestId('test-is-dragging')).toHaveTextContent('isDragging: false');
     expect(screen.getByTestId('test-has-drag-props')).toHaveTextContent('noDragProps');
   });
 
   it('renders hasDragProps when drag-and-drop is enabled', () => {
-    renderDraggableWithDroppable(true);
+    renderDraggableWithDroppable(false);
 
     expect(screen.getByTestId('test-is-dragging')).toHaveTextContent('isDragging: false');
     expect(screen.getByTestId('test-has-drag-props')).toHaveTextContent('hasDragProps');
