@@ -22,6 +22,7 @@ examples/feature_control_examples @elastic/kibana-security
 examples/feature_flags_example @elastic/kibana-core
 examples/field_formats_example @elastic/kibana-data-discovery
 examples/files_example @elastic/appex-sharedux
+examples/flyout_system @elastic/appex-sharedux
 examples/grid_example @elastic/kibana-presentation
 examples/hello_world @elastic/kibana-core
 examples/locator_examples @elastic/appex-sharedux
