@@ -39,7 +39,7 @@ export const updateDashboardMeta = async ({
     contentTypeId: DASHBOARD_CONTENT_ID,
     id,
     data: { title, description, tags },
-    options: { references: [] }
+    options: { references: [] },
   });
 
   getDashboardContentManagementCache().deleteDashboard(id);

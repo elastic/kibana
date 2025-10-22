@@ -95,7 +95,7 @@ export const loadDashboardState = async ({
     query,
     timeRange,
     title,
-    tags
+    tags,
   } = attributes;
 
   return {

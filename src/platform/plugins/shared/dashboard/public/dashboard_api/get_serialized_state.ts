@@ -100,9 +100,6 @@ export const getSerializedState = ({
     tags,
   };
 
-  const allReferences = [
-    ...(prefixedPanelReferences ?? []),
-    ...(controlGroupReferences ?? []),
-  ];
+  const allReferences = [...(prefixedPanelReferences ?? []), ...(controlGroupReferences ?? [])];
   return { attributes, references: allReferences };
 };
