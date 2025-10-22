@@ -21,5 +21,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...functionalConfig.esTestCluster,
       serverArgs: ['xpack.security.enabled=true'],
     },
+    indexRefreshInterval: '1s',
   };
 }
