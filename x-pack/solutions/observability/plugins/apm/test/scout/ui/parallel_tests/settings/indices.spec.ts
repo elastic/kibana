@@ -41,16 +41,9 @@ test.describe('Indices', { tag: ['@ess'] }, () => {
     const applyButton = await indicesPage.getApplyChangesButton();
     await expect(applyButton).toBeEnabled();
 
-    // Set up network interception for the save request
-    const saveRequestPromise = page.waitForResponse(
-      (response) =>
-        response.url().includes('/internal/apm-sources/settings/apm-indices/save') &&
-        response.request().method() === 'POST'
-    );
-
     await indicesPage.clickApplyChanges();
+    await page.waitForLoadingIndicatorHidden();
 
-    const saveResponse = await saveRequestPromise;
-    expect(saveResponse.status()).toBe(200);
+    await expect(await indicesPage.getErrorIndexInput()).toHaveValue(newErrorIndex);
   });
 });
