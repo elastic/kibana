@@ -22,6 +22,7 @@ export { CONNECTOR_ID as OpenAIConnectorTypeId } from './openai';
 export { CONNECTOR_ID as OpsgenieConnectorTypeId } from './opsgenie';
 export { CONNECTOR_ID as PagerDutyConnectorTypeId } from './pagerduty';
 export { CONNECTOR_ID as ResilientConnectorTypeId } from './resilient';
+export { CONNECTOR_ID as SentinelOneConnectorTypeId } from './sentinelone';
 export { CONNECTOR_ID as ServerLogConnectorTypeId } from './server_log';
 export { CONNECTOR_ID as ServiceNowITOMConnectorTypeId } from './servicenow_itom';
 export { CONNECTOR_ID as ServiceNowITSMConnectorTypeId } from './servicenow_itsm';
