@@ -35,13 +35,16 @@ export const runComparator = <StateType extends object = object>(
  */
 export const diffComparators = <StateType extends object = object>(
   comparators: StateComparators<StateType>,
-  lastSavedState?: StateType,
-  latestState?: StateType
+  lastSavedState?: Partial<StateType>,
+  latestState?: Partial<StateType>,
+  defaultState?: Partial<StateType>
 ): Partial<StateType> => {
   return Object.keys(comparators).reduce((acc, key) => {
     const comparator = comparators[key as keyof StateType];
-    const lastSavedValue = lastSavedState?.[key as keyof StateType];
-    const currentValue = latestState?.[key as keyof StateType];
+    const lastSavedValue =
+      lastSavedState?.[key as keyof StateType] ?? defaultState?.[key as keyof StateType];
+    const currentValue =
+      latestState?.[key as keyof StateType] ?? defaultState?.[key as keyof StateType];
 
     if (!runComparator(comparator, lastSavedState, latestState, lastSavedValue, currentValue)) {
       acc[key as keyof StateType] = currentValue;
