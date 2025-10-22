@@ -16,6 +16,7 @@ import { WebElementWrapper } from './web_element_wrapper';
 import type { TimeoutOpt } from '../types';
 
 import { FtrService } from './ftr_provider_context';
+import { delay } from '@kbn/test-jest-helpers';
 
 export class FindService extends FtrService {
   private readonly log = this.ctx.getService('log');
@@ -415,13 +416,14 @@ export class FindService extends FtrService {
   public async clickByCssSelector(
     selector: string,
     timeout: number = this.defaultFindTimeout,
-    topOffsetOrOptions?: number | { topOffset?: number; bottomOffset?: number }
+    topOffsetOrOptions?: number | { topOffset?: number; bottomOffset?: number },
+    preclickDelay: number = 10
   ): Promise<void> {
     this.log.debug(`Find.clickByCssSelector('${selector}') with timeout=${timeout}`);
     await this.retry.try(async () => {
       const element = await this.byCssSelector(selector, timeout);
       if (element) {
-        // await element.moveMouseTo();
+        await delay(preclickDelay); // give React enough time to bind the click handler to the element
         await element.click(topOffsetOrOptions);
       } else {
         throw new Error(`Element with css='${selector}' is not found`);
