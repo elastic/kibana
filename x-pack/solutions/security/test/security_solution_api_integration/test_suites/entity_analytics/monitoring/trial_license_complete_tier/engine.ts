@@ -37,8 +37,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/236954
-  describe('@ess @serverless @skipInServerlessMKI Entity Privilege Monitoring APIs', () => {
+  describe.skip('@ess @serverless @skipInServerlessMKI Entity Privilege Monitoring APIs', () => {
     const dataView = dataViewRouteHelpersFactory(supertest);
     const dataViewWithNamespace = dataViewRouteHelpersFactory(supertest, customSpace);
 
