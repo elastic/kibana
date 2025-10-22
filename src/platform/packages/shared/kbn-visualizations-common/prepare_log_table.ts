@@ -12,8 +12,10 @@ import type {
   DatatableColumn,
   DimensionType,
 } from '@kbn/expressions-plugin/common/expression_types/specs';
-import type { ExpressionValueVisDimension } from '../expression_functions/vis_dimension';
-import type { ExpressionValueXYDimension } from '../expression_functions/xy_dimension';
+import type {
+  ExpressionValueVisDimension,
+  ExpressionValueXYDimension,
+} from '@kbn/chart-expressions-common';
 
 type DimensionColumn = ExpressionValueVisDimension | ExpressionValueXYDimension | string;
 
