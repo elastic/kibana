@@ -27,7 +27,6 @@ import { APM_ROLES } from './constants';
 export interface ApmBrowserAuthFixture extends BrowserAuthFixture {
   loginAsApmAllPrivilegesWithoutWriteSettings: () => Promise<void>;
   loginAsApmReadPrivilegesWithWriteSettings: () => Promise<void>;
-  loginAsApmMonitor: () => Promise<void>;
 }
 
 export interface ExtendedScoutTestFixtures extends ObltTestFixtures {
@@ -80,13 +79,11 @@ export const test = base.extend<ExtendedScoutTestFixtures, ObltWorkerFixtures>({
       browserAuth.loginWithCustomRole(APM_ROLES.apmAllPrivilegesWithoutWriteSettings);
     const loginAsApmReadPrivilegesWithWriteSettings = async () =>
       browserAuth.loginWithCustomRole(APM_ROLES.apmReadPrivilegesWithWriteSettings);
-    const loginAsApmMonitor = async () => browserAuth.loginWithCustomRole(APM_ROLES.apmMonitor);
 
     await use({
       ...browserAuth,
       loginAsApmAllPrivilegesWithoutWriteSettings,
       loginAsApmReadPrivilegesWithWriteSettings,
-      loginAsApmMonitor,
     });
   },
 });
