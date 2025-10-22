@@ -12,8 +12,8 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type {
-  TaskInstanceWithDeprecatedFields,
   ScheduleOptions,
+  TaskInstanceWithDeprecatedFields,
 } from '@kbn/task-manager-plugin/server/task';
 
 export class TaskManagerMock implements Partial<TaskManagerStartContract> {

@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { CoreStart, KibanaRequest } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { StackFrame, StepContext, WorkflowContext } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { KibanaRequest, CoreStart } from '@kbn/core/server';
+import type { ContextDependencies } from './types';
 import type { WorkflowExecutionState } from './workflow_execution_state';
+import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { RunStepResult } from '../step/node_implementation';
 import { buildStepExecutionId } from '../utils';
-import { WorkflowScopeStack } from './workflow_scope_stack';
-import type { ContextDependencies } from './types';
 
 export interface ContextManagerInit {
   // New properties for logging
@@ -95,8 +95,10 @@ export class WorkflowContextManager {
     return stepContext;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public readContextPath(propertyPath: string): { pathExists: boolean; value: any } {
     const propertyPathSegments = propertyPath.split('.');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let result: any = this.getContext();
 
     for (const segment of propertyPathSegments) {
@@ -208,6 +210,7 @@ export class WorkflowContextManager {
     );
 
     while (!scopeStack.isEmpty()) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const topFrame = scopeStack.getCurrentScope()!;
       scopeStack = scopeStack.exitScope();
       const stepExecution = this.workflowExecutionState.getStepExecution(
@@ -233,6 +236,7 @@ export class WorkflowContextManager {
   private getStepData(stepId: string):
     | {
         runStepResult: RunStepResult;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         stepState: Record<string, any> | undefined;
       }
     | undefined {
