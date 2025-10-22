@@ -8,8 +8,8 @@
 export { ParamsSchema } from './latest';
 export { ParamsSchema as ParamsSchemaV1 } from './latest';
 
-export { type Params } from './latest';
-export { type Params as ParamsV1 } from './latest';
+export { type IndexThresholdRuleParams } from './latest';
+export { type IndexThresholdRuleParams as IndexThresholdRuleParamsV1 } from './latest';
 
 export type { CoreQueryParams } from './latest';
 export type { CoreQueryParams as CoreQueryParamsV1 } from './latest';

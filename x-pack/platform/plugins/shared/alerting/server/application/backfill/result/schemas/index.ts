@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ruleParamsSchema } from '@kbn/response-ops-rule-params';
+import { ruleParamsSchemaWithRuleTypeId } from '@kbn/response-ops-rule-params';
 import { adHocRunStatus } from '../../../../../common/constants';
 import { actionSchema as ruleActionSchema } from '../../../rule/schemas/action_schemas';
 import { backfillInitiator } from '../../../../../common/constants';
@@ -36,7 +36,7 @@ export const backfillSchema = schema.object({
     tags: schema.arrayOf(schema.string()),
     actions: schema.arrayOf(ruleActionSchema),
     alertTypeId: schema.string(),
-    params: ruleParamsSchema,
+    params: ruleParamsSchemaWithRuleTypeId('alertTypeId'),
     apiKeyOwner: schema.nullable(schema.string()),
     apiKeyCreatedByUser: schema.maybe(schema.nullable(schema.boolean())),
     consumer: schema.string(),
