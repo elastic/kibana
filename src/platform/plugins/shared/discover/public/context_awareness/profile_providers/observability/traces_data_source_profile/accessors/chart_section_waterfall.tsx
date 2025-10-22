@@ -11,16 +11,17 @@ import type { ChartSectionConfiguration } from '@kbn/unified-histogram';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import React from 'react';
 import { once } from 'lodash';
+import { TraceWaterfallForChart } from '@kbn/unified-doc-viewer-plugin/public';
 import type { DataSourceProfileProvider } from '../../../../profiles';
 
-export const createChartSectionWaterfall = // TODO pasarle aqui el traceid?
+export const createChartSectionWaterfall =
   (): DataSourceProfileProvider['profile']['getChartSectionConfiguration'] =>
     // prevents unmounting the component when the query changes but the index pattern is still valid
     once((prev: () => ChartSectionConfiguration) =>
       once((): ChartSectionConfiguration => {
         return {
           ...(prev ? prev() : {}),
-          Component: (props: ChartSectionProps) => <div>HELLO</div>,
+          Component: (props: ChartSectionProps) => <TraceWaterfallForChart />,
           replaceDefaultChart: true,
           defaultTopPanelHeight: 'max-content',
         };
