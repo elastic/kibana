@@ -13,5 +13,4 @@ export default createCompleteTierTestConfig({
     reportName:
       'Rules Management - Prebuilt Rules Upgrade Notifications (Customization Enabled) - Serverless Env',
   },
-  indexRefreshInterval: '1s',
 });
