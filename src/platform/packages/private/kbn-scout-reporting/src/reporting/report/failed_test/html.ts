@@ -38,6 +38,8 @@ export const buildFailureHtml = (testFailure: TestFailure): string => {
       `;
     });
 
+  const errorStackTrace = error?.stack_trace || 'No stack trace available';
+
   return `
     <!DOCTYPE html>
 <html lang="en">
@@ -135,6 +137,16 @@ export const buildFailureHtml = (testFailure: TestFailure): string => {
         white-space: pre-wrap;
         word-wrap: break-word;
         margin: 10px 0;
+      }
+
+      /* Error section background */
+      .error-section {
+        background-color: #fff5f5;
+      }
+
+      .error-section pre {
+        background-color: #fff5f5;
+        border-color: #fecaca;
       }
 
       /* Details and summary */
@@ -255,11 +267,51 @@ export const buildFailureHtml = (testFailure: TestFailure): string => {
 
       /* Sections */
       .section {
-        margin-bottom: 30px;
+        margin-bottom: 20px;
         background-color: #fff;
-        padding: 20px;
+        padding: 15px;
         border-radius: 5px;
         border: 1px solid #dee2e6;
+      }
+
+      .section h5 {
+        margin-top: 0;
+        margin-bottom: 10px;
+        font-size: 1.1rem;
+      }
+
+      /* Compact info display */
+      .info-grid {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 8px 12px;
+        align-items: baseline;
+      }
+
+      .info-label {
+        font-weight: 600;
+        color: #495057;
+        white-space: nowrap;
+      }
+
+      .info-value {
+        color: #212529;
+      }
+
+      .inline-list {
+        display: inline;
+        margin: 0;
+        padding: 0;
+      }
+
+      .owners-inline {
+        display: inline-block;
+        padding: 4px 8px;
+        background-color: #e9ecef;
+        border-radius: 3px;
+        font-family: "SFMono-Regular", Consolas, monospace;
+        font-size: 0.9em;
+        margin: 0;
       }
 
       /* Plugin info */
@@ -283,32 +335,28 @@ export const buildFailureHtml = (testFailure: TestFailure): string => {
 
         <div class="section">
           <h5>Test Details</h5>
-          <table class="table-details">
-            <tr>
-              <td><strong>Suite Title</strong></td>
-              <td>${suite}</td>
-            </tr>
-            <tr>
-              <td><strong>Test Title</strong></td>
-              <td>${title}</td>
-            </tr>
-            <tr>
-              <td><strong>Execution Details</strong></td>
-              <td>
-                Target: <em>${target}</em>,
-                Duration: <em>${testDuration}</em>
-              </td>
-            </tr>
-            <tr>
-              <td><strong>Kibana Module</strong></td>
-              <td>
-                ID: <em>${kibanaModule?.id}</em>,
-                Type: <em>${kibanaModule?.type}</em>,
-                Visibility: <em>${kibanaModule?.visibility}</em>,
-                Group: <em>${kibanaModule?.group}</em>
-              </td>
-            </tr>
-          </table>
+          <div class="info-grid">
+            <span class="info-label">Suite:</span>
+            <span class="info-value">${suite}</span>
+
+            <span class="info-label">Test:</span>
+            <span class="info-value">${title}</span>
+
+            <span class="info-label">Target:</span>
+            <span class="info-value">${target}</span>
+
+            <span class="info-label">Duration:</span>
+            <span class="info-value">${testDuration}</span>
+
+            <span class="info-label">Module:</span>
+            <span class="info-value">${kibanaModule?.id} ${kibanaModule?.type}</span>
+
+            <span class="info-label">Visibility:</span>
+            <span class="info-value">${kibanaModule?.visibility} / ${kibanaModule?.group}</span>
+
+            <span class="info-label">Owners:</span>
+            <span class="info-value"><code class="owners-inline">${owner.join(', ')}</code></span>
+          </div>
         </div>
 
         <div id="ci-links-placeholder">
@@ -320,14 +368,9 @@ export const buildFailureHtml = (testFailure: TestFailure): string => {
           <pre>${command}</pre>
         </div>
 
-        <div class="section">
-          <h5>Owners</h5>
-          <pre>${owner.join(', ')}</pre>
-        </div>
-
-        <div class="section">
+        <div class="section error-section">
             <h5>Error Details</h5>
-            <pre>${error?.stack_trace || 'No stack trace available'}</pre>
+            <pre>${errorStackTrace}</pre>
         </div>
 
         <div>
