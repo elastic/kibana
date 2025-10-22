@@ -7,19 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import External from '../../lib/external_packages.js';
-import { REPO_ROOT } from '../../lib/paths.mjs';
+import Fs from 'fs';
+import Fsp from 'fs/promises';
+import Path from 'path';
 
 /**
- * @param {import('@kbn/some-dev-log').SomeDevLog} log
- * @param {string[]} packageManifestPaths
+ *
+ * @param {import('src/platform/packages/private/kbn-some-dev-log').SomeDevLog} log
+ * @param {string[]} paths
  */
-export async function regeneratePackageMap(log, packageManifestPaths) {
-  const { updatePackageMap, getPackages } = External['@kbn/repo-packages']();
+export async function cleanPaths(log, paths) {
+  for (const path of paths) {
+    if (!Fs.existsSync(path)) {
+      continue;
+    }
 
-  if (updatePackageMap(REPO_ROOT, packageManifestPaths)) {
-    log.warning('updated package map');
+    log.info('deleting', Path.relative(process.cwd(), path));
+    await Fsp.rm(path, {
+      recursive: true,
+      force: true,
+    });
   }
-
-  return getPackages(REPO_ROOT);
 }

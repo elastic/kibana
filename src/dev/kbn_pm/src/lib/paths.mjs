@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/src/cli/encryption_keys'],
-};
+import Path from 'path';
+
+export const REPO_ROOT = Path.resolve(
+  Path.dirname(new URL(import.meta.url).pathname),
+  '../../../../..'
+);

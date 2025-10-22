@@ -7981,6 +7981,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/security_solution_api_integration@link:x-pack/solutions/security/test/security_solution_api_integration":
+  version "0.0.0"
+  uid ""
+
 "@kbn/securitysolution-autocomplete@link:x-pack/solutions/security/packages/kbn-securitysolution-autocomplete":
   version "0.0.0"
   uid ""
@@ -8578,6 +8582,10 @@
   uid ""
 
 "@kbn/test-suites-xpack-search@link:x-pack/solutions/search/test":
+  version "0.0.0"
+  uid ""
+
+"@kbn/test-suites-xpack-security-endpoint@link:x-pack/solutions/security/test/security_solution_endpoint":
   version "0.0.0"
   uid ""
 

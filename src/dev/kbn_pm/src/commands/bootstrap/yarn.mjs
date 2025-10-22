@@ -35,7 +35,7 @@ export async function areNodeModulesPresent() {
 
 /**
  * Installs project dependencies, using yarn
- * @param {import('@kbn/some-dev-log').SomeDevLog} log
+ * @param {import('src/platform/packages/private/kbn-some-dev-log').SomeDevLog} log
  * @param {{offline: boolean, quiet:boolean } } options
  * @returns {Promise<void>}
  */
@@ -60,7 +60,7 @@ export async function yarnInstallDeps(log, { offline, quiet }) {
 
 /**
  * Checks if the installed state adheres to the integrity checksums from the yarn.lock file
- * @param {import('@kbn/some-dev-log').SomeDevLog} log
+ * @param {import('src/platform/packages/private/kbn-some-dev-log').SomeDevLog} log
  * @returns {Promise<boolean>}
  */
 export async function checkYarnIntegrity(log) {

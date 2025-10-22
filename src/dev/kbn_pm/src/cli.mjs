@@ -58,7 +58,7 @@ try {
     throw createFlagError('missing command name');
   }
 
-  /** @type {import('@kbn/ci-stats-reporter').CiStatsTiming[]} */
+  /** @type {import('src/platform/packages/private/kbn-ci-stats-reporter').CiStatsTiming[]} */
   const timings = [];
 
   /** @type {import('./lib/command').CommandRunContext['time']} */

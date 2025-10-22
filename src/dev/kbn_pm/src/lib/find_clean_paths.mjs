@@ -16,7 +16,7 @@ import External from './external_packages.js';
 /**
  * Attempt to load the package map, if bootstrap hasn't run successfully
  * this might fail.
- * @param {import('@kbn/some-dev-log').SomeDevLog} log
+ * @param {import('src/platform/packages/private/kbn-some-dev-log').SomeDevLog} log
  * @returns {Promise<import('@kbn/repo-packages').PackageMap>}
  */
 async function tryToGetPackageMap(log) {
@@ -63,7 +63,7 @@ export function readCleanPatterns(packageDir) {
 }
 
 /**
- * @param {import('@kbn/some-dev-log').SomeDevLog} log
+ * @param {import('src/platform/packages/private/kbn-some-dev-log').SomeDevLog} log
  * @returns {Promise<string[]>}
  */
 export async function findPluginCleanPaths(log) {

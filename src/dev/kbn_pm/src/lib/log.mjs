@@ -11,7 +11,7 @@ import { format } from 'util';
 
 import * as Colors from './colors.mjs';
 
-/** @typedef {import('@kbn/some-dev-log').SomeDevLog} SomeDevLog */
+/** @typedef {import('src/platform/packages/private/kbn-some-dev-log').SomeDevLog} SomeDevLog */
 
 /**
  * @implements {SomeDevLog}
@@ -21,7 +21,7 @@ export class Log {
 
   /**
    *
-   * @param {import('@kbn/some-dev-log').SomeLogLevel} level
+   * @param {import('src/platform/packages/private/kbn-some-dev-log').SomeLogLevel} level
    */
   constructor(level) {
     this.#flags = {

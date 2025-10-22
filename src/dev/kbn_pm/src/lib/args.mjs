@@ -67,7 +67,7 @@ export class Args {
   }
 
   /**
-   * @returns {import('@kbn/some-dev-log').SomeLogLevel}
+   * @returns {import('src/platform/packages/private/kbn-some-dev-log').SomeLogLevel}
    */
   getLoggingLevel() {
     if (this.getBooleanValue('quiet')) {

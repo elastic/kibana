@@ -9,7 +9,7 @@
 
 require('@kbn/setup-node-env/root');
 require('@kbn/setup-node-env/node_version_validator');
-import('../kbn_pm/src/cli.mjs').catch(function (error) {
+import('../src/dev/kbn_pm/src/cli.mjs').catch(function (error) {
   console.error('UNHANDLED EXCEPTION:', error.stack);
   process.exit(1);
 });

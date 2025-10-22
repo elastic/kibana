@@ -81,5 +81,6 @@
     "@kbn/field-formats-common",
     "@kbn/ai-assistant-management-plugin",
     "@kbn/core-chrome-navigation-tour",
+    "@kbn/setup-node-env",
   ]
 }

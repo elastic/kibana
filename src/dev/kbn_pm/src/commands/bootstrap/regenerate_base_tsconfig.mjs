@@ -14,7 +14,7 @@ import { REPO_ROOT } from '../../lib/paths.mjs';
 
 /**
  * @param {import('@kbn/repo-packages').Package[]} packages
- * @param {import('@kbn/some-dev-log').SomeDevLog} log
+ * @param {import('src/platform/packages/private/kbn-some-dev-log').SomeDevLog} log
  */
 export async function regenerateBaseTsconfig(packages, log) {
   const tsconfigPath = Path.resolve(REPO_ROOT, 'tsconfig.base.json');

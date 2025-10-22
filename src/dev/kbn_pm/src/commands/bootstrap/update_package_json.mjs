@@ -45,7 +45,7 @@ function updatePkgEntries(depsObj, actual, expected) {
 
 /**
  * @param {import('@kbn/repo-packages').Package[]} pkgs
- * @param {import('@kbn/some-dev-log').SomeDevLog} log
+ * @param {import('src/platform/packages/private/kbn-some-dev-log').SomeDevLog} log
  */
 export async function updatePackageJson(pkgs, log) {
   const path = Path.resolve(REPO_ROOT, 'package.json');

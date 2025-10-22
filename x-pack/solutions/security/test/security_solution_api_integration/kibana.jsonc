@@ -1,0 +1,8 @@
+{
+  "type": "test-helper",
+  "id": "@kbn/security_solution_api_integration",
+  "owner": [],
+  "group": "security",
+  "visibility": "private",
+  "devOnly": true
+}

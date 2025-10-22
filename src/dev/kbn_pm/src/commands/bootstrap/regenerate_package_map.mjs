@@ -7,24 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Path from 'path';
-import Fsp from 'fs/promises';
-
-import { REPO_ROOT } from '../../lib/paths.mjs';
 import External from '../../lib/external_packages.js';
+import { REPO_ROOT } from '../../lib/paths.mjs';
 
 /**
- *
- * @param {import('@kbn/some-dev-log').SomeDevLog} log
+ * @param {import('src/platform/packages/private/kbn-some-dev-log').SomeDevLog} log
+ * @param {string[]} packageManifestPaths
  */
-export async function sortPackageJson(log) {
-  const { sortPackageJson } = External['@kbn/sort-package-json']();
+export async function regeneratePackageMap(log, packageManifestPaths) {
+  const { updatePackageMap, getPackages } = External['@kbn/repo-packages']();
 
-  const path = Path.resolve(REPO_ROOT, 'package.json');
-  const json = await Fsp.readFile(path, 'utf8');
-  const sorted = sortPackageJson(json);
-  if (sorted !== json) {
-    await Fsp.writeFile(path, sorted, 'utf8');
-    log.success('sorted package.json');
+  if (updatePackageMap(REPO_ROOT, packageManifestPaths)) {
+    log.warning('updated package map');
   }
+
+  return getPackages(REPO_ROOT);
 }

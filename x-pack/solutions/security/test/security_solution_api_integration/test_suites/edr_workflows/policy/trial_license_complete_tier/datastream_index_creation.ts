@@ -16,7 +16,7 @@ import {
   updateAgentPolicy,
   updateIntegrationPolicy,
 } from '@kbn/security-solution-plugin/scripts/endpoint/common/fleet_services';
-import type { PolicyTestResourceInfo } from '../../../../../security_solution_endpoint/services/endpoint_policy';
+import type { PolicyTestResourceInfo } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_policy';
 import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 
 export default function ({ getService }: FtrProviderContext) {
