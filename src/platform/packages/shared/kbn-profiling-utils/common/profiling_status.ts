@@ -8,6 +8,7 @@
  */
 
 export interface ProfilingStatus {
+  type?: 'cloud' | 'self-managed';
   has_setup: boolean;
   has_data: boolean;
   pre_8_9_1_data: boolean;

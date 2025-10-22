@@ -28,6 +28,7 @@ export function createGetStatusService(params: RegisterServicesParams) {
       );
 
       return {
+        type,
         has_setup:
           type === 'cloud' ? areCloudResourcesSetup(setupState) : areResourcesSetup(setupState),
         has_data: setupState.data.available,
