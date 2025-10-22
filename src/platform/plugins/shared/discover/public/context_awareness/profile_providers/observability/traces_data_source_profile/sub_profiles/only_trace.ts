@@ -20,8 +20,8 @@ import type { ProfileProviderServices } from '../../../profile_provider_services
 // TODO search if there's helpers to extract filters from ESQL queries so we can use them here
 function hasOnlyTraceIdFilter(esql: string): boolean {
   if (typeof esql !== 'string') return false;
-  const normalized = esql.replace(/\s+/g, ' ').trim();
-  const re = /^FROM\s+[^|]+\s*\|\s*WHERE\s+trace\.id\s*={1,2}\s*["']?[\w\-]+["']?$/i;
+  const normalized = esql.trim().replace(/[\r\n]+/g, ' ');
+  const re = /^FROM\s+[\w\-\*\.,:\s]+?\|\s*WHERE\s+trace\.id\s*={1,2}\s*["']?[\w\-]+["']?$/i;
   return re.test(normalized);
 }
 
