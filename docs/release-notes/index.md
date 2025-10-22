@@ -31,7 +31,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 ### Features and enhancements [kibana-9.1.6-features-enhancements]
 
 **Data ingestion and Fleet**:
-* Show agentless resources" toggle added to Fleet > Settings for debugging and diagnostics purposes [#237528]({{kib-pull}}237528).
+* Replaces the `?showAgentless` query param with a local storage setting called `fleet:showAgentlessResources`, which can be toggled from the {{fleet}} settings page. When enabled, agentless agents and policies are visible in the {{fleet}} UI [#237528]({{kib-pull}}237528).
 
 **Elastic Security solution**:
 For the Elastic Security 9.1.6 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
@@ -43,17 +43,17 @@ For the Elastic Security 9.1.6 release information, refer to [Elastic Security S
 ### Fixes [kibana-9.1.6-fixes]
 
 **Dashboards and Visualizations**:
-* Fixes unable to reset unsaved change when enabling timeRestore and setting time range [#239992]({{kib-pull}}239992).
-* Fixes error when selecting "(blank)" value in options list [#239791]({{kib-pull}}239791).
-* Fixes a bug in *Lens* that incorrectly assigned unsaved (ad-hoc) dataview references [#239431]({{kib-pull}}239431).
-* Fixes metric color assignment when breakdown and a max dimension are defined in *Lens* [#238901]({{kib-pull}}238901).
-* Fixes Adhoc dataviews from ES|QL charts are being filtered out in the KQL search bar [#238731]({{kib-pull}}238731).
+* Fixes bug that prevented you from deleting unsaved dashboard changes after you had enabled the timeRestore setting and selected a time and date using the date picker [#239992]({{kib-pull}}239992).
+* FFixes error that occured when you selected a blank value in the options list [#239791]({{kib-pull}}239791).
+* Fixes a bug in Lens that incorrectly assigned unsaved, ad-hoc dataview references [#239431]({{kib-pull}}239431).
+* Fixes metric color assignment when breakdown and a max dimension are defined in Lens [#238901]({{kib-pull}}238901).
+* Ensures adhoc dataviews from {{esql}} charts aren't being filtered out in the KQL search bar [#238731]({{kib-pull}}238731).
 
 **Data ingestion and Fleet**:
-* Fixes on integration policy upgrade [#238542]({{kib-pull}}238542).
+* Fixes bug that occured during an integration policy upgrade that prevented the new package global variables from being included and stale variable references from being removed [#238542]({{kib-pull}}238542).
 
 **Discover**:
-* Fixes missing fields when using combined filters with `ignoreFilterIfFieldNotInIndex` UI setting [#238945]({{kib-pull}}238945).
+* Ensures that the combined filters are considered when selecting the correct fields for the query while the `courier:ignoreFilterIfFieldNotInIndex` advanced setting is enabled [#238945]({{kib-pull}}238945).
 
 **Elastic Observability solution**:
 For the Elastic Observability 9.1.6 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
@@ -62,10 +62,7 @@ For the Elastic Observability 9.1.6 release information, refer to [Elastic Obser
 For the Elastic Security 9.1.6 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
 
 **Search**:
-* Fix: Add styling to handle the text overflow [#239768]({{kib-pull}}239768).
-% !!TODO!! The above PR had a lengthy release note description:
-% Fixed data preview metadata popup visual issues when ID is too long. Added a tooltip and copy button to improve user experience.
-
+* Fixes visual issues with the document metadata popup that happened when the document ID was too long. Also added a tooltip and copy button to improve the user experience [#239768]({{kib-pull}}239768).
 
 ## 9.1.5 [kibana-9.1.5-release-notes]
 
