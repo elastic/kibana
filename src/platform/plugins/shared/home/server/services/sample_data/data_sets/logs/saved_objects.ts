@@ -424,7 +424,7 @@ export const getSavedObjects = (): SavedObject[] => [
       hits: 0,
       kibanaSavedObjectMeta: {
         searchSourceJSON:
-          '{"query":{"esql":"FROM kibana_sample_data_logs  | SORT @timestamp desc | LIMIT 10000"},"filter":[]}',
+          '{"query":{"esql":"FROM kibana_sample_data_logs | SORT @timestamp desc | LIMIT 10000"},"filter":[]}',
       },
       sort: [['timestamp', 'desc']],
       version: 1,
