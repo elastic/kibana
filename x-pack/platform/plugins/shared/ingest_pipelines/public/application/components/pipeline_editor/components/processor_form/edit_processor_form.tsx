@@ -43,6 +43,7 @@ export interface Props {
   resetProcessors: () => void;
   handleSubmit: (shouldCloseFlyout?: boolean) => Promise<void>;
   getProcessor: () => ProcessorInternal;
+  buttonRef?: React.RefObject<HTMLButtonElement | HTMLAnchorElement>;
 }
 
 const updateButtonLabel = i18n.translate(
@@ -103,6 +104,7 @@ export const EditProcessorForm: FunctionComponent<Props> = ({
   closeFlyout,
   handleSubmit,
   resetProcessors,
+  buttonRef,
 }) => {
   const { testPipelineData, testPipelineDataDispatch } = useTestPipelineContext();
   const {
@@ -168,6 +170,19 @@ export const EditProcessorForm: FunctionComponent<Props> = ({
         }}
         outsideClickCloses={!isFormDirty}
         aria-labelledby={flyoutTitleId}
+        focusTrapProps={{
+          returnFocus: (triggerElement) => {
+            if (buttonRef?.current) {
+              // Using setTimeout here to postpone focus until after the flyout has finished unmounting and cleaning up its focus traps.
+              // Without this, the focus gets applied too early and it's overridden by the browser's default focus behavior.
+              setTimeout(() => {
+                buttonRef.current?.focus();
+              }, 0);
+              return false;
+            }
+            return true;
+          },
+        }}
       >
         <EuiFlyoutHeader>
           <EuiFlexGroup gutterSize="xs">

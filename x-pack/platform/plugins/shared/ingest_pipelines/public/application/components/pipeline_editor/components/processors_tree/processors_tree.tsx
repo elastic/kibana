@@ -30,7 +30,10 @@ export type Action =
   | { type: 'move'; payload: { source: ProcessorSelector; destination: ProcessorSelector } }
   | { type: 'selectToMove'; payload: { info: ProcessorInfo } }
   | { type: 'cancelMove' }
-  | { type: 'addProcessor'; payload: { target: ProcessorSelector } };
+  | {
+      type: 'addProcessor';
+      payload: { target: ProcessorSelector; buttonRef?: React.RefObject<HTMLButtonElement> };
+    };
 
 export type OnActionHandler = (action: Action) => void;
 
@@ -58,6 +61,7 @@ const useStyles = () => {
 export const ProcessorsTree: FunctionComponent<Props> = memo((props) => {
   const { processors, baseSelector, onAction, movingProcessor } = props;
   const styles = useStyles();
+  const buttonRef = useRef<HTMLButtonElement>(null);
   // These refs are created here so they can be shared with all
   // recursively rendered trees. Their values should come from react-virtualized
   // List component and WindowScroller component.
@@ -140,8 +144,9 @@ export const ProcessorsTree: FunctionComponent<Props> = memo((props) => {
           )}
           <EuiFlexItem grow={false}>
             <AddProcessorButton
+              ref={buttonRef}
               onClick={() => {
-                onAction({ type: 'addProcessor', payload: { target: baseSelector } });
+                onAction({ type: 'addProcessor', payload: { target: baseSelector, buttonRef } });
               }}
               renderButtonAsLink
             />
