@@ -12,5 +12,7 @@ describe('TextareaInputArgument component', () => {
 
   it.todo('should toggle popup visibility when selection area is clicked');
 
-  // FIXME:PT define tests
+  it.todo('should only send user input to console when popup is closed');
+
+  it.todo('should render message only when argument is not allowed to be used more than once');
 });

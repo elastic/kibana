@@ -20,6 +20,8 @@ import {
   EuiTitle,
   EuiPanel,
   useEuiTheme,
+  EuiButton,
+  EuiSpacer,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -60,6 +62,8 @@ export interface TextareaInputArgumentProps<
   textareaPlaceholderLabel?: string;
   /** Help icon `title` and `aria-label` label */
   helpIconLabel?: string;
+  /** Label for the close button in the popup */
+  closePopupButtonLabel?: string;
 }
 
 const OPEN_INPUT = i18n.translate(
@@ -82,6 +86,11 @@ const HELP_ICON_LABEL = i18n.translate(
   { defaultMessage: 'Show instructions' }
 );
 
+const CLOSE_POPUP_BUTTON_LABEL = i18n.translate(
+  'xpack.securitySolution.consoleArgumentSelectors.textAreaInputArgument.closePopupButtonLabel',
+  { defaultMessage: 'Close' }
+);
+
 /**
  * Console argument component that displays a popup textarea for user to enter free-form data.
  */
@@ -100,6 +109,7 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
     noInputEnteredMessage = NO_INPUT_ENTERED_MESSAGE,
     textareaPlaceholderLabel = TEXTAREA_PLACEHOLDER_TEXT,
     helpIconLabel = HELP_ICON_LABEL,
+    closePopupButtonLabel = CLOSE_POPUP_BUTTON_LABEL,
     width,
     textareaLabel,
     helpContent,
@@ -271,6 +281,16 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
                 )}
               </EuiFlexGroup>
             </div>
+            <EuiPanel paddingSize="xs" hasShadow={false} hasBorder={false}>
+              <EuiSpacer size="s" />
+              <EuiFlexGroup alignItems="flexEnd" justifyContent="flexEnd" gutterSize="none">
+                <EuiFlexItem grow={false}>
+                  <EuiButton iconType="cross" size="s" onClick={handleClosePopover}>
+                    {closePopupButtonLabel}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
           </div>
         )}
       </EuiPopover>
