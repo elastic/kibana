@@ -15,7 +15,7 @@ import { getCompletionItemProvider } from '../../lib/get_completion_item_provide
 
 export const useCompletionProvider = () => {
   const editorState = useSelector(selectWorkflowEditorState);
-  const editorStateRef = useRef<WorkflowEditorState>();
+  const editorStateRef = useRef<WorkflowEditorState>(editorState);
   editorStateRef.current = editorState;
 
   const completionProvider = useMemo(

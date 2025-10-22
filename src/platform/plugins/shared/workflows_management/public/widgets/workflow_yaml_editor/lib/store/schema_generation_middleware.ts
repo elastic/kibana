@@ -17,7 +17,7 @@ export const schemaGenerationMiddleware: Middleware =
     const result = next(action);
 
     // Only react to connectors changes
-    if (action.type === setConnectors.type) {
+    if (setConnectors.match(action)) {
       const setConnectorsAction = action as ReturnType<typeof setConnectors>;
 
       if (setConnectorsAction.payload) {
