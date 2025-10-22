@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Reference } from '@kbn/content-management-utils';
 import type { SerializableRecord, Writable } from '@kbn/utility-types';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import type { DashboardState } from '../server';
@@ -19,11 +18,6 @@ export interface DashboardCapabilities {
   createNew: boolean;
   show: boolean;
   [key: string]: boolean;
-}
-
-export interface DashboardAttributesAndReferences {
-  attributes: DashboardState;
-  references: Reference[];
 }
 
 export type DashboardLocatorParams = Partial<
