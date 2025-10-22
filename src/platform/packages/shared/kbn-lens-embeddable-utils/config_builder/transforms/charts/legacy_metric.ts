@@ -69,7 +69,7 @@ function reverseBuildVisualizationState(
   references: SavedObjectReference[],
   adhocReferences?: SavedObjectReference[]
 ): LegacyMetricState {
-  if (visualization.accessor === undefined) {
+  if (visualization.accessor == null) {
     throw new Error('Metric accessor is missing in the visualization state');
   }
 
