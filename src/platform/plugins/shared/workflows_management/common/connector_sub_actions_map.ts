@@ -22,8 +22,8 @@ import {
 } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import {
   SUB_ACTION as GEMINI_SUB_ACTION,
-  GEMINI_CONNECTOR_ID,
-} from '@kbn/stack-connectors-plugin/common/gemini/constants';
+  CONNECTOR_ID as GEMINI_CONNECTOR_ID,
+} from '@kbn/connector-schemas/gemini/constants';
 import {
   SUB_ACTION as THEHIVE_SUB_ACTION,
   THEHIVE_CONNECTOR_ID,
