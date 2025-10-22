@@ -23,6 +23,7 @@
     "@kbn/axe-config",
     "@kbn/cypress-config",
     "@kbn/rison",
+    "@kbn/fleet-plugin",
     "@kbn/actions-plugin",
     "@kbn/core-chrome-layout-constants",
   ]
