@@ -18,7 +18,5 @@
     "@kbn/data-forge",
     "@kbn/test",
     "@kbn/server-route-repository",
-    "@kbn/ftr-common-functional-services",
-    "@kbn/std",
   ]
 }
