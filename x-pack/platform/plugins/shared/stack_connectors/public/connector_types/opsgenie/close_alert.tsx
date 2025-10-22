@@ -13,10 +13,7 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { RecursivePartial } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
-import type {
-  OpsgenieActionParams,
-  OpsgenieCloseAlertParams,
-} from '../../../server/connector_types';
+import type { Params, CloseAlertParams } from '@kbn/connector-schemas/opsgenie';
 import * as i18n from './translations';
 import type { EditActionCallback } from './types';
 import { DisplayMoreOptions } from './display_more_options';
@@ -75,11 +72,8 @@ const AdditionalOptions: React.FC<AdditionalOptionsProps> = ({
 
 AdditionalOptions.displayName = 'AdditionalOptions';
 
-type CloseAlertProps = Pick<
-  ActionParamsProps<OpsgenieActionParams>,
-  'errors' | 'index' | 'messageVariables'
-> & {
-  subActionParams?: RecursivePartial<OpsgenieCloseAlertParams>;
+type CloseAlertProps = Pick<ActionParamsProps<Params>, 'errors' | 'index' | 'messageVariables'> & {
+  subActionParams?: RecursivePartial<CloseAlertParams>;
   editSubAction: EditActionCallback;
   editOptionalSubAction: EditActionCallback;
   showSaveError: boolean;

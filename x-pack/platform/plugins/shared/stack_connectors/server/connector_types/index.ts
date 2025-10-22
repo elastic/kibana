@@ -41,20 +41,8 @@ import { getSentinelOneConnectorType } from './sentinelone';
 import { getCrowdstrikeConnectorType } from './crowdstrike';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
 
-export type { ActionParamsType as TeamsActionParams } from './teams';
 export { ConnectorTypeId as XmattersConnectorTypeId } from './xmatters';
 export type { ActionParamsType as XmattersActionParams } from './xmatters';
-export { OpsgenieConnectorTypeId } from './opsgenie';
-
-export type {
-  OpsgenieActionConfig,
-  OpsgenieActionSecrets,
-  OpsgenieActionParams,
-  OpsgenieCloseAlertSubActionParams,
-  OpsgenieCreateAlertSubActionParams,
-  OpsgenieCloseAlertParams,
-  OpsgenieCreateAlertParams,
-} from './opsgenie';
 
 export type ServiceNowActionParams = ServiceNowITSMActionParams | ServiceNowSIRActionParams;
 

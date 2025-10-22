@@ -9,13 +9,13 @@ import React, { useCallback } from 'react';
 
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 
-import type { OpsgenieCreateAlertParams } from '../../../../server/connector_types';
+import type { CreateAlertParams } from '@kbn/connector-schemas/opsgenie';
 import * as i18n from './translations';
 import type { EditActionCallback } from '../types';
 import { OptionalFieldLabel } from '../../../common/optional_field_label';
 
 interface PriorityComponentProps {
-  priority: OpsgenieCreateAlertParams['priority'];
+  priority: CreateAlertParams['priority'];
   onChange: EditActionCallback;
 }
 

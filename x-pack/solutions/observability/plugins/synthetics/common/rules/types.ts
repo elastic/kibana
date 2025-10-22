@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { OpsgenieConnectorTypeId } from '@kbn/stack-connectors-plugin/server/connector_types';
 import type {
   EmailConnectorTypeId,
   EsIndexConnectorTypeId,
   JiraConnectorTypeId,
+  OpsgenieConnectorTypeId,
   PagerDutyConnectorTypeId,
   ServerLogConnectorTypeId,
   ServiceNowITSMConnectorTypeId as ServiceNowConnectorTypeId,

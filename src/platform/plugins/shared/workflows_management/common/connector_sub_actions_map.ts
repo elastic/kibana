@@ -57,9 +57,9 @@ import {
   CONNECTOR_ID as JIRA_SERVICE_MANAGEMENT_CONNECTOR_TYPE_ID,
 } from '@kbn/connector-schemas/jira-service-management/constants';
 import {
-  OpsgenieSubActions,
-  OpsgenieConnectorTypeId,
-} from '@kbn/stack-connectors-plugin/common/opsgenie';
+  SUB_ACTION as OpsgenieSubActions,
+  CONNECTOR_ID as OpsgenieConnectorTypeId,
+} from '@kbn/connector-schemas/opsgenie';
 
 // Helper function to format sub-action names for display
 function formatSubActionName(action: string): string {

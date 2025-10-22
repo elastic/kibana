@@ -13,19 +13,22 @@ import {
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
 import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { ValidatorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { OpsgenieConnectorTypeId } from '../../../common';
+import {
+  CONNECTOR_ID,
+  CONNECTOR_NAME,
+  ConfigSchema,
+  SecretsSchema,
+} from '@kbn/connector-schemas/opsgenie';
+import type { Config, Secrets } from '@kbn/connector-schemas/opsgenie';
 import { OpsgenieConnector } from './connector';
-import { ConfigSchema, SecretsSchema } from './schema';
-import type { Config, Secrets } from './types';
-import * as i18n from './translations';
 import { renderParameterTemplates } from './render_template_variables';
 
 export const getOpsgenieConnectorType = (): SubActionConnectorType<Config, Secrets> => {
   return {
     getService: (params) => new OpsgenieConnector(params),
     minimumLicenseRequired: 'platinum',
-    name: i18n.OPSGENIE_NAME,
-    id: OpsgenieConnectorTypeId,
+    name: CONNECTOR_NAME,
+    id: CONNECTOR_ID,
     schema: { config: ConfigSchema, secrets: SecretsSchema },
     validators: [{ type: ValidatorType.CONFIG, validator: urlAllowListValidator('apiUrl') }],
     supportedFeatureIds: [
@@ -36,15 +39,3 @@ export const getOpsgenieConnectorType = (): SubActionConnectorType<Config, Secre
     renderParameterTemplates,
   };
 };
-
-export { OpsgenieConnectorTypeId };
-
-export type {
-  Config as OpsgenieActionConfig,
-  Secrets as OpsgenieActionSecrets,
-  Params as OpsgenieActionParams,
-  CreateAlertSubActionParams as OpsgenieCreateAlertSubActionParams,
-  CloseAlertSubActionParams as OpsgenieCloseAlertSubActionParams,
-  CreateAlertParams as OpsgenieCreateAlertParams,
-  CloseAlertParams as OpsgenieCloseAlertParams,
-} from './types';

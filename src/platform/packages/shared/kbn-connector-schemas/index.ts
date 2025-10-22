@@ -13,6 +13,7 @@ export { CONNECTOR_ID as EmailConnectorTypeId } from './email';
 export { CONNECTOR_ID as EsIndexConnectorTypeId } from './es_index';
 export { CONNECTOR_ID as JiraConnectorTypeId } from './jira';
 export { CONNECTOR_ID as JiraServiceManagementConnectorTypeId } from './jira-service-management';
+export { CONNECTOR_ID as OpsgenieConnectorTypeId } from './opsgenie';
 export { CONNECTOR_ID as PagerDutyConnectorTypeId } from './pagerduty';
 export { CONNECTOR_ID as ServerLogConnectorTypeId } from './server_log';
 export { CONNECTOR_ID as ServiceNowITOMConnectorTypeId } from './servicenow_itom';

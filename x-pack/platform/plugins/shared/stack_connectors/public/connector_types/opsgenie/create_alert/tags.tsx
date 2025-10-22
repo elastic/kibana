@@ -19,7 +19,7 @@ import {
 
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
-import type { OpsgenieActionParams } from '../../../../server/connector_types';
+import type { Params } from '@kbn/connector-schemas/opsgenie';
 import { RULE_TAGS_TEMPLATE } from '../../../../common/opsgenie';
 import * as i18n from './translations';
 import type { EditActionCallback } from '../types';
@@ -28,7 +28,7 @@ import { OptionalFieldLabel } from '../../../common/optional_field_label';
 interface TagsProps {
   onChange: EditActionCallback;
   values: string[];
-  executionMode: ActionParamsProps<OpsgenieActionParams>['executionMode'];
+  executionMode: ActionParamsProps<Params>['executionMode'];
 }
 
 const options: Array<EuiComboBoxOptionOption<string>> = [
