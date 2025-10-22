@@ -10,7 +10,7 @@
 import React, { useMemo } from 'react';
 import { Navigation as NavigationComponent } from '@kbn/core-chrome-navigation';
 import type { Observable } from 'rxjs';
-import { combineLatest, debounceTime, EMPTY } from 'rxjs';
+import { combineLatest, EMPTY } from 'rxjs';
 import classnames from 'classnames';
 import type {
   ChromeNavLink,
