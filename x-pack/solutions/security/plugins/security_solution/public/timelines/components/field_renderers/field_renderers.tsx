@@ -20,6 +20,7 @@ import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { HostDetailsLink, ReputationLink, WhoIsLink } from '../../../common/components/links';
 import * as i18n from '../../../explore/network/components/details/translations';
 import type { SourcererScopeName } from '../../../sourcerer/store/model';
+import { DefaultFieldRenderer } from './default_renderer';
 
 export const IpOverviewId = 'ip-overview';
 
@@ -108,27 +109,21 @@ export const hostIdRenderer = ({
   ipFilter,
   noLink,
   scopeId,
-}: HostIdRendererTypes): React.ReactElement =>
-  host.id && host.ip && (ipFilter == null || host.ip.includes(ipFilter)) ? (
+}: HostIdRendererTypes): React.ReactElement => {
+  const hostName = host.name && host.name[0];
+  return host.id && host.ip && (ipFilter == null || host.ip.includes(ipFilter)) ? (
     <>
-      {host.name && host.name[0] != null ? (
-        <DefaultDraggable
-          id={`host-id-renderer-default-draggable-${IpOverviewId}-${
-            contextID ? `${contextID}-` : ''
-          }host-id`}
+      {hostName != null ? (
+        <DefaultFieldRenderer
+          rowItems={host.id}
+          attrName={'host.id'}
           isDraggable={isDraggable}
-          field="host.id"
-          value={host.id[0]}
-          isAggregatable={true}
-          fieldType={'keyword'}
+          idPrefix={contextID ? `host-overview-${contextID}` : 'host-overview'}
           scopeId={scopeId}
-        >
-          {noLink ? (
-            <>{host.id}</>
-          ) : (
-            <HostDetailsLink hostName={host.name[0]}>{host.id}</HostDetailsLink>
-          )}
-        </DefaultDraggable>
+          render={(id) =>
+            noLink ? <>{id}</> : <HostDetailsLink hostName={hostName}>{id}</HostDetailsLink>
+          }
+        />
       ) : (
         <>{host.id}</>
       )}
@@ -136,6 +131,7 @@ export const hostIdRenderer = ({
   ) : (
     getEmptyTagValue()
   );
+};
 
 export const hostNameRenderer = (
   scopeId: SourcererScopeName,
