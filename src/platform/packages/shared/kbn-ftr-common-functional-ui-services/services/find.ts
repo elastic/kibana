@@ -10,13 +10,13 @@
 import type { WebDriver, WebElement } from 'selenium-webdriver';
 import { By, until } from 'selenium-webdriver';
 
+import { delay } from '@kbn/test-jest-helpers';
 import type { Browsers } from './remote/browsers';
 import type { FtrProviderContext } from './ftr_provider_context';
 import { WebElementWrapper } from './web_element_wrapper';
 import type { TimeoutOpt } from '../types';
 
 import { FtrService } from './ftr_provider_context';
-import { delay } from '@kbn/test-jest-helpers';
 
 export class FindService extends FtrService {
   private readonly log = this.ctx.getService('log');
