@@ -17,6 +17,9 @@ export const visualizationWrapper = (euiTheme: UseEuiTheme['euiTheme'], height: 
       opacity: 1,
       pointerEvents: 'auto',
     },
+    '.echChart ul': {
+      marginInlineStart: 0,
+    },
   });
 
 export const actionsContainer = (euiTheme: UseEuiTheme['euiTheme']) =>
