@@ -16,15 +16,20 @@ const liquidEngine = new Liquid({
   strictVariables: false,
 });
 
+interface StackEntry {
+  node: string;
+  variables: Set<string>;
+}
+
 function truncatePathAtLocalVariable(
   propertyPath: string,
   parts: string[],
-  localVariablesSet: Set<string>
+  stack: StackEntry[]
 ): string {
   // Check if any parts after the first are local variables (used as indices)
   // If so, truncate the path at that point
   for (let i = 1; i < parts.length; i++) {
-    if (localVariablesSet.has(parts[i])) {
+    if (stack.toReversed().some((frame) => frame.variables.has(parts[i]))) {
       // Found a local variable used as an index/property
       // Find where this appears in the original string and truncate there
       const localVarPattern = new RegExp(`\\[${parts[i]}\\]`);
@@ -42,33 +47,32 @@ function truncatePathAtLocalVariable(
   return propertyPath;
 }
 
-function visitLiquidAST(node: unknown, localVariablesSet: Set<string>): string[] {
+function visitLiquidAST(node: unknown, stack: StackEntry[]): string[] {
   if (node instanceof Output) {
-    return visitLiquidAST(node.value.initial, localVariablesSet);
+    return visitLiquidAST(node.value.initial, stack);
   }
 
   if (node instanceof Expression) {
-    return node.postfix.flatMap((token) => visitLiquidAST(token, localVariablesSet));
+    return node.postfix.flatMap((token) => visitLiquidAST(token, stack));
   }
 
   if (node instanceof IfTag) {
+    stack.push({ node: 'if', variables: new Set<string>() });
     const fromBranches = node.branches.flatMap((branch) => {
-      const fromValue = visitLiquidAST(branch.value.initial, localVariablesSet);
-      const fromTemplates = branch.templates.flatMap((template) =>
-        visitLiquidAST(template, localVariablesSet)
-      );
+      const fromValue = visitLiquidAST(branch.value.initial, stack);
+      const fromTemplates = branch.templates.flatMap((template) => visitLiquidAST(template, stack));
       return fromValue.concat(fromTemplates);
     });
+    stack.pop();
     return [...fromBranches];
   }
 
   if (node instanceof ForTag) {
-    localVariablesSet.add(node.variable);
-    const fromCollection = visitLiquidAST(node.collection, localVariablesSet);
-    const fromBody = node.templates
-      .flatMap((template) => visitLiquidAST(template, localVariablesSet))
-      .filter((prop) => !localVariablesSet.has(parseJsPropertyAccess(prop)[0]));
-    localVariablesSet.delete(node.variable);
+    stack.push({ node: 'for', variables: new Set<string>([node.variable]) });
+
+    const fromCollection = visitLiquidAST(node.collection, stack);
+    const fromBody = node.templates.flatMap((template) => visitLiquidAST(template, stack));
+    stack.pop();
     return fromCollection.concat(fromBody);
   }
 
@@ -78,11 +82,11 @@ function visitLiquidAST(node: unknown, localVariablesSet: Set<string>): string[]
       const parts = parseJsPropertyAccess(propertyPath);
 
       // If the root variable is local, skip it entirely
-      if (localVariablesSet.has(parts[0])) {
+      if (stack.toReversed().some((frame) => frame.variables.has(parts[0]))) {
         return [];
       }
 
-      return [truncatePathAtLocalVariable(propertyPath, parts, localVariablesSet)];
+      return [truncatePathAtLocalVariable(propertyPath, parts, stack)];
     }
 
     // Handle Range tokens
@@ -93,7 +97,9 @@ function visitLiquidAST(node: unknown, localVariablesSet: Set<string>): string[]
         .replace(/[()]/g, '')
         .split('..')
         .map((v) => v.trim())
-        .filter((v) => !/^\d+$/.test(v) && !localVariablesSet.has(v));
+        .filter(
+          (v) => !/^\d+$/.test(v) && !stack.toReversed().some((frame) => frame.variables.has(v))
+        );
       return vars;
     }
   }
@@ -103,7 +109,8 @@ function visitLiquidAST(node: unknown, localVariablesSet: Set<string>): string[]
 
 export function extractTemplateVariables(template: string): string[] {
   const ast: Template[] = liquidEngine.parse(template); // Pre-parse to ensure syntax is valid
-  const foundVariables: string[] = ast.flatMap((node) => visitLiquidAST(node, new Set<string>()));
+  const stack: StackEntry[] = [];
+  const foundVariables: string[] = ast.flatMap((node) => visitLiquidAST(node, stack));
   const distictVariables = Array.from(new Set(foundVariables));
   return distictVariables;
 }
