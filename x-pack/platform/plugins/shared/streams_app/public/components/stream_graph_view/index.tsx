@@ -8,39 +8,29 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiFlexGroup,
-  useEuiTheme,
-  EuiButton,
-  EuiFlexItem,
   EuiEmptyPrompt,
   EuiLoadingElastic,
-  EuiSpacer,
+  EuiButton,
   EuiButtonEmpty,
-  EuiPanel,
-  EuiTitle,
-  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { isEmpty } from 'lodash';
 import type { OverlayRef } from '@kbn/core/public';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
+import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
-import { StreamsTreeTable } from './tree_table';
-import { StreamsAppPageTemplate } from '../streams_app_page_template';
-import { StreamsListEmptyPrompt } from './streams_list_empty_prompt';
-import { useTimefilter } from '../../hooks/use_timefilter';
-import { GroupStreamModificationFlyout } from '../group_stream_modification_flyout/group_stream_modification_flyout';
-import { GroupStreamsCards } from './group_streams_cards';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
+import { StreamsAppPageTemplate } from '../streams_app_page_template';
+import { GroupStreamModificationFlyout } from '../group_stream_modification_flyout/group_stream_modification_flyout';
 import { StreamsAppContextProvider } from '../streams_app_context_provider';
-import { StreamsSettingsFlyout } from './streams_settings_flyout';
+import { StreamsSettingsFlyout } from '../stream_list_view/streams_settings_flyout';
 import { FeedbackButton } from '../feedback_button';
-import { AssetImage } from '../asset_image';
+import { StreamsGraph } from '../streams_graph';
 
-export function StreamListView() {
+export function StreamGraphView() {
   const { euiTheme } = useEuiTheme();
   const context = useKibana();
   const router = useStreamsAppRouter();
@@ -53,17 +43,12 @@ export function StreamListView() {
     core,
   } = context;
 
-  const { timeState } = useTimefilter();
   const streamsListFetch = useStreamsAppFetch(
     async ({ signal }) =>
       streamsRepositoryClient.fetch('GET /internal/streams', {
         signal,
       }),
-    // time state change is used to trigger a refresh of the listed
-    // streams metadata but we operate on stale data if we don't
-    // also refresh the streams
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [streamsRepositoryClient, timeState.start, timeState.end]
+    [streamsRepositoryClient]
   );
 
   const {
@@ -71,7 +56,6 @@ export function StreamListView() {
   } = useStreamsPrivileges();
 
   const overlayRef = React.useRef<OverlayRef | null>(null);
-
   const [isSettingsFlyoutOpen, setIsSettingsFlyoutOpen] = React.useState(false);
 
   function openGroupStreamModificationFlyout() {
@@ -148,7 +132,7 @@ export function StreamListView() {
             label: i18n.translate('xpack.streams.streamsListView.tableTab', {
               defaultMessage: 'List',
             }),
-            isSelected: true,
+            isSelected: false,
             onClick: () => router.push('/list', { path: {}, query: {} }),
           },
           {
@@ -156,7 +140,7 @@ export function StreamListView() {
             label: i18n.translate('xpack.streams.streamsListView.graphTab', {
               defaultMessage: 'Graph',
             }),
-            isSelected: false,
+            isSelected: true,
             onClick: () => router.push('/graph', { path: {}, query: {} }),
           },
         ]}
@@ -167,29 +151,17 @@ export function StreamListView() {
             icon={<EuiLoadingElastic size="xl" />}
             title={
               <h2>
-                {i18n.translate('xpack.streams.streamsListView.loadingStreams', {
+                {i18n.translate('xpack.streams.streamsGraphView.loadingStreams', {
                   defaultMessage: 'Loading Streams',
                 })}
               </h2>
             }
           />
-        ) : !streamsListFetch.loading && isEmpty(streamsListFetch.value?.streams) ? (
-          <StreamsListEmptyPrompt />
         ) : (
-          <>
-            <WelcomePanel />
-            <StreamsTreeTable
-              loading={streamsListFetch.loading}
-              streams={streamsListFetch.value?.streams}
-              canReadFailureStore={streamsListFetch.value?.canReadFailureStore}
-            />
-            {groupStreams?.enabled && (
-              <>
-                <EuiSpacer size="l" />
-                <GroupStreamsCards streams={streamsListFetch.value?.streams} />
-              </>
-            )}
-          </>
+          <StreamsGraph
+            streams={streamsListFetch.value?.streams || []}
+            loading={streamsListFetch.loading}
+          />
         )}
       </StreamsAppPageTemplate.Body>
       {isSettingsFlyoutOpen && (
@@ -198,85 +170,6 @@ export function StreamListView() {
           refreshStreams={streamsListFetch.refresh}
         />
       )}
-    </>
-  );
-}
-
-function WelcomePanel() {
-  const {
-    core: { docLinks },
-  } = useKibana();
-  const [isDismissed, setIsDismissed] = useLocalStorage('streamsWelcomePanelDismissed', false);
-
-  if (isDismissed) {
-    return null;
-  }
-
-  return (
-    <>
-      <EuiPanel hasBorder={true} paddingSize="m" color="subdued" grow={false} borderRadius="m">
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <AssetImage type="yourPreviewWillAppearHere" size="s" />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="xs">
-              <EuiFlexItem>
-                <EuiTitle size="xs">
-                  <h4>
-                    {i18n.translate('xpack.streams.streamsListView.welcomeTitle', {
-                      defaultMessage: 'Welcome to Streams',
-                    })}
-                  </h4>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText size="s" color="subdued">
-                  {i18n.translate('xpack.streams.streamsListView.welcomeDescription', {
-                    defaultMessage:
-                      'Use Streams to organize and process your data into clear structured flows, and simplify routing, field extraction, and retention management.',
-                  })}
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiFlexGroup direction="row" gutterSize="xs" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      color="primary"
-                      size="s"
-                      href={docLinks.links.observability.logsStreams}
-                      target="_blank"
-                      rel="noopener"
-                    >
-                      {i18n.translate('xpack.streams.streamsListView.learnMoreButtonLabel', {
-                        defaultMessage: 'Go to docs',
-                      })}
-                    </EuiButton>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiButtonEmpty
-                      color="text"
-                      size="s"
-                      onClick={() => setIsDismissed(true)}
-                      aria-label={i18n.translate(
-                        'xpack.streams.streamsListView.dismissWelcomeButtonLabel',
-                        {
-                          defaultMessage: 'Dismiss welcome panel',
-                        }
-                      )}
-                    >
-                      {i18n.translate('xpack.streams.streamsListView.learnMoreButtonLabel', {
-                        defaultMessage: 'Hide this',
-                      })}
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-      <EuiSpacer size="l" />
     </>
   );
 }
