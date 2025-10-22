@@ -17,7 +17,7 @@ import type { DashboardAttributes } from '../../server';
 
 import type { DashboardState } from '../../common';
 import { LATEST_VERSION } from '../../common/content_management';
-import { dataService, savedObjectsTaggingService } from '../services/kibana_services';
+import { dataService } from '../services/kibana_services';
 import type { DashboardApi } from './types';
 import { generateNewPanelIds } from './generate_new_panel_ids';
 
@@ -97,18 +97,10 @@ export const getSerializedState = ({
     options,
     panels,
     title,
+    tags,
   };
 
-  // TODO Provide tags as an array of tag names in the attribute. In that case, tag references
-  // will be extracted by the server.
-  const savedObjectsTaggingApi = savedObjectsTaggingService?.getTaggingApi();
-  const references =
-    tags && savedObjectsTaggingApi?.ui.updateTagsReferences
-      ? savedObjectsTaggingApi?.ui.updateTagsReferences([], tags)
-      : [];
-
   const allReferences = [
-    ...references,
     ...(prefixedPanelReferences ?? []),
     ...(controlGroupReferences ?? []),
   ];
