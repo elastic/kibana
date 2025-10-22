@@ -122,42 +122,46 @@ The 8.19.6 release includes the following fixes.
 [[enhancement-v8.19.6]]
 === Enhancements
 Elastic Security solution::
-For the Elastic Security 8.19.6 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+For the Elastic Security 8.19.6 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Kibana security::
-* Enhanced the error message to include detailed information about why the role is considered malformed ({kibana-pull}239098[#239098]).
-Other::
-* CDR Data View versioning and migration logic ({kibana-pull}238547[#238547]).
+* Enhances error message by explaining why the role is considered malformed ({kibana-pull}239098[#239098]).
 
 [float]
 [[fixes-v8.19.6]]
 === Fixes
 Alerting and cases::
-* Update `nodemailer` ({kibana-pull}238816[#238816]).
-* Connector api update ({kibana-pull}236863[#236863]).
+* Updates `nodemailer` to `7.0.9` ({kibana-pull}238816[#238816]).
+* Isolates the configuration parameters for the Tines connector to the server side ({kibana-pull}236863[#236863]).
 Dashboards and Visualizations::
-* Fixes unable to reset unsaved change when enabling timeRestore and setting time range ({kibana-pull}239992[#239992]).
-* Fixes error when selecting "(blank)" value in options list ({kibana-pull}239791[#239791]).
-* Fixes a bug in *Lens* that incorrectly assigned unsaved (ad-hoc) dataview references ({kibana-pull}239431[#239431]).
-* Fixes a bug in the Lens Table that broke **click to filter** on table rows when any column is used as a formula. in *Lens* ({kibana-pull}239222[#239222]).
-* Fixes metric color assignment when breakdown and a max dimension are defined in *Lens* ({kibana-pull}238901[#238901]).
-* Fixes Adhoc dataviews from ES|QL charts are being filtered out in the KQL search bar ({kibana-pull}238731[#238731]).
-* Fixes an error in the **Visualize Listing** page in which an error in the vis could cause the entire page to error. This improves the error handling to make it easier to identity which visualization is causing the problem in order to address it.({kibana-pull}238355[#238355]).
-* Fixes panels in sections from URL state are not transformed ({kibana-pull}237382[#237382]).
+* Fixes bug that prevented you from deleting unsaved dashboard changes after you had enabled the timeRestore setting and selected a time and date using the date picker ({kibana-pull}239992[#239992]).
+* Fixes error that occured when you selected a blank value in the options list ({kibana-pull}239791[#239791]).
+* Fixes a bug in Lens that incorrectly assigned unsaved, ad-hoc dataview references ({kibana-pull}239431[#239431]).
+* Fixes bug that broke the filter functionalty in table rows when any column is used as a formula in *Lens* ({kibana-pull}239222[#239222]).
+* Fixes metric color assignment when breakdown and a max dimension are defined in Lens ({kibana-pull}238901[#238901]).
+* Ensures adhoc dataviews from {esql} charts aren't being filtered out in the KQL search bar ({kibana-pull}238731[#238731]).
+* Fixes bug where where an error in the visualization could cause the entire **Visualize Listing** page to error. This improves the error handling to make it easier to identify which visualization is causing problems ({kibana-pull}238355[#238355]).
+* Fixes bug that prevented panels in sections from URL state from being transformed ({kibana-pull}237382[#237382]).
 Data ingestion and Fleet::
-* Fixes on integration policy upgrade ({kibana-pull}238542[#238542]).
-* Fixes error when deleting orphaned integration policies ({kibana-pull}237875[#237875]).
+* Fixes bug that occured during an integration policy upgrade that prevented the new package global variables from being included and stale variable references from being removed ({kibana-pull}238542[#238542]).
+* Fixes error when deleting orphaned integration policies and allows you to force delete orphaned integration policies using Fleet APIs ({kibana-pull}237875[#237875]).
 * Fixes an issue where fields were resetting automatically when editing ingest pipeline settings ({kibana-pull}237509[#237509]).
 Discover::
-* Fixes missing fields when using combined filters with `ignoreFilterIfFieldNotInIndex` UI setting ({kibana-pull}238945[#238945]).
-* Clear time field sorting after going from Classic to ES|QL mode ({kibana-pull}235338[#235338]).
+* Ensures that the combined filters are considered when selecting the correct fields for the query while the `courier:ignoreFilterIfFieldNotInIndex` advanced setting is enabled ({kibana-pull}238945[#238945]).
+* Clears time field sorting after going from Classic to {esql} mode ({kibana-pull}235338[#235338]).
 Elastic Observability solution::
-For the Elastic Observability 8.19.6 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+* Removes unecessary `_source` from query as we use fields ({kibana-pull}239205[#239205]).
+* Uses word boundaries to only replace the metric name as an identifier and not as part of other text ({kibana-pull}238849[#238849]).
+* Fixes error when Observability AI Assistant is disabled ({kibana-pull}238811[#238811]).
+* Uses `runWithCache`` for Fleet bulk operations ({kibana-pull}238326[#238326]).
+* Disables max attempts for private locations sync task ({kibana-pull}237784[#237784]).
+* Fixes recover alert while monitor is down ({kibana-pull}237479[#237479]).
+* Fixes the AI Assistant button tooltip by closing the tooltip when you are not hovering over the button ({kibana-pull}237202[#237202]).
 Kibana platform::
 * Fixes files management flyout crashing ({kibana-pull}237588[#237588]).
 Management::
-* Fixed a bug in component template creation flow where a new component template with `@custom` suffix in name would lead to updating mappings of all unrelated data-streams and a popup would appear asking to rollover conflicting ones ({kibana-pull}237952[#237952]).
+* Fixed a bug in component template creation flow where a new component template with `@custom` suffix in name would lead to updating mappings of all unrelated data streams and a message would display asking to rollover conflicting ones ({kibana-pull}237952[#237952]).
 Search::
-* Fixes an issue in the RAG Playground where invalid fields displayed red styling but no error message. Error text is now shown to help users identify and correct form issues. ({kibana-pull}238284[#238284]).
+* Fixes an issue in the RAG Playground where invalid fields displayed red styling but no error message. Error text is now shown to help users identify and correct form issues ({kibana-pull}238284[#238284]).
 
 [[release-notes-8.19.5]]
 == {kib} 8.19.5
