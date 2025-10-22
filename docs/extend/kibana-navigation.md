@@ -91,29 +91,14 @@ Both methods offer customization such as opening the target in a new page, with 
 * [core.application.navigateToApp options](https://github.com/elastic/kibana/tree/master/src/core/packages/application/browser/src/contracts.ts)
 * [core.application.navigateToUrl options](https://github.com/elastic/kibana/tree/master/src/core/packages/application/browser/src/contracts.ts)
 
-**Rendering a link to a different {{kib}} app on its own would also cause a full page reload:**
+With {{kib}}'s `GlobalRedirectAppLinks` global solution, regular links now work correctly without causing full page reloads:
 
 ```typescript
-const myLink = () =>
+const MyLink = () =>
   <a href={urlToADashboard}>Go to Dashboard</a>;
 ```
 
-A workaround could be to handle a click, prevent browser navigation and use `core.application.navigateToApp` API:
-
-```typescript
-const MySPALink = () =>
-  <a
-    href={urlToADashboard}
-    onClick={(e) => {
-      e.preventDefault();
-      core.application.navigateToApp('dashboard', { path: '/my-dashboard' });
-    }}
-  >
-    Go to Dashboard
-  </a>;
-```
-
-Rather than handling this manually for each link, {{kib}} now provides a global solution: `GlobalRedirectAppLinks`. This component is registered once by the core rendering service and automatically handles link clicks on the entire document, enabling SPA-friendly in-app navigation without requiring manual wrapping of component trees.
+This works automatically throughout your entire app without any additional wrapping or manual click handling. The `GlobalRedirectAppLinks` component is registered once by the core rendering service and automatically handles link clicks on the entire document, enabling SPA-friendly in-app navigation.
 
 This means you can use regular links throughout your app without any wrapper:
 
@@ -131,24 +116,60 @@ const MyApp = () =>
 The previous `RedirectAppLinks` wrapper approach is now deprecated. It's no longer necessary to wrap component trees, as the global solution handles all links automatically. Existing usages will continue to work for backward compatibility, but new code should rely on the global solution instead.
 ::::
 
-::::{note}
-If you need to prevent the global link handling (e.g., to force a full page reload or control navigation manually), you can use `preventDefault()` or `stopPropagation()` on the click event:
+## Advanced: Manual Navigation Control
+
+In most cases, regular links are sufficient. However, you may need manual navigation control when you want to pass navigation state, execute custom logic, or handle special cases.
+
+### Intercepting Link Clicks
+
+Use `preventDefault()` to intercept a link click and handle navigation manually:
 
 ```typescript
 const MyCustomLink = () =>
   <a
+    href={urlToADashboard}
+    onClick={(e) => {
+      e.preventDefault();
+      // Custom logic here
+      core.application.navigateToApp('dashboard', { path: '/my-dashboard' });
+    }}
+  >
+    Go to Dashboard
+  </a>;
+```
+
+### Passing Navigation State
+
+Use `navigateToApp` to navigate to other apps and pass state through locators:
+
+```typescript
+const navigateWithState = async () => {
+  await plugins.discover.locator.navigate({
+    filters: myFilters,
+    timeRange: myTimeRange,
+    index: myIndexPattern,
+  });
+};
+```
+
+### Special Navigation Scenarios
+
+For cases requiring full page reload or bypassing navigation guards:
+
+```typescript
+const MyForcedReloadLink = () =>
+  <a
     href={urlToSomeSpecialApp}
     onClick={(e) => {
       e.preventDefault();
-      core.application.navigateToUrl('someSpecialApp', { forceRedirect: true });
+      core.application.navigateToUrl(urlToSomeSpecialApp, { forceRedirect: true });
     }}
   >
-    Go to Some Special App
+    Go to Special App
   </a>;
 ```
 
 To bypass the default onAppLeave behavior, you can set the `skipUnload` option to `true`. This option is also available in `navigateToApp`.
-::::
 
 
 ## Setting up internal app routing [routing]
