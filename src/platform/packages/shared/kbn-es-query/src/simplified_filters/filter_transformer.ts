@@ -34,6 +34,7 @@ import { FilterConversionError } from './errors';
 export class FilterTransformer {
   /**
    * Convert stored Filter (from saved objects/URL state) to SimplifiedFilter
+   * Uses 3-tier approach: Full Compatibility -> Enhanced Compatibility -> Preserve Original
    */
   static fromStoredFilter(storedFilter: any): SimplifiedFilter {
     try {
@@ -45,25 +46,49 @@ export class FilterTransformer {
       // Extract base properties from stored filter
       const baseProperties = this.extractBaseProperties(storedFilter);
 
-      // Determine filter type and convert accordingly
-      if (this.isRawDSLFilter(storedFilter)) {
-        return {
-          ...baseProperties,
-          dsl: this.convertToDSLFilter(storedFilter),
-        } as SimplifiedFilter;
+      // TIER 1: Full Compatibility - Direct SimplifiedFilter conversion
+      if (this.isFullyCompatible(storedFilter)) {
+        try {
+          const condition = this.convertToSimpleCondition(storedFilter);
+          return {
+            ...baseProperties,
+            condition,
+          } as SimplifiedFilter;
+        } catch (conversionError) {
+          // If conversion fails, fall through to DSL handling
+        }
       }
 
+      // TIER 2: Enhanced Compatibility - Parse and simplify when possible
+      if (this.isEnhancedCompatible(storedFilter)) {
+        try {
+          const condition = this.convertWithEnhancement(storedFilter);
+          return {
+            ...baseProperties,
+            condition,
+          } as SimplifiedFilter;
+        } catch (conversionError) {
+          // If conversion fails, fall through to DSL handling
+        }
+      }
+
+      // Handle grouped filters
       if (this.isStoredGroupFilter(storedFilter)) {
-        return {
-          ...baseProperties,
-          group: this.convertToFilterGroup(storedFilter),
-        } as SimplifiedFilter;
+        try {
+          const group = this.convertToFilterGroup(storedFilter);
+          return {
+            ...baseProperties,
+            group,
+          } as SimplifiedFilter;
+        } catch (conversionError) {
+          // If conversion fails, fall through to DSL handling
+        }
       }
 
-      // Default to simple condition filter
+      // TIER 3: Preserve Original - No data loss, keep as RawDSL
       return {
         ...baseProperties,
-        condition: this.convertToSimpleCondition(storedFilter),
+        dsl: this.convertToRawDSLWithReason(storedFilter),
       } as SimplifiedFilter;
     } catch (error) {
       if (error instanceof FilterConversionError) {
@@ -211,25 +236,69 @@ export class FilterTransformer {
     };
   }
 
-  private static isRawDSLFilter(storedFilter: any): boolean {
-    // Detect if this is a raw DSL filter that can't be converted to simple conditions
-    return Boolean(
-      storedFilter.query &&
-        (storedFilter.query.bool?.should ||
-          storedFilter.query.bool?.must_not ||
-          storedFilter.query.script ||
-          storedFilter.query.nested ||
-          storedFilter.query.has_child ||
-          storedFilter.query.has_parent)
-    );
-  }
-
   private static isStoredGroupFilter(storedFilter: any): boolean {
     // Detect if this represents a grouped filter with multiple conditions
     return Boolean(
       storedFilter.query?.bool &&
         (storedFilter.query.bool.must?.length > 1 || storedFilter.query.bool.should?.length > 1)
     );
+  }
+
+  // ====================================================================
+  // TIER DETECTION METHODS
+  // ====================================================================
+
+  /**
+   * TIER 1: Full Compatibility - Can be directly converted to SimplifiedFilter
+   */
+  private static isFullyCompatible(storedFilter: any): boolean {
+    const meta = storedFilter.meta || {};
+
+    // Simple phrase filter without complex query structure
+    if (meta.type === 'phrase' && !storedFilter.query && meta.params) {
+      return true;
+    }
+
+    // Basic exists filter without query structure
+    if (meta.type === 'exists' && !storedFilter.query) {
+      return true;
+    }
+
+    // Simple range filter without complex query structure
+    if (meta.type === 'range' && !storedFilter.query && meta.params) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * TIER 2: Enhanced Compatibility - Can be parsed and simplified
+   */
+  private static isEnhancedCompatible(storedFilter: any): boolean {
+    // Check for simplifiable query structures
+    if (storedFilter.query?.match_phrase || storedFilter.query?.match) {
+      return true;
+    }
+
+    if (storedFilter.query?.range) {
+      return true;
+    }
+
+    if (storedFilter.query?.exists) {
+      return true;
+    }
+
+    // Legacy filter structures that can be migrated
+    if (storedFilter.range && !storedFilter.query) {
+      return true;
+    }
+
+    if (storedFilter.exists && !storedFilter.query) {
+      return true;
+    }
+
+    return false;
   }
 
   private static convertToSimpleCondition(storedFilter: any): SimpleFilterCondition {
@@ -300,6 +369,17 @@ export class FilterTransformer {
       };
     }
 
+    if (query.match_phrase) {
+      const phraseField = Object.keys(query.match_phrase)[0];
+      const value = query.match_phrase[phraseField];
+      return {
+        ...baseCondition,
+        field: phraseField, // Use the field from the query, not meta
+        operator: meta.negate ? 'is_not' : 'is',
+        value: typeof value === 'object' ? value.query : value,
+      };
+    }
+
     // Fallback - try to extract from meta.params
     if (meta.params?.query) {
       return {
@@ -338,9 +418,116 @@ export class FilterTransformer {
     };
   }
 
-  private static convertToDSLFilter(storedFilter: any): RawDSLFilter {
+  // ====================================================================
+  // ENHANCED CONVERSION METHODS
+  // ====================================================================
+
+  /**
+   * TIER 2: Convert with enhancement - parse complex structures when possible
+   */
+  private static convertWithEnhancement(storedFilter: any): SimpleFilterCondition {
+    // Handle query-based filters
+    if (storedFilter.query) {
+      return this.parseQueryFilter(storedFilter);
+    }
+
+    // Handle legacy filter structures
+    if (storedFilter.range || storedFilter.exists) {
+      return this.parseLegacyFilter(storedFilter);
+    }
+
+    throw new FilterConversionError('Filter is not enhancement-compatible');
+  }
+
+  /**
+   * Parse query-based filters (match_phrase, range, exists, etc.)
+   */
+  private static parseQueryFilter(storedFilter: any): SimpleFilterCondition {
+    const query = storedFilter.query;
+
+    // Handle match_phrase queries
+    if (query.match_phrase) {
+      const field = Object.keys(query.match_phrase)[0];
+      const value = query.match_phrase[field];
+
+      return {
+        field,
+        operator: 'is',
+        value: typeof value === 'object' ? value.query : value,
+      };
+    }
+
+    // Handle match queries with phrase type
+    if (query.match) {
+      const field = Object.keys(query.match)[0];
+      const config = query.match[field];
+
+      if (config.type === 'phrase') {
+        return {
+          field,
+          operator: 'is',
+          value: config.query,
+        };
+      }
+    }
+
+    // Handle range queries
+    if (query.range) {
+      const field = Object.keys(query.range)[0];
+      const rangeConfig = query.range[field];
+
+      return {
+        field,
+        operator: 'range',
+        value: rangeConfig,
+      };
+    }
+
+    // Handle exists queries
+    if (query.exists) {
+      return {
+        field: query.exists.field,
+        operator: 'exists',
+      };
+    }
+
+    throw new FilterConversionError('Query type not supported for enhancement');
+  }
+
+  /**
+   * Parse legacy filter structures (pre-query format)
+   */
+  private static parseLegacyFilter(storedFilter: any): SimpleFilterCondition {
+    // Handle legacy range filters
+    if (storedFilter.range) {
+      const field = Object.keys(storedFilter.range)[0];
+      const rangeConfig = storedFilter.range[field];
+
+      return {
+        field,
+        operator: 'range',
+        value: rangeConfig,
+      };
+    }
+
+    // Handle legacy exists filters
+    if (storedFilter.exists) {
+      return {
+        field: storedFilter.exists.field,
+        operator: 'exists',
+      };
+    }
+
+    throw new FilterConversionError('Legacy filter type not supported');
+  }
+
+  /**
+   * TIER 3: Convert to RawDSL with preservation reason
+   */
+  private static convertToRawDSLWithReason(storedFilter: any): RawDSLFilter {
+    // Preserved as RawDSL for maximum compatibility
     return {
-      query: storedFilter.query || {},
+      query: storedFilter.query || storedFilter,
     };
   }
 
