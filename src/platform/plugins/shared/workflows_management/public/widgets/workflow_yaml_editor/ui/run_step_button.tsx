@@ -18,7 +18,7 @@ const Text = {
     defaultMessage: 'Run step',
   }),
   invalid: i18n.translate('workflows.workflowDetail.yamlEditor.stepActions.runStep.disabled', {
-    defaultMessage: 'Fix syntax errors to run',
+    defaultMessage: 'Fix errors to run the step',
   }),
 };
 
