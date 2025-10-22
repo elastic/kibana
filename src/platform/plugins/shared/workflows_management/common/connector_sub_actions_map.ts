@@ -46,8 +46,8 @@ import {
 } from '@kbn/connector-schemas/d3security/constants';
 import {
   SUB_ACTION as CROWDSTRIKE_SUB_ACTION,
-  CROWDSTRIKE_CONNECTOR_ID,
-} from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
+  CONNECTOR_ID as CROWDSTRIKE_CONNECTOR_ID,
+} from '@kbn/connector-schemas/crowdstrike/constants';
 import {
   MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION,
   MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID,
