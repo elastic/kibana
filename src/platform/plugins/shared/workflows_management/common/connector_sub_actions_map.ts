@@ -26,8 +26,8 @@ import {
 } from '@kbn/connector-schemas/gemini/constants';
 import {
   SUB_ACTION as THEHIVE_SUB_ACTION,
-  THEHIVE_CONNECTOR_ID,
-} from '@kbn/stack-connectors-plugin/common/thehive/constants';
+  CONNECTOR_ID as THEHIVE_CONNECTOR_ID,
+} from '@kbn/connector-schemas/thehive/constants';
 import {
   SUB_ACTION as TINES_SUB_ACTION,
   CONNECTOR_ID as TINES_CONNECTOR_ID,
@@ -38,8 +38,8 @@ import {
 } from '@kbn/connector-schemas/xsoar/constants';
 import {
   SUB_ACTION as SENTINELONE_SUB_ACTION,
-  SENTINELONE_CONNECTOR_ID,
-} from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
+  CONNECTOR_ID as SENTINELONE_CONNECTOR_ID,
+} from '@kbn/connector-schemas/sentinelone/constants';
 import {
   SUB_ACTION as D3SECURITY_SUB_ACTION,
   CONNECTOR_ID as D3_SECURITY_CONNECTOR_ID,
