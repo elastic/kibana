@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type React from 'react';
-import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import type { OverlayBannersStart } from './banners';
 import type { OverlayFlyoutStart } from './flyout';
 import type { OverlayModalStart } from './modal';
-import type { OverlayFlyoutOpenOptions } from './flyout';
+import type { OverlaySystemFlyoutStart } from './system_flyout';
 
 /** @public */
 export interface OverlayStart {
@@ -20,12 +18,10 @@ export interface OverlayStart {
   banners: OverlayBannersStart;
   /** {@link OverlayFlyoutStart#open} */
   openFlyout: OverlayFlyoutStart['open'];
+  /** Opens a system flyout that integrates with EUI Flyout Manager */
+  openSystemFlyout: OverlaySystemFlyoutStart['open'];
   /** {@link OverlayModalStart#open} */
   openModal: OverlayModalStart['open'];
   /** {@link OverlayModalStart#openConfirm} */
   openConfirm: OverlayModalStart['openConfirm'];
-  /** Opens a system flyout that integrates with EUI Flyout Manager */
-  openSystemFlyout: (content: React.ReactElement, options?: OverlayFlyoutOpenOptions) => OverlayRef;
-  /** Closes all system flyouts */
-  closeAllSystemFlyouts: () => void;
 }
