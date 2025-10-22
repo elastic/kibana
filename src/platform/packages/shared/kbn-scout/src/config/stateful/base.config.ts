@@ -21,7 +21,13 @@ import { fleetPackageRegistryDockerImage, defineDockerServersConfig } from '@kbn
 import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { STATEFUL_ROLES_ROOT_PATH } from '@kbn/es';
-import { FLEET_PACKAGE_REGISTRY_PORT, TEST_ES_HOST, TEST_ES_PORT } from '@kbn/test-services';
+import {
+  FLEET_PACKAGE_REGISTRY_PORT,
+  TEST_ES_HOST,
+  TEST_ES_PORT,
+  TEST_KIBANA_HOST,
+  TEST_KIBANA_PORT,
+} from '@kbn/test-services';
 import type { ScoutServerConfig } from '../../types';
 import { SAML_IDP_PLUGIN_PATH, STATEFUL_IDP_METADATA_PATH } from '../constants';
 
@@ -49,8 +55,8 @@ const servers = {
   },
   kibana: {
     protocol: 'http',
-    hostname: TEST_ES_HOST,
-    port: TEST_ES_PORT,
+    hostname: TEST_KIBANA_HOST,
+    port: TEST_KIBANA_PORT,
     username: 'elastic',
     password: 'changeme',
   },

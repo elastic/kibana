@@ -14,7 +14,11 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 
-import { TEST_ES_HOST, TEST_ES_PORT, TEST_REMOTE_KIBANA_PORT } from '@kbn/test-services';
+import {
+  TEST_REMOTE_ES_HOST,
+  TEST_REMOTE_ES_PORT,
+  TEST_REMOTE_KIBANA_PORT,
+} from '@kbn/test-services';
 import { applyFipsOverrides } from '../lib/fips_overrides';
 import { Config, readConfigFile } from '../../functional_test_runner';
 
@@ -148,7 +152,7 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
                   serverArgs: [
                     ...config.get('kbnTestServer.serverArgs'),
                     `--xpack.fleet.syncIntegrations.taskInterval=5s`,
-                    `--elasticsearch.hosts=http://${TEST_ES_HOST}:${TEST_ES_PORT}`,
+                    `--elasticsearch.hosts=http://${TEST_REMOTE_ES_HOST}:${TEST_REMOTE_ES_PORT}`,
                     `--server.port=${TEST_REMOTE_KIBANA_PORT}`,
                   ],
                 },

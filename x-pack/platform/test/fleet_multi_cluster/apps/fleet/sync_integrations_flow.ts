@@ -11,7 +11,9 @@ import {
   TEST_ES_PORT,
   TEST_ES_TRANSPORT_PORT,
   TEST_KIBANA_HOST,
-  TEST_KIBANA_PORT,
+  TEST_REMOTE_ES_HOST,
+  TEST_REMOTE_ES_PORT,
+  TEST_REMOTE_KIBANA_PORT,
 } from '@kbn/test-services';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -84,9 +86,9 @@ export default ({ getService }: FtrProviderContext) => {
           id: 'remote-elasticsearch1',
           name: 'Remote ES Output',
           type: 'remote_elasticsearch',
-          hosts: [`http://${TEST_ES_HOST}:${TEST_ES_PORT + 1}`],
+          hosts: [`http://${TEST_REMOTE_ES_HOST}:${TEST_REMOTE_ES_PORT}`],
           kibana_api_key: await createRemoteAPIKey(),
-          kibana_url: `http://localhost:${TEST_KIBANA_PORT + 1}`,
+          kibana_url: `http://localhost:${TEST_REMOTE_KIBANA_PORT}`,
           sync_integrations: true,
           sync_uninstalled_integrations: true,
           secrets: {
@@ -98,12 +100,12 @@ export default ({ getService }: FtrProviderContext) => {
 
     async function createLocalOutputOnRemote() {
       const response = await axios.post(
-        `http://${TEST_KIBANA_HOST}:${TEST_KIBANA_PORT + 1}/api/fleet/outputs`,
+        `http://${TEST_KIBANA_HOST}:${TEST_REMOTE_KIBANA_PORT}/api/fleet/outputs`,
         {
           id: 'es',
           type: 'elasticsearch',
           name: 'Local ES Output',
-          hosts: [`http://${TEST_ES_HOST}:${TEST_ES_PORT + 1}`],
+          hosts: [`http://${TEST_ES_HOST}:${TEST_ES_PORT}`],
         },
         {
           auth: { username: 'elastic', password: 'changeme' },
@@ -221,7 +223,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       // Clean up the local output on remote
       const response = await axios.delete(
-        `http://${TEST_KIBANA_HOST}:${TEST_KIBANA_PORT + 1}/api/fleet/outputs/es`,
+        `http://${TEST_KIBANA_HOST}:${TEST_REMOTE_KIBANA_PORT}/api/fleet/outputs/es`,
         {
           auth: { username: 'elastic', password: 'changeme' },
           headers: { 'kbn-xsrf': 'true', 'x-elastic-internal-origin': 'fleet-e2e' },

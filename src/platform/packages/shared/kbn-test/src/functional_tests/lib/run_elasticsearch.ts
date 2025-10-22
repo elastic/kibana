@@ -111,10 +111,12 @@ export async function runElasticsearch(
     };
   }
 
+  const remoteName = name ?? `${SERVICE_NAMESPACE}-ftr-remote`;
+
   const remotePort = await getPort();
   const remoteNode = await startEsNode({
     log,
-    name: name ?? `${SERVICE_NAMESPACE}-ftr-remote`,
+    name: remoteName,
     logsDir,
     config: {
       ...config,
