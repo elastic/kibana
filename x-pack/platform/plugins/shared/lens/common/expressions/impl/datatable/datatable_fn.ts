@@ -7,7 +7,7 @@
 
 import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
+import { prepareLogTable } from '@kbn/visualizations-common';
 import type { Datatable, ExecutionContext } from '@kbn/expressions-plugin/common';
 import type { FormatFactory } from '../../../types';
 import { computeSummaryRowForColumn } from './summary';
