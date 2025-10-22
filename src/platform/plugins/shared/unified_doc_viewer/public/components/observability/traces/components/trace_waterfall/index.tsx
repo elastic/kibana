@@ -16,6 +16,8 @@ import { ContentFrameworkSection } from '../../../../..';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { FullScreenWaterfall } from '../full_screen_waterfall';
 import { TraceWaterfallTourStep } from './full_screen_waterfall_tour_step';
+import { useGetGenerateDiscoverLink } from '../../hooks/use_get_generate_discover_link';
+import { createTraceContextWhereClause } from '../../common/create_trace_context_where_clause';
 
 interface Props {
   traceId: string;
@@ -27,6 +29,11 @@ interface Props {
 export const fullScreenButtonLabel = i18n.translate(
   'unifiedDocViewer.observability.traces.trace.fullScreen.button',
   { defaultMessage: 'Expand trace timeline' }
+);
+
+export const exploreTraceButtonLabel = i18n.translate(
+  'unifiedDocViewer.observability.traces.trace.exploreTrace.button',
+  { defaultMessage: 'Explore trace timeline' }
 );
 
 const sectionTip = i18n.translate('unifiedDocViewer.observability.traces.trace.description', {
@@ -58,6 +65,16 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
 
   const actionId = 'traceWaterfallFullScreenAction';
 
+  // TODO the POC only uses this only for ESQL (at least for now)
+  const query = data.query.queryString.getQuery();
+  const isEsqlMode = 'esql' in query;
+
+  const { generateDiscoverLink } = useGetGenerateDiscoverLink({
+    indexPattern: 'traces*,remote_cluster:traces*', // TODO put the proper indexes, not hardcoded
+    tabId: 'unifiedDocViewerExploreTraceTab',
+  });
+  const link = generateDiscoverLink(createTraceContextWhereClause({ traceId }));
+
   return (
     <>
       {showFullScreenWaterfall ? (
@@ -77,15 +94,24 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
         title={sectionTitle}
         description={sectionTip}
         actions={[
-          {
-            icon: 'fullScreen',
-            onClick: () => setShowFullScreenWaterfall(true),
-            label: fullScreenButtonLabel,
-            ariaLabel: fullScreenButtonLabel,
-            id: actionId,
-          },
+          isEsqlMode && link
+            ? {
+                icon: 'discoverApp',
+                href: link,
+                label: exploreTraceButtonLabel,
+                ariaLabel: exploreTraceButtonLabel,
+                id: actionId,
+              }
+            : {
+                icon: 'fullScreen',
+                onClick: () => setShowFullScreenWaterfall(true),
+                label: fullScreenButtonLabel,
+                ariaLabel: fullScreenButtonLabel,
+                id: actionId,
+              },
         ]}
       >
+        {isEsqlMode}
         <EmbeddableRenderer
           type="APM_TRACE_WATERFALL_EMBEDDABLE"
           getParentApi={getParentApi}
