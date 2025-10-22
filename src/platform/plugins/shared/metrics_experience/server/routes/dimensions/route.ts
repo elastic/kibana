@@ -35,6 +35,7 @@ export const getDimensionsRoute = createRoute({
         .union([z.string(), z.array(z.string())])
         .transform((val) => (Array.isArray(val) ? val : [val]))
         .default(['metrics-*']),
+      metrics: z.array(z.string()),
       to: z.string().datetime().default(dateMathParse('now')!.toISOString()).transform(isoToEpoch),
       from: z
         .string()
@@ -47,7 +48,7 @@ export const getDimensionsRoute = createRoute({
     const { elasticsearch, featureFlags } = await context.core;
     await throwNotFoundIfMetricsExperienceDisabled(featureFlags);
 
-    const { dimensions, indices, from, to } = params.query;
+    const { dimensions, indices, from, to, metrics } = params.query;
     const esClient = elasticsearch.client.asCurrentUser;
 
     const values = await getDimensions({
@@ -59,6 +60,7 @@ export const getDimensionsRoute = createRoute({
       dimensions,
       indices,
       from,
+      metrics,
       to,
       logger,
     });

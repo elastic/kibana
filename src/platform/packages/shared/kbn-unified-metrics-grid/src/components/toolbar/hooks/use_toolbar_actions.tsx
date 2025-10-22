@@ -66,6 +66,7 @@ export const useToolbarActions = ({
           indices={[indexPattern]}
           timeRange={requestParams.getTimeRange()}
           onClear={onClearValues}
+          metrics={fields.map((field) => field.name)}
         />
       ) : null,
     ],

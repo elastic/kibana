@@ -35,16 +35,18 @@ interface ValuesFilterProps {
   indices?: string[];
   disabled?: boolean;
   timeRange: TimeRange;
+  metrics: string[];
   onChange: (values: string[]) => void;
   onClear: () => void;
 }
 export const ValuesSelector = ({
   selectedDimensions,
   selectedValues,
-  onChange,
-  timeRange,
-  disabled = false,
   indices = [],
+  disabled = false,
+  timeRange,
+  metrics,
+  onChange,
   onClear,
 }: ValuesFilterProps) => {
   const {
@@ -54,6 +56,7 @@ export const ValuesSelector = ({
   } = useDimensionsQuery({
     dimensions: selectedDimensions,
     indices,
+    metrics,
     from: timeRange.from,
     to: timeRange.to,
   });

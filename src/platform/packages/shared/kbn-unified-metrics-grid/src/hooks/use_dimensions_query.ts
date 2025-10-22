@@ -12,6 +12,7 @@ import { useMetricsExperience } from './use_metrics_experience';
 
 export const useDimensionsQuery = (params: {
   dimensions: string[];
+  metrics: string[];
   indices?: string[];
   from?: string;
   to?: string;
