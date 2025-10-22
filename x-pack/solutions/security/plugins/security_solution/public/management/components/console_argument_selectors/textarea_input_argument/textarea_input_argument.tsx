@@ -64,29 +64,30 @@ export interface TextareaInputArgumentProps<
   helpIconLabel?: string;
   /** Label for the close button in the popup */
   closePopupButtonLabel?: string;
+  'data-test-subj'?: string;
 }
 
-const OPEN_INPUT = i18n.translate(
+export const OPEN_INPUT = i18n.translate(
   'xpack.securitySolution.consoleArgumentSelectors.textAreaInputArgument.openInputButton',
   { defaultMessage: 'Open input area' }
 );
 
-const TEXTAREA_PLACEHOLDER_TEXT = i18n.translate(
+export const TEXTAREA_PLACEHOLDER_TEXT = i18n.translate(
   'xpack.securitySolution.consoleArgumentSelectors.textAreaInputArgument.textareaPlaceholderText',
   { defaultMessage: 'Enter data here' }
 );
 
-const NO_INPUT_ENTERED_MESSAGE = i18n.translate(
+export const NO_INPUT_ENTERED_MESSAGE = i18n.translate(
   'xpack.securitySolution.consoleArgumentSelectors.textAreaInputArgument.noInputEnteredMessage',
   { defaultMessage: 'No input entered' }
 );
 
-const HELP_ICON_LABEL = i18n.translate(
+export const HELP_ICON_LABEL = i18n.translate(
   'xpack.securitySolution.consoleArgumentSelectors.textAreaInputArgument.helpIconLabel',
   { defaultMessage: 'Show instructions' }
 );
 
-const CLOSE_POPUP_BUTTON_LABEL = i18n.translate(
+export const CLOSE_POPUP_BUTTON_LABEL = i18n.translate(
   'xpack.securitySolution.consoleArgumentSelectors.textAreaInputArgument.closePopupButtonLabel',
   { defaultMessage: 'Close' }
 );
@@ -113,9 +114,11 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
     width,
     textareaLabel,
     helpContent,
+    'data-test-subj': dataTestSubj,
   }) => {
     const testId = useTestIdGenerator(
-      `textareaInputArgument-${command.commandDefinition.name}-${argName}-${argIndex}`
+      dataTestSubj ??
+        `textareaInputArgument-${command.commandDefinition.name}-${argName}-${argIndex}`
     );
     const { euiTheme } = useEuiTheme();
     const [showHelpContent, setShowHelpContent] = useState(false);
@@ -218,6 +221,7 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
                 onClick={handleOpenPopover}
                 title={openLabel}
                 aria-label={openLabel}
+                data-test-subj={testId('openInputButton')}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -228,7 +232,7 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
             <EuiPanel paddingSize="xs" hasShadow={false} hasBorder={false}>
               <EuiFlexGroup alignItems="center" gutterSize="none">
                 <EuiFlexItem>
-                  <EuiTitle size="xxxs">
+                  <EuiTitle size="xxxs" data-test-subj={testId('title')}>
                     <h5>{textareaLabel ?? argName}</h5>
                   </EuiTitle>
                 </EuiFlexItem>
@@ -241,6 +245,7 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
                       isSelected={showHelpContent}
                       title={helpIconLabel}
                       aria-label={helpIconLabel}
+                      data-test-subj={testId('helpButton')}
                     />
                   </EuiFlexItem>
                 )}
@@ -263,6 +268,7 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
                     className={textAreaHtmlId}
                     resize="none"
                     fullWidth
+                    data-test-subj={testId('textarea')}
                   />
                 </EuiFlexItem>
                 {showHelpContent && (
@@ -285,7 +291,12 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
               <EuiSpacer size="s" />
               <EuiFlexGroup alignItems="flexEnd" justifyContent="flexEnd" gutterSize="none">
                 <EuiFlexItem grow={false}>
-                  <EuiButton iconType="cross" size="s" onClick={handleClosePopover}>
+                  <EuiButton
+                    iconType="cross"
+                    size="s"
+                    onClick={handleClosePopover}
+                    data-test-subj={testId('closeButton')}
+                  >
                     {closePopupButtonLabel}
                   </EuiButton>
                 </EuiFlexItem>
