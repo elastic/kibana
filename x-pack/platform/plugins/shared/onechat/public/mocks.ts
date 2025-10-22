@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import type React from 'react';
 import type { OnechatPluginSetup, OnechatPluginStart, ConversationFlyoutRef } from './types';
 import type { OpenConversationFlyoutOptions } from './flyout/types';
+import type { EmbeddableConversationProps } from './embeddable/types';
 
 const createSetupContractMock = (): jest.Mocked<OnechatPluginSetup> => {
   return {};
@@ -15,6 +17,9 @@ const createSetupContractMock = (): jest.Mocked<OnechatPluginSetup> => {
 const createStartContractMock = (): jest.Mocked<OnechatPluginStart> => {
   return {
     tools: {} as any,
+    components: {
+      Conversation: jest.fn() as unknown as jest.Mocked<React.FC<EmbeddableConversationProps>>,
+    },
     openConversationFlyout: jest
       .fn()
       .mockImplementation((options: OpenConversationFlyoutOptions) => {
