@@ -70,7 +70,7 @@ interface BaseOptions extends ImageOptions {
   files?: string | string[];
 }
 
-export const serverlessProjectTypes = new Set<string>(['es', 'oblt', 'security', 'workplace_ai']);
+export const serverlessProjectTypes = new Set<string>(['es', 'oblt', 'security', 'workplaceai']);
 export const serverlessProductTiers = new Set<string>([
   'essentials',
   'logs_essentials',
@@ -81,7 +81,7 @@ export const isServerlessProjectType = (value: string): value is ServerlessProje
   return serverlessProjectTypes.has(value);
 };
 
-export type ServerlessProjectType = 'es' | 'oblt' | 'security' | 'workplace_ai';
+export type ServerlessProjectType = 'es' | 'oblt' | 'security' | 'workplaceai';
 export type ServerlessProductTier =
   | 'essentials'
   | 'logs_essentials'
@@ -92,7 +92,7 @@ export const esServerlessProjectTypes = new Map<string, string>([
   ['es', 'elasticsearch'],
   ['oblt', 'observability'],
   ['security', 'security'],
-  ['workplace_ai', 'elasticsearch'],
+  ['workplaceai', 'elasticsearch'],
 ]);
 
 export interface DockerOptions extends EsClusterExecOptions, BaseOptions {
