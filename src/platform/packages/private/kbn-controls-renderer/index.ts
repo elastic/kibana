@@ -8,5 +8,5 @@
  */
 
 export { ControlsRenderer } from './src/controls_renderer';
-export type { ControlsRendererParentApi, CanOpenDisplaySettingsPopover } from './src/types';
-export { apiCanOpenDisplaySettingsPopover } from './src/types';
+export type { ControlsRendererParentApi, HasPrependWrapperRef } from './src/types';
+export { apiHasPrependWrapperRef } from './src/types';

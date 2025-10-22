@@ -8,10 +8,10 @@
  */
 
 import type { StickyControlLayoutState } from '@kbn/controls-schemas';
-import type { PublishingSubject } from '@kbn/presentation-publishing';
+import type { BehaviorSubject } from 'rxjs';
 
 export interface PublishesControlsLayout {
-  layout$: PublishingSubject<{
+  layout$: BehaviorSubject<{
     controls: {
       [id: string]: StickyControlLayoutState;
     };

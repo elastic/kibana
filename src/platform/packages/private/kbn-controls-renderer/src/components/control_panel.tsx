@@ -10,12 +10,13 @@
 import classNames from 'classnames';
 import deepEqual from 'fast-deep-equal';
 import { pick } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Subscription, distinctUntilChanged, map, of } from 'rxjs';
 
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import {
+  EuiFlexGroup,
   EuiFlexItem,
   EuiFormControlLayout,
   EuiFormLabel,
@@ -39,7 +40,6 @@ import type { ControlPanelState, ControlsRendererParentApi } from '../types';
 import { controlWidthStyles } from './control_panel.styles';
 import { DragHandle } from './drag_handle';
 import { FloatingActions } from './floating_actions';
-import { DisplaySettingsPopover } from './display_settings_popover';
 
 export const ControlPanel = ({
   parentApi,
@@ -76,11 +76,7 @@ export const ControlPanel = ({
   const [panelTitle, setPanelTitle] = useState<string | undefined>();
   const [defaultPanelTitle, setDefaultPanelTitle] = useState<string | undefined>();
 
-  const [isDisplaySettingsPopoverOpen, setIsDisplaySettingsPopoverOpen] = useState(false);
-  const openDisplaySettingsPopover = useCallback(() => {
-    setIsDisplaySettingsPopoverOpen(true);
-  }, []);
-  const closeDisplaySettingsPopover = useCallback(() => setIsDisplaySettingsPopoverOpen(false), []);
+  const prependWrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const stateSubscription = parentApi.layout$
@@ -163,7 +159,7 @@ export const ControlPanel = ({
         uuid={uuid}
         viewMode={viewMode}
         disabledActions={disabledActionIds}
-        openDisplaySettingsPopover={openDisplaySettingsPopover}
+        prependWrapperRef={prependWrapperRef}
       >
         <EuiFormRow
           data-test-subj="control-frame-title"
@@ -182,33 +178,29 @@ export const ControlPanel = ({
             })}
             css={styles.formControl}
             prepend={
-              <DisplaySettingsPopover
-                grow={grow}
-                width={width}
-                parentApi={parentApi}
-                uuid={uuid}
-                isOpen={isDisplaySettingsPopoverOpen}
-                closePopover={closeDisplaySettingsPopover}
-              >
+              <>
+                {' '}
                 <DragHandle
                   isEditable={isEditable}
                   controlTitle={panelTitle || defaultPanelTitle}
                   {...attributes}
                   {...listeners}
                 />
-                {api?.CustomPrependComponent ? (
-                  <api.CustomPrependComponent />
-                ) : (
-                  <EuiToolTip
-                    content={panelTitle || defaultPanelTitle}
-                    anchorProps={{ className: 'eui-textTruncate', css: styles.tooltipStyles }}
-                  >
-                    <EuiFormLabel className="controlPanel--label">
-                      {panelTitle || defaultPanelTitle}
-                    </EuiFormLabel>
-                  </EuiToolTip>
-                )}
-              </DisplaySettingsPopover>
+                <EuiFlexGroup ref={prependWrapperRef} gutterSize="none">
+                  {api?.CustomPrependComponent ? (
+                    <api.CustomPrependComponent />
+                  ) : (
+                    <EuiToolTip
+                      content={panelTitle || defaultPanelTitle}
+                      anchorProps={{ className: 'eui-textTruncate', css: styles.tooltipStyles }}
+                    >
+                      <EuiFormLabel className="controlPanel--label">
+                        {panelTitle || defaultPanelTitle}
+                      </EuiFormLabel>
+                    </EuiToolTip>
+                  )}
+                </EuiFlexGroup>
+              </>
             }
             compressed={parentApi.isCompressed ? parentApi.isCompressed() : true}
           >

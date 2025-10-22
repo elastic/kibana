@@ -45,11 +45,9 @@ export type ControlsRendererParentApi = Pick<
     isCompressed?: () => boolean;
   };
 
-export interface CanOpenDisplaySettingsPopover {
-  openDisplaySettingsPopover: () => void;
+export interface HasPrependWrapperRef {
+  prependWrapperRef: React.RefObject<HTMLDivElement>;
 }
 
-export const apiCanOpenDisplaySettingsPopover = (
-  api: unknown
-): api is CanOpenDisplaySettingsPopover =>
-  Boolean((api as CanOpenDisplaySettingsPopover).openDisplaySettingsPopover);
+export const apiHasPrependWrapperRef = (api: unknown): api is HasPrependWrapperRef =>
+  Boolean((api as HasPrependWrapperRef).prependWrapperRef);
