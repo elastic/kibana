@@ -52,6 +52,7 @@ export function SloManagementSearchBar({ onRefresh }: Props) {
       renderQueryInputAppend={() => (
         <>
           <EuiComboBox
+            compressed
             aria-label={filterTagsLabel}
             placeholder={filterTagsLabel}
             delimiter=","

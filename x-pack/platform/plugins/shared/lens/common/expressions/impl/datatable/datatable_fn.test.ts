@@ -119,4 +119,31 @@ describe('datatableFn', () => {
     expect(resultColumnIds).toEqual(expectedColumnIds);
     expect(resultColumnIds).toEqual(['bucket1', 'bucket2', 'bucket3', 'metric1', 'metric2']);
   });
+
+  // This is needed for ghost formula columns, see https://github.com/elastic/kibana/issues/239170
+  it('should sort unknown columns in table by order of args.columns', async () => {
+    const table = buildTable();
+    const shuffledTable: Datatable = {
+      ...table,
+      columns: shuffle([
+        ...table.columns,
+        { id: 'unknown', name: 'unknown', meta: { type: 'number' } },
+      ]),
+    };
+    const args = buildArgs();
+    const result = await datatableFn(() => mockFormatFactory)(shuffledTable, args, context);
+
+    const resultColumnIds = result.value.data.columns.map((c) => c.id);
+    const expectedColumnIds = args.columns.map((c) => c.columnId).concat('unknown');
+
+    expect(resultColumnIds).toEqual(expectedColumnIds);
+    expect(resultColumnIds).toEqual([
+      'bucket1',
+      'bucket2',
+      'bucket3',
+      'metric1',
+      'metric2',
+      'unknown',
+    ]);
+  });
 });

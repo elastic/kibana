@@ -37,7 +37,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     beforeEach(async () => {
       await dashboard.navigateToApp(); // required for svl until dashboard PO navigation is fixed
-      await dashboard.gotoDashboardEditMode('Convert to Lens - Gauge');
+      await dashboard.loadDashboardInEditMode('Convert to Lens - Gauge');
       await timePicker.setDefaultAbsoluteRange();
       await elasticChart.setNewChartUiDebugFlag(true);
     });

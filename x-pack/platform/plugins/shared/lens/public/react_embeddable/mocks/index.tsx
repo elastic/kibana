@@ -94,7 +94,6 @@ function getDefaultLensApiMock() {
     updateAttributes: jest.fn(),
     updateSavedObjectId: jest.fn(),
     updateOverrides: jest.fn(),
-    updateAbortController: jest.fn(),
     getSerializedStateByReference: jest.fn(),
     getSerializedStateByValue: jest.fn(),
     getTriggerCompatibleActions: jest.fn(),

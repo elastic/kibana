@@ -19,12 +19,7 @@ import {
 } from '@kbn/presentation-publishing';
 import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import { isTextBasedLanguage } from '../helper';
-import type {
-  GetStateType,
-  LensEmbeddableStartServices,
-  LensInternalApi,
-  LensRuntimeState,
-} from '../types';
+import type { GetStateType, LensEmbeddableStartServices, LensRuntimeState } from '../types';
 import type { IntegrationCallbacks } from '../types';
 import { DOC_TYPE } from '../../../common/constants';
 
@@ -45,8 +40,7 @@ function cleanupSerializedState({
 export function initializeIntegrations(
   getLatestState: GetStateType,
   serializeDynamicActions: (() => SerializedPanelState<DynamicActionsSerializedState>) | undefined,
-  { attributeService }: LensEmbeddableStartServices,
-  internalApi: LensInternalApi
+  { attributeService }: LensEmbeddableStartServices
 ): {
   api: Omit<
     IntegrationCallbacks,
@@ -110,9 +104,6 @@ export function initializeIntegrations(
         }
         const language = getAggregateQueryMode(query);
         return getLanguageDisplayName(language).toUpperCase();
-      },
-      updateAbortController: (abortController) => {
-        internalApi.updateAbortController(abortController);
       },
     },
   };

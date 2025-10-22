@@ -20,7 +20,7 @@ interface StreamConfigurationProps {
 
 export function StreamFeatureConfiguration({ definition }: StreamConfigurationProps) {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const { identifyFeatures } = useStreamFeaturesApi(definition);
+  const { identifyFeatures, abort } = useStreamFeaturesApi(definition);
   const aiFeatures = useAIFeatures();
   const [features, setFeatures] = useState<Feature[]>([]);
   const {
@@ -74,19 +74,24 @@ export function StreamFeatureConfiguration({ definition }: StreamConfigurationPr
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiSpacer size="m" />
-        <StreamFeaturesAccordion
-          definition={definition}
-          features={existingFeatures}
-          loading={featuresLoading}
-          refresh={refreshFeatures}
-        />
+        {existingFeatures.length > 0 && (
+          <>
+            <EuiSpacer size="m" />
+            <StreamFeaturesAccordion
+              definition={definition}
+              features={existingFeatures}
+              loading={featuresLoading}
+              refresh={refreshFeatures}
+            />
+          </>
+        )}
         {isFlyoutVisible && (
           <StreamFeaturesFlyout
             definition={definition}
             features={features}
             isLoading={isLoading}
             closeFlyout={() => {
+              abort();
               refreshFeatures();
               setIsFlyoutVisible(false);
             }}

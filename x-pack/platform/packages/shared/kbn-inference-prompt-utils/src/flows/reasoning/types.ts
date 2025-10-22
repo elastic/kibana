@@ -33,7 +33,7 @@ export type ReasoningPromptResponseOf<
     MessageOf<
       ToolOptionsOfPrompt<TPrompt>,
       {
-        [key in keyof TToolCallbacks]: Awaited<ReturnType<TToolCallbacks[key]>>;
+        [key in keyof TToolCallbacks]: Awaited<ReturnType<TToolCallbacks[key]>>['response'];
       }
     >
   >;

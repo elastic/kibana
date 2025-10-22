@@ -262,6 +262,7 @@ describe('Actions Plugin', () => {
             isDeprecated: false,
             isPreconfigured: true,
             isSystemAction: false,
+            isConnectorTypeDeprecated: false,
           },
           {
             id: 'system-connector-.cases',
@@ -273,6 +274,7 @@ describe('Actions Plugin', () => {
             isPreconfigured: false,
             isSystemAction: true,
             isMissingSecrets: false,
+            isConnectorTypeDeprecated: false,
           },
         ]);
       });
@@ -815,6 +817,7 @@ describe('Actions Plugin', () => {
               isDeprecated: false,
               isPreconfigured: true,
               isSystemAction: false,
+              isConnectorTypeDeprecated: false,
             },
             {
               id: 'system-connector-.cases',
@@ -826,6 +829,7 @@ describe('Actions Plugin', () => {
               isMissingSecrets: false,
               isPreconfigured: false,
               isSystemAction: true,
+              isConnectorTypeDeprecated: false,
             },
           ]);
           expect(pluginStart.isActionExecutable('preconfiguredServerLog', '.cases')).toBe(true);
@@ -934,6 +938,7 @@ describe('Actions Plugin', () => {
             supportedFeatureIds: ['alerting'],
             isSystemActionType: false,
             validate: { params: expect.any(Object) },
+            isDeprecated: false,
           },
         ]);
 

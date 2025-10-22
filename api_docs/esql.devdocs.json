@@ -315,6 +315,17 @@
           "path": "src/platform/plugins/shared/esql/public/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "esql",
+          "id": "def-public.EsqlPluginStart.isServerless",
+          "type": "boolean",
+          "tags": [],
+          "label": "isServerless",
+          "description": [],
+          "path": "src/platform/plugins/shared/esql/public/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "start",

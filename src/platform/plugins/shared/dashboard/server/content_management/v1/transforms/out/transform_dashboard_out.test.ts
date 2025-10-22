@@ -21,7 +21,6 @@ import type {
 } from '../../../../dashboard_saved_object';
 import type { DashboardAttributes } from '../../types';
 import { transformDashboardOut } from './transform_dashboard_out';
-import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../../common/content_management';
 
 describe('transformDashboardOut', () => {
   const controlGroupInputControlsSo = {
@@ -42,7 +41,7 @@ describe('transformDashboardOut', () => {
     },
   ];
 
-  test('should set default values if not provided', () => {
+  test('should not supply defaults for missing properties', () => {
     const input: DashboardSavedObjectAttributes = {
       controlGroupInput: {
         panelsJSON: JSON.stringify({ foo: controlGroupInputControlsSo }),
@@ -74,7 +73,6 @@ describe('transformDashboardOut', () => {
       },
       description: 'my description',
       options: {
-        ...DEFAULT_DASHBOARD_OPTIONS,
         hidePanelTitles: false,
       },
       panels: [

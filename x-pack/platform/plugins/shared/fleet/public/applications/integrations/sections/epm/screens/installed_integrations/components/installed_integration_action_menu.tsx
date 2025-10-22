@@ -76,7 +76,8 @@ export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
     );
 
     const hasRollbackableIntegrations = selectedItems.some(
-      (item) => !!item.installationInfo?.previous_version
+      (item) =>
+        !!item.installationInfo?.previous_version && !item.installationInfo?.is_rollback_ttl_expired
     );
 
     return [

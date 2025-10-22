@@ -516,7 +516,7 @@ export class DissectCommandVisitorContext<
   Data extends SharedData = SharedData
 > extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
 
-// GROK <column> <string>
+// GROK <column> <string> [ , <string> ... ]
 export class GrokCommandVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData

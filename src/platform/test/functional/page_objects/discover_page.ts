@@ -810,6 +810,7 @@ export class DiscoverPageObject extends FtrService {
       await this.fieldEditor.setPopularity(popularity);
     }
     await this.fieldEditor.save();
+    await this.fieldEditor.waitUntilClosed();
     await this.header.waitUntilLoadingHasFinished();
   }
 

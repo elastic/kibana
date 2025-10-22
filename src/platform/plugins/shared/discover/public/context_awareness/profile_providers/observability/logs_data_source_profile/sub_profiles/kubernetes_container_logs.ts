@@ -7,23 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataViewField } from '@kbn/data-views-plugin/common';
+import { KUBERNETES_CONTAINER_LOGS_PROFILE } from '@kbn/discover-utils';
 import type { LogsDataSourceProfileProvider } from '../profile';
 import { extendProfileProvider } from '../../../extend_profile_provider';
 import { createGetDefaultAppState, createRecommendedFields } from '../accessors';
 import { LOG_LEVEL_COLUMN, MESSAGE_COLUMN } from '../consts';
 import { createResolve } from './create_resolve';
-
-export const KUBERNETES_CONTAINER_LOGS_RECOMMENDED_FIELD_NAMES: Array<DataViewField['name']> = [
-  'log.level',
-  'message',
-  'kubernetes.pod.name',
-  'kubernetes.container.name',
-  'kubernetes.namespace',
-  'orchestrator.resource.name',
-  'container.image.name',
-  'kubernetes.node.name',
-];
 
 export const createKubernetesContainerLogsDataSourceProfileProvider = (
   logsDataSourceProfileProvider: LogsDataSourceProfileProvider
@@ -41,8 +30,8 @@ export const createKubernetesContainerLogsDataSourceProfileProvider = (
         ],
       }),
       getRecommendedFields: createRecommendedFields({
-        defaultFields: KUBERNETES_CONTAINER_LOGS_RECOMMENDED_FIELD_NAMES,
+        defaultFields: KUBERNETES_CONTAINER_LOGS_PROFILE.recommendedFields,
       }),
     },
-    resolve: createResolve('logs-kubernetes.container_logs'),
+    resolve: createResolve(KUBERNETES_CONTAINER_LOGS_PROFILE.pattern),
   });

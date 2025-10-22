@@ -11,9 +11,9 @@ describe('generate_yaml_schema', () => {
   describe('fixAdditionalPropertiesInSchema', () => {
     it('should have the fixAdditionalPropertiesInSchema function with correct logic', () => {
       // This test validates that the fix logic is present in the code
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @typescript-eslint/no-var-requires, import/no-nodejs-modules
       const fs = require('fs');
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @typescript-eslint/no-var-requires, import/no-nodejs-modules
       const path = require('path');
 
       const schemaFilePath = path.join(__dirname, 'generate_yaml_schema.ts');

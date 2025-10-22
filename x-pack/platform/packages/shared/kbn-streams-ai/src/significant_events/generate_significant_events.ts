@@ -15,6 +15,11 @@ import { fromKueryExpression } from '@kbn/es-query';
 import { GenerateSignificantEventsPrompt } from './prompt';
 import type { SignificantEventType } from './types';
 
+interface Query {
+  kql: string;
+  title: string;
+  category: SignificantEventType;
+}
 /**
  * Generate significant event definitions, based on:
  * - the description of the feature (or stream if feature is undefined)
@@ -38,11 +43,7 @@ export async function generateSignificantEvents({
   inferenceClient: BoundInferenceClient;
   logger: Logger;
 }): Promise<{
-  queries: Array<{
-    title: string;
-    kql: string;
-    category: SignificantEventType;
-  }>;
+  queries: Query[];
 }> {
   const analysis = await describeDataset({
     start,
@@ -92,9 +93,12 @@ export async function generateSignificantEvents({
   });
 
   const queries = response.input.flatMap((message) => {
-    if (message.role === MessageRole.Assistant) {
-      return message.toolCalls.flatMap((toolCall) => {
-        return toolCall.function.arguments.queries;
+    if (message.role === MessageRole.Tool) {
+      return message.response.queries.flatMap((query) => {
+        if (query.valid) {
+          return [query.query];
+        }
+        return [];
       });
     }
     return [];

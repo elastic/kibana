@@ -98,6 +98,7 @@ describe('CreateESQLControlAction', () => {
           isResizable: true,
           maxWidth: 800,
           triggerId: 'dashboard-controls-menu-button',
+          onClose: expect.any(Function),
         },
       });
     });

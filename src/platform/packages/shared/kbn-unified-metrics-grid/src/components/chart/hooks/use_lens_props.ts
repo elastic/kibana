@@ -26,6 +26,7 @@ import {
 } from 'rxjs';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import { useEuiTheme } from '@elastic/eui';
+import type { LensYBoundsConfig } from '@kbn/lens-embeddable-utils/config_builder/types';
 export type LensProps = Pick<
   EmbeddableComponentProps,
   | 'id'
@@ -47,6 +48,7 @@ export const useLensProps = ({
   discoverFetch$,
   chartRef,
   chartLayers,
+  yBounds,
 }: {
   title: string;
   query: string;
@@ -54,6 +56,7 @@ export const useLensProps = ({
   getTimeRange: () => TimeRange;
   chartRef?: React.RefObject<HTMLDivElement>;
   chartLayers: LensSeriesLayer[];
+  yBounds?: LensYBoundsConfig;
 } & Pick<ChartSectionProps, 'services' | 'searchSessionId'>) => {
   const { euiTheme } = useEuiTheme();
   const attributes$ = useRef(new BehaviorSubject<LensAttributes | undefined>(undefined));
@@ -76,9 +79,10 @@ export const useLensProps = ({
             },
             layers: chartLayers,
             fittingFunction: 'Linear',
+            yBounds,
           }
         : undefined,
-    [query, title, chartLayers]
+    [query, title, chartLayers, yBounds]
   );
 
   useAsync(async () => {

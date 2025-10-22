@@ -70,7 +70,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const log = getService('log');
 
-  describe('patch_cases', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/238980
+  describe.skip('patch_cases', () => {
     afterEach(async () => {
       await deleteAllCaseItems(es);
     });

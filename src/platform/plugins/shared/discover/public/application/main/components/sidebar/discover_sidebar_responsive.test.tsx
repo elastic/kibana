@@ -738,6 +738,7 @@ describe('discover responsive sidebar', function () {
     const addFieldButton = findTestSubject(comp, 'dataView-add-field_btn');
     expect(addFieldButton.length).toBe(1);
     addFieldButton.simulate('click');
+    await new Promise(process.nextTick);
     expect(services.dataViewFieldEditor.openEditor).toHaveBeenCalledTimes(1);
   });
 
@@ -752,6 +753,7 @@ describe('discover responsive sidebar', function () {
     const editFieldButton = findTestSubject(comp, 'discoverFieldListPanelEdit-bytes');
     expect(editFieldButton.length).toBe(1);
     editFieldButton.simulate('click');
+    await new Promise(process.nextTick);
     expect(services.dataViewFieldEditor.openEditor).toHaveBeenCalledTimes(1);
   });
 

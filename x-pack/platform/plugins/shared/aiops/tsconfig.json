@@ -80,6 +80,7 @@
     "@kbn/aiops-utils",
     "@kbn/presentation-util",
     "@kbn/licensing-types",
+    "@kbn/unified-data-table",
   ],
   "exclude": [
     "target/**/*",

@@ -20,5 +20,6 @@
     "@kbn/ml-is-populated-object",
     "@kbn/field-types",
     "@kbn/utility-types",
+    "@kbn/config-schema",
   ]
 }

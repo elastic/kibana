@@ -532,6 +532,154 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-eui-helpers",
+        "id": "def-common.EuiTableTestHarness",
+        "type": "Class",
+        "tags": [],
+        "label": "EuiTableTestHarness",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiTableTestHarness.testId",
+            "type": "string",
+            "tags": [],
+            "label": "#testId",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiTableTestHarness.tableEl",
+            "type": "Object",
+            "tags": [],
+            "label": "#tableEl",
+            "description": [
+              "\nReturns table element or throws"
+            ],
+            "signature": [
+              "HTMLElement"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiTableTestHarness.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-eui-helpers",
+                "id": "def-common.EuiTableTestHarness.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "testId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiTableTestHarness.testId",
+            "type": "string",
+            "tags": [],
+            "label": "testId",
+            "description": [
+              "\nReturns `data-test-subj` of table"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiTableTestHarness.self",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "self",
+            "description": [
+              "\nReturns table if found, otherwise `null`"
+            ],
+            "signature": [
+              "HTMLElement | null"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiTableTestHarness.body",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "body",
+            "description": [],
+            "signature": [
+              "HTMLTableSectionElement | null"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiTableTestHarness.rows",
+            "type": "Array",
+            "tags": [],
+            "label": "rows",
+            "description": [
+              "\nGet table row elements for direct interaction with cells.\nUseful when you need to click buttons, checkboxes, or other interactive elements within rows.\n"
+            ],
+            "signature": [
+              "HTMLElement[]"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-eui-helpers",
+            "id": "def-common.EuiTableTestHarness.cellValues",
+            "type": "Array",
+            "tags": [],
+            "label": "cellValues",
+            "description": [
+              "\nGet table cell values as a 2D array.\nUseful for asserting table data in a structured way.\n"
+            ],
+            "signature": [
+              "string[][]"
+            ],
+            "path": "src/platform/packages/private/kbn-test-eui-helpers/src/rtl_helpers.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "functions": [

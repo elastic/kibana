@@ -17,7 +17,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const securitySolutionEnableExperimental: Array<keyof SecuritySolutionExperimentalFeatures> = [
     'endpointManagementSpaceAwarenessEnabled',
   ];
-  const fleetEnableExperimental: Array<keyof FleetExperimentalFeatures> = ['useSpaceAwareness'];
+  const fleetEnableExperimental: Partial<FleetExperimentalFeatures> = {
+    useSpaceAwareness: true,
+  };
 
   return {
     ...functionalConfig.getAll(),
@@ -32,11 +34,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           // Exclude Fleet and Security solution experimental features
           // properties since we are overriding them here
           (arg: string) =>
-            !arg.includes('xpack.fleet.enableExperimental') &&
+            !arg.includes('xpack.fleet.experimentalFeatures') &&
             !arg.includes('xpack.securitySolution.enableExperimental')
         ),
         // FLEET: set any experimental feature flags for testing
-        `--xpack.fleet.enableExperimental=${JSON.stringify(fleetEnableExperimental)}`,
+        `--xpack.fleet.experimentalFeatures=${JSON.stringify(fleetEnableExperimental)}`,
 
         // SECURITY SOLUTION: set any experimental feature flags for testing
         `--xpack.securitySolution.enableExperimental=${JSON.stringify(

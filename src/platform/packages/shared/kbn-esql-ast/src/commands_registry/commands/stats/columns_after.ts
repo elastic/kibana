@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import uniqBy from 'lodash/uniqBy';
-import { isAssignment, isColumn, isOptionNode } from '../../../ast/is';
+import { isAssignment, isColumn, isFunctionExpression, isOptionNode } from '../../../ast/is';
 import type { SupportedDataType } from '../../../definitions/types';
 import { getExpressionType } from '../../../definitions/utils';
 import type { ESQLAstItem, ESQLCommand, ESQLCommandOption } from '../../../types';
@@ -35,6 +35,22 @@ const getUserDefinedColumns = (
 
     if (isOptionNode(expression) && expression.name === 'by') {
       columns.push(...getUserDefinedColumns(expression, typeOf, query));
+      continue;
+    }
+
+    if (isFunctionExpression(expression) && expression.name === 'where') {
+      const assignment = expression.args[0];
+
+      if (isAssignment(assignment) && isColumn(assignment.args[0])) {
+        const name = assignment.args[0].parts.join('.');
+        const newColumn: ESQLUserDefinedColumn = {
+          name,
+          type: typeOf(assignment.args[1]),
+          location: assignment.args[0].location,
+          userDefined: true,
+        };
+        columns.push(newColumn);
+      }
       continue;
     }
 

@@ -22,7 +22,11 @@ import { CommandVisitorContext, Visitor } from '../visitor';
 import { children, singleItems } from '../visitor/utils';
 import type { BasicPrettyPrinterOptions } from './basic_pretty_printer';
 import { BasicPrettyPrinter } from './basic_pretty_printer';
-import { commandOptionsWithEqualsSeparator, commandsWithNoCommaArgSeparator } from './constants';
+import {
+  commandOptionsWithEqualsSeparator,
+  commandsWithNoCommaArgSeparator,
+  commandsWithSpecialCommaRules,
+} from './constants';
 import { getPrettyPrintStats } from './helpers';
 import { LeafPrinter } from './leaf_printer';
 
@@ -317,6 +321,7 @@ export class WrappingPrettyPrinter {
     const commaBetweenArgs = !commandsWithNoCommaArgSeparator.has(ctx.node.name);
 
     if (!oneArgumentPerLine) {
+      let argIndex = 0;
       ARGS: for (const arg of singleItems(ctx.arguments())) {
         if (arg.type === 'option') {
           continue;
@@ -329,7 +334,13 @@ export class WrappingPrettyPrinter {
           largestArg = formattedArgLength;
         }
 
-        let separator = txt ? (commaBetweenArgs ? ',' : '') : '';
+        // Check if this command has special comma rules
+        const specialRule = commandsWithSpecialCommaRules.get(ctx.node.name);
+        const needsComma = specialRule ? specialRule(argIndex) : commaBetweenArgs;
+        let separator = txt ? (needsComma ? ',' : '') : '';
+
+        argIndex++;
+
         let fragment = '';
 
         if (needsWrap) {
@@ -385,10 +396,12 @@ export class WrappingPrettyPrinter {
       for (let i = 0; i <= last; i++) {
         const isFirstArg = i === 0;
         const isLastArg = i === last;
+        const specialRule = commandsWithSpecialCommaRules.get(ctx.node.name);
+        const needsComma = specialRule ? specialRule(i) : commaBetweenArgs;
         const arg = ctx.visitExpression(args[i], {
           indent,
           remaining: this.opts.wrap - indent.length,
-          suffix: isLastArg ? '' : commaBetweenArgs ? ',' : '',
+          suffix: isLastArg ? '' : needsComma ? ',' : '',
         });
         const indentation = arg.indented ? '' : indent;
         let formattedArg = arg.txt;

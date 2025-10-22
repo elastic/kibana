@@ -7062,7 +7062,7 @@
             "signature": [
               "{ name: string; backing_indices?: string[] | undefined; timestamp_field?: string | undefined; indices?: string[] | undefined; aliases?: string[] | undefined; attributes?: ",
               "ResolveIndexResponseItemIndexAttrs",
-              "[] | undefined; data_stream?: string | undefined; }"
+              "[] | undefined; data_stream?: string | undefined; mode?: string | undefined; }"
             ],
             "path": "src/platform/plugins/shared/data_views/public/types.ts",
             "deprecated": false,

@@ -24,7 +24,7 @@ import type { VisualizationDimensionEditorProps } from '../../../../types';
 import type { State, XYState, XYReferenceLineLayerConfig, YConfig } from '../../types';
 import type { FormatFactory } from '../../../../../common/types';
 
-import { updateLayer } from '..';
+import { updateLayer } from '../../toolbar';
 import { idPrefix } from '../dimension_editor';
 import { isHorizontalChart } from '../../state_helpers';
 import { MarkerDecorationPosition } from '../shared/marker_decoration_settings';

@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiInputPopover,
+  useEuiTheme,
 } from '@elastic/eui';
 import React, { Suspense, useCallback, useMemo, useState } from 'react';
 import type {
@@ -75,6 +76,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
       settings,
       navigateToApp,
     } = useAssistantContext();
+    const { euiTheme } = useEuiTheme();
 
     const [isConnectorModalVisible, setIsConnectorModalVisible] = useState<boolean>(false);
     const [modalForceOpen, setModalForceOpen] = useState(isOpen);
@@ -234,13 +236,14 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
           color="text"
           fullWidth={fullWidth}
           onClick={() => setModalForceOpen(true)}
-          style={{ borderWidth: fullWidth ? 1 : 0 }}
+          style={{ borderWidth: fullWidth ? 1 : 0, backgroundColor: 'transparent' }}
           contentProps={{
             style: {
               display: 'flex',
               flexDirection: 'row',
               justifyContent: 'space-between',
               alignItems: 'center',
+              color: localIsDisabled ? euiTheme.colors.textDisabled : euiTheme.colors.textPrimary,
             },
           }}
           data-test-subj="connector-selector"
@@ -256,6 +259,8 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
       buttonLabel,
       selectedOrDefaultConnector,
       setModalForceOpen,
+      euiTheme.colors.textDisabled,
+      euiTheme.colors.textPrimary,
     ]);
 
     return (

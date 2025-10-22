@@ -517,55 +517,6 @@ describe('artifacts lists', () => {
     });
 
     describe('`descendant_of` operator', () => {
-      let enabledProcessDescendant: ExperimentalFeatures;
-
-      beforeEach(() => {
-        enabledProcessDescendant = {
-          ...defaultFeatures,
-          filterProcessDescendantsForEventFiltersEnabled: true,
-        };
-      });
-
-      test('when feature flag is disabled, it should not convert `descendant_of`', async () => {
-        const expectedEndpointExceptions: TranslatedExceptionListItem = {
-          type: 'simple',
-          entries: [
-            {
-              field: 'process.executable',
-              operator: 'included',
-              type: 'exact_caseless',
-              value: 'C:\\Windows\\System32\\ping.exe',
-            },
-          ],
-        };
-
-        const inputEntry: EntriesArray = [
-          {
-            field: 'process.executable.text',
-            operator: 'included',
-            type: 'match',
-            value: 'C:\\Windows\\System32\\ping.exe',
-          },
-        ];
-
-        const exceptionMock = getFoundExceptionListItemSchemaMock();
-        exceptionMock.data[0].tags.push(FILTER_PROCESS_DESCENDANTS_TAG);
-        exceptionMock.data[0].list_id = ENDPOINT_ARTIFACT_LISTS.eventFilters.id;
-        exceptionMock.data[0].entries = inputEntry;
-        mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(exceptionMock);
-
-        const resp = await getFilteredEndpointExceptionListRaw({
-          elClient: mockExceptionClient,
-          filter: TEST_FILTER,
-          listId: ENDPOINT_LIST_ID,
-        });
-        const translated = convertExceptionsToEndpointFormat(resp, 'v1', {
-          filterProcessDescendantsForEventFiltersEnabled: false,
-        } as ExperimentalFeatures);
-
-        expect(translated).toEqual({ entries: [expectedEndpointExceptions] });
-      });
-
       test.each([
         ENDPOINT_ARTIFACT_LISTS.blocklists.id,
         ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id,
@@ -603,7 +554,7 @@ describe('artifacts lists', () => {
           filter: TEST_FILTER,
           listId: ENDPOINT_LIST_ID,
         });
-        const translated = convertExceptionsToEndpointFormat(resp, 'v1', enabledProcessDescendant);
+        const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
 
         expect(translated).toEqual({ entries: [expectedEndpointExceptions] });
       });
@@ -660,7 +611,7 @@ describe('artifacts lists', () => {
           filter: TEST_FILTER,
           listId: ENDPOINT_LIST_ID,
         });
-        const translated = convertExceptionsToEndpointFormat(resp, 'v1', enabledProcessDescendant);
+        const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
 
         expect(translated).toEqual({ entries: [expectedEndpointExceptions] });
       });
@@ -719,7 +670,7 @@ describe('artifacts lists', () => {
           filter: TEST_FILTER,
           listId: ENDPOINT_LIST_ID,
         });
-        const translated = convertExceptionsToEndpointFormat(resp, 'v1', enabledProcessDescendant);
+        const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
 
         expect(translated).toEqual({ entries: [expectedEndpointExceptions] });
       });

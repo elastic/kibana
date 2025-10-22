@@ -114,7 +114,7 @@ export class StepExecutionRuntime {
     });
   }
 
-  public async startStep(input?: Record<string, any>): Promise<void> {
+  public async startStep(): Promise<void> {
     const stepId = this.node.stepId;
     const stepStartedAt = new Date();
 
@@ -126,12 +126,18 @@ export class StepExecutionRuntime {
       topologicalIndex: this.topologicalOrder.indexOf(this.node.id),
       status: ExecutionStatus.RUNNING,
       startedAt: stepStartedAt.toISOString(),
-      input,
     } as Partial<EsWorkflowStepExecution>;
 
     this.workflowExecutionState.upsertStep(stepExecution);
     this.logStepStart(stepId, stepExecution.id!);
     await this.workflowExecutionState.flushStepChanges();
+  }
+
+  public async setInput(input: Record<string, any>): Promise<void> {
+    this.workflowExecutionState.upsertStep({
+      id: this.stepExecutionId,
+      input,
+    });
   }
 
   public async finishStep(stepOutput?: Record<string, any>): Promise<void> {

@@ -211,12 +211,18 @@ export type MockedICommandCallbacks = {
 export const getMockCallbacks = (): MockedICommandCallbacks => {
   const expectedFields = getFieldNamesByType('any');
   return {
-    getByType: jest
-      .fn()
-      .mockResolvedValue(expectedFields.map((name) => ({ label: name, text: name }))),
+    getByType: jest.fn().mockImplementation(async (types, ignoredColumns = []) => {
+      return (
+        expectedFields
+          // Exclude columns already used (e.g., used in STATS BY or parent function scope)
+          .filter((name) => !ignoredColumns.includes(name))
+          .map((name) => ({ label: name, text: name }))
+      );
+    }),
     getSuggestedUserDefinedColumnName: jest.fn(),
     getColumnsForQuery: jest.fn(),
     hasMinimumLicenseRequired: jest.fn().mockReturnValue(true),
     canCreateLookupIndex: jest.fn().mockReturnValue(true),
+    isServerless: false,
   };
 };

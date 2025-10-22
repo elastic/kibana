@@ -1,0 +1,86 @@
+{
+  "id": "@kbn/core-elasticsearch-server-utils",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-elasticsearch-server-utils",
+        "id": "def-common.isRetryableEsClientError",
+        "type": "Function",
+        "tags": [],
+        "label": "isRetryableEsClientError",
+        "description": [
+          "\nReturns true if the given elasticsearch error should be retried\n\nRetryable errors include:\n- NoLivingConnectionsError\n- ConnectionError\n- TimeoutError\n- ResponseError with status codes:\n  - 408 RequestTimeout\n  - 410 Gone\n  - 429 TooManyRequests (ES circuit breaker)\n  - 503 ServiceUnavailable\n  - 504 GatewayTimeout\n  - OR custom status codes if provided"
+        ],
+        "signature": [
+          "(e: ",
+          "ElasticsearchClientError",
+          ", customRetryStatusCodes?: number[] | undefined) => boolean"
+        ],
+        "path": "src/core/packages/elasticsearch/server-utils/src/is_retryable_es_client_error.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server-utils",
+            "id": "def-common.isRetryableEsClientError.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "e",
+            "description": [
+              "The error to check"
+            ],
+            "signature": [
+              "ElasticsearchClientError"
+            ],
+            "path": "src/core/packages/elasticsearch/server-utils/src/is_retryable_es_client_error.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server-utils",
+            "id": "def-common.isRetryableEsClientError.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "customRetryStatusCodes",
+            "description": [
+              "Custom response status codes to consider as retryable"
+            ],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "src/core/packages/elasticsearch/server-utils/src/is_retryable_es_client_error.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "true if the error is retryable, false otherwise"
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

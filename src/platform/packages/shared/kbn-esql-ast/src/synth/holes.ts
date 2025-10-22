@@ -55,6 +55,11 @@ export const holeToFragment = (hole: SynthTemplateHole): string => {
 
       return LeafPrinter.literal(node);
     }
+    case 'boolean': {
+      const node = Builder.expression.literal.boolean(hole);
+
+      return LeafPrinter.literal(node);
+    }
     case 'object': {
       if (hole instanceof SynthLiteralFragment) {
         return hole.value;

@@ -55,9 +55,7 @@
             "section": "def-common.Logger",
             "text": "Logger"
           },
-          "; }) => Promise<{ queries: { title: string; kql: string; category: ",
-          "SignificantEventType",
-          "; }[]; }>"
+          "; }) => Promise<{ queries: Query[]; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
         "deprecated": false,

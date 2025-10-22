@@ -21,7 +21,7 @@ export const datatableFn =
   ): DatatableExpressionFunction['fn'] =>
   async (table, args, context) => {
     const columnSortMap = args.columns.reduce((acc, c, i) => acc.set(c.columnId, i), new Map());
-    const getColumnSort = (id: string) => columnSortMap.get(id) ?? -1;
+    const getColumnSort = (id: string) => columnSortMap.get(id) ?? Infinity;
     const sortedTable: Datatable = {
       ...table,
       columns: table.columns.slice().sort((a, b) => getColumnSort(a.id) - getColumnSort(b.id)),

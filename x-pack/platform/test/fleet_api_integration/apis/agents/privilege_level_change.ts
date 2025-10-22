@@ -25,7 +25,8 @@ export default function (providerContext: FtrProviderContext) {
     expect(actionStatus.nbAgentsActioned).to.eql(agentCount);
   }
 
-  describe('fleet_agents_change_privilege_level', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/238933
+  describe.skip('fleet_agents_change_privilege_level', () => {
     before(async () => {
       // Not strictly necessary, but allows automatic cleanup.
       await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/agents');

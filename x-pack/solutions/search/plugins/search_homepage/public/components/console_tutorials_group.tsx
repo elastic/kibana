@@ -59,6 +59,19 @@ export const ConsoleTutorialsGroup = () => {
       request: consoleTutorials.esql,
       duration: 4,
     },
+    // TODO:  uncomment below lines when we are ready to show TSDS tutorial. review https://github.com/elastic/kibana/pull/237384#issuecomment-3411670210
+    // {
+    //   title: i18n.translate('xpack.searchHomepage.consoleTutorials.tsdsTitle', {
+    //     defaultMessage: 'Time series data streams',
+    //   }),
+    //   dataTestSubj: 'console_tutorials_tsds',
+    //   description: i18n.translate('xpack.searchHomepage.consoleTutorials.tsdsDescription', {
+    //     defaultMessage:
+    //       'Learn how to use a time series data stream (TSDS) to store timestamped metrics data.',
+    //   }),
+    //   request: consoleTutorials.timeSeriesDataStreams,
+    //   duration: 3,
+    // },
   ];
 
   return (

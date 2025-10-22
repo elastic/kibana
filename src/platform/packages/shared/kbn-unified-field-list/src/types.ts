@@ -162,6 +162,11 @@ export interface UnifiedFieldListSidebarContainerCreationOptions {
   disableFieldListItemDragAndDrop?: boolean;
 
   /**
+   * When editing fields, it will create a new ad-hoc data view instead of modifying the existing one.
+   */
+  shouldKeepAdHocDataViewImmutable?: boolean;
+
+  /**
    * This button will be shown in mobile view
    */
   buttonPropsToTriggerFlyout?: Partial<EuiButtonProps>;

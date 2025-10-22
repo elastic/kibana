@@ -102,7 +102,7 @@ export const loadDashboardState = async ({
     references,
     resolveMeta: { ...resolveMeta, version },
     dashboardInput: {
-      ...options,
+      options,
       refreshInterval,
       timeRestore,
       description,

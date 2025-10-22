@@ -709,12 +709,12 @@ describe('WorkflowsParamsFields', () => {
     expect(workflowOptions[2]).toHaveAttribute('name', 'Workflow With Empty Triggers');
   });
 
-  test('should render workflow links and handle click to open in new tab', async () => {
+  test('should render view all workflows link and handle click to open in new tab', async () => {
     const originalOpen = window.open;
     window.open = jest.fn();
 
     // Mock the application service
-    const mockGetUrlForApp = jest.fn().mockReturnValue('/app/workflows/workflow-1');
+    const mockGetUrlForApp = jest.fn().mockReturnValue('/app/workflows');
     mockUseKibana.mockReturnValue({
       services: {
         http: {
@@ -764,16 +764,16 @@ describe('WorkflowsParamsFields', () => {
       expect(screen.getByText('Test Workflow')).toBeInTheDocument();
     });
 
-    // Find the workflow link button
-    const workflowLinkButton = screen.getByRole('button', { name: 'Open workflow' });
-    expect(workflowLinkButton).toBeInTheDocument();
+    // Find the "View all workflows" link button in the footer
+    const viewAllWorkflowsButton = screen.getByRole('button', { name: 'View all workflows' });
+    expect(viewAllWorkflowsButton).toBeInTheDocument();
 
-    // Click the workflow link button directly
-    fireEvent.click(workflowLinkButton);
+    // Click the "View all workflows" button
+    fireEvent.click(viewAllWorkflowsButton);
 
-    // Verify that the correct URL was opened in a new tab
-    expect(mockGetUrlForApp).toHaveBeenCalledWith('workflows', { path: '/workflow-1' });
-    expect(window.open).toHaveBeenCalledWith('/app/workflows/workflow-1', '_blank');
+    // Verify that the workflows page was opened in a new tab
+    expect(mockGetUrlForApp).toHaveBeenCalledWith('workflows');
+    expect(window.open).toHaveBeenCalledWith('/app/workflows', '_blank');
 
     window.open = originalOpen;
   });

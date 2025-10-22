@@ -187,7 +187,6 @@ export function translateToEndpointExceptions(
           storeUniqueItem(translatedItem);
         });
       } else if (
-        experimentalFeatures.filterProcessDescendantsForEventFiltersEnabled &&
         entry.list_id === ENDPOINT_ARTIFACT_LISTS.eventFilters.id &&
         isProcessDescendantsEnabled(entry)
       ) {

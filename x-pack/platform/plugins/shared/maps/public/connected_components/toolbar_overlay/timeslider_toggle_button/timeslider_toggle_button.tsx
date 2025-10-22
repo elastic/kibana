@@ -45,6 +45,7 @@ export function TimesliderToggleButton(props: Props) {
         iconType="timeslider"
         aria-label={label}
         title={label}
+        color="text"
         isSelected={props.isTimesliderOpen}
         display={props.isTimesliderOpen ? 'fill' : 'empty'}
       />

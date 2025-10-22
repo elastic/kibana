@@ -20,6 +20,8 @@ export type ESQLAstCommand =
   | ESQLAstCompletionCommand
   | ESQLAstFuseCommand;
 
+export type ESQLAstAllCommands = ESQLAstCommand | ESQLAstHeaderCommand;
+
 export type ESQLAstNode = ESQLAstCommand | ESQLAstHeaderCommand | ESQLAstExpression | ESQLAstItem;
 
 /**

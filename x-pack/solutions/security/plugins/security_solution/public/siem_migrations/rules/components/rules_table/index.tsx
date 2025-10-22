@@ -219,6 +219,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
           ids: selectedMigrationRules.map((rule) => rule.id),
         });
         setTableLoading(false);
+        setSelectedMigrationRules([]);
       },
       [migrationId, updateIndexPattern, selectedMigrationRules, setTableLoading]
     );

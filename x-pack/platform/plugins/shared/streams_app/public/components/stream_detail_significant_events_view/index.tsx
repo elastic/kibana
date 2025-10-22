@@ -9,7 +9,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { StreamQueryKql, Feature } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useFilteredSigEvents } from './hooks/use_filtered_sig_events';
 import { useKibana } from '../../hooks/use_kibana';
 import { EditSignificantEventFlyout } from './edit_significant_event_flyout';
@@ -27,6 +27,10 @@ import { StreamFeaturesFlyout } from '../data_management/stream_detail_managemen
 import { useStreamFeatures } from '../data_management/stream_detail_management/stream_features/hooks/use_stream_features';
 import { useStreamFeaturesApi } from '../../hooks/use_stream_features_api';
 import { useAIFeatures } from './add_significant_event_flyout/generated_flow_form/use_ai_features';
+import {
+  OPEN_SIGNIFICANT_EVENTS_FLYOUT_URL_PARAM,
+  SELECTED_FEATURES_URL_PARAM,
+} from '../../constants';
 
 interface Props {
   definition: Streams.all.GetResponse;
@@ -46,7 +50,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   }, [start, end]);
 
   const { features, refreshFeatures, featuresLoading } = useStreamFeatures(definition.stream);
-  const { identifyFeatures } = useStreamFeaturesApi(definition.stream);
+  const { identifyFeatures, abort } = useStreamFeaturesApi(definition.stream);
   const [isFeatureDetectionFlyoutOpen, setIsFeatureDetectionFlyoutOpen] = useState(false);
   const [isFeatureDetectionLoading, setIsFeatureDetectionLoading] = useState(false);
   const [detectedFeatures, setDetectedFeatures] = useState<Feature[]>([]);
@@ -75,6 +79,29 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     query
   );
 
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get(OPEN_SIGNIFICANT_EVENTS_FLYOUT_URL_PARAM) === 'true' && features.length > 0) {
+      setIsEditFlyoutOpen(true);
+
+      // Parse selected features from URL parameters
+      const selectedFeaturesParam = urlParams.get(SELECTED_FEATURES_URL_PARAM);
+
+      if (selectedFeaturesParam) {
+        const selectedFeatureNames = selectedFeaturesParam.split(',').filter((name) => name.trim());
+        setSelectedFeatures(
+          features.filter((feature) => selectedFeatureNames.includes(feature.name))
+        );
+      }
+
+      // Clean up the URL parameters after opening the flyout
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete(OPEN_SIGNIFICANT_EVENTS_FLYOUT_URL_PARAM);
+      newUrl.searchParams.delete(SELECTED_FEATURES_URL_PARAM);
+      window.history.replaceState({}, '', newUrl.toString());
+    }
+  }, [features]);
+
   if (featuresLoading || significantEventsFetchState.loading) {
     return <LoadingPanel size="xxl" />;
   }
@@ -85,6 +112,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
       features={detectedFeatures}
       isLoading={isFeatureDetectionLoading}
       closeFlyout={() => {
+        abort();
         refreshFeatures();
         setIsFeatureDetectionFlyoutOpen(false);
       }}

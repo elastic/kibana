@@ -506,6 +506,14 @@ describe('validation logic', () => {
       ]);
     });
 
+    describe('settings', () => {
+      // Should return error if there is no query following SET
+      testErrorsAndWarnings(`SET time_zone = "CEST";`, [expect.stringContaining('SyntaxError:')]);
+      testErrorsAndWarnings(`SET invalid_setting = "_alias:_origin"; FROM index`, [
+        expect.stringContaining('Unknown setting invalid_setting'),
+      ]);
+    });
+
     describe('shadowing', () => {
       // fields shadowing validation removed
     });

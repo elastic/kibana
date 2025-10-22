@@ -17,11 +17,14 @@ The communication between clusters happens as follows:
 
 ### Changes to `kibana.dev.yml`
 
-- Remove `elasticsearch.hosts`
-- Enable feature flag
+Remove `elasticsearch.hosts`.
 
-```
-  xpack.fleet.enableExperimental: ['enableSyncIntegrationsOnRemote']
+
+ The `enableSyncIntegrationsOnRemote` feature flag should be enabled by default. If not, set it with:
+
+```yaml
+  xpack.fleet.experimentalFeatures:
+    enableSyncIntegrationsOnRemote: true
 ```
 
 This configuration allows to run two local ES clusters in parallel, each one having its own instance of Kibana.
@@ -207,8 +210,7 @@ GET remote1:metrics-*/_search
 
 ## Cloud testing
 
-- Create 2 deployments in https://console.qa.cld.elstc.co called main and remote
-- Manage the deployments and add `xpack.fleet.enableExperimental: ['enableSyncIntegrationsOnRemote']` to kibana configuration to enable the feature flag
+Create 2 deployments in https://console.qa.cld.elstc.co called main and remote.
 
 - On remote cluster:
   - Go to Stack Management / Remote Clusters

@@ -128,6 +128,7 @@
     "@kbn/controls-plugin",
     "@kbn/controls-schemas",
     "@kbn/controls-constants",
+    "@kbn/css-utils",
   ],
   "exclude": ["target/**/*"]
 }

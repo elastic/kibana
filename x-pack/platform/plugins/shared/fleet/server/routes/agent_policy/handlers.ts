@@ -860,7 +860,7 @@ export const GetAgentPolicyOutputsHandler: FleetRequestHandler<
       body: { message: 'Agent policy not found' },
     });
   }
-  const outputs = await agentPolicyService.getAllOutputsForPolicy(soClient, agentPolicy);
+  const outputs = await agentPolicyService.getAllOutputsForPolicy(agentPolicy);
 
   const body: GetAgentPolicyOutputsResponse = {
     item: outputs,
@@ -888,7 +888,7 @@ export const GetListAgentPolicyOutputsHandler: FleetRequestHandler<
     withPackagePolicies: true,
   });
 
-  const outputsList = await agentPolicyService.listAllOutputsForPolicies(soClient, agentPolicies);
+  const outputsList = await agentPolicyService.listAllOutputsForPolicies(agentPolicies);
 
   const body: GetListAgentPolicyOutputsResponse = {
     items: outputsList,

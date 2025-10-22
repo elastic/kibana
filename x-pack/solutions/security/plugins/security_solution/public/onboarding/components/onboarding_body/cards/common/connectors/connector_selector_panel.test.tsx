@@ -10,28 +10,19 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ConnectorSelectorPanel } from './connector_selector_panel';
 import type { AIConnector } from './types';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 const mockConnectors: AIConnector[] = [
-  {
+  createMockActionConnector({
     id: '1',
     name: 'Connector 1',
     actionTypeId: 'testType',
-    isPreconfigured: false,
-    isSystemAction: false,
-    isDeprecated: false,
-    config: {},
-    secrets: {},
-  },
-  {
+  }),
+  createMockActionConnector({
     id: '2',
     name: 'Connector 2',
     actionTypeId: 'testType',
-    isPreconfigured: false,
-    isSystemAction: false,
-    isDeprecated: false,
-    config: {},
-    secrets: {},
-  },
+  }),
 ];
 
 const mockActionTypeRegistry = {

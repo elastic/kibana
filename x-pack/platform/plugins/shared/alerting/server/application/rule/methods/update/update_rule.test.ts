@@ -33,6 +33,7 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import type { RuleDomain } from '../../types';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
+import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -172,7 +173,7 @@ describe('update()', () => {
     actionsClient = (await rulesClientParams.getActionsClient()) as jest.Mocked<ActionsClient>;
     actionsClient.getBulk.mockReset();
     actionsClient.getBulk.mockResolvedValue([
-      {
+      createMockConnector({
         id: '1',
         actionTypeId: 'test',
         config: {
@@ -183,12 +184,8 @@ describe('update()', () => {
           secure: null,
           service: null,
         },
-        isMissingSecrets: false,
         name: 'email connector',
-        isPreconfigured: false,
-        isDeprecated: false,
-        isSystemAction: false,
-      },
+      }),
     ]);
     actionsClient.listTypes.mockReset();
     actionsClient.listTypes.mockResolvedValue([]);
@@ -222,7 +219,7 @@ describe('update()', () => {
   test('updates given parameters', async () => {
     actionsClient.getBulk.mockReset();
     actionsClient.getBulk.mockResolvedValue([
-      {
+      createMockConnector({
         id: '1',
         actionTypeId: 'test',
         config: {
@@ -233,13 +230,9 @@ describe('update()', () => {
           secure: null,
           service: null,
         },
-        isMissingSecrets: false,
         name: 'email connector',
-        isPreconfigured: false,
-        isDeprecated: false,
-        isSystemAction: false,
-      },
-      {
+      }),
+      createMockConnector({
         id: '2',
         actionTypeId: 'test2',
         config: {
@@ -250,12 +243,8 @@ describe('update()', () => {
           secure: null,
           service: null,
         },
-        isMissingSecrets: false,
         name: 'email connector',
-        isPreconfigured: false,
-        isDeprecated: false,
-        isSystemAction: false,
-      },
+      }),
     ]);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
@@ -550,7 +539,7 @@ describe('update()', () => {
   test('should update a rule with some preconfigured actions', async () => {
     actionsClient.getBulk.mockReset();
     actionsClient.getBulk.mockResolvedValue([
-      {
+      createMockConnector({
         id: '1',
         actionTypeId: 'test',
         config: {
@@ -561,13 +550,9 @@ describe('update()', () => {
           secure: null,
           service: null,
         },
-        isMissingSecrets: false,
         name: 'email connector',
-        isPreconfigured: false,
-        isDeprecated: false,
-        isSystemAction: false,
-      },
-      {
+      }),
+      createMockConnector({
         id: '2',
         actionTypeId: 'test2',
         config: {
@@ -578,13 +563,9 @@ describe('update()', () => {
           secure: null,
           service: null,
         },
-        isMissingSecrets: false,
         name: 'another email connector',
-        isPreconfigured: false,
-        isDeprecated: false,
-        isSystemAction: false,
-      },
-      {
+      }),
+      createMockConnector({
         id: 'preconfigured',
         actionTypeId: 'test',
         config: {
@@ -595,12 +576,9 @@ describe('update()', () => {
           secure: null,
           service: null,
         },
-        isMissingSecrets: false,
         name: 'preconfigured email connector',
         isPreconfigured: true,
-        isDeprecated: false,
-        isSystemAction: false,
-      },
+      }),
     ]);
     actionsClient.isPreconfigured.mockImplementation((id: string) => id === 'preconfigured');
 
@@ -843,7 +821,7 @@ describe('update()', () => {
   test('should update a rule with system actions', async () => {
     actionsClient.getBulk.mockReset();
     actionsClient.getBulk.mockResolvedValue([
-      {
+      createMockConnector({
         id: '1',
         actionTypeId: 'test',
         config: {
@@ -854,13 +832,9 @@ describe('update()', () => {
           secure: null,
           service: null,
         },
-        isMissingSecrets: false,
         name: 'email connector',
-        isPreconfigured: false,
-        isDeprecated: false,
-        isSystemAction: false,
-      },
-      {
+      }),
+      createMockConnector({
         id: '2',
         actionTypeId: 'test2',
         config: {
@@ -871,22 +845,15 @@ describe('update()', () => {
           secure: null,
           service: null,
         },
-        isMissingSecrets: false,
         name: 'another email connector',
-        isPreconfigured: false,
-        isDeprecated: false,
-        isSystemAction: false,
-      },
-      {
+      }),
+      createMockConnector({
         id: 'system_action-id',
         actionTypeId: 'test',
         config: {},
-        isMissingSecrets: false,
         name: 'system action connector',
-        isPreconfigured: false,
-        isDeprecated: false,
         isSystemAction: true,
-      },
+      }),
     ]);
 
     actionsClient.isSystemAction.mockImplementation((id: string) => id === 'system_action-id');
@@ -2002,7 +1969,7 @@ describe('update()', () => {
     encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValue(new Error('Fail'));
     actionsClient.getBulk.mockReset();
     actionsClient.getBulk.mockResolvedValue([
-      {
+      createMockConnector({
         id: '1',
         actionTypeId: 'test',
         config: {
@@ -2013,13 +1980,9 @@ describe('update()', () => {
           secure: null,
           service: null,
         },
-        isMissingSecrets: false,
         name: 'email connector',
-        isPreconfigured: false,
-        isDeprecated: false,
-        isSystemAction: false,
-      },
-      {
+      }),
+      createMockConnector({
         id: '2',
         actionTypeId: 'test2',
         config: {
@@ -2030,12 +1993,8 @@ describe('update()', () => {
           secure: null,
           service: null,
         },
-        isMissingSecrets: false,
         name: 'email connector',
-        isPreconfigured: false,
-        isDeprecated: false,
-        isSystemAction: false,
-      },
+      }),
     ]);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
@@ -2620,7 +2579,7 @@ describe('update()', () => {
     // Reset from default behaviour
     actionsClient.getBulk.mockReset();
     actionsClient.getBulk.mockResolvedValueOnce([
-      {
+      createMockConnector({
         id: '1',
         actionTypeId: 'test',
         config: {
@@ -2631,13 +2590,9 @@ describe('update()', () => {
           secure: null,
           service: null,
         },
-        isMissingSecrets: false,
         name: 'email connector',
-        isPreconfigured: false,
-        isDeprecated: false,
-        isSystemAction: false,
-      },
-      {
+      }),
+      createMockConnector({
         id: '2',
         actionTypeId: 'tes2',
         config: {
@@ -2650,10 +2605,7 @@ describe('update()', () => {
         },
         isMissingSecrets: true,
         name: 'another connector',
-        isPreconfigured: false,
-        isDeprecated: false,
-        isSystemAction: false,
-      },
+      }),
     ]);
 
     await expect(
@@ -2703,16 +2655,11 @@ describe('update()', () => {
     // Reset from default behaviour
     actionsClient.getBulk.mockReset();
     actionsClient.getBulk.mockResolvedValue([
-      {
+      createMockConnector({
         id: '1',
         actionTypeId: '.slack',
-        config: {},
-        isMissingSecrets: true,
         name: 'slack connector',
-        isPreconfigured: false,
-        isDeprecated: false,
-        isSystemAction: false,
-      },
+      }),
     ]);
     actionsClient.isPreconfigured.mockImplementation((id: string) => id === 'preconfigured');
 
@@ -2890,7 +2837,7 @@ describe('update()', () => {
   test('logs warning when creating with an interval less than the minimum configured one when enforce = false', async () => {
     actionsClient.getBulk.mockReset();
     actionsClient.getBulk.mockResolvedValue([
-      {
+      createMockConnector({
         id: '1',
         actionTypeId: 'test',
         config: {
@@ -2901,13 +2848,9 @@ describe('update()', () => {
           secure: null,
           service: null,
         },
-        isMissingSecrets: false,
         name: 'email connector',
-        isPreconfigured: false,
-        isDeprecated: false,
-        isSystemAction: false,
-      },
-      {
+      }),
+      createMockConnector({
         id: '2',
         actionTypeId: 'test2',
         config: {
@@ -2918,12 +2861,8 @@ describe('update()', () => {
           secure: null,
           service: null,
         },
-        isMissingSecrets: false,
         name: 'email connector',
-        isPreconfigured: false,
-        isDeprecated: false,
-        isSystemAction: false,
-      },
+      }),
     ]);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
@@ -3259,7 +3198,7 @@ describe('update()', () => {
   test('updates an action with uuid and adds uuid to an action without it', async () => {
     actionsClient.getBulk.mockReset();
     actionsClient.getBulk.mockResolvedValue([
-      {
+      createMockConnector({
         id: '1',
         actionTypeId: 'test',
         config: {
@@ -3270,12 +3209,8 @@ describe('update()', () => {
           secure: null,
           service: null,
         },
-        isMissingSecrets: false,
         name: 'email connector',
-        isPreconfigured: false,
-        isDeprecated: false,
-        isSystemAction: false,
-      },
+      }),
     ]);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
@@ -3731,7 +3666,7 @@ describe('update()', () => {
       });
 
       actionsClient.getBulk.mockResolvedValue([
-        {
+        createMockConnector({
           id: '1',
           actionTypeId: 'test',
           config: {
@@ -3742,13 +3677,9 @@ describe('update()', () => {
             secure: null,
             service: null,
           },
-          isMissingSecrets: false,
           name: 'email connector',
-          isPreconfigured: false,
-          isDeprecated: false,
-          isSystemAction: false,
-        },
-        {
+        }),
+        createMockConnector({
           id: '2',
           actionTypeId: 'test2',
           config: {
@@ -3759,22 +3690,15 @@ describe('update()', () => {
             secure: null,
             service: null,
           },
-          isMissingSecrets: false,
           name: 'another email connector',
-          isPreconfigured: false,
-          isDeprecated: false,
-          isSystemAction: false,
-        },
-        {
+        }),
+        createMockConnector({
           id: 'system_action-id',
           actionTypeId: 'test',
           config: {},
-          isMissingSecrets: false,
           name: 'system action connector',
-          isPreconfigured: false,
-          isDeprecated: false,
           isSystemAction: true,
-        },
+        }),
       ]);
     });
 
@@ -4665,7 +4589,7 @@ describe('update()', () => {
     test('gives updated investigation guide to saved objects client', async () => {
       actionsClient.getBulk.mockReset();
       actionsClient.getBulk.mockResolvedValue([
-        {
+        createMockConnector({
           id: '1',
           actionTypeId: 'test',
           config: {
@@ -4676,13 +4600,9 @@ describe('update()', () => {
             secure: null,
             service: null,
           },
-          isMissingSecrets: false,
           name: 'email connector',
-          isPreconfigured: false,
-          isDeprecated: false,
-          isSystemAction: false,
-        },
-        {
+        }),
+        createMockConnector({
           id: '2',
           actionTypeId: 'test2',
           config: {
@@ -4693,12 +4613,8 @@ describe('update()', () => {
             secure: null,
             service: null,
           },
-          isMissingSecrets: false,
           name: 'email connector',
-          isPreconfigured: false,
-          isDeprecated: false,
-          isSystemAction: false,
-        },
+        }),
       ]);
       unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
         id: '1',

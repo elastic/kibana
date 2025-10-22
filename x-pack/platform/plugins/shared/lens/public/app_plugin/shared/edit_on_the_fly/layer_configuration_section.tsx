@@ -16,13 +16,12 @@ import { replaceIndexpattern } from '../../../state_management/lens_slice';
 import type { LayerConfigurationProps } from './types';
 import { useLensSelector } from '../../../state_management';
 import type { ConfigPanelWrapperProps } from '../../../editor_frame_service/editor_frame/config_panel/types';
+import { useEditorFrameService } from '../../../editor_frame_service/editor_frame_service_context';
 
 export function LayerConfiguration({
   attributes,
   coreStart,
   startDependencies,
-  visualizationMap,
-  datasourceMap,
   datasourceId,
   framePublicAPI,
   hasPadding,
@@ -41,6 +40,7 @@ export function LayerConfiguration({
 }: LayerConfigurationProps) {
   const dispatch = useLensDispatch();
   const { euiTheme } = useEuiTheme();
+  const { visualizationMap } = useEditorFrameService();
   const { visualization } = useLensSelector((state) => state.lens);
   const activeVisualization =
     visualizationMap[visualization.activeId ?? attributes.visualizationType];
@@ -65,8 +65,6 @@ export function LayerConfiguration({
     lensAdapters,
     dataLoading$,
     framePublicAPI,
-    datasourceMap,
-    visualizationMap,
     core: coreStart,
     dataViews: startDependencies.dataViews,
     uiActions: startDependencies.uiActions,
@@ -95,6 +93,7 @@ export function LayerConfiguration({
       <VisualizationToolbar
         activeVisualization={activeVisualization}
         framePublicAPI={framePublicAPI}
+        // enableFlyoutToolbar
       />
       <EuiSpacer size="m" />
       <ConfigPanelWrapper {...layerPanelsProps} />

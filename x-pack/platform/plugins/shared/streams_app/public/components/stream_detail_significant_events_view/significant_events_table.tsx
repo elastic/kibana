@@ -76,7 +76,7 @@ export function SignificantEventsTable({
     {
       field: 'query',
       name: i18n.translate('xpack.streams.significantEventsTable.feature', {
-        defaultMessage: 'Feauture',
+        defaultMessage: 'Feature',
       }),
       render: (query: StreamQuery) => {
         return (

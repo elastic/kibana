@@ -26,7 +26,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('Saves and restores a session with relative time ranges', async () => {
       await dashboard.loadSavedDashboard('Delayed 5s');
       await dashboard.waitForRenderComplete();
-      await header.waitUntilLoadingHasFinished();
       await timePicker.setCommonlyUsedTime('This_week');
 
       await searchSessions.save({ withRefresh: true, isSubmitButton: true });

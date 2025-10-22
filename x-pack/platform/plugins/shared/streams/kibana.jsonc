@@ -12,6 +12,7 @@
     "server": true,
     "requiredPlugins": [
       "alerting",
+      "console",
       "data",
       "encryptedSavedObjects",
       "features",

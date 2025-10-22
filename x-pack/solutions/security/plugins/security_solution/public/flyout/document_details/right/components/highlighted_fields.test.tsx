@@ -52,7 +52,7 @@ describe('<HighlightedFields />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useHighlightedFieldsPrivilege as jest.Mock).mockReturnValue({
-      isEditHighlightedFieldsDisabled: false,
+      isDisabled: false,
       tooltipContent: 'tooltip content',
     });
     (useRuleIndexPattern as jest.Mock).mockReturnValue({
