@@ -14,8 +14,8 @@ import {
 } from '@kbn/stack-connectors-plugin/common/inference/constants';
 import {
   SUB_ACTION as BEDROCK_SUB_ACTION,
-  BEDROCK_CONNECTOR_ID,
-} from '@kbn/stack-connectors-plugin/common/bedrock/constants';
+  CONNECTOR_ID as BEDROCK_CONNECTOR_ID,
+} from '@kbn/connector-schemas/bedrock/constants';
 import {
   SUB_ACTION as OPENAI_SUB_ACTION,
   OPENAI_CONNECTOR_ID,

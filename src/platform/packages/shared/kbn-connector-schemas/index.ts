@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export { CONNECTOR_ID as BedrockConnectorTypeId } from './bedrock';
 export { CONNECTOR_ID as CasesWebhookConnectorTypeId } from './cases_webhook';
 export { CONNECTOR_ID as D3SecurityConnectorTypeId } from './d3security';
 export { CONNECTOR_ID as EmailConnectorTypeId } from './email';
