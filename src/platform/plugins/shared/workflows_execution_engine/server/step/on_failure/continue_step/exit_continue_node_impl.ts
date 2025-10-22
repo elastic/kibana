@@ -14,7 +14,6 @@ export class ExitContinueNodeImpl implements NodeImplementation {
   constructor(private workflowRuntime: WorkflowExecutionRuntimeManager) {}
 
   public async run(): Promise<void> {
-    this.workflowRuntime.exitScope();
     this.workflowRuntime.navigateToNextNode();
   }
 }

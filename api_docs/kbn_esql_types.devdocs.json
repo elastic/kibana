@@ -98,6 +98,45 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-types",
+        "id": "def-common.controlHasVariableName",
+        "type": "Function",
+        "tags": [],
+        "label": "controlHasVariableName",
+        "description": [
+          "\nType guard to check if a control state object has a variable name property."
+        ],
+        "signature": [
+          "(controlState: unknown) => controlState is HasVariableName"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.controlHasVariableName.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "controlState",
+            "description": [
+              "- The control state object to check"
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "True if the control state has a defined variableName property"
+        ],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -1547,6 +1586,18 @@
         "label": "ESQLVariableType",
         "description": [],
         "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-types",
+        "id": "def-common.SOURCES_TYPES",
+        "type": "Enum",
+        "tags": [],
+        "label": "SOURCES_TYPES",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-esql-types/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
