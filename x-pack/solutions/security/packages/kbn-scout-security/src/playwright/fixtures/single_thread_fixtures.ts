@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ApiServicesFixture, UserProfilesFixture } from '@kbn/scout';
-import { test as baseTest, mergeTests, userProfilesFixture } from '@kbn/scout';
+import type { ApiServicesFixture } from '@kbn/scout';
+import { test as baseTest, mergeTests } from '@kbn/scout';
 import type {
   SecurityApiServicesFixture,
   SecurityTestFixtures,
@@ -20,7 +20,7 @@ import {
 } from './worker';
 import { extendPageObjects, securityBrowserAuthFixture } from './test';
 
-const securityFixtures = mergeTests(baseTest, securityBrowserAuthFixture, userProfilesFixture);
+const securityFixtures = mergeTests(baseTest, securityBrowserAuthFixture);
 
 export const test = securityFixtures.extend<SecurityTestFixtures, SecurityWorkerFixtures>({
   pageObjects: async (
@@ -40,41 +40,14 @@ export const test = securityFixtures.extend<SecurityTestFixtures, SecurityWorker
         kbnClient,
         log,
         esClient,
-        userProfiles,
-        config,
       }: {
         apiServices: ApiServicesFixture;
         kbnClient: SecurityWorkerFixtures['kbnClient'];
         log: SecurityWorkerFixtures['log'];
         esClient: SecurityWorkerFixtures['esClient'];
-        userProfiles: UserProfilesFixture;
-        config: SecurityWorkerFixtures['config'];
       },
       use: (extendedApiServices: SecurityApiServicesFixture) => Promise<void>
     ) => {
-      // Auto-activate user profile for the test user to ensure profile_uid is available
-      // This is critical for features like Elastic AI Assistant that require user profiles
-      log.debug('[API SERVICES] Starting user profile activation...');
-      log.debug(`[API SERVICES] Username: ${config.auth.username}`);
-      let currentUserUid: string | undefined;
-      try {
-        log.debug('[API SERVICES] Calling userProfiles.activateUserProfile...');
-        const userProfile = await userProfiles.activateUserProfile(
-          config.auth.username,
-          config.auth.password
-        );
-        log.debug(`[API SERVICES] Profile activation response: ${JSON.stringify(userProfile)}`);
-        currentUserUid = userProfile.uid;
-        log.debug(`[API SERVICES] User profile activated with UID: ${currentUserUid}`);
-      } catch (err) {
-        const error = err as Error;
-        log.error(`[API SERVICES] Failed to activate user profile for ${config.auth.username}`);
-        log.error(`[API SERVICES] Error: ${error?.message || err}`);
-        log.error(`[API SERVICES] Error stack: ${error?.stack}`);
-      }
-
-      log.debug(`[API SERVICES] Final currentUserUid value: ${currentUserUid}`);
-
       const extendedApiServices = apiServices as SecurityApiServicesFixture;
       extendedApiServices.detectionRule = getDetectionRuleApiService({
         kbnClient,

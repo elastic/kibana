@@ -131,21 +131,9 @@ export const userProfilesFixture = coreWorkerFixtures.extend<
           log.debug(`Failed to activate profile for ${config.auth.username}: ${err}`);
         }
 
-        // Activate role-based test users that might be used in tests
-        const commonTestUsers = [
-          { username: 'elastic_admin', password: config.auth.password },
-          { username: 'elastic_viewer', password: config.auth.password },
-          { username: 'elastic_editor', password: config.auth.password },
-        ];
-
-        for (const user of commonTestUsers) {
-          try {
-            await activateProfile(esClient, log, user.username, user.password);
-          } catch (err) {
-            // It's OK if these users don't exist - they're created on-demand by SAML
-            log.debug(`Skipping profile activation for ${user.username}: user may not exist yet`);
-          }
-        }
+        // Note: SAML users (elastic_admin, elastic_viewer, elastic_editor, etc.) cannot be
+        // activated via password grant type. They are auto-activated by Kibana on first
+        // authenticated request through SAML flow.
       };
 
       log.serviceLoaded('userProfiles');
