@@ -56,16 +56,15 @@ export const nlToEsqlQueryNode = async ({
 
               Guidelines:
               - If generated query does not have any aggregations(using STATS..BY command), make sure you add operator metadata _id, _index, _version after source index in FROM command
+              - If you use KEEP command, after METADATA operator, make sure to include _id field. 
               - In command FROM use only listed indices: ${state.indices.shortlistedIndexPatterns.join(
                 ', '
-              )} if they satisfy requirements`
-            ),
-            new HumanMessage(
-              `Any referred field in command should exist in any index referred in FROM command.
-              Use for reference:
-
-              ${indexPatternsContext.join('')}
-              `
+              )}
+              - Ensure the query is syntactically correct and adheres to ES|QL standards.
+              - Do not include any explanations, only provide the ES|QL query string.
+              - Any referred field in ES|QL command must exist in list of fields for given index patterns context:
+                ${indexPatternsContext.join('')}
+              - Do not include any fields that do not exist in the provided index patterns context.`
             ),
             new HumanMessage({ content: state.userQuery }),
           ]).messages,
