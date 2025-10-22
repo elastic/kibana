@@ -16,3 +16,6 @@ export * from './src/conditions/helpers';
 export * from './src/conditions/condition_to_query_dsl';
 export * from './src/conditions/condition_to_painless';
 export * from './src/transpilers/shared/convert_for_ui';
+
+export type * from './src/type_validation';
+export { validateTypes } from './src/type_validation';

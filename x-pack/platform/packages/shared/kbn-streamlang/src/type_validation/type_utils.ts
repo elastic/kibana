@@ -34,6 +34,7 @@ export function normalizeToPrimitive(esType: string): PrimitiveType {
   switch (esType.toLowerCase()) {
     case 'keyword':
     case 'text':
+    case 'match_only_text':
     case 'string':
       return 'string';
     case 'int':
