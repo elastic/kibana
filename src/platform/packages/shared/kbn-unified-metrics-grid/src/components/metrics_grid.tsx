@@ -111,13 +111,17 @@ export const MetricsGrid = ({
   );
 
   const handleCloseFlyout = useCallback(() => {
-    if (expandedMetric) {
-      // Use setTimeout to ensure the flyout is fully closed before focusing
-      setTimeout(() => {
-        focusCell(expandedMetric.rowIndex, expandedMetric.colIndex);
-      }, 0);
+    if (!expandedMetric) {
+      return;
     }
+
+    const rowIndex = expandedMetric.rowIndex;
+    const colIndex = expandedMetric.colIndex;
     setExpandedMetric(undefined);
+    // Use requestAnimationFrame to ensure the flyout is fully closed before focusing
+    requestAnimationFrame(() => {
+      focusCell(rowIndex, colIndex);
+    });
   }, [expandedMetric, focusCell]);
 
   const getChartRefForFocus = useCallback(() => {
