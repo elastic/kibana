@@ -73,6 +73,7 @@ function getReloadTimeFetchContext(api: unknown, reloadTimestamp?: number): Relo
 
 function hasSearchSession(api: unknown) {
   // TODO: Remove this once https://github.com/elastic/kibana/issues/239610 is resolved
+  // console.log('api.parentApi.searchSessionId$.value', api.parentApi.searchSessionId$.value);
   // return apiHasParentApi(api) && apiPublishesSearchSession(api.parentApi)
   //   ? typeof api.parentApi.searchSessionId$.value === 'string'
   //   : false;
@@ -178,9 +179,6 @@ export function fetch$(api: unknown): Observable<FetchContext> {
   );
 
   return fetchContext$.pipe(
-    tap(() => {
-      console.log('HERE!!!!!!');
-    }),
     combineLatestWith(isFetchPaused$),
     filter(([, isFetchPaused]) => !isFetchPaused),
     map(([fetchContext]) => fetchContext),

@@ -235,6 +235,7 @@ export function initializeLayoutManager(
   function getDashboardPanelFromId(panelId: string) {
     const childLayout = layout$.value.panels[panelId];
     const childApi = children$.value[panelId];
+
     if (!childApi || !childLayout) throw new PanelNotFoundError();
     return {
       type: childLayout.type,
