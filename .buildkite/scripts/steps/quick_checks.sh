@@ -19,10 +19,10 @@ node scripts/quick_checks --file .buildkite/scripts/steps/checks/quick_checks.js
 if [[ "${COLLECT_QUICK_CHECK_CHANGES:-}" == "true" ]]; then
   # Check if any commits were made during the checks
   CURRENT_HEAD=$(git rev-parse HEAD)
-  
+
   if [[ "$ORIGINAL_HEAD" != "$CURRENT_HEAD" ]]; then
     echo "Changes were committed during quick checks. Pushing to remote..."
-    
+
     if ! is_auto_commit_disabled && [[ "${BUILDKITE_PULL_REQUEST:-false}" != "false" ]]; then
       gh pr checkout "${BUILDKITE_PULL_REQUEST}"
       git push
@@ -33,7 +33,7 @@ if [[ "${COLLECT_QUICK_CHECK_CHANGES:-}" == "true" ]]; then
   else
     echo "No changes were made during quick checks."
   fi
-  
+
   # Also check for any uncommitted changes that might have been missed
   export COLLECT_QUICK_CHECK_CHANGES=false
   check_for_changed_files 'node scripts/quick_checks' true "Collected changes from quick checks"

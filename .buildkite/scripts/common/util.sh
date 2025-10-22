@@ -32,7 +32,7 @@ check_for_changed_files() {
   C_RESET='\033[0m' # Reset color
 
   SHOULD_AUTO_COMMIT_CHANGES="${2:-}"
-  CUSTOM_FIX_MESSAGE="${3:-}"
+  CUSTOM_FIX_MESSAGE="${3:-Changes from $1}"
   GIT_CHANGES="$(git status --porcelain -- . ':!:config/node.options' ':!config/kibana.yml')"
 
   if [[  "$GIT_CHANGES" && "${COLLECT_QUICK_CHECK_CHANGES:-}" == "true" ]]; then
