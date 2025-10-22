@@ -44,13 +44,14 @@ export const MacrosDataInput = React.memo<MacrosDataInputProps>(
             <EuiFlexGroup direction="row" justifyContent="center" gutterSize="m">
               <EuiFlexItem grow={false}>
                 <EuiStepNumber
+                  data-test-subj="macrosUploadStepNumber"
                   titleSize="xs"
                   number={DataInputStep.Macros}
                   status={dataInputStatus}
                 />
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiTitle size="xs">
+                <EuiTitle size="xs" data-test-subj="macrosUploadTitle">
                   <b>{i18n.MACROS_DATA_INPUT_TITLE}</b>
                 </EuiTitle>
               </EuiFlexItem>

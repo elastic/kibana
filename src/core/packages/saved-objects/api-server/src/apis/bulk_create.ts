@@ -64,6 +64,7 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
    * make their edits to the copy.
    */
   managed?: boolean;
+
   /**
    * The access control settings for the object
    *

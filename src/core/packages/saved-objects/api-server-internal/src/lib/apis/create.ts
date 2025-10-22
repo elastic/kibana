@@ -115,7 +115,7 @@ export const performCreate = async <T>(
 
   if (!createdBy && accessMode) {
     throw SavedObjectsErrorHelpers.createBadRequestError(
-      `Unable to create "read_only" "${type}" saved object. User profile ID not found.`
+      `Unable to create "${type}" with "accessMode". User profile ID not found.`
     );
   }
 

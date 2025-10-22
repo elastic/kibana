@@ -72,6 +72,7 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
   managed?: boolean;
   /** {@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility} */
   migrationVersionCompatibility?: 'compatible' | 'raw';
+
   /**
    * Access control settings for the create operation.
    *

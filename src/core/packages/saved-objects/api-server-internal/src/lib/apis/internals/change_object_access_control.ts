@@ -198,7 +198,7 @@ export const changeObjectAccessControl = async (
   if (validObjects.length === 0) {
     // We only have error results; return early to avoid potentially trying authZ checks for 0 types which would result in an exception.
     return {
-      objects: expectedBulkGetResults.filter(isLeft).map(({ value }) => value),
+      objects: expectedBulkGetResults.map(({ value }) => value),
     };
   }
 
@@ -227,7 +227,7 @@ export const changeObjectAccessControl = async (
   const authObjects = validObjects.map((element) => {
     const { type, id, esRequestIndex: index } = element.value;
 
-    const preflightResult = bulkGetResponse?.body.docs[
+    const preflightResult = bulkGetResponse.body.docs[
       index
     ] as estypes.GetGetResult<SavedObjectsRawDocSource>;
 

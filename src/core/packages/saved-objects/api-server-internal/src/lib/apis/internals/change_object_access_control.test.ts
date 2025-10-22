@@ -168,7 +168,10 @@ describe('changeObjectAccessControl', () => {
 
       it('returns error if no read-only objects are specified', async () => {
         const params = setup({
-          objects: [{ type: NON_READ_ONLY_TYPE, id: 'id-1' }],
+          objects: [
+            { type: NON_READ_ONLY_TYPE, id: 'id-1' },
+            { type: NON_READ_ONLY_TYPE, id: 'id-2' },
+          ],
         });
 
         const result = await changeObjectAccessControl({

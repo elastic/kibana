@@ -32,13 +32,6 @@ export const OKTA_DATA_PANEL_TITLE = i18n.translate(
   }
 );
 
-export const RISK_SCORE = i18n.translate(
-  'xpack.securitySolution.flyout.entityDetails.user.riskScoreLabel',
-  {
-    defaultMessage: 'Risk score',
-  }
-);
-
 export const VALUES_COLUMN_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.user.valuesColumnTitle',
   {

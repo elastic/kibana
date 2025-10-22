@@ -460,15 +460,4 @@ export interface SavedObjectsClientContract {
     objects: SavedObjectsChangeAccessControlObject[],
     options: SavedObjectsChangeAccessModeOptions
   ): Promise<SavedObjectsChangeAccessControlResponse>;
-
-  /**
-   * Changes the access mode of one or more SavedObjects.
-   * @param objects - The objects to change access mode for
-   * @param options {@link SavedObjectsChangeAccessModeOptions} - options for the change access mode operation
-   * @returns the {@link SavedObjectsChangeAccessControlResponse}
-   */
-  // checkAccessControl(
-  //   objects: SavedObjectsChangeAccessControlObject[],
-  //   options: SavedObjectsChangeAccessModeOptions
-  // ): Promise<SavedObjectsChangeAccessControlResponse>;
 }

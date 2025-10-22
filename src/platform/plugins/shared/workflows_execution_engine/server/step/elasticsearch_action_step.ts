@@ -8,7 +8,7 @@
  */
 
 import { buildRequestFromConnector } from '@kbn/workflows';
-import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
+import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 import type { RunStepResult, BaseStep } from './node_implementation';
@@ -23,7 +23,7 @@ export interface ElasticsearchActionStep extends BaseStep {
 export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<ElasticsearchActionStep> {
   constructor(
     step: ElasticsearchActionStep,
-    contextManager: WorkflowContextManager,
+    contextManager: StepExecutionRuntime,
     workflowRuntime: WorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger
   ) {
@@ -32,7 +32,7 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<El
 
   public getInput() {
     // Get current context for templating
-    const context = this.contextManager.getContext();
+    const context = this.stepExecutionRuntime.contextManager.getContext();
     // Render inputs from 'with' - support both direct step.with and step.configuration.with
     const stepWith = this.step.with || (this.step as any).configuration?.with || {};
     return this.renderObjectTemplate(stepWith, context);
@@ -78,7 +78,7 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<El
       });
 
       // Get ES client (user-scoped if available, fallback otherwise)
-      const esClient = this.contextManager.getEsClientAsUser();
+      const esClient = this.stepExecutionRuntime.contextManager.getEsClientAsUser();
 
       // Generic approach like Dev Console - just forward the request to ES
       const result = await this.executeElasticsearchRequest(esClient, stepType, stepWith);
@@ -155,12 +155,11 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<El
         body: requestBody,
       };
 
-      // console.log('DEBUG - Sending to ES client:', JSON.stringify(requestOptions, null, 2));
+      // TODO: This is a hack to handle bulk requests. We should refactor this to use the bulk API properly.
       if (requestOptions.path.endsWith('/_bulk')) {
-        // console.log('DEBUG - Bulk request detected:', JSON.stringify(requestOptions.body, null, 2));
         // Further processing for bulk requests can be added here
         // SG: ugly hack cuz _bulk is special
-        const docs = requestOptions.body.operations; // your 3 doc objects
+        const docs = requestOptions.body?.operations as Array<Record<string, unknown>> | undefined; // your 3 doc objects
         // If the index is in the path `/tin-workflows/_bulk`, pass it explicitly:
         const pathIndex = requestOptions.path.split('/')[1]; // "tin-workflows"
 
@@ -168,31 +167,18 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<El
         const refresh = queryParams?.refresh ?? false;
 
         // Turn each doc into an action+doc pair
-        const bulkBody = docs.flatMap((doc: any, i: number) => {
+        const bulkBody = docs?.flatMap((doc) => {
           // If you have ids, use: { index: { _id: doc._id } }
           return [{ index: {} }, doc];
         });
 
-        const resp = await esClient.bulk({
-          index: pathIndex, // default index for all actions
-          refresh, // true | false | 'wait_for'
-          body: bulkBody, // [ {index:{}}, doc, {index:{}}, doc, ... ]
-        });
-
-        // Helpful: surface per-item errors if any
-        if (resp.errors) {
-          /*
-          const itemsWithErrors = resp.items
-            .map((it: any, idx: number) => ({
-              idx,
-              action: Object.keys(it)[0],
-              result: it[Object.keys(it)[0]],
-            }))
-            .filter((x: any) => x.result.error);
-          */
-          // console.error('Bulk had item errors:', itemsWithErrors);
+        if (bulkBody?.length) {
+          return await esClient.bulk({
+            index: pathIndex, // default index for all actions
+            refresh, // true | false | 'wait_for'
+            body: bulkBody, // [ {index:{}}, doc, {index:{}}, doc, ... ]
+          });
         }
-        return resp;
       }
       return await esClient.transport.request(requestOptions);
     }

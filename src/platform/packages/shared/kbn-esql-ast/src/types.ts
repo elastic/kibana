@@ -17,7 +17,10 @@ export type ESQLAstCommand =
   | ESQLAstJoinCommand
   | ESQLAstChangePointCommand
   | ESQLAstRerankCommand
-  | ESQLAstCompletionCommand;
+  | ESQLAstCompletionCommand
+  | ESQLAstFuseCommand;
+
+export type ESQLAstAllCommands = ESQLAstCommand | ESQLAstHeaderCommand;
 
 export type ESQLAstNode = ESQLAstCommand | ESQLAstHeaderCommand | ESQLAstExpression | ESQLAstItem;
 
@@ -127,6 +130,10 @@ export interface ESQLAstCompletionCommand extends ESQLCommand<'completion'> {
   prompt: ESQLAstExpression;
   inferenceId: ESQLLiteral;
   targetField?: ESQLColumn;
+}
+
+export interface ESQLAstFuseCommand extends ESQLCommand<'fuse'> {
+  fuseType?: ESQLIdentifier;
 }
 
 export interface ESQLAstRerankCommand extends ESQLCommand<'rerank'> {

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Streams, System } from '@kbn/streams-schema';
+import type { Streams, Feature } from '@kbn/streams-schema';
 import { describeDataset, sortAndTruncateAnalyzedFields } from '@kbn/ai-tools';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { type BoundInferenceClient } from '@kbn/inference-common';
@@ -16,14 +16,14 @@ import { GenerateStreamDescriptionPrompt } from './prompt';
  */
 export async function generateStreamDescription({
   stream,
-  system,
+  feature,
   start,
   end,
   esClient,
   inferenceClient,
 }: {
   stream: Streams.all.Definition;
-  system?: System;
+  feature?: Feature;
   start: number;
   end: number;
   esClient: ElasticsearchClient;
@@ -34,12 +34,12 @@ export async function generateStreamDescription({
     end,
     esClient,
     index: stream.name,
-    filter: system ? conditionToQueryDsl(system.filter) : undefined,
+    filter: feature ? conditionToQueryDsl(feature.filter) : undefined,
   });
 
   const response = await inferenceClient.prompt({
     input: {
-      name: system?.name || stream.name,
+      name: feature?.name || stream.name,
       dataset_analysis: JSON.stringify(
         sortAndTruncateAnalyzedFields(analysis, { dropEmpty: true, dropUnmapped: false })
       ),
