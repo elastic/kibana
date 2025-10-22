@@ -51,7 +51,7 @@ export const PromptComponent: React.FC<PromptComponentProps> = ({
             onPromptSubmit={handlePromptSubmit}
             setUserPrompt={setPromptValue}
             value={promptValue}
-            isDisabled={isLoading}
+            isDisabled={isLoading || isAiRuleCreationInProgress}
           />
         </EuiFlexItem>
         <EuiFlexItem

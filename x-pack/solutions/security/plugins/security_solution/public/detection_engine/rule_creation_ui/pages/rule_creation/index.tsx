@@ -115,7 +115,7 @@ const MyEuiPanel = styled(EuiPanel)<{
 
 MyEuiPanel.displayName = 'MyEuiPanel';
 
-const CreateRulePageComponent: React.FC<{ rule: RuleResponse; aiAssistedUserQuery?: string }> = ({
+const CreateRulePageComponent: React.FC<{ rule?: RuleResponse; aiAssistedUserQuery?: string }> = ({
   rule,
   aiAssistedUserQuery,
 }) => {
