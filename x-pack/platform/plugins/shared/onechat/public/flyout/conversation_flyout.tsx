@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export const baseToolsProviderId = 'base_tools';
+import React from 'react';
+import type { ConversationFlyoutProps } from './types';
+
+export const ConversationFlyout = ({ onClose }: ConversationFlyoutProps) => {
+  return <div>Agent Builder Conversation Flyout</div>;
+};

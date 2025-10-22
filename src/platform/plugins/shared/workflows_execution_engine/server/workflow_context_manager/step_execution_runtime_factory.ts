@@ -12,6 +12,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { StackFrame } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import { StepExecutionRuntime } from './step_execution_runtime';
+import type { ContextDependencies } from './types';
 import { WorkflowContextManager } from './workflow_context_manager';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import { buildStepExecutionId } from '../utils';
@@ -50,7 +51,8 @@ export class StepExecutionRuntimeFactory {
       workflowLogger: IWorkflowEventLogger;
       esClient: ElasticsearchClient; // ES client (user-scoped if available, fallback otherwise)
       fakeRequest?: KibanaRequest;
-      coreStart?: CoreStart; // For using Kibana's internal HTTP client
+      coreStart?: CoreStart;
+      dependencies: ContextDependencies;
     }
   ) {}
 
@@ -79,6 +81,7 @@ export class StepExecutionRuntimeFactory {
       esClient: this.params.esClient,
       fakeRequest: this.params.fakeRequest,
       coreStart: this.params.coreStart,
+      dependencies: this.params.dependencies,
     });
     return new StepExecutionRuntime({
       stepExecutionId,

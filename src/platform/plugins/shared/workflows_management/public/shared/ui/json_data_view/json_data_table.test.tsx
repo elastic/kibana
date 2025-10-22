@@ -27,9 +27,7 @@ jest.mock('./field_name', () => ({
     mockFieldName(props);
     return (
       <div data-test-subj={`mocked-field-name-${props.fieldName}`}>
-        {props.fieldName} {'('}
-        {props.fieldType}
-        {')'}
+        {`${props.fieldName} (${props.fieldType})`}
       </div>
     );
   },
@@ -40,26 +38,6 @@ jest.mock('./table_field_value', () => ({
     mockTableFieldValue(props);
     return <div data-test-subj={`mocked-field-value-${props.field}`}>{props.formattedValue}</div>;
   },
-}));
-
-// Mock kibanaFlatten
-jest.mock('../../lib/kibana_flatten', () => ({
-  kibanaFlatten: jest.fn((obj: any) => {
-    // Simple mock implementation
-    const result: Record<string, any> = {};
-    const flatten = (o: any, prefix = '') => {
-      Object.keys(o).forEach((key) => {
-        const newKey = prefix ? `${prefix}.${key}` : key;
-        if (typeof o[key] === 'object' && o[key] !== null && !Array.isArray(o[key])) {
-          flatten(o[key], newKey);
-        } else {
-          result[newKey] = o[key];
-        }
-      });
-    };
-    flatten(obj);
-    return result;
-  }),
 }));
 
 // Mock useGetFormattedDateTime hook
@@ -334,7 +312,7 @@ describe('JSONDataTable', () => {
     });
 
     it('should handle undefined values', () => {
-      render(<JSONDataTable data={{ undefinedField: undefined }} />);
+      render(<JSONDataTable data={{ undefinedField: undefined as any }} />);
 
       expect(mockTableFieldValue).toHaveBeenCalledWith(
         expect.objectContaining({

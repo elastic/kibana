@@ -11,6 +11,7 @@ import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { StackFrame, StepContext, WorkflowContext } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
+import type { ContextDependencies } from './types';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { RunStepResult } from '../step/node_implementation';
@@ -26,6 +27,7 @@ export interface ContextManagerInit {
   esClient: ElasticsearchClient; // ES client (user-scoped if available, fallback otherwise)
   fakeRequest?: KibanaRequest;
   coreStart?: CoreStart; // For using Kibana's internal HTTP client
+  dependencies: ContextDependencies;
 }
 
 export class WorkflowContextManager {
@@ -34,6 +36,7 @@ export class WorkflowContextManager {
   private esClient: ElasticsearchClient;
   private fakeRequest?: KibanaRequest;
   private coreStart?: CoreStart;
+  private dependencies: ContextDependencies;
 
   private stackFrames: StackFrame[];
   public readonly node: GraphNodeUnion;
@@ -50,6 +53,7 @@ export class WorkflowContextManager {
     this.coreStart = init.coreStart;
     this.node = init.node;
     this.stackFrames = init.stackFrames;
+    this.dependencies = init.dependencies;
   }
 
   // Any change here should be reflected in the 'getContextSchemaForPath' function for frontend validation to work
@@ -128,6 +132,13 @@ export class WorkflowContextManager {
    */
   public getCoreStart(): CoreStart | undefined {
     return this.coreStart;
+  }
+
+  /**
+   * Get dependencies
+   */
+  public getDependencies(): ContextDependencies {
+    return this.dependencies;
   }
 
   private buildWorkflowContext(): WorkflowContext {

@@ -22,6 +22,7 @@ import type { StepExecutionRepository } from '../repositories/step_execution_rep
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { NodesFactory } from '../step/nodes_factory';
 import { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
+import type { ContextDependencies } from '../workflow_context_manager/types';
 import { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 import { WorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
@@ -39,6 +40,7 @@ export async function setupDependencies(
   stepExecutionRepository: StepExecutionRepository,
   logsRepository: LogsRepository,
   coreStart: CoreStart, // CoreStart for creating esClientAsUser
+  dependencies: ContextDependencies,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fakeRequest?: any // KibanaRequest from task manager
 ) {
@@ -110,6 +112,7 @@ export async function setupDependencies(
     esClient,
     fakeRequest,
     coreStart,
+    dependencies,
   });
 
   const nodesFactory = new NodesFactory(

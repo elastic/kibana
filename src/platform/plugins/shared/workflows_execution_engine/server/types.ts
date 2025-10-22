@@ -11,6 +11,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import type { KibanaRequest } from '@kbn/core/server';
 import type {
   TaskManagerSetupContract,
@@ -46,9 +47,11 @@ export interface WorkflowsExecutionEnginePluginStart {
 
 export interface WorkflowsExecutionEnginePluginSetupDeps {
   taskManager: TaskManagerSetupContract;
+  cloud: CloudSetup;
 }
 
 export interface WorkflowsExecutionEnginePluginStartDeps {
   taskManager: TaskManagerStartContract;
   actions: ActionsPluginStartContract;
+  cloud: CloudStart;
 }

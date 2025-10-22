@@ -116,10 +116,25 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
   }
 
   private getKibanaUrl(): string {
-    // Get Kibana URL from CoreStart if available
+    // Get Kibana URL from server.publicBaseUrl config if available
     const coreStart = this.stepExecutionRuntime.contextManager.getCoreStart();
     if (coreStart?.http?.basePath?.publicBaseUrl) {
       return coreStart.http.basePath.publicBaseUrl;
+    }
+    // Get Kibana URL from cloud.kibanaUrl config if available
+    const { cloudSetup } = this.stepExecutionRuntime.contextManager.getDependencies();
+    if (cloudSetup?.kibanaUrl) {
+      return cloudSetup.kibanaUrl;
+    }
+
+    // Fallback to local network binding
+    const http = coreStart?.http;
+    if (http) {
+      const { protocol, hostname, port } = http.getServerInfo();
+      return `${protocol}://${hostname}:${port}${http.basePath
+        // Prepending on '' removes the serverBasePath
+        .prepend('/')
+        .slice(0, -1)}`;
     }
 
     // Fallback to localhost for development

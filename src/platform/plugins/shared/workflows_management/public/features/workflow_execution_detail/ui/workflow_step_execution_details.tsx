@@ -30,6 +30,7 @@ import { StepExecutionTimelineStateful } from './step_execution_timeline_statefu
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { StatusBadge } from '../../../shared/ui';
 import { useGetFormattedDateTime } from '../../../shared/ui/use_formatted_date';
+import { isTerminalStatus } from '../lib/execution_status';
 
 interface WorkflowStepExecutionDetailsProps {
   workflowExecutionId: string;
@@ -43,6 +44,10 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
     const getFormattedDateTime = useGetFormattedDateTime();
 
     const complicatedFlyoutTitleId = `Step ${stepExecution?.stepId} Execution Details`;
+    const isFinished = useMemo(
+      () => Boolean(stepExecution?.status && isTerminalStatus(stepExecution.status)),
+      [stepExecution?.status]
+    );
 
     const tabs = useMemo(
       () => [
@@ -135,38 +140,41 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
           </EuiPanel>
         </EuiFlexItem>
 
-        <EuiFlexItem grow={true}>
-          <EuiTabs bottomBorder={false} css={styles.tabs}>
-            {tabs.map((tab) => (
-              <EuiTab
-                onClick={() => setSelectedTabId(tab.id)}
-                isSelected={tab.id === selectedTabId}
-                key={tab.id}
-              >
-                {tab.name}
-              </EuiTab>
-            ))}
-          </EuiTabs>
-          <EuiHorizontalRule margin="none" />
-          <EuiPanel hasShadow={false} paddingSize="m">
-            {selectedTabId === 'output' && (
-              <StepExecutionDataView stepExecution={stepExecution} mode="output" />
-            )}
-            {selectedTabId === 'input' && (
-              <StepExecutionDataView stepExecution={stepExecution} mode="input" />
-            )}
-            {selectedTabId === 'timeline' && (
-              <StepExecutionTimelineStateful
-                executionId={workflowExecutionId}
-                stepExecutionId={stepExecution.id}
-              />
-            )}
-          </EuiPanel>
-        </EuiFlexItem>
+        {isFinished && (
+          <EuiFlexItem grow={true}>
+            <EuiTabs bottomBorder={false} css={styles.tabs}>
+              {tabs.map((tab) => (
+                <EuiTab
+                  onClick={() => setSelectedTabId(tab.id)}
+                  isSelected={tab.id === selectedTabId}
+                  key={tab.id}
+                >
+                  {tab.name}
+                </EuiTab>
+              ))}
+            </EuiTabs>
+            <EuiHorizontalRule margin="none" />
+            <EuiPanel hasShadow={false} paddingSize="m">
+              {selectedTabId === 'output' && (
+                <StepExecutionDataView stepExecution={stepExecution} mode="output" />
+              )}
+              {selectedTabId === 'input' && (
+                <StepExecutionDataView stepExecution={stepExecution} mode="input" />
+              )}
+              {selectedTabId === 'timeline' && (
+                <StepExecutionTimelineStateful
+                  executionId={workflowExecutionId}
+                  stepExecutionId={stepExecution.id}
+                />
+              )}
+            </EuiPanel>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     );
   }
 );
+WorkflowStepExecutionDetails.displayName = 'WorkflowStepExecutionDetails';
 
 WorkflowStepExecutionDetails.displayName = 'WorkflowStepExecutionDetails';
 

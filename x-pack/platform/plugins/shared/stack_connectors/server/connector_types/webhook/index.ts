@@ -21,6 +21,7 @@ import {
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 
+import { WebhookMethods } from '../../../common/auth/constants';
 import type {
   ActionParamsType,
   WebhookConnectorType,
@@ -33,9 +34,8 @@ import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_hea
 import { isOk, promiseResult } from '../lib/result_type';
 import { ConfigSchema, ParamsSchema } from './schema';
 import { getAxiosConfig } from './get_axios_config';
-import { validateConnectorTypeConfig, validateParamsForMethod } from './validations';
+import { validateConnectorTypeConfig } from './validations';
 import {
-  errorInvalidParamsForMethod,
   errorResultRequestFailed,
   errorResultUnexpectedNullResponse,
   errorResultInvalid,
@@ -88,6 +88,10 @@ function renderParameterTemplates(
   };
 }
 
+function methodExpectsBody({ method }: { method: WebhookMethods }): Boolean {
+  return ![WebhookMethods.GET, WebhookMethods.DELETE].includes(method);
+}
+
 // action executor
 export async function executor(
   execOptions: WebhookConnectorTypeExecutorOptions
@@ -104,12 +108,6 @@ export async function executor(
 
   const { method, url } = config;
   const { body: data } = params;
-
-  try {
-    validateParamsForMethod({ method, data });
-  } catch {
-    return errorInvalidParamsForMethod(actionId, method);
-  }
 
   const [axiosConfig, axiosConfigError] = await getAxiosConfig({
     connectorId: actionId,
@@ -140,7 +138,7 @@ export async function executor(
       url,
       logger,
       headers,
-      data,
+      data: methodExpectsBody({ method }) ? data : undefined,
       configurationUtilities,
       sslOverrides,
       connectorUsageCollector,
