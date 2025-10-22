@@ -13,7 +13,10 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { RecursivePartial } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import type { Params, CloseAlertParams } from '@kbn/connector-schemas/jira-service-management';
+import type {
+  Params as JiraServiceManagementActionParams,
+  CloseAlertParams as JiraServiceManagementCloseAlertParams,
+} from '@kbn/connector-schemas/jira-service-management';
 import { DisplayMoreOptions } from './display_more_options';
 import * as i18n from './translations';
 import type { EditActionCallback } from './types';
@@ -72,8 +75,11 @@ const AdditionalOptions: React.FC<AdditionalOptionsProps> = ({
 
 AdditionalOptions.displayName = 'AdditionalOptions';
 
-type CloseAlertProps = Pick<ActionParamsProps<Params>, 'errors' | 'index' | 'messageVariables'> & {
-  subActionParams?: RecursivePartial<CloseAlertParams>;
+type CloseAlertProps = Pick<
+  ActionParamsProps<JiraServiceManagementActionParams>,
+  'errors' | 'index' | 'messageVariables'
+> & {
+  subActionParams?: RecursivePartial<JiraServiceManagementCloseAlertParams>;
   editSubAction: EditActionCallback;
   editOptionalSubAction: EditActionCallback;
   showSaveError: boolean;

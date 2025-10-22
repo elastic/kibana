@@ -12,8 +12,8 @@ import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { isEmpty, unset, cloneDeep } from 'lodash';
 import { SUB_ACTION } from '@kbn/connector-schemas/jira-service-management/constants';
 import type {
-  Params,
-  CreateAlertSubActionParams,
+  Params as JiraServiceManagementActionParams,
+  CreateAlertSubActionParams as JiraServiceManagementCreateAlertSubActionParams,
 } from '@kbn/connector-schemas/jira-service-management';
 import * as i18n from './translations';
 import { CreateAlert, isPartialCreateAlertSchema } from './create_alert';
@@ -34,14 +34,9 @@ const actionOptions = [
   },
 ];
 
-const JiraServiceManagementParamFields: React.FC<ActionParamsProps<Params>> = ({
-  actionParams,
-  editAction,
-  errors,
-  index,
-  messageVariables,
-  executionMode,
-}) => {
+const JiraServiceManagementParamFields: React.FC<
+  ActionParamsProps<JiraServiceManagementActionParams>
+> = ({ actionParams, editAction, errors, index, messageVariables, executionMode }) => {
   const { subAction, subActionParams } = actionParams;
 
   const currentSubAction = useRef<string>(subAction ?? SUB_ACTION.CreateAlert);
@@ -150,7 +145,10 @@ JiraServiceManagementParamFields.displayName = 'JiraServiceManagementParamFields
  * and not the entire object.
  */
 
-const showCreateAlertSaveError = (params: Partial<Params>, errors: IErrorObject): boolean => {
+const showCreateAlertSaveError = (
+  params: Partial<JiraServiceManagementActionParams>,
+  errors: IErrorObject
+): boolean => {
   const errorArray = errors['subActionParams.message'] as string[] | undefined;
   const errorsLength = errorArray?.length ?? 0;
 
@@ -159,7 +157,10 @@ const showCreateAlertSaveError = (params: Partial<Params>, errors: IErrorObject)
   );
 };
 
-const showCloseAlertSaveError = (params: Partial<Params>, errors: IErrorObject): boolean => {
+const showCloseAlertSaveError = (
+  params: Partial<JiraServiceManagementActionParams>,
+  errors: IErrorObject
+): boolean => {
   const errorArray = errors['subActionParams.alias'] as string[] | undefined;
   const errorsLength = errorArray?.length ?? 0;
 
@@ -167,10 +168,13 @@ const showCloseAlertSaveError = (params: Partial<Params>, errors: IErrorObject):
 };
 
 const isCreateAlertParams = (
-  params: Partial<Params>
-): params is Partial<CreateAlertSubActionParams> => params.subAction === SUB_ACTION.CreateAlert;
+  params: Partial<JiraServiceManagementActionParams>
+): params is Partial<JiraServiceManagementCreateAlertSubActionParams> =>
+  params.subAction === SUB_ACTION.CreateAlert;
 
-const isCloseAlertParams = (params: Partial<Params>): params is CreateAlertSubActionParams =>
+const isCloseAlertParams = (
+  params: Partial<JiraServiceManagementActionParams>
+): params is JiraServiceManagementCreateAlertSubActionParams =>
   params.subAction === SUB_ACTION.CloseAlert;
 
 // eslint-disable-next-line import/no-default-export

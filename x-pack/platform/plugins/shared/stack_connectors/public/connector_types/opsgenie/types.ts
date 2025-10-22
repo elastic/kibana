@@ -10,9 +10,16 @@ import type {
   ActionParamsProps,
   UserConfiguredActionConnector,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
-import type { Config, Secrets, Params } from '@kbn/connector-schemas/opsgenie';
+import type {
+  Config as OpsgenieActionConfig,
+  Secrets as OpsgenieActionSecrets,
+  Params as OpsgenieActionParams,
+} from '@kbn/connector-schemas/opsgenie';
 
-export type OpsgenieActionConnector = UserConfiguredActionConnector<Config, Secrets>;
+export type OpsgenieActionConnector = UserConfiguredActionConnector<
+  OpsgenieActionConfig,
+  OpsgenieActionSecrets
+>;
 
 /**
  * These fields will never be sent to Opsgenie or the sub actions framework. This allows us to pass a value to the
@@ -23,13 +30,13 @@ interface JsonEditorError {
   jsonEditorError: boolean;
 }
 
-export type OpsgenieConnectorTypeParams = Params & JsonEditorError;
+export type OpsgenieConnectorTypeParams = OpsgenieActionParams & JsonEditorError;
 
-export type ValidationParams = RecursivePartial<Params> & JsonEditorError;
+export type ValidationParams = RecursivePartial<OpsgenieActionParams> & JsonEditorError;
 
-type EditActionParameters = Parameters<ActionParamsProps<Params>['editAction']>;
+type EditActionParameters = Parameters<ActionParamsProps<OpsgenieActionParams>['editAction']>;
 
 export type EditActionCallback = (
   key: EditActionParameters[0],
   value: EditActionParameters[1]
-) => ReturnType<ActionParamsProps<Params>['editAction']>;
+) => ReturnType<ActionParamsProps<OpsgenieActionParams>['editAction']>;
