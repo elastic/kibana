@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ruleParamsSchema } from '@kbn/response-ops-rule-params';
+import { ruleParamsSchemaWithRuleTypeId } from '@kbn/response-ops-rule-params';
 import {
   ruleLastRunOutcomeValues,
   ruleExecutionStatusValues,
@@ -163,7 +163,7 @@ export const ruleDomainSchema = schema.object({
   schedule: intervalScheduleSchema,
   actions: schema.arrayOf(actionSchema),
   systemActions: schema.maybe(schema.arrayOf(systemActionSchema)),
-  params: ruleParamsSchema,
+  params: ruleParamsSchemaWithRuleTypeId('alertTypeId'),
   mapped_params: schema.maybe(mappedParamsSchema),
   scheduledTaskId: schema.maybe(schema.string()),
   createdBy: schema.nullable(schema.string()),
@@ -206,7 +206,7 @@ export const ruleSchema = schema.object({
   schedule: intervalScheduleSchema,
   actions: schema.arrayOf(actionSchema),
   systemActions: schema.maybe(schema.arrayOf(systemActionSchema)),
-  params: ruleParamsSchema,
+  params: ruleParamsSchemaWithRuleTypeId('alertTypeId'),
   mapped_params: schema.maybe(mappedParamsSchema),
   scheduledTaskId: schema.maybe(schema.string()),
   createdBy: schema.nullable(schema.string()),

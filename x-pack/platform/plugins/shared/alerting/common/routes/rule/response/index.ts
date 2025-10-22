@@ -40,8 +40,8 @@ export type {
   Monitoring as MonitoringV1,
 } from './types/v1';
 
-export { ruleParamsSchemaV1 } from '@kbn/response-ops-rule-params';
-export { ruleParamsSchema } from '@kbn/response-ops-rule-params';
+export { ruleParamsSchemaWithRuleTypeIdV1 } from '@kbn/response-ops-rule-params';
+export { ruleParamsSchemaWithRuleTypeId } from '@kbn/response-ops-rule-params';
 
 export type { RuleParamsV1 } from '@kbn/response-ops-rule-params';
 export type { RuleParams } from '@kbn/response-ops-rule-params';

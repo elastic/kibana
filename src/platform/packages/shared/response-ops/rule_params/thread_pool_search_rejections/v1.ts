@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
+import { schema, type TypeOf } from '@kbn/config-schema';
 import { threadPoolRejectionsCommonSchema } from '../common';
 
-export const threadPoolSearchRejectionsParamsSchema = threadPoolRejectionsCommonSchema.extends({});
+export const threadPoolSearchRejectionsParamsSchema = threadPoolRejectionsCommonSchema.extends({
+  duration: schema.string(),
+});
 export type ThreadPoolSearchRejectionsParams = TypeOf<
   typeof threadPoolSearchRejectionsParamsSchema
 >;

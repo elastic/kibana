@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ruleParamsSchema, ruleParamsSchemaWithDefaultValue } from './latest';
+export {
+  ruleParamsSchemaWithRuleTypeId,
+  ruleParamsSchemaWithRuleTypeIdAndDefaultValue,
+} from './latest';
 
 export {
-  ruleParamsSchema as ruleParamsSchemaV1,
-  ruleParamsSchemaWithDefaultValue as ruleParamsSchemaWithDefaultValueV1,
+  ruleParamsSchemaWithRuleTypeId as ruleParamsSchemaWithRuleTypeIdV1,
+  ruleParamsSchemaWithRuleTypeIdAndDefaultValue as ruleParamsSchemaWithRuleTypeIdAndDefaultValueV1,
   createRuleParamsExamples as createRuleParamsExamplesV1,
 } from './v1';
 
