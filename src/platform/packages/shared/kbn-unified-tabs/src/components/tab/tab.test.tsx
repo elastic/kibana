@@ -329,4 +329,52 @@ describe('Tab', () => {
       expect(preview).not.toBeInTheDocument();
     });
   });
+
+  it('shows close button when disableCloseButton is false', () => {
+    const onLabelEdited = jest.fn();
+    const onSelect = jest.fn();
+    const onClose = jest.fn();
+
+    render(
+      <Tab
+        tabContentId={tabContentId}
+        tabsSizeConfig={tabsSizeConfig}
+        item={tabItem}
+        isSelected={false}
+        services={servicesMock}
+        getPreviewData={getPreviewDataMock}
+        onLabelEdited={onLabelEdited}
+        onSelect={onSelect}
+        onClose={onClose}
+        disableCloseButton={false}
+      />
+    );
+
+    const closeButton = screen.getByTestId(`unifiedTabs_closeTabBtn_${tabItem.id}`);
+    expect(closeButton).toBeInTheDocument();
+  });
+
+  it('does not show close button when disableCloseButton is true', () => {
+    const onLabelEdited = jest.fn();
+    const onSelect = jest.fn();
+    const onClose = jest.fn();
+
+    render(
+      <Tab
+        tabContentId={tabContentId}
+        tabsSizeConfig={tabsSizeConfig}
+        item={tabItem}
+        isSelected={false}
+        services={servicesMock}
+        getPreviewData={getPreviewDataMock}
+        onLabelEdited={onLabelEdited}
+        onSelect={onSelect}
+        onClose={onClose}
+        disableCloseButton={true}
+      />
+    );
+
+    const closeButton = screen.queryByTestId(`unifiedTabs_closeTabBtn_${tabItem.id}`);
+    expect(closeButton).not.toBeInTheDocument();
+  });
 });

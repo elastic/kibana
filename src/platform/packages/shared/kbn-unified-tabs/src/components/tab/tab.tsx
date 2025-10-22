@@ -50,6 +50,7 @@ export interface TabProps {
   onSelect: (item: TabItem) => Promise<void>;
   onClose: ((item: TabItem) => Promise<void>) | undefined;
   onSelectedTabKeyDown?: (event: KeyboardEvent<HTMLDivElement>) => Promise<void>;
+  disableCloseButton?: boolean;
   disableInlineLabelEditing?: boolean;
   disablePreview?: boolean;
   disableDragAndDrop?: boolean;
@@ -79,6 +80,7 @@ export const Tab: React.FC<TabProps> = (props) => {
     onSelect,
     onClose,
     onSelectedTabKeyDown,
+    disableCloseButton = false,
     disableInlineLabelEditing = false,
     disablePreview = false,
     disableDragAndDrop = false,
@@ -271,7 +273,7 @@ export const Tab: React.FC<TabProps> = (props) => {
                 {item.customMenuButton ?? null}
               </EuiFlexItem>
             )}
-            {!!onClose && !item.customMenuButton && (
+            {!disableCloseButton && !!onClose && (
               <EuiFlexItem grow={false} className="unifiedTabs__closeTabBtn">
                 <EuiToolTip content={closeButtonLabel}>
                   <EuiButtonIcon

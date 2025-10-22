@@ -60,6 +60,7 @@ export type TabsBarProps = Pick<
   | 'onSelect'
   | 'onClose'
   | 'tabContentId'
+  | 'disableCloseButton'
   | 'disableInlineLabelEditing'
   | 'disablePreview'
   | 'disableDragAndDrop'
@@ -104,6 +105,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
       getPreviewData,
       onEBTEvent,
       customNewTabButton,
+      disableCloseButton = false,
       disableInlineLabelEditing = false,
       disablePreview = false,
       disableDragAndDrop = false,
@@ -312,6 +314,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
                           onSelect={onSelect}
                           onSelectedTabKeyDown={onSelectedTabKeyDown}
                           onClose={items.length > 1 ? onClose : undefined} // prevents closing the last tab
+                          disableCloseButton={disableCloseButton}
                           disableInlineLabelEditing={disableInlineLabelEditing}
                           disablePreview={disablePreview}
                           disableDragAndDrop={disableDragAndDrop}

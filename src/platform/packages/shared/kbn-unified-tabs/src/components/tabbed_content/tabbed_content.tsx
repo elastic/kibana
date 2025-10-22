@@ -36,6 +36,7 @@ export interface TabbedContentProps
     | 'unsavedItemIds'
     | 'maxItemsCount'
     | 'onClearRecentlyClosed'
+    | 'disableCloseButton'
     | 'disableInlineLabelEditing'
     | 'disablePreview'
     | 'disableDragAndDrop'
@@ -75,6 +76,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   getPreviewData,
   onEBTEvent,
   customNewTabButton,
+  disableCloseButton = false,
   disableInlineLabelEditing = false,
   disablePreview = false,
   disableDragAndDrop = false,
@@ -348,6 +350,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
             getPreviewData={getPreviewData}
             onEBTEvent={onEBTEvent}
             customNewTabButton={customNewTabButton}
+            disableCloseButton={disableCloseButton}
             disableInlineLabelEditing={disableInlineLabelEditing}
             disablePreview={disablePreview}
             disableDragAndDrop={disableDragAndDrop}
