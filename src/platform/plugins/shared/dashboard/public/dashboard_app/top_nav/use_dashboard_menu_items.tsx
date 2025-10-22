@@ -57,22 +57,6 @@ export const useDashboardMenuItems = ({
   const disableTopNav = isSaveInProgress || hasOverlays;
 
   /**
-   * Show the Dashboard app's share menu
-   */
-  const showShare = useCallback(
-    (anchorElement: HTMLElement, asExport?: boolean) => {
-      ShowShareModal({
-        asExport,
-        dashboardTitle,
-        anchorElement,
-        savedObjectId: lastSavedId,
-        isDirty: Boolean(hasUnsavedChanges),
-      });
-    },
-    [dashboardTitle, hasUnsavedChanges, lastSavedId]
-  );
-
-  /**
    * Save the dashboard without any UI or popups.
    */
   const quickSaveDashboard = useCallback(() => {
@@ -86,6 +70,32 @@ export const useDashboardMenuItems = ({
   const dashboardInteractiveSave = useCallback(() => {
     dashboardApi.runInteractiveSave().then((result) => maybeRedirect(result));
   }, [maybeRedirect, dashboardApi]);
+
+  const saveFromShareModal = useCallback(async () => {
+    if (lastSavedId) {
+      quickSaveDashboard();
+      return Promise.resolve({});
+    } else {
+      return dashboardInteractiveSave();
+    }
+  }, [quickSaveDashboard, dashboardInteractiveSave, lastSavedId]);
+
+  /**
+   * Show the Dashboard app's share menu
+   */
+  const showShare = useCallback(
+    (anchorElement: HTMLElement, asExport?: boolean) => {
+      ShowShareModal({
+        asExport,
+        dashboardTitle,
+        anchorElement,
+        savedObjectId: lastSavedId,
+        isDirty: Boolean(hasUnsavedChanges),
+        onSave: saveFromShareModal,
+      });
+    },
+    [dashboardTitle, hasUnsavedChanges, lastSavedId, saveFromShareModal]
+  );
 
   /**
    * Show the dashboard's "Confirm reset changes" modal. If confirmed:
