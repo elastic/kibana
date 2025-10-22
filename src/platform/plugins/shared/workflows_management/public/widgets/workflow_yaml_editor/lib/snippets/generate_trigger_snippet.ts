@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TriggerType } from '@kbn/workflows';
 import type { ToStringOptions } from 'yaml';
 import { stringify } from 'yaml';
+import type { TriggerType } from '@kbn/workflows';
 
 interface GenerateTriggerSnippetOptions {
   full?: boolean;
@@ -31,7 +31,7 @@ export function generateTriggerSnippet(
   { full, monacoSuggestionFormat, withTriggersSection }: GenerateTriggerSnippetOptions = {}
 ): string {
   const stringifyOptions: ToStringOptions = { indent: 2 };
-  let parameters: Record<string, any>;
+  let parameters: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
   switch (triggerType) {
     case 'alert':
@@ -97,7 +97,7 @@ export function generateRRuleTriggerSnippet(
   { full, monacoSuggestionFormat, withTriggersSection }: GenerateTriggerSnippetOptions = {}
 ): string {
   const stringifyOptions: ToStringOptions = { indent: 2 };
-  let rruleConfig: Record<string, any>;
+  let rruleConfig: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
   switch (pattern) {
     case 'daily':
