@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export * from './v7';
+import { casesSchema as casesSchemaV6 } from './v6';
+export const casesSchema = casesSchemaV6;
