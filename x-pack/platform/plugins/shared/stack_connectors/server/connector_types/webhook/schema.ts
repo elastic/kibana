@@ -6,8 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { AuthConfiguration } from '../../../common/auth/schema';
-import { WebhookMethods } from '../../../common/auth/constants';
+import { AuthConfiguration, WebhookMethods } from '@kbn/connector-schemas/common/auth';
 
 export const HeadersSchema = z.record(z.string(), z.string());
 

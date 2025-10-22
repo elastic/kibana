@@ -9,6 +9,6 @@
 import { i18n } from '@kbn/i18n';
 
 export const CONNECTOR_ID = '.server-log';
-export const CONNECTOR_NAME = i18n.translate('xpack.connectors.serverLog.title', {
+export const CONNECTOR_NAME = i18n.translate('connectors.serverLog.title', {
   defaultMessage: 'Server log',
 });

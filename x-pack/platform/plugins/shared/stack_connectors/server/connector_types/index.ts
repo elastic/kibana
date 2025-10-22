@@ -45,17 +45,9 @@ export { ConnectorTypeId as CasesWebhookConnectorTypeId } from './cases_webhook'
 export type { ActionParamsType as CasesWebhookActionParams } from './cases_webhook';
 export { ServiceNowITSMConnectorTypeId } from './servicenow_itsm';
 export { ServiceNowSIRConnectorTypeId } from './servicenow_sir';
-export { ConnectorTypeId as PagerDutyConnectorTypeId } from './pagerduty';
-export type { ActionParamsType as PagerDutyActionParams } from './pagerduty';
 export { ServiceNowITOMConnectorTypeId } from './servicenow_itom';
-export { ConnectorTypeId as SlackWebhookConnectorTypeId } from './slack';
-export type { ActionParamsType as SlackWebhookActionParams } from './slack';
-export { SLACK_API_CONNECTOR_ID as SlackApiConnectorTypeId } from '../../common/slack_api/constants';
-export type { SlackApiActionParams as SlackApiActionParams } from '../../common/slack_api/types';
 export { ConnectorTypeId as TeamsConnectorTypeId } from './teams';
 export type { ActionParamsType as TeamsActionParams } from './teams';
-export { ConnectorTypeId as WebhookConnectorTypeId } from './webhook';
-export type { ActionParamsType as WebhookActionParams } from './webhook/types';
 export { ConnectorTypeId as XmattersConnectorTypeId } from './xmatters';
 export type { ActionParamsType as XmattersActionParams } from './xmatters';
 export { OpsgenieConnectorTypeId } from './opsgenie';

@@ -5,8 +5,11 @@
  * 2.0.
  */
 import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
-import { SlackWebhookConnectorTypeId } from '@kbn/stack-connectors-plugin/server/connector_types';
-import { EmailConnectorTypeId, EsIndexConnectorTypeId } from '@kbn/connector-schemas';
+import {
+  EmailConnectorTypeId,
+  EsIndexConnectorTypeId,
+  SlackWebhookConnectorTypeId,
+} from '@kbn/connector-schemas';
 
 import { EnabledActionTypes } from '@kbn/actions-plugin/server/config';
 import type { ProductFeatureKeys } from '@kbn/security-solution-features';

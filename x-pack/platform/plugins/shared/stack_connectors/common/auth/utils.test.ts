@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AuthType } from './constants';
+import { AuthType } from '@kbn/connector-schemas/common/auth';
 import { buildConnectorAuth, isBasicAuth, validateConnectorAuthConfiguration } from './utils';
 
 describe('utils', () => {
