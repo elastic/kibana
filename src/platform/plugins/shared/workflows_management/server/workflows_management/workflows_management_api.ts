@@ -34,7 +34,7 @@ import type {
 } from './workflows_management_service';
 import { WorkflowValidationError } from '../../common/lib/errors';
 import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
-import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
+import { parseWorkflowYamlToJSON } from '../../common/lib/yaml';
 
 export interface GetWorkflowsParams {
   triggerType?: 'schedule' | 'event' | 'manual';

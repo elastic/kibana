@@ -44,6 +44,7 @@ import type {
 } from '@kbn/workflows';
 import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
 import type { z } from '@kbn/zod';
+
 import { getWorkflowExecution } from './lib/get_workflow_execution';
 import { searchStepExecutions } from './lib/search_step_executions';
 import { searchWorkflowExecutions } from './lib/search_workflow_executions';
@@ -63,15 +64,15 @@ import {
   WORKFLOWS_STEP_EXECUTIONS_INDEX,
 } from '../../common';
 import { CONNECTOR_SUB_ACTIONS_MAP } from '../../common/connector_sub_actions_map';
-
 import { InvalidYamlSchemaError, WorkflowValidationError } from '../../common/lib/errors';
+
 import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
-import { parseWorkflowYamlToJSON, stringifyWorkflowDefinition } from '../../common/lib/yaml_utils';
+import { parseWorkflowYamlToJSON, stringifyWorkflowDefinition } from '../../common/lib/yaml';
 import { getWorkflowZodSchema, getWorkflowZodSchemaLoose } from '../../common/schema';
 import { getAuthenticatedUser } from '../lib/get_user';
 import { hasScheduledTriggers } from '../lib/schedule_utils';
-import type { WorkflowProperties, WorkflowStorage } from '../storage/workflow_storage';
 import { createStorage } from '../storage/workflow_storage';
+import type { WorkflowProperties, WorkflowStorage } from '../storage/workflow_storage';
 import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 
 const DEFAULT_PAGE_SIZE = 20;

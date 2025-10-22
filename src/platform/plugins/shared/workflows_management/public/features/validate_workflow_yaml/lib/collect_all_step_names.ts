@@ -10,7 +10,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { isPair, isScalar, visit } from 'yaml';
-import { getPathFromAncestors } from '../../../../common/lib/yaml_utils';
+import { getPathFromAncestors } from '../../../../common/lib/yaml/yaml_utils';
 import type { StepNameInfo } from '../model/types';
 
 export function collectAllStepNames(yamlDocument: any): StepNameInfo[] {

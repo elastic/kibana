@@ -49,6 +49,7 @@ import {
   generateRRuleTriggerSnippet,
   generateTriggerSnippet,
 } from './snippets/generate_trigger_snippet';
+import type { StepInfo } from './store/utils/build_workflow_lookup';
 import {
   LIQUID_BLOCK_END_REGEX,
   LIQUID_BLOCK_FILTER_REGEX,
@@ -59,7 +60,7 @@ import {
   UNFINISHED_VARIABLE_REGEX_GLOBAL,
   VARIABLE_REGEX_GLOBAL,
 } from '../../../../common/lib/regex';
-import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
+import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/yaml';
 import { getDetailedTypeDescription, getSchemaAtPath, parsePath } from '../../../../common/lib/zod';
 import { getCachedDynamicConnectorTypes } from '../../../../common/schema';
 import { getContextSchemaForPath } from '../../../features/workflow_context/lib/get_context_for_path';
@@ -960,7 +961,8 @@ export function getSuggestion(
 
 export function getCompletionItemProvider(
   workflowYamlSchema: z.ZodSchema,
-  dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>
+  dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>,
+  focusedStepInfoRef?: React.MutableRefObject<StepInfo | undefined>
 ): monaco.languages.CompletionItemProvider {
   return {
     // Trigger characters for completion:
@@ -1082,17 +1084,18 @@ export function getCompletionItemProvider(
         // Check if we're trying to complete a connector-id field value
         const connectorIdCompletionMatch = lineUpToCursor.match(/^\s*connector-id:\s*(.*)$/i);
 
-        if (
-          connectorIdCompletionMatch &&
-          completionContext.triggerKind === monaco.languages.CompletionTriggerKind.Invoke
-        ) {
+        if (connectorIdCompletionMatch) {
           // Find the connector type for this step
-          const stepConnectorType = getConnectorTypeFromContext(
+          let stepConnectorType: string | null = getConnectorTypeFromContext(
             yamlDocument,
             path,
             model,
             position
           );
+
+          if (focusedStepInfoRef?.current) {
+            stepConnectorType = focusedStepInfoRef.current.stepType;
+          }
 
           if (stepConnectorType) {
             // For connector-id values, we replace from the start of the value to the end of the line
@@ -1707,6 +1710,11 @@ export function getCompletionItemProvider(
             completionContext.triggerKind === monaco.languages.CompletionTriggerKind.Invoke;
 
           if (lastPathSegment && !key.startsWith(lastPathSegment) && !isManualTrigger) {
+            // eslint-disable-next-line no-continue
+            continue;
+          }
+
+          if (!isManualTrigger && !parseResult.fullKey) {
             // eslint-disable-next-line no-continue
             continue;
           }

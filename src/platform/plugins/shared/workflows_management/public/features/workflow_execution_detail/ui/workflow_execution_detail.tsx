@@ -20,7 +20,7 @@ import type { EsWorkflowStepExecution, WorkflowYaml } from '@kbn/workflows';
 import { useWorkflowExecutionPolling } from './hooks/use_workflow_execution_polling';
 import { WorkflowStepExecutionList } from './workflow_execution_list';
 import { WorkflowStepExecutionDetails } from './workflow_step_execution_details';
-import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
+import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml';
 import {
   getCachedDynamicConnectorTypes,
   getWorkflowZodSchemaLoose,

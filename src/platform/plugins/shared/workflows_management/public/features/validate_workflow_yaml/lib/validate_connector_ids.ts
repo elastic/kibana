@@ -59,7 +59,7 @@ export function validateConnectorIds(
         endColumn: connectorIdItem.endColumn,
         afterMessage: null,
         hoverMessage: connectorsManagementUrl
-          ? `[Open connectors management](${connectorsManagementUrl})`
+          ? `[Open connectors management](${connectorsManagementUrl}) [Add connector](command:addConnector)`
           : null,
       });
     } else {

@@ -12,7 +12,7 @@ import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { WorkflowVisualEditor } from './workflow_visual_editor';
-import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
+import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml';
 import {
   getCachedDynamicConnectorTypes,
   getWorkflowZodSchemaLoose,

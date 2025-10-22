@@ -19,7 +19,7 @@ import type { WorkflowYaml } from '@kbn/workflows';
 import { WorkflowDetailHeader } from './workflow_detail_header';
 import { WorkflowEditorLayout } from './workflow_detail_layout';
 import { WorkflowEditor } from './workflow_editor';
-import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
+import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml';
 import {
   getCachedDynamicConnectorTypes,
   getWorkflowZodSchemaLoose,

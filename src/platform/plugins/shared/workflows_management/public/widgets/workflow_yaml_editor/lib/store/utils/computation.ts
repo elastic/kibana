@@ -12,11 +12,7 @@ import YAML, { LineCounter } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import { buildWorkflowLookup } from './build_workflow_lookup';
-import { parseWorkflowYamlToJSON } from '../../../../../../common/lib/yaml_utils';
-import {
-  getCachedDynamicConnectorTypes,
-  getWorkflowZodSchemaLoose,
-} from '../../../../../../common/schema';
+import { dangerouslyParseWorkflowYamlToJSON } from '../../../../../../common/lib/yaml';
 import { _setComputedDataInternal, clearComputedData } from '../slice';
 import type { RootState } from '../types';
 
@@ -36,17 +32,13 @@ export const performComputation = (
     const yamlDoc = YAML.parseDocument(yamlString, { lineCounter });
 
     // Parse workflow JSON for graph creation
-    const dynamicConnectorTypes = getCachedDynamicConnectorTypes() || {};
-    const parsingResult = parseWorkflowYamlToJSON(
-      yamlString,
-      getWorkflowZodSchemaLoose(dynamicConnectorTypes)
-    );
+    const parsingResult = dangerouslyParseWorkflowYamlToJSON(yamlString);
 
     // Build workflow lookup
     const lookup = buildWorkflowLookup(yamlDoc, lineCounter);
 
     // Create workflow graph
-    const parsedWorkflow = parsingResult.success ? parsingResult.data : undefined;
+    const parsedWorkflow = parsingResult.success ? parsingResult.json : undefined;
     const graph = parsedWorkflow ? WorkflowGraph.fromWorkflowDefinition(parsedWorkflow) : undefined;
 
     // Dispatch computed data

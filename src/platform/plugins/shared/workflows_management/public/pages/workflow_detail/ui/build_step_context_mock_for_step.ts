@@ -11,7 +11,7 @@
 
 import { v4 as generateUuid } from 'uuid';
 import { WorkflowGraph } from '@kbn/workflows/graph';
-import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
+import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml';
 import {
   getCachedDynamicConnectorTypes,
   getWorkflowZodSchemaLoose,

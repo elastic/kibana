@@ -130,6 +130,7 @@ export interface WorkflowYAMLEditorProps {
   selectedExecutionId?: string;
   originalValue?: string;
   onStepActionClicked?: (params: { stepId: string; actionType: string }) => void;
+  onAddConnectorClicked?: () => void;
 }
 
 export const WorkflowYAMLEditor = ({
@@ -151,6 +152,7 @@ export const WorkflowYAMLEditor = ({
   selectedExecutionId,
   originalValue,
   onStepActionClicked,
+  onAddConnectorClicked,
   ...props
 }: WorkflowYAMLEditorProps) => {
   const { euiTheme } = useEuiTheme();
@@ -287,6 +289,17 @@ export const WorkflowYAMLEditor = ({
         run: () => runRef.current(),
         saveAndRun: () => saveAndRunRef.current(),
       });
+
+      const linkOpenerDisposable = monaco.editor.registerLinkOpener({
+        open: (resource) => {
+          if (resource.scheme === 'command' && resource.path === 'addConnector') {
+            onAddConnectorClicked?.();
+            return true;
+          }
+          return false;
+        },
+      });
+      disposablesRef.current.push(linkOpenerDisposable);
 
       // Listen to content changes to detect typing
       const model = editor.getModel();
@@ -534,7 +547,11 @@ export const WorkflowYAMLEditor = ({
   };
 
   const completionProvider = useMemo(() => {
-    return getCompletionItemProvider(workflowYamlSchemaLoose, connectorsData?.connectorTypes);
+    return getCompletionItemProvider(
+      workflowYamlSchemaLoose,
+      connectorsData?.connectorTypes,
+      focusedStepInfoRef
+    );
   }, [workflowYamlSchemaLoose, connectorsData?.connectorTypes]);
 
   useEffect(() => {

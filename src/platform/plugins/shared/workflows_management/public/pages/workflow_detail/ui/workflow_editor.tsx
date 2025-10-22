@@ -10,9 +10,8 @@
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { StepContext, WorkflowDetailDto, WorkflowExecutionDto } from '@kbn/workflows';
 import {
   WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID,
@@ -22,6 +21,7 @@ import { buildContextOverrideForStep } from './build_step_context_mock_for_step'
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { ExecutionGraph } from '../../../features/debug-graph/execution_graph';
 import { TestStepModal } from '../../../features/run_workflow/ui/test_step_modal';
+import { useKibana } from '../../../hooks/use_kibana';
 import type { WorkflowUrlStateTabType } from '../../../hooks/use_workflow_url_state';
 import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
 
@@ -112,6 +112,13 @@ export function WorkflowEditor({
     false
   );
 
+  const [addConnectorFlyoutVisible, setAddConnectorFlyoutVisible] = useState(false);
+  const triggersActionsUi = useKibana().services.triggersActionsUi;
+  const ConnectorFlyout = useMemo(
+    () => triggersActionsUi.getAddConnectorFlyout,
+    [triggersActionsUi]
+  );
+
   return (
     <>
       <EuiFlexGroup gutterSize="none" style={{ height: '100%' }}>
@@ -134,6 +141,9 @@ export function WorkflowEditor({
               selectedExecutionId={selectedExecutionId}
               originalValue={workflow?.yaml ?? ''}
               onStepActionClicked={handleStepRun}
+              onAddConnectorClicked={() => {
+                setAddConnectorFlyoutVisible(true);
+              }}
             />
           </React.Suspense>
         </EuiFlexItem>
@@ -164,6 +174,15 @@ export function WorkflowEditor({
             setTestStepId(null);
             setContextOverride(null);
           }}
+        />
+      )}
+      {addConnectorFlyoutVisible && (
+        <ConnectorFlyout
+          onConnectorCreated={(connector) => {
+            // console.log(connector);
+          }}
+          onClose={() => setAddConnectorFlyoutVisible(false)}
+          featureId="generativeAIForSecurity"
         />
       )}
     </>
