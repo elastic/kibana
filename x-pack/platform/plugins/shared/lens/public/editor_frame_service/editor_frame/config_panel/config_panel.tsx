@@ -48,7 +48,7 @@ import {
 } from '../../../state_management';
 import { getRemoveOperation } from '../../../utils';
 import { useEditorFrameService } from '../../editor_frame_service_context';
-import { VisualizationToolbar } from '../visualization_toolbar';
+import { VisualizationToolbarWrapper } from '../visualization_toolbar';
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
   const { visualizationMap } = useEditorFrameService();
@@ -62,10 +62,7 @@ export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: Config
     <>
       <EuiFlexItem css={{ margin: '16px 16px 0 0' }}>
         <EuiFlexGroup alignItems="center" justifyContent="flexEnd" responsive={false} wrap={true}>
-          <VisualizationToolbar
-            activeVisualization={activeVisualization}
-            framePublicAPI={props.framePublicAPI}
-          />
+          <VisualizationToolbarWrapper framePublicAPI={props.framePublicAPI} />
         </EuiFlexGroup>
       </EuiFlexItem>
       <LayerPanels {...props} activeVisualization={activeVisualization} />

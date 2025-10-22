@@ -23,28 +23,20 @@ import type {
 import type { UserMessagesGetter } from '../../../types';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../utils';
 import { MessageList } from './message_list';
-// import type { DatasourceStates } from '../../../state_management';
 import {
   useLensDispatch,
   useLensSelector,
   selectChangesApplied,
   applyChanges,
   selectAutoApplyEnabled,
-  selectVisualization,
-  selectVisualizationState,
 } from '../../../state_management';
-// import type { LensInspector } from '../../../lens_inspector_service';
 import { WorkspaceTitle } from './title';
 
 export const AUTO_APPLY_DISABLED_STORAGE_KEY = 'autoApplyDisabled';
 
 export interface WorkspacePanelWrapperProps {
   children: React.ReactNode | React.ReactNode[];
-  // framePublicAPI: FramePublicAPI;
-  // visualizationId: string | null;
-  // datasourceStates: DatasourceStates;
   isFullscreen: boolean;
-  // lensInspector: LensInspector;
   getUserMessages: UserMessagesGetter;
   displayOptions: ChartSizeSpec | undefined;
 }
@@ -69,71 +61,6 @@ const getAspectRatioStyles = ({ x, y }: { x: number; y: number }) => {
   };
 };
 
-export function VisualizationToolbarWrapper(props: { framePublicAPI: FramePublicAPI }) {
-  const { visualizationMap } = useEditorFrameService();
-  const { framePublicAPI } = props;
-  const visualization = useLensSelector(selectVisualization);
-
-  const activeVisualization = visualization.activeId
-    ? visualizationMap[visualization.activeId]
-    : null;
-
-  return activeVisualization && visualization.state ? (
-    <VisualizationToolbar
-      framePublicAPI={framePublicAPI}
-      activeVisualization={activeVisualization}
-    />
-  ) : null;
-}
-
-export function VisualizationToolbar(props: {
-  activeVisualization: Visualization | null;
-  framePublicAPI: FramePublicAPI;
-  enableFlyoutToolbar?: boolean;
-}) {
-  const dispatchLens = useLensDispatch();
-  const visualization = useLensSelector(selectVisualizationState);
-  const { activeVisualization, enableFlyoutToolbar = false } = props;
-  const setVisualizationState = useCallback(
-    (newState: unknown) => {
-      if (!activeVisualization) {
-        return;
-      }
-      dispatchLens(
-        updateVisualizationState({
-          visualizationId: activeVisualization.id,
-          newState,
-        })
-      );
-    },
-    [dispatchLens, activeVisualization]
-  );
-
-  const { FlyoutToolbarComponent, ToolbarComponent: RegularToolbarComponent } =
-    activeVisualization || {};
-
-  let ToolbarComponent;
-  if (enableFlyoutToolbar) {
-    ToolbarComponent = FlyoutToolbarComponent || RegularToolbarComponent;
-  } else {
-    ToolbarComponent = RegularToolbarComponent;
-  }
-
-  return (
-    <>
-      {ToolbarComponent && (
-        <EuiFlexItem grow={false}>
-          {ToolbarComponent({
-            frame: props.framePublicAPI,
-            state: visualization.state,
-            setState: setVisualizationState,
-          })}
-        </EuiFlexItem>
-      )}
-    </>
-  );
-}
-
 export function WorkspacePanelWrapper({
   children,
   isFullscreen,
@@ -142,8 +69,7 @@ export function WorkspacePanelWrapper({
 }: WorkspacePanelWrapperProps) {
   const dispatchLens = useLensDispatch();
 
-  const euiThemeContext = useEuiTheme();
-  const { euiTheme } = euiThemeContext;
+  const { euiTheme } = useEuiTheme();
 
   const changesApplied = useLensSelector(selectChangesApplied);
   const autoApplyEnabled = useLensSelector(selectAutoApplyEnabled);

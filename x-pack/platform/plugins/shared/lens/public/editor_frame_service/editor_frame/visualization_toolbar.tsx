@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { memo, useCallback } from 'react';
 import { EuiFlexItem } from '@elastic/eui';
 import type { FramePublicAPI, Visualization } from '../../types';
 import {
@@ -13,16 +13,21 @@ import {
   updateVisualizationState,
   useLensSelector,
   selectVisualizationState,
+  selectVisualization,
 } from '../../state_management';
+import { useEditorFrameService } from '../editor_frame_service_context';
 
-export function VisualizationToolbar(props: {
+const VisualizationToolbar = memo(function VisualizationToolbar({
+  activeVisualization,
+  framePublicAPI,
+  enableFlyoutToolbar = false,
+}: {
   activeVisualization: Visualization | null;
   framePublicAPI: FramePublicAPI;
   enableFlyoutToolbar?: boolean;
 }) {
   const dispatchLens = useLensDispatch();
   const visualization = useLensSelector(selectVisualizationState);
-  const { activeVisualization, enableFlyoutToolbar = false } = props;
   const setVisualizationState = useCallback(
     (newState: unknown) => {
       if (!activeVisualization) {
@@ -53,7 +58,7 @@ export function VisualizationToolbar(props: {
       {ToolbarComponent && (
         <EuiFlexItem grow={false}>
           {ToolbarComponent({
-            frame: props.framePublicAPI,
+            frame: framePublicAPI,
             state: visualization.state,
             setState: setVisualizationState,
           })}
@@ -61,4 +66,24 @@ export function VisualizationToolbar(props: {
       )}
     </>
   );
+});
+
+export function VisualizationToolbarWrapper({
+  framePublicAPI,
+}: {
+  framePublicAPI: FramePublicAPI;
+}) {
+  const { visualizationMap } = useEditorFrameService();
+  const visualization = useLensSelector(selectVisualization);
+
+  const activeVisualization = visualization.activeId
+    ? visualizationMap[visualization.activeId]
+    : null;
+
+  return activeVisualization && visualization.state ? (
+    <VisualizationToolbar
+      framePublicAPI={framePublicAPI}
+      activeVisualization={activeVisualization}
+    />
+  ) : null;
 }
