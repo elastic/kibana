@@ -8,18 +8,15 @@
 import React, { Suspense, lazy } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { ConversationFlyout } from './conversation_flyout';
 import type { OpenConversationFlyoutOptions } from './types';
 import type { OnechatInternalService } from '../services';
-import type { OnechatStartDependencies, ConversationFlyoutRef } from '../types';
-import { OnechatServicesContext } from '../application/context/onechat_services_context';
+import type { ConversationFlyoutRef } from '../types';
 
 interface OpenConversationFlyoutParams {
   coreStart: CoreStart;
   services: OnechatInternalService;
-  startDependencies: OnechatStartDependencies;
 }
 
 /**
@@ -31,15 +28,9 @@ interface OpenConversationFlyoutParams {
  */
 export function openConversationFlyout(
   options: OpenConversationFlyoutOptions,
-  { coreStart, services, startDependencies }: OpenConversationFlyoutParams
+  { coreStart, services }: OpenConversationFlyoutParams
 ): { flyoutRef: ConversationFlyoutRef } {
   const { overlays, application, ...startServices } = coreStart;
-
-  // Prepare Kibana services context
-  const kibanaServices = {
-    ...coreStart,
-    plugins: startDependencies,
-  };
 
   const LazyConversationComponent = lazy(async () => {
     const { createEmbeddableConversation } = await import(
@@ -56,17 +47,13 @@ export function openConversationFlyout(
 
   const flyoutRef = overlays.openFlyout(
     toMountPoint(
-      <KibanaContextProvider services={kibanaServices}>
-        <OnechatServicesContext.Provider value={services}>
-          <Suspense fallback={<EuiLoadingSpinner size="l" />}>
-            <ConversationFlyout
-              {...options}
-              onClose={() => flyoutRef.close()}
-              ConversationComponent={LazyConversationComponent}
-            />
-          </Suspense>
-        </OnechatServicesContext.Provider>
-      </KibanaContextProvider>,
+      <Suspense fallback={<EuiLoadingSpinner size="l" />}>
+        <ConversationFlyout
+          {...options}
+          onClose={() => flyoutRef.close()}
+          ConversationComponent={LazyConversationComponent}
+        />
+      </Suspense>,
       startServices
     ),
     {

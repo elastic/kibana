@@ -13,6 +13,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Conversation } from '../application/components/conversations/conversation';
 import { SendMessageProvider } from '../application/context/send_message/send_message_context';
+import { OnechatServicesContext } from '../application/context/onechat_services_context';
 import type { EmbeddableConversationDependencies, EmbeddableConversationProps } from './types';
 
 const queryClient = new QueryClient();
@@ -39,11 +40,13 @@ export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInte
       <KibanaContextProvider services={kibanaServices}>
         <I18nProvider>
           <QueryClientProvider client={queryClient}>
-            <Router history={history}>
-              <SendMessageProvider>
-                <Conversation />
-              </SendMessageProvider>
-            </Router>
+            <OnechatServicesContext.Provider value={services}>
+              <Router history={history}>
+                <SendMessageProvider>
+                  <Conversation />
+                </SendMessageProvider>
+              </Router>
+            </OnechatServicesContext.Provider>
           </QueryClientProvider>
         </I18nProvider>
       </KibanaContextProvider>
