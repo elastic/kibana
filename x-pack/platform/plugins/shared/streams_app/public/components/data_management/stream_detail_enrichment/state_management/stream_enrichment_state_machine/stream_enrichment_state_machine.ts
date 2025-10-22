@@ -70,6 +70,7 @@ import {
 import { setupGrokCollectionActor } from './setup_grok_collection_actor';
 import { selectPreviewRecords } from '../simulation_state_machine/selectors';
 import { selectWhetherAnyProcessorBeforePersisted } from './selectors';
+import { createSchemaFieldsActor } from './schema_fields_actor';
 
 export type StreamEnrichmentActorRef = ActorRefFrom<typeof streamEnrichmentMachine>;
 export type StreamEnrichmentActorSnapshot = SnapshotFrom<typeof streamEnrichmentMachine>;
@@ -87,6 +88,7 @@ export const streamEnrichmentMachine = setup({
     upsertStream: getPlaceholderFor(createUpsertStreamActor),
     dataSourceMachine: getPlaceholderFor(() => dataSourceMachine),
     setupGrokCollection: getPlaceholderFor(setupGrokCollectionActor),
+    schemaFieldsActor: getPlaceholderFor(createSchemaFieldsActor),
     stepMachine: getPlaceholderFor(() => stepMachine),
     simulationMachine: getPlaceholderFor(() => simulationMachine),
   },
@@ -102,6 +104,15 @@ export const streamEnrichmentMachine = setup({
     storeDefinition: assign((_, params: { definition: Streams.ingest.all.GetResponse }) => ({
       definition: params.definition,
     })),
+    sendDefinitionUpdateToSchemaFields: sendTo(
+      ({ context }) => context.schemaFieldsRef,
+      ({ event }) => {
+        if (event.type === 'stream.received') {
+          return { type: 'definition.update', definition: event.definition };
+        }
+        return { type: 'fields.refresh' };
+      }
+    ),
     /* Steps actions */
     setupSteps: assign(({ context, spawn, self }) => {
       // Clean-up pre-existing steps
@@ -317,6 +328,12 @@ export const streamEnrichmentMachine = setup({
         streamType: getStreamTypeFromDefinition(input.definition.stream),
       },
     }),
+    schemaFieldsRef: spawn('schemaFieldsActor', {
+      id: 'schemaFields',
+      input: {
+        definition: input.definition,
+      },
+    }),
   }),
   initial: 'initializingFromUrl',
   states: {
@@ -355,6 +372,7 @@ export const streamEnrichmentMachine = setup({
           target: '#ready',
           actions: [
             { type: 'storeDefinition', params: ({ event }) => event },
+            { type: 'sendDefinitionUpdateToSchemaFields' },
             { type: 'sendResetEventToSimulator' },
           ],
           reenter: true,
@@ -606,6 +624,7 @@ export const createStreamEnrichmentMachineImplementations = ({
     initializeUrl: createUrlInitializerActor({ core, urlStateStorageContainer }),
     upsertStream: createUpsertStreamActor({ streamsRepositoryClient, telemetryClient }),
     setupGrokCollection: setupGrokCollectionActor(),
+    schemaFieldsActor: createSchemaFieldsActor({ data, streamsRepositoryClient }),
     stepMachine,
     dataSourceMachine: dataSourceMachine.provide(
       createDataSourceMachineImplementations({ data, toasts: core.notifications.toasts })

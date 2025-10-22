@@ -6,9 +6,11 @@
  */
 
 import { createSelector } from 'reselect';
-import { isActionBlock } from '@kbn/streamlang';
+import { convertUIStepsToDSL, isActionBlock, validateTypes } from '@kbn/streamlang';
+import type { TypeValidationResult } from '@kbn/streamlang';
 import type { StreamEnrichmentContextType } from './types';
 import { isStepUnderEdit } from '../steps_state_machine';
+import { getConfiguredSteps } from './utils';
 
 /**
  * Selects the processor marked as the draft processor.
@@ -53,5 +55,38 @@ export const selectWhetherAnyProcessorBeforePersisted = createSelector(
 
         return hasPersistedAfter;
       });
+  }
+);
+
+/**
+ * Selects the type validation result for the current configured steps.
+ * Returns either a TypeValidationResult or an error if validation fails.
+ */
+export const selectTypeValidationResult = createSelector(
+  [
+    (context: StreamEnrichmentContextType) => context,
+    (context: StreamEnrichmentContextType) => context.schemaFieldsRef.getSnapshot(),
+  ],
+  (context, schemaFieldsSnapshot): TypeValidationResult | Error => {
+    try {
+      // Get the configured steps (steps that are ready)
+      const configuredSteps = getConfiguredSteps(context);
+
+      // Convert UI steps to DSL
+      const dsl = convertUIStepsToDSL(configuredSteps, false);
+
+      // Get field types from schema fields actor
+      const fieldTypeMap = Object.fromEntries(
+        schemaFieldsSnapshot.context.fields.map((field) => [
+          field.name,
+          field.type || field.esType || 'unknown',
+        ])
+      );
+
+      // Run type validation
+      return validateTypes(dsl, fieldTypeMap);
+    } catch (error) {
+      return error as Error;
+    }
   }
 );

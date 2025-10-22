@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonIcon,
@@ -18,7 +18,6 @@ import {
   EuiTab,
   EuiTabs,
 } from '@elastic/eui';
-import { convertUIStepsToDSL, validateTypes } from '@kbn/streamlang';
 import { ProcessorOutcomePreview } from './processor_outcome_preview';
 import {
   useSimulatorSelector,
@@ -27,8 +26,7 @@ import {
 } from './state_management/stream_enrichment_state_machine';
 import { DetectedFieldsEditor } from './detected_fields_editor';
 import { DataSourcesList } from './data_sources_list';
-import { useSchemaFields } from '../schema_editor/hooks/use_schema_fields';
-import { getConfiguredSteps } from './state_management/stream_enrichment_state_machine/utils';
+import { selectTypeValidationResult } from './state_management/stream_enrichment_state_machine/selectors';
 
 export const SimulationPlayground = () => {
   const { refreshSimulation, viewSimulationPreviewData, viewSimulationDetectedFields } =
@@ -47,26 +45,9 @@ export const SimulationPlayground = () => {
 
   const detectedFields = useSimulatorSelector((state) => state.context.detectedSchemaFields);
 
-  const definition = useStreamEnrichmentSelector((state) => state.context.definition);
-
-  const { fields } = useSchemaFields({ definition, refreshDefinition: () => {} });
-
-  const newSteps = useStreamEnrichmentSelector((state) =>
-    convertUIStepsToDSL(getConfiguredSteps(state.context), false)
+  const validationResult = useStreamEnrichmentSelector((state) =>
+    selectTypeValidationResult(state.context)
   );
-
-  const validationResult = useMemo(() => {
-    const fieldTypeMap = Object.fromEntries(
-      fields.map((field) => [field.name, field.type || 'unknown'])
-    );
-    // normalize field types
-
-    try {
-      return validateTypes(newSteps, fieldTypeMap);
-    } catch (e) {
-      return e;
-    }
-  }, [fields, newSteps]);
 
   return (
     <>
@@ -103,9 +84,10 @@ export const SimulationPlayground = () => {
                         {detectedFields.length}
                       </EuiNotificationBadge>
                     ) : null}
-                    {validationResult.name === 'ConditionalTypeChangeError' && (
-                      <EuiIcon type="error" color="danger" size="l" />
-                    )}
+                    {validationResult instanceof Error &&
+                      validationResult.name === 'ConditionalTypeChangeError' && (
+                        <EuiIcon type="error" color="danger" size="l" />
+                      )}
                   </EuiFlexGroup>
                 }
               >
