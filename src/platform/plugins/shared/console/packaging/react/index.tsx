@@ -64,7 +64,7 @@ import { AutocompleteInfo, setAutocompleteInfo } from '../../public/services';
 import type { OneConsoleProps } from './types';
 
 // Translation files are generated during the build process
-/* eslint-disable @kbn/imports/no_unresolvable_imports */
+
 const translations = {
   en: {
     formats: {},
@@ -75,7 +75,6 @@ const translations = {
   'zh-CN': require('./translations/zh-CN.json'),
   'de-DE': require('./translations/de-DE.json'),
 };
-/* eslint-enable @kbn/imports/no_unresolvable_imports */
 
 export const OneConsole = ({
   lang = 'en',
