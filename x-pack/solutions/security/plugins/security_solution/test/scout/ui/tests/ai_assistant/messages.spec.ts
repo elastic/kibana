@@ -22,10 +22,7 @@ spaceTest.describe('AI Assistant Messages', { tag: ['@ess', '@svlSecurity'] }, (
       },
       {
         timestamp: '2024-08-15T18:31:24.008Z',
-        content:
-          'To query events from a high-risk host in the Elastic Security timeline, you can use the following KQL query:\n\n```kql\n' +
-          mockTimelineQuery +
-          '\n```',
+        content: `To query events from a high-risk host in the Elastic Security timeline, you can use the following KQL query:\n\n\`\`\`kql\n${mockTimelineQuery}\n\`\`\``,
         role: 'assistant' as MessageRole,
         traceData: {
           traceId: '74d2fac29753adebd5c479e3d9e45da3',

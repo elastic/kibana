@@ -7,7 +7,7 @@
 
 import { expect, spaceTest, TIMEOUTS } from '@kbn/scout-security';
 import { CUSTOM_QUERY_RULE } from '@kbn/scout-security/src/playwright/constants/detection_rules';
-import { RULE_MANAGEMENT_CONTEXT_DESCRIPTION } from '@kbn/security-solution-plugin/public/detection_engine/common/translations';
+import { RULE_MANAGEMENT_CONTEXT_DESCRIPTION } from '../../../../../public/detection_engine/common/translations';
 
 spaceTest.describe('AI Assistant Conversations', { tag: ['@ess', '@svlSecurity'] }, () => {
   // On serverless we provide default .inference `Elastic LLM` connector
