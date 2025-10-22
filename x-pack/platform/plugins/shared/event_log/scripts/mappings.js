@@ -397,7 +397,7 @@ exports.EcsCustomPropertyMappings = {
                   },
                   max_backfills: {
                     type: 'long',
-                  }
+                  },
                 },
               },
               results: {
