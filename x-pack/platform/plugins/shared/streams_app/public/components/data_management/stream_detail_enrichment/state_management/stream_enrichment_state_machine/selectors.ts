@@ -10,7 +10,7 @@ import { convertUIStepsToDSL, isActionBlock, validateTypes } from '@kbn/streamla
 import type { TypeValidationResult } from '@kbn/streamlang';
 import type { StreamEnrichmentContextType } from './types';
 import { isStepUnderEdit } from '../steps_state_machine';
-import { getConfiguredSteps } from './utils';
+import { getAllMostRecentSteps } from './utils';
 
 /**
  * Selects the processor marked as the draft processor.
@@ -69,11 +69,11 @@ export const selectTypeValidationResult = createSelector(
   ],
   (context, schemaFieldsSnapshot): TypeValidationResult | Error => {
     try {
-      // Get the configured steps (steps that are ready)
-      const configuredSteps = getConfiguredSteps(context);
+      // Get all steps with their most recent state (including steps being edited)
+      const allSteps = getAllMostRecentSteps(context);
 
       // Convert UI steps to DSL
-      const dsl = convertUIStepsToDSL(configuredSteps, false);
+      const dsl = convertUIStepsToDSL(allSteps, false);
 
       // Get field types from schema fields actor
       const fieldTypeMap = Object.fromEntries(

@@ -13,10 +13,12 @@ import {
   EuiForm,
   EuiHorizontalRule,
   EuiFlexItem,
+  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { StreamlangProcessorDefinitionWithUIAttributes } from '@kbn/streamlang';
 import { isActionBlock } from '@kbn/streamlang';
+import type { ConditionalTypeChangeError } from '@kbn/streamlang';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { isEqual, isEmpty } from 'lodash';
 import React, { useState, useEffect, forwardRef } from 'react';
@@ -30,6 +32,7 @@ import {
   useGetStreamEnrichmentState,
   useStreamEnrichmentSelector,
 } from '../../../state_management/stream_enrichment_state_machine';
+import { selectTypeValidationResult } from '../../../state_management/stream_enrichment_state_machine/selectors';
 import type { ProcessorFormState } from '../../../types';
 import {
   convertFormStateToProcessor,
@@ -58,6 +61,19 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
   const grokCollection = useStreamEnrichmentSelector((snapshot) => snapshot.context.grokCollection);
 
   const step = useSelector(stepRef, (snapshot) => snapshot.context.step);
+
+  const validationResult = useStreamEnrichmentSelector((state) =>
+    selectTypeValidationResult(state.context)
+  );
+
+  const validationError =
+    validationResult instanceof Error &&
+    validationResult.name === 'ConditionalTypeChangeError' &&
+    (validationResult as ConditionalTypeChangeError).customIdentifiers.includes(
+      step.customIdentifier
+    )
+      ? (validationResult as ConditionalTypeChangeError)
+      : undefined;
 
   const [defaultValues] = useState(() =>
     getFormStateFromActionStep(
@@ -175,6 +191,29 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
         <EuiFlexItem>
           <FormProvider {...methods}>
             <EuiForm component="form" fullWidth onSubmit={methods.handleSubmit(handleSubmit)}>
+              {validationError && (
+                <>
+                  <EuiCallOut announceOnMount color="danger" size="s">
+                    {i18n.translate('xpack.streams.actionBlockEditor.fieldCallOutLabel', {
+                      defaultMessage: 'Field',
+                    })}{' '}
+                    <b>{validationError.field}</b>{' '}
+                    {i18n.translate(
+                      'xpack.streams.actionBlockEditor.conditionallyChangesFromCallOutLabel',
+                      { defaultMessage: 'conditionally changes from' }
+                    )}{' '}
+                    <b>{validationError.types[0]}</b>{' '}
+                    {i18n.translate('xpack.streams.actionBlockEditor.toCallOutLabel', {
+                      defaultMessage: 'to',
+                    })}{' '}
+                    <b>{validationError.types[1]}</b>{' '}
+                    {i18n.translate('xpack.streams.actionBlockEditor.ThisMightLeadCallOutLabel', {
+                      defaultMessage: '- this might lead to type conflicts in production.',
+                    })}
+                  </EuiCallOut>
+                  <EuiSpacer size="m" />
+                </>
+              )}
               <ProcessorTypeSelector disabled={isConfigured} />
               <EuiSpacer size="m" />
               {type === 'convert' && <ConvertProcessorForm />}
