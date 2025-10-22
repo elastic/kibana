@@ -142,7 +142,11 @@ const filterPackageListDeploymentModes = (packages: PackageList, isAgentlessEnab
 
 export type AvailablePackagesHookType = typeof useAvailablePackages;
 
-export const useAvailablePackages = () => {
+export const useAvailablePackages = (
+  { prereleaseIntegrationsEnabled }: { prereleaseIntegrationsEnabled: boolean } = {
+    prereleaseIntegrationsEnabled: true,
+  }
+) => {
   const [preference, setPreference] = useState<IntegrationPreferenceType>('recommended');
 
   const { isAgentlessEnabled } = useAgentless();
@@ -172,7 +176,7 @@ export const useAvailablePackages = () => {
     data: eprPackages,
     isLoading: isLoadingAllPackages,
     error: eprPackageLoadingError,
-  } = useGetPackagesQuery({ prerelease: true });
+  } = useGetPackagesQuery({ prerelease: prereleaseIntegrationsEnabled });
 
   // Remove Kubernetes package granularity
   if (eprPackages?.items) {
@@ -257,7 +261,7 @@ export const useAvailablePackages = () => {
     data: eprCategoriesRes,
     isLoading: isLoadingCategories,
     error: eprCategoryLoadingError,
-  } = useGetCategoriesQuery({ prerelease: true });
+  } = useGetCategoriesQuery({ prerelease: prereleaseIntegrationsEnabled });
 
   const eprCategories = useMemo(() => eprCategoriesRes?.items || [], [eprCategoriesRes]);
 
