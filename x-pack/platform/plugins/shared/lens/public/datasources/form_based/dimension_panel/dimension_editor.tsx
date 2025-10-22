@@ -33,7 +33,6 @@ import type {
 } from '@kbn/lens-common';
 import type { FormBasedDimensionEditorProps } from './dimension_panel';
 import type { OperationSupportMatrix } from './operation_support';
-import { deleteColumn } from '../form_based';
 import {
   operationDefinitionMap,
   getOperationDisplay,
@@ -44,6 +43,7 @@ import {
   resetIncomplete,
   canTransition,
   adjustColumnReferencesForChangedColumn,
+  deleteColumn,
 } from '../operations';
 import { mergeLayer } from '../state_helpers';
 import { getReferencedField, hasField } from '../pure_utils';
