@@ -68,8 +68,7 @@ const ResilientFieldsComponent: React.FunctionComponent<
   const severity = severityData?.data;
 
   const listItems = useMemo(() => {
-    const additionalFieldsParsed =
-      additionalFields && showAdditionalFields ? JSON.parse(additionalFields) : {};
+    const additionalFieldsParsed = additionalFields ? JSON.parse(additionalFields) : {};
 
     return [
       ...(incidentTypes != null && incidentTypes.length > 0
