@@ -294,13 +294,25 @@ export function initializeUnifiedSearchManager(
     // pinned filters are not serialized when saving the dashboard
     const serializableFilters = unifiedSearchFilters$.value?.filter((f) => !isFilterPinned(f));
 
+    const timeRange = timeRestore$.value && timeRange$.value
+      ? {
+          from: timeRange$.value.from,
+          to: timeRange$.value.to,
+        }
+      : undefined;
+
+    const refreshInterval = timeRestore$.value && refreshInterval$.value
+      ? {
+        pause: refreshInterval$.value.pause,
+        value: refreshInterval$.value.value
+      }
+      : undefined;
+
     return {
-      filters: serializableFilters,
       query: query$.value,
-      ...(timeRestore$.value && {
-        refreshInterval: refreshInterval$.value,
-        timeRange: timeRange$.value,
-      }),
+      ...(serializableFilters?.length && { filters: serializableFilters }),
+      ...(refreshInterval && { refreshInterval }),
+      ...(timeRange && { timeRange }),
     };
   };
 
