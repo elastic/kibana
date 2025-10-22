@@ -44,7 +44,7 @@ import { cleanFiltersForSerialize } from '../../common';
 export function initializeUnifiedSearchManager(
   initialState: DashboardState,
   controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>,
-  timeRestore$: PublishingSubject<boolean | undefined>,
+  timeRestore$: PublishingSubject<boolean>,
   waitForPanelsToLoad$: Observable<void>,
   getLastSavedState: () => DashboardState | undefined,
   creationOptions?: DashboardCreationOptions

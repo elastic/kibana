@@ -38,23 +38,39 @@ import type {
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { LogsRepository } from './repositories/logs_repository/logs_repository';
 import { resumeWorkflow, runWorkflow } from './execution_functions';
+import type { ContextDependencies } from './workflow_context_manager/types';
+
+type SetupDependencies = Pick<ContextDependencies, 'cloudSetup'>;
 
 export class WorkflowsExecutionEnginePlugin
-  implements Plugin<WorkflowsExecutionEnginePluginSetup, WorkflowsExecutionEnginePluginStart>
+  implements
+    Plugin<
+      WorkflowsExecutionEnginePluginSetup,
+      WorkflowsExecutionEnginePluginStart,
+      WorkflowsExecutionEnginePluginSetupDeps,
+      WorkflowsExecutionEnginePluginStartDeps
+    >
 {
   private readonly logger: Logger;
   private readonly config: WorkflowsExecutionEngineConfig;
+  private setupDependencies?: SetupDependencies;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.config = initializerContext.config.get<WorkflowsExecutionEngineConfig>();
   }
 
-  public setup(core: CoreSetup, plugins: WorkflowsExecutionEnginePluginSetupDeps) {
+  public setup(
+    core: CoreSetup<WorkflowsExecutionEnginePluginStartDeps, WorkflowsExecutionEnginePluginStart>,
+    plugins: WorkflowsExecutionEnginePluginSetupDeps
+  ) {
     this.logger.debug('workflows-execution-engine: Setup');
 
     const logger = this.logger;
     const config = this.config;
+
+    const setupDependencies: SetupDependencies = { cloudSetup: plugins.cloud };
+    this.setupDependencies = setupDependencies;
 
     plugins.taskManager.registerTaskDefinitions({
       'workflow:run': {
@@ -69,8 +85,9 @@ export class WorkflowsExecutionEnginePlugin
               const { workflowRunId, spaceId } =
                 taskInstance.params as StartWorkflowExecutionParams;
               const [coreStart, pluginsStart] = await core.getStartServices();
-              const { actions, taskManager } =
-                pluginsStart as WorkflowsExecutionEnginePluginStartDeps;
+              const { actions, taskManager } = pluginsStart;
+              const dependencies: ContextDependencies = setupDependencies; // TODO: append start dependencies
+
               // Get ES client from core services (guaranteed to be available at task execution time)
               const esClient = coreStart.elasticsearch.client.asInternalUser as Client;
               const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
@@ -80,17 +97,18 @@ export class WorkflowsExecutionEnginePlugin
               await runWorkflow({
                 workflowRunId,
                 spaceId,
-                workflowExecutionRepository,
-                stepExecutionRepository,
-                logsRepository,
+                workflowExecutionRepository, // TODO: remove from params, can be created inside
+                stepExecutionRepository, // TODO: remove from params, can be created inside
+                logsRepository, // TODO: remove from params, can be created inside
                 taskAbortController,
-                taskManager,
-                esClient,
-                actions,
-                coreStart,
+                taskManager, // TODO: move to dependencies
+                esClient, // TODO: remove from params, can be created inside
+                actions, // TODO: move to dependencies
+                coreStart, // TODO: move to dependencies
                 config,
                 logger,
                 fakeRequest: fakeRequest!,
+                dependencies,
               });
             },
             async cancel() {
@@ -113,8 +131,8 @@ export class WorkflowsExecutionEnginePlugin
               const { workflowRunId, spaceId } =
                 taskInstance.params as ResumeWorkflowExecutionParams;
               const [coreStart, pluginsStart] = await core.getStartServices();
-              const { actions, taskManager } =
-                pluginsStart as WorkflowsExecutionEnginePluginStartDeps;
+              const dependencies: ContextDependencies = setupDependencies; // TODO: append start dependencies
+              const { actions, taskManager } = pluginsStart;
               // Get ES client from core services (guaranteed to be available at task execution time)
               const esClient = coreStart.elasticsearch.client.asInternalUser as Client;
               const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
@@ -135,6 +153,7 @@ export class WorkflowsExecutionEnginePlugin
                 config,
                 logger,
                 fakeRequest: fakeRequest!,
+                dependencies,
               });
             },
             async cancel() {
@@ -150,6 +169,10 @@ export class WorkflowsExecutionEnginePlugin
 
   public start(coreStart: CoreStart, plugins: WorkflowsExecutionEnginePluginStartDeps) {
     this.logger.debug('workflows-execution-engine: Start');
+    if (!this.setupDependencies) {
+      throw new Error('Setup not called before start');
+    }
+    const dependencies: ContextDependencies = this.setupDependencies; // TODO: append start dependencies
 
     const executeWorkflow = async (
       workflow: WorkflowExecutionEngineModel,
@@ -188,7 +211,7 @@ export class WorkflowsExecutionEnginePlugin
 
       if (isRunningInTaskManager) {
         // We're already in a task - execute directly without scheduling another task
-        this.logger.info(
+        this.logger.debug(
           `Executing workflow directly (already in Task Manager context): ${workflow.id}`
         );
 
@@ -206,6 +229,7 @@ export class WorkflowsExecutionEnginePlugin
           logger: this.logger,
           config: this.config,
           fakeRequest: request, // will be undefined if not available
+          dependencies,
         });
       } else {
         // Normal manual execution - schedule a task
@@ -229,12 +253,12 @@ export class WorkflowsExecutionEnginePlugin
         // Task Manager will automatically create and manage the API key
         if (request) {
           // Debug: Log the user info from the original request
-          this.logger.info(
+          this.logger.debug(
             `Scheduling workflow task with user context for workflow ${workflow.id}`
           );
           await plugins.taskManager.schedule(taskInstance, { request });
         } else {
-          this.logger.info(`Scheduling workflow task without user context`);
+          this.logger.debug(`Scheduling workflow task without user context`);
           await plugins.taskManager.schedule(taskInstance);
         }
       }
