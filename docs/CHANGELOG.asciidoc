@@ -115,9 +115,14 @@ include::upgrade-notes.asciidoc[]
 [[release-notes-8.19.5]]
 == {kib} 8.19.5
 
-The 8.19.5 release includes the following fixes.
+The 8.19.5 release includes the following known issues and fixes.
 
 IMPORTANT: This release contains fixes for potential security vulnerabilities. Check our link:https://discuss.elastic.co/c/announcements/security-announcements/31[security advisory] for more details.
+
+[float]
+[[known-issues-8.19.5]]
+=== Known issues
+include::CHANGELOG.asciidoc[tag=known-issue-3610]
 
 [float]
 [[fixes-v8.19.5]]
@@ -163,7 +168,12 @@ Management::
 [[release-notes-8.19.4]]
 == {kib} 8.19.4
 
-The 8.19.4 release includes the following fixes.
+The 8.19.4 release includes the following known issues, enhancements, and fixes.
+
+[float]
+[[known-issues-8.19.4]]
+=== Known issues
+include::CHANGELOG.asciidoc[tag=known-issue-3610]
 
 [float]
 [[enhancement-v8.19.4]]
@@ -188,7 +198,12 @@ Observability solution::
 [[release-notes-8.19.3]]
 == {kib} 8.19.3
 
-The 8.19.3 release includes the following fixes.
+The 8.19.3 release includes the following known issues and fixes.
+
+[float]
+[[known-issues-8.19.3]]
+=== Known issues
+include::CHANGELOG.asciidoc[tag=known-issue-3610]
 
 [float]
 [[fixes-v8.19.3]]
@@ -213,7 +228,12 @@ Kibana platform::
 [[release-notes-8.19.2]]
 == {kib} 8.19.2
 
-The 8.19.2 release includes the following fixes.
+The 8.19.2 release includes the following known issues, enhancements, and fixes.
+
+[float]
+[[known-issues-8.19.2]]
+=== Known issues
+include::CHANGELOG.asciidoc[tag=known-issue-3610]
 
 [float]
 [[enhancement-v8.19.2]]
@@ -242,6 +262,7 @@ The 8.19.1 release includes the following known issues and fixes.
 === Known issues
 include::CHANGELOG.asciidoc[tag=known-issue-230275]
 include::CHANGELOG.asciidoc[tag=known-issue-2462]
+include::CHANGELOG.asciidoc[tag=known-issue-3610]
 
 [float]
 [[fixes-v8.19.1]]
@@ -295,6 +316,20 @@ After creating a report in a non-default {kib} space, the document exists in the
 This issue is resolved in 8.19.0, 8.19.2, 9.1.0, and 9.1.2.
 ====
 // end::known-issue-2462[]
+
+// tag::known-issue-3610[]
+.Alerts aren't generated for rules with alert flapping off and an alert delay higher than 1.
+[%collapsible]
+====
+*Details* +
+
+Alerts aren't generated for rules that have **Alert flapping detection** turned off and the alert delay set to a value higher than 1.
+
+*Workaround* +
+Set the alert delay value to 1 or turn on **Alert flapping detection**.
+
+====
+// end::known-issue-3610[]
 
 [float]
 [[breaking-changes-8.19.0]]
