@@ -16,10 +16,7 @@ import {
   ALERT_UUID,
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
-  ALERT_RULE_CONSUMER,
 } from '@kbn/rule-data-utils';
-
-type AlertsResult = Array<{ [ALERT_RULE_UUID]: string; [ALERT_UUID]: string }>;
 
 export interface ClearAlertFlappingHistoryParams {
   indices: string[];
@@ -62,7 +59,6 @@ const clearAlertFlappingHistoryQuery = (ruleIds: string[]): QueryDslQueryContain
           },
         },
       ],
-      must_not: [{ term: { [ALERT_RULE_CONSUMER]: 'siem' } }],
     },
   };
 };
@@ -121,18 +117,16 @@ export const clearAlertFlappingHistory = async (
     }
 
     // Fetch and return updated rule and alert instance UUIDs
-    const searchResponse = await esClient.search({
+    await esClient.search({
       index: indices,
       allow_no_indices: true,
       _source: [ALERT_RULE_UUID, ALERT_UUID, ALERT_FLAPPING, ALERT_FLAPPING_HISTORY],
       size: total,
       query: clearAlertFlappingHistoryQuery(ruleIds),
     });
-
-    return searchResponse.hits.hits.map((hit) => hit._source) as AlertsResult;
   } catch (err) {
     logger.error(
-      `Error clearing alert flapping for indicies: ${indices}, ruleIds: ${ruleIds} - ${err.message}`
+      `Error clearing alert flapping for indices: ${indices}, ruleIds: ${ruleIds} - ${err.message}`
     );
     throw err;
   }

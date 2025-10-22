@@ -509,23 +509,30 @@ describe('bulkEnableRules', () => {
       saved_objects: [enabledRuleForBulkOps1, enabledRuleForBulkOps2],
     });
 
-    rulesClientParams.getAlertIndicesAlias.mockReturnValue(['test-index']);
+    rulesClientParams.getAlertIndicesAlias.mockReturnValueOnce(['test-index-1', 'test-index-2']);
 
-    (rulesClientParams.ruleTypeRegistry.get as jest.Mock).mockReturnValue({
+    (rulesClientParams.ruleTypeRegistry.get as jest.Mock).mockReturnValueOnce({
       autoRecoverAlerts: true,
+      id: 'fakeType1',
+    });
+
+    (rulesClientParams.ruleTypeRegistry.get as jest.Mock).mockReturnValueOnce({
+      autoRecoverAlerts: true,
+      id: 'fakeType2',
     });
 
     const result = await rulesClient.bulkEnableRules({
       filter: 'fake_filter',
     });
 
+    expect(rulesClientParams.getAlertIndicesAlias).toHaveBeenCalledWith(
+      ['fakeType1', 'fakeType2'],
+      'default'
+    );
+
     expect(alertsService.clearAlertFlappingHistory).toHaveBeenCalledWith({
-      indices: ['test-index'],
-      ruleIds: ['id1'],
-    });
-    expect(alertsService.clearAlertFlappingHistory).toHaveBeenCalledWith({
-      indices: ['test-index'],
-      ruleIds: ['id2'],
+      indices: ['test-index-1', 'test-index-2'],
+      ruleIds: ['id1', 'id2'],
     });
 
     expect(result).toStrictEqual({
@@ -560,11 +567,7 @@ describe('bulkEnableRules', () => {
 
     expect(alertsService.clearAlertFlappingHistory).toHaveBeenCalledWith({
       indices: ['test-index'],
-      ruleIds: ['id1'],
-    });
-    expect(alertsService.clearAlertFlappingHistory).toHaveBeenCalledWith({
-      indices: ['test-index'],
-      ruleIds: ['id2'],
+      ruleIds: ['id1', 'id2'],
     });
 
     expect(result).toStrictEqual({
@@ -575,10 +578,7 @@ describe('bulkEnableRules', () => {
     });
 
     expect(logger.error).toBeCalledWith(
-      'Failure to clear flapping history from rule id1 - something went wrong!'
-    );
-    expect(logger.error).toBeCalledWith(
-      'Failure to clear flapping history from rule id2 - something went wrong!'
+      'Failure to clear flapping history from rule ["id1","id2"] - something went wrong!'
     );
   });
 
@@ -605,6 +605,56 @@ describe('bulkEnableRules', () => {
     expect(result).toStrictEqual({
       errors: [],
       rules: [returnedRuleForBulkOps1, returnedRuleForBulkOps2],
+      total: 2,
+      taskIdsFailedToBeEnabled: [],
+    });
+  });
+
+  test('should not try to clear flapping for rules that failed to enable', async () => {
+    mockCreatePointInTimeFinderAsInternalUser({
+      saved_objects: [disabledRule1, enabledRuleForBulkOps2],
+    });
+    unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+      saved_objects: [
+        enabledRuleForBulkOps1,
+        {
+          ...enabledRuleForBulkOps2,
+          error: {
+            message: 'something went wrong!',
+            statusCode: 400,
+            error: 'something went wrong!',
+          },
+        },
+      ],
+    });
+
+    rulesClientParams.getAlertIndicesAlias.mockReturnValue(['test-index']);
+
+    (rulesClientParams.ruleTypeRegistry.get as jest.Mock).mockReturnValue({
+      autoRecoverAlerts: true,
+    });
+
+    const result = await rulesClient.bulkEnableRules({
+      filter: 'fake_filter',
+    });
+
+    expect(alertsService.clearAlertFlappingHistory).toHaveBeenCalledWith({
+      indices: ['test-index'],
+      ruleIds: ['id1'],
+    });
+
+    expect(result).toStrictEqual({
+      errors: [
+        {
+          message: 'something went wrong!',
+          rule: {
+            id: 'id2',
+            name: 'fakeName',
+          },
+          status: 400,
+        },
+      ],
+      rules: [returnedRuleForBulkOps1],
       total: 2,
       taskIdsFailedToBeEnabled: [],
     });

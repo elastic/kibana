@@ -6,16 +6,21 @@
  */
 
 import expect from '@kbn/expect';
-import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
-import { ALERT_FLAPPING, ALERT_FLAPPING_HISTORY, ALERT_UUID } from '@kbn/rule-data-utils';
-import { UserAtSpaceScenarios, SuperuserAtSpace1 } from '../../../scenarios';
-import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { ALERT_FLAPPING, ALERT_FLAPPING_HISTORY, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
+import { RuleNotifyWhen } from '@kbn/alerting-types';
+import type { SearchHit } from '@kbn/es-types';
+import type { Alert } from '@kbn/alerts-as-data-utils';
+import type { String } from 'lodash';
 import {
   getUrlPrefix,
   getTestRuleData,
   ObjectRemover,
   getUnauthorizedErrorMessage,
+  resetRulesSettings,
 } from '../../../../common/lib';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { UserAtSpaceScenarios, SuperuserAtSpace1 } from '../../../scenarios';
 
 const defaultSuccessfulResponse = {
   total: 1,
@@ -23,8 +28,6 @@ const defaultSuccessfulResponse = {
   errors: [],
   task_ids_failed_to_be_enabled: [],
 };
-
-const alertAsDataIndex = '.internal.alerts-observability.test.alerts.alerts-default-000001';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -753,9 +756,36 @@ export default ({ getService }: FtrProviderContext) => {
     }
 
     describe('Clearing flapping tests', () => {
+      const { user, space } = SuperuserAtSpace1;
+      const alertsAsDataIndex = '.alerts-test.patternfiring.alerts-default';
+      const TEST_CACHE_EXPIRATION_TIME = 12000;
+
+      const queryForAlertDocs = async <T>(ruleId: string): Promise<Array<SearchHit<T>>> => {
+        const searchResult = await es.search({
+          index: alertsAsDataIndex,
+          sort: [{ '@timestamp': 'desc' }],
+          query: {
+            bool: {
+              must: {
+                term: { [ALERT_RULE_UUID]: { value: ruleId } },
+              },
+            },
+          },
+          size: 25,
+        });
+        return searchResult.hits.hits as Array<SearchHit<T>>;
+      };
+
+      const runSoon = async (id: String) => {
+        return supertest
+          .post(`${getUrlPrefix(space.id)}/internal/alerting/rule/${id}/_run_soon`)
+          .set('kbn-xsrf', 'foo')
+          .expect(204);
+      };
+
       afterEach(async () => {
         await es.deleteByQuery({
-          index: alertAsDataIndex,
+          index: alertsAsDataIndex,
           query: {
             match_all: {},
           },
@@ -763,23 +793,34 @@ export default ({ getService }: FtrProviderContext) => {
           ignore_unavailable: true,
         });
         await objectRemover.removeAll();
+        await resetRulesSettings(supertest, space.id);
       });
-      const { user, space } = SuperuserAtSpace1;
 
       it('should clear flapping history when enabling rules', async () => {
+        const params = { pattern: { alertA: [true, false, true, false, true, false, true] } };
+        await supertest
+          .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/settings/_flapping`)
+          .set('kbn-xsrf', 'foo')
+          .auth('superuser', 'superuser')
+          .send({
+            enabled: true,
+            look_back_window: 5,
+            status_change_threshold: 2,
+          })
+          .expect(200);
+        await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
+
         const rule1 = await supertest
           .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
           .set('kbn-xsrf', 'foo')
           .send(
             getTestRuleData({
-              rule_type_id: 'test.always-firing-alert-as-data',
-              schedule: { interval: '24h' },
-              throttle: undefined,
-              notify_when: undefined,
-              params: {
-                index: ES_TEST_INDEX_NAME,
-                reference: 'test',
-              },
+              rule_type_id: 'test.patternFiringAad',
+              schedule: { interval: '1d' },
+              throttle: null,
+              params,
+              actions: [],
+              notify_when: RuleNotifyWhen.CHANGE,
             })
           )
           .expect(200);
@@ -791,35 +832,40 @@ export default ({ getService }: FtrProviderContext) => {
           .set('kbn-xsrf', 'foo')
           .send(
             getTestRuleData({
-              rule_type_id: 'test.always-firing-alert-as-data',
-              schedule: { interval: '24h' },
-              throttle: undefined,
-              notify_when: undefined,
-              params: {
-                index: ES_TEST_INDEX_NAME,
-                reference: 'test',
-              },
+              rule_type_id: 'test.patternFiringAad',
+              schedule: { interval: '1d' },
+              throttle: null,
+              params,
+              actions: [],
+              notify_when: RuleNotifyWhen.CHANGE,
             })
           )
           .expect(200);
 
         objectRemover.add(space.id, rule2.body.id, 'rule', 'alerting');
 
-        let ids: string[] = [];
-        await retry.try(async () => {
-          const result = await es.search({
-            index: alertAsDataIndex,
-            query: {
-              match_all: {},
-            },
+        for (let i = 0; i < 4; i++) {
+          await retry.try(async () => {
+            const alert1Docs = await queryForAlertDocs<Alert>(rule1.body.id);
+            const alert2Docs = await queryForAlertDocs<Alert>(rule2.body.id);
+
+            expect(alert1Docs[0]?._source[ALERT_FLAPPING_HISTORY]?.length).eql(i + 1);
+            expect(alert2Docs[0]?._source[ALERT_FLAPPING_HISTORY]?.length).eql(i + 1);
+            if (i === 3) {
+              return;
+            }
+            await Promise.all([runSoon(rule1.body.id), runSoon(rule2.body.id)]);
           });
-          expect(result.hits.hits.length).eql(4);
-          result.hits.hits.forEach((alert: any) => {
-            expect(alert._source[ALERT_FLAPPING]).eql(false);
-            expect(alert._source[ALERT_FLAPPING_HISTORY]).eql([true]);
-          });
-          ids = result.hits.hits.map((alert: any) => alert._source[ALERT_UUID]);
-        });
+        }
+
+        let alert1Docs = await queryForAlertDocs<Alert>(rule1.body.id);
+        let alert2Docs = await queryForAlertDocs<Alert>(rule1.body.id);
+
+        expect(alert1Docs[0]?._source[ALERT_FLAPPING_HISTORY]).eql([true, true, true, true]);
+        expect(alert1Docs[0]?._source[ALERT_FLAPPING]).eql(true);
+
+        expect(alert2Docs[0]?._source[ALERT_FLAPPING_HISTORY]).eql([true, true, true, true]);
+        expect(alert2Docs[0]?._source[ALERT_FLAPPING]).eql(true);
 
         await supertestWithoutAuth
           .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_disable`)
@@ -835,26 +881,13 @@ export default ({ getService }: FtrProviderContext) => {
           .send({ ids: [rule1.body.id, rule2.body.id] })
           .expect(200);
 
-        await retry.try(async () => {
-          const result = await es.search({
-            index: alertAsDataIndex,
-            query: {
-              bool: {
-                must: {
-                  terms: {
-                    [ALERT_UUID]: ids,
-                  },
-                },
-              },
-            },
-          });
+        alert1Docs = await queryForAlertDocs<Alert>(rule1.body.id);
+        alert2Docs = await queryForAlertDocs<Alert>(rule1.body.id);
 
-          expect(result.hits.hits.length).eql(4);
-          result.hits.hits.forEach((alert: any) => {
-            expect(alert._source[ALERT_FLAPPING]).eql(false);
-            expect(alert._source[ALERT_FLAPPING_HISTORY]).eql([]);
-          });
-        });
+        expect(alert1Docs[0]?._source[ALERT_FLAPPING_HISTORY]).eql([]);
+        expect(alert1Docs[0]?._source[ALERT_FLAPPING]).eql(false);
+        expect(alert2Docs[0]?._source[ALERT_FLAPPING_HISTORY]).eql([]);
+        expect(alert2Docs[0]?._source[ALERT_FLAPPING]).eql(false);
       });
     });
 

@@ -49,7 +49,7 @@ describe('clearAlertFlappingHistory()', () => {
   });
 
   test('should call updateByQuery with provided rule id and index', async () => {
-    const result = await clearAlertFlappingHistory({
+    await clearAlertFlappingHistory({
       logger,
       esClient: clusterClient,
       indices: ['test-index'],
@@ -99,13 +99,6 @@ describe('clearAlertFlappingHistory()', () => {
                         },
                       },
                     ],
-                  },
-                },
-              ],
-              "must_not": Array [
-                Object {
-                  "term": Object {
-                    "kibana.alert.rule.consumer": "siem",
                   },
                 },
               ],
@@ -174,21 +167,12 @@ describe('clearAlertFlappingHistory()', () => {
                   },
                 },
               ],
-              "must_not": Array [
-                Object {
-                  "term": Object {
-                    "kibana.alert.rule.consumer": "siem",
-                  },
-                },
-              ],
             },
           },
           "size": 1,
         },
       ]
     `);
-
-    expect(result).toEqual([{ 'kibana.alert.uuid': 'test-alert-id' }]);
   });
 
   test('should throw if either indices or ruleIds is empty', async () => {
@@ -228,7 +212,7 @@ describe('clearAlertFlappingHistory()', () => {
     expect(clusterClient.search).toHaveBeenCalledTimes(0);
 
     expect(logger.error).toHaveBeenCalledWith(
-      'Error clearing alert flapping for indicies: test-index, ruleIds: test-rule - something went wrong!'
+      'Error clearing alert flapping for indices: test-index, ruleIds: test-rule - something went wrong!'
     );
   });
 
@@ -246,7 +230,7 @@ describe('clearAlertFlappingHistory()', () => {
       updated: 3,
     });
 
-    const result = await clearAlertFlappingHistory({
+    await clearAlertFlappingHistory({
       logger,
       esClient: clusterClient,
       indices: ['test-index'],
@@ -255,6 +239,5 @@ describe('clearAlertFlappingHistory()', () => {
 
     expect(clusterClient.updateByQuery).toHaveBeenCalledTimes(3);
     expect(clusterClient.search).toHaveBeenCalledTimes(1);
-    expect(result).toEqual([{ 'kibana.alert.uuid': 'test-alert-id' }]);
   });
 });
