@@ -417,7 +417,7 @@ export class FindService extends FtrService {
     selector: string,
     timeout: number = this.defaultFindTimeout,
     topOffsetOrOptions?: number | { topOffset?: number; bottomOffset?: number },
-    preclickDelay: number = 10
+    preclickDelay: number = 0
   ): Promise<void> {
     this.log.debug(`Find.clickByCssSelector('${selector}') with timeout=${timeout}`);
     await this.retry.try(async () => {
