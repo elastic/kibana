@@ -15,6 +15,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { set } from '@kbn/safer-lodash-set';
 
 import type { ViewMode } from '@kbn/presentation-publishing';
+import type { Writable } from '@kbn/utility-types';
 import { coreServices, spacesService } from './kibana_services';
 import type { DashboardState } from '../../common';
 
@@ -30,7 +31,7 @@ const getPanelsGetError = (message: string) =>
     values: { message },
   });
 
-export type DashboardBackupState = Partial<DashboardState> & {
+export type DashboardBackupState = Partial<Writable<DashboardState>> & {
   viewMode?: ViewMode;
 };
 

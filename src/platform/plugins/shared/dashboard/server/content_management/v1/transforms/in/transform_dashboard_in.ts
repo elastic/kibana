@@ -76,7 +76,7 @@ export const transformDashboardIn = ({
       timeRestore,
       ...(timeRange && timeRestore && { timeFrom: timeRange.from, timeTo: timeRange.to }),
       kibanaSavedObjectMeta: { searchSourceJSON },
-    };
+    } as DashboardSavedObjectAttributes;
     return {
       attributes,
       references: [

@@ -8,6 +8,7 @@
  */
 
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
+import type { Writable } from '@kbn/utility-types';
 import type { DashboardState } from '../../../common';
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';
 import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
@@ -52,7 +53,7 @@ export async function loadDashboardApi({
     return getDashboardBackupService().getState(savedObjectResult.dashboardId);
   })();
 
-  const combinedSessionState: DashboardState = {
+  const combinedSessionState: Writable<DashboardState> = {
     ...(savedObjectResult?.dashboardInput ?? {}),
     ...sessionStorageInput,
   };

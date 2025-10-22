@@ -8,7 +8,7 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { SerializableRecord } from '@kbn/utility-types';
+import type { SerializableRecord, Writable } from '@kbn/utility-types';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import type { DashboardState } from '../server';
 
@@ -27,7 +27,7 @@ export interface DashboardAttributesAndReferences {
 }
 
 export type DashboardLocatorParams = Partial<
-  DashboardState & {
+  Writable<DashboardState> & {
     controlGroupInput?: DashboardState['controlGroupInput'] & SerializableRecord;
 
     references?: DashboardState['references'] & SerializableRecord;

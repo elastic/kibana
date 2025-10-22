@@ -18,7 +18,7 @@ export type DashboardSettings = Required<DashboardOptions> & {
   description?: DashboardState['description'];
   tags: DashboardState['tags'];
   timeRestore: DashboardState['timeRestore'];
-  title: DashboardState['description'];
+  title: DashboardState['title'];
 };
 
 const DEFAULT_SETTINGS: WithAllKeys<DashboardSettings> = {

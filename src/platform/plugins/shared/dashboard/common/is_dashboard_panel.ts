@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DashboardAttributes, DashboardPanel } from '../server/content_management';
+import type { DashboardState, DashboardPanel } from '../server/content_management';
 
 export const isDashboardPanel = (
-  widget: DashboardAttributes['panels'][number]
+  widget: DashboardState['panels'][number]
 ): widget is DashboardPanel => {
   return 'config' in widget;
 };
