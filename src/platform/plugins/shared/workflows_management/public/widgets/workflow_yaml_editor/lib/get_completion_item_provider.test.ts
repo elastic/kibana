@@ -10,8 +10,8 @@
 import { monaco } from '@kbn/monaco';
 import type { ConnectorContractUnion } from '@kbn/workflows';
 import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
-import { getCompletionItemProvider, parseLineForCompletion } from './get_completion_item_provider';
 import { z } from '@kbn/zod';
+import { getCompletionItemProvider, parseLineForCompletion } from './get_completion_item_provider';
 
 // Mock Monaco editor model
 const createMockModel = (value: string, cursorOffset: number) => {
