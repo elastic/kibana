@@ -14,7 +14,6 @@ import {
   esArchiverFixture,
   scoutSpaceParallelFixture,
   synthtraceFixture,
-  profilingFixture,
 } from '../../fixtures/scope/worker';
 import type {
   ApiServicesFixture,
@@ -92,7 +91,6 @@ export const globalSetupFixtures = mergeTests(
   coreWorkerFixtures,
   esArchiverFixture,
   synthtraceFixture,
-  profilingFixture,
   apiServicesFixture,
   preCreateSecurityIndexesFixture
 );

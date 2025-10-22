@@ -33,8 +33,6 @@ export type { ApiServicesFixture } from './apis';
 export { synthtraceFixture } from './synthtrace';
 export type { SynthtraceFixture } from './synthtrace';
 
-export { profilingFixture } from './profiling';
-export type { ProfilingFixture } from './profiling';
 
 export { lighthouseFixture } from './lighthouse';
 export type { LighthouseFixture, LighthouseAuditOptions } from './lighthouse';

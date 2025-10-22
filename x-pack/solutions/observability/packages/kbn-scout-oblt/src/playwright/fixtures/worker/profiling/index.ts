@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { profilingSetupFixture } from './api_supertest';
-export type { ProfilingSetupFixture } from './api_supertest';
+export { profilingSetupFixture } from './profiling_setup_fixture';
+export type { ProfilingSetupFixture } from './profiling_setup_fixture';

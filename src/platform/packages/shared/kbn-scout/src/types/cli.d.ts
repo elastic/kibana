@@ -12,5 +12,4 @@ export type CliSupportedServerModes =
   | 'serverless=es'
   | 'serverless=oblt'
   | 'serverless=oblt-logs-essentials'
-  | 'serverless=security'
-  | 'profiling';
+  | 'serverless=security';

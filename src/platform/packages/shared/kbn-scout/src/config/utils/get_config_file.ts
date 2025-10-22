@@ -17,15 +17,11 @@ export const getConfigFilePath = (config: CliSupportedServerModes): string => {
     return path.join(baseDir, 'stateful', 'stateful.config.ts');
   }
 
-  if (config === 'profiling') {
-    return path.join(baseDir, 'profiling', 'profiling.config.ts');
-  }
-
   const [mode, type] = config.split('=');
 
   if (mode !== 'serverless' || !type) {
     throw new Error(
-      `Invalid config format: "${config}". Expected "stateful", "profiling", or "serverless=<type>".`
+      `Invalid config format: "${config}". Expected "stateful" or "serverless=<type>".`
     );
   }
 
