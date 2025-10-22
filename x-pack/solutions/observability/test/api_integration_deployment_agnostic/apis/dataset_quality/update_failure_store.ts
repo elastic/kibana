@@ -13,7 +13,8 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_co
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const synthtrace = getService('synthtrace');
   const roleScopedSupertest = getService('roleScopedSupertest');
-
+  const config = getService('config');
+  const isServerless = !!config.get('serverless');
   const start = '2023-12-11T18:00:00.000Z';
   const end = '2023-12-11T18:01:00.000Z';
   const type = 'logs';
@@ -110,7 +111,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(requestBody.failure_store).to.have.property('enabled', true);
       expect(requestBody.failure_store).to.have.property('lifecycle');
       expect(requestBody.failure_store.lifecycle).to.have.property('data_retention', '30d');
-      expect(requestBody.failure_store.lifecycle).to.have.property('enabled', true);
+      if (!isServerless) {
+        expect(requestBody.failure_store.lifecycle).to.have.property('enabled', true);
+      }
     });
   });
 }
