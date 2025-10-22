@@ -8,8 +8,8 @@
  */
 
 import { configureStore } from '@reduxjs/toolkit';
-import { workflowEditorReducer } from './slice';
 import { workflowComputationMiddleware } from './middleware';
+import { workflowEditorReducer } from './slice';
 
 // Store factory
 export const createWorkflowEditorStore = () => {
