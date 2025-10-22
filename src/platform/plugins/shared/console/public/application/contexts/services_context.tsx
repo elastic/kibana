@@ -43,6 +43,7 @@ export interface ContextValue extends ConsoleStartServices {
   docLinks: DocLinksStart['links'];
   config: {
     isDevMode: boolean;
+    isPackagedEnvironment?: boolean;
   };
 }
 
