@@ -4,6 +4,8 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
+export COLLECT_QUICK_CHECK_CHANGES=true
+
 if [[ "${CI:-}" =~ ^(1|true)$ ]]; then
   export DISABLE_BOOTSTRAP_VALIDATION=false
   .buildkite/scripts/bootstrap.sh

@@ -52,7 +52,7 @@ check_for_changed_files() {
       echo "'$1' caused changes to the following files:"
       echo "$GIT_CHANGES"
       echo ""
-      echo "Auto-committing these changes now. A new build should start soon if successful."
+      echo "Auto-committing & pushing these changes now."
 
       git config --global user.name kibanamachine
       git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
@@ -61,6 +61,9 @@ check_for_changed_files() {
 
       git commit -m "$CUSTOM_FIX_MESSAGE"
       git push
+
+      # Still exit with error to fail the current build, a new build should be started after the push
+      exit 1
     else
       echo -e "\n${RED}ERROR: '$1' caused changes to the following files:${C_RESET}\n"
       echo -e "$GIT_CHANGES\n"
