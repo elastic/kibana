@@ -147,9 +147,6 @@ const flyoutRef = openMySystemFlyout(overlays);
 
 // Close the flyout programmatically from outside
 flyoutRef.close();
-
-// Close all system flyouts at once
-overlays.closeAllSystemFlyouts();
 ```
 
 ### Key Differences

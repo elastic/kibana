@@ -14,7 +14,10 @@ import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
-import type { OverlayFlyoutOpenOptions } from '@kbn/core-overlays-browser';
+import type {
+  OverlayFlyoutOpenOptions,
+  OverlaySystemFlyoutStart,
+} from '@kbn/core-overlays-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { EuiFlyout } from '@elastic/eui';
 import { SystemFlyoutRef } from './system_flyout_ref';
@@ -35,11 +38,17 @@ export class SystemFlyoutService {
   private targetDomElement: Element | null = null;
   private activeFlyouts = new Map<string, SystemFlyoutRef>();
 
-  public start({ analytics, i18n, theme, userProfile, targetDomElement }: SystemFlyoutStartDeps) {
+  public start({
+    analytics,
+    i18n,
+    theme,
+    userProfile,
+    targetDomElement,
+  }: SystemFlyoutStartDeps): OverlaySystemFlyoutStart {
     this.targetDomElement = targetDomElement;
 
     return {
-      openSystemFlyout: (
+      open: (
         content: React.ReactElement,
         { title, ...options }: OverlayFlyoutOpenOptions = {}
       ): OverlayRef => {
@@ -89,12 +98,6 @@ export class SystemFlyoutService {
         );
 
         return flyoutRef;
-      },
-
-      // Method to close all system flyouts
-      closeAllSystemFlyouts: (): void => {
-        this.activeFlyouts.forEach((flyout) => flyout.close());
-        this.activeFlyouts.clear();
       },
     };
   }

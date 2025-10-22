@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { OverlayStart } from './src/overlays';
-export type { OverlayBannersStart } from './src/banners';
-export type { OverlayFlyoutStart, OverlayFlyoutOpenOptions } from './src/flyout';
-export type { OverlaySystemFlyoutStart } from './src/system_flyout';
-export type {
-  OverlayModalStart,
-  OverlayModalOpenOptions,
-  OverlayModalConfirmOptions,
-} from './src/modal';
+const createStartContractMock = () => {
+  return {
+    open: jest.fn().mockReturnValue({
+      close: jest.fn(),
+      onClose: Promise.resolve(),
+    }),
+  };
+};
+
+export const overlaySystemFlyoutServiceMock = {
+  createStartContract: createStartContractMock,
+};
