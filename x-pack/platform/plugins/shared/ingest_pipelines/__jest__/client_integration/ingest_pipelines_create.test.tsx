@@ -99,7 +99,7 @@ describe('<PipelinesCreate />', () => {
       testBed.component.update();
 
       expect(testBed.exists('nameField.input')).toBe(true);
-      expect(testBed.find('nameField.input').props().disabled).toBe(true);
+      expect(testBed.find('nameField.input').props()).toHaveEuiDisabledProp();
       expect(testBed.find('nameField.input').props().value).toBe('test-pipeline');
     });
 
@@ -110,7 +110,7 @@ describe('<PipelinesCreate />', () => {
         await actions.clickSubmitButton();
 
         expect(form.getErrorsMessages()).toEqual(['Name is required.']);
-        expect(find('submitButton').props().disabled).toEqual(true);
+        expect(find('submitButton').props()).toHaveEuiDisabledProp();
 
         await act(async () => {
           // Add required fields and verify button is enabled again
@@ -119,7 +119,7 @@ describe('<PipelinesCreate />', () => {
 
         component.update();
 
-        expect(find('submitButton').props().disabled).toEqual(false);
+        expect(find('submitButton').props()).not.toHaveEuiDisabledProp();
       });
     });
 

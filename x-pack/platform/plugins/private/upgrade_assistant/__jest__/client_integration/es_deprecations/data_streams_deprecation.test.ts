@@ -193,12 +193,12 @@ describe('Data streams deprecation', () => {
       );
       expect(exists('startActionButton')).toBe(true);
       expect(find('startActionButton').text()).toBe('Start reindexing');
-      expect(find('startActionButton').props().disabled).toBe(true);
+      expect(find('startActionButton').props()).toHaveEuiDisabledProp();
       expect(exists('closeDataStreamConfirmStepButton')).toBe(true);
 
       await actions.dataStreamDeprecationFlyout.checkMigrationWarningCheckbox();
 
-      expect(find('startActionButton').props().disabled).toBe(false);
+      expect(find('startActionButton').props()).not.toHaveEuiDisabledProp();
     });
     describe('reindexing progress', () => {
       it('reindexing pending', async () => {
@@ -253,7 +253,7 @@ describe('Data streams deprecation', () => {
           '1 Index waiting to start.'
         );
         expect(exists('startDataStreamMigrationButton')).toBe(true);
-        expect(find('startDataStreamMigrationButton').props().disabled).toBe(true);
+        expect(find('startDataStreamMigrationButton').props()).toHaveEuiDisabledProp();
         expect(exists('cancelDataStreamMigrationButton')).toBe(true);
       });
       it('reindexing in progress', async () => {
@@ -306,7 +306,7 @@ describe('Data streams deprecation', () => {
         );
 
         expect(exists('startDataStreamMigrationButton')).toBe(true);
-        expect(find('startDataStreamMigrationButton').props().disabled).toBe(true);
+        expect(find('startDataStreamMigrationButton').props()).toHaveEuiDisabledProp();
         expect(exists('cancelDataStreamMigrationButton')).toBe(true);
         expect(exists('startDataStreamReadonlyButton')).toBe(false);
       });
@@ -361,7 +361,7 @@ describe('Data streams deprecation', () => {
         );
 
         expect(exists('startDataStreamMigrationButton')).toBe(true);
-        expect(find('startDataStreamMigrationButton').props().disabled).toBe(true);
+        expect(find('startDataStreamMigrationButton').props()).toHaveEuiDisabledProp();
         expect(exists('cancelDataStreamMigrationButton')).toBe(true);
         expect(exists('startDataStreamReadonlyButton')).toBe(false);
       });
@@ -419,7 +419,7 @@ describe('Data streams deprecation', () => {
         );
 
         expect(exists('startDataStreamMigrationButton')).toBe(true);
-        expect(find('startDataStreamMigrationButton').props().disabled).toBe(true);
+        expect(find('startDataStreamMigrationButton').props()).toHaveEuiDisabledProp();
         expect(exists('cancelDataStreamMigrationButton')).toBe(true);
         expect(exists('startDataStreamReadonlyButton')).toBe(false);
       });
@@ -489,12 +489,12 @@ describe('Data streams deprecation', () => {
       );
       expect(exists('startActionButton')).toBe(true);
       expect(find('startActionButton').text()).toBe('Set all to read-only');
-      expect(find('startActionButton').props().disabled).toBe(true);
+      expect(find('startActionButton').props()).toHaveEuiDisabledProp();
       expect(exists('cancelDataStreamMigrationModal')).toBe(true);
 
       await actions.dataStreamDeprecationFlyout.checkMigrationWarningCheckbox();
 
-      expect(find('startActionButton').props().disabled).toBe(false);
+      expect(find('startActionButton').props()).not.toHaveEuiDisabledProp();
     });
     describe('read-only progress', () => {
       it('pending', async () => {
@@ -549,7 +549,7 @@ describe('Data streams deprecation', () => {
           '1 Index waiting to start.'
         );
         expect(exists('startDataStreamMigrationButton')).toBe(true);
-        expect(find('startDataStreamMigrationButton').props().disabled).toBe(true);
+        expect(find('startDataStreamMigrationButton').props()).toHaveEuiDisabledProp();
         expect(exists('cancelDataStreamMigrationButton')).toBe(true);
       });
       it('read-only in progress', async () => {
@@ -602,7 +602,7 @@ describe('Data streams deprecation', () => {
         );
 
         expect(exists('startDataStreamMigrationButton')).toBe(true);
-        expect(find('startDataStreamMigrationButton').props().disabled).toBe(true);
+        expect(find('startDataStreamMigrationButton').props()).toHaveEuiDisabledProp();
         expect(exists('cancelDataStreamMigrationButton')).toBe(true);
       });
       it('read-only success', async () => {
@@ -655,7 +655,7 @@ describe('Data streams deprecation', () => {
         );
 
         expect(exists('startDataStreamMigrationButton')).toBe(true);
-        expect(find('startDataStreamMigrationButton').props().disabled).toBe(true);
+        expect(find('startDataStreamMigrationButton').props()).toHaveEuiDisabledProp();
         expect(exists('cancelDataStreamMigrationButton')).toBe(true);
       });
       it('reindexing error', async () => {
@@ -712,7 +712,7 @@ describe('Data streams deprecation', () => {
         );
 
         expect(exists('startDataStreamMigrationButton')).toBe(true);
-        expect(find('startDataStreamMigrationButton').props().disabled).toBe(true);
+        expect(find('startDataStreamMigrationButton').props()).toHaveEuiDisabledProp();
         expect(exists('cancelDataStreamMigrationButton')).toBe(true);
       });
     });

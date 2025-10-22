@@ -284,7 +284,7 @@ export const setup = async ({
     },
     clickSaveMappingsButton: async () => {
       expect(exists('indexDetailsMappingsSaveMappings')).toBe(true);
-      expect(find('indexDetailsMappingsSaveMappings').props().disabled).toBeFalsy();
+      expect(find('indexDetailsMappingsSaveMappings').props()).not.toHaveEuiDisabledProp();
       await act(async () => {
         find('indexDetailsMappingsSaveMappings').simulate('click');
       });
@@ -310,7 +310,7 @@ export const setup = async ({
 
           await act(async () => {
             expect(exists('createFieldForm.addButton')).toBe(true);
-            expect(find('createFieldForm.addButton').props().disabled).toBeFalsy();
+            expect(find('createFieldForm.addButton').props()).not.toHaveEuiDisabledProp();
             find('createFieldForm.addButton').simulate('click');
           });
 

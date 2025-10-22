@@ -178,13 +178,13 @@ describe('When semantic_text is enabled', () => {
       expect(saveMappings.mock.calls).toHaveLength(1);
     });
     it('should disable the force save mappings button if checkbox is not checked', async () => {
-      expect(find('forceSaveMappingsButton').props().disabled).toBe(true);
+      expect(find('forceSaveMappingsButton').props()).toHaveEuiDisabledProp();
     });
     it('checking checkbox should enable force save mappings button', async () => {
       find('allowForceSaveMappingsCheckbox')
         .simulate('change', { target: { checked: true } })
         .update();
-      expect(find('forceSaveMappingsButton').props().disabled).toBe(false);
+      expect(find('forceSaveMappingsButton').props()).not.toHaveEuiDisabledProp();
       await act(async () => {
         find('forceSaveMappingsButton').simulate('click');
       });

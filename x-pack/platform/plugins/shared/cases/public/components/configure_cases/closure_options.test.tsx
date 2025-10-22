@@ -49,7 +49,7 @@ describe('ClosureOptions', () => {
 
   test('it pass the correct props to child', () => {
     const closureOptionsRadioComponent = wrapper.find(ClosureOptionsRadio);
-    expect(closureOptionsRadioComponent.props().disabled).toEqual(false);
+    expect(closureOptionsRadioComponent.props()).not.toHaveEuiDisabledProp();
     expect(closureOptionsRadioComponent.props().closureTypeSelected).toEqual('close-by-user');
     expect(closureOptionsRadioComponent.props().onChangeClosureType).toEqual(onChangeClosureType);
   });

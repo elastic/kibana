@@ -137,7 +137,7 @@ describe('<TemplateCreate />', () => {
     test('should not let the user go to the next step with invalid fields', async () => {
       const { find, actions, component } = testBed;
 
-      expect(find('nextButton').props().disabled).toEqual(false);
+      expect(find('nextButton').props()).not.toHaveEuiDisabledProp();
 
       await act(async () => {
         actions.clickNextButton();
@@ -145,7 +145,7 @@ describe('<TemplateCreate />', () => {
       });
       component.update();
 
-      expect(find('nextButton').props().disabled).toEqual(true);
+      expect(find('nextButton').props()).toHaveEuiDisabledProp();
     });
   });
 

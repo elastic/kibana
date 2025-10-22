@@ -199,7 +199,7 @@ describe('Create Rollup Job, step 4: Histogram', () => {
 
     describe('input validation', () => {
       afterEach(() => {
-        expect(find('rollupJobNextButton').props().disabled).toBe(true);
+        expect(find('rollupJobNextButton').props()).toHaveEuiDisabledProp();
       });
 
       it('should display errors when clicking "next" without filling the interval', () => {

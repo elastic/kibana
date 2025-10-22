@@ -78,39 +78,39 @@ describe('<RepositoryEdit />', () => {
       await mountComponentWithMock({ type: 'azure' });
       const { find } = testBed;
       const clientInput = find('clientInput');
-      expect(clientInput.props().disabled).toEqual(true);
+      expect(clientInput.props()).toHaveEuiDisabledProp();
 
       const containerInput = find('containerInput');
-      expect(containerInput.props().disabled).toEqual(true);
+      expect(containerInput.props()).toHaveEuiDisabledProp();
 
       const basePathInput = find('basePathInput');
-      expect(basePathInput.props().disabled).toEqual(true);
+      expect(basePathInput.props()).toHaveEuiDisabledProp();
     });
 
     it('gcs repository', async () => {
       await mountComponentWithMock({ type: 'gcs' });
       const { find } = testBed;
       const clientInput = find('clientInput');
-      expect(clientInput.props().disabled).toEqual(true);
+      expect(clientInput.props()).toHaveEuiDisabledProp();
 
       const bucketInput = find('bucketInput');
-      expect(bucketInput.props().disabled).toEqual(true);
+      expect(bucketInput.props()).toHaveEuiDisabledProp();
 
       const basePathInput = find('basePathInput');
-      expect(basePathInput.props().disabled).toEqual(true);
+      expect(basePathInput.props()).toHaveEuiDisabledProp();
     });
 
     it('s3 repository', async () => {
       await mountComponentWithMock({ type: 's3' });
       const { find } = testBed;
       const clientInput = find('clientInput');
-      expect(clientInput.props().disabled).toEqual(true);
+      expect(clientInput.props()).toHaveEuiDisabledProp();
 
       const bucketInput = find('bucketInput');
-      expect(bucketInput.props().disabled).toEqual(true);
+      expect(bucketInput.props()).toHaveEuiDisabledProp();
 
       const basePathInput = find('basePathInput');
-      expect(basePathInput.props().disabled).toEqual(true);
+      expect(basePathInput.props()).toHaveEuiDisabledProp();
     });
   });
 

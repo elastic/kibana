@@ -69,12 +69,12 @@ describe('<PipelinesCreateFromCsv />', () => {
       test('should prevent form submission if file for upload is missing', async () => {
         const { component, find, actions } = testBed;
 
-        expect(find('processFileButton').props().disabled).toEqual(true);
+        expect(find('processFileButton').props()).toHaveEuiDisabledProp();
 
         actions.selectCsvForUpload();
         component.update();
 
-        expect(find('processFileButton').props().disabled).toEqual(false);
+        expect(find('processFileButton').props()).not.toHaveEuiDisabledProp();
       });
     });
 

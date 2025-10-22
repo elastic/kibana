@@ -127,12 +127,12 @@ describe('Create Rollup Job, step 2: Date histogram', () => {
 
       expect(exists('rollupJobCreateStepError')).toBeTruthy();
       expect(form.getErrorsMessages()).toEqual(['Interval is required.']);
-      expect(find('rollupJobNextButton').props().disabled).toBe(true);
+      expect(find('rollupJobNextButton').props()).toHaveEuiDisabledProp();
     });
 
     describe('interval', () => {
       afterEach(() => {
-        expect(find('rollupJobNextButton').props().disabled).toBe(true);
+        expect(find('rollupJobNextButton').props()).toHaveEuiDisabledProp();
       });
 
       it('should validate the interval format', () => {

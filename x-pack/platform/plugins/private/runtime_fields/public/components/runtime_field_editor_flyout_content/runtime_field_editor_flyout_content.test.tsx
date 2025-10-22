@@ -100,7 +100,7 @@ describe('Runtime field editor flyout', () => {
 
       const { find, exists, form, component } = setup({ ...defaultProps, onSave });
 
-      expect(find('saveFieldButton').props().disabled).toBe(false);
+      expect(find('saveFieldButton').props()).not.toHaveEuiDisabledProp();
 
       await act(async () => {
         find('saveFieldButton').simulate('click');
@@ -109,7 +109,7 @@ describe('Runtime field editor flyout', () => {
       component.update();
 
       expect(onSave).toHaveBeenCalledTimes(0);
-      expect(find('saveFieldButton').props().disabled).toBe(true);
+      expect(find('saveFieldButton').props()).toHaveEuiDisabledProp();
       expect(form.getErrorsMessages()).toEqual(['Give a name to the field.']);
       expect(exists('formError')).toBe(true);
       expect(find('formError').text()).toBe('Fix errors in form before continuing.');

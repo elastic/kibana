@@ -130,7 +130,7 @@ describe('FileUpload', () => {
     const { actions, testSubjects, find } = await initTestBed();
     await actions.addFiles([{ name: 'test', size: 1 } as File]);
     await actions.upload();
-    expect(find(testSubjects.cancelButton).props().disabled).toBe(false);
+    expect(find(testSubjects.cancelButton).props()).not.toHaveEuiDisabledProp();
     actions.abort();
 
     await sleep(1000);

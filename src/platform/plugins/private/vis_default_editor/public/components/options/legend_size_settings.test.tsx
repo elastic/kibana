@@ -24,7 +24,7 @@ describe('legend size settings', () => {
       />
     );
 
-    expect(instance.find(EuiSuperSelect).props().disabled).toBeTruthy();
+    expect(instance.find(EuiSuperSelect).props()).toHaveEuiDisabledProp();
   });
 
   it('reflects current setting in select', () => {

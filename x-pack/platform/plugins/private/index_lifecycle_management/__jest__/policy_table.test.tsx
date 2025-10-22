@@ -253,7 +253,7 @@ describe('policy table', () => {
     const rendered = mountWithIntl(component);
     const policyRow = findTestSubject(rendered, `policyTableRow-${testPolicy.name}`);
     const deleteButton = findTestSubject(policyRow, 'deletePolicy');
-    expect(deleteButton.props().disabled).toBeTruthy();
+    expect(deleteButton.props()).toHaveEuiDisabledProp();
   });
   test('delete policy button is enabled when there are no linked indices', () => {
     const rendered = mountWithIntl(component);
@@ -263,7 +263,7 @@ describe('policy table', () => {
 
     const policyRow = findTestSubject(rendered, `policyTableRow-${unusedPolicy!.name}`);
     const deleteButton = findTestSubject(policyRow, 'deletePolicy');
-    expect(deleteButton.props().disabled).toBeFalsy();
+    expect(deleteButton.props()).not.toHaveEuiDisabledProp();
   });
   test('confirmation modal shows when delete button is pressed', () => {
     const rendered = mountWithIntl(component);

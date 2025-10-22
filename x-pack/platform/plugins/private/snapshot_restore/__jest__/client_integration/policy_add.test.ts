@@ -55,7 +55,7 @@ describe('<PolicyAdd />', () => {
     test('should not let the user go to the next step if required fields are missing', () => {
       const { find } = testBed;
 
-      expect(find('nextButton').props().disabled).toBe(true);
+      expect(find('nextButton').props()).toHaveEuiDisabledProp();
     });
 
     test('should not show repository-not-found warning', () => {

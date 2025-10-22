@@ -98,7 +98,7 @@ describe('PrivilegeSpaceForm', () => {
     expect(
       wrapper.find(EuiButtonGroup).filter('[name="basePrivilegeButtonGroup"]').props().idSelected
     ).toEqual(`basePrivilege_all`);
-    expect(wrapper.find(FeatureTable).props().disabled).toEqual(true);
+    expect(wrapper.find(FeatureTable).props()).toHaveEuiDisabledProp();
     expect(getDisplayedFeaturePrivileges(wrapper)).toMatchInlineSnapshot(`
       Object {
         "excluded_from_base": Object {
@@ -160,7 +160,7 @@ describe('PrivilegeSpaceForm', () => {
     expect(
       wrapper.find(EuiButtonGroup).filter('[name="basePrivilegeButtonGroup"]').props().idSelected
     ).toEqual(`basePrivilege_custom`);
-    expect(wrapper.find(FeatureTable).props().disabled).toEqual(false);
+    expect(wrapper.find(FeatureTable).props()).not.toHaveEuiDisabledProp();
     expect(getDisplayedFeaturePrivileges(wrapper)).toMatchInlineSnapshot(`
       Object {
         "excluded_from_base": Object {
@@ -229,7 +229,7 @@ describe('PrivilegeSpaceForm', () => {
       wrapper.find(EuiButtonGroup).filter('[name="basePrivilegeButtonGroup"]').props().idSelected
     ).toEqual(`basePrivilege_custom`);
 
-    expect(wrapper.find(FeatureTable).props().disabled).toEqual(false);
+    expect(wrapper.find(FeatureTable).props()).not.toHaveEuiDisabledProp();
     expect(getDisplayedFeaturePrivileges(wrapper)).toMatchInlineSnapshot(`
       Object {
         "excluded_from_base": Object {

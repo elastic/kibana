@@ -114,7 +114,7 @@ describe('<FieldEditorFlyoutContent />', () => {
         actions: { waitForUpdates },
       } = await setup({ onSave });
 
-      expect(find('fieldSaveButton').props().disabled).toBe(false);
+      expect(find('fieldSaveButton').props()).not.toHaveEuiDisabledProp();
 
       await act(async () => {
         find('fieldSaveButton').simulate('click');
@@ -123,7 +123,7 @@ describe('<FieldEditorFlyoutContent />', () => {
       await waitForUpdates();
 
       expect(onSave).toHaveBeenCalledTimes(0);
-      expect(find('fieldSaveButton').props().disabled).toBe(true);
+      expect(find('fieldSaveButton').props()).toHaveEuiDisabledProp();
       expect(form.getErrorsMessages()).toEqual(['A name is required.']);
     });
 

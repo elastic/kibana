@@ -66,13 +66,13 @@ describe('Create Follower index', () => {
 
     test('should display errors and disable the save button when clicking "save" without filling the form', () => {
       expect(exists('formError')).toBe(false);
-      expect(find('submitButton').props().disabled).toBe(false);
+      expect(find('submitButton').props()).not.toHaveEuiDisabledProp();
 
       actions.clickSaveForm();
 
       expect(exists('formError')).toBe(true);
       expect(form.getErrorsMessages()).toEqual(['Leader index is required.', 'Name is required.']);
-      expect(find('submitButton').props().disabled).toBe(true);
+      expect(find('submitButton').props()).toHaveEuiDisabledProp();
     });
   });
 

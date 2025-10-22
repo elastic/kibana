@@ -55,7 +55,7 @@ describe('RuleSwitch', () => {
       wrappingComponent: TestProviders as EnzymeComponentType<{}>,
     });
 
-    expect(wrapper.find('[data-test-subj="ruleSwitch"]').at(0).props().disabled).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="ruleSwitch"]').at(0).props()).toHaveEuiDisabledProp();
   });
 
   test('it renders switch enabled if "enabled" is true', () => {

@@ -45,6 +45,6 @@ describe('LongLegendOptions', () => {
     component = mountWithIntl(<LongLegendOptions {...props} />);
     const numberField = component.find(EuiFieldNumber);
 
-    expect(numberField.props().disabled).toBeTruthy();
+    expect(numberField.props()).toHaveEuiDisabledProp();
   });
 });

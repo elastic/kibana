@@ -1884,8 +1884,8 @@ describe('TableListView', () => {
       const firstCheckBox = find(`checkboxSelectRow-${hits[0].id}`);
       const secondCheckBox = find(`checkboxSelectRow-${hits[1].id}`);
 
-      expect(firstCheckBox.props().disabled).toBe(false);
-      expect(secondCheckBox.props().disabled).toBe(true);
+      expect(firstCheckBox.props()).not.toHaveEuiDisabledProp();
+      expect(secondCheckBox.props()).toHaveEuiDisabledProp();
       // EUI changes the check "title" from "Select this row" to the reason to disable the checkbox
       expect(secondCheckBox.props().title).toBe(reasonMessage);
     });

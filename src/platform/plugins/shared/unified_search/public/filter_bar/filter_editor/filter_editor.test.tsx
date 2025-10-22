@@ -69,18 +69,18 @@ describe('<FilterEditor />', () => {
       find('customEditorInput').simulate('change', {
         target: { value: '{ }' },
       });
-      expect(find('saveFilter').props().disabled).toBe(true);
+      expect(find('saveFilter').props()).toHaveEuiDisabledProp();
 
       find('customEditorInput').simulate('change', {
         target: { value: '{' }, // bad JSON
       });
-      expect(find('saveFilter').props().disabled).toBe(true);
+      expect(find('saveFilter').props()).toHaveEuiDisabledProp();
 
       find('customEditorInput').simulate('change', {
         target: { value: '{ "something": "here" }' },
       });
 
-      expect(find('saveFilter').props().disabled).toBe(false);
+      expect(find('saveFilter').props()).not.toHaveEuiDisabledProp();
     });
   });
   describe('handling data view fallback', () => {

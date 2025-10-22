@@ -113,10 +113,10 @@ describe('FilePicker', () => {
     );
     const { find, testSubjects, actions } = await initTestBed();
     await actions.waitUntilLoaded();
-    expect(find(testSubjects.selectButton).props().disabled).toBe(true);
+    expect(find(testSubjects.selectButton).props()).toHaveEuiDisabledProp();
     actions.select(0);
     actions.select(1);
-    expect(find(testSubjects.selectButton).props().disabled).toBe(false);
+    expect(find(testSubjects.selectButton).props()).not.toHaveEuiDisabledProp();
     actions.done();
     expect(onDone).toHaveBeenCalledTimes(1);
     expect(onDone).toHaveBeenNthCalledWith(1, [{ id: 'a' }, { id: 'b' }]);

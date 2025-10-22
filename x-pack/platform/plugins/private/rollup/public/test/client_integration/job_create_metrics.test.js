@@ -238,7 +238,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
         expect(stepError.text()).toEqual(
           'Select metrics types for these fields or remove them: a-numericField.'
         );
-        expect(find('rollupJobNextButton').props().disabled).toBe(true);
+        expect(find('rollupJobNextButton').props()).toHaveEuiDisabledProp();
       });
 
       it('should have a delete button on each row to remove the metric field', async () => {

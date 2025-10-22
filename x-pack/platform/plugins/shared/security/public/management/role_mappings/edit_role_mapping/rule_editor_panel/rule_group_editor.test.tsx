@@ -174,7 +174,7 @@ describe('RuleGroupEditor', () => {
     const titleLinks = wrapper.find('EuiLink[data-test-subj="ruleGroupTitle"]');
     expect(titleLinks).not.toHaveLength(0);
     titleLinks.map((titleLink) => {
-      expect(titleLink.props().disabled).toBeTruthy();
+      expect(titleLink.props()).toHaveEuiDisabledProp();
     });
 
     // No goup delete buttons

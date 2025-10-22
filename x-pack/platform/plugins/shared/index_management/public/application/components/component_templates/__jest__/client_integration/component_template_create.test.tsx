@@ -126,7 +126,7 @@ describe('<ComponentTemplateCreate />', () => {
 
           // Verify name is required
           expect(form.getErrorsMessages()).toEqual(['A component template name is required.']);
-          expect(find('nextButton').props().disabled).toEqual(true);
+          expect(find('nextButton').props()).toHaveEuiDisabledProp();
         });
       });
     });

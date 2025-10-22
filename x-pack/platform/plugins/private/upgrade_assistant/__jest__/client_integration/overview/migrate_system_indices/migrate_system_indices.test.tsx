@@ -85,7 +85,7 @@ describe('Overview - Migrate system indices', () => {
 
     // Start migration is disabled
     expect(exists('startSystemIndicesMigrationButton')).toBe(true);
-    expect(find('startSystemIndicesMigrationButton').props().disabled).toBe(true);
+    expect(find('startSystemIndicesMigrationButton').props()).toHaveEuiDisabledProp();
     // But we keep view system indices CTA
     expect(exists('viewSystemIndicesStateButton')).toBe(true);
   });
@@ -104,7 +104,7 @@ describe('Overview - Migrate system indices', () => {
 
       // Start migration should be enabled
       expect(exists('startSystemIndicesMigrationButton')).toBe(true);
-      expect(find('startSystemIndicesMigrationButton').props().disabled).toBe(false);
+      expect(find('startSystemIndicesMigrationButton').props()).not.toHaveEuiDisabledProp();
       // Same for view system indices status
       expect(exists('viewSystemIndicesStateButton')).toBe(true);
     });
@@ -174,7 +174,7 @@ describe('Overview - Migrate system indices', () => {
       expect(exists('startSystemIndicesMigrationCalloutError')).toBe(true);
       // CTA is enabled
       expect(exists('startSystemIndicesMigrationButton')).toBe(true);
-      expect(find('startSystemIndicesMigrationButton').props().disabled).toBe(false);
+      expect(find('startSystemIndicesMigrationButton').props()).not.toHaveEuiDisabledProp();
     });
 
     test('Shows migration error with details', async () => {

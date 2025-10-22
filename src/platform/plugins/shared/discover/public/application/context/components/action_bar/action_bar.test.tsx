@@ -95,7 +95,7 @@ describe('Test Discover Context ActionBar for successor | predecessor records', 
       );
       const inputWhenZeroStep = findTestSubject(wrapperWhenZeroStep, `${type}CountPicker`);
       const btnWhenZeroStep = findTestSubject(wrapperWhenZeroStep, `${type}LoadMoreButton`);
-      expect(btnWhenZeroStep.props().disabled).toBe(true);
+      expect(btnWhenZeroStep.props()).toHaveEuiDisabledProp();
       btnWhenZeroStep.simulate('click');
       expect(onChangeCount).toHaveBeenCalledTimes(0);
       inputWhenZeroStep.simulate('change', { target: { valueAsNumber: 3 } });

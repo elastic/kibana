@@ -149,7 +149,7 @@ describe('Kibana deprecations - Deprecation details flyout', () => {
       expect(exists('resolveSection')).toBe(true);
       // Badge should remain the same
       expect(exists('kibanaDeprecationDetails.criticalDeprecationBadge')).toBe(true);
-      expect(find('resolveButton').props().disabled).toBe(false);
+      expect(find('resolveButton').props()).not.toHaveEuiDisabledProp();
       expect(find('resolveButton').text()).toContain('Try again');
     });
   });

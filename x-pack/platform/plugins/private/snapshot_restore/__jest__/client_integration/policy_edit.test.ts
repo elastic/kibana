@@ -108,7 +108,7 @@ describe('<PolicyEdit />', () => {
       const { find } = testBed;
 
       const nameInput = find('nameInput');
-      expect(nameInput.props().disabled).toEqual(true);
+      expect(nameInput.props()).toHaveEuiDisabledProp();
     });
 
     test('should disable the repo and snapshot fields for managed policies', async () => {
@@ -127,10 +127,10 @@ describe('<PolicyEdit />', () => {
       const { find } = testBed;
 
       const snapshotInput = find('snapshotNameInput');
-      expect(snapshotInput.props().disabled).toEqual(true);
+      expect(snapshotInput.props()).toHaveEuiDisabledProp();
 
       const repoSelect = find('repositorySelect');
-      expect(repoSelect.props().disabled).toEqual(true);
+      expect(repoSelect.props()).toHaveEuiDisabledProp();
     });
 
     describe('form payload', () => {

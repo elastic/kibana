@@ -49,12 +49,12 @@ function assertValue(wrapper: ReactWrapper<any, any, any>, index: number, value:
 
 function assertValueTypeDisabled(wrapper: ReactWrapper<any, any, any>, index: number) {
   const valueTypeField = findTestSubject(wrapper, `fieldRuleEditorValueType-${index}`);
-  expect(valueTypeField.props().disabled).toBeTruthy();
+  expect(valueTypeField.props()).toHaveEuiDisabledProp();
 }
 
 function assertValueDisabled(wrapper: ReactWrapper<any, any, any>, index: number) {
   const valueField = findTestSubject(wrapper, `fieldRuleEditorValue-${index}`);
-  expect(valueField.props().disabled).toBeTruthy();
+  expect(valueField.props()).toHaveEuiDisabledProp();
 }
 
 describe('FieldRuleEditor', () => {
@@ -257,7 +257,7 @@ describe('FieldRuleEditor', () => {
     // User field disabled
     const userFields = wrapper.find(`EuiComboBox[data-test-subj~="fieldRuleEditorField-0"]`);
     expect(userFields).toHaveLength(1);
-    expect(userFields.at(0).props().disabled).toBeTruthy();
+    expect(userFields.at(0).props()).toHaveEuiDisabledProp();
 
     // All type and value fields disabled
     assertValueTypeDisabled(wrapper, 0); // text

@@ -9,6 +9,7 @@ import { act } from 'react-dom/test-utils';
 import type { HttpSetup } from '@kbn/core/public';
 import type { TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
 import { registerTestBed } from '@kbn/test-jest-helpers';
+import { hasEuiDisabledProp } from '@elastic/eui/lib/test/enzyme';
 import { RestoreSnapshot } from '../../../public/application/sections/restore_snapshot';
 import { WithAppDependencies } from './setup_environment';
 import { REPOSITORY_NAME, SNAPSHOT_NAME } from './constant';
@@ -30,9 +31,9 @@ const setupActions = (testBed: TestBed<RestoreSnapshotFormTestSubject>) => {
     },
 
     canGoToADifferentStep() {
-      const canGoNext = find('restoreSnapshotsForm.nextButton').props().disabled !== true;
+      const canGoNext = !hasEuiDisabledProp(find('restoreSnapshotsForm.nextButton').props());
       const canGoPrevious = exists('restoreSnapshotsForm.backButton')
-        ? find('restoreSnapshotsForm.nextButton').props().disabled !== true
+        ? !hasEuiDisabledProp(find('restoreSnapshotsForm.backButton').props())
         : true;
       return canGoNext && canGoPrevious;
     },

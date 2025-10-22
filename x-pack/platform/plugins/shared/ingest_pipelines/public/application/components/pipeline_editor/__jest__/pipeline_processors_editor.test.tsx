@@ -319,8 +319,8 @@ describe('Pipeline Editor', () => {
       const { find, exists } = testBed;
       find('processors>0.manageItemButton').simulate('click');
       expect(exists('editProcessorForm')).toBe(true);
-      expect(find('processors>0.moveItemButton').props().disabled).toBe(true);
-      expect(find('processors>1.moveItemButton').props().disabled).toBe(true);
+      expect(find('processors>0.moveItemButton').props()).toHaveEuiDisabledProp();
+      expect(find('processors>1.moveItemButton').props()).toHaveEuiDisabledProp();
     });
 
     it('can move a processor into an empty tree', () => {

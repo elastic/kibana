@@ -70,9 +70,9 @@ describe('ReportingPanelContent', () => {
         objectId: undefined,
       });
       wrapper.update();
-      expect(wrapper.find('[data-test-subj="generateReportButton"]').last().props().disabled).toBe(
-        true
-      );
+      expect(
+        wrapper.find('[data-test-subj="generateReportButton"]').last().props()
+      ).toHaveEuiDisabledProp();
     });
 
     it('allows generating reports when saving is not required', () => {
@@ -82,9 +82,9 @@ describe('ReportingPanelContent', () => {
         objectId: undefined,
       });
       wrapper.update();
-      expect(wrapper.find('[data-test-subj="generateReportButton"]').last().props().disabled).toBe(
-        false
-      );
+      expect(
+        wrapper.find('[data-test-subj="generateReportButton"]').last().props()
+      ).not.toHaveEuiDisabledProp();
     });
 
     it('changing the layout triggers refreshing the state with the latest job params', () => {

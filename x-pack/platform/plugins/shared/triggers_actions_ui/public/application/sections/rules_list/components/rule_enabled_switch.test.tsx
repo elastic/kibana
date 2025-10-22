@@ -53,7 +53,7 @@ describe('RuleEnabledSwitch', () => {
 
   test('renders switch control as disabled when rule is not editable', () => {
     const wrapper = mountWithIntl(<RuleEnabledSwitch {...props} />);
-    expect(wrapper.find('[data-test-subj="enableSwitch"]').first().props().disabled).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="enableSwitch"]').first().props()).toHaveEuiDisabledProp();
   });
 
   test('renders switch control', () => {

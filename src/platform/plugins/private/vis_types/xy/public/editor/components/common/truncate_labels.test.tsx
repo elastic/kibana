@@ -41,7 +41,7 @@ describe('TruncateLabelsOption', function () {
     const newProps = { ...props, disabled: true };
     component = mountWithIntl(<TruncateLabelsOption {...newProps} />);
     const input = findTestSubject(component, 'xyLabelTruncateInput');
-    expect(input.props().disabled).toBeTruthy();
+    expect(input.props()).toHaveEuiDisabledProp();
   });
 
   it('should set the new value', () => {

@@ -45,6 +45,6 @@ describe('PercentageModeOption', () => {
     component = mountWithIntl(<PercentageModeOption {...props} />);
     const fieldText = component.find(EuiFieldText);
 
-    expect(fieldText.props().disabled).toBeTruthy();
+    expect(fieldText.props()).toHaveEuiDisabledProp();
   });
 });

@@ -41,7 +41,7 @@ describe('TruncateLabelsOption', function () {
     const newProps = { ...props, disabled: true };
     component = mountWithIntl(<TruncateLabelsOption {...newProps} />);
     const input = findTestSubject(component, 'pieLabelTruncateInput');
-    expect(input.props().disabled).toBe(true);
+    expect(input.props()).toHaveEuiDisabledProp();
   });
 
   it('should set the new value', function () {

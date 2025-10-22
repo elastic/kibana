@@ -41,6 +41,6 @@ describe('PointOptions component', () => {
     chart.showCircles = false;
     const comp = mount(<PointOptions {...defaultProps} />);
     const range = findTestSubject(comp, 'circlesRadius');
-    expect(range.at(1).props().disabled).toBeTruthy();
+    expect(range.at(1).props()).toHaveEuiDisabledProp();
   });
 });

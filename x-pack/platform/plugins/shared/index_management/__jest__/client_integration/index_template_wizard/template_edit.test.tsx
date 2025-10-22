@@ -223,7 +223,7 @@ describe('<TemplateEdit />', () => {
       const { find } = testBed;
 
       const nameInput = find('nameField.input');
-      expect(nameInput.props().disabled).toEqual(true);
+      expect(nameInput.props()).toHaveEuiDisabledProp();
     });
 
     describe('form payload', () => {

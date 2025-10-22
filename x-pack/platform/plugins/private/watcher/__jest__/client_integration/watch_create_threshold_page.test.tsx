@@ -167,13 +167,13 @@ describe('<ThresholdWatchEditPage /> create route', () => {
         test('should disable the Create button with invalid fields', () => {
           const { find } = testBed;
 
-          expect(find('saveWatchButton').props().disabled).toEqual(true);
+          expect(find('saveWatchButton').props()).toHaveEuiDisabledProp();
         });
 
         test('it should enable the Create button and render additional content with valid fields', async () => {
           const { form, find, component, exists } = testBed;
 
-          expect(find('saveWatchButton').props().disabled).toBe(true);
+          expect(find('saveWatchButton').props()).toHaveEuiDisabledProp();
 
           await act(async () => {
             form.setInputValue('nameInput', 'my_test_watch');
@@ -183,7 +183,7 @@ describe('<ThresholdWatchEditPage /> create route', () => {
 
           component.update();
 
-          expect(find('saveWatchButton').props().disabled).toBe(false);
+          expect(find('saveWatchButton').props()).not.toHaveEuiDisabledProp();
           expect(find('watchConditionTitle').text()).toBe('Match the following condition');
           expect(exists('watchVisualizationChart')).toBe(true);
           expect(exists('watchActionsPanel')).toBe(true);
@@ -268,7 +268,7 @@ describe('<ThresholdWatchEditPage /> create route', () => {
           form.setInputValue('loggingTextInput', '');
 
           expect(form.getErrorsMessages()).toContain('Log text is required.');
-          expect(find('simulateActionButton').props().disabled).toEqual(true);
+          expect(find('simulateActionButton').props()).toHaveEuiDisabledProp();
 
           // Next, provide valid field and verify
           form.setInputValue('loggingTextInput', LOGGING_MESSAGE);
@@ -542,7 +542,7 @@ describe('<ThresholdWatchEditPage /> create route', () => {
             'Webhook host is required.',
             'Webhook port is required.',
           ]);
-          expect(find('simulateActionButton').props().disabled).toEqual(true);
+          expect(find('simulateActionButton').props()).toHaveEuiDisabledProp();
 
           // Next, provide valid fields and verify
           form.setInputValue('webhookMethodSelect', METHOD);
@@ -636,7 +636,7 @@ describe('<ThresholdWatchEditPage /> create route', () => {
             'Jira issue type is required.',
             'Jira summary is required.',
           ]);
-          expect(find('simulateActionButton').props().disabled).toEqual(true);
+          expect(find('simulateActionButton').props()).toHaveEuiDisabledProp();
 
           // Next, provide valid fields and verify
           form.setInputValue('jiraProjectKeyInput', PROJECT_KEY);
@@ -716,7 +716,7 @@ describe('<ThresholdWatchEditPage /> create route', () => {
           form.setInputValue('pagerdutyDescriptionInput', '');
 
           expect(form.getErrorsMessages()).toContain('PagerDuty description is required.');
-          expect(find('simulateActionButton').props().disabled).toEqual(true);
+          expect(find('simulateActionButton').props()).toHaveEuiDisabledProp();
 
           // Next, provide valid fields and verify
           form.setInputValue('pagerdutyDescriptionInput', DESCRIPTION);

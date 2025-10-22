@@ -78,7 +78,7 @@ describe('Overview - Migrate system indices - Flyout', () => {
 
     component.update();
 
-    expect(find('startSystemIndicesMigrationButton').props().disabled).toBe(true);
+    expect(find('startSystemIndicesMigrationButton').props()).toHaveEuiDisabledProp();
   });
 
   test('hides the start migration button when finished', async () => {

@@ -79,17 +79,17 @@ describe('Create Rollup Job, step 1: Logistics', () => {
       'Index pattern is required.',
       'Rollup index is required.',
     ]);
-    expect(find('rollupJobNextButton').props().disabled).toBe(true);
+    expect(find('rollupJobNextButton').props()).toHaveEuiDisabledProp();
   });
 
   describe('form validations', () => {
     describe('index pattern', () => {
       beforeEach(() => {
-        expect(find('rollupJobNextButton').props().disabled).toBe(false);
+        expect(find('rollupJobNextButton').props()).not.toHaveEuiDisabledProp();
       });
 
       afterEach(() => {
-        expect(find('rollupJobNextButton').props().disabled).toBe(true);
+        expect(find('rollupJobNextButton').props()).toHaveEuiDisabledProp();
       });
 
       it('should not allow spaces', async () => {
@@ -150,11 +150,11 @@ describe('Create Rollup Job, step 1: Logistics', () => {
 
     describe('rollup index name', () => {
       beforeEach(() => {
-        expect(find('rollupJobNextButton').props().disabled).toBe(false);
+        expect(find('rollupJobNextButton').props()).not.toHaveEuiDisabledProp();
       });
 
       afterEach(() => {
-        expect(find('rollupJobNextButton').props().disabled).toBe(true);
+        expect(find('rollupJobNextButton').props()).toHaveEuiDisabledProp();
       });
 
       it('should not allow spaces', () => {
@@ -413,11 +413,11 @@ describe('Create Rollup Job, step 1: Logistics', () => {
 
     describe('page size', () => {
       beforeEach(() => {
-        expect(find('rollupJobNextButton').props().disabled).toBe(false);
+        expect(find('rollupJobNextButton').props()).not.toHaveEuiDisabledProp();
       });
 
       afterEach(() => {
-        expect(find('rollupJobNextButton').props().disabled).toBe(true);
+        expect(find('rollupJobNextButton').props()).toHaveEuiDisabledProp();
       });
 
       it('should not be empty', () => {
@@ -435,11 +435,11 @@ describe('Create Rollup Job, step 1: Logistics', () => {
 
     describe('delay', () => {
       beforeEach(() => {
-        expect(find('rollupJobNextButton').props().disabled).toBe(false);
+        expect(find('rollupJobNextButton').props()).not.toHaveEuiDisabledProp();
       });
 
       afterEach(() => {
-        expect(find('rollupJobNextButton').props().disabled).toBe(true);
+        expect(find('rollupJobNextButton').props()).toHaveEuiDisabledProp();
       });
 
       it('should validate the interval format', () => {

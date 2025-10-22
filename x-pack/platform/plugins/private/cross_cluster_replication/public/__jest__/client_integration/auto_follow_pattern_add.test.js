@@ -60,7 +60,7 @@ describe('Create Auto-follow pattern', () => {
 
     test('should display errors and disable the save button when clicking "save" without filling the form', () => {
       expect(exists('formError')).toBe(false);
-      expect(find('submitButton').props().disabled).toBe(false);
+      expect(find('submitButton').props()).not.toHaveEuiDisabledProp();
 
       actions.clickSaveForm();
 
@@ -69,7 +69,7 @@ describe('Create Auto-follow pattern', () => {
         'Name is required.',
         'At least one leader index pattern is required.',
       ]);
-      expect(find('submitButton').props().disabled).toBe(true);
+      expect(find('submitButton').props()).toHaveEuiDisabledProp();
     });
   });
 

@@ -146,14 +146,14 @@ describe('RoleTemplateEditor', () => {
     const typeCombos = wrapper.find(EuiComboBox);
     expect(typeCombos).toHaveLength(typeSelectors.length);
     typeCombos.map((typeCombo) => {
-      expect(typeCombo.props().isDisabled).toBeTruthy();
+      expect(typeCombo.props()).toHaveEuiDisabledProp();
     });
 
     // Any/all JSON switches are disabled
     const jsonSwitches = wrapper.find('EuiSwitch[data-test-subj="roleTemplateFormatSwitch"]');
     expect(jsonSwitches).toHaveLength(typeSelectors.length);
     jsonSwitches.map((jsonSwitch) => {
-      expect(jsonSwitch.props().disabled).toBeTruthy();
+      expect(jsonSwitch.props()).toHaveEuiDisabledProp();
     });
 
     // Any/all template source inputs are disabled
@@ -162,7 +162,7 @@ describe('RoleTemplateEditor', () => {
     );
     expect(templateSourceInputs).toHaveLength(typeSelectors.length);
     templateSourceInputs.map((templateSource) => {
-      expect(templateSource.props().disabled).toBeTruthy();
+      expect(templateSource.props()).toHaveEuiDisabledProp();
     });
 
     // No delete buttons

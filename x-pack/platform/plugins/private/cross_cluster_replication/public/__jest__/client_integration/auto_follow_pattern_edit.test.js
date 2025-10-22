@@ -105,7 +105,7 @@ describe('Edit Auto-follow pattern', () => {
       actions.clickSaveForm();
 
       expect(form.getErrorsMessages()).toEqual(['A connected remote cluster is required.']);
-      expect(find('submitButton').props().disabled).toBe(true);
+      expect(find('submitButton').props()).toHaveEuiDisabledProp();
     });
   });
 });
