@@ -6,17 +6,18 @@
  */
 
 import { kqlQuery, rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { merge } from 'lodash';
 import type { ServicesResponse } from '../../../common/service_map/types';
 import { AGENT_NAME, SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
-import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import type { IEnvOptions } from './get_service_map';
 
 export async function getServiceStats({
   environment,
   apmEventClient,
-  searchAggregatedTransactions,
+  servicesWithAggregatedTransactions,
   start,
   end,
   maxNumberOfServices,
@@ -24,9 +25,44 @@ export async function getServiceStats({
   serviceName,
   kuery,
 }: IEnvOptions & { maxNumberOfServices: number }): Promise<ServicesResponse[]> {
-  const params = {
+  const metricParams = {
     apm: {
-      events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
+      events: [ProcessorEvent.metric],
+    },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          ...rangeQuery(start, end),
+          ...environmentQuery(environment),
+          ...termsQuery(SERVICE_NAME, ...servicesWithAggregatedTransactions),
+          ...termsQuery(SERVICE_NAME, serviceName),
+          ...kqlQuery(serviceGroupKuery),
+          ...kqlQuery(kuery),
+        ],
+      },
+    },
+    aggs: {
+      services: {
+        terms: {
+          field: SERVICE_NAME,
+          size: maxNumberOfServices,
+        },
+        aggs: {
+          agent_name: {
+            terms: {
+              field: AGENT_NAME,
+            },
+          },
+        },
+      },
+    },
+  };
+
+  const transactionParams = {
+    apm: {
+      events: [ProcessorEvent.transaction],
     },
     track_total_hits: false,
     size: 0,
@@ -58,15 +94,37 @@ export async function getServiceStats({
     },
   };
 
-  const response = await apmEventClient.search('get_service_stats_for_service_map', params);
+  const [metricResponse, transactionResponse] = await Promise.all([
+    servicesWithAggregatedTransactions.length > 0
+      ? apmEventClient.search('get_service_stats_for_service_map_metrics', metricParams)
+      : Promise.resolve({ aggregations: { services: { buckets: [] } } }),
+    apmEventClient.search('get_service_stats_for_service_map_transactions', transactionParams),
+  ]);
 
-  return (
-    response.aggregations?.services.buckets.map((bucket) => {
-      return {
-        [SERVICE_NAME]: bucket.key as string,
-        [AGENT_NAME]: (bucket.agent_name.buckets[0]?.key as string | undefined) || '',
-        [SERVICE_ENVIRONMENT]: environment === ENVIRONMENT_ALL.value ? null : environment,
-      };
-    }) || []
-  );
+  const metricServices =
+    metricResponse.aggregations?.services.buckets.map((bucket) => ({
+      [SERVICE_NAME]: bucket.key as string,
+      [AGENT_NAME]: (bucket.agent_name.buckets[0]?.key as string | undefined) || '',
+      [SERVICE_ENVIRONMENT]: environment === ENVIRONMENT_ALL.value ? null : environment,
+    })) || [];
+
+  const transactionServices =
+    transactionResponse.aggregations?.services.buckets.map((bucket) => ({
+      [SERVICE_NAME]: bucket.key as string,
+      [AGENT_NAME]: (bucket.agent_name.buckets[0]?.key as string | undefined) || '',
+      [SERVICE_ENVIRONMENT]: environment === ENVIRONMENT_ALL.value ? null : environment,
+    })) || [];
+
+  const servicesMap = new Map<string, ServicesResponse>();
+
+  [...metricServices, ...transactionServices].forEach((service) => {
+    const existingService = servicesMap.get(service[SERVICE_NAME]);
+    if (existingService) {
+      servicesMap.set(service[SERVICE_NAME], merge({}, existingService, service));
+    } else {
+      servicesMap.set(service[SERVICE_NAME], service);
+    }
+  });
+
+  return Array.from(servicesMap.values());
 }

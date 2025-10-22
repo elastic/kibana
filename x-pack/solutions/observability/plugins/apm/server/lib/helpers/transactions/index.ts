@@ -15,6 +15,7 @@ import {
   TRANSACTION_ROOT,
   PARENT_ID,
   TRANSACTION_DURATION_SUMMARY,
+  SERVICE_NAME,
 } from '../../../../common/es_fields/apm';
 import type { APMConfig } from '../../..';
 import type { APMEventClient } from '../create_es_client/create_apm_event_client';
@@ -49,9 +50,16 @@ export async function getHasTransactionsEvents({
         ],
       },
     },
+    aggs: {
+      services: {
+        terms: {
+          field: SERVICE_NAME,
+        },
+      },
+    },
   });
 
-  return response.hits.total.value > 0;
+  return response;
 }
 
 export async function getSearchTransactionsEvents({
@@ -69,15 +77,22 @@ export async function getSearchTransactionsEvents({
 }): Promise<boolean> {
   switch (config.searchAggregatedTransactions) {
     case SearchAggregatedTransactionSetting.always:
-      return kuery ? getHasTransactionsEvents({ start, end, apmEventClient, kuery }) : true;
+      return kuery
+        ? (await getHasTransactionsEvents({ start, end, apmEventClient, kuery })).hits.total.value >
+            0
+        : true;
 
     case SearchAggregatedTransactionSetting.auto:
-      return getHasTransactionsEvents({
-        start,
-        end,
-        apmEventClient,
-        kuery,
-      });
+      return (
+        (
+          await getHasTransactionsEvents({
+            start,
+            end,
+            apmEventClient,
+            kuery,
+          })
+        ).hits.total.value > 0
+      );
 
     case SearchAggregatedTransactionSetting.never:
       return false;
