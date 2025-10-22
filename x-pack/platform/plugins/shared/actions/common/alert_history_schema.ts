@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import { ALERT_HISTORY_PREFIX } from '@kbn/connector-schemas/es_index';
+import { ALERT_HISTORY_PREFIX } from '@kbn/connector-schemas/es_index/constants';
 
 export const AlertHistoryDefaultIndexName = `${ALERT_HISTORY_PREFIX}default`;
 export const AlertHistoryEsIndexConnectorId = 'preconfigured-alert-history-es-index';

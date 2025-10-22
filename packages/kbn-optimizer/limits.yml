@@ -17,10 +17,10 @@ pageLoadAssetSize:
   cloudFullStory: 4752
   cloudLinks: 36333
   cloudSecurityPosture: 21520
-  console: 31337
+  console: 31322
   contentConnectors: 33014
   contentManagement: 8350
-  controls: 12234
+  controls: 12224
   core: 574609
   crossClusterReplication: 12662
   customIntegrations: 11715
@@ -72,7 +72,7 @@ pageLoadAssetSize:
   globalSearch: 6890
   globalSearchBar: 26986
   globalSearchProviders: 4646
-  graph: 10010
+  graph: 10006
   grokdebugger: 5484
   home: 13621
   imageEmbeddable: 6000
@@ -109,7 +109,7 @@ pageLoadAssetSize:
   navigation: 11684
   newsfeed: 12371
   noDataPage: 1749
-  observability: 109690
+  observability: 109574
   observabilityAIAssistant: 52556
   observabilityAIAssistantApp: 18553
   observabilityAiAssistantManagement: 6438
@@ -150,11 +150,11 @@ pageLoadAssetSize:
   searchQueryRules: 6689
   searchSynonyms: 6371
   security: 79987
-  securitySolution: 119669
+  securitySolution: 119517
   securitySolutionEss: 43319
   securitySolutionServerless: 62964
   serverless: 7854
-  serverlessObservability: 24297
+  serverlessObservability: 23996
   serverlessSearch: 33338
   serverlessWorkplaceAI: 5425
   sessionView: 47912

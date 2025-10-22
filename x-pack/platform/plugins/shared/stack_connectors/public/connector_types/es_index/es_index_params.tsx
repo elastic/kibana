@@ -26,7 +26,7 @@ import {
   JsonEditorWithMessageVariables,
   useKibana,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { ALERT_HISTORY_PREFIX } from '@kbn/connector-schemas/es_index';
+import { ALERT_HISTORY_PREFIX } from '@kbn/connector-schemas/es_index/constants';
 import type { IndexActionParams } from '../types';
 
 export const IndexParamsFields = ({
