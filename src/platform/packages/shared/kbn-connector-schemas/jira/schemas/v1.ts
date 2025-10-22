@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { z } from '@kbn/zod';
-import {
-  Coerced,
-  validateKeysAllowed,
-  validateRecordMaxKeys,
-} from '@kbn/connector-schemas/common/utils';
+import { Coerced, validateKeysAllowed, validateRecordMaxKeys } from '../../common/utils';
 import { MAX_OTHER_FIELDS_LENGTH } from '../constants';
 
 export const ExternalIncidentServiceConfiguration = {

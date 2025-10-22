@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MAX_OTHER_FIELDS_LENGTH } from '..';
+import { MAX_OTHER_FIELDS_LENGTH } from '../constants';
 import { ExecutorSubActionPushParamsSchema, incidentSchemaObjectProperties } from './v1';
 
 describe('Jira schema', () => {
