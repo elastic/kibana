@@ -36,10 +36,9 @@ import type {
 import type {
   EditableSavedSearchAttributes,
   NonPersistedDisplayOptions,
-  SearchEmbeddableState,
 } from '../../common/embeddable/types';
 
-export type SearchEmbeddableState = Pick<
+export type SearchEmbeddablePublicState = Pick<
   SerializableSavedSearch,
   | 'rowHeight'
   | 'rowsPerPage'
@@ -58,11 +57,13 @@ export type SearchEmbeddableState = Pick<
 };
 
 export type SearchEmbeddableStateManager = {
-  [key in keyof Required<SearchEmbeddableState>]: BehaviorSubject<SearchEmbeddableState[key]>;
+  [key in keyof Required<SearchEmbeddablePublicState>]: BehaviorSubject<
+    SearchEmbeddablePublicState[key]
+  >;
 };
 
 export type SearchEmbeddableSerializedAttributes = Omit<
-  SearchEmbeddableState,
+  SearchEmbeddablePublicState,
   'rows' | 'columnsMeta' | 'totalHitCount' | 'searchSource' | 'inspectorAdapters'
 > &
   Pick<SerializableSavedSearch, 'serializedSearchSource'>;
@@ -78,7 +79,7 @@ export type SearchEmbeddableRuntimeState = SearchEmbeddableSerializedAttributes 
     nonPersistedDisplayOptions?: NonPersistedDisplayOptions;
   };
 
-export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableState> &
+export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddablePublicState> &
   PublishesSavedObjectId &
   PublishesDataLoading &
   PublishesBlockingError &
