@@ -57,7 +57,7 @@
     "serverless-es": "node --no-experimental-require-module scripts/kibana --dev --serverless=es",
     "serverless-oblt": "node --no-experimental-require-module scripts/kibana --dev --serverless=oblt",
     "serverless-security": "node --no-experimental-require-module scripts/kibana --dev --serverless=security",
-    "serverless-workplace-ai": "node --no-experimental-require-module scripts/kibana --dev --serverless=workplace_ai",
+    "serverless-workplace-ai": "node --no-experimental-require-module scripts/kibana --dev --serverless=workplaceai",
     "spec_to_console": "node --no-experimental-require-module scripts/spec_to_console",
     "start": "node --no-experimental-require-module scripts/kibana --dev",
     "storybook": "node --no-experimental-require-module scripts/storybook",
