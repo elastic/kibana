@@ -6,7 +6,7 @@
  */
 
 import type httpProxy from 'http-proxy';
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/generated/schemas';
 
 import { getHttpProxyServer } from '@kbn/alerting-api-integration-helpers';
