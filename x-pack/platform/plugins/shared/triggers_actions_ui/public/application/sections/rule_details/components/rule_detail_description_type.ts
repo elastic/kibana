@@ -12,6 +12,3 @@ export const RULE_DETAIL_DESCRIPTION_FIELD_TYPES = {
   DATA_VIEW_ID: 'dataViewId',
   DATA_VIEW_INDEX_PATTERN: 'dataViewIndexPattern',
 } as const;
-
-export type RuleDetailDescriptionFieldType =
-  (typeof RULE_DETAIL_DESCRIPTION_FIELD_TYPES)[keyof typeof RULE_DETAIL_DESCRIPTION_FIELD_TYPES];
