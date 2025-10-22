@@ -159,7 +159,7 @@ Elastic Observability solution::
 Kibana platform::
 * Fixes files management flyout crashing ({kibana-pull}237588[#237588]).
 Management::
-* Fixed a bug in component template creation flow where a new component template with `@custom` suffix in name would lead to updating mappings of all unrelated data streams and a message would display asking to rollover conflicting ones ({kibana-pull}237952[#237952]).
+* Fixes a bug where creating a new component template with `@custom` suffix in its name would update mappings of all unrelated data streams and a message would display asking to rollover conflicting ones ({kibana-pull}237952[#237952]).
 Search::
 * Fixes an issue in the RAG Playground where invalid fields displayed red styling but no error message. Error text is now shown to help users identify and correct form issues ({kibana-pull}238284[#238284]).
 
