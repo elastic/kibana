@@ -29,7 +29,7 @@ import type { ControlRendererServices } from '../types';
 
 export interface FloatingActionsProps {
   children: ReactElement;
-
+  openDisplaySettingsPopover: () => void;
   api?: unknown;
   uuid: string;
   viewMode?: ViewMode;
@@ -74,6 +74,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
   api,
   uuid,
   disabledActions,
+  openDisplaySettingsPopover,
 }) => {
   const {
     services: { uiActions },
@@ -87,7 +88,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
 
     let canceled = false;
     const context = {
-      embeddable: api,
+      embeddable: { ...api, openDisplaySettingsPopover },
       trigger: uiActions.getTrigger(CONTROL_HOVER_TRIGGER_ID),
     };
 
@@ -154,7 +155,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
       canceled = true;
       subscriptions.unsubscribe();
     };
-  }, [api, uuid, viewMode, disabledActions, uiActions]);
+  }, [api, uuid, viewMode, disabledActions, uiActions, openDisplaySettingsPopover]);
 
   const styles = useMemoCss(floatingActionsStyles);
   return (

@@ -44,3 +44,12 @@ export type ControlsRendererParentApi = Pick<
     layout$: BehaviorSubject<ControlsLayout>;
     isCompressed?: () => boolean;
   };
+
+export interface CanOpenDisplaySettingsPopover {
+  openDisplaySettingsPopover: () => void;
+}
+
+export const apiCanOpenDisplaySettingsPopover = (
+  api: unknown
+): api is CanOpenDisplaySettingsPopover =>
+  Boolean((api as CanOpenDisplaySettingsPopover).openDisplaySettingsPopover);

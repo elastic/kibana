@@ -39,6 +39,7 @@ import type { ControlPanelState, ControlsRendererParentApi } from '../types';
 import { controlWidthStyles } from './control_panel.styles';
 import { DragHandle } from './drag_handle';
 import { FloatingActions } from './floating_actions';
+import { DisplaySettingsPopover } from './display_settings_popover';
 
 export const ControlPanel = ({
   parentApi,
@@ -74,6 +75,12 @@ export const ControlPanel = ({
   );
   const [panelTitle, setPanelTitle] = useState<string | undefined>();
   const [defaultPanelTitle, setDefaultPanelTitle] = useState<string | undefined>();
+
+  const [isDisplaySettingsPopoverOpen, setIsDisplaySettingsPopoverOpen] = useState(false);
+  const openDisplaySettingsPopover = useCallback(() => {
+    setIsDisplaySettingsPopoverOpen(true);
+  }, []);
+  const closeDisplaySettingsPopover = useCallback(() => setIsDisplaySettingsPopoverOpen(false), []);
 
   useEffect(() => {
     const stateSubscription = parentApi.layout$
@@ -156,6 +163,7 @@ export const ControlPanel = ({
         uuid={uuid}
         viewMode={viewMode}
         disabledActions={disabledActionIds}
+        openDisplaySettingsPopover={openDisplaySettingsPopover}
       >
         <EuiFormRow
           data-test-subj="control-frame-title"
@@ -174,7 +182,14 @@ export const ControlPanel = ({
             })}
             css={styles.formControl}
             prepend={
-              <>
+              <DisplaySettingsPopover
+                grow={grow}
+                width={width}
+                parentApi={parentApi}
+                uuid={uuid}
+                isOpen={isDisplaySettingsPopoverOpen}
+                closePopover={closeDisplaySettingsPopover}
+              >
                 <DragHandle
                   isEditable={isEditable}
                   controlTitle={panelTitle || defaultPanelTitle}
@@ -193,7 +208,7 @@ export const ControlPanel = ({
                     </EuiFormLabel>
                   </EuiToolTip>
                 )}
-              </>
+              </DisplaySettingsPopover>
             }
             compressed={parentApi.isCompressed ? parentApi.isCompressed() : true}
           >
