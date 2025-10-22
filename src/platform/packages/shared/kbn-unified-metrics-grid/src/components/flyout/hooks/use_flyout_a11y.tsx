@@ -15,7 +15,7 @@ import useUnmount from 'react-use/lib/useUnmount';
 export const useFlyoutA11y = ({ isXlScreen }: { isXlScreen: boolean }) => {
   const descriptionId = useGeneratedHtmlId();
   const [triggerEl] = useState(document.activeElement);
-  const [flyoutEl, setFlyoutEl] = useState<HTMLElement>();
+  const [flyoutEl, setFlyoutEl] = useState<HTMLElement | null>(null);
 
   // Auto-focus push flyout on open or when switching to XL screen
   useEffect(() => {
