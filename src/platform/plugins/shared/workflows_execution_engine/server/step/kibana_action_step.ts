@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// TODO: Remove eslint exceptions comments and fix the issues
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { buildKibanaRequestFromAction } from '@kbn/workflows';
+import type { BaseStep, RunStepResult } from './node_implementation';
+import { BaseAtomicNodeImplementation } from './node_implementation';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
-import type { RunStepResult, BaseStep } from './node_implementation';
-import { BaseAtomicNodeImplementation } from './node_implementation';
 
 // Extend BaseStep for kibana-specific properties
 export interface KibanaActionStep extends BaseStep {
@@ -84,7 +87,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
           action_type: 'kibana',
         },
       });
-      return await this.handleFailure(stepWith, error);
+      return this.handleFailure(stepWith, error);
     }
   }
 
@@ -147,7 +150,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
     if (params.request) {
       // Raw API format: { request: { method, path, body, query, headers } } - like Dev Console
       const { method = 'GET', path, body, query, headers: customHeaders } = params.request;
-      return await this.makeHttpRequest(kibanaUrl, {
+      return this.makeHttpRequest(kibanaUrl, {
         method,
         path,
         body,
@@ -164,7 +167,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
         headers: connectorHeaders,
       } = buildKibanaRequestFromAction(stepType, params);
 
-      return await this.makeHttpRequest(kibanaUrl, {
+      return this.makeHttpRequest(kibanaUrl, {
         method,
         path,
         body,

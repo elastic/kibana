@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { CoreStart, KibanaRequest } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { StackFrame, StepContext, WorkflowContext } from '@kbn/workflows';
 import { parseJsPropertyAccess } from '@kbn/workflows/common/utils';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { KibanaRequest, CoreStart } from '@kbn/core/server';
-import type { WorkflowExecutionState } from './workflow_execution_state';
-import type { RunStepResult } from '../step/node_implementation';
-import { buildStepExecutionId } from '../utils';
-import { WorkflowScopeStack } from './workflow_scope_stack';
-import type { WorkflowTemplatingEngine } from '../templating_engine';
 import type { ContextDependencies } from './types';
+import type { WorkflowExecutionState } from './workflow_execution_state';
+import { WorkflowScopeStack } from './workflow_scope_stack';
+import type { RunStepResult } from '../step/node_implementation';
+import type { WorkflowTemplatingEngine } from '../templating_engine';
+import { buildStepExecutionId } from '../utils';
 
 export interface ContextManagerInit {
   // New properties for logging
@@ -134,16 +134,21 @@ export class WorkflowContextManager {
     return this.templateEngine.render(obj, context);
   }
 
-  public readContextPath(propertyPath: string): { pathExists: boolean; value: any } {
+  public readContextPath(propertyPath: string): { pathExists: boolean; value: unknown } {
     const propertyPathSegments = parseJsPropertyAccess(propertyPath);
-    let result: any = this.getContext();
+    let result: unknown = this.getContext();
 
     for (const segment of propertyPathSegments) {
-      if (!(segment in result)) {
+      if (result === null || result === undefined || typeof result !== 'object') {
         return { pathExists: false, value: undefined }; // Path not found in context
       }
 
-      result = result[segment];
+      const resultAsRecord = result as Record<string, unknown>;
+      if (!(segment in resultAsRecord)) {
+        return { pathExists: false, value: undefined }; // Path not found in context
+      }
+
+      result = resultAsRecord[segment];
     }
 
     return { pathExists: true, value: result };
@@ -247,6 +252,7 @@ export class WorkflowContextManager {
     );
 
     while (!scopeStack.isEmpty()) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const topFrame = scopeStack.getCurrentScope()!;
       scopeStack = scopeStack.exitScope();
       const stepExecution = this.workflowExecutionState.getStepExecution(
@@ -272,6 +278,7 @@ export class WorkflowContextManager {
   private getStepData(stepId: string):
     | {
         runStepResult: RunStepResult;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         stepState: Record<string, any> | undefined;
       }
     | undefined {

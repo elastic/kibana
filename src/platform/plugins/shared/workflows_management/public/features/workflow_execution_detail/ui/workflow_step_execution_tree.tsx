@@ -7,30 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiThemeComputed, EuiTreeViewProps, UseEuiTheme } from '@elastic/eui';
+import type {
+  EuiEmptyPromptProps,
+  EuiThemeComputed,
+  EuiTreeViewProps,
+  UseEuiTheme,
+} from '@elastic/eui';
 import {
   EuiEmptyPrompt,
   EuiIcon,
   EuiLoadingSpinner,
   EuiText,
-  useEuiTheme,
   EuiTreeView,
   logicalCSS,
-  type EuiEmptyPromptProps,
+  useEuiTheme,
 } from '@elastic/eui';
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
-import { ExecutionStatus, isInProgressStatus } from '@kbn/workflows';
-import { isDangerousStatus, type WorkflowExecutionDto } from '@kbn/workflows';
 import { css } from '@emotion/react';
+import React from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { WorkflowExecutionDto, WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
+import { ExecutionStatus, isDangerousStatus, isInProgressStatus } from '@kbn/workflows';
+import type { StepExecutionTreeItem } from './build_step_executions_tree';
+import { buildStepExecutionsTree } from './build_step_executions_tree';
 import { StepExecutionTreeItemLabel } from './step_execution_tree_item_label';
 import { getExecutionStatusColors } from '../../../shared/ui/status_badge';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
-import type { StepExecutionTreeItem } from './build_step_executions_tree';
-import { buildStepExecutionsTree } from './build_step_executions_tree';
 
 function convertTreeToEuiTreeViewItems(
   treeItems: StepExecutionTreeItem[],

@@ -65,6 +65,7 @@ import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 
 import { css, injectGlobal } from '@emotion/css';
+import { VisualizeConstants, VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
 import type { TypesSetup, TypesStart } from './vis_types';
 import type { VisualizeServices } from './visualize_app/types';
 import {
@@ -112,7 +113,6 @@ import {
   getTypes,
   setNotifications,
 } from './services';
-import { VisualizeConstants, VISUALIZE_EMBEDDABLE_TYPE } from '../common/constants';
 import type { ListingViewRegistry } from './types';
 import type { VisualizationSavedObjectAttributes } from '../common/content_management';
 import { LATEST_VERSION, CONTENT_ID } from '../common/content_management';

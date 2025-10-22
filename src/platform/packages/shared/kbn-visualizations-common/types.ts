@@ -7,4 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { VisualizationContainer } from './visualization_container';
+export interface VisParams {
+  [key: string]: any;
+}

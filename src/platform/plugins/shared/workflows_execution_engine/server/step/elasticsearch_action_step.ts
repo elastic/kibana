@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// TODO: Remove eslint exceptions comments
+/* eslint-disable @typescript-eslint/no-explicit-any,  */
+
 import { buildRequestFromConnector } from '@kbn/workflows';
+import type { BaseStep, RunStepResult } from './node_implementation';
+import { BaseAtomicNodeImplementation } from './node_implementation';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
-import type { RunStepResult, BaseStep } from './node_implementation';
-import { BaseAtomicNodeImplementation } from './node_implementation';
 
 // Extend BaseStep for elasticsearch-specific properties
 export interface ElasticsearchActionStep extends BaseStep {
@@ -83,7 +86,7 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<El
           action_type: 'elasticsearch',
         },
       });
-      return await this.handleFailure(stepWith, error);
+      return this.handleFailure(stepWith, error);
     }
   }
 
@@ -96,19 +99,11 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<El
     if (params.request) {
       // Raw API format: { request: { method, path, body } } - like Dev Console
       const { method = 'GET', path, body } = params.request;
-      return await esClient.transport.request({
-        method,
-        path,
-        body,
-      });
+      return esClient.transport.request({ method, path, body });
     } else if (stepType === 'elasticsearch.request') {
       // Special case: elasticsearch.request type uses raw API format at top level
       const { method = 'GET', path, body } = params;
-      return await esClient.transport.request({
-        method,
-        path,
-        body,
-      });
+      return esClient.transport.request({ method, path, body });
     } else {
       // Use generated connector definitions to determine method and path (covers all 568+ ES APIs)
       const {
@@ -149,14 +144,14 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<El
         });
 
         if (bulkBody?.length) {
-          return await esClient.bulk({
+          return esClient.bulk({
             index: pathIndex, // default index for all actions
             refresh, // true | false | 'wait_for'
             body: bulkBody, // [ {index:{}}, doc, {index:{}}, doc, ... ]
           });
         }
       }
-      return await esClient.transport.request(requestOptions);
+      return esClient.transport.request(requestOptions);
     }
   }
 }

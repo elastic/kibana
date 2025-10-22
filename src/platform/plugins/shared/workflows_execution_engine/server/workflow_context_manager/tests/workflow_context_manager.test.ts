@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import type {
   ConnectorStep,
   EsWorkflowExecution,
@@ -17,11 +18,10 @@ import type {
 } from '@kbn/workflows';
 import type { AtomicGraphNode } from '@kbn/workflows/graph';
 import { WorkflowGraph } from '@kbn/workflows/graph';
-import { WorkflowContextManager } from '../workflow_context_manager';
-import type { WorkflowExecutionState } from '../workflow_execution_state';
 import type { WorkflowTemplatingEngine } from '../../templating_engine';
 import type { ContextDependencies } from '../types';
-import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
+import { WorkflowContextManager } from '../workflow_context_manager';
+import type { WorkflowExecutionState } from '../workflow_execution_state';
 
 const cloudSetupMock = cloudMock.createSetup();
 const dependencies: ContextDependencies = {

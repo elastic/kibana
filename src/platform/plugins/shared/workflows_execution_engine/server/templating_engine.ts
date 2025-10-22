@@ -31,11 +31,11 @@ export class WorkflowTemplatingEngine {
     });
   }
 
-  public render<T>(obj: T, context: Record<string, any>): T {
+  public render<T>(obj: T, context: Record<string, unknown>): T {
     return this.renderValueRecursively(obj, context) as T;
   }
 
-  private renderValueRecursively(value: unknown, context: Record<string, any>): unknown {
+  private renderValueRecursively(value: unknown, context: Record<string, unknown>): unknown {
     // Handle null and undefined
     if (value === null || value === undefined) {
       return value;
@@ -53,7 +53,7 @@ export class WorkflowTemplatingEngine {
 
     // Handle objects - recursively render each property
     if (typeof value === 'object') {
-      const renderedObject: Record<string, any> = {};
+      const renderedObject: Record<string, unknown> = {};
       for (const [key, val] of Object.entries(value)) {
         renderedObject[key] = this.renderValueRecursively(val, context);
       }
@@ -64,7 +64,7 @@ export class WorkflowTemplatingEngine {
     return value;
   }
 
-  public renderString(template: string, context: Record<string, any>): string {
+  public renderString(template: string, context: Record<string, unknown>): string {
     try {
       return this.engine.parseAndRenderSync(template, context);
     } catch (error) {
