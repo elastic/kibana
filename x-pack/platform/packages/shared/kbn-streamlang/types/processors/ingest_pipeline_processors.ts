@@ -16,6 +16,7 @@ import type {
   AppendProcessor,
   ConvertProcessor,
 } from '.';
+import type { Condition } from '../conditions';
 
 /** Ingest Pipeline processor configurations very closely resemble Streamlang DSL action blocks */
 
@@ -58,7 +59,9 @@ export type IngestPipelineAppendProcessor = RenameFieldsAndRemoveAction<
 // Convert
 export type IngestPipelineConvertProcessor = RenameFieldsAndRemoveAction<
   ConvertProcessor,
-  { from: 'field'; to: 'target_field'; where: 'if' }
+  ConvertProcessor extends { where: Condition }
+    ? { from: 'field'; to: 'target_field'; where: 'if' }
+    : { from: 'field'; to: 'target_field' }
 >;
 
 // Manual Ingest Pipeline (escape hatch)

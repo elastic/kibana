@@ -135,7 +135,7 @@ function validateSteps(steps: StreamlangStep[]) {
       validateCondition(step.where as Condition);
       validateSteps(step.where.steps);
     } else if (isActionBlock(step)) {
-      if (step.where) {
+      if ('where' in step && step.where) {
         validateCondition(step.where);
       }
       const validateStep = actionStepValidators[step.action] as (
