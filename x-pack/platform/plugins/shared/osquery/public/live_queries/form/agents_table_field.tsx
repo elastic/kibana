@@ -14,9 +14,12 @@ import type { AgentSelection } from '../../agents/types';
 
 const checkAgentsLength = (agentsSelection: AgentSelection) => {
   if (!isEmpty(agentsSelection)) {
+    // Allow unhealthy agents with working Osquery components
+    // Only warn if truly offline agents are selected
     if (agentsSelection.offlineAgentsSelected) {
       return i18n.translate('xpack.osquery.pack.queryFlyoutForm.osqueryAgentsOfflineErrorMessage', {
-        defaultMessage: 'Some agents are offline',
+        defaultMessage:
+          'Some selected agents are offline or have unhealthy Osquery components and may not respond to queries',
       });
     }
 

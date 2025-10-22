@@ -110,10 +110,6 @@ import type {
   SetAlertsStatusResponse,
 } from './detection_engine/signals/set_signal_status/set_signals_status_route.gen';
 import type { SuggestUserProfilesRequestQueryInput } from './detection_engine/users/suggest_user_profiles_route.gen';
-import type {
-  EndpointGetActionsDetailsRequestParamsInput,
-  EndpointGetActionsDetailsResponse,
-} from './endpoint/actions/details/details.gen';
 import type { EndpointFileDownloadRequestParamsInput } from './endpoint/actions/file_download/file_download.gen';
 import type {
   EndpointFileInfoRequestParamsInput,
@@ -1183,21 +1179,6 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
     return this.kbnClient
       .request<EndpointFileInfoResponse>({
         path: replaceParams('/api/endpoint/action/{action_id}/file/{file_id}', props.params),
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'GET',
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
-   * Get the details of a response action using the action ID.
-   */
-  async endpointGetActionsDetails(props: EndpointGetActionsDetailsProps) {
-    this.log.info(`${new Date().toISOString()} Calling API EndpointGetActionsDetails`);
-    return this.kbnClient
-      .request<EndpointGetActionsDetailsResponse>({
-        path: replaceParams('/api/endpoint/action/{action_id}', props.params),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
@@ -3242,9 +3223,6 @@ export interface EndpointFileDownloadProps {
 }
 export interface EndpointFileInfoProps {
   params: EndpointFileInfoRequestParamsInput;
-}
-export interface EndpointGetActionsDetailsProps {
-  params: EndpointGetActionsDetailsRequestParamsInput;
 }
 export interface EndpointGetActionsListProps {
   query: EndpointGetActionsListRequestQueryInput;
