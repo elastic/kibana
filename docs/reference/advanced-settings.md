@@ -182,6 +182,14 @@ $$$timepicker-timedefaults$$$`timepicker:timeDefaults`
 $$$enableESQL$$$`enableESQL`
 :   This setting enables ES|QL in Kibana.
 
+$$$aiAssistant:preferredAIAssistantType$$$`aiAssistant:preferredAIAssistantType` {applies_to}`stack: ga 9.1`
+:   This setting allows you to choose which AI Assistants are available to use and where. You can choose to only show the AI Assistants in their solutions, in other Kibana applications (for example, Discover, Dashboards, and Stack Management pages), or nowhere.
+
+      ::::{note}
+      :applies_to: stack: ga 9.2
+      Configure the `aiAssistant:preferredAIAssistantType` setting from the **GenAI Settings** page, which you can find using the Classic navigation menu or the [global search field](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md). Note that this setting is unavailable from the **GenAI Settings** page when using a [solution view](docs-content://deploy-manage/manage-spaces.md). 
+      ::::
+
 
 ### Presentation Labs [presentation-labs]
 
@@ -331,7 +339,7 @@ $$$apm-enable-service-metrics$$$`observability:apmEnableServiceMetrics` {applies
 :   Enable the usage of service transaction metrics, which are low cardinality metrics that can be used by certain views like the service inventory for faster loading times.
 
 $$$observability-apm-labs$$$`observability:apmLabsButton` {applies_to}`stack: removed 9.1`
-:   Enable or disable the APM Labs button — a quick way to enable and disable technical preview features in APM.
+:   Enable or disable the APM Labs button, a quick way to enable and disable technical preview features in APM.
 
 $$$observability-apm-critical-path$$$`observability:apmEnableCriticalPath` {applies_to}`stack: removed 9.1`
 :   When enabled, displays the critical path of a trace.
