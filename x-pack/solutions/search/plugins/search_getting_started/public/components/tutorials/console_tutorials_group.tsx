@@ -107,8 +107,8 @@ export const ConsoleTutorialsGroup = () => {
       </EuiFlexGroup>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="l" justifyContent="spaceBetween">
-          {tutorials.map((tutorial, index) => (
-            <EuiFlexItem key={index}>
+          {tutorials.map((tutorial) => (
+            <EuiFlexItem key={tutorial.dataTestSubj}>
               <EuiCard
                 hasBorder
                 title={tutorial.title}
@@ -162,7 +162,11 @@ export const ConsoleTutorialsGroup = () => {
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <div style={{ alignSelf: 'flex-end', minWidth: '66px' }}>
-                      <EuiImage src={tutorial.image} alt="Custom SVG icon" size="original" />
+                      <EuiImage
+                        src={tutorial.image}
+                        alt={`${tutorial.title} tutorial icon`}
+                        size="original"
+                      />
                     </div>
                   </EuiFlexItem>
                 </EuiFlexGroup>

@@ -8,9 +8,21 @@
     "id": "searchGettingStarted",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "searchGettingStarted"],
-    "requiredPlugins": ["share"],
-    "optionalPlugins": ["cloud", "console", "searchNavigation", "usageCollection"],
-    "requiredBundles": ["kibanaReact"]
+    "configPath": [
+      "xpack",
+      "searchGettingStarted"
+    ],
+    "requiredPlugins": [
+      "share"
+    ],
+    "optionalPlugins": [
+      "cloud",
+      "console",
+      "searchNavigation",
+      "usageCollection"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
   }
 }
