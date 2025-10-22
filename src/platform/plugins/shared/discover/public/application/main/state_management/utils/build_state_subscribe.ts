@@ -84,11 +84,9 @@ export const buildStateSubscribe =
       }
     }
 
-    const { interval, breakdownField, sampleSize, sort, dataSource } = prevState;
+    const { sampleSize, sort, dataSource } = prevState;
     // Cast to boolean to avoid false positives when comparing
     // undefined and false, which would trigger a refetch
-    const chartIntervalChanged = nextState.interval !== interval && !isEsqlMode;
-    const breakdownFieldChanged = nextState.breakdownField !== breakdownField;
     const sampleSizeChanged = nextState.sampleSize !== sampleSize;
     const docTableSortChanged = !isEqual(nextState.sort, sort) && !isEsqlMode;
     const dataSourceChanged = !isEqual(nextState.dataSource, dataSource) && !isEsqlMode;
@@ -138,21 +136,8 @@ export const buildStateSubscribe =
       return;
     }
 
-    if (
-      chartIntervalChanged ||
-      breakdownFieldChanged ||
-      sampleSizeChanged ||
-      docTableSortChanged ||
-      dataSourceChanged ||
-      queryChanged
-    ) {
+    if (sampleSizeChanged || docTableSortChanged || dataSourceChanged || queryChanged) {
       const logData = {
-        chartIntervalChanged: logEntry(chartIntervalChanged, interval, nextState.interval),
-        breakdownFieldChanged: logEntry(
-          breakdownFieldChanged,
-          breakdownField,
-          nextState.breakdownField
-        ),
         docTableSortChanged: logEntry(docTableSortChanged, sort, nextState.sort),
         dataSourceChanged: logEntry(dataSourceChanged, dataSource, nextState.dataSource),
         queryChanged: logEntry(queryChanged, prevQuery, nextQuery),
