@@ -100,9 +100,10 @@ export class EditControlDisplaySettingsAction
       () => layoutState.controls[embeddable.uuid],
       [layoutState, embeddable.uuid]
     );
-    const isRightmostControl = useMemo(
-      () => layoutEntry.order === Object.keys(layoutState.controls).length - 1,
-      [layoutEntry, layoutState]
+    const isToRightOfGrowControl = useMemo(
+      () =>
+        layoutEntry.order > 0 && Object.values(layoutState.controls)[layoutEntry.order - 1].grow,
+      [layoutEntry.order, layoutState.controls]
     );
 
     const grow = useMemo(() => layoutEntry.grow ?? false, [layoutEntry]);
@@ -167,7 +168,7 @@ export class EditControlDisplaySettingsAction
     const popoverProps: Omit<EuiPopoverProps, 'button'> = {
       repositionOnScroll: true,
       panelPaddingSize: 'm',
-      anchorPosition: 'downRight',
+      anchorPosition: isToRightOfGrowControl ? 'downRight' : 'downLeft',
       isOpen: isPopoverOpen,
       closePopover: onClose,
       focusTrapProps: {
@@ -181,7 +182,7 @@ export class EditControlDisplaySettingsAction
     };
 
     const PopoverComponent: React.FC<React.PropsWithChildren> = ({ children }) =>
-      isRightmostControl ? (
+      isToRightOfGrowControl ? (
         <EuiPopover {...popoverProps} button={settingsButton} children={children} />
       ) : embeddable.prependWrapperRef.current ? (
         <EuiWrappingPopover
@@ -193,7 +194,7 @@ export class EditControlDisplaySettingsAction
 
     return (
       <>
-        {!isRightmostControl && settingsButton}
+        {!isToRightOfGrowControl && settingsButton}
         <PopoverComponent>
           <EuiFormRow
             label={i18n.translate(
