@@ -9,26 +9,28 @@
 
 import type { Page } from '@playwright/test';
 
-/**
- * Presses a key until the element with the provided selector is in focus.
- * @param selector - The selector for the input element (supports 'data-test-subj' attributes).
- * @param key The key to press for keyboard navigation, defaults to Tab if none specified.
- * @param visited A set of visited elements used internally within the function to prevent tab cycles.
- * @returns A Promise that resolves once the text has been typed.
- */
-export const keyToElement = async (
-  page: Page,
-  selector: string,
-  key: string = 'Tab',
-  visited: Set<string> = new Set()
-): Promise<void> => {
+const verifyValidSelector = async (selector: string, page: Page): Promise<void> => {
   const target = page.locator(selector);
   // selector should be on the page and match exactly one element
   const matchingElements = await target.count();
   if (matchingElements === 0) throw new Error(`No elements found with selector: ${selector}`);
   if (matchingElements > 1)
     throw new Error(`${matchingElements} elements found with selector: ${selector}`);
+};
 
+/**
+ * Presses a key until the element with the provided selector is in focus.
+ * @param selector - The selector for the input element.
+ * @param key The key to press for keyboard navigation, defaults to Tab if none specified. Corresponds with the playwright keyboard api https://playwright.dev/docs/api/class-keyboard.
+ * @param visited A set of visited elements used internally within the function to prevent tab cycles.
+ * @returns A Promise that resolves once the the element with the provided selector is focused, or an error occurs.
+ */
+const keyToElement = async (
+  page: Page,
+  selector: string,
+  key: string = 'Tab',
+  visited: Set<string> = new Set()
+): Promise<void> => {
   await page.keyboard.press(key);
   await page.screenshot();
 
@@ -56,4 +58,17 @@ export const keyToElement = async (
   );
 
   if (!isTargetFocused) return keyToElement(page, selector, key, visited);
+};
+
+/**
+ * Presses a key until the element with the provided selector is in focus.
+ * @param page The playwright page object.
+ * @param selector - The selector for the input element.
+ * @param key The key to press for keyboard navigation, defaults to Tab if none specified. Corresponds with the playwright keyboard api https://playwright.dev/docs/api/class-keyboard.
+ * @param visited A set of visited elements used internally within the function to prevent tab cycles.
+ * @returns A Promise that resolves once the the element with the provided selector is focused, or an error occurs.
+ */
+export const keyTo = async (page: Page, selector: string, key: string = 'Tab'): Promise<void> => {
+  await verifyValidSelector(selector, page);
+  await keyToElement(page, selector, key);
 };

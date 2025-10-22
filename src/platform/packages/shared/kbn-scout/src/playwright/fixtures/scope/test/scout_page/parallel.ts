@@ -9,9 +9,9 @@
 
 import type { Page } from '@playwright/test';
 import { test as base } from '@playwright/test';
-import { keyToElement } from '../../../../utils';
-import type { PathOptions } from '../../../../../common/services/kibana_url';
 import type { ScoutPage } from '.';
+import type { PathOptions } from '../../../../../common/services/kibana_url';
+import { keyTo } from '../../../../utils';
 import type { KibanaUrl, ScoutLogger } from '../../worker';
 import type { ScoutSpaceParallelFixture } from '../../worker/scout_space';
 import { extendPlaywrightPage } from './single_thread';
@@ -36,7 +36,7 @@ export const scoutPageParallelFixture = base.extend<
       page.goto(kbnUrl.app(appName, { space: scoutSpace.id, pathOptions }));
     // Method to press a key until an element with the provided selector is in focus.
     extendedPage.keyTo = async (selector: string, key: string = 'Tab') => {
-      return await keyToElement(page, selector, key);
+      return await keyTo(page, selector, key);
     };
 
     log.serviceLoaded(`scoutPage`);

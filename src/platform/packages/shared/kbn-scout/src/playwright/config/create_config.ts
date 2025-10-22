@@ -94,8 +94,7 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
       /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
       trace: 'on-first-retry',
       screenshot: 'only-on-failure',
-      // TODO - I used this for debugging
-      video: 'on',
+      // video: 'retain-on-failure',
       // storageState: './output/reports/state.json', // Store session state (like cookies)
     },
 

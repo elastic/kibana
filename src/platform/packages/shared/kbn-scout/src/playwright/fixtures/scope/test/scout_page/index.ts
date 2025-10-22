@@ -33,10 +33,9 @@ export type ScoutPage = Page & {
   waitForLoadingIndicatorHidden: () => ReturnType<Page['waitForSelector']>;
   /**
    * Presses a key until the element with the provided selector is in focus.
-   * Uses the playwright keyboard api https://playwright.dev/docs/api/class-keyboard.
-   * @param selector - The selector for the input element (supports 'data-test-subj' attributes).
-   * @param key The key to press for keyboard navigation, defaults to Tab if none specified.
-   * @returns A Promise that resolves once the text has been typed.
+   * @param selector - The selector for the input element.
+   * @param key The key to press for keyboard navigation, defaults to Tab if none specified. Corresponds with the playwright keyboard api https://playwright.dev/docs/api/class-keyboard.
+   * @returns A Promise that resolves once the the element with the provided selector is focused, or an error occurs.
    */
   keyTo: (selector: string, key?: string) => Promise<void>;
   /**
