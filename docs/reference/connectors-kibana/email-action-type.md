@@ -78,7 +78,7 @@ You can test connectors as you're creating or editing the connector in {{kib}}. 
 Email actions have the following configuration properties.
 
 To, CC, BCC
-:   Each item is a list of addresses. Addresses can be specified in `user@host-name` format, or in `name <user@host-name>` format. One of To, CC, or BCC must contain an entry. The mail adress can be parsed out of the document by leveraging [mustache templates](how-watcher-works.md#templates).
+:   Each item is a list of addresses. Addresses can be specified in `user@host-name` format, or in `name <user@host-name>` format. One of To, CC, or BCC must contain an entry. The address can be parsed out of the document by leveraging [mustache templates](docs-content://explore-analyze/alerts-cases/watcher/how-watcher-works.md#templates).
 
 Subject
 :   The subject line of the email.
