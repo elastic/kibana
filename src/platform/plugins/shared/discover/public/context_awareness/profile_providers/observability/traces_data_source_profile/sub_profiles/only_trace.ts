@@ -17,6 +17,14 @@ import { extractIndexPatternFrom } from '../../../extract_index_pattern_from';
 import { createChartSectionWaterfall } from '../accessors/chart_section_waterfall';
 import type { ProfileProviderServices } from '../../../profile_provider_services';
 
+// TODO search if there's helpers to extract filters from ESQL queries so we can use them here
+function hasOnlyTraceIdFilter(esql: string): boolean {
+  if (typeof esql !== 'string') return false;
+  const normalized = esql.replace(/\s+/g, ' ').trim();
+  const re = /^FROM\s+[^|]+\s*\|\s*WHERE\s+trace\.id\s*={1,2}\s*["']?[\w\-]+["']?$/i;
+  return re.test(normalized);
+}
+
 export const createTracesOnlyTraceDataSourceProfileProvider = (
   { tracesContextService }: ProfileProviderServices,
   tracesDataSourceProfileProvider: DataSourceProfileProvider
@@ -27,13 +35,20 @@ export const createTracesOnlyTraceDataSourceProfileProvider = (
       return baseResult;
     }
 
-    const isOnlyTraceQuery = true; // TODO check if params.query contains only trace.id
-
     if (
-      params.rootContext.solutionType === SolutionType.Observability &&
-      tracesContextService.isTracesIndexPattern(extractIndexPatternFrom(params)) &&
-      isOnlyTraceQuery
+      params.rootContext.solutionType === SolutionType.Observability ||
+      tracesContextService.isTracesIndexPattern(extractIndexPatternFrom(params)) ||
+      !params.query
     ) {
+      return { isMatch: false };
+    }
+
+    // Only enabled on ESQL for POC purposes
+    if ('language' in params.query) {
+      return { isMatch: false };
+    }
+
+    if (hasOnlyTraceIdFilter(params.query.esql)) {
       return {
         isMatch: true,
         context: { category: DataSourceCategory.Traces },
