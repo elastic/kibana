@@ -66,7 +66,24 @@ describe('GROK Autocomplete', () => {
     );
   });
 
-  it('suggests a pipe after a pattern', async () => {
-    await grokExpectSuggestions(`from a | grok keywordField ${constantPattern} /`, ['| ']);
+  it('suggests pipe or comma after multiple patterns', async () => {
+    const result = await autocomplete(
+      `from a | grok keywordField "%{IP:ip}", "%{WORD:method}" /`,
+      {
+        type: 'command',
+        name: 'grok',
+        args: [
+          { type: 'column', name: 'keywordField' },
+          { type: 'literal', value: '"%{IP:ip}"' },
+          { type: 'literal', value: '"%{WORD:method}"' },
+        ],
+      } as any,
+      mockCallbacks
+    );
+
+    const suggestions = result.map(({ text }) => text);
+
+    expect(suggestions).toContain('| ');
+    expect(suggestions).toContain(', ');
   });
 });

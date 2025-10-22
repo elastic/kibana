@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { synth } from '../../..';
 import { Builder } from '../../builder';
 import { BasicPrettyPrinter } from '../../pretty_print';
 import { query } from '../query';
@@ -84,4 +85,70 @@ test('can create a query without a source command', () => {
   expect(query2 + '').toBe(
     'FORK (/* asdf */ WHERE emp_no == 10001) (WHERE emp_no == 10002) | KEEP emp_no, _fork | SORT emp_no'
   );
+});
+
+describe('queries with header commands', () => {
+  test('can create a query with a single SET header command', () => {
+    const node = query`SET param = "value"; FROM index | WHERE field == ?param`;
+    const text = BasicPrettyPrinter.print(node);
+
+    expect(text).toBe('SET param = "value"; FROM index | WHERE field == ?param');
+    expect(node.header).toBeDefined();
+    expect(node.header).toHaveLength(1);
+    expect(node.header![0].name).toBe('set');
+  });
+
+  test('can create a query with multiple SET header commands', () => {
+    const node = query`SET a = "foo"; SET b = 123; SET c = TRUE; FROM index | WHERE x == ?a`;
+    const text = BasicPrettyPrinter.print(node);
+
+    expect(text).toBe('SET a = "foo"; SET b = 123; SET c = TRUE; FROM index | WHERE x == ?a');
+    expect(node.header).toBeDefined();
+    expect(node.header).toHaveLength(3);
+    expect(node.header![0].name).toBe('set');
+    expect(node.header![1].name).toBe('set');
+    expect(node.header![2].name).toBe('set');
+  });
+
+  test('can create a query with header commands and ROW source', () => {
+    const node = query`SET x = 10; ROW a = 1, b = 2`;
+    const text = BasicPrettyPrinter.print(node);
+
+    expect(text).toBe('SET x = 10; ROW a = 1, b = 2');
+    expect(node.header).toBeDefined();
+    expect(node.header).toHaveLength(1);
+    expect(node.commands).toHaveLength(1);
+    expect(node.commands[0].name).toBe('row');
+  });
+
+  test('can create a query with header commands and multiple pipes', () => {
+    const node = query`SET a = 100; FROM logs | WHERE level == "error" | LIMIT ?limit`;
+    const text = BasicPrettyPrinter.print(node);
+
+    expect(text).toBe('SET a = 100; FROM logs | WHERE level == "error" | LIMIT ?limit');
+    expect(node.header).toBeDefined();
+    expect(node.header).toHaveLength(1);
+    expect(node.commands).toHaveLength(3);
+  });
+
+  test('throws on queries starting with SET but no source command', () => {
+    expect(() => query`SET x = 1; WHERE field == 10`).toThrow();
+  });
+
+  test('can insert header instruction value via template literal', () => {
+    const param = 'myvalue';
+    const node = query`SET x = ${param}; FROM index | WHERE field == ?x`;
+    const text = BasicPrettyPrinter.print(node);
+
+    expect(text).toBe('SET x = "myvalue"; FROM index | WHERE field == ?x');
+  });
+
+  test('can insert header SET instruction key', () => {
+    const param = 'myvalue';
+    const key = 'x';
+    const node = query`SET ${synth.kwd(key)} = ${param}; FROM index | WHERE field == 123`;
+    const text = BasicPrettyPrinter.print(node);
+
+    expect(text).toBe('SET x = "myvalue"; FROM index | WHERE field == 123');
+  });
 });
