@@ -1501,10 +1501,6 @@
           {
             "plugin": "dataViewFieldEditor",
             "path": "src/platform/plugins/shared/data_view_field_editor/__jest__/client_integration/field_editor_flyout_preview.helpers.ts"
-          },
-          {
-            "plugin": "esUiShared",
-            "path": "src/platform/plugins/shared/es_ui_shared/static/forms/hook_form_lib/shared_imports.ts"
           }
         ],
         "children": [
