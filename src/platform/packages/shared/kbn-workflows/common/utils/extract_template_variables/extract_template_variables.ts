@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Liquid, Template, IfTag, Output, Expression, ForTag, Token, TokenKind } from 'liquidjs';
+import type { Template } from 'liquidjs';
+import { Expression, ForTag, IfTag, Liquid, Output, Token, TokenKind } from 'liquidjs';
 import { parseJsPropertyAccess } from '../parse_js_property_access/parse_js_property_access';
 
 const liquidEngine = new Liquid({
