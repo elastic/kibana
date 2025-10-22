@@ -7,6 +7,7 @@
 
 import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { ScriptHelpContent } from './shared/script_help_content';
 import type { SentinelOneRunScriptActionParameters } from '../../endpoint_responder/command_render_components/run_script_action';
 import type { CustomScriptSelectorState } from '../custom_scripts_selector/custom_script_selector';
 import type { SentinelOneScript } from '../../../../../common/endpoint/types';
@@ -30,9 +31,18 @@ export const SentinelOneScriptInputParams = memo<
     | 'textareaPlaceholderLabel'
   > = useMemo(() => {
     const selectedScript = enteredCommand.argState?.script?.at(0)?.store?.selectedOption;
+    const scriptMeta = selectedScript?.meta;
+    const helpContent =
+      scriptMeta?.inputInstructions || scriptMeta?.scriptDescription || scriptMeta?.inputExample ? (
+        <ScriptHelpContent
+          description={scriptMeta?.scriptDescription}
+          instructions={scriptMeta?.inputInstructions}
+          example={scriptMeta?.inputExample}
+        />
+      ) : undefined;
 
     return {
-      helpContent: selectedScript?.meta?.inputInstructions || undefined,
+      helpContent,
 
       openLabel: i18n.translate(
         'xpack.securitySolution.sentineloneScriptInputParams.openInputParamsMessage',

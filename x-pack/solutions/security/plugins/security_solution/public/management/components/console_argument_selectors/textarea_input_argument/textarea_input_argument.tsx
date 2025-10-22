@@ -89,7 +89,7 @@ export const NO_INPUT_ENTERED_MESSAGE = i18n.translate(
 
 export const HELP_ICON_LABEL = i18n.translate(
   'xpack.securitySolution.consoleArgumentSelectors.textAreaInputArgument.helpIconLabel',
-  { defaultMessage: 'Show instructions' }
+  { defaultMessage: 'Toggle instructions' }
 );
 
 export const CLOSE_POPUP_BUTTON_LABEL = i18n.translate(
@@ -207,34 +207,6 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
       setShowHelpContent((prev) => !prev);
     }, []);
 
-    const helpButton = useMemo(() => {
-      const button = (
-        <EuiButtonIcon
-          iconType="help"
-          size="xs"
-          onClick={handleHelpOnClick}
-          isSelected={showHelpContent}
-          title={helpIconLabel}
-          aria-label={helpIconLabel}
-          disabled={!helpContent}
-          data-test-subj={testId('helpButton')}
-        />
-      );
-
-      return helpContent ? (
-        button
-      ) : (
-        <EuiToolTip content={helpNotAvailableTooltip}>{button}</EuiToolTip>
-      );
-    }, [
-      handleHelpOnClick,
-      helpContent,
-      helpIconLabel,
-      helpNotAvailableTooltip,
-      showHelpContent,
-      testId,
-    ]);
-
     return shouldRender ? (
       <EuiPopover
         isOpen={state.isPopoverOpen}
@@ -279,7 +251,20 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
                   </EuiTitle>
                 </EuiFlexItem>
 
-                <EuiFlexItem grow={false}>{helpButton}</EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip content={helpContent ? helpIconLabel : helpNotAvailableTooltip}>
+                    <EuiButtonIcon
+                      iconType="help"
+                      size="xs"
+                      onClick={handleHelpOnClick}
+                      isSelected={showHelpContent}
+                      title={helpIconLabel}
+                      aria-label={helpIconLabel}
+                      disabled={!helpContent}
+                      data-test-subj={testId('helpButton')}
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPanel>
             <div>

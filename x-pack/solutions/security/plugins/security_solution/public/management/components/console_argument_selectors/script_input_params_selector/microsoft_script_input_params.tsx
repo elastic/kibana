@@ -7,6 +7,7 @@
 
 import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { ScriptHelpContent } from './shared/script_help_content';
 import type { MicrosoftDefenderEndpointRunScriptActionParameters } from '../../endpoint_responder/command_render_components/run_script_action';
 import type { TextareaInputArgumentProps } from '../textarea_input_argument';
 import { TextareaInputArgument } from '../textarea_input_argument';
@@ -45,7 +46,7 @@ export const MicrosoftScriptInputParams = memo<
     | 'textareaPlaceholderLabel'
   > = useMemo(() => {
     return {
-      helpContent: scriptHelp || undefined,
+      helpContent: scriptHelp ? <ScriptHelpContent description={scriptHelp} /> : undefined,
 
       textareaLabel: i18n.translate(
         'xpack.securitySolution.microsoftScriptInputParams.textareaLabel',
