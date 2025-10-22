@@ -132,7 +132,7 @@ export const getApiKeyAndUserScope = async (
   const user = security.authc.getCurrentUser(request);
 
   const requestBasePath = basePath.get(request);
-  const { spaceId } = getSpaceIdFromPath(requestBasePath, basePath.serverBasePath);
+  const space = getSpaceIdFromPath(requestBasePath, basePath.serverBasePath);
 
   const apiKeyAndUserScopeByTaskId = new Map<string, ApiKeyAndUserScope>();
 
@@ -143,7 +143,7 @@ export const getApiKeyAndUserScope = async (
         apiKey: encodedApiKeyResult.apiKey,
         userScope: {
           apiKeyId: encodedApiKeyResult.apiKeyId,
-          spaceId,
+          spaceId: space?.spaceId || 'default',
           // Set apiKeyCreatedByUser to true if the user passed in their own API key, since we do
           // not want to invalidate a specific API key that was not created by the task manager
           apiKeyCreatedByUser: isRequestApiKeyType(user),
