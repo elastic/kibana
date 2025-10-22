@@ -133,6 +133,7 @@ export function getDashboardApi({
       dashboardState,
       controlGroupReferences,
       panelReferences: panelReferences ?? [],
+      timeRestore: settingsManager.api.getSettings().timeRestore,
     };
   }
 
@@ -191,7 +192,6 @@ export function getDashboardApi({
           hidePanelTitles: settings.hidePanelTitles ?? false,
           description: saveResult.savedState.description,
           tags: saveResult.savedState.tags,
-          timeRestore: saveResult.savedState.timeRestore,
           title: saveResult.savedState.title,
         });
         savedObjectId$.next(saveResult.id);
@@ -208,6 +208,7 @@ export function getDashboardApi({
         panelReferences,
         saveOptions: {},
         lastSavedId: savedObjectId$.value,
+        timeRestore: settingsManager.api.getSettings().timeRestore,
       });
 
       if (saveResult?.error) return;

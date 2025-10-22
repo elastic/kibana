@@ -70,6 +70,7 @@ export interface SaveDashboardProps {
   panelReferences?: Reference[];
   searchSourceReferences?: Reference[];
   lastSavedId?: string;
+  timeRestore: boolean;
 }
 
 export interface GetDashboardStateReturn {

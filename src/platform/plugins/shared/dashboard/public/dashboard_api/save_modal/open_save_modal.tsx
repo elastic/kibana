@@ -89,7 +89,6 @@ export async function openSaveModal({
               title: newTitle,
               tags: savedObjectsTaggingService && newTags ? newTags : ([] as string[]),
               description: newDescription,
-              timeRestore: newTimeRestore,
               timeRange: newTimeRestore
                 ? dataService.query.timefilter.timefilter.getTime()
                 : undefined,
@@ -109,6 +108,7 @@ export async function openSaveModal({
               saveOptions,
               dashboardState: dashboardStateToSave,
               lastSavedId,
+              timeRestore: newTimeRestore,
             });
 
             const addDuration = window.performance.now() - beforeAddTime;
@@ -136,7 +136,7 @@ export async function openSaveModal({
             tags={dashboardState.tags}
             title={saveAsTitle}
             onClose={() => resolve(undefined)}
-            timeRestore={dashboardState.timeRestore}
+            timeRestore={Boolean(dashboardState.timeRange)}
             showStoreTimeOnSave={!lastSavedId}
             description={dashboardState.description ?? ''}
             showCopyOnSave={false}

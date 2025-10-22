@@ -33,7 +33,7 @@ describe('initializeSettingsManager', () => {
       const currentSettings = settingsManager.api.getSettings();
       settingsManager.api.setSettings({
         ...currentSettings,
-        timeRestore: !currentSettings.timeRestore
+        timeRestore: !currentSettings.timeRestore,
       });
     });
 

@@ -50,6 +50,7 @@ describe('getSerializedState', () => {
       generateNewIds: false,
       dashboardState,
       panelReferences: [],
+      timeRestore: false,
     });
 
     expect(result.attributes).toMatchInlineSnapshot(`
@@ -95,6 +96,7 @@ describe('getSerializedState', () => {
           id: 'bizzbuzz',
         },
       ],
+      timeRestore: false,
     });
 
     expect(result.attributes.panels).toMatchInlineSnapshot(`
@@ -126,6 +128,7 @@ describe('getSerializedState', () => {
       generateNewIds: false,
       dashboardState,
       panelReferences: [],
+      timeRestore: false,
     });
 
     expect(result.references).toEqual(controlGroupReferences);
@@ -141,6 +144,7 @@ describe('getSerializedState', () => {
       generateNewIds: false,
       dashboardState,
       panelReferences,
+      timeRestore: false,
     });
 
     expect(result.references).toEqual(panelReferences);

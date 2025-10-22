@@ -85,16 +85,8 @@ export const loadDashboardState = async ({
 
   const { references, attributes, managed, version } = rawDashboardContent;
 
-  const {
-    refreshInterval,
-    description,
-    options,
-    panels,
-    filters,
-    query,
-    timeRange,
-    title,
-  } = attributes;
+  const { refreshInterval, description, options, panels, filters, query, timeRange, title } =
+    attributes;
 
   return {
     managed,

@@ -36,11 +36,13 @@ export const getSerializedState = ({
   generateNewIds,
   dashboardState,
   panelReferences,
+  timeRestore,
 }: {
   controlGroupReferences?: Reference[];
   generateNewIds?: boolean;
   dashboardState: DashboardState;
   panelReferences?: Reference[];
+  timeRestore: boolean;
 }): ReturnType<DashboardApi['getSerializedState']> => {
   const {
     query: {
@@ -52,7 +54,6 @@ export const getSerializedState = ({
     query,
     title,
     filters,
-    timeRestore,
     description,
 
     options,
@@ -93,7 +94,6 @@ export const getSerializedState = ({
     ...(query ? { query } : {}),
     refreshInterval,
     timeRange,
-    timeRestore,
     options,
     panels,
     title,

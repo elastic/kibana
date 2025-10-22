@@ -36,7 +36,6 @@ import {
 } from 'rxjs';
 import { dataService } from '../services/kibana_services';
 import { GLOBAL_STATE_STORAGE_KEY } from '../utils/urls';
-import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
 import type { DashboardCreationOptions } from './types';
 import type { DashboardState } from '../../common';
 import { cleanFiltersForSerialize } from '../../common';
@@ -290,7 +289,7 @@ export function initializeUnifiedSearchManager(
 
   const getState = (): Pick<
     DashboardState,
-    'filters' | 'query' | 'refreshInterval' | 'timeRange' | 'timeRestore'
+    'filters' | 'query' | 'refreshInterval' | 'timeRange'
   > => {
     // pinned filters are not serialized when saving the dashboard
     const serializableFilters = unifiedSearchFilters$.value?.filter((f) => !isFilterPinned(f));
@@ -298,9 +297,10 @@ export function initializeUnifiedSearchManager(
     return {
       filters: serializableFilters,
       query: query$.value,
-      refreshInterval: refreshInterval$.value,
-      timeRange: timeRange$.value,
-      timeRestore: timeRestore$.value ?? DEFAULT_DASHBOARD_STATE.timeRestore,
+      ...(timeRestore$.value && {
+        refreshInterval: refreshInterval$.value,
+        timeRange: timeRange$.value,
+      }),
     };
   };
 
@@ -353,7 +353,7 @@ export function initializeUnifiedSearchManager(
         if (lastSavedState.query) {
           setQuery(lastSavedState.query);
         }
-        if (lastSavedState.timeRestore) {
+        if (lastSavedState.timeRange) {
           setAndSyncRefreshInterval(lastSavedState.refreshInterval);
           setAndSyncTimeRange(lastSavedState.timeRange);
         }

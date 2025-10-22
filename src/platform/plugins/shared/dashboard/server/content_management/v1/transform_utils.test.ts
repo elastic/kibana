@@ -54,7 +54,7 @@ describe('savedObjectToItem', () => {
         kibanaSavedObjectMeta: {
           searchSourceJSON: '{"query":{"query":"test","language":"KQL"}}',
         },
-      }
+      },
     };
 
     const { item, error } = savedObjectToItem(input, false);
@@ -98,7 +98,7 @@ describe('savedObjectToItem', () => {
         timeRestore: false,
         panelsJSON: '[]',
         kibanaSavedObjectMeta: {},
-      }
+      },
     };
 
     const { item, error } = savedObjectToItem(input, false);

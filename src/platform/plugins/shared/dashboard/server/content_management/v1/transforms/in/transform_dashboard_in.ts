@@ -34,16 +34,8 @@ export const transformDashboardIn = ({
       error: Error;
     } => {
   try {
-    const {
-      controlGroupInput,
-      options,
-      filters,
-      panels,
-      query,
-      tags,
-      timeRange,
-      ...rest
-    } = dashboardState;
+    const { controlGroupInput, options, filters, panels, query, tags, timeRange, ...rest } =
+      dashboardState;
 
     const tagReferences = transformTagsIn({
       tags,
