@@ -106,7 +106,7 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
 
   protected async _run(input: any): Promise<RunStepResult> {
     try {
-      return this.executeHttpRequest(input);
+      return await this.executeHttpRequest(input);
     } catch (error) {
       return this.handleFailure(input, error);
     }

@@ -19,6 +19,9 @@ import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
+// Mock the isAxiosError static method
+(axios as any).isAxiosError = jest.fn();
+
 describe('HttpStepImpl', () => {
   let httpStep: HttpStepImpl;
   let mockStepExecutionRuntime: jest.Mocked<StepExecutionRuntime>;
@@ -347,7 +350,7 @@ describe('HttpStepImpl', () => {
       };
 
       (mockedAxios as unknown as jest.Mock).mockRejectedValueOnce(axiosError);
-      (mockedAxios as any).isAxiosError = jest.fn().mockReturnValue(true);
+      (mockedAxios as any).isAxiosError.mockReturnValue(true);
       const input = {
         url: 'https://api.example.com/users',
         method: 'POST',

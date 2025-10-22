@@ -27,6 +27,11 @@ export class UrlValidator {
    */
   isUrlAllowed(uri: string): boolean {
     try {
+      // Reject protocol-relative URLs as they are ambiguous in server context
+      if (uri.startsWith('//')) {
+        return false;
+      }
+
       const parsedUrl = new URL(uri);
       const hostname = parsedUrl.hostname;
 
