@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { renderHook } from '@testing-library/react';
 import type { UseQueryResult } from '@tanstack/react-query';
+import { renderHook } from '@testing-library/react';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
-import { useWorkflowExecution } from '../../../../entities/workflows/model/use_workflow_execution';
 import { PollingIntervalMs, useWorkflowExecutionPolling } from './use_workflow_execution_polling';
+import { useWorkflowExecution } from '../../../../entities/workflows/model/use_workflow_execution';
 
 // Mock the useWorkflowExecution hook
 jest.mock('../../../../entities/workflows/model/use_workflow_execution');
@@ -21,16 +21,16 @@ const mockUseWorkflowExecution = useWorkflowExecution as jest.MockedFunction<
 >;
 
 // Helper function to create a complete UseQueryResult mock
-const createMockQueryResult = <TData = unknown, TError = unknown>(
-  overrides: Partial<UseQueryResult<TData, TError>> = {}
-): UseQueryResult<TData, TError> =>
+const createMockQueryResult = (
+  overrides: Partial<UseQueryResult<WorkflowExecutionDto, Error>> = {}
+): UseQueryResult<WorkflowExecutionDto, Error> =>
   ({
     data: undefined,
     error: null,
     isLoading: false,
     refetch: jest.fn(),
     ...overrides,
-  } as UseQueryResult<TData, TError>);
+  } as UseQueryResult<WorkflowExecutionDto, Error>);
 
 describe('useWorkflowExecutionPolling', () => {
   const mockWorkflowExecutionId = 'test-execution-id';
@@ -91,7 +91,7 @@ describe('useWorkflowExecutionPolling', () => {
     const mockWorkflowExecution = createMockWorkflowExecution(ExecutionStatus.RUNNING);
     const mockError = new Error('Test error');
     mockUseWorkflowExecution.mockReturnValue(
-      createMockQueryResult<WorkflowExecutionDto, Error>({
+      createMockQueryResult({
         data: mockWorkflowExecution,
         isLoading: false,
         error: mockError,
@@ -109,7 +109,7 @@ describe('useWorkflowExecutionPolling', () => {
 
   it('should not start polling when workflow execution data is not available', () => {
     mockUseWorkflowExecution.mockReturnValue(
-      createMockQueryResult<WorkflowExecutionDto, Error>({
+      createMockQueryResult({
         data: undefined,
         isLoading: true,
         error: null,
@@ -138,7 +138,7 @@ describe('useWorkflowExecutionPolling', () => {
         const mockWorkflowExecution = createMockWorkflowExecution(status);
 
         mockUseWorkflowExecution.mockReturnValue(
-          createMockQueryResult<WorkflowExecutionDto, Error>({
+          createMockQueryResult({
             data: mockWorkflowExecution,
             isLoading: false,
             error: null,
@@ -181,7 +181,7 @@ describe('useWorkflowExecutionPolling', () => {
         const initialWorkflowExecution = createMockWorkflowExecution(ExecutionStatus.RUNNING);
 
         mockUseWorkflowExecution.mockReturnValue(
-          createMockQueryResult<WorkflowExecutionDto, Error>({
+          createMockQueryResult({
             data: initialWorkflowExecution,
             isLoading: false,
             error: null,
@@ -199,7 +199,7 @@ describe('useWorkflowExecutionPolling', () => {
         // Update to terminal status
         const terminalWorkflowExecution = createMockWorkflowExecution(status);
         mockUseWorkflowExecution.mockReturnValue(
-          createMockQueryResult<WorkflowExecutionDto, Error>({
+          createMockQueryResult({
             data: terminalWorkflowExecution,
             isLoading: false,
             error: null,
@@ -221,7 +221,7 @@ describe('useWorkflowExecutionPolling', () => {
         const mockWorkflowExecution = createMockWorkflowExecution(status);
 
         mockUseWorkflowExecution.mockReturnValue(
-          createMockQueryResult<WorkflowExecutionDto, Error>({
+          createMockQueryResult({
             data: mockWorkflowExecution,
             isLoading: false,
             error: null,
@@ -243,7 +243,7 @@ describe('useWorkflowExecutionPolling', () => {
     const mockWorkflowExecution = createMockWorkflowExecution(ExecutionStatus.RUNNING);
 
     mockUseWorkflowExecution.mockReturnValue(
-      createMockQueryResult<WorkflowExecutionDto, Error>({
+      createMockQueryResult({
         data: mockWorkflowExecution,
         isLoading: false,
         error: null,
@@ -272,7 +272,7 @@ describe('useWorkflowExecutionPolling', () => {
   it('should restart polling when workflow execution data changes from null to available', () => {
     // Start with no data
     mockUseWorkflowExecution.mockReturnValue(
-      createMockQueryResult<WorkflowExecutionDto, Error>({
+      createMockQueryResult({
         data: undefined,
         isLoading: true,
         error: null,
@@ -290,7 +290,7 @@ describe('useWorkflowExecutionPolling', () => {
     // Update with workflow execution data
     const mockWorkflowExecution = createMockWorkflowExecution(ExecutionStatus.RUNNING);
     mockUseWorkflowExecution.mockReturnValue(
-      createMockQueryResult<WorkflowExecutionDto, Error>({
+      createMockQueryResult({
         data: mockWorkflowExecution,
         isLoading: false,
         error: null,
@@ -310,7 +310,7 @@ describe('useWorkflowExecutionPolling', () => {
     const runningExecution = createMockWorkflowExecution(ExecutionStatus.RUNNING);
 
     mockUseWorkflowExecution.mockReturnValue(
-      createMockQueryResult<WorkflowExecutionDto, Error>({
+      createMockQueryResult({
         data: runningExecution,
         isLoading: false,
         error: null,
@@ -328,7 +328,7 @@ describe('useWorkflowExecutionPolling', () => {
     // Change to another non-terminal status
     const waitingExecution = createMockWorkflowExecution(ExecutionStatus.WAITING);
     mockUseWorkflowExecution.mockReturnValue(
-      createMockQueryResult<WorkflowExecutionDto, Error>({
+      createMockQueryResult({
         data: waitingExecution,
         isLoading: false,
         error: null,
@@ -344,7 +344,7 @@ describe('useWorkflowExecutionPolling', () => {
     // Change to terminal status - create a new execution object
     const completedExecution = createMockWorkflowExecution(ExecutionStatus.COMPLETED);
     mockUseWorkflowExecution.mockReturnValue(
-      createMockQueryResult<WorkflowExecutionDto, Error>({
+      createMockQueryResult({
         data: completedExecution,
         isLoading: false,
         error: null,

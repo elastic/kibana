@@ -163,6 +163,24 @@ describe('esql query helpers', () => {
     it('should return true for timeseries with aggregations', () => {
       expect(hasTransformationalCommand('ts a | stats var = avg(b)')).toBeTruthy();
     });
+
+    it('should return true for fork with all branches containing only transformational commands', () => {
+      expect(
+        hasTransformationalCommand('from a | fork (stats count() by field1) (keep field2, field3)')
+      ).toBeTruthy();
+    });
+
+    it('should return false for fork with non-transformational commands in branches', () => {
+      expect(
+        hasTransformationalCommand('from a | fork (where field1 > 0) (eval field2 = field1 * 2)')
+      ).toBeFalsy();
+    });
+
+    it('should return false for fork with mixed transformational and non-transformational commands', () => {
+      expect(
+        hasTransformationalCommand('from a | fork (stats count() by field1) (where field2 > 0)')
+      ).toBeFalsy();
+    });
   });
 
   describe('getTimeFieldFromESQLQuery', () => {

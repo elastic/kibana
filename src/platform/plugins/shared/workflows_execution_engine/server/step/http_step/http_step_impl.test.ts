@@ -7,17 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { HttpGraphNode } from '@kbn/workflows/graph';
 import axios from 'axios';
+import type { HttpGraphNode } from '@kbn/workflows/graph';
+import { HttpStepImpl } from './http_step_impl';
 import { UrlValidator } from '../../lib/url_validator';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
-import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
+import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
-import { HttpStepImpl } from './http_step_impl';
 
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
+
+// Mock the isAxiosError static method
+(axios as any).isAxiosError = jest.fn();
 
 describe('HttpStepImpl', () => {
   let httpStep: HttpStepImpl;
@@ -347,7 +350,7 @@ describe('HttpStepImpl', () => {
       };
 
       (mockedAxios as unknown as jest.Mock).mockRejectedValueOnce(axiosError);
-      (mockedAxios as any).isAxiosError = jest.fn().mockReturnValue(true);
+      (mockedAxios as any).isAxiosError.mockReturnValue(true);
       const input = {
         url: 'https://api.example.com/users',
         method: 'POST',
