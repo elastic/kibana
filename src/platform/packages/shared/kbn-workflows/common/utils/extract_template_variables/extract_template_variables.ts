@@ -8,7 +8,20 @@
  */
 
 import type { Template } from 'liquidjs';
-import { ForTag, IfTag, AssignTag, Liquid, Output, Token, TokenKind, Value } from 'liquidjs';
+import {
+  AssignTag,
+  CaptureTag,
+  CaseTag,
+  ForTag,
+  IfTag,
+  Liquid,
+  Output,
+  TablerowTag,
+  Token,
+  TokenKind,
+  UnlessTag,
+  Value,
+} from 'liquidjs';
 import { parseJsPropertyAccess } from '../parse_js_property_access/parse_js_property_access';
 
 const liquidEngine = new Liquid({
@@ -39,22 +52,16 @@ function truncatePathAtLocalVariable(
 ): string {
   // Check if any parts after the first are local variables (used as indices)
   // If so, truncate the path at that point
-  for (let i = 1; i < parts.length; i++) {
-    if (stack.toReversed().some((frame) => frame.variables.has(parts[i]))) {
-      // Found a local variable used as an index/property
-      // Find where this appears in the original string and truncate there
-      const localVarPattern = new RegExp(`\\[${parts[i]}\\]`);
+  for (const part of parts) {
+    if (stack.toReversed().some((frame) => frame.variables.has(part))) {
+      const localVarPattern = new RegExp(`\\[${part}\\]`);
       const match = propertyPath.match(localVarPattern);
       if (match && match.index !== undefined) {
-        // Return everything before the bracket containing the local variable
         return propertyPath.substring(0, match.index);
       }
-      // Fallback: just return the root if we can't find the pattern
       return parts[0];
     }
   }
-
-  // No truncation needed, return the full path
   return propertyPath;
 }
 
@@ -64,7 +71,11 @@ function visitLiquidAST(node: unknown, stack: StackEntry[]): string[] {
   }
 
   if (node instanceof Value) {
-    return node.initial.postfix.flatMap((token) => visitLiquidAST(token, stack));
+    const fromInitial = node.initial.postfix.flatMap((token) => visitLiquidAST(token, stack));
+    const fromFilters = node.filters.flatMap((filter) =>
+      filter.args ? filter.args.flatMap((arg) => visitLiquidAST(arg, stack)) : []
+    );
+    return fromInitial.concat(fromFilters);
   }
 
   if (node instanceof IfTag) {
@@ -74,17 +85,24 @@ function visitLiquidAST(node: unknown, stack: StackEntry[]): string[] {
       const fromTemplates = branch.templates.flatMap((template) => visitLiquidAST(template, stack));
       return fromValue.concat(fromTemplates);
     });
+    const fromElse = node.elseTemplates
+      ? node.elseTemplates.flatMap((template) => visitLiquidAST(template, stack))
+      : [];
     stack.pop();
-    return [...fromBranches];
+    return [...fromBranches, ...fromElse];
   }
 
   if (node instanceof ForTag) {
     stack.push({ node: 'for', variables: new Set<string>([node.variable]) });
 
     const fromCollection = visitLiquidAST(node.collection, stack);
+    const fromHash =
+      node.hash && node.hash.hash
+        ? Object.values(node.hash.hash).flatMap((value) => visitLiquidAST(value, stack))
+        : [];
     const fromBody = node.templates.flatMap((template) => visitLiquidAST(template, stack));
     stack.pop();
-    return fromCollection.concat(fromBody);
+    return fromCollection.concat(fromHash).concat(fromBody);
   }
 
   if (node instanceof AssignTag) {
@@ -95,6 +113,55 @@ function visitLiquidAST(node: unknown, stack: StackEntry[]): string[] {
     const result = args.flatMap((arg) => visitLiquidAST(arg, stack));
     stack.at(-1)?.variables.add(variableName);
     return result;
+  }
+
+  if (node instanceof UnlessTag) {
+    stack.push({ node: 'unless', variables: new Set<string>() });
+    const fromBranches = node.branches.flatMap((branch) => {
+      const fromValue = visitLiquidAST(branch.value, stack);
+      const fromTemplates = branch.templates.flatMap((template) => visitLiquidAST(template, stack));
+      return fromValue.concat(fromTemplates);
+    });
+    const fromElse = node.elseTemplates
+      ? node.elseTemplates.flatMap((template) => visitLiquidAST(template, stack))
+      : [];
+    stack.pop();
+    return [...fromBranches, ...fromElse];
+  }
+
+  if (node instanceof CaseTag) {
+    stack.push({ node: 'case', variables: new Set<string>() });
+    const fromCondition = visitLiquidAST(node.value, stack);
+    const fromBranches = node.branches.flatMap((branch) => {
+      const fromValues = branch.values.flatMap((value) => visitLiquidAST(value, stack));
+      const fromTemplates = branch.templates.flatMap((template) => visitLiquidAST(template, stack));
+      return fromValues.concat(fromTemplates);
+    });
+    const fromElse = node.elseTemplates.flatMap((template) => visitLiquidAST(template, stack));
+    stack.pop();
+    return [...fromCondition, ...fromBranches, ...fromElse];
+  }
+
+  if (node instanceof CaptureTag) {
+    const variableName = node.variable;
+    stack.push({ node: 'capture', variables: new Set<string>() });
+    const fromBody = node.templates.flatMap((template) => visitLiquidAST(template, stack));
+    stack.pop();
+    stack.at(-1)?.variables.add(variableName);
+    return fromBody;
+  }
+
+  if (node instanceof TablerowTag) {
+    stack.push({ node: 'tablerow', variables: new Set<string>([node.variable]) });
+    const fromCollection = visitLiquidAST(node.collection, stack);
+    const fromArgs =
+      node.args && node.args.hash
+        ? Object.values(node.args.hash).flatMap((value) => visitLiquidAST(value, stack))
+        : [];
+    const fromBody = node.templates.flatMap((template) => visitLiquidAST(template, stack));
+
+    stack.pop();
+    return fromCollection.concat(fromArgs).concat(fromBody);
   }
 
   if (node instanceof Token) {
@@ -113,6 +180,8 @@ function visitLiquidAST(node: unknown, stack: StackEntry[]): string[] {
     // Handle Range tokens
     if (node.kind === TokenKind.Range) {
       const rangeText = node.getText();
+      // Dirty solution but works. For some reason specific value tokens are not exported by public API.
+      // See this GH issue - https://github.com/harttle/liquidjs/issues/823
       // Extract start and end from range like "(start..end)" or "1..5"
       const vars = rangeText
         .replace(/[()]/g, '')
@@ -130,7 +199,7 @@ function visitLiquidAST(node: unknown, stack: StackEntry[]): string[] {
 
 export function extractTemplateVariables(template: string): string[] {
   const ast: Template[] = liquidEngine.parse(template); // Pre-parse to ensure syntax is valid
-  const stack: StackEntry[] = [];
+  const stack: StackEntry[] = [{ node: 'root', variables: new Set<string>() }];
   const foundVariables: string[] = ast.flatMap((node) => visitLiquidAST(node, stack));
   const distictVariables = Array.from(new Set(foundVariables));
   return distictVariables;

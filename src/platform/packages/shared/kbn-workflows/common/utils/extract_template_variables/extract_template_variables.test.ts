@@ -202,4 +202,330 @@ describe('extractTemplateVariables', () => {
     const variables = extractTemplateVariables(template);
     expect(variables).toEqual(['products', 'user.age', 'threshold']);
   });
+
+  it('should handle unless tag (inverse of if)', () => {
+    const template = `
+      {% unless user.isPremium %}
+        {{ upgrade.message }}
+      {% endunless %}
+      {{ user.name }}
+    `;
+
+    const variables = extractTemplateVariables(template);
+    expect(variables).toEqual(['user.isPremium', 'upgrade.message', 'user.name']);
+  });
+
+  it('should handle case/when statements', () => {
+    const template = `
+      {% case product.type %}
+        {% when "electronics" %}
+          {{ product.warranty }}
+        {% when "clothing" %}
+          {{ product.size }}
+        {% else %}
+          {{ product.description }}
+      {% endcase %}
+      {{ product.price }}
+    `;
+
+    const variables = extractTemplateVariables(template);
+    expect(variables).toEqual([
+      'product.type',
+      'product.warranty',
+      'product.size',
+      'product.description',
+      'product.price',
+    ]);
+  });
+
+  it('should handle elsif statements', () => {
+    const template = `
+      {% if user.age < 18 %}
+        Minor
+      {% elsif user.age < 65 %}
+        {{ user.benefits }}
+      {% else %}
+        {{ senior.discount }}
+      {% endif %}
+      {{ user.name }}
+    `;
+
+    const variables = extractTemplateVariables(template);
+    expect(variables).toEqual(['user.age', 'user.benefits', 'senior.discount', 'user.name']);
+  });
+
+  it('should handle capture tag', () => {
+    const template = `
+      {% capture fullName %}
+        {{ user.firstName }} {{ user.lastName }}
+      {% endcapture %}
+      {{ fullName }}
+      {{ user.email }}
+    `;
+
+    const variables = extractTemplateVariables(template);
+    expect(variables).toEqual(['user.firstName', 'user.lastName', 'user.email']);
+  });
+
+  it('should handle increment and decrement tags', () => {
+    const template = `
+      {% increment counter %}
+      {% decrement counter %}
+      {{ user.name }}
+      {{ counter }}
+    `;
+
+    const variables = extractTemplateVariables(template);
+    expect(variables).toEqual(['user.name', 'counter']);
+  });
+
+  it('should handle tablerow tag', () => {
+    const template = `
+      {% tablerow item in products %}
+        {{ item.name }} - {{ item.price }}
+      {% endtablerow %}
+      {{ total }}
+    `;
+
+    const variables = extractTemplateVariables(template);
+    expect(variables).toEqual(['products', 'total']);
+  });
+
+  it('should handle cycle tag in loops', () => {
+    const template = `
+      {% for item in items %}
+        {% cycle 'odd', 'even' %}: {{ item.name }}
+      {% endfor %}
+      {{ summary }}
+    `;
+
+    const variables = extractTemplateVariables(template);
+    expect(variables).toEqual(['items', 'summary']);
+  });
+
+  it('should handle break and continue in loops', () => {
+    const template = `
+      {% for item in products %}
+        {% if item.price > maxPrice %}{% continue %}{% endif %}
+        {% if item.stock == 0 %}{% break %}{% endif %}
+        {{ item.name }}
+      {% endfor %}
+      {{ total }}
+    `;
+
+    const variables = extractTemplateVariables(template);
+    expect(variables).toEqual(['products', 'maxPrice', 'total']);
+  });
+
+  it('should handle complex filter chains with variable arguments', () => {
+    const template = `
+      {{ products | where: "type", category | sort: sortField }}
+      {{ user.name | default: defaultName }}
+    `;
+
+    const variables = extractTemplateVariables(template);
+    expect(variables).toEqual(['products', 'category', 'sortField', 'user.name', 'defaultName']);
+  });
+
+  it('should handle nested for loops with multiple local variables', () => {
+    const template = `
+      {% for category in categories %}
+        {% for product in category.items %}
+          {{ product.name }} - {{ category.name }}
+        {% endfor %}
+        {{ category.total }}
+      {% endfor %}
+      {{ grandTotal }}
+    `;
+
+    const variables = extractTemplateVariables(template);
+    expect(variables).toEqual(['categories', 'grandTotal']);
+  });
+
+  it('should handle complex operator expressions', () => {
+    const template = `
+      {% if user.age >= minAge and user.age <= maxAge or user.isVIP %}
+        {{ user.discount }}
+      {% endif %}
+      {% if product.inStock and product.price < budget %}
+        {{ product.name }}
+      {% endif %}
+    `;
+
+    const variables = extractTemplateVariables(template);
+    expect(variables).toEqual([
+      'user.age',
+      'minAge',
+      'maxAge',
+      'user.isVIP',
+      'user.discount',
+      'product.inStock',
+      'product.price',
+      'budget',
+      'product.name',
+    ]);
+  });
+
+  it('should handle empty and blank values', () => {
+    const template = `
+      {% if user.name == empty %}
+        {{ defaultUser.name }}
+      {% endif %}
+      {% if product.description == blank %}
+        {{ product.shortDesc }}
+      {% endif %}
+    `;
+
+    const variables = extractTemplateVariables(template);
+    expect(variables).toEqual([
+      'user.name',
+      'defaultUser.name',
+      'product.description',
+      'product.shortDesc',
+    ]);
+  });
+
+  it('should handle forloop special variables', () => {
+    const template = `
+      {% for item in items %}
+        {{ forloop.index }}: {{ item.name }}
+        {% if forloop.first %}
+          First: {{ item.id }}
+        {% endif %}
+        {% if forloop.last %}
+          Last: {{ item.id }}
+        {% endif %}
+      {% endfor %}
+    `;
+
+    const variables = extractTemplateVariables(template);
+    expect(variables).toEqual(['items', 'forloop.index', 'forloop.first', 'forloop.last']);
+  });
+
+  it('should handle unless with elsif', () => {
+    const template = `
+      {% unless user.isActive %}
+        {{ inactiveMessage }}
+      {% elsif user.isPending %}
+        {{ pendingMessage }}
+      {% else %}
+        {{ user.status }}
+      {% endunless %}
+    `;
+
+    const variables = extractTemplateVariables(template);
+    expect(variables).toEqual([
+      'user.isActive',
+      'inactiveMessage',
+      'user.isPending',
+      'pendingMessage',
+      'user.status',
+    ]);
+  });
+
+  it('should handle tablerow with range', () => {
+    const template = `
+      {% tablerow i in (1..num) %}
+        {{ items[i] }}
+      {% endtablerow %}
+    `;
+
+    const variables = extractTemplateVariables(template);
+    expect(variables).toEqual(['num', 'items']);
+  });
+
+  it('should handle nested captures', () => {
+    const template = `
+      {% capture outer %}
+        {{ user.title }}
+        {% capture inner %}
+          {{ user.firstName }} {{ user.lastName }}
+        {% endcapture %}
+        {{ inner }}
+      {% endcapture %}
+      {{ outer }}
+      {{ user.email }}
+    `;
+
+    const variables = extractTemplateVariables(template);
+    expect(variables).toEqual(['user.title', 'user.firstName', 'user.lastName', 'user.email']);
+  });
+
+  it('should handle case with multiple when clauses', () => {
+    const template = `
+      {% case order.status %}
+        {% when "pending" %}
+          {{ order.estimatedTime }}
+        {% when "processing" %}
+          {{ order.currentStep }}
+        {% when "shipped" %}
+          {{ order.trackingNumber }}
+        {% when "delivered" %}
+          {{ order.deliveryDate }}
+        {% else %}
+          {{ order.errorMessage }}
+      {% endcase %}
+    `;
+
+    const variables = extractTemplateVariables(template);
+    expect(variables).toEqual([
+      'order.status',
+      'order.estimatedTime',
+      'order.currentStep',
+      'order.trackingNumber',
+      'order.deliveryDate',
+      'order.errorMessage',
+    ]);
+  });
+
+  it('should handle complex nested conditionals', () => {
+    const template = `
+      {% if user.isLoggedIn %}
+        {% if user.hasAccess %}
+          {% unless user.isBlocked %}
+            {{ user.dashboard }}
+          {% else %}
+            {{ blockedMessage }}
+          {% endunless %}
+        {% else %}
+          {{ accessDenied }}
+        {% endif %}
+      {% else %}
+        {{ loginPrompt }}
+      {% endif %}
+    `;
+
+    const variables = extractTemplateVariables(template);
+    expect(variables).toEqual([
+      'user.isLoggedIn',
+      'user.hasAccess',
+      'user.isBlocked',
+      'user.dashboard',
+      'blockedMessage',
+      'accessDenied',
+      'loginPrompt',
+    ]);
+  });
+
+  it('should handle for loop with offset and limit', () => {
+    const template = `
+      {% for item in products offset: startIndex limit: pageSize %}
+        {{ item.name }}
+      {% endfor %}
+    `;
+
+    const variables = extractTemplateVariables(template);
+    expect(variables).toEqual(['products', 'startIndex', 'pageSize']);
+  });
+
+  it('should handle reversed for loops', () => {
+    const template = `
+      {% for item in products reversed %}
+        {{ item.name }}
+      {% endfor %}
+    `;
+
+    const variables = extractTemplateVariables(template);
+    expect(variables).toEqual(['products']);
+  });
 });
