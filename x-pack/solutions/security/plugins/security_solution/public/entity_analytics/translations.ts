@@ -7,6 +7,34 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const SHOW_USERS_RISK_SCORE = i18n.translate(
+  'xpack.securitySolution.riskScore.riskScorePreview.users.show',
+  {
+    defaultMessage: 'Show users',
+  }
+);
+
+export const HIDE_USERS_RISK_SCORE = i18n.translate(
+  'xpack.securitySolution.riskScore.riskScorePreview.users.hide',
+  {
+    defaultMessage: 'Hide users',
+  }
+);
+
+export const LOADING_RISK_ENGINE_SETTINGS = i18n.translate(
+  'xpack.securitySolution.riskScore.riskScorePreview.loadingRiskEngineSettings',
+  {
+    defaultMessage: 'Loading risk engine settings...',
+  }
+);
+
+export const RISK_ENGINE_STATUS = i18n.translate(
+  'xpack.securitySolution.riskScore.riskScorePreview.status',
+  {
+    defaultMessage: 'Status',
+  }
+);
+
 export const RISK_ENGINE_STATUS_ON = i18n.translate(
   'xpack.securitySolution.riskScore.riskScorePreview.statusOn',
   {

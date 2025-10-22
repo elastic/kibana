@@ -45,7 +45,7 @@ export const RiskScoreConfigurationSection = ({
         <EuiSpacer size="s" />
         <EuiLoadingSpinner size="m" />
         <EuiText size="s">
-          <p>{'Loading risk engine settings...'}</p>
+          <p>{i18n.LOADING_RISK_ENGINE_SETTINGS}</p>
         </EuiText>
       </>
     );
