@@ -9,7 +9,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import type { WorkflowListDto } from '@kbn/workflows';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../../../hooks/use_kibana';
 import type { WorkflowsSearchParams } from '../../../types';
 
 export function useWorkflows(params: WorkflowsSearchParams) {
@@ -19,7 +19,7 @@ export function useWorkflows(params: WorkflowsSearchParams) {
     networkMode: 'always',
     queryKey: ['workflows', params],
     queryFn: () => {
-      return http!.post<WorkflowListDto>('/api/workflows/search', {
+      return http.post<WorkflowListDto>('/api/workflows/search', {
         body: JSON.stringify(params),
       });
     },

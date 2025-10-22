@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { z } from '@kbn/zod';
 import {
   expectZodSchemaEqual,
   getSchemaAtPath,
@@ -14,7 +15,6 @@ import {
   inferZodType,
   isValidSchemaPath,
 } from './zod_utils';
-import { z } from '@kbn/zod';
 
 describe('isValidSchemaPath', () => {
   it('should return true for simple paths', () => {
