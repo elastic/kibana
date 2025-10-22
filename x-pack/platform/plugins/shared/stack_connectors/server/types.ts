@@ -14,8 +14,6 @@ export type {
   CasesWebhookActionParams,
   PagerDutyConnectorTypeId,
   PagerDutyActionParams,
-  ServerLogConnectorTypeId,
-  ServerLogActionParams,
   SlackApiConnectorTypeId,
   SlackApiActionParams,
   SlackWebhookConnectorTypeId,

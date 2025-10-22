@@ -47,8 +47,6 @@ export { ServiceNowITSMConnectorTypeId } from './servicenow_itsm';
 export { ServiceNowSIRConnectorTypeId } from './servicenow_sir';
 export { ConnectorTypeId as PagerDutyConnectorTypeId } from './pagerduty';
 export type { ActionParamsType as PagerDutyActionParams } from './pagerduty';
-export { ConnectorTypeId as ServerLogConnectorTypeId } from './server_log';
-export type { ActionParamsType as ServerLogActionParams } from './server_log';
 export { ServiceNowITOMConnectorTypeId } from './servicenow_itom';
 export { ConnectorTypeId as SlackWebhookConnectorTypeId } from './slack';
 export type { ActionParamsType as SlackWebhookActionParams } from './slack';

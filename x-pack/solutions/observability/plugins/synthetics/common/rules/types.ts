@@ -7,7 +7,6 @@
 
 import type {
   PagerDutyConnectorTypeId,
-  ServerLogConnectorTypeId,
   ServiceNowITSMConnectorTypeId as ServiceNowConnectorTypeId,
   SlackWebhookConnectorTypeId,
   SlackApiConnectorTypeId,
@@ -19,6 +18,7 @@ import type {
   EmailConnectorTypeId,
   EsIndexConnectorTypeId,
   JiraConnectorTypeId,
+  ServerLogConnectorTypeId,
 } from '@kbn/connector-schemas';
 
 import type { ActionConnector as RawActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
