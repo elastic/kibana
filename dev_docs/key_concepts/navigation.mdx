@@ -115,32 +115,37 @@ const MySPALink = () =>
 </a>;
 ```
 
-As it would be too much boilerplate to do this for each link in your app, there is a handy wrapper that helps with it:
-[RedirectAppLinks](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/shared-ux/link/redirect_app/impl/src/redirect_app_links.tsx).
+Rather than handling this manually for each link, Kibana now provides a global solution: `GlobalRedirectAppLinks`.
+This component is registered once by the core rendering service and automatically handles link clicks on the entire document,
+enabling SPA-friendly in-app navigation without requiring manual wrapping of component trees.
+
+This means you can use regular links throughout your app without any wrapper:
 
 ```jsx
 const MyApp = () =>
-<RedirectAppLinks coreStart={{application: core.application}}>
-  {/*...*/}
-  {/* navigations using this link will happen in SPA friendly way */}
-  <a href={urlToADashboard}>Go to Dashboard</a>
-  {/*...*/}
-</RedirectAppLinks>
+  <div>
+    {/*...*/}
+    {/* Link navigations automatically happen in SPA friendly way */}
+    <a href={urlToADashboard}>Go to Dashboard</a>
+    {/*...*/}
+  </div>
 ```
 
-NOTE: There may be cases where you need a full page reload. While rare and should be avoided, rather than implement your own navigation, 
-you can use the `navigateToUrl` `forceRedirect` option.
+> **Deprecation Notice**: The previous `RedirectAppLinks` wrapper approach is now deprecated. It's no longer necessary to wrap component trees,
+> as the global solution handles all links automatically. Existing usages will continue to work for backward compatibility, but new code should rely on the global solution instead.
+
+If you need to prevent the global link handling (e.g., to force a full page reload or control navigation manually), you can use `preventDefault()` or `stopPropagation()` on the click event:
 
 ```tsx
-const MyForcedPageReloadLink = () => 
-  <a 
-    href={urlToSomeSpecialApp} 
+const MyCustomLink = () =>
+  <a
+    href={urlToSomeSpecialApp}
     onClick={(e) => {
       e.preventDefault();
-      core.application.navigateToUrl('someSpecialApp', { forceRedirect: true }); 
+      core.application.navigateToUrl('someSpecialApp', { forceRedirect: true });
     }}
-  > 
-    Go to Some Special App 
+  >
+    Go to Some Special App
   </a>;
 ```
 
