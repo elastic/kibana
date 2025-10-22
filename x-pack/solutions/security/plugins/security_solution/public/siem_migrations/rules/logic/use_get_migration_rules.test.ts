@@ -6,7 +6,6 @@
  */
 
 import { renderHook, waitFor, act } from '@testing-library/react';
-import '@kbn/react-query/mock';
 import { useQueryClient } from '@kbn/react-query';
 import { useGetMigrationRules, useInvalidateGetMigrationRules } from './use_get_migration_rules';
 import { migrationRules } from '../__mocks__';
@@ -14,6 +13,10 @@ import { getMigrationRules } from '../api';
 import { TestProviders } from '../../../common/mock/test_providers';
 
 jest.mock('../api');
+jest.mock('@kbn/react-query', () => ({
+  ...jest.requireActual('@kbn/react-query'),
+  useQueryClient: jest.fn(),
+}));
 
 describe('Get Migration Rules Hooks', () => {
   afterEach(() => {

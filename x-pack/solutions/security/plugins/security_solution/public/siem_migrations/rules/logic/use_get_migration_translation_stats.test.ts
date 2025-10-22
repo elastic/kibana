@@ -6,7 +6,6 @@
  */
 
 import { renderHook, waitFor, act } from '@testing-library/react';
-import '@kbn/react-query/mock';
 import { useQueryClient } from '@kbn/react-query';
 import {
   useGetMigrationTranslationStats,
@@ -16,6 +15,10 @@ import { getRuleMigrationTranslationStats } from '../api';
 import { TestProviders } from '../../../common/mock/test_providers';
 
 jest.mock('../api');
+jest.mock('@kbn/react-query', () => ({
+  ...jest.requireActual('@kbn/react-query'),
+  useQueryClient: jest.fn(),
+}));
 
 describe('Get Migration Translation Stats Hooks', () => {
   afterEach(() => {
