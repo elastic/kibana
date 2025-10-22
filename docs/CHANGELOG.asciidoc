@@ -149,7 +149,7 @@ Discover::
 * Ensures that the combined filters are considered when selecting the correct fields for the query while the `courier:ignoreFilterIfFieldNotInIndex` advanced setting is enabled ({kibana-pull}238945[#238945]).
 * Clears time field sorting after going from Classic to {esql} mode ({kibana-pull}235338[#235338]).
 Elastic Observability solution::
-* Removes unecessary `_source` from query as we use fields ({kibana-pull}239205[#239205]).
+* Removes unecessary `_source` from APM query ({kibana-pull}239205[#239205]).
 * Uses word boundaries to only replace the metric name as an identifier and not as part of other text ({kibana-pull}238849[#238849]).
 * Fixes error when Observability AI Assistant is disabled ({kibana-pull}238811[#238811]).
 * Uses `runWithCache` for Fleet bulk operations ({kibana-pull}238326[#238326]).
