@@ -102,7 +102,7 @@ export const ColorSwatch = ({
               border-radius: 50%;
               top: 8px;
               border: 3px solid ${euiTheme.euiTheme.colors.emptyShade};
-              ${euiShadowSmall(euiTheme)};
+              ${euiShadowSmall(euiTheme, { border: 'none' })};
               backgroundcolor: ${colorHex};
               cursor: pointer;
             `}

@@ -7,41 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge, EuiToolTip } from '@elastic/eui';
-import { FormattedRelative } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
+import { EuiToolTip } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import type { WorkflowExecutionHistoryModel } from '@kbn/workflows';
+import { useGetFormattedDateTime } from './use_formatted_date';
 import type { WorkflowTrigger } from '../../../server/lib/schedule_utils';
 import { getWorkflowNextExecutionTime } from '../../lib/next_execution_time';
-import { useGetFormattedDateTime } from './use_formatted_date';
 
 interface NextExecutionTimeProps {
   triggers: WorkflowTrigger[];
+  history: WorkflowExecutionHistoryModel[];
+  children: React.ReactElement;
 }
 
-export function NextExecutionTime({ triggers }: NextExecutionTimeProps) {
-  const nextExecutionTime = getWorkflowNextExecutionTime(triggers);
+export function NextExecutionTime({ triggers, history, children }: NextExecutionTimeProps) {
+  const nextExecutionTime = getWorkflowNextExecutionTime(triggers, history);
   const getFormattedDateTime = useGetFormattedDateTime();
-
-  if (!nextExecutionTime) {
-    return null;
-  }
 
   return (
     <EuiToolTip
-      content={i18n.translate('workflows.workflowList.nextExecutionTime.tooltip', {
-        defaultMessage: 'Next execution: {date}',
-        values: {
-          date: getFormattedDateTime(nextExecutionTime),
-        },
-      })}
+      content={
+        nextExecutionTime &&
+        i18n.translate('workflows.workflowList.nextExecutionTime.tooltip', {
+          defaultMessage: 'Next execution: {date}',
+          values: {
+            date: getFormattedDateTime(nextExecutionTime),
+          },
+        })
+      }
     >
-      <EuiBadge color="hollow">
-        {i18n.translate('workflows.workflowList.nextExecutionTime.nextExecutionTimeText', {
-          defaultMessage: 'Next execution: ',
-        })}
-        <FormattedRelative value={nextExecutionTime} />
-      </EuiBadge>
+      {children}
     </EuiToolTip>
   );
 }

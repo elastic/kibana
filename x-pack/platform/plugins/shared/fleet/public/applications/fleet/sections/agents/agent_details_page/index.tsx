@@ -23,7 +23,7 @@ import {
   useBreadcrumbs,
   useStartServices,
   useIntraAppState,
-  sendGetAgentTags,
+  sendGetAgentTagsForRq,
   useAgentlessResources,
 } from '../../../hooks';
 import { WithHeaderLayout } from '../../../layouts';
@@ -86,7 +86,13 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     () => (
       <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
         <EuiFlexItem>
-          <EuiButtonEmpty iconType="arrowLeft" href={getHref('agent_list')} flush="left" size="xs">
+          <EuiButtonEmpty
+            iconType="arrowLeft"
+            href={getHref('agent_list')}
+            flush="left"
+            size="xs"
+            aria-label="View all agents"
+          >
             <FormattedMessage
               id="xpack.fleet.agentDetails.viewAgentListTitle"
               defaultMessage="View all agents"
@@ -126,13 +132,10 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     // Fetch all tags when the component mounts
     const fetchTags = async () => {
       try {
-        const agentTagsResponse = await sendGetAgentTags({
+        const agentTagsResponse = await sendGetAgentTagsForRq({
           showInactive: agent?.status === 'inactive',
         });
-        if (agentTagsResponse.error) {
-          throw agentTagsResponse.error;
-        }
-        const newAllTags = agentTagsResponse?.data?.items ?? [];
+        const newAllTags = agentTagsResponse?.items ?? [];
         setAllTags(newAllTags);
       } catch (err) {
         notifications.toasts.addError(err, {

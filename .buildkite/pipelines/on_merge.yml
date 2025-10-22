@@ -17,6 +17,20 @@ steps:
           limit: 1
   - wait
 
+  - command: .buildkite/scripts/steps/store_cache.sh
+    label: Store Cache for build
+    timeout_in_minutes: 10
+    id: store_cache
+    soft_fail: true
+    depends_on:
+      - terrazzo-initial-pipeline-upload
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
+      diskSizeGb: 95
+
   - command: .buildkite/scripts/steps/on_merge_build_and_metrics.sh
     label: Build Kibana Distribution
     agents:
@@ -565,7 +579,7 @@ steps:
       provider: gcp
       enableNestedVirtualization: true
       machineType: n2-standard-4
-    timeout_in_minutes: 60
+    timeout_in_minutes: 75
     parallelism: 20
     retry:
       automatic:
@@ -580,7 +594,7 @@ steps:
       provider: gcp
       enableNestedVirtualization: true
       machineType: n2-standard-4
-    timeout_in_minutes: 60
+    timeout_in_minutes: 75
     parallelism: 14
     retry:
       automatic:

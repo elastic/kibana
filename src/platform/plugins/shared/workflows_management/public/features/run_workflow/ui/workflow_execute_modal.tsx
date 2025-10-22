@@ -8,58 +8,104 @@
  */
 
 import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiModal,
+  EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiModalBody,
-  useGeneratedHtmlId,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiRadio,
-  EuiButton,
-  useEuiTheme,
   EuiText,
+  useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
-import React, { useState } from 'react';
-import type { WorkflowYaml } from '@kbn/workflows';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { Global, css } from '@emotion/react';
+import { css, Global } from '@emotion/react';
 import capitalize from 'lodash/capitalize';
-import { WorkflowExecuteIndexForm } from './workflow_execute_index_form';
-import { MANUAL_TRIGGERS_DESCRIPTIONS } from '../../../../common/translations';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { WorkflowYaml } from '@kbn/workflows';
 import { WorkflowExecuteEventForm } from './workflow_execute_event_form';
+import { WorkflowExecuteIndexForm } from './workflow_execute_index_form';
 import { WorkflowExecuteManualForm } from './workflow_execute_manual_form';
+import { MANUAL_TRIGGERS_DESCRIPTIONS } from '../../../../common/translations';
 
 type TriggerType = 'manual' | 'index' | 'alert';
+
+function getDefaultTrigger(definition: WorkflowYaml | null): TriggerType {
+  if (!definition) {
+    return 'alert';
+  }
+
+  const hasManualTrigger = definition.triggers?.some((trigger) => trigger.type === 'manual');
+  const hasInputs = definition.inputs && definition.inputs.length > 0;
+
+  if (hasManualTrigger && hasInputs) {
+    return 'manual';
+  }
+  return 'alert';
+}
 
 export function WorkflowExecuteModal({
   definition,
   onClose,
   onSubmit,
 }: {
-  definition: WorkflowYaml | null;
+  definition: WorkflowYaml;
   onClose: () => void;
-  onSubmit: (data: Record<string, any>) => void;
+  onSubmit: (data: Record<string, any>) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
 }) {
   const modalTitleId = useGeneratedHtmlId();
   const enabledTriggers = ['alert', 'index', 'manual'];
-  const [selectedTrigger, setSelectedTrigger] = useState<TriggerType>('alert');
+  const defaultTrigger = useMemo(() => getDefaultTrigger(definition), [definition]);
+  const [selectedTrigger, setSelectedTrigger] = useState<TriggerType>(defaultTrigger);
 
   const [executionInput, setExecutionInput] = useState<string>('');
   const [executionInputErrors, setExecutionInputErrors] = useState<string | null>(null);
 
   const { euiTheme } = useEuiTheme();
 
-  const handleSubmit = () => {
+  const handleSubmit = useCallback(() => {
     onSubmit(JSON.parse(executionInput));
     onClose();
-  };
+  }, [onSubmit, onClose, executionInput]);
 
-  const handleChangeTrigger = (trigger: TriggerType): void => {
-    setExecutionInput('');
-    setSelectedTrigger(trigger);
-  };
+  const handleChangeTrigger = useCallback(
+    (trigger: TriggerType): void => {
+      setExecutionInput('');
+      setSelectedTrigger(trigger);
+    },
+    [setExecutionInput, setSelectedTrigger]
+  );
+
+  const shouldAutoRun = useMemo(() => {
+    if (definition.triggers?.some((trigger) => trigger.type === 'alert') || definition.inputs) {
+      return false;
+    }
+    return true;
+  }, [definition]);
+
+  useEffect(() => {
+    if (shouldAutoRun) {
+      onSubmit({});
+      onClose();
+      return;
+    }
+    // Default trigger selection
+    if (definition.triggers?.some((trigger) => trigger.type === 'alert')) {
+      setSelectedTrigger('alert');
+      return;
+    }
+    if (definition.inputs) {
+      setSelectedTrigger('manual');
+    }
+  }, [shouldAutoRun, onSubmit, onClose, definition]);
+
+  if (shouldAutoRun) {
+    // Not rendered if the workflow should auto run, will close the modal automatically
+    return null;
+  }
 
   return (
     <>
@@ -82,7 +128,7 @@ export function WorkflowExecuteModal({
         style={{ width: '1200px', height: '100vh' }}
       >
         <EuiModalHeader>
-          <EuiModalHeaderTitle id={modalTitleId}>Run Workflow</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle id={modalTitleId}>{'Run Workflow'}</EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
           <EuiFlexGroup direction="row" gutterSize="l">

@@ -10,6 +10,7 @@
 import type { EuiButtonGroupOptionProps, UseEuiTheme } from '@elastic/eui';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiButtonGroup,
   EuiButtonIcon,
   EuiConfirmModal,
@@ -25,13 +26,15 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo, useState } from 'react';
-import { WorkflowUnsavedChangesBadge } from '../../../widgets/workflow_yaml_editor/ui/workflow_unsaved_changes_badge';
+import { PLUGIN_ID } from '../../../../common';
+import { useKibana } from '../../../hooks/use_kibana';
 import type { WorkflowUrlStateTabType } from '../../../hooks/use_workflow_url_state';
 import { getRunWorkflowTooltipContent } from '../../../shared/ui';
+import { WorkflowUnsavedChangesBadge } from '../../../widgets/workflow_yaml_editor/ui/workflow_unsaved_changes_badge';
 
 export interface WorkflowDetailHeaderProps {
   name: string | undefined;
@@ -44,7 +47,6 @@ export interface WorkflowDetailHeaderProps {
   handleSave: () => void;
   isEnabled: boolean;
   handleToggleWorkflow: () => void;
-  canTestWorkflow: boolean;
   isValid: boolean;
   hasUnsavedChanges: boolean;
   // TODO: manage it in a workflow state context
@@ -63,7 +65,6 @@ export const WorkflowDetailHeader = ({
   canSaveWorkflow,
   isEnabled,
   handleToggleWorkflow,
-  canTestWorkflow,
   handleTabChange,
   isValid,
   hasUnsavedChanges,
@@ -71,6 +72,7 @@ export const WorkflowDetailHeader = ({
   setHighlightDiff,
   lastUpdatedAt,
 }: WorkflowDetailHeaderProps) => {
+  const { application } = useKibana().services;
   const styles = useMemoCss(componentStyles);
   const [showRunConfirmation, setShowRunConfirmation] = useState(false);
 
@@ -78,13 +80,17 @@ export const WorkflowDetailHeader = ({
     () => [
       {
         id: 'workflow',
-        label: 'Workflow',
+        label: i18n.translate('workflows.workflowDetailHeader.workflowTab', {
+          defaultMessage: 'Workflow',
+        }),
         iconType: 'grid',
         type: 'button',
       },
       {
         id: 'executions',
-        label: 'Executions',
+        label: i18n.translate('workflows.workflowDetailHeader.executionsTab', {
+          defaultMessage: 'Executions',
+        }),
         iconType: 'play',
       },
     ],
@@ -94,6 +100,10 @@ export const WorkflowDetailHeader = ({
   const runWorkflowTooltipContent = useMemo(() => {
     return getRunWorkflowTooltipContent(isValid, canRunWorkflow, isEnabled, false);
   }, [isValid, canRunWorkflow, isEnabled]);
+
+  const handleSaveClick = useCallback<React.MouseEventHandler<HTMLButtonElement>>(() => {
+    handleSave();
+  }, [handleSave]);
 
   const handleRunClickWithUnsavedCheck = () => {
     if (hasUnsavedChanges) {
@@ -112,11 +122,26 @@ export const WorkflowDetailHeader = ({
     setShowRunConfirmation(false);
   };
 
+  const backLinkLabel = i18n.translate('workflows.workflowDetailHeader.backLink', {
+    defaultMessage: 'Back to Workflows',
+  });
+
   return (
     <>
       <EuiPageTemplate offset={0} minHeight={0} grow={false} css={styles.pageTemplate}>
         <EuiPageTemplate.Header css={styles.header} restrictWidth={false} bottomBorder={false}>
           <EuiPageHeaderSection css={styles.headerSection}>
+            <EuiButtonEmpty
+              iconType="sortLeft"
+              size="s"
+              flush="left"
+              onClick={() => {
+                application.navigateToApp(PLUGIN_ID);
+              }}
+              aria-label={backLinkLabel}
+            >
+              {backLinkLabel}
+            </EuiButtonEmpty>
             <EuiFlexGroup
               alignItems="center"
               responsive={false}
@@ -131,7 +156,7 @@ export const WorkflowDetailHeader = ({
                   css={styles.skeletonTitle}
                 >
                   <EuiTitle size="m" css={styles.title}>
-                    <h1>{name}</h1>
+                    <h2>{name}</h2>
                   </EuiTitle>
                 </EuiSkeletonTitle>
               </EuiFlexItem>
@@ -220,7 +245,7 @@ export const WorkflowDetailHeader = ({
                 fill
                 color="primary"
                 size="s"
-                onClick={handleSave}
+                onClick={handleSaveClick}
                 disabled={!canSaveWorkflow || isLoading}
               >
                 <FormattedMessage id="keepWorkflows.buttonText" defaultMessage="Save" ignoreTag />

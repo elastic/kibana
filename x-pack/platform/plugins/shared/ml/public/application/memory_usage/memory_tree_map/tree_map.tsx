@@ -137,6 +137,9 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
           selectedOptions={selectedOptions ?? []}
           onChange={setSelectedOptions}
           data-test-subj="mlJobTreeMapComboBox"
+          aria-label={i18n.translate('xpack.ml.memoryUsage.treeMap.typeFilterAriaLabel', {
+            defaultMessage: 'Job or model type',
+          })}
         />
 
         <EuiSpacer size="s" />

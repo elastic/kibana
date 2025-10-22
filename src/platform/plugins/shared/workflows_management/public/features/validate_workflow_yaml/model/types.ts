@@ -7,6 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export interface ConnectorIdItem {
+  id: string;
+  connectorType: string;
+  type: 'connector-id';
+  key: string | null;
+  startLineNumber: number;
+  startColumn: number;
+  endLineNumber: number;
+  endColumn: number;
+  yamlPath: (string | number)[];
+}
+
 export interface VariableItem {
   id: string;
   type: 'regexp' | 'foreach';
@@ -20,7 +32,7 @@ export interface VariableItem {
 
 export interface StepNameInfo {
   name: string;
-  node: any;
+  node: any; // eslint-disable-line @typescript-eslint/no-explicit-any
   startLineNumber: number;
   startColumn: number;
   endLineNumber: number;
@@ -36,36 +48,68 @@ interface YamlValidationResultBase {
   endLineNumber: number;
   endColumn: number;
   hoverMessage: string | null;
+  afterMessage?: string | null;
+  source?: string; // the source of the marker, details e.g. yaml schema uri
 }
 
 interface YamlValidationResultNonUniqueStepName extends YamlValidationResultBase {
   severity: YamlValidationErrorSeverity;
   message: string;
-  source: 'step-name-validation';
+  owner: 'step-name-validation';
 }
 
 interface YamlValidationResultVariableError extends YamlValidationResultBase {
   severity: YamlValidationErrorSeverity;
   message: string;
-  source: 'variable-validation';
+  owner: 'variable-validation';
 }
 
 // null means that the result is not an error
 interface YamlValidationResultVariableValid extends YamlValidationResultBase {
   severity: null;
   message: null;
-  source: 'variable-validation';
+  owner: 'variable-validation';
 }
 
 interface YamlValidationResultMonacoYaml extends YamlValidationResultBase {
   severity: YamlValidationErrorSeverity;
   message: string;
-  source: 'monaco-yaml';
+  owner: 'yaml';
   hoverMessage: null;
+}
+
+interface YamlValidationResultLiquidTemplate extends YamlValidationResultBase {
+  severity: YamlValidationErrorSeverity;
+  message: string;
+  owner: 'liquid-template-validation';
+}
+interface YamlValidationResultConnectorIdValid extends YamlValidationResultBase {
+  severity: null;
+  message: null;
+  owner: 'connector-id-validation';
+}
+
+interface YamlValidationResultConnectorIdError extends YamlValidationResultBase {
+  severity: YamlValidationErrorSeverity;
+  message: string;
+  owner: 'connector-id-validation';
+}
+
+export function isYamlValidationMarkerOwner(owner: string): owner is YamlValidationResult['owner'] {
+  return [
+    'step-name-validation',
+    'variable-validation',
+    'liquid-template-validation',
+    'yaml',
+    'connector-id-validation',
+  ].includes(owner);
 }
 
 export type YamlValidationResult =
   | YamlValidationResultNonUniqueStepName
   | YamlValidationResultVariableError
   | YamlValidationResultVariableValid
-  | YamlValidationResultMonacoYaml;
+  | YamlValidationResultMonacoYaml
+  | YamlValidationResultLiquidTemplate
+  | YamlValidationResultConnectorIdError
+  | YamlValidationResultConnectorIdValid;

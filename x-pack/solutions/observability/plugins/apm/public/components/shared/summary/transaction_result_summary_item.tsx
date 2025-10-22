@@ -20,7 +20,7 @@ export function TransactionResultSummaryItem({ transactionResult }: Props) {
         defaultMessage: 'Result',
       })}
     >
-      <EuiBadge color="default" title={undefined}>
+      <EuiBadge color="default" title={undefined} tabIndex={0}>
         {transactionResult}
       </EuiBadge>
     </EuiToolTip>

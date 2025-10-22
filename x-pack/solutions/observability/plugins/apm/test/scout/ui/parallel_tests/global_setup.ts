@@ -8,13 +8,15 @@
 import { globalSetupHook } from '@kbn/scout-oblt';
 import type { ApmFields, SynthtraceGenerator } from '@kbn/apm-synthtrace-client';
 import { opbeans } from '../fixtures/synthtrace/opbeans';
+import { servicesDataFromTheLast24Hours } from '../fixtures/synthtrace/last_24_hours';
 import { testData } from '../fixtures';
 
 globalSetupHook('Ingest data to Elasticsearch', async ({ apmSynthtraceEsClient }) => {
-  const dataGenerator: SynthtraceGenerator<ApmFields> = opbeans({
+  const opbeansDataGenerator: SynthtraceGenerator<ApmFields> = opbeans({
     from: new Date(testData.OPBEANS_START_DATE).getTime(),
     to: new Date(testData.OPBEANS_END_DATE).getTime(),
   });
 
-  await apmSynthtraceEsClient.index(dataGenerator);
+  await apmSynthtraceEsClient.index(opbeansDataGenerator);
+  await apmSynthtraceEsClient.index(servicesDataFromTheLast24Hours());
 });
