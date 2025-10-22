@@ -8,8 +8,8 @@
  */
 
 import type { AnyAction, Dispatch, Middleware, MiddlewareAPI } from '@reduxjs/toolkit';
+import { _setGeneratedSchemaInternal, setConnectors } from './slice';
 import type { RootState } from './types';
-import { setConnectors, _setGeneratedSchemaInternal } from './slice';
 import { getWorkflowZodSchemaLoose } from '../../../../../common/schema';
 
 export const schemaGenerationMiddleware: Middleware =

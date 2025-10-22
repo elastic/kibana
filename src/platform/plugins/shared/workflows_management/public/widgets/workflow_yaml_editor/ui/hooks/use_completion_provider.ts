@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useSelector } from 'react-redux';
 import { useMemo, useRef } from 'react';
+import { useSelector } from 'react-redux';
+import { getCompletionItemProvider } from '../../lib/get_completion_item_provider';
 import type { WorkflowEditorState } from '../../lib/store';
 import { selectWorkflowEditorState } from '../../lib/store';
-import { getCompletionItemProvider } from '../../lib/get_completion_item_provider';
 
 export const useCompletionProvider = () => {
   const editorState = useSelector(selectWorkflowEditorState);
