@@ -31,7 +31,8 @@ export function handleSetProcessor(
       assumptions,
       processorIndex,
       isConditional,
-      `set: copy from '${processor.copy_from}' to '${processor.to}'`
+      `set: copy from '${processor.copy_from}' to '${processor.to}'`,
+      processor.customIdentifier
     );
   } else if (processor.value !== undefined) {
     // Setting a literal value - infer type from the value
@@ -43,7 +44,8 @@ export function handleSetProcessor(
       assumptions,
       processorIndex,
       isConditional,
-      `set: assign ${valueType} value to '${processor.to}'`
+      `set: assign ${valueType} value to '${processor.to}'`,
+      processor.customIdentifier
     );
   }
 }

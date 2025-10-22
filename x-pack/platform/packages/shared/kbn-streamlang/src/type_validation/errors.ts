@@ -16,13 +16,20 @@ export class ConditionalTypeChangeError extends Error {
   constructor(
     public field: string,
     public types: PrimitiveType[],
-    public processorIndices: number[]
+    public processorIndices: number[],
+    public customIdentifiers: Array<string | undefined>
   ) {
+    const identifierInfo = customIdentifiers.some((id) => id)
+      ? ` (processors: ${customIdentifiers
+          .map((id, i) => id || `index ${processorIndices[i]}`)
+          .join(', ')})`
+      : ` at processors ${processorIndices.join(', ')}`;
+
     super(
       `Field '${field}' has conditional type changes: ` +
-        `types ${types.map((t) => `'${t}'`).join(', ')} ` +
-        `at processors ${processorIndices.join(', ')}. ` +
-        `Types can only change unconditionally (outside conditional blocks).`
+        `types ${types.map((t) => `'${t}'`).join(', ')}` +
+        identifierInfo +
+        `. Types can only change unconditionally (outside conditional blocks).`
     );
     this.name = 'ConditionalTypeChangeError';
     Object.setPrototypeOf(this, ConditionalTypeChangeError.prototype);

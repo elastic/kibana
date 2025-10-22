@@ -24,7 +24,8 @@ export function assignType(
   assumptions: TypeAssumption[],
   processorIndex: number,
   isConditional: boolean,
-  reason: string
+  reason: string,
+  customIdentifier?: string
 ): void {
   const existing = state.get(fieldName);
 
@@ -32,7 +33,7 @@ export function assignType(
   if (!existing) {
     state.set(fieldName, {
       currentType: newType,
-      allAssignments: [{ type: newType, processorIndex, isConditional }],
+      allAssignments: [{ type: newType, processorIndex, isConditional, customIdentifier }],
     });
     return;
   }
@@ -41,7 +42,12 @@ export function assignType(
 
   // Case 2: Same type - just record the assignment
   if (currentType === newType) {
-    existing.allAssignments.push({ type: newType, processorIndex, isConditional });
+    existing.allAssignments.push({
+      type: newType,
+      processorIndex,
+      isConditional,
+      customIdentifier,
+    });
     return;
   }
 
@@ -49,7 +55,12 @@ export function assignType(
   if (isPrimitiveType(currentType) && isPrimitiveType(newType)) {
     // Different primitive types
     // Record the assignment first (for validation later)
-    existing.allAssignments.push({ type: newType, processorIndex, isConditional });
+    existing.allAssignments.push({
+      type: newType,
+      processorIndex,
+      isConditional,
+      customIdentifier,
+    });
 
     if (!isConditional) {
       // Unconditional type change is OK - update the current type
@@ -69,7 +80,12 @@ export function assignType(
       reason: `${reason} (field '${fieldName}' has type '${currentType}')`,
     });
     // Keep the primitive type
-    existing.allAssignments.push({ type: currentType, processorIndex, isConditional });
+    existing.allAssignments.push({
+      type: currentType,
+      processorIndex,
+      isConditional,
+      customIdentifier,
+    });
     return;
   }
 
@@ -83,7 +99,12 @@ export function assignType(
     });
     // Update to primitive type
     existing.currentType = newType;
-    existing.allAssignments.push({ type: newType, processorIndex, isConditional });
+    existing.allAssignments.push({
+      type: newType,
+      processorIndex,
+      isConditional,
+      customIdentifier,
+    });
     return;
   }
 
@@ -99,7 +120,12 @@ export function assignType(
     });
 
     existing.currentType = mergedPlaceholder;
-    existing.allAssignments.push({ type: mergedPlaceholder, processorIndex, isConditional });
+    existing.allAssignments.push({
+      type: mergedPlaceholder,
+      processorIndex,
+      isConditional,
+      customIdentifier,
+    });
     return;
   }
 
@@ -126,53 +152,75 @@ export function getOrCreateFieldType(fieldName: string, state: TypeState): Field
 /**
  * Validate that no field has conditional type changes.
  * This should be called after all assignments are done.
+ *
+ * The validation tracks type progression and only flags conditional assignments
+ * that would change the type from what it was immediately before the conditional.
+ *
+ * Example that's OK:
+ *   1. field = "string" (unconditional, type: string)
+ *   2. field = 123 (unconditional, type: number)
+ *   3. field = 456 (conditional, type: number) <- OK, matches current type
+ *
+ * Example that's NOT OK:
+ *   1. field = "string" (unconditional, type: string)
+ *   2. field = 123 (conditional, type: number) <- ERROR, changes from string
  */
 export function validateNoConditionalTypeChanges(state: TypeState): void {
   const entries = Array.from(state.entries());
   for (const [fieldName, fieldInfo] of entries) {
     const { allAssignments } = fieldInfo;
 
-    // Group assignments by whether they're conditional
-    const conditionalAssignments = allAssignments.filter((a) => a.isConditional);
-    const unconditionalAssignments = allAssignments.filter((a) => !a.isConditional);
+    // Sort assignments by processor index to process them in order
+    const sortedAssignments = [...allAssignments].sort(
+      (a, b) => a.processorIndex - b.processorIndex
+    );
 
-    // Get unique primitive types from conditional assignments
-    const conditionalPrimitiveTypes = conditionalAssignments
-      .map((a) => a.type)
-      .filter(isPrimitiveType);
-    const conditionalTypes = new Set(conditionalPrimitiveTypes);
+    // Track the current type as we process assignments
+    let currentType: FieldType | undefined;
+    const conditionalTypes = new Set<PrimitiveType>();
 
-    // If there are multiple different primitive types in conditional assignments, error
-    if (conditionalTypes.size > 1) {
-      const typesArray = Array.from(conditionalTypes) as PrimitiveType[];
-      const indices = conditionalAssignments
-        .filter((a) => isPrimitiveType(a.type))
-        .map((a) => a.processorIndex);
+    for (const assignment of sortedAssignments) {
+      if (!assignment.isConditional) {
+        // Unconditional assignment updates the current type
+        currentType = assignment.type;
+      } else {
+        // Conditional assignment
+        if (isPrimitiveType(assignment.type)) {
+          conditionalTypes.add(assignment.type);
 
-      throw new ConditionalTypeChangeError(fieldName, typesArray, indices);
+          // If we have a current type and it's different, that's an error
+          if (currentType && isPrimitiveType(currentType) && currentType !== assignment.type) {
+            // Found a conditional assignment that changes the type
+            const conflictingTypes = new Set([currentType, assignment.type]);
+            const conflictingAssignments = sortedAssignments.filter(
+              (a) =>
+                isPrimitiveType(a.type) && (a.type === currentType || a.type === assignment.type)
+            );
+            const conflictingIndices = conflictingAssignments.map((a) => a.processorIndex);
+            const conflictingIdentifiers = conflictingAssignments.map((a) => a.customIdentifier);
+
+            throw new ConditionalTypeChangeError(
+              fieldName,
+              Array.from(conflictingTypes) as PrimitiveType[],
+              conflictingIndices,
+              conflictingIdentifiers
+            );
+          }
+        }
+      }
     }
 
-    // Check if conditional and unconditional assignments have different primitive types
-    const unconditionalPrimitiveTypes = unconditionalAssignments
-      .map((a) => a.type)
-      .filter(isPrimitiveType);
-    const unconditionalTypes = new Set(unconditionalPrimitiveTypes);
+    // Also check if there are multiple different conditional types
+    // (even without an unconditional type set first)
+    if (conditionalTypes.size > 1) {
+      const typesArray = Array.from(conditionalTypes);
+      const conditionalAssignments = sortedAssignments.filter(
+        (a) => a.isConditional && isPrimitiveType(a.type)
+      );
+      const indices = conditionalAssignments.map((a) => a.processorIndex);
+      const identifiers = conditionalAssignments.map((a) => a.customIdentifier);
 
-    if (conditionalTypes.size > 0 && unconditionalTypes.size > 0) {
-      const conditionalTypesArray = Array.from(conditionalTypes);
-      const unconditionalTypesArray = Array.from(unconditionalTypes);
-      const conditionalType = conditionalTypesArray[0] as PrimitiveType;
-      const hasConflict = unconditionalTypesArray.some((t) => t !== conditionalType);
-
-      if (hasConflict) {
-        const uniqueTypes = new Set([...conditionalTypesArray, ...unconditionalTypesArray]);
-        const allTypes = Array.from(uniqueTypes);
-        const allIndices = allAssignments
-          .filter((a) => isPrimitiveType(a.type))
-          .map((a) => a.processorIndex);
-
-        throw new ConditionalTypeChangeError(fieldName, allTypes as PrimitiveType[], allIndices);
-      }
+      throw new ConditionalTypeChangeError(fieldName, typesArray, indices, identifiers);
     }
   }
 }

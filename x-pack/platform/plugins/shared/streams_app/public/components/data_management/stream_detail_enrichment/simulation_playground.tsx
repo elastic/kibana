@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiNotificationBadge,
   EuiProgress,
   EuiSpacer,
   EuiTab,
   EuiTabs,
 } from '@elastic/eui';
+import { convertUIStepsToDSL, validateTypes } from '@kbn/streamlang';
 import { ProcessorOutcomePreview } from './processor_outcome_preview';
 import {
   useSimulatorSelector,
@@ -25,6 +27,8 @@ import {
 } from './state_management/stream_enrichment_state_machine';
 import { DetectedFieldsEditor } from './detected_fields_editor';
 import { DataSourcesList } from './data_sources_list';
+import { useSchemaFields } from '../schema_editor/hooks/use_schema_fields';
+import { getConfiguredSteps } from './state_management/stream_enrichment_state_machine/utils';
 
 export const SimulationPlayground = () => {
   const { refreshSimulation, viewSimulationPreviewData, viewSimulationDetectedFields } =
@@ -42,6 +46,27 @@ export const SimulationPlayground = () => {
   );
 
   const detectedFields = useSimulatorSelector((state) => state.context.detectedSchemaFields);
+
+  const definition = useStreamEnrichmentSelector((state) => state.context.definition);
+
+  const { fields } = useSchemaFields({ definition, refreshDefinition: () => {} });
+
+  const newSteps = useStreamEnrichmentSelector((state) =>
+    convertUIStepsToDSL(getConfiguredSteps(state.context), false)
+  );
+
+  const validationResult = useMemo(() => {
+    const fieldTypeMap = Object.fromEntries(
+      fields.map((field) => [field.name, field.type || 'unknown'])
+    );
+    // normalize field types
+
+    try {
+      return validateTypes(newSteps, fieldTypeMap);
+    } catch (e) {
+      return e;
+    }
+  }, [fields, newSteps]);
 
   return (
     <>
@@ -72,9 +97,16 @@ export const SimulationPlayground = () => {
                 isSelected={isViewingDetectedFields}
                 onClick={viewSimulationDetectedFields}
                 append={
-                  detectedFields.length > 0 ? (
-                    <EuiNotificationBadge size="m">{detectedFields.length}</EuiNotificationBadge>
-                  ) : undefined
+                  <EuiFlexGroup gutterSize="s" alignItems="center">
+                    {detectedFields.length > 0 ? (
+                      <EuiNotificationBadge size="m" color="subdued">
+                        {detectedFields.length}
+                      </EuiNotificationBadge>
+                    ) : null}
+                    {validationResult.name === 'ConditionalTypeChangeError' && (
+                      <EuiIcon type="error" color="danger" size="l" />
+                    )}
+                  </EuiFlexGroup>
                 }
               >
                 {i18n.translate(
@@ -92,7 +124,9 @@ export const SimulationPlayground = () => {
       </EuiFlexItem>
       <EuiSpacer size="m" />
       {isViewingDataPreview && <ProcessorOutcomePreview />}
-      {isViewingDetectedFields && <DetectedFieldsEditor detectedFields={detectedFields} />}
+      {isViewingDetectedFields && (
+        <DetectedFieldsEditor validationResult={validationResult} detectedFields={detectedFields} />
+      )}
     </>
   );
 };

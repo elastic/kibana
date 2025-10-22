@@ -46,6 +46,8 @@ export interface TypeAssignment {
   processorIndex: number;
   /** Whether this assignment happened inside a conditional block */
   isConditional: boolean;
+  /** Custom identifier of the processor that made this assignment (if available) */
+  customIdentifier?: string;
 }
 
 /**

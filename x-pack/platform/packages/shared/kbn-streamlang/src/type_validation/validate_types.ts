@@ -40,7 +40,8 @@ export function validateTypes(
       assumptions,
       -1, // Use -1 for initial types
       false,
-      `initial type: '${fieldName}' is ${primitiveType}`
+      `initial type: '${fieldName}' is ${primitiveType}`,
+      undefined // No customIdentifier for initial types
     );
   }
 

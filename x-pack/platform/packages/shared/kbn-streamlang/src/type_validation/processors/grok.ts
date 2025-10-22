@@ -38,7 +38,8 @@ export function handleGrokProcessor(
       assumptions,
       processorIndex,
       isConditional,
-      `grok: extract '${field.name}' as ${primitiveType} from '${processor.from}'`
+      `grok: extract '${field.name}' as ${primitiveType} from '${processor.from}'`,
+      processor.customIdentifier
     );
   }
 }

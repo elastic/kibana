@@ -31,6 +31,7 @@ export function handleDateProcessor(
     assumptions,
     processorIndex,
     isConditional,
-    `date: parse '${processor.from}' to '${targetField}' as date`
+    `date: parse '${processor.from}' to '${targetField}' as date`,
+    processor.customIdentifier
   );
 }

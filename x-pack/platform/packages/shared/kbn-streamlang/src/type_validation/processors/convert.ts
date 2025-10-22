@@ -62,6 +62,7 @@ export function handleConvertProcessor(
     assumptions,
     processorIndex,
     isConditional,
-    `convert: '${from}' to type '${convertType}'${to ? ` as '${to}'` : ''}`
+    `convert: '${from}' to type '${convertType}'${to ? ` as '${to}'` : ''}`,
+    processor.customIdentifier
   );
 }

@@ -34,7 +34,8 @@ export function handleDissectProcessor(
       assumptions,
       processorIndex,
       isConditional,
-      `dissect: extract '${field.name}' as string from '${processor.from}'`
+      `dissect: extract '${field.name}' as string from '${processor.from}'`,
+      processor.customIdentifier
     );
   }
 }

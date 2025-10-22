@@ -252,6 +252,116 @@ describe('validateTypes', () => {
     expect(() => validateTypes(dsl)).not.toThrow();
   });
 
+  it('allows conditional assignment that matches preceding unconditional type', () => {
+    // This is the scenario from the user's example:
+    // 1. Grok extracts field as string (unconditional)
+    // 2. Convert to number (unconditional)
+    // 3. Grok extracts field as number (conditional) <- OK because current type is already number
+    const dsl: StreamlangDSL = {
+      steps: [
+        // Step 1: Extract as string (unconditional)
+        {
+          action: 'grok',
+          from: 'body.text',
+          patterns: ['%{WORD:attributes.abc}'],
+        },
+        // Step 2: Convert to number (unconditional)
+        {
+          action: 'convert',
+          from: 'attributes.abc',
+          type: 'long',
+        },
+        // Step 3: Extract as number conditionally (OK - matches current type)
+        {
+          where: {
+            field: 'condition',
+            eq: 'true',
+            steps: [
+              {
+                action: 'grok',
+                from: 'body.text',
+                patterns: ['%{NUMBER:attributes.abc:int}'],
+              },
+            ],
+          },
+        },
+      ],
+    };
+
+    // Should not throw - the conditional grok assigns number type,
+    // which matches the current type from the convert processor
+    expect(() => validateTypes(dsl, { 'body.text': 'string' })).not.toThrow();
+  });
+
+  it('throws when conditional assignment changes type from current unconditional type', () => {
+    const dsl: StreamlangDSL = {
+      steps: [
+        // Start with string
+        { action: 'set', to: 'field', value: 'text' },
+        // Conditionally change to number - ERROR
+        {
+          where: {
+            field: 'condition',
+            eq: 'true',
+            steps: [{ action: 'set', to: 'field', value: 123 }],
+          },
+        },
+      ],
+    };
+
+    expect(() => validateTypes(dsl)).toThrow(ConditionalTypeChangeError);
+  });
+
+  it('allows type change followed by conditional assignment of same new type', () => {
+    const dsl: StreamlangDSL = {
+      steps: [
+        // Start with string
+        { action: 'set', to: 'field', value: 'text' },
+        // Change to number (unconditional - OK)
+        { action: 'set', to: 'field', value: 100 },
+        // Conditionally assign another number (OK - matches current type)
+        {
+          where: {
+            field: 'condition',
+            eq: 'true',
+            steps: [{ action: 'set', to: 'field', value: 200 }],
+          },
+        },
+      ],
+    };
+
+    expect(() => validateTypes(dsl)).not.toThrow();
+  });
+
+  it('includes customIdentifier in conditional type change errors', () => {
+    const dsl: StreamlangDSL = {
+      steps: [
+        // Start with string
+        { action: 'set', to: 'field', value: 'text', customIdentifier: 'step1' },
+        // Conditionally change to number - ERROR
+        {
+          where: {
+            field: 'condition',
+            eq: 'true',
+            steps: [{ action: 'set', to: 'field', value: 123, customIdentifier: 'step2' }],
+          },
+        },
+      ],
+    };
+
+    try {
+      validateTypes(dsl);
+      fail('Expected ConditionalTypeChangeError to be thrown');
+    } catch (error) {
+      expect(error).toBeInstanceOf(ConditionalTypeChangeError);
+      if (error instanceof ConditionalTypeChangeError) {
+        expect(error.customIdentifiers).toEqual(['step1', 'step2']);
+        expect(error.message).toContain('step1');
+        expect(error.message).toContain('step2');
+      }
+    }
+  });
+
   it('validates real-world log processing example', () => {
     const dsl: StreamlangDSL = {
       steps: [

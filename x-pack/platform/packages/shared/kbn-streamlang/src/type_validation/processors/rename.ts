@@ -31,7 +31,8 @@ export function handleRenameProcessor(
     assumptions,
     processorIndex,
     isConditional,
-    `rename: move '${processor.from}' to '${processor.to}'`
+    `rename: move '${processor.from}' to '${processor.to}'`,
+    processor.customIdentifier
   );
 
   // Note: We don't remove the source field from state because it might still be referenced

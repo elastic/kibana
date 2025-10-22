@@ -1,31 +1,16 @@
 /*
- * Cimport React, { useMemo } from 'react';
-import { useEuiTheme, EuiEmptyPrompt, EuiText, EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
-import { Streams } from '@kbn/streams-schema';
-import { uniq } from 'lodash';
-import {
-  convertUIStepsToDSL,
-  validateTypes,
-  ConditionalTypeChangeError,
-  AssumptionConflictError,
-} from '@kbn/streamlang';
-import { AssetImage } from '../../asset_image';
-import { SchemaEditor } from '../schema_editor';
-import type { SchemaField } from '../schema_editor/types';lasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { useEuiTheme, EuiEmptyPrompt, EuiText } from '@elastic/eui';
+import React from 'react';
+import { useEuiTheme, EuiEmptyPrompt, EuiText, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { Streams } from '@kbn/streams-schema';
 import { uniq } from 'lodash';
-import { convertUIStepsToDSL, validateTypes } from '@kbn/streamlang';
 import { AssetImage } from '../../asset_image';
 import { SchemaEditor } from '../schema_editor';
 import type { SchemaField } from '../schema_editor/types';
@@ -34,24 +19,21 @@ import {
   useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
 import { isSelectableField } from '../schema_editor/schema_editor_table';
-import { getConfiguredSteps } from './state_management/stream_enrichment_state_machine/utils';
-import { useSchemaFields } from '../schema_editor/hooks/use_schema_fields';
 
 interface DetectedFieldsEditorProps {
   detectedFields: SchemaField[];
+  validationResult: any;
 }
 
-export const DetectedFieldsEditor = ({ detectedFields }: DetectedFieldsEditorProps) => {
+export const DetectedFieldsEditor = ({
+  detectedFields,
+  validationResult,
+}: DetectedFieldsEditorProps) => {
   const { euiTheme } = useEuiTheme();
 
   const { mapField, unmapField } = useStreamEnrichmentEvents();
   const definition = useStreamEnrichmentSelector((state) => state.context.definition);
 
-  const { fields } = useSchemaFields({ definition, refreshDefinition: () => {} });
-
-  const newSteps = useStreamEnrichmentSelector((state) =>
-    convertUIStepsToDSL(getConfiguredSteps(state.context))
-  );
   const isWiredStream = Streams.WiredStream.GetResponse.is(definition);
   const [selectedFields, setSelectedFields] = React.useState<string[]>(
     detectedFields
@@ -61,20 +43,29 @@ export const DetectedFieldsEditor = ({ detectedFields }: DetectedFieldsEditorPro
 
   const hasFields = detectedFields.length > 0;
 
-  const validationResult = useMemo(() => {
-    const fieldTypeMap = Object.fromEntries(
-      fields.map((field) => [field.name, field.type || 'unknown'])
-    );
-    // normalize field types
-
-    try {
-      return validateTypes(newSteps, fieldTypeMap);
-    } catch (e) {
-      return e;
-    }
-  }, [fields, newSteps]);
-
   if (!hasFields) {
+    if (validationResult.name === 'ConditionalTypeChangeError') {
+      return (
+        <EuiCallOut announceOnMount color="danger">
+          {i18n.translate('xpack.streams.detectedFieldsEditor.fieldCallOutLabel', {
+            defaultMessage: 'Field',
+          })}{' '}
+          <b>{validationResult.field}</b>{' '}
+          {i18n.translate(
+            'xpack.streams.detectedFieldsEditor.conditionallyChangesFromCallOutLabel',
+            { defaultMessage: 'conditionally changes from' }
+          )}{' '}
+          <b>{validationResult.types[0]}</b>{' '}
+          {i18n.translate('xpack.streams.detectedFieldsEditor.toCallOutLabel', {
+            defaultMessage: 'to',
+          })}{' '}
+          <b>{validationResult.types[1]}</b>{' '}
+          {i18n.translate('xpack.streams.detectedFieldsEditor.ThisMightLeadCallOutLabel', {
+            defaultMessage: '- this might lead to type conflicts in production.',
+          })}
+        </EuiCallOut>
+      );
+    }
     return (
       <EuiEmptyPrompt
         titleSize="xs"
@@ -112,12 +103,30 @@ export const DetectedFieldsEditor = ({ detectedFields }: DetectedFieldsEditorPro
           )}
         </EuiText>
       )}
-      {validationResult instanceof Error && (
+      {validationResult.name === 'ConditionalTypeChangeError' && (
         <>
-          <TypeValidationError error={validationResult} />
-          <EuiSpacer size="m" />
+          <EuiCallOut announceOnMount color="danger">
+            {i18n.translate('xpack.streams.detectedFieldsEditor.fieldCallOutLabel', {
+              defaultMessage: 'Field',
+            })}{' '}
+            <b>{validationResult.field}</b>{' '}
+            {i18n.translate(
+              'xpack.streams.detectedFieldsEditor.conditionallyChangesFromCallOutLabel',
+              { defaultMessage: 'conditionally changes from' }
+            )}{' '}
+            <b>{validationResult.types[0]}</b>{' '}
+            {i18n.translate('xpack.streams.detectedFieldsEditor.toCallOutLabel', {
+              defaultMessage: 'to',
+            })}{' '}
+            <b>{validationResult.types[1]}</b>{' '}
+            {i18n.translate('xpack.streams.detectedFieldsEditor.ThisMightLeadCallOutLabel', {
+              defaultMessage: '- this might lead to type conflicts in production.',
+            })}
+          </EuiCallOut>
+          <EuiSpacer />
         </>
       )}
+
       <SchemaEditor
         defaultColumns={['name', 'type', 'format', 'status', 'source']}
         fields={detectedFields}
