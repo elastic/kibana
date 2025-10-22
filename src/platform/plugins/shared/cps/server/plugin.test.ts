@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// plugin.test.ts
 import { CPSServerPlugin } from './plugin';
 import { coreMock } from '@kbn/core/server/mocks';
 import { registerRoutes } from './routes';

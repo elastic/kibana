@@ -64,6 +64,7 @@ export class ElasticsearchService
   private clusterInfo$?: Observable<ClusterInfo>;
   private unauthorizedErrorHandler?: UnauthorizedErrorHandler;
   private agentManager?: AgentManager;
+  // @ts-expect-error - CPS is not yet implemented
   private cpsEnabled = false;
 
   constructor(private readonly coreContext: CoreContext) {
@@ -142,7 +143,6 @@ export class ElasticsearchService
       setCpsFeatureFlag: (enabled) => {
         this.cpsEnabled = enabled;
       },
-      getCpsFeatureFlag: () => this.cpsEnabled,
     };
   }
 

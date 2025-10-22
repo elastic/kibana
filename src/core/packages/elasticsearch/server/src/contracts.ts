@@ -108,7 +108,6 @@ export interface ElasticsearchServiceSetup {
    * ```
    */
   setCpsFeatureFlag: (enabled: boolean) => void;
-  getCpsFeatureFlag: () => boolean;
 }
 
 /**
