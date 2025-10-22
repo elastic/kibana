@@ -11,7 +11,6 @@ import { SlackApiParamsSchema } from '../common/slack_api/schema';
 
 export { ParamsSchema as SlackParamsSchema } from './connector_types/slack';
 export { ParamsSchema as WebhookParamsSchema } from './connector_types/webhook/schema';
-export { ExecutorParamsSchema as JiraParamsSchema } from './connector_types/jira/schema';
 export { ParamsSchema as PagerdutyParamsSchema } from './connector_types/pagerduty';
 
 export { SlackApiParamsSchema };

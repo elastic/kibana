@@ -7,7 +7,6 @@
 
 import type {
   IndexConnectorTypeId,
-  JiraConnectorTypeId,
   PagerDutyConnectorTypeId,
   ServerLogConnectorTypeId,
   ServiceNowITSMConnectorTypeId as ServiceNowConnectorTypeId,
@@ -17,7 +16,7 @@ import type {
   WebhookConnectorTypeId,
   OpsgenieConnectorTypeId,
 } from '@kbn/stack-connectors-plugin/server/connector_types';
-import type { CONNECTOR_ID as EmailConnectorTypeId } from '@kbn/connector-schemas/email';
+import type { EmailConnectorTypeId, JiraConnectorTypeId } from '@kbn/connector-schemas';
 
 import type { ActionConnector as RawActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import type { SlackApiConfig } from '@kbn/stack-connectors-plugin/common/slack_api/types';

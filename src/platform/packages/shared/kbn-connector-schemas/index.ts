@@ -7,4 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './email';
+export { CONNECTOR_ID as EmailConnectorTypeId } from './email';
+export { CONNECTOR_ID as JiraConnectorTypeId } from './jira';

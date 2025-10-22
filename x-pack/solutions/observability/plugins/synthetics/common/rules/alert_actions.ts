@@ -10,12 +10,12 @@ import type {
   PagerDutyActionParams,
   ServerLogActionParams,
   ServiceNowActionParams,
-  JiraActionParams,
   WebhookActionParams,
   SlackApiActionParams,
   OpsgenieActionParams,
 } from '@kbn/stack-connectors-plugin/server/connector_types';
 import type { ActionParamsType as EmailActionParams } from '@kbn/connector-schemas/email';
+import type { ActionParamsType as JiraActionParams } from '@kbn/connector-schemas/jira';
 
 import type { RuleAction as RuleActionOrig } from '@kbn/alerting-plugin/common';
 import { v4 as uuidv4 } from 'uuid';

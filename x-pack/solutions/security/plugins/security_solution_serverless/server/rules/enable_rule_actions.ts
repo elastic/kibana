@@ -9,7 +9,7 @@ import {
   IndexConnectorTypeId,
   SlackWebhookConnectorTypeId,
 } from '@kbn/stack-connectors-plugin/server/connector_types';
-import { CONNECTOR_ID as EmailConnectorTypeId } from '@kbn/connector-schemas/email';
+import { EmailConnectorTypeId } from '@kbn/connector-schemas';
 
 import { EnabledActionTypes } from '@kbn/actions-plugin/server/config';
 import type { ProductFeatureKeys } from '@kbn/security-solution-features';

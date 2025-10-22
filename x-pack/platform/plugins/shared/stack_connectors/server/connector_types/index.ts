@@ -43,8 +43,6 @@ import type { ExperimentalFeatures } from '../../common/experimental_features';
 
 export { ConnectorTypeId as CasesWebhookConnectorTypeId } from './cases_webhook';
 export type { ActionParamsType as CasesWebhookActionParams } from './cases_webhook';
-export { ConnectorTypeId as JiraConnectorTypeId } from './jira';
-export type { ActionParamsType as JiraActionParams } from './jira';
 export { ServiceNowITSMConnectorTypeId } from './servicenow_itsm';
 export { ServiceNowSIRConnectorTypeId } from './servicenow_sir';
 export { ConnectorTypeId as IndexConnectorTypeId } from './es_index';

@@ -21,12 +21,12 @@ import type {
 } from '@kbn/actions-plugin/server/types';
 import type { ConnectorAdapter } from '@kbn/alerting-plugin/server';
 import {
-  JiraParamsSchema,
   PagerdutyParamsSchema,
   SlackApiParamsSchema,
   WebhookParamsSchema,
 } from '@kbn/stack-connectors-plugin/server';
 import { ParamsSchema as EmailParamsSchema } from '@kbn/connector-schemas/email';
+import { ExecutorParamsSchema as JiraParamsSchema } from '@kbn/connector-schemas/jira';
 import type { ObservabilityAIAssistantRouteHandlerResources } from '@kbn/observability-ai-assistant-plugin/server/routes/types';
 import type { ChatCompletionChunkEvent } from '@kbn/observability-ai-assistant-plugin/common';
 import {
