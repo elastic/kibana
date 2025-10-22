@@ -78,7 +78,7 @@ export const AzureCredentialsFormAgentless = ({
     useCloudSetup();
 
   const azureCredentialsType = getAgentlessCredentialsType(input, isAzureCloudConnectorEnabled);
-  const azureCredentialsDisabled =
+  const credentialSelectionDisabled =
     isEditPage &&
     azureCredentialsType === AZURE_CREDENTIALS_TYPE.CLOUD_CONNECTORS &&
     isAzureCloudConnectorEnabled;
@@ -115,7 +115,7 @@ export const AzureCredentialsFormAgentless = ({
           <AzureCredentialTypeSelector
             options={getCloudConnectorCredentialOptions(agentlessOptions)}
             type={azureCredentialsType}
-            disabled={azureCredentialsDisabled}
+            disabled={credentialSelectionDisabled}
             onChange={(optionId) => {
               updatePolicy({
                 updatedPolicy: updatePolicyWithInputs(
