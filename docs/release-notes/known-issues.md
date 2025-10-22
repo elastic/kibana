@@ -14,11 +14,11 @@ Applies to: {{stack}} 9.0.0-9.2.0
 
 **Details**
 
-Alerts are not generated for rules that have **Alert flapping detection** turned off and the alert delay set to a value higher than 1.
+Alerts aren't generated for rules that have **Alert flapping detection** turned off and the alert delay set to a value higher than 1.
 
 **Workaround**
 
-Set the alert delay value to 1 and turn on **Alert flapping detection**.
+Set the alert delay value to 1 or turn on **Alert flapping detection**.
 
 ::::
 
