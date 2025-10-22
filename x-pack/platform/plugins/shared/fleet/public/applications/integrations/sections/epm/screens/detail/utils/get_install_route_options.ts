@@ -62,7 +62,7 @@ export const getInstallPkgRouteOptions = ({
   const path = pagePathGetters.add_integration_to_policy({
     pkgkey,
     useMultiPageLayout,
-    prerelease: prerelease ?? true,
+    prerelease: prerelease ?? false,
     ...integrationOpts,
     ...(agentPolicyId ? { agentPolicyId } : {}),
   })[1];
