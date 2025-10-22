@@ -41,8 +41,6 @@ import { getSentinelOneConnectorType } from './sentinelone';
 import { getCrowdstrikeConnectorType } from './crowdstrike';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
 
-export { ConnectorTypeId as CasesWebhookConnectorTypeId } from './cases_webhook';
-export type { ActionParamsType as CasesWebhookActionParams } from './cases_webhook';
 export { ServiceNowITSMConnectorTypeId } from './servicenow_itsm';
 export { ServiceNowSIRConnectorTypeId } from './servicenow_sir';
 export { ServiceNowITOMConnectorTypeId } from './servicenow_itom';

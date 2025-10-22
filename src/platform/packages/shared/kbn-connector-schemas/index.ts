@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export { CONNECTOR_ID as CasesWebhookConnectorTypeId } from './cases_webhook';
 export { CONNECTOR_ID as EmailConnectorTypeId } from './email';
 export { CONNECTOR_ID as EsIndexConnectorTypeId } from './es_index';
 export { CONNECTOR_ID as JiraConnectorTypeId } from './jira';

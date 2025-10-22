@@ -10,8 +10,6 @@ export type { GetCommonFieldsResponse as ResilientGetFieldsResponse } from './co
 export type { SwimlanePublicConfigurationType } from './connector_types/swimlane/types';
 
 export type {
-  CasesWebhookConnectorTypeId,
-  CasesWebhookActionParams,
   ServiceNowITSMConnectorTypeId,
   ServiceNowSIRConnectorTypeId,
   ServiceNowActionParams,
