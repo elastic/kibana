@@ -213,5 +213,51 @@ describe('When using runscript action from response console', () => {
         });
       });
     });
+
+    it('should show textarea popup for --inputPrams', async () => {
+      await render();
+      await enterConsoleCommand(renderResult, user, 'runscript --inputParams', { inputOnly: true });
+      await waitFor(() => {
+        expect(
+          renderResult.queryByTestId('textareaInputArgument-runscript-inputParams-0-popoverPanel')
+        ).not.toBeNull();
+      });
+    });
+  });
+
+  describe('and agent type is Microsoft Defender', () => {
+    beforeEach(async () => {
+      const _render = render;
+
+      render = () => _render('microsoft_defender_endpoint');
+    });
+
+    it('should show textarea popup for --Args', async () => {
+      await render();
+      await enterConsoleCommand(renderResult, user, 'runscript --Args', { inputOnly: true });
+      await waitFor(() => {
+        expect(
+          renderResult.queryByTestId('textareaInputArgument-runscript-Args-0-popoverPanel')
+        ).not.toBeNull();
+      });
+    });
+  });
+
+  describe('and agent type is Crowdstrike', () => {
+    beforeEach(async () => {
+      const _render = render;
+
+      render = () => _render('crowdstrike');
+    });
+
+    it('should show textarea popup for --CommandLine', async () => {
+      await render();
+      await enterConsoleCommand(renderResult, user, 'runscript --CommandLine', { inputOnly: true });
+      await waitFor(() => {
+        expect(
+          renderResult.queryByTestId('textareaInputArgument-runscript-CommandLine-0-popoverPanel')
+        ).not.toBeNull();
+      });
+    });
   });
 });
