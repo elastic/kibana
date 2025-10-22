@@ -182,12 +182,19 @@ Object {
   "processors": Array [
     Object {
       "convert": Object {
-        "from": "http.status_code",
+        "field": "http.status_code",
+        "if": "
+  try {
+  if (($('http.error', null) !== null && (($('http.error', null) instanceof Number && $('http.error', null).toString() == \\"404\\") || $('http.error', null) == 404))) {
+    return true;
+  }
+  return false;
+} catch (Exception e) {
+  return false;
+}
+",
+        "target_field": "http.status_code_str",
         "type": "string",
-        "where": Object {
-          "eq": 404,
-          "field": "http.error",
-        },
       },
     },
     Object {
