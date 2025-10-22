@@ -12,6 +12,7 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
+    "**/*.js"
   ],
   "exclude": [
     "target/**/*"
