@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EuiText } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { JsonValue } from '@kbn/utility-types';
+import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { JSONDataView } from '../../../shared/ui/json_data_view';
 
 const Titles = {
@@ -31,7 +34,7 @@ interface StepExecutionDataViewProps {
 
 export const StepExecutionDataView = React.memo<StepExecutionDataViewProps>(
   ({ stepExecution, mode }) => {
-    const { data, title } = useMemo(() => {
+    const { data, title } = useMemo<{ data: JsonValue | undefined; title: string }>(() => {
       if (mode === 'input') {
         return { data: stepExecution.input, title: Titles.input };
       } else {
@@ -42,38 +45,29 @@ export const StepExecutionDataView = React.memo<StepExecutionDataViewProps>(
       }
     }, [mode, stepExecution]);
 
-    // Convert data to object format if needed
-    const jsonObject = useMemo<Record<string, unknown>>(() => {
-      if (Array.isArray(data)) {
-        return data[0] || {};
-      }
-      // If data is already an object, use it directly
-      if (data && typeof data === 'object') {
-        return data;
-      }
-      if (data != null) {
-        // For primitive values, wrap them in an object
-        return { value: data };
-      }
-      return {};
-    }, [data]);
-
     const fieldPathActionsPrefix: string | undefined = useMemo(() => {
       if (mode !== 'output' || stepExecution.error) {
         return undefined; // Make field path actions available only for output data and not error.
       }
-      if (Array.isArray(data) && data.length > 0) {
-        return `steps.${stepExecution.stepId}.${mode}[0]`; // jsonObject will be data[0]
-      }
       return `steps.${stepExecution.stepId}.${mode}`;
-    }, [data, mode, stepExecution.stepId, stepExecution.error]);
+    }, [mode, stepExecution.stepId, stepExecution.error]);
+
+    if (data === undefined) {
+      return (
+        <EuiText color="subdued" size="xs">
+          <FormattedMessage
+            id="workflowsManagement.stepExecutionDataView.noData"
+            defaultMessage="No {mode} data"
+            values={{ mode: Titles[mode].toLowerCase() }}
+          />
+        </EuiText>
+      );
+    }
 
     return (
-      <JSONDataView
-        data={jsonObject}
-        title={title}
-        fieldPathActionsPrefix={fieldPathActionsPrefix}
-      />
+      <JSONDataView data={data} title={title} fieldPathActionsPrefix={fieldPathActionsPrefix} />
     );
   }
 );
+
+StepExecutionDataView.displayName = 'StepExecutionDataView';
