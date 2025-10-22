@@ -48,7 +48,7 @@ import {
 } from '../../../state_management';
 import { getRemoveOperation } from '../../../utils';
 import { useEditorFrameService } from '../../editor_frame_service_context';
-import { VisualizationToolbar } from '../workspace_panel';
+import { VisualizationToolbar } from '../visualization_toolbar';
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
   const { visualizationMap } = useEditorFrameService();

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { Visualization, LensInspector, LensAppState } from '@kbn/lens-common';
+import type { Visualization, LensAppState } from '@kbn/lens-common';
 import type { FrameMock } from '../../../mocks';
 import {
   createMockVisualization,
@@ -39,11 +39,7 @@ describe('workspace_panel_wrapper', () => {
         datasourceMap={{}}
       >
         <WorkspacePanelWrapper
-          // framePublicAPI={mockFrameAPI}
-          // visualizationId="myVis"
-          // datasourceStates={{}}
           isFullscreen={false}
-          // lensInspector={{} as unknown as LensInspector}
           getUserMessages={() => []}
           children={<span />}
           displayOptions={undefined}

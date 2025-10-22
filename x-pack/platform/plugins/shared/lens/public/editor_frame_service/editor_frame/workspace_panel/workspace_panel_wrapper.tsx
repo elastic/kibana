@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { EuiPageTemplate, EuiFlexGroup, EuiFlexItem, EuiButton, useEuiTheme } from '@elastic/eui';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -20,12 +20,12 @@ import type {
   DatasourceStates,
   LensInspector,
 } from '@kbn/lens-common';
+import type { UserMessagesGetter } from '../../../types';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../utils';
 import { MessageList } from './message_list';
 // import type { DatasourceStates } from '../../../state_management';
 import {
   useLensDispatch,
-  updateVisualizationState,
   useLensSelector,
   selectChangesApplied,
   applyChanges,
@@ -197,7 +197,7 @@ export function WorkspacePanelWrapper({
             gutterSize="s"
             direction="row"
             css={css`
-              margin-bottom: ${euiTheme.size.xs};
+              margin-bottom: ${euiTheme.size.m};
               ${isFullscreen &&
               `
                 background-color: ${euiTheme.colors.emptyShade};
