@@ -8,9 +8,10 @@
  */
 
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TraceIndexes } from '@kbn/discover-utils/src';
+import type { Subscription } from 'rxjs';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import {
   SpanFlyout,
@@ -22,14 +23,41 @@ import { LogsFlyout, logsFlyoutId } from '../full_screen_waterfall/waterfall_fly
 import type { TraceOverviewSections } from '../../doc_viewer_overview/overview';
 import { DataSourcesProvider } from '../../hooks/use_data_sources';
 
+// TODO search if there's helpers to extract filters from ESQL queries so we can use them here
+function extractTraceIdIfOnlyTraceFilter(query: string): string | null {
+  if (typeof query !== 'string') return null;
+  const normalized = query.replace(/\s+/g, ' ').trim();
+  const reEsql = /^FROM\s+[^|]+\s*\|\s*WHERE\s+trace\.id\s*={1,2}\s*["']?([\w\-]+)["']?$/i;
+  const match = normalized.match(reEsql);
+  return match ? match[1] : null;
+}
+
 // Temporary for POC purposes, this component should not be in this plugin
 export function TraceWaterfallForChart() {
   const { data } = getUnifiedDocViewerServices();
   const { from: rangeFrom, to: rangeTo } = data.query.timefilter.timefilter.getAbsoluteTime();
+  const [traceId, setTraceId] = useState<string | null>(null);
 
-  // TODO get the right trace id (extract from query)
-  // const traceId = '7b9ad4a8eb72d9bc69678981376dafeb';
-  const traceId = 'e5458ded740fe3bcca842fb6872cc709'; // with errors
+  useEffect(() => {
+    const initialQuery = data.query.queryString.getQuery();
+    if ('esql' in initialQuery) {
+      // TODO the POC only uses TraceWaterfallForChart only for ESQL (at least for now)
+      const esql: string = initialQuery.esql;
+      setTraceId(extractTraceIdIfOnlyTraceFilter(esql));
+    }
+
+    const subscription: Subscription = data.query.queryString.getUpdates$().subscribe((query) => {
+      if ('esql' in query) {
+        // TODO the POC only uses TraceWaterfallForChart only for ESQL (at least for now)
+        const esql: string = query.esql;
+        setTraceId(extractTraceIdIfOnlyTraceFilter(esql));
+      } else {
+        setTraceId(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [data.query.queryString]);
 
   // TODO get the right data view
   const [dataView, setDataView] = useState<DataView | null>(null);
@@ -90,14 +118,17 @@ export function TraceWaterfallForChart() {
         },
       }),
     }),
-    [, rangeFrom, rangeTo]
+    [rangeFrom, rangeTo, traceId]
   );
+
+  if (!traceId) return null;
 
   return (
     <>
       {/* TODO adjust whatever is needed to the virtual scroll to work properly */}
       <div css={{ height: '100%', overflow: 'auto' }}>
         <EmbeddableRenderer
+          key={traceId}
           type="APM_TRACE_WATERFALL_EMBEDDABLE"
           getParentApi={getParentApi}
           hidePanelChrome
