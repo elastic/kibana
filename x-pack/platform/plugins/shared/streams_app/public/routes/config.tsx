@@ -12,10 +12,9 @@ import React from 'react';
 import { StreamsAppPageTemplate } from '../components/streams_app_page_template';
 import { StreamsAppRouterBreadcrumb } from '../components/streams_app_router_breadcrumb';
 import { RedirectTo } from '../components/redirect_to';
-import { StreamListView } from '../components/stream_list_view';
-import { StreamGraphView } from '../components/stream_graph_view';
 import { StreamDetailRoot } from '../components/stream_root';
 import { StreamDetailManagement } from '../components/data_management/stream_detail_management';
+import { StreamsViews } from '../components/streams_listing/streams_views';
 
 /**
  * The array of route definitions to be used when the application
@@ -42,10 +41,10 @@ const streamsAppRoutes = {
         ),
       },
       '/list': {
-        element: <StreamListView />,
+        element: <StreamsViews />,
       },
       '/graph': {
-        element: <StreamGraphView />,
+        element: <StreamsViews />,
       },
       '/{key}': {
         element: (
