@@ -10,6 +10,8 @@ import { i18n } from '@kbn/i18n';
 import rison from '@kbn/rison';
 import type { Duration } from 'moment/moment';
 import { capitalize, get, memoize, pick } from 'lodash';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import {
   FIELD_FORMAT_IDS,
   type IFieldFormat,
@@ -28,6 +30,8 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
 import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { ANOMALY_RESULT_TYPE_SCORE_FIELDS } from '../../../common/constants/alerts';
+import { detectAnomalyAlertFieldUsage } from '../../../common/util/alerting/detect_anomaly_alert_field_usage';
 import { getAnomalyDescription } from '../../../common/util/anomaly_description';
 import { getMetricChangeDescription } from '../../../common/util/metric_change_description';
 import type { MlClient } from '../ml_client';
@@ -79,9 +83,28 @@ interface AnomalyESQueryParams {
   includeInterimResults: boolean;
   /** Source index from the datafeed. Required for retrieving field types for formatting results. */
   indexPattern: string;
+  customFilter?: string;
 }
 
 const TIME_RANGE_PADDING = 10;
+
+/**
+ * Parse KQL filter and convert to Elasticsearch Query DSL.
+ */
+function parseCustomKqlFilter(
+  customFilter: string | null | undefined
+): QueryDslQueryContainer | undefined {
+  if (!customFilter) return undefined;
+
+  try {
+    const ast = fromKueryExpression(customFilter);
+    return toElasticsearchQuery(ast);
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('Failed to parse custom KQL filter:', error);
+    return undefined;
+  }
+}
 
 /**
  * TODO Replace with URL generator when https://github.com/elastic/kibana/issues/59453 is resolved
@@ -166,15 +189,6 @@ export function buildExplorerUrl(
     rison.encode(globalState)
   )}&_a=${encodeURIComponent(rison.encode(appState))}`;
 }
-
-/**
- * Mapping for result types and corresponding score fields.
- */
-const resultTypeScoreMapping = {
-  [ML_ANOMALY_RESULT_TYPE.BUCKET]: 'anomaly_score',
-  [ML_ANOMALY_RESULT_TYPE.RECORD]: 'record_score',
-  [ML_ANOMALY_RESULT_TYPE.INFLUENCER]: 'influencer_score',
-};
 
 export interface AnomalyDetectionAlertFieldFormatters {
   numberFormatter: IFieldFormat['convert'];
@@ -401,7 +415,7 @@ export function alertingServiceProvider(
   };
 
   const getScoreFields = (resultType: MlAnomalyResultType, useInitialScore?: boolean) => {
-    return `${useInitialScore ? 'initial_' : ''}${resultTypeScoreMapping[resultType]}`;
+    return `${useInitialScore ? 'initial_' : ''}${ANOMALY_RESULT_TYPE_SCORE_FIELDS[resultType]}`;
   };
 
   const getRecordKey = (source: MlAnomalyRecordDoc): string => {
@@ -675,6 +689,12 @@ export function alertingServiceProvider(
 
     const datafeeds = await datafeedsService.getDatafeedByJobId(jobIds);
 
+    const parsedCustomFilter = parseCustomKqlFilter(params.customFilter);
+
+    const anomalyAlertFieldUsage = detectAnomalyAlertFieldUsage(params.customFilter);
+
+    const effectiveSeverity = anomalyAlertFieldUsage.hasAnomalyScoreFilter ? 0 : params.severity;
+
     const requestBody = {
       size: 0,
       query: {
@@ -697,13 +717,15 @@ export function alertingServiceProvider(
                 result_type: Object.values(ML_ANOMALY_RESULT_TYPE) as string[],
               },
             },
-            ...(params.includeInterim
-              ? []
-              : [
+            // Only apply interim filter if KQL doesn't already filter on is_interim
+            ...(!anomalyAlertFieldUsage.hasInterimFilter && !params.includeInterim
+              ? [
                   {
                     term: { is_interim: false },
                   },
-                ]),
+                ]
+              : []),
+            ...(parsedCustomFilter ? [parsedCustomFilter] : []),
           ],
         },
       },
@@ -716,10 +738,10 @@ export function alertingServiceProvider(
                 // Ignore empty buckets
                 min_doc_count: 1,
               },
-              aggs: getResultTypeAggRequest(params.resultType, params.severity, true),
+              aggs: getResultTypeAggRequest(params.resultType, effectiveSeverity, true),
             },
           }
-        : getResultTypeAggRequest(params.resultType, params.severity),
+        : getResultTypeAggRequest(params.resultType, effectiveSeverity),
     };
 
     const body = await mlClient.anomalySearch(
@@ -818,7 +840,7 @@ export function alertingServiceProvider(
       topNBuckets,
       maxBucketInSeconds,
       lookBackTimeInterval,
-      anomalyScoreField: resultTypeScoreMapping[params.resultType],
+      anomalyScoreField: ANOMALY_RESULT_TYPE_SCORE_FIELDS[params.resultType],
       includeInterimResults: params.includeInterim,
       resultType: params.resultType,
       indexPattern: datafeeds![0]!.indices[0],
@@ -844,7 +866,17 @@ export function alertingServiceProvider(
       anomalyScoreField,
       includeInterimResults,
       anomalyScoreThreshold,
+
+      customFilter,
     } = params;
+
+    const parsedCustomFilter = parseCustomKqlFilter(customFilter);
+
+    const anomalyAlertFieldUsage = detectAnomalyAlertFieldUsage(customFilter);
+
+    const effectiveSeverity = anomalyAlertFieldUsage.hasAnomalyScoreFilter
+      ? 0
+      : anomalyScoreThreshold;
 
     const requestBody = {
       size: 0,
@@ -866,13 +898,14 @@ export function alertingServiceProvider(
                 },
               },
             },
-            ...(includeInterimResults
+            ...(!anomalyAlertFieldUsage.hasInterimFilter && !includeInterimResults
               ? []
               : [
                   {
                     term: { is_interim: false },
                   },
                 ]),
+            ...(parsedCustomFilter ? [parsedCustomFilter] : []),
           ],
         },
       },
@@ -891,7 +924,7 @@ export function alertingServiceProvider(
                 field: anomalyScoreField,
               },
             },
-            ...getResultTypeAggRequest(resultType, anomalyScoreThreshold),
+            ...getResultTypeAggRequest(resultType, effectiveSeverity),
             truncate: {
               bucket_sort: {
                 size: topNBuckets,

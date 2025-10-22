@@ -35,6 +35,8 @@ import { ConfigValidator } from './config_validator';
 import { type CombinedJobWithStats } from '../../../common/types/anomaly_detection_jobs';
 import { AdvancedSettings } from './advanced_settings';
 import { getLookbackInterval, getTopNBuckets } from '../../../common/util/alerts';
+import { AnomalyKqlFilter } from './anomaly_kql_filter';
+import type { AnomalyAlertFieldUsage } from '../../../common/util/alerting/detect_anomaly_alert_field_usage';
 
 export type MlAnomalyAlertTriggerProps =
   RuleTypeParamsExpressionProps<MlAnomalyDetectionAlertParams> & {
@@ -57,6 +59,14 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   } = useKibana();
 
   const [newJobUrl, setNewJobUrl] = useState<string | undefined>(undefined);
+  const [kqlFieldUsage, setKqlFieldUsage] = useState<AnomalyAlertFieldUsage>({
+    hasAnomalyScoreFilter: false,
+    hasInterimFilter: false,
+  });
+
+  const [savedFilterForNonBucketTypes, setSavedFilterForNonBucketTypes] = useState<string | null>(
+    null
+  );
 
   useEffect(() => {
     let mounted = true;
@@ -137,6 +147,30 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
     [jobsAndGroupIds]
   );
 
+  useEffect(
+    function handleFilterPreservationAcrossResultTypes() {
+      const isBucketType = ruleParams.resultType === ML_ANOMALY_RESULT_TYPE.BUCKET;
+
+      if (isBucketType) {
+        if (ruleParams.customFilter) {
+          setSavedFilterForNonBucketTypes(ruleParams.customFilter);
+          setRuleParams('customFilter', null);
+
+          setKqlFieldUsage({
+            hasAnomalyScoreFilter: false,
+            hasInterimFilter: false,
+          });
+        }
+      } else {
+        if (savedFilterForNonBucketTypes && !ruleParams.customFilter) {
+          setRuleParams('customFilter', savedFilterForNonBucketTypes);
+        }
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [ruleParams.resultType]
+  );
+
   useMount(function setDefaults() {
     const { jobSelection, ...rest } = ruleParams;
     if (Object.keys(rest).length === 0) {
@@ -196,8 +230,7 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
         createJobUrl={newJobUrl}
         jobsAndGroupIds={jobsAndGroupIds}
         adJobsApiService={adJobsApiService}
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        onChange={useCallback(onAlertParamChange('jobSelection'), [])}
+        onChange={onAlertParamChange('jobSelection')}
         errors={Array.isArray(errors.jobSelection) ? errors.jobSelection : []}
         shouldUseDropdownJobCreate
       />
@@ -211,19 +244,29 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
       <ResultTypeSelector
         value={ruleParams.resultType}
         availableOption={availableResultTypes}
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        onChange={useCallback(onAlertParamChange('resultType'), [])}
+        onChange={onAlertParamChange('resultType')}
+      />
+      <EuiSpacer size="m" />
+      <AnomalyKqlFilter
+        value={ruleParams.customFilter}
+        onChange={onAlertParamChange('customFilter')}
+        jobConfigs={jobConfigs}
+        resultType={ruleParams.resultType}
+        jobId={ruleParams.jobSelection?.jobIds?.[0]}
+        onFieldUsageChange={setKqlFieldUsage}
+        errors={Array.isArray(errors.customFilter) ? errors.customFilter : []}
+        disabled={ruleParams.resultType === ML_ANOMALY_RESULT_TYPE.BUCKET}
       />
       <SeverityControl
         value={ruleParams.severity}
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        onChange={useCallback(onAlertParamChange('severity'), [])}
+        onChange={onAlertParamChange('severity')}
+        disabled={kqlFieldUsage.hasAnomalyScoreFilter}
       />
       <EuiSpacer size="m" />
       <InterimResultsControl
         value={ruleParams.includeInterim}
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        onChange={useCallback(onAlertParamChange('includeInterim'), [])}
+        onChange={onAlertParamChange('includeInterim')}
+        disabled={kqlFieldUsage.hasInterimFilter}
       />
       <EuiSpacer size="m" />
       <AdvancedSettings
