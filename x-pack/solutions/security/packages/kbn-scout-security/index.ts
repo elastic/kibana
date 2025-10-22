@@ -41,7 +41,6 @@ export type {
   SecurityTestFixtures,
   SecurityWorkerFixtures,
   SecurityParallelTestFixtures,
-  SecurityParallelApiServicesFixture,
   SecurityParallelWorkerFixtures,
 } from './src/playwright';
 

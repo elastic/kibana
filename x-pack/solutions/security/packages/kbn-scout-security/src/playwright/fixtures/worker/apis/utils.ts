@@ -163,11 +163,16 @@ export async function pollUntilAvailable<T>(
       lastError = error as Error;
 
       // Log different messages for different error types
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if ((error as any)?.response?.status === 404 || (error as Error)?.message?.includes('not found')) {
+
+      if (
+        (error as any)?.response?.status === 404 ||
+        (error as Error)?.message?.includes('not found')
+      ) {
         log?.debug(`[POLL] Attempt ${attempt}/${maxAttempts}: Resource not yet available (404)`);
       } else {
-        log?.debug(`[POLL] Attempt ${attempt}/${maxAttempts} failed: ${(error as Error)?.message || error}`);
+        log?.debug(
+          `[POLL] Attempt ${attempt}/${maxAttempts} failed: ${(error as Error)?.message || error}`
+        );
       }
 
       // If this isn't the last attempt and we haven't timed out, wait before retrying
