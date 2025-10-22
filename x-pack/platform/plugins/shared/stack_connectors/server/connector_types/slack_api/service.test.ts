@@ -13,7 +13,7 @@ import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.moc
 import { createExternalService } from './service';
 import type { SlackApiService } from '../../../common/slack_api/types';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
-import { CONNECTOR_ID } from '@kbn/connector-schemas/slack_api/constants';
+import { CONNECTOR_ID } from '@kbn/connector-schemas/slack_api';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 

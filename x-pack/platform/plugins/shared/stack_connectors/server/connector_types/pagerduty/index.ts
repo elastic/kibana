@@ -21,7 +21,6 @@ import {
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
-import { ConfigSchema, SecretsSchema, ParamsSchema } from '@kbn/connector-schemas/pagerduty';
 import {
   CONNECTOR_ID,
   CONNECTOR_NAME,
@@ -29,7 +28,10 @@ import {
   EVENT_ACTION_TRIGGER,
   EVENT_ACTION_ACKNOWLEDGE,
   EVENT_ACTION_RESOLVE,
-} from '@kbn/connector-schemas/pagerduty/constants';
+  ConfigSchema,
+  SecretsSchema,
+  ParamsSchema,
+} from '@kbn/connector-schemas/pagerduty';
 import type {
   ConnectorTypeConfigType,
   ConnectorTypeSecretsType,

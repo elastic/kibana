@@ -25,8 +25,10 @@ import {
   CONNECTOR_ID,
   CONNECTOR_NAME,
   serviceParamValueToKbnSettingMap as emailKbnSettings,
-} from '@kbn/connector-schemas/email/constants';
-import { ConfigSchema, SecretsSchema, ParamsSchema } from '@kbn/connector-schemas/email';
+  ConfigSchema,
+  SecretsSchema,
+  ParamsSchema,
+} from '@kbn/connector-schemas/email';
 import {
   AlertingConnectorFeatureId,
   UptimeConnectorFeatureId,

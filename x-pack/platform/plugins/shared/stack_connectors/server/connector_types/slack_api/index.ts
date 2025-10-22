@@ -17,15 +17,13 @@ import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { i18n } from '@kbn/i18n';
 import type { SlackApiParams, SlackApiSecrets } from '@kbn/connector-schemas/slack_api';
 import {
+  CONNECTOR_ID,
+  CONNECTOR_NAME,
+  SLACK_URL,
   SlackApiConfigSchema,
   SlackApiParamsSchema,
   SlackApiSecretsSchema,
 } from '@kbn/connector-schemas/slack_api';
-import {
-  CONNECTOR_ID,
-  CONNECTOR_NAME,
-  SLACK_URL,
-} from '@kbn/connector-schemas/slack_api/constants';
 import type {
   SlackApiExecutorOptions,
   SlackApiConnectorType,

@@ -18,7 +18,7 @@ import type { AxiosResponse } from 'axios';
 import axios from 'axios';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
-import { SLACK_URL } from '@kbn/connector-schemas/slack_api/constants';
+import { SLACK_URL } from '@kbn/connector-schemas/slack_api';
 import { INTERNAL_BASE_STACK_CONNECTORS_API_PATH } from '../../common';
 
 import type { ValidChannelResponse } from '../../common/slack_api/types';
