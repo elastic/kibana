@@ -131,6 +131,10 @@ async function createSetupSideEffects(
 
   await ensureFleetDirectories();
 
+  if (appContextService.getCloud()?.isCloudEnabled) {
+    throw new Error('TEST 123');
+  }
+
   const { agentPolicies: policiesOrUndefined, packages: packagesOrUndefined } =
     appContextService.getConfig() ?? {};
   const policies = policiesOrUndefined ?? [];
