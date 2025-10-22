@@ -38,7 +38,7 @@ export function flattenStepsWithTracking(
     // Handle processor steps
     const processor = step;
     // If the processor has an inline where condition, it's also conditional
-    const processorIsConditional = isConditional || !!processor.where;
+    const processorIsConditional = isConditional || ('where' in processor && !!processor.where);
 
     return [
       {

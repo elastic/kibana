@@ -5,6 +5,27 @@
  * 2.0.
  */
 
+/*
+ * Copyrig  it('validates simple set operations', () => {
+    const dsl: StreamlangDSL = {
+      steps: [
+        { action: 'set', to: 'field1', value: 'test' },
+        { action: 'set', to: 'field2', value: 123 },
+      ],
+    };
+
+    const result = validateTypes(dsl);
+    expect(result.assumptions).toEqual([]);
+    expect(result.fieldTypes).toEqual({
+      field1: 'string',
+      field2: 'number',
+    });
+  });earch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import type { StreamlangDSL } from '../../types/streamlang';
 import { validateTypes } from './validate_types';
 import { ConditionalTypeChangeError } from './errors';
@@ -19,8 +40,8 @@ describe('validateTypes', () => {
       ],
     };
 
-    const assumptions = validateTypes(dsl);
-    expect(assumptions).toEqual([]);
+    const result = validateTypes(dsl);
+    expect(result.assumptions).toEqual([]);
   });
 
   it('validates type propagation through rename', () => {
@@ -31,8 +52,8 @@ describe('validateTypes', () => {
       ],
     };
 
-    const assumptions = validateTypes(dsl);
-    expect(assumptions).toEqual([]);
+    const result = validateTypes(dsl);
+    expect(result.assumptions).toEqual([]);
   });
 
   it('validates grok field extraction', () => {
@@ -46,8 +67,8 @@ describe('validateTypes', () => {
       ],
     };
 
-    const assumptions = validateTypes(dsl);
-    expect(assumptions).toEqual([]);
+    const result = validateTypes(dsl);
+    expect(result.assumptions).toEqual([]);
   });
 
   it('validates dissect field extraction', () => {
@@ -61,8 +82,8 @@ describe('validateTypes', () => {
       ],
     };
 
-    const assumptions = validateTypes(dsl);
-    expect(assumptions).toEqual([]);
+    const result = validateTypes(dsl);
+    expect(result.assumptions).toEqual([]);
   });
 
   it('validates date processor', () => {
@@ -77,8 +98,8 @@ describe('validateTypes', () => {
       ],
     };
 
-    const assumptions = validateTypes(dsl);
-    expect(assumptions).toEqual([]);
+    const result = validateTypes(dsl);
+    expect(result.assumptions).toEqual([]);
   });
 
   it('uses starting field types', () => {
@@ -86,10 +107,10 @@ describe('validateTypes', () => {
       steps: [{ action: 'set', to: 'target', copy_from: 'source' }],
     };
 
-    const assumptions = validateTypes(dsl, { source: 'string' });
+    const result = validateTypes(dsl, { source: 'string' });
 
     // Should assume that source is string, so no typeof placeholder
-    expect(assumptions.length).toBe(0);
+    expect(result.assumptions.length).toBe(0);
   });
 
   it('creates assumptions for unknown fields', () => {
@@ -97,11 +118,11 @@ describe('validateTypes', () => {
       steps: [{ action: 'set', to: 'target', copy_from: 'unknown_field' }],
     };
 
-    const assumptions = validateTypes(dsl);
+    const result = validateTypes(dsl);
 
     // Should create typeof_unknown_field placeholder
     // No assumptions yet since it's never resolved to a concrete type
-    expect(assumptions).toEqual([]);
+    expect(result.assumptions).toEqual([]);
   });
 
   it('resolves typeof placeholders when field is later used', () => {
@@ -115,11 +136,11 @@ describe('validateTypes', () => {
       ],
     };
 
-    const assumptions = validateTypes(dsl);
+    const result = validateTypes(dsl);
 
     // field1 and field2 both have typeof_unknown
     // No concrete type resolution happens in this example
-    expect(assumptions).toEqual([]);
+    expect(result.assumptions).toEqual([]);
   });
 
   it('allows unconditional type changes', () => {
@@ -208,9 +229,9 @@ describe('validateTypes', () => {
       ],
     };
 
-    const assumptions = validateTypes(dsl);
+    const result = validateTypes(dsl);
     // No assumptions needed - all concrete string type
-    expect(assumptions).toEqual([]);
+    expect(result.assumptions).toEqual([]);
   });
 
   it('handles mixed conditional and unconditional operations', () => {
@@ -269,9 +290,9 @@ describe('validateTypes', () => {
       ],
     };
 
-    const assumptions = validateTypes(dsl, {});
+    const result = validateTypes(dsl, {});
     // int should be normalized to number, keyword to string
-    expect(assumptions).toEqual([]);
+    expect(result.assumptions).toEqual([]);
   });
 
   it('comprehensive integration test with all features', () => {
@@ -349,21 +370,36 @@ describe('validateTypes', () => {
           pattern: 'user=%{user} action=%{action}',
         },
 
-        // Step 8: Unconditional processing - propagate types
+        // Step 8: Convert action field to uppercase/normalized format
+        {
+          action: 'grok',
+          from: 'raw_message',
+          patterns: ['bytes: %{NUMBER:bytes}'],
+        },
+
+        // Step 9: Convert bytes from string to number
+        {
+          action: 'convert',
+          from: 'bytes',
+          to: 'bytes_num',
+          type: 'long',
+        },
+
+        // Step 10: Unconditional processing - propagate types
         {
           action: 'rename',
           from: 'user',
           to: 'user.name',
         },
 
-        // Step 9: Resolve one of the unknown types
+        // Step 11: Resolve one of the unknown types
         {
           action: 'set',
           to: 'external_severity',
           value: 5,
         },
 
-        // Step 10: Use host from starting types and process it
+        // Step 12: Use host from starting types and process it
         {
           action: 'set',
           to: 'host.name',
@@ -380,13 +416,13 @@ describe('validateTypes', () => {
       structured_data: 'keyword',
     };
 
-    const assumptions = validateTypes(dsl, startingTypes);
+    const result = validateTypes(dsl, startingTypes);
 
     // All typeof placeholders in this test are actually resolved:
     // - typeof_external_severity: resolved in step 9 (set value: 5)
     // - typeof_external_error_info: resolved in step 5 (used conditionally but as target, not source)
     // Therefore, the assumptions list should be empty
-    expect(assumptions).toEqual([]);
+    expect(result.assumptions).toEqual([]);
 
     // The test should pass without throwing errors because:
     // - No conflicting type assignments (alert is always boolean)
@@ -396,9 +432,10 @@ describe('validateTypes', () => {
     // This test successfully demonstrates:
     // ✓ Starting types (host, environment, raw_message, structured_data)
     // ✓ Type propagation (copy_from operations)
-    // ✓ Pattern extraction (grok extracts log_timestamp, log.level, log.message)
+    // ✓ Pattern extraction (grok extracts log_timestamp, log.level, log.message, bytes)
     // ✓ Pattern extraction (dissect extracts user, action)
     // ✓ Type transformations (date parsing to @timestamp)
+    // ✓ Type conversions (convert bytes string to number)
     // ✓ Conditional steps (two where blocks based on log.level)
     // ✓ Field renaming (user → user.name)
     // ✓ Type normalization (keyword → string, text → string)
@@ -448,19 +485,283 @@ describe('validateTypes', () => {
       ],
     };
 
-    const assumptions = validateTypes(dsl, {});
+    const result = validateTypes(dsl, {});
 
     // We should have 2 assumptions:
     // 1. typeof_external_data assumed to be string (from step 3)
     // 2. typeof_api_count assumed to be number (from step 5)
-    expect(assumptions.length).toBe(2);
+    expect(result.assumptions.length).toBe(2);
 
-    const stringAssumption = assumptions.find((a) => a.placeholder === 'typeof_external_data');
+    const stringAssumption = result.assumptions.find(
+      (a) => a.placeholder === 'typeof_external_data'
+    );
     expect(stringAssumption).toBeDefined();
     expect(stringAssumption?.assumedType).toBe('string');
 
-    const numberAssumption = assumptions.find((a) => a.placeholder === 'typeof_api_count');
+    const numberAssumption = result.assumptions.find((a) => a.placeholder === 'typeof_api_count');
     expect(numberAssumption).toBeDefined();
     expect(numberAssumption?.assumedType).toBe('number');
+  });
+
+  describe('convert processor', () => {
+    it('validates basic type conversion', () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          { action: 'set', to: 'status_code', value: '200' }, // string
+          { action: 'convert', from: 'status_code', to: 'status_num', type: 'integer' },
+        ],
+      };
+
+      const result = validateTypes(dsl, {});
+      expect(result.assumptions).toEqual([]);
+    });
+
+    it('validates in-place type conversion', () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          { action: 'set', to: 'value', value: '123' }, // string
+          { action: 'convert', from: 'value', type: 'integer' }, // converts to number
+        ],
+      };
+
+      const result = validateTypes(dsl, {});
+      expect(result.assumptions).toEqual([]);
+    });
+
+    it('validates conversion chain', () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          { action: 'set', to: 'original', value: '42' }, // string
+          { action: 'convert', from: 'original', to: 'as_num', type: 'integer' }, // number
+          { action: 'convert', from: 'as_num', to: 'as_bool', type: 'boolean' }, // boolean
+          { action: 'convert', from: 'as_bool', to: 'as_str', type: 'string' }, // string
+        ],
+      };
+
+      const result = validateTypes(dsl, {});
+      expect(result.assumptions).toEqual([]);
+    });
+
+    it('validates conditional conversion does not create type conflicts', () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          { action: 'set', to: 'raw_value', value: 'text' },
+          {
+            where: {
+              field: 'type',
+              eq: 'number',
+              steps: [{ action: 'convert', from: 'raw_value', to: 'converted', type: 'integer' }],
+            },
+          },
+          {
+            where: {
+              field: 'type',
+              eq: 'bool',
+              steps: [{ action: 'convert', from: 'raw_value', to: 'converted', type: 'boolean' }],
+            },
+          },
+        ],
+      };
+
+      // This should throw because 'converted' has different types conditionally
+      expect(() => validateTypes(dsl, {})).toThrow(ConditionalTypeChangeError);
+    });
+
+    it('validates unconditional type change through convert is allowed', () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          { action: 'set', to: 'value', value: 'text' }, // string
+          { action: 'convert', from: 'value', type: 'integer' }, // changes to number (OK - unconditional)
+        ],
+      };
+
+      const result = validateTypes(dsl, {});
+      expect(result.assumptions).toEqual([]);
+    });
+
+    it('validates convert with typeof placeholder source', () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          { action: 'set', to: 'data', copy_from: 'external_field' }, // typeof_external_field
+          { action: 'convert', from: 'data', to: 'data_str', type: 'string' }, // converts to string
+        ],
+      };
+
+      const result = validateTypes(dsl, {});
+
+      // Convert doesn't resolve the source typeof placeholder
+      // It just creates a new field with the target type
+      // The typeof_external_field in 'data' remains unresolved
+      expect(result.assumptions).toEqual([]);
+    });
+
+    it('validates complex scenario with conversions and grok', () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          // Extract status code as string from log message
+          {
+            action: 'grok',
+            from: 'message',
+            patterns: ['%{NUMBER:http.status_code} %{WORD:http.method}'],
+          },
+          // Convert status code to number
+          {
+            action: 'convert',
+            from: 'http.status_code',
+            to: 'http.status_code_num',
+            type: 'integer',
+          },
+          // Use the number in another operation
+          {
+            action: 'set',
+            to: 'is_success',
+            value: true,
+          },
+          // Conditionally convert based on status
+          {
+            where: {
+              field: 'http.status_code_num',
+              exists: true,
+              steps: [
+                {
+                  action: 'convert',
+                  from: 'http.status_code_num',
+                  to: 'status_display',
+                  type: 'string',
+                },
+              ],
+            },
+          },
+        ],
+      };
+
+      const result = validateTypes(dsl, { message: 'string' });
+      expect(result.assumptions).toEqual([]);
+    });
+
+    it('validates all convert type mappings', () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          { action: 'set', to: 'source', value: 'data' },
+          { action: 'convert', from: 'source', to: 'as_int', type: 'integer' },
+          { action: 'convert', from: 'source', to: 'as_long', type: 'long' },
+          { action: 'convert', from: 'source', to: 'as_double', type: 'double' },
+          { action: 'convert', from: 'source', to: 'as_bool', type: 'boolean' },
+          { action: 'convert', from: 'source', to: 'as_str', type: 'string' },
+        ],
+      };
+
+      const result = validateTypes(dsl, {});
+      expect(result.assumptions).toEqual([]);
+    });
+  });
+
+  describe('field types tracking', () => {
+    it('tracks final types of all fields', () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          { action: 'set', to: 'name', value: 'John' },
+          { action: 'set', to: 'age', value: 30 },
+          { action: 'set', to: 'active', value: true },
+        ],
+      };
+
+      const result = validateTypes(dsl, {});
+
+      expect(result.fieldTypes).toEqual({
+        name: 'string',
+        age: 'number',
+        active: 'boolean',
+      });
+    });
+
+    it('tracks type changes through the pipeline', () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          { action: 'set', to: 'value', value: '123' }, // starts as string
+          { action: 'convert', from: 'value', type: 'integer' }, // becomes number
+        ],
+      };
+
+      const result = validateTypes(dsl, {});
+
+      expect(result.fieldTypes).toEqual({
+        value: 'number', // Final type is number after conversion
+      });
+    });
+
+    it('tracks types from starting fields', () => {
+      const dsl: StreamlangDSL = {
+        steps: [{ action: 'set', to: 'new_field', copy_from: 'existing_field' }],
+      };
+
+      const result = validateTypes(dsl, { existing_field: 'string' });
+
+      expect(result.fieldTypes).toEqual({
+        existing_field: 'string', // From starting types
+        new_field: 'string', // Copied from existing_field
+      });
+    });
+
+    it('tracks typeof placeholders for unknown fields', () => {
+      const dsl: StreamlangDSL = {
+        steps: [{ action: 'set', to: 'data', copy_from: 'unknown_source' }],
+      };
+
+      const result = validateTypes(dsl, {});
+
+      expect(result.fieldTypes).toEqual({
+        data: 'typeof_unknown_source', // typeof placeholder
+      });
+    });
+
+    it('shows evolution from starting types through conversions', () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          // Extract as string with grok
+          {
+            action: 'grok',
+            from: 'message',
+            patterns: ['%{NUMBER:count}'],
+          },
+          // Convert to number
+          {
+            action: 'convert',
+            from: 'count',
+            to: 'count_num',
+            type: 'integer',
+          },
+          // Keep original message
+        ],
+      };
+
+      const result = validateTypes(dsl, { message: 'text' });
+
+      expect(result.fieldTypes).toEqual({
+        message: 'string', // Normalized from 'text'
+        count: 'string', // Extracted by grok as string
+        count_num: 'number', // Converted to number
+      });
+    });
+
+    it('tracks complex field relationships', () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          { action: 'set', to: 'original', value: 'test' },
+          { action: 'rename', from: 'original', to: 'renamed' },
+          { action: 'set', to: 'copy', copy_from: 'renamed' },
+          { action: 'convert', from: 'copy', to: 'converted', type: 'string' },
+        ],
+      };
+
+      const result = validateTypes(dsl, {});
+
+      expect(result.fieldTypes).toEqual({
+        original: 'string', // Original field still exists (rename copies)
+        renamed: 'string', // Renamed from original
+        copy: 'string', // Copied from renamed
+        converted: 'string', // Converted (same type)
+      });
+    });
   });
 });

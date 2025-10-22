@@ -63,3 +63,13 @@ export interface FieldTypeInfo {
  * Maps field names to their type information.
  */
 export type TypeState = Map<string, FieldTypeInfo>;
+
+/**
+ * Result of type validation.
+ */
+export interface TypeValidationResult {
+  /** Assumptions made about typeof placeholders */
+  assumptions: TypeAssumption[];
+  /** Final types of all fields after processing */
+  fieldTypes: Record<string, FieldType>;
+}

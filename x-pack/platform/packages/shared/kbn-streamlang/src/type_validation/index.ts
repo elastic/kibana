@@ -6,6 +6,12 @@
  */
 
 export { validateTypes } from './validate_types';
-export type { TypeAssumption, PrimitiveType, TypeofPlaceholder, FieldType } from './types';
+export type {
+  TypeAssumption,
+  PrimitiveType,
+  TypeofPlaceholder,
+  FieldType,
+  TypeValidationResult,
+} from './types';
 export { ConditionalTypeChangeError } from './errors';
 export { AssumptionConflictError } from './assumption_conflict_error';

@@ -14,6 +14,7 @@ import { handleDissectProcessor } from './dissect';
 import { handleDateProcessor } from './date';
 import { handleAppendProcessor } from './append';
 import { handleManualProcessor } from './manual';
+import { handleConvertProcessor } from './convert';
 
 export * from './set';
 export * from './rename';
@@ -22,6 +23,7 @@ export * from './dissect';
 export * from './date';
 export * from './append';
 export * from './manual';
+export * from './convert';
 
 /**
  * Process a single processor and update type state.
@@ -51,6 +53,9 @@ export function processProcessor(
       break;
     case 'append':
       handleAppendProcessor(processor, state, assumptions, processorIndex, isConditional);
+      break;
+    case 'convert':
+      handleConvertProcessor(processor, state, assumptions, processorIndex, isConditional);
       break;
     case 'manual_ingest_pipeline':
       handleManualProcessor(processor, state, assumptions, processorIndex, isConditional);

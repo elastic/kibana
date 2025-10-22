@@ -16,21 +16,40 @@ const dsl: StreamlangDSL = {
 };
 
 // Validate with starting field types
-const assumptions = validateTypes(dsl, {
+const result = validateTypes(dsl, {
   existingField: 'string',
   count: 'int', // Will be normalized to 'number'
 });
 
-console.log('Validation passed!', assumptions);
+console.log('Assumptions:', result.assumptions);
+console.log('Final field types:', result.fieldTypes);
 ```
+
+## Return Value
+
+`validateTypes` returns a `TypeValidationResult` object with:
+
+```typescript
+interface TypeValidationResult {
+  /** Assumptions made about typeof placeholders during validation */
+  assumptions: TypeAssumption[];
+  
+  /** Final types of all fields after processing the pipeline */
+  fieldTypes: Record<string, FieldType>;
+}
+```
+
+- **`assumptions`**: Records when typeof placeholders get resolved to concrete types
+- **`fieldTypes`**: Maps each field name to its final type after all processing steps
 
 ## Features
 
-- **Type Propagation**: Tracks how types flow through `set`, `rename`, `grok`, `dissect`, `date`, and other processors
+- **Type Propagation**: Tracks how types flow through `set`, `rename`, `grok`, `dissect`, `date`, `convert`, and other processors
 - **Type Normalization**: Converts Elasticsearch types (`keyword`, `int`, `long`, `float`) to primitive types (`string`, `number`)
 - **Unknown Field Handling**: Creates `typeof_<fieldname>` placeholders for unknown fields
 - **Conditional Type Checking**: Validates that fields don't change types conditionally (inside `where` blocks)
 - **Assumption Tracking**: Records and validates assumptions about unknown field types
+- **Field Type Tracking**: Returns final state of all field types showing how they evolved
 
 ## Type System
 

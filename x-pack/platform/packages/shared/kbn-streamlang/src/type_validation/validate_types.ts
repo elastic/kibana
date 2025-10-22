@@ -6,7 +6,7 @@
  */
 
 import type { StreamlangDSL } from '../../types/streamlang';
-import type { TypeState, TypeAssumption } from './types';
+import type { TypeState, TypeAssumption, TypeValidationResult } from './types';
 import { normalizeToPrimitive } from './type_utils';
 import { assignType, validateNoConditionalTypeChanges } from './type_assignment';
 import { flattenStepsWithTracking } from './flatten_steps_with_tracking';
@@ -18,14 +18,14 @@ import { validateAssumptions } from './validate_assumptions';
  *
  * @param streamlang - The Streamlang DSL to validate
  * @param startingFieldTypes - Known field types at the start (field name -> type string)
- * @returns Array of valid type assumptions made during validation
+ * @returns Validation result with assumptions and final field types
  * @throws ConditionalTypeChangeError if a field has conditional type changes
  * @throws AssumptionConflictError if assumptions about typeof placeholders conflict
  */
 export function validateTypes(
   streamlang: StreamlangDSL,
   startingFieldTypes: Record<string, string> = {}
-): TypeAssumption[] {
+): TypeValidationResult {
   // Initialize type state with starting field types
   const state: TypeState = new Map();
   const assumptions: TypeAssumption[] = [];
@@ -59,6 +59,15 @@ export function validateTypes(
   // Validate all assumptions are consistent
   validateAssumptions(assumptions);
 
-  // Return the valid assumptions
-  return assumptions;
+  // Build final field types map
+  const fieldTypes: Record<string, import('./types').FieldType> = {};
+  for (const [fieldName, fieldInfo] of state.entries()) {
+    fieldTypes[fieldName] = fieldInfo.currentType;
+  }
+
+  // Return the validation result
+  return {
+    assumptions,
+    fieldTypes,
+  };
 }
