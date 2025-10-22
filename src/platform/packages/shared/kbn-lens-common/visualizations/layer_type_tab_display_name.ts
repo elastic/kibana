@@ -11,28 +11,28 @@ import { i18n } from '@kbn/i18n';
 
 import type { LensLayerType } from './types';
 
-// Mapping of lens layer types to display names
-export const lensLayerTypeDisplayNames = {
-  data: i18n.translate('xpack.lens.layerTypes.displayName.data', {
+// Mapping of lens layer types to tab display names
+export const lensLayerTypeTabDisplayNames = {
+  data: i18n.translate('xpack.lens.layerTypes.tabDisplayName.data', {
     defaultMessage: 'Data',
   }),
-  referenceLine: i18n.translate('xpack.lens.layerTypes.displayName.referenceLine', {
+  referenceLine: i18n.translate('xpack.lens.layerTypes.tabDisplayName.referenceLine', {
     defaultMessage: 'Reference line',
   }),
-  annotations: i18n.translate('xpack.lens.layerTypes.displayName.annotations', {
+  annotations: i18n.translate('xpack.lens.layerTypes.tabDisplayName.annotations', {
     defaultMessage: 'Annotation',
   }),
-  metricTrendline: i18n.translate('xpack.lens.layerTypes.displayName.metricTrendline', {
+  metricTrendline: i18n.translate('xpack.lens.layerTypes.tabDisplayName.metricTrendline', {
     defaultMessage: 'Metric trendline',
   }),
 } as const;
 
-// Utility function to get the display name for a layer type
-export function getLensLayerTypeDisplayName(layerType?: LensLayerType): string {
+// Utility function to get the tab display name for a layer type
+export function getLensLayerTypeTabDisplayName(layerType?: LensLayerType): string {
   if (!layerType)
-    return i18n.translate('xpack.lens.layerTypes.displayName.layer', {
+    return i18n.translate('xpack.lens.layerTypes.tabDisplayName.layer', {
       defaultMessage: 'Layer',
     });
 
-  return lensLayerTypeDisplayNames[layerType] || layerType;
+  return lensLayerTypeTabDisplayNames[layerType] || layerType;
 }
