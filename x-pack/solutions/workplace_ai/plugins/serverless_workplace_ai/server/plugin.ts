@@ -14,7 +14,7 @@ import type {
 } from '@kbn/core/server';
 import { WORKPLACE_AI_PROJECT_SETTINGS } from '@kbn/serverless-workplace-ai-settings';
 
-import type { ServerlessChatConfig } from './config';
+import type { ServerlessWorkplaceAIConfig } from './config';
 import type {
   ServerlessWorkplaceAIPluginSetup,
   ServerlessWorkplaceAIPluginStart,
@@ -37,7 +37,7 @@ export class ServerlessWorkplaceAIPlugin
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {
-    this.config = initializerContext.config.get<ServerlessChatConfig>();
+    this.config = initializerContext.config.get<ServerlessWorkplaceAIConfig>();
     this.logger = initializerContext.logger.get();
   }
 

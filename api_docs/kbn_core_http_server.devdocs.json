@@ -3654,7 +3654,7 @@
               },
               {
                 "plugin": "reporting",
-                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/management/scheduled.ts"
+                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/scheduled_reports/list/index.ts"
               },
               {
                 "plugin": "reporting",
@@ -6534,7 +6534,7 @@
               },
               {
                 "plugin": "reporting",
-                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/schedule/schedule_from_jobparams.ts"
+                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/scheduled_reports/post/index.ts"
               },
               {
                 "plugin": "reporting",
@@ -8998,7 +8998,7 @@
               },
               {
                 "plugin": "reporting",
-                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/management/scheduled.ts"
+                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/scheduled_reports/bulk_disable/index.ts"
               },
               {
                 "plugin": "reporting",
@@ -9330,7 +9330,7 @@
               },
               {
                 "plugin": "reporting",
-                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/management/scheduled.ts"
+                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/scheduled_reports/bulk_delete/index.ts"
               },
               {
                 "plugin": "reporting",
