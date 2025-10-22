@@ -6,7 +6,7 @@
 // ESS (recommended for profiling tests)
 node scripts/scout.js start-server --stateful
 
-// Serverless
+// Serverless - currently not supported in Universal Profiling
 node scripts/scout.js start-server --serverless=[es|oblt|security]
 ```
 
@@ -29,6 +29,6 @@ npx playwright test --config x-pack/solutions/observability/plugins/profiling/te
 
 Tests are tagged with:
 - `@ess` - Stateful tests
-- `@svlOblt` - Serverless tests
+- `@svlOblt` - Serverless tests - currently not supported in Universal Profiling
 
 Test results are available in `x-pack/solutions/observability/plugins/profiling/test/scout/ui/output`
