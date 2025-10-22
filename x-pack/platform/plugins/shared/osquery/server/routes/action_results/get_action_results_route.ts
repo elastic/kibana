@@ -206,10 +206,20 @@ export const getActionResultsRoute = (
             ) as typeof res.edges;
           }
 
+          // Calculate pagination metadata
+          const currentPage = request.query.page ?? 0;
+          const currentPageSize = request.query.pageSize ?? 100;
+          const totalAgents = agentIds.length;
+          const totalPages = Math.ceil(totalAgents / currentPageSize);
+
           return response.ok({
             body: {
               edges: processedEdges,
-              total: processedEdges.length,
+              total: processedEdges.length, // Current page size
+              totalAgents, // Total agents across all pages
+              currentPage, // Current page number (0-indexed)
+              pageSize: currentPageSize, // Items per page
+              totalPages, // Total number of pages
               aggregations,
               inspect: res.inspect,
             },

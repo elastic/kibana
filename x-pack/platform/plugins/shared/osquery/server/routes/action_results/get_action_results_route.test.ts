@@ -103,9 +103,13 @@ describe('getActionResultsRoute', () => {
         expectedSearchOptions
       );
 
-      // Verify response includes correct aggregations
+      // Verify response includes correct aggregations and pagination metadata
       expect(mockResponse.ok).toHaveBeenCalledWith({
         body: expect.objectContaining({
+          totalAgents: 3,
+          currentPage: 0,
+          pageSize: 100,
+          totalPages: 1,
           aggregations: {
             totalRowCount: 100,
             totalResponded: 3,
@@ -592,7 +596,15 @@ describe('getActionResultsRoute', () => {
         expectedSearchOptions
       );
 
-      expect(mockResponse.ok).toHaveBeenCalled();
+      // Verify pagination metadata in response
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: expect.objectContaining({
+          totalAgents: 1,
+          currentPage: 2,
+          pageSize: 50,
+          totalPages: 1,
+        }),
+      });
     });
 
     it('should use default pagination values when not provided', async () => {
@@ -626,6 +638,38 @@ describe('getActionResultsRoute', () => {
         }),
         expectedSearchOptions
       );
+    });
+
+    it('should return correct pagination metadata for multi-page results', async () => {
+      // Test with 250 agents, page size 100, requesting page 1 (second page)
+      const allAgents = Array.from({ length: 250 }, (_, i) => `agent-${i}`);
+      const mockSearchFn = createMockSearchStrategy(
+        createMockActionDetailsResponse(allAgents),
+        createMockActionResultsResponse(50)
+      );
+
+      const mockContext = createMockContext(mockSearchFn);
+      const mockRequest = createMockRequest({
+        actionId: 'test-action-id',
+        query: {
+          page: 1,
+          pageSize: 100,
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      // Verify pagination metadata is correct
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: expect.objectContaining({
+          totalAgents: 250,
+          currentPage: 1,
+          pageSize: 100,
+          totalPages: 3,
+          total: expect.any(Number),
+        }),
+      });
     });
   });
 

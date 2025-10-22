@@ -40,7 +40,11 @@ export interface UseActionResults {
 
 interface ActionResultsResponse {
   edges: ResultEdges;
-  total: number;
+  total: number; // Current page size (number of edges)
+  totalAgents: number; // Total agents across all pages
+  currentPage: number; // Current page number (0-indexed)
+  pageSize: number; // Items per page
+  totalPages: number; // Total number of pages
   aggregations: {
     totalRowCount: number;
     totalResponded: number;
