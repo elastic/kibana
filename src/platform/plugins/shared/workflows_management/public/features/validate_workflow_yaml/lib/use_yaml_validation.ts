@@ -7,27 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { monaco } from '@kbn/monaco';
 import { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { getCachedDynamicConnectorTypes } from '../../../../common/schema';
-import {
-  selectWorkflowDefinition,
-  selectYamlLineCounter,
-} from '../../../widgets/workflow_yaml_editor/lib/store/selectors';
-import type { YamlValidationResult } from '../model/types';
-import { MarkerSeverity } from '../../../widgets/workflow_yaml_editor/lib/utils';
+import { monaco } from '@kbn/monaco';
+import { collectAllConnectorIds } from './collect_all_connector_ids';
+import { collectAllVariables } from './collect_all_variables';
+import { validateConnectorIds } from './validate_connector_ids';
 import { validateLiquidTemplate } from './validate_liquid_template';
 import { validateStepNameUniqueness } from './validate_step_name_uniqueness';
 import { validateVariables as validateVariablesInternal } from './validate_variables';
-import { collectAllVariables } from './collect_all_variables';
+import { getCachedDynamicConnectorTypes } from '../../../../common/schema';
+import { useKibana } from '../../../hooks/use_kibana';
 import {
   selectWorkflowGraph,
   selectYamlDocument,
 } from '../../../widgets/workflow_yaml_editor/lib/store';
-import { collectAllConnectorIds } from './collect_all_connector_ids';
-import { validateConnectorIds } from './validate_connector_ids';
-import { useKibana } from '../../../hooks/use_kibana';
+import {
+  selectWorkflowDefinition,
+  selectYamlLineCounter,
+} from '../../../widgets/workflow_yaml_editor/lib/store/selectors';
+import { MarkerSeverity } from '../../../widgets/workflow_yaml_editor/lib/utils';
+import type { YamlValidationResult } from '../model/types';
 
 const SEVERITY_MAP = {
   error: MarkerSeverity.Error,

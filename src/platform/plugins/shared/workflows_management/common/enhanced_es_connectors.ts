@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
 import type { EnhancedInternalConnectorContract, InternalConnectorContract } from '@kbn/workflows';
+import { z } from '@kbn/zod';
 
 /**
  * Enhanced connector definition that extends auto-generated connectors
@@ -27,7 +27,7 @@ export interface EnhancedConnectorDefinition {
   /** Example usage snippets for autocomplete */
   examples?: {
     /** Example parameter values for autocomplete */
-    params?: Record<string, any>;
+    params?: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
     /** Full example workflow step */
     snippet?: string;
   };
@@ -35,11 +35,7 @@ export interface EnhancedConnectorDefinition {
   /** Override specific parameters with better schemas/examples */
   parameterEnhancements?: Record<
     string,
-    {
-      schema?: z.ZodType;
-      example?: any;
-      description?: string;
-    }
+    { schema?: z.ZodType; example?: unknown; description?: string }
   >;
 }
 
@@ -180,7 +176,7 @@ export function mergeEnhancedConnectors(
  */
 function enhanceParameterSchema(
   originalSchema: z.ZodType,
-  enhancements: Record<string, { schema?: z.ZodType; example?: any; description?: string }>
+  enhancements: Record<string, { schema?: z.ZodType; example?: unknown; description?: string }>
 ): z.ZodType {
   // Enhanced parameter schema processing
 
