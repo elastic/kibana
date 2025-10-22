@@ -30,6 +30,7 @@ import { buildIgnoreMissingFilter, buildWhereCondition } from './common';
  *        {
  *          action: 'convert',
  *          from: 'http.status_code',
+ *          to: 'http.status_code_str',
  *          type: 'string',
  *          ignore_missing: true,
  *          where: { field: 'http.error', exists: true },
@@ -41,7 +42,7 @@ import { buildIgnoreMissingFilter, buildWhereCondition } from './common';
  *    Generates (conceptually):
  *    ```txt
  *    // | WHERE NOT(size IS NULL)  // Only if ignore_missing = false
- *    | EVAL size = CASE(NOT(`http.error` IS NULL), TO_STRING(size), size)
+ *    | EVAL http.status_code_str = CASE(NOT(`http.error` IS NULL), TO_STRING(http.status_code), null)
  *    ```
  */
 export function convertConvertProcessorToESQL(processor: ConvertProcessor): ESQLAstCommand[] {

@@ -11,11 +11,12 @@ import { EuiFormRow, EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { convertTypes } from '@kbn/streamlang/types/formats';
 import { FieldNameWithIcon } from '@kbn/react-field';
+import { capitalize } from 'lodash';
 import type { ConvertFormState } from '../../../../types';
 
 const typeSelectorOptions = convertTypes.map((type) => ({
   value: type,
-  inputDisplay: <FieldNameWithIcon name={type} type={type} />,
+  inputDisplay: <FieldNameWithIcon name={capitalize(type)} type={type} />,
 }));
 
 export const ConvertTypeSelector = () => {

@@ -29,23 +29,49 @@ export const TargetFieldSelector = () => {
 
   const { ref, ...inputProps } = register('to', {
     validate: (value, formValues) => {
+      const hasTargetField = Boolean(value?.trim());
+      const isEqualToSourceField = value?.trim() === formValues.from?.trim();
+
       if (isWithinWhereBlock) {
-        return i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.processor.convertTargetFieldRequiredInWhereBlock',
-          {
-            defaultMessage:
-              'For a convert processor within a where block, the target field is required. Either set this field or move the processor at the root level.',
-          }
-        );
+        if (!hasTargetField) {
+          return i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.processor.convertTargetFieldRequiredInWhereBlock',
+            {
+              defaultMessage:
+                'For a convert processor within a where block, the target field is required. Either set this field or move the processor at the root level.',
+            }
+          );
+        }
+        if (isEqualToSourceField) {
+          return i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.processor.convertTargetFieldCannotBeEqualToSourceFieldInWhereBlock',
+            {
+              defaultMessage:
+                'The target field cannot be the same as the source field in a where block.',
+            }
+          );
+        }
       }
-      if ('where' in formValues && !isAlwaysCondition(formValues.where) && !value) {
-        return i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.processor.convertTargetFieldRequiredWithCondition',
-          {
-            defaultMessage:
-              'For a convert processor with a defined condition, the target field is required. Either set this field or remove the processor condition.',
-          }
-        );
+
+      if ('where' in formValues && !isAlwaysCondition(formValues.where)) {
+        if (!hasTargetField) {
+          return i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.processor.convertTargetFieldRequiredWithCondition',
+            {
+              defaultMessage:
+                'For a convert processor with a defined condition, the target field is required. Either set this field or remove the processor condition.',
+            }
+          );
+        }
+        if (isEqualToSourceField) {
+          return i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.processor.convertTargetFieldCannotBeEqualToSourceFieldWithCondition',
+            {
+              defaultMessage:
+                'The target field cannot be the same as the source field when a condition is defined.',
+            }
+          );
+        }
       }
       return true;
     },
