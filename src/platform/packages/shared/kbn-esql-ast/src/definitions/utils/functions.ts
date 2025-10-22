@@ -30,7 +30,7 @@ import { getSafeInsertText, getControlSuggestion } from './autocomplete/helpers'
 import type { ESQLAstItem, ESQLFunction } from '../../types';
 import { removeFinalUnknownIdentiferArg } from './shared';
 import { getTestFunctions } from './test_functions';
-import { getMatchingSignatures } from './expressions';
+import { getExpressionType, getMatchingSignatures } from './expressions';
 import { isLiteral } from '../../ast/is';
 
 const techPreviewLabel = i18n.translate('kbn-esql-ast.esql.autocomplete.techPreviewLabel', {
@@ -297,7 +297,7 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
 
 export function checkFunctionInvocationComplete(
   func: ESQLFunction,
-  getExpressionType: (expression: ESQLAstItem) => SupportedDataType | 'unknown'
+  scopedGetExpressionType: (expression: ESQLAstItem) => SupportedDataType | 'unknown'
 ): {
   complete: boolean;
   reason?: 'tooFewArgs' | 'wrongTypes';
@@ -307,7 +307,7 @@ export function checkFunctionInvocationComplete(
     return { complete: false };
   }
 
-  const cleanedArgs = removeFinalUnknownIdentiferArg(func.args, getExpressionType);
+  const cleanedArgs = removeFinalUnknownIdentiferArg(func.args, scopedGetExpressionType);
 
   const argLengthCheck = fnDefinition.signatures.some((def) => {
     if (def.minParams && cleanedArgs.length >= def.minParams) {
@@ -338,7 +338,7 @@ export function checkFunctionInvocationComplete(
   }
 
   // If the function is complete, check that the types of the arguments match the function definition
-  const givenTypes = func.args.map((arg) => getExpressionType(arg));
+  const givenTypes = func.args.map((arg) => scopedGetExpressionType(arg));
   const literalMask = func.args.map((arg) => isLiteral(Array.isArray(arg) ? arg[0] : arg));
 
   const hasCorrectTypes = !!getMatchingSignatures(
@@ -437,6 +437,8 @@ export const buildColumnSuggestions = (
 /**
  * Helper function to format a function signature in a readable format.
  * @param functionDef The function definition to format
+ * @param fnNode ESQLFunction node to help determine the best matching signature
+ * @param columns map of column data to help determine argument types
  * @returns A formatted signature string
  *
  * @example output:
@@ -447,19 +449,41 @@ export const buildColumnSuggestions = (
  *  ): long
  * ```
  */
-export function getFormattedFunctionSignature(functionDef: FunctionDefinition): string {
+export function getFormattedFunctionSignature(
+  functionDef: FunctionDefinition,
+  fnNode?: ESQLFunction,
+  columns?: Map<string, ESQLColumnData>
+): string {
   if (!functionDef.signatures || functionDef.signatures.length === 0) {
     return `${functionDef.name}()`;
+  }
+
+  let signatures = functionDef.signatures;
+
+  // Filter signatures with matching arguments
+  if (fnNode && columns && fnNode.args.length > 0) {
+    const argTypes = fnNode.args.map((arg) => getExpressionType(arg, columns));
+    const literalMask = fnNode.args.map((arg) => isLiteral(arg));
+
+    const matchingSignatures = getMatchingSignatures(
+      functionDef.signatures,
+      argTypes,
+      literalMask,
+      false
+    );
+    if (matchingSignatures.length > 0) {
+      signatures = matchingSignatures;
+    }
   }
 
   const returnTypes = new Set<string>();
   const parameterTypeMap = new Map<string, Set<string>>();
   const parameterOptionalMap = new Map<string, boolean>();
   const parameterSignatureCount = new Map<string, number>();
-  let bestSignature = functionDef.signatures[0];
+  let bestSignature = signatures[0];
   let maxParams = bestSignature.params.length;
 
-  functionDef.signatures.forEach((signature) => {
+  signatures.forEach((signature) => {
     // Collect return types
     returnTypes.add(signature.returnType);
 
@@ -495,15 +519,13 @@ export function getFormattedFunctionSignature(functionDef: FunctionDefinition): 
     // 1. ANY signature explicitly marks it as optional, OR
     // 2. It doesn't appear in ALL signatures
     const isExplicitlyOptional = parameterOptionalMap.get(param.name) || false;
-    const appearsInAllSignatures =
-      parameterSignatureCount.get(param.name) === functionDef.signatures.length;
+    const appearsInAllSignatures = parameterSignatureCount.get(param.name) === signatures.length;
     const isOptional = isExplicitlyOptional || !appearsInAllSignatures;
 
     const optionalMarker = isOptional ? '?' : '';
     return `${param.name}${optionalMarker}: ${typesList}`;
   });
 
-  // Build final string
   const returnTypesList = Array.from(returnTypes).sort().join(' | ');
 
   if (formattedParams.length > 0) {
