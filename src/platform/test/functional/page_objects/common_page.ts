@@ -327,10 +327,6 @@ export class CommonPageObject extends FtrService {
         );
         return;
       }
-    } else {
-      this.log.debug(
-        `Navigating to base app URL for ${appName} (no state params), will refresh to ensure clean state.`
-      );
     }
 
     // Phase 2: Navigate to the app and verify it loaded successfully
@@ -338,13 +334,6 @@ export class CommonPageObject extends FtrService {
       this.log.debug('navigate to: ' + appUrl);
 
       await this.browser.get(appUrl, insertTimestamp);
-
-      // For base URLs (no state params), do a hard refresh to clear stale app state
-      // (localStorage, React state, etc.) that might persist from previous tests.
-      // For URLs with state params, skip refresh since the state is intentional.
-      if (!targetHasState) {
-        await this.browser.refresh();
-      }
 
       // accept alert if it pops up
       const alert = await this.browser.getAlert();
