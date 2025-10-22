@@ -6,8 +6,6 @@
  */
 
 import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
-import type { ActionParamsType as ServiceNowITSMActionParams } from '@kbn/connector-schemas/servicenow_itsm';
-import type { ActionParamsType as ServiceNowSIRActionParams } from '@kbn/connector-schemas/servicenow_sir';
 
 import { getJiraServiceManagementConnectorType } from './jira-service-management';
 import { getMicrosoftDefenderEndpointConnectorType } from './microsoft_defender_endpoint';
@@ -43,8 +41,6 @@ import type { ExperimentalFeatures } from '../../common/experimental_features';
 
 export { ConnectorTypeId as XmattersConnectorTypeId } from './xmatters';
 export type { ActionParamsType as XmattersActionParams } from './xmatters';
-
-export type ServiceNowActionParams = ServiceNowITSMActionParams | ServiceNowSIRActionParams;
 
 export { getConnectorType as getSwimlaneConnectorType } from './swimlane';
 
