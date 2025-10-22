@@ -1003,17 +1003,15 @@ export function getCompletionItemProvider(
 
           const focusedStepInfo = workflowLookup.steps[focusedStepId]!;
 
-          let focusedProp: StepPropInfo | undefined;
-          for (const [, stepPropInfo] of Object.entries(focusedStepInfo.propInfos)) {
-            if (
-              stepPropInfo.valueNode.range &&
-              stepPropInfo.valueNode.range[0] <= absolutePosition &&
-              absolutePosition <= stepPropInfo.valueNode.range[2]
-            ) {
-              focusedProp = stepPropInfo;
-              break;
-            }
-          }
+          const focusedProp: StepPropInfo | undefined = Object.entries(focusedStepInfo.propInfos)
+            .map(([, stepPropInfo]) => stepPropInfo)
+            .find(
+              (stepPropInfo) =>
+                stepPropInfo.valueNode.range &&
+                stepPropInfo.valueNode.range[0] <= absolutePosition &&
+                absolutePosition <= stepPropInfo.valueNode.range[2]
+            );
+
           if (!focusedProp) {
             return {
               suggestions: [],
