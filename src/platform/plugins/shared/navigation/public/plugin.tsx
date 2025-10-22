@@ -125,13 +125,13 @@ export class NavigationPublicPlugin
       activeSpace$.pipe(take(1)).subscribe(initSolutionNavigation);
     }
 
-    if (spaces && this.isSolutionNavEnabled) {
+    if (this.isSolutionNavEnabled || isServerless) {
       const hideAnnouncements = core.settings.client.get('hideAnnouncements', false);
       if (!hideAnnouncements) {
         const { project } = core.chrome as InternalChromeStart;
         const tourManager = new SolutionNavigationTourManager({
           navigationTourManager: project.navigationTourManager,
-          spacesSolutionViewTourManager: spaces.solutionViewTourManager,
+          spacesSolutionViewTourManager: spaces?.solutionViewTourManager,
           userProfile: core.userProfile,
           capabilities: core.application.capabilities,
           featureFlags: core.featureFlags,
