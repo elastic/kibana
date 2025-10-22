@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import type { TraceItem } from '../../../common/waterfall/unified_trace_item';
+import type { TraceItem } from './unified_trace_item';
 
 const MAX_NUMBER_OF_CHILDREN = 2;
 
@@ -124,7 +124,7 @@ export function flattenChildren(children: FocusedTraceItems['focusedTraceTree'])
   return children.flatMap(convert);
 }
 
-export function reparentDocumentToRoot(items: FocusedTraceItems) {
+export function reparentDocumentToRoot(items?: FocusedTraceItems) {
   if (!items) {
     return undefined;
   }

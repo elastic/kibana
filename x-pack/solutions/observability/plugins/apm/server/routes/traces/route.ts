@@ -29,7 +29,8 @@ import {
   findRootItem,
   reparentDocumentToRoot,
   getFocusedTraceItems,
-} from './build_focused_trace_items';
+} from '../../../common/waterfall/build_focused_trace_items';
+import { getTraceParentChildrenMap } from '../../../common/waterfall/parent_children_map';
 import type { TopTracesPrimaryStatsResponse } from './get_top_traces_primary_stats';
 import { getTopTracesPrimaryStats } from './get_top_traces_primary_stats';
 import type { TraceItems } from './get_trace_items';
@@ -37,7 +38,7 @@ import { getTraceItems } from './get_trace_items';
 import type { TraceSamplesResponse } from './get_trace_samples_by_query';
 import { getTraceSamplesByQuery } from './get_trace_samples_by_query';
 import { getTraceSummaryCount } from './get_trace_summary_count';
-import { getTraceParentChildrenMap, getUnifiedTraceItems } from './get_unified_trace_items';
+import { getUnifiedTraceItems } from './get_unified_trace_items';
 import { getUnifiedTraceErrors } from './get_unified_trace_errors';
 import { createLogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
 import { normalizeErrors } from './normalize_errors';

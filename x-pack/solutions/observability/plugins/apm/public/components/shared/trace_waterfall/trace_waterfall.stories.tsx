@@ -13,6 +13,7 @@ import { traceUnprocessedOtelSample } from './mock/trace_unprocessed_otel_sample
 import { traceSample } from './mock/trace_sample';
 import { MockApmPluginStorybook } from '../../../context/apm_plugin/mock_apm_plugin_storybook';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
+import { getTraceParentChildrenMap } from '../../../../common/waterfall/parent_children_map';
 
 const stories: Meta = {
   title: 'UnifiedTraceWaterfall',
@@ -29,167 +30,182 @@ const stories: Meta = {
 export default stories;
 
 export const ManyChildren: StoryFn<{}> = () => {
-  return (
-    <TraceWaterfall
-      traceItems={[
-        {
-          id: '1',
-          timestampUs: new Date('2025-05-21T18:50:00.660Z').getTime() * 1000,
-          name: 'Root',
-          duration: 5000000,
-          serviceName: 'frontend',
-          traceId: 'ed1aacaf31264b93e0e405e42b00af74',
-          errors: [{ errorDocId: '1' }],
-        },
-        ...Array(200)
-          .fill(0)
-          .map((_, index) => ({
-            id: `child-${index}`,
-            timestampUs: new Date(`2025-05-21T18:50:00.${660 + index}Z`).getTime() * 1000,
-            name: `Child ${index + 1}`,
-            duration: 1000000 + index * 1000,
-            parentId: '1',
-            serviceName: 'child-service',
-            traceId: 'ed1aacaf31264b93e0e405e42b00af74',
-            errors: [],
-          })),
-      ]}
-    />
-  );
+  const traceItems = [
+    {
+      id: '1',
+      timestampUs: new Date('2025-05-21T18:50:00.660Z').getTime() * 1000,
+      name: 'Root',
+      duration: 5000000,
+      serviceName: 'frontend',
+      traceId: 'ed1aacaf31264b93e0e405e42b00af74',
+      errors: [{ errorDocId: '1' }],
+    },
+    ...Array(200)
+      .fill(0)
+      .map((_, index) => ({
+        id: `child-${index}`,
+        timestampUs: new Date(`2025-05-21T18:50:00.${660 + index}Z`).getTime() * 1000,
+        name: `Child ${index + 1}`,
+        duration: 1000000 + index * 1000,
+        parentId: '1',
+        serviceName: 'child-service',
+        traceId: 'ed1aacaf31264b93e0e405e42b00af74',
+        errors: [],
+      })),
+  ];
+
+  const parentChildrenMap = getTraceParentChildrenMap(traceItems, false);
+
+  return <TraceWaterfall traceItems={traceItems} traceParentChildrenMap={parentChildrenMap} />;
 };
 
 export const ExampleClockSkew: StoryFn<{}> = () => {
+  const traceItems = [
+    {
+      id: 'd2efb76164a77608',
+      timestampUs: new Date('2025-05-21T18:50:00.660Z').getTime() * 1000,
+      name: 'HTTP GET /api',
+      duration: 5000000,
+      serviceName: 'frontend',
+      traceId: 'ed1aacaf31264b93e0e405e42b00af74',
+      errors: [{ errorDocId: '1' }],
+    },
+    {
+      id: 'cdd3568d81149715',
+      timestampUs: new Date('2025-05-21T18:50:00.652Z').getTime() * 1000, // Starts before its parent
+      name: 'POST /getquote',
+      duration: 3677750,
+      parentId: 'd2efb76164a77608',
+      serviceName: 'quote',
+      traceId: 'ed1aacaf31264b93e0e405e42b00af74',
+      errors: [],
+    },
+    {
+      id: 'a111aabbccddeeff',
+      timestampUs: new Date('2025-05-21T18:50:00.653Z').getTime() * 1000,
+      name: 'DB query',
+      duration: 1000000,
+      parentId: 'cdd3568d81149715',
+      serviceName: 'database',
+      traceId: 'ed1aacaf31264b93e0e405e42b00af74',
+      errors: [],
+    },
+  ];
+
+  const parentChildrenMap = getTraceParentChildrenMap(traceItems, false);
+
   return (
     <TraceWaterfall
       onClick={action('onClick')}
       onErrorClick={action('onErrorClick')}
-      traceItems={[
-        {
-          id: 'd2efb76164a77608',
-          timestampUs: new Date('2025-05-21T18:50:00.660Z').getTime() * 1000,
-          name: 'HTTP GET /api',
-          duration: 5000000,
-          serviceName: 'frontend',
-          traceId: 'ed1aacaf31264b93e0e405e42b00af74',
-          errors: [{ errorDocId: '1' }],
-        },
-        {
-          id: 'cdd3568d81149715',
-          timestampUs: new Date('2025-05-21T18:50:00.652Z').getTime() * 1000, // Starts before its parent
-          name: 'POST /getquote',
-          duration: 3677750,
-          parentId: 'd2efb76164a77608',
-          serviceName: 'quote',
-          traceId: 'ed1aacaf31264b93e0e405e42b00af74',
-          errors: [],
-        },
-        {
-          id: 'a111aabbccddeeff',
-          timestampUs: new Date('2025-05-21T18:50:00.653Z').getTime() * 1000,
-          name: 'DB query',
-          duration: 1000000,
-          parentId: 'cdd3568d81149715',
-          serviceName: 'database',
-          traceId: 'ed1aacaf31264b93e0e405e42b00af74',
-          errors: [],
-        },
-      ]}
+      traceItems={traceItems}
+      traceParentChildrenMap={parentChildrenMap}
     />
   );
 };
 export const Example: StoryFn<{}> = () => {
+  const traceItems = [
+    {
+      id: '06b480d1e6e2ac2e',
+      timestampUs: new Date('2025-05-27T12:15:04.973Z').getTime() * 1000,
+      name: 'POST',
+      traceId: 'cc847a76570773d6fc96fac63dfcddd2',
+      duration: 53170917,
+      errors: [],
+      serviceName: 'load-generator',
+    },
+    {
+      id: '2b18312dfedbf16a',
+      timestampUs: new Date('2025-05-27T12:15:04.974Z').getTime() * 1000,
+      name: 'executing api route (pages) /api/checkout',
+      traceId: 'cc847a76570773d6fc96fac63dfcddd2',
+      duration: 51298750,
+      errors: [],
+      parentId: '06b480d1e6e2ac2e',
+      serviceName: 'frontend',
+    },
+    {
+      id: '41b39c13ec0166a8',
+      timestampUs: new Date('2025-05-27T12:15:06.024Z').getTime() * 1000,
+      name: 'grpc.oteldemo.ProductCatalogService/GetProduct',
+      traceId: 'cc847a76570773d6fc96fac63dfcddd2',
+      duration: 1187042,
+      errors: [],
+      parentId: '2b18312dfedbf16a',
+      serviceName: 'frontend',
+    },
+    {
+      id: '255547a7b6b19871',
+      timestampUs: new Date('2025-05-27T12:15:06.500Z').getTime() * 1000,
+      name: 'oteldemo.ProductCatalogService/GetProduct',
+      traceId: 'cc847a76570773d6fc96fac63dfcddd2',
+      duration: 90416,
+      errors: [],
+      parentId: '41b39c13ec0166a8',
+      serviceName: 'product-catalog',
+    },
+  ];
+
+  const parentChildrenMap = getTraceParentChildrenMap(traceItems, false);
+
   return (
     <TraceWaterfall
-      traceItems={[
-        {
-          id: '06b480d1e6e2ac2e',
-          timestampUs: new Date('2025-05-27T12:15:04.973Z').getTime() * 1000,
-          name: 'POST',
-          traceId: 'cc847a76570773d6fc96fac63dfcddd2',
-          duration: 53170917,
-          errors: [],
-          serviceName: 'load-generator',
-        },
-        {
-          id: '2b18312dfedbf16a',
-          timestampUs: new Date('2025-05-27T12:15:04.974Z').getTime() * 1000,
-          name: 'executing api route (pages) /api/checkout',
-          traceId: 'cc847a76570773d6fc96fac63dfcddd2',
-          duration: 51298750,
-          errors: [],
-          parentId: '06b480d1e6e2ac2e',
-          serviceName: 'frontend',
-        },
-        {
-          id: '41b39c13ec0166a8',
-          timestampUs: new Date('2025-05-27T12:15:06.024Z').getTime() * 1000,
-          name: 'grpc.oteldemo.ProductCatalogService/GetProduct',
-          traceId: 'cc847a76570773d6fc96fac63dfcddd2',
-          duration: 1187042,
-          errors: [],
-          parentId: '2b18312dfedbf16a',
-          serviceName: 'frontend',
-        },
-        {
-          id: '255547a7b6b19871',
-          timestampUs: new Date('2025-05-27T12:15:06.500Z').getTime() * 1000,
-          name: 'oteldemo.ProductCatalogService/GetProduct',
-          traceId: 'cc847a76570773d6fc96fac63dfcddd2',
-          duration: 90416,
-          errors: [],
-          parentId: '41b39c13ec0166a8',
-          serviceName: 'product-catalog',
-        },
-      ]}
+      traceItems={traceItems}
+      traceParentChildrenMap={parentChildrenMap}
       highlightedTraceId="41b39c13ec0166a8"
     />
   );
 };
 
 export const ExampleWithServiceLegend: StoryFn<{}> = () => {
+  const traceItems = [
+    {
+      id: '06b480d1e6e2ac2e',
+      timestampUs: new Date('2025-05-27T12:15:04.973Z').getTime() * 1000,
+      name: 'POST',
+      traceId: 'cc847a76570773d6fc96fac63dfcddd2',
+      duration: 53170917,
+      errors: [],
+      serviceName: 'load-generator',
+    },
+    {
+      id: '2b18312dfedbf16a',
+      timestampUs: new Date('2025-05-27T12:15:04.974Z').getTime() * 1000,
+      name: 'executing api route (pages) /api/checkout',
+      traceId: 'cc847a76570773d6fc96fac63dfcddd2',
+      duration: 51298750,
+      errors: [],
+      parentId: '06b480d1e6e2ac2e',
+      serviceName: 'frontend',
+    },
+    {
+      id: '41b39c13ec0166a8',
+      timestampUs: new Date('2025-05-27T12:15:06.024Z').getTime() * 1000,
+      name: 'grpc.oteldemo.ProductCatalogService/GetProduct',
+      traceId: 'cc847a76570773d6fc96fac63dfcddd2',
+      duration: 1187042,
+      errors: [],
+      parentId: '2b18312dfedbf16a',
+      serviceName: 'frontend',
+    },
+    {
+      id: '255547a7b6b19871',
+      timestampUs: new Date('2025-05-27T12:15:06.500Z').getTime() * 1000,
+      name: 'oteldemo.ProductCatalogService/GetProduct',
+      traceId: 'cc847a76570773d6fc96fac63dfcddd2',
+      duration: 90416,
+      errors: [],
+      parentId: '41b39c13ec0166a8',
+      serviceName: 'product-catalog',
+    },
+  ];
+
+  const parentChildrenMap = getTraceParentChildrenMap(traceItems, false);
+
   return (
     <TraceWaterfall
-      traceItems={[
-        {
-          id: '06b480d1e6e2ac2e',
-          timestampUs: new Date('2025-05-27T12:15:04.973Z').getTime() * 1000,
-          name: 'POST',
-          traceId: 'cc847a76570773d6fc96fac63dfcddd2',
-          duration: 53170917,
-          errors: [],
-          serviceName: 'load-generator',
-        },
-        {
-          id: '2b18312dfedbf16a',
-          timestampUs: new Date('2025-05-27T12:15:04.974Z').getTime() * 1000,
-          name: 'executing api route (pages) /api/checkout',
-          traceId: 'cc847a76570773d6fc96fac63dfcddd2',
-          duration: 51298750,
-          errors: [],
-          parentId: '06b480d1e6e2ac2e',
-          serviceName: 'frontend',
-        },
-        {
-          id: '41b39c13ec0166a8',
-          timestampUs: new Date('2025-05-27T12:15:06.024Z').getTime() * 1000,
-          name: 'grpc.oteldemo.ProductCatalogService/GetProduct',
-          traceId: 'cc847a76570773d6fc96fac63dfcddd2',
-          duration: 1187042,
-          errors: [],
-          parentId: '2b18312dfedbf16a',
-          serviceName: 'frontend',
-        },
-        {
-          id: '255547a7b6b19871',
-          timestampUs: new Date('2025-05-27T12:15:06.500Z').getTime() * 1000,
-          name: 'oteldemo.ProductCatalogService/GetProduct',
-          traceId: 'cc847a76570773d6fc96fac63dfcddd2',
-          duration: 90416,
-          errors: [],
-          parentId: '41b39c13ec0166a8',
-          serviceName: 'product-catalog',
-        },
-      ]}
+      traceItems={traceItems}
+      traceParentChildrenMap={parentChildrenMap}
       highlightedTraceId="41b39c13ec0166a8"
       showLegend
     />
@@ -197,52 +213,57 @@ export const ExampleWithServiceLegend: StoryFn<{}> = () => {
 };
 
 export const ExampleWithTypeLegend: StoryFn<{}> = () => {
+  const traceItems = [
+    {
+      id: '06b480d1e6e2ac2e',
+      timestampUs: new Date('2025-05-27T12:15:04.973Z').getTime() * 1000,
+      name: 'POST',
+      traceId: 'cc847a76570773d6fc96fac63dfcddd2',
+      duration: 53170917,
+      errors: [],
+      serviceName: 'frontend',
+    },
+    {
+      id: '2b18312dfedbf16a',
+      timestampUs: new Date('2025-05-27T12:15:04.974Z').getTime() * 1000,
+      name: 'executing api route (pages) /api/checkout',
+      traceId: 'cc847a76570773d6fc96fac63dfcddd2',
+      duration: 51298750,
+      errors: [],
+      parentId: '06b480d1e6e2ac2e',
+      serviceName: 'frontend',
+      type: 'http',
+    },
+    {
+      id: '41b39c13ec0166a8',
+      timestampUs: new Date('2025-05-27T12:15:06.024Z').getTime() * 1000,
+      name: 'grpc.oteldemo.ProductCatalogService/GetProduct',
+      traceId: 'cc847a76570773d6fc96fac63dfcddd2',
+      duration: 1187042,
+      errors: [],
+      parentId: '2b18312dfedbf16a',
+      serviceName: 'frontend',
+      type: 'http',
+    },
+    {
+      id: '255547a7b6b19871',
+      timestampUs: new Date('2025-05-27T12:15:06.500Z').getTime() * 1000,
+      name: 'oteldemo.ProductCatalogService/GetProduct',
+      traceId: 'cc847a76570773d6fc96fac63dfcddd2',
+      duration: 90416,
+      errors: [],
+      parentId: '41b39c13ec0166a8',
+      serviceName: 'frontend',
+      type: 'css',
+    },
+  ];
+
+  const parentChildrenMap = getTraceParentChildrenMap(traceItems, false);
+
   return (
     <TraceWaterfall
-      traceItems={[
-        {
-          id: '06b480d1e6e2ac2e',
-          timestampUs: new Date('2025-05-27T12:15:04.973Z').getTime() * 1000,
-          name: 'POST',
-          traceId: 'cc847a76570773d6fc96fac63dfcddd2',
-          duration: 53170917,
-          errors: [],
-          serviceName: 'frontend',
-        },
-        {
-          id: '2b18312dfedbf16a',
-          timestampUs: new Date('2025-05-27T12:15:04.974Z').getTime() * 1000,
-          name: 'executing api route (pages) /api/checkout',
-          traceId: 'cc847a76570773d6fc96fac63dfcddd2',
-          duration: 51298750,
-          errors: [],
-          parentId: '06b480d1e6e2ac2e',
-          serviceName: 'frontend',
-          type: 'http',
-        },
-        {
-          id: '41b39c13ec0166a8',
-          timestampUs: new Date('2025-05-27T12:15:06.024Z').getTime() * 1000,
-          name: 'grpc.oteldemo.ProductCatalogService/GetProduct',
-          traceId: 'cc847a76570773d6fc96fac63dfcddd2',
-          duration: 1187042,
-          errors: [],
-          parentId: '2b18312dfedbf16a',
-          serviceName: 'frontend',
-          type: 'http',
-        },
-        {
-          id: '255547a7b6b19871',
-          timestampUs: new Date('2025-05-27T12:15:06.500Z').getTime() * 1000,
-          name: 'oteldemo.ProductCatalogService/GetProduct',
-          traceId: 'cc847a76570773d6fc96fac63dfcddd2',
-          duration: 90416,
-          errors: [],
-          parentId: '41b39c13ec0166a8',
-          serviceName: 'frontend',
-          type: 'css',
-        },
-      ]}
+      traceItems={traceItems}
+      traceParentChildrenMap={parentChildrenMap}
       highlightedTraceId="41b39c13ec0166a8"
       serviceName="frontend"
       showLegend
@@ -262,9 +283,11 @@ export const HiddenAccordionExample: StoryFn<{}> = () => {
         serviceName: item._source.resource.attributes['service.name'],
       } as TraceItem)
   );
+  const parentChildrenMap = getTraceParentChildrenMap(traceItems, false);
   return (
     <TraceWaterfall
       traceItems={traceItems}
+      traceParentChildrenMap={parentChildrenMap}
       showAccordion={false}
       highlightedTraceId="99e36adf40935241"
       onClick={() => {}}
@@ -284,7 +307,8 @@ export const OpenTelemetryExample: StoryFn<{}> = () => {
         serviceName: item._source.resource.attributes['service.name'],
       } as TraceItem)
   );
-  return <TraceWaterfall traceItems={traceItems} />;
+  const parentChildrenMap = getTraceParentChildrenMap(traceItems, false);
+  return <TraceWaterfall traceItems={traceItems} traceParentChildrenMap={parentChildrenMap} />;
 };
 
 export const APMExample: StoryFn<{}> = () => {
@@ -300,6 +324,6 @@ export const APMExample: StoryFn<{}> = () => {
         serviceName: item.service.name,
       } as TraceItem)
   );
-
-  return <TraceWaterfall traceItems={traceItems} />;
+  const parentChildrenMap = getTraceParentChildrenMap(traceItems, false);
+  return <TraceWaterfall traceItems={traceItems} traceParentChildrenMap={parentChildrenMap} />;
 };
