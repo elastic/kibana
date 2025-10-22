@@ -40,15 +40,28 @@ export async function EsProvider({ getService }: FtrProviderContext): Promise<Cl
     return client;
   }
 
-  const idxPatterns = [
-    '.kibana*',
-    '.internal*',
-    'logs*',
-    'metrics*',
-    'traces*',
-    'filebeat*',
-    'metricbeat*',
-  ];
+  const putFastRefreshSettings = async () => {
+    const idxPatterns = [
+      '.kibana*',
+      '.internal*',
+      'logs*',
+      'metrics*',
+      'traces*',
+      'filebeat*',
+      'metricbeat*',
+    ];
+
+    await client.indices.putSettings({
+      index: idxPatterns,
+      allow_no_indices: true,
+      expand_wildcards: ['all'],
+      settings: {
+        index: {
+          refresh_interval: refreshInterval,
+        },
+      },
+    });
+  };
 
   function wrap<T, U extends keyof T>(obj: T, prop: U, cb: (m: T[U]) => T[U]) {
     const original = obj[prop];
@@ -63,19 +76,6 @@ export async function EsProvider({ getService }: FtrProviderContext): Promise<Cl
       },
     },
   });
-
-  async function putFastRefreshSettings() {
-    await client.indices.putSettings({
-      index: idxPatterns,
-      allow_no_indices: true,
-      expand_wildcards: ['all'],
-      settings: {
-        index: {
-          refresh_interval: refreshInterval,
-        },
-      },
-    });
-  }
 
   const { index_templates: idxTemplates } = await client.indices.getIndexTemplate({
     name: '*',
@@ -103,15 +103,13 @@ export async function EsProvider({ getService }: FtrProviderContext): Promise<Cl
     })
   );
 
-  function wrapTemplate(tpl: IndicesPutIndexTemplateIndexTemplateMapping = {}) {
-    return {
-      ...tpl,
-      settings: {
-        ...tpl.settings,
-        refresh_interval: refreshInterval,
-      },
-    };
-  }
+  const wrapTemplate = (tpl: IndicesPutIndexTemplateIndexTemplateMapping = {}) => ({
+    ...tpl,
+    settings: {
+      ...tpl.settings,
+      refresh_interval: refreshInterval,
+    },
+  });
 
   // Wrap putIndexTemplate to always include 'fast_refresh' in composed_of
   // @ts-expect-error
