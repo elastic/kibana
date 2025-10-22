@@ -124,7 +124,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({
             aria-label={i18n.translate(
               'xpack.searchIndexDocuments.documentList.paginationAriaLabel',
               {
-                defaultMessage: 'Pagination for document list',
+                defaultMessage: 'Document lists pagination',
               }
             )}
             pageCount={pageCount}

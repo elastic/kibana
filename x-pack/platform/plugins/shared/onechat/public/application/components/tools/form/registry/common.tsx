@@ -6,18 +6,11 @@
  */
 
 import type { Resolver } from 'react-hook-form';
-
 import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
 
 import type { OnechatInternalService } from '../../../../../services/types';
 import type { CreateToolPayload, UpdateToolPayload } from '../../../../../../common/http_api/tools';
-import type {
-  ToolFormData,
-  EsqlToolFormData,
-  IndexSearchToolFormData,
-  BuiltinToolFormData,
-  WorkflowToolFormData,
-} from '../types/tool_form_types';
+import type { ToolFormData } from '../types/tool_form_types';
 
 export const commonToolFormDefaultValues = {
   toolId: '',
@@ -34,14 +27,3 @@ export interface ToolTypeRegistryEntry<TFormData extends ToolFormData = ToolForm
   formDataToUpdatePayload: (data: TFormData) => UpdateToolPayload;
   getValidationResolver: (services?: OnechatInternalService) => Resolver<TFormData>;
 }
-
-export type EsqlToolTypeRegistryEntry = ToolTypeRegistryEntry<EsqlToolFormData>;
-export type IndexSearchToolTypeRegistryEntry = ToolTypeRegistryEntry<IndexSearchToolFormData>;
-export type BuiltinToolTypeRegistryEntry = ToolTypeRegistryEntry<BuiltinToolFormData>;
-export type WorkflowToolTypeRegistryEntry = ToolTypeRegistryEntry<WorkflowToolFormData>;
-
-export type SupportedToolTypeRegistryEntry =
-  | EsqlToolTypeRegistryEntry
-  | IndexSearchToolTypeRegistryEntry
-  | BuiltinToolTypeRegistryEntry
-  | WorkflowToolTypeRegistryEntry;

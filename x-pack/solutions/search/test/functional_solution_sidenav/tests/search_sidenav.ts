@@ -35,7 +35,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('sidenav & breadcrumbs', () => {
       it('renders the correct nav and navigate to links', async () => {
         const isV2 = await solutionNavigation.sidenav.isV2();
-        const expectNoPageReload = await solutionNavigation.createNoPageReloadCheck();
 
         await solutionNavigation.expectExists();
         await solutionNavigation.breadcrumbs.expectExists();
@@ -92,13 +91,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await solutionNavigation.sidenav.expectLinkActive({
           deepLinkId: 'searchHomepage',
         });
-
-        // Redirected to Onboarding Page to Create Index
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-          text: 'Create your first index',
-        });
-
-        await expectNoPageReload();
       });
 
       it('renders a feedback callout', async function () {

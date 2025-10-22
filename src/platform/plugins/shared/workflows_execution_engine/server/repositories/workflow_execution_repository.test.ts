@@ -8,18 +8,27 @@
  */
 
 import { ExecutionStatus } from '@kbn/workflows';
-import { WorkflowExecutionRepository } from './workflow_execution_repository';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../../common';
+import { WorkflowExecutionRepository } from './workflow_execution_repository';
 
 describe('WorkflowExecutionRepository', () => {
   let repository: WorkflowExecutionRepository;
-  let esClient: { index: jest.Mock; update: jest.Mock; search: jest.Mock };
+  let esClient: {
+    index: jest.Mock;
+    update: jest.Mock;
+    search: jest.Mock;
+    indices: { exists: jest.Mock; create: jest.Mock };
+  };
 
   beforeEach(() => {
     esClient = {
       index: jest.fn(),
       update: jest.fn(),
       search: jest.fn(),
+      indices: {
+        exists: jest.fn().mockResolvedValue(false),
+        create: jest.fn().mockResolvedValue({}),
+      },
     };
     repository = new WorkflowExecutionRepository(esClient as any);
   });
