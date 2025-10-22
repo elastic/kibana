@@ -18,8 +18,8 @@ export class WorkflowTemplatingEngine {
       strictVariables: false,
     });
 
-    // register json filter that converts JSON string to object
-    this.engine.registerFilter('json', (value: unknown): unknown => {
+    // register json_parse filter that converts JSON string to object
+    this.engine.registerFilter('json_parse', (value: unknown): unknown => {
       if (typeof value !== 'string') {
         return value;
       }
@@ -29,20 +29,16 @@ export class WorkflowTemplatingEngine {
         return value;
       }
     });
-    // register dump filter that converts an object to a JSON string
-    this.engine.registerFilter('dump', (value: unknown): string => {
-      if (typeof value !== 'object' || value === null) {
-        return String(value);
-      }
-      try {
-        return JSON.stringify(value, null, 2);
-      } catch (error) {
-        return String(value);
-      }
-    });
   }
 
   public render(template: string, context: Record<string, any>): string {
-    return this.engine.parseAndRenderSync(template, context);
+    try {
+      return this.engine.parseAndRenderSync(template, context);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      // customer-facing error message without the default line number and column number
+      const customerFacingErrorMessage = errorMessage.replace(/, line:\d+, col:\d+/g, '');
+      throw new Error(customerFacingErrorMessage);
+    }
   }
 }
