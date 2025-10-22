@@ -136,6 +136,9 @@ export class OnechatPlugin
 
     return {
       tools: createPublicToolContract({ toolsService }),
+      components: {
+        Conversation: ConversationComponent,
+      },
       openConversationFlyout: (options) =>
         openConversationFlyout(options, {
           coreStart: core,

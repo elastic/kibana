@@ -19,6 +19,7 @@ import type { InferencePublicStart } from '@kbn/inference-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
 import type { OpenConversationFlyoutOptions } from './flyout/types';
+import type { EmbeddableConversationProps } from './embeddable/types';
 
 export interface ConversationFlyoutRef {
   close(): void;
@@ -61,6 +62,15 @@ export interface OnechatPluginStart {
    * Tool service contract, can be used to list or execute tools.
    */
   tools: ToolServiceStartContract;
+  /**
+   * UI components that can be consumed outside of Agent Builder with all necessary context.
+   */
+  components: {
+    /**
+     * Conversation component, can be used to render a conversation.
+     */
+    Conversation: React.FC<EmbeddableConversationProps>;
+  };
   /**
    * Opens a conversation flyout.
    *
