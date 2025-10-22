@@ -185,7 +185,7 @@ export const EntityAnalyticsManagementPage = () => {
                 includeClosedAlerts={selectedRiskEngineSettings.includeClosedAlerts}
                 from={selectedRiskEngineSettings.range.start}
                 to={selectedRiskEngineSettings.range.end}
-                alertFilters={selectedRiskEngineSettings.alertFilters}
+                alertFilters={selectedRiskEngineSettings.filters}
               />
             </EuiFlexItem>
           </>
