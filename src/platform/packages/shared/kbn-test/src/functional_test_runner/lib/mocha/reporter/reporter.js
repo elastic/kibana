@@ -50,22 +50,16 @@ function simplifyHookTitle(hookTitle) {
  * Extract the first meaningful error line and the file where it occurred from the stack trace
  */
 function extractErrorInfo(errorMessage) {
-  const lines = errorMessage.split('\n');
-
-  // Find the first line with "Error:"
-  let errorLine = lines.find((line) => line.trim().startsWith('Error:'));
-  if (!errorLine) {
-    errorLine = lines[0] || 'Unknown error';
-  }
-
-  // Clean up the error line (remove leading whitespace and color codes)
-  errorLine = errorLine.replace(/^\s+/, '').replace(/\x1b\[\d+m/g, '');
+  const match = errorMessage.match(/Error:[\s\S]*?(?=\n\s+at )/);
+  const message = match ? match[0] : errorMessage;
+  const errorLine = message.replace(/\s+/g, ' ').trim();
 
   // Find the first stack frame that's not from node_modules or node internals
+  const lines = errorMessage.split('\n');
   let errorFile = 'Unknown file';
   for (const line of lines) {
-    // Match file paths with better regex to capture full paths
-    const match = line.match(/at\s+.*?\(?([^\s()]+\.(?:ts|js|tsx|jsx)):\d+:\d+\)?/);
+    // Match file paths with line and column numbers
+    const match = line.match(/at\s+.*?\(?([^\s()]+\.(?:ts|js|tsx|jsx)):(\d+):(\d+)\)?/);
     if (
       match &&
       !line.includes('node_modules') &&
@@ -73,12 +67,16 @@ function extractErrorInfo(errorMessage) {
       !line.includes('retry_for_success')
     ) {
       const fullPath = match[1];
+      const lineNum = match[2];
+      const colNum = match[3];
+
       // Convert to path relative to REPO_ROOT
       try {
-        errorFile = Path.relative(REPO_ROOT, Path.resolve(fullPath));
+        const relativePath = Path.relative(REPO_ROOT, Path.resolve(fullPath));
+        errorFile = `${relativePath}:${lineNum}:${colNum}`;
       } catch (e) {
         // If path resolution fails, use the matched path as-is
-        errorFile = fullPath;
+        errorFile = `${fullPath}:${lineNum}:${colNum}`;
       }
       break;
     }
@@ -87,36 +85,150 @@ function extractErrorInfo(errorMessage) {
   return { errorLine, errorFile };
 }
 
+function formatLongString(str, width) {
+  const arr = str.split(' ');
+
+  return arr.reduce((acc, curr) => {
+    if (curr.length > width) {
+      return acc + curr.slice(0, width) + '\n' + curr.slice(width);
+    }
+    return acc + curr + ' ';
+  }, '');
+}
+
+/**
+ * Wrap text to fit within a specified width
+ */
+function wrapText(text = '', width) {
+  const arr = text.split('\n');
+
+  return arr.reduce((acc, curr) => {
+    if (curr.length > width) {
+      return acc + formatLongString(curr, width) + '\n';
+    }
+    return acc + curr.trim();
+  }, '');
+}
+/**
+ * Get the root suite (config) name with file path
+ */
+function getRootSuite(runnable) {
+  let current = runnable;
+  let rootTitle = '';
+
+  // Walk up to find the root suite
+  while (current.parent) {
+    if (current.title && !current.parent.parent) {
+      // This is a top-level suite (likely the config/describe block)
+      rootTitle = current.title;
+    }
+    current = current.parent;
+  }
+
+  const suiteName = rootTitle || 'Unknown config';
+  const configFile = runnable.file || '';
+  const relativeConfigFile = configFile ? Path.relative(REPO_ROOT, configFile) : '';
+
+  return {
+    suiteName,
+    relativeConfigFile,
+  };
+}
+
+/**
+ * Format the test hierarchy with better visual separation
+ */
+function formatTestHierarchy(runnable) {
+  const titles = [];
+  let current = runnable;
+  let skipFirst = true; // Skip the root suite since we show it separately as "Config"
+
+  // Walk up the suite hierarchy
+  while (current.parent) {
+    if (current.title) {
+      // Skip the root suite (first level)
+      if (skipFirst && !current.parent.parent) {
+        skipFirst = false;
+      } else {
+        titles.unshift(current.title);
+      }
+    }
+    current = current.parent;
+  }
+
+  // Join with visual separator for better readability
+  return titles.join(' › ');
+}
+
+/**
+ * Format the test file location with line and column numbers
+ */
+function formatTestLocation(runnable, extractedLocation = null) {
+  const testFile = runnable.file || 'Unknown file';
+  const relativeTestFile = Path.relative(REPO_ROOT, testFile);
+
+  // Use extracted location from error stack if available
+  if (extractedLocation && extractedLocation.line) {
+    const locationFile = Path.relative(REPO_ROOT, extractedLocation.file);
+    if (extractedLocation.column) {
+      return `${locationFile}:${extractedLocation.line}:${extractedLocation.column}`;
+    }
+    return `${locationFile}:${extractedLocation.line}`;
+  }
+
+  // Fallback to runnable properties if available
+  if (runnable.line && runnable.column) {
+    return `${relativeTestFile}:${runnable.line}:${runnable.column}`;
+  } else if (runnable.line) {
+    return `${relativeTestFile}:${runnable.line}`;
+  }
+
+  return relativeTestFile;
+}
+
 /**
  * Create a formatted error summary table
  */
-function createErrorSummary(runnable, errorMessage) {
-  const testFile = runnable.file || 'Unknown file';
-  const testName = runnable.fullTitle();
-  const { errorLine, errorFile } = extractErrorInfo(errorMessage);
+function createErrorSummary(runnable, errorMessage, extractedLocation = null) {
+  const VALUE_WIDTH = 140;
 
-  // Get path relative to REPO_ROOT
-  let relativeTestFile;
-  try {
-    relativeTestFile = Path.relative(REPO_ROOT, testFile);
-  } catch (e) {
-    relativeTestFile = testFile;
-  }
+  const { relativeConfigFile, suiteName } = getRootSuite(runnable);
+  const testName = formatTestHierarchy(runnable);
+  const testLocation = formatTestLocation(runnable, extractedLocation);
+  const { errorLine, errorFile } = extractErrorInfo(errorMessage);
 
   const table = new Table({
     style: {
       head: [],
       border: ['red'],
     },
-    colWidths: [18, 80],
+    colWidths: [14, VALUE_WIDTH],
     wordWrap: true,
+    wrapOnWordBoundary: true,
   });
 
   table.push(
-    [colors.fail('Test file'), relativeTestFile],
-    [colors.fail(`Failing test`), testName],
-    [colors.fail('Error'), errorLine],
-    [colors.fail('Thrown from'), errorFile]
+    ...[
+      {
+        label: 'Config',
+        value: [colors.suite(suiteName), colors.subdued(relativeConfigFile)],
+      },
+      {
+        label: 'Failing test',
+        value: [colors.suite(testName), colors.subdued(testLocation)],
+      },
+      {
+        label: 'Error',
+        value: [errorLine],
+      },
+      {
+        label: 'Thrown from',
+        value: [errorFile],
+      },
+    ].map((row) => [
+      colors.fail(row.label),
+      row.value.map((val) => wrapText(val, VALUE_WIDTH - 2)).join('\n'),
+    ])
   );
 
   return '\n' + table.toString() + '\n';
@@ -134,6 +246,7 @@ export function MochaReporterProvider({ getService }) {
   return class MochaReporter extends Mocha.reporters.Base {
     constructor(runner, options) {
       super(runner, options);
+      this.runner = runner;
       runner.on('start', this.onStart);
       runner.on('hook', this.onHookStart);
       runner.on('hook end', this.onHookEnd);
@@ -243,7 +356,7 @@ export function MochaReporterProvider({ getService }) {
     };
 
     onTestStart = (test) => {
-      log.write(`  ○ ${test.title}`);
+      log.write(`  ○ ${colors.suite(test.title)}`);
       log.indent(2);
     };
 
@@ -260,10 +373,11 @@ export function MochaReporterProvider({ getService }) {
     onPass = (test) => {
       const time = colors.speed(test.speed, ` (${ms(test.duration)})`);
       const pass = colors.pass(`${symbols.ok} pass`);
-      log.write(`    ${pass} ${time}`);
+      const progress = this.getProgressIndicator();
+      log.write(`    ${pass} ${time} ${progress}`);
     };
 
-    onFail = (runnable) => {
+    onFail = (runnable, err) => {
       // NOTE: this is super gross
       //
       //  - I started by trying to extract the Base.list() logic from mocha
@@ -297,11 +411,13 @@ export function MochaReporterProvider({ getService }) {
         .map((line) => ` ${line}`)
         .join('\n');
 
-      // Create a cleaner error summary table
-      const errorSummary = createErrorSummary(runnable, errorMessage);
+      const location = this.extractLocation(err.stack, runnable.file);
+      // Create a cleaner error summary table with extracted location
+      const errorSummary = createErrorSummary(runnable, errorMessage, location);
+      const progress = runnable.type === 'test' ? ` ${this.getProgressIndicator()}` : '';
 
       log.write(
-        `    ${colors.fail(`${symbols.err} fail`)}` +
+        `    ${colors.fail(`${symbols.err} fail`)}${progress}` +
           errorSummary +
           '\n' +
           colors.fail('Full Error Details:') +
@@ -333,5 +449,63 @@ export function MochaReporterProvider({ getService }) {
 
       writeEpilogue(log, this.stats, failuresOverTime);
     };
+
+    getProgressIndicator = () => {
+      const completed = (this.stats.passes || 0) + (this.stats.failures || 0);
+      const total = this.runner.total || 0;
+      const remaining = total - completed;
+
+      if (total === 0) {
+        return '';
+      }
+
+      const percentage = Math.round((completed / total) * 100);
+      return colors.suite(`[${completed}/${total} (${percentage}%), ${remaining} remaining]`);
+    };
+
+    extractLocation(stack, testFile) {
+      if (!stack || !testFile) return null;
+
+      const lines = stack.split('\n');
+      const testFileName = Path.basename(testFile);
+
+      let bestMatch = null;
+
+      for (const line of lines) {
+        // Match patterns like: at Context.<anonymous> (infrastructure_security.ts:67:29)
+        const match = line.match(/\(([^)]+):(\d+):(\d+)\)/);
+
+        if (match) {
+          const file = match[1].trim();
+          const lineNum = match[2];
+          const col = match[3];
+
+          // Check if this line is from the test file (match by filename or full path)
+          if (
+            !file.includes('node_modules') &&
+            !file.includes('node:internal') &&
+            (file.endsWith(testFileName) || testFile.endsWith(file))
+          ) {
+            const location = {
+              file: testFile,
+              line: lineNum,
+              column: col,
+            };
+
+            // Prioritize Context.<anonymous> (the actual test) or return first match
+            if (line.includes('Context.<anonymous>') || line.includes('Context.it')) {
+              return location;
+            }
+
+            // Store first match as fallback
+            if (!bestMatch) {
+              bestMatch = location;
+            }
+          }
+        }
+      }
+
+      return bestMatch;
+    }
   };
 }
