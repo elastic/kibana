@@ -44,7 +44,7 @@ For the Elastic Security 9.1.6 release information, refer to [Elastic Security S
 
 **Dashboards and Visualizations**:
 * Fixes bug that prevented you from deleting unsaved dashboard changes after you had enabled the `timeRestore` setting and selected a time and date using the date picker [#239992]({{kib-pull}}239992).
-* FFixes error that occured when you selected a blank value in the options list [#239791]({{kib-pull}}239791).
+* Fixes error that occured when you selected a blank value in the options list [#239791]({{kib-pull}}239791).
 * Fixes a bug in Lens that incorrectly assigned unsaved, ad-hoc dataview references [#239431]({{kib-pull}}239431).
 * Fixes metric color assignment when breakdown and a max dimension are defined in Lens [#238901]({{kib-pull}}238901).
 * Ensures adhoc dataviews from {{esql}} charts aren't being filtered out in the KQL search bar [#238731]({{kib-pull}}238731).
