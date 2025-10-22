@@ -10,7 +10,6 @@ import { screen } from '@testing-library/react';
 
 import { connector } from '../mock';
 import { useGetIncidentTypes } from './use_get_incident_types';
-import { KibanaServices } from '../../../common/lib/kibana';
 import { useGetSeverity } from './use_get_severity';
 import { useGetFields } from './use_get_fields';
 import FieldsPreview from './case_fields_preview';
@@ -24,7 +23,6 @@ jest.mock('./use_get_incident_types');
 jest.mock('./use_get_severity');
 jest.mock('./use_get_fields');
 
-const getConfigMock = KibanaServices.getConfig as jest.Mock;
 const useGetIncidentTypesMock = useGetIncidentTypes as jest.Mock;
 const useGetSeverityMock = useGetSeverity as jest.Mock;
 const useGetFieldsMock = useGetFields as jest.Mock;
@@ -97,13 +95,6 @@ describe('Resilient Fields: Preview', () => {
   };
 
   beforeEach(() => {
-    getConfigMock.mockReturnValue({
-      resilient: {
-        additionalFields: {
-          enabled: true,
-        },
-      },
-    });
     useGetIncidentTypesMock.mockReturnValue(useGetIncidentTypesResponse);
     useGetSeverityMock.mockReturnValue(useGetSeverityResponse);
     useGetFieldsMock.mockReturnValue(useGetFieldsResponse);
@@ -128,18 +119,5 @@ describe('Resilient Fields: Preview', () => {
       getByTextWithMarkup('Test datetimepicker: February 13, 2009 @ 23:31:30')
     ).toBeInTheDocument();
     expect(getByTextWithMarkup('Resolution summary: some resolution summary')).toBeInTheDocument();
-  });
-
-  it('hides the additional fields when it is disabled', async () => {
-    getConfigMock.mockReturnValue({
-      resilient: {
-        additionalFields: {
-          enabled: false,
-        },
-      },
-    });
-
-    renderWithTestingProviders(<FieldsPreview connector={connector} fields={fields} />);
-    expect(screen.queryByText('Test text: testValue')).not.toBeInTheDocument();
   });
 });

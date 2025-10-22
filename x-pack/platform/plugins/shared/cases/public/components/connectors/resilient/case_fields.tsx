@@ -14,7 +14,7 @@ import {
   UseField,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { KibanaServices, useKibana } from '../../../common/lib/kibana';
+import { useKibana } from '../../../common/lib/kibana';
 import type { ConnectorFieldsProps } from '../types';
 import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
@@ -26,7 +26,6 @@ import { AdditionalFormFields } from './additional_form_fields';
 
 const ResilientFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({ connector }) => {
   const { http } = useKibana().services;
-  const showAdditionalFields = KibanaServices.getConfig()?.resilient.additionalFields.enabled;
 
   const {
     isLoading: isLoadingIncidentTypesData,
@@ -133,8 +132,6 @@ const ResilientFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = 
           },
         }}
       />
-      <EuiSpacer size="m" />
-      {showAdditionalFields && (
         <UseField
           path="fields.additionalFields"
           config={{
@@ -148,33 +145,6 @@ const ResilientFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = 
           component={AdditionalFormFields}
           componentProps={{ connector }}
         />
-      )}
-      {/* {showAdditionalFields && (
-        <UseField
-          path="fields.additionalFields"
-          component={JsonEditorField}
-          config={{
-            label: i18n.ADDITIONAL_FIELDS_LABEL,
-            validations: [
-              {
-                validator: generateJSONValidator({ maxAdditionalFields: 50 }),
-              },
-            ],
-          }}
-          componentProps={{
-            euiCodeEditorProps: {
-              fullWidth: true,
-              height: '200px',
-              options: {
-                fontSize: '12px',
-                renderValidationDecorations: 'off',
-              },
-            },
-            dataTestSubj: 'additionalFieldsEditor',
-          }}
-        />
-      )} */}
-
       <EuiSpacer size="m" />
     </span>
   );

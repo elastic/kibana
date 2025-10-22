@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowGraph } from '@kbn/workflows/graph';
-import type YAML from 'yaml';
 import type { EnhancedStore } from '@reduxjs/toolkit';
-import type { WorkflowStepExecutionDto } from '@kbn/workflows';
+import type YAML from 'yaml';
+import type { LineCounter } from 'yaml';
+import type { WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
+import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowLookup } from './utils/build_workflow_lookup';
 
 // State interface - only serializable data
@@ -18,8 +19,10 @@ export interface WorkflowEditorState {
   yamlString?: string;
   computed?: {
     yamlDocument?: YAML.Document; // This will be handled specially for serialization
+    yamlLineCounter?: LineCounter;
     workflowLookup?: WorkflowLookup;
     workflowGraph?: WorkflowGraph; // This will be handled specially for serialization
+    workflowDefinition?: WorkflowYaml | null;
   };
   focusedStepId?: string;
   highlightedStepId?: string;
