@@ -1592,6 +1592,18 @@
       },
       {
         "parentPluginId": "@kbn/esql-types",
+        "id": "def-common.SOURCES_TYPES",
+        "type": "Enum",
+        "tags": [],
+        "label": "SOURCES_TYPES",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-esql-types/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-types",
         "id": "def-common.VariableNamePrefix",
         "type": "Enum",
         "tags": [],
