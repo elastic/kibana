@@ -132,11 +132,6 @@ export const allowedExperimentalValues = Object.freeze({
   bulkFillRuleGapsEnabled: true,
 
   /**
-   * Adds a new option to filter descendants of a process for Management / Event Filters
-   */
-  filterProcessDescendantsForEventFiltersEnabled: true,
-
-  /**
    * Adds a new option to filter descendants of a process for Management / Trusted Apps
    */
   filterProcessDescendantsForTrustedAppsEnabled: false,
@@ -176,11 +171,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Disables flyout history and new preview navigation
    */
   newExpandableFlyoutNavigationDisabled: false,
-
-  /**
-   * Enables the ability to edit highlighted fields in the alertflyout
-   */
-  editHighlightedFields: true,
 
   /**
    * Enables CrowdStrike's RunScript RTR command
