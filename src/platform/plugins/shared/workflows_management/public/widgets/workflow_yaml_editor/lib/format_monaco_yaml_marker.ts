@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any, complexity */
+
+import type YAML from 'yaml';
 import type { monaco } from '@kbn/monaco';
 import type { z } from '@kbn/zod';
-import type YAML from 'yaml';
-import { getCurrentPath, formatValidationError } from '../../../../common/lib/yaml_utils';
+import { formatValidationError, getCurrentPath } from '../../../../common/lib/yaml_utils';
 
 export function formatMonacoYamlMarker(
   marker: monaco.editor.IMarker | monaco.editor.IMarkerData,
