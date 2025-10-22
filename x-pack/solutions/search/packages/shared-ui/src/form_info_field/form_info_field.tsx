@@ -53,7 +53,7 @@ export const FormInfoField: React.FC<FormInfoFieldProps> = ({
       {label && (
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxxs">
-            <h1>{label}</h1>
+            <span>{label}</span>
           </EuiTitle>
         </EuiFlexItem>
       )}
@@ -85,7 +85,7 @@ export const FormInfoField: React.FC<FormInfoFieldProps> = ({
           <EuiFlexItem grow={false}>
             <EuiCopy
               textToCopy={copyValue ?? value}
-              afterMessage={i18n.translate('xpack.searchSharedUI.formInfoField.copyMessage', {
+              afterMessage={i18n.translate('xpack.searchSharedUI.formInfoField.copyAfterMessage', {
                 defaultMessage: 'Copied',
               })}
             >
@@ -97,7 +97,7 @@ export const FormInfoField: React.FC<FormInfoFieldProps> = ({
                   iconType="copy"
                   color="text"
                   data-test-subj={copyValueDataTestSubj}
-                  aria-label={i18n.translate('xpack.searchSharedUI.formInfoField.copyMessage', {
+                  aria-label={i18n.translate('xpack.searchSharedUI.formInfoField.copyAriaLabel', {
                     defaultMessage: 'Copy to clipboard',
                   })}
                 />
