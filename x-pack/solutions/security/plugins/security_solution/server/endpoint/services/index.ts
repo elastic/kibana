@@ -11,5 +11,3 @@ export * from './agent';
 export * from './artifacts_exception_list';
 export * from './workflow_insights';
 export type { FeatureKeys } from './feature_usage';
-
-// FIXME:PT Remove this comment after testing for PR 239215 is done
