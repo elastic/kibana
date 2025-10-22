@@ -850,7 +850,8 @@ export class FleetPlugin
             jitter: 'full',
             retry: (error: any, attemptCount: number) => {
               const summary = `Fleet setup attempt ${attemptCount} failed, will retry after backoff`;
-              logger.warn(summary, { error });
+              logger.warn('TEST 1 ' + summary, { error });
+              logger.warn('TEST 2 ' + summary, { error: { message: error } });
 
               this.fleetStatus$.next({
                 level: ServiceStatusLevels.available,
