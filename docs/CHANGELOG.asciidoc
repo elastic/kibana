@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.19.6>>
 * <<release-notes-8.19.5>>
 * <<release-notes-8.19.4>>
 * <<release-notes-8.19.3>>
@@ -112,6 +113,52 @@ Review important information about the {kib} 8.x releases.
 
 include::upgrade-notes.asciidoc[]
 
+[[release-notes-8.19.6]]
+== {kib} 8.19.6
+
+The 8.19.6 release includes the following fixes.
+
+[float]
+[[enhancement-v8.19.6]]
+=== Enhancements
+Elastic Security solution::
+For the Elastic Security 8.19.6 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+Kibana security::
+* Enhanced the error message to include detailed information about why the role is considered malformed ({kibana-pull}239098[#239098]).
+Other::
+* CDR Data View versioning and migration logic ({kibana-pull}238547[#238547]).
+
+[float]
+[[fixes-v8.19.6]]
+=== Fixes
+Alerting and cases::
+* Update `nodemailer` ({kibana-pull}238816[#238816]).
+* Connector api update ({kibana-pull}236863[#236863]).
+Dashboards and Visualizations::
+* Fixes unable to reset unsaved change when enabling timeRestore and setting time range ({kibana-pull}239992[#239992]).
+* Fixes error when selecting "(blank)" value in options list ({kibana-pull}239791[#239791]).
+* Fixes a bug in *Lens* that incorrectly assigned unsaved (ad-hoc) dataview references ({kibana-pull}239431[#239431]).
+* Fixes a bug in the Lens Table that broke **click to filter** on table rows when any column is used as a formula. in *Lens* ({kibana-pull}239222[#239222]).
+* Fixes metric color assignment when breakdown and a max dimension are defined in *Lens* ({kibana-pull}238901[#238901]).
+* Fixes Adhoc dataviews from ES|QL charts are being filtered out in the KQL search bar ({kibana-pull}238731[#238731]).
+* Fixes an error in the **Visualize Listing** page in which an error in the vis could cause the entire page to error. This improves the error handling to make it easier to identity which visualization is causing the problem in order to address it.({kibana-pull}238355[#238355]).
+* Fixes panels in sections from URL state are not transformed ({kibana-pull}237382[#237382]).
+Data ingestion and Fleet::
+* Fixes on integration policy upgrade ({kibana-pull}238542[#238542]).
+* Fixes error when deleting orphaned integration policies ({kibana-pull}237875[#237875]).
+* Fixes an issue where fields were resetting automatically when editing ingest pipeline settings ({kibana-pull}237509[#237509]).
+Discover::
+* Fixes missing fields when using combined filters with `ignoreFilterIfFieldNotInIndex` UI setting ({kibana-pull}238945[#238945]).
+* Clear time field sorting after going from Classic to ES|QL mode ({kibana-pull}235338[#235338]).
+Elastic Observability solution::
+For the Elastic Observability 8.19.6 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+Kibana platform::
+* Fixes files management flyout crashing ({kibana-pull}237588[#237588]).
+Management::
+* Fixed a bug in component template creation flow where a new component template with `@custom` suffix in name would lead to updating mappings of all unrelated data-streams and a popup would appear asking to rollover conflicting ones ({kibana-pull}237952[#237952]).
+Search::
+* Fixes an issue in the RAG Playground where invalid fields displayed red styling but no error message. Error text is now shown to help users identify and correct form issues. ({kibana-pull}238284[#238284]).
+
 [[release-notes-8.19.5]]
 == {kib} 8.19.5
 
@@ -130,7 +177,7 @@ Dashboards and Visualizations::
 * Fixes an issue with the Lens table's column sort order being different in the dashboard and the exported CSV ({kibana-pull}236673[#236673]).
 * Updates dashboards to wait until controls are ready before rendering panels to prevent a double fetch of data ({kibana-pull}237169[#237169]).
 Data ingestion and Fleet::
-* Fixes an issue where fields were resetting automatically when editing ingest pipeline settings. ({kibana-pull}237509[#237509]).
+* Fixes an issue where fields were resetting automatically when editing ingest pipeline settings ({kibana-pull}237509[#237509]).
 * Adds a unique count to improve accuracy of the number of transforms on the integrations overview page ({kibana-pull}236177[#236177]).
 * Validates the Logstash pipeline ID at the {kib} API level ({kibana-pull}236347[#236347]).
 * Fixes malformed synthetics package policies ({kibana-pull}236176[#236176]).
