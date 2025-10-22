@@ -6,9 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { scheduleRruleSchemaV2 } from '@kbn/task-manager-plugin/server';
+import { scheduleRruleSchemaV3 } from '@kbn/task-manager-plugin/server';
 
 export const updateScheduledReportSchema = schema.object({
   title: schema.maybe(schema.string()),
-  schedule: schema.maybe(scheduleRruleSchemaV2),
+  schedule: schema.maybe(scheduleRruleSchemaV3),
 });
