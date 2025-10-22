@@ -49,6 +49,20 @@ const ResilientFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = 
   const isLoadingIncidentTypes = isLoadingIncidentTypesData || isFetchingIncidentTypesData;
   const isLoadingSeverity = isLoadingSeverityData || isFetchingSeverityData;
 
+  const additionalFieldsProps = useMemo(() => {
+    return {
+      componentProps: { connector },
+      config: {
+        defaultValue: '',
+        validations: [
+          {
+            validator: generateJSONValidator({ maxAdditionalFields: 50 }),
+          },
+        ],
+      },
+    };
+  }, [connector]);
+
   const severitySelectOptions: EuiSelectOption[] = useMemo(
     () =>
       (severity ?? []).map((s) => ({
@@ -133,16 +147,9 @@ const ResilientFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = 
       />
       <UseField
         path="fields.additionalFields"
-        config={{
-          defaultValue: '',
-          validations: [
-            {
-              validator: generateJSONValidator({ maxAdditionalFields: 50 }),
-            },
-          ],
-        }}
+        config={additionalFieldsProps.config}
         component={AdditionalFormFields}
-        componentProps={{ connector }}
+        componentProps={additionalFieldsProps.componentProps}
       />
       <EuiSpacer size="m" />
     </span>
