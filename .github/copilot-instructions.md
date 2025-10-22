@@ -8,7 +8,7 @@ Kibana is a browser-based analytics and search dashboard for Elasticsearch, cons
 
 **Key Technologies:**
 
-- **Runtime:** Node.js 22.17.1 (exact version in `.nvmrc`)
+- **Runtime:** Node.js (exact version required, check `.nvmrc` and `.node-version`)
 - **Package Manager:** Yarn ^1.22.19 (Yarn 2.0+ not supported)
 - **Primary Languages:** TypeScript, JavaScript (React for frontend)
 - **Architecture:** Plugin-based with shared core platform
@@ -35,14 +35,14 @@ Kibana is a browser-based analytics and search dashboard for Elasticsearch, cons
 
 **Working Approach:**
 
-- ✅ Work carefully and thoroughly - NO time constraints or token limits or iteration limits exist
-- ✅ Read large files completely - understand context and architecture before changing
+- ✅ ALWAYS work carefully and thoroughly - NO time constraints or token limits or iteration limits exist
+- ✅ ALWAYS read large files completely - understand context and architecture before changing
 - ⛔ NEVER say "Given time constraints", "Due to token usage", "Let me work faster", "Due to limited iterations" or alike and don't act as if it's true - these do NOT apply
 - ⛔ NEVER rush or panic when encountering complex code - take time to understand it
 
 **Definition of "Complete":**
 
-⚠️ **Complete = ALL THREE verification steps pass with ZERO errors/failures:**
+⚠️ **Complete = ALL THREE verification steps pass with ZERO errors:**
 
 1. **Linting:** 0 errors
 2. **Type checking:** 0 errors
@@ -54,6 +54,8 @@ Kibana is a browser-based analytics and search dashboard for Elasticsearch, cons
 
 - "The core/main/bulk of work is done" (while leaving ANY work unfinished)
 - "Linting/types/tests mostly pass, just a few need fixes" (fix ALL of them NOW)
+- "I'll fix the remaining issues later" (fix ALL of them NOW)
+- "I'll convert any or unknown types later" (convert ALL of them NOW)
 - "General migration is done, minor adjustments needed" (those adjustments ARE the work)
 - "All files migrated except some may need adjustments" (then they're NOT migrated)
 
@@ -122,17 +124,6 @@ Verify **only the files you changed in this commit**:
 
    (Note: FTR auto-builds plugins; manual build only for Cypress tests)
 
-**CRITICAL RULES:**
-
-- ⛔ **DO NOT** commit if ANY of the three verification steps fail - fix ALL issues first
-- ⛔ **DO NOT** remove tests or disable lint/type rules to make verification pass - fix the underlying issues
-- ⛔ **DO NOT** accumulate multiple unverified changes before committing
-- ⛔ **DO NOT** say "I'll fix it later" or use phrases like "mostly passes", "core work done", "minor adjustments needed"
-- ✅ **MUST** run ALL THREE verification steps for every commit
-- ✅ **MUST** stop and fix if ANY verification step fails - do not continue to next task
-- ✅ **MUST** achieve 0 lint errors + 0 type errors + 0 test failures before committing
-- ✅ **MUST** include verification command outputs in commit messages
-
 ### When Submitting PR
 
 Your PR description should summarize all the verification you already did for each commit. Since you verified each commit, the PR should be clean.
@@ -173,7 +164,7 @@ cat versions.json  # See all active branches and their versions
 
 **ALTERNATIVE METHOD - Manual Backport Tool:**
 
-If you need to backport manually after merge (e.g., missed labels):
+If you need to backport manually due to failed backports:
 
 ```bash
 # Interactive backport (select commits and branches)
@@ -188,14 +179,14 @@ node scripts/backport --sha <commit-sha> --branch 9.2 --branch 9.1
 
 - **Features** should NOT be backported to release branches
 - **Bug fixes** can be backported if safe and appropriate
-- **Documentation changes** can be backported to any branch
+- **Documentation changes** can be backported to relevant branches
 - **Breaking changes** can ONLY go to `main`
 
 ## Environment Setup - CRITICAL REQUIREMENTS
 
 ### Node.js Version - MANDATORY REQUIREMENT
 
-⚠️ **REQUIRED:** Use the EXACT Node.js version specified in `.nvmrc` (currently 22.17.1).
+⚠️ **REQUIRED:** Use the EXACT Node.js version specified in `.nvmrc`
 
 **This is not optional. Wrong Node version WILL cause build failures.**
 
@@ -206,8 +197,8 @@ nvm use
 # or install: nvm install $(cat .nvmrc)
 ```
 
-**Common error:** "The engine 'node' is incompatible with this module"  
-**Solution:** Run `nvm use` to switch to the correct Node version (22.17.1).
+**Common error:** "The engine 'node' is incompatible with this module"
+**Solution:** Run `nvm use` to switch to the correct Node version
 
 ### Package Manager - MANDATORY REQUIREMENT
 
@@ -246,8 +237,7 @@ yarn kbn bootstrap --allow-root
 
 # Full repository reset (last resort)
 git clean -fdx
-yarn cache clean
-yarn kbn clean
+yarn kbn reset
 yarn kbn bootstrap --force-install
 ```
 
@@ -261,9 +251,6 @@ node scripts/build_kibana_platform_plugins
 
 # Build specific plugins by name + dependencies (faster for targeted testing)
 node scripts/build_kibana_platform_plugins --focus securitySolution
-
-# Production build
-yarn build
 ```
 
 **When to build plugins manually:**
@@ -276,6 +263,8 @@ yarn build
 
 ### Development Servers
 
+**Stateful mode (standard development):**
+
 ```bash
 # Start Elasticsearch (in separate terminal)
 yarn es snapshot
@@ -286,38 +275,58 @@ yarn es snapshot --license trial
 yarn start
 yarn start --run-examples   # Include developer examples
 yarn start --no-base-path   # Disable basePath
+```
 
-# Serverless variants
-yarn serverless             # Generic serverless mode
-yarn serverless-es          # Elasticsearch serverless
-yarn serverless-oblt        # Observability serverless
-yarn serverless-security    # Security serverless
-yarn serverless-workplace-ai # Workplace AI serverless
+**Serverless mode (requires BOTH ES and Kibana in serverless with matching modes):**
+
+```bash
+# 1. FIRST: Start Elasticsearch in serverless mode (separate terminal)
+# ES uses --projectType flag
+yarn es serverless --projectType=oblt          # Observability
+yarn es serverless --projectType=security      # Security
+yarn es serverless --projectType=es            # Elasticsearch
+yarn es serverless --projectType=workplace_ai  # Workplace AI
+
+# 2. THEN: Start Kibana in MATCHING serverless mode
+# Kibana uses --serverless flag (NOT --projectType)
+# The mode MUST match the ES projectType value
+yarn serverless              # Generic (uses config or defaults to 'es')
+yarn serverless-oblt         # Matches ES projectType=oblt
+yarn serverless-security     # Matches ES projectType=security
+yarn serverless-es           # Matches ES projectType=es
+yarn serverless-workplace-ai # Matches ES projectType=workplace_ai
+
+# Login: elastic_serverless / changeme (or system_indices_superuser / changeme)
+# Note: Cannot use basePath in serverless mode
 ```
 
 ### Testing Commands
 
 ```bash
 # Unit tests (REQUIRED before each commit - see MANDATORY VERIFICATION section)
-yarn test:jest
-yarn test:jest --watch  # Watch mode for development
+# Test specific files/directories you changed
+yarn test:jest path/to/changed/file.test.ts
+yarn test:jest x-pack/platform/plugins/your_plugin
+yarn test:jest --watch path/to/your/code  # Watch mode for development
 
-# Integration tests
-yarn test:jest_integration
+# Integration tests (specific paths)
+yarn test:jest_integration path/to/integration_tests/
 
 # Functional tests - requires bootstrap (plugins auto-build in dev mode)
 # OPTION 1: Full cycle (all-in-one)
-yarn test:ftr               # Starts servers, runs tests, tears down (from source OR built distribution)
+yarn test:ftr --config path/to/specific/config.ts  # Starts servers, runs tests, tears down
 
 # OPTION 2: Development workflow (RECOMMENDED for fast iteration)
-yarn test:ftr:server        # Starts servers, keeps them running, auto-restarts Kibana on changes
-yarn test:ftr:runner        # Runs tests against running servers (repeat as needed)
+yarn test:ftr:server --config path/to/specific/config.ts  # Starts servers, keeps them running
+yarn test:ftr:runner --config path/to/specific/config.ts  # Runs tests against running servers
 
 # Type checking (REQUIRED before each commit - see MANDATORY VERIFICATION section)
-yarn test:type_check
+# Check types for specific project only
+node scripts/type_check --project path/to/plugin/tsconfig.json
 
-# Run specific FTR config (example paths - works with ANY config)
-yarn test:ftr --config x-pack/platform/test/api_integration/config.ts  # Stateful
+# Run specific FTR config examples
+yarn test:ftr --config x-pack/platform/test/api_integration/config.ts  # Stateful API tests
+yarn test:ftr --config x-pack/platform/test/functional/config.base.js  # Stateful functional tests
 yarn test:ftr --config x-pack/platform/test/serverless/functional/configs/observability/config.group1.ts  # Serverless
 
 # Run specific test pattern (use runner for speed)
@@ -334,39 +343,32 @@ yarn test:ftr --config path/to/config.ts --kibana-install-dir /path/to/build
 ### Linting & Code Quality - REQUIRED BEFORE EACH COMMIT
 
 ```bash
-# Run all linters (REQUIRED before each commit - see MANDATORY VERIFICATION section)
-yarn lint
-# This runs: yarn lint:es && yarn lint:style
+# ESLint specific files/directories you changed (REQUIRED before each commit)
+node scripts/eslint --fix path/to/changed/file.ts
+node scripts/eslint --fix path/to/changed/directory/
+node scripts/eslint --fix x-pack/platform/plugins/your_plugin
 
-# ESLint with auto-fix (REQUIRED before each commit - see MANDATORY VERIFICATION section)
-node scripts/eslint_all_files --fix
+# ESLint multiple changed files (using git)
+node scripts/eslint --fix $(git diff --name-only --diff-filter=ACMR "*.ts" "*.tsx" "*.js")
 
-# ESLint via yarn script
-yarn lint:es
+# ESLint with type information for specific project (advanced)
+node scripts/eslint_with_types --project path/to/tsconfig.json
+node scripts/eslint_with_types --fix --project path/to/tsconfig.json
 
-# ESLint specific files
-node scripts/eslint [options] [<file>...]
+# Type checking for specific project (REQUIRED before each commit)
+node scripts/type_check --project path/to/plugin/tsconfig.json
+node scripts/type_check --project x-pack/platform/plugins/your_plugin/tsconfig.json
 
-# ESLint with type information (advanced)
-node scripts/eslint_with_types
-node scripts/eslint_with_types --fix
-
-# Style linting only
-yarn lint:style
-
-# Type checking (see MANDATORY VERIFICATION section)
-node scripts/type_check
-yarn test:type_check  # Alternative via yarn
+# Style linting specific files
+yarn lint:style path/to/changed/styles/
 
 # Clear TypeScript cache if needed
 node scripts/type_check --clean-cache
-```
 
-### Clean Commands
-
-```bash
-yarn kbn clean              # Deletes output directories and resets internal caches
-yarn kbn reset              # Full reset (deletes node_modules, output directories, and all caches)
+# Full repository linting (SLOW - only use for large refactors)
+yarn lint  # Runs: yarn lint:es && yarn lint:style
+node scripts/eslint_all_files --fix  # All files
+node scripts/type_check  # All projects
 ```
 
 ## Testing Requirements
@@ -383,7 +385,7 @@ yarn kbn reset              # Full reset (deletes node_modules, output directori
 - ⛔ **DO NOT:** Delete failing tests
 - ⛔ **DO NOT:** Comment out failing tests
 - ⛔ **DO NOT:** Skip failing tests with `.skip()`
-- ⛔ **DO NOT:** Use `@ts-ignore` or `@ts-expect-error` to hide type errors
+- ⛔ **DO NOT:** Use `any`, `unknown`, `@ts-ignore` or `@ts-expect-error` to hide type errors
 - ⛔ **DO NOT:** Disable lint rules to hide lint errors
 
 Deleted tests, ignored types, and disabled linters represent lost validation of critical functionality. Fix the underlying issues.
@@ -394,7 +396,7 @@ Deleted tests, ignored types, and disabled linters represent lost validation of 
 
 - **Unit tests:** Co-located with source (`*.test.ts`) - Run: `yarn test:jest`
 - **Integration tests:** `**/integration_tests/**/*.test.{js,mjs,ts,tsx}` - Run: `yarn test:jest_integration`
-- **FTR tests:** `x-pack/platform/test/` and solution-specific `test/` directories
+- **FTR tests:** `x-pack/platform/test/` and solution-specific `test/` directories (functional tests in `functional/` subdirs, API tests in `api_integration/` subdirs)
 - **Cypress tests:** Require `node scripts/build_kibana_platform_plugins` before running
 
 See `dev_docs/` for complete test directory structure details.
@@ -412,44 +414,6 @@ See `dev_docs/` for comprehensive FTR guides and troubleshooting.
 
 ## Project Structure Overview
 
-```
-kibana/
-├── src/                        # Core Kibana platform
-│   ├── cli/                    # CLI command implementations
-│   ├── cli_encryption_keys/    # Encryption key CLI tools
-│   ├── cli_health_gateway/     # Health gateway CLI
-│   ├── cli_keystore/           # Keystore CLI tools
-│   ├── cli_plugin/             # Plugin CLI tools
-│   ├── cli_setup/              # Setup CLI tools
-│   ├── cli_verification_code/  # Verification code CLI
-│   ├── core/                   # Core services and APIs
-│   ├── dev/                    # Development tools and utilities
-│   ├── platform/               # Platform-level packages/plugins
-│   └── setup_node_env/         # Node.js environment setup
-├── x-pack/                     # Commercial/licensed features
-│   ├── build_chromium/         # Chromium build artifacts
-│   ├── dev-tools/              # X-Pack development tools
-│   ├── examples/               # X-Pack development examples
-│   ├── packages/               # X-Pack specific packages
-│   ├── performance/            # Performance testing tools
-│   ├── platform/               # X-Pack platform plugins
-│   ├── scripts/                # X-Pack specific scripts
-│   ├── solutions/              # Solution-specific plugins (Security, Observability, Search, Chat)
-│   └── test/                   # X-Pack functional and API integration tests
-├── .buildkite/                 # CI/CD pipeline definitions
-├── .devcontainer/              # Development container configuration
-├── .es/                        # Cached ES/serverless snapshots
-├── .github/                    # GitHub configuration & workflows
-├── .moon/                      # Moonrepo tasks for monorepo management
-├── api_docs/                   # API documentation for plugins and packages
-├── config/                     # Configuration files (kibana.yml, etc.)
-├── dev_docs/                   # Development documentation
-├── examples/                   # Core platform development examples
-├── kbn_pm/                     # CLI tool (bootstrap, clean, etc.)
-├── packages/                   # Shared packages (all plugins)
-└── scripts/                    # Build and utility scripts
-```
-
 **Key configuration files:**
 
 - `config/kibana.yml` - Main Kibana configuration
@@ -461,31 +425,7 @@ kibana/
 
 For complete structure details, see `dev_docs/key_concepts/` directory.
 
-## CI/CD Validation
-
-### Buildkite Pipeline Phases
-
-The CI runs these checks on every PR. **If you followed MANDATORY VERIFICATION for each commit, CI should pass.**
-
-⚠️ **DO NOT** rely on CI to catch errors. Verify locally before each commit.
-
-**Pre-Checks Phase:**
-
-- Quick checks: `yarn quick-checks`
-- ESLint: `yarn lint:es`
-- TypeScript: `yarn test:type_check`
-- OAS Snapshot validation
-- OpenAPI Code Generation
-- Saved Objects validation
-
-**Testing Phase:**
-
-- Jest unit tests
-- Jest integration tests
-- FTR tests (api_integration and ui)
-- Cypress tests (Security solution)
-
-### Local Validation
+## Validation
 
 ⚠️ **CRITICAL:** For each commit, use the **MANDATORY VERIFICATION** section which scopes checks to affected files only.
 
@@ -495,37 +435,14 @@ The CI runs these checks on every PR. **If you followed MANDATORY VERIFICATION f
 # Full repository validation (SLOW - only if needed)
 yarn kbn bootstrap
 yarn quick-checks         # Quick pre-commit checks
-yarn lint:es             # Lint all files (slow)
-yarn test:type_check     # Check all types (slow)
+yarn lint:es <path/to/file> # Lint specific file
+yarn test:type_check --project path/to/plugin/or/package/tsconfig.json  # Type check specific project
 yarn test:jest           # Run all tests (very slow)
 ```
 
 **For typical changes:** See **MANDATORY VERIFICATION** section for scoped commands.
 
 ## Development Best Practices
-
-### Working with Large Files & Complex Changes
-
-This is a large codebase (~74,000 files). You will regularly encounter large files (1000+ lines) and complex architectural patterns. **This is normal and expected.**
-
-**When working with large or complex code:**
-
-1. **READ COMPLETELY:** Read entire files to understand context, patterns, and architecture
-2. **ANALYZE PATTERNS:** Identify existing conventions, naming patterns, and code organization
-3. **UNDERSTAND DEPENDENCIES:** Trace imports, exports, and relationships before changing
-4. **PLAN THOROUGHLY:** Think through implications across the codebase, consider edge cases
-5. **MAKE PRECISE EDITS:** Preserve existing patterns and style, avoid unnecessary changes
-6. **VERIFY COMPREHENSIVELY:** Test all affected code paths, not just the changed lines
-
-**Decision Framework:**
-
-- **Understanding > Assumptions:** Take time to understand rather than guessing
-- **Completeness > Partial:** Finish tasks fully rather than leaving them partially done
-- **100% > "Mostly":** All verification passing > "mostly clean" or "core verification passing"
-- **All Three Steps > Any Two:** Must pass linting AND type checking AND testing - no shortcuts
-- **Zero Errors > "Minor Adjustments":** 0 lint + 0 type + 0 test errors > leaving ANY work for others
-- **Verification > Hoping:** Run all three checks rather than assuming they pass
-- **Quality > Quantity:** One properly completed task beats multiple rushed incomplete ones
 
 ### Critical Rules - NON-NEGOTIABLE
 
@@ -543,46 +460,6 @@ See `dev_docs/` for detailed guidance on:
 - Code review guidelines
 - Performance optimization patterns (`dev_docs/key_concepts/performance/`)
 - Security and accessibility requirements
-
-## Common Issues & Solutions
-
-### Bootstrap Failures
-
-```bash
-# Integrity errors
-yarn cache clean && yarn kbn clean
-yarn kbn bootstrap --force-install
-
-# Root user
-yarn kbn bootstrap --allow-root
-
-# Full reset (last resort)
-git clean -fdx
-yarn cache clean
-yarn kbn clean
-yarn kbn bootstrap --force-install
-```
-
-### TypeScript Issues
-
-```bash
-# Clear TS cache
-node scripts/type_check.js --clean-cache
-
-# Check specific project only
-yarn test:type_check --project path/to/tsconfig.json
-```
-
-### Node Version Mismatch
-
-```bash
-# Error: "The engine 'node' is incompatible with this module"
-nvm use  # Use version from .nvmrc
-```
-
-### FTR Test Failures
-
-See `dev_docs/` for FTR troubleshooting guides.
 
 ## Additional Resources
 
@@ -613,7 +490,7 @@ If you followed the MANDATORY VERIFICATION workflow (verify each commit), these 
 - [ ] **REQUIRED:** All commits are on the correct branch (`git branch --show-current`)
 - [ ] **REQUIRED:** Bootstrap was run when dependencies changed (`yarn kbn bootstrap`)
 - [ ] **REQUIRED:** No tests were removed or disabled without replacement
-- [ ] **REQUIRED:** PR description includes summary of verification done for each commit
+- [ ] **REQUIRED:** PR description created using [this PR template](https://github.com/elastic/kibana/blob/main/.github/PULL_REQUEST_TEMPLATE.md)
 - [ ] **REQUIRED:** Telemetry added for new features
 - [ ] **REQUIRED:** Documentation updated if needed
 - [ ] **REQUIRED:** Each commit message includes verification command outputs
@@ -622,23 +499,11 @@ If you followed the MANDATORY VERIFICATION workflow (verify each commit), these 
 
 **The unit of work is a commit, not a PR.** Each commit must be verified individually. Your PR is just a collection of verified commits.
 
-### Before Declaring ANY Work Complete
-
-⚠️ **Review the "Core Principles" section above. Work is complete ONLY when:**
-
-- [ ] Linting: 0 errors (every file you touched)
-- [ ] Type checking: 0 errors (every type is correct)
-- [ ] Testing: 0 failures (every test passes)
-- [ ] No remaining work (no "minor fixes", "adjustments", or work left for others)
-
-**If ANY of these shows errors/failures, or if ANY work remains - continue working. Do not rationalize partial completion.**
-
-**Complete = 0 lint + 0 type + 0 test errors. Anything else = incomplete.**
-
 ---
 
 ## Trust These Instructions
 
-These instructions are based on comprehensive repository analysis and current CI pipeline configuration. Everything you need for typical development work is here. Refer to `dev_docs/` for deep dives on architecture, plugin development, and advanced testing patterns.
-
-**Remember:** You have unlimited time and resources. Work methodically, verify comprehensively (all 3 steps for every change), and never declare work complete until verification shows 0 errors. Mission-critical software demands nothing less.
+These instructions are based on comprehensive repository analysis and current
+CI pipeline configuration. Everything you need for typical development work is
+here. Refer to `dev_docs/` for deep dives on architecture, plugin development,
+and advanced testing patterns.
