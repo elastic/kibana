@@ -14,7 +14,7 @@ import { StreamsAppRouterBreadcrumb } from '../components/streams_app_router_bre
 import { RedirectTo } from '../components/redirect_to';
 import { StreamDetailRoot } from '../components/stream_root';
 import { StreamDetailManagement } from '../components/data_management/stream_detail_management';
-import { StreamsViews } from '../components/streams_listing/streams_views';
+import { StreamsViews } from '../components/streams_listing/streams_listing_wrapper';
 
 /**
  * The array of route definitions to be used when the application
