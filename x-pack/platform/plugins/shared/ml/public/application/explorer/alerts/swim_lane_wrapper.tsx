@@ -130,6 +130,7 @@ export const SwimLaneWrapper: FC<PropsWithChildren<SwimLaneWrapperProps>> = ({
           repositionOnScroll
           closePopover={closePopover}
           panelPaddingSize="s"
+          panelProps={{ 'data-test-subj': 'mlSwimLaneAlertsPopover' }}
         >
           <EuiPopoverTitle paddingSize={'xs'}>
             <EuiFlexGroup gutterSize={'none'} justifyContent={'spaceBetween'} alignItems={'center'}>
@@ -182,7 +183,9 @@ export const SwimLaneWrapper: FC<PropsWithChildren<SwimLaneWrapperProps>> = ({
             </EuiFlexGroup>
           </EuiPopoverTitle>
           {viewType === 'table' && !!selectedAlerts?.length ? (
-            <MiniAlertTable data={selectedAlerts} />
+            <div data-test-subj="mlSwimLaneAlertsMiniTable">
+              <MiniAlertTable data={selectedAlerts} />
+            </div>
           ) : (
             (selectedAlerts ?? []).map((alert) => {
               const fields = Object.entries(

@@ -52,6 +52,9 @@ export const useStreamEnrichmentEvents = () => {
       ) => {
         service.send({ type: 'step.addProcessor', step, options });
       },
+      duplicateProcessor: (id: string) => {
+        service.send({ type: 'step.duplicateProcessor', processorStepId: id });
+      },
       addCondition: (
         step?: StreamlangWhereBlock,
         options?: { parentId: StreamlangStepWithUIAttributes['parentId'] }
