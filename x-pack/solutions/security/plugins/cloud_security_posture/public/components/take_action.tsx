@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -13,6 +13,7 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLiveAnnouncer,
   EuiPopover,
   EuiText,
   useGeneratedHtmlId,
@@ -44,18 +45,49 @@ interface TakeActionProps {
   isDataGridControlColumn?: boolean;
 }
 
+const ErrorAnnouncement = ({ error }: { error: Error }) => {
+  const liveRegionRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (liveRegionRef.current) {
+      liveRegionRef.current.textContent = kbnI18n.translate(
+        'xpack.csp.takeAction.createRuleErrorAnnouncement',
+        {
+          defaultMessage: 'Error: Unable to create detection rule. {errorMessage}',
+          values: { errorMessage: error.message },
+        }
+      );
+    }
+  }, [error]);
+
+  return (
+    <EuiLiveAnnouncer>
+      <div aria-live="assertive" aria-atomic="true" ref={liveRegionRef} role="alert" />
+    </EuiLiveAnnouncer>
+  );
+};
+
 export const showCreateDetectionRuleErrorToast = (
   cloudSecurityStartServices: CloudSecurityPostureStartServices,
   error: Error
 ) => {
+  const { analytics, i18n, theme } = cloudSecurityStartServices;
+  const startServices = { analytics, i18n, theme };
+
   return cloudSecurityStartServices.notifications.toasts.addDanger({
     title: kbnI18n.translate('xpack.csp.takeAction.createRuleErrorTitle', {
       defaultMessage: 'Unable to create detection rule',
     }),
-    text: kbnI18n.translate('xpack.csp.takeAction.createRuleErrorDescription', {
-      defaultMessage: 'An error occurred while creating the detection rule: {errorMessage}.',
-      values: { errorMessage: error.message },
-    }),
+    text: toMountPoint(
+      <>
+        <ErrorAnnouncement error={error} />
+        {kbnI18n.translate('xpack.csp.takeAction.createRuleErrorDescription', {
+          defaultMessage: 'An error occurred while creating the detection rule: {errorMessage}.',
+          values: { errorMessage: error.message },
+        })}
+      </>,
+      startServices
+    ),
     'data-test-subj': 'csp:toast-error',
   });
 };
