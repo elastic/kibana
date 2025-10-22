@@ -38,8 +38,7 @@ export const getBulkAgentDetailsRoute = (router: IRouter, osqueryContext: Osquer
         },
       },
       async (context, request, response) => {
-        const coreContext = await context.core;
-        const logger = coreContext.logger.get();
+        const logger = osqueryContext.logFactory.get('bulkAgentDetails');
         const space = await osqueryContext.service.getActiveSpace(request);
         const { agentIds } = request.body;
 
@@ -51,7 +50,7 @@ export const getBulkAgentDetailsRoute = (router: IRouter, osqueryContext: Osquer
           }
 
           const agents = await agentService
-            .aspeInternalScodUser(space?.id ?? DEFAULT_SPACE_ID)
+            .asInternalScopedUser(space?.id ?? DEFAULT_SPACE_ID)
             ?.getByIds(agentIds, { ignoreMissing: true });
 
           return response.ok({

@@ -248,14 +248,22 @@ describe('getActionResultsRoute', () => {
         expectedSearchOptions
       );
 
-      // Verify action results was called with agent.id kuery
-      expect(mockSearchFn).toHaveBeenCalledWith(
-        expect.objectContaining({
-          factoryQueryType: OsqueryQueries.actionResults,
-          kuery: 'agent.id: "agent-1" OR agent.id: "agent-2"',
-        }),
-        expectedSearchOptions
+      // Verify action results was called with agentIds array (new pagination approach)
+      const actionResultsCall = mockSearchFn.mock.calls.find(
+        (call) => call[0].factoryQueryType === OsqueryQueries.actionResults
       );
+
+      expect(actionResultsCall).toBeDefined();
+      expect(actionResultsCall![0]).toMatchObject({
+        factoryQueryType: OsqueryQueries.actionResults,
+        agentIds: ['agent-1', 'agent-2'],
+      });
+
+      // CRITICAL: Verify kuery does NOT contain agent.id filters (architectural change from KQL to array)
+      // kuery should be undefined or not contain agent.id patterns
+      if (actionResultsCall![0].kuery) {
+        expect(actionResultsCall![0].kuery).not.toMatch(/agent\.id:/);
+      }
 
       expect(mockResponse.ok).toHaveBeenCalled();
     });
@@ -278,7 +286,7 @@ describe('getActionResultsRoute', () => {
 
       expect(mockSearchFn).toHaveBeenCalledWith(
         expect.objectContaining({
-          kuery: 'agent.id: "agent-1"',
+          agentIds: ['agent-1'],
         }),
         expectedSearchOptions
       );
@@ -325,10 +333,10 @@ describe('getActionResultsRoute', () => {
 
       await routeHandler(mockContext, mockRequest, mockResponse);
 
-      // Verify trimmed agent IDs in kuery
+      // Verify trimmed agent IDs in array
       expect(mockSearchFn).toHaveBeenCalledWith(
         expect.objectContaining({
-          kuery: 'agent.id: "agent-1" OR agent.id: "agent-2" OR agent.id: "agent-3"',
+          agentIds: ['agent-1', 'agent-2', 'agent-3'],
         }),
         expectedSearchOptions
       );
@@ -352,13 +360,20 @@ describe('getActionResultsRoute', () => {
 
       await routeHandler(mockContext, mockRequest, mockResponse);
 
-      // Verify combined kuery: (agentIds kuery) AND (user kuery)
-      expect(mockSearchFn).toHaveBeenCalledWith(
-        expect.objectContaining({
-          kuery: '(agent.id: "agent-1" OR agent.id: "agent-2") AND (error.message: *timeout*)',
-        }),
-        expectedSearchOptions
+      // Verify agentIds passed as array and kuery kept separate (new pagination approach)
+      const actionResultsCall = mockSearchFn.mock.calls.find(
+        (call) => call[0].factoryQueryType === OsqueryQueries.actionResults
       );
+
+      expect(actionResultsCall).toBeDefined();
+      expect(actionResultsCall![0]).toMatchObject({
+        agentIds: ['agent-1', 'agent-2'],
+        kuery: userKuery,
+      });
+
+      // CRITICAL: Verify kuery contains ONLY user filter, NOT agent.id filters (architectural change)
+      expect(actionResultsCall![0].kuery).toBe(userKuery);
+      expect(actionResultsCall![0].kuery).not.toMatch(/agent\.id:/);
     });
 
     it('should handle empty string agentIds parameter', async () => {
@@ -615,42 +630,8 @@ describe('getActionResultsRoute', () => {
   });
 
   describe('ProcessedEdges for Internal UI', () => {
-    it('should create placeholder edges for agents without results', async () => {
-      // 5 agents in action, but only 3 have results (agent-1, agent-2, agent-3)
-      const mockSearchFn = createMockSearchStrategy(
-        createMockActionDetailsResponse(['agent-1', 'agent-2', 'agent-3', 'agent-4', 'agent-5']),
-        createMockActionResultsResponse(['agent-1', 'agent-2', 'agent-3'], {
-          totalResponded: 3,
-          successCount: 3,
-          errorCount: 0,
-        })
-      );
-
-      const mockContext = createMockContext(mockSearchFn);
-      const mockRequest = createMockRequest({
-        actionId: 'test-action-id',
-      });
-      const mockResponse = httpServerMock.createResponseFactory();
-
-      await routeHandler(mockContext, mockRequest, mockResponse);
-
-      // Verify response contains all 5 agents (3 real + 2 placeholders)
-      expect(mockResponse.ok).toHaveBeenCalledWith({
-        body: expect.objectContaining({
-          edges: expect.arrayContaining([
-            expect.any(Object), // Real results
-            expect.any(Object),
-            expect.any(Object),
-            expect.any(Object), // Placeholder edges
-            expect.any(Object),
-          ]),
-          total: 5, // Total should be 5 (all agents)
-          aggregations: expect.objectContaining({
-            pending: 2, // 5 agents - 3 responded = 2 pending
-          }),
-        }),
-      });
-    });
+    // Note: Mixed results + placeholders scenario is tested at scale in
+    // "should handle large agent sets efficiently" (100 agents, 50 responded)
 
     it('should not create placeholders when agentIds parameter provided', async () => {
       // External API usage - agentIds parameter provided
@@ -891,6 +872,470 @@ describe('getActionResultsRoute', () => {
           }),
         }),
       });
+    });
+  });
+
+  describe('Server-side Pagination', () => {
+    it('should apply pagination to agent IDs before querying (page 0)', async () => {
+      // 1000 agents total, page 0, pageSize 100 -> agents 0-99
+      const totalAgents = 1000;
+      const allAgents = Array.from({ length: totalAgents }, (_, i) => `agent-${i}`);
+
+      // Mock response for current page: agents 0-49 responded (50 out of 100)
+      const currentPageResponded = allAgents.slice(0, 50);
+
+      const mockSearchFn = createMockSearchStrategy(
+        createMockActionDetailsResponse(allAgents),
+        createMockActionResultsResponse(currentPageResponded, {
+          totalResponded: 50,
+          successCount: 50,
+          errorCount: 0,
+        })
+      );
+
+      const mockContext = createMockContext(mockSearchFn);
+      const mockRequest = createMockRequest({
+        actionId: 'test-action-id',
+        query: {
+          page: 0,
+          pageSize: 100,
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      // Verify action results was called with pagination-sliced agents
+      expect(mockSearchFn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          factoryQueryType: OsqueryQueries.actionResults,
+          // Should pass first 100 agent IDs to query
+          agentIds: allAgents.slice(0, 100),
+        }),
+        expectedSearchOptions
+      );
+
+      // Verify response contains current page (100 agents: 50 responded + 50 placeholders)
+      const responseBody = mockResponse.ok.mock.calls[0]?.[0]?.body as {
+        edges: unknown[];
+        aggregations: { pending: number };
+      };
+
+      // Should have exactly 100 edges for current page
+      expect(responseBody.edges.length).toBe(100);
+
+      // Total pending is 1000 total - 50 responded = 950
+      expect(responseBody.aggregations.pending).toBe(950);
+    });
+
+    it('should apply pagination to agent IDs for page 5', async () => {
+      // 1000 agents total, page 5, pageSize 100 -> agents 500-599
+      const totalAgents = 1000;
+      const allAgents = Array.from({ length: totalAgents }, (_, i) => `agent-${i}`);
+
+      // Mock response for current page: agents 500-574 responded (75 out of 100)
+      const currentPageResponded = allAgents.slice(500, 575);
+
+      const mockSearchFn = createMockSearchStrategy(
+        createMockActionDetailsResponse(allAgents),
+        createMockActionResultsResponse(currentPageResponded, {
+          totalResponded: 75,
+          successCount: 75,
+          errorCount: 0,
+        })
+      );
+
+      const mockContext = createMockContext(mockSearchFn);
+      const mockRequest = createMockRequest({
+        actionId: 'test-action-id',
+        query: {
+          page: 5,
+          pageSize: 100,
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      // Verify correct page slice (500-599)
+      expect(mockSearchFn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          factoryQueryType: OsqueryQueries.actionResults,
+          agentIds: allAgents.slice(500, 600),
+        }),
+        expectedSearchOptions
+      );
+
+      // Verify response for current page only (100 agents: 75 responded + 25 placeholders)
+      const responseBody = mockResponse.ok.mock.calls[0]?.[0]?.body as {
+        edges: unknown[];
+        aggregations: { pending: number };
+      };
+
+      expect(responseBody.edges.length).toBe(100);
+      expect(responseBody.aggregations.pending).toBe(925); // 1000 total - 75 responded
+    });
+
+    it('should handle last page with partial results (10k+ agents)', async () => {
+      // 10,200 agents total, page 101, pageSize 100 -> agents 10100-10199 (last 100)
+      const totalAgents = 10200;
+      const allAgents = Array.from({ length: totalAgents }, (_, i) => `agent-${i}`);
+      const lastPageIndex = 101; // Page 0 = first 100, page 101 = agents 10100-10199
+      const lastPageSize = 100;
+
+      // Mock response for last page: all 100 agents responded
+      const lastPageResponded = allAgents.slice(10100, 10200);
+
+      const mockSearchFn = createMockSearchStrategy(
+        createMockActionDetailsResponse(allAgents),
+        createMockActionResultsResponse(lastPageResponded, {
+          totalResponded: 100,
+          successCount: 100,
+          errorCount: 0,
+        })
+      );
+
+      const mockContext = createMockContext(mockSearchFn);
+      const mockRequest = createMockRequest({
+        actionId: 'test-action-id',
+        query: {
+          page: lastPageIndex,
+          pageSize: lastPageSize,
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      // Verify correct last page slice
+      expect(mockSearchFn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          factoryQueryType: OsqueryQueries.actionResults,
+          agentIds: allAgents.slice(10100, 10200),
+        }),
+        expectedSearchOptions
+      );
+
+      // Verify response for last page (100 agents all responded, no placeholders)
+      const responseBody = mockResponse.ok.mock.calls[0]?.[0]?.body as { edges: unknown[] };
+      expect(responseBody.edges.length).toBe(100);
+    });
+
+    it('should handle 15k agents with efficient pagination (150 pages)', async () => {
+      // Simulates enterprise deployment with 15,000 agents
+      const totalAgents = 15000;
+      const allAgents = Array.from({ length: totalAgents }, (_, i) => `agent-${i}`);
+
+      // Test middle page (page 75 = agents 7500-7599)
+      // Mock response: agents 7500-7519 responded (20 out of 100)
+      const currentPageResponded = allAgents.slice(7500, 7520);
+
+      const mockSearchFn = createMockSearchStrategy(
+        createMockActionDetailsResponse(allAgents),
+        createMockActionResultsResponse(currentPageResponded, {
+          totalResponded: 20,
+          successCount: 20,
+          errorCount: 0,
+        })
+      );
+
+      const mockContext = createMockContext(mockSearchFn);
+      const mockRequest = createMockRequest({
+        actionId: 'test-action-id',
+        query: {
+          page: 75,
+          pageSize: 100,
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      // Verify only 100 agents processed (not all 15k)
+      expect(mockSearchFn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          factoryQueryType: OsqueryQueries.actionResults,
+          agentIds: allAgents.slice(7500, 7600),
+        }),
+        expectedSearchOptions
+      );
+
+      // Verify memory-efficient response (only current page: 20 responded + 80 placeholders = 100 total)
+      const responseBody = mockResponse.ok.mock.calls[0]?.[0]?.body as { edges: unknown[] };
+      expect(responseBody.edges.length).toBe(100);
+    });
+
+    it('should create placeholders only for current page, not all agents', async () => {
+      // This is the CRITICAL test for Issue 3 fix - memory efficiency
+      // Validates that ES query receives ONLY current page agent IDs (100), not all 10,000
+      const totalAgents = 10000;
+      const allAgents = Array.from({ length: totalAgents }, (_, i) => `agent-${i}`);
+
+      // No agents responded on this page
+      const mockSearchFn = createMockSearchStrategy(
+        createMockActionDetailsResponse(allAgents),
+        createMockActionResultsResponse(0, {
+          totalResponded: 0,
+          successCount: 0,
+          errorCount: 0,
+        })
+      );
+
+      const mockContext = createMockContext(mockSearchFn);
+      const mockRequest = createMockRequest({
+        actionId: 'test-action-id',
+        query: {
+          page: 0,
+          pageSize: 100,
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      // CRITICAL ASSERTION: Verify Elasticsearch query receives ONLY 100 agent IDs, not all 10,000
+      // This is the core Issue 3 fix - prevents memory exhaustion with large agent sets
+      const actionResultsCall = mockSearchFn.mock.calls.find(
+        (call) => call[0].factoryQueryType === OsqueryQueries.actionResults
+      );
+
+      expect(actionResultsCall).toBeDefined();
+      expect(actionResultsCall![0].agentIds).toHaveLength(100);
+      expect(actionResultsCall![0].agentIds).not.toHaveLength(totalAgents);
+
+      // Verify response also has correct number of edges (100 placeholders created)
+      const responseBody = mockResponse.ok.mock.calls[0]?.[0]?.body as { edges: unknown[] };
+      expect(responseBody.edges.length).toBe(100);
+      expect(responseBody.edges.length).not.toBe(totalAgents);
+    });
+
+    it('should support different page sizes (50, 100, 500)', async () => {
+      const totalAgents = 1000;
+      const allAgents = Array.from({ length: totalAgents }, (_, i) => `agent-${i}`);
+
+      const pageSizes = [50, 100, 500];
+
+      for (const pageSize of pageSizes) {
+        const mockSearchFn = createMockSearchStrategy(
+          createMockActionDetailsResponse(allAgents),
+          createMockActionResultsResponse(pageSize / 2) // Half responded
+        );
+
+        const mockContext = createMockContext(mockSearchFn);
+        const mockRequest = createMockRequest({
+          actionId: 'test-action-id',
+          query: {
+            page: 0,
+            pageSize,
+          },
+        });
+        const mockResponse = httpServerMock.createResponseFactory();
+
+        await routeHandler(mockContext, mockRequest, mockResponse);
+
+        // Verify correct page size used
+        expect(mockSearchFn).toHaveBeenCalledWith(
+          expect.objectContaining({
+            agentIds: allAgents.slice(0, pageSize),
+          }),
+          expectedSearchOptions
+        );
+
+        const responseBody = mockResponse.ok.mock.calls[0]?.[0]?.body as { edges: unknown[] };
+        expect(responseBody.edges.length).toBeLessThanOrEqual(pageSize);
+      }
+    });
+
+    it('should handle boundary condition: exactly 10k agents at page boundary', async () => {
+      // Edge case: exactly 10,000 agents, last page (page 99)
+      const totalAgents = 10000;
+      const allAgents = Array.from({ length: totalAgents }, (_, i) => `agent-${i}`);
+
+      const mockSearchFn = createMockSearchStrategy(
+        createMockActionDetailsResponse(allAgents),
+        createMockActionResultsResponse(100)
+      );
+
+      const mockContext = createMockContext(mockSearchFn);
+      const mockRequest = createMockRequest({
+        actionId: 'test-action-id',
+        query: {
+          page: 99, // Last page (0-indexed, so page 99 = agents 9900-9999)
+          pageSize: 100,
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      // Verify last page slice
+      expect(mockSearchFn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          agentIds: allAgents.slice(9900, 10000),
+        }),
+        expectedSearchOptions
+      );
+
+      expect(mockResponse.ok).toHaveBeenCalled();
+    });
+
+    it('should handle pagination beyond last page gracefully', async () => {
+      // Critical edge case: requesting page 999 when only 100 pages exist (10,000 agents / 100 per page)
+      const totalAgents = 10000;
+      const allAgents = Array.from({ length: totalAgents }, (_, i) => `agent-${i}`);
+
+      const mockSearchFn = createMockSearchStrategy(
+        createMockActionDetailsResponse(allAgents),
+        createMockActionResultsResponse(0, {
+          totalResponded: 0,
+          successCount: 0,
+          errorCount: 0,
+        })
+      );
+
+      const mockContext = createMockContext(mockSearchFn);
+      const mockRequest = createMockRequest({
+        actionId: 'test-action-id',
+        query: {
+          page: 999, // Way beyond last page (only pages 0-99 exist)
+          pageSize: 100,
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      // Verify request doesn't crash and returns empty results
+      expect(mockResponse.ok).toHaveBeenCalled();
+
+      const responseBody = mockResponse.ok.mock.calls[0]?.[0]?.body as { edges: unknown[] };
+
+      // Should return empty results (slicing beyond array returns empty)
+      expect(responseBody.edges).toEqual([]);
+    });
+
+    it('should pass agentIds array to search strategy (not KQL string)', async () => {
+      const totalAgents = 500;
+      const allAgents = Array.from({ length: totalAgents }, (_, i) => `agent-${i}`);
+
+      const mockSearchFn = createMockSearchStrategy(
+        createMockActionDetailsResponse(allAgents),
+        createMockActionResultsResponse(50)
+      );
+
+      const mockContext = createMockContext(mockSearchFn);
+      const mockRequest = createMockRequest({
+        actionId: 'test-action-id',
+        query: {
+          page: 2,
+          pageSize: 100,
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      // Verify agentIds is passed as array, not converted to KQL
+      expect(mockSearchFn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          factoryQueryType: OsqueryQueries.actionResults,
+          agentIds: expect.arrayContaining(['agent-200', 'agent-250', 'agent-299']),
+        }),
+        expectedSearchOptions
+      );
+
+      // Verify kuery is separate (not mixed with agentIds)
+      const actionResultsCall = mockSearchFn.mock.calls.find(
+        (call) => call[0].factoryQueryType === OsqueryQueries.actionResults
+      );
+      expect(actionResultsCall?.[0].kuery).toBeUndefined();
+    });
+
+    it('should combine user kuery with internal pagination correctly', async () => {
+      // Tests internal API (no agentIds param) with BOTH pagination AND user kuery filtering
+      const totalAgents = 1000;
+      const allAgents = Array.from({ length: totalAgents }, (_, i) => `agent-${i}`);
+      const userKuery = 'error.message: *timeout*';
+
+      // Mock response for page 2: agents 200-249 responded (50 out of 100)
+      const currentPageResponded = allAgents.slice(200, 250);
+
+      const mockSearchFn = createMockSearchStrategy(
+        createMockActionDetailsResponse(allAgents),
+        createMockActionResultsResponse(currentPageResponded, {
+          totalResponded: 50,
+          successCount: 50,
+          errorCount: 0,
+        })
+      );
+
+      const mockContext = createMockContext(mockSearchFn);
+      const mockRequest = createMockRequest({
+        actionId: 'test-action-id',
+        query: {
+          page: 2,
+          pageSize: 100,
+          kuery: userKuery,
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      // Verify action details was fetched (internal API path)
+      expect(mockSearchFn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          factoryQueryType: OsqueryQueries.actionDetails,
+        }),
+        expectedSearchOptions
+      );
+
+      // Verify action results was called with pagination + user kuery
+      const actionResultsCall = mockSearchFn.mock.calls.find(
+        (call) => call[0].factoryQueryType === OsqueryQueries.actionResults
+      );
+
+      expect(actionResultsCall).toBeDefined();
+      expect(actionResultsCall![0]).toMatchObject({
+        factoryQueryType: OsqueryQueries.actionResults,
+        agentIds: allAgents.slice(200, 300), // Page 2, pageSize 100
+        kuery: userKuery, // User kuery preserved
+      });
+
+      // CRITICAL: Verify kuery contains ONLY user filter, NOT agent.id filters
+      expect(actionResultsCall![0].kuery).toBe(userKuery);
+      expect(actionResultsCall![0].kuery).not.toMatch(/agent\.id:/);
+
+      // Verify response has correct page size
+      const responseBody = mockResponse.ok.mock.calls[0]?.[0]?.body as { edges: unknown[] };
+      expect(responseBody.edges.length).toBe(100); // 50 responded + 50 placeholders
+    });
+
+    it('should apply pagination for external API with agentIds parameter', async () => {
+      // External API consumer provides agentIds, pagination should still apply
+      const mockSearchFn = createMockSearchStrategy(undefined, createMockActionResultsResponse(50));
+
+      const mockContext = createMockContext(mockSearchFn);
+      const mockRequest = createMockRequest({
+        actionId: 'test-action-id',
+        query: {
+          agentIds: Array.from({ length: 100 }, (_, i) => `agent-${i}`).join(','),
+          page: 0,
+          pageSize: 50,
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      // Verify pagination applied to provided agentIds
+      expect(mockSearchFn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          factoryQueryType: OsqueryQueries.actionResults,
+          agentIds: expect.arrayContaining(['agent-0', 'agent-25', 'agent-49']),
+        }),
+        expectedSearchOptions
+      );
     });
   });
 });
