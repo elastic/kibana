@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Writable } from '@kbn/utility-types';
 import type { DashboardState } from '../../../../common';
 import { migrateLegacyQuery } from '../../../../common';
 
@@ -19,7 +18,7 @@ type DashboardSearchState = Pick<
 export function extractSearchState(state: {
   [key: string]: unknown;
 }): Partial<DashboardSearchState> {
-  const searchState: Partial<Writable<DashboardSearchState>> = {};
+  const searchState: Partial<DashboardSearchState> = {};
 
   if (Array.isArray(state.filters)) {
     searchState.filters = state.filters;

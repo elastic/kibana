@@ -19,6 +19,7 @@ import type {
 } from '@kbn/content-management-plugin/common';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type { filterSchema, querySchema } from '@kbn/es-query-server';
+import type { Writable } from '@kbn/utility-types';
 import type * as schema from './schema';
 import type { CONTENT_ID } from '../../../common/content_management';
 
@@ -28,7 +29,7 @@ export type DashboardOptions = TypeOf<typeof schema.optionsSchema>;
 
 export type DashboardPanel = TypeOf<ReturnType<typeof schema.getPanelSchema>>;
 export type DashboardSection = TypeOf<ReturnType<typeof schema.getSectionSchema>>;
-export type DashboardState = TypeOf<ReturnType<typeof schema.getDashboardDataSchema>>;
+export type DashboardState = Writable<TypeOf<ReturnType<typeof schema.getDashboardDataSchema>>>;
 
 export type DashboardItem = TypeOf<ReturnType<typeof schema.getDashboardItemSchema>>;
 export type PartialDashboardItem = Omit<DashboardItem, 'attributes' | 'references'> & {

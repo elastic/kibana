@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SerializableRecord, Writable } from '@kbn/utility-types';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import type { DashboardState } from '../server';
 
@@ -21,7 +21,7 @@ export interface DashboardCapabilities {
 }
 
 export type DashboardLocatorParams = Partial<
-  Writable<DashboardState> & {
+  DashboardState & {
     controlGroupInput?: DashboardState['controlGroupInput'] & SerializableRecord;
 
     references?: DashboardState['references'] & SerializableRecord;

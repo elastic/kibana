@@ -8,7 +8,6 @@
  */
 
 import type { ViewMode } from '@kbn/presentation-publishing';
-import type { Writable } from '@kbn/utility-types';
 import type { DashboardCreationOptions } from '../../../dashboard_api/types';
 import { extractControlGroupState } from './extract_control_group_state';
 import { extractOptions } from './extract_options';
@@ -18,9 +17,7 @@ import { extractSearchState } from './extract_search_state';
 export function extractDashboardState(
   state?: unknown
 ): ReturnType<NonNullable<DashboardCreationOptions['getInitialInput']>> {
-  let dashboardState: Writable<
-    ReturnType<NonNullable<DashboardCreationOptions['getInitialInput']>>
-  > = {};
+  let dashboardState: ReturnType<NonNullable<DashboardCreationOptions['getInitialInput']>> = {};
   if (state && typeof state === 'object') {
     const stateAsObject = state as { [key: string]: unknown };
 
