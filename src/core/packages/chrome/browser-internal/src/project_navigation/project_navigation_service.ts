@@ -131,8 +131,6 @@ export class ProjectNavigationService {
       })
     );
 
-
-
     return {
       setProjectHome: this.setProjectHome.bind(this),
       getProjectHome$: () => {
@@ -178,24 +176,16 @@ export class ProjectNavigationService {
           this.kibanaName$,
           this.cloudLinks$,
         ]).pipe(
-          map(
-            ([
+          map(([projectBreadcrumbs, activeNodes, chromeBreadcrumbs, kibanaName, cloudLinks]) => {
+            return buildBreadcrumbs({
+              kibanaName,
               projectBreadcrumbs,
               activeNodes,
               chromeBreadcrumbs,
-              kibanaName,
               cloudLinks,
-            ]) => {
-              return buildBreadcrumbs({
-                kibanaName,
-                projectBreadcrumbs,
-                activeNodes,
-                chromeBreadcrumbs,
-                cloudLinks,
-                isServerless: this.isServerless,
-              });
-            }
-          )
+              isServerless: this.isServerless,
+            });
+          })
         );
       },
       /** In stateful Kibana, get the registered solution navigations */
