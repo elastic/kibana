@@ -460,7 +460,7 @@ describe('updateLastScheduledActions()', () => {
         },
       },
     });
-    alert.updateLastScheduledActions('default', 'hash', '333-333', actionsOnTheRule);
+    alert.clearThrottlingLastScheduledActions(actionsOnTheRule);
     expect(alert.toJSON()).toEqual({
       state: {},
       meta: {
@@ -472,8 +472,39 @@ describe('updateLastScheduledActions()', () => {
           group: 'default',
           actions: {
             '222-222': { date: new Date().toISOString() },
-            '333-333': { date: new Date().toISOString() },
           },
+        },
+      },
+    });
+  });
+  test('removes all the actions when there is no action on the rule', () => {
+    const actionsOnTheRule: string[] = [];
+
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta: {
+        flappingHistory: [],
+        maintenanceWindowIds: [],
+        lastScheduledActions: {
+          date: new Date().toISOString(),
+          group: 'default',
+          actions: {
+            '111-111': { date: new Date().toISOString() },
+            '222-222': { date: new Date().toISOString() },
+          },
+        },
+      },
+    });
+    alert.clearThrottlingLastScheduledActions(actionsOnTheRule);
+    expect(alert.toJSON()).toEqual({
+      state: {},
+      meta: {
+        flappingHistory: [],
+        maintenanceWindowIds: [],
+        uuid: expect.any(String),
+        lastScheduledActions: {
+          date: new Date().toISOString(),
+          group: 'default',
+          actions: {},
         },
       },
     });
