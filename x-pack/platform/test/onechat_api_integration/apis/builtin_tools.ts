@@ -24,6 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
               .delete(`/api/agent_builder/tools/${toolId}`)
               .set('kbn-xsrf', 'kibana')
               .expect(404);
+            return;
           }
           const response = await supertest
             .delete(`/api/agent_builder/tools/${toolId}`)
