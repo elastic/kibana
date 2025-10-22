@@ -17,7 +17,7 @@ export const useChromeStyle = (services: TabsServices) => {
   const [chromeStyle, setChromeStyle] = useState<ChromeStyle | undefined>(undefined);
 
   useEffect(() => {
-    if (!chrome) {
+    if (!chrome?.getChromeStyle$) {
       return;
     }
 
