@@ -7,17 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  Liquid,
-  Template,
-  IfTag,
-  Output,
-  TokenKind,
-  Expression,
-  Value,
-  ForTag,
-  Token,
-} from 'liquidjs';
+import { Liquid, Template, IfTag, Output, TokenKind, Expression, ForTag, Token } from 'liquidjs';
+
+// Internal types not exported by liquidjs
+interface PropertyAccessToken extends Token {
+  kind: TokenKind.PropertyAccess;
+  props: Array<{ kind: TokenKind; content: string | number }>;
+}
+
+// Type guards
+function isPropertyAccessToken(token: Token): token is PropertyAccessToken {
+  return token.kind === TokenKind.PropertyAccess && 'props' in token;
+}
 
 const liquidEngine = new Liquid({
   strictFilters: true,
@@ -52,16 +53,12 @@ function visitLiquidAST(node: unknown, localVariablesSet: Set<string>): string[]
   if (node instanceof Token) {
     let path = '';
 
-    if (node.kind === TokenKind.PropertyAccess) {
-      const props: [] = (node as any).props;
-      props.forEach((prop) => {
-        const kind: TokenKind = (prop as any).kind;
-
-        if (kind === TokenKind.Word) {
-          const wordContent = (prop as any).content;
-          path += path ? `.${wordContent}` : wordContent;
-        } else if (kind === TokenKind.Number) {
-          path += `[${(prop as any).content}]`;
+    if (isPropertyAccessToken(node)) {
+      node.props.forEach((prop) => {
+        if (prop.kind === TokenKind.Word) {
+          path += path ? `.${prop.content}` : prop.content;
+        } else if (prop.kind === TokenKind.Number) {
+          path += `[${prop.content}]`;
         }
       });
     }
