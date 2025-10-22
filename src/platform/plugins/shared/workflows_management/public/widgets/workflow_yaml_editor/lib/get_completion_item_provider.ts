@@ -1005,12 +1005,11 @@ export function getCompletionItemProvider(
 
           let focusedProp: StepPropInfo | undefined;
           for (const [, stepPropInfo] of Object.entries(focusedStepInfo.propInfos)) {
-            const range = stepPropInfo.valueNode.range;
-            if (!range) {
-              continue;
-            }
-
-            if (range[0] <= absolutePosition && absolutePosition <= range[2]) {
+            if (
+              stepPropInfo.valueNode.range &&
+              stepPropInfo.valueNode.range[0] <= absolutePosition &&
+              absolutePosition <= stepPropInfo.valueNode.range[2]
+            ) {
               focusedProp = stepPropInfo;
               break;
             }
