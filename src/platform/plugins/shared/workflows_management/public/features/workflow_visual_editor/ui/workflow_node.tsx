@@ -9,11 +9,11 @@
 
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, useEuiTheme } from '@elastic/eui';
-import type { EsWorkflowStepExecution, WorkflowYaml } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
 import type { Node } from '@xyflow/react';
 import { Handle, Position } from '@xyflow/react';
 import React from 'react';
+import { ExecutionStatus } from '@kbn/workflows';
+import type { EsWorkflowStepExecution, WorkflowYaml } from '@kbn/workflows';
 import type { NodeType } from '../lib/get_layouted_nodes_and_edges';
 import { flowNodeTypes } from '../lib/get_layouted_nodes_and_edges';
 

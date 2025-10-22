@@ -8,28 +8,28 @@
  */
 
 import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiModal,
+  EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiModalBody,
-  useGeneratedHtmlId,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiRadio,
-  EuiButton,
-  useEuiTheme,
   EuiText,
+  useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import type { WorkflowYaml } from '@kbn/workflows';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { Global, css } from '@emotion/react';
+import { css, Global } from '@emotion/react';
 import capitalize from 'lodash/capitalize';
-import { WorkflowExecuteIndexForm } from './workflow_execute_index_form';
-import { MANUAL_TRIGGERS_DESCRIPTIONS } from '../../../../common/translations';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { WorkflowYaml } from '@kbn/workflows';
 import { WorkflowExecuteEventForm } from './workflow_execute_event_form';
+import { WorkflowExecuteIndexForm } from './workflow_execute_index_form';
 import { WorkflowExecuteManualForm } from './workflow_execute_manual_form';
+import { MANUAL_TRIGGERS_DESCRIPTIONS } from '../../../../common/translations';
 
 type TriggerType = 'manual' | 'index' | 'alert';
 
@@ -54,7 +54,7 @@ export function WorkflowExecuteModal({
 }: {
   definition: WorkflowYaml;
   onClose: () => void;
-  onSubmit: (data: Record<string, any>) => void;
+  onSubmit: (data: Record<string, any>) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
 }) {
   const modalTitleId = useGeneratedHtmlId();
   const enabledTriggers = ['alert', 'index', 'manual'];
@@ -99,7 +99,6 @@ export function WorkflowExecuteModal({
     }
     if (definition.inputs) {
       setSelectedTrigger('manual');
-      return;
     }
   }, [shouldAutoRun, onSubmit, onClose, definition]);
 
@@ -129,7 +128,7 @@ export function WorkflowExecuteModal({
         style={{ width: '1200px', height: '100vh' }}
       >
         <EuiModalHeader>
-          <EuiModalHeaderTitle id={modalTitleId}>Run Workflow</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle id={modalTitleId}>{'Run Workflow'}</EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
           <EuiFlexGroup direction="row" gutterSize="l">

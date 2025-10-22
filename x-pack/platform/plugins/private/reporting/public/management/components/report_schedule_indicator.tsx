@@ -17,6 +17,9 @@ interface ReportScheduleIndicatorProps {
 }
 
 const translations = {
+  [Frequency.HOURLY]: i18n.translate('xpack.reporting.schedules.scheduleIndicator.hourly', {
+    defaultMessage: 'Hourly',
+  }),
   [Frequency.DAILY]: i18n.translate('xpack.reporting.schedules.scheduleIndicator.daily', {
     defaultMessage: 'Daily',
   }),

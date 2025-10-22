@@ -126,8 +126,6 @@ export function applyConfigOverrides(rawConfig, opts, extraCliOptions, keystoreC
       );
     }
 
-    set('server.prototypeHardening', true);
-
     if (!has('elasticsearch.serviceAccountToken') && opts.devCredentials !== false) {
       if (!has('elasticsearch.username')) {
         set('elasticsearch.username', 'kibana_system');

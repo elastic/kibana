@@ -30,6 +30,11 @@ import type { UserContentCommonSchema } from '@kbn/content-management-table-list
 
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import {
+  SAVED_OBJECTS_LIMIT_SETTING,
+  SAVED_OBJECTS_PER_PAGE_SETTING,
+  VisualizeConstants,
+} from '@kbn/visualizations-common';
 import { findListItems } from '../../utils/saved_visualize_utils';
 import {
   deleteListItems,
@@ -38,10 +43,8 @@ import {
 import { checkForDuplicateTitle } from '../../utils/saved_objects_utils/check_for_duplicate_title';
 import { showNewVisModal } from '../../wizard';
 import { getTypes } from '../../services';
-import { SAVED_OBJECTS_LIMIT_SETTING, SAVED_OBJECTS_PER_PAGE_SETTING } from '../..';
 import type { VisualizationListItem } from '../..';
 import type { VisualizeServices } from '../types';
-import { VisualizeConstants } from '../../../common/constants';
 import { getNoItemsMessage, getCustomColumn, getCustomSortingOptions } from '../utils';
 import { getVisualizeListItemLinkFn } from '../utils/get_visualize_list_item_link';
 import type { VisualizationStage } from '../../vis_types/vis_type_alias_registry';

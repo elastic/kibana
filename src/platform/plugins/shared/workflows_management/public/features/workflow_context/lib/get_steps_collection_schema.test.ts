@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WorkflowGraph } from '@kbn/workflows/graph';
-import { getStepsCollectionSchema } from './get_steps_collection_schema';
 import { DynamicStepContextSchema } from '@kbn/workflows';
-import { expectZodSchemaEqual } from '../../../../common/lib/zod/zod_utils';
+import { WorkflowGraph } from '@kbn/workflows/graph';
 import { z } from '@kbn/zod';
+import { getStepsCollectionSchema } from './get_steps_collection_schema';
+import { expectZodSchemaEqual } from '../../../../common/lib/zod/zod_utils';
 
 describe('getStepsCollectionSchema', () => {
   it('should return empty steps collection schema for a step with no predecessors', () => {

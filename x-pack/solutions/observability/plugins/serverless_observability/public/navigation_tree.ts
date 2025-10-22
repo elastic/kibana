@@ -8,6 +8,7 @@
 import { lazy } from 'react';
 import type { NavigationTreeDefinition, NodeDefinition } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
+import { DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 
 const LazyIconBriefcase = lazy(() =>
   import('@kbn/observability-nav-icons').then(({ iconBriefcase }) => ({ default: iconBriefcase }))
@@ -389,7 +390,7 @@ export const createNavigationTree = ({
             icon: 'code',
           },
           {
-            id: 'ingest_and_manage_data',
+            id: DATA_MANAGEMENT_NAV_ID,
             title: i18n.translate('xpack.serverlessObservability.nav.dataManagement', {
               defaultMessage: 'Data management',
             }),
@@ -434,7 +435,7 @@ export const createNavigationTree = ({
             ],
           },
           {
-            id: 'admin_and_settings_project_nav',
+            id: 'admin_and_settings',
             title: i18n.translate('xpack.serverlessObservability.nav.adminAndSettings', {
               defaultMessage: 'Admin and Settings',
             }),
@@ -485,7 +486,7 @@ export const createNavigationTree = ({
                   { link: 'management:triggersActionsAlerts' },
                   { link: 'management:triggersActions' },
                   { link: 'management:triggersActionsConnectors', breadcrumbStatus: 'hidden' },
-                  { link: 'management:maintenanceWindows' },
+                  { link: 'management:maintenanceWindows', breadcrumbStatus: 'hidden' },
                 ],
               },
               ...filterForFeatureAvailability(
@@ -503,6 +504,7 @@ export const createNavigationTree = ({
                     { link: 'management:anomaly_detection' },
                     { link: 'management:analytics' },
                     { link: 'management:trained_models' },
+                    { link: 'management:supplied_configurations' },
                   ],
                 },
                 overviewAvailable
