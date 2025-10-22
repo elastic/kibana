@@ -9,10 +9,15 @@ import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/onechat-common';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition, ModelProvider } from '@kbn/onechat-server';
-import type { IScopedClusterClient, Logger } from '@kbn/core/server';
+import type { CoreSetup, IScopedClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { encode } from 'gpt-tokenizer';
 import { orderBy } from 'lodash';
 import { MessageRole } from '@kbn/inference-common';
+import { getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
+import type {
+  ObservabilityAgentPluginStart,
+  ObservabilityAgentPluginStartDependencies,
+} from '../types';
 
 export const OBSERVABILITY_RECALL_KNOWLEDGE_BASE_TOOL_ID = 'observability.recall_knowledge_base';
 
@@ -49,14 +54,20 @@ const recallKnowledgeBaseSchema = z.object({
   query: z.string().min(1).describe('The search query to find relevant knowledge base entries.'),
 });
 
-export async function createObservabilityRecallKnowledgeBaseTool({ logger }: { logger: Logger }) {
+export async function createObservabilityRecallKnowledgeBaseTool({
+  core,
+  logger,
+}: {
+  core: CoreSetup<ObservabilityAgentPluginStartDependencies, ObservabilityAgentPluginStart>;
+  logger: Logger;
+}) {
   const toolDefinition: BuiltinToolDefinition<typeof recallKnowledgeBaseSchema> = {
     id: OBSERVABILITY_RECALL_KNOWLEDGE_BASE_TOOL_ID,
     type: ToolType.builtin,
     description: `Search the observability knowledge base for documentation, guides, custom organizational knowledge, and user-specific information. This contains specialized content not accessible through other search tools, including personal user details, preferences, and context from previous interactions. Use when built-in tools don't have the needed information or when queries involve custom organizational policies, procedures, domain-specific knowledge, or personal user information not available in standard indices.`,
     schema: recallKnowledgeBaseSchema,
     tags: ['observability', 'knowledge', 'documentation', 'context'],
-    handler: async ({ query }, { esClient, modelProvider }) => {
+    handler: async ({ query }, { esClient, modelProvider, request }) => {
       try {
         const rewrittenQuery = await rewriteQuery({ query, modelProvider, logger });
 
@@ -64,7 +75,14 @@ export async function createObservabilityRecallKnowledgeBaseTool({ logger }: { l
           `Recalling from knowledge base: original="${query}", rewritten="${rewrittenQuery}"`
         );
 
-        const entries = await recallFromKnowledgeBase({ esClient, query: rewrittenQuery, logger });
+        const namespace = await getNamespaceForRequest(request, core);
+        logger.debug(`Using namespace: ${namespace}`);
+        const entries = await recallFromKnowledgeBase({
+          esClient,
+          query: rewrittenQuery,
+          namespace,
+          logger,
+        });
 
         if (entries.length === 0) {
           logger.debug('No knowledge base entries found');
@@ -175,10 +193,12 @@ EXAMPLES
 async function recallFromKnowledgeBase({
   esClient,
   query,
+  namespace,
   logger,
 }: {
   esClient: IScopedClusterClient;
   query: string;
+  namespace: string;
   logger: Logger;
 }): Promise<RecalledEntry[]> {
   try {
@@ -188,8 +208,9 @@ async function recallFromKnowledgeBase({
         bool: {
           should: [{ semantic: { field: 'semantic_text', query } }],
           filter: [
+            { term: { namespace } }, // filter by space
             { term: { public: true } }, // only public entries
-            { bool: { must_not: { term: { type: KnowledgeBaseType.UserInstruction } } } }, // only get contextual entries (exclude user instructions)
+            { bool: { must_not: { term: { type: KnowledgeBaseType.UserInstruction } } } }, // exclude user instructions
           ],
         },
       },
@@ -243,4 +264,14 @@ function filterEntriesByTokenLimit(entries: RecalledEntry[], logger: Logger): Re
   }
 
   return returnedEntries;
+}
+
+// Get the current namespace from the request
+async function getNamespaceForRequest(request: KibanaRequest, core: CoreSetup) {
+  const [coreStart] = await core.getStartServices();
+  const { serverBasePath } = coreStart.http.basePath;
+
+  const basePath = coreStart.http.basePath.get(request);
+  const { spaceId } = getSpaceIdFromPath(basePath, serverBasePath);
+  return spaceId;
 }

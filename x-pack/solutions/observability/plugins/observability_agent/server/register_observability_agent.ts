@@ -56,6 +56,7 @@ export async function registerObservabilityAgent({
   });
 
   const observabilityRecallKnowledgeBaseTool = await createObservabilityRecallKnowledgeBaseTool({
+    core,
     logger,
   });
 
