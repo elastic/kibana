@@ -38,6 +38,7 @@ import type {
 } from '../../schema/charts/legacy_metric';
 import { getSharedChartLensStateToAPI, getSharedChartAPIToLensState } from './utils';
 import { fromColorByValueAPIToLensState, fromColorByValueLensStateToAPI } from '../coloring';
+import { isEsqlTableTypeDataset } from '../../utils';
 
 const ACCESSOR = 'metric_formula_accessor';
 const LENS_DEFAULT_LAYER_ID = 'layer_0';
@@ -79,26 +80,15 @@ function reverseBuildVisualizationState(
     throw new Error('Unsupported dataset type');
   }
 
-  let props: DeepPartial<DeepMutable<LegacyMetricState>> = generateApiLayer(layer);
-
-  if (dataset.type === 'esql' || dataset.type === 'table') {
-    const esqlLayer = layer as TextBasedLayer;
-    props = {
-      ...props,
-      metric: getValueApiColumn(visualization.accessor, esqlLayer),
-    } as LegacyMetricState;
-  } else if (dataset.type === 'dataView' || dataset.type === 'index') {
-    const formLayer = layer as FormBasedLayer;
-    const metric = operationFromColumn(
-      visualization.accessor,
-      formLayer
-    ) as LensApiAllMetricOperations;
-
-    props = {
-      ...props,
-      metric,
-    } as LegacyMetricState;
-  }
+  const props: DeepPartial<DeepMutable<LegacyMetricState>> = {
+    ...generateApiLayer(layer),
+    metric: isEsqlTableTypeDataset(dataset)
+      ? getValueApiColumn(visualization.accessor, layer as TextBasedLayer)
+      : (operationFromColumn(
+          visualization.accessor,
+          layer as FormBasedLayer
+        ) as LensApiAllMetricOperations),
+  } as LegacyMetricState;
 
   if (props.metric) {
     if (visualization.size) {
