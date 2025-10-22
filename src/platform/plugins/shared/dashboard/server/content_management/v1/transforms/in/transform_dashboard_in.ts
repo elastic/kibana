@@ -42,7 +42,6 @@ export const transformDashboardIn = ({
       query,
       tags,
       timeRange,
-      timeRestore,
       ...rest
     } = dashboardState;
 
@@ -73,8 +72,7 @@ export const transformDashboardIn = ({
         panelsJSON,
       }),
       ...(sections?.length && { sections }),
-      timeRestore,
-      ...(timeRange && timeRestore && { timeFrom: timeRange.from, timeTo: timeRange.to }),
+      ...(timeRange && { timeFrom: timeRange.from, timeTo: timeRange.to, timeRestore: true }),
       kibanaSavedObjectMeta: { searchSourceJSON },
     };
     return {

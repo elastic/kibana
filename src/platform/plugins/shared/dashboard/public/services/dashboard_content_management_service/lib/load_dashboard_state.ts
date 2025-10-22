@@ -88,7 +88,6 @@ export const loadDashboardState = async ({
   const {
     refreshInterval,
     description,
-    timeRestore,
     options,
     panels,
     filters,
@@ -104,7 +103,6 @@ export const loadDashboardState = async ({
     dashboardInput: {
       options,
       refreshInterval,
-      timeRestore,
       description,
       timeRange,
       filters,

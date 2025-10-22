@@ -18,7 +18,7 @@ import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/content_management';
 export type DashboardSettings = Required<DashboardOptions> & {
   description?: DashboardAttributes['description'];
   tags: DashboardAttributes['tags'];
-  timeRestore: DashboardAttributes['timeRestore'];
+  timeRestore: boolean;
   title: DashboardAttributes['description'];
 };
 
@@ -37,7 +37,7 @@ const comparators: StateComparators<DashboardSettings> = {
   syncColors: 'referenceEquality',
   syncCursor: 'referenceEquality',
   syncTooltips: 'referenceEquality',
-  timeRestore: 'referenceEquality',
+  timeRestore: 'skip',
   useMargins: 'referenceEquality',
   tags: 'deepEquality',
 };
@@ -47,7 +47,7 @@ function deserializeState(state: DashboardState) {
     ...state.options,
     description: state.description,
     tags: state.tags,
-    timeRestore: state.timeRestore,
+    timeRestore: Boolean(state.timeRange),
     title: state.title,
   };
 }
@@ -107,7 +107,6 @@ export function initializeSettingsManager(initialState: DashboardState) {
             return {
               ...(description && { description }),
               ...(tags && { tags }),
-              ...(typeof timeRestore === 'boolean' && { timeRestore }),
               ...(title && { title }),
               ...(options && { options }),
             };

@@ -31,7 +31,6 @@ export interface DashboardState {
   options?: DashboardAttributes['options'];
   description?: DashboardAttributes['description'];
   tags?: DashboardAttributes['tags'];
-  timeRestore: DashboardAttributes['timeRestore'];
   title: DashboardAttributes['description'];
   query?: DashboardAttributes['query'];
   filters?: DashboardAttributes['filters'];
