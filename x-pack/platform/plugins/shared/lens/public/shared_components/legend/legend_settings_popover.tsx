@@ -19,9 +19,8 @@ import {
 } from '@elastic/eui';
 import type { VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
 import { Position, LegendValue } from '@elastic/charts';
-import type { LegendSize } from '@kbn/visualizations-plugin/public';
+import type { LegendSize, XYLegendValue } from '@kbn/chart-expressions-common';
 import { useDebouncedValue } from '@kbn/visualization-utils';
-import type { XYLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import { ToolbarDivider } from '../toolbar_divider';
 import { ToolbarPopover, type ToolbarPopoverProps } from '../toolbar_popover';
 import { LegendLocationSettings } from './location/legend_location_settings';
@@ -209,7 +208,27 @@ export function shouldDisplayTable(legendValues: LegendValue[]) {
   return legendValues.some((v) => v !== LegendValue.CurrentAndLastValue);
 }
 
-export function LegendSettingsPopover<LegendStats extends LegendValue = XYLegendValue>({
+export function LegendSettingsPopover<LegendStats extends LegendValue = XYLegendValue>(
+  props: LegendSettingsPopoverProps<LegendStats>
+) {
+  const { groupPosition = 'none' } = props;
+
+  return (
+    <ToolbarPopover
+      title={i18n.translate('xpack.lens.shared.legendLabel', {
+        defaultMessage: 'Legend',
+      })}
+      type="legend"
+      groupPosition={groupPosition}
+      buttonDataTestSubj="lnsLegendButton"
+      panelStyle={PANEL_STYLE}
+    >
+      <LegendSettings {...props} />
+    </ToolbarPopover>
+  );
+}
+
+function LegendSettings<LegendStats extends LegendValue = XYLegendValue>({
   allowedLegendStats = [],
   legendOptions,
   mode,
@@ -231,7 +250,6 @@ export function LegendSettingsPopover<LegendStats extends LegendValue = XYLegend
   onNestedLegendChange = noop,
   legendStats = [],
   onLegendStatsChange = noop,
-  groupPosition = 'none',
   maxLines,
   onMaxLinesChange = noop,
   shouldTruncate,
@@ -254,15 +272,7 @@ export function LegendSettingsPopover<LegendStats extends LegendValue = XYLegend
   const showsLegendTitleSetting = shouldDisplayTable(legendStats) && !!onLegendTitleChange;
 
   return (
-    <ToolbarPopover
-      title={i18n.translate('xpack.lens.shared.legendLabel', {
-        defaultMessage: 'Legend',
-      })}
-      type="legend"
-      groupPosition={groupPosition}
-      buttonDataTestSubj="lnsLegendButton"
-      panelStyle={PANEL_STYLE}
-    >
+    <>
       <EuiFormRow
         display="columnCompressed"
         label={i18n.translate('xpack.lens.shared.legendVisibilityLabel', {
@@ -434,6 +444,6 @@ export function LegendSettingsPopover<LegendStats extends LegendValue = XYLegend
           />
         </EuiFormRow>
       )}
-    </ToolbarPopover>
+    </>
   );
 }

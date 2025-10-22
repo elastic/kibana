@@ -76,3 +76,20 @@ export const apiPublishesESQLVariables = (
     unknownApi && (unknownApi as PublishesESQLVariables)?.esqlVariables$ !== undefined
   );
 };
+
+interface HasVariableName {
+  variableName: string;
+}
+
+/**
+ * Type guard to check if a control state object has a variable name property.
+ * @param controlState - The control state object to check
+ * @returns True if the control state has a defined variableName property
+ */
+export const controlHasVariableName = (controlState: unknown): controlState is HasVariableName => {
+  return Boolean(
+    controlState &&
+      (controlState as HasVariableName)?.variableName !== undefined &&
+      typeof (controlState as HasVariableName).variableName === 'string'
+  );
+};

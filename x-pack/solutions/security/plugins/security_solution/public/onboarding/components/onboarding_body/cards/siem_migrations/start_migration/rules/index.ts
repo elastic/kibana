@@ -6,19 +6,17 @@
  */
 
 import React from 'react';
+import { IconRules } from '../../../../../../../common/icons/rules';
 import type { OnboardingCardConfig } from '../../../../../../types';
 import { OnboardingCardId } from '../../../../../../constants';
 import { START_MIGRATION_CARD_TITLE } from './translations';
 import type { StartMigrationCardMetadata } from '../common/types';
 import { checkStartMigrationCardComplete } from './start_migration_check_complete';
-import startMigrationIcon from '../images/start_migration_icon.png';
-import startMigrationDarkIcon from '../images/start_migration_icon_dark.png';
 
 export const startRuleMigrationCardConfig: OnboardingCardConfig<StartMigrationCardMetadata> = {
   id: OnboardingCardId.siemMigrationsRules,
   title: START_MIGRATION_CARD_TITLE,
-  icon: startMigrationIcon,
-  iconDark: startMigrationDarkIcon,
+  icon: IconRules,
   Component: React.lazy(
     () =>
       import(

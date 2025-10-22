@@ -6,13 +6,15 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+// TODO: Remove the eslint-disable comments to use the proper types.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { WorkflowInputSchema, WorkflowYaml } from '@kbn/workflows';
-import React, { useCallback, useEffect, useMemo } from 'react';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
-import { z } from '@kbn/zod';
 import { i18n } from '@kbn/i18n';
+import type { WorkflowInputSchema, WorkflowYaml } from '@kbn/workflows';
+import { z } from '@kbn/zod';
 
 const makeWorkflowInputsValidator = (inputs: Array<z.infer<typeof WorkflowInputSchema>>) => {
   return z.object(

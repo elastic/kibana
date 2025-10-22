@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { I18nProviderMock } from '@kbn/core-i18n-browser-mocks/src/i18n_context_mock';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import { I18nProviderMock } from '@kbn/core-i18n-browser-mocks/src/i18n_context_mock';
 import type { WorkflowYAMLEditorProps } from './workflow_yaml_editor';
 import { WorkflowYAMLEditor } from './workflow_yaml_editor';
 import { WorkflowEditorStoreProvider } from '../lib/store';
@@ -53,24 +54,51 @@ jest.mock('./workflow_yaml_validation_errors', () => ({
   WorkflowYAMLValidationErrors: () => null,
 }));
 
+// Mock the useAvailableConnectors hook
+jest.mock('../../../entities/connectors/model/use_available_connectors', () => ({
+  useAvailableConnectors: () => ({
+    data: {
+      connectorTypes: {},
+      totalConnectors: 0,
+    },
+    isLoading: false,
+    error: null,
+    refetch: jest.fn(),
+  }),
+}));
+
 describe('WorkflowYAMLEditor', () => {
+  let queryClient: QueryClient;
+
   const defaultProps: WorkflowYAMLEditorProps = {
     value: '',
     workflowId: 'test-workflow',
+    onSave: jest.fn(),
+    onRun: jest.fn(),
+    onSaveAndRun: jest.fn(),
   };
 
   const renderWithI18n = (component: React.ReactElement) => {
     return render(
       <MemoryRouter>
-        <I18nProviderMock>
-          <WorkflowEditorStoreProvider>{component}</WorkflowEditorStoreProvider>
-        </I18nProviderMock>
+        <QueryClientProvider client={queryClient}>
+          <I18nProviderMock>
+            <WorkflowEditorStoreProvider>{component}</WorkflowEditorStoreProvider>
+          </I18nProviderMock>
+        </QueryClientProvider>
       </MemoryRouter>
     );
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
+    queryClient = new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+        },
+      },
+    });
   });
 
   it('renders without crashing', () => {

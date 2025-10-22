@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { I18nProviderMock } from '@kbn/core-i18n-browser-mocks/src/i18n_context_mock';
 import { render } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import type { CoreStart } from '@kbn/core/public';
+import { I18nProviderMock } from '@kbn/core-i18n-browser-mocks/src/i18n_context_mock';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { WorkflowDetailHeaderProps } from './workflow_detail_header';
 import { WorkflowDetailHeader } from './workflow_detail_header';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { mockUiSettingsService } from '../../../shared/mocks/mock_ui_settings_service';
-import type { CoreStart } from '@kbn/core/public';
 
 const services = {
   settings: {
@@ -35,7 +35,6 @@ describe('WorkflowDetailHeader', () => {
     handleSave: () => {},
     isEnabled: true,
     handleToggleWorkflow: () => {},
-    canTestWorkflow: true,
     isValid: true,
     hasUnsavedChanges: false,
     highlightDiff: false,
