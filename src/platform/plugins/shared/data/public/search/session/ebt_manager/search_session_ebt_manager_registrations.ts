@@ -100,12 +100,6 @@ export const registerSearchSessionEBTManagerAnalytics = (core: CoreSetup) => {
           description: 'The HTTP status code returned by the search request.',
         },
       },
-      error_code: {
-        type: 'keyword',
-        _meta: {
-          description: 'The type of error that occurred during the background search.',
-        },
-      },
     },
   });
 
