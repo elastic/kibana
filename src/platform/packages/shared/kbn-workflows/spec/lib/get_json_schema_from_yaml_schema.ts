@@ -12,20 +12,14 @@ import { zodToJsonSchema } from 'zod-to-json-schema';
 import type { z } from '@kbn/zod';
 
 export function getJsonSchemaFromYamlSchema(yamlSchema: z.ZodType): JsonSchema7Type {
-  // eslint-disable-next-line no-useless-catch
-  try {
-    // Generate the full schema - this should work and give us the full schema
-    const jsonSchema = zodToJsonSchema(yamlSchema, {
-      name: 'WorkflowSchema',
-      target: 'jsonSchema7',
-    });
+  // Generate the json schema from zod schema
+  const jsonSchema = zodToJsonSchema(yamlSchema, {
+    name: 'WorkflowSchema',
+    target: 'jsonSchema7',
+  });
 
-    // Apply targeted fixes to make it valid for JSON Schema validators
-    return fixBrokenSchemaReferencesAndEnforceStrictValidation(jsonSchema);
-  } catch (error) {
-    // console.error('Schema generation failed:', error.message);
-    throw error; // Don't use fallback - we need to fix the root cause
-  }
+  // Apply targeted fixes to make it valid for JSON Schema validators
+  return fixBrokenSchemaReferencesAndEnforceStrictValidation(jsonSchema);
 }
 
 /**
@@ -47,7 +41,7 @@ function fixAdditionalPropertiesInSchema(obj: any, path: string = '', visited = 
     return;
   }
 
-  // Fix objects with type: "object" to have additionalProperties: false
+  // For objects with type: "object", which don't have additionalProperties, set it to false
   if (obj.type === 'object' && !('additionalProperties' in obj)) {
     obj.additionalProperties = false;
   }
@@ -175,26 +169,13 @@ function fixBrokenSchemaReferencesAndEnforceStrictValidation(schema: any): any {
 
   // Enforce strict validation: ensure all objects have additionalProperties: false
   // This fixes the main issue where Kibana connectors were too permissive
-  // BUT: Don't force additionalProperties: false on simplified broken reference objects
-
-  // First, replace any existing "additionalProperties": true with false
-  //   fixedSchemaString = fixedSchemaString.replace(
-  //     /"additionalProperties":\s*true/g,
-  //     '"additionalProperties": false'
-  //   );
-
-  // Then, add additionalProperties: false to objects that don't have it
-  // Use the proper function to handle this recursively
   try {
     const tempSchema = JSON.parse(fixedSchemaString);
     fixAdditionalPropertiesInSchema(tempSchema);
     fixedSchemaString = JSON.stringify(tempSchema);
   } catch (parseError) {
-    // If parsing fails, fall back to the simple regex approach
-    fixedSchemaString = fixedSchemaString.replace(
-      /"type":\s*"object"(?![^}]*"additionalProperties")/g,
-      '"type": "object", "additionalProperties": false'
-    );
+    // If parsing fails, throw an error, since replacing with regexp isn't safe
+    throw new Error('Failed to fix additionalProperties in json schema');
   }
 
   try {
