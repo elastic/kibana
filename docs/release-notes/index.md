@@ -37,7 +37,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 For the Elastic Security 9.1.6 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
 
 **Kibana security**:
-* Enhanced the error message to include detailed information about why the role is considered malformed [#239098]({{kib-pull}}239098).
+* Enhances error message by explaining why the role is considered malformed [#239098]({{kib-pull}}239098).
 
 
 ### Fixes [kibana-9.1.6-fixes]
