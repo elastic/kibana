@@ -49,7 +49,7 @@ export interface TabbedContentProps
   hideTabsBar?: boolean;
   renderContent: (selectedItem: TabItem) => React.ReactNode;
   createItem: () => TabItem;
-  createItemElement?: React.ReactElement;
+  customNewTabButton?: React.ReactElement;
   onChanged: (state: TabbedContentState) => void;
   getPreviewData: (item: TabItem) => TabPreviewData;
   onEBTEvent: (event: TabsEBTEvent) => void;
@@ -74,7 +74,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   onClearRecentlyClosed,
   getPreviewData,
   onEBTEvent,
-  createItemElement,
+  customNewTabButton,
   disableInlineLabelEditing = false,
   disablePreview = false,
   disableDragAndDrop = false,
@@ -347,7 +347,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
             onClose={onClose}
             getPreviewData={getPreviewData}
             onEBTEvent={onEBTEvent}
-            createItemElement={createItemElement}
+            customNewTabButton={customNewTabButton}
             disableInlineLabelEditing={disableInlineLabelEditing}
             disablePreview={disablePreview}
             disableDragAndDrop={disableDragAndDrop}

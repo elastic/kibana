@@ -75,7 +75,7 @@ export type TabsBarProps = Pick<
   onReorder: (items: TabItem[], movedTabId: string) => void;
   onEBTEvent: (event: TabsEBTEvent) => void;
   onClearRecentlyClosed: TabsBarMenuProps['onClearRecentlyClosed'];
-  createItemElement?: React.ReactElement;
+  customNewTabButton?: React.ReactElement;
   disableTabsBarMenu?: boolean; // defaults to `true`
 };
 
@@ -103,7 +103,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
       onClose,
       getPreviewData,
       onEBTEvent,
-      createItemElement,
+      customNewTabButton,
       disableInlineLabelEditing = false,
       disablePreview = false,
       disableDragAndDrop = false,
@@ -326,7 +326,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
             {!!scrollRightButton && <EuiFlexItem grow={false}>{scrollRightButton}</EuiFlexItem>}
             {!hasReachedMaxItemsCount && (
               <EuiFlexItem grow={false}>
-                {!createItemElement && (
+                {!customNewTabButton && (
                   <EuiToolTip content={addButtonLabel} disableScreenReaderOutput>
                     <EuiButtonIcon
                       data-test-subj="unifiedTabs_tabsBar_newTabBtn"
@@ -337,7 +337,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
                     />
                   </EuiToolTip>
                 )}
-                {createItemElement ?? null}
+                {customNewTabButton ?? null}
               </EuiFlexItem>
             )}
           </EuiFlexGroup>

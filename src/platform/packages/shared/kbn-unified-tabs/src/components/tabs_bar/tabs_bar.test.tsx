@@ -94,11 +94,11 @@ describe('TabsBar', () => {
     expect(onClose).not.toHaveBeenCalled();
   });
 
-  it('renders createItemElement when provided', () => {
+  it('renders customNewTabButton when provided', () => {
     const selectedItem = items[0];
 
     const customElementClickHandler = jest.fn();
-    const createItemElement = (
+    const customNewTabButton = (
       <button data-test-subj="custom-create-item-button" onClick={customElementClickHandler}>
         Custom Create Item
       </button>
@@ -120,7 +120,7 @@ describe('TabsBar', () => {
         onReorder={onReorder}
         getPreviewData={getPreviewData}
         onEBTEvent={onEBTEvent}
-        createItemElement={createItemElement}
+        customNewTabButton={customNewTabButton}
       />
     );
 
@@ -129,7 +129,7 @@ describe('TabsBar', () => {
     expect(customButton).toBeInTheDocument();
     expect(customButton).toHaveTextContent('Custom Create Item');
 
-    // Verify default add button is not rendered when createItemElement is provided
+    // Verify default add button is not rendered when customNewTabButton is provided
     const defaultAddButton = screen.queryByTestId('unifiedTabs_tabsBar_newTabBtn');
     expect(defaultAddButton).not.toBeInTheDocument();
 
