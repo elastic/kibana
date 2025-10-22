@@ -272,8 +272,11 @@ The URL is an identifier only. Kibana and your browser will never access this UR
       }
     }
     this.vlspec = this.spec;
-    const vegaLogger = logger(Warn); // note: eslint has a false positive here
-    vegaLogger.warn = this._onWarning.bind(this);
+    const vegaLogger = logger(Warn);
+    vegaLogger.warn = (...args) => {
+      this._onWarning(...args);
+      return vegaLogger;
+    };
     this.spec = compile(this.vlspec as TopLevelSpec, { logger: vegaLogger }).spec;
 
     // When using Vega-Lite (VL) with the type=map and user did not provid their own projection settings,
@@ -776,8 +779,8 @@ The URL is an identifier only. Kibana and your browser will never access this UR
    */
   _onWarning(...args: any[]) {
     if (!this.hideWarnings) {
-      this.warnings.push(Utils.formatWarningToStr(args));
-      return Utils.formatWarningToStr(args);
+      this.warnings.push(Utils.formatWarningToStr(...args));
+      return Utils.formatWarningToStr(...args);
     }
   }
 }

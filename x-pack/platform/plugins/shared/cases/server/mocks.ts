@@ -763,11 +763,6 @@ export const mockCasesContract = (): CasesServerStart => ({
         enabled: true,
       },
     },
-    resilient: {
-      additionalFields: {
-        enabled: true,
-      },
-    },
     incrementalId: {
       enabled: true,
       taskIntervalMinutes: 10,

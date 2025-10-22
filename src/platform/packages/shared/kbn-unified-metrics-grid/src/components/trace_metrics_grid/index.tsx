@@ -8,14 +8,9 @@
  */
 import { EuiFlexGrid, EuiFlexItem, EuiPanel, euiPaletteColorBlind } from '@elastic/eui';
 import { css } from '@emotion/react';
-import {
-  DiscoverFlyouts,
-  dismissAllFlyoutsExceptFor,
-  type TraceIndexes,
-} from '@kbn/discover-utils/src';
 import { useFetch } from '@kbn/unified-histogram';
 import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Provider } from 'react-redux';
 import { Subject } from 'rxjs';
 import { TraceMetricsProvider } from '../../context/trace_metrics_context';
@@ -38,14 +33,13 @@ function TraceMetricsGrid({
   onBrushEnd,
   onFilter,
   abortController,
-  indexes,
   query,
   dataSource,
   renderToggleActions,
   chartToolbarCss,
   isComponentVisible,
+  dataView,
 }: ChartSectionProps & {
-  indexes: TraceIndexes;
   dataSource: DataSource;
 }) {
   const esqlQuery = useEsqlQueryInfo({
@@ -75,30 +69,16 @@ function TraceMetricsGrid({
     beforeFetch: updateTimeRange,
   });
 
-  useEffect(() => {
-    const handleClick = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
+  const indexPattern = dataView?.getIndexPattern();
 
-      if (target.closest('[data-test-subj="embeddablePanelAction-openInspector"]')) {
-        dismissAllFlyoutsExceptFor(DiscoverFlyouts.inspectorPanel);
-      }
-    };
-
-    document.addEventListener('click', handleClick);
-
-    return () => {
-      document.removeEventListener('click', handleClick);
-    };
-  }, []);
-
-  if (!indexes.apm.traces) {
+  if (!indexPattern) {
     return undefined;
   }
 
   return (
     <Provider store={store}>
       <MetricsGridWrapper
-        indexPattern={indexes.apm.traces}
+        indexPattern={indexPattern}
         renderToggleActions={renderToggleActions}
         chartToolbarCss={chartToolbarCss}
         requestParams={requestParams}
@@ -110,7 +90,7 @@ function TraceMetricsGrid({
         <TraceMetricsProvider
           value={{
             dataSource,
-            indexes: indexes.apm.traces,
+            indexes: indexPattern,
             filters,
             requestParams,
             services,
