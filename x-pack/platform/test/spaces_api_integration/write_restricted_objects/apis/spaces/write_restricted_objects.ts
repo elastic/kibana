@@ -8,7 +8,10 @@ import { parse as parseCookie } from 'tough-cookie';
 
 import expect from '@kbn/expect';
 import { adminTestUser } from '@kbn/test';
-import { ACCESS_CONTROL_TYPE, NON_ACCESS_CONTROL_TYPE } from '@kbn/write-restricted-objects-test-plugin/server';
+import {
+  ACCESS_CONTROL_TYPE,
+  NON_ACCESS_CONTROL_TYPE,
+} from '@kbn/write-restricted-objects-test-plugin/server';
 
 import type { FtrProviderContext } from '../../../../functional/ftr_provider_context';
 
@@ -510,7 +513,10 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(403);
 
         expect(res.body).to.have.property('error', 'Forbidden');
-        expect(res.body).to.have.property('message', `Unable to bulk_create ${ACCESS_CONTROL_TYPE}`);
+        expect(res.body).to.have.property(
+          'message',
+          `Unable to bulk_create ${ACCESS_CONTROL_TYPE}`
+        );
 
         // ToDo: read back objects and confirm the owner has not changed
         const getResponse = await supertestWithoutAuth
