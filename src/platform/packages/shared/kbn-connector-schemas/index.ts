@@ -8,6 +8,7 @@
  */
 
 export { CONNECTOR_ID as CasesWebhookConnectorTypeId } from './cases_webhook';
+export { CONNECTOR_ID as D3SecurityConnectorTypeId } from './d3security';
 export { CONNECTOR_ID as EmailConnectorTypeId } from './email';
 export { CONNECTOR_ID as EsIndexConnectorTypeId } from './es_index';
 export { CONNECTOR_ID as JiraConnectorTypeId } from './jira';
