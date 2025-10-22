@@ -122,23 +122,17 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           });
           expect(focusedTraceResponse?.status).to.be(200);
           focusedTrace = focusedTraceResponse?.body;
-          rootTransactionId = focusedTrace?.traceItems?.rootDoc?.id;
+          rootTransactionId = focusedTrace?.traceParentChildrenMap?.root?.[0].id;
         });
 
         describe('focus on root transaction', () => {
           it('returns same root transaction and focused item', async () => {
-            expect(focusedTrace?.traceItems?.rootDoc?.id).to.eql(
-              focusedTrace?.traceItems?.focusedTraceDoc?.id
-            );
+            expect(focusedTrace?.highlightId).to.eql(rootTransactionId);
           });
 
-          it('does not have parent item', () => {
-            expect(focusedTrace?.traceItems?.parentDoc).to.be(undefined);
-          });
-
-          it('has 2 children', () => {
-            expect(focusedTrace?.traceItems?.focusedTraceTree.length).to.eql(1);
-            expect(focusedTrace?.traceItems?.focusedTraceTree?.[0]?.children?.length).to.eql(1);
+          it('has 3 spans', () => {
+            expect(focusedTrace?.traceItems?.length).to.eql(3);
+            expect(focusedTrace?.traceParentChildrenMap?.[rootTransactionId!]?.length).to.eql(1);
           });
 
           it('returns trace summary', () => {
@@ -154,9 +148,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           let nodeParentSpanId: string | undefined;
           let nodeTransactionId: string | undefined;
           before(async () => {
-            nodeParentSpanId = focusedTrace?.traceItems?.focusedTraceTree?.[0]?.traceDoc?.id;
-            nodeTransactionId =
-              focusedTrace?.traceItems?.focusedTraceTree?.[0]?.children?.[0]?.traceDoc?.id;
+            nodeParentSpanId = focusedTrace?.traceItems?.[0].id;
+            nodeTransactionId = focusedTrace?.traceParentChildrenMap?.[nodeParentSpanId!][0].id;
             const focusedTraceResponse = await fetchFocusedTrace({
               traceId,
               docId: nodeTransactionId,
@@ -166,20 +159,16 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           });
 
           it('focus on node transaction', () => {
-            expect(focusedTrace?.traceItems?.focusedTraceDoc?.id).to.eql(nodeTransactionId);
+            expect(focusedTrace?.highlightId).to.eql(nodeTransactionId);
           });
 
           it('returns root transaction', async () => {
-            expect(focusedTrace?.traceItems?.rootDoc?.id).to.eql(rootTransactionId);
+            expect(focusedTrace?.traceParentChildrenMap?.root[0].id).to.eql(rootTransactionId);
           });
 
-          it('returns parent span', () => {
-            expect(focusedTrace?.traceItems?.parentDoc?.id).to.eql(nodeParentSpanId);
-          });
-
-          it('has 2 children', () => {
-            expect(focusedTrace?.traceItems?.focusedTraceTree.length).to.eql(1);
-            expect(focusedTrace?.traceItems?.focusedTraceTree?.[0]?.children?.length).to.eql(1);
+          it('has 4 spans', () => {
+            expect(focusedTrace?.traceItems?.length).to.eql(4);
+            expect(focusedTrace?.traceParentChildrenMap?.[nodeTransactionId!]?.length).to.eql(1);
           });
         });
 
@@ -202,7 +191,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           });
 
           it('returns empty focused trace', () => {
-            expect(focusedTrace?.traceItems).to.be(undefined);
+            expect(focusedTrace?.traceItems).to.eql([]);
           });
         });
 
@@ -225,7 +214,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           });
 
           it('returns empty focused trace', () => {
-            expect(focusedTrace?.traceItems).to.be(undefined);
+            expect(focusedTrace?.traceItems).to.eql([]);
           });
         });
       });
