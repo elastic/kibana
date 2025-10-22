@@ -268,6 +268,7 @@ describe('Cloud Plugin', () => {
       });
 
       const coreStart = coreMock.createStart();
+      coreStart.http.get.mockResolvedValue({});
       plugin.start(coreStart);
 
       expect(coreStart.chrome.setHelpSupportUrl).toHaveBeenCalledTimes(1);
@@ -295,6 +296,7 @@ describe('Cloud Plugin', () => {
           serverless: undefined,
         });
         const coreStart = coreMock.createStart();
+        coreStart.http.get.mockResolvedValue({});
         const start = plugin.start(coreStart);
         expect(start.isServerlessEnabled).toBe(false);
       });

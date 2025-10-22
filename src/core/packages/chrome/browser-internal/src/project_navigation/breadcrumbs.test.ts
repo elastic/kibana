@@ -50,7 +50,6 @@ describe('buildBreadcrumbs', () => {
       ],
     ] as ChromeProjectNavigationNode[][];
     const result = buildBreadcrumbs({
-      kibanaName: 'Test Project',
       cloudLinks: mockCloudLinks,
       projectBreadcrumbs: { breadcrumbs: [], params: { absolute: false } },
       activeNodes,
@@ -79,7 +78,6 @@ describe('buildBreadcrumbs', () => {
       { text: 'Chrome Crumb 2', href: '/chrome2' },
     ] as ChromeBreadcrumb[];
     const result = buildBreadcrumbs({
-      kibanaName: 'Test Project',
       cloudLinks: mockCloudLinks,
       projectBreadcrumbs: { breadcrumbs: [], params: { absolute: false } },
       activeNodes,
