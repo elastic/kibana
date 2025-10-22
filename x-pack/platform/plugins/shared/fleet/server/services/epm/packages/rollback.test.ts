@@ -9,13 +9,17 @@ import { PACKAGES_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '..
 import { agentPolicyService, appContextService, packagePolicyService } from '../..';
 import type { PackagePolicyClient } from '../../package_policy_service';
 
+import { sendTelemetryEvents } from '../../upgrade_sender';
+
 import { installPackage } from './install';
-import { rollbackInstallation } from './rollback';
+import { isIntegrationRollbackTTLExpired, rollbackInstallation } from './rollback';
 
 jest.mock('../..', () => ({
   appContextService: {
-    getLogger: jest.fn().mockReturnValue({ info: jest.fn() } as any),
+    getLogger: jest.fn().mockReturnValue({ info: jest.fn(), debug: jest.fn() } as any),
     getInternalUserSOClientWithoutSpaceExtension: jest.fn(),
+    getTelemetryEventsSender: jest.fn(),
+    getConfig: jest.fn().mockReturnValue({}),
   },
   packagePolicyService: {
     getPackagePolicySavedObjects: jest.fn(),
@@ -31,6 +35,8 @@ jest.mock('../..', () => ({
 
 jest.mock('../../audit_logging');
 
+jest.mock('../../upgrade_sender');
+
 const packagePolicyServiceMock = packagePolicyService as jest.Mocked<PackagePolicyClient>;
 const agentPolicyServiceMock = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
 
@@ -39,6 +45,8 @@ const pkgName = 'test-package';
 const oldPkgVersion = '1.0.0';
 const newPkgVersion = '1.5.0';
 const spaceId = 'default';
+
+const sendTelemetryEventsMock = sendTelemetryEvents as jest.Mock;
 
 jest.mock('./install', () => ({
   installPackage: jest.fn(),
@@ -94,6 +102,28 @@ describe('rollbackInstallation', () => {
     await expect(
       rollbackInstallation({ esClient, currentUserPolicyIds: [], pkgName, spaceId })
     ).rejects.toThrow('test-package was not installed from the registry (install source: upload)');
+  });
+
+  it('should throw an error if TTL expired', async () => {
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue({
+      find: jest.fn().mockResolvedValue({
+        saved_objects: [
+          {
+            id: pkgName,
+            type: PACKAGES_SAVED_OBJECT_TYPE,
+            attributes: {
+              install_source: 'registry',
+              previous_version: oldPkgVersion,
+              install_started_at: '2023-01-01T00:00:00Z',
+            },
+          },
+        ],
+      }),
+    });
+
+    await expect(
+      rollbackInstallation({ esClient, currentUserPolicyIds: [], pkgName, spaceId })
+    ).rejects.toThrow('Rollback not allowed as TTL expired');
   });
 
   it('should throw an error if at least one package policy does not have a previous version', async () => {
@@ -190,7 +220,11 @@ describe('rollbackInstallation', () => {
           {
             id: pkgName,
             type: PACKAGES_SAVED_OBJECT_TYPE,
-            attributes: { install_source: 'registry', previous_version: oldPkgVersion },
+            attributes: {
+              install_source: 'registry',
+              previous_version: oldPkgVersion,
+              version: newPkgVersion,
+            },
           },
         ],
       }),
@@ -245,6 +279,14 @@ describe('rollbackInstallation', () => {
     expect(packagePolicyServiceMock.restoreRollback).toHaveBeenCalled();
     expect(packagePolicyServiceMock.cleanupRollbackSavedObjects).not.toHaveBeenCalled();
     expect(packagePolicyServiceMock.bumpAgentPolicyRevisionAfterRollback).not.toHaveBeenCalled();
+    expect(sendTelemetryEventsMock).toHaveBeenCalledWith(expect.anything(), undefined, {
+      packageName: pkgName,
+      currentVersion: newPkgVersion,
+      newVersion: oldPkgVersion,
+      status: 'failure',
+      eventType: 'package-rollback',
+      errorMessage: 'Failed to rollback package test-package to version 1.0.0: Installation failed',
+    });
   });
 
   it('should rollback package policies and install the package on the previous version', async () => {
@@ -255,7 +297,11 @@ describe('rollbackInstallation', () => {
           {
             id: pkgName,
             type: PACKAGES_SAVED_OBJECT_TYPE,
-            attributes: { install_source: 'registry', previous_version: oldPkgVersion },
+            attributes: {
+              install_source: 'registry',
+              previous_version: oldPkgVersion,
+              version: newPkgVersion,
+            },
           },
         ],
       }),
@@ -306,6 +352,14 @@ describe('rollbackInstallation', () => {
     expect(packagePolicyServiceMock.restoreRollback).not.toHaveBeenCalled();
     expect(packagePolicyServiceMock.cleanupRollbackSavedObjects).toHaveBeenCalled();
     expect(packagePolicyServiceMock.bumpAgentPolicyRevisionAfterRollback).toHaveBeenCalled();
+    expect(sendTelemetryEventsMock).toHaveBeenCalledWith(expect.anything(), undefined, {
+      packageName: pkgName,
+      currentVersion: newPkgVersion,
+      newVersion: oldPkgVersion,
+      status: 'success',
+      eventType: 'package-rollback',
+      errorMessage: undefined,
+    });
   });
 
   it('should throw error on rollback when package policy is managed', async () => {
@@ -409,5 +463,37 @@ describe('rollbackInstallation', () => {
     await expect(
       rollbackInstallation({ esClient, currentUserPolicyIds: [], pkgName, spaceId })
     ).rejects.toThrow('Not authorized to rollback integration policies in all spaces');
+  });
+});
+
+describe('isIntegrationRollbackTTLExpired', () => {
+  it('should return true if integration rollback TTL is expired', () => {
+    const installStartedAt = new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(); // 8 days ago
+    const isExpired = isIntegrationRollbackTTLExpired(installStartedAt);
+    expect(isExpired).toBe(true);
+  });
+
+  it('should return false if integration rollback TTL is not expired', () => {
+    const installStartedAt = new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(); // 6 days ago
+    const isExpired = isIntegrationRollbackTTLExpired(installStartedAt);
+    expect(isExpired).toBe(false);
+  });
+
+  it('should return true if integration rollback TTL is expired with changed config', () => {
+    (appContextService.getConfig as jest.Mock).mockReturnValue({
+      integrationRollbackTTL: '1h',
+    });
+    const installStartedAt = new Date(Date.now() - 60 * 60 * 1000 - 100).toISOString();
+    const isExpired = isIntegrationRollbackTTLExpired(installStartedAt);
+    expect(isExpired).toBe(true);
+  });
+
+  it('should return false if integration rollback TTL is not expired with changed config', () => {
+    (appContextService.getConfig as jest.Mock).mockReturnValue({
+      integrationRollbackTTL: '1h',
+    });
+    const installStartedAt = new Date(Date.now() - 60 * 60 * 1000 + 100).toISOString();
+    const isExpired = isIntegrationRollbackTTLExpired(installStartedAt);
+    expect(isExpired).toBe(false);
   });
 });

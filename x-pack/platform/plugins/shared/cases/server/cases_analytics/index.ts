@@ -18,14 +18,14 @@ import type {
 import { OWNERS } from '../../common/constants';
 import type { CasesServerStartDependencies } from '../types';
 import { registerCAIBackfillTask } from './tasks/backfill_task';
-import { registerCAISynchronizationTask } from './tasks/synchronization_task';
 import {
-  createAttachmentsAnalyticsIndex,
-  scheduleAttachmentsAnalyticsSyncTask,
-} from './attachments_index';
-import { createCasesAnalyticsIndex, scheduleCasesAnalyticsSyncTask } from './cases_index';
-import { createCommentsAnalyticsIndex, scheduleCommentsAnalyticsSyncTask } from './comments_index';
-import { createActivityAnalyticsIndex, scheduleActivityAnalyticsSyncTask } from './activity_index';
+  registerCAISynchronizationTask,
+  scheduleCAISynchronizationTask,
+} from './tasks/synchronization_task';
+import { createAttachmentsAnalyticsIndex } from './attachments_index';
+import { createCasesAnalyticsIndex } from './cases_index';
+import { createCommentsAnalyticsIndex } from './comments_index';
+import { createActivityAnalyticsIndex } from './activity_index';
 import type { ConfigType } from '../config';
 import { getAllSpacesWithCases } from './utils';
 import { registerCAISchedulerTask } from './tasks/scheduler_task';
@@ -147,10 +147,7 @@ export const scheduleCasesAnalyticsSyncTasks = ({
   spaceId: string;
 }) => {
   for (const owner of OWNERS) {
-    scheduleActivityAnalyticsSyncTask({ taskManager, logger, spaceId, owner });
-    scheduleCasesAnalyticsSyncTask({ taskManager, logger, spaceId, owner });
-    scheduleCommentsAnalyticsSyncTask({ taskManager, logger, spaceId, owner });
-    scheduleAttachmentsAnalyticsSyncTask({ taskManager, logger, spaceId, owner });
+    void scheduleCAISynchronizationTask({ taskManager, logger, spaceId, owner });
   }
 };
 

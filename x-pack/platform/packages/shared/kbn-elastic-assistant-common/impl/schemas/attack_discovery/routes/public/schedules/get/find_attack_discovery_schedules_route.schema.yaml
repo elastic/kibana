@@ -11,15 +11,14 @@ paths:
           label: Example request
           source: |
             curl \
-             --request GET 'http://localhost:5601/api/attack_discovery/schedules/_find?page=1&per_page=10&sort_field=name&sort_direction=asc' \
+             --request GET 'http://localhost:5601/api/attack_discovery/schedules/_find' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
       x-labels: [ess, serverless]
       operationId: FindAttackDiscoverySchedules
+      x-state: Technical Preview; added in 9.2.0
       summary: Finds Attack discovery schedules that match the search criteria
-      description: Finds Attack discovery schedules that match the search criteria. Supports pagination and sorting by various fields.
-      tags:
-        - Attack discovery API
+      description: Finds Attack discovery schedules that match the search criteria. Supports pagination and sorting by various fields. `Technical preview`
       parameters:
         - name: page
           description: Page number to return (used for pagination). Defaults to 1.

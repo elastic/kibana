@@ -119,7 +119,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   }
 
   /**
-   * responsible for making a esClient inference method to perform chat completetion task endpoint and returning the service response data
+   * responsible for making a esClient inference method to perform chat completion task endpoint and returning the service response data
    * @param input the text on which you want to perform the inference task.
    * @signal abort signal
    */
@@ -182,7 +182,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   }
 
   /**
-   * responsible for making a esClient inference method to perform chat completetion task endpoint and returning the service response data
+   * responsible for making a esClient inference method to perform chat completion task endpoint and returning the service response data
    * @param input the text on which you want to perform the inference task.
    * @signal abort signal
    */

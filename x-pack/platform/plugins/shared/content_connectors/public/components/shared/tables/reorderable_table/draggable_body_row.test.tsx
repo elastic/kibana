@@ -50,8 +50,12 @@ describe('DraggableBodyRow', () => {
     // It adds an index and unique draggable id from the provided rowIndex
     expect(euiDraggable.prop('index')).toEqual(1);
     expect(euiDraggable.prop('draggableId')).toEqual('draggable_row_1');
+    expect(euiDraggable.prop('customDragHandle')).toBe(true);
+    expect(euiDraggable.prop('hasInteractiveChildren')).toBe(true);
 
-    const bodyRow = wrapper.find(BodyRow);
+    const childrenFn = euiDraggable.prop('children');
+    const bodyRowWrapper = shallow(<div>{childrenFn({ dragHandleProps: {} })}</div>);
+    const bodyRow = bodyRowWrapper.find(BodyRow);
     expect(bodyRow.exists()).toEqual(true);
     expect(bodyRow.props()).toEqual(expect.objectContaining({ columns, item, additionalProps }));
     const leftAction = shallow(<div>{bodyRow.prop('leftAction')}</div>);
@@ -65,6 +69,6 @@ describe('DraggableBodyRow', () => {
 
     const euiDraggable = wrapper.find(EuiDraggable);
     expect(euiDraggable.prop('isDragDisabled')).toBe(true);
-    expect(euiDraggable.prop('disableInteractiveElementBlocking')).toBe(true);
+    expect(euiDraggable.prop('customDragHandle')).toBe(false);
   });
 });

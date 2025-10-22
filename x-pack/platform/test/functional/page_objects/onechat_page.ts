@@ -5,18 +5,22 @@
  * 2.0.
  */
 
-import { last } from 'lodash';
-
+import type { ToolType } from '@kbn/onechat-common';
+import { AGENT_BUILDER_APP_ID } from '../../onechat/common/constants';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { FtrService } from '../ftr_provider_context';
 import type { LlmProxy } from '../../onechat_api_integration/utils/llm_proxy';
-import { toolCallMock } from '../../onechat_api_integration/utils/llm_proxy/mocks';
+import {
+  setupAgentDirectAnswer,
+  setupAgentCallSearchToolWithNoIndexSelectedThenAnswer,
+} from '../../onechat_api_integration/utils/proxy_scenario';
 
 export class OneChatPageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
   private readonly browser = this.ctx.getService('browser');
   private readonly common = this.ctx.getPageObject('common');
+  private readonly monacoEditor = this.ctx.getService('monacoEditor');
 
   constructor(ctx: FtrProviderContext) {
     super(ctx);
@@ -26,7 +30,7 @@ export class OneChatPageObject extends FtrService {
    * Navigate to the OneChat app
    */
   async navigateToApp(path: string = 'conversations/new') {
-    await this.common.navigateToApp('agent_builder', { path });
+    await this.common.navigateToApp(AGENT_BUILDER_APP_ID, { path });
   }
 
   /**
@@ -69,48 +73,18 @@ export class OneChatPageObject extends FtrService {
     userMessage: string,
     expectedResponse: string,
     llmProxy: LlmProxy,
-    useToolCalls: boolean = false
+    withToolCall: boolean = false
   ): Promise<string> {
     // Navigate to new conversation
     await this.navigateToApp('conversations/new');
 
-    // Set up title tool call
-    void llmProxy.interceptors.toolChoice({
-      name: 'set_title',
-      response: toolCallMock('set_title', { title }),
-    });
-
-    if (useToolCalls) {
-      // First interceptor: respond to user message with tool call
-      void llmProxy.interceptors.userMessage({
-        when: ({ messages }) => {
-          const lastMessage = last(messages)?.content as string;
-          return lastMessage?.includes(userMessage);
-        },
-        response: toolCallMock('platform_core_search', {
-          query: 'test data',
-        }),
-      });
-
-      // Second interceptor: respond to tool message with final response
-      void llmProxy.interceptors.toolMessage({
-        when: ({ messages }) => {
-          const lastMessage = last(messages);
-          const contentParsed = JSON.parse(lastMessage?.content as string);
-          return contentParsed?.results;
-        },
-        response: expectedResponse,
-      });
-    } else {
-      // Simple response without tool calls
-      void llmProxy.interceptors.userMessage({
-        when: ({ messages }) => {
-          const lastMessage = last(messages)?.content as string;
-          return lastMessage?.includes(userMessage);
-        },
-        response: expectedResponse,
-      });
-    }
+    await (withToolCall
+      ? setupAgentCallSearchToolWithNoIndexSelectedThenAnswer({
+          proxy: llmProxy,
+          title,
+          response: expectedResponse,
+        })
+      : setupAgentDirectAnswer({ proxy: llmProxy, title, response: expectedResponse }));
 
     // Type and send the message
     await this.typeMessage(userMessage);
@@ -155,13 +129,10 @@ export class OneChatPageObject extends FtrService {
    * Continue chatting in an existing conversation
    */
   async continueConversation(userMessage: string, expectedResponse: string, llmProxy: LlmProxy) {
-    // Set up LLM proxy
-    void llmProxy.interceptors.userMessage({
-      when: ({ messages }) => {
-        const lastMessage = last(messages)?.content as string;
-        return lastMessage?.includes(userMessage);
-      },
+    await setupAgentDirectAnswer({
+      proxy: llmProxy,
       response: expectedResponse,
+      continueConversation: true,
     });
 
     // Type and send the message
@@ -233,5 +204,156 @@ export class OneChatPageObject extends FtrService {
   async getThinkingDetails() {
     const responseElement = await this.testSubjects.find('agentBuilderRoundResponse');
     return await responseElement.getVisibleText();
+  }
+
+  /**
+   * Click the retry button in the error UI
+   */
+  async clickRetryButton() {
+    const retryButton = await this.testSubjects.find('agentBuilderRoundErrorRetryButton');
+    await retryButton.click();
+  }
+
+  /**
+   * Check if the error UI is visible
+   */
+  async isErrorVisible() {
+    return await this.testSubjects.exists('agentBuilderRoundError');
+  }
+
+  /*
+   * ==========================
+   * Tools: navigation helpers
+   * ==========================
+   */
+  async navigateToToolsLanding() {
+    await this.navigateToApp('tools');
+  }
+
+  async navigateToNewTool() {
+    await this.navigateToApp('tools/new');
+  }
+
+  async navigateToTool(toolId: string) {
+    await this.navigateToApp(`tools/${toolId}`);
+  }
+
+  /*
+   * ==========================
+   * Tools: form helpers
+   * ==========================
+   */
+  async setToolId(toolId: string) {
+    await this.testSubjects.setValue('agentBuilderToolIdInput', toolId);
+  }
+
+  async getToolIdValue() {
+    return await this.testSubjects.getAttribute('agentBuilderToolIdInput', 'value');
+  }
+
+  async selectToolType(type: Exclude<ToolType, ToolType.builtin>) {
+    await this.testSubjects.selectValue('agentBuilderToolTypeSelect', type);
+  }
+
+  async setToolDescription(description: string) {
+    await this.testSubjects.setValue('euiMarkdownEditorTextArea', description);
+  }
+
+  async getToolDescriptionValue() {
+    return await this.testSubjects.getAttribute('euiMarkdownEditorTextArea', 'value');
+  }
+
+  async setIndexPattern(indexPattern: string) {
+    await this.testSubjects.setValue('onechatIndexPatternInput', indexPattern);
+  }
+
+  async setEsqlQuery(query: string) {
+    await this.monacoEditor.setCodeEditorValue(query);
+  }
+
+  /*
+   * ==========================
+   * Tools: actions (save, context menu, delete, test flyout)
+   * ==========================
+   */
+
+  async saveTool(closeToast: boolean = true) {
+    await this.testSubjects.click('toolFormSaveButton');
+    if (closeToast) {
+      await this.testSubjects.click('toastCloseButton');
+    }
+  }
+
+  async openToolContextMenu() {
+    await this.testSubjects.click('agentBuilderToolContextMenuButton');
+  }
+
+  async clickToolCloneButton() {
+    await this.testSubjects.click('agentBuilderToolCloneButton');
+  }
+
+  async clickToolDeleteButton() {
+    await this.testSubjects.click('agentBuilderToolDeleteButton');
+  }
+
+  async confirmModalConfirm() {
+    await this.testSubjects.click('confirmModalConfirmButton');
+  }
+
+  async selectToolRowCheckbox(toolId: string) {
+    await this.testSubjects.click(`checkboxSelectRow-${toolId}`);
+  }
+
+  async clickToolsSelectAll() {
+    await this.testSubjects.click('agentBuilderToolsSelectAllButton');
+  }
+
+  async clickToolsBulkDelete() {
+    await this.testSubjects.click('agentBuilderToolsBulkDeleteButton');
+  }
+
+  async openToolTestFlyout() {
+    await this.testSubjects.click('toolFormTestButton');
+  }
+
+  async submitToolTest() {
+    await this.testSubjects.click('agentBuilderToolTestSubmitButton');
+  }
+
+  async waitForToolTestResponseNotEmpty() {
+    await this.retry.try(async () => {
+      const response = await this.testSubjects.getVisibleText('agentBuilderToolTestResponse');
+      if (response.includes('{}')) {
+        throw new Error('Tool execution response not ready');
+      }
+    });
+  }
+
+  /*
+   * ==========================
+   * Tools: table helpers
+   * ==========================
+   */
+  async isToolInTable(toolId: string): Promise<boolean> {
+    try {
+      await this.testSubjects.find(`agentBuilderToolsTableRow-${toolId}`);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  async bulkDeleteTools(ids?: string[]) {
+    if (ids && ids.length > 0) {
+      for (const id of ids) {
+        await this.selectToolRowCheckbox(id);
+      }
+    } else {
+      await this.clickToolsSelectAll();
+    }
+
+    await this.clickToolsBulkDelete();
+    await this.confirmModalConfirm();
+    await this.testSubjects.click('toastCloseButton');
   }
 }

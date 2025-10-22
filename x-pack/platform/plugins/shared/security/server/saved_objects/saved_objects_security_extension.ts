@@ -1281,7 +1281,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
   getTypesRequiringAccessControlCheck(
     objects: AuthorizeObject[],
-    action: SecurityAction = SecurityAction.CHANGE_ACCESS_MODE // default action to create, because this is used to check conflicts (perhaps we really just need a bespoke "check access control conflicts" function)
+    action: SecurityAction = SecurityAction.CHANGE_OWNERSHIP
   ) {
     return this.accessControlService.getObjectsRequiringPrivilegeCheck({
       objects,

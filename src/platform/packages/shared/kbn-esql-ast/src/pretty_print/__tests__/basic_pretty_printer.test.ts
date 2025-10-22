@@ -10,12 +10,15 @@
 import { parse } from '../../parser';
 import type { ESQLFunction, ESQLMap } from '../../types';
 import { Walker } from '../../walker';
-import type { BasicPrettyPrinterMultilineOptions } from '../basic_pretty_printer';
+import type {
+  BasicPrettyPrinterMultilineOptions,
+  BasicPrettyPrinterOptions,
+} from '../basic_pretty_printer';
 import { BasicPrettyPrinter } from '../basic_pretty_printer';
 
-const reprint = (src: string) => {
+const reprint = (src: string, opts?: BasicPrettyPrinterOptions) => {
   const { root } = parse(src);
-  const text = BasicPrettyPrinter.print(root);
+  const text = BasicPrettyPrinter.print(root, opts);
 
   // console.log(JSON.stringify(root, null, 2));
 
@@ -29,6 +32,53 @@ const assertReprint = (src: string, expected: string = src) => {
 };
 
 describe('single line query', () => {
+  describe('header commands', () => {
+    describe('SET', () => {
+      test('single SET command (with keyword "KEY")', () => {
+        const { text } = reprint('SET key = "value"; FROM index');
+
+        expect(text).toBe('SET `key` = "value"; FROM index');
+      });
+
+      test('multiple SET commands', () => {
+        const { text } = reprint(
+          'SET key1 = "value1"; SET key2 = "value2"; FROM index | LIMIT 123'
+        );
+
+        expect(text).toBe('SET key1 = "value1"; SET key2 = "value2"; FROM index | LIMIT 123');
+      });
+
+      test('SET with numeric value', () => {
+        const { text } = reprint('SET timeout = 30; FROM index');
+
+        expect(text).toBe('SET timeout = 30; FROM index');
+      });
+
+      test('SET with boolean value', () => {
+        const { text } = reprint('SET flag = true; FROM index');
+
+        expect(text).toBe('SET flag = TRUE; FROM index');
+      });
+
+      test('can skip printing header commands', () => {
+        const { text } = reprint('SET flag = true; FROM index', { skipHeader: true });
+
+        expect(text).toBe('FROM index');
+      });
+
+      test('can sckip multiple SET commands', () => {
+        const { text } = reprint(
+          'SET key1 = "value1"; SET key2 = "value2"; FROM index | LIMIT 123',
+          {
+            skipHeader: true,
+          }
+        );
+
+        expect(text).toBe('FROM index | LIMIT 123');
+      });
+    });
+  });
+
   describe('commands', () => {
     describe('FROM', () => {
       test('FROM command with a single source', () => {
@@ -126,6 +176,16 @@ describe('single line query', () => {
         const { text } = reprint('FROM search-movies | GROK Awards "text"');
 
         expect(text).toBe('FROM search-movies | GROK Awards "text"');
+      });
+
+      test('multiple patterns', () => {
+        const { text } = reprint(
+          'FROM logs | GROK message "%{IP:client}", "%{WORD:method}", "%{NUMBER:status}"'
+        );
+
+        expect(text).toBe(
+          'FROM logs | GROK message "%{IP:client}", "%{WORD:method}", "%{NUMBER:status}"'
+        );
       });
     });
 

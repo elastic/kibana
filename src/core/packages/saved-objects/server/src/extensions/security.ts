@@ -509,6 +509,21 @@ export interface ISavedObjectsSecurityExtension {
   ) => GetObjectsRequiringPrivilegeCheckResult;
 
   /**
+   * Performs authorization for the CHANGE_OWNERSHIP or CHANGE_ACCESS_MODE security actions
+   * @param params the namespace and object to authorize for changing ownership
+   * @param operation the operation to authorize - one of 'changeAccessMode' or 'changeOwnership'
+   * @returns CheckAuthorizationResult - the resulting authorization level and authorization map
+   */
+  authorizeChangeAccessControl: <A extends string>(
+    params: AuthorizeChangeAccessControlParams,
+    operation: 'changeAccessMode' | 'changeOwnership'
+  ) => Promise<CheckAuthorizationResult<A>>;
+
+  getTypesRequiringAccessControlCheck: (
+    objects: AuthorizeObject[]
+  ) => GetTypesRequiringAccessControlCheckResult;
+
+  /**
    * Performs audit logging for the CLOSE_POINT_IN_TIME security action
    */
   auditClosePointInTime: () => void;
