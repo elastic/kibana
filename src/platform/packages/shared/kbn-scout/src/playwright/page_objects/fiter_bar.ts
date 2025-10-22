@@ -44,6 +44,7 @@ export class FilterBar {
     await this.page.click(`.euiFilterSelectItem[title="${options.operator}"]`);
     // set value
     const filterParamsInput = this.page.locator('[data-test-subj="filterParams"] input');
+    await filterParamsInput.focus();
     await expect(filterParamsInput).toBeEditable();
     await filterParamsInput.pressSequentially(options.value, { delay: 100 });
     // save filter
