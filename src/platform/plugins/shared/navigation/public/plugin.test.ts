@@ -330,46 +330,43 @@ describe('Navigation Plugin', () => {
       expect(isEnabled).toBe(false);
     });
   });
-  describe('set deployment type', () => {
-    it('should set the deployment type to "serverless" when on serverless', async () => {
-      const { plugin, coreStart, unifiedSearch, cloud, spaces } = setup({
+  describe('set feedback URL parameters', () => {
+    it('should set the relevant params when on serverless', async () => {
+      const { plugin, coreStart, unifiedSearch, cloud } = setup({
         buildFlavor: 'serverless',
       });
-      spaces.getActiveSpace$ = jest
-        .fn()
-        .mockReturnValue(of({ solution: 'es' } as Pick<Space, 'solution'>));
-      plugin.start(coreStart, { unifiedSearch, cloud, spaces });
+      plugin.start(coreStart, { unifiedSearch, cloud });
       await new Promise((resolve) => setTimeout(resolve));
-      expect(coreStart.chrome.project.setDeploymentType).toHaveBeenCalledWith('serverless');
+      expect(coreStart.chrome.project.setFeedbackUrlParams).toHaveBeenCalledWith(
+        new URLSearchParams({
+          version: 'version',
+          type: 'serverless',
+        })
+      );
     });
-    it('should set the deployment type to "ech" when on cloud', async () => {
-      const { plugin, coreStart, unifiedSearch, cloud, spaces } = setup({});
-      spaces.isSolutionViewEnabled = true;
-      spaces.getActiveSpace$ = jest
-        .fn()
-        .mockReturnValue(of({ solution: 'es' } as Pick<Space, 'solution'>));
+    it('should set the relevant params when on cloud', async () => {
+      const { plugin, coreStart, unifiedSearch, cloud } = setup({});
       cloud.isCloudEnabled = true;
-      plugin.start(coreStart, { unifiedSearch, cloud, spaces });
+      plugin.start(coreStart, { unifiedSearch, cloud });
       await new Promise((resolve) => setTimeout(resolve));
-      expect(coreStart.chrome.project.setDeploymentType).toHaveBeenCalledWith('ech');
+      expect(coreStart.chrome.project.setFeedbackUrlParams).toHaveBeenCalledWith(
+        new URLSearchParams({
+          version: 'version',
+          type: 'ech',
+        })
+      );
     });
-    it('should set the deployment type to "local" when on local', async () => {
-      const { plugin, coreStart, unifiedSearch, cloud, spaces } = setup();
-      spaces.isSolutionViewEnabled = true;
-      spaces.getActiveSpace$ = jest
-        .fn()
-        .mockReturnValue(of({ solution: 'es' } as Pick<Space, 'solution'>));
+    it('should set the relevant params when on local', async () => {
+      const { plugin, coreStart, unifiedSearch, cloud } = setup();
       cloud.isCloudEnabled = false;
-      plugin.start(coreStart, { unifiedSearch, cloud, spaces });
+      plugin.start(coreStart, { unifiedSearch, cloud });
       await new Promise((resolve) => setTimeout(resolve));
-      expect(coreStart.chrome.project.setDeploymentType).toHaveBeenCalledWith('local');
-    });
-    it('should not set the deployment type when isSolutionViewEnabled is false', async () => {
-      const { plugin, coreStart, unifiedSearch, cloud, spaces } = setup();
-      spaces.isSolutionViewEnabled = false;
-      plugin.start(coreStart, { unifiedSearch, cloud, spaces });
-      await new Promise((resolve) => setTimeout(resolve));
-      expect(coreStart.chrome.project.setDeploymentType).not.toHaveBeenCalled();
+      expect(coreStart.chrome.project.setFeedbackUrlParams).toHaveBeenCalledWith(
+        new URLSearchParams({
+          version: 'version',
+          type: 'local',
+        })
+      );
     });
   });
 });

@@ -130,10 +130,10 @@ export interface InternalChromeStart extends ChromeStart {
     setCloudUrls(cloudUrls: CloudURLs): void;
 
     /**
-     * Sets the deployment type.
-     * @param deploymentType
+     * Sets the feedback URL parameters.
+     * @param feedbackUrlParams
      */
-    setDeploymentType(deploymentType: 'serverless' | 'ech' | 'local'): void;
+    setFeedbackUrlParams(feedbackUrlParams: URLSearchParams): void;
 
     /**
      * Sets the project name.

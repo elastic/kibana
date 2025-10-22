@@ -16,8 +16,7 @@ import { css } from '@emotion/react';
 
 export interface NavigationFeedbackSnippetProps {
   solutionId: SolutionId;
-  kibanaVersion: string;
-  deploymentType?: string;
+  feedbackUrlParams: URLSearchParams | undefined;
 }
 
 const feedbackSnippetId = 'sideNavigationFeedback';
@@ -43,19 +42,24 @@ const promptViewMessage = (
   />
 );
 
-const getSurveyFeedbackURL = (solutionId: SolutionId, version: string, type?: string) => {
+const getSurveyFeedbackURL = (
+  solutionId: SolutionId,
+  feedbackUrlParams: URLSearchParams | undefined
+) => {
   const url = new URL(feedbackUrls[solutionId]);
-  url.searchParams.set('version', version);
-  if (type) url.searchParams.set('type', type);
+  if (feedbackUrlParams) {
+    feedbackUrlParams.forEach((value, key) => {
+      url.searchParams.set(key, value);
+    });
+  }
   return url.href;
 };
 
 export const NavigationFeedbackSnippet = ({
   solutionId,
-  kibanaVersion,
-  deploymentType,
+  feedbackUrlParams,
 }: NavigationFeedbackSnippetProps) => {
-  const feedbackSurveyUrl = getSurveyFeedbackURL(solutionId, kibanaVersion, deploymentType);
+  const feedbackSurveyUrl = getSurveyFeedbackURL(solutionId, feedbackUrlParams);
   const { euiTheme } = useEuiTheme();
 
   return (
