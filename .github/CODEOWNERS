@@ -738,6 +738,7 @@ src/platform/plugins/shared/charts @elastic/kibana-visualizations
 src/platform/plugins/shared/console @elastic/kibana-management
 src/platform/plugins/shared/content_management @elastic/appex-sharedux
 src/platform/plugins/shared/controls @elastic/kibana-presentation
+src/platform/plugins/shared/cps @elastic/kibana-core
 src/platform/plugins/shared/custom_integrations @elastic/fleet
 src/platform/plugins/shared/dashboard @elastic/kibana-presentation
 src/platform/plugins/shared/dashboard_markdown @elastic/kibana-presentation
@@ -1189,9 +1190,6 @@ x-pack/solutions/security/plugins/security_solution_serverless @elastic/security
 x-pack/solutions/security/plugins/session_view @elastic/contextual-security-apps
 x-pack/solutions/security/test
 x-pack/solutions/security/test/plugin_functional/plugins/resolver_test @elastic/security-solution
-x-pack/solutions/workplace_ai/packages/wci-browser @elastic/search-kibana @elastic/workchat-eng
-x-pack/solutions/workplace_ai/packages/wci-common @elastic/search-kibana @elastic/workchat-eng
-x-pack/solutions/workplace_ai/packages/wci-server @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/workplace_ai/plugins/serverless_workplace_ai @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/workplace_ai/plugins/workplace_ai_app @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/workplace_ai/test @elastic/workchat-eng

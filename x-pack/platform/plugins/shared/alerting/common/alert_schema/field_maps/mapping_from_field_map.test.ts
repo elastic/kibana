@@ -236,6 +236,9 @@ describe('mappingFromFieldMap', () => {
                 flapping_history: {
                   type: 'boolean',
                 },
+                index_pattern: {
+                  type: 'keyword',
+                },
                 maintenance_window_ids: {
                   type: 'keyword',
                 },
