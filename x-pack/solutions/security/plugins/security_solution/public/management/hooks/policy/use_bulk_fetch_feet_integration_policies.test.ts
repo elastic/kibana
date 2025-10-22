@@ -16,8 +16,8 @@ import type { Mutable } from 'utility-types';
 
 const useQueryMock = _useQuery as jest.Mock;
 
-jest.mock('@tanstack/react-query', () => {
-  const actualReactQueryModule = jest.requireActual('@tanstack/react-query');
+jest.mock('@kbn/react-query', () => {
+  const actualReactQueryModule = jest.requireActual('@kbn/react-query');
 
   return {
     ...actualReactQueryModule,

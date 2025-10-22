@@ -22,7 +22,7 @@ import { mockStatsNode } from '../../right/mocks/mock_analyzer_data';
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../timelines/containers/use_timeline_data_filters');
 jest.mock('./use_alert_document_analyzer_schema');
-jest.mock('@tanstack/react-query');
+jest.mock('@kbn/react-query');
 jest.mock('../../../../data_view_manager/hooks/use_security_default_patterns');
 jest.mock('../../../../common/hooks/use_experimental_features');
 

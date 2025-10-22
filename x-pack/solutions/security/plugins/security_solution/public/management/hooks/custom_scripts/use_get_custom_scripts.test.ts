@@ -12,7 +12,7 @@ import { useGetCustomScripts } from './use_get_custom_scripts';
 import { useHttp } from '../../../common/lib/kibana';
 import type { HttpSetup } from '@kbn/core/public';
 
-jest.mock('@tanstack/react-query');
+jest.mock('@kbn/react-query');
 jest.mock('../../../common/lib/kibana');
 
 describe('useGetCustomScripts', () => {

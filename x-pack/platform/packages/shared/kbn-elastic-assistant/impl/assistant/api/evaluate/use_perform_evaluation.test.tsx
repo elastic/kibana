@@ -24,7 +24,7 @@ jest.mock('./evaluate', () => {
   };
 });
 
-jest.mock('@tanstack/react-query', () => ({
+jest.mock('@kbn/react-query', () => ({
   useMutation: jest.fn().mockImplementation(async (queryKey, fn, opts) => {
     try {
       const res = await fn();

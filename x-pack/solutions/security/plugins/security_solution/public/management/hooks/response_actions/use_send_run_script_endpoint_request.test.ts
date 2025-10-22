@@ -20,8 +20,8 @@ import { useSendRunScriptEndpoint } from './use_send_run_script_endpoint_request
 
 const useMutationMock = _useMutation as jest.Mock;
 
-jest.mock('@tanstack/react-query', () => {
-  const actualReactQueryModule = jest.requireActual('@tanstack/react-query');
+jest.mock('@kbn/react-query', () => {
+  const actualReactQueryModule = jest.requireActual('@kbn/react-query');
 
   return {
     ...actualReactQueryModule,

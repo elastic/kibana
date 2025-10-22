@@ -18,7 +18,7 @@ import { useCreateCloudFormationUrl } from '../../../../../../../../../component
 
 import { mockAgentPolicy, mockPackagePolicy } from './mockData';
 
-jest.mock('@tanstack/react-query');
+jest.mock('@kbn/react-query');
 jest.mock('../../../../../../../../../components/agent_enrollment_flyout/hooks');
 jest.mock('../../../../../../../../../hooks');
 jest.mock('../../../../../../../../../components/cloud_security_posture/hooks');

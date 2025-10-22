@@ -25,7 +25,7 @@ jest.mock('../pages', () => ({
   Benchmarks: () => <div data-test-subj="Benchmarks">Benchmarks</div>,
 }));
 
-jest.mock('@tanstack/react-query', () => ({
+jest.mock('@kbn/react-query', () => ({
   QueryClientProvider: ({ children }: QueryClientProviderProps) => <>{children}</>,
   QueryClient: jest.fn(),
 }));

@@ -22,8 +22,8 @@ import { getPolicyDataForUpdate } from '../../../../common/endpoint/service/poli
 
 const useMutationMock = _useMutation as jest.Mock;
 
-jest.mock('@tanstack/react-query', () => {
-  const actualReactQueryModule = jest.requireActual('@tanstack/react-query');
+jest.mock('@kbn/react-query', () => {
+  const actualReactQueryModule = jest.requireActual('@kbn/react-query');
 
   return {
     ...actualReactQueryModule,
