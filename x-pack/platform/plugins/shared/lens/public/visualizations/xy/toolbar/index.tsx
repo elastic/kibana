@@ -20,7 +20,7 @@ import type {
 } from '@kbn/lens-common';
 import type { XYLegendValue } from '@kbn/chart-expressions-common';
 import { LegendSize } from '@kbn/chart-expressions-common';
-import type { LegendSettingsPopoverProps } from '../../../shared_components/legend/legend_settings_popover';
+import type { LegendSettingsProps } from '../../../shared_components/legend/legend_settings_popover';
 import { hasBarSeries, isHorizontalChart } from '../state_helpers';
 import { hasNumericHistogramDimension, LegendSettingsPopover } from '../../../shared_components';
 import { AxisSettingsPopover } from './axis_settings_popover';
@@ -718,9 +718,8 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
           }}
           onAlignmentChange={(value) => {
             const [vertical, horizontal] = value.split('_');
-            const verticalAlignment = vertical as LegendSettingsPopoverProps['verticalAlignment'];
-            const horizontalAlignment =
-              horizontal as LegendSettingsPopoverProps['horizontalAlignment'];
+            const verticalAlignment = vertical as LegendSettingsProps['verticalAlignment'];
+            const horizontalAlignment = horizontal as LegendSettingsProps['horizontalAlignment'];
 
             setState({
               ...state,
