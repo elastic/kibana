@@ -94,7 +94,7 @@ export async function buildEvaluationReport({
 }
 
 /**
- * Exports evaluation results to Elasticsearch datastream
+ * Exports evaluation results to an Elasticsearch datastream
  * This ensures results are persisted for analysis and comparison
  */
 export async function exportEvaluations(
