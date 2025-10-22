@@ -20,7 +20,7 @@ import type { ESQLAstAllCommands } from '@kbn/esql-ast/src/types';
 import { QueryColumns } from '../shared/resources_helpers';
 import type { ESQLCallbacks } from '../shared/types';
 import { retrievePolicies, retrieveSources } from './resources';
-import type { ReferenceMaps, ValidationOptions, ValidationResult } from './types';
+import type { ReferenceMaps, ValidationResult } from './types';
 import { getSubqueriesToValidate } from './helpers';
 
 /**
@@ -32,7 +32,6 @@ import { getSubqueriesToValidate } from './helpers';
  */
 export async function validateQuery(
   queryString: string,
-  options: ValidationOptions = {}, // deprecated
   callbacks?: ESQLCallbacks
 ): Promise<ValidationResult> {
   return validateAst(queryString, callbacks);

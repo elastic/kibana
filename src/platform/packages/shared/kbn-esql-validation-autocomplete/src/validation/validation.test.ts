@@ -219,12 +219,7 @@ describe('validation logic', () => {
         `${statement} => ${expectedErrors.length} errors, ${expectedWarnings.length} warnings`,
         async () => {
           const callbackMocks = getCallbackMocks();
-          const { warnings, errors } = await validateQuery(
-            statement,
-
-            undefined,
-            callbackMocks
-          );
+          const { warnings, errors } = await validateQuery(statement, callbackMocks);
           expect(errors.map((e) => ('message' in e ? e.message : e.text))).toEqual(expectedErrors);
           expect(warnings.map((w) => w.text)).toEqual(expectedWarnings);
         }
@@ -572,32 +567,27 @@ describe('validation logic', () => {
     describe('callbacks', () => {
       it(`should not fetch source and fields list when a row command is set`, async () => {
         const callbackMocks = getCallbackMocks();
-        await validateQuery(`row a = 1 | eval a`, undefined, callbackMocks);
+        await validateQuery(`row a = 1 | eval a`, callbackMocks);
         expect(callbackMocks.getColumnsFor).not.toHaveBeenCalled();
         expect(callbackMocks.getSources).not.toHaveBeenCalled();
       });
 
       it(`should not fetch policies if no enrich command is found`, async () => {
         const callbackMocks = getCallbackMocks();
-        await validateQuery(`row a = 1 | eval a`, undefined, callbackMocks);
+        await validateQuery(`row a = 1 | eval a`, callbackMocks);
         expect(callbackMocks.getPolicies).not.toHaveBeenCalled();
       });
 
       it(`should not fetch source and fields for empty command`, async () => {
         const callbackMocks = getCallbackMocks();
-        await validateQuery(` `, undefined, callbackMocks);
+        await validateQuery(` `, callbackMocks);
         expect(callbackMocks.getColumnsFor).not.toHaveBeenCalled();
         expect(callbackMocks.getSources).not.toHaveBeenCalled();
       });
 
       it(`should skip initial source and fields call but still call fields for enriched policy`, async () => {
         const callbackMocks = getCallbackMocks();
-        await validateQuery(
-          `row a = 1 | eval b  = a | enrich policy`,
-
-          undefined,
-          callbackMocks
-        );
+        await validateQuery(`row a = 1 | eval b  = a | enrich policy`, callbackMocks);
         expect(callbackMocks.getSources).not.toHaveBeenCalled();
         expect(callbackMocks.getPolicies).toHaveBeenCalled();
         expect(callbackMocks.getColumnsFor).toHaveBeenCalledTimes(0);
@@ -605,12 +595,7 @@ describe('validation logic', () => {
 
       it(`should fetch additional fields if an enrich command is found`, async () => {
         const callbackMocks = getCallbackMocks();
-        await validateQuery(
-          `from a_index | eval b  = a | enrich policy`,
-
-          undefined,
-          callbackMocks
-        );
+        await validateQuery(`from a_index | eval b  = a | enrich policy`, callbackMocks);
         expect(callbackMocks.getSources).toHaveBeenCalled();
         expect(callbackMocks.getPolicies).toHaveBeenCalled();
         expect(callbackMocks.getColumnsFor).toHaveBeenCalledTimes(0);
@@ -620,8 +605,6 @@ describe('validation logic', () => {
         try {
           await validateQuery(
             `from a_index | eval b  = a | enrich policy | dissect textField "%{firstWord}"`,
-
-            undefined,
             {
               getColumnsFor: undefined,
               getSources: undefined,
@@ -767,13 +750,7 @@ describe('validation logic', () => {
       const allErrors = await Promise.all(
         fixtures.testCases
           .filter(({ query }) => query === 'from index METADATA _id, _source2')
-          .map(({ query }) =>
-            validateQuery(
-              query,
-              {}, // ignoreOnMissingCallbacks is now automatic
-              getCallbackMocks()
-            )
-          )
+          .map(({ query }) => validateQuery(query, getCallbackMocks()))
       );
       for (const [index, { errors }] of Object.entries(allErrors)) {
         expect(errors.map((e) => ('severity' in e ? e.message : e.text))).toEqual(
@@ -795,11 +772,7 @@ describe('validation logic', () => {
         );
         const allErrors = await Promise.all(
           filteredTestCases.map(({ query }) =>
-            validateQuery(
-              query,
-              {}, // ignoreOnMissingCallbacks is now automatic
-              getPartialCallbackMocks(excludedCallback)
-            )
+            validateQuery(query, getPartialCallbackMocks(excludedCallback))
           )
         );
         for (const { errors } of allErrors) {
@@ -882,7 +855,7 @@ describe('validation logic', () => {
         getColumnsFor: undefined, // Missing this callback
       };
 
-      const { errors } = await validateQuery('FROM index | WHERE unknownField > 10', {}, callbacks);
+      const { errors } = await validateQuery('FROM index | WHERE unknownField > 10', callbacks);
 
       const hasUnknownColumnError = errors.some((e) => e.code === 'unknownColumn');
       expect(hasUnknownColumnError).toBe(false);
@@ -891,7 +864,7 @@ describe('validation logic', () => {
     it('should show semantic errors when required callback is available', async () => {
       const callbacks = getCallbackMocks(); // All callbacks available
 
-      const { errors } = await validateQuery('FROM index | WHERE unknownField > 10', {}, callbacks);
+      const { errors } = await validateQuery('FROM index | WHERE unknownField > 10', callbacks);
 
       const unknownColumnError = errors.find((e) => e.code === 'unknownColumn');
       expect(unknownColumnError).toBeDefined();
@@ -909,7 +882,6 @@ describe('validation logic', () => {
 
       const { errors } = await validateQuery(
         'FROM unknown_index | LIMIT abc', // unknown_index (semantic) + invalid limit (syntax)
-        {},
         callbacks
       );
 
@@ -927,7 +899,6 @@ describe('validation logic', () => {
 
       const { errors: errorsNoSources } = await validateQuery(
         'FROM unknown_index | ENRICH unknown_policy',
-        {},
         callbacksNoSources
       );
 
@@ -941,7 +912,6 @@ describe('validation logic', () => {
 
       const { errors: errorsNoPolicies } = await validateQuery(
         'FROM unknown_index | ENRICH unknown_policy',
-        {},
         callbacksNoPolicies
       );
 
