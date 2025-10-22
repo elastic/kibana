@@ -7,8 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { HttpGraphNode } from '@kbn/workflows/graph';
+// TODO: Remove eslint exceptions comments and fix the issues
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios';
+import type { HttpGraphNode } from '@kbn/workflows/graph';
 import type { UrlValidator } from '../../lib/url_validator';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
@@ -105,7 +108,7 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
     try {
       return await this.executeHttpRequest(input);
     } catch (error) {
-      return await this.handleFailure(input, error);
+      return this.handleFailure(input, error);
     }
   }
 
