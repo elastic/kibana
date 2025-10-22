@@ -330,8 +330,8 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
     await pageObjects.streams.clickCreateRoutingRule();
     await pageObjects.streams.fillRoutingRuleName('logs.no-condition-test');
 
-    await expect(page.getByTestId('routingPreviewMatchedFilterButton')).toBeDisabled();
-    await expect(page.getByTestId('routingPreviewUnmatchedFilterButton')).toBeDisabled();
+    await expect(page.getByTestId('routingPreviewMatchedFilterButton')).toBeEuiDisabled();
+    await expect(page.getByTestId('routingPreviewUnmatchedFilterButton')).toBeEuiDisabled();
   });
 
   test('should show filter tooltip', async ({ page, pageObjects }) => {
@@ -352,7 +352,7 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
     });
 
     // Verify filter controls are present and disabled
-    await expect(page.getByTestId('routingPreviewMatchedFilterButton')).toBeDisabled();
-    await expect(page.getByTestId('routingPreviewUnmatchedFilterButton')).toBeDisabled();
+    await expect(page.getByTestId('routingPreviewMatchedFilterButton')).toBeEuiDisabled();
+    await expect(page.getByTestId('routingPreviewUnmatchedFilterButton')).toBeEuiDisabled();
   });
 });

@@ -68,7 +68,7 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
   }) => {
     await pageObjects.streams.clickCreateRoutingRule();
 
-    await expect(page.getByTestId('streamsAppStreamDetailRoutingAddRuleButton')).toBeDisabled();
+    await expect(page.getByTestId('streamsAppStreamDetailRoutingAddRuleButton')).toBeEuiDisabled();
 
     // Cancel the operation
     await pageObjects.streams.cancelRoutingRule();

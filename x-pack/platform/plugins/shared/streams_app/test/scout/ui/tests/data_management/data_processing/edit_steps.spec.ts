@@ -64,7 +64,7 @@ test.describe('Stream data processing - editing steps', { tag: ['@ess', '@svlObl
     pageObjects,
   }) => {
     await pageObjects.streams.clickAddProcessor();
-    await expect(await pageObjects.streams.getProcessorContextMenuButton(0)).toBeDisabled();
+    await expect(await pageObjects.streams.getProcessorContextMenuButton(0)).toBeEuiDisabled();
 
     await pageObjects.streams.clickCancelProcessorChanges();
     await expect(await pageObjects.streams.getProcessorContextMenuButton(0)).toBeEnabled();
@@ -110,6 +110,6 @@ test.describe('Stream data processing - editing steps', { tag: ['@ess', '@svlObl
     await pageObjects.streams.gotoProcessingTab('logs-generic-default');
 
     // Edit button should be disabled or show tooltip
-    await expect(await pageObjects.streams.getProcessorEditButton(0)).toBeDisabled();
+    await expect(await pageObjects.streams.getProcessorEditButton(0)).toBeEuiDisabled();
   });
 });
