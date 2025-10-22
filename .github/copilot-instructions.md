@@ -407,7 +407,7 @@ See `dev_docs/` for complete test directory structure details.
 
 - ⚠️ **REQUIRED:** Run `yarn kbn bootstrap` first - FTR will fail without it
 - ⚠️ **DO NOT** manually build plugins for FTR - it auto-builds (only Cypress needs manual builds)
-- ⚠️ **DO NOT** modify base configs - create new runnable configs that extend them
+- ⚠️ **DO NOT** modify or run base configs - create new runnable configs that extend them
 - ⚠️ **DO NOT** skip FTR tests if you modified code with FTR coverage
 
 See `dev_docs/` for comprehensive FTR guides and troubleshooting.
