@@ -8,7 +8,6 @@
 import { resolve } from 'path';
 import type { FtrConfigProviderContext } from '@kbn/test';
 import { CLOUD_SECURITY_PLUGIN_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
-import { TEST_FLEET_PORT } from '@kbn/test';
 import { TEST_FLEET_PORT } from '@kbn/test-services';
 import { pageObjects } from '../page_objects';
 import { services } from '../services';

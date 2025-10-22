@@ -12,6 +12,8 @@ export {
   CI_PARALLEL_PROCESS_PREFIX,
 } from './src/ci_parallel_process_prefix';
 
+export { assignPorts } from './src/assign_ports';
+
 export {
   TEST_ES_PORT,
   TEST_ES_HOST,
