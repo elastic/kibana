@@ -51,6 +51,8 @@ export const ALERT_ORIGINAL_DATA_STREAM_NAMESPACE =
   `${ALERT_ORIGINAL_DATA_STREAM}.namespace` as const;
 export const ALERT_ORIGINAL_DATA_STREAM_TYPE = `${ALERT_ORIGINAL_DATA_STREAM}.type` as const;
 
+export const ALERT_ATTACK_IDS = `${ALERT_NAMESPACE}.attack_ids` as const;
+
 export const ALERT_RULE_ACTIONS = `${ALERT_RULE_NAMESPACE}.actions` as const;
 export const ALERT_RULE_EXCEPTIONS_LIST = `${ALERT_RULE_NAMESPACE}.exceptions_list` as const;
 export const ALERT_RULE_FALSE_POSITIVES = `${ALERT_RULE_NAMESPACE}.false_positives` as const;
