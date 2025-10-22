@@ -9,19 +9,18 @@ import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
   CDR_MISCONFIGURATIONS_INDEX_PATTERN,
   LATEST_FINDINGS_RETENTION_POLICY,
+  MISCONFIGURATION_STATUS,
 } from '@kbn/cloud-security-posture-common';
 
 export interface GetAssetMisconfigurationsQueryParams {
   resourceId: string;
-  size?: number;
 }
 
 export const getAssetMisconfigurationsQuery = ({
   resourceId,
-  size = 50,
 }: GetAssetMisconfigurationsQueryParams): SearchRequest => ({
   index: CDR_MISCONFIGURATIONS_INDEX_PATTERN,
-  size,
+  size: 50, // 50 is adequate as usually per resource there are max 10 findings, though in case of 3p data it might be more
   sort: [{ '@timestamp': { order: 'desc' } }],
   _source: [
     'rule.name',
@@ -50,7 +49,7 @@ export const getAssetMisconfigurationsQuery = ({
         },
         {
           term: {
-            'result.evaluation': 'failed',
+            'result.evaluation': MISCONFIGURATION_STATUS.FAILED,
           },
         },
         {

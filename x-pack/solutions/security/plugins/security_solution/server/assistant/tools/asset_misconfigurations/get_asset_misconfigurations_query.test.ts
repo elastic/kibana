@@ -86,14 +86,9 @@ describe('getAssetMisconfigurationsQuery', () => {
     expect(query._source).toEqual(expectedFields);
   });
 
-  it('should use default size when not provided', () => {
+  it('should use default size', () => {
     const query = getAssetMisconfigurationsQuery({ resourceId: 'test-resource-id' });
     expect(query.size).toBe(50);
-  });
-
-  it('should use provided size', () => {
-    const query = getAssetMisconfigurationsQuery({ resourceId: 'test-resource-id', size: 100 });
-    expect(query.size).toBe(100);
   });
 
   it('should sort by timestamp', () => {

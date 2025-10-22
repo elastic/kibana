@@ -9,12 +9,9 @@ import { tool } from '@langchain/core/tools';
 import { z } from '@kbn/zod';
 import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-plugin/server/lib/langchain/helpers';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
-import type { Require } from '@kbn/elastic-assistant-plugin/server/types';
 import type { CspFinding } from '@kbn/cloud-security-posture-common/types/findings';
 import { APP_UI_ID } from '../../../../common';
 import { getAssetMisconfigurationsQuery } from './get_asset_misconfigurations_query';
-
-export type AssetMisconfigurationsToolParams = Require<AssistantToolParams, 'size'>;
 
 export const ASSET_MISCONFIGURATIONS_TOOL_DESCRIPTION =
   "Call this to retrieve security misconfigurations and compliance violations for a specific cloud asset. The resource_id must be the full cloud resource identifier (e.g., AWS ARN like 'arn:aws:ec2:region:account:resource-type/resource-id', Azure resource path, or GCP resource name). This returns failed findings including rule details, benchmark information, and compliance impact.";
@@ -27,20 +24,19 @@ export const ASSET_MISCONFIGURATIONS_TOOL: AssistantTool = {
   // local definitions can be overwritten by security-ai-prompt integration definitions
   description: ASSET_MISCONFIGURATIONS_TOOL_DESCRIPTION,
   sourceRegister: APP_UI_ID,
-  isSupported: (params: AssistantToolParams): params is AssetMisconfigurationsToolParams => {
-    const { request, size } = params;
-    return requestHasRequiredAnonymizationParams(request) && size != null;
+  isSupported: (params: AssistantToolParams) => {
+    const { request } = params;
+    return requestHasRequiredAnonymizationParams(request);
   },
   async getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
-    const { esClient, size } = params as AssetMisconfigurationsToolParams;
+    const { esClient } = params;
     return tool(
       async (input) => {
         const query = getAssetMisconfigurationsQuery({
           resourceId: input.resource_id,
-          size,
         });
-        const result = await esClient.search<CspFinding>(query);
+        const result = await esClient.search<CspFinding>(query); // TODO: check error handling
 
         const findings =
           result.hits?.hits?.map((hit) => {
@@ -59,7 +55,7 @@ export const ASSET_MISCONFIGURATIONS_TOOL: AssistantTool = {
               resource_type: source?.resource?.type,
               resource_sub_type: source?.resource?.sub_type,
               evaluation: source?.result?.evaluation,
-              evidence: source?.result?.evidence,
+              evidence: source?.result?.evidence, // TODO: check getEvaluationEvidence for the logic to get evidence. Should we also trim?
               timestamp: source?.['@timestamp'],
             };
           }) || [];
@@ -78,10 +74,10 @@ export const ASSET_MISCONFIGURATIONS_TOOL: AssistantTool = {
             .string()
             .min(1)
             .describe(
-              'The full cloud resource identifier (ARN, Azure resource path, or GCP resource name) of the asset. Examples: "arn:aws:ec2:us-east-1:123456789:security-group/sg-abc123", "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.Compute/virtualMachines/vm-name". Use entity.id field from entity data, NOT Kibana document IDs or UUIDs.'
+              'The full cloud resource identifier (ARN, Azure Resource ID, or GCP Resource Name) of the asset. Examples: "arn:aws:ec2:us-east-1:123456789:security-group/sg-abc123", "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.Compute/virtualMachines/vm-name". Use entity.id field from entity data, NOT Elasticsearch document IDs or UUIDs.'
             ),
         }),
-        tags: ['misconfigurations', 'cloud-security-posture', 'compliance'],
+        tags: ['asset-misconfigurations', 'compliance'],
       }
     );
   },

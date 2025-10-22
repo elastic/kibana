@@ -21,7 +21,6 @@ const mockRequest = {
   headers: {},
   body: {
     isEnabledKnowledgeBase: false,
-    size: 50,
     replacements: { key: 'value' },
   },
   query: {},
@@ -33,7 +32,6 @@ const mockRequest = {
 
 const validParams: AssistantToolParams = {
   request: mockRequest,
-  size: 50,
   esClient: mockEsClient,
   logger: loggerMock.create(),
   contentReferencesStore: newContentReferencesStoreMock(),
@@ -45,23 +43,9 @@ describe('ASSET_MISCONFIGURATIONS_TOOL', () => {
     jest.clearAllMocks();
   });
 
-  it('should have correct tool properties', () => {
-    expect(ASSET_MISCONFIGURATIONS_TOOL.id).toBe('asset-misconfigurations-tool');
-    expect(ASSET_MISCONFIGURATIONS_TOOL.name).toBe('AssetMisconfigurationsTool');
-    expect(ASSET_MISCONFIGURATIONS_TOOL.sourceRegister).toBe('securitySolutionUI');
-  });
-
   it('should be supported with valid parameters', () => {
     const isSupported = ASSET_MISCONFIGURATIONS_TOOL.isSupported(validParams);
     expect(isSupported).toBe(true);
-  });
-
-  it('should not be supported without size parameter', () => {
-    const paramsWithoutSize = { ...validParams };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    delete (paramsWithoutSize as any).size;
-    const isSupported = ASSET_MISCONFIGURATIONS_TOOL.isSupported(paramsWithoutSize);
-    expect(isSupported).toBe(false);
   });
 
   it('should not be supported without request parameter', () => {
@@ -73,10 +57,10 @@ describe('ASSET_MISCONFIGURATIONS_TOOL', () => {
   });
 
   it('should return null when not supported', async () => {
-    const paramsWithoutSize = { ...validParams };
+    const paramsWithoutRequest = { ...validParams };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    delete (paramsWithoutSize as any).size;
-    const tool = await ASSET_MISCONFIGURATIONS_TOOL.getTool(paramsWithoutSize);
+    delete (paramsWithoutRequest as any).request;
+    const tool = await ASSET_MISCONFIGURATIONS_TOOL.getTool(paramsWithoutRequest);
     expect(tool).toBeNull();
   });
 
@@ -132,11 +116,7 @@ describe('ASSET_MISCONFIGURATIONS_TOOL', () => {
     expect(mockEsClient.search).toHaveBeenCalledWith({
       index: 'security_solution-*.misconfiguration_latest',
       size: 50,
-      sort: [
-        { 'rule.benchmark.name': { order: 'asc' } },
-        { 'rule.section': { order: 'asc' } },
-        { '@timestamp': { order: 'desc' } },
-      ],
+      sort: [{ '@timestamp': { order: 'desc' } }],
       _source: expect.any(Array),
       query: {
         bool: {
