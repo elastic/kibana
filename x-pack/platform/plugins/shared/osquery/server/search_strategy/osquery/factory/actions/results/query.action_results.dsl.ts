@@ -19,9 +19,11 @@ import { buildIndexNameWithNamespace } from '../../../../../utils/build_index_na
 
 export const buildActionResultsQuery = ({
   actionId,
+  agentIds,
   kuery,
   startDate,
   sort,
+  pagination,
   componentTemplateExists,
   useNewDataStream,
   integrationNamespaces,
@@ -45,7 +47,11 @@ export const buildActionResultsQuery = ({
         ]
       : [];
 
-  const filterQuery = [...timeRangeFilter, getQueryFilter({ filter })];
+  // Use structured terms query for agent filtering (more secure and performant than KQL)
+  const agentIdsFilter =
+    agentIds && agentIds.length > 0 ? [{ terms: { 'agent.id': agentIds } }] : [];
+
+  const filterQuery = [...timeRangeFilter, ...agentIdsFilter, getQueryFilter({ filter })];
 
   let baseIndex: string;
   if (useNewDataStream) {
@@ -106,8 +112,8 @@ export const buildActionResultsQuery = ({
       },
     },
     query: { bool: { filter: filterQuery } },
-    // from: activePage * querySize,
-    size: 10000, // querySize,
+    from: pagination ? pagination.activePage * pagination.querySize : 0,
+    size: pagination?.querySize ?? 100,
     track_total_hits: true,
     fields: ['*'],
     sort: [

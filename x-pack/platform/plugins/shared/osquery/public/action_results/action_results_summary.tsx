@@ -4,14 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import { EuiInMemoryTable, EuiCodeBlock } from '@elastic/eui';
+import type { Criteria } from '@elastic/eui';
+import { EuiBasicTable, EuiCodeBlock, EuiLink, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { PLUGIN_ID } from '@kbn/fleet-plugin/common';
+import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import type { estypes } from '@elastic/elasticsearch';
 
-import { AgentIdToName } from '../agents/agent_id_to_name';
 import { useActionResults } from './use_action_results';
 import { Direction } from '../../common/search_strategy';
+import { useKibana } from '../common/lib/kibana';
+import { API_VERSIONS } from '../../common/constants';
+import { useErrorToast } from '../common/hooks/use_error_toast';
 
 interface ActionResultsSummaryProps {
   actionId: string;
@@ -21,11 +27,37 @@ interface ActionResultsSummaryProps {
   error?: string;
 }
 
+// Use Elasticsearch's native SearchHit type for result edges
+type ResultEdge = estypes.SearchHit<object>;
+
 const renderErrorMessage = (error: string) => (
   <EuiCodeBlock language="shell" fontSize="s" paddingSize="none" transparentBackground>
     {error}
   </EuiCodeBlock>
 );
+
+// CSS-in-JS styles for fixed-height scrollable table (moved outside component for performance)
+const statusTableCss = {
+  '.euiTable': {
+    display: 'block',
+  },
+  '.euiTable thead': {
+    display: 'table',
+    width: '100%',
+    tableLayout: 'fixed' as const,
+  },
+  '.euiTable tbody': {
+    display: 'block',
+    minHeight: '400px',
+    maxHeight: '400px',
+    overflowY: 'auto' as const,
+  },
+  '.euiTable tbody tr': {
+    display: 'table',
+    width: '100%',
+    tableLayout: 'fixed' as const,
+  },
+};
 
 const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   actionId,
@@ -34,8 +66,10 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   error,
   startDate,
 }) => {
-  const [pageIndex] = useState(0);
-  const [pageSize] = useState(50);
+  const { http, application } = useKibana().services;
+  const setErrorToast = useErrorToast();
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(20); // Match EuiBasicTable default
   const expired = useMemo(
     () => (!expirationDate ? false : new Date(expirationDate) < new Date()),
     [expirationDate]
@@ -53,6 +87,55 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     sortField: '@timestamp',
     isLive,
   });
+
+  // Extract agent IDs from current page edges
+  // Note: Check both bracket notation ['agent.id'] (ECS formatted) and legacy format (agent_id)
+  const currentPageAgentIds = useMemo(
+    () =>
+      edges
+        .map((edge) => edge.fields?.['agent.id']?.[0] || edge.fields?.agent_id?.[0])
+        .filter(Boolean) as string[],
+    [edges]
+  );
+
+  // Bulk fetch agent details for current page using POST (avoids URL length limits)
+  const { data: agentsData } = useQuery(
+    ['bulkAgentDetails', currentPageAgentIds], // Use array directly for cache key
+    async () => {
+      if (currentPageAgentIds.length === 0) return { agents: [] };
+
+      return http.post<{
+        agents: Array<{ id: string; local_metadata?: { host?: { name?: string } } }>;
+      }>('/internal/osquery/fleet_wrapper/agents/_bulk', {
+        version: API_VERSIONS.internal.v1,
+        body: JSON.stringify({
+          agentIds: currentPageAgentIds,
+        }),
+      });
+    },
+    {
+      enabled: currentPageAgentIds.length > 0,
+      staleTime: 60000, // Cache for 1 minute
+      onError: (err) => {
+        setErrorToast(err, {
+          title: i18n.translate('xpack.osquery.bulkAgentDetails.fetchError', {
+            defaultMessage: 'Error while fetching agent details',
+          }),
+        });
+      },
+    }
+  );
+
+  // Create agent ID to name map
+  const agentNameMap = useMemo(() => {
+    const map = new Map<string, string>();
+    agentsData?.agents?.forEach((agent) => {
+      const hostname = agent.local_metadata?.host?.name || agent.id;
+      map.set(agent.id, hostname);
+    });
+
+    return map;
+  }, [agentsData]);
 
   useEffect(() => {
     if (error) {
@@ -75,19 +158,35 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   }, [edges, error, expired]);
 
   const renderAgentIdColumn = useCallback(
-    (agentId: any) => <AgentIdToName agentId={agentId} />,
-    []
+    (agentId: string) => {
+      const agentName = agentNameMap.get(agentId) || agentId;
+
+      return (
+        <EuiToolTip position="top" content={<p>{agentId}</p>}>
+          <EuiLink
+            className="eui-textTruncate"
+            href={application.getUrlForApp(PLUGIN_ID, {
+              path: pagePathGetters.agent_details({ agentId })[1],
+            })}
+            target="_blank"
+          >
+            {agentName}
+          </EuiLink>
+        </EuiToolTip>
+      );
+    },
+    [agentNameMap, application]
   );
-  const renderRowsColumn = useCallback((rowsCount: any) => rowsCount ?? '-', []);
+  const renderRowsColumn = useCallback((rowsCount: number | undefined) => rowsCount ?? '-', []);
   const renderStatusColumn = useCallback(
-    (_: any, item: any) => {
-      if (item.fields['error.skipped']) {
+    (_: unknown, item: ResultEdge) => {
+      if (item.fields?.['error.skipped']) {
         return i18n.translate('xpack.osquery.liveQueryActionResults.table.skippedStatusText', {
           defaultMessage: 'skipped',
         });
       }
 
-      if (!item.fields.completed_at) {
+      if (!item.fields?.completed_at) {
         return expired
           ? i18n.translate('xpack.osquery.liveQueryActionResults.table.expiredStatusText', {
               defaultMessage: 'expired',
@@ -97,7 +196,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
             });
       }
 
-      if (item.fields['error.keyword']) {
+      if (item.fields?.['error.keyword']) {
         return i18n.translate('xpack.osquery.liveQueryActionResults.table.errorStatusText', {
           defaultMessage: 'error',
         });
@@ -148,12 +247,23 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     [renderAgentIdColumn, renderRowsColumn, renderStatusColumn]
   );
 
+  const onTableChange = useCallback(({ page }: Criteria<ResultEdge>) => {
+    if (page) {
+      setPageIndex(page.index);
+      setPageSize(page.size);
+    }
+  }, []);
+
   const pagination = useMemo(
     () => ({
       initialPageSize: 20,
+      pageIndex,
+      pageSize,
+      totalItemCount: agentIds?.length ?? 0,
       pageSizeOptions: [10, 20, 50, 100],
+      showPerPageOptions: true,
     }),
-    []
+    [pageIndex, pageSize, agentIds?.length]
   );
 
   useEffect(() => {
@@ -164,9 +274,18 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     });
   }, [agentIds?.length, aggregations.totalResponded, error, expired]);
 
-  return edges.length ? (
-    <EuiInMemoryTable loading={isLive} items={edges} columns={columns} pagination={pagination} />
-  ) : null;
+  return (
+    <div css={statusTableCss}>
+      <EuiBasicTable
+        loading={isLive}
+        items={edges as ResultEdge[]}
+        columns={columns}
+        pagination={pagination}
+        onChange={onTableChange}
+        tableLayout="auto"
+      />
+    </div>
+  );
 };
 
 export const ActionResultsSummary = React.memo(ActionResultsSummaryComponent);

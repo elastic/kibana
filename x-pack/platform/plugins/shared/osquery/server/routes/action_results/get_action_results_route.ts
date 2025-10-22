@@ -101,14 +101,19 @@ export const getActionResultsRoute = (
           }
 
           let agentIds: string[];
-          let agentIdsKuery: string | undefined;
+          let agentIdsForCurrentPage: string[];
 
           if (requestedAgentIds) {
             // Use provided agentIds for filtering (external API consumers)
             agentIds = requestedAgentIds;
 
-            // Build kuery to filter results to requested agents
-            agentIdsKuery = requestedAgentIds.map((id) => `agent.id: "${id}"`).join(' OR ');
+            // Apply server-side pagination for external API consumers too
+            // This ensures consistent behavior and proper memory management
+            const page = request.query.page ?? 0;
+            const pageSize = request.query.pageSize ?? 100;
+            const startIndex = page * pageSize;
+            const endIndex = startIndex + pageSize;
+            agentIdsForCurrentPage = requestedAgentIds.slice(startIndex, endIndex);
           } else {
             // Fetch action details to get agent IDs (internal UI usage)
             const { actionDetails } = await lastValueFrom(
@@ -134,14 +139,13 @@ export const getActionResultsRoute = (
             } else {
               agentIds = [];
             }
-          }
 
-          // Combine agentIds filtering with user-provided kuery
-          let combinedKuery = request.query.kuery;
-          if (agentIdsKuery) {
-            combinedKuery = combinedKuery
-              ? `(${agentIdsKuery}) AND (${combinedKuery})`
-              : agentIdsKuery;
+            // Apply pagination to agent IDs for internal UI (Issue 3 fix)
+            const page = request.query.page ?? 0;
+            const pageSize = request.query.pageSize ?? 100;
+            const startIndex = page * pageSize;
+            const endIndex = startIndex + pageSize;
+            agentIdsForCurrentPage = agentIds.slice(startIndex, endIndex);
           }
 
           const res = await lastValueFrom(
@@ -149,7 +153,8 @@ export const getActionResultsRoute = (
               {
                 actionId: request.params.actionId,
                 factoryQueryType: OsqueryQueries.actionResults,
-                kuery: combinedKuery,
+                agentIds: agentIdsForCurrentPage,
+                kuery: request.query.kuery,
                 startDate: request.query.startDate,
                 pagination: generateTablePaginationOptions(
                   request.query.page ?? 0,
@@ -185,9 +190,9 @@ export const getActionResultsRoute = (
           let processedEdges = res.edges;
 
           // Only process edges for internal UI (when agentIds NOT provided in request)
-          if (!requestedAgentIds && agentIds.length > 0) {
-            // Create placeholder edges for ALL agents
-            const placeholderEdges = agentIds.map((agentId) => ({
+          if (!requestedAgentIds && agentIdsForCurrentPage.length > 0) {
+            // Create placeholder edges for CURRENT PAGE agents only (Issue 3 pagination fix)
+            const placeholderEdges = agentIdsForCurrentPage.map((agentId) => ({
               _index: '.logs-osquery_manager.action.responses-default',
               _id: `placeholder-${agentId}`,
               _source: {},

@@ -91,7 +91,8 @@ describe('buildActionResultsQuery', () => {
             ],
           },
         },
-        size: 10000,
+        from: 0,
+        size: 50,
         track_total_hits: true,
         fields: ['*'],
         sort: [
@@ -331,7 +332,8 @@ describe('buildActionResultsQuery', () => {
             ],
           },
         },
-        size: 10000,
+        from: 500,
+        size: 500,
         track_total_hits: true,
         fields: ['*'],
         sort: [
@@ -341,6 +343,138 @@ describe('buildActionResultsQuery', () => {
             },
           },
         ],
+      });
+    });
+  });
+
+  describe('pagination behavior', () => {
+    it('should use pagination parameters when provided', () => {
+      const options: ActionResultsRequestOptions = {
+        actionId: 'test-123',
+        pagination: { activePage: 5, querySize: 50, cursorStart: 0 },
+        sort: {
+          field: '@timestamp',
+          direction: Direction.desc,
+        },
+        componentTemplateExists: false,
+        useNewDataStream: false,
+      };
+
+      const result = buildActionResultsQuery(options);
+
+      expect(result.from).toBe(250); // 5 * 50
+      expect(result.size).toBe(50);
+    });
+
+    it('should use default pagination when not provided', () => {
+      const options: ActionResultsRequestOptions = {
+        actionId: 'test-123',
+        pagination: {
+          activePage: 0,
+          querySize: 100,
+          cursorStart: 0,
+        },
+        sort: {
+          field: '@timestamp',
+          direction: Direction.desc,
+        },
+        componentTemplateExists: false,
+        useNewDataStream: false,
+      };
+
+      const result = buildActionResultsQuery(options);
+
+      expect(result.from).toBe(0);
+      expect(result.size).toBe(100);
+    });
+
+    it('should handle first page correctly', () => {
+      const options: ActionResultsRequestOptions = {
+        actionId: 'test-first-page',
+        pagination: { activePage: 0, querySize: 100, cursorStart: 0 },
+        sort: {
+          field: '@timestamp',
+          direction: Direction.desc,
+        },
+        componentTemplateExists: false,
+        useNewDataStream: false,
+      };
+
+      const result = buildActionResultsQuery(options);
+
+      expect(result.from).toBe(0);
+      expect(result.size).toBe(100);
+    });
+
+    it('should handle large page numbers for 10k+ agents', () => {
+      const options: ActionResultsRequestOptions = {
+        actionId: 'test-large-pagination',
+        pagination: { activePage: 99, querySize: 100, cursorStart: 0 },
+        sort: {
+          field: '@timestamp',
+          direction: Direction.desc,
+        },
+        componentTemplateExists: false,
+        useNewDataStream: false,
+      };
+
+      const result = buildActionResultsQuery(options);
+
+      expect(result.from).toBe(9900); // 99 * 100
+      expect(result.size).toBe(100);
+    });
+
+    it('should maintain aggregations regardless of pagination', () => {
+      const optionsPage1: ActionResultsRequestOptions = {
+        actionId: 'test-aggs',
+        pagination: { activePage: 0, querySize: 50, cursorStart: 0 },
+        sort: {
+          field: '@timestamp',
+          direction: Direction.desc,
+        },
+        componentTemplateExists: false,
+        useNewDataStream: false,
+      };
+
+      const optionsPage10: ActionResultsRequestOptions = {
+        ...optionsPage1,
+        pagination: { activePage: 10, querySize: 50, cursorStart: 0 },
+      };
+
+      const resultPage1 = buildActionResultsQuery(optionsPage1);
+      const resultPage10 = buildActionResultsQuery(optionsPage10);
+
+      // Aggregations should be identical regardless of page
+      expect(resultPage1.aggs).toEqual(resultPage10.aggs);
+      // But from/size should differ
+      expect(resultPage1.from).toBe(0);
+      expect(resultPage10.from).toBe(500);
+    });
+
+    it('should handle different page sizes', () => {
+      const testCases = [
+        { activePage: 0, querySize: 10, expectedFrom: 0, expectedSize: 10 },
+        { activePage: 0, querySize: 50, expectedFrom: 0, expectedSize: 50 },
+        { activePage: 0, querySize: 100, expectedFrom: 0, expectedSize: 100 },
+        { activePage: 0, querySize: 500, expectedFrom: 0, expectedSize: 500 },
+      ];
+
+      testCases.forEach(({ activePage, querySize, expectedFrom, expectedSize }) => {
+        const options: ActionResultsRequestOptions = {
+          actionId: 'test-page-sizes',
+          pagination: { activePage, querySize, cursorStart: 0 },
+          sort: {
+            field: '@timestamp',
+            direction: Direction.desc,
+          },
+          componentTemplateExists: false,
+          useNewDataStream: false,
+        };
+
+        const result = buildActionResultsQuery(options);
+
+        expect(result.from).toBe(expectedFrom);
+        expect(result.size).toBe(expectedSize);
       });
     });
   });
