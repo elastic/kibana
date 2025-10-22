@@ -16,7 +16,9 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/developer-examples-plugin",
-    "@kbn/shared-ux-error-boundary",
-    "@kbn/shared-ux-page-kibana-template"
+    "@kbn/navigation-plugin",
+    "@kbn/core-rendering-browser",
+    "@kbn/shared-ux-router",
+    "@kbn/core-mount-utils-browser"
   ]
 }
