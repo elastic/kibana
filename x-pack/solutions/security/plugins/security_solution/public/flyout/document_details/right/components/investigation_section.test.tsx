@@ -8,33 +8,28 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import {
-  HIGHLIGHTED_FIELDS_EDIT_BUTTON_TEST_ID,
-  HIGHLIGHTED_FIELDS_TITLE_TEST_ID,
   INVESTIGATION_GUIDE_TEST_ID,
   INVESTIGATION_SECTION_CONTENT_TEST_ID,
   INVESTIGATION_SECTION_HEADER_TEST_ID,
 } from './test_ids';
 import { DocumentDetailsContext } from '../../shared/context';
 import { InvestigationSection } from './investigation_section';
-import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { useExpandSection } from '../hooks/use_expand_section';
 import { useHighlightedFields } from '../../shared/hooks/use_highlighted_fields';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useFetchIndex } from '../../../../common/containers/source';
 import { useRuleDetails } from '../../../rule_details/hooks/use_rule_details';
 import type { RuleResponse } from '../../../../../common/api/detection_engine';
 import { useHighlightedFieldsPrivilege } from '../../shared/hooks/use_highlighted_fields_privilege';
+import { useInvestigationGuide } from '../../shared/hooks/use_investigation_guide';
 
-jest.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback');
 jest.mock('../hooks/use_expand_section');
 jest.mock('../../shared/hooks/use_highlighted_fields');
 jest.mock('../../../../common/hooks/use_experimental_features');
-jest.mock('../../../../common/containers/source');
 jest.mock('../../../rule_details/hooks/use_rule_details');
 jest.mock('../../shared/hooks/use_highlighted_fields_privilege');
+jest.mock('../../shared/hooks/use_investigation_guide');
 
 const mockAddSuccess = jest.fn();
 jest.mock('../../../../common/hooks/use_app_toasts', () => ({
@@ -64,9 +59,16 @@ describe('<InvestigationSection />', () => {
     jest.clearAllMocks();
     (useExpandSection as jest.Mock).mockReturnValue(true);
     (useHighlightedFields as jest.Mock).mockReturnValue([]);
-    (useRuleWithFallback as jest.Mock).mockReturnValue({ rule: { note: 'test note' } });
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
-    (useFetchIndex as jest.Mock).mockReturnValue([false, { indexPatterns: { fields: ['field'] } }]);
+    (useRuleDetails as jest.Mock).mockReturnValue({
+      rule: { id: '123' } as RuleResponse,
+      isExistingRule: true,
+      loading: false,
+    });
+    (useHighlightedFieldsPrivilege as jest.Mock).mockReturnValue({
+      isDisabled: false,
+      tooltipContent: 'tooltip content',
+    });
+    (useInvestigationGuide as jest.Mock).mockReturnValue({});
   });
 
   it('should render investigation component top level items', () => {
@@ -86,29 +88,6 @@ describe('<InvestigationSection />', () => {
   it('should render the component expanded if value is true in local storage', () => {
     const { getByTestId } = renderInvestigationSection();
     expect(getByTestId(INVESTIGATION_SECTION_CONTENT_TEST_ID)).toBeVisible();
-  });
-
-  it('should render highlighted fields section without edit button when feature flag is disabled', () => {
-    const { getByTestId, queryByTestId } = renderInvestigationSection();
-    expect(getByTestId(HIGHLIGHTED_FIELDS_TITLE_TEST_ID)).toBeInTheDocument();
-    expect(queryByTestId(HIGHLIGHTED_FIELDS_EDIT_BUTTON_TEST_ID)).not.toBeInTheDocument();
-  });
-
-  it('should render highlighted fields section with edit button when feature flag is enabled', () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
-    (useRuleDetails as jest.Mock).mockReturnValue({
-      rule: { id: '123' } as RuleResponse,
-      isExistingRule: true,
-      loading: false,
-    });
-    (useHighlightedFieldsPrivilege as jest.Mock).mockReturnValue({
-      isEditHighlightedFieldsDisabled: false,
-      tooltipContent: 'tooltip content',
-    });
-
-    const { getByTestId } = renderInvestigationSection();
-    expect(getByTestId(HIGHLIGHTED_FIELDS_TITLE_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(HIGHLIGHTED_FIELDS_EDIT_BUTTON_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render investigation guide and highlighted fields when document is signal', () => {
