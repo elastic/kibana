@@ -70,7 +70,7 @@ Jira Service Management tags
 :   The tags for the alert (optional).
 
 Priority
-:   The priority level for the alert.
+:   The priority level for the alert (optional).
 
 Description
 :   A description that provides detailed information about the alert (optional).
