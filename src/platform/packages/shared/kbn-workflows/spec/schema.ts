@@ -370,28 +370,28 @@ const WorkflowInputBaseSchema = z.object({
   required: z.boolean().optional(),
 });
 
-const WorkflowInputStringSchema = WorkflowInputBaseSchema.extend({
+export const WorkflowInputStringSchema = WorkflowInputBaseSchema.extend({
   type: z.literal('string'),
   default: z.string().optional(),
 });
 
-const WorkflowInputNumberSchema = WorkflowInputBaseSchema.extend({
+export const WorkflowInputNumberSchema = WorkflowInputBaseSchema.extend({
   type: z.literal('number'),
   default: z.number().optional(),
 });
 
-const WorkflowInputBooleanSchema = WorkflowInputBaseSchema.extend({
+export const WorkflowInputBooleanSchema = WorkflowInputBaseSchema.extend({
   type: z.literal('boolean'),
   default: z.boolean().optional(),
 });
 
-const WorkflowInputChoiceSchema = WorkflowInputBaseSchema.extend({
+export const WorkflowInputChoiceSchema = WorkflowInputBaseSchema.extend({
   type: z.literal('choice'),
   default: z.string().optional(),
   options: z.array(z.string()),
 });
 
-const WorkflowInputArraySchema = WorkflowInputBaseSchema.extend({
+export const WorkflowInputArraySchema = WorkflowInputBaseSchema.extend({
   type: z.literal('array'),
   minItems: z.number().int().nonnegative().optional(),
   maxItems: z.number().int().nonnegative().optional(),

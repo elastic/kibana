@@ -35,9 +35,9 @@ export function getWorkflowContextSchema(definition: WorkflowYaml) {
               valueSchema = z.any();
               if (opts.length > 0) {
                 const literals = opts.map((o) => z.literal(o)) as [
-                  z.ZodLiteral<any>,
-                  z.ZodLiteral<any>,
-                  ...z.ZodLiteral<any>[]
+                  z.ZodLiteral<unknown>,
+                  z.ZodLiteral<unknown>,
+                  ...z.ZodLiteral<unknown>[]
                 ];
                 valueSchema = z.union(literals);
               }
@@ -45,26 +45,23 @@ export function getWorkflowContextSchema(definition: WorkflowYaml) {
             case 'array': {
               // Create a union of all possible array types to show comprehensive type information
               // This allows the type description to show "string[] | number[] | boolean[]"
-              let stringArray = z.array(z.string());
-              let numberArray = z.array(z.number());
-              let booleanArray = z.array(z.boolean());
-
-              // Apply minItems constraint to all array types if specified
-              if ((input as any).minItems != null) {
-                stringArray = stringArray.min((input as any).minItems);
-                numberArray = numberArray.min((input as any).minItems);
-                booleanArray = booleanArray.min((input as any).minItems);
-              }
-
-              // Apply maxItems constraint to all array types if specified
-              if ((input as any).maxItems != null) {
-                stringArray = stringArray.max((input as any).maxItems);
-                numberArray = numberArray.max((input as any).maxItems);
-                booleanArray = booleanArray.max((input as any).maxItems);
-              }
-
-              const schema = z.union([stringArray, numberArray, booleanArray]);
-              valueSchema = schema;
+              const arraySchemas = [z.array(z.string()), z.array(z.number()), z.array(z.boolean())];
+              const { minItems, maxItems } = input;
+              const applyConstraints = (
+                schema: z.ZodArray<z.ZodString | z.ZodNumber | z.ZodBoolean>
+              ) => {
+                let s = schema;
+                if (minItems != null) s = s.min(minItems);
+                if (maxItems != null) s = s.max(maxItems);
+                return s;
+              };
+              valueSchema = z.union(
+                arraySchemas.map(applyConstraints) as [
+                  z.ZodArray<z.ZodString>,
+                  z.ZodArray<z.ZodNumber>,
+                  z.ZodArray<z.ZodBoolean>
+                ]
+              );
               break;
             }
             default:

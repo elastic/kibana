@@ -44,11 +44,12 @@ const generateField = (input: InputType) => {
       break;
     case 'array': {
       const arraySchemas = [z.array(z.string()), z.array(z.number()), z.array(z.boolean())];
-      const { minItems, maxItems } = input as any;
-      const applyConstraints = (schema: z.ZodArray<any>) => {
-        if (minItems != null) schema = schema.min(minItems);
-        if (maxItems != null) schema = schema.max(maxItems);
-        return schema;
+      const { minItems, maxItems } = input;
+      const applyConstraints = (schema: z.ZodArray<z.ZodString | z.ZodNumber | z.ZodBoolean>) => {
+        let s = schema;
+        if (minItems != null) s = s.min(minItems);
+        if (maxItems != null) s = s.max(maxItems);
+        return s;
       };
       const arr = z.union(
         arraySchemas.map(applyConstraints) as [
