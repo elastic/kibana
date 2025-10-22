@@ -77,7 +77,7 @@ describe('extractTemplateVariables', () => {
     `;
 
     const variables = extractTemplateVariables(template);
-    expect(variables).toEqual(['products[i]', 'start', 'end', 'items']);
+    expect(variables).toEqual(['products', 'start', 'end', 'items']);
   });
 
   it('should handle LiteralToken (true, false, nil)', () => {
@@ -126,8 +126,8 @@ describe('extractTemplateVariables', () => {
     expect(variables).toEqual([
       'user.age',
       'user.name',
-      'items',
-      'products',
+      'items[0]',
+      'products[123]',
       'price',
       'cart.total',
     ]);
