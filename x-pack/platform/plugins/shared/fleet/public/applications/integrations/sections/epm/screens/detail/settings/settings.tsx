@@ -90,10 +90,11 @@ interface Props {
   packageMetadata?: PackageMetadata;
   startServices: Pick<FleetStartServices, 'analytics' | 'i18n' | 'theme'>;
   isCustomPackage: boolean;
+  latestGAVersion?: string;
 }
 
 export const SettingsPage: React.FC<Props> = memo(
-  ({ packageInfo, packageMetadata, startServices, isCustomPackage }: Props) => {
+  ({ packageInfo, packageMetadata, startServices, isCustomPackage, latestGAVersion }: Props) => {
     const authz = useAuthz();
     const { name, title, latestVersion, version, keepPoliciesUpToDate } = packageInfo;
     const [isUpgradingPackagePolicies, setIsUpgradingPackagePolicies] = useState<boolean>(false);
@@ -217,7 +218,9 @@ export const SettingsPage: React.FC<Props> = memo(
     // hide install/remove options if the user has version of the package is installed
     // and this package is out of date or if they do have a version installed but it's not this one
     const hideInstallOptions =
-      (installationStatus === InstallStatus.notInstalled && isViewingOldPackage) ||
+      (installationStatus === InstallStatus.notInstalled &&
+        isViewingOldPackage &&
+        latestGAVersion !== version) ||
       (installationStatus === InstallStatus.installed && installedVersion !== version);
 
     const isUpdating = installationStatus === InstallStatus.installing && installedVersion;

@@ -843,6 +843,7 @@ export function Detail() {
               packageMetadata={packageInfoData?.metadata}
               startServices={services}
               isCustomPackage={isCustomPackage}
+              latestGAVersion={latestGAVersion}
             />
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_assets}>
