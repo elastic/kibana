@@ -10,6 +10,8 @@
 import { Liquid, Template, IfTag, Output, TokenKind, Expression, ForTag, Token } from 'liquidjs';
 
 // Internal types not exported by liquidjs
+// See this GH issue - https://github.com/harttle/liquidjs/issues/822
+// Will be removed once the types are exported from liquidjs
 interface PropertyAccessToken extends Token {
   kind: TokenKind.PropertyAccess;
   props: Array<{ kind: TokenKind; content: string | number }>;
