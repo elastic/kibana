@@ -18,8 +18,8 @@ import type YAML from 'yaml';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { monaco } from '@kbn/monaco';
 import { isTriggerType } from '@kbn/workflows';
-import type { z } from '@kbn/zod';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows/types/v1';
+import type { z } from '@kbn/zod';
 import {
   useAlertTriggerDecorations,
   useConnectorTypeDecorations,
@@ -28,6 +28,7 @@ import {
   useStepDecorationsInExecution,
   useTriggerTypeDecorations,
 } from './decorations';
+import { useCompletionProvider } from './hooks/use_completion_provider';
 import { StepActions } from './step_actions';
 import { WorkflowYAMLEditorShortcuts } from './workflow_yaml_editor_shortcuts';
 import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors';
@@ -56,12 +57,12 @@ import { insertTriggerSnippet } from '../lib/snippets/insert_trigger_snippet';
 import type { StepInfo } from '../lib/store';
 import {
   selectFocusedStepInfo,
+  selectSchemaLoose,
   selectYamlDocument,
+  setConnectors,
   setCursorPosition,
   setStepExecutions,
   setYamlString,
-  setConnectors,
-  selectSchemaLoose,
 } from '../lib/store';
 import { useRegisterKeyboardCommands } from '../lib/use_register_keyboard_commands';
 import { navigateToErrorPosition } from '../lib/utils';
@@ -69,7 +70,6 @@ import { GlobalWorkflowEditorStyles } from '../styles/global_workflow_editor_sty
 import { useDynamicTypeIcons } from '../styles/use_dynamic_type_icons';
 import { useWorkflowEditorStyles } from '../styles/use_workflow_editor_styles';
 import { useWorkflowsMonacoTheme } from '../styles/use_workflows_monaco_theme';
-import { useCompletionProvider } from './hooks/use_completion_provider';
 
 const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   minimap: { enabled: false },
