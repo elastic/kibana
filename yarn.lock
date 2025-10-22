@@ -8913,6 +8913,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/visualizations-common@link:src/platform/packages/shared/kbn-visualizations-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/visualizations-plugin@link:src/platform/plugins/shared/visualizations":
   version "0.0.0"
   uid ""

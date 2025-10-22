@@ -1129,6 +1129,7 @@
     "@kbn/vis-type-xy-plugin": "link:src/platform/plugins/private/vis_types/xy",
     "@kbn/visualization-ui-components": "link:src/platform/packages/shared/kbn-visualization-ui-components",
     "@kbn/visualization-utils": "link:src/platform/packages/shared/kbn-visualization-utils",
+    "@kbn/visualizations-common": "link:src/platform/packages/shared/kbn-visualizations-common",
     "@kbn/visualizations-plugin": "link:src/platform/plugins/shared/visualizations",
     "@kbn/watcher-plugin": "link:x-pack/platform/plugins/private/watcher",
     "@kbn/workflows": "link:src/platform/packages/shared/kbn-workflows",
