@@ -12,8 +12,9 @@ import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { Query } from '@kbn/es-query';
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { getQueryParams } from '@kbn/kibana-utils-plugin/public';
+import { createQueryParamObservable, getQueryParams } from '@kbn/kibana-utils-plugin/public';
 import type { History } from 'history';
+import { map } from 'rxjs';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { SEARCH_SESSION_ID } from '../../../common/constants';
 import type { DashboardLocatorParams, DashboardState } from '../../../common/types';
@@ -34,6 +35,11 @@ export const removeSearchSessionIdFromURL = (kbnUrlStateStorage: IKbnUrlStateSto
 
 export const getSearchSessionIdFromURL = (history: History): string | undefined =>
   getQueryParams(history.location)[SEARCH_SESSION_ID] as string | undefined;
+
+export const getSessionURLObservable = (history: History) =>
+  createQueryParamObservable<string>(history, SEARCH_SESSION_ID).pipe(
+    map((sessionId) => sessionId ?? undefined)
+  );
 
 export function createSessionRestorationDataProvider(
   dashboardApi: DashboardApi,

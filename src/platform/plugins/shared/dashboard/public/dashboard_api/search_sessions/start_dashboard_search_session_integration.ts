@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { combineLatest, filter, skip } from 'rxjs';
+
 import { noSearchSessionStorageCapabilityMessage } from '@kbn/data-plugin/public';
 
-import { combineLatest, filter } from 'rxjs';
 import type { DashboardApi, DashboardCreationOptions } from '../..';
 import { dataService } from '../../services/kibana_services';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
@@ -28,6 +29,7 @@ export function startDashboardSearchSessionIntegration(
   if (!searchSessionSettings) return;
 
   const {
+    sessionIdUrlChangeObservable,
     getSearchSessionIdFromURL,
     removeSessionIdFromUrl,
     createSessionRestorationDataProvider,
@@ -45,6 +47,11 @@ export function startDashboardSearchSessionIntegration(
             },
     }
   );
+
+  // force refresh when the session id in the URL changes. This will also fire off the "handle search session change" below.
+  const searchSessionIdChangeSubscription = sessionIdUrlChangeObservable
+    ?.pipe(skip(1))
+    .subscribe(() => dashboardApi.forceRefresh());
 
   const newSessionSubscription = combineLatest([
     newSession$(dashboardApi),
@@ -79,6 +86,7 @@ export function startDashboardSearchSessionIntegration(
     });
 
   return () => {
+    searchSessionIdChangeSubscription?.unsubscribe();
     newSessionSubscription.unsubscribe();
   };
 }
