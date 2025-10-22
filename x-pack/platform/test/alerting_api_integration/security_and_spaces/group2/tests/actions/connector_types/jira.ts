@@ -6,7 +6,7 @@
  */
 
 import type httpProxy from 'http-proxy';
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/generated/schemas';
 
 import { getHttpProxyServer } from '@kbn/alerting-api-integration-helpers';
@@ -15,7 +15,8 @@ import {
   ExternalServiceSimulator,
 } from '@kbn/actions-simulators-plugin/server/plugin';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
-import { MAX_OTHER_FIELDS_LENGTH } from '@kbn/stack-connectors-plugin/common/jira/constants';
+import { MAX_OTHER_FIELDS_LENGTH } from '@kbn/connector-schemas/jira';
+
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getEventLog } from '../../../../../common/lib';
 

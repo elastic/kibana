@@ -1,5 +1,5 @@
 pageLoadAssetSize:
-  actions: 20000
+  actions: 78504
   advancedSettings: 6196
   aiAssistantManagementSelection: 9214
   aiops: 15440
@@ -163,7 +163,7 @@ pageLoadAssetSize:
   snapshotRestore: 22068
   spaces: 32135
   stackAlerts: 31499
-  stackConnectors: 74000
+  stackConnectors: 143631
   streams: 9000
   streamsApp: 17000
   synthetics: 31571
