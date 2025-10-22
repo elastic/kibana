@@ -163,6 +163,6 @@ describe('<RequestBodyField />', () => {
     }
 
     expect(formButton).toHaveAttribute('aria-selected', 'true');
-    expect(getByRole('button', { name: 'Add form field' })).toBeDisabled();
+    expect(getByRole('button', { name: 'Add form field' })).toBeEuiDisabled();
   });
 });

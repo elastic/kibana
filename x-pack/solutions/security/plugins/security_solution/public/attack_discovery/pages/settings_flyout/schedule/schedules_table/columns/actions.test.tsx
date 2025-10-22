@@ -78,7 +78,7 @@ describe('Actions Column', () => {
 
     it('should render disabled delete button', () => {
       renderComponent();
-      expect(screen.getByTestId('deleteButton')).toBeDisabled();
+      expect(screen.getByTestId('deleteButton')).toBeEuiDisabled();
     });
 
     it('should not invoke `deleteSchedule` when the delete button is clicked', async () => {

@@ -195,7 +195,7 @@ describe('EsQueryRuleTypeExpression', () => {
 
     expect(result.getByTestId('excludeHitsFromPreviousRunExpression')).toBeChecked();
 
-    expect(result.getByTestId('testQuery')).not.toBeDisabled();
+    expect(result.getByTestId('testQuery')).not.toBeEuiDisabled();
   });
 
   test('should render Test Query button disabled if alert params are invalid', async () => {
@@ -204,7 +204,7 @@ describe('EsQueryRuleTypeExpression', () => {
       timeField: null,
     } as unknown as EsQueryRuleParams<SearchType.esQuery>);
 
-    expect(result.getByTestId('testQuery')).toBeDisabled();
+    expect(result.getByTestId('testQuery')).toBeEuiDisabled();
   });
 
   test('should show excludeHitsFromPreviousRun unchecked by default', async () => {

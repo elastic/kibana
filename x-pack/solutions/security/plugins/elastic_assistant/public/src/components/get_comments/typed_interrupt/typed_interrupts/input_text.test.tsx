@@ -112,8 +112,8 @@ describe('InputText', () => {
     const input = screen.getByPlaceholderText('Type here...');
     const submitButton = screen.getByRole('button', { name: 'Submit' });
 
-    expect(input).toBeDisabled();
-    expect(submitButton).toBeDisabled();
+    expect(input).toBeEuiDisabled();
+    expect(submitButton).toBeEuiDisabled();
   });
 
   it('disables input and button when not last in conversation', () => {
@@ -121,8 +121,8 @@ describe('InputText', () => {
     const input = screen.getByPlaceholderText('Type here...');
     const submitButton = screen.getByRole('button', { name: 'Submit' });
 
-    expect(input).toBeDisabled();
-    expect(submitButton).toBeDisabled();
+    expect(input).toBeEuiDisabled();
+    expect(submitButton).toBeEuiDisabled();
   });
 
   it('disables input and button when resume value exists', () => {
@@ -134,8 +134,8 @@ describe('InputText', () => {
     const input = screen.getByDisplayValue('submitted value');
     const submitButton = screen.getByRole('button', { name: 'Submit' });
 
-    expect(input).toBeDisabled();
-    expect(submitButton).toBeDisabled();
+    expect(input).toBeEuiDisabled();
+    expect(submitButton).toBeEuiDisabled();
   });
 
   it('shows "Expired" badge when interrupt is expired', () => {

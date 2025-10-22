@@ -75,7 +75,7 @@ describe('Edit ', () => {
       </FormTestComponent>
     );
 
-    expect(screen.getByRole('switch')).toBeDisabled();
+    expect(screen.getByRole('switch')).toBeEuiDisabled();
   });
 
   it('disables the toggle when loading', async () => {
@@ -91,7 +91,7 @@ describe('Edit ', () => {
       </FormTestComponent>
     );
 
-    expect(screen.getByRole('switch')).toBeDisabled();
+    expect(screen.getByRole('switch')).toBeEuiDisabled();
   });
 
   it('sets the configuration key and the initial value if the custom field is undefined', async () => {

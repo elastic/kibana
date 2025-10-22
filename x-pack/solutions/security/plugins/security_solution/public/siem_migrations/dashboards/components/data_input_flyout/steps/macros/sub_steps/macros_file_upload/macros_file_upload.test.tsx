@@ -81,7 +81,7 @@ describe('MacrosFileUpload', () => {
     });
 
     const uploadButton = getByText('Upload');
-    expect(uploadButton).not.toBeDisabled();
+    expect(uploadButton).not.toBeEuiDisabled();
 
     await act(async () => {
       fireEvent.click(uploadButton);

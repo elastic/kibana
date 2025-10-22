@@ -135,17 +135,17 @@ describe('rulePageFooter', () => {
   test('should disable buttons when saving', () => {
     render(<RulePageFooter isSaving onSave={onSave} onCancel={onCancel} />);
 
-    expect(screen.getByTestId('rulePageFooterCancelButton')).toBeDisabled();
-    expect(screen.getByTestId('rulePageFooterShowRequestButton')).toBeDisabled();
-    expect(screen.getByTestId('rulePageFooterSaveButton')).toBeDisabled();
+    expect(screen.getByTestId('rulePageFooterCancelButton')).toBeEuiDisabled();
+    expect(screen.getByTestId('rulePageFooterShowRequestButton')).toBeEuiDisabled();
+    expect(screen.getByTestId('rulePageFooterSaveButton')).toBeEuiDisabled();
   });
 
   test('should disable save and show request buttons when there is an error', () => {
     hasRuleErrors.mockReturnValue(true);
     render(<RulePageFooter onSave={onSave} onCancel={onCancel} />);
 
-    expect(screen.getByTestId('rulePageFooterShowRequestButton')).toBeDisabled();
-    expect(screen.getByTestId('rulePageFooterSaveButton')).toBeDisabled();
-    expect(screen.getByTestId('rulePageFooterCancelButton')).not.toBeDisabled();
+    expect(screen.getByTestId('rulePageFooterShowRequestButton')).toBeEuiDisabled();
+    expect(screen.getByTestId('rulePageFooterSaveButton')).toBeEuiDisabled();
+    expect(screen.getByTestId('rulePageFooterCancelButton')).not.toBeEuiDisabled();
   });
 });

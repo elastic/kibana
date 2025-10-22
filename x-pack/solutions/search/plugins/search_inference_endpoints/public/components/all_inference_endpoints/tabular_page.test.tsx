@@ -199,7 +199,7 @@ describe('When the tabular page is loaded', () => {
 
     const deleteAction = screen.getByTestId(/inferenceUIDeleteAction/);
 
-    expect(deleteAction).toBeDisabled();
+    expect(deleteAction).toBeEuiDisabled();
   });
 
   it('should not disable delete action for other endpoints', () => {

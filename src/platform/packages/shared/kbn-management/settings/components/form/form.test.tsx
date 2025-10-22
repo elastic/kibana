@@ -65,9 +65,9 @@ describe('Form', () => {
       const inputTestSubj = `${TEST_SUBJ_PREFIX_FIELD}-${type}`;
 
       if (type === 'color') {
-        expect(getByTestId(`euiColorPickerAnchor ${inputTestSubj}`)).toBeDisabled();
+        expect(getByTestId(`euiColorPickerAnchor ${inputTestSubj}`)).toBeEuiDisabled();
       } else {
-        expect(getByTestId(inputTestSubj)).toBeDisabled();
+        expect(getByTestId(inputTestSubj)).toBeEuiDisabled();
       }
     });
   });

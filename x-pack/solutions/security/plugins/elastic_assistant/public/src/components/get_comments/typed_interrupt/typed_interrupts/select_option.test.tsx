@@ -73,7 +73,7 @@ describe('SelectOption', () => {
     render(<SelectOption {...defaultProps} resumedValue={resumedValue} />);
 
     const approveButton = screen.getByTestId('select-option-approve');
-    expect(approveButton).toBeDisabled();
+    expect(approveButton).toBeEuiDisabled();
   });
 
   it('disables buttons when interrupt is expired', () => {
@@ -81,14 +81,14 @@ describe('SelectOption', () => {
     render(<SelectOption {...defaultProps} interrupt={expiredInterrupt} />);
 
     const approveButton = screen.getByTestId('select-option-approve');
-    expect(approveButton).toBeDisabled();
+    expect(approveButton).toBeEuiDisabled();
   });
 
   it('disables buttons when not last in conversation', () => {
     render(<SelectOption {...defaultProps} isLastInConversation={false} />);
 
     const approveButton = screen.getByTestId('select-option-approve');
-    expect(approveButton).toBeDisabled();
+    expect(approveButton).toBeEuiDisabled();
   });
 
   it('shows outcome badge with selected option label when resumed', () => {
@@ -138,6 +138,6 @@ describe('SelectOption', () => {
     fireEvent.click(approveButton);
 
     // After clicking, the button should be disabled due to state change
-    expect(approveButton).toBeDisabled();
+    expect(approveButton).toBeEuiDisabled();
   });
 });

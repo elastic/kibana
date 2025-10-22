@@ -73,6 +73,6 @@ describe('ColorPickerInput', () => {
       wrap(<ColorPickerInput {...defaultProps} isSavingEnabled={false} />)
     );
     const input = getByRole('textbox');
-    expect(input).toBeDisabled();
+    expect(input).toBeEuiDisabled();
   });
 });

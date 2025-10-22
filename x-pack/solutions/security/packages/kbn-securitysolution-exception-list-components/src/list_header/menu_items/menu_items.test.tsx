@@ -86,8 +86,8 @@ describe('MenuItems', () => {
     fireEvent.click(wrapper.getByTestId('MenuActionsButtonIcon'));
 
     expect(wrapper.getByTestId('MenuActionsActionItem1')).toBeEnabled();
-    expect(wrapper.getByTestId('MenuActionsActionItem2')).toBeDisabled();
-    expect(wrapper.getByTestId('MenuActionsActionItem3')).toBeDisabled();
+    expect(wrapper.getByTestId('MenuActionsActionItem2')).toBeEuiDisabled();
+    expect(wrapper.getByTestId('MenuActionsActionItem3')).toBeEuiDisabled();
   });
 
   it('should not render Manage rules when read only', () => {

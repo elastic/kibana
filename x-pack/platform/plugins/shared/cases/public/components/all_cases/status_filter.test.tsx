@@ -36,7 +36,7 @@ describe('StatusFilter', () => {
   it('should render', async () => {
     render(<StatusFilter {...defaultProps} />);
 
-    expect(await screen.findByTestId('options-filter-popover-button-status')).not.toBeDisabled();
+    expect(await screen.findByTestId('options-filter-popover-button-status')).not.toBeEuiDisabled();
 
     await userEvent.click(await screen.findByTestId('options-filter-popover-button-status'));
 

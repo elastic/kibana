@@ -138,7 +138,7 @@ describe('NewCalendar', () => {
 
     const importEventsButton = getByTestId('mlCalendarImportEventsButton');
     expect(importEventsButton).toBeInTheDocument();
-    expect(importEventsButton).toBeDisabled();
+    expect(importEventsButton).toBeEuiDisabled();
   });
 
   test('New event modal button is disabled', async () => {
@@ -150,7 +150,7 @@ describe('NewCalendar', () => {
 
     const newEventButton = getByTestId('mlCalendarNewEventButton');
     expect(newEventButton).toBeInTheDocument();
-    expect(newEventButton).toBeDisabled();
+    expect(newEventButton).toBeEuiDisabled();
   });
 
   test('isDuplicateId returns true if form calendar id already exists in calendars', async () => {

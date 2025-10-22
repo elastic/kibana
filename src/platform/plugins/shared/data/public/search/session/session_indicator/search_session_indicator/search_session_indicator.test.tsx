@@ -112,7 +112,7 @@ describe('<SearchSessionIndicator />', () => {
       it('the button should be disabled', async () => {
         const { userEvent } = setup({ state, saveDisabled });
         await userEvent.click(screen.getByLabelText(text));
-        expect(screen.getByRole('button', { name: 'Save session' })).toBeDisabled();
+        expect(screen.getByRole('button', { name: 'Save session' })).toBeEuiDisabled();
       });
     });
   });

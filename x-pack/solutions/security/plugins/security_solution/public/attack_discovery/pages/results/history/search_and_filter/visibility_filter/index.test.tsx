@@ -70,7 +70,7 @@ describe('VisibilityFilter', () => {
 
     const button = screen.getByRole('button', { name: /visibility/i });
 
-    expect(button).toBeDisabled();
+    expect(button).toBeEuiDisabled();
   });
 
   it('calls setShared with true when only Shared is selected', () => {

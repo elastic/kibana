@@ -128,7 +128,7 @@ describe('AppearancePopover', () => {
     clickOnToolbarButton();
 
     const subtitleInput = screen.getByTestId('lens-metric-appearance-subtitle-field');
-    expect(subtitleInput).toBeDisabled();
+    expect(subtitleInput).toBeEuiDisabled();
   });
 
   it.each<[Alignment, string, Alignment, string]>(alignmentTransitions)(
@@ -199,7 +199,7 @@ describe('AppearancePopover', () => {
 
     expect(
       screen.getByTestId('lens-metric-appearance-secondary-metric-alignment-btn')
-    ).toBeDisabled();
+    ).toBeEuiDisabled();
   });
 
   it('should set valueFontMode to Fit', async () => {
@@ -290,7 +290,9 @@ describe('AppearancePopover', () => {
     const { clickOnToolbarButton } = renderToolbarOptions({ icon });
     clickOnToolbarButton();
 
-    expect(screen.queryByTestId('lens-metric-appearance-other-icon-position-btn')).toBeDisabled();
+    expect(
+      screen.queryByTestId('lens-metric-appearance-other-icon-position-btn')
+    ).toBeEuiDisabled();
   });
 
   it('should set Regular titleWeight', async () => {

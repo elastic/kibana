@@ -250,7 +250,7 @@ describe('SettingsFlyout', () => {
       renderComponent(propsWithUndefinedConnector);
 
       const save = screen.getByTestId('save');
-      expect(save).toBeDisabled();
+      expect(save).toBeEuiDisabled();
     });
   });
 

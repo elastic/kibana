@@ -194,7 +194,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
 
     const button = result.getByTestId('testQuery');
     expect(button).toBeInTheDocument();
-    expect(button).toBeDisabled();
+    expect(button).toBeEuiDisabled();
   });
 
   test('should show success message if Test Query is successful', async () => {

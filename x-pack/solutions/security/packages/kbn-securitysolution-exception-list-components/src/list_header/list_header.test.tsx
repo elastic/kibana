@@ -47,7 +47,7 @@ describe('ExceptionListHeader', () => {
       />
     );
     fireEvent.click(wrapper.getByTestId('RightSideMenuItemsMenuActionsItems'));
-    expect(wrapper.queryByTestId('RightSideMenuItemsMenuActionsButtonIcon')).toBeDisabled();
+    expect(wrapper.queryByTestId('RightSideMenuItemsMenuActionsButtonIcon')).toBeEuiDisabled();
     expect(wrapper.getByTestId('DescriptionText')).toHaveTextContent(
       i18n.EXCEPTION_LIST_HEADER_DESCRIPTION
     );
@@ -82,8 +82,8 @@ describe('ExceptionListHeader', () => {
     fireEvent.click(wrapper.getByTestId('RightSideMenuItemsMenuActionsButtonIcon'));
 
     expect(wrapper.queryByTestId('RightSideMenuItemsMenuActionsActionItem1')).toBeEnabled();
-    expect(wrapper.queryByTestId('RightSideMenuItemsMenuActionsActionItem2')).toBeDisabled();
-    expect(wrapper.queryByTestId('RightSideMenuItemsMenuActionsActionItem3')).toBeDisabled();
+    expect(wrapper.queryByTestId('RightSideMenuItemsMenuActionsActionItem2')).toBeEuiDisabled();
+    expect(wrapper.queryByTestId('RightSideMenuItemsMenuActionsActionItem3')).toBeEuiDisabled();
     expect(wrapper.queryByTestId('EditTitleIcon')).not.toBeInTheDocument();
   });
 

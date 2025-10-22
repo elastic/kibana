@@ -120,7 +120,7 @@ describe('Options list popover', () => {
     contextMock.componentApi.setAvailableOptions(take(allOptions, 10));
     renderComponent(contextMock);
 
-    expect(getSelectAllCheckbox()).toBeDisabled();
+    expect(getSelectAllCheckbox()).toBeEuiDisabled();
   });
 
   test('bulk selections are disabled when there are no available options', async () => {
@@ -129,7 +129,7 @@ describe('Options list popover', () => {
     contextMock.componentApi.setAvailableOptions([]);
     renderComponent(contextMock);
 
-    expect(getSelectAllCheckbox()).toBeDisabled();
+    expect(getSelectAllCheckbox()).toBeEuiDisabled();
   });
 
   test('bulk selections are disabled when showOnlySelected is true', async () => {
@@ -138,6 +138,6 @@ describe('Options list popover', () => {
     contextMock.componentApi.setAvailableOptions([]);
     renderComponent({ ...contextMock, showOnlySelected: true });
 
-    expect(getSelectAllCheckbox()).toBeDisabled();
+    expect(getSelectAllCheckbox()).toBeEuiDisabled();
   });
 });

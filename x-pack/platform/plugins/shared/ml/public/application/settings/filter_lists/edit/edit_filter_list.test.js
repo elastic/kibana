@@ -92,7 +92,7 @@ describe('EditFilterList', () => {
 
     // Emptied again, the save button should be disabled.
     await waitFor(() => {
-      expect(getByTestId('mlFilterListSaveButton')).toBeDisabled();
+      expect(getByTestId('mlFilterListSaveButton')).toBeEuiDisabled();
     });
 
     await userEvent.type(mlNewFilterListIdInput, '#invalid#$%^', { delay: 1 });
@@ -103,7 +103,7 @@ describe('EditFilterList', () => {
 
     // After entering an invalid ID, the save button should still be disabled.
     await waitFor(() => {
-      expect(getByTestId('mlFilterListSaveButton')).toBeDisabled();
+      expect(getByTestId('mlFilterListSaveButton')).toBeEuiDisabled();
     });
 
     expect(mockFilters).toHaveBeenCalledTimes(0);
@@ -244,7 +244,7 @@ describe('EditFilterList', () => {
     // Assert that the add items button prenset but disabled.
     const mlFilterListAddItemsButton = getByTestId('mlFilterListAddItemsButton');
     expect(mlFilterListAddItemsButton).toBeInTheDocument();
-    expect(mlFilterListAddItemsButton).toBeDisabled();
+    expect(mlFilterListAddItemsButton).toBeEuiDisabled();
 
     // Enter items in the textarea and click the add items button
     await userEvent.type(mlFilterListAddItemTextArea, 'amazon.com\nspotify.com');

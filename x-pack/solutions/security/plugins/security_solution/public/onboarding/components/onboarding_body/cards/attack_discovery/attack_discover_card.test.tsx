@@ -53,6 +53,6 @@ describe('RulesCard', () => {
       </TestProviders>
     );
 
-    expect(getByTestId('attackDiscoveryCardButton').querySelector('button')).toBeDisabled();
+    expect(getByTestId('attackDiscoveryCardButton').querySelector('button')).toBeEuiDisabled();
   });
 });

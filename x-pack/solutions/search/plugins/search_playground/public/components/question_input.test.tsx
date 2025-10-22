@@ -64,7 +64,7 @@ describe('Question Input', () => {
         </IntlProvider>
       );
 
-      expect(screen.getByTestId('questionInput')).toBeDisabled();
+      expect(screen.getByTestId('questionInput')).toBeEuiDisabled();
     });
 
     it('with value', () => {

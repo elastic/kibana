@@ -190,7 +190,7 @@ describe('MigrationDashboardsTable', () => {
         expect(await screen.findByTestId('siemMigrationsDashboardsTable')).toBeInTheDocument();
         const installButton = screen.getByTestId('installDashboard');
         fireEvent.click(installButton);
-        expect(screen.getByTestId('installDashboard')).toBeDisabled();
+        expect(screen.getByTestId('installDashboard')).toBeEuiDisabled();
         await waitFor(() => {
           expect(mockInstallMigrationDashboard).toHaveBeenCalledWith({ ids: ['1'] });
         });

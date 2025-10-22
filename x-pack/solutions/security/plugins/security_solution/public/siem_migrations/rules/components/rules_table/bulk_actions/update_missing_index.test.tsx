@@ -190,6 +190,6 @@ describe('UpdateMissingIndex', () => {
       </TestProviders>
     );
 
-    expect(getByTestId('updateMissingIndexPatternButton')).toBeDisabled();
+    expect(getByTestId('updateMissingIndexPatternButton')).toBeEuiDisabled();
   });
 });

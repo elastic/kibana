@@ -99,7 +99,7 @@ describe('CreateNewSetModal', () => {
     );
 
     expect(screen.getByTestId(TEST_IDS.NameInput).getAttribute('value')).toBe('');
-    expect(screen.getByTestId(TEST_IDS.CreateButton)).toBeDisabled();
+    expect(screen.getByTestId(TEST_IDS.CreateButton)).toBeEuiDisabled();
 
     act(ACTIONS.TypeSetName);
 

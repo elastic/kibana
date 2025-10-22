@@ -42,7 +42,7 @@ describe('Toolbar', () => {
 
     const bulkActionsButton = getByTestId('bulkActionsButton');
 
-    expect(bulkActionsButton).toBeDisabled();
+    expect(bulkActionsButton).toBeEuiDisabled();
   });
 
   it('enables bulk actions when some fields are selected', () => {
@@ -50,7 +50,7 @@ describe('Toolbar', () => {
 
     const bulkActionsButton = getByTestId('bulkActionsButton');
 
-    expect(bulkActionsButton).not.toBeDisabled();
+    expect(bulkActionsButton).not.toBeEuiDisabled();
   });
 
   it('calls onSelectAll when the Select All Fields button is clicked', () => {

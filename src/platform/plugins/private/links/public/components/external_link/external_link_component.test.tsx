@@ -93,7 +93,7 @@ describe('external link component', () => {
     render(<ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />);
 
     const link = screen.getByTestId('externalLink--foo--error');
-    expect(link).toBeDisabled();
+    expect(link).toBeEuiDisabled();
     /**
      * TODO: We should test the tooltip content, but the component is disabled
      * so it has pointer-events: none. This means we can not use userEvent.hover().

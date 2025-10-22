@@ -111,7 +111,7 @@ describe('ML Flyout component', () => {
         </UptimeSettingsContext.Provider>
       );
 
-      expect(forNearestButton(queryByText)(labels.CREATE_NEW_JOB)).toBeDisabled();
+      expect(forNearestButton(queryByText)(labels.CREATE_NEW_JOB)).toBeEuiDisabled();
     });
   });
 });

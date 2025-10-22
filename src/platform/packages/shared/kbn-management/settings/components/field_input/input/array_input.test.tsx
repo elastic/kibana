@@ -77,6 +77,6 @@ describe('ArrayInput', () => {
   it('disables the input when isDisabled prop is true', () => {
     const { getByTestId } = render(wrap(<ArrayInput {...defaultProps} isSavingEnabled={false} />));
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`);
-    expect(input).toBeDisabled();
+    expect(input).toBeEuiDisabled();
   });
 });

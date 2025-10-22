@@ -222,7 +222,7 @@ describe('KnowledgeBaseTab', () => {
           target: { value: 'foo' },
         });
 
-        expect(getByTestId('knowledgeBaseEditManualEntryFlyoutSaveButton')).toBeDisabled();
+        expect(getByTestId('knowledgeBaseEditManualEntryFlyoutSaveButton')).toBeEuiDisabled();
       });
     });
 

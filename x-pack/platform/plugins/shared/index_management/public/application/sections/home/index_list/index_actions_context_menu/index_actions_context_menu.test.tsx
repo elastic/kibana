@@ -558,7 +558,7 @@ describe('IndexActionsContextMenu', () => {
         await openContextMenu();
         const convertBtn = await screen.findByTestId('convertToLookupIndexButton');
 
-        expect(convertBtn).not.toBeDisabled();
+        expect(convertBtn).not.toBeEuiDisabled();
       });
 
       it('SHOULD open the Convert to Lookup modal', async () => {
@@ -611,7 +611,7 @@ describe('IndexActionsContextMenu', () => {
         await openContextMenu();
 
         const convertBtn = await screen.findByTestId('convertToLookupIndexButton');
-        expect(convertBtn).toBeDisabled();
+        expect(convertBtn).toBeEuiDisabled();
 
         const tooltip = await screen.findByText(/less than 2 billion documents/i);
         expect(tooltip).toBeInTheDocument();

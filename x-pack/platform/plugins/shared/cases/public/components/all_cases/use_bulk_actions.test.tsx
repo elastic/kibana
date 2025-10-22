@@ -540,9 +540,9 @@ describe('useBulkActions', () => {
       expect(await screen.findByTestId('case-bulk-action-status')).toBeInTheDocument();
       await userEvent.click(screen.getByTestId('case-bulk-action-status'));
 
-      expect(await screen.findByTestId('cases-bulk-action-status-open')).toBeDisabled();
-      expect(screen.queryByTestId('cases-bulk-action-status-in-progress')).toBeDisabled();
-      expect(screen.queryByTestId('cases-bulk-action-status-closed')).toBeDisabled();
+      expect(await screen.findByTestId('cases-bulk-action-status-open')).toBeEuiDisabled();
+      expect(screen.queryByTestId('cases-bulk-action-status-in-progress')).toBeEuiDisabled();
+      expect(screen.queryByTestId('cases-bulk-action-status-closed')).toBeEuiDisabled();
     });
 
     it('shows the correct actions with reopen permissions', async () => {
@@ -572,9 +572,9 @@ describe('useBulkActions', () => {
 
       await userEvent.click(screen.getByTestId('case-bulk-action-status'));
 
-      expect(await screen.findByTestId('cases-bulk-action-status-open')).not.toBeDisabled();
-      expect(screen.queryByTestId('cases-bulk-action-status-in-progress')).not.toBeDisabled();
-      expect(screen.queryByTestId('cases-bulk-action-status-closed')).not.toBeDisabled();
+      expect(await screen.findByTestId('cases-bulk-action-status-open')).not.toBeEuiDisabled();
+      expect(screen.queryByTestId('cases-bulk-action-status-in-progress')).not.toBeEuiDisabled();
+      expect(screen.queryByTestId('cases-bulk-action-status-closed')).not.toBeEuiDisabled();
     });
   });
 });

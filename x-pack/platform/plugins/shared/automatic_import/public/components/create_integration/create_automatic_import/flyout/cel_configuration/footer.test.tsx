@@ -77,7 +77,7 @@ describe('Footer', () => {
     });
 
     it('should render disabled save button', () => {
-      expect(result.queryByTestId('footer-saveButton')).toBeDisabled();
+      expect(result.queryByTestId('footer-saveButton')).toBeEuiDisabled();
     });
 
     it('should render hint', () => {
@@ -108,7 +108,7 @@ describe('Footer', () => {
     });
 
     it('should render disabled save button', () => {
-      expect(result.queryByTestId('footer-saveButton')).toBeDisabled();
+      expect(result.queryByTestId('footer-saveButton')).toBeEuiDisabled();
     });
 
     it('should render hint', () => {

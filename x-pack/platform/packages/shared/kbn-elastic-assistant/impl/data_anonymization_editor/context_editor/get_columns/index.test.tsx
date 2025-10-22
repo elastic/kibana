@@ -197,7 +197,7 @@ describe('getColumns', () => {
         </TestProviders>
       );
 
-      expect(getByTestId('anonymized')).toBeDisabled();
+      expect(getByTestId('anonymized')).toBeEuiDisabled();
     });
 
     it('enables the button when the field is allowed', () => {
@@ -210,7 +210,7 @@ describe('getColumns', () => {
         </TestProviders>
       );
 
-      expect(getByTestId('anonymized')).not.toBeDisabled();
+      expect(getByTestId('anonymized')).not.toBeEuiDisabled();
     });
 
     it('calls onListUpdated with an `add` operation when an unanonymized field is toggled', () => {

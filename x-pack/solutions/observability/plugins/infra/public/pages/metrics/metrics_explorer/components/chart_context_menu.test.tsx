@@ -127,7 +127,7 @@ describe('MetricsExplorerChartContextMenu', () => {
 
     await waitFor(() => {
       const visualizeButton = screen.getByTestId('metricsExplorerAction-OpenInTSVB');
-      expect(visualizeButton).toBeDisabled();
+      expect(visualizeButton).toBeEuiDisabled();
     });
   });
 

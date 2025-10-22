@@ -92,7 +92,7 @@ describe('XY Toolbar', () => {
   describe('Axis settings', () => {
     it('should disable the popover if there is no right axis', () => {
       renderToolbar();
-      expect(screen.getByRole('button', { name: 'Right axis' })).toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Right axis' })).toBeEuiDisabled();
     });
 
     it('should enable the popover if there is right axis', () => {

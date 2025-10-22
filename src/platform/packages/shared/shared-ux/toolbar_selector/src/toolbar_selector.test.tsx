@@ -106,7 +106,7 @@ describe('ToolbarSelector', () => {
         disabled={true}
       />
     );
-    expect(screen.getByTestId('toolbarSelectorDisabledButton')).toBeDisabled();
+    expect(screen.getByTestId('toolbarSelectorDisabledButton')).toBeEuiDisabled();
   });
 
   it('renders with searchable enabled', async () => {

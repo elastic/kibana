@@ -132,7 +132,7 @@ describe('Table', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId('savedObjectsManagementDelete')).toBeDisabled();
+      expect(screen.getByTestId('savedObjectsManagementDelete')).toBeEuiDisabled();
     });
   });
 
@@ -150,7 +150,7 @@ describe('Table', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId('savedObjectsManagementDelete')).toBeDisabled();
+      expect(screen.getByTestId('savedObjectsManagementDelete')).toBeEuiDisabled();
     });
   });
 
@@ -198,7 +198,7 @@ describe('Table', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByTestId('savedObjectsManagementDelete')).toBeDisabled();
+        expect(screen.getByTestId('savedObjectsManagementDelete')).toBeEuiDisabled();
         expect(screen.getByRole('button', { name: 'Export' })).toBeEnabled();
       });
     });

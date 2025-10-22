@@ -20,7 +20,7 @@ describe('MlUserJobDescription', () => {
   it('should render switch component disabled', async () => {
     render(<MlUserJobDescription job={mockOpenedJob} />, { wrapper: TestProviders });
     await waitFor(() => {
-      expect(screen.getByTestId('mlUserJobSwitch')).toBeDisabled();
+      expect(screen.getByTestId('mlUserJobSwitch')).toBeEuiDisabled();
     });
   });
 

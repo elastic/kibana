@@ -76,14 +76,14 @@ describe('Legend Settings', () => {
     await renderLegendSettingsPopover({ shouldTruncate: true });
     const lineLimit = screen.getByRole('spinbutton', { name: 'Line limit' });
     expect(lineLimit).toHaveValue(1);
-    expect(lineLimit).not.toBeDisabled();
+    expect(lineLimit).not.toBeEuiDisabled();
   });
 
   it('should have default line limit set to one and be disabled when it is off', async () => {
     await renderLegendSettingsPopover({ shouldTruncate: false });
     const lineLimit = screen.getByRole('spinbutton', { name: 'Line limit' });
     expect(lineLimit).toHaveValue(1);
-    expect(lineLimit).toBeDisabled();
+    expect(lineLimit).toBeEuiDisabled();
   });
 
   it('should have the `Label truncation` switch enabled by default', async () => {

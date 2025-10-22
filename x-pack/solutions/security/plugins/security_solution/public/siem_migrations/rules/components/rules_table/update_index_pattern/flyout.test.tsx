@@ -53,7 +53,7 @@ describe('IndexPatternPlaceholderFormWrapper', () => {
     const { getByTestId } = render(<Component />);
 
     await waitFor(() => {
-      expect(getByTestId('indexPatternPlaceholderFormSaveBtn')).toBeDisabled();
+      expect(getByTestId('indexPatternPlaceholderFormSaveBtn')).toBeEuiDisabled();
     });
   });
 });

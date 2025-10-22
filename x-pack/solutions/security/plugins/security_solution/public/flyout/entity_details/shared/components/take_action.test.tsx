@@ -25,6 +25,6 @@ describe('<TakeAction />', () => {
       wrapper: TestProviders,
     });
     const button = getByRole('button', { name: /take action/i });
-    expect(button).toBeDisabled();
+    expect(button).toBeEuiDisabled();
   });
 });

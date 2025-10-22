@@ -209,7 +209,7 @@ describe('SearchAndFilter', () => {
     const datePicker = screen.getByTestId('alertSelectionDatePicker');
     const button = datePicker.querySelector('button');
 
-    expect(button).toBeDisabled();
+    expect(button).toBeEuiDisabled();
   });
 
   it('returns statusItems updated when Status filter changes', () => {

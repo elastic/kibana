@@ -111,7 +111,9 @@ describe('ResilientParamsFields renders', () => {
       </MockFormWrapperComponent>
     );
 
-    expect(within(screen.getByTestId('incidentTypeComboBox')).getByRole('combobox')).toBeDisabled();
+    expect(
+      within(screen.getByTestId('incidentTypeComboBox')).getByRole('combobox')
+    ).toBeEuiDisabled();
   });
 
   it('disabled the fields when loading severity', () => {
@@ -126,7 +128,7 @@ describe('ResilientParamsFields renders', () => {
       </MockFormWrapperComponent>
     );
 
-    expect(screen.getByTestId('severitySelect')).toBeDisabled();
+    expect(screen.getByTestId('severitySelect')).toBeEuiDisabled();
   });
 
   it('sets issue type correctly', async () => {

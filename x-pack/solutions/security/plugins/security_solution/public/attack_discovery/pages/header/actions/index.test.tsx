@@ -45,15 +45,15 @@ describe('Actions', () => {
     });
 
     it('disables the run button', () => {
-      expect(screen.getByTestId('run')).toBeDisabled();
+      expect(screen.getByTestId('run')).toBeEuiDisabled();
     });
 
     it('disables the settings button', () => {
-      expect(screen.getByTestId('settings')).toBeDisabled();
+      expect(screen.getByTestId('settings')).toBeEuiDisabled();
     });
 
     it('disables the schedule button', () => {
-      expect(screen.getByTestId('schedule')).toBeDisabled();
+      expect(screen.getByTestId('schedule')).toBeEuiDisabled();
     });
   });
 

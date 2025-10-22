@@ -212,7 +212,7 @@ describe('ConnectorsForm ', () => {
       expect(screen.getByText('My SN connector')).toBeInTheDocument();
     });
 
-    expect(screen.getByTestId('edit-connectors-submit')).toBeDisabled();
+    expect(screen.getByTestId('edit-connectors-submit')).toBeEuiDisabled();
   });
 
   it('disables the save button if the fields have not been changed and the fields contain null values', async () => {
@@ -238,7 +238,7 @@ describe('ConnectorsForm ', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId('edit-connectors-submit')).toBeDisabled();
+      expect(screen.getByTestId('edit-connectors-submit')).toBeEuiDisabled();
     });
   });
 
@@ -260,7 +260,7 @@ describe('ConnectorsForm ', () => {
       expect(screen.getByText('No connector selected')).toBeInTheDocument();
     });
 
-    expect(screen.getByTestId('edit-connectors-submit')).toBeDisabled();
+    expect(screen.getByTestId('edit-connectors-submit')).toBeEuiDisabled();
   });
 
   it('can select the none connector', async () => {
@@ -303,13 +303,13 @@ describe('ConnectorsForm ', () => {
 
     expect(screen.getByTestId('connector-fields-resilient')).toBeInTheDocument();
 
-    expect(screen.getByTestId('edit-connectors-submit')).not.toBeDisabled();
+    expect(screen.getByTestId('edit-connectors-submit')).not.toBeEuiDisabled();
   });
 
   it('does not disables the submit button if the connector is deleted', async () => {
     renderWithTestingProviders(<ConnectorsForm {...props} supportedActionConnectors={[]} />);
 
-    expect(screen.getByTestId('edit-connectors-submit')).not.toBeDisabled();
+    expect(screen.getByTestId('edit-connectors-submit')).not.toBeEuiDisabled();
   });
 
   it('changes optional (undefined) values to null', async () => {

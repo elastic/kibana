@@ -318,7 +318,7 @@ describe('SearchSourceAlertTypeExpression', () => {
       })
     );
 
-    expect(result.getByTestId('testQuery')).toBeDisabled();
+    expect(result.getByTestId('testQuery')).toBeEuiDisabled();
   });
 
   test('should show success message if ungrouped Test Query is successful', async () => {

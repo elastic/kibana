@@ -204,7 +204,7 @@ describe.skip('SuggestUsersPopover', () => {
 
     await waitForEuiPopoverOpen();
 
-    expect(await screen.findByTestId('case-view-assignees-edit-button')).not.toBeDisabled();
+    expect(await screen.findByTestId('case-view-assignees-edit-button')).not.toBeEuiDisabled();
 
     await userEvent.click(await screen.findByTestId('case-view-assignees-edit-button'));
 

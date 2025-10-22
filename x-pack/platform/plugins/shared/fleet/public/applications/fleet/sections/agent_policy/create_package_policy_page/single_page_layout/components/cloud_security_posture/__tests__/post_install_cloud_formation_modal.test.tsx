@@ -87,7 +87,7 @@ describe('PostInstallCloudFormationModal', () => {
       </IntlProvider>
     );
 
-    expect(screen.getByTestId('confirmCloudFormationModalConfirmButton')).toBeDisabled();
+    expect(screen.getByTestId('confirmCloudFormationModalConfirmButton')).toBeEuiDisabled();
   });
 
   it('should open correct cloudFormation URL', () => {

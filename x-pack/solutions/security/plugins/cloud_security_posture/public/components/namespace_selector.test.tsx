@@ -58,7 +58,7 @@ describe('NamespaceSelector', () => {
     render(<NamespaceSelector {...propsWithSingleNamespace} />);
     const button = screen.getByTestId('namespace-selector-dropdown-button');
 
-    expect(button).toBeDisabled();
+    expect(button).toBeEuiDisabled();
     expect(button).toHaveTextContent('default-disabled');
   });
 });

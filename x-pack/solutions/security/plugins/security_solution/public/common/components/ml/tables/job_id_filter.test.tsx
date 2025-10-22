@@ -22,7 +22,7 @@ describe('JobIdFilter', () => {
         jobNameById={{}}
       />
     );
-    expect(getByTestId('job-id-filter-button')).toBeDisabled();
+    expect(getByTestId('job-id-filter-button')).toBeEuiDisabled();
   });
 
   it('calls onSelect when clicked', () => {

@@ -93,7 +93,7 @@ describe('EditConnectorFlyout', () => {
         onConnectorUpdated={onConnectorUpdated}
       />
     );
-    expect(getByTestId('edit-connector-flyout-save-btn')).toBeDisabled();
+    expect(getByTestId('edit-connector-flyout-save-btn')).toBeEuiDisabled();
 
     await act(async () => {
       await userEvent.clear(getByTestId('nameInput'));
@@ -102,7 +102,7 @@ describe('EditConnectorFlyout', () => {
       });
     });
 
-    expect(getByTestId('edit-connector-flyout-save-btn')).not.toBeDisabled();
+    expect(getByTestId('edit-connector-flyout-save-btn')).not.toBeEuiDisabled();
   });
 
   it('shows a confirmation modal on close if the form is modified', async () => {
@@ -114,7 +114,7 @@ describe('EditConnectorFlyout', () => {
         onConnectorUpdated={onConnectorUpdated}
       />
     );
-    expect(getByTestId('edit-connector-flyout-save-btn')).toBeDisabled();
+    expect(getByTestId('edit-connector-flyout-save-btn')).toBeEuiDisabled();
 
     await userEvent.clear(getByTestId('nameInput'));
     await userEvent.type(getByTestId('nameInput'), 'My new name', {
@@ -244,8 +244,8 @@ describe('EditConnectorFlyout', () => {
     await userEvent.click(getByTestId('edit-connector-flyout-save-btn'));
 
     await waitFor(() => {
-      expect(getByTestId('edit-connector-flyout-close-btn')).not.toBeDisabled();
-      expect(getByTestId('edit-connector-flyout-save-btn')).toBeDisabled();
+      expect(getByTestId('edit-connector-flyout-close-btn')).not.toBeEuiDisabled();
+      expect(getByTestId('edit-connector-flyout-save-btn')).toBeEuiDisabled();
     });
   });
 
@@ -755,7 +755,7 @@ describe('EditConnectorFlyout', () => {
       });
 
       expect(getByTestId('executionAwaiting')).toBeInTheDocument();
-      expect(getByTestId('executeActionButton')).toBeDisabled();
+      expect(getByTestId('executeActionButton')).toBeEuiDisabled();
     });
   });
 });

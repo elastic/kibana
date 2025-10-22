@@ -90,7 +90,7 @@ describe('<Assignees />', () => {
 
     expect(getByTestId(USERS_AVATARS_PANEL_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID)).not.toBeDisabled();
+    expect(getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID)).not.toBeEuiDisabled();
   });
 
   it('should render assignees avatars', () => {
@@ -152,7 +152,7 @@ describe('<Assignees />', () => {
     const { getByTestId } = renderAssignees('test-event', assignees);
 
     expect(getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID)).toBeDisabled();
+    expect(getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID)).toBeEuiDisabled();
   });
 
   it('should render add assignees button as disabled within Basic license', () => {
@@ -162,7 +162,7 @@ describe('<Assignees />', () => {
     const { getByTestId } = renderAssignees('test-event', assignees);
 
     expect(getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID)).toBeDisabled();
+    expect(getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID)).toBeEuiDisabled();
   });
 
   it('should render empty tag in when showAssignees is false', () => {

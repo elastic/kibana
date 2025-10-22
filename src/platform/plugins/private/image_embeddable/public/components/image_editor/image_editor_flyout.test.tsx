@@ -134,5 +134,5 @@ test(`shouldn't be able to save if url is invalid`, async () => {
 
   const { getByTestId } = render(<ImageEditor initialImageConfig={initialImageConfig} />);
 
-  expect(getByTestId(`imageEmbeddableEditorSave`)).toBeDisabled();
+  expect(getByTestId(`imageEmbeddableEditorSave`)).toBeEuiDisabled();
 });

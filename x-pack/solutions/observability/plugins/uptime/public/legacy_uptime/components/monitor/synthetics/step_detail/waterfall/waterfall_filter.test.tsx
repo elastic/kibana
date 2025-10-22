@@ -133,7 +133,7 @@ describe('waterfall filter', () => {
     });
 
     const collapseCheckbox = getByLabelText(FILTER_COLLAPSE_REQUESTS_LABEL) as HTMLInputElement;
-    expect(collapseCheckbox).not.toBeDisabled();
+    expect(collapseCheckbox).not.toBeEuiDisabled();
     fireEvent.click(collapseCheckbox);
     expect(collapseCheckbox).toBeChecked();
 
@@ -148,6 +148,6 @@ describe('waterfall filter', () => {
 
     // expect the checkbox to reset to disabled and unchecked
     expect(collapseCheckbox).not.toBeChecked();
-    expect(collapseCheckbox).toBeDisabled();
+    expect(collapseCheckbox).toBeEuiDisabled();
   });
 });

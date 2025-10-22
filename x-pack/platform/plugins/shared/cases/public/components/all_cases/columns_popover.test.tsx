@@ -178,7 +178,7 @@ describe('ColumnsPopover', () => {
     await userEvent.click(await screen.findByTestId('column-selection-popover-search'));
     await userEvent.paste('Foobar');
 
-    expect(await screen.findByTestId('column-selection-popover-show-all-button')).toBeDisabled();
-    expect(await screen.findByTestId('column-selection-popover-hide-all-button')).toBeDisabled();
+    expect(await screen.findByTestId('column-selection-popover-show-all-button')).toBeEuiDisabled();
+    expect(await screen.findByTestId('column-selection-popover-hide-all-button')).toBeEuiDisabled();
   });
 });

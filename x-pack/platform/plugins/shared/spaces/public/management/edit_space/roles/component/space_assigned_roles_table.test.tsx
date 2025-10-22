@@ -134,7 +134,7 @@ describe('SpaceAssignedRolesTable', () => {
 
     expect(within(trisolarisRow).getAllByText('Reserved')).toHaveLength(1);
     expect(within(trisolarisRow).getByTestId('spaceRoleCellActionLocked')).toBeInTheDocument();
-    expect(within(trisolarisRow).getByTestId('spaceRoleCellActionLocked')).toBeDisabled();
+    expect(within(trisolarisRow).getByTestId('spaceRoleCellActionLocked')).toBeEuiDisabled();
     expect(
       within(trisolarisRow).queryByTestId('spaceRoleCellDeleteAction')
     ).not.toBeInTheDocument();

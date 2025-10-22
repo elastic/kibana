@@ -134,7 +134,7 @@ describe('Agent policy advanced options content', () => {
         'aria-checked',
         'false'
       );
-      expect(renderResult.getByTestId('uninstallCommandLink')).toBeDisabled();
+      expect(renderResult.getByTestId('uninstallCommandLink')).toBeEuiDisabled();
     });
     it('when there is no policy id, the uninstall command link is not displayed', async () => {
       usePlatinumLicense();
@@ -163,8 +163,8 @@ describe('Agent policy advanced options content', () => {
         });
       });
       it('should disable the switch and uninstall command link', () => {
-        expect(renderResult.getByTestId('tamperProtectionSwitch')).toBeDisabled();
-        expect(renderResult.getByTestId('uninstallCommandLink')).toBeDisabled();
+        expect(renderResult.getByTestId('tamperProtectionSwitch')).toBeEuiDisabled();
+        expect(renderResult.getByTestId('uninstallCommandLink')).toBeEuiDisabled();
       });
       it('should show an icon tip explaining why the switch is disabled', () => {
         expect(renderResult.getByTestId('tamperMissingIntegrationTooltip')).toBeTruthy();
@@ -174,7 +174,7 @@ describe('Agent policy advanced options content', () => {
       it('should be disabled, since it has no package policies and therefore elastic defend integration is not installed', async () => {
         usePlatinumLicense();
         render({ newAgentPolicy: true });
-        expect(renderResult.getByTestId('tamperProtectionSwitch')).toBeDisabled();
+        expect(renderResult.getByTestId('tamperProtectionSwitch')).toBeEuiDisabled();
       });
     });
   });

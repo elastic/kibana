@@ -553,7 +553,7 @@ describe('Lens App', () => {
           },
         };
         await renderApp({ preloadedState: { isSaveable: true } });
-        expect(querySaveButton()).toBeDisabled();
+        expect(querySaveButton()).toBeEuiDisabled();
       });
 
       it('shows a save button that is enabled when the frame has provided its state and does not show save and return or save as', async () => {
@@ -826,7 +826,7 @@ describe('Lens App', () => {
 
     it('should be disabled when no data is available', async () => {
       await renderApp({ preloadedState: { isSaveable: true } });
-      expect(getShareButton()).toBeDisabled();
+      expect(getShareButton()).toBeEuiDisabled();
     });
 
     it('should not disable share when not saveable', async () => {
@@ -883,7 +883,7 @@ describe('Lens App', () => {
           activeData: { layer1: { type: 'datatable', columns: [], rows: [] } },
         },
       });
-      expect(getShareButton()).toBeDisabled();
+      expect(getShareButton()).toBeEuiDisabled();
     });
   });
 

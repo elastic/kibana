@@ -70,7 +70,7 @@ describe('AxesSettingsPopover', () => {
   it('should disable the popover if the isDisabled property is true', async () => {
     await renderAxisSettingsPopover({ axis: 'x', isDisabled: true });
     const toolbarBtn = screen.getByTestId('lnsBottomAxisButton');
-    expect(toolbarBtn).toBeDisabled();
+    expect(toolbarBtn).toBeEuiDisabled();
   });
 
   it('should have the gridlines switch on by default', async () => {

@@ -162,7 +162,7 @@ describe('EmptyPrompt', () => {
     it('disables the generate button when isDisabled is true', () => {
       const generateButton = screen.getByTestId('generate');
 
-      expect(generateButton).toBeDisabled();
+      expect(generateButton).toBeEuiDisabled();
     });
   });
 

@@ -58,7 +58,7 @@ describe('NoDataCardComponent', () => {
       // Button should be present and disabled, not hidden
       const button = screen.getByRole('button', { name: 'Browse integrations' });
       expect(button).toBeInTheDocument();
-      expect(button).toBeDisabled();
+      expect(button).toBeEuiDisabled();
 
       // Button should not be a link when disabled
       expect(screen.queryByRole('link', { name: 'Browse integrations' })).not.toBeInTheDocument();

@@ -71,7 +71,7 @@ describe('AddToCaseAction', function () {
       { core: coreRenderProps }
     );
 
-    expect(await forNearestButton(getByText)('Add to case')).toBeDisabled();
+    expect(await forNearestButton(getByText)('Add to case')).toBeEuiDisabled();
 
     expect(useAddToCaseHook).toHaveBeenCalledWith(
       expect.objectContaining({

@@ -404,7 +404,7 @@ describe('take action dropdown', () => {
         await waitFor(() => {
           expect(
             wrapper.find('[data-test-subj="add-endpoint-exception-menu-item"]').last().getDOMNode()
-          ).toBeDisabled();
+          ).toBeEuiDisabled();
         });
       });
 
@@ -418,7 +418,7 @@ describe('take action dropdown', () => {
         await waitFor(() => {
           expect(
             wrapper.find('[data-test-subj="add-endpoint-exception-menu-item"]').last().getDOMNode()
-          ).toBeDisabled();
+          ).toBeEuiDisabled();
         });
       });
 
@@ -432,7 +432,7 @@ describe('take action dropdown', () => {
         await waitFor(() => {
           expect(
             wrapper.find('[data-test-subj="add-endpoint-exception-menu-item"]').last().getDOMNode()
-          ).toBeDisabled();
+          ).toBeEuiDisabled();
         });
       });
     });

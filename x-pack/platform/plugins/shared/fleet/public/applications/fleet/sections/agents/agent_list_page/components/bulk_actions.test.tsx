@@ -96,7 +96,9 @@ describe('AgentBulkActions', () => {
       expect(results.getByText('Assign to new policy').closest('button')!).toBeEnabled();
       expect(results.getByText('Unenroll 2 agents').closest('button')!).toBeEnabled();
       expect(results.getByText('Upgrade 2 agents').closest('button')!).toBeEnabled();
-      expect(results.getByText('Schedule upgrade for 2 agents').closest('button')!).toBeDisabled();
+      expect(
+        results.getByText('Schedule upgrade for 2 agents').closest('button')!
+      ).toBeEuiDisabled();
       expect(results.getByText('Restart upgrade 2 agents').closest('button')!).toBeEnabled();
       expect(
         results.getByText('Request diagnostics for 2 agents').closest('button')!
@@ -146,7 +148,9 @@ describe('AgentBulkActions', () => {
       expect(results.getByText('Assign to new policy').closest('button')!).toBeEnabled();
       expect(results.getByText('Unenroll 10 agents').closest('button')!).toBeEnabled();
       expect(results.getByText('Upgrade 10 agents').closest('button')!).toBeEnabled();
-      expect(results.getByText('Schedule upgrade for 10 agents').closest('button')!).toBeDisabled();
+      expect(
+        results.getByText('Schedule upgrade for 10 agents').closest('button')!
+      ).toBeEuiDisabled();
       expect(
         results.getByText('Request diagnostics for 10 agents').closest('button')!
       ).toBeEnabled();
@@ -180,7 +184,9 @@ describe('AgentBulkActions', () => {
       ).toBeEnabled();
       expect(results.getByText('Unenroll 8 agents').closest('button')!).toBeEnabled();
       expect(results.getByText('Upgrade 8 agents').closest('button')!).toBeEnabled();
-      expect(results.getByText('Schedule upgrade for 8 agents').closest('button')!).toBeDisabled();
+      expect(
+        results.getByText('Schedule upgrade for 8 agents').closest('button')!
+      ).toBeEuiDisabled();
       expect(results.getByText('Restart upgrade 8 agents').closest('button')!).toBeEnabled();
       expect(results.getByText('Migrate 8 agents').closest('button')!).toBeEnabled();
       expect(

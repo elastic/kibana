@@ -79,7 +79,7 @@ describe('Connector', () => {
 
     expect(await screen.findByRole('progressbar')).toBeInTheDocument();
     expect(await screen.findByLabelText('Loading')).toBeInTheDocument();
-    expect(await screen.findByTestId('dropdown-connectors')).toBeDisabled();
+    expect(await screen.findByTestId('dropdown-connectors')).toBeEuiDisabled();
   });
 
   it('renders default connector correctly', async () => {

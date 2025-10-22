@@ -331,7 +331,7 @@ describe('When the add exception modal is opened', () => {
       it('should have the bulk close alerts checkbox disabled', () => {
         expect(
           wrapper.find('input[data-test-subj="bulkCloseAlertOnAddExceptionCheckbox"]').getDOMNode()
-        ).toBeDisabled();
+        ).toBeEuiDisabled();
       });
 
       it('should NOT render the os selection dropdown', () => {
@@ -446,7 +446,7 @@ describe('When the add exception modal is opened', () => {
       it('should have the bulk close checkbox enabled', () => {
         expect(
           wrapper.find('input[data-test-subj="bulkCloseAlertOnAddExceptionCheckbox"]').getDOMNode()
-        ).not.toBeDisabled();
+        ).not.toBeEuiDisabled();
       });
 
       describe('when a "is in list" entry is added', () => {
@@ -471,7 +471,7 @@ describe('When the add exception modal is opened', () => {
             wrapper
               .find('input[data-test-subj="bulkCloseAlertOnAddExceptionCheckbox"]')
               .getDOMNode()
-          ).toBeDisabled();
+          ).toBeEuiDisabled();
         });
       });
     });
@@ -842,7 +842,7 @@ describe('When the add exception modal is opened', () => {
       it('disables add to shared lists option if rule has no shared exception lists attached already', () => {
         expect(
           wrapper.find('[data-test-subj="addToListsRadioOption"] input').getDOMNode()
-        ).toBeDisabled();
+        ).toBeEuiDisabled();
       });
 
       it('enables add to shared lists option if rule has shared list', () => {
@@ -969,7 +969,7 @@ describe('When the add exception modal is opened', () => {
       it('disables add to shared lists option if rules have no shared lists in common', () => {
         expect(
           wrapper.find('[data-test-subj="addToListsRadioOption"] input').getDOMNode()
-        ).toBeDisabled();
+        ).toBeEuiDisabled();
       });
 
       it('enables add to shared lists option if rules have at least one shared list in common', () => {

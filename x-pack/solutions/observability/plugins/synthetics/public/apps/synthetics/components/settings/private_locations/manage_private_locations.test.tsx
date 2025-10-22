@@ -69,10 +69,10 @@ describe('<ManagePrivateLocations />', () => {
 
       if (canSave) {
         const button = getByRole('button', { name: 'Create agent policy' });
-        expect(button).toBeDisabled();
+        expect(button).toBeEuiDisabled();
       } else {
         const button = getByRole('button', { name: 'Create agent policy' });
-        expect(button).toBeDisabled();
+        expect(button).toBeEuiDisabled();
         // hover over the button to see the tooltip
         fireEvent.mouseOver(button);
         expect(
@@ -104,9 +104,9 @@ describe('<ManagePrivateLocations />', () => {
       const button = getByRole('button', { name: 'Create location' });
 
       if (canSave) {
-        expect(button).not.toBeDisabled();
+        expect(button).not.toBeEuiDisabled();
       } else {
-        expect(button).toBeDisabled();
+        expect(button).toBeEuiDisabled();
         fireEvent.mouseOver(button);
         expect(
           await findByText(/You do not have sufficient permissions to perform this action./)
@@ -156,9 +156,9 @@ describe('<ManagePrivateLocations />', () => {
       const button = getByRole('button', { name: 'Create location' });
 
       if (canSave) {
-        expect(button).not.toBeDisabled();
+        expect(button).not.toBeEuiDisabled();
       } else {
-        expect(button).toBeDisabled();
+        expect(button).toBeEuiDisabled();
         fireEvent.mouseOver(button);
         expect(
           await findByText('You do not have sufficient permissions to perform this action.')

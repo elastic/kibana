@@ -98,11 +98,11 @@ describe('RuleTypeList', () => {
 
     const ruleListEl = await screen.findAllByTestId('-SelectOption', { exact: false });
     const firstRuleInList = within(ruleListEl[0]).getByRole('button', { name: 'A - Rule Type 3' });
-    expect(firstRuleInList).not.toBeDisabled();
+    expect(firstRuleInList).not.toBeEuiDisabled();
     const secondRuleInList = within(ruleListEl[1]).getByRole('button', { name: 'B - Rule Type 1' });
-    expect(secondRuleInList).not.toBeDisabled();
+    expect(secondRuleInList).not.toBeEuiDisabled();
     const thirdRuleInList = within(ruleListEl[2]).getByRole('button', { name: 'Rule Type 2' });
-    expect(thirdRuleInList).toBeDisabled();
+    expect(thirdRuleInList).toBeEuiDisabled();
 
     await userEvent.hover(ruleListEl[2]);
     expect(await screen.findByText('This rule requires a platinum license.')).toBeInTheDocument();

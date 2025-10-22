@@ -190,7 +190,7 @@ describe('RequiredFields form part', () => {
   it('adding a new required field is disabled when index patterns are loading', async () => {
     render(<TestForm indexPatternFields={undefined} isIndexPatternLoading={true} />);
 
-    expect(screen.getByTestId(ADD_REQUIRED_FIELD_BUTTON_TEST_ID)).toBeDisabled();
+    expect(screen.getByTestId(ADD_REQUIRED_FIELD_BUTTON_TEST_ID)).toBeEuiDisabled();
   });
 
   it('adding a new required field is disabled when an empty row is already displayed', async () => {
@@ -204,7 +204,7 @@ describe('RequiredFields form part', () => {
 
     await addRequiredFieldRow();
 
-    expect(screen.getByTestId(ADD_REQUIRED_FIELD_BUTTON_TEST_ID)).toBeDisabled();
+    expect(screen.getByTestId(ADD_REQUIRED_FIELD_BUTTON_TEST_ID)).toBeEuiDisabled();
   });
 
   describe('warnings', () => {

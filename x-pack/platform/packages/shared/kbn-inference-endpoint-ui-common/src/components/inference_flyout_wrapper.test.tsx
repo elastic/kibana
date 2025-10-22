@@ -77,7 +77,7 @@ describe('InferenceFlyout', () => {
     await userEvent.click(screen.getByTestId('inference-endpoint-submit-button'));
     expect(screen.getByText('Provider is required.')).toBeInTheDocument();
     expect(mockMutationFn).not.toHaveBeenCalled();
-    expect(screen.getByTestId('inference-endpoint-submit-button')).toBeDisabled();
+    expect(screen.getByTestId('inference-endpoint-submit-button')).toBeEuiDisabled();
   });
 
   it('submits form with correct data', async () => {
@@ -179,7 +179,7 @@ describe('InferenceFlyout', () => {
     };
 
     renderComponent({ isEdit: true, inferenceEndpoint: mockEndpoint });
-    expect(screen.getByTestId('num_allocations-number')).toBeDisabled();
+    expect(screen.getByTestId('num_allocations-number')).toBeEuiDisabled();
   });
 
   it('the num_allocations field is enabled for other endpoints', () => {

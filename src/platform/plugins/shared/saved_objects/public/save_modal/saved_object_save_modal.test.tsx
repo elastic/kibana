@@ -147,7 +147,7 @@ describe('SavedObjectSaveModal', () => {
 
     expect(onSave).not.toHaveBeenCalled();
 
-    expect(screen.getByTestId('saveAsNewCheckbox')).toBeDisabled();
+    expect(screen.getByTestId('saveAsNewCheckbox')).toBeEuiDisabled();
     await userEvent.click(screen.getByRole('button', { name: 'Save' }));
 
     await waitFor(() => {

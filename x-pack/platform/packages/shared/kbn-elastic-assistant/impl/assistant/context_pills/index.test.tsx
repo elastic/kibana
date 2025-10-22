@@ -148,7 +148,7 @@ describe('ContextPills', () => {
       </TestProviders>
     );
 
-    expect(screen.getByTestId(`pillButton-${context.id}`)).toBeDisabled();
+    expect(screen.getByTestId(`pillButton-${context.id}`)).toBeEuiDisabled();
   });
 
   it("does NOT disable context pills that aren't selected", () => {
@@ -164,6 +164,6 @@ describe('ContextPills', () => {
       </TestProviders>
     );
 
-    expect(screen.getByTestId(`pillButton-${context.id}`)).not.toBeDisabled();
+    expect(screen.getByTestId(`pillButton-${context.id}`)).not.toBeEuiDisabled();
   });
 });

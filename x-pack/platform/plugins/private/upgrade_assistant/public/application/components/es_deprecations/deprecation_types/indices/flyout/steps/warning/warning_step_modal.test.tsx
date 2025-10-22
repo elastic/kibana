@@ -109,7 +109,7 @@ describe('WarningModalStep', () => {
     expect(screen.getByText(/Set index to read-only/i)).toBeInTheDocument();
     expect(screen.getByText(/Old indices can maintain compatibility/i)).toBeInTheDocument();
     const continueBtn = screen.getByRole('button', { name: /Set to read-only/i });
-    expect(continueBtn).toBeDisabled();
+    expect(continueBtn).toBeEuiDisabled();
     // Check all checkboxes
     const checkboxes = container.querySelectorAll(
       'input[type="checkbox"][data-testid^="reindexWarning-"]'
@@ -117,7 +117,7 @@ describe('WarningModalStep', () => {
     checkboxes.forEach((checkbox) => {
       fireEvent.click(checkbox);
     });
-    expect(continueBtn).not.toBeDisabled();
+    expect(continueBtn).not.toBeEuiDisabled();
   });
 
   it('calls confirm when continue is clicked in read-only flow', () => {

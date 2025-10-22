@@ -251,7 +251,7 @@ describe('XSOARParamsFields renders', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByTestId('comboBoxSearchInput')).not.toBeDisabled();
+        expect(screen.getByTestId('comboBoxSearchInput')).not.toBeEuiDisabled();
       });
 
       await userEvent.click(screen.getByTestId('comboBoxSearchInput'));

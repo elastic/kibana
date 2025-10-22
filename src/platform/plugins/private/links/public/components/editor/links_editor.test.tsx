@@ -76,7 +76,7 @@ describe('LinksEditor', () => {
       LinksStrings.editor.panelEditor.getCreateFlyoutTitle()
     );
     expect(screen.getByTestId('links--panelEditor--emptyPrompt')).toBeInTheDocument();
-    expect(screen.getByTestId('links--panelEditor--saveBtn')).toBeDisabled();
+    expect(screen.getByTestId('links--panelEditor--saveBtn')).toBeEuiDisabled();
 
     await userEvent.click(screen.getByTestId('links--panelEditor--closeBtn'));
     expect(onClose).toHaveBeenCalledTimes(1);

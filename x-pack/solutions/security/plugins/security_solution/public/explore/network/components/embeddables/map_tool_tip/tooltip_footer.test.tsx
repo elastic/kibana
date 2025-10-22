@@ -45,7 +45,7 @@ describe('ToolTipFilter', () => {
         />
       );
 
-      expect(screen.getByTestId('previous-feature-button')).toBeDisabled();
+      expect(screen.getByTestId('previous-feature-button')).toBeEuiDisabled();
     });
 
     test('previousFeature is not called when featureIndex is 0', () => {
@@ -73,7 +73,7 @@ describe('ToolTipFilter', () => {
         />
       );
 
-      expect(screen.getByTestId('next-feature-button')).not.toBeDisabled();
+      expect(screen.getByTestId('next-feature-button')).not.toBeEuiDisabled();
     });
 
     test('nextFeature is called when featureIndex is < totalFeatures', () => {
@@ -102,7 +102,7 @@ describe('ToolTipFilter', () => {
         />
       );
 
-      expect(screen.getByTestId('previous-feature-button')).not.toBeDisabled();
+      expect(screen.getByTestId('previous-feature-button')).not.toBeEuiDisabled();
     });
 
     test('previousFunction is called when featureIndex >== totalFeatures', () => {
@@ -129,7 +129,7 @@ describe('ToolTipFilter', () => {
         />
       );
 
-      expect(screen.getByTestId('next-feature-button')).toBeDisabled();
+      expect(screen.getByTestId('next-feature-button')).toBeEuiDisabled();
     });
 
     test('nextFunction is not called when featureIndex >== totalFeatures', () => {
@@ -157,7 +157,7 @@ describe('ToolTipFilter', () => {
         />
       );
 
-      expect(screen.getByTestId('previous-feature-button')).toBeDisabled();
+      expect(screen.getByTestId('previous-feature-button')).toBeEuiDisabled();
     });
 
     test('previousFunction is not called when only a single feature is provided', () => {
@@ -184,7 +184,7 @@ describe('ToolTipFilter', () => {
         />
       );
 
-      expect(screen.getByTestId('next-feature-button')).toBeDisabled();
+      expect(screen.getByTestId('next-feature-button')).toBeEuiDisabled();
     });
 
     test('nextFunction is not called when only a single feature is provided', () => {
@@ -213,7 +213,7 @@ describe('ToolTipFilter', () => {
         />
       );
 
-      expect(screen.getByTestId('previous-feature-button')).not.toBeDisabled();
+      expect(screen.getByTestId('previous-feature-button')).not.toBeEuiDisabled();
     });
 
     test('previousFunction is called when featureIndex > 0 && featureIndex < totalFeatures', () => {
@@ -240,7 +240,7 @@ describe('ToolTipFilter', () => {
         />
       );
 
-      expect(screen.getByTestId('next-feature-button')).not.toBeDisabled();
+      expect(screen.getByTestId('next-feature-button')).not.toBeEuiDisabled();
     });
 
     test('nextFunction is called when featureIndex > 0 && featureIndex < totalFeatures', () => {

@@ -104,7 +104,7 @@ describe.skip('sourcerer on alerts page or rules details page', () => {
   });
 
   it('disable data view selector', () => {
-    expect(screen.getByTestId('sourcerer-select')).toBeDisabled();
+    expect(screen.getByTestId('sourcerer-select')).toBeEuiDisabled();
   });
 
   it('data view selector is default to Security Data View', () => {

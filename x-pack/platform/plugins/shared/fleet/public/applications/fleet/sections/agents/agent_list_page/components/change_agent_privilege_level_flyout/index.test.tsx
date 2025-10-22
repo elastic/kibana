@@ -56,7 +56,7 @@ describe('ChangeAgentPrivilegeLevelFlyout', () => {
     expect(alertPanel).toBeInTheDocument();
     const submitButton = component.getByTestId('changeAgentPrivilegeLevelFlyoutSubmitButton');
     expect(submitButton.textContent).toEqual('Remove privilege for 0 agents');
-    expect(submitButton).toBeDisabled();
+    expect(submitButton).toBeEuiDisabled();
   });
 
   it('should not render the alert panel when there are no unsupported agents', () => {
@@ -85,6 +85,6 @@ describe('ChangeAgentPrivilegeLevelFlyout', () => {
     expect(alertPanel).not.toBeInTheDocument();
     const submitButton = component.getByTestId('changeAgentPrivilegeLevelFlyoutSubmitButton');
     expect(submitButton.textContent).toEqual('Remove privilege for 1 agent');
-    expect(submitButton).not.toBeDisabled();
+    expect(submitButton).not.toBeEuiDisabled();
   });
 });

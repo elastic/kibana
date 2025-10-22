@@ -41,7 +41,7 @@ describe('Settings', () => {
   it('disables the button when isLoading is true', () => {
     render(<Settings {...defaultProps} isLoading={true} />);
 
-    expect(screen.getByTestId('settings')).toBeDisabled();
+    expect(screen.getByTestId('settings')).toBeEuiDisabled();
   });
 
   it('calls openFlyout with SETTINGS_TAB_ID when the button is clicked', () => {

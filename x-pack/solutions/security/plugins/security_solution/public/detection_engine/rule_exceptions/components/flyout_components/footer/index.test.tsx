@@ -32,7 +32,7 @@ describe('Exception flyout footer', () => {
       </TestProviders>
     );
 
-    expect(screen.getByTestId('addExceptionConfirmButton')).toBeDisabled();
+    expect(screen.getByTestId('addExceptionConfirmButton')).toBeEuiDisabled();
   });
 
   describe('"isEdit" is "false"', () => {

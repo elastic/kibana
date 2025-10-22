@@ -67,7 +67,7 @@ export function assertFieldValidation({
       // or it may be picked up by the event loop later than expected.
       // Waiting for the "Save" button to be disabled with a reasonable timeout makes sure the validation
       // has enough time to run.
-      await waitFor(() => expect(getSaveFieldValueButton(fieldUpgradeWrapper)).toBeDisabled(), {
+      await waitFor(() => expect(getSaveFieldValueButton(fieldUpgradeWrapper)).toBeEuiDisabled(), {
         timeout: 1000,
       });
     });

@@ -62,7 +62,7 @@ describe('AddItemPopover', () => {
     let addButton;
     await waitFor(() => {
       addButton = screen.getByTestId('mlFilterListAddItemsButton');
-      expect(addButton).not.toBeDisabled();
+      expect(addButton).not.toBeEuiDisabled();
     });
 
     // Click the Add button
@@ -95,7 +95,7 @@ describe('AddItemPopover', () => {
     let addButton;
     await waitFor(() => {
       addButton = screen.getByTestId('mlFilterListAddItemsButton');
-      expect(addButton).not.toBeDisabled();
+      expect(addButton).not.toBeEuiDisabled();
     });
 
     // Click the Add button
@@ -114,7 +114,7 @@ describe('AddItemPopover', () => {
     // Find the button and verify it's disabled
     await waitFor(() => {
       const button = screen.getByTestId('mlFilterListOpenNewItemsPopoverButton');
-      expect(button).toBeDisabled();
+      expect(button).toBeEuiDisabled();
     });
   });
 });

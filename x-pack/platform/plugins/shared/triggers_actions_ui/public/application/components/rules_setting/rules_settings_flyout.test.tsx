@@ -322,10 +322,10 @@ describe('rules_settings_flyout', () => {
     const result = render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
     await waitForFlyoutLoad({ queryDelaySection: false });
 
-    expect(result.getByTestId('rulesSettingsFlappingEnableSwitch')).toBeDisabled();
-    expect(result.getByTestId('lookBackWindowRangeInput')).toBeDisabled();
-    expect(result.getByTestId('statusChangeThresholdRangeInput')).toBeDisabled();
-    expect(result.getByTestId('rulesSettingsFlyoutSaveButton')).toBeDisabled();
+    expect(result.getByTestId('rulesSettingsFlappingEnableSwitch')).toBeEuiDisabled();
+    expect(result.getByTestId('lookBackWindowRangeInput')).toBeEuiDisabled();
+    expect(result.getByTestId('statusChangeThresholdRangeInput')).toBeEuiDisabled();
+    expect(result.getByTestId('rulesSettingsFlyoutSaveButton')).toBeEuiDisabled();
   });
 
   test('form elements are not visible when provided with insufficient read permissions', async () => {
@@ -428,8 +428,8 @@ describe('rules_settings_flyout', () => {
     const result = render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
     await waitForFlyoutLoad({ flappingSection: false });
 
-    expect(result.getByTestId('queryDelayRangeInput')).toBeDisabled();
-    expect(result.getByTestId('rulesSettingsFlyoutSaveButton')).toBeDisabled();
+    expect(result.getByTestId('queryDelayRangeInput')).toBeEuiDisabled();
+    expect(result.getByTestId('rulesSettingsFlyoutSaveButton')).toBeEuiDisabled();
   });
 
   test('query delay form elements are not visible when provided with insufficient read permissions', async () => {
@@ -483,7 +483,7 @@ describe('rules_settings_flyout', () => {
       expect(screen.queryByTestId('rulesSettingsFlyout')).not.toBe(null);
     });
 
-    expect(result.getByTestId('alert-delete-open-modal-button')).toBeDisabled();
+    expect(result.getByTestId('alert-delete-open-modal-button')).toBeEuiDisabled();
   });
 
   test('alert delete not visible when provided with insufficient read permissions', async () => {

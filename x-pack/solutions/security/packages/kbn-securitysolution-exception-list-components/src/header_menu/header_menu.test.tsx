@@ -41,7 +41,7 @@ describe('HeaderMenu', () => {
     );
 
     fireEvent.click(wrapper.getByTestId('ButtonIcon'));
-    expect(wrapper.getByTestId('ActionItemdelete')).toBeDisabled();
+    expect(wrapper.getByTestId('ActionItemdelete')).toBeEuiDisabled();
     expect(wrapper.getByTestId('ActionItemedit')).toBeEnabled();
   });
 

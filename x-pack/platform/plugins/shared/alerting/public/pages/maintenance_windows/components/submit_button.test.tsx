@@ -67,6 +67,6 @@ describe('SubmitButton', () => {
     );
 
     fireEvent.click(result.getByTestId('create-submit'));
-    await waitFor(() => expect(result.getByTestId('create-submit')).toBeDisabled());
+    await waitFor(() => expect(result.getByTestId('create-submit')).toBeEuiDisabled());
   });
 });

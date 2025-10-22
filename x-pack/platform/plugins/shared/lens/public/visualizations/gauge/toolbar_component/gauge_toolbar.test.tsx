@@ -102,7 +102,7 @@ describe('gauge toolbar', () => {
           'Titles and text'
         );
         expect(getTitleLabel()).toHaveValue('');
-        expect(getTitleLabel()).toBeDisabled();
+        expect(getTitleLabel()).toBeEuiDisabled();
         const titleSelect = getTitleSelectValue();
         expect(titleSelect).toHaveValue('none');
       });
@@ -119,7 +119,7 @@ describe('gauge toolbar', () => {
         const titleSelect = getTitleSelectValue();
         expect(titleSelect).toHaveValue('auto');
         expect(getTitleLabel()).toHaveValue('');
-        expect(getTitleLabel()).not.toBeDisabled();
+        expect(getTitleLabel()).not.toBeEuiDisabled();
 
         fireEvent.change(getTitleLabel(), { target: { value: 'labelMajor' } });
         jest.advanceTimersByTime(256);
@@ -150,7 +150,7 @@ describe('gauge toolbar', () => {
         expect(getSubtitleLabel()).toHaveValue('labelMinor label');
         const subtitleSelect = getSubtitleSelectValue();
         expect(subtitleSelect).toHaveValue('custom');
-        expect(getSubtitleLabel()).not.toBeDisabled();
+        expect(getSubtitleLabel()).not.toBeEuiDisabled();
       });
       it('labelMajor mode can switch to custom', async () => {
         await renderGaugeToolbarAndOpen(
@@ -165,7 +165,7 @@ describe('gauge toolbar', () => {
         const subtitleSelect = getSubtitleSelectValue();
         expect(subtitleSelect).toHaveValue('none');
         expect(getSubtitleLabel()).toHaveValue('');
-        expect(getSubtitleLabel()).toBeDisabled();
+        expect(getSubtitleLabel()).toBeEuiDisabled();
 
         fireEvent.change(getSubtitleLabel(), { target: { value: 'labelMinor label' } });
         jest.advanceTimersByTime(256);

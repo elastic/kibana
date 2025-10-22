@@ -51,7 +51,7 @@ describe('MigrateAgentFlyout', () => {
 
     const submitButton = component.getByTestId('migrateAgentFlyoutSubmitButton');
 
-    expect(submitButton).toBeDisabled();
+    expect(submitButton).toBeEuiDisabled();
   });
 
   it('submit button should be enabled when form is valid', () => {
@@ -63,7 +63,7 @@ describe('MigrateAgentFlyout', () => {
     fireEvent.change(tokenInput, { target: { value: 'someToken' } });
     const submitButton = component.getByTestId('migrateAgentFlyoutSubmitButton');
 
-    expect(submitButton).not.toBeDisabled();
+    expect(submitButton).not.toBeEuiDisabled();
   });
 
   it('replace token field should be visible when there is one agent', () => {
@@ -144,7 +144,7 @@ describe('MigrateAgentFlyout', () => {
     const tokenInput = component.getByTestId('migrateAgentFlyoutEnrollmentTokenInput');
     fireEvent.change(tokenInput, { target: { value: 'someToken' } });
 
-    expect(submitButton).toBeDisabled();
+    expect(submitButton).toBeEuiDisabled();
   });
   it('alert panel should not be visible when there are no protected or fleet-server agents', () => {
     const alertPanel = component.queryByTestId('migrateAgentFlyoutAlertPanel');

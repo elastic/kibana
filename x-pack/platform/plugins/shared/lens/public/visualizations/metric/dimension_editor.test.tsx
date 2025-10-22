@@ -687,7 +687,7 @@ describe('dimension editor', () => {
           });
 
           // check dynamic button to be disabled
-          expect(getColorByValueDynamic()).toBeDisabled();
+          expect(getColorByValueDynamic()).toBeEuiDisabled();
         });
 
         it('should correctly select the reversed Trend color palette based on configuration', async () => {
@@ -729,7 +729,7 @@ describe('dimension editor', () => {
           const baselineGroup = getBaselineGroup();
 
           expect(baselineGroup).toBeInTheDocument();
-          expect(getByTitle(baselineGroup, 'Primary metric')).toBeDisabled();
+          expect(getByTitle(baselineGroup, 'Primary metric')).toBeEuiDisabled();
         });
       });
 
@@ -1122,7 +1122,7 @@ describe('dimension editor', () => {
               maxAccessor: 'something',
             },
           });
-          expect(supportingVisOptions.bar).not.toBeDisabled();
+          expect(supportingVisOptions.bar).not.toBeEuiDisabled();
         });
 
         it('should disable bar when max dimension does not exist', () => {
@@ -1133,7 +1133,7 @@ describe('dimension editor', () => {
               maxAccessor: undefined,
             },
           });
-          expect(supportingVisOptions.bar).toBeDisabled();
+          expect(supportingVisOptions.bar).toBeEuiDisabled();
         });
 
         it('should disable trendline when no default time field', () => {
@@ -1143,12 +1143,12 @@ describe('dimension editor', () => {
               hasDefaultTimeField: () => false,
             },
           });
-          expect(supportingVisOptions.trendline).toBeDisabled();
+          expect(supportingVisOptions.trendline).toBeEuiDisabled();
         });
 
         it('should enable trendline when default time field exists', () => {
           const { supportingVisOptions } = renderAdditionalSectionEditor();
-          expect(supportingVisOptions.trendline).not.toBeDisabled();
+          expect(supportingVisOptions.trendline).not.toBeEuiDisabled();
         });
       });
 
@@ -1162,7 +1162,7 @@ describe('dimension editor', () => {
             }),
           },
         });
-        expect(supportingVisOptions.trendline).toBeDisabled();
+        expect(supportingVisOptions.trendline).toBeEuiDisabled();
       });
 
       it('should not show a trendline button group when primary metric dimension is non-numeric', () => {

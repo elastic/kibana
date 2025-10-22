@@ -152,7 +152,7 @@ describe('Policy details artifacts flyout', () => {
     });
     await render();
     expect(await renderResult.findByTestId('artifactsList')).toBeTruthy();
-    expect(renderResult.getByTestId('artifacts-assign-confirm-button')).toBeDisabled();
+    expect(renderResult.getByTestId('artifacts-assign-confirm-button')).toBeEuiDisabled();
   });
 
   it('should enable the submit button if an exception is selected', async () => {

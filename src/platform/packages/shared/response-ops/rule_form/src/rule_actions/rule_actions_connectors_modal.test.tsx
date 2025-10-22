@@ -373,7 +373,7 @@ describe('ruleActionsConnectorsModal', () => {
 
     render(<RuleActionsConnectorsModal />);
 
-    expect(screen.getByText('connector-2')).toBeDisabled();
+    expect(screen.getByText('connector-2')).toBeEuiDisabled();
   });
 
   test('should disable connector if its a selected system action', () => {
@@ -396,6 +396,6 @@ describe('ruleActionsConnectorsModal', () => {
 
     render(<RuleActionsConnectorsModal />);
 
-    expect(screen.getByText('connector-2')).toBeDisabled();
+    expect(screen.getByText('connector-2')).toBeEuiDisabled();
   });
 });

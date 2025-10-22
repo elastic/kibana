@@ -154,7 +154,9 @@ describe('DocViewerTable', () => {
       it('should disable the switch if columns is empty', async () => {
         setupComponent({ filter: jest.fn() });
 
-        expect(screen.getByTestId('unifiedDocViewerShowOnlySelectedFieldsSwitch')).toBeDisabled();
+        expect(
+          screen.getByTestId('unifiedDocViewerShowOnlySelectedFieldsSwitch')
+        ).toBeEuiDisabled();
         expect(screen.getByText('@timestamp')).toBeInTheDocument();
         expect(screen.getByText('bytes')).toBeInTheDocument();
         expect(screen.getByText('extension.keyword')).toBeInTheDocument();
@@ -165,7 +167,9 @@ describe('DocViewerTable', () => {
 
         setupComponent({ filter: jest.fn() });
 
-        expect(screen.getByTestId('unifiedDocViewerShowOnlySelectedFieldsSwitch')).toBeDisabled();
+        expect(
+          screen.getByTestId('unifiedDocViewerShowOnlySelectedFieldsSwitch')
+        ).toBeEuiDisabled();
         expect(screen.getByText('@timestamp')).toBeInTheDocument();
         expect(screen.getByText('bytes')).toBeInTheDocument();
         expect(screen.getByText('extension.keyword')).toBeInTheDocument();

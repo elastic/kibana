@@ -41,7 +41,7 @@ describe('ErrorsPopover', () => {
       </TestExternalProviders>
     );
 
-    expect(screen.getByTestId('viewErrors')).toBeDisabled();
+    expect(screen.getByTestId('viewErrors')).toBeEuiDisabled();
   });
 
   test('it enables the view errors button when `errorSummary` is NOT empty', () => {
@@ -51,7 +51,7 @@ describe('ErrorsPopover', () => {
       </TestExternalProviders>
     );
 
-    expect(screen.getByTestId('viewErrors')).not.toBeDisabled();
+    expect(screen.getByTestId('viewErrors')).not.toBeEuiDisabled();
   });
 
   describe('popover content', () => {

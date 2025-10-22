@@ -50,7 +50,7 @@ describe('Run', () => {
   it('disables the button when isLoading is true', () => {
     render(<Run {...defaultProps} isLoading={true} />);
 
-    expect(screen.getByTestId('run')).toBeDisabled();
+    expect(screen.getByTestId('run')).toBeEuiDisabled();
   });
 
   it('calls onGenerate when the button is clicked', () => {

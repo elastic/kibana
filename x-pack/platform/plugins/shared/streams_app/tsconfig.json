@@ -10,7 +10,8 @@
     "public/**/*.json",
     "server/**/*",
     ".storybook/**/*",
-    "test/scout/**/*"
+    "test/scout/**/*",
+    "@elastic/eui/lib/test/rtl/matchers"
   ],
   "exclude": [
     "target/**/*",

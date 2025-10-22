@@ -68,6 +68,6 @@ describe('ObservablesToggle', () => {
     );
     const extractObservablesToggle = await screen.findByTestId(CASE_OBSERVABLES_TOGGLE_TEST_ID);
     expect(extractObservablesToggle).toBeInTheDocument();
-    expect(within(extractObservablesToggle).getByRole('switch')).toBeDisabled();
+    expect(within(extractObservablesToggle).getByRole('switch')).toBeEuiDisabled();
   });
 });

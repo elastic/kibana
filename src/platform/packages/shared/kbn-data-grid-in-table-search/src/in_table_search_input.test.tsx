@@ -62,8 +62,8 @@ describe('InTableSearchInput', () => {
       />
     );
 
-    expect(screen.getByTestId(BUTTON_PREV_TEST_SUBJ)).toBeDisabled();
-    expect(screen.getByTestId(BUTTON_NEXT_TEST_SUBJ)).toBeDisabled();
+    expect(screen.getByTestId(BUTTON_PREV_TEST_SUBJ)).toBeEuiDisabled();
+    expect(screen.getByTestId(BUTTON_NEXT_TEST_SUBJ)).toBeEuiDisabled();
 
     expect(container).toMatchSnapshot();
   });

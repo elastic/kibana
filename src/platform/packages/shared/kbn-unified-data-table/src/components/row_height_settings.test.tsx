@@ -67,7 +67,7 @@ describe('RowHeightSettings', () => {
   it('should disable FieldNumber when Auto is selected', async () => {
     renderRowHeightSettings();
     await userEvent.click(screen.getByRole('button', { name: 'Auto' }));
-    expect(screen.getByRole('spinbutton')).toBeDisabled();
+    expect(screen.getByRole('spinbutton')).toBeEuiDisabled();
   });
 
   it('field number should persevere previously selected Custom number after changing rowHight to Auto', async () => {

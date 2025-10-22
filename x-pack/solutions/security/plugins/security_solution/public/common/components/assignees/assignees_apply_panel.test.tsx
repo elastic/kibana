@@ -64,7 +64,7 @@ describe('<AssigneesApplyPanel />', () => {
 
     expect(getByTestId(ASSIGNEES_APPLY_PANEL_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID)).toBeDisabled();
+    expect(getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID)).toBeEuiDisabled();
   });
 
   it('should call `onApply` callback on apply button click', async () => {
@@ -75,9 +75,9 @@ describe('<AssigneesApplyPanel />', () => {
       onApply: mockedOnApply,
     });
 
-    expect(getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID)).toBeDisabled();
+    expect(getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID)).toBeEuiDisabled();
     await userEvent.click(getByText(mockUserProfiles[1].user.full_name));
-    expect(getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID)).not.toBeDisabled();
+    expect(getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID)).not.toBeEuiDisabled();
     await userEvent.click(getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID));
 
     expect(mockedOnApply).toHaveBeenCalledWith({

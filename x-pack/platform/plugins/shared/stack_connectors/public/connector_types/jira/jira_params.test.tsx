@@ -178,9 +178,9 @@ describe('JiraParamsFields renders', () => {
     const results = render(<JiraParamsFields {...defaultProps} />);
     const labels = within(results.getByTestId('labelsComboBox'));
 
-    expect(results.getByTestId('issueTypeSelect')).toBeDisabled();
-    expect(results.getByTestId('prioritySelect')).toBeDisabled();
-    expect(labels.getByTestId('comboBoxSearchInput')).toBeDisabled();
+    expect(results.getByTestId('issueTypeSelect')).toBeEuiDisabled();
+    expect(results.getByTestId('prioritySelect')).toBeEuiDisabled();
+    expect(labels.getByTestId('comboBoxSearchInput')).toBeEuiDisabled();
   });
 
   it('it disabled the fields when loading fields', () => {
@@ -192,9 +192,9 @@ describe('JiraParamsFields renders', () => {
     const results = render(<JiraParamsFields {...defaultProps} />);
     const labels = within(results.getByTestId('labelsComboBox'));
 
-    expect(results.getByTestId('issueTypeSelect')).toBeDisabled();
-    expect(results.getByTestId('prioritySelect')).toBeDisabled();
-    expect(labels.getByTestId('comboBoxSearchInput')).toBeDisabled();
+    expect(results.getByTestId('issueTypeSelect')).toBeEuiDisabled();
+    expect(results.getByTestId('prioritySelect')).toBeEuiDisabled();
+    expect(labels.getByTestId('comboBoxSearchInput')).toBeEuiDisabled();
   });
 
   it('hide unsupported fields', () => {

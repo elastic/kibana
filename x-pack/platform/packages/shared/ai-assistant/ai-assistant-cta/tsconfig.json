@@ -9,6 +9,7 @@
       "@emotion/react/types/css-prop",
       "@kbn/ambient-ui-types",
       "@testing-library/jest-dom",
+      "@elastic/eui/lib/test/rtl/matchers"
     ]
   },
   "include": [

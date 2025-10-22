@@ -94,7 +94,7 @@ describe('EntityStoreManagementPage', () => {
 
     render(<EntityStoreManagementPage />, { wrapper: TestProviders });
 
-    expect(screen.getByTestId('entity-store-switch')).toBeDisabled();
+    expect(screen.getByTestId('entity-store-switch')).toBeEuiDisabled();
   });
 
   it('show clear entity data modal when clear data button clicked', () => {

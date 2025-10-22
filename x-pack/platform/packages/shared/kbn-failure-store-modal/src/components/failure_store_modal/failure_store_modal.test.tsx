@@ -102,7 +102,7 @@ describe('FailureStoreModal', () => {
       });
 
       expect(getByTestId('failureStoreModalSaveButton')).toBeInTheDocument();
-      expect(getByTestId('failureStoreModalSaveButton')).toBeDisabled();
+      expect(getByTestId('failureStoreModalSaveButton')).toBeEuiDisabled();
       // Expect the toggle to be on initially
       expect(getByTestId('enableFailureStoreToggle')).toBeChecked();
 
@@ -117,7 +117,7 @@ describe('FailureStoreModal', () => {
       expect(queryByTestId('selectFailureStorePeriodType')).not.toBeInTheDocument();
       expect(queryByTestId('selectFailureStorePeriodValue')).not.toBeInTheDocument();
 
-      expect(getByTestId('failureStoreModalSaveButton')).not.toBeDisabled();
+      expect(getByTestId('failureStoreModalSaveButton')).not.toBeEuiDisabled();
       // Expect the toggle to be off
       expect(getByTestId('enableFailureStoreToggle')).not.toBeChecked();
 
@@ -156,8 +156,8 @@ describe('FailureStoreModal', () => {
 
       expect(valueSelector).toBeInTheDocument();
       expect(unitSelector).toBeInTheDocument();
-      expect(valueSelector).toBeDisabled();
-      expect(unitSelector).toBeDisabled();
+      expect(valueSelector).toBeEuiDisabled();
+      expect(unitSelector).toBeEuiDisabled();
 
       // The default retention period in the props is 40m, so the value should be 40 and unit 'Minutes'
       expect(valueSelector).toHaveValue(40);
@@ -168,8 +168,8 @@ describe('FailureStoreModal', () => {
       expect(customButton).toHaveAttribute('aria-pressed', 'true');
       expect(defaultButton).toHaveAttribute('aria-pressed', 'false');
 
-      expect(valueSelector).not.toBeDisabled();
-      expect(unitSelector).not.toBeDisabled();
+      expect(valueSelector).not.toBeEuiDisabled();
+      expect(unitSelector).not.toBeEuiDisabled();
 
       // The custom retention period by default is the default period, so the value should be 40 and unit 'Minutes'
       expect(valueSelector).toHaveValue(40);

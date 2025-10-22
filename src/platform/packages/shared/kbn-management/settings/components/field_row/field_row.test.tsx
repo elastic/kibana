@@ -250,9 +250,9 @@ describe('Field', () => {
           )
         );
         if (type === 'color') {
-          expect(getByTestId(`euiColorPickerAnchor ${inputTestSubj}`)).toBeDisabled();
+          expect(getByTestId(`euiColorPickerAnchor ${inputTestSubj}`)).toBeEuiDisabled();
         } else {
-          expect(getByTestId(inputTestSubj)).toBeDisabled();
+          expect(getByTestId(inputTestSubj)).toBeEuiDisabled();
         }
 
         // expect(getByTestId(`${DATA_TEST_SUBJ_OVERRIDDEN_PREFIX}-${id}`)).toBeInTheDocument();
@@ -272,9 +272,9 @@ describe('Field', () => {
           )
         );
         if (type === 'color') {
-          expect(getByTestId(`euiColorPickerAnchor ${inputTestSubj}`)).toBeDisabled();
+          expect(getByTestId(`euiColorPickerAnchor ${inputTestSubj}`)).toBeEuiDisabled();
         } else {
-          expect(getByTestId(inputTestSubj)).toBeDisabled();
+          expect(getByTestId(inputTestSubj)).toBeEuiDisabled();
         }
       });
 

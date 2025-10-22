@@ -195,9 +195,9 @@ describe('Querybar Menu component', () => {
     const loadFilterSetButton = screen.getByTestId('saved-query-management-load-button');
 
     expect(saveFilterSetButton).toBeInTheDocument();
-    expect(saveFilterSetButton).toBeDisabled();
+    expect(saveFilterSetButton).toBeEuiDisabled();
     expect(loadFilterSetButton).toBeInTheDocument();
-    expect(loadFilterSetButton).toBeDisabled();
+    expect(loadFilterSetButton).toBeEuiDisabled();
   });
 
   it('should render the saved queries panels if the showFilterBar is true but disabled', async () => {
@@ -212,8 +212,8 @@ describe('Querybar Menu component', () => {
     const applyToAllFiltersButton = screen.getByTestId('filter-sets-applyToAllFilters');
     const removeAllFiltersButton = screen.getByTestId('filter-sets-removeAllFilters');
 
-    expect(applyToAllFiltersButton).toBeDisabled();
-    expect(removeAllFiltersButton).toBeDisabled();
+    expect(applyToAllFiltersButton).toBeEuiDisabled();
+    expect(removeAllFiltersButton).toBeEuiDisabled();
   });
 
   it('should enable the clear all button if query is given', async () => {
@@ -230,7 +230,7 @@ describe('Querybar Menu component', () => {
     render(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
 
     const removeAllFiltersButton = screen.getByTestId('filter-sets-removeAllFilters');
-    expect(removeAllFiltersButton).not.toBeDisabled();
+    expect(removeAllFiltersButton).not.toBeEuiDisabled();
   });
 
   it('should enable the apply to all button if filter is given', async () => {
@@ -244,7 +244,7 @@ describe('Querybar Menu component', () => {
     render(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
 
     const applyToAllFiltersButton = screen.getByTestId('filter-sets-applyToAllFilters');
-    expect(applyToAllFiltersButton).not.toBeDisabled();
+    expect(applyToAllFiltersButton).not.toBeEuiDisabled();
   });
 
   it('should render the language switcher panel', async () => {

@@ -127,7 +127,7 @@ describe('CasesParamsFields renders', () => {
     render(<CasesParamsFields {...defaultProps} />);
 
     expect(await screen.findByRole('progressbar')).toBeInTheDocument();
-    expect(await screen.findByTestId('comboBoxSearchInput')).toBeDisabled();
+    expect(await screen.findByTestId('comboBoxSearchInput')).toBeEuiDisabled();
   });
 
   it('when subAction undefined, sets to default', () => {
@@ -489,7 +489,7 @@ describe('CasesParamsFields renders', () => {
       const templateSelectorComponent = await screen.findByTestId('create-case-template-select');
 
       expect(templateSelectorComponent).toBeInTheDocument();
-      expect(templateSelectorComponent).toBeDisabled();
+      expect(templateSelectorComponent).toBeEuiDisabled();
     });
 
     it('shows attack discovery explanation tooltip', async () => {

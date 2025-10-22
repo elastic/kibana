@@ -303,7 +303,7 @@ describe('edit package policy page', () => {
       expect(
         renderResult.getByText('Your integration policy has errors. Please fix them before saving.')
       ).toBeInTheDocument();
-      expect(renderResult.getByText(/Save integration/).closest('button')!).toBeDisabled();
+      expect(renderResult.getByText(/Save integration/).closest('button')!).toBeEuiDisabled();
 
       renderResult.getAllByRole('link', { name: 'Cancel' }).forEach((btn) => {
         expect(btn).toHaveAttribute('href', '/navigate/path');
@@ -439,7 +439,9 @@ describe('edit package policy page', () => {
     render();
 
     await waitFor(() => {
-      expect(renderResult.getByText(/Upgrade integration/).closest('button')!).not.toBeDisabled();
+      expect(
+        renderResult.getByText(/Upgrade integration/).closest('button')!
+      ).not.toBeEuiDisabled();
       expect(
         renderResult.getByText(
           'This integration is ready to be upgraded from version 1.3.0 to 1.4.0. Review the changes below and save to upgrade.'

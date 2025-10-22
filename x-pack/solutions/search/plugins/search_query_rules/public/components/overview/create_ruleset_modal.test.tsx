@@ -108,7 +108,7 @@ describe('CreateRulesetModal', () => {
       expect(screen.getByText('Ruleset name already exists')).toBeInTheDocument();
     });
     waitFor(() => {
-      expect(screen.getByTestId(TEST_IDS.CreateButton)).toBeDisabled();
+      expect(screen.getByTestId(TEST_IDS.CreateButton)).toBeEuiDisabled();
     });
     waitFor(() => {
       expect(screen.getByTestId(TEST_IDS.EditLink)).toHaveAttribute(

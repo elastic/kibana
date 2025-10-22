@@ -42,7 +42,7 @@ describe('CreateIndexModal', () => {
     });
 
     const createButton = screen.getByTestId('createIndexModalCreateButton');
-    expect(createButton).toBeDisabled();
+    expect(createButton).toBeEuiDisabled();
   });
 
   it('enables create button when index name is not empty', () => {
@@ -54,7 +54,7 @@ describe('CreateIndexModal', () => {
     fireEvent.change(input, { target: { value: 'my-index' } });
 
     const createButton = screen.getByTestId('createIndexModalCreateButton');
-    expect(createButton).not.toBeDisabled();
+    expect(createButton).not.toBeEuiDisabled();
   });
 
   it('calls onClose when cancel button is clicked', () => {

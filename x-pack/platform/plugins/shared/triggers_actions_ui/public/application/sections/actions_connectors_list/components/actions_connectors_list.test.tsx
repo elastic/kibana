@@ -231,11 +231,11 @@ describe('actions_connectors_list', () => {
       );
 
       const editButton = await screen.findByTestId('edit4');
-      expect(editButton).toBeDisabled();
+      expect(editButton).toBeEuiDisabled();
       const deleteButtons = await screen.findAllByTestId('deleteConnector');
-      expect(deleteButtons[deleteButtons.length - 1]).not.toBeDisabled();
+      expect(deleteButtons[deleteButtons.length - 1]).not.toBeEuiDisabled();
       const runButtons = await screen.findAllByTestId('runConnector');
-      expect(runButtons[runButtons.length - 1]).toBeDisabled();
+      expect(runButtons[runButtons.length - 1]).toBeEuiDisabled();
     });
 
     it('renders fix button when connector secrets is missing', async () => {
@@ -253,9 +253,9 @@ describe('actions_connectors_list', () => {
       );
 
       const deleteButtons = await screen.findAllByTestId('deleteConnector');
-      expect(deleteButtons[deleteButtons.length - 1]).not.toBeDisabled();
+      expect(deleteButtons[deleteButtons.length - 1]).not.toBeEuiDisabled();
       const fixButtons = await screen.findAllByTestId('fixConnectorButton');
-      expect(fixButtons[fixButtons.length - 1]).not.toBeDisabled();
+      expect(fixButtons[fixButtons.length - 1]).not.toBeEuiDisabled();
     });
 
     it('supports pagination', async () => {
@@ -443,7 +443,7 @@ describe('actions_connectors_list', () => {
 
       expect(await screen.findByTestId('actionsTable')).toBeInTheDocument();
       const deleteButtons = await screen.findAllByTestId('deleteConnector');
-      deleteButtons.forEach((btn) => expect(btn).toBeDisabled());
+      deleteButtons.forEach((btn) => expect(btn).toBeEuiDisabled());
     });
   });
 
@@ -503,16 +503,16 @@ describe('actions_connectors_list', () => {
 
       const edit1 = await screen.findByTestId('edit1');
       const edit2 = await screen.findByTestId('edit2');
-      expect(edit1).toBeDisabled();
-      expect(edit2).toBeDisabled();
+      expect(edit1).toBeEuiDisabled();
+      expect(edit2).toBeEuiDisabled();
 
       const edit3 = await screen.findByTestId('edit3');
-      expect(edit3).toBeDisabled();
+      expect(edit3).toBeEuiDisabled();
 
       const runButtons = await screen.findAllByTestId('runConnector');
 
-      expect(runButtons[0]).toBeDisabled();
-      expect(runButtons[1]).toBeDisabled();
+      expect(runButtons[0]).toBeEuiDisabled();
+      expect(runButtons[1]).toBeEuiDisabled();
     });
   });
 

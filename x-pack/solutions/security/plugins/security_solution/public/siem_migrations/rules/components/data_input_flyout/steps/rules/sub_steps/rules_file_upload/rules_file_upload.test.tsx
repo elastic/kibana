@@ -67,7 +67,7 @@ describe('RulesFileUpload', () => {
     const { getByTestId } = renderTestComponent();
 
     expect(getByTestId('rulesFilePicker')).toBeInTheDocument();
-    expect(getByTestId('uploadFileButton')).toBeDisabled();
+    expect(getByTestId('uploadFileButton')).toBeEuiDisabled();
   });
 
   it('should be able to upload correct file type', async () => {
@@ -179,7 +179,7 @@ describe('RulesFileUpload', () => {
         });
 
         await waitFor(() => {
-          expect(getByTestId('uploadFileButton')).toBeDisabled();
+          expect(getByTestId('uploadFileButton')).toBeEuiDisabled();
         });
       });
     });

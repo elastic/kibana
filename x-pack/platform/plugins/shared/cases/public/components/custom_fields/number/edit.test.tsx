@@ -231,7 +231,7 @@ describe('Edit ', () => {
 
     expect(
       await screen.findByTestId('case-number-custom-field-submit-button-test_key_5')
-    ).not.toBeDisabled();
+    ).not.toBeEuiDisabled();
 
     await userEvent.click(
       await screen.findByTestId('case-number-custom-field-submit-button-test_key_5')
@@ -271,7 +271,7 @@ describe('Edit ', () => {
     );
     expect(
       await screen.findByTestId('case-number-custom-field-submit-button-test_key_5')
-    ).not.toBeDisabled();
+    ).not.toBeEuiDisabled();
 
     await userEvent.click(
       await screen.findByTestId('case-number-custom-field-submit-button-test_key_5')
@@ -307,7 +307,7 @@ describe('Edit ', () => {
 
     expect(
       await screen.findByTestId('case-number-custom-field-submit-button-test_key_5')
-    ).not.toBeDisabled();
+    ).not.toBeEuiDisabled();
 
     await userEvent.click(
       await screen.findByTestId('case-number-custom-field-submit-button-test_key_5')
@@ -374,7 +374,7 @@ describe('Edit ', () => {
 
     expect(
       await screen.findByTestId('case-number-custom-field-submit-button-test_key_5')
-    ).not.toBeDisabled();
+    ).not.toBeEuiDisabled();
 
     await userEvent.click(
       await screen.findByTestId('case-number-custom-field-cancel-button-test_key_5')
@@ -437,7 +437,7 @@ describe('Edit ', () => {
 
     expect(
       await screen.findByTestId('case-number-custom-field-submit-button-test_key_5')
-    ).not.toBeDisabled();
+    ).not.toBeEuiDisabled();
 
     expect(screen.queryByText('My test label 1 is required.')).not.toBeInTheDocument();
   });

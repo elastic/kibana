@@ -113,7 +113,7 @@ describe('StartMigrationsBody', () => {
 
     expect(screen.getByTestId('mockUpsellSection')).toBeVisible();
     expect(screen.getByTestId('startMigrationUploadRulesButton')).toBeVisible();
-    expect(screen.getByTestId('startMigrationUploadRulesButton')).toBeDisabled();
+    expect(screen.getByTestId('startMigrationUploadRulesButton')).toBeEuiDisabled();
   });
 
   it('should render missing Privileges Callout when there are missing capabilities but NO Upsell', () => {

@@ -109,7 +109,7 @@ describe('StartDashboardMigrationCard', () => {
 
     expect(screen.getByTestId('mockUpsellSection')).toBeVisible();
     expect(screen.getByTestId('startDashboardMigrationUploadDashboardsButton')).toBeVisible();
-    expect(screen.getByTestId('startDashboardMigrationUploadDashboardsButton')).toBeDisabled();
+    expect(screen.getByTestId('startDashboardMigrationUploadDashboardsButton')).toBeEuiDisabled();
   });
 
   it('should render missing Privileges Callout when there are missing capabilities but NO Upsell', () => {

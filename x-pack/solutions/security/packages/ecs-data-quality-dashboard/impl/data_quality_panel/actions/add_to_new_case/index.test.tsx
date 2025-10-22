@@ -42,7 +42,7 @@ describe('AddToNewCaseAction', () => {
         </TestExternalProviders>
       );
 
-      expect(screen.getByTestId('addToNewCase')).toBeDisabled();
+      expect(screen.getByTestId('addToNewCase')).toBeEuiDisabled();
     });
   });
 
@@ -58,7 +58,7 @@ describe('AddToNewCaseAction', () => {
         </TestExternalProviders>
       );
 
-      expect(screen.getByTestId('addToNewCase')).toBeDisabled();
+      expect(screen.getByTestId('addToNewCase')).toBeEuiDisabled();
     });
   });
 

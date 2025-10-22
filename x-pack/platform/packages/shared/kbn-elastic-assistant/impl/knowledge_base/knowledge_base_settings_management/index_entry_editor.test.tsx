@@ -218,7 +218,7 @@ describe('IndexEntryEditor', () => {
     );
 
     waitFor(() => {
-      expect(getByRole('combobox', { name: i18n.ENTRY_FIELD_PLACEHOLDER })).toBeDisabled();
+      expect(getByRole('combobox', { name: i18n.ENTRY_FIELD_PLACEHOLDER })).toBeEuiDisabled();
     });
   });
 

@@ -87,7 +87,7 @@ describe('ConversationSettingsMenu', () => {
     await userEvent.click(screen.getByTestId('conversation-settings-menu'));
 
     const anonymizeSwitch = screen.getByTestId('anonymize-switch');
-    expect(anonymizeSwitch).toBeDisabled();
+    expect(anonymizeSwitch).toBeEuiDisabled();
   });
 
   it('enables the anonymize values switch when no anonymized fields are present', async () => {
@@ -100,7 +100,7 @@ describe('ConversationSettingsMenu', () => {
     await userEvent.click(screen.getByTestId('conversation-settings-menu'));
 
     const anonymizeSwitch = screen.getByTestId('anonymize-switch');
-    expect(anonymizeSwitch).not.toBeDisabled();
+    expect(anonymizeSwitch).not.toBeEuiDisabled();
   });
 
   it('disables the show citations switch when no citations are present', async () => {
@@ -113,7 +113,7 @@ describe('ConversationSettingsMenu', () => {
     await userEvent.click(screen.getByTestId('conversation-settings-menu'));
 
     const citationsSwitch = screen.getByTestId('citations-switch');
-    expect(citationsSwitch).toBeDisabled();
+    expect(citationsSwitch).toBeEuiDisabled();
   });
 
   it('enables the show citations switch when no citations are present', async () => {
@@ -129,6 +129,6 @@ describe('ConversationSettingsMenu', () => {
     await userEvent.click(screen.getByTestId('conversation-settings-menu'));
 
     const citationsSwitch = screen.getByTestId('citations-switch');
-    expect(citationsSwitch).not.toBeDisabled();
+    expect(citationsSwitch).not.toBeEuiDisabled();
   });
 });

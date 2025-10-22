@@ -409,7 +409,7 @@ describe('EditConnector ', () => {
       />
     );
 
-    expect(await screen.findByTestId('push-to-external-service')).toBeDisabled();
+    expect(await screen.findByTestId('push-to-external-service')).toBeEuiDisabled();
   });
 
   it('does not show the push button if the user does not have access to cases actions', async () => {

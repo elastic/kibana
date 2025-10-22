@@ -86,7 +86,7 @@ describe('Policy form DeviceControlNotifyUserOption component', () => {
     formProps.policy.mac.device_control!.enabled = false;
     render();
 
-    expect(renderResult.getByTestId('test-checkbox')).toBeDisabled();
+    expect(renderResult.getByTestId('test-checkbox')).toBeEuiDisabled();
   });
 
   it('should be able to un-check the option', async () => {

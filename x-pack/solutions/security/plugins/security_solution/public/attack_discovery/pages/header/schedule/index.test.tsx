@@ -53,7 +53,7 @@ describe('Schedule', () => {
       </TestProviders>
     );
 
-    expect(screen.getByTestId('schedule')).toBeDisabled();
+    expect(screen.getByTestId('schedule')).toBeEuiDisabled();
   });
 
   it('calls openFlyout with schedule when clicked', () => {

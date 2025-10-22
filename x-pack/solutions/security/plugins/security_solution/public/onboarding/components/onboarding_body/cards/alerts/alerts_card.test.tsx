@@ -70,6 +70,6 @@ describe('AlertsCard', () => {
       </TestProviders>
     );
 
-    expect(getByTestId('alertsCardButton').querySelector('button')).not.toBeDisabled();
+    expect(getByTestId('alertsCardButton').querySelector('button')).not.toBeEuiDisabled();
   });
 });

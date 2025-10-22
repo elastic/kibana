@@ -29,9 +29,9 @@ describe('ReportDeleteButton', () => {
     );
     const getDeleteReportButton = () => findByTestId('deleteReportButton');
 
-    expect(await getDeleteReportButton()).not.toBeDisabled();
+    expect(await getDeleteReportButton()).not.toBeEuiDisabled();
     fireEvent.click(await getDeleteReportButton());
-    expect(await getDeleteReportButton()).toBeDisabled();
+    expect(await getDeleteReportButton()).toBeEuiDisabled();
 
     const modalElem = await findByTestId('deleteReportConfirm');
     expect(
@@ -39,13 +39,13 @@ describe('ReportDeleteButton', () => {
     ).toBeInTheDocument();
     const getConfirmButton = () => findItByTestId(modalElem, 'confirmModalConfirmButton');
 
-    expect(await getConfirmButton()).not.toBeDisabled();
+    expect(await getConfirmButton()).not.toBeEuiDisabled();
     fireEvent.click(await getConfirmButton());
-    expect(await getConfirmButton()).toBeDisabled();
+    expect(await getConfirmButton()).toBeEuiDisabled();
 
     deletePerformed$.next();
 
-    expect(await getConfirmButton()).not.toBeDisabled();
+    expect(await getConfirmButton()).not.toBeEuiDisabled();
   });
 
   it('renders prompt modal for multiple selected reports', async () => {
@@ -58,20 +58,20 @@ describe('ReportDeleteButton', () => {
     );
     const getDeleteReportButton = () => findByTestId('deleteReportButton');
 
-    expect(await getDeleteReportButton()).not.toBeDisabled();
+    expect(await getDeleteReportButton()).not.toBeEuiDisabled();
     fireEvent.click(await getDeleteReportButton());
-    expect(await getDeleteReportButton()).toBeDisabled();
+    expect(await getDeleteReportButton()).toBeEuiDisabled();
 
     const modalElem = await findByTestId('deleteReportConfirm');
     expect(await findItByText(modalElem, 'Delete the 2 selected reports?')).toBeInTheDocument();
     const getConfirmButton = () => findItByTestId(modalElem, 'confirmModalConfirmButton');
 
-    expect(await getConfirmButton()).not.toBeDisabled();
+    expect(await getConfirmButton()).not.toBeEuiDisabled();
     fireEvent.click(await getConfirmButton());
-    expect(await getConfirmButton()).toBeDisabled();
+    expect(await getConfirmButton()).toBeEuiDisabled();
 
     deletePerformed$.next();
 
-    expect(await getConfirmButton()).not.toBeDisabled();
+    expect(await getConfirmButton()).not.toBeEuiDisabled();
   });
 });

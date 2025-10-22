@@ -166,7 +166,7 @@ test('should be disabled in case uiConfig says so ', async () => {
 
   await userEvent.click(screen.getByLabelText('Background search loading'));
 
-  expect(screen.getByRole('button', { name: 'Save session' })).toBeDisabled();
+  expect(screen.getByRole('button', { name: 'Save session' })).toBeEuiDisabled();
 });
 
 test('should be disabled in case not enough permissions', async () => {
@@ -190,8 +190,8 @@ test('should be disabled in case not enough permissions', async () => {
 
   await userEvent.click(screen.getByLabelText('Background search complete'));
 
-  expect(screen.getByRole('button', { name: 'Save session' })).toBeDisabled();
-  expect(screen.getByRole('button', { name: 'Manage sessions' })).toBeDisabled();
+  expect(screen.getByRole('button', { name: 'Save session' })).toBeEuiDisabled();
+  expect(screen.getByRole('button', { name: 'Manage sessions' })).toBeEuiDisabled();
 });
 
 describe('Completed inactivity', () => {
@@ -220,13 +220,13 @@ describe('Completed inactivity', () => {
 
     await userEvent.click(screen.getByLabelText('Background search loading'));
 
-    expect(screen.getByRole('button', { name: 'Save session' })).not.toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Save session' })).not.toBeEuiDisabled();
 
     act(() => {
       disableSaveAfterSearchesExpire$.next(true);
     });
 
-    expect(screen.getByRole('button', { name: 'Save session' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Save session' })).toBeEuiDisabled();
   });
 });
 

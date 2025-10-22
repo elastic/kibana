@@ -295,14 +295,14 @@ describe('GlobalDataTagsTable', () => {
     renderComponent([], { isDisabled: true });
 
     const test = renderResult.getByTestId('globalDataTagAddFieldBtn');
-    expect(test).toBeDisabled();
+    expect(test).toBeEuiDisabled();
   });
 
   it('should not allow to add/edit/remove tag when disabled and tags already exists', () => {
     renderComponent(globalDataTags, { isDisabled: true });
 
-    expect(renderResult.getByTestId('globalDataTagAddAnotherFieldBtn')).toBeDisabled();
-    expect(renderResult.getByTestId('globalDataTagDeleteField1Btn')).toBeDisabled();
-    expect(renderResult.getByTestId('globalDataTagEditField1Btn')).toBeDisabled();
+    expect(renderResult.getByTestId('globalDataTagAddAnotherFieldBtn')).toBeEuiDisabled();
+    expect(renderResult.getByTestId('globalDataTagDeleteField1Btn')).toBeEuiDisabled();
+    expect(renderResult.getByTestId('globalDataTagEditField1Btn')).toBeEuiDisabled();
   });
 });

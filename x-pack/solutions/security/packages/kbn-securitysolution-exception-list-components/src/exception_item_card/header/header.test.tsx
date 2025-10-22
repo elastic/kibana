@@ -52,6 +52,6 @@ describe('ExceptionItemCardHeader', () => {
       />
     );
 
-    expect(wrapper.getByTestId('exceptionItemHeaderButtonIcon')).toBeDisabled();
+    expect(wrapper.getByTestId('exceptionItemHeaderButtonIcon')).toBeEuiDisabled();
   });
 });

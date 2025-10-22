@@ -80,13 +80,13 @@ describe('AddFilter', () => {
     await user.tab();
 
     expect(await screen.findByTestId('fieldFilterInput')).toHaveAttribute('aria-invalid', 'true');
-    expect(screen.getByTestId('addFieldFilterButton')).toBeDisabled();
+    expect(screen.getByTestId('addFieldFilterButton')).toBeEuiDisabled();
 
     // This would be regarded as a valid regex
     await user.type(screen.getByTestId('fieldFilterInput'), '*//foo');
     await user.tab();
 
     expect(await screen.findByTestId('fieldFilterInput')).not.toHaveAttribute('aria-invalid');
-    expect(screen.getByTestId('addFieldFilterButton')).not.toBeDisabled();
+    expect(screen.getByTestId('addFieldFilterButton')).not.toBeEuiDisabled();
   });
 });

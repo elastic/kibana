@@ -55,7 +55,7 @@ describe('InstallTranslatedButton', () => {
     const { getByTestId } = render(
       <InstallTranslatedButton {...defaultProps} disableInstallTranslatedItemsButton={true} />
     );
-    expect(getByTestId('installTranslatedItemsButton')).toBeDisabled();
+    expect(getByTestId('installTranslatedItemsButton')).toBeEuiDisabled();
   });
 
   it('shows a loading spinner when isLoading is true', () => {

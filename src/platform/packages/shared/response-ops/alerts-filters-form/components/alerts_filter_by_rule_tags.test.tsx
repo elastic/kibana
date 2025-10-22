@@ -99,7 +99,7 @@ describe('AlertsFilterByRuleTags', () => {
     );
     const comboboxInput = screen.getByTestId('comboBoxSearchInput');
     expect(comboboxInput).toHaveAttribute('aria-invalid', 'true');
-    expect(comboboxInput).toBeDisabled();
+    expect(comboboxInput).toBeEuiDisabled();
   });
 
   it('should disable the combobox when no tags are available', async () => {

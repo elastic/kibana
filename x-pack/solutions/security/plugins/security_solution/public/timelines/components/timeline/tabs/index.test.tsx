@@ -123,8 +123,8 @@ describe('Timeline', () => {
           <TabsContent {...defaultProps} />
         </TestProviders>
       );
-      expect(screen.getByTestId('timelineTabs-notes')).not.toBeDisabled();
-      expect(screen.getByTestId('timelineTabs-pinned')).not.toBeDisabled();
+      expect(screen.getByTestId('timelineTabs-notes')).not.toBeEuiDisabled();
+      expect(screen.getByTestId('timelineTabs-pinned')).not.toBeEuiDisabled();
     });
 
     it('should not show notes and pinned tabs for users with the insufficient privileges', () => {
@@ -138,8 +138,8 @@ describe('Timeline', () => {
           <TabsContent {...defaultProps} />
         </TestProviders>
       );
-      expect(screen.getByTestId('timelineTabs-notes')).toBeDisabled();
-      expect(screen.getByTestId('timelineTabs-pinned')).toBeDisabled();
+      expect(screen.getByTestId('timelineTabs-notes')).toBeEuiDisabled();
+      expect(screen.getByTestId('timelineTabs-pinned')).toBeEuiDisabled();
     });
   });
 });

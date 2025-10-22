@@ -118,7 +118,7 @@ describe('When rendering the command list (help output)', () => {
       commands[0].helpDisabled = true;
       renderAndOpenHelpPanel({ commands });
 
-      expect(renderResult.getByTestId('test-commandList-group1-cmd1-addToInput')).toBeDisabled();
+      expect(renderResult.getByTestId('test-commandList-group1-cmd1-addToInput')).toBeEuiDisabled();
     });
 
     it('should add command to console input when [+] button is clicked', () => {

@@ -167,7 +167,7 @@ describe('useScheduleView', () => {
 
       render(<TestProviders>{result.current.actionButtons}</TestProviders>);
 
-      expect(screen.getByTestId('createSchedule')).toBeDisabled();
+      expect(screen.getByTestId('createSchedule')).toBeEuiDisabled();
     });
 
     it('should render missing privileges tooltip if update schedule privilege is missing', async () => {

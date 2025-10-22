@@ -168,7 +168,9 @@ describe('PackagePolicyAgentsCell', () => {
         ],
       });
       await act(async () => {
-        expect(utils.container.querySelector('[data-test-subj="addAgentButton"]')).toBeDisabled();
+        expect(
+          utils.container.querySelector('[data-test-subj="addAgentButton"]')
+        ).toBeEuiDisabled();
       });
     });
   });

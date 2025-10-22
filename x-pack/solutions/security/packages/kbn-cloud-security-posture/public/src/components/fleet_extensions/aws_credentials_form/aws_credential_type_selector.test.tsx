@@ -77,7 +77,7 @@ describe('AwsCredentialTypeSelector', () => {
         disabled={true}
       />
     );
-    expect(screen.getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ)).toBeDisabled();
+    expect(screen.getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ)).toBeEuiDisabled();
   });
 
   it('shows the correct selected value', () => {

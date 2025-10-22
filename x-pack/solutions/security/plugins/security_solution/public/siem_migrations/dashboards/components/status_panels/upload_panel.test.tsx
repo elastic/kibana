@@ -42,7 +42,7 @@ describe('UploadDashboardsPanel', () => {
   it('renders correctly with default props', () => {
     const { getByTestId } = renderTestComponent();
     expect(getByTestId('startDashboardMigrationUploadDashboardsButton')).toBeVisible();
-    expect(getByTestId('startDashboardMigrationUploadDashboardsButton')).not.toBeDisabled();
+    expect(getByTestId('startDashboardMigrationUploadDashboardsButton')).not.toBeEuiDisabled();
   });
 
   it('disables the button when isDisabled is true', () => {
@@ -50,7 +50,7 @@ describe('UploadDashboardsPanel', () => {
       isDisabled: true,
     });
 
-    expect(getByTestId('startDashboardMigrationUploadDashboardsButton')).toBeDisabled();
+    expect(getByTestId('startDashboardMigrationUploadDashboardsButton')).toBeEuiDisabled();
   });
 
   it('should show upload more button when isUploadMore is true', () => {
@@ -59,6 +59,6 @@ describe('UploadDashboardsPanel', () => {
     });
 
     expect(getByTestId('startDashboardMigrationUploadMoreButton')).toBeVisible();
-    expect(getByTestId('startDashboardMigrationUploadMoreButton')).not.toBeDisabled();
+    expect(getByTestId('startDashboardMigrationUploadMoreButton')).not.toBeEuiDisabled();
   });
 });

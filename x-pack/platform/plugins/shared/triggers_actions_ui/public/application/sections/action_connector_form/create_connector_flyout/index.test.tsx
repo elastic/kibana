@@ -157,7 +157,7 @@ describe('CreateConnectorFlyout', () => {
       />
     );
 
-    expect(await screen.findByTestId('create-connector-flyout-close-btn')).not.toBeDisabled();
+    expect(await screen.findByTestId('create-connector-flyout-close-btn')).not.toBeEuiDisabled();
   });
 
   it('disables the buttons when there are error on the form', async () => {
@@ -179,9 +179,9 @@ describe('CreateConnectorFlyout', () => {
     await userEvent.click(await screen.findByTestId('create-connector-flyout-save-btn'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('create-connector-flyout-back-btn')).not.toBeDisabled();
-      expect(screen.getByTestId('create-connector-flyout-save-test-btn')).toBeDisabled();
-      expect(screen.getByTestId('create-connector-flyout-save-btn')).toBeDisabled();
+      expect(screen.getByTestId('create-connector-flyout-back-btn')).not.toBeEuiDisabled();
+      expect(screen.getByTestId('create-connector-flyout-save-test-btn')).toBeEuiDisabled();
+      expect(screen.getByTestId('create-connector-flyout-save-btn')).toBeEuiDisabled();
     });
   });
 

@@ -54,7 +54,7 @@ describe('Title', () => {
         <Title isLoading={true} />
       </MockHookWrapperComponent>
     );
-    expect(await screen.findByTestId('input')).toBeDisabled();
+    expect(await screen.findByTestId('input')).toBeEuiDisabled();
   });
 
   it('it changes the title', async () => {

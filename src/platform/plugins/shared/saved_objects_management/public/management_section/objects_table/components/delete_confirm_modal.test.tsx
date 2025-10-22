@@ -197,7 +197,7 @@ describe('DeleteConfirmModal', () => {
 
       expect(
         wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').getDOMNode()
-      ).toBeDisabled();
+      ).toBeEuiDisabled();
     });
   });
 

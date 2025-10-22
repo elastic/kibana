@@ -62,7 +62,7 @@ describe('BulkFillRuleGapsModal', () => {
       target: { value: convertToDatePickerFormat(endDate) },
     });
 
-    expect(confirmModalConfirmButton).toBeDisabled();
+    expect(confirmModalConfirmButton).toBeEuiDisabled();
     expect(timeRangeForm).toHaveTextContent('Selected time range is invalid');
   });
 
@@ -78,7 +78,7 @@ describe('BulkFillRuleGapsModal', () => {
       },
     });
 
-    expect(confirmModalConfirmButton).toBeDisabled();
+    expect(confirmModalConfirmButton).toBeEuiDisabled();
     expect(timeRangeForm).toHaveTextContent(
       'Rule gap fills cannot be scheduled earlier than 90 days ago'
     );
@@ -94,7 +94,7 @@ describe('BulkFillRuleGapsModal', () => {
       target: { value: convertToDatePickerFormat(endDate) },
     });
 
-    expect(confirmModalConfirmButton).toBeDisabled();
+    expect(confirmModalConfirmButton).toBeEuiDisabled();
     expect(timeRangeForm).toHaveTextContent(
       'Select a different time range. Future gap fills are not supported.'
     );

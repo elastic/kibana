@@ -217,7 +217,7 @@ function expectRuleUpgradeButtonToBeDisabled(): void {
     within(screen.getByRole('dialog')).getByRole('button', {
       name: 'Update rule',
     })
-  ).toBeDisabled();
+  ).toBeEuiDisabled();
 }
 
 function expectRuleUpgradeButtonToBeEnabled(): void {

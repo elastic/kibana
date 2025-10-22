@@ -33,7 +33,7 @@ describe('Tags', () => {
     render(<Tags {...{ ...options, values: ['super', 'hello'] }} />);
 
     await waitFor(() => {
-      expect(screen.getByTestId('comboBoxSearchInput')).not.toBeDisabled();
+      expect(screen.getByTestId('comboBoxSearchInput')).not.toBeEuiDisabled();
     });
 
     await userEvent.click(screen.getByTestId('comboBoxClearButton'));
@@ -52,7 +52,7 @@ describe('Tags', () => {
     render(<Tags {...{ ...options, values: ['super', 'hello'] }} />);
 
     await waitFor(() => {
-      expect(screen.getByTestId('comboBoxSearchInput')).not.toBeDisabled();
+      expect(screen.getByTestId('comboBoxSearchInput')).not.toBeEuiDisabled();
     });
 
     await userEvent.click(screen.getByTitle('Remove super from selection in this group'));
@@ -73,7 +73,7 @@ describe('Tags', () => {
     render(<Tags {...options} />);
 
     await waitFor(() => {
-      expect(screen.getByTestId('comboBoxSearchInput')).not.toBeDisabled();
+      expect(screen.getByTestId('comboBoxSearchInput')).not.toBeEuiDisabled();
     });
 
     await userEvent.click(screen.getByTestId('comboBoxSearchInput'));
@@ -96,7 +96,7 @@ describe('Tags', () => {
     render(<Tags {...options} />);
 
     await waitFor(() => {
-      expect(screen.getByTestId('comboBoxSearchInput')).not.toBeDisabled();
+      expect(screen.getByTestId('comboBoxSearchInput')).not.toBeEuiDisabled();
     });
 
     await userEvent.click(screen.getByTestId('comboBoxSearchInput'));
@@ -111,7 +111,7 @@ describe('Tags', () => {
     render(<Tags {...options} />);
 
     await waitFor(() => {
-      expect(screen.getByTestId('comboBoxSearchInput')).not.toBeDisabled();
+      expect(screen.getByTestId('comboBoxSearchInput')).not.toBeEuiDisabled();
     });
 
     await userEvent.click(screen.getByTestId('comboBoxSearchInput'));
@@ -139,7 +139,7 @@ describe('Tags', () => {
     render(<Tags {...{ ...options, executionMode: ActionConnectorMode.Test }} />);
 
     await waitFor(() => {
-      expect(screen.getByTestId('comboBoxSearchInput')).not.toBeDisabled();
+      expect(screen.getByTestId('comboBoxSearchInput')).not.toBeEuiDisabled();
     });
 
     await userEvent.click(screen.getByTestId('comboBoxSearchInput'));

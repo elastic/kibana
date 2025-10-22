@@ -56,7 +56,7 @@ describe('ConvertToLookupIndexModal', () => {
     expect(await findByText('Lookup index name is required')).toBeInTheDocument();
 
     // Check if the convert button is disabled
-    expect(getByTestId('convertButton')).toBeDisabled();
+    expect(getByTestId('convertButton')).toBeEuiDisabled();
   });
 
   it('should enable the convert button when lookup index name', () => {
@@ -66,7 +66,7 @@ describe('ConvertToLookupIndexModal', () => {
     fireEvent.change(getByTestId('lookupIndexName'), { target: { value: '' } });
 
     // Check if the convert button is disabled
-    expect(getByTestId('convertButton')).toBeDisabled();
+    expect(getByTestId('convertButton')).toBeEuiDisabled();
 
     // Provide lookup index name
     fireEvent.change(getByTestId('lookupIndexName'), { target: { value: 'lookup-my-index' } });
@@ -104,10 +104,10 @@ describe('ConvertToLookupIndexModal', () => {
     const { getByTestId } = renderModal({ isConverting: true });
 
     // Check if the lookup index name input is disabled
-    expect(getByTestId('lookupIndexName')).toBeDisabled();
+    expect(getByTestId('lookupIndexName')).toBeEuiDisabled();
 
     // Check if the convert button is disabled
-    expect(getByTestId('convertButton')).toBeDisabled();
+    expect(getByTestId('convertButton')).toBeEuiDisabled();
   });
 
   it('should display the error message when errorMessage prop is provided', () => {

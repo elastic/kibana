@@ -45,7 +45,7 @@ describe('Assignees', () => {
     );
 
     await waitFor(() => {
-      expect(screen.queryByTestId('comboBoxSearchInput')).not.toBeDisabled();
+      expect(screen.queryByTestId('comboBoxSearchInput')).not.toBeEuiDisabled();
     });
 
     expect(await screen.findByTestId('createCaseAssigneesComboBox')).toBeInTheDocument();
@@ -62,7 +62,7 @@ describe('Assignees', () => {
     );
 
     await waitFor(() => {
-      expect(screen.queryByTestId('comboBoxSearchInput')).not.toBeDisabled();
+      expect(screen.queryByTestId('comboBoxSearchInput')).not.toBeEuiDisabled();
     });
 
     expect(screen.queryByTestId('create-case-assign-yourself-link')).not.toBeInTheDocument();
@@ -80,7 +80,7 @@ describe('Assignees', () => {
     );
 
     await waitFor(() => {
-      expect(screen.queryByTestId('comboBoxSearchInput')).not.toBeDisabled();
+      expect(screen.queryByTestId('comboBoxSearchInput')).not.toBeEuiDisabled();
     });
 
     await userEvent.click(await screen.findByTestId('create-case-assign-yourself-link'));
@@ -99,7 +99,7 @@ describe('Assignees', () => {
     );
 
     await waitFor(() => {
-      expect(screen.queryByTestId('comboBoxSearchInput')).not.toBeDisabled();
+      expect(screen.queryByTestId('comboBoxSearchInput')).not.toBeEuiDisabled();
     });
 
     await userEvent.click(await screen.findByTestId('create-case-assign-yourself-link'));
@@ -108,7 +108,7 @@ describe('Assignees', () => {
       expect(globalForm.getFormData()).toEqual({ assignees: [{ uid: currentUserProfile.uid }] });
     });
 
-    expect(await screen.findByTestId('create-case-assign-yourself-link')).toBeDisabled();
+    expect(await screen.findByTestId('create-case-assign-yourself-link')).toBeEuiDisabled();
   });
 
   it('assignees users correctly', async () => {
@@ -119,7 +119,7 @@ describe('Assignees', () => {
     );
 
     await waitFor(() => {
-      expect(screen.queryByTestId('comboBoxSearchInput')).not.toBeDisabled();
+      expect(screen.queryByTestId('comboBoxSearchInput')).not.toBeEuiDisabled();
     });
 
     await userEvent.type(await screen.findByTestId('comboBoxSearchInput'), 'dr', { delay: 1 });
@@ -169,7 +169,7 @@ describe('Assignees', () => {
     );
 
     await waitFor(() => {
-      expect(screen.queryByTestId('comboBoxSearchInput')).not.toBeDisabled();
+      expect(screen.queryByTestId('comboBoxSearchInput')).not.toBeEuiDisabled();
     });
 
     await userEvent.click(await screen.findByTestId('comboBoxSearchInput'));

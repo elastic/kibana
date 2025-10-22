@@ -68,7 +68,7 @@ describe('LegacyHistoricalCheckFields', () => {
 
     expect(screen.getByTestId('incompatibleTab')).toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByTestId('sameFamilyTab')).toHaveAttribute('aria-pressed', 'false');
-    expect(screen.getByTestId('sameFamilyTab')).toBeDisabled();
+    expect(screen.getByTestId('sameFamilyTab')).toBeEuiDisabled();
 
     expect(screen.getByTestId('legacyIncompatibleTabContent')).toBeInTheDocument();
     expect(screen.queryByTestId('sameFamilyTabContent')).not.toBeInTheDocument();

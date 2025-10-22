@@ -243,7 +243,7 @@ describe('DetailsFlyout', () => {
 
       await renderComponent();
       await waitFor(() => {
-        expect(screen.getByTestId('edit')).toBeDisabled();
+        expect(screen.getByTestId('edit')).toBeEuiDisabled();
       });
     });
 

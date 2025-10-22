@@ -213,7 +213,7 @@ describe('SharedLists', () => {
       </TestProviders>
     );
     const allMenuActions = wrapper.getAllByTestId('sharedListOverflowCardButtonIcon');
-    expect(allMenuActions[0]).toBeDisabled();
+    expect(allMenuActions[0]).toBeEuiDisabled();
   });
 
   it('renders delete option as disabled if list is "endpoint_list"', async () => {
@@ -227,7 +227,7 @@ describe('SharedLists', () => {
 
     await waitFor(() => {
       const allDeleteActions = wrapper.getAllByTestId('sharedListOverflowCardActionItemDelete');
-      expect(allDeleteActions[0]).toBeDisabled();
+      expect(allDeleteActions[0]).toBeEuiDisabled();
     });
   });
 
@@ -246,6 +246,6 @@ describe('SharedLists', () => {
       </TestProviders>
     );
     const allMenuActions = wrapper.getAllByTestId('sharedListOverflowCardButtonIcon');
-    expect(allMenuActions[1]).toBeDisabled();
+    expect(allMenuActions[1]).toBeEuiDisabled();
   });
 });

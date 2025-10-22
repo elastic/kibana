@@ -121,7 +121,7 @@ describe('AddPrebuiltRulesTable', () => {
     const installAllButton = screen.getByTestId('installAllRulesButton');
 
     expect(installAllButton).toHaveTextContent('Install all');
-    expect(installAllButton).toBeDisabled();
+    expect(installAllButton).toBeEuiDisabled();
   });
 
   it('disables `Install all` button if prebuilt package is being installed', async () => {
@@ -146,7 +146,7 @@ describe('AddPrebuiltRulesTable', () => {
     const installAllButton = screen.getByTestId('installAllRulesButton');
 
     expect(installAllButton).toHaveTextContent('Install all');
-    expect(installAllButton).toBeDisabled();
+    expect(installAllButton).toBeEuiDisabled();
   });
 
   it('enables Install all` button when user has permissions', async () => {

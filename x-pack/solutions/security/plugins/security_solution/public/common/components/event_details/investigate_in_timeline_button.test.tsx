@@ -33,7 +33,7 @@ describe('InvestigateInTimelineButton', () => {
         </TestProviders>
       );
       expect(screen.queryByLabelText(ACTION_INVESTIGATE_IN_TIMELINE)).toBeInTheDocument();
-      expect(screen.queryByLabelText(ACTION_INVESTIGATE_IN_TIMELINE)).not.toBeDisabled();
+      expect(screen.queryByLabelText(ACTION_INVESTIGATE_IN_TIMELINE)).not.toBeEuiDisabled();
     });
 
     it('should be disabled when the user has insufficient privileges', () => {
@@ -48,7 +48,7 @@ describe('InvestigateInTimelineButton', () => {
           <InvestigateInTimelineButton asEmptyButton={true} dataProviders={dataProviders} />
         </TestProviders>
       );
-      expect(screen.queryByLabelText(ACTION_INVESTIGATE_IN_TIMELINE)).toBeDisabled();
+      expect(screen.queryByLabelText(ACTION_INVESTIGATE_IN_TIMELINE)).toBeEuiDisabled();
     });
   });
 });

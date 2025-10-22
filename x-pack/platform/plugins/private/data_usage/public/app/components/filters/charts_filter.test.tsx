@@ -119,6 +119,6 @@ describe('Charts Filters', () => {
     await user.click(filterButton);
     expect(queryByTestId('dataStreams-filter-option')).toBeFalsy();
     expect(getByTestId('dataStreams-group-label')).toBeTruthy();
-    expect(getByTestId(`${testIdFilter}-dataStreams-selectAllButton`)).toBeDisabled();
+    expect(getByTestId(`${testIdFilter}-dataStreams-selectAllButton`)).toBeEuiDisabled();
   });
 });

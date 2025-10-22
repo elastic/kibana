@@ -28,7 +28,7 @@ describe('UpdateIndexPatternForm', () => {
       </TestProviders>
     );
 
-    expect(getByTestId('indexPatternPlaceholderFormSaveBtn')).toBeDisabled();
+    expect(getByTestId('indexPatternPlaceholderFormSaveBtn')).toBeEuiDisabled();
   });
 
   it('calls onClose when the cancel button is clicked', () => {
@@ -61,7 +61,7 @@ describe('UpdateIndexPatternForm', () => {
     fireEvent.click(getByText('logs-*'));
 
     await waitFor(() => {
-      expect(getByTestId('indexPatternPlaceholderFormSaveBtn')).not.toBeDisabled();
+      expect(getByTestId('indexPatternPlaceholderFormSaveBtn')).not.toBeEuiDisabled();
     });
 
     fireEvent.click(getByTestId('indexPatternPlaceholderFormSaveBtn'));

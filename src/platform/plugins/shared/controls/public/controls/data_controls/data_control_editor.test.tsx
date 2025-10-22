@@ -140,7 +140,7 @@ describe('Data control editor', () => {
       const controlEditor = await mountComponent({});
 
       const saveButton = controlEditor.getByTestId('control-editor-save');
-      expect(saveButton).toBeDisabled();
+      expect(saveButton).toBeEuiDisabled();
       await selectField(controlEditor, 'machine.os.raw');
       expect(saveButton).toBeEnabled();
     });

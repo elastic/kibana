@@ -84,7 +84,7 @@ test('disabled', () => {
   const rangeInputs = screen.getAllByRole('spinbutton');
   expect(rangeInputs).toHaveLength(2);
   rangeInputs.forEach((input) => {
-    expect(input).toBeDisabled();
+    expect(input).toBeEuiDisabled();
   });
 });
 

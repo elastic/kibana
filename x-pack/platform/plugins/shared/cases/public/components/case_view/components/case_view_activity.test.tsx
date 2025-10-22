@@ -280,7 +280,7 @@ describe('Case View Page activity tab', () => {
       wrapperProps: { license: platinumLicense, permissions: noUpdateCasesPermissions() },
     });
 
-    expect(await screen.findByTestId('case-severity-selection')).toBeDisabled();
+    expect(await screen.findByTestId('case-severity-selection')).toBeEuiDisabled();
 
     await waitForComponentToUpdate();
   });

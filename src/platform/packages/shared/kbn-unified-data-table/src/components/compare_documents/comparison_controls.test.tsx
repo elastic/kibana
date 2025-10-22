@@ -142,11 +142,11 @@ describe('ComparisonControls', () => {
     expect(result.getShowDiffDecorationsSwitch()).toBeEnabled();
     await result.clickShowDiffSwitch();
     expect(result.getShowDiffSwitch()).not.toBeChecked();
-    expect(result.getDiffModeEntry('basic')).toBeDisabled();
-    expect(result.getDiffModeEntry('chars')).toBeDisabled();
-    expect(result.getDiffModeEntry('words')).toBeDisabled();
-    expect(result.getDiffModeEntry('lines')).toBeDisabled();
-    expect(result.getShowDiffDecorationsSwitch()).toBeDisabled();
+    expect(result.getDiffModeEntry('basic')).toBeEuiDisabled();
+    expect(result.getDiffModeEntry('chars')).toBeEuiDisabled();
+    expect(result.getDiffModeEntry('words')).toBeEuiDisabled();
+    expect(result.getDiffModeEntry('lines')).toBeEuiDisabled();
+    expect(result.getShowDiffDecorationsSwitch()).toBeEuiDisabled();
     await result.clickShowDiffSwitch();
     expect(result.getShowDiffSwitch()).toBeChecked();
   });

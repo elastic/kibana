@@ -99,6 +99,6 @@ describe('use investigate in timeline hook', () => {
         <InvestigateInTimelineAction {...props} />
       </TestProviders>
     );
-    expect(wrapper.getByTestId('send-alert-to-timeline-button')).toBeDisabled();
+    expect(wrapper.getByTestId('send-alert-to-timeline-button')).toBeEuiDisabled();
   });
 });

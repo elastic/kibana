@@ -141,7 +141,7 @@ describe('workspace_panel_wrapper', () => {
       const { store, toggleAutoApply, getApplyChangesToolbar, editVisualization } =
         renderWorkspacePanelWrapper();
       await toggleAutoApply();
-      expect(getApplyChangesToolbar()).toBeDisabled();
+      expect(getApplyChangesToolbar()).toBeEuiDisabled();
 
       // make a change
       act(() => {
@@ -153,13 +153,13 @@ describe('workspace_panel_wrapper', () => {
         store.dispatch(setChangesApplied(false));
       });
 
-      expect(getApplyChangesToolbar()).not.toBeDisabled();
+      expect(getApplyChangesToolbar()).not.toBeEuiDisabled();
 
       // // simulate workspace panel behavior
       act(() => {
         store.dispatch(setChangesApplied(true));
       });
-      expect(getApplyChangesToolbar()).toBeDisabled();
+      expect(getApplyChangesToolbar()).toBeEuiDisabled();
     });
 
     it('enabling auto apply while having unapplied changes works', async () => {
@@ -174,7 +174,7 @@ describe('workspace_panel_wrapper', () => {
       act(() => {
         store.dispatch(setChangesApplied(false));
       });
-      expect(getApplyChangesToolbar()).not.toBeDisabled();
+      expect(getApplyChangesToolbar()).not.toBeEuiDisabled();
       await toggleAutoApply();
       expect(getApplyChangesToolbar()).not.toBeInTheDocument();
     });

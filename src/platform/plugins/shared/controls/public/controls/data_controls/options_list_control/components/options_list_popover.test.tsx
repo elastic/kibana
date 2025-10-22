@@ -145,14 +145,14 @@ describe('Options list popover', () => {
 
       let searchBox = popover.getByTestId('optionsList-control-search-input');
       let sortButton = popover.getByTestId('optionsListControl__sortingOptionsButton');
-      expect(searchBox).not.toBeDisabled();
-      expect(sortButton).not.toBeDisabled();
+      expect(searchBox).not.toBeEuiDisabled();
+      expect(sortButton).not.toBeEuiDisabled();
 
       await clickShowOnlySelections(popover);
       searchBox = popover.getByTestId('optionsList-control-search-input');
       sortButton = popover.getByTestId('optionsListControl__sortingOptionsButton');
-      expect(searchBox).toBeDisabled();
-      expect(sortButton).toBeDisabled();
+      expect(searchBox).toBeEuiDisabled();
+      expect(sortButton).toBeEuiDisabled();
     });
   });
 

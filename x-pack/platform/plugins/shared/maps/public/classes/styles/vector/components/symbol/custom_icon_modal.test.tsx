@@ -48,7 +48,7 @@ test('should render an empty custom icon modal', () => {
 
   // Check for disabled Save button
   const saveButton = screen.getByRole('button', { name: /save/i });
-  expect(saveButton).toBeDisabled();
+  expect(saveButton).toBeEuiDisabled();
 
   // Check for Cancel button
   const cancelButton = screen.getByRole('button', { name: /cancel/i });
@@ -77,7 +77,7 @@ test('should render a custom icon modal with an existing icon', () => {
   expect(screen.getByTestId('mapsCustomIconForm-label')).toHaveValue('square');
 
   // Save button should not be disabled
-  expect(screen.getByRole('button', { name: 'Save' })).not.toBeDisabled();
+  expect(screen.getByRole('button', { name: 'Save' })).not.toBeEuiDisabled();
 
   // Advanced options accordion is rendered
   expect(screen.getByText('Advanced options')).toBeInTheDocument();

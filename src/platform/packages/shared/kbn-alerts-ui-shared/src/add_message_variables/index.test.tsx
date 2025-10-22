@@ -140,7 +140,7 @@ describe('AddMessageVariables', () => {
       />
     );
 
-    expect(screen.queryByTestId('fooAddVariableButton')).toBeDisabled();
+    expect(screen.queryByTestId('fooAddVariableButton')).toBeEuiDisabled();
   });
 
   test('it renders button title when passed', async () => {

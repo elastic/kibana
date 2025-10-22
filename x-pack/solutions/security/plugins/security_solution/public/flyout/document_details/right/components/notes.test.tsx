@@ -118,7 +118,7 @@ describe('<Notes />', () => {
 
     const button = getByTestId(NOTES_ADD_NOTE_BUTTON_TEST_ID);
     expect(button).toBeInTheDocument();
-    expect(button).toBeDisabled();
+    expect(button).toBeEuiDisabled();
 
     button.click();
 
@@ -177,7 +177,7 @@ describe('<Notes />', () => {
 
     expect(button).toBeInTheDocument();
     button.click();
-    expect(button).toBeDisabled();
+    expect(button).toBeEuiDisabled();
 
     expect(mockNavigateToLeftPanel).not.toHaveBeenCalled();
   });

@@ -70,6 +70,6 @@ test('disableMsg', () => {
 
   // When disabled, it should render a disabled text field instead of combobox
   const disabledInput = screen.getByDisplayValue('');
-  expect(disabledInput).toBeDisabled();
+  expect(disabledInput).toBeEuiDisabled();
   expect(disabledInput).toHaveAttribute('placeholder', 'Select...');
 });

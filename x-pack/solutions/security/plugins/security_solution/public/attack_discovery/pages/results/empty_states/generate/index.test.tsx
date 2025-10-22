@@ -25,13 +25,13 @@ describe('Generate Component', () => {
   it('disables the generate button when isLoading is true', () => {
     render(<Generate isLoading={true} onGenerate={jest.fn()} />);
 
-    expect(screen.getByTestId('generate')).toBeDisabled();
+    expect(screen.getByTestId('generate')).toBeEuiDisabled();
   });
 
   it('disables the generate button when isDisabled is true', () => {
     render(<Generate isLoading={false} isDisabled={true} onGenerate={jest.fn()} />);
 
-    expect(screen.getByTestId('generate')).toBeDisabled();
+    expect(screen.getByTestId('generate')).toBeEuiDisabled();
   });
 
   it('shows tooltip content when the button is disabled', async () => {

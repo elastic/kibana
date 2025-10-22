@@ -131,7 +131,7 @@ describe(' Filter Group Component ', () => {
       await waitFor(() => {
         expect(screen.getByTestId(TEST_IDS.ADD_CONTROL)).toBeVisible();
         expect(screen.getByTestId(TEST_IDS.SAVE_CONTROL)).toBeVisible();
-        expect(screen.getByTestId(TEST_IDS.SAVE_CONTROL)).toBeDisabled();
+        expect(screen.getByTestId(TEST_IDS.SAVE_CONTROL)).toBeEuiDisabled();
       });
     });
 
@@ -144,7 +144,7 @@ describe(' Filter Group Component ', () => {
 
       fireEvent.click(screen.getByTestId(TEST_IDS.CONTEXT_MENU.EDIT));
       await waitFor(() => {
-        expect(screen.getByTestId(TEST_IDS.ADD_CONTROL)).toBeDisabled();
+        expect(screen.getByTestId(TEST_IDS.ADD_CONTROL)).toBeEuiDisabled();
       });
 
       // delete some panels
@@ -159,9 +159,9 @@ describe(' Filter Group Component ', () => {
 
       await waitFor(() => {
         // add button should be enabled now
-        expect(screen.getByTestId(TEST_IDS.ADD_CONTROL)).not.toBeDisabled();
+        expect(screen.getByTestId(TEST_IDS.ADD_CONTROL)).not.toBeEuiDisabled();
         // save button should also be enable since changes have taken place
-        expect(screen.getByTestId(TEST_IDS.SAVE_CONTROL)).not.toBeDisabled();
+        expect(screen.getByTestId(TEST_IDS.SAVE_CONTROL)).not.toBeEuiDisabled();
       });
     });
 
@@ -174,7 +174,7 @@ describe(' Filter Group Component ', () => {
 
       fireEvent.click(screen.getByTestId(TEST_IDS.CONTEXT_MENU.EDIT));
       await waitFor(() => {
-        expect(screen.getByTestId(TEST_IDS.ADD_CONTROL)).toBeDisabled();
+        expect(screen.getByTestId(TEST_IDS.ADD_CONTROL)).toBeEuiDisabled();
       });
 
       // delete some panels
@@ -189,9 +189,9 @@ describe(' Filter Group Component ', () => {
 
       await waitFor(() => {
         // add button should be enabled now
-        expect(screen.getByTestId(TEST_IDS.ADD_CONTROL)).not.toBeDisabled();
+        expect(screen.getByTestId(TEST_IDS.ADD_CONTROL)).not.toBeEuiDisabled();
         // save button should also be enable since changes have taken place
-        expect(screen.getByTestId(TEST_IDS.SAVE_CONTROL)).not.toBeDisabled();
+        expect(screen.getByTestId(TEST_IDS.SAVE_CONTROL)).not.toBeEuiDisabled();
       });
 
       fireEvent.click(screen.getByTestId(TEST_IDS.ADD_CONTROL));
@@ -226,7 +226,7 @@ describe(' Filter Group Component ', () => {
       fireEvent.click(screen.getByTestId(TEST_IDS.CONTEXT_MENU.EDIT));
       await waitFor(() => {
         // add button should be enabled now
-        expect(screen.getByTestId(TEST_IDS.ADD_CONTROL)).not.toBeDisabled();
+        expect(screen.getByTestId(TEST_IDS.ADD_CONTROL)).not.toBeEuiDisabled();
       });
 
       fireEvent.click(screen.getByTestId(TEST_IDS.ADD_CONTROL));
@@ -265,7 +265,7 @@ describe(' Filter Group Component ', () => {
       fireEvent.click(screen.getByTestId(TEST_IDS.CONTEXT_MENU.EDIT));
       await waitFor(() => {
         // add button should be enabled now
-        expect(screen.getByTestId(TEST_IDS.ADD_CONTROL)).not.toBeDisabled();
+        expect(screen.getByTestId(TEST_IDS.ADD_CONTROL)).not.toBeEuiDisabled();
       });
 
       fireEvent.click(screen.getByTestId(TEST_IDS.ADD_CONTROL));

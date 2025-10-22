@@ -52,7 +52,7 @@ describe('CopyToClipboardAction', () => {
         </TestExternalProviders>
       );
 
-      expect(screen.getByTestId('copyToClipboard')).toBeDisabled();
+      expect(screen.getByTestId('copyToClipboard')).toBeEuiDisabled();
     });
   });
 

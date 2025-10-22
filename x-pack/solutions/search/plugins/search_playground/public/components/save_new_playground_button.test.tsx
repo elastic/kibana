@@ -125,7 +125,7 @@ describe('SaveNewPlaygroundButton', () => {
     const saveButton = screen.getByTestId('playground-save-button');
     expect(saveButton).toBeInTheDocument();
     expect(saveButton).toHaveTextContent('Save');
-    expect(saveButton).not.toBeDisabled();
+    expect(saveButton).not.toBeEuiDisabled();
   });
 
   it('disables the save button when there are form errors', () => {
@@ -136,7 +136,7 @@ describe('SaveNewPlaygroundButton', () => {
     render({}, formErrors);
 
     const saveButton = screen.getByTestId('playground-save-button');
-    expect(saveButton).toBeDisabled();
+    expect(saveButton).toBeEuiDisabled();
   });
 
   it('enables the save button when there are no relevant form errors', () => {
@@ -148,7 +148,7 @@ describe('SaveNewPlaygroundButton', () => {
     render({}, formErrors);
 
     const saveButton = screen.getByTestId('playground-save-button');
-    expect(saveButton).not.toBeDisabled();
+    expect(saveButton).not.toBeEuiDisabled();
   });
 
   it('opens the save playground modal when save button is clicked', async () => {
@@ -246,14 +246,14 @@ describe('SaveNewPlaygroundButton', () => {
     render({ disabled: true });
 
     const saveButton = screen.getByTestId('playground-save-button');
-    expect(saveButton).toBeDisabled();
+    expect(saveButton).toBeEuiDisabled();
   });
 
   it('renders enabled with prop and no errors', () => {
     render({ disabled: false });
 
     const saveButton = screen.getByTestId('playground-save-button');
-    expect(saveButton).not.toBeDisabled();
+    expect(saveButton).not.toBeEuiDisabled();
   });
 
   describe('form errors handling', () => {
@@ -276,7 +276,7 @@ describe('SaveNewPlaygroundButton', () => {
         render({ disabled: false }, formErrors);
 
         const saveButton = screen.getByTestId('playground-save-button');
-        expect(saveButton).toBeDisabled();
+        expect(saveButton).toBeEuiDisabled();
       });
     });
   });

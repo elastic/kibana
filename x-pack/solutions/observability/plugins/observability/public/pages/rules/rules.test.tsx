@@ -122,7 +122,7 @@ describe('RulesPage with all capabilities', () => {
 
   it('renders a create rule button which is not disabled', async () => {
     const wrapper = await setup();
-    expect(wrapper.getByTestId('createRuleButton')).not.toBeDisabled();
+    expect(wrapper.getByTestId('createRuleButton')).not.toBeEuiDisabled();
   });
 
   it('navigates to create rule form correctly', async () => {
@@ -156,6 +156,6 @@ describe('RulesPage with show only capability', () => {
 
   it('renders a create rule button which is not disabled', async () => {
     const wrapper = await setup();
-    expect(wrapper.getByTestId('createRuleButton')).toBeDisabled();
+    expect(wrapper.getByTestId('createRuleButton')).toBeEuiDisabled();
   });
 });

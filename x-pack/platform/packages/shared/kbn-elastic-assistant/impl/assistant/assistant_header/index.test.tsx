@@ -113,21 +113,21 @@ describe('AssistantHeader', () => {
     render(<AssistantHeader {...testProps} />, {
       wrapper: TestProviders,
     });
-    expect(screen.getByTestId('shareBadgeButton')).not.toBeDisabled();
-    expect(screen.getByTestId('connector-selector')).not.toBeDisabled();
+    expect(screen.getByTestId('shareBadgeButton')).not.toBeEuiDisabled();
+    expect(screen.getByTestId('connector-selector')).not.toBeEuiDisabled();
     expect(
       within(screen.getByTestId('conversationTitle')).getByTestId('euiInlineReadModeButton')
-    ).not.toBeDisabled();
+    ).not.toBeEuiDisabled();
   });
 
   it('disables share badge when isConversationOwner=false', () => {
     render(<AssistantHeader {...testProps} isConversationOwner={false} />, {
       wrapper: TestProviders,
     });
-    expect(screen.getByTestId('shareBadgeButton')).toBeDisabled();
-    expect(screen.getByTestId('connector-selector')).toBeDisabled();
+    expect(screen.getByTestId('shareBadgeButton')).toBeEuiDisabled();
+    expect(screen.getByTestId('connector-selector')).toBeEuiDisabled();
     expect(
       within(screen.getByTestId('conversationTitle')).getByTestId('euiInlineReadModeButton')
-    ).toBeDisabled();
+    ).toBeEuiDisabled();
   });
 });

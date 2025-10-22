@@ -104,7 +104,7 @@ describe('AwsAccountTypeSelect', () => {
       packageInfo: { version: '3.0.0' },
     });
     const orgRadio = screen.getByLabelText('AWS Organization');
-    expect(orgRadio).toBeDisabled();
+    expect(orgRadio).toBeEuiDisabled();
     expect(
       screen.getByText(/AWS Organization not supported in current integration version/)
     ).toBeInTheDocument();
@@ -135,7 +135,7 @@ describe('AwsAccountTypeSelect', () => {
 
   it('disables all radios if disabled prop is true', () => {
     renderComponent({ disabled: true });
-    expect(screen.getByLabelText('Single Account')).toBeDisabled();
-    expect(screen.getByLabelText('AWS Organization')).toBeDisabled();
+    expect(screen.getByLabelText('Single Account')).toBeEuiDisabled();
+    expect(screen.getByLabelText('AWS Organization')).toBeEuiDisabled();
   });
 });

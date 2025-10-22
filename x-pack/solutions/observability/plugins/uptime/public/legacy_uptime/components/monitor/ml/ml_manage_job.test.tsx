@@ -77,7 +77,7 @@ describe('Manage ML Job', () => {
       expect(anomalyDetectionBtn).toBeInTheDocument();
       await userEvent.click(anomalyDetectionBtn as HTMLElement);
 
-      expect(forNearestButton(getByText)(labels.ENABLE_ANOMALY_ALERT)).toBeDisabled();
+      expect(forNearestButton(getByText)(labels.ENABLE_ANOMALY_ALERT)).toBeEuiDisabled();
     });
 
     it('displays an informative tooltip', async () => {

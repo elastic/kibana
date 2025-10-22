@@ -106,7 +106,7 @@ describe('rules_settings_link', () => {
     await waitFor(() => {
       expect(result.getByText('Settings')).toBeInTheDocument();
     });
-    expect(result.getByText('Settings')).not.toBeDisabled();
+    expect(result.getByText('Settings')).not.toBeEuiDisabled();
     expect(result.queryByTestId('rulesSettingsFlyout')).toBe(null);
   });
 
@@ -132,7 +132,7 @@ describe('rules_settings_link', () => {
     await waitFor(() => {
       expect(result.getByText('Settings')).toBeInTheDocument();
     });
-    expect(result.getByText('Settings')).not.toBeDisabled();
+    expect(result.getByText('Settings')).not.toBeEuiDisabled();
     expect(result.queryByTestId('rulesSettingsFlyout')).toBe(null);
   });
 
@@ -158,7 +158,7 @@ describe('rules_settings_link', () => {
     await waitFor(() => {
       expect(result.getByText('Settings')).toBeInTheDocument();
     });
-    expect(result.getByText('Settings')).not.toBeDisabled();
+    expect(result.getByText('Settings')).not.toBeEuiDisabled();
     expect(result.queryByTestId('rulesSettingsFlyout')).toBe(null);
   });
 

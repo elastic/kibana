@@ -65,14 +65,14 @@ describe('WithMissingPrivileges Tooltip', () => {
       mockSiemMigrationsService.rules.getMissingCapabilities.mockReturnValue([]);
       const { getByTestId, queryByTestId } = renderTestComponent('rule');
       expect(getByTestId('test-component')).toBeInTheDocument();
-      expect(getByTestId('test-component')).not.toBeDisabled();
+      expect(getByTestId('test-component')).not.toBeEuiDisabled();
       expect(queryByTestId('missingPrivilegesTooltipAnchor')).not.toBeInTheDocument();
     });
 
     it('renders the component with tooltip when there are missing capabilities', async () => {
       const { getByTestId, queryByTestId } = renderTestComponent('rule');
       expect(getByTestId('test-component')).toBeInTheDocument();
-      expect(getByTestId('test-component')).toBeDisabled();
+      expect(getByTestId('test-component')).toBeEuiDisabled();
       expect(queryByTestId('missingPrivilegesTooltipAnchor')).toBeInTheDocument();
       fireEvent.mouseOver(getByTestId('test-component'));
       await waitFor(() => {
@@ -89,14 +89,14 @@ describe('WithMissingPrivileges Tooltip', () => {
       mockSiemMigrationsService.dashboards.getMissingCapabilities.mockReturnValue([]);
       const { getByTestId, queryByTestId } = renderTestComponent('dashboard');
       expect(getByTestId('test-component')).toBeInTheDocument();
-      expect(getByTestId('test-component')).not.toBeDisabled();
+      expect(getByTestId('test-component')).not.toBeEuiDisabled();
       expect(queryByTestId('missingPrivilegesTooltipAnchor')).not.toBeInTheDocument();
     });
 
     it('renders the component with tooltip when there are missing capabilities', async () => {
       const { getByTestId, queryByTestId } = renderTestComponent('dashboard');
       expect(getByTestId('test-component')).toBeInTheDocument();
-      expect(getByTestId('test-component')).toBeDisabled();
+      expect(getByTestId('test-component')).toBeEuiDisabled();
       expect(queryByTestId('missingPrivilegesTooltipAnchor')).toBeInTheDocument();
       fireEvent.mouseOver(getByTestId('test-component'));
       await waitFor(() => {

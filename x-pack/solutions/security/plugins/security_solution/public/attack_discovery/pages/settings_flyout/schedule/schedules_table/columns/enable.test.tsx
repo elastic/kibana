@@ -102,7 +102,7 @@ describe('Enable Column', () => {
 
     it('should render disabled delete button', () => {
       renderEnabledSchedule();
-      expect(screen.getByTestId('scheduleSwitch')).toBeDisabled();
+      expect(screen.getByTestId('scheduleSwitch')).toBeEuiDisabled();
     });
 
     it('should not invoke `deleteSchedule` when the delete button is clicked', async () => {

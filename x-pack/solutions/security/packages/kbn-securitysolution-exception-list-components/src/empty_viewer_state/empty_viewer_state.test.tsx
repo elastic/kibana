@@ -154,6 +154,6 @@ describe('EmptyViewerState', () => {
     expect(getByTestId('emptyStateButton')).toHaveTextContent(
       i18n.EMPTY_VIEWER_STATE_EMPTY_VIEWER_BUTTON(ListTypeText.ENDPOINT)
     );
-    expect(getByTestId('emptyStateButton')).toBeDisabled();
+    expect(getByTestId('emptyStateButton')).toBeEuiDisabled();
   });
 });

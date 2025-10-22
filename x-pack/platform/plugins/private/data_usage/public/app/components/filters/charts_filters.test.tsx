@@ -160,7 +160,7 @@ describe('Charts Filters', () => {
       ...defaultProps,
       isUpdateDisabled: true,
     });
-    expect(getByTestId(`${testIdFilter}-super-refresh-button`)).toBeDisabled();
+    expect(getByTestId(`${testIdFilter}-super-refresh-button`)).toBeEuiDisabled();
   });
 
   it('should show `updating` on refresh button', () => {
@@ -168,7 +168,7 @@ describe('Charts Filters', () => {
       ...defaultProps,
       isDataLoading: true,
     });
-    expect(getByTestId(`${testIdFilter}-super-refresh-button`)).toBeDisabled();
+    expect(getByTestId(`${testIdFilter}-super-refresh-button`)).toBeEuiDisabled();
     expect(getByTestId(`${testIdFilter}-super-refresh-button`).textContent).toEqual('Updating');
   });
 

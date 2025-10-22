@@ -67,6 +67,6 @@ describe('Severity form field', () => {
       </FormTestComponent>
     );
 
-    expect(await screen.findByTestId('case-severity-selection')).toBeDisabled();
+    expect(await screen.findByTestId('case-severity-selection')).toBeEuiDisabled();
   });
 });

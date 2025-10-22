@@ -246,9 +246,10 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
     expect(option1).toBeInTheDocument();
     expect(option2).toBeInTheDocument();
     expect(option3).toBeInTheDocument();
-    expect(option1).toBeDisabled();
-    expect(option2).toBeDisabled();
-    expect(option3).toBeDisabled();
+    expect(option1).toBeEuiDisabled();
+    expect(option1).toBeEuiDisabled();
+    expect(option2).toBeEuiDisabled();
+    expect(option3).toBeEuiDisabled();
     expect(option1).toBeChecked();
   });
 

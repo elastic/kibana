@@ -87,8 +87,8 @@ describe('RetentionPeriodField', () => {
       disabled: true,
     });
 
-    expect(getByTestId('selectFailureStorePeriodValue')).toBeDisabled();
-    expect(getByTestId('selectFailureStoreRetentionPeriodUnit')).toBeDisabled();
+    expect(getByTestId('selectFailureStorePeriodValue')).toBeEuiDisabled();
+    expect(getByTestId('selectFailureStoreRetentionPeriodUnit')).toBeEuiDisabled();
   });
 
   it('renders only days, hours, minutes and seconds options', () => {

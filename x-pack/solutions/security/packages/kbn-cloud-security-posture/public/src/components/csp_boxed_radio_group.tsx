@@ -55,6 +55,7 @@ export const RadioGroup = ({
     >
       {options.map((option) => {
         const isChecked = option.id === idSelected;
+        const isDisabled = option.disabled || disabled;
         return (
           <EuiToolTip
             key={option.id}
@@ -65,8 +66,9 @@ export const RadioGroup = ({
               },
             }}
           >
+            {/* WARNING: It's not valid HTML to nest interactive elements inside of buttons (radio elements in this case) */}
             <EuiButton
-              disabled={option.disabled || disabled}
+              disabled={isDisabled}
               color={isChecked ? 'primary' : 'text'}
               onClick={() => onChange(option.id)}
               iconType={option.icon}
@@ -99,6 +101,7 @@ export const RadioGroup = ({
                 checked={isChecked}
                 onChange={() => {}}
                 name={name || camelCase(option.label || 'optionsGroup')}
+                disabled={isDisabled}
               />
               {option.isBeta && (
                 <div

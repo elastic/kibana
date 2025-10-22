@@ -173,7 +173,7 @@ describe('renders', () => {
 
       // Dynamic options switch should be enabled for string fields
       const dynamicSwitch = screen.getByTestId('listControlDynamicOptionsSwitch');
-      expect(dynamicSwitch).not.toBeDisabled();
+      expect(dynamicSwitch).not.toBeEuiDisabled();
 
       // Should show multiselect checkbox
       expect(screen.getByTestId('listControlMultiselectInput')).toBeInTheDocument();
@@ -220,7 +220,7 @@ describe('renders', () => {
 
       // Dynamic options should be disabled (unchecked) for this test
       const dynamicSwitch = screen.getByTestId('listControlDynamicOptionsSwitch');
-      expect(dynamicSwitch).not.toBeDisabled();
+      expect(dynamicSwitch).not.toBeEuiDisabled();
 
       // Should show multiselect checkbox
       expect(screen.getByTestId('listControlMultiselectInput')).toBeInTheDocument();
@@ -268,7 +268,7 @@ describe('renders', () => {
 
       // Dynamic options switch should be disabled for non-string fields
       const dynamicSwitch = screen.getByTestId('listControlDynamicOptionsSwitch');
-      expect(dynamicSwitch).toBeDisabled();
+      expect(dynamicSwitch).toBeEuiDisabled();
 
       // Should show multiselect checkbox
       expect(screen.getByTestId('listControlMultiselectInput')).toBeInTheDocument();
@@ -375,7 +375,7 @@ test('field name change', async () => {
   await waitFor(() => {
     const switchElement = screen.getByTestId('listControlDynamicOptionsSwitch');
     expect(switchElement).toBeInTheDocument();
-    expect(switchElement).not.toBeDisabled();
+    expect(switchElement).not.toBeEuiDisabled();
   });
 
   // Change to number field
@@ -390,7 +390,7 @@ test('field name change', async () => {
   await waitFor(() => {
     const switchElement = screen.getByTestId('listControlDynamicOptionsSwitch');
     expect(switchElement).toBeInTheDocument();
-    expect(switchElement).toBeDisabled();
+    expect(switchElement).toBeEuiDisabled();
   });
 
   // Change back to string field
@@ -400,6 +400,6 @@ test('field name change', async () => {
   await waitFor(() => {
     const switchElement = screen.getByTestId('listControlDynamicOptionsSwitch');
     expect(switchElement).toBeInTheDocument();
-    expect(switchElement).not.toBeDisabled();
+    expect(switchElement).not.toBeEuiDisabled();
   });
 });

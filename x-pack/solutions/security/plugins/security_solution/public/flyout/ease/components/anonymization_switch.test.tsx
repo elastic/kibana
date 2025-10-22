@@ -72,12 +72,12 @@ describe('AnonymizationSwitch', () => {
   it('should enable the switch when hasAlertSummary is true', () => {
     const { getByTestId } = renderAnonymizedSwitch(mockContextValue, true);
 
-    expect(getByTestId(ALERT_SUMMARY_ANONYMIZE_TOGGLE_TEST_ID)).not.toBeDisabled();
+    expect(getByTestId(ALERT_SUMMARY_ANONYMIZE_TOGGLE_TEST_ID)).not.toBeEuiDisabled();
   });
 
   it('should disable the switch when hasAlertSummary is false', () => {
     const { getByTestId } = renderAnonymizedSwitch(mockContextValue, false);
 
-    expect(getByTestId(ALERT_SUMMARY_ANONYMIZE_TOGGLE_TEST_ID)).toBeDisabled();
+    expect(getByTestId(ALERT_SUMMARY_ANONYMIZE_TOGGLE_TEST_ID)).toBeEuiDisabled();
   });
 });

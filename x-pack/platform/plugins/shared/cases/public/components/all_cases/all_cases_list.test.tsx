@@ -782,10 +782,10 @@ describe('AllCasesListGeneric', () => {
           wrapperProps: { permissions: readCasesPermissions() },
         });
 
-        expect(await screen.findByTestId('checkboxSelectAll')).toBeDisabled();
+        expect(await screen.findByTestId('checkboxSelectAll')).toBeEuiDisabled();
 
         for (const theCase of defaultGetCases.data.cases) {
-          expect(await screen.findByTestId(`checkboxSelectRow-${theCase.id}`)).toBeDisabled();
+          expect(await screen.findByTestId(`checkboxSelectRow-${theCase.id}`)).toBeEuiDisabled();
         }
       });
     });
@@ -892,7 +892,7 @@ describe('AllCasesListGeneric', () => {
         for (const theCase of defaultGetCases.data.cases) {
           expect(
             await screen.findByTestId(`case-action-popover-button-${theCase.id}`)
-          ).toBeDisabled();
+          ).toBeEuiDisabled();
         }
       });
 
@@ -905,7 +905,7 @@ describe('AllCasesListGeneric', () => {
         for (const theCase of defaultGetCases.data.cases) {
           expect(
             await screen.findByTestId(`case-action-popover-button-${theCase.id}`)
-          ).toBeDisabled();
+          ).toBeEuiDisabled();
         }
       });
     });

@@ -88,7 +88,7 @@ describe('DeleteDataViewFlyout', () => {
       } as unknown as Record<string, SavedObjectRelation[]>,
     };
     render(<DeleteDataViewFlyout {...props} />);
-    expect(screen.getByText('Delete').closest('button')).toBeDisabled();
+    expect(screen.getByText('Delete').closest('button')).toBeEuiDisabled();
   });
 
   it('enables Delete button if all relationships reviewed', () => {
@@ -110,7 +110,7 @@ describe('DeleteDataViewFlyout', () => {
     const useStateSpy = jest.spyOn(React, 'useState');
     useStateSpy.mockImplementationOnce(() => [new Set(['rel1']), jest.fn()]);
     render(<DeleteDataViewFlyout {...props} />);
-    expect(screen.getByText('Delete').closest('button')).not.toBeDisabled();
+    expect(screen.getByText('Delete').closest('button')).not.toBeEuiDisabled();
     useStateSpy.mockRestore();
   });
 
@@ -123,14 +123,14 @@ describe('DeleteDataViewFlyout', () => {
       } as unknown as Record<string, SavedObjectRelation[]>,
     };
     render(<DeleteDataViewFlyout {...props} />);
-    expect(screen.getByText('Delete').closest('button')).not.toBeDisabled();
+    expect(screen.getByText('Delete').closest('button')).not.toBeEuiDisabled();
   });
 
   it('calls dataViews.delete and onDelete when Delete is clicked', async () => {
     // Simulate no relationships to review
     render(<DeleteDataViewFlyout {...defaultProps} />);
     const deleteButton = screen.getByText('Delete');
-    expect(deleteButton).not.toBeDisabled();
+    expect(deleteButton).not.toBeEuiDisabled();
     await act(async () => {
       fireEvent.click(deleteButton);
     });

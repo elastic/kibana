@@ -61,7 +61,7 @@ describe('CalendarsListTable', () => {
 
     const createButton = screen.getByTestId('mlCalendarButtonCreate');
 
-    expect(createButton).not.toBeDisabled();
+    expect(createButton).not.toBeEuiDisabled();
   });
 
   test('New button disabled if no permission available', () => {
@@ -78,7 +78,7 @@ describe('CalendarsListTable', () => {
 
     const createButton = screen.getByTestId('mlCalendarButtonCreate');
 
-    expect(createButton).toBeDisabled();
+    expect(createButton).toBeEuiDisabled();
   });
 
   test('New button disabled if no ML nodes available', () => {
@@ -95,6 +95,6 @@ describe('CalendarsListTable', () => {
 
     const createButton = screen.getByTestId('mlCalendarButtonCreate');
 
-    expect(createButton).toBeDisabled();
+    expect(createButton).toBeEuiDisabled();
   });
 });

@@ -48,7 +48,7 @@ describe('ResizableContainer', () => {
 
     const resizeButton = getByTestId(RESIZABLE_BUTTON_TEST_ID);
     expect(resizeButton).toBeInTheDocument();
-    expect(resizeButton).toBeDisabled();
+    expect(resizeButton).toBeEuiDisabled();
 
     const leftSection = getByTestId(RESIZABLE_LEFT_SECTION_TEST_ID);
     expect(leftSection).toBeInTheDocument();
@@ -83,7 +83,7 @@ describe('ResizableContainer', () => {
 
     const resizeButton = getByTestId(RESIZABLE_BUTTON_TEST_ID);
     expect(resizeButton).toBeInTheDocument();
-    expect(resizeButton).not.toBeDisabled();
+    expect(resizeButton).not.toBeEuiDisabled();
 
     const leftSection = getByTestId(RESIZABLE_LEFT_SECTION_TEST_ID);
     expect(leftSection).toBeInTheDocument();

@@ -107,7 +107,7 @@ describe('SelectIndicesFlyout', () => {
     });
 
     const saveButton = getByTestId('saveButton');
-    expect(saveButton).toBeDisabled();
+    expect(saveButton).toBeEuiDisabled();
   });
 
   it('updates selectedTempIndices correctly with previous values', async () => {

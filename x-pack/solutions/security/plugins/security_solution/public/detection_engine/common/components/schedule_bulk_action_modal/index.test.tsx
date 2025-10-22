@@ -83,7 +83,7 @@ describe('ScheduleBulkActionModal', () => {
       target: { value: convertToDatePickerFormat(endDate) },
     });
 
-    expect(confirmModalConfirmButton).toBeDisabled();
+    expect(confirmModalConfirmButton).toBeEuiDisabled();
     expect(timeRangeForm).toHaveTextContent('INVALID_TIME_RANGE_ERROR');
   });
 
@@ -99,7 +99,7 @@ describe('ScheduleBulkActionModal', () => {
       },
     });
 
-    expect(confirmModalConfirmButton).toBeDisabled();
+    expect(confirmModalConfirmButton).toBeEuiDisabled();
     expect(timeRangeForm).toHaveTextContent('START_DATE_OUT_OF_RANGE_ERROR');
   });
 
@@ -113,7 +113,7 @@ describe('ScheduleBulkActionModal', () => {
       target: { value: convertToDatePickerFormat(endDate) },
     });
 
-    expect(confirmModalConfirmButton).toBeDisabled();
+    expect(confirmModalConfirmButton).toBeEuiDisabled();
     expect(timeRangeForm).toHaveTextContent('FUTURE_TIME_RANGE_ERROR');
   });
 });

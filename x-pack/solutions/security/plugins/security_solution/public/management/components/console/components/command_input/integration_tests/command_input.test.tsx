@@ -188,14 +188,14 @@ describe('When entering data into the Console input', () => {
     await enterCommand('cm ', { inputOnly: true });
 
     const arrowButton = renderResult.getByTestId('test-inputTextSubmitButton');
-    expect(arrowButton).not.toBeDisabled();
+    expect(arrowButton).not.toBeEuiDisabled();
   });
 
   it('should show the arrow button as disabled if input area is blank', () => {
     render();
 
     const arrowButton = renderResult.getByTestId('test-inputTextSubmitButton');
-    expect(arrowButton).toBeDisabled();
+    expect(arrowButton).toBeEuiDisabled();
   });
 
   it('should show the arrow button as disabled if input has only whitespace entered and it is left to the cursor', async () => {
@@ -203,7 +203,7 @@ describe('When entering data into the Console input', () => {
     await enterCommand(' ', { inputOnly: true });
 
     const arrowButton = renderResult.getByTestId('test-inputTextSubmitButton');
-    expect(arrowButton).toBeDisabled();
+    expect(arrowButton).toBeEuiDisabled();
   });
 
   it('should show the arrow button as disabled if input has only whitespace entered and it is right to the cursor', async () => {
@@ -212,7 +212,7 @@ describe('When entering data into the Console input', () => {
     await typeKeyboardKey('{ArrowLeft}');
 
     const arrowButton = renderResult.getByTestId('test-inputTextSubmitButton');
-    expect(arrowButton).toBeDisabled();
+    expect(arrowButton).toBeEuiDisabled();
   });
 
   it('should execute correct command if arrow button is clicked', async () => {

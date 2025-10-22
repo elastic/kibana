@@ -138,7 +138,7 @@ describe('ChangeKbModel', () => {
     renderComponent(mockKb);
 
     const button = screen.getByTestId('observabilityAiAssistantKnowledgeBaseUpdateModelButton');
-    expect(button).toBeDisabled();
+    expect(button).toBeEuiDisabled();
   });
 
   it('enables the `Update` button when a different model is selected', async () => {
@@ -146,7 +146,7 @@ describe('ChangeKbModel', () => {
     renderComponent(mockKb);
 
     const button = screen.getByTestId('observabilityAiAssistantKnowledgeBaseUpdateModelButton');
-    expect(button).toBeDisabled();
+    expect(button).toBeEuiDisabled();
 
     const dropdown = screen.getByTestId('observabilityAiAssistantKnowledgeBaseModelDropdown');
     dropdown.click();
@@ -164,7 +164,7 @@ describe('ChangeKbModel', () => {
     renderComponent(mockKb);
 
     const button = screen.getByTestId('observabilityAiAssistantKnowledgeBaseUpdateModelButton');
-    expect(button).toBeDisabled();
+    expect(button).toBeEuiDisabled();
   });
 
   // Legacy inference ID tests cover the component behavior when currentInferenceId is LEGACY_CUSTOM_INFERENCE_ID
@@ -212,7 +212,7 @@ describe('ChangeKbModel', () => {
 
       await waitFor(() => {
         const button = screen.getByTestId('observabilityAiAssistantKnowledgeBaseUpdateModelButton');
-        expect(button).toBeDisabled();
+        expect(button).toBeEuiDisabled();
       });
     });
 

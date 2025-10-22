@@ -249,7 +249,7 @@ describe('MigrationPanelTitle', () => {
       fireEvent.click(optionsButton);
 
       const deleteButton = screen.getByTestId('deleteMigrationItem');
-      expect(deleteButton).not.toBeDisabled();
+      expect(deleteButton).not.toBeEuiDisabled();
     });
 
     it('should disable delete button for running migration', () => {
@@ -259,7 +259,7 @@ describe('MigrationPanelTitle', () => {
       fireEvent.click(optionsButton);
 
       const deleteButton = screen.getByTestId('deleteMigrationItem');
-      expect(deleteButton).toBeDisabled();
+      expect(deleteButton).toBeEuiDisabled();
     });
   });
 

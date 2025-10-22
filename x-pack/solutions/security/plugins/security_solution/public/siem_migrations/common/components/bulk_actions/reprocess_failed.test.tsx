@@ -45,14 +45,14 @@ describe('ReprocessFailedItemsButton', () => {
     const { getByTestId } = render(
       <ReprocessFailedItemsButton {...defaultProps} isDisabled={true} />
     );
-    expect(getByTestId('reprocessFailedItemsButton')).toBeDisabled();
+    expect(getByTestId('reprocessFailedItemsButton')).toBeEuiDisabled();
   });
 
   it('disables the button when isAuthorized is false', () => {
     const { getByTestId } = render(
       <ReprocessFailedItemsButton {...defaultProps} isAuthorized={false} />
     );
-    expect(getByTestId('reprocessFailedItemsButton')).toBeDisabled();
+    expect(getByTestId('reprocessFailedItemsButton')).toBeEuiDisabled();
   });
 
   it('shows a loading spinner when isLoading is true', () => {

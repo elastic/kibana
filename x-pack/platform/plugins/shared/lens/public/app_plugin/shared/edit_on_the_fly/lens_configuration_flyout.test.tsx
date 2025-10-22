@@ -327,7 +327,7 @@ describe('LensEditConfigurationFlyout', () => {
     // @ts-ignore
     newProps.attributes.state.datasourceStates.testDatasource = 'state';
     await renderConfigFlyout(newProps);
-    expect(screen.getByRole('button', { name: /apply and close/i })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /apply and close/i })).toBeEuiDisabled();
   });
 
   it('save button should be disabled if expression cannot be generated', async () => {
@@ -348,7 +348,7 @@ describe('LensEditConfigurationFlyout', () => {
     };
 
     await renderConfigFlyout(newProps);
-    expect(screen.getByRole('button', { name: /apply and close/i })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /apply and close/i })).toBeEuiDisabled();
   });
 
   it('should use correct activeVisualization', async () => {

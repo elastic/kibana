@@ -381,7 +381,7 @@ describe('useActions', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByTestId(`case-action-popover-button-${basicCase.id}`)).toBeDisabled();
+        expect(screen.getByTestId(`case-action-popover-button-${basicCase.id}`)).toBeEuiDisabled();
       });
     });
 

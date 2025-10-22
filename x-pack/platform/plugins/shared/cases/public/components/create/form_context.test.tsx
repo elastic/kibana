@@ -1218,7 +1218,7 @@ describe('Create case', () => {
       const assigneesComboBox = within(screen.getByTestId('createCaseAssigneesComboBox'));
 
       await waitFor(() => {
-        expect(assigneesComboBox.getByTestId('comboBoxSearchInput')).not.toBeDisabled();
+        expect(assigneesComboBox.getByTestId('comboBoxSearchInput')).not.toBeEuiDisabled();
       });
 
       await user.click(assigneesComboBox.getByTestId('comboBoxSearchInput'));

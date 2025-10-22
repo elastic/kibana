@@ -84,8 +84,8 @@ describe('CommonFlyout ', () => {
       <CommonFlyout {...{ ...props, disabled: true }}>{children}</CommonFlyout>
     );
 
-    expect(await screen.findByTestId('common-flyout-cancel')).toBeDisabled();
-    expect(await screen.findByTestId('common-flyout-save')).toBeDisabled();
+    expect(await screen.findByTestId('common-flyout-cancel')).toBeEuiDisabled();
+    expect(await screen.findByTestId('common-flyout-save')).toBeEuiDisabled();
   });
 
   it('calls onCloseFlyout on cancel', async () => {

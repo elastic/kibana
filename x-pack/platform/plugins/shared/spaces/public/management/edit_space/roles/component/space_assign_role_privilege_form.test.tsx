@@ -179,7 +179,9 @@ describe('PrivilegesRolesForm', () => {
     renderPrivilegeRolesForm();
 
     await waitFor(() =>
-      expect(screen.getByTestId('space-assign-role-create-roles-privilege-button')).toBeDisabled()
+      expect(
+        screen.getByTestId('space-assign-role-create-roles-privilege-button')
+      ).toBeEuiDisabled()
     );
   });
 
@@ -223,7 +225,7 @@ describe('PrivilegesRolesForm', () => {
       screen.getByTestId('space-assign-role-privilege-customization-form')
     ).toBeInTheDocument();
 
-    expect(screen.getByTestId('space-update-role-create-roles-privilege-button')).toBeDisabled();
+    expect(screen.getByTestId('space-update-role-create-roles-privilege-button')).toBeEuiDisabled();
   });
 
   it('preselects the privilege of the selected role when one is provided', async () => {
@@ -273,7 +275,7 @@ describe('PrivilegesRolesForm', () => {
 
     expect(
       screen.getByTestId('space-update-role-create-roles-privilege-button')
-    ).not.toBeDisabled();
+    ).not.toBeEuiDisabled();
   });
 
   describe('selecting multiple roles', () => {
@@ -495,7 +497,7 @@ describe('PrivilegesRolesForm', () => {
             `${featureUT.category.id}_${featureUT.id}_customizeSubFeaturesSwitchContainer`
           )
         ).getByTestId('customizeSubFeaturePrivileges')
-      ).toBeDisabled();
+      ).toBeEuiDisabled();
     });
 
     it('supports customization up to sub privilege level only when security license allows', async () => {
@@ -553,7 +555,7 @@ describe('PrivilegesRolesForm', () => {
             `${featureUT.category.id}_${featureUT.id}_customizeSubFeaturesSwitchContainer`
           )
         ).getByTestId('customizeSubFeaturePrivileges')
-      ).not.toBeDisabled();
+      ).not.toBeEuiDisabled();
     });
   });
 });

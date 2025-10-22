@@ -418,7 +418,7 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    expect(screen.getByTestId('save')).not.toBeDisabled();
+    expect(screen.getByTestId('save')).not.toBeEuiDisabled();
   });
 
   test('it disables the save button when field is invalid because it is empty', () => {
@@ -438,7 +438,7 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    expect(screen.getByTestId('save')).toBeDisabled();
+    expect(screen.getByTestId('save')).toBeEuiDisabled();
   });
 
   test('it disables the save button when field is invalid because it is not contained in the browser fields', () => {
@@ -458,7 +458,7 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    expect(screen.getByTestId('save')).toBeDisabled();
+    expect(screen.getByTestId('save')).toBeEuiDisabled();
   });
 
   test('it invokes onDataProviderEdited with the expected values when the user clicks the save button', async () => {

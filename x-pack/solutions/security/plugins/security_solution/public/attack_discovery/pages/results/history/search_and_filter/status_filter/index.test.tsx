@@ -88,7 +88,7 @@ describe('StatusFilter', () => {
 
     const button = screen.getByTestId('statusFilterButton');
 
-    expect(button).toBeDisabled();
+    expect(button).toBeEuiDisabled();
   });
 
   describe('when an option is changed', () => {

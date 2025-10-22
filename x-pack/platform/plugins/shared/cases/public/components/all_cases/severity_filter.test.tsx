@@ -28,7 +28,7 @@ describe('Severity form field', () => {
 
     const popoverButton = await screen.findByTestId('options-filter-popover-button-severity');
     expect(popoverButton).toBeInTheDocument();
-    expect(popoverButton).not.toBeDisabled();
+    expect(popoverButton).not.toBeEuiDisabled();
 
     await userEvent.click(popoverButton);
 
@@ -50,7 +50,7 @@ describe('Severity form field', () => {
 
     const popoverButton = await screen.findByTestId('options-filter-popover-button-severity');
     expect(popoverButton).toBeInTheDocument();
-    expect(popoverButton).not.toBeDisabled();
+    expect(popoverButton).not.toBeEuiDisabled();
 
     await userEvent.click(popoverButton);
 

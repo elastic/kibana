@@ -79,10 +79,10 @@ describe('AlertDelete Modal', () => {
     expect(screen.getByText(i18n.MODAL_DESCRIPTION)).toBeInTheDocument();
     expect(screen.getByText(i18n.ACTIVE_ALERTS)).toBeInTheDocument();
     expect(screen.getByText(i18n.INACTIVE_ALERTS)).toBeInTheDocument();
-    expect(screen.getByTestId('alert-delete-active-threshold')).toBeDisabled();
-    expect(screen.getByTestId('alert-delete-active-threshold-unit')).toBeDisabled();
-    expect(screen.getByTestId('alert-delete-inactive-threshold')).toBeDisabled();
-    expect(screen.getByTestId('alert-delete-inactive-threshold-unit')).toBeDisabled();
+    expect(screen.getByTestId('alert-delete-active-threshold')).toBeEuiDisabled();
+    expect(screen.getByTestId('alert-delete-active-threshold-unit')).toBeEuiDisabled();
+    expect(screen.getByTestId('alert-delete-inactive-threshold')).toBeEuiDisabled();
+    expect(screen.getByTestId('alert-delete-inactive-threshold-unit')).toBeEuiDisabled();
     expect(screen.getByTestId('alert-delete-preview-message').textContent).toEqual(
       'Select the type of alerts you wish to delete'
     );
@@ -103,8 +103,8 @@ describe('AlertDelete Modal', () => {
     fireEvent.click(activeCheckbox);
 
     expect(activeCheckbox).toBeChecked();
-    expect(screen.getByTestId('alert-delete-active-threshold')).not.toBeDisabled();
-    expect(screen.getByTestId('alert-delete-active-threshold-unit')).not.toBeDisabled();
+    expect(screen.getByTestId('alert-delete-active-threshold')).not.toBeEuiDisabled();
+    expect(screen.getByTestId('alert-delete-active-threshold-unit')).not.toBeEuiDisabled();
   });
 
   it('enables the inactive alerts threshold when the checkbox is checked', () => {
@@ -122,8 +122,8 @@ describe('AlertDelete Modal', () => {
     fireEvent.click(inactiveCheckbox);
 
     expect(inactiveCheckbox).toBeChecked();
-    expect(screen.getByTestId('alert-delete-inactive-threshold')).not.toBeDisabled();
-    expect(screen.getByTestId('alert-delete-inactive-threshold-unit')).not.toBeDisabled();
+    expect(screen.getByTestId('alert-delete-inactive-threshold')).not.toBeEuiDisabled();
+    expect(screen.getByTestId('alert-delete-inactive-threshold-unit')).not.toBeEuiDisabled();
   });
 
   it('validates the delete confirmation input', async () => {
@@ -146,7 +146,7 @@ describe('AlertDelete Modal', () => {
     fireEvent.change(deleteInput, { target: { value: 'wrong-passkey' } });
 
     expect(deleteInput).toHaveValue('wrong-passkey');
-    expect(screen.getByTestId('alert-delete-submit')).toBeDisabled();
+    expect(screen.getByTestId('alert-delete-submit')).toBeEuiDisabled();
 
     fireEvent.change(deleteInput, { target: { value: i18n.DELETE_PASSKEY } });
     expect(deleteInput).toHaveValue(i18n.DELETE_PASSKEY);
@@ -155,7 +155,7 @@ describe('AlertDelete Modal', () => {
       expect(screen.getByTestId('alert-delete-preview-message').textContent).toContain('100 alerts')
     );
 
-    expect(screen.getByTestId('alert-delete-submit')).not.toBeDisabled();
+    expect(screen.getByTestId('alert-delete-submit')).not.toBeEuiDisabled();
   });
 
   it('calls closeModal when the cancel button is clicked', () => {
@@ -197,7 +197,7 @@ describe('AlertDelete Modal', () => {
     const submitButton = screen.getByTestId('alert-delete-submit');
     fireEvent.click(submitButton);
 
-    await waitFor(() => expect(submitButton).not.toBeDisabled());
+    await waitFor(() => expect(submitButton).not.toBeEuiDisabled());
   });
 
   it('disables the submit button when no alert would be deleted with current settings', async () => {
@@ -224,7 +224,7 @@ describe('AlertDelete Modal', () => {
         'No alerts match the selected criteria.'
       )
     );
-    expect(submitButton).toBeDisabled();
+    expect(submitButton).toBeEuiDisabled();
   });
 
   it('shows a success toast and closes the modal on successful schedule submission', async () => {
@@ -249,7 +249,7 @@ describe('AlertDelete Modal', () => {
 
     const submitButton = screen.getByTestId('alert-delete-submit');
     await waitFor(() => {
-      expect(submitButton).not.toBeDisabled();
+      expect(submitButton).not.toBeEuiDisabled();
     });
     fireEvent.click(submitButton);
 
@@ -281,7 +281,7 @@ describe('AlertDelete Modal', () => {
 
     const submitButton = screen.getByTestId('alert-delete-submit');
     await waitFor(() => {
-      expect(submitButton).not.toBeDisabled();
+      expect(submitButton).not.toBeEuiDisabled();
     });
     fireEvent.click(submitButton);
 
@@ -319,7 +319,7 @@ describe('AlertDelete Modal', () => {
 
     const submitButton = screen.getByTestId('alert-delete-submit');
     await waitFor(() => {
-      expect(submitButton).not.toBeDisabled();
+      expect(submitButton).not.toBeEuiDisabled();
     });
     fireEvent.click(submitButton);
 
@@ -405,7 +405,7 @@ describe('AlertDelete Modal Error Handling', () => {
 
     const submitButton = screen.getByTestId('alert-delete-submit');
     await waitFor(() => {
-      expect(submitButton).not.toBeDisabled();
+      expect(submitButton).not.toBeEuiDisabled();
     });
     fireEvent.click(submitButton);
 
@@ -442,7 +442,7 @@ describe('AlertDelete Modal Error Handling', () => {
 
     const submitButton = screen.getByTestId('alert-delete-submit');
     await waitFor(() => {
-      expect(submitButton).not.toBeDisabled();
+      expect(submitButton).not.toBeEuiDisabled();
     });
     fireEvent.click(submitButton);
 

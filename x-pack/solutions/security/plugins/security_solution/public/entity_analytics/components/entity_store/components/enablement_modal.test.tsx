@@ -143,7 +143,7 @@ describe('EntityStoreEnablementModal', () => {
       fireEvent.click(screen.getByTestId('enablementRiskScoreSwitch')); // unselect risk engine
 
       const enableButton = screen.getByRole('button', { name: /Enable/i });
-      expect(enableButton).toBeDisabled();
+      expect(enableButton).toBeEuiDisabled();
     });
 
     it('should show proceed warning when riskScore is not installed and unchecked but entityStore is already running', () => {
@@ -216,7 +216,7 @@ describe('EntityStoreEnablementModal', () => {
       expect(screen.getByTestId('callout-missing-privileges-callout')).toBeInTheDocument();
 
       const enableButton = screen.getByRole('button', { name: /Enable/i });
-      expect(enableButton).toBeDisabled();
+      expect(enableButton).toBeEuiDisabled();
     });
   });
 });

@@ -109,8 +109,8 @@ describe('SynonymRuleFlyout', () => {
       // Map to terms and bottom elements
       expect(screen.queryByTestId(TEST_IDS.MapToTermsInput)).not.toBeInTheDocument();
       expect(screen.queryByTestId(TEST_IDS.HasChangesBadge)).not.toBeInTheDocument();
-      expect(screen.getByTestId(TEST_IDS.ResetChangesButton)).toBeDisabled();
-      expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeDisabled();
+      expect(screen.getByTestId(TEST_IDS.ResetChangesButton)).toBeEuiDisabled();
+      expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeEuiDisabled();
     });
     it('should render the flyout for explicit synonyms', () => {
       render(
@@ -140,8 +140,8 @@ describe('SynonymRuleFlyout', () => {
       // Map to terms and bottom elements
       expect(screen.getByTestId(TEST_IDS.MapToTermsInput)).toBeInTheDocument();
       expect(screen.queryByTestId(TEST_IDS.HasChangesBadge)).not.toBeInTheDocument();
-      expect(screen.getByTestId(TEST_IDS.ResetChangesButton)).toBeDisabled();
-      expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeDisabled();
+      expect(screen.getByTestId(TEST_IDS.ResetChangesButton)).toBeEuiDisabled();
+      expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeEuiDisabled();
     });
 
     it('should call backend with correct payload for equivalent synonyms', () => {
@@ -160,7 +160,7 @@ describe('SynonymRuleFlyout', () => {
         </Wrapper>
       );
 
-      expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeDisabled();
+      expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeEuiDisabled();
 
       ACTIONS.AddFromTerm('from1');
       expect(screen.getByTestId(TEST_IDS.FromTermCountLabel).textContent).toBe('1 term');
@@ -194,7 +194,7 @@ describe('SynonymRuleFlyout', () => {
       );
       ACTIONS.AddFromTerm('from1');
       expect(screen.getByTestId(TEST_IDS.FromTermCountLabel).textContent).toBe('1 term');
-      expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeDisabled();
+      expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeEuiDisabled();
 
       ACTIONS.AddMapToTerm('to1');
       expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeEnabled();
@@ -269,8 +269,8 @@ describe('SynonymRuleFlyout', () => {
       // Map to terms and bottom elements
       expect(screen.queryByTestId(TEST_IDS.MapToTermsInput)).not.toBeInTheDocument();
       expect(screen.queryByTestId(TEST_IDS.HasChangesBadge)).not.toBeInTheDocument();
-      expect(screen.getByTestId(TEST_IDS.ResetChangesButton)).toBeDisabled();
-      expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeDisabled();
+      expect(screen.getByTestId(TEST_IDS.ResetChangesButton)).toBeEuiDisabled();
+      expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeEuiDisabled();
     });
 
     it('should call backend with correct payload for equivalent synonyms', () => {
@@ -289,7 +289,7 @@ describe('SynonymRuleFlyout', () => {
         </Wrapper>
       );
 
-      expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeDisabled();
+      expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeEuiDisabled();
       ACTIONS.AddFromTerm('synonym3');
       expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeEnabled();
       expect(screen.getByTestId(TEST_IDS.FromTermCountLabel).textContent).toBe('3 terms');
@@ -332,8 +332,8 @@ describe('SynonymRuleFlyout', () => {
       expect(screen.getByTestId(TEST_IDS.MapToTermsInput)).toBeInTheDocument();
       expect(screen.getByTestId(TEST_IDS.MapToTermsInput)).toHaveValue('explicit-to');
       expect(screen.queryByTestId(TEST_IDS.HasChangesBadge)).not.toBeInTheDocument();
-      expect(screen.getByTestId(TEST_IDS.ResetChangesButton)).toBeDisabled();
-      expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeDisabled();
+      expect(screen.getByTestId(TEST_IDS.ResetChangesButton)).toBeEuiDisabled();
+      expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeEuiDisabled();
     });
     it('should call backend with correct payload for explicit synonyms', () => {
       render(
@@ -351,7 +351,7 @@ describe('SynonymRuleFlyout', () => {
         </Wrapper>
       );
 
-      expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeDisabled();
+      expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeEuiDisabled();
       ACTIONS.AddMapToTerm('explicit-to-2');
       expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeEnabled();
       ACTIONS.PressSaveChangesButton();

@@ -90,7 +90,7 @@ describe('AddObservable', () => {
     const addButton = screen.getByTestId('cases-observables-add');
 
     expect(addButton).toBeInTheDocument();
-    expect(addButton).toBeDisabled();
+    expect(addButton).toBeEuiDisabled();
   });
 
   it('does not render the button with insufficient permissions', async () => {

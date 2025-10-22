@@ -40,7 +40,7 @@ describe('DeleteFilterListModal', () => {
     const deleteButton = screen.getByTestId('mlFilterListsDeleteButton');
 
     // Verify it's disabled
-    expect(deleteButton).toBeDisabled();
+    expect(deleteButton).toBeEuiDisabled();
 
     // Take a snapshot of the rendered component
     expect(container.firstChild).toMatchSnapshot();
@@ -53,7 +53,7 @@ describe('DeleteFilterListModal', () => {
     const deleteButton = screen.getByTestId('mlFilterListsDeleteButton');
 
     // Verify it's enabled
-    expect(deleteButton).not.toBeDisabled();
+    expect(deleteButton).not.toBeEuiDisabled();
 
     // Take a snapshot of the rendered component
     expect(container.firstChild).toMatchSnapshot();
@@ -117,7 +117,7 @@ describe('DeleteFilterListModal false canDeleteFilter privilege', () => {
     const deleteButton = screen.getByTestId('mlFilterListsDeleteButton');
 
     // Verify it's disabled
-    expect(deleteButton).toBeDisabled();
+    expect(deleteButton).toBeEuiDisabled();
 
     // Take a snapshot of the rendered component
     expect(container.firstChild).toMatchSnapshot();

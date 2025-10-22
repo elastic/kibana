@@ -95,7 +95,7 @@ describe('BulkAlertAssigneesPanel', () => {
     const wrapper = renderAssigneesMenu(mockAlertsWithAssignees);
 
     expect(wrapper.getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID)).toBeInTheDocument();
-    expect(wrapper.getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID)).toBeDisabled();
+    expect(wrapper.getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID)).toBeEuiDisabled();
     expect(useSuggestUsers).toHaveBeenCalled();
   });
 
@@ -103,31 +103,31 @@ describe('BulkAlertAssigneesPanel', () => {
     const wrapper = renderAssigneesMenu(mockAlertsWithAssignees);
 
     // No changes => Apply button is disabled
-    expect(wrapper.getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID)).toBeDisabled();
+    expect(wrapper.getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID)).toBeEuiDisabled();
 
     act(() => {
       fireEvent.click(wrapper.getByText('user1'));
     });
     // Assign 'user1' => Apply button is enabled
-    expect(wrapper.getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID)).not.toBeDisabled();
+    expect(wrapper.getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID)).not.toBeEuiDisabled();
 
     act(() => {
       fireEvent.click(wrapper.getByText('user2'));
     });
     // Assign 'user1' & 'user2' => Apply button is enabled
-    expect(wrapper.getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID)).not.toBeDisabled();
+    expect(wrapper.getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID)).not.toBeEuiDisabled();
 
     act(() => {
       fireEvent.click(wrapper.getByText('user2'));
     });
     // Assign 'user1' => Apply button is enabled
-    expect(wrapper.getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID)).not.toBeDisabled();
+    expect(wrapper.getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID)).not.toBeEuiDisabled();
 
     act(() => {
       fireEvent.click(wrapper.getByText('user1'));
     });
     // No changes => Apply button is disabled
-    expect(wrapper.getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID)).toBeDisabled();
+    expect(wrapper.getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID)).toBeEuiDisabled();
   });
 
   test('it updates state correctly', () => {

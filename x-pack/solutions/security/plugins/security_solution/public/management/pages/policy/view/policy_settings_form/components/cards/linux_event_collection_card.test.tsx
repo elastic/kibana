@@ -47,7 +47,7 @@ describe('Policy Linux Event Collection Card', () => {
     expect(getByTestId(testSubj.processCheckbox)).toBeChecked();
     expect(getByTestId(testSubj.osValueContainer)).toHaveTextContent(exactMatchText('Linux'));
     expect(getByTestId(testSubj.sessionDataCheckbox)).not.toBeChecked();
-    expect(getByTestId(testSubj.captureTerminalCheckbox)).toBeDisabled();
+    expect(getByTestId(testSubj.captureTerminalCheckbox)).toBeEuiDisabled();
   });
 
   describe('and is displayed in View mode', () => {

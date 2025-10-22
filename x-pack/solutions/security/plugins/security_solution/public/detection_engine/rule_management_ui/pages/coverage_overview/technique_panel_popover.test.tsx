@@ -104,7 +104,7 @@ describe('CoverageOverviewMitreTechniquePanelPopover', () => {
     act(() => {
       fireEvent.click(wrapper.getByTestId('coverageOverviewTechniquePanel'));
     });
-    expect(wrapper.getByTestId('enableAllDisabledButton')).toBeDisabled();
+    expect(wrapper.getByTestId('enableAllDisabledButton')).toBeEuiDisabled();
   });
 
   test('"Enable all disabled" button is disabled when user does not have CRUD permissions', async () => {
@@ -114,6 +114,6 @@ describe('CoverageOverviewMitreTechniquePanelPopover', () => {
     act(() => {
       fireEvent.click(wrapper.getByTestId('coverageOverviewTechniquePanel'));
     });
-    expect(wrapper.getByTestId('enableAllDisabledButton')).toBeDisabled();
+    expect(wrapper.getByTestId('enableAllDisabledButton')).toBeEuiDisabled();
   });
 });

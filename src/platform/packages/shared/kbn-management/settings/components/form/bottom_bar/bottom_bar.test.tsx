@@ -62,7 +62,7 @@ describe('BottomBar', () => {
     );
 
     const input = getByTestId(DATA_TEST_SUBJ_SAVE_BUTTON);
-    expect(input).toBeDisabled();
+    expect(input).toBeEuiDisabled();
   });
 
   it('save button is loading when in loading state', () => {
@@ -71,7 +71,7 @@ describe('BottomBar', () => {
     );
 
     const input = getByTestId(DATA_TEST_SUBJ_SAVE_BUTTON);
-    expect(input).toBeDisabled();
+    expect(input).toBeEuiDisabled();
     expect(getByLabelText('Loading')).toBeInTheDocument();
   });
 });

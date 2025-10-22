@@ -117,7 +117,7 @@ describe('EditCategory ', () => {
     await user.type(screen.getByRole('combobox'), `${categories[0]}{enter}`);
 
     await waitFor(() => {
-      expect(screen.getByTestId('edit-category-submit')).not.toBeDisabled();
+      expect(screen.getByTestId('edit-category-submit')).not.toBeEuiDisabled();
     });
 
     await user.click(screen.getByTestId('edit-category-submit'));
@@ -137,7 +137,7 @@ describe('EditCategory ', () => {
     await user.type(screen.getByRole('combobox'), 'new{enter}');
 
     await waitFor(() => {
-      expect(screen.getByTestId('edit-category-submit')).not.toBeDisabled();
+      expect(screen.getByTestId('edit-category-submit')).not.toBeEuiDisabled();
     });
 
     await user.click(screen.getByTestId('edit-category-submit'));
@@ -157,7 +157,7 @@ describe('EditCategory ', () => {
     await user.type(screen.getByRole('combobox'), 'category-with-space            {enter}');
 
     await waitFor(() => {
-      expect(screen.getByTestId('edit-category-submit')).not.toBeDisabled();
+      expect(screen.getByTestId('edit-category-submit')).not.toBeEuiDisabled();
     });
 
     await user.click(screen.getByTestId('edit-category-submit'));
@@ -203,7 +203,7 @@ describe('EditCategory ', () => {
     await user.click(screen.getByTestId('comboBoxClearButton'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('edit-category-submit')).not.toBeDisabled();
+      expect(screen.getByTestId('edit-category-submit')).not.toBeEuiDisabled();
     });
 
     await user.click(screen.getByTestId('edit-category-submit'));
@@ -232,7 +232,7 @@ describe('EditCategory ', () => {
       ).toBeInTheDocument();
     });
 
-    expect(screen.getByTestId('edit-category-submit')).toBeDisabled();
+    expect(screen.getByTestId('edit-category-submit')).toBeEuiDisabled();
   });
 
   it('should disabled the save button on empty state', async () => {
@@ -244,7 +244,7 @@ describe('EditCategory ', () => {
       expect(screen.getByTestId('categories-list')).toBeInTheDocument();
     });
 
-    expect(screen.getByTestId('edit-category-submit')).toBeDisabled();
+    expect(screen.getByTestId('edit-category-submit')).toBeEuiDisabled();
   });
 
   it('should disabled the save button when not changing category', async () => {
@@ -258,7 +258,7 @@ describe('EditCategory ', () => {
 
     expect(screen.getByTestId('comboBoxSearchInput')).toHaveValue('My category');
 
-    expect(screen.getByTestId('edit-category-submit')).toBeDisabled();
+    expect(screen.getByTestId('edit-category-submit')).toBeEuiDisabled();
   });
 
   it('does not show edit button when the user does not have update permissions', () => {

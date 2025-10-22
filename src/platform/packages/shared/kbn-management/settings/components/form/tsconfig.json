@@ -7,6 +7,7 @@
       "node",
       "react",
       "@testing-library/jest-dom",
+      "@elastic/eui/lib/test/rtl/matchers"
     ]
   },
   "include": [

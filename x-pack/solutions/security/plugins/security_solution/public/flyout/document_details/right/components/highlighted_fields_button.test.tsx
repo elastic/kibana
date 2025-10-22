@@ -69,7 +69,7 @@ describe('<EditHighlighedFieldsButton />', () => {
   it('should render button when user has privilege to edit rule', () => {
     const { getByTestId } = renderEditHighlighedFieldsButton();
     expect(getByTestId(HIGHLIGHTED_FIELDS_EDIT_BUTTON_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(HIGHLIGHTED_FIELDS_EDIT_BUTTON_TEST_ID)).not.toBeDisabled();
+    expect(getByTestId(HIGHLIGHTED_FIELDS_EDIT_BUTTON_TEST_ID)).not.toBeEuiDisabled();
   });
 
   it('should render disabled button when user does not have privilege to edit a prebuilt rule', () => {
@@ -79,7 +79,7 @@ describe('<EditHighlighedFieldsButton />', () => {
     });
     const { getByTestId } = renderEditHighlighedFieldsButton();
     expect(getByTestId(HIGHLIGHTED_FIELDS_EDIT_BUTTON_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(HIGHLIGHTED_FIELDS_EDIT_BUTTON_TEST_ID)).toBeDisabled();
+    expect(getByTestId(HIGHLIGHTED_FIELDS_EDIT_BUTTON_TEST_ID)).toBeEuiDisabled();
   });
 
   it('should render modal when button is clicked', () => {

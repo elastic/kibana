@@ -74,6 +74,6 @@ describe('KnowledgeSourceCard', () => {
       </TestProviders>
     );
 
-    expect(getByTestId('knowledgeSourceCardButton').querySelector('button')).not.toBeDisabled();
+    expect(getByTestId('knowledgeSourceCardButton').querySelector('button')).not.toBeEuiDisabled();
   });
 });

@@ -119,7 +119,7 @@ describe('SaveTimelineButton', () => {
 
     const { getByTestId } = renderSaveTimelineButton();
 
-    expect(getByTestId('timeline-modal-save-timeline')).toBeDisabled();
+    expect(getByTestId('timeline-modal-save-timeline')).toBeEuiDisabled();
   });
 
   it('should disable the save timeline button when the timeline is immutable', () => {
@@ -130,6 +130,6 @@ describe('SaveTimelineButton', () => {
 
     const { getByTestId } = renderSaveTimelineButton();
 
-    expect(getByTestId('timeline-modal-save-timeline')).toBeDisabled();
+    expect(getByTestId('timeline-modal-save-timeline')).toBeEuiDisabled();
   });
 });

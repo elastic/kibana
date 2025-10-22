@@ -338,7 +338,7 @@ describe('RuleActionsOverflow', () => {
         { wrapper: TestProviders }
       );
       fireEvent.click(getByTestId('rules-details-popover-button-icon'));
-      expect(getByTestId('rules-details-revert-rule')).toBeDisabled();
+      expect(getByTestId('rules-details-revert-rule')).toBeEuiDisabled();
     });
   });
 });

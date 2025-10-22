@@ -75,7 +75,7 @@ describe('AddSeriesButton', () => {
 
       render(<AddSeriesButton />);
       const addSeriesButton = screen.getByText(/Add series/i);
-      expect(addSeriesButton.closest('button')).toBeDisabled();
+      expect(addSeriesButton.closest('button')).toBeEuiDisabled();
 
       fireEvent.click(addSeriesButton);
 
@@ -95,7 +95,7 @@ describe('AddSeriesButton', () => {
 
     render(<AddSeriesButton />);
     const addSeriesButton = screen.getByText(/Add series/i);
-    expect(addSeriesButton.closest('button')).toBeDisabled();
+    expect(addSeriesButton.closest('button')).toBeEuiDisabled();
 
     fireEvent.click(addSeriesButton);
 

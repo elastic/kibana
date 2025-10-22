@@ -1031,7 +1031,7 @@ describe.skip('query tab with unified timeline', () => {
           expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
 
           expect(screen.getAllByTestId('timeline-notes-button-small')).toHaveLength(1);
-          expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
+          expect(screen.getByTestId('timeline-notes-button-small')).not.toBeEuiDisabled();
 
           expect(screen.getByTestId('timeline-notes-notification-dot')).toBeVisible();
 
@@ -1053,7 +1053,7 @@ describe.skip('query tab with unified timeline', () => {
           expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
 
           await waitFor(() => {
-            expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
+            expect(screen.getByTestId('timeline-notes-button-small')).not.toBeEuiDisabled();
           });
 
           fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
@@ -1086,7 +1086,7 @@ describe.skip('query tab with unified timeline', () => {
           expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
 
           expect(screen.getAllByTestId('timeline-notes-button-small')).toHaveLength(1);
-          expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
+          expect(screen.getByTestId('timeline-notes-button-small')).not.toBeEuiDisabled();
 
           expect(screen.getByTestId('timeline-notes-notification-dot')).toBeVisible();
 
@@ -1108,7 +1108,7 @@ describe.skip('query tab with unified timeline', () => {
           expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
 
           await waitFor(() => {
-            expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
+            expect(screen.getByTestId('timeline-notes-button-small')).not.toBeEuiDisabled();
           });
 
           fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
@@ -1127,7 +1127,7 @@ describe.skip('query tab with unified timeline', () => {
           expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
 
           await waitFor(() => {
-            expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
+            expect(screen.getByTestId('timeline-notes-button-small')).not.toBeEuiDisabled();
           });
 
           fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
@@ -1136,7 +1136,7 @@ describe.skip('query tab with unified timeline', () => {
             expect(screen.getByTestId('add-note-container')).toBeVisible();
           });
 
-          expect(screen.getByTestId('cancel')).not.toBeDisabled();
+          expect(screen.getByTestId('cancel')).not.toBeEuiDisabled();
 
           fireEvent.click(screen.getByTestId('cancel'));
 
@@ -1154,7 +1154,7 @@ describe.skip('query tab with unified timeline', () => {
           expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
 
           await waitFor(() => {
-            expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
+            expect(screen.getByTestId('timeline-notes-button-small')).not.toBeEuiDisabled();
           });
 
           fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
@@ -1185,7 +1185,7 @@ describe.skip('query tab with unified timeline', () => {
           expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
 
           await waitFor(() => {
-            expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
+            expect(screen.getByTestId('timeline-notes-button-small')).not.toBeEuiDisabled();
           });
 
           fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
@@ -1242,7 +1242,7 @@ describe.skip('query tab with unified timeline', () => {
 
           expect(screen.getAllByTestId('pin')).toHaveLength(1);
           // disabled because it is already pinned
-          expect(screen.getByTestId('pin')).toBeDisabled();
+          expect(screen.getByTestId('pin')).toBeEuiDisabled();
 
           fireEvent.mouseOver(screen.getByTestId('pin'));
 
@@ -1270,7 +1270,7 @@ describe.skip('query tab with unified timeline', () => {
           expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
 
           expect(screen.getAllByTestId('pin')).toHaveLength(1);
-          expect(screen.getByTestId('pin')).not.toBeDisabled();
+          expect(screen.getByTestId('pin')).not.toBeEuiDisabled();
 
           fireEvent.mouseOver(screen.getByTestId('pin'));
           await waitFor(() => {
@@ -1305,7 +1305,7 @@ describe.skip('query tab with unified timeline', () => {
 
           expect(screen.getAllByTestId('pin')).toHaveLength(1);
           // disabled because it is already pinned
-          expect(screen.getByTestId('pin')).toBeDisabled();
+          expect(screen.getByTestId('pin')).toBeEuiDisabled();
 
           fireEvent.mouseOver(screen.getByTestId('pin'));
 

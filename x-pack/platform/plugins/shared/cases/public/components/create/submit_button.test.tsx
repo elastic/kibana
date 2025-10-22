@@ -46,6 +46,6 @@ describe('SubmitCaseButton', () => {
     const button = await screen.findByTestId('create-case-submit');
     await userEvent.click(button);
 
-    expect(await screen.findByTestId('create-case-submit')).toBeDisabled();
+    expect(await screen.findByTestId('create-case-submit')).toBeEuiDisabled();
   });
 });

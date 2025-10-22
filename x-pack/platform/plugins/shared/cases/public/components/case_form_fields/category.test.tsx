@@ -68,7 +68,7 @@ describe('Category', () => {
       </FormComponent>
     );
 
-    expect(screen.getByRole('combobox')).toBeDisabled();
+    expect(screen.getByRole('combobox')).toBeEuiDisabled();
   });
 
   it('disables the combobox when is loading categories', async () => {
@@ -81,7 +81,7 @@ describe('Category', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByRole('combobox')).toBeDisabled();
+      expect(screen.getByRole('combobox')).toBeEuiDisabled();
     });
   });
 

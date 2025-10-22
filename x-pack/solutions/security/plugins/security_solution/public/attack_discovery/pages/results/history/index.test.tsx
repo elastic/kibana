@@ -387,7 +387,7 @@ describe('History', () => {
 
     it('enables the next page button', () => {
       const nextPageButton = screen.getByTestId('pagination-button-next');
-      expect(nextPageButton).not.toBeDisabled();
+      expect(nextPageButton).not.toBeEuiDisabled();
     });
   });
 

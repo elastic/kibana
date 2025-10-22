@@ -345,8 +345,8 @@ describe('<CspPolicyTemplateForm />', () => {
 
     expect(option1).toBeInTheDocument();
     expect(option2).toBeInTheDocument();
-    expect(option1).toBeDisabled();
-    expect(option2).toBeDisabled();
+    expect(option1).toBeEuiDisabled();
+    expect(option2).toBeEuiDisabled();
     expect(option1).toBeChecked();
   });
 
@@ -362,9 +362,9 @@ describe('<CspPolicyTemplateForm />', () => {
     expect(option1).toBeInTheDocument();
     expect(option2).toBeInTheDocument();
     expect(option3).toBeInTheDocument();
-    expect(option1).toBeDisabled();
-    expect(option2).toBeDisabled();
-    expect(option3).toBeDisabled();
+    expect(option1).toBeEuiDisabled();
+    expect(option2).toBeEuiDisabled();
+    expect(option3).toBeEuiDisabled();
     expect(option1).toBeChecked();
   });
 
@@ -982,7 +982,7 @@ describe('<CspPolicyTemplateForm />', () => {
           'AWS Organization not supported in current integration version. Please upgrade to the latest version to enable AWS Organizations integration.'
         )
       ).toBeInTheDocument();
-      expect(getByLabelText('AWS Organization')).toBeDisabled();
+      expect(getByLabelText('AWS Organization')).toBeEuiDisabled();
       expect(getByLabelText('Single Account')).toBeEnabled();
     });
 

@@ -85,7 +85,7 @@ describe('ConnectorSelector', () => {
         settings={mockSettings}
       />
     );
-    expect(getByTestId(testSubj)).toBeDisabled();
+    expect(getByTestId(testSubj)).toBeEuiDisabled();
   });
 
   it('should render a button to add a new connector when no connectors exist', () => {

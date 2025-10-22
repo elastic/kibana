@@ -212,8 +212,8 @@ describe('Saved query management list component', () => {
       onClose: onCloseSpy,
     };
     render(wrapSavedQueriesListComponentInContext(newProps));
-    expect(await screen.findByLabelText('Load query')).toBeDisabled();
-    expect(screen.getByRole('button', { name: 'Delete query' })).toBeDisabled();
+    expect(await screen.findByLabelText('Load query')).toBeEuiDisabled();
+    expect(screen.getByRole('button', { name: 'Delete query' })).toBeEuiDisabled();
     await userEvent.click(screen.getByRole('option', { name: 'Test' }));
     expect(screen.getByLabelText('Load query')).toBeEnabled();
     expect(screen.getByRole('button', { name: 'Delete query' })).toBeEnabled();
@@ -295,8 +295,8 @@ describe('Saved query management list component', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Delete' }));
     expect(screen.getByText('1 query')).toBeInTheDocument();
     expect(screen.getAllByRole('option')).toHaveLength(1);
-    expect(screen.getByLabelText('Load query')).toBeDisabled();
-    expect(screen.getByRole('button', { name: 'Delete query' })).toBeDisabled();
+    expect(screen.getByLabelText('Load query')).toBeEuiDisabled();
+    expect(screen.getByRole('button', { name: 'Delete query' })).toBeEuiDisabled();
     expect(deleteSavedQuerySpy).toHaveBeenLastCalledWith('8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a9');
     expect(onClearSavedQuerySpy).toBeCalled();
   });

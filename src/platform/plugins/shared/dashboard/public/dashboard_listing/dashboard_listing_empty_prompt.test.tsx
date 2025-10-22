@@ -61,7 +61,7 @@ test.each([
 test('renders disabled action button when disableCreateDashboardButton is true', async () => {
   (coreServices.application.capabilities as any).dashboard_v2.showWriteControls = true;
   renderDashboardListingEmptyPrompt({ disableCreateDashboardButton: true });
-  expect(screen.getByTestId('newItemButton')).toBeDisabled();
+  expect(screen.getByTestId('newItemButton')).toBeEuiDisabled();
 });
 
 test('renders continue button when no dashboards exist but one is in progress', async () => {

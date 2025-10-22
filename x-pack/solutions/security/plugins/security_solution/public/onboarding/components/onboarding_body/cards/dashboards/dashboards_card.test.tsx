@@ -104,7 +104,7 @@ describe('DashboardsCard', () => {
       </TestProviders>
     );
 
-    expect(getByTestId('dashboardsCardButton').querySelector('button')).toBeDisabled();
+    expect(getByTestId('dashboardsCardButton').querySelector('button')).toBeEuiDisabled();
   });
 
   it('renders an enabled button if integrations card is complete', () => {
@@ -119,7 +119,7 @@ describe('DashboardsCard', () => {
       </TestProviders>
     );
 
-    expect(getByTestId('dashboardsCardButton').querySelector('button')).not.toBeDisabled();
+    expect(getByTestId('dashboardsCardButton').querySelector('button')).not.toBeEuiDisabled();
   });
 
   it('calls setExpandedCardId when the callout link is clicked', () => {

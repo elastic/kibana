@@ -140,7 +140,7 @@ describe('PackagePolicyActionsMenu', () => {
 
     await waitFor(() => {
       const upgradeButton = utils.getByTestId('PackagePolicyActionsUpgradeItem');
-      expect(upgradeButton).not.toBeDisabled();
+      expect(upgradeButton).not.toBeEuiDisabled();
     });
   });
 

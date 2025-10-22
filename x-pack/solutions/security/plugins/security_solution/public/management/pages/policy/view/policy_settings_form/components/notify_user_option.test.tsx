@@ -86,7 +86,7 @@ describe('Policy form Notify User option component', () => {
     set(formProps.policy, 'windows.malware.mode', ProtectionModes.off);
     render();
 
-    expect(renderResult.getByTestId('test-checkbox')).toBeDisabled();
+    expect(renderResult.getByTestId('test-checkbox')).toBeEuiDisabled();
   });
 
   it('should be able to un-check the option', async () => {

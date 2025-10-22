@@ -79,7 +79,7 @@ describe('AnnotationFlyout', () => {
       </MlAnnotationUpdatesContextProvider>
     );
     const updateBtn = getByTestId('annotationFlyoutUpdateOrCreateButton');
-    expect(updateBtn).toBeDisabled();
+    expect(updateBtn).toBeEuiDisabled();
   });
 
   test('Error displayed and update button displayed if annotation text is longer than max chars', async () => {
@@ -92,7 +92,7 @@ describe('AnnotationFlyout', () => {
       </MlAnnotationUpdatesContextProvider>
     );
     const updateBtn = getByTestId('annotationFlyoutUpdateOrCreateButton');
-    expect(updateBtn).toBeDisabled();
+    expect(updateBtn).toBeEuiDisabled();
     await waitFor(() => {
       const errorText = screen.queryByText(/characters above maximum length/);
       expect(errorText).not.toBe(undefined);
@@ -110,7 +110,7 @@ describe('AnnotationFlyout', () => {
       </MlAnnotationUpdatesContextProvider>
     );
     const updateBtn = getByTestId('annotationFlyoutUpdateOrCreateButton');
-    expect(updateBtn).not.toBeDisabled();
+    expect(updateBtn).not.toBeEuiDisabled();
     expect(screen.queryByTestId('mlAnnotationFlyout')).toBeInTheDocument();
 
     await fireEvent.click(updateBtn);

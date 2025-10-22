@@ -41,7 +41,7 @@ describe('Category ', () => {
   it('is disabled when loading', () => {
     render(<CategoryComponent {...defaultProps} isLoading={true} />);
 
-    expect(screen.getByRole('combobox')).toBeDisabled();
+    expect(screen.getByRole('combobox')).toBeEuiDisabled();
   });
 
   it('renders category correctly', () => {

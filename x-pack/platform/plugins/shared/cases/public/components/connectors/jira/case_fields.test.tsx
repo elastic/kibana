@@ -173,8 +173,8 @@ describe('Jira Fields', () => {
       </MockFormWrapperComponent>
     );
 
-    expect(await screen.findByTestId('issueTypeSelect')).toBeDisabled();
-    expect(await screen.findByTestId('prioritySelect')).toBeDisabled();
+    expect(await screen.findByTestId('issueTypeSelect')).toBeEuiDisabled();
+    expect(await screen.findByTestId('prioritySelect')).toBeEuiDisabled();
   });
 
   it('disabled the priority when loading fields', async () => {
@@ -189,7 +189,7 @@ describe('Jira Fields', () => {
       </MockFormWrapperComponent>
     );
 
-    expect(await screen.findByTestId('prioritySelect')).toBeDisabled();
+    expect(await screen.findByTestId('prioritySelect')).toBeEuiDisabled();
   });
 
   it('hides the priority if not supported', () => {

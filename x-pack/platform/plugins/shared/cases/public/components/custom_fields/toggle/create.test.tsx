@@ -109,6 +109,6 @@ describe('Create ', () => {
       </FormTestComponent>
     );
 
-    expect(await screen.findByRole('switch')).toBeDisabled();
+    expect(await screen.findByRole('switch')).toBeEuiDisabled();
   });
 });

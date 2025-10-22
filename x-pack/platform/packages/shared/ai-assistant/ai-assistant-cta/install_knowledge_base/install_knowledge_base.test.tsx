@@ -46,7 +46,7 @@ describe('InstallKnowledgeBase', () => {
     renderComponent({ onInstallKnowledgeBase, isInstallAvailable: false });
 
     const button = screen.getByTestId(DATA_TEST_SUBJ_INSTALL_KNOWLEDGE_BASE_BUTTON);
-    expect(button).toBeDisabled();
+    expect(button).toBeEuiDisabled();
   });
 
   it('shows the unavailable tooltip when isInstallAvailable is false', () => {
@@ -59,7 +59,7 @@ describe('InstallKnowledgeBase', () => {
     renderComponent({ onInstallKnowledgeBase, isInstalling: true });
 
     const button = screen.getByTestId(DATA_TEST_SUBJ_INSTALL_KNOWLEDGE_BASE_BUTTON);
-    expect(button).toBeDisabled();
+    expect(button).toBeEuiDisabled();
   });
 
   it('renders the button with the correct text when isInstalling is true', () => {
@@ -72,6 +72,6 @@ describe('InstallKnowledgeBase', () => {
     renderComponent({ onInstallKnowledgeBase, isInstallAvailable: true, isInstalling: false });
 
     const button = screen.getByTestId(DATA_TEST_SUBJ_INSTALL_KNOWLEDGE_BASE_BUTTON);
-    expect(button).not.toBeDisabled();
+    expect(button).not.toBeEuiDisabled();
   });
 });

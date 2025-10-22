@@ -88,7 +88,7 @@ describe.each(listType)('Policy details %s artifact delete modal', (type) => {
     await userEvent.click(confirmButton);
 
     await waitFor(() => {
-      expect(confirmButton).toBeDisabled();
+      expect(confirmButton).toBeEuiDisabled();
     });
 
     await act(async () => {

@@ -133,7 +133,7 @@ describe('MacrosDataInput', () => {
     });
 
     const uploadButton = getByTestId('uploadFileButton');
-    expect(uploadButton).not.toBeDisabled();
+    expect(uploadButton).not.toBeEuiDisabled();
 
     await act(async () => {
       if (uploadButton) {

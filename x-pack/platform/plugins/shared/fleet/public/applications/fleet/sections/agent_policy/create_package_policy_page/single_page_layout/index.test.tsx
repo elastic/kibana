@@ -396,7 +396,7 @@ describe('When on the package policy create page', () => {
 
       await waitFor(() => {
         saveBtn = renderResult.getByText(/Save and continue/).closest('button')!;
-        expect(saveBtn).not.toBeDisabled();
+        expect(saveBtn).not.toBeEuiDisabled();
       });
 
       await act(async () => {
@@ -579,7 +579,7 @@ describe('When on the package policy create page', () => {
         renderResult.getByText(
           'Your integration policy has errors. Please fix them before saving.'
         );
-        expect(renderResult.getByText(/Save and continue/).closest('button')!).toBeDisabled();
+        expect(renderResult.getByText(/Save and continue/).closest('button')!).toBeEuiDisabled();
       });
 
       test('should show modal if agent policy has agents', async () => {
@@ -642,7 +642,7 @@ describe('When on the package policy create page', () => {
           renderResult.getByText(
             'Your integration policy has errors. Please fix them before saving.'
           );
-          expect(renderResult.getByText(/Save and continue/).closest('button')!).toBeDisabled();
+          expect(renderResult.getByText(/Save and continue/).closest('button')!).toBeEuiDisabled();
         });
 
         test('should disable submit button on invalid form with empty package var', async () => {
@@ -659,7 +659,7 @@ describe('When on the package policy create page', () => {
           renderResult.getByText(
             'Your integration policy has errors. Please fix them before saving.'
           );
-          expect(renderResult.getByText(/Save and continue/).closest('button')!).toBeDisabled();
+          expect(renderResult.getByText(/Save and continue/).closest('button')!).toBeEuiDisabled();
         });
 
         test('should submit form with changed package var', async () => {

@@ -117,7 +117,7 @@ describe('Inspect Button', () => {
           <InspectButton isDisabled={true} queryId={newQuery.id} title="My title" />
         </TestProviders>
       );
-      expect(container.querySelector('.euiButtonIcon')).toBeDisabled();
+      expect(container.querySelector('.euiButtonIcon')).toBeEuiDisabled();
     });
 
     test('Eui Icon Button disabled', () => {
@@ -126,7 +126,7 @@ describe('Inspect Button', () => {
           <InspectButton isDisabled={true} queryId={newQuery.id} title="My title" />
         </TestProviders>
       );
-      expect(container.querySelector('.euiButtonIcon')).toBeDisabled();
+      expect(container.querySelector('.euiButtonIcon')).toBeEuiDisabled();
     });
 
     test('Button disabled when inspect == null', () => {
@@ -141,7 +141,7 @@ describe('Inspect Button', () => {
           <InspectButton queryId={newQuery.id} title="My title" />
         </TestProviders>
       );
-      expect(container.querySelector('.euiButtonIcon')).toBeDisabled();
+      expect(container.querySelector('.euiButtonIcon')).toBeEuiDisabled();
     });
 
     test('Button disabled when inspect.dsl.length == 0', () => {
@@ -159,7 +159,7 @@ describe('Inspect Button', () => {
           <InspectButton queryId={newQuery.id} title="My title" />
         </TestProviders>
       );
-      expect(container.querySelector('.euiButtonIcon')).toBeDisabled();
+      expect(container.querySelector('.euiButtonIcon')).toBeEuiDisabled();
     });
 
     test('Button disabled when inspect.response.length == 0', () => {
@@ -177,7 +177,7 @@ describe('Inspect Button', () => {
           <InspectButton queryId={newQuery.id} title="My title" />
         </TestProviders>
       );
-      expect(container.querySelector('.euiButtonIcon')).toBeDisabled();
+      expect(container.querySelector('.euiButtonIcon')).toBeEuiDisabled();
     });
   });
 

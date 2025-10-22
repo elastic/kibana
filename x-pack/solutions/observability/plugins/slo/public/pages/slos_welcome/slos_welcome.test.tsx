@@ -126,7 +126,7 @@ describe('SLOs Welcome Page', () => {
 
         const createNewSloButton = screen.queryByTestId('o11ySloListWelcomePromptCreateSloButton');
 
-        expect(createNewSloButton).toBeDisabled();
+        expect(createNewSloButton).toBeEuiDisabled();
       });
 
       it('disables the create slo button when no cluster permissions capabilities', async () => {
@@ -142,7 +142,7 @@ describe('SLOs Welcome Page', () => {
         expect(screen.queryByTestId('slosPageWelcomePrompt')).toBeTruthy();
 
         const createNewSloButton = screen.queryByTestId('o11ySloListWelcomePromptCreateSloButton');
-        expect(createNewSloButton).toBeDisabled();
+        expect(createNewSloButton).toBeEuiDisabled();
       });
 
       it('should display the welcome message with a Create new SLO button which should navigate to the SLO Creation page', async () => {

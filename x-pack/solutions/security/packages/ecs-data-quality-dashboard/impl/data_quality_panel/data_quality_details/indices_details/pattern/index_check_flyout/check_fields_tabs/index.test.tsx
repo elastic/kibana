@@ -187,7 +187,7 @@ describe('HistoricalCheckFieldsTabs', () => {
         </TestExternalProviders>
       );
 
-      expect(screen.getByTestId(ALL_TAB_ID)).toBeDisabled();
+      expect(screen.getByTestId(ALL_TAB_ID)).toBeEuiDisabled();
       expect(screen.getByTestId('disabledReasonTooltip')).toBeInTheDocument();
     });
   });

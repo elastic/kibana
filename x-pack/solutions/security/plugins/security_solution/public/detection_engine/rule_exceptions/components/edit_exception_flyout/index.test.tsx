@@ -415,7 +415,7 @@ describe('When the edit exception modal is opened', () => {
       it('should have the bulk close checkbox enabled', () => {
         expect(
           wrapper.find('input[data-test-subj="bulkCloseAlertOnAddExceptionCheckbox"]').getDOMNode()
-        ).not.toBeDisabled();
+        ).not.toBeEuiDisabled();
       });
     });
 
@@ -461,7 +461,7 @@ describe('When the edit exception modal is opened', () => {
       it('should have the bulk close checkbox disabled', () => {
         expect(
           wrapper.find('input[data-test-subj="bulkCloseAlertOnAddExceptionCheckbox"]').getDOMNode()
-        ).toBeDisabled();
+        ).toBeEuiDisabled();
       });
     });
   });
@@ -694,7 +694,7 @@ describe('When the edit exception modal is opened', () => {
     it('should have the bulk close checkbox disabled', () => {
       expect(
         wrapper.find('input[data-test-subj="bulkCloseAlertOnAddExceptionCheckbox"]').getDOMNode()
-      ).toBeDisabled();
+      ).toBeEuiDisabled();
     });
 
     it('should display the eql sequence callout', () => {
@@ -742,7 +742,7 @@ describe('When the edit exception modal is opened', () => {
 
       expect(
         wrapper.find('button[data-test-subj="editExceptionConfirmButton"]').getDOMNode()
-      ).toBeDisabled();
+      ).toBeEuiDisabled();
     });
 
     test('when there is a comment error has submit button disabled', async () => {
@@ -797,7 +797,7 @@ describe('When the edit exception modal is opened', () => {
         fireEvent.blur(commentInput);
       });
       expect(queryByText(commentErrorMessage)).not.toBeNull();
-      expect(getByTestId('editExceptionConfirmButton')).toBeDisabled();
+      expect(getByTestId('editExceptionConfirmButton')).toBeEuiDisabled();
     });
   });
 });

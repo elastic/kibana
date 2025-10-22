@@ -59,6 +59,6 @@ describe('MissingLookupsList', () => {
         />
       </TestProviders>
     );
-    expect(getAllByTestId('lookupNameClear')[0]).toBeDisabled();
+    expect(getAllByTestId('lookupNameClear')[0]).toBeEuiDisabled();
   });
 });

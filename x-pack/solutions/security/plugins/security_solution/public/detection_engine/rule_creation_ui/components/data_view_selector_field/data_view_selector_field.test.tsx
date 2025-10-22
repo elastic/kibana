@@ -42,7 +42,7 @@ describe('data_view_selector', () => {
       { wrapper: TestProviders }
     );
 
-    expect(screen.getByRole('combobox')).toBeDisabled();
+    expect(screen.getByRole('combobox')).toBeEuiDisabled();
   });
 
   it('displays the selected dataview by name, if specified', () => {

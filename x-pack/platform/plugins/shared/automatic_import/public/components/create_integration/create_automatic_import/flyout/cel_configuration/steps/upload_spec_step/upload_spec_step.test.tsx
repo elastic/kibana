@@ -72,7 +72,7 @@ describe('UploadSpecStep', () => {
     });
 
     it('analyze button disabled', () => {
-      expect(result.queryByTestId('analyzeApiButton')).toBeDisabled();
+      expect(result.queryByTestId('analyzeApiButton')).toBeEuiDisabled();
     });
 
     describe('fills in fields', () => {
@@ -124,11 +124,11 @@ describe('UploadSpecStep', () => {
     });
 
     it('form is disabled', () => {
-      expect(result.queryByTestId('dataStreamTitleInput')).toBeDisabled();
+      expect(result.queryByTestId('dataStreamTitleInput')).toBeEuiDisabled();
     });
 
     it('analyze button disabled; cancel button appears and is enabled', () => {
-      expect(result.queryByTestId('analyzeApiButton')).toBeDisabled();
+      expect(result.queryByTestId('analyzeApiButton')).toBeEuiDisabled();
       expect(result.queryByTestId('cancelAnalyzeApiButton')).toBeVisible();
     });
   });

@@ -94,7 +94,7 @@ describe('CopyToDashboardModal', () => {
       );
 
       await waitFor(() =>
-        expect(result.container.querySelector('#new-dashboard-option')).toBeDisabled()
+        expect(result.container.querySelector('#new-dashboard-option')).toBeEuiDisabled()
       );
     });
 

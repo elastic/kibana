@@ -209,7 +209,7 @@ describe('Alert table context menu', () => {
           const button = wrapper.getByTestId(addEndpointEventFilterButton);
 
           expect(button).toBeInTheDocument();
-          expect(button).toBeDisabled();
+          expect(button).toBeEuiDisabled();
         });
 
         test('it enables AddEndpointEventFilter when timeline id is host events page', async () => {
@@ -224,7 +224,7 @@ describe('Alert table context menu', () => {
           const button = wrapper.getByTestId(addEndpointEventFilterButton);
 
           expect(button).toBeInTheDocument();
-          expect(button).not.toBeDisabled();
+          expect(button).not.toBeEuiDisabled();
         });
 
         test('it disables AddEndpointEventFilter when timeline id is host events page but is not from endpoint', async () => {
@@ -243,7 +243,7 @@ describe('Alert table context menu', () => {
           const button = wrapper.getByTestId(addEndpointEventFilterButton);
 
           expect(button).toBeInTheDocument();
-          expect(button).toBeDisabled();
+          expect(button).toBeEuiDisabled();
         });
 
         test('it enables AddEndpointEventFilter when timeline id is user events page', async () => {
@@ -258,7 +258,7 @@ describe('Alert table context menu', () => {
           const button = wrapper.getByTestId(addEndpointEventFilterButton);
 
           expect(button).toBeInTheDocument();
-          expect(button).not.toBeDisabled();
+          expect(button).not.toBeEuiDisabled();
         });
 
         test('it disables AddEndpointEventFilter when timeline id is user events page but is not from endpoint', async () => {
@@ -277,7 +277,7 @@ describe('Alert table context menu', () => {
           const button = wrapper.getByTestId(addEndpointEventFilterButton);
 
           expect(button).toBeInTheDocument();
-          expect(button).toBeDisabled();
+          expect(button).toBeEuiDisabled();
         });
       });
     });

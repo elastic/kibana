@@ -145,7 +145,7 @@ describe('FieldInput', () => {
     const props = getDefaultProps('string');
     const { getByTestId } = render(wrap(<FieldInput {...props} isSavingEnabled={false} />));
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${name}`);
-    expect(input).toBeDisabled();
+    expect(input).toBeEuiDisabled();
   });
 
   it('throws an error if the field and unsavedChange types do not match', () => {

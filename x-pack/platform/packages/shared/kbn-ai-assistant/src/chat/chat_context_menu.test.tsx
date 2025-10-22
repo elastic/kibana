@@ -123,6 +123,8 @@ describe('ChatContextMenu', () => {
 
   it('disables button when disabled prop is true', () => {
     renderComponent({ disabled: true });
-    expect(screen.getByTestId('observabilityAiAssistantChatContextMenuButtonIcon')).toBeDisabled();
+    expect(
+      screen.getByTestId('observabilityAiAssistantChatContextMenuButtonIcon')
+    ).toBeEuiDisabled();
   });
 });

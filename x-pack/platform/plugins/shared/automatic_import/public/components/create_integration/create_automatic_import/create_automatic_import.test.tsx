@@ -111,7 +111,7 @@ describe('CreateIntegration', () => {
 
       it('should disable the next button', () => {
         const result = renderAutomaticImport();
-        expect(result.getByTestId('buttonsFooter-nextButton')).toBeDisabled();
+        expect(result.getByTestId('buttonsFooter-nextButton')).toBeEuiDisabled();
       });
 
       it('should still enable the back button', () => {
@@ -217,7 +217,7 @@ describe('CreateIntegration', () => {
 
       it('should disable the next button', () => {
         const result = renderAutomaticImport();
-        expect(result.getByTestId('buttonsFooter-nextButton')).toBeDisabled();
+        expect(result.getByTestId('buttonsFooter-nextButton')).toBeEuiDisabled();
       });
 
       it('should still enable the back button', () => {
@@ -328,7 +328,7 @@ describe('CreateIntegration', () => {
 
       it('should disable the next button', () => {
         const result = renderAutomaticImport();
-        expect(result.getByTestId('buttonsFooter-nextButton')).toBeDisabled();
+        expect(result.getByTestId('buttonsFooter-nextButton')).toBeEuiDisabled();
       });
 
       it('should still enable the back button', () => {
@@ -395,7 +395,7 @@ describe('CreateIntegration', () => {
           const nextButton = result
             .getAllByTestId('buttonsFooter-nextButton')
             .filter((button) => button.textContent !== 'Next')[0];
-          expect(nextButton).toBeDisabled();
+          expect(nextButton).toBeEuiDisabled();
         });
       });
     });
@@ -466,7 +466,7 @@ describe('CreateIntegration', () => {
 
       it('should disable the next button', () => {
         const result = renderAutomaticImport();
-        expect(result.getByTestId('buttonsFooter-nextButton')).toBeDisabled();
+        expect(result.getByTestId('buttonsFooter-nextButton')).toBeEuiDisabled();
       });
 
       it('should still enable the back button', () => {

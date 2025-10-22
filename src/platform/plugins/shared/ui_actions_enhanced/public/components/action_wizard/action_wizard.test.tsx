@@ -114,7 +114,7 @@ test('If not enough license, button is disabled', () => {
   // check that all factories are displayed to pick
   expect(screen.getAllByTestId(new RegExp(TEST_SUBJ_ACTION_FACTORY_ITEM))).toHaveLength(2);
 
-  expect(screen.getByTestId(/actionFactoryItem-Url/i)).toBeDisabled();
+  expect(screen.getByTestId(/actionFactoryItem-Url/i)).toBeEuiDisabled();
 });
 
 test('if action is beta, beta badge is shown', () => {

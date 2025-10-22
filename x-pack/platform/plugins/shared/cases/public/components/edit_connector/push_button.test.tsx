@@ -61,7 +61,7 @@ describe('PushButton ', () => {
   it('disables the button', async () => {
     renderWithTestingProviders(<PushButton {...defaultProps} disabled={true} />);
 
-    expect(await screen.findByTestId('push-to-external-service')).toBeDisabled();
+    expect(await screen.findByTestId('push-to-external-service')).toBeEuiDisabled();
   });
 
   it('shows the tooltip context correctly', async () => {

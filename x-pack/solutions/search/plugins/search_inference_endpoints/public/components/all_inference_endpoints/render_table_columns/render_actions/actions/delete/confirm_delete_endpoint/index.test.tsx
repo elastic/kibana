@@ -86,7 +86,7 @@ describe('ConfirmDeleteEndpointModal', () => {
   describe('endpoint with usage', () => {
     it('disables delete endpoint button', () => {
       render(<Wrapper />);
-      expect(screen.getByTestId('confirmModalConfirmButton')).toBeDisabled();
+      expect(screen.getByTestId('confirmModalConfirmButton')).toBeEuiDisabled();
     });
 
     it('renders warning message', () => {

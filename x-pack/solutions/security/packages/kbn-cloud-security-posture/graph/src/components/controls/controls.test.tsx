@@ -99,7 +99,7 @@ describe('Controls', () => {
       const { getByLabelText } = renderWithProviders();
 
       const zoomInButton = getByLabelText('Zoom in');
-      expect(zoomInButton).toBeDisabled();
+      expect(zoomInButton).toBeEuiDisabled();
     });
 
     it('disables zoom out button when min zoom is reached', () => {
@@ -108,7 +108,7 @@ describe('Controls', () => {
       const { getByLabelText } = renderWithProviders();
 
       const zoomOutButton = getByLabelText('Zoom out');
-      expect(zoomOutButton).toBeDisabled();
+      expect(zoomOutButton).toBeEuiDisabled();
     });
   });
 

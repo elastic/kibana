@@ -215,7 +215,7 @@ describe('RulesListNotifyBadge', () => {
     );
 
     expect(screen.getByTestId('rulesListNotifyBadge-snoozed')).toBeInTheDocument();
-    expect(screen.getByTestId('rulesListNotifyBadge-snoozed')).toBeDisabled();
+    expect(screen.getByTestId('rulesListNotifyBadge-snoozed')).toBeEuiDisabled();
   });
 
   it('should clear an infinitive snooze schedule', async () => {

@@ -539,8 +539,8 @@ describe('TakeAction', () => {
       const addToCaseButton = screen.getByTestId('addToCase');
       const addToExistingCaseButton = screen.getByTestId('addToExistingCase');
 
-      expect(addToCaseButton).toBeDisabled();
-      expect(addToExistingCaseButton).toBeDisabled();
+      expect(addToCaseButton).toBeEuiDisabled();
+      expect(addToExistingCaseButton).toBeEuiDisabled();
     });
   });
 
@@ -575,7 +575,7 @@ describe('TakeAction', () => {
       openPopover();
       const viewInAiAssistantButton = screen.getByTestId('viewInAiAssistant');
 
-      expect(viewInAiAssistantButton).toBeDisabled();
+      expect(viewInAiAssistantButton).toBeEuiDisabled();
     });
   });
 });

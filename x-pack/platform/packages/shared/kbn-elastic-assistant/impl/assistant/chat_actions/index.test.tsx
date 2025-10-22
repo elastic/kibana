@@ -39,7 +39,7 @@ describe('ChatActions', () => {
       isDisabled: true,
     };
     const { getByTestId } = render(<ChatActions {...props} />);
-    expect(getByTestId('submit-chat')).toBeDisabled();
+    expect(getByTestId('submit-chat')).toBeEuiDisabled();
   });
 
   it('send message button is in loading state when isLoading prop is true', () => {

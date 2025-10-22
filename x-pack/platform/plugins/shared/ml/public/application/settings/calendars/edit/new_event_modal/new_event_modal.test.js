@@ -25,14 +25,14 @@ describe('NewEventModal', () => {
     const addButton = getByTestId('mlCalendarAddEventButton');
 
     // Verify it's disabled when description is empty
-    expect(addButton).toBeDisabled();
+    expect(addButton).toBeEuiDisabled();
 
     // Enter a description
     const descriptionField = getByTestId('mlCalendarEventDescriptionInput');
     fireEvent.change(descriptionField, { target: { value: 'Test event' } });
 
     // Verify button is now enabled
-    expect(addButton).not.toBeDisabled();
+    expect(addButton).not.toBeEuiDisabled();
   });
 
   it('enables adding event when description is provided', () => {
@@ -41,14 +41,14 @@ describe('NewEventModal', () => {
 
     // Find the Add button by its role and verify it's initially disabled
     const addButton = getByTestId('mlCalendarAddEventButton');
-    expect(addButton).toBeDisabled();
+    expect(addButton).toBeEuiDisabled();
 
     // Enter a description
     const descriptionField = getByTestId('mlCalendarEventDescriptionInput');
     fireEvent.change(descriptionField, { target: { value: 'Test event' } });
 
     // Verify button is now enabled
-    expect(addButton).not.toBeDisabled();
+    expect(addButton).not.toBeEuiDisabled();
 
     // Click the Add button
     fireEvent.click(addButton);

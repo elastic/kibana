@@ -41,7 +41,7 @@ describe('<NoDataViewsPromptComponent />', () => {
     render(<NoDataViewsPrompt canCreateNewDataView={false} />);
 
     const button = screen.getByTestId('createDataViewButton');
-    expect(button).toBeDisabled();
+    expect(button).toBeEuiDisabled();
   });
 
   test('onClickCreate', async () => {

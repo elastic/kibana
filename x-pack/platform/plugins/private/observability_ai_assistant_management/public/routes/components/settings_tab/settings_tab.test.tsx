@@ -118,6 +118,6 @@ describe('SettingsTab', () => {
     });
 
     expect(getByTestId('observabilityAiAssistantKnowledgeBaseLoadingSpinner')).toBeInTheDocument();
-    expect(getByTestId('observabilityAiAssistantKnowledgeBaseUpdateModelButton')).toBeDisabled();
+    expect(getByTestId('observabilityAiAssistantKnowledgeBaseUpdateModelButton')).toBeEuiDisabled();
   });
 });

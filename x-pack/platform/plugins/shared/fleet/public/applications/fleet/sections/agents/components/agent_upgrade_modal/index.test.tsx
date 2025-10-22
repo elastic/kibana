@@ -132,7 +132,7 @@ describe('AgentUpgradeAgentModal', () => {
         const input = within(container).getByRole<HTMLInputElement>('combobox');
         expect(input?.value).toEqual('');
         expect(utils.getByText('Version is required')).toBeInTheDocument();
-        expect(utils.getByTestId('confirmModalConfirmButton')).toBeDisabled();
+        expect(utils.getByTestId('confirmModalConfirmButton')).toBeEuiDisabled();
       });
     });
 
@@ -148,7 +148,7 @@ describe('AgentUpgradeAgentModal', () => {
         const input = within(container).getByRole<HTMLInputElement>('combobox');
         expect(input?.value).toEqual('');
         expect(utils.getByText('Version is required')).toBeInTheDocument();
-        expect(utils.getByTestId('confirmModalConfirmButton')).toBeDisabled();
+        expect(utils.getByTestId('confirmModalConfirmButton')).toBeEuiDisabled();
       });
     });
 
@@ -275,7 +275,7 @@ describe('AgentUpgradeAgentModal', () => {
           )
         ).toBeInTheDocument();
         const el = utils.getByTestId('confirmModalConfirmButton');
-        expect(el).toBeDisabled();
+        expect(el).toBeEuiDisabled();
       });
     });
 
@@ -331,7 +331,7 @@ describe('AgentUpgradeAgentModal', () => {
           )
         ).toBeInTheDocument();
         const el = utils.getByTestId('confirmModalConfirmButton');
-        expect(el).not.toBeDisabled();
+        expect(el).not.toBeEuiDisabled();
       });
     });
 
@@ -440,7 +440,7 @@ describe('AgentUpgradeAgentModal', () => {
       });
 
       const el = utils.getByTestId('confirmModalConfirmButton');
-      expect(el).toBeDisabled();
+      expect(el).toBeEuiDisabled();
     });
   });
 
@@ -463,7 +463,7 @@ describe('AgentUpgradeAgentModal', () => {
         )
       ).toBeInTheDocument();
       const el = utils.getByTestId('confirmModalConfirmButton');
-      expect(el).toBeDisabled();
+      expect(el).toBeEuiDisabled();
     });
   });
 

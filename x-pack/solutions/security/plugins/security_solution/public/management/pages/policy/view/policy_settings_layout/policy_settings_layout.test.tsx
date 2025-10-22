@@ -135,16 +135,16 @@ describe('When rendering PolicySettingsLayout', () => {
       const { getByTestId } = render();
 
       expect(getByTestId('endpointPolicyForm'));
-      expect(getByTestId('policyDetailsCancelButton')).not.toBeDisabled();
-      expect(getByTestId('policyDetailsSaveButton')).toBeDisabled();
+      expect(getByTestId('policyDetailsCancelButton')).not.toBeEuiDisabled();
+      expect(getByTestId('policyDetailsSaveButton')).toBeEuiDisabled();
     });
 
     it('should render layout with expected content when changes have been made', async () => {
       const { getByTestId } = render();
       await makeMinimalUpdates();
       expect(getByTestId('endpointPolicyForm'));
-      expect(getByTestId('policyDetailsCancelButton')).not.toBeDisabled();
-      expect(getByTestId('policyDetailsSaveButton')).not.toBeDisabled();
+      expect(getByTestId('policyDetailsCancelButton')).not.toBeEuiDisabled();
+      expect(getByTestId('policyDetailsSaveButton')).not.toBeEuiDisabled();
     });
 
     it('should allow updates to be made', async () => {
@@ -167,10 +167,10 @@ describe('When rendering PolicySettingsLayout', () => {
       await clickSave(true, false);
 
       await waitFor(() => {
-        expect(getByTestId('policyDetailsCancelButton')).toBeDisabled();
+        expect(getByTestId('policyDetailsCancelButton')).toBeEuiDisabled();
       });
 
-      expect(getByTestId('policyDetailsSaveButton')).toBeDisabled();
+      expect(getByTestId('policyDetailsSaveButton')).toBeEuiDisabled();
       expect(
         getByTestId('policyDetailsSaveButton').querySelector('.euiLoadingSpinner')
       ).not.toBeNull();
@@ -182,7 +182,7 @@ describe('When rendering PolicySettingsLayout', () => {
       await clickSave();
 
       await waitFor(() => {
-        expect(renderResult.getByTestId('policyDetailsSaveButton')).toBeDisabled();
+        expect(renderResult.getByTestId('policyDetailsSaveButton')).toBeEuiDisabled();
       });
 
       expect(toasts.addSuccess).toHaveBeenCalledWith({
@@ -201,7 +201,7 @@ describe('When rendering PolicySettingsLayout', () => {
       await clickSave();
 
       await waitFor(() => {
-        expect(renderResult.getByTestId('policyDetailsSaveButton')).not.toBeDisabled();
+        expect(renderResult.getByTestId('policyDetailsSaveButton')).not.toBeEuiDisabled();
       });
 
       expect(toasts.addDanger).toHaveBeenCalledWith({

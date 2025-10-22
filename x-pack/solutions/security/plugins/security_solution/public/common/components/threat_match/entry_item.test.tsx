@@ -266,7 +266,7 @@ describe('EntryItem', () => {
     await userEvent.click(matchSelect);
     const option = screen.getByRole('option', { name: 'DOES NOT MATCH' });
 
-    expect(option).toBeDisabled();
+    expect(option).toBeEuiDisabled();
   });
 
   test('invokes onChange when MATCHES clause changed to DOES NOT MATCH', async () => {

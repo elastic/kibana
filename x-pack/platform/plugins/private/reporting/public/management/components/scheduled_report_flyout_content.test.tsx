@@ -267,7 +267,7 @@ describe('ScheduledReportFlyoutContent', () => {
 
     const emailField = await screen.findByTestId('emailRecipientsCombobox');
     const emailInput = within(emailField).getByTestId('comboBoxSearchInput');
-    expect(emailInput).toBeDisabled();
+    expect(emailInput).toBeEuiDisabled();
     expect(screen.getByText('Sensitive information')).toBeInTheDocument();
   });
 

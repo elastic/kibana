@@ -242,7 +242,7 @@ describe('QueryBarTopRowTopRow', () => {
         // Then
         await waitFor(() => {
           expect(getByTestId('dataSharedTimefilterDuration')).toBeInTheDocument();
-          expect(getByTestId('querySubmitButton-secondary-button')).toBeDisabled();
+          expect(getByTestId('querySubmitButton-secondary-button')).toBeEuiDisabled();
         });
       });
     });

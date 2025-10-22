@@ -200,6 +200,6 @@ describe('Category', () => {
       </FormTestComponent>
     );
 
-    expect(await screen.findByRole('combobox')).toBeDisabled();
+    expect(await screen.findByRole('combobox')).toBeEuiDisabled();
   });
 });

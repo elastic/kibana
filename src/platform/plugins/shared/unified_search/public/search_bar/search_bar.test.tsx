@@ -294,15 +294,15 @@ describe('SearchBar', () => {
 
     await waitFor(() => {
       const queryInput = screen.getByTestId('unifiedQueryInput');
-      expect(queryInput.querySelector('textarea')).toBeDisabled();
+      expect(queryInput.querySelector('textarea')).toBeEuiDisabled();
       expect(queryInput.querySelector('[title="Clear input"]')).toBeFalsy();
 
-      expect(screen.getByTestId('showQueryBarMenu')).toBeDisabled();
-      expect(screen.getByTestId('addFilter')).toBeDisabled();
+      expect(screen.getByTestId('showQueryBarMenu')).toBeEuiDisabled();
+      expect(screen.getByTestId('addFilter')).toBeEuiDisabled();
 
       // Check all buttons are disabled
       Array.from(container.querySelectorAll('button')).forEach((button) => {
-        expect(button).toBeDisabled();
+        expect(button).toBeEuiDisabled();
       });
     });
   });

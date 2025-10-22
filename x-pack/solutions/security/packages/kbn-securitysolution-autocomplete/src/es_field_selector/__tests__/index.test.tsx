@@ -51,7 +51,9 @@ describe('FieldComponent', () => {
       />
     );
     expect(wrapper.container).toMatchSnapshot();
-    expect(wrapper.getByTestId('fieldAutocompleteComboBox').querySelector('input')).toBeDisabled();
+    expect(
+      wrapper.getByTestId('fieldAutocompleteComboBox').querySelector('input')
+    ).toBeEuiDisabled();
   });
   it('should render the loading spinner if isLoading is true when clicked', () => {
     const wrapper = render(

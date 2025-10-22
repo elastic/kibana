@@ -205,7 +205,7 @@ describe('OpenErrorInDiscoverButton', () => {
 
     const button = getByTestId('testId');
     expect(button).toBeInTheDocument();
-    expect(button).toBeDisabled();
+    expect(button).toBeEuiDisabled();
     expect(button).toHaveTextContent('Open in Discover');
   });
 });

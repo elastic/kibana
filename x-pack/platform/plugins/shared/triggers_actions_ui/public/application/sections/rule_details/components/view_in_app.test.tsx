@@ -48,7 +48,7 @@ describe('view in app, link to the app that created the rule', () => {
     renderWithIntl(<ViewInApp rule={rule} />);
     const button = await screen.findByRole('button', { name: /view in app/i });
 
-    expect(button).toBeDisabled();
+    expect(button).toBeEuiDisabled();
     expect(button).toHaveTextContent('View in app');
 
     await waitFor(() => expect(mockGetNavigation).toBeCalledWith(rule.id));
@@ -65,7 +65,7 @@ describe('view in app, link to the app that created the rule', () => {
     const button = screen.getByRole('button', { name: /view in app/i });
 
     await waitFor(() => {
-      expect(button).not.toBeDisabled();
+      expect(button).not.toBeEuiDisabled();
     });
 
     await user.click(button);

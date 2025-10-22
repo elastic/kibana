@@ -180,7 +180,7 @@ describe('Policy Event Collection Card common component', () => {
       supplementalEntry.isDisabled = () => true;
       render();
 
-      expect(renderResult.getByTestId('test-dns')).toBeDisabled();
+      expect(renderResult.getByTestId('test-dns')).toBeEuiDisabled();
     });
   });
 

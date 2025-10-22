@@ -90,7 +90,7 @@ describe('ConfirmSettingsStep', () => {
     });
 
     it('generate button disabled; cancel button appears and is enabled', () => {
-      expect(result.queryByTestId('generateCelInputButton')).toBeDisabled();
+      expect(result.queryByTestId('generateCelInputButton')).toBeEuiDisabled();
       expect(result.queryByTestId('cancelCelGenerationButton')).toBeVisible();
     });
   });

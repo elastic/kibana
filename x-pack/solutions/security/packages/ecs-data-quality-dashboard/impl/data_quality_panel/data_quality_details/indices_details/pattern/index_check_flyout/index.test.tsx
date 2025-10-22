@@ -69,8 +69,10 @@ describe('IndexCheckFlyout', () => {
         'aria-selected',
         'true'
       );
-      expect(screen.getByTestId(`indexCheckFlyoutTab-${LATEST_CHECK_TAB_ID}`)).not.toBeDisabled();
-      expect(screen.getByTestId(`indexCheckFlyoutTab-${HISTORY_TAB_ID}`)).not.toBeDisabled();
+      expect(
+        screen.getByTestId(`indexCheckFlyoutTab-${LATEST_CHECK_TAB_ID}`)
+      ).not.toBeEuiDisabled();
+      expect(screen.getByTestId(`indexCheckFlyoutTab-${HISTORY_TAB_ID}`)).not.toBeEuiDisabled();
     });
 
     it('should render the correct index properties panel', () => {

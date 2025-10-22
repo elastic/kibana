@@ -173,10 +173,10 @@ describe('SpanLinks', () => {
     const select = getByTestId('unifiedDocViewerSpanLinkTypeSelect');
     expect(
       select.querySelector('[data-test-subj="unifiedDocViewerSpanLinkTypeSelect-incoming"]')
-    ).toBeDisabled();
+    ).toBeEuiDisabled();
     expect(
       select.querySelector('[data-test-subj="unifiedDocViewerSpanLinkTypeSelect-outgoing"]')
-    ).not.toBeDisabled();
+    ).not.toBeEuiDisabled();
   });
 });
 

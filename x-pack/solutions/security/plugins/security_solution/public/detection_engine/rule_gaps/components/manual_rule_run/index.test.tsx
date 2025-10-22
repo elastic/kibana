@@ -59,7 +59,7 @@ describe('ManualRuleRunModal', () => {
       target: { value: convertToDatePickerFormat(endDate) },
     });
 
-    expect(confirmModalConfirmButton).toBeDisabled();
+    expect(confirmModalConfirmButton).toBeEuiDisabled();
     expect(timeRangeForm).toHaveTextContent('Selected time range is invalid');
   });
 
@@ -75,7 +75,7 @@ describe('ManualRuleRunModal', () => {
       },
     });
 
-    expect(confirmModalConfirmButton).toBeDisabled();
+    expect(confirmModalConfirmButton).toBeEuiDisabled();
     expect(timeRangeForm).toHaveTextContent(
       'Manual rule run cannot be scheduled earlier than 90 days ago'
     );
@@ -91,7 +91,7 @@ describe('ManualRuleRunModal', () => {
       target: { value: convertToDatePickerFormat(endDate) },
     });
 
-    expect(confirmModalConfirmButton).toBeDisabled();
+    expect(confirmModalConfirmButton).toBeEuiDisabled();
     expect(timeRangeForm).toHaveTextContent('Manual rule run cannot be scheduled for the future');
   });
 });

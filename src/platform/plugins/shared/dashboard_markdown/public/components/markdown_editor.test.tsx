@@ -62,7 +62,7 @@ it('calls onSave with current value when Apply clicked', async () => {
   const onSave = jest.fn();
   renderMarkdownEditor({ onSave });
 
-  expect(screen.getByRole('button', { name: /Apply/i })).toBeDisabled();
+  expect(screen.getByRole('button', { name: /Apply/i })).toBeEuiDisabled();
   const textarea = await screen.findByRole('textbox');
   await userEvent.type(textarea, ' Added Paragraph');
   await userEvent.click(screen.getByRole('button', { name: /Apply/i }));

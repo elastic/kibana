@@ -53,7 +53,7 @@ describe('ToggleAlertFlyoutButtonComponent', () => {
       await userEvent.click(getByText('Alerts'));
       expect(
         forNearestButton(getByText)(ToggleFlyoutTranslations.openAlertContextPanelLabel)
-      ).toBeDisabled();
+      ).toBeEuiDisabled();
     });
 
     it("contains a tooltip explaining why users can't create rules", async () => {

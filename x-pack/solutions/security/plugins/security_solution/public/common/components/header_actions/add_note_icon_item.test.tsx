@@ -71,7 +71,7 @@ describe('AddEventNoteAction', () => {
       renderTestComponent({ eventId: 'event-1' });
 
       await waitFor(() => {
-        expect(screen.getByTestId('timeline-notes-button-small-mock')).not.toBeDisabled();
+        expect(screen.getByTestId('timeline-notes-button-small-mock')).not.toBeEuiDisabled();
       });
 
       expect(NotesButtonMock).toHaveBeenCalledWith(
@@ -93,7 +93,7 @@ describe('AddEventNoteAction', () => {
       renderTestComponent({ eventId: 'event-2', notesCount: 1 });
 
       await waitFor(() => {
-        expect(screen.getByTestId('timeline-notes-button-small-mock')).not.toBeDisabled();
+        expect(screen.getByTestId('timeline-notes-button-small-mock')).not.toBeEuiDisabled();
       });
 
       expect(NotesButtonMock).toHaveBeenCalledWith(
@@ -115,7 +115,7 @@ describe('AddEventNoteAction', () => {
       renderTestComponent({ eventId: 'event-3', notesCount: 0 });
 
       await waitFor(() => {
-        expect(screen.getByTestId('timeline-notes-button-small-mock')).not.toBeDisabled();
+        expect(screen.getByTestId('timeline-notes-button-small-mock')).not.toBeEuiDisabled();
       });
 
       expect(NotesButtonMock).toHaveBeenCalledWith(
@@ -157,7 +157,7 @@ describe('AddEventNoteAction', () => {
 
       renderTestComponent();
 
-      expect(screen.getByTestId('timeline-notes-button-small-mock')).not.toBeDisabled();
+      expect(screen.getByTestId('timeline-notes-button-small-mock')).not.toBeEuiDisabled();
     });
   });
 });

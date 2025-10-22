@@ -246,7 +246,7 @@ describe('useSettingsView', () => {
 
     render(<TestProviders>{result.current.actionButtons}</TestProviders>);
 
-    expect(screen.getByTestId('save')).toBeDisabled();
+    expect(screen.getByTestId('save')).toBeEuiDisabled();
   });
 
   it('enables the save button when localConnectorId is set', () => {
@@ -257,7 +257,7 @@ describe('useSettingsView', () => {
 
     render(<TestProviders>{result.current.actionButtons}</TestProviders>);
 
-    expect(screen.getByTestId('save')).not.toBeDisabled();
+    expect(screen.getByTestId('save')).not.toBeEuiDisabled();
   });
 
   it('disables the save and run button when localConnectorId is null', () => {
@@ -268,7 +268,7 @@ describe('useSettingsView', () => {
 
     render(<TestProviders>{result.current.actionButtons}</TestProviders>);
 
-    expect(screen.getByTestId('saveAndRun')).toBeDisabled();
+    expect(screen.getByTestId('saveAndRun')).toBeEuiDisabled();
   });
 
   it('enables the save and run button when localConnectorId is set', () => {
@@ -279,7 +279,7 @@ describe('useSettingsView', () => {
 
     render(<TestProviders>{result.current.actionButtons}</TestProviders>);
 
-    expect(screen.getByTestId('saveAndRun')).not.toBeDisabled();
+    expect(screen.getByTestId('saveAndRun')).not.toBeEuiDisabled();
   });
 
   it('invokes onSettingsSave when the save button is clicked', () => {

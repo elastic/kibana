@@ -5,7 +5,8 @@
     "types": [
       "jest",
       "node",
-      "react"
+      "react",
+      "@elastic/eui/lib/test/rtl/matchers"
     ]
   },
   "include": [

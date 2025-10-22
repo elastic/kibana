@@ -235,8 +235,8 @@ describe('DefaultAIConnector', () => {
       const comboBoxInput = screen.getByTestId('comboBoxSearchInput');
       const checkbox = screen.getByTestId('defaultAiConnectorCheckbox');
 
-      expect(comboBoxInput).toBeDisabled();
-      expect(checkbox).toBeDisabled();
+      expect(comboBoxInput).toBeEuiDisabled();
+      expect(checkbox).toBeEuiDisabled();
     });
 
     it('enables components when user can save advanced settings', () => {
@@ -245,8 +245,8 @@ describe('DefaultAIConnector', () => {
       const comboBoxInput = screen.getByTestId('comboBoxSearchInput');
       const checkbox = screen.getByTestId('defaultAiConnectorCheckbox');
 
-      expect(comboBoxInput).not.toBeDisabled();
-      expect(checkbox).not.toBeDisabled();
+      expect(comboBoxInput).not.toBeEuiDisabled();
+      expect(checkbox).not.toBeEuiDisabled();
     });
   });
 
