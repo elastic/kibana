@@ -64,9 +64,9 @@ export class ProfilingApiError extends Error {
   constructor(res: request.Response, endpoint: string) {
     super(
       `Unhandled ProfilingApiError.
-Status: "${res.status}"
-Endpoint: "${endpoint}"
-Body: ${JSON.stringify(res.body)}`
+      Status: "${res.status}"
+      Endpoint: "${endpoint}"
+      Body: ${JSON.stringify(res.body)}`
     );
 
     this.res = res;
