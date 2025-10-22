@@ -24,6 +24,7 @@ export {
   buildColumnSuggestions as buildFieldsDefinitionsWithMetadata,
   getFunctionSignatures,
   getFunctionDefinition,
+  getFormattedFunctionSignature,
 } from './functions';
 export { getDateLiterals, getCompatibleLiterals } from './literals';
 export { getColumnForASTNode, pipePrecedesCurrentWord } from './shared';

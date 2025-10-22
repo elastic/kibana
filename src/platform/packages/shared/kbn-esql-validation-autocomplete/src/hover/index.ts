@@ -14,7 +14,7 @@ import {
 } from '@kbn/esql-ast/src/commands_registry/commands/enrich/util';
 import {
   getFunctionDefinition,
-  getFunctionSignatures,
+  getFormattedFunctionSignature,
   getValidSignaturesAndTypesToSuggestNext,
 } from '@kbn/esql-ast/src/definitions/utils';
 import {
@@ -28,7 +28,6 @@ import type { ESQLCallbacks } from '../shared/types';
 import { getColumnsByTypeRetriever } from '../autocomplete/autocomplete';
 import { getPolicyHelper } from '../shared/resources_helpers';
 import { getVariablesHoverContent } from './helpers';
-import { formatFunctionSignature } from './helpers-2';
 
 interface HoverContent {
   contents: Array<{ value: string }>;
@@ -122,7 +121,9 @@ export async function getHoverItem(fullText: string, offset: number, callbacks?:
       hoverContent.contents.push(
         ...[
           {
-            value: formatFunctionSignature(fnDefinition),
+            value: `\`\`\`none
+${getFormattedFunctionSignature(fnDefinition)}
+\`\`\``,
           },
           { value: fnDefinition.description },
           { value: `[Open documentation](command:esql.control.functions.create)`, isTrusted: true },

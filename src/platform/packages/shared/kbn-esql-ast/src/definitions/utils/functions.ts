@@ -433,3 +433,85 @@ export const buildColumnSuggestions = (
 
   return [...suggestions];
 };
+
+/**
+ * Helper function to format a function signature in a readable format.
+ * @param functionDef The function definition to format
+ * @returns A formatted signature string
+ *
+ * @example output:
+ * ```typescript
+ *  count_distinct(
+ *    field: boolean | date | date_nanos | double,
+ *    precision?: integer | long | unsigned_long
+ *  ): long
+ * ```
+ */
+export function getFormattedFunctionSignature(functionDef: FunctionDefinition): string {
+  if (!functionDef.signatures || functionDef.signatures.length === 0) {
+    return `${functionDef.name}()`;
+  }
+
+  const returnTypes = new Set<string>();
+  const parameterTypeMap = new Map<string, Set<string>>();
+  const parameterOptionalMap = new Map<string, boolean>();
+  const parameterSignatureCount = new Map<string, number>();
+  let bestSignature = functionDef.signatures[0];
+  let maxParams = bestSignature.params.length;
+
+  functionDef.signatures.forEach((signature) => {
+    // Collect return types
+    returnTypes.add(signature.returnType);
+
+    // Find signature with most parameters
+    if (signature.params.length > maxParams) {
+      maxParams = signature.params.length;
+      bestSignature = signature;
+    }
+
+    // Collect parameter types, optional status, and signature count
+    signature.params.forEach((param) => {
+      if (!parameterTypeMap.has(param.name)) {
+        parameterTypeMap.set(param.name, new Set());
+        parameterOptionalMap.set(param.name, false);
+        parameterSignatureCount.set(param.name, 0);
+      }
+      parameterTypeMap.get(param.name)!.add(param.type);
+      parameterSignatureCount.set(param.name, parameterSignatureCount.get(param.name)! + 1);
+
+      // If ANY signature has this parameter as optional, mark it as optional
+      if (param.optional) {
+        parameterOptionalMap.set(param.name, true);
+      }
+    });
+  });
+
+  // Build parameter strings with combined types
+  const formattedParams = bestSignature.params.map((param) => {
+    const types = parameterTypeMap.get(param.name)!;
+    const typesList = Array.from(types).sort().join(' | ');
+
+    // A parameter is optional if:
+    // 1. ANY signature explicitly marks it as optional, OR
+    // 2. It doesn't appear in ALL signatures
+    const isExplicitlyOptional = parameterOptionalMap.get(param.name) || false;
+    const appearsInAllSignatures =
+      parameterSignatureCount.get(param.name) === functionDef.signatures.length;
+    const isOptional = isExplicitlyOptional || !appearsInAllSignatures;
+
+    const optionalMarker = isOptional ? '?' : '';
+    return `${param.name}${optionalMarker}: ${typesList}`;
+  });
+
+  // Build final string
+  const returnTypesList = Array.from(returnTypes).sort().join(' | ');
+
+  if (formattedParams.length > 0) {
+    const paramsString = formattedParams.join(',  \n  ');
+    return `${functionDef.name} (
+  ${paramsString}
+): ${returnTypesList}`;
+  } else {
+    return `${functionDef.name}(): ${returnTypesList}`;
+  }
+}
