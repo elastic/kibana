@@ -44,7 +44,7 @@ const optionListControlStyles = {
   validOption: ({ euiTheme }: UseEuiTheme) =>
     css({
       color: euiTheme.colors.text,
-      fontWeight: euiTheme.font.weight.medium,
+      fontWeight: euiTheme.font.weight.regular,
     }),
   invalidOption: ({ euiTheme }: UseEuiTheme) =>
     css({
