@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
 import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 
 const RunSubActionParamsSchema = z
   .object({
