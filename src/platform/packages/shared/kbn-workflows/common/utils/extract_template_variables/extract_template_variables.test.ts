@@ -172,4 +172,34 @@ describe('extractTemplateVariables', () => {
       'array[0][1][2]',
     ]);
   });
+
+  it('should handle local assigned variables within for loops', () => {
+    const template = `
+      {% for item in products %}
+        {% assign discountedPrice = item.price | minus: 10 %}
+        {{ item.name }}: {{ discountedPrice }}
+        {% if discountedPrice < threshold %}
+          On sale!
+        {% endif %}
+      {% endfor %}
+    `;
+
+    const variables = extractTemplateVariables(template);
+    expect(variables).toEqual(['products', 'threshold']);
+  });
+
+  it('should handle user age assignment and comparison', () => {
+    const template = `
+      {% for item in products %}
+        {% assign userAge = user.age %}
+        {{ item.name }}: {{ userAge }}
+        {% if userAge < threshold %}
+          On sale!
+        {% endif %}
+      {% endfor %}
+    `;
+
+    const variables = extractTemplateVariables(template);
+    expect(variables).toEqual(['products', 'user.age', 'threshold']);
+  });
 });

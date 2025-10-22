@@ -8,12 +8,23 @@
  */
 
 import type { Template } from 'liquidjs';
-import { Expression, ForTag, IfTag, Liquid, Output, Token, TokenKind } from 'liquidjs';
+import { ForTag, IfTag, AssignTag, Liquid, Output, Token, TokenKind, Value } from 'liquidjs';
 import { parseJsPropertyAccess } from '../parse_js_property_access/parse_js_property_access';
 
 const liquidEngine = new Liquid({
-  strictFilters: true,
+  strictFilters: false,
   strictVariables: false,
+});
+
+liquidEngine.registerFilter('json_parse', (value: unknown): unknown => {
+  if (typeof value !== 'string') {
+    return value;
+  }
+  try {
+    return JSON.parse(value);
+  } catch (error) {
+    return value;
+  }
 });
 
 interface StackEntry {
@@ -49,17 +60,17 @@ function truncatePathAtLocalVariable(
 
 function visitLiquidAST(node: unknown, stack: StackEntry[]): string[] {
   if (node instanceof Output) {
-    return visitLiquidAST(node.value.initial, stack);
+    return visitLiquidAST(node.value, stack);
   }
 
-  if (node instanceof Expression) {
-    return node.postfix.flatMap((token) => visitLiquidAST(token, stack));
+  if (node instanceof Value) {
+    return node.initial.postfix.flatMap((token) => visitLiquidAST(token, stack));
   }
 
   if (node instanceof IfTag) {
     stack.push({ node: 'if', variables: new Set<string>() });
     const fromBranches = node.branches.flatMap((branch) => {
-      const fromValue = visitLiquidAST(branch.value.initial, stack);
+      const fromValue = visitLiquidAST(branch.value, stack);
       const fromTemplates = branch.templates.flatMap((template) => visitLiquidAST(template, stack));
       return fromValue.concat(fromTemplates);
     });
@@ -74,6 +85,16 @@ function visitLiquidAST(node: unknown, stack: StackEntry[]): string[] {
     const fromBody = node.templates.flatMap((template) => visitLiquidAST(template, stack));
     stack.pop();
     return fromCollection.concat(fromBody);
+  }
+
+  if (node instanceof AssignTag) {
+    const localScope = Array.from(node.localScope());
+    const firstArg = localScope[0];
+    const variableName = firstArg.getText();
+    const args = Array.from(node.arguments());
+    const result = args.flatMap((arg) => visitLiquidAST(arg, stack));
+    stack.at(-1)?.variables.add(variableName);
+    return result;
   }
 
   if (node instanceof Token) {
