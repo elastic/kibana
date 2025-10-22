@@ -12,7 +12,7 @@ import type {
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
 import type { Runner } from '@kbn/onechat-server';
-import type { WorkflowsPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { isAllowedBuiltinTool } from '@kbn/onechat-server/allow_lists';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { getCurrentSpaceId } from '../../utils/spaces';
@@ -30,7 +30,7 @@ import { getToolTypeInfo } from './utils';
 
 export interface ToolsServiceSetupDeps {
   logger: Logger;
-  workflowsManagement?: WorkflowsPluginSetup;
+  workflowsManagement?: WorkflowsServerPluginSetup;
 }
 
 export interface ToolsServiceStartDeps {

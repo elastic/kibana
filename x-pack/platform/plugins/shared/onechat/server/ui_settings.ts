@@ -23,7 +23,7 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
         defaultMessage: 'Elastic Agent Builder',
       }),
       schema: schema.boolean(),
-      value: false,
+      value: true,
       technicalPreview: true,
       requiresPageReload: true,
       readonly: false,

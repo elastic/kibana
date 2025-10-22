@@ -15,7 +15,12 @@ import { columnExists, handleFragment } from '../../../definitions/utils/autocom
 import { unescapeColumnName } from '../../../definitions/utils/shared';
 import * as mutate from '../../../mutate';
 import { LeafPrinter } from '../../../pretty_print/leaf_printer';
-import type { ESQLAstJoinCommand, ESQLCommand, ESQLCommandOption } from '../../../types';
+import type {
+  ESQLAstAllCommands,
+  ESQLAstJoinCommand,
+  ESQLCommand,
+  ESQLCommandOption,
+} from '../../../types';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 
 import type { ICommand } from '../../registry';
@@ -153,7 +158,7 @@ export const getFieldSuggestions = async (
 
 export const suggestFields = async (
   innerText: string,
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   getColumnsByType: GetColumnsByTypeFn,
   getColumnsForQuery: (query: string) => Promise<ESQLColumnData[]>,
   context?: ICommandContext
@@ -163,7 +168,7 @@ export const suggestFields = async (
   }
 
   const { suggestions: fieldSuggestions, lookupIndexFieldExists } = await getFieldSuggestions(
-    command,
+    command as ESQLCommand,
     getColumnsByType,
     // this type cast is ok because getFieldSuggestions only ever fetches columns
     // from a bare FROM clause, so they will always be fields, not user-defined columns

@@ -79,5 +79,6 @@
     "@kbn/licensing-plugin",
     "@kbn/lens-embeddable-utils",
     "@kbn/maps-plugin",
+    "@kbn/react-kibana-mount",
   ]
 }
