@@ -322,7 +322,7 @@ export const toNavigationItems = (
 
   if (!SKIP_WARNINGS) {
     warnAboutDuplicateIds(logoItem, primaryItems, footerItems);
-    warnAboutDuplicateIcons(logoItem, primaryItems);
+    warnAboutDuplicateIcons(logoItem, primaryItems, footerItems);
   }
 
   return {
@@ -451,10 +451,14 @@ function warnAboutDuplicates(
   });
 }
 
-function warnAboutDuplicateIcons(logoItem: SideNavLogo, primaryItems: MenuItem[]) {
+function warnAboutDuplicateIcons(
+  logoItem: SideNavLogo,
+  primaryItems: MenuItem[],
+  footerItems: MenuItem[]
+) {
   if (SKIP_WARNINGS) return;
   // Collect all items with icons (only logo + primary items, excluding fallback)
-  const icons = [logoItem, ...primaryItems]
+  const icons = [logoItem, ...primaryItems, ...footerItems]
     .filter(
       (item) =>
         item.iconType && item.iconType !== FALLBACK_ICON && typeof item.iconType === 'string'
