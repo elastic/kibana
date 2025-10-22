@@ -126,14 +126,19 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
 
   public start(coreStart: CoreStart): CloudStart {
     coreStart.chrome.setHelpSupportUrl(getSupportUrl(this.config));
-    coreStart.http
-      .get<CloudDataAttributes>('/internal/cloud/solution', { version: '1' })
-      .then((response) => {
-        const deploymentName = response?.resourceData?.deployment?.name;
-        if (deploymentName) {
-          (coreStart.chrome as InternalChromeStart).project.setKibanaName(deploymentName);
-        }
-      });
+
+    // Deployment name is only available in ECH
+    if (this.isCloudEnabled && !this.isServerlessEnabled) {
+      coreStart.http
+        .get<CloudDataAttributes>('/internal/cloud/solution', { version: '1' })
+        .then((response) => {
+          const deploymentName = response?.resourceData?.deployment?.name;
+          if (deploymentName) {
+            (coreStart.chrome as InternalChromeStart)?.project?.setKibanaName(deploymentName);
+          }
+        })
+        .catch();
+    }
 
     // Nest all the registered context providers under the Cloud Services Provider.
     // This way, plugins only need to require Cloud's context provider to have all the enriched Cloud services.
