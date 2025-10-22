@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export * from './v7';
+import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
+
+export default ({ loadTestFile }: FtrProviderContext): void => {
+  loadTestFile(require.resolve('./install_prebuilt_rules'));
+};
