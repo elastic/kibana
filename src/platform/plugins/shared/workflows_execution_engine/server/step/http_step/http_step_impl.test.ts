@@ -151,31 +151,20 @@ describe('HttpStepImpl', () => {
       );
     });
 
-    it('should throw error when template rendering fails in URL', () => {
+    it('should throw error when template rendering fails', () => {
       const context = {
         execution: { id: 'test-run', isTestRun: false, startedAt: new Date() },
         workflow: { id: 'test-workflow', name: 'Test', enabled: true, spaceId: 'default' },
         steps: {},
       };
+      mockContextManager.renderValueAccordingToContext = jest.fn().mockImplementation(() => {
+        throw new Error('Template rendering failed');
+      });
       mockContextManager.getContext.mockReturnValue(context as any);
       // Use a filter that will throw an error (e.g., accessing undefined property)
       mockStep.configuration.with.url = '{{ nonexistent | upper }}';
 
-      expect(() => httpStep.getInput()).toThrow();
-    });
-
-    it('should throw error when template rendering fails in headers', () => {
-      const context = {
-        execution: { id: 'test-run', isTestRun: false, startedAt: new Date() },
-        workflow: { id: 'test-workflow', name: 'Test', enabled: true, spaceId: 'default' },
-        steps: {},
-      };
-      mockContextManager.getContext.mockReturnValue(context as any);
-      mockStep.configuration.with.headers = {
-        Authorization: '{{ invalidFilter | nonExistentFilter }}',
-      };
-
-      expect(() => httpStep.getInput()).toThrow();
+      expect(() => httpStep.getInput()).toThrow(new Error('Template rendering failed'));
     });
   });
 
@@ -310,7 +299,8 @@ describe('HttpStepImpl', () => {
 
       await httpStep.run();
 
-      expect(mockStepExecutionRuntime.startStep).toHaveBeenCalledWith({
+      expect(mockStepExecutionRuntime.startStep).toHaveBeenCalledWith();
+      expect(mockStepExecutionRuntime.setInput).toHaveBeenCalledWith({
         url: 'https://api.example.com/users',
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -352,6 +342,9 @@ describe('HttpStepImpl', () => {
         workflow: { id: 'test-workflow', name: 'Test', enabled: true, spaceId: 'default' },
         steps: {},
       };
+      mockContextManager.renderValueAccordingToContext = jest.fn().mockImplementation(() => {
+        throw new Error('Template rendering failed');
+      });
       mockContextManager.getContext.mockReturnValue(context as any);
       // Use a filter that will throw an error (strictFilters: true in templating engine)
       mockStep.configuration.with.url = '{{ invalidVariable | nonExistentFilter }}';
@@ -368,9 +361,7 @@ describe('HttpStepImpl', () => {
       expect(mockStepExecutionRuntime.setInput).not.toHaveBeenCalled();
 
       // Should fail the step with a clear error message
-      expect(mockStepExecutionRuntime.failStep).toHaveBeenCalledWith(
-        expect.stringContaining('nonExistentFilter')
-      );
+      expect(mockStepExecutionRuntime.failStep).toHaveBeenCalledWith('Template rendering failed');
 
       // Should navigate to next node (workflow continues)
       expect(mockWorkflowRuntime.navigateToNextNode).toHaveBeenCalled();
