@@ -65,7 +65,7 @@ export const CloudConnectorInputFields = ({
                       ...findVariableDef(packageInfo, field.id)!,
                       required: true,
                       type: field.type,
-                    }} is
+                    }}
                     value={field.value || ''}
                     onChange={(value) => onChange(field.id, value)}
                     errors={invalid ? [invalidError] : []}
