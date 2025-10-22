@@ -115,7 +115,7 @@ include::upgrade-notes.asciidoc[]
 [[release-notes-8.19.5]]
 == {kib} 8.19.5
 
-The 8.19.5 release includes the following fixes.
+The 8.19.5 release includes the following known issues and fixes.
 
 IMPORTANT: This release contains fixes for potential security vulnerabilities. Check our link:https://discuss.elastic.co/c/announcements/security-announcements/31[security advisory] for more details.
 
@@ -168,7 +168,7 @@ Management::
 [[release-notes-8.19.4]]
 == {kib} 8.19.4
 
-The 8.19.4 release includes the following fixes.
+The 8.19.4 release includes the following known issues, enhancements, and fixes.
 
 [float]
 [[known-issues-8.19.4]]
@@ -198,7 +198,7 @@ Observability solution::
 [[release-notes-8.19.3]]
 == {kib} 8.19.3
 
-The 8.19.3 release includes the following fixes.
+The 8.19.3 release includes the following known issues and fixes.
 
 [float]
 [[known-issues-8.19.3]]
@@ -228,7 +228,7 @@ Kibana platform::
 [[release-notes-8.19.2]]
 == {kib} 8.19.2
 
-The 8.19.2 release includes the following fixes.
+The 8.19.2 release includes the following known issues, enhancements, and fixes.
 
 [float]
 [[known-issues-8.19.2]]
