@@ -12,7 +12,7 @@ import { omit } from 'lodash';
 import { useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, distinctUntilChanged, map } from 'rxjs';
 
-import type { StickyControlState } from '@kbn/controls-schemas';
+import type { StickyControlState, TimeSlice } from '@kbn/controls-schemas';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import {
@@ -26,9 +26,11 @@ import {
 } from '@kbn/presentation-containers';
 import {
   apiAppliesFilters,
+  apiAppliesTimeslice,
   apiHasSerializableState,
   apiHasUniqueId,
   type AppliesFilters,
+  type AppliesTimeslice,
   type SerializedPanelState,
 } from '@kbn/presentation-publishing';
 
@@ -142,7 +144,15 @@ export const useChildrenApi = (
         apiPublishesESQLVariable,
         []
       ),
-      timeslice$: new BehaviorSubject(undefined),
+      appliedTimeslice$: combineCompatibleChildrenApis<AppliesTimeslice, TimeSlice | undefined>(
+        { children$: children$Ref.current },
+        'appliedTimeslice$',
+        apiAppliesTimeslice,
+        undefined, // flatten method is unnecessary since there is only ever one timeslice
+        (values) => {
+          return values.length === 0 ? undefined : values[values.length - 1];
+        }
+      ),
     };
   }, [state, lastSavedChildState$Ref]);
 
