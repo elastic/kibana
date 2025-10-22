@@ -7,28 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EnterIfNodeImpl } from '../enter_if_node_impl';
-import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
-import type { EnterConditionBranchNode, EnterIfNode } from '@kbn/workflows/graph';
-import type { IWorkflowEventLogger } from '../../../workflow_event_logger/workflow_event_logger';
+import type { EnterConditionBranchNode, EnterIfNode, WorkflowGraph } from '@kbn/workflows/graph';
+import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowContextManager } from '../../../workflow_context_manager/workflow_context_manager';
-import type { WorkflowGraph } from '@kbn/workflows/graph';
+import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { IWorkflowEventLogger } from '../../../workflow_event_logger/workflow_event_logger';
+import { EnterIfNodeImpl } from '../enter_if_node_impl';
 
 describe('EnterIfNodeImpl', () => {
   let node: EnterIfNode;
-  let wfExecutionRuntimeManagerMock: WorkflowExecutionRuntimeManager;
+  let mockStepExecutionRuntime: jest.Mocked<StepExecutionRuntime>;
+  let mockWorkflowRuntime: jest.Mocked<WorkflowExecutionRuntimeManager>;
   let impl: EnterIfNodeImpl;
   let workflowContextLoggerMock: IWorkflowEventLogger;
-  let workflowContextManagerMock: WorkflowContextManager;
+  let mockContextManager: jest.Mocked<Pick<WorkflowContextManager, 'getContext'>>;
   let workflowGraph: WorkflowGraph;
 
   beforeEach(() => {
     workflowContextLoggerMock = {} as unknown as IWorkflowEventLogger;
     workflowContextLoggerMock.logDebug = jest.fn();
-    workflowContextManagerMock = {} as unknown as WorkflowContextManager;
-    workflowContextManagerMock.getContext = jest.fn().mockReturnValue({
-      event: { type: 'alert' },
-    });
+
+    mockContextManager = {
+      getContext: jest.fn().mockReturnValue({
+        event: { type: 'alert' },
+      }),
+    };
+
+    mockStepExecutionRuntime = {
+      contextManager: mockContextManager,
+      startStep: jest.fn().mockResolvedValue(undefined),
+    } as any;
+
     node = {
       id: 'testStep',
       type: 'enter-if',
@@ -37,10 +46,11 @@ describe('EnterIfNodeImpl', () => {
       exitNodeId: 'exitIfNode',
       configuration: {} as any,
     };
-    wfExecutionRuntimeManagerMock = {} as unknown as WorkflowExecutionRuntimeManager;
-    wfExecutionRuntimeManagerMock.startStep = jest.fn();
-    wfExecutionRuntimeManagerMock.navigateToNode = jest.fn();
-    wfExecutionRuntimeManagerMock.enterScope = jest.fn();
+
+    mockWorkflowRuntime = {
+      navigateToNode: jest.fn(),
+    } as any;
+
     workflowGraph = {} as unknown as WorkflowGraph;
     workflowGraph.getDirectSuccessors = jest.fn().mockReturnValue([
       {
@@ -55,33 +65,16 @@ describe('EnterIfNodeImpl', () => {
     ]);
     impl = new EnterIfNodeImpl(
       node,
-      wfExecutionRuntimeManagerMock,
+      mockWorkflowRuntime,
       workflowGraph,
-      workflowContextManagerMock,
+      mockStepExecutionRuntime,
       workflowContextLoggerMock
     );
   });
 
   it('should start the step', async () => {
     await impl.run();
-    expect(wfExecutionRuntimeManagerMock.startStep).toHaveBeenCalledWith();
-  });
-
-  it('should enter scope', async () => {
-    await impl.run();
-    expect(wfExecutionRuntimeManagerMock.enterScope).toHaveBeenCalledWith();
-    expect(wfExecutionRuntimeManagerMock.enterScope).toHaveBeenCalledTimes(1);
-  });
-
-  it('should be called after startStep', async () => {
-    await impl.run();
-    expect(wfExecutionRuntimeManagerMock.startStep).toHaveBeenCalled();
-    expect(wfExecutionRuntimeManagerMock.enterScope).toHaveBeenCalled();
-    expect(
-      (wfExecutionRuntimeManagerMock.startStep as jest.Mock).mock.invocationCallOrder[0]
-    ).toBeLessThan(
-      (wfExecutionRuntimeManagerMock.enterScope as jest.Mock).mock.invocationCallOrder[0]
-    );
+    expect(mockStepExecutionRuntime.startStep).toHaveBeenCalledWith();
   });
 
   describe('then branch', () => {
@@ -100,8 +93,8 @@ describe('EnterIfNodeImpl', () => {
     });
     it('should evaluate condition and go to thenNode if condition is true', async () => {
       await impl.run();
-      expect(wfExecutionRuntimeManagerMock.navigateToNode).toHaveBeenCalledTimes(1);
-      expect(wfExecutionRuntimeManagerMock.navigateToNode).toHaveBeenCalledWith('thenNode');
+      expect(mockWorkflowRuntime.navigateToNode).toHaveBeenCalledTimes(1);
+      expect(mockWorkflowRuntime.navigateToNode).toHaveBeenCalledWith('thenNode');
     });
 
     it('should log debug message for then branch', async () => {
@@ -128,8 +121,8 @@ describe('EnterIfNodeImpl', () => {
     });
     it('should evaluate condition and go to elseNode if condition is false', async () => {
       await impl.run();
-      expect(wfExecutionRuntimeManagerMock.navigateToNode).toHaveBeenCalledTimes(1);
-      expect(wfExecutionRuntimeManagerMock.navigateToNode).toHaveBeenCalledWith('elseNode');
+      expect(mockWorkflowRuntime.navigateToNode).toHaveBeenCalledTimes(1);
+      expect(mockWorkflowRuntime.navigateToNode).toHaveBeenCalledWith('elseNode');
     });
 
     it('should log debug message for else branch', async () => {
@@ -153,8 +146,8 @@ describe('EnterIfNodeImpl', () => {
 
     it('should evaluate condition and go to exit node if no else branch is defined', async () => {
       await impl.run();
-      expect(wfExecutionRuntimeManagerMock.navigateToNode).toHaveBeenCalledTimes(1);
-      expect(wfExecutionRuntimeManagerMock.navigateToNode).toHaveBeenCalledWith('exitIfNode');
+      expect(mockWorkflowRuntime.navigateToNode).toHaveBeenCalledTimes(1);
+      expect(mockWorkflowRuntime.navigateToNode).toHaveBeenCalledWith('exitIfNode');
     });
 
     it('should log debug message for no else branch defined', async () => {

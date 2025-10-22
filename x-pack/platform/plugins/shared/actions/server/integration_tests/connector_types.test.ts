@@ -66,7 +66,7 @@ describe('Connector type config checks', () => {
   });
 
   test('ensure connector types list up to date', () => {
-    expect(connectorTypes).toEqual(actionTypeRegistry.getAllTypes());
+    expect(connectorTypes.sort()).toEqual(actionTypeRegistry.getAllTypes().sort());
   });
 
   for (const connectorTypeId of connectorTypes) {

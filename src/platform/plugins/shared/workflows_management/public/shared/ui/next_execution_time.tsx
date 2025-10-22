@@ -8,12 +8,12 @@
  */
 
 import { EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import type { WorkflowExecutionHistoryModel } from '@kbn/workflows';
+import { useGetFormattedDateTime } from './use_formatted_date';
 import type { WorkflowTrigger } from '../../../server/lib/schedule_utils';
 import { getWorkflowNextExecutionTime } from '../../lib/next_execution_time';
-import { useGetFormattedDateTime } from './use_formatted_date';
 
 interface NextExecutionTimeProps {
   triggers: WorkflowTrigger[];
@@ -25,18 +25,17 @@ export function NextExecutionTime({ triggers, history, children }: NextExecution
   const nextExecutionTime = getWorkflowNextExecutionTime(triggers, history);
   const getFormattedDateTime = useGetFormattedDateTime();
 
-  if (!nextExecutionTime) {
-    return null;
-  }
-
   return (
     <EuiToolTip
-      content={i18n.translate('workflows.workflowList.nextExecutionTime.tooltip', {
-        defaultMessage: 'Next execution: {date}',
-        values: {
-          date: getFormattedDateTime(nextExecutionTime),
-        },
-      })}
+      content={
+        nextExecutionTime &&
+        i18n.translate('workflows.workflowList.nextExecutionTime.tooltip', {
+          defaultMessage: 'Next execution: {date}',
+          values: {
+            date: getFormattedDateTime(nextExecutionTime),
+          },
+        })
+      }
     >
       {children}
     </EuiToolTip>

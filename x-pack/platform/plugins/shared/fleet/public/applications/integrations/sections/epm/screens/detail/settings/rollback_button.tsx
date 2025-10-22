@@ -12,7 +12,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { InstallationInfo } from '../../../../../../../../server/types';
 
 import { InstallStatus, type PackageInfo } from '../../../../../types';
-import { useAuthz, useGetPackageInstallStatus, useRollbackPackage } from '../../../../../hooks';
+import {
+  useAuthz,
+  useGetPackageInstallStatus,
+  useLicense,
+  useRollbackPackage,
+} from '../../../../../hooks';
 import { useInstalledIntegrationsActions } from '../../installed_integrations/hooks/use_installed_integrations_actions';
 
 interface RollbackButtonProps {
@@ -21,10 +26,17 @@ interface RollbackButtonProps {
 }
 export function RollbackButton({ packageInfo, isCustomPackage }: RollbackButtonProps) {
   const canRollbackPackages = useAuthz().integrations.installPackages;
+  const licenseService = useLicense();
   const hasPreviousVersion = !!packageInfo?.installationInfo?.previous_version;
+  const isRollbackTTLExpired = !!packageInfo.installationInfo?.is_rollback_ttl_expired;
   const isUploadedPackage = packageInfo.installationInfo?.install_source === 'upload';
   const isDisabled =
-    !canRollbackPackages || !hasPreviousVersion || isUploadedPackage || isCustomPackage;
+    !canRollbackPackages ||
+    !hasPreviousVersion ||
+    isUploadedPackage ||
+    isCustomPackage ||
+    !licenseService.isEnterprise() ||
+    isRollbackTTLExpired;
   const {
     actions: { bulkRollbackIntegrationsWithConfirmModal },
   } = useInstalledIntegrationsActions();
@@ -80,6 +92,16 @@ export function RollbackButton({ packageInfo, isCustomPackage }: RollbackButtonP
               <FormattedMessage
                 id="xpack.fleet.integrations.rollbackPackage.customTooltip"
                 defaultMessage="Custom integrations cannot be rolled back."
+              />
+            ) : !licenseService.isEnterprise() ? (
+              <FormattedMessage
+                id="xpack.fleet.integrations.rollbackPackage.licenseTooltip"
+                defaultMessage="Rolling back integrations requires an Enterprise license."
+              />
+            ) : isRollbackTTLExpired ? (
+              <FormattedMessage
+                id="xpack.fleet.integrations.rollbackPackage.rollbackTTLExpiredTooltip"
+                defaultMessage="You can no longer roll back this integration."
               />
             ) : null
           }

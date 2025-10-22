@@ -7,26 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { css } from '@emotion/react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { WorkflowYaml } from '@kbn/workflows';
-import { css } from '@emotion/react';
-import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
+import { WorkflowDetailHeader } from './workflow_detail_header';
+import { WorkflowEditorLayout } from './workflow_detail_layout';
+import { WorkflowEditor } from './workflow_editor';
 import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
-import { useWorkflowsBreadcrumbs } from '../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
+import {
+  getCachedDynamicConnectorTypes,
+  getWorkflowZodSchemaLoose,
+} from '../../../../common/schema';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { useWorkflowDetail } from '../../../entities/workflows/model/use_workflow_detail';
 import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
 import { WorkflowExecuteModal } from '../../../features/run_workflow/ui/workflow_execute_modal';
 import { WorkflowExecutionDetail } from '../../../features/workflow_execution_detail';
 import { WorkflowExecutionList } from '../../../features/workflow_execution_list/ui/workflow_execution_list_stateful';
+import { useWorkflowsBreadcrumbs } from '../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
-import { WorkflowDetailHeader } from './workflow_detail_header';
-import { WorkflowEditor } from './workflow_editor';
-import { WorkflowEditorLayout } from './workflow_detail_layout';
-import { getWorkflowZodSchemaLoose } from '../../../../common/schema';
 import { WorkflowEditorStoreProvider } from '../../../widgets/workflow_yaml_editor/lib/store';
 
 export function WorkflowDetailPage({ id }: { id: string }) {
@@ -47,6 +52,11 @@ export function WorkflowDetailPage({ id }: { id: string }) {
   const originalWorkflowYaml = useMemo(() => workflow?.yaml ?? '', [workflow]);
   const [hasChanges, setHasChanges] = useState(false);
   const [highlightDiff, setHighlightDiff] = useState(false);
+
+  const [workflowExecuteModalOpen, setWorkflowExecuteModalOpen] = useState(false);
+  const closeModal = useCallback(() => {
+    setWorkflowExecuteModalOpen(false);
+  }, []);
 
   const yamlValue = selectedExecutionId && execution ? execution.yaml : workflowYaml;
 
@@ -78,10 +88,12 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     [id, workflowYaml, updateWorkflow, notifications?.toasts]
   );
 
-  const [workflowExecuteModalOpen, setWorkflowExecuteModalOpen] = useState(false);
-
   const definitionFromCurrentYaml: WorkflowYaml | null = useMemo(() => {
-    const parsingResult = parseWorkflowYamlToJSON(workflowYaml, getWorkflowZodSchemaLoose());
+    const dynamicConnectorTypes = getCachedDynamicConnectorTypes() || {};
+    const parsingResult = parseWorkflowYamlToJSON(
+      workflowYaml,
+      getWorkflowZodSchemaLoose(dynamicConnectorTypes)
+    );
 
     if (!parsingResult.success) {
       return null;
@@ -161,10 +173,13 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     setHasChanges(false);
   }, [workflow]);
 
-  const handleChange = (wfString: string = '') => {
-    setWorkflowYaml(wfString);
-    setHasChanges(originalWorkflowYaml !== wfString);
-  };
+  const handleChange = useCallback(
+    (wfString: string = '') => {
+      setWorkflowYaml(wfString);
+      setHasChanges(originalWorkflowYaml !== wfString);
+    },
+    [originalWorkflowYaml]
+  );
 
   if (workflowError) {
     const error = workflowError as Error;
@@ -172,8 +187,13 @@ export function WorkflowDetailPage({ id }: { id: string }) {
       <EuiEmptyPrompt
         iconType="error"
         color="danger"
-        title={<h2>Unable to load workflow</h2>}
-        body={<p>There was an error loading the workflow. {error.message}</p>}
+        title={<h2>{'Unable to load workflow'}</h2>}
+        body={
+          <p>
+            {'There was an error loading the workflow. '}
+            {error.message}
+          </p>
+        }
       />
     );
   }
@@ -237,10 +257,10 @@ export function WorkflowDetailPage({ id }: { id: string }) {
           />
         </EuiFlexItem>
 
-        {workflowExecuteModalOpen && workflow && (
+        {workflowExecuteModalOpen && definitionFromCurrentYaml && (
           <WorkflowExecuteModal
             definition={definitionFromCurrentYaml}
-            onClose={() => setWorkflowExecuteModalOpen(false)}
+            onClose={closeModal}
             onSubmit={handleRunWorkflow}
           />
         )}
