@@ -41,6 +41,7 @@ export interface ExtendedScoutTestFixtures extends ObltTestFixtures {
     agentKeysPage: AgentKeysPage;
     anomalyDetectionPage: AnomalyDetectionPage;
   };
+  browserAuth: ApmBrowserAuthFixture;
 }
 
 export const test = base.extend<ExtendedScoutTestFixtures, ObltWorkerFixtures>({
