@@ -17,15 +17,17 @@ import type {
   LensAppServices,
   FramePublicAPI,
   VisualizationDimensionEditorProps,
+  XYState,
+  XYAnnotationLayerConfig,
+  XYDataLayerConfig,
 } from '@kbn/lens-common';
 import { LENS_APP_NAME } from '../../../../../common/constants';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../../utils';
 import { updateLayer } from '../../toolbar';
-import type { State, XYState, XYAnnotationLayerConfig, XYDataLayerConfig } from '../../types';
 import { isDataLayer } from '../../visualization_helpers';
 
 export const AnnotationsPanel = (
-  props: VisualizationDimensionEditorProps<State> & {
+  props: VisualizationDimensionEditorProps<XYState> & {
     datatableUtilities: DatatableUtilitiesService;
     dataViewsService: DataViewsPublicPluginStart;
   }
