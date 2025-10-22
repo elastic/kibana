@@ -65,8 +65,8 @@ export function LayerTabs(
   }
 ) {
   const { activeVisualization, coreStart, startDependencies } = props;
-  const { datasourceMap } = useEditorFrameService();
 
+  const { datasourceMap } = useEditorFrameService();
   const { isSaveable, visualization, datasourceStates, query } = useLensSelector(
     (state) => state.lens
   );

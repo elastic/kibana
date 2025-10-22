@@ -99,8 +99,8 @@ describe('ConfigPanel', () => {
           query: query as Query,
         },
         storeDeps: mockStoreDeps({
-          datasourceMap: props.datasourceMap,
-          visualizationMap: props.visualizationMap,
+          datasourceMap,
+          visualizationMap,
         }),
         ...customStoreProps,
       },
