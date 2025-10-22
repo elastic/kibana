@@ -20,6 +20,7 @@ import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/act
 import YAML from 'yaml';
 import type { EsWorkflowExecution, WorkflowYaml } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
+import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import type { WorkflowsExecutionEngineConfig } from '../server/config';
 import { UnsecuredActionsClientMock } from './mocks/actions_plugin_mock';
 import {
@@ -30,6 +31,7 @@ import {
 import { runWorkflow } from '../server/execution_functions/run_workflow';
 import { TaskManagerMock } from './mocks/task_manager_mock';
 import { resumeWorkflow } from '../server/execution_functions';
+import type { ContextDependencies } from '../server/workflow_context_manager/types';
 
 export class WorkflowRunFixture {
   /** This prop is just to satisfy runWorkflow function params. Consider having real mock once needed. */
@@ -42,6 +44,9 @@ export class WorkflowRunFixture {
       } as IClusterClient,
     } as ElasticsearchServiceStart,
   } as CoreStart;
+  public readonly dependencies: ContextDependencies = {
+    cloudSetup: cloudMock.createSetup(),
+  };
   public readonly taskManagerMock = TaskManagerMock.create() as TaskManagerStartContract;
   public readonly loggerMock = {
     info: jest.fn(),
@@ -106,6 +111,7 @@ export class WorkflowRunFixture {
       logsRepository: this.logsRepositoryMock as unknown as any,
       taskAbortController: this.taskAbortController,
       coreStart: this.coreStartMock,
+      dependencies: this.dependencies,
       esClient: this.esClientMock,
       actions: this.actionsClientMock,
       taskManager: this.taskManagerMock,
@@ -130,6 +136,7 @@ export class WorkflowRunFixture {
       logger: this.loggerMock,
       config: this.configMock,
       fakeRequest: this.fakeKibanaRequest,
+      dependencies: this.dependencies,
     });
   }
 
@@ -172,6 +179,7 @@ export class WorkflowRunFixture {
       logsRepository: this.logsRepositoryMock as unknown as any,
       taskAbortController: this.taskAbortController,
       coreStart: this.coreStartMock,
+      dependencies: this.dependencies,
       esClient: this.esClientMock,
       actions: this.actionsClientMock,
       taskManager: this.taskManagerMock,
