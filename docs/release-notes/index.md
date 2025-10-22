@@ -21,8 +21,51 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % ### Fixes [kibana-X.X.X-fixes]
 % *
 
-% FEATURES, ENHANCEMENTS, FIXES
-% Paste in index.md
+
+## 9.1.6 [kibana-9.1.6-release-notes]
+
+% ::::{NOTE}
+% ::::
+
+
+### Features and enhancements [kibana-9.1.6-features-enhancements]
+
+**Data ingestion and Fleet**:
+* Show agentless resources" toggle added to Fleet > Settings for debugging and diagnostics purposes [#237528]({{kib-pull}}237528).
+
+**Elastic Security solution**:
+For the Elastic Security 9.1.6 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Kibana security**:
+* Enhanced the error message to include detailed information about why the role is considered malformed [#239098]({{kib-pull}}239098).
+
+
+### Fixes [kibana-9.1.6-fixes]
+
+**Dashboards and Visualizations**:
+* Fixes unable to reset unsaved change when enabling timeRestore and setting time range [#239992]({{kib-pull}}239992).
+* Fixes error when selecting "(blank)" value in options list [#239791]({{kib-pull}}239791).
+* Fixes a bug in *Lens* that incorrectly assigned unsaved (ad-hoc) dataview references [#239431]({{kib-pull}}239431).
+* Fixes metric color assignment when breakdown and a max dimension are defined in *Lens* [#238901]({{kib-pull}}238901).
+* Fixes Adhoc dataviews from ES|QL charts are being filtered out in the KQL search bar [#238731]({{kib-pull}}238731).
+
+**Data ingestion and Fleet**:
+* Fixes on integration policy upgrade [#238542]({{kib-pull}}238542).
+
+**Discover**:
+* Fixes missing fields when using combined filters with `ignoreFilterIfFieldNotInIndex` UI setting [#238945]({{kib-pull}}238945).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.1.6 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.1.6 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Search**:
+* Fix: Add styling to handle the text overflow [#239768]({{kib-pull}}239768).
+% !!TODO!! The above PR had a lengthy release note description:
+% Fixed data preview metadata popup visual issues when ID is too long. Added a tooltip and copy button to improve user experience.
+
 
 ## 9.1.5 [kibana-9.1.5-release-notes]
 
