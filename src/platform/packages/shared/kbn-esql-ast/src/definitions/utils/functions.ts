@@ -41,6 +41,35 @@ const techPreviewLabel = i18n.translate('kbn-esql-ast.esql.autocomplete.techPrev
   defaultMessage: `Technical Preview`,
 });
 
+/**
+ * Filters function signatures based on the provided function node and columns.
+ * Returns the best matching signatures if available, otherwise returns the original signatures.
+ */
+function getFilteredSignatures(
+  functionDef: FunctionDefinition,
+  fnNode?: ESQLFunction,
+  columns?: Map<string, ESQLColumnData>
+): FunctionDefinition['signatures'] {
+  let signatures = functionDef.signatures;
+
+  if (fnNode && columns && fnNode.args.length > 0) {
+    const argTypes = fnNode.args.map((arg) => getExpressionType(arg, columns));
+    const literalMask = fnNode.args.map((arg) => isLiteral(arg));
+
+    const matchingSignatures = getPartiallyMatchingSignatures(
+      functionDef.signatures,
+      argTypes,
+      literalMask,
+      false
+    );
+    if (matchingSignatures.length > 0) {
+      signatures = matchingSignatures;
+    }
+  }
+
+  return signatures;
+}
+
 let fnLookups: Map<string, FunctionDefinition> | undefined;
 
 export function buildFunctionLookup() {
@@ -462,23 +491,8 @@ export function getFormattedFunctionSignature(
     return `${functionDef.name}()`;
   }
 
-  let signatures = functionDef.signatures;
-
-  // Filter signatures with matching arguments
-  if (fnNode && columns && fnNode.args.length > 0) {
-    const argTypes = fnNode.args.map((arg) => getExpressionType(arg, columns));
-    const literalMask = fnNode.args.map((arg) => isLiteral(arg));
-
-    const matchingSignatures = getPartiallyMatchingSignatures(
-      functionDef.signatures,
-      argTypes,
-      literalMask,
-      false
-    );
-    if (matchingSignatures.length > 0) {
-      signatures = matchingSignatures;
-    }
-  }
+  // Get the signatures that matches the given args so far
+  const signatures = getFilteredSignatures(functionDef, fnNode, columns);
 
   const returnTypes = new Set<string>();
   const parameterTypeMap = new Map<string, Set<string>>();
