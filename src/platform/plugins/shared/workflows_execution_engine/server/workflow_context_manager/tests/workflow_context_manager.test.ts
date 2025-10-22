@@ -19,6 +19,13 @@ import type { AtomicGraphNode } from '@kbn/workflows/graph';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import { WorkflowContextManager } from '../workflow_context_manager';
 import type { WorkflowExecutionState } from '../workflow_execution_state';
+import type { ContextDependencies } from '../types';
+import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
+
+const cloudSetupMock = cloudMock.createSetup();
+const dependencies: ContextDependencies = {
+  cloudSetup: cloudSetupMock,
+};
 
 jest.mock('../../utils', () => ({
   buildStepExecutionId: jest.fn().mockImplementation((executionId, stepId, path) => {
@@ -65,6 +72,7 @@ describe('WorkflowContextManager', () => {
       workflowExecutionGraph,
       workflowExecutionState,
       esClient,
+      dependencies,
     });
 
     return {
