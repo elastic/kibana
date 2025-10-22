@@ -8,8 +8,8 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiHighlight } from '@elastic/eui';
-import { FieldIcon } from '@kbn/react-field';
 import React from 'react';
+import { FieldIcon } from '@kbn/react-field';
 
 interface FieldNameProps {
   fieldName: string;
@@ -27,3 +27,4 @@ export const FieldName = React.memo<FieldNameProps>(({ fieldName, fieldType, hig
     </EuiFlexItem>
   </EuiFlexGroup>
 ));
+FieldName.displayName = 'FieldName';
