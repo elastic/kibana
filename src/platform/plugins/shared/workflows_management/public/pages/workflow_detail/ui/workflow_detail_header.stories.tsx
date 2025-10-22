@@ -8,8 +8,8 @@
  */
 
 import type { StoryObj } from '@storybook/react';
-import { kibanaReactDecorator } from '../../../../.storybook/decorators';
 import { WorkflowDetailHeader } from './workflow_detail_header';
+import { kibanaReactDecorator } from '../../../../.storybook/decorators';
 
 export default {
   component: WorkflowDetailHeader,
