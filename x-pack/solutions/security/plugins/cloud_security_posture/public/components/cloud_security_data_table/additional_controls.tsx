@@ -60,7 +60,18 @@ export const AdditionalControls = ({
         />
       )}
       <EuiFlexItem grow={0}>
-        <span className="cspDataTableTotal">{`${getAbbreviatedNumber(total)} ${title}`}</span>
+        <div
+          className="cspDataTableTotal"
+          role="status"
+          aria-live="polite"
+          aria-label={i18n.translate('xpack.csp.dataTable.totalFindings', {
+            defaultMessage: 'Total findings: {total} {title}',
+            values: { total: getAbbreviatedNumber(total), title },
+          })}
+          tabIndex={0}
+        >
+          {`${getAbbreviatedNumber(total)} ${title}`}
+        </div>
       </EuiFlexItem>
       <EuiFlexItem grow={0}>
         <EuiButtonEmpty
