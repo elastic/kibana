@@ -94,7 +94,7 @@ export const registerSyntheticsStatusCheckRule = (
         downConfigs,
       });
 
-      statusRule.handlePendingMonitorAlert({
+      await statusRule.handlePendingMonitorAlert({
         pendingConfigs,
       });
 

@@ -11,6 +11,7 @@ import {
   getReasonMessage,
   getUngroupedReasonMessage,
   getMonitorAlertDocument,
+  formatStepInformation,
 } from './message_utils';
 import type { MissingPingMonitorInfo } from '../../../common/runtime_types/alert_rules/common';
 import type { OverviewPing } from '../../../common/runtime_types';
@@ -265,6 +266,126 @@ describe('message_utils', () => {
         'kibana.alert.evaluation.value': 2,
         'monitor.tags': monitorTags,
       });
+    });
+  });
+
+  describe('formatStepInformation', () => {
+    const mockContext = {
+      monitorName: 'Test Monitor',
+      locationName: 'US Central',
+      timestamp: '2024-05-13T12:33:37.000Z',
+    };
+
+    it('returns empty string for null step info', () => {
+      const result = formatStepInformation(null);
+      expect(result).toBe('');
+    });
+
+    it('returns empty string for undefined step info', () => {
+      const result = formatStepInformation(undefined as any);
+      expect(result).toBe('');
+    });
+
+    it('formats basic step information without context', () => {
+      const stepInfo = {
+        stepName: 'Click button',
+        stepAction: 'locator.click',
+        scriptSource: 'await page.click("button")',
+      };
+
+      const result = formatStepInformation(stepInfo);
+
+      expect(result).toContain('- Step name: Click button');
+      expect(result).toContain('- Step action: locator.click');
+      expect(result).toContain('- Script: await page.click("button")');
+    });
+
+    it('formats enhanced step information with full context', () => {
+      const stepInfo = {
+        stepName: 'Click button',
+        stepAction: 'locator.click',
+        scriptSource: 'await page.click("button")',
+        stepNumber: 3,
+      };
+
+      const result = formatStepInformation(stepInfo, mockContext);
+
+      // Check enhanced header
+      expect(result).toContain(
+        '[Test Monitor] has failed on step [3] [Click button] in [US Central] at [12:33:37] on [13/05/2024]'
+      );
+
+      // Check detailed information
+      expect(result).toContain('- Step name: Click button');
+      expect(result).toContain('- Step action: locator.click');
+      expect(result).toContain('- Script: await page.click("button")');
+    });
+
+    it('handles missing context gracefully', () => {
+      const stepInfo = {
+        stepName: 'Click button',
+        stepNumber: 3,
+      };
+
+      const result = formatStepInformation(stepInfo, {
+        monitorName: 'Test Monitor',
+        // Missing locationName and timestamp
+      });
+
+      // Should not include enhanced header but should include basic info
+      expect(result).toContain('- Step name: Click button');
+      expect(result).not.toContain('[Test Monitor] has failed on step');
+    });
+
+    it('handles partial step information', () => {
+      const stepInfo = {
+        stepName: 'Click button',
+        // Missing stepAction and scriptSource
+      };
+
+      const result = formatStepInformation(stepInfo, mockContext);
+
+      expect(result).toContain('- Step name: Click button');
+      expect(result).not.toContain('- Step action:');
+      expect(result).not.toContain('- Script:');
+    });
+
+    it('truncates long script source', () => {
+      const longScript = 'a'.repeat(300);
+      const stepInfo = {
+        stepName: 'Click button',
+        scriptSource: longScript,
+      };
+
+      const result = formatStepInformation(stepInfo);
+
+      expect(result).toContain('- Script: ' + 'a'.repeat(200) + '...');
+    });
+
+    it('formats time and date correctly', () => {
+      const stepInfo = {
+        stepName: 'Click button',
+        stepNumber: 1,
+      };
+
+      const result = formatStepInformation(stepInfo, mockContext);
+
+      // Check time format (HH:MM:SS)
+      expect(result).toContain('at [12:33:37]');
+      // Check date format (DD/MM/YYYY)
+      expect(result).toContain('on [13/05/2024]');
+    });
+
+    it('handles step action extraction from error message', () => {
+      const stepInfo = {
+        stepName: 'Click button',
+        stepAction: 'Error: locator.click failed: Element not found',
+        scriptSource: 'await page.click("button")',
+      };
+
+      const result = formatStepInformation(stepInfo);
+
+      expect(result).toContain('- Step action: locator.click');
     });
   });
 });

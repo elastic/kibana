@@ -33,78 +33,6 @@ import {
 } from '../../../common/field_names';
 import type { OverviewPing } from '../../../common/runtime_types';
 import { UNNAMED_LOCATION } from '../../../common/constants';
-import type { SyntheticsEsClient } from '../../lib';
-
-interface StepInformation {
-  stepName?: string;
-  stepAction?: string;
-  scriptSource?: string;
-}
-
-/**
- * Fetches detailed step information from Elasticsearch for failed browser monitors
- */
-export const fetchStepInformation = async (
-  esClient: SyntheticsEsClient,
-  checkGroup: string,
-  monitorType: string
-): Promise<StepInformation | null> => {
-  // Only fetch for browser monitors
-  if (monitorType !== 'browser' || !checkGroup) {
-    return null;
-  }
-
-  try {
-    // First query: Get the failed step details
-    const failedStepResponse = await esClient.search({
-      index: 'synthetics-*',
-      size: 1,
-      query: {
-        bool: {
-          filter: [
-            { term: { 'synthetics.type': 'step/end' } },
-            { term: { 'synthetics.step.status': 'failed' } },
-            { term: { 'monitor.check_group': checkGroup } },
-          ],
-        },
-      },
-    });
-
-    const failedStepHit = failedStepResponse.body.hits.hits[0];
-    const stepName = (failedStepHit?._source as any)?.synthetics?.step?.name;
-    const stepAction = (failedStepHit?._source as any)?.error?.message;
-    // Try to get script source from the first query response
-    let scriptSource = (failedStepHit?._source as any)?.synthetics?.payload?.source;
-
-    // If script source is not in the first response, try the second query
-    if (!scriptSource) {
-      const finalAttemptResponse = await esClient.search({
-        index: 'synthetics-*',
-        size: 1,
-        query: {
-          bool: {
-            filter: [
-              { term: { 'monitor.check_group': checkGroup } },
-              { term: { 'summary.final_attempt': 'true' } },
-            ],
-          },
-        },
-      });
-
-      const finalAttemptHit = finalAttemptResponse.body.hits.hits[0];
-      scriptSource = (finalAttemptHit?._source as any)?.synthetics?.payload?.source;
-    }
-
-    return {
-      stepName,
-      stepAction: stepAction ? extractStepActionFromError(stepAction) : undefined,
-      scriptSource,
-    };
-  } catch (error) {
-    // Silently fail if we can't fetch step information
-    return null;
-  }
-};
 
 export const getMonitorAlertDocument = (
   monitorSummary: MonitorSummaryStatusRule,
@@ -135,6 +63,7 @@ export const getMonitorAlertDocument = (
   'kibana.alert.evaluation.value':
     (useLatestChecks ? monitorSummary.checks?.downWithinXChecks : monitorSummary.checks?.down) ?? 1,
   'monitor.tags': monitorSummary.monitorTags ?? [],
+  'monitor.step_info': monitorSummary.stepInfo,
   ...(grouping ? { [ALERT_GROUPING]: grouping } : {}),
 });
 
@@ -457,19 +386,59 @@ const extractStepActionFromError = (errorMessage: string): string | undefined =>
 /**
  * Formats step information for display in alert messages
  */
-export const formatStepInformation = (stepInfo: StepInformation | null): string => {
+export const formatStepInformation = (
+  stepInfo: {
+    stepName?: string;
+    stepAction?: string;
+    scriptSource?: string;
+    stepNumber?: number;
+  } | null,
+  context?: {
+    monitorName?: string;
+    locationName?: string;
+    timestamp?: string;
+  }
+): string => {
   if (!stepInfo) {
     return '';
   }
 
   const parts: string[] = [];
 
+  if (
+    context?.monitorName &&
+    stepInfo.stepNumber &&
+    stepInfo.stepName &&
+    context?.locationName &&
+    context?.timestamp
+  ) {
+    const date = new Date(context.timestamp);
+    const timeStr = date.toLocaleTimeString('en-US', {
+      hour12: false,
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    });
+    const dateStr = date.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    });
+
+    parts.push(
+      `\n[${context.monitorName}] has failed on step [${stepInfo.stepNumber}] [${stepInfo.stepName}] in [${context.locationName}] at [${timeStr}] on [${dateStr}].`
+    );
+  }
+
   if (stepInfo.stepName) {
     parts.push(`\n- Step name: ${stepInfo.stepName}  `);
   }
 
   if (stepInfo.stepAction) {
-    parts.push(`\n- Step action: ${stepInfo.stepAction}  `);
+    const extractedAction = extractStepActionFromError(stepInfo.stepAction);
+    if (extractedAction) {
+      parts.push(`\n- Step action: ${extractedAction}  `);
+    }
   }
 
   if (stepInfo.scriptSource) {

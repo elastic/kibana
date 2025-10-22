@@ -24,6 +24,11 @@ import { SyntheticsEsClient } from '../../lib';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
 import { ALERT_GROUPING } from '@kbn/rule-data-utils';
 
+// Mock the step information functions
+jest.mock('./queries/get_step_information', () => ({
+  getStepInformation: jest.fn().mockResolvedValue(null),
+}));
+
 describe('StatusRuleExecutor', () => {
   // @ts-ignore
   Date.now = jest.fn(() => new Date('2024-05-13T12:33:37.000Z'));
@@ -1008,7 +1013,7 @@ describe('StatusRuleExecutor', () => {
     });
 
     it('adds grouping to both context and alert document when only one location', async () => {
-      statusRule.scheduleAlert({
+      await statusRule.scheduleAlert({
         idWithLocation: 'config1-loc1',
         alertId: 'alert-1',
         monitorSummary: {
