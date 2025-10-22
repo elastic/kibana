@@ -21,8 +21,8 @@ import {
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import { convertTimestamp } from '@kbn/connector-schemas/common/utils';
 import { postPagerduty } from './post_pagerduty';
-import { convertTimestamp } from '../lib/convert_timestamp';
 
 // uses the PagerDuty Events API v2
 // https://v2.developer.pagerduty.com/docs/events-api-v2

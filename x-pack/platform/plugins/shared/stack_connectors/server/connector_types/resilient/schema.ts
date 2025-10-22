@@ -6,8 +6,11 @@
  */
 
 import { z } from '@kbn/zod';
-import { Coerced } from '../../../common/lib';
-import { validateKeysAllowed, validateRecordMaxKeys } from '../lib/validators';
+import {
+  Coerced,
+  validateKeysAllowed,
+  validateRecordMaxKeys,
+} from '@kbn/connector-schemas/common/utils';
 
 export const ExternalIncidentServiceConfiguration = {
   apiUrl: z.string(),
