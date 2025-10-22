@@ -35,7 +35,17 @@ export const getDimensionsRoute = createRoute({
         .union([z.string(), z.array(z.string())])
         .transform((val) => (Array.isArray(val) ? val : [val]))
         .default(['metrics-*']),
-      metrics: z.array(z.string()),
+      metrics: z
+        .string()
+        .transform((str) => {
+          try {
+            const parsed = JSON.parse(str);
+            return parsed;
+          } catch {
+            throw new Error('Invalid JSON');
+          }
+        })
+        .pipe(z.array(z.string())),
       to: z.string().datetime().default(dateMathParse('now')!.toISOString()).transform(isoToEpoch),
       from: z
         .string()

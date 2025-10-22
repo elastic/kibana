@@ -22,10 +22,11 @@ export const useDimensionsQuery = (params: {
   return useQuery({
     queryKey: ['dimensionValues', params],
     queryFn: async ({ signal }) => {
-      const { dimensions, ...rest } = params;
+      const { dimensions, metrics, ...rest } = params;
       const response = await client.getDimensions(
         {
           dimensions: JSON.stringify(dimensions),
+          metrics: JSON.stringify(metrics),
           ...rest,
         },
         signal
