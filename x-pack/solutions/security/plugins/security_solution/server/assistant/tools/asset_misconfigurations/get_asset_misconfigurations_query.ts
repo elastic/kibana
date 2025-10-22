@@ -22,11 +22,7 @@ export const getAssetMisconfigurationsQuery = ({
 }: GetAssetMisconfigurationsQueryParams): SearchRequest => ({
   index: CDR_MISCONFIGURATIONS_INDEX_PATTERN,
   size,
-  sort: [
-    { 'rule.benchmark.name': { order: 'asc' } },
-    { 'rule.section': { order: 'asc' } },
-    { '@timestamp': { order: 'desc' } },
-  ],
+  sort: [{ '@timestamp': { order: 'desc' } }],
   _source: [
     'rule.name',
     'rule.description',

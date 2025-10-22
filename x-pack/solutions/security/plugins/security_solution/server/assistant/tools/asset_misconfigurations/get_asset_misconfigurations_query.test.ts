@@ -96,12 +96,8 @@ describe('getAssetMisconfigurationsQuery', () => {
     expect(query.size).toBe(100);
   });
 
-  it('should sort by benchmark name, section, and timestamp', () => {
+  it('should sort by timestamp', () => {
     const query = getAssetMisconfigurationsQuery({ resourceId: 'test-resource-id' });
-    expect(query.sort).toEqual([
-      { 'rule.benchmark.name': { order: 'asc' } },
-      { 'rule.section': { order: 'asc' } },
-      { '@timestamp': { order: 'desc' } },
-    ]);
+    expect(query.sort).toEqual([{ '@timestamp': { order: 'desc' } }]);
   });
 });
