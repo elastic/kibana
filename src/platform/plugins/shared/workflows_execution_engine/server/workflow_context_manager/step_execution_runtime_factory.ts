@@ -18,6 +18,7 @@ import type { WorkflowExecutionState } from './workflow_execution_state';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 import { WorkflowContextManager } from './workflow_context_manager';
 import { WorkflowTemplatingEngine } from '../templating_engine';
+import type { ContextDependencies } from './types';
 
 /**
  * Factory class responsible for creating StepExecutionRuntime instances.
@@ -52,7 +53,8 @@ export class StepExecutionRuntimeFactory {
       workflowLogger: IWorkflowEventLogger;
       esClient: ElasticsearchClient; // ES client (user-scoped if available, fallback otherwise)
       fakeRequest?: KibanaRequest;
-      coreStart?: CoreStart; // For using Kibana's internal HTTP client
+      coreStart?: CoreStart;
+      dependencies: ContextDependencies;
     }
   ) {}
 
@@ -82,6 +84,7 @@ export class StepExecutionRuntimeFactory {
       esClient: this.params.esClient,
       fakeRequest: this.params.fakeRequest,
       coreStart: this.params.coreStart,
+      dependencies: this.params.dependencies,
     });
     return new StepExecutionRuntime({
       stepExecutionId,

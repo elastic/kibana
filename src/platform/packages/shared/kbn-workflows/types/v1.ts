@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { JsonValue } from '@kbn/utility-types';
 import { z } from '@kbn/zod';
 import type { WorkflowYaml } from '../spec/schema';
 import { WorkflowSchema } from '../spec/schema';
@@ -126,8 +127,8 @@ export interface EsWorkflowStepExecution {
    */
   stepExecutionIndex: number;
   error?: string | null;
-  output?: Record<string, unknown> | null;
-  input?: Record<string, unknown> | null;
+  output?: JsonValue;
+  input?: JsonValue;
 
   /** Specific step execution instance state. Used by loops, retries, etc to track execution context. */
   state?: Record<string, unknown>;

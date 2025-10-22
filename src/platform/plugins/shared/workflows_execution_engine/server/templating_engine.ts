@@ -43,7 +43,7 @@ export class WorkflowTemplatingEngine {
 
     // Handle string values - render them using the template engine
     if (typeof value === 'string') {
-      return this.engine.parseAndRenderSync(value, context);
+      return this.renderString(value, context);
     }
 
     // Handle arrays - recursively render each element
@@ -62,5 +62,16 @@ export class WorkflowTemplatingEngine {
 
     // Return primitive values as-is (numbers, booleans, etc.)
     return value;
+  }
+
+  public renderString(template: string, context: Record<string, any>): string {
+    try {
+      return this.engine.parseAndRenderSync(template, context);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      // customer-facing error message without the default line number and column number
+      const customerFacingErrorMessage = errorMessage.replace(/, line:\d+, col:\d+/g, '');
+      throw new Error(customerFacingErrorMessage);
+    }
   }
 }

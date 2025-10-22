@@ -55,6 +55,7 @@ describe('HttpStepImpl', () => {
       startStep: jest.fn().mockResolvedValue(undefined),
       finishStep: jest.fn().mockResolvedValue(undefined),
       failStep: jest.fn().mockResolvedValue(undefined),
+      setInput: jest.fn().mockResolvedValue(undefined),
       getCurrentStepState: jest.fn(),
       setCurrentStepState: jest.fn().mockResolvedValue(undefined),
       stepExecutionId: 'test-step-exec-id',
@@ -148,6 +149,33 @@ describe('HttpStepImpl', () => {
           method: 'GET',
         })
       );
+    });
+
+    it('should throw error when template rendering fails in URL', () => {
+      const context = {
+        execution: { id: 'test-run', isTestRun: false, startedAt: new Date() },
+        workflow: { id: 'test-workflow', name: 'Test', enabled: true, spaceId: 'default' },
+        steps: {},
+      };
+      mockContextManager.getContext.mockReturnValue(context as any);
+      // Use a filter that will throw an error (e.g., accessing undefined property)
+      mockStep.configuration.with.url = '{{ nonexistent | upper }}';
+
+      expect(() => httpStep.getInput()).toThrow();
+    });
+
+    it('should throw error when template rendering fails in headers', () => {
+      const context = {
+        execution: { id: 'test-run', isTestRun: false, startedAt: new Date() },
+        workflow: { id: 'test-workflow', name: 'Test', enabled: true, spaceId: 'default' },
+        steps: {},
+      };
+      mockContextManager.getContext.mockReturnValue(context as any);
+      mockStep.configuration.with.headers = {
+        Authorization: '{{ invalidFilter | nonExistentFilter }}',
+      };
+
+      expect(() => httpStep.getInput()).toThrow();
     });
   });
 
@@ -316,6 +344,39 @@ describe('HttpStepImpl', () => {
 
       expect((mockedAxios as any).isAxiosError).toHaveBeenCalledWith(axiosError);
       expect(result.error).toBe('HTTP request was cancelled');
+    });
+
+    it('should fail the step and continue workflow when template rendering fails', async () => {
+      const context = {
+        execution: { id: 'test-run', isTestRun: false, startedAt: new Date() },
+        workflow: { id: 'test-workflow', name: 'Test', enabled: true, spaceId: 'default' },
+        steps: {},
+      };
+      mockContextManager.getContext.mockReturnValue(context as any);
+      // Use a filter that will throw an error (strictFilters: true in templating engine)
+      mockStep.configuration.with.url = '{{ invalidVariable | nonExistentFilter }}';
+
+      await httpStep.run();
+
+      // Should not make HTTP request
+      expect(mockedAxios).not.toHaveBeenCalled();
+
+      // should start the step once
+      expect(mockStepExecutionRuntime.startStep).toHaveBeenCalled();
+
+      // Should start the step with undefined input
+      expect(mockStepExecutionRuntime.setInput).not.toHaveBeenCalled();
+
+      // Should fail the step with a clear error message
+      expect(mockStepExecutionRuntime.failStep).toHaveBeenCalledWith(
+        expect.stringContaining('nonExistentFilter')
+      );
+
+      // Should navigate to next node (workflow continues)
+      expect(mockWorkflowRuntime.navigateToNextNode).toHaveBeenCalled();
+
+      // Should NOT call finishStep
+      expect(mockStepExecutionRuntime.finishStep).not.toHaveBeenCalled();
     });
   });
 
