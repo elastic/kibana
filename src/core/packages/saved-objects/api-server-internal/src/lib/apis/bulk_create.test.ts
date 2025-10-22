@@ -1093,7 +1093,7 @@ describe('#bulkCreate', () => {
 
       describe('access control', () => {
         const CURRENT_USER_PROFILE_ID = 'current_user_profile_id';
-        const READ_ONLY_TYPE = 'read-only-type';
+        const ACCESS_CONTROL_TYPE = 'access-control-type';
 
         beforeEach(() => {
           securityExtension.getCurrentUser.mockReturnValue({
@@ -1116,7 +1116,7 @@ describe('#bulkCreate', () => {
         });
 
         registry.registerType({
-          name: READ_ONLY_TYPE,
+          name: ACCESS_CONTROL_TYPE,
           hidden: false,
           namespaceType: 'multiple-isolated',
           supportsAccessControl: true,
@@ -1143,7 +1143,7 @@ describe('#bulkCreate', () => {
             references: [{ name: 'ref_0', type: 'test', id: '1' }],
           };
           const obj2AccessControl = {
-            type: READ_ONLY_TYPE,
+            type: ACCESS_CONTROL_TYPE,
             id: 'has-read-only-metadata',
             attributes: { title: 'Test Two' },
             references: [{ name: 'ref_0', type: 'test', id: '2' }],
@@ -1164,7 +1164,7 @@ describe('#bulkCreate', () => {
                   // explicitly confirm there is no accessControl for non-supporting type
                 },
                 {
-                  type: READ_ONLY_TYPE,
+                  type: ACCESS_CONTROL_TYPE,
                   id: 'has-read-only-metadata',
                   name: 'Test Two',
                   existingNamespaces: [],
@@ -1190,7 +1190,7 @@ describe('#bulkCreate', () => {
             } as Pick<SavedObjectAccessControl, 'accessMode'>,
           };
           const obj2AccessControl = {
-            type: READ_ONLY_TYPE,
+            type: ACCESS_CONTROL_TYPE,
             id: 'has-read-only-metadata',
             attributes: { title: 'Test Two' },
             references: [{ name: 'ref_0', type: 'test', id: '2' }],
@@ -1199,7 +1199,7 @@ describe('#bulkCreate', () => {
             } as Pick<SavedObjectAccessControl, 'accessMode'>,
           };
           const obj3AccessControl = {
-            type: READ_ONLY_TYPE,
+            type: ACCESS_CONTROL_TYPE,
             id: 'has-read-only-metadata',
             attributes: { title: 'Test Three' },
             references: [{ name: 'ref_0', type: 'test', id: '3' }],
@@ -1225,7 +1225,7 @@ describe('#bulkCreate', () => {
                   // explicitly confirm there is no accessControl for non-supporting type
                 },
                 {
-                  type: READ_ONLY_TYPE,
+                  type: ACCESS_CONTROL_TYPE,
                   id: 'has-read-only-metadata',
                   name: 'Test Two',
                   existingNamespaces: [],
@@ -1236,7 +1236,7 @@ describe('#bulkCreate', () => {
                   },
                 },
                 {
-                  type: READ_ONLY_TYPE,
+                  type: ACCESS_CONTROL_TYPE,
                   id: 'has-read-only-metadata',
                   name: 'Test Three',
                   existingNamespaces: [],
@@ -1261,7 +1261,7 @@ describe('#bulkCreate', () => {
             references: [{ name: 'ref_0', type: 'test', id: '1' }],
           };
           const obj2AccessControl = {
-            type: READ_ONLY_TYPE,
+            type: ACCESS_CONTROL_TYPE,
             id: 'has-read-only-metadata',
             attributes: { title: 'Test Two' },
             references: [{ name: 'ref_0', type: 'test', id: '2' }],
@@ -1297,7 +1297,7 @@ describe('#bulkCreate', () => {
             references: [{ name: 'ref_0', type: 'test', id: '1' }],
           };
           const obj2AccessControl = {
-            type: READ_ONLY_TYPE,
+            type: ACCESS_CONTROL_TYPE,
             id: 'could-have-read-only-metadata',
             attributes: { title: 'Test Two' },
             references: [{ name: 'ref_0', type: 'test', id: '2' }],
@@ -1316,7 +1316,7 @@ describe('#bulkCreate', () => {
                   // explicitly confirm there is no accessControl for non-supporting type
                 },
                 {
-                  type: READ_ONLY_TYPE,
+                  type: ACCESS_CONTROL_TYPE,
                   id: 'could-have-read-only-metadata',
                   name: 'Test Two',
                   existingNamespaces: [],

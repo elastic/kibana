@@ -7469,10 +7469,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/read-only-objects-test-plugin@link:x-pack/platform/test/spaces_api_integration/common/plugins/read_only_objects_test_plugin":
-  version "0.0.0"
-  uid ""
-
 "@kbn/recently-accessed@link:src/platform/packages/shared/kbn-recently-accessed":
   version "0.0.0"
   uid ""
@@ -8950,6 +8946,10 @@
   uid ""
 
 "@kbn/workspaces@link:src/platform/packages/shared/kbn-workspaces":
+  version "0.0.0"
+  uid ""
+
+"@kbn/write-restricted-objects-test-plugin@link:x-pack/platform/test/spaces_api_integration/common/plugins/write_restricted_objects_test_plugin":
   version "0.0.0"
   uid ""
 

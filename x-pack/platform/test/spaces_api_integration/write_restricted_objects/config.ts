@@ -19,11 +19,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   const readOnlyObjectsPlugin = resolve(
     __dirname,
-    '../common/plugins/read_only_objects_test_plugin'
+    '../common/plugins/write_restricted_objects_test_plugin'
   );
 
   return {
-    testFiles: [resolve(__dirname, './apis/spaces/read_only_objects.ts')],
+    testFiles: [resolve(__dirname, './apis/spaces/write_restricted_objects.ts')],
     services: {
       ...kibanaAPITestsConfig.get('services'),
       ...xPackAPITestsConfig.get('services'),

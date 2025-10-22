@@ -1,9 +1,9 @@
 {
   "type": "plugin",
-  "id": "@kbn/read-only-objects-test-plugin",
+  "id": "@kbn/write-restricted-objects-test-plugin",
   "owner": "@elastic/kibana-security",
   "plugin": {
-    "id": "readOnlyObjectsTestPlugin",
+    "id": "writeRestrictedObjectsTestPlugin",
     "server": true,
     "browser": false
   }
