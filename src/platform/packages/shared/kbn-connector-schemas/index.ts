@@ -24,4 +24,5 @@ export { CONNECTOR_ID as SlackWebhookConnectorTypeId } from './slack';
 export { CONNECTOR_ID as SlackApiConnectorTypeId } from './slack_api';
 export { CONNECTOR_ID as SwimlaneConnectorTypeId } from './swimlane';
 export { CONNECTOR_ID as TeamsConnectorTypeId } from './teams';
+export { CONNECTOR_ID as TinesConnectorTypeId } from './tines';
 export { CONNECTOR_ID as WebhookConnectorTypeId } from './webhook';
