@@ -6,7 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { SUB_ACTION } from '@kbn/connector-schemas/opsgenie/constants';
+import { SUB_ACTION } from '@kbn/connector-schemas/opsgenie';
 import { renderParameterTemplates } from './render_template_variables';
 
 const ruleTagsTemplate = '{{rule.tags}}';

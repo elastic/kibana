@@ -12,6 +12,7 @@ import type { AxiosError } from 'axios';
 import { isEmpty } from 'lodash';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import {
+  SUB_ACTION,
   CreateAlertParamsSchema,
   CloseAlertParamsSchema,
   Response,
@@ -23,7 +24,6 @@ import type {
   FailureResponseType,
   Secrets,
 } from '@kbn/connector-schemas/opsgenie';
-import { SUB_ACTION } from '@kbn/connector-schemas/opsgenie/constants';
 import * as i18n from './translations';
 
 export class OpsgenieConnector extends SubActionConnector<Config, Secrets> {

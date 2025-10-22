@@ -6,7 +6,7 @@
  */
 
 import type httpProxy from 'http-proxy';
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
 import getPort from 'get-port';
 import type http from 'http';
