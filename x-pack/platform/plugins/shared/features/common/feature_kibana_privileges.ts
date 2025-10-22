@@ -124,7 +124,7 @@ export interface FeatureKibanaPrivileges {
        * @example
        * ```ts
        *  {
-       *    read: [{ ruleTypeId: 'my-alert-type-within-my-feature', consumers: ['my-consumer-within-my-feature'] }]
+       *    enable: [{ ruleTypeId: 'my-alert-type-within-my-feature', consumers: ['my-consumer-within-my-feature'] }]
        *  }
        * ```
        */
@@ -134,7 +134,7 @@ export interface FeatureKibanaPrivileges {
        * @example
        * ```ts
        *  {
-       *    read: [{ ruleTypeId: 'my-alert-type-within-my-feature', consumers: ['my-consumer-within-my-feature'] }]
+       *    manual_run: [{ ruleTypeId: 'my-alert-type-within-my-feature', consumers: ['my-consumer-within-my-feature'] }]
        *  }
        * ```
        */
