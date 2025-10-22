@@ -188,7 +188,7 @@ export class AutomaticImportSavedObjectService {
       this.logger.error(`Failed to delete integration ${integrationId}: ${error}`);
       throw error;
     }
-    // TODO: Delete all data streams associated with this integration in a Cascade type of operation
+    // TODO: Delete all data streams associated with this integration in a Cascade type of operation so there are no orphaned data streams
   }
 
 
@@ -410,13 +410,36 @@ export class AutomaticImportSavedObjectService {
    * @param options - The options for the delete
    * @returns The deleted data stream
    */
-  public async deleteDataStream(dataStreamId: string, options?: SavedObjectsDeleteOptions): Promise<{}> {
+  public async deleteDataStream(dataStreamId: string, options?: SavedObjectsDeleteOptions): Promise<void> {
+    let parentIntegrationId: string | undefined;
     try {
+
+      const dataStream = await this.getDataStream(dataStreamId);
+      parentIntegrationId = dataStream.attributes.integration_id;
+
       this.logger.debug(`Deleting data stream with id:${dataStreamId}`);
-      return await this.savedObjectsClient.delete(DATA_STREAM_SAVED_OBJECT_TYPE, dataStreamId, options);
+      await this.savedObjectsClient.delete(DATA_STREAM_SAVED_OBJECT_TYPE, dataStreamId, options);
     } catch (error) {
       this.logger.error(`Failed to delete data stream ${dataStreamId}: ${error}`);
       throw error;
+    }
+
+    // update the integration count since we are deleting a data stream
+    try {
+      const parentIntegration = await this.getIntegration(parentIntegrationId);
+      if (!parentIntegration) {
+        throw new Error(`Integration associated with this data stream ${parentIntegrationId} not found`);
+      }
+
+      const updatedIntegrationData: IntegrationAttributes = {
+        ...parentIntegration.attributes,
+        data_stream_count: parentIntegration.attributes.data_stream_count - 1,
+      };
+
+      await this.updateIntegration(updatedIntegrationData, { version: parentIntegration.version! });
+      // TODO: Do we us P-Retry to handle optimistic concurrency? We can make the unimportant data optional in the updateIntegration function.
+    } catch (integrationError) {
+      this.logger.error(`Failed to update integration ${parentIntegrationId} after deleting data stream ${dataStreamId}: ${integrationError}`);
     }
   }
 }
