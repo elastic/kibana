@@ -150,7 +150,7 @@ export const DEFAULT_PORT = 9200;
 
 const DOCKER_REGISTRY = 'docker.elastic.co';
 
-const DEFAULT_MEM = `-Xms1024m -Xmx1024m`;
+const DEFAULT_MEM = `-Xms1536m -Xmx1536m`;
 
 const MORE_MEM = `-Xms1536m -Xmx1536m`;
 
