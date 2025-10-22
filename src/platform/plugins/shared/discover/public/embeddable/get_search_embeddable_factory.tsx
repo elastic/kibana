@@ -118,7 +118,7 @@ export const getSearchEmbeddableFactory = ({
           savedObjectId,
         });
 
-      const unsavedChangesApi = initializeUnsavedChanges<SearchEmbeddableSerializedState>({
+      const unsavedChangesApi = initializeUnsavedChanges<SearchEmbeddableState>({
         uuid,
         parentApi,
         serializeState: () => serialize(savedObjectId$.getValue()),

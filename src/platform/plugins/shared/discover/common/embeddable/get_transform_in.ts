@@ -14,6 +14,7 @@ import type {
   SearchEmbeddableByReferenceState,
   SearchEmbeddableState,
   StoredSearchEmbeddableByReferenceState,
+  StoredSearchEmbeddableByValueState,
   StoredSearchEmbeddableState,
 } from './types';
 import { extract } from './search_inject_extract';
@@ -67,7 +68,7 @@ export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['tr
           // discover session stores references as part of attributes
           references,
         },
-      },
+      } as StoredSearchEmbeddableByValueState,
       references: [...references, ...enhancementsReferences],
     };
   }
