@@ -35,8 +35,12 @@ import { OperatingSystem } from '@kbn/securitysolution-utils';
 
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { OnChangeProps } from '@kbn/lists-plugin/public';
+import {
+  ENDPOINT_FIELDS_SEARCH_STRATEGY,
+  alertsIndexPattern,
+} from '../../../../../../common/endpoint/constants';
+import { useFetchIndex } from '../../../../../common/containers/source';
 import type { ExceptionEntries } from '../../../../../../common/endpoint/types/exception_list_items';
-import { useFetchIndexPatterns } from '../../../../../detection_engine/rule_exceptions/logic/use_exception_flyout_data';
 import { FormattedError } from '../../../../components/formatted_error';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { Loader } from '../../../../../common/components/loader';
@@ -60,6 +64,8 @@ import { ENDPOINT_EXCEPTIONS_LIST_DEFINITION } from '../../constants';
 
 import { ExceptionItemComments } from '../../../../../detection_engine/rule_exceptions/components/item_comments';
 import { ShowValueListModal } from '../../../../../value_list/components/show_value_list_modal';
+
+const ENDPOINT_ALERTS_INDEX_NAMES = [alertsIndexPattern];
 
 const OS_OPTIONS: Array<EuiSuperSelectOption<OsTypeArray>> = [
   {
@@ -115,11 +121,11 @@ export const EndpointExceptionsForm: React.FC<
   const [hasPartialCodeSignatureWarning, setHasPartialCodeSignatureWarning] =
     useState<boolean>(false);
 
-  const {
-    isLoading: isIndexPatternLoading,
-    indexPatterns,
-    getExtendedFields,
-  } = useFetchIndexPatterns(null);
+  const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(
+    ENDPOINT_ALERTS_INDEX_NAMES,
+    undefined,
+    ENDPOINT_FIELDS_SEARCH_STRATEGY
+  );
 
   const [areConditionsValid, setAreConditionsValid] = useState(!!exception.entries.length);
   // compute this for initial render only
@@ -394,6 +400,7 @@ export const EndpointExceptionsForm: React.FC<
     },
     [exception, hasFormChanged, processChanged]
   );
+
   const exceptionBuilderComponentMemo = useMemo(
     () =>
       getExceptionBuilderComponentLazy({
@@ -413,7 +420,6 @@ export const EndpointExceptionsForm: React.FC<
         onChange: handleOnBuilderChange,
         osTypes: exception.os_types,
         showValueListModal: ShowValueListModal,
-        getExtendedFields,
       }),
     [
       http,
@@ -422,7 +428,6 @@ export const EndpointExceptionsForm: React.FC<
       indexPatterns,
       handleOnBuilderChange,
       exception.os_types,
-      getExtendedFields,
     ]
   );
 
