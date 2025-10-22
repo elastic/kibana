@@ -93,11 +93,11 @@ test.describe('Functions page', { tag: ['@ess'] }, () => {
       { parentKey: 'impactEstimates', key: 'annualizedSelfCoreSeconds', value: '1.41 months' },
       { parentKey: 'impactEstimates', key: 'co2Emission', value: '~0.00 lbs / ~0.00 kg' },
       { parentKey: 'impactEstimates', key: 'selfCo2Emission', value: '~0.00 lbs / ~0.00 kg' },
-      { parentKey: 'impactEstimates', key: 'annualizedCo2Emission', value: '4.85k lbs / 2.2k kg' },
+      { parentKey: 'impactEstimates', key: 'annualizedCo2Emission', value: '10.58 lbs / 4.8 kg' },
       {
         parentKey: 'impactEstimates',
         key: 'annualizedSelfCo2Emission',
-        value: '4.71k lbs / 2.14k kg',
+        value: '10.14 lbs / 4.6 kg',
       },
       { parentKey: 'impactEstimates', key: 'dollarCost', value: '$~0.00' },
       { parentKey: 'impactEstimates', key: 'selfDollarCost', value: '$~0.00' },

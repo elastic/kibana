@@ -40,40 +40,6 @@ Profiling is now fully integrated into the scout-oblt infrastructure, similar to
 
 This follows the same pattern as APM's synthtrace integration and ensures profiling tests work with actual data instead of just showing the setup page.
 
-## Manual Setup Scripts (Optional)
-
-For manual testing or debugging, you can still use the standalone scripts:
-
-- **`setup_profiling.js`** - Manually set up profiling resources
-- **`load_profiling_data.js`** - Manually load profiling test data
-
-## Test Structure
-
-The profiling scout tests are organized as follows:
-
-- `fixtures/` - Test fixtures and page objects
-  - `page_objects/` - Page object models for different profiling pages
-    - `functions.ts` - Functions page interactions
-    - `flamegraphs.ts` - Flamegraphs page interactions
-    - `storage_explorer.ts` - Storage explorer page interactions
-    - `settings.ts` - Settings page interactions
-  - `constants.ts` - Profiling-specific roles and constants
-  - `index.ts` - Main fixtures configuration
-
-- `parallel_tests/` - Test specifications
-  - `functions/` - Functions page tests
-  - `flamegraphs/` - Flamegraphs page tests
-  - `storage_explorer/` - Storage explorer page tests
-  - `settings/` - Settings page tests
-  - `global_setup.ts` - Global test setup
-
-## User Roles
-
-The tests use three different user roles:
-
-- **Profiling Viewer** (`profilingViewer`) - Read-only access to profiling data
-- **Profiling Editor** (`profilingEditor`) - Can view and modify profiling data
-- **Profiling Admin** (`profilingAdmin`) - Full access to all profiling features
 
 ## Test Categories
 

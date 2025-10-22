@@ -1,5 +1,0 @@
-# Package registry configuration for profiling tests
-packages:
-  - name: apm
-    version: latest
-    description: "Elastic APM package for profiling tests"
