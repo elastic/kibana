@@ -22,6 +22,7 @@ import { act, screen } from '@testing-library/react';
 import { faker } from '@faker-js/faker';
 import { SettingsMenu } from '../../../app_plugin/settings_menu';
 import userEvent from '@testing-library/user-event';
+import { EditorFrameServiceProvider } from '../../editor_frame_service_context';
 
 describe('workspace_panel_wrapper', () => {
   let mockVisualization: jest.Mocked<Visualization>;
@@ -33,14 +34,15 @@ describe('workspace_panel_wrapper', () => {
     { preloadedState }: { preloadedState: Partial<LensAppState> } = { preloadedState: {} }
   ) => {
     const { store, ...rtlRender } = renderWithReduxStore(
-      <>
+      <EditorFrameServiceProvider
+        visualizationMap={{
+          myVis: { ...mockVisualization, ToolbarComponent: ToolbarComponentMock },
+        }}
+        datasourceMap={{}}
+      >
         <WorkspacePanelWrapper
           framePublicAPI={mockFrameAPI}
           visualizationId="myVis"
-          visualizationMap={{
-            myVis: { ...mockVisualization, ToolbarComponent: ToolbarComponentMock },
-          }}
-          datasourceMap={{}}
           datasourceStates={{}}
           isFullscreen={false}
           lensInspector={{} as unknown as LensInspector}
@@ -55,7 +57,7 @@ describe('workspace_panel_wrapper', () => {
           onClose={jest.fn()}
           {...propsOverrides}
         />
-      </>,
+      </EditorFrameServiceProvider>,
       {},
       { preloadedState }
     );

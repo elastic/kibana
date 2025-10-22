@@ -293,6 +293,10 @@ export interface ValidationErrors {
     message: string;
     type: { name: string };
   };
+  unknownSetting: {
+    message: string;
+    type: { name: string };
+  };
   functionNotAllowedHere: {
     message: string;
     type: { name: string; locationName: string };
