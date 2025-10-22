@@ -30,12 +30,12 @@ import {
 } from '@kbn/stack-connectors-plugin/common/thehive/constants';
 import {
   SUB_ACTION as TINES_SUB_ACTION,
-  TINES_CONNECTOR_ID,
-} from '@kbn/stack-connectors-plugin/common/tines/constants';
+  CONNECTOR_ID as TINES_CONNECTOR_ID,
+} from '@kbn/connector-schemas/tines/constants';
 import {
   SUB_ACTION as XSOAR_SUB_ACTION,
-  XSOAR_CONNECTOR_ID,
-} from '@kbn/stack-connectors-plugin/common/xsoar/constants';
+  CONNECTOR_ID as XSOAR_CONNECTOR_ID,
+} from '@kbn/connector-schemas/xsoar/constants';
 import {
   SUB_ACTION as SENTINELONE_SUB_ACTION,
   SENTINELONE_CONNECTOR_ID,

@@ -25,4 +25,7 @@ export { CONNECTOR_ID as SlackApiConnectorTypeId } from './slack_api';
 export { CONNECTOR_ID as SwimlaneConnectorTypeId } from './swimlane';
 export { CONNECTOR_ID as TeamsConnectorTypeId } from './teams';
 export { CONNECTOR_ID as TinesConnectorTypeId } from './tines';
+export { CONNECTOR_ID as TorqConnectorTypeId } from './torq';
 export { CONNECTOR_ID as WebhookConnectorTypeId } from './webhook';
+export { CONNECTOR_ID as XmattersConnectorTypeId } from './xmatters';
+export { CONNECTOR_ID as XsoarConnectorTypeId } from './xsoar';

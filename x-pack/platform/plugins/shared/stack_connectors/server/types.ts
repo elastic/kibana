@@ -6,6 +6,5 @@
  */
 
 export type { GetCommonFieldsResponse as ServiceNowGetFieldsResponse } from './connector_types/lib/servicenow/types';
-export type { SwimlanePublicConfigurationType } from './connector_types/swimlane/types';
 
 export type { ServiceNowActionParams } from './connector_types';
