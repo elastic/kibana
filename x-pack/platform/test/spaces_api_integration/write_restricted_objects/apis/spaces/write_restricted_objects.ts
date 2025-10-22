@@ -101,7 +101,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/write_restricted_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', adminCookie.cookieString())
-          .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
           .expect(200);
 
         expect(response.body.type).to.eql(ACCESS_CONTROL_TYPE);
@@ -138,7 +138,7 @@ export default function ({ getService }: FtrProviderContext) {
         const response = await supertest
           .post('/write_restricted_objects/create')
           .set('kbn-xsrf', 'true')
-          .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
           .expect(400);
         expect(response.body).to.have.property('message');
         expect(response.body.message).to.contain(
@@ -155,7 +155,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/write_restricted_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', objectOwnerCookie.cookieString())
-          .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
           .expect(200);
 
         const objectId = createResponse.body.id;
@@ -176,7 +176,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/write_restricted_objects/create?overwrite=true')
           .set('kbn-xsrf', 'true')
           .set('cookie', objectOwnerCookie.cookieString())
-          .send({ id: objectId, type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+          .send({ id: objectId, type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
           .expect(200);
 
         const overwriteId = overwriteResponse.body.id;
@@ -195,7 +195,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/write_restricted_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', objectOwnerCookie.cookieString())
-          .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
           .expect(200);
 
         const objectId = createResponse.body.id;
@@ -212,7 +212,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/write_restricted_objects/create?overwrite=true')
           .set('kbn-xsrf', 'true')
           .set('cookie', adminCookie.cookieString())
-          .send({ id: objectId, type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+          .send({ id: objectId, type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
           .expect(200);
 
         const overwriteId = overwriteResponse.body.id;
@@ -230,7 +230,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/write_restricted_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', adminCookie.cookieString())
-          .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: false })
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: false })
           .expect(200);
 
         const objectId = createResponse.body.id;
@@ -247,7 +247,7 @@ export default function ({ getService }: FtrProviderContext) {
           .send({
             id: objectId,
             type: ACCESS_CONTROL_TYPE,
-            isReadOnly: true,
+            isWriteRestricted: true,
             // description: 'overwritten', ToDo: support this in test plugin
           })
           .expect(200);
@@ -265,7 +265,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/write_restricted_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', objectOwnerCookie.cookieString())
-          .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
           .expect(200);
 
         const objectId = createResponse.body.id;
@@ -282,7 +282,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/write_restricted_objects/create?overwrite=true')
           .set('kbn-xsrf', 'true')
           .set('cookie', otherOwnerCookie.cookieString())
-          .send({ id: objectId, type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+          .send({ id: objectId, type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
           .expect(403);
 
         expect(overwriteResponse.body).to.have.property('error', 'Forbidden');
@@ -304,8 +304,8 @@ export default function ({ getService }: FtrProviderContext) {
           .set('cookie', objectOwnerCookie.cookieString())
           .send({
             objects: [
-              { type: ACCESS_CONTROL_TYPE, isReadOnly: true },
-              { type: ACCESS_CONTROL_TYPE, isReadOnly: true },
+              { type: ACCESS_CONTROL_TYPE, isWriteRestricted: true },
+              { type: ACCESS_CONTROL_TYPE, isWriteRestricted: true },
             ],
           });
         expect(bulkCreateResponse.body.saved_objects).to.have.length(2);
@@ -322,7 +322,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/write_restricted_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', objectOwnerCookie.cookieString())
-          .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
           .expect(200);
         const { id: objectId1, type: type1 } = firstObject.body;
         expect(firstObject.body.accessControl).to.have.property('owner', objectOwnerProfileUid);
@@ -331,7 +331,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/write_restricted_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', objectOwnerCookie.cookieString())
-          .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
           .expect(200);
         const { id: objectId2, type: type2 } = secondObject.body;
         expect(secondObject.body.accessControl).to.have.property('owner', objectOwnerProfileUid);
@@ -370,7 +370,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/write_restricted_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', objectOwnerCookie.cookieString())
-          .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
           .expect(200);
         const { id: objectId1, type: type1 } = firstObject.body;
         expect(firstObject.body.accessControl).to.have.property('owner', objectOwnerProfileUid);
@@ -379,7 +379,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/write_restricted_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', objectOwnerCookie.cookieString())
-          .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
           .expect(200);
         const { id: objectId2, type: type2 } = secondObject.body;
         expect(secondObject.body.accessControl).to.have.property('owner', objectOwnerProfileUid);
@@ -420,7 +420,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/write_restricted_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', adminCookie.cookieString())
-          .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: false })
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: false })
           .expect(200);
         const { id: objectId1, type: type1 } = firstObject.body;
         expect(firstObject.body.accessControl).to.have.property('owner', adminProfileUid);
@@ -429,7 +429,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/write_restricted_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', adminCookie.cookieString())
-          .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: false })
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: false })
           .expect(200);
         const { id: objectId2, type: type2 } = secondObject.body;
         expect(secondObject.body.accessControl).to.have.property('owner', adminProfileUid);
@@ -473,7 +473,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/write_restricted_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', adminCookie.cookieString())
-          .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
           .expect(200);
         const { id: objectId1, type: type1 } = firstObject.body;
         expect(firstObject.body.accessControl).to.have.property('owner', adminProfileUid);
@@ -482,7 +482,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/write_restricted_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', adminCookie.cookieString())
-          .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
           .expect(200);
         const { id: objectId2, type: type2 } = secondObject.body;
         expect(secondObject.body.accessControl).to.have.property('owner', adminProfileUid);
@@ -547,7 +547,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/write_restricted_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', objectOwnerCookie.cookieString())
-          .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
           .expect(200);
 
         const objectId = createResponse.body.id;
@@ -578,7 +578,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/write_restricted_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', adminCookie.cookieString())
-          .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
           .expect(200);
         const objectId = createResponse.body.id;
         expect(createResponse.body.attributes).to.have.property('description', 'test');
@@ -630,7 +630,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/write_restricted_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', ownerCookie.cookieString())
-          .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
           .expect(200);
         const objectId = createResponse.body.id;
 
@@ -658,7 +658,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/write_restricted_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', objectOwnerCookie.cookieString())
-          .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
           .expect(200);
         const { id: objectId1, type: type1 } = firstObject.body;
 
@@ -666,7 +666,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/write_restricted_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', objectOwnerCookie.cookieString())
-          .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
           .expect(200);
         const { id: objectId2, type: type2 } = secondObject.body;
 
@@ -705,7 +705,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/write_restricted_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', objectOwnerCookie.cookieString())
-          .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
           .expect(200);
         const { id: objectId1, type: type1 } = firstObject.body;
 
@@ -713,7 +713,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/write_restricted_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', objectOwnerCookie.cookieString())
-          .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
           .expect(200);
         const { id: objectId2, type: type2 } = secondObject.body;
 
@@ -752,7 +752,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/write_restricted_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', objectOwnerCookie.cookieString())
-          .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
           .expect(200);
         const { id: objectId1, type: type1 } = firstObject.body;
 
@@ -760,7 +760,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/write_restricted_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', objectOwnerCookie.cookieString())
-          .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
           .expect(200);
         const { id: objectId2, type: type2 } = secondObject.body;
 
@@ -846,7 +846,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/write_restricted_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', objectOwnerCookie.cookieString())
-          .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
           .expect(200);
         const objectId = createResponse.body.id;
         expect(createResponse.body.accessControl).to.have.property('owner', profileUid);
@@ -867,7 +867,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/write_restricted_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', objectOwnerCookie.cookieString())
-          .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
           .expect(200);
         const objectId = createResponse.body.id;
         expect(createResponse.body.accessControl).to.have.property('owner', profileUid);
@@ -896,7 +896,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/write_restricted_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', adminCookie.cookieString())
-          .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
           .expect(200);
         const objectId = createResponse.body.id;
         expect(createResponse.body.accessControl).to.have.property('owner', adminProfileUid);
@@ -939,7 +939,7 @@ export default function ({ getService }: FtrProviderContext) {
             .post('/write_restricted_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', objectOwnerCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
             .expect(200);
           const { id: objectId1, type: type1 } = firstObject.body;
 
@@ -947,7 +947,7 @@ export default function ({ getService }: FtrProviderContext) {
             .post('/write_restricted_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', objectOwnerCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
             .expect(200);
           const { id: objectId2, type: type2 } = secondObject.body;
 
@@ -984,7 +984,7 @@ export default function ({ getService }: FtrProviderContext) {
             .post('/write_restricted_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', objectOwnerCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
             .expect(200);
           const { id: objectId1, type: type1 } = firstObject.body;
 
@@ -992,7 +992,7 @@ export default function ({ getService }: FtrProviderContext) {
             .post('/write_restricted_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', objectOwnerCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
             .expect(200);
           const { id: objectId2, type: type2 } = secondObject.body;
 
@@ -1031,7 +1031,7 @@ export default function ({ getService }: FtrProviderContext) {
             .post('/write_restricted_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', objectOwnerCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
             .expect(200);
           const { id: objectId1, type: type1 } = firstObject.body;
 
@@ -1039,7 +1039,7 @@ export default function ({ getService }: FtrProviderContext) {
             .post('/write_restricted_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', objectOwnerCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
             .expect(200);
           const { id: objectId2, type: type2 } = secondObject.body;
 
@@ -1128,7 +1128,7 @@ export default function ({ getService }: FtrProviderContext) {
             .post('/write_restricted_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', objectOwnerCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
             .expect(200);
           const { id: objectId1, type: type1 } = firstObject.body;
 
@@ -1136,7 +1136,7 @@ export default function ({ getService }: FtrProviderContext) {
             .post('/write_restricted_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', objectOwnerCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
             .expect(200);
           const { id: objectId2, type: type2 } = secondObject.body;
 
@@ -1174,7 +1174,7 @@ export default function ({ getService }: FtrProviderContext) {
             .post('/write_restricted_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', objectOwnerCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
             .expect(200);
           const { id: objectId1, type: type1 } = firstObject.body;
 
@@ -1182,7 +1182,7 @@ export default function ({ getService }: FtrProviderContext) {
             .post('/write_restricted_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', objectOwnerCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
             .expect(200);
           const { id: objectId2, type: type2 } = secondObject.body;
 
@@ -1221,7 +1221,7 @@ export default function ({ getService }: FtrProviderContext) {
             .post('/write_restricted_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', objectOwnerCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
             .expect(200);
           const { id: objectId1, type: type1 } = firstObject.body;
 
@@ -1229,7 +1229,7 @@ export default function ({ getService }: FtrProviderContext) {
             .post('/write_restricted_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', objectOwnerCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
             .expect(200);
           const { id: objectId2, type: type2 } = secondObject.body;
 
@@ -1274,7 +1274,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/write_restricted_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', ownerCookie.cookieString())
-          .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
           .expect(200);
         const objectId = createResponse.body.id;
         expect(createResponse.body.accessControl).to.have.property('owner', profileUid);
@@ -1305,7 +1305,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/write_restricted_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', adminCookie.cookieString())
-          .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
           .expect(200);
         const objectId = createResponse.body.id;
 
@@ -1338,7 +1338,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/write_restricted_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', ownerCookie.cookieString())
-          .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
           .expect(200);
         const objectId = createResponse.body.id;
 
@@ -1372,7 +1372,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/write_restricted_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', ownerCookie.cookieString())
-          .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
           .expect(200);
         const firstObjectId = firstCreate.body.id;
 
@@ -1380,7 +1380,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/write_restricted_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', ownerCookie.cookieString())
-          .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
           .expect(200);
         const secondObjectId = secondCreate.body.id;
 
@@ -1423,7 +1423,7 @@ export default function ({ getService }: FtrProviderContext) {
             .post('/write_restricted_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', ownerCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
             .expect(200);
           const firstObjectId = firstCreate.body.id;
 
@@ -1479,7 +1479,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/write_restricted_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', ownerCookie.cookieString())
-          .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: false })
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: false })
           .expect(200);
         const objectId = createResponse.body.id;
         expect(createResponse.body.accessControl).to.have.property('owner', profileUid);
@@ -1516,7 +1516,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/write_restricted_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', ownerCookie.cookieString())
-          .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: false })
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: false })
           .expect(200);
         const objectId = createResponse.body.id;
         expect(createResponse.body.accessControl).to.have.property('owner', profileUid);
@@ -1565,7 +1565,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/write_restricted_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', ownerCookie.cookieString())
-          .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
           .expect(200);
 
         const objectId = createResponse.body.id;
@@ -1597,7 +1597,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/write_restricted_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', ownerCookie.cookieString())
-          .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
           .expect(200);
         const objectId = createResponse.body.id;
         expect(createResponse.body.accessControl).to.have.property('owner', profileUid);

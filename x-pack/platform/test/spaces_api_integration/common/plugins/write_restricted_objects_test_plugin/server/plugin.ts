@@ -64,19 +64,19 @@ export class WriteRestrictedObjectsPlugin implements Plugin {
                 schema.literal(NON_ACCESS_CONTROL_TYPE),
               ])
             ),
-            isReadOnly: schema.maybe(schema.boolean()),
+            isWriteRestricted: schema.maybe(schema.boolean()),
           }),
         },
       },
       async (context, request, response) => {
         const soClient = (await context.core).savedObjects.getClient();
         const objType = request.body.type || ACCESS_CONTROL_TYPE;
-        const { isReadOnly } = request.body;
+        const { isWriteRestricted } = request.body;
 
         const options = {
           overwrite: request.query.overwrite ?? false,
           ...(request.body.id ? { id: request.body.id } : {}),
-          ...(isReadOnly ? { accessControl: { accessMode: 'write_restricted' as const } } : {}),
+          ...(isWriteRestricted ? { accessControl: { accessMode: 'write_restricted' as const } } : {}),
         };
         try {
           const result = await soClient.create(
@@ -131,7 +131,7 @@ export class WriteRestrictedObjectsPlugin implements Plugin {
                       schema.literal(NON_ACCESS_CONTROL_TYPE),
                     ])
                   ),
-                  isReadOnly: schema.maybe(schema.boolean()),
+                  isWriteRestricted: schema.maybe(schema.boolean()),
                 })
               ),
               force: schema.maybe(schema.boolean({ defaultValue: false })),
@@ -146,7 +146,7 @@ export class WriteRestrictedObjectsPlugin implements Plugin {
           const createObjects = request.body.objects.map((obj) => ({
             type: obj.type || ACCESS_CONTROL_TYPE,
             ...(obj.id ? { id: obj.id } : {}),
-            ...(obj.isReadOnly
+            ...(obj.isWriteRestricted
               ? { accessControl: { accessMode: 'write_restricted' as const } }
               : {}),
             attributes: {
