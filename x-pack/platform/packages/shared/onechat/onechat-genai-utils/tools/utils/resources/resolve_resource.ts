@@ -35,6 +35,12 @@ export const resolveResource = async ({
   resourceName: string;
   esClient: ElasticsearchClient;
 }): Promise<ResolveResourceResponse> => {
+  if (!resourceName) {
+    throw new Error(
+      'Resource name is required but was not provided. Please specify an index, alias, or datastream name.'
+    );
+  }
+
   if (resourceName.includes(',') || resourceName.includes('*')) {
     throw new Error(
       `Tried to resolve resource for multiple resources using pattern ${resourceName}`
