@@ -19,7 +19,7 @@ import type {
   DashboardSavedObjectAttributes,
   SavedDashboardPanel,
 } from '../../../../dashboard_saved_object';
-import type { DashboardAttributes } from '../../types';
+import type { DashboardState } from '../../types';
 import { transformDashboardOut } from './transform_dashboard_out';
 
 describe('transformDashboardOut', () => {
@@ -54,7 +54,7 @@ describe('transformDashboardOut', () => {
       title: 'my title',
       description: 'my description',
     };
-    expect(transformDashboardOut(input)).toEqual<DashboardAttributes>({
+    expect(transformDashboardOut(input)).toEqual<DashboardState>({
       controlGroupInput: {
         chainingSystem: DEFAULT_CONTROLS_CHAINING,
         labelPosition: DEFAULT_CONTROLS_LABEL_POSITION,
@@ -143,7 +143,7 @@ describe('transformDashboardOut', () => {
         name: 'index-pattern-ref-index-pattern1',
       },
     ];
-    expect(transformDashboardOut(input, references)).toEqual<DashboardAttributes>({
+    expect(transformDashboardOut(input, references)).toEqual<DashboardState>({
       controlGroupInput: {
         chainingSystem: 'NONE',
         labelPosition: 'twoLine',

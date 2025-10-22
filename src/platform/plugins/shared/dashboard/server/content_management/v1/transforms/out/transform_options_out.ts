@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DashboardAttributes } from '../../types';
+import type { DashboardState } from '../../types';
 
 const OPTION_KEYS = ['hidePanelTitles', 'useMargins', 'syncColors', 'syncCursor', 'syncTooltips'];
 
-export function transformOptionsOut(optionsJSON: string): Required<DashboardAttributes>['options'] {
+export function transformOptionsOut(optionsJSON: string): Required<DashboardState>['options'] {
   const options = JSON.parse(optionsJSON);
   const knownOptions: { [key: string]: unknown } = {};
   Object.keys(options).forEach((key) => {
