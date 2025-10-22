@@ -12,19 +12,13 @@ import {
   ESQL_QUERY_HISTORY_CLICKED,
   ESQL_QUERY_HISTORY_OPENED,
   ESQL_QUERY_SUBMITTED,
+  ESQL_RECOMMENDED_QUERY_CLICKED,
   ESQL_STARRED_QUERY_CLICKED,
   ESQL_SUGGESTIONS_WITH_CUSTOM_COMMAND_SHOWN,
 } from './events_registration';
 import type { IndexEditorCommandArgs } from '../custom_commands/use_lookup_index_editor';
 import { COMMAND_ID as LOOKUP_INDEX_EDITOR_COMMAND } from '../custom_commands/use_lookup_index_editor';
-
-export interface TelemetryQuerySubmittedProps {
-  exec_source: 'manual' | 'help' | 'history' | 'starred';
-  query_length: string;
-  query_lines: string;
-  anti_limit_before_aggregate: boolean;
-  anti_missing_sort_before_limit: boolean;
-}
+import { TelemetryQuerySubmittedProps } from '@kbn/esql-types/src/esql_telemetry_types';
 
 export class ESQLEditorTelemetryService {
   constructor(private readonly _analytics: AnalyticsServiceStart) {}
@@ -109,7 +103,7 @@ export class ESQLEditorTelemetryService {
 
   public trackQuerySubmitted(props: TelemetryQuerySubmittedProps) {
     this._reportEvent(ESQL_QUERY_SUBMITTED, {
-      exec_source: props.exec_source,
+      exec_source: props.query_source,
       query_length: props.query_length,
       query_lines: props.query_lines,
       anti_limit_before_aggregate: props.anti_limit_before_aggregate,

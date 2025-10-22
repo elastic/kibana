@@ -85,7 +85,7 @@ export const registerESQLEditorAnalyticsEvents = once((analytics: AnalyticsServi
   analytics.registerEventType({
     eventType: ESQL_QUERY_SUBMITTED,
     schema: {
-      exec_source: {
+      query_source: {
         type: 'keyword',
         _meta: {
           description:
@@ -102,11 +102,11 @@ export const registerESQLEditorAnalyticsEvents = once((analytics: AnalyticsServi
       },
       anti_limit_before_aggregate: {
         type: 'boolean',
-        _meta: { description: 'Whether the query had a limit before the aggregate.' },
+        _meta: { description: 'Whether the query had a LIMIT before the aggregation.' },
       },
       anti_missing_sort_before_limit: {
         type: 'boolean',
-        _meta: { description: 'Whether the query was missing a sort before the limit.' },
+        _meta: { description: 'Whether the query was missing a SORT before a LIMIT.' },
       },
     },
   });

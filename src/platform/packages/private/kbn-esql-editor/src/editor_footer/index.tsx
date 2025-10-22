@@ -33,10 +33,11 @@ import { SubmitFeedbackComponent } from './feedback_component';
 import { HistoryAndStarredQueriesTabs, QueryHistoryAction } from './history_starred_queries';
 import { KeyboardShortcuts } from './keyboard_shortcuts';
 import { QueryWrapComponent } from './query_wrap_component';
-import type {
-  ESQLEditorTelemetryService,
+import type { ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
+import {
+  QuerySource,
   TelemetryQuerySubmittedProps,
-} from '../telemetry/telemetry_service';
+} from '@kbn/esql-types/src/esql_telemetry_types';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 const COMMAND_KEY = isMac ? '⌘' : '^';
@@ -52,7 +53,7 @@ interface EditorFooterProps {
   warnings?: MonacoMessage[];
   detectedTimestamp?: string;
   onErrorClick: (error: MonacoMessage) => void;
-  runQuery: (source: TelemetryQuerySubmittedProps['exec_source']) => void;
+  runQuery: (source: TelemetryQuerySubmittedProps['query_source']) => void;
   updateQuery: (qs: string) => void;
   isHistoryOpen: boolean;
   setIsHistoryOpen: (status: boolean) => void;
@@ -111,7 +112,7 @@ export const EditorFooter = memo(function EditorFooter({
       // submit the query with some latency
       // if I do it immediately there is some race condition until
       // the state is updated and it won't be sumbitted correctly
-      const source = isStarred ? 'starred' : 'history';
+      const source = isStarred ? QuerySource.STARRED : QuerySource.HISTORY;
       setTimeout(() => {
         runQuery(source);
       }, 300);
