@@ -22,8 +22,8 @@ import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 
 import { SecretConfigurationSchema } from '@kbn/connector-schemas/common/auth';
 import type { ActionParamsType } from '@kbn/connector-schemas/webhook';
-import { CONNECTOR_ID, CONNECTOR_NAME, ParamsSchema } from '@kbn/connector-schemas/webhook';
-import { ConfigSchema } from '@kbn/connector-schemas/webhook';
+import { CONNECTOR_ID, CONNECTOR_NAME } from '@kbn/connector-schemas/webhook/constants';
+import { ConfigSchema, ParamsSchema } from '@kbn/connector-schemas/webhook';
 import type { WebhookConnectorType, WebhookConnectorTypeExecutorOptions } from './types';
 import type { Result } from '../lib/result_type';
 

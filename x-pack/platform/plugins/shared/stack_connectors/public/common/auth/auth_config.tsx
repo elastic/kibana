@@ -32,7 +32,7 @@ import {
 
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { isEqual } from 'lodash';
-import { AuthType, SSLCertType, MAX_HEADERS } from '@kbn/connector-schemas/common/auth';
+import { AuthType, SSLCertType, MAX_HEADERS } from '@kbn/connector-schemas/common/auth/constants';
 import { useSecretHeaders } from './use_secret_headers';
 import { SSLCertFields } from './ssl_cert_fields';
 import { BasicAuthFields } from './basic_auth_fields';

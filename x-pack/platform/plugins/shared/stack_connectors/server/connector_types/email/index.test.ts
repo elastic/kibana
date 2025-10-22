@@ -33,7 +33,7 @@ import { getConnectorType } from '.';
 import type { ValidateEmailAddressesOptions } from '@kbn/actions-plugin/common';
 import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
 import { AdditionalEmailServices } from '../../../common';
-import { serviceParamValueToKbnSettingMap } from '@kbn/connector-schemas/email';
+import { serviceParamValueToKbnSettingMap } from '@kbn/connector-schemas/email/constants';
 
 const sendEmailMock = sendEmail as jest.Mock;
 

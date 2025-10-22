@@ -22,13 +22,8 @@ import {
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import type { BulkOperationType, BulkResponseItem } from '@elastic/elasticsearch/lib/api/types';
-import {
-  CONNECTOR_ID,
-  CONNECTOR_NAME,
-  ConfigSchema,
-  ParamsSchema,
-  SecretsSchema,
-} from '@kbn/connector-schemas/es_index';
+import { ConfigSchema, ParamsSchema, SecretsSchema } from '@kbn/connector-schemas/es_index';
+import { CONNECTOR_ID, CONNECTOR_NAME } from '@kbn/connector-schemas/es_index/constants';
 import type {
   ActionParamsType,
   ConnectorTypeConfigType,

@@ -10,7 +10,7 @@ import type { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-action
 import { registerConnectorTypes } from '..';
 import { experimentalFeaturesMock, registrationServicesMock } from '../../mocks';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
-import { CONNECTOR_ID } from '@kbn/connector-schemas/slack_api';
+import { CONNECTOR_ID } from '@kbn/connector-schemas/slack_api/constants';
 
 let connectorTypeModel: ConnectorTypeModel;
 const testBlock = {

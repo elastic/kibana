@@ -31,7 +31,11 @@ jest.mock('axios', () => ({
 }));
 import axios from 'axios';
 import { CRT_FILE, KEY_FILE, PFX_FILE } from '@kbn/connector-schemas/common/auth/mocks';
-import { AuthType, SSLCertType, WebhookMethods } from '@kbn/connector-schemas/common/auth';
+import {
+  AuthType,
+  SSLCertType,
+  WebhookMethods,
+} from '@kbn/connector-schemas/common/auth/constants';
 import type {
   ConnectorTypeConfigType,
   ConnectorTypeSecretsType,

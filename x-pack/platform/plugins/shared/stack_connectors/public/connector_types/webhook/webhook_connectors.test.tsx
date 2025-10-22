@@ -17,7 +17,7 @@ import {
   formSerializer,
   formDeserializer,
 } from '@kbn/triggers-actions-ui-plugin/public/application/sections/action_connector_form/connector_form';
-import { AuthType, SSLCertType } from '@kbn/connector-schemas/common/auth';
+import { AuthType, SSLCertType } from '@kbn/connector-schemas/common/auth/constants';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
   const original = jest.requireActual('@kbn/triggers-actions-ui-plugin/public');

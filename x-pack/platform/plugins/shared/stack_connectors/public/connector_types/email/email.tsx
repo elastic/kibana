@@ -17,7 +17,7 @@ import type {
 import {
   CONNECTOR_ID,
   serviceParamValueToKbnSettingMap as emailKbnSettings,
-} from '@kbn/connector-schemas/email';
+} from '@kbn/connector-schemas/email/constants';
 import type { EmailActionParams, EmailConfig, EmailSecrets } from '../types';
 import type { RegistrationServices } from '..';
 

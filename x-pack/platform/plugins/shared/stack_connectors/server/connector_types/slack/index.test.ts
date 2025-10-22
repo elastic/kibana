@@ -19,7 +19,7 @@ import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { loggerMock } from '@kbn/logging-mocks';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
-import { CONNECTOR_ID } from '@kbn/connector-schemas/slack';
+import { CONNECTOR_ID } from '@kbn/connector-schemas/slack/constants';
 
 const sendSpy = jest.spyOn(IncomingWebhook.prototype, 'send');
 

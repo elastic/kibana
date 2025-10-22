@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './coerced';
+export { Coerced } from './coerced';
 export { validateRecordMaxKeys, validateKeysAllowed } from './validators';
 export { convertTimestamp } from './convert_timestamp';

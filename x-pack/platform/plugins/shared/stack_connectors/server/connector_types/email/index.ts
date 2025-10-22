@@ -24,11 +24,9 @@ import type {
 import {
   CONNECTOR_ID,
   CONNECTOR_NAME,
-  ConfigSchema,
-  SecretsSchema,
-  ParamsSchema,
   serviceParamValueToKbnSettingMap as emailKbnSettings,
-} from '@kbn/connector-schemas/email';
+} from '@kbn/connector-schemas/email/constants';
+import { ConfigSchema, SecretsSchema, ParamsSchema } from '@kbn/connector-schemas/email';
 import {
   AlertingConnectorFeatureId,
   UptimeConnectorFeatureId,

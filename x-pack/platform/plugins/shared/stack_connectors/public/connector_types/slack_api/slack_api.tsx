@@ -10,8 +10,8 @@ import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { CONNECTOR_ID as SLACK_CONNECTOR_ID } from '@kbn/connector-schemas/slack';
-import { CONNECTOR_ID as SLACK_API_CONNECTOR_ID } from '@kbn/connector-schemas/slack_api';
+import { CONNECTOR_ID as SLACK_CONNECTOR_ID } from '@kbn/connector-schemas/slack/constants';
+import { CONNECTOR_ID as SLACK_API_CONNECTOR_ID } from '@kbn/connector-schemas/slack_api/constants';
 import type {
   PostBlockkitParams,
   PostMessageParams,

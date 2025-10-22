@@ -14,8 +14,8 @@ import type {
 import {
   CONNECTOR_ID as SLACK_CONNECTOR_ID,
   CONNECTOR_NAME as SLACK_CONNECTOR_NAME,
-} from '@kbn/connector-schemas/slack';
-import { CONNECTOR_ID as SLACK_API_CONNECTOR_ID } from '@kbn/connector-schemas/slack_api';
+} from '@kbn/connector-schemas/slack/constants';
+import { CONNECTOR_ID as SLACK_API_CONNECTOR_ID } from '@kbn/connector-schemas/slack_api/constants';
 import type { PostMessageParams } from '@kbn/connector-schemas/slack_api';
 import type { SlackActionParams, SlackSecrets } from '../types';
 

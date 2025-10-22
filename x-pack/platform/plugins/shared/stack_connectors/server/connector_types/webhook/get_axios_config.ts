@@ -19,7 +19,7 @@ import type {
   ConnectorTypeConfigType,
   ConnectorTypeSecretsType,
 } from '@kbn/connector-schemas/webhook';
-import { AuthType } from '@kbn/connector-schemas/common/auth';
+import { AuthType } from '@kbn/connector-schemas/common/auth/constants';
 import { getOauth2DeleteTokenAxiosInterceptor } from '../../../common/auth/oauth2_delete_token_axios_interceptor';
 import { buildConnectorAuth } from '../../../common/auth/utils';
 

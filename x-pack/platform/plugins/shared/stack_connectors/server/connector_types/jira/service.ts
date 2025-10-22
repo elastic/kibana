@@ -17,7 +17,7 @@ import {
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
-import { CONNECTOR_NAME } from '@kbn/connector-schemas/jira';
+import { CONNECTOR_NAME } from '@kbn/connector-schemas/jira/constants';
 import type {
   CreateCommentParams,
   CreateIncidentParams,

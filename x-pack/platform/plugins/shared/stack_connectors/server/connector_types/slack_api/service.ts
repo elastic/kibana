@@ -20,7 +20,11 @@ import type {
   PostBlockkitSubActionParams,
   PostMessageSubActionParams,
 } from '@kbn/connector-schemas/slack_api';
-import { CONNECTOR_ID, CONNECTOR_NAME, SLACK_URL } from '@kbn/connector-schemas/slack_api';
+import {
+  CONNECTOR_ID,
+  CONNECTOR_NAME,
+  SLACK_URL,
+} from '@kbn/connector-schemas/slack_api/constants';
 import type {
   SlackApiService,
   PostMessageResponse,

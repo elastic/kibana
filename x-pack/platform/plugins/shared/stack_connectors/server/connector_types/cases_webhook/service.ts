@@ -17,7 +17,7 @@ import {
   mergeConfigHeadersWithSecretHeaders,
 } from '@kbn/actions-plugin/server/lib';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
-import { WebhookMethods } from '@kbn/connector-schemas/common/auth';
+import { WebhookMethods } from '@kbn/connector-schemas/common/auth/constants';
 import { buildConnectorAuth, validateConnectorAuthConfiguration } from '../../../common/auth/utils';
 import { validateAndNormalizeUrl, validateJson } from './validators';
 

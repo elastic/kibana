@@ -18,13 +18,8 @@ import {
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
-import {
-  CONNECTOR_NAME,
-  CONNECTOR_ID,
-  ConfigSchema,
-  SecretsSchema,
-  ParamsSchema,
-} from '@kbn/connector-schemas/server_log';
+import { ConfigSchema, SecretsSchema, ParamsSchema } from '@kbn/connector-schemas/server_log';
+import { CONNECTOR_NAME, CONNECTOR_ID } from '@kbn/connector-schemas/server_log/constants';
 import type { Config, Secrets, ActionParamsType } from '@kbn/connector-schemas/server_log';
 import { withoutControlCharacters } from '../lib/string_utils';
 

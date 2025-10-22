@@ -11,7 +11,7 @@ import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { CONNECTOR_ID } from '@kbn/connector-schemas/server_log';
+import { CONNECTOR_ID } from '@kbn/connector-schemas/server_log/constants';
 import type { ServerLogActionParams } from '../types';
 
 export function getConnectorType(): ConnectorTypeModel<unknown, unknown, ServerLogActionParams> {
