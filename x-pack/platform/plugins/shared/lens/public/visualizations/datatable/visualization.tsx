@@ -64,7 +64,7 @@ import { DatatableInspectorTables } from '../../../common/expressions/defs/datat
 import { getSimpleColumnType } from './components/table_actions';
 import { convertToRuntimeState } from './runtime_state';
 import { FlyoutToolbar } from '../../shared_components/flyout_toolbar';
-import { DatatableAppearanceSettings } from './components/toolbar/appearance_settings';
+import { DatatableAppearanceSettings } from './components/appearance_settings';
 
 export interface DatatableVisualizationState {
   columns: ColumnState[];
@@ -501,6 +501,7 @@ export const getDatatableVisualization = ({
       ],
     };
   },
+
   removeDimension({ prevState, columnId }) {
     return {
       ...prevState,
@@ -508,6 +509,7 @@ export const getDatatableVisualization = ({
       sorting: prevState.sorting?.columnId === columnId ? undefined : prevState.sorting,
     };
   },
+
   DimensionEditorComponent(props) {
     const isDarkMode = useKibanaIsDarkMode();
     const palettes = useKbnPalettes();
