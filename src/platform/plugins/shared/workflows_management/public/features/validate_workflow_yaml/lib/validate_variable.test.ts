@@ -8,17 +8,17 @@
  */
 
 import { z } from '@kbn/zod';
-import type { VariableItem } from '../model/types';
-import { validateVariable } from './validate_variable';
 
 // Mock the imports
 jest.mock('../../../../common/lib/parse_variable_path');
 jest.mock('../../../../common/lib/zod');
 jest.mock('../../workflow_context/lib/get_foreach_state_schema');
 
+import { validateVariable } from './validate_variable';
 import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
 import { getSchemaAtPath, getZodTypeName } from '../../../../common/lib/zod';
 import { getForeachItemSchema } from '../../workflow_context/lib/get_foreach_state_schema';
+import type { VariableItem } from '../model/types';
 
 const mockParseVariablePath = parseVariablePath as jest.MockedFunction<typeof parseVariablePath>;
 const mockGetSchemaAtPath = getSchemaAtPath as jest.MockedFunction<typeof getSchemaAtPath>;

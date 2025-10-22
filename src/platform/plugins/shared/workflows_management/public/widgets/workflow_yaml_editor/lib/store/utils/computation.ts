@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WorkflowGraph } from '@kbn/workflows/graph';
 import YAML, { LineCounter } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
+import { WorkflowGraph } from '@kbn/workflows/graph';
 import type { z } from '@kbn/zod';
 import { buildWorkflowLookup } from './build_workflow_lookup';
-import type { WorkflowZodSchemaLooseType } from '../../../../../../common/schema';
 import { parseWorkflowYamlToJSON } from '../../../../../../common/lib/yaml_utils';
+import type { WorkflowZodSchemaLooseType } from '../../../../../../common/schema';
 import type { WorkflowEditorState } from '../types';
 
 export const performComputation = (
@@ -47,8 +47,6 @@ export const performComputation = (
       workflowDefinition: parsedWorkflow as WorkflowYaml,
     };
   } catch (e) {
-    // console.error('Error performing computation', e);
     // Clear computed data on error
-    return;
   }
 };

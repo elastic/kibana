@@ -10,10 +10,10 @@
 import { monaco } from '@kbn/monaco';
 import type { ConnectorContractUnion } from '@kbn/workflows';
 import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
+import { z } from '@kbn/zod';
 import { getCompletionItemProvider, parseLineForCompletion } from './get_completion_item_provider';
 import { performComputation } from './store/utils/computation';
 import { getWorkflowZodSchemaLoose } from '../../../../common/schema';
-import { z } from '@kbn/zod';
 
 // Mock Monaco editor model
 const createMockModel = (value: string, cursorOffset: number) => {
@@ -327,39 +327,38 @@ steps:
       expect(suggestions.map((s) => s.label)).toEqual(expect.arrayContaining(['apiUrl']));
     });
 
-    it('should provide completions with brackets for keys in kebab-case and use quote type opposite to the one in the string', async () => {
+    it('should provide completions with brackets for keys in kebab-case and use single quotes when inside double quoted string', async () => {
       focusedStepId = 'step0';
       yamlContent = `
-version: "1"
-name: "test"
-consts:
-  api-url: "https://api.example.com"
-steps:
-  - name: step0
+  version: "1"
+  name: "test"
+  consts:
+    api-url: "https://api.example.com"
+  steps:
+    - name: step0
     type: console
     with:
       message: "{{consts.|<-}}"
-`.trim();
-      const suggestions1 = await getSuggestions(completionProvider, yamlContent);
-      expect(suggestions1.map((s) => s.insertText)).toEqual(
-        expect.arrayContaining(["['api-url']"])
-      );
+  `.trim();
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+      expect(suggestions.map((s) => s.insertText)).toEqual(expect.arrayContaining(["['api-url']"]));
+    });
 
+    it('should provide completions with brackets for keys in kebab-case and use double quotes when inside single quoted string', async () => {
+      focusedStepId = 'step0';
       yamlContent = `
-version: "1"
-name: "test"
-consts:
-  api-url: "https://api.example.com"
-steps:
-  - name: step0
+  version: "1"
+  name: "test"
+  consts:
+    api-url: "https://api.example.com"
+  steps:
+    - name: step0
     type: console
     with:
       message: '{{consts.|<-}}'
       `.trim();
-      const suggestions2 = await getSuggestions(completionProvider, yamlContent);
-      expect(suggestions2.map((s) => s.insertText)).toEqual(
-        expect.arrayContaining(['["api-url"]'])
-      );
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+      expect(suggestions.map((s) => s.insertText)).toEqual(expect.arrayContaining(['["api-url"]']));
     });
 
     it('should provide rrule suggestions in empty scheduled trigger with block', async () => {
