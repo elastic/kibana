@@ -74,7 +74,7 @@ export class ConfigRunner {
         TEST_AGENTLESS_PORT: this.options.ports.agentless.toString(),
         TEST_FLEET_PORT: this.options.ports.fleet.toString(),
         FLEET_PACKAGE_REGISTRY_PORT: this.options.ports.packageRegistry.toString(),
-        CI_PARALLEL_PROCESS_NUMBER: this.options.index,
+        SERVICE_NAMESPACE: this.options.index,
         FORCE_COLOR: '1',
         npm_config_color: 'true',
       },

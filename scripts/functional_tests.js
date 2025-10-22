@@ -10,7 +10,7 @@
 require('../src/setup_node_env');
 
 require('@kbn/test-services')
-  .assignPorts()
+  .assignPorts(false)
   .then(function () {
     require('@kbn/test').runTestsCli();
   })

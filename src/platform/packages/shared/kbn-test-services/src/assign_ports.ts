@@ -14,7 +14,11 @@ async function acquire(preference?: number) {
   return (await getPort({ port: preference })).toString();
 }
 
-export async function assignPorts() {
+export async function assignPorts(apply: boolean = true) {
+  if (!apply) {
+    return;
+  }
+
   for (const [key, _port] of Object.entries(defaults)) {
     const envVarName = key.replace('_DEFAULT', '');
     const acquiredPort = await acquire();
