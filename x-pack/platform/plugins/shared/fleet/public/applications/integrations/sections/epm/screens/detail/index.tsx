@@ -191,18 +191,9 @@ export function Detail() {
     packageInfo.installationInfo?.version &&
     semverLt(packageInfo.installationInfo.version, packageInfo.latestVersion);
 
-  const [prereleaseIntegrationsEnabled, setPrereleaseIntegrationsEnabled] = React.useState<
-    boolean | undefined
-  >();
-
-  const { data: settings, isInitialLoading: isSettingsInitialLoading } = useGetSettingsQuery({
+  const { isInitialLoading: isSettingsInitialLoading } = useGetSettingsQuery({
     enabled: authz.fleet.readSettings,
   });
-
-  useEffect(() => {
-    const isEnabled = Boolean(settings?.item.prerelease_integrations_enabled) || prerelease;
-    setPrereleaseIntegrationsEnabled(isEnabled);
-  }, [settings?.item.prerelease_integrations_enabled, prerelease]);
 
   const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
   // Fetch package info
@@ -216,7 +207,7 @@ export function Detail() {
     pkgName,
     pkgVersion,
     {
-      prerelease: prereleaseIntegrationsEnabled,
+      prerelease: true,
       withMetadata: true,
     },
     {
@@ -474,14 +465,13 @@ export function Detail() {
 
   const showVersionSelect = useMemo(
     () =>
-      prereleaseIntegrationsEnabled &&
       latestGAVersion &&
       latestPrereleaseVersion &&
       latestGAVersion !== latestPrereleaseVersion &&
       (!packageInfo?.version ||
         packageInfo.version === latestGAVersion ||
         packageInfo.version === latestPrereleaseVersion),
-    [prereleaseIntegrationsEnabled, latestGAVersion, latestPrereleaseVersion, packageInfo?.version]
+    [latestGAVersion, latestPrereleaseVersion, packageInfo?.version]
   );
 
   const versionOptions = useMemo(
@@ -776,6 +766,7 @@ export function Detail() {
   const securityCallout = missingSecurityConfiguration ? (
     <>
       <EuiCallOut
+        announceOnMount
         color="warning"
         iconType="lock"
         title={
