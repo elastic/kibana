@@ -89,16 +89,12 @@ const defaultConditionEntry = (): ExceptionListItemSchema['entries'] => [
   },
 ];
 
-const cleanupEntries = (
-  item: ArtifactFormComponentProps['item']
-): ArtifactFormComponentProps['item']['entries'] => {
-  return item.entries.map(
+const cleanupEntries = (item: ArtifactFormComponentProps['item']) =>
+  item.entries.forEach(
     (e: ArtifactFormComponentProps['item']['entries'][number] & { id?: string }) => {
       delete e.id;
-      return e;
     }
   );
-};
 
 export const EndpointExceptionsForm: React.FC<
   ArtifactFormComponentProps & { allowSelectOs?: boolean }
@@ -184,8 +180,6 @@ export const EndpointExceptionsForm: React.FC<
       ? (exception.entries as ExceptionListItemSchema['entries'])
       : defaultConditionEntry();
 
-    // TODO: `id` gets added to the exception.entries item
-    // Is there a simpler way to this?
     cleanupEntries(ef);
 
     setAreConditionsValid(!!exception.entries.length);
