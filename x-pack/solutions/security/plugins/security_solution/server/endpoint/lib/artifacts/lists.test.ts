@@ -16,7 +16,7 @@ import {
   getFilteredEndpointExceptionListRaw,
   convertExceptionsToEndpointFormat,
 } from './lists';
-import type { TranslatedEntry, TranslatedEntryTrustDescendants, TranslatedExceptionListItem } from '../../schemas/artifacts';
+import type { TranslatedEntry, TranslatedExceptionListItem } from '../../schemas/artifacts';
 import { ArtifactConstants } from './common';
 import { ENDPOINT_ARTIFACT_LISTS, ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { FILTER_PROCESS_DESCENDANTS_TAG, TRUSTED_PROCESS_DESCENDANTS_TAG } from '../../../../common/endpoint/service/artifacts/constants';
