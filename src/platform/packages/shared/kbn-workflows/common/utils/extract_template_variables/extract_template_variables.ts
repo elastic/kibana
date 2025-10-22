@@ -17,6 +17,7 @@ import {
   Liquid,
   Output,
   TablerowTag,
+  Tag,
   Token,
   TokenKind,
   UnlessTag,
@@ -78,90 +79,8 @@ function visitLiquidAST(node: unknown, stack: StackEntry[]): string[] {
     return fromInitial.concat(fromFilters);
   }
 
-  if (node instanceof IfTag) {
-    stack.push({ node: 'if', variables: new Set<string>() });
-    const fromBranches = node.branches.flatMap((branch) => {
-      const fromValue = visitLiquidAST(branch.value, stack);
-      const fromTemplates = branch.templates.flatMap((template) => visitLiquidAST(template, stack));
-      return fromValue.concat(fromTemplates);
-    });
-    const fromElse = node.elseTemplates
-      ? node.elseTemplates.flatMap((template) => visitLiquidAST(template, stack))
-      : [];
-    stack.pop();
-    return [...fromBranches, ...fromElse];
-  }
-
-  if (node instanceof ForTag) {
-    stack.push({ node: 'for', variables: new Set<string>([node.variable]) });
-
-    const fromCollection = visitLiquidAST(node.collection, stack);
-    const fromHash =
-      node.hash && node.hash.hash
-        ? Object.values(node.hash.hash).flatMap((value) => visitLiquidAST(value, stack))
-        : [];
-    const fromBody = node.templates.flatMap((template) => visitLiquidAST(template, stack));
-    stack.pop();
-    return fromCollection.concat(fromHash).concat(fromBody);
-  }
-
-  if (node instanceof AssignTag) {
-    const localScope = Array.from(node.localScope());
-    const firstArg = localScope[0];
-    const variableName = firstArg.getText();
-    const args = Array.from(node.arguments());
-    const result = args.flatMap((arg) => visitLiquidAST(arg, stack));
-    stack.at(-1)?.variables.add(variableName);
-    return result;
-  }
-
-  if (node instanceof UnlessTag) {
-    stack.push({ node: 'unless', variables: new Set<string>() });
-    const fromBranches = node.branches.flatMap((branch) => {
-      const fromValue = visitLiquidAST(branch.value, stack);
-      const fromTemplates = branch.templates.flatMap((template) => visitLiquidAST(template, stack));
-      return fromValue.concat(fromTemplates);
-    });
-    const fromElse = node.elseTemplates
-      ? node.elseTemplates.flatMap((template) => visitLiquidAST(template, stack))
-      : [];
-    stack.pop();
-    return [...fromBranches, ...fromElse];
-  }
-
-  if (node instanceof CaseTag) {
-    stack.push({ node: 'case', variables: new Set<string>() });
-    const fromCondition = visitLiquidAST(node.value, stack);
-    const fromBranches = node.branches.flatMap((branch) => {
-      const fromValues = branch.values.flatMap((value) => visitLiquidAST(value, stack));
-      const fromTemplates = branch.templates.flatMap((template) => visitLiquidAST(template, stack));
-      return fromValues.concat(fromTemplates);
-    });
-    const fromElse = node.elseTemplates.flatMap((template) => visitLiquidAST(template, stack));
-    stack.pop();
-    return [...fromCondition, ...fromBranches, ...fromElse];
-  }
-
-  if (node instanceof CaptureTag) {
-    const variableName = node.variable;
-    stack.push({ node: 'capture', variables: new Set<string>() });
-    const fromBody = node.templates.flatMap((template) => visitLiquidAST(template, stack));
-    stack.pop();
-    stack.at(-1)?.variables.add(variableName);
-    return fromBody;
-  }
-
-  if (node instanceof TablerowTag) {
-    stack.push({ node: 'tablerow', variables: new Set<string>([node.variable]) });
-    const fromCollection = visitLiquidAST(node.collection, stack);
-    const fromArgs =
-      node.args && node.args.hash
-        ? Object.values(node.args.hash).flatMap((value) => visitLiquidAST(value, stack))
-        : [];
-    const fromBody = node.templates.flatMap((template) => visitLiquidAST(template, stack));
-
-    stack.pop();
-    return fromCollection.concat(fromArgs).concat(fromBody);
+  if (node instanceof Tag) {
+    return visitTag(node, stack);
   }
 
   if (node instanceof Token) {
@@ -192,6 +111,100 @@ function visitLiquidAST(node: unknown, stack: StackEntry[]): string[] {
         );
       return vars;
     }
+  }
+
+  return [];
+}
+
+function visitTag(node: Tag, stack: StackEntry[]): string[] {
+  try {
+    stack.push({ node: node.name, variables: new Set<string>() });
+
+    if (node instanceof IfTag) {
+      const fromBranches = node.branches.flatMap((branch) => {
+        const fromValue = visitLiquidAST(branch.value, stack);
+        const fromTemplates = branch.templates.flatMap((template) =>
+          visitLiquidAST(template, stack)
+        );
+        return fromValue.concat(fromTemplates);
+      });
+      const fromElse = node.elseTemplates
+        ? node.elseTemplates.flatMap((template) => visitLiquidAST(template, stack))
+        : [];
+      return [...fromBranches, ...fromElse];
+    }
+
+    if (node instanceof ForTag) {
+      // put variable to the current scope
+      stack.at(-1)?.variables.add(node.variable);
+      const fromCollection = visitLiquidAST(node.collection, stack);
+      const fromHash =
+        node.hash && node.hash.hash
+          ? Object.values(node.hash.hash).flatMap((value) => visitLiquidAST(value, stack))
+          : [];
+      const fromBody = node.templates.flatMap((template) => visitLiquidAST(template, stack));
+      return fromCollection.concat(fromHash).concat(fromBody);
+    }
+
+    if (node instanceof AssignTag) {
+      const localScope = Array.from(node.localScope());
+      const firstArg = localScope[0];
+      const variableName = firstArg.getText();
+      const args = Array.from(node.arguments());
+      const result = args.flatMap((arg) => visitLiquidAST(arg, stack));
+      // put variable to the higher scope
+      stack.at(-2)?.variables.add(variableName);
+      return result;
+    }
+
+    if (node instanceof UnlessTag) {
+      const fromBranches = node.branches.flatMap((branch) => {
+        const fromValue = visitLiquidAST(branch.value, stack);
+        const fromTemplates = branch.templates.flatMap((template) =>
+          visitLiquidAST(template, stack)
+        );
+        return fromValue.concat(fromTemplates);
+      });
+      const fromElse = node.elseTemplates
+        ? node.elseTemplates.flatMap((template) => visitLiquidAST(template, stack))
+        : [];
+      return [...fromBranches, ...fromElse];
+    }
+
+    if (node instanceof CaseTag) {
+      const fromCondition = visitLiquidAST(node.value, stack);
+      const fromBranches = node.branches.flatMap((branch) => {
+        const fromValues = branch.values.flatMap((value) => visitLiquidAST(value, stack));
+        const fromTemplates = branch.templates.flatMap((template) =>
+          visitLiquidAST(template, stack)
+        );
+        return fromValues.concat(fromTemplates);
+      });
+      const fromElse = node.elseTemplates.flatMap((template) => visitLiquidAST(template, stack));
+      return [...fromCondition, ...fromBranches, ...fromElse];
+    }
+
+    if (node instanceof CaptureTag) {
+      const variableName = node.variable;
+      const fromBody = node.templates.flatMap((template) => visitLiquidAST(template, stack));
+      // put variable to the higher scope
+      stack.at(-2)?.variables.add(variableName);
+      return fromBody;
+    }
+
+    if (node instanceof TablerowTag) {
+      // put variable to the current scope
+      stack.at(-1)?.variables.add(node.variable);
+      const fromCollection = visitLiquidAST(node.collection, stack);
+      const fromArgs =
+        node.args && node.args.hash
+          ? Object.values(node.args.hash).flatMap((value) => visitLiquidAST(value, stack))
+          : [];
+      const fromBody = node.templates.flatMap((template) => visitLiquidAST(template, stack));
+      return fromCollection.concat(fromArgs).concat(fromBody);
+    }
+  } finally {
+    stack.pop();
   }
 
   return [];
