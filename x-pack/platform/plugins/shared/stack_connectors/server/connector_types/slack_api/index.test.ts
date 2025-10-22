@@ -18,7 +18,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
 import type { SlackApiConnectorType } from '../../../common/slack_api/types';
 import type { PostMessageParams } from '@kbn/connector-schemas/slack_api';
-import { CONNECTOR_ID, CONNECTOR_NAME } from '@kbn/connector-schemas/slack_api/constants';
+import { CONNECTOR_ID, CONNECTOR_NAME } from '@kbn/connector-schemas/slack_api';
 
 jest.mock('axios');
 jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {

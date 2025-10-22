@@ -35,8 +35,13 @@ import type {
   ActionParamsType,
   ConnectorTypeSecretsType,
 } from '@kbn/connector-schemas/slack';
-import { ConfigSchema, ParamsSchema, SecretsSchema } from '@kbn/connector-schemas/slack';
-import { CONNECTOR_ID, CONNECTOR_NAME } from '@kbn/connector-schemas/slack/constants';
+import {
+  CONNECTOR_ID,
+  CONNECTOR_NAME,
+  ConfigSchema,
+  ParamsSchema,
+  SecretsSchema,
+} from '@kbn/connector-schemas/slack';
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
 
 export type SlackConnectorType = ConnectorType<

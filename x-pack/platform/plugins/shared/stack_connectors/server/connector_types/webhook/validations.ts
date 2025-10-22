@@ -11,11 +11,7 @@ import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 
 import type { ConnectorTypeConfigType } from '@kbn/connector-schemas/webhook';
-import {
-  AuthType,
-  SSLCertType,
-  WebhookMethods,
-} from '@kbn/connector-schemas/common/auth/constants';
+import { AuthType, SSLCertType, WebhookMethods } from '@kbn/connector-schemas/common/auth';
 import { ADDITIONAL_FIELD_CONFIG_ERROR } from './translations';
 
 function validateUrl(configuredUrl: string) {

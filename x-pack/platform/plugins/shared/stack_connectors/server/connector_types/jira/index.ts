@@ -16,8 +16,9 @@ import {
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
-import { CONNECTOR_ID, CONNECTOR_NAME } from '@kbn/connector-schemas/jira/constants';
 import {
+  CONNECTOR_ID,
+  CONNECTOR_NAME,
   ExternalIncidentServiceConfigurationSchema,
   ExternalIncidentServiceSecretConfigurationSchema,
   ExecutorParamsSchema,

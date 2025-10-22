@@ -18,7 +18,7 @@ import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { promiseResult } from '../lib/result_type';
 import sinon from 'sinon';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { AuthType, WebhookMethods } from '@kbn/connector-schemas/common/auth/constants';
+import { AuthType, WebhookMethods } from '@kbn/connector-schemas/common/auth';
 
 jest.mock('@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token', () => ({
   getOAuthClientCredentialsAccessToken: jest.fn(),
