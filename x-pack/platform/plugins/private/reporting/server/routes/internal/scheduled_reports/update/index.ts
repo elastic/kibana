@@ -51,7 +51,7 @@ export const registerInternalUpdateScheduledReportRoute = ({
           return handleUnavailable(responseFactory);
         }
 
-        validateReportingLicense({ reporting, responseFactory });
+        await validateReportingLicense({ reporting, responseFactory });
 
         const { id } = request.params;
 
