@@ -21,7 +21,8 @@ import type {
 } from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import type { DataViewsCommon } from './config_builder';
+import type { Reference } from '@kbn/content-management-utils';
+import type { DataViewsCommon } from './types';
 import type {
   FormulaValueConfig,
   LensAnnotationLayer,
@@ -76,14 +77,43 @@ export function mapToFormula(layer: LensBaseLayer): FormulaValueConfig {
   };
 }
 
-export function buildReferences(dataviews: Record<string, DataView>) {
+export function extractReferences(dataviews: Record<string, DataView>): {
+  references: Reference[];
+  internalReferences: Reference[];
+  adHocDataViews: Record<string, DataViewSpec>;
+} {
+  const adHocDataViews = getAdhocDataviews(dataviews);
+  return {
+    ...buildReferences(dataviews, adHocDataViews),
+    adHocDataViews,
+  };
+}
+
+export function buildReferences(
+  dataviews: Record<string, DataView>,
+  adHocDataViews: Record<string, DataViewSpec>
+): {
+  references: Reference[];
+  internalReferences: Reference[];
+} {
   const references = [];
-  for (const layerid in dataviews) {
-    if (dataviews[layerid]) {
-      references.push(...getDefaultReferences(dataviews[layerid].id!, layerid));
+  const internalReferences = [];
+
+  for (const [layerId, dataview] of Object.entries(dataviews)) {
+    if (dataview.id) {
+      const defaultRefs = getDefaultReferences(dataview.id, layerId);
+      if (adHocDataViews[dataview.id]) {
+        internalReferences.push(...defaultRefs);
+      } else {
+        references.push(...defaultRefs);
+      }
     }
   }
-  return references.flat();
+
+  return {
+    references: references.flat(),
+    internalReferences: internalReferences.flat(),
+  };
 }
 
 const getAdhocDataView = (dataView: DataView): Record<string, DataViewSpec> => {
@@ -94,6 +124,7 @@ const getAdhocDataView = (dataView: DataView): Record<string, DataViewSpec> => {
   };
 };
 
+// Getting the spec from a data view is a heavy operation, that's why the result is cached.
 export const getAdhocDataviews = (dataviews: Record<string, DataView>) => {
   let adHocDataViews = {};
   [...new Set(Object.values(dataviews))].forEach((d) => {
