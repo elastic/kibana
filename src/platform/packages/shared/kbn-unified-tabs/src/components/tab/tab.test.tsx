@@ -213,4 +213,33 @@ describe('Tab', () => {
     expect(screen.queryByTestId(tabButtonTestSubj)).toBeInTheDocument();
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
   });
+
+  it('does not trigger inline editing when enableInlineLabelEditing is false', async () => {
+    const onLabelEdited = jest.fn();
+    const onSelect = jest.fn();
+    const onClose = jest.fn();
+
+    render(
+      <Tab
+        tabContentId={tabContentId}
+        tabsSizeConfig={tabsSizeConfig}
+        item={tabItem}
+        isSelected
+        services={servicesMock}
+        getPreviewData={getPreviewDataMock}
+        onLabelEdited={onLabelEdited}
+        onSelect={onSelect}
+        onClose={onClose}
+        enableInlineLabelEditing={false}
+      />
+    );
+
+    expect(screen.queryByText(tabItem.label)).toBeInTheDocument();
+    await userEvent.dblClick(screen.getByTestId(tabButtonTestSubj));
+
+    // Verify that double click did not trigger inline editing
+    expect(screen.queryByText(tabItem.label)).toBeInTheDocument();
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+    expect(onLabelEdited).not.toHaveBeenCalled();
+  });
 });
