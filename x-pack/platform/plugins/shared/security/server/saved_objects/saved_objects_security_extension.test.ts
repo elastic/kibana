@@ -6568,7 +6568,7 @@ describe('#authorizeChangeAccessControl', () => {
     const { securityExtension } = setup();
     const objects = [
       {
-        type: 'non_read_only',
+        type: 'non_access_control_type',
         id: '1',
         existingNamespaces: [],
         accessControl: { owner: 'fake_owner_id', accessMode: 'write_restricted' as const },
@@ -6593,7 +6593,7 @@ describe('#authorizeChangeAccessControl', () => {
       output: {
         payload: {
           message: expect.stringContaining(
-            'Unable to manage_access_control for types non_read_only, visualization'
+            'Unable to manage_access_control for types non_access_control_type, visualization'
           ),
         },
       },
