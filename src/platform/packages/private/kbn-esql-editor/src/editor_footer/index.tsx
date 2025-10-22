@@ -27,6 +27,8 @@ import {
 } from '@kbn/language-documentation';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
+import type { TelemetryQuerySubmittedProps } from '@kbn/esql-types/src/esql_telemetry_types';
+import { QuerySource } from '@kbn/esql-types/src/esql_telemetry_types';
 import type { DataErrorsControl, ESQLEditorDeps } from '../types';
 import { ErrorsWarningsFooterPopover } from './errors_warnings_popover';
 import { SubmitFeedbackComponent } from './feedback_component';
@@ -34,10 +36,6 @@ import { HistoryAndStarredQueriesTabs, QueryHistoryAction } from './history_star
 import { KeyboardShortcuts } from './keyboard_shortcuts';
 import { QueryWrapComponent } from './query_wrap_component';
 import type { ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
-import {
-  QuerySource,
-  TelemetryQuerySubmittedProps,
-} from '@kbn/esql-types/src/esql_telemetry_types';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 const COMMAND_KEY = isMac ? '⌘' : '^';

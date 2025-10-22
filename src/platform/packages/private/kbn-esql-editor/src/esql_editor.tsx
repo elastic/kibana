@@ -48,6 +48,12 @@ import type { ComponentProps } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
+import {
+  hasLimitBeforeAggregate,
+  missingSortBeforeLimit,
+} from '@kbn/esql-utils/src/utils/query_parsing_helpers';
+import type { TelemetryQuerySubmittedProps } from '@kbn/esql-types/src/esql_telemetry_types';
+import { QuerySource } from '@kbn/esql-types/src/esql_telemetry_types';
 import { useCanCreateLookupIndex, useLookupIndexCommand } from './custom_commands';
 import { EditorFooter } from './editor_footer';
 import {
@@ -77,14 +83,6 @@ import type {
   ESQLEditorDeps,
   ESQLEditorProps as ESQLEditorPropsInternal,
 } from './types';
-import {
-  hasLimitBeforeAggregate,
-  missingSortBeforeLimit,
-} from '@kbn/esql-utils/src/utils/query_parsing_helpers';
-import {
-  QuerySource,
-  TelemetryQuerySubmittedProps,
-} from '@kbn/esql-types/src/esql_telemetry_types';
 
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
@@ -217,7 +215,7 @@ const ESQLEditorInternal = function ESQLEditor({
           setCodeStateOnSubmission(currentValue);
         }
 
-        //TODO: add rest of options
+        // TODO: add rest of options
         if (currentValue) {
           telemetryService.trackQuerySubmitted({
             query_source: source,
