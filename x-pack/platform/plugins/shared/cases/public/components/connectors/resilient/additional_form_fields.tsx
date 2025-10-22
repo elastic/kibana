@@ -138,10 +138,10 @@ export const AdditionalFormFields = React.memo<{
             return null;
           }
           return (
-            <>
+            <React.Fragment key={fieldMetaData.name}>
               <EuiSpacer size="m" />
               <AdditionalFormField key={fieldMetaData.name} field={fieldMetaData} />
-            </>
+            </React.Fragment>
           );
         })}
       </div>
