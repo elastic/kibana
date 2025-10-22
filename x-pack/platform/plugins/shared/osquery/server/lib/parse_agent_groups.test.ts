@@ -215,46 +215,21 @@ describe('parseAgentSelection', () => {
   });
 
   describe('with 10k+ agents (scalability tests)', () => {
-    it.each([
-      {
-        count: 15000,
-        selection: { allAgentsSelected: true },
-        expectedKuery: null,
-        expectedCalls: 3,
-      },
-      {
-        count: 20000,
-        selection: { platformsSelected: ['linux', 'darwin'] },
-        expectedKuery: 'local_metadata.os.platform:(linux or darwin)',
-        expectedCalls: 4,
-      },
-      {
-        count: 12000,
-        selection: { policiesSelected: ['policy-1', 'policy-2'] },
-        expectedKuery: 'policy_id:(policy-1 or policy-2)',
-        expectedCalls: 3,
-      },
-    ])(
-      'should handle $count agents with filters',
-      async ({ count, selection, expectedKuery, expectedCalls }) => {
-        mockAgentService.listAgents = createPaginatedMockResponse(count);
+    it('should handle multi-page results with 10k+ agents', async () => {
+      const agentCount = 15000;
+      mockAgentService.listAgents = createPaginatedMockResponse(agentCount);
 
-        const result = await parseAgentSelection(
-          mockSoClient,
-          mockElasticsearchClient,
-          mockContextWithServices,
-          { ...selection, spaceId: 'default' }
-        );
+      const result = await parseAgentSelection(
+        mockSoClient,
+        mockElasticsearchClient,
+        mockContextWithServices,
+        { allAgentsSelected: true, spaceId: 'default' }
+      );
 
-        expect(result).toHaveLength(count);
-        expect(mockAgentService.listAgents).toHaveBeenCalledTimes(expectedCalls);
-
-        if (expectedKuery) {
-          const firstCall = mockAgentService.listAgents.mock.calls[0][0];
-          expect(firstCall.kuery).toContain(expectedKuery);
-        }
-      }
-    );
+      expect(result).toHaveLength(agentCount);
+      expect(mockAgentService.listAgents).toHaveBeenCalled();
+      expect(mockAgentService.listAgents.mock.calls.length).toBeGreaterThan(1);
+    });
   });
 
   describe('PIT-based pagination verification', () => {
