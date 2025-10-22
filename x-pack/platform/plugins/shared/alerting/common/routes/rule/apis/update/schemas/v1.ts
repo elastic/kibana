@@ -7,7 +7,7 @@
 
 import path from 'node:path';
 import { schema } from '@kbn/config-schema';
-import { ruleParamsSchemaWithDefaultValueV1 } from '@kbn/response-ops-rule-params';
+import { ruleParamsSchemaWithRuleTypeIdAndDefaultValueV1 } from '@kbn/response-ops-rule-params';
 import { validateDurationV1, validateHoursV1, validateTimezoneV1 } from '../../../validation';
 import { notifyWhenSchemaV1, alertDelaySchemaV1 } from '../../../response';
 import { alertsFilterQuerySchemaV1 } from '../../../../alerts_filter_query';
@@ -159,7 +159,7 @@ export const updateBodySchema = schema.object({
       })
     )
   ),
-  params: ruleParamsSchemaWithDefaultValueV1,
+  params: ruleParamsSchemaWithRuleTypeIdAndDefaultValueV1('rule_type_id'),
   actions: schema.arrayOf(actionSchema, { defaultValue: [] }),
   notify_when: schema.maybe(schema.nullable(notifyWhenSchemaV1)),
   alert_delay: schema.maybe(alertDelaySchemaV1),
