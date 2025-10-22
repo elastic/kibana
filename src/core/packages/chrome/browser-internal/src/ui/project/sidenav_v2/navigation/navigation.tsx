@@ -96,8 +96,8 @@ const useNavigationItems = (
   props: Pick<ChromeNavigationProps, 'navigationTree$' | 'navLinks$' | 'activeNodes$' | 'basePath'>
 ): NavigationItems | null => {
   const state$ = useMemo(
-    () => combineLatest([props.navigationTree$, props.navLinks$, props.activeNodes$]),
-    [props.navigationTree$, props.navLinks$, props.activeNodes$]
+    () => combineLatest([props.navigationTree$, props.activeNodes$]),
+    [props.navigationTree$, props.activeNodes$]
   );
   const state = useObservable(state$);
 
@@ -106,8 +106,8 @@ const useNavigationItems = (
 
   const memoizedItems = useMemo(() => {
     if (!state) return null;
-    const [navigationTree, navLinks, activeNodes] = state;
-    return toNavigationItems(navigationTree, navLinks, activeNodes, panelStateManager);
+    const [navigationTree, activeNodes] = state;
+    return toNavigationItems(navigationTree, activeNodes, panelStateManager);
   }, [state, panelStateManager]);
 
   return memoizedItems;
