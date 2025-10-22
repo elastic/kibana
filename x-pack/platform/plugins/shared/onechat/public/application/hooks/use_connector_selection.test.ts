@@ -5,15 +5,8 @@
  * 2.0.
  */
 
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
 import { useConnectorSelection } from './use_connector_selection';
-import { InferenceConnectorType, type InferenceConnector } from '@kbn/inference-common';
-import {
-  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
-  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
-} from '@kbn/management-settings-ids';
-
-const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
 
 jest.mock('./use_kibana', () => ({
   useKibana: jest.fn(),
@@ -32,55 +25,30 @@ const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockUseLocalStorage = useLocalStorage as jest.MockedFunction<typeof useLocalStorage>;
 
 describe('useConnectorSelection', () => {
-  let mockGetConnectors: jest.Mock;
-  let mockUiSettingsGet: jest.Mock;
-  let mockConnectors: InferenceConnector[];
+  let mockSettingsGet: jest.Mock;
   let localStorageState: { [key: string]: string | undefined };
+  let mockSetLocalStorage: jest.Mock;
 
   beforeEach(() => {
-    mockConnectors = [
-      {
-        connectorId: 'connector-1',
-        name: 'Connector 1',
-        type: InferenceConnectorType.OpenAI,
-      } as InferenceConnector,
-      {
-        connectorId: 'connector-2',
-        name: 'Connector 2',
-        type: InferenceConnectorType.Bedrock,
-      } as InferenceConnector,
-      {
-        connectorId: 'connector-3',
-        name: 'Connector 3',
-        type: InferenceConnectorType.Gemini,
-      } as InferenceConnector,
-    ];
-
-    mockGetConnectors = jest.fn().mockResolvedValue(mockConnectors);
-    mockUiSettingsGet = jest.fn();
-
-    // Mock localStorage state
+    mockSettingsGet = jest.fn();
     localStorageState = {};
-    mockUseLocalStorage.mockImplementation((key: string) => {
-      const value = localStorageState[key];
-      const setValue = (newValue: any) => {
-        localStorageState[key] = newValue;
-      };
-      const remove = () => {
-        delete localStorageState[key];
-      };
-      return [value, setValue, remove];
+    mockSetLocalStorage = jest.fn((newValue: string) => {
+      localStorageState[storageKeys.lastUsedConnector] = newValue;
     });
 
+    // Mock localStorage
+    mockUseLocalStorage.mockImplementation((key: string) => {
+      const value = localStorageState[key];
+      return [value, mockSetLocalStorage, jest.fn()];
+    });
+
+    // Mock Kibana services
     mockUseKibana.mockReturnValue({
       services: {
-        plugins: {
-          inference: {
-            getConnectors: mockGetConnectors,
+        settings: {
+          client: {
+            get: mockSettingsGet,
           },
-        },
-        uiSettings: {
-          get: mockUiSettingsGet,
         },
       },
     } as any);
@@ -90,422 +58,130 @@ describe('useConnectorSelection', () => {
     jest.clearAllMocks();
   });
 
-  describe('initial loading', () => {
-    it('should load connectors on mount', async () => {
+  describe('selectedConnector', () => {
+    it('should return undefined when no connector is selected and no default is set', () => {
+      mockSettingsGet.mockReturnValue(undefined);
+
       const { result } = renderHook(() => useConnectorSelection());
 
-      expect(result.current.isLoading).toBe(true);
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
-
-      expect(mockGetConnectors).toHaveBeenCalledTimes(1);
-      expect(result.current.connectors).toEqual(mockConnectors);
-      expect(result.current.error).toBeNull();
+      expect(result.current.selectedConnector).toBeUndefined();
+      expect(result.current.defaultConnectorId).toBeUndefined();
     });
 
-    it('should handle errors when loading connectors', async () => {
-      const error = new Error('Failed to load connectors');
-      mockGetConnectors.mockRejectedValueOnce(error);
+    it('should return the connector from localStorage when set', () => {
+      mockSettingsGet.mockReturnValue(undefined);
+      localStorageState[storageKeys.lastUsedConnector] = 'connector-1';
 
       const { result } = renderHook(() => useConnectorSelection());
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
-
-      expect(result.current.error).toEqual(error);
-      expect(result.current.connectors).toEqual([]);
-    });
-
-    it('should not call getConnectors if inference is not available', async () => {
-      mockUseKibana.mockReturnValue({
-        services: {
-          plugins: {},
-          uiSettings: {
-            get: mockUiSettingsGet,
-          },
-        },
-      } as any);
-
-      const { result } = renderHook(() => useConnectorSelection());
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
-
-      expect(mockGetConnectors).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('connector selection priority', () => {
-    it('should select the first available connector when no preferences are set', async () => {
-      mockUiSettingsGet.mockReturnValue(NO_DEFAULT_CONNECTOR);
-
-      const { result } = renderHook(() => useConnectorSelection());
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
 
       expect(result.current.selectedConnector).toBe('connector-1');
     });
 
-    it('should use default connector when set', async () => {
-      mockUiSettingsGet.mockImplementation((key: string) => {
-        if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) {
-          return 'connector-2';
-        }
-        return false;
-      });
+    it('should return defaultConnectorId from settings', () => {
+      mockSettingsGet.mockReturnValue('default-connector');
 
       const { result } = renderHook(() => useConnectorSelection());
 
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
-
-      expect(result.current.selectedConnector).toBe('connector-2');
-      expect(result.current.defaultConnector).toBe('connector-2');
-    });
-
-    it('should prefer localStorage over default connector', async () => {
-      mockUiSettingsGet.mockImplementation((key: string) => {
-        if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) {
-          return 'connector-2';
-        }
-        return false;
-      });
-
-      localStorageState[storageKeys.lastUsedConnector] = 'connector-3';
-
-      const { result } = renderHook(() => useConnectorSelection());
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
-
-      expect(result.current.selectedConnector).toBe('connector-3');
-    });
-
-    it('should prefer user selection over localStorage', async () => {
-      mockUiSettingsGet.mockImplementation((key: string) => {
-        if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) {
-          return 'connector-1';
-        }
-        return false;
-      });
-
-      localStorageState[storageKeys.lastUsedConnector] = 'connector-2';
-
-      const { result } = renderHook(() => useConnectorSelection());
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
-
-      act(() => {
-        result.current.selectConnector('connector-3');
-      });
-
-      expect(result.current.selectedConnector).toBe('connector-3');
-    });
-
-    it('should ignore invalid connector in localStorage', async () => {
-      mockUiSettingsGet.mockImplementation((key: string) => {
-        if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) {
-          return 'connector-2';
-        }
-        return false;
-      });
-
-      localStorageState[storageKeys.lastUsedConnector] = 'non-existent-connector';
-
-      const { result } = renderHook(() => useConnectorSelection());
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
-
-      expect(result.current.selectedConnector).toBe('connector-2');
-    });
-
-    it('should fallback to first connector when stored connector becomes unavailable', async () => {
-      mockUiSettingsGet.mockReturnValue(NO_DEFAULT_CONNECTOR);
-
-      localStorageState[storageKeys.lastUsedConnector] = 'removed-connector';
-
-      const { result } = renderHook(() => useConnectorSelection());
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
-
-      expect(result.current.selectedConnector).toBe('connector-1');
-    });
-  });
-
-  describe('admin restrictions', () => {
-    it('should filter to only show default connector when defaultConnectorOnly is true', async () => {
-      mockUiSettingsGet.mockImplementation((key: string) => {
-        if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) {
-          return 'connector-2';
-        }
-        if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY) {
-          return true;
-        }
-        return false;
-      });
-
-      const { result } = renderHook(() => useConnectorSelection());
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
-
-      expect(result.current.connectors).toEqual([
-        {
-          connectorId: 'connector-2',
-          name: 'Connector 2',
-          type: InferenceConnectorType.Bedrock,
-        },
-      ]);
-      expect(result.current.selectedConnector).toBe('connector-2');
-    });
-
-    it('should always use default connector when selection is restricted', async () => {
-      mockUiSettingsGet.mockImplementation((key: string) => {
-        if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) {
-          return 'connector-2';
-        }
-        if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY) {
-          return true;
-        }
-        return false;
-      });
-
-      localStorageState[storageKeys.lastUsedConnector] = 'connector-3';
-
-      const { result } = renderHook(() => useConnectorSelection());
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
-
-      expect(result.current.selectedConnector).toBe('connector-2');
-
-      act(() => {
-        result.current.selectConnector('connector-3');
-      });
-
-      expect(result.current.selectedConnector).toBe('connector-2');
-    });
-
-    it('should not restrict when defaultConnectorOnly is true but default is NO_DEFAULT_CONNECTOR', async () => {
-      mockUiSettingsGet.mockImplementation((key: string) => {
-        if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) {
-          return NO_DEFAULT_CONNECTOR;
-        }
-        if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY) {
-          return true;
-        }
-        return false;
-      });
-
-      const { result } = renderHook(() => useConnectorSelection());
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
-
-      expect(result.current.connectors).toEqual(mockConnectors);
-      expect(result.current.selectedConnector).toBe('connector-1');
-    });
-
-    it('should not save to localStorage when selection is restricted', async () => {
-      mockUiSettingsGet.mockImplementation((key: string) => {
-        if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) {
-          return 'connector-2';
-        }
-        if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY) {
-          return true;
-        }
-        return false;
-      });
-
-      const { result } = renderHook(() => useConnectorSelection());
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
-
-      act(() => {
-        result.current.selectConnector('connector-3');
-      });
-
-      expect(localStorageState[storageKeys.lastUsedConnector]).toBeUndefined();
+      expect(result.current.defaultConnectorId).toBe('default-connector');
     });
   });
 
   describe('selectConnector', () => {
-    it('should update selected connector and save to localStorage', async () => {
-      mockUiSettingsGet.mockReturnValue(NO_DEFAULT_CONNECTOR);
+    it('should update localStorage when a connector is selected', () => {
+      mockSettingsGet.mockReturnValue(undefined);
 
       const { result } = renderHook(() => useConnectorSelection());
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
 
       act(() => {
         result.current.selectConnector('connector-2');
       });
 
-      expect(result.current.selectedConnector).toBe('connector-2');
+      expect(mockSetLocalStorage).toHaveBeenCalledWith('connector-2');
       expect(localStorageState[storageKeys.lastUsedConnector]).toBe('connector-2');
     });
-  });
 
-  describe('reloadConnectors', () => {
-    it('should reload connectors when called', async () => {
-      const { result } = renderHook(() => useConnectorSelection());
+    it('should update selected connector when selectConnector is called', () => {
+      mockSettingsGet.mockReturnValue(undefined);
 
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
+      const { result, rerender } = renderHook(() => useConnectorSelection());
+
+      act(() => {
+        result.current.selectConnector('connector-3');
       });
 
-      expect(mockGetConnectors).toHaveBeenCalledTimes(1);
+      // Rerender to get updated value from localStorage
+      rerender();
 
-      const newConnectors = [
-        {
-          connectorId: 'connector-4',
-          name: 'Connector 4',
-          type: InferenceConnectorType.Inference,
-        } as InferenceConnector,
-      ];
-      mockGetConnectors.mockResolvedValueOnce(newConnectors);
-
-      await act(async () => {
-        result.current.reloadConnectors();
-      });
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
-
-      expect(mockGetConnectors).toHaveBeenCalledTimes(2);
-      expect(result.current.connectors).toEqual(newConnectors);
+      expect(result.current.selectedConnector).toBe('connector-3');
     });
 
-    it('should update selected connector if current selection becomes unavailable after reload', async () => {
-      mockUiSettingsGet.mockReturnValue(NO_DEFAULT_CONNECTOR);
+    it('should allow selecting different connectors sequentially', () => {
+      mockSettingsGet.mockReturnValue(undefined);
 
-      const { result } = renderHook(() => useConnectorSelection());
+      const { result, rerender } = renderHook(() => useConnectorSelection());
 
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
+      act(() => {
+        result.current.selectConnector('connector-1');
       });
+      rerender();
+      expect(result.current.selectedConnector).toBe('connector-1');
 
       act(() => {
         result.current.selectConnector('connector-2');
       });
-
+      rerender();
       expect(result.current.selectedConnector).toBe('connector-2');
 
-      const newConnectors = [
-        {
-          connectorId: 'connector-4',
-          name: 'Connector 4',
-          type: InferenceConnectorType.Inference,
-        } as InferenceConnector,
-      ];
-      mockGetConnectors.mockResolvedValueOnce(newConnectors);
-
-      await act(async () => {
-        result.current.reloadConnectors();
+      act(() => {
+        result.current.selectConnector('connector-3');
       });
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
-
-      expect(result.current.selectedConnector).toBe('connector-4');
+      rerender();
+      expect(result.current.selectedConnector).toBe('connector-3');
     });
   });
 
   describe('edge cases', () => {
-    it('should handle empty connector list', async () => {
-      mockGetConnectors.mockResolvedValueOnce([]);
-      mockUiSettingsGet.mockReturnValue(NO_DEFAULT_CONNECTOR);
-
-      const { result } = renderHook(() => useConnectorSelection());
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
-
-      expect(result.current.connectors).toEqual([]);
-      expect(result.current.selectedConnector).toBeUndefined();
-    });
-
-    it('should handle uiSettings being undefined', async () => {
+    it('should handle settings being undefined gracefully', () => {
       mockUseKibana.mockReturnValue({
         services: {
-          plugins: {
-            inference: {
-              getConnectors: mockGetConnectors,
-            },
-          },
-          uiSettings: undefined,
+          settings: undefined,
         },
       } as any);
 
       const { result } = renderHook(() => useConnectorSelection());
 
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
-
-      expect(result.current.selectedConnector).toBe('connector-1');
-      expect(result.current.defaultConnector).toBeUndefined();
+      expect(result.current.defaultConnectorId).toBeUndefined();
+      expect(() => result.current.selectConnector('connector-1')).not.toThrow();
     });
 
-    it('should maintain selection stability across re-renders', async () => {
-      mockUiSettingsGet.mockReturnValue(NO_DEFAULT_CONNECTOR);
+    it('should maintain selection stability across re-renders', () => {
+      mockSettingsGet.mockReturnValue('default-connector');
       localStorageState[storageKeys.lastUsedConnector] = 'connector-2';
 
       const { result, rerender } = renderHook(() => useConnectorSelection());
 
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
-
       const firstSelectedConnector = result.current.selectedConnector;
-      expect(firstSelectedConnector).toBe('connector-2');
+      const firstDefaultConnectorId = result.current.defaultConnectorId;
 
+      rerender();
+      rerender();
       rerender();
 
       expect(result.current.selectedConnector).toBe(firstSelectedConnector);
+      expect(result.current.defaultConnectorId).toBe(firstDefaultConnectorId);
     });
 
-    it('should handle race conditions when selecting connectors rapidly', async () => {
-      mockUiSettingsGet.mockReturnValue(NO_DEFAULT_CONNECTOR);
+    it('should update when default connector changes in settings', () => {
+      mockSettingsGet.mockReturnValue('default-connector-1');
 
-      const { result } = renderHook(() => useConnectorSelection());
+      const { result, rerender } = renderHook(() => useConnectorSelection());
 
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
+      expect(result.current.defaultConnectorId).toBe('default-connector-1');
 
-      act(() => {
-        result.current.selectConnector('connector-1');
-        result.current.selectConnector('connector-2');
-        result.current.selectConnector('connector-3');
-      });
+      mockSettingsGet.mockReturnValue('default-connector-2');
+      rerender();
 
-      expect(result.current.selectedConnector).toBe('connector-3');
-      expect(localStorageState[storageKeys.lastUsedConnector]).toBe('connector-3');
+      expect(result.current.defaultConnectorId).toBe('default-connector-2');
     });
   });
 });

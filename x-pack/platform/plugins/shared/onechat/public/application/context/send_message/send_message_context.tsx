@@ -20,10 +20,8 @@ interface SendMessageState {
   cancel: () => void;
   cleanConversation: () => void;
   connectorSelection: {
-    connectors: ReturnType<typeof useConnectorSelection>['connectors'];
     selectedConnector: string | undefined;
     selectConnector: (connectorId: string) => void;
-    isLoading: boolean;
     defaultConnectorId?: string;
   };
 }
@@ -58,11 +56,9 @@ export const SendMessageProvider = ({ children }: { children: React.ReactNode })
         cancel,
         cleanConversation,
         connectorSelection: {
-          connectors: connectorSelection.connectors,
           selectedConnector: connectorSelection.selectedConnector,
           selectConnector: connectorSelection.selectConnector,
-          isLoading: connectorSelection.isLoading,
-          defaultConnectorId: connectorSelection.defaultConnector,
+          defaultConnectorId: connectorSelection.defaultConnectorId,
         },
       }}
     >

@@ -9,8 +9,8 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { ConversationAgentSelector } from '../conversation_agent_selector';
 import { ConversationActionButton } from './conversation_action_button';
-import { ConnectorSelector } from '../../connector_selector';
 import { useSendMessage } from '../../../context/send_message/send_message_context';
+import { ConnectorSelector } from '../../connector_selector';
 
 interface ConversationInputActionsProps {
   onSubmit: () => void;
@@ -37,10 +37,8 @@ export const ConversationInputActions: React.FC<ConversationInputActionsProps> =
       >
         <EuiFlexItem grow={false}>
           <ConnectorSelector
-            connectors={connectorSelection.connectors}
             selectedConnectorId={connectorSelection.selectedConnector}
             onSelectConnector={connectorSelection.selectConnector}
-            isLoading={connectorSelection.isLoading}
             defaultConnectorId={connectorSelection.defaultConnectorId}
           />
         </EuiFlexItem>

@@ -13,28 +13,35 @@ import {
   ConnectorSelectable,
   type ConnectorSelectableComponentProps,
 } from '@kbn/ai-assistant-connector-selector-action';
-import type { InferenceConnector } from '@kbn/inference-common';
-import { InferenceConnectorType } from '@kbn/inference-common';
+import { useLoadConnectors } from '@kbn/elastic-assistant';
 import { useNavigation } from '../../hooks/use_navigation';
+import { useKibana } from '../../hooks/use_kibana';
 
 interface ConnectorSelectorProps {
-  connectors: InferenceConnector[];
   selectedConnectorId?: string;
   onSelectConnector: (connectorId: string) => void;
-  isLoading?: boolean;
   defaultConnectorId?: string;
 }
 
 export const ConnectorSelector: React.FC<ConnectorSelectorProps> = ({
-  connectors,
   selectedConnectorId,
   onSelectConnector,
-  isLoading = false,
   defaultConnectorId,
 }) => {
   const { euiTheme } = useEuiTheme();
   const { navigateToManageConnectors } = useNavigation();
+  const {
+    services: { http, settings },
+  } = useKibana();
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
+
+  const { data: aiConnectors, isLoading } = useLoadConnectors({
+    http,
+    settings,
+    inferenceEnabled: true,
+  });
+
+  const connectors = useMemo(() => aiConnectors ?? [], [aiConnectors]);
 
   const togglePopover = () => setIsPopoverOpen(!isPopoverOpen);
   const closePopover = () => setIsPopoverOpen(false);
@@ -43,19 +50,17 @@ export const ConnectorSelector: React.FC<ConnectorSelectorProps> = ({
     inline-size: calc(${euiTheme.size.xxl} * 8);
   `;
 
-  // Split connectors into preconfigured and custom
   const { preConfiguredConnectors, customConnectors } = useMemo(() => {
     const preConfigured: ConnectorSelectableComponentProps['preConfiguredConnectors'] = [];
     const custom: ConnectorSelectableComponentProps['customConnectors'] = [];
 
     connectors.forEach((connector) => {
       const option = {
-        value: connector.connectorId,
-        label: connector.name || connector.connectorId,
+        value: connector.id,
+        label: connector.name,
       };
 
-      // Consider inference type connectors as "preconfigured"
-      if (connector.type === InferenceConnectorType.Inference) {
+      if (connector.isPreconfigured) {
         preConfigured.push(option);
       } else {
         custom.push(option);
@@ -65,29 +70,28 @@ export const ConnectorSelector: React.FC<ConnectorSelectorProps> = ({
     return { preConfiguredConnectors: preConfigured, customConnectors: custom };
   }, [connectors]);
 
-  const selectedConnector = connectors.find((c) => c.connectorId === selectedConnectorId);
-  const selectedConnectorName = selectedConnector?.name || selectedConnector?.connectorId;
+  const selectedConnector = connectors.find((c) => c.id === selectedConnectorId);
+  const selectedConnectorName = selectedConnector?.name || selectedConnectorId;
 
-  if (isLoading) {
-    return <EuiLoadingSpinner size="m" />;
-  }
+  const buttonLabel =
+    selectedConnectorName ||
+    i18n.translate('xpack.onechat.connectorSelector.noConnector', {
+      defaultMessage: 'No connector',
+    });
 
   const button = (
     <EuiButtonEmpty
-      iconType="arrowDown"
+      iconType={isLoading ? undefined : 'arrowDown'}
       iconSide="right"
       onClick={togglePopover}
-      disabled={connectors.length === 0}
+      disabled={isLoading || connectors.length === 0}
       data-test-subj="onechatConnectorSelectorButton"
       aria-haspopup="menu"
       aria-label={i18n.translate('xpack.onechat.connectorSelector.selectConnector', {
         defaultMessage: 'Select connector',
       })}
     >
-      {selectedConnectorName ||
-        i18n.translate('xpack.onechat.connectorSelector.noConnector', {
-          defaultMessage: 'No connector',
-        })}
+      {isLoading ? <EuiLoadingSpinner size="s" /> : buttonLabel}
     </EuiButtonEmpty>
   );
 
