@@ -7,6 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { NewAgentPolicySchema } from '../models';
+
+import { CreatePackagePolicyRequestSchema } from './package_policy';
+
 export const CreateCloudConnectorRequestSchema = {
   body: schema.object({
     name: schema.string({
@@ -152,5 +156,27 @@ export const UpdateCloudConnectorResponseSchema = schema.object({
     packagePolicyCount: schema.number(),
     created_at: schema.string(),
     updated_at: schema.string(),
+  }),
+});
+
+// Internal API: Create Agent Policy with Cloud Connector and Package Policy
+export const CreateAgentPolicyWithCloudConnectorRequestSchema = {
+  body: NewAgentPolicySchema.extends({
+    cloud_connector: CreateCloudConnectorRequestSchema.body,
+    package_policy: CreatePackagePolicyRequestSchema.body,
+  }),
+  query: schema.intersection([
+    schema.object({
+      sys_monitoring: schema.maybe(schema.boolean()),
+    }),
+    CreatePackagePolicyRequestSchema.query,
+  ]),
+};
+
+export const CreateAgentPolicyWithCloudConnectorResponseSchema = schema.object({
+  item: schema.object({
+    agent_policy_id: schema.string(),
+    cloud_connector_id: schema.string(),
+    package_policy_id: schema.string(),
   }),
 });

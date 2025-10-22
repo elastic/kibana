@@ -22,6 +22,8 @@ import {
   UpdateCloudConnectorResponseSchema,
   DeleteCloudConnectorRequestSchema,
   DeleteCloudConnectorResponseSchema,
+  CreateAgentPolicyWithCloudConnectorRequestSchema,
+  CreateAgentPolicyWithCloudConnectorResponseSchema,
 } from '../../types/rest_spec/cloud_connector';
 
 import {
@@ -30,6 +32,7 @@ import {
   getCloudConnectorHandler,
   updateCloudConnectorHandler,
   deleteCloudConnectorHandler,
+  createCloudConnectorWithPackagePolicyHandler,
 } from './handlers';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
@@ -256,5 +259,39 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       deleteCloudConnectorHandler
+    );
+
+  // POST /internal/fleet/cloud_connector_with_package_policy
+  // Internal API: Create cloud connector with agent policy and package policy
+  router.versioned
+    .post({
+      path: CLOUD_CONNECTOR_API_ROUTES.CREATE_WITH_PACKAGE_POLICY,
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL],
+        },
+      },
+      summary: `Create a cloud connector with agent policy and package policy`,
+      description: `Atomically creates a cloud connector, agent policy, and package policy in a single request. Designed for agentless integrations that require cloud connectors. Implements comprehensive rollback on failure to prevent orphaned resources.`,
+      options: {
+        tags: ['oas-tag:Cloud Connectors'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: CreateAgentPolicyWithCloudConnectorRequestSchema,
+          response: {
+            200: {
+              body: () => CreateAgentPolicyWithCloudConnectorResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      createCloudConnectorWithPackagePolicyHandler
     );
 };
