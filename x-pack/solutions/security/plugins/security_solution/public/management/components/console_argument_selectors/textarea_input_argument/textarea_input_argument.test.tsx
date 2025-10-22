@@ -154,4 +154,20 @@ describe('TextareaInputArgument component', () => {
 
     expect(getByTestId('test-noMultipleArgs')).toBeTruthy();
   });
+
+  it('should show help content when help icon is clicked', async () => {
+    componentPropsMock.helpContent = 'some content here';
+    const { getByTestId } = render();
+
+    await userEvent.click(getByTestId('test-helpButton'));
+
+    expect(getByTestId('test-helpContent').textContent).toEqual(componentPropsMock.helpContent);
+  });
+
+  it('should show disabled help icon when showHelpIcon is false', async () => {
+    componentPropsMock.showHelpIcon = false;
+    const { getByTestId } = render();
+
+    expect((getByTestId('test-helpButton') as HTMLButtonElement).disabled).toEqual(true);
+  });
 });

@@ -22,6 +22,7 @@ import {
   useEuiTheme,
   EuiButton,
   EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -62,8 +63,12 @@ export interface TextareaInputArgumentProps<
   textareaPlaceholderLabel?: string;
   /** Help icon `title` and `aria-label` label */
   helpIconLabel?: string;
+  /** Message to display on help icons tooltip when no help is available */
+  helpNotAvailableTooltip?: string;
   /** Label for the close button in the popup */
   closePopupButtonLabel?: string;
+  /** If set to `false`, the help icons in the popup will not be shown. Default is is `true` */
+  showHelpIcon?: boolean;
   'data-test-subj'?: string;
 }
 
@@ -89,7 +94,12 @@ export const HELP_ICON_LABEL = i18n.translate(
 
 export const CLOSE_POPUP_BUTTON_LABEL = i18n.translate(
   'xpack.securitySolution.consoleArgumentSelectors.textAreaInputArgument.closePopupButtonLabel',
-  { defaultMessage: 'Close' }
+  { defaultMessage: 'Apply' }
+);
+
+export const HELP_NOT_AVAILABLE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.consoleArgumentSelectors.textAreaInputArgument.helpNotAvailable',
+  { defaultMessage: 'Help not available' }
 );
 
 /**
@@ -110,10 +120,12 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
     noInputEnteredMessage = NO_INPUT_ENTERED_MESSAGE,
     textareaPlaceholderLabel = TEXTAREA_PLACEHOLDER_TEXT,
     helpIconLabel = HELP_ICON_LABEL,
+    helpNotAvailableTooltip = HELP_NOT_AVAILABLE_TOOLTIP,
     closePopupButtonLabel = CLOSE_POPUP_BUTTON_LABEL,
     width,
     textareaLabel,
     helpContent,
+    showHelpIcon = true,
     'data-test-subj': dataTestSubj,
   }) => {
     const testId = useTestIdGenerator(
@@ -195,6 +207,34 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
       setShowHelpContent((prev) => !prev);
     }, []);
 
+    const helpButton = useMemo(() => {
+      const button = (
+        <EuiButtonIcon
+          iconType="help"
+          size="xs"
+          onClick={handleHelpOnClick}
+          isSelected={showHelpContent}
+          title={helpIconLabel}
+          aria-label={helpIconLabel}
+          disabled={!helpContent}
+          data-test-subj={testId('helpButton')}
+        />
+      );
+
+      return helpContent ? (
+        button
+      ) : (
+        <EuiToolTip content={helpNotAvailableTooltip}>{button}</EuiToolTip>
+      );
+    }, [
+      handleHelpOnClick,
+      helpContent,
+      helpIconLabel,
+      helpNotAvailableTooltip,
+      showHelpContent,
+      testId,
+    ]);
+
     return shouldRender ? (
       <EuiPopover
         isOpen={state.isPopoverOpen}
@@ -214,16 +254,18 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
                 )}
               </div>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType="pencil"
-                size="xs"
-                onClick={handleOpenPopover}
-                title={openLabel}
-                aria-label={openLabel}
-                data-test-subj={testId('openInputButton')}
-              />
-            </EuiFlexItem>
+            {showHelpIcon && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  iconType="pencil"
+                  size="xs"
+                  onClick={handleOpenPopover}
+                  title={openLabel}
+                  aria-label={openLabel}
+                  data-test-subj={testId('openInputButton')}
+                />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         }
       >
@@ -236,19 +278,8 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
                     <h5>{textareaLabel ?? argName}</h5>
                   </EuiTitle>
                 </EuiFlexItem>
-                {helpContent && (
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      iconType="help"
-                      size="xs"
-                      onClick={handleHelpOnClick}
-                      isSelected={showHelpContent}
-                      title={helpIconLabel}
-                      aria-label={helpIconLabel}
-                      data-test-subj={testId('helpButton')}
-                    />
-                  </EuiFlexItem>
-                )}
+
+                <EuiFlexItem grow={false}>{helpButton}</EuiFlexItem>
               </EuiFlexGroup>
             </EuiPanel>
             <div>
@@ -279,7 +310,11 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
                       hasBorder={true}
                       className="eui-fullHeight"
                     >
-                      <EuiText size="s" className="eui-scrollBar eui-yScroll">
+                      <EuiText
+                        size="s"
+                        className="eui-scrollBar eui-yScroll"
+                        data-test-subj={testId('helpContent')}
+                      >
                         {helpContent}
                       </EuiText>
                     </EuiPanel>
@@ -292,7 +327,6 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
               <EuiFlexGroup alignItems="flexEnd" justifyContent="flexEnd" gutterSize="none">
                 <EuiFlexItem grow={false}>
                   <EuiButton
-                    iconType="cross"
                     size="s"
                     onClick={handleClosePopover}
                     data-test-subj={testId('closeButton')}
