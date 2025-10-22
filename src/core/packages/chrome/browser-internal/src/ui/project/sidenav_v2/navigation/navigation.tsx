@@ -96,7 +96,7 @@ const useNavigationItems = (
   props: Pick<ChromeNavigationProps, 'navigationTree$' | 'navLinks$' | 'activeNodes$' | 'basePath'>
 ): NavigationItems | null => {
   const state$ = useMemo(
-    () => combineLatest([props.navigationTree$, props.activeNodes$]).pipe(debounceTime(0)),
+    () => combineLatest([props.navigationTree$, props.activeNodes$]),
     [props.navigationTree$, props.activeNodes$]
   );
   const state = useObservable(state$);
