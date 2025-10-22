@@ -12,6 +12,7 @@ import {
   modelVersion4,
   modelVersion5,
   modelVersion6,
+  modelVersion7,
 } from '.';
 
 describe('Model versions', () => {
@@ -179,6 +180,27 @@ describe('Model versions', () => {
           Object {
             "backfillFn": [Function],
             "type": "data_backfill",
+          },
+        ]
+      `);
+    });
+  });
+
+  describe('version 7', () => {
+    it('returns version 7 changes correctly', () => {
+      expect(modelVersion7.changes).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "addedMappings": Object {
+              "observables": Object {
+                "properties": Object {
+                  "description": Object {
+                    "type": "keyword",
+                  },
+                },
+              },
+            },
+            "type": "mappings_addition",
           },
         ]
       `);

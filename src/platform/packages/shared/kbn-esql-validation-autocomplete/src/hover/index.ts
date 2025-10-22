@@ -200,12 +200,10 @@ async function getHintForFunctionArg(
     columns: columnsMap,
   };
 
-  const { typesToSuggestNext, enrichedArgs } = getValidSignaturesAndTypesToSuggestNext(
+  const { compatibleParamDefs, enrichedArgs } = getValidSignaturesAndTypesToSuggestNext(
     fnNode,
     references,
-    fnDefinition,
-    query,
-    offset
+    fnDefinition
   );
 
   const hoveredArg: ESQLAstItem & {
@@ -224,9 +222,9 @@ async function getHintForFunctionArg(
     }
   }
 
-  if (typesToSuggestNext.length > 0) {
+  if (compatibleParamDefs.length > 0) {
     contents.push({
-      value: `**${ACCEPTABLE_TYPES_HOVER}**: ${typesToSuggestNext
+      value: `**${ACCEPTABLE_TYPES_HOVER}**: ${compatibleParamDefs
         .map(
           ({ type, constantOnly }) =>
             `${constantOnly ? '_constant_ ' : ''}**${type}**` +

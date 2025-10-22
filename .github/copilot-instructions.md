@@ -96,6 +96,7 @@ yarn start --no-base-path   # Disable basePath
 yarn serverless-es          # Elasticsearch serverless
 yarn serverless-oblt        # Observability serverless
 yarn serverless-security    # Security serverless
+yarn serverless-workplace-ai # Workplace AI serverless
 ```
 
 ### Testing
