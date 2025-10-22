@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common/types';
-import type { ExpressionValueVisDimension } from '../expression_functions';
+import type { ExpressionValueVisDimension } from '.';
 
 const getAccessorByIndex = (accessor: number, columns: Datatable['columns']) =>
   columns.length > accessor ? accessor : undefined;
@@ -58,7 +58,7 @@ export function findAccessorOrFail(
 
   if (foundAccessor === undefined) {
     throw new Error(
-      i18n.translate('visualizations.function.findAccessorOrFail.error.accessor', {
+      i18n.translate('chartExpressionsCommon.function.findAccessorOrFail.error.accessor', {
         defaultMessage: 'Provided column name or index is invalid: {accessor}',
         values: { accessor },
       })
