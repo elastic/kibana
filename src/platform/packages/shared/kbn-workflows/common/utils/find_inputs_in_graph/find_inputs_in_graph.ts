@@ -7,11 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowGraph } from '../../../graph';
-import { extractNunjucksVariables } from '../extract_nunjucks_variables/extract_nunjucks_variables';
+import type { AtomicGraphNode, EnterForeachNode, EnterIfNode, WorkflowGraph } from '../../../graph';
 import { extractPropertyPathsFromKql } from '../extract_property_paths_from_kql/extract_property_paths_from_kql';
-
-import type { AtomicGraphNode, EnterForeachNode, EnterIfNode } from '../../../graph';
+import { extractTemplateVariables } from '../extract_template_variables/extract_template_variables';
 
 export function findInputsInGraph(workflowGraph: WorkflowGraph): Record<string, string[]> {
   const inputsInSteps: Record<string, string[]> = {};
@@ -55,7 +53,7 @@ export function findInputsInGraph(workflowGraph: WorkflowGraph): Record<string, 
           return;
         }
 
-        extractNunjucksVariables(input).forEach((variable) => stepInputs.push(variable));
+        extractTemplateVariables(input).forEach((variable) => stepInputs.push(variable));
       });
     }
 
