@@ -969,11 +969,12 @@ export const LensTopNavMenu = ({
   );
 
   const onProjectRoutingChangeWrapped = useCallback(
-    (newProjectRouting: ProjectRouting) => {
-      if (!isEqual(newProjectRouting, projectRouting)) {
-        dispatchSetState({ projectRouting: newProjectRouting });
+    (value: ProjectRouting) => {
+      if (value !== projectRouting) {
+        const newProjectRouting = value === '_alias:*' ? undefined : value;
         // Start a new search session when project routing changes
-        dispatchSetState({
+        dispatchSetState({ 
+          projectRouting: newProjectRouting,
           searchSessionId: data.search.session.start(),
           resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
         });
