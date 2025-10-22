@@ -45,7 +45,6 @@ export interface TabProps {
   tabsSizeConfig: TabsSizeConfig;
   getTabMenuItems?: GetTabMenuItems;
   getPreviewData: (item: TabItem) => TabPreviewData;
-
   services: TabsServices;
   onLabelEdited: EditTabLabelProps['onLabelEdited'];
   onSelect: (item: TabItem) => Promise<void>;

@@ -30,6 +30,15 @@ const tabsSizeConfig = {
 };
 
 describe('Tab', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
+  });
+
   it('renders tab', async () => {
     const onLabelEdited = jest.fn();
     const onSelect = jest.fn();
@@ -111,6 +120,7 @@ describe('Tab', () => {
   });
 
   it('can edit tab label', async () => {
+    const user = userEvent.setup({ delay: null, advanceTimers: jest.advanceTimersByTime });
     const onLabelEdited = jest.fn();
     const onSelect = jest.fn();
     const onClose = jest.fn();
@@ -130,14 +140,14 @@ describe('Tab', () => {
     );
 
     expect(screen.queryByText(tabItem.label)).toBeInTheDocument();
-    await userEvent.dblClick(screen.getByTestId(tabButtonTestSubj));
+    await user.dblClick(screen.getByTestId(tabButtonTestSubj));
     expect(screen.queryByText(tabItem.label)).not.toBeInTheDocument();
 
     const input = screen.getByRole('textbox');
-    await userEvent.clear(input);
-    await userEvent.type(input, 'new-label');
+    await user.clear(input);
+    await user.type(input, 'new-label');
     expect(input).toHaveValue('new-label');
-    await userEvent.keyboard('{enter}');
+    await user.keyboard('{enter}');
     expect(onLabelEdited).toHaveBeenCalledWith(tabItem, 'new-label');
 
     expect(screen.queryByTestId(tabButtonTestSubj)).toBeInTheDocument();
@@ -145,6 +155,7 @@ describe('Tab', () => {
   });
 
   it('can cancel editing of tab label', async () => {
+    const user = userEvent.setup({ delay: null, advanceTimers: jest.advanceTimersByTime });
     const onLabelEdited = jest.fn();
     const onSelect = jest.fn();
     const onClose = jest.fn();
@@ -164,14 +175,14 @@ describe('Tab', () => {
     );
 
     expect(screen.queryByText(tabItem.label)).toBeInTheDocument();
-    await userEvent.dblClick(screen.getByTestId(tabButtonTestSubj));
+    await user.dblClick(screen.getByTestId(tabButtonTestSubj));
     expect(screen.queryByText(tabItem.label)).not.toBeInTheDocument();
 
     const input = screen.getByRole('textbox');
-    await userEvent.clear(input);
-    await userEvent.type(input, 'new-label');
+    await user.clear(input);
+    await user.type(input, 'new-label');
     expect(input).toHaveValue('new-label');
-    await userEvent.keyboard('{escape}');
+    await user.keyboard('{escape}');
 
     await waitFor(() => {
       expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
@@ -181,6 +192,7 @@ describe('Tab', () => {
   });
 
   it('can finish editing of tab label on blur', async () => {
+    const user = userEvent.setup({ delay: null, advanceTimers: jest.advanceTimersByTime });
     const onLabelEdited = jest.fn();
     const onSelect = jest.fn();
     const onClose = jest.fn();
@@ -200,14 +212,14 @@ describe('Tab', () => {
     );
 
     expect(screen.queryByText(tabItem.label)).toBeInTheDocument();
-    await userEvent.dblClick(screen.getByTestId(tabButtonTestSubj));
+    await user.dblClick(screen.getByTestId(tabButtonTestSubj));
     expect(screen.queryByText(tabItem.label)).not.toBeInTheDocument();
 
     const input = screen.getByRole('textbox');
-    await userEvent.clear(input);
-    await userEvent.type(input, 'label2   ');
+    await user.clear(input);
+    await user.type(input, 'label2   ');
     expect(input).toHaveValue('label2   ');
-    await userEvent.keyboard('{tab}');
+    await user.keyboard('{tab}');
     expect(onLabelEdited).toHaveBeenCalledWith(tabItem, 'label2');
 
     expect(screen.queryByTestId(tabButtonTestSubj)).toBeInTheDocument();
@@ -215,6 +227,7 @@ describe('Tab', () => {
   });
 
   it('does not trigger inline editing when enableInlineLabelEditing is false', async () => {
+    const user = userEvent.setup({ delay: null, advanceTimers: jest.advanceTimersByTime });
     const onLabelEdited = jest.fn();
     const onSelect = jest.fn();
     const onClose = jest.fn();
@@ -235,11 +248,85 @@ describe('Tab', () => {
     );
 
     expect(screen.queryByText(tabItem.label)).toBeInTheDocument();
-    await userEvent.dblClick(screen.getByTestId(tabButtonTestSubj));
+    await user.dblClick(screen.getByTestId(tabButtonTestSubj));
 
     // Verify that double click did not trigger inline editing
     expect(screen.queryByText(tabItem.label)).toBeInTheDocument();
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
     expect(onLabelEdited).not.toHaveBeenCalled();
+  });
+
+  it('shows preview when enablePreview is true', async () => {
+    const user = userEvent.setup({ delay: null, advanceTimers: jest.advanceTimersByTime });
+    const onLabelEdited = jest.fn();
+    const onSelect = jest.fn();
+    const onClose = jest.fn();
+
+    render(
+      <Tab
+        tabContentId={tabContentId}
+        tabsSizeConfig={tabsSizeConfig}
+        item={tabItem}
+        isSelected={false}
+        services={servicesMock}
+        getPreviewData={getPreviewDataMock}
+        onLabelEdited={onLabelEdited}
+        onSelect={onSelect}
+        onClose={onClose}
+        enablePreview={true}
+      />
+    );
+
+    const tabButton = screen.getByTestId(tabButtonTestSubj);
+
+    // Hover over the tab to trigger preview
+    await user.hover(tabButton);
+
+    // Fast-forward the preview delay (default is 1250ms)
+    act(() => {
+      jest.advanceTimersByTime(1250);
+    });
+
+    await waitFor(() => {
+      const preview = screen.getByTestId(`unifiedTabs_tabPreviewCodeBlock_${tabItem.id}`);
+      expect(preview).toBeInTheDocument();
+    });
+  });
+
+  it('does not show preview when enablePreview is false', async () => {
+    const user = userEvent.setup({ delay: null, advanceTimers: jest.advanceTimersByTime });
+    const onLabelEdited = jest.fn();
+    const onSelect = jest.fn();
+    const onClose = jest.fn();
+
+    render(
+      <Tab
+        tabContentId={tabContentId}
+        tabsSizeConfig={tabsSizeConfig}
+        item={tabItem}
+        isSelected={false}
+        services={servicesMock}
+        getPreviewData={getPreviewDataMock}
+        onLabelEdited={onLabelEdited}
+        onSelect={onSelect}
+        onClose={onClose}
+        enablePreview={false}
+      />
+    );
+
+    const tabButton = screen.getByTestId(tabButtonTestSubj);
+
+    // Hover over the tab - preview should not be shown
+    await user.hover(tabButton);
+
+    // Fast-forward the preview delay (default is 1250ms)
+    act(() => {
+      jest.advanceTimersByTime(1250);
+    });
+
+    await waitFor(() => {
+      const preview = screen.queryByTestId(`unifiedTabs_tabPreviewCodeBlock_${tabItem.id}`);
+      expect(preview).not.toBeInTheDocument();
+    });
   });
 });
