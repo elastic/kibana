@@ -64,6 +64,7 @@ export const transformDashboardIn = ({
     );
 
     const attributes = {
+      description: '',
       ...rest,
       ...(controlGroupInput && {
         controlGroupInput: transformControlGroupIn(controlGroupInput),
@@ -76,7 +77,7 @@ export const transformDashboardIn = ({
       timeRestore,
       ...(timeRange && timeRestore && { timeFrom: timeRange.from, timeTo: timeRange.to }),
       kibanaSavedObjectMeta: { searchSourceJSON },
-    } as DashboardSavedObjectAttributes;
+    };
     return {
       attributes,
       references: [
