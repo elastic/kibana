@@ -190,41 +190,20 @@ export function getMatchingSignatures(
   givenTypes: Array<SupportedDataType | 'unknown'>,
   // a boolean array indicating which args are literals
   literalMask: boolean[],
-  acceptUnknown: boolean
+  acceptUnknown: boolean,
+  acceptPartialMatches: boolean = false
 ): Signature[] {
   return signatures.filter((sig) => {
-    if (!matchesArity(sig, givenTypes.length)) {
+    if (!acceptPartialMatches && !matchesArity(sig, givenTypes.length)) {
       return false;
     }
 
-    return givenTypes.every((givenType, index) => {
-      // safe to assume the param is there, because we checked the length above
-      const expectedType = unwrapArrayOneLevel(getParamAtPosition(sig, index)!.type);
-      return argMatchesParamType(givenType, expectedType, literalMask[index], acceptUnknown);
-    });
-  });
-}
-
-/**
- * Returns all signatures matching the given types
- * As difference with getMatchingSignatures, it returns all signatures that
- * STARTS with the given parameters.
- * @param definition
- * @param types
- */
-export function getPartiallyMatchingSignatures(
-  signatures: Signature[],
-  givenTypes: Array<SupportedDataType | 'unknown'>,
-  // a boolean array indicating which args are literals
-  literalMask: boolean[],
-  acceptUnknown: boolean
-): Signature[] {
-  return signatures.filter((sig) => {
     return givenTypes.every((givenType, index) => {
       const param = getParamAtPosition(sig, index);
       if (!param) {
         return false;
       }
+
       const expectedType = unwrapArrayOneLevel(param.type);
       return argMatchesParamType(givenType, expectedType, literalMask[index], acceptUnknown);
     });
