@@ -8,10 +8,10 @@
  */
 
 import type { EnterForeachNode } from '@kbn/workflows/graph';
-import type { NodeImplementation } from '../node_implementation';
+import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
-import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
+import type { NodeImplementation } from '../node_implementation';
 
 export class EnterForeachNodeImpl implements NodeImplementation {
   constructor(
@@ -67,11 +67,13 @@ export class EnterForeachNodeImpl implements NodeImplementation {
 
     await this.stepExecutionRuntime.setCurrentStepState(foreachState);
     // Enter a new scope for the first iteration
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.wfExecutionRuntimeManager.enterScope(foreachState.index!.toString());
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 
   private async advanceIteration(): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     let foreachState = this.stepExecutionRuntime.getCurrentStepState()!;
     // Update items and index if they have changed
     const items = foreachState.items;
@@ -86,11 +88,14 @@ export class EnterForeachNodeImpl implements NodeImplementation {
     };
     // Enter a new scope for the new iteration
     await this.stepExecutionRuntime.setCurrentStepState(foreachState);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.wfExecutionRuntimeManager.enterScope(foreachState.index!.toString());
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private getItems(): any[] {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let items: any[] = [];
 
     if (!this.node.configuration.foreach) {
