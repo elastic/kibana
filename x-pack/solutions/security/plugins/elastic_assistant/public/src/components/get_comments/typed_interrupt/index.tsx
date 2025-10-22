@@ -29,7 +29,6 @@ export const InterruptFactory = ({
   interruptResumeValue: resumedValue,
   isLastInConversation,
 }: Props<InterruptType>) => {
-
   switch (interrupt.type) {
     case 'SELECT_OPTION':
       return (
