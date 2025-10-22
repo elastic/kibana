@@ -63,7 +63,6 @@
     "@kbn/security-plugin",
     "@kbn/observability-plugin",
     "@kbn/actions-plugin",
-    "@kbn/stack-connectors-plugin",
     "@kbn/features-plugin",
     "@kbn/serverless",
     "@kbn/task-manager-plugin",
