@@ -18,11 +18,7 @@ import { CONTROL_HOVER_TRIGGER_ID } from '@kbn/controls-constants';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { AnyApiAction } from '@kbn/presentation-panel-plugin/public/panel_actions/types';
-import {
-  apiCanLockHoverActions,
-  type EmbeddableApiContext,
-  type ViewMode,
-} from '@kbn/presentation-publishing';
+import { type EmbeddableApiContext, type ViewMode } from '@kbn/presentation-publishing';
 import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 
 import type { ControlRendererServices } from '../types';
@@ -81,7 +77,6 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
   } = useKibana<ControlRendererServices>();
 
   const [floatingActions, setFloatingActions] = useState<FloatingActionItem[]>([]);
-  const [hasLockedHoverActions, setHasLockedHoverActions] = useState(false);
 
   useEffect(() => {
     if (!api) return;
@@ -144,13 +139,6 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
         subscriptions.add(compatibilitySubscription);
       }
     })();
-
-    if (apiCanLockHoverActions(api)) {
-      subscriptions.add(
-        api.hasLockedHoverActions$.subscribe((nextLock) => setHasLockedHoverActions(nextLock))
-      );
-    }
-
     return () => {
       canceled = true;
       subscriptions.unsubscribe();
@@ -159,10 +147,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
 
   const styles = useMemoCss(floatingActionsStyles);
   return (
-    <div
-      css={styles.wrapper}
-      className={classNames(hasLockedHoverActions ? 'lockHoverActions' : null)}
-    >
+    <div css={styles.wrapper}>
       {children}
       {floatingActions.length > 0 && (
         <div
@@ -185,7 +170,7 @@ const floatingActionsStyles = {
   wrapper: ({ euiTheme }: UseEuiTheme) =>
     css({
       position: 'relative',
-      '&:hover, &:focus-within, &.lockHoverActions': {
+      '&:hover, &:focus-within': {
         '.presentationUtil__floatingActions': {
           opacity: 1,
           visibility: 'visible',
