@@ -58,7 +58,7 @@ export const registerFileUploadAnalyticsEvents = (analytics: AnalyticsServiceSet
       file_size_bytes: {
         type: 'integer',
         _meta: {
-          description: 'The bucket in which the file size of the analyzed file falls into.',
+          description: 'The size of the uploaded file in bytes.',
         },
       },
       num_lines_analyzed: {
@@ -156,7 +156,7 @@ export const registerFileUploadAnalyticsEvents = (analytics: AnalyticsServiceSet
       file_size_bytes: {
         type: 'integer',
         _meta: {
-          description: 'The bucket in which the file size of the analyzed file falls into.',
+          description: 'The size of the uploaded file in bytes.',
         },
       },
       documents_success: {
