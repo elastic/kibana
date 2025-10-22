@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
-import { TEST_KIBANA_HOST, TEST_KIBANA_PORT } from '@kbn/test-services';
 import { getUrlPrefix } from '../../../common/lib';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 
@@ -34,7 +33,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(response.body.config).not.key('casesConfiguration');
       expect(response.body.config).not.key('isCaseOwned');
       expect(response.body.config).to.eql({
-        apiUrl: `http://elastic:changeme@${TEST_KIBANA_HOST}:${TEST_KIBANA_PORT}/api/_actions-FTS-external-service-simulators/jira`,
+        apiUrl: `http://elastic:changeme@localhost:5620/api/_actions-FTS-external-service-simulators/jira`,
         projectKey: 'CK',
       });
     });
