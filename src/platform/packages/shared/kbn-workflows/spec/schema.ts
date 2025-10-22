@@ -393,11 +393,9 @@ const WorkflowInputChoiceSchema = WorkflowInputBaseSchema.extend({
 
 const WorkflowInputArraySchema = WorkflowInputBaseSchema.extend({
   type: z.literal('array'),
-  items: z.enum(['string', 'number', 'boolean']).optional(),
   minItems: z.number().int().nonnegative().optional(),
   maxItems: z.number().int().nonnegative().optional(),
-  // validate default later based on items; allow omission
-  default: z.array(z.any()).optional(),
+  default: z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]).optional(),
 });
 
 export const WorkflowInputSchema = z.union([
