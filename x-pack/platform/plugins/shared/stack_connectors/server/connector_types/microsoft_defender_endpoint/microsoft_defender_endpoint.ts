@@ -11,9 +11,8 @@ import type { AxiosError, AxiosResponse } from 'axios';
 import type { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import type { Stream } from 'stream';
-import { OAuthTokenManager } from './o_auth_token_manager';
-import { MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION } from '../../../common/microsoft_defender_endpoint/constants';
 import {
+  SUB_ACTION,
   IsolateHostParamsSchema,
   ReleaseHostParamsSchema,
   TestConnectorParamsSchema,
@@ -26,7 +25,7 @@ import {
   GetActionResultsParamsSchema,
   DownloadActionResultsResponseSchema,
   CancelParamsSchema,
-} from '../../../common/microsoft_defender_endpoint/schema';
+} from '@kbn/connector-schemas/microsoft_defender_endpoint';
 import type {
   MicrosoftDefenderEndpointAgentDetailsParams,
   MicrosoftDefenderEndpointIsolateHostParams,
@@ -46,7 +45,8 @@ import type {
   MicrosoftDefenderEndpointRunScriptParams,
   MicrosoftDefenderEndpointGetActionResultsResponse,
   MicrosoftDefenderEndpointCancelParams,
-} from '../../../common/microsoft_defender_endpoint/types';
+} from '@kbn/connector-schemas/microsoft_defender_endpoint';
+import { OAuthTokenManager } from './o_auth_token_manager';
 
 export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
   MicrosoftDefenderEndpointConfig,
@@ -81,58 +81,58 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
 
   private registerSubActions() {
     this.registerSubAction({
-      name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_AGENT_DETAILS,
+      name: SUB_ACTION.GET_AGENT_DETAILS,
       method: 'getAgentDetails',
       schema: AgentDetailsParamsSchema,
     });
     this.registerSubAction({
-      name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_AGENT_LIST,
+      name: SUB_ACTION.GET_AGENT_LIST,
       method: 'getAgentList',
       schema: AgentListParamsSchema,
     });
 
     this.registerSubAction({
-      name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.ISOLATE_HOST,
+      name: SUB_ACTION.ISOLATE_HOST,
       method: 'isolateHost',
       schema: IsolateHostParamsSchema,
     });
 
     this.registerSubAction({
-      name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.RELEASE_HOST,
+      name: SUB_ACTION.RELEASE_HOST,
       method: 'releaseHost',
       schema: ReleaseHostParamsSchema,
     });
 
     this.registerSubAction({
-      name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.TEST_CONNECTOR,
+      name: SUB_ACTION.TEST_CONNECTOR,
       method: 'testConnector',
       schema: TestConnectorParamsSchema,
     });
 
     this.registerSubAction({
-      name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTIONS,
+      name: SUB_ACTION.GET_ACTIONS,
       method: 'getActions',
       schema: GetActionsParamsSchema,
     });
     this.registerSubAction({
-      name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_LIBRARY_FILES,
+      name: SUB_ACTION.GET_LIBRARY_FILES,
       method: 'getLibraryFiles',
       schema: MicrosoftDefenderEndpointEmptyParamsSchema,
     });
 
     this.registerSubAction({
-      name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.RUN_SCRIPT,
+      name: SUB_ACTION.RUN_SCRIPT,
       method: 'runScript',
       schema: RunScriptParamsSchema,
     });
     this.registerSubAction({
-      name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.CANCEL_ACTION,
+      name: SUB_ACTION.CANCEL_ACTION,
       method: 'cancelAction',
       schema: CancelParamsSchema,
     });
 
     this.registerSubAction({
-      name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTION_RESULTS,
+      name: SUB_ACTION.GET_ACTION_RESULTS,
       method: 'getActionResults',
       schema: GetActionResultsParamsSchema,
     });

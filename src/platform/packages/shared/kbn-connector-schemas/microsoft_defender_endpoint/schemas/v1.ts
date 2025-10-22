@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
 import { z } from '@kbn/zod';
-import { MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION } from './constants';
+import { SUB_ACTION } from '../constants';
 
 // ----------------------------------
 // Connector setup schemas
@@ -181,27 +182,27 @@ export const DownloadActionResultsResponseSchema = z.any();
 
 const TestConnectorSchema = z
   .object({
-    subAction: z.literal(MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.TEST_CONNECTOR),
+    subAction: z.literal(SUB_ACTION.TEST_CONNECTOR),
     subActionParams: TestConnectorParamsSchema,
   })
   .strict();
 
 const IsolateHostSchema = z
   .object({
-    subAction: z.literal(MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.ISOLATE_HOST),
+    subAction: z.literal(SUB_ACTION.ISOLATE_HOST),
     subActionParams: IsolateHostParamsSchema,
   })
   .strict();
 
 const ReleaseHostSchema = z
   .object({
-    subAction: z.literal(MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.RELEASE_HOST),
+    subAction: z.literal(SUB_ACTION.RELEASE_HOST),
     subActionParams: ReleaseHostParamsSchema,
   })
   .strict();
 const RunScriptSchema = z
   .object({
-    subAction: z.literal(MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.RUN_SCRIPT),
+    subAction: z.literal(SUB_ACTION.RUN_SCRIPT),
     subActionParams: RunScriptParamsSchema,
   })
   .strict();

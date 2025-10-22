@@ -49,9 +49,9 @@ import {
   CONNECTOR_ID as CROWDSTRIKE_CONNECTOR_ID,
 } from '@kbn/connector-schemas/crowdstrike/constants';
 import {
-  MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION,
-  MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID,
-} from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/constants';
+  SUB_ACTION as MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION,
+  CONNECTOR_ID as MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID,
+} from '@kbn/connector-schemas/microsoft_defender_endpoint/constants';
 import {
   SUB_ACTION as JiraServiceManagementSubActions,
   CONNECTOR_ID as JIRA_SERVICE_MANAGEMENT_CONNECTOR_TYPE_ID,
