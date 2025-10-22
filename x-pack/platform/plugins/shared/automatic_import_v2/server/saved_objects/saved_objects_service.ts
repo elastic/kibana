@@ -175,20 +175,134 @@ export class AutomaticImportSavedObjectService {
   }
 
   /**
-   * Delete an integration by ID
+   * Delete an integration by ID and cascade delete all associated data streams
    * @param integrationId - The ID of the integration
    * @param options - The options for the delete
-   * @returns The deleted integration
+   * @returns Object containing deletion results with success status and any errors
    */
-  public async deleteIntegration(integrationId: string, options?: SavedObjectsDeleteOptions): Promise<{}> {
+  public async deleteIntegration(
+    integrationId: string,
+    options?: SavedObjectsDeleteOptions
+  ): Promise<{ success: boolean; dataStreamsDeleted: number; errors: Array<{ id: string; error: string }> }> {
+    this.logger.debug(`Starting cascade deletion for integration: ${integrationId}`);
+
+    const deletionErrors: Array<{ id: string; error: string }> = [];
+    let dataStreamsDeleted = 0;
+
     try {
-      this.logger.debug(`Deleting integration with id:${integrationId}`)
-      return await this.savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, integrationId, options)
+      // delete up to 100 data streams at a time
+      const perPage = 100;
+      let page = 1;
+      let hasMore = true;
+      const dataStreamsToDelete: Array<{ id: string; type: string }> = [];
+
+      while (hasMore) {
+        try {
+          const dataStreamsResponse = await this.savedObjectsClient.find<DataStreamAttributes>({
+            type: DATA_STREAM_SAVED_OBJECT_TYPE,
+            filter: `${DATA_STREAM_SAVED_OBJECT_TYPE}.attributes.integration_id: ${JSON.stringify(integrationId)}`,
+            page,
+            perPage,
+            fields: ['integration_id'],
+          });
+
+          dataStreamsToDelete.push(
+            ...dataStreamsResponse.saved_objects.map((ds) => ({
+              id: ds.id,
+              type: DATA_STREAM_SAVED_OBJECT_TYPE,
+            }))
+          );
+
+          // If 100 saved objects are retrieved in a page, then we try to see if there are more
+          hasMore = dataStreamsResponse.saved_objects.length === perPage;
+          page++;
+        } catch (error) {
+          this.logger.error(
+            `Failed to find data streams for integration ${integrationId} on page ${page}: ${error}`
+          );
+          hasMore = false;
+        }
+      }
+
+      this.logger.debug(
+        `Found ${dataStreamsToDelete.length} data streams to delete for integration ${integrationId}`
+      );
+
+
+      const CHUNK_SIZE = 50;
+      if (dataStreamsToDelete.length > 0) {
+        for (let i = 0; i < dataStreamsToDelete.length; i += CHUNK_SIZE) {
+          const chunk = dataStreamsToDelete.slice(i, i + CHUNK_SIZE);
+          try {
+            const bulkDeleteResult = await this.savedObjectsClient.bulkDelete(chunk, {
+              ...options,
+              force: true,
+            });
+
+            // Process results to track successes and failures
+            bulkDeleteResult.statuses.forEach((status) => {
+              if (status.success) {
+                dataStreamsDeleted++;
+              } else {
+                const errorMessage = status.error?.message || 'Unknown error';
+                this.logger.warn(
+                  `Failed to delete data stream ${status.id}: ${errorMessage}`
+                );
+                deletionErrors.push({
+                  id: status.id,
+                  error: errorMessage,
+                });
+              }
+            });
+          } catch (bulkDeleteError) {
+            // If bulk delete fails entirely, log and track errors for this chunk
+            this.logger.error(
+              `Bulk delete failed for chunk starting at index ${i}: ${bulkDeleteError}`
+            );
+            chunk.forEach((ds) => {
+              deletionErrors.push({
+                id: ds.id,
+                error: bulkDeleteError instanceof Error ? bulkDeleteError.message : String(bulkDeleteError),
+              });
+            });
+          }
+        }
+
+        this.logger.debug(
+          `Deleted ${dataStreamsDeleted} of ${dataStreamsToDelete.length} data streams for integration ${integrationId}`
+        );
+      }
+
+
+      // Delete the integration if we successfully deleted all data streams OR the a force option is provided
+      const allDataStreamsDeleted = deletionErrors.length === 0;
+      if (!allDataStreamsDeleted && !options?.force) {
+        throw new Error(
+          `Cannot delete integration ${integrationId}: Failed to delete ${deletionErrors.length} data streams. ` +
+          `Use force option to delete the integration anyway. Errors: ${JSON.stringify(deletionErrors)}`
+        );
+      }
+
+      await this.savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, integrationId, options);
+
+      this.logger.info(
+        `Successfully deleted integration ${integrationId} and ${dataStreamsDeleted} associated data streams`
+      );
+
+      return {
+        success: true,
+        dataStreamsDeleted,
+        errors: deletionErrors,
+      };
     } catch (error) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+        this.logger.error(`Integration ${integrationId} not found`);
+        throw error; // Throw the original SavedObjectsError for proper error handling upstream
+      }
+
       this.logger.error(`Failed to delete integration ${integrationId}: ${error}`);
       throw error;
     }
-    // TODO: Delete all data streams associated with this integration in a Cascade type of operation so there are no orphaned data streams
   }
 
 

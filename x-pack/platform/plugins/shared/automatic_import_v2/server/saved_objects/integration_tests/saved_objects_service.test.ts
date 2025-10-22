@@ -318,6 +318,36 @@ describe('AutomaticImportSavedObjectService', () => {
           savedObjectService.updateIntegration(invalidData, { version: '1' })
         ).rejects.toThrow('Integration ID is required');
       });
+
+      it('should throw conflict error when integration internal versions do not match (optimistic concurrency control)', async () => {
+        const integrationData: IntegrationAttributes = {
+          integration_id: 'test-version-conflict-integration',
+          data_stream_count: 1,
+          status: TASK_STATUSES.pending,
+          metadata: {
+            version: 0,
+          },
+        };
+
+        // the version here is an internal version that is not the same as the version in the metadata
+        const created = await savedObjectService.insertIntegration(integrationData);
+
+        // Update once to change the internal version
+        await savedObjectService.updateIntegration(
+          { ...integrationData, data_stream_count: 2 },
+          { version: created.version! } // this internal version matches
+        );
+
+        await expect(
+          savedObjectService.updateIntegration(
+            { ...integrationData, data_stream_count: 3 },
+            { version: created.version! } // the stale internal version from create will throw a conflict error cause it has changed.
+          )
+        ).rejects.toThrow();
+
+        // Cleanup
+        await savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, 'test-version-conflict-integration');
+      });
     });
 
     describe('getAllIntegrations', () => {
@@ -364,27 +394,69 @@ describe('AutomaticImportSavedObjectService', () => {
       });
     });
 
-    describe('deleteIntegration', () => {
-      it('should delete an existing integration', async () => {
-        const integrationData: IntegrationAttributes = {
-          integration_id: 'test-delete-integration',
-          data_stream_count: 1,
+    describe('deleteIntegration - cascade deletion', () => {
+      it('should cascade delete integration and all associated data streams', async () => {
+        const integrationId = 'test-cascade-delete-integration';
+
+        // Create integration with 3 data streams to test cascade deletion
+        await savedObjectService.insertIntegration({
+          integration_id: integrationId,
+          data_stream_count: 0,
           status: TASK_STATUSES.pending,
-          metadata: {
-            version: 0,
+          metadata: { version: 0 },
+        });
+
+        await savedObjectService.insertDataStream({
+          integration_id: integrationId,
+          data_stream_id: 'test-cascade-ds-1',
+          job_info: {
+            job_id: 'job-1',
+            job_type: 'import',
+            status: TASK_STATUSES.pending,
           },
-        };
+          metadata: { sample_count: 0 },
+          result: {},
+        });
 
-        // Create integration
-        await savedObjectService.insertIntegration(integrationData);
+        await savedObjectService.insertDataStream({
+          integration_id: integrationId,
+          data_stream_id: 'test-cascade-ds-2',
+          job_info: {
+            job_id: 'job-2',
+            job_type: 'import',
+            status: TASK_STATUSES.pending,
+          },
+          metadata: { sample_count: 0 },
+          result: {},
+        });
 
-        // Delete it
-        await savedObjectService.deleteIntegration('test-delete-integration');
+        await savedObjectService.insertDataStream({
+          integration_id: integrationId,
+          data_stream_id: 'test-cascade-ds-3',
+          job_info: {
+            job_id: 'job-3',
+            job_type: 'import',
+            status: TASK_STATUSES.pending,
+          },
+          metadata: { sample_count: 0 },
+          result: {},
+        });
 
-        // Verify it's deleted
-        await expect(
-          savedObjectService.getIntegration('test-delete-integration')
-        ).rejects.toThrow();
+        // Verify 3 data streams exist
+        const dataStreamsBefore = await savedObjectService.findAllDataStreamsByIntegrationId(integrationId);
+        expect(dataStreamsBefore.total).toBe(3);
+
+        const result = await savedObjectService.deleteIntegration(integrationId);
+
+        expect(result.success).toBe(true);
+        expect(result.dataStreamsDeleted).toBe(3);
+        expect(result.errors).toEqual([]);
+
+        await expect(savedObjectService.getIntegration(integrationId)).rejects.toThrow();
+
+        await expect(savedObjectService.getDataStream('test-cascade-ds-1')).rejects.toThrow();
+        await expect(savedObjectService.getDataStream('test-cascade-ds-2')).rejects.toThrow();
+        await expect(savedObjectService.getDataStream('test-cascade-ds-3')).rejects.toThrow();
       });
 
       it('should throw error when deleting non-existent integration', async () => {
@@ -686,6 +758,39 @@ describe('AutomaticImportSavedObjectService', () => {
         await expect(
           savedObjectService.updateDataStream(invalidData, { version: '1' })
         ).rejects.toThrow('Data stream ID is required');
+      });
+
+      it('should throw conflict error when data stream internal versions do not match (optimistic concurrency control)', async () => {
+        const dataStreamData: DataStreamAttributes = {
+          integration_id: 'version-conflict-ds-integration',
+          data_stream_id: 'test-version-conflict-ds',
+          job_info: {
+            job_id: 'conflict-job',
+            job_type: 'import',
+            status: TASK_STATUSES.pending,
+          },
+          metadata: { sample_count: 100 },
+          result: {},
+        };
+
+        const created = await savedObjectService.insertDataStream(dataStreamData);
+
+        await savedObjectService.updateDataStream(
+          { ...dataStreamData, metadata: { sample_count: 200 } },
+          { version: created.version! }
+        );
+
+        await expect(
+          savedObjectService.updateDataStream(
+            { ...dataStreamData, metadata: { sample_count: 300 } },
+            { version: created.version! }
+          )
+        ).rejects.toThrow(),
+
+          // Cleanup
+          await savedObjectsClient.delete(DATA_STREAM_SAVED_OBJECT_TYPE, 'test-version-conflict-ds');
+
+        await savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, 'version-conflict-ds-integration');
       });
     });
 
