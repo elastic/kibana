@@ -8,10 +8,10 @@
  */
 
 import type { ExitRetryNode } from '@kbn/workflows/graph';
-import type { NodeImplementation } from '../../node_implementation';
+import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger/workflow_event_logger';
-import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
+import type { NodeImplementation } from '../../node_implementation';
 
 export class ExitRetryNodeImpl implements NodeImplementation {
   constructor(
@@ -24,6 +24,7 @@ export class ExitRetryNodeImpl implements NodeImplementation {
   public async run(): Promise<void> {
     // Exit whole retry step scope
     await this.stepExecutionRuntime.finishStep();
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const retryState = this.stepExecutionRuntime.getCurrentStepState()!;
     this.workflowLogger.logDebug(
       `Exiting retry step ${this.node.stepId} after ${retryState.attempt} attempts.`
