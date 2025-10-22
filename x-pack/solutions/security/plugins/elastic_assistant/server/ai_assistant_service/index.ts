@@ -46,7 +46,10 @@ import {
   errorResult,
   successResult,
 } from './create_resource_installation_helper';
-import { conversationsFieldMap } from '../ai_assistant_data_clients/conversations/field_maps_configuration';
+import {
+  conversationsAssistantInterruptsFieldMap,
+  conversationsFieldMap,
+} from '../ai_assistant_data_clients/conversations/field_maps_configuration';
 import { assistantPromptsFieldMap } from '../ai_assistant_data_clients/prompts/field_maps_configuration';
 import { assistantAnonymizationFieldsFieldMap } from '../ai_assistant_data_clients/anonymization_fields/field_maps_configuration';
 import { AIAssistantDataClient } from '../ai_assistant_data_clients';
@@ -142,6 +145,9 @@ export class AIAssistantService {
   private productDocManager?: ProductDocBaseStartContract['management'];
   private isProductDocumentationInProgress: boolean = false;
   private isCheckpointSaverEnabled: boolean = false;
+  // Temporary 'feature flag' to determine if we should initialize the assistant interrupts mappings.
+  private assistantInterruptsEnabled: boolean = false;
+  private assistantInterruptsInitialized: boolean = false;
 
   constructor(private readonly options: AIAssistantServiceOpts) {
     this.initialized = false;
@@ -399,6 +405,17 @@ export class AIAssistantService {
         });
       }
 
+      // If assistantInterruptsEnabled is true, re-install data stream resources for new mappings if it has not been done already
+      if (this.assistantInterruptsEnabled && !this.assistantInterruptsInitialized) {
+        this.options.logger.debug(`Creating conversation datastream with assistant interrupts`);
+        this.conversationsDataStream = this.createDataStream({
+          resource: 'conversations',
+          kibanaVersion: this.options.kibanaVersion,
+          fieldMap: conversationsAssistantInterruptsFieldMap,
+        });
+        this.assistantInterruptsInitialized = true;
+      }
+
       await this.conversationsDataStream.install({
         esClient,
         logger: this.options.logger,
@@ -630,6 +647,18 @@ export class AIAssistantService {
 
     if (res === null) {
       return null;
+    }
+
+    // Note: Due to plugin lifecycle and feature flag registration timing, we need to pass in the feature flag her
+    if (opts.assistantInterruptsEnabled) {
+      this.assistantInterruptsEnabled = true;
+    }
+
+    /**
+     * Initialize the assistant interrupts mappings if they are not already initialized.
+     */
+    if (this.assistantInterruptsEnabled && !this.assistantInterruptsInitialized) {
+      await this.initializeResources();
     }
 
     return new AIAssistantConversationsDataClient({
