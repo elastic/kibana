@@ -42,6 +42,7 @@ describe('EnterForeachNodeImpl', () => {
     stepExecutionRuntime.finishStep = jest.fn();
     stepExecutionRuntime.getCurrentStepState = jest.fn();
     stepExecutionRuntime.setCurrentStepState = jest.fn();
+    stepExecutionRuntime.setInput = jest.fn();
     stepExecutionRuntime.contextManager = {
       readContextPath: jest.fn(),
       renderValueAccordingToContext: jest.fn().mockImplementation((input) => input),
@@ -89,7 +90,12 @@ describe('EnterForeachNodeImpl', () => {
 
       it('should start step with foreach input equal to provided rendered JSON', async () => {
         await underTest.run();
-        expect(stepExecutionRuntime.startStep).toHaveBeenCalledWith({
+        expect(stepExecutionRuntime.startStep).toHaveBeenCalledWith();
+      });
+
+      it('should set step input equal to provided rendered JSON', async () => {
+        await underTest.run();
+        expect(stepExecutionRuntime.setInput).toHaveBeenCalledWith({
           foreach: JSON.stringify(['renderedItem1', 'renderedItem2', 'renderedItem3']),
         });
       });
@@ -122,7 +128,13 @@ describe('EnterForeachNodeImpl', () => {
       it('should start step with foreach input equal to rendered value', async () => {
         await underTest.run();
 
-        expect(stepExecutionRuntime.startStep).toHaveBeenCalledWith({
+        expect(stepExecutionRuntime.startStep).toHaveBeenCalledWith();
+      });
+
+      it('should set step inputs', async () => {
+        await underTest.run();
+
+        expect(stepExecutionRuntime.setInput).toHaveBeenCalledWith({
           foreach: 'steps.testStep.arrayRendered',
         });
       });

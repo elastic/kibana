@@ -40,6 +40,7 @@ describe('EnterIfNodeImpl', () => {
     mockStepExecutionRuntime = {
       contextManager: mockContextManager,
       startStep: jest.fn().mockResolvedValue(undefined),
+      setInput: jest.fn(),
     } as any;
 
     node = {
@@ -86,7 +87,20 @@ describe('EnterIfNodeImpl', () => {
     expect(mockContextManager.renderValueAccordingToContext).toHaveBeenCalledWith(
       'event.type: alert'
     );
-    expect(mockStepExecutionRuntime.startStep).toHaveBeenCalledWith({
+    expect(mockStepExecutionRuntime.startStep).toHaveBeenCalledWith();
+  });
+
+  it('should set step inputs', async () => {
+    mockContextManager.renderValueAccordingToContext = jest
+      .fn()
+      .mockImplementation(() => 'event.type: foo');
+
+    await impl.run();
+
+    expect(mockContextManager.renderValueAccordingToContext).toHaveBeenCalledWith(
+      'event.type: alert'
+    );
+    expect(mockStepExecutionRuntime.setInput).toHaveBeenCalledWith({
       condition: 'event.type: foo',
       conditionResult: false,
     });

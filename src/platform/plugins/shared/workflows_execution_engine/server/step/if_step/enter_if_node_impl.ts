@@ -26,6 +26,7 @@ export class EnterIfNodeImpl implements NodeImplementation {
   ) {}
 
   public async run(): Promise<void> {
+    await this.stepExecutionRuntime.startStep();
     const successors: any[] = this.workflowGraph.getDirectSuccessors(this.node.id);
 
     if (
@@ -50,7 +51,7 @@ export class EnterIfNodeImpl implements NodeImplementation {
     const renderedCondition =
       this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(thenNode.condition);
     const evaluatedConditionResult = this.evaluateCondition(renderedCondition);
-    await this.stepExecutionRuntime.startStep({
+    this.stepExecutionRuntime.setInput({
       condition: renderedCondition,
       conditionResult: evaluatedConditionResult,
     });
