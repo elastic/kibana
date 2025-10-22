@@ -636,8 +636,8 @@ describe('<TemplateCreate />', () => {
             name: TEMPLATE_NAME,
             indexPatterns: DEFAULT_INDEX_PATTERNS,
             allowAutoCreate: 'TRUE',
-            indexMode: 'time_series',
             dataStream: {},
+            indexMode: 'time_series',
             _kbnMeta: {
               type: 'default',
               hasDatastream: false,

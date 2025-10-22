@@ -45,19 +45,28 @@ export function serializeTemplate(
   // Build settings object, properly handling index mode
   const settings = buildTemplateSettings(template, indexMode);
 
-  // Separate settings from other template properties so we can rebuild template cleanly
-  const { settings: _templateSettings, ...otherTemplateProperties } = template || {};
+  // Separate settings and lifecycle from other template properties so we can rebuild template cleanly
+  const { settings: _templateSettings, lifecycle, ...otherTemplateProperties } = template || {};
+
+  const showTemplateOptions =
+    Object.keys(otherTemplateProperties).length > 0 ||
+    (settings && Object.keys(settings).length > 0) ||
+    (lifecycle && Object.keys(lifecycle).length > 0) ||
+    dataStreamOptions;
+
+  const templateOptions = {
+    ...otherTemplateProperties,
+    ...(settings && { settings }),
+    ...(lifecycle && { lifecycle }),
+    // If the existing template contains data stream options, we need to persist them.
+    // Otherwise, they will be lost when the template is updated.
+    ...(dataStreamOptions && { data_stream_options: dataStreamOptions }),
+  };
 
   return {
     version,
     priority,
-    template: {
-      ...otherTemplateProperties,
-      ...(settings && { settings }),
-      // If the existing template contains data stream options, we need to persist them.
-      // Otherwise, they will be lost when the template is updated.
-      ...(dataStreamOptions && { data_stream_options: dataStreamOptions }),
-    },
+    ...(showTemplateOptions && { template: templateOptions }),
     index_patterns: indexPatterns,
     data_stream: dataStream,
     composed_of: composedOf,

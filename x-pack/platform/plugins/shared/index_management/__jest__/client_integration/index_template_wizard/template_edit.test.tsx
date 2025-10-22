@@ -169,11 +169,11 @@ describe('<TemplateEdit />', () => {
             indexPatterns: ['myPattern*'],
             version: 1,
             allowAutoCreate: 'NO_OVERWRITE',
-            indexMode: 'standard',
             dataStream: {
               hidden: true,
               anyUnknownKey: 'should_be_kept',
             },
+            indexMode: 'standard',
             _kbnMeta: {
               type: 'default',
               hasDatastream: true,
