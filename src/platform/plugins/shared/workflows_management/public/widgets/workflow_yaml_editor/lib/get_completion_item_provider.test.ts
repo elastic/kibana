@@ -961,7 +961,7 @@ triggers:
 
   describe('Integration tests for liquid completions', () => {
     it('should provide liquid filter completions', async () => {
-      const yamlContent = `
+      yamlContent = `
 steps:
   - name: test
     type: set_variable
@@ -972,10 +972,7 @@ steps:
       const model = createMockModel(yamlContent, cursorOffset);
       const position = model.getPositionAt(cursorOffset);
 
-      const schema = generateYamlSchemaFromConnectors(mockConnectors);
-      const provider = getCompletionItemProvider(schema);
-
-      const result = await provider.provideCompletionItems(
+      const result = await completionProvider.provideCompletionItems(
         model as any,
         position as any,
         {
@@ -995,7 +992,7 @@ steps:
     });
 
     it('should provide filtered liquid filter completions', async () => {
-      const yamlContent = `
+      yamlContent = `
 steps:
   - name: test
     type: set_variable
@@ -1006,10 +1003,7 @@ steps:
       const model = createMockModel(yamlContent, cursorOffset);
       const position = model.getPositionAt(cursorOffset);
 
-      const schema = generateYamlSchemaFromConnectors(mockConnectors);
-      const provider = getCompletionItemProvider(schema);
-
-      const result = await provider.provideCompletionItems(
+      const result = await completionProvider.provideCompletionItems(
         model as any,
         position as any,
         { triggerKind: monaco.languages.CompletionTriggerKind.Invoke } as any,
@@ -1025,7 +1019,7 @@ steps:
     });
 
     it('should provide liquid syntax completions', async () => {
-      const yamlContent = `
+      yamlContent = `
 steps:
   - name: test
     type: set_variable
@@ -1037,10 +1031,7 @@ steps:
       const model = createMockModel(yamlContent, cursorOffset);
       const position = model.getPositionAt(cursorOffset);
 
-      const schema = generateYamlSchemaFromConnectors(mockConnectors);
-      const provider = getCompletionItemProvider(schema);
-
-      const result = await provider.provideCompletionItems(
+      const result = await completionProvider.provideCompletionItems(
         model as any,
         position as any,
         {
@@ -1059,7 +1050,7 @@ steps:
     });
 
     it('should provide liquid syntax completions with partial match', async () => {
-      const yamlContent = `
+      yamlContent = `
 steps:
   - name: test
     type: set_variable
@@ -1071,10 +1062,7 @@ steps:
       const model = createMockModel(yamlContent, cursorOffset);
       const position = model.getPositionAt(cursorOffset);
 
-      const schema = generateYamlSchemaFromConnectors(mockConnectors);
-      const provider = getCompletionItemProvider(schema);
-
-      const result = await provider.provideCompletionItems(
+      const result = await completionProvider.provideCompletionItems(
         model as any,
         position as any,
         { triggerKind: monaco.languages.CompletionTriggerKind.Invoke } as any,
@@ -1089,7 +1077,7 @@ steps:
     });
 
     it('should provide liquid block keyword completions with tab indentation', async () => {
-      const yamlContent = `
+      yamlContent = `
 steps:
   - name: test
     type: set_variable
@@ -1102,10 +1090,7 @@ steps:
       const model = createMockModel(yamlContent, cursorOffset);
       const position = model.getPositionAt(cursorOffset);
 
-      const schema = generateYamlSchemaFromConnectors(mockConnectors);
-      const provider = getCompletionItemProvider(schema);
-
-      const result = await provider.provideCompletionItems(
+      const result = await completionProvider.provideCompletionItems(
         model as any,
         position as any,
         { triggerKind: monaco.languages.CompletionTriggerKind.Invoke } as any,
@@ -1124,7 +1109,7 @@ steps:
     });
 
     it('should provide liquid block keyword completions with mixed tab/space indentation', async () => {
-      const yamlContent = `
+      yamlContent = `
 steps:
   - name: test
     type: set_variable
@@ -1137,10 +1122,7 @@ steps:
       const model = createMockModel(yamlContent, cursorOffset);
       const position = model.getPositionAt(cursorOffset);
 
-      const schema = generateYamlSchemaFromConnectors(mockConnectors);
-      const provider = getCompletionItemProvider(schema);
-
-      const result = await provider.provideCompletionItems(
+      const result = await completionProvider.provideCompletionItems(
         model as any,
         position as any,
         { triggerKind: monaco.languages.CompletionTriggerKind.Invoke } as any,
@@ -1160,7 +1142,7 @@ steps:
 
     it('should properly detect nested liquid blocks', async () => {
       // Test case with nested liquid blocks
-      const yamlContent = `
+      yamlContent = `
 steps:
   - name: test
     type: set_variable
@@ -1176,10 +1158,7 @@ steps:
       const model = createMockModel(yamlContent, cursorOffset);
       const position = model.getPositionAt(cursorOffset);
 
-      const schema = generateYamlSchemaFromConnectors(mockConnectors);
-      const provider = getCompletionItemProvider(schema);
-
-      const result = await provider.provideCompletionItems(
+      const result = await completionProvider.provideCompletionItems(
         model as any,
         position as any,
         { triggerKind: monaco.languages.CompletionTriggerKind.Invoke } as any,
@@ -1195,7 +1174,7 @@ steps:
     });
 
     it('should not provide liquid block completions outside liquid blocks', async () => {
-      const yamlContent = `
+      yamlContent = `
 steps:
   - name: test
     type: set_variable
@@ -1210,10 +1189,7 @@ steps:
       const model = createMockModel(yamlContent, cursorOffset);
       const position = model.getPositionAt(cursorOffset);
 
-      const schema = generateYamlSchemaFromConnectors(mockConnectors);
-      const provider = getCompletionItemProvider(schema);
-
-      const result = await provider.provideCompletionItems(
+      const result = await completionProvider.provideCompletionItems(
         model as any,
         position as any,
         { triggerKind: monaco.languages.CompletionTriggerKind.Invoke } as any,
