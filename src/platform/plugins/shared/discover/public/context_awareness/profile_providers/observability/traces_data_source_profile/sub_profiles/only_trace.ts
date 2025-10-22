@@ -36,8 +36,8 @@ export const createTracesOnlyTraceDataSourceProfileProvider = (
     }
 
     if (
-      params.rootContext.solutionType === SolutionType.Observability ||
-      tracesContextService.isTracesIndexPattern(extractIndexPatternFrom(params)) ||
+      params.rootContext.solutionType !== SolutionType.Observability ||
+      !tracesContextService.isTracesIndexPattern(extractIndexPatternFrom(params)) ||
       !params.query
     ) {
       return { isMatch: false };
