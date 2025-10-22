@@ -30,7 +30,6 @@ import type {
 } from '@kbn/lens-common';
 import type { GenericOperationDefinition } from '..';
 import { termsOperation, operationDefinitionMap } from '..';
-import type {} from '../../../types';
 import { getOperationSupportMatrix } from '../../../dimension_panel/operation_support';
 import { FieldSelect } from '../../../dimension_panel/field_select';
 import { ReferenceEditor } from '../../../dimension_panel/reference_editor';

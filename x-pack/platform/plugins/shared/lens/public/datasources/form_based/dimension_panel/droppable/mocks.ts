@@ -15,7 +15,6 @@ import type {
   FormBasedLayer,
 } from '@kbn/lens-common';
 import { documentField } from '../../document_field';
-import type {} from '../../operations';
 import { getFieldByNameFactory } from '../../pure_helpers';
 jest.mock('../../../../id_generator');
 

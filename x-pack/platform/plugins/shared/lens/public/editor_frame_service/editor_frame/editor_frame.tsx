@@ -15,8 +15,8 @@ import type {
   Suggestion,
   UserMessagesGetter,
   AddUserMessages,
+  LensInspector,
 } from '@kbn/lens-common';
-import type { LensInspector } from '@kbn/lens-common';
 import { getAbsoluteDateRange } from '../../utils';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { DataPanelWrapper } from './data_panel_wrapper';

@@ -21,8 +21,8 @@ import type {
   StateSetter,
   DragDropOperation,
   VisualizationDimensionGroupConfig,
+  LensInspector,
 } from '@kbn/lens-common';
-import type { LensInspector } from '@kbn/lens-common';
 import type { IndexPatternServiceAPI } from '../../../data_views_service/service';
 
 export interface LensConfigPanelBaseProps {

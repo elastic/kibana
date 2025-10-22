@@ -13,8 +13,9 @@ import type {
   CountIndexPatternColumn,
   PercentileRanksIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,
+  GenericIndexPatternColumn,
+  MovingAverageIndexPatternColumn,
 } from '@kbn/lens-common';
-import type { GenericIndexPatternColumn } from '@kbn/lens-common';
 import { createMockedIndexPattern } from '../../../mocks';
 import {
   getDisallowedTermsMessage,
@@ -23,7 +24,6 @@ import {
   getOtherBucketSwitchDefault,
 } from './helpers';
 import { MULTI_KEY_VISUAL_SEPARATOR } from './constants';
-import type { MovingAverageIndexPatternColumn } from '@kbn/lens-common';
 
 jest.mock('@kbn/unified-field-list/src/services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({

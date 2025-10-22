@@ -18,13 +18,13 @@ import {
 } from '../../../../mocks';
 
 import type {
+  LensAppState,
   DatasourcePublicAPI,
   SuggestionRequest,
   DatasourceSuggestion,
 } from '@kbn/lens-common';
 import type { ChartSwitchProps } from './chart_switch';
 import { ChartSwitchPopover } from './chart_switch_popover';
-import type { LensAppState } from '@kbn/lens-common';
 import { applyChanges } from '../../../../state_management';
 import { faker } from '@faker-js/faker';
 import { EditorFrameServiceProvider } from '../../../editor_frame_service_context';

@@ -11,8 +11,7 @@ import { HeatmapToolbar } from './toolbar_component';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { LegendSize } from '@kbn/chart-expressions-common';
-import type { FramePublicAPI } from '@kbn/lens-common';
-import type { HeatmapVisualizationState } from '@kbn/lens-common';
+import type { FramePublicAPI, HeatmapVisualizationState } from '@kbn/lens-common';
 import type { HeatmapGridConfigResult } from '@kbn/expression-heatmap-plugin/common';
 
 type Props = ComponentProps<typeof HeatmapToolbar>;

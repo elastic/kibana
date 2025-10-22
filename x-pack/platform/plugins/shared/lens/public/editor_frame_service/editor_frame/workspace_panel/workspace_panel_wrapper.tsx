@@ -18,8 +18,8 @@ import type {
   UserMessagesGetter,
   Visualization,
   DatasourceStates,
+  LensInspector,
 } from '@kbn/lens-common';
-import type { LensInspector } from '@kbn/lens-common';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../utils';
 import { MessageList } from './message_list';
 import {

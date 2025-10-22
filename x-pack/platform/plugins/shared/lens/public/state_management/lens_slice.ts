@@ -22,8 +22,6 @@ import type {
   VisualizationMap,
   DatasourceMap,
   SeriesType,
-} from '@kbn/lens-common';
-import type {
   VisualizeEditorContext,
   LensAppState,
   LensStoreDeps,
@@ -31,8 +29,9 @@ import type {
   DragDropOperation,
   LensAppServices,
   IndexPattern,
+  LensEditEvent,
+  LensEditContextMapping,
 } from '@kbn/lens-common';
-import type { LensEditEvent, LensEditContextMapping } from '@kbn/lens-common';
 import { getInitialDatasourceId, getResolvedDateRange, getRemoveOperation } from '../utils';
 import { generateId } from '../id_generator';
 import { getVisualizeFieldSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';

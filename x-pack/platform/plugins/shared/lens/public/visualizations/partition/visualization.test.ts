@@ -6,7 +6,12 @@
  */
 
 import { getPieVisualization } from './visualization';
-import type { LensPartitionVisualizationState } from '@kbn/lens-common';
+import type {
+  LensPartitionVisualizationState,
+  FramePublicAPI,
+  OperationDescriptor,
+  Visualization,
+} from '@kbn/lens-common';
 import {
   CategoryDisplay,
   LegendDisplay,
@@ -17,7 +22,6 @@ import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
-import type { FramePublicAPI, OperationDescriptor, Visualization } from '@kbn/lens-common';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 import { PartitionChartsMeta } from './partition_charts_meta';
 import type { CollapseFunction } from '../../../common/expressions';

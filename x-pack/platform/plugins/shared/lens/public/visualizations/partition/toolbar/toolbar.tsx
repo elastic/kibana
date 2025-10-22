@@ -15,8 +15,8 @@ import { type PartitionLegendValue } from '@kbn/expression-partition-vis-plugin/
 import type {
   LensPartitionVisualizationState as PieVisualizationState,
   SharedPartitionLayerState as SharedPieLayerState,
+  VisualizationToolbarProps,
 } from '@kbn/lens-common';
-import type { VisualizationToolbarProps } from '@kbn/lens-common';
 import { PARTITION_EMPTY_SIZE_RADIUS as EmptySizeRatios } from '@kbn/lens-common';
 import { LegendDisplay } from '../../../../common/constants';
 import { PartitionChartsMeta } from '../partition_charts_meta';

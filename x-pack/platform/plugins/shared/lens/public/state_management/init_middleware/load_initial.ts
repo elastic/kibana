@@ -8,11 +8,15 @@
 import type { MiddlewareAPI } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
 import type { History } from 'history';
-import type { LensStoreDeps, LensAppState, VisualizationState } from '@kbn/lens-common';
-import type { SharingSavedObjectProps } from '@kbn/lens-common';
-import type { LensAppServices } from '@kbn/lens-common';
-import type { LensDocument } from '@kbn/lens-common';
-import type { LensSerializedState } from '@kbn/lens-common';
+import type {
+  LensStoreDeps,
+  LensAppState,
+  VisualizationState,
+  SharingSavedObjectProps,
+  LensAppServices,
+  LensDocument,
+  LensSerializedState,
+} from '@kbn/lens-common';
 import { setState, initExisting, initEmpty } from '..';
 import { type InitialAppState, disableAutoApply, getPreloadedState } from '../lens_slice';
 import { getInitialDatasourceId, getInitialDataViewsObject } from '../../utils';

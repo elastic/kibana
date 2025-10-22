@@ -26,15 +26,15 @@ import { uniq } from 'lodash';
 import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { css } from '@emotion/react';
-import type { OperationMetadata } from '@kbn/lens-common';
-import {
-  LENS_DOCUMENT_FIELD_NAME,
-  type DataType,
-  type GenericIndexPatternColumn,
-  type IncompleteColumn,
-  type TermsIndexPatternColumn,
-  type IndexPatternField,
+import type {
+  OperationMetadata,
+  DataType,
+  GenericIndexPatternColumn,
+  IncompleteColumn,
+  TermsIndexPatternColumn,
+  IndexPatternField,
 } from '@kbn/lens-common';
+import { LENS_DOCUMENT_FIELD_NAME } from '@kbn/lens-common';
 import { insertOrReplaceColumn, updateColumnParam, updateDefaultLabels } from '../../layer_helpers';
 import type { OperationDefinition } from '..';
 import { ValuesInput } from './values_input';

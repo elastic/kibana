@@ -8,8 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { TooltipWrapper } from '@kbn/visualization-utils';
-import type { FramePublicAPI } from '@kbn/lens-common';
-import type { LegacyMetricState } from '@kbn/lens-common';
+import type { FramePublicAPI, LegacyMetricState } from '@kbn/lens-common';
 import { ToolbarPopover } from '../../../shared_components';
 import { TitlePositionOptions } from './title_position_option';
 import { TextFormattingOptions } from './text_formatting_options';

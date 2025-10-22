@@ -17,8 +17,8 @@ import type {
   LensStoreDeps,
   DatasourceMap,
   VisualizationMap,
+  LensAppServices,
 } from '@kbn/lens-common';
-import type { LensAppServices } from '@kbn/lens-common';
 import { mountWithProviders, renderWithProviders } from '../test_utils/test_utils';
 import { makeConfigureStore } from '../state_management';
 import { getResolvedDateRange } from '../utils';

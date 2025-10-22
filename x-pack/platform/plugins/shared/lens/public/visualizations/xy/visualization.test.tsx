@@ -14,6 +14,7 @@ import type {
   FramePublicAPI,
   UserMessage,
   AnnotationGroups,
+  DataViewsState,
 } from '@kbn/lens-common';
 import type {
   State,
@@ -39,7 +40,6 @@ import type {
 } from '@kbn/event-annotation-common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import type { DataViewsState } from '@kbn/lens-common';
 import { createMockedIndexPattern } from '../../datasources/form_based/mocks';
 import { createMockDataViewsState } from '../../data_views_service/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';

@@ -47,8 +47,6 @@ import type {
   UserMessagesGetter,
   AddUserMessages,
   VisualizationDisplayOptions,
-} from '@kbn/lens-common';
-import type {
   VisualizationState,
   DatasourceStates,
   DataViewsState,

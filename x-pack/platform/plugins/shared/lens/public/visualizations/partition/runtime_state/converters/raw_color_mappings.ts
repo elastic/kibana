@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import type { LensPartitionLayerState, LensPartitionVisualizationState } from '@kbn/lens-common';
-import type { GeneralDatasourceStates } from '@kbn/lens-common';
+import type {
+  LensPartitionLayerState,
+  LensPartitionVisualizationState,
+  GeneralDatasourceStates,
+} from '@kbn/lens-common';
 import type { DeprecatedColorMappingConfig } from '../../../../runtime_state/converters/raw_color_mappings';
 import {
   convertToRawColorMappings,

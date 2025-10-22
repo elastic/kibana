@@ -22,8 +22,13 @@ import type {
 } from '@kbn/expression-partition-vis-plugin/common';
 import type { ExpressionFunctionTheme } from '@kbn/expressions-plugin/common';
 import type { ExpressionFunctionVisDimension } from '@kbn/visualizations-plugin/common';
-import type { LensPartitionLayerState, LensPartitionVisualizationState } from '@kbn/lens-common';
-import type { Operation, DatasourcePublicAPI, DatasourceLayers } from '@kbn/lens-common';
+import type {
+  LensPartitionLayerState,
+  LensPartitionVisualizationState,
+  Operation,
+  DatasourcePublicAPI,
+  DatasourceLayers,
+} from '@kbn/lens-common';
 import { PARTITION_EMPTY_SIZE_RADIUS } from '@kbn/lens-common';
 import type { CollapseExpressionFunction } from '../../../common/expressions';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';

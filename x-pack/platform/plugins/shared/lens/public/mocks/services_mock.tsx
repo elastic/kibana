@@ -27,8 +27,7 @@ import { presentationUtilPluginMock } from '@kbn/presentation-util-plugin/public
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 
-import type { LensDocument } from '@kbn/lens-common';
-import type { LensAppServices } from '@kbn/lens-common';
+import type { LensDocument, LensAppServices } from '@kbn/lens-common';
 import { mockDataPlugin } from './data_plugin_mock';
 import { getLensInspectorService } from '../lens_inspector_service';
 import type { LensDocumentService } from '../persistence';

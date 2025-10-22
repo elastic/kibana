@@ -33,8 +33,8 @@ import type {
   DatasourceStates,
   VisualizationState,
   DocumentToExpressionReturnType,
+  LensDocument,
 } from '@kbn/lens-common';
-import type { LensDocument } from '@kbn/lens-common';
 import { COLOR_MAPPING_OFF_BY_DEFAULT } from '../../../common/constants';
 
 import { buildExpression } from './expression_helpers';

@@ -25,8 +25,6 @@ import type {
   LensLayerType,
   OperationMetadata,
   ReferenceBasedIndexPatternColumn,
-} from '@kbn/lens-common';
-import type {
   FramePublicAPI,
   IndexPattern,
   IndexPatternField,
@@ -68,62 +66,11 @@ import {
 } from './formula';
 import { staticValueOperation } from './static_value';
 import { lastValueOperation } from './last_value';
-// import type {
-//   BaseIndexPatternColumn,
-//   IncompleteColumn,
-//   GenericIndexPatternColumn,
-//   ReferenceBasedIndexPatternColumn,
-// } from './column_types';
 import type { DataViewDragDropOperation } from '../../types';
-// import type { DateRange, LayerType } from '../../../../../common/types';
 import { rangeOperation } from './ranges';
 import type { FormBasedDimensionEditorProps, OperationSupportMatrix } from '../../dimension_panel';
 import type { OriginalColumn } from '../../to_expression';
 import type { ReferenceEditorProps } from '../../dimension_panel/reference_editor';
-
-// export type {
-//   IncompleteColumn,
-//   BaseIndexPatternColumn,
-//   GenericIndexPatternColumn,
-//   FieldBasedIndexPatternColumn,
-// } from './column_types';
-
-// export type { TermsIndexPatternColumn } from './terms';
-// export type { FiltersIndexPatternColumn, Filter } from './filters';
-// export type { CardinalityIndexPatternColumn } from './cardinality';
-// export type { PercentileIndexPatternColumn } from './percentile';
-// export type { PercentileRanksIndexPatternColumn } from './percentile_ranks';
-// export type {
-//   MinIndexPatternColumn,
-//   AvgIndexPatternColumn,
-//   SumIndexPatternColumn,
-//   MaxIndexPatternColumn,
-//   MedianIndexPatternColumn,
-//   StandardDeviationIndexPatternColumn,
-// } from './metrics';
-// export type { DateHistogramIndexPatternColumn } from './date_histogram';
-// export type {
-//   CumulativeSumIndexPatternColumn,
-//   CounterRateIndexPatternColumn,
-//   DerivativeIndexPatternColumn,
-//   MovingAverageIndexPatternColumn,
-//   OverallSumIndexPatternColumn,
-//   OverallMinIndexPatternColumn,
-//   OverallMaxIndexPatternColumn,
-//   OverallAverageIndexPatternColumn,
-//   TimeScaleIndexPatternColumn,
-// } from './calculations';
-// export type { CountIndexPatternColumn } from './count';
-// export type { LastValueIndexPatternColumn } from './last_value';
-// export type { RangeIndexPatternColumn } from './ranges';
-// export type {
-//   FormulaIndexPatternColumn,
-//   MathIndexPatternColumn,
-//   TimeRangeIndexPatternColumn,
-//   NowIndexPatternColumn,
-//   IntervalIndexPatternColumn,
-// } from './formula';
-// export type { StaticValueIndexPatternColumn } from './static_value';
 
 // List of all operation definitions registered to this data source.
 // If you want to implement a new operation, add the definition to this array and

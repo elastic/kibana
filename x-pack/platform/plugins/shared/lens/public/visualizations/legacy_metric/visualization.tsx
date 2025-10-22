@@ -27,8 +27,8 @@ import type {
   OperationMetadata,
   DatasourceLayers,
   FramePublicAPI,
+  LegacyMetricState,
 } from '@kbn/lens-common';
-import type { LegacyMetricState } from '@kbn/lens-common';
 import { getSuggestions } from './metric_suggestions';
 import { MetricDimensionEditor } from './dimension_editor';
 import { MetricToolbar } from './metric_config_panel';

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { LensPartitionVisualizationState } from '@kbn/lens-common';
-import type { GeneralDatasourceStates } from '@kbn/lens-common';
+import type { LensPartitionVisualizationState, GeneralDatasourceStates } from '@kbn/lens-common';
 
 import { getRuntimeConverters } from './converters';
 
