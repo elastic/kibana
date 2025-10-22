@@ -9,8 +9,4 @@ export type { GetCommonFieldsResponse as ServiceNowGetFieldsResponse } from './c
 export type { GetCommonFieldsResponse as ResilientGetFieldsResponse } from './connector_types/resilient/types';
 export type { SwimlanePublicConfigurationType } from './connector_types/swimlane/types';
 
-export type {
-  ServiceNowActionParams,
-  TeamsConnectorTypeId,
-  TeamsActionParams,
-} from './connector_types';
+export type { ServiceNowActionParams } from './connector_types';

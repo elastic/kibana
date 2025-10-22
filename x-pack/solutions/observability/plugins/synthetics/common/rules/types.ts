@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  TeamsConnectorTypeId,
-  OpsgenieConnectorTypeId,
-} from '@kbn/stack-connectors-plugin/server/connector_types';
+import type { OpsgenieConnectorTypeId } from '@kbn/stack-connectors-plugin/server/connector_types';
 import type {
   EmailConnectorTypeId,
   EsIndexConnectorTypeId,
@@ -18,6 +15,7 @@ import type {
   ServiceNowITSMConnectorTypeId as ServiceNowConnectorTypeId,
   SlackApiConnectorTypeId,
   SlackWebhookConnectorTypeId,
+  TeamsConnectorTypeId,
   WebhookConnectorTypeId,
 } from '@kbn/connector-schemas';
 
