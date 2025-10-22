@@ -311,8 +311,9 @@ spaceTest.describe('AI Assistant Prompts', { tag: ['@ess', '@svlSecurity'] }, ()
           description: 'Test rule for quick prompt context',
           severity: 'high' as const,
           risk_score: 17,
-          interval: '1m',
           from: '1900-01-01T00:00:00.000Z',
+          enabled: true,
+          rule_id: `test_rule_${scoutSpace.id}_${timestamp}`,
         };
 
         await apiServices.detectionRule.createCustomQueryRule(ruleConfig);
