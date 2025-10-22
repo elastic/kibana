@@ -17,6 +17,7 @@ import type { WorkflowsExecutionEngineConfig } from '../config';
 import { setupDependencies } from './setup_dependencies';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { LogsRepository } from '../repositories/logs_repository/logs_repository';
+import type { ContextDependencies } from '../workflow_context_manager/types';
 
 export async function resumeWorkflow({
   workflowRunId,
@@ -25,6 +26,7 @@ export async function resumeWorkflow({
   workflowExecutionRepository,
   stepExecutionRepository,
   logsRepository,
+  dependencies,
   coreStart,
   esClient,
   actions,
@@ -46,6 +48,7 @@ export async function resumeWorkflow({
   logger: Logger;
   config: WorkflowsExecutionEngineConfig;
   fakeRequest: KibanaRequest;
+  dependencies: ContextDependencies;
 }): Promise<void> {
   const {
     workflowRuntime,
@@ -68,6 +71,7 @@ export async function resumeWorkflow({
     workflowExecutionRepository,
     stepExecutionRepository,
     logsRepository,
+    dependencies,
     fakeRequest, // Provided by Task Manager's first-class API key support
     coreStart
   );

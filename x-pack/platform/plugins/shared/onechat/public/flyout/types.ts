@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-export { getConnectToInternalServer } from './create_internal_client';
-export { getConnectToExternalServer } from './create_external_client';
-export { createMcpServer } from './create_mcp_server';
+export interface ConversationFlyoutProps {
+  onClose: () => void;
+}
+
+export interface OpenConversationFlyoutOptions {
+  onClose?: () => void;
+}
