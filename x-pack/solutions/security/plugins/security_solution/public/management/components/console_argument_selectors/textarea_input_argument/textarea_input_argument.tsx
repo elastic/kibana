@@ -99,7 +99,7 @@ export const CLOSE_POPUP_BUTTON_LABEL = i18n.translate(
 
 export const HELP_NOT_AVAILABLE_TOOLTIP = i18n.translate(
   'xpack.securitySolution.consoleArgumentSelectors.textAreaInputArgument.helpNotAvailable',
-  { defaultMessage: 'Help not available' }
+  { defaultMessage: 'No instructions available' }
 );
 
 /**
