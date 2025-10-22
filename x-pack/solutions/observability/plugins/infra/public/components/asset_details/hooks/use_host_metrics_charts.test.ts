@@ -9,7 +9,7 @@ import { waitFor, renderHook } from '@testing-library/react';
 import type { HostMetricTypes } from '../charts/types';
 import { useHostKpiCharts, useHostCharts, useKubernetesCharts } from './use_host_metrics_charts';
 
-const dataViewId = 'metricsDataViewId';
+const indexPattern = 'metrics-*';
 const getHostChartsExpectedOrder = (metric: HostMetricTypes, overview: boolean): string[] => {
   switch (metric) {
     case 'cpu':
@@ -40,7 +40,7 @@ describe('useHostCharts', () => {
         async (metric) => {
           const expectedOrder = getHostChartsExpectedOrder(metric, false);
 
-          const { result } = renderHook(() => useHostCharts({ dataViewId, metric }));
+          const { result } = renderHook(() => useHostCharts({ indexPattern, metric }));
           await waitFor(() => new Promise((resolve) => resolve(null)));
 
           const { charts } = result.current;
@@ -59,7 +59,7 @@ describe('useHostCharts', () => {
           const expectedOrder = getHostChartsExpectedOrder(metric, true);
 
           const { result } = renderHook(() =>
-            useHostCharts({ dataViewId, metric, overview: true })
+            useHostCharts({ indexPattern, metric, overview: true })
           );
           await waitFor(() => new Promise((resolve) => resolve(null)));
 
@@ -78,7 +78,7 @@ describe('useHostCharts', () => {
 
 describe('useKubernetesCharts', () => {
   it('should return an array of charts with correct order - overview', async () => {
-    const { result } = renderHook(() => useKubernetesCharts({ dataViewId, overview: true }));
+    const { result } = renderHook(() => useKubernetesCharts({ indexPattern, overview: true }));
     await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const expectedOrder = ['nodeCpuCapacity', 'nodeMemoryCapacity'];
@@ -93,7 +93,7 @@ describe('useKubernetesCharts', () => {
   });
 
   it('should return an array of charts with correct order', async () => {
-    const { result } = renderHook(() => useKubernetesCharts({ dataViewId }));
+    const { result } = renderHook(() => useKubernetesCharts({ indexPattern }));
     await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const expectedOrder = [
@@ -115,7 +115,7 @@ describe('useKubernetesCharts', () => {
 
 describe('useHostKpiCharts', () => {
   it('should return an array of charts with correct order', async () => {
-    const { result } = renderHook(() => useHostKpiCharts({ dataViewId }));
+    const { result } = renderHook(() => useHostKpiCharts({ indexPattern }));
     await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const expectedOrder = ['cpuUsage', 'normalizedLoad1m', 'memoryUsage', 'diskUsage'];
@@ -136,7 +136,7 @@ describe('useHostKpiCharts', () => {
       getSubtitle: () => 'Custom Subtitle',
     };
 
-    const { result } = renderHook(() => useHostKpiCharts({ dataViewId, ...options }));
+    const { result } = renderHook(() => useHostKpiCharts({ indexPattern, ...options }));
     await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(result.current).toHaveLength(4);
