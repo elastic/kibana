@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AnalyticsServiceStart } from '@kbn/core/server';
+import type { AnalyticsServiceStart } from '@kbn/core/public';
 import { FILE_UPLOAD_EVENT } from './register_telemetry';
 
 interface FileAnalysisEvent {
