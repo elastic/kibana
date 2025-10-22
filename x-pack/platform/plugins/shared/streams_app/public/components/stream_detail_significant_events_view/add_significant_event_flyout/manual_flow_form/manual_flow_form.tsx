@@ -17,12 +17,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { StreamQueryKql, Streams, System } from '@kbn/streams-schema';
+import type { StreamQueryKql, Streams, Feature } from '@kbn/streams-schema';
 import React, { useEffect, useState } from 'react';
 import { UncontrolledStreamsAppSearchBar } from '../../../streams_app_search_bar/uncontrolled_streams_app_bar';
 import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
 import { validateQuery } from '../common/validate_query';
-import { NO_SYSTEM } from '../utils/default_query';
+import { NO_FEATURE } from '../utils/default_query';
 
 interface Props {
   definition: Streams.all.Definition;
@@ -30,7 +30,7 @@ interface Props {
   isSubmitting: boolean;
   setQuery: (query: StreamQueryKql) => void;
   setCanSave: (canSave: boolean) => void;
-  systems: Omit<System, 'description'>[];
+  features: Omit<Feature, 'description'>[];
   dataViews: DataView[];
 }
 
@@ -40,30 +40,30 @@ export function ManualFlowForm({
   setQuery,
   setCanSave,
   isSubmitting,
-  systems,
+  features,
   dataViews,
 }: Props) {
-  const [touched, setTouched] = useState({ title: false, system: false, kql: false });
+  const [touched, setTouched] = useState({ title: false, feature: false, kql: false });
 
   const validation = validateQuery(query);
 
   useEffect(() => {
     const isValid = !validation.title.isInvalid && !validation.kql.isInvalid;
-    const isTouched = touched.title || touched.kql || touched.system;
+    const isTouched = touched.title || touched.kql || touched.feature;
     setCanSave(isValid && isTouched);
   }, [validation, setCanSave, touched]);
 
-  const options = systems
-    .map((system) => ({
-      value: system,
-      inputDisplay: system.name,
+  const options = features
+    .map((feature) => ({
+      value: feature,
+      inputDisplay: feature.name,
     }))
     .concat([
       {
-        value: NO_SYSTEM,
+        value: NO_FEATURE,
         inputDisplay: i18n.translate(
-          'xpack.streams.addSignificantEventFlyout.manualFlow.noSystemOptionLabel',
-          { defaultMessage: 'No system' }
+          'xpack.streams.addSignificantEventFlyout.manualFlow.noFeatureOptionLabel',
+          { defaultMessage: 'No feature' }
         ),
       },
     ]);
@@ -105,8 +105,8 @@ export function ManualFlowForm({
             label={
               <EuiFormLabel>
                 {i18n.translate(
-                  'xpack.streams.addSignificantEventFlyout.manualFlow.formFieldSystemLabel',
-                  { defaultMessage: 'System' }
+                  'xpack.streams.addSignificantEventFlyout.manualFlow.formFieldFeatureLabel',
+                  { defaultMessage: 'Feature' }
                 )}
               </EuiFormLabel>
             }
@@ -114,22 +114,22 @@ export function ManualFlowForm({
             <EuiSuperSelect
               options={options}
               valueOfSelected={
-                options.find((option) => option.value.name === query.system?.name)?.value
+                options.find((option) => option.value.name === query.feature?.name)?.value
               }
               placeholder={i18n.translate(
-                'xpack.streams.addSignificantEventFlyout.manualFlow.systemPlaceholder',
-                { defaultMessage: 'Select system' }
+                'xpack.streams.addSignificantEventFlyout.manualFlow.featurePlaceholder',
+                { defaultMessage: 'Select feature' }
               )}
-              disabled={isSubmitting || systems.length === 0}
+              disabled={isSubmitting || features.length === 0}
               onBlur={() => {
-                setTouched((prev) => ({ ...prev, system: true }));
+                setTouched((prev) => ({ ...prev, feature: true }));
               }}
               onChange={(value) => {
                 setQuery({
                   ...query,
-                  system: value,
+                  feature: value,
                 });
-                setTouched((prev) => ({ ...prev, system: true }));
+                setTouched((prev) => ({ ...prev, feature: true }));
               }}
               fullWidth
             />

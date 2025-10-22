@@ -1213,4 +1213,153 @@ FROM a
       }
     });
   });
+
+  describe('comments in query header', () => {
+    it('to a single command', () => {
+      const text = `
+        // The SET pseudo-command is part of the header
+        SET a = "b";
+        FROM index`;
+      const { root } = parse(text, { withFormatting: true });
+
+      expect(root.header![0]).toMatchObject({
+        type: 'header-command',
+        name: 'set',
+        formatting: {
+          top: [
+            {
+              type: 'comment',
+              subtype: 'single-line',
+              text: ' The SET pseudo-command is part of the header',
+            },
+          ],
+        },
+      });
+    });
+
+    it('multi-line comment before SET in header', () => {
+      const text = `
+        /* header info */
+        SET x = 123;
+        FROM index`;
+      const { root } = parse(text, { withFormatting: true });
+
+      expect(root.header![0]).toMatchObject({
+        type: 'header-command',
+        name: 'set',
+        formatting: {
+          top: [
+            {
+              type: 'comment',
+              subtype: 'multi-line',
+              text: ' header info ',
+            },
+          ],
+        },
+      });
+    });
+
+    it('multiple SET header commands each with comments', () => {
+      const text = `
+        // first header
+        SET a = 1;
+        // second header
+        SET b = 2;
+        FROM index`;
+      const { root } = parse(text, { withFormatting: true });
+
+      expect(root.header).toHaveLength(2);
+      expect(root.header![0]).toMatchObject({
+        type: 'header-command',
+        name: 'set',
+        formatting: {
+          top: [
+            {
+              type: 'comment',
+              subtype: 'single-line',
+              text: ' first header',
+            },
+          ],
+        },
+      });
+
+      expect(root.header![1]).toMatchObject({
+        type: 'header-command',
+        name: 'set',
+        formatting: {
+          top: [
+            {
+              type: 'comment',
+              subtype: 'single-line',
+              text: ' second header',
+            },
+          ],
+        },
+      });
+    });
+
+    it('left and right from header command', () => {
+      const text = `
+        // first header
+        /* a */ /* b */ SET a = 1; /* c */ // d
+        // second header
+        SET b = 2;
+        FROM index`;
+      const { root } = parse(text, { withFormatting: true });
+
+      expect(root.header).toHaveLength(2);
+      expect(root.header![0]).toMatchObject({
+        type: 'header-command',
+        name: 'set',
+        formatting: {
+          top: [{ type: 'comment' }],
+          left: [
+            { type: 'comment', text: ' a ' },
+            { type: 'comment', text: ' b ' },
+          ],
+          right: [{ type: 'comment', text: ' c ' }],
+          rightSingleLine: { type: 'comment', text: ' d' },
+        },
+      });
+    });
+
+    it('inside a header command', () => {
+      const text = `
+        SET /* a */ a /* b */ = /* c */ 1 /* d */ ;
+        SET b = 2;
+        FROM index`;
+      const { root, errors } = parse(text, { withFormatting: true });
+
+      expect(errors).toHaveLength(0);
+      expect(root.header).toHaveLength(2);
+      expect(root.header![0]).toMatchObject({
+        type: 'header-command',
+        name: 'set',
+        args: [
+          {
+            type: 'function',
+            name: '=',
+            args: [
+              {
+                type: 'identifier',
+                name: 'a',
+                formatting: {
+                  left: [{ type: 'comment', text: ' a ' }],
+                  right: [{ type: 'comment', text: ' b ' }],
+                },
+              },
+              {
+                type: 'literal',
+                value: 1,
+                formatting: {
+                  left: [{ type: 'comment', text: ' c ' }],
+                  right: [{ type: 'comment', text: ' d ' }],
+                },
+              },
+            ],
+          },
+        ],
+      });
+    });
+  });
 });

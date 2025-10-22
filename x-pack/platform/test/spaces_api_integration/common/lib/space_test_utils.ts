@@ -10,6 +10,9 @@ import type { Client } from '@elastic/elasticsearch';
 import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
+import { SPACE_1, SPACE_2, SPACE_3 } from './spaces';
+import type { SpacesServiceProvider } from '../../../api_integration/services/spaces';
+
 export function getUrlPrefix(spaceId?: string) {
   return spaceId && spaceId !== DEFAULT_SPACE_ID ? `/s/${spaceId}` : ``;
 }
@@ -68,3 +71,18 @@ export function getAggregatedSpaceData(es: Client, objectTypes: string[]) {
     },
   });
 }
+
+export const createSpaces = async (
+  spacesService: ReturnType<typeof SpacesServiceProvider>,
+  isServerless: boolean
+) => {
+  await spacesService.create(SPACE_1);
+  await spacesService.create(SPACE_2);
+  await spacesService.create({ ...SPACE_3, ...(isServerless ? {} : { solution: 'es' }) });
+};
+
+export const deleteSpaces = async (spacesService: ReturnType<typeof SpacesServiceProvider>) => {
+  await spacesService.delete(SPACE_1.id);
+  await spacesService.delete(SPACE_2.id);
+  await spacesService.delete(SPACE_3.id);
+};
