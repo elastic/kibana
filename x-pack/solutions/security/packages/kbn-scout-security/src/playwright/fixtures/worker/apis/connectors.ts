@@ -380,9 +380,10 @@ export const getConnectorsApiService = ({
           );
 
           log.debug(`[CONNECTORS API] All connectors verified as deleted`);
-        } catch (error: any) {
+        } catch (error: unknown) {
           // Ignore 404 errors - it means the connectors API is not available or no connectors exist
-          if (error?.response?.status !== 404) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          if ((error as any)?.response?.status !== 404) {
             log.error(`[CONNECTORS API] Failed to delete connectors: ${error}`);
             log.error(`[CONNECTORS API] Error details: ${JSON.stringify(error, null, 2)}`);
             throw error;

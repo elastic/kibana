@@ -237,23 +237,23 @@ export class AssistantPage {
     return this.page.locator('li[data-test-subj="restricted"]');
   }
 
-  get sharedSelectOption() {
+  public get sharedSelectOption() {
     return this.page.locator('li[data-test-subj="shared"]');
   }
 
-  get shareModal() {
+  public get shareModal() {
     return this.page.testSubj.locator('shareConversationModal');
   }
 
-  get shareButton() {
+  public get shareButton() {
     return this.page.locator('button[data-test-subj="shareConversation"]');
   }
 
-  get shareModalCloseButton() {
+  public get shareModalCloseButton() {
     return this.shareModal.locator('button.euiModal__closeIcon');
   }
 
-  get userProfilesSearch() {
+  public get userProfilesSearch() {
     return this.page.testSubj.locator('userProfilesSearch');
   }
 
@@ -261,43 +261,43 @@ export class AssistantPage {
     return this.page.testSubj.locator(`userProfileSelectableOption-${username}`);
   }
 
-  get ownerSharedCallout() {
+  public get ownerSharedCallout() {
     return this.page.testSubj.locator('ownerSharedConversationCallout');
   }
 
-  get sharedCallout() {
+  public get sharedCallout() {
     return this.page.testSubj.locator('sharedConversationCallout');
   }
 
-  get dismissCalloutButton() {
+  public get dismissCalloutButton() {
     return this.page.testSubj.locator('euiDismissCalloutButton');
   }
 
-  get duplicateConversationButton() {
+  public get duplicateConversationButton() {
     return this.page.testSubj.locator('duplicateConversation');
   }
 
-  get copyUrlButton() {
+  public get copyUrlButton() {
     return this.page.testSubj.locator('copy-url');
   }
 
-  get duplicateButton() {
+  public get duplicateButton() {
     return this.page.testSubj.locator('duplicate');
   }
 
-  get convoContextMenuButton() {
+  public get convoContextMenuButton() {
     return this.page.testSubj.locator('convo-context-menu-button');
   }
 
-  get convoContextMenuCopyUrl() {
+  public get convoContextMenuCopyUrl() {
     return this.page.testSubj.locator('convo-context-menu-item-copy');
   }
 
-  get convoContextMenuDuplicate() {
+  public get convoContextMenuDuplicate() {
     return this.page.testSubj.locator('convo-context-menu-item-duplicate');
   }
 
-  get shareModalCopyUrlButton() {
+  public get shareModalCopyUrlButton() {
     return this.page.testSubj.locator('copyConversationUrl');
   }
 
@@ -424,6 +424,7 @@ export class AssistantPage {
     await this.createNewChat();
     await this.typeAndSendMessage(initialMessage);
     // Wait for response (error is expected in test environment)
+    // eslint-disable-next-line playwright/no-nth-methods
     await this.conversationErrorMessages.first().waitFor({ state: 'visible' });
     await this.updateConversationTitle(title);
   }
@@ -480,6 +481,7 @@ export class AssistantPage {
     // eslint-disable-next-line playwright/no-wait-for-timeout
     await this.page.waitForTimeout(2000);
     // Use .first() to handle multiple connectors with same name (from test pollution)
+    // eslint-disable-next-line playwright/no-nth-methods
     await this.connectorOption(connectorName).first().click();
     // Use containText instead of exact match to handle UI variations
     await expect(this.connectorSelector).toContainText(connectorName);
@@ -679,6 +681,7 @@ export class AssistantPage {
    * Duplicates conversation from the conversation side menu
    */
   async duplicateFromConversationSideContextMenu(conversationTitle: string) {
+    // eslint-disable-next-line playwright/no-nth-methods
     await this.convoContextMenuButton.first().click();
     await this.convoContextMenuDuplicate.click();
     await expect(this.conversationTitleHeading).toHaveText(`[Duplicate] ${conversationTitle}`);
@@ -696,6 +699,7 @@ export class AssistantPage {
    * Copies the conversation URL from the conversation side context menu
    */
   async copyUrlFromConversationSideContextMenu() {
+    // eslint-disable-next-line playwright/no-nth-methods
     await this.convoContextMenuButton.first().click();
     await this.convoContextMenuCopyUrl.click();
   }
@@ -757,6 +761,7 @@ export class AssistantPage {
    */
   async expectMessageSent(message: string, afterSystemPrompt = false) {
     const index = afterSystemPrompt ? 1 : 0;
+    // eslint-disable-next-line playwright/no-nth-methods
     await expect(this.conversationMessages.nth(index)).toContainText(message);
   }
 
@@ -764,6 +769,7 @@ export class AssistantPage {
    * Asserts that a system prompt was sent
    */
   async expectSystemPromptSent(promptContent: string) {
+    // eslint-disable-next-line playwright/no-nth-methods
     await expect(this.conversationMessages.first()).toContainText(promptContent);
   }
 
@@ -888,6 +894,7 @@ export class AssistantPage {
    * Asserts that a message is from a specific user
    */
   async expectMessageUser(username: string, messageIndex: number) {
+    // eslint-disable-next-line playwright/no-nth-methods
     const userElement = this.page.locator('.euiCommentEvent__headerUsername').nth(messageIndex);
     await expect(userElement).toHaveText(username);
   }

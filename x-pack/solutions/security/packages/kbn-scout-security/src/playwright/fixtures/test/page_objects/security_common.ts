@@ -50,6 +50,7 @@ export class SecurityCommonPage {
       const count = await toastCloseButtons.count();
 
       for (let i = 0; i < count; i++) {
+        // eslint-disable-next-line playwright/no-nth-methods
         const button = toastCloseButtons.nth(i);
         if (await button.isVisible({ timeout: 1000 })) {
           await button.click();

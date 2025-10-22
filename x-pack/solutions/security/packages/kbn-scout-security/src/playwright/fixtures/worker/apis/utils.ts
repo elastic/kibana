@@ -65,7 +65,7 @@ export async function retryApiCall<T>(
   }
 
   log?.error(`[RETRY] All ${maxAttempts} attempts failed`);
-  throw lastError!;
+  throw lastError || new Error(`All ${maxAttempts} retry attempts failed`);
 }
 
 /**
@@ -159,14 +159,15 @@ export async function pollUntilAvailable<T>(
         attempts: attempt,
         totalWaitMs,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       lastError = error as Error;
 
       // Log different messages for different error types
-      if (error?.response?.status === 404 || error?.message?.includes('not found')) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if ((error as any)?.response?.status === 404 || (error as Error)?.message?.includes('not found')) {
         log?.debug(`[POLL] Attempt ${attempt}/${maxAttempts}: Resource not yet available (404)`);
       } else {
-        log?.debug(`[POLL] Attempt ${attempt}/${maxAttempts} failed: ${error?.message || error}`);
+        log?.debug(`[POLL] Attempt ${attempt}/${maxAttempts} failed: ${(error as Error)?.message || error}`);
       }
 
       // If this isn't the last attempt and we haven't timed out, wait before retrying
@@ -221,9 +222,10 @@ export async function pollUntilDocumentIndexed<T>(
       try {
         const result = await getOperation();
         return result;
-      } catch (error: any) {
+      } catch (error: unknown) {
         // 404 means document not indexed yet - this is expected
-        if (error?.response?.status === 404 || error?.status === 404) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if ((error as any)?.response?.status === 404 || (error as any)?.status === 404) {
           throw new Error('Document not yet indexed (404)');
         }
         // Other errors should be re-thrown

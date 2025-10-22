@@ -102,6 +102,7 @@ export const getDetectionRuleApiService = ({
           // Step 2: Poll to verify rules are deleted
           await pollUntilAvailable(
             async () => {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const response = await kbnClient.request<{ data?: any[] }>({
                 method: 'GET',
                 path: `${basePath}${DETECTION_ENGINE_RULES_FIND_URL}`,
@@ -124,9 +125,10 @@ export const getDetectionRuleApiService = ({
           );
 
           log.debug(`[DETECTION RULE API] All rules verified as deleted`);
-        } catch (error: any) {
+        } catch (error: unknown) {
           // Ignore 404 errors - it means the detection engine API is not available or not initialized yet
-          if (error?.response?.status !== 404) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          if ((error as any)?.response?.status !== 404) {
             throw error;
           }
           log.debug(`[DETECTION RULE API] No rules to delete (404)`);
@@ -144,6 +146,7 @@ export const getDetectionRuleApiService = ({
           // Use standardized polling (12 seconds = 24 * 500ms)
           await pollUntilAvailable(
             async () => {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const response = await kbnClient.request<{ data?: any[] }>({
                 method: 'GET',
                 path: `${basePath}${DETECTION_ENGINE_RULES_FIND_URL}`,
@@ -153,6 +156,7 @@ export const getDetectionRuleApiService = ({
               const rules = response.data?.data || response.data || response;
 
               if (Array.isArray(rules)) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const rule = rules.find((r: any) => r.rule_id === ruleId);
 
                 if (rule?.execution_summary?.last_execution?.date) {
