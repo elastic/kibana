@@ -31,9 +31,10 @@ export const buildFailureHtml = (testFailure: TestFailure): string => {
     .filter((a) => a.contentType.startsWith('image/'))
     .map((s) => {
       const base64 = fs.readFileSync(s.path!).toString('base64');
+      const escapedName = (s.name || 'screenshot').replace(/"/g, '&quot;');
       return `
         <div class="screenshotContainer">
-          <img class="screenshot img-fluid img-thumbnail" src="data:image/png;base64,${base64}" alt="${s.name}"/>
+          <img class="screenshot img-fluid img-thumbnail" src="data:${s.contentType};base64,${base64}" alt="${escapedName}" />
         </div>
       `;
     });
@@ -46,6 +47,7 @@ export const buildFailureHtml = (testFailure: TestFailure): string => {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: 'unsafe-inline'; img-src 'self' data:; style-src 'self' 'unsafe-inline';" />
     <style>
       /* Reset and base styles */
       * {
