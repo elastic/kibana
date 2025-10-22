@@ -14,17 +14,17 @@ import type {
   DataControlState,
   LegacyIgnoreParentSettings,
   StickyControlState,
-  TimeSlice,
 } from '@kbn/controls-schemas';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { PublishesESQLVariables } from '@kbn/esql-types';
-import type { AppliesFilters, PublishingSubject } from '@kbn/presentation-publishing';
+import type { AppliesFilters, AppliesTimeslice } from '@kbn/presentation-publishing';
 
 import type { controlGroupStateBuilder } from './control_group_state_builder';
 
 export type ControlGroupRendererApi = ControlsRendererParentApi &
   Pick<AppliesFilters, 'appliedFilters$'> &
-  PublishesESQLVariables & {
+  PublishesESQLVariables &
+  AppliesTimeslice & {
     reload: () => void;
 
     /**
@@ -48,8 +48,6 @@ export type ControlGroupRendererApi = ControlsRendererParentApi &
      * @deprecated
      */
     getInput: () => ControlGroupRuntimeState;
-
-    timeslice$: PublishingSubject<TimeSlice | undefined>;
 
     openAddDataControlFlyout: (options?: {
       controlStateTransform?: ControlStateTransform;
