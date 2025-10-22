@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
-import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 
 export const FakeConnectors = {
   slack1: {
