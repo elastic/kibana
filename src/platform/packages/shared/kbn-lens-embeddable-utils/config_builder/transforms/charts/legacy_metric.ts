@@ -123,10 +123,7 @@ function reverseBuildVisualizationState(
 function buildFormBasedLayer(layer: LegacyMetricStateNoESQL): FormBasedPersistedState['layers'] {
   const columns = fromMetricAPItoLensState(layer.metric as LensApiAllMetricOperations);
 
-  const layers: Record<string, PersistedIndexPatternLayer> = {
-    ...generateLayer(DEFAULT_LAYER_ID, layer),
-  };
-
+  const layers: Record<string, PersistedIndexPatternLayer> = generateLayer(DEFAULT_LAYER_ID, layer);
   const defaultLayer = layers[DEFAULT_LAYER_ID];
 
   addLayerColumn(defaultLayer, ACCESSOR, columns);
