@@ -319,6 +319,7 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
             packageInfo={packageInfo}
             updatePolicy={updatePolicy}
             cloud={cloud}
+            isEditPage={isEditPage}
             hasInvalidRequiredVars={hasInvalidRequiredVars}
             setupTechnology={setupTechnology}
           />

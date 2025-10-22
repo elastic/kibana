@@ -46,6 +46,7 @@ interface AzureCredentialsFormProps {
   hasInvalidRequiredVars: boolean;
   setupTechnology: SetupTechnology;
   cloud?: CloudSetup;
+  isEditPage?: boolean;
 }
 
 const getCloudConnectorCredentialOptions = (
@@ -71,11 +72,16 @@ export const AzureCredentialsFormAgentless = ({
   hasInvalidRequiredVars,
   setupTechnology,
   cloud,
+  isEditPage = false,
 }: AzureCredentialsFormProps) => {
   const { azureOverviewPath, azurePolicyType, isAzureCloudConnectorEnabled, templateName } =
     useCloudSetup();
 
   const azureCredentialsType = getAgentlessCredentialsType(input, isAzureCloudConnectorEnabled);
+  const azureCredentialsDisabled =
+    isEditPage &&
+    azureCredentialsType === AZURE_CREDENTIALS_TYPE.CLOUD_CONNECTORS &&
+    isAzureCloudConnectorEnabled;
 
   // Ensures the  cloud connector support is false if the credential if azureCredentialsType is not cloud_connectors
   if (
@@ -109,6 +115,7 @@ export const AzureCredentialsFormAgentless = ({
           <AzureCredentialTypeSelector
             options={getCloudConnectorCredentialOptions(agentlessOptions)}
             type={azureCredentialsType}
+            disabled={azureCredentialsDisabled}
             onChange={(optionId) => {
               updatePolicy({
                 updatedPolicy: updatePolicyWithInputs(
