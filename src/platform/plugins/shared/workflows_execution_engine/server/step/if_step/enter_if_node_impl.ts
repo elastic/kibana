@@ -51,7 +51,7 @@ export class EnterIfNodeImpl implements NodeImplementation {
     const renderedCondition =
       this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(thenNode.condition);
     const evaluatedConditionResult = this.evaluateCondition(renderedCondition);
-    this.stepExecutionRuntime.setInput({
+    await this.stepExecutionRuntime.setInput({
       condition: renderedCondition,
       conditionResult: evaluatedConditionResult,
     });
