@@ -1201,13 +1201,13 @@ describe('Per-Alert Action Scheduler', () => {
       expect(alert.hasScheduledActions()).toBe(false);
     });
 
-    test('should pass all the action ids to lastScheduledActions', async () => {
+    test('should clear lastScheduledActions', async () => {
       const alert = new Alert<AlertInstanceState, AlertInstanceContext, 'default'>('1', {
         state: { test: true },
         meta: {},
       });
 
-      const spy = jest.spyOn(alert, 'updateLastScheduledActions');
+      const spy = jest.spyOn(alert, 'clearThrottlingLastScheduledActions');
 
       alert.scheduleActions('default');
 
@@ -1249,8 +1249,8 @@ describe('Per-Alert Action Scheduler', () => {
         activeAlerts: { '1': alert },
       });
       expect(spy).toHaveBeenCalledTimes(2); // 2 actions
-      expect(spy).nthCalledWith(1, 'default', 'test:default:1h', '111-111', ['111-111', '222-222']);
-      expect(spy).nthCalledWith(2, 'default', 'test:default:1h', '222-222', ['111-111', '222-222']);
+      expect(spy).nthCalledWith(1, ['111-111', '222-222']);
+      expect(spy).nthCalledWith(2, ['111-111', '222-222']);
     });
   });
 });
