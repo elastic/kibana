@@ -126,7 +126,7 @@ export const EsqlQueryExpression: React.FC<
 
     if (table.response) {
       const esqlTable = transformToEsqlTable(table.response);
-      const { rows, cols } = await getEsqlQueryHits(esqlTable, true);
+      const { rows, cols } = await getEsqlQueryHits(esqlQuery.esql, esqlTable, true);
       setIsLoading(false);
       return {
         timeWindow: window,

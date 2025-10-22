@@ -68,7 +68,7 @@ export async function fetchEsqlQuery({
     throw e;
   }
 
-  const { results } = await getEsqlQueryHits(response);
+  const { results, alertIdFields } = await getEsqlQueryHits(params.esqlQuery.esql, response);
 
   const isPartial = response.is_partial ?? false;
 
@@ -80,11 +80,13 @@ export async function fetchEsqlQuery({
 
   const link = generateLink(params, discoverLocator, dateStart, dateEnd, spacePrefix);
   const sourceFieldsPerResult = getSourceFields(results, sourceFieldsParams);
+  const groupingObjectsPerResult = getGroupingObjects(results, alertIdFields);
 
   return {
     link,
     results,
     sourceFieldsPerResult,
+    groupingObjectsPerResult,
   };
 }
 
@@ -182,4 +184,20 @@ function getSourceFields(results: Record<string, EsqlHit[]>, sourceFieldsParams:
   }
 
   return sourceFieldsPerResult;
+}
+
+function getGroupingObjects(results: Record<string, EsqlHit[]>, alertIdFields: string[]) {
+  const groupingObjectsPerResult: Record<string, Record<string, unknown>> = {};
+  for (const alertId of Object.keys(results)) {
+    const hit = results[alertId].at(0);
+    if (hit) {
+      const groupingObject: Record<string, unknown> = {};
+      alertIdFields.forEach((field) => {
+        const groupingField = get(hit._source, field);
+        groupingObject[field] = groupingField;
+      });
+      groupingObjectsPerResult[alertId] = groupingObject;
+    }
+  }
+  return groupingObjectsPerResult;
 }

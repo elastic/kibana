@@ -6,9 +6,10 @@
  */
 
 import type { CoreSetup } from '@kbn/core/server';
-import { ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
+import { ALERT_REASON, ALERT_URL, ALERT_GROUPING } from '@kbn/rule-data-utils';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import type { ESQLParams } from '@kbn/response-ops-rule-params/esql';
+import { unflattenObject } from '@kbn/object-utils';
 
 import type { ESQLActionContext } from './action_context';
 import { addMessages } from './action_context';
@@ -42,7 +43,7 @@ export async function executor(
   const latestTimestamp: string | undefined = tryToParseAsDate(state.latestTimestamp);
   const { dateStart, dateEnd } = getTimeRange(`${params.timeWindowSize}${params.timeWindowUnit}`);
 
-  const { results, link, sourceFieldsPerResult } = await fetchEsqlQuery({
+  const { results, link, sourceFieldsPerResult, groupingObjectsPerResult } = await fetchEsqlQuery({
     ruleId,
     alertLimit,
     params,
@@ -61,6 +62,9 @@ export async function executor(
   for (const alertId of Object.keys(results)) {
     const hits = results[alertId];
     const sourceFields = sourceFieldsPerResult[alertId];
+    const groupingObject = groupingObjectsPerResult[alertId]
+      ? unflattenObject(groupingObjectsPerResult[alertId])
+      : undefined;
     const baseContext: ESQLActionContext = {
       title: name,
       date: currentTimestamp,
@@ -85,6 +89,7 @@ export async function executor(
         [ALERT_URL]: actionContext.link,
         [ALERT_REASON]: actionContext.message,
         [ALERT_TITLE]: actionContext.title,
+        [ALERT_GROUPING]: groupingObject,
         ...actionContext.sourceFields,
       },
     });
