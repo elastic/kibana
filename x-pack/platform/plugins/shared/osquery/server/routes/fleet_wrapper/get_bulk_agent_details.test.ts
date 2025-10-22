@@ -13,7 +13,9 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 
 describe('getBulkAgentDetailsRoute', () => {
   let mockOsqueryContext: OsqueryAppContext;
-  let mockRouter: ReturnType<ReturnType<typeof httpServiceMock.createSetupContract>['createRouter']>;
+  let mockRouter: ReturnType<
+    ReturnType<typeof httpServiceMock.createSetupContract>['createRouter']
+  >;
   let routeHandler: RequestHandler<unknown, unknown, { agentIds: string[] }>;
 
   const mockAgentService = {

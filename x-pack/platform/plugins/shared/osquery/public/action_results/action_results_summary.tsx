@@ -75,9 +75,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     [expirationDate]
   );
   const [isLive, setIsLive] = useState(true);
-  const {
-    data: { aggregations, edges },
-  } = useActionResults({
+  const { data } = useActionResults({
     actionId,
     startDate,
     activePage: pageIndex,
@@ -92,10 +90,10 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   // Note: Check both bracket notation ['agent.id'] (ECS formatted) and legacy format (agent_id)
   const currentPageAgentIds = useMemo(
     () =>
-      edges
+      data.edges
         .map((edge) => edge.fields?.['agent.id']?.[0] || edge.fields?.agent_id?.[0])
         .filter(Boolean) as string[],
-    [edges]
+    [data.edges]
   );
 
   // Bulk fetch agent details for current page using POST (avoids URL length limits)
@@ -139,13 +137,13 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
 
   useEffect(() => {
     if (error) {
-      edges.forEach((edge) => {
+      data.edges.forEach((edge) => {
         if (edge.fields) {
           edge.fields['error.skipped'] = edge.fields.error = [error];
         }
       });
     } else if (expired) {
-      edges.forEach((edge) => {
+      data.edges.forEach((edge) => {
         if (!edge.fields?.completed_at && edge.fields) {
           edge.fields['error.keyword'] = edge.fields.error = [
             i18n.translate('xpack.osquery.liveQueryActionResults.table.expiredErrorText', {
@@ -155,7 +153,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
         }
       });
     }
-  }, [edges, error, expired]);
+  }, [data.edges, error, expired]);
 
   const renderAgentIdColumn = useCallback(
     (agentId: string) => {
@@ -270,15 +268,15 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     setIsLive(() => {
       if (!agentIds?.length || expired || error) return false;
 
-      return aggregations.totalResponded !== agentIds?.length;
+      return data.aggregations.totalResponded !== agentIds?.length;
     });
-  }, [agentIds?.length, aggregations.totalResponded, error, expired]);
+  }, [agentIds?.length, data.aggregations.totalResponded, error, expired]);
 
   return (
     <div css={statusTableCss}>
       <EuiBasicTable
         loading={isLive}
-        items={edges as ResultEdge[]}
+        items={data.edges as ResultEdge[]}
         columns={columns}
         pagination={pagination}
         onChange={onTableChange}

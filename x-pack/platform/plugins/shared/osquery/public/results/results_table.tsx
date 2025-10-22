@@ -84,9 +84,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 }) => {
   const [isLive, setIsLive] = useState(true);
 
-  const {
-    data: { aggregations },
-  } = useActionResults({
+  const { data } = useActionResults({
     actionId,
     startDate,
     activePage: 0,
@@ -380,15 +378,14 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
         if (!agentIds?.length || expired || error) return false;
 
         return !!(
-          aggregations.totalResponded !== agentIds?.length ||
-          allResultsData?.total !== aggregations?.totalRowCount ||
+          data.aggregations.totalResponded !== agentIds?.length ||
+          allResultsData?.total !== data.aggregations?.totalRowCount ||
           (allResultsData?.total && !allResultsData?.edges.length)
         );
       }),
     [
       agentIds?.length,
-      aggregations.totalResponded,
-      aggregations?.totalRowCount,
+      data.aggregations,
       allResultsData?.edges.length,
       allResultsData?.total,
       error,
@@ -406,7 +403,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
       {!allResultsData?.edges.length ? (
         <EuiPanel hasShadow={false} data-test-subj={'osqueryResultsPanel'}>
-          <EuiCallOut title={generateEmptyDataMessage(aggregations.totalResponded)} />
+          <EuiCallOut title={generateEmptyDataMessage(data.aggregations.totalResponded)} />
         </EuiPanel>
       ) : (
         <DataContext.Provider value={allResultsData?.edges}>

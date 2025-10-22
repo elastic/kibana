@@ -93,6 +93,10 @@ export const useActionResults = ({
       initialData: {
         edges: [],
         total: 0,
+        totalAgents: agentIds?.length ?? 0,
+        currentPage: 0,
+        pageSize: limit,
+        totalPages: 0,
         aggregations: {
           totalRowCount: 0,
           totalResponded: 0,
