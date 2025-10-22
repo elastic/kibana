@@ -19,6 +19,7 @@ import { observeContainerLogs } from './container_logs';
 import type { DockerServer, DockerServerSpec } from './define_docker_servers_config';
 
 const SECOND = 1000;
+const ES_NODE_STAGGER_DELAY = 10 * SECOND; // 10 seconds between ES node startups
 
 export class DockerServersService {
   private servers: DockerServer[];
@@ -213,12 +214,53 @@ export class DockerServersService {
       return;
     }
 
-    await Promise.all(
-      this.servers.map(async (server) => {
-        if (server.enabled) {
-          await this.startServer(server);
+    // Separate ES nodes from other servers
+    const esNodes: DockerServer[] = [];
+    const otherServers: DockerServer[] = [];
+
+    this.servers.forEach((server) => {
+      if (server.enabled) {
+        // Identify ES nodes by name pattern (es01, es02, es03, etc.)
+        if (/^es\d+$/.test(server.name)) {
+          esNodes.push(server);
+        } else {
+          otherServers.push(server);
         }
-      })
-    );
+      }
+    });
+
+    // Sort ES nodes by name to ensure consistent ordering (es01, es02, es03)
+    esNodes.sort((a, b) => a.name.localeCompare(b.name));
+
+    // Start ES nodes sequentially with delay to prevent election race conditions
+    const esStartupPromises: Promise<void>[] = [];
+    for (const esNode of esNodes) {
+      this.log.info(
+        `[docker:${esNode.name}] Starting ES node (${esNodes.indexOf(esNode) + 1}/${
+          esNodes.length
+        })`
+      );
+      esStartupPromises.push(this.startServer(esNode));
+
+      // Add delay between ES node startups (except after the last one)
+      if (esNodes.indexOf(esNode) < esNodes.length - 1) {
+        this.log.info(
+          `[docker] Waiting ${
+            ES_NODE_STAGGER_DELAY / SECOND
+          }s before starting next ES node to prevent election race conditions`
+        );
+        await new Promise((resolve) => setTimeout(resolve, ES_NODE_STAGGER_DELAY));
+      }
+    }
+
+    // Start all non-ES servers in parallel for efficiency
+    const otherStartupPromises: Promise<void>[] = [];
+    if (otherServers.length > 0) {
+      this.log.info(`[docker] Starting ${otherServers.length} non-ES servers in parallel`);
+      otherServers.forEach((server) => {
+        otherStartupPromises.push(this.startServer(server));
+      });
+    }
+    await Promise.all(esStartupPromises.concat(otherStartupPromises));
   }
 }
