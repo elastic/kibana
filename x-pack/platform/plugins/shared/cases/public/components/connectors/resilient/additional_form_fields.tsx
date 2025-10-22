@@ -79,7 +79,12 @@ export const AdditionalFormFields = React.memo<{
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      const transformedFields = Object.entries(fields ?? {}).reduce((acc, [key, value]) => {
+      const transformedFields = additionalFields.reduce((acc, field) => {
+        const key = field.value;
+        const value = fields[key || ''];
+        if (key === undefined) {
+          return acc;
+        }
         // Dates need to be sent to the resilient API as numbers
         if (
           isObject(value) &&
@@ -107,10 +112,24 @@ export const AdditionalFormFields = React.memo<{
       additionalFieldsFormField.setValue(JSON.stringify(transformedFields));
     }, 500);
     return () => clearTimeout(timeout);
-  }, [additionalFieldsFormField, fields, fieldsMetadataRecord]);
+  }, [additionalFields, additionalFieldsFormField, fields, fieldsMetadataRecord]);
 
   return (
     <Form form={form}>
+      <div>
+        {additionalFields.map((field) => {
+          const fieldMetaData = fieldsMetadataRecord[field.value || ''];
+          if (!fieldMetaData) {
+            return null;
+          }
+          return (
+            <React.Fragment key={fieldMetaData.name}>
+              <EuiSpacer size="m" />
+              <AdditionalFormField key={fieldMetaData.name} field={fieldMetaData} />
+            </React.Fragment>
+          );
+        })}
+      </div>
       <EuiFormRow
         label={i18n.ADDITIONAL_FIELDS_LABEL}
         helpText={i18n.ADDITIONAL_FIELDS_HELP_TEXT}
@@ -130,21 +149,6 @@ export const AdditionalFormFields = React.memo<{
           selectedOptions={additionalFields}
         />
       </EuiFormRow>
-
-      <div>
-        {additionalFields.map((field) => {
-          const fieldMetaData = fieldsMetadataRecord[field.value || ''];
-          if (!fieldMetaData) {
-            return null;
-          }
-          return (
-            <React.Fragment key={fieldMetaData.name}>
-              <EuiSpacer size="m" />
-              <AdditionalFormField key={fieldMetaData.name} field={fieldMetaData} />
-            </React.Fragment>
-          );
-        })}
-      </div>
     </Form>
   );
 });
