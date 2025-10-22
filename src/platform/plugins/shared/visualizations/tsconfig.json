@@ -10,6 +10,7 @@
     "@kbn/data-plugin",
     "@kbn/data-views-plugin",
     "@kbn/expressions-plugin",
+    "@kbn/expression-partition-vis-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/inspector-plugin",
@@ -78,7 +79,8 @@
     "@kbn/ui-actions-browser",
     "@kbn/deeplinks-analytics",
     "@kbn/core-saved-objects-api-server",
-    "@kbn/css-utils"
+    "@kbn/css-utils",
+    "@kbn/visualizations-common"
   ],
   "exclude": ["target/**/*"]
 }
