@@ -6,7 +6,8 @@
       "jest",
       "node",
       "react",
-      "@kbn/ambient-ui-types"
+      "@kbn/ambient-ui-types",
+      "@elastic/eui/lib/test/rtl/matchers"
     ]
   },
   "include": [

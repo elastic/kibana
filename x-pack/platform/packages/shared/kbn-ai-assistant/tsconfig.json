@@ -6,7 +6,8 @@
       "jest",
       "node",
       "react",
-      "@emotion/react/types/css-prop"
+      "@emotion/react/types/css-prop",
+      "@elastic/eui/lib/test/rtl/matchers"
     ]
   },
   "include": [

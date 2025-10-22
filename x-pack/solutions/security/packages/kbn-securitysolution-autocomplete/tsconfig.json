@@ -2,7 +2,7 @@
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": ["jest", "node"]
+    "types": ["jest", "node", "@elastic/eui/lib/test/rtl/matchers"]
   },
   "include": [
     "**/*.ts",

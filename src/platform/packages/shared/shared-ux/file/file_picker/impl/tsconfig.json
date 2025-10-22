@@ -7,6 +7,7 @@
       "jest",
       "react",
       "@emotion/react/types/css-prop",
+      "@elastic/eui/lib/test/enzyme/enzyme_matchers"
     ]
   },
   "include": [

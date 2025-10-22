@@ -6,7 +6,9 @@
       "jest",
       "node",
       "@emotion/react/types/css-prop",
-      "@kbn/ambient-ui-types"
+      "@kbn/ambient-ui-types",
+      "@elastic/eui/lib/test/rtl/matchers",
+      "@elastic/eui/lib/test/enzyme/enzyme_matchers",
     ]
   },
   "include": [

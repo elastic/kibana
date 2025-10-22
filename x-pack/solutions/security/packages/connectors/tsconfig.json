@@ -9,6 +9,7 @@
       "@emotion/react/types/css-prop",
       "@testing-library/jest-dom",
       "@testing-library/react",
+      "@elastic/eui/lib/test/rtl/matchers"
     ]
   },
   "include": ["**/*.ts", "**/*.tsx"],

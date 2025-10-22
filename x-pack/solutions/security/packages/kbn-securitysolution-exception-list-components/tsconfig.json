@@ -7,7 +7,8 @@
       "node",
       "react",
       "@emotion/react/types/css-prop",
-      "../../../../../typings/emotion.d.ts"
+      "../../../../../typings/emotion.d.ts",
+      "@elastic/eui/lib/test/rtl/matchers"
     ]
   },
   "include": [
