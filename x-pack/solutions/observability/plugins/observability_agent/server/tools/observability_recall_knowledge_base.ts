@@ -188,8 +188,8 @@ async function recallFromKnowledgeBase({
         bool: {
           should: [{ semantic: { field: 'semantic_text', query } }],
           filter: [
-            // exclude user instructions - only get contextual entries
-            { bool: { must_not: { term: { type: KnowledgeBaseType.UserInstruction } } } },
+            { term: { public: true } }, // only public entries
+            { bool: { must_not: { term: { type: KnowledgeBaseType.UserInstruction } } } }, // only get contextual entries (exclude user instructions)
           ],
         },
       },
