@@ -133,7 +133,7 @@ Alerting and cases::
 * Updates `nodemailer` to `7.0.9` ({kibana-pull}238816[#238816]).
 * Isolates the configuration parameters for the Tines connector to the server side ({kibana-pull}236863[#236863]).
 Dashboards and Visualizations::
-* Fixes bug that prevented you from deleting unsaved dashboard changes after you had enabled the `timeRestore`` setting and selected a time and date using the date picker ({kibana-pull}239992[#239992]).
+* Fixes bug that prevented you from deleting unsaved dashboard changes after you had enabled the `timeRestore` setting and selected a time and date using the date picker ({kibana-pull}239992[#239992]).
 * Fixes error that occured when you selected a blank value in the options list ({kibana-pull}239791[#239791]).
 * Fixes a bug in Lens that incorrectly assigned unsaved, ad-hoc dataview references ({kibana-pull}239431[#239431]).
 * Fixes bug that broke the filter functionalty in table rows when any column is used as a formula in *Lens* ({kibana-pull}239222[#239222]).
