@@ -26,7 +26,7 @@ import {
   AgentPolicyNameExistsError,
   ConcurrentInstallOperationError,
   FleetError,
-  FleetElasticsearchValidationError,
+  FleetElasticsearchError,
   isESClientError,
   PackageUnsupportedMediaTypeError,
   RegistryConnectionError,
@@ -236,7 +236,7 @@ export const defaultFleetErrorHandler: IngestErrorHandler = async ({
   // Convert ALL Elasticsearch errors to Fleet errors (preserving original status codes)
   let processedError = error;
   if (isESClientError(error)) {
-    processedError = new FleetElasticsearchValidationError(error);
+    processedError = new FleetElasticsearchError(error);
   }
 
   const options = fleetErrorToResponseOptions(processedError);

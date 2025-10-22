@@ -20,7 +20,6 @@
     "@kbn/saved-objects-finder-plugin",
     "@kbn/saved-objects-tagging-plugin",
     "@kbn/presentation-util-plugin",
-    "@kbn/visualizations-plugin",
     "@kbn/data-views-plugin",
     "@kbn/visualization-ui-components",
     "@kbn/i18n-react",
@@ -34,7 +33,8 @@
     "@kbn/event-annotation-common",
     "@kbn/content-management-utils",
     "@kbn/logging",
-    "@kbn/core-plugins-server"
+    "@kbn/core-plugins-server",
+    "@kbn/visualizations-common"
   ],
   "exclude": [
     "target/**/*",
