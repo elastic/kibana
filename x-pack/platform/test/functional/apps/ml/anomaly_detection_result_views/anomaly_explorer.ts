@@ -176,6 +176,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
             await ml.testExecution.logTestStep('anomalies table is not empty');
             await ml.anomaliesTable.assertTableNotEmpty();
+
+            await ml.testExecution.logTestStep('displays the feedback button');
+            await ml.anomalyExplorer.assertFeatureButtonExists();
           });
 
           it('should allow filtering by influencer', async () => {
