@@ -10,6 +10,7 @@
 import { resolve, relative } from 'path';
 import { createReadStream } from 'fs';
 import type { Readable, Writable } from 'stream';
+import chalk from 'chalk';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
@@ -42,7 +43,7 @@ export async function unloadAction({
 
   const files = prioritizeMappings(await readDirectory(inputDir));
   for (const filename of files) {
-    log.info('[%s] Unloading indices from %j', name, filename);
+    log.write(`${chalk.green('[FTR] [Test Data]')} Unloading indices from %j`, filename);
 
     await createPromiseFromStreams([
       createReadStream(resolve(inputDir, filename)) as Readable,

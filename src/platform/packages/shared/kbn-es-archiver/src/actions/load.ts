@@ -10,6 +10,7 @@
 import { resolve, relative } from 'path';
 import { createReadStream } from 'fs';
 import type { Readable } from 'stream';
+import chalk from 'chalk';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { KbnClient } from '@kbn/test';
@@ -86,7 +87,7 @@ export async function loadAction({
   // across archives and properly skip docs from existing indexes
   const recordStream = concatStreamProviders(
     files.map((filename) => () => {
-      log.info('[%s] Loading %j', name, filename);
+      log.write(`${chalk.green('[FTR] [Test Data]')} Loading archive %j`, filename);
 
       return pipeline(
         createReadStream(resolve(inputDir, filename)),
@@ -126,7 +127,7 @@ export async function loadAction({
   const indicesWithDocs: string[] = [];
   for (const [index, { docs }] of Object.entries(result)) {
     if (docs && docs.indexed > 0) {
-      log.info('[%s] Indexed %d docs into %j', name, docs.indexed, index);
+      log.write(`${chalk.green('[FTR] [Test Data]')} Indexed %d docs into %j`, docs.indexed, index);
       indicesWithDocs.push(index);
     }
   }
@@ -144,12 +145,18 @@ export async function loadAction({
   // If we affected saved objects indices, we need to ensure they are migrated...
   if (Object.keys(result).some((k) => k.startsWith(MAIN_SAVED_OBJECT_INDEX))) {
     await migrateSavedObjectIndices(kbnClient);
-    log.debug('[%s] Migrated Kibana index after loading Kibana data', name);
+    log.write(
+      `${chalk.green('[FTR] [Test Data]')} Migrated Kibana index after loading Kibana data`
+    );
 
     if (kibanaPluginIds.includes('spaces')) {
       // WARNING affected by #104081. Assumes 'spaces' saved objects are stored in MAIN_SAVED_OBJECT_INDEX
       await createDefaultSpace({ client, index: MAIN_SAVED_OBJECT_INDEX });
-      log.debug(`[%s] Ensured that default space exists in ${MAIN_SAVED_OBJECT_INDEX}`, name);
+      log.write(
+        `${chalk.green(
+          '[FTR] [Test Data]'
+        )} Ensured that default space exists in ${MAIN_SAVED_OBJECT_INDEX}`
+      );
     }
   }
 

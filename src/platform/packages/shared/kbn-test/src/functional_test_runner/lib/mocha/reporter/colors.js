@@ -14,6 +14,7 @@ export const pending = cyan;
 export const pass = green;
 export const fail = red;
 export const progress = cyan;
+export const gray = dim;
 
 export function speed(name, txt) {
   switch (name) {

@@ -8,6 +8,7 @@
  */
 
 import Path from 'path';
+import Fs from 'fs';
 import { setTimeout } from 'timers/promises';
 
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -105,19 +106,42 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
           abortCtrl.abort();
         };
 
+        // Determine if we should use minimal logging
+        const ftrLogOutput = config.get('ftrLogOutput');
+        const useMinimalLogging = ftrLogOutput === 'minimal';
+
+        // Set up logs directory for minimal logging mode
+        const logsDir = useMinimalLogging
+          ? options.logsDir || Path.join(REPO_ROOT, 'target/ftr-logs')
+          : options.logsDir;
+
+        // Create logs directory if it doesn't exist
+        if (logsDir) {
+          Fs.mkdirSync(logsDir, { recursive: true });
+        }
+
         let shutdownEs;
         try {
           if (process.env.TEST_ES_DISABLE_STARTUP !== 'true') {
-            shutdownEs = await runElasticsearch({ ...options, log, config, onEarlyExit });
+            if (useMinimalLogging) {
+              log.info('Starting Elasticsearch...');
+            }
+            shutdownEs = await runElasticsearch({ ...options, log, config, onEarlyExit, logsDir });
             if (abortCtrl.signal.aborted) {
               return;
             }
+            if (useMinimalLogging) {
+              log.success('Elasticsearch started successfully');
+            }
           }
 
+          if (useMinimalLogging) {
+            log.info('Starting Kibana...');
+          }
           await runKibanaServer({
             procs,
             config,
-            logsDir: options.logsDir,
+            logsDir,
             installDir: options.installDir,
             onEarlyExit,
             extraKbnOpts: [
@@ -126,10 +150,16 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
                 : '--server.versioned.versionResolution=oldest',
             ],
           });
+          if (useMinimalLogging) {
+            log.success('Kibana started successfully');
+          }
 
           const startRemoteKibana = config.get('kbnTestServer.startRemoteKibana');
 
           if (startRemoteKibana) {
+            if (useMinimalLogging) {
+              log.info('Starting remote Kibana instance...');
+            }
             await runKibanaServer({
               procs,
               config: new Config({
@@ -148,7 +178,7 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
                 path: config.path,
                 module: config.module,
               }),
-              logsDir: options.logsDir,
+              logsDir,
               installDir: options.installDir,
               onEarlyExit,
               extraKbnOpts: [
@@ -158,6 +188,9 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
               ],
               remote: true,
             });
+            if (useMinimalLogging) {
+              log.success('Remote Kibana instance started successfully');
+            }
           }
 
           if (abortCtrl.signal.aborted) {
@@ -171,6 +204,11 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
             signal: abortCtrl.signal,
           });
         } finally {
+          // Cleanup: Always stop processes, even on error
+          if (useMinimalLogging) {
+            log.info('Stopping Kibana and Elasticsearch...');
+          }
+
           try {
             const delay = config.get('kbnTestServer.delayShutdown');
             if (typeof delay === 'number') {
@@ -183,6 +221,10 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
             if (shutdownEs) {
               await shutdownEs();
             }
+          }
+
+          if (useMinimalLogging) {
+            log.success('Cleanup complete');
           }
         }
       });

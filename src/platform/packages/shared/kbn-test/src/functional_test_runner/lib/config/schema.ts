@@ -189,6 +189,13 @@ export const schema = Joi.object()
       })
       .default(),
 
+    ftrLogOutput: Joi.string()
+      .valid('minimal', 'full')
+      .default('minimal')
+      .description(
+        'Controls FTR log verbosity: "minimal" (default) shows only key milestones and buffers browser logs; "full" shows all server and browser logs immediately'
+      ),
+
     scoutReporter: Joi.object()
       .keys({
         enabled: Joi.boolean().default(SCOUT_REPORTER_ENABLED),

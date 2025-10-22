@@ -136,9 +136,10 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
       next(line) {
         if (stdioTarget) {
           stdioTarget.write(stripAnsi(line) + '\n');
-        } else {
-          log.write(` ${chalk.gray('proc')} [${chalk.gray(name)}] ${line}`);
         }
+        // Always write to log for pattern matching, with clear source label
+        const label = name;
+        log.write(`[${chalk.cyan(label)}] ${line}`);
       },
       complete() {
         if (stdioTarget) {

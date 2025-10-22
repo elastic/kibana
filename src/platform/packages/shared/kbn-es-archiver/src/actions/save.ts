@@ -10,6 +10,7 @@
 import { resolve, relative } from 'path';
 import { createWriteStream, mkdirSync } from 'fs';
 import type { Readable, Writable } from 'stream';
+import chalk from 'chalk';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { createListStream, createPromiseFromStreams } from '@kbn/utils';
@@ -43,7 +44,7 @@ export async function saveAction({
   const name = relative(REPO_ROOT, outputDir);
   const stats = createStats(name, log);
 
-  log.info('[%s] Creating archive of %j', name, indices);
+  log.write(`${chalk.green('[FTR] [Test Data]')} Creating archive of %j`, indices);
 
   mkdirSync(outputDir, { recursive: true });
 
@@ -70,7 +71,7 @@ export async function saveAction({
 
   progress.deactivate();
   stats.forEachIndex((index, { docs }) => {
-    log.info('[%s] Archived %d docs from %j', name, docs.archived, index);
+    log.write(`${chalk.green('[FTR] [Test Data]')} Archived %d docs from %j`, docs.archived, index);
   });
 
   return stats.toJSON();
