@@ -19,8 +19,6 @@ interface Props {
   jobIds: string[];
 }
 
-const MATCHED_CREATED_BY_TAGS = ['ml-module-metrics-ui-hosts'];
-
 export const FeedBackButton: FC<Props> = ({ jobIds }) => {
   const { jobs: getJobs } = useJobsApiService();
   const {
@@ -39,7 +37,7 @@ export const FeedBackButton: FC<Props> = ({ jobIds }) => {
 
   const isMounted = useMountedState();
 
-  const HOSTS_ANOMALY_DETECTION_FEEDBACK_URL = 'https://ela.st/anomaly-detection-feedback';
+  const ANOMALY_DETECTION_FEEDBACK_URL = 'https://ela.st/anomaly-detection-feedback';
 
   useEffect(() => {
     const tempJobIdsString = jobIds.join(',');
@@ -51,17 +49,19 @@ export const FeedBackButton: FC<Props> = ({ jobIds }) => {
 
     getJobs(jobIds).then((resp) => {
       if (isMounted()) {
-        setShowButton(
-          resp.some((job) => MATCHED_CREATED_BY_TAGS.includes(job.custom_settings?.created_by))
-        );
+        setShowButton(resp.length > 0);
       }
     });
   }, [jobIds, getJobs, jobIdsString, isMounted]);
 
-  return showButton === false ? null : (
+  if (showButton === false) {
+    return null;
+  }
+
+  return (
     <FeatureFeedbackButton
       data-test-subj="mlFeatureFeedbackButton"
-      formUrl={HOSTS_ANOMALY_DETECTION_FEEDBACK_URL}
+      formUrl={ANOMALY_DETECTION_FEEDBACK_URL}
       kibanaVersion={kibanaVersion}
       isCloudEnv={isCloud}
       isServerlessEnv={showNodeInfo === false}
