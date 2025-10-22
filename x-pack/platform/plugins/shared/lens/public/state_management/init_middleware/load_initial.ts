@@ -145,6 +145,7 @@ async function loadFromLocatorState(
       isSaveable: true,
       filters: initialState.filters || data.query.filterManager.getFilters(),
       query: initialState.query || emptyState.query,
+      projectRouting: initialState.projectRouting || emptyState.projectRouting,
       searchSessionId: currentSessionId,
       activeDatasourceId: emptyState.activeDatasourceId,
       visualization: {
@@ -280,6 +281,7 @@ async function loadFromSavedObject(
       sharingSavedObjectProps,
       filters: data.query.filterManager.getFilters(),
       query: doc.state.query,
+      projectRouting: doc.state.projectRouting,
       searchSessionId:
         !savedObjectId && currentSessionId
           ? currentSessionId

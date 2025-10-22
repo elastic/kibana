@@ -22,7 +22,7 @@ import {
 import { css } from '@emotion/react';
 import type { MountPoint } from '@kbn/core/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import type { Query } from '@kbn/es-query';
+import type { ProjectRouting, Query } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import type { TopNavMenuBadgeProps, TopNavMenuProps } from '@kbn/navigation-plugin/public';
@@ -85,16 +85,25 @@ export function InternalDashboardTopNav({
 
   const dashboardApi = useDashboardApi();
 
-  const [allDataViews, fullScreenMode, hasUnsavedChanges, lastSavedId, query, title, viewMode] =
-    useBatchedPublishingSubjects(
-      dashboardApi.dataViews$,
-      dashboardApi.fullScreenMode$,
-      dashboardApi.hasUnsavedChanges$,
-      dashboardApi.savedObjectId$,
-      dashboardApi.query$,
-      dashboardApi.title$,
-      dashboardApi.viewMode$
-    );
+  const [
+    allDataViews,
+    fullScreenMode,
+    hasUnsavedChanges,
+    lastSavedId,
+    projectRouting,
+    query,
+    title,
+    viewMode,
+  ] = useBatchedPublishingSubjects(
+    dashboardApi.dataViews$,
+    dashboardApi.fullScreenMode$,
+    dashboardApi.hasUnsavedChanges$,
+    dashboardApi.savedObjectId$,
+    dashboardApi.projectRouting$,
+    dashboardApi.query$,
+    dashboardApi.title$,
+    dashboardApi.viewMode$
+  );
 
   const [savedQueryId, setSavedQueryId] = useState<string | undefined>();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -340,6 +349,22 @@ export function InternalDashboardTopNav({
     []
   );
 
+  const onProjectRoutingChange = useCallback(
+    (value: ProjectRouting) => {
+      // newProjectRouting is already normalized (undefined for 'all', '_alias:_origin' for origin)
+      if (value !== projectRouting) {
+        // we do the ternary here so we don't get unsaved changes when switching to 'all' back and forth  
+        // - it has to be done at this level because it might behave differently for lens or maps in the editors
+        const newProjectRouting =
+          value === '_alias:*' ? undefined : value;
+        dashboardApi.setProjectRouting(newProjectRouting);
+        // Force refresh to trigger a new search with the updated project routing
+        dashboardApi.forceRefresh();
+      }
+    },
+    [dashboardApi, projectRouting]
+  );
+
   return (
     <div css={styles.container}>
       <EuiScreenReaderOnly>
@@ -351,6 +376,8 @@ export function InternalDashboardTopNav({
       <navigationService.ui.TopNavMenu
         {...visibilityProps}
         query={query as Query | undefined}
+        projectRouting={projectRouting}
+        onProjectRoutingChange={onProjectRoutingChange}
         badges={badges}
         screenTitle={title}
         useDefaultBehaviors={true}

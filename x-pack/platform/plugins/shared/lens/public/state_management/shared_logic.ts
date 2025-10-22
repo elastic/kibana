@@ -24,6 +24,7 @@ export function mergeToNewDoc(
   datasourceStates: DatasourceStates,
   query: AggregateQuery | Query,
   filters: Filter[],
+  projectRouting: LensDocument['state']['projectRouting'],
   activeDatasourceId: string | null,
   adHocDataViews: Record<string, DataViewSpec>,
   {
@@ -123,6 +124,7 @@ export function mergeToNewDoc(
       query,
       filters: [...persistableFilters, ...adHocFilters],
       datasourceStates: persistibleDatasourceStates,
+      ...(projectRouting !== undefined ? { projectRouting } : {}),
       internalReferences,
       adHocDataViews: persistableAdHocDataViews,
     },

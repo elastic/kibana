@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import type { AggregateQuery, Filter, ProjectRouting, Query } from '@kbn/es-query';
 import type { Reference } from '@kbn/content-management-utils';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { LENS_ITEM_LATEST_VERSION } from '../../common/constants';
@@ -25,6 +25,7 @@ export interface LensDocument {
       state?: unknown;
     };
     filters: Filter[];
+    projectRouting?: ProjectRouting;
     needsRefresh?: boolean;
     adHocDataViews?: Record<string, DataViewSpec>;
     internalReferences?: Reference[];

@@ -76,7 +76,7 @@ import {
 import { catchError, finalize, first, last, map, shareReplay, switchMap, tap } from 'rxjs';
 import { defer, EMPTY, from, lastValueFrom, Observable } from 'rxjs';
 import type { estypes } from '@elastic/elasticsearch';
-import type { Filter } from '@kbn/es-query';
+import type { Filter, ProjectRouting } from '@kbn/es-query';
 import { buildEsQuery, isOfQueryType, isPhraseFilter, isPhrasesFilter } from '@kbn/es-query';
 import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/common';
 import { getHighlightRequest } from '@kbn/field-formats-plugin/common';
@@ -680,6 +680,24 @@ export class SearchSource {
         return addToBody(key, sort);
       case 'pit':
         return addToRoot(key, val);
+      case 'projectRouting':
+        // TEMPORARY WORKAROUND: Use filters until project_routing parameter is supported
+        // This allows testing the projectRouting field without breaking on non-serverless ES
+
+        console.log('SearchSource: Adding dummy filter for projectRouting:', val);
+
+        // Add a dummy filter based on the routing type to validate the field works
+        // When project_routing is supported, replace this with:
+        
+        // return addToBody('project_routing', val);
+        const dummyFilter = this.createProjectRoutingDummyFilter(val);
+        if (dummyFilter) {
+          // Add to filters array in the root
+          const existingFilters =
+            typeof data.filters === 'function' ? data.filters() : data.filters || [];
+          addToRoot('filters', existingFilters.concat(dummyFilter));
+        }
+        return;
       case 'aggs':
         if ((val as unknown) instanceof AggConfigs) {
           return addToBody('aggs', val.toDsl());
@@ -714,6 +732,37 @@ export class SearchSource {
 
   private getDataView(index?: DataView | string): DataView | undefined {
     return typeof index !== 'string' ? index : undefined;
+  }
+
+  /**
+   * TEMPORARY: Creates a dummy filter for testing projectRouting field
+   * This is a workaround until project_routing parameter is supported
+   * @param config - The project routing configuration
+   * @returns A filter that serves as a placeholder
+   */
+  private createProjectRoutingDummyFilter(type: ProjectRouting): Filter | null {
+    switch (type) {
+      case '_alias:_origin':
+        // For origin: add a filter just see the call is made
+        return {
+          meta: {
+            disabled: false,
+            negate: false,
+            key: '_id',
+            type: 'exists',
+            value: 'exists',
+          },
+          query: {
+            exists: {
+              field: '_id',
+            },
+          },
+        };
+      case '_alias:*':
+      default:
+        // For all: don't add anything, since it is gonna be default
+        return null; // Don't add any filter for origin
+    }
   }
 
   private readonly getFieldName = (fld: SearchFieldValue): string =>
@@ -1096,12 +1145,19 @@ export class SearchSource {
       size: _size, // omit it
       sort,
       index,
+      projectRouting,
       ...searchSourceFields
     } = this.getFields();
 
     let serializedSearchSourceFields: SerializedSearchSourceFields = {
       ...searchSourceFields,
     };
+
+    console.log('SearchSource: Serializing projectRouting field:', projectRouting);
+    // Only include projectRouting if it's defined (undefined is the default for 'all projects')
+    if (projectRouting !== undefined) {
+      serializedSearchSourceFields.projectRouting = projectRouting;
+    }
     if (index) {
       serializedSearchSourceFields.index = index.isPersisted() ? index.id : index.toMinimalSpec();
     }

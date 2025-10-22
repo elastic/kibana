@@ -18,7 +18,7 @@ import { throttle } from 'lodash';
 
 import dateMath from '@kbn/datemath';
 import { css } from '@emotion/react';
-import type { Filter, TimeRange, Query, AggregateQuery } from '@kbn/es-query';
+import type { Filter, TimeRange, Query, AggregateQuery, ProjectRouting } from '@kbn/es-query';
 import {
   getAggregateQueryMode,
   isOfQueryType,
@@ -55,6 +55,7 @@ import { DataViewPicker } from '../dataview_picker';
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
 import { NoDataPopover } from './no_data_popover';
 import { ProjectPicker } from '../project_picker';
+import type { ProjectPickerProps } from '../project_picker';
 import type {
   SuggestionsAbstraction,
   SuggestionsListSize,
@@ -235,6 +236,8 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   };
   useBackgroundSearchButton?: boolean;
   showProjectPicker?: boolean;
+  projectRouting?: ProjectRouting;
+  onProjectRoutingChange?: ProjectPickerProps['onProjectRoutingChange'];
 }
 
 export const SharingMetaFields = React.memo(function SharingMetaFields({
@@ -782,7 +785,10 @@ export const QueryBarTopRow = React.memo(
       if (props.showProjectPicker && localStorage.getItem(SHOW_PROJECT_PICKER_KEY) === 'true') {
         return (
           <EuiFlexItem grow={isMobile}>
-            <ProjectPicker />
+            <ProjectPicker
+              projectRouting={props.projectRouting}
+              onProjectRoutingChange={props.onProjectRoutingChange}
+            />
           </EuiFlexItem>
         );
       }

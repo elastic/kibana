@@ -10,7 +10,7 @@
 import type { ControlGroupApi } from '@kbn/controls-plugin/public';
 import type { GlobalQueryStateFromUrl, RefreshInterval } from '@kbn/data-plugin/public';
 import { connectToQueryState, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { Filter, ProjectRouting, Query, TimeRange } from '@kbn/es-query';
 import { COMPARE_ALL_OPTIONS, compareFilters, isFilterPinned } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
@@ -58,6 +58,15 @@ export function initializeUnifiedSearchManager(
   const controlGroupReload$ = new Subject<void>();
   const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
   const panelsReload$ = new Subject<void>();
+  const projectRouting$ = new BehaviorSubject<ProjectRouting | undefined>(
+    initialState.projectRouting
+  );
+  function setProjectRouting(projectRouting: ProjectRouting | undefined) {
+    console.log('setProjectRouting called with:', projectRouting, 'current value:', projectRouting$.value);
+    if (projectRouting !== projectRouting$.value) {
+      projectRouting$.next(projectRouting);
+    }
+  }
   const query$ = new BehaviorSubject<Query | undefined>(initialState.query);
   // setAndSyncQuery method not needed since query synced with 2-way data binding
   function setQuery(query: Query) {
@@ -272,6 +281,7 @@ export function initializeUnifiedSearchManager(
         (b ?? []).filter((f) => !isFilterPinned(f)),
         COMPARE_ALL_OPTIONS
       ),
+    projectRouting: 'deepEquality',
     query: 'deepEquality',
     refreshInterval: (a: RefreshInterval | undefined, b: RefreshInterval | undefined) =>
       timeRestore$.value ? fastIsEqual(a, b) : true,
@@ -283,18 +293,21 @@ export function initializeUnifiedSearchManager(
       return true;
     },
   } as StateComparators<
-    Pick<DashboardState, 'filters' | 'query' | 'refreshInterval' | 'timeRange'>
+    Pick<DashboardState, 'filters' | 'projectRouting' | 'query' | 'refreshInterval' | 'timeRange'>
   >;
 
   const getState = (): Pick<
     DashboardState,
-    'filters' | 'query' | 'refreshInterval' | 'timeRange' | 'timeRestore'
+    'filters' | 'projectRouting' | 'query' | 'refreshInterval' | 'timeRange' | 'timeRestore'
   > => {
     // pinned filters are not serialized when saving the dashboard
     const serializableFilters = unifiedSearchFilters$.value?.filter((f) => !isFilterPinned(f));
 
+    console.log('getState called, returning:', projectRouting$.value);
+
     return {
       filters: serializableFilters,
+      projectRouting: projectRouting$.value,
       query: query$.value,
       refreshInterval: refreshInterval$.value,
       timeRange: timeRange$.value,
@@ -310,9 +323,11 @@ export function initializeUnifiedSearchManager(
         controlGroupReload$.next();
         panelsReload$.next();
       },
+      projectRouting$,
       query$,
       refreshInterval$,
       setFilters: setUnifiedSearchFilters,
+      setProjectRouting,
       setQuery,
       setTimeRange: setAndSyncTimeRange,
       timeRange$,
@@ -322,10 +337,17 @@ export function initializeUnifiedSearchManager(
     internalApi: {
       controlGroupReload$,
       startComparing$: (lastSavedState$: BehaviorSubject<DashboardState>) => {
-        return combineLatest([unifiedSearchFilters$, query$, refreshInterval$, timeRange$]).pipe(
+        return combineLatest([
+          unifiedSearchFilters$,
+          projectRouting$,
+          query$,
+          refreshInterval$,
+          timeRange$,
+        ]).pipe(
           debounceTime(100),
-          map(([filters, query, refreshInterval, timeRange]) => ({
+          map(([filters, projectRouting, query, refreshInterval, timeRange]) => ({
             filters,
+            projectRouting,
             query,
             refreshInterval,
             timeRange,
@@ -342,6 +364,7 @@ export function initializeUnifiedSearchManager(
           ...(unifiedSearchFilters$.value ?? []).filter(isFilterPinned),
           ...(lastSavedState.filters ?? []),
         ]);
+        setProjectRouting(lastSavedState.projectRouting);
         if (lastSavedState.query) {
           setQuery(lastSavedState.query);
         }

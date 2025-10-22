@@ -24,6 +24,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import type { ProjectRouting } from '@kbn/es-query';
 import { ProjectListItem } from './project_list_item';
 
 export const strings = {
@@ -180,8 +181,12 @@ const response: { origin: Record<string, Project>; linked_projects: Record<strin
   },
 };
 
-export const ProjectPicker = () => {
-  const [crossProjectSearchScope, setCrossProjectSearchScope] = useState<string>('all');
+export interface ProjectPickerProps {
+  projectRouting?: ProjectRouting;
+  onProjectRoutingChange?: (projectRouting: ProjectRouting) => void;
+}
+
+export const ProjectPicker = ({ projectRouting, onProjectRoutingChange }: ProjectPickerProps) => {
   const [showProjectPickerPopover, setShowProjectPickerPopover] = useState(false);
   const [linkedProjects, setProjects] = useState<Project[]>([]);
 
@@ -190,7 +195,7 @@ export const ProjectPicker = () => {
   const originProject: Project = Object.values(response.origin)[0];
 
   const projects =
-    crossProjectSearchScope === 'origin' ? [originProject] : [originProject, ...linkedProjects];
+    projectRouting === '_alias:_origin' ? [originProject] : [originProject, ...linkedProjects];
 
   useEffect(() => {
     // TODO: replace with fetch linked projects from cross project API
@@ -288,25 +293,27 @@ export const ProjectPicker = () => {
           <EuiButtonGroup
             isFullWidth
             legend={strings.getProjectPickerButtonAriaLabel()}
-            idSelected={crossProjectSearchScope}
+            idSelected={projectRouting ?? '_alias:*'}
             options={[
               {
-                id: 'all',
-                value: 'all',
+                id: '_alias:*',
+                value: '_alias:*',
                 label: i18n.translate('unifiedSearch.projectPicker.allProjectsLabel', {
                   defaultMessage: 'All projects',
                 }),
               },
               {
-                id: 'origin',
-                value: 'origin',
+                id: '_alias:_origin',
+                value: '_alias:_origin',
                 label: strings.getOriginProjectLabel(),
               },
             ]}
             onChange={(value: string) => {
               // TODO: add telemetry for project scope change?
-              // TODO: propagate the scope change to search settings
-              setCrossProjectSearchScope(value);
+              const newProjectRouting: ProjectRouting =
+                value === '_alias:_origin' ? '_alias:_origin' : '_alias:*';
+              console.log('Project scope changed to:', value, newProjectRouting);
+              onProjectRoutingChange?.(newProjectRouting);
             }}
             css={{ margin: '8px' }}
             buttonSize="compressed"
@@ -327,7 +334,7 @@ export const ProjectPicker = () => {
                 defaultMessage="Searching across {numberOfProjects, plural, one {# project} other {# projects}}"
                 values={{
                   numberOfProjects:
-                    crossProjectSearchScope === 'origin' ? 1 : linkedProjects.length + 1,
+                    projectRouting === '_alias:_origin' ? 1 : linkedProjects.length + 1,
                 }}
               />
             </h6>

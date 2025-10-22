@@ -39,6 +39,7 @@ export const transformDashboardIn = ({
       options,
       filters,
       panels,
+      projectRouting,
       query,
       tags,
       timeRange,
@@ -60,7 +61,8 @@ export const transformDashboardIn = ({
 
     const { searchSourceJSON, references: searchSourceReferences } = transformSearchSourceIn(
       filters,
-      query
+      query,
+      projectRouting
     );
 
     const attributes = {

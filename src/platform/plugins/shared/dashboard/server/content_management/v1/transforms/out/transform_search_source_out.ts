@@ -17,7 +17,7 @@ import { logger } from '../../../../kibana_services';
 export function transformSearchSourceOut(
   kibanaSavedObjectMeta: DashboardSavedObjectAttributes['kibanaSavedObjectMeta'] = {},
   references: SavedObjectReference[] = []
-): Pick<DashboardAttributes, 'filters' | 'query'> {
+): Pick<DashboardAttributes, 'filters' | 'projectRouting' | 'query'> {
   const { searchSourceJSON } = kibanaSavedObjectMeta;
   if (!searchSourceJSON) {
     return {};
@@ -43,8 +43,9 @@ export function transformSearchSourceOut(
 
   try {
     const filters = cleanFiltersForSerialize(searchSource.filter);
+    const projectRouting = searchSource.projectRouting;
     const query = searchSource.query ? migrateLegacyQuery(searchSource.query) : undefined;
-    return { filters, query };
+    return { filters, projectRouting, query };
   } catch (error) {
     logger.warn(
       `Unexpected error transforming filter and query state on read. Error: ${error.message}`

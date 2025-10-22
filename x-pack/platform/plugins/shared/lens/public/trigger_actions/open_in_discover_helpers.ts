@@ -17,6 +17,7 @@ interface DiscoverAppLocatorParams extends SerializableRecord {
   filters?: Filter[];
   indexPatternId?: string;
   query?: Query | AggregateQuery | undefined;
+  // TODO: should project routing be also passed to a discover locator?
   columns?: string[];
 }
 
