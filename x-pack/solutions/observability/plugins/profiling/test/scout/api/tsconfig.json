@@ -4,7 +4,8 @@
     "outDir": "target/types"
   },
   "include": [
-    "**/*"
+    "**/*",
+    "common/**/*.ts"
   ],
   "kbn_references": [
     "@kbn/scout-oblt"
