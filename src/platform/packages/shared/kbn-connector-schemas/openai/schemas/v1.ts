@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
 import { z } from '@kbn/zod';
-import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from './constants';
+import { DEFAULT_MODEL, OpenAiProviderType } from '../constants';
 
 export const TelemetryMetadataSchema = z
   .object({
@@ -31,7 +32,7 @@ export const ConfigSchema = z.union([
       apiUrl: z.string(),
       organizationId: z.string().optional(),
       projectId: z.string().optional(),
-      defaultModel: z.string().default(DEFAULT_OPENAI_MODEL),
+      defaultModel: z.string().default(DEFAULT_MODEL),
       headers: z.record(z.string(), z.string()).optional(),
       contextWindowLength: z.coerce.number().optional(),
     })

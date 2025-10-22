@@ -18,8 +18,8 @@ import {
 } from '@kbn/connector-schemas/bedrock/constants';
 import {
   SUB_ACTION as OPENAI_SUB_ACTION,
-  OPENAI_CONNECTOR_ID,
-} from '@kbn/stack-connectors-plugin/common/openai/constants';
+  CONNECTOR_ID as OPENAI_CONNECTOR_ID,
+} from '@kbn/connector-schemas/openai/constants';
 import {
   SUB_ACTION as GEMINI_SUB_ACTION,
   CONNECTOR_ID as GEMINI_CONNECTOR_ID,

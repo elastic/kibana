@@ -22,34 +22,30 @@ import { trace } from '@opentelemetry/api';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { TaskErrorSource, createTaskRunError } from '@kbn/task-manager-plugin/server';
 import { getCustomAgents } from '@kbn/actions-plugin/server/lib/get_custom_agents';
-import { removeEndpointFromUrl } from './lib/openai_utils';
 import {
+  DEFAULT_MODEL,
+  DEFAULT_TIMEOUT_MS,
+  OpenAiProviderType,
+  SUB_ACTION,
   RunActionParamsSchema,
   RunActionResponseSchema,
   DashboardActionParamsSchema,
   StreamActionParamsSchema,
   StreamingResponseSchema,
   InvokeAIActionParamsSchema,
-} from '../../../common/openai/schema';
+} from '@kbn/connector-schemas/openai';
 import type {
   Config,
   Secrets,
   RunActionParams,
   RunActionResponse,
   StreamActionParams,
-} from '../../../common/openai/types';
-import {
-  DEFAULT_OPENAI_MODEL,
-  DEFAULT_TIMEOUT_MS,
-  OpenAiProviderType,
-  SUB_ACTION,
-} from '../../../common/openai/constants';
-import type {
   DashboardActionParams,
   DashboardActionResponse,
   InvokeAIActionParams,
   InvokeAIActionResponse,
-} from '../../../common/openai/types';
+} from '@kbn/connector-schemas/openai';
+import { removeEndpointFromUrl } from './lib/openai_utils';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import {
   getAxiosOptions,
@@ -417,7 +413,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     try {
       const { signal, timeout, telemetryMetadata: _telemetryMetadata, ...rest } = body;
       const messages = rest.messages as unknown as ChatCompletionMessageParam[];
-      let model: string = DEFAULT_OPENAI_MODEL;
+      let model: string = DEFAULT_MODEL;
       if (rest.model) {
         model = rest.model;
       } else if ('defaultModel' in this.config && this.config.defaultModel) {
