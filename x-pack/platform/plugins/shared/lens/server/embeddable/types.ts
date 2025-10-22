@@ -13,7 +13,7 @@ import type {
 import type { LensRuntimeState } from '../../public';
 import type { DOC_TYPE } from '../../common/constants';
 
-type LensEmbeddableStateWithType = EmbeddableStateWithType &
+export type LensEmbeddableStateWithType = EmbeddableStateWithType &
   LensRuntimeState & {
     type: typeof DOC_TYPE;
   };
