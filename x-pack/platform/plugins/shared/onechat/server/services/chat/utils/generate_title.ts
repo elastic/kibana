@@ -6,7 +6,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { defer, shareReplay, switchMap } from 'rxjs';
+import { defer, shareReplay } from 'rxjs';
 import { z } from '@kbn/zod';
 import type { BaseMessageLike } from '@langchain/core/messages';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
@@ -14,29 +14,28 @@ import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-
 import type { Conversation, ConversationRound, RoundInput } from '@kbn/onechat-common';
 import { conversationToLangchainMessages } from '../../agents/modes/utils';
 
-export const generateTitle$ = ({
-  chatModel,
-  conversation$,
+/**
+ * Generates a title for a conversation
+ */
+export const generateTitle = ({
   nextInput,
+  conversation,
+  chatModel,
 }: {
-  chatModel: InferenceChatModel;
-  conversation$: Observable<Conversation>;
   nextInput: RoundInput;
+  conversation: Conversation;
+  chatModel: InferenceChatModel;
 }): Observable<string> => {
-  return conversation$.pipe(
-    switchMap((conversation) => {
-      return defer(async () => {
-        return generateConversationTitle({
-          previousRounds: conversation.rounds,
-          nextInput,
-          chatModel,
-        });
-      }).pipe(shareReplay());
-    })
-  );
+  return defer(async () => {
+    return generateConversationTitle({
+      previousRounds: conversation.rounds,
+      nextInput,
+      chatModel,
+    });
+  }).pipe(shareReplay());
 };
 
-export const generateConversationTitle = async ({
+const generateConversationTitle = async ({
   previousRounds,
   nextInput,
   chatModel,
@@ -73,7 +72,7 @@ Conversation:
 
 Now, generate a title for the following conversation.`,
         ],
-        ...conversationToLangchainMessages({ previousRounds, nextInput }),
+        ...conversationToLangchainMessages({ previousRounds, nextInput, ignoreSteps: true }),
       ];
 
       const { title } = await structuredModel.invoke(prompt);

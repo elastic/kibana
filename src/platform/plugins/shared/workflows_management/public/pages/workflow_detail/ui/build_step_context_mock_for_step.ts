@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowGraph } from '@kbn/workflows/graph';
 import { v4 as generateUuid } from 'uuid';
 
 import type { WorkflowYaml } from '@kbn/workflows';
+import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
 import { buildContextOverride } from '../../../shared/utils/build_step_context_override/build_step_context_override';
 
@@ -24,7 +24,7 @@ export function buildContextOverrideForStep(
     consts: workflowDefinition.consts,
     workflow: {
       id: generateUuid(),
-      name: workflowDefinition.name!,
+      name: workflowDefinition.name,
       enabled: workflowDefinition.enabled || true,
       spaceId: 'default', // TODO: figure out where to get the spaceId from
     },
