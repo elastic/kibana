@@ -21,23 +21,23 @@ export class AssistantPage {
   // Locators - Main Elements
   // ========================================
 
-  get assistantButton() {
+  public get assistantButton() {
     return this.page.testSubj.locator('assistantNavLink');
   }
 
-  get assistantChatBody() {
+  public get assistantChatBody() {
     return this.page.testSubj.locator('assistantChat');
   }
 
-  get closeFlyoutButton() {
+  public get closeFlyoutButton() {
     return this.assistantChatBody.locator('[data-test-subj="euiFlyoutCloseButton"]');
   }
 
-  get emptyConversation() {
+  public get emptyConversation() {
     return this.page.testSubj.locator('emptyConvo');
   }
 
-  get welcomeSetup() {
+  public get welcomeSetup() {
     return this.page.testSubj.locator('welcome-setup');
   }
 
@@ -45,39 +45,39 @@ export class AssistantPage {
   // Locators - Conversation Management
   // ========================================
 
-  get conversationTitle() {
+  public get conversationTitle() {
     return this.page.testSubj.locator('conversationTitle');
   }
 
-  get conversationTitleHeading() {
+  public get conversationTitleHeading() {
     return this.conversationTitle.locator('h2');
   }
 
-  get conversationTitleInput() {
+  public get conversationTitleInput() {
     return this.conversationTitle.locator('input');
   }
 
-  get newChatButton() {
+  public get newChatButton() {
     return this.page.testSubj.locator('newChatFromOverlay');
   }
 
-  get newChatByTitleButton() {
+  public get newChatByTitleButton() {
     return this.page.testSubj.locator('newChatByTitle');
   }
 
-  get conversationSettingsMenu() {
+  public get conversationSettingsMenu() {
     return this.page.testSubj.locator('conversation-settings-menu');
   }
 
-  get clearChatButton() {
+  public get clearChatButton() {
     return this.page.testSubj.locator('clear-chat');
   }
 
-  get confirmClearChatButton() {
+  public get confirmClearChatButton() {
     return this.page.testSubj.locator('confirmModalConfirmButton');
   }
 
-  get flyoutNavToggle() {
+  public get flyoutNavToggle() {
     return this.page.testSubj.locator('aiAssistantFlyoutNavigationToggle');
   }
 
@@ -93,23 +93,23 @@ export class AssistantPage {
   // Locators - Messaging
   // ========================================
 
-  get userPromptTextarea() {
+  public get userPromptTextarea() {
     return this.page.testSubj.locator('prompt-textarea');
   }
 
-  get submitChatButton() {
+  public get submitChatButton() {
     return this.page.testSubj.locator('submit-chat');
   }
 
-  get conversationMessages() {
+  public get conversationMessages() {
     return this.page.testSubj.locator('messageText');
   }
 
-  get conversationErrorMessages() {
+  public get conversationErrorMessages() {
     return this.page.testSubj.locator('errorComment').locator('[data-test-subj="messageText"]');
   }
 
-  get sendToTimelineButton() {
+  public get sendToTimelineButton() {
     return this.page.testSubj.locator('sendToTimelineEmptyButton');
   }
 
@@ -121,7 +121,7 @@ export class AssistantPage {
   // Locators - Connectors
   // ========================================
 
-  get connectorSelector() {
+  public get connectorSelector() {
     return this.page.testSubj.locator('connector-selector');
   }
 
@@ -129,7 +129,7 @@ export class AssistantPage {
     return this.page.getByTestId('connectorMissingCallout');
   }
 
-  get addNewConnectorButton() {
+  public get addNewConnectorButton() {
     return this.page.testSubj.locator('addNewConnectorButton');
   }
 
@@ -137,19 +137,19 @@ export class AssistantPage {
     return this.page.testSubj.locator(`connector-${connectorName}`);
   }
 
-  get openAIConnectorOption() {
+  public get openAIConnectorOption() {
     return this.page.testSubj.locator('action-option-OpenAI');
   }
 
-  get connectorNameInput() {
+  public get connectorNameInput() {
     return this.page.testSubj.locator('nameInput');
   }
 
-  get secretsApiKeyInput() {
+  public get secretsApiKeyInput() {
     return this.page.testSubj.locator('secrets.apiKey-input');
   }
 
-  get saveActionConnectorButton() {
+  public get saveActionConnectorButton() {
     return this.page.testSubj.locator('saveActionButtonModal');
   }
 
@@ -157,29 +157,29 @@ export class AssistantPage {
   // Locators - System Prompts
   // ========================================
 
-  get systemPromptSelect() {
+  public get systemPromptSelect() {
     return this.page.testSubj.locator('promptSuperSelect');
   }
 
-  get clearSystemPromptButton() {
+  public get clearSystemPromptButton() {
     return this.page.testSubj.locator('clearSystemPrompt');
   }
 
-  get createSystemPromptButton() {
+  public get createSystemPromptButton() {
     return this.page.testSubj.locator('addSystemPrompt');
   }
 
-  get systemPromptTitleInput() {
+  public get systemPromptTitleInput() {
     return this.page.testSubj
       .locator('systemPromptSelector')
       .locator('[data-test-subj="comboBoxSearchInput"]');
   }
 
-  get systemPromptBodyInput() {
+  public get systemPromptBodyInput() {
     return this.page.testSubj.locator('systemPromptModalPromptText');
   }
 
-  get conversationMultiSelector() {
+  public get conversationMultiSelector() {
     return this.page.testSubj
       .locator('conversationMultiSelector')
       .locator('[data-test-subj="comboBoxSearchInput"]');
@@ -193,21 +193,21 @@ export class AssistantPage {
   // Locators - Quick Prompts
   // ========================================
 
-  get addQuickPromptButton() {
+  public get addQuickPromptButton() {
     return this.page.testSubj.locator('addQuickPrompt');
   }
 
-  get quickPromptTitleInput() {
+  public get quickPromptTitleInput() {
     return this.page.testSubj
       .locator('quickPromptSelector')
       .locator('[data-test-subj="comboBoxSearchInput"]');
   }
 
-  get quickPromptBodyInput() {
+  public get quickPromptBodyInput() {
     return this.page.testSubj.locator('quick-prompt-prompt');
   }
 
-  get promptContextSelector() {
+  public get promptContextSelector() {
     return this.page.testSubj
       .locator('promptContextSelector')
       .locator('[data-test-subj="comboBoxSearchInput"]');
@@ -221,19 +221,19 @@ export class AssistantPage {
   // Locators - Sharing
   // ========================================
 
-  get shareBadgeButton() {
+  public get shareBadgeButton() {
     return this.page.testSubj.locator('shareBadgeButton');
   }
 
-  get shareSelect() {
+  public get shareSelect() {
     return this.page.testSubj.locator('shareSelect');
   }
 
-  get privateSelectOption() {
+  public get privateSelectOption() {
     return this.page.locator('li[data-test-subj="private"]');
   }
 
-  get restrictedSelectOption() {
+  public get restrictedSelectOption() {
     return this.page.locator('li[data-test-subj="restricted"]');
   }
 
@@ -719,7 +719,7 @@ export class AssistantPage {
    */
   async dismissSharedCallout() {
     await this.sharedCallout.locator(this.dismissCalloutButton).click();
-    await expect(this.sharedCallout).not.toBeVisible();
+    await expect(this.sharedCallout).toBeHidden();
   }
 
   // ========================================
@@ -830,20 +830,20 @@ export class AssistantPage {
    */
   async expectCalloutState(state: 'private' | 'shared-by-me' | 'shared-with-me') {
     if (state === 'private') {
-      await expect(this.ownerSharedCallout).not.toBeVisible();
-      await expect(this.sharedCallout).not.toBeVisible();
+      await expect(this.ownerSharedCallout).toBeHidden();
+      await expect(this.sharedCallout).toBeHidden();
       await expect(this.userPromptTextarea).toBeVisible();
       await expect(this.submitChatButton).toBeVisible();
     } else if (state === 'shared-by-me') {
       await expect(this.ownerSharedCallout).toBeVisible();
-      await expect(this.sharedCallout).not.toBeVisible();
+      await expect(this.sharedCallout).toBeHidden();
       await expect(this.userPromptTextarea).toBeVisible();
       await expect(this.submitChatButton).toBeVisible();
     } else if (state === 'shared-with-me') {
       await expect(this.sharedCallout).toBeVisible();
-      await expect(this.ownerSharedCallout).not.toBeVisible();
-      await expect(this.userPromptTextarea).not.toBeVisible();
-      await expect(this.submitChatButton).not.toBeVisible();
+      await expect(this.ownerSharedCallout).toBeHidden();
+      await expect(this.userPromptTextarea).toBeHidden();
+      await expect(this.submitChatButton).toBeHidden();
     }
   }
 
@@ -858,14 +858,14 @@ export class AssistantPage {
    * Asserts that a conversation does not have a shared icon in the list
    */
   async expectNotSharedConversationIcon(conversationTitle: string) {
-    await expect(this.conversationListIcon(conversationTitle)).not.toBeVisible();
+    await expect(this.conversationListIcon(conversationTitle)).toBeHidden();
   }
 
   /**
    * Asserts that no shared callout is visible
    */
   async expectNoSharedCallout() {
-    await expect(this.sharedCallout).not.toBeVisible();
+    await expect(this.sharedCallout).toBeHidden();
   }
 
   /**
@@ -881,7 +881,7 @@ export class AssistantPage {
    */
   async expectConversationReadOnly() {
     // Verify title is not editable (input should not exist in read-only mode)
-    await expect(this.conversationTitleInput).not.toBeVisible();
+    await expect(this.conversationTitleInput).toBeHidden();
 
     // Controls should be disabled
     await expect(this.addNewConnectorButton).toBeDisabled();
@@ -938,7 +938,7 @@ export class AssistantPage {
    * Asserts that a quick prompt badge is not visible
    */
   async expectQuickPromptNotVisible(promptName: string) {
-    await expect(this.quickPromptBadge(promptName)).not.toBeVisible();
+    await expect(this.quickPromptBadge(promptName)).toBeHidden();
   }
 
   // ========================================
