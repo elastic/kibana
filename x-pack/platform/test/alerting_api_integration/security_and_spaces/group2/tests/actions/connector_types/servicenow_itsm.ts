@@ -6,7 +6,7 @@
  */
 
 import type httpProxy from 'http-proxy';
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { asyncForEach } from '@kbn/std';
 import getPort from 'get-port';
 import type http from 'http';
@@ -15,7 +15,7 @@ import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { getHttpProxyServer } from '@kbn/alerting-api-integration-helpers';
 import { getServiceNowServer } from '@kbn/actions-simulators-plugin/server/plugin';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
-import { MAX_ADDITIONAL_FIELDS_LENGTH } from '@kbn/stack-connectors-plugin/common/servicenow/constants';
+import { MAX_ADDITIONAL_FIELDS_LENGTH } from '@kbn/connector-schemas/servicenow/constants';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getEventLog } from '../../../../../common/lib';
 
