@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { useCallback, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
-import { useCallback, useRef } from 'react';
 
 interface RegisterKeyboardCommandsParams {
   editor: monaco.editor.IStandaloneCodeEditor;

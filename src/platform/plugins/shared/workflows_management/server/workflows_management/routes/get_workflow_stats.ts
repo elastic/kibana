@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RouteDependencies } from './types';
 import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
-import { WORKFLOW_READ_SECURITY } from './route_security';
 import { handleRouteError } from './route_error_handlers';
+import { WORKFLOW_READ_SECURITY } from './route_security';
+import type { RouteDependencies } from './types';
 
 export function registerGetWorkflowStatsRoute({ router, api, logger, spaces }: RouteDependencies) {
   router.get(

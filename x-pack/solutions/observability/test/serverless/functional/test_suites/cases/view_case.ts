@@ -68,7 +68,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('properties', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/239300
+    describe.skip('properties', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService, owner);
 
       it('edits a case title from the case view page', async () => {

@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { EnterRetryNode } from '@kbn/workflows/graph';
+import type { StepExecutionRuntime } from '../../../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
-import { EnterRetryNodeImpl } from '../enter_retry_node_impl';
 import type { IWorkflowEventLogger } from '../../../../workflow_event_logger/workflow_event_logger';
 import type { WorkflowTaskManager } from '../../../../workflow_task_manager/workflow_task_manager';
-import type { StepExecutionRuntime } from '../../../../workflow_context_manager/step_execution_runtime';
+import { EnterRetryNodeImpl } from '../enter_retry_node_impl';
 
 describe('EnterRetryNodeImpl', () => {
   let underTest: EnterRetryNodeImpl;

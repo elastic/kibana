@@ -27,7 +27,7 @@ jest.mock('./field_name', () => ({
     mockFieldName(props);
     return (
       <div data-test-subj={`mocked-field-name-${props.fieldName}`}>
-        {props.fieldName} {props.fieldType}
+        {`${props.fieldName} (${props.fieldType})`}
       </div>
     );
   },

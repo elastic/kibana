@@ -7,14 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { validateLiquidTemplate } from './validate_liquid_template';
-
 // Mock the extractLiquidErrorPosition function
 jest.mock('./extract_liquid_error_position', () => ({
   extractLiquidErrorPosition: jest.fn(),
 }));
 
 import { extractLiquidErrorPosition } from './extract_liquid_error_position';
+import { validateLiquidTemplate } from './validate_liquid_template';
 
 const mockExtractLiquidErrorPosition = extractLiquidErrorPosition as jest.MockedFunction<
   typeof extractLiquidErrorPosition

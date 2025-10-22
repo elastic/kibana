@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { zodToJsonSchema } from 'zod-to-json-schema';
 import type { ZodFirstPartySchemaTypes } from '@kbn/zod';
 import { z } from '@kbn/zod';
-import { zodToJsonSchema } from 'zod-to-json-schema';
 
 export interface TypeDescriptionOptions {
   /** Maximum depth for nested objects */
@@ -72,24 +72,24 @@ function getBasicTypeName(schema: z.ZodType): string {
     case 'ZodBoolean':
       return 'boolean';
     case 'ZodArray':
-      const arrayElement = (schema as z.ZodArray<any>).element;
+      const arrayElement = (schema as z.ZodArray<z.ZodType>).element;
       return `${getBasicTypeName(arrayElement)}[]`;
     case 'ZodObject':
       return 'object';
     case 'ZodUnion':
-      const unionTypes = (schema as z.ZodUnion<any>).options;
+      const unionTypes = (schema as z.ZodUnion<[z.ZodType, ...z.ZodType[]]>).options;
       const unionString = unionTypes.map((t: z.ZodType) => getBasicTypeName(t)).join(' | ');
       return `(${unionString})`;
     case 'ZodOptional':
-      const optionalInner = (schema as z.ZodOptional<any>).unwrap();
+      const optionalInner = (schema as z.ZodOptional<z.ZodType>).unwrap();
       return `${getBasicTypeName(optionalInner)}?`;
     case 'ZodDate':
       return 'date';
     case 'ZodLiteral':
-      const literalValue = (schema as z.ZodLiteral<any>).value;
+      const literalValue = (schema as z.ZodLiteral<unknown>).value;
       return typeof literalValue === 'string' ? `"${literalValue}"` : String(literalValue);
     case 'ZodEnum':
-      const enumValues = (schema as z.ZodEnum<any>).options;
+      const enumValues = (schema as z.ZodEnum<[string, ...string[]]>).options;
       return enumValues.map((v: string) => `"${v}"`).join(' | ');
     case 'ZodAny':
       return 'any';
@@ -100,7 +100,7 @@ function getBasicTypeName(schema: z.ZodType): string {
     case 'ZodUnknown':
       return 'unknown';
     case 'ZodRecord':
-      const recordSchema = schema as z.ZodRecord<any>;
+      const recordSchema = schema as z.ZodRecord<z.ZodType, z.ZodType>;
       const keyType = getBasicTypeName(recordSchema.keySchema || z.any());
       const valueType = getBasicTypeName(recordSchema.valueSchema || z.any());
       return `Record<${keyType}, ${valueType}>`;
@@ -135,13 +135,15 @@ function generateDetailedDescription(
 
   // Extract description if available
   const description =
-    includeDescriptions && 'description' in schema ? (schema as any).description : null;
+    includeDescriptions && 'description' in schema
+      ? (schema as unknown as { description?: string }).description ?? null
+      : null;
 
   const descriptionSuffix = description ? ` // ${description}` : '';
 
   switch (def.typeName) {
     case 'ZodObject': {
-      const objectSchema = schema as z.ZodObject<any>;
+      const objectSchema = schema as z.ZodObject<Record<string, z.ZodType>>;
       const shape = objectSchema.shape;
       const properties: string[] = [];
 
@@ -149,7 +151,7 @@ function generateDetailedDescription(
         const isOptional = (fieldSchema as z.ZodType) instanceof z.ZodOptional;
         // If field is optional, we need to unwrap it and process the inner type
         const actualFieldSchema = isOptional
-          ? (fieldSchema as z.ZodOptional<any>).unwrap()
+          ? (fieldSchema as z.ZodOptional<z.ZodType>).unwrap()
           : (fieldSchema as z.ZodType);
         const fieldType = generateDetailedDescription(actualFieldSchema, currentDepth + 1, {
           maxDepth,
@@ -172,7 +174,7 @@ function generateDetailedDescription(
     }
 
     case 'ZodArray': {
-      const arraySchema = schema as z.ZodArray<any>;
+      const arraySchema = schema as z.ZodArray<z.ZodType>;
       const elementType = generateDetailedDescription(arraySchema.element, currentDepth + 1, {
         maxDepth,
         showOptional,
@@ -184,7 +186,7 @@ function generateDetailedDescription(
     }
 
     case 'ZodUnion': {
-      const unionSchema = schema as z.ZodUnion<any>;
+      const unionSchema = schema as z.ZodUnion<[z.ZodType, ...z.ZodType[]]>;
       const unionTypes = unionSchema.options.map((option: z.ZodType) =>
         generateDetailedDescription(option, currentDepth + 1, {
           maxDepth,
@@ -198,7 +200,7 @@ function generateDetailedDescription(
     }
 
     case 'ZodOptional': {
-      const optionalSchema = schema as z.ZodOptional<any>;
+      const optionalSchema = schema as z.ZodOptional<z.ZodType>;
       const innerType = generateDetailedDescription(optionalSchema.unwrap(), currentDepth, {
         maxDepth,
         showOptional: false, // Don't show optional for inner type since we're handling it here
@@ -211,7 +213,10 @@ function generateDetailedDescription(
     }
 
     case 'ZodDiscriminatedUnion': {
-      const discriminatedSchema = schema as z.ZodDiscriminatedUnion<any, any>;
+      const discriminatedSchema = schema as z.ZodDiscriminatedUnion<
+        string,
+        z.ZodDiscriminatedUnionOption<string>[]
+      >;
       const discriminator = discriminatedSchema.discriminator;
       const options = discriminatedSchema.options;
 
@@ -229,7 +234,7 @@ function generateDetailedDescription(
     }
 
     case 'ZodRecord': {
-      const recordSchema = schema as z.ZodRecord<any>;
+      const recordSchema = schema as z.ZodRecord<z.ZodType, z.ZodType>;
       const valueType = generateDetailedDescription(
         recordSchema.valueSchema || z.any(),
         currentDepth + 1,

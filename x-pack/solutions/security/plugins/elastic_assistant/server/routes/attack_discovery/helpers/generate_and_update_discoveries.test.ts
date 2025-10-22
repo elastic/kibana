@@ -9,7 +9,10 @@ import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { coreMock, elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
-import type { AttackDiscoveryGenerationConfig } from '@kbn/elastic-assistant-common';
+import {
+  type AttackDiscoveryApiAlert,
+  type AttackDiscoveryGenerationConfig,
+} from '@kbn/elastic-assistant-common';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 
 import { mockAnonymizedAlerts } from '../../../lib/attack_discovery/evaluation/__mocks__/mock_anonymized_alerts';
@@ -50,7 +53,59 @@ jest.mock('./telemetry', () => {
   };
 });
 
-const createAttackDiscoveryAlerts = jest.fn();
+const mockApiConfig = {
+  connectorId: 'connector-id',
+  actionTypeId: '.bedrock',
+  model: 'model',
+  provider: OpenAiProviderType.OpenAi,
+};
+
+const mockConfig: AttackDiscoveryGenerationConfig = {
+  subAction: 'invokeAI',
+  apiConfig: mockApiConfig,
+  alertsIndexPattern: 'alerts-*',
+  anonymizationFields: [],
+  replacements: {},
+  model: 'gpt-4',
+  size: 20,
+  langSmithProject: 'langSmithProject',
+  langSmithApiKey: 'langSmithApiKey',
+};
+
+// Helper function to create mock AttackDiscoveryApiAlert objects with required API fields
+const createMockAttackDiscoveryAlerts = (): AttackDiscoveryApiAlert[] => {
+  return mockAttackDiscoveries.map((discovery, index) => {
+    const mockAttackDiscoveryApiAlert: AttackDiscoveryApiAlert = {
+      alert_ids: discovery.alertIds,
+      alert_rule_uuid: undefined,
+      alert_start: undefined,
+      alert_updated_at: undefined,
+      alert_updated_by_user_id: undefined,
+      alert_updated_by_user_name: undefined,
+      alert_workflow_status: undefined,
+      alert_workflow_status_updated_at: undefined,
+      connector_id: mockApiConfig.connectorId,
+      connector_name: `Test Connector ${index + 1}`,
+      details_markdown: discovery.detailsMarkdown,
+      entity_summary_markdown: discovery.entitySummaryMarkdown,
+      generation_uuid: `execution-uuid-${index + 1}`,
+      id: `test-id-${index + 1}`,
+      mitre_attack_tactics: discovery.mitreAttackTactics,
+      replacements: undefined,
+      risk_score: undefined,
+      summary_markdown: discovery.summaryMarkdown,
+      timestamp: discovery.timestamp ?? new Date().toISOString(),
+      title: discovery.title,
+      user_id: undefined,
+      user_name: undefined,
+      users: undefined,
+    };
+
+    return mockAttackDiscoveryApiAlert;
+  });
+};
+
+const createAttackDiscoveryAlerts = jest.fn().mockResolvedValue(createMockAttackDiscoveryAlerts());
 const getAdHocAlertsIndexPattern = jest.fn();
 const mockDataClient = {
   createAttackDiscoveryAlerts,
@@ -71,25 +126,6 @@ const mockAuthenticatedUser = {
     name: 'my_realm_name',
   },
 } as AuthenticatedUser;
-
-const mockApiConfig = {
-  connectorId: 'connector-id',
-  actionTypeId: '.bedrock',
-  model: 'model',
-  provider: OpenAiProviderType.OpenAi,
-};
-
-const mockConfig: AttackDiscoveryGenerationConfig = {
-  subAction: 'invokeAI',
-  apiConfig: mockApiConfig,
-  alertsIndexPattern: 'alerts-*',
-  anonymizationFields: [],
-  replacements: {},
-  model: 'gpt-4',
-  size: 20,
-  langSmithProject: 'langSmithProject',
-  langSmithApiKey: 'langSmithApiKey',
-};
 
 describe('generateAndUpdateAttackDiscoveries', () => {
   const testInvokeError = new Error('Failed to invoke AD graph.');
@@ -198,7 +234,7 @@ describe('generateAndUpdateAttackDiscoveries', () => {
 
       expect(results).toEqual({
         anonymizedAlerts: mockAnonymizedAlerts,
-        attackDiscoveries: mockAttackDiscoveries,
+        attackDiscoveries: createMockAttackDiscoveryAlerts(),
         replacements: mockConfig.replacements,
       });
     });
@@ -378,7 +414,7 @@ describe('generateAndUpdateAttackDiscoveries', () => {
 
       expect(results).toEqual({
         anonymizedAlerts: mockAnonymizedAlerts,
-        attackDiscoveries: mockAttackDiscoveries,
+        attackDiscoveries: createMockAttackDiscoveryAlerts(),
         replacements: mockConfig.replacements,
       });
     });

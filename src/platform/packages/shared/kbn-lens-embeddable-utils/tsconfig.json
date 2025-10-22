@@ -20,5 +20,6 @@
     "@kbn/config-schema",
     "@kbn/coloring",
     "@kbn/content-management-utils",
+    "@kbn/chart-expressions-common",
   ]
 }

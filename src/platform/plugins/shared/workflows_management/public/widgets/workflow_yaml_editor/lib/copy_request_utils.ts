@@ -63,7 +63,7 @@ export function getConsoleFormat(step: ElasticsearchStepData): string {
   let consoleFormat = `${request.method} ${request.url}`;
 
   if (request.data && request.data.length > 0) {
-    consoleFormat += '\n' + request.data.join('\n');
+    consoleFormat += `\n${request.data.join('\n')}`;
   }
 
   return consoleFormat;

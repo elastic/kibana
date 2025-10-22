@@ -10,9 +10,9 @@
 import { renderHook } from '@testing-library/react';
 import { useWorkflowsBreadcrumbs } from './use_workflow_breadcrumbs';
 import { PLUGIN_ID } from '../../../common';
-import { useKibana } from '../use_kibana';
 import { createStartServicesMock } from '../../mocks';
 import type { WorkflowsServices } from '../../types';
+import { useKibana } from '../use_kibana';
 
 jest.mock('../use_kibana');
 const mockUseKibana = useKibana as jest.Mock;

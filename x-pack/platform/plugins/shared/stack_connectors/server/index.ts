@@ -11,7 +11,6 @@ import { configSchema } from './config';
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
     enableExperimental: true,
-    resilient: true,
   },
   schema: configSchema,
 };

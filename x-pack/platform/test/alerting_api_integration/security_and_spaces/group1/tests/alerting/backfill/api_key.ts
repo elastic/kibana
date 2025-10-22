@@ -31,7 +31,8 @@ export default function apiKeyBackfillTests({ getService }: FtrProviderContext) 
   const retry = getService('retry');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('backfill api key invalidation', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/225194
+  describe.skip('backfill api key invalidation', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     beforeEach(async () => {
