@@ -22,14 +22,7 @@ export class SiemMigrationsDataLookupsClient {
   ) {}
 
   async create(lookupName: string, data: LookupData): Promise<string> {
-    let sanitizedLookupName = lookupName;
-    try {
-      sanitizedLookupName = toValidIndexName(lookupName);
-    } catch (error) {
-      const message = `Error creating lookup index from lookup: ${lookupName}. It does not conform to index naming rules. ${error.message}`;
-      this.logger.error(message);
-      throw new Error(message);
-    }
+    const sanitizedLookupName = this.getSanitizedLookupName(lookupName);
     const indexName = `${LOOKUPS_INDEX_PREFIX}${this.spaceId}_${sanitizedLookupName}`;
     try {
       await this.executeEs(() =>
@@ -76,5 +69,15 @@ export class SiemMigrationsDataLookupsClient {
 
   private generateDocumentHash(document: object): string {
     return sha256.create().update(JSON.stringify(document)).hex(); // document need to be created in a deterministic way
+  }
+
+  private getSanitizedLookupName(lookupName: string): string {
+    try {
+      return toValidIndexName(lookupName);
+    } catch (error) {
+      const message = `Error creating lookup index from lookup: ${lookupName}. It does not conformto index naming rules. ${error.message}`;
+      this.logger.error(message);
+      throw new Error(message);
+    }
   }
 }
