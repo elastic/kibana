@@ -22,6 +22,7 @@ export const convertToEntityManagerDefinition = (
     type: description.entityType,
     indexPatterns: description.indexPatterns,
     identityFields: [description.identityField],
+    calculatedIdentity: description.calculatedIdentity,
     displayNameTemplate: `{{${description.identityField}}}`,
     filter: options.filter,
     metadata,

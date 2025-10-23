@@ -24,6 +24,7 @@ import {
 } from '../helpers/generate_component_id';
 import { generateLatestMetadataAggregations } from './generate_metadata_aggregations';
 import { TRANSFORM_IGNORED_SLOW_TIERS } from './constants';
+import { generateRuntimeMappings } from './generate_runtime_mappings';
 
 export function generateLatestTransform(
   definition: EntityDefinition
@@ -68,6 +69,7 @@ const generateTransformPutRequest = ({
     source: {
       index: definition.indexPatterns,
       query: filter,
+      runtime_mappings: generateRuntimeMappings(definition),
     },
     dest: {
       index: `${generateLatestIndexName({ id: 'noop' } as EntityDefinition)}`,
@@ -114,6 +116,7 @@ const generateTransformPutRequest = ({
 function generateFilters(definition: EntityDefinition) {
   const filter = {
     bool: {
+      should: [] as QueryDslQueryContainer[],
       must: [] as QueryDslQueryContainer[],
       must_not: [] as QueryDslQueryContainer[],
     },
@@ -123,12 +126,25 @@ function generateFilters(definition: EntityDefinition) {
     filter.bool.must.push(getElasticsearchQueryOrThrow(definition.filter));
   }
 
-  definition.identityFields.forEach(({ field }) => {
-    filter.bool.must.push({ exists: { field } });
-    filter.bool.must_not.push({
-      term: { [field]: '' }, // identity field can't be empty
+  if (definition.calculatedIdentity) {
+    // If we have cascade ids we must ensure that at least
+    // one if the ids is present and not empty on query level
+    definition.calculatedIdentity.filterOnAtLeastOneOf.forEach((field) => {
+      filter.bool.should.push({
+        bool: {
+          must: [{ exists: { field } }],
+          must_not: [{ term: { [field]: '' } }],
+        },
+      });
     });
-  });
+  } else {
+    definition.identityFields.forEach(({ field }) => {
+      filter.bool.must.push({ exists: { field } });
+      filter.bool.must_not.push({
+        term: { [field]: '' }, // identity field can't be empty
+      });
+    });
+  }
 
   filter.bool.must.push({
     range: {

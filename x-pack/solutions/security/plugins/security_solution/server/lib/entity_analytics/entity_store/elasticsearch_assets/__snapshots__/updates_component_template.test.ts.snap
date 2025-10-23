@@ -42,6 +42,9 @@ Object {
         "host.domain": Object {
           "type": "keyword",
         },
+        "host.entity.Calculated_id": Object {
+          "type": "keyword",
+        },
         "host.entity.attributes.Asset": Object {
           "type": "boolean",
         },
@@ -118,9 +121,6 @@ Object {
           "type": "ip",
         },
         "host.mac": Object {
-          "type": "keyword",
-        },
-        "host.name": Object {
           "type": "keyword",
         },
         "host.os.name": Object {

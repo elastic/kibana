@@ -13,6 +13,7 @@ import {
   debugDeepCopyContextStep,
   getDotExpanderSteps,
   getRemoveEmptyFieldSteps,
+  removeCalculatedIdStep,
   removeEntityDefinitionFieldsStep,
 } from './ingest_processor_steps';
 
@@ -99,6 +100,7 @@ const buildIngestPipeline = ({
     ),
     ...getRemoveEmptyFieldSteps([...allEntityFields, 'asset', `${description.entityType}.risk`]),
     removeEntityDefinitionFieldsStep(),
+    ...removeCalculatedIdStep(description),
     ...(description.dynamic
       ? [dynamicNewestRetentionSteps(description.fields.map((field) => field.destination))]
       : []),

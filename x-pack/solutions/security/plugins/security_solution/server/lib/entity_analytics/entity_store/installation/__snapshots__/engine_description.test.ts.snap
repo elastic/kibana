@@ -2,6 +2,7 @@
 
 exports[`getUnitedEntityDefinition generic entityManagerDefinition 1`] = `
 Object {
+  "calculatedIdentity": undefined,
   "capabilities": Array [
     "CRUD_API",
   ],
@@ -1114,15 +1115,30 @@ Object {
 
 exports[`getUnitedEntityDefinition host entityManagerDefinition 1`] = `
 Object {
+  "calculatedIdentity": Object {
+    "filterOnAtLeastOneOf": Array [
+      "host.entity.id",
+      "host.name",
+    ],
+    "script": "
+      def entityId = doc.containsKey('host.entity.id') && doc['host.entity.id'].size() > 0 ? doc['host.entity.id'].value : null;
+      def hostName = doc.containsKey('host.name') && doc['host.name'].size() > 0 ? doc['host.name'].value : null;
+      if (entityId != null && !entityId.isEmpty()) {
+        emit(entityId);
+      } else if (hostName != null && !hostName.isEmpty()) {
+        emit(hostName);
+      }
+    ",
+  },
   "capabilities": Array [
     "CRUD_API",
   ],
-  "displayNameTemplate": "{{host.name}}",
+  "displayNameTemplate": "{{host.entity.Calculated_id}}",
   "filter": "",
   "id": "security_host_test",
   "identityFields": Array [
     Object {
-      "field": "host.name",
+      "field": "host.entity.Calculated_id",
       "optional": false,
     },
   ],
@@ -1667,6 +1683,9 @@ Object {
     "host.domain": Object {
       "type": "keyword",
     },
+    "host.entity.Calculated_id": Object {
+      "type": "keyword",
+    },
     "host.hostname": Object {
       "type": "keyword",
     },
@@ -1677,9 +1696,6 @@ Object {
       "type": "ip",
     },
     "host.mac": Object {
-      "type": "keyword",
-    },
-    "host.name": Object {
       "type": "keyword",
     },
     "host.os.name": Object {
@@ -1711,6 +1727,7 @@ Object {
 
 exports[`getUnitedEntityDefinition service entityManagerDefinition 1`] = `
 Object {
+  "calculatedIdentity": undefined,
   "capabilities": Array [
     "CRUD_API",
   ],
@@ -2296,6 +2313,7 @@ Object {
 
 exports[`getUnitedEntityDefinition user entityManagerDefinition 1`] = `
 Object {
+  "calculatedIdentity": undefined,
   "capabilities": Array [
     "CRUD_API",
   ],

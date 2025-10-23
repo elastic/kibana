@@ -272,21 +272,24 @@ function getFieldDescriptions(
   const invalid: string[] = [];
   const descriptions: Record<string, FieldDescription & { value: unknown }> = {};
 
-  for (const [key, value] of Object.entries(flatProps)) {
-    if (key === ENTITY_ID_FIELD || key === description.identityField) {
-      // eslint-disable-next-line no-continue
-      continue;
-    }
-
-    if (!allFieldDescriptions[key]) {
-      invalid.push(key);
-    } else {
-      descriptions[key] = {
-        ...allFieldDescriptions[key],
-        value,
-      };
-    }
-  }
+  Object.entries(flatProps)
+    .filter(
+      ([key]) =>
+        key !== ENTITY_ID_FIELD &&
+        key !== description.identityField &&
+        (!description.calculatedIdentity ||
+          !description.calculatedIdentity.filterOnAtLeastOneOf.includes(key))
+    )
+    .forEach(([key, value]) => {
+      if (!allFieldDescriptions[key]) {
+        invalid.push(key);
+      } else {
+        descriptions[key] = {
+          ...allFieldDescriptions[key],
+          value,
+        };
+      }
+    });
 
   // This will catch differences between
   // API and entity store definition

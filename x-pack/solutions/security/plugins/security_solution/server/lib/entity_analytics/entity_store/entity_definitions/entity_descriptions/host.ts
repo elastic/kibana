@@ -10,13 +10,24 @@ import type { EntityDescription } from '../types';
 import { getCommonFieldDescriptions, getEntityFieldsDescriptions } from './common';
 
 export const HOST_DEFINITION_VERSION = '1.0.0';
-export const HOST_IDENTITY_FIELD = 'host.name';
 
 const HOST_ENTITY_TYPE = 'Host';
 export const hostEntityEngineDescription: EntityDescription = {
   entityType: 'host',
   version: HOST_DEFINITION_VERSION,
-  identityField: HOST_IDENTITY_FIELD,
+  identityField: 'host.entity.Calculated_id',
+  calculatedIdentity: {
+    filterOnAtLeastOneOf: ['host.entity.id', 'host.name'],
+    script: `
+      def entityId = doc.containsKey('host.entity.id') && doc['host.entity.id'].size() > 0 ? doc['host.entity.id'].value : null;
+      def hostName = doc.containsKey('host.name') && doc['host.name'].size() > 0 ? doc['host.name'].value : null;
+      if (entityId != null && !entityId.isEmpty()) {
+        emit(entityId);
+      } else if (hostName != null && !hostName.isEmpty()) {
+        emit(hostName);
+      }
+    `,
+  },
   identityFieldMapping: { type: 'keyword' },
   settings: {
     timestampField: '@timestamp',
