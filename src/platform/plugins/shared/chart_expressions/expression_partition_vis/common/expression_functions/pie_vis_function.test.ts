@@ -15,8 +15,8 @@ import {
   ValueFormats,
   LegendDisplay,
 } from '../types/expression_renderers';
-import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
-import { LegendSize } from '@kbn/visualizations-plugin/common';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
+import { LegendSize } from '@kbn/chart-expressions-common';
 import type { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
 import { pieVisFunction } from './pie_vis_function';
 import { PARTITION_LABELS_VALUE, PARTITION_VIS_RENDERER_NAME } from '../constants';
