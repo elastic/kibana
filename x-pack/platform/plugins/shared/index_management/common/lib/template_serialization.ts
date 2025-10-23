@@ -17,10 +17,10 @@ import { deserializeESLifecycle } from './data_stream_utils';
 import {
   allowAutoCreateRadioValues,
   allowAutoCreateRadioIds,
-  STANDARD_INDEX_MODE,
   LOGSDB_INDEX_MODE,
 } from '../constants';
 import type { DataStreamOptions } from '../types/data_streams';
+import { buildTemplateSettings } from './utils';
 
 const hasEntries = (data: object = {}) => Object.entries(data).length > 0;
 
@@ -42,22 +42,31 @@ export function serializeTemplate(
     deprecated,
   } = templateDeserialized;
 
+  // Build settings object, properly handling index mode
+  const settings = buildTemplateSettings(template, indexMode);
+
+  // Separate settings and lifecycle from other template properties so we can rebuild template cleanly
+  const { settings: _templateSettings, lifecycle, ...otherTemplateProperties } = template || {};
+
+  const showTemplateOptions =
+    Object.keys(otherTemplateProperties).length > 0 ||
+    (settings && Object.keys(settings).length > 0) ||
+    (lifecycle && Object.keys(lifecycle).length > 0) ||
+    dataStreamOptions;
+
+  const templateOptions = {
+    ...otherTemplateProperties,
+    ...(settings && { settings }),
+    ...(lifecycle && { lifecycle }),
+    // If the existing template contains data stream options, we need to persist them.
+    // Otherwise, they will be lost when the template is updated.
+    ...(dataStreamOptions && { data_stream_options: dataStreamOptions }),
+  };
+
   return {
     version,
     priority,
-    template: {
-      ...template,
-      settings: {
-        ...template?.settings,
-        index: {
-          ...template?.settings?.index,
-          mode: indexMode,
-        },
-      },
-      // If the existing template contains data stream options, we need to persist them.
-      // Otherwise, they will be lost when the template is updated.
-      ...(dataStreamOptions && { data_stream_options: dataStreamOptions }),
-    },
+    ...(showTemplateOptions && { template: templateOptions }),
     index_patterns: indexPatterns,
     data_stream: dataStream,
     composed_of: composedOf,
@@ -102,7 +111,7 @@ export function deserializeTemplate(
   const indexMode = (settings?.index?.mode ??
     (isLogsdbEnabled && indexPatterns.some((pattern) => pattern === 'logs-*-*')
       ? LOGSDB_INDEX_MODE
-      : STANDARD_INDEX_MODE)) as IndexMode;
+      : undefined)) as IndexMode | undefined;
 
   const deserializedTemplate: TemplateDeserialized = {
     name,
