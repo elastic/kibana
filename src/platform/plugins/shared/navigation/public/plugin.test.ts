@@ -330,4 +330,43 @@ describe('Navigation Plugin', () => {
       expect(isEnabled).toBe(false);
     });
   });
+  describe('set feedback URL parameters', () => {
+    it('should set the relevant params when on serverless', async () => {
+      const { plugin, coreStart, unifiedSearch, cloud } = setup({
+        buildFlavor: 'serverless',
+      });
+      plugin.start(coreStart, { unifiedSearch, cloud });
+      await new Promise((resolve) => setTimeout(resolve));
+      expect(coreStart.chrome.project.setFeedbackUrlParams).toHaveBeenCalledWith(
+        new URLSearchParams({
+          version: 'version',
+          type: 'serverless',
+        })
+      );
+    });
+    it('should set the relevant params when on cloud', async () => {
+      const { plugin, coreStart, unifiedSearch, cloud } = setup({});
+      cloud.isCloudEnabled = true;
+      plugin.start(coreStart, { unifiedSearch, cloud });
+      await new Promise((resolve) => setTimeout(resolve));
+      expect(coreStart.chrome.project.setFeedbackUrlParams).toHaveBeenCalledWith(
+        new URLSearchParams({
+          version: 'version',
+          type: 'ech',
+        })
+      );
+    });
+    it('should set the relevant params when on local', async () => {
+      const { plugin, coreStart, unifiedSearch, cloud } = setup();
+      cloud.isCloudEnabled = false;
+      plugin.start(coreStart, { unifiedSearch, cloud });
+      await new Promise((resolve) => setTimeout(resolve));
+      expect(coreStart.chrome.project.setFeedbackUrlParams).toHaveBeenCalledWith(
+        new URLSearchParams({
+          version: 'version',
+          type: 'local',
+        })
+      );
+    });
+  });
 });

@@ -134,7 +134,6 @@ export class OnechatPlugin
         openConversationFlyout(options, {
           coreStart: core,
           services: internalServices,
-          startDependencies,
         }),
     };
   }

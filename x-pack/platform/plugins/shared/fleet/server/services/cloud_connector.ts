@@ -12,6 +12,7 @@ import type {
   CloudConnector,
   CloudConnectorListOptions,
   CloudConnectorSecretReference,
+  AwsCloudConnectorVars,
 } from '../../common/types/models/cloud_connector';
 import type { CloudConnectorSOAttributes } from '../types/so_attributes';
 import type {
@@ -76,9 +77,11 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
           `CloudConnectorService Package policy must contain ${cloudProvider} input vars`
         );
       }
+
+      const awsVars = vars as Partial<AwsCloudConnectorVars>;
       const name =
-        cloudConnector.cloudProvider === 'aws' && vars.role_arn?.value
-          ? vars.role_arn.value
+        cloudConnector.cloudProvider === 'aws' && awsVars.role_arn?.value
+          ? awsVars.role_arn.value
           : cloudConnector.name;
 
       // Check if space awareness is enabled for namespace handling
@@ -92,8 +95,8 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         namespace,
         cloudProvider,
         vars: {
-          ...(vars.role_arn?.value && { role_arn: vars.role_arn }),
-          ...(vars.external_id?.value && { external_id: vars.external_id }),
+          ...(awsVars.role_arn?.value && { role_arn: awsVars.role_arn }),
+          ...(awsVars.external_id?.value && { external_id: awsVars.external_id }),
         },
         packagePolicyCount: 1,
         created_at: new Date().toISOString(),
@@ -213,9 +216,10 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       }
 
       if (updates.vars) {
+        const awsVars = updates.vars as Partial<AwsCloudConnectorVars>;
         updateAttributes.vars = {
-          ...(updates.vars.role_arn?.value && { role_arn: updates.vars.role_arn }),
-          ...(updates.vars.external_id?.value && { external_id: updates.vars.external_id }),
+          ...(awsVars.role_arn?.value && { role_arn: awsVars.role_arn }),
+          ...(awsVars.external_id?.value && { external_id: awsVars.external_id }),
         };
       }
 
@@ -303,13 +307,14 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
     const vars = cloudConnector.vars;
 
     if (cloudConnector.cloudProvider === 'aws') {
-      const roleArn = vars.role_arn?.value;
+      const awsVars = vars as Partial<AwsCloudConnectorVars>;
+      const roleArn = awsVars.role_arn?.value;
 
       if (!roleArn) {
         logger.error('Package policy must contain role_arn variable');
         throw new CloudConnectorInvalidVarsError('Package policy must contain role_arn variable');
       }
-      const externalId: CloudConnectorSecretReference | undefined = vars.external_id?.value;
+      const externalId: CloudConnectorSecretReference | undefined = awsVars.external_id?.value;
 
       if (!externalId) {
         logger.error('Package policy must contain valid external_id secret reference');
