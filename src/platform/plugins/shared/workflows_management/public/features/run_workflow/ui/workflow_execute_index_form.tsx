@@ -7,28 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
+// TODO: remove eslint exception and use i18n for strings
+/* eslint-disable @typescript-eslint/no-explicit-any, react/jsx-no-literals */
+
 import {
+  EuiCallOut,
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiInMemoryTable,
   EuiLoadingSpinner,
+  EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiInMemoryTable,
-  EuiCallOut,
   EuiToken,
-  EuiDescriptionList,
-  EuiPanel,
-  EuiDescriptionListTitle,
-  EuiDescriptionListDescription,
 } from '@elastic/eui';
-import { DataViewPicker } from '@kbn/unified-search-plugin/public';
-import { buildEsQuery, type Query, type TimeRange } from '@kbn/es-query';
-import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { take } from 'rxjs';
+import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
+import { formatHit } from '@kbn/discover-utils';
+import { buildEsQuery, type Query, type TimeRange } from '@kbn/es-query';
 import type { SearchHit } from '@kbn/es-types';
 import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
-import { formatHit } from '@kbn/discover-utils';
+import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import { useKibana } from '../../../hooks/use_kibana';
 
 interface Document {
@@ -255,13 +258,15 @@ export const WorkflowExecuteIndexForm = ({
           };
 
           // Use formatHit to get properly formatted field pairs
-          const formattedPairs = formatHit(
-            mockRecord,
-            selectedDataView!,
-            () => true, // Show all fields
-            10, // Max entries
-            services.fieldFormats
-          );
+          const formattedPairs = selectedDataView
+            ? formatHit(
+                mockRecord,
+                selectedDataView,
+                () => true, // Show all fields
+                10, // Max entries
+                services.fieldFormats
+              )
+            : [];
 
           return (
             <EuiFlexGroup alignItems="center" gutterSize="s">

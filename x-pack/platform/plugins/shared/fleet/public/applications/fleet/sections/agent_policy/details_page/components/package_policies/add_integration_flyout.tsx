@@ -24,14 +24,13 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { Suspense, useCallback, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { Loading } from '../../../../agents/components';
-import { useGetSettings } from '../../../../../hooks';
 import type { AgentPolicy } from '../../../../../../../../common';
 import { CreatePackagePolicySinglePage } from '../../../create_package_policy_page/single_page_layout';
 import { useAvailablePackages } from '../../../../../../integrations/sections/epm/screens/home/hooks/use_available_packages';
@@ -43,19 +42,7 @@ export const AddIntegrationFlyout: React.FunctionComponent<{
 }> = ({ onClose, agentPolicy }) => {
   const modalTitleId = useGeneratedHtmlId();
 
-  const [prerelease, setPrerelease] = React.useState<boolean>(false);
-  const { data: settings } = useGetSettings();
-
-  useEffect(() => {
-    const isEnabled = Boolean(settings?.item.prerelease_integrations_enabled);
-    if (settings?.item) {
-      setPrerelease(isEnabled);
-    }
-  }, [settings?.item]);
-
-  const { filteredCards, isLoading } = useAvailablePackages({
-    prereleaseIntegrationsEnabled: prerelease,
-  });
+  const { filteredCards, isLoading } = useAvailablePackages();
 
   const options = useMemo(() => {
     return filteredCards
@@ -178,7 +165,7 @@ export const AddIntegrationFlyout: React.FunctionComponent<{
               <CreatePackagePolicySinglePage
                 from="policy"
                 queryParamsPolicyId={agentPolicy.id}
-                prerelease={prerelease}
+                prerelease={true}
                 pkgLabel={selectedOptions[0]?.label}
                 pkgName={selectedOptions[0]?.value}
                 integration={selectedOptions[0]?.integration}

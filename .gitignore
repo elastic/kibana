@@ -181,4 +181,7 @@ x-pack/solutions/security/test/security_solution_playwright/.env
 .codeql
 .dependency-graph-log.json
 
+# Ignore the one-console translations build output folder
+src/platform/plugins/shared/console/packaging/react/translations
+
 .moon/cache

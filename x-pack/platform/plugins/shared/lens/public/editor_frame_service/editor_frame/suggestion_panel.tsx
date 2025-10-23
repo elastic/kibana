@@ -45,7 +45,6 @@ import type {
   Visualization,
   FramePublicAPI,
   DatasourceMap,
-  VisualizationMap,
   UserMessagesGetter,
   DatasourceLayers,
 } from '../../types';
@@ -72,6 +71,7 @@ import {
   selectFramePublicAPI,
 } from '../../state_management';
 import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
+import { useEditorFrameService } from '../editor_frame_service_context';
 
 const MAX_SUGGESTIONS_DISPLAYED = 5;
 const LOCAL_STORAGE_SUGGESTIONS_PANEL = 'LENS_SUGGESTIONS_PANEL_HIDDEN';
@@ -103,8 +103,6 @@ const configurationsValid = (
 };
 
 export interface SuggestionPanelProps {
-  datasourceMap: DatasourceMap;
-  visualizationMap: VisualizationMap;
   ExpressionRenderer: ReactExpressionRendererType;
   frame: FramePublicAPI;
   getUserMessages?: UserMessagesGetter;
@@ -308,8 +306,6 @@ export const SuggestionPanelWrapper = (props: SuggestionPanelProps) => {
 };
 
 export function SuggestionPanel({
-  datasourceMap,
-  visualizationMap,
   frame,
   ExpressionRenderer: ExpressionRendererComponent,
   getUserMessages,
@@ -320,6 +316,7 @@ export function SuggestionPanel({
   toggleAccordionCb,
   isAccordionOpen,
 }: SuggestionPanelProps) {
+  const { datasourceMap, visualizationMap } = useEditorFrameService();
   const dispatchLens = useLensDispatch();
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
   const activeData = useLensSelector(selectStagedActiveData);

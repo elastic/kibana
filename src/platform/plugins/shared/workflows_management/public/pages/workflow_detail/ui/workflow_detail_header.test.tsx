@@ -7,21 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { I18nProviderMock } from '@kbn/core-i18n-browser-mocks/src/i18n_context_mock';
 import { render } from '@testing-library/react';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { I18nProvider } from '@kbn/i18n-react';
 import type { WorkflowDetailHeaderProps } from './workflow_detail_header';
 import { WorkflowDetailHeader } from './workflow_detail_header';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { mockUiSettingsService } from '../../../shared/mocks/mock_ui_settings_service';
-import type { CoreStart } from '@kbn/core/public';
 
-const services = {
-  settings: {
-    client: mockUiSettingsService(),
-  },
-} as unknown as CoreStart;
+jest.mock('../../../hooks/use_kibana');
+jest.mock('react-redux', () => ({
+  useSelector: jest.fn((fn) => fn()),
+}));
+const mockSelectIsYamlSyntaxValid = jest.fn(() => true);
+jest.mock('../../../widgets/workflow_yaml_editor/lib/store/selectors', () => ({
+  selectIsYamlSyntaxValid: () => mockSelectIsYamlSyntaxValid(),
+}));
+
+const renderWithI18n = (component: React.ReactElement) => {
+  return render(component, { wrapper: I18nProvider });
+};
 
 describe('WorkflowDetailHeader', () => {
   const defaultProps: WorkflowDetailHeaderProps = {
@@ -35,21 +38,10 @@ describe('WorkflowDetailHeader', () => {
     handleSave: () => {},
     isEnabled: true,
     handleToggleWorkflow: () => {},
-    isValid: true,
     hasUnsavedChanges: false,
     highlightDiff: false,
     setHighlightDiff: () => {},
     lastUpdatedAt: null,
-  };
-
-  const renderWithI18n = (component: React.ReactElement) => {
-    return render(
-      <MemoryRouter>
-        <I18nProviderMock>
-          <KibanaContextProvider services={services}>{component}</KibanaContextProvider>
-        </I18nProviderMock>
-      </MemoryRouter>
-    );
   };
 
   beforeEach(() => {
@@ -71,5 +63,17 @@ describe('WorkflowDetailHeader', () => {
       <WorkflowDetailHeader {...defaultProps} hasUnsavedChanges={true} />
     );
     expect(getByText('Unsaved changes')).toBeInTheDocument();
+  });
+
+  it('shows run workflow tooltip when yaml is invalid', () => {
+    mockSelectIsYamlSyntaxValid.mockReturnValue(false);
+    const result = renderWithI18n(<WorkflowDetailHeader {...defaultProps} />);
+    expect(result.getByTestId('runWorkflowHeaderButton')).toBeDisabled();
+  });
+
+  it('shows run workflow tooltip when yaml is valid', () => {
+    mockSelectIsYamlSyntaxValid.mockReturnValue(true);
+    const result = renderWithI18n(<WorkflowDetailHeader {...defaultProps} />);
+    expect(result.getByTestId('runWorkflowHeaderButton')).toBeEnabled();
   });
 });

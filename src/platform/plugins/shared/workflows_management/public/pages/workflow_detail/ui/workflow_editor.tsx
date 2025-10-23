@@ -10,6 +10,7 @@
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/react';
+import React, { useState } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { StepContext, WorkflowDetailDto, WorkflowExecutionDto } from '@kbn/workflows';
@@ -17,13 +18,12 @@ import {
   WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID,
   WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
 } from '@kbn/workflows';
-import React, { useState } from 'react';
+import { buildContextOverrideForStep } from './build_step_context_mock_for_step';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { ExecutionGraph } from '../../../features/debug-graph/execution_graph';
+import { TestStepModal } from '../../../features/run_workflow/ui/test_step_modal';
 import type { WorkflowUrlStateTabType } from '../../../hooks/use_workflow_url_state';
 import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
-import { TestStepModal } from '../../../features/run_workflow/ui/test_step_modal';
-import { buildContextOverrideForStep } from './build_step_context_mock_for_step';
 
 const WorkflowYAMLEditor = React.lazy(() =>
   import('../../../widgets/workflow_yaml_editor').then((module) => ({

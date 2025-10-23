@@ -47,6 +47,11 @@ export const selectWorkflowDefinition = createSelector(
   (computed) => computed?.workflowDefinition
 );
 
+// Only checks if the current workflow yaml can be parses, does check the schema, only the yaml syntax
+export const selectIsYamlSyntaxValid = createSelector(selectComputedState, (computed): boolean =>
+  Boolean(computed?.workflowDefinition)
+);
+
 export const selectFocusedStepId = createSelector(
   selectWorkflowState,
   (workflow) => workflow.focusedStepId

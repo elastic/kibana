@@ -47,6 +47,8 @@ import {
 } from './helpers';
 import { getAccessorType } from '../../shared_components';
 import { convertToRunTimeState } from './runtime_state';
+import { MetricAppearanceSettings } from './toolbar/appearance_settings';
+import { FlyoutToolbar } from '../../shared_components/flyout_toolbar';
 
 export const DEFAULT_MAX_COLUMNS = 3;
 
@@ -665,6 +667,10 @@ export const getMetricVisualization = ({
 
   ToolbarComponent(props) {
     return <Toolbar {...props} />;
+  },
+
+  FlyoutToolbarComponent(props) {
+    return <FlyoutToolbar {...props} contentMap={{ style: MetricAppearanceSettings }} />;
   },
 
   DimensionEditorDataExtraComponent(props) {

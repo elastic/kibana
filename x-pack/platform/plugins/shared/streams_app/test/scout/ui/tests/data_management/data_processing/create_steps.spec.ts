@@ -155,4 +155,42 @@ test.describe('Stream data processing - creating steps', { tag: ['@ess', '@svlOb
     const createButton = page.getByTestId('streamsAppStreamDetailEnrichmentCreateStepButton');
     await expect(createButton).toBeHidden();
   });
+
+  test('should duplicate a processor', async ({ pageObjects }) => {
+    await pageObjects.streams.clickAddProcessor();
+    await pageObjects.streams.fillProcessorFieldInput('message');
+    await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.method}');
+    await pageObjects.streams.clickSaveProcessor();
+
+    await pageObjects.streams.clickDuplicateProcessor(0);
+    await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.method2}');
+    await pageObjects.streams.clickSaveProcessor();
+
+    await pageObjects.streams.saveStepsListChanges();
+    expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(2);
+  });
+
+  test('should duplicate a processor under a condition', async ({ pageObjects }) => {
+    // Create a condition first
+    await pageObjects.streams.clickAddCondition();
+    await pageObjects.streams.fillCondition('test_field', 'contains', 'logs');
+    await pageObjects.streams.clickSaveCondition();
+    expect(await pageObjects.streams.getConditionsListItems()).toHaveLength(1);
+
+    // Add a processor under the condition
+    const addStepButton = await pageObjects.streams.getConditionAddStepMenuButton(0);
+    await addStepButton.click();
+    await pageObjects.streams.clickAddProcessor(false);
+    await pageObjects.streams.fillProcessorFieldInput('message');
+    await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.method}');
+    await pageObjects.streams.clickSaveProcessor();
+    expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(1);
+
+    await pageObjects.streams.clickDuplicateProcessor(0);
+    await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.method2}');
+    await pageObjects.streams.clickSaveProcessor();
+
+    await pageObjects.streams.saveStepsListChanges();
+    expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(2);
+  });
 });

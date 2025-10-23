@@ -60,6 +60,7 @@ export {
   AppMenuRegistry,
   dismissAllFlyoutsExceptFor,
   dismissFlyouts,
+  prepareDataViewForEditing,
   LogLevelBadge,
   getDefaultSort,
   getSort,

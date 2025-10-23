@@ -10,7 +10,7 @@
 import type { Reference } from '@kbn/content-management-utils';
 import type { ControlsGroupState } from '@kbn/controls-schemas';
 import type { ControlGroupApi } from '@kbn/controls-plugin/public';
-import { BehaviorSubject, first, skipWhile, switchMap } from 'rxjs';
+import { BehaviorSubject, first, from, skipWhile, startWith, switchMap } from 'rxjs';
 
 export const CONTROL_GROUP_EMBEDDABLE_ID = 'CONTROL_GROUP_EMBEDDABLE_ID';
 
@@ -36,9 +36,16 @@ export function initializeControlGroupManager(
     });
   }
 
+  const unPauseWhenControlsAreAvailable = async () => {
+    await untilControlsInitialized();
+    return false;
+  };
+  const isFetchPaused$ = from(unPauseWhenControlsAreAvailable()).pipe(startWith(true));
+
   return {
     api: {
       controlGroupApi$,
+      isFetchPaused$,
     },
     internalApi: {
       getStateForControlGroup: () => {
@@ -69,7 +76,6 @@ export function initializeControlGroupManager(
       },
       setControlGroupApi: (controlGroupApi: ControlGroupApi) =>
         controlGroupApi$.next(controlGroupApi),
-      untilControlsInitialized,
     },
   };
 }

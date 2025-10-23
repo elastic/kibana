@@ -244,6 +244,12 @@ describe('ScheduledReportsService', () => {
         attributes: { enabled: false },
       })),
     }));
+    soClient.bulkDelete = jest.fn().mockImplementation(async () => ({
+      statuses: savedObjects.map((so) => ({
+        id: so.id,
+        type: so.type,
+      })),
+    }));
     client = (await core.getEsClient()).asInternalUser as typeof client;
     client.search.mockResponse(
       lastRunResponse as unknown as Awaited<ReturnType<ElasticsearchClient['search']>>
@@ -252,6 +258,9 @@ describe('ScheduledReportsService', () => {
     taskManager.bulkDisable = jest.fn().mockImplementation(async () => ({
       tasks: savedObjects.map((so) => ({ id: so.id })),
       errors: [],
+    }));
+    taskManager.bulkRemove = jest.fn().mockImplementation(async () => ({
+      statuses: savedObjects.map((so) => ({ id: so.id, success: true })),
     }));
     taskManager.bulkGet = jest.fn().mockResolvedValue(nextRunResponse);
     mockResponseFactory = getMockResponseFactory();
@@ -1250,6 +1259,464 @@ describe('ScheduledReportsService', () => {
       ).rejects.toMatchInlineSnapshot(`
         Object {
           "body": "Error disabling scheduled reports: Some error",
+          "statusCode": 500,
+        }
+      `);
+    });
+  });
+
+  describe('bulkDelete', () => {
+    it('should pass parameters in the request body', async () => {
+      const result = await scheduledReportsService.bulkDelete({
+        user: { username: 'somebody' },
+        ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+      });
+
+      expect(soClient.bulkGet).toHaveBeenCalledTimes(1);
+      expect(soClient.bulkGet).toHaveBeenCalledWith([
+        { id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', type: 'scheduled_report' },
+        { id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4', type: 'scheduled_report' },
+      ]);
+      expect(soClient.bulkDelete).toHaveBeenCalledTimes(1);
+      expect(soClient.bulkDelete).toHaveBeenCalledWith([
+        {
+          id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+          type: 'scheduled_report',
+        },
+        {
+          id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+          type: 'scheduled_report',
+        },
+      ]);
+      expect(taskManager.bulkRemove).toHaveBeenCalledTimes(1);
+      expect(taskManager.bulkRemove).toHaveBeenCalledWith([
+        'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+        '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+      ]);
+
+      expect(auditLogger.log).toHaveBeenCalledTimes(2);
+      expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
+        event: {
+          action: 'scheduled_report_delete',
+          category: ['database'],
+          outcome: 'unknown',
+          type: ['deletion'],
+        },
+        kibana: {
+          saved_object: {
+            id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+            name: '[Logs] Web Traffic',
+            type: 'scheduled_report',
+          },
+        },
+        message:
+          'User is deleting scheduled report [id=aa8b6fb3-cf61-4903-bce3-eec9ddc823ca] [name=[Logs] Web Traffic]',
+      });
+
+      expect(auditLogger.log).toHaveBeenNthCalledWith(2, {
+        event: {
+          action: 'scheduled_report_delete',
+          category: ['database'],
+          outcome: 'unknown',
+          type: ['deletion'],
+        },
+        kibana: {
+          saved_object: {
+            id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+            name: 'Another cool dashboard',
+            type: 'scheduled_report',
+          },
+        },
+        message:
+          'User is deleting scheduled report [id=2da1cb75-04c7-4202-a9f0-f8bcce63b0f4] [name=Another cool dashboard]',
+      });
+
+      expect(result).toEqual({
+        scheduled_report_ids: [
+          'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+          '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+        ],
+        errors: [],
+        total: 2,
+      });
+    });
+
+    it('should not delete scheduled report when user does not have permissions', async () => {
+      jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
+      scheduledReportsService = await ScheduledReportsService.build({
+        logger: mockLogger,
+        reportingCore: core,
+        responseFactory: mockResponseFactory,
+        request: fakeRawRequest,
+      });
+      soClient.bulkDelete = jest.fn().mockImplementationOnce(async () => ({
+        statuses: [
+          {
+            id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+            type: 'scheduled_report',
+          },
+        ],
+      }));
+      taskManager.bulkRemove = jest.fn().mockImplementationOnce(async () => ({
+        statuses: [{ id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', success: true }],
+      }));
+      const result = await scheduledReportsService.bulkDelete({
+        user: { username: 'elastic' },
+        ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+      });
+
+      expect(soClient.bulkGet).toHaveBeenCalledTimes(1);
+      expect(soClient.bulkGet).toHaveBeenCalledWith([
+        { id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', type: 'scheduled_report' },
+        { id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4', type: 'scheduled_report' },
+      ]);
+      expect(soClient.bulkDelete).toHaveBeenCalledTimes(1);
+      expect(soClient.bulkDelete).toHaveBeenCalledWith([
+        {
+          id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+          type: 'scheduled_report',
+        },
+      ]);
+      expect(taskManager.bulkRemove).toHaveBeenCalledTimes(1);
+      expect(taskManager.bulkRemove).toHaveBeenCalledWith(['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca']);
+
+      expect(result).toEqual({
+        scheduled_report_ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca'],
+        errors: [
+          {
+            id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+            message: `Not found.`,
+            status: 404,
+          },
+        ],
+        total: 2,
+      });
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        `User "elastic" attempted to delete scheduled report "2da1cb75-04c7-4202-a9f0-f8bcce63b0f4" created by "not-elastic" without sufficient privileges.`
+      );
+
+      expect(auditLogger.log).toHaveBeenCalledTimes(2);
+      expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
+        error: {
+          code: 'Error',
+          message: 'Not found.',
+        },
+        event: {
+          action: 'scheduled_report_delete',
+          category: ['database'],
+          outcome: 'failure',
+          type: ['deletion'],
+        },
+        kibana: {
+          saved_object: {
+            id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+            type: 'scheduled_report',
+            name: 'Another cool dashboard',
+          },
+        },
+        message:
+          'Failed attempt to delete scheduled report [id=2da1cb75-04c7-4202-a9f0-f8bcce63b0f4] [name=Another cool dashboard]',
+      });
+      expect(auditLogger.log).toHaveBeenNthCalledWith(2, {
+        event: {
+          action: 'scheduled_report_delete',
+          category: ['database'],
+          outcome: 'unknown',
+          type: ['deletion'],
+        },
+        kibana: {
+          saved_object: {
+            id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+            name: '[Logs] Web Traffic',
+            type: 'scheduled_report',
+          },
+        },
+        message:
+          'User is deleting scheduled report [id=aa8b6fb3-cf61-4903-bce3-eec9ddc823ca] [name=[Logs] Web Traffic]',
+      });
+    });
+
+    it('should handle errors in bulk get', async () => {
+      soClient.bulkGet = jest.fn().mockImplementationOnce(async () => ({
+        saved_objects: [
+          {
+            id: savedObjects[0].id,
+            type: savedObjects[0].type,
+            error: {
+              error: 'Not Found',
+              message:
+                'Saved object [scheduled-report/aa8b6fb3-cf61-4903-bce3-eec9ddc823ca] not found',
+              statusCode: 404,
+            },
+          },
+          savedObjects[1],
+        ],
+      }));
+      soClient.bulkDelete = jest.fn().mockImplementation(async () => ({
+        statuses: [
+          {
+            id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+            type: 'scheduled_report',
+            success: true,
+          },
+        ],
+      }));
+      taskManager.bulkRemove = jest.fn().mockImplementation(async () => ({
+        statuses: [{ id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4', success: true }],
+      }));
+      const result = await scheduledReportsService.bulkDelete({
+        user: { username: 'elastic' },
+        ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+      });
+
+      expect(soClient.bulkGet).toHaveBeenCalledTimes(1);
+      expect(soClient.bulkGet).toHaveBeenCalledWith([
+        { id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', type: 'scheduled_report' },
+        { id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4', type: 'scheduled_report' },
+      ]);
+      expect(soClient.bulkDelete).toHaveBeenCalledTimes(1);
+      expect(soClient.bulkDelete).toHaveBeenCalledWith([
+        {
+          id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+          type: 'scheduled_report',
+        },
+      ]);
+      expect(taskManager.bulkRemove).toHaveBeenCalledTimes(1);
+      expect(taskManager.bulkRemove).toHaveBeenCalledWith(['2da1cb75-04c7-4202-a9f0-f8bcce63b0f4']);
+
+      expect(auditLogger.log).toHaveBeenCalledTimes(1);
+      expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
+        event: {
+          action: 'scheduled_report_delete',
+          category: ['database'],
+          outcome: 'unknown',
+          type: ['deletion'],
+        },
+        kibana: {
+          saved_object: {
+            id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+            name: 'Another cool dashboard',
+            type: 'scheduled_report',
+          },
+        },
+        message:
+          'User is deleting scheduled report [id=2da1cb75-04c7-4202-a9f0-f8bcce63b0f4] [name=Another cool dashboard]',
+      });
+
+      expect(result).toEqual({
+        scheduled_report_ids: ['2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+        errors: [
+          {
+            id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+            message:
+              'Saved object [scheduled-report/aa8b6fb3-cf61-4903-bce3-eec9ddc823ca] not found',
+            status: 404,
+          },
+        ],
+        total: 2,
+      });
+    });
+
+    it('should short-circuit if no saved objects to update', async () => {
+      soClient.bulkGet = jest.fn().mockImplementationOnce(async () => ({
+        saved_objects: [
+          {
+            id: savedObjects[0].id,
+            type: savedObjects[0].type,
+            error: {
+              error: 'Not found',
+              message:
+                'Saved object [scheduled-report/aa8b6fb3-cf61-4903-bce3-eec9ddc823ca] not found',
+              statusCode: 404,
+            },
+          },
+          {
+            id: savedObjects[1].id,
+            type: savedObjects[1].type,
+            error: { error: 'Bad Request', message: 'Some unspecified error', statusCode: 404 },
+          },
+        ],
+      }));
+      const result = await scheduledReportsService.bulkDelete({
+        user: { username: 'elastic' },
+        ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+      });
+
+      expect(soClient.bulkGet).toHaveBeenCalledTimes(1);
+      expect(soClient.bulkGet).toHaveBeenCalledWith([
+        { id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', type: 'scheduled_report' },
+        { id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4', type: 'scheduled_report' },
+      ]);
+      expect(soClient.bulkDelete).not.toHaveBeenCalled();
+      expect(auditLogger.log).not.toHaveBeenCalled();
+      expect(taskManager.bulkRemove).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        scheduled_report_ids: [],
+        errors: [
+          {
+            id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+            message:
+              'Saved object [scheduled-report/aa8b6fb3-cf61-4903-bce3-eec9ddc823ca] not found',
+            status: 404,
+          },
+          {
+            id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+            message: 'Some unspecified error',
+            status: 404,
+          },
+        ],
+        total: 2,
+      });
+    });
+
+    it('should handle errors in bulk delete', async () => {
+      soClient.bulkDelete = jest.fn().mockImplementation(async () => ({
+        statuses: [
+          {
+            id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+            type: 'scheduled_report',
+            success: true,
+          },
+          {
+            id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+            type: 'scheduled_report',
+            success: false,
+            error: { error: 'Conflict', message: 'Error updating saved object', statusCode: 409 },
+          },
+        ],
+      }));
+      taskManager.bulkRemove = jest.fn().mockImplementation(async () => ({
+        statuses: [{ id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4', success: true }],
+      }));
+      const result = await scheduledReportsService.bulkDelete({
+        user: { username: 'elastic' },
+        ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+      });
+
+      expect(soClient.bulkGet).toHaveBeenCalledTimes(1);
+      expect(soClient.bulkGet).toHaveBeenCalledWith([
+        { id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', type: 'scheduled_report' },
+        { id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4', type: 'scheduled_report' },
+      ]);
+      expect(soClient.bulkDelete).toHaveBeenCalledTimes(1);
+      expect(soClient.bulkDelete).toHaveBeenCalledWith([
+        {
+          id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+          type: 'scheduled_report',
+        },
+        {
+          id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+          type: 'scheduled_report',
+        },
+      ]);
+      expect(taskManager.bulkRemove).toHaveBeenCalledTimes(1);
+      expect(taskManager.bulkRemove).toHaveBeenCalledWith(['2da1cb75-04c7-4202-a9f0-f8bcce63b0f4']);
+
+      expect(auditLogger.log).toHaveBeenCalledTimes(3);
+      expect(auditLogger.log).toHaveBeenNthCalledWith(3, {
+        error: {
+          code: 'Error',
+          message: 'Error updating saved object',
+        },
+        event: {
+          action: 'scheduled_report_delete',
+          category: ['database'],
+          outcome: 'failure',
+          type: ['deletion'],
+        },
+        kibana: {
+          saved_object: {
+            id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+            type: 'scheduled_report',
+          },
+        },
+        message:
+          'Failed attempt to delete scheduled report [id=aa8b6fb3-cf61-4903-bce3-eec9ddc823ca]',
+      });
+
+      expect(result).toEqual({
+        scheduled_report_ids: ['2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+        errors: [
+          {
+            id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+            message: 'Error updating saved object',
+            status: 409,
+          },
+        ],
+        total: 2,
+      });
+    });
+
+    it('should handle errors in bulk task remove', async () => {
+      taskManager.bulkRemove = jest.fn().mockImplementation(async () => ({
+        statuses: [
+          { id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4', success: true },
+          {
+            type: 'task',
+            id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+            success: false,
+            error: {
+              statusCode: 400,
+              error: 'Fail',
+              message: 'Error removing task',
+            },
+          },
+        ],
+      }));
+      const result = await scheduledReportsService.bulkDelete({
+        user: { username: 'elastic' },
+        ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+      });
+
+      expect(soClient.bulkGet).toHaveBeenCalledTimes(1);
+      expect(soClient.bulkGet).toHaveBeenCalledWith([
+        { id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', type: 'scheduled_report' },
+        { id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4', type: 'scheduled_report' },
+      ]);
+      expect(soClient.bulkDelete).toHaveBeenCalledTimes(1);
+      expect(soClient.bulkDelete).toHaveBeenCalledWith([
+        {
+          id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+          type: 'scheduled_report',
+        },
+        {
+          id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+          type: 'scheduled_report',
+        },
+      ]);
+      expect(taskManager.bulkRemove).toHaveBeenCalledTimes(1);
+      expect(taskManager.bulkRemove).toHaveBeenCalledWith([
+        'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+        '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+      ]);
+
+      expect(result).toEqual({
+        scheduled_report_ids: ['2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+        errors: [
+          {
+            id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+            message:
+              'Scheduled report deleted but task deleting failed due to: Error removing task',
+            status: 400,
+          },
+        ],
+        total: 2,
+      });
+    });
+
+    it('should reject if the soClient throws an error', async () => {
+      soClient.bulkGet = jest.fn().mockImplementationOnce(async () => {
+        throw new Error('Some error');
+      });
+
+      await expect(
+        scheduledReportsService.bulkDelete({
+          user: { username: 'somebody' },
+          ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+        })
+      ).rejects.toMatchInlineSnapshot(`
+        Object {
+          "body": "Error deleting scheduled reports: Some error",
           "statusCode": 500,
         }
       `);

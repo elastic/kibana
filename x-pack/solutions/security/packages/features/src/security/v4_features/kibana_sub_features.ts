@@ -68,10 +68,8 @@ export const getSecurityV4SubFeaturesMap = ({
     securitySubFeaturesList.map(([id, originalSubFeature]) => {
       let subFeature = originalSubFeature;
 
-      // If the feature is space-aware, we need to set false to the requireAllSpaces flag and remove the privilegesTooltip
-      if (experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
-        subFeature = { ...subFeature, requireAllSpaces: false, privilegesTooltip: undefined };
-      }
+      // Space awareness is now always enabled - set requireAllSpaces to false and remove privilegesTooltip
+      subFeature = { ...subFeature, requireAllSpaces: false, privilegesTooltip: undefined };
 
       return [id, subFeature];
     })

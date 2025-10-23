@@ -80,11 +80,7 @@ export const getExceptionsPreExportHandler = (
       await new EndpointExceptionsValidator(endpointAppContextService, request).validatePreExport();
     }
 
-    // If space awareness is enabled, add space filter to export options
-    if (
-      isEndpointArtifact &&
-      endpointAppContextService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled
-    ) {
+    if (isEndpointArtifact) {
       if (!request) {
         throw new EndpointArtifactExceptionValidationError(`Missing HTTP Request object`);
       }

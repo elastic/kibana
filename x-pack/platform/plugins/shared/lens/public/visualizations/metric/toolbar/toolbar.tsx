@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { VisualizationToolbarProps } from '../../../types';
-import { AppearancePopover } from './appearance_popover';
+import { AppearanceSettingsPopover } from './appearance_settings_popover';
 import type { MetricVisualizationState } from '../types';
 
 export function Toolbar(props: VisualizationToolbarProps<MetricVisualizationState>) {
@@ -18,7 +18,7 @@ export function Toolbar(props: VisualizationToolbarProps<MetricVisualizationStat
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
-          <AppearancePopover state={state} setState={setState} />
+          <AppearanceSettingsPopover state={state} setState={setState} />
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>

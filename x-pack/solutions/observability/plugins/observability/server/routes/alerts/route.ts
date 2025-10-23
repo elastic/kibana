@@ -9,7 +9,7 @@ import type { GetRelatedDashboardsResponse } from '@kbn/observability-schema';
 import { getRelatedDashboardsParamsSchema } from '@kbn/observability-schema';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import type { SavedObjectsFindResult } from '@kbn/core/server';
-import type { DashboardAttributes } from '@kbn/dashboard-plugin/server';
+import type { DashboardState } from '@kbn/dashboard-plugin/server';
 import { ALERTS_API_URLS } from '../../../common/constants';
 import { createObservabilityServerRoute } from '../create_observability_server_route';
 import { RelatedDashboardsClient } from '../../services/related_dashboards_client';
@@ -36,7 +36,7 @@ const alertsDynamicDashboardSuggestions = createObservabilityServerRoute({
     const { savedObjects } = await context.core;
 
     const dashboardClient = getContentClient()!.getForRequest<
-      SavedObjectsFindResult<DashboardAttributes>
+      SavedObjectsFindResult<DashboardState>
     >({
       requestHandlerContext: context,
       request,

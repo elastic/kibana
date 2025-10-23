@@ -21,10 +21,10 @@ paths:
   /api/attack_discovery/_bulk:
     post:
       description: >-
-        Performs bulk updates on multiple Attack discovery alerts, including
-        workflow status changes and visibility settings. This endpoint allows
-        efficient batch processing of alert modifications without requiring
-        individual API calls for each alert. `Technical preview`
+        Performs bulk updates on multiple Attack discoveries, including workflow
+        status changes and visibility settings. This endpoint allows efficient
+        batch processing of alert modifications without requiring individual API
+        calls for each alert. `Technical preview`
       operationId: PostAttackDiscoveryBulk
       requestBody:
         content:
@@ -92,7 +92,7 @@ paths:
                     - ids
               required:
                 - update
-        description: Bulk update parameters for Attack discovery alerts
+        description: Bulk update parameters for Attack discoveries
         required: true
       responses:
         '200':
@@ -137,7 +137,7 @@ paths:
                   - error
                   - message
           description: Generic Error
-      summary: Bulk update Attack discovery alerts
+      summary: Bulk update Attack discoveries
       tags:
         - Security Attack discovery API
       x-code-samples:
@@ -161,7 +161,7 @@ paths:
   /api/attack_discovery/_find:
     get:
       description: >-
-        Finds Attack discoveries that match the search criteria. Supports free
+        Find Attack discoveries that match the search criteria. Supports free
         text search, filtering, pagination, and sorting. `Technical preview`
       operationId: AttackDiscoveryFind
       parameters:
@@ -397,7 +397,7 @@ paths:
                     example: 400
                     type: number
           description: Generic Error
-      summary: Finds Attack discoveries that match the search criteria
+      summary: Find Attack discoveries that match the search criteria
       tags:
         - Security Attack discovery API
       x-code-samples:
@@ -474,7 +474,6 @@ paths:
              --request POST 'http://localhost:5601/api/attack_discovery/_generate' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json" \
-             --header "elastic-api-version: 2023-10-31" \
              --data '{
                 "alertsIndexPattern": ".alerts-security.alerts-default",
                 "anonymizationFields": [
@@ -1412,10 +1411,10 @@ paths:
   /api/attack_discovery/generations:
     get:
       description: >-
-        Get the latest attack discovery generations (that are not dismissed) for
-        the current user. This endpoint retrieves generation metadata including
-        execution status and statistics for Attack discovery generations.
-        `Technical preview`
+        Get the latest attack discovery generations metadata (that are not
+        dismissed) for the current user. This endpoint retrieves generation
+        metadata including execution status and statistics for Attack discovery
+        generations. `Technical preview`
       operationId: GetAttackDiscoveryGenerations
       parameters:
         - description: >-
@@ -1480,8 +1479,8 @@ paths:
                     type: number
           description: Bad request
       summary: >-
-        Get the latest attack discovery generations (that are not dismissed) for
-        the current user
+        Get the latest attack discovery generations metadata for the current
+        user
       tags:
         - Security Attack discovery API
       x-code-samples:
@@ -1772,7 +1771,7 @@ paths:
               enabled: true
               name: Daily Security Analysis
               params:
-                alerts_index_pattern: .alerts-security.alerts-*
+                alerts_index_pattern: .alerts-security.alerts-default
                 api_config:
                   actionTypeId: bedrock
                   connectorId: my-bedrock-connector
@@ -1800,7 +1799,7 @@ paths:
                 id: 12345678-1234-1234-1234-123456789012
                 name: Daily Security Analysis
                 params:
-                  alerts_index_pattern: .alerts-security.alerts-*
+                  alerts_index_pattern: .alerts-security.alerts-default
                   api_config:
                     actionTypeId: bedrock
                     connectorId: my-bedrock-connector
@@ -1840,7 +1839,7 @@ paths:
                "name": "Daily Security Analysis",
                "enabled": true,
                "params": {
-                 "alerts_index_pattern": ".alerts-security.alerts-*",
+                 "alerts_index_pattern": ".alerts-security.alerts-default",
                  "api_config": {
                    "actionTypeId": "bedrock",
                    "connectorId": "my-bedrock-connector",
@@ -1853,7 +1852,22 @@ paths:
                "schedule": {
                  "interval": "24h"
                },
-               "actions": []
+               "actions": [
+                  {
+                     "action_type_id": ".cases",
+                     "id": "system-connector-.cases",
+                     "params": {
+                       "subAction": "run",
+                       "subActionParams": {
+                         "timeWindow": "7d",
+                         "reopenClosedCases": false,
+                         "groupingBy": [],
+                         "templateId": null
+                       }
+                     },
+                     "uuid": "12345678-1234-1234-1234-123456789012"
+                   }
+               ]
              }'
       x-state: Technical Preview; added in 9.2.0
   /api/attack_discovery/schedules/_find:
@@ -1956,7 +1970,7 @@ paths:
           lang: curl
           source: |
             curl \
-             --request GET 'http://localhost:5601/api/attack_discovery/schedules/_find?page=1&per_page=10&sort_field=name&sort_direction=asc' \
+             --request GET 'http://localhost:5601/api/attack_discovery/schedules/_find' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
       x-state: Technical Preview; added in 9.2.0
@@ -2051,7 +2065,7 @@ paths:
                   status: ok
                 name: Daily Security Analysis
                 params:
-                  alerts_index_pattern: .alerts-security.alerts-*
+                  alerts_index_pattern: .alerts-security.alerts-default
                   api_config:
                     actionTypeId: bedrock
                     connectorId: my-bedrock-connector
@@ -2115,7 +2129,7 @@ paths:
               actions: []
               name: Updated Daily Security Analysis
               params:
-                alerts_index_pattern: .alerts-security.alerts-*
+                alerts_index_pattern: .alerts-security.alerts-default
                 api_config:
                   actionTypeId: bedrock
                   connectorId: my-bedrock-connector
@@ -2143,7 +2157,7 @@ paths:
                 id: 12345678-1234-1234-1234-123456789012
                 name: Updated Daily Security Analysis
                 params:
-                  alerts_index_pattern: .alerts-security.alerts-*
+                  alerts_index_pattern: .alerts-security.alerts-default
                   api_config:
                     actionTypeId: bedrock
                     connectorId: my-bedrock-connector
@@ -2184,7 +2198,7 @@ paths:
              --data '{
                "name": "Updated Daily Security Analysis",
                "params": {
-                 "alerts_index_pattern": ".alerts-security.alerts-*",
+                 "alerts_index_pattern": ".alerts-security.alerts-default",
                  "api_config": {
                    "actionTypeId": "bedrock",
                    "connectorId": "my-bedrock-connector",
@@ -2201,7 +2215,7 @@ paths:
              }'
       x-state: Technical Preview; added in 9.2.0
   /api/attack_discovery/schedules/{id}/_disable:
-    put:
+    post:
       description: >-
         Disables an Attack discovery schedule, preventing it from running
         according to its configured interval. The schedule configuration is
@@ -2257,12 +2271,12 @@ paths:
           lang: curl
           source: |
             curl \
-             --request PUT 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012/_disable' \
+             --request POST 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012/_disable' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
       x-state: Technical Preview; added in 9.2.0
   /api/attack_discovery/schedules/{id}/_enable:
-    put:
+    post:
       description: >-
         Enables a previously disabled Attack discovery schedule, allowing it to
         run according to its configured interval. Once enabled, the schedule
@@ -2317,7 +2331,7 @@ paths:
           lang: curl
           source: |
             curl \
-             --request PUT 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012/_enable' \
+             --request POST 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012/_enable' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
       x-state: Technical Preview; added in 9.2.0
@@ -2558,27 +2572,9 @@ components:
         - schedule
         - actions
     AttackDiscoveryApiScheduleAction:
-      type: object
-      properties:
-        action_type_id:
-          description: The action type used for sending notifications.
-          type: string
-        alerts_filter:
-          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionAlertsFilter'
-        frequency:
-          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionFrequency'
-        group:
-          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionGroup'
-        id:
-          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionId'
-        params:
-          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionParams'
-        uuid:
-          $ref: '#/components/schemas/NonEmptyString'
-      required:
-        - action_type_id
-        - id
-        - params
+      oneOf:
+        - $ref: '#/components/schemas/AttackDiscoveryApiScheduleGeneralAction'
+        - $ref: '#/components/schemas/AttackDiscoveryApiScheduleSystemAction'
     AttackDiscoveryApiScheduleActionAlertsFilter:
       additionalProperties: true
       type: object
@@ -2684,6 +2680,29 @@ components:
         - unknown
         - warning
       type: string
+    AttackDiscoveryApiScheduleGeneralAction:
+      type: object
+      properties:
+        action_type_id:
+          description: The action type used for sending notifications.
+          type: string
+        alerts_filter:
+          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionAlertsFilter'
+        frequency:
+          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionFrequency'
+        group:
+          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionGroup'
+        id:
+          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionId'
+        params:
+          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionParams'
+        uuid:
+          $ref: '#/components/schemas/NonEmptyString'
+      required:
+        - action_type_id
+        - group
+        - id
+        - params
     AttackDiscoveryApiScheduleParams:
       description: An attack discovery schedule params
       type: object
@@ -2719,6 +2738,22 @@ components:
         - alerts_index_pattern
         - api_config
         - size
+    AttackDiscoveryApiScheduleSystemAction:
+      type: object
+      properties:
+        action_type_id:
+          description: The action type used for sending notifications.
+          type: string
+        id:
+          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionId'
+        params:
+          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionParams'
+        uuid:
+          $ref: '#/components/schemas/NonEmptyString'
+      required:
+        - action_type_id
+        - id
+        - params
     AttackDiscoveryApiScheduleUpdateProps:
       description: An attack discovery schedule update properties
       type: object

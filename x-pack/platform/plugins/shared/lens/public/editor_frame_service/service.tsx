@@ -153,8 +153,6 @@ export class EditorFrameService {
                 getUserMessages={getUserMessages}
                 addUserMessages={addUserMessages}
                 indexPatternService={indexPatternService}
-                datasourceMap={resolvedDatasources}
-                visualizationMap={resolvedVisualizations}
                 ExpressionRenderer={plugins.expressions.ReactExpressionRenderer}
               />
             </div>

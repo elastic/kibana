@@ -750,9 +750,6 @@ describe('CrowdstrikeActionsClient class', () => {
 
   describe('and space awareness is enabled', () => {
     beforeEach(() => {
-      // @ts-expect-error write to readonly property
-      classConstructorOptions.endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
-        true;
       getActionDetailsByIdMock.mockResolvedValue({});
     });
 

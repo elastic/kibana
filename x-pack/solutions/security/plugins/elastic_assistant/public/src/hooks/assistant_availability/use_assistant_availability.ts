@@ -26,8 +26,6 @@ export const useAssistantAvailability = (): UseAssistantAvailability => {
   const hasManageGlobalKnowledgeBase =
     capabilities[ASSISTANT_FEATURE_ID]?.manageGlobalKnowledgeBaseAIAssistant === true;
   const hasSearchAILakeConfigurations = capabilities[SECURITY_FEATURE_ID]?.configurations === true;
-  const hasManageAssistantPrivilege =
-    capabilities?.management?.ai?.aiAssistantManagementSelection === true;
 
   // Connectors & Actions capabilities as defined in x-pack/plugins/actions/server/feature.ts
   // `READ` ui capabilities defined as: { ui: ['show', 'execute'] }
@@ -46,7 +44,7 @@ export const useAssistantAvailability = (): UseAssistantAvailability => {
     hasConnectorsReadPrivilege,
     isAssistantEnabled: isEnterprise,
     isAssistantVisible: isEnterprise && isVisible,
-    isAssistantManagementEnabled: isEnterprise && hasManageAssistantPrivilege,
+    isAssistantManagementEnabled: isEnterprise && hasAssistantPrivilege,
     hasUpdateAIAssistantAnonymization,
     hasManageGlobalKnowledgeBase,
   };

@@ -63,6 +63,8 @@ import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_te
 import { DatatableInspectorTables } from '../../../common/expressions/defs/datatable/datatable';
 import { getSimpleColumnType } from './components/table_actions';
 import { convertToRuntimeState } from './runtime_state';
+import { FlyoutToolbar } from '../../shared_components/flyout_toolbar';
+import { DatatableAppearanceSettings } from './components/toolbar/appearance_settings';
 
 export interface DatatableVisualizationState {
   columns: ColumnState[];
@@ -708,6 +710,10 @@ export const getDatatableVisualization = ({
 
   ToolbarComponent(props) {
     return <DataTableToolbar {...props} />;
+  },
+
+  FlyoutToolbarComponent(props) {
+    return <FlyoutToolbar {...props} contentMap={{ style: DatatableAppearanceSettings }} />;
   },
 
   onEditAction(state, event) {

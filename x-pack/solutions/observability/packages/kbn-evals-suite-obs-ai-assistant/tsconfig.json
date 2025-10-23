@@ -27,5 +27,6 @@
     "@kbn/product-doc-base-plugin",
     "@kbn/alerts-ui-shared",
     "@kbn/alerting-comparators",
+    "@kbn/some-dev-log",
   ]
 }

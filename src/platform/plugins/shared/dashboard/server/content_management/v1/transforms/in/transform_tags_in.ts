@@ -9,13 +9,13 @@
 
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import { tagSavedObjectTypeName } from '@kbn/saved-objects-tagging-plugin/common';
-import type { DashboardAttributes } from '../../types';
+import type { DashboardState } from '../../types';
 
 export function transformTagsIn({
   tags,
   references,
 }: {
-  tags: DashboardAttributes['tags'];
+  tags: DashboardState['tags'];
   references?: SavedObjectReference[];
 }) {
   const uniqueTagIds = new Set<string>([]);

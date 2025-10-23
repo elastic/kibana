@@ -47,11 +47,9 @@ import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/pu
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type {
-  DatasourceMap,
   EditorFrameInstance,
   VisualizeEditorContext,
   LensTopNavMenuEntryGenerator,
-  VisualizationMap,
   UserMessagesGetter,
   StartServices,
 } from '../types';
@@ -80,8 +78,6 @@ export interface LensAppProps {
 
   // State passed in by the container which is used to determine the id of the Originating App.
   incomingState?: EmbeddableEditorState;
-  datasourceMap: DatasourceMap;
-  visualizationMap: VisualizationMap;
   initialContext?: VisualizeEditorContext | VisualizeFieldContext;
   contextOriginatingApp?: string;
   topNavMenuEntryGenerators: LensTopNavMenuEntryGenerator[];
@@ -114,8 +110,6 @@ export interface LensTopNavMenuProps {
   indicateNoData: boolean;
   setIsSaveModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   runSave: RunSave;
-  datasourceMap: DatasourceMap;
-  visualizationMap: VisualizationMap;
   title?: string;
   lensInspector: LensInspector;
   goBackToOriginatingApp?: () => void;

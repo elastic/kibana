@@ -46,6 +46,7 @@ const actionsClient = actionsClientMock.create();
 function getMockData(overwrites: Record<string, unknown> = {}): ScheduleBackfillParam {
   return {
     ruleId: '1',
+    initiator: 'user',
     ranges: [
       {
         start: '2023-11-16T08:00:00.000Z',
@@ -127,6 +128,7 @@ function getMockAdHocRunAttributes({
 } = {}): AdHocRunSO {
   // @ts-expect-error
   return {
+    initiator: 'user',
     ...(omitApiKey ? {} : { apiKeyId: '123', apiKeyToUse: 'MTIzOmFiYw==' }),
     createdAt: '2024-01-30T00:00:00.000Z',
     duration: '12h',
@@ -1734,7 +1736,7 @@ describe('BackfillClient', () => {
         message: 'User has created ad hoc run for ad_hoc_run_params [id=abc]',
       });
       expect(logger.warn).toHaveBeenCalledWith(
-        `Error for ruleId 2 - not scheduling backfill for {\"ruleId\":\"2\",\"ranges\":[{\"start\":\"2023-11-16T08:00:00.000Z\",\"end\":\"2023-11-17T08:00:00.000Z\"}],\"runActions\":true}`
+        `Error for ruleId 2 - not scheduling backfill for {\"ruleId\":\"2\",\"initiator\":\"user\",\"ranges\":[{\"start\":\"2023-11-16T08:00:00.000Z\",\"end\":\"2023-11-17T08:00:00.000Z\"}],\"runActions\":true}`
       );
       expect(taskManagerStart.bulkSchedule).toHaveBeenCalledWith([
         {

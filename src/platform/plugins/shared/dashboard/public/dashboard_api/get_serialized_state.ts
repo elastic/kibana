@@ -13,9 +13,8 @@ import type { Moment } from 'moment';
 import moment from 'moment';
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { DashboardAttributes } from '../../server';
+import type { DashboardState } from '../../server';
 
-import type { DashboardState } from '../../common';
 import { LATEST_VERSION } from '../../common/content_management';
 import { dataService, savedObjectsTaggingService } from '../services/kibana_services';
 import type { DashboardApi } from './types';
@@ -55,12 +54,7 @@ export const getSerializedState = ({
     timeRestore,
     description,
 
-    // Dashboard options
-    useMargins,
-    syncColors,
-    syncCursor,
-    syncTooltips,
-    hidePanelTitles,
+    options,
     controlGroupInput,
   } = dashboardState;
 
@@ -76,14 +70,6 @@ export const getSerializedState = ({
     //
   }
 
-  const options = {
-    useMargins,
-    syncColors,
-    syncCursor,
-    syncTooltips,
-    hidePanelTitles,
-  };
-
   /**
    * Parse global time filter settings
    */
@@ -98,9 +84,9 @@ export const getSerializedState = ({
       ]) as RefreshInterval)
     : undefined;
 
-  const attributes: DashboardAttributes = {
+  const attributes: DashboardState = {
     version: LATEST_VERSION,
-    controlGroupInput: controlGroupInput as DashboardAttributes['controlGroupInput'],
+    controlGroupInput: controlGroupInput as DashboardState['controlGroupInput'],
     description: description ?? '',
     ...(filters ? { filters } : {}),
     ...(query ? { query } : {}),
@@ -115,9 +101,10 @@ export const getSerializedState = ({
   // TODO Provide tags as an array of tag names in the attribute. In that case, tag references
   // will be extracted by the server.
   const savedObjectsTaggingApi = savedObjectsTaggingService?.getTaggingApi();
-  const references = savedObjectsTaggingApi?.ui.updateTagsReferences
-    ? savedObjectsTaggingApi?.ui.updateTagsReferences([], tags)
-    : [];
+  const references =
+    tags && savedObjectsTaggingApi?.ui.updateTagsReferences
+      ? savedObjectsTaggingApi?.ui.updateTagsReferences([], tags)
+      : [];
 
   const allReferences = [
     ...references,

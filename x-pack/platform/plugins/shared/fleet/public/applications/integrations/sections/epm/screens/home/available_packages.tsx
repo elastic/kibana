@@ -98,9 +98,7 @@ function OnPremLink() {
   );
 }
 
-export const AvailablePackages: React.FC<{ prereleaseIntegrationsEnabled: boolean }> = ({
-  prereleaseIntegrationsEnabled,
-}) => {
+export const AvailablePackages: React.FC<{}> = () => {
   useBreadcrumbs('integrations_all');
 
   const {
@@ -128,7 +126,7 @@ export const AvailablePackages: React.FC<{ prereleaseIntegrationsEnabled: boolea
     availableSubCategories,
     selectedSubCategory,
     setSelectedSubCategory,
-  } = useAvailablePackages({ prereleaseIntegrationsEnabled });
+  } = useAvailablePackages();
 
   const onCategoryChange = useCallback(
     ({ id }: { id: string }) => {
@@ -186,11 +184,7 @@ export const AvailablePackages: React.FC<{ prereleaseIntegrationsEnabled: boolea
           <EuiSpacer size="m" />
         </>
       )}
-      <IntegrationPreference
-        initialType={preference}
-        prereleaseIntegrationsEnabled={prereleaseIntegrationsEnabled}
-        onChange={setPreference}
-      />
+      <IntegrationPreference initialType={preference} onChange={setPreference} />
     </EuiFlexItem>,
   ];
 

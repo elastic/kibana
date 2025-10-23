@@ -28,6 +28,8 @@
     "@kbn/config-schema",
     "@kbn/react-kibana-context-render",
     "@kbn/css-utils",
+    "@kbn/visualizations-common",
+    "@kbn/chart-expressions-common",
   ],
   "exclude": [
     "target/**/*",

@@ -197,7 +197,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
                               type: 'routingRule.edit',
                               id: routingRule.id,
                             })}
-                            onEditIconClick={editRule}
+                            onEditClick={editRule}
                             routingRule={routingRule}
                             canReorder={canReorderRoutingRules}
                           />

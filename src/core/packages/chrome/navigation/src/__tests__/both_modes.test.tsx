@@ -1569,6 +1569,36 @@ describe('Both modes', () => {
         // Expect the "Machine learning" button to regain focus
         expect(within(popover).getByRole('button', { name: 'Machine learning' })).toHaveFocus();
       });
+
+      // https://github.com/elastic/kibana/issues/239726
+      it('does NOT close the popover when onBlur has relatedTarget === null (Safari quirk)', async () => {
+        render(<TestComponent items={securityMock.navItems} logo={securityMock.logo} />);
+
+        const moreButton = screen.getByRole('button', { name: 'More' });
+        act(() => {
+          moreButton.focus();
+        });
+
+        const popover = await screen.findByRole('dialog', { name: 'More' });
+        expect(popover).toBeInTheDocument();
+
+        // Enter to open the popover content
+        await user.keyboard('{Enter}');
+
+        // Focus an element inside the popover to make the blur meaningful
+        const mlBtn = within(popover).getByRole('button', { name: 'Machine learning' });
+        expect(mlBtn).toHaveFocus();
+
+        // Simulate Safari: blur/focusout with null relatedTarget
+        // Use focusout (bubbling) because React's onBlur maps to it.
+        act(() => {
+          fireEvent.focusOut(popover, { relatedTarget: null });
+        });
+        flushPopoverTimers(); // allow any delayed close to run
+
+        // Blur handler should skip close when nextElement is null -> popover stays open
+        expect(screen.getByRole('dialog', { name: 'More' })).toBeInTheDocument();
+      });
     });
   });
 });

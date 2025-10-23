@@ -18,15 +18,16 @@ import type {
   ExecutionContext,
   ExpressionFunctionDefinition,
 } from '@kbn/expressions-plugin/common';
-import type {
-  LegendSize,
-  XYLegendValue,
-  LegendLayout,
-  ExpressionValueVisDimension,
-} from '@kbn/visualizations-plugin/common';
 import type { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
 
-import type { MakeOverridesSerializable, Simplify } from '@kbn/chart-expressions-common/types';
+import type {
+  MakeOverridesSerializable,
+  Simplify,
+  ExpressionValueVisDimension,
+  LegendLayout,
+  LegendSize,
+  XYLegendValue,
+} from '@kbn/chart-expressions-common';
 import type {
   AxisExtentModes,
   FillStyles,
