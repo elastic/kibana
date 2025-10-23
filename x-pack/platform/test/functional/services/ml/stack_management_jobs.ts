@@ -14,6 +14,7 @@ import type { JobType, MlSavedObjectType } from '@kbn/ml-plugin/common/types/sav
 import type { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import { SERVICE_NAMESPACE } from '@kbn/test-services';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { MlDFAJobTable } from './data_frame_analytics_table';
 import type { MlADJobTable } from './job_table';
@@ -383,7 +384,12 @@ export function MachineLearningStackManagementJobsProvider(
     },
 
     getExportedFile(fileName: string) {
-      return path.resolve(REPO_ROOT, `target/functional-tests/downloads/${fileName}.json`);
+      return path.resolve(
+        REPO_ROOT,
+        `target/functional-tests`,
+        SERVICE_NAMESPACE,
+        `downloads/${fileName}.json`
+      );
     },
 
     deleteExportedFiles(fileNames: string[]) {

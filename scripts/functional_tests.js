@@ -9,8 +9,14 @@
 
 require('../src/setup_node_env');
 
-require('@kbn/test-services')
-  .assignPorts(false)
+var assignPorts = require('@kbn/test-services').assignPorts;
+
+Promise.resolve()
+  .then(function () {
+    if (process.env.RANDOMIZE_PORTS) {
+      return assignPorts();
+    }
+  })
   .then(function () {
     require('@kbn/test').runTestsCli();
   })

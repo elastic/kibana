@@ -19,14 +19,7 @@ import { format } from 'util';
 import chalk from 'chalk';
 
 import { uniqueId } from 'lodash';
-import {
-  FLEET_PACKAGE_REGISTRY_PORT,
-  TEST_AGENTLESS_PORT,
-  TEST_ES_PORT,
-  TEST_ES_TRANSPORT_PORT,
-  TEST_FLEET_PORT,
-  TEST_KIBANA_PORT,
-} from '../../../service_addresses';
+import { acquirePorts } from '@kbn/test-services';
 import { ConfigRunner } from './config_runner';
 import { ResourcePool, Phase } from './resource_pool';
 import type { Slot } from './resource_pool';
@@ -120,32 +113,9 @@ export async function runTestsParallel(
     });
   }
 
-  const DEFAULT_PORTS = {
-    agentless: await getPort(), // TEST_AGENTLESS_PORT,
-    fleet: await getPort(), // TEST_FLEET_PORT,
-    es: await getPort(), // TEST_ES_PORT,
-    esTransport: await getPort(), // TEST_ES_TRANSPORT_PORT,
-    kibana: await getPort(), // TEST_KIBANA_PORT,
-    packageRegistry: await getPort(), // FLEET_PACKAGE_REGISTRY_PORT,
-  };
-
   const portConfigEntries = await Promise.all(
     configs.map(async (config) => {
-      return [
-        config,
-        {
-          agentless: await getPort({ port: DEFAULT_PORTS.agentless }),
-          fleet: await getPort({ port: DEFAULT_PORTS.fleet }),
-          es: [await getPort({ port: DEFAULT_PORTS.es }), await getPort(), await getPort()],
-          esTransport: [
-            await getPort({ port: DEFAULT_PORTS.esTransport }),
-            await getPort(),
-            await getPort(),
-          ],
-          kibana: await getPort({ port: DEFAULT_PORTS.kibana }),
-          packageRegistry: await getPort({ port: DEFAULT_PORTS.packageRegistry }),
-        },
-      ] as const;
+      return [config, await acquirePorts()] as const;
     })
   );
 
@@ -187,7 +157,6 @@ export async function runTestsParallel(
         args: [
           `scripts/functional_tests`,
           `--config=${config}`,
-          `--base-path=${Path.join(REPO_ROOT, '.es', id)}`,
           '--debug',
           ...extraArgsList
             .flat()

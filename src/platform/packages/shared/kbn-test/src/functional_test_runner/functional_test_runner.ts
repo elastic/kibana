@@ -12,6 +12,7 @@ import Path, { dirname } from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
 
+import { SERVICE_NAMESPACE } from '@kbn/test-services';
 import type { Suite, Test } from './fake_mocha_types';
 import type { Providers, Config } from './lib';
 import {
@@ -78,7 +79,12 @@ export class FunctionalTestRunner {
       let reporterOptions;
       if (this.config.get('mochaOpts.dryRun')) {
         // override default reporter for dryRun results
-        const targetFile = Path.resolve(REPO_ROOT, 'target/functional-tests/dryRunOutput.json');
+        const targetFile = Path.resolve(
+          REPO_ROOT,
+          'target/functional-tests',
+          SERVICE_NAMESPACE,
+          'dryRunOutput.json'
+        );
         reporter = 'json';
         reporterOptions = {
           output: targetFile,

@@ -24,7 +24,9 @@ import { Executor } from 'selenium-webdriver/lib/http';
 // @ts-ignore internal modules are not typed
 import { getLogger } from 'selenium-webdriver/lib/logging';
 import { installDriver } from 'ms-chromium-edge-driver';
-import { mkdtempSync } from 'fs';
+import { resolve } from 'path';
+import { SERVICE_NAMESPACE } from '@kbn/test-services';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { FINAL_LOG_ENTRY_PREFIX, pollForLogEntry$ } from './poll_for_log_entry';
 import { createStdoutSocket } from './create_stdout_stream';
 import { preventParallelCalls } from './prevent_parallel_calls';
@@ -47,7 +49,7 @@ const now = Date.now();
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;
 const NO_QUEUE_COMMANDS = ['getLog', 'getStatus', 'newSession', 'quit'];
-const downloadDir = mkdtempSync('functional-tests-download');
+const downloadDir = resolve(REPO_ROOT, 'target/functional-tests', SERVICE_NAMESPACE, 'downloads');
 let runtimeEnvVariables: Configuration | undefined;
 
 // ENV variables may be injected dynamically by the test runner CLI script
