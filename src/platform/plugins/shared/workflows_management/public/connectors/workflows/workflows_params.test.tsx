@@ -783,4 +783,102 @@ describe('WorkflowsParamsFields', () => {
 
     window.open = originalOpen;
   });
+
+  test('should show disabled badge for disabled workflows', async () => {
+    const mockWorkflows = {
+      results: [
+        {
+          id: 'workflow-1',
+          name: 'Disabled Workflow',
+          description: 'A disabled workflow',
+          enabled: false,
+          definition: { triggers: [] },
+        },
+      ],
+    };
+
+    mockHttpPost.mockResolvedValue(mockWorkflows);
+
+    await act(async () => {
+      renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
+    });
+
+    await waitFor(() => {
+      expect(mockHttpPost).toHaveBeenCalled();
+    });
+
+    // Click on the input to open the popover
+    const input = screen.getByRole('searchbox');
+    fireEvent.click(input);
+
+    // Wait for the disabled workflow to appear
+    await waitFor(() => {
+      expect(screen.getByText('Disabled Workflow')).toBeInTheDocument();
+      expect(screen.getByText('Disabled')).toBeInTheDocument();
+    });
+  });
+
+  test('should show "No description" for workflows with undefined description', async () => {
+    const mockWorkflows = {
+      results: [
+        {
+          id: 'workflow-1',
+          name: 'Workflow without description',
+          description: undefined,
+          enabled: true,
+          definition: { triggers: [] },
+        },
+      ],
+    };
+
+    mockHttpPost.mockResolvedValue(mockWorkflows);
+
+    await act(async () => {
+      renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
+    });
+
+    await waitFor(() => {
+      expect(mockHttpPost).toHaveBeenCalled();
+    });
+
+    // Click on the input to open the popover
+    const input = screen.getByRole('searchbox');
+    fireEvent.click(input);
+
+    // Wait for the workflow to appear
+    await waitFor(() => {
+      expect(screen.getByText('Workflow without description')).toBeInTheDocument();
+      expect(screen.getByText('No description')).toBeInTheDocument();
+    });
+  });
+
+  test('should not show tooltip for empty state workflow', async () => {
+    // Mock empty workflows response
+    const mockWorkflows = {
+      results: [],
+    };
+
+    mockHttpPost.mockResolvedValue(mockWorkflows);
+
+    await act(async () => {
+      renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
+    });
+
+    await waitFor(() => {
+      expect(mockHttpPost).toHaveBeenCalled();
+    });
+
+    // Click on the input to open the popover
+    const input = screen.getByRole('searchbox');
+    fireEvent.click(input);
+
+    // Wait for the empty state to appear
+    await waitFor(() => {
+      expect(screen.getByText('No workflows available')).toBeInTheDocument();
+    });
+
+    // The empty state should not have a tooltip
+    const emptyStateOption = screen.getByText('No workflows available');
+    expect(emptyStateOption).toBeInTheDocument();
+  });
 });
