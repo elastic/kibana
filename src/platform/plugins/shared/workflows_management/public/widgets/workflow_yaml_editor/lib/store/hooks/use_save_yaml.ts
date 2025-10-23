@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
+import { useThunkDispatch } from './use_thunk_dispatch';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { saveYamlThunk } from '../thunks/save_yaml_thunk';
-import { useThunkDispatch } from './use_thunk_dispatch';
 
 export interface UseSaveYamlReturn {
   saveYaml: () => Promise<{ success: boolean }>;
@@ -31,9 +31,6 @@ export function useSaveYaml(): UseSaveYamlReturn {
   const [error, setError] = useState<string | null>(null);
 
   const saveYaml = useCallback(async () => {
-    if (!id) {
-      throw new Error('Workflow ID is required');
-    }
     setIsLoading(true);
     setError(null);
 

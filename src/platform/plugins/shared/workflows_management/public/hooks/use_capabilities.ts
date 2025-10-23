@@ -10,14 +10,14 @@
 import { useKibana } from './use_kibana';
 
 export interface WorkflowsManagementCapabilities {
-  canUpdateWorkflow: boolean;
+  canWriteWorkflow: boolean;
   canExecuteWorkflow: boolean;
 }
 
 export const useCapabilities = (): WorkflowsManagementCapabilities => {
   const { application } = useKibana().services;
   return {
-    canUpdateWorkflow: Boolean(application?.capabilities.workflowsManagement.updateWorkflow),
+    canWriteWorkflow: Boolean(application?.capabilities.workflowsManagement.updateWorkflow),
     canExecuteWorkflow: Boolean(application?.capabilities.workflowsManagement.executeWorkflow),
   };
 };

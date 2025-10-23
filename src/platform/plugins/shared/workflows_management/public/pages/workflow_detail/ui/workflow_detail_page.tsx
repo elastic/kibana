@@ -8,9 +8,12 @@
  */
 
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { workflowDefaultYaml } from './workflow_default_yml';
 import { WorkflowDetailEditor } from './workflow_detail_editor';
 import { WorkflowDetailHeader } from './workflow_detail_header';
 import { WorkflowEditorLayout } from './workflow_detail_layout';
@@ -20,18 +23,24 @@ import { WorkflowExecutionDetail } from '../../../features/workflow_execution_de
 import { WorkflowExecutionList } from '../../../features/workflow_execution_list/ui/workflow_execution_list_stateful';
 import { useWorkflowsBreadcrumbs } from '../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
+import { setYamlString } from '../../../widgets/workflow_yaml_editor/lib/store';
 import { useLoadWorkflow } from '../../../widgets/workflow_yaml_editor/lib/store/hooks/use_load_workflow';
 import {
   selectWorkflowName,
   selectYamlString,
 } from '../../../widgets/workflow_yaml_editor/lib/store/selectors';
 
-export function WorkflowDetailPage({ id }: { id: string }) {
+export function WorkflowDetailPage({ id }: { id?: string }) {
   const { loadWorkflow, error, isLoading: isLoadingWorkflow } = useLoadWorkflow();
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    loadWorkflow(id);
-  }, [loadWorkflow, id]);
+    if (id) {
+      loadWorkflow(id);
+    } else {
+      dispatch(setYamlString(workflowDefaultYaml));
+    }
+  }, [loadWorkflow, id, dispatch]);
 
   const workflowName = useSelector(selectWorkflowName);
   useWorkflowsBreadcrumbs(workflowName);
@@ -73,8 +82,8 @@ export function WorkflowDetailPage({ id }: { id: string }) {
   }
 
   return (
-    <EuiFlexGroup gutterSize="none" style={{ height: '100%' }}>
-      <EuiFlexItem style={{ overflow: 'hidden' }}>
+    <EuiFlexGroup direction="column" gutterSize="none" css={kbnFullBodyHeightCss()}>
+      <EuiFlexItem grow={false}>
         <WorkflowDetailHeader
           isLoading={isLoadingWorkflow}
           activeTab={activeTab}
@@ -82,6 +91,8 @@ export function WorkflowDetailPage({ id }: { id: string }) {
           highlightDiff={highlightDiff}
           setHighlightDiff={setHighlightDiff}
         />
+      </EuiFlexItem>
+      <EuiFlexItem css={css({ overflow: 'hidden', minHeight: 0 })}>
         <WorkflowEditorLayout
           editor={
             <WorkflowDetailEditor
@@ -94,7 +105,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
             />
           }
           executionList={
-            activeTab === 'executions' && !selectedExecutionId ? (
+            id && activeTab === 'executions' && !selectedExecutionId ? (
               <WorkflowExecutionList workflowId={id} />
             ) : null
           }

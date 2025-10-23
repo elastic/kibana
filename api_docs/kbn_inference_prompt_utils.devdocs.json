@@ -634,7 +634,7 @@
             "section": "def-common.ToolOptionsOfPrompt",
             "text": "ToolOptionsOfPrompt"
           },
-          "<TPrompt>, { [key in keyof TToolCallbacks]: Awaited<ReturnType<TToolCallbacks[key]>>; }>[]; }"
+          "<TPrompt>, { [key in keyof TToolCallbacks]: Awaited<ReturnType<TToolCallbacks[key]>>[\"response\"]; }>[]; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-prompt-utils/src/flows/reasoning/types.ts",
         "deprecated": false,

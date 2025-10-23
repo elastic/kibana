@@ -8,8 +8,8 @@
  */
 
 import type { AnyAction, Dispatch, Middleware, MiddlewareAPI } from '@reduxjs/toolkit';
-import type { RootState } from './types';
 import { setYamlString } from './slice';
+import type { RootState } from './types';
 import { performComputation } from './utils/computation';
 
 // Debounced computation function
@@ -17,7 +17,7 @@ let computationTimeoutId: NodeJS.Timeout | null = null;
 const COMPUTATION_DEBOUNCE_MS = 500; // 500ms debounce
 
 const debounceComputation = (
-  store: MiddlewareAPI<Dispatch<AnyAction>, any>,
+  store: MiddlewareAPI<Dispatch<AnyAction>, any>, // eslint-disable-line @typescript-eslint/no-explicit-any
   yamlString: string | undefined
 ) => {
   // Clear any pending computation

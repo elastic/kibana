@@ -40,10 +40,27 @@ import { useSaveYaml } from '../../../widgets/workflow_yaml_editor/lib/store/hoo
 import { useToggleWorkflow } from '../../../widgets/workflow_yaml_editor/lib/store/hooks/use_toggle_workflow';
 import {
   selectHasChanges,
+  selectIsYamlSyntaxValid,
   selectWorkflow,
 } from '../../../widgets/workflow_yaml_editor/lib/store/selectors';
 import { setIsTestModalOpen } from '../../../widgets/workflow_yaml_editor/lib/store/slice';
 import { WorkflowUnsavedChangesBadge } from '../../../widgets/workflow_yaml_editor/ui/workflow_unsaved_changes_badge';
+
+const Translations = {
+  runWorkflow: i18n.translate('workflows.workflowDetailHeader.runWorkflow', {
+    defaultMessage: 'Run workflow',
+  }),
+  runWithUnsavedChangesQuestion: i18n.translate(
+    'workflows.workflowDetailHeader.runWithUnsavedChangesQuestion',
+    { defaultMessage: 'Run workflow with unsaved changes?' }
+  ),
+  runWorkflowCancel: i18n.translate('workflows.workflowDetailHeader.runWorkflowCancel', {
+    defaultMessage: 'Cancel',
+  }),
+  backLink: i18n.translate('workflows.workflowDetailHeader.backLink', {
+    defaultMessage: 'Back to Workflows',
+  }),
+};
 
 const buttonGroupOptions: EuiButtonGroupOptionProps[] = [
   {
@@ -81,14 +98,15 @@ export const WorkflowDetailHeader = ({
   const { application } = useKibana().services;
   const styles = useMemoCss(componentStyles);
   const dispatch = useDispatch();
-  const { canUpdateWorkflow, canExecuteWorkflow } = useCapabilities();
+  const { canWriteWorkflow, canExecuteWorkflow } = useCapabilities();
 
   const workflow = useSelector(selectWorkflow);
-  const { name, isEnabled, isValid, lastUpdatedAt } = useMemo(
+  const isSyntaxValid = useSelector(selectIsYamlSyntaxValid);
+
+  const { name, isEnabled, lastUpdatedAt } = useMemo(
     () => ({
-      name: workflow?.name ?? '',
+      name: workflow?.name ?? 'New workflow',
       isEnabled: workflow?.enabled ?? false,
-      isValid: workflow?.valid ?? true,
       lastUpdatedAt: workflow ? new Date(workflow.lastUpdatedAt) : null,
     }),
     [workflow]
@@ -112,8 +130,8 @@ export const WorkflowDetailHeader = ({
   const [showRunConfirmation, setShowRunConfirmation] = useState(false);
 
   const runWorkflowTooltipContent = useMemo(() => {
-    return getRunWorkflowTooltipContent(isValid, canExecuteWorkflow, isEnabled, false);
-  }, [isValid, canExecuteWorkflow, isEnabled]);
+    return getRunWorkflowTooltipContent(isSyntaxValid, canExecuteWorkflow, isEnabled, false);
+  }, [isSyntaxValid, canExecuteWorkflow, isEnabled]);
 
   const handleRunClickWithUnsavedCheck = useCallback(() => {
     if (hasUnsavedChanges) {
@@ -132,10 +150,6 @@ export const WorkflowDetailHeader = ({
     setShowRunConfirmation(false);
   }, []);
 
-  const backLinkLabel = i18n.translate('workflows.workflowDetailHeader.backLink', {
-    defaultMessage: 'Back to Workflows',
-  });
-
   return (
     <>
       <EuiPageTemplate offset={0} minHeight={0} grow={false} css={styles.pageTemplate}>
@@ -148,9 +162,9 @@ export const WorkflowDetailHeader = ({
               onClick={() => {
                 application.navigateToApp(PLUGIN_ID);
               }}
-              aria-label={backLinkLabel}
+              aria-label={Translations.backLink}
             >
-              {backLinkLabel}
+              {Translations.backLink}
             </EuiButtonEmpty>
             <EuiFlexGroup
               alignItems="center"
@@ -217,7 +231,7 @@ export const WorkflowDetailHeader = ({
                     ? i18n.translate('workflows.workflowDetailHeader.unsaved', {
                         defaultMessage: 'Save changes to enable/disable workflow',
                       })
-                    : !isValid
+                    : !isSyntaxValid
                     ? i18n.translate('workflows.workflowDetailHeader.invalid', {
                         defaultMessage: 'Fix errors to enable workflow',
                       })
@@ -225,9 +239,9 @@ export const WorkflowDetailHeader = ({
                 }
               >
                 <EuiSwitch
-                  disabled={isLoading || !canUpdateWorkflow || !isValid || hasUnsavedChanges}
+                  disabled={isLoading || !canWriteWorkflow || !isSyntaxValid || hasUnsavedChanges}
                   checked={isEnabled}
-                  onChange={handleToggleWorkflow}
+                  onChange={() => handleToggleWorkflow()}
                   label={i18n.translate('workflows.workflowDetailHeader.enabled', {
                     defaultMessage: 'Enabled',
                   })}
@@ -241,14 +255,10 @@ export const WorkflowDetailHeader = ({
                   iconType="play"
                   size="s"
                   onClick={handleRunClickWithUnsavedCheck}
-                  disabled={!canExecuteWorkflow || !isEnabled || isLoading || !isValid}
+                  disabled={!canExecuteWorkflow || !isEnabled || isLoading || !isSyntaxValid}
                   title={runWorkflowTooltipContent ?? undefined}
-                  aria-label={i18n.translate(
-                    'workflows.workflowDetailHeader.runWorkflow.ariaLabel',
-                    {
-                      defaultMessage: 'Run workflow',
-                    }
-                  )}
+                  aria-label={Translations.runWorkflow}
+                  data-test-subj="runWorkflowHeaderButton"
                 />
               </EuiToolTip>
               <EuiButton
@@ -256,7 +266,7 @@ export const WorkflowDetailHeader = ({
                 color="primary"
                 size="s"
                 onClick={handleSaveWorkflow}
-                disabled={!canUpdateWorkflow || isLoading}
+                disabled={!canWriteWorkflow || isLoading}
               >
                 <FormattedMessage id="keepWorkflows.buttonText" defaultMessage="Save" ignoreTag />
               </EuiButton>
@@ -266,40 +276,27 @@ export const WorkflowDetailHeader = ({
       </EuiPageTemplate>
       {showRunConfirmation && (
         <EuiConfirmModal
-          title={i18n.translate('workflows.workflowDetailHeader.runWithUnsavedChanges.title', {
-            defaultMessage: 'Run workflow with unsaved changes?',
-          })}
+          title={Translations.runWithUnsavedChangesQuestion}
           onCancel={handleCancelRun}
           onConfirm={handleConfirmRun}
-          cancelButtonText={i18n.translate(
-            'workflows.workflowDetailHeader.runWithUnsavedChanges.cancel',
-            {
-              defaultMessage: 'Cancel',
-            }
-          )}
-          confirmButtonText={i18n.translate(
-            'workflows.workflowDetailHeader.runWithUnsavedChanges.confirm',
-            {
-              defaultMessage: 'Run workflow',
-            }
-          )}
+          cancelButtonText={Translations.runWorkflowCancel}
+          confirmButtonText={Translations.runWorkflow}
           buttonColor="success"
           defaultFocusedButton="confirm"
-          aria-label={i18n.translate('workflows.workflowDetailHeader.runWithUnsavedChanges.title', {
-            defaultMessage: 'Run workflow with unsaved changes?',
-          })}
+          aria-label={Translations.runWithUnsavedChangesQuestion}
         >
           <p>
-            {i18n.translate('workflows.workflowDetailHeader.runWithUnsavedChanges.message', {
-              defaultMessage:
-                'You have unsaved changes. Running the workflow will not save your changes. Are you sure you want to continue?',
-            })}
+            <FormattedMessage
+              id="workflows.workflowDetailHeader.runWithUnsavedChanges.message"
+              defaultMessage="You have unsaved changes. Running the workflow will not save your changes. Are you sure you want to continue?"
+            />
           </p>
         </EuiConfirmModal>
       )}
     </>
   );
 };
+WorkflowDetailHeader.displayName = 'WorkflowDetailHeader';
 
 const componentStyles = {
   pageTemplate: css({
