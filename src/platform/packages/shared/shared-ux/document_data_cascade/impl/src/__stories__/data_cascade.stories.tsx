@@ -55,7 +55,6 @@ import mdx from './guide.mdx';
 export default {
   title: 'Data Cascade/Configuration Examples',
   component: DataCascade,
-  // @ts-expect-error -- Need because these components accept generic types, and we don't provide them in the storybook declaration
   subcomponents: { DataCascadeRow, DataCascadeRowCell },
   parameters: {
     docs: {
