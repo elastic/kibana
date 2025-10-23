@@ -898,21 +898,24 @@ export class CstToAstConverter {
   private fromGrokCommand(ctx: cst.GrokCommandContext): ast.ESQLCommand<'grok'> {
     const command = this.createCommand('grok', ctx);
     const primaryExpression = this.visitPrimaryExpression(ctx.primaryExpression());
-    const stringContext = ctx.string_();
-    const pattern = stringContext.getToken(cst.default.QUOTED_STRING, 0);
-    const doParseStringAndOptions = pattern && textExistsAndIsValid(pattern.getText());
 
     command.args.push(primaryExpression);
 
-    if (doParseStringAndOptions) {
-      const stringNode = this.toStringLiteral(stringContext);
+    const stringContexts = ctx.string__list();
 
-      command.args.push(stringNode);
+    for (let i = 0; i < stringContexts.length; i++) {
+      const stringContext = stringContexts[i];
+      const pattern = stringContext.getToken(cst.default.QUOTED_STRING, 0);
+      const doParseStringAndOptions = pattern && textExistsAndIsValid(pattern.getText());
+
+      if (doParseStringAndOptions) {
+        const stringNode = this.toStringLiteral(stringContext);
+        command.args.push(stringNode);
+      }
     }
 
     return command;
   }
-
   // ------------------------------------------------------------------- ENRICH
 
   private fromEnrichCommand(ctx: cst.EnrichCommandContext): ast.ESQLCommand<'enrich'> {

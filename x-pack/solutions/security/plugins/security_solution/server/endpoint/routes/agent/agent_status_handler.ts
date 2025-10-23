@@ -17,7 +17,6 @@ import type {
 } from '../../../types';
 import type { EndpointAppContext } from '../../types';
 import { withEndpointAuthz } from '../with_endpoint_authz';
-import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import { getAgentStatusClient } from '../../services';
 
 export const registerAgentStatusRoute = (
@@ -67,23 +66,6 @@ export const getAgentStatusRouteHandler = (
     logger.debug(
       `Retrieving status for: agentType [${agentType}], agentIds: [${agentIds.join(', ')}]`
     );
-
-    // Note: because our API schemas are defined as module static variables (as opposed to a
-    //        `getter` function), we need to include this additional validation here, since
-    //        `agent_type` is included in the schema independent of the feature flag
-    if (
-      (agentType === 'crowdstrike' &&
-        !endpointContext.experimentalFeatures
-          .responseActionsCrowdstrikeManualHostIsolationEnabled) ||
-      (agentType === 'microsoft_defender_endpoint' &&
-        !endpointContext.experimentalFeatures.responseActionsMSDefenderEndpointEnabled)
-    ) {
-      return errorHandler(
-        logger,
-        response,
-        new CustomHttpRequestError(`[request query.agent_type]: feature is disabled`, 400)
-      );
-    }
 
     try {
       const [securitySolutionPlugin, corePlugin, actionsPlugin] = await Promise.all([
