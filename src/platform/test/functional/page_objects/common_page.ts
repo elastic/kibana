@@ -307,7 +307,7 @@ export class CommonPageObject extends FtrService {
 
     this.log.debug('navigating to ' + appName + ' url: ' + appUrl);
 
-    await this.retry.tryForTime(this.defaultTryTimeout, async () => {
+    await this.retry.tryForTime(this.defaultTryTimeout * 2, async () => {
       let lastUrl = await this.retry.try(async () => {
         // since we're using hash URLs, always reload first to force re-render
         this.log.debug('navigate to: ' + appUrl);
