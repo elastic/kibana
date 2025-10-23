@@ -147,9 +147,15 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
                 color="text"
                 iconType={rowIsExpanded ? 'arrowDown' : 'arrowRight'}
                 onClick={rowToggleFn}
-                aria-label={i18n.translate('sharedUXPackages.dataCascade.toggleRowButtonLabel', {
-                  defaultMessage: 'toggle row',
-                })}
+                aria-label={
+                  rowIsExpanded
+                    ? i18n.translate('sharedUXPackages.dataCascade.collapseRowButtonLabel', {
+                        defaultMessage: 'collapse row',
+                      })
+                    : i18n.translate('sharedUXPackages.dataCascade.expandRowButtonLabel', {
+                        defaultMessage: 'expand row',
+                      })
+                }
                 data-test-subj={`toggle-row-${rowId}-button`}
               />
             </EuiFlexItem>
