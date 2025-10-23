@@ -175,11 +175,18 @@ export function getDashboardApi({
     },
     runInteractiveSave: async () => {
       trackOverlayApi.clearOverlays();
+
+      const { description, tags, timeRestore, title } = settingsManager.api.getSettings();
       const saveResult = await openSaveModal({
+        description,
         isManaged,
         lastSavedId: savedObjectId$.value,
+        serializeState: getState,
+        setTimeRestore: (newTimeRestore: boolean) => settingsManager.api.setSettings({ timeRestore: newTimeRestore }),
+        tags,
+        timeRestore,
+        title,
         viewMode: viewModeManager.api.viewMode$.value,
-        ...getState(),
       });
 
       if (!saveResult || saveResult.error) {

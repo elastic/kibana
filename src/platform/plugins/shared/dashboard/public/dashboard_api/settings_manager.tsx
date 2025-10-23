@@ -63,7 +63,6 @@ export function initializeSettingsManager(initialState: DashboardState) {
     return {
       ...(description && { description }),
       tags,
-      timeRestore,
       title,
       options,
     };
