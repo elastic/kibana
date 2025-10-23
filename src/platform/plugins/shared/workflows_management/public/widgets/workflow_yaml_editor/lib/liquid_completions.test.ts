@@ -9,11 +9,11 @@
 
 import { monaco } from '@kbn/monaco';
 import {
+  createLiquidBlockKeywordCompletions,
   createLiquidFilterCompletions,
   createLiquidSyntaxCompletions,
-  createLiquidBlockKeywordCompletions,
-  LIQUID_FILTERS,
   LIQUID_BLOCK_KEYWORDS,
+  LIQUID_FILTERS,
 } from './liquid_completions';
 
 describe('liquid_completions', () => {

@@ -10,6 +10,8 @@ import {
   updatePolicyInputs,
   updatePolicyWithAwsCloudConnectorCredentials,
   isCloudConnectorReusableEnabled,
+  isAwsCloudConnectorVars,
+  isAzureCloudConnectorVars,
 } from './utils';
 
 import type {
@@ -17,7 +19,12 @@ import type {
   NewPackagePolicy,
   NewPackagePolicyInput,
 } from '@kbn/fleet-plugin/common';
-import { type CloudConnectorCredentials } from './hooks/use_cloud_connector_setup';
+import type {
+  AwsCloudConnectorVars,
+  AzureCloudConnectorVars,
+} from '@kbn/fleet-plugin/common/types';
+import type { CloudConnectorCredentials } from './types';
+import { AWS_PROVIDER, AZURE_PROVIDER } from './constants';
 
 describe('updateInputVarsWithCredentials', () => {
   let mockInputVars: PackagePolicyConfigRecord;
@@ -534,5 +541,67 @@ describe('isCloudConnectorReusableEnabled', () => {
   it('should handle edge cases with version formats', () => {
     expect(isCloudConnectorReusableEnabled('3.1.0', 'cspm')).toBe(true);
     expect(isCloudConnectorReusableEnabled('3.1.0-preview06', 'cspm')).toBe(true);
+  });
+});
+
+describe('Cloud Connector Type Guards', () => {
+  describe('isAwsCloudConnectorVars', () => {
+    it('should return true for AWS cloud connector vars with aws provider', () => {
+      const awsVars: AwsCloudConnectorVars = {
+        role_arn: { value: 'arn:aws:iam::123456789012:role/MyRole' },
+        external_id: { value: { isSecretRef: true, id: 'secret-id' }, type: 'password' },
+      };
+
+      expect(isAwsCloudConnectorVars(awsVars, AWS_PROVIDER)).toBe(true);
+    });
+
+    it('should return false for AWS cloud connector vars with non-aws provider', () => {
+      const awsVars: AwsCloudConnectorVars = {
+        role_arn: { value: 'arn:aws:iam::123456789012:role/MyRole' },
+        external_id: { value: { isSecretRef: true, id: 'secret-id' }, type: 'password' },
+      };
+
+      expect(isAwsCloudConnectorVars(awsVars, AZURE_PROVIDER)).toBe(false);
+    });
+
+    it('should return false for Azure cloud connector vars', () => {
+      const azureVars: AzureCloudConnectorVars = {
+        tenant_id: { value: 'tenant-id' },
+        client_id: { value: 'client-id' },
+        azure_credentials_cloud_connector_id: { value: 'connector-id' },
+      };
+
+      expect(isAwsCloudConnectorVars(azureVars, AWS_PROVIDER)).toBe(false);
+    });
+  });
+
+  describe('isAzureCloudConnectorVars', () => {
+    it('should return true for Azure cloud connector vars with azure provider', () => {
+      const azureVars: AzureCloudConnectorVars = {
+        tenant_id: { value: 'tenant-id' },
+        client_id: { value: 'client-id' },
+        azure_credentials_cloud_connector_id: { value: 'connector-id' },
+      };
+
+      expect(isAzureCloudConnectorVars(azureVars, AZURE_PROVIDER)).toBe(true);
+    });
+
+    it('should return false for Azure cloud connector vars with non-azure provider', () => {
+      const awsVars: AwsCloudConnectorVars = {
+        role_arn: { value: 'arn:aws:iam::123456789012:role/MyRole' },
+        external_id: { value: { isSecretRef: true, id: 'secret-id' }, type: 'password' },
+      };
+
+      expect(isAzureCloudConnectorVars(awsVars, AWS_PROVIDER)).toBe(false);
+    });
+
+    it('should return false for AWS cloud connector vars', () => {
+      const awsVars: AwsCloudConnectorVars = {
+        role_arn: { value: 'arn:aws:iam::123456789012:role/MyRole' },
+        external_id: { value: { isSecretRef: true, id: 'secret-id' }, type: 'password' },
+      };
+
+      expect(isAzureCloudConnectorVars(awsVars, AZURE_PROVIDER)).toBe(false);
+    });
   });
 });
