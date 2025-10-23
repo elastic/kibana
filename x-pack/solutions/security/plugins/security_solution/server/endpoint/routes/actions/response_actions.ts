@@ -461,9 +461,8 @@ function isResponseActionDisabled(
   }
 
   if (
-    agentType === 'endpoint' &&
     command === 'memory-dump' &&
-    !experimentalFeatures.responseActionsEndpointMemoryDump
+    (agentType !== 'endpoint' || !experimentalFeatures.responseActionsEndpointMemoryDump)
   ) {
     return true;
   }

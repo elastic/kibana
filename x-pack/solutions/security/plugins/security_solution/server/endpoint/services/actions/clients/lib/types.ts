@@ -6,6 +6,7 @@
  */
 
 import type { Readable } from 'stream';
+import type { MemoryDumpActionRequestBody } from '../../../../../../common/api/endpoint/actions/response_actions/memory_dump';
 import type { CustomScriptsRequestQueryParams } from '../../../../../../common/api/endpoint/custom_scripts/get_custom_scripts_route';
 import type {
   ActionDetails,
@@ -29,6 +30,8 @@ import type {
   ResponseActionCancelParameters,
   SuspendProcessActionOutputContent,
   UploadedFileInfo,
+  ResponseActionMemoryDumpOutputContent,
+  ResponseActionMemoryDumpParameters,
 } from '../../../../../../common/endpoint/types';
 import type {
   BaseActionRequestBody,
@@ -192,6 +195,18 @@ export interface ResponseActionsClient {
     actionRequest: OmitUnsupportedAttributes<CancelActionRequestBody>,
     options?: CommonResponseActionMethodOptions
   ) => Promise<ActionDetails<ResponseActionCancelOutputContent, ResponseActionCancelParameters>>;
+
+  /**
+   * Generate a memory dump
+   * @param actionRequest
+   * @param options
+   */
+  memoryDump: (
+    actionRequest: OmitUnsupportedAttributes<MemoryDumpActionRequestBody>,
+    options?: CommonResponseActionMethodOptions
+  ) => Promise<
+    ActionDetails<ResponseActionMemoryDumpOutputContent, ResponseActionMemoryDumpParameters>
+  >;
 }
 
 /**

@@ -283,6 +283,16 @@ export type ResponseActionRunScriptParameters = RunScriptActionRequestBody['para
 
 export type ResponseActionMemoryDumpParameters = MemoryDumpActionRequestBody['parameters'];
 
+export interface ResponseActionMemoryDumpOutputContent {
+  code: string;
+  /** The zip file size */
+  file_size: number;
+  /** The full path of the file on the host machine */
+  path: string;
+  /** The remaining free disk space in bytes (after creating memory dump) */
+  disk_free_space: number;
+}
+
 export type EndpointActionDataParameterTypes =
   | undefined
   | ResponseActionParametersWithProcessData
