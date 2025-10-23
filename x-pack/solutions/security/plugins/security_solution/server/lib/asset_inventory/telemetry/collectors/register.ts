@@ -20,6 +20,7 @@ import { getEntitiesTypeStats } from './entities_type_stats_collector';
 import { getAssetCriticalityStats } from './asset_criticality_stats_collector';
 import { getEntitySourceStats } from './entity_source_stats_collector';
 import { getEntityStoreStats } from './entity_store_stats_collector';
+import { getAssetInventoryCloudConnectorUsageStats } from './asset_inventory_cloud_connector_usage_stats_collector';
 import type { AssetInventoryUsage, AssetInventoryUsageCollectorType } from '../type';
 import { ENTITY_INDEX } from '../helper';
 
@@ -59,6 +60,7 @@ export function registerAssetInventoryUsageCollector(
       };
 
       const esClient = collectorFetchContext.esClient;
+      const soClient = collectorFetchContext.soClient;
 
       const [
         entitiesStats,
@@ -66,12 +68,17 @@ export function registerAssetInventoryUsageCollector(
         entityStoreStats,
         entitySourceStats,
         assetCriticalityStats,
+        assetInventoryCloudConnectorUsageStats,
       ] = await Promise.all([
         awaitPromiseSafe('Entities', getEntityStats(esClient, ENTITY_INDEX, logger)),
         awaitPromiseSafe('Entities Type', getEntitiesTypeStats(esClient, logger)),
         awaitPromiseSafe('Entity Store', getEntityStoreStats(esClient, logger)),
         awaitPromiseSafe('Entity Source', getEntitySourceStats(esClient, logger)),
         awaitPromiseSafe('Asset Criticality', getAssetCriticalityStats(esClient, logger)),
+        awaitPromiseSafe(
+          'Asset Inventory Cloud Connector Usage',
+          getAssetInventoryCloudConnectorUsageStats(soClient, coreServices, logger)
+        ),
       ]);
       return {
         entities: entitiesStats,
@@ -79,6 +86,7 @@ export function registerAssetInventoryUsageCollector(
         entity_store_stats: entityStoreStats,
         entity_source_stats: entitySourceStats,
         asset_criticality_stats: assetCriticalityStats,
+        asset_inventory_cloud_connector_usage_stats: assetInventoryCloudConnectorUsageStats,
       };
     },
     schema: assetInventoryUsageSchema,
