@@ -286,7 +286,7 @@ describe('LensVisService suggestions', () => {
 
     const histogramQuery = {
       esql: `from the-data-view | limit 100
-| STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 30 minute), \`var0\` | sort \`var0\` asc`,
+| STATS results = COUNT(*) BY \`var0\`, timestamp = BUCKET(@timestamp, 30 minute) | sort \`var0\` asc`,
     };
 
     expect(lensVis.visContext?.attributes.state.query).toStrictEqual(histogramQuery);
@@ -367,7 +367,7 @@ describe('LensVisService suggestions', () => {
 
     const histogramQuery = {
       esql: `from the-data-view | limit 100
-| STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 30 minute), \`coordinates\``,
+| STATS results = COUNT(*) BY \`coordinates\`, timestamp = BUCKET(@timestamp, 30 minute)`,
     };
 
     expect(lensVis.visContext?.attributes.state.query).toStrictEqual(histogramQuery);
