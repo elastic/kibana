@@ -62,6 +62,7 @@ describe('getSerializedState', () => {
           "query": "hi",
         },
         "refreshInterval": undefined,
+        "tags": Array [],
         "timeRange": undefined,
         "timeRestore": false,
         "title": "My Dashboard",
