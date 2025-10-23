@@ -146,8 +146,6 @@ export const getAvailableVersions = async ({
     availableVersions = [kibanaVersion];
   }
 
-  availableVersions.push('9.1.5+build.1234'); // --- IGNORE ---
-
   // Don't prime the cache in tests
   if (!ignoreCache) {
     CACHED_AVAILABLE_VERSIONS = availableVersions;
