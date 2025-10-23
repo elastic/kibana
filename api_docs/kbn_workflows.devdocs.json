@@ -29,7 +29,7 @@
           "\nBuilds a Kibana HTTP request from connector definitions\nThis is shared between the execution engine and the YAML editor copy functionality"
         ],
         "signature": [
-          "(actionType: string, params: any) => { method: string; path: string; body?: any; query?: any; headers?: any; }"
+          "(actionType: string, params: Record<string, unknown>) => { method: string; path: string; body?: Record<string, unknown> | undefined; query?: Record<string, unknown> | undefined; headers?: Record<string, string> | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/common/kibana_request_builder.ts",
         "deprecated": false,
@@ -53,12 +53,12 @@
           {
             "parentPluginId": "@kbn/workflows",
             "id": "def-common.buildKibanaRequestFromAction.$2",
-            "type": "Any",
+            "type": "Object",
             "tags": [],
             "label": "params",
             "description": [],
             "signature": [
-              "any"
+              "Record<string, unknown>"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/common/kibana_request_builder.ts",
             "deprecated": false,
@@ -79,7 +79,7 @@
           "\nBuilds an Elasticsearch request from connector definitions\nThis is shared between the execution engine and the YAML editor copy functionality"
         ],
         "signature": [
-          "(stepType: string, params: any) => { method: string; path: string; body?: any; params?: any; }"
+          "(stepType: string, params: Record<string, unknown>) => { method: string; path: string; body?: Record<string, unknown> | undefined; params?: Record<string, string> | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/common/elasticsearch_request_builder.ts",
         "deprecated": false,
@@ -103,12 +103,12 @@
           {
             "parentPluginId": "@kbn/workflows",
             "id": "def-common.buildRequestFromConnector.$2",
-            "type": "Any",
+            "type": "Object",
             "tags": [],
             "label": "params",
             "description": [],
             "signature": [
-              "any"
+              "Record<string, unknown>"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/common/elasticsearch_request_builder.ts",
             "deprecated": false,
@@ -2055,7 +2055,14 @@
             "label": "output",
             "description": [],
             "signature": [
-              "Record<string, any> | null | undefined"
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.JsonValue",
+                "text": "JsonValue"
+              },
+              " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
             "deprecated": false,
@@ -2069,7 +2076,14 @@
             "label": "input",
             "description": [],
             "signature": [
-              "Record<string, any> | null | undefined"
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.JsonValue",
+                "text": "JsonValue"
+              },
+              " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
             "deprecated": false,
@@ -2085,7 +2099,7 @@
               "Specific step execution instance state. Used by loops, retries, etc to track execution context."
             ],
             "signature": [
-              "Record<string, any> | undefined"
+              "Record<string, unknown> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
             "deprecated": false,
@@ -2245,7 +2259,7 @@
             "label": "action",
             "description": [],
             "signature": [
-              "(stepInputs?: Record<string, any> | undefined) => Promise<void | Record<string, any>>"
+              "(stepInputs?: Record<string, unknown> | undefined) => Promise<void | Record<string, unknown>>"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
             "deprecated": false,
@@ -2259,7 +2273,7 @@
                 "label": "stepInputs",
                 "description": [],
                 "signature": [
-                  "Record<string, any> | undefined"
+                  "Record<string, unknown> | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
                 "deprecated": false,
@@ -3864,7 +3878,7 @@
         "label": "RunStepCommand",
         "description": [],
         "signature": [
-          "{ stepId: string; workflowYaml: string; contextOverride?: Record<string, any> | undefined; }"
+          "{ stepId: string; workflowYaml: string; contextOverride?: Record<string, unknown> | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
         "deprecated": false,
@@ -3879,7 +3893,7 @@
         "label": "RunWorkflowCommand",
         "description": [],
         "signature": [
-          "{ inputs: Record<string, any>; }"
+          "{ inputs: Record<string, unknown>; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
         "deprecated": false,
@@ -3999,7 +4013,7 @@
         "label": "TestWorkflowCommand",
         "description": [],
         "signature": [
-          "{ inputs: Record<string, any>; workflowYaml: string; }"
+          "{ inputs: Record<string, unknown>; workflowYaml: string; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
         "deprecated": false,
@@ -4266,7 +4280,7 @@
         "label": "WorkflowStepExecutionDto",
         "description": [],
         "signature": [
-          "{ id: string; error?: string | null | undefined; state?: Record<string, any> | undefined; status: ",
+          "{ id: string; error?: string | null | undefined; state?: Record<string, unknown> | undefined; status: ",
           {
             "pluginId": "@kbn/workflows",
             "scope": "common",
@@ -4274,7 +4288,23 @@
             "section": "def-common.ExecutionStatus",
             "text": "ExecutionStatus"
           },
-          "; input?: Record<string, any> | null | undefined; output?: Record<string, any> | null | undefined; startedAt: string; workflowId: string; stepId: string; workflowRunId: string; stepType?: string | undefined; scopeStack: ",
+          "; input?: ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.JsonValue",
+            "text": "JsonValue"
+          },
+          " | undefined; output?: ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.JsonValue",
+            "text": "JsonValue"
+          },
+          " | undefined; startedAt: string; workflowId: string; stepId: string; workflowRunId: string; stepType?: string | undefined; scopeStack: ",
           {
             "pluginId": "@kbn/workflows",
             "scope": "common",
