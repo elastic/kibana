@@ -8,3 +8,5 @@
  */
 
 export { WorkflowsEmptyState } from './workflows_empty_state';
+export { WorkflowSelector } from './workflow_selector';
+export { useWorkflowSelection } from './use_workflow_selection';
