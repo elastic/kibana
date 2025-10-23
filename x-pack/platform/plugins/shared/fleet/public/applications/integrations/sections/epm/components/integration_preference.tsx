@@ -6,25 +6,14 @@
  */
 
 import React from 'react';
-import styled from 'styled-components';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiPanel,
-  EuiLink,
-  EuiText,
-  EuiForm,
-  EuiRadioGroup,
-  EuiSpacer,
-  EuiIconTip,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiPanel, EuiLink, EuiText, EuiForm, EuiRadioGroup, EuiSpacer } from '@elastic/eui';
 
 import { useStartServices } from '../../../hooks';
 
-export type IntegrationPreferenceType = 'recommended' | 'beats' | 'agent';
+export type IntegrationPreferenceType = 'beats' | 'agent';
 
 interface Option {
   type: IntegrationPreferenceType;
@@ -36,33 +25,7 @@ export interface Props {
   onChange: (type: IntegrationPreferenceType) => void;
 }
 
-const recommendedTooltip = (
-  <FormattedMessage
-    id="xpack.fleet.epm.integrationPreference.recommendedTooltip"
-    defaultMessage="We recommend Elastic Agent integrations when they are generally available."
-  />
-);
-
-const Item = styled(EuiFlexItem)`
-  padding-left: ${(props) => props.theme.eui.euiSizeXS};
-`;
-
 const options: Option[] = [
-  {
-    type: 'recommended',
-    label: (
-      <EuiFlexGroup alignItems="center" gutterSize="none">
-        <EuiFlexItem grow={false}>
-          {i18n.translate('xpack.fleet.epm.integrationPreference.recommendedLabel', {
-            defaultMessage: 'Recommended',
-          })}
-        </EuiFlexItem>
-        <Item>
-          <EuiIconTip content={recommendedTooltip} />
-        </Item>
-      </EuiFlexGroup>
-    ),
-  },
   {
     type: 'agent',
     label: i18n.translate('xpack.fleet.epm.integrationPreference.elasticAgentLabel', {

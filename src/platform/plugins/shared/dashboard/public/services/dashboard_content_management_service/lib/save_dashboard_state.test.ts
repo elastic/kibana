@@ -107,6 +107,7 @@ describe('Save dashboard state', () => {
     );
   });
 
+<<<<<<< HEAD
   it('should update prefixes on references when save as copy is true', async () => {
     const result = await saveDashboardState({
       dashboardState: {
@@ -134,6 +135,8 @@ describe('Save dashboard state', () => {
     );
   });
 
+=======
+>>>>>>> upstream/main
   it('should return an error when the save fails.', async () => {
     contentManagementService.client.create = jest.fn().mockRejectedValue('Whoops');
     const result = await saveDashboardState({
