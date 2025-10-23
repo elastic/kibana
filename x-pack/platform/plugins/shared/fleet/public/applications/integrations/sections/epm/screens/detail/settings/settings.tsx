@@ -217,6 +217,7 @@ export const SettingsPage: React.FC<Props> = memo(
     const isViewingOldPackage = version < latestVersion;
     // hide install/remove options if the user has version of the package is installed
     // and this package is out of date or if they do have a version installed but it's not this one
+    // allow to install the latest GA version if the latest version is prerelease
     const hideInstallOptions =
       (installationStatus === InstallStatus.notInstalled &&
         isViewingOldPackage &&

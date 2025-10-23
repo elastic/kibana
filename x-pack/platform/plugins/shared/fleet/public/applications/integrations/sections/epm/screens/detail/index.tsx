@@ -232,14 +232,9 @@ export function Detail() {
     }
   }, [packageInfoLatestGAData?.item]);
 
-  // fetch latest Prerelease version (prerelease=true)
-  const { data: packageInfoLatestPrereleaseData } = useGetPackageInfoByKeyQuery(pkgName, '', {
-    prerelease: true,
-  });
-
   useEffect(() => {
-    setLatestPrereleaseVersion(packageInfoLatestPrereleaseData?.item.version);
-  }, [packageInfoLatestPrereleaseData?.item.version]);
+    setLatestPrereleaseVersion(packageInfoData?.item.version);
+  }, [packageInfoData?.item.version]);
 
   const { isFirstTimeAgentUser = false, isLoading: firstTimeUserLoading } =
     useIsFirstTimeAgentUserQuery();
