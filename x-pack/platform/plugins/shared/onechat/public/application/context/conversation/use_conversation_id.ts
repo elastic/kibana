@@ -6,8 +6,8 @@
  */
 
 import { useMemo } from 'react';
-import { useConversationContext } from '../context/conversation_context';
-import { newConversationId } from '../utils/new_conversation';
+import { useConversationContext } from './conversation_context';
+import { newConversationId } from '../../utils/new_conversation';
 
 export const useConversationId = () => {
   const { conversationId } = useConversationContext();
@@ -17,9 +17,4 @@ export const useConversationId = () => {
   }, [conversationId]);
 
   return processedConversationId;
-};
-
-export const useShouldStickToBottom = () => {
-  const { shouldStickToBottom } = useConversationContext();
-  return shouldStickToBottom ?? true;
 };

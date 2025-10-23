@@ -11,7 +11,7 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { oneChatDefaultAgentId } from '@kbn/onechat-common';
 import { queryKeys } from '../query_keys';
 import { newConversationId } from '../utils/new_conversation';
-import { useConversationId } from './use_conversation_context';
+import { useConversationId } from '../context/conversation/use_conversation_id';
 import { useIsSendingMessage } from './use_is_sending_message';
 import { useOnechatServices } from './use_onechat_service';
 import { storageKeys } from '../storage_keys';

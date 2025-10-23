@@ -9,7 +9,7 @@ import { useMutation } from '@kbn/react-query';
 import { useRef, useState } from 'react';
 import { useAgentId } from '../../hooks/use_conversation';
 import { useConversationActions } from '../../hooks/use_conversation_actions';
-import { useConversationId } from '../../hooks/use_conversation_context';
+import { useConversationId } from '../conversation/use_conversation_id';
 import { useOnechatServices } from '../../hooks/use_onechat_service';
 import { useReportConverseError } from '../../hooks/use_report_error';
 import { mutationKeys } from '../../mutation_keys';

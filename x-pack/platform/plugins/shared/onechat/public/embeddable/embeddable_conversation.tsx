@@ -12,7 +12,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { SendMessageProvider } from '../application/context/send_message/send_message_context';
 import { OnechatServicesContext } from '../application/context/onechat_services_context';
 import type { EmbeddableConversationDependencies, EmbeddableConversationProps } from './types';
-import { EmbeddableConversationProvider } from '../application/providers/embeddable_conversation_provider';
+import { EmbeddableConversationProvider } from '../application/context/conversation/embeddable_conversation_provider';
 import { Conversation } from '../application/components/conversations/conversation';
 
 const queryClient = new QueryClient();

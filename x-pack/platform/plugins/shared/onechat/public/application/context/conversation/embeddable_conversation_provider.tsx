@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ConversationContext } from '../context/conversation_context';
+import { ConversationContext } from './conversation_context';
 
 interface EmbeddableConversationProviderProps {
   conversationId?: string;

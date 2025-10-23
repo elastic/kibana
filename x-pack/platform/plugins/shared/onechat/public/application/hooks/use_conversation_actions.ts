@@ -23,7 +23,7 @@ import { queryKeys } from '../query_keys';
 import { storageKeys } from '../storage_keys';
 import { appPaths } from '../utils/app_paths';
 import { createNewConversation, newConversationId } from '../utils/new_conversation';
-import { useConversationId } from './use_conversation_context';
+import { useConversationId } from '../context/conversation/use_conversation_id';
 import { useNavigation } from './use_navigation';
 import { useOnechatServices } from './use_onechat_service';
 
