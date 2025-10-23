@@ -507,31 +507,38 @@ export const WorkflowYAMLEditor = ({
 
   // Actions
   const [actionsPopoverOpen, setActionsPopoverOpen] = useState(false);
-  const openActionsPopover = () => {
+  const openActionsPopover = useCallback(() => {
     setActionsPopoverOpen(true);
-  };
-  const closeActionsPopover = () => {
+  }, []);
+  const closeActionsPopover = useCallback(() => {
     setActionsPopoverOpen(false);
-  };
-  const onActionSelected = (action: ActionOptionData) => {
-    const model = editorRef.current?.getModel();
-    const yamlDocumentCurrent = yamlDocumentRef.current;
-    const cursorPosition = editorRef.current?.getPosition();
-    const editor = editorRef.current;
-    if (!model || !yamlDocumentCurrent || !editor) {
-      return;
-    }
-    if (isTriggerType(action.id)) {
-      insertTriggerSnippet(model, yamlDocumentCurrent, action.id, editor);
-    } else {
-      insertStepSnippet(model, yamlDocumentCurrent, action.id, cursorPosition, editor);
-    }
-    closeActionsPopover();
-  };
+  }, []);
+  const onActionSelected = useCallback(
+    (action: ActionOptionData) => {
+      const model = editorRef.current?.getModel();
+      const yamlDocumentCurrent = yamlDocumentRef.current;
+      const cursorPosition = editorRef.current?.getPosition();
+      const editor = editorRef.current;
+      if (!model || !yamlDocumentCurrent || !editor) {
+        return;
+      }
+      if (isTriggerType(action.id)) {
+        insertTriggerSnippet(model, yamlDocumentCurrent, action.id, editor);
+      } else {
+        insertStepSnippet(model, yamlDocumentCurrent, action.id, cursorPosition, editor);
+      }
+      closeActionsPopover();
+    },
+    [closeActionsPopover]
+  );
 
   const completionProvider = useMemo(() => {
     return getCompletionItemProvider(workflowYamlSchemaLoose, connectorsData?.connectorTypes);
   }, [workflowYamlSchemaLoose, connectorsData?.connectorTypes]);
+
+  const options = useMemo(() => {
+    return { ...editorOptions, readOnly };
+  }, [readOnly]);
 
   useEffect(() => {
     // Monkey patching
@@ -629,7 +636,7 @@ export const WorkflowYAMLEditor = ({
           editorDidMount={handleEditorDidMount}
           editorWillUnmount={handleEditorWillUnmount}
           onChange={handleChange}
-          options={{ ...editorOptions, readOnly }}
+          options={options}
           schemas={schemas}
           suggestionProvider={completionProvider}
           value={workflowYaml}
