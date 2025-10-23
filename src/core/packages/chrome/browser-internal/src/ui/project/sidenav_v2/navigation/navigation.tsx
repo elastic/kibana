@@ -52,11 +52,14 @@ export interface ChromeNavigationProps {
   isFeedbackBtnVisible$: Observable<boolean>;
   loadingCount$: Observable<number>;
   dataTestSubj$?: Observable<string | undefined>;
+
+  feedbackUrlParams$: Observable<URLSearchParams | undefined>;
 }
 
 export const Navigation = (props: ChromeNavigationProps) => {
   const state = useNavigationItems(props);
   const dataTestSubj = useObservable(props.dataTestSubj$ ?? EMPTY, undefined);
+  const feedbackUrlParams = useObservable(props.feedbackUrlParams$ ?? EMPTY, undefined);
 
   if (!state) {
     return null;
@@ -77,7 +80,12 @@ export const Navigation = (props: ChromeNavigationProps) => {
         <NavigationComponent
           items={navItems}
           logo={logoItem}
-          sidePanelFooter={<NavigationFeedbackSnippet solutionId={solutionId} />}
+          sidePanelFooter={
+            <NavigationFeedbackSnippet
+              solutionId={solutionId}
+              feedbackUrlParams={feedbackUrlParams}
+            />
+          }
           isCollapsed={props.isCollapsed}
           setWidth={props.setWidth}
           activeItemId={activeItemId}

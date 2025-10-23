@@ -114,6 +114,12 @@ export class RequestContextFactory implements IRequestContextFactory {
       checkPrivileges: () => {
         return startPlugins.security.authz.checkPrivilegesWithRequest(request);
       },
+      /**
+       * Test purpose only.
+       */
+      updateAnonymizationFields: async () => {
+        return this.assistantService.createDefaultAnonymizationFields(getSpaceId());
+      },
       llmTasks: startPlugins.llmTasks,
       inference: startPlugins.inference,
       savedObjectsClient,

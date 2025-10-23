@@ -156,7 +156,7 @@ export const optionsSchema = schema.object({
 export function getDashboardStateSchema() {
   return {
     controlGroupInput: schema.maybe(controlsGroupSchema),
-    description: schema.string({ defaultValue: '', meta: { description: 'A short description.' } }),
+    description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
     filters: schema.maybe(schema.arrayOf(filterSchema)),
     options: schema.maybe(optionsSchema),
     panels: schema.arrayOf(schema.oneOf([getPanelSchema(), getSectionSchema()]), {
