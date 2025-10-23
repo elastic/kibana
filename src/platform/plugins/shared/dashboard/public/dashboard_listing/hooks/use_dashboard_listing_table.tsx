@@ -217,7 +217,7 @@ export const useDashboardListingTable = ({
           options: {
             // include only tags references in the response to save bandwidth
             includeReferences: ['tag'],
-            fields: ['title', 'description', 'timeRestore'],
+            fields: ['title', 'description', 'timeRange'],
           },
         })
         .then(({ total, hits }) => {
