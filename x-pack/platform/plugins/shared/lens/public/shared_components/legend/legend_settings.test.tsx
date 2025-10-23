@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import type { LegendSettingsProps } from './legend_settings_popover';
-import { LegendSettingsPopover } from './legend_settings_popover';
+import type { LegendSettingsProps } from './legend_settings';
+import { LegendSettingsPopover } from './legend_settings';
 import userEvent from '@testing-library/user-event';
 import type { RenderOptions } from '@testing-library/react';
 import { fireEvent, render, screen } from '@testing-library/react';
