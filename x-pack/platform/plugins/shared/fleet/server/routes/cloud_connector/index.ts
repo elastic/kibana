@@ -266,6 +266,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .post({
       path: CLOUD_CONNECTOR_API_ROUTES.CREATE_WITH_PACKAGE_POLICY,
+      access: 'internal',
       security: {
         authz: {
           requiredPrivileges: [FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL],
