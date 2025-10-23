@@ -123,9 +123,18 @@ describe('Slack API service', () => {
       logger,
       connectorId: 'test-connector-id',
     });
+    const configWithAllowedChannels = {
+      allowedChannels: [
+        { id: 'QWEERTYU987', name: 'general' },
+        { id: 'POIUYT123', name: 'alerts' },
+        { id: 'channel_id_1', name: 'test-channel' },
+        { name: '#general' },
+      ],
+    };
     service = createExternalService(
       {
         secrets: { token: 'token' },
+        config: configWithAllowedChannels,
       },
       logger,
       configurationUtilities,
@@ -541,7 +550,7 @@ describe('Slack API service', () => {
         actionId: SLACK_API_CONNECTOR_ID,
         message: 'error posting slack message',
         serviceMessage:
-          'One or more channel names #channel-2 are not included in the allowed channel list',
+          'One or more provided channel names are not included in the allowed channels list',
         status: 'error',
       });
 
@@ -551,7 +560,7 @@ describe('Slack API service', () => {
     test('should use the channel name in the request if it is included in allowedChannels when postBlockkit', async () => {
       requestMock.mockImplementation(() => postBlockkitResponse);
 
-      await service.postBlockkit({
+      await serviceWithAllowedChannels.postBlockkit({
         channelNames: ['#channel-1'],
         channelIds: ['channel-id-1'],
         text: JSON.stringify(testBlock),
@@ -584,7 +593,7 @@ describe('Slack API service', () => {
         actionId: SLACK_API_CONNECTOR_ID,
         message: 'error posting slack message',
         serviceMessage:
-          'One or more channel names #channel-2 are not included in the allowed channel list',
+          'One or more provided channel names are not included in the allowed channels list',
         status: 'error',
       });
       expect(requestMock).not.toHaveBeenCalled();
