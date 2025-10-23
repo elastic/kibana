@@ -15,6 +15,7 @@ import { StepExecutionRuntime } from './step_execution_runtime';
 import type { ContextDependencies } from './types';
 import { WorkflowContextManager } from './workflow_context_manager';
 import type { WorkflowExecutionState } from './workflow_execution_state';
+import { WorkflowTemplatingEngine } from '../templating_engine';
 import { buildStepExecutionId } from '../utils';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 
@@ -74,6 +75,7 @@ export class StepExecutionRuntimeFactory {
       node.stepType
     );
     const contextManager = new WorkflowContextManager({
+      templateEngine: new WorkflowTemplatingEngine(),
       workflowExecutionGraph: this.params.workflowExecutionGraph,
       workflowExecutionState: this.params.workflowExecutionState,
       node,
