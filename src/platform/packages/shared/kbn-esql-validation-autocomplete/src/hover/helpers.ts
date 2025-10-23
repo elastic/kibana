@@ -47,7 +47,7 @@ export function correctQuerySyntax(query: string, offset: number): string {
   const bracketsToAppend = getBracketsToClose(query);
   query += bracketsToAppend.join('');
 
-  // Replace partial written function arguments: ,) with )
+  // Replace partially written function arguments: ,) with )
   query = query.replace(/,\s*\)/g, ')');
 
   return query;
