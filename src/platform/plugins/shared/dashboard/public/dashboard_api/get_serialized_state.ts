@@ -9,8 +9,6 @@
 
 import type { RefreshInterval } from '@kbn/data-plugin/public';
 import { pick } from 'lodash';
-import type { Moment } from 'moment';
-import moment from 'moment';
 
 import type { Reference } from '@kbn/content-management-utils';
 import type { DashboardState } from '../../server';
@@ -18,26 +16,13 @@ import type { DashboardState } from '../../server';
 import { LATEST_VERSION } from '../../common/content_management';
 import { dataService, savedObjectsTaggingService } from '../services/kibana_services';
 import type { DashboardApi } from './types';
-import { generateNewPanelIds } from './generate_new_panel_ids';
-
-export const convertTimeToUTCString = (time?: string | Moment): undefined | string => {
-  if (moment(time).isValid()) {
-    return moment(time).utc().format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
-  } else {
-    // If it's not a valid moment date, then it should be a string representing a relative time
-    // like 'now' or 'now-15m'.
-    return time as string;
-  }
-};
 
 export const getSerializedState = ({
   controlGroupReferences,
-  generateNewIds,
   dashboardState,
   panelReferences,
 }: {
   controlGroupReferences?: Reference[];
-  generateNewIds?: boolean;
   dashboardState: DashboardState;
   panelReferences?: Reference[];
 }): ReturnType<DashboardApi['getSerializedState']> => {
@@ -53,22 +38,10 @@ export const getSerializedState = ({
     filters,
     timeRestore,
     description,
-
+    panels,
     options,
     controlGroupInput,
   } = dashboardState;
-
-  let { panels } = dashboardState;
-  let prefixedPanelReferences = panelReferences;
-  if (generateNewIds) {
-    const { newPanels, newPanelReferences } = generateNewPanelIds(panels, panelReferences);
-    panels = newPanels;
-    prefixedPanelReferences = newPanelReferences;
-    //
-    // do not need to generate new ids for controls.
-    // ControlGroup Component is keyed on dashboard id so changing dashboard id mounts new ControlGroup Component.
-    //
-  }
 
   /**
    * Parse global time filter settings
@@ -108,7 +81,7 @@ export const getSerializedState = ({
 
   const allReferences = [
     ...references,
-    ...(prefixedPanelReferences ?? []),
+    ...(panelReferences ?? []),
     ...(controlGroupReferences ?? []),
   ];
   return { attributes, references: allReferences };
