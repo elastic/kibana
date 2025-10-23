@@ -23,7 +23,7 @@ import { queryKeys } from '../query_keys';
 import { storageKeys } from '../storage_keys';
 import { appPaths } from '../utils/app_paths';
 import { createNewConversation, newConversationId } from '../utils/new_conversation';
-import { useConversationId } from './use_conversation_id';
+import { useConversationIdFromContext } from './use_conversation_context';
 import { useNavigation } from './use_navigation';
 import { useOnechatServices } from './use_onechat_service';
 
@@ -31,7 +31,7 @@ const pendingRoundId = '__pending__';
 
 export const useConversationActions = () => {
   const queryClient = useQueryClient();
-  const conversationId = useConversationId();
+  const conversationId = useConversationIdFromContext();
   const [, setAgentIdStorage] = useLocalStorage<string>(storageKeys.agentId);
   const { conversationsService } = useOnechatServices();
   const queryKey = queryKeys.conversations.byId(conversationId ?? newConversationId);
