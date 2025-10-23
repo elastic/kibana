@@ -8,3 +8,10 @@
  */
 
 export const REGISTRY_EXTENSIONS_ROUTE = '/internal/esql_registry/extensions/';
+
+export enum SOURCES_TYPES {
+  INDEX = 'Index',
+  TIMESERIES = 'Timeseries',
+  INTEGRATION = 'Integration',
+  ALIAS = 'Alias',
+}
