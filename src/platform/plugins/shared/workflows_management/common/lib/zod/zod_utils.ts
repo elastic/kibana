@@ -10,6 +10,7 @@
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import type { ZodFirstPartySchemaTypes } from '@kbn/zod';
 import { z } from '@kbn/zod';
+import type { WorkflowZodSchemaLooseType } from '../../schema';
 
 export function parsePath(path: string) {
   const segments = path
@@ -27,7 +28,7 @@ export function parsePath(path: string) {
  * @returns The schema at the given path or null if the path is invalid.
  */
 export function getSchemaAtPath(
-  schema: z.ZodType,
+  schema: WorkflowZodSchemaLooseType,
   path: string,
   { partial = false }: { partial?: boolean } = {}
 ): z.ZodType | null {
@@ -96,7 +97,7 @@ export function getSchemaAtPath(
       return current.unwrap();
     }
 
-    return current;
+    return current as z.ZodType;
   } catch {
     return null;
   }
