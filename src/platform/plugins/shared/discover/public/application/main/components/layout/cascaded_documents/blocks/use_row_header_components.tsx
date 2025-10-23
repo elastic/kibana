@@ -6,8 +6,13 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { MouseEventHandler } from 'react';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import type {
+  EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor,
+} from '@elastic/eui';
+import type { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
 import { type AggregateQuery } from '@kbn/es-query';
 import { appendWhereClauseToESQLQuery } from '@kbn/esql-utils';
 import {
@@ -53,10 +58,13 @@ interface RowClickActionContext {
   openInNewTab: (...args: Parameters<typeof internalStateActions.openInNewTab>) => void;
 }
 
+/**
+ * Defines the context menu actions for the row header.
+ */
 const contextRowActions: Array<
-  NonNullable<EuiContextMenuPanelDescriptor['items']>[number] & {
+  EuiContextMenuPanelItemDescriptorEntry & {
     /**
-     * The stats function type to render the action for.
+     * The stats function type to render the action for. If not provided, the action will be rendered for all stats function types.
      */
     renderFor?: SupportedStatsFunction;
   }
@@ -178,8 +186,7 @@ const ContextMenu = React.memo(
 
             return acc.concat({
               ...action,
-              // @ts-expect-error - this is necessary to bind the correct context to the action
-              onClick: action.onClick?.bind({
+              onClick: (action.onClick as MouseEventHandler<Element>)?.bind({
                 rowContext: row,
                 services,
                 editorQuery,
@@ -188,7 +195,7 @@ const ContextMenu = React.memo(
                 openInNewTab,
               }),
             });
-          }, [] as NonNullable<EuiContextMenuPanelDescriptor['items']>),
+          }, [] as Array<EuiContextMenuPanelItemDescriptor>),
         },
       ];
     }, [close, editorQuery, globalState, groupType, openInNewTab, row, services]);
@@ -203,12 +210,12 @@ const ContextMenu = React.memo(
   }
 );
 
-export function useEsqlDataCascadeRowHeaderComponents(
+export const useEsqlDataCascadeRowActionHelpers = (
   services: UnifiedDataTableProps['services'],
   editorQuery: AggregateQuery,
   editorQueryMeta: ESQLStatsQueryMeta,
   globalState: TabStateGlobalState
-) {
+) => {
   const popoverRef = useRef<HTMLButtonElement | null>(null);
   const [popoverRowData, setPopoverRowData] = useState<RowContext | null>(null);
   const dispatch = useInternalStateDispatch();
@@ -222,41 +229,76 @@ export function useEsqlDataCascadeRowHeaderComponents(
   );
 
   /**
-   * Renders the popover for the row action (3 dots) button. Adopting this patterns avoids rendering multiple popovers
+   * Helper function to toggle the popover for the row action (3 dots) button.
+   */
+  const togglePopover = useCallback(
+    function (this: RowContext, e: React.MouseEvent<Element>) {
+      setPopoverRowData((prev) => {
+        if (prev?.groupValue === this.groupValue) {
+          popoverRef.current = null;
+          return null;
+        }
+
+        popoverRef.current = e.currentTarget as HTMLButtonElement;
+        return this;
+      });
+    },
+    [setPopoverRowData]
+  );
+
+  /**
+   * Renders the popover for the row action (3 dots) button.
+   * Adopting this pattern avoids rendering multiple popovers
    * in the table which can be very expensive.
    *
-   * Note: The popover content is re-created each time it is opened to ensure the context actions have access to the
+   * Note: The popover content is re-created each
+   * time it is opened to ensure the context actions have access to the
    * latest props and state.
    */
-  const renderRowActionPopover = useCallback(() => {
-    return popoverRowData ? (
-      <EuiWrappingPopover
-        button={popoverRef.current!}
-        isOpen={popoverRowData !== null}
-        closePopover={() => setPopoverRowData(null)}
-        panelPaddingSize="none"
-      >
-        <ContextMenu
-          close={closePopover}
-          editorQuery={editorQuery}
-          editorQueryMeta={editorQueryMeta}
-          globalState={globalState}
-          row={popoverRowData!}
-          services={services}
-          openInNewTab={openInNewTab}
-        />
-      </EuiWrappingPopover>
-    ) : null;
-  }, [
-    popoverRowData,
-    closePopover,
-    editorQuery,
-    editorQueryMeta,
-    globalState,
-    services,
-    openInNewTab,
-  ]);
+  const renderRowActionPopover = useCallback(
+    (container?: HTMLElement) => {
+      return popoverRowData ? (
+        <EuiWrappingPopover
+          button={popoverRef.current!}
+          isOpen={popoverRowData !== null}
+          closePopover={() => setPopoverRowData(null)}
+          panelPaddingSize="none"
+          anchorPosition="upLeft"
+          container={container}
+        >
+          <ContextMenu
+            close={closePopover}
+            editorQuery={editorQuery}
+            editorQueryMeta={editorQueryMeta}
+            globalState={globalState}
+            row={popoverRowData!}
+            services={services}
+            openInNewTab={openInNewTab}
+          />
+        </EuiWrappingPopover>
+      ) : null;
+    },
+    [
+      popoverRowData,
+      closePopover,
+      editorQuery,
+      editorQueryMeta,
+      globalState,
+      services,
+      openInNewTab,
+    ]
+  );
 
+  return {
+    renderRowActionPopover,
+    togglePopover,
+  };
+};
+
+export function useEsqlDataCascadeRowHeaderComponents(
+  editorQueryMeta: ESQLStatsQueryMeta,
+  togglePopover: ReturnType<typeof useEsqlDataCascadeRowActionHelpers>['togglePopover']
+) {
   /**
    * Renders the title part of the row header.
    */
@@ -265,7 +307,6 @@ export function useEsqlDataCascadeRowHeaderComponents(
   >(
     ({ rowData, nodePath }) => {
       const rowGroup = nodePath[nodePath.length - 1];
-
       const type = editorQueryMeta.groupByFields.find((field) => field.field === rowGroup)!.type;
 
       if (/categorize/i.test(type)) {
@@ -284,7 +325,14 @@ export function useEsqlDataCascadeRowHeaderComponents(
 
       return (
         <EuiText size="s">
-          <EuiTextTruncate text={(rowData[rowGroup] ?? '-') as string}>
+          <EuiTextTruncate
+            text={
+              (rowData[rowGroup] ??
+                i18n.translate('discover.esql_data_cascade.row.action.no_value', {
+                  defaultMessage: '(null)',
+                })) as string
+            }
+          >
             {(truncatedText) => {
               return <h4>{truncatedText}</h4>;
             }}
@@ -303,7 +351,6 @@ export function useEsqlDataCascadeRowHeaderComponents(
   >(
     ({ rowData }) =>
       editorQueryMeta.appliedFunctions.map(({ identifier }) => {
-        // maybe use operator to determine what meta component to render
         return (
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <FormattedMessage
@@ -338,21 +385,6 @@ export function useEsqlDataCascadeRowHeaderComponents(
     [editorQueryMeta.appliedFunctions]
   );
 
-  const rowContextActionClickHandler = useCallback(
-    function togglePopover(this: RowContext, e: React.MouseEvent<Element>) {
-      setPopoverRowData((prev) => {
-        if (prev?.groupId === this.groupId) {
-          popoverRef.current = null;
-          return null;
-        }
-
-        popoverRef.current = e.currentTarget as HTMLButtonElement;
-        return this;
-      });
-    },
-    [setPopoverRowData]
-  );
-
   const rowActions = useCallback<
     NonNullable<DataCascadeRowProps<ESQLDataGroupNode, DataTableRecord>['rowHeaderActions']>
   >(
@@ -365,11 +397,11 @@ export function useEsqlDataCascadeRowHeaderComponents(
           iconType: 'boxesVertical',
           'aria-label': `${rowData.id}-cascade-row-actions`,
           'data-test-subj': `${rowData.id}-dscCascadeRowContextActionButton`,
-          onClick: rowContextActionClickHandler.bind({ groupId, groupValue }),
+          onClick: togglePopover?.bind({ groupId, groupValue }),
         },
       ];
     },
-    [rowContextActionClickHandler]
+    [togglePopover]
   );
 
   return useMemo(
@@ -377,8 +409,7 @@ export function useEsqlDataCascadeRowHeaderComponents(
       rowHeaderMeta,
       rowHeaderTitle,
       rowActions,
-      renderRowActionPopover,
     }),
-    [renderRowActionPopover, rowActions, rowHeaderMeta, rowHeaderTitle]
+    [rowActions, rowHeaderMeta, rowHeaderTitle]
   );
 }
