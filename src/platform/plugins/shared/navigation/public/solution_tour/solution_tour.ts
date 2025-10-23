@@ -55,7 +55,7 @@ const SOLUTION_NAVIGATION_TOUR_KEY = 'solutionNavigationTour:completed';
 async function preserveTourCompletion(userProfile: UserProfileServiceStart): Promise<void> {
   try {
     localStorage.setItem(SOLUTION_NAVIGATION_TOUR_KEY, 'true');
-    return await userProfile.update({ [SOLUTION_NAVIGATION_TOUR_KEY]: true });
+    return await userProfile.partialUpdate({ [SOLUTION_NAVIGATION_TOUR_KEY]: true });
   } catch (e) {
     // ignore
   }
