@@ -133,7 +133,7 @@ const Graph = ({ streams, loading = false }: StreamsGraphProps) => {
           label: streamName,
           type: s.type,
           hasChildren:  s.stream.ingest.wired.routing && s.stream.ingest.wired.routing.length > 0,
-          stream: s.stream,
+          stream: s,
         },
       };
       nodes.push(reactFlowNode);

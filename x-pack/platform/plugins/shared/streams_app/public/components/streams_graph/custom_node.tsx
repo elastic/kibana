@@ -4,7 +4,7 @@ import { EuiFlexGroup, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { truncateText } from '../../util/truncate_text';
 import { StreamNodePopover } from './stream_popup';
-import type { Streams } from '@kbn/streams-schema';
+import type { EnrichedStream } from '../stream_list_view/utils';
 
 export const STREAM_NODE_TYPE = 'streamNode';
 
@@ -12,7 +12,7 @@ export interface StreamNodeData extends Record<string, unknown> {
     label: string;
     type: 'wired' | 'root' | 'classic';
     hasChildren: boolean;
-    stream: Streams.WiredStream.Definition;
+    stream: EnrichedStream;
 }
 
 export const StreamNode = ({ data: { label, type, hasChildren, stream } }: { data: StreamNodeData }) => {
