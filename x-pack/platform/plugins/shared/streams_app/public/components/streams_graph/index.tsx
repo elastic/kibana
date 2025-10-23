@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useEffect } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiPanel, EuiText, EuiSpacer, EuiEmptyPrompt, EuiLoadingElastic, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
@@ -19,8 +19,6 @@ import {
   Background,
   useNodesState,
   useEdgesState,
-  addEdge,
-  Connection,
   BackgroundVariant,
   useStore,
   useReactFlow,
@@ -155,18 +153,12 @@ const Graph = ({ streams, loading = false }: StreamsGraphProps) => {
       }
     }
 
-    const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(nodes, edges);
-
+    const { layoutedNodes, layoutedEdges } = getLayoutedElements(nodes, edges);
     return { initialNodes: layoutedNodes, initialEdges: layoutedEdges };
   }, [streams, loading, getStreamDocCounts]);
 
-  const [nodes, , onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-
-  const onConnect = useCallback(
-    (params: Connection) => setEdges((eds) => addEdge(params, eds)),
-    [setEdges]
-  );
+  const [nodes] = useNodesState(initialNodes);
+  const [edges] = useEdgesState(initialEdges);
 
   return (
     <EuiPanel paddingSize="l">
@@ -188,12 +180,8 @@ const Graph = ({ streams, loading = false }: StreamsGraphProps) => {
         <ReactFlow
           nodes={nodes}
           edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onConnect={onConnect}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
-          attributionPosition="bottom-left"
           fitView
           fitViewOptions={{ padding: 0.2 }}
         >

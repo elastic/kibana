@@ -24,7 +24,8 @@ export const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = 'T
     Dagre.layout(g);
 
     return {
-        nodes: nodes.map((node) => {
+        layoutedEdges: edges,
+        layoutedNodes: nodes.map((node) => {
             const position = g.node(node.id);
             return {
                 ...node,
@@ -33,6 +34,6 @@ export const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = 'T
                     y: position.y - NODE_DIMENSIONS.HEIGHT / 2,
                 },
             };
-        }), edges
+        })
     };
 };
