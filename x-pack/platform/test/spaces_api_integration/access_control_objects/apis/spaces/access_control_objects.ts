@@ -70,7 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
     };
   };
 
-  describe('read only saved objects', () => {
+  describe('access control saved objects', () => {
     before(async () => {
       await security.testUser.setRoles(['kibana_savedobjects_editor']);
       await createSimpleUser();
@@ -79,7 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
       await security.testUser.restoreDefaults();
     });
 
-    describe('default state of read only objects', () => {
+    describe('default state of access control objects', () => {
       it('types supporting access control are created with default access mode when not specified', async () => {
         const { cookie: adminCookie, profileUid } = await loginAsKibanaAdmin();
         const response = await supertestWithoutAuth
@@ -95,7 +95,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('#create', () => {
-      it('should create a read only object', async () => {
+      it('should create a write-restricted object', async () => {
         const { cookie: adminCookie, profileUid } = await loginAsKibanaAdmin();
         const response = await supertestWithoutAuth
           .post('/access_control_objects/create')
@@ -134,7 +134,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(type).to.be(ACCESS_CONTROL_TYPE);
       });
 
-      it('should throw when trying to create read only object with no user', async () => {
+      it('should throw when trying to create an access control object with no user', async () => {
         const response = await supertest
           .post('/access_control_objects/create')
           .set('kbn-xsrf', 'true')
@@ -294,7 +294,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('#bulk_create', () => {
-      it('should create read only objects', async () => {
+      it('should create write-restricted objects', async () => {
         const { cookie: objectOwnerCookie, profileUid: objectOwnerProfileUid } =
           await loginAsObjectOwner('test_user', 'changeme');
 
@@ -538,7 +538,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('#update', () => {
-      it('should update read only objects owned by the same user', async () => {
+      it('should update write-restricted objects owned by the same user', async () => {
         const { cookie: objectOwnerCookie, profileUid } = await loginAsObjectOwner(
           'test_user',
           'changeme'
@@ -572,7 +572,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
       });
 
-      it('should throw when updating read only objects owned by a different user when not admin', async () => {
+      it('should throw when updating write-restricted objects owned by a different user when not admin', async () => {
         const { cookie: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin();
         const createResponse = await supertestWithoutAuth
           .post('/access_control_objects/create')
@@ -651,7 +651,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('#bulk_update', () => {
-      it('allow owner to bulk update objects marked as read only', async () => {
+      it('allow owner to bulk update objects marked as write-restricted', async () => {
         const { cookie: objectOwnerCookie, profileUid: objectOwnerProfileUid } =
           await loginAsObjectOwner('test_user', 'changeme');
         const firstObject = await supertestWithoutAuth
@@ -698,7 +698,7 @@ export default function ({ getService }: FtrProviderContext) {
         }
       });
 
-      it('allow admin to bulk update objects marked as read only', async () => {
+      it('allow admin to bulk update objects marked as write-restricted', async () => {
         const { cookie: objectOwnerCookie, profileUid: objectOwnerProfileUid } =
           await loginAsObjectOwner('test_user', 'changeme');
         const firstObject = await supertestWithoutAuth
@@ -745,7 +745,7 @@ export default function ({ getService }: FtrProviderContext) {
         }
       });
 
-      it('does not allow non-owner to bulk update objects marked as read only if not admin', async () => {
+      it('does not allow non-owner to bulk update objects marked as write-restricted if not admin', async () => {
         await activateSimpleUserProfile();
         const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
         const firstObject = await supertestWithoutAuth
@@ -837,7 +837,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('#delete', () => {
-      it('allow owner to delete object marked as read only', async () => {
+      it('allow owner to delete object marked as write-restricted', async () => {
         const { cookie: objectOwnerCookie, profileUid } = await loginAsObjectOwner(
           'test_user',
           'changeme'
@@ -858,7 +858,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
       });
 
-      it('allows admin to delete object marked as read only', async () => {
+      it('allows admin to delete object marked as write-restricted', async () => {
         const { cookie: objectOwnerCookie, profileUid } = await loginAsObjectOwner(
           'test_user',
           'changeme'
@@ -890,7 +890,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
       });
 
-      it('throws when trying to delete read only object owned by a different user when not admin', async () => {
+      it('throws when trying to delete write-restricted object owned by a different user when not admin', async () => {
         const { cookie: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin();
         const createResponse = await supertestWithoutAuth
           .post('/access_control_objects/create')
@@ -933,7 +933,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('#bulk_delete', () => {
       describe('bulk delete ownable objects', () => {
-        it('allow owner to bulk delete objects marked as read only', async () => {
+        it('allow owner to bulk delete objects marked as write-restricted', async () => {
           const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
           const firstObject = await supertestWithoutAuth
             .post('/access_control_objects/create')
@@ -978,7 +978,7 @@ export default function ({ getService }: FtrProviderContext) {
           }
         });
 
-        it('allow admin to bulk delete objects marked as read only', async () => {
+        it('allow admin to bulk delete objects marked as write-restricted', async () => {
           const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
           const firstObject = await supertestWithoutAuth
             .post('/access_control_objects/create')
@@ -1024,7 +1024,7 @@ export default function ({ getService }: FtrProviderContext) {
           }
         });
 
-        it('does not allow non-owner to bulk delete objects marked as read only', async () => {
+        it('does not allow non-owner to bulk delete objects marked as write-restricted', async () => {
           await activateSimpleUserProfile();
           const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
           const firstObject = await supertestWithoutAuth
@@ -1122,7 +1122,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       describe('force bulk delete ownable objects', () => {
-        it('allow owner to bulk delete objects marked as read only', async () => {
+        it('allow owner to bulk delete objects marked as write-restricted', async () => {
           const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
           const firstObject = await supertestWithoutAuth
             .post('/access_control_objects/create')
@@ -1168,7 +1168,7 @@ export default function ({ getService }: FtrProviderContext) {
           }
         });
 
-        it('allow admin to bulk delete objects marked as read only', async () => {
+        it('allow admin to bulk delete objects marked as write-restricted', async () => {
           const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
           const firstObject = await supertestWithoutAuth
             .post('/access_control_objects/create')
@@ -1214,7 +1214,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(success).to.be(true);
           }
         });
-        it('does not allow non-owner to bulk delete objects marked as read only', async () => {
+        it('does not allow non-owner to bulk delete objects marked as write-restricted', async () => {
           await activateSimpleUserProfile();
           const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
           const firstObject = await supertestWithoutAuth
@@ -1262,7 +1262,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('#change_ownership', () => {
-      it('should transfer ownership of read only objects by owner', async () => {
+      it('should transfer ownership of write-restricted objects by owner', async () => {
         const { profileUid: simpleUserProfileUid } = await activateSimpleUserProfile();
 
         const { cookie: ownerCookie, profileUid } = await loginAsObjectOwner(
@@ -1588,7 +1588,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
       });
 
-      it('allows updates by non-owner after removing read only access mode', async () => {
+      it('allows updates by non-owner after removing write-restricted access mode', async () => {
         const { cookie: ownerCookie, profileUid } = await loginAsObjectOwner(
           'test_user',
           'changeme'
