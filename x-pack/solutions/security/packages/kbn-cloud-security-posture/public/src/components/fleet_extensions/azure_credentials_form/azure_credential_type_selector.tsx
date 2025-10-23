@@ -16,10 +16,12 @@ export const AzureCredentialTypeSelector = ({
   type,
   onChange,
   options,
+  disabled = false,
 }: {
   onChange(type: AzureCredentialsType): void;
   type: AzureCredentialsType;
   options: Array<{ value: string; text: string }>;
+  disabled?: boolean;
 }) => (
   <EuiFormRow
     fullWidth
@@ -34,6 +36,7 @@ export const AzureCredentialTypeSelector = ({
       fullWidth
       options={options}
       value={type}
+      disabled={disabled}
       onChange={(optionElem) => {
         onChange(optionElem.target.value as AzureCredentialsType);
       }}

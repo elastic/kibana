@@ -110,6 +110,24 @@ const useSettings = ({ settingsKeys }: { settingsKeys: string[] }) => {
     refetchOnWindowFocus: true,
   });
 
+  // Subscribe to UI settings changes to update in real-time when values change
+  React.useEffect(() => {
+    if (!settings?.client) {
+      return;
+    }
+
+    const subscription = settings.client.getUpdate$().subscribe(({ key }) => {
+      // If the changed setting is one we're tracking, invalidate the query to refetch
+      if (settingsKeys.includes(key)) {
+        queryClient.invalidateQueries({ queryKey: ['settingsFields', settingsKeys] });
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [settings?.client, settingsKeys, queryClient]);
+
   const saveSingleSettingMutation = useMutation({
     mutationFn: async ({
       id,
