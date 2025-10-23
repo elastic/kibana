@@ -8,11 +8,14 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { offeringBasedSchema, schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
 
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
+  cpsEnabled: offeringBasedSchema({
+    serverless: schema.boolean({ defaultValue: false }),
+  }),
 });
 
 type ConfigType = TypeOf<typeof configSchema>;
@@ -20,7 +23,7 @@ type ConfigType = TypeOf<typeof configSchema>;
 export const config: PluginConfigDescriptor<ConfigType> = {
   schema: configSchema,
   exposeToBrowser: {
-    enabled: true,
+    cpsEnabled: true,
   },
 };
 

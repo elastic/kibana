@@ -300,3 +300,4 @@ xpack.genAiSettings:
 
 # Cross Project Search
 cps.enabled: false
+cps.cpsEnabled: false

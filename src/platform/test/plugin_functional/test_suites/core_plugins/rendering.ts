@@ -104,7 +104,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'console.autocompleteDefinitions.endpointsAvailability (stack?|serverless?)',
         'console.ui.enabled (boolean?)',
         'console.ui.embeddedEnabled (boolean?)',
-        'cps.enabled (boolean?|never)',
+        'cps.cpsEnabled (boolean?|never)',
         'unifiedSearch.autocomplete.querySuggestions.enabled (boolean?)',
         'unifiedSearch.autocomplete.valueSuggestions.enabled (boolean?)',
         'unifiedSearch.autocomplete.valueSuggestions.terminateAfter (duration?)',

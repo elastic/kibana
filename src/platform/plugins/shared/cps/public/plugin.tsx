@@ -14,10 +14,10 @@ export class CpsPlugin implements Plugin<CPSPluginSetup> {
   constructor(private readonly initContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup): CPSPluginSetup {
-    const { enabled } = this.initContext.config.get<CPSConfigType>();
+    const { cpsEnabled } = this.initContext.config.get<CPSConfigType>();
 
     return {
-      enabled,
+      cpsEnabled,
     };
   }
 

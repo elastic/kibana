@@ -36,8 +36,8 @@ export class CPSServerPlugin implements Plugin<CPSServerSetup> {
 
     return {
       getCpsEnabled: async () => {
-        const { enabled } = await firstValueFrom(config$);
-        return enabled;
+        const { cpsEnabled } = await firstValueFrom(config$);
+        return cpsEnabled;
       },
     };
   }
@@ -50,6 +50,6 @@ export class CPSServerPlugin implements Plugin<CPSServerSetup> {
 
   private async setCpsFeatureFlagAsync(core: CoreSetup) {
     const config = await firstValueFrom(this.config$);
-    core.elasticsearch.setCpsFeatureFlag(config.enabled);
+    core.elasticsearch.setCpsFeatureFlag(config.cpsEnabled);
   }
 }
