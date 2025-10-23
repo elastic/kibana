@@ -15,17 +15,76 @@ The rest of this doc dives into the implementation details of each of the above 
 
 ## Quick steps for testing
 
-The pattern for creating a rollup job and rollup index pattern is:
+**Note:** Since Rollups has been deprecated, the UI is hidden unless there is an existing rollup job in the cluster. To test the Rollup UI, you must first create a rollup job using the workaround described below.
 
-1. Install sample data (web logs is a good one).
-2. Create a rollup job with an index pattern that captures this index (e.g. `k*`).
-3. Set frequency to "minute". Clear the latency buffer field.
-4. Select the time field which is the same time field selected in the installed index pattern (`timestamp` without an `@` in the case of web logs).
-5. Specify a time bucket size (`10m` will do).
-6. Select a few terms, histogram, and metrics fields.
-7. Create and start the rollup job. Wait a minute for the job to run. You should see the numbers for documents and pages processed change in the detail panel.
-8. Create a rollup index pattern in the Index Patterns app.
-9. Now you can create visualizations using this index pattern.
+### Creating a Rollup Job for Testing
+
+Elasticsearch only allows creating a rollup job if there is existing rollup usage in the cluster. To work around this:
+
+1. **Start Elasticsearch and Kibana**
+
+2. **Add sample data** (e.g., "Sample web logs")
+
+3. **Create a mock rollup index** through Dev Tools Console to simulate rollup usage:
+   ```
+   PUT /mock_rollup_index
+   {
+     "mappings": {
+       "_meta": {
+         "_rollup": {
+           "id": "logs_job"
+         }
+       }
+     }
+   }
+   ```
+
+4. **Create a rollup job** through Dev Tools Console:
+   ```
+   PUT _rollup/job/logs_job
+   {
+     "id": "logs_job",
+     "index_pattern": "kibana_sample_data_logs",
+     "rollup_index": "rollup_logstash",
+     "cron": "* * * * * ?",
+     "page_size": 1000,
+     "groups": {
+       "date_histogram": {
+         "interval": "60m",
+         "delay": "7d",
+         "time_zone": "UTC",
+         "field": "@timestamp"
+       },
+       "terms": {
+         "fields": [
+           "geo.src",
+           "machine.os.keyword"
+         ]
+       },
+       "histogram": {
+         "interval": "1003",
+         "fields": [
+           "bytes",
+           "memory"
+         ]
+       }
+     }
+   }
+   ```
+
+5. **Delete the mock rollup index** (it causes issues for the rollup API used to fetch rollup indices):
+   ```
+   DELETE /mock_rollup_index
+   ```
+
+6. **Navigate to Stack Management > Rollup Jobs** to view and manage the rollup job. Wait for the job to process some documents.
+
+7. **Create a rollup index pattern** in Stack Management > Data Views with an index pattern that matches the created rollup index (e.g., `rollup*`).
+
+8. **Test rollup features:**
+   - View rollup indices in Index Management (toggle "Include rollup indices")
+   - Create visualizations using the rollup index pattern
+   - Verify rollup badges appear in the Data Views list and Index Management
 
 ---
 
