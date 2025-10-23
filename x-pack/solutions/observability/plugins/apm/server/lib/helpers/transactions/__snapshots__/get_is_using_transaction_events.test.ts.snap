@@ -34,6 +34,29 @@ Object {
             ],
           },
         },
+        Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "term": Object {
+                  "service.environment": "ENVIRONMENT_NOT_DEFINED",
+                },
+              },
+              Object {
+                "bool": Object {
+                  "must_not": Array [
+                    Object {
+                      "exists": Object {
+                        "field": "service.environment",
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
       ],
     },
   },
@@ -63,6 +86,29 @@ Object {
         Object {
           "exists": Object {
             "field": "transaction.duration.histogram",
+          },
+        },
+        Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "term": Object {
+                  "service.environment": "ENVIRONMENT_NOT_DEFINED",
+                },
+              },
+              Object {
+                "bool": Object {
+                  "must_not": Array [
+                    Object {
+                      "exists": Object {
+                        "field": "service.environment",
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
           },
         },
       ],
@@ -97,6 +143,29 @@ Array [
             Object {
               "exists": Object {
                 "field": "transaction.duration.histogram",
+              },
+            },
+            Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "term": Object {
+                      "service.environment": "ENVIRONMENT_NOT_DEFINED",
+                    },
+                  },
+                  Object {
+                    "bool": Object {
+                      "must_not": Array [
+                        Object {
+                          "exists": Object {
+                            "field": "service.environment",
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
               },
             },
           ],

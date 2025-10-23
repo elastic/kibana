@@ -89,6 +89,7 @@ const serviceMapRoute = createApmServerRoute({
               start,
               end,
               kuery,
+              environment,
             })
           ).aggregations?.services.buckets.map((bucket): string => {
             return bucket.key as string;

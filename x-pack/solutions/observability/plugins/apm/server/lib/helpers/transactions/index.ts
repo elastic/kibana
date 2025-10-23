@@ -8,6 +8,7 @@
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { environmentQuery } from '../../../../common/utils/environment_query';
 import { SearchAggregatedTransactionSetting } from '../../../../common/aggregated_transactions';
 import {
   TRANSACTION_DURATION,
@@ -28,11 +29,13 @@ export async function getHasTransactionsEvents({
   end,
   apmEventClient,
   kuery,
+  environment,
 }: {
   start?: number;
   end?: number;
   apmEventClient: APMEventClient;
   kuery?: string;
+  environment?: string;
 }) {
   const response = await apmEventClient.search('get_has_aggregated_transactions', {
     apm: {
@@ -47,6 +50,7 @@ export async function getHasTransactionsEvents({
           { exists: { field: TRANSACTION_DURATION_HISTOGRAM } },
           ...(start && end ? rangeQuery(start, end) : []),
           ...kqlQuery(kuery),
+          ...environmentQuery(environment),
         ],
       },
     },
