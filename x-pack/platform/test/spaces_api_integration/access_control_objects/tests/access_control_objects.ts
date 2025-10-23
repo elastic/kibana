@@ -13,7 +13,7 @@ import {
 import expect from '@kbn/expect';
 import { adminTestUser } from '@kbn/test';
 
-import type { FtrProviderContext } from '../../../../functional/ftr_provider_context';
+import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
