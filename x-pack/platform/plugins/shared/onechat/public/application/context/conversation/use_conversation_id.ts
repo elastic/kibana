@@ -5,16 +5,9 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
 import { useConversationContext } from './conversation_context';
-import { newConversationId } from '../../utils/new_conversation';
 
 export const useConversationId = () => {
   const { conversationId } = useConversationContext();
-
-  const processedConversationId = useMemo(() => {
-    return conversationId === newConversationId ? undefined : conversationId;
-  }, [conversationId]);
-
-  return processedConversationId;
+  return conversationId;
 };
