@@ -15,6 +15,7 @@ import { getWorkflowZodSchemaLoose } from '../../../../../common/schema';
 
 // Initial state
 const initialState: WorkflowEditorState = {
+  isInitialized: false,
   yamlString: undefined,
   computed: undefined,
   connectors: undefined,
@@ -39,6 +40,7 @@ const workflowEditorSlice = createSlice({
         payload: WorkflowEditorState['computed'];
       }
     ) => {
+      state.isInitialized = true;
       state.computed = action.payload;
     },
     _setGeneratedSchemaInternal: (
@@ -52,13 +54,7 @@ const workflowEditorSlice = createSlice({
     },
     // Clear computed data (used when YAML changes)
     clearComputedData: (state) => {
-      state.computed = {
-        yamlLineCounter: undefined,
-        yamlDocument: undefined,
-        workflowLookup: undefined,
-        workflowGraph: undefined,
-        workflowDefinition: undefined,
-      };
+      state.computed = undefined;
     },
     setCursorPosition: (state, action: { payload: { lineNumber: number } }) => {
       if (!state.computed?.workflowLookup) {

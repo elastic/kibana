@@ -20,15 +20,12 @@ const debounceComputation = (
   store: MiddlewareAPI<Dispatch<AnyAction>, any>, // eslint-disable-line @typescript-eslint/no-explicit-any
   yamlString: string | undefined
 ) => {
-  // Clear any pending computation
-  if (computationTimeoutId) {
-    clearTimeout(computationTimeoutId);
-    computationTimeoutId = null;
-  }
-  const state = store.getState();
+  // Note: timeout clearing is handled in the middleware before this function is called
 
-  // Debounce the computation
+  // Schedule the debounced computation
   computationTimeoutId = setTimeout(() => {
+    // Get fresh state at execution time, not at scheduling time
+    const state = store.getState();
     const computed = performComputation(yamlString, state.workflow.schemaLoose);
 
     if (computed) {
@@ -47,11 +44,23 @@ export const workflowComputationMiddleware: Middleware =
 
     // Only react to yamlString changes
     if (action.type === setYamlString.type) {
+      // Clear any pending computation first (before checking state)
+      if (computationTimeoutId) {
+        clearTimeout(computationTimeoutId);
+        computationTimeoutId = null;
+      }
+
       const state = store.getState();
       const { yamlString } = state.workflow;
 
-      // Do computation immediately if yaml string is defined and no previous workflow graph exists
-      if (yamlString && !state.workflow.computed) {
+      // If yamlString is empty/undefined, clear computed data and return
+      if (!yamlString) {
+        store.dispatch(clearComputedData());
+        return result;
+      }
+
+      // Do computation immediately if not initialized yet
+      if (!state.workflow.isInitialized) {
         const computed = performComputation(yamlString, state.workflow.schemaLoose);
 
         if (computed) {
@@ -63,12 +72,7 @@ export const workflowComputationMiddleware: Middleware =
         return result;
       }
 
-      // Clear any pending computation
-      if (computationTimeoutId) {
-        clearTimeout(computationTimeoutId);
-        computationTimeoutId = null;
-      }
-
+      // Otherwise, debounce subsequent changes
       debounceComputation(store, yamlString);
     }
 
