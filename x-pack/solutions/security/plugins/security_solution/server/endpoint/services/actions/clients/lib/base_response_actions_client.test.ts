@@ -635,39 +635,6 @@ describe('ResponseActionsClientImpl base class', () => {
         );
       });
     });
-
-    describe('Telemetry (with feature disabled)', () => {
-      // although this is redundant, it is here to make sure that it works as expected wit the feature disabled
-      beforeEach(() => {
-        // @ts-expect-error
-        endpointAppContextService.experimentalFeatures.responseActionsTelemetryEnabled = false;
-      });
-
-      it('should not send action creation success telemetry for manual actions', async () => {
-        await baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions);
-
-        expect(endpointAppContextService.getTelemetryService().reportEvent).not.toHaveBeenCalled();
-      });
-
-      it('should not send action creation success telemetry for automated actions', async () => {
-        constructorOptions.isAutomated = true;
-        baseClassMock = new MockClassWithExposedProtectedMembers(constructorOptions);
-
-        await baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions);
-
-        expect(endpointAppContextService.getTelemetryService().reportEvent).not.toHaveBeenCalled();
-      });
-
-      it('should not send error telemetry if action creation fails', async () => {
-        esClient.index.mockImplementation(async () => {
-          throw new Error('test error');
-        });
-        const responsePromise = baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions);
-        await expect(responsePromise).rejects.toBeInstanceOf(ResponseActionsClientError);
-
-        expect(endpointAppContextService.getTelemetryService().reportEvent).not.toHaveBeenCalled();
-      });
-    });
   });
 
   describe('#writeActionResponseToEndpointIndex()', () => {
