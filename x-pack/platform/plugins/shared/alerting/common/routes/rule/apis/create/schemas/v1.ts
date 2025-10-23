@@ -140,9 +140,6 @@ export const createBodySchemaCommon = schema.object({
         'The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule.',
     },
   }),
-  // rule_type_id: schema.string({
-  //   meta: { description: 'The rule type identifier.' },
-  // }),
   enabled: schema.boolean({
     defaultValue: true,
     meta: {
@@ -171,7 +168,6 @@ export const createBodySchemaCommon = schema.object({
       })
     )
   ),
-  // params: ruleParamsSchemaWithIdAndDefaultValueV1,
   schedule: schema.object(
     {
       interval: schema.string({

@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ruleParamsSchemaWithRuleTypeIdAndDefaultValue } from '@kbn/response-ops-rule-params';
+import { ruleParamsSchemaWithRuleTypeIdAndDefaultValueForUpdate } from '@kbn/response-ops-rule-params';
 import { validateDuration } from '../../../validation';
 import {
   notifyWhenSchema,
@@ -17,7 +17,7 @@ import {
   artifactsSchema,
 } from '../../../schemas';
 
-export const updateRuleDataSchemaCommon = schema.object(
+export const updateRuleDataSchema = schema.object(
   {
     name: schema.string(),
     tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
@@ -25,7 +25,7 @@ export const updateRuleDataSchemaCommon = schema.object(
       interval: schema.string({ validate: validateDuration }),
     }),
     throttle: schema.maybe(schema.nullable(schema.string({ validate: validateDuration }))),
-    // params: ruleParamsSchemaWithDefaultValue,
+    params: ruleParamsSchemaWithRuleTypeIdAndDefaultValueForUpdate,
     actions: schema.arrayOf(actionRequestSchema, { defaultValue: [] }),
     systemActions: schema.maybe(schema.arrayOf(systemActionRequestSchema, { defaultValue: [] })),
     notifyWhen: schema.maybe(schema.nullable(notifyWhenSchema)),
@@ -35,8 +35,3 @@ export const updateRuleDataSchemaCommon = schema.object(
   },
   { unknowns: 'allow' }
 );
-
-export const updateRuleDataSchema = schema.intersection([
-  updateRuleDataSchemaCommon,
-  ruleParamsSchemaWithRuleTypeIdAndDefaultValue('alertTypeId'),
-]);

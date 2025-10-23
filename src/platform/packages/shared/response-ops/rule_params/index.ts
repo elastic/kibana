@@ -10,18 +10,30 @@
 export {
   ruleParamsSchemaWithRuleTypeId,
   ruleParamsSchemaWithRuleTypeIdAndDefaultValue,
+  ruleParamsSchemaWithRuleTypeIdForUpdate,
+  ruleParamsSchemaWithRuleTypeIdAndDefaultValueForUpdate,
 } from './latest';
 
 export {
   ruleParamsSchemaWithRuleTypeId as ruleParamsSchemaWithRuleTypeIdV1,
   ruleParamsSchemaWithRuleTypeIdAndDefaultValue as ruleParamsSchemaWithRuleTypeIdAndDefaultValueV1,
+  ruleParamsSchemaWithRuleTypeIdForUpdate as ruleParamsSchemaWithRuleTypeIdForUpdateV1,
+  ruleParamsSchemaWithRuleTypeIdAndDefaultValueForUpdate as ruleParamsSchemaWithRuleTypeIdAndDefaultValueForUpdateV1,
   createRuleParamsExamples as createRuleParamsExamplesV1,
 } from './v1';
 
-export type { RuleParams } from './latest';
-export type { RuleParamsWithDefaultValue } from './latest';
+export type {
+  RuleParams,
+  RuleParamsForUpdate,
+  RuleParamsWithDefaultValue,
+  RuleParamsWithDefaultValueForUpdate,
+} from './latest';
 
 export type {
   RuleParams as RuleParamsV1,
   RuleParamsWithDefaultValue as RuleParamsWithDefaultValueV1,
+  RuleParamsForUpdate as RuleParamsForUpdateV1,
+  RuleParamsWithDefaultValueForUpdate as RuleParamsWithDefaultValueForUpdateV1,
 } from './v1';
+
+export { RULE_TYPE_ID, ALERT_TYPE_ID } from './v1';
