@@ -28,3 +28,14 @@ export const getVariablesHoverContent = (
 
   return hoverContents;
 };
+
+/**
+ * Corrects an incomplete arguments list in an ESQL query.
+ * This is useful to avoid parse errors when users are in the middle of typing function arguments.
+ * @param query
+ * @returns
+ */
+export function correctIncompleteArgumentsList(query: string) {
+  // Replace ,) with )
+  return query.replace(/,\s*\)/g, ')');
+}

@@ -27,7 +27,7 @@ import {
 import type { ESQLCallbacks } from '../shared/types';
 import { getColumnsByTypeRetriever } from '../autocomplete/autocomplete';
 import { getPolicyHelper } from '../shared/resources_helpers';
-import { getVariablesHoverContent } from './helpers';
+import { correctIncompleteArgumentsList, getVariablesHoverContent } from './helpers';
 
 interface HoverContent {
   contents: Array<{ value: string }>;
@@ -56,7 +56,9 @@ const TIME_SYSTEM_DESCRIPTIONS = {
 };
 
 export async function getHoverItem(fullText: string, offset: number, callbacks?: ESQLCallbacks) {
-  const { root } = parse(fullText);
+  const correctedQuery = correctIncompleteArgumentsList(fullText);
+
+  const { root } = parse(correctedQuery);
 
   let containingFunction: ESQLFunction<'variadic-call'> | undefined;
   let node: ESQLSingleAstItem | undefined;

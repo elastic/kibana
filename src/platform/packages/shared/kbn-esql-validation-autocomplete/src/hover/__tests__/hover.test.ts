@@ -82,6 +82,16 @@ describe('getHoverItem()', () => {
         createFunctionContent('round')
       );
       await assertGetHoverItem(
+        `from a | eval round(numberField,)`,
+        'round',
+        createFunctionContent('round')
+      );
+      await assertGetHoverItem(
+        `from a | eval round(numberField, )`,
+        'round',
+        createFunctionContent('round')
+      );
+      await assertGetHoverItem(
         `from a | eval nonExistentFn(numberField)`,
         'nonExistentFn',
         createFunctionContent('nonExistentFn')
