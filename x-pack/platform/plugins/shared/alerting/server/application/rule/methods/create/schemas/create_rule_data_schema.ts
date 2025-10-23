@@ -20,12 +20,10 @@ import {
 export const createRuleDataSchemaCommon = schema.object(
   {
     name: schema.string(),
-    //  alertTypeId: schema.string(),
     enabled: schema.boolean({ defaultValue: true }),
     consumer: schema.string(),
     tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
     throttle: schema.maybe(schema.nullable(schema.string({ validate: validateDuration }))),
-    // params: ruleParamsSchemaWithDefaultValue,
     schedule: schema.object({
       interval: schema.string({ validate: validateDuration }),
     }),
