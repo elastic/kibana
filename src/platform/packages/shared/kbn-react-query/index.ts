@@ -19,11 +19,11 @@ class QueryClient extends TanstackQueryClient {
       defaultOptions: {
         ...config.defaultOptions,
         queries: {
-          networkMode: 'always',
+          ...(window?.navigator?.onLine === false && { networkMode: 'always' }),
           ...config.defaultOptions?.queries,
         },
         mutations: {
-          networkMode: 'always',
+          ...(window?.navigator?.onLine === false && { networkMode: 'always' }),
           ...config.defaultOptions?.mutations,
         },
       },
