@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { DefaultEvaluators, EvaluationDataset, KibanaPhoenixClient } from '@kbn/evals';
+import {
+  createQuantitativeCorrectnessEvaluators,
+  createQuantitativeGroundednessEvaluator,
+  type DefaultEvaluators,
+  type EvaluationDataset,
+  type KibanaPhoenixClient,
+} from '@kbn/evals';
 import type { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import type { ObservabilityAIAssistantEvaluationChatClient } from './chat_client';
@@ -54,25 +60,64 @@ export function createEvaluateObservabilityAIAssistantDataset({
       examples,
     } satisfies EvaluationDataset;
 
+    /**
+     * We're still defaulting our reporting to criteria only. Correctness and groundedness don't work reliably with our
+     * current LLM judge of choice (Gemini 2.5 Pro), causing timeouts and occasional malformed tool calls.
+     */
+    const useQualitativeEvaluators = process.env.USE_QUALITATIVE_EVALUATORS === 'true';
+
     await phoenixClient.runExperiment(
       {
         dataset,
-        task: async ({ input }) => {
+        task: async ({ input, output, metadata }) => {
           const response = await chatClient.complete({
             messages: input.question,
             scope: input.scope,
           });
 
-          return {
+          const result: any = {
             errors: response.errors,
             messages: response.messages,
           };
+
+          if (useQualitativeEvaluators) {
+            const qualitativeAnalysisInput = {
+              input,
+              expected: {
+                expected: output.criteria.join('\n'),
+              },
+              output: {
+                messages: [response.messages[response.messages.length - 1]].map((message) => ({
+                  message: message.content ?? '',
+                })),
+                steps: response.messages,
+              },
+              metadata,
+            };
+            const [correctnessResult, groundednessResult] = await Promise.all([
+              evaluators.correctnessAnalysis().evaluate(qualitativeAnalysisInput),
+              evaluators.groundednessAnalysis().evaluate(qualitativeAnalysisInput),
+            ]);
+
+            if (correctnessResult?.metadata)
+              result.correctnessAnalysis = correctnessResult.metadata;
+            if (groundednessResult?.metadata)
+              result.groundednessAnalysis = groundednessResult.metadata;
+          }
+
+          return result;
         },
       },
       [
         createCriteriaEvaluator({
           evaluators,
         }),
+        ...(useQualitativeEvaluators
+          ? [
+              createQuantitativeGroundednessEvaluator(),
+              ...createQuantitativeCorrectnessEvaluators(),
+            ]
+          : []),
       ]
     );
   };
