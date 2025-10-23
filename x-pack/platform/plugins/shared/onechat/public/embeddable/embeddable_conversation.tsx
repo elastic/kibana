@@ -11,7 +11,6 @@ import { Router } from '@kbn/shared-ux-router';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Conversation } from '../application/components/conversations/conversation';
 import { SendMessageProvider } from '../application/context/send_message/send_message_context';
 import { OnechatServicesContext } from '../application/context/onechat_services_context';
 import type { EmbeddableConversationDependencies, EmbeddableConversationProps } from './types';
@@ -25,7 +24,7 @@ type EmbeddableConversationInternalProps = EmbeddableConversationDependencies &
 export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInternalProps> = ({
   coreStart,
   services,
-  conversationId,
+  ...contextProps
 }) => {
   const kibanaServices = useMemo(
     () => ({
@@ -43,7 +42,7 @@ export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInte
             <OnechatServicesContext.Provider value={services}>
               <Router history={history}>
                 <SendMessageProvider>
-                  <Conversation />
+                  <div>{JSON.stringify(contextProps)}</div>
                 </SendMessageProvider>
               </Router>
             </OnechatServicesContext.Provider>
