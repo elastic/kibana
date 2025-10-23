@@ -12,6 +12,8 @@ import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 export const ACCESS_CONTROL_TYPE = 'access_control_type';
 export const NON_ACCESS_CONTROL_TYPE = 'non_access_control_type';
 
+
+
 export class AccessControlTestPlugin implements Plugin {
   public setup(core: CoreSetup) {
     core.savedObjects.registerType({
@@ -43,7 +45,7 @@ export class AccessControlTestPlugin implements Plugin {
     // Create
     router.post(
       {
-        path: '/write_restricted_objects/create',
+        path: '/access_control_objects/create',
         security: {
           authz: {
             enabled: false,
@@ -109,7 +111,7 @@ export class AccessControlTestPlugin implements Plugin {
     // Bulk Create
     router.post(
       {
-        path: '/write_restricted_objects/bulk_create',
+        path: '/access_control_objects/bulk_create',
         security: {
           authz: {
             enabled: false,
@@ -175,7 +177,7 @@ export class AccessControlTestPlugin implements Plugin {
 
     router.get(
       {
-        path: '/write_restricted_objects/_find',
+        path: '/access_control_objects/_find',
         security: {
           authz: {
             enabled: false,
@@ -196,7 +198,7 @@ export class AccessControlTestPlugin implements Plugin {
     );
     router.get(
       {
-        path: '/write_restricted_objects/{objectId}',
+        path: '/access_control_objects/{objectId}',
         security: {
           authz: {
             enabled: false,
@@ -232,7 +234,7 @@ export class AccessControlTestPlugin implements Plugin {
 
     router.put(
       {
-        path: '/write_restricted_objects/update',
+        path: '/access_control_objects/update',
         security: {
           authz: {
             enabled: false,
@@ -275,7 +277,7 @@ export class AccessControlTestPlugin implements Plugin {
     );
     router.put(
       {
-        path: '/write_restricted_objects/change_owner',
+        path: '/access_control_objects/change_owner',
         security: {
           authz: {
             enabled: false,
@@ -322,7 +324,7 @@ export class AccessControlTestPlugin implements Plugin {
     );
     router.put(
       {
-        path: '/write_restricted_objects/change_access_mode',
+        path: '/access_control_objects/change_access_mode',
         security: {
           authz: {
             enabled: false,
@@ -372,7 +374,7 @@ export class AccessControlTestPlugin implements Plugin {
 
     router.delete(
       {
-        path: '/write_restricted_objects/{objectId}',
+        path: '/access_control_objects/{objectId}',
         security: {
           authz: {
             enabled: false,
@@ -408,7 +410,7 @@ export class AccessControlTestPlugin implements Plugin {
 
     router.post(
       {
-        path: '/write_restricted_objects/bulk_delete',
+        path: '/access_control_objects/bulk_delete',
         security: {
           authz: {
             enabled: false,
@@ -454,7 +456,7 @@ export class AccessControlTestPlugin implements Plugin {
     );
     router.post(
       {
-        path: '/write_restricted_objects/bulk_update',
+        path: '/access_control_objects/bulk_update',
         security: {
           authz: {
             enabled: false,
