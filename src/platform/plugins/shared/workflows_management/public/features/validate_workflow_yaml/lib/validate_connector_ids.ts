@@ -13,7 +13,7 @@ import type { ConnectorIdItem, YamlValidationResult } from '../model/types';
 
 export function validateConnectorIds(
   connectorIdItems: ConnectorIdItem[],
-  dynamicConnectorTypes: Record<string, any> | null,
+  dynamicConnectorTypes: Record<string, any> | null, // eslint-disable-line @typescript-eslint/no-explicit-any
   connectorsManagementUrl?: string
 ): YamlValidationResult[] {
   const results: YamlValidationResult[] = [];
