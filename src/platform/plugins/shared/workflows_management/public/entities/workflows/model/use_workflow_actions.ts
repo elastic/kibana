@@ -10,14 +10,10 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import type {
-  CreateWorkflowCommand,
   EsWorkflow,
   RunStepCommand,
   RunWorkflowCommand,
   RunWorkflowResponseDto,
-  TestWorkflowCommand,
-  TestWorkflowResponseDto,
-  WorkflowDetailDto,
 } from '@kbn/workflows';
 import { useKibana } from '../../../hooks/use_kibana';
 
@@ -31,19 +27,6 @@ export interface UpdateWorkflowParams {
 export function useWorkflowActions() {
   const queryClient = useQueryClient();
   const { http } = useKibana().services;
-
-  const createWorkflow = useMutation<WorkflowDetailDto, HttpError, CreateWorkflowCommand>({
-    networkMode: 'always',
-    mutationKey: ['POST', 'workflows'],
-    mutationFn: (workflow) => {
-      return http.post<WorkflowDetailDto>('/api/workflows', {
-        body: JSON.stringify(workflow),
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['workflows'] });
-    },
-  });
 
   const updateWorkflow = useMutation<void, HttpError, UpdateWorkflowParams>({
     mutationKey: ['PUT', 'workflows', 'id'],
@@ -110,28 +93,11 @@ export function useWorkflowActions() {
     },
   });
 
-  const testWorkflow = useMutation<TestWorkflowResponseDto, HttpError, TestWorkflowCommand>({
-    mutationKey: ['POST', 'workflows', 'test'],
-    mutationFn: ({
-      workflowYaml,
-      inputs,
-    }: {
-      workflowYaml: string;
-      inputs: Record<string, unknown>;
-    }) => {
-      return http.post(`/api/workflows/test`, {
-        body: JSON.stringify({ workflowYaml, inputs }),
-      });
-    },
-  });
-
   return {
-    createWorkflow,
     updateWorkflow, // kc: maybe return mutation.mutate? where the navigation is handled?
     deleteWorkflows,
     runWorkflow,
     runIndividualStep,
     cloneWorkflow,
-    testWorkflow,
   };
 }
