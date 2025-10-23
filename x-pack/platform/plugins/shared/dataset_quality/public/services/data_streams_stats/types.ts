@@ -33,7 +33,7 @@ export interface DataStreamsStatsServiceStart {
 
 export interface DataStreamsStatsServiceStartDeps {
   http: HttpStart;
-  telemetryClient: ITelemetryClient;
+  telemetryClient?: ITelemetryClient;
 }
 
 export interface IDataStreamsStatsClient {

@@ -46,7 +46,7 @@ import type { ITelemetryClient } from '../telemetry';
 export class DataStreamsStatsClient implements IDataStreamsStatsClient {
   constructor(
     private readonly http: HttpStart,
-    private readonly telemetryClient: ITelemetryClient
+    private readonly telemetryClient?: ITelemetryClient
   ) {}
 
   public async getDataStreamsTypesPrivileges(
@@ -241,7 +241,7 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
         throw new DatasetQualityError(`Failed to update failure store": ${error}`, error);
       });
 
-    this.telemetryClient.trackFailureStoreUpdated({
+    this.telemetryClient?.trackFailureStoreUpdated({
       data_stream_name: dataStream,
       failure_store_enabled: failureStoreEnabled,
       custom_retention_period: customRetentionPeriod,
