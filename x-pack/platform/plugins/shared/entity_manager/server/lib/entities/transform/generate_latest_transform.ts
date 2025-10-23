@@ -127,8 +127,8 @@ function generateFilters(definition: EntityDefinition) {
   }
 
   if (definition.calculatedIdentity) {
-    // If we have cascade ids we must ensure that at least
-    // one if the ids is present and not empty on query level
+    // If we have a calculated id we must ensure that at least
+    // one of the ids is present and not empty on query level
     definition.calculatedIdentity.filterOnAtLeastOneOf.forEach((field) => {
       filter.bool.should.push({
         bool: {
