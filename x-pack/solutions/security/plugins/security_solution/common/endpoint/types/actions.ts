@@ -8,6 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import type { EcsError } from '@elastic/ecs';
 import type { BaseFileMetadata, FileCompression, FileJSON } from '@kbn/files-plugin/common';
+import type { MemoryDumpActionRequestBody } from '../../api/endpoint/actions/response_actions/memory_dump';
 import type {
   ActionStatusRequestSchema,
   KillProcessRequestBody,
@@ -280,6 +281,8 @@ export interface ResponseActionCancelParameters {
 
 export type ResponseActionRunScriptParameters = RunScriptActionRequestBody['parameters'];
 
+export type ResponseActionMemoryDumpParameters = MemoryDumpActionRequestBody['parameters'];
+
 export type EndpointActionDataParameterTypes =
   | undefined
   | ResponseActionParametersWithProcessData
@@ -288,7 +291,8 @@ export type EndpointActionDataParameterTypes =
   | ResponseActionUploadParameters
   | ResponseActionScanParameters
   | ResponseActionRunScriptParameters
-  | ResponseActionCancelParameters;
+  | ResponseActionCancelParameters
+  | ResponseActionMemoryDumpParameters;
 
 /** Output content of the different response actions */
 export type EndpointActionResponseDataOutput =
