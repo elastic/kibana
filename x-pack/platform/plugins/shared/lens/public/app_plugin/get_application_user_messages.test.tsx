@@ -41,7 +41,7 @@ describe('application-level user messages', () => {
         visualizationType: undefined,
 
         visualization: undefined,
-        visualizationState: { activeId: '', state: {} },
+        visualizationState: { activeId: '', state: {}, selectedLayerId: null },
         activeDatasource: {} as Datasource,
         activeDatasourceState: null,
         dataViews: {} as DataViewsState,
@@ -70,7 +70,11 @@ describe('application-level user messages', () => {
       getApplicationUserMessages({
         visualizationType: '123',
         visualization: undefined,
-        visualizationState: { activeId: 'id_for_type_that_doesnt_exist', state: {} },
+        visualizationState: {
+          activeId: 'id_for_type_that_doesnt_exist',
+          state: {},
+          selectedLayerId: null,
+        },
 
         activeDatasource: {} as Datasource,
         activeDatasourceState: null,
@@ -102,7 +106,7 @@ describe('application-level user messages', () => {
 
         visualizationType: '123',
         visualization: {} as Visualization,
-        visualizationState: { activeId: 'some-id', state: {} },
+        visualizationState: { activeId: 'some-id', state: {}, selectedLayerId: null },
         activeDatasourceState: null,
         dataViews: {} as DataViewsState,
         core: {} as CoreStart,
@@ -169,7 +173,7 @@ describe('application-level user messages', () => {
         // irrelevantProps
         dataViews: {} as DataViewsState,
         visualization: {} as Visualization,
-        visualizationState: { activeId: 'foo', state: {} },
+        visualizationState: { activeId: 'foo', state: {}, selectedLayerId: null },
       };
       const firstMessage = getApplicationUserMessages({ ...props, ...propsOverrides }).at(0);
       const rtlRender = render(

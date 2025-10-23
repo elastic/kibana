@@ -42,6 +42,7 @@ export function getStateManagementForInlineEditing(
       {
         activeId: visualizationType || viz.visualizationType,
         state: visualizationState,
+        selectedLayerId: null,
       },
       datasourceStates,
       viz.state.query,

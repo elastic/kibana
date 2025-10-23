@@ -141,7 +141,11 @@ describe('editor_frame', () => {
       {
         preloadedState: {
           activeDatasourceId: 'testDatasource',
-          visualization: { activeId: mockVisualization.id, state: 'initialState' },
+          visualization: {
+            activeId: mockVisualization.id,
+            state: 'initialState',
+            selectedLayerId: null,
+          },
           datasourceStates: {
             testDatasource: {
               isLoading: false,
@@ -246,6 +250,7 @@ describe('editor_frame', () => {
             visualization: {
               activeId: mockVisualization.id,
               state: updatedState,
+              selectedLayerId: null,
             },
           })
         );

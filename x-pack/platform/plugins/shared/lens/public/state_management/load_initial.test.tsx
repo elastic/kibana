@@ -33,6 +33,7 @@ const preloadedState = {
   visualization: {
     state: null,
     activeId: 'testVis',
+    selectedLayerId: null,
   },
 };
 
@@ -173,6 +174,7 @@ describe('Initializing the store', () => {
           visualization: {
             activeId: 'testVis',
             state: {},
+            selectedLayerId: null,
           },
           datasourceStates: { testDatasource: { isLoading: false, state: {} } },
         },

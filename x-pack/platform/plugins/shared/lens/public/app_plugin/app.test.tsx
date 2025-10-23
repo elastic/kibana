@@ -184,6 +184,7 @@ describe('Lens App', () => {
           state: {
             visState: true,
           },
+          selectedLayerId: null,
         },
         activeDatasourceId: 'testDatasource',
         datasourceStates: {
@@ -1316,6 +1317,7 @@ describe('Lens App', () => {
           visualization: {
             activeId: 'testVis',
             state: {},
+            selectedLayerId: null,
           },
           isSaveable: true,
         },
@@ -1335,6 +1337,7 @@ describe('Lens App', () => {
           visualization: {
             activeId: 'testVis',
             state: {},
+            selectedLayerId: null,
           },
           isSaveable: true,
         },
@@ -1381,6 +1384,7 @@ describe('Lens App', () => {
           visualization: {
             activeId: 'testVis',
             state: {},
+            selectedLayerId: null,
           },
           isSaveable: true,
         },
@@ -1409,6 +1413,7 @@ describe('Lens App', () => {
         visualization: {
           activeId: 'testVis',
           state: {},
+          selectedLayerId: null,
         },
       };
 
