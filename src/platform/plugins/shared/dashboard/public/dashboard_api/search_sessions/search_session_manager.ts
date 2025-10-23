@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { v4 } from 'uuid';
+import { BehaviorSubject, Subject, debounceTime, first } from 'rxjs';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import type { DashboardApi, DashboardCreationOptions, DashboardInternalApi } from '../types';
 import { dataService } from '../../services/kibana_services';
@@ -22,6 +23,7 @@ export function initializeSearchSessionManager(
   const searchSessionId$ = new BehaviorSubject<string | undefined>(undefined);
 
   let stopSearchSessionIntegration: (() => void) | undefined;
+  let requestSearchSessionId: (() => Promise<string | undefined>) | undefined;
   if (searchSessionSettings) {
     const { sessionIdToRestore } = searchSessionSettings;
 
@@ -43,6 +45,20 @@ export function initializeSearchSessionManager(
         : dataService.search.session.start());
     searchSessionId$.next(initialSearchSessionId);
 
+    const searchSessionGenerationInProgress$ = new BehaviorSubject<boolean>(true);
+    requestSearchSessionId = async () => {
+      return new Promise((resolve) => {
+        const subscription = searchSessionGenerationInProgress$
+          .pipe(debounceTime(0))
+          .subscribe((inProgress) => {
+            if (!inProgress) {
+              resolve(searchSessionId$.getValue());
+              subscription.unsubscribe();
+            }
+          });
+      });
+    };
+
     stopSearchSessionIntegration = startDashboardSearchSessionIntegration(
       {
         ...dashboardApi,
@@ -50,12 +66,14 @@ export function initializeSearchSessionManager(
       },
       dashboardInternalApi,
       searchSessionSettings,
-      (searchSessionId: string) => searchSessionId$.next(searchSessionId)
+      (searchSessionId: string) => searchSessionId$.next(searchSessionId),
+      searchSessionGenerationInProgress$
     );
   }
   return {
     api: {
       searchSessionId$,
+      requestSearchSessionId,
     },
     cleanup: () => {
       stopSearchSessionIntegration?.();

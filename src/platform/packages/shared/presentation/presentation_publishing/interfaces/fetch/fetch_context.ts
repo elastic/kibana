@@ -28,8 +28,6 @@ export function isReloadTimeFetchContextEqual(
   currentContext: ReloadTimeFetchContext,
   lastContext: ReloadTimeFetchContext
 ): boolean {
-  if (currentContext.searchSessionId !== lastContext.searchSessionId) return false;
-
   return (
     isReloadTimestampEqualForFetch(currentContext.reloadTimestamp, lastContext.reloadTimestamp) &&
     areFiltersEqualForFetch(currentContext.filters, lastContext.filters) &&

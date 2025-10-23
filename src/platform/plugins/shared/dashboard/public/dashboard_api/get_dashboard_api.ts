@@ -9,7 +9,7 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import { BehaviorSubject, debounceTime, merge } from 'rxjs';
+import { BehaviorSubject, Subject, debounceTime, first, merge } from 'rxjs';
 import { v4 } from 'uuid';
 import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
 import { DASHBOARD_APP_ID } from '../../common/constants';
@@ -136,9 +136,25 @@ export function getDashboardApi({
     };
   }
 
+  // const searchSessionRequested$ = new Subject<void>();
+  // const searchSessionIDTemp$ = new BehaviorSubject<string>(v4());
+  // searchSessionRequested$.pipe(debounceTime(1)).subscribe(() => {
+  //   searchSessionIDTemp$.next(v4());
+  // });
+
+  // const assignNewSearchSessionID = async () => {
+  //   searchSessionRequested$.next();
+  //   return new Promise((resolve) => {
+  //     searchSessionIDTemp$.pipe(first()).subscribe((searchSessionRegerated) => {
+  //       resolve(searchSessionRegerated);
+  //     });
+  //   });
+  // };
+
   const trackOverlayApi = initializeTrackOverlay(trackPanel.setFocusedPanelId);
 
   const dashboardApi = {
+    // assignNewSearchSessionID,
     ...viewModeManager.api,
     ...dataLoadingManager.api,
     ...dataViewsManager.api,

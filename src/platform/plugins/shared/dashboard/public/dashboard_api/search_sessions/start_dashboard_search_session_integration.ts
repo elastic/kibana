@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { combineLatest, filter, skip } from 'rxjs';
+import { BehaviorSubject, Subject, combineLatest, debounceTime, filter, skip, tap } from 'rxjs';
 
 import { noSearchSessionStorageCapabilityMessage } from '@kbn/data-plugin/public';
 
@@ -16,6 +16,7 @@ import { dataService } from '../../services/kibana_services';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import type { DashboardInternalApi } from '../types';
 import { newSession$ } from './new_session';
+import { v4 } from 'uuid';
 
 /**
  * Enables dashboard search sessions.
@@ -24,7 +25,8 @@ export function startDashboardSearchSessionIntegration(
   dashboardApi: DashboardApi,
   dashboardInternalApi: DashboardInternalApi,
   searchSessionSettings: DashboardCreationOptions['searchSessionSettings'],
-  setSearchSessionId: (searchSessionId: string) => void
+  setSearchSessionId: (searchSessionId: string) => void,
+  searchSessionGenerationInProgress$: BehaviorSubject<boolean>
 ) {
   if (!searchSessionSettings) return;
 
@@ -47,6 +49,19 @@ export function startDashboardSearchSessionIntegration(
             },
     }
   );
+  // const searchSessionRequested$ = new Subject<void>();
+  // searchSessionRequested$.pipe(debounceTime(1)).subscribe(() => {
+  //   searchSessionId$.next(dataService.search.session.start());
+  // });
+
+  // const assignNewSearchSessionID = async () => {
+  //   searchSessionRequested$.next();
+  //   return new Promise((resolve) => {
+  //     searchSessionId$.pipe(first()).subscribe((searchSessionRegerated) => {
+  //       resolve(searchSessionRegerated);
+  //     });
+  //   });
+  // };
 
   // force refresh when the session id in the URL changes. This will also fire off the "handle search session change" below.
   const searchSessionIdChangeSubscription = sessionIdUrlChangeObservable
@@ -58,7 +73,11 @@ export function startDashboardSearchSessionIntegration(
     dashboardApi.isFetchPaused$,
   ])
     .pipe(
-      filter(([, isFetchPaused]) => !isFetchPaused) // don't generate new search session until fetch is unpaused
+      filter(([, isFetchPaused]) => !isFetchPaused), // don't generate new search session until fetch is unpaused
+      tap(() => {
+        console.log('IN PROGRESS');
+        searchSessionGenerationInProgress$.next(true);
+      })
     )
     .subscribe(() => {
       const currentSearchSessionId = dashboardApi.searchSessionId$.value;
@@ -83,6 +102,8 @@ export function startDashboardSearchSessionIntegration(
       if (updatedSearchSessionId && updatedSearchSessionId !== currentSearchSessionId) {
         setSearchSessionId(updatedSearchSessionId);
       }
+      console.log('NOT IN PROGRESS');
+      searchSessionGenerationInProgress$.next(false);
     });
 
   return () => {

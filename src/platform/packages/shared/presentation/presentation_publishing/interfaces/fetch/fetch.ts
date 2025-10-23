@@ -36,7 +36,6 @@ import {
 } from './fetch_context';
 import { apiPublishesPauseFetch } from './publishes_pause_fetch';
 import { apiPublishesReload } from './publishes_reload';
-import { apiPublishesSearchSession, type PublishesSearchSession } from './publishes_search_session';
 import {
   apiPublishesTimeRange,
   apiPublishesUnifiedSearch,
@@ -46,22 +45,16 @@ import {
 
 function getReloadTimeFetchContext(api: unknown, reloadTimestamp?: number): ReloadTimeFetchContext {
   const typeApi = api as Partial<
-    PublishesTimeRange & HasParentApi<Partial<PublishesUnifiedSearch & PublishesSearchSession>>
+    PublishesTimeRange & HasParentApi<Partial<PublishesUnifiedSearch>>
   >;
   return {
     reloadTimestamp,
     filters: typeApi?.parentApi?.filters$?.value,
     query: typeApi?.parentApi?.query$?.value,
-    searchSessionId: typeApi?.parentApi?.searchSessionId$?.value,
+    // searchSessionId: typeApi?.parentApi?.searchSessionId$?.value,
     timeRange: typeApi?.timeRange$?.value ?? typeApi?.parentApi?.timeRange$?.value,
     timeslice: typeApi?.timeRange$?.value ? undefined : typeApi?.parentApi?.timeslice$?.value,
   };
-}
-
-function hasSearchSession(api: unknown) {
-  return apiHasParentApi(api) && apiPublishesSearchSession(api.parentApi)
-    ? typeof api.parentApi.searchSessionId$.value === 'string'
-    : false;
 }
 
 function hasLocalTimeRange(api: unknown) {
@@ -79,12 +72,7 @@ function getBatchedObservables(api: unknown): Array<Observable<unknown>> {
   }
 
   if (apiHasParentApi(api) && apiPublishesUnifiedSearch(api.parentApi)) {
-    observables.push(
-      combineLatest([api.parentApi.filters$, api.parentApi.query$]).pipe(
-        skip(1),
-        filter(() => !hasSearchSession(api))
-      )
-    );
+    observables.push(combineLatest([api.parentApi.filters$, api.parentApi.query$]).pipe(skip(1)));
   }
 
   if (apiHasParentApi(api) && apiPublishesTimeRange(api.parentApi)) {
@@ -95,7 +83,7 @@ function getBatchedObservables(api: unknown): Array<Observable<unknown>> {
     observables.push(
       combineLatest(timeObservables).pipe(
         skip(1),
-        filter(() => !hasSearchSession(api) && !hasLocalTimeRange(api))
+        filter(() => !hasLocalTimeRange(api))
       )
     );
   }
@@ -108,11 +96,8 @@ function getBatchedObservables(api: unknown): Array<Observable<unknown>> {
 // 2. Observables will not emit on subscribe
 function getImmediateObservables(api: unknown): Array<Observable<unknown>> {
   const observables: Array<Observable<unknown>> = [];
-  if (apiHasParentApi(api) && apiPublishesSearchSession(api.parentApi)) {
-    observables.push(api.parentApi.searchSessionId$.pipe(skip(1)));
-  }
   if (apiHasParentApi(api) && apiPublishesReload(api.parentApi)) {
-    observables.push(api.parentApi.reload$.pipe(filter(() => !hasSearchSession(api))));
+    observables.push(api.parentApi.reload$);
   }
   return observables;
 }
@@ -162,19 +147,31 @@ export function fetch$(api: unknown): Observable<FetchContext> {
 
   return fetchContext$.pipe(
     combineLatestWith(isFetchPaused$),
-    filter(([, isFetchPaused]) => !isFetchPaused),
+    filter(([, isFetchPaused]) => {
+      return !isFetchPaused;
+    }),
     map(([fetchContext]) => fetchContext),
     distinctUntilChanged((prevContext, nextContext) =>
       isReloadTimeFetchContextEqual(prevContext, nextContext)
     ),
-    map((reloadTimeFetchContext) => ({
-      isReload: Boolean(reloadTimeFetchContext.reloadTimestamp),
-      filters: reloadTimeFetchContext.filters,
-      query: reloadTimeFetchContext.query,
-      timeRange: reloadTimeFetchContext.timeRange,
-      timeslice: reloadTimeFetchContext.timeslice,
-      searchSessionId: reloadTimeFetchContext.searchSessionId,
-    }))
+    switchMap(async (context) => {
+      const searchSessionId = await ((api as any).parentApi as any).requestSearchSessionId();
+      console.log(`${(api as any).uuid} got search session id: ${searchSessionId}`);
+      return { ...context, searchSessionId };
+    }),
+    map((reloadTimeFetchContext) => {
+      console.log({
+        reloadTimeFetchContext,
+      });
+      return {
+        isReload: Boolean(reloadTimeFetchContext.reloadTimestamp),
+        filters: reloadTimeFetchContext.filters,
+        query: reloadTimeFetchContext.query,
+        timeRange: reloadTimeFetchContext.timeRange,
+        timeslice: reloadTimeFetchContext.timeslice,
+        searchSessionId: reloadTimeFetchContext.searchSessionId,
+      };
+    })
   );
 }
 
