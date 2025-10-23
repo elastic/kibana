@@ -36,7 +36,7 @@ const comparators: StateComparators<DashboardSettings> = {
   syncColors: 'referenceEquality',
   syncCursor: 'referenceEquality',
   syncTooltips: 'referenceEquality',
-  timeRestore: 'skip',
+  timeRestore: 'referenceEquality',
   useMargins: 'referenceEquality',
   tags: 'deepEquality',
 };
