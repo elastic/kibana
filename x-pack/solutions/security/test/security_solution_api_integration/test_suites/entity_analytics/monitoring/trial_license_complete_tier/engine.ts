@@ -37,7 +37,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
   }
 
-  describe.skip('@ess @serverless @skipInServerlessMKI Entity Privilege Monitoring APIs', () => {
+  describe('@ess @serverless @skipInServerlessMKI Entity Privilege Monitoring APIs', () => {
     const dataView = dataViewRouteHelpersFactory(supertest);
     const dataViewWithNamespace = dataViewRouteHelpersFactory(supertest, customSpace);
 
