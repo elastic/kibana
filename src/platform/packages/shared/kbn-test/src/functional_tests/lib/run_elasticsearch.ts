@@ -10,12 +10,11 @@
 import Url from 'url';
 import { resolve } from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
-import getPort from 'get-port';
 import getopts from 'getopts';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ArtifactLicense, ServerlessProjectType } from '@kbn/es';
 import { isServerlessProjectType, extractAndArchiveLogs } from '@kbn/es/src/utils';
-import { SERVICE_NAMESPACE } from '@kbn/test-services';
+import { SERVICE_NAMESPACE, TEST_REMOTE_ES_PORT } from '@kbn/test-services';
 import type { Config } from '../../functional_test_runner';
 import type { ICluster } from '../../es';
 import { createTestEsCluster, esTestConfig } from '../../es';
@@ -28,7 +27,6 @@ interface RunElasticsearchOptions {
   onEarlyExit?: (msg: string) => void;
   logsDir?: string;
   name?: string;
-  basePath?: string;
 }
 
 interface CcsConfig {
@@ -96,7 +94,7 @@ export async function cleanupElasticsearch(
 export async function runElasticsearch(
   options: RunElasticsearchOptions
 ): Promise<() => Promise<void>> {
-  const { log, logsDir, name, basePath } = options;
+  const { log, logsDir, name } = options;
   const config = getEsConfig(options);
 
   if (!config.ccsConfig) {
@@ -105,7 +103,6 @@ export async function runElasticsearch(
       name: name ?? `${SERVICE_NAMESPACE}-ftr`,
       logsDir,
       config,
-      basePath,
     });
     return async () => {
       await cleanupElasticsearch(node, config.serverless, logsDir, log);
@@ -114,7 +111,8 @@ export async function runElasticsearch(
 
   const remoteName = name ?? `${SERVICE_NAMESPACE}-ftr-remote`;
 
-  const remotePort = await getPort();
+  const remotePort = TEST_REMOTE_ES_PORT;
+
   const remoteNode = await startEsNode({
     log,
     name: remoteName,
@@ -124,7 +122,6 @@ export async function runElasticsearch(
       port: parseInt(new URL(config.ccsConfig.remoteClusterUrl).port, 10),
       transportPort: remotePort,
     },
-    basePath,
   });
 
   const localNode = await startEsNode({
@@ -135,7 +132,6 @@ export async function runElasticsearch(
       ...config,
       esArgs: [...config.esArgs, `cluster.remote.ftr-remote.seeds=localhost:${remotePort}`],
     },
-    basePath,
   });
 
   return async () => {
@@ -151,14 +147,12 @@ async function startEsNode({
   config,
   onEarlyExit,
   logsDir,
-  basePath,
 }: {
   log: ToolingLog;
   name: string;
   config: EsConfig & { transportPort?: number };
   onEarlyExit?: (msg: string) => void;
   logsDir?: string;
-  basePath?: string;
 }) {
   const cluster = createTestEsCluster({
     clusterName: `cluster-${name}`,

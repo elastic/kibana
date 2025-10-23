@@ -22,7 +22,6 @@ import { parseRawFlags, getArgValue, remapPluginPaths } from './kibana_cli_args'
 export async function runKibanaServer(options: {
   procs: ProcRunner;
   config: Config;
-  name?: string;
   installDir?: string;
   extraKbnOpts?: string[];
   logsDir?: string;

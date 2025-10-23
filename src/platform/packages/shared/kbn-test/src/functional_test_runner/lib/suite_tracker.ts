@@ -12,6 +12,7 @@ import { dirname, relative, resolve } from 'path';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 
+import { SERVICE_NAMESPACE } from '@kbn/test-services';
 import type { Lifecycle } from './lifecycle';
 
 export interface SuiteInProgress {
@@ -33,7 +34,10 @@ export interface SuiteWithMetadata {
 }
 
 const getTestMetadataPath = () => {
-  return process.env.TEST_METADATA_PATH || resolve(REPO_ROOT, 'target', 'test_metadata.json');
+  return (
+    process.env.TEST_METADATA_PATH ||
+    resolve(REPO_ROOT, 'target', SERVICE_NAMESPACE, 'test_metadata.json')
+  );
 };
 
 export class SuiteTracker {

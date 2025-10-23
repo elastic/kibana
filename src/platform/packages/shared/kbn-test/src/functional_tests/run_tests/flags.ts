@@ -40,7 +40,6 @@ export const FLAG_OPTIONS: FlagOptions = {
     'include',
     'exclude',
     'writeLogsToPath',
-    'base-path',
   ],
   alias: {
     updateAll: 'u',
@@ -64,7 +63,6 @@ export const FLAG_OPTIONS: FlagOptions = {
     --updateSnapshots    Replace inline and file snapshots with whatever is generated from the test
     --updateAll, -u      Replace both baseline screenshots and snapshots
     --pause              Pause and wait for a message after starting services before continuing
-    --base-path          The base path for Elasticsearch files (defaults to .es)
   `,
   examples: `
 Run the latest verified, kibana-compatible ES Serverless image:
@@ -114,6 +112,5 @@ export function parseFlags(flags: FlagsReader) {
       include: flags.arrayOfPaths('include') ?? [],
       exclude: flags.arrayOfPaths('exclude') ?? [],
     },
-    basePath: flags.string('base-path'),
   };
 }

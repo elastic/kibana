@@ -12,7 +12,6 @@ import { execSync } from 'child_process';
 import dedent from 'dedent';
 import execa from 'execa';
 import Fs from 'fs';
-import getPort from 'get-port';
 import os from 'os';
 import Path from 'path';
 import { format } from 'util';
@@ -28,6 +27,7 @@ import { readConfig } from './read_config';
 import { getAvailableMemory } from './get_available_memory';
 import { getSlotResources } from './get_slot_resources';
 import type { SlotResources } from './get_slot_resources';
+import { startWatchingFiles } from './start_watching_files';
 
 function booleanFromEnv(varName: string, defaultValue: boolean = false): boolean {
   const envValue = process.env[varName];
@@ -157,7 +157,6 @@ export async function runTestsParallel(
         args: [
           `scripts/functional_tests`,
           `--config=${config}`,
-          '--debug',
           ...extraArgsList
             .flat()
             .map((arg) => {
@@ -188,6 +187,23 @@ export async function runTestsParallel(
   let statsTimer: NodeJS.Timeout | undefined;
 
   let previousResourceUsage: NodeJS.ResourceUsage | undefined;
+
+  const fileWatcher = startWatchingFiles({
+    directories: [
+      { dir: REPO_ROOT, depth: 5 },
+      { dir: os.tmpdir(), depth: 5 },
+    ],
+  });
+
+  function logChangedFiles() {
+    log.info(`Files changed`);
+    log.indent(4);
+    const formattedChanges = fileWatcher.getFormattedFileChanges();
+    if (formattedChanges) {
+      log.write(formattedChanges);
+    }
+    log.indent(-4);
+  }
 
   if (stats) {
     const formatSeconds = (microseconds: number) => (microseconds / 1_000_000).toFixed(2);
@@ -417,6 +433,10 @@ export async function runTestsParallel(
       runBuildkiteMetaSet(FAILED_CONFIGS_KEY, failedConfigs.join('\n'));
     }
   }
+
+  logChangedFiles();
+
+  fileWatcher.unsubscribe();
 
   return failedConfigs.length ? 1 : 0;
 }

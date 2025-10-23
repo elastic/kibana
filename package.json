@@ -1858,6 +1858,7 @@
     "cache-manager-fs-hash": "^2.0.0",
     "callsites": "^3.1.0",
     "chance": "1.0.18",
+    "chokidar": "^3.5.3",
     "chromedriver": "^141.0.0",
     "clarify": "^2.2.0",
     "clean-webpack-plugin": "^4.0.0",
