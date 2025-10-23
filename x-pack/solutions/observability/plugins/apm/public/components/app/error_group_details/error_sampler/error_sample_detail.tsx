@@ -7,6 +7,7 @@
 
 import {
   EuiBadge,
+  EuiButtonEmpty,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -38,7 +39,7 @@ import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import type { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { isPending, isSuccess } from '../../../../hooks/use_fetcher';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import { callApmApi, type APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { TransactionDetailLink } from '../../../shared/links/apm/transaction_detail_link';
 import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
 import { ErrorMetadata } from '../../../shared/metadata_table/error_metadata';
@@ -330,6 +331,8 @@ export function ErrorSampleDetailTabContent({
 }: {
   error: {
     service: {
+      name: string;
+      version?: string;
       language?: {
         name?: string;
       };
@@ -342,21 +345,136 @@ export function ErrorSampleDetailTabContent({
   const codeLanguage = error?.service.language?.name;
   const exceptions = error?.error.exception || [];
   const logStackframes = error?.error.log?.stacktrace;
+  const [deobfucstatedStacktrace, setDeobfucstatedStacktrace] = useState<string>('');
+
   const isPlaintextException =
     !!error.error.stack_trace && exceptions.length === 1 && !exceptions[0].stacktrace;
+  const onClickDeobfuscate = () => {
+    if (error.error.stack_trace && error.error.stack_trace.length > 0) {
+      const parsedStack = error.error
+        .stack_trace!.split('\n')
+        .map((line) => line.trim())
+        .map((line) => {
+          if (line.startsWith('at ')) {
+            const identifier = line.substring(3).split('(')[0];
+            const post = line.split('(').slice(-1)[0];
+            const filename = post.split(':')[0];
+            const lineNumber = post.split(':')[1].split(')')[0];
+            return {
+              obfuscated: {
+                classname: identifier.split('.').slice(0, -1).join('.'),
+                method: identifier.split('.').slice(-1)[0],
+                lineNumber,
+                filename,
+              },
+              end: '(' + line.split('(').slice(-1),
+              output: line,
+            };
+          } else {
+            return {
+              output: line,
+            };
+          }
+        });
+
+      const promises = [];
+      parsedStack.forEach((stackframe) => {
+        if (stackframe.obfuscated) {
+          promises.push(
+            callApmApi('POST /internal/apm/mobile-services/{serviceName}/deobfuscate/{buildId}', {
+              signal: null,
+              params: {
+                path: {
+                  serviceName: error.service.name,
+                  buildId: error.service.version ?? '',
+                },
+                query: {
+                  className: stackframe.obfuscated.classname,
+                },
+              },
+            }).then((response) => {
+              const classMapping = response.hits.hits[0]?._source;
+              if (!classMapping) {
+                return;
+              }
+              const deobfuscatedClassName = classMapping.originalName;
+              const results = classMapping.callSites.filter((callsight) => {
+                return callsight.obfuscatedName === stackframe.obfuscated.method;
+              });
+              const linesbylinenumber = results[0].lines.filter((line) => {
+                return (
+                  line.obfuscatedLineNumbers[0] <= stackframe.obfuscated.lineNumber &&
+                  line.obfuscatedLineNumbers[1] >= stackframe.obfuscated.lineNumber
+                );
+              });
+              stackframe.output = `at ${deobfuscatedClassName}.${linesbylinenumber[0].value}(${stackframe.obfuscated.filename}:${linesbylinenumber[0].originalLineNumbers[0]})`;
+              stackframe.deobfuscated = true;
+              // set deobfucstated stacktrace state;
+            })
+          );
+        }
+      });
+      Promise.all(promises).then(() => {
+        // set deobfuscated stacktrace state;
+        setDeobfucstatedStacktrace(
+          parsedStack
+            .map((stackframe) => {
+              return stackframe.output;
+            })
+            .join('\n')
+        );
+      });
+    }
+  };
+
   switch (currentTab.key) {
     case ErrorTabKey.LogStackTrace:
-      return <Stacktrace stackframes={logStackframes} codeLanguage={codeLanguage} />;
+      return (
+        <div>
+          <Stacktrace stackframes={logStackframes} codeLanguage={codeLanguage} />;
+        </div>
+      );
     case ErrorTabKey.ExceptionStacktrace:
-      return isPlaintextException ? (
-        <PlaintextStacktrace
-          message={exceptions[0].message}
-          type={exceptions[0]?.type}
-          stacktrace={error?.error.stack_trace}
-          codeLanguage={codeLanguage}
-        />
-      ) : (
-        <ExceptionStacktrace codeLanguage={codeLanguage} exceptions={exceptions} />
+      return (
+        <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
+              <EuiSpacer />
+              <EuiButtonEmpty
+                aria-label={i18n.translate(
+                  'xpack.apm.errorSampleDetailTabContent.deobfuscateAndroidStackTraceLabel',
+                  { defaultMessage: 'Deobfuscate Android stack trace' }
+                )}
+                onClick={onClickDeobfuscate}
+                size={'s'}
+                data-test-subj="android-deobfuscate-button"
+              >
+                {i18n.translate(
+                  'xpack.apm.errorSampleDetailTabContent.androidDeobfuscateButtonLabel',
+                  {
+                    defaultMessage: 'deobfuscate',
+                  }
+                )}
+              </EuiButtonEmpty>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            {isPlaintextException ? (
+              <PlaintextStacktrace
+                message={exceptions[0].message}
+                type={exceptions[0]?.type}
+                stacktrace={
+                  deobfucstatedStacktrace.length
+                    ? deobfucstatedStacktrace
+                    : error?.error.stack_trace
+                }
+                codeLanguage={codeLanguage}
+              />
+            ) : (
+              <ExceptionStacktrace codeLanguage={codeLanguage} exceptions={exceptions} />
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       );
     default:
       return <ErrorMetadata error={error} />;
