@@ -177,4 +177,44 @@ describe('SelectInferenceId', () => {
     );
     expect(endpoint2.prop('aria-checked')).toEqual(false);
   });
+
+  it('should prioritize ELSER endpoint when available', () => {
+    const mockUseLoadInferenceEndpoints =
+      require('../../../public/application/services/api').useLoadInferenceEndpoints;
+    mockUseLoadInferenceEndpoints.mockReturnValue({
+      data: [
+        { inference_id: '.elser-2-elasticsearch', task_type: 'sparse_embedding' },
+        { inference_id: '.preconfigured-e5', task_type: 'text_embedding' },
+        { inference_id: 'endpoint-1', task_type: 'text_embedding' },
+      ] as InferenceAPIConfigResponse[],
+      isLoading: false,
+      error: null,
+    });
+
+    const TestComponent = () => {
+      const { form } = useForm();
+      return (
+        <Form form={form}>
+          <SelectInferenceId data-test-subj="data-inference-endpoint-list" />
+        </Form>
+      );
+    };
+
+    const setup = registerTestBed(TestComponent, {
+      memoryRouter: { wrapComponent: false },
+    });
+
+    return act(async () => {
+      const testBed = await setup();
+      const { find } = testBed;
+
+      find('inferenceIdButton').simulate('click');
+
+      const elserOption = findTestSubject(
+        find('data-inference-endpoint-list'),
+        'custom-inference_.elser-2-elasticsearch'
+      );
+      expect(elserOption.prop('aria-checked')).toEqual(true);
+    });
+  });
 });
