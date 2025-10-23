@@ -51,8 +51,8 @@ export const UnsavedChangesPrompt: React.FC<Props> = ({
     // Look for workflow ID in the path (could be /app/workflows/workflow-123 or /workflow-123)
     const getWorkflowId = (path: string) => {
       const parts = path.split('/');
-      const workflowIndex = parts.findIndex((part) => part.startsWith('workflow-'));
-      return workflowIndex !== -1 ? parts[workflowIndex] : null;
+      // If the path is the create page, return 'create', otherwise return the workflow ID
+      return parts.find((part) => part === 'create' || part.startsWith('workflow-')) ?? null;
     };
 
     const currentWorkflowId = getWorkflowId(currentPath);

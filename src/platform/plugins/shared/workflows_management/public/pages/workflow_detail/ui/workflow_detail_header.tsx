@@ -28,6 +28,7 @@ import {
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -95,6 +96,7 @@ export const WorkflowDetailHeader = ({
   highlightDiff,
   setHighlightDiff,
 }: WorkflowDetailHeaderProps) => {
+  const { id: workflowId } = useParams<{ id?: string }>();
   const { application } = useKibana().services;
   const styles = useMemoCss(componentStyles);
   const dispatch = useDispatch();
@@ -200,25 +202,27 @@ export const WorkflowDetailHeader = ({
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPageHeaderSection>
-          <EuiPageHeaderSection
-            css={{
-              flexBasis: '15%',
-            }}
-          >
-            <EuiFlexGroup justifyContent="center">
-              <EuiFlexItem grow={false}>
-                <EuiButtonGroup
-                  buttonSize="compressed"
-                  color="primary"
-                  options={buttonGroupOptions}
-                  idSelected={activeTab}
-                  legend="Switch between workflow and executions"
-                  type="single"
-                  onChange={(id) => handleTabChange(id as WorkflowUrlStateTabType)}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPageHeaderSection>
+          {workflowId && (
+            <EuiPageHeaderSection
+              css={{
+                flexBasis: '15%',
+              }}
+            >
+              <EuiFlexGroup justifyContent="center">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonGroup
+                    buttonSize="compressed"
+                    color="primary"
+                    options={buttonGroupOptions}
+                    idSelected={activeTab}
+                    legend="Switch between workflow and executions"
+                    type="single"
+                    onChange={(id) => handleTabChange(id as WorkflowUrlStateTabType)}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPageHeaderSection>
+          )}
           <EuiPageHeaderSection
             css={{
               flexBasis: '40%',
