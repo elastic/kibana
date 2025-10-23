@@ -84,13 +84,13 @@ export function getSlotResources(capabilities: ServerCapabilities): SlotResource
   const isServerless = capabilities.esTestCluster.from === 'serverless';
   const hasCcs = !!capabilities.servers.elasticsearch.ccs;
 
-  const numNodes = isServerless || hasCcs ? 2 : 1;
+  const numNodes = isServerless ? 3 : hasCcs ? 2 : 1;
 
   const esMemoryPerNode = capabilities.esTestCluster.esJavaOpts
     ? getMemFromJavaOpts(capabilities.esTestCluster.esJavaOpts)
     : undefined;
 
-  const esMemory = numNodes * (esMemoryPerNode ?? 1.5 * 1024);
+  const esMemory = numNodes * (esMemoryPerNode ?? 1.5 * 1024) * 1.5;
 
   const numContainers = Object.entries(capabilities.dockerServers ?? {}).filter(
     ([name, config]) => config.enabled
@@ -107,7 +107,11 @@ export function getSlotResources(capabilities: ServerCapabilities): SlotResource
     (capabilities.kbnTestServer.startRemoteKibana ? 1 : 0) +
     (capabilities.kbnTestServer.useDedicatedTaskRunner ? 1 : 0);
 
-  const kibanaMemory = kibanaNodes * 768;
+  const kibanaMemory = kibanaNodes * 1024;
+
+  const esCpu = 0.5 * numNodes;
+  const browserCpu = hasBrowser ? 1 : 0;
+  const kibanaCpu = kibanaNodes * 0.5;
 
   return {
     idle: {
@@ -115,12 +119,12 @@ export function getSlotResources(capabilities: ServerCapabilities): SlotResource
       memory: esMemory + kibanaMemory,
     },
     warming: {
-      cpu: numNodes,
+      cpu: numNodes * 1.5,
       memory: esMemory,
-      exclusive: true,
+      exclusive: false,
     },
     running: {
-      cpu: hasBrowser ? 2 : 1.5,
+      cpu: esCpu + browserCpu + kibanaCpu,
       memory: esMemory + kibanaMemory + containerMemory + browserMemory,
       exclusive: false,
     },
