@@ -119,11 +119,11 @@ describe('identifyDependencyUsage', () => {
       `x-pack/solutions/${solution}/packages`,
     ]).join('|');
     expect(configWithDepth2.collapse).toMatchInlineSnapshot(
-      `"^(${solutionsFolders}|x-pack/platform/plugins|x-pack/platform/packages|x-pack/packages|src/platform/plugins|src/platform/packages|src/core/packages|packages|src|test)/([^/]+)/([^/]+)"`
+      `"^(x-pack/solutions/observability/plugins|x-pack/solutions/observability/packages|x-pack/solutions/security/plugins|x-pack/solutions/security/packages|x-pack/solutions/search/plugins|x-pack/solutions/search/packages|x-pack/solutions/workplace_ai/plugins|x-pack/solutions/workplace_ai/packages|x-pack/platform/plugins|x-pack/platform/packages|x-pack/packages|src/platform/plugins|src/platform/packages|src/core/packages|packages|src|test)/([^/]+)/([^/]+)"`
     );
 
     expect(configWithDepth1.collapse).toMatchInlineSnapshot(
-      `"^(${solutionsFolders}|x-pack/platform/plugins|x-pack/platform/packages|x-pack/packages|src/platform/plugins|src/platform/packages|src/core/packages|packages|src|test)/([^/]+)|^node_modules/(@[^/]+/[^/]+|[^/]+)"`
+      `"^(x-pack/solutions/observability/plugins|x-pack/solutions/observability/packages|x-pack/solutions/security/plugins|x-pack/solutions/security/packages|x-pack/solutions/search/plugins|x-pack/solutions/search/packages|x-pack/solutions/workplace_ai/plugins|x-pack/solutions/workplace_ai/packages|x-pack/platform/plugins|x-pack/platform/packages|x-pack/packages|src/platform/plugins|src/platform/packages|src/core/packages|packages|src|test)/([^/]+)|^node_modules/(@[^/]+/[^/]+|[^/]+)"`
     );
   });
 
