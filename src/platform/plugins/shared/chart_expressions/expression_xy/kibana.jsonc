@@ -25,7 +25,7 @@
     ],
     "requiredBundles": [],
     "extraPublicDirs": [
-      "common/constants",
+      "common",
     ]
   }
 }
