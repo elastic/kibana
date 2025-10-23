@@ -106,6 +106,8 @@ export default function ({ getService }: FtrProviderContext) {
               namespaceType: 'multiple',
               hiddenType: false,
             },
+            managed: false,
+            references: [],
           },
           {
             id: 'a42c0580-3224-11e8-a572-ffca06da1357',
@@ -121,6 +123,14 @@ export default function ({ getService }: FtrProviderContext) {
               namespaceType: 'multiple-isolated',
               hiddenType: false,
             },
+            managed: false,
+            references: [
+              {
+                id: '960372e0-3224-11e8-a572-ffca06da1357',
+                name: 'search_0',
+                type: 'search',
+              },
+            ],
           },
         ]);
       });
