@@ -14,6 +14,8 @@ import { DiscoverBadgeButton } from '../stream_badges';
 import { useStreamDocCountsFetch } from '../../hooks/use_streams_doc_counts_fetch';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
+import { useDataStreamStats } from '../data_management/stream_detail_lifecycle/hooks/use_data_stream_stats';
+import { formatBytes } from '../data_management/stream_detail_lifecycle/helpers/format_bytes';
 import type { EnrichedStream } from '../stream_list_view/utils';
 import { css } from '@emotion/react';
 import { DATA_QUALITY_COLUMN_HEADER, RETENTION_COLUMN_HEADER, DOCUMENTS_COLUMN_HEADER } from '../stream_list_view/translations';
@@ -28,7 +30,7 @@ interface StreamNodePopupProps {
 }
 
 export const StreamNodePopover = ({ isOpen, onClose, stream, button }: StreamNodePopupProps) => {
-  const {effective_lifecycle: lifecycle, data_stream: dataStream, stream: { name: streamName, description: streamDescription }} = stream;
+  const { effective_lifecycle: lifecycle, data_stream: dataStream, stream: { name: streamName, description: streamDescription } } = stream;
   const router = useStreamsAppRouter();
 
   const numDataPoints = 25;
@@ -38,6 +40,14 @@ export const StreamNodePopover = ({ isOpen, onClose, stream, button }: StreamNod
     canReadFailureStore: false,
   });
   const { timeState } = useTimefilter();
+
+  const { stats: storageStats, error: storageError } = useDataStreamStats({
+    definition: {
+      stream: stream.stream,
+      data_stream_exists: !!dataStream,
+    } as Streams.ingest.all.GetResponse,
+    timeState,
+  });
 
   return (
     <EuiPopover
@@ -80,6 +90,28 @@ export const StreamNodePopover = ({ isOpen, onClose, stream, button }: StreamNod
                     numDataPoints={numDataPoints}
                   />
                 </div>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
+
+        {dataStream && storageStats && (
+          <EuiFlexItem>
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiText size="s" color="subdued">
+                  <strong>
+                    {i18n.translate('xpack.streams.streamDetailLifecycle.storageSize.title', { defaultMessage: 'Storage size' })}
+                  </strong>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="s" color="subdued">
+                  {storageError || !storageStats.ds?.stats?.sizeBytes
+                    ? '-'
+                    : formatBytes(storageStats.ds.stats.sizeBytes)
+                  }
+                </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
