@@ -14,7 +14,7 @@ import { useSelector } from 'react-redux';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { WorkflowDetailDto, WorkflowYaml } from '@kbn/workflows';
+import type { WorkflowDetailDto } from '@kbn/workflows';
 import { WorkflowDetailHeader } from './workflow_detail_header';
 import { WorkflowEditorLayout } from './workflow_detail_layout';
 import { WorkflowEditor } from './workflow_editor';
@@ -249,22 +249,6 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   const yamlValue = selectedExecutionId && execution ? execution.yaml : workflowYaml;
   const definition = useSelector(selectWorkflowDefinition) ?? null;
 
-  // Parse YAML to determine if workflow is enabled in create mode
-  const definitionFromCurrentYaml: WorkflowYaml | null = useMemo(() => {
-    try {
-      return workflowYaml ? JSON.parse(workflowYaml) : null;
-    } catch {
-      return null;
-    }
-  }, [workflowYaml]);
-
-  const isWorkflowEnabled = useMemo(() => {
-    if (isCreateMode) {
-      return definitionFromCurrentYaml?.enabled ?? false;
-    }
-    return workflow?.enabled ?? false;
-  }, [isCreateMode, definitionFromCurrentYaml?.enabled, workflow?.enabled]);
-
   const { handleUpdateSave, handleRunWorkflow, handleToggleWorkflow } = useWorkflowActions(
     id,
     workflowYaml,
@@ -325,7 +309,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
           activeTab={activeTab}
           canRunWorkflow={canRunWorkflow}
           canSaveWorkflow={canSaveWorkflow}
-          isEnabled={isWorkflowEnabled}
+          isEnabled={workflow?.enabled ?? false}
           handleRunClick={handleRun}
           handleSave={handleSave}
           handleToggleWorkflow={handleToggleWorkflow}
