@@ -344,7 +344,7 @@ export const useDashboardListingTable = ({
         const isDisabled = () => {
           if (!showWriteControls) return true;
           if (item?.managed === true) return true;
-          if (item?.canManageAccessControl === false && item?.accessMode === 'read_only')
+          if (item?.canManageAccessControl === false && item?.accessMode === 'write_restricted')
             return true;
           return false;
         };

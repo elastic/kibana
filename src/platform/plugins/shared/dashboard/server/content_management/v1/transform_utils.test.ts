@@ -198,7 +198,7 @@ describe('savedObjectToItem', () => {
       references: [],
       accessControl: {
         owner: 'owner1',
-        accessMode: 'read_only' as SavedObjectAccessControl['accessMode'],
+        accessMode: 'write_restricted' as SavedObjectAccessControl['accessMode'],
       },
     };
     const { item, error } = savedObjectToItem(input, false, { isAccessControlEnabled: true });
@@ -212,7 +212,7 @@ describe('savedObjectToItem', () => {
       },
       accessControl: {
         owner: 'owner1',
-        accessMode: 'read_only',
+        accessMode: 'write_restricted',
       },
     });
   });

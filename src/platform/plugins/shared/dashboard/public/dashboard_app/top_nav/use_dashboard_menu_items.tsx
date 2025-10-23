@@ -183,14 +183,14 @@ export const useDashboardMenuItems = ({
     if (isInEditAccessMode || canManageAccessControl) {
       return undefined;
     }
-    return topNavStrings.edit.readOnlyTooltip;
+    return topNavStrings.edit.writeRestrictedTooltip;
   }, [isInEditAccessMode, canManageAccessControl, dashboardApi.isManaged]);
 
   const getShareTooltip = useCallback(() => {
     if (!dashboardApi.isAccessControlEnabled) return undefined;
     return isInEditAccessMode
       ? topNavStrings.share.editModeTooltipContent
-      : topNavStrings.share.readOnlyModeTooltipContent;
+      : topNavStrings.share.writeRestrictedModeTooltipContent;
   }, [isInEditAccessMode, dashboardApi.isAccessControlEnabled]);
 
   /**

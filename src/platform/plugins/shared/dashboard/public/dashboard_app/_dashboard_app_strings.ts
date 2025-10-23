@@ -197,7 +197,7 @@ export const topNavStrings = {
     description: i18n.translate('dashboard.topNave.editConfigDescription', {
       defaultMessage: 'Switch to edit mode',
     }),
-    readOnlyTooltip: i18n.translate('dashboard.topNave.editButtonTooltip.readOnly', {
+    writeRestrictedTooltip: i18n.translate('dashboard.topNave.editButtonTooltip.writeRestricted', {
       defaultMessage:
         "You don't have permission to edit this dashboard. Contact the author to change it.",
     }),
@@ -255,9 +255,12 @@ export const topNavStrings = {
     tooltipTitle: i18n.translate('dashboard.topNave.shareTooltipTitle', {
       defaultMessage: 'Share',
     }),
-    readOnlyModeTooltipContent: i18n.translate('dashboard.topNave.shareTooltipContent.readOnly', {
-      defaultMessage: 'Everybody in this space can view',
-    }),
+    writeRestrictedModeTooltipContent: i18n.translate(
+      'dashboard.topNave.shareTooltipContent.writeRestricted',
+      {
+        defaultMessage: 'Everybody in this space can view',
+      }
+    ),
     editModeTooltipContent: i18n.translate(
       'dashboard.topNave.shareButtonEditModeTooltipContent.editable',
       {

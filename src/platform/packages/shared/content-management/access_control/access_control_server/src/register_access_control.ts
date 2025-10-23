@@ -93,7 +93,10 @@ export const registerAccessControl = async ({
                 id: schema.string(),
               })
             ),
-            accessMode: schema.oneOf([schema.literal('read_only'), schema.literal('default')]),
+            accessMode: schema.oneOf([
+              schema.literal('write_restricted'),
+              schema.literal('default'),
+            ]),
           }),
         },
         response: {

@@ -20,7 +20,7 @@ export const dashboardCreateOptionsSchema = schema.object({
     schema.object({
       owner: schema.maybe(schema.string()),
       accessMode: schema.maybe(
-        schema.oneOf([schema.literal('default'), schema.literal('read_only')])
+        schema.oneOf([schema.literal('default'), schema.literal('write_restricted')])
       ),
     })
   ),

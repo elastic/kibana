@@ -143,7 +143,7 @@ describe('Save dashboard state', () => {
         title: 'New Dashboard',
       },
       saveOptions: { saveAsCopy: true },
-      accessMode: 'read_only',
+      accessMode: 'write_restricted',
     });
 
     expect(createResult.id).toBe('newlyGeneratedId');
@@ -151,7 +151,7 @@ describe('Save dashboard state', () => {
       expect.objectContaining({
         options: expect.objectContaining({
           accessControl: {
-            accessMode: 'read_only',
+            accessMode: 'write_restricted',
           },
         }),
       })
@@ -166,7 +166,7 @@ describe('Save dashboard state', () => {
       },
       lastSavedId: 'existing-dashboard-id',
       saveOptions: {},
-      accessMode: 'read_only', // Should be ignored for updates
+      accessMode: 'write_restricted', // Should be ignored for updates
     });
 
     expect(updateResult.id).toBe('existing-dashboard-id');
