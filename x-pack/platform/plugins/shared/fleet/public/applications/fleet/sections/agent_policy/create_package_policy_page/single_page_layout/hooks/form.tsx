@@ -36,6 +36,7 @@ import {
   sendGetPackagePolicies,
   useMultipleAgentPolicies,
   useFleetStatus,
+  sendCreateAgentPolicyWithCloudConnector,
 } from '../../../../../hooks';
 import { isVerificationError, packageToPackagePolicy } from '../../../../../services';
 import type { NewPackagePolicyInput } from '../../../../../../../../common';
@@ -60,6 +61,10 @@ import {
   getCloudShellUrlFromPackagePolicy,
 } from '../../../../../../../components/cloud_security_posture/services';
 import { ensurePackageKibanaAssetsInstalled } from '../../../../../services/ensure_kibana_assets_installed';
+import {
+  extractCloudConnectorVars,
+  shouldUseCloudConnectorAPI,
+} from '../services/extract_cloud_connector_vars';
 
 import { useAgentless, useSetupTechnology } from './setup_technology';
 
@@ -480,6 +485,121 @@ export function useOnSubmit({
         setFormState('CONFIRM');
         return;
       }
+      // Check if we should use the atomic cloud connector API
+      const useCloudConnectorAPI = shouldUseCloudConnectorAPI(packagePolicy, selectedPolicyTab);
+
+      if (useCloudConnectorAPI && !overrideCreatedAgentPolicy) {
+        try {
+          setFormState('LOADING');
+
+          // Extract cloud connector vars from package policy
+          const cloudConnectorData = extractCloudConnectorVars(packagePolicy);
+
+          if (!cloudConnectorData) {
+            throw new Error('Failed to extract cloud connector configuration');
+          }
+
+          // Prepare the atomic request by spreading agent policy and extracting package policy fields
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          const { policy_id, policy_ids, ...packagePolicyFields } = packagePolicy;
+
+          const { error, data } = await sendCreateAgentPolicyWithCloudConnector({
+            ...newAgentPolicy,
+            cloud_connector: {
+              name: `${newAgentPolicy.name}-cloud-connector`,
+              cloudProvider: cloudConnectorData.cloudProvider,
+              vars: cloudConnectorData.vars,
+            },
+            package_policy: packagePolicyFields,
+          });
+
+          if (error) {
+            throw error;
+          }
+
+          if (!data?.item) {
+            throw new Error('Invalid response from cloud connector API');
+          }
+
+          // Update state with the created resources
+          const createdAgentPolicy: AgentPolicy = {
+            id: data.item.agent_policy_id,
+            name: newAgentPolicy.name,
+            namespace: newAgentPolicy.namespace || 'default',
+            description: newAgentPolicy.description,
+            monitoring_enabled: newAgentPolicy.monitoring_enabled || [],
+            status: 'active',
+            is_managed: false,
+            revision: 1,
+            updated_at: new Date().toISOString(),
+            updated_by: 'system',
+            supports_agentless: newAgentPolicy.supports_agentless,
+            agentless: newAgentPolicy.agentless,
+          } as AgentPolicy;
+
+          const createdPackagePolicy: PackagePolicy = {
+            ...packagePolicy,
+            id: data.item.package_policy_id,
+            policy_id: data.item.agent_policy_id,
+            policy_ids: [data.item.agent_policy_id],
+            cloud_connector_id: data.item.cloud_connector_id,
+            revision: 1,
+            created_at: new Date().toISOString(),
+            created_by: 'system',
+            updated_at: new Date().toISOString(),
+            updated_by: 'system',
+          } as PackagePolicy;
+
+          setAgentPolicies([createdAgentPolicy]);
+          setSavedPackagePolicy(createdPackagePolicy);
+
+          // Ensure Kibana assets are installed
+          if (createdPackagePolicy.package) {
+            await ensurePackageKibanaAssetsInstalled({
+              currentSpaceId: spaceId ?? DEFAULT_SPACE_ID,
+              pkgName: createdPackagePolicy.package.name,
+              pkgVersion: createdPackagePolicy.package.version,
+              toasts: notifications.toasts,
+            });
+          }
+
+          // Show success notification
+          notifications.toasts.addSuccess({
+            title: i18n.translate('xpack.fleet.createPackagePolicy.addedNotificationTitle', {
+              defaultMessage: `''{packagePolicyName}'' integration added.`,
+              values: {
+                packagePolicyName: packagePolicy.name,
+              },
+            }),
+            'data-test-subj': 'packagePolicyCreateSuccessToast',
+          });
+
+          // Navigate based on agent policy type
+          const isAgentlessConfigured = isAgentlessAgentPolicy(createdAgentPolicy);
+          if (!skipConfirmModal) {
+            if (isAgentlessConfigured) {
+              onSaveNavigate(createdPackagePolicy, ['openEnrollmentFlyout']);
+            } else {
+              onSaveNavigate(createdPackagePolicy);
+            }
+          }
+
+          return;
+        } catch (e) {
+          setFormState('VALID');
+          notifications.toasts.addError(e as Error, {
+            title: i18n.translate(
+              'xpack.fleet.createAgentPolicyWithCloudConnector.errorNotificationTitle',
+              {
+                defaultMessage: 'Unable to create integration with cloud connector',
+              }
+            ),
+          });
+          return;
+        }
+      }
+
+      // Traditional flow: create agent policy and package policy separately
       let createdPolicy = overrideCreatedAgentPolicy;
       if (!overrideCreatedAgentPolicy) {
         try {
