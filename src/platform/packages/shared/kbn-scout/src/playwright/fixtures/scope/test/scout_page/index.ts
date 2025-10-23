@@ -32,7 +32,8 @@ export type ScoutPage = Page & {
    */
   waitForLoadingIndicatorHidden: () => ReturnType<Page['waitForSelector']>;
   /**
-   * Presses a key until the element with the css selector is in focus.
+   * Presses a key until the element with the css selector is in focus. If multiple elements match it will
+   * press the key until the first occurrence of the element is focused.
    * @param selector - The css selector for the element.
    * @param key The key to press for keyboard navigation, defaults to Tab if none specified. Corresponds with the playwright keyboard api https://playwright.dev/docs/api/class-keyboard.
    * @returns A Promise that resolves once the the element with the css selector is focused, or an error occurs.
