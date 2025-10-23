@@ -86,7 +86,7 @@ function extractCommonProperties(savedObject: SavedObjectWithMetadata) {
     id: savedObject.id,
     type: savedObject.type,
     meta: savedObject.meta,
-    managed: savedObject.managed,
+    ...(savedObject.managed !== undefined && { managed: savedObject.managed }),
     references: savedObject.references,
   };
 }

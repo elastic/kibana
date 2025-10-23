@@ -178,18 +178,21 @@ describe('findRelationships', () => {
         relationship: 'child',
         type: 'some-type',
         meta: expect.any(Object),
+        references: [],
       },
       {
         id: 'ref-2',
         relationship: 'child',
         type: 'another-type',
         meta: expect.any(Object),
+        references: [],
       },
       {
         id: 'parent-id',
         relationship: 'parent',
         type: 'parent-type',
         meta: expect.any(Object),
+        references: [],
       },
     ]);
     expect(invalidRelations).toHaveLength(0);
@@ -250,6 +253,7 @@ describe('findRelationships', () => {
         relationship: 'child',
         type: 'another-type',
         meta: expect.any(Object),
+        references: [],
       },
     ]);
 
@@ -324,6 +328,7 @@ describe('findRelationships', () => {
             uiCapabilitiesPath: 'uiCapabilitiesPath',
           },
         },
+        references: [],
       },
     ]);
   });
