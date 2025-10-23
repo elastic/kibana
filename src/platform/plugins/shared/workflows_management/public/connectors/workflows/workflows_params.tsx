@@ -20,6 +20,7 @@ import {
   EuiPopoverFooter,
   EuiSelectable,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 
@@ -40,8 +41,10 @@ interface WorkflowOption {
   label: string;
   disabled?: boolean;
   checked?: 'on' | 'off';
+  namePrepend?: React.ReactNode;
   prepend?: React.ReactNode;
   append?: React.ReactNode;
+  hoverTooltip?: string;
   data?: {
     secondaryContent?: string;
   };
@@ -111,9 +114,16 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
 
   // Custom render function for workflow options
   const renderWorkflowOption = useCallback((option: WorkflowOption, searchValue: string) => {
-    return (
+    const workflowName = (
       <>
+        {option.namePrepend}
         <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+      </>
+    );
+
+    const content = (
+      <>
+        {workflowName}
         {option.secondaryContent && (
           <EuiText size="xs" color="subdued" className="eui-displayBlock">
             <small>
@@ -123,6 +133,13 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
         )}
       </>
     );
+
+    // Add hoverTooltip if defined
+    if (option.hoverTooltip) {
+      return <EuiToolTip content={option.hoverTooltip}>{content}</EuiToolTip>;
+    }
+
+    return content;
   }, []);
 
   // Ensure proper initialization of action parameters
@@ -225,16 +242,23 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
           }
 
           // Determine what to show in prepend
-          let prependElement;
+          let prependNameElement;
           if (wasSelectedButNowDisabled) {
             // Show warning icon for previously selected but now disabled workflows
-            prependElement = (
+            prependNameElement = (
               <EuiIcon type="alert" color="warning" aria-label={i18n.WORKFLOW_DISABLED_WARNING} />
             );
           } else if (isDisabled) {
             // Show disabled badge for disabled workflows
-            prependElement = <EuiBadge color="default">{i18n.DISABLED_BADGE_LABEL}</EuiBadge>;
+            prependNameElement = (
+              <EuiBadge color="default" style={{ marginRight: '8px' }}>
+                {i18n.DISABLED_BADGE_LABEL}
+              </EuiBadge>
+            );
           }
+
+          const hoverTooltip =
+            isDisabled && workflow.id ? i18n.DISABLED_WORKFLOW_TOOLTIP : undefined;
 
           const workflowTags = workflow.definition?.tags || [];
 
@@ -248,10 +272,11 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
               label: workflow.name,
               disabled: isDisabled,
               checked: isSelected ? 'on' : undefined,
-              prepend: prependElement,
+              namePrepend: prependNameElement,
               append: <TagsBadge tags={workflowTags} />,
+              hoverTooltip,
               data: {
-                secondaryContent: workflow.description,
+                secondaryContent: workflow.description || 'No description',
               },
             } as WorkflowOption,
             hasAlertTriggerType,

@@ -101,3 +101,10 @@ export const OPEN_WORKFLOW_LINK = i18n.translate(
     defaultMessage: 'Open workflow',
   }
 );
+
+export const DISABLED_WORKFLOW_TOOLTIP = i18n.translate(
+  'xpack.stackConnectors.components.workflows.disabledWorkflowTooltip',
+  {
+    defaultMessage: 'Disabled workflow',
+  }
+);
