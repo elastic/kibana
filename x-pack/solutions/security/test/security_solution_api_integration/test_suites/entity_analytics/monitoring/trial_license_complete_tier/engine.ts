@@ -431,6 +431,14 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('integrations sync', async () => {
+      // --- Timestamps
+      const nowMinus1M1D = await privMonUtils.integrationsSync.dateOffsetFromNow({
+        months: 2,
+        days: 1,
+      });
+      const nowMinus2M = await privMonUtils.integrationsSync.dateOffsetFromNow({ months: 2 });
+      const nowMinus1w = await privMonUtils.integrationsSync.dateOffsetFromNow({ days: 7 });
+      const nowMinus6d = await privMonUtils.integrationsSync.dateOffsetFromNow({ days: 6 });
       beforeEach(async () => {
         await esArchiver.load(
           'x-pack/solutions/security/test/fixtures/es_archives/privileged_monitoring/integrations/okta',
@@ -541,14 +549,6 @@ export default ({ getService }: FtrProviderContext) => {
           kaelyn: 'AZmLBcGV9XhZAwOqZV5s', // Kaelyn.Shanahan
           bennett: 'AZmLBcGV9XhZAwOqZV5y', // Bennett.Becker
         };
-        // --- Timestamps
-        const nowMinus1M1D = await privMonUtils.integrationsSync.dateOffsetFromNow({
-          months: 2,
-          days: 1,
-        });
-        const nowMinus2M = await privMonUtils.integrationsSync.dateOffsetFromNow({ months: 2 });
-        const nowMinus1w = await privMonUtils.integrationsSync.dateOffsetFromNow({ days: 7 });
-        const nowMinus6d = await privMonUtils.integrationsSync.dateOffsetFromNow({ days: 6 });
         // PHASE 1: Push two users out of range, sync => expect 4 privileged remain
         await privMonUtils.integrationsSync.setTimestamp(IDS.devon, nowMinus1M1D, oktaIndex);
         await privMonUtils.integrationsSync.setTimestamp(IDS.elinor, nowMinus2M, oktaIndex);
@@ -592,8 +592,14 @@ export default ({ getService }: FtrProviderContext) => {
         expect(markerAfterPhase4).toBe(nowMinus6d);
       });
 
-      it.skip('deletion detection should delete users on full sync', async () => {
+      it.skip('deletion detection should delete missing users on full sync', async () => {
         // placeholder for deletion detection
+        const oktaIndex = 'logs-entityanalytics_okta.user-default';
+        const oktaEventsIndex = 'logs-entityanalytics_okta.entity-default';
+        // at this point, the sync has run once in beforeEach, so users are present
+        // all users should be within the last month range.
+        // make timestamps before oldest user and after latest user
+        // do not upload new data, do a sync, expect all users to be deleted
       });
     });
 
