@@ -32,7 +32,5 @@ export default {
 } as Meta;
 
 export const IntegrationPreference = () => {
-
   return <Component initialType="agent" onChange={action('onChange')} />;
-
 };
