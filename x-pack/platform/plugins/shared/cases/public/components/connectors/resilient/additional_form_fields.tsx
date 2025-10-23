@@ -140,6 +140,7 @@ export const AdditionalFormFields = React.memo<{
           );
         })}
       </div>
+      <EuiSpacer size="m" />
       <EuiFormRow
         label={i18n.ADDITIONAL_FIELDS_LABEL}
         helpText={i18n.ADDITIONAL_FIELDS_HELP_TEXT}
