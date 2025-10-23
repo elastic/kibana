@@ -269,4 +269,62 @@ This is a test integration with no sample events.
       expect(result.queryByText('This should not run')).not.toBeInTheDocument();
     });
   });
+
+  it('should render tooltips from EUI tooltip syntax', async () => {
+    const result = render(`
+# Test Integration
+
+This is a test with !{tooltip[hover me](This is the tooltip content)} in the text.
+`);
+
+    await waitFor(() => {
+      // Check that the tooltip wrapper span exists
+      const tooltipWrapper = result.container.querySelector('.eui-tooltip-wrapper');
+      expect(tooltipWrapper).toBeInTheDocument();
+
+      // Check that the anchor text is rendered
+      expect(result.getByText('hover me')).toBeInTheDocument();
+
+      // Check that the title attribute contains the tooltip content
+      expect(tooltipWrapper).toHaveAttribute('title', 'This is the tooltip content');
+    });
+  });
+
+  it('should handle multiple tooltips in the same document', async () => {
+    const result = render(`
+# Test Integration
+
+First !{tooltip[tooltip one](Content one)} and second !{tooltip[tooltip two](Content two)}.
+`);
+
+    await waitFor(() => {
+      // Check that both tooltip wrappers exist
+      const tooltipWrappers = result.container.querySelectorAll('.eui-tooltip-wrapper');
+      expect(tooltipWrappers.length).toBe(2);
+
+      // Check that both anchor texts are rendered
+      expect(result.getByText('tooltip one')).toBeInTheDocument();
+      expect(result.getByText('tooltip two')).toBeInTheDocument();
+
+      // Check that both tooltips have their respective content
+      expect(tooltipWrappers[0]).toHaveAttribute('title', 'Content one');
+      expect(tooltipWrappers[1]).toHaveAttribute('title', 'Content two');
+    });
+  });
+
+  it('should escape quotes in tooltip content', async () => {
+    const result = render(`
+# Test Integration
+
+This has !{tooltip[text](Content with "quotes" inside)} in it.
+`);
+
+    await waitFor(() => {
+      const tooltipWrapper = result.container.querySelector('.eui-tooltip-wrapper');
+      expect(tooltipWrapper).toBeInTheDocument();
+
+      // Quotes should be escaped as &quot;
+      expect(tooltipWrapper).toHaveAttribute('title', 'Content with &quot;quotes&quot; inside');
+    });
+  });
 });
