@@ -43,6 +43,7 @@ export const PipelineTreeNodeLabel = ({
             e.stopPropagation();
             onClick();
           }}
+          data-test-subj={`pipelineTreeNode-${pipelineName}-link`}
         >
           {pipelineName}
         </EuiLink>

@@ -75,7 +75,7 @@ describe('PipelineTreeNodeLabel', () => {
       />
     );
 
-    const label = getByTestId('pipelineTreeNode-clickable-pipeline');
+    const label = getByTestId('pipelineTreeNode-clickable-pipeline-link');
     label.click();
 
     expect(handleClick).toHaveBeenCalled();

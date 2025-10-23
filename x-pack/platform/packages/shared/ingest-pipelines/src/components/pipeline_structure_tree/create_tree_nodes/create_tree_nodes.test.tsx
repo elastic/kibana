@@ -63,7 +63,7 @@ describe('createTreeNodesFromPipelines', () => {
     const node = createTreeNodesFromPipelines(pipeline, '', clickTreeNode, clickMorePipelines);
     const { getByTestId } = renderTreeNode(node);
 
-    fireEvent.click(getByTestId('pipelineTreeNode-test-pipeline'));
+    fireEvent.click(getByTestId('pipelineTreeNode-test-pipeline-link'));
     expect(clickTreeNode).toHaveBeenCalledWith('test-pipeline');
   });
 
