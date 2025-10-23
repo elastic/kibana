@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { SUB_ACTION, TinesRunActionParams } from '@kbn/connector-schemas/tines';
+import type { TinesRunActionParams } from '@kbn/connector-schemas/tines';
+import type { SUB_ACTION } from '@kbn/connector-schemas/tines/constants';
 
 export type TinesExecuteSubActionParams = Omit<Partial<TinesRunActionParams>, 'webhook'> & {
   webhook?: Partial<TinesRunActionParams['webhook']>;
