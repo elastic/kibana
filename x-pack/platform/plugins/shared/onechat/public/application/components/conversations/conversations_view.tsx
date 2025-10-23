@@ -61,49 +61,49 @@ export const OnechatConversationsView: React.FC<{}> = () => {
 
   return (
     <SendMessageProvider>
-      <KibanaPageTemplate
-        offset={0}
-        restrictWidth={false}
-        data-test-subj="onechatPageConversations"
-        grow={false}
-        panelled={false}
-        mainProps={{
-          css: mainStyles,
-        }}
-        responsive={[]}
-      >
-        {isSidebarOpen && (
-          <KibanaPageTemplate.Sidebar data-test-subj="onechatSidebar" css={sidebarStyles}>
-            <ConversationSidebar conversations={conversations} isLoading={isLoading} />
-          </KibanaPageTemplate.Sidebar>
-        )}
-
-        <KibanaPageTemplate.Header
-          css={headerStyles}
-          bottomBorder={false}
-          aria-label={labels.header}
-          paddingSize="m"
-        >
-          <ConversationHeader
-            isSidebarOpen={isSidebarOpen}
-            onToggleSidebar={() => {
-              setIsSidebarOpen((open) => !open);
-            }}
-          />
-        </KibanaPageTemplate.Header>
-        <KibanaPageTemplate.Section
-          paddingSize="none"
-          grow
-          contentProps={{
-            css: contentStyles,
+      <RoutedConversationProvider>
+        <KibanaPageTemplate
+          offset={0}
+          restrictWidth={false}
+          data-test-subj="onechatPageConversations"
+          grow={false}
+          panelled={false}
+          mainProps={{
+            css: mainStyles,
           }}
-          aria-label={labels.content}
+          responsive={[]}
         >
-          <RoutedConversationProvider>
+          {isSidebarOpen && (
+            <KibanaPageTemplate.Sidebar data-test-subj="onechatSidebar" css={sidebarStyles}>
+              <ConversationSidebar conversations={conversations} isLoading={isLoading} />
+            </KibanaPageTemplate.Sidebar>
+          )}
+
+          <KibanaPageTemplate.Header
+            css={headerStyles}
+            bottomBorder={false}
+            aria-label={labels.header}
+            paddingSize="m"
+          >
+            <ConversationHeader
+              isSidebarOpen={isSidebarOpen}
+              onToggleSidebar={() => {
+                setIsSidebarOpen((open) => !open);
+              }}
+            />
+          </KibanaPageTemplate.Header>
+          <KibanaPageTemplate.Section
+            paddingSize="none"
+            grow
+            contentProps={{
+              css: contentStyles,
+            }}
+            aria-label={labels.content}
+          >
             <Conversation />
-          </RoutedConversationProvider>
-        </KibanaPageTemplate.Section>
-      </KibanaPageTemplate>
+          </KibanaPageTemplate.Section>
+        </KibanaPageTemplate>
+      </RoutedConversationProvider>
     </SendMessageProvider>
   );
 };

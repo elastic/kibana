@@ -10,7 +10,7 @@ import type { ConversationWithoutRounds } from '@kbn/onechat-common';
 import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { useConversationIdFromContext } from '../../../hooks/use_conversation_context';
+import { useConversationId } from '../../../hooks/use_conversation_context';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
 import { useConversationActions } from '../../../hooks/use_conversation_actions';
@@ -21,7 +21,7 @@ interface ConversationItemProps {
 
 export const ConversationItem: React.FC<ConversationItemProps> = ({ conversation }) => {
   const { createOnechatUrl } = useNavigation();
-  const currentConversationId = useConversationIdFromContext();
+  const currentConversationId = useConversationId();
   const { deleteConversation } = useConversationActions();
   const isActive = currentConversationId === conversation.id;
   const [showDeleteModal, setShowDeleteModal] = useState(false);

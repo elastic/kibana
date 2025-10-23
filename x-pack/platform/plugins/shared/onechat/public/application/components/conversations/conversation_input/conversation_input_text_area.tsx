@@ -9,7 +9,7 @@ import { EuiFlexItem, EuiTextArea, keys } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef } from 'react';
-import { useConversationIdFromContext } from '../../../hooks/use_conversation_context';
+import { useConversationId } from '../../../hooks/use_conversation_context';
 
 const inputContainerStyles = css`
   display: flex;
@@ -46,7 +46,7 @@ export const ConversationInputTextArea: React.FC<ConversationInputTextAreaProps>
   disabled,
   agentId,
 }) => {
-  const conversationId = useConversationIdFromContext();
+  const conversationId = useConversationId();
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {

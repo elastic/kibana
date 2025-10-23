@@ -12,10 +12,7 @@ import { useHasActiveConversation } from '../../hooks/use_conversation';
 import { ConversationInputForm } from './conversation_input/conversation_input_form';
 import { ConversationRounds } from './conversation_rounds/conversation_rounds';
 import { NewConversationPrompt } from './new_conversation_prompt';
-import {
-  useConversationIdFromContext,
-  useShouldStickToBottomFromContext,
-} from '../../hooks/use_conversation_context';
+import { useConversationId, useShouldStickToBottom } from '../../hooks/use_conversation_context';
 import { useSendMessage } from '../../context/send_message/send_message_context';
 import { useConversationScrollActions } from '../../hooks/use_conversation_scroll_actions';
 import { useConversationStatus } from '../../hooks/use_conversation';
@@ -30,12 +27,12 @@ const conversationContainerStyles = css`
 `;
 
 export const Conversation: React.FC<{}> = () => {
-  const conversationId = useConversationIdFromContext();
+  const conversationId = useConversationId();
   const hasActiveConversation = useHasActiveConversation();
   const { euiTheme } = useEuiTheme();
   const { isResponseLoading } = useSendMessage();
   const { isFetched } = useConversationStatus();
-  const shouldStickToBottom = useShouldStickToBottomFromContext();
+  const shouldStickToBottom = useShouldStickToBottom();
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const {

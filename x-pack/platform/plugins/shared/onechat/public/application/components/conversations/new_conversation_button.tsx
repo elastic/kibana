@@ -10,13 +10,13 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useNavigation } from '../../hooks/use_navigation';
 import { appPaths } from '../../utils/app_paths';
-import { useConversationIdFromContext } from '../../hooks/use_conversation_context';
+import { useConversationId } from '../../hooks/use_conversation_context';
 import { useIsSendingMessage } from '../../hooks/use_is_sending_message';
 import { useSendMessage } from '../../context/send_message/send_message_context';
 
 export const NewConversationButton: React.FC<{}> = () => {
   const { createOnechatUrl } = useNavigation();
-  const conversationId = useConversationIdFromContext();
+  const conversationId = useConversationId();
   const isNewConversation = !conversationId;
   const isSendingMessage = useIsSendingMessage();
   const { cleanConversation } = useSendMessage();

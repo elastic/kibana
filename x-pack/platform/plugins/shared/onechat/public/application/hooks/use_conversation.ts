@@ -11,7 +11,7 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { oneChatDefaultAgentId } from '@kbn/onechat-common';
 import { queryKeys } from '../query_keys';
 import { newConversationId } from '../utils/new_conversation';
-import { useConversationIdFromContext } from './use_conversation_context';
+import { useConversationId } from './use_conversation_context';
 import { useIsSendingMessage } from './use_is_sending_message';
 import { useOnechatServices } from './use_onechat_service';
 import { storageKeys } from '../storage_keys';
@@ -19,7 +19,7 @@ import { useSendMessage } from '../context/send_message/send_message_context';
 import { useValidateAgentId } from './agents/use_validate_agent_id';
 
 export const useConversation = () => {
-  const conversationId = useConversationIdFromContext();
+  const conversationId = useConversationId();
   const { conversationsService } = useOnechatServices();
   const queryKey = queryKeys.conversations.byId(conversationId ?? newConversationId);
   const isSendingMessage = useIsSendingMessage();
@@ -66,7 +66,7 @@ const useGetNewConversationAgentId = () => {
 export const useAgentId = () => {
   const { conversation } = useConversation();
   const agentId = conversation?.agent_id;
-  const conversationId = useConversationIdFromContext();
+  const conversationId = useConversationId();
   const isNewConversation = !conversationId;
   const getNewConversationAgentId = useGetNewConversationAgentId();
 
@@ -117,7 +117,7 @@ export const useStepsFromPrevRounds = () => {
 };
 
 export const useHasActiveConversation = () => {
-  const conversationId = useConversationIdFromContext();
+  const conversationId = useConversationId();
   const conversationRounds = useConversationRounds();
   return Boolean(conversationId || conversationRounds.length > 0);
 };

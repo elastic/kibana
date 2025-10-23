@@ -9,7 +9,7 @@ import { useMutation } from '@kbn/react-query';
 import { useRef, useState } from 'react';
 import { useAgentId } from '../../hooks/use_conversation';
 import { useConversationActions } from '../../hooks/use_conversation_actions';
-import { useConversationIdFromContext } from '../../hooks/use_conversation_context';
+import { useConversationId } from '../../hooks/use_conversation_context';
 import { useOnechatServices } from '../../hooks/use_onechat_service';
 import { useReportConverseError } from '../../hooks/use_report_error';
 import { mutationKeys } from '../../mutation_keys';
@@ -26,7 +26,7 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
   const conversationActions = useConversationActions();
   const [isResponseLoading, setIsResponseLoading] = useState(false);
   const [agentReasoning, setAgentReasoning] = useState<string | null>(null);
-  const conversationId = useConversationIdFromContext();
+  const conversationId = useConversationId();
   const isMutatingNewConversationRef = useRef(false);
   const agentId = useAgentId();
   const messageControllerRef = useRef<AbortController | null>(null);

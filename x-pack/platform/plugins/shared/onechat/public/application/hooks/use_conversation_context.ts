@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import { useConversationContext } from '../context/conversation_context';
 import { newConversationId } from '../utils/new_conversation';
 
-export const useConversationIdFromContext = () => {
+export const useConversationId = () => {
   const { conversationId } = useConversationContext();
 
   const processedConversationId = useMemo(() => {
@@ -19,7 +19,7 @@ export const useConversationIdFromContext = () => {
   return processedConversationId;
 };
 
-export const useShouldStickToBottomFromContext = () => {
+export const useShouldStickToBottom = () => {
   const { shouldStickToBottom } = useConversationContext();
   return shouldStickToBottom ?? true;
 };
