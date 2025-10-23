@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DashboardPanel } from '../../server';
-
 import { dataService } from '../services/kibana_services';
 import { getSampleDashboardState } from '../mocks';
 import { getSerializedState } from './get_serialized_state';
@@ -39,7 +37,6 @@ describe('getSerializedState', () => {
     const dashboardState = getSampleDashboardState();
     const result = getSerializedState({
       controlGroupReferences: [],
-      generateNewIds: false,
       dashboardState,
       panelReferences: [],
     });
@@ -72,43 +69,6 @@ describe('getSerializedState', () => {
     expect(result.references).toEqual([]);
   });
 
-  it('should generate new IDs for panels and references when generateNewIds is true', () => {
-    const dashboardState = {
-      ...getSampleDashboardState(),
-      panels: [{ uid: 'oldPanelId', type: 'visualization' } as DashboardPanel],
-    };
-    const result = getSerializedState({
-      controlGroupReferences: [],
-      generateNewIds: true,
-      dashboardState,
-      panelReferences: [
-        {
-          name: 'oldPanelId:indexpattern_foobar',
-          type: 'index-pattern',
-          id: 'bizzbuzz',
-        },
-      ],
-    });
-
-    expect(result.attributes.panels).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "type": "visualization",
-          "uid": "54321",
-        },
-      ]
-    `);
-    expect(result.references).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "id": "bizzbuzz",
-          "name": "54321:indexpattern_foobar",
-          "type": "index-pattern",
-        },
-      ]
-    `);
-  });
-
   it('should include control group references', () => {
     const dashboardState = getSampleDashboardState();
     const controlGroupReferences = [
@@ -116,7 +76,6 @@ describe('getSerializedState', () => {
     ];
     const result = getSerializedState({
       controlGroupReferences,
-      generateNewIds: false,
       dashboardState,
       panelReferences: [],
     });
@@ -131,7 +90,6 @@ describe('getSerializedState', () => {
     ];
     const result = getSerializedState({
       controlGroupReferences: [],
-      generateNewIds: false,
       dashboardState,
       panelReferences,
     });
