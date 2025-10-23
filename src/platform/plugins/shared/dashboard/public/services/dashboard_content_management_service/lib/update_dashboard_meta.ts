@@ -9,7 +9,7 @@
 
 import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
 import type {
-  DashboardAttributes,
+  DashboardState,
   DashboardUpdateIn,
   DashboardUpdateOut,
 } from '../../../../server/content_management';
@@ -19,8 +19,8 @@ import { getDashboardContentManagementCache } from '..';
 
 export interface UpdateDashboardMetaProps {
   id: DashboardUpdateIn['id'];
-  title: DashboardAttributes['title'];
-  description?: DashboardAttributes['description'];
+  title: DashboardState['title'];
+  description?: DashboardState['description'];
   tags: string[];
 }
 

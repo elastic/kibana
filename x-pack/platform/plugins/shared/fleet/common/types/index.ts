@@ -111,6 +111,7 @@ export interface FleetConfigType {
   integrationsHomeOverride?: string;
   prereleaseEnabledByDefault?: boolean;
   hideDashboards?: boolean;
+  integrationRollbackTTL?: string;
   installIntegrationsKnowledge?: boolean;
 }
 
