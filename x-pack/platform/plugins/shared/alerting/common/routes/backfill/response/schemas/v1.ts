@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ruleParamsSchemaWithRuleTypeIdV1 } from '@kbn/response-ops-rule-params';
+import { ruleParamsSchemaV1 } from '@kbn/response-ops-rule-params';
 import { adHocRunStatus } from '../../../../constants';
 
 export const statusSchema = schema.oneOf([
@@ -27,7 +27,7 @@ export const backfillResponseSchema = schema.object({
     name: schema.string(),
     tags: schema.arrayOf(schema.string()),
     rule_type_id: schema.string(),
-    params: ruleParamsSchemaWithRuleTypeIdV1('alertTypeId'),
+    params: ruleParamsSchemaV1,
     api_key_owner: schema.nullable(schema.string()),
     api_key_created_by_user: schema.maybe(schema.nullable(schema.boolean())),
     consumer: schema.string(),

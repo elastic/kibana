@@ -46,8 +46,6 @@ import { uptimeMonitorStatusRuleParamsSchemaV1 } from './uptime_monitor_status';
 import { uptimeTLSRuleParamsSchemaV1 } from './uptime_tls';
 
 export const RULE_TYPE_ID = 'rule_type_id';
-export const ALERT_TYPE_ID = 'alertTypeId';
-type RuleTypeIdKey = typeof RULE_TYPE_ID | typeof ALERT_TYPE_ID;
 
 const ruleParamsSchemasWithRuleTypeId: Record<string, Type<any>> = {
   monitoring_ccr_read_exceptions: ccrReadExceptionsParamsSchemaV1,
@@ -92,36 +90,55 @@ const buildKeyLiterals = () =>
     Object.keys(ruleParamsSchemasWithRuleTypeId).map((k) => schema.literal(k)) as [Type<string>]
   );
 
-const buildParamsConditional = (key: string) =>
+const buildParamsConditional = () =>
   Object.entries(ruleParamsSchemasWithRuleTypeId).reduce<Type<any> | Type<never>>(
     (accSchema, [ruleTypeId, paramsSchema]) => {
-      return schema.conditional(schema.siblingRef(key), ruleTypeId, paramsSchema, accSchema);
+      return schema.conditional(
+        schema.siblingRef(RULE_TYPE_ID),
+        ruleTypeId,
+        paramsSchema,
+        accSchema
+      );
     },
     schema.never()
   );
 
-export const ruleParamsSchemaWithRuleTypeId = (key: RuleTypeIdKey = RULE_TYPE_ID) =>
-  schema.object(
-    {
-      [key]: buildKeyLiterals(),
-      params: buildParamsConditional(key),
-    },
-    {
-      meta: { description: 'The parameters for the rule.' },
-    }
-  );
+export const ruleParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()), {
+  meta: { description: 'The parameters for the rule.' },
+});
 
-export const ruleParamsSchemaWithRuleTypeIdAndDefaultValue = (key: RuleTypeIdKey = RULE_TYPE_ID) =>
-  schema.object(
-    {
-      [key]: buildKeyLiterals(),
-      params: buildParamsConditional(key),
-    },
-    {
-      defaultValue: {},
-      meta: { description: 'The parameters for the rule.' },
-    }
-  );
+export const ruleParamsSchemaWithDefaultValue = schema.recordOf(
+  schema.string(),
+  schema.maybe(schema.any()),
+  {
+    defaultValue: {},
+    meta: { description: 'The parameters for the rule.' },
+  }
+);
+
+export const ruleParamsSchemaWithRuleTypeId = schema.object(
+  {
+    [RULE_TYPE_ID]: buildKeyLiterals(),
+    params: buildParamsConditional(),
+  },
+  {
+    meta: { description: 'The parameters for the rule.' },
+  }
+);
+
+export const ruleParamsSchemaWithRuleTypeIdAndDefaultValue = schema.object(
+  {
+    [RULE_TYPE_ID]: buildKeyLiterals(),
+    params: buildParamsConditional(),
+  },
+  {
+    defaultValue: () => ({
+      [RULE_TYPE_ID]: Object.keys(ruleParamsSchemasWithRuleTypeId)[0],
+      params: {},
+    }),
+    meta: { description: 'The parameters for the rule.' },
+  }
+);
 
 export const ruleParamsSchemaWithRuleTypeIdForUpdate = schema.oneOf(
   Object.values(ruleParamsSchemasWithRuleTypeId).map((schemaValue) => schemaValue) as [Type<any>],
@@ -141,8 +158,11 @@ export const ruleParamsSchemaWithRuleTypeIdAndDefaultValueForUpdate = schema.one
 export const createRuleParamsExamples = () =>
   path.join(__dirname, 'examples_create_rule_params.yaml');
 
-export type RuleParams = TypeOf<typeof ruleParamsSchemaWithRuleTypeId>;
-export type RuleParamsWithDefaultValue = TypeOf<
+export type RuleParams = TypeOf<typeof ruleParamsSchema>;
+export type RuleParamsWithDefaultValue = TypeOf<typeof ruleParamsSchemaWithDefaultValue>;
+
+export type RuleParamsWithRuleTypeId = TypeOf<typeof ruleParamsSchemaWithRuleTypeId>;
+export type RuleParamsWithDefaultValueWithRuleTypeId = TypeOf<
   typeof ruleParamsSchemaWithRuleTypeIdAndDefaultValue
 >;
 
