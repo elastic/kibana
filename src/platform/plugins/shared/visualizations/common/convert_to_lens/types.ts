@@ -91,7 +91,10 @@ export type RangeColumn = ToBaseColumnFormat<RangeIndexPatternColumn>;
 export type TermsColumn = ToBaseColumnFormat<
   Omit<TermsIndexPatternColumn, 'params'> & {
     params: Omit<TermsIndexPatternColumn['params'], 'orderAgg'> & {
-      orderAgg?: AnyMetricColumnWithSourceField;
+      // Due to an existing bug we have to relax the checks here
+      // and allow even a formula column to be passed as orderAgg
+      // Lens will ignore it on the other end anyway
+      orderAgg?: AnyMetricColumn;
     };
   }
 >;
@@ -170,7 +173,7 @@ export type AnyColumnWithReferences =
   | FormulaColumn
   | StaticValueColumn;
 
-type AnyMetricColumn = AnyMetricColumnWithSourceField | AnyColumnWithReferences;
+export type AnyMetricColumn = AnyMetricColumnWithSourceField | AnyColumnWithReferences;
 
 export type Column = AnyColumnWithReferences | AnyColumnWithSourceField | FiltersColumn;
 

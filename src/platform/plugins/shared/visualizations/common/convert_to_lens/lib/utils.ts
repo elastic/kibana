@@ -12,7 +12,7 @@ import type { IAggConfig } from '@kbn/data-plugin/common';
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { DataViewFieldBase } from '@kbn/es-query';
-import type { AnyMetricColumnWithSourceField, ColumnWithMeta } from '../types';
+import type { AnyMetricColumn, AnyMetricColumnWithSourceField, ColumnWithMeta } from '../types';
 import type { SchemaConfig } from '../../types';
 import type {
   AggBasedColumn,
@@ -212,14 +212,14 @@ export const getAggIdAndValue = (aggId?: string) => {
   return aggId.split('.');
 };
 
+export function isColumnMetric(column: unknown): column is AnyMetricColumn {
+  return (
+    typeof column === 'object' && column !== null && 'isBucketed' in column && !column.isBucketed
+  );
+}
+
 export function isColumnMetricWithSourceField(
   column: unknown
 ): column is AnyMetricColumnWithSourceField {
-  return (
-    typeof column === 'object' &&
-    column !== null &&
-    'sourceField' in column &&
-    'isBucketed' in column &&
-    !column.isBucketed
-  );
+  return isColumnMetric(column) && 'sourceField' in column;
 }
