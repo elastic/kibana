@@ -9,7 +9,7 @@
 
 /* eslint-env jest */
 
-import { setupEuiMatchers } from '@elastic/eui/lib/test/rtl';
+import { setupEuiMatchers } from '@elastic/eui/lib/test/rtl/matchers';
 import { setupEuiEnzymeMatchers } from '@elastic/eui/lib/test/enzyme';
 
 setupEuiMatchers();
