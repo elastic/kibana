@@ -9,7 +9,7 @@
 
 import { configureStore } from '@reduxjs/toolkit';
 import { workflowComputationMiddleware } from './middleware';
-import { workflowDetailReducer } from './slice';
+import { ignoredActions, ignoredPaths, workflowDetailReducer } from './slice';
 import type { WorkflowsServices } from '../../../../types';
 
 // Store factory
@@ -23,15 +23,9 @@ export const createWorkflowsStore = (services: WorkflowsServices) => {
         thunk: { extraArgument: { services } },
         serializableCheck: {
           // Ignore these non-serializable fields in the state
-          ignoredPaths: [
-            'detail.computed.yamlDocument',
-            'detail.computed.yamlLineCounter',
-            'detail.computed.workflowGraph',
-            'detail.computed.workflowLookup',
-            'detail.computed.workflowDefinition',
-          ],
+          ignoredPaths,
           // Ignore these specific action types that contain non-serializable data
-          ignoredActions: ['detail/_setComputedDataInternal'],
+          ignoredActions,
         },
       }).concat(workflowComputationMiddleware),
   });

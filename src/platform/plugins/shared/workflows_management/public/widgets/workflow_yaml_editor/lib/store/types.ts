@@ -10,11 +10,7 @@
 import type { EnhancedStore } from '@reduxjs/toolkit';
 import type YAML from 'yaml';
 import type { LineCounter } from 'yaml';
-<<<<<<< HEAD
 import type { WorkflowDetailDto, WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
-=======
-import type { WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
->>>>>>> upstream/main
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowLookup } from './utils/build_workflow_lookup';
 

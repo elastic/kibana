@@ -90,3 +90,11 @@ export const { _setComputedDataInternal } = workflowDetailSlice.actions;
 
 // Export the reducer
 export const workflowDetailReducer = workflowDetailSlice.reducer;
+
+// Ignore these non-serializable fields in the state
+export const ignoredPaths: Array<string | RegExp> = [
+  /detail\.computed\.*/, // All computed data
+  'detail.workflow.definition', // WorkflowYaml schema is not serializable
+];
+// Ignore these specific action types that contain non-serializable data
+export const ignoredActions: Array<string> = ['detail/_setComputedDataInternal'];

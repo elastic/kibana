@@ -9,8 +9,8 @@
 
 import React, { useMemo } from 'react';
 import { Provider } from 'react-redux';
-import { useKibana } from '../../../../hooks/use_kibana';
 import { createWorkflowsStore } from './store';
+import { useKibana } from '../../../../hooks/use_kibana';
 
 /**
  * Provides a workflow editor Redux store context to child components.
