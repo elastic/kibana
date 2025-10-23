@@ -57,6 +57,7 @@ const writeOperations: Record<AlertingEntity, string[]> = {
     'scheduleBackfill',
     'deleteBackfill',
     'fillGaps',
+    'createGapAutoFillScheduler',
   ],
   alert: ['update'],
 };

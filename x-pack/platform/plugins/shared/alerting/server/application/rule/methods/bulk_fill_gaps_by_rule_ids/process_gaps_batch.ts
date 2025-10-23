@@ -17,6 +17,7 @@ interface ProcessGapsBatchParams {
   gapsBatch: Gap[];
   maxGapsCountToProcess?: number;
   initiator: BackfillInitiator;
+  initiatorId?: string;
 }
 
 interface ProcessGapsBatchResult {
@@ -32,7 +33,7 @@ interface ProcessGapsBatchResult {
 
 export const processGapsBatch = async (
   context: RulesClientContext,
-  { range, gapsBatch, maxGapsCountToProcess, initiator }: ProcessGapsBatchParams
+  { range, gapsBatch, maxGapsCountToProcess, initiator, initiatorId }: ProcessGapsBatchParams
 ): Promise<ProcessGapsBatchResult> => {
   const { start, end } = range;
 
@@ -53,6 +54,7 @@ export const processGapsBatch = async (
     ruleId: string;
     ranges: Array<{ start: string; end: string }>;
     initiator: BackfillInitiator;
+    initiatorId?: string;
   }> = [];
 
   let totalProcessedGapsCount = 0;
@@ -105,6 +107,7 @@ export const processGapsBatch = async (
       ruleId,
       ranges: gapRanges,
       initiator,
+      ...(initiatorId ? { initiatorId } : {}),
     });
 
     // Stop if we've reached the max gaps count limit

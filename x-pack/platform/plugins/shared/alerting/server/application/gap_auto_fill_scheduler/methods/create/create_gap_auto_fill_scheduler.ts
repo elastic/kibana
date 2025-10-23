@@ -69,7 +69,9 @@ Payload summary: ${JSON.stringify(otherParams, (key, value) =>
     updatedBy: createdBy,
   });
 
-  const savedObjectOptions = params.id ? { id: params.id } : {};
+  const savedObjectOptions = params.id
+    ? { id: params.id, refresh: 'wait_for' as const }
+    : { refresh: 'wait_for' as const };
 
   const so = await soClient.create(
     GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,

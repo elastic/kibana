@@ -158,27 +158,25 @@ export function setupSavedObjects(
     modelVersions: apiKeyPendingInvalidationModelVersions,
   });
 
-  if (options?.enableGapAutoFillScheduler) {
-    savedObjects.registerType({
-      name: GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
-      indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
-      hidden: true,
-      namespaceType: 'single',
-      mappings: {
-        dynamic: false,
-        properties: {
-          name: { type: 'keyword' },
-          enabled: { type: 'boolean' },
-          createdAt: { type: 'date' },
-          updatedAt: { type: 'date' },
-        },
+  savedObjects.registerType({
+    name: GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    hidden: true,
+    namespaceType: 'single',
+    mappings: {
+      dynamic: false,
+      properties: {
+        name: { type: 'keyword' },
+        enabled: { type: 'boolean' },
+        createdAt: { type: 'date' },
+        updatedAt: { type: 'date' },
       },
-      management: {
-        importableAndExportable: false,
-      },
-      modelVersions: gapAutoFillSchedulerModelVersions,
-    });
-  }
+    },
+    management: {
+      importableAndExportable: false,
+    },
+    modelVersions: gapAutoFillSchedulerModelVersions,
+  });
 
   savedObjects.registerType({
     name: RULES_SETTINGS_SAVED_OBJECT_TYPE,

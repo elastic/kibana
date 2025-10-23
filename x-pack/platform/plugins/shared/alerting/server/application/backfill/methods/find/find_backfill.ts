@@ -82,7 +82,7 @@ export async function findBackfill(
     }
 
     if (params.initiatorId) {
-      timeFilters.push(`ad_hoc_run_params.attributes.initiator_id: ${params.initiatorId}`);
+      timeFilters.push(`ad_hoc_run_params.attributes.initiatorId: ${params.initiatorId}`);
     }
 
     const timeFilter = timeFilters.length > 0 ? timeFilters.join(` AND `) : undefined;

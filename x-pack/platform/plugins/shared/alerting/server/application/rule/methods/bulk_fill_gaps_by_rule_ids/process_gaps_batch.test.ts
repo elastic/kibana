@@ -529,4 +529,90 @@ describe('processGapsBatch', () => {
       });
     });
   });
+
+  describe('initiatorId forwarding', () => {
+    it('forwards initiatorId to scheduleBackfill for single-rule batches', async () => {
+      scheduleBackfillMock.mockResolvedValue([{ some: 'successful result' }]);
+      const initiatorId = 'user-123';
+
+      await processGapsBatch(context, {
+        range: backfillingDateRange,
+        gapsBatch: testBatch,
+        initiator: backfillInitiator.SYSTEM,
+        initiatorId,
+      });
+
+      expect(scheduleBackfillMock).toHaveBeenCalledTimes(1);
+      expect(scheduleBackfillMock).toHaveBeenCalledWith(
+        context,
+        [
+          {
+            ruleId: 'some-rule-id',
+            initiator: backfillInitiator.SYSTEM,
+            initiatorId,
+            ranges: testBatch.flatMap(getGapScheduleRange),
+          },
+        ],
+        testBatch
+      );
+    });
+
+    it('omits initiatorId when not provided', async () => {
+      scheduleBackfillMock.mockResolvedValue([{ some: 'successful result' }]);
+      await processGapsBatch(context, {
+        range: backfillingDateRange,
+        gapsBatch: testBatch,
+        initiator: backfillInitiator.USER,
+      });
+
+      const payloads = scheduleBackfillMock.mock.calls[0][1];
+      expect(payloads[0]).not.toHaveProperty('initiatorId');
+    });
+
+    it('adds initiatorId to all per-rule payloads for multi-rule batches', async () => {
+      const multiRuleGapsBatch = [
+        createGap({
+          ruleId: 'rule-1',
+          range: getRange('2025-05-10T09:15:09.457Z', '2025-05-11T09:15:09.457Z'),
+        }),
+        createGap({
+          ruleId: 'rule-2',
+          range: getRange('2025-05-11T09:15:09.457Z', '2025-05-12T09:15:09.457Z'),
+        }),
+      ];
+
+      scheduleBackfillMock.mockResolvedValue([
+        { some: 'successful result for rule-1' },
+        { some: 'successful result for rule-2' },
+      ]);
+
+      const initiatorId = 'service-abc';
+      await processGapsBatch(context, {
+        range: backfillingDateRange,
+        gapsBatch: multiRuleGapsBatch,
+        initiator: backfillInitiator.SYSTEM,
+        initiatorId,
+      });
+
+      expect(scheduleBackfillMock).toHaveBeenCalledTimes(1);
+      expect(scheduleBackfillMock).toHaveBeenCalledWith(
+        context,
+        [
+          {
+            ruleId: 'rule-1',
+            initiator: backfillInitiator.SYSTEM,
+            initiatorId,
+            ranges: [multiRuleGapsBatch[0]].flatMap(getGapScheduleRange),
+          },
+          {
+            ruleId: 'rule-2',
+            initiator: backfillInitiator.SYSTEM,
+            initiatorId,
+            ranges: [multiRuleGapsBatch[1]].flatMap(getGapScheduleRange),
+          },
+        ],
+        multiRuleGapsBatch
+      );
+    });
+  });
 });

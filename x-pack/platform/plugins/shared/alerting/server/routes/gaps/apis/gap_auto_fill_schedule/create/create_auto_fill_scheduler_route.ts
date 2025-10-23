@@ -31,10 +31,7 @@ export const createAutoFillSchedulerRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const alertingContext = await context.alerting;
         const rulesClient = await alertingContext.getRulesClient();
-
-        console.log('api 1');
         const result = await rulesClient.createGapAutoFillScheduler(transformRequestV1(req));
-        console.log('api 2');
         const response: GapAutoFillSchedulerResponseV1 = {
           body: transformResponseV1(result),
         };
