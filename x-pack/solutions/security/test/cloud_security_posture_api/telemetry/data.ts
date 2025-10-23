@@ -19,16 +19,8 @@ export interface MockTelemetryFindings {
   data_stream?: { namespace: string };
 }
 
-export interface MockCloudConnector {
-  id: string;
-  created_at: string;
-  updated_at: string;
-  cloudProvider: string;
-  vars: Record<string, { value?: string }>;
-}
-
 export interface MockTelemetryData {
-  [key: string]: MockTelemetryFindings[] | MockCloudConnector[];
+  [key: string]: MockTelemetryFindings[];
 }
 
 export const data: MockTelemetryData = {
@@ -156,39 +148,6 @@ export const data: MockTelemetryData = {
       result: { evaluation: 'passed' },
       host: { name: 'control-plane' },
       cloudbeat: { kubernetes: { version: 'v1.23.0' } },
-    },
-  ],
-  cloudConnectors: [
-    {
-      id: 'cloud-connector-aws-1',
-      created_at: '2024-01-15T10:00:00.000Z',
-      updated_at: '2024-01-20T15:30:00.000Z',
-      cloudProvider: 'aws',
-      vars: {
-        role_arn: { value: 'arn:aws:iam::123456789012:role/CloudConnectorRole' },
-        external_id: { value: 'external-id-123' },
-      },
-    },
-    {
-      id: 'cloud-connector-azure-1',
-      created_at: '2024-01-16T11:00:00.000Z',
-      updated_at: '2024-01-21T16:30:00.000Z',
-      cloudProvider: 'azure',
-      vars: {
-        client_id: { value: 'azure-client-id-456' },
-        tenant_id: { value: 'azure-tenant-id-789' },
-        azure_cloud_connector_id: { value: 'azure-connector-id-101' },
-      },
-    },
-    {
-      id: 'cloud-connector-aws-2',
-      created_at: '2024-01-17T12:00:00.000Z',
-      updated_at: '2024-01-22T17:30:00.000Z',
-      cloudProvider: 'aws',
-      vars: {
-        role_arn: { value: 'arn:aws:iam::987654321098:role/AnotherRole' },
-        // Missing external_id - should show hasCredentials: false
-      },
     },
   ],
 };

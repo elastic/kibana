@@ -85,4 +85,45 @@ export const assetInventoryUsageSchema: MakeSchemaFrom<AssetInventoryUsage> = {
       },
     },
   },
+  asset_inventory_installation_stats: {
+    type: 'array',
+    items: {
+      package_policy_id: {
+        type: 'keyword',
+        _meta: { description: 'Package policy ID' },
+      },
+      package_name: {
+        type: 'keyword',
+        _meta: { description: 'Package name' },
+      },
+      package_version: {
+        type: 'keyword',
+        _meta: { description: 'Package version' },
+      },
+      created_at: {
+        type: 'date',
+        _meta: { description: 'Package policy created at timestamp' },
+      },
+      agent_policy_id: {
+        type: 'keyword',
+        _meta: { description: 'Agent policy ID' },
+      },
+      agent_count: {
+        type: 'long',
+        _meta: { description: 'Number of agents associated with the agent policy' },
+      },
+      is_agentless: {
+        type: 'boolean',
+        _meta: { description: 'Whether the deployment is agentless' },
+      },
+      supports_cloud_connector: {
+        type: 'boolean',
+        _meta: { description: 'Whether the package policy supports cloud connector' },
+      },
+      cloud_connector_id: {
+        type: 'keyword',
+        _meta: { description: 'Cloud connector ID associated with the package policy' },
+      },
+    },
+  },
 };

@@ -11,7 +11,8 @@ export type AssetInventoryUsageCollectorType =
   | 'Entity Store'
   | 'Entity Source'
   | 'Asset Criticality'
-  | 'Asset Inventory Cloud Connector Usage';
+  | 'Asset Inventory Cloud Connector Usage'
+  | 'Asset Inventory Installation';
 
 interface BaseStats {
   doc_count: number;
@@ -46,6 +47,18 @@ export interface AssetInventoryCloudConnectorUsageStats {
   packagePolicyCount: number;
 }
 
+export interface AssetInventoryInstallationStats {
+  package_policy_id: string;
+  package_name: string;
+  package_version: string;
+  created_at: string;
+  agent_policy_id: string;
+  agent_count: number;
+  is_agentless: boolean;
+  supports_cloud_connector: boolean;
+  cloud_connector_id: string | null;
+}
+
 export interface AssetInventoryUsage {
   entities: EntitiesStats;
   entities_type_stats: EntitiesTypeStats[];
@@ -53,6 +66,7 @@ export interface AssetInventoryUsage {
   entity_source_stats: EntitySourceStats[];
   asset_criticality_stats: AssetCriticalityStats[];
   asset_inventory_cloud_connector_usage_stats: AssetInventoryCloudConnectorUsageStats[];
+  asset_inventory_installation_stats: AssetInventoryInstallationStats[];
 }
 
 /**

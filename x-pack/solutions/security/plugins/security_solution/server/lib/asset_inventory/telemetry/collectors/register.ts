@@ -21,6 +21,7 @@ import { getAssetCriticalityStats } from './asset_criticality_stats_collector';
 import { getEntitySourceStats } from './entity_source_stats_collector';
 import { getEntityStoreStats } from './entity_store_stats_collector';
 import { getAssetInventoryCloudConnectorUsageStats } from './asset_inventory_cloud_connector_usage_stats_collector';
+import { getAssetInventoryInstallationStats } from './asset_inventory_installation_stats_collector';
 import type { AssetInventoryUsage, AssetInventoryUsageCollectorType } from '../type';
 import { ENTITY_INDEX } from '../helper';
 
@@ -69,6 +70,7 @@ export function registerAssetInventoryUsageCollector(
         entitySourceStats,
         assetCriticalityStats,
         assetInventoryCloudConnectorUsageStats,
+        assetInventoryInstallationStats,
       ] = await Promise.all([
         awaitPromiseSafe('Entities', getEntityStats(esClient, ENTITY_INDEX, logger)),
         awaitPromiseSafe('Entities Type', getEntitiesTypeStats(esClient, logger)),
@@ -79,6 +81,10 @@ export function registerAssetInventoryUsageCollector(
           'Asset Inventory Cloud Connector Usage',
           getAssetInventoryCloudConnectorUsageStats(soClient, coreServices, logger)
         ),
+        awaitPromiseSafe(
+          'Asset Inventory Installation',
+          getAssetInventoryInstallationStats(esClient, soClient, coreServices, logger)
+        ),
       ]);
       return {
         entities: entitiesStats,
@@ -87,6 +93,7 @@ export function registerAssetInventoryUsageCollector(
         entity_source_stats: entitySourceStats,
         asset_criticality_stats: assetCriticalityStats,
         asset_inventory_cloud_connector_usage_stats: assetInventoryCloudConnectorUsageStats,
+        asset_inventory_installation_stats: assetInventoryInstallationStats,
       };
     },
     schema: assetInventoryUsageSchema,
