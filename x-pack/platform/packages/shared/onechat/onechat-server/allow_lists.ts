@@ -13,6 +13,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
   // Observability
   'observability.get_services',
   'observability.execute_paths',
+  'observability.elasticsearch_api',
 ];
 
 /**

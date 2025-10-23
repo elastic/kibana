@@ -8,6 +8,7 @@
 import { contextFunctionHandler } from '../functions/context';
 import { elasticsearchFunctionHandler } from '../functions/elasticsearch';
 import { kibanaFunctionHandler } from '../functions/kibana';
+import { elasticsearchApiDocFunctionHandler } from '../functions/retrieve_es_api_doc';
 import type { PathDefinition } from './types';
 
 // Example schema for a path structure
@@ -28,6 +29,24 @@ export const PATH_EXAMPLE: PathDefinition = {
         id: 'kibana-node',
         description: 'kibana node of the path',
         tool: kibanaFunctionHandler,
+      },
+    ],
+  },
+};
+
+export const RETRIEVE_ES_DOC: PathDefinition = {
+  name: 'retrieve-es-doc-path',
+  description: 'A path to retrieve Elasticsearch API documentation',
+  root: {
+    id: 'elasticsearch-api-doc',
+    description:
+      'retrieve elasticsearch api documentation before executing any elasticsearch query',
+    tool: elasticsearchApiDocFunctionHandler,
+    nodes: [
+      {
+        id: 'elasticsearch',
+        description: 'query elasticsearch',
+        tool: elasticsearchFunctionHandler,
       },
     ],
   },

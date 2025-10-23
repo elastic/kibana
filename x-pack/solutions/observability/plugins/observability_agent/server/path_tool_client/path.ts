@@ -7,8 +7,13 @@
 /* eslint-disable max-classes-per-file*/
 
 import type { ScopedModel, ToolHandlerContext } from '@kbn/onechat-server';
-import { MessageRole } from '@kbn/inference-common';
-import type { PathDefinition, ToolHandler } from './types';
+import {
+  MessageRole,
+  type AssistantMessage,
+  type ToolMessage,
+  type Message,
+} from '@kbn/inference-common';
+import type { PathDefinition, PathNode, ToolHandler } from './types';
 
 export class Node {
   public readonly children: Node[] = [];
@@ -29,14 +34,17 @@ export class Path {
   private readonly root: Node;
   private readonly id: string;
   constructor(pathSchema: PathDefinition) {
-    this.root = new Node(pathSchema.root.id, [], pathSchema.root.tool);
     this.id = pathSchema.name;
+    this.root = this.buildNode(pathSchema.root, null);
+  }
 
-    if (pathSchema.root.nodes) {
-      pathSchema.root.nodes.forEach((node) => {
-        this.root.addChild(new Node(node.id, [], node.tool));
-      });
-    }
+  buildNode(pathNode: PathNode, parent: Node | null): Node {
+    const newNode = new Node(pathNode.id, [], pathNode.tool);
+    pathNode.nodes?.forEach((child) => {
+      const childNode = this.buildNode(child, newNode);
+      newNode.addChild(childNode);
+    });
+    return newNode;
   }
 
   getRoot() {
@@ -50,6 +58,7 @@ export class Path {
   async traverse(
     node: Node,
     model: ScopedModel,
+    messages: Message[],
     prompt: string,
     toolHandlerContext: ToolHandlerContext
   ): Promise<any> {
@@ -57,12 +66,7 @@ export class Path {
       connectorId: model.connector.connectorId,
       system:
         'You are executing a path step. Use the function to perform the step action as needed.',
-      messages: [
-        {
-          role: MessageRole.User,
-          content: prompt,
-        },
-      ],
+      messages,
       tools: { [node.tool!.name]: node.tool!.definition },
       toolChoice: { function: node.tool!.name },
     });
@@ -72,12 +76,33 @@ export class Path {
     if (node.children.length === 0) {
       return { toolCall: response.toolCalls?.[0], toolResponse };
     }
-    const childrenResults = await Promise.all(
+
+    const next = await Promise.all(
       node.children.map(
-        async (child) => await this.traverse(child, model, prompt, toolHandlerContext)
+        async (child) =>
+          await this.traverse(
+            child,
+            model,
+            [
+              ...messages,
+              {
+                role: MessageRole.Assistant,
+                content: '',
+                toolCalls: response.toolCalls,
+              } as AssistantMessage,
+              {
+                role: MessageRole.Tool,
+                name: node.tool!.name,
+                toolCallId: response.toolCalls?.[0].toolCallId!,
+                response: toolResponse,
+              } as ToolMessage,
+            ],
+            prompt,
+            toolHandlerContext
+          )
       )
     );
-    return { toolCall: response.toolCalls?.[0], toolResponse, childrenResults };
+    return { toolCall: response.toolCalls?.[0], toolResponse, next };
   }
 
   async walk(
@@ -86,6 +111,17 @@ export class Path {
     toolHandlerContext: ToolHandlerContext
   ): Promise<any> {
     const root = this.getRoot();
-    return await this.traverse(root, model, prompt, toolHandlerContext);
+    return await this.traverse(
+      root,
+      model,
+      [
+        {
+          role: MessageRole.User,
+          content: prompt,
+        },
+      ],
+      prompt,
+      toolHandlerContext
+    );
   }
 }

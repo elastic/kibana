@@ -21,7 +21,11 @@ import {
   createObservabilityExecutePathsTool,
 } from './tools/observability_execute_paths';
 import { PathToolClient } from './path_tool_client';
-import { PATH_EXAMPLE } from './path_tool_client/example_path';
+import { PATH_EXAMPLE, RETRIEVE_ES_DOC } from './path_tool_client/example_path';
+import {
+  OBSERVABILITY_ELASTICSEARCH_API_TOOL_ID,
+  createObservabilityElasticsearchApiTool,
+} from './tools/es_api';
 export const OBSERVABILITY_AGENT_ID = 'platform.core.observability';
 
 export const OBSERVABILITY_AGENT_NAME = 'Observability agent';
@@ -38,6 +42,7 @@ const OBSERVABILITY_AGENT_TOOL_IDS = [
   // Observability tools
   OBSERVABILITY_GET_SERVICES_TOOL_ID,
   OBSERVABILITY_EXECUTE_PATHS_TOOL_ID,
+  OBSERVABILITY_ELASTICSEARCH_API_TOOL_ID,
 ];
 
 export async function registerObservabilityAgent({
@@ -55,8 +60,15 @@ export async function registerObservabilityAgent({
     logger,
   });
 
+  const observabilityElasticsearchApiTool = await createObservabilityElasticsearchApiTool({
+    core,
+    plugins,
+    logger,
+  });
+
   const observabilityPathToolClient = new PathToolClient();
   observabilityPathToolClient.registerPath(PATH_EXAMPLE);
+  observabilityPathToolClient.registerPath(RETRIEVE_ES_DOC);
 
   const observabilityExecutePathsTool = await createObservabilityExecutePathsTool({
     core,
@@ -68,6 +80,7 @@ export async function registerObservabilityAgent({
   // register tools
   plugins.onechat.tools.register(observabilityGetServicesTool);
   plugins.onechat.tools.register(observabilityExecutePathsTool);
+  plugins.onechat.tools.register(observabilityElasticsearchApiTool);
 
   // register agent
   plugins.onechat.agents.register({
