@@ -139,4 +139,24 @@ describe('extractEsqlVariables', () => {
       },
     ]);
   });
+
+  it('should extract multi-select numeric variables', () => {
+    const panels: ControlPanelsState<ESQLControlState> = {
+      panel1: createMockESQLControlPanel(
+        'multiVar',
+        ESQLVariableType.MULTI_VALUES,
+        ['1', '2', '3'],
+        false
+      ),
+    };
+
+    const result = extractEsqlVariables(panels);
+    expect(result).toEqual([
+      {
+        key: 'multiVar',
+        type: ESQLVariableType.MULTI_VALUES,
+        value: [1, 2, 3],
+      },
+    ]);
+  });
 });
