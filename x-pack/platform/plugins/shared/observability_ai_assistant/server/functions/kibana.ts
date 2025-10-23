@@ -7,7 +7,7 @@
 
 import axios from 'axios';
 import { format } from 'url';
-import { pickBy } from 'lodash';
+import { castArray, first, pick, pickBy } from 'lodash';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { FunctionRegistrationParameters } from '.';
 import { KIBANA_FUNCTION_NAME } from '..';
@@ -52,6 +52,10 @@ export function registerKibanaFunction({
       const { request, logger } = resources;
       const { protocol, host, pathname: pathnameFromRequest } = request.rewrittenUrl || request.url;
 
+      const originUrl = first(castArray(request.headers.origin));
+
+      
+
       const nextUrl = {
         host,
         protocol,
@@ -61,6 +65,8 @@ export function registerKibanaFunction({
         ),
         query: query ? (query as Record<string, string>) : undefined,
       };
+
+      logger.info(`kibana tool: originUrl = ${originUrl}, nextUrl = ${nextUrl}`);
 
       const copiedHeaderNames = [
         'authorization',
@@ -85,7 +91,7 @@ export function registerKibanaFunction({
         );
       });
 
-      logger.debug(
+      logger.info(
         `Forwarding requests from ${
           request.headers.origin ?? host
         } to call Kibana API: ${method} ${format(nextUrl)}`
