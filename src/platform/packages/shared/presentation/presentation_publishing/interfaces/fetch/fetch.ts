@@ -10,129 +10,68 @@
 import { useEffect, useMemo } from 'react';
 import {
   BehaviorSubject,
-  Subject,
   combineLatest,
   combineLatestWith,
   debounceTime,
-  delay,
   distinctUntilChanged,
+  exhaustMap,
   filter,
   map,
-  merge,
+  mergeMap,
   of,
-  skip,
-  startWith,
   switchMap,
-  takeUntil,
   tap,
   type Observable,
 } from 'rxjs';
 import { useStateFromPublishingSubject } from '../../publishing_subject';
-import { apiHasParentApi, type HasParentApi } from '../has_parent_api';
-import {
-  type FetchContext,
-  type ReloadTimeFetchContext,
-  isReloadTimeFetchContextEqual,
-} from './fetch_context';
+import { apiHasParentApi } from '../has_parent_api';
+import { isReloadTimeFetchContextEqual, type FetchContext } from './fetch_context';
 import { apiPublishesPauseFetch } from './publishes_pause_fetch';
-import { apiPublishesReload } from './publishes_reload';
-import {
-  apiPublishesTimeRange,
-  apiPublishesUnifiedSearch,
-  type PublishesTimeRange,
-  type PublishesUnifiedSearch,
-} from './publishes_unified_search';
-
-function getReloadTimeFetchContext(api: unknown, reloadTimestamp?: number): ReloadTimeFetchContext {
-  const typeApi = api as Partial<
-    PublishesTimeRange & HasParentApi<Partial<PublishesUnifiedSearch>>
-  >;
-  return {
-    reloadTimestamp,
-    filters: typeApi?.parentApi?.filters$?.value,
-    query: typeApi?.parentApi?.query$?.value,
-    // searchSessionId: typeApi?.parentApi?.searchSessionId$?.value,
-    timeRange: typeApi?.timeRange$?.value ?? typeApi?.parentApi?.timeRange$?.value,
-    timeslice: typeApi?.timeRange$?.value ? undefined : typeApi?.parentApi?.timeslice$?.value,
-  };
-}
+import { apiPublishesTimeRange, apiPublishesUnifiedSearch } from './publishes_unified_search';
 
 function hasLocalTimeRange(api: unknown) {
   return apiPublishesTimeRange(api) ? typeof api.timeRange$.value === 'object' : false;
 }
 
-// Returns observables that emit to changes after subscribe
-// 1. Observables are not guaranteed to have an initial value (can not be used in combineLatest)
-// 2. Observables will not emit on subscribe
-function getBatchedObservables(api: unknown): Array<Observable<unknown>> {
-  const observables: Array<Observable<unknown>> = [];
+function getFetchContext$(api: unknown) {
+  const observables: {
+    [key in keyof FetchContext]: Observable<FetchContext[key]>;
+  } = {
+    filters: of(undefined),
+    query: of(undefined),
+    searchSessionId: of(undefined),
+    timeRange: of(undefined),
+    timeslice: of(undefined),
+    isReload: of(false),
+  };
 
   if (apiPublishesTimeRange(api)) {
-    observables.push(api.timeRange$.pipe(skip(1)));
+    observables.timeRange = api.timeRange$;
   }
 
   if (apiHasParentApi(api) && apiPublishesUnifiedSearch(api.parentApi)) {
-    observables.push(combineLatest([api.parentApi.filters$, api.parentApi.query$]).pipe(skip(1)));
+    observables.filters = api.parentApi.filters$;
+    observables.query = api.parentApi.query$;
   }
 
   if (apiHasParentApi(api) && apiPublishesTimeRange(api.parentApi)) {
-    const timeObservables: Array<Observable<unknown>> = [api.parentApi.timeRange$];
+    observables.timeRange = api.parentApi.timeRange$.pipe(filter(() => !hasLocalTimeRange(api)));
     if (api.parentApi.timeslice$) {
-      timeObservables.push(api.parentApi.timeslice$);
+      observables.timeslice = api.parentApi.timeslice$.pipe(filter(() => !hasLocalTimeRange(api)));
     }
-    observables.push(
-      combineLatest(timeObservables).pipe(
-        skip(1),
-        filter(() => !hasLocalTimeRange(api))
-      )
-    );
   }
 
-  return observables;
-}
-
-// Returns observables that emit to changes after subscribe
-// 1. Observables are not guaranteed to have an initial value (can not be used in combineLatest)
-// 2. Observables will not emit on subscribe
-function getImmediateObservables(api: unknown): Array<Observable<unknown>> {
-  const observables: Array<Observable<unknown>> = [];
-  if (apiHasParentApi(api) && apiPublishesReload(api.parentApi)) {
-    observables.push(api.parentApi.reload$);
-  }
-  return observables;
+  // if (apiHasParentApi(api) && apiPublishesReload(api.parentApi)) {
+  //   api.parentApi.reload$.subscribe(() => {
+  //     observables.isReload(true);
+  //   });
+  // }
+  console.log(observables);
+  return combineLatest(observables);
 }
 
 export function fetch$(api: unknown): Observable<FetchContext> {
-  const batchedObservables = getBatchedObservables(api);
-  const immediateObservables = getImmediateObservables(api);
-
-  const fetchContext$ = (() => {
-    if (immediateObservables.length === 0) {
-      return merge(...batchedObservables).pipe(
-        startWith(getReloadTimeFetchContext(api)),
-        debounceTime(0),
-        map(() => getReloadTimeFetchContext(api))
-      );
-    }
-    const interrupt = new Subject<void>();
-    const batchedChanges$ = merge(...batchedObservables).pipe(
-      switchMap((value) =>
-        of(value).pipe(
-          delay(0),
-          takeUntil(interrupt),
-          map(() => getReloadTimeFetchContext(api))
-        )
-      )
-    );
-
-    const immediateChange$ = merge(...immediateObservables).pipe(
-      tap(() => {
-        interrupt.next();
-      }),
-      map(() => getReloadTimeFetchContext(api, Date.now()))
-    );
-    return merge(immediateChange$, batchedChanges$).pipe(startWith(getReloadTimeFetchContext(api)));
-  })();
+  const fetchContext$ = getFetchContext$(api);
 
   const parentPauseFetch =
     apiHasParentApi(api) && apiPublishesPauseFetch(api.parentApi)
@@ -146,32 +85,22 @@ export function fetch$(api: unknown): Observable<FetchContext> {
   );
 
   return fetchContext$.pipe(
-    combineLatestWith(isFetchPaused$),
-    filter(([, isFetchPaused]) => {
-      return !isFetchPaused;
-    }),
+    combineLatestWith(isFetchPaused$.pipe(distinctUntilChanged())),
+    filter(([, isFetchPaused]) => !isFetchPaused),
     map(([fetchContext]) => fetchContext),
     distinctUntilChanged((prevContext, nextContext) =>
       isReloadTimeFetchContextEqual(prevContext, nextContext)
     ),
     switchMap(async (context) => {
       const searchSessionId = await ((api as any).parentApi as any).requestSearchSessionId();
-      console.log(`${(api as any).uuid} got search session id: ${searchSessionId}`);
-      return { ...context, searchSessionId };
-    }),
-    map((reloadTimeFetchContext) => {
-      console.log({
-        reloadTimeFetchContext,
-      });
+      console.log({ context });
       return {
-        isReload: Boolean(reloadTimeFetchContext.reloadTimestamp),
-        filters: reloadTimeFetchContext.filters,
-        query: reloadTimeFetchContext.query,
-        timeRange: reloadTimeFetchContext.timeRange,
-        timeslice: reloadTimeFetchContext.timeslice,
-        searchSessionId: reloadTimeFetchContext.searchSessionId,
+        ...context,
+        searchSessionId,
+        // isReload: Boolean(reloadTimeFetchContext.reloadTimestamp),
       };
     })
+    // debounceTime(0)
   );
 }
 

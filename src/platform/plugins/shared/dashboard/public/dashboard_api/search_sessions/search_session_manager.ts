@@ -45,11 +45,12 @@ export function initializeSearchSessionManager(
         : dataService.search.session.start());
     searchSessionId$.next(initialSearchSessionId);
 
-    const searchSessionGenerationInProgress$ = new BehaviorSubject<boolean>(true);
+    const searchSessionGenerationInProgress$ = new BehaviorSubject<boolean>(false);
     requestSearchSessionId = async () => {
+      if (!searchSessionGenerationInProgress$.getValue()) return searchSessionId$.getValue();
       return new Promise((resolve) => {
         const subscription = searchSessionGenerationInProgress$
-          .pipe(debounceTime(0))
+          // .pipe(debounceTime(0))
           .subscribe((inProgress) => {
             if (!inProgress) {
               resolve(searchSessionId$.getValue());
