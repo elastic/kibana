@@ -39,5 +39,8 @@ export type OverlayFlyoutOpenOptions = Omit<
    * If provided the consumer is responsible for calling flyout.close() to close the flyout;
    */
   onClose?: (flyout: OverlayRef) => void;
+  /**
+   * @deprecated Use `resizable` instead.
+   */
   isResizable?: boolean;
 };

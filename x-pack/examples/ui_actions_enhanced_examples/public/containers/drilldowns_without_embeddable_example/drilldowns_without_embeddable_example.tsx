@@ -116,7 +116,11 @@ export const DrilldownsWithoutEmbeddableExample: React.FC = () => {
       </EuiFlexGroup>
 
       {showManager && (
-        <EuiFlyout onClose={() => setShowManager(false)} aria-label="Drilldown Manager">
+        <EuiFlyout
+          onClose={() => setShowManager(false)}
+          aria-label="Drilldown Manager"
+          session="start"
+        >
           <plugins.uiActionsEnhanced.DrilldownManager
             key={viewRef.current}
             initialRoute={viewRef.current}
