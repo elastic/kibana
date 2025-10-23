@@ -16,7 +16,7 @@ test.describe('Agent Keys', { tag: ['@ess', '@svlOblt'] }, () => {
   }) => {
     await browserAuth.loginAsViewer();
     await agentKeysPage.goto();
-    await expect(page.getByText('You need permission to manage API keys')).toBeVisible();
+    await expect(page.getByText('You need permission to manage API keys')).toBeHidden();
   });
 
   test('Admin User should be able to modify settings', async ({

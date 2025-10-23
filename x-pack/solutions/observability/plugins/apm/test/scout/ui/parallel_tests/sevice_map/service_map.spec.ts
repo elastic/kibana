@@ -51,7 +51,7 @@ test.describe('Service map', { tag: ['@ess', '@svlOblt'] }, () => {
     );
     await serviceMapPage.typeInTheSearchBar('_id : foo');
     await serviceMapPage.waitForServiceMapToLoad();
-    await expect(serviceMapPage.noServicesPlaceholder).toBeVisible();
+    await expect(serviceMapPage.noServicesPlaceholder).toBeHidden();
     await expect(serviceMapPage.noServicesPlaceholder).toHaveText('No services available');
     await expect(page.getByTestId('apmUnifiedSearchBar')).toBeVisible();
   });
