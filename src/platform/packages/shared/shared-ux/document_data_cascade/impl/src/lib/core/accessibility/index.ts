@@ -48,13 +48,15 @@ export function useTreeGridRowARIAAttributes<G extends GroupNode>({
       id: rowId,
       role: 'row',
       tabIndex: 0,
-      'aria-rowindex': virtualRowIndex,
+      'aria-rowindex': virtualRowIndex + 1,
       'aria-expanded': rowIsExpanded,
       'aria-level': rowDepth + 1,
+      'aria-setsize': rowChildren.length,
       'aria-posinset': rowDepth + 1,
-      ...(rowChildren.length > 0 && {
-        'aria-owns': rowChildren.map((row) => row.id).join(' '),
-      }),
+      ...(rowChildren.length > 0 &&
+        rowIsExpanded && {
+          'aria-owns': rowChildren.map((row) => row.id).join(' '),
+        }),
     };
   }, [rowId, rowIsExpanded, rowDepth, rowChildren, virtualRowIndex]);
 }

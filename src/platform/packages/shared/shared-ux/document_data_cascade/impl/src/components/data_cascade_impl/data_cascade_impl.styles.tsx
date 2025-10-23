@@ -16,11 +16,7 @@ export const relativePosition = css({ position: 'relative' });
 
 const slideIn = keyframes({
   '0%': {
-    display: 'none',
     transform: 'translateY(-100%)',
-  },
-  '50%': {
-    display: 'initial',
   },
   '100%': {
     transform: 'translateY(0)',
