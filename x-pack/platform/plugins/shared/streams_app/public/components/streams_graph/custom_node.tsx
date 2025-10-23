@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { EuiFlexGroup, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { truncateText } from '../../util/truncate_text';
+import { StreamNodePopover } from './stream_popup';
+import type { Streams } from '@kbn/streams-schema';
 
 export const STREAM_NODE_TYPE = 'streamNode';
 
@@ -10,10 +12,12 @@ export interface StreamNodeData extends Record<string, unknown> {
     label: string;
     type: 'wired' | 'root' | 'classic';
     hasChildren: boolean;
+    stream: Streams.WiredStream.Definition;
 }
 
-export const StreamNode = ({ data: { label, type, hasChildren }}: { data: StreamNodeData }) => {
+export const StreamNode = ({ data: { label, type, hasChildren, stream } }: { data: StreamNodeData }) => {
     const { euiTheme } = useEuiTheme();
+    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
     const nodeClass = css`
         background: ${euiTheme.colors.emptyShade};
@@ -21,11 +25,13 @@ export const StreamNode = ({ data: { label, type, hasChildren }}: { data: Stream
         border-radius: 6px;
         padding: ${euiTheme.size.m};
         font-size: ${euiTheme.font.scale.xs};
+        cursor: pointer;
     `;
 
-    return (
+    const nodeContent = (
         <div
             className={nodeClass}
+            onClick={() => setIsPopoverOpen((isPopupOpen) => !isPopupOpen)}
         >
             <Handle
                 type="source"
@@ -48,4 +54,13 @@ export const StreamNode = ({ data: { label, type, hasChildren }}: { data: Stream
             </EuiFlexGroup>
         </div>
     );
-};
+
+    return (
+        <StreamNodePopover
+            isOpen={isPopoverOpen}
+            onClose={() => setIsPopoverOpen(false)}
+            stream={stream}
+            button={nodeContent}
+        />
+    );
+}
