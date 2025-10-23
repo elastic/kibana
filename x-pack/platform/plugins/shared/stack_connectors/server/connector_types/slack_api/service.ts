@@ -137,27 +137,6 @@ export const createExternalService = (
     'Content-type': 'application/json; charset=UTF-8',
   };
 
-  const validateChannelNames = (channelNames?: string[]): void => {
-    if (!channelNames || channelNames.length === 0) {
-      return;
-    }
-
-    // validate against allowed channel list
-    if (allowedChannelNames && allowedChannelNames.length > 0) {
-      const notAllowedChannelNames = channelNames.filter(
-        (channel) => !allowedChannelNames.includes(channel)
-      );
-
-      if (notAllowedChannelNames.length > 0) {
-        throw new Error(
-          `One or more channel names ${notAllowedChannelNames.join(
-            ', '
-          )} are not included in the allowed channel list`
-        );
-      }
-    }
-  };
-
   const validChannelId = async (
     channelId: string
   ): Promise<ConnectorTypeExecutorResult<ValidChannelResponse | void>> => {
@@ -191,7 +170,7 @@ export const createExternalService = (
   };
 
   const validateChannels = (channels?: string[], allowedList?: string[]) => {
-    if (!channels?.length || !allowedList?.length) return;
+    if (!channels || !channels.length || !allowedList) return;
 
     const hasDisallowedChannel = channels?.some((name) => !allowedList.includes(name));
 
@@ -242,7 +221,6 @@ export const createExternalService = (
     text,
   }: PostMessageSubActionParams): Promise<ConnectorTypeExecutorResult<unknown>> => {
     try {
-      validateChannelNames(channelNames);
       const channelToUse = getChannelToUse({ channels, channelIds, channelNames });
 
       const result: AxiosResponse<PostMessageResponse> = await request({
@@ -269,7 +247,6 @@ export const createExternalService = (
     text,
   }: PostBlockkitSubActionParams): Promise<ConnectorTypeExecutorResult<unknown>> => {
     try {
-      validateChannelNames(channelNames);
       const channelToUse = getChannelToUse({ channels, channelIds, channelNames });
       const blockJson = JSON.parse(text);
 
