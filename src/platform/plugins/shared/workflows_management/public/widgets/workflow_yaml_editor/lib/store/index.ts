@@ -24,6 +24,7 @@ export {
   selectFocusedStepInfo,
   selectStepExecutions,
   selectHighlightedStepId,
+  selectWorkflowDefinition,
 } from './selectors';
 
 // Middleware (if needed for custom store setup)

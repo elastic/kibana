@@ -26,7 +26,10 @@ import { TestStepModal } from '../../../features/run_workflow/ui/test_step_modal
 import type { WorkflowUrlStateTabType } from '../../../hooks/use_workflow_url_state';
 import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
 import { selectWorkflowGraph } from '../../../widgets/workflow_yaml_editor/lib/store';
-import { selectWorkflowDefinition } from '../../../widgets/workflow_yaml_editor/lib/store/selectors';
+import {
+  selectWorkflowDefinition,
+  selectYamlString,
+} from '../../../widgets/workflow_yaml_editor/lib/store/selectors';
 
 const WorkflowYAMLEditor = React.lazy(() =>
   import('../../../widgets/workflow_yaml_editor').then((module) => ({
@@ -41,8 +44,7 @@ const WorkflowVisualEditor = React.lazy(() =>
 );
 
 interface WorkflowEditorProps {
-  workflowYaml: string;
-  onWorkflowYamlChange: (yaml: string | undefined) => void;
+  // onWorkflowYamlChange: (yaml: string | undefined) => void;
   hasChanges: boolean;
   handleSave: () => void;
   handleRun: () => void;
@@ -57,8 +59,7 @@ interface WorkflowEditorProps {
 }
 
 export function WorkflowEditor({
-  workflowYaml,
-  onWorkflowYamlChange,
+  // onWorkflowYamlChange,
   handleSave,
   handleRun,
   handleSaveAndRun,
@@ -81,7 +82,7 @@ export function WorkflowEditor({
   const workflowGraph = useSelector(selectWorkflowGraph);
   const workflowDefinition = useSelector(selectWorkflowDefinition);
 
-  const yamlValue = selectedExecutionId && execution ? execution.yaml : workflowYaml;
+  const workflowYaml = useSelector(selectYamlString);
 
   const handleStepRun = async (params: { stepId: string; actionType: string }) => {
     if (!workflowGraph || !workflowDefinition) {
@@ -133,8 +134,6 @@ export function WorkflowEditor({
             <WorkflowYAMLEditor
               workflowId={workflow?.id ?? 'unknown'}
               filename={`${workflow?.id ?? 'unknown'}.yaml`}
-              value={yamlValue}
-              onChange={onWorkflowYamlChange}
               onSave={handleSave}
               onRun={handleRun}
               onSaveAndRun={handleSaveAndRun}
@@ -154,7 +153,7 @@ export function WorkflowEditor({
           <EuiFlexItem css={styles.visualEditor}>
             <React.Suspense fallback={<EuiLoadingSpinner />}>
               <WorkflowVisualEditor
-                workflowYaml={yamlValue}
+                workflowYaml={workflowYaml}
                 workflowExecutionId={selectedExecutionId}
               />
             </React.Suspense>
@@ -163,7 +162,7 @@ export function WorkflowEditor({
         {isExecutionGraphEnabled && workflow && (
           <EuiFlexItem css={styles.visualEditor}>
             <React.Suspense fallback={<EuiLoadingSpinner />}>
-              <ExecutionGraph workflowYaml={yamlValue} />
+              <ExecutionGraph workflowYaml={workflowYaml} />
             </React.Suspense>
           </EuiFlexItem>
         )}

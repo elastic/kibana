@@ -19,7 +19,7 @@ const selectComputedState = (state: RootState) => state.workflow.computed;
 // Exported memoized selectors for final properties
 export const selectYamlString = createSelector(
   selectWorkflowState,
-  (workflow) => workflow.yamlString
+  (workflow) => workflow.yamlString ?? ''
 );
 
 export const selectYamlDocument = createSelector(
