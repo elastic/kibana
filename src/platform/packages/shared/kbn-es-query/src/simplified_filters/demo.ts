@@ -8,14 +8,26 @@
  */
 
 /**
- * SimplifiedFilter Demo: Examples showing FilterTransformer usage
+ * SimplifiedFilter Demo: Examples showing modular conversion functions
  *
- * This file demonstrates how to use the FilterTransformer utilities
+ * This file demonstrates how to use the new modular filter conversion utilities
  * for bi-directional conversion between SimplifiedFilter and stored Filter formats.
+ * Shows both the new functional API and backward-compatible class API.
  */
 
 import type { SimplifiedFilter } from '@kbn/es-query-server';
-import { FilterTransformer, createFilter, field, and, FilterPatterns } from '.';
+import { createFilter, field, and, FilterPatterns } from '.';
+// New modular imports
+import {
+  fromStoredFilter,
+  toStoredFilter,
+  validate,
+  convertToSimpleCondition,
+  isFullyCompatible as isFullyCompatibleFn,
+  isEnhancedCompatible as isEnhancedCompatibleFn,
+  extractBaseProperties,
+  FilterTransformer, // Backward compatibility
+} from './conversion';
 
 // ====================================================================
 // DEMO: CREATING SIMPLIFIED FILTERS WITH BUILDER API
@@ -63,11 +75,69 @@ export function demoSimpleFilterCreation() {
 }
 
 // ====================================================================
+// DEMO: NEW MODULAR API - INDIVIDUAL FUNCTIONS
+// ====================================================================
+
+/**
+ * Demo: Using individual modular functions for targeted operations
+ */
+export function demoModularAPI() {
+  // Example: Legacy filter from production system
+  const legacyStoredFilter = {
+    meta: {
+      type: 'phrase',
+      key: 'user.status',
+      params: { query: 'premium' },
+      alias: 'Premium Users',
+      disabled: false,
+      negate: false,
+    },
+    query: {
+      term: { 'user.status': 'premium' },
+    },
+  };
+
+  // NEW MODULAR APPROACH - Use individual functions
+
+  // 1. Check filter compatibility level before conversion
+  const isFullyCompatibleResult = isFullyCompatibleFn(legacyStoredFilter);
+  const isEnhancedCompatibleResult = isEnhancedCompatibleFn(legacyStoredFilter);
+
+  // 2. Extract base properties (useful for metadata analysis)
+  const baseProps = extractBaseProperties(legacyStoredFilter);
+
+  // 3. Convert using the appropriate function
+  const simplifiedFilter = fromStoredFilter(legacyStoredFilter);
+
+  // 4. Validate the result with detailed error information
+  const validation = validate(simplifiedFilter);
+
+  // 5. Individual conversion function (useful for testing/debugging)
+  let conditionDemo = null;
+  if (legacyStoredFilter.meta?.type === 'phrase') {
+    conditionDemo = convertToSimpleCondition(legacyStoredFilter);
+    // condition now contains the extracted SimpleFilterCondition
+  }
+
+  return {
+    compatibility: {
+      isFullyCompatible: isFullyCompatibleResult,
+      isEnhancedCompatible: isEnhancedCompatibleResult,
+    },
+    extractedProperties: baseProps,
+    convertedFilter: simplifiedFilter,
+    validation,
+    individualFunctionDemo: conditionDemo,
+  };
+}
+
+// ====================================================================
 // DEMO: FILTER TRANSFORMATION (SIMPLIFIED ↔ STORED)
 // ====================================================================
 
 /**
  * Demo: Convert SimplifiedFilter to stored format for persistence
+ * Shows both new functional API and backward-compatible class API
  */
 export function demoFilterTransformation() {
   // Create a SimplifiedFilter
@@ -83,20 +153,29 @@ export function demoFilterTransformation() {
     },
   };
 
-  // Convert to stored format (for saving to savedObject or URL state)
-  const storedFilter = FilterTransformer.toStoredFilter(simplifiedFilter);
+  // NEW FUNCTIONAL API (recommended)
+  const storedFilterNew = toStoredFilter(simplifiedFilter);
+  const backToSimplifiedNew = fromStoredFilter(storedFilterNew);
+  const validationResultNew = validate(simplifiedFilter);
 
-  // Convert back to SimplifiedFilter (when loading from savedObject or URL state)
-  const backToSimplified = FilterTransformer.fromStoredFilter(storedFilter);
-
-  // Validate a SimplifiedFilter
-  const validationResult = FilterTransformer.validate(simplifiedFilter);
+  // BACKWARD COMPATIBLE CLASS API (still works)
+  const storedFilterOld = FilterTransformer.toStoredFilter(simplifiedFilter);
+  const backToSimplifiedOld = FilterTransformer.fromStoredFilter(storedFilterOld);
+  const validationResultOld = FilterTransformer.validate(simplifiedFilter);
 
   return {
     simplifiedFilter,
-    storedFilter,
-    backToSimplified,
-    validationResult,
+    newAPI: {
+      storedFilter: storedFilterNew,
+      backToSimplified: backToSimplifiedNew,
+      validation: validationResultNew,
+    },
+    oldAPI: {
+      storedFilter: storedFilterOld,
+      backToSimplified: backToSimplifiedOld,
+      validation: validationResultOld,
+    },
+    note: 'Both APIs produce identical results, choose based on your preference',
   };
 }
 
@@ -209,19 +288,81 @@ export function demoLegacyMigration() {
   return modernFilter;
 }
 
+// ====================================================================
+// DEMO: UNIT TESTING BENEFITS
+// ====================================================================
+
+/**
+ * Demo: How the modular approach improves testability
+ */
+export function demoUnitTestingBenefits() {
+  // Example: Test individual functions in isolation
+
+  // 1. Test type detection without full conversion
+  const phraseFilter = { meta: { type: 'phrase', params: { query: 'test' } } };
+  const scriptFilter = { query: { script: { source: 'doc.field.value > 0' } } };
+
+  const phraseCompatibility = isFullyCompatibleFn(phraseFilter);
+  const scriptCompatibility = isFullyCompatibleFn(scriptFilter);
+
+  // 2. Test property extraction independently
+  const complexStoredFilter = {
+    $state: { store: 'globalState' },
+    meta: {
+      key: 'user.id',
+      disabled: true,
+      alias: 'User Filter',
+      negate: true,
+      controlledBy: 'dashboard-123',
+    },
+  };
+
+  const extractedProps = extractBaseProperties(complexStoredFilter);
+
+  // 3. Test validation logic separately
+  const validFilter: SimplifiedFilter = {
+    condition: { field: 'status', operator: 'is', value: 'active' },
+  };
+
+  const invalidFilter = {
+    condition: { field: 'status', operator: 'is', value: 'active' },
+    group: { type: 'AND', conditions: [] }, // Multiple types - invalid
+  } as any;
+
+  const validResult = validate(validFilter);
+  const invalidResult = validate(invalidFilter);
+
+  return {
+    typeDetection: {
+      phraseFilter: { isFullyCompatible: phraseCompatibility },
+      scriptFilter: { isFullyCompatible: scriptCompatibility },
+    },
+    propertyExtraction: extractedProps,
+    validation: {
+      valid: validResult,
+      invalid: invalidResult,
+    },
+    testingNote: 'Each function can be unit tested independently with focused test cases',
+  };
+}
+
 /**
  * Demo usage showing the complete FilterTransformer workflow
  */
 export function runAllDemos() {
   const builderExamples = demoSimpleFilterCreation();
+  const modularAPIExamples = demoModularAPI();
   const transformationExamples = demoFilterTransformation();
+  const unitTestingExamples = demoUnitTestingBenefits();
   const errorHandlingResult = demoErrorHandling();
   const dashboardExamples = demoDashboardFilters();
   const migrationExample = demoLegacyMigration();
 
   return {
     builderExamples,
+    modularAPIExamples,
     transformationExamples,
+    unitTestingExamples,
     errorHandlingResult,
     dashboardExamples,
     migrationExample,
