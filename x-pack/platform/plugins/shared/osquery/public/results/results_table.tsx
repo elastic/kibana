@@ -259,10 +259,10 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
     const newColumns = fields.reduce(
       (acc, fieldName) => {
-        const { data: columns, seen } = acc;
+        const { data: accData, seen } = acc;
         if (fieldName === 'agent.name') {
           if (!seen.has(fieldName)) {
-            columns.push({
+            accData.push({
               id: fieldName,
               displayAsText: i18n.translate(
                 'xpack.osquery.liveQueryResults.table.agentColumnTitle',
@@ -280,7 +280,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
         if (ecsMappingColumns.includes(fieldName)) {
           if (!seen.has(fieldName)) {
-            columns.push({
+            accData.push({
               id: fieldName,
               displayAsText: fieldName,
               defaultSortDirection: Direction.asc,
@@ -296,7 +296,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
           const hasNumberType = fields.includes(`${fieldName}.number`);
           if (!seen.has(displayAsText)) {
             const id = hasNumberType ? fieldName + '.number' : fieldName;
-            columns.push({
+            accData.push({
               id,
               displayAsText,
               display: getHeaderDisplay(displayAsText),
