@@ -9,7 +9,7 @@ import type { Reference } from '@kbn/content-management-utils';
 import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
 
 import type { AnnotationGroups } from '@kbn/lens-common';
-import { LENS_LAYER_TYPES as layerTypes } from '@kbn/lens-common';
+import { LENS_LAYER_TYPES } from '@kbn/lens-common';
 import type {
   XYLayerConfig,
   XYDataLayerConfig,
@@ -164,7 +164,7 @@ export function convertToPersistable(state: XYState) {
 export const isPersistedAnnotationsLayer = (
   layer: XYPersistedLayerConfig
 ): layer is XYPersistedAnnotationLayerConfig =>
-  layer.layerType === layerTypes.ANNOTATIONS && !('indexPatternId' in layer);
+  layer.layerType === LENS_LAYER_TYPES.ANNOTATIONS && !('indexPatternId' in layer);
 
 export const isPersistedByValueAnnotationsLayer = (
   layer: XYPersistedLayerConfig
