@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// TODO: Remove the eslint-disable comments to use the proper types.
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import dagre from '@dagrejs/dagre';
 import type { Node } from '@xyflow/react';
 import { Position } from '@xyflow/react';

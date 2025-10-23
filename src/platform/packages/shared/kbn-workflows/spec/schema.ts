@@ -361,7 +361,7 @@ export const getMergeStepSchema = (stepSchema: z.ZodType, loose: boolean = false
 };
 
 /* --- Inputs --- */
-export const WorkflowInputTypeEnum = z.enum(['string', 'number', 'boolean', 'choice']);
+export const WorkflowInputTypeEnum = z.enum(['string', 'number', 'boolean', 'choice', 'array']);
 
 const WorkflowInputBaseSchema = z.object({
   name: z.string(),
@@ -370,32 +370,40 @@ const WorkflowInputBaseSchema = z.object({
   required: z.boolean().optional(),
 });
 
-const WorkflowInputStringSchema = WorkflowInputBaseSchema.extend({
+export const WorkflowInputStringSchema = WorkflowInputBaseSchema.extend({
   type: z.literal('string'),
   default: z.string().optional(),
 });
 
-const WorkflowInputNumberSchema = WorkflowInputBaseSchema.extend({
+export const WorkflowInputNumberSchema = WorkflowInputBaseSchema.extend({
   type: z.literal('number'),
   default: z.number().optional(),
 });
 
-const WorkflowInputBooleanSchema = WorkflowInputBaseSchema.extend({
+export const WorkflowInputBooleanSchema = WorkflowInputBaseSchema.extend({
   type: z.literal('boolean'),
   default: z.boolean().optional(),
 });
 
-const WorkflowInputChoiceSchema = WorkflowInputBaseSchema.extend({
+export const WorkflowInputChoiceSchema = WorkflowInputBaseSchema.extend({
   type: z.literal('choice'),
   default: z.string().optional(),
   options: z.array(z.string()),
 });
 
-export const WorkflowInputSchema = z.discriminatedUnion('type', [
+export const WorkflowInputArraySchema = WorkflowInputBaseSchema.extend({
+  type: z.literal('array'),
+  minItems: z.number().int().nonnegative().optional(),
+  maxItems: z.number().int().nonnegative().optional(),
+  default: z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]).optional(),
+});
+
+export const WorkflowInputSchema = z.union([
   WorkflowInputStringSchema,
   WorkflowInputNumberSchema,
   WorkflowInputBooleanSchema,
   WorkflowInputChoiceSchema,
+  WorkflowInputArraySchema,
 ]);
 
 /* --- Consts --- */
@@ -507,7 +515,16 @@ export const WorkflowContextSchema = z.object({
   event: EventSchema.optional(),
   execution: WorkflowExecutionContextSchema,
   workflow: WorkflowDataContextSchema,
-  inputs: z.record(z.union([z.string(), z.number(), z.boolean()])).optional(),
+  inputs: z
+    .record(
+      z.union([
+        z.string(),
+        z.number(),
+        z.boolean(),
+        z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]),
+      ])
+    )
+    .optional(),
   consts: z.record(z.string(), z.any()).optional(),
   now: z.date().optional(),
 });
