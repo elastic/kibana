@@ -31,18 +31,16 @@ import { DashboardSaveModal } from './save_modal';
  * accounts for scenarios of cloning elastic managed dashboard into user managed dashboards
  */
 export async function openSaveModal({
-  controlGroupReferences,
+  references,
   dashboardState,
   isManaged,
   lastSavedId,
-  panelReferences,
   viewMode,
 }: {
-  controlGroupReferences?: Reference[];
+  references: Reference[];
   dashboardState: DashboardState;
   isManaged: boolean;
   lastSavedId: string | undefined;
-  panelReferences: Reference[];
   viewMode: ViewMode;
 }) {
   try {
@@ -103,12 +101,10 @@ export async function openSaveModal({
             const beforeAddTime = window.performance.now();
 
             const saveResult = await dashboardContentManagementService.saveDashboardState({
-              controlGroupReferences,
-              panelReferences,
+              references,
               saveOptions,
               dashboardState: dashboardStateToSave,
               lastSavedId,
-              timeRestore: newTimeRestore,
             });
 
             const addDuration = window.performance.now() - beforeAddTime;

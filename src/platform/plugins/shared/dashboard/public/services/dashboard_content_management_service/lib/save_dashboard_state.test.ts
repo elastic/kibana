@@ -44,7 +44,6 @@ describe('Save dashboard state', () => {
       },
       lastSavedId: 'Boogaloo',
       saveOptions: {},
-      timeRestore: false,
     });
 
     expect(result.id).toBe('Boogaloo');
@@ -66,7 +65,6 @@ describe('Save dashboard state', () => {
       },
       lastSavedId: 'Boogaloonie',
       saveOptions: { saveAsCopy: true },
-      timeRestore: false,
     });
 
     expect(result.id).toBe('newlyGeneratedId');
@@ -92,7 +90,6 @@ describe('Save dashboard state', () => {
       },
       lastSavedId: 'Boogatoonie',
       saveOptions: { saveAsCopy: true },
-      timeRestore: false,
     });
 
     expect(result.id).toBe('newlyGeneratedId');
@@ -117,10 +114,9 @@ describe('Save dashboard state', () => {
         title: 'BooFour',
         panels: [{ type: 'boop', uid: 'idOne' } as DashboardPanel],
       },
-      panelReferences: [{ name: 'idOne:panel_idOne', type: 'boop', id: 'idOne' }],
+      references: [{ name: 'idOne:panel_idOne', type: 'boop', id: 'idOne' }],
       lastSavedId: 'Boogatoonie',
       saveOptions: { saveAsCopy: true },
-      timeRestore: false,
     });
 
     expect(result.id).toBe('newlyGeneratedId');
@@ -148,7 +144,6 @@ describe('Save dashboard state', () => {
       },
       lastSavedId: 'Boogatoonie',
       saveOptions: { saveAsCopy: true },
-      timeRestore: false,
     });
 
     expect(result.id).toBeUndefined();
