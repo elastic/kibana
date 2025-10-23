@@ -126,7 +126,7 @@
     "@elastic/ecs": "^9.0.0",
     "@elastic/elasticsearch": "9.1.1",
     "@elastic/ems-client": "8.6.3",
-    "@elastic/eui": "file:./eui_107.0.0_disabled_btns_001.tgz",
+    "@elastic/eui": "file:./eui_107.0.0_disabled_btns_008.tgz",
     "@elastic/eui-theme-borealis": "file:./eui_theme_borealis_3.6.0_disabled_btns_001.tgz",
     "@elastic/eui-theme-common": "file:./eui_theme_common_5.0.0_disabled_btns_001.tgz",
     "@elastic/filesaver": "1.1.2",

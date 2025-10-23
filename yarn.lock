@@ -2496,9 +2496,9 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@file:./eui_107.0.0_disabled_btns_001.tgz":
+"@elastic/eui@file:./eui_107.0.0_disabled_btns_008.tgz":
   version "107.0.0"
-  resolved "file:./eui_107.0.0_disabled_btns_001.tgz#c2f0f07d32f852259e6cca02ce3588d90d86c695"
+  resolved "file:./eui_107.0.0_disabled_btns_008.tgz#d5e8fd429210b76ffa54409349a01f3238c6b848"
   dependencies:
     "@elastic/prismjs-esql" "^1.1.2"
     "@hello-pangea/dnd" "^16.6.0"
