@@ -267,7 +267,7 @@ export class EditControlDisplaySettingsAction
 
   public getDisplayName() {
     return i18n.translate('controls.controlGroup.floatingActions.editDisplaySettings', {
-      defaultMessage: 'Width',
+      defaultMessage: 'Display settings',
     });
   }
 
