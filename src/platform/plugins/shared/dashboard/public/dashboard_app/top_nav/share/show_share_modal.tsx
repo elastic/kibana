@@ -11,15 +11,7 @@ import { omit } from 'lodash';
 import moment from 'moment';
 import type { ReactElement } from 'react';
 import React, { useState } from 'react';
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiCheckbox,
-  EuiFlexGrid,
-  EuiFlexItem,
-  EuiFormFieldset,
-  EuiText,
-} from '@elastic/eui';
+import { EuiCallOut, EuiCheckbox, EuiFlexGrid, EuiFlexItem, EuiFormFieldset } from '@elastic/eui';
 import type { Capabilities } from '@kbn/core/public';
 import type { QueryState } from '@kbn/data-plugin/common';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
@@ -203,60 +195,6 @@ export function ShowShareModal({
 
   const allowShortUrl = getDashboardCapabilities().createShortUrl;
 
-  const LinkCalloutBody = () => (
-    <EuiText component="p" size="s">
-      {hasPanelChanges
-        ? allowShortUrl
-          ? shareModalStrings.getDraftSharePanelChangesWarning()
-          : shareModalStrings.getSnapshotShareWarning()
-        : shareModalStrings.getDraftShareWarning('link')}
-    </EuiText>
-  );
-
-  const EmbedCalloutBody = () => (
-    <EuiText component="p" size="s">
-      {hasPanelChanges
-        ? shareModalStrings.getEmbedSharePanelChangesWarning()
-        : shareModalStrings.getDraftShareWarning('embed')}
-    </EuiText>
-  );
-
-  const DraftModalCallout = ({ type }: { type: string }) => {
-    const [hasBeenSaved, setHasBeenSaved] = useState<boolean>(!isDirty);
-
-    const handleSaveDashboard = async () => {
-      const result = await saveDashboard();
-      if (result && !result.error) {
-        setHasBeenSaved(true);
-      }
-    };
-
-    if (hasBeenSaved) {
-      return null;
-    }
-
-    return (
-      <EuiCallOut
-        color="warning"
-        iconType="info"
-        data-test-subj="DashboardDraftModeCopyLinkCallOut"
-        title={shareModalStrings.draftModeCalloutTitle}
-      >
-        {type === 'embed' ? <EmbedCalloutBody /> : <LinkCalloutBody />}
-        <EuiButton
-          color="warning"
-          fill
-          size="s"
-          iconType="save"
-          data-test-subj="DashboardDraftModeSaveButton"
-          onClick={handleSaveDashboard}
-        >
-          {shareModalStrings.draftModeSaveButtonLabel}
-        </EuiButton>
-      </EuiCallOut>
-    );
-  };
-
   shareService.toggleShareContextMenu({
     isDirty,
     anchorElement,
@@ -265,16 +203,29 @@ export function ShowShareModal({
     asExport,
     objectId: savedObjectId,
     objectType: 'dashboard',
+    onSave: saveDashboard,
     objectTypeMeta: {
       title: i18n.translate('dashboard.share.shareModal.title', {
         defaultMessage: 'Share dashboard',
       }),
       config: {
         link: {
-          draftModeCallOut: canSave && <DraftModalCallout type="link" />,
+          draftModeCallOut: {
+            message: hasPanelChanges
+              ? allowShortUrl
+                ? shareModalStrings.getDraftSharePanelChangesWarning()
+                : shareModalStrings.getSnapshotShareWarning()
+              : shareModalStrings.getDraftShareWarning('link'),
+            'data-test-subj': 'DashboardDraftModeCopyLinkCallOut',
+          },
         },
         embed: {
-          draftModeCallOut: canSave && <DraftModalCallout type="embed" />,
+          draftModeCallOut: {
+            message: hasPanelChanges
+              ? shareModalStrings.getEmbedSharePanelChangesWarning()
+              : shareModalStrings.getDraftShareWarning('embed'),
+            'data-test-subj': 'DashboardDraftModeEmbedCallOut',
+          },
           embedUrlParamExtensions: [
             {
               paramName: 'embed',
