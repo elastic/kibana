@@ -15,7 +15,7 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMockedIndexPattern } from '../../mocks';
-import { staticValueOperation } from './static_value';
+import { staticValueOperation } from '.';
 import type {
   FormBasedLayer,
   IndexPattern,

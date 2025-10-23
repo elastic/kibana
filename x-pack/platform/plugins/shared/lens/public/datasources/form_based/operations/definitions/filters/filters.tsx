@@ -39,9 +39,12 @@ const filtersLabel = i18n.translate('xpack.lens.indexPattern.filters', {
   defaultMessage: 'Filters',
 });
 
-export const defaultLabel = i18n.translate('xpack.lens.indexPattern.filters.label.placeholder', {
-  defaultMessage: 'All records',
-});
+export const filtersDefaultLabel = i18n.translate(
+  'xpack.lens.indexPattern.filters.label.placeholder',
+  {
+    defaultMessage: 'All records',
+  }
+);
 
 // to do: get the language from uiSettings
 const defaultFilter: Filter = {
@@ -263,7 +266,7 @@ export const FilterList = ({
                     })}
                     css={draggablePopoverButtonStyles(euiThemeContext)}
                   >
-                    {filter.label || (filter.input.query as string) || defaultLabel}
+                    {filter.label || (filter.input.query as string) || filtersDefaultLabel}
                   </EuiLink>
                 }
               />

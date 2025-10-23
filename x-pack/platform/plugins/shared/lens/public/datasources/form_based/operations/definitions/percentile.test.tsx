@@ -23,7 +23,7 @@ import type {
   IndexPattern,
   FormBasedLayer,
 } from '@kbn/lens-common';
-import { percentileOperation } from './percentile';
+import { percentileOperation } from '.';
 import type { ExpressionAstExpressionBuilder } from '@kbn/expressions-plugin/public';
 import {
   buildExpressionFunction,

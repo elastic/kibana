@@ -21,7 +21,7 @@ import type {
   FormBasedLayer,
   TermsIndexPatternColumn,
 } from '@kbn/lens-common';
-import { lastValueOperation } from './last_value';
+import { lastValueOperation } from '.';
 import type { EuiSwitchEvent } from '@elastic/eui';
 import { EuiSwitch } from '@elastic/eui';
 import { buildExpression, parseExpression } from '@kbn/expressions-plugin/common';
