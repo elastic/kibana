@@ -46,6 +46,12 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsSentinelOneRunScriptEnabled: true,
 
   /**
+   * Memory Dump response actions support for Elastic Defend.
+   * Release: v9.3
+   */
+  responseActionsEndpointMemoryDump: false,
+
+  /**
    * Disables new notes
    */
   securitySolutionNotesDisabled: false,
