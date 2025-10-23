@@ -150,6 +150,9 @@ export function SelectModelAndInstallKnowledgeBase({
             onChange={(value) => setSelectedInferenceId(value)}
             disabled={isInstalling}
             data-test-subj="observabilityAiAssistantKnowledgeBaseModelDropdown"
+            aria-label={i18n.translate('xpack.aiAssistant.knowledgeBase.modelSelectAriaLabel', {
+              defaultMessage: 'Default language model',
+            })}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
