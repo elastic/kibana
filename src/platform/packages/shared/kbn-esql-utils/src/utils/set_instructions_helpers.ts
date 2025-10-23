@@ -40,7 +40,7 @@ export function getProjectRoutingFromEsqlQuery(queryString: string): string | un
       if (identifierArg?.name !== 'project_routing') continue;
 
       const valueArg = instructionFunction.args[1];
-      if (!valueArg || Array.isArray(valueArg)) return undefined;
+      if (!valueArg || Array.isArray(valueArg)) continue;
 
       if (isLiteral(valueArg)) {
         // For string literals, extract the unquoted value
@@ -50,12 +50,9 @@ export function getProjectRoutingFromEsqlQuery(queryString: string): string | un
         // For other literal types, use the printer to get proper string representation
         return LeafPrinter.literal(valueArg);
       }
-      return undefined;
     }
-
-    return undefined;
   } catch (error) {
-    // Return undefined if query parsing fails
-    return undefined;
+    // Silently handle parsing errors
   }
+  return undefined;
 }
