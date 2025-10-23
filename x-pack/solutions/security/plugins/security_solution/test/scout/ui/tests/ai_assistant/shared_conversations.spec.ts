@@ -384,7 +384,7 @@ spaceTest.describe.skip('Assistant Conversation Sharing', { tag: ['@ess', '@svlS
 
   spaceTest(
     'Visiting a URL with the assistant param shows access error when user does not have access to the conversation',
-    async ({ page, browserAuth, scoutSpace }) => {
+    async ({ page, browserAuth, scoutSpace, pageObjects }) => {
       // Login as secondary user (automatically clears cookies)
       await browserAuth.loginAs(secondaryUser);
 
