@@ -16,7 +16,7 @@
 
 import { z } from '@kbn/zod';
 
-import { NonEmptyString } from '../primitive.gen';
+import { NonEmptyString } from '../../primitive.gen';
 
 export type CreateAutoImportIntegrationRequestBody = z.infer<
   typeof CreateAutoImportIntegrationRequestBody
