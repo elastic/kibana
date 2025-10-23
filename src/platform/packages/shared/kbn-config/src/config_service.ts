@@ -72,6 +72,7 @@ export class ConfigService {
     removals: string[];
   }>({ additions: {}, removals: [] });
   private readonly handledDeprecatedConfigs = new Map<string, DeprecatedConfigDetails[]>();
+  private readonly configTransformers: Array<(path: string, config: unknown) => unknown> = [];
 
   constructor(
     private readonly rawConfigProvider: RawConfigurationProvider,
@@ -123,6 +124,11 @@ export class ConfigService {
 
     this.schemas.set(namespace, schema);
     this.markAsHandled(path);
+  }
+
+  // Register a config transformer that can modify config values before they are returned.
+  public registerConfigTransformer(transformer: (path: string, config: unknown) => unknown): void {
+    this.configTransformers.push(transformer);
   }
 
   /**
@@ -184,7 +190,9 @@ export class ConfigService {
     path: ConfigPath,
     { ignoreUnchanged = true }: { ignoreUnchanged?: boolean } = {}
   ) {
-    return this.getValidatedConfigAtPath$(path, { ignoreUnchanged }) as Observable<TSchema>;
+    return this.getValidatedConfigAtPath$(path, { ignoreUnchanged }).pipe(
+      map((config) => this.applyConfigTransformers(pathToString(path), config))
+    ) as Observable<TSchema>;
   }
 
   /**
@@ -198,7 +206,8 @@ export class ConfigService {
       throw new Error('`atPathSync` called before config was validated');
     }
     const configAtPath = this.lastConfig!.get(path);
-    return this.validateAtPath(path, configAtPath) as TSchema;
+    const validated = this.validateAtPath(path, configAtPath) as TSchema;
+    return this.applyConfigTransformers(pathToString(path), validated);
   }
 
   public async isEnabledAtPath(path: ConfigPath) {
@@ -404,6 +413,15 @@ export class ConfigService {
       version: this.env.packageInfo.version,
       docLinks: this.docLinks,
     };
+  }
+
+  private applyConfigTransformers<T>(path: string, config: T): T {
+    if (this.configTransformers.length === 0) return config;
+
+    return this.configTransformers.reduce(
+      (transformedConfig, transformer) => transformer(path, transformedConfig) as T,
+      config
+    );
   }
 }
 

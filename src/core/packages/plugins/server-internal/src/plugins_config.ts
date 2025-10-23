@@ -41,6 +41,11 @@ const configSchema = schema.object({
    * internal purposes.
    */
   forceEnableAllPlugins: schema.maybe(schema.boolean({ defaultValue: false })),
+  featureFlags: schema.maybe(
+    schema.object({
+      enableAll: schema.maybe(schema.boolean()),
+    })
+  ),
 });
 
 type InternalPluginsConfigType = TypeOf<typeof configSchema>;

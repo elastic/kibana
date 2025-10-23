@@ -15,6 +15,7 @@ import { schema } from '@kbn/config-schema';
  * @internal
  */
 const configSchema = schema.object({
+  enableAllFlags: schema.maybe(schema.boolean()),
   overrides: schema.maybe(schema.recordOf(schema.string(), schema.any())),
 });
 
@@ -23,6 +24,7 @@ const configSchema = schema.object({
  * @internal
  */
 export interface FeatureFlagsConfig {
+  enableAllFlags?: boolean;
   overrides?: Record<string, unknown>;
 }
 
