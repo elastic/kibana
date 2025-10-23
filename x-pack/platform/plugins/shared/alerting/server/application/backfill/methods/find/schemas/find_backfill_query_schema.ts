@@ -14,7 +14,12 @@ export const findBackfillQuerySchema = schema.object(
     page: schema.number({ defaultValue: 1, min: 1 }),
     perPage: schema.number({ defaultValue: 10, min: 0 }),
     ruleIds: schema.maybe(schema.string()),
-    initiator: schema.maybe(schema.string()),
+    initiator: schema.maybe(
+      schema.oneOf([
+        schema.literal(backfillInitiator.USER),
+        schema.literal(backfillInitiator.SYSTEM),
+      ])
+    ),
     initiatorId: schema.maybe(schema.string()),
     start: schema.maybe(schema.string()),
     sortField: schema.maybe(schema.oneOf([schema.literal('createdAt'), schema.literal('start')])),
