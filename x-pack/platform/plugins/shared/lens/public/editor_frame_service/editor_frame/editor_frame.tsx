@@ -17,6 +17,8 @@ import type {
   AddUserMessages,
   LensInspector,
 } from '@kbn/lens-common';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { getAbsoluteDateRange } from '../../utils';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { DataPanelWrapper } from './data_panel_wrapper';
@@ -40,6 +42,7 @@ import { ErrorBoundary, showMemoizedErrorNotification } from '../../lens_ui_erro
 import type { IndexPatternServiceAPI } from '../../data_views_service/service';
 import { getLongMessage } from '../../user_messages_utils';
 import { useEditorFrameService } from '../editor_frame_service_context';
+import { VisualizationToolbarWrapper } from './visualization_toolbar';
 
 export interface EditorFrameProps {
   ExpressionRenderer: ReactExpressionRendererType;
@@ -59,6 +62,9 @@ export function EditorFrame(props: EditorFrameProps) {
   const datasourceStates = useLensSelector(selectDatasourceStates);
   const visualization = useLensSelector(selectVisualization);
   const areDatasourcesLoaded = useLensSelector(selectAreDatasourcesLoaded);
+
+  const { euiTheme } = useEuiTheme();
+
   const isVisualizationLoaded = !!visualization.state;
   const visualizationTypeIsKnown = Boolean(
     visualization.activeId && visualizationMap[visualization.activeId]
@@ -147,15 +153,29 @@ export function EditorFrame(props: EditorFrameProps) {
         configPanel={
           areDatasourcesLoaded && (
             <ErrorBoundary onError={onError}>
-              <ConfigPanelWrapper
-                core={props.core}
-                framePublicAPI={framePublicAPI}
-                uiActions={props.plugins.uiActions}
-                dataViews={props.plugins.dataViews}
-                data={props.plugins.data}
-                indexPatternService={props.indexPatternService}
-                getUserMessages={props.getUserMessages}
-              />
+              <>
+                <EuiFlexItem
+                  css={css({ margin: `${euiTheme.size.base} ${euiTheme.size.base} 0 0` })}
+                >
+                  <EuiFlexGroup
+                    alignItems="center"
+                    justifyContent="flexEnd"
+                    responsive={false}
+                    wrap={true}
+                  >
+                    <VisualizationToolbarWrapper framePublicAPI={framePublicAPI} />
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+                <ConfigPanelWrapper
+                  core={props.core}
+                  framePublicAPI={framePublicAPI}
+                  uiActions={props.plugins.uiActions}
+                  dataViews={props.plugins.dataViews}
+                  data={props.plugins.data}
+                  indexPatternService={props.indexPatternService}
+                  getUserMessages={props.getUserMessages}
+                />
+              </>
             </ErrorBoundary>
           )
         }
