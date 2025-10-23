@@ -8,10 +8,10 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import type { ConnectorContract } from '@kbn/workflows';
+import type { ConnectorContractUnion } from '@kbn/workflows';
 import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
-import { getCompletionItemProvider, parseLineForCompletion } from './get_completion_item_provider';
 import { z } from '@kbn/zod';
+import { getCompletionItemProvider, parseLineForCompletion } from './get_completion_item_provider';
 
 // Mock Monaco editor model
 const createMockModel = (value: string, cursorOffset: number) => {
@@ -50,17 +50,16 @@ const createMockModel = (value: string, cursorOffset: number) => {
   };
 };
 
-function testCompletion(
+async function getSuggestions(
   completionProvider: monaco.languages.CompletionItemProvider,
-  yamlContent: string,
-  expectedSuggestions: string[] | ((suggestion: monaco.languages.CompletionItem) => boolean)
+  yamlContent: string
 ) {
   const cursorOffset = yamlContent.indexOf('|<-');
   const mockModel = createMockModel(yamlContent, cursorOffset);
   const position = mockModel.getPositionAt(cursorOffset);
   const triggerCharacter = yamlContent.slice(cursorOffset - 1, cursorOffset);
 
-  const result = completionProvider.provideCompletionItems(
+  const result = await completionProvider.provideCompletionItems(
     mockModel as any,
     position as any,
     {
@@ -70,32 +69,11 @@ function testCompletion(
     {} as any // cancellation token
   );
 
-  // Handle both sync and async returns
-  const completionList = result as monaco.languages.CompletionList;
-  expect(completionList?.suggestions).toBeDefined();
-  expect(completionList?.suggestions.length).toBeGreaterThan(0);
-
-  // Should include basic context items
-  const labels =
-    completionList?.suggestions.map((s: monaco.languages.CompletionItem) => s.label) || [];
-  // checking for sorted arrays to avoid flakiness, since the order of suggestions is not guaranteed
-  if (typeof expectedSuggestions === 'function') {
-    for (const suggestion of completionList?.suggestions || []) {
-      if (!expectedSuggestions(suggestion)) {
-        throw new Error(
-          `Suggestion ${suggestion.label} does not match expected function: ${JSON.stringify(
-            suggestion
-          )}`
-        );
-      }
-    }
-  } else {
-    expect(labels.sort()).toEqual(expectedSuggestions.sort());
-  }
+  return result?.suggestions ?? [];
 }
 
 describe('getCompletionItemProvider', () => {
-  const mockConnectors: ConnectorContract[] = [
+  const mockConnectors: ConnectorContractUnion[] = [
     {
       type: 'console.log',
       paramsSchema: z.object({
@@ -111,7 +89,7 @@ describe('getCompletionItemProvider', () => {
   const completionProvider = getCompletionItemProvider(workflowSchema);
 
   describe('Integration tests', () => {
-    it('should provide basic completions inside variable expression', () => {
+    it('should provide basic completions inside variable expression', async () => {
       const yamlContent = `
 version: "1"
 name: "test"
@@ -124,18 +102,21 @@ steps:
       message: "{{|<-}}"
 `.trim();
 
-      testCompletion(completionProvider, yamlContent, [
-        'consts',
-        'event',
-        'now',
-        'workflow',
-        'steps',
-        'execution',
-        'inputs',
-      ]);
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+      expect(suggestions.map((s) => s.label)).toEqual(
+        expect.arrayContaining([
+          'consts',
+          'event',
+          'now',
+          'workflow',
+          'steps',
+          'execution',
+          'inputs',
+        ])
+      );
     });
 
-    it('should provide completions after @ and quote insertText automatically if cursor is in plain scalar', () => {
+    it('should provide completions after @ and quote insertText automatically if cursor is in plain scalar', async () => {
       const yamlContent = `
 version: "1"
 name: "test"
@@ -147,12 +128,13 @@ steps:
     with:
       message: @|<-
 `.trim();
-      testCompletion(completionProvider, yamlContent, (suggestion) => {
-        return suggestion.insertText.startsWith('"') && suggestion.insertText.endsWith('"');
-      });
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+      expect(suggestions.map((s) => s.insertText)).toEqual(
+        expect.arrayContaining([expect.stringMatching(/^".*"$/)])
+      );
     });
 
-    it('should provide completions after @ and not quote insertText automatically if cursor is in plain scalar but not starting with { or @', () => {
+    it('should provide completions after @ and not quote insertText automatically if cursor is in plain scalar but not starting with { or @', async () => {
       const yamlContent = `
 version: "1"
 name: "test"
@@ -164,12 +146,13 @@ steps:
     with:
       message: hey, this is @|<-
 `.trim();
-      testCompletion(completionProvider, yamlContent, (suggestion) => {
-        return !suggestion.insertText.startsWith('"') && !suggestion.insertText.endsWith('"');
-      });
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+      expect(suggestions.map((s) => s.label)).toEqual(
+        expect.arrayContaining([expect.not.stringMatching(/^"[^"]*$/)])
+      );
     });
 
-    it('should provide basic completions with @ and not quote insertText automatically if cursor is in string', () => {
+    it('should provide basic completions with @ and not quote insertText automatically if cursor is in string', async () => {
       const yamlContent = `
 version: "1"
 name: "test"
@@ -182,21 +165,21 @@ steps:
       message: "@<-"
 `.trim();
 
-      testCompletion(completionProvider, yamlContent, [
-        'consts',
-        'event',
-        'now',
-        'workflow',
-        'steps',
-        'execution',
-        'inputs',
-      ]);
-      testCompletion(completionProvider, yamlContent, (suggestion) => {
-        return !suggestion.insertText.startsWith('"') && !suggestion.insertText.endsWith('"');
-      });
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+      expect(suggestions.map((s) => s.label)).toEqual(
+        expect.arrayContaining([
+          'consts',
+          'event',
+          'now',
+          'workflow',
+          'steps',
+          'execution',
+          'inputs',
+        ])
+      );
     });
 
-    it('should provide const completion with type', () => {
+    it('should provide const completion with type', async () => {
       const yamlContent = `
 version: "1"
 name: "test"
@@ -215,21 +198,25 @@ steps:
       message: "{{consts.|<-}}"
 `.trim();
 
-      testCompletion(completionProvider, yamlContent, (suggestion) => {
-        if (suggestion.label === 'apiUrl') {
-          return suggestion.detail!.startsWith('string');
-        }
-        if (suggestion.label === 'threshold') {
-          return suggestion.detail!.startsWith('number');
-        }
-        if (suggestion.label === 'templates') {
-          return suggestion.detail!.startsWith('array');
-        }
-        return false;
-      });
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+      expect(suggestions).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ label: 'apiUrl', detail: '"https://api.example.com"' }),
+          expect.objectContaining({
+            label: 'threshold',
+            detail: '100',
+          }),
+          expect.objectContaining({
+            label: 'templates',
+            detail: expect.stringContaining(
+              '{  name: "template1";  template: {  subject: "Suspicious activity detected";  body: "Go look at the activity"}}[]'
+            ),
+          }),
+        ])
+      );
     });
 
-    it('should provide const completion with type in array', () => {
+    it('should provide const completion with type in array', async () => {
       const yamlContent = `
 version: "1"
 name: "test"
@@ -248,18 +235,19 @@ steps:
       message: "{{consts.templates[0].|<-}}"
 `.trim();
 
-      testCompletion(completionProvider, yamlContent, (suggestion) => {
-        if (suggestion.label === 'name') {
-          return suggestion.detail!.startsWith('string');
-        }
-        if (suggestion.label === 'template') {
-          return suggestion.detail!.startsWith('object');
-        }
-        return false;
-      });
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+      expect(suggestions).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ label: 'name', detail: '"template1"' }),
+          expect.objectContaining({
+            label: 'template',
+            detail: '{  subject: "Suspicious activity detected";  body: "Go look at the activity"}',
+          }),
+        ])
+      );
     });
 
-    it('should provide previous step completion', () => {
+    it('should provide previous step completion', async () => {
       const yamlContent = `
 version: "1"
 name: "test"
@@ -276,10 +264,11 @@ steps:
       message: "{{steps.|<-}}"
 `.trim();
 
-      testCompletion(completionProvider, yamlContent, ['step0']);
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+      expect(suggestions.map((s) => s.label)).toEqual(expect.arrayContaining(['step0']));
     });
 
-    it('should not provide unreachable step', () => {
+    it('should not provide unreachable step', async () => {
       const yamlContent = `
 version: "1"
 name: "test"
@@ -306,10 +295,13 @@ steps:
           message: "im unreachable"
 `.trim();
 
-      testCompletion(completionProvider, yamlContent, ['if-step', 'first-true-step']);
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+      expect(suggestions.map((s) => s.label)).toEqual(
+        expect.arrayContaining(['if-step', 'first-true-step'])
+      );
     });
 
-    it('should autocomplete incomplete key', () => {
+    it('should autocomplete incomplete key', async () => {
       const yamlContent = `
 version: "1"
 name: "test"
@@ -322,10 +314,11 @@ steps:
       message: "{{consts.a|<-}}"
 `.trim();
 
-      testCompletion(completionProvider, yamlContent, ['apiUrl']);
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+      expect(suggestions.map((s) => s.label)).toEqual(expect.arrayContaining(['apiUrl']));
     });
 
-    it('should provide completions with brackets for keys in kebab-case and use quote type opposite to the one in the string', () => {
+    it('should provide completions with brackets for keys in kebab-case and use quote type opposite to the one in the string', async () => {
       const yamlContentDoubleQuote = `
 version: "1"
 name: "test"
@@ -337,9 +330,10 @@ steps:
     with:
       message: "{{consts.|<-}}"
 `.trim();
-      testCompletion(completionProvider, yamlContentDoubleQuote, (suggestion) => {
-        return suggestion.insertText === "['api-url']";
-      });
+      const suggestions1 = await getSuggestions(completionProvider, yamlContentDoubleQuote);
+      expect(suggestions1.map((s) => s.insertText)).toEqual(
+        expect.arrayContaining(["['api-url']"])
+      );
 
       const yamlContentSingleQuote = `
       version: "1"
@@ -352,9 +346,254 @@ steps:
           with:
             message: '{{consts.|<-}}'
       `.trim();
-      testCompletion(completionProvider, yamlContentSingleQuote, (suggestion) => {
-        return suggestion.insertText === '["api-url"]';
-      });
+      const suggestions2 = await getSuggestions(completionProvider, yamlContentSingleQuote);
+      expect(suggestions2.map((s) => s.insertText)).toEqual(
+        expect.arrayContaining(['["api-url"]'])
+      );
+    });
+
+    it('should provide rrule suggestions in empty scheduled trigger with block', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+triggers:
+  - type: scheduled
+    enabled: true
+    with:
+      |<-
+steps: []
+`.trim();
+
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+      expect(suggestions.map((s) => s.label)).toEqual(
+        expect.arrayContaining([
+          'Daily at 9 AM',
+          'Business hours (weekdays 8 AM & 5 PM)',
+          'Monthly on 1st and 15th',
+          'Custom RRule',
+        ])
+      );
+    });
+
+    it('should provide rrule suggestions in scheduled trigger with block with proper YAML', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+triggers:
+  - type: scheduled
+    enabled: true
+    with:
+      |<-
+steps: []
+`.trim();
+
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+      expect(suggestions.map((s) => s.label)).toEqual(
+        expect.arrayContaining([
+          'Daily at 9 AM',
+          'Business hours (weekdays 8 AM & 5 PM)',
+          'Monthly on 1st and 15th',
+          'Custom RRule',
+        ])
+      );
+    });
+
+    it('should provide rrule suggestions in scheduled trigger with block with empty map', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+triggers:
+  - type: scheduled
+    enabled: true
+    with:
+      |<-
+steps: []
+`.trim();
+
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+      expect(suggestions.map((s) => s.label)).toEqual(
+        expect.arrayContaining([
+          'Daily at 9 AM',
+          'Business hours (weekdays 8 AM & 5 PM)',
+          'Monthly on 1st and 15th',
+          'Custom RRule',
+        ])
+      );
+    });
+
+    it('should provide rrule suggestions in scheduled trigger with block with cursor inside', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+triggers:
+  - type: scheduled
+    enabled: true
+    with:
+      |<-
+steps: []
+`.trim();
+
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+      expect(suggestions.map((s) => s.label)).toEqual(
+        expect.arrayContaining([
+          'Daily at 9 AM',
+          'Business hours (weekdays 8 AM & 5 PM)',
+          'Monthly on 1st and 15th',
+          'Custom RRule',
+        ])
+      );
+    });
+
+    it('should NOT provide rrule suggestions when rrule already exists', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+triggers:
+  - type: scheduled
+    enabled: true
+    with:
+      rrule:
+        freq: DAILY
+        interval: 1
+        tzid: UTC
+        byhour: [9]
+        byminute: [0]
+      |<-
+steps: []
+`.trim();
+
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+      expect(suggestions.map((s) => s.label)).not.toEqual(
+        expect.arrayContaining([
+          'Daily at 9 AM',
+          'Business hours (weekdays 8 AM & 5 PM)',
+          'Monthly on 1st and 15th',
+          'Custom RRule',
+        ])
+      );
+    });
+
+    it('should NOT provide rrule suggestions when every already exists', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+triggers:
+  - type: scheduled
+    enabled: true
+    with:
+      every: "5m"
+      |<-
+steps: []
+`.trim();
+
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+      expect(suggestions.map((s) => s.label)).not.toEqual(
+        expect.arrayContaining([
+          'Daily at 9 AM',
+          'Business hours (weekdays 8 AM & 5 PM)',
+          'Monthly on 1st and 15th',
+          'Custom RRule',
+        ])
+      );
+    });
+
+    it('should provide timezone suggestions for tzid field in scheduled trigger', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+triggers:
+  - name: scheduled-trigger
+    type: scheduled
+    with:
+      rrule:
+        freq: DAILY
+        interval: 1
+        tzid: |<-
+`.trim();
+
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+
+      // Should include timezone suggestions
+      expect(suggestions.length).toBeGreaterThan(0);
+
+      // Should have timezone documentation
+      const firstSuggestion = suggestions[0];
+      expect(firstSuggestion?.documentation).toBeDefined();
+      expect(firstSuggestion?.detail).toContain('Timezone:');
+    });
+
+    it('should filter timezone suggestions based on prefix', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+triggers:
+  - name: scheduled-trigger
+    type: scheduled
+    with:
+      rrule:
+        freq: DAILY
+        interval: 1
+        tzid: Amer|<-
+`.trim();
+
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+
+      // Should only include American timezones
+      expect(suggestions.length).toBeGreaterThan(0);
+      expect(
+        suggestions.every((s) => typeof s.label === 'string' && s.label.startsWith('America/'))
+      ).toBe(true);
+    });
+
+    it('should prioritize UTC timezones in suggestions', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+triggers:
+  - name: scheduled-trigger
+    type: scheduled
+    with:
+      rrule:
+        freq: DAILY
+        interval: 1
+        tzid: |<-
+`.trim();
+
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+
+      // Should have timezone suggestions
+      expect(suggestions.length).toBeGreaterThan(0);
+
+      // Should have timezone documentation
+      const firstSuggestion = suggestions[0];
+      expect(firstSuggestion?.documentation).toBeDefined();
+      expect(firstSuggestion?.detail).toContain('Timezone:');
+    });
+
+    it('should replace entire tzid value when selecting timezone', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+triggers:
+  - name: scheduled-trigger
+    type: scheduled
+    with:
+      rrule:
+        freq: DAILY
+        interval: 1
+        tzid: UTC |<-
+`.trim();
+
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+
+      // Should have timezone suggestions
+      expect(suggestions.length).toBeGreaterThan(0);
+
+      // Check that suggestions have InsertAsSnippet insertTextRules
+      const firstSuggestion = suggestions[0];
+      expect(firstSuggestion?.insertTextRules).toBe(
+        monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
+      );
     });
   });
 
@@ -466,18 +705,515 @@ steps:
         expect(result.matchType).toBe('variable-complete');
         expect(result.fullKey).toBe('consts.apiUrl');
       });
-
+      // matches as 'liquid-block-keyword' which is then filtered out
+      // later by the completion provider's isInsideLiquidBlock check
       it('should handle empty line', () => {
         const result = parseLineForCompletion('');
-        expect(result.matchType).toBeNull();
+        expect(result.matchType).toBe('liquid-block-keyword');
+        expect(result.fullKey).toBe('');
+      });
+      // matches as 'liquid-block-keyword' which is then filtered out
+      // later by the completion provider's isInsideLiquidBlock check
+      it('should handle line with only spaces', () => {
+        const result = parseLineForCompletion('    ');
+        expect(result.matchType).toBe('liquid-block-keyword');
+        expect(result.fullKey).toBe('');
+      });
+    });
+
+    describe('liquid filter scenarios', () => {
+      it('should parse liquid filter at end of line', () => {
+        const result = parseLineForCompletion('message: "{{ user.name | ');
+        expect(result.matchType).toBe('liquid-filter');
+        expect(result.fullKey).toBe('');
+        expect(result.match).toBeTruthy();
+      });
+
+      it('should parse liquid filter with partial filter name', () => {
+        const result = parseLineForCompletion('value: {{ price | up');
+        expect(result.matchType).toBe('liquid-filter');
+        expect(result.fullKey).toBe('up');
+        expect(result.match).toBeTruthy();
+      });
+
+      it('should parse liquid filter with complex variable path', () => {
+        const result = parseLineForCompletion('data: {{ steps.fetchUser.output.name | ');
+        expect(result.matchType).toBe('liquid-filter');
         expect(result.fullKey).toBe('');
       });
 
-      it('should handle line with only spaces', () => {
-        const result = parseLineForCompletion('    ');
+      it('should parse liquid filter with array access', () => {
+        const result = parseLineForCompletion('item: {{ items[0].title | cap');
+        expect(result.matchType).toBe('liquid-filter');
+        expect(result.fullKey).toBe('cap');
+      });
+
+      it('should parse liquid filter with whitespace', () => {
+        const result = parseLineForCompletion('text: {{  user.name  |  up');
+        expect(result.matchType).toBe('liquid-filter');
+        expect(result.fullKey).toBe('up');
+      });
+
+      it('should not match liquid filter if not at end of line', () => {
+        const result = parseLineForCompletion('text: {{ user.name | upcase }} more content');
+        expect(result.matchType).not.toBe('liquid-filter');
+      });
+
+      it('should not match liquid filter without pipe', () => {
+        const result = parseLineForCompletion('text: {{ user.name ');
+        expect(result.matchType).toBe('variable-unfinished');
+      });
+
+      it('should not match liquid filter in regular text', () => {
+        const result = parseLineForCompletion('text: "normal | pipe character"');
         expect(result.matchType).toBeNull();
+      });
+    });
+
+    describe('liquid block filter scenarios', () => {
+      it('should parse liquid block filter at end of line', () => {
+        const result = parseLineForCompletion('  assign variable = value | ');
+        expect(result.matchType).toBe('liquid-block-filter');
         expect(result.fullKey).toBe('');
       });
+
+      it('should parse liquid block filter with prefix', () => {
+        const result = parseLineForCompletion('  assign variable = data | up');
+        expect(result.matchType).toBe('liquid-block-filter');
+        expect(result.fullKey).toBe('up');
+      });
+
+      it('should parse liquid block filter in complex expression', () => {
+        const result = parseLineForCompletion('  assign result = foreach.item | down');
+        expect(result.matchType).toBe('liquid-block-filter');
+        expect(result.fullKey).toBe('down');
+      });
+
+      it('should parse liquid block filter with spaces', () => {
+        const result = parseLineForCompletion('assign   variable   =   value   |   cap');
+        expect(result.matchType).toBe('liquid-block-filter');
+        expect(result.fullKey).toBe('cap');
+      });
+
+      it('should parse liquid block filter in echo statement', () => {
+        const result = parseLineForCompletion('  echo message | ');
+        expect(result.matchType).toBe('liquid-block-filter');
+        expect(result.fullKey).toBe('');
+      });
+
+      it('should not match liquid block filter within mustache', () => {
+        const result = parseLineForCompletion('  assign var = {{ value | filter');
+        expect(result.matchType).toBe('liquid-filter');
+        expect(result.fullKey).toBe('filter');
+      });
+
+      it('should parse liquid block filter without leading spaces', () => {
+        const result = parseLineForCompletion('assign message = value | ');
+        expect(result.matchType).toBe('liquid-block-filter');
+        expect(result.fullKey).toBe('');
+      });
+
+      it('should parse liquid block filter with tab indentation', () => {
+        const result = parseLineForCompletion('\tassign variable = value | fil');
+        expect(result.matchType).toBe('liquid-block-filter');
+        expect(result.fullKey).toBe('fil');
+      });
+
+      it('should parse liquid block filter with tabs around pipe', () => {
+        const result = parseLineForCompletion('\techo\tmessage\t|\tup');
+        expect(result.matchType).toBe('liquid-block-filter');
+        expect(result.fullKey).toBe('up');
+      });
+    });
+
+    describe('liquid syntax scenarios', () => {
+      it('should parse liquid syntax block start', () => {
+        const result = parseLineForCompletion('  {% ');
+        expect(result.matchType).toBe('liquid-syntax');
+        expect(result.fullKey).toBe('');
+      });
+
+      it('should parse liquid syntax with partial keyword', () => {
+        const result = parseLineForCompletion('{% if');
+        expect(result.matchType).toBe('liquid-syntax');
+        expect(result.fullKey).toBe('if');
+      });
+
+      it('should parse liquid syntax with partial assign', () => {
+        const result = parseLineForCompletion('  {% ass');
+        expect(result.matchType).toBe('liquid-syntax');
+        expect(result.fullKey).toBe('ass');
+      });
+
+      it('should parse liquid syntax with whitespace', () => {
+        const result = parseLineForCompletion('  {%  for');
+        expect(result.matchType).toBe('liquid-syntax');
+        expect(result.fullKey).toBe('for');
+      });
+
+      it('should not match liquid syntax if not at end of line', () => {
+        const result = parseLineForCompletion('{% if condition %} content');
+        expect(result.matchType).toBeNull();
+      });
+
+      it('should not match liquid syntax without %', () => {
+        const result = parseLineForCompletion('{ if ');
+        expect(result.matchType).toBeNull();
+      });
+    });
+
+    describe('liquid block keyword scenarios', () => {
+      it('should parse liquid block keyword at start of line', () => {
+        const result = parseLineForCompletion('assign');
+        expect(result.matchType).toBe('liquid-block-keyword');
+        expect(result.fullKey).toBe('assign');
+      });
+
+      it('should parse liquid block keyword with indentation', () => {
+        const result = parseLineForCompletion('  case');
+        expect(result.matchType).toBe('liquid-block-keyword');
+        expect(result.fullKey).toBe('case');
+      });
+
+      it('should parse partial liquid block keyword', () => {
+        const result = parseLineForCompletion('  ass');
+        expect(result.matchType).toBe('liquid-block-keyword');
+        expect(result.fullKey).toBe('ass');
+      });
+
+      it('should parse completely empty line as liquid block keyword', () => {
+        const result = parseLineForCompletion('');
+        expect(result.matchType).toBe('liquid-block-keyword');
+        expect(result.fullKey).toBe('');
+      });
+
+      it('should parse line with only whitespace as liquid block keyword', () => {
+        const result = parseLineForCompletion('    ');
+        expect(result.matchType).toBe('liquid-block-keyword');
+        expect(result.fullKey).toBe('');
+      });
+
+      it('should parse line with tabs as liquid block keyword', () => {
+        const result = parseLineForCompletion('\t\t');
+        expect(result.matchType).toBe('liquid-block-keyword');
+        expect(result.fullKey).toBe('');
+      });
+
+      it('should parse liquid block keyword with tab indentation', () => {
+        const result = parseLineForCompletion('\tassign');
+        expect(result.matchType).toBe('liquid-block-keyword');
+        expect(result.fullKey).toBe('assign');
+      });
+
+      it('should parse partial liquid block keyword with tabs', () => {
+        const result = parseLineForCompletion('\t\tass');
+        expect(result.matchType).toBe('liquid-block-keyword');
+        expect(result.fullKey).toBe('ass');
+      });
+
+      it('should parse liquid block keyword with mixed tab and space indentation', () => {
+        const result = parseLineForCompletion('\t  case');
+        expect(result.matchType).toBe('liquid-block-keyword');
+        expect(result.fullKey).toBe('case');
+      });
+
+      it('should parse liquid block keyword with trailing space', () => {
+        const result = parseLineForCompletion('echo ');
+        expect(result.matchType).toBe('liquid-block-keyword');
+        expect(result.fullKey).toBe('echo');
+      });
+
+      it('should not match liquid block keyword with complex content', () => {
+        const result = parseLineForCompletion('assign variable = "value"');
+        expect(result.matchType).toBeNull();
+      });
+    });
+
+    describe('liquid priority handling', () => {
+      it('should prioritize liquid filter over unfinished mustache', () => {
+        const result = parseLineForCompletion('{{ consts.api | ');
+        expect(result.matchType).toBe('liquid-filter');
+      });
+
+      it('should prioritize liquid filter over complete mustache when at end', () => {
+        const result = parseLineForCompletion('{{ consts.apiUrl }} {{ user.name | fil');
+        expect(result.matchType).toBe('liquid-filter');
+        expect(result.fullKey).toBe('fil');
+      });
+
+      it('should prioritize @ trigger over liquid syntax', () => {
+        const result = parseLineForCompletion('{% if @steps');
+        expect(result.matchType).toBe('at');
+        expect(result.fullKey).toBe('steps');
+      });
+    });
+  });
+
+  describe('Integration tests for liquid completions', () => {
+    it('should provide liquid filter completions', async () => {
+      const yamlContent = `
+steps:
+  - name: test
+    type: set_variable
+    with:
+      message: "{{ user.name | `;
+
+      const cursorOffset = yamlContent.length;
+      const model = createMockModel(yamlContent, cursorOffset);
+      const position = model.getPositionAt(cursorOffset);
+
+      const schema = generateYamlSchemaFromConnectors(mockConnectors);
+      const provider = getCompletionItemProvider(schema);
+
+      const result = await provider.provideCompletionItems(
+        model as any,
+        position as any,
+        {
+          triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
+          triggerCharacter: '|',
+        } as any,
+        {} as any
+      );
+
+      expect(result?.suggestions).toBeDefined();
+      expect(result?.suggestions.length).toBeGreaterThan(0);
+
+      const labels = result?.suggestions.map((s) => s.label) || [];
+      expect(labels).toContain('upcase');
+      expect(labels).toContain('downcase');
+      expect(labels).toContain('capitalize');
+    });
+
+    it('should provide filtered liquid filter completions', async () => {
+      const yamlContent = `
+steps:
+  - name: test
+    type: set_variable
+    with:
+      message: "{{ user.name | up`;
+
+      const cursorOffset = yamlContent.length;
+      const model = createMockModel(yamlContent, cursorOffset);
+      const position = model.getPositionAt(cursorOffset);
+
+      const schema = generateYamlSchemaFromConnectors(mockConnectors);
+      const provider = getCompletionItemProvider(schema);
+
+      const result = await provider.provideCompletionItems(
+        model as any,
+        position as any,
+        { triggerKind: monaco.languages.CompletionTriggerKind.Invoke } as any,
+        {} as any
+      );
+
+      expect(result?.suggestions).toBeDefined();
+      expect(result?.suggestions.length).toBeGreaterThan(0);
+
+      const labels = result?.suggestions.map((s) => s.label) || [];
+      expect(labels).toContain('upcase');
+      expect(labels).not.toContain('downcase'); // Should be filtered out
+    });
+
+    it('should provide liquid syntax completions', async () => {
+      const yamlContent = `
+steps:
+  - name: test
+    type: set_variable
+    with:
+      content: |
+        {% `;
+
+      const cursorOffset = yamlContent.length;
+      const model = createMockModel(yamlContent, cursorOffset);
+      const position = model.getPositionAt(cursorOffset);
+
+      const schema = generateYamlSchemaFromConnectors(mockConnectors);
+      const provider = getCompletionItemProvider(schema);
+
+      const result = await provider.provideCompletionItems(
+        model as any,
+        position as any,
+        {
+          triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
+          triggerCharacter: '{',
+        } as any,
+        {} as any
+      );
+
+      expect(result?.suggestions).toBeDefined();
+      expect(result?.suggestions.length).toBeGreaterThan(0);
+
+      const labels = result?.suggestions.map((s) => s.label) || [];
+      expect(labels).toContain('if');
+      expect(labels).toContain('for');
+    });
+
+    it('should provide liquid syntax completions with partial match', async () => {
+      const yamlContent = `
+steps:
+  - name: test
+    type: set_variable
+    with:
+      content: |
+        {% if`;
+
+      const cursorOffset = yamlContent.length;
+      const model = createMockModel(yamlContent, cursorOffset);
+      const position = model.getPositionAt(cursorOffset);
+
+      const schema = generateYamlSchemaFromConnectors(mockConnectors);
+      const provider = getCompletionItemProvider(schema);
+
+      const result = await provider.provideCompletionItems(
+        model as any,
+        position as any,
+        { triggerKind: monaco.languages.CompletionTriggerKind.Invoke } as any,
+        {} as any
+      );
+
+      expect(result?.suggestions).toBeDefined();
+      expect(result?.suggestions.length).toBeGreaterThan(0);
+
+      const labels = result?.suggestions.map((s) => s.label) || [];
+      expect(labels).toContain('if');
+    });
+
+    it('should provide liquid block keyword completions with tab indentation', async () => {
+      const yamlContent = `
+steps:
+  - name: test
+    type: set_variable
+    with:
+      message: |-
+        {%- liquid
+\t\t\t`;
+
+      const cursorOffset = yamlContent.length;
+      const model = createMockModel(yamlContent, cursorOffset);
+      const position = model.getPositionAt(cursorOffset);
+
+      const schema = generateYamlSchemaFromConnectors(mockConnectors);
+      const provider = getCompletionItemProvider(schema);
+
+      const result = await provider.provideCompletionItems(
+        model as any,
+        position as any,
+        { triggerKind: monaco.languages.CompletionTriggerKind.Invoke } as any,
+        {} as any
+      );
+
+      expect(result?.suggestions).toBeDefined();
+      expect(result?.suggestions.length).toBeGreaterThan(0);
+
+      const labels = result?.suggestions.map((s) => s.label) || [];
+      expect(labels).toContain('assign');
+      expect(labels).toContain('echo');
+      expect(labels).toContain('case');
+      expect(labels).toContain('if');
+      expect(labels).toContain('for');
+    });
+
+    it('should provide liquid block keyword completions with mixed tab/space indentation', async () => {
+      const yamlContent = `
+steps:
+  - name: test
+    type: set_variable
+    with:
+      message: |-
+        {%- liquid
+\t  `;
+
+      const cursorOffset = yamlContent.length;
+      const model = createMockModel(yamlContent, cursorOffset);
+      const position = model.getPositionAt(cursorOffset);
+
+      const schema = generateYamlSchemaFromConnectors(mockConnectors);
+      const provider = getCompletionItemProvider(schema);
+
+      const result = await provider.provideCompletionItems(
+        model as any,
+        position as any,
+        { triggerKind: monaco.languages.CompletionTriggerKind.Invoke } as any,
+        {} as any
+      );
+
+      expect(result?.suggestions).toBeDefined();
+      expect(result?.suggestions.length).toBeGreaterThan(0);
+
+      const labels = result?.suggestions.map((s) => s.label) || [];
+      expect(labels).toContain('assign');
+      expect(labels).toContain('echo');
+      expect(labels).toContain('case');
+      expect(labels).toContain('if');
+      expect(labels).toContain('for');
+    });
+
+    it('should properly detect nested liquid blocks', async () => {
+      // Test case with nested liquid blocks
+      const yamlContent = `
+steps:
+  - name: test
+    type: set_variable
+    with:
+      message: |-
+        {%- liquid
+          assign x = 1
+          {%- liquid
+            assign y = 2
+            `;
+
+      const cursorOffset = yamlContent.length;
+      const model = createMockModel(yamlContent, cursorOffset);
+      const position = model.getPositionAt(cursorOffset);
+
+      const schema = generateYamlSchemaFromConnectors(mockConnectors);
+      const provider = getCompletionItemProvider(schema);
+
+      const result = await provider.provideCompletionItems(
+        model as any,
+        position as any,
+        { triggerKind: monaco.languages.CompletionTriggerKind.Invoke } as any,
+        {} as any
+      );
+
+      expect(result?.suggestions).toBeDefined();
+      expect(result?.suggestions.length).toBeGreaterThan(0);
+
+      const labels = result?.suggestions.map((s) => s.label) || [];
+      expect(labels).toContain('assign');
+      expect(labels).toContain('echo');
+    });
+
+    it('should not provide liquid block completions outside liquid blocks', async () => {
+      const yamlContent = `
+steps:
+  - name: test
+    type: set_variable
+    with:
+      message: |-
+        {%- liquid
+          assign x = 1
+        -%}
+        `;
+
+      const cursorOffset = yamlContent.length;
+      const model = createMockModel(yamlContent, cursorOffset);
+      const position = model.getPositionAt(cursorOffset);
+
+      const schema = generateYamlSchemaFromConnectors(mockConnectors);
+      const provider = getCompletionItemProvider(schema);
+
+      const result = await provider.provideCompletionItems(
+        model as any,
+        position as any,
+        { triggerKind: monaco.languages.CompletionTriggerKind.Invoke } as any,
+        {} as any
+      );
+
+      // Should not contain liquid block keywords since we're outside the block
+      const labels = result?.suggestions.map((s) => s.label) || [];
+      expect(labels).not.toContain('assign');
+      expect(labels).not.toContain('echo');
     });
   });
 });

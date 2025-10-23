@@ -41,6 +41,7 @@ import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { findLastIndex } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { ChatFeedback } from '@kbn/observability-ai-assistant-plugin/public/analytics/schemas/chat_feedback';
+import type { ApplicationStart } from '@kbn/core/public';
 import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
 import { ASSISTANT_SETUP_TITLE, EMPTY_CONVERSATION_TITLE, UPGRADE_LICENSE_TITLE } from '../i18n';
 import { useAIAssistantChatService } from '../hooks/use_ai_assistant_chat_service';
@@ -133,6 +134,7 @@ export function ChatBody({
   refreshConversations,
   updateDisplayedConversation,
   onConversationDuplicate,
+  navigateToConnectorsManagementApp,
 }: {
   connectors: ReturnType<typeof useGenAIConnectors>;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username' | 'profile_uid'>;
@@ -149,6 +151,7 @@ export function ChatBody({
   setIsUpdatingConversationList: (isUpdating: boolean) => void;
   refreshConversations: () => void;
   updateDisplayedConversation: (id?: string) => void;
+  navigateToConnectorsManagementApp: (application: ApplicationStart) => void;
 }) {
   const license = useLicense();
   const hasCorrectLicense = license?.hasAtLeast('enterprise');
@@ -722,6 +725,7 @@ export function ChatBody({
           deleteConversation={deleteConversation}
           handleArchiveConversation={handleArchiveConversation}
           isConversationApp={!showLinkToConversationsApp}
+          navigateToConnectorsManagementApp={navigateToConnectorsManagementApp}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

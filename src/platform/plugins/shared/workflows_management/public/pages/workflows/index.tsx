@@ -7,28 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 import {
   EuiBetaBadge,
   EuiButton,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiPageHeader,
   EuiPageTemplate,
-  EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import React, { useState } from 'react';
+import { WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID } from '@kbn/workflows/common/constants';
 import { useWorkflowActions } from '../../entities/workflows/model/use_workflow_actions';
 import { useWorkflowFiltersOptions } from '../../entities/workflows/model/use_workflow_stats';
 import { useWorkflows } from '../../entities/workflows/model/use_workflows';
 import { WorkflowExecutionStatsBar } from '../../features/workflow_executions_stats/ui';
 import { WorkflowList } from '../../features/workflow_list';
 import { WORKFLOWS_TABLE_INITIAL_PAGE_SIZE } from '../../features/workflow_list/constants';
+import { useWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import { shouldShowWorkflowsEmptyState } from '../../shared/utils/workflow_utils';
 import type { WorkflowsSearchParams } from '../../types';
 import { WorkflowsFilterPopover } from '../../widgets/workflow_filter_popover/workflow_filter_popover';
@@ -46,7 +48,7 @@ steps:
 `;
 
 export function WorkflowsPage() {
-  const { application, chrome, notifications } = useKibana().services;
+  const { application, notifications, featureFlags } = useKibana().services;
   const { data: filtersData } = useWorkflowFiltersOptions(['enabled', 'createdBy']);
   const { euiTheme } = useEuiTheme();
   const { createWorkflow } = useWorkflowActions();
@@ -57,22 +59,16 @@ export function WorkflowsPage() {
   });
 
   const { data: workflows, refetch } = useWorkflows(search);
+  useWorkflowsBreadcrumbs();
 
   const canCreateWorkflow = application?.capabilities.workflowsManagement.createWorkflow;
+  const isExecutionStatsBarEnabled = featureFlags?.getBooleanValue(
+    WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID,
+    false
+  );
 
   // Check if we should show empty state
   const shouldShowEmptyState = shouldShowWorkflowsEmptyState(workflows, search);
-
-  chrome!.setBreadcrumbs([
-    {
-      text: i18n.translate('workflows.breadcrumbs.title', { defaultMessage: 'Workflows' }),
-      href: application!.getUrlForApp('workflows', { path: '/' }),
-    },
-  ]);
-
-  chrome!.docTitle.change([
-    i18n.translate('workflows.breadcrumbs.title', { defaultMessage: 'Workflows' }),
-  ]);
 
   const handleCreateWorkflow = () => {
     createWorkflow.mutate(
@@ -95,7 +91,7 @@ export function WorkflowsPage() {
             'message' in error.body &&
             typeof error.body.message === 'string'
           ) {
-            (error as any).message = error.body.message;
+            (error as any).message = error.body.message; // eslint-disable-line @typescript-eslint/no-explicit-any
           }
 
           notifications!.toasts.addError(error, {
@@ -156,7 +152,8 @@ export function WorkflowsPage() {
                 <EuiButton
                   iconType="plusInCircle"
                   color="primary"
-                  size="s"
+                  size="m"
+                  fill
                   onClick={handleCreateWorkflow}
                 >
                   <FormattedMessage
@@ -215,10 +212,7 @@ export function WorkflowsPage() {
                 </EuiFilterGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
-
-            <EuiSpacer size="l" />
-            <WorkflowExecutionStatsBar height={140} />
-            <EuiHorizontalRule />
+            {isExecutionStatsBarEnabled && <WorkflowExecutionStatsBar height={140} />}
           </>
         )}
 

@@ -94,6 +94,7 @@ const getResponseActionListTableColumns = ({
               size="s"
               className="eui-textTruncate eui-fullWidth"
               data-test-subj={getTestId('column-command')}
+              tabIndex={0}
             >
               {command}
             </EuiText>
@@ -144,6 +145,7 @@ const getResponseActionListTableColumns = ({
                 size="s"
                 className="eui-textTruncate eui-fullWidth"
                 data-test-subj={getTestId('column-user-name')}
+                tabIndex={0}
               >
                 {createdBy}
               </EuiText>
@@ -172,6 +174,7 @@ const getResponseActionListTableColumns = ({
               size="s"
               className="eui-textTruncate eui-fullWidth"
               data-test-subj={getTestId('column-hostname')}
+              tabIndex={0}
             >
               {hostnames}
             </EuiText>
@@ -191,6 +194,7 @@ const getResponseActionListTableColumns = ({
               size="s"
               className="eui-textTruncate eui-fullWidth"
               data-test-subj={getTestId('column-comments')}
+              tabIndex={0}
             >
               {comment ?? emptyValue}
             </EuiText>
@@ -213,6 +217,7 @@ const getResponseActionListTableColumns = ({
               }
               data-test-subj={getTestId('column-status')}
               status={status}
+              tabIndex={0}
             />
           </EuiToolTip>
         );

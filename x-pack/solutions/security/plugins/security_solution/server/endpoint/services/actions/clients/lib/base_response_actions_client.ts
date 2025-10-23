@@ -82,6 +82,8 @@ import type {
   ResponseActionScanParameters,
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
+  ResponseActionCancelOutputContent,
+  ResponseActionCancelParameters,
   SuspendProcessActionOutputContent,
   UploadedFileInfo,
   WithAllKeys,
@@ -99,6 +101,7 @@ import type {
   SuspendProcessRequestBody,
   UnisolationRouteRequestBody,
   UploadActionApiRequestBody,
+  CancelActionRequestBody,
 } from '../../../../../../common/api/endpoint';
 import { stringify } from '../../../../utils/stringify';
 import { CASE_ATTACHMENT_ENDPOINT_TYPE_ID } from '../../../../../../common/constants';
@@ -918,9 +921,6 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   }
 
   protected sendActionCreationTelemetry(actionRequest: LogsEndpointAction): void {
-    if (!this.options.endpointService.experimentalFeatures.responseActionsTelemetryEnabled) {
-      return;
-    }
     this.options.endpointService
       .getTelemetryService()
       .reportEvent(ENDPOINT_RESPONSE_ACTION_SENT_EVENT.eventType, {
@@ -937,9 +937,6 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     command: ResponseActionsApiCommandNames,
     error: Error
   ): void {
-    if (!this.options.endpointService.experimentalFeatures.responseActionsTelemetryEnabled) {
-      return;
-    }
     this.options.endpointService
       .getTelemetryService()
       .reportEvent(ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT.eventType, {
@@ -952,9 +949,6 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   }
 
   protected sendActionResponseTelemetry(responseList: LogsEndpointActionResponse[]): void {
-    if (!this.options.endpointService.experimentalFeatures.responseActionsTelemetryEnabled) {
-      return;
-    }
     for (const response of responseList) {
       this.options.endpointService
         .getTelemetryService()
@@ -1043,6 +1037,13 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>
   > {
     throw new ResponseActionsNotSupportedError('runscript');
+  }
+
+  public async cancel(
+    actionRequest: OmitUnsupportedAttributes<CancelActionRequestBody>,
+    options?: CommonResponseActionMethodOptions
+  ): Promise<ActionDetails<ResponseActionCancelOutputContent, ResponseActionCancelParameters>> {
+    throw new ResponseActionsNotSupportedError('cancel');
   }
 
   public async getCustomScripts(

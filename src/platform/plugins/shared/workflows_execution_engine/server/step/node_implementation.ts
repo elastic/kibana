@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// TODO: Remove eslint exceptions comments and fix the issues
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 // Import specific step types as needed from schema
 // import { evaluate } from '@marcbachmann/cel-js'
 import type { ConnectorExecutor } from '../connector_executor';
-import { WorkflowTemplatingEngine } from '../templating_engine';
-import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
+import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 
 export interface RunStepResult {
@@ -37,28 +39,30 @@ export interface NodeImplementation {
   run(): Promise<void>;
 }
 
-export interface StepErrorCatcher {
+export interface NodeWithErrorCatching {
   catchError(): Promise<void>;
+}
+
+export interface MonitorableNode {
+  monitor(monitoredContext: StepExecutionRuntime): Promise<void>;
 }
 
 export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
   implements NodeImplementation
 {
   protected step: TStep;
-  protected contextManager: WorkflowContextManager;
-  protected templatingEngine: WorkflowTemplatingEngine;
+  protected stepExecutionRuntime: StepExecutionRuntime;
   protected connectorExecutor: ConnectorExecutor;
   protected workflowExecutionRuntime: WorkflowExecutionRuntimeManager;
 
   constructor(
     step: TStep,
-    contextManager: WorkflowContextManager,
+    stepExecutionRuntime: StepExecutionRuntime,
     connectorExecutor: ConnectorExecutor | undefined,
     workflowExecutionRuntime: WorkflowExecutionRuntimeManager
   ) {
     this.step = step;
-    this.contextManager = contextManager;
-    this.templatingEngine = new WorkflowTemplatingEngine();
+    this.stepExecutionRuntime = stepExecutionRuntime;
     this.connectorExecutor = connectorExecutor as any;
     this.workflowExecutionRuntime = workflowExecutionRuntime;
   }
@@ -72,18 +76,27 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
   }
 
   public async run(): Promise<void> {
-    await this.workflowExecutionRuntime.startStep();
-
-    const input = this.getInput();
+    let input: any;
+    await this.stepExecutionRuntime.startStep();
 
     try {
+      input = await this.getInput();
+      await this.stepExecutionRuntime.setInput(input);
       const result = await this._run(input);
-      await this.workflowExecutionRuntime.setCurrentStepResult(result);
+
+      // Don't update step execution runtime if abort was initiated
+      if (this.stepExecutionRuntime.abortController.signal.aborted) {
+        return;
+      }
+
+      if (result.error) {
+        await this.stepExecutionRuntime.failStep(result.error);
+      } else {
+        await this.stepExecutionRuntime.finishStep(result.output);
+      }
     } catch (error) {
       const result = await this.handleFailure(input, error);
-      await this.workflowExecutionRuntime.setCurrentStepResult(result);
-    } finally {
-      await this.workflowExecutionRuntime.finishStep();
+      await this.stepExecutionRuntime.failStep(result.error);
     }
 
     this.workflowExecutionRuntime.navigateToNextNode();

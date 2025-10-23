@@ -39,13 +39,14 @@ export interface CasePersistedAttributes {
   duration: number | null;
   external_service: ExternalServicePersisted | null;
   owner: string;
-  settings: { syncAlerts: boolean };
+  settings: { syncAlerts: boolean; extractObservables?: boolean };
   severity: CasePersistedSeverity;
   status: CasePersistedStatus;
   tags: string[];
   title: string;
   total_alerts: number;
   total_comments: number;
+  total_events?: number;
   updated_at: string | null;
   updated_by: User | null;
   category?: string | null;

@@ -21,7 +21,7 @@ describe('convertTreeToList', () => {
     offset: 0,
     skew: 0,
     color: 'red',
-    errorCount: 0,
+    errors: [],
   };
   const itemB: TraceWaterfallItem = {
     id: 'b',
@@ -35,7 +35,7 @@ describe('convertTreeToList', () => {
     offset: 10,
     skew: 0,
     color: 'blue',
-    errorCount: 0,
+    errors: [],
   };
   const itemC: TraceWaterfallItem = {
     id: 'c',
@@ -49,7 +49,7 @@ describe('convertTreeToList', () => {
     offset: 20,
     skew: 0,
     color: 'green',
-    errorCount: 0,
+    errors: [],
   };
   const itemD: TraceWaterfallItem = {
     id: 'd',
@@ -63,7 +63,7 @@ describe('convertTreeToList', () => {
     offset: 30,
     skew: 0,
     color: 'yellow',
-    errorCount: 0,
+    errors: [],
   };
 
   const treeMap = {

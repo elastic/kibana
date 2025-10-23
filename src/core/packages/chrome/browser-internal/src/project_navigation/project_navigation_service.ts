@@ -47,6 +47,7 @@ import type {
 import type { Logger } from '@kbn/logging';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 import { getSideNavVersion } from '@kbn/core-chrome-layout-feature-flags';
+import { NavigationTourManager } from '@kbn/core-chrome-navigation-tour';
 
 import { findActiveNodes, flattenNav, parseNavigationTree, stripQueryParams } from './utils';
 import { buildBreadcrumbs } from './breadcrumbs';
@@ -65,6 +66,7 @@ export class ProjectNavigationService {
   private logger: Logger | undefined;
   private projectHome$ = new BehaviorSubject<string | undefined>(undefined);
   private projectName$ = new BehaviorSubject<string | undefined>(undefined);
+  private feedbackUrlParams$ = new BehaviorSubject<URLSearchParams | undefined>(undefined);
   private navigationTree$ = new BehaviorSubject<ChromeProjectNavigationNode[] | undefined>(
     undefined
   );
@@ -141,11 +143,17 @@ export class ProjectNavigationService {
 
         this.cloudLinks$.next(getCloudLinks(cloudUrls));
       },
+      setFeedbackUrlParams: (feedbackUrlParams: URLSearchParams) => {
+        this.feedbackUrlParams$.next(feedbackUrlParams);
+      },
       setProjectName: (projectName: string) => {
         this.projectName$.next(projectName);
       },
       getProjectName$: () => {
         return this.projectName$.asObservable();
+      },
+      getFeedbackUrlParams$: () => {
+        return this.feedbackUrlParams$.asObservable();
       },
       initNavigation: <LinkId extends AppDeepLinkId = AppDeepLinkId>(
         id: SolutionId,
@@ -200,6 +208,7 @@ export class ProjectNavigationService {
       getPanelSelectedNode$: () => this.panelSelectedNode$.asObservable(),
       setPanelSelectedNode: this.setPanelSelectedNode.bind(this),
       getActiveDataTestSubj$: () => this.activeDataTestSubj$.asObservable(),
+      tourManager: new NavigationTourManager(),
     };
   }
 

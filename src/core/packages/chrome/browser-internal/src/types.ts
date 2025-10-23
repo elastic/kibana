@@ -20,6 +20,7 @@ import type {
   SolutionNavigationDefinitions,
   SolutionId,
 } from '@kbn/core-chrome-browser';
+import type { NavigationTourManager } from '@kbn/core-chrome-navigation-tour';
 import type { Observable } from 'rxjs';
 
 /** @internal */
@@ -132,6 +133,12 @@ export interface InternalChromeStart extends ChromeStart {
     setCloudUrls(cloudUrls: CloudURLs): void;
 
     /**
+     * Sets the feedback URL parameters.
+     * @param feedbackUrlParams
+     */
+    setFeedbackUrlParams(feedbackUrlParams: URLSearchParams): void;
+
+    /**
      * Sets the project name.
      * @param projectName
      */
@@ -185,5 +192,10 @@ export interface InternalChromeStart extends ChromeStart {
      * will be replaced with the legacy Kibana navigation.
      */
     changeActiveSolutionNavigation(id: SolutionId | null): void;
+
+    /**
+     * Used to manage the navigation tour state and start/stop the tour.
+     */
+    navigationTourManager: NavigationTourManager;
   };
 }

@@ -15,6 +15,7 @@ jobs:
           repository: 'elastic/kibana-github-actions'
           ref: main
           path: ./actions
+          persist-credentials: false
 
       - name: Install Actions
         run: npm install --production --prefix ./actions

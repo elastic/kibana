@@ -8,11 +8,8 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { DataViewPicker } from '.';
-import { sharedDataViewManagerSlice } from '../../redux/slices';
 import { useDispatch } from 'react-redux';
 import { useKibana } from '../../../common/lib/kibana';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { TestProviders } from '../../../common/mock/test_providers';
 import { useSelectDataView } from '../../hooks/use_select_data_view';
 import { useUpdateUrlParam } from '../../../common/utils/global_query_string';
@@ -50,7 +47,11 @@ jest.mock('@kbn/unified-search-plugin/public', () => ({
       >
         {'Change Data View'}
       </button>
-      <button type="button" onClick={props.onDataViewCreated} data-test-subj="createDataView">
+      <button
+        type="button"
+        onClick={() => props.onDataViewCreated()}
+        data-test-subj="createDataView"
+      >
         {'Create Data View'}
       </button>
       {props.onAddField && (
@@ -84,7 +85,6 @@ describe('DataViewPicker', () => {
         ...mockUseKibana().services,
         dataViewFieldEditor: { openEditor: jest.fn() },
         dataViewEditor: {
-          openEditor: jest.fn(),
           userPermissions: { editDataView: jest.fn().mockReturnValue(true) },
         },
       },
@@ -121,7 +121,7 @@ describe('DataViewPicker', () => {
     });
   });
 
-  it('calls useUpdateUrlParam when changing the data view', () => {
+  it('calls useUpdateUrlParam when changing the default scoped data view', () => {
     render(
       <TestProviders>
         <DataViewPicker scope={DataViewManagerScopeName.default} />
@@ -138,34 +138,20 @@ describe('DataViewPicker', () => {
     });
   });
 
-  it('opens data view editor when creating a new data view', async () => {
+  it('calls useUpdateUrlParam when changing the explore scoped data view', () => {
     render(
       <TestProviders>
-        <DataViewPicker scope={DataViewManagerScopeName.default} />
+        <DataViewPicker scope={DataViewManagerScopeName.explore} />
       </TestProviders>
     );
 
-    fireEvent.click(screen.getByTestId('createDataView'));
+    fireEvent.click(screen.getByTestId('changeDataView'));
 
-    expect(jest.mocked(useKibana().services.dataViewEditor.openEditor)).toHaveBeenCalled();
-
-    // Test the onSave callback
-    const onSaveCallback = jest.mocked(useKibana().services.dataViewEditor.openEditor).mock
-      .calls[0][0].onSave;
-
-    const newDataView = new DataView({
-      spec: { id: 'new-data-view-id', name: 'New Data View' },
-      fieldFormats: new FieldFormatsRegistry(),
-    });
-
-    onSaveCallback(newDataView);
-
-    expect(mockDispatch).toHaveBeenCalledWith(
-      sharedDataViewManagerSlice.actions.addDataView(newDataView)
-    );
-    expect(jest.mocked(useSelectDataView())).toHaveBeenCalledWith({
-      id: 'new-data-view-id',
-      scope: 'default',
+    expect(jest.mocked(useUpdateUrlParam(URL_PARAM_KEY.sourcerer))).toHaveBeenCalledWith({
+      explore: {
+        id: 'new-data-view-id',
+        selectedPatterns: [],
+      },
     });
   });
 

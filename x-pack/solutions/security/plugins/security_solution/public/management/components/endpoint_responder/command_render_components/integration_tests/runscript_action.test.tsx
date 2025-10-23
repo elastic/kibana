@@ -150,7 +150,7 @@ describe('When using runscript action from response console', () => {
       });
 
       await waitFor(() => {
-        expect(renderResult.getAllByTestId('scriptSelector-runscript-script')).toHaveLength(2);
+        expect(renderResult.getAllByTestId('scriptSelector-runscript-0-script')).toHaveLength(2);
       });
     });
 
@@ -167,10 +167,10 @@ describe('When using runscript action from response console', () => {
       await render();
       await enterConsoleCommand(renderResult, user, 'runscript --script', { inputOnly: true });
       await waitFor(() =>
-        user.click(renderResult.getAllByTestId('scriptSelector-runscript-script')[0])
+        user.click(renderResult.getAllByTestId('scriptSelector-runscript-0-script')[0])
       );
       await waitFor(() => {
-        expect(renderResult.queryByTestId('scriptSelector-runscript-popupPanel')).toBeNull();
+        expect(renderResult.queryByTestId('scriptSelector-runscript-0-popoverPanel')).toBeNull();
       });
       consoleMockUtils.submitCommand();
 
@@ -183,10 +183,10 @@ describe('When using runscript action from response console', () => {
       await render();
       await enterConsoleCommand(renderResult, user, 'runscript --script', { inputOnly: true });
       await waitFor(() =>
-        user.click(renderResult.getAllByTestId('scriptSelector-runscript-script')[0])
+        user.click(renderResult.getAllByTestId('scriptSelector-runscript-0-script')[0])
       );
       await waitFor(() => {
-        expect(renderResult.queryByTestId('scriptSelector-runscript-popupPanel')).toBeNull();
+        expect(renderResult.queryByTestId('scriptSelector-runscript-0-popoverPanel')).toBeNull();
       });
 
       expect(renderResult.getByTestId('test-footer')).toHaveTextContent(
@@ -198,10 +198,10 @@ describe('When using runscript action from response console', () => {
       await render();
       await enterConsoleCommand(renderResult, user, 'runscript --script', { inputOnly: true });
       await waitFor(() =>
-        user.click(renderResult.getAllByTestId('scriptSelector-runscript-script')[1])
+        user.click(renderResult.getAllByTestId('scriptSelector-runscript-0-script')[1])
       );
       await waitFor(() => {
-        expect(renderResult.queryByTestId('scriptSelector-runscript-popupPanel')).toBeNull();
+        expect(renderResult.queryByTestId('scriptSelector-runscript-0-popoverPanel')).toBeNull();
       });
       consoleMockUtils.submitCommand();
 

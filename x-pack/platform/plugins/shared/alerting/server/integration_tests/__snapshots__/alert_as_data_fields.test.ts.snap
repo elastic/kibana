@@ -713,6 +713,11 @@ Object {
       "required": false,
       "type": "boolean",
     },
+    "kibana.alert.index_pattern": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.instance.id": Object {
       "array": false,
       "required": true,
@@ -1399,6 +1404,11 @@ Object {
       "type": "integer",
     },
     "kibana.alert.host.criticality_level": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.index_pattern": Object {
       "array": false,
       "required": false,
       "type": "keyword",
@@ -2556,6 +2566,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.index_pattern": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.instance.id": Object {
       "array": false,
       "required": true,
@@ -3705,6 +3720,11 @@ Object {
       "type": "integer",
     },
     "kibana.alert.host.criticality_level": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.index_pattern": Object {
       "array": false,
       "required": false,
       "type": "keyword",
@@ -4862,6 +4882,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.index_pattern": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.instance.id": Object {
       "array": false,
       "required": true,
@@ -6011,6 +6036,11 @@ Object {
       "type": "integer",
     },
     "kibana.alert.host.criticality_level": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.index_pattern": Object {
       "array": false,
       "required": false,
       "type": "keyword",
@@ -7174,6 +7204,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.index_pattern": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.instance.id": Object {
       "array": false,
       "required": true,
@@ -8323,6 +8358,11 @@ Object {
       "type": "integer",
     },
     "kibana.alert.host.criticality_level": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.index_pattern": Object {
       "array": false,
       "required": false,
       "type": "keyword",
@@ -9480,6 +9520,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.index_pattern": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.instance.id": Object {
       "array": false,
       "required": true,
@@ -10563,6 +10608,11 @@ Object {
       "required": false,
       "type": "object",
     },
+    "slo.dataViewId": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
     "slo.id": Object {
       "array": false,
       "required": false,
@@ -10643,6 +10693,11 @@ Object {
       "array": true,
       "required": false,
       "type": "boolean",
+    },
+    "kibana.alert.index_pattern": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
     },
     "kibana.alert.instance.id": Object {
       "array": false,

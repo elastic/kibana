@@ -13,7 +13,7 @@ import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import type { MutableRefObject } from 'react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import type { Observable } from 'rxjs';
 import { catchError, filter, lastValueFrom, map, of } from 'rxjs';
 import type {
@@ -37,6 +37,7 @@ export const useTotalHits = ({
   fetch$,
   onTotalHitsChange,
   isPlainRecord,
+  abortController: parentAbortController,
 }: {
   services: UnifiedHistogramServices;
   dataView: DataView;
@@ -49,6 +50,7 @@ export const useTotalHits = ({
   fetch$: Observable<UnifiedHistogramInputMessage>;
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
   isPlainRecord?: boolean;
+  abortController: AbortController | undefined;
 }) => {
   const abortController = useRef<AbortController>();
   const fetch = useStableCallback(() => {
@@ -71,6 +73,17 @@ export const useTotalHits = ({
     const subscription = fetch$.subscribe(fetch);
     return () => subscription.unsubscribe();
   }, [fetch, fetch$]);
+
+  const onAbort = useCallback(() => {
+    abortController.current?.abort();
+  }, []);
+
+  useEffect(() => {
+    parentAbortController?.signal.addEventListener('abort', onAbort);
+    return () => {
+      parentAbortController?.signal.removeEventListener('abort', onAbort);
+    };
+  }, [parentAbortController, onAbort]);
 };
 
 const fetchTotalHits = async ({

@@ -74,9 +74,10 @@ export const DetailsFlyout: React.FC<Props> = React.memo(({ scheduleId, onClose 
   } = useKibana();
   const { euiTheme } = useEuiTheme();
 
-  const { alertsIndexPattern, http } = useAssistantContext();
+  const { alertsIndexPattern, http, settings } = useAssistantContext();
   const { data: aiConnectors, isLoading: isLoadingConnectors } = useLoadConnectors({
     http,
+    settings,
   });
   const { data: { schedule } = { schedule: undefined }, isLoading: isLoadingSchedule } =
     useGetAttackDiscoverySchedule({

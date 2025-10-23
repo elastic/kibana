@@ -24,7 +24,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testPlaygroundName = 'FTR Search Playground';
   const updatedPlaygroundName = 'Test Search Playground';
 
-  describe('Saved Playgrounds', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/237715
+  describe.skip('Saved Playgrounds', function () {
     before(async () => {
       await createIndices();
     });
@@ -58,6 +59,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         // Select indices
         await pageObjects.searchPlayground.PlaygroundStartChatPage.expectToSelectIndicesAndLoadChat();
 
+        // Select created openai connector
+        await pageObjects.searchPlayground.PlaygroundChatPage.selectConnector(openaiConnectorName);
         await pageObjects.searchPlayground.PlaygroundChatPage.expectSaveButtonToExist();
         await pageObjects.searchPlayground.PlaygroundChatPage.expectSaveButtonToBeEnabled();
         await pageObjects.searchPlayground.PlaygroundChatPage.savePlayground(testPlaygroundName);

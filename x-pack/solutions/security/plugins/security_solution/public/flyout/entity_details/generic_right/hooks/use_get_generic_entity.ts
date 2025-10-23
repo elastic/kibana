@@ -47,6 +47,7 @@ export const fetchGenericEntity = async (
             minimum_should_match: 1,
           },
         },
+        fields: ['*'],
       },
     })
   );

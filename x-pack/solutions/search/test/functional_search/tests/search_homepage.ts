@@ -13,16 +13,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects([
     'embeddedConsole',
     'header',
-    'common',
-    'searchStart',
-    'searchOverview',
     'apiKeys',
     'searchHomePage',
     'searchNavigation',
   ]);
   const es = getService('es');
+  const searchSpace = getService('searchSpace');
   const browser = getService('browser');
-  const spaces = getService('spaces');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
@@ -37,17 +34,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       let spaceCreated: { id: string } = { id: '' };
 
       before(async () => {
-        // Navigate to the spaces management page which will log us in Kibana
-        await pageObjects.common.navigateToUrl('management', 'kibana/spaces', {
-          shouldUseHashForSubUrl: false,
-        });
-
-        // Create a space with the search solution and navigate to its home page
-        ({ cleanUp, space: spaceCreated } = await spaces.create({
-          name: 'search-ftr',
-          solution: 'es',
-        }));
-        await browser.navigateTo(spaces.getRootUrl(spaceCreated.id));
+        ({ cleanUp, spaceCreated } = await searchSpace.createTestSpace('search-homepage-ftr'));
+        await searchSpace.navigateTo(spaceCreated.id);
       });
 
       after(async () => {
@@ -59,7 +47,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       describe('search home page', () => {
         beforeEach(async () => {
           await esDeleteAllIndices(['test-*', 'search-*']);
-          await pageObjects.searchNavigation.navigateToElasticsearchOverviewPage(
+          await pageObjects.searchNavigation.navigateToElasticsearchSearchHomePage(
             `/s/${spaceCreated.id}`
           );
         });
@@ -70,10 +58,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         it('should have embedded dev console', async () => {
           await testHasEmbeddedConsole(pageObjects);
-        });
-
-        it('redirect to start page when no indices are exists', async () => {
-          await pageObjects.searchStart.expectToBeOnStartPage();
         });
 
         it('load search home page', async () => {
@@ -160,7 +144,33 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             });
           });
         });
-
+        describe('Get started with API', function () {
+          it('clicking on search basics tutorial open console', async () => {
+            await testSubjects.existOrFail('console_tutorials_search_basics');
+            await testSubjects.existOrFail('console_tutorials_search_basics_console_btn');
+            await testSubjects.click('console_tutorials_search_basics_console_btn');
+            await testSubjects.existOrFail('consoleEditorContainer');
+          });
+          it('clicking on semantic search tutorial open console', async () => {
+            await testSubjects.existOrFail('console_tutorials_semantic_search');
+            await testSubjects.existOrFail('console_tutorials_semantic_search_console_btn');
+            await testSubjects.click('console_tutorials_semantic_search_console_btn');
+            await testSubjects.existOrFail('consoleEditorContainer');
+          });
+          it('clicking on esql tutorial open console', async () => {
+            await testSubjects.existOrFail('console_tutorials_esql');
+            await testSubjects.existOrFail('console_tutorials_esql_console_btn');
+            await testSubjects.click('console_tutorials_esql_console_btn');
+            await testSubjects.existOrFail('consoleEditorContainer');
+          });
+          // TODO:  uncomment below lines when we are ready to show TSDS tutorial. review https://github.com/elastic/kibana/pull/237384#issuecomment-3411670210
+          // it('clicking on tsds tutorial open console', async () => {
+          //   await testSubjects.existOrFail('console_tutorials_tsds');
+          //   await testSubjects.existOrFail('console_tutorials_tsds_console_btn');
+          //   await testSubjects.click('console_tutorials_tsds_console_btn');
+          //   await testSubjects.existOrFail('consoleEditorContainer');
+          // });
+        });
         describe('Alternate Solutions', function () {
           it('renders Observability content', async () => {
             await testSubjects.scrollIntoView('analyzeLogsBrowseIntegrations');

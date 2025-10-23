@@ -7,16 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import moment from 'moment-timezone';
 import { z } from '@kbn/zod';
+
+export const DurationSchema = z.string().regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format');
 
 /* -- Settings -- */
 export const RetryPolicySchema = z.object({
   'max-attempts': z.number().int().min(1).optional(),
   'timeout-seconds': z.number().int().min(1).optional(),
-});
-
-export const TemplatingOptionsSchema = z.object({
-  engine: z.enum(['mustache', 'nunjucks']),
 });
 
 export const WorkflowRetrySchema = z.object({
@@ -40,7 +39,9 @@ export const WorkflowOnFailureSchema = z.object({
   fallback: z.array(BaseStepSchema).min(1).optional(),
   continue: z.boolean().optional(),
 });
+
 export type WorkflowOnFailure = z.infer<typeof WorkflowOnFailureSchema>;
+
 export function getOnFailureStepSchema(stepSchema: z.ZodType, loose: boolean = false) {
   const schema = WorkflowOnFailureSchema.extend({
     fallback: z.array(stepSchema).optional(),
@@ -56,8 +57,8 @@ export function getOnFailureStepSchema(stepSchema: z.ZodType, loose: boolean = f
 
 export const WorkflowSettingsSchema = z.object({
   'on-failure': WorkflowOnFailureSchema.optional(),
-  templating: TemplatingOptionsSchema.optional(),
   timezone: z.string().optional(), // Should follow IANA TZ format
+  timeout: DurationSchema.optional(), // e.g., '5s', '1m', '2h'
 });
 export type WorkflowSettings = z.infer<typeof WorkflowSettingsSchema>;
 
@@ -87,11 +88,24 @@ export const ScheduledTriggerSchema = z.object({
   type: z.literal('scheduled'),
   enabled: z.boolean().optional().default(true),
   with: z.union([
+    // New format: every: "5m", "2h", "1d", "30s"
     z.object({
-      every: z.string().min(1),
-      unit: z.enum(['second', 'minute', 'hour', 'day', 'week', 'month', 'year']),
+      every: z
+        .string()
+        .regex(/^\d+[smhd]$/, 'Invalid interval format. Use format like "5m", "2h", "1d", "30s"'),
     }),
-    z.object({ cron: z.string().min(1) }),
+    z.object({
+      rrule: z.object({
+        freq: z.enum(['DAILY', 'WEEKLY', 'MONTHLY']),
+        interval: z.number().int().positive(),
+        tzid: z.enum(moment.tz.names() as [string, ...string[]]).default('UTC'),
+        dtstart: z.string().optional(),
+        byhour: z.array(z.number().int().min(0).max(23)).optional(),
+        byminute: z.array(z.number().int().min(0).max(59)).optional(),
+        byweekday: z.array(z.enum(['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'])).optional(),
+        bymonthday: z.array(z.number().int().min(1).max(31)).optional(),
+      }),
+    }),
   ]),
 });
 
@@ -106,11 +120,18 @@ export const TriggerSchema = z.discriminatedUnion('type', [
   ManualTriggerSchema,
 ]);
 
+export const TriggerTypes = [
+  AlertRuleTriggerSchema.shape.type._def.value,
+  ScheduledTriggerSchema.shape.type._def.value,
+  ManualTriggerSchema.shape.type._def.value,
+];
+export type TriggerType = (typeof TriggerTypes)[number];
+
 /* --- Steps --- */
-const StepWithTimeoutSchema = z.object({
-  timeout: z.number().optional(),
+export const TimeoutPropSchema = z.object({
+  timeout: DurationSchema.optional(),
 });
-export type StepWithTimeout = z.infer<typeof StepWithTimeoutSchema>;
+export type TimeoutProp = z.infer<typeof TimeoutPropSchema>;
 
 const StepWithForEachSchema = z.object({
   foreach: z.string().optional(),
@@ -135,14 +156,14 @@ export const BaseConnectorStepSchema = BaseStepSchema.extend({
 })
   .merge(StepWithIfConditionSchema)
   .merge(StepWithForEachSchema)
-  .merge(StepWithTimeoutSchema)
+  .merge(TimeoutPropSchema)
   .merge(StepWithOnFailureSchema);
 export type ConnectorStep = z.infer<typeof BaseConnectorStepSchema>;
 
 export const WaitStepSchema = BaseStepSchema.extend({
   type: z.literal('wait'),
   with: z.object({
-    duration: z.string().regex(/^\d+(ms|[smhdw])$/), // e.g., '5s', '1m', '2h'
+    duration: DurationSchema, // e.g., '5s', '1m', '2h'
   }),
 });
 export type WaitStep = z.infer<typeof WaitStepSchema>;
@@ -162,7 +183,7 @@ export const HttpStepSchema = BaseStepSchema.extend({
 })
   .merge(StepWithIfConditionSchema)
   .merge(StepWithForEachSchema)
-  .merge(StepWithTimeoutSchema)
+  .merge(TimeoutPropSchema)
   .merge(StepWithOnFailureSchema);
 export type HttpStep = z.infer<typeof HttpStepSchema>;
 
@@ -340,7 +361,7 @@ export const getMergeStepSchema = (stepSchema: z.ZodType, loose: boolean = false
 };
 
 /* --- Inputs --- */
-export const WorkflowInputTypeEnum = z.enum(['string', 'number', 'boolean', 'choice']);
+export const WorkflowInputTypeEnum = z.enum(['string', 'number', 'boolean', 'choice', 'array']);
 
 const WorkflowInputBaseSchema = z.object({
   name: z.string(),
@@ -349,32 +370,40 @@ const WorkflowInputBaseSchema = z.object({
   required: z.boolean().optional(),
 });
 
-const WorkflowInputStringSchema = WorkflowInputBaseSchema.extend({
+export const WorkflowInputStringSchema = WorkflowInputBaseSchema.extend({
   type: z.literal('string'),
   default: z.string().optional(),
 });
 
-const WorkflowInputNumberSchema = WorkflowInputBaseSchema.extend({
+export const WorkflowInputNumberSchema = WorkflowInputBaseSchema.extend({
   type: z.literal('number'),
   default: z.number().optional(),
 });
 
-const WorkflowInputBooleanSchema = WorkflowInputBaseSchema.extend({
+export const WorkflowInputBooleanSchema = WorkflowInputBaseSchema.extend({
   type: z.literal('boolean'),
   default: z.boolean().optional(),
 });
 
-const WorkflowInputChoiceSchema = WorkflowInputBaseSchema.extend({
+export const WorkflowInputChoiceSchema = WorkflowInputBaseSchema.extend({
   type: z.literal('choice'),
   default: z.string().optional(),
   options: z.array(z.string()),
 });
 
-export const WorkflowInputSchema = z.discriminatedUnion('type', [
+export const WorkflowInputArraySchema = WorkflowInputBaseSchema.extend({
+  type: z.literal('array'),
+  minItems: z.number().int().nonnegative().optional(),
+  maxItems: z.number().int().nonnegative().optional(),
+  default: z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]).optional(),
+});
+
+export const WorkflowInputSchema = z.union([
   WorkflowInputStringSchema,
   WorkflowInputNumberSchema,
   WorkflowInputBooleanSchema,
   WorkflowInputChoiceSchema,
+  WorkflowInputArraySchema,
 ]);
 
 /* --- Consts --- */
@@ -403,6 +432,17 @@ const StepSchema = z.lazy(() =>
     BaseConnectorStepSchema,
   ])
 );
+export type Step = z.infer<typeof StepSchema>;
+
+export const BuiltInStepTypes = [
+  ForEachStepSchema.shape.type._def.value,
+  IfStepSchema.shape.type._def.value,
+  ParallelStepSchema.shape.type._def.value,
+  MergeStepSchema.shape.type._def.value,
+  WaitStepSchema.shape.type._def.value,
+  HttpStepSchema.shape.type._def.value,
+];
+export type BuiltInStepType = (typeof BuiltInStepTypes)[number];
 
 /* --- Workflow --- */
 export const WorkflowSchema = z.object({
@@ -435,32 +475,93 @@ export const WorkflowDataContextSchema = z.object({
 });
 export type WorkflowDataContext = z.infer<typeof WorkflowDataContextSchema>;
 
+// TODO: import AlertSchema from from '@kbn/alerts-as-data-utils' once it exported, now only type is exported
+const AlertSchema = z.object({
+  _id: z.string(),
+  _index: z.string(),
+  kibana: z.object({
+    alert: z.any(),
+  }),
+  '@timestamp': z.string(),
+});
+
+const SummarizedAlertsChunkSchema = z.object({
+  count: z.number(),
+  data: z.array(z.union([AlertSchema, z.any()])),
+});
+
+const RuleSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  tags: z.array(z.string()),
+  consumer: z.string(),
+  producer: z.string(),
+  ruleTypeId: z.string(),
+});
+
+export const EventSchema = z.object({
+  alerts: z.object({
+    new: SummarizedAlertsChunkSchema,
+    ongoing: SummarizedAlertsChunkSchema,
+    recovered: SummarizedAlertsChunkSchema,
+    all: SummarizedAlertsChunkSchema,
+  }),
+  rule: RuleSchema,
+  spaceId: z.string(),
+  params: z.any(),
+});
+
 export const WorkflowContextSchema = z.object({
-  event: z.any().optional(),
-  inputs: z.any().optional(),
+  event: EventSchema.optional(),
   execution: WorkflowExecutionContextSchema,
   workflow: WorkflowDataContextSchema,
+  inputs: z
+    .record(
+      z.union([
+        z.string(),
+        z.number(),
+        z.boolean(),
+        z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]),
+      ])
+    )
+    .optional(),
   consts: z.record(z.string(), z.any()).optional(),
   now: z.date().optional(),
 });
-
 export type WorkflowContext = z.infer<typeof WorkflowContextSchema>;
 
+export const DynamicWorkflowContextSchema = WorkflowContextSchema.extend({
+  // overriding record with object to avoid type mismatch when
+  // extending with actual inputs and consts of different types
+  inputs: z.object({}),
+  consts: z.object({}),
+});
+export type DynamicWorkflowContext = z.infer<typeof DynamicWorkflowContextSchema>;
+
+export const StepDataSchema = z.object({
+  output: z.any().optional(),
+  error: z.any().optional(),
+});
+export type StepData = z.infer<typeof StepDataSchema>;
+
+const ForEachContextItemSchema = z.unknown();
+export const ForEachContextSchema = z.object({
+  items: z.array(ForEachContextItemSchema),
+  index: z.number().int(),
+  item: ForEachContextItemSchema,
+  total: z.number().int(),
+});
+export type ForEachContext = z.infer<typeof ForEachContextSchema>;
+
 export const StepContextSchema = WorkflowContextSchema.extend({
-  steps: z.record(
-    z.string(),
-    z.object({
-      output: z.any().optional(),
-      error: z.any().optional(),
-    })
-  ),
-  foreach: z
-    .object({
-      items: z.array(z.any()),
-      index: z.number().int(),
-      item: z.any(),
-      total: z.number().int(),
-    })
-    .optional(),
+  steps: z.record(z.string(), StepDataSchema),
+  foreach: ForEachContextSchema.optional(),
 });
 export type StepContext = z.infer<typeof StepContextSchema>;
+
+export const DynamicStepContextSchema = DynamicWorkflowContextSchema.extend({
+  // overriding record with object to avoid type mismatch when
+  // extending with actual step ids and different output types
+  steps: z.object({}),
+});
+export type DynamicStepContext = z.infer<typeof DynamicStepContextSchema>;

@@ -50,13 +50,6 @@ const thumbDownIconLabel = i18n.translate(
   }
 );
 
-const faceHappyIconLabel = i18n.translate(
-  'sharedUXPackages.feedbackSnippet.feedbackPanel.faceHappyIconLabel',
-  {
-    defaultMessage: 'Happy face',
-  }
-);
-
 /**
  * A panel to gather user feedback.
  * There are 3 available views:
@@ -137,7 +130,13 @@ export const FeedbackPanel = ({
 
   const positiveFooter = (
     <EuiFlexItem grow={false}>
-      <EuiIcon type="faceHappy" color="success" size="l" aria-label={faceHappyIconLabel} />
+      <EuiIcon
+        data-test-subj="feedbackSnippetPanelPositiveIcon"
+        type="thumbUp"
+        color="success"
+        size="l"
+        aria-label={thumbUpIconLabel}
+      />
     </EuiFlexItem>
   );
 

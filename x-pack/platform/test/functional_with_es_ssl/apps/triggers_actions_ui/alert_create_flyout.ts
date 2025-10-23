@@ -25,6 +25,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const synthtraceClient = getService('synthtrace');
   const filterBar = getService('filterBar');
   const esArchiver = getService('esArchiver');
+  const browser = getService('browser');
 
   async function getAlertsByName(name: string) {
     const {
@@ -616,6 +617,55 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('confirmRuleCloseModal > confirmModalConfirmButton');
         await testSubjects.missingOrFail('confirmRuleCloseModal');
       }
+    });
+
+    it('should show KEEP command warning when creating a ES query rule with ESQL', async () => {
+      await pageObjects.triggersActionsUI.clickCreateAlertButton();
+      await testSubjects.click(`.es-query-SelectOption`);
+      await testSubjects.click('queryFormType_esqlQuery');
+      await testSubjects.setValue('ESQLEditor', 'FROM *', {
+        clearWithKeyboard: true,
+      });
+
+      await browser.pressKeys(browser.keys.ESCAPE);
+
+      await testSubjects.existOrFail('ESQLEditor-footerPopoverButton-warning');
+
+      await testSubjects.click('ESQLEditor-footerPopoverButton-warning');
+      const warningContent = await testSubjects.find('ESQLEditor-errors-warnings-content');
+      const warningContentText = await warningContent.getVisibleText();
+
+      expect(warningContentText).contain('KEEP processing command is recommended');
+
+      await testSubjects.setValue('ESQLEditor', 'FROM * | KEEP @timestamp', {
+        clearWithKeyboard: true,
+      });
+
+      await browser.pressKeys(browser.keys.ESCAPE);
+
+      await testSubjects.missingOrFail('ESQLEditor-errors-warnings-content');
+    });
+
+    it('should not show KEEP command warning when editing a ES query rule with ESQL', async () => {
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await pageObjects.triggersActionsUI.searchAlerts('Elasticsearch query rule');
+      await testSubjects.click('selectActionButton');
+      await testSubjects.click('editRule');
+
+      await pageObjects.header.waitUntilLoadingHasFinished();
+
+      await testSubjects.click('queryFormTypeChooserCancel');
+      await testSubjects.click('queryFormType_esqlQuery');
+      await testSubjects.setValue('ESQLEditor', 'FROM *', {
+        clearWithKeyboard: true,
+      });
+
+      await browser.pressKeys(browser.keys.ESCAPE);
+
+      // Wait 2 seconds for the debounce to take effect
+      await new Promise((res) => setTimeout(res, 2000));
+
+      await testSubjects.missingOrFail('ESQLEditor-errors-warnings-content');
     });
 
     // Related issue that this test is trying to prevent:

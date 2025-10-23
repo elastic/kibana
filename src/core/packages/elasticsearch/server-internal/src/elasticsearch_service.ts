@@ -105,6 +105,7 @@ export class ElasticsearchService
       ignoreVersionMismatch: config.ignoreVersionMismatch,
       healthCheckInterval: config.healthCheckDelay.asMilliseconds(),
       healthCheckStartupInterval: config.healthCheckStartupDelay.asMilliseconds(),
+      healthCheckRetry: config.healthCheckRetry,
       log: this.log,
       internalClient: this.client.asInternalUser,
     }).pipe(takeUntil(this.stop$));
@@ -191,7 +192,10 @@ export class ElasticsearchService
     }
 
     return {
-      client: this.client!,
+      client: {
+        asInternalUser: this.client!.asInternalUser,
+        asScoped: this.client!.asScoped.bind(this.client!),
+      },
       createClient: (type, clientConfig) => this.createClusterClient(type, config, clientConfig),
       getCapabilities: () => capabilities,
       metrics: {

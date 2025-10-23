@@ -17,6 +17,7 @@
       "encryptedSavedObjects",
       "spaces"
     ],
-    "extraPublicDirs": ["public/common"]
+    "optionalPlugins": ["usageCollection"],
+    "extraPublicDirs": ["public/common", "public/common/logos"]
   }
 }

@@ -79,6 +79,12 @@ export const RoleTemplateTypeSelect = (props: Props) => {
       }}
       isClearable={false}
       isDisabled={props.readOnly}
+      aria-label={i18n.translate(
+        'xpack.security.management.editRoleMapping.roleTemplate.typeComboBoxAriaLabel',
+        {
+          defaultMessage: 'Role template',
+        }
+      )}
     />
   );
 };

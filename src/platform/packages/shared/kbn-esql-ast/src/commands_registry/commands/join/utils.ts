@@ -8,15 +8,21 @@
  */
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
+import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import { buildFieldsDefinitionsWithMetadata } from '../../../definitions/utils';
 import { isColumn } from '../../../ast/is';
 import { columnExists, handleFragment } from '../../../definitions/utils/autocomplete/helpers';
 import { unescapeColumnName } from '../../../definitions/utils/shared';
 import * as mutate from '../../../mutate';
 import { LeafPrinter } from '../../../pretty_print/leaf_printer';
-import type { ESQLAstJoinCommand, ESQLCommand, ESQLCommandOption } from '../../../types';
+import type {
+  ESQLAstAllCommands,
+  ESQLAstJoinCommand,
+  ESQLCommand,
+  ESQLCommandOption,
+} from '../../../types';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
-import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
+
 import type { ICommand } from '../../registry';
 import type {
   ESQLColumnData,
@@ -152,7 +158,7 @@ export const getFieldSuggestions = async (
 
 export const suggestFields = async (
   innerText: string,
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   getColumnsByType: GetColumnsByTypeFn,
   getColumnsForQuery: (query: string) => Promise<ESQLColumnData[]>,
   context?: ICommandContext
@@ -162,7 +168,7 @@ export const suggestFields = async (
   }
 
   const { suggestions: fieldSuggestions, lookupIndexFieldExists } = await getFieldSuggestions(
-    command,
+    command as ESQLCommand,
     getColumnsByType,
     // this type cast is ok because getFieldSuggestions only ever fetches columns
     // from a bare FROM clause, so they will always be fields, not user-defined columns
@@ -176,12 +182,11 @@ export const suggestFields = async (
     (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
       // fie<suggest>
       return fieldSuggestions.map((suggestion) => {
-        return {
+        return withAutoSuggest({
           ...suggestion,
           text: suggestion.text,
-          command: TRIGGER_SUGGESTION_COMMAND,
           rangeToReplace,
-        };
+        });
       });
     },
     (fragment: string, rangeToReplace: { start: number; end: number }) => {
@@ -193,13 +198,14 @@ export const suggestFields = async (
       // existing fields above.
       if (fieldSuggestions.length > 1) finalSuggestions.push({ ...commaCompleteItem, text: ', ' });
 
-      return finalSuggestions.map<ISuggestionItem>((s) => ({
-        ...s,
-        filterText: fragment,
-        text: fragment + s.text,
-        command: TRIGGER_SUGGESTION_COMMAND,
-        rangeToReplace,
-      }));
+      return finalSuggestions.map<ISuggestionItem>((s) =>
+        withAutoSuggest({
+          ...s,
+          filterText: fragment,
+          text: fragment + s.text,
+          rangeToReplace,
+        })
+      );
     }
   );
 };

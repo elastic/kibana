@@ -751,31 +751,11 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/tasks/security_lists.test.ts"
           },
           {
             "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/tasks/security_lists.test.ts"
-          },
-          {
-            "plugin": "@kbn/test-suites-xpack-security",
-            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/spaces/trial_license_complete_tier/role_backwards_compatibility.ts"
-          },
-          {
-            "plugin": "@kbn/test-suites-xpack-security",
-            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/spaces/trial_license_complete_tier/role_backwards_compatibility.ts"
-          },
-          {
-            "plugin": "@kbn/test-suites-xpack-security",
-            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/spaces/trial_license_complete_tier/role_backwards_compatibility.ts"
-          },
-          {
-            "plugin": "@kbn/test-suites-xpack-security",
-            "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/spaces/trial_license_complete_tier/role_backwards_compatibility.ts"
           },
           {
             "plugin": "securitySolution",

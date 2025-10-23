@@ -11,7 +11,6 @@ import { login, ROLE } from '../../tasks/login';
 import { loadPage } from '../../tasks/common';
 import type { SiemVersion } from '../../common/constants';
 import { SIEM_VERSIONS } from '../../common/constants';
-import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
 
 describe(
   'Navigation RBAC',
@@ -52,7 +51,7 @@ describe(
         name: 'Trusted devices',
         privilegePrefix: 'trusted_devices_',
         selector: Selectors.TRUSTED_DEVICES,
-        siemVersions: [SECURITY_FEATURE_ID as SiemVersion], // Only available in siemV3
+        siemVersions: ['siemV3', 'siemV4'], // Only available starting siemV3
       },
       {
         name: 'Event filters',
@@ -150,8 +149,9 @@ describe(
       it('without access to any of the subpages, none of those should be displayed', () => {
         login(ROLE.detections_admin);
         loadPage('/app/security');
-        cy.get(MenuButtonSelector).click();
-        cy.get('[data-test-subj~="sideNavPanel-id-securityGroup:assets"]');
+        // assets should be missing, checking that assets link and more button is missing
+        cy.get(ServerlessHeaders.MORE_MENU_BTN).should('not.exist');
+        cy.get(MenuButtonSelector).should('not.exist');
 
         for (const page of allPages) {
           cy.get(page.selector).should('not.exist');
@@ -161,8 +161,9 @@ describe(
       it('with access to all of the subpages, all of those should be displayed', () => {
         login(ROLE.soc_manager);
         loadPage('/app/security');
-        cy.get(MenuButtonSelector).click();
-        cy.get('[data-test-subj~="sideNavPanel-id-securityGroup:assets"]');
+        ServerlessHeaders.showMoreItems();
+        cy.get(MenuButtonSelector).click(); // click "Assets" to open the menu
+        cy.get(allPages[0].selector).click(); // open the Assets anv panel by clicking the first item in more>assets popover
 
         for (const page of allPages) {
           if (page.selector !== Selectors.TRUSTED_DEVICES) {

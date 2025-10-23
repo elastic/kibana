@@ -18,7 +18,7 @@ describe('fetchGraph', () => {
   beforeEach(() => {
     const toRecordsMock = jest.fn().mockResolvedValue([{ id: 'dummy' }]);
     // Stub the esClient helpers.esql method to return an object with toRecords
-    (esClient.asCurrentUser.helpers as jest.Mocked<any>).esql = jest.fn().mockReturnValue({
+    esClient.asCurrentUser.helpers.esql.mockReturnValue({
       toRecords: toRecordsMock,
       toArrowTable: jest.fn(),
       toArrowReader: jest.fn(),
@@ -174,22 +174,38 @@ describe('fetchGraph', () => {
     const query = esqlCallArgs[0].query;
 
     expect(query).toContain(`ENRICH ${getEnrichPolicyId()} ON actor.entity.id`);
-    expect(query).toContain(`WITH actorEntityName = entity.name, actorEntityType = entity.type`);
+    expect(query).toContain(
+      `WITH actorEntityName = entity.name, actorEntityType = entity.type, actorEntitySubType = entity.sub_type, actorHostIp = host.ip`
+    );
     expect(query).toContain(`ENRICH ${getEnrichPolicyId()} ON target.entity.id`);
-    expect(query).toContain(`WITH targetEntityName = entity.name, targetEntityType = entity.type`);
+    expect(query).toContain(
+      `WITH targetEntityName = entity.name, targetEntityType = entity.type, targetEntitySubType = entity.sub_type, targetHostIp = host.ip`
+    );
 
     expect(query).toContain('EVAL actorDocData = CONCAT');
     expect(query).toContain('actor.entity.id');
+    expect(query).toContain('actorEntityGroup'); // <-- should be present because we group by type and sub_type
     expect(query).toContain('actorEntityName');
     expect(query).toContain('actorEntityType');
+    expect(query).toContain('actorEntitySubType');
+    expect(query).toContain('actorHostIp');
 
     expect(query).toContain('EVAL targetDocData = CONCAT');
     expect(query).toContain('target.entity.id');
+    expect(query).toContain('targetEntityGroup'); // <-- should be present because we group by type and sub_type
     expect(query).toContain('targetEntityName');
     expect(query).toContain('targetEntityType');
+    expect(query).toContain('targetEntitySubType');
+    expect(query).toContain('targetHostIp');
 
-    expect(query).toContain(`actorsDocData = VALUES(actorDocData)`);
-    expect(query).toContain(`targetsDocData = VALUES(targetDocData)`);
+    expect(query).toContain('EVAL sourceIps = source.ip');
+    expect(query).toContain('EVAL sourceCountryCodes = source.geo.country_iso_code');
+
+    expect(query).toContain('actorsDocData = VALUES(actorDocData)');
+    expect(query).toContain('targetsDocData = VALUES(targetDocData)');
+    expect(query).toContain('actorEntityGroup = VALUES(actorEntityGroup)');
+    expect(query).toContain('targetEntityGroup = VALUES(targetEntityGroup)');
+
     expect(result).toEqual([{ id: 'dummy' }]);
   });
 
@@ -221,17 +237,44 @@ describe('fetchGraph', () => {
 
     expect(query).not.toContain(`ENRICH ${getEnrichPolicyId()} ON actor.entity.id`);
     expect(query).not.toContain(
-      `WITH actorEntityName = entity.name, actorEntityType = entity.type, actorSourceIndex = entity.source`
+      `WITH actorEntityName = entity.name,
+      actorEntityType = entity.type,
+      actorEntitySubType = entity.sub_type,
+      actorHostIp = host.ip,
+      actorSourceIndex = entity.source`
     );
     expect(query).not.toContain(`ENRICH ${getEnrichPolicyId()} ON target.entity.id`);
     expect(query).not.toContain(
-      `WITH targetEntityName = entity.name, targetEntityType = entity.type, targetSourceIndex = entity.source`
+      `WITH targetEntityName = entity.name,
+      targetEntityType = entity.type,
+      targetEntitySubType = entity.sub_type,
+      targetHostIp = host.ip,
+      targetSourceIndex = entity.source`
     );
 
+    // Fallback eval clauses for non-enriched actor data
+    expect(query).toContain(`EVAL actorEntityType = TO_STRING(null)`);
+    expect(query).toContain(`EVAL actorEntitySubType = TO_STRING(null)`);
     expect(query).toContain(`EVAL actorDocData = TO_STRING(null)`);
+    expect(query).toContain(`EVAL actorHostIp = TO_STRING(null)`);
+
+    // Fallback eval clauses for non-enriched target data
+    expect(query).toContain(`EVAL targetEntityType = TO_STRING(null)`);
+    expect(query).toContain(`EVAL targetEntitySubType = TO_STRING(null)`);
     expect(query).toContain(`EVAL targetDocData = TO_STRING(null)`);
+    expect(query).toContain(`EVAL targetHostIp = TO_STRING(null)`);
+
+    expect(query).toContain('EVAL sourceIps = source.ip');
+    expect(query).toContain('EVAL sourceCountryCodes = source.geo.country_iso_code');
+
     expect(query).toContain(`actorsDocData = VALUES(actorDocData)`);
     expect(query).toContain(`targetsDocData = VALUES(targetDocData)`);
+
+    expect(query).toContain('EVAL actorEntityGroup = CASE'); // <-- should be present because we group by id
+    expect(query).toContain('EVAL targetEntityGroup = CASE'); // <-- should be present because we group by id
+    expect(query).toContain('actorEntityGroup = VALUES(actorEntityGroup)');
+    expect(query).toContain('targetEntityGroup = VALUES(targetEntityGroup)');
+
     expect(result).toEqual([{ id: 'dummy' }]);
   });
 

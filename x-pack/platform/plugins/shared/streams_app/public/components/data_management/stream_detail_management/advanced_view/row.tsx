@@ -10,7 +10,7 @@ import React from 'react';
 
 export function Row({ left, right }: { left: React.ReactNode; right: React.ReactNode }) {
   return (
-    <EuiFlexGroup alignItems="center">
+    <EuiFlexGroup alignItems="center" gutterSize="l">
       <EuiFlexItem grow={2}>{left}</EuiFlexItem>
       <EuiFlexItem grow={5}>{right}</EuiFlexItem>
     </EuiFlexGroup>
@@ -25,6 +25,7 @@ export function RowMetadata({ label, description }: { label: string; description
           <h4>{label}</h4>
         </EuiText>
       </EuiFlexItem>
+
       <EuiFlexItem>
         <EuiText color="subdued" size="s">
           {description}

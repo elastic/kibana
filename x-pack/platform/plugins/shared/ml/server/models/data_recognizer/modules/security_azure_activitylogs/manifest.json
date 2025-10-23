@@ -1,0 +1,66 @@
+{
+  "id": "security_azure_activitylogs",
+  "title": "Security: Azure Activity Logs",
+  "description": "Detect suspicious activity recorded in Azure Activity Logs.",
+  "type": "Azure Activity Logs data",
+  "logoFile": "logo.json",
+  "defaultIndexPattern": "logs-*,filebeat-*",
+  "query": {
+    "bool": {
+      "filter": [{ "term": { "event.dataset": "azure.activitylogs" } }],
+      "must_not": { "terms": { "_tier": ["data_frozen", "data_cold"] } }
+    }
+  },
+  "jobs": [
+    {
+      "id": "azure_activitylogs_rare_event_action_for_a_city",
+      "file": "azure_activitylogs_rare_event_action_for_a_city.json"
+    },
+    {
+      "id": "azure_activitylogs_rare_event_action_for_a_country",
+      "file": "azure_activitylogs_rare_event_action_for_a_country.json"
+    },
+    {
+      "id": "azure_activitylogs_rare_event_action_for_a_username",
+      "file": "azure_activitylogs_rare_event_action_for_a_username.json"
+    },
+    {
+      "id": "azure_activitylogs_high_distinct_count_event_action_on_failure",
+      "file": "azure_activitylogs_high_distinct_count_event_action_on_failure.json"
+    },
+    {
+      "id": "azure_activitylogs_rare_event_action_on_failure",
+      "file": "azure_activitylogs_rare_event_action_on_failure.json"
+    }
+  ],
+  "datafeeds": [
+    {
+      "id": "datafeed-azure_activitylogs_rare_event_action_for_a_city",
+      "file": "datafeed_azure_activitylogs_rare_event_action_for_a_city.json",
+      "job_id": "azure_activitylogs_rare_event_action_for_a_city"
+    },
+    {
+      "id": "datafeed-azure_activitylogs_rare_event_action_for_a_country",
+      "file": "datafeed_azure_activitylogs_rare_event_action_for_a_country.json",
+      "job_id": "azure_activitylogs_rare_event_action_for_a_country"
+    },
+    {
+      "id": "datafeed-azure_activitylogs_rare_event_action_for_a_username",
+      "file": "datafeed_azure_activitylogs_rare_event_action_for_a_username.json",
+      "job_id": "azure_activitylogs_rare_event_action_for_a_username"
+    },
+    {
+      "id": "datafeed-azure_activitylogs_high_distinct_count_event_action_on_failure",
+      "file": "datafeed_azure_activitylogs_high_distinct_count_event_action_on_failure.json",
+      "job_id": "azure_activitylogs_high_distinct_count_event_action_on_failure"
+    },
+    {
+      "id": "datafeed-azure_activitylogs_rare_event_action_on_failure",
+      "file": "datafeed_azure_activitylogs_rare_event_action_on_failure.json",
+      "job_id": "azure_activitylogs_rare_event_action_on_failure"
+    }
+  ],
+  "tags": [
+    "security"
+  ]
+}

@@ -13,7 +13,8 @@
   ],
   "kbn_references": [
     "@kbn/utility-types",
-    "@kbn/core-integrations-browser-internal"
+    "@kbn/core-integrations-browser-internal",
+    "@kbn/lazy-object"
   ],
   "exclude": [
     "target/**/*",

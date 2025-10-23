@@ -8,8 +8,8 @@
  */
 
 import type { StoryObj } from '@storybook/react';
-import { kibanaReactDecorator } from '../../../../.storybook/decorators';
 import { WorkflowDetailHeader } from './workflow_detail_header';
+import { kibanaReactDecorator } from '../../../../.storybook/decorators';
 
 export default {
   component: WorkflowDetailHeader,
@@ -22,16 +22,34 @@ type Story = StoryObj<typeof WorkflowDetailHeader>;
 export const Default: Story = {
   args: {
     isLoading: false,
-    name: 'Very extra super long title that should be truncated',
+    name: 'Server Downtime Notification',
     activeTab: 'workflow',
     canRunWorkflow: true,
     canSaveWorkflow: true,
     isEnabled: true,
+    lastUpdatedAt: new Date(Date.now() - 15 * 60 * 1000),
     handleRunClick: () => {},
     handleSave: () => {},
     handleToggleWorkflow: () => {},
-    handleTestClick: () => {},
     handleTabChange: () => {},
+    hasUnsavedChanges: false,
+  },
+};
+
+export const JustNow: Story = {
+  args: {
+    isLoading: false,
+    name: 'Server Downtime Notification',
+    activeTab: 'workflow',
+    canRunWorkflow: true,
+    canSaveWorkflow: true,
+    isEnabled: true,
+    lastUpdatedAt: new Date(),
+    handleRunClick: () => {},
+    handleSave: () => {},
+    handleToggleWorkflow: () => {},
+    handleTabChange: () => {},
+    hasUnsavedChanges: false,
   },
 };
 
@@ -46,12 +64,12 @@ export const Loading: Story = {
     handleRunClick: () => {},
     handleSave: () => {},
     handleToggleWorkflow: () => {},
-    handleTestClick: () => {},
     handleTabChange: () => {},
+    hasUnsavedChanges: false,
   },
 };
 
-export const Disabled: Story = {
+export const LongTitle: Story = {
   args: {
     isLoading: false,
     name: 'Very extra super long title that should be truncated',
@@ -59,10 +77,27 @@ export const Disabled: Story = {
     canRunWorkflow: false,
     canSaveWorkflow: false,
     isEnabled: false,
+    lastUpdatedAt: new Date(),
     handleRunClick: () => {},
     handleSave: () => {},
     handleToggleWorkflow: () => {},
-    handleTestClick: () => {},
     handleTabChange: () => {},
+  },
+};
+
+export const UnsavedChanges: Story = {
+  args: {
+    isLoading: false,
+    name: 'Notify new hires to enroll in Elastic Shield',
+    activeTab: 'workflow',
+    canRunWorkflow: false,
+    canSaveWorkflow: false,
+    isEnabled: false,
+    lastUpdatedAt: new Date(),
+    handleRunClick: () => {},
+    handleSave: () => {},
+    handleToggleWorkflow: () => {},
+    handleTabChange: () => {},
+    hasUnsavedChanges: true,
   },
 };

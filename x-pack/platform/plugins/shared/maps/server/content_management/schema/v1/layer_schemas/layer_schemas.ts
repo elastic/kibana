@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { querySchema } from '@kbn/es-query-server';
 import { LAYER_TYPE } from '../../../../../common';
 import {
   EMSFileSourceSchema,
@@ -15,7 +16,7 @@ import {
   XYZTMSSourceSchema,
   kibanaTilemapSourceSchema,
 } from '../source_schemas/source_schemas';
-import { joinSourceSchema, querySchema } from '../source_schemas/es_join_source_schemas';
+import { joinSourceSchema } from '../source_schemas/es_join_source_schemas';
 import { EMSVectorTileStyleSchema, heatmapStyleSchema } from '../style_schemas/style_schemas';
 import { vectorStyleSchema } from '../style_schemas/vector_style_schemas/vector_style_schemas';
 import {
@@ -180,3 +181,17 @@ export const vectorLayerSchema = layerSchema.extends({
     schema.literal(LAYER_TYPE.MVT_VECTOR),
   ]),
 });
+
+export const layersSchema = schema.oneOf([
+  EMSVectorTileLayerSchema,
+  heatmapLayerSchema,
+  layerGroupSchema,
+  rasterLayerSchema,
+  vectorLayerSchema,
+  schema.object(
+    {},
+    {
+      unknowns: 'allow',
+    }
+  ),
+]);

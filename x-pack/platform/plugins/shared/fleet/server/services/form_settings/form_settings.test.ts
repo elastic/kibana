@@ -16,7 +16,7 @@ const TEST_SETTINGS: SettingsConfig[] = [
   {
     name: 'test.foo',
     title: 'test',
-    description: 'test',
+    description: () => 'test',
     schema: z.boolean(),
     api_field: {
       name: 'test_foo',
@@ -25,7 +25,7 @@ const TEST_SETTINGS: SettingsConfig[] = [
   {
     name: 'test.foo.default_value',
     title: 'test',
-    description: 'test',
+    description: () => 'test',
     schema: z.string().default('test'),
     api_field: {
       name: 'test_foo_default_value',

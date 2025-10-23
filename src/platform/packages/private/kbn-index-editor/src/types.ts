@@ -18,15 +18,19 @@ import type { FileUploadManager } from '@kbn/file-upload';
 import type { FileUploadPluginStart, MessageImporter } from '@kbn/file-upload-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { IndexUpdateService } from './index_update_service';
+import type { IndexEditorTelemetryService } from './telemetry/telemetry_service';
 
 export interface EditLookupIndexContentContext {
   indexName?: string;
   doesIndexExist: boolean;
   canEditIndex: boolean;
+  triggerSource: string;
   onClose?: (result: {
     indexName: string | null;
     /** Indicates if the index was created */
     indexCreatedDuringFlyout: boolean;
+    /** Indicates if new fields have been added to the index */
+    indexHasNewFields: boolean;
   }) => void;
 }
 
@@ -42,6 +46,7 @@ export interface EditLookupIndexFlyoutDeps {
 export type FlyoutDeps = EditLookupIndexFlyoutDeps & {
   storage: Storage;
   indexUpdateService: IndexUpdateService;
+  indexEditorTelemetryService: IndexEditorTelemetryService;
   fileManager: FileUploadManager;
 };
 
@@ -57,6 +62,7 @@ export interface KibanaContextExtra {
   /** Custom service for indexing documents */
   indexUpdateService: IndexUpdateService;
   fileUploadManager: FileUploadManager;
+  indexEditorTelemetryService: IndexEditorTelemetryService;
   // Required services
   theme: ThemeServiceStart;
   uiSettings: IUiSettingsClient;

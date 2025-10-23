@@ -31,7 +31,7 @@ import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
 import type { useTimefilter } from '../../hooks/use_timefilter';
 import { TooltipOrPopoverIcon } from '../tooltip_popover_icon/tooltip_popover_icon';
 import { getFormattedError } from '../../util/errors';
-import type { StreamHistogramFetch } from '../../hooks/use_streams_histogram_fetch';
+import type { StreamDocCountsFetch } from '../../hooks/use_streams_doc_counts_fetch';
 
 export function DocumentsColumn({
   indexPattern,
@@ -40,7 +40,7 @@ export function DocumentsColumn({
   numDataPoints,
 }: {
   indexPattern: string;
-  histogramQueryFetch: StreamHistogramFetch;
+  histogramQueryFetch: StreamDocCountsFetch;
   timeState: ReturnType<typeof useTimefilter>['timeState'];
   numDataPoints: number;
 }) {
@@ -118,6 +118,7 @@ export function DocumentsColumn({
               text-align: right;
               font-family: 'Roboto mono', sans-serif;
             `}
+            data-test-subj={`streamsDocCount-${indexPattern}`}
           >
             {hasData ? <EuiI18nNumber value={docCount} /> : noDocCountData}
           </EuiFlexItem>

@@ -26,13 +26,15 @@ import type { AdditionalContext, AlertsDataGridProps, CellActionsOptions } from 
 import { useGetToolbarVisibility } from '../hooks/use_toolbar_visibility';
 import { InspectButtonContainer } from './alerts_query_inspector';
 import { typedMemo } from '../utils/react';
-import type { AlertsFlyout as AlertsFlyoutType } from './alerts_flyout';
 import { useBulkActions } from '../hooks/use_bulk_actions';
 import { useSorting } from '../hooks/use_sorting';
 import { CellPopoverHost } from './cell_popover_host';
 import { NonVirtualizedGridBody } from './non_virtualized_grid_body';
+import type { AlertDetailFlyout as AlertDetailFlyoutType } from './alert_detail_flyout';
 
-const AlertsFlyout = lazy(() => import('./alerts_flyout')) as typeof AlertsFlyoutType;
+const AlertDetailFlyout = lazy(
+  () => import('./alert_detail_flyout')
+) as typeof AlertDetailFlyoutType;
 
 const defaultGridStyle: EuiDataGridStyle = {
   border: 'none',
@@ -52,10 +54,9 @@ export const AlertsDataGrid = typedMemo(
     const {
       ruleTypeIds,
       query,
-      visibleColumns,
+      columnVisibility,
       onToggleColumn,
       onResetColumns,
-      onChangeVisibleColumns,
       onColumnResize,
       showInspectButton = false,
       leadingControlColumns: additionalLeadingControlColumns,
@@ -71,11 +72,6 @@ export const AlertsDataGrid = typedMemo(
       renderContext,
       hideBulkActions,
       casesConfiguration,
-      flyoutAlertIndex,
-      setFlyoutAlertIndex,
-      onPaginateFlyout,
-      onChangePageSize,
-      onChangePageIndex,
       actionsColumnWidth = DEFAULT_ACTIONS_COLUMN_WIDTH,
       additionalBulkActions,
       fieldsBrowserOptions,
@@ -91,8 +87,12 @@ export const AlertsDataGrid = typedMemo(
       isLoadingAlerts,
       browserFields,
       renderActionsCell,
+      expandedAlertIndex,
+      renderExpandedAlertView,
       pageIndex,
+      onPageIndexChange,
       pageSize,
+      onPageSizeChange,
       refresh: refreshQueries,
       columns,
       dataGridRef,
@@ -100,7 +100,11 @@ export const AlertsDataGrid = typedMemo(
     } = renderContext;
 
     const { colorMode, euiTheme } = useEuiTheme();
-    const { sortingColumns, onSort } = useSorting(onSortChange, visibleColumns, sortingFields);
+    const { sortingColumns, onSort } = useSorting(
+      onSortChange,
+      columnVisibility.visibleColumns,
+      sortingFields
+    );
     const {
       isBulkActionsColumnActive,
       bulkActionsState,
@@ -186,27 +190,15 @@ export const AlertsDataGrid = typedMemo(
       actionsColumnWidth,
     ]);
 
-    const flyoutRowIndex = flyoutAlertIndex + pageIndex * pageSize;
-
-    // Row classes do not deal with visible row indices, so we need to handle page offset
-    const activeRowClasses = useMemo<NonNullable<EuiDataGridStyle['rowClasses']>>(
-      () => ({
-        [flyoutRowIndex]: 'alertsTableActiveRow',
-      }),
-      [flyoutRowIndex]
-    );
-
-    const handleFlyoutClose = useCallback(() => setFlyoutAlertIndex(-1), [setFlyoutAlertIndex]);
-
     const dataGridPagination = useMemo(
       () => ({
         pageIndex,
         pageSize,
         pageSizeOptions,
-        onChangeItemsPerPage: onChangePageSize,
-        onChangePage: onChangePageIndex,
+        onChangePage: onPageIndexChange,
+        onChangeItemsPerPage: onPageSizeChange,
       }),
-      [onChangePageIndex, onChangePageSize, pageIndex, pageSize, pageSizeOptions]
+      [onPageIndexChange, onPageSizeChange, pageIndex, pageSize, pageSizeOptions]
     );
 
     const { getCellActionsForColumn, visibleCellActions, disabledCellActions } =
@@ -256,10 +248,10 @@ export const AlertsDataGrid = typedMemo(
           // We're spreading the highlighted row classes first, so that the active
           // row classed can override the highlighted row classes.
           ...highlightedRowClasses,
-          ...activeRowClasses,
+          ...(expandedAlertIndex != null ? { [expandedAlertIndex]: 'alertsTableActiveRow' } : {}),
         },
       };
-    }, [activeRowClasses, highlightedRowClasses, props.gridStyle]);
+    }, [expandedAlertIndex, highlightedRowClasses, props.gridStyle]);
 
     // Merges the default grid style with the grid style that comes in through props.
     const actualGridStyle = useMemo(() => {
@@ -312,10 +304,6 @@ export const AlertsDataGrid = typedMemo(
       return { columns: sortingColumns, onSort };
     }, [sortingColumns, onSort]);
 
-    const columnVisibility = useMemo(() => {
-      return { visibleColumns, setVisibleColumns: onChangeVisibleColumns };
-    }, [visibleColumns, onChangeVisibleColumns]);
-
     const rowStyles = useMemo(
       () => css`
         .alertsTableHighlightedRow {
@@ -331,19 +319,19 @@ export const AlertsDataGrid = typedMemo(
       [colorMode, euiTheme]
     );
 
+    const ExpandedAlertView =
+      // By checking undefined explicitly, we allow falsy values (null) to skip rendering the flyout
+      renderExpandedAlertView !== undefined
+        ? renderExpandedAlertView
+        : // Overriding the simplified type here to avoid cyclic problems with generics
+          (AlertDetailFlyout as NonNullable<typeof renderExpandedAlertView>);
+
     return (
       <InspectButtonContainer>
         <section style={{ width: '100%' }} data-test-subj={props['data-test-subj']}>
           <Suspense fallback={null}>
-            {flyoutAlertIndex > -1 && (
-              <AlertsFlyout<AC>
-                {...renderContext}
-                alert={alerts[flyoutAlertIndex]}
-                alertsCount={alertsCount}
-                onClose={handleFlyoutClose}
-                flyoutIndex={flyoutAlertIndex + pageIndex * pageSize}
-                onPaginate={onPaginateFlyout}
-              />
+            {expandedAlertIndex != null && ExpandedAlertView && (
+              <ExpandedAlertView {...renderContext} expandedAlertIndex={expandedAlertIndex} />
             )}
           </Suspense>
           {alertsCount > 0 && (

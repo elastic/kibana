@@ -11,9 +11,11 @@ import type {
   ConversationRound,
   ConversationRoundStep,
   ConversationWithoutRounds,
+  ToolResult,
   UserIdAndName,
 } from '@kbn/onechat-common';
 import { ConversationRoundStepType } from '@kbn/onechat-common';
+import { getToolResultId } from '@kbn/onechat-server';
 import type {
   ConversationCreateRequest,
   ConversationUpdateRequest,
@@ -64,7 +66,12 @@ function deserializeStepResults(rounds: PersistentConversationRound[]): Conversa
       if (step.type === ConversationRoundStepType.toolCall) {
         return {
           ...step,
-          results: JSON.parse(step.results),
+          results: (JSON.parse(step.results) as ToolResult[]).map((result) => {
+            return {
+              ...result,
+              tool_result_id: result.tool_result_id ?? getToolResultId(),
+            };
+          }),
           progression: step.progression ?? [],
         };
       } else {
@@ -76,9 +83,13 @@ function deserializeStepResults(rounds: PersistentConversationRound[]): Conversa
 
 export const fromEs = (document: Document): Conversation => {
   const base = convertBaseFromEs(document);
+
+  // Migration: prefer legacy 'rounds' field, fallback to new 'conversation_rounds' field
+  const rounds = document._source!.rounds ?? document._source!.conversation_rounds;
+
   return {
     ...base,
-    rounds: deserializeStepResults(document._source!.rounds),
+    rounds: deserializeStepResults(rounds),
   };
 };
 
@@ -86,30 +97,36 @@ export const fromEsWithoutRounds = (document: Document): ConversationWithoutRoun
   return convertBaseFromEs(document);
 };
 
-export const toEs = (conversation: Conversation): ConversationProperties => {
+export const toEs = (conversation: Conversation, space: string): ConversationProperties => {
   return {
     agent_id: conversation.agent_id,
     user_id: conversation.user.id,
     user_name: conversation.user.username,
+    space,
     title: conversation.title,
     created_at: conversation.created_at,
     updated_at: conversation.updated_at,
-    rounds: serializeStepResults(conversation.rounds),
+    // Explicitly omit rounds to ensure migration
+    rounds: undefined,
+    conversation_rounds: serializeStepResults(conversation.rounds),
   };
 };
 
 export const updateConversation = ({
   conversation,
   update,
+  space,
   updateDate,
 }: {
   conversation: Conversation;
   update: ConversationUpdateRequest;
+  space: string;
   updateDate: Date;
 }) => {
   const updated = {
     ...conversation,
     ...update,
+    space,
     updatedAt: updateDate.toISOString(),
   };
 
@@ -118,20 +135,23 @@ export const updateConversation = ({
 
 export const createRequestToEs = ({
   conversation,
+  space,
   currentUser,
   creationDate,
 }: {
   conversation: ConversationCreateRequest;
   currentUser: UserIdAndName;
   creationDate: Date;
+  space: string;
 }): ConversationProperties => {
   return {
     agent_id: conversation.agent_id,
     user_id: currentUser.id,
     user_name: currentUser.username,
+    space,
     title: conversation.title,
     created_at: creationDate.toISOString(),
     updated_at: creationDate.toISOString(),
-    rounds: serializeStepResults(conversation.rounds),
+    conversation_rounds: serializeStepResults(conversation.rounds),
   };
 };
