@@ -14,7 +14,7 @@ node scripts/edot_collector.js
 
 This will:
 
-1. Read Elasticsearch connection details from `config/kibana.yml` and `config/kibana.dev.yml`
+1. Read Elasticsearch connection details from `config/kibana.dev.yml`
 2. Generate an OpenTelemetry Collector configuration
 3. Start a Docker container named `kibana-dev-edot-collector` with the EDOT Collector running in Gateway mode
 4. Expose OTLP endpoints (gRPC on 4317, HTTP on 4318) for application instrumentation
@@ -23,14 +23,7 @@ This will:
 ### With custom config file
 
 ```bash
-# Single config file
-node scripts/edot_collector.js --config path/to/custom/kibana.yml
-
-# Short form
-node scripts/edot_collector.js -c path/to/custom/kibana.yml
-
-# Multiple config files (later files override earlier ones)
-node scripts/edot_collector.js --config config/kibana.yml --config config/kibana.dev.yml
+node scripts/edot_collector.js --config config/<custom-kibana-config>.yml
 ```
 
 ### Using environment variables
@@ -135,14 +128,6 @@ The command generates the following files in `data/edot_collector/`:
 
 ## Troubleshooting
 
-### Docker not available
-
-If you see "Docker is not available", make sure Docker is installed and running:
-
-```bash
-docker info
-```
-
 ### Container fails to start
 
 Check the logs:
@@ -155,5 +140,4 @@ docker logs kibana-dev-edot-collector
 
 1. Verify the container is running: `docker ps | grep kibana-dev-edot-collector`
 2. Check Elasticsearch connection in the logs: `docker logs kibana-dev-edot-collector`
-3. Verify your Elasticsearch credentials are correct
-4. Make sure you've installed the OpenTelemetry Assets integrations
+3. Check instrumented application logs for OTLP export errors.

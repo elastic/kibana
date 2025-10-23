@@ -25,12 +25,10 @@ const COLLECTOR_CONFIG_FILE_PATH = Path.join(DATA_DIR, 'otel-collector-config.ym
 
 /**
  * Stops the EDOT Collector Docker containers.
- *
- * @param cleanup - Whether to perform cleanup after stopping
  */
-async function down(cleanup: boolean = true) {
+async function down() {
   await execa
-    .command(`docker compose -f ${DOCKER_COMPOSE_FILE_PATH} down`, { cleanup })
+    .command(`docker compose -f ${DOCKER_COMPOSE_FILE_PATH} down`, { cleanup: true })
     .catch(() => {});
 }
 
@@ -47,12 +45,10 @@ function normalizeElasticsearchHost(host: string): string {
   // Convert localhost to host.docker.internal for Docker connectivity
   hostStr = hostStr.replace(/localhost/g, 'host.docker.internal');
 
-  // If it's already a full URL, return it
   if (hostStr.startsWith('http://') || hostStr.startsWith('https://')) {
     return hostStr;
   }
 
-  // Otherwise, assume it's localhost with a port
   return `http://${hostStr}`;
 }
 
@@ -90,7 +86,6 @@ export async function ensureEdotCollector({
   log.debug(`Stopping existing containers`);
   await down();
 
-  // Generate EDOT Collector configuration
   const collectorConfig = getEdotCollectorConfiguration({
     elasticsearchEndpoint: elasticsearchHost,
     username: elasticsearchUsername,
@@ -100,7 +95,6 @@ export async function ensureEdotCollector({
   log.debug(`Writing collector config to ${COLLECTOR_CONFIG_FILE_PATH}`);
   await writeFile(COLLECTOR_CONFIG_FILE_PATH, collectorConfig);
 
-  // Generate Docker Compose configuration
   const dockerComposeYaml = getDockerComposeYaml({
     collectorConfigPath: COLLECTOR_CONFIG_FILE_PATH,
   });
