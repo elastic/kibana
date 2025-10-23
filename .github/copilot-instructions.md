@@ -91,11 +91,8 @@ Verify **only the files you changed in this commit**:
 3. **Linting (scoped):** Run ESLint only on changed files - MUST pass with 0 errors
 
    ```bash
-   # Lint specific files or directories you just changed
-   node scripts/eslint --fix path/to/changed/file.ts path/to/changed/dir/
-
-   # Or use git to get staged/changed files
-   node scripts/eslint --fix $(git diff --name-only --diff-filter=ACMR "*.ts" "*.tsx" "*.js")
+   # Lint changed files
+   node scripts/eslint --fix $(git diff --name-only)
    ```
 
 4. **Type checking (scoped):** Check types only for affected project(s) - MUST pass with 0 errors
@@ -344,7 +341,7 @@ node scripts/eslint --fix path/to/changed/directory/
 node scripts/eslint --fix x-pack/platform/plugins/your_plugin
 
 # ESLint multiple changed files (using git)
-node scripts/eslint --fix $(git diff --name-only --diff-filter=ACMR "*.ts" "*.tsx" "*.js")
+node scripts/eslint --fix $(git diff --name-only)
 
 # ESLint with type information for specific project (advanced)
 node scripts/eslint_with_types --project path/to/tsconfig.json
