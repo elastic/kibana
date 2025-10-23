@@ -6,14 +6,7 @@
  */
 
 import React, { useMemo, memo, useCallback } from 'react';
-import {
-  EuiForm,
-  euiBreakpoint,
-  useEuiTheme,
-  useEuiOverflowScroll,
-  EuiFlexItem,
-  EuiFlexGroup,
-} from '@elastic/eui';
+import { EuiForm, euiBreakpoint, useEuiTheme, useEuiOverflowScroll } from '@elastic/eui';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import {
@@ -48,7 +41,6 @@ import {
 } from '../../../state_management';
 import { getRemoveOperation } from '../../../utils';
 import { useEditorFrameService } from '../../editor_frame_service_context';
-import { VisualizationToolbarWrapper } from '../visualization_toolbar';
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
   const { visualizationMap } = useEditorFrameService();
@@ -59,14 +51,7 @@ export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: Config
     : null;
 
   return activeVisualization && visualization.state ? (
-    <>
-      <EuiFlexItem css={{ margin: '16px 16px 0 0' }}>
-        <EuiFlexGroup alignItems="center" justifyContent="flexEnd" responsive={false} wrap={true}>
-          <VisualizationToolbarWrapper framePublicAPI={props.framePublicAPI} />
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <LayerPanels {...props} activeVisualization={activeVisualization} />
-    </>
+    <LayerPanels {...props} activeVisualization={activeVisualization} />
   ) : null;
 });
 
