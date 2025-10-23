@@ -202,7 +202,7 @@ export function getZodTypeName(schema: z.ZodType) {
       return 'literal';
     case 'ZodUnion': {
       // Check if all union members are arrays - if so, treat as array type
-      const unionSchema = unwrappedSchema as z.ZodUnion<any>;
+      const unionSchema = unwrappedSchema as z.ZodUnion<[z.ZodType, ...z.ZodType[]]>;
       const allMembersAreArrays = unionSchema.options.every(
         (option: z.ZodType) => option instanceof z.ZodArray
       );
