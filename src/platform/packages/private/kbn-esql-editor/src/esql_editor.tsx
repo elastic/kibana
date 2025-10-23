@@ -23,6 +23,7 @@ import { Global, css } from '@emotion/react';
 import { getESQLQueryColumns } from '@kbn/esql-utils';
 import type { CodeEditorProps } from '@kbn/code-editor';
 import { CodeEditor } from '@kbn/code-editor';
+import { APP_WRAPPER_CLASS } from '@kbn/core-application-common';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
@@ -809,6 +810,13 @@ const ESQLEditorInternal = function ESQLEditor({
     [esqlCallbacks, telemetryCallbacks]
   );
 
+  const signatureProvider = useMemo(() => {
+    return ESQLLang.getSignatureProvider?.({
+      ...esqlCallbacks,
+      telemetry: telemetryCallbacks,
+    });
+  }, [esqlCallbacks, telemetryCallbacks]);
+
   const onErrorClick = useCallback(({ startLineNumber, startColumn }: MonacoMessage) => {
     if (!editor1.current) {
       return;
@@ -851,6 +859,10 @@ const ESQLEditorInternal = function ESQLEditor({
     () => ({
       hover: {
         above: false,
+      },
+      parameterHints: {
+        enabled: true,
+        cycle: true,
       },
       accessibilitySupport: 'auto',
       autoIndent: 'keep',
@@ -895,9 +907,19 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const htmlId = useGeneratedHtmlId({ prefix: 'esql-editor' });
   const [labelInFocus, setLabelInFocus] = useState(false);
+
+  // TEMP WORKAROUND (NO A SOLUTION): Style for signature help widget
+  // Set z-index on app wrapper (top container) to ensure widget appears above Kibana header
+  const signatureHelpWidgetStyle = css`
+    .${APP_WRAPPER_CLASS} {
+      z-index: 1001;
+    }
+  `;
+
   const editorPanel = (
     <>
       <Global styles={lookupIndexBadgeStyle} />
+      <Global styles={signatureHelpWidgetStyle} />
       {Boolean(editorIsInline) && (
         <EuiFlexGroup
           gutterSize="none"
@@ -994,6 +1016,7 @@ const ESQLEditorInternal = function ESQLEditor({
                       return hoverProvider?.provideHover(model, position, token);
                     },
                   }}
+                  signatureProvider={signatureProvider}
                   onChange={onQueryUpdate}
                   onFocus={() => setLabelInFocus(true)}
                   onBlur={() => setLabelInFocus(false)}

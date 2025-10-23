@@ -24,7 +24,7 @@ import { timeSeriesAggFunctionDefinitions } from '../generated/time_series_agg_f
 import { groupingFunctionDefinitions } from '../generated/grouping_functions';
 import { scalarFunctionDefinitions } from '../generated/scalar_functions';
 import type { ESQLColumnData, ISuggestionItem } from '../../commands_registry/types';
-import { withAutoSuggest } from './autocomplete/helpers';
+import { withAutoSuggest, withSignatureHelp } from './autocomplete/helpers';
 import { buildFunctionDocumentation } from './documentation';
 import { getSafeInsertText, getControlSuggestion } from './autocomplete/helpers';
 import type { ESQLAstItem, ESQLFunction } from '../../types';
@@ -402,7 +402,8 @@ export const buildColumnSuggestions = (
       !column.userDefined && Boolean(column.isEcs),
       Boolean(fieldIsRecommended)
     );
-    const suggestion: ISuggestionItem = {
+
+    let suggestion: ISuggestionItem = {
       label: column.name,
       text:
         getSafeInsertText(column.name) +
@@ -413,7 +414,15 @@ export const buildColumnSuggestions = (
       sortText,
     };
 
-    return options?.openSuggestions ? withAutoSuggest(suggestion) : suggestion;
+    if (options?.openSuggestions) {
+      suggestion = withAutoSuggest(suggestion);
+    }
+
+    if (options?.addComma) {
+      suggestion = withSignatureHelp(suggestion);
+    }
+
+    return suggestion;
   });
 
   const suggestions = [...fieldsSuggestions];
