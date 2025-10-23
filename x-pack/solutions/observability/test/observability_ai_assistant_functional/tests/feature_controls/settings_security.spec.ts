@@ -18,11 +18,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('all privileges', () => {
       before(async () => {
         await createAndLoginUserWithCustomRole(getPageObjects, getService, {
-          // we need all these privileges to view and modify Obs AI Assistant settings view
+          // Only need observabilityAIAssistant privilege to access settings
           observabilityAIAssistant: ['all'],
-          // aiAssistantManagementSelection determines link visibility in stack management and navigating to the page
-          // but not whether you can read/write the settings
-          aiAssistantManagementSelection: ['all'],
           // advancedSettings determines whether user can read/write the settings
           advancedSettings: ['all'],
         });
@@ -41,19 +38,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.existOrFail(ui.pages.settings.managementLink);
       });
 
-      it('allows access to ai assistant settings landing page', async () => {
+      it('redirects directly to observability ai assistant settings', async () => {
         await PageObjects.common.navigateToUrl('aiAssistantManagementSelection', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
           shouldUseHashForSubUrl: false,
         });
-      });
-      it('allows access to obs ai assistant settings view', async () => {
-        await PageObjects.common.navigateToUrl('obsAIAssistantManagement', '', {
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-          shouldUseHashForSubUrl: false,
-        });
+
         await testSubjects.existOrFail(ui.pages.settings.settingsPage);
       });
     });
@@ -61,7 +52,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       before(async () => {
         await createAndLoginUserWithCustomRole(getPageObjects, getService, {
           observabilityAIAssistant: ['all'],
-          aiAssistantManagementSelection: ['all'],
           advancedSettings: ['read'],
         });
       });
@@ -79,22 +69,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.existOrFail(ui.pages.settings.managementLink);
       });
 
-      it('allows access to ai assistant settings landing page', async () => {
+      it('redirects directly to observability ai assistant settings', async () => {
         await PageObjects.common.navigateToUrl('aiAssistantManagementSelection', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
           shouldUseHashForSubUrl: false,
         });
-        await testSubjects.existOrFail(ui.pages.settings.aiAssistantCard);
-      });
-      it('allows access to obs ai assistant settings page', async () => {
-        await PageObjects.common.navigateToUrl('obsAIAssistantManagement', '', {
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-          shouldUseHashForSubUrl: false,
-        });
+
         await testSubjects.existOrFail(ui.pages.settings.settingsPage);
       });
+
       it('has disabled inputs', async () => {
         const searchConnectorIndexPatternInput = await testSubjects.find(
           ui.pages.settings.searchConnectorIndexPatternInput
@@ -102,11 +86,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(await searchConnectorIndexPatternInput.getAttribute('disabled')).to.be('true');
       });
     });
-    describe('observabilityAIAssistant privilege with no aiAssistantManagementSelection privilege', () => {
+    describe('without observabilityAIAssistant privilege', () => {
       before(async () => {
         await createAndLoginUserWithCustomRole(getPageObjects, getService, {
-          // we need at least one feature available to login
-          observabilityAIAssistant: ['all'],
+          // User has no AI Assistant privileges
+          advancedSettings: ['all'],
         });
       });
 
@@ -131,44 +115,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
         await testSubjects.missingOrFail(ui.pages.settings.aiAssistantCard);
       });
-      it('allows access to obs ai assistant settings page', async () => {
-        await PageObjects.common.navigateToUrl('obsAIAssistantManagement', '', {
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-          shouldUseHashForSubUrl: false,
-        });
-        await testSubjects.missingOrFail(ui.pages.settings.settingsPage);
-      });
-    });
-    describe('aiAssistantManagementSelection privilege with no observabilityAIAssistant privilege', () => {
-      before(async () => {
-        await createAndLoginUserWithCustomRole(getPageObjects, getService, {
-          aiAssistantManagementSelection: ['all'],
-          advancedSettings: ['all'],
-        });
-      });
 
-      after(async () => {
-        await deleteAndLogoutUser(getService, getPageObjects);
-      });
-
-      it('shows AI Assistant settings link in solution nav', async () => {
-        await PageObjects.common.navigateToUrl('management', '', {
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-          shouldUseHashForSubUrl: false,
-        });
-        await testSubjects.existOrFail(ui.pages.settings.managementLink);
-      });
-
-      it('allows access to ai assistant settings landing page', async () => {
-        await PageObjects.common.navigateToUrl('aiAssistantManagementSelection', '', {
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-          shouldUseHashForSubUrl: false,
-        });
-        await testSubjects.existOrFail(ui.pages.settings.aiAssistantCard);
-      });
       it('does not allow access to obs ai assistant settings page', async () => {
         await PageObjects.common.navigateToUrl('obsAIAssistantManagement', '', {
           ensureCurrentUrl: false,
