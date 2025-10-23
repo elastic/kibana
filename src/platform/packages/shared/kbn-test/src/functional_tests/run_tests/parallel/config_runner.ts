@@ -13,6 +13,8 @@ import { REPO_ROOT } from '@kbn/repo-info';
 
 import type { ToolingLog } from '@kbn/tooling-log';
 
+import { createEsCacheSymlink } from './create_es_cache_symlink';
+
 interface ConfigRunnerOptions {
   index: string;
   log: ToolingLog;
@@ -54,6 +56,8 @@ export class ConfigRunner {
         'ipc',
       ] as StdioOption[],
     };
+
+    await createEsCacheSymlink(this.options.index);
 
     this.proc = execa(this.options.command.exec, args, {
       env: {
