@@ -27,7 +27,7 @@ import type {
   FramePublicAPI,
 } from '@kbn/lens-common';
 import { operationDefinitionMap } from '..';
-import { defaultLabel } from '../filters/filters';
+import { filtersDefaultLabel } from '../filters/filters';
 import { isReferenced } from '../../layer_helpers';
 
 import type { FieldBasedOperationErrorMessage } from '..';
@@ -231,7 +231,7 @@ export function getDisallowedTermsMessage(
                               query: '*',
                               language: 'kuery',
                             },
-                            label: defaultLabel,
+                            label: filtersDefaultLabel,
                           },
                         ],
                 },
