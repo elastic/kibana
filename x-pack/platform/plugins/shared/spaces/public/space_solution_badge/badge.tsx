@@ -25,7 +25,7 @@ const SolutionOptions: Record<
       />
     ),
   },
-  workplace_ai: {
+  workplaceai: {
     iconType: 'logoElasticsearch',
     label: (
       <FormattedMessage

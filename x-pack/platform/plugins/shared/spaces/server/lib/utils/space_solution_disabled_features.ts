@@ -37,7 +37,7 @@ const enabledFeaturesPerSolution: Record<SolutionId, string[]> = {
   es: ['observabilityAIAssistant'],
   oblt: [],
   security: [],
-  workplace_ai: [],
+  workplaceai: [],
 };
 
 /**
@@ -78,12 +78,12 @@ export function withSpaceSolutionDisabledFeatures(
       'enterpriseSearch',
       'workplace_ai',
     ]).filter((featureId) => !enabledFeaturesPerSolution.security.includes(featureId));
-  } else if (spaceSolution === 'workplace_ai') {
+  } else if (spaceSolution === 'workplaceai') {
     disabledFeatureKeysFromSolution = getFeatureIdsForCategories(features, [
       'observability',
       'securitySolution',
       'enterpriseSearch',
-    ]).filter((featureId) => !enabledFeaturesPerSolution.workplace_ai.includes(featureId));
+    ]).filter((featureId) => !enabledFeaturesPerSolution.workplaceai.includes(featureId));
   }
 
   return Array.from(new Set([...disabledFeatureKeysFromSolution]));

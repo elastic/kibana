@@ -102,10 +102,10 @@ describe('#withSpaceSolutionDisabledFeatures', () => {
     });
   });
 
-  describe('when the space solution is "workplace_ai"', () => {
+  describe('when the space solution is "workplaceai"', () => {
     test('it removes the "oblt", "es" and "security" features', () => {
       const spaceDisabledFeatures: string[] = ['foo'];
-      const spaceSolution = 'workplace_ai';
+      const spaceSolution = 'workplaceai';
 
       const result = withSpaceSolutionDisabledFeatures(
         features,
