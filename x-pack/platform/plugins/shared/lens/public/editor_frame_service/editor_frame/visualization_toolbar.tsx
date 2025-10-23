@@ -44,11 +44,11 @@ const VisualizationToolbar = memo(function VisualizationToolbar({
   );
 
   const { FlyoutToolbarComponent, ToolbarComponent: RegularToolbarComponent } =
-    activeVisualization || {};
+    activeVisualization ?? {};
 
   let ToolbarComponent;
   if (enableFlyoutToolbar) {
-    ToolbarComponent = FlyoutToolbarComponent || RegularToolbarComponent;
+    ToolbarComponent = FlyoutToolbarComponent ?? RegularToolbarComponent;
   } else {
     ToolbarComponent = RegularToolbarComponent;
   }
@@ -56,7 +56,7 @@ const VisualizationToolbar = memo(function VisualizationToolbar({
   return (
     <>
       {ToolbarComponent && (
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} data-test-subj="lnsVisualizationToolbar">
           {ToolbarComponent({
             frame: framePublicAPI,
             state: visualization.state,
