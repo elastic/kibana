@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { z } from '@kbn/zod';
 import type { Logger } from '@kbn/core/server';
+import type { z } from '@kbn/zod';
 import type { ExecutorParamsSchema } from './schema';
 
 export type ExecutorParams = z.infer<typeof ExecutorParamsSchema>;
