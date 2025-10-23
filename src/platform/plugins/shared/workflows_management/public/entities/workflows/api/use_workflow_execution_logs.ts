@@ -8,8 +8,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-
+import { useKibana } from '../../../hooks/use_kibana';
 interface WorkflowExecutionLogEntry {
   id: string;
   timestamp: string;
@@ -19,7 +18,7 @@ interface WorkflowExecutionLogEntry {
   stepName?: string;
   connectorType?: string;
   duration?: number;
-  additionalData?: Record<string, any>;
+  additionalData?: Record<string, unknown>;
 }
 
 interface WorkflowExecutionLogsResponse {
@@ -61,7 +60,7 @@ export function useWorkflowExecutionLogs({
       sortOrder,
     ],
     queryFn: async () => {
-      const response = await http!.get<WorkflowExecutionLogsResponse>(
+      const response = await http.get<WorkflowExecutionLogsResponse>(
         `/api/workflowExecutions/${executionId}/logs`,
         {
           query: {

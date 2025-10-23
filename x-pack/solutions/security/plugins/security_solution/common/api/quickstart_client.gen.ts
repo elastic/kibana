@@ -110,10 +110,6 @@ import type {
   SetAlertsStatusResponse,
 } from './detection_engine/signals/set_signal_status/set_signals_status_route.gen';
 import type { SuggestUserProfilesRequestQueryInput } from './detection_engine/users/suggest_user_profiles_route.gen';
-import type {
-  EndpointGetActionsDetailsRequestParamsInput,
-  EndpointGetActionsDetailsResponse,
-} from './endpoint/actions/details/details.gen';
 import type { EndpointFileDownloadRequestParamsInput } from './endpoint/actions/file_download/file_download.gen';
 import type {
   EndpointFileInfoRequestParamsInput,
@@ -259,6 +255,10 @@ import type {
   ListEntitiesRequestQueryInput,
   ListEntitiesResponse,
 } from './entity_analytics/entity_store/entities/list_entities.gen';
+import type {
+  UpsertEntitiesBulkRequestQueryInput,
+  UpsertEntitiesBulkRequestBodyInput,
+} from './entity_analytics/entity_store/entities/upsert_entities_bulk.gen';
 import type {
   UpsertEntityRequestQueryInput,
   UpsertEntityRequestParamsInput,
@@ -1183,21 +1183,6 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
     return this.kbnClient
       .request<EndpointFileInfoResponse>({
         path: replaceParams('/api/endpoint/action/{action_id}/file/{file_id}', props.params),
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'GET',
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
-   * Get the details of a response action using the action ID.
-   */
-  async endpointGetActionsDetails(props: EndpointGetActionsDetailsProps) {
-    this.log.info(`${new Date().toISOString()} Calling API EndpointGetActionsDetails`);
-    return this.kbnClient
-      .request<EndpointGetActionsDetailsResponse>({
-        path: replaceParams('/api/endpoint/action/{action_id}', props.params),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
@@ -3095,6 +3080,26 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+    * Update or create many entities in Entity Store.
+If the specified entity already exists, it is updated with the provided values.  If the entity does not exist, a new one is created.
+The creation is asynchronous. The time for a document to be present in the  final index depends on the entity store transform and usually takes more than 1 minute.
+
+    */
+  async upsertEntitiesBulk(props: UpsertEntitiesBulkProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UpsertEntitiesBulk`);
+    return this.kbnClient
+      .request({
+        path: '/api/entity_store/entities/bulk',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'PUT',
+        body: props.body,
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
     * Update or create an entity in Entity Store.
 If the specified entity already exists, it is updated with the provided values.  If the entity does not exist, a new one is created. By default, only the following fields can be updated: * `entity.attributes.*` * `entity.lifecycle.*` * `entity.behavior.*` To update other fields, set the `force` query parameter to `true`. > info > Some fields always retain the first observed value. Updates to these fields will not appear in the final index.
 > Due to technical limitations, not all updates are guaranteed to appear in the final list of observed values.
@@ -3235,9 +3240,6 @@ export interface EndpointFileDownloadProps {
 }
 export interface EndpointFileInfoProps {
   params: EndpointFileInfoRequestParamsInput;
-}
-export interface EndpointGetActionsDetailsProps {
-  params: EndpointGetActionsDetailsRequestParamsInput;
 }
 export interface EndpointGetActionsListProps {
   query: EndpointGetActionsListRequestQueryInput;
@@ -3536,6 +3538,10 @@ export interface UploadAssetCriticalityRecordsProps {
 export interface UpsertDashboardMigrationResourcesProps {
   params: UpsertDashboardMigrationResourcesRequestParamsInput;
   body: UpsertDashboardMigrationResourcesRequestBodyInput;
+}
+export interface UpsertEntitiesBulkProps {
+  query: UpsertEntitiesBulkRequestQueryInput;
+  body: UpsertEntitiesBulkRequestBodyInput;
 }
 export interface UpsertEntityProps {
   query: UpsertEntityRequestQueryInput;
