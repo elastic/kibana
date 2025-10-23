@@ -65,6 +65,7 @@ export function openConversationFlyout(
       },
       isResizable: true,
       size: '1000px',
+      type: 'push',
     }
   );
 
