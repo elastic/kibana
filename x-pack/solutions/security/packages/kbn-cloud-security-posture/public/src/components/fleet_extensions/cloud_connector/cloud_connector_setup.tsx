@@ -23,7 +23,8 @@ import { useCloudConnectorSetup } from './hooks/use_cloud_connector_setup';
 import { CloudConnectorTabs, type CloudConnectorTab } from './cloud_connector_tabs';
 import type { UpdatePolicy } from '../types';
 import { TABS, CLOUD_FORMATION_EXTERNAL_DOC_URL } from './constants';
-import { isCloudConnectorReusableEnabled } from './utils';
+import { hasValidNewConnectionCredentials, isCloudConnectorReusableEnabled } from './utils';
+import { AZURE_PROVIDER } from '../constants';
 export interface CloudConnectorSetupProps {
   input: NewPackagePolicyInput;
   newPolicy: NewPackagePolicy;
@@ -145,7 +146,10 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
     (tab: { id: 'new-connection' | 'existing-connection' }) => {
       setSelectedTabId(tab.id);
 
-      if (tab.id === TABS.NEW_CONNECTION && newConnectionCredentials.roleArn) {
+      if (
+        tab.id === TABS.NEW_CONNECTION &&
+        hasValidNewConnectionCredentials(newConnectionCredentials, cloudProvider)
+      ) {
         updatePolicyWithNewCredentials(newConnectionCredentials);
       } else if (
         tab.id === TABS.EXISTING_CONNECTION &&
@@ -156,6 +160,7 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
     },
     [
       newConnectionCredentials,
+      cloudProvider,
       existingConnectionCredentials,
       updatePolicyWithNewCredentials,
       updatePolicyWithExistingCredentials,
@@ -180,13 +185,28 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
           setCredentials={updatePolicyWithNewCredentials}
         />
       )}
-      {reusableFeatureEnabled && (
+      {reusableFeatureEnabled && cloudProvider === AZURE_PROVIDER && (
+        <NewCloudConnectorForm
+          input={input}
+          templateName={templateName}
+          newPolicy={newPolicy}
+          packageInfo={packageInfo}
+          updatePolicy={updatePolicy}
+          isEditPage={isEditPage}
+          hasInvalidRequiredVars={hasInvalidRequiredVars}
+          cloud={cloud}
+          cloudProvider={cloudProvider}
+          credentials={newConnectionCredentials}
+          setCredentials={updatePolicyWithNewCredentials}
+        />
+      )}
+      {reusableFeatureEnabled && cloudProvider !== AZURE_PROVIDER && (
         <CloudConnectorTabs
           tabs={tabs}
           selectedTabId={selectedTabId}
           onTabClick={onTabClick}
           isEditPage={isEditPage}
-          cloudProvider={cloudProvider || 'aws'}
+          cloudProvider={cloudProvider}
           cloudConnectorsCount={cloudConnectorsCount || 0}
         />
       )}

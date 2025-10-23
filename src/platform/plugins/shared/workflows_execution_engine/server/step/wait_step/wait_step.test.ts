@@ -10,11 +10,11 @@
 import type { WaitStep } from '@kbn/workflows';
 import type { WaitGraphNode } from '@kbn/workflows/graph';
 import { WaitStepImpl } from './wait_step';
+import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
+import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
 import type { WorkflowTaskManager } from '../../workflow_task_manager/workflow_task_manager';
-import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
-import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
 
 describe('WaitStepImpl', () => {
   let underTest: WaitStepImpl;
