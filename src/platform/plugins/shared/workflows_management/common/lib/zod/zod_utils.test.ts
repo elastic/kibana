@@ -11,6 +11,7 @@ import { z } from '@kbn/zod';
 import {
   expectZodSchemaEqual,
   getSchemaAtPath,
+  getZodTypeName,
   inferZodType,
   isValidSchemaPath,
 } from './zod_utils';
@@ -126,6 +127,55 @@ describe('getSchemaAtPath', () => {
     expect(getSchemaAtPath(z.object({ a: z.string() }), 'a.b')).toBeNull();
     expect(getSchemaAtPath(z.object({ a: z.string() }), 'a[1]')).toBeNull();
     expect(getSchemaAtPath(z.object({ a: z.string() }), 'a[0].b')).toBeNull();
+  });
+});
+
+describe('getZodTypeName', () => {
+  it('should return the correct type for basic schemas', () => {
+    expect(getZodTypeName(z.string())).toBe('string');
+    expect(getZodTypeName(z.number())).toBe('number');
+    expect(getZodTypeName(z.boolean())).toBe('boolean');
+    expect(getZodTypeName(z.array(z.string()))).toBe('array');
+    expect(getZodTypeName(z.object({}))).toBe('object');
+    expect(getZodTypeName(z.date())).toBe('date');
+    expect(getZodTypeName(z.any())).toBe('any');
+    expect(getZodTypeName(z.null())).toBe('null');
+    expect(getZodTypeName(z.unknown())).toBe('unknown');
+    expect(getZodTypeName(z.literal('test'))).toBe('literal');
+  });
+
+  it('should unwrap ZodDefault wrappers', () => {
+    expect(getZodTypeName(z.string().default('hello'))).toBe('string');
+    expect(getZodTypeName(z.number().default(42))).toBe('number');
+    expect(getZodTypeName(z.boolean().default(true))).toBe('boolean');
+    expect(getZodTypeName(z.array(z.string()).default(['a', 'b']))).toBe('array');
+    expect(getZodTypeName(z.object({}).default({}))).toBe('object');
+  });
+
+  it('should unwrap ZodOptional wrappers', () => {
+    expect(getZodTypeName(z.string().optional())).toBe('string');
+    expect(getZodTypeName(z.number().optional())).toBe('number');
+    expect(getZodTypeName(z.boolean().optional())).toBe('boolean');
+    expect(getZodTypeName(z.array(z.string()).optional())).toBe('array');
+    expect(getZodTypeName(z.object({}).optional())).toBe('object');
+  });
+
+  it('should unwrap both ZodDefault and ZodOptional wrappers', () => {
+    expect(getZodTypeName(z.string().default('hello').optional())).toBe('string');
+    expect(getZodTypeName(z.number().default(42).optional())).toBe('number');
+    expect(getZodTypeName(z.array(z.string()).default(['a']).optional())).toBe('array');
+  });
+
+  it('should handle nested wrappers correctly', () => {
+    // Test with multiple layers of wrapping
+    const schema = z.string().default('test').optional();
+    expect(getZodTypeName(schema)).toBe('string');
+  });
+
+  it('should return unknown for truly unknown types', () => {
+    // Create a custom schema that doesn't match any known types
+    const customSchema = z.tuple([z.string(), z.number()]);
+    expect(getZodTypeName(customSchema)).toBe('unknown');
   });
 });
 
