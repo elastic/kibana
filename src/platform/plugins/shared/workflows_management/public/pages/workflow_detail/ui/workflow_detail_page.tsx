@@ -7,30 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { css } from '@emotion/react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { WorkflowYaml } from '@kbn/workflows';
-import { css } from '@emotion/react';
-import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
-import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
-import { useWorkflowsBreadcrumbs } from '../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
+import { WorkflowDetailHeader } from './workflow_detail_header';
+import { WorkflowEditorLayout } from './workflow_detail_layout';
+import { WorkflowEditor } from './workflow_editor';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { useWorkflowDetail } from '../../../entities/workflows/model/use_workflow_detail';
 import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
 import { WorkflowExecuteModal } from '../../../features/run_workflow/ui/workflow_execute_modal';
 import { WorkflowExecutionDetail } from '../../../features/workflow_execution_detail';
 import { WorkflowExecutionList } from '../../../features/workflow_execution_list/ui/workflow_execution_list_stateful';
+import { useWorkflowsBreadcrumbs } from '../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
-import { WorkflowDetailHeader } from './workflow_detail_header';
-import { WorkflowEditor } from './workflow_editor';
-import { WorkflowEditorLayout } from './workflow_detail_layout';
-import {
-  getCachedDynamicConnectorTypes,
-  getWorkflowZodSchemaLoose,
-} from '../../../../common/schema';
-import { WorkflowEditorStoreProvider } from '../../../widgets/workflow_yaml_editor/lib/store';
+import { selectWorkflowDefinition } from '../../../widgets/workflow_yaml_editor/lib/store/selectors';
 
 export function WorkflowDetailPage({ id }: { id: string }) {
   const { application, notifications } = useKibana().services;
@@ -86,25 +81,14 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     [id, workflowYaml, updateWorkflow, notifications?.toasts]
   );
 
-  const definitionFromCurrentYaml: WorkflowYaml | null = useMemo(() => {
-    const dynamicConnectorTypes = getCachedDynamicConnectorTypes() || {};
-    const parsingResult = parseWorkflowYamlToJSON(
-      workflowYaml,
-      getWorkflowZodSchemaLoose(dynamicConnectorTypes)
-    );
-
-    if (!parsingResult.success) {
-      return null;
-    }
-    return parsingResult.data as WorkflowYaml;
-  }, [workflowYaml]);
+  const definition = useSelector(selectWorkflowDefinition) ?? null;
 
   const handleRun = useCallback(() => {
     setWorkflowExecuteModalOpen(true);
   }, [setWorkflowExecuteModalOpen]);
 
   const handleRunWorkflow = useCallback(
-    (event: Record<string, any>) => {
+    (event: Record<string, unknown>) => {
       testWorkflow.mutate(
         { workflowYaml, inputs: event },
         {
@@ -185,79 +169,81 @@ export function WorkflowDetailPage({ id }: { id: string }) {
       <EuiEmptyPrompt
         iconType="error"
         color="danger"
-        title={<h2>Unable to load workflow</h2>}
-        body={<p>There was an error loading the workflow. {error.message}</p>}
+        title={<h2>{'Unable to load workflow'}</h2>}
+        body={
+          <p>
+            {'There was an error loading the workflow. '}
+            {error.message}
+          </p>
+        }
       />
     );
   }
 
   return (
-    <WorkflowEditorStoreProvider>
-      <EuiFlexGroup direction="column" gutterSize="none" css={kbnFullBodyHeightCss()}>
-        <EuiFlexItem grow={false}>
-          <WorkflowDetailHeader
-            name={workflow?.name}
-            isLoading={isLoadingWorkflow}
-            activeTab={activeTab}
-            canRunWorkflow={canRunWorkflow}
-            canSaveWorkflow={canSaveWorkflow}
-            isValid={workflow?.valid ?? true}
-            isEnabled={workflow?.enabled ?? false}
-            handleRunClick={handleRun}
-            handleSave={handleSave}
-            handleToggleWorkflow={handleToggleWorkflow}
-            handleTabChange={setActiveTab}
-            hasUnsavedChanges={hasChanges}
-            highlightDiff={highlightDiff}
-            setHighlightDiff={setHighlightDiff}
-            lastUpdatedAt={workflow?.lastUpdatedAt ?? null}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem css={css({ overflow: 'hidden', minHeight: 0 })}>
-          <WorkflowEditorLayout
-            editor={
-              <WorkflowEditor
-                workflow={workflow}
+    <EuiFlexGroup direction="column" gutterSize="none" css={kbnFullBodyHeightCss()}>
+      <EuiFlexItem grow={false}>
+        <WorkflowDetailHeader
+          name={workflow?.name}
+          isLoading={isLoadingWorkflow}
+          activeTab={activeTab}
+          canRunWorkflow={canRunWorkflow}
+          canSaveWorkflow={canSaveWorkflow}
+          isEnabled={workflow?.enabled ?? false}
+          handleRunClick={handleRun}
+          handleSave={handleSave}
+          handleToggleWorkflow={handleToggleWorkflow}
+          handleTabChange={setActiveTab}
+          hasUnsavedChanges={hasChanges}
+          highlightDiff={highlightDiff}
+          setHighlightDiff={setHighlightDiff}
+          lastUpdatedAt={workflow?.lastUpdatedAt ?? null}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem css={css({ overflow: 'hidden', minHeight: 0 })}>
+        <WorkflowEditorLayout
+          editor={
+            <WorkflowEditor
+              workflow={workflow}
+              workflowYaml={yamlValue}
+              onWorkflowYamlChange={handleChange}
+              handleSave={handleSave}
+              handleRun={handleRun}
+              handleSaveAndRun={handleSaveAndRun}
+              hasChanges={hasChanges}
+              execution={execution}
+              activeTab={activeTab}
+              selectedExecutionId={selectedExecutionId}
+              selectedStepId={selectedStepId}
+              highlightDiff={highlightDiff}
+              setSelectedExecution={setSelectedExecution}
+            />
+          }
+          executionList={
+            activeTab === 'executions' && workflow && !selectedExecutionId ? (
+              <WorkflowExecutionList workflowId={workflow?.id ?? null} />
+            ) : null
+          }
+          executionDetail={
+            workflow && selectedExecutionId ? (
+              <WorkflowExecutionDetail
+                workflowExecutionId={selectedExecutionId}
                 workflowYaml={yamlValue}
-                onWorkflowYamlChange={handleChange}
-                handleSave={handleSave}
-                handleRun={handleRun}
-                handleSaveAndRun={handleSaveAndRun}
-                hasChanges={hasChanges}
-                execution={execution}
-                activeTab={activeTab}
-                selectedExecutionId={selectedExecutionId}
-                selectedStepId={selectedStepId}
-                highlightDiff={highlightDiff}
-                setSelectedExecution={setSelectedExecution}
+                showBackButton={activeTab === 'executions'}
+                onClose={() => setSelectedExecution(null)}
               />
-            }
-            executionList={
-              activeTab === 'executions' && workflow && !selectedExecutionId ? (
-                <WorkflowExecutionList workflowId={workflow?.id ?? null} />
-              ) : null
-            }
-            executionDetail={
-              workflow && selectedExecutionId ? (
-                <WorkflowExecutionDetail
-                  workflowExecutionId={selectedExecutionId}
-                  workflowYaml={yamlValue}
-                  showBackButton={activeTab === 'executions'}
-                  onClose={() => setSelectedExecution(null)}
-                />
-              ) : null
-            }
-          />
-        </EuiFlexItem>
+            ) : null
+          }
+        />
+      </EuiFlexItem>
 
-        {workflowExecuteModalOpen && definitionFromCurrentYaml && (
-          <WorkflowExecuteModal
-            definition={definitionFromCurrentYaml}
-            onClose={closeModal}
-            onSubmit={handleRunWorkflow}
-          />
-        )}
-      </EuiFlexGroup>
-    </WorkflowEditorStoreProvider>
+      {workflowExecuteModalOpen && (
+        <WorkflowExecuteModal
+          definition={definition}
+          onClose={closeModal}
+          onSubmit={handleRunWorkflow}
+        />
+      )}
+    </EuiFlexGroup>
   );
 }
