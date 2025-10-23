@@ -7,26 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import type { WorkflowYaml } from '@kbn/workflows';
-import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
-import {
-  getCachedDynamicConnectorTypes,
-  getWorkflowZodSchemaLoose,
-} from '../../../../common/schema';
 import { WorkflowExecuteModal } from '../../../features/run_workflow/ui/workflow_execute_modal';
 import { useTestWorkflow } from '../../../widgets/workflow_yaml_editor/lib/store/hooks/use_test_workflow';
 import {
   selectIsTestModalOpen,
-  selectYamlString,
+  selectWorkflowDefinition,
 } from '../../../widgets/workflow_yaml_editor/lib/store/selectors';
 import { setIsTestModalOpen } from '../../../widgets/workflow_yaml_editor/lib/store/slice';
 
 export const WorkflowDetailTestModal = () => {
   const dispatch = useDispatch();
   const isTestModalOpen = useSelector(selectIsTestModalOpen);
-  const workflowYaml = useSelector(selectYamlString);
+  const definition = useSelector(selectWorkflowDefinition);
 
   const { testWorkflow } = useTestWorkflow();
 
@@ -41,28 +35,11 @@ export const WorkflowDetailTestModal = () => {
     dispatch(setIsTestModalOpen({ isTestModalOpen: false }));
   }, [dispatch]);
 
-  const definitionFromCurrentYaml: WorkflowYaml | null = useMemo(() => {
-    const dynamicConnectorTypes = getCachedDynamicConnectorTypes() || {};
-    const parsingResult = parseWorkflowYamlToJSON(
-      workflowYaml,
-      getWorkflowZodSchemaLoose(dynamicConnectorTypes)
-    );
-
-    if (!parsingResult.success) {
-      return null;
-    }
-    return parsingResult.data as WorkflowYaml;
-  }, [workflowYaml]);
-
-  if (!isTestModalOpen || !definitionFromCurrentYaml) {
+  if (!isTestModalOpen || !definition) {
     return null;
   }
 
   return (
-    <WorkflowExecuteModal
-      definition={definitionFromCurrentYaml}
-      onClose={onClose}
-      onSubmit={handleRunWorkflow}
-    />
+    <WorkflowExecuteModal definition={definition} onClose={onClose} onSubmit={handleRunWorkflow} />
   );
 };

@@ -10,7 +10,7 @@
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -25,7 +25,10 @@ import { ExecutionGraph } from '../../../features/debug-graph/execution_graph';
 import { TestStepModal } from '../../../features/run_workflow/ui/test_step_modal';
 import type { WorkflowUrlStateTabType } from '../../../hooks/use_workflow_url_state';
 import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
-import { selectYamlString } from '../../../widgets/workflow_yaml_editor/lib/store/selectors';
+import {
+  selectWorkflowDefinition,
+  selectYamlString,
+} from '../../../widgets/workflow_yaml_editor/lib/store/selectors';
 
 const WorkflowYAMLEditor = React.lazy(() =>
   import('../../../widgets/workflow_yaml_editor').then((module) => ({
@@ -60,6 +63,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(
     const styles = useMemoCss(componentStyles);
     const { uiSettings } = useKibana().services;
     const workflowYaml = useSelector(selectYamlString) ?? '';
+    const workflowDefinition = useSelector(selectWorkflowDefinition);
 
     const { runIndividualStep } = useWorkflowActions();
 
@@ -68,30 +72,39 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(
 
     const yamlValue = selectedExecutionId && execution ? execution.yaml : workflowYaml;
 
-    const handleStepRun = async (params: { stepId: string; actionType: string }) => {
-      if (params.actionType === 'run') {
-        const contextOverrideData = buildContextOverrideForStep(workflowYaml, params.stepId);
+    const submitStepRun = useCallback(
+      async (stepId: string, mock: Partial<StepContext>) => {
+        const response = await runIndividualStep.mutateAsync({
+          stepId,
+          workflowYaml,
+          contextOverride: mock,
+        });
+        setSelectedExecution(response.workflowExecutionId);
+        setTestStepId(null);
+        setContextOverride(null);
+      },
+      [runIndividualStep, workflowYaml, setSelectedExecution, setTestStepId, setContextOverride]
+    );
 
-        if (!Object.keys(contextOverrideData.stepContext).length) {
-          submitStepRun(params.stepId, {});
-          return;
+    const handleStepRun = useCallback(
+      async (params: { stepId: string; actionType: string }) => {
+        if (params.actionType === 'run' && workflowDefinition) {
+          const contextOverrideData = buildContextOverrideForStep(
+            workflowDefinition,
+            params.stepId
+          );
+
+          if (!Object.keys(contextOverrideData.stepContext).length) {
+            submitStepRun(params.stepId, {});
+            return;
+          }
+
+          setContextOverride(contextOverrideData);
+          setTestStepId(params.stepId);
         }
-
-        setContextOverride(contextOverrideData);
-        setTestStepId(params.stepId);
-      }
-    };
-
-    const submitStepRun = async (stepId: string, mock: Partial<StepContext>) => {
-      const response = await runIndividualStep.mutateAsync({
-        stepId,
-        workflowYaml,
-        contextOverride: mock,
-      });
-      setSelectedExecution(response.workflowExecutionId);
-      setTestStepId(null);
-      setContextOverride(null);
-    };
+      },
+      [workflowDefinition, submitStepRun]
+    );
 
     const isVisualEditorEnabled = uiSettings?.get<boolean>(
       WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
