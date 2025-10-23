@@ -179,16 +179,14 @@ export const InvokeAIActionParamsSchema = z
   })
   .strict();
 
-export const InvokeAIActionResponseSchema = z
-  .object({
-    message: z.string(),
-    usage: z.object({
-      prompt_tokens: z.coerce.number(),
-      completion_tokens: z.coerce.number(),
-      total_tokens: z.coerce.number(),
-    }),
-  })
-  .strict();
+export const InvokeAIActionResponseSchema = z.object({
+  message: z.string(),
+  usage: z.object({
+    prompt_tokens: z.coerce.number(),
+    completion_tokens: z.coerce.number(),
+    total_tokens: z.coerce.number(),
+  }),
+});
 
 // Execute action schema
 export const StreamActionParamsSchema = z
@@ -234,8 +232,6 @@ export const DashboardActionParamsSchema = z
   })
   .strict();
 
-export const DashboardActionResponseSchema = z
-  .object({
-    available: z.boolean(),
-  })
-  .strict();
+export const DashboardActionResponseSchema = z.object({
+  available: z.boolean(),
+});

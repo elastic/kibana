@@ -46,13 +46,11 @@ export const RunActionParamsSchema = z
 
 export const RunApiResponseSchema = z.object({
   candidates: z.any(),
-  usageMetadata: z
-    .object({
-      promptTokenCount: z.coerce.number(),
-      candidatesTokenCount: z.coerce.number(),
-      totalTokenCount: z.coerce.number(),
-    })
-    .strict(),
+  usageMetadata: z.object({
+    promptTokenCount: z.coerce.number(),
+    candidatesTokenCount: z.coerce.number(),
+    totalTokenCount: z.coerce.number(),
+  }),
 });
 
 export const RunActionResponseSchema = z.object({
@@ -64,7 +62,6 @@ export const RunActionResponseSchema = z.object({
       candidatesTokenCount: z.coerce.number(),
       totalTokenCount: z.coerce.number(),
     })
-    .strict()
     .optional(),
 });
 
@@ -107,19 +104,16 @@ export const InvokeAIRawActionParamsSchema = z
   })
   .strict();
 
-export const InvokeAIActionResponseSchema = z
-  .object({
-    message: z.string(),
-    usageMetadata: z
-      .object({
-        promptTokenCount: z.coerce.number(),
-        candidatesTokenCount: z.coerce.number(),
-        totalTokenCount: z.coerce.number(),
-      })
-      .strict()
-      .optional(),
-  })
-  .strict();
+export const InvokeAIActionResponseSchema = z.object({
+  message: z.string(),
+  usageMetadata: z
+    .object({
+      promptTokenCount: z.coerce.number(),
+      candidatesTokenCount: z.coerce.number(),
+      totalTokenCount: z.coerce.number(),
+    })
+    .optional(),
+});
 
 export const InvokeAIRawActionResponseSchema = z.any();
 
@@ -131,8 +125,6 @@ export const DashboardActionParamsSchema = z
   })
   .strict();
 
-export const DashboardActionResponseSchema = z
-  .object({
-    available: z.boolean(),
-  })
-  .strict();
+export const DashboardActionResponseSchema = z.object({
+  available: z.boolean(),
+});
