@@ -55,9 +55,9 @@ fi
 
 cmd=(node scripts/functional_tests_parallel --bail --inherit --stats)
 
-# if [[ -n "${KIBANA_BUILD_LOCATION:-}" ]]; then
-#   cmd+=(--kibana-install-dir "$KIBANA_BUILD_LOCATION")
-# fi
+if [[ -n "${KIBANA_BUILD_LOCATION:-}" ]]; then
+  cmd+=(--kibana-install-dir "$KIBANA_BUILD_LOCATION")
+fi
 
 cmd+=("${config_args[@]}")
 
