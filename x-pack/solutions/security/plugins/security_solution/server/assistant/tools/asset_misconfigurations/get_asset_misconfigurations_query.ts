@@ -48,7 +48,7 @@ export const getAssetMisconfigurationsQuery = ({
   return {
     index: CDR_MISCONFIGURATIONS_INDEX_PATTERN,
     size: 50, // 50 is adequate as usually per resource there are max 10 findings, though in case of 3p data it might be more
-    sort: [{ '@timestamp': { order: 'desc' } }],
+    sort: [{ '@timestamp': { order: 'desc' as const } }],
     fields,
     query: {
       bool: {
