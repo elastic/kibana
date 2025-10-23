@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-import { useLocation } from 'react-router-dom';
-import { useConversationId } from '../hooks/use_conversation_id';
+import React, { useMemo } from 'react';
+import { useLocation, useParams } from 'react-router-dom';
+import { useSyncAgentId } from '../hooks/use_sync_agent_id';
 import { ConversationContext } from '../context/conversation_context';
 import type { LocationState } from '../hooks/use_navigation';
+import { newConversationId } from '../utils/new_conversation';
 
 interface RoutedConversationProviderProps {
   children: React.ReactNode;
@@ -18,9 +19,17 @@ interface RoutedConversationProviderProps {
 export const RoutedConversationProvider: React.FC<RoutedConversationProviderProps> = ({
   children,
 }) => {
-  const conversationId = useConversationId();
+  const { conversationId: conversationIdParam } = useParams<{ conversationId?: string }>();
+
+  const conversationId = useMemo(() => {
+    return conversationIdParam === newConversationId ? undefined : conversationIdParam;
+  }, [conversationIdParam]);
+
   const location = useLocation<LocationState>();
   const shouldStickToBottom = location.state?.shouldStickToBottom ?? true;
+
+  // Handle agent ID syncing from URL params (full-screen only)
+  useSyncAgentId();
 
   return (
     <ConversationContext.Provider value={{ conversationId, shouldStickToBottom }}>

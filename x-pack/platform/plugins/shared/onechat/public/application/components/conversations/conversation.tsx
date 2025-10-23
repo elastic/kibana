@@ -12,7 +12,6 @@ import { useHasActiveConversation } from '../../hooks/use_conversation';
 import { ConversationInputForm } from './conversation_input/conversation_input_form';
 import { ConversationRounds } from './conversation_rounds/conversation_rounds';
 import { NewConversationPrompt } from './new_conversation_prompt';
-import { useSyncAgentId } from '../../hooks/use_sync_agent_id';
 import {
   useConversationIdFromContext,
   useShouldStickToBottomFromContext,
@@ -66,8 +65,6 @@ export const Conversation: React.FC<{}> = () => {
     ${fullHeightStyles}
     ${useEuiScrollBar()}
   `;
-
-  useSyncAgentId();
 
   const scrollDownButtonStyles = css`
     position: absolute;
