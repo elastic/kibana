@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { SetStateAction, Dispatch } from 'react';
 import React, { type ChangeEvent, useState, useEffect } from 'react';
 import {
   EuiBadge,
@@ -17,6 +18,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -49,7 +51,10 @@ const selectOptions = [
 ];
 
 interface Props {
-  onChangeAccessMode: (value: SavedObjectAccessControl['accessMode']) => Promise<void> | void;
+  onChangeAccessMode: (
+    value: SavedObjectAccessControl['accessMode'],
+    setTooltipContent: Dispatch<SetStateAction<string>>
+  ) => Promise<void> | void;
   getActiveSpace?: () => Promise<Space>;
   getCurrentUser: () => Promise<GetUserProfileResponse<UserProfileData>>;
   accessControlClient: AccessControlClient;
@@ -71,6 +76,7 @@ export const AccessModeContainer = ({
   const [isUpdatingPermissions, setIsUpdatingPermissions] = useState(false);
   const [canManageAccessControl, setCanManageAccessControl] = useState(false);
   const [isAccessControlEnabled, setIsAccessControlEnabled] = useState(false);
+  const [tooltipContent, setTooltipContent] = useState('');
   const isInEditAccessMode = accessControlClient.isInEditAccessMode(accessControl);
 
   useEffect(() => {
@@ -103,11 +109,22 @@ export const AccessModeContainer = ({
     getCanManage();
   }, [accessControl, createdBy, accessControlClient, contentTypeId, getCurrentUser]);
 
+  useEffect(() => {
+    if (tooltipContent) {
+      const timeout = setTimeout(() => setTooltipContent(''), 2000);
+      return () => clearTimeout(timeout);
+    }
+  }, [tooltipContent]);
+
   const selectId = useGeneratedHtmlId({ prefix: 'accessControlSelect' });
 
   const handleSelectChange = async (e: ChangeEvent<HTMLSelectElement>) => {
+    setTooltipContent('');
     setIsUpdatingPermissions(true);
-    await onChangeAccessMode(e.target.value as SavedObjectAccessControl['accessMode']);
+    await onChangeAccessMode(
+      e.target.value as SavedObjectAccessControl['accessMode'],
+      setTooltipContent
+    );
     setIsUpdatingPermissions(false);
   };
 
@@ -183,22 +200,24 @@ export const AccessModeContainer = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             {canManageAccessControl && (
-              <EuiSelect
-                id={selectId}
-                isLoading={isUpdatingPermissions}
-                disabled={isUpdatingPermissions}
-                data-test-subj="accessModeSelect"
-                options={selectOptions}
-                defaultValue={accessControl?.accessMode ?? 'default'}
-                onChange={handleSelectChange}
-                aria-label={i18n.translate(
-                  'contentManagement.accessControl.accessMode.container.select.ariaLabel',
-                  {
-                    defaultMessage: 'Modify access acess mode for the {contentTypeId}.',
-                    values: { contentTypeId },
-                  }
-                )}
-              />
+              <EuiToolTip content={tooltipContent || null}>
+                <EuiSelect
+                  id={selectId}
+                  isLoading={isUpdatingPermissions}
+                  disabled={isUpdatingPermissions}
+                  data-test-subj="accessModeSelect"
+                  options={selectOptions}
+                  defaultValue={accessControl?.accessMode ?? 'default'}
+                  onChange={handleSelectChange}
+                  aria-label={i18n.translate(
+                    'contentManagement.accessControl.accessMode.container.select.ariaLabel',
+                    {
+                      defaultMessage: 'Modify access acess mode for the {contentTypeId}.',
+                      values: { contentTypeId },
+                    }
+                  )}
+                />
+              </EuiToolTip>
             )}
           </EuiFlexItem>
         </EuiFlexGroup>

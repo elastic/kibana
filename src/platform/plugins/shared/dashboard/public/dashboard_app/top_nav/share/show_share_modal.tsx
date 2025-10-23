@@ -9,7 +9,7 @@
 
 import { omit } from 'lodash';
 import moment from 'moment';
-import type { ReactElement } from 'react';
+import type { Dispatch, ReactElement, SetStateAction } from 'react';
 import React, { useState } from 'react';
 import { EuiCallOut, EuiCheckbox, EuiFlexGrid, EuiFlexItem, EuiFormFieldset } from '@elastic/eui';
 import type { Capabilities } from '@kbn/core/public';
@@ -79,18 +79,17 @@ export function ShowShareModal({
 }: ShowShareModalProps) {
   if (!shareService) return;
 
-  const handleChangeAccessMode = async (accessMode: SavedObjectAccessControl['accessMode']) => {
+  const handleChangeAccessMode = async (
+    accessMode: SavedObjectAccessControl['accessMode'],
+    setTooltipContent: Dispatch<SetStateAction<string>>
+  ) => {
     if (!savedObjectId) return;
 
     try {
       await changeAccessMode(accessMode);
-      coreServices.notifications.toasts.addSuccess({
-        title: shareModalStrings.accessModeUpdateSuccess,
-      });
+      setTooltipContent(shareModalStrings.accessModeUpdateSuccess);
     } catch (error) {
-      coreServices.notifications.toasts.addError(error?.message, {
-        title: shareModalStrings.accessModeUpdateError,
-      });
+      setTooltipContent(shareModalStrings.accessModeUpdateError);
     }
   };
 
