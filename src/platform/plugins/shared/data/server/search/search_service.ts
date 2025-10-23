@@ -410,9 +410,7 @@ export class SearchService {
                     isStored: true,
                   });
                 } else {
-                  return from(
-                    deps.searchSessionsClient.trackId(request, response.id, options)
-                  ).pipe(
+                  return from(deps.searchSessionsClient.trackId(response.id, options)).pipe(
                     tap(() => {
                       isInternalSearchStored = true;
                     }),

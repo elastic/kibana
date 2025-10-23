@@ -10,6 +10,10 @@
 import { Sha256 } from '@kbn/crypto-browser';
 import stringify from 'json-stable-stringify';
 
+/**
+ * Generate the hash for this request. Ignores the `preference` parameter since it generally won't
+ * match from one request to another identical request.
+ */
 export async function createRequestHash(keys: Record<string, any>) {
   const { preference, ...params } = keys;
   return new Sha256().update(stringify(params), 'utf8').digest('hex');

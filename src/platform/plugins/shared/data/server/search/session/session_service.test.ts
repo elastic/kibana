@@ -12,7 +12,7 @@ import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { nodeBuilder } from '@kbn/es-query';
 import { SearchSessionService } from './session_service';
-import { createRequestHash } from './utils';
+import { faker } from '@faker-js/faker';
 import moment from 'moment';
 import { coreMock } from '@kbn/core/server/mocks';
 import type { ConfigSchema } from '../../config';
@@ -91,9 +91,10 @@ describe('SearchSessionService', () => {
     });
 
     it('trackId ignores', async () => {
-      await service.trackId({ savedObjectsClient }, mockUser1, { params: {} }, '123', {
+      await service.trackId({ savedObjectsClient }, mockUser1, '123', {
         sessionId: '321',
         strategy: MOCK_STRATEGY,
+        requestHash: faker.string.uuid(),
       });
 
       expect(savedObjectsClient.update).not.toHaveBeenCalled();
@@ -691,8 +692,7 @@ describe('SearchSessionService', () => {
 
     describe('trackId', () => {
       it('updates the saved object if search session already exists', async () => {
-        const searchRequest = { params: {} };
-        const requestHash = createRequestHash(searchRequest.params);
+        const requestHash = faker.string.uuid();
         const searchId = 'FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0';
 
         const mockUpdateSavedObject = {
@@ -701,9 +701,10 @@ describe('SearchSessionService', () => {
         };
         savedObjectsClient.update.mockResolvedValue(mockUpdateSavedObject);
 
-        await service.trackId({ savedObjectsClient }, mockUser1, searchRequest, searchId, {
+        await service.trackId({ savedObjectsClient }, mockUser1, searchId, {
           sessionId,
           strategy: MOCK_STRATEGY,
+          requestHash,
         });
 
         expect(savedObjectsClient.update).toHaveBeenCalled();
@@ -721,12 +722,12 @@ describe('SearchSessionService', () => {
       });
 
       it('passes retryOnConflict param to es', async () => {
-        const searchRequest = { params: {} };
         const searchId = 'FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0';
 
-        await service.trackId({ savedObjectsClient }, mockUser1, searchRequest, searchId, {
+        await service.trackId({ savedObjectsClient }, mockUser1, searchId, {
           sessionId,
           strategy: MOCK_STRATEGY,
+          requestHash: faker.string.uuid(),
         });
 
         expect(savedObjectsClient.update).toHaveBeenCalled();
@@ -739,16 +740,13 @@ describe('SearchSessionService', () => {
         const sessionId1 = 'sessiondId1';
         const sessionId2 = 'sessiondId2';
 
-        const searchRequest1 = { params: { 1: '1' } };
-        const requestHash1 = createRequestHash(searchRequest1.params);
+        const requestHash1 = faker.string.uuid();
         const searchId1 = 'searchId1';
 
-        const searchRequest2 = { params: { 2: '2' } };
-        const requestHash2 = createRequestHash(searchRequest2.params);
+        const requestHash2 = faker.string.uuid();
         const searchId2 = 'searchId1';
 
-        const searchRequest3 = { params: { 3: '3' } };
-        const requestHash3 = createRequestHash(searchRequest3.params);
+        const requestHash3 = faker.string.uuid();
         const searchId3 = 'searchId3';
 
         const mockUpdateSavedObject = {
@@ -758,17 +756,20 @@ describe('SearchSessionService', () => {
         savedObjectsClient.update.mockResolvedValue(mockUpdateSavedObject);
 
         await Promise.all([
-          service.trackId({ savedObjectsClient }, mockUser1, searchRequest1, searchId1, {
+          service.trackId({ savedObjectsClient }, mockUser1, searchId1, {
             sessionId: sessionId1,
             strategy: MOCK_STRATEGY,
+            requestHash: requestHash1,
           }),
-          service.trackId({ savedObjectsClient }, mockUser1, searchRequest2, searchId2, {
+          service.trackId({ savedObjectsClient }, mockUser1, searchId2, {
             sessionId: sessionId1,
             strategy: MOCK_STRATEGY,
+            requestHash: requestHash2,
           }),
-          service.trackId({ savedObjectsClient }, mockUser1, searchRequest3, searchId3, {
+          service.trackId({ savedObjectsClient }, mockUser1, searchId3, {
             sessionId: sessionId2,
             strategy: MOCK_STRATEGY,
+            requestHash: requestHash3,
           }),
         ]);
 
@@ -849,7 +850,7 @@ describe('SearchSessionService', () => {
 
       it('returns the search ID from the saved object ID mapping', async () => {
         const searchRequest = { params: {} };
-        const requestHash = createRequestHash(searchRequest.params);
+        const requestHash = faker.string.uuid();
         const searchId = 'FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0';
         const mockSession = {
           ...mockSavedObject,
@@ -868,6 +869,7 @@ describe('SearchSessionService', () => {
           sessionId,
           isStored: true,
           isRestore: true,
+          requestHash,
         });
 
         expect(id).toBe(searchId);

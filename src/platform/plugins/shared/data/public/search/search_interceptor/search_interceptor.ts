@@ -10,7 +10,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { memoize, once } from 'lodash';
 import type { Observable, Subscription } from 'rxjs';
-import { BehaviorSubject, EMPTY, from, fromEvent, of, throwError } from 'rxjs';
+import { BehaviorSubject, EMPTY, defer, from, fromEvent, of, throwError } from 'rxjs';
 import {
   catchError,
   filter,
@@ -401,7 +401,7 @@ export class SearchInterceptor {
             [EVENT_PROPERTY_SEARCH_TIMEOUT_MS]: this.searchTimeout,
             [EVENT_PROPERTY_EXECUTION_CONTEXT]: options.executionContext,
           });
-          return from(
+          return defer(() =>
             this.runSearch({ id, ...request }, { ...options, retrieveResults: true })
           ).pipe(
             map((response) =>
@@ -437,14 +437,17 @@ export class SearchInterceptor {
    * @internal
    * @throws `AbortError` | `ErrorLike`
    */
-  private runSearch(
+  private async runSearch(
     request: IKibanaSearchRequest,
     options?: ISearchOptions
   ): Promise<IKibanaSearchResponse> {
     const { abortSignal } = options || {};
 
+    const requestHash = await createRequestHash(request.params);
+
     if (request.id) {
-      // just polling an existing search, no need to send body
+      // just polling an existing search, no need to send the body, just the hash
+
       const { params, ...requestWithoutParams } = request;
       if (params) {
         const { body, ...paramsWithoutBody } = params;
@@ -466,6 +469,7 @@ export class SearchInterceptor {
           body: JSON.stringify({
             ...request,
             ...searchOptions,
+            requestHash,
             stream:
               strategy === ESQL_ASYNC_SEARCH_STRATEGY ||
               strategy === ENHANCED_ES_SEARCH_STRATEGY ||
