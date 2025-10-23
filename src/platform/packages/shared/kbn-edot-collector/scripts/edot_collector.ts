@@ -29,8 +29,8 @@ run(
     description: `
       Start EDOT Collector (Elastic Distribution of OpenTelemetry Collector) as a Gateway and connect it to Elasticsearch.
       
-      Reads Elasticsearch connection details from kibana.yml and kibana.dev.yml, generates 
-      OpenTelemetry Collector configuration, and starts a Docker container running the EDOT Collector.
+      Reads Elasticsearch connection details from kibana.dev.yml, generates OpenTelemetry Collector configuration, 
+      and starts a Docker container running the EDOT Collector.
     `,
     flags: {
       string: ['config'],
@@ -38,7 +38,7 @@ run(
         c: 'config',
       },
       help: `
-        --config, -c       Path to Kibana config file (can be specified multiple times)
+        --config, -c       Path to Kibana config file (defaults to config/kibana.dev.yml)
       `,
     },
   }
