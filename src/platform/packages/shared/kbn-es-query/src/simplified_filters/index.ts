@@ -19,8 +19,8 @@
 export type { ValidationResult, ValidationError } from './types';
 
 // Conversion utilities
-export { FilterTransformer } from './filter_transformer';
 export { FilterConversionError } from './errors';
+export { fromStoredFilter, toStoredFilter, validate } from './conversion';
 
 // Fluent builder API
 export { SimpleFilterBuilder } from './simple_filter_builder';

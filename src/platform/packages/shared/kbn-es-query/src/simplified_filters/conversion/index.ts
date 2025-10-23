@@ -59,15 +59,3 @@ export {
 
 // Utilities
 export { extractBaseProperties, getFilterTypeForOperator } from './utils';
-
-// Import for backward compatibility class
-import { fromStoredFilter } from './from_stored_filter';
-import { toStoredFilter } from './to_stored_filter';
-import { validate } from './validation';
-
-// Backward compatibility: Export the old class-based interface
-export class FilterTransformer {
-  static fromStoredFilter = fromStoredFilter;
-  static toStoredFilter = toStoredFilter;
-  static validate = validate;
-}

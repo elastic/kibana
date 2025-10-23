@@ -26,7 +26,6 @@ import {
   isFullyCompatible as isFullyCompatibleFn,
   isEnhancedCompatible as isEnhancedCompatibleFn,
   extractBaseProperties,
-  FilterTransformer, // Backward compatibility
 } from './conversion';
 
 // ====================================================================
@@ -153,29 +152,16 @@ export function demoFilterTransformation() {
     },
   };
 
-  // NEW FUNCTIONAL API (recommended)
-  const storedFilterNew = toStoredFilter(simplifiedFilter);
-  const backToSimplifiedNew = fromStoredFilter(storedFilterNew);
-  const validationResultNew = validate(simplifiedFilter);
-
-  // BACKWARD COMPATIBLE CLASS API (still works)
-  const storedFilterOld = FilterTransformer.toStoredFilter(simplifiedFilter);
-  const backToSimplifiedOld = FilterTransformer.fromStoredFilter(storedFilterOld);
-  const validationResultOld = FilterTransformer.validate(simplifiedFilter);
+  // FUNCTIONAL API for conversion
+  const storedFilter = toStoredFilter(simplifiedFilter);
+  const backToSimplified = fromStoredFilter(storedFilter);
+  const validationResult = validate(simplifiedFilter);
 
   return {
     simplifiedFilter,
-    newAPI: {
-      storedFilter: storedFilterNew,
-      backToSimplified: backToSimplifiedNew,
-      validation: validationResultNew,
-    },
-    oldAPI: {
-      storedFilter: storedFilterOld,
-      backToSimplified: backToSimplifiedOld,
-      validation: validationResultOld,
-    },
-    note: 'Both APIs produce identical results, choose based on your preference',
+    storedFilter,
+    backToSimplified,
+    validation: validationResult,
   };
 }
 
@@ -189,7 +175,7 @@ export function demoFilterTransformation() {
 export function demoErrorHandling() {
   try {
     // This will throw a FilterConversionError
-    FilterTransformer.fromStoredFilter(null);
+    fromStoredFilter(null);
   } catch (error) {
     // Conversion error handling
     return { error: error.message, originalFilter: error.originalFilter };
@@ -200,7 +186,7 @@ export function demoErrorHandling() {
     // Missing required discriminated union property
   } as SimplifiedFilter;
 
-  const validation = FilterTransformer.validate(invalidFilter);
+  const validation = validate(invalidFilter);
   if (!validation.valid) {
     return { validationErrors: validation.errors, warnings: validation.warnings };
   }
@@ -272,7 +258,7 @@ export function demoLegacyMigration() {
   };
 
   // Convert legacy filter to SimplifiedFilter
-  const modernFilter = FilterTransformer.fromStoredFilter(legacyFilter);
+  const modernFilter = fromStoredFilter(legacyFilter);
 
   // Result: Clean, typed, validated SimplifiedFilter
   // Example result:
@@ -347,7 +333,7 @@ export function demoUnitTestingBenefits() {
 }
 
 /**
- * Demo usage showing the complete FilterTransformer workflow
+ * Demo usage showing the complete filter conversion workflow
  */
 export function runAllDemos() {
   const builderExamples = demoSimpleFilterCreation();
