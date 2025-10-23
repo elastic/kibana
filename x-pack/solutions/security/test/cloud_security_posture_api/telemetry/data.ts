@@ -24,7 +24,7 @@ export interface MockCloudConnector {
   created_at: string;
   updated_at: string;
   cloudProvider: string;
-  vars: Record<string, any>;
+  vars: Record<string, { value?: string }>;
 }
 
 export interface MockTelemetryData {
