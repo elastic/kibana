@@ -56,29 +56,27 @@ export class DashboardEnhancedPlugin
   public start(core: CoreStart, plugins: StartDependencies): StartContract {
     setKibanaServices(core, plugins);
 
-    untilPluginStartServicesReady().then(() => {
-      plugins.uiActionsEnhanced.addTriggerActionAsync(
-        CONTEXT_MENU_TRIGGER,
-        'OPEN_FLYOUT_ADD_DRILLDOWN',
-        async () => {
-          const { flyoutCreateDrilldownAction } = await import(
-            './services/drilldowns/actions/flyout_create_drilldown'
-          );
-          return flyoutCreateDrilldownAction;
-        }
-      );
+    plugins.uiActionsEnhanced.addTriggerActionAsync(
+      CONTEXT_MENU_TRIGGER,
+      'OPEN_FLYOUT_ADD_DRILLDOWN',
+      async () => {
+        const { flyoutCreateDrilldownAction } = await import(
+          './services/drilldowns/actions/context_menu_actions_module'
+        );
+        return flyoutCreateDrilldownAction;
+      }
+    );
 
-      plugins.uiActionsEnhanced.addTriggerActionAsync(
-        CONTEXT_MENU_TRIGGER,
-        'OPEN_FLYOUT_EDIT_DRILLDOWN',
-        async () => {
-          const { flyoutEditDrilldownAction } = await import(
-            './services/drilldowns/actions/flyout_edit_drilldown'
-          );
-          return flyoutEditDrilldownAction;
-        }
-      );
-    });
+    plugins.uiActionsEnhanced.addTriggerActionAsync(
+      CONTEXT_MENU_TRIGGER,
+      'OPEN_FLYOUT_EDIT_DRILLDOWN',
+      async () => {
+        const { flyoutEditDrilldownAction } = await import(
+          './services/drilldowns/actions/context_menu_actions_module'
+        );
+        return flyoutEditDrilldownAction;
+      }
+    );
 
     return {};
   }
