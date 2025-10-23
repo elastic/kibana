@@ -66,5 +66,5 @@ export function newSession$(api: unknown) {
     observables.push(api.reload$.pipe(startWith(undefined)));
   }
 
-  return combineLatest(observables).pipe(skip(1));
+  return combineLatest(observables);
 }

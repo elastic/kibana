@@ -48,19 +48,6 @@ export function startDashboardSearchSessionIntegration(
             },
     }
   );
-  // const searchSessionRequested$ = new Subject<void>();
-  // searchSessionRequested$.pipe(debounceTime(1)).subscribe(() => {
-  //   searchSessionId$.next(dataService.search.session.start());
-  // });
-
-  // const assignNewSearchSessionID = async () => {
-  //   searchSessionRequested$.next();
-  //   return new Promise((resolve) => {
-  //     searchSessionId$.pipe(first()).subscribe((searchSessionRegerated) => {
-  //       resolve(searchSessionRegerated);
-  //     });
-  //   });
-  // };
 
   // force refresh when the session id in the URL changes. This will also fire off the "handle search session change" below.
   const searchSessionIdChangeSubscription = sessionIdUrlChangeObservable
@@ -72,7 +59,8 @@ export function startDashboardSearchSessionIntegration(
     dashboardApi.isFetchPaused$,
   ])
     .pipe(
-      filter(([, isFetchPaused]) => !isFetchPaused) // don't generate new search session until fetch is unpaused
+      filter(([, isFetchPaused]) => isFetchPaused), // don't generate new search session until fetch is unpaused
+      skip(1) // ignore first emit since search session ID is initialized
     )
     .subscribe(() => {
       searchSessionGenerationInProgress$.next(true);

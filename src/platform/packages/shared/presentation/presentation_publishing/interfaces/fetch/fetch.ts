@@ -94,23 +94,20 @@ export function fetch$(api: unknown): Observable<FetchContext> {
   return merge(fetchContext$, reload$).pipe(
     combineLatestWith(isFetchPaused$.pipe(distinctUntilChanged())),
     filter(([, isFetchPaused]) => !isFetchPaused),
-    map(([fetchContext]) => fetchContext),
+    map(([fetchContext]) => fetchContext as ReloadTimeFetchContext),
     distinctUntilChanged((prevContext, nextContext) =>
       isReloadTimeFetchContextEqual(prevContext, nextContext)
     ),
     switchMap(async (reloadTimeFetchContext) => {
+      console.log({ reloadTimeFetchContext });
       const searchSessionId = await ((api as any).parentApi as any).requestSearchSessionId();
-      const { reloadTimestamp, ...rest } = {
-        reloadTimestamp: undefined,
-        ...reloadTimeFetchContext,
-      };
+      const { reloadTimestamp, ...rest } = reloadTimeFetchContext;
       return {
         ...rest,
         searchSessionId,
         isReload: Boolean(reloadTimestamp),
       };
     })
-    // debounceTime(0)
   );
 }
 
