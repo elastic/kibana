@@ -154,6 +154,7 @@ async function loadFromLocatorState(
       visualization: {
         activeId: emptyState.visualization.activeId,
         state: visualizationState,
+        selectedLayerId: null,
       },
       dataViews: getInitialDataViewsObject(indexPatterns, indexPatternRefs),
       datasourceStates: Object.entries(datasourceStates).reduce(
@@ -260,6 +261,7 @@ async function loadFromSavedObject(
   const docVisualizationState: VisualizationState = {
     activeId: doc.visualizationType,
     state: doc.state.visualization,
+    selectedLayerId: null,
   };
   const {
     datasourceStates,
@@ -301,6 +303,7 @@ async function loadFromSavedObject(
       visualization: {
         activeId: doc.visualizationType,
         state: visualizationState,
+        selectedLayerId: null,
       },
       dataViews: getInitialDataViewsObject(indexPatterns, indexPatternRefs),
       datasourceStates: Object.entries(datasourceStates).reduce(

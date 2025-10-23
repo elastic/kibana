@@ -323,11 +323,13 @@ describe('lensSlice', () => {
             visualization: {
               activeId: activeVisId,
               state: ['layer1', 'layer2'],
+              selectedLayerId: null,
             },
             stagedPreview: {
               visualization: {
                 activeId: activeVisId,
                 state: ['layer1', 'layer2'],
+                selectedLayerId: null,
               },
               datasourceStates,
             },
@@ -477,6 +479,7 @@ describe('lensSlice', () => {
               visualization: {
                 activeId: activeVisId,
                 state: ['layer1'],
+                selectedLayerId: null,
               },
             },
             storeDeps: mockStoreDeps({
@@ -534,6 +537,7 @@ describe('lensSlice', () => {
               visualization: {
                 activeId: activeVisId,
                 state: ['layer1'],
+                selectedLayerId: null,
               },
             },
             storeDeps: mockStoreDeps({
@@ -589,6 +593,7 @@ describe('lensSlice', () => {
               visualization: {
                 activeId: activeVisId,
                 state: ['layer1'],
+                selectedLayerId: null,
               },
             },
             storeDeps: mockStoreDeps({
@@ -663,11 +668,13 @@ describe('lensSlice', () => {
             visualization: {
               activeId: activeVisId,
               state: ['layer1', 'layer2'],
+              selectedLayerId: null,
             },
             stagedPreview: {
               visualization: {
                 activeId: activeVisId,
                 state: ['layer1', 'layer2'],
+                selectedLayerId: null,
               },
               datasourceStates,
             },
@@ -744,6 +751,7 @@ describe('lensSlice', () => {
             visualization: {
               activeId: activeVisId,
               state: visualizationState,
+              selectedLayerId: null,
             },
             dataViews,
           } as Partial<LensAppState>,
