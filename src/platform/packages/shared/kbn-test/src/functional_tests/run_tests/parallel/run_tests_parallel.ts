@@ -107,6 +107,13 @@ export async function runTestsParallel(
     }
   };
 
+  const fileWatcher = startWatchingFiles({
+    directories: [
+      { dir: REPO_ROOT, depth: 5 },
+      { dir: os.tmpdir(), depth: 5 },
+    ],
+  });
+
   if (booleanFromEnv('USE_CHROME_BETA', false)) {
     await prepareChrome().catch((err) => {
       process.stdout.write(format(err) + '\n');
@@ -187,13 +194,6 @@ export async function runTestsParallel(
   let statsTimer: NodeJS.Timeout | undefined;
 
   let previousResourceUsage: NodeJS.ResourceUsage | undefined;
-
-  const fileWatcher = startWatchingFiles({
-    directories: [
-      { dir: REPO_ROOT, depth: 5 },
-      { dir: os.tmpdir(), depth: 5 },
-    ],
-  });
 
   function logChangedFiles() {
     log.info(`Files changed`);

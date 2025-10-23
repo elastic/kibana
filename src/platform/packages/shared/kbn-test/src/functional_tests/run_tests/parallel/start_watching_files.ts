@@ -74,10 +74,7 @@ export function startWatchingFiles({
       // If depth=1, we still want to see top-level items, so set depth-1 for chokidar.
       depth: Math.max(depth - 1, 0),
       // Reasonable defaults; tweak as needed
-      awaitWriteFinish: {
-        stabilityThreshold: 100,
-        pollInterval: 50,
-      },
+      awaitWriteFinish: false,
       ignored: ['**/.git/**', '**/*.d.ts', '**/*.map'],
       followSymlinks: false,
       ignorePermissionErrors: true,
@@ -93,7 +90,7 @@ export function startWatchingFiles({
   });
 
   // Subscribe to file-change-like events. You can extend to dir events if needed.
-  const eventNames = ['add', 'unlink', 'unlinkDir'];
+  const eventNames = ['add', 'change', 'unlink', 'addDir', 'unlinkDir'];
 
   for (const w of watchers) {
     w.watcher.on('ready', () => {
@@ -108,7 +105,7 @@ export function startWatchingFiles({
         }
 
         if (changedPath.includes('.backportrc.json')) {
-          console.log(changedPath, stats);
+          console.log(evt, changedPath, stats);
         }
 
         // Only consider paths under this base; chokidar guarantees it, but be defensive.
@@ -126,6 +123,7 @@ export function startWatchingFiles({
 
   function unsubscribe() {
     for (const w of watchers) {
+      w.isReady = false;
       w.watcher.close().catch(() => {
         /* ignore */
       });
