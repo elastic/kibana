@@ -69,30 +69,71 @@ The collector exposes OTLP endpoints for application instrumentation:
 
 Configure your OpenTelemetry SDKs to send data to these endpoints.
 
-### Example: Instrumenting a Node.js Application
+### Example: Minimal Express App with Traces and Logs
+
+Create a new directory and initialize:
+
+```bash
+mkdir my-instrumented-app && cd my-instrumented-app
+npm init -y
+npm install express winston @opentelemetry/sdk-node @opentelemetry/auto-instrumentations-node @opentelemetry/exporter-trace-otlp-http @opentelemetry/exporter-logs-otlp-http @opentelemetry/instrumentation-winston @opentelemetry/winston-transport --save
+```
+
+Create `server.js`:
 
 ```javascript
-// Set environment variables
-process.env.OTEL_EXPORTER_OTLP_ENDPOINT = 'http://localhost:4318';
-process.env.OTEL_SERVICE_NAME = 'my-service';
-
-// Use OpenTelemetry auto-instrumentation
 const { NodeSDK } = require('@opentelemetry/sdk-node');
+const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
 const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
+const { OTLPLogExporter } = require('@opentelemetry/exporter-logs-otlp-http');
+const { WinstonInstrumentation } = require('@opentelemetry/instrumentation-winston');
 
 const sdk = new NodeSDK({
-  traceExporter: new OTLPTraceExporter(),
+  serviceName: 'my-express-app',
+  traceExporter: new OTLPTraceExporter({ url: 'http://localhost:4318/v1/traces' }),
+  logExporter: new OTLPLogExporter({ url: 'http://localhost:4318/v1/logs' }),
+  instrumentations: [getNodeAutoInstrumentations(), new WinstonInstrumentation()],
 });
 
 sdk.start();
+
+const express = require('express');
+const winston = require('winston');
+const { OpenTelemetryTransportV3 } = require('@opentelemetry/winston-transport');
+
+// Create Winston logger with OpenTelemetry transport
+const logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.json(),
+  transports: [new winston.transports.Console(), new OpenTelemetryTransportV3()],
+});
+
+const app = express();
+
+app.get('/', (req, res) => {
+  logger.info('Received request to /');
+  res.json({ message: 'Hello! Check Kibana for traces and logs.' });
+});
+
+app.listen(3000, () => {
+  logger.info('Server running on http://localhost:3000');
+  logger.info('Visit http://localhost:3000 to generate traces and logs');
+});
 ```
+
+Run the app:
+
+```bash
+node server.js
+```
+
+Visit `http://localhost:3000` in your browser. You can now see the logs and traces of `my-express-app` in Kibana.
 
 ## Viewing the data
 
 1. Start Kibana
 2. Go to **Observability** → **Applications** to view traces and APM data
 3. Go to **Discover** to explore logs and raw telemetry data
-4. Create custom dashboards for your application metrics
 
 ## Managing the container
 
