@@ -20,7 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
 
   const sendRequest = (query: object) =>
-    supertest.get(ENDPOINT).set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana').query(query);
+    supertest.post(ENDPOINT).set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana').send(query);
 
   describe('GET /internal/metrics_experience/dimensions', () => {
     before(async () => {
@@ -39,7 +39,8 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return dimension values for a single dimension', async () => {
       const { body, status } = await sendRequest({
         indices: 'fieldsense-station-metrics',
-        dimensions: JSON.stringify(['station.name']),
+        dimensions: ['station.name'],
+        metrics: ['FieldSense-station-01'],
         from: timerange.min,
         to: timerange.max,
       });
@@ -51,7 +52,8 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return dimension values for multiple dimensions', async () => {
       const { body, status } = await sendRequest({
         indices: 'fieldsense-station-metrics',
-        dimensions: JSON.stringify(['station.name', 'sensor.type', 'network.interface']),
+        dimensions: ['station.name', 'sensor.type', 'network.interface'],
+        metrics: ['FieldSense-station-01'],
         from: timerange.min,
         to: timerange.max,
       });
@@ -78,9 +80,35 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return 400 if dimensions is an empty array', async () => {
       const { status } = await sendRequest({
         indices: 'fieldsense-station-metrics',
-        dimensions: JSON.stringify([]),
+        dimensions: [],
       });
       expect(status).to.be(400);
+    });
+
+    it('should return 400 if metrics are missing', async () => {
+      const { status } = await sendRequest({
+        indices: 'fieldsense-station-metrics',
+        dimensions: ['station.name'],
+      });
+      expect(status).to.be(400);
+    });
+
+    it('should return 400 if metrics are invalid JSON', async () => {
+      const { status } = await sendRequest({
+        indices: 'fieldsense-station-metrics',
+        dimensions: ['station.name'],
+        metrics: 'not-json',
+      });
+      expect(status).to.be(400);
+    });
+
+    it('should return 200 if metrics is an empty array', async () => {
+      const { status } = await sendRequest({
+        indices: 'fieldsense-station-metrics',
+        dimensions: ['station.name'],
+        metrics: [],
+      });
+      expect(status).to.be(200);
     });
 
     it('should return 404 if feature flag is disabled', async () => {
@@ -88,7 +116,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { status } = await sendRequest({
         indices: 'fieldsense-station-metrics',
-        dimensions: JSON.stringify(['station.name']),
+        dimensions: ['station.name'],
+        metrics: ['FieldSense-station-01'],
         from: timerange.min,
         to: timerange.max,
       });

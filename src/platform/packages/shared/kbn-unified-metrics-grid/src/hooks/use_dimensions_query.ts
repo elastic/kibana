@@ -25,8 +25,8 @@ export const useDimensionsQuery = (params: {
       const { dimensions, metrics, ...rest } = params;
       const response = await client.getDimensions(
         {
-          dimensions: JSON.stringify(dimensions),
-          metrics: JSON.stringify(metrics),
+          dimensions,
+          metrics,
           ...rest,
         },
         signal
