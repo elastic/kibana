@@ -7,12 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { AnalyticsServiceStart } from '@kbn/core/server';
-import type { TelemetryQuerySubmittedProps } from '@kbn/esql-types/src/esql_telemetry_types';
+import type {
+  QuerySource,
+  TelemetryQuerySubmittedProps,
+} from '@kbn/esql-types/src/esql_telemetry_types';
 import {
   ESQL_LOOKUP_JOIN_ACTION_SHOWN,
   ESQL_QUERY_HISTORY_CLICKED,
   ESQL_QUERY_HISTORY_OPENED,
   ESQL_QUERY_SUBMITTED,
+  ESQL_RECOMMENDED_QUERY_CLICKED,
   ESQL_STARRED_QUERY_CLICKED,
   ESQL_SUGGESTIONS_WITH_CUSTOM_COMMAND_SHOWN,
 } from './events_registration';
@@ -107,6 +111,12 @@ export class ESQLEditorTelemetryService {
       query_lines: props.query_lines,
       anti_limit_before_aggregate: props.anti_limit_before_aggregate,
       anti_missing_sort_before_limit: props.anti_missing_sort_before_limit,
+    });
+  }
+
+  public trackRecommendedQueryClicked(source: QuerySource.HELP | QuerySource.AUTOCOMPLETE) {
+    this._reportEvent(ESQL_RECOMMENDED_QUERY_CLICKED, {
+      ui_surface: source,
     });
   }
 }
