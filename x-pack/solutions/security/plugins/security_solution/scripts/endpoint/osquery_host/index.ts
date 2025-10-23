@@ -149,7 +149,7 @@ const runCli: RunFn = async ({ log, flags }) => {
     log.info(`${EMOJIS.VM} --- Phase 2: VM Discovery and Management ---`);
     // Note: This script currently only supports multipass VMs
     const vmType: 'multipass' = 'multipass';
-    let existingVms: HostVm[] = [];
+    const existingVms: HostVm[] = [];
 
     log.info(`${EMOJIS.CLOCK} Checking for existing Osquery VMs...`);
     const allVmNames = await findVm(vmType, undefined, log);
@@ -531,7 +531,7 @@ const runCli: RunFn = async ({ log, flags }) => {
     }
 
     // Final Summary
-    log.info('\n' + '='.repeat(70));
+    log.info(`\n${'='.repeat(70)}`);
     log.info(`${EMOJIS.SUCCESS} SETUP COMPLETE!`);
     log.info('='.repeat(70));
 
@@ -586,9 +586,9 @@ const runCli: RunFn = async ({ log, flags }) => {
       log.info(`\n${EMOJIS.WARNING} ${vmNotice}`);
     }
 
-    log.info('\n' + '='.repeat(70));
+    log.info(`\n${'='.repeat(70)}`);
   } catch (error) {
-    log.error('\n' + '='.repeat(70));
+    log.error(`\n${'='.repeat(70)}`);
     log.error(`${EMOJIS.ERROR} SETUP FAILED`);
     log.error('='.repeat(70));
     log.error(`\n${EMOJIS.ERROR} Error: ${error.message}`);
