@@ -12,14 +12,13 @@ import type { Query, SerializedSearchSourceFields } from '@kbn/data-plugin/commo
 import type { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
-import type { DashboardAttributes, DashboardAPIGetOut } from '../../../server/content_management';
+import type { DashboardState, DashboardAPIGetOut } from '../../../server/content_management';
 import type { DashboardDuplicateTitleCheckProps } from './lib/check_for_duplicate_dashboard_title';
 import type {
   FindDashboardsByIdResponse,
   SearchDashboardsArgs,
   SearchDashboardsResponse,
 } from './lib/find_dashboards';
-import type { DashboardState } from '../../../common';
 import type { UpdateDashboardMetaProps } from './lib/update_dashboard_meta';
 
 export interface DashboardContentManagementService {
@@ -77,7 +76,7 @@ export interface SaveDashboardProps {
 }
 
 export interface GetDashboardStateReturn {
-  attributes: DashboardAttributes;
+  attributes: DashboardState;
   references: Reference[];
 }
 

@@ -18,6 +18,8 @@ import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
 import { z } from '@kbn/zod';
 
 // Import connector schemas from the organized structure
+import { mergeEnhancedConnectors } from './enhanced_es_connectors';
+/* eslint-disable sort-imports */
 import {
   // Inference connector schemas
   InferenceUnifiedCompletionParamsSchema,
@@ -146,7 +148,6 @@ import {
   TorqParamsSchema,
   TorqResponseSchema,
 } from './stack_connectors_schema';
-import { mergeEnhancedConnectors } from './enhanced_es_connectors';
 
 /**
  * Get parameter schema for a specific sub-action

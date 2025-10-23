@@ -51,8 +51,8 @@ import type { ControlsGroupState } from '@kbn/controls-schemas';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { BehaviorSubject, Observable, Subject } from 'rxjs';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
-import type { DashboardLocatorParams, DashboardState } from '../../common';
-import type { DashboardAttributes, GridData } from '../../server/content_management';
+import type { DashboardLocatorParams } from '../../common';
+import type { DashboardState, GridData } from '../../server/content_management';
 import type {
   LoadDashboardReturn,
   SaveDashboardReturn,
@@ -129,7 +129,7 @@ export type DashboardApi = CanExpandPanels &
     forceRefresh: () => void;
     getSettings: () => DashboardSettings;
     getSerializedState: () => {
-      attributes: DashboardAttributes;
+      attributes: DashboardState;
       references: Reference[];
     };
     getDashboardPanelFromId: (id: string) => {
