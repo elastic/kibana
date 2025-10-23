@@ -809,7 +809,6 @@ describe('artifacts lists', () => {
           listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
         });
         const translated = convertExceptionsToEndpointFormat(resp, 'v1', enabledTrustedProcessDescendant);
-        console.log(translated)
 
         expect(translated).toEqual({ entries: [expectedEndpointExceptions] });
       });
