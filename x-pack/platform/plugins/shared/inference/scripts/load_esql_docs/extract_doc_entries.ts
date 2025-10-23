@@ -8,7 +8,6 @@
 import Fs from 'fs/promises';
 import Path from 'path';
 import fastGlob from 'fast-glob';
-import type { Cheerio, AnyNode } from 'cheerio';
 import $, { load } from 'cheerio';
 import { partition } from 'lodash';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -262,11 +261,11 @@ async function processCommands({
   output.commands.push(...markdownFiles);
 }
 
-function getSimpleText($element: Cheerio<AnyNode>) {
+function getSimpleText($element: any) {
   $element.remove('.navfooter');
   $element.remove('#sticky_content');
   $element.remove('.edit_me');
-  $element.find('code').each(function () {
+  $element.find('code').each(function (this: any) {
     $(this).replaceWith('`' + $(this).text() + '`');
   });
   return $element
@@ -276,12 +275,12 @@ function getSimpleText($element: Cheerio<AnyNode>) {
     .replaceAll(/([\n]\s*){2,}/g, '\n');
 }
 
-export function extractSections(cheerio: Cheerio<AnyNode>) {
+export function extractSections(cheerio: any) {
   const sections: Array<{
     title: string;
     content: string;
   }> = [];
-  cheerio.find('.section .position-relative').each((index, element) => {
+  cheerio.find('.section .position-relative').each((index: number, element: any) => {
     const untilNextHeader = $(element).nextUntil('.position-relative');
 
     const title = $(element).text().trim().replace('edit', '');
