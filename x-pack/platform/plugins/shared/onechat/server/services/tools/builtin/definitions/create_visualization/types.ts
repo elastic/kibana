@@ -8,11 +8,6 @@
 import type { MetricStateESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/metric';
 import type { MapAttributes } from '@kbn/maps-plugin/server/content_management/schema/v1/map_attributes_schema/types';
 
-export enum SupportedChartType {
-  Metric = 'metric',
-  Map = 'map',
-}
-
 export type VisualizationConfig = MetricStateESQL;
 export type MapConfig = MapAttributes;
 

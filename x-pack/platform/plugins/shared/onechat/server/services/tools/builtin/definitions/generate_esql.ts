@@ -38,7 +38,6 @@ export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSch
     ) => {
       const model = await modelProvider.getDefaultModel();
 
-      // Index discovery is now handled internally by generateEsql
       const esqlResponse = await generateEsql({
         nlQuery,
         index,

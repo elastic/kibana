@@ -11,7 +11,8 @@ import { esqlMetricState } from '@kbn/lens-embeddable-utils/config_builder/schem
 import { generateEsql } from '@kbn/onechat-genai-utils';
 import { extractTextContent } from '@kbn/onechat-genai-utils/langchain';
 import { type IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import { SupportedChartType, type VisualizationConfig } from './types';
+import { SupportedChartType } from '@kbn/onechat-common/tools/tool_result';
+import type { VisualizationConfig } from './types';
 import {
   GENERATE_ESQL_NODE,
   GENERATE_CONFIG_NODE,

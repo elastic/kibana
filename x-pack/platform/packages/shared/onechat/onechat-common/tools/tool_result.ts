@@ -17,6 +17,11 @@ export enum ToolResultType {
   error = 'error',
 }
 
+export enum SupportedChartType {
+  Metric = 'metric',
+  Map = 'map',
+}
+
 interface ToolResultMixin<TType extends ToolResultType, TData extends Object> {
   tool_result_id: string;
   type: TType;
@@ -52,10 +57,9 @@ export interface VisualizationResult {
   tool_result_id: string;
   type: ToolResultType.visualization;
   data: {
-    query: string;
     visualization: Record<string, unknown>;
-    chartType: string;
-    esqlQuery: string;
+    chart_type: SupportedChartType;
+    esql: string;
   };
 }
 

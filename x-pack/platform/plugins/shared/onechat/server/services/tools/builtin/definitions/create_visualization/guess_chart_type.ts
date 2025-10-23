@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 import type { ModelProvider } from '@kbn/onechat-server';
-import { SupportedChartType } from './types';
+import { SupportedChartType } from '@kbn/onechat-common/tools/tool_result';
 
 const chartTypeSchema = z
   .object({
@@ -21,7 +21,7 @@ const chartTypeSchema = z
   })
   .describe('Chart type selection for data visualization');
 
-export async function getChartType(
+export async function guessChartType(
   modelProvider: ModelProvider,
   existingType: string,
   nlQuery: string
@@ -58,5 +58,10 @@ ${existingType ? `- The existing chart type is: ${existingType}` : ''}`,
     },
   ]);
 
-  return response.chartType;
+  let selectedChartType: SupportedChartType = SupportedChartType.Metric;
+  if (Object.values(SupportedChartType).includes(response.chartType as SupportedChartType)) {
+    selectedChartType = response.chartType as SupportedChartType;
+  }
+
+  return selectedChartType;
 }

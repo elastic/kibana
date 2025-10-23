@@ -8,13 +8,12 @@
 import { z } from '@kbn/zod';
 import { platformCoreTools, ToolType } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import { ToolResultType, SupportedChartType } from '@kbn/onechat-common/tools/tool_result';
 import parse from 'joi-to-json';
 
 import { esqlMetricState } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/metric';
 import { getToolResultId } from '@kbn/onechat-server';
-import { getChartType } from './guess_chart_type';
-import { SupportedChartType } from './types';
+import { guessChartType } from './guess_chart_type';
 import { createVisualizationGraph } from './graph_lens';
 
 const metricSchema = parse(esqlMetricState.getSchema()) as object;
@@ -35,7 +34,7 @@ const createVisualizationSchema = z.object({
     .string()
     .optional()
     .describe(
-      '(optional) An ES|QL query. If not provided, tool with automatically generate the query.'
+      '(optional) An ES|QL query. If not provided, tool with automatically generate the query. Only pass ES|QL queries from reliable sources (other tool calls or the user) and NEVER invent queries directly.'
     ),
 });
 
@@ -66,21 +65,11 @@ This tool will:
 
         if (!chartType) {
           logger.debug('Chart type not provided, using LLM to suggest one');
-          const suggestedChartType = await getChartType(
+          selectedChartType = await guessChartType(
             modelProvider,
             parsedExistingConfig?.type,
             nlQuery
           );
-          if (
-            Object.values(SupportedChartType).includes(suggestedChartType as SupportedChartType)
-          ) {
-            selectedChartType = suggestedChartType as SupportedChartType;
-          } else {
-            logger.warn(
-              `LLM suggested invalid chart type: ${suggestedChartType}, defaulting to metric`
-            );
-            selectedChartType = SupportedChartType.Metric;
-          }
         }
 
         // Step 2: Generate visualization configuration using langgraph with validation retry
@@ -121,8 +110,8 @@ This tool will:
               data: {
                 query: nlQuery,
                 visualization: validatedConfig,
-                chartType: selectedChartType,
-                esqlQuery,
+                chart_type: selectedChartType,
+                esql: esqlQuery,
               },
             },
           ],
