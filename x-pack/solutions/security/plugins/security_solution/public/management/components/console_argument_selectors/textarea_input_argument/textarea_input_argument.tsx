@@ -7,7 +7,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -155,6 +155,7 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
 
         .help-container {
           width: 25rem;
+          max-width: 50%;
           word-break: break-word;
           white-space: pre-wrap;
           height: var(--height);
@@ -206,6 +207,14 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
     const handleHelpOnClick = useCallback(() => {
       setShowHelpContent((prev) => !prev);
     }, []);
+
+    useEffect(() => {
+      // If the user picked a different script, after having already opened the help area, make
+      // sure we reset the `showHelpContent` if the new script has no help content.
+      if (showHelpContent && !helpContent) {
+        setShowHelpContent(false);
+      }
+    }, [helpContent, showHelpContent]);
 
     return shouldRender ? (
       <EuiPopover
