@@ -16,10 +16,13 @@ import type { CoreStart } from '@kbn/core/public';
 import { firstValueFrom } from 'rxjs';
 import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
 import type { StartPluginsDependencies } from '../../../types';
-import { getMissingCapabilitiesChecker } from './capabilities';
+import type { CapabilitiesLevel, MissingCapability } from './capabilities';
+import { getMissingCapabilitiesChecker, requiredSiemMigrationCapabilities } from './capabilities';
 import { SiemMigrationsServiceBase } from './migrations_service_base';
 import type { MigrationTaskStats } from '../../../../common/siem_migrations/model/common.gen';
 import { TASK_STATS_POLLING_SLEEP_SECONDS } from '../constants';
+import { ExperimentalFeaturesService } from '../../../common/experimental_features_service';
+import { licenseService } from '../../../common/hooks/use_license';
 
 // --- Mocks for external modules ---
 
@@ -59,6 +62,21 @@ class TestMigrationsService extends SiemMigrationsServiceBase<MigrationTaskStats
   protected fetchMigrationStats = mockFetchMigrationStats;
   protected fetchMigrationsStatsAll = mockFetchMigrationsStatsAll;
   protected sendFinishedMigrationNotification = mockSendFinishedMigrationNotification;
+
+  public isAvailable(): boolean {
+    const { siemMigrationsDisabled } = ExperimentalFeaturesService.get();
+    return (
+      !siemMigrationsDisabled &&
+      licenseService.isEnterprise() &&
+      !this.hasMissingCapabilities('minimum')
+    );
+  }
+
+  /** Returns any missing capabilities for the user to use this feature */
+  public getMissingCapabilities(level?: CapabilitiesLevel): MissingCapability[] {
+    const getMissingCapabilities = getMissingCapabilitiesChecker(requiredSiemMigrationCapabilities);
+    return getMissingCapabilities(this.core.application.capabilities, level);
+  }
 }
 
 // --- End of mocks ---
