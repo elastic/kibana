@@ -1,6 +1,6 @@
 # Kibana Development Guide for Coding Agents
 
-> **Mission-Critical Software:** This codebase serves millions of users. Quality and correctness are paramount. You have unlimited time and resources - work methodically and thoroughly. **NEVER rush, skip verification, or compromise on quality.**
+> **Mission-Critical Software:** This codebase serves millions of users. Quality and correctness are paramount. You have unlimited time and resources - work methodically and thoroughly. **NEVER rush, skip verification, or compromise on quality. NEVER guess - if uncertain, investigate further to increase confidence.**
 
 ## Repository Overview
 
@@ -36,7 +36,8 @@ Kibana is a browser-based analytics and search dashboard for Elasticsearch, cons
 **Working Approach:**
 
 - ✅ ALWAYS work carefully and thoroughly - NO time constraints or token limits or iteration limits exist
-- ✅ ALWAYS read large files completely - understand context and architecture before changing
+- ✅ ALWAYS read files completely (regardless of file size) - understand context and architecture before changing
+- ✅ ALWAYS investigate further when uncertain - NEVER guess or assume
 - ⛔ NEVER say "Given time constraints", "Due to token usage", "Let me work faster", "Due to limited iterations" or alike and don't act as if it's true - these do NOT apply
 - ⛔ NEVER rush or panic when encountering complex code - take time to understand it
 
@@ -48,11 +49,11 @@ Kibana is a browser-based analytics and search dashboard for Elasticsearch, cons
 2. **Type checking:** 0 errors
 3. **Testing:** 0 failures
 
-**There is no partial completion, no "mostly done", no "core vs non-core" distinction.**
+**There is no partial completion, no "mostly done", no "primary vs remaining migration" distinction.**
 
 **⛔ NEVER rationalize incomplete work by saying:**
 
-- "The core/main/bulk of work is done" (while leaving ANY work unfinished)
+- "The main/bulk of work is done" (while leaving ANY work unfinished)
 - "Linting/types/tests mostly pass, just a few need fixes" (fix ALL of them NOW)
 - "I'll fix the remaining issues later" (fix ALL of them NOW)
 - "I'll convert any or unknown types later" (convert ALL of them NOW)
@@ -140,15 +141,9 @@ If you cannot run a command due to environment limitations, explicitly state thi
 
 The repository maintains multiple branches defined and categorized in `versions.json` by `branchType`:
 
-- Active Development: `main` (for all changes including new features and breaking changes. No commits allowed directly, use PRs)
-- Current and maintained release branches (for backporting fixes/docs/tests/security and dependency updates)
-- Legacy unmaintained branches (for historical reference, no commits allowed)
-
-```bash
-# Check current branch
-git branch --show-current
-cat versions.json  # See all active branches and their versions
-```
+- `branchType: "development"` → Branches like `main` (for new features and breaking changes)
+- `branchType: "release"` → Maintained release branches (for backporting fixes/docs/tests/security and dependency updates)
+- `branchType: "legacy"` → Unmaintained branches (for historical reference, no commits allowed)
 
 ### Backporting Process
 
