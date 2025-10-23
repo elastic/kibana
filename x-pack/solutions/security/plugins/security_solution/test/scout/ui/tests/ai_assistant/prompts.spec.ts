@@ -37,41 +37,41 @@ const mockConvo2 = {
   title: 'Silly convo',
 };
 
-spaceTest.describe('AI Assistant Prompts', { tag: ['@ess', '@svlSecurity'] }, () => {
-  spaceTest.beforeEach(async ({ browserAuth, apiServices, browserScopedApis, scoutSpace }) => {
-    // Login
-    await browserAuth.loginAsAdmin();
+spaceTest.describe(
+  'AI Assistant Prompts - System Prompts',
+  { tag: ['@ess', '@svlSecurity'] },
+  () => {
+    spaceTest.beforeEach(async ({ browserAuth, apiServices, browserScopedApis, scoutSpace }) => {
+      // Login
+      await browserAuth.loginAsAdmin();
 
-    // Clean up existing data
-    await apiServices.connectors.deleteAll();
-    await apiServices.assistant.deleteAllConversations();
-    await apiServices.assistant.deleteAllPrompts();
+      // Clean up existing data
+      await apiServices.connectors.deleteAll();
+      await apiServices.assistant.deleteAllConversations();
+      await apiServices.assistant.deleteAllPrompts();
 
-    // Create test connector
-    await apiServices.connectors.createAzureOpenAI();
+      // Create test connector
+      await apiServices.connectors.createAzureOpenAI();
 
-    // Create mock conversations with unique IDs using browser-scoped API
-    const timestamp = Date.now();
-    await browserScopedApis.assistant.createConversation({
-      id: `${mockConvo1.id}-${scoutSpace.id}-${timestamp}`,
-      title: mockConvo1.title,
-    });
-    await browserScopedApis.assistant.createConversation({
-      id: `${mockConvo2.id}-${scoutSpace.id}-${timestamp}`,
-      title: mockConvo2.title,
-    });
-  });
+      // Create mock conversations with unique IDs using browser-scoped API
+      const timestamp = Date.now();
+      await browserScopedApis.assistant.createConversation({
+        id: `${mockConvo1.id}-${scoutSpace.id}-${timestamp}`,
+        title: mockConvo1.title,
+      });
+      await browserScopedApis.assistant.createConversation({
+        id: `${mockConvo2.id}-${scoutSpace.id}-${timestamp}`,
+        title: mockConvo2.title,
+      });
 
-  spaceTest.afterEach(async ({ apiServices }) => {
-    await apiServices.connectors.deleteAll();
-    await apiServices.assistant.deleteAllConversations();
-    await apiServices.assistant.deleteAllPrompts();
-  });
-
-  spaceTest.describe('System Prompts', () => {
-    spaceTest.beforeEach(async ({ browserScopedApis }) => {
       // Create custom system prompts using browser-scoped API
       await browserScopedApis.assistant.createPrompts([customPrompt2, customPrompt1]);
+    });
+
+    spaceTest.afterEach(async ({ apiServices }) => {
+      await apiServices.connectors.deleteAll();
+      await apiServices.assistant.deleteAllConversations();
+      await apiServices.assistant.deleteAllPrompts();
     });
 
     spaceTest(
@@ -264,9 +264,43 @@ spaceTest.describe('AI Assistant Prompts', { tag: ['@ess', '@svlSecurity'] }, ()
         await pageObjects.assistantPage.expectErrorResponse();
       }
     );
-  });
+  }
+);
 
-  spaceTest.describe('Quick Prompts', () => {
+spaceTest.describe(
+  'AI Assistant Prompts - Quick Prompts',
+  { tag: ['@ess', '@svlSecurity'] },
+  () => {
+    spaceTest.beforeEach(async ({ browserAuth, apiServices, browserScopedApis, scoutSpace }) => {
+      // Login
+      await browserAuth.loginAsAdmin();
+
+      // Clean up existing data
+      await apiServices.connectors.deleteAll();
+      await apiServices.assistant.deleteAllConversations();
+      await apiServices.assistant.deleteAllPrompts();
+
+      // Create test connector
+      await apiServices.connectors.createAzureOpenAI();
+
+      // Create mock conversations with unique IDs using browser-scoped API
+      const timestamp = Date.now();
+      await browserScopedApis.assistant.createConversation({
+        id: `${mockConvo1.id}-${scoutSpace.id}-${timestamp}`,
+        title: mockConvo1.title,
+      });
+      await browserScopedApis.assistant.createConversation({
+        id: `${mockConvo2.id}-${scoutSpace.id}-${timestamp}`,
+        title: mockConvo2.title,
+      });
+    });
+
+    spaceTest.afterEach(async ({ apiServices }) => {
+      await apiServices.connectors.deleteAll();
+      await apiServices.assistant.deleteAllConversations();
+      await apiServices.assistant.deleteAllPrompts();
+    });
+
     spaceTest(
       'Add a quick prompt and send it in the conversation',
       async ({ page, pageObjects }) => {
@@ -328,10 +362,12 @@ spaceTest.describe('AI Assistant Prompts', { tag: ['@ess', '@svlSecurity'] }, ()
         await pageObjects.securityCommon.dismissOnboardingModal();
 
         // Wait for alerts page to be fully loaded
+        // eslint-disable-next-line playwright/no-wait-for-timeout
         await page.waitForTimeout(TIMEOUTS.NETWORK_IDLE);
 
         // Expand first alert if available, otherwise skip
         const firstAlert = page.testSubj.locator('expand-event');
+        // eslint-disable-next-line playwright/no-nth-methods
         await firstAlert.first().click();
 
         // Open assistant from alert context
@@ -351,5 +387,5 @@ spaceTest.describe('AI Assistant Prompts', { tag: ['@ess', '@svlSecurity'] }, ()
     // TODO: Delete quick prompt test
     // The Cypress test notes that deletion is difficult due to hidden CSS elements
     // This functionality should be added when the UI is improved
-  });
-});
+  }
+);

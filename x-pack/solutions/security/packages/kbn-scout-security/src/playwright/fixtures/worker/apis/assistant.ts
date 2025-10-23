@@ -176,6 +176,7 @@ export const getBrowserScopedAssistantService = ({
             category: 'assistant' as ConversationCategory,
             ...body,
           },
+          timeout: 30000,
         }
       );
 
@@ -196,6 +197,7 @@ export const getBrowserScopedAssistantService = ({
           headers: {
             'kbn-xsrf': 'true',
           },
+          timeout: 30000,
         }
       );
 
@@ -226,6 +228,7 @@ export const getBrowserScopedAssistantService = ({
               ...prompt,
             })),
           } as PerformPromptsBulkActionRequestBody,
+          timeout: 30000,
         }
       );
 

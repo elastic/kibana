@@ -75,7 +75,7 @@ spaceTest.describe('AI Assistant Messages', { tag: ['@ess', '@svlSecurity'] }, (
       await page.reload();
 
       // Wait for page to be fully loaded after reload
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
     }
   );
 

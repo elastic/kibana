@@ -39,6 +39,12 @@ export const TIMEOUTS = {
    * Use with waitForLoadState('networkidle') for ensuring all requests complete.
    */
   NETWORK_IDLE: 5000,
+
+  /**
+   * Timeout for AI Assistant responses (LLM processing, message generation)
+   * Use for operations involving AI/LLM calls which can be slow in serverless.
+   */
+  AI_ASSISTANT_RESPONSE: 30000,
 } as const;
 
 /**

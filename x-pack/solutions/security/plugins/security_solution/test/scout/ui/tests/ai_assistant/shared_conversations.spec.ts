@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import type { MessageRole } from '@kbn/elastic-assistant-common';
 import { expect, spaceTest } from '@kbn/scout-security';
 
@@ -16,7 +17,7 @@ spaceTest.describe.skip('Assistant Conversation Sharing', { tag: ['@ess', '@svlS
   // User roles - these will be used for multi-user testing
   let primaryUser: string;
   let secondaryUser: string;
-  let connector: any;
+  let connector: Connector;
 
   // Mock conversation data
   const mockConvo1 = {
@@ -155,6 +156,7 @@ spaceTest.describe.skip('Assistant Conversation Sharing', { tag: ['@ess', '@svlS
 
       // Close any toast notifications
       const toast = page.testSubj.locator('euiToastCloseButton');
+      // eslint-disable-next-line playwright/no-conditional-in-test
       if (await toast.isVisible()) {
         await toast.click();
       }

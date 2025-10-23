@@ -426,7 +426,10 @@ export class AssistantPage {
     await this.typeAndSendMessage(initialMessage);
     // Wait for response (error is expected in test environment)
     // eslint-disable-next-line playwright/no-nth-methods
-    await this.conversationErrorMessages.first().waitFor({ state: 'visible' });
+    await this.conversationErrorMessages.first().waitFor({
+      state: 'visible',
+      timeout: TIMEOUTS.AI_ASSISTANT_RESPONSE,
+    });
     await this.updateConversationTitle(title);
   }
 
@@ -777,7 +780,9 @@ export class AssistantPage {
    * Asserts that an error response is visible
    */
   async expectErrorResponse() {
-    await expect(this.conversationErrorMessages).toBeVisible();
+    await expect(this.conversationErrorMessages).toBeVisible({
+      timeout: TIMEOUTS.AI_ASSISTANT_RESPONSE,
+    });
   }
 
   /**
