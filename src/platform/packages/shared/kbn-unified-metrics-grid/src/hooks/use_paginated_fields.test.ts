@@ -126,18 +126,19 @@ describe('usePaginatedFields', () => {
 
     await waitFor(() => {
       expect(result.current?.currentPageFields.map((f) => f.name)).toEqual(['field1', 'field3']);
+      expect(result.current?.dimensionFilteredMetrics).toEqual(['field1', 'field3']);
       expect(result.current?.totalPages).toBe(1);
     });
   });
 
   it('filters fields based on valueMetrics', async () => {
     const fields = [
-      createField('metric1'),
-      createField('metric2'),
-      createField('metric3'),
-      createField('metric4'),
+      createField('metric1', ['foo']),
+      createField('metric2', ['bar']),
+      createField('metric3', ['foo', 'bar']),
+      createField('metric4', ['foo']),
     ];
-    const dimensions: string[] = [];
+    const dimensions: string[] = ['foo'];
     const valueMetrics: string[] = ['metric1', 'metric3'];
 
     const { result } = renderHook(() =>
@@ -153,6 +154,7 @@ describe('usePaginatedFields', () => {
 
     await waitFor(() => {
       expect(result.current?.currentPageFields.map((f) => f.name)).toEqual(['metric1', 'metric3']);
+      expect(result.current?.dimensionFilteredMetrics).toEqual(['metric1', 'metric3', 'metric4']);
       expect(result.current?.filteredFieldsCount).toBe(2);
       expect(result.current?.totalPages).toBe(1);
     });

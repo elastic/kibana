@@ -83,6 +83,7 @@ export const MetricsExperienceGrid = ({
     currentPageFields = [],
     totalPages = 0,
     filteredFieldsCount = 0,
+    dimensionFilteredMetrics = [],
   } = usePaginatedFields({
     fields,
     dimensions,
@@ -108,6 +109,7 @@ export const MetricsExperienceGrid = ({
       chartToolbarCss={chartToolbarCss}
       requestParams={requestParams}
       fields={fields}
+      dimensionFilteredMetrics={dimensionFilteredMetrics}
       isComponentVisible={isComponentVisible}
     >
       <EuiFlexGroup

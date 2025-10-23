@@ -32,6 +32,7 @@ export interface MetricsGridWrapperProps
   indexPattern: string;
   chartToolbarCss?: SerializedStyles;
   fields: MetricField[];
+  dimensionFilteredMetrics: string[];
   children?: React.ReactNode;
   hideRightSideActions?: boolean;
   hideDimensionsSelector?: boolean;
@@ -43,6 +44,7 @@ export const MetricsGridWrapper = ({
   chartToolbarCss,
   requestParams,
   fields,
+  dimensionFilteredMetrics,
   children,
   isComponentVisible,
   hideRightSideActions = false,
@@ -50,6 +52,7 @@ export const MetricsGridWrapper = ({
 }: MetricsGridWrapperProps) => {
   const { leftSideActions, rightSideActions } = useToolbarActions({
     fields,
+    dimensionFilteredMetrics,
     indexPattern,
     renderToggleActions,
     requestParams,
