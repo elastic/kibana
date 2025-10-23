@@ -475,9 +475,6 @@ describe('ResponseActionsClientImpl base class', () => {
     });
 
     it('should include `agent.policy` document field if space awareness is enabled', async () => {
-      // @ts-expect-error writing to a readonly property
-      endpointAppContextService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = true;
-
       await expect(
         baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions)
       ).resolves.toEqual(
