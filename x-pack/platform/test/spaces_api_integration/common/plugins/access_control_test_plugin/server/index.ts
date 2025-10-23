@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { WriteRestrictedObjectsPlugin } from './plugin';
+import { AccessControlTestPlugin } from './plugin';
 
-export const plugin = async () => new WriteRestrictedObjectsPlugin();
+export const plugin = async () => new AccessControlTestPlugin();
 export { ACCESS_CONTROL_TYPE, NON_ACCESS_CONTROL_TYPE } from './plugin';

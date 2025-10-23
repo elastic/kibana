@@ -6,6 +6,8 @@
       // START AUTOMATED PACKAGE LISTING
       "@kbn/aad-fixtures-plugin": ["x-pack/platform/test/alerting_api_integration/common/plugins/aad"],
       "@kbn/aad-fixtures-plugin/*": ["x-pack/platform/test/alerting_api_integration/common/plugins/aad/*"],
+      "@kbn/access-control-test-plugin": ["x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin"],
+      "@kbn/access-control-test-plugin/*": ["x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin/*"],
       "@kbn/actions-plugin": ["x-pack/platform/plugins/shared/actions"],
       "@kbn/actions-plugin/*": ["x-pack/platform/plugins/shared/actions/*"],
       "@kbn/actions-simulators-plugin": ["x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators"],
@@ -2372,8 +2374,6 @@
       "@kbn/workplace-ai-app/*": ["x-pack/solutions/workplace_ai/plugins/workplace_ai_app/*"],
       "@kbn/workspaces": ["src/platform/packages/shared/kbn-workspaces"],
       "@kbn/workspaces/*": ["src/platform/packages/shared/kbn-workspaces/*"],
-      "@kbn/write-restricted-objects-test-plugin": ["x-pack/platform/test/spaces_api_integration/common/plugins/write_restricted_objects_test_plugin"],
-      "@kbn/write-restricted-objects-test-plugin/*": ["x-pack/platform/test/spaces_api_integration/common/plugins/write_restricted_objects_test_plugin/*"],
       "@kbn/xstate-utils": ["src/platform/packages/shared/kbn-xstate-utils"],
       "@kbn/xstate-utils/*": ["src/platform/packages/shared/kbn-xstate-utils/*"],
       "@kbn/yarn-lock-validator": ["packages/kbn-yarn-lock-validator"],

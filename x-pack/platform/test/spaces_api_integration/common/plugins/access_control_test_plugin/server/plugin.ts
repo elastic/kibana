@@ -12,7 +12,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 export const ACCESS_CONTROL_TYPE = 'access_control_type';
 export const NON_ACCESS_CONTROL_TYPE = 'non_access_control_type';
 
-export class WriteRestrictedObjectsPlugin implements Plugin {
+export class AccessControlTestPlugin implements Plugin {
   public setup(core: CoreSetup) {
     core.savedObjects.registerType({
       name: ACCESS_CONTROL_TYPE,
@@ -76,7 +76,9 @@ export class WriteRestrictedObjectsPlugin implements Plugin {
         const options = {
           overwrite: request.query.overwrite ?? false,
           ...(request.body.id ? { id: request.body.id } : {}),
-          ...(isWriteRestricted ? { accessControl: { accessMode: 'write_restricted' as const } } : {}),
+          ...(isWriteRestricted
+            ? { accessControl: { accessMode: 'write_restricted' as const } }
+            : {}),
         };
         try {
           const result = await soClient.create(

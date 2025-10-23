@@ -17,10 +17,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     require.resolve('../../api_integration/config.ts')
   );
 
-  const readOnlyObjectsPlugin = resolve(
-    __dirname,
-    '../common/plugins/write_restricted_objects_test_plugin'
-  );
+  const readOnlyObjectsPlugin = resolve(__dirname, '../common/plugins/access_control_test_plugin');
 
   return {
     testFiles: [resolve(__dirname, './apis/spaces/write_restricted_objects.ts')],

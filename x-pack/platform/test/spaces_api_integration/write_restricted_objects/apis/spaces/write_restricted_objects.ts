@@ -11,7 +11,7 @@ import { adminTestUser } from '@kbn/test';
 import {
   ACCESS_CONTROL_TYPE,
   NON_ACCESS_CONTROL_TYPE,
-} from '@kbn/write-restricted-objects-test-plugin/server';
+} from '@kbn/access-control-test-plugin/server';
 
 import type { FtrProviderContext } from '../../../../functional/ftr_provider_context';
 
