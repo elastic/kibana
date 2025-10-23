@@ -26,7 +26,7 @@ import { groupingFunctionDefinitions } from '../definitions/generated/grouping_f
 import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
 import { operatorsDefinitions } from '../definitions/all_operators';
 import { parse } from '../parser';
-import type { ESQLCommand } from '../types';
+import type { ESQLAstAllCommands } from '../types';
 import type {
   FieldType,
   FunctionParameterType,
@@ -64,7 +64,7 @@ export const suggest = (
   mockCallbacks = getMockCallbacks(),
   autocomplete: (
     arg0: string,
-    arg1: ESQLCommand,
+    arg1: ESQLAstAllCommands,
     arg2: ICommandCallbacks,
     arg3: {
       columns: Map<string, ESQLColumnData>;
@@ -93,7 +93,7 @@ export const expectSuggestions = async (
   mockCallbacks = getMockCallbacks(),
   autocomplete: (
     arg0: string,
-    arg1: ESQLCommand,
+    arg1: ESQLAstAllCommands,
     arg2: ICommandCallbacks,
     arg3: {
       columns: Map<string, ESQLColumnData>;

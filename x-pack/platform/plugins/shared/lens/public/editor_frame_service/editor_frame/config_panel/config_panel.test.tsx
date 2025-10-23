@@ -31,6 +31,7 @@ import { createIndexPatternServiceMock } from '../../../mocks/data_views_service
 import { AddLayerButton } from '../../../visualizations/xy/add_layer';
 import type { LayerType } from '@kbn/visualizations-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { EditorFrameServiceProvider } from '../../editor_frame_service_context';
 
 jest.mock('../../../id_generator');
 
@@ -82,8 +83,11 @@ describe('ConfigPanel', () => {
     query?: Query | AggregateQuery
   ) {
     (generateId as jest.Mock).mockReturnValue(`newId`);
+    const { visualizationMap, datasourceMap, ...rest } = props;
     return mountWithReduxStore(
-      <LayerPanels {...props} />,
+      <EditorFrameServiceProvider visualizationMap={visualizationMap} datasourceMap={datasourceMap}>
+        <LayerPanels {...rest} />
+      </EditorFrameServiceProvider>,
       {
         preloadedState: {
           datasourceStates: {

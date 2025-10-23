@@ -13,12 +13,12 @@ import { isAssignment, isColumn, isFunctionExpression } from '../../../ast/is';
 import type { ICommandCallbacks } from '../../types';
 import { Location } from '../../types';
 import type {
-  ESQLCommand,
   ESQLCommandOption,
   ESQLColumn,
   ESQLFunction,
   ESQLAstItem,
   ESQLSingleAstItem,
+  ESQLAstAllCommands,
 } from '../../../types';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
 import {
@@ -47,7 +47,7 @@ import { buildExpressionFunctionParameterContext } from '../../../definitions/ut
 
 export async function autocomplete(
   query: string,
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
   cursorPosition: number = query.length
@@ -328,7 +328,7 @@ async function getExpressionSuggestions({
   openSuggestions,
 }: {
   query: string;
-  command: ESQLCommand;
+  command: ESQLAstAllCommands;
   cursorPosition: number;
   expressionRoot: ESQLSingleAstItem | undefined;
   lastArg?: ESQLAstItem;
@@ -392,19 +392,19 @@ async function getExpressionSuggestions({
   return suggestions;
 }
 
-function getByOption(command: ESQLCommand): ESQLCommandOption | undefined {
+function getByOption(command: ESQLAstAllCommands): ESQLCommandOption | undefined {
   return command.args.find((arg) => !Array.isArray(arg) && arg.name === 'by') as
     | ESQLCommandOption
     | undefined;
 }
 
-function isNodeWithinByClause(node: ESQLSingleAstItem, command: ESQLCommand): boolean {
+function isNodeWithinByClause(node: ESQLSingleAstItem, command: ESQLAstAllCommands): boolean {
   const byOption = getByOption(command);
 
   return byOption ? within(node, byOption) : false;
 }
 
-function alreadyUsedColumns(command: ESQLCommand) {
+function alreadyUsedColumns(command: ESQLAstAllCommands) {
   const byOption = getByOption(command);
   const columnNodes = (byOption?.args.filter(
     (arg) => !Array.isArray(arg) && arg.type === 'column'
@@ -416,7 +416,7 @@ function alreadyUsedColumns(command: ESQLCommand) {
 // Builds function filtering context: always ignore grouping functions,
 // in main STATS clause also filter conflicting aggregate functions
 function buildCustomFilteringContext(
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   foundFunction: ESQLFunction | null,
   context?: ICommandContext
 ): FunctionParameterContext | undefined {
@@ -459,7 +459,7 @@ function buildCustomFilteringContext(
 
 /** Finds the function at cursor position that should handle suggestions. */
 function findFunctionForSuggestions(
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   cursorPosition: number
 ): ESQLFunction | null {
   const { node } = findAstPosition([command], cursorPosition);

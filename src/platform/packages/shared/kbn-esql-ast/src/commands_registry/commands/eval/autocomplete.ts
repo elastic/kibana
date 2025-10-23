@@ -13,7 +13,7 @@ import { getExpressionPosition } from '../../../definitions/utils/autocomplete/e
 import { suggestForExpression } from '../../../definitions/utils';
 import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import { getExpressionType, isExpressionComplete } from '../../../definitions/utils/expressions';
-import type { ESQLCommand, ESQLSingleAstItem } from '../../../types';
+import type { ESQLAstAllCommands, ESQLSingleAstItem } from '../../../types';
 import {
   commaCompleteItem,
   getNewUserDefinedColumnSuggestion,
@@ -24,7 +24,7 @@ import { Location, type ICommandContext, type ISuggestionItem } from '../../type
 
 export async function autocomplete(
   query: string,
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
   cursorPosition: number = query.length

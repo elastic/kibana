@@ -11,12 +11,12 @@ import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers
 import { getFragmentData } from '../../../definitions/utils/autocomplete/helpers';
 import {
   pipeCompleteItem,
-  type ESQLCommand,
   type ESQLSingleAstItem,
   commaCompleteItem,
   isColumn,
   isFunctionExpression,
 } from '../../../..';
+import type { ESQLAstAllCommands } from '../../../types';
 import { within } from '../../../ast/location';
 import type { ISuggestionItem } from '../../types';
 
@@ -34,7 +34,7 @@ export interface SortPositionContext {
 
 export const getSortPos = (
   query: string,
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   cursorPosition: number
 ): { position: SortPosition | undefined; context?: SortPositionContext } => {
   const lastArg = command.args[command.args.length - 1];

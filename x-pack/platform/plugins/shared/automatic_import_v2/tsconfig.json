@@ -6,6 +6,7 @@
   "include": [
     "index.ts",
     "server/**/*.ts",
+    "common/**/*.ts",
     "../../../../typings/**/*"
   ],
   "exclude": [
@@ -19,6 +20,8 @@
     "@kbn/spaces-plugin",
     "@kbn/security-plugin",
     "@kbn/core-saved-objects-utils-server",
-    "@kbn/config-schema"
+    "@kbn/config-schema",
+    "@kbn/zod",
+    "@kbn/zod-helpers"
   ]
 }

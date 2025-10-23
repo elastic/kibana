@@ -9,7 +9,7 @@
 
 import { isAssignment, isFunctionExpression } from '../../../ast/is';
 
-import type { ESQLAstItem, ESQLCommand, ESQLFunction } from '../../../types';
+import type { ESQLAstAllCommands, ESQLAstItem, ESQLFunction } from '../../../types';
 import type { FunctionParameterType } from '../../types';
 import { FunctionDefinitionTypes } from '../../types';
 import { getFunctionDefinition } from '../functions';
@@ -22,7 +22,7 @@ function checkContentPerDefinition(fn: ESQLFunction, def: FunctionDefinitionType
   );
 }
 
-export function isAggFunctionUsedAlready(command: ESQLCommand, argIndex: number) {
+export function isAggFunctionUsedAlready(command: ESQLAstAllCommands, argIndex: number) {
   if (argIndex < 0) {
     return false;
   }
@@ -32,7 +32,7 @@ export function isAggFunctionUsedAlready(command: ESQLCommand, argIndex: number)
     : false;
 }
 
-export function isTimeseriesAggUsedAlready(command: ESQLCommand, argIndex: number) {
+export function isTimeseriesAggUsedAlready(command: ESQLAstAllCommands, argIndex: number) {
   if (argIndex < 0) {
     return false;
   }
@@ -52,7 +52,7 @@ function getFnContent(fn: ESQLFunction): string[] {
   return [fn.name].concat(extractFunctionArgs(fn.args).flatMap(getFnContent));
 }
 
-export function getFunctionsToIgnoreForStats(command: ESQLCommand, argIndex: number) {
+export function getFunctionsToIgnoreForStats(command: ESQLAstAllCommands, argIndex: number) {
   if (argIndex < 0) {
     return [];
   }
