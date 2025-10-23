@@ -35,7 +35,7 @@ test.describe(
       await expect(fullScreenBtn).toBeVisible();
       await expect(exitFullScreenBtn).toBeHidden();
       await expect(visibleChrome).toBeVisible();
-      await expect(hiddenChrome).toBeVisible();
+      await expect(hiddenChrome).toBeHidden();
       await expect(baseMapBtn).toBeVisible();
 
       await fullScreenBtn.click();
