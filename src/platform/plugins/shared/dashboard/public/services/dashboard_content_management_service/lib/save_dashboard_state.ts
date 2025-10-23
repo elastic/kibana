@@ -7,119 +7,85 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getSampleDashboardState } from '../../../mocks';
-import { contentManagementService, coreServices, dataService } from '../../kibana_services';
-import { saveDashboardState } from './save_dashboard_state';
-import type { DashboardPanel } from '../../../../server';
+import { i18n } from '@kbn/i18n';
+import { getDashboardContentManagementCache } from '..';
+import type {
+  DashboardCreateIn,
+  DashboardCreateOut,
+  DashboardUpdateIn,
+  DashboardUpdateOut,
+} from '../../../../server/content_management';
+import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
+import { getDashboardBackupService } from '../../dashboard_backup_service';
+import { contentManagementService, coreServices } from '../../kibana_services';
+import type { SaveDashboardProps, SaveDashboardReturn } from '../types';
 
-contentManagementService.client.create = jest.fn().mockImplementation(({ options }) => {
-  if (options.id === undefined) {
-    return { item: { id: 'newlyGeneratedId' } };
-  }
+export const saveDashboardState = async ({
+  lastSavedId,
+  saveOptions,
+  dashboardState,
+  references,
+}: SaveDashboardProps): Promise<SaveDashboardReturn> => {
+  const dashboardContentManagementCache = getDashboardContentManagementCache();
 
-  throw new Error('Update should be used when id is provided');
-});
+  /**
+   * Save the saved object using the content management
+   */
+  const idToSaveTo = saveOptions.saveAsCopy ? undefined : lastSavedId;
 
-contentManagementService.client.update = jest.fn().mockImplementation(({ id }) => {
-  if (id === undefined) {
-    throw new Error('Update needs an id');
-  }
-  return { item: { id } };
-});
+  try {
+    const result = idToSaveTo
+      ? await contentManagementService.client.update<DashboardUpdateIn, DashboardUpdateOut>({
+          id: idToSaveTo,
+          contentTypeId: DASHBOARD_CONTENT_ID,
+          data: dashboardState,
+          options: {
+            references,
+            /** perform a "full" update instead, where the provided attributes will fully replace the existing ones */
+            mergeAttributes: false,
+          },
+        })
+      : await contentManagementService.client.create<DashboardCreateIn, DashboardCreateOut>({
+          contentTypeId: DASHBOARD_CONTENT_ID,
+          data: dashboardState,
+          options: {
+            references,
+          },
+        });
+    const newId = result.item.id;
 
-dataService.query.timefilter.timefilter.getTime = jest
-  .fn()
-  .mockReturnValue({ from: 'then', to: 'now' });
-
-describe('Save dashboard state', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('should save the dashboard using the same ID', async () => {
-    const result = await saveDashboardState({
-      dashboardState: {
-        ...getSampleDashboardState(),
-        title: 'BOO',
-      },
-      lastSavedId: 'Boogaloo',
-      saveOptions: {},
-    });
-
-    expect(result.id).toBe('Boogaloo');
-    expect(contentManagementService.client.update).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'Boogaloo' })
-    );
-    expect(coreServices.notifications.toasts.addSuccess).toHaveBeenCalledWith({
-      title: `Dashboard 'BOO' was saved`,
-      className: 'eui-textBreakWord',
-      'data-test-subj': 'saveDashboardSuccess',
-    });
-  });
-
-  it('should save the dashboard using a new id, and return redirect required', async () => {
-    const result = await saveDashboardState({
-      dashboardState: {
-        ...getSampleDashboardState(),
-        title: 'BooToo',
-      },
-      lastSavedId: 'Boogaloonie',
-      saveOptions: { saveAsCopy: true },
-    });
-
-    expect(result.id).toBe('newlyGeneratedId');
-    expect(result.redirectRequired).toBe(true);
-    expect(contentManagementService.client.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        options: { references: [] },
-      })
-    );
-    expect(coreServices.notifications.toasts.addSuccess).toHaveBeenCalledWith({
-      title: `Dashboard 'BooToo' was saved`,
-      className: 'eui-textBreakWord',
-      'data-test-subj': 'saveDashboardSuccess',
-    });
-  });
-
-  it('should generate new panel IDs for dashboard panels when save as copy is true', async () => {
-    const result = await saveDashboardState({
-      dashboardState: {
-        ...getSampleDashboardState(),
-        title: 'BooThree',
-        panels: [{ type: 'boop', uid: 'idOne' } as DashboardPanel],
-      },
-      lastSavedId: 'Boogatoonie',
-      saveOptions: { saveAsCopy: true },
-    });
-
-    expect(result.id).toBe('newlyGeneratedId');
-
-    expect(contentManagementService.client.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({
-          panels: expect.arrayContaining([
-            expect.objectContaining({
-              uid: expect.not.stringContaining('aVerySpecialVeryUniqueId'),
-            }),
-          ]),
+    if (newId) {
+      coreServices.notifications.toasts.addSuccess({
+        title: i18n.translate('dashboard.dashboardWasSavedSuccessMessage', {
+          defaultMessage: `Dashboard ''{title}'' was saved`,
+          values: { title: dashboardState.title },
         }),
-      })
-    );
-  });
+        className: 'eui-textBreakWord',
+        'data-test-subj': 'saveDashboardSuccess',
+      });
 
-  it('should return an error when the save fails.', async () => {
-    contentManagementService.client.create = jest.fn().mockRejectedValue('Whoops');
-    const result = await saveDashboardState({
-      dashboardState: {
-        ...getSampleDashboardState(),
-        title: 'BooThree',
-        panels: [{ type: 'boop', uid: 'idOne' } as DashboardPanel],
-      },
-      lastSavedId: 'Boogatoonie',
-      saveOptions: { saveAsCopy: true },
+      /**
+       * If the dashboard id has been changed, redirect to the new ID to keep the url param in sync.
+       */
+      if (newId !== lastSavedId) {
+        getDashboardBackupService().clearState(lastSavedId);
+        return { redirectRequired: true, id: newId, references };
+      } else {
+        dashboardContentManagementCache.deleteDashboard(newId); // something changed in an existing dashboard, so delete it from the cache so that it can be re-fetched
+      }
+    }
+    return { id: newId, references };
+  } catch (error) {
+    coreServices.notifications.toasts.addDanger({
+      title: i18n.translate('dashboard.dashboardWasNotSavedDangerMessage', {
+        defaultMessage: `Dashboard ''{title}'' was not saved. Error: {errorMessage}`,
+        values: {
+          title: dashboardState.title,
+          errorMessage: error.message,
+        },
+      }),
+      'data-test-subj': 'saveDashboardFailure',
     });
-
-    expect(result.id).toBeUndefined();
-    expect(result.error).toBe('Whoops');
-  });
-});
+    return { error };
+  }
+};
