@@ -6,8 +6,7 @@
  */
 import React, { useEffect, useRef, useState } from 'react';
 import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
-import { EuiButton, EuiLoadingSpinner, EuiToolTip, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { v4 } from 'uuid';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
@@ -97,23 +96,12 @@ export function NavControl() {
     title: undefined,
   };
 
-  const theme = useEuiTheme().euiTheme;
-
-  const buttonCss = css`
-    padding: 0px 8px;
-
-    svg path {
-      fill: ${theme.colors.darkestShade};
-    }
-  `;
-
   return (
     <>
       <EuiToolTip content={buttonLabel}>
-        <EuiButton
+        <EuiButtonEmpty
           aria-label={buttonLabel}
           data-test-subj="AiAssistantAppNavControlButton"
-          css={buttonCss}
           onClick={() => {
             service.conversations.openNewConversation({
               messages: [],
@@ -121,11 +109,13 @@ export function NavControl() {
           }}
           color="primary"
           size="s"
-          fullWidth={false}
-          minWidth={0}
+          iconType={AssistantIcon}
+          isLoading={chatService.loading}
         >
-          {chatService.loading ? <EuiLoadingSpinner size="s" /> : <AssistantIcon size="m" />}
-        </EuiButton>
+          {i18n.translate('xpack.searchAssistant.navControl.assistantNavLink', {
+            defaultMessage: 'AI Assistant',
+          })}
+        </EuiButtonEmpty>
       </EuiToolTip>
       {chatService.value &&
       Boolean(observabilityAIAssistant?.ObservabilityAIAssistantChatServiceContext) ? (
