@@ -179,8 +179,9 @@ describe('SelectInferenceId', () => {
   });
 
   it('should prioritize ELSER endpoint when available', () => {
-    const mockUseLoadInferenceEndpoints =
-      require('../../../public/application/services/api').useLoadInferenceEndpoints;
+    const mockUseLoadInferenceEndpoints = jest.requireMock(
+      '../../../public/application/services/api'
+    ).useLoadInferenceEndpoints;
     mockUseLoadInferenceEndpoints.mockReturnValue({
       data: [
         { inference_id: '.elser-2-elasticsearch', task_type: 'sparse_embedding' },
@@ -206,12 +207,12 @@ describe('SelectInferenceId', () => {
 
     return act(async () => {
       const testBed = await setup();
-      const { find } = testBed;
+      const { find: findInTest } = testBed;
 
-      find('inferenceIdButton').simulate('click');
+      findInTest('inferenceIdButton').simulate('click');
 
       const elserOption = findTestSubject(
-        find('data-inference-endpoint-list'),
+        findInTest('data-inference-endpoint-list'),
         'custom-inference_.elser-2-elasticsearch'
       );
       expect(elserOption.prop('aria-checked')).toEqual(true);
