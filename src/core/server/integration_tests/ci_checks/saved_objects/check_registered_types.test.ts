@@ -63,7 +63,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
       Object {
         "action": "696d997e420024a8cf973da94d905c8756e1177c",
         "action_task_params": "cd91a48515202852ebf1fed0d999cd96f6b2823e",
-        "ad_hoc_run_params": "690b8991f48c73a04e6a8cf41fd4967a42f8e552",
+        "ad_hoc_run_params": "0ad7655c0a2f9b8ae103294674ffd2d6c6bf51b6",
         "alert": "581f322afd6784aebdb80f872b825a928533d364",
         "alerting_rule_template": "409b303ab6441623caabedd9118922670e431dd9",
         "api_key_pending_invalidation": "cef0693ec88475a0e1f43614cfa6ca43c24d0338",
@@ -253,8 +253,9 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "action_task_params|warning: The SO type owner should ensure these transform functions DO NOT mutate after they are defined.",
         "===========================================================================================================================",
         "ad_hoc_run_params|global: b21683e0a579fdd6de1fc018d8967473e5ecb860",
-        "ad_hoc_run_params|mappings: 181dfd63349a1e5fcad63a77f404d1d96cfbfdf4",
+        "ad_hoc_run_params|mappings: f645c66872741fe5f68d0f40c70e427b77050f6d",
         "ad_hoc_run_params|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
+        "ad_hoc_run_params|10.3.0: 54c48d9e06c7b5b403d40e2498c5a95837245f76",
         "ad_hoc_run_params|10.2.0: eeccffff5f54f6d1975d164e79c286fca385e7ce",
         "ad_hoc_run_params|10.1.0: ad66cd89a19424a6bea8d01c5c121fe5fb7b4f67",
         "==================================================================",
@@ -1248,7 +1249,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
       Object {
         "action": "10.1.0",
         "action_task_params": "10.2.0",
-        "ad_hoc_run_params": "10.2.0",
+        "ad_hoc_run_params": "10.3.0",
         "alert": "10.6.0",
         "alerting_rule_template": "10.1.0",
         "api_key_pending_invalidation": "10.1.0",
@@ -1395,7 +1396,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
       Object {
         "action": "10.1.0",
         "action_task_params": "10.2.0",
-        "ad_hoc_run_params": "10.2.0",
+        "ad_hoc_run_params": "10.3.0",
         "alert": "10.6.0",
         "alerting_rule_template": "10.1.0",
         "api_key_pending_invalidation": "10.1.0",
