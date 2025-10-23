@@ -230,7 +230,7 @@ class Package {
       group = 'observability';
       visibility = 'private';
     } else if (dir.startsWith('x-pack/solutions/workplace_ai/')) {
-      group = 'workplace_ai';
+      group = 'workplaceai';
       visibility = 'private';
     } else {
       // this conditional branch is the only one that applies in production
