@@ -63,10 +63,10 @@ const createLayer = (
   percentageModeConfig: PercentageModeConfig,
   dropEmptyRowsInDateHistogram?: boolean
 ) => {
-  const metricColumns: (AnyMetricColumnAndMeta | null)[] | null = metricsForLayer.flatMap((m) =>
+  const metricColumns: (AnyMetricColumnAndMeta | null)[] = metricsForLayer.flatMap((m) =>
     convertMetricToColumns({ agg: m, dataView, aggs: allMetrics, visType }, percentageModeConfig)
   );
-  if (metricColumns?.includes(null)) {
+  if (metricColumns.includes(null)) {
     return null;
   }
   const metricColumnsWithoutNull = metricColumns as NonNullable<
