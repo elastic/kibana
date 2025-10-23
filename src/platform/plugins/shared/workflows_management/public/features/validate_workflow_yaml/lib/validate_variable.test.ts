@@ -8,17 +8,17 @@
  */
 
 import { z } from '@kbn/zod';
-import type { VariableItem } from '../model/types';
-import { validateVariable } from './validate_variable';
 
 // Mock the imports
 jest.mock('../../../../common/lib/parse_variable_path');
 jest.mock('../../../../common/lib/zod');
 jest.mock('../../workflow_context/lib/get_foreach_state_schema');
 
+import { validateVariable } from './validate_variable';
 import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
 import { getSchemaAtPath, getZodTypeName } from '../../../../common/lib/zod';
 import { getForeachItemSchema } from '../../workflow_context/lib/get_foreach_state_schema';
+import type { VariableItem } from '../model/types';
 
 const mockParseVariablePath = parseVariablePath as jest.MockedFunction<typeof parseVariablePath>;
 const mockGetSchemaAtPath = getSchemaAtPath as jest.MockedFunction<typeof getSchemaAtPath>;
@@ -58,7 +58,7 @@ describe('validateVariable', () => {
     expect(result).toMatchObject({
       message: 'Variable is not defined',
       severity: 'error',
-      source: 'variable-validation',
+      owner: 'variable-validation',
       hoverMessage: null,
     });
   });
@@ -72,7 +72,7 @@ describe('validateVariable', () => {
     expect(result).toMatchObject({
       message: 'Invalid variable path: invalid.path',
       severity: 'error',
-      source: 'variable-validation',
+      owner: 'variable-validation',
       hoverMessage: null,
     });
   });
@@ -93,7 +93,7 @@ describe('validateVariable', () => {
     expect(result).toMatchObject({
       message: null,
       severity: null,
-      source: 'variable-validation',
+      owner: 'variable-validation',
       hoverMessage: expect.stringContaining('(property)'),
     });
   });
@@ -116,7 +116,7 @@ describe('validateVariable', () => {
     expect(result).toMatchObject({
       message: 'Foreach parameter can be an array or a JSON string. invalid json is not valid JSON',
       severity: 'error',
-      source: 'variable-validation',
+      owner: 'variable-validation',
       hoverMessage: null,
     });
   });
@@ -133,7 +133,7 @@ describe('validateVariable', () => {
     expect(result).toMatchObject({
       message: 'Missing closing bracket, Invalid character',
       severity: 'error',
-      source: 'variable-validation',
+      owner: 'variable-validation',
       hoverMessage: null,
     });
   });
@@ -150,7 +150,7 @@ describe('validateVariable', () => {
     expect(result).toMatchObject({
       message: 'Failed to parse variable path',
       severity: 'error',
-      source: 'variable-validation',
+      owner: 'variable-validation',
       hoverMessage: null,
     });
   });
@@ -167,7 +167,7 @@ describe('validateVariable', () => {
     expect(result).toMatchObject({
       message: 'Variable test.variable cannot be validated, because the workflow schema is invalid',
       severity: 'warning',
-      source: 'variable-validation',
+      owner: 'variable-validation',
       hoverMessage: null,
     });
   });
@@ -185,7 +185,7 @@ describe('validateVariable', () => {
     expect(result).toMatchObject({
       message: 'Variable nonexistent.variable is invalid',
       severity: 'error',
-      source: 'variable-validation',
+      owner: 'variable-validation',
       hoverMessage: null,
     });
   });
@@ -208,7 +208,7 @@ describe('validateVariable', () => {
       message:
         'Foreach parameter should be an array or a JSON string. stringVar is unknown string, engine will try to parse it as JSON in runtime, but it might fail',
       severity: 'warning',
-      source: 'variable-validation',
+      owner: 'variable-validation',
       hoverMessage: expect.stringContaining('(property)'),
     });
   });
@@ -229,7 +229,7 @@ describe('validateVariable', () => {
     expect(result).toMatchObject({
       message: 'This variable comes from external source',
       severity: 'warning',
-      source: 'variable-validation',
+      owner: 'variable-validation',
       hoverMessage: expect.stringContaining('(property)'),
     });
   });
@@ -248,7 +248,7 @@ describe('validateVariable', () => {
     expect(result).toMatchObject({
       message: "Variable unknownVar cannot be validated, because it's type is unknown",
       severity: 'warning',
-      source: 'variable-validation',
+      owner: 'variable-validation',
       hoverMessage: expect.stringContaining('(property) unknownVar:'),
     });
   });
@@ -267,7 +267,7 @@ describe('validateVariable', () => {
     expect(result).toMatchObject({
       message: null,
       severity: null,
-      source: 'variable-validation',
+      owner: 'variable-validation',
       hoverMessage: expect.stringContaining('(property) test.variable:'),
     });
   });
@@ -286,8 +286,54 @@ describe('validateVariable', () => {
     expect(result).toMatchObject({
       message: null,
       severity: null,
-      source: 'variable-validation',
+      owner: 'variable-validation',
       hoverMessage: expect.stringContaining('(property) response.data.items[0].name:'),
+    });
+  });
+
+  it('should handle array input with default value in foreach validation', () => {
+    const variableItem = createVariableItem({
+      key: 'inputs.days_to_plan',
+      type: 'foreach',
+    });
+    mockParseVariablePath.mockReturnValue({
+      errors: null,
+      propertyPath: 'inputs.days_to_plan',
+    } as any);
+    // Mock the schema as an array with default value (ZodDefault wrapper)
+    mockGetSchemaAtPath.mockReturnValue(z.array(z.string()).default(['monday', 'tuesday']));
+    mockGetZodTypeName.mockReturnValue('array');
+
+    const result = validateVariable(variableItem, mockContext);
+
+    expect(result).toMatchObject({
+      message: null,
+      severity: null,
+      owner: 'variable-validation',
+      hoverMessage: expect.stringContaining('(property) inputs.days_to_plan:'),
+    });
+  });
+
+  it('should handle array input without default value in foreach validation', () => {
+    const variableItem = createVariableItem({
+      key: 'inputs.items',
+      type: 'foreach',
+    });
+    mockParseVariablePath.mockReturnValue({
+      errors: null,
+      propertyPath: 'inputs.items',
+    } as any);
+    // Mock the schema as a plain array without default
+    mockGetSchemaAtPath.mockReturnValue(z.array(z.string()));
+    mockGetZodTypeName.mockReturnValue('array');
+
+    const result = validateVariable(variableItem, mockContext);
+
+    expect(result).toMatchObject({
+      message: null,
+      severity: null,
+      owner: 'variable-validation',
+      hoverMessage: expect.stringContaining('(property) inputs.items:'),
     });
   });
 });

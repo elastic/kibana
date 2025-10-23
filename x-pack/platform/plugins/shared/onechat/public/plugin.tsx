@@ -34,6 +34,7 @@ import type {
   OnechatSetupDependencies,
   OnechatStartDependencies,
 } from './types';
+import { openConversationFlyout } from './flyout/open_conversation_flyout';
 
 export class OnechatPlugin
   implements
@@ -115,7 +116,7 @@ export class OnechatPlugin
 
     const { navigationService } = this.setupServices;
 
-    this.internalServices = {
+    const internalServices: OnechatInternalService = {
       agentService,
       chatService,
       conversationsService,
@@ -125,8 +126,15 @@ export class OnechatPlugin
       accessChecker,
     };
 
+    this.internalServices = internalServices;
+
     return {
       tools: createPublicToolContract({ toolsService }),
+      openConversationFlyout: (options) =>
+        openConversationFlyout(options, {
+          coreStart: core,
+          services: internalServices,
+        }),
     };
   }
 }
