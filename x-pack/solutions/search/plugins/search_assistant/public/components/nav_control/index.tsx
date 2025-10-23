@@ -95,14 +95,17 @@ export function NavControl() {
     messages: [],
     title: undefined,
   };
+  const tooltipRef = useRef<EuiToolTip | null>(null);
+  const hideToolTip = () => tooltipRef.current?.hideToolTip();
 
   return (
     <>
-      <EuiToolTip content={buttonLabel}>
+      <EuiToolTip content={buttonLabel} ref={tooltipRef} onMouseOut={hideToolTip}>
         <EuiButtonEmpty
           aria-label={buttonLabel}
           data-test-subj="AiAssistantAppNavControlButton"
           onClick={() => {
+            hideToolTip();
             service.conversations.openNewConversation({
               messages: [],
             });
