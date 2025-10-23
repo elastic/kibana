@@ -207,12 +207,11 @@ describe('SelectInferenceId', () => {
 
     return act(async () => {
       const testBed = await setup();
-      const { find: findInTest } = testBed;
 
-      findInTest('inferenceIdButton').simulate('click');
+      find('inferenceIdButton').simulate('click');
 
       const elserOption = findTestSubject(
-        findInTest('data-inference-endpoint-list'),
+        find('data-inference-endpoint-list'),
         'custom-inference_.elser-2-elasticsearch'
       );
       expect(elserOption.prop('aria-checked')).toEqual(true);
