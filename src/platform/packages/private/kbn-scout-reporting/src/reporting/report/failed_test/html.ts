@@ -42,10 +42,9 @@ export const buildFailureHtml = (testFailure: TestFailure, destinationDir?: stri
 
         try {
           fs.copyFileSync(s.path, screenshotDestPath);
-          // Use artifact:// scheme for Buildkite compatibility
-          // Get the relative path from the workspace root
-          const relativePath = path.relative(process.cwd(), screenshotDestPath);
-          imgSrc = `artifact://${relativePath}`;
+          // Use simple relative path - Buildkite's native HTML artifact support
+          // handles relative paths within the same artifact directory
+          imgSrc = `./${screenshotFileName}`;
         } catch (copyError) {
           // Fallback to base64 if copy fails
           const base64 = fs.readFileSync(s.path).toString('base64');
