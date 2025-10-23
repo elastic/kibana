@@ -87,9 +87,10 @@ export const getBucketColumns = (
           )
         )
         ?.filter(<T>(v: T | null | undefined): v is NonNullable<T> => v != null);
-      if (bucketColumns) {
-        columns.push(...bucketColumns);
+      if (!bucketColumns || bucketColumns.length === 0) {
+        return null;
       }
+      columns.push(...bucketColumns);
     }
   }
   return columns;
