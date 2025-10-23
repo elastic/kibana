@@ -19,7 +19,10 @@ import {
 import type { TranslatedEntry, TranslatedExceptionListItem } from '../../schemas/artifacts';
 import { ArtifactConstants } from './common';
 import { ENDPOINT_ARTIFACT_LISTS, ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
-import { FILTER_PROCESS_DESCENDANTS_TAG, TRUSTED_PROCESS_DESCENDANTS_TAG } from '../../../../common/endpoint/service/artifacts/constants';
+import {
+  FILTER_PROCESS_DESCENDANTS_TAG,
+  TRUSTED_PROCESS_DESCENDANTS_TAG,
+} from '../../../../common/endpoint/service/artifacts/constants';
 import type { ExperimentalFeatures } from '../../../../common';
 import { allowedExperimentalValues } from '../../../../common';
 
@@ -762,7 +765,11 @@ describe('artifacts lists', () => {
           filter: TEST_FILTER,
           listId: ENDPOINT_LIST_ID,
         });
-        const translated = convertExceptionsToEndpointFormat(resp, 'v1', enabledTrustedProcessDescendant);
+        const translated = convertExceptionsToEndpointFormat(
+          resp,
+          'v1',
+          enabledTrustedProcessDescendant
+        );
 
         expect(translated).toEqual({ entries: [expectedEndpointExceptions] });
       });
@@ -784,9 +791,8 @@ describe('artifacts lists', () => {
               type: 'exact_cased',
               value: 'process',
             },
-          ]
+          ],
         } as TranslatedExceptionListItem;
-
 
         const inputEntry: EntriesArray = [
           {
@@ -808,7 +814,11 @@ describe('artifacts lists', () => {
           filter: TEST_FILTER,
           listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
         });
-        const translated = convertExceptionsToEndpointFormat(resp, 'v1', enabledTrustedProcessDescendant);
+        const translated = convertExceptionsToEndpointFormat(
+          resp,
+          'v1',
+          enabledTrustedProcessDescendant
+        );
 
         expect(translated).toEqual({ entries: [expectedEndpointExceptions] });
       });
@@ -855,7 +865,11 @@ describe('artifacts lists', () => {
           filter: TEST_FILTER,
           listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
         });
-        const translated = convertExceptionsToEndpointFormat(resp, 'v1', enabledTrustedProcessDescendant);
+        const translated = convertExceptionsToEndpointFormat(
+          resp,
+          'v1',
+          enabledTrustedProcessDescendant
+        );
 
         expect(translated).toEqual({ entries: [expectedEndpointExceptions] });
       });

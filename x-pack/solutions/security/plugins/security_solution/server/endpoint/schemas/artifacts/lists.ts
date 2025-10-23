@@ -95,7 +95,9 @@ const translatedEntriesOfProcessDescendants = t.type({
     ])
   ),
 });
-export type TranslatedEntriesOfProcessDescendants = t.TypeOf<typeof translatedEntriesOfProcessDescendants>;
+export type TranslatedEntriesOfProcessDescendants = t.TypeOf<
+  typeof translatedEntriesOfProcessDescendants
+>;
 
 export const translatedEntryDescendantOf = t.exact(
   t.type({
@@ -108,14 +110,15 @@ export const translatedEntryDescendantOf = t.exact(
 );
 export type TranslatedEntryDescendantOf = t.TypeOf<typeof translatedEntryDescendantOf>;
 
-export const translatedEntriesOfTrustDescendants =
-  t.union([
-    translatedEntryNested,
-    translatedEntryMatch,
-    translatedEntryMatchWildcard,
-    translatedEntryMatchAny,
-  ]);
-export type TranslatedEntriesOfTrustDescendants = t.TypeOf<typeof translatedEntriesOfTrustDescendants>;
+export const TranslatedEntriesOfTrustDescendants = t.union([
+  translatedEntryNested,
+  translatedEntryMatch,
+  translatedEntryMatchWildcard,
+  translatedEntryMatchAny,
+]);
+export type TranslatedEntriesOfTrustDescendants = t.TypeOf<
+  typeof TranslatedEntriesOfTrustDescendants
+>;
 
 export const translatedEntryTrustDescendants = t.exact(
   t.type({
@@ -123,7 +126,7 @@ export const translatedEntryTrustDescendants = t.exact(
     trust_descendants: t.boolean,
     entries: t.array(translatedEntriesOfTrustDescendants),
   })
-)
+);
 
 export type TranslatedEntryTrustDescendants = t.TypeOf<typeof translatedEntryTrustDescendants>;
 
@@ -147,7 +150,7 @@ export const translatedExceptionListItem = t.union([
     t.type({
       type: t.string,
       entries: t.array(translatedEntry),
-    }),
+    })
   ),
   translatedEntryTrustDescendants,
 ]);
