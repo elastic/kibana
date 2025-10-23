@@ -130,6 +130,7 @@
     "@kbn/css-utils",
     "@kbn/lens-common",
     "@kbn/react-kibana-context-common",
+    "@kbn/unified-tabs",
   ],
   "exclude": ["target/**/*"]
 }
