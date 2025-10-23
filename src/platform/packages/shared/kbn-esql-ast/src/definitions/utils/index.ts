@@ -24,7 +24,6 @@ export {
   buildColumnSuggestions as buildFieldsDefinitionsWithMetadata,
   getFunctionSignatures,
   getFunctionDefinition,
-  getFormattedFunctionSignature,
 } from './functions';
 export { getDateLiterals, getCompatibleLiterals } from './literals';
 export { getColumnForASTNode, pipePrecedesCurrentWord } from './shared';
@@ -33,3 +32,4 @@ export { getMessageFromId, errors } from './errors';
 export { sourceExists } from './sources';
 export { getColumnExists } from './columns';
 export { getValidSignaturesAndTypesToSuggestNext } from './autocomplete/helpers';
+export { getFormattedFunctionSignature } from './hover/functions';

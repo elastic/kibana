@@ -6,11 +6,11 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { type FunctionDefinition, FunctionDefinitionTypes } from '../types';
+import { type FunctionDefinition, FunctionDefinitionTypes } from '../../types';
 import { getFormattedFunctionSignature } from './functions';
-import type { ESQLFunction } from '../../types';
-import type { ESQLColumnData } from '../../commands_registry/types';
-import { exp } from '../../synth';
+import type { ESQLFunction } from '../../../types';
+import type { ESQLColumnData } from '../../../commands_registry/types';
+import { exp } from '../../../synth';
 
 describe('getFormattedFunctionSignature', () => {
   describe('basic function formatting', () => {
