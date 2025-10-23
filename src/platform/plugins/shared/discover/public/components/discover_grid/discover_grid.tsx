@@ -19,7 +19,7 @@ import { useProfileAccessor } from '../../context_awareness';
 import type { DiscoverAppState } from '../../application/main/state_management/discover_app_state_container';
 import type { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
 import {
-  ESQLDataCascade,
+  DataCascadeLayout,
   useGroupBySelectorRenderer,
 } from '../../application/main/components/layout/cascaded_documents';
 import type { CascadeDocumentsRestorableState } from '../../application/main/components/layout/cascaded_documents/esql_data_cascade_restorable_state';
@@ -122,7 +122,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
   }, [cascadeConfig, customExternalAdditionalControls, groupBySelectorRenderer]);
 
   return isCascadeLayoutSelected && Boolean(cascadeConfig?.selectedCascadeGroups?.length) ? (
-    <ESQLDataCascade
+    <DataCascadeLayout
       {...props}
       dataView={dataView}
       viewModeToggle={viewModeToggle}

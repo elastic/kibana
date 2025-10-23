@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ComponentProps } from 'react';
 import React, { useCallback, useState } from 'react';
 import {
   EuiFlexGroup,
@@ -42,6 +43,36 @@ export function useGetGroupBySelectorRenderer({
 }: GroupBySelectorRendererProps) {
   const [cascadeSelectOpen, setCascadeSelectOpen] = useState(false);
 
+  const getSelectionOptions = useCallback(
+    (availableColumns: string[], currentSelectedColumns: string[]) =>
+      [NONE_GROUP_OPTION].concat(availableColumns).map((field) => ({
+        label: field,
+        'data-test-subj':
+          field === NONE_GROUP_OPTION
+            ? 'discoverCascadeLayoutOptOutButton'
+            : `${field}-cascadeLayoutOptionBtn`,
+        checked:
+          (field === NONE_GROUP_OPTION && !currentSelectedColumns.length) ||
+          currentSelectedColumns.includes(field)
+            ? ('on' as const)
+            : undefined,
+      })),
+    []
+  );
+
+  const onSelectionChange = useCallback<
+    NonNullable<ComponentProps<typeof EuiSelectable>['onActiveOptionChange']>
+  >(
+    (option) => {
+      if (option) {
+        cascadeGroupingChangeHandler([option.label].filter((o) => o !== NONE_GROUP_OPTION));
+      }
+
+      setCascadeSelectOpen(false);
+    },
+    [cascadeGroupingChangeHandler]
+  );
+
   return useCallback(
     (availableColumns: string[], currentSelectedColumns: string[]) => (
       <EuiPopover
@@ -74,32 +105,15 @@ export function useGetGroupBySelectorRenderer({
             isVirtualized: false,
           }}
           data-test-subj="discoverGroupBySelectionList"
-          options={[NONE_GROUP_OPTION].concat(availableColumns).map((field) => ({
-            label: field,
-            'data-test-subj':
-              field === NONE_GROUP_OPTION
-                ? 'discoverCascadeLayoutOptOutButton'
-                : `${field}-cascadeLayoutOptionBtn`,
-            checked:
-              (field === NONE_GROUP_OPTION && !currentSelectedColumns.length) ||
-              currentSelectedColumns.includes(field)
-                ? 'on'
-                : undefined,
-          }))}
+          options={getSelectionOptions(availableColumns, currentSelectedColumns)}
           singleSelection="always"
-          onActiveOptionChange={(option) => {
-            if (option) {
-              cascadeGroupingChangeHandler([option.label].filter((o) => o !== NONE_GROUP_OPTION));
-            }
-
-            setCascadeSelectOpen(false);
-          }}
+          onActiveOptionChange={onSelectionChange}
         >
           {(list) => <div style={{ width }}>{list}</div>}
         </EuiSelectable>
       </EuiPopover>
     ),
-    [cascadeSelectOpen, cascadeGroupingChangeHandler, width]
+    [cascadeSelectOpen, getSelectionOptions, onSelectionChange, width]
   );
 }
 
