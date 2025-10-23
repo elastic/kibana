@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { isObject } from 'lodash';
 import { EuiComboBox, EuiFormRow, EuiSpacer, type EuiComboBoxOptionOption } from '@elastic/eui';
 import {
@@ -62,6 +62,12 @@ export const AdditionalFormFields = React.memo<{
     }
   );
 
+  const onRemoveField = useCallback((fieldName: string) => {
+    setAdditionalFields((fields) => {
+      return fields.filter((field) => field.value !== fieldName);
+    });
+  }, []);
+
   const defaultAdditionalFields = useMemo(() => {
     return additionalFieldsFormField.value ? JSON.parse(additionalFieldsFormField.value) : {};
   }, [additionalFieldsFormField.value]);
@@ -108,10 +114,14 @@ export const AdditionalFormFields = React.memo<{
         }
         return acc;
       }, {} as Record<string, unknown>);
-
-      additionalFieldsFormField.setValue(JSON.stringify(transformedFields));
+      const newValue = JSON.stringify(transformedFields);
+      if (newValue !== additionalFieldsFormField.value) {
+        additionalFieldsFormField.setValue(JSON.stringify(transformedFields));
+      }
     }, 500);
-    return () => clearTimeout(timeout);
+    return () => {
+      clearTimeout(timeout);
+    };
   }, [additionalFields, additionalFieldsFormField, fields, fieldsMetadataRecord]);
 
   return (
@@ -125,7 +135,7 @@ export const AdditionalFormFields = React.memo<{
           return (
             <React.Fragment key={fieldMetaData.name}>
               <EuiSpacer size="m" />
-              <AdditionalFormField key={fieldMetaData.name} field={fieldMetaData} />
+              <AdditionalFormField field={fieldMetaData} onRemoveField={onRemoveField} />
             </React.Fragment>
           );
         })}
