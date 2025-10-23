@@ -90,7 +90,7 @@ export const WorkflowStepExecutionList = ({
         />
       </EuiFlexItem>
 
-      <EuiFlexItem>
+      <EuiFlexItem css={{ overflowY: 'auto' }}>
         <WorkflowStepExecutionTree
           definition={definition}
           execution={execution ?? null}
