@@ -12,8 +12,6 @@ import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 export const ACCESS_CONTROL_TYPE = 'access_control_type';
 export const NON_ACCESS_CONTROL_TYPE = 'non_access_control_type';
 
-
-
 export class AccessControlTestPlugin implements Plugin {
   public setup(core: CoreSetup) {
     core.savedObjects.registerType({
