@@ -70,6 +70,7 @@ describe('useConversationActions', () => {
     mockUseNavigation.mockReturnValue({
       navigateToOnechatUrl: mockNavigateToOnechatUrl,
       createOnechatUrl: jest.fn(),
+      navigateToManageConnectors: jest.fn(),
     });
 
     mockUseOnechatServices.mockReturnValue({
