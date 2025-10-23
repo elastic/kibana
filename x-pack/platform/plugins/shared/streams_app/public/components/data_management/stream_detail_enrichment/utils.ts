@@ -194,6 +194,10 @@ export const getFormStateFromActionStep = (
     clone.patterns = step.patterns.map(
       (pattern) => new DraftGrokExpression(formStateDependencies.grokCollection, pattern)
     );
+    // Ensure Advanced settings shows the condition editor even when not prepopulated
+    if ((clone as any).where === undefined) {
+      (clone as any).where = ALWAYS_CONDITION;
+    }
 
     return clone;
   }
@@ -207,6 +211,8 @@ export const getFormStateFromActionStep = (
     const { customIdentifier, parentId, ...restStep } = step;
     return structuredClone({
       ...restStep,
+      // Ensure condition editor is available when not prepopulated
+      where: (restStep as any).where ?? ALWAYS_CONDITION,
     });
   }
 

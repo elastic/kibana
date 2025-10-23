@@ -61,6 +61,7 @@ import {
   spawnDataSource,
   spawnStep,
   reorderSteps,
+  rewriteConditionFieldsToOtel,
 } from './utils';
 import { createUrlInitializerActor, createUrlSyncAction } from './url_state_actor';
 import {
@@ -97,6 +98,9 @@ export const streamEnrichmentMachine = setup({
     // Placeholders for URL processor consumption actions; implementations provided below
     consumeProcessorsFromUrl: () => {},
     stripProcessorsFromUrl: () => {},
+    // v3 steps actions placeholders
+    consumeStepsFromUrl: () => {},
+    stripStepsFromUrl: () => {},
     /* URL state actions */
     storeUrlState: assign((_, params: { urlState: EnrichmentUrlState }) => ({
       urlState: params.urlState,
@@ -267,6 +271,26 @@ export const streamEnrichmentMachine = setup({
         }
       }
     ),
+    /**
+     * When navigating with URL-appended steps, run a single simulation once the steps are hydrated.
+     * Rationale: prepopulated processors are spawned as isNew, but no user edit occurs yet, so
+     * the simulator wouldn’t run until the first change. This action mirrors the same
+     * step.change path used by manual edits, showing proper loaders without page refresh.
+     */
+    /* @ts-expect-error The type inference of enqueueActions is broad here; parameters are safe */
+    sendStepsEventToSimulatorIfHasNewSteps: enqueueActions(({ context, enqueue }) => {
+      const anyNew = context.stepRefs.some((ref) => ref.getSnapshot().context.isNew);
+      if (!anyNew) return;
+
+      if (selectWhetherAnyProcessorBeforePersisted(context)) {
+        enqueue('sendResetEventToSimulator');
+      } else {
+        enqueue.sendTo('simulator', {
+          type: 'step.change',
+          steps: getStepsForSimulation({ stepRefs: context.stepRefs }),
+        });
+      }
+    }),
     sendDataSourcesSamplesToSimulator: sendTo(
       'simulator',
       ({ context }) => ({
@@ -354,9 +378,15 @@ export const streamEnrichmentMachine = setup({
       entry: [
         { type: 'setupSteps' },
         { type: 'setupDataSources' },
+        // v3 first (steps), then v2 (processors), then strip and sync
+        { type: 'consumeStepsFromUrl', params: () => ({}) },
+        { type: 'stripStepsFromUrl', params: () => ({}) },
         { type: 'consumeProcessorsFromUrl', params: () => ({}) },
         { type: 'stripProcessorsFromUrl', params: () => ({}) },
         { type: 'syncUrlState' },
+        // Run a single simulation if URL appended new steps. This ensures prepopulated processors
+        // simulate once on load (proper loader UX) without waiting for a user change.
+        { type: 'sendStepsEventToSimulatorIfHasNewSteps' },
       ],
       on: {
         'stream.received': {
@@ -541,6 +571,11 @@ export const streamEnrichmentMachine = setup({
                       target: 'creating',
                       actions: [{ type: 'addCondition', params: ({ event }) => event }],
                     },
+                    // When URL-prepopulated steps change while we're idle, trigger simulation
+                    'step.change': {
+                      guard: 'hasSimulatePrivileges',
+                      actions: [{ type: 'sendStepsEventToSimulator', params: ({ event }) => event }],
+                    },
                   },
                 },
                 creating: {
@@ -643,8 +678,13 @@ export const createStreamEnrichmentMachineImplementations = ({
         return {};
       }
 
+      const isWired = getStreamTypeFromDefinition(context.definition.stream) === 'wired';
       const appendedRefs = processors.map((processor) => {
         const converted = stepConverter.toUIDefinition(processor, { parentId: null });
+        // Convert ECS→OTel field names in WHERE for Wired streams
+        if ((converted as any).where) {
+          (converted as any).where = rewriteConditionFieldsToOtel((converted as any).where, isWired);
+        }
         return spawnStep(converted, { spawn, self }, { isNew: true });
       });
 
@@ -659,6 +699,36 @@ export const createStreamEnrichmentMachineImplementations = ({
       }
 
       const { processorsToAppend, ...rest } = urlState;
+      return {
+        urlState: { ...rest },
+      };
+    }),
+    // v3 steps consumption (where blocks + processors)
+    consumeStepsFromUrl: assign(({ context, spawn, self }) => {
+      const urlState = context.urlState as any;
+      const steps: any[] | undefined = urlState && urlState.v === 3 ? urlState.stepsToAppend : undefined;
+      if (!steps || steps.length === 0) {
+        return {};
+      }
+      const isWired = getStreamTypeFromDefinition(context.definition.stream) === 'wired';
+      const appendRefs = steps.map((step) => {
+        const converted = stepConverter.toUIDefinition(step, { parentId: null });
+        // Convert ECS→OTel field names in WHERE for Wired streams
+        if ((converted as any).where) {
+          (converted as any).where = rewriteConditionFieldsToOtel((converted as any).where, isWired);
+        }
+        return spawnStep(converted, { spawn, self }, { isNew: true });
+      });
+      return {
+        stepRefs: [...context.stepRefs, ...appendRefs],
+      };
+    }),
+    stripStepsFromUrl: assign(({ context }) => {
+      const urlState = context.urlState as any;
+      if (!urlState || urlState.v !== 3 || !urlState.stepsToAppend) {
+        return {};
+      }
+      const { stepsToAppend, ...rest } = urlState;
       return {
         urlState: { ...rest },
       };

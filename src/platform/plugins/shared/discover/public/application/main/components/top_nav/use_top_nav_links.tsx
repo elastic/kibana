@@ -238,7 +238,9 @@ export const useTopNavLinks = ({
     const indexPattern = esqlQuery ? getIndexPatternFromESQLQuery(esqlQuery) : '';
     const isSingleTarget = Boolean(indexPattern) && !indexPattern.includes(',') && !indexPattern.includes('*') && !indexPattern.includes(' ');
     const processors = esqlQuery ? esqlReverse.esqlToStreamlangProcessors(esqlQuery) : [];
-    const hasMaterializable = processors.length > 0;
+    const stepsV3 = esqlQuery ? esqlReverse.esqlToStreamlangSteps(esqlQuery) : [];
+    // Temporary debug removed
+    const hasMaterializable = stepsV3.length > 0 || processors.length > 0;
     const isEligible = Boolean(isEsqlMode && isSingleTarget && hasMaterializable);
 
     const entries = appMenuRegistry.getSortedItems().map((appMenuItem) =>
@@ -264,10 +266,24 @@ export const useTopNavLinks = ({
           if (!isEligible) return;
           const locator = services.share?.url.locators.get(STREAMS_APP_LOCATOR_ID);
           if (!locator) return;
+          const pageState = stepsV3.length > 0
+            ? ({ v: 3, dataSources: [], stepsToAppend: stepsV3 } as any)
+            : ({ v: 2, dataSources: [], processorsToAppend: processors as any } as any);
+          if (stepsV3.length === 0 && processors.length > 0) {
+            services.notifications.toasts.addInfo({
+              title: i18n.translate('discover.materialize.debug.noStepsV3', {
+                defaultMessage: 'Materialize falling back to v2 processors',
+              }),
+              text: i18n.translate('discover.materialize.debug.noStepsV3.body', {
+                defaultMessage: 'ES|QL reverse produced {count} processors but no steps. URL schema v2 will be used.',
+                values: { count: processors.length },
+              }),
+            });
+          }
           const url = await locator.getRedirectUrl({
             name: indexPattern,
             managementTab: 'processing',
-            pageState: { v: 2, dataSources: [], processorsToAppend: processors as any },
+            pageState,
           } as any);
           services.application.navigateToUrl(url);
         },

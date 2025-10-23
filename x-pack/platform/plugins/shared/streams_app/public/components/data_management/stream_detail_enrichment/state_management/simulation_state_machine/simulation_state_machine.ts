@@ -120,7 +120,7 @@ export const simulationMachine = setup({
     processorChangeDebounceTime: 300,
   },
   guards: {
-    canSimulate: ({ context }) => hasAnyValidSteps(context.steps),
+    canSimulate: ({ context }) => hasAnyValidSteps(context.steps) && hasSamples(context.samples),
     hasSteps: (_, params: StepsEventParams) => !isEmpty(params.steps),
     '!hasSamples': (_, params: { samples: SampleDocumentWithUIAttributes[] }) =>
       !hasSamples(params.samples),

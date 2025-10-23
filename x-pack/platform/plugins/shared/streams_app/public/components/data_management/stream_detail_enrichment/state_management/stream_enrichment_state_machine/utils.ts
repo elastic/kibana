@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { AssignArgs } from 'xstate5';
 import { isActionBlock, isWhereBlock } from '@kbn/streamlang/types/streamlang';
 import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
+import type { Condition } from '@kbn/streamlang';
 import type { StreamEnrichmentContextType } from './types';
 import type { SampleDocumentWithUIAttributes } from '../simulation_state_machine';
 import {
@@ -144,6 +145,80 @@ export function getUpsertFields(context: StreamEnrichmentContextType): FieldDefi
   const simulationMappedFieldDefinition = convertToFieldDefinition(mappedSchemaFields);
 
   return { ...originalFieldDefinition, ...simulationMappedFieldDefinition };
+}
+
+/**
+ * Minimal ECS→OTel mapping used when materializing ES|QL into a Wired stream.
+ * Rationale:
+ *  - Discover queries often reference ECS fields (e.g. host.name),
+ *    but Wired streams preview/simulation expose OTel paths (e.g. resource.attributes.host.name).
+ *  - To keep the ES|QL UX simple, we rewrite only condition field names at hydration time
+ *    when the target stream is Wired, so gates work with preview docs without requiring users
+ *    to know OTel naming.
+ *  - This is intentionally conservative and can be replaced with a metadata-driven translation later.
+ */
+export function mapEcsFieldToOtel(field: string): string {
+  if (!field || field.startsWith('resource.attributes.') || field.startsWith('attributes.')) {
+    return field;
+  }
+  if (field === '@timestamp') return '@timestamp';
+  if (field === 'message') return 'body.text';
+
+  const explicit: Record<string, string> = {
+    'host.name': 'resource.attributes.host.name',
+    'service.name': 'resource.attributes.service.name',
+    'cloud.provider': 'resource.attributes.cloud.provider',
+    'cloud.region': 'resource.attributes.cloud.region',
+    'kubernetes.pod.name': 'resource.attributes.kubernetes.pod.name',
+    'container.id': 'resource.attributes.container.id',
+    'user.name': 'attributes.user.name',
+    'process.id': 'attributes.process.id',
+    'file.path': 'attributes.filepath',
+    'log.file.path': 'attributes.filepath',
+  };
+  if (explicit[field]) return explicit[field];
+
+  const top = field.split('.')[0];
+  const resourceScopes = new Set([
+    'host',
+    'service',
+    'cloud',
+    'kubernetes',
+    'container',
+    'agent',
+    'orchestrator',
+  ]);
+  if (resourceScopes.has(top)) return `resource.attributes.${field}`;
+  return `attributes.${field}`;
+}
+
+type AnyCondition = Condition;
+
+export function rewriteConditionFieldsToOtel(
+  cond: AnyCondition,
+  isWired: boolean
+): AnyCondition {
+  if (!cond || !isWired) return cond;
+
+  if (typeof (cond as any).field === 'string') {
+    return { ...(cond as any), field: mapEcsFieldToOtel((cond as any).field) } as AnyCondition;
+  }
+
+  if ((cond as any).and) {
+    return {
+      and: (cond as any).and.map((c: AnyCondition) => rewriteConditionFieldsToOtel(c, isWired)),
+    } as AnyCondition;
+  }
+  if ((cond as any).or) {
+    return {
+      or: (cond as any).or.map((c: AnyCondition) => rewriteConditionFieldsToOtel(c, isWired)),
+    } as AnyCondition;
+  }
+  if ((cond as any).not) {
+    return { not: rewriteConditionFieldsToOtel((cond as any).not, isWired) } as AnyCondition;
+  }
+
+  return cond;
 }
 
 export const spawnStep = <

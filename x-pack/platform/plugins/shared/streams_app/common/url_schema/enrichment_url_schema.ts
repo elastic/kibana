@@ -9,7 +9,7 @@ import type { Filter, TimeRange } from '@kbn/es-query';
 import type { SampleDocument } from '@kbn/streams-schema/src/shared/record_types';
 import { sampleDocument } from '@kbn/streams-schema/src/shared/record_types';
 import { z } from '@kbn/zod';
-import type { StreamlangProcessorDefinition } from '@kbn/streamlang';
+import type { StreamlangProcessorDefinition, StreamlangStep } from '@kbn/streamlang';
 
 /**
  * Base interface for all data source types with common properties
@@ -112,7 +112,13 @@ export interface EnrichmentUrlStateV2 {
   processorsToAppend?: StreamlangProcessorDefinition[];
 }
 
-export type EnrichmentUrlState = EnrichmentUrlStateV1 | EnrichmentUrlStateV2;
+export interface EnrichmentUrlStateV3 {
+  v: 3;
+  dataSources: EnrichmentDataSource[];
+  stepsToAppend?: StreamlangStep[];
+}
+
+export type EnrichmentUrlState = EnrichmentUrlStateV1 | EnrichmentUrlStateV2 | EnrichmentUrlStateV3;
 
 /**
  * Schema for validating enrichment URL state
@@ -128,4 +134,14 @@ const enrichmentUrlSchemaV2 = z.object({
   processorsToAppend: z.array(z.any()).optional(),
 }) satisfies z.Schema<EnrichmentUrlStateV2>;
 
-export const enrichmentUrlSchema = z.union([enrichmentUrlSchemaV1, enrichmentUrlSchemaV2]);
+const enrichmentUrlSchemaV3 = z.object({
+  v: z.literal(3),
+  dataSources: z.array(enrichmentDataSourceSchema),
+  stepsToAppend: z.array(z.any()).optional(),
+}) satisfies z.Schema<EnrichmentUrlStateV3>;
+
+export const enrichmentUrlSchema = z.union([
+  enrichmentUrlSchemaV1,
+  enrichmentUrlSchemaV2,
+  enrichmentUrlSchemaV3,
+]);
