@@ -18,7 +18,7 @@ import { createLicensedRouteHandler } from '../licensed_route_handler';
 const ALLOWED_KEYS_UPDATE_CLOUD = [
   'userSettings.darkMode',
   'userSettings.contrastMode',
-  'solutionNavigationTour:completed',
+  'solutionNavigationTour:completed', // TODO: remove with https://github.com/elastic/kibana/issues/239313
 ];
 
 export function defineUpdateUserProfileDataRoute({
