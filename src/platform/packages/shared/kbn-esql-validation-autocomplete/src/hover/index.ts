@@ -24,10 +24,11 @@ import {
   type ESQLSingleAstItem,
   type ESQLSource,
 } from '@kbn/esql-ast/src/types';
+
 import type { ESQLCallbacks } from '../shared/types';
 import { getColumnsByTypeRetriever } from '../autocomplete/autocomplete';
 import { getPolicyHelper } from '../shared/resources_helpers';
-import { correctIncompleteArgumentsList, getVariablesHoverContent } from './helpers';
+import { correctQuerySyntax, getVariablesHoverContent } from './helpers';
 
 interface HoverContent {
   contents: Array<{ value: string }>;
@@ -56,7 +57,7 @@ const TIME_SYSTEM_DESCRIPTIONS = {
 };
 
 export async function getHoverItem(fullText: string, offset: number, callbacks?: ESQLCallbacks) {
-  const correctedQuery = correctIncompleteArgumentsList(fullText);
+  const correctedQuery = correctQuerySyntax(fullText, offset);
 
   const { root } = parse(correctedQuery);
 
