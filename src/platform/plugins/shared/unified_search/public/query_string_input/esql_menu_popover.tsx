@@ -29,6 +29,8 @@ import { LanguageDocumentationFlyout } from '@kbn/language-documentation';
 import { getCategorizationField } from '@kbn/aiops-utils';
 import { prettifyQueryTemplate } from '@kbn/esql-ast/src/commands_registry/options/recommended_queries/utils';
 import type { IUnifiedSearchPluginServices } from '../types';
+import { ESQLEditorTelemetryService } from '@kbn/esql-editor/src/telemetry/telemetry_service';
+import { QuerySource } from '@kbn/esql-types/src/esql_telemetry_types';
 
 export interface ESQLMenuPopoverProps {
   onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
@@ -42,7 +44,7 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
   onESQLQuerySubmit,
 }) => {
   const kibana = useKibana<IUnifiedSearchPluginServices>();
-  const { docLinks, http, chrome } = kibana.services;
+  const { docLinks, http, chrome, analytics } = kibana.services;
 
   const { euiTheme } = useEuiTheme();
 
@@ -53,6 +55,8 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
   const [solutionsRecommendedQueries, setSolutionsRecommendedQueries] = useState<
     RecommendedQuery[]
   >([]);
+
+  const telemetryService = useRef(new ESQLEditorTelemetryService(analytics)).current;
 
   const { queryForRecommendedQueries, timeFieldName, categorizationField } = useMemo(() => {
     if (adHocDataview && typeof adHocDataview !== 'string') {
@@ -246,6 +250,7 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
             onClick: () => {
               onESQLQuerySubmit?.(query.queryString);
               setIsESQLMenuPopoverOpen(false);
+              telemetryService.trackRecommendedQueryClicked(QuerySource.HELP);
             },
           };
         }),
