@@ -421,7 +421,7 @@ export const localPrompts: Prompt[] = [
     promptGroupId: promptGroupId.aiForEntityAnalytics,
     prompt: {
       default: ENTITY_DETAILS_HIGHLIGHTS_PROMPT,
-    }
+    },
   },
   {
     promptId: promptDictionary.alertSummary,
