@@ -13,4 +13,4 @@ export type {
   ConnectorTypeConfigType,
   ConnectorTypeSecretsType,
   ActionParamsType,
-} from './types/v1';
+} from './types/latest';

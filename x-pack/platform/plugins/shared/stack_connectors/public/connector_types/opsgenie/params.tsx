@@ -10,7 +10,10 @@ import type { ActionParamsProps, IErrorObject } from '@kbn/triggers-actions-ui-p
 import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { isEmpty, unset, cloneDeep } from 'lodash';
-import type { Params, CreateAlertSubActionParams } from '@kbn/connector-schemas/opsgenie';
+import type {
+  Params as OpsgenieActionParams,
+  CreateAlertSubActionParams as OpsgenieCreateAlertSubActionParams,
+} from '@kbn/connector-schemas/opsgenie';
 import { SUB_ACTION } from '@kbn/connector-schemas/opsgenie/constants';
 import * as i18n from './translations';
 import { CreateAlert, isPartialCreateAlertSchema } from './create_alert';
@@ -31,7 +34,7 @@ const actionOptions = [
   },
 ];
 
-const OpsgenieParamFields: React.FC<ActionParamsProps<Params>> = ({
+const OpsgenieParamFields: React.FC<ActionParamsProps<OpsgenieActionParams>> = ({
   actionParams,
   editAction,
   errors,
@@ -147,7 +150,10 @@ OpsgenieParamFields.displayName = 'OpsgenieParamFields';
  * and not the entire object.
  */
 
-const showCreateAlertSaveError = (params: Partial<Params>, errors: IErrorObject): boolean => {
+const showCreateAlertSaveError = (
+  params: Partial<OpsgenieActionParams>,
+  errors: IErrorObject
+): boolean => {
   const errorArray = errors['subActionParams.message'] as string[] | undefined;
   const errorsLength = errorArray?.length ?? 0;
 
@@ -156,7 +162,10 @@ const showCreateAlertSaveError = (params: Partial<Params>, errors: IErrorObject)
   );
 };
 
-const showCloseAlertSaveError = (params: Partial<Params>, errors: IErrorObject): boolean => {
+const showCloseAlertSaveError = (
+  params: Partial<OpsgenieActionParams>,
+  errors: IErrorObject
+): boolean => {
   const errorArray = errors['subActionParams.alias'] as string[] | undefined;
   const errorsLength = errorArray?.length ?? 0;
 
@@ -164,11 +173,13 @@ const showCloseAlertSaveError = (params: Partial<Params>, errors: IErrorObject):
 };
 
 const isCreateAlertParams = (
-  params: Partial<Params>
-): params is Partial<CreateAlertSubActionParams> => params.subAction === SUB_ACTION.CreateAlert;
+  params: Partial<OpsgenieActionParams>
+): params is Partial<OpsgenieCreateAlertSubActionParams> =>
+  params.subAction === SUB_ACTION.CreateAlert;
 
-const isCloseAlertParams = (params: Partial<Params>): params is CreateAlertSubActionParams =>
-  params.subAction === SUB_ACTION.CloseAlert;
+const isCloseAlertParams = (
+  params: Partial<OpsgenieActionParams>
+): params is OpsgenieCreateAlertSubActionParams => params.subAction === SUB_ACTION.CloseAlert;
 
 // eslint-disable-next-line import/no-default-export
 export { OpsgenieParamFields as default };

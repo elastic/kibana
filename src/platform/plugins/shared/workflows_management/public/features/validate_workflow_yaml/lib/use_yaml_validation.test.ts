@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { monaco } from '@kbn/monaco';
 import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { Provider } from 'react-redux';
+import { monaco } from '@kbn/monaco';
 import { useYamlValidation } from './use_yaml_validation';
-import { createWorkflowEditorStore } from '../../../widgets/workflow_yaml_editor/lib/store/store';
 import { setYamlString } from '../../../widgets/workflow_yaml_editor/lib/store/slice';
+import { createWorkflowEditorStore } from '../../../widgets/workflow_yaml_editor/lib/store/store';
 
 // Mock Monaco editor
 const createMockEditor = (value: string) => {

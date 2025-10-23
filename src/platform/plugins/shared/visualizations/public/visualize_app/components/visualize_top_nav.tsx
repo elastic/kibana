@@ -21,13 +21,13 @@ import { injectI18n } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { euiBreakpoint, type UseEuiTheme } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { VISUALIZE_APP_NAME } from '@kbn/visualizations-common';
 import type {
   VisualizeServices,
   VisualizeAppState,
   VisualizeAppStateContainer,
   VisualizeEditorVisInstance,
 } from '../types';
-import { VISUALIZE_APP_NAME } from '../../../common/constants';
 import { getTopNavConfig, isFallbackDataView } from '../utils';
 
 const LOCAL_STORAGE_EDIT_IN_LENS_BADGE = 'EDIT_IN_LENS_BADGE_VISIBLE';

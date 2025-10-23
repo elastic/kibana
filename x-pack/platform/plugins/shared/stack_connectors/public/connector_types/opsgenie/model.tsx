@@ -17,7 +17,10 @@ import {
   CONNECTOR_ID,
   CONNECTOR_NAME,
 } from '@kbn/connector-schemas/opsgenie/constants';
-import type { Config, Secrets } from '@kbn/connector-schemas/opsgenie';
+import type {
+  Config as OpsgenieActionConfig,
+  Secrets as OpsgenieActionSecrets,
+} from '@kbn/connector-schemas/opsgenie';
 import { RULE_TAGS_TEMPLATE } from '../../../common/opsgenie';
 import type { OpsgenieConnectorTypeParams, ValidationParams } from './types';
 import { DEFAULT_ALIAS } from './constants';
@@ -30,8 +33,8 @@ const SELECT_MESSAGE = i18n.translate(
 );
 
 export const getConnectorType = (): ConnectorTypeModel<
-  Config,
-  Secrets,
+  OpsgenieActionConfig,
+  OpsgenieActionSecrets,
   OpsgenieConnectorTypeParams
 > => {
   return {

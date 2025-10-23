@@ -9,10 +9,10 @@
 
 // Borrowed from x-pack/solutions/security/plugins/security_solution/public/resolver/view/panels/use_formatted_date.ts
 
-import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 
 const invalidDateText = i18n.translate(
   'xpack.securitySolution.enpdoint.resolver.panelutils.invaliddate',

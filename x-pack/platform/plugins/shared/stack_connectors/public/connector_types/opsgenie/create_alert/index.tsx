@@ -21,7 +21,10 @@ import {
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
-import type { Params, CreateAlertParams } from '@kbn/connector-schemas/opsgenie';
+import type {
+  Params as OpsgenieActionParams,
+  CreateAlertParams as OpsgenieCreateAlertParams,
+} from '@kbn/connector-schemas/opsgenie';
 import * as i18n from './translations';
 import type { EditActionCallback } from '../types';
 import { DisplayMoreOptions } from '../display_more_options';
@@ -118,10 +121,10 @@ const FormView: React.FC<FormViewProps> = ({
 FormView.displayName = 'FormView';
 
 export type CreateAlertProps = Pick<
-  ActionParamsProps<Params>,
+  ActionParamsProps<OpsgenieActionParams>,
   'errors' | 'index' | 'messageVariables' | 'editAction' | 'executionMode'
 > & {
-  subActionParams?: Partial<CreateAlertParams>;
+  subActionParams?: Partial<OpsgenieCreateAlertParams>;
   editSubAction: EditActionCallback;
   editOptionalSubAction: EditActionCallback;
   showSaveError: boolean;

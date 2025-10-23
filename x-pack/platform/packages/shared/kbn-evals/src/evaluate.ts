@@ -9,13 +9,18 @@ import type { InferenceConnectorType, InferenceConnector, Model } from '@kbn/inf
 import { getConnectorModel, getConnectorFamily, getConnectorProvider } from '@kbn/inference-common';
 import { createRestClient } from '@kbn/inference-plugin/common';
 import { test as base } from '@kbn/scout';
+import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import { getPhoenixConfig } from './utils/get_phoenix_config';
 import { KibanaPhoenixClient } from './kibana_phoenix_client/client';
 import type { EvaluationTestOptions } from './config/create_playwright_eval_config';
 import { httpHandlerFromKbnClient } from './utils/http_handler_from_kbn_client';
 import { createCriteriaEvaluator } from './evaluators/criteria';
 import type { DefaultEvaluators, EvaluationSpecificWorkerFixtures } from './types';
-import { reportModelScore } from './utils/report_model_score';
+import {
+  buildEvaluationReport,
+  exportEvaluations,
+  createDefaultTerminalReporter,
+} from './utils/report_model_score';
 import { createConnectorFixture } from './utils/create_connector_fixture';
 import { createCorrectnessAnalysisEvaluator } from './evaluators/correctness';
 import { EvaluationAnalysisService } from './utils/analysis';
@@ -26,6 +31,7 @@ import { createGroundednessAnalysisEvaluator } from './evaluators/groundedness';
  * Test type for evaluations. Loads an inference client and a
  * (Kibana-flavored) Phoenix client.
  */
+
 export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
   fetch: [
     async ({ kbnClient, log }, use) => {
@@ -65,7 +71,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     },
   ],
   inferenceClient: [
-    async ({ kbnClient, log, fetch, connector }, use, testInfo) => {
+    async ({ log, fetch, connector }, use) => {
       log.info('Loading inference client');
 
       const inferenceClient = createRestClient({
@@ -80,25 +86,43 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     },
     { scope: 'worker' },
   ],
+  reportModelScore: [
+    async ({}, use) => {
+      // Provide default terminal reporter implementation
+      // Consumers can override this fixture to provide custom reporting
+      await use(createDefaultTerminalReporter());
+    },
+    { scope: 'worker' },
+  ],
   phoenixClient: [
-    async ({ log, connector, repetitions, esClient }, use) => {
+    async (
+      { log, connector, evaluationConnector, repetitions, esClient, reportModelScore },
+      use
+    ) => {
       const config = getPhoenixConfig();
 
-      const inferenceConnector: InferenceConnector = {
-        type: connector.actionTypeId as InferenceConnectorType,
-        config: connector.config,
-        connectorId: connector.id,
-        name: connector.name,
-        capabilities: {
-          contextWindowSize: 32000,
-        },
-      };
+      function buildModelFromConnector(connectorWithId: AvailableConnectorWithId): Model {
+        const inferenceConnector: InferenceConnector = {
+          type: connectorWithId.actionTypeId as InferenceConnectorType,
+          config: connectorWithId.config,
+          connectorId: connectorWithId.id,
+          name: connectorWithId.name,
+          capabilities: {
+            contextWindowSize: 32000,
+          },
+        };
 
-      const model: Model = {
-        family: getConnectorFamily(inferenceConnector),
-        provider: getConnectorProvider(inferenceConnector),
-        id: getConnectorModel(inferenceConnector),
-      };
+        const model: Model = {
+          family: getConnectorFamily(inferenceConnector),
+          provider: getConnectorProvider(inferenceConnector),
+          id: getConnectorModel(inferenceConnector),
+        };
+
+        return model;
+      }
+
+      const model = buildModelFromConnector(connector);
+      const evaluatorModel = buildModelFromConnector(evaluationConnector);
 
       const phoenixClient = new KibanaPhoenixClient({
         config,
@@ -110,15 +134,29 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
 
       await use(phoenixClient);
 
-      await reportModelScore({
+      const report = await buildEvaluationReport({
         phoenixClient,
-        esClient,
-        log,
-        model,
         experiments: await phoenixClient.getRanExperiments(),
+        model,
+        evaluatorModel,
         repetitions,
         runId: process.env.TEST_RUN_ID,
       });
+
+      try {
+        await exportEvaluations(report, esClient, log);
+      } catch (error) {
+        log.error(
+          new Error(
+            `Failed to export evaluation results to Elasticsearch for run ID: ${report.runId}.`,
+            { cause: error }
+          )
+        );
+        throw error;
+      }
+
+      const scoreRepository = new EvaluationScoreRepository(esClient, log);
+      await reportModelScore(scoreRepository, report.runId, log);
     },
     {
       scope: 'worker',

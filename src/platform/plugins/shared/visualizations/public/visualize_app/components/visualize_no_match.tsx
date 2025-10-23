@@ -14,8 +14,8 @@ import { EuiCallOut, EuiLink } from '@elastic/eui';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { VisualizeConstants } from '@kbn/visualizations-common';
 import type { VisualizeServices } from '../types';
-import { VisualizeConstants } from '../../../common/constants';
 
 let bannerId: string;
 

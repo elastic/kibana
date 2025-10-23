@@ -7,10 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect } from 'react';
-import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
-import { monaco } from '@kbn/monaco';
 import {
   EuiButtonEmpty,
   EuiCopy,
@@ -19,8 +15,12 @@ import {
   type UseEuiTheme,
   useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
+import React, { useEffect } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { i18n } from '@kbn/i18n';
+import { monaco } from '@kbn/monaco';
 
 const codeEditorAriaLabel = i18n.translate('workflows.jsonDataView.codeEditorAriaLabel', {
   defaultMessage: 'Read only JSON view',

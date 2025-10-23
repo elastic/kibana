@@ -11,8 +11,8 @@ import type { ApplicationStart } from '@kbn/core/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
+import { GLOBAL_STATE_STORAGE_KEY, VISUALIZE_APP_NAME } from '@kbn/visualizations-common';
 import { getUISettings } from '../../services';
-import { GLOBAL_STATE_STORAGE_KEY, VISUALIZE_APP_NAME } from '../../../common/constants';
 import type { VisualizeUserContent } from '../components/visualize_listing';
 
 export const getVisualizeListItemLinkFn =

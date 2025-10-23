@@ -11,21 +11,21 @@ import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  euiFontSize,
   EuiIcon,
   EuiPanel,
   EuiToolTip,
-  euiFontSize,
   useEuiTheme,
 } from '@elastic/eui';
-import { ExecutionStatus } from '@kbn/workflows';
-import React, { useMemo } from 'react';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import React, { useMemo } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { useGetFormattedDateTime } from '../../../shared/ui/use_formatted_date';
+import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import { ExecutionStatus } from '@kbn/workflows';
+import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations';
 import { getExecutionStatusColors, getExecutionStatusIcon } from '../../../shared/ui/status_badge';
-import { formatDuration } from '../../../shared/lib/format_duration';
+import { useGetFormattedDateTime } from '../../../shared/ui/use_formatted_date';
 
 interface WorkflowExecutionListItemProps {
   status: ExecutionStatus;

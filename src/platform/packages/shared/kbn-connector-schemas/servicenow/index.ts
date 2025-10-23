@@ -30,4 +30,5 @@ export type {
   ExecutorSubActionCommonFieldsParams,
   ServiceNowPublicConfigurationType,
   ExecutorSubActionHandshakeParams,
+  ServiceNowActionParams,
 } from './types/latest';

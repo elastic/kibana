@@ -10,9 +10,16 @@ import type {
   ActionParamsProps,
   UserConfiguredActionConnector,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
-import type { Config, Secrets, Params } from '@kbn/connector-schemas/jira-service-management';
+import type {
+  Config as JiraServiceManagementActionConfig,
+  Secrets as JiraServiceManagementActionSecrets,
+  Params as JiraServiceManagementActionParams,
+} from '@kbn/connector-schemas/jira-service-management';
 
-export type JiraServiceManagementActionConnector = UserConfiguredActionConnector<Config, Secrets>;
+export type JiraServiceManagementActionConnector = UserConfiguredActionConnector<
+  JiraServiceManagementActionConfig,
+  JiraServiceManagementActionSecrets
+>;
 
 /**
  * These fields will never be sent to JSM or the sub actions framework. This allows us to pass a value to the
@@ -23,13 +30,17 @@ interface JsonEditorError {
   jsonEditorError: boolean;
 }
 
-export type JiraServiceManagementConnectorTypeParams = Params & JsonEditorError;
+export type JiraServiceManagementConnectorTypeParams = JiraServiceManagementActionParams &
+  JsonEditorError;
 
-export type ValidationParams = RecursivePartial<Params> & JsonEditorError;
+export type ValidationParams = RecursivePartial<JiraServiceManagementActionParams> &
+  JsonEditorError;
 
-type EditActionParameters = Parameters<ActionParamsProps<Params>['editAction']>;
+type EditActionParameters = Parameters<
+  ActionParamsProps<JiraServiceManagementActionParams>['editAction']
+>;
 
 export type EditActionCallback = (
   key: EditActionParameters[0],
   value: EditActionParameters[1]
-) => ReturnType<ActionParamsProps<Params>['editAction']>;
+) => ReturnType<ActionParamsProps<JiraServiceManagementActionParams>['editAction']>;

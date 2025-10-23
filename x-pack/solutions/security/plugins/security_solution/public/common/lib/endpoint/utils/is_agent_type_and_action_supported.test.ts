@@ -21,13 +21,9 @@ describe('isAgentTypeAndActionSupported() util', () => {
   const enableFeatures = (overrides: Partial<ExperimentalFeatures> = {}): void => {
     (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
       ...allowedExperimentalValues,
-      responseActionsMSDefenderEndpointEnabled: true,
       responseActionsSentinelOneRunScriptEnabled: true,
       ...overrides,
     });
-  };
-  const disableMicrosoftIsolationFeature = () => {
-    enableFeatures({ responseActionsMSDefenderEndpointEnabled: false });
   };
   const disableS1RunScript = () => {
     enableFeatures({ responseActionsSentinelOneRunScriptEnabled: false });
@@ -63,7 +59,6 @@ describe('isAgentTypeAndActionSupported() util', () => {
     ${'microsoft_defender_endpoint'} | ${undefined}   | ${undefined}   | ${true}       | ${undefined}
     ${'microsoft_defender_endpoint'} | ${'isolate'}   | ${'manual'}    | ${true}       | ${undefined}
     ${'microsoft_defender_endpoint'} | ${'isolate'}   | ${'automated'} | ${false}      | ${undefined}
-    ${'microsoft_defender_endpoint'} | ${'isolate'}   | ${undefined}   | ${false}      | ${disableMicrosoftIsolationFeature}
   `(
     'should return `$expectedValue` for $agentType $actionName ($actionType)',
     ({

@@ -11,7 +11,7 @@ import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 
 import type { ConnectorTypeConfigType } from '@kbn/connector-schemas/webhook';
-import { AuthType, SSLCertType, WebhookMethods } from '@kbn/connector-schemas/common/auth';
+import { AuthType, SSLCertType } from '@kbn/connector-schemas/common/auth';
 import { ADDITIONAL_FIELD_CONFIG_ERROR } from './translations';
 
 function validateUrl(configuredUrl: string) {
@@ -133,19 +133,4 @@ export function validateConnectorTypeConfig(
   validateCertType(configObject, configurationUtilities);
   validateAdditionalFields(configObject);
   validateOAuth2(configObject);
-}
-
-export function validateParamsForMethod({
-  method,
-  data,
-}: {
-  method: WebhookMethods;
-  data?: string;
-}) {
-  if ([WebhookMethods.GET, WebhookMethods.DELETE].includes(method) && data !== undefined)
-    throw new Error(
-      i18n.translate('xpack.stackConnectors.webhook.invalidParamsForMethod', {
-        defaultMessage: `error validation webhook action: invalid params for method`,
-      })
-    );
 }

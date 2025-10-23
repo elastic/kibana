@@ -35,9 +35,9 @@ export function getWorkflowContextSchema(definition: WorkflowYaml) {
               valueSchema = z.any();
               if (opts.length > 0) {
                 const literals = opts.map((o) => z.literal(o)) as [
-                  z.ZodLiteral<any>,
-                  z.ZodLiteral<any>,
-                  ...z.ZodLiteral<any>[]
+                  z.ZodLiteral<any>, // eslint-disable-line @typescript-eslint/no-explicit-any
+                  z.ZodLiteral<any>, // eslint-disable-line @typescript-eslint/no-explicit-any
+                  ...z.ZodLiteral<any>[] // eslint-disable-line @typescript-eslint/no-explicit-any
                 ];
                 valueSchema = z.union(literals);
               }

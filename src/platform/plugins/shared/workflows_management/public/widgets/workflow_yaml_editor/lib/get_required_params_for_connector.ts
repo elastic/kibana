@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import { type ConnectorTypeInfo, isEnhancedInternalConnector } from '@kbn/workflows';
 import { z } from '@kbn/zod';
-import { isEnhancedInternalConnector, type ConnectorTypeInfo } from '@kbn/workflows';
 import { getCachedAllConnectors } from './connectors_cache';
 
 export interface RequiredParamForConnector {
@@ -131,6 +133,7 @@ function extractRequiredParamsFromSchema(
 
       // Skip common non-parameter fields
       if (['pretty', 'human', 'error_trace', 'source', 'filter_path'].includes(key)) {
+        // eslint-disable-next-line no-continue
         continue;
       }
 

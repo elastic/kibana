@@ -39,6 +39,7 @@ describe('Endpoint exceptions - preserving behaviour without `endpointExceptions
       login(ROLE.t1_analyst);
       cy.visit(APP_PATH);
 
+      serverlessSecurityHeaders.showMoreItems();
       serverlessSecurityHeaders.openNavigationPanelFor(
         serverlessSecurityHeaders.ENDPOINT_EXCEPTIONS
       );

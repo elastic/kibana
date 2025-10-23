@@ -6,5 +6,3 @@
  */
 
 export type { GetCommonFieldsResponse as ServiceNowGetFieldsResponse } from './connector_types/lib/servicenow/types';
-
-export type { ServiceNowActionParams } from './connector_types';
