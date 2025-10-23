@@ -109,6 +109,7 @@ export const HostCharts = React.forwardRef<HTMLDivElement, Props>(
               dataView={dataView}
               lensAttributes={chart}
               queryField={findInventoryFields('host').id}
+              overrides={{ settings: { legendAction: 'ignore' } }}
             />
           ))}
         </ChartsGrid>
