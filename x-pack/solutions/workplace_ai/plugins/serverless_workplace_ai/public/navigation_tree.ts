@@ -46,13 +46,6 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
               }),
             },
           },
-          {
-            link: 'workplace_ai:agents',
-            spaceBefore: 'l',
-          },
-          {
-            link: 'workplace_ai:integrations',
-          },
         ],
       },
     ],
