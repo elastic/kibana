@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import type {
   NewPackagePolicy,
   NewPackagePolicyInput,
@@ -14,6 +14,7 @@ import type {
 import {
   AWS_CREDENTIALS_TYPE,
   AWS_SETUP_FORMAT,
+  DEFAULT_AWS_CREDENTIALS_TYPE,
   DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE,
 } from '../constants';
 import {
@@ -96,36 +97,24 @@ const updateCloudFormationPolicyTemplate = (
 };
 
 const useCloudFormationTemplate = ({
-  packageInfo,
   newPolicy,
   updatePolicy,
   setupFormat,
   awsPolicyType,
-  templateName,
 }: {
-  packageInfo: PackageInfo;
   newPolicy: NewPackagePolicy;
   updatePolicy: UpdatePolicy;
   setupFormat: AwsSetupFormat;
   awsPolicyType?: string;
-  templateName: string;
 }) => {
   const policyInputCloudFormationTemplate = getAwsCloudFormationTemplate(newPolicy, awsPolicyType);
 
-  if (setupFormat === AWS_SETUP_FORMAT.MANUAL) {
-    if (policyInputCloudFormationTemplate) {
-      updateCloudFormationPolicyTemplate(newPolicy, updatePolicy, undefined, awsPolicyType);
-    }
-    return;
+  // Only clear template when switching to manual mode
+  if (setupFormat === AWS_SETUP_FORMAT.MANUAL && policyInputCloudFormationTemplate) {
+    updateCloudFormationPolicyTemplate(newPolicy, updatePolicy, undefined, awsPolicyType);
   }
-  const templateUrl = getCloudFormationDefaultValue(packageInfo, templateName);
 
-  // If the template is not available, do not update the policy
-  if (templateUrl === '') return;
-
-  // If the template is already set, do not update the policy
-  if (policyInputCloudFormationTemplate === templateUrl) return;
-  updateCloudFormationPolicyTemplate(newPolicy, updatePolicy, templateUrl, awsPolicyType);
+  // Note: Initial CloudFormation template setting is now handled in preload logic
 };
 
 export const useAwsCredentialsForm = ({
@@ -146,27 +135,22 @@ export const useAwsCredentialsForm = ({
   const lastManualCredentialsType = useRef<string | undefined>(undefined);
 
   // Assumes if the credentials type is not set, the default is CloudFormation
-  const awsCredentialsType =
-    (getAwsCredentialsType(input) as Exclude<AwsCredentialsType, 'cloud_connectors'>) ||
-    AWS_SETUP_FORMAT.CLOUD_FORMATION;
+  const resolvedCredentialsType = getAwsCredentialsType(input) as Exclude<
+    AwsCredentialsType,
+    'cloud_connectors'
+  >;
+  const awsCredentialsType = resolvedCredentialsType || DEFAULT_AWS_CREDENTIALS_TYPE;
 
-  const group = options[awsCredentialsType];
-  const fields = getInputVarsFields(input, group.fields);
+  // Ensure we have a valid group, fallback to any available option if needed
+  let group = options[awsCredentialsType];
+  if (!group && Object.keys(options).length > 0) {
+    // Fallback to the first available credential type if the requested one doesn't exist
+    const fallbackType = Object.keys(options)[0];
+    group = options[fallbackType as keyof typeof options];
+  }
+
+  const fields = getInputVarsFields(input, group?.fields || {});
   const fieldsSnapshot = useRef({});
-
-  useEffect(() => {
-    // This should ony set the credentials after the initial render
-    if (!getAwsCredentialsType(input) && !lastManualCredentialsType.current) {
-      updatePolicy({
-        updatedPolicy: updatePolicyWithInputs(newPolicy, awsPolicyType, {
-          'aws.credentials.type': {
-            value: awsCredentialsType,
-            type: 'text',
-          },
-        }),
-      });
-    }
-  }, [awsCredentialsType, awsPolicyType, input, newPolicy, updatePolicy]);
 
   if (isValid && setupFormat === AWS_SETUP_FORMAT.CLOUD_FORMATION && !hasCloudFormationTemplate) {
     updatePolicy({
@@ -177,11 +161,9 @@ export const useAwsCredentialsForm = ({
 
   useCloudFormationTemplate({
     updatePolicy,
-    packageInfo,
     newPolicy,
     setupFormat,
     awsPolicyType,
-    templateName,
   });
 
   const onSetupFormatChange = (newSetupFormat: AwsSetupFormat) => {

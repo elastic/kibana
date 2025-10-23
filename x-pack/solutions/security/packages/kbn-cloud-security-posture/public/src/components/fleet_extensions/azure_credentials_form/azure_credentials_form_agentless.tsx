@@ -16,14 +16,18 @@ import type {
   NewPackagePolicyInput,
   PackageInfo,
 } from '@kbn/fleet-plugin/common';
-import type { SetupTechnology } from '@kbn/fleet-plugin/common/types';
+import type { SetupTechnology } from '@kbn/fleet-plugin/public';
 import { AZURE_LAUNCH_CLOUD_CONNECTOR_ARM_TEMPLATE_TEST_SUBJ } from '@kbn/cloud-security-posture-common';
 import {
   ARM_TEMPLATE_EXTERNAL_DOC_URL,
   AZURE_CREDENTIALS_TYPE,
   AZURE_PROVIDER,
 } from '../constants';
-import { getCloudCredentialVarsConfig, updatePolicyWithInputs } from '../utils';
+import {
+  getCloudCredentialVarsConfig,
+  updatePolicyWithInputs,
+  preloadPolicyWithCloudCredentials,
+} from '../utils';
 import type { AzureOptions } from './get_azure_credentials_form_options';
 import {
   getAgentlessCredentialsType,
@@ -75,7 +79,23 @@ export const AzureCredentialsFormAgentless = ({
     azurePolicyType,
     isAzureCloudConnectorEnabled,
     azureCloudConnectorRemoteRoleTemplate,
+    templateName,
+    azureOrganizationEnabled,
   } = useCloudSetup();
+
+  // Preload policy with default Azure credentials to reduce Fleet updates
+  preloadPolicyWithCloudCredentials({
+    provider: 'azure',
+    input,
+    newPolicy,
+    updatePolicy,
+    policyType: azurePolicyType,
+    packageInfo,
+    templateName: templateName || '',
+    setupTechnology,
+    isCloudConnectorEnabled: isAzureCloudConnectorEnabled,
+    organizationEnabled: azureOrganizationEnabled,
+  });
 
   const azureCredentialsType = getAgentlessCredentialsType(input, isAzureCloudConnectorEnabled);
 

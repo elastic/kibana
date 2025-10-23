@@ -362,7 +362,7 @@ describe('getDefaultGcpHiddenVars', () => {
         },
       ],
     } as PackageInfo;
-    const result = getDefaultGcpHiddenVars(packageInfo, setupTechnology);
+    const result = getDefaultGcpHiddenVars(packageInfo, TEMPLATE_NAME, setupTechnology);
 
     expect(result).toMatchObject({
       'gcp.credentials.type': { value: 'credentials-file', type: 'text' },

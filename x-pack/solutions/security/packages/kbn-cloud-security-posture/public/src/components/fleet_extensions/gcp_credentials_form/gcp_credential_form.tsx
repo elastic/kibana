@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import { css } from '@emotion/react';
 import { EuiCallOut, EuiFieldText, EuiForm, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import { type NewPackagePolicy } from '@kbn/fleet-plugin/public';
@@ -17,15 +17,16 @@ import {
   GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS,
   GCP_ORGANIZATION_ACCOUNT,
 } from '@kbn/cloud-security-posture-common';
+import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import type { CspRadioOption } from '../../csp_boxed_radio_group';
 import { RadioGroup } from '../../csp_boxed_radio_group';
 import {
   fieldIsInvalid,
-  getCloudShellDefaultValue,
   updatePolicyWithInputs,
   gcpField,
   getGcpCredentialsType,
   getGcpInputVarsFields,
+  preloadPolicyWithCloudCredentials,
 } from '../utils';
 import { GCP_CREDENTIALS_TYPE, GCP_SETUP_ACCESS } from '../constants';
 import { ReadDocumentation } from '../common';
@@ -205,75 +206,6 @@ const getSetupFormatFromInput = (input: NewPackagePolicyInput): SetupFormatGCP =
   return GCP_SETUP_ACCESS.CLOUD_SHELL;
 };
 
-const getGoogleCloudShellUrl = (newPolicy: NewPackagePolicy, policyType?: string) => {
-  if (!policyType) {
-    return undefined;
-  }
-  const template: string | undefined = newPolicy?.inputs?.find((i) => i.type === policyType)?.config
-    ?.cloud_shell_url?.value;
-
-  return template || undefined;
-};
-
-const updateCloudShellUrl = (
-  newPolicy: NewPackagePolicy,
-  updatePolicy: UpdatePolicy,
-  templateUrl: string | undefined,
-  policyType?: string
-) => {
-  if (!policyType) {
-    return;
-  }
-
-  updatePolicy?.({
-    updatedPolicy: {
-      ...newPolicy,
-      inputs: newPolicy.inputs.map((input) => {
-        if (input.type === policyType) {
-          return {
-            ...input,
-            config: { cloud_shell_url: { value: templateUrl } },
-          };
-        }
-        return input;
-      }),
-    },
-  });
-};
-
-const useCloudShellUrl = ({
-  packageInfo,
-  newPolicy,
-  updatePolicy,
-  setupFormat,
-}: {
-  packageInfo: PackageInfo;
-  newPolicy: NewPackagePolicy;
-  updatePolicy: UpdatePolicy;
-  setupFormat: SetupFormatGCP;
-}) => {
-  const { gcpPolicyType, templateName } = useCloudSetup();
-  useEffect(() => {
-    const policyInputCloudShellUrl = getGoogleCloudShellUrl(newPolicy, gcpPolicyType);
-    if (setupFormat === GCP_SETUP_ACCESS.MANUAL) {
-      if (policyInputCloudShellUrl) {
-        updateCloudShellUrl(newPolicy, updatePolicy, undefined, gcpPolicyType);
-      }
-      return;
-    }
-    const templateUrl = getCloudShellDefaultValue(packageInfo, templateName);
-
-    // If the template is not available, do not update the policy
-    if (templateUrl === '') return;
-
-    // If the template is already set, do not update the policy
-    if (policyInputCloudShellUrl === templateUrl) return;
-
-    updateCloudShellUrl(newPolicy, updatePolicy, templateUrl, gcpPolicyType);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [newPolicy?.vars?.cloud_shell_url, newPolicy, packageInfo, setupFormat, gcpPolicyType]);
-};
-
 export const GcpCredentialsForm = ({
   input,
   newPolicy,
@@ -283,7 +215,23 @@ export const GcpCredentialsForm = ({
   isEditPage,
   hasInvalidRequiredVars,
 }: GcpFormProps) => {
-  const { gcpEnabled, gcpPolicyType, gcpOverviewPath } = useCloudSetup();
+  const { gcpEnabled, gcpPolicyType, gcpOverviewPath, templateName, gcpOrganizationEnabled } =
+    useCloudSetup();
+
+  // Preload policy with default GCP credentials to reduce Fleet updates
+  preloadPolicyWithCloudCredentials({
+    provider: 'gcp',
+    input,
+    newPolicy,
+    updatePolicy,
+    policyType: gcpPolicyType,
+    packageInfo,
+    templateName: templateName || '',
+    setupTechnology: SetupTechnology.AGENT_BASED,
+    isCloudConnectorEnabled: false, // GCP doesn't support cloud connectors yet
+    organizationEnabled: gcpOrganizationEnabled,
+  });
+
   /* Create a subset of properties from GcpField to use for hiding value of credentials json and credentials file when user switch from Manual to Cloud Shell, we wanna keep Project and Organization ID */
   const { 'gcp.credentials.file': file, 'gcp.credentials.json': json } = gcpField.fields;
   const subsetOfGcpField = {
@@ -299,12 +247,6 @@ export const GcpCredentialsForm = ({
   const accountType = input.streams?.[0]?.vars?.['gcp.account_type']?.value;
   const isOrganization = accountType === 'organization-account';
 
-  useCloudShellUrl({
-    packageInfo,
-    newPolicy,
-    updatePolicy,
-    setupFormat,
-  });
   const onSetupFormatChange = (newSetupFormat: SetupFormatGCP) => {
     if (newSetupFormat === GCP_SETUP_ACCESS.CLOUD_SHELL) {
       // We need to store the current manual fields to restore them later
@@ -344,7 +286,7 @@ export const GcpCredentialsForm = ({
     return (
       <>
         <EuiSpacer size="l" />
-        <EuiCallOut color="warning">
+        <EuiCallOut announceOnMount color="warning">
           <FormattedMessage
             id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.gcpNotSupportedMessage"
             defaultMessage="CIS GCP is not supported on the current Integration version, please upgrade your integration to the latest version to use CIS GCP"
