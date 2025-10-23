@@ -33,12 +33,43 @@ import { StreamNode, StreamNodeData } from './custom_node';
 import { PartitionEdge } from './partition_edge';
 import { css } from '@emotion/css';
 import { useStreamDocCountsFetch } from '../../hooks/use_streams_doc_counts_fetch';
+import Dagre from '@dagrejs/dagre';
 
-const LAYOUT_CONSTANTS = {
-  NODE_WIDTH: 200,
-  LEVEL_HEIGHT: 150,
-  SIBLING_SPACING: 50
+const NODE_DIMENSIONS = {
+  WIDTH: 200,
+  HEIGHT: 100,
 }
+
+const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = 'TB') => {
+  const g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
+  g.setGraph({ rankdir: direction });
+
+  edges.forEach((edge) => {
+    g.setEdge(edge.source, edge.target);
+  });
+
+  nodes.forEach((node) => {
+    g.setNode(node.id, {
+      width: NODE_DIMENSIONS.WIDTH,
+      height: NODE_DIMENSIONS.HEIGHT
+    });
+  });
+
+  Dagre.layout(g);
+
+  return {
+    nodes: nodes.map((node) => {
+      const position = g.node(node.id);
+      return {
+        ...node,
+        position: {
+          x: position.x - NODE_DIMENSIONS.WIDTH / 2,
+          y: position.y - NODE_DIMENSIONS.HEIGHT / 2,
+        },
+      };
+    }), edges
+  };
+};
 
 const nodeTypes = {
   'streamNode': StreamNode,
@@ -130,16 +161,14 @@ const Graph = ({ streams, loading = false }: StreamsGraphProps) => {
     const nodes: Node<StreamNodeData>[] = [];
     const edges: Edge[] = [];
 
-    const buildGraph = (treeNodes: any[], level = 0, parentX = 0, parentId?: string) => {
-      treeNodes.forEach((node, index) => {
+    const buildGraph = (treeNodes: any[], level = 0, parentId?: string) => {
+      treeNodes.forEach((node) => {
         const nodeId = node.stream.name;
-        const x = parentX + (index - (treeNodes.length - 1) / 2) * (LAYOUT_CONSTANTS.NODE_WIDTH + LAYOUT_CONSTANTS.SIBLING_SPACING);
-        const y = level * LAYOUT_CONSTANTS.LEVEL_HEIGHT;
 
         const reactFlowNode: Node<StreamNodeData> = {
           id: nodeId,
           type: 'streamNode',
-          position: { x, y },
+          position: { x: 0, y: 0 },
           data: {
             label: node.stream.name,
             type: node.type || 'wired',
@@ -177,15 +206,18 @@ const Graph = ({ streams, loading = false }: StreamsGraphProps) => {
 
         // Recursively process children
         if (node.children && node.children.length > 0) {
-          buildGraph(node.children, level + 1, x, nodeId);
+          buildGraph(node.children, level + 1, nodeId);
         }
       });
     };
 
     buildGraph(trees);
 
-    return { initialNodes: nodes, initialEdges: edges };
-  }, [streams, loading]);
+    // Apply Dagre layout
+    const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(nodes, edges);
+
+    return { initialNodes: layoutedNodes, initialEdges: layoutedEdges };
+  }, [streams, loading, getStreamDocCounts]);
 
   const [nodes, , onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
@@ -198,11 +230,11 @@ const Graph = ({ streams, loading = false }: StreamsGraphProps) => {
   return (
     <EuiPanel paddingSize="l">
       <EuiText>
-        <h3>
-          {i18n.translate('xpack.streams.streamsGraph.title', {
-            defaultMessage: 'Streams Graph',
-          })}
-        </h3>
+            <h3>
+              {i18n.translate('xpack.streams.streamsGraph.title', {
+                defaultMessage: 'Streams Graph',
+              })}
+            </h3>
         <p>
           {i18n.translate('xpack.streams.streamsGraph.description', {
             defaultMessage: 'Visual representation of wired streams and their hierarchical relationships.',
