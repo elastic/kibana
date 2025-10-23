@@ -10,13 +10,20 @@
 export type { WorkflowEditorState, RootState, AppDispatch, WorkflowEditorStore } from './types';
 
 // Action creators
-export { setYamlString, clearComputedData, setCursorPosition, setStepExecutions } from './slice';
+export {
+  setYamlString,
+  clearComputedData,
+  setCursorPosition,
+  setStepExecutions,
+  setConnectors,
+} from './slice';
 
 // Store
 export { createWorkflowEditorStore, workflowEditorStore } from './store';
 
 // Selectors
 export {
+  selectWorkflowEditorState,
   selectYamlString,
   selectYamlDocument,
   selectWorkflowLookup,
@@ -25,6 +32,8 @@ export {
   selectStepExecutions,
   selectHighlightedStepId,
   selectWorkflowDefinition,
+  selectConnectorsData,
+  selectSchemaLoose,
 } from './selectors';
 
 // Middleware (if needed for custom store setup)
