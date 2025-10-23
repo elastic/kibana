@@ -30,6 +30,7 @@ jest.mock('../lib/rule_gaps/update/update_gaps', () => ({
 }));
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import type { RawRule, RawRuleAction } from '../types';
+import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 const logger = loggingSystemMock.create().get();
 const taskManagerSetup = taskManagerMock.createSetup();
@@ -392,7 +393,7 @@ describe('BackfillClient', () => {
 
     test('should successfully schedule backfill for rule with actions when runActions=true', async () => {
       actionsClient.getBulk.mockResolvedValue([
-        {
+        createMockConnector({
           id: '987',
           actionTypeId: 'test',
           config: {
@@ -403,12 +404,8 @@ describe('BackfillClient', () => {
             secure: null,
             service: null,
           },
-          isMissingSecrets: false,
           name: 'email connector',
-          isPreconfigured: false,
-          isSystemAction: false,
-          isDeprecated: false,
-        },
+        }),
       ]);
       const mockData = [
         getMockData(),
@@ -614,7 +611,7 @@ describe('BackfillClient', () => {
 
     test('should successfully schedule backfill for rule with rule-level notifyWhen field', async () => {
       actionsClient.getBulk.mockResolvedValue([
-        {
+        createMockConnector({
           id: '987',
           actionTypeId: 'test',
           config: {
@@ -625,12 +622,8 @@ describe('BackfillClient', () => {
             secure: null,
             service: null,
           },
-          isMissingSecrets: false,
           name: 'email connector',
-          isPreconfigured: false,
-          isSystemAction: false,
-          isDeprecated: false,
-        },
+        }),
       ]);
       const mockData = [
         getMockData(),
@@ -997,7 +990,7 @@ describe('BackfillClient', () => {
       actionsClient.isSystemAction.mockReturnValueOnce(false);
       actionsClient.isSystemAction.mockReturnValueOnce(true);
       actionsClient.getBulk.mockResolvedValue([
-        {
+        createMockConnector({
           id: '987',
           actionTypeId: 'test',
           config: {
@@ -1008,22 +1001,14 @@ describe('BackfillClient', () => {
             secure: null,
             service: null,
           },
-          isMissingSecrets: false,
           name: 'email connector',
-          isPreconfigured: false,
-          isSystemAction: false,
-          isDeprecated: false,
-        },
-        {
+        }),
+        createMockConnector({
           id: 'system_456',
           actionTypeId: 'test.system',
           name: 'System action: .cases',
-          config: {},
-          isDeprecated: false,
-          isMissingSecrets: false,
-          isPreconfigured: false,
           isSystemAction: true,
-        },
+        }),
       ]);
       const mockData = [getMockData()];
       const rule = getMockRule({
@@ -1149,7 +1134,7 @@ describe('BackfillClient', () => {
 
     test('should schedule backfill for rule with unsupported actions and return warning', async () => {
       actionsClient.getBulk.mockResolvedValue([
-        {
+        createMockConnector({
           id: '987',
           actionTypeId: 'test',
           config: {
@@ -1160,12 +1145,8 @@ describe('BackfillClient', () => {
             secure: null,
             service: null,
           },
-          isMissingSecrets: false,
           name: 'email connector',
-          isPreconfigured: false,
-          isSystemAction: false,
-          isDeprecated: false,
-        },
+        }),
       ]);
       const mockData = [
         getMockData(),
@@ -1370,7 +1351,7 @@ describe('BackfillClient', () => {
 
     test('should schedule backfill for rule with unsupported rule-level notifyWhen field and return warning', async () => {
       actionsClient.getBulk.mockResolvedValue([
-        {
+        createMockConnector({
           id: '987',
           actionTypeId: 'test',
           config: {
@@ -1381,12 +1362,8 @@ describe('BackfillClient', () => {
             secure: null,
             service: null,
           },
-          isMissingSecrets: false,
           name: 'email connector',
-          isPreconfigured: false,
-          isSystemAction: false,
-          isDeprecated: false,
-        },
+        }),
       ]);
       const mockData = [
         getMockData(),

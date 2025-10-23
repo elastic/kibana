@@ -644,6 +644,9 @@
           },
           "value": {
             "type": "keyword"
+          },
+          "description": {
+            "type": "keyword"
           }
         },
         "type": "nested"
