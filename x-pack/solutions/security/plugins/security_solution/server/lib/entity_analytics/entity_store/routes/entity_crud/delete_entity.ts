@@ -15,6 +15,7 @@ import {
   BadCRUDRequestError,
   EngineNotRunningError,
   DocumentVersionConflictError,
+  EntityNotFoundError,
 } from '../../errors';
 import { CapabilityNotEnabledError } from '../../errors/capability_not_enabled_error';
 
@@ -51,7 +52,11 @@ export const deleteEntity = (router: EntityAnalyticsRoutesDeps['router'], logger
             .getEntityStoreCrudClient()
             .deleteEntity(request.params.entityType, request.params.entityId);
 
-          return response.ok();
+          return response.ok({
+            body: {
+              deleted: true,
+            },
+          });
         } catch (error) {
           if (
             error instanceof EngineNotRunningError ||
@@ -59,6 +64,13 @@ export const deleteEntity = (router: EntityAnalyticsRoutesDeps['router'], logger
           ) {
             // Service Unavailable 503
             return response.customError({ statusCode: 503, body: error as EngineNotRunningError });
+          }
+
+          if (error instanceof EntityNotFoundError) {
+            return response.customError({
+              statusCode: 404,
+              body: error as EntityNotFoundError,
+            });
           }
 
           if (error instanceof BadCRUDRequestError) {

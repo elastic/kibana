@@ -176,7 +176,7 @@ export class EntityStoreCrudClient {
       throw new EntityNotFoundError(type, id);
     }
 
-    if (deleteByQueryResp.failures) {
+    if (deleteByQueryResp.failures !== undefined && deleteByQueryResp.failures.length > 0) {
       throw new Error(`Failed to delete entity of type '${type}' and ID '${id}'`);
     }
 
