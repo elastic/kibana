@@ -36,7 +36,7 @@ export const ServiceProviderFilter: React.FC<Props> = ({
   const filteredOptions = useMemo(() => {
     const options: any = [];
     uniqueProviders.forEach((provider) => {
-      const { name } = SERVICE_PROVIDERS[provider];
+      const { name } = SERVICE_PROVIDERS[provider] ?? {};
       options.push({
         key: provider,
         label: name,
