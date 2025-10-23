@@ -309,6 +309,12 @@ export class TestSubjects extends FtrService {
     return await element.isEuiEnabled();
   }
 
+  public async isEuiDisabled(selector: string): Promise<boolean> {
+    this.log.debug(`TestSubjects.isEuiDisabled(${selector})`);
+    const element = await this.find(selector);
+    return await element.isEuiDisabled();
+  }
+
   public async isDisplayed(selector: string, timeout?: number): Promise<boolean> {
     this.log.debug(`TestSubjects.isDisplayed(${selector})`);
     const element = await this.find(selector, timeout);

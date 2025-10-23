@@ -120,6 +120,6 @@ describe('DeleteConfirmModal', () => {
     );
 
     const deleteButton = getByTestId('confirmModalConfirmButton');
-    expect(deleteButton.closest('button')).toHaveAttribute('disabled');
+    expect(deleteButton.closest('button')).toBeEuiDisabled();
   });
 });

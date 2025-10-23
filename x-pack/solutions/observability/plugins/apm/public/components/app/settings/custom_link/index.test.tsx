@@ -107,7 +107,7 @@ describe('CustomLink', () => {
         </LicenseContext.Provider>
       );
       const createButton = getByTestId('createButton') as HTMLButtonElement;
-      expect(createButton.disabled).toBeFalsy();
+      expect(createButton).not.toBeEuiDisabled();
     });
 
     it('enables edit button on custom link table when user has write privileges', () => {
@@ -381,7 +381,7 @@ describe('CustomLink', () => {
         </LicenseContext.Provider>
       );
       const createButton = getByTestId('createButton') as HTMLButtonElement;
-      expect(createButton.disabled).toBeTruthy();
+      expect(createButton).toBeEuiDisabled();
     });
 
     it('removes edit button on custom link table', () => {

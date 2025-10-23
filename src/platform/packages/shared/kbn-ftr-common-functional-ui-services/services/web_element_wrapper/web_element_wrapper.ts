@@ -196,6 +196,15 @@ export class WebElementWrapper {
     });
   }
 
+  public async isEuiDisabled() {
+    return await this.retryCall(async function isEuiDisabled(wrapper) {
+      const isEnabled = await wrapper._webElement.isEnabled();
+      const isAriaDisabled = await wrapper._webElement.getAttribute('aria-disabled');
+
+      return !isEnabled || isAriaDisabled === 'true';
+    });
+  }
+
   /**
    * Tests whether this element is selected.
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#isSelected

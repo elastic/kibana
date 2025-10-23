@@ -257,7 +257,7 @@ describe('Event filter flyout', () => {
     it('should start with "add event filter" button disabled', () => {
       render();
       const confirmButton = renderResult.getByTestId('add-exception-confirm-button');
-      expect(confirmButton.hasAttribute('disabled')).toBeTruthy();
+      expect(confirmButton).toBeEuiDisabled();
     });
 
     it('should close when click on cancel button', async () => {
@@ -300,7 +300,7 @@ describe('Event filter flyout', () => {
     it('should display "Add event filter"/"Save" button disabled when form hasn\'t changed', () => {
       render();
       const confirmButton = renderResult.getByTestId('add-exception-confirm-button');
-      expect(confirmButton.hasAttribute('disabled')).toBeTruthy();
+      expect(confirmButton).toBeEuiDisabled();
     });
 
     it('should enable "Add event filter"/"Save" button when user enters/modifies filter name', async () => {
@@ -309,7 +309,7 @@ describe('Event filter flyout', () => {
       await user.type(renderResult.getByTestId('eventFilters-form-name-input'), 'a');
 
       const confirmButton = renderResult.getByTestId('add-exception-confirm-button');
-      expect(confirmButton.hasAttribute('disabled')).toBeFalsy();
+      expect(confirmButton).not.toBeEuiDisabled();
     });
 
     it('should prevent close when submitting data', async () => {
@@ -346,7 +346,7 @@ describe('Event filter flyout', () => {
       render();
 
       const confirmButton = renderResult.getByTestId('add-exception-confirm-button');
-      expect(confirmButton.hasAttribute('disabled')).toBeFalsy();
+      expect(confirmButton).not.toBeEuiDisabled();
       expect(onCancelMock).toHaveBeenCalledTimes(0);
       await user.click(confirmButton);
 

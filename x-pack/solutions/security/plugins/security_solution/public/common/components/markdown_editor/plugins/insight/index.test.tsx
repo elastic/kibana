@@ -111,10 +111,7 @@ describe('insight component renderer', () => {
           />
         </TestProviders>
       );
-      expect(getByText((_, element) => element?.tagName === 'BUTTON')).toHaveAttribute(
-        'disabled',
-        ''
-      );
+      expect(getByText((_, element) => element?.tagName === 'BUTTON')).toBeEuiDisabled();
     });
   });
 });

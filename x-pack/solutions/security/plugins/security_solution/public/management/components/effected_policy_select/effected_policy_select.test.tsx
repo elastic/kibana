@@ -147,9 +147,7 @@ describe('when using EffectedPolicySelect component', () => {
     componentProps.disabled = true;
     const { getByTestId } = await render();
 
-    expect((getByTestId('test-byPolicyGlobalButtonGroup') as HTMLFieldSetElement).disabled).toEqual(
-      true
-    );
+    expect(getByTestId('test-byPolicyGlobalButtonGroup') as HTMLFieldSetElement).toBeEuiDisabled();
   });
 
   it('should call onChange when artifact is set to Per-Policy', async () => {

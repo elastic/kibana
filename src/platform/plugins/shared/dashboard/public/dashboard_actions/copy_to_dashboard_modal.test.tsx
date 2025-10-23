@@ -77,7 +77,7 @@ describe('CopyToDashboardModal', () => {
       const result = render(<CopyToDashboardModal api={api} closeModal={closeModalMock} />);
 
       await waitFor(() =>
-        expect(result.container.querySelector('#new-dashboard-option')).toBeEnabled()
+        expect(result.container.querySelector('#new-dashboard-option')).toBeEuiEnabled()
       );
     });
 
@@ -110,7 +110,7 @@ describe('CopyToDashboardModal', () => {
         // Click submit button
         const submitButton = result.container.querySelector('[data-test-subj=confirmCopyToButton]');
         expect(submitButton).not.toBeNull();
-        expect(submitButton).toBeEnabled();
+        expect(submitButton).toBeEuiEnabled();
         userEvent.click(submitButton!);
       });
 
@@ -157,7 +157,7 @@ describe('CopyToDashboardModal', () => {
         // Click submit button
         const submitButton = result.container.querySelector('[data-test-subj=confirmCopyToButton]');
         expect(submitButton).not.toBeNull();
-        expect(submitButton).toBeEnabled();
+        expect(submitButton).toBeEuiEnabled();
         userEvent.click(submitButton!);
       });
 

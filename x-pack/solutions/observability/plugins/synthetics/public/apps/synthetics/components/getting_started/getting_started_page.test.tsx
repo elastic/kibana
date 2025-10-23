@@ -101,7 +101,7 @@ describe('GettingStartedPage', () => {
 
     expect(getByRole('heading', { name: 'Create private location', level: 2 }));
     expect(getByText('No agent policies found')).toBeInTheDocument();
-    expect(getByRole('button', { name: 'Create agent policy' })).not.toBeEnabled();
+    expect(getByRole('button', { name: 'Create agent policy' })).not.toBeEuiEnabled();
     expect(queryByLabelText('Location name')).not.toBeInTheDocument();
     expect(queryByLabelText('Agent policy')).not.toBeInTheDocument();
   });

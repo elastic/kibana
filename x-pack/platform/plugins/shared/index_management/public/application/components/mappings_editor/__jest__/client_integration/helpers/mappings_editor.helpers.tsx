@@ -8,6 +8,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import type { ReactWrapper } from 'enzyme';
+import { hasEuiDisabledProp } from '@elastic/eui/lib/test/enzyme/enzyme_matchers';
 import type { TestBed } from '@kbn/test-jest-helpers';
 import { registerTestBed, findTestSubject } from '@kbn/test-jest-helpers';
 
@@ -197,7 +198,7 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
   };
 
   const isUpdateButtonDisabled = () =>
-    find('mappingsEditorFieldEdit.editFieldUpdateButton').props().disabled;
+    hasEuiDisabledProp(find('mappingsEditorFieldEdit.editFieldUpdateButton').props());
 
   const showAdvancedSettings = async () => {
     if (find('mappingsEditorFieldEdit.advancedSettings').props().style.display === 'block') {

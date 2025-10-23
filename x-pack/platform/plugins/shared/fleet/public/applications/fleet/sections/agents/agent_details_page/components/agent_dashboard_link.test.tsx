@@ -100,7 +100,7 @@ describe('AgentDashboardLink', () => {
 
     expect(result.queryByRole('link')).toBeNull();
     expect(result.queryByRole('button')).not.toBeNull();
-    expect(result.getByRole('button').hasAttribute('disabled')).toBeTruthy();
+    expect(result.getByRole('button')).toBeEuiDisabled();
   });
 
   it('should link to the agent policy settings tab if logs and metrics are not enabled for that policy', async () => {
@@ -162,8 +162,6 @@ describe('AgentDashboardLink', () => {
       />
     );
 
-    expect(
-      result.getByTestId('agentDetails.enableLogsAndMetricsButton').hasAttribute('disabled')
-    ).toBeTruthy();
+    expect(result.getByTestId('agentDetails.enableLogsAndMetricsButton')).toBeEuiDisabled();
   });
 });

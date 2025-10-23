@@ -53,7 +53,7 @@ async function clickFieldSaveButton(wrapper: HTMLElement, buttonName: string): P
   // Wait for async validation to finish.
   // It has been noticed some fields (like "EQL") can take more than 500ms to validate since
   // it sums up with the 300ms debounce time.
-  await waitFor(() => expect(saveButton).toBeEnabled(), {
+  await waitFor(() => expect(saveButton).toBeEuiEnabled(), {
     timeout: 1500,
   });
 

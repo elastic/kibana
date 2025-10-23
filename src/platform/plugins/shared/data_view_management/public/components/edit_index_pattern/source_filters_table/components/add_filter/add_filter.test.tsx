@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
+import { screen } from '@elastic/eui/lib/test/rtl';
+import { fireEvent } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { AddFilter } from './add_filter';
@@ -48,7 +49,7 @@ describe('AddFilter', () => {
     renderAddFilterComponent({ onAddFilter });
 
     await user.type(screen.getByTestId('fieldFilterInput'), 'tim*');
-    await user.click(screen.getByText('Add'));
+    await user.click(screen.getByTestSubject('addFieldFilterButton'));
     expect(onAddFilter).toBeCalledWith('tim*');
   });
 
@@ -60,7 +61,9 @@ describe('AddFilter', () => {
 
     // Set a value in the input field
     await user.type(screen.getByTestId('fieldFilterInput'), ' ');
-    await user.click(screen.getByText('Add'));
+    // The button is disabled and it can't be clicked in UI (via userEvent);
+    // programmatically clicking it with fireEvent to ensure the callback is not called
+    fireEvent.click(screen.getByTestSubject('addFieldFilterButton'));
     expect(onAddFilter).not.toBeCalled();
   });
 

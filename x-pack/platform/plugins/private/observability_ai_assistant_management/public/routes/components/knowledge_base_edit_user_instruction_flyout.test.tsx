@@ -204,7 +204,7 @@ describe('KnowledgeBaseEditUserInstructionFlyout', () => {
     )) as HTMLButtonElement;
     await act(async () => {
       fireEvent.click(saveButton);
-      expect(saveButton.disabled).toBe(true);
+      expect(saveButton).toBeEuiDisabled();
     });
 
     expect(deleteMock).not.toHaveBeenCalled();

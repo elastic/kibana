@@ -108,7 +108,7 @@ describe('PolicySelector component', () => {
 
     expect(getByTestId('test-searchbar')).toBeTruthy();
     expect(getByTestId('test-viewSelectedButton')).toBeTruthy();
-    expect((getByTestId('test-viewSelectedButton') as HTMLButtonElement).disabled).toBe(true);
+    expect(getByTestId('test-viewSelectedButton') as HTMLButtonElement).toBeEuiDisabled();
     expect(getByTestId(testUtils.testIds.policyFetchTotal)).toBeTruthy();
     expect(getByTestId('test-pagination')).toBeTruthy();
     expect(queryByTestId(`test-policy-${testPolicyId1}-checkbox`)).toBeNull();
@@ -120,7 +120,7 @@ describe('PolicySelector component', () => {
     testUtils.clickOnPolicy(testPolicyId1);
 
     expect(getByTestId(testUtils.testIds.policyFetchTotal).textContent).toEqual('1 of 50 selected');
-    expect((getByTestId('test-viewSelectedButton') as HTMLButtonElement).disabled).toBe(false);
+    expect(getByTestId('test-viewSelectedButton') as HTMLButtonElement).not.toBeEuiDisabled();
     expect(props.onChange).toHaveBeenCalledWith([testPolicyId1], []);
   });
 
@@ -349,7 +349,7 @@ describe('PolicySelector component', () => {
     it('should disable search field', async () => {
       const { getByTestId } = await render();
 
-      expect((getByTestId('test-searchbar') as HTMLInputElement).disabled).toBe(true);
+      expect(getByTestId('test-searchbar') as HTMLInputElement).toBeEuiDisabled();
     });
 
     it('should display "un-select all" button', async () => {
@@ -381,7 +381,7 @@ describe('PolicySelector component', () => {
       await testUtils.waitForDataToLoad();
 
       expect(props.onChange).toHaveBeenCalledWith([], []);
-      expect((getByTestId('test-searchbar') as HTMLInputElement).disabled).toBe(false);
+      expect(getByTestId('test-searchbar') as HTMLInputElement).not.toBeEuiDisabled();
       expect(getByTestId(testUtils.testIds.policyFetchTotal).textContent).toEqual(
         '0 of 50 selected'
       );
@@ -676,34 +676,32 @@ describe('PolicySelector component', () => {
 
     [testPolicyId2, testPolicyId3].forEach((policyId) => {
       expect(getByTestId(`test-policy-${policyId}`).getAttribute('aria-disabled')).toEqual('true');
-      expect((getByTestId(`test-policy-${policyId}-checkbox`) as HTMLInputElement).disabled).toBe(
-        true
-      );
+      expect(getByTestId(`test-policy-${policyId}-checkbox`) as HTMLInputElement).toBeEuiDisabled();
     });
 
     // We don't disable custom items since those can be fully controlled by the caller of the component
     expect(getByTestId('customItem1').getAttribute('aria-disabled')).toEqual('true');
-    expect((getByTestId('test-customItem1-checkbox') as HTMLInputElement).disabled).toBe(true);
+    expect(getByTestId('test-customItem1-checkbox') as HTMLInputElement).toBeEuiDisabled();
 
-    expect((getByTestId('test-searchbar') as HTMLInputElement).disabled).toBe(true);
-    expect((getByTestId('test-selectAllButton') as HTMLButtonElement).disabled).toBe(true);
-    expect((getByTestId('test-unselectAllButton') as HTMLButtonElement).disabled).toBe(true);
+    expect(getByTestId('test-searchbar') as HTMLInputElement).toBeEuiDisabled();
+    expect(getByTestId('test-selectAllButton') as HTMLButtonElement).toBeEuiDisabled();
+    expect(getByTestId('test-unselectAllButton') as HTMLButtonElement).toBeEuiDisabled();
 
     // Pagination and View Selected button should NOT be disabled
-    expect((getByTestId('test-viewSelectedButton') as HTMLButtonElement).disabled).toBe(false);
-    expect((getByTestId('pagination-button-next') as HTMLButtonElement).disabled).toBe(false);
+    expect(getByTestId('test-viewSelectedButton') as HTMLButtonElement).not.toBeEuiDisabled();
+    expect(getByTestId('pagination-button-next') as HTMLButtonElement).not.toBeEuiDisabled();
 
     // should still be able to see selected, but they also would be disabled
     testUtils.clickOnViewSelected();
     await testUtils.waitForDataToLoad();
 
-    expect((getByTestId('test-unselectAllButton') as HTMLButtonElement).disabled).toBe(true);
+    expect(getByTestId('test-unselectAllButton') as HTMLButtonElement).toBeEuiDisabled();
     expect(getByTestId(`test-policy-${testPolicyId1}`).getAttribute('aria-disabled')).toEqual(
       'true'
     );
     expect(
-      (getByTestId(`test-policy-${testPolicyId1}-checkbox`) as HTMLInputElement).disabled
-    ).toBe(true);
+      getByTestId(`test-policy-${testPolicyId1}-checkbox`) as HTMLInputElement
+    ).toBeEuiDisabled();
   });
 
   it('should allow additionalListItems to override the isDisabled prop default', async () => {
@@ -715,7 +713,7 @@ describe('PolicySelector component', () => {
     const { getByTestId } = await render();
 
     expect(getByTestId('customItem1').getAttribute('aria-disabled')).toEqual('false');
-    expect((getByTestId('test-customItem1-checkbox') as HTMLInputElement).disabled).toBe(false);
+    expect(getByTestId('test-customItem1-checkbox') as HTMLInputElement).not.toBeEuiDisabled();
   });
 
   it('should display no policies found empty state', async () => {

@@ -1608,7 +1608,7 @@ describe('Response actions history', () => {
 
       await user.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const clearAllButton = getByTestId(`${testPrefix}-${filterPrefix}-clearAllButton`);
-      expect(clearAllButton.hasAttribute('disabled')).toBeTruthy();
+      expect(clearAllButton).toBeEuiDisabled();
     });
   });
 
@@ -1637,7 +1637,7 @@ describe('Response actions history', () => {
 
       await user.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const clearAllButton = getByTestId(`${testPrefix}-${filterPrefix}-clearAllButton`);
-      expect(clearAllButton.hasAttribute('disabled')).toBeTruthy();
+      expect(clearAllButton).toBeEuiDisabled();
     });
 
     it('should use selected statuses on api call', async () => {
@@ -1922,7 +1922,7 @@ describe('Response actions history', () => {
 
       await user.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const clearAllButton = getByTestId(`${testPrefix}-${filterPrefix}-clearAllButton`);
-      expect(clearAllButton.hasAttribute('disabled')).toBeTruthy();
+      expect(clearAllButton).toBeEuiDisabled();
     });
   });
 });

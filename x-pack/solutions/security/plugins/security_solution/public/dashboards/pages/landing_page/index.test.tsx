@@ -189,14 +189,14 @@ describe('Dashboards landing', () => {
       it('should be enabled when link loaded', async () => {
         await renderDashboardLanding();
 
-        expect(screen.getByTestId('createDashboardButton')).not.toHaveAttribute('disabled');
+        expect(screen.getByTestId('createDashboardButton')).not.toBeEuiDisabled();
       });
 
       it('should be disabled when link is not loaded', async () => {
         mockUseCreateSecurityDashboard.mockReturnValue({ isLoading: true, url: '' });
         await renderDashboardLanding();
 
-        expect(screen.getByTestId('createDashboardButton')).toHaveAttribute('disabled');
+        expect(screen.getByTestId('createDashboardButton')).toBeEuiDisabled();
       });
 
       it('should link to correct href', async () => {

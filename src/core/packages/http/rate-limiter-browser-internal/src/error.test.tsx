@@ -61,13 +61,13 @@ describe('RateLimiterError', () => {
 
   it('should count down the remaining time', async () => {
     const button = result.getByTestId('reload') as HTMLButtonElement;
-    expect(button.disabled).toBeTruthy();
+    expect(button).toBeEuiDisabled();
     expect(button.textContent).toContain('(2)');
     act(() => jest.advanceTimersByTime(1000));
     expect(button.textContent).toContain('(1)');
     act(() => jest.advanceTimersByTime(1000));
     expect(button.textContent).not.toContain('(0)');
-    expect(button.disabled).toBeFalsy();
+    expect(button).not.toBeEuiDisabled();
   });
 
   it('should reload on button click', async () => {

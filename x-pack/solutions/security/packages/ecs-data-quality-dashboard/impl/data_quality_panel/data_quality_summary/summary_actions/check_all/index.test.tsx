@@ -144,7 +144,7 @@ describe('CheckAll', () => {
       </TestExternalProviders>
     );
 
-    expect(screen.getByTestId('checkAll').hasAttribute('disabled')).toBeTruthy();
+    expect(screen.getByTestId('checkAll')).toBeEuiDisabled();
   });
 
   test('it renders the expected button when ILM is NOT available', () => {
@@ -172,7 +172,7 @@ describe('CheckAll', () => {
       </TestExternalProviders>
     );
 
-    expect(screen.getByTestId('checkAll').hasAttribute('disabled')).toBeFalsy();
+    expect(screen.getByTestId('checkAll')).not.toBeEuiDisabled();
   });
 
   test('it renders the expected button text when a check is running', async () => {

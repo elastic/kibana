@@ -7,7 +7,8 @@
       "cheerio",
       "@emotion/react/types/css-prop",
       "@kbn/ambient-ui-types",
-      "@kbn/ambient-ftr-types"
+      "@kbn/ambient-ftr-types",
+      "@elastic/eui/lib/test/enzyme/enzyme_matchers"
     ],
     // there is still a decent amount of JS in this plugin and we are taking
     // advantage of the fact that TS doesn't know the types of that code and

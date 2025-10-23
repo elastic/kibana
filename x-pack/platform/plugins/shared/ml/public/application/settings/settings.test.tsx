@@ -8,6 +8,7 @@
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen } from '@testing-library/react';
+import { isEuiDisabled } from '@elastic/eui/lib/test/rtl/matchers';
 
 import { Settings } from './settings';
 
@@ -43,19 +44,19 @@ describe('Settings', () => {
 
     // Check filter lists manage button
     const filterMngButton = screen.getByTestId('mlFilterListsMngButton');
-    expect(filterMngButton.hasAttribute('disabled')).toBe(isFilterListsMngDisabled);
+    expect(isEuiDisabled(filterMngButton)).toBe(isFilterListsMngDisabled);
 
     // Check filter lists create button
     const filterCreateButton = screen.getByTestId('mlFilterListsCreateButton');
-    expect(filterCreateButton.hasAttribute('disabled')).toBe(isFilterListCreateDisabled);
+    expect(isEuiDisabled(filterCreateButton)).toBe(isFilterListCreateDisabled);
 
     // Check calendars manage button
     const calendarMngButton = screen.getByTestId('mlCalendarsMngButton');
-    expect(calendarMngButton.hasAttribute('disabled')).toBe(isCalendarsMngDisabled);
+    expect(isEuiDisabled(calendarMngButton)).toBe(isCalendarsMngDisabled);
 
     // Check calendars create button
     const calendarCreateButton = screen.getByTestId('mlCalendarsCreateButton');
-    expect(calendarCreateButton.hasAttribute('disabled')).toBe(isCalendarCreateDisabled);
+    expect(isEuiDisabled(calendarCreateButton)).toBe(isCalendarCreateDisabled);
   }
 
   test('should render settings page with all buttons enabled when full user capabilities', () => {

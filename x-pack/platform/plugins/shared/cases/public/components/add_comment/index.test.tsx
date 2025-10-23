@@ -92,7 +92,7 @@ describe('AddComment ', () => {
     fireEvent.click(screen.getByTestId('submit-comment'));
 
     expect(await screen.findByTestId('loading-spinner')).toBeInTheDocument();
-    expect(screen.getByTestId('submit-comment')).toHaveAttribute('disabled');
+    expect(screen.getByTestId('submit-comment')).toBeEuiDisabled();
   });
 
   it('should hide the component when the user does not have createComment permissions', () => {
@@ -205,7 +205,7 @@ describe('AddComment ', () => {
       await userEvent.clear(markdown);
 
       expect(await screen.findByText('Empty comments are not allowed.')).toBeInTheDocument();
-      expect(screen.getByTestId('submit-comment')).toHaveAttribute('disabled');
+      expect(screen.getByTestId('submit-comment')).toBeEuiDisabled();
     });
 
     it('shows an error when comment is of empty characters', async () => {
@@ -217,7 +217,7 @@ describe('AddComment ', () => {
       await userEvent.type(markdown, '  ');
 
       expect(await screen.findByText('Empty comments are not allowed.')).toBeInTheDocument();
-      expect(screen.getByTestId('submit-comment')).toHaveAttribute('disabled');
+      expect(screen.getByTestId('submit-comment')).toBeEuiDisabled();
     });
 
     it('shows an error when comment is too long', async () => {
@@ -236,7 +236,7 @@ describe('AddComment ', () => {
         )
       ).toBeInTheDocument();
 
-      expect(screen.getByTestId('submit-comment')).toHaveAttribute('disabled');
+      expect(screen.getByTestId('submit-comment')).toBeEuiDisabled();
     });
   });
 });

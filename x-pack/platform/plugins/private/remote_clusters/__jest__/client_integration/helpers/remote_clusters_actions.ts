@@ -7,6 +7,8 @@
 
 import type { TestBed } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
+import { hasEuiDisabledProp } from '@elastic/eui/lib/test/enzyme/enzyme_matchers';
+
 export interface RemoteClustersActions {
   docsButtonExists: () => boolean;
   pageTitle: {
@@ -132,7 +134,7 @@ export const createRemoteClustersActions = (testBed: TestBed): RemoteClustersAct
         nameInput: {
           setValue: (name: string) => form.setInputValue(nameInputSelector, name),
           getValue: () => find(nameInputSelector).props().value,
-          isDisabled: () => find(nameInputSelector).props().disabled,
+          isDisabled: () => hasEuiDisabledProp(find(nameInputSelector).props()),
         },
       };
     };
@@ -221,7 +223,7 @@ export const createRemoteClustersActions = (testBed: TestBed): RemoteClustersAct
       return {
         button: {
           click: () => click(formButtonSelector),
-          isDisabled: () => find(formButtonSelector).props().disabled,
+          isDisabled: () => hasEuiDisabledProp(find(formButtonSelector).props()),
         },
       };
     };
@@ -301,7 +303,7 @@ export const createRemoteClustersActions = (testBed: TestBed): RemoteClustersAct
         selectCertificatesTrustMode: () => click('setupTrustCertMode'),
         button: {
           click: () => click(trustButtonSelector),
-          isDisabled: () => find(trustButtonSelector).props().disabled,
+          isDisabled: () => hasEuiDisabledProp(find(trustButtonSelector).props()),
         },
         isOnTrustStep: () => exists(trustButtonSelector),
       },

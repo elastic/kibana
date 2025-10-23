@@ -60,11 +60,11 @@ describe('AddNote', () => {
 
     const addButton = getByTestId(ADD_NOTE_BUTTON_TEST_ID);
 
-    expect(addButton).toHaveAttribute('disabled');
+    expect(addButton).toBeEuiDisabled();
 
     await userEvent.type(getByTestId('euiMarkdownEditorTextArea'), 'new note');
 
-    expect(addButton).not.toHaveAttribute('disabled');
+    expect(addButton).not.toBeEuiDisabled();
   });
 
   it('should disable add button always is disableButton props is true', async () => {
@@ -77,7 +77,7 @@ describe('AddNote', () => {
     await userEvent.type(getByTestId('euiMarkdownEditorTextArea'), 'new note');
 
     const addButton = getByTestId(ADD_NOTE_BUTTON_TEST_ID);
-    expect(addButton).toHaveAttribute('disabled');
+    expect(addButton).toBeEuiDisabled();
   });
 
   it('should render the add note button in loading state while creating a new note', () => {
