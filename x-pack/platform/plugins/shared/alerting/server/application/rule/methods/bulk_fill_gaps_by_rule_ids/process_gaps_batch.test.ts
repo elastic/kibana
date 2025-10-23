@@ -10,6 +10,7 @@ import type { StringInterval } from '../../../../lib/rule_gaps/types';
 import { scheduleBackfill } from '../../../backfill/methods/schedule';
 import { rulesClientContextMock } from '../../../../rules_client/rules_client.mock';
 import { processGapsBatch } from './process_gaps_batch';
+import { backfillInitiator } from '../../../../../common/constants';
 
 jest.mock('../../../backfill/methods/schedule', () => {
   return {
@@ -70,7 +71,7 @@ describe('processGapsBatch', () => {
       range: dateRange,
       gapsBatch: batch,
       maxGapsCountToProcess,
-      initiator: 'user',
+      initiator: backfillInitiator.USER,
     });
   };
 
@@ -87,7 +88,7 @@ describe('processGapsBatch', () => {
         [
           {
             ruleId: 'some-rule-id',
-            initiator: 'user',
+            initiator: backfillInitiator.USER,
             ranges: testBatch.flatMap(getGapScheduleRange),
           },
         ],
@@ -183,7 +184,7 @@ describe('processGapsBatch', () => {
         [
           {
             ruleId: 'some-rule-id',
-            initiator: 'user',
+            initiator: backfillInitiator.USER,
             ranges: clampedGapsBatch.flatMap(getGapScheduleRange),
           },
         ],
@@ -255,7 +256,7 @@ describe('processGapsBatch', () => {
         [
           {
             ruleId: 'some-rule-id',
-            initiator: 'user',
+            initiator: backfillInitiator.USER,
             ranges: processedGaps.flatMap(getGapScheduleRange),
           },
         ],
@@ -319,17 +320,17 @@ describe('processGapsBatch', () => {
         [
           {
             ruleId: 'rule-1',
-            initiator: 'user',
+            initiator: backfillInitiator.USER,
             ranges: [multiRuleGapsBatch[0], multiRuleGapsBatch[1]].flatMap(getGapScheduleRange),
           },
           {
             ruleId: 'rule-2',
-            initiator: 'user',
+            initiator: backfillInitiator.USER,
             ranges: [multiRuleGapsBatch[2]].flatMap(getGapScheduleRange),
           },
           {
             ruleId: 'rule-3',
-            initiator: 'user',
+            initiator: backfillInitiator.USER,
             ranges: [multiRuleGapsBatch[3]].flatMap(getGapScheduleRange),
           },
         ],
@@ -448,12 +449,12 @@ describe('processGapsBatch', () => {
         [
           {
             ruleId: 'rule-1',
-            initiator: 'user',
+            initiator: backfillInitiator.USER,
             ranges: [multiRuleGapsBatch[0], multiRuleGapsBatch[1]].flatMap(getGapScheduleRange),
           },
           {
             ruleId: 'rule-2',
-            initiator: 'user',
+            initiator: backfillInitiator.USER,
             ranges: [multiRuleGapsBatch[2]].flatMap(getGapScheduleRange),
           },
         ],
@@ -506,7 +507,7 @@ describe('processGapsBatch', () => {
         [
           {
             ruleId: 'valid-rule',
-            initiator: 'user',
+            initiator: backfillInitiator.USER,
             ranges: [gapsWithMixedRuleIds[0]].flatMap(getGapScheduleRange),
           },
         ],

@@ -11,6 +11,7 @@ import {
   rawAdHocRunParamsSchemaV2,
   rawAdHocRunParamsSchemaV3,
 } from '../schemas/raw_ad_hoc_run_params';
+import { backfillInitiator } from '../../../common/constants';
 
 export const adHocRunParamsModelVersions: SavedObjectsModelVersionMap = {
   '1': {
@@ -38,8 +39,8 @@ export const adHocRunParamsModelVersions: SavedObjectsModelVersionMap = {
       },
       {
         type: 'data_backfill',
-        backfillFn: (document) => {
-          return { attributes: { initiator: 'user' } };
+        backfillFn: () => {
+          return { attributes: { initiator: backfillInitiator.USER } };
         },
       },
     ],
