@@ -25,6 +25,5 @@ export async function writeFile(filePath: string, content: string): Promise<void
 
   await createDirIfNotExists(dir);
 
-  // Write the provided content to the file
   await Fs.writeFile(filePath, content, 'utf8');
 }
