@@ -8,8 +8,8 @@
 import { useCallback } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
-import { useKibana } from './use_kibana';
-import { storageKeys } from '../storage_keys';
+import { useKibana } from '../use_kibana';
+import { storageKeys } from '../../storage_keys';
 
 export interface UseConnectorSelectionResult {
   selectedConnector?: string;

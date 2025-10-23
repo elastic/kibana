@@ -8,7 +8,7 @@
 import { renderHook, act } from '@testing-library/react';
 import { useConnectorSelection } from './use_connector_selection';
 
-jest.mock('./use_kibana', () => ({
+jest.mock('../use_kibana', () => ({
   useKibana: jest.fn(),
 }));
 
@@ -17,8 +17,8 @@ jest.mock('react-use/lib/useLocalStorage', () => ({
   default: jest.fn(),
 }));
 
-import { useKibana } from './use_kibana';
-import { storageKeys } from '../storage_keys';
+import { useKibana } from '../use_kibana';
+import { storageKeys } from '../../storage_keys';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;

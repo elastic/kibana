@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { EuiPopover, EuiButtonEmpty, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -16,6 +16,7 @@ import {
 import { useLoadConnectors } from '@kbn/elastic-assistant';
 import { useNavigation } from '../../hooks/use_navigation';
 import { useKibana } from '../../hooks/use_kibana';
+import { useDefaultConnector } from '../../hooks/chat/use_default_connector';
 
 interface ConnectorSelectorProps {
   selectedConnectorId?: string;
@@ -69,6 +70,18 @@ export const ConnectorSelector: React.FC<ConnectorSelectorProps> = ({
 
     return { preConfiguredConnectors: preConfigured, customConnectors: custom };
   }, [connectors]);
+
+  const initialConnectorId = useDefaultConnector({
+    connectors,
+    defaultConnectorId,
+  });
+
+  // If no user preference is set, initialize with reasonable default connector
+  useEffect(() => {
+    if (!selectedConnectorId && !isLoading && initialConnectorId) {
+      onSelectConnector(initialConnectorId);
+    }
+  }, [selectedConnectorId, isLoading, initialConnectorId, onSelectConnector]);
 
   const selectedConnector = connectors.find((c) => c.id === selectedConnectorId);
   const selectedConnectorName = selectedConnector?.name || selectedConnectorId;

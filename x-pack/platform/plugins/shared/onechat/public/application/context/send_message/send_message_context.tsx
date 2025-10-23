@@ -7,7 +7,7 @@
 
 import React, { createContext, useContext } from 'react';
 import { useSendMessageMutation } from './use_send_message_mutation';
-import { useConnectorSelection } from '../../hooks/use_connector_selection';
+import { useConnectorSelection } from '../../hooks/chat/use_connector_selection';
 
 interface SendMessageState {
   sendMessage: ({ message }: { message: string }) => void;
