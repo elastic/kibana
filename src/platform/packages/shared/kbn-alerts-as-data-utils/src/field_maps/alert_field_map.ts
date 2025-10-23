@@ -56,6 +56,7 @@ import {
   ALERT_SCHEDULED_ACTION_GROUP,
   ALERT_SCHEDULED_ACTION_DATE,
   ALERT_INDEX_PATTERN,
+  ALERT_SCHEDULED_ACTION_THROTTLING,
 } from '@kbn/rule-data-utils';
 import type { MultiField } from './types';
 
@@ -269,6 +270,10 @@ export const alertFieldMap = {
   [ALERT_SCHEDULED_ACTION_GROUP]: {
     type: 'keyword',
     array: false,
+    required: false,
+  },
+  [ALERT_SCHEDULED_ACTION_THROTTLING]: {
+    type: 'unmapped',
     required: false,
   },
   [EVENT_ACTION]: {
