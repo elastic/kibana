@@ -13,6 +13,7 @@ import type {
   IndicesDataStreamIndex,
   IndicesDataStreamLifecycleWithRollover,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { IndexMode } from '../constants/index_modes';
 
 interface TimestampFieldFromEs {
   name: string;
@@ -34,7 +35,7 @@ export type DataStreamIndexFromEs = IndicesDataStreamIndex;
 
 export type Health = 'green' | 'yellow' | 'red';
 
-export type IndexMode = 'standard' | 'logsdb' | 'time_series' | 'lookup';
+export type IndexMode = (typeof IndexMode)[keyof typeof IndexMode];
 
 export interface EnhancedDataStreamFromEs extends IndicesDataStream {
   global_max_retention?: string;
@@ -70,6 +71,10 @@ export interface DataStream {
   hidden: boolean;
   nextGenerationManagedBy: string;
   failureStoreEnabled?: boolean;
+  failureStoreRetention?: {
+    customRetentionPeriod?: string;
+    defaultRetentionPeriod?: string;
+  };
   lifecycle?: IndicesDataStreamLifecycleWithRollover & {
     enabled?: boolean;
     effective_retention?: string;

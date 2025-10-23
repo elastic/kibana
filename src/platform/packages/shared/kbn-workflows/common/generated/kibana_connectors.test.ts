@@ -10,6 +10,8 @@
 import { z } from '@kbn/zod';
 import { GENERATED_KIBANA_CONNECTORS, KIBANA_CONNECTOR_COUNT } from './kibana_connectors';
 import type { InternalConnectorContract } from '../../types/v1';
+import { generateYamlSchemaFromConnectors } from '../../spec/lib/generate_yaml_schema';
+import { getJsonSchemaFromYamlSchema } from '../../spec/lib/get_json_schema_from_yaml_schema';
 
 describe('Generated Kibana Connectors', () => {
   // SANITY TEST: Critical test to ensure no runtime errors are introduced
@@ -37,12 +39,14 @@ describe('Generated Kibana Connectors', () => {
           try {
             const schema = connector.paramsSchema;
             expect(schema).toBeDefined();
-            
+
             // Test basic schema operations
             const result = schema.safeParse({});
             expect(result.success === true || result.success === false).toBe(true);
           } catch (error) {
-            throw new Error(`Schema error in connector ${index} (${connector.type}): ${error.message}`);
+            throw new Error(
+              `Schema error in connector ${index} (${connector.type}): ${error.message}`
+            );
           }
         });
       }).not.toThrow();
@@ -558,14 +562,6 @@ describe('Generated Kibana Connectors', () => {
       // This test verifies that the Monaco YAML validation works properly
       // after fixing the broken $ref paths in the JSON schema
 
-      // Import the schema generation function
-
-      const {
-        generateYamlSchemaFromConnectors,
-        getJsonSchemaFromYamlSchema,
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-      } = require('../../spec/lib/generate_yaml_schema');
-
       // Generate the workflow schema and convert to JSON schema (this is what Monaco uses)
       const workflowSchema = generateYamlSchemaFromConnectors(GENERATED_KIBANA_CONNECTORS);
       const jsonSchema = getJsonSchemaFromYamlSchema(workflowSchema);
@@ -620,7 +616,7 @@ describe('Generated Kibana Connectors', () => {
 
           for (const part of pathParts) {
             if (current && typeof current === 'object' && part in current) {
-              current = current[part];
+              current = (current as any)[part];
             } else {
               isValid = false;
               break;
@@ -652,7 +648,7 @@ describe('Generated Kibana Connectors', () => {
       // console.log('✅ No broken references found');
 
       // Verify core workflow structure is present in the definitions
-      const workflowDef = jsonSchema.definitions.WorkflowSchema;
+      const workflowDef = jsonSchema.definitions.WorkflowSchema as any;
       expect(workflowDef.type).toBe('object');
       expect(workflowDef.properties).toBeDefined();
       expect(workflowDef.properties.version).toBeDefined();
@@ -711,38 +707,6 @@ describe('Generated Kibana Connectors', () => {
       // console.log('🔧 YAML editor validation should now work correctly');
     });
 
-    it('should prove that additionalProperties: true was replaced with false', () => {
-      // This test checks if our regex replacement worked
-      // Import the schema generation function
-
-      const {
-        generateYamlSchemaFromConnectors,
-        getJsonSchemaFromYamlSchema,
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-      } = require('../../spec/lib/generate_yaml_schema');
-
-      // Generate the workflow schema and convert to JSON schema (this is what Monaco uses)
-      const workflowSchema = generateYamlSchemaFromConnectors(GENERATED_KIBANA_CONNECTORS);
-      const jsonSchema = getJsonSchemaFromYamlSchema(workflowSchema);
-
-      // Convert to string and count occurrences
-      const jsonString = JSON.stringify(jsonSchema);
-
-      const trueCount = (jsonString.match(/"additionalProperties":\s*true/g) || []).length;
-      const falseCount = (jsonString.match(/"additionalProperties":\s*false/g) || []).length;
-
-      // console.log(`Found ${trueCount} "additionalProperties": true`);
-      // console.log(`Found ${falseCount} "additionalProperties": false`);
-
-      // After our fix, there should be no "additionalProperties": true
-      expect(trueCount).toBe(0);
-
-      // And there should be many "additionalProperties": false
-      expect(falseCount).toBeGreaterThan(0);
-
-      // console.log('✅ All additionalProperties are now set to false');
-    });
-
     it('should validate that complex POST endpoints have reasonable parameter counts', () => {
       const complexPostEndpoints = GENERATED_KIBANA_CONNECTORS.filter(
         (c) => c.methods!.includes('POST') && c.parameterTypes!.bodyParams!.length > 10
@@ -770,12 +734,6 @@ describe('Generated Kibana Connectors', () => {
       // This test validates the fix for RulePreview and similar complex union schemas
       // The issue was that objects inside allOf arrays had additionalProperties: false,
       // which blocked properties from other parts of the union
-
-      const {
-        generateYamlSchemaFromConnectors,
-        getJsonSchemaFromYamlSchema,
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-      } = require('../../spec/lib/generate_yaml_schema');
 
       // Generate the workflow schema and convert to JSON schema
       const workflowSchema = generateYamlSchemaFromConnectors(GENERATED_KIBANA_CONNECTORS);
@@ -823,12 +781,6 @@ describe('Generated Kibana Connectors', () => {
       // These are empty objects with descriptions like "Complex schema intersection (simplified...)"
       // that were blocking ALL properties
 
-      const {
-        generateYamlSchemaFromConnectors,
-        getJsonSchemaFromYamlSchema,
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-      } = require('../../spec/lib/generate_yaml_schema');
-
       // Generate the workflow schema and convert to JSON schema
       const workflowSchema = generateYamlSchemaFromConnectors(GENERATED_KIBANA_CONNECTORS);
       const jsonSchema = getJsonSchemaFromYamlSchema(workflowSchema);
@@ -855,12 +807,6 @@ describe('Generated Kibana Connectors', () => {
     it('should FAIL: Monaco JSON schema still has additionalProperties issues in anyOf', () => {
       // This test should catch the real issue: objects inside anyOf (nested in allOf)
       // still have additionalProperties: false, which prevents caseId from being accepted
-
-      const {
-        generateYamlSchemaFromConnectors,
-        getJsonSchemaFromYamlSchema,
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-      } = require('../../spec/lib/generate_yaml_schema');
 
       // Generate the workflow schema and convert to JSON schema (this is what Monaco uses)
       const workflowSchema = generateYamlSchemaFromConnectors(GENERATED_KIBANA_CONNECTORS);
@@ -933,12 +879,6 @@ describe('Generated Kibana Connectors', () => {
       // This test ensures our generated JSON Schema is structurally valid
       // This is critical for Monaco autocomplete and validation to work properly
 
-      const {
-        generateYamlSchemaFromConnectors,
-        getJsonSchemaFromYamlSchema,
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-      } = require('../../spec/lib/generate_yaml_schema');
-
       // Generate the workflow schema and convert to JSON schema (this is what Monaco uses)
       const workflowSchema = generateYamlSchemaFromConnectors(GENERATED_KIBANA_CONNECTORS);
       const jsonSchema = getJsonSchemaFromYamlSchema(workflowSchema);
@@ -998,12 +938,6 @@ describe('Generated Kibana Connectors', () => {
       // but the full schema with all 459 connectors cannot be compiled by AJV for validation testing.
       // This is a limitation of AJV with deeply recursive schemas at scale, not a functional issue.
       // This test proves whether the schema is actually functional or just empty garbage
-
-      const {
-        generateYamlSchemaFromConnectors,
-        getJsonSchemaFromYamlSchema,
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-      } = require('../../spec/lib/generate_yaml_schema');
 
       const workflowSchema = generateYamlSchemaFromConnectors(GENERATED_KIBANA_CONNECTORS);
       const jsonSchema = getJsonSchemaFromYamlSchema(workflowSchema);
