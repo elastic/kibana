@@ -588,6 +588,8 @@ export interface ESQLMessage {
   text: string;
   location: ESQLLocation;
   code: string;
+  errorType?: 'semantic';
+  requiresCallback?: 'getColumnsFor' | 'getSources' | 'getPolicies' | 'getJoinIndices' | string;
 }
 
 export interface EditorError {

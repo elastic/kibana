@@ -106,12 +106,6 @@ export const allowedExperimentalValues = Object.freeze({
   protectionUpdatesEnabled: true,
 
   /**
-   * Enables Response actions telemetry collection
-   * Should be enabled in 8.17.0
-   */
-  responseActionsTelemetryEnabled: true,
-
-  /**
    * Enables experimental Microsoft Defender for Endpoint integration data to be available in Analyzer
    */
   microsoftDefenderEndpointDataInAnalyzerEnabled: true,

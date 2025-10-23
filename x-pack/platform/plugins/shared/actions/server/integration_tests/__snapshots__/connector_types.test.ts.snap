@@ -3492,7 +3492,7 @@ Object {
             ],
             "type": "object",
           },
-          "maxItems": 25,
+          "maxItems": 500,
           "type": "array",
         },
       },
