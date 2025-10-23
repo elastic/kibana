@@ -8,6 +8,7 @@
  */
 import getPort from 'get-port';
 import * as defaults from './defaults';
+import { FLEET_PACKAGE_REGISTRY_PORT } from './service_addresses';
 
 async function acquire(preference?: number) {
   return (await getPort({ port: preference })).toString();
@@ -20,5 +21,8 @@ export async function acquirePorts() {
     const acquiredPort = await acquire();
     ports[envVarName] = acquiredPort;
   }
+
+  ports.FLEET_PACKAGE_REGISTRY_PORT = FLEET_PACKAGE_REGISTRY_PORT ? await acquire() : undefined;
+
   return ports;
 }

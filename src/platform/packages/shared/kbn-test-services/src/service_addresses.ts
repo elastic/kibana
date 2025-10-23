@@ -19,6 +19,7 @@ import {
   TEST_DEFAULT_KIBANA_PORT,
   TEST_DEFAULT_REMOTE_ES_PORT,
   TEST_DEFAULT_REMOTE_KIBANA_PORT,
+  TEST_DEFAULT_REMOTE_ES_TRANSPORT_PORT,
 } from './defaults';
 import { getUrlParts } from './get_url_parts';
 
@@ -47,6 +48,10 @@ export const TEST_ES_PORT = Number(
 export const TEST_REMOTE_ES_HOST = TEST_ES_HOST;
 export const TEST_REMOTE_ES_PORT = Number(
   process.env.TEST_REMOTE_ES_PORT || TEST_DEFAULT_REMOTE_ES_PORT
+);
+
+export const TEST_REMOTE_ES_TRANSPORT_PORT = Number(
+  process.env.TEST_REMOTE_ES_TRANSPORT_PORT || TEST_DEFAULT_REMOTE_ES_TRANSPORT_PORT
 );
 
 export const TEST_ES_TRANSPORT_PORT = Number(

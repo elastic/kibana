@@ -14,7 +14,8 @@ import getopts from 'getopts';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ArtifactLicense, ServerlessProjectType } from '@kbn/es';
 import { isServerlessProjectType, extractAndArchiveLogs } from '@kbn/es/src/utils';
-import { SERVICE_NAMESPACE, TEST_REMOTE_ES_PORT } from '@kbn/test-services';
+import { SERVICE_NAMESPACE } from '@kbn/test-services';
+import { TEST_REMOTE_ES_TRANSPORT_PORT } from '@kbn/test-services/src/service_addresses';
 import type { Config } from '../../functional_test_runner';
 import type { ICluster } from '../../es';
 import { createTestEsCluster, esTestConfig } from '../../es';
@@ -111,7 +112,7 @@ export async function runElasticsearch(
 
   const remoteName = name ?? `${SERVICE_NAMESPACE}-ftr-remote`;
 
-  const remotePort = TEST_REMOTE_ES_PORT;
+  const remotePort = TEST_REMOTE_ES_TRANSPORT_PORT;
 
   const remoteNode = await startEsNode({
     log,

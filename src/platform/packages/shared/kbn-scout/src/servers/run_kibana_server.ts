@@ -13,6 +13,8 @@ import { v4 as uuidv4 } from 'uuid';
 import type { ProcRunner } from '@kbn/dev-proc-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { parseRawFlags, getArgValue, remapPluginPaths, DedicatedTaskRunner } from '@kbn/test';
+import { getDataPath } from '@kbn/utils';
+import { SERVICE_NAMESPACE } from '@kbn/test-services';
 import type { Config } from '../config';
 
 export async function runKibanaServer(options: {
@@ -79,7 +81,7 @@ export async function runKibanaServer(options: {
         ...parseRawFlags([
           ...kbnFlags,
           ...(!useTaskRunner
-            ? []
+            ? [`--path.data=${Path.join(getDataPath(), SERVICE_NAMESPACE)}`]
             : [
                 '--node.roles=["ui"]',
                 `--path.data=${Path.resolve(Os.tmpdir(), `scout-ui-${uuidv4()}`)}`,

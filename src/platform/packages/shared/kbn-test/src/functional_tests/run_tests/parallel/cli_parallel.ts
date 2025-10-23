@@ -10,6 +10,7 @@
 import { run } from '@kbn/dev-cli-runner';
 
 import dedent from 'dedent';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { FLAG_OPTIONS } from '../flags';
 import { runTestsParallel } from './run_tests_parallel';
 
@@ -26,6 +27,15 @@ export function runTestsCliParallel() {
       const bail = flagsReader.boolean('bail');
       const grep = flagsReader.string('grep');
       const debug = flagsReader.boolean('debug');
+
+      let category = flagsReader.string('category');
+
+      if (
+        category !== ScoutTestRunConfigCategory.API_TEST &&
+        category !== ScoutTestRunConfigCategory.UI_TEST
+      ) {
+        category = undefined;
+      }
 
       const extraArgs: string[] = [];
 
@@ -56,6 +66,7 @@ export function runTestsCliParallel() {
             ? 'inherit'
             : 'buffer',
         stats,
+        category,
       });
 
       return exitCode;
@@ -70,6 +81,7 @@ export function runTestsCliParallel() {
       `,
       flags: {
         ...FLAG_OPTIONS,
+        string: [...(FLAG_OPTIONS.string ?? []), 'category'],
         boolean: [
           ...(FLAG_OPTIONS.boolean ?? []).filter((flag) => flag !== 'pause'),
           'suppress',
@@ -82,7 +94,9 @@ export function runTestsCliParallel() {
             --suppress            Suppress logs from configs
             --buffer              Buffer logs from configs (default)
             --inherit             Inherit logs from configs
-            --stats               Log stats for each running config every 10s`)
+            --stats               Log stats for each running config every 10s
+            --category            Category of tests to run (defaults to all)
+            `)
         ),
       },
     }

@@ -53,7 +53,7 @@ if [[ ${#config_args[@]} -eq 0 ]]; then
   exit 1
 fi
 
-cmd=(node scripts/functional_tests_parallel --bail --inherit --stats)
+cmd=(node scripts/functional_tests_parallel --bail --inherit --stats --category api-test)
 
 # if [[ -n "${KIBANA_BUILD_LOCATION:-}" ]]; then
 #   cmd+=(--kibana-install-dir "$KIBANA_BUILD_LOCATION")

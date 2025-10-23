@@ -19,6 +19,7 @@ import chalk from 'chalk';
 
 import { uniqueId } from 'lodash';
 import { acquirePorts } from '@kbn/test-services';
+import type { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { ConfigRunner } from './config_runner';
 import { ResourcePool, Phase } from './resource_pool';
 import type { Slot } from './resource_pool';
@@ -73,6 +74,7 @@ export interface ParallelRunOptions {
   extraArgs: Array<string | number | boolean | string[]>;
   stdio?: 'suppress' | 'buffer' | 'inherit';
   stats?: boolean;
+  category?: ScoutTestRunConfigCategory;
 }
 
 export async function runTestsParallel(
@@ -80,7 +82,7 @@ export async function runTestsParallel(
   configs: string[],
   options: ParallelRunOptions
 ): Promise<number> {
-  const { extraArgs, stdio = 'inherit', stats = false } = options;
+  const { extraArgs, stdio = 'inherit', stats = false, category } = options;
 
   const extraArgsList = [...extraArgs, process.env.FTR_EXTRA_ARGS ?? process.env.EXTRA_ARGS ?? ''];
 
@@ -149,6 +151,15 @@ export async function runTestsParallel(
 
     if (isConfigExecution === 'true') {
       results.push(`- ${config}\n    duration: 0s\n    result: already-tested`);
+      continue;
+    }
+
+    const testCategory = configObj.get('testConfigCategory');
+
+    if (category && testCategory !== category) {
+      results.push(
+        `- ${config}\n    duration: 0s\n    result: skipping, ${testCategory} is not ${category}`
+      );
       continue;
     }
 

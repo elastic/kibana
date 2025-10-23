@@ -15,6 +15,9 @@ import type { ProcRunner } from '@kbn/dev-proc-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 
 import { SERVICE_NAMESPACE } from '@kbn/test-services';
+
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
+import { getDataPath } from '@kbn/utils';
 import type { Config } from '../../functional_test_runner';
 import { DedicatedTaskRunner } from '../../functional_test_runner/lib';
 import { parseRawFlags, getArgValue, remapPluginPaths } from './kibana_cli_args';
@@ -96,7 +99,7 @@ export async function runKibanaServer(options: {
         ...parseRawFlags([
           ...kbnFlags,
           ...(!useTaskRunner
-            ? []
+            ? [`--path.data=${Path.join(getDataPath(), SERVICE_NAMESPACE)}`]
             : [
                 '--node.roles=["ui"]',
                 `--path.data=${Path.resolve(Os.tmpdir(), `ftr-ui-${uuidv4()}`)}`,
