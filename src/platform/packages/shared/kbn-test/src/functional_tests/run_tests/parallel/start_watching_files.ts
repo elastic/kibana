@@ -104,10 +104,6 @@ export function startWatchingFiles({
           return;
         }
 
-        if (changedPath.includes('.backportrc.json')) {
-          console.log(evt, changedPath, stats);
-        }
-
         // Only consider paths under this base; chokidar guarantees it, but be defensive.
         const rel = toPosixRelative(w.baseDir, changedPath);
         if (rel == null || rel.length === 0) return;

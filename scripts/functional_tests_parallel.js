@@ -10,6 +10,8 @@
 require('../src/setup_node_env');
 require('@kbn/test')
   .runTestsCliParallel()
-  .then(function (code) {
-    process.exit(code ?? 1);
+  .finally(function () {
+    if (process.exitCode === undefined) {
+      process.exitCode = 1;
+    }
   });

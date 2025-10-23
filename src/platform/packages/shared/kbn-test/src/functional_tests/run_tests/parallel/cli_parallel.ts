@@ -69,7 +69,7 @@ export function runTestsCliParallel() {
         category,
       });
 
-      return exitCode;
+      process.exitCode = exitCode;
     },
     {
       description: `Run Functional Tests`,
