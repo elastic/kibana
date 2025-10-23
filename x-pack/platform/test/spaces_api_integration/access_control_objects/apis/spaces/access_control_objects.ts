@@ -4,11 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { parse as parseCookie } from 'tough-cookie';
 
+import {
+  ACCESS_CONTROL_TYPE,
+  NON_ACCESS_CONTROL_TYPE,
+} from '@kbn/access-control-test-plugin/server';
 import expect from '@kbn/expect';
-import { NON_READ_ONLY_TYPE, READ_ONLY_TYPE } from '@kbn/read-only-objects-test-plugin/server';
 import { adminTestUser } from '@kbn/test';
 
 import type { FtrProviderContext } from '../../../../functional/ftr_provider_context';
@@ -293,24 +295,24 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('#bulk_create', () => {
       describe('success', () => {
-        it('should create read only objects', async () => {
+        it('should create write-restricted objects', async () => {
           const { cookie: objectOwnerCookie, profileUid: objectOwnerProfileUid } =
             await loginAsObjectOwner('test_user', 'changeme');
 
           const bulkCreateResponse = await supertestWithoutAuth
-            .post('/read_only_objects/bulk_create')
+            .post('/access_control_objects/bulk_create')
             .set('kbn-xsrf', 'true')
             .set('cookie', objectOwnerCookie.cookieString())
             .send({
               objects: [
-                { type: ACCESS_CONTROL_TYPE, isReadOnly: true },
-                { type: ACCESS_CONTROL_TYPE, isReadOnly: true },
+                { type: ACCESS_CONTROL_TYPE, isWriteRestricted: true },
+                { type: ACCESS_CONTROL_TYPE, isWriteRestricted: true },
               ],
             });
           expect(bulkCreateResponse.body.saved_objects).to.have.length(2);
           for (const { accessControl } of bulkCreateResponse.body.saved_objects) {
             expect(accessControl).to.have.property('owner', objectOwnerProfileUid);
-            expect(accessControl).to.have.property('accessMode', 'read_only');
+            expect(accessControl).to.have.property('accessMode', 'write_restricted');
           }
         });
 
@@ -318,19 +320,19 @@ export default function ({ getService }: FtrProviderContext) {
           const { cookie: objectOwnerCookie, profileUid: objectOwnerProfileUid } =
             await loginAsObjectOwner('test_user', 'changeme');
           const firstObject = await supertestWithoutAuth
-            .post('/read_only_objects/create')
+            .post('/access_control_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', objectOwnerCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
             .expect(200);
           const { id: objectId1, type: type1 } = firstObject.body;
           expect(firstObject.body.accessControl).to.have.property('owner', objectOwnerProfileUid);
 
           const secondObject = await supertestWithoutAuth
-            .post('/read_only_objects/create')
+            .post('/access_control_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', objectOwnerCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
             .expect(200);
           const { id: objectId2, type: type2 } = secondObject.body;
           expect(secondObject.body.accessControl).to.have.property('owner', objectOwnerProfileUid);
@@ -347,7 +349,7 @@ export default function ({ getService }: FtrProviderContext) {
           ];
 
           const res = await supertestWithoutAuth
-            .post('/read_only_objects/bulk_create?overwrite=true')
+            .post('/access_control_objects/bulk_create?overwrite=true')
             .set('kbn-xsrf', 'true')
             .set('cookie', objectOwnerCookie.cookieString())
             .send({
@@ -358,7 +360,7 @@ export default function ({ getService }: FtrProviderContext) {
             const object = objects.find((obj) => obj.id === id);
             expect(object).to.not.be(undefined);
             expect(accessControl).to.have.property('owner', objectOwnerProfileUid);
-            expect(accessControl).to.have.property('accessMode', 'read_only');
+            expect(accessControl).to.have.property('accessMode', 'write_restricted');
           }
         });
 
@@ -366,19 +368,19 @@ export default function ({ getService }: FtrProviderContext) {
           const { cookie: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin();
 
           const firstObject = await supertestWithoutAuth
-            .post('/read_only_objects/create')
+            .post('/access_control_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', adminCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: false })
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: false })
             .expect(200);
           const { id: objectId1, type: type1 } = firstObject.body;
           expect(firstObject.body.accessControl).to.have.property('owner', adminProfileUid);
 
           const secondObject = await supertestWithoutAuth
-            .post('/read_only_objects/create')
+            .post('/access_control_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', adminCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: false })
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: false })
             .expect(200);
           const { id: objectId2, type: type2 } = secondObject.body;
           expect(secondObject.body.accessControl).to.have.property('owner', adminProfileUid);
@@ -400,7 +402,7 @@ export default function ({ getService }: FtrProviderContext) {
           );
 
           const res = await supertestWithoutAuth
-            .post('/read_only_objects/bulk_create?overwrite=true')
+            .post('/access_control_objects/bulk_create?overwrite=true')
             .set('kbn-xsrf', 'true')
             .set('cookie', notObjectOwnerCookieCookie.cookieString())
             .send({
@@ -425,19 +427,19 @@ export default function ({ getService }: FtrProviderContext) {
           const { cookie: objectOwnerCookie, profileUid: objectOwnerProfileUid } =
             await loginAsObjectOwner('test_user', 'changeme');
           const firstObject = await supertestWithoutAuth
-            .post('/read_only_objects/create')
+            .post('/access_control_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', objectOwnerCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
             .expect(200);
           const { id: objectId1, type: type1 } = firstObject.body;
           expect(firstObject.body.accessControl).to.have.property('owner', objectOwnerProfileUid);
 
           const secondObject = await supertestWithoutAuth
-            .post('/read_only_objects/create')
+            .post('/access_control_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', objectOwnerCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
             .expect(200);
           const { id: objectId2, type: type2 } = secondObject.body;
           expect(secondObject.body.accessControl).to.have.property('owner', objectOwnerProfileUid);
@@ -456,7 +458,7 @@ export default function ({ getService }: FtrProviderContext) {
           const { cookie: adminCookie } = await loginAsKibanaAdmin();
 
           const res = await supertestWithoutAuth
-            .post('/read_only_objects/bulk_create?overwrite=true')
+            .post('/access_control_objects/bulk_create?overwrite=true')
             .set('kbn-xsrf', 'true')
             .set('cookie', adminCookie.cookieString())
             .send({
@@ -467,7 +469,7 @@ export default function ({ getService }: FtrProviderContext) {
             const object = objects.find((obj) => obj.id === id);
             expect(object).to.not.be(undefined);
             expect(accessControl).to.have.property('owner', objectOwnerProfileUid);
-            expect(accessControl).to.have.property('accessMode', 'read_only');
+            expect(accessControl).to.have.property('accessMode', 'write_restricted');
           }
         });
       });
@@ -477,19 +479,19 @@ export default function ({ getService }: FtrProviderContext) {
           const { cookie: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin();
 
           const firstObject = await supertestWithoutAuth
-            .post('/read_only_objects/create')
+            .post('/access_control_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', adminCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
             .expect(200);
           const { id: objectId1, type: type1 } = firstObject.body;
           expect(firstObject.body.accessControl).to.have.property('owner', adminProfileUid);
 
           const secondObject = await supertestWithoutAuth
-            .post('/read_only_objects/create')
+            .post('/access_control_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', adminCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
             .expect(200);
           const { id: objectId2, type: type2 } = secondObject.body;
           expect(secondObject.body.accessControl).to.have.property('owner', adminProfileUid);
@@ -511,7 +513,7 @@ export default function ({ getService }: FtrProviderContext) {
           );
 
           const res = await supertestWithoutAuth
-            .post('/read_only_objects/bulk_create?overwrite=true')
+            .post('/access_control_objects/bulk_create?overwrite=true')
             .set('kbn-xsrf', 'true')
             .set('cookie', notObjectOwnerCookieCookie.cookieString())
             .send({
@@ -528,30 +530,33 @@ export default function ({ getService }: FtrProviderContext) {
           expect(res.body.message).to.contain(`${ACCESS_CONTROL_TYPE}:${objectId2}`);
 
           const getResponse = await supertestWithoutAuth
-            .get(`/read_only_objects/${objectId1}`)
+            .get(`/access_control_objects/${objectId1}`)
             .set('kbn-xsrf', 'true')
             .set('cookie', adminCookie.cookieString())
             .expect(200);
           expect(getResponse.body.accessControl).to.have.property('owner', adminProfileUid);
-          expect(getResponse.body.accessControl).to.have.property('accessMode', 'read_only');
+          expect(getResponse.body.accessControl).to.have.property('accessMode', 'write_restricted');
 
           const getResponse2 = await supertestWithoutAuth
-            .get(`/read_only_objects/${objectId2}`)
+            .get(`/access_control_objects/${objectId2}`)
             .set('kbn-xsrf', 'true')
             .set('cookie', adminCookie.cookieString())
             .expect(200);
           expect(getResponse2.body.accessControl).to.have.property('owner', adminProfileUid);
-          expect(getResponse2.body.accessControl).to.have.property('accessMode', 'read_only');
+          expect(getResponse2.body.accessControl).to.have.property(
+            'accessMode',
+            'write_restricted'
+          );
         });
 
         it('return status when overwriting objects and all objects are write-restricted but some are owned by current user', async () => {
           const { cookie: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin();
 
           const firstObject = await supertestWithoutAuth
-            .post('/read_only_objects/create')
+            .post('/access_control_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', adminCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
             .expect(200);
           const { id: objectId1, type: type1 } = firstObject.body;
           expect(firstObject.body).to.have.property('accessControl');
@@ -561,10 +566,10 @@ export default function ({ getService }: FtrProviderContext) {
             await loginAsNotObjectOwner('test_user', 'changeme');
 
           const secondObject = await supertestWithoutAuth
-            .post('/read_only_objects/create')
+            .post('/access_control_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', notObjectOwnerCookieCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
             .expect(200);
           const { id: objectId2, type: type2 } = secondObject.body;
           expect(secondObject.body).to.have.property('accessControl');
@@ -582,7 +587,7 @@ export default function ({ getService }: FtrProviderContext) {
           ];
 
           const res = await supertestWithoutAuth
-            .post('/read_only_objects/bulk_create?overwrite=true')
+            .post('/access_control_objects/bulk_create?overwrite=true')
             .set('kbn-xsrf', 'true')
             .set('cookie', notObjectOwnerCookieCookie.cookieString())
             .send({
@@ -600,7 +605,7 @@ export default function ({ getService }: FtrProviderContext) {
               statusCode: 403,
               error: 'Forbidden',
               message:
-                'Overwriting objects in write-restricted mode that are owned by another user requires the manage_access_control privilege.',
+                'Overwriting objects in "write_restricted" mode that are owned by another user requires the "manage_access_control" privilege.',
             },
           });
           expect(res.body.saved_objects[1]).to.have.property('type', ACCESS_CONTROL_TYPE);
@@ -612,20 +617,20 @@ export default function ({ getService }: FtrProviderContext) {
           const { cookie: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin();
 
           const firstObject = await supertestWithoutAuth
-            .post('/read_only_objects/create')
+            .post('/access_control_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', adminCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
             .expect(200);
           const { id: objectId1, type: type1 } = firstObject.body;
           expect(firstObject.body).to.have.property('accessControl');
           expect(firstObject.body.accessControl).to.have.property('owner', adminProfileUid);
 
           const secondObject = await supertestWithoutAuth
-            .post('/read_only_objects/create')
+            .post('/access_control_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', adminCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: false })
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: false })
             .expect(200);
           const { id: objectId2, type: type2 } = secondObject.body;
           expect(secondObject.body).to.have.property('accessControl');
@@ -648,7 +653,7 @@ export default function ({ getService }: FtrProviderContext) {
           ];
 
           const res = await supertestWithoutAuth
-            .post('/read_only_objects/bulk_create?overwrite=true')
+            .post('/access_control_objects/bulk_create?overwrite=true')
             .set('kbn-xsrf', 'true')
             .set('cookie', notObjectOwnerCookieCookie.cookieString())
             .send({
@@ -666,7 +671,7 @@ export default function ({ getService }: FtrProviderContext) {
               statusCode: 403,
               error: 'Forbidden',
               message:
-                'Overwriting objects in write-restricted mode that are owned by another user requires the manage_access_control privilege.',
+                'Overwriting objects in "write_restricted" mode that are owned by another user requires the "manage_access_control" privilege.',
             },
           });
           expect(res.body.saved_objects[1]).to.have.property('type', ACCESS_CONTROL_TYPE);
@@ -678,17 +683,17 @@ export default function ({ getService }: FtrProviderContext) {
           const { cookie: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin();
 
           const firstObject = await supertestWithoutAuth
-            .post('/read_only_objects/create')
+            .post('/access_control_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', adminCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
             .expect(200);
           const { id: objectId1, type: type1 } = firstObject.body;
           expect(firstObject.body).to.have.property('accessControl');
           expect(firstObject.body.accessControl).to.have.property('owner', adminProfileUid);
 
           const secondObject = await supertestWithoutAuth
-            .post('/read_only_objects/create')
+            .post('/access_control_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', adminCookie.cookieString())
             .send({ type: NON_ACCESS_CONTROL_TYPE })
@@ -713,7 +718,7 @@ export default function ({ getService }: FtrProviderContext) {
           );
 
           const res = await supertestWithoutAuth
-            .post('/read_only_objects/bulk_create?overwrite=true')
+            .post('/access_control_objects/bulk_create?overwrite=true')
             .set('kbn-xsrf', 'true')
             .set('cookie', notObjectOwnerCookieCookie.cookieString())
             .send({
@@ -731,7 +736,7 @@ export default function ({ getService }: FtrProviderContext) {
               statusCode: 403,
               error: 'Forbidden',
               message:
-                'Overwriting objects in write-restricted mode that are owned by another user requires the manage_access_control privilege.',
+                'Overwriting objects in "write_restricted" mode that are owned by another user requires the "manage_access_control" privilege.',
             },
           });
           expect(res.body.saved_objects[1]).to.have.property('type', NON_ACCESS_CONTROL_TYPE);
@@ -860,18 +865,18 @@ export default function ({ getService }: FtrProviderContext) {
           const { cookie: objectOwnerCookie, profileUid: objectOwnerProfileUid } =
             await loginAsObjectOwner('test_user', 'changeme');
           const firstObject = await supertestWithoutAuth
-            .post('/read_only_objects/create')
+            .post('/access_control_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', objectOwnerCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
             .expect(200);
           const { id: objectId1, type: type1 } = firstObject.body;
 
           const secondObject = await supertestWithoutAuth
-            .post('/read_only_objects/create')
+            .post('/access_control_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', objectOwnerCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
             .expect(200);
           const { id: objectId2, type: type2 } = secondObject.body;
 
@@ -887,7 +892,7 @@ export default function ({ getService }: FtrProviderContext) {
           ];
 
           const res = await supertestWithoutAuth
-            .post('/read_only_objects/bulk_update')
+            .post('/access_control_objects/bulk_update')
             .set('kbn-xsrf', 'true')
             .set('cookie', objectOwnerCookie.cookieString())
             .send({
@@ -899,7 +904,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(object).to.not.be(undefined);
             expect(attributes).to.have.property('description', 'updated description');
             expect(accessControl).to.have.property('owner', objectOwnerProfileUid);
-            expect(accessControl).to.have.property('accessMode', 'read_only');
+            expect(accessControl).to.have.property('accessMode', 'write_restricted');
           }
         });
 
@@ -907,18 +912,18 @@ export default function ({ getService }: FtrProviderContext) {
           const { cookie: objectOwnerCookie, profileUid: objectOwnerProfileUid } =
             await loginAsObjectOwner('test_user', 'changeme');
           const firstObject = await supertestWithoutAuth
-            .post('/read_only_objects/create')
+            .post('/access_control_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', objectOwnerCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
             .expect(200);
           const { id: objectId1, type: type1 } = firstObject.body;
 
           const secondObject = await supertestWithoutAuth
-            .post('/read_only_objects/create')
+            .post('/access_control_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', objectOwnerCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
             .expect(200);
           const { id: objectId2, type: type2 } = secondObject.body;
 
@@ -934,7 +939,7 @@ export default function ({ getService }: FtrProviderContext) {
           ];
           const { cookie: adminCookie } = await loginAsKibanaAdmin();
           const res = await supertestWithoutAuth
-            .post('/read_only_objects/bulk_update')
+            .post('/access_control_objects/bulk_update')
             .set('kbn-xsrf', 'true')
             .set('cookie', adminCookie.cookieString())
             .send({
@@ -946,14 +951,14 @@ export default function ({ getService }: FtrProviderContext) {
             expect(object).to.not.be(undefined);
             expect(attributes).to.have.property('description', 'updated description');
             expect(accessControl).to.have.property('owner', objectOwnerProfileUid);
-            expect(accessControl).to.have.property('accessMode', 'read_only');
+            expect(accessControl).to.have.property('accessMode', 'write_restricted');
           }
         });
 
         it('allows non-owner non-admin to bulk update objects in default mode ', async () => {
           const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
           const firstObject = await supertestWithoutAuth
-            .post('/read_only_objects/create')
+            .post('/access_control_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', objectOwnerCookie.cookieString())
             .send({ type: ACCESS_CONTROL_TYPE })
@@ -961,7 +966,7 @@ export default function ({ getService }: FtrProviderContext) {
           const { id: objectId1, type: type1 } = firstObject.body;
 
           const secondObject = await supertestWithoutAuth
-            .post('/read_only_objects/create')
+            .post('/access_control_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', objectOwnerCookie.cookieString())
             .send({ type: ACCESS_CONTROL_TYPE })
@@ -983,7 +988,7 @@ export default function ({ getService }: FtrProviderContext) {
           const { cookie: notOwnerCookie } = await loginAsNotObjectOwner('simple_user', 'changeme');
 
           const res = await supertestWithoutAuth
-            .post('/read_only_objects/bulk_update')
+            .post('/access_control_objects/bulk_update')
             .set('kbn-xsrf', 'true')
             .set('cookie', notOwnerCookie.cookieString())
             .send({
@@ -1004,18 +1009,18 @@ export default function ({ getService }: FtrProviderContext) {
           await activateSimpleUserProfile();
           const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
           const firstObject = await supertestWithoutAuth
-            .post('/read_only_objects/create')
+            .post('/access_control_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', objectOwnerCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
             .expect(200);
           const { id: objectId1, type: type1 } = firstObject.body;
 
           const secondObject = await supertestWithoutAuth
-            .post('/read_only_objects/create')
+            .post('/access_control_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', objectOwnerCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
             .expect(200);
           const { id: objectId2, type: type2 } = secondObject.body;
 
@@ -1031,7 +1036,7 @@ export default function ({ getService }: FtrProviderContext) {
           ];
           const { cookie: nonOwnerCookie } = await loginAsNotObjectOwner('simple_user', 'changeme');
           const res = await supertestWithoutAuth
-            .post('/read_only_objects/bulk_update')
+            .post('/access_control_objects/bulk_update')
             .set('kbn-xsrf', 'true')
             .set('cookie', nonOwnerCookie.cookieString())
             .send({
@@ -1049,30 +1054,33 @@ export default function ({ getService }: FtrProviderContext) {
             'changeme'
           );
           const firstObject = await supertestWithoutAuth
-            .post('/read_only_objects/create')
+            .post('/access_control_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', object1OwnerCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
             .expect(200);
           const { id: objectId1, type: type1 } = firstObject.body;
           expect(firstObject.body).to.have.property('accessControl');
           expect(firstObject.body.accessControl).to.have.property('owner', obj1OwnerId);
-          expect(firstObject.body.accessControl).to.have.property('accessMode', 'read_only');
+          expect(firstObject.body.accessControl).to.have.property('accessMode', 'write_restricted');
 
           await createSimpleUser(['kibana_savedobjects_editor']);
           const { cookie: object2OwnerCookie, profileUid: obj2OwnerId } =
             await loginAsNotObjectOwner('simple_user', 'changeme');
 
           const secondObject = await supertestWithoutAuth
-            .post('/read_only_objects/create')
+            .post('/access_control_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', object2OwnerCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
             .expect(200);
           const { id: objectId2, type: type2 } = secondObject.body;
           expect(secondObject.body).to.have.property('accessControl');
           expect(secondObject.body.accessControl).to.have.property('owner', obj2OwnerId);
-          expect(secondObject.body.accessControl).to.have.property('accessMode', 'read_only');
+          expect(secondObject.body.accessControl).to.have.property(
+            'accessMode',
+            'write_restricted'
+          );
 
           const objects = [
             {
@@ -1086,7 +1094,7 @@ export default function ({ getService }: FtrProviderContext) {
           ];
 
           const res = await supertestWithoutAuth
-            .post('/read_only_objects/bulk_update')
+            .post('/access_control_objects/bulk_update')
             .set('kbn-xsrf', 'true')
             .set('cookie', object2OwnerCookie.cookieString())
             .send({
@@ -1104,7 +1112,7 @@ export default function ({ getService }: FtrProviderContext) {
               statusCode: 403,
               error: 'Forbidden',
               message:
-                'Updating objects in write-restricted mode that are owned by another user requires the manage_access_control privilege.',
+                'Updating objects in "write_restricted" mode that are owned by another user requires the "manage_access_control" privilege.',
             },
           });
           expect(res.body.saved_objects[1]).to.have.property('id', objectId2);
@@ -1120,21 +1128,21 @@ export default function ({ getService }: FtrProviderContext) {
             'changeme'
           );
           const firstObject = await supertestWithoutAuth
-            .post('/read_only_objects/create')
+            .post('/access_control_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', object1OwnerCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
             .expect(200);
           const { id: objectId1, type: type1 } = firstObject.body;
           expect(firstObject.body).to.have.property('accessControl');
           expect(firstObject.body.accessControl).to.have.property('owner', obj1OwnerId);
-          expect(firstObject.body.accessControl).to.have.property('accessMode', 'read_only');
+          expect(firstObject.body.accessControl).to.have.property('accessMode', 'write_restricted');
 
           const secondObject = await supertestWithoutAuth
-            .post('/read_only_objects/create')
+            .post('/access_control_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', object1OwnerCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: false })
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: false })
             .expect(200);
           const { id: objectId2, type: type2 } = secondObject.body;
           expect(secondObject.body).to.have.property('accessControl');
@@ -1157,7 +1165,7 @@ export default function ({ getService }: FtrProviderContext) {
           ];
 
           const res = await supertestWithoutAuth
-            .post('/read_only_objects/bulk_update')
+            .post('/access_control_objects/bulk_update')
             .set('kbn-xsrf', 'true')
             .set('cookie', object2OwnerCookie.cookieString())
             .send({
@@ -1175,7 +1183,7 @@ export default function ({ getService }: FtrProviderContext) {
               statusCode: 403,
               error: 'Forbidden',
               message:
-                'Updating objects in write-restricted mode that are owned by another user requires the manage_access_control privilege.',
+                'Updating objects in "write_restricted" mode that are owned by another user requires the "manage_access_control" privilege.',
             },
           });
           expect(res.body.saved_objects[1]).to.have.property('id', objectId2);
@@ -1191,18 +1199,18 @@ export default function ({ getService }: FtrProviderContext) {
             'changeme'
           );
           const firstObject = await supertestWithoutAuth
-            .post('/read_only_objects/create')
+            .post('/access_control_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', object1OwnerCookie.cookieString())
-            .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
             .expect(200);
           const { id: objectId1, type: type1 } = firstObject.body;
           expect(firstObject.body).to.have.property('accessControl');
           expect(firstObject.body.accessControl).to.have.property('owner', obj1OwnerId);
-          expect(firstObject.body.accessControl).to.have.property('accessMode', 'read_only');
+          expect(firstObject.body.accessControl).to.have.property('accessMode', 'write_restricted');
 
           const secondObject = await supertestWithoutAuth
-            .post('/read_only_objects/create')
+            .post('/access_control_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', object1OwnerCookie.cookieString())
             .send({ type: NON_ACCESS_CONTROL_TYPE })
@@ -1226,7 +1234,7 @@ export default function ({ getService }: FtrProviderContext) {
           ];
 
           const res = await supertestWithoutAuth
-            .post('/read_only_objects/bulk_update')
+            .post('/access_control_objects/bulk_update')
             .set('kbn-xsrf', 'true')
             .set('cookie', object2OwnerCookie.cookieString())
             .send({
@@ -1244,7 +1252,7 @@ export default function ({ getService }: FtrProviderContext) {
               statusCode: 403,
               error: 'Forbidden',
               message:
-                'Updating objects in write-restricted mode that are owned by another user requires the manage_access_control privilege.',
+                'Updating objects in "write_restricted" mode that are owned by another user requires the "manage_access_control" privilege.',
             },
           });
           expect(res.body.saved_objects[1]).to.have.property('id', objectId2);
@@ -1356,18 +1364,18 @@ export default function ({ getService }: FtrProviderContext) {
           it('allows owner to bulk delete objects in write-restricted mode', async () => {
             const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
             const firstObject = await supertestWithoutAuth
-              .post('/read_only_objects/create')
+              .post('/access_control_objects/create')
               .set('kbn-xsrf', 'true')
               .set('cookie', objectOwnerCookie.cookieString())
-              .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+              .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
               .expect(200);
             const { id: objectId1, type: type1 } = firstObject.body;
 
             const secondObject = await supertestWithoutAuth
-              .post('/read_only_objects/create')
+              .post('/access_control_objects/create')
               .set('kbn-xsrf', 'true')
               .set('cookie', objectOwnerCookie.cookieString())
-              .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+              .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
               .expect(200);
             const { id: objectId2, type: type2 } = secondObject.body;
 
@@ -1383,7 +1391,7 @@ export default function ({ getService }: FtrProviderContext) {
             ];
 
             const res = await supertestWithoutAuth
-              .post('/read_only_objects/bulk_delete')
+              .post('/access_control_objects/bulk_delete')
               .set('kbn-xsrf', 'true')
               .set('cookie', objectOwnerCookie.cookieString())
               .send({
@@ -1402,7 +1410,7 @@ export default function ({ getService }: FtrProviderContext) {
             const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
 
             const firstObject = await supertestWithoutAuth
-              .post('/read_only_objects/create')
+              .post('/access_control_objects/create')
               .set('kbn-xsrf', 'true')
               .set('cookie', objectOwnerCookie.cookieString())
               .send({ type: ACCESS_CONTROL_TYPE })
@@ -1410,7 +1418,7 @@ export default function ({ getService }: FtrProviderContext) {
             const { id: objectId1, type: type1 } = firstObject.body;
 
             const secondObject = await supertestWithoutAuth
-              .post('/read_only_objects/create')
+              .post('/access_control_objects/create')
               .set('kbn-xsrf', 'true')
               .set('cookie', objectOwnerCookie.cookieString())
               .send({ type: ACCESS_CONTROL_TYPE })
@@ -1434,20 +1442,20 @@ export default function ({ getService }: FtrProviderContext) {
             );
 
             await supertestWithoutAuth
-              .post('/read_only_objects/bulk_delete')
+              .post('/access_control_objects/bulk_delete')
               .set('kbn-xsrf', 'true')
               .set('cookie', notOwnerCookie.cookieString())
               .send({ objects })
               .expect(200);
 
             await supertestWithoutAuth
-              .get(`/read_only_objects/${objectId1}`)
+              .get(`/access_control_objects/${objectId1}`)
               .set('kbn-xsrf', 'true')
               .set('cookie', notOwnerCookie.cookieString())
               .expect(404);
 
             await supertestWithoutAuth
-              .get(`/read_only_objects/${objectId2}`)
+              .get(`/access_control_objects/${objectId2}`)
               .set('kbn-xsrf', 'true')
               .set('cookie', notOwnerCookie.cookieString())
               .expect(404);
@@ -1456,18 +1464,18 @@ export default function ({ getService }: FtrProviderContext) {
           it('allows admin to bulk delete objects they do not own', async () => {
             const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
             const firstObject = await supertestWithoutAuth
-              .post('/read_only_objects/create')
+              .post('/access_control_objects/create')
               .set('kbn-xsrf', 'true')
               .set('cookie', objectOwnerCookie.cookieString())
-              .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+              .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
               .expect(200);
             const { id: objectId1, type: type1 } = firstObject.body;
 
             const secondObject = await supertestWithoutAuth
-              .post('/read_only_objects/create')
+              .post('/access_control_objects/create')
               .set('kbn-xsrf', 'true')
               .set('cookie', objectOwnerCookie.cookieString())
-              .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+              .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
               .expect(200);
             const { id: objectId2, type: type2 } = secondObject.body;
 
@@ -1485,7 +1493,7 @@ export default function ({ getService }: FtrProviderContext) {
             ];
 
             const res = await supertestWithoutAuth
-              .post('/read_only_objects/bulk_delete')
+              .post('/access_control_objects/bulk_delete')
               .set('kbn-xsrf', 'true')
               .set('cookie', adminCookie.cookieString())
               .send({
@@ -1504,18 +1512,18 @@ export default function ({ getService }: FtrProviderContext) {
           it('rejects if all objects are write-restricted and inaccessible', async () => {
             const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
             const firstObject = await supertestWithoutAuth
-              .post('/read_only_objects/create')
+              .post('/access_control_objects/create')
               .set('kbn-xsrf', 'true')
               .set('cookie', objectOwnerCookie.cookieString())
-              .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+              .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
               .expect(200);
             const { id: objectId1, type: type1 } = firstObject.body;
 
             const secondObject = await supertestWithoutAuth
-              .post('/read_only_objects/create')
+              .post('/access_control_objects/create')
               .set('kbn-xsrf', 'true')
               .set('cookie', objectOwnerCookie.cookieString())
-              .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+              .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
               .expect(200);
             const { id: objectId2, type: type2 } = secondObject.body;
 
@@ -1537,7 +1545,7 @@ export default function ({ getService }: FtrProviderContext) {
             ];
 
             const res = await supertestWithoutAuth
-              .post('/read_only_objects/bulk_delete')
+              .post('/access_control_objects/bulk_delete')
               .set('kbn-xsrf', 'true')
               .set('cookie', notOwnerCookie.cookieString())
               .send({
@@ -1557,30 +1565,36 @@ export default function ({ getService }: FtrProviderContext) {
             const { cookie: object1OwnerCookie, profileUid: obj1OwnerId } =
               await loginAsObjectOwner('test_user', 'changeme');
             const firstObject = await supertestWithoutAuth
-              .post('/read_only_objects/create')
+              .post('/access_control_objects/create')
               .set('kbn-xsrf', 'true')
               .set('cookie', object1OwnerCookie.cookieString())
-              .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+              .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
               .expect(200);
             const { id: objectId1, type: type1 } = firstObject.body;
             expect(firstObject.body).to.have.property('accessControl');
             expect(firstObject.body.accessControl).to.have.property('owner', obj1OwnerId);
-            expect(firstObject.body.accessControl).to.have.property('accessMode', 'read_only');
+            expect(firstObject.body.accessControl).to.have.property(
+              'accessMode',
+              'write_restricted'
+            );
 
             await createSimpleUser(['kibana_savedobjects_editor']);
             const { cookie: object2OwnerCookie, profileUid: obj2OwnerId } =
               await loginAsNotObjectOwner('simple_user', 'changeme');
 
             const secondObject = await supertestWithoutAuth
-              .post('/read_only_objects/create')
+              .post('/access_control_objects/create')
               .set('kbn-xsrf', 'true')
               .set('cookie', object2OwnerCookie.cookieString())
-              .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+              .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
               .expect(200);
             const { id: objectId2, type: type2 } = secondObject.body;
             expect(secondObject.body).to.have.property('accessControl');
             expect(secondObject.body.accessControl).to.have.property('owner', obj2OwnerId);
-            expect(secondObject.body.accessControl).to.have.property('accessMode', 'read_only');
+            expect(secondObject.body.accessControl).to.have.property(
+              'accessMode',
+              'write_restricted'
+            );
 
             const objects = [
               {
@@ -1594,7 +1608,7 @@ export default function ({ getService }: FtrProviderContext) {
             ];
 
             const res = await supertestWithoutAuth
-              .post('/read_only_objects/bulk_delete')
+              .post('/access_control_objects/bulk_delete')
               .set('kbn-xsrf', 'true')
               .set('cookie', object2OwnerCookie.cookieString())
               .send({
@@ -1614,7 +1628,7 @@ export default function ({ getService }: FtrProviderContext) {
                   statusCode: 403,
                   error: 'Forbidden',
                   message:
-                    'Deleting objects in write-restricted mode that are owned by another user requires the manage_access_control privilege.',
+                    'Deleting objects in "write_restricted" mode that are owned by another user requires the "manage_access_control" privilege.',
                 },
               },
               {
@@ -1632,21 +1646,24 @@ export default function ({ getService }: FtrProviderContext) {
               'changeme'
             );
             const firstObject = await supertestWithoutAuth
-              .post('/read_only_objects/create')
+              .post('/access_control_objects/create')
               .set('kbn-xsrf', 'true')
               .set('cookie', objectOwnerCookie.cookieString())
-              .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+              .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
               .expect(200);
             const { id: objectId1, type: type1 } = firstObject.body;
             expect(firstObject.body).to.have.property('accessControl');
             expect(firstObject.body.accessControl).to.have.property('owner', obj1OwnerId);
-            expect(firstObject.body.accessControl).to.have.property('accessMode', 'read_only');
+            expect(firstObject.body.accessControl).to.have.property(
+              'accessMode',
+              'write_restricted'
+            );
 
             const secondObject = await supertestWithoutAuth
-              .post('/read_only_objects/create')
+              .post('/access_control_objects/create')
               .set('kbn-xsrf', 'true')
               .set('cookie', objectOwnerCookie.cookieString())
-              .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: false })
+              .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: false })
               .expect(200);
             const { id: objectId2, type: type2 } = secondObject.body;
             expect(secondObject.body).to.have.property('accessControl');
@@ -1671,7 +1688,7 @@ export default function ({ getService }: FtrProviderContext) {
             ];
 
             const res = await supertestWithoutAuth
-              .post('/read_only_objects/bulk_delete')
+              .post('/access_control_objects/bulk_delete')
               .set('kbn-xsrf', 'true')
               .set('cookie', notOwnerCookie.cookieString())
               .send({
@@ -1691,7 +1708,7 @@ export default function ({ getService }: FtrProviderContext) {
                   statusCode: 403,
                   error: 'Forbidden',
                   message:
-                    'Deleting objects in write-restricted mode that are owned by another user requires the manage_access_control privilege.',
+                    'Deleting objects in "write_restricted" mode that are owned by another user requires the "manage_access_control" privilege.',
                 },
               },
               {
@@ -1709,18 +1726,21 @@ export default function ({ getService }: FtrProviderContext) {
               'changeme'
             );
             const firstObject = await supertestWithoutAuth
-              .post('/read_only_objects/create')
+              .post('/access_control_objects/create')
               .set('kbn-xsrf', 'true')
               .set('cookie', objectOwnerCookie.cookieString())
-              .send({ type: ACCESS_CONTROL_TYPE, isReadOnly: true })
+              .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
               .expect(200);
             const { id: objectId1, type: type1 } = firstObject.body;
             expect(firstObject.body).to.have.property('accessControl');
             expect(firstObject.body.accessControl).to.have.property('owner', obj1OwnerId);
-            expect(firstObject.body.accessControl).to.have.property('accessMode', 'read_only');
+            expect(firstObject.body.accessControl).to.have.property(
+              'accessMode',
+              'write_restricted'
+            );
 
             const secondObject = await supertestWithoutAuth
-              .post('/read_only_objects/create')
+              .post('/access_control_objects/create')
               .set('kbn-xsrf', 'true')
               .set('cookie', objectOwnerCookie.cookieString())
               .send({ type: NON_ACCESS_CONTROL_TYPE })
@@ -1745,7 +1765,7 @@ export default function ({ getService }: FtrProviderContext) {
             ];
 
             const res = await supertestWithoutAuth
-              .post('/read_only_objects/bulk_delete')
+              .post('/access_control_objects/bulk_delete')
               .set('kbn-xsrf', 'true')
               .set('cookie', notOwnerCookie.cookieString())
               .send({
@@ -1765,7 +1785,7 @@ export default function ({ getService }: FtrProviderContext) {
                   statusCode: 403,
                   error: 'Forbidden',
                   message:
-                    'Deleting objects in write-restricted mode that are owned by another user requires the manage_access_control privilege.',
+                    'Deleting objects in "write_restricted" mode that are owned by another user requires the "manage_access_control" privilege.',
                 },
               },
               {

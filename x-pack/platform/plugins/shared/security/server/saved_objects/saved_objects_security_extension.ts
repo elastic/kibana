@@ -1800,7 +1800,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
                   new Error(
                     `${
                       verbMap.get(action) ?? 'Affecting'
-                    } objects in read-only mode that are owned by another user requires the manage_access_control privilege.`
+                    } objects in "write_restricted" mode that are owned by another user requires the "manage_access_control" privilege.`
                   )
                 )
               ),
