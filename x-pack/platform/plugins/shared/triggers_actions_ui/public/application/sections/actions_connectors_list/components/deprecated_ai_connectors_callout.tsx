@@ -25,7 +25,7 @@ export const DeprecatedAIConnectorsCallOut: React.FC<Props> = ({ handleCalloutCl
     color="warning"
   >
     <FormattedMessage
-      id="xpack.stackConnectors.components.actionConnectorAdd.deprecatedAiConnectorsBannerMessage"
+      id="xpack.triggersActionsUI.components.actionConnectorAdd.deprecatedAiConnectorsBannerMessage"
       defaultMessage="Only connectors created with the {aiConnectorLink} for these services will remain. While you can still access existing connectors and create new ones with this flow, make sure to migrate in a timely manner to avoid interruptions in your workflow."
       values={{
         aiConnectorLink: (

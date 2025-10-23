@@ -415,12 +415,11 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       }
       setUpdatedProviders(getUpdatedProviders(currentSolution));
 
-      const params = parse(location.search, {
-        sort: false,
-      });
-      const { selectedConnector, connectorState } = params;
-
       try {
+        const params = parse(location.search, {
+          sort: false,
+        });
+        const { selectedConnector, connectorState } = params ?? {};
         const selectedProvider =
           typeof connectorState === 'string' && JSON.parse(connectorState).provider;
         const providerKey =
@@ -440,7 +439,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [config?.provider, providers, currentSolution, getUpdatedProviders]);
+  }, [location.search, config?.provider, providers, currentSolution, getUpdatedProviders]);
 
   useEffect(() => {
     if (config?.provider && config?.taskType && isEdit) {
