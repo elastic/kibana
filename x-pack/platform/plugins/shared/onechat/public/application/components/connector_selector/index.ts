@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export const storageKeys = {
-  agentId: 'agentBuilder.agentId',
-  lastUsedConnector: 'agentBuilder.lastUsedConnector',
-};
+export { ConnectorSelector } from './connector_selector';
