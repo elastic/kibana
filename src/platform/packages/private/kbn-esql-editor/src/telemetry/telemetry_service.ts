@@ -102,7 +102,7 @@ export class ESQLEditorTelemetryService {
 
   public trackQuerySubmitted(props: TelemetryQuerySubmittedProps) {
     this._reportEvent(ESQL_QUERY_SUBMITTED, {
-      exec_source: props.query_source,
+      query_source: props.query_source,
       query_length: props.query_length,
       query_lines: props.query_lines,
       anti_limit_before_aggregate: props.anti_limit_before_aggregate,
