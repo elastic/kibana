@@ -16,7 +16,7 @@ import type {
   AdvancedUiActionsStart,
 } from '@kbn/ui-actions-enhanced-plugin/public';
 import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
-import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
+import { setKibanaServices } from './services/kibana_services';
 import { EmbeddableToDashboardDrilldown } from './services/drilldowns/embeddable_to_dashboard_drilldown';
 
 export interface SetupDependencies {
