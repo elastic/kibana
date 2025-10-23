@@ -10,7 +10,7 @@ export function getTestRuleData(overwrites = {}) {
     enabled: true,
     name: 'abc',
     tags: ['foo'],
-    rule_type_id: 'test.noop',
+    rule_type_id: '.es-query',
     consumer: 'alertsFixture',
     schedule: { interval: '1m' },
     throttle: '1m',

@@ -27,7 +27,7 @@ export const backfillResponseSchema = schema.object({
     name: schema.string(),
     tags: schema.arrayOf(schema.string()),
     rule_type_id: schema.string(),
-    params: ruleParamsSchemaWithRuleTypeIdV1('alertTypeId'),
+    params: ruleParamsSchemaV1,
     api_key_owner: schema.nullable(schema.string()),
     api_key_created_by_user: schema.maybe(schema.nullable(schema.boolean())),
     consumer: schema.string(),

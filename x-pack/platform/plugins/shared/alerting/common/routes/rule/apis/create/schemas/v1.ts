@@ -191,7 +191,7 @@ export const createBodySchemaCommon = schema.object({
 
 export const createBodySchema = schema.intersection([
   createBodySchemaCommon,
-  ruleParamsSchemaWithRuleTypeIdAndDefaultValueV1('rule_type_id'),
+  ruleParamsSchemaWithRuleTypeIdAndDefaultValueV1,
 ]);
 
 export { createRuleParamsExamplesV1 };

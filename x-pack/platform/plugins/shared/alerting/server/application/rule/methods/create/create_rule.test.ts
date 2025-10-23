@@ -36,7 +36,6 @@ import type { RuleDomain } from '../../types';
 import type { RuleSystemAction } from '../../../../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
-import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
@@ -113,37 +112,19 @@ setGlobalDate();
 const now = new Date().toISOString();
 
 function getMockData(overwrites: Record<string, unknown> = {}): CreateRuleParams<{
-  searchType: 'searchSource' | 'esqlQuery';
-  timeWindowSize: number;
-  timeWindowUnit: 'm' | 's' | 'h' | 'd';
-  threshold: number[];
-  thresholdComparator: '>' | '<';
-  size: number;
-  aggType: 'count';
-  groupBy: 'all' | 'top' | 'row';
-  excludeHitsFromPreviousRun: boolean;
-  sourceFields: string[];
+  bar: boolean;
 }>['data'] {
   return {
     enabled: true,
     name: 'abc',
     tags: ['foo'],
-    alertTypeId: '.es-query',
+    alertTypeId: '123',
     consumer: 'bar',
     schedule: { interval: '1m' },
     throttle: null,
     notifyWhen: null,
     params: {
-      searchType: 'searchSource',
-      timeWindowSize: 10,
-      timeWindowUnit: 'm',
-      threshold: [5],
-      thresholdComparator: '>',
-      size: 100,
-      aggType: 'count',
-      groupBy: 'all',
-      excludeHitsFromPreviousRun: false,
-      sourceFields: [],
+      bar: true,
     },
     actions: [
       {
@@ -167,7 +148,7 @@ describe('create()', () => {
     actionsClient = (await rulesClientParams.getActionsClient()) as jest.Mocked<ActionsClient>;
     actionsClient.getBulk.mockReset();
     actionsClient.getBulk.mockResolvedValue([
-      createMockConnector({
+      {
         id: '1',
         actionTypeId: 'test',
         config: {
@@ -178,8 +159,12 @@ describe('create()', () => {
           secure: null,
           service: null,
         },
+        isMissingSecrets: false,
         name: 'email connector',
-      }),
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: false,
+      },
     ]);
     actionsClient.listTypes.mockReset();
     actionsClient.listTypes.mockResolvedValue([]);
@@ -206,35 +191,17 @@ describe('create()', () => {
   describe('authorization', () => {
     function tryToExecuteOperation(
       options: CreateRuleParams<{
-        searchType: 'searchSource' | 'esqlQuery';
-        timeWindowSize: number;
-        timeWindowUnit: 'm' | 's' | 'h' | 'd';
-        threshold: number[];
-        thresholdComparator: '>' | '<';
-        size: number;
-        aggType: 'count';
-        groupBy: 'all' | 'top' | 'row';
-        excludeHitsFromPreviousRun: boolean;
-        sourceFields: string[];
+        bar: boolean;
       }>
     ): Promise<unknown> {
       unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
         id: '1',
         type: RULE_SAVED_OBJECT_TYPE,
         attributes: {
-          alertTypeId: '.es-query',
+          alertTypeId: '123',
           schedule: { interval: '1m' },
           params: {
-            searchType: 'searchSource',
-            timeWindowSize: 10,
-            timeWindowUnit: 'm',
-            threshold: [5],
-            thresholdComparator: '>',
-            size: 100,
-            aggType: 'count',
-            groupBy: 'all',
-            excludeHitsFromPreviousRun: false,
-            sourceFields: [],
+            bar: true,
           },
           executionStatus: getRuleExecutionStatusPending('2019-02-12T21:01:22.479Z'),
           running: false,
@@ -281,7 +248,7 @@ describe('create()', () => {
 
     test('ensures user is authorised to create this type of rule under the consumer', async () => {
       const data = getMockData({
-        alertTypeId: '.es-query',
+        alertTypeId: 'myType',
         consumer: 'myApp',
       });
 
@@ -291,29 +258,29 @@ describe('create()', () => {
         entity: 'rule',
         consumer: 'myApp',
         operation: 'create',
-        ruleTypeId: '.es-query',
+        ruleTypeId: 'myType',
       });
     });
 
     test('throws when user is not authorised to create this type of rule', async () => {
       const data = getMockData({
-        alertTypeId: '.es-query',
+        alertTypeId: 'myType',
         consumer: 'myApp',
       });
 
       authorization.ensureAuthorized.mockRejectedValue(
-        new Error(`Unauthorized to create a ".es-query" rule for "myApp"`)
+        new Error(`Unauthorized to create a "myType" rule for "myApp"`)
       );
 
       await expect(tryToExecuteOperation({ data })).rejects.toMatchInlineSnapshot(
-        `[Error: Unauthorized to create a ".es-query" rule for "myApp"]`
+        `[Error: Unauthorized to create a "myType" rule for "myApp"]`
       );
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
         entity: 'rule',
         consumer: 'myApp',
         operation: 'create',
-        ruleTypeId: '.es-query',
+        ruleTypeId: 'myType',
       });
     });
   });
@@ -385,19 +352,10 @@ describe('create()', () => {
     const data = getMockData();
     const createdAttributes = {
       ...data,
-      alertTypeId: '.es-query',
+      alertTypeId: '123',
       schedule: { interval: '1m' },
       params: {
-        searchType: 'searchSource',
-        timeWindowSize: 10,
-        timeWindowUnit: 'm',
-        threshold: [5],
-        thresholdComparator: '>',
-        size: 100,
-        aggType: 'count',
-        groupBy: 'all',
-        excludeHitsFromPreviousRun: false,
-        sourceFields: [],
+        bar: true,
       },
       createdAt: '2019-02-12T21:01:22.479Z',
       createdBy: 'elastic',
@@ -460,7 +418,7 @@ describe('create()', () => {
       entity: 'rule',
       consumer: 'bar',
       operation: 'create',
-      ruleTypeId: '.es-query',
+      ruleTypeId: '123',
     });
 
     expect(result).toMatchInlineSnapshot(`
@@ -476,7 +434,7 @@ describe('create()', () => {
             "uuid": "test-uuid",
           },
         ],
-        "alertTypeId": ".es-query",
+        "alertTypeId": "123",
         "artifacts": Object {
           "dashboards": Array [],
           "investigation_guide": Object {
@@ -497,18 +455,7 @@ describe('create()', () => {
         "name": "abc",
         "notifyWhen": null,
         "params": Object {
-          "aggType": "count",
-          "excludeHitsFromPreviousRun": false,
-          "groupBy": "all",
-          "searchType": "searchSource",
-          "size": 100,
-          "sourceFields": Array [],
-          "threshold": Array [
-            5,
-          ],
-          "thresholdComparator": ">",
-          "timeWindowSize": 10,
-          "timeWindowUnit": "m",
+          "bar": true,
         },
         "running": false,
         "schedule": Object {
@@ -540,7 +487,7 @@ describe('create()', () => {
             "uuid": "102",
           },
         ],
-        "alertTypeId": ".es-query",
+        "alertTypeId": "123",
         "apiKey": null,
         "apiKeyCreatedByUser": null,
         "apiKeyOwner": null,
@@ -588,18 +535,7 @@ describe('create()', () => {
         "name": "abc",
         "notifyWhen": null,
         "params": Object {
-          "aggType": "count",
-          "excludeHitsFromPreviousRun": false,
-          "groupBy": "all",
-          "searchType": "searchSource",
-          "size": 100,
-          "sourceFields": Array [],
-          "threshold": Array [
-            5,
-          ],
-          "thresholdComparator": ">",
-          "timeWindowSize": 10,
-          "timeWindowUnit": "m",
+          "bar": true,
         },
         "revision": 0,
         "running": false,
@@ -629,30 +565,30 @@ describe('create()', () => {
     `);
     expect(taskManager.schedule).toHaveBeenCalledTimes(1);
     expect(taskManager.schedule.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "enabled": true,
-          "id": "1",
-          "params": Object {
-            "alertId": "1",
-            "consumer": "bar",
-            "spaceId": "default",
-          },
-          "schedule": Object {
-            "interval": "1m",
-          },
-          "scope": Array [
-            "alerting",
-          ],
-          "state": Object {
-            "alertInstances": Object {},
-            "alertTypeState": Object {},
-            "previousStartedAt": null,
-          },
-          "taskType": "alerting:.es-query",
-        },
-      ]
-    `);
+                                                                        Array [
+                                                                          Object {
+                                                                            "enabled": true,
+                                                                            "id": "1",
+                                                                            "params": Object {
+                                                                              "alertId": "1",
+                                                                              "consumer": "bar",
+                                                                              "spaceId": "default",
+                                                                            },
+                                                                            "schedule": Object {
+                                                                              "interval": "1m",
+                                                                            },
+                                                                            "scope": Array [
+                                                                              "alerting",
+                                                                            ],
+                                                                            "state": Object {
+                                                                              "alertInstances": Object {},
+                                                                              "alertTypeState": Object {},
+                                                                              "previousStartedAt": null,
+                                                                            },
+                                                                            "taskType": "alerting:123",
+                                                                          },
+                                                                        ]
+                                                `);
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.update.mock.calls[0]).toHaveLength(4);
     expect(unsecuredSavedObjectsClient.update.mock.calls[0][0]).toEqual(RULE_SAVED_OBJECT_TYPE);
@@ -789,7 +725,7 @@ describe('create()', () => {
             "uuid": "104",
           },
         ],
-        "alertTypeId": ".es-query",
+        "alertTypeId": "123",
         "apiKey": null,
         "apiKeyCreatedByUser": null,
         "apiKeyOwner": null,
@@ -837,18 +773,7 @@ describe('create()', () => {
         "name": "abc",
         "notifyWhen": null,
         "params": Object {
-          "aggType": "count",
-          "excludeHitsFromPreviousRun": false,
-          "groupBy": "all",
-          "searchType": "searchSource",
-          "size": 100,
-          "sourceFields": Array [],
-          "threshold": Array [
-            5,
-          ],
-          "thresholdComparator": ">",
-          "timeWindowSize": 10,
-          "timeWindowUnit": "m",
+          "bar": true,
         },
         "revision": 0,
         "running": false,
@@ -894,7 +819,7 @@ describe('create()', () => {
     });
     actionsClient.getBulk.mockReset();
     actionsClient.getBulk.mockResolvedValue([
-      createMockConnector({
+      {
         id: '1',
         actionTypeId: 'test',
         config: {
@@ -905,9 +830,13 @@ describe('create()', () => {
           secure: null,
           service: null,
         },
+        isMissingSecrets: false,
         name: 'email connector',
-      }),
-      createMockConnector({
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: false,
+      },
+      {
         id: '2',
         actionTypeId: 'test',
         config: {
@@ -918,8 +847,12 @@ describe('create()', () => {
           secure: null,
           service: null,
         },
+        isMissingSecrets: false,
         name: 'email connector',
-      }),
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: false,
+      },
     ]);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
@@ -1080,7 +1013,7 @@ describe('create()', () => {
     });
     actionsClient.getBulk.mockReset();
     actionsClient.getBulk.mockResolvedValue([
-      createMockConnector({
+      {
         id: '1',
         actionTypeId: 'test',
         config: {
@@ -1091,9 +1024,13 @@ describe('create()', () => {
           secure: null,
           service: null,
         },
+        isMissingSecrets: false,
         name: 'email connector',
-      }),
-      createMockConnector({
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: false,
+      },
+      {
         id: '2',
         actionTypeId: 'test2',
         config: {
@@ -1104,9 +1041,13 @@ describe('create()', () => {
           secure: null,
           service: null,
         },
+        isMissingSecrets: false,
         name: 'another email connector',
-      }),
-      createMockConnector({
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: false,
+      },
+      {
         id: 'preconfigured',
         actionTypeId: 'test',
         config: {
@@ -1117,9 +1058,12 @@ describe('create()', () => {
           secure: null,
           service: null,
         },
+        isMissingSecrets: false,
         name: 'preconfigured email connector',
         isPreconfigured: true,
-      }),
+        isDeprecated: false,
+        isSystemAction: false,
+      },
     ]);
 
     actionsClient.isPreconfigured.mockReset();
@@ -1130,19 +1074,10 @@ describe('create()', () => {
       type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         executionStatus: getRuleExecutionStatusPending('2019-02-12T21:01:22.479Z'),
-        alertTypeId: '.es-query',
+        alertTypeId: '123',
         schedule: { interval: '1m' },
         params: {
-          searchType: 'searchSource',
-          timeWindowSize: 10,
-          timeWindowUnit: 'm',
-          threshold: [5],
-          thresholdComparator: '>',
-          size: 100,
-          aggType: 'count',
-          groupBy: 'all',
-          excludeHitsFromPreviousRun: false,
-          sourceFields: [],
+          bar: true,
         },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -1232,7 +1167,7 @@ describe('create()', () => {
             "uuid": "test-uuid-2",
           },
         ],
-        "alertTypeId": ".es-query",
+        "alertTypeId": "123",
         "artifacts": Object {
           "dashboards": Array [],
           "investigation_guide": Object {
@@ -1247,18 +1182,7 @@ describe('create()', () => {
         "id": "1",
         "notifyWhen": null,
         "params": Object {
-          "aggType": "count",
-          "excludeHitsFromPreviousRun": false,
-          "groupBy": "all",
-          "searchType": "searchSource",
-          "size": 100,
-          "sourceFields": Array [],
-          "threshold": Array [
-            5,
-          ],
-          "thresholdComparator": ">",
-          "timeWindowSize": 10,
-          "timeWindowUnit": "m",
+          "bar": true,
         },
         "running": false,
         "schedule": Object {
@@ -1301,7 +1225,7 @@ describe('create()', () => {
             uuid: '110',
           },
         ],
-        alertTypeId: '.es-query',
+        alertTypeId: '123',
         apiKey: null,
         apiKeyOwner: null,
         artifacts: {
@@ -1326,18 +1250,7 @@ describe('create()', () => {
         mutedInstanceIds: [],
         name: 'abc',
         notifyWhen: null,
-        params: {
-          searchType: 'searchSource',
-          timeWindowSize: 10,
-          timeWindowUnit: 'm',
-          threshold: [5],
-          thresholdComparator: '>',
-          size: 100,
-          aggType: 'count',
-          groupBy: 'all',
-          excludeHitsFromPreviousRun: false,
-          sourceFields: [],
-        },
+        params: { bar: true },
         revision: 0,
         running: false,
         schedule: { interval: '1m' },
@@ -1385,7 +1298,7 @@ describe('create()', () => {
 
     actionsClient.getBulk.mockReset();
     actionsClient.getBulk.mockResolvedValue([
-      createMockConnector({
+      {
         id: '1',
         actionTypeId: 'test',
         config: {
@@ -1396,9 +1309,13 @@ describe('create()', () => {
           secure: null,
           service: null,
         },
+        isMissingSecrets: false,
         name: 'email connector',
-      }),
-      createMockConnector({
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: false,
+      },
+      {
         id: '2',
         actionTypeId: 'test2',
         config: {
@@ -1409,15 +1326,22 @@ describe('create()', () => {
           secure: null,
           service: null,
         },
+        isMissingSecrets: false,
         name: 'another email connector',
-      }),
-      createMockConnector({
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: false,
+      },
+      {
         id: 'system_action-id',
         actionTypeId: 'test',
         config: {},
+        isMissingSecrets: false,
         name: 'system action connector',
+        isPreconfigured: false,
+        isDeprecated: false,
         isSystemAction: true,
-      }),
+      },
     ]);
 
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
@@ -1425,19 +1349,10 @@ describe('create()', () => {
       type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         executionStatus: getRuleExecutionStatusPending('2019-02-12T21:01:22.479Z'),
-        alertTypeId: '.es-query',
+        alertTypeId: '123',
         schedule: { interval: '1m' },
         params: {
-          searchType: 'searchSource',
-          timeWindowSize: 10,
-          timeWindowUnit: 'm',
-          threshold: [5],
-          thresholdComparator: '>',
-          size: 100,
-          aggType: 'count',
-          groupBy: 'all',
-          excludeHitsFromPreviousRun: false,
-          sourceFields: [],
+          bar: true,
         },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -1515,7 +1430,7 @@ describe('create()', () => {
             "uuid": undefined,
           },
         ],
-        "alertTypeId": ".es-query",
+        "alertTypeId": "123",
         "artifacts": Object {
           "dashboards": Array [],
           "investigation_guide": Object {
@@ -1530,18 +1445,7 @@ describe('create()', () => {
         "id": "1",
         "notifyWhen": null,
         "params": Object {
-          "aggType": "count",
-          "excludeHitsFromPreviousRun": false,
-          "groupBy": "all",
-          "searchType": "searchSource",
-          "size": 100,
-          "sourceFields": Array [],
-          "threshold": Array [
-            5,
-          ],
-          "thresholdComparator": ">",
-          "timeWindowSize": 10,
-          "timeWindowUnit": "m",
+          "bar": true,
         },
         "running": false,
         "schedule": Object {
@@ -1589,7 +1493,7 @@ describe('create()', () => {
             uuid: '113',
           },
         ],
-        alertTypeId: '.es-query',
+        alertTypeId: '123',
         apiKey: null,
         apiKeyCreatedByUser: null,
         apiKeyOwner: null,
@@ -1635,16 +1539,7 @@ describe('create()', () => {
         name: 'abc',
         notifyWhen: null,
         params: {
-          searchType: 'searchSource',
-          timeWindowSize: 10,
-          timeWindowUnit: 'm',
-          threshold: [5],
-          thresholdComparator: '>',
-          size: 100,
-          aggType: 'count',
-          groupBy: 'all',
-          excludeHitsFromPreviousRun: false,
-          sourceFields: [],
+          bar: true,
         },
         revision: 0,
         running: false,
@@ -1750,30 +1645,12 @@ describe('create()', () => {
 
   test('should call useSavedObjectReferences.extractReferences and useSavedObjectReferences.injectReferences if defined for rule type', async () => {
     const ruleParams = {
-      searchType: 'searchSource',
-      timeWindowSize: 10,
-      timeWindowUnit: 'm',
-      threshold: [5],
-      thresholdComparator: '>',
-      size: 100,
-      aggType: 'count',
-      groupBy: 'all',
-      excludeHitsFromPreviousRun: false,
-      sourceFields: [],
+      bar: true,
       parameterThatIsSavedObjectId: '9',
     };
     const extractReferencesFn = jest.fn().mockReturnValue({
       params: {
-        searchType: 'searchSource',
-        timeWindowSize: 10,
-        timeWindowUnit: 'm',
-        threshold: [5],
-        thresholdComparator: '>',
-        size: 100,
-        aggType: 'count',
-        groupBy: 'all',
-        excludeHitsFromPreviousRun: false,
-        sourceFields: [],
+        bar: true,
         parameterThatIsSavedObjectRef: 'soRef_0',
       },
       references: [
@@ -1785,16 +1662,7 @@ describe('create()', () => {
       ],
     });
     const injectReferencesFn = jest.fn().mockReturnValue({
-      searchType: 'searchSource',
-      timeWindowSize: 10,
-      timeWindowUnit: 'm',
-      threshold: [5],
-      thresholdComparator: '>',
-      size: 100,
-      aggType: 'count',
-      groupBy: 'all',
-      excludeHitsFromPreviousRun: false,
-      sourceFields: [],
+      bar: true,
       parameterThatIsSavedObjectId: '9',
     });
     ruleTypeRegistry.get.mockImplementation(() => ({
@@ -1827,19 +1695,10 @@ describe('create()', () => {
       id: '1',
       type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
-        alertTypeId: '.es-query',
+        alertTypeId: '123',
         schedule: { interval: '1m' },
         params: {
-          searchType: 'searchSource',
-          timeWindowSize: 10,
-          timeWindowUnit: 'm',
-          threshold: [5],
-          thresholdComparator: '>',
-          size: 100,
-          aggType: 'count',
-          groupBy: 'all',
-          excludeHitsFromPreviousRun: false,
-          sourceFields: [],
+          bar: true,
           parameterThatIsSavedObjectRef: 'soRef_0',
         },
         executionStatus: getRuleExecutionStatusPending('2019-02-12T21:01:22.479Z'),
@@ -1896,7 +1755,7 @@ describe('create()', () => {
             uuid: '115',
           },
         ],
-        alertTypeId: '.es-query',
+        alertTypeId: '123',
         apiKey: null,
         apiKeyOwner: null,
         apiKeyCreatedByUser: null,
@@ -1921,19 +1780,7 @@ describe('create()', () => {
         mutedInstanceIds: [],
         name: 'abc',
         notifyWhen: null,
-        params: {
-          searchType: 'searchSource',
-          timeWindowSize: 10,
-          timeWindowUnit: 'm',
-          threshold: [5],
-          thresholdComparator: '>',
-          size: 100,
-          aggType: 'count',
-          groupBy: 'all',
-          excludeHitsFromPreviousRun: false,
-          sourceFields: [],
-          parameterThatIsSavedObjectRef: 'soRef_0',
-        },
+        params: { bar: true, parameterThatIsSavedObjectRef: 'soRef_0' },
         revision: 0,
         running: false,
         schedule: { interval: '1m' },
@@ -2002,30 +1849,12 @@ describe('create()', () => {
 
   test('should allow rule types to use action_ prefix for saved object reference names', async () => {
     const ruleParams = {
-      searchType: 'searchSource',
-      timeWindowSize: 10,
-      timeWindowUnit: 'm',
-      threshold: [5],
-      thresholdComparator: '>',
-      size: 100,
-      aggType: 'count',
-      groupBy: 'all',
-      excludeHitsFromPreviousRun: false,
-      sourceFields: [],
+      bar: true,
       parameterThatIsSavedObjectId: '8',
     };
     const extractReferencesFn = jest.fn().mockReturnValue({
       params: {
-        searchType: 'searchSource',
-        timeWindowSize: 10,
-        timeWindowUnit: 'm',
-        threshold: [5],
-        thresholdComparator: '>',
-        size: 100,
-        aggType: 'count',
-        groupBy: 'all',
-        excludeHitsFromPreviousRun: false,
-        sourceFields: [],
+        bar: true,
         parameterThatIsSavedObjectRef: 'action_0',
       },
       references: [
@@ -2037,16 +1866,7 @@ describe('create()', () => {
       ],
     });
     const injectReferencesFn = jest.fn().mockReturnValue({
-      searchType: 'searchSource',
-      timeWindowSize: 10,
-      timeWindowUnit: 'm',
-      threshold: [5],
-      thresholdComparator: '>',
-      size: 100,
-      aggType: 'count',
-      groupBy: 'all',
-      excludeHitsFromPreviousRun: false,
-      sourceFields: [],
+      bar: true,
       parameterThatIsSavedObjectId: '8',
     });
     ruleTypeRegistry.get.mockImplementation(() => ({
@@ -2079,19 +1899,10 @@ describe('create()', () => {
       id: '1',
       type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
-        alertTypeId: '.es-query',
+        alertTypeId: '123',
         schedule: { interval: '1m' },
         params: {
-          searchType: 'searchSource',
-          timeWindowSize: 10,
-          timeWindowUnit: 'm',
-          threshold: [5],
-          thresholdComparator: '>',
-          size: 100,
-          aggType: 'count',
-          groupBy: 'all',
-          excludeHitsFromPreviousRun: false,
-          sourceFields: [],
+          bar: true,
           parameterThatIsSavedObjectRef: 'action_0',
         },
         executionStatus: getRuleExecutionStatusPending(now),
@@ -2148,7 +1959,7 @@ describe('create()', () => {
             uuid: '116',
           },
         ],
-        alertTypeId: '.es-query',
+        alertTypeId: '123',
         apiKey: null,
         apiKeyOwner: null,
         apiKeyCreatedByUser: null,
@@ -2173,19 +1984,7 @@ describe('create()', () => {
         mutedInstanceIds: [],
         name: 'abc',
         notifyWhen: null,
-        params: {
-          searchType: 'searchSource',
-          timeWindowSize: 10,
-          timeWindowUnit: 'm',
-          threshold: [5],
-          thresholdComparator: '>',
-          size: 100,
-          aggType: 'count',
-          groupBy: 'all',
-          excludeHitsFromPreviousRun: false,
-          sourceFields: [],
-          parameterThatIsSavedObjectRef: 'action_0',
-        },
+        params: { bar: true, parameterThatIsSavedObjectRef: 'action_0' },
         revision: 0,
         running: false,
         schedule: { interval: '1m' },
@@ -2298,19 +2097,10 @@ describe('create()', () => {
     const data = getMockData({ notifyWhen: 'onActionGroupChange', throttle: '10m' });
     const createdAttributes = {
       ...data,
-      alertTypeId: '.es-query',
+      alertTypeId: '123',
       schedule: { interval: '1m' },
       params: {
-        searchType: 'searchSource',
-        timeWindowSize: 10,
-        timeWindowUnit: 'm',
-        threshold: [5],
-        thresholdComparator: '>',
-        size: 100,
-        aggType: 'count',
-        groupBy: 'all',
-        excludeHitsFromPreviousRun: false,
-        sourceFields: [],
+        bar: true,
       },
       executionStatus: getRuleExecutionStatusPending('2019-02-12T21:01:22.479Z'),
       createdAt: '2019-02-12T21:01:22.479Z',
@@ -2359,22 +2149,11 @@ describe('create()', () => {
             uuid: '118',
           },
         ],
-        alertTypeId: '.es-query',
+        alertTypeId: '123',
         consumer: 'bar',
         name: 'abc',
         legacyId: null,
-        params: {
-          searchType: 'searchSource',
-          timeWindowSize: 10,
-          timeWindowUnit: 'm',
-          threshold: [5],
-          thresholdComparator: '>',
-          size: 100,
-          aggType: 'count',
-          groupBy: 'all',
-          excludeHitsFromPreviousRun: false,
-          sourceFields: [],
-        },
+        params: { bar: true },
         apiKey: null,
         apiKeyOwner: null,
         apiKeyCreatedByUser: null,
@@ -2430,7 +2209,7 @@ describe('create()', () => {
             "uuid": "test-uuid",
           },
         ],
-        "alertTypeId": ".es-query",
+        "alertTypeId": "123",
         "artifacts": Object {
           "dashboards": Array [],
           "investigation_guide": Object {
@@ -2451,18 +2230,7 @@ describe('create()', () => {
         "name": "abc",
         "notifyWhen": "onActionGroupChange",
         "params": Object {
-          "aggType": "count",
-          "excludeHitsFromPreviousRun": false,
-          "groupBy": "all",
-          "searchType": "searchSource",
-          "size": 100,
-          "sourceFields": Array [],
-          "threshold": Array [
-            5,
-          ],
-          "thresholdComparator": ">",
-          "timeWindowSize": 10,
-          "timeWindowUnit": "m",
+          "bar": true,
         },
         "running": false,
         "schedule": Object {
@@ -2484,19 +2252,10 @@ describe('create()', () => {
     const data = getMockData({ throttle: '10m' });
     const createdAttributes = {
       ...data,
-      alertTypeId: '.es-query',
+      alertTypeId: '123',
       schedule: { interval: '1m' },
       params: {
-        searchType: 'searchSource',
-        timeWindowSize: 10,
-        timeWindowUnit: 'm',
-        threshold: [5],
-        thresholdComparator: '>',
-        size: 100,
-        aggType: 'count',
-        groupBy: 'all',
-        excludeHitsFromPreviousRun: false,
-        sourceFields: [],
+        bar: true,
       },
       executionStatus: getRuleExecutionStatusPending('2019-02-12T21:01:22.479Z'),
       createdAt: '2019-02-12T21:01:22.479Z',
@@ -2546,21 +2305,10 @@ describe('create()', () => {
           },
         ],
         legacyId: null,
-        alertTypeId: '.es-query',
+        alertTypeId: '123',
         consumer: 'bar',
         name: 'abc',
-        params: {
-          searchType: 'searchSource',
-          timeWindowSize: 10,
-          timeWindowUnit: 'm',
-          threshold: [5],
-          thresholdComparator: '>',
-          size: 100,
-          aggType: 'count',
-          groupBy: 'all',
-          excludeHitsFromPreviousRun: false,
-          sourceFields: [],
-        },
+        params: { bar: true },
         apiKey: null,
         apiKeyOwner: null,
         apiKeyCreatedByUser: null,
@@ -2616,7 +2364,7 @@ describe('create()', () => {
             "uuid": "test-uuid",
           },
         ],
-        "alertTypeId": ".es-query",
+        "alertTypeId": "123",
         "artifacts": Object {
           "dashboards": Array [],
           "investigation_guide": Object {
@@ -2637,18 +2385,7 @@ describe('create()', () => {
         "name": "abc",
         "notifyWhen": "onThrottleInterval",
         "params": Object {
-          "aggType": "count",
-          "excludeHitsFromPreviousRun": false,
-          "groupBy": "all",
-          "searchType": "searchSource",
-          "size": 100,
-          "sourceFields": Array [],
-          "threshold": Array [
-            5,
-          ],
-          "thresholdComparator": ">",
-          "timeWindowSize": 10,
-          "timeWindowUnit": "m",
+          "bar": true,
         },
         "running": false,
         "schedule": Object {
@@ -2670,19 +2407,10 @@ describe('create()', () => {
     const data = getMockData();
     const createdAttributes = {
       ...data,
-      alertTypeId: '.es-query',
+      alertTypeId: '123',
       schedule: { interval: '1m' },
       params: {
-        searchType: 'searchSource',
-        timeWindowSize: 10,
-        timeWindowUnit: 'm',
-        threshold: [5],
-        thresholdComparator: '>',
-        size: 100,
-        aggType: 'count',
-        groupBy: 'all',
-        excludeHitsFromPreviousRun: false,
-        sourceFields: [],
+        bar: true,
       },
       executionStatus: getRuleExecutionStatusPending('2019-02-12T21:01:22.479Z'),
       createdAt: '2019-02-12T21:01:22.479Z',
@@ -2732,21 +2460,10 @@ describe('create()', () => {
           },
         ],
         legacyId: null,
-        alertTypeId: '.es-query',
+        alertTypeId: '123',
         consumer: 'bar',
         name: 'abc',
-        params: {
-          searchType: 'searchSource',
-          timeWindowSize: 10,
-          timeWindowUnit: 'm',
-          threshold: [5],
-          thresholdComparator: '>',
-          size: 100,
-          aggType: 'count',
-          groupBy: 'all',
-          excludeHitsFromPreviousRun: false,
-          sourceFields: [],
-        },
+        params: { bar: true },
         apiKey: null,
         apiKeyOwner: null,
         apiKeyCreatedByUser: null,
@@ -2804,7 +2521,7 @@ describe('create()', () => {
             "uuid": "test-uuid",
           },
         ],
-        "alertTypeId": ".es-query",
+        "alertTypeId": "123",
         "artifacts": Object {
           "dashboards": Array [],
           "investigation_guide": Object {
@@ -2825,18 +2542,7 @@ describe('create()', () => {
         "name": "abc",
         "notifyWhen": null,
         "params": Object {
-          "aggType": "count",
-          "excludeHitsFromPreviousRun": false,
-          "groupBy": "all",
-          "searchType": "searchSource",
-          "size": 100,
-          "sourceFields": Array [],
-          "threshold": Array [
-            5,
-          ],
-          "thresholdComparator": ">",
-          "timeWindowSize": 10,
-          "timeWindowUnit": "m",
+          "bar": true,
         },
         "running": false,
         "schedule": Object {
@@ -2857,16 +2563,7 @@ describe('create()', () => {
   test('should create rules with mapped_params', async () => {
     const data = getMockData({
       params: {
-        searchType: 'searchSource',
-        timeWindowSize: 10,
-        timeWindowUnit: 'm',
-        threshold: [5],
-        thresholdComparator: '>',
-        size: 100,
-        aggType: 'count',
-        groupBy: 'all',
-        excludeHitsFromPreviousRun: false,
-        sourceFields: [],
+        bar: true,
         risk_score: 42,
         severity: 'low',
       },
@@ -2874,19 +2571,10 @@ describe('create()', () => {
 
     const createdAttributes = {
       ...data,
-      alertTypeId: '.es-query',
+      alertTypeId: '123',
       schedule: { interval: '10s' },
       params: {
-        searchType: 'searchSource',
-        timeWindowSize: 10,
-        timeWindowUnit: 'm',
-        threshold: [5],
-        thresholdComparator: '>',
-        size: 100,
-        aggType: 'count',
-        groupBy: 'all',
-        excludeHitsFromPreviousRun: false,
-        sourceFields: [],
+        bar: true,
         risk_score: 42,
         severity: 'low',
       },
@@ -2932,7 +2620,7 @@ describe('create()', () => {
         enabled: true,
         name: 'abc',
         tags: ['foo'],
-        alertTypeId: '.es-query',
+        alertTypeId: '123',
         consumer: 'bar',
         schedule: {
           interval: '1m',
@@ -2940,16 +2628,7 @@ describe('create()', () => {
         throttle: null,
         notifyWhen: null,
         params: {
-          searchType: 'searchSource',
-          timeWindowSize: 10,
-          timeWindowUnit: 'm',
-          threshold: [5],
-          thresholdComparator: '>',
-          size: 100,
-          aggType: 'count',
-          groupBy: 'all',
-          excludeHitsFromPreviousRun: false,
-          sourceFields: [],
+          bar: true,
           risk_score: 42,
           severity: 'low',
         },
@@ -3311,19 +2990,10 @@ describe('create()', () => {
       id: '1',
       type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
-        alertTypeId: '.es-query',
+        alertTypeId: '123',
         schedule: { interval: '1m' },
         params: {
-          searchType: 'searchSource',
-          timeWindowSize: 10,
-          timeWindowUnit: 'm',
-          threshold: [5],
-          thresholdComparator: '>',
-          size: 100,
-          aggType: 'count',
-          groupBy: 'all',
-          excludeHitsFromPreviousRun: false,
-          sourceFields: [],
+          bar: true,
         },
         executionStatus: getRuleExecutionStatusPending('2019-02-12T21:01:22.479Z'),
         running: false,
@@ -3377,22 +3047,11 @@ describe('create()', () => {
             uuid: '129',
           },
         ],
-        alertTypeId: '.es-query',
+        alertTypeId: '123',
         consumer: 'bar',
         name: 'abc',
         legacyId: null,
-        params: {
-          searchType: 'searchSource',
-          timeWindowSize: 10,
-          timeWindowUnit: 'm',
-          threshold: [5],
-          thresholdComparator: '>',
-          size: 100,
-          aggType: 'count',
-          groupBy: 'all',
-          excludeHitsFromPreviousRun: false,
-          sourceFields: [],
-        },
+        params: { bar: true },
         apiKey: Buffer.from('123:abc').toString('base64'),
         apiKeyOwner: 'elastic',
         artifacts: {
@@ -3444,19 +3103,10 @@ describe('create()', () => {
       id: '1',
       type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
-        alertTypeId: '.es-query',
+        alertTypeId: '123',
         schedule: { interval: '1m' },
         params: {
-          searchType: 'searchSource',
-          timeWindowSize: 10,
-          timeWindowUnit: 'm',
-          threshold: [5],
-          thresholdComparator: '>',
-          size: 100,
-          aggType: 'count',
-          groupBy: 'all',
-          excludeHitsFromPreviousRun: false,
-          sourceFields: [],
+          bar: true,
         },
         actions: [
           {
@@ -3511,7 +3161,7 @@ describe('create()', () => {
           },
         ],
         legacyId: null,
-        alertTypeId: '.es-query',
+        alertTypeId: '123',
         artifacts: {
           dashboards: [],
           investigation_guide: {
@@ -3520,18 +3170,7 @@ describe('create()', () => {
         },
         consumer: 'bar',
         name: 'abc',
-        params: {
-          searchType: 'searchSource',
-          timeWindowSize: 10,
-          timeWindowUnit: 'm',
-          threshold: [5],
-          thresholdComparator: '>',
-          size: 100,
-          aggType: 'count',
-          groupBy: 'all',
-          excludeHitsFromPreviousRun: false,
-          sourceFields: [],
-        },
+        params: { bar: true },
         apiKey: null,
         apiKeyOwner: null,
         apiKeyCreatedByUser: null,
@@ -3596,7 +3235,7 @@ describe('create()', () => {
     // Reset from default behaviour
     actionsClient.getBulk.mockReset();
     actionsClient.getBulk.mockResolvedValueOnce([
-      createMockConnector({
+      {
         id: '1',
         actionTypeId: 'test',
         config: {
@@ -3609,7 +3248,10 @@ describe('create()', () => {
         },
         isMissingSecrets: true,
         name: 'email connector',
-      }),
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: false,
+      },
     ]);
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Failed to validate actions due to the following error: Invalid connectors: email connector"`
@@ -4190,13 +3832,16 @@ describe('create()', () => {
     });
     actionsClient.getBulk.mockReset();
     actionsClient.getBulk.mockResolvedValue([
-      createMockConnector({
+      {
         id: '1',
         actionTypeId: '.slack',
         config: {},
         isMissingSecrets: true,
         name: 'Slack connector',
-      }),
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: false,
+      },
     ]);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
@@ -4423,21 +4068,12 @@ describe('create()', () => {
       id: '1',
       type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
-        alertTypeId: '.es-query',
+        alertTypeId: '123',
         schedule: { interval: '1m' },
         running: false,
         executionStatus: getRuleExecutionStatusPending('2019-02-12T21:01:22.479Z'),
         params: {
-          searchType: 'searchSource',
-          timeWindowSize: 10,
-          timeWindowUnit: 'm',
-          threshold: [5],
-          thresholdComparator: '>',
-          size: 100,
-          aggType: 'count',
-          groupBy: 'all',
-          excludeHitsFromPreviousRun: false,
-          sourceFields: [],
+          bar: true,
         },
         actions: [
           {
@@ -4490,22 +4126,11 @@ describe('create()', () => {
             uuid: '155',
           },
         ],
-        alertTypeId: '.es-query',
+        alertTypeId: '123',
         consumer: 'bar',
         name: 'abc',
         legacyId: null,
-        params: {
-          searchType: 'searchSource',
-          timeWindowSize: 10,
-          timeWindowUnit: 'm',
-          threshold: [5],
-          thresholdComparator: '>',
-          size: 100,
-          aggType: 'count',
-          groupBy: 'all',
-          excludeHitsFromPreviousRun: false,
-          sourceFields: [],
-        },
+        params: { bar: true },
         apiKey: Buffer.from('123:abc').toString('base64'),
         apiKeyOwner: 'elastic',
         apiKeyCreatedByUser: true,
@@ -4585,7 +4210,7 @@ describe('create()', () => {
     beforeEach(() => {
       actionsClient.getBulk.mockReset();
       actionsClient.getBulk.mockResolvedValue([
-        createMockConnector({
+        {
           id: '1',
           actionTypeId: 'test',
           config: {
@@ -4596,15 +4221,22 @@ describe('create()', () => {
             secure: null,
             service: null,
           },
+          isMissingSecrets: false,
           name: 'email connector',
-        }),
-        createMockConnector({
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: false,
+        },
+        {
           id: 'system_action-id',
           actionTypeId: '.test',
           config: {},
+          isMissingSecrets: false,
           name: 'system action connector',
+          isPreconfigured: false,
+          isDeprecated: false,
           isSystemAction: true,
-        }),
+        },
       ]);
 
       unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
@@ -4612,19 +4244,10 @@ describe('create()', () => {
         type: 'alert',
         attributes: {
           executionStatus: getRuleExecutionStatusPending('2019-02-12T21:01:22.479Z'),
-          alertTypeId: '.es-query',
+          alertTypeId: '123',
           schedule: { interval: '1m' },
           params: {
-            searchType: 'searchSource',
-            timeWindowSize: 10,
-            timeWindowUnit: 'm',
-            threshold: [5],
-            thresholdComparator: '>',
-            size: 100,
-            aggType: 'count',
-            groupBy: 'all',
-            excludeHitsFromPreviousRun: false,
-            sourceFields: [],
+            bar: true,
           },
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
@@ -4695,7 +4318,7 @@ describe('create()', () => {
               "uuid": "test-uuid",
             },
           ],
-          "alertTypeId": ".es-query",
+          "alertTypeId": "123",
           "artifacts": Object {
             "dashboards": Array [],
             "investigation_guide": Object {
@@ -4710,18 +4333,7 @@ describe('create()', () => {
           "id": "1",
           "notifyWhen": null,
           "params": Object {
-            "aggType": "count",
-            "excludeHitsFromPreviousRun": false,
-            "groupBy": "all",
-            "searchType": "searchSource",
-            "size": 100,
-            "sourceFields": Array [],
-            "threshold": Array [
-              5,
-            ],
-            "thresholdComparator": ">",
-            "timeWindowSize": 10,
-            "timeWindowUnit": "m",
+            "bar": true,
           },
           "running": false,
           "schedule": Object {
@@ -4762,7 +4374,7 @@ describe('create()', () => {
               uuid: '158',
             },
           ],
-          alertTypeId: '.es-query',
+          alertTypeId: '123',
           apiKey: null,
           apiKeyOwner: null,
           apiKeyCreatedByUser: null,
@@ -4789,18 +4401,7 @@ describe('create()', () => {
           mutedInstanceIds: [],
           name: 'abc',
           notifyWhen: null,
-          params: {
-            searchType: 'searchSource',
-            timeWindowSize: 10,
-            timeWindowUnit: 'm',
-            threshold: [5],
-            thresholdComparator: '>',
-            size: 100,
-            aggType: 'count',
-            groupBy: 'all',
-            excludeHitsFromPreviousRun: false,
-            sourceFields: [],
-          },
+          params: { bar: true },
           revision: 0,
           running: false,
           schedule: { interval: '1m' },
