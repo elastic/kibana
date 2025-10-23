@@ -34,12 +34,14 @@ import {
 } from '../state_helpers';
 import { axisKeyToTitleMapping, getDataBounds, hasPercentageAxis } from '.';
 import { getScaleType } from '../to_expression';
+import { XyLegendSettings } from './legend_settings';
 
 type Props = VisualizationToolbarProps<XYState>;
 
 export const XyFlyoutToolbar: React.FC<Props> = (props) => {
   const xyToolbarContentMap: ToolbarContentMap<XYState> = {
     style: XyStyleSettings,
+    legend: XyLegendSettings,
   };
   return <FlyoutToolbar {...props} contentMap={xyToolbarContentMap} />;
 };

@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import type { Position } from '@elastic/charts';
-import { LegendSize } from '@kbn/visualizations-plugin/public';
+import { LegendSize } from '@kbn/chart-expressions-common';
 
 import type { VisualizationToolbarProps } from '../../../types';
 import type { HeatmapVisualizationState } from '../types';

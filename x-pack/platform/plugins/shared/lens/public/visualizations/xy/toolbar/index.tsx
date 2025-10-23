@@ -8,7 +8,7 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Position } from '@elastic/charts';
-import { LegendValue, ScaleType } from '@elastic/charts';
+import { ScaleType } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { AxisExtentConfig, YScaleType } from '@kbn/expression-xy-plugin/common';
 import { TooltipWrapper } from '@kbn/visualization-utils';
@@ -32,6 +32,7 @@ import { getScaleType } from '../to_expression';
 import { getDefaultVisualValuesForLayer } from '../../../shared_components/datasource_default_values';
 import { getDataLayers } from '../visualization_helpers';
 import type { AxesSettingsConfigKeys } from '../../../shared_components';
+import { defaultLegendTitle, legendOptions, xyLegendValues } from './legend_settings';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 
@@ -45,34 +46,6 @@ export function updateLayer(
     layers: state.layers.map((l, i) => (i === index ? layer : l)),
   };
 }
-
-const legendOptions: Array<{
-  id: string;
-  value: 'auto' | 'show' | 'hide';
-  label: string;
-}> = [
-  {
-    id: `xy_legend_auto`,
-    value: 'auto',
-    label: i18n.translate('xpack.lens.xyChart.legendVisibility.auto', {
-      defaultMessage: 'Auto',
-    }),
-  },
-  {
-    id: `xy_legend_show`,
-    value: 'show',
-    label: i18n.translate('xpack.lens.xyChart.legendVisibility.show', {
-      defaultMessage: 'Show',
-    }),
-  },
-  {
-    id: `xy_legend_hide`,
-    value: 'hide',
-    label: i18n.translate('xpack.lens.xyChart.legendVisibility.hide', {
-      defaultMessage: 'Hide',
-    }),
-  },
-];
 
 export const getDataBounds = function (
   activeData: FramePublicAPI['activeData'],
