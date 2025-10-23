@@ -24,13 +24,27 @@ import {
 
 // Mock the LazyPackagePolicyInputVarField
 jest.mock('@kbn/fleet-plugin/public', () => ({
-  LazyPackagePolicyInputVarField: jest.fn(({ varDef, onChange }) => (
-    <input
-      data-test-subj={`mock-var-field-${varDef.name}`}
-      onChange={(e) => onChange(varDef.name, e.target.value)}
-      placeholder={varDef.title}
-    />
-  )),
+  LazyPackagePolicyInputVarField: jest.fn(({ varDef, onChange, value }) => {
+    // Extract the field name from the varDef - use the last part of multi_fields path or name
+    const fieldName = varDef.multi_fields?.[0] || varDef.name || 'unknown';
+    // Use hardcoded test subject values to avoid accessing out-of-scope variables
+    const testSubjMap: Record<string, string> = {
+      tenant_id: 'textInput-tenant-id',
+      'azure.tenant_id': 'textInput-tenant-id',
+      client_id: 'textInput-client-id',
+      'azure.client_id': 'textInput-client-id',
+    };
+    const testSubj = testSubjMap[fieldName] || `mock-var-field-${fieldName}`;
+
+    return (
+      <input
+        data-test-subj={testSubj}
+        value={value || ''}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={varDef.title}
+      />
+    );
+  }),
 }));
 
 describe('AzureCloudConnectorForm', () => {
@@ -87,6 +101,45 @@ describe('AzureCloudConnectorForm', () => {
       icons: [],
       assets: {},
       policy_templates: [],
+      data_streams: [
+        {
+          type: 'logs',
+          dataset: 'azure.cloudtrail',
+          title: 'Azure Cloud Trail',
+          release: 'ga',
+          package: 'cloud_security_posture',
+          path: 'azure',
+          ingest_pipeline: 'default',
+          streams: [
+            {
+              input: 'cloudbeat/cis_azure',
+              title: 'Azure CIS',
+              description: 'Azure CIS compliance monitoring',
+              enabled: true,
+              vars: [
+                {
+                  name: 'tenant_id',
+                  type: 'text',
+                  title: 'Tenant ID',
+                  multi: false,
+                  required: true,
+                  show_user: true,
+                  secret: true,
+                },
+                {
+                  name: 'client_id',
+                  type: 'text',
+                  title: 'Client ID',
+                  multi: false,
+                  required: true,
+                  show_user: true,
+                  secret: true,
+                },
+              ],
+            },
+          ],
+        },
+      ],
       owner: { github: 'elastic/security' },
       ...overrides,
     } as unknown as PackageInfo);
