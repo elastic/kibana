@@ -52,7 +52,7 @@ export const ASSET_MISCONFIGURATIONS_TOOL: AssistantTool = {
           anonymizationFields: anonymizationFields ?? [],
           resourceId: input.resource_id,
         });
-        const result = await esClient.search<CspFinding>(query); // TODO: check error handling
+        const result = await esClient.search<CspFinding>(query);
 
         const findings =
           result.hits?.hits?.map((hit) => {

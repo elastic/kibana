@@ -88,7 +88,6 @@ describe('getAssetMisconfigurationsQuery', () => {
       anonymizationFields: mockAnonymizationFields,
       resourceId: 'test-resource-id',
     });
-    // resource.id is not in MISCONFIGURATION_FIELDS, so it's filtered out
     const expectedFields = [
       { field: 'resource.name', include_unmapped: true },
       { field: 'rule.name', include_unmapped: true },
@@ -116,7 +115,7 @@ describe('getAssetMisconfigurationsQuery', () => {
   it('should only include fields that are in MISCONFIGURATION_FIELDS list', () => {
     const fieldsWithNonMisconfigurationField = [
       { id: '1', field: 'resource.name', allowed: true, anonymized: false },
-      { id: '2', field: 'some.random.field', allowed: true, anonymized: false }, // Not in MISCONFIGURATION_FIELDS
+      { id: '2', field: 'some.random.field', allowed: true, anonymized: false },
       { id: '3', field: 'rule.name', allowed: true, anonymized: false },
     ];
 
@@ -125,7 +124,6 @@ describe('getAssetMisconfigurationsQuery', () => {
       resourceId: 'test-resource-id',
     });
 
-    // Should only include fields that are both allowed AND in MISCONFIGURATION_FIELDS
     expect(query.fields).toEqual([
       { field: 'resource.name', include_unmapped: true },
       { field: 'rule.name', include_unmapped: true },
@@ -144,7 +142,6 @@ describe('getAssetMisconfigurationsQuery', () => {
       resourceId: 'test-resource-id',
     });
 
-    // Should exclude rule.name because it's not allowed
     expect(query.fields).toEqual([
       { field: 'resource.name', include_unmapped: true },
       { field: '@timestamp', include_unmapped: true },

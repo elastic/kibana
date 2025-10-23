@@ -126,11 +126,9 @@ describe('ASSET_MISCONFIGURATIONS_TOOL', () => {
       size: 50,
       sort: [{ '@timestamp': { order: 'desc' } }],
       fields: [
-        // Only fields that are both in mockAnonymizationFields AND MISCONFIGURATION_FIELDS
         { field: 'resource.name', include_unmapped: true },
         { field: 'rule.name', include_unmapped: true },
         { field: '@timestamp', include_unmapped: true },
-        // Note: resource.id is not in MISCONFIGURATION_FIELDS, so it's excluded
       ],
       query: {
         bool: {
@@ -146,7 +144,7 @@ describe('ASSET_MISCONFIGURATIONS_TOOL', () => {
     expect(parsedResult).toEqual({
       resource_id: 'test-resource-id',
       findings_count: 1,
-      findings: [expect.any(String)], // transformRawData returns a formatted string
+      findings: [expect.any(String)],
     });
   });
 
@@ -195,6 +193,7 @@ describe('ASSET_MISCONFIGURATIONS_TOOL', () => {
 
   it('should not be supported when anonymizationFields are missing', () => {
     const paramsWithoutAnonymization = { ...validParams };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     delete (paramsWithoutAnonymization as any).anonymizationFields;
 
     const isSupported = ASSET_MISCONFIGURATIONS_TOOL.isSupported(paramsWithoutAnonymization);
@@ -259,7 +258,6 @@ describe('ASSET_MISCONFIGURATIONS_TOOL', () => {
     const result = await tool?.invoke({ resource_id: 'test-resource-id' });
     const parsedResult = JSON.parse(result as string);
 
-    // transformRawData returns a formatted string, not an object
     expect(parsedResult.findings_count).toBe(1);
     expect(parsedResult.findings[0]).toEqual(expect.any(String));
   });
