@@ -7,11 +7,20 @@
 
 import { tool } from '@langchain/core/tools';
 import { z } from '@kbn/zod';
+import {
+  getAnonymizedValue,
+  getRawDataOrDefault,
+  isDenied,
+  transformRawData,
+} from '@kbn/elastic-assistant-common';
 import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-plugin/server/lib/langchain/helpers';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
+import type { Require } from '@kbn/elastic-assistant-plugin/server/types';
 import type { CspFinding } from '@kbn/cloud-security-posture-common/types/findings';
 import { APP_UI_ID } from '../../../../common';
 import { getAssetMisconfigurationsQuery } from './get_asset_misconfigurations_query';
+
+export type AssetMisconfigurationsToolParams = Require<AssistantToolParams, 'anonymizationFields'>;
 
 export const ASSET_MISCONFIGURATIONS_TOOL_DESCRIPTION =
   "Call this to retrieve security misconfigurations and compliance violations for a specific cloud asset. The resource_id must be the full cloud resource identifier (e.g., AWS ARN like 'arn:aws:ec2:region:account:resource-type/resource-id', Azure resource path, or GCP resource name). This returns failed findings including rule details, benchmark information, and compliance impact.";
@@ -24,40 +33,37 @@ export const ASSET_MISCONFIGURATIONS_TOOL: AssistantTool = {
   // local definitions can be overwritten by security-ai-prompt integration definitions
   description: ASSET_MISCONFIGURATIONS_TOOL_DESCRIPTION,
   sourceRegister: APP_UI_ID,
-  isSupported: (params: AssistantToolParams) => {
-    const { request } = params;
-    return requestHasRequiredAnonymizationParams(request);
+  isSupported: (params: AssistantToolParams): params is AssetMisconfigurationsToolParams => {
+    const { anonymizationFields, request } = params;
+    return requestHasRequiredAnonymizationParams(request) && anonymizationFields != null;
   },
   async getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
-    const { esClient } = params;
+    const { anonymizationFields, esClient, onNewReplacements, replacements } =
+      params as AssetMisconfigurationsToolParams;
+
     return tool(
       async (input) => {
+        if (isDenied({ anonymizationFields, field: 'resource.id' })) {
+          return 'The field resource.id is denied by the anonymization settings and cannot be used to query misconfigurations. Please modify the anonymization settings and try again.';
+        }
+
         const query = getAssetMisconfigurationsQuery({
+          anonymizationFields: anonymizationFields ?? [],
           resourceId: input.resource_id,
         });
         const result = await esClient.search<CspFinding>(query); // TODO: check error handling
 
         const findings =
           result.hits?.hits?.map((hit) => {
-            const source: CspFinding | undefined = hit._source;
-            return {
-              rule_name: source?.rule?.name,
-              rule_description: source?.rule?.description,
-              rule_section: source?.rule?.section,
-              rule_tags: source?.rule?.tags,
-              benchmark_name: source?.rule?.benchmark?.name,
-              benchmark_id: source?.rule?.benchmark?.id,
-              benchmark_rule_number: source?.rule?.benchmark?.rule_number,
-              benchmark_version: source?.rule?.benchmark?.version,
-              benchmark_posture_type: source?.rule?.benchmark?.posture_type,
-              resource_name: source?.resource?.name,
-              resource_type: source?.resource?.type,
-              resource_sub_type: source?.resource?.sub_type,
-              evaluation: source?.result?.evaluation,
-              evidence: source?.result?.evidence, // TODO: check getEvaluationEvidence for the logic to get evidence. Should we also trim?
-              timestamp: source?.['@timestamp'],
-            };
+            const transformed = transformRawData({
+              anonymizationFields,
+              currentReplacements: replacements ?? {},
+              getAnonymizedValue,
+              onNewReplacements,
+              rawData: getRawDataOrDefault(hit.fields),
+            });
+            return transformed;
           }) || [];
 
         return JSON.stringify({

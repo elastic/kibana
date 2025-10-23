@@ -30,12 +30,20 @@ const mockRequest = {
   raw: { req: { url: '' } },
 } as unknown as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
 
+const mockAnonymizationFields = [
+  { id: '1', field: 'resource.id', allowed: true, anonymized: true },
+  { id: '2', field: 'resource.name', allowed: true, anonymized: true },
+  { id: '3', field: 'rule.name', allowed: true, anonymized: false },
+  { id: '4', field: '@timestamp', allowed: true, anonymized: false },
+];
+
 const validParams: AssistantToolParams = {
   request: mockRequest,
   esClient: mockEsClient,
   logger: loggerMock.create(),
   contentReferencesStore: newContentReferencesStoreMock(),
   isEnabledKnowledgeBase: false,
+  anonymizationFields: mockAnonymizationFields,
 };
 
 describe('ASSET_MISCONFIGURATIONS_TOOL', () => {
@@ -75,7 +83,7 @@ describe('ASSET_MISCONFIGURATIONS_TOOL', () => {
       hits: {
         hits: [
           {
-            _source: {
+            fields: {
               rule: {
                 name: 'Test Rule',
                 description: 'Test Description',
@@ -117,7 +125,13 @@ describe('ASSET_MISCONFIGURATIONS_TOOL', () => {
       index: 'security_solution-*.misconfiguration_latest',
       size: 50,
       sort: [{ '@timestamp': { order: 'desc' } }],
-      _source: expect.any(Array),
+      fields: [
+        // Only fields that are both in mockAnonymizationFields AND MISCONFIGURATION_FIELDS
+        { field: 'resource.name', include_unmapped: true },
+        { field: 'rule.name', include_unmapped: true },
+        { field: '@timestamp', include_unmapped: true },
+        // Note: resource.id is not in MISCONFIGURATION_FIELDS, so it's excluded
+      ],
       query: {
         bool: {
           filter: [
@@ -132,25 +146,7 @@ describe('ASSET_MISCONFIGURATIONS_TOOL', () => {
     expect(parsedResult).toEqual({
       resource_id: 'test-resource-id',
       findings_count: 1,
-      findings: [
-        {
-          rule_name: 'Test Rule',
-          rule_description: 'Test Description',
-          rule_section: 'Test Section',
-          rule_tags: ['test-tag'],
-          benchmark_name: 'CIS AWS',
-          benchmark_id: 'cis_aws',
-          benchmark_rule_number: '1.1',
-          benchmark_version: '1.2.0',
-          benchmark_posture_type: 'cspm',
-          resource_name: 'test-resource',
-          resource_type: 's3_bucket',
-          resource_sub_type: 'bucket',
-          evaluation: 'failed',
-          evidence: { test: 'evidence' },
-          timestamp: '2023-01-01T00:00:00Z',
-        },
-      ],
+      findings: [expect.any(String)], // transformRawData returns a formatted string
     });
   });
 
@@ -172,5 +168,99 @@ describe('ASSET_MISCONFIGURATIONS_TOOL', () => {
       findings_count: 0,
       findings: [],
     });
+  });
+
+  it('should return error message when resource.id is denied', async () => {
+    const paramsWithDeniedResourceId = {
+      ...validParams,
+      anonymizationFields: [
+        { id: '1', field: 'resource.id', allowed: false, anonymized: true }, // Denied
+        { id: '2', field: 'resource.name', allowed: true, anonymized: true },
+      ],
+    };
+
+    const tool = await ASSET_MISCONFIGURATIONS_TOOL.getTool(paramsWithDeniedResourceId);
+    const result = await tool?.invoke({ resource_id: 'test-resource-id' });
+
+    expect(result).toBe(
+      'The field resource.id is denied by the anonymization settings and cannot be used to query misconfigurations. Please modify the anonymization settings and try again.'
+    );
+    expect(mockEsClient.search).not.toHaveBeenCalled();
+  });
+
+  it('should be supported when anonymizationFields are provided', () => {
+    const isSupported = ASSET_MISCONFIGURATIONS_TOOL.isSupported(validParams);
+    expect(isSupported).toBe(true);
+  });
+
+  it('should not be supported when anonymizationFields are missing', () => {
+    const paramsWithoutAnonymization = { ...validParams };
+    delete (paramsWithoutAnonymization as any).anonymizationFields;
+
+    const isSupported = ASSET_MISCONFIGURATIONS_TOOL.isSupported(paramsWithoutAnonymization);
+    expect(isSupported).toBe(false);
+  });
+
+  it('should not be supported when anonymizationFields are undefined', () => {
+    const paramsWithUndefinedAnonymization = {
+      ...validParams,
+      anonymizationFields: undefined,
+    };
+
+    const isSupported = ASSET_MISCONFIGURATIONS_TOOL.isSupported(paramsWithUndefinedAnonymization);
+    expect(isSupported).toBe(false);
+  });
+
+  it('should pass anonymizationFields to query function', async () => {
+    const mockSearchResponse = {
+      hits: {
+        hits: [
+          {
+            fields: {
+              'resource.name': ['test-resource'],
+              'rule.name': ['Test Rule'],
+            },
+          },
+        ],
+      },
+    };
+
+    (mockEsClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+
+    const tool = await ASSET_MISCONFIGURATIONS_TOOL.getTool(validParams);
+    await tool?.invoke({ resource_id: 'test-resource-id' });
+
+    const searchCall = (mockEsClient.search as jest.Mock).mock.calls[0][0];
+    expect(searchCall.fields).toEqual([
+      { field: 'resource.name', include_unmapped: true },
+      { field: 'rule.name', include_unmapped: true },
+      { field: '@timestamp', include_unmapped: true },
+    ]);
+  });
+
+  it('should use transformRawData for anonymization', async () => {
+    const mockSearchResponse = {
+      hits: {
+        hits: [
+          {
+            fields: {
+              'resource.name': ['sensitive-name'],
+              'rule.name': ['Rule Name'],
+              '@timestamp': ['2023-01-01T00:00:00Z'],
+            },
+          },
+        ],
+      },
+    };
+
+    (mockEsClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+
+    const tool = await ASSET_MISCONFIGURATIONS_TOOL.getTool(validParams);
+    const result = await tool?.invoke({ resource_id: 'test-resource-id' });
+    const parsedResult = JSON.parse(result as string);
+
+    // transformRawData returns a formatted string, not an object
+    expect(parsedResult.findings_count).toBe(1);
+    expect(parsedResult.findings[0]).toEqual(expect.any(String));
   });
 });

@@ -7,14 +7,27 @@
 
 import { getAssetMisconfigurationsQuery } from './get_asset_misconfigurations_query';
 
+const mockAnonymizationFields = [
+  { id: '1', field: 'resource.id', allowed: true, anonymized: false },
+  { id: '2', field: 'resource.name', allowed: true, anonymized: true },
+  { id: '3', field: 'rule.name', allowed: true, anonymized: false },
+  { id: '4', field: '@timestamp', allowed: true, anonymized: false },
+];
+
 describe('getAssetMisconfigurationsQuery', () => {
   it('should create query with correct index pattern', () => {
-    const query = getAssetMisconfigurationsQuery({ resourceId: 'test-resource-id' });
+    const query = getAssetMisconfigurationsQuery({
+      anonymizationFields: mockAnonymizationFields,
+      resourceId: 'test-resource-id',
+    });
     expect(query.index).toBe('security_solution-*.misconfiguration_latest');
   });
 
   it('should filter for specific resource ID', () => {
-    const query = getAssetMisconfigurationsQuery({ resourceId: 'test-resource-id' });
+    const query = getAssetMisconfigurationsQuery({
+      anonymizationFields: mockAnonymizationFields,
+      resourceId: 'test-resource-id',
+    });
     const filters = Array.isArray(query.query?.bool?.filter)
       ? query.query.bool.filter
       : [query.query?.bool?.filter].filter(Boolean);
@@ -30,7 +43,10 @@ describe('getAssetMisconfigurationsQuery', () => {
   });
 
   it('should filter for failed findings only', () => {
-    const query = getAssetMisconfigurationsQuery({ resourceId: 'test-resource-id' });
+    const query = getAssetMisconfigurationsQuery({
+      anonymizationFields: mockAnonymizationFields,
+      resourceId: 'test-resource-id',
+    });
     const filters = Array.isArray(query.query?.bool?.filter)
       ? query.query.bool.filter
       : [query.query?.bool?.filter].filter(Boolean);
@@ -46,7 +62,10 @@ describe('getAssetMisconfigurationsQuery', () => {
   });
 
   it('should include timestamp filter with retention policy', () => {
-    const query = getAssetMisconfigurationsQuery({ resourceId: 'test-resource-id' });
+    const query = getAssetMisconfigurationsQuery({
+      anonymizationFields: mockAnonymizationFields,
+      resourceId: 'test-resource-id',
+    });
     const filters = Array.isArray(query.query?.bool?.filter)
       ? query.query.bool.filter
       : [query.query?.bool?.filter].filter(Boolean);
@@ -64,35 +83,91 @@ describe('getAssetMisconfigurationsQuery', () => {
     });
   });
 
-  it('should include expected source fields', () => {
-    const query = getAssetMisconfigurationsQuery({ resourceId: 'test-resource-id' });
+  it('should include expected fields from anonymization', () => {
+    const query = getAssetMisconfigurationsQuery({
+      anonymizationFields: mockAnonymizationFields,
+      resourceId: 'test-resource-id',
+    });
+    // resource.id is not in MISCONFIGURATION_FIELDS, so it's filtered out
     const expectedFields = [
-      'rule.name',
-      'rule.description',
-      'rule.section',
-      'rule.tags',
-      'rule.benchmark.name',
-      'rule.benchmark.id',
-      'rule.benchmark.rule_number',
-      'rule.benchmark.version',
-      'rule.benchmark.posture_type',
-      'resource.name',
-      'resource.type',
-      'resource.sub_type',
-      'result.evaluation',
-      'result.evidence',
-      '@timestamp',
+      { field: 'resource.name', include_unmapped: true },
+      { field: 'rule.name', include_unmapped: true },
+      { field: '@timestamp', include_unmapped: true },
     ];
-    expect(query._source).toEqual(expectedFields);
+    expect(query.fields).toEqual(expectedFields);
   });
 
   it('should use default size', () => {
-    const query = getAssetMisconfigurationsQuery({ resourceId: 'test-resource-id' });
+    const query = getAssetMisconfigurationsQuery({
+      anonymizationFields: mockAnonymizationFields,
+      resourceId: 'test-resource-id',
+    });
     expect(query.size).toBe(50);
   });
 
   it('should sort by timestamp', () => {
-    const query = getAssetMisconfigurationsQuery({ resourceId: 'test-resource-id' });
+    const query = getAssetMisconfigurationsQuery({
+      anonymizationFields: mockAnonymizationFields,
+      resourceId: 'test-resource-id',
+    });
     expect(query.sort).toEqual([{ '@timestamp': { order: 'desc' } }]);
+  });
+
+  it('should only include fields that are in MISCONFIGURATION_FIELDS list', () => {
+    const fieldsWithNonMisconfigurationField = [
+      { id: '1', field: 'resource.name', allowed: true, anonymized: false },
+      { id: '2', field: 'some.random.field', allowed: true, anonymized: false }, // Not in MISCONFIGURATION_FIELDS
+      { id: '3', field: 'rule.name', allowed: true, anonymized: false },
+    ];
+
+    const query = getAssetMisconfigurationsQuery({
+      anonymizationFields: fieldsWithNonMisconfigurationField,
+      resourceId: 'test-resource-id',
+    });
+
+    // Should only include fields that are both allowed AND in MISCONFIGURATION_FIELDS
+    expect(query.fields).toEqual([
+      { field: 'resource.name', include_unmapped: true },
+      { field: 'rule.name', include_unmapped: true },
+    ]);
+  });
+
+  it('should only include allowed fields from anonymization config', () => {
+    const fieldsWithDenied = [
+      { id: '1', field: 'resource.name', allowed: true, anonymized: false },
+      { id: '2', field: 'rule.name', allowed: false, anonymized: false }, // Not allowed
+      { id: '3', field: '@timestamp', allowed: true, anonymized: false },
+    ];
+
+    const query = getAssetMisconfigurationsQuery({
+      anonymizationFields: fieldsWithDenied,
+      resourceId: 'test-resource-id',
+    });
+
+    // Should exclude rule.name because it's not allowed
+    expect(query.fields).toEqual([
+      { field: 'resource.name', include_unmapped: true },
+      { field: '@timestamp', include_unmapped: true },
+    ]);
+  });
+
+  it('should handle empty anonymization fields array', () => {
+    const query = getAssetMisconfigurationsQuery({
+      anonymizationFields: [],
+      resourceId: 'test-resource-id',
+    });
+
+    expect(query.fields).toEqual([]);
+  });
+
+  it('should set include_unmapped to true for all fields', () => {
+    const query = getAssetMisconfigurationsQuery({
+      anonymizationFields: mockAnonymizationFields,
+      resourceId: 'test-resource-id',
+    });
+
+    query.fields?.forEach((field) => {
+      expect(field).toHaveProperty('include_unmapped', true);
+    });
   });
 });
