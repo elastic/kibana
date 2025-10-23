@@ -674,6 +674,26 @@
       "warning": []
     },
     {
+      "query": "SET time_zone = \"CEST\";",
+      "error": [
+        {
+          "sample": "SyntaxError:",
+          "inverse": false
+        }
+      ],
+      "warning": []
+    },
+    {
+      "query": "SET invalid_setting = \"_alias:_origin\"; FROM index",
+      "error": [
+        {
+          "sample": "Unknown setting invalid_setting",
+          "inverse": false
+        }
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | eval round(doubleField) + 1 | eval `round(doubleField) + 1` + 1 | keep ```round(doubleField) + 1`` + 1`",
       "error": [],
       "warning": []

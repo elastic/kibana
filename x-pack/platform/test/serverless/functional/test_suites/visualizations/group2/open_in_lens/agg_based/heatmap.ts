@@ -34,7 +34,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     beforeEach(async () => {
       await dashboard.navigateToApp(); // required for svl until dashboard PO navigation is fixed
-      await dashboard.gotoDashboardEditMode('Convert to Lens - Heatmap');
+      await dashboard.loadDashboardInEditMode('Convert to Lens - Heatmap');
       await timePicker.setDefaultAbsoluteRange();
     });
 
