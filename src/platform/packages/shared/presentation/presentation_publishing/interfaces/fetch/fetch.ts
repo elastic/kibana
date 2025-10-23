@@ -31,7 +31,7 @@ import {
 } from './fetch_context';
 import { apiPublishesPauseFetch } from './publishes_pause_fetch';
 import { apiPublishesReload } from './publishes_reload';
-import type { PublishesSearchSession } from './publishes_search_session';
+import { apiPublishesSearchSession, type PublishesSearchSession } from './publishes_search_session';
 import {
   apiPublishesTimeRange,
   apiPublishesUnifiedSearch,
@@ -63,7 +63,9 @@ function getFetchContext$(api: unknown): Observable<Omit<FetchContext, 'isReload
     observables.query = api.parentApi.query$;
   }
 
-  if (apiHasParentApi(api) && apiPublishesTimeRange(api.parentApi)) {
+  if (apiPublishesTimeRange(api)) {
+    observables.timeRange = api.timeRange$;
+  } else if (apiHasParentApi(api) && apiPublishesTimeRange(api.parentApi)) {
     observables.timeRange = api.parentApi.timeRange$.pipe(filter(() => !hasLocalTimeRange(api)));
     if (api.parentApi.timeslice$) {
       observables.timeslice = api.parentApi.timeslice$.pipe(filter(() => !hasLocalTimeRange(api)));
@@ -98,14 +100,19 @@ export function fetch$(api: unknown): Observable<FetchContext> {
   );
 
   return merge(fetchContext$, reload$).pipe(
-    combineLatestWith(isFetchPaused$.pipe(distinctUntilChanged())),
+    combineLatestWith(isFetchPaused$),
     filter(([, isFetchPaused]) => !isFetchPaused),
     map(([fetchContext]) => fetchContext as ReloadTimeFetchContext),
     distinctUntilChanged((prevContext, nextContext) =>
       isReloadTimeFetchContextEqual(prevContext, nextContext)
     ),
     switchMap(async (reloadTimeFetchContext) => {
-      const searchSessionId = await ((api as any).parentApi as any).requestSearchSessionId();
+      let searchSessionId;
+      if (apiHasParentApi(api) && apiPublishesSearchSession(api.parentApi)) {
+        searchSessionId =
+          (await api.parentApi.requestSearchSessionId?.()) ??
+          api.parentApi.searchSessionId$.getValue();
+      }
       const { reloadTimestamp, ...rest } = reloadTimeFetchContext;
       return {
         ...rest,
@@ -113,6 +120,7 @@ export function fetch$(api: unknown): Observable<FetchContext> {
         isReload: Boolean(reloadTimestamp),
       };
     })
+    // debounceTime(0)
   );
 }
 
