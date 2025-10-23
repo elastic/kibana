@@ -108,7 +108,7 @@ export function StreamsViews() {
             href: router.link('/graph'),
             content: (
                 <StreamsGraph
-                streams={streamsListFetch.value?.streams || []}
+                streams={streamsListFetch.value?.streams}
                 loading={streamsListFetch.loading}
               />
             )

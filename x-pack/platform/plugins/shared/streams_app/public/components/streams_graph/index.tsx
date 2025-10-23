@@ -7,7 +7,7 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiPanel, EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiPanel, EuiText, EuiSpacer, EuiEmptyPrompt, EuiLoadingElastic, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import { Streams } from '@kbn/streams-schema';
 import { asTrees, enrichStream } from '../stream_list_view/utils';
@@ -22,12 +22,14 @@ import {
   addEdge,
   Connection,
   BackgroundVariant,
-  MarkerType,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { ConditionPanel } from '../data_management/shared/condition_display';
 import { CustomEdge } from './custom_edge';
-import { StreamNodeData } from './custom_node';
+import { StreamNode, StreamNodeData } from './custom_node';
+import { PartitionEdge } from './partition_edge';
+import { css } from '@emotion/css';
+import { useStreamDocCountsFetch } from '../../hooks/use_streams_doc_counts_fetch';
 
 const LAYOUT_CONSTANTS = {
   NODE_WIDTH: 200,
@@ -35,23 +37,69 @@ const LAYOUT_CONSTANTS = {
   SIBLING_SPACING: 50
 }
 
-const nodeTypes = {};
+const nodeTypes = {
+  'streamNode': StreamNode,
+};
 const edgeTypes = {
   'custom-edge': CustomEdge,
 };
 
 interface StreamsGraphProps {
-  streams: ListStreamDetail[];
+  streams?: ListStreamDetail[];
   loading?: boolean;
 }
 
 export function StreamsGraph({ streams, loading = false }: StreamsGraphProps) {
+  if (loading || !streams) {
+    return (
+      <EuiPanel paddingSize="l">
+        <EuiFlexGroup direction='column' className={css`height: 100%;`}>
+          <EuiText>
+            <h3>
+              {i18n.translate('xpack.streams.streamsGraph.title', {
+                defaultMessage: 'Streams Graph',
+              })}
+            </h3>
+            <p>
+              {i18n.translate('xpack.streams.streamsGraph.description', {
+                defaultMessage: 'Visual representation of wired streams and their hierarchical relationships.',
+              })}
+            </p>
+          </EuiText>
+          <EuiFlexItem grow={1}>
+            <EuiEmptyPrompt
+              icon={<EuiLoadingElastic size="xl" />}
+              title={
+                  <h2>
+                      {i18n.translate('xpack.streams.streamsGraph.loading', {
+                          defaultMessage: 'Loading graph',
+                      })}
+                  </h2>
+              }
+              className={css`
+                display: flex;
+                flex-grow: 1;
+                justify-content: center;
+                align-items: center;
+              `}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+    );
+  }
+
+  const { getStreamDocCounts } = useStreamDocCountsFetch({
+    groupTotalCountByTimestamp: false,
+    canReadFailureStore: false,
+  });
+
   const { initialNodes, initialEdges } = useMemo(() => {
-    if (!streams || streams.length === 0) {
+    if (loading || !streams || streams.length === 0) {
       return { initialNodes: [], initialEdges: [] };
     }
 
-    const wiredStreams = streams.filter((stream) =>
+    const wiredStreams = streams?.filter((stream) =>
       Streams.WiredStream.Definition.is(stream.stream)
     );
 
@@ -75,6 +123,8 @@ export function StreamsGraph({ streams, loading = false }: StreamsGraphProps) {
             label: node.stream.name,
             type: node.type || 'wired',
             level,
+            hasParent: !!parentId,
+            hasChildren: node.children && node.children.length > 0,
           },
         };
 
@@ -95,13 +145,12 @@ export function StreamsGraph({ streams, loading = false }: StreamsGraphProps) {
             source: parentId,
             target: nodeId,
             type: 'custom-edge',
-            animated: true,
-            label: routingConditionPanel,
-            markerEnd: {
-              type: MarkerType.ArrowClosed
-            }
-            // sourceHandle: 'source',
-            // targetHandle: 'target',
+            label: <PartitionEdge
+              content={routingConditionPanel}
+              parentDocuments={getStreamDocCounts(`${parentId}*`)}
+              currentDocuments={getStreamDocCounts(`${nodeId}*`)}
+              id={`${parentId}-${nodeId}`}
+            />,
           });
         }
 
@@ -115,7 +164,7 @@ export function StreamsGraph({ streams, loading = false }: StreamsGraphProps) {
     buildGraph(trees);
 
     return { initialNodes: nodes, initialEdges: edges };
-  }, [streams]);
+  }, [streams, loading]);
 
   const [nodes, , onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
@@ -124,34 +173,6 @@ export function StreamsGraph({ streams, loading = false }: StreamsGraphProps) {
     (params: Connection) => setEdges((eds) => addEdge(params, eds)),
     [setEdges]
   );
-
-  if (loading) {
-    return (
-      <EuiPanel paddingSize="l">
-        <EuiText>
-          <p>
-            {i18n.translate('xpack.streams.streamsGraph.loading', {
-              defaultMessage: 'Loading graph...',
-            })}
-          </p>
-        </EuiText>
-      </EuiPanel>
-    );
-  }
-
-  if (initialNodes.length === 0) {
-    return (
-      <EuiPanel paddingSize="l">
-        <EuiText>
-          <p>
-            {i18n.translate('xpack.streams.streamsGraph.noStreams', {
-              defaultMessage: 'No wired streams found to display in the graph.',
-            })}
-          </p>
-        </EuiText>
-      </EuiPanel>
-    );
-  }
 
   return (
     <EuiPanel paddingSize="l">
@@ -178,8 +199,9 @@ export function StreamsGraph({ streams, loading = false }: StreamsGraphProps) {
           onConnect={onConnect}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
-          fitView
           attributionPosition="bottom-left"
+          fitView
+          fitViewOptions={{ padding: 0.2 }}
         >
           <Controls />
           <Background variant={BackgroundVariant.Dots} gap={12} size={1} />

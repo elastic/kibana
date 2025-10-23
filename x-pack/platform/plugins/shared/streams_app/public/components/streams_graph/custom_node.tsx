@@ -1,72 +1,49 @@
 import React from 'react';
 import { Handle, Position } from '@xyflow/react';
+import { EuiFlexGroup, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/css';
 
 export interface StreamNodeData extends Record<string, unknown> {
     label: string;
     type: 'wired' | 'root' | 'classic';
     level: number;
+    hasParent?: boolean;
+    hasChildren?: boolean;
 }
 
-export const StreamNode = ({ data }: { data: StreamNodeData }) => {
-    const getNodeColor = (type: string) => {
-        switch (type) {
-            case 'wired':
-                return '#0079a5';
-            case 'root':
-                return '#00bfb3';
-            case 'classic':
-                return '#f5a700';
-            default:
-                return '#6b7280';
-        }
-    };
+export const StreamNode = ({ data: { label, type, hasParent, hasChildren }}: { data: StreamNodeData }) => {
+    const { euiTheme } = useEuiTheme();
+
+    const nodeClass = css`
+        background: ${euiTheme.colors.emptyShade};
+        border: 1px solid ${euiTheme.colors.lightShade};
+        border-radius: 6px;
+        padding: ${euiTheme.size.m};
+        font-size: ${euiTheme.font.scale.xs};
+    `;
 
     return (
         <div
-            style={{
-                background: getNodeColor(data.type),
-                color: 'white',
-                padding: '10px',
-                borderRadius: '8px',
-                border: '2px solid #ffffff',
-                minWidth: '150px',
-                textAlign: 'center',
-                fontSize: '12px',
-                fontWeight: 'bold',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                position: 'relative',
-            }}
+            className={nodeClass}
         >
-            {/* Source handle for outgoing edges */}
             <Handle
                 type="source"
                 position={Position.Bottom}
                 id="source"
-                style={{
-                    background: '#0079a5',
-                    width: 10,
-                    height: 10,
-                }}
+                className={css`visibility: ${!hasChildren ? 'hidden' : ''};`}
             />
-
-            {/* Target handle for incoming edges */}
             <Handle
                 type="target"
                 position={Position.Top}
                 id="target"
-                style={{
-                    background: '#0079a5',
-                    width: 10,
-                    height: 10,
-                }}
+                className={css`visibility: ${!hasParent ? 'hidden' : ''};`}
             />
-
-            <div style={{ marginBottom: '4px' }}>
-                {data.label.length > 20 ? data.label.substring(0, 17) + '...' : data.label}
-            </div>
-            <div style={{ fontSize: '10px', opacity: 0.9 }}>
-                {data.type.toUpperCase()}
-            </div>
+            <EuiFlexGroup alignItems="center" gutterSize='xs'>
+                {type === 'root' && <EuiIcon type="aggregate" size="s" />}
+                <EuiText size='xs'>
+                    {label.length > 20 ? label.substring(0, 17) + '...' : label}
+                </EuiText>
+            </EuiFlexGroup>
         </div>
     );
 };

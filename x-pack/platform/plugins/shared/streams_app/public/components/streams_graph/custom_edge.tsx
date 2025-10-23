@@ -1,6 +1,5 @@
+import { BaseEdge, EdgeLabelRenderer, EdgeProps, getSmoothStepPath } from '@xyflow/react';
 import React from 'react';
-import { EdgeLabelRenderer, EdgeProps } from '@xyflow/react';
-import { BaseEdge, getStraightPath } from '@xyflow/react';
 
 export function CustomEdge({
     id,
@@ -11,7 +10,7 @@ export function CustomEdge({
     label,
     markerEnd
 }: EdgeProps) {
-    const [edgePath, labelX, labelY] = getStraightPath({
+    const [edgePath, labelX, labelY] = getSmoothStepPath({
         sourceX,
         sourceY,
         targetX,
