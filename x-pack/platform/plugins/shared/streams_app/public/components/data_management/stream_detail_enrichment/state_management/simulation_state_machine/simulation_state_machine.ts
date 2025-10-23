@@ -60,6 +60,7 @@ export const simulationMachine = setup({
     })),
     storeSamples: assign((_, params: { samples: SampleDocumentWithUIAttributes[] }) => ({
       samples: params.samples,
+      hasReceivedSamples: true,
     })),
     storeSimulation: assign((_, params: { simulation: Simulation | undefined }) => ({
       simulation: params.simulation,
@@ -114,7 +115,7 @@ export const simulationMachine = setup({
       previewDocsFilter: 'outcome_filter_all',
     }),
     resetSteps: assign({ steps: [] }),
-    resetSamples: assign({ samples: [] }),
+    resetSamples: assign({ samples: [], hasReceivedSamples: false }),
   },
   delays: {
     processorChangeDebounceTime: 300,
@@ -139,6 +140,7 @@ export const simulationMachine = setup({
     previewColumnsSorting: { fieldName: undefined, direction: 'asc' },
     steps: input.steps,
     samples: [],
+    hasReceivedSamples: false,
     streamName: input.streamName,
     streamType: input.streamType,
   }),

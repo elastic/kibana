@@ -54,6 +54,7 @@ import { RowSelectionContext } from '../shared/preview_table';
 
 export const ProcessorOutcomePreview = () => {
   const samples = useSimulatorSelector((snapshot) => snapshot.context.samples);
+  const hasReceivedSamples = useSimulatorSelector((snapshot) => snapshot.context.hasReceivedSamples);
   const previewDocuments = useSimulatorSelector((snapshot) =>
     selectPreviewRecords(snapshot.context)
   );
@@ -68,7 +69,7 @@ export const ProcessorOutcomePreview = () => {
   );
 
   if (isEmpty(samples)) {
-    if (areDataSourcesLoading) {
+    if (areDataSourcesLoading || !hasReceivedSamples) {
       return (
         <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 200 }}>
           <EuiFlexItem grow={false}>
