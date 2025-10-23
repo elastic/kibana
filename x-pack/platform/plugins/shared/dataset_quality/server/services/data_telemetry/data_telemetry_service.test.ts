@@ -294,6 +294,40 @@ describe('DataTelemetryService', () => {
     );
 
     it(
+      'should handle license errors gracefully and log as debug',
+      async () => {
+        jest.spyOn(service as any, 'shouldCollectTelemetry').mockResolvedValue(true);
+
+        // Mock a license error from Elasticsearch
+        const licenseError = {
+          message: 'security_exception: current license is non-compliant for [security]',
+          meta: {
+            body: {
+              error: {
+                type: 'security_exception',
+                reason: 'current license is non-compliant for [security]',
+              },
+            },
+          },
+        };
+
+        (mockEsClient.transport.request as jest.Mock).mockRejectedValue(licenseError);
+
+        const taskResult = await runTask();
+
+        // Task should complete successfully with null data
+        expect(taskResult?.state.data).toBeNull();
+
+        // Error should be logged as debug, not error
+        expect(mockLogger.debug).toHaveBeenCalledWith(
+          expect.stringContaining('Skipping telemetry collection due to license restriction')
+        );
+        expect(mockLogger.error).not.toHaveBeenCalled();
+      },
+      TEST_TIMEOUT
+    );
+
+    it(
       'should not include stats of excluded indices',
       async () => {
         jest.spyOn(service as any, 'shouldCollectTelemetry').mockResolvedValue(true);
