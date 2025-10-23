@@ -635,9 +635,9 @@ exports[`Filter Lists Table renders with filter lists supplied 1`] = `
       >
         <div>
           <button
+            aria-disabled="true"
             class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-isDisabled-base-disabled"
             data-test-subj="mlFilterListsDeleteButton"
-            disabled=""
             type="button"
           >
             <span

@@ -2192,6 +2192,7 @@ exports[`it renders without blowing up 1`] = `
             "flags": Object {
               "buttonVariant": "refresh",
               "formVariant": "refresh",
+              "hasAriaDisabledButton": true,
               "hasGlobalFocusColor": true,
               "hasVisColorAdjustment": false,
               "shadowVariant": "refresh",

@@ -11,10 +11,10 @@ exports[`install footer should render 1`] = `
       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
     >
       <button
+        aria-disabled="true"
         aria-label="Add Data Set Name"
         class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-isDisabled-base-disabled"
         data-test-subj="addSampleDataSetdata-set-id"
-        disabled=""
         type="button"
       >
         <span

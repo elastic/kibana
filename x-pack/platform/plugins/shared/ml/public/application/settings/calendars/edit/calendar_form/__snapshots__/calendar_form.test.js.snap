@@ -374,9 +374,9 @@ exports[`CalendarForm CalendarId shown as title when editing 1`] = `
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <button
+        aria-disabled="true"
         class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-isDisabled-fill-disabled"
         data-test-subj="mlSaveCalendarButton"
-        disabled=""
         type="button"
       >
         <span
@@ -811,9 +811,9 @@ exports[`CalendarForm Renders calendar form 1`] = `
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <button
+        aria-disabled="true"
         class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-isDisabled-fill-disabled"
         data-test-subj="mlSaveCalendarButton"
-        disabled=""
         type="button"
       >
         <span

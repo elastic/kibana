@@ -67,9 +67,9 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <button
+          aria-disabled="true"
           class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-isDisabled-base-disabled"
           data-test-subj="mlCalendarButtonDelete"
-          disabled=""
           type="button"
         >
           <span

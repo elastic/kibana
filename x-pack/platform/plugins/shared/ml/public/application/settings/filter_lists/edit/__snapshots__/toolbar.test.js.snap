@@ -80,9 +80,9 @@ exports[`EditFilterListToolbar renders the toolbar with no items selected 1`] = 
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <button
+          aria-disabled="true"
           class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-isDisabled-base-disabled"
           data-test-subj="mlFilterListDeleteItemButton"
-          disabled=""
           type="button"
         >
           <span

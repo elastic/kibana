@@ -273,9 +273,9 @@ exports[`Clear btns enabled when there are values 1`] = `
             class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <button
+              aria-disabled="true"
               class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-isDisabled-fill-disabled"
               data-test-subj="inputControlSubmitBtn"
-              disabled=""
               type="button"
             >
               <span
@@ -439,9 +439,9 @@ exports[`Renders list control 1`] = `
             class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <button
+              aria-disabled="true"
               class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-isDisabled-fill-disabled"
               data-test-subj="inputControlSubmitBtn"
-              disabled=""
               type="button"
             >
               <span
@@ -661,9 +661,9 @@ exports[`Renders range control 1`] = `
             class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <button
+              aria-disabled="true"
               class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-isDisabled-fill-disabled"
               data-test-subj="inputControlSubmitBtn"
-              disabled=""
               type="button"
             >
               <span

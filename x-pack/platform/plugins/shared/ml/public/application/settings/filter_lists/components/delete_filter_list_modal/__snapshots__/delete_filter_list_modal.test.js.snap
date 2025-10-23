@@ -3,9 +3,9 @@
 exports[`DeleteFilterListModal false canDeleteFilter privilege renders as disabled delete button 1`] = `
 <div>
   <button
+    aria-disabled="true"
     class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-isDisabled-base-disabled"
     data-test-subj="mlFilterListsDeleteButton"
-    disabled=""
     type="button"
   >
     <span
@@ -24,9 +24,9 @@ exports[`DeleteFilterListModal false canDeleteFilter privilege renders as disabl
 exports[`DeleteFilterListModal renders as disabled delete button when no lists selected 1`] = `
 <div>
   <button
+    aria-disabled="true"
     class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-isDisabled-base-disabled"
     data-test-subj="mlFilterListsDeleteButton"
-    disabled=""
     type="button"
   >
     <span
