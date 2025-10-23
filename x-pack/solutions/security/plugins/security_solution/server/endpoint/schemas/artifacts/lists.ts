@@ -110,14 +110,14 @@ export const translatedEntryDescendantOf = t.exact(
 );
 export type TranslatedEntryDescendantOf = t.TypeOf<typeof translatedEntryDescendantOf>;
 
-export const TranslatedEntriesOfTrustDescendants = t.union([
+export const translatedEntriesOfTrustDescendants = t.union([
   translatedEntryNested,
   translatedEntryMatch,
   translatedEntryMatchWildcard,
   translatedEntryMatchAny,
 ]);
 export type TranslatedEntriesOfTrustDescendants = t.TypeOf<
-  typeof TranslatedEntriesOfTrustDescendants
+  typeof translatedEntriesOfTrustDescendants
 >;
 
 export const translatedEntryTrustDescendants = t.exact(
