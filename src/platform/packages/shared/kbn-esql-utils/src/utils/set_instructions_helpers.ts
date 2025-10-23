@@ -21,13 +21,11 @@ import {
  * @returns The project routing value if found, undefined otherwise
  *
  * @example
- * ```typescript
  * getProjectRoutingFromEsqlQuery('SET project_routing = "_alias: *"; FROM my_index')
  * // Returns: '_alias: *'
  *
  * getProjectRoutingFromEsqlQuery('FROM my_index')
  * // Returns: undefined
- * ```
  */
 export function getProjectRoutingFromEsqlQuery(queryString: string): string | undefined {
   try {

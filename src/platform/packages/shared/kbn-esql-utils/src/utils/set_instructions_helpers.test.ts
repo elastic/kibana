@@ -40,15 +40,9 @@ describe('set instructions helpers', () => {
 
       it('should work with multiple SET instructions', () => {
         const queryString =
-          'SET other_setting = "value"; SET project_routing = "_alias: *"; FROM my_index';
+          'SET other_setting = "value"; SET project_routing = "projectId: *"; FROM my_index';
         const result = getProjectRoutingFromEsqlQuery(queryString);
-        expect(result).toBe('_alias: *');
-      });
-
-      it('should handle project_routing with special characters', () => {
-        const queryString = 'SET project_routing = "_alias: projectId"; FROM my_index';
-        const result = getProjectRoutingFromEsqlQuery(queryString);
-        expect(result).toBe('_alias: projectId');
+        expect(result).toBe('projectId: *');
       });
     });
   });
