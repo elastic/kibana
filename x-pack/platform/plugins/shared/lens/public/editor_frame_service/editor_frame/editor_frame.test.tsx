@@ -37,6 +37,7 @@ import { getLensInspectorService } from '../../lens_inspector_service';
 import { createIndexPatternServiceMock } from '../../mocks/data_views_service_mock';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import { EditorFrameServiceProvider } from '../editor_frame_service_context';
 
 function wrapDataViewsContract() {
   const dataViewsContract = dataViewPluginMocks.createStartContract();
@@ -128,12 +129,10 @@ describe('editor_frame', () => {
     }
   ) => {
     const { store, ...rtlRender } = renderWithReduxStore(
-      <EditorFrame
-        {...getDefaultProps()}
-        visualizationMap={visualizationMap}
-        datasourceMap={datasourceMap}
-        {...propsOverrides}
-      />,
+      <EditorFrameServiceProvider visualizationMap={visualizationMap} datasourceMap={datasourceMap}>
+        <EditorFrame {...getDefaultProps()} {...propsOverrides} />
+      </EditorFrameServiceProvider>,
+
       {},
       {
         preloadedState: {

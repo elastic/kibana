@@ -46,16 +46,6 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsSentinelOneRunScriptEnabled: true,
 
   /**
-   * Space awareness for Elastic Defend management.
-   * Feature depends on Fleet's corresponding features also being enabled:
-   * - `subfeaturePrivileges`
-   * - `useSpaceAwareness`
-   * and Fleet must set it runtime mode to spaces by calling the following API:
-   * - `POST /internal/fleet/enable_space_awareness`
-   */
-  endpointManagementSpaceAwarenessEnabled: true,
-
-  /**
    * Disables new notes
    */
   securitySolutionNotesDisabled: false,
@@ -104,12 +94,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables Protection Updates tab in the Endpoint Policy Details page
    */
   protectionUpdatesEnabled: true,
-
-  /**
-   * Enables Response actions telemetry collection
-   * Should be enabled in 8.17.0
-   */
-  responseActionsTelemetryEnabled: true,
 
   /**
    * Enables experimental Microsoft Defender for Endpoint integration data to be available in Analyzer
@@ -173,21 +157,10 @@ export const allowedExperimentalValues = Object.freeze({
   newExpandableFlyoutNavigationDisabled: false,
 
   /**
-   * Enables the ability to edit highlighted fields in the alertflyout
-   */
-  editHighlightedFields: true,
-
-  /**
    * Enables CrowdStrike's RunScript RTR command
    * Release: 8.18/9.0
    */
   crowdstrikeRunScriptEnabled: true,
-
-  /**
-   * Enabled Microsoft Defender for  Endpoint actions: Isolate and Release.
-   * Release: 8.18/9.0
-   */
-  responseActionsMSDefenderEndpointEnabled: true,
 
   /** Enables new Data View Picker */
   newDataViewPickerEnabled: true,
