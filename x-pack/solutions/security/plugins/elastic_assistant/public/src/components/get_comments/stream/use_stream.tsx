@@ -7,6 +7,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Subscription } from 'rxjs';
+import type { InterruptValue } from '@kbn/elastic-assistant-common';
 import { getPlaceholderObservable, getStreamObservable } from './stream_observable';
 
 interface UseStreamProps {
@@ -24,6 +25,7 @@ interface UseStream {
   isStreaming: boolean;
   // The pending message from the streaming data.
   pendingMessage: string;
+  interruptValue: InterruptValue | undefined;
   //  A function to mark the streaming as complete, with a parameter to indicate if the streaming was aborted.
   setComplete: (args: { complete: boolean; didAbort: boolean }) => void;
 }
@@ -42,6 +44,8 @@ export const useStream = ({
   refetchCurrentConversation,
 }: UseStreamProps): UseStream => {
   const [pendingMessage, setPendingMessage] = useState<string | undefined>();
+  const [interruptValue, setInterruptValue] = useState<InterruptValue | undefined>();
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
   const [subscription, setSubscription] = useState<Subscription | undefined>();
@@ -52,6 +56,7 @@ export const useStream = ({
         : getPlaceholderObservable(),
     [content, isError, reader]
   );
+
   const onCompleteStream = useCallback(
     (didAbort: boolean) => {
       subscription?.unsubscribe();
@@ -77,9 +82,10 @@ export const useStream = ({
 
   useEffect(() => {
     const newSubscription = observer$.subscribe({
-      next: ({ message, loading: isLoading }) => {
+      next: ({ message, loading: isLoading, interruptValues }) => {
         setLoading(isLoading);
         setPendingMessage(message);
+        setInterruptValue(interruptValues?.at(interruptValues.length - 1));
       },
       complete: () => {
         setComplete({ complete: true, didAbort: false });
@@ -100,6 +106,7 @@ export const useStream = ({
     isLoading: loading,
     isStreaming: loading && pendingMessage != null,
     pendingMessage: pendingMessage ?? '',
+    interruptValue,
     setComplete,
   };
 };

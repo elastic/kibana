@@ -19,6 +19,7 @@ describe('SelectOption', () => {
     type: 'SELECT_OPTION',
     threadId: 'test-thread-id',
     description: 'Please select an option:',
+    id: '1234',
     options: [
       {
         label: 'Approve',
@@ -37,6 +38,7 @@ describe('SelectOption', () => {
     interrupt: defaultInterrupt,
     resumeGraph: mockResumeGraph,
     isLastInConversation: true,
+    disableAction: false,
   };
 
   beforeEach(() => {
@@ -69,6 +71,7 @@ describe('SelectOption', () => {
     const resumedValue: SelectOptionInterruptResumeValue = {
       type: 'SELECT_OPTION',
       value: 'approve',
+      interruptId: '1234',
     };
     render(<SelectOption {...defaultProps} resumedValue={resumedValue} />);
 
@@ -95,6 +98,7 @@ describe('SelectOption', () => {
     const resumedValue: SelectOptionInterruptResumeValue = {
       type: 'SELECT_OPTION',
       value: 'approve',
+      interruptId: '1234',
     };
     render(<SelectOption {...defaultProps} resumedValue={resumedValue} />);
 
@@ -119,6 +123,7 @@ describe('SelectOption', () => {
     const resumedValue: SelectOptionInterruptResumeValue = {
       type: 'SELECT_OPTION',
       value: 'unknown-value',
+      interruptId: '1234',
     };
     render(<SelectOption {...defaultProps} resumedValue={resumedValue} />);
 

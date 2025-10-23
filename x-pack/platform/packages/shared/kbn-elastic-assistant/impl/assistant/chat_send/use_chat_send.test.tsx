@@ -119,6 +119,39 @@ describe('use chat send', () => {
       expect(messages[messages.length - 1].content).toEqual(robotMessage.response);
     });
   });
+
+  it('handleResumeGraph sends the resume value', async () => {
+    const { result } = renderHook(
+      () =>
+        useChatSend({ ...testProps, currentConversation: { ...welcomeConvo, id: 'welcome-id' } }),
+      {
+        wrapper: TestProviders,
+      }
+    );
+
+    await waitFor(() => new Promise((resolve) => resolve(null)));
+    act(() => {
+      result.current.handleResumeGraph('threadId123', {
+        type: 'SELECT_OPTION',
+        interruptId: 'interruptId123',
+        value: 'option1',
+      });
+    });
+
+    await waitFor(() => {
+      expect(sendMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          threadId: 'threadId123',
+          interruptResumeValue: {
+            type: 'SELECT_OPTION',
+            interruptId: 'interruptId123',
+            value: 'option1',
+          },
+        })
+      );
+    });
+  });
+
   it('sends telemetry events for both user and assistant', async () => {
     const promptText = 'prompt text';
     const { result } = renderHook(() => useChatSend(testProps), {

@@ -7,7 +7,11 @@
 
 import { AIMessage, HumanMessage } from '@langchain/core/messages';
 import { getConversationWithNewMessage } from './get_conversation_with_new_message';
-import type { ConversationResponse, Message, Replacements } from '@kbn/elastic-assistant-common';
+import type {
+  Message,
+  type ConversationResponse,
+  type Replacements,
+} from '@kbn/elastic-assistant-common';
 import type { AIAssistantConversationsDataClient } from '../../../ai_assistant_data_clients/conversations';
 import type { Logger } from '@kbn/logging';
 
@@ -55,6 +59,42 @@ describe('getConversationWithNewMessage', () => {
           ],
         };
       }
+      if (id === 'withPendingInterrupts') {
+        return {
+          users: [{ name: 'elastic' }],
+          messages: [
+            {
+              content: 'first human message anonymized-value',
+              role: 'user',
+              timestamp: '2023-10-01T00:00:00Z',
+            },
+            {
+              content: 'User action required',
+              role: 'assistant',
+              timestamp: '2023-10-01T00:00:00Z',
+              metadata: {
+                interruptValue: {
+                  id: '111',
+                  type: 'INPUT_TEXT',
+                  threadId: '777',
+                },
+              } as Message['metadata'],
+            },
+            {
+              content: 'User action required',
+              role: 'assistant',
+              timestamp: '2023-10-01T00:00:00Z',
+              metadata: {
+                interruptValue: {
+                  id: '222',
+                  type: 'INPUT_TEXT',
+                  threadId: '777',
+                },
+              } as Message['metadata'],
+            },
+          ],
+        };
+      }
       return {
         messages: [
           {
@@ -70,20 +110,11 @@ describe('getConversationWithNewMessage', () => {
         ],
       };
     }),
-    appendConversationMessages: jest
+    updateConversation: jest
       .fn()
       .mockImplementation(
-        ({
-          existingConversation,
-          messages,
-        }: {
-          existingConversation: ConversationResponse;
-          messages: Message[];
-        }) => {
-          return {
-            ...existingConversation,
-            messages: [...(existingConversation.messages ?? []), ...messages],
-          };
+        ({ conversationUpdateProps }: { conversationUpdateProps: ConversationResponse }) => {
+          return conversationUpdateProps;
         }
       ),
   } as unknown as AIAssistantConversationsDataClient;
@@ -101,7 +132,7 @@ describe('getConversationWithNewMessage', () => {
     });
     expect(result).toEqual(newMessages);
     expect(conversationsDataClient.getConversation).toHaveBeenCalledTimes(0);
-    expect(conversationsDataClient.appendConversationMessages).toHaveBeenCalledTimes(0);
+    expect(conversationsDataClient.updateConversation).toHaveBeenCalledTimes(0);
   });
 
   it('when conversationDataClient is missing, just returns the new message', async () => {
@@ -114,7 +145,7 @@ describe('getConversationWithNewMessage', () => {
     });
     expect(result).toEqual(newMessages);
     expect(conversationsDataClient.getConversation).toHaveBeenCalledTimes(0);
-    expect(conversationsDataClient.appendConversationMessages).toHaveBeenCalledTimes(0);
+    expect(conversationsDataClient.updateConversation).toHaveBeenCalledTimes(0);
   });
 
   it('when conversation does not exist, just returns the new message', async () => {
@@ -128,7 +159,7 @@ describe('getConversationWithNewMessage', () => {
     });
     expect(result).toEqual(newMessages);
     expect(conversationsDataClient.getConversation).toHaveBeenCalledTimes(1);
-    expect(conversationsDataClient.appendConversationMessages).toHaveBeenCalledTimes(0);
+    expect(conversationsDataClient.updateConversation).toHaveBeenCalledTimes(0);
   });
 
   it('when conversation does exist, update conversation and return the new full conversation', async () => {
@@ -146,29 +177,170 @@ describe('getConversationWithNewMessage', () => {
       new HumanMessage('Second human message anonymized-value'),
     ]);
     expect(conversationsDataClient.getConversation).toHaveBeenCalledTimes(1);
-    expect(conversationsDataClient.appendConversationMessages).toHaveBeenCalledTimes(1);
-    expect(conversationsDataClient.appendConversationMessages).toHaveBeenCalledWith({
-      existingConversation: {
-        messages: expect.arrayContaining([
-          expect.objectContaining({
+    expect(conversationsDataClient.updateConversation).toHaveBeenCalledTimes(1);
+    expect(conversationsDataClient.updateConversation).toHaveBeenCalledWith({
+      conversationUpdateProps: {
+        messages: [
+          {
             content: 'first human message anonymized-value',
+            role: 'user',
+            timestamp: '2023-10-01T00:00:00Z',
+          },
+          {
+            content: 'first assistant message anonymized-value',
+            role: 'assistant',
+            timestamp: '2023-10-01T00:00:00Z',
+          },
+          expect.objectContaining({
+            content: 'Second human message original-value',
             role: 'user',
             timestamp: expect.any(String),
           }),
+        ],
+      },
+    });
+  });
+
+  it('expires old interrupts when no resume value is provided', async () => {
+    const newMessages = [new HumanMessage('Second human message anonymized-value')];
+    await getConversationWithNewMessage({
+      logger,
+      newMessages,
+      conversationId: 'withPendingInterrupts',
+      conversationsDataClient,
+      replacements,
+    });
+    expect(conversationsDataClient.updateConversation).toHaveBeenCalledWith({
+      conversationUpdateProps: expect.objectContaining({
+        messages: expect.arrayContaining([
           expect.objectContaining({
-            content: 'first assistant message anonymized-value',
+            content: 'User action required',
             role: 'assistant',
-            timestamp: expect.any(String),
+            timestamp: '2023-10-01T00:00:00Z',
+            metadata: {
+              interruptValue: {
+                id: '111',
+                expired: true,
+                type: 'INPUT_TEXT',
+                threadId: '777',
+              },
+            } as Message['metadata'],
+          }),
+          expect.objectContaining({
+            content: 'User action required',
+            role: 'assistant',
+            timestamp: '2023-10-01T00:00:00Z',
+            metadata: {
+              interruptValue: {
+                id: '222',
+                expired: true,
+                type: 'INPUT_TEXT',
+                threadId: '777',
+              },
+            } as Message['metadata'],
           }),
         ]),
+      }),
+    });
+  });
+
+  it('expires interrupt if resume value is not the last message', async () => {
+    const newMessages = [new HumanMessage('Second human message anonymized-value')];
+    await getConversationWithNewMessage({
+      logger,
+      newMessages,
+      conversationId: 'withPendingInterrupts',
+      conversationsDataClient,
+      replacements,
+      interruptResumeValue: {
+        interruptId: '111',
+        type: 'INPUT_TEXT',
+        value: 'User action required',
       },
-      messages: expect.arrayContaining([
-        expect.objectContaining({
-          content: 'Second human message original-value',
-          role: 'user',
-          timestamp: expect.any(String),
-        }),
-      ]),
+    });
+    expect(conversationsDataClient.updateConversation).toHaveBeenCalledWith({
+      conversationUpdateProps: expect.objectContaining({
+        messages: expect.arrayContaining([
+          expect.objectContaining({
+            content: 'User action required',
+            role: 'assistant',
+            timestamp: '2023-10-01T00:00:00Z',
+            metadata: {
+              interruptValue: {
+                id: '111',
+                expired: true,
+                type: 'INPUT_TEXT',
+                threadId: '777',
+              },
+            } as Message['metadata'],
+          }),
+          expect.objectContaining({
+            content: 'User action required',
+            role: 'assistant',
+            timestamp: '2023-10-01T00:00:00Z',
+            metadata: {
+              interruptValue: {
+                id: '222',
+                expired: true,
+                type: 'INPUT_TEXT',
+                threadId: '777',
+              },
+            } as Message['metadata'],
+          }),
+        ]),
+      }),
+    });
+  });
+
+  it('expires old interrupt and adds resume value to corresponding message', async () => {
+    const newMessages = [new HumanMessage('Second human message anonymized-value')];
+    await getConversationWithNewMessage({
+      logger,
+      newMessages,
+      conversationId: 'withPendingInterrupts',
+      conversationsDataClient,
+      replacements,
+      interruptResumeValue: {
+        interruptId: '222',
+        type: 'INPUT_TEXT',
+        value: 'User action required',
+      },
+    });
+    expect(conversationsDataClient.updateConversation).toHaveBeenCalledWith({
+      conversationUpdateProps: expect.objectContaining({
+        messages: expect.arrayContaining([
+          expect.objectContaining({
+            content: 'User action required',
+            role: 'assistant',
+            timestamp: '2023-10-01T00:00:00Z',
+            metadata: {
+              interruptValue: {
+                id: '111',
+                expired: true,
+                type: 'INPUT_TEXT',
+                threadId: '777',
+              },
+            } as Message['metadata'],
+          }),
+          expect.objectContaining({
+            content: 'User action required',
+            role: 'assistant',
+            timestamp: '2023-10-01T00:00:00Z',
+            metadata: {
+              interruptValue: {
+                id: '222',
+                type: 'INPUT_TEXT',
+                threadId: '777',
+              },
+              interruptResumeValue: {
+                interruptId: '222',
+                type: 'INPUT_TEXT',
+                value: 'User action required',
+              },
+            } as Message['metadata'],
+          }),
+        ]),
+      }),
     });
   });
 
@@ -181,30 +353,28 @@ describe('getConversationWithNewMessage', () => {
       conversationsDataClient,
       replacements,
     });
-    expect(conversationsDataClient.appendConversationMessages).toHaveBeenCalledWith({
-      existingConversation: {
-        messages: expect.arrayContaining([
-          expect.objectContaining({
+    expect(conversationsDataClient.updateConversation).toHaveBeenCalledWith({
+      conversationUpdateProps: {
+        messages: [
+          {
             content: 'first human message anonymized-value',
             role: 'user',
-            timestamp: expect.any(String),
-          }),
-          expect.objectContaining({
+            timestamp: '2023-10-01T00:00:00Z',
+          },
+          {
             content: 'first assistant message anonymized-value',
             role: 'assistant',
+            timestamp: '2023-10-01T00:00:00Z',
+          },
+          expect.objectContaining({
+            content: 'Second human message original-value',
+            role: 'user',
             timestamp: expect.any(String),
+            user: { name: 'elastic' },
           }),
-        ]),
+        ],
         createdBy: { name: 'elastic' },
       },
-      messages: expect.arrayContaining([
-        expect.objectContaining({
-          content: 'Second human message original-value',
-          role: 'user',
-          timestamp: expect.any(String),
-          user: { name: 'elastic' },
-        }),
-      ]),
     });
   });
 
@@ -217,30 +387,28 @@ describe('getConversationWithNewMessage', () => {
       conversationsDataClient,
       replacements,
     });
-    expect(conversationsDataClient.appendConversationMessages).toHaveBeenCalledWith({
-      existingConversation: {
-        messages: expect.arrayContaining([
-          expect.objectContaining({
+    expect(conversationsDataClient.updateConversation).toHaveBeenCalledWith({
+      conversationUpdateProps: {
+        messages: [
+          {
             content: 'first human message anonymized-value',
             role: 'user',
-            timestamp: expect.any(String),
-          }),
-          expect.objectContaining({
+            timestamp: '2023-10-01T00:00:00Z',
+          },
+          {
             content: 'first assistant message anonymized-value',
             role: 'assistant',
+            timestamp: '2023-10-01T00:00:00Z',
+          },
+          expect.objectContaining({
+            content: 'Second human message original-value',
+            role: 'user',
             timestamp: expect.any(String),
+            user: { name: 'elastic' },
           }),
-        ]),
+        ],
         users: [{ name: 'elastic' }],
       },
-      messages: expect.arrayContaining([
-        expect.objectContaining({
-          content: 'Second human message original-value',
-          role: 'user',
-          timestamp: expect.any(String),
-          user: { name: 'elastic' },
-        }),
-      ]),
     });
   });
 });

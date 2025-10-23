@@ -7,7 +7,7 @@
 
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { useCallback, useRef, useState } from 'react';
-import type { ApiConfig, Replacements } from '@kbn/elastic-assistant-common';
+import type { ApiConfig, InterruptResumeValue, Replacements } from '@kbn/elastic-assistant-common';
 import moment from 'moment';
 import { useAssistantContext } from '../../assistant_context';
 import type { FetchConnectorExecuteResponse } from '../api';
@@ -21,14 +21,20 @@ interface SendMessageProps {
   replacements: Replacements;
 }
 
+interface ResumeGraphProps {
+  apiConfig: ApiConfig;
+  http: HttpSetup;
+  conversationId: string;
+  replacements: Replacements;
+  threadId: string;
+  interruptResumeValue: InterruptResumeValue;
+}
+
+type InvokeGraphProps = SendMessageProps | ResumeGraphProps;
 interface UseSendMessage {
   abortStream: () => void;
   isLoading: boolean;
-  sendMessage: ({
-    apiConfig,
-    http,
-    message,
-  }: SendMessageProps) => Promise<FetchConnectorExecuteResponse>;
+  sendMessage: (args: InvokeGraphProps) => Promise<FetchConnectorExecuteResponse>;
 }
 
 export const useSendMessage = (): UseSendMessage => {
@@ -37,18 +43,25 @@ export const useSendMessage = (): UseSendMessage => {
   const [isLoading, setIsLoading] = useState(false);
   const abortController = useRef(new AbortController());
   const sendMessage = useCallback(
-    async ({ apiConfig, http, message, conversationId, replacements }: SendMessageProps) => {
+    async (args: InvokeGraphProps) => {
       setIsLoading(true);
+
+      const message = 'message' in args ? args.message : undefined;
+      const threadId = 'threadId' in args ? args.threadId : undefined;
+      const interruptResumeValue =
+        'interruptResumeValue' in args ? args.interruptResumeValue : undefined;
 
       try {
         return await fetchConnectorExecuteAction({
-          conversationId,
+          conversationId: args.conversationId,
           alertsIndexPattern,
-          apiConfig,
+          apiConfig: args.apiConfig,
           assistantStreamingEnabled,
-          http,
+          http: args.http,
           message,
-          replacements,
+          threadId,
+          interruptResumeValue,
+          replacements: args.replacements,
           signal: abortController.current.signal,
           size: knowledgeBase.latestAlerts,
           traceOptions,

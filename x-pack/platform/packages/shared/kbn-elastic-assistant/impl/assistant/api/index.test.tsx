@@ -84,6 +84,27 @@ describe('API tests', () => {
       );
     });
 
+    it('sends thread id and interrupt resume value when they are provided', async () => {
+      (mockHttp.fetch as jest.Mock).mockResolvedValue({ status: 'error' });
+
+      await fetchConnectorExecuteAction({
+        ...fetchConnectorArgs,
+        threadId: 'threadId123',
+        interruptResumeValue: {
+          type: 'SELECT_OPTION',
+          interruptId: 'interruptId123',
+          value: 'option1',
+        },
+      });
+
+      expect(mockHttp.fetch).toHaveBeenCalledWith(
+        '/internal/elastic_assistant/actions/connector/foo/_execute',
+        expect.objectContaining({
+          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeStream","conversationId":"test","actionTypeId":".gen-ai","replacements":{},"screenContext":{"timeZone":"America/New_York"},"threadId":"threadId123","interruptResumeValue":{"type":"SELECT_OPTION","interruptId":"interruptId123","value":"option1"}}',
+        })
+      );
+    });
+
     it('calls the stream API when assistantStreamingEnabled is true', async () => {
       await fetchConnectorExecuteAction(fetchConnectorArgs);
 

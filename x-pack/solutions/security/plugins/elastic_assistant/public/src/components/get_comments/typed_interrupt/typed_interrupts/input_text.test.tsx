@@ -21,12 +21,14 @@ describe('InputText', () => {
     threadId: 'test-thread-id',
     description: 'Please enter some text',
     placeholder: 'Type here...',
+    id: '1234',
   };
 
   const defaultProps = {
     interruptValue: defaultInterruptValue,
     resumeGraph: mockResumeGraph,
     isLastInConversation: true,
+    disableAction: false,
   };
 
   const renderWithProviders = (component: React.ReactElement) => {
@@ -96,6 +98,7 @@ describe('InputText', () => {
     const resumeValue: InputTextInterruptResumeValue = {
       type: 'INPUT_TEXT',
       value: 'initial value',
+      interruptId: '1234',
     };
     renderWithProviders(<InputText {...defaultProps} resumeValue={resumeValue} />);
     const input = screen.getByDisplayValue('initial value');
@@ -129,6 +132,7 @@ describe('InputText', () => {
     const resumeValue: InputTextInterruptResumeValue = {
       type: 'INPUT_TEXT',
       value: 'submitted value',
+      interruptId: '1234',
     };
     renderWithProviders(<InputText {...defaultProps} resumeValue={resumeValue} />);
     const input = screen.getByDisplayValue('submitted value');
@@ -158,6 +162,7 @@ describe('InputText', () => {
     const resumeValue: InputTextInterruptResumeValue = {
       type: 'INPUT_TEXT',
       value: 'my response',
+      interruptId: '1234',
     };
     renderWithProviders(<InputText {...defaultProps} resumeValue={resumeValue} />);
 
@@ -168,6 +173,7 @@ describe('InputText', () => {
     const resumeValue: InputTextInterruptResumeValue = {
       type: 'INPUT_TEXT',
       value: '',
+      interruptId: '1234',
     };
     renderWithProviders(<InputText {...defaultProps} resumeValue={resumeValue} />);
 

@@ -14,12 +14,14 @@ import { streamFactory } from '@kbn/ml-response-stream/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
   ExecuteConnectorRequestBody,
-  InterruptValue,
+  InterruptResumeValue,
   TraceData,
 } from '@kbn/elastic-assistant-common';
+import { InterruptValue } from '@kbn/elastic-assistant-common';
 import type { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import type { AIMessageChunk } from '@langchain/core/messages';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import { Command } from '@langchain/langgraph';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../../../telemetry/event_based_telemetry';
 import { withAssistantSpan } from '../../tracers/apm/with_assistant_span';
 import { AGENT_NODE_TAG } from './nodes/run_agent';
@@ -27,6 +29,7 @@ import type { DefaultAssistantGraph } from './graph';
 import { DEFAULT_ASSISTANT_GRAPH_ID } from './graph';
 import type { GraphInputs } from './types';
 import type { OnLlmResponse, TraceOptions } from '../../executors/types';
+import { PromiseQueue } from '../../utils/promise_queue';
 
 interface StreamGraphParams {
   apmTracer: APMTracer;
@@ -39,6 +42,7 @@ interface StreamGraphParams {
   telemetry: AnalyticsServiceSetup;
   telemetryTracer?: TelemetryTracer;
   traceOptions?: TraceOptions;
+  interruptResumeValue?: InterruptResumeValue;
 }
 
 /**
@@ -66,6 +70,7 @@ export const streamGraph = async ({
   telemetry,
   telemetryTracer,
   traceOptions,
+  interruptResumeValue,
 }: StreamGraphParams): Promise<StreamResponseWithHeaders> => {
   let streamingSpan: Span | undefined;
   if (agent.isStarted()) {
@@ -110,7 +115,7 @@ export const streamGraph = async ({
     interruptValue?: InterruptValue;
   }) => {
     if (onLlmResponse) {
-      onLlmResponse({
+      return onLlmResponse({
         content: args.finalResponse,
         interruptValue: args.interruptValue,
         traceData: {
@@ -118,11 +123,15 @@ export const streamGraph = async ({
           traceId: streamingSpan?.ids?.['trace.id'],
         },
         isError: args.isError,
-      }).catch(() => {});
+      });
     }
   };
 
-  const stream = await assistantGraph.streamEvents(inputs, {
+  const streamEventsInput = interruptResumeValue
+    ? new Command({ resume: interruptResumeValue })
+    : inputs;
+
+  const stream = await assistantGraph.streamEvents(streamEventsInput, {
     callbacks: [
       apmTracer,
       ...(traceOptions?.tracers ?? []),
@@ -138,8 +147,11 @@ export const streamGraph = async ({
     },
   });
 
+  const promiseQueue = new PromiseQueue();
+
   const pushStreamUpdate = async () => {
-    for await (const { event, data, tags } of stream) {
+    for await (const chunk of stream) {
+      const { event, data, tags } = chunk;
       if ((tags || []).includes(AGENT_NODE_TAG)) {
         if (event === 'on_chat_model_stream' && !inputs.isOssModel) {
           const msg = data.chunk as AIMessageChunk;
@@ -151,7 +163,9 @@ export const streamGraph = async ({
           !data.output.lc_kwargs?.tool_calls?.length &&
           !didEnd
         ) {
-          handleFinalContent({ finalResponse: data.output.content, isError: false });
+          promiseQueue.queuePromise(
+            handleFinalContent({ finalResponse: data.output.content, isError: false })
+          );
         } else if (
           // This is the end of one model invocation but more message will follow as there are tool calls. If this chunk contains text content, add a newline separator to the stream to visually separate the chunks.
           event === 'on_chat_model_end' &&
@@ -162,6 +176,29 @@ export const streamGraph = async ({
           push({ payload: '\n\n' as string, type: 'content' });
         }
       }
+
+      // include interrupts in the stream.
+      if (event === 'on_chain_stream') {
+        const payload = data.chunk?.[1].payload;
+        if (payload) {
+          const id = payload.id;
+          const interruptValue = payload.interrupts?.[0]?.value;
+          if (typeof id === 'string' && interruptValue !== null) {
+            const parsedInterruptValue = InterruptValue.safeParse({ id, ...interruptValue });
+            if (parsedInterruptValue.success) {
+              push({ payload: JSON.stringify(parsedInterruptValue.data), type: 'interruptValue' });
+            }
+          }
+        }
+      }
+    }
+
+    // finished consuming the stream. Checking if interrupts happened.
+    await checkInterrupts(assistantGraph, inputs.threadId, logger, handleFinalContent);
+
+    // Ensure any queued final-content work is done before closing the stream
+    if (promiseQueue.pendingPromises.size > 0) {
+      await Promise.allSettled([...promiseQueue.pendingPromises]);
     }
 
     closeStream({ isError: false });
@@ -183,6 +220,8 @@ interface InvokeGraphParams {
   onLlmResponse?: OnLlmResponse;
   telemetryTracer?: TelemetryTracer;
   traceOptions?: TraceOptions;
+  interruptResumeValue?: InterruptResumeValue;
+  logger: Logger;
 }
 interface InvokeGraphResponse {
   output: string;
@@ -207,6 +246,8 @@ export const invokeGraph = async ({
   onLlmResponse,
   telemetryTracer,
   traceOptions,
+  interruptResumeValue,
+  logger,
 }: InvokeGraphParams): Promise<InvokeGraphResponse> => {
   return withAssistantSpan(DEFAULT_ASSISTANT_GRAPH_ID, async (span) => {
     let traceData: TraceData = {};
@@ -218,7 +259,12 @@ export const invokeGraph = async ({
       };
       span.addLabels({ evaluationId: traceOptions?.evaluationId });
     }
-    const result = await assistantGraph.invoke(inputs, {
+
+    const invokeInput = interruptResumeValue
+      ? new Command({ resume: interruptResumeValue })
+      : inputs;
+
+    const result = await assistantGraph.invoke(invokeInput, {
       callbacks: [
         apmTracer,
         ...(traceOptions?.tracers ?? []),
@@ -234,13 +280,90 @@ export const invokeGraph = async ({
     const lastMessage = result.messages[result.messages.length - 1];
     const output = lastMessage.text;
     const conversationId = result.conversationId;
-    if (onLlmResponse) {
-      await onLlmResponse({
-        content: output,
-        traceData,
+
+    const handleFinalContent = (args: {
+      finalResponse: string;
+      isError: boolean;
+      interruptValue?: InterruptValue;
+    }) => {
+      if (onLlmResponse) {
+        return onLlmResponse({
+          content: args.finalResponse,
+          interruptValue: args.interruptValue,
+          isError: args.isError,
+          traceData,
+        });
+      }
+    };
+
+    const handleFinalContentCalled = await checkInterrupts(
+      assistantGraph,
+      inputs.threadId,
+      logger,
+      handleFinalContent
+    );
+
+    if (!handleFinalContentCalled) {
+      await handleFinalContent({
+        finalResponse: output,
+        isError: false,
       });
     }
 
     return { output, traceData, conversationId };
   });
 };
+
+/**
+ * Checks if graph has pending interrupts and if it does, calls handleFinalContent with the interrupt.
+ * @param assistantGraph
+ * @param threadId
+ * @param logger
+ * @param handleFinalContent
+ * @returns boolean if handleFinalContent was called
+ */
+async function checkInterrupts(
+  assistantGraph: DefaultAssistantGraph,
+  threadId: string,
+  logger: Logger,
+  handleFinalContent: (args: {
+    finalResponse: string;
+    isError: boolean;
+    interruptValue?: InterruptValue;
+  }) => Promise<void> | undefined
+): Promise<boolean> {
+  const state = await assistantGraph.getState({ configurable: { thread_id: threadId } });
+  if (state?.tasks?.length > 0) {
+    // The graph contains tasks, graph must have been interrupted
+    if (state.tasks.length > 1) {
+      logger.warn('Expected at most one task to be active');
+    }
+    const task = state.tasks.at(0);
+    if (!task) {
+      throw new Error(`No task found in state: ${JSON.stringify(state, null, 2)}`);
+    }
+    if (task.interrupts.length < 1 || task.interrupts.length > 1) {
+      throw new Error(`Expected exactly one interrupt in task, found ${task.interrupts.length}`);
+    }
+    const interrupt = task.interrupts[0];
+    const interruptValue = interrupt.value;
+    const parsedInterruptValue = InterruptValue.safeParse({ id: task.id, ...interruptValue });
+    if (!parsedInterruptValue.success) {
+      throw new Error(
+        `Interrupt did not match schema. You must use typedInterrupt(...). ${JSON.stringify(
+          parsedInterruptValue.error
+        )}`
+      );
+    }
+
+    await handleFinalContent({
+      finalResponse: '#### ⏳ Action required',
+      interruptValue: parsedInterruptValue.data,
+      isError: false,
+    });
+
+    return true;
+  }
+
+  return false;
+}

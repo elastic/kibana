@@ -21,6 +21,7 @@ interface Props<T extends InterruptType> {
   resumeGraph: (threadId: string, resumeValue: { type: T } & InterruptResumeValue) => void;
   interruptResumeValue?: { type: T } & InterruptResumeValue;
   isLastInConversation: boolean;
+  disableAction: boolean;
 }
 
 export const InterruptFactory = ({
@@ -28,6 +29,7 @@ export const InterruptFactory = ({
   resumeGraph,
   interruptResumeValue: resumedValue,
   isLastInConversation,
+  disableAction,
 }: Props<InterruptType>) => {
   if (!interrupt) {
     return;
@@ -41,6 +43,7 @@ export const InterruptFactory = ({
           resumeGraph={resumeGraph}
           resumedValue={resumedValue as SelectOptionInterruptResumeValue}
           isLastInConversation={isLastInConversation}
+          disableAction={disableAction}
         />
       );
     case 'INPUT_TEXT':
@@ -50,6 +53,7 @@ export const InterruptFactory = ({
           resumeGraph={resumeGraph}
           resumeValue={resumedValue as InputTextInterruptResumeValue}
           isLastInConversation={isLastInConversation}
+          disableAction={disableAction}
         />
       );
     default:

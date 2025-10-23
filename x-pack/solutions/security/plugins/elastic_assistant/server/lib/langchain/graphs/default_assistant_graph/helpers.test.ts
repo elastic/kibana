@@ -8,7 +8,11 @@
 import { streamGraph } from './helpers';
 import agent from 'elastic-apm-node';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
+import type {
+  ExecuteConnectorRequestBody,
+  InterruptValue,
+  SelectOptionInterruptValue,
+} from '@kbn/elastic-assistant-common';
 import { PassThrough } from 'stream';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AGENT_NODE_TAG } from './nodes/run_agent';
@@ -43,12 +47,17 @@ jest.mock('@kbn/ml-response-stream/server', () => ({
 }));
 
 describe('streamGraph', () => {
-  const mockRequest = {} as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
+  const mockRequest = {
+    body: {
+      actionTypeId: '123',
+    },
+  } as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
   const mockLogger = loggerMock.create();
   const mockApmTracer = {} as APMTracer;
   const mockStreamEvents = jest.fn();
   const mockAssistantGraph = {
     streamEvents: mockStreamEvents,
+    getState: jest.fn().mockResolvedValue({ tasks: [] }),
   } as unknown as DefaultAssistantGraph;
   const mockOnLlmResponse = jest.fn().mockResolvedValue(null);
   const requestArgs: Parameters<typeof streamGraph>[0] = {
@@ -179,6 +188,200 @@ describe('streamGraph', () => {
             content: 'content',
             traceData: { transactionId: 'transactionId', traceId: 'traceId' },
             isError: false,
+          });
+        });
+      });
+
+      it('when the graph stream ends, the graph state is checked for interrupts', async () => {
+        const interruptWithoutId: Omit<SelectOptionInterruptValue, 'id'> = {
+          type: 'SELECT_OPTION',
+          threadId: 'thread-123',
+          description: 'User action required',
+          options: [
+            {
+              label: 'User action required',
+              value: 'User action required',
+            },
+          ],
+        };
+
+        mockStreamEvents.mockReturnValue({
+          async *[Symbol.asyncIterator]() {
+            yield {
+              event: 'on_chat_model_stream',
+              data: { chunk: new AIMessageChunk({ content: 'content' }) },
+              tags: [AGENT_NODE_TAG],
+            };
+          },
+        });
+
+        (mockAssistantGraph.getState as jest.Mock).mockResolvedValue({
+          tasks: [
+            {
+              id: '123',
+              interrupts: [
+                {
+                  value: interruptWithoutId,
+                },
+              ],
+            },
+          ],
+        });
+
+        const response = await streamGraph(requestArgs);
+
+        expect(response).toBe(mockResponseWithHeaders);
+        await waitFor(() => {
+          expect(mockOnLlmResponse).toHaveBeenCalledWith({
+            content: '#### ⏳ Action required',
+            traceData: { transactionId: 'transactionId', traceId: 'traceId' },
+            isError: false,
+            interruptValue: expect.objectContaining({ ...interruptWithoutId, id: '123' }),
+          });
+        });
+      });
+
+      it('throws error if the interrupt in the graph state is not valid', async () => {
+        const interruptWithoutId = {
+          type: 'INVALID_INTERRUPT_TYPE',
+          threadId: 'thread-123',
+          description: 'User action required',
+          options: [
+            {
+              label: 'User action required',
+              value: 'User action required',
+            },
+          ],
+        };
+
+        mockStreamEvents.mockReturnValue({
+          async *[Symbol.asyncIterator]() {
+            yield {
+              event: 'on_chat_model_stream',
+              data: { chunk: new AIMessageChunk({ content: 'content' }) },
+              tags: [AGENT_NODE_TAG],
+            };
+          },
+        });
+
+        (mockAssistantGraph.getState as jest.Mock).mockResolvedValue({
+          tasks: [
+            {
+              id: '123',
+              interrupts: [
+                {
+                  value: interruptWithoutId,
+                },
+              ],
+            },
+          ],
+        });
+
+        const response = await streamGraph(requestArgs);
+
+        expect(response).toBe(mockResponseWithHeaders);
+        await waitFor(() => {
+          expect(mockOnLlmResponse).toHaveBeenCalledWith({
+            content: expect.stringContaining('Interrupt did not match schema'),
+            traceData: { transactionId: 'transactionId', traceId: 'traceId' },
+            isError: true,
+          });
+        });
+      });
+
+      it('handdles interrupt parsing error from stream', async () => {
+        const interrupt = {
+          type: 'INVALID_INTERRUPT_TYPE',
+          threadId: 'thread-123',
+          id: '123',
+          description: 'User action required',
+          options: [
+            {
+              label: 'User action required',
+              value: 'User action required',
+            },
+          ],
+        };
+        mockStreamEvents.mockReturnValue({
+          async *[Symbol.asyncIterator]() {
+            yield {
+              event: 'on_chain_stream',
+              data: {
+                chunk: [
+                  'debug',
+                  {
+                    payload: {
+                      id: '123',
+                      interrupts: [{ value: interrupt }],
+                    },
+                  },
+                ],
+              },
+            };
+            yield {
+              event: 'on_chat_model_end',
+              data: {
+                output: new AIMessage('content'),
+              },
+              tags: [AGENT_NODE_TAG],
+            };
+          },
+        });
+
+        const response = await streamGraph(requestArgs);
+
+        expect(response).toBe(mockResponseWithHeaders);
+        await waitFor(() => {
+          expect(mockPush).not.toBeCalled();
+        });
+      });
+
+      it('interrupt events from the graph stream are pushed to the stream', async () => {
+        const interrupt: InterruptValue = {
+          type: 'SELECT_OPTION',
+          threadId: 'thread-123',
+          id: '123',
+          description: 'User action required',
+          options: [
+            {
+              label: 'User action required',
+              value: 'User action required',
+            },
+          ],
+        };
+        mockStreamEvents.mockReturnValue({
+          async *[Symbol.asyncIterator]() {
+            yield {
+              event: 'on_chain_stream',
+              data: {
+                chunk: [
+                  'debug',
+                  {
+                    payload: {
+                      id: '123',
+                      interrupts: [{ value: interrupt }],
+                    },
+                  },
+                ],
+              },
+            };
+            yield {
+              event: 'on_chat_model_end',
+              data: {
+                output: new AIMessage('content'),
+              },
+              tags: [AGENT_NODE_TAG],
+            };
+          },
+        });
+
+        const response = await streamGraph(requestArgs);
+
+        expect(response).toBe(mockResponseWithHeaders);
+        await waitFor(() => {
+          expect(mockPush).toHaveBeenCalledWith({
+            payload: JSON.stringify(interrupt),
+            type: 'interruptValue',
           });
         });
       });

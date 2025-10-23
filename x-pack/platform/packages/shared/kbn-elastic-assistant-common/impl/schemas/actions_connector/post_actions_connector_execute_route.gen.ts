@@ -18,7 +18,7 @@ import { z } from '@kbn/zod';
 import { BooleanFromString } from '@kbn/zod-helpers';
 
 import { NonEmptyString, ScreenContext, PromptIds } from '../common_attributes.gen';
-import { Replacements } from '../conversations/common_attributes.gen';
+import { Replacements, InterruptResumeValue } from '../conversations/common_attributes.gen';
 
 export type ExecuteConnectorRequestQuery = z.infer<typeof ExecuteConnectorRequestQuery>;
 export const ExecuteConnectorRequestQuery = z.object({
@@ -49,6 +49,14 @@ export const ExecuteConnectorRequestBody = z.object({
   allow: z.array(z.string()).optional(),
   allowReplacement: z.array(z.string()).optional(),
   replacements: Replacements,
+  /**
+   * Thread ID of a graph execution. Only required when resuming graph execution for a particular thread ID.
+   */
+  threadId: z.string().optional(),
+  /**
+   * Value that should be used when resuming graph execution following an intterupt.
+   */
+  interruptResumeValue: InterruptResumeValue.optional(),
   size: z.number().optional(),
   langSmithProject: z.string().optional(),
   langSmithApiKey: z.string().optional(),
