@@ -2,13 +2,6 @@
 
 exports[`getIsUsingTransactionEvents with config xpack.apm.searchAggregatedTransactions: always should query for data when kuery is set 1`] = `
 Object {
-  "aggs": Object {
-    "services": Object {
-      "terms": Object {
-        "field": "service.name",
-      },
-    },
-  },
   "apm": Object {
     "events": Array [
       "metric",
@@ -34,29 +27,6 @@ Object {
             ],
           },
         },
-        Object {
-          "bool": Object {
-            "minimum_should_match": 1,
-            "should": Array [
-              Object {
-                "term": Object {
-                  "service.environment": "ENVIRONMENT_NOT_DEFINED",
-                },
-              },
-              Object {
-                "bool": Object {
-                  "must_not": Array [
-                    Object {
-                      "exists": Object {
-                        "field": "service.environment",
-                      },
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-        },
       ],
     },
   },
@@ -68,13 +38,6 @@ Object {
 
 exports[`getIsUsingTransactionEvents with config xpack.apm.searchAggregatedTransactions: auto should query for data once if metrics data found 1`] = `
 Object {
-  "aggs": Object {
-    "services": Object {
-      "terms": Object {
-        "field": "service.name",
-      },
-    },
-  },
   "apm": Object {
     "events": Array [
       "metric",
@@ -86,29 +49,6 @@ Object {
         Object {
           "exists": Object {
             "field": "transaction.duration.histogram",
-          },
-        },
-        Object {
-          "bool": Object {
-            "minimum_should_match": 1,
-            "should": Array [
-              Object {
-                "term": Object {
-                  "service.environment": "ENVIRONMENT_NOT_DEFINED",
-                },
-              },
-              Object {
-                "bool": Object {
-                  "must_not": Array [
-                    Object {
-                      "exists": Object {
-                        "field": "service.environment",
-                      },
-                    },
-                  ],
-                },
-              },
-            ],
           },
         },
       ],
@@ -125,13 +65,6 @@ Array [
   Array [
     "get_has_aggregated_transactions",
     Object {
-      "aggs": Object {
-        "services": Object {
-          "terms": Object {
-            "field": "service.name",
-          },
-        },
-      },
       "apm": Object {
         "events": Array [
           "metric",
@@ -143,29 +76,6 @@ Array [
             Object {
               "exists": Object {
                 "field": "transaction.duration.histogram",
-              },
-            },
-            Object {
-              "bool": Object {
-                "minimum_should_match": 1,
-                "should": Array [
-                  Object {
-                    "term": Object {
-                      "service.environment": "ENVIRONMENT_NOT_DEFINED",
-                    },
-                  },
-                  Object {
-                    "bool": Object {
-                      "must_not": Array [
-                        Object {
-                          "exists": Object {
-                            "field": "service.environment",
-                          },
-                        },
-                      ],
-                    },
-                  },
-                ],
               },
             },
           ],

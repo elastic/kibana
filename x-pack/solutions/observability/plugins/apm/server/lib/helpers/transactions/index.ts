@@ -29,6 +29,38 @@ export async function getHasTransactionsEvents({
   end,
   apmEventClient,
   kuery,
+}: {
+  start?: number;
+  end?: number;
+  apmEventClient: APMEventClient;
+  kuery?: string;
+}) {
+  const response = await apmEventClient.search('get_has_aggregated_transactions', {
+    apm: {
+      events: [ProcessorEvent.metric],
+    },
+    track_total_hits: 1,
+    terminate_after: 1,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          { exists: { field: TRANSACTION_DURATION_HISTOGRAM } },
+          ...(start && end ? rangeQuery(start, end) : []),
+          ...kqlQuery(kuery),
+        ],
+      },
+    },
+  });
+
+  return response.hits.total.value > 0;
+}
+
+export async function getServiceNamesFromAggregatedTransactions({
+  start,
+  end,
+  apmEventClient,
+  kuery,
   environment,
 }: {
   start?: number;
@@ -37,7 +69,7 @@ export async function getHasTransactionsEvents({
   kuery?: string;
   environment?: string;
 }) {
-  const response = await apmEventClient.search('get_has_aggregated_transactions', {
+  const response = await apmEventClient.search('get_service_names_from_aggregated_transactions', {
     apm: {
       events: [ProcessorEvent.metric],
     },
@@ -63,7 +95,11 @@ export async function getHasTransactionsEvents({
     },
   });
 
-  return response;
+  const serviceNames = response.aggregations?.services.buckets.map((bucket): string => {
+    return bucket.key as string;
+  });
+
+  return serviceNames;
 }
 
 export async function getSearchTransactionsEvents({
@@ -81,22 +117,15 @@ export async function getSearchTransactionsEvents({
 }): Promise<boolean> {
   switch (config.searchAggregatedTransactions) {
     case SearchAggregatedTransactionSetting.always:
-      return kuery
-        ? (await getHasTransactionsEvents({ start, end, apmEventClient, kuery })).hits.total.value >
-            0
-        : true;
+      return kuery ? getHasTransactionsEvents({ start, end, apmEventClient, kuery }) : true;
 
     case SearchAggregatedTransactionSetting.auto:
-      return (
-        (
-          await getHasTransactionsEvents({
-            start,
-            end,
-            apmEventClient,
-            kuery,
-          })
-        ).hits.total.value > 0
-      );
+      return getHasTransactionsEvents({
+        start,
+        end,
+        apmEventClient,
+        kuery,
+      });
 
     case SearchAggregatedTransactionSetting.never:
       return false;

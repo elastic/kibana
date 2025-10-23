@@ -15,7 +15,7 @@ import { notifyFeatureUsage } from '../../feature';
 import { SearchAggregatedTransactionSetting } from '../../../common/aggregated_transactions';
 import {
   getSearchTransactionsEvents,
-  getHasTransactionsEvents,
+  getServiceNamesFromAggregatedTransactions,
 } from '../../lib/helpers/transactions';
 import { getMlClient } from '../../lib/helpers/get_ml_client';
 import { getServiceMap } from './get_service_map';
@@ -83,17 +83,13 @@ const serviceMapRoute = createApmServerRoute({
     const servicesWithAggregatedTransactions =
       config.searchAggregatedTransactions === SearchAggregatedTransactionSetting.never
         ? []
-        : (
-            await getHasTransactionsEvents({
-              apmEventClient,
-              start,
-              end,
-              kuery,
-              environment,
-            })
-          ).aggregations?.services.buckets.map((bucket): string => {
-            return bucket.key as string;
-          }) ?? [];
+        : (await getServiceNamesFromAggregatedTransactions({
+            apmEventClient,
+            start,
+            end,
+            kuery,
+            environment,
+          })) ?? [];
 
     return getServiceMap({
       mlClient,
