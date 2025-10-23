@@ -4,11 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useMemo } from 'react';
 import { useLocation, useRouteMatch } from 'react-router-dom';
-
-import { useGetSettings } from '../../../hooks';
 
 import { splitPkgKey } from '../../../../../../common/services';
 
@@ -26,21 +24,8 @@ export const CreatePackagePolicyPage: React.FC<{}> = () => {
     () => queryParams.get('policyId') ?? undefined,
     [queryParams]
   );
-  const [prerelease, setPrerelease] = React.useState<boolean>(false);
+
   const { pkgName, pkgVersion } = splitPkgKey(params.pkgkey);
-
-  const { data: settings } = useGetSettings();
-
-  const queryParamPrerelease = useMemo(() => Boolean(queryParams.get('prerelease')), [queryParams]);
-
-  useEffect(() => {
-    const isEnabled =
-      Boolean(settings?.item.prerelease_integrations_enabled) || queryParamPrerelease;
-
-    if (settings?.item) {
-      setPrerelease(isEnabled);
-    }
-  }, [queryParamPrerelease, settings?.item]);
 
   /**
    * Please note: policyId can come from one of two sources. The URL param (in the URL path) or
@@ -59,7 +44,7 @@ export const CreatePackagePolicyPage: React.FC<{}> = () => {
   const pageParams = {
     from,
     queryParamsPolicyId,
-    prerelease,
+    prerelease: true,
     pkgName,
     pkgVersion,
     integration: params.integration,
