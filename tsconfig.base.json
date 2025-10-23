@@ -6,6 +6,8 @@
       // START AUTOMATED PACKAGE LISTING
       "@kbn/aad-fixtures-plugin": ["x-pack/platform/test/alerting_api_integration/common/plugins/aad"],
       "@kbn/aad-fixtures-plugin/*": ["x-pack/platform/test/alerting_api_integration/common/plugins/aad/*"],
+      "@kbn/access-control-test-plugin": ["x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin"],
+      "@kbn/access-control-test-plugin/*": ["x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin/*"],
       "@kbn/actions-plugin": ["x-pack/platform/plugins/shared/actions"],
       "@kbn/actions-plugin/*": ["x-pack/platform/plugins/shared/actions/*"],
       "@kbn/actions-simulators-plugin": ["x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators"],
@@ -1632,8 +1634,6 @@
       "@kbn/react-kibana-mount/*": ["src/platform/packages/shared/react/kibana_mount/*"],
       "@kbn/react-mute-legacy-root-warning": ["src/platform/packages/private/kbn-react-mute-legacy-root-warning"],
       "@kbn/react-mute-legacy-root-warning/*": ["src/platform/packages/private/kbn-react-mute-legacy-root-warning/*"],
-      "@kbn/read-only-objects-test-plugin": ["x-pack/platform/test/spaces_api_integration/common/plugins/read_only_objects_test_plugin"],
-      "@kbn/read-only-objects-test-plugin/*": ["x-pack/platform/test/spaces_api_integration/common/plugins/read_only_objects_test_plugin/*"],
       "@kbn/recently-accessed": ["src/platform/packages/shared/kbn-recently-accessed"],
       "@kbn/recently-accessed/*": ["src/platform/packages/shared/kbn-recently-accessed/*"],
       "@kbn/reindex-service-plugin": ["x-pack/platform/plugins/private/reindex_service"],

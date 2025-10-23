@@ -133,7 +133,7 @@ describe('Saved Objects type validation schema', () => {
         })
       ).toThrow(
         `[accessControl.accessMode]: types that failed validation:
-- [accessControl.accessMode.0]: expected value to equal [read_only]
+- [accessControl.accessMode.0]: expected value to equal [write_restricted]
 - [accessControl.accessMode.1]: expected value to equal [default]`
       );
     });

@@ -9,13 +9,13 @@ import { schema } from '@kbn/config-schema';
 import type { CoreSetup, Plugin } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 
-export const READ_ONLY_TYPE = 'read_only_type';
-export const NON_READ_ONLY_TYPE = 'non_read_only_type';
+export const ACCESS_CONTROL_TYPE = 'access_control_type';
+export const NON_ACCESS_CONTROL_TYPE = 'non_access_control_type';
 
-export class ReadOnlyObjectsPlugin implements Plugin {
+export class AccessControlTestPlugin implements Plugin {
   public setup(core: CoreSetup) {
     core.savedObjects.registerType({
-      name: READ_ONLY_TYPE,
+      name: ACCESS_CONTROL_TYPE,
       hidden: false,
       namespaceType: 'multiple-isolated',
       supportsAccessControl: true,
@@ -28,7 +28,7 @@ export class ReadOnlyObjectsPlugin implements Plugin {
     });
 
     core.savedObjects.registerType({
-      name: NON_READ_ONLY_TYPE,
+      name: NON_ACCESS_CONTROL_TYPE,
       hidden: false,
       namespaceType: 'multiple-isolated',
       mappings: {
@@ -43,7 +43,7 @@ export class ReadOnlyObjectsPlugin implements Plugin {
     // Create
     router.post(
       {
-        path: '/read_only_objects/create',
+        path: '/access_control_objects/create',
         security: {
           authz: {
             enabled: false,
@@ -59,21 +59,26 @@ export class ReadOnlyObjectsPlugin implements Plugin {
           body: schema.object({
             id: schema.maybe(schema.string()),
             type: schema.maybe(
-              schema.oneOf([schema.literal(READ_ONLY_TYPE), schema.literal(NON_READ_ONLY_TYPE)])
+              schema.oneOf([
+                schema.literal(ACCESS_CONTROL_TYPE),
+                schema.literal(NON_ACCESS_CONTROL_TYPE),
+              ])
             ),
-            isReadOnly: schema.maybe(schema.boolean()),
+            isWriteRestricted: schema.maybe(schema.boolean()),
           }),
         },
       },
       async (context, request, response) => {
         const soClient = (await context.core).savedObjects.getClient();
-        const objType = request.body.type || READ_ONLY_TYPE;
-        const { isReadOnly } = request.body;
+        const objType = request.body.type || ACCESS_CONTROL_TYPE;
+        const { isWriteRestricted } = request.body;
 
         const options = {
           overwrite: request.query.overwrite ?? false,
           ...(request.body.id ? { id: request.body.id } : {}),
-          ...(isReadOnly ? { accessControl: { accessMode: 'read_only' as const } } : {}),
+          ...(isWriteRestricted
+            ? { accessControl: { accessMode: 'write_restricted' as const } }
+            : {}),
         };
         try {
           const result = await soClient.create(
@@ -104,7 +109,7 @@ export class ReadOnlyObjectsPlugin implements Plugin {
     // Bulk Create
     router.post(
       {
-        path: '/read_only_objects/bulk_create',
+        path: '/access_control_objects/bulk_create',
         security: {
           authz: {
             enabled: false,
@@ -124,11 +129,11 @@ export class ReadOnlyObjectsPlugin implements Plugin {
                   id: schema.maybe(schema.string()),
                   type: schema.maybe(
                     schema.oneOf([
-                      schema.literal(READ_ONLY_TYPE),
-                      schema.literal(NON_READ_ONLY_TYPE),
+                      schema.literal(ACCESS_CONTROL_TYPE),
+                      schema.literal(NON_ACCESS_CONTROL_TYPE),
                     ])
                   ),
-                  isReadOnly: schema.maybe(schema.boolean()),
+                  isWriteRestricted: schema.maybe(schema.boolean()),
                 })
               ),
               force: schema.maybe(schema.boolean({ defaultValue: false })),
@@ -141,9 +146,11 @@ export class ReadOnlyObjectsPlugin implements Plugin {
         const overwrite = request.query.overwrite ?? false;
         try {
           const createObjects = request.body.objects.map((obj) => ({
-            type: obj.type || READ_ONLY_TYPE,
+            type: obj.type || ACCESS_CONTROL_TYPE,
             ...(obj.id ? { id: obj.id } : {}),
-            ...(obj.isReadOnly ? { accessControl: { accessMode: 'read_only' as const } } : {}),
+            ...(obj.isWriteRestricted
+              ? { accessControl: { accessMode: 'write_restricted' as const } }
+              : {}),
             attributes: {
               description: 'description',
             },
@@ -168,7 +175,7 @@ export class ReadOnlyObjectsPlugin implements Plugin {
 
     router.get(
       {
-        path: '/read_only_objects/_find',
+        path: '/access_control_objects/_find',
         security: {
           authz: {
             enabled: false,
@@ -180,7 +187,7 @@ export class ReadOnlyObjectsPlugin implements Plugin {
       async (context, request, response) => {
         const soClient = (await context.core).savedObjects.client;
         const result = await soClient.find({
-          type: READ_ONLY_TYPE,
+          type: ACCESS_CONTROL_TYPE,
         });
         return response.ok({
           body: result,
@@ -189,7 +196,7 @@ export class ReadOnlyObjectsPlugin implements Plugin {
     );
     router.get(
       {
-        path: '/read_only_objects/{objectId}',
+        path: '/access_control_objects/{objectId}',
         security: {
           authz: {
             enabled: false,
@@ -205,7 +212,7 @@ export class ReadOnlyObjectsPlugin implements Plugin {
       async (context, request, response) => {
         try {
           const soClient = (await context.core).savedObjects.client;
-          const result = await soClient.get(READ_ONLY_TYPE, request.params.objectId);
+          const result = await soClient.get(ACCESS_CONTROL_TYPE, request.params.objectId);
           return response.ok({
             body: result,
           });
@@ -225,7 +232,7 @@ export class ReadOnlyObjectsPlugin implements Plugin {
 
     router.put(
       {
-        path: '/read_only_objects/update',
+        path: '/access_control_objects/update',
         security: {
           authz: {
             enabled: false,
@@ -235,8 +242,8 @@ export class ReadOnlyObjectsPlugin implements Plugin {
         validate: {
           body: schema.object({
             type: schema.oneOf([
-              schema.literal(READ_ONLY_TYPE),
-              schema.literal(NON_READ_ONLY_TYPE),
+              schema.literal(ACCESS_CONTROL_TYPE),
+              schema.literal(NON_ACCESS_CONTROL_TYPE),
             ]),
             objectId: schema.string(),
           }),
@@ -245,7 +252,7 @@ export class ReadOnlyObjectsPlugin implements Plugin {
       async (context, request, response) => {
         const soClient = (await context.core).savedObjects.client;
         try {
-          const objectType = request.body.type || READ_ONLY_TYPE;
+          const objectType = request.body.type || ACCESS_CONTROL_TYPE;
           const result = await soClient.update(objectType, request.body.objectId, {
             description: 'updated description',
           });
@@ -268,7 +275,7 @@ export class ReadOnlyObjectsPlugin implements Plugin {
     );
     router.put(
       {
-        path: '/read_only_objects/change_owner',
+        path: '/access_control_objects/change_owner',
         security: {
           authz: {
             enabled: false,
@@ -281,8 +288,8 @@ export class ReadOnlyObjectsPlugin implements Plugin {
             objects: schema.arrayOf(
               schema.object({
                 type: schema.oneOf([
-                  schema.literal(READ_ONLY_TYPE),
-                  schema.literal(NON_READ_ONLY_TYPE),
+                  schema.literal(ACCESS_CONTROL_TYPE),
+                  schema.literal(NON_ACCESS_CONTROL_TYPE),
                 ]),
                 id: schema.string(),
               })
@@ -315,7 +322,7 @@ export class ReadOnlyObjectsPlugin implements Plugin {
     );
     router.put(
       {
-        path: '/read_only_objects/change_access_mode',
+        path: '/access_control_objects/change_access_mode',
         security: {
           authz: {
             enabled: false,
@@ -328,12 +335,15 @@ export class ReadOnlyObjectsPlugin implements Plugin {
               schema.object({
                 id: schema.string(),
                 type: schema.oneOf([
-                  schema.literal(READ_ONLY_TYPE),
-                  schema.literal(NON_READ_ONLY_TYPE),
+                  schema.literal(ACCESS_CONTROL_TYPE),
+                  schema.literal(NON_ACCESS_CONTROL_TYPE),
                 ]),
               })
             ),
-            newAccessMode: schema.oneOf([schema.literal('read_only'), schema.literal('default')]),
+            newAccessMode: schema.oneOf([
+              schema.literal('write_restricted'),
+              schema.literal('default'),
+            ]),
           }),
         },
       },
@@ -362,7 +372,7 @@ export class ReadOnlyObjectsPlugin implements Plugin {
 
     router.delete(
       {
-        path: '/read_only_objects/{objectId}',
+        path: '/access_control_objects/{objectId}',
         security: {
           authz: {
             enabled: false,
@@ -378,7 +388,7 @@ export class ReadOnlyObjectsPlugin implements Plugin {
       async (context, request, response) => {
         try {
           const soClient = (await context.core).savedObjects.client;
-          const result = await soClient.delete(READ_ONLY_TYPE, request.params.objectId);
+          const result = await soClient.delete(ACCESS_CONTROL_TYPE, request.params.objectId);
           return response.ok({
             body: result,
           });
@@ -398,7 +408,7 @@ export class ReadOnlyObjectsPlugin implements Plugin {
 
     router.post(
       {
-        path: '/read_only_objects/bulk_delete',
+        path: '/access_control_objects/bulk_delete',
         security: {
           authz: {
             enabled: false,
@@ -411,8 +421,8 @@ export class ReadOnlyObjectsPlugin implements Plugin {
               schema.object({
                 id: schema.string(),
                 type: schema.oneOf([
-                  schema.literal(READ_ONLY_TYPE),
-                  schema.literal(NON_READ_ONLY_TYPE),
+                  schema.literal(ACCESS_CONTROL_TYPE),
+                  schema.literal(NON_ACCESS_CONTROL_TYPE),
                 ]),
               })
             ),
@@ -444,7 +454,7 @@ export class ReadOnlyObjectsPlugin implements Plugin {
     );
     router.post(
       {
-        path: '/read_only_objects/bulk_update',
+        path: '/access_control_objects/bulk_update',
         security: {
           authz: {
             enabled: false,
@@ -457,8 +467,8 @@ export class ReadOnlyObjectsPlugin implements Plugin {
               schema.object({
                 id: schema.string(),
                 type: schema.oneOf([
-                  schema.literal(READ_ONLY_TYPE),
-                  schema.literal(NON_READ_ONLY_TYPE),
+                  schema.literal(ACCESS_CONTROL_TYPE),
+                  schema.literal(NON_ACCESS_CONTROL_TYPE),
                 ]),
               })
             ),
@@ -492,10 +502,10 @@ export class ReadOnlyObjectsPlugin implements Plugin {
         }
       }
     );
-    // Get NON_READ_ONLY_TYPE
+    // Get NON_ACCESS_CONTROL_TYPE
     router.get(
       {
-        path: '/non_read_only_objects/{objectId}',
+        path: '/non_access_control_objects/{objectId}',
         security: {
           authz: {
             enabled: false,
@@ -511,7 +521,7 @@ export class ReadOnlyObjectsPlugin implements Plugin {
       async (context, request, response) => {
         try {
           const soClient = (await context.core).savedObjects.client;
-          const result = await soClient.get(NON_READ_ONLY_TYPE, request.params.objectId);
+          const result = await soClient.get(NON_ACCESS_CONTROL_TYPE, request.params.objectId);
           return response.ok({
             body: result,
           });
@@ -528,10 +538,10 @@ export class ReadOnlyObjectsPlugin implements Plugin {
       }
     );
 
-    // FIND NON_READ_ONLY_TYPE
+    // FIND NON_ACCESS_CONTROL_TYPE
     router.get(
       {
-        path: '/non_read_only_objects/_find',
+        path: '/non_access_control_objects/_find',
         security: {
           authz: {
             enabled: false,
@@ -543,7 +553,7 @@ export class ReadOnlyObjectsPlugin implements Plugin {
       async (context, request, response) => {
         const soClient = (await context.core).savedObjects.client;
         const result = await soClient.find({
-          type: NON_READ_ONLY_TYPE,
+          type: NON_ACCESS_CONTROL_TYPE,
         });
         return response.ok({
           body: result,
