@@ -9,8 +9,8 @@
 
 import type { EnterContinueNode } from '@kbn/workflows/graph';
 import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
-import { EnterContinueNodeImpl } from '../enter_continue_node_impl';
 import type { IWorkflowEventLogger } from '../../../../workflow_event_logger/workflow_event_logger';
+import { EnterContinueNodeImpl } from '../enter_continue_node_impl';
 
 describe('EnterContinueNodeImpl', () => {
   let underTest: EnterContinueNodeImpl;
@@ -35,13 +35,7 @@ describe('EnterContinueNodeImpl', () => {
 
   describe('run', () => {
     beforeEach(() => {
-      workflowRuntime.enterScope = jest.fn();
       workflowRuntime.navigateToNextNode = jest.fn();
-    });
-
-    it('should enter scope', async () => {
-      await underTest.run();
-      expect(workflowRuntime.enterScope).toHaveBeenCalled();
     });
 
     it('should go to next node', async () => {

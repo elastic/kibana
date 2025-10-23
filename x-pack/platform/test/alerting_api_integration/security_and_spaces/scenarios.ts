@@ -248,6 +248,12 @@ const OtherSpace: Space = {
   disabledFeatures: [],
 };
 
+export const DefaultSpace: Space = {
+  id: 'default',
+  name: 'Default Space',
+  disabledFeatures: [],
+};
+
 export const Spaces: Space[] = [Space1, Space2, OtherSpace];
 
 // For all scenarios, we define both an instance in addition

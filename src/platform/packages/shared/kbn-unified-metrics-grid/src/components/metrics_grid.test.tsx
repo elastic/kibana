@@ -29,6 +29,7 @@ describe('MetricsGrid', () => {
     query: {
       esql: 'FROM metrics-*',
     },
+    esqlVariables: [],
     relativeTimeRange: { from: 'now-1h', to: 'now' },
     updateTimeRange: () => {},
   };
@@ -296,22 +297,11 @@ describe('MetricsGrid', () => {
           />
         );
 
-        // Verify Chart components receive unique chartId props
-        expect(Chart).toHaveBeenNthCalledWith(
-          1,
-          expect.objectContaining({
-            chartId: 'chart-system.cpu.utilization-0',
-          }),
-          expect.anything()
-        );
+        const chartDiv1 = document.getElementById('system.cpu.utilization-0');
+        const chartDiv2 = document.getElementById('system.memory.utilization-1');
 
-        expect(Chart).toHaveBeenNthCalledWith(
-          2,
-          expect.objectContaining({
-            chartId: 'chart-system.memory.utilization-1',
-          }),
-          expect.anything()
-        );
+        expect(chartDiv1).toBeTruthy();
+        expect(chartDiv2).toBeTruthy();
       });
 
       it('should store chart refs with proper data attributes', () => {

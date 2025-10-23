@@ -5,6 +5,55 @@
     "functions": [
       {
         "parentPluginId": "lens",
+        "id": "def-public.EditorFrameServiceProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "EditorFrameServiceProvider",
+        "description": [
+          "\nProvider component that makes visualizationMap and datasourceMap available\nthroughout the component tree via React context.\n\nThis provides the same values returned by plugin.initEditorFrameService().\n\nThis should be added at the root of:\n- Full-page Lens editor\n- Inline edit configuration flyout\n- Embeddable component"
+        ],
+        "signature": [
+          "({\n  visualizationMap,\n  datasourceMap,\n  children,\n}: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.EditorFrameServiceProviderProps",
+            "text": "EditorFrameServiceProviderProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/plugins/shared/lens/public/editor_frame_service/editor_frame_service_context.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.EditorFrameServiceProvider.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  visualizationMap,\n  datasourceMap,\n  children,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.EditorFrameServiceProviderProps",
+                "text": "EditorFrameServiceProviderProps"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/lens/public/editor_frame_service/editor_frame_service_context.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
         "id": "def-public.isLensApi",
         "type": "Function",
         "tags": [],
@@ -1223,6 +1272,28 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.useEditorFrameService",
+        "type": "Function",
+        "tags": [
+          "throws"
+        ],
+        "label": "useEditorFrameService",
+        "description": [
+          "\nHook to access visualizationMap and datasourceMap from context.\n\nReturns the same values as plugin.initEditorFrameService().\n"
+        ],
+        "signature": [
+          "() => ",
+          "EditorFrameServiceValue"
+        ],
+        "path": "x-pack/platform/plugins/shared/lens/public/editor_frame_service/editor_frame_service_context.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -2209,7 +2280,7 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              " | undefined) => { error: string; } | Record<\"disabled\" | \"enabled\", { kuery: ",
+              " | undefined) => { error: string; } | Record<\"enabled\" | \"disabled\", { kuery: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -2548,6 +2619,45 @@
               "{ interval: string; ignoreTimeRange?: boolean | undefined; includeEmptyRows?: boolean | undefined; dropPartials?: boolean | undefined; }"
             ],
             "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/operations/definitions/date_histogram.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.EditorFrameServiceProviderProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "EditorFrameServiceProviderProps",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.EditorFrameServiceProviderProps",
+            "text": "EditorFrameServiceProviderProps"
+          },
+          " extends ",
+          "EditorFrameServiceValue"
+        ],
+        "path": "x-pack/platform/plugins/shared/lens/public/editor_frame_service/editor_frame_service_context.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.EditorFrameServiceProviderProps.children",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "children",
+            "description": [],
+            "signature": [
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/lens/public/editor_frame_service/editor_frame_service_context.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -9972,6 +10082,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/entity_analytics/lens_attributes/risk_score_summary.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/metric/breakdown.mock.ts"
               }
             ]
           }
@@ -12933,6 +13047,45 @@
               {
                 "parentPluginId": "lens",
                 "id": "def-public.Visualization.ToolbarComponent.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "VisualizationToolbarProps",
+                  "<T>"
+                ],
+                "path": "x-pack/platform/plugins/shared/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.Visualization.FlyoutToolbarComponent",
+            "type": "Function",
+            "tags": [],
+            "label": "FlyoutToolbarComponent",
+            "description": [
+              "\nOptional flyout toolbar component that renders visualization-specific controls\nin a flyout panel. Provides configuration options for style, legend and filters."
+            ],
+            "signature": [
+              "((props: ",
+              "VisualizationToolbarProps",
+              "<T>) => React.ReactElement<",
+              "VisualizationToolbarProps",
+              "<T>, string | React.JSXElementConstructor<any>> | null) | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.FlyoutToolbarComponent.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "props",

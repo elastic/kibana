@@ -29,7 +29,7 @@ export const Panel: FC<PanelProps> = ({ children, id, title }) => {
 
       // If we have a return focus id, we focus the trigger element
       if (returnFocusId && node) {
-        const triggerElement = node.querySelector<HTMLElement>(`#${returnFocusId}`);
+        const triggerElement = node.querySelector<HTMLElement>(`#${CSS.escape(returnFocusId)}`);
         if (triggerElement) return triggerElement.focus();
       }
 

@@ -7,10 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { HttpGraphNode } from '@kbn/workflows/graph';
+// TODO: Remove eslint exceptions comments and fix the issues
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios';
+import type { HttpGraphNode } from '@kbn/workflows/graph';
 import type { UrlValidator } from '../../lib/url_validator';
-import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
+import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
 import type { BaseStep, RunStepResult } from '../node_implementation';
@@ -31,7 +34,7 @@ export interface HttpStep extends BaseStep {
 export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
   constructor(
     node: HttpGraphNode,
-    contextManager: WorkflowContextManager,
+    stepExecutionRuntime: StepExecutionRuntime,
     private workflowLogger: IWorkflowEventLogger,
     private urlValidator: UrlValidator,
     workflowRuntime: WorkflowExecutionRuntimeManager
@@ -44,68 +47,28 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
     };
     super(
       httpStep,
-      contextManager,
+      stepExecutionRuntime,
       undefined, // no connector executor needed for HTTP
       workflowRuntime
     );
   }
 
   public getInput() {
-    const context = this.contextManager.getContext();
     const { url, method = 'GET', headers = {}, body } = this.step.with;
 
-    return {
-      url: typeof url === 'string' ? this.templatingEngine.render(url, context) : url,
+    return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext({
+      url,
       method,
-      headers: this.renderHeaders(headers, context),
-      body: this.renderBody(body, context),
-    };
-  }
-
-  private renderHeaders(headers: HttpHeaders, context: any): HttpHeaders {
-    return Object.entries(headers).reduce((acc, [key, value]) => {
-      acc[key] = typeof value === 'string' ? this.templatingEngine.render(value, context) : value;
-      return acc;
-    }, {} as HttpHeaders);
-  }
-
-  private renderBody(body: any, context: any): any {
-    if (typeof body === 'string') {
-      return this.templatingEngine.render(body, context);
-    }
-    if (body && typeof body === 'object') {
-      return this.renderObjectTemplate(body, context);
-    }
-    return body;
-  }
-
-  /**
-   * Recursively render the object template.
-   * @param obj - The object to render.
-   * @param context - The context to use for rendering.
-   * @returns The rendered object.
-   */
-  private renderObjectTemplate(obj: any, context: any): any {
-    if (Array.isArray(obj)) {
-      return obj.map((item) => this.renderObjectTemplate(item, context));
-    }
-    if (obj && typeof obj === 'object') {
-      return Object.entries(obj).reduce((acc, [key, value]) => {
-        acc[key] = this.renderObjectTemplate(value, context);
-        return acc;
-      }, {} as any);
-    }
-    if (typeof obj === 'string') {
-      return this.templatingEngine.render(obj, context);
-    }
-    return obj;
+      headers,
+      body,
+    });
   }
 
   protected async _run(input: any): Promise<RunStepResult> {
     try {
       return await this.executeHttpRequest(input);
     } catch (error) {
-      return await this.handleFailure(input, error);
+      return this.handleFailure(input, error);
     }
   }
 
@@ -138,7 +101,7 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
       url,
       method,
       headers,
-      signal: this.contextManager.abortController.signal,
+      signal: this.stepExecutionRuntime.abortController.signal,
     };
 
     if (body && ['POST', 'PUT', 'PATCH'].includes(method)) {

@@ -13,6 +13,7 @@ export {
   packageToPackagePolicy,
   getStreamsForInputType,
   getRegistryStreamWithDataStreamForInputType,
+  varsReducer,
 } from './package_to_package_policy';
 export { fullAgentPolicyToYaml } from './full_agent_policy_to_yaml';
 export { isPackageLimited, doesAgentPolicyAlreadyIncludePackage } from './limited_package';
@@ -31,7 +32,13 @@ export {
 export {
   isAgentMigrationSupported,
   MINIMUM_MIGRATE_AGENT_VERSION,
-} from './is_agent_migrate_supported';
+  isAgentEligibleForMigration,
+} from './agent_migration_helpers';
+export {
+  isAgentPrivilegeLevelChangeSupported,
+  MINIMUM_PRIVILEGE_LEVEL_CHANGE_AGENT_VERSION,
+  isAgentEligibleForPrivilegeLevelChange,
+} from './agent_privilege_level_change_helpers';
 export {
   isInputOnlyPolicyTemplate,
   isIntegrationPolicyTemplate,

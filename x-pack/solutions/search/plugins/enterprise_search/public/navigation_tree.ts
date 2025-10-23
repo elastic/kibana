@@ -172,6 +172,11 @@ export const getNavigationTreeDefinition = ({
             {
               children: [
                 {
+                  icon: 'launch',
+                  id: 'getting_started',
+                  link: 'searchGettingStarted',
+                },
+                {
                   getIsActive: ({ pathNameSerialized, prepend }) => {
                     return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
                   },

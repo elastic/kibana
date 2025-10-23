@@ -7,10 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { renderHook, waitFor } from '@testing-library/react';
+import React from 'react';
+import { Provider } from 'react-redux';
 import { monaco } from '@kbn/monaco';
-import { z } from '@kbn/zod';
-import { renderHook } from '@testing-library/react';
 import { useYamlValidation } from './use_yaml_validation';
+import { setYamlString } from '../../../widgets/workflow_yaml_editor/lib/store/slice';
+import { createWorkflowEditorStore } from '../../../widgets/workflow_yaml_editor/lib/store/store';
 
 // Mock Monaco editor
 const createMockEditor = (value: string) => {
@@ -37,35 +40,65 @@ const createMockEditor = (value: string) => {
 const mockSetModelMarkers = jest.fn();
 (monaco.editor as any).setModelMarkers = mockSetModelMarkers;
 
-describe('useYamlValidation - Step Name Uniqueness', () => {
-  const mockSchema = z
-    .object({
-      version: z.string().optional(),
-      name: z.string(),
-      enabled: z.boolean().optional(),
-      triggers: z.array(z.any()).optional(),
-      steps: z
-        .array(
-          z.object({
-            name: z.string(),
-            type: z.string(),
-          })
-        )
-        .optional(),
-    })
-    .passthrough();
+// Mock schema functions
+jest.mock('../../../../common/schema', () => ({
+  ...jest.requireActual('../../../../common/schema'),
+  getCachedDynamicConnectorTypes: jest.fn(() => ({})),
+  getWorkflowZodSchemaLoose: jest.fn(() => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { z } = require('@kbn/zod');
+    // mock actual schema, we only test the name uniqueness validation
+    return z
+      .object({
+        version: z.string().optional(),
+        name: z.string(),
+        enabled: z.boolean().optional(),
+        triggers: z.array(z.any()).optional(),
+        steps: z
+          .array(
+            z.object({
+              name: z.string(),
+              type: z.string(),
+            })
+          )
+          .optional(),
+      })
+      .passthrough();
+  }),
+}));
 
+// Helper to render hook with proper Redux context
+const renderHookWithProviders = (
+  editor: monaco.editor.IStandaloneCodeEditor | null,
+  yamlContent: string
+) => {
+  const store = createWorkflowEditorStore();
+
+  // Set the YAML content which will trigger computation via middleware
+  store.dispatch(setYamlString(yamlContent));
+
+  const wrapper = ({ children }: { children: React.ReactNode }) => {
+    return React.createElement(Provider, { store }, children);
+  };
+
+  return {
+    ...renderHook(() => useYamlValidation(editor), { wrapper }),
+    store,
+  };
+};
+
+describe('useYamlValidation - Step Name Uniqueness', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.useFakeTimers();
   });
 
-  it('should not report errors for unique step names', () => {
-    const { result } = renderHook(() =>
-      useYamlValidation({
-        workflowYamlSchema: mockSchema,
-      })
-    );
+  afterEach(() => {
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
+  });
 
+  it('should not report errors for unique step names', async () => {
     const yamlContent = `
 version: "1"
 name: "Test Workflow"
@@ -83,23 +116,45 @@ steps:
 `;
 
     const mockEditor = createMockEditor(yamlContent);
-    result.current.validateVariables(mockEditor as any);
+    const { result, store } = renderHookWithProviders(mockEditor as any, yamlContent);
+
+    // Fast-forward through the debounced computation
+    jest.advanceTimersByTime(500);
+
+    // Wait for the Redux state to have computed data
+    await waitFor(
+      () => {
+        const state = store.getState();
+        // Debug: log the state to understand what's happening
+        // console.log('Redux state:', JSON.stringify(state, null, 2));
+        expect(state.workflow.computed).toBeDefined();
+        expect(state.workflow.computed?.yamlDocument).toBeDefined();
+        expect(state.workflow.computed?.workflowDefinition).toBeDefined();
+      },
+      { timeout: 2000 }
+    );
+
+    // Wait for validation to complete
+    await waitFor(() => {
+      expect(result.current.error).toBeNull();
+    });
+
+    // Wait for Monaco markers to be set
+    await waitFor(() => {
+      const stepNameCalls = mockSetModelMarkers.mock.calls.filter(
+        (call) => call[1] === 'step-name-validation'
+      );
+      expect(stepNameCalls.length).toBeGreaterThan(0);
+    });
 
     // Should call setModelMarkers for step-name-validation with empty array
     const stepNameCalls = mockSetModelMarkers.mock.calls.filter(
       (call) => call[1] === 'step-name-validation'
     );
-    expect(stepNameCalls).toHaveLength(1);
     expect(stepNameCalls[0][2]).toEqual([]);
   });
 
-  it('should report errors for duplicate step names', () => {
-    const { result } = renderHook(() =>
-      useYamlValidation({
-        workflowYamlSchema: mockSchema,
-      })
-    );
-
+  it('should report errors for duplicate step names', async () => {
     const yamlContent = `
 version: "1"
 name: "Test Workflow"
@@ -117,7 +172,15 @@ steps:
 `;
 
     const mockEditor = createMockEditor(yamlContent);
-    result.current.validateVariables(mockEditor as any);
+    const { result } = renderHookWithProviders(mockEditor as any, yamlContent);
+
+    // Fast-forward through the debounced computation
+    jest.advanceTimersByTime(500);
+
+    // Wait for validation to complete
+    await waitFor(() => {
+      expect(result.current.error).toBeNull();
+    });
 
     // Should call setModelMarkers for step-name-validation with errors
     const stepNameCalls = mockSetModelMarkers.mock.calls.filter(
@@ -133,13 +196,7 @@ steps:
     });
   });
 
-  it('should handle nested steps in foreach', () => {
-    const { result } = renderHook(() =>
-      useYamlValidation({
-        workflowYamlSchema: mockSchema,
-      })
-    );
-
+  it('should handle nested steps in foreach', async () => {
     const yamlContent = `
 name: "Test Workflow"
 steps:
@@ -154,7 +211,15 @@ steps:
 `;
 
     const mockEditor = createMockEditor(yamlContent);
-    result.current.validateVariables(mockEditor as any);
+    const { result } = renderHookWithProviders(mockEditor as any, yamlContent);
+
+    // Fast-forward through the debounced computation
+    jest.advanceTimersByTime(500);
+
+    // Wait for validation to complete
+    await waitFor(() => {
+      expect(result.current.error).toBeNull();
+    });
 
     const stepNameCalls = mockSetModelMarkers.mock.calls.filter(
       (call) => call[1] === 'step-name-validation'
@@ -168,13 +233,7 @@ steps:
     });
   });
 
-  it('should handle nested steps in if/else', () => {
-    const { result } = renderHook(() =>
-      useYamlValidation({
-        workflowYamlSchema: mockSchema,
-      })
-    );
-
+  it('should handle nested steps in if/else', async () => {
     const yamlContent = `
 name: "Test Workflow"
 steps:
@@ -190,7 +249,15 @@ steps:
 `;
 
     const mockEditor = createMockEditor(yamlContent);
-    result.current.validateVariables(mockEditor as any);
+    const { result } = renderHookWithProviders(mockEditor as any, yamlContent);
+
+    // Fast-forward through the debounced computation
+    jest.advanceTimersByTime(500);
+
+    // Wait for validation to complete
+    await waitFor(() => {
+      expect(result.current.error).toBeNull();
+    });
 
     const stepNameCalls = mockSetModelMarkers.mock.calls.filter(
       (call) => call[1] === 'step-name-validation'
@@ -204,13 +271,7 @@ steps:
     });
   });
 
-  it('should handle nested steps in parallel branches', () => {
-    const { result } = renderHook(() =>
-      useYamlValidation({
-        workflowYamlSchema: mockSchema,
-      })
-    );
-
+  it('should handle nested steps in parallel branches', async () => {
     const yamlContent = `
 name: "Test Workflow"
 steps:
@@ -226,7 +287,15 @@ steps:
 `;
 
     const mockEditor = createMockEditor(yamlContent);
-    result.current.validateVariables(mockEditor as any);
+    const { result } = renderHookWithProviders(mockEditor as any, yamlContent);
+
+    // Fast-forward through the debounced computation
+    jest.advanceTimersByTime(500);
+
+    // Wait for validation to complete
+    await waitFor(() => {
+      expect(result.current.error).toBeNull();
+    });
 
     const stepNameCalls = mockSetModelMarkers.mock.calls.filter(
       (call) => call[1] === 'step-name-validation'
@@ -240,13 +309,7 @@ steps:
     });
   });
 
-  it('should handle complex nested scenarios with multiple duplicates', () => {
-    const { result } = renderHook(() =>
-      useYamlValidation({
-        workflowYamlSchema: mockSchema,
-      })
-    );
-
+  it('should handle complex nested scenarios with multiple duplicates', async () => {
     const yamlContent = `
 name: "Test Workflow"
 steps:
@@ -272,7 +335,15 @@ steps:
 `;
 
     const mockEditor = createMockEditor(yamlContent);
-    result.current.validateVariables(mockEditor as any);
+    const { result } = renderHookWithProviders(mockEditor as any, yamlContent);
+
+    // Fast-forward through the debounced computation
+    jest.advanceTimersByTime(500);
+
+    // Wait for validation to complete
+    await waitFor(() => {
+      expect(result.current.error).toBeNull();
+    });
 
     const stepNameCalls = mockSetModelMarkers.mock.calls.filter(
       (call) => call[1] === 'step-name-validation'

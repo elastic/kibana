@@ -8,11 +8,12 @@
  */
 
 import { createSlice } from '@reduxjs/toolkit';
-import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type YAML from 'yaml';
-import type { WorkflowStepExecutionDto } from '@kbn/workflows';
-import type { WorkflowLookup } from './utils/build_workflow_lookup';
+import type { LineCounter } from 'yaml';
+import type { WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
+import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowEditorState } from './types';
+import type { WorkflowLookup } from './utils/build_workflow_lookup';
 import { findStepByLine } from './utils/step_finder';
 
 // Initial state
@@ -38,22 +39,28 @@ const workflowEditorSlice = createSlice({
       action: {
         payload: {
           yamlDocument?: YAML.Document;
+          yamlLineCounter?: LineCounter;
           workflowLookup?: WorkflowLookup;
           workflowGraph?: WorkflowGraph;
+          workflowDefinition?: WorkflowYaml;
         };
       }
     ) => {
       state.computed = {
+        yamlLineCounter: action.payload.yamlLineCounter,
         yamlDocument: action.payload.yamlDocument,
         workflowLookup: action.payload.workflowLookup,
         workflowGraph: action.payload.workflowGraph,
+        workflowDefinition: action.payload.workflowDefinition,
       };
     },
     clearComputedData: (state) => {
       state.computed = {
+        yamlLineCounter: undefined,
         yamlDocument: undefined,
         workflowLookup: undefined,
         workflowGraph: undefined,
+        workflowDefinition: undefined,
       };
     },
     setCursorPosition: (state, action: { payload: { lineNumber: number } }) => {

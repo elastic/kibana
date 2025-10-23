@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { useQuery } from '@tanstack/react-query';
+import type { WorkflowExecutionDto } from '@kbn/workflows';
+import { useKibana } from '../../../hooks/use_kibana';
 
 export function useWorkflowExecution(workflowExecutionId: string | null) {
   const { http } = useKibana().services;
@@ -17,7 +17,7 @@ export function useWorkflowExecution(workflowExecutionId: string | null) {
   return useQuery<WorkflowExecutionDto, Error>({
     networkMode: 'always',
     queryKey: ['stepExecutions', workflowExecutionId],
-    queryFn: () => http!.get(`/api/workflowExecutions/${workflowExecutionId}`),
+    queryFn: () => http.get(`/api/workflowExecutions/${workflowExecutionId}`),
     enabled: workflowExecutionId !== null,
   });
 }

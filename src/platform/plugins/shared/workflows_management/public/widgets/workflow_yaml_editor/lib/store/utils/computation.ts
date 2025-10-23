@@ -8,12 +8,16 @@
  */
 
 import type { AnyAction, Dispatch, MiddlewareAPI } from '@reduxjs/toolkit';
-import { WorkflowGraph } from '@kbn/workflows/graph';
 import YAML, { LineCounter } from 'yaml';
+import type { WorkflowYaml } from '@kbn/workflows';
+import { WorkflowGraph } from '@kbn/workflows/graph';
 import { buildWorkflowLookup } from './build_workflow_lookup';
-import { getWorkflowZodSchemaLoose } from '../../../../../../common/schema';
 import { parseWorkflowYamlToJSON } from '../../../../../../common/lib/yaml_utils';
-import { clearComputedData, _setComputedDataInternal } from '../slice';
+import {
+  getCachedDynamicConnectorTypes,
+  getWorkflowZodSchemaLoose,
+} from '../../../../../../common/schema';
+import { _setComputedDataInternal, clearComputedData } from '../slice';
 import type { RootState } from '../types';
 
 export const performComputation = (
@@ -32,24 +36,31 @@ export const performComputation = (
     const yamlDoc = YAML.parseDocument(yamlString, { lineCounter });
 
     // Parse workflow JSON for graph creation
-    const parsingResult = parseWorkflowYamlToJSON(yamlString, getWorkflowZodSchemaLoose());
+    const dynamicConnectorTypes = getCachedDynamicConnectorTypes() || {};
+    const parsingResult = parseWorkflowYamlToJSON(
+      yamlString,
+      getWorkflowZodSchemaLoose(dynamicConnectorTypes)
+    );
 
     // Build workflow lookup
     const lookup = buildWorkflowLookup(yamlDoc, lineCounter);
 
     // Create workflow graph
-    const parsedWorkflow = parsingResult.success ? parsingResult.data : null;
+    const parsedWorkflow = parsingResult.success ? parsingResult.data : undefined;
     const graph = parsedWorkflow ? WorkflowGraph.fromWorkflowDefinition(parsedWorkflow) : undefined;
 
     // Dispatch computed data
     store.dispatch(
       _setComputedDataInternal({
+        yamlLineCounter: lineCounter,
         yamlDocument: yamlDoc,
         workflowLookup: lookup,
         workflowGraph: graph,
+        workflowDefinition: parsedWorkflow as WorkflowYaml,
       })
     );
   } catch (e) {
+    // console.error('Error performing computation', e);
     // Clear computed data on error
     store.dispatch(clearComputedData());
   }

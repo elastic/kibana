@@ -66,6 +66,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
           config: {
             apiUrl: simulatorUrl,
           },
+          is_connector_type_deprecated: false,
         });
       });
 

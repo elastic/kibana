@@ -6,13 +6,31 @@
  */
 
 import { uniq } from 'lodash';
+import type { unitOfTime } from 'moment';
+import moment from 'moment';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { PackageRollbackError } from '../../../errors';
 import { agentPolicyService, appContextService, packagePolicyService } from '../..';
 
+import type { PackageUpdateEvent } from '../../upgrade_sender';
+import { UpdateEventType, sendTelemetryEvents } from '../../upgrade_sender';
+
 import { getPackageSavedObjects } from './get';
 import { installPackage } from './install';
+
+const DEFAULT_INTEGRATION_ROLLBACK_TTL = '7d';
+
+export const isIntegrationRollbackTTLExpired = (installStartedAt: string): boolean => {
+  let { integrationRollbackTTL } = appContextService.getConfig() ?? {};
+  if (!integrationRollbackTTL) {
+    integrationRollbackTTL = DEFAULT_INTEGRATION_ROLLBACK_TTL;
+  }
+  const numberPart = integrationRollbackTTL.slice(0, -1);
+  const unitPart = integrationRollbackTTL.slice(-1) as unitOfTime.DurationConstructor;
+  const ttlDuration = moment.duration(Number(numberPart), unitPart).asMilliseconds();
+  return Date.parse(installStartedAt) < Date.now() - ttlDuration;
+};
 
 export async function rollbackInstallation(options: {
   esClient: ElasticsearchClient;
@@ -44,6 +62,9 @@ export async function rollbackInstallation(options: {
   const packageSO = packageSORes.saved_objects[0];
   if (!packageSO.attributes.previous_version) {
     throw new PackageRollbackError(`No previous version found for package ${pkgName}`);
+  }
+  if (isIntegrationRollbackTTLExpired(packageSO.attributes.install_started_at)) {
+    throw new PackageRollbackError(`Rollback not allowed as TTL expired`);
   }
   const previousVersion = packageSO.attributes.previous_version;
   if (packageSO.attributes.install_source !== 'registry') {
@@ -119,33 +140,85 @@ export async function rollbackInstallation(options: {
     throw new PackageRollbackError(`Not authorized to rollback integration policies in all spaces`);
   }
 
-  // Roll back package policies.
-  const rollbackResult = await packagePolicyService.rollback(savedObjectsClient, packagePolicySOs);
-
-  // Roll back package.
-  const res = await installPackage({
-    esClient,
-    savedObjectsClient,
-    installSource: 'registry', // Can only rollback from the registry.
-    pkgkey: `${pkgName}-${previousVersion}`,
-    spaceId,
-    force: true,
-  });
-  if (res.error) {
-    await packagePolicyService.restoreRollback(savedObjectsClient, rollbackResult);
-    throw new PackageRollbackError(
-      `Failed to rollback package ${pkgName} to version ${previousVersion}: ${res.error.message}`
+  try {
+    // Roll back package policies.
+    const rollbackResult = await packagePolicyService.rollback(
+      savedObjectsClient,
+      packagePolicySOs
     );
+
+    // Roll back package.
+    const res = await installPackage({
+      esClient,
+      savedObjectsClient,
+      installSource: 'registry', // Can only rollback from the registry.
+      pkgkey: `${pkgName}-${previousVersion}`,
+      spaceId,
+      force: true,
+    });
+    if (res.error) {
+      await packagePolicyService.restoreRollback(savedObjectsClient, rollbackResult);
+      throw new PackageRollbackError(
+        `Failed to rollback package ${pkgName} to version ${previousVersion}: ${res.error.message}`
+      );
+    }
+
+    // Clean up package policies previous revisions and package policies that were copied during rollback.
+    await packagePolicyService.cleanupRollbackSavedObjects(savedObjectsClient, rollbackResult);
+    // Bump agent policy revision for all package policies that were rolled back.
+    await packagePolicyService.bumpAgentPolicyRevisionAfterRollback(
+      savedObjectsClient,
+      rollbackResult
+    );
+  } catch (error) {
+    sendRollbackTelemetry({
+      packageName: pkgName,
+      currentVersion: packageSO.attributes.version,
+      previousVersion,
+      success: false,
+      errorMessage: error.message,
+    });
+    throw error;
   }
 
-  // Clean up package policies previous revisions and package policies that were copied during rollback.
-  await packagePolicyService.cleanupRollbackSavedObjects(savedObjectsClient, rollbackResult);
-  // Bump agent policy revision for all package policies that were rolled back.
-  await packagePolicyService.bumpAgentPolicyRevisionAfterRollback(
-    savedObjectsClient,
-    rollbackResult
-  );
+  sendRollbackTelemetry({
+    packageName: pkgName,
+    currentVersion: packageSO.attributes.version,
+    previousVersion,
+    success: true,
+  });
 
   logger.info(`Package: ${pkgName} successfully rolled back to version: ${previousVersion}`);
   return { version: previousVersion, success: true };
+}
+
+function sendRollbackTelemetry({
+  packageName,
+  currentVersion,
+  previousVersion,
+  success,
+  errorMessage,
+}: {
+  packageName: string;
+  currentVersion: string;
+  previousVersion: string;
+  success: boolean;
+  errorMessage?: string;
+}) {
+  const upgradeTelemetry: PackageUpdateEvent = {
+    packageName,
+    currentVersion,
+    newVersion: previousVersion,
+    status: success ? 'success' : 'failure',
+    eventType: UpdateEventType.PACKAGE_ROLLBACK,
+    errorMessage,
+  };
+  sendTelemetryEvents(
+    appContextService.getLogger(),
+    appContextService.getTelemetryEventsSender(),
+    upgradeTelemetry
+  );
+  appContextService
+    .getLogger()
+    .debug(`Send rollback telemetry: ${JSON.stringify(upgradeTelemetry)}`);
 }

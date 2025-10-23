@@ -12,12 +12,12 @@ import type { Owner } from '../../../common/constants/types';
 
 const CAI_ATTACHMENTS_INDEX_NAME_BASE = '.internal.cases-attachments';
 export function getAttachmentsDestinationIndexName(spaceId: string, owner: Owner) {
-  return `${CAI_ATTACHMENTS_INDEX_NAME_BASE}.${spaceId}-${owner}`.toLowerCase();
+  return `${CAI_ATTACHMENTS_INDEX_NAME_BASE}.${owner}-${spaceId}`.toLowerCase();
 }
 
 const CAI_ATTACHMENTS_INDEX_ALIAS_BASE = '.cases-attachments';
 export function getAttachmentsDestinationIndexAlias(spaceId: string, owner: Owner) {
-  return `${CAI_ATTACHMENTS_INDEX_ALIAS_BASE}.${spaceId}-${owner}`.toLowerCase();
+  return `${CAI_ATTACHMENTS_INDEX_ALIAS_BASE}.${owner}-${spaceId}`.toLowerCase();
 }
 
 export const CAI_ATTACHMENTS_INDEX_VERSION = 1;
@@ -69,12 +69,7 @@ export const CAI_ATTACHMENTS_SOURCE_INDEX = ALERTING_CASES_SAVED_OBJECT_INDEX;
 
 const CAI_ATTACHMENTS_BACKFILL_TASK_ID = 'cai_attachments_backfill_task';
 export const getCAIAttachmentsBackfillTaskId = (spaceId: string, owner: Owner): string => {
-  return `${CAI_ATTACHMENTS_BACKFILL_TASK_ID}-${spaceId}-${owner}`;
-};
-
-const CAI_ATTACHMENTS_SYNCHRONIZATION_TASK_ID = 'cai_cases_attachments_synchronization_task';
-export const getCAIAttachmentsSynchronizationTaskId = (spaceId: string, owner: Owner): string => {
-  return `${CAI_ATTACHMENTS_SYNCHRONIZATION_TASK_ID}-${spaceId}-${owner}`;
+  return `${CAI_ATTACHMENTS_BACKFILL_TASK_ID}-${owner}-${spaceId}`;
 };
 
 export const getAttachmentsSynchronizationSourceQuery = (

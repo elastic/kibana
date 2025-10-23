@@ -88,6 +88,7 @@ describe('ApmConfiguration', () => {
       Object {
         "active": true,
         "breakdownMetrics": true,
+        "captureHeaders": false,
         "captureSpanStackTraces": false,
         "centralConfig": false,
         "contextPropagationOnly": true,

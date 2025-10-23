@@ -314,7 +314,6 @@ const countDefinition: FunctionDefinition = {
           name: 'field',
           type: 'aggregate_metric_double',
           optional: true,
-          supportsWildcard: true,
         },
       ],
       returnType: 'long',
@@ -2669,10 +2668,26 @@ const topDefinition: FunctionDefinition = {
           optional: false,
           constantOnly: true,
         },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'boolean',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
         {
           name: 'order',
           type: 'keyword',
-          optional: false,
+          optional: true,
           constantOnly: true,
           suggestedValues: ['asc', 'desc'],
         },
@@ -2692,10 +2707,26 @@ const topDefinition: FunctionDefinition = {
           optional: false,
           constantOnly: true,
         },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
         {
           name: 'order',
           type: 'keyword',
-          optional: false,
+          optional: true,
           constantOnly: true,
           suggestedValues: ['asc', 'desc'],
         },
@@ -2715,10 +2746,26 @@ const topDefinition: FunctionDefinition = {
           optional: false,
           constantOnly: true,
         },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
         {
           name: 'order',
           type: 'keyword',
-          optional: false,
+          optional: true,
           constantOnly: true,
           suggestedValues: ['asc', 'desc'],
         },
@@ -2738,10 +2785,26 @@ const topDefinition: FunctionDefinition = {
           optional: false,
           constantOnly: true,
         },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
         {
           name: 'order',
           type: 'keyword',
-          optional: false,
+          optional: true,
           constantOnly: true,
           suggestedValues: ['asc', 'desc'],
         },
@@ -2761,10 +2824,26 @@ const topDefinition: FunctionDefinition = {
           optional: false,
           constantOnly: true,
         },
+      ],
+      returnType: 'ip',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'ip',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
         {
           name: 'order',
           type: 'keyword',
-          optional: false,
+          optional: true,
           constantOnly: true,
           suggestedValues: ['asc', 'desc'],
         },
@@ -2784,10 +2863,26 @@ const topDefinition: FunctionDefinition = {
           optional: false,
           constantOnly: true,
         },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'keyword',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
         {
           name: 'order',
           type: 'keyword',
-          optional: false,
+          optional: true,
           constantOnly: true,
           suggestedValues: ['asc', 'desc'],
         },
@@ -2805,11 +2900,30 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
+          constantOnly: true,
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
         },
         {
           name: 'order',
           type: 'keyword',
-          optional: false,
+          optional: true,
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
         },
       ],
       returnType: 'long',
@@ -2825,11 +2939,30 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
+          constantOnly: true,
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'text',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
         },
         {
           name: 'order',
           type: 'keyword',
-          optional: false,
+          optional: true,
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
         },
       ],
       returnType: 'keyword',
