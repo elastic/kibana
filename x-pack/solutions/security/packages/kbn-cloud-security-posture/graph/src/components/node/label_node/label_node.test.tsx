@@ -10,6 +10,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ReactFlow, Position } from '@xyflow/react';
 import type { EuiThemeComputed } from '@elastic/eui';
+import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import type { NodeProps } from '../../types';
 import { getLabelColors } from '../styles';
 import { GRAPH_FLAGS_BADGE_ID, GRAPH_IPS_TEXT_ID, GRAPH_LABEL_NODE_ID } from '../../test_ids';
@@ -32,6 +33,10 @@ jest.mock('./label_node_badges', () => {
 });
 
 describe('LabelNode', () => {
+  const renderWithProvider = (ui: React.ReactElement) => {
+    return render(<TestProvider>{ui}</TestProvider>);
+  };
+
   const baseProps: NodeProps = {
     id: 'test-label-node',
     data: {
@@ -59,7 +64,7 @@ describe('LabelNode', () => {
   };
 
   test('renders basic label node', () => {
-    render(
+    renderWithProvider(
       <ReactFlow>
         <LabelNode {...baseProps} />
       </ReactFlow>
@@ -70,7 +75,7 @@ describe('LabelNode', () => {
   });
 
   test('renders expand button and outline on hover if interactive', async () => {
-    render(
+    renderWithProvider(
       <ReactFlow>
         <LabelNode {...baseProps} />
       </ReactFlow>
@@ -93,7 +98,7 @@ describe('LabelNode', () => {
       },
     };
 
-    render(
+    renderWithProvider(
       <ReactFlow>
         <LabelNode {...props} />
       </ReactFlow>
@@ -115,7 +120,7 @@ describe('LabelNode', () => {
         ips: ['127.0.0.1'],
       },
     };
-    render(
+    renderWithProvider(
       <ReactFlow>
         <LabelNode {...props} />
       </ReactFlow>
@@ -133,7 +138,7 @@ describe('LabelNode', () => {
         countryCodes: ['us'],
       },
     };
-    render(
+    renderWithProvider(
       <ReactFlow>
         <LabelNode {...props} />
       </ReactFlow>
@@ -152,7 +157,7 @@ describe('LabelNode', () => {
         ips: ['127.0.0.1'],
       },
     };
-    render(
+    renderWithProvider(
       <ReactFlow>
         <LabelNode {...props} />
       </ReactFlow>
@@ -172,7 +177,7 @@ describe('LabelNode', () => {
         },
       };
 
-      render(
+      renderWithProvider(
         <ReactFlow>
           <LabelNode {...props} />
         </ReactFlow>
@@ -194,7 +199,7 @@ describe('LabelNode', () => {
           label: longText,
         },
       };
-      render(
+      renderWithProvider(
         <ReactFlow>
           <LabelNode {...props} />
         </ReactFlow>
@@ -209,7 +214,7 @@ describe('LabelNode', () => {
     });
 
     test('does not show tooltip otherwise', async () => {
-      render(
+      renderWithProvider(
         <ReactFlow>
           <LabelNode {...baseProps} />
         </ReactFlow>
