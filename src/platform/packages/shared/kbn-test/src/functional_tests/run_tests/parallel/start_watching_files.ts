@@ -13,6 +13,7 @@
 
 import type { FSWatcher } from 'chokidar';
 import chokidar from 'chokidar';
+import type { Stats } from 'node:fs';
 import * as path from 'node:path';
 
 export interface WatchedDirectoryEntry {
@@ -79,6 +80,7 @@ export function startWatchingFiles({
       },
       ignored: ['**/.git/**', '**/*.d.ts', '**/*.map'],
       followSymlinks: false,
+      ignorePermissionErrors: true,
     });
 
     return {
@@ -95,13 +97,18 @@ export function startWatchingFiles({
 
   for (const w of watchers) {
     w.watcher.on('ready', () => {
+      w.changes.clear();
       w.isReady = true;
     });
 
     for (const evt of eventNames) {
-      w.watcher.on(evt, (changedPath: string) => {
+      w.watcher.on(evt, (changedPath: string, stats?: Stats) => {
         if (!w.isReady) {
           return;
+        }
+
+        if (changedPath.includes('.backportrc.json')) {
+          console.log(changedPath, stats);
         }
 
         // Only consider paths under this base; chokidar guarantees it, but be defensive.
