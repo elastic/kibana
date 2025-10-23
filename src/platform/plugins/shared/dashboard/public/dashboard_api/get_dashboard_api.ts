@@ -182,7 +182,8 @@ export function getDashboardApi({
         isManaged,
         lastSavedId: savedObjectId$.value,
         serializeState: getState,
-        setTimeRestore: (newTimeRestore: boolean) => settingsManager.api.setSettings({ timeRestore: newTimeRestore }),
+        setTimeRestore: (newTimeRestore: boolean) =>
+          settingsManager.api.setSettings({ timeRestore: newTimeRestore }),
         tags,
         timeRestore,
         title,
