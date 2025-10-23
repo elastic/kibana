@@ -628,6 +628,7 @@
     },
     "MediaType": {
       "type": "object",
+      "required": ["examples"],
       "properties": {
         "schema": {
           "oneOf": [
@@ -826,6 +827,7 @@
         "tags",
         "responses",
         "summary",
+        "description",
         "operationId"
       ],
       "properties": {
