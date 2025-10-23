@@ -11,7 +11,15 @@ import type { JsonSchema7Type } from 'zod-to-json-schema';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import type { z } from '@kbn/zod';
 
-export function getJsonSchemaFromYamlSchema(yamlSchema: z.ZodType): JsonSchema7Type {
+type WorkflowJsonSchema = JsonSchema7Type & {
+  $ref: '#/definitions/WorkflowSchema';
+  $schema: 'http://json-schema.org/draft-07/schema#';
+  definitions: {
+    WorkflowSchema: JsonSchema7Type;
+  };
+};
+
+export function getJsonSchemaFromYamlSchema(yamlSchema: z.ZodType): WorkflowJsonSchema {
   // Generate the json schema from zod schema
   const jsonSchema = zodToJsonSchema(yamlSchema, {
     name: 'WorkflowSchema',

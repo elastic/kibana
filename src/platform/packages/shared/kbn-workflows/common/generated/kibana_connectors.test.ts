@@ -616,7 +616,7 @@ describe('Generated Kibana Connectors', () => {
 
           for (const part of pathParts) {
             if (current && typeof current === 'object' && part in current) {
-              current = current[part];
+              current = (current as any)[part];
             } else {
               isValid = false;
               break;
@@ -648,7 +648,7 @@ describe('Generated Kibana Connectors', () => {
       // console.log('✅ No broken references found');
 
       // Verify core workflow structure is present in the definitions
-      const workflowDef = jsonSchema.definitions.WorkflowSchema;
+      const workflowDef = jsonSchema.definitions.WorkflowSchema as any;
       expect(workflowDef.type).toBe('object');
       expect(workflowDef.properties).toBeDefined();
       expect(workflowDef.properties.version).toBeDefined();
