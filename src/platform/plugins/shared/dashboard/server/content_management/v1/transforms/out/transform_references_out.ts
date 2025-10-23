@@ -29,7 +29,9 @@ export function transformReferencesOut(
   }
   (panels ?? []).forEach((panel) => {
     if (isDashboardSection(panel)) {
-      panel.panels.forEach((panelInSection) => setDropRefsForPanel(panelInSection));
+      panel.panels.forEach((panelInSection) =>
+        setDropRefsForPanel(panelInSection as DashboardPanel)
+      );
     } else {
       setDropRefsForPanel(panel);
     }

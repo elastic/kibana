@@ -75,7 +75,7 @@ describe('transformReferencesOut', () => {
         transformReferencesOut(references, [
           {
             config: {},
-            grid: { x: 0, y: 0, w: 24, h: 15 },
+            grid: { x: 0, y: 0, w: 24, h: 15, i: 'panel1' },
             uid: 'panel1',
             type: 'someType',
           },
@@ -100,7 +100,7 @@ describe('transformReferencesOut', () => {
         transformReferencesOut(references, [
           {
             config: {},
-            grid: { x: 0, y: 0, w: 24, h: 15 },
+            grid: { x: 0, y: 0, w: 24, h: 15, i: 'panel1' },
             uid: 'panel1',
             type: 'someType',
           },
