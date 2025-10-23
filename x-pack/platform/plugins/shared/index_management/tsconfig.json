@@ -62,7 +62,8 @@
     "@kbn/streams-app-plugin",
     "@kbn/licensing-types",
     "@kbn/reindex-service-plugin",
-    "@kbn/upgrade-assistant-pkg-common",
+    "@kbn/inference-common",
+    "@kbn/upgrade-assistant-pkg-common"
   ],
   "exclude": ["target/**/*"]
 }

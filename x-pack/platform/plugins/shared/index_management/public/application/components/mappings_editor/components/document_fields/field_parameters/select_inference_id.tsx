@@ -24,6 +24,7 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import React, { useState, useCallback, useMemo, lazy, Suspense } from 'react';
 
 import { getFieldConfig } from '../../../lib';
@@ -111,12 +112,16 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
      */
     const hasInferenceSelected = newOptions.some((option) => option.checked === 'on');
     // If nothing has been selected, select .elser-2-elasticsearch as default if it exists.
+    // Use a constant for the ELSER inference endpoint label instead of a hard-coded string
+
     if (!hasInferenceSelected && newOptions.length > 0) {
-      const elserOption = newOptions.find((option) => option.label === '.elser-2-elasticsearch');
+      const elserOption = newOptions.find(
+        (option) => option.label === defaultInferenceEndpoints.ELSER
+      );
       if (elserOption) {
         elserOption.checked = 'on';
         if (!value) {
-          setValue('.elser-2-elasticsearch');
+          setValue(defaultInferenceEndpoints.ELSER);
         }
       } else {
         // fallback: select the first option if the Elser option does not exist
