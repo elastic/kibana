@@ -8,6 +8,20 @@ For Elastic {{observability}} known issues, refer to [Elastic Observability know
 
 For Elastic Security known issues, refer to [Elastic Security known issues](docs-content://release-notes/elastic-security/known-issues.md).
 
+::::{dropdown} Alerts aren't generated for rules with alert flapping off and an alert delay higher than 1
+
+Applies to: {{stack}} 9.0.0-9.2.0
+
+**Details**
+
+Alerts aren't generated for rules that have **Alert flapping detection** turned off and the alert delay set to a value higher than 1.
+
+**Workaround**
+
+Set the alert delay value to 1 or turn on **Alert flapping detection**.
+
+::::
+
 ::::{dropdown} Reports created in non-default Kibana spaces aren't shown in the Reporting UI
 
 Applies to: {{stack}} 9.1.0, 9.1.1
@@ -22,10 +36,6 @@ After creating a report in a non-default {{kib}} space, the document exists in t
 
 Applies to: {{stack}} 9.0.3, 9.0.4, 9.1.0
 
-**Resolved**
-
-This issue is resolved in {{stack}} 9.1.0 and 9.1.2.
-
 **Details**
 
 If you've set `xpack.alerting.rules.run.alerts.max` to a value greater than `5000`, you will encounter `Result window is too large` error messages when a maintenance window is active.
@@ -33,6 +43,10 @@ If you've set `xpack.alerting.rules.run.alerts.max` to a value greater than `500
 **Action**
 
 To mitigate the issue, set `xpack.alerting.rules.run.alerts.max` to a value equal to or less than `5000`.
+
+**Resolved**
+
+This issue is resolved in {{stack}} 9.1.0 and 9.1.2.
 
 ::::
 

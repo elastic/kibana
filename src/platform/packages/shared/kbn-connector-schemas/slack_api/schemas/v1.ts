@@ -25,7 +25,7 @@ export const SlackApiConfigSchema = z
           })
           .strict()
       )
-      .max(25)
+      .max(500)
       .optional(),
   })
   .strict();

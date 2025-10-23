@@ -123,14 +123,14 @@ export class AIAssistantManagementPlugin
 
   public start(coreStart: CoreStart, startDeps: StartDependencies) {
     const { licensing } = startDeps;
-    const preferredAIAssistantType: AIAssistantType = coreStart.uiSettings.get(
+    const preferredAIAssistantType: AIAssistantType = coreStart.settings.client.get(
       PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
       AIAssistantType.Default
     );
 
     const aiAssistantType$ = new BehaviorSubject<AIAssistantType>(preferredAIAssistantType);
     // Keep aiAssistantType$ in sync with UI setting without page reload
-    this.aiAssistantTypeSubscription = coreStart.uiSettings
+    this.aiAssistantTypeSubscription = coreStart.settings.client
       .get$<AIAssistantType>(PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY, AIAssistantType.Default)
       .subscribe((nextValue) => {
         aiAssistantType$.next(nextValue);
@@ -176,7 +176,7 @@ export class AIAssistantManagementPlugin
     const isSecurityAIAssistantEnabled =
       coreStart.application.capabilities.securitySolutionAssistant?.['ai-assistant'] === true;
 
-    const isUntouchedUiSetting = coreStart.uiSettings.isDefault(
+    const isUntouchedUiSetting = coreStart.settings.client.isDefault(
       PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY
     );
 

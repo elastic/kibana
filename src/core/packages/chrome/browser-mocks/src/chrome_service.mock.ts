@@ -87,6 +87,7 @@ const createStartContractMock = () => {
       setHome: jest.fn(),
       setCloudUrls: jest.fn(),
       setProjectName: jest.fn(),
+      setFeedbackUrlParams: jest.fn(),
       initNavigation: jest.fn(),
       setBreadcrumbs: jest.fn(),
       getBreadcrumbs$: jest.fn(),

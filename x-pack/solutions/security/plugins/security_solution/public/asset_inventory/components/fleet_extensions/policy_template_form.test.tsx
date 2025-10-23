@@ -1175,9 +1175,9 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       const optionValues = options.map((option) => option.value);
 
       await waitFor(() => {
-        expect(options).toHaveLength(2);
+        expect(options).toHaveLength(3);
         expect(optionValues).toEqual(
-          expect.arrayContaining(['direct_access_keys', 'temporary_keys'])
+          expect.arrayContaining(['cloud_connectors', 'direct_access_keys', 'temporary_keys'])
         );
       });
     });
@@ -1296,9 +1296,9 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       const optionValues = options.map((option) => option.value);
 
       await waitFor(() => {
-        expect(options).toHaveLength(2);
+        expect(options).toHaveLength(3);
         expect(optionValues).toEqual(
-          expect.arrayContaining(['direct_access_keys', 'temporary_keys'])
+          expect.arrayContaining(['cloud_connectors', 'direct_access_keys', 'temporary_keys'])
         );
       });
     });
@@ -1357,9 +1357,9 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       const optionValues = options.map((option) => option.value);
 
       await waitFor(() => {
-        expect(options).toHaveLength(2);
+        expect(options).toHaveLength(3);
         expect(optionValues).toEqual(
-          expect.arrayContaining(['direct_access_keys', 'temporary_keys'])
+          expect.arrayContaining(['cloud_connectors', 'direct_access_keys', 'temporary_keys'])
         );
       });
     });

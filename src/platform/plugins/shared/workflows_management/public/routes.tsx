@@ -14,6 +14,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { WorkflowDetailPage } from './pages/workflow_detail';
 import { WorkflowsPage } from './pages/workflows';
+import { WorkflowEditorStoreProvider } from './widgets/workflow_yaml_editor/lib/store/provider';
 import { AccessDenied } from '../common/components/access_denied';
 
 interface WorkflowsAppDeps {
@@ -59,7 +60,9 @@ export function WorkflowsRoutes({ history }: WorkflowsAppDeps) {
             path="/:id"
             render={(props) => (
               <WorkflowsPermissionsWrapper permissions={['read', 'readWorkflow']}>
-                <WorkflowDetailPage id={props.match.params.id} />
+                <WorkflowEditorStoreProvider>
+                  <WorkflowDetailPage id={props.match.params.id} />
+                </WorkflowEditorStoreProvider>
               </WorkflowsPermissionsWrapper>
             )}
           />

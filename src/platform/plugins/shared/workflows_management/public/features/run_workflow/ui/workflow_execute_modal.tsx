@@ -47,175 +47,179 @@ function getDefaultTrigger(definition: WorkflowYaml | null): TriggerType {
   return 'alert';
 }
 
-export function WorkflowExecuteModal({
-  definition,
-  onClose,
-  onSubmit,
-}: {
-  definition: WorkflowYaml;
+interface WorkflowExecuteModalProps {
+  definition: WorkflowYaml | null;
   onClose: () => void;
-  onSubmit: (data: Record<string, any>) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
-}) {
-  const modalTitleId = useGeneratedHtmlId();
-  const enabledTriggers = ['alert', 'index', 'manual'];
-  const defaultTrigger = useMemo(() => getDefaultTrigger(definition), [definition]);
-  const [selectedTrigger, setSelectedTrigger] = useState<TriggerType>(defaultTrigger);
+  onSubmit: (data: Record<string, unknown>) => void;
+}
+export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
+  ({ definition, onClose, onSubmit }) => {
+    const modalTitleId = useGeneratedHtmlId();
+    const enabledTriggers = ['alert', 'index', 'manual'];
+    const defaultTrigger = useMemo(() => getDefaultTrigger(definition), [definition]);
+    const [selectedTrigger, setSelectedTrigger] = useState<TriggerType>(defaultTrigger);
 
-  const [executionInput, setExecutionInput] = useState<string>('');
-  const [executionInputErrors, setExecutionInputErrors] = useState<string | null>(null);
+    const [executionInput, setExecutionInput] = useState<string>('');
+    const [executionInputErrors, setExecutionInputErrors] = useState<string | null>(null);
 
-  const { euiTheme } = useEuiTheme();
+    const { euiTheme } = useEuiTheme();
 
-  const handleSubmit = useCallback(() => {
-    onSubmit(JSON.parse(executionInput));
-    onClose();
-  }, [onSubmit, onClose, executionInput]);
-
-  const handleChangeTrigger = useCallback(
-    (trigger: TriggerType): void => {
-      setExecutionInput('');
-      setSelectedTrigger(trigger);
-    },
-    [setExecutionInput, setSelectedTrigger]
-  );
-
-  const shouldAutoRun = useMemo(() => {
-    if (definition.triggers?.some((trigger) => trigger.type === 'alert') || definition.inputs) {
-      return false;
-    }
-    return true;
-  }, [definition]);
-
-  useEffect(() => {
-    if (shouldAutoRun) {
-      onSubmit({});
+    const handleSubmit = useCallback(() => {
+      onSubmit(JSON.parse(executionInput));
       onClose();
-      return;
-    }
-    // Default trigger selection
-    if (definition.triggers?.some((trigger) => trigger.type === 'alert')) {
-      setSelectedTrigger('alert');
-      return;
-    }
-    if (definition.inputs) {
-      setSelectedTrigger('manual');
-    }
-  }, [shouldAutoRun, onSubmit, onClose, definition]);
+    }, [onSubmit, onClose, executionInput]);
 
-  if (shouldAutoRun) {
-    // Not rendered if the workflow should auto run, will close the modal automatically
-    return null;
-  }
+    const handleChangeTrigger = useCallback(
+      (trigger: TriggerType): void => {
+        setExecutionInput('');
+        setSelectedTrigger(trigger);
+      },
+      [setExecutionInput, setSelectedTrigger]
+    );
 
-  return (
-    <>
-      {/*
+    const shouldAutoRun = useMemo(() => {
+      if (
+        definition &&
+        !definition.triggers?.some((trigger) => trigger.type === 'alert') &&
+        !definition.inputs
+      ) {
+        return true;
+      }
+      return false;
+    }, [definition]);
+
+    useEffect(() => {
+      if (shouldAutoRun) {
+        onSubmit({});
+        onClose();
+        return;
+      }
+      // Default trigger selection
+      if (definition?.triggers?.some((trigger) => trigger.type === 'alert')) {
+        setSelectedTrigger('alert');
+        return;
+      }
+      if (definition?.inputs) {
+        setSelectedTrigger('manual');
+      }
+    }, [shouldAutoRun, onSubmit, onClose, definition]);
+
+    if (shouldAutoRun) {
+      // Not rendered if the workflow should auto run, will close the modal automatically
+      return null;
+    }
+
+    return (
+      <>
+        {/*
         The following Global CSS is needed to ensure that modal will not overlay SearchBar's
         autocomplete popup
       */}
-      <Global
-        styles={css`
-          .euiOverlayMask:has(.workflowExecuteModal) {
-            z-index: 4000;
-          }
-        `}
-      />
-      <EuiModal
-        className="workflowExecuteModal"
-        aria-labelledby={modalTitleId}
-        onClose={onClose}
-        maxWidth={1400}
-        style={{ width: '1200px', height: '100vh' }}
-      >
-        <EuiModalHeader>
-          <EuiModalHeaderTitle id={modalTitleId}>{'Run Workflow'}</EuiModalHeaderTitle>
-        </EuiModalHeader>
-        <EuiModalBody>
-          <EuiFlexGroup direction="row" gutterSize="l">
-            {enabledTriggers.map((trigger) => (
-              <EuiFlexItem key={trigger}>
-                <EuiButton
-                  color={selectedTrigger === trigger ? 'primary' : 'text'}
-                  onClick={() => handleChangeTrigger(trigger as TriggerType)}
-                  iconSide="right"
-                  contentProps={{
-                    style: {
-                      justifyContent: 'flex-start',
-                      flexDirection: 'column',
-                      alignItems: 'flex-start',
-                      padding: selectedTrigger === trigger ? '10px' : '9px',
-                      textAlign: 'left',
-                    },
-                  }}
-                  css={css`
-                    width: 100%;
-                    height: fit-content;
-                    min-height: 100%;
-                    svg,
-                    img {
-                      margin-left: auto;
-                    }
-                  `}
-                >
-                  <EuiRadio
-                    name={capitalize(trigger)}
-                    label={capitalize(trigger)}
-                    id={trigger}
-                    checked={selectedTrigger === trigger}
-                    onChange={() => {}}
-                  />
-                  <EuiText
-                    size="s"
+        <Global
+          styles={css`
+            .euiOverlayMask:has(.workflowExecuteModal) {
+              z-index: 4000;
+            }
+          `}
+        />
+        <EuiModal
+          className="workflowExecuteModal"
+          aria-labelledby={modalTitleId}
+          onClose={onClose}
+          maxWidth={1400}
+          style={{ width: '1200px', height: '100vh' }}
+        >
+          <EuiModalHeader>
+            <EuiModalHeaderTitle id={modalTitleId}>{'Run Workflow'}</EuiModalHeaderTitle>
+          </EuiModalHeader>
+          <EuiModalBody>
+            <EuiFlexGroup direction="row" gutterSize="l">
+              {enabledTriggers.map((trigger) => (
+                <EuiFlexItem key={trigger}>
+                  <EuiButton
+                    color={selectedTrigger === trigger ? 'primary' : 'text'}
+                    onClick={() => handleChangeTrigger(trigger as TriggerType)}
+                    iconSide="right"
+                    contentProps={{
+                      style: {
+                        justifyContent: 'flex-start',
+                        flexDirection: 'column',
+                        alignItems: 'flex-start',
+                        padding: selectedTrigger === trigger ? '10px' : '9px',
+                        textAlign: 'left',
+                      },
+                    }}
                     css={css`
-                      text-wrap: auto;
-                      margin-left: ${euiTheme.size.l};
+                      width: 100%;
+                      height: fit-content;
+                      min-height: 100%;
+                      svg,
+                      img {
+                        margin-left: auto;
+                      }
                     `}
                   >
-                    {MANUAL_TRIGGERS_DESCRIPTIONS[trigger]}
-                  </EuiText>
-                </EuiButton>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
+                    <EuiRadio
+                      name={capitalize(trigger)}
+                      label={capitalize(trigger)}
+                      id={trigger}
+                      checked={selectedTrigger === trigger}
+                      onChange={() => {}}
+                    />
+                    <EuiText
+                      size="s"
+                      css={css`
+                        text-wrap: auto;
+                        margin-left: ${euiTheme.size.l};
+                      `}
+                    >
+                      {MANUAL_TRIGGERS_DESCRIPTIONS[trigger]}
+                    </EuiText>
+                  </EuiButton>
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
 
-          {selectedTrigger === 'alert' && (
-            <WorkflowExecuteEventForm
-              value={executionInput}
-              setValue={setExecutionInput}
-              errors={executionInputErrors}
-              setErrors={setExecutionInputErrors}
-            />
-          )}
-          {selectedTrigger === 'manual' && (
-            <WorkflowExecuteManualForm
-              definition={definition}
-              value={executionInput}
-              errors={executionInputErrors}
-              setErrors={setExecutionInputErrors}
-              setValue={setExecutionInput}
-            />
-          )}
-          {selectedTrigger === 'index' && (
-            <WorkflowExecuteIndexForm
-              value={executionInput}
-              setValue={setExecutionInput}
-              errors={executionInputErrors}
-              setErrors={setExecutionInputErrors}
-            />
-          )}
-        </EuiModalBody>
-        <EuiModalFooter>
-          <EuiButton
-            onClick={handleSubmit}
-            iconType="play"
-            disabled={Boolean(executionInputErrors)}
-            color="success"
-            data-test-subj="executeWorkflowButton"
-          >
-            <FormattedMessage id="keepWorkflows.buttonText" defaultMessage="Run" ignoreTag />
-          </EuiButton>
-        </EuiModalFooter>
-      </EuiModal>
-    </>
-  );
-}
+            {selectedTrigger === 'alert' && (
+              <WorkflowExecuteEventForm
+                value={executionInput}
+                setValue={setExecutionInput}
+                errors={executionInputErrors}
+                setErrors={setExecutionInputErrors}
+              />
+            )}
+            {selectedTrigger === 'manual' && (
+              <WorkflowExecuteManualForm
+                definition={definition}
+                value={executionInput}
+                errors={executionInputErrors}
+                setErrors={setExecutionInputErrors}
+                setValue={setExecutionInput}
+              />
+            )}
+            {selectedTrigger === 'index' && (
+              <WorkflowExecuteIndexForm
+                value={executionInput}
+                setValue={setExecutionInput}
+                errors={executionInputErrors}
+                setErrors={setExecutionInputErrors}
+              />
+            )}
+          </EuiModalBody>
+          <EuiModalFooter>
+            <EuiButton
+              onClick={handleSubmit}
+              iconType="play"
+              disabled={Boolean(executionInputErrors)}
+              color="success"
+              data-test-subj="executeWorkflowButton"
+            >
+              <FormattedMessage id="keepWorkflows.buttonText" defaultMessage="Run" ignoreTag />
+            </EuiButton>
+          </EuiModalFooter>
+        </EuiModal>
+      </>
+    );
+  }
+);
+WorkflowExecuteModal.displayName = 'WorkflowExecuteModal';
