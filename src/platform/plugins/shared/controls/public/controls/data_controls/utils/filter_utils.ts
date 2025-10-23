@@ -11,9 +11,7 @@ import type { FetchContext } from '@kbn/presentation-publishing';
 
 export const getFetchContextFilters = (fetchContext: FetchContext, useGlobalFilters?: boolean) => {
   if (!useGlobalFilters) {
-    return fetchContext.filters?.filter(
-      (currentFilter) => Boolean(currentFilter.meta.controlledBy) // filters without `controlledBy` are coming from unified search
-    );
+    return [];
   }
   return fetchContext.filters;
 };
