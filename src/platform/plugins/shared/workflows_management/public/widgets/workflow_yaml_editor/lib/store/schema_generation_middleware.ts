@@ -18,10 +18,8 @@ export const schemaGenerationMiddleware: Middleware =
 
     // Only react to connectors changes
     if (setConnectors.match(action)) {
-      const setConnectorsAction = action as ReturnType<typeof setConnectors>;
-
-      if (setConnectorsAction.payload) {
-        const schemaLoose = getWorkflowZodSchemaLoose(setConnectorsAction.payload.connectorTypes);
+      if (action.payload) {
+        const schemaLoose = getWorkflowZodSchemaLoose(action.payload.connectorTypes);
         store.dispatch(_setGeneratedSchemaInternal(schemaLoose));
       }
     }

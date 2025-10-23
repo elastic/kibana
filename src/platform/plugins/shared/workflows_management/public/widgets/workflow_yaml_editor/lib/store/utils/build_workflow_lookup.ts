@@ -110,10 +110,9 @@ function inspectStep(node: any, lineCounter: LineCounter): Record<string, StepIn
     });
   }
 
-  if (stepId && stepType) {
-    const stepNode = node as YAML.YAMLMap<unknown, unknown>;
+  if (stepId && stepType && YAML.isMap(node)) {
     const propNodes: Record<string, StepPropInfo> = {};
-    stepNode.items.forEach((innerNode) => {
+    node.items.forEach((innerNode) => {
       if (YAML.isPair(innerNode) && YAML.isScalar(innerNode.key)) {
         if (!['steps', 'else', 'fallback'].includes(innerNode.key.value as string)) {
           Object.assign(propNodes, visitStepProps(innerNode));
