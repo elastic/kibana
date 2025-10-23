@@ -10,10 +10,10 @@
 import type { monaco } from '@kbn/monaco';
 import { BaseMonacoConnectorHandler } from './base_monaco_connector_handler';
 import type {
-  HoverContext,
   ActionContext,
   ActionInfo,
   ConnectorExamples,
+  HoverContext,
 } from '../monaco_providers/provider_interfaces';
 
 /**
