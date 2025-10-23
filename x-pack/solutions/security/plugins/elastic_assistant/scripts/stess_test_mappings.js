@@ -9,10 +9,10 @@
 
 /**
  * Stress Test Mappings Script -- generated almost entirely by gemini-pro-2.5 via gemini-cli.
- * 
+ *
  * Updated to include test data for nested fields and multi-fields scenarios to validate
  * the Security Assistant Index Entry form field suggestions fix (issue #239429).
- * 
+ *
  * The script now creates indices with:
  * - Multi-field examples: keyword fields with text sub-fields (e.g., executable.text)
  * - Nested object examples: complex nested structures with searchable fields at various levels
