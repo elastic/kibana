@@ -10,11 +10,11 @@ import {
   ACCESS_CONTROL_TYPE,
   NON_ACCESS_CONTROL_TYPE,
 } from '@kbn/access-control-test-plugin/server';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import expect from '@kbn/expect';
 import { adminTestUser } from '@kbn/test';
 
 import type { FtrProviderContext } from '../../../../functional/ftr_provider_context';
-import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core/packages/http/common';
 
 export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
@@ -256,6 +256,25 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(getResponse.body.accessControl).to.have.property('owner', simpleUserProfileUid);
+    });
+
+    it.skip('should not allow non-admins to assign ownership of an unowned object', async () => {
+      const { cookie: notAdminCookie } = await loginAsNotObjectOwner('test_user', 'changeme');
+      const objectId = await createUnownedAccessControlObject();
+      const { profileUid: simpleUserProfileUid } = await activateSimpleUserProfile();
+      const transferResponse = await supertestWithoutAuth
+        .put('/access_control_objects/change_owner')
+        .set('kbn-xsrf', 'true')
+        .set('cookie', notAdminCookie.cookieString())
+        .send({
+          objects: [{ id: objectId, type: ACCESS_CONTROL_TYPE }],
+          newOwnerProfileUid: simpleUserProfileUid,
+        })
+        .expect(403);
+      expect(transferResponse.body).to.have.property('message');
+      expect(transferResponse.body.message).to.contain(
+        `Access denied: Unable to manage access control for ${ACCESS_CONTROL_TYPE}`
+      );
     });
 
     describe('partial bulk change ownership', () => {
