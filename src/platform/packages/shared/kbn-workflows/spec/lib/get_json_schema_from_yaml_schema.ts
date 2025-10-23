@@ -170,24 +170,11 @@ function fixBrokenSchemaReferencesAndEnforceStrictValidation(schema: any): any {
   // Enforce strict validation: ensure all objects have additionalProperties: false
   // This fixes the main issue where Kibana connectors were too permissive
   try {
-    const tempSchema = JSON.parse(fixedSchemaString);
-    fixAdditionalPropertiesInSchema(tempSchema);
-    fixedSchemaString = JSON.stringify(tempSchema);
+    const fixedSchema = JSON.parse(fixedSchemaString);
+    fixAdditionalPropertiesInSchema(fixedSchema);
+    return fixedSchema;
   } catch (parseError) {
     // If parsing fails, throw an error, since replacing with regexp isn't safe
     throw new Error('Failed to fix additionalProperties in json schema');
-  }
-
-  try {
-    const fixedSchema = JSON.parse(fixedSchemaString);
-    /*
-      console.log(
-        `Fixed schema size: ${Math.round((fixedSchemaString.length / 1024 / 1024) * 100) / 100}MB`
-      );
-      */
-    return fixedSchema;
-  } catch (parseError) {
-    // console.warn('Failed to parse fixed schema, using original');
-    return schema;
   }
 }
