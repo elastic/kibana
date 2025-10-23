@@ -692,6 +692,7 @@
     },
     "Header": {
       "type": "object",
+      "required": ["description"],
       "properties": {
         "description": {
           "type": "string"
@@ -822,7 +823,10 @@
     "Operation": {
       "type": "object",
       "required": [
-        "responses"
+        "tags",
+        "responses",
+        "summary",
+        "operationId"
       ],
       "properties": {
         "tags": {
@@ -1054,6 +1058,11 @@
     },
     "Parameter": {
       "type": "object",
+      "required": [
+        "name",
+        "in",
+        "description"
+      ],
       "properties": {
         "name": {
           "type": "string"
@@ -1123,11 +1132,6 @@
         "^x-": {}
       },
       "additionalProperties": false,
-      "required": [
-        "name",
-        "in",
-        "description"
-      ],
       "allOf": [
         {
           "$ref": "#/definitions/ExampleXORExamples"
