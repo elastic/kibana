@@ -17,15 +17,18 @@ import type { SimplifiedFilter } from '@kbn/es-query-server';
  * Extract base properties from stored filter
  */
 export function extractBaseProperties(storedFilter: any): Partial<SimplifiedFilter> {
+  const $state = storedFilter.$state || {};
+  const meta = storedFilter.meta || {};
+  
   return {
-    id: storedFilter.meta?.key || undefined,
-    pinned: storedFilter.$state?.store === 'globalState' || undefined,
-    disabled: storedFilter.meta?.disabled || undefined,
-    controlledBy: storedFilter.meta?.controlledBy || undefined,
-    indexPattern: storedFilter.meta?.index || undefined,
-    metadata: storedFilter.meta?.params || undefined,
-    negate: storedFilter.meta?.negate || undefined,
-    label: storedFilter.meta?.alias || undefined,
+    id: meta.key || undefined,
+    pinned: $state.store === 'globalState' ? true : $state.store === 'appState' ? false : undefined,
+    disabled: meta.disabled === true ? true : meta.disabled === false ? false : undefined,
+    controlledBy: meta.controlledBy || undefined,
+    indexPattern: meta.index || undefined,
+    metadata: meta.params !== undefined ? meta.params : undefined,
+    negate: meta.negate === true ? true : meta.negate === false ? false : undefined,
+    label: meta.alias || undefined,
   };
 }
 

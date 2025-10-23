@@ -59,19 +59,18 @@ describe('Utils', () => {
     it('should detect non-global state as not pinned', () => {
       const storedFilter = {
         $state: { store: 'appState' },
+        meta: { key: 'field1' },
       };
 
       const result = extractBaseProperties(storedFilter);
 
-      expect(result.pinned).toBeUndefined();
+      expect(result.pinned).toBe(false); // appState should be false, not undefined
     });
 
     it('should handle partial meta object', () => {
       const storedFilter = {
-        meta: {
-          key: 'field1',
-          disabled: false,
-        },
+        $state: {},
+        meta: { key: 'field1', disabled: false },
       };
 
       const result = extractBaseProperties(storedFilter);
@@ -79,7 +78,7 @@ describe('Utils', () => {
       expect(result).toEqual({
         id: 'field1',
         pinned: undefined,
-        disabled: undefined,
+        disabled: false, // disabled: false should be preserved as false, not undefined
         controlledBy: undefined,
         indexPattern: undefined,
         metadata: undefined,

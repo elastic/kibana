@@ -21,7 +21,12 @@ import type {
 } from '@kbn/es-query-server';
 import { FilterConversionError } from '../errors';
 import { extractBaseProperties } from './utils';
-import { isFullyCompatible, isEnhancedCompatible, isStoredGroupFilter } from './type_guards';
+import {
+  isFullyCompatible,
+  isEnhancedCompatible,
+  isStoredGroupFilter,
+  requiresHighFidelity,
+} from './type_guards';
 
 /**
  * Convert stored Filter (from saved objects/URL state) to SimplifiedFilter
@@ -36,6 +41,14 @@ export function fromStoredFilter(storedFilter: any): SimplifiedFilter {
 
     // Extract base properties from stored filter
     const baseProperties = extractBaseProperties(storedFilter);
+
+    // TIER 1.5: High-Fidelity Check - Preserve as DSL if fidelity required
+    if (requiresHighFidelity(storedFilter)) {
+      return {
+        ...baseProperties,
+        dsl: convertToRawDSLWithReason(storedFilter),
+      } as SimplifiedFilter;
+    }
 
     // TIER 1: Full Compatibility - Direct SimplifiedFilter conversion
     if (isFullyCompatible(storedFilter)) {
@@ -155,9 +168,13 @@ export function convertToSimpleCondition(storedFilter: any): SimpleFilterConditi
   }
 
   if (query.match) {
-    const value = query.match[field];
+    const matchField = Object.keys(query.match)[0];
+    const matchValue = query.match[matchField];
+    const value = typeof matchValue === 'object' ? matchValue.query : matchValue;
+
     return {
       ...baseCondition,
+      field: matchField, // Use the field from the query, not meta
       operator: meta.negate ? 'is_not' : 'is',
       value,
     };
@@ -255,11 +272,12 @@ export function parseQueryFilter(storedFilter: any): SimpleFilterCondition {
     const field = Object.keys(query.match)[0];
     const config = query.match[field];
 
-    if (config.type === 'phrase') {
+    // Check if this is a phrase-type match query
+    if (config.type === 'phrase' || (typeof config === 'object' && config.query)) {
       return {
         field,
         operator: 'is',
-        value: config.query,
+        value: config.query || config,
       };
     }
   }
@@ -276,11 +294,38 @@ export function parseQueryFilter(storedFilter: any): SimpleFilterCondition {
     };
   }
 
+  // Handle term queries
+  if (query.term) {
+    const field = Object.keys(query.term)[0];
+    const value = query.term[field];
+    const meta = storedFilter.meta || {};
+
+    return {
+      field,
+      operator: meta.negate ? 'is_not' : 'is',
+      value,
+    };
+  }
+
+  // Handle terms queries (multiple values)
+  if (query.terms) {
+    const field = Object.keys(query.terms)[0];
+    const values = query.terms[field];
+    const meta = storedFilter.meta || {};
+
+    return {
+      field,
+      operator: meta.negate ? 'is_not_one_of' : 'is_one_of',
+      value: values,
+    };
+  }
+
   // Handle exists queries
   if (query.exists) {
+    const meta = storedFilter.meta || {};
     return {
       field: query.exists.field,
-      operator: 'exists',
+      operator: meta.negate ? 'not_exists' : 'exists',
     };
   }
 

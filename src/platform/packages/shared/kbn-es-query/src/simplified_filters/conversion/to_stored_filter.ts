@@ -102,12 +102,28 @@ export function convertFromSimpleCondition(
       break;
 
     case 'is':
-      query = { term: { [condition.field]: condition.value } };
+      // Use match query for phrase filters to maintain compatibility
+      query = {
+        match: {
+          [condition.field]: {
+            query: condition.value,
+            type: 'phrase',
+          },
+        },
+      };
       meta = { ...meta, params: { query: condition.value } };
       break;
 
     case 'is_not':
-      query = { term: { [condition.field]: condition.value } };
+      // Use match query for phrase filters to maintain compatibility
+      query = {
+        match: {
+          [condition.field]: {
+            query: condition.value,
+            type: 'phrase',
+          },
+        },
+      };
       meta = { ...meta, negate: true, params: { query: condition.value } };
       break;
 
@@ -123,8 +139,23 @@ export function convertFromSimpleCondition(
 
     case 'range':
       const rangeValue = condition.value as RangeValue;
-      query = { range: { [condition.field]: rangeValue } };
-      meta = { ...meta, params: rangeValue };
+
+      // Build range query, preserving format for timestamp fields
+      const rangeQuery: any = { ...rangeValue };
+      if (condition.field === '@timestamp') {
+        rangeQuery.format = 'strict_date_optional_time';
+      }
+
+      query = { range: { [condition.field]: rangeQuery } };
+
+      // Only put range values (not format) in meta.params
+      const paramsValue: any = {};
+      if (rangeValue.gte !== undefined) paramsValue.gte = rangeValue.gte;
+      if (rangeValue.lte !== undefined) paramsValue.lte = rangeValue.lte;
+      if (rangeValue.gt !== undefined) paramsValue.gt = rangeValue.gt;
+      if (rangeValue.lt !== undefined) paramsValue.lt = rangeValue.lt;
+
+      meta = { ...meta, params: paramsValue };
       break;
 
     default:
@@ -143,11 +174,61 @@ export function convertFromSimpleCondition(
  * Convert filter group to stored filter
  */
 export function convertFromFilterGroup(group: FilterGroup, baseStored: StoredFilter): StoredFilter {
-  const meta = {
+  // Check if this is a phrases filter (OR group with same-field conditions)
+  const isPhrasesFilter =
+    group.type === 'OR' &&
+    group.conditions.length > 1 &&
+    group.conditions.every((condition) => {
+      const typedCondition = condition as SimpleFilterCondition;
+      return (
+        'field' in typedCondition &&
+        'operator' in typedCondition &&
+        typedCondition.field === (group.conditions[0] as SimpleFilterCondition).field &&
+        typedCondition.operator === 'is'
+      );
+    });
+
+  let meta = {
     ...baseStored.meta,
   };
 
-  // Convert conditions to query clauses
+  if (isPhrasesFilter) {
+    // Handle as phrases filter
+    const field = (group.conditions[0] as SimpleFilterCondition).field;
+    const values = group.conditions
+      .map((condition) => {
+        const typedCondition = condition as SimpleFilterCondition;
+        return 'value' in typedCondition ? typedCondition.value : undefined;
+      })
+      .filter(Boolean);
+
+    meta = {
+      ...meta,
+      key: field,
+      type: 'phrases',
+      params: values as any,
+    };
+
+    // Build match_phrase queries for each value
+    const clauses = values.map((value) => ({
+      match_phrase: {
+        [field]: value,
+      },
+    }));
+
+    const boolQuery: any = {
+      should: clauses,
+      minimum_should_match: 1,
+    };
+
+    return {
+      ...baseStored,
+      query: { bool: boolQuery },
+      meta,
+    };
+  }
+
+  // Standard group filter conversion
   const clauses = group.conditions.map((condition) => {
     const typedCondition = condition as SimpleFilterCondition | FilterGroup;
     if (isNestedFilterGroup(typedCondition)) {

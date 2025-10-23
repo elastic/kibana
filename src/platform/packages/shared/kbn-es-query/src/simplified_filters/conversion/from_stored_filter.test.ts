@@ -15,6 +15,7 @@ import {
   extractFieldFromQuery,
 } from './from_stored_filter';
 import { FilterConversionError } from '../errors';
+import { isConditionFilter, isGroupFilter, isDSLFilter } from './type_guards';
 
 describe('fromStoredFilter', () => {
   describe('main conversion function', () => {
@@ -29,11 +30,14 @@ describe('fromStoredFilter', () => {
 
       const result = fromStoredFilter(storedFilter);
 
-      expect((result as any).condition).toEqual({
-        field: 'status',
-        operator: 'is',
-        value: 'active',
-      });
+      expect(isConditionFilter(result)).toBe(true);
+      if (isConditionFilter(result)) {
+        expect(result.condition).toEqual({
+          field: 'status',
+          operator: 'is',
+          value: 'active',
+        });
+      }
     });
 
     it('should convert match_phrase query filters', () => {
@@ -48,11 +52,14 @@ describe('fromStoredFilter', () => {
 
       const result = fromStoredFilter(storedFilter);
 
-      expect((result as any).condition).toEqual({
-        field: 'message',
-        operator: 'is',
-        value: 'error occurred',
-      });
+      expect(isConditionFilter(result)).toBe(true);
+      if (isConditionFilter(result)) {
+        expect(result.condition).toEqual({
+          field: 'message',
+          operator: 'is',
+          value: 'error occurred',
+        });
+      }
     });
 
     it('should convert boolean group filters', () => {
@@ -67,13 +74,16 @@ describe('fromStoredFilter', () => {
 
       const result = fromStoredFilter(storedFilter);
 
-      expect((result as any).group).toEqual({
-        type: 'AND',
-        conditions: expect.arrayContaining([
-          expect.objectContaining({ field: 'status', operator: 'is', value: 'active' }),
-          expect.objectContaining({ field: 'type', operator: 'is', value: 'user' }),
-        ]),
-      });
+      expect(isGroupFilter(result)).toBe(true);
+      if (isGroupFilter(result)) {
+        expect(result.group).toEqual({
+          type: 'AND',
+          conditions: expect.arrayContaining([
+            expect.objectContaining({ field: 'status', operator: 'is', value: 'active' }),
+            expect.objectContaining({ field: 'type', operator: 'is', value: 'user' }),
+          ]),
+        });
+      }
     });
 
     it('should preserve complex filters as DSL', () => {
@@ -91,9 +101,12 @@ describe('fromStoredFilter', () => {
 
       const result = fromStoredFilter(storedFilter);
 
-      expect((result as any).dsl).toEqual({
-        query: storedFilter.query,
-      });
+      expect(isDSLFilter(result)).toBe(true);
+      if (isDSLFilter(result)) {
+        expect(result.dsl).toEqual({
+          query: storedFilter.query,
+        });
+      }
     });
 
     it('should extract base properties', () => {

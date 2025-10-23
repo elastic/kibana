@@ -47,11 +47,51 @@ export function isFullyCompatible(storedFilter: any): boolean {
 }
 
 /**
+ * TIER 1.5: High-Fidelity Detection - Requires DSL preservation
+ */
+export function requiresHighFidelity(storedFilter: any): boolean {
+  // match_phrase queries must preserve exact semantics
+  if (storedFilter.query?.match_phrase) {
+    return true;
+  }
+
+  // Complex match queries with advanced parameters
+  if (storedFilter.query?.match) {
+    const matchValues = Object.values(storedFilter.query.match);
+    const hasComplexParams = matchValues.some((value: any) => {
+      return (
+        typeof value === 'object' &&
+        value !== null &&
+        (value.analyzer || value.fuzziness || value.minimum_should_match)
+      );
+    });
+    if (hasComplexParams) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
  * TIER 2: Enhanced Compatibility - Can be parsed and simplified
  */
 export function isEnhancedCompatible(storedFilter: any): boolean {
+  // Exclude high-fidelity cases from simple conversion
+  if (requiresHighFidelity(storedFilter)) {
+    return false;
+  }
+
   // Check for simplifiable query structures
-  if (storedFilter.query?.match_phrase || storedFilter.query?.match) {
+  if (storedFilter.query?.match) {
+    return true;
+  }
+
+  if (storedFilter.query?.term) {
+    return true;
+  }
+
+  if (storedFilter.query?.terms) {
     return true;
   }
 

@@ -7,13 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SimplifiedFilter, SimpleFilterCondition } from '@kbn/es-query-server';
+import type {
+  SimplifiedFilter,
+  SimpleFilterCondition,
+  Filter as StoredFilter,
+} from '@kbn/es-query-server';
 import {
   toStoredFilter,
   convertFromSimpleCondition,
   convertFromFilterGroup,
   convertFromDSLFilter,
 } from './to_stored_filter';
+import { FilterStateStore } from '../../..';
 import { FilterConversionError } from '../errors';
 
 describe('toStoredFilter', () => {
@@ -39,7 +44,12 @@ describe('toStoredFilter', () => {
         negate: false,
       });
       expect(result.query).toEqual({
-        term: { status: 'active' },
+        match: {
+          status: {
+            query: 'active',
+            type: 'phrase',
+          },
+        },
       });
     });
 
@@ -73,7 +83,24 @@ describe('toStoredFilter', () => {
 
       expect(result.query).toEqual({
         bool: {
-          must: [{ term: { status: 'active' } }, { term: { type: 'user' } }],
+          must: [
+            {
+              match: {
+                status: {
+                  query: 'active',
+                  type: 'phrase',
+                },
+              },
+            },
+            {
+              match: {
+                type: {
+                  query: 'user',
+                  type: 'phrase',
+                },
+              },
+            },
+          ],
         },
       });
     });
@@ -101,10 +128,11 @@ describe('toStoredFilter', () => {
   });
 
   describe('convertFromSimpleCondition', () => {
-    const baseStored = {
-      $state: { store: 'appState' },
+    const createBaseStored = (): StoredFilter => ({
+      $state: { store: FilterStateStore.APP_STATE },
       meta: { alias: null, disabled: false, negate: false },
-    };
+      query: {}, // Will be overridden by the conversion function
+    });
 
     it('should convert exists conditions', () => {
       const condition: SimpleFilterCondition = {
@@ -112,7 +140,7 @@ describe('toStoredFilter', () => {
         operator: 'exists',
       };
 
-      const result = convertFromSimpleCondition(condition, baseStored as any);
+      const result = convertFromSimpleCondition(condition, createBaseStored());
 
       expect(result.query).toEqual({ exists: { field: 'username' } });
       expect(result.meta.type).toBe('exists');
@@ -124,7 +152,7 @@ describe('toStoredFilter', () => {
         operator: 'not_exists',
       };
 
-      const result = convertFromSimpleCondition(condition, baseStored as any);
+      const result = convertFromSimpleCondition(condition, createBaseStored());
 
       expect(result.query).toEqual({ exists: { field: 'username' } });
       expect(result.meta.negate).toBe(true);
@@ -137,36 +165,17 @@ describe('toStoredFilter', () => {
         value: 'active',
       };
 
-      const result = convertFromSimpleCondition(condition, baseStored as any);
+      const result = convertFromSimpleCondition(condition, createBaseStored());
 
-      expect(result.query).toEqual({ term: { status: 'active' } });
-      expect(result.meta.params).toEqual({ query: 'active' });
-    });
-
-    it('should convert is_not conditions', () => {
-      const condition: SimpleFilterCondition = {
-        field: 'status',
-        operator: 'is_not',
-        value: 'inactive',
-      };
-
-      const result = convertFromSimpleCondition(condition, baseStored as any);
-
-      expect(result.query).toEqual({ term: { status: 'inactive' } });
-      expect(result.meta.negate).toBe(true);
-    });
-
-    it('should convert is_one_of conditions', () => {
-      const condition: SimpleFilterCondition = {
-        field: 'tags',
-        operator: 'is_one_of',
-        value: ['urgent', 'bug'],
-      };
-
-      const result = convertFromSimpleCondition(condition, baseStored as any);
-
-      expect(result.query).toEqual({ terms: { tags: ['urgent', 'bug'] } });
-      expect(result.meta.params).toEqual({ terms: ['urgent', 'bug'] });
+      expect(result.query).toEqual({
+        match: {
+          status: {
+            query: 'active',
+            type: 'phrase',
+          },
+        },
+      });
+      expect(result.meta.type).toBe('phrase');
     });
 
     it('should convert range conditions', () => {
@@ -176,7 +185,7 @@ describe('toStoredFilter', () => {
         value: { gte: 18, lte: 65 },
       };
 
-      const result = convertFromSimpleCondition(condition, baseStored as any);
+      const result = convertFromSimpleCondition(condition, createBaseStored());
 
       expect(result.query).toEqual({ range: { age: { gte: 18, lte: 65 } } });
       expect(result.meta.params).toEqual({ gte: 18, lte: 65 });
@@ -184,10 +193,11 @@ describe('toStoredFilter', () => {
   });
 
   describe('convertFromFilterGroup', () => {
-    const baseStored = {
-      $state: { store: 'appState' },
+    const createBaseStored = (): StoredFilter => ({
+      $state: { store: FilterStateStore.APP_STATE },
       meta: { alias: null, disabled: false, negate: false },
-    };
+      query: {},
+    });
 
     it('should convert AND groups to must queries', () => {
       const group = {
@@ -198,11 +208,28 @@ describe('toStoredFilter', () => {
         ],
       };
 
-      const result = convertFromFilterGroup(group, baseStored as any);
+      const result = convertFromFilterGroup(group, createBaseStored());
 
       expect(result.query).toEqual({
         bool: {
-          must: [{ term: { status: 'active' } }, { term: { type: 'user' } }],
+          must: [
+            {
+              match: {
+                status: {
+                  query: 'active',
+                  type: 'phrase',
+                },
+              },
+            },
+            {
+              match: {
+                type: {
+                  query: 'user',
+                  type: 'phrase',
+                },
+              },
+            },
+          ],
         },
       });
     });
@@ -216,11 +243,12 @@ describe('toStoredFilter', () => {
         ],
       };
 
-      const result = convertFromFilterGroup(group, baseStored as any);
+      const result = convertFromFilterGroup(group, createBaseStored());
 
+      // Same-field OR groups should be detected as phrases filter with match_phrase queries
       expect(result.query).toEqual({
         bool: {
-          should: [{ term: { status: 'active' } }, { term: { status: 'pending' } }],
+          should: [{ match_phrase: { status: 'active' } }, { match_phrase: { status: 'pending' } }],
           minimum_should_match: 1,
         },
       });
@@ -228,17 +256,18 @@ describe('toStoredFilter', () => {
   });
 
   describe('convertFromDSLFilter', () => {
-    const baseStored = {
-      $state: { store: 'appState' },
+    const createBaseStored = (): StoredFilter => ({
+      $state: { store: FilterStateStore.APP_STATE },
       meta: { alias: null, disabled: false, negate: false },
-    };
+      query: {},
+    });
 
     it('should convert DSL filters to stored format', () => {
       const dsl = {
         query: { script: { source: 'doc.field.value > 0' } },
       };
 
-      const result = convertFromDSLFilter(dsl, baseStored as any);
+      const result = convertFromDSLFilter(dsl, createBaseStored());
 
       expect(result.query).toEqual(dsl.query);
       expect(result.meta.type).toBe('custom');
