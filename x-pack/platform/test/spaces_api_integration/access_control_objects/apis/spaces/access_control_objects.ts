@@ -861,7 +861,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('#bulk_update', () => {
       describe('success', () => {
-        it('allows owner to bulk update objects marked as read only', async () => {
+        it('allows owner to bulk update objects marked as write restricted', async () => {
           const { cookie: objectOwnerCookie, profileUid: objectOwnerProfileUid } =
             await loginAsObjectOwner('test_user', 'changeme');
           const firstObject = await supertestWithoutAuth
@@ -908,7 +908,7 @@ export default function ({ getService }: FtrProviderContext) {
           }
         });
 
-        it('allows admin to bulk update objects marked as read only', async () => {
+        it('allows admin to bulk update objects marked as write restricted', async () => {
           const { cookie: objectOwnerCookie, profileUid: objectOwnerProfileUid } =
             await loginAsObjectOwner('test_user', 'changeme');
           const firstObject = await supertestWithoutAuth
