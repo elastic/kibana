@@ -29,7 +29,3 @@ export {
   parseAggregationResults,
 } from './data';
 export { NORMALIZED_FIELD_TYPES } from './normalized_field_types';
-export {
-  RULE_DETAIL_DESCRIPTION_FIELD_TYPES,
-  type RuleDetailDescriptionFieldType,
-} from './rule_detail_description_type';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { GetDescriptionFieldsFn } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { RULE_DETAIL_DESCRIPTION_FIELD_TYPES } from '@kbn/triggers-actions-ui-plugin/common';
+import { RULE_DETAIL_DESCRIPTION_FIELD_TYPES } from '@kbn/triggers-actions-ui-plugin/public';
 
 export const getDescriptionFields: GetDescriptionFieldsFn = ({ rule, prebuildFields }) => {
   if (!rule || !prebuildFields) return [];
