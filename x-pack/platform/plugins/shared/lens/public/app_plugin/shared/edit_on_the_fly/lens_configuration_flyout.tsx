@@ -29,6 +29,7 @@ import { LayerConfiguration } from './layer_configuration_section';
 import type { EditConfigPanelProps } from './types';
 import { FlyoutWrapper } from './flyout_wrapper';
 import { SuggestionPanel } from '../../../editor_frame_service/editor_frame/suggestion_panel';
+import { VisualizationToolbarWrapper } from '../../../editor_frame_service/editor_frame/workspace_panel/workspace_panel_wrapper';
 import { useEditorFrameService } from '../../../editor_frame_service/editor_frame_service_context';
 import { useApplicationUserMessages } from '../../get_application_user_messages';
 import { trackSaveUiCounterEvents } from '../../../lens_ui_telemetry';
@@ -293,6 +294,7 @@ export function LensEditConfigurationFlyout({
           isSaveable={isSaveable}
           isReadOnly={isReadOnly}
           applyButtonLabel={applyButtonLabel}
+          toolbar={<VisualizationToolbarWrapper framePublicAPI={framePublicAPI} />}
         >
           <LayerConfiguration
             // TODO: remove this once we support switching to any chart in Discover
@@ -332,6 +334,7 @@ export function LensEditConfigurationFlyout({
         isNewPanel={isNewPanel}
         isReadOnly={isReadOnly}
         applyButtonLabel={applyButtonLabel}
+        toolbar={<VisualizationToolbarWrapper framePublicAPI={framePublicAPI} />}
       >
         <EuiFlexGroup
           css={css`
