@@ -10,7 +10,7 @@ import moment from 'moment';
 import { schema } from '@kbn/config-schema';
 import { isEmpty, omit } from 'lodash';
 import type { RruleSchedule } from '@kbn/task-manager-plugin/server';
-import { scheduleRruleSchemaV2 } from '@kbn/task-manager-plugin/server';
+import { scheduleRruleSchemaV3 } from '@kbn/task-manager-plugin/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import type { IKibanaResponse } from '@kbn/core/server';
 import { ScheduleType } from '@kbn/reporting-server';
@@ -40,7 +40,7 @@ const MAX_ALLOWED_EMAILS = 30;
 const validation = {
   params: schema.object({ exportType: schema.string({ minLength: 2 }) }),
   body: schema.object({
-    schedule: scheduleRruleSchemaV2,
+    schedule: scheduleRruleSchemaV3,
     notification: schema.maybe(rawNotificationSchema),
     jobParams: schema.string(),
   }),

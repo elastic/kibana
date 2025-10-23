@@ -22,7 +22,7 @@ const flyoutOpenCloseAnimation = keyframes`
 
 export const flyoutContainerStyles = (euiThemeContext: UseEuiTheme) => css`
   border-left: ${euiThemeContext.euiTheme.border.thin};
-  ${euiShadow(euiThemeContext, 'xl')};
+  ${euiShadow(euiThemeContext, 'xl', { border: 'none' })};
   position: fixed;
   top: 0;
   bottom: 0;
