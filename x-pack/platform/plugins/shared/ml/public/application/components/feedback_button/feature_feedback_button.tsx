@@ -12,14 +12,14 @@ import { EuiButtonEmpty } from '@elastic/eui';
 const KIBANA_VERSION_QUERY_PARAM = 'version';
 const KIBANA_DEPLOYMENT_TYPE_PARAM = 'deployment_type';
 const SANITIZED_PATH_PARAM = 'path';
-const ML_JOB_TYPE = 'ml_job_type';
 const FEEDBACK_BUTTON_DEFAULT_TEXT = i18n.translate('xpack.ml.featureFeedbackButton.defaultText', {
   defaultMessage: 'Give feedback',
 });
 
-export type NodeType = 'host' | 'pod';
-
 const getDeploymentType = (isCloudEnv?: boolean, isServerlessEnv?: boolean): string | undefined => {
+  if (isCloudEnv === undefined && isServerlessEnv === undefined) {
+    return undefined;
+  }
   if (isServerlessEnv) {
     return 'Serverless';
   }
@@ -29,16 +29,12 @@ const getDeploymentType = (isCloudEnv?: boolean, isServerlessEnv?: boolean): str
   return 'Self-Managed';
 };
 
-const getMLJobType = (mlJobType: NodeType) =>
-  mlJobType === 'pod' ? 'Pod Anomalies' : 'Host Anomalies';
-
 export const getSurveyFeedbackURL = ({
   formUrl,
   kibanaVersion,
   sanitizedPath,
   isCloudEnv,
   isServerlessEnv,
-  nodeType,
 }: {
   formUrl: string;
   kibanaVersion?: string;
@@ -47,14 +43,8 @@ export const getSurveyFeedbackURL = ({
   mlJobType?: string;
   isCloudEnv?: boolean;
   isServerlessEnv?: boolean;
-  nodeType?: NodeType;
 }) => {
-  const deploymentType =
-    isCloudEnv !== undefined || isServerlessEnv !== undefined
-      ? getDeploymentType(isCloudEnv, isServerlessEnv)
-      : undefined;
-
-  const mlJobType = nodeType ? getMLJobType(nodeType) : undefined;
+  const deploymentType = getDeploymentType(isCloudEnv, isServerlessEnv);
 
   const url = new URL(formUrl);
   if (kibanaVersion) {
@@ -65,9 +55,6 @@ export const getSurveyFeedbackURL = ({
   }
   if (sanitizedPath) {
     url.searchParams.append(SANITIZED_PATH_PARAM, sanitizedPath);
-  }
-  if (mlJobType) {
-    url.searchParams.append(ML_JOB_TYPE, mlJobType);
   }
 
   return url.href;
@@ -83,7 +70,6 @@ interface FeatureFeedbackButtonProps {
   isCloudEnv?: boolean;
   isServerlessEnv?: boolean;
   sanitizedPath?: string;
-  nodeType?: NodeType;
 }
 
 export const FeatureFeedbackButton = ({
@@ -95,7 +81,6 @@ export const FeatureFeedbackButton = ({
   isCloudEnv,
   isServerlessEnv,
   sanitizedPath,
-  nodeType,
   surveyButtonText = FEEDBACK_BUTTON_DEFAULT_TEXT,
 }: FeatureFeedbackButtonProps) => {
   return (
@@ -105,7 +90,6 @@ export const FeatureFeedbackButton = ({
         formUrl,
         kibanaVersion,
         isCloudEnv,
-        nodeType,
         isServerlessEnv,
         sanitizedPath,
       })}
