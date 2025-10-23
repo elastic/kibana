@@ -2,6 +2,13 @@
 
 exports[`getIsUsingTransactionEvents with config xpack.apm.searchAggregatedTransactions: always should query for data when kuery is set 1`] = `
 Object {
+  "aggs": Object {
+    "services": Object {
+      "terms": Object {
+        "field": "service.name",
+      },
+    },
+  },
   "apm": Object {
     "events": Array [
       "metric",
@@ -38,6 +45,13 @@ Object {
 
 exports[`getIsUsingTransactionEvents with config xpack.apm.searchAggregatedTransactions: auto should query for data once if metrics data found 1`] = `
 Object {
+  "aggs": Object {
+    "services": Object {
+      "terms": Object {
+        "field": "service.name",
+      },
+    },
+  },
   "apm": Object {
     "events": Array [
       "metric",
@@ -65,6 +79,13 @@ Array [
   Array [
     "get_has_aggregated_transactions",
     Object {
+      "aggs": Object {
+        "services": Object {
+          "terms": Object {
+            "field": "service.name",
+          },
+        },
+      },
       "apm": Object {
         "events": Array [
           "metric",
