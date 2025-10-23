@@ -17,7 +17,7 @@ import { SelectOption } from './typed_interrupts/select_option';
 import { InputText } from './typed_interrupts/input_text';
 
 interface Props<T extends InterruptType> {
-  interruptValue?: { type: T } & InterruptValue;
+  interruptValue: { type: T } & InterruptValue;
   resumeGraph: (threadId: string, resumeValue: { type: T } & InterruptResumeValue) => void;
   interruptResumeValue?: { type: T } & InterruptResumeValue;
   isLastInConversation: boolean;
@@ -29,10 +29,6 @@ export const InterruptFactory = ({
   interruptResumeValue: resumedValue,
   isLastInConversation,
 }: Props<InterruptType>) => {
-  if (!interrupt) {
-    return;
-  }
-
   switch (interrupt.type) {
     case 'SELECT_OPTION':
       return (
