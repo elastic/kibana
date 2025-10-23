@@ -7,7 +7,6 @@
 
 import { kqlQuery, rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { merge } from 'lodash';
 import type { ServicesResponse } from '../../../common/service_map/types';
 import { AGENT_NAME, SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
@@ -27,7 +26,7 @@ export async function getServiceStats({
 }: IEnvOptions & { maxNumberOfServices: number }): Promise<ServicesResponse[]> {
   const metricParams = {
     apm: {
-      events: [ProcessorEvent.metric],
+      events: [ProcessorEvent.metric, ProcessorEvent.transaction],
     },
     track_total_hits: false,
     size: 0,
@@ -37,7 +36,6 @@ export async function getServiceStats({
           ...rangeQuery(start, end),
           ...environmentQuery(environment),
           ...termsQuery(SERVICE_NAME, ...servicesWithAggregatedTransactions),
-          ...termsQuery(SERVICE_NAME, serviceName),
           ...kqlQuery(serviceGroupKuery),
           ...kqlQuery(kuery),
         ],
@@ -75,6 +73,7 @@ export async function getServiceStats({
           ...kqlQuery(serviceGroupKuery),
           ...kqlQuery(kuery),
         ],
+        must_not: [...termsQuery(SERVICE_NAME, ...servicesWithAggregatedTransactions)],
       },
     },
     aggs: {
@@ -115,16 +114,5 @@ export async function getServiceStats({
       [SERVICE_ENVIRONMENT]: environment === ENVIRONMENT_ALL.value ? null : environment,
     })) || [];
 
-  const servicesMap = new Map<string, ServicesResponse>();
-
-  [...metricServices, ...transactionServices].forEach((service) => {
-    const existingService = servicesMap.get(service[SERVICE_NAME]);
-    if (existingService) {
-      servicesMap.set(service[SERVICE_NAME], merge({}, existingService, service));
-    } else {
-      servicesMap.set(service[SERVICE_NAME], service);
-    }
-  });
-
-  return Array.from(servicesMap.values());
+  return [...metricServices, ...transactionServices];
 }
