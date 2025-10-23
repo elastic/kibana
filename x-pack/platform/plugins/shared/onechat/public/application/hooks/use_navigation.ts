@@ -39,8 +39,17 @@ export const useNavigation = () => {
     [application]
   );
 
+  const navigateToManageConnectors = useCallback(
+    () =>
+      application.navigateToApp('management', {
+        path: '/insightsAndAlerting/triggersActionsConnectors/connectors',
+      }),
+    [application]
+  );
+
   return {
     createOnechatUrl,
     navigateToOnechatUrl,
+    navigateToManageConnectors,
   };
 };
