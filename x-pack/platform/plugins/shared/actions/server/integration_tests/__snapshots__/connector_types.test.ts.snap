@@ -44442,7 +44442,7 @@ Object {
       "rules": Array [
         Object {
           "args": Object {
-            "limit": 25,
+            "limit": 500,
           },
           "name": "max",
         },
