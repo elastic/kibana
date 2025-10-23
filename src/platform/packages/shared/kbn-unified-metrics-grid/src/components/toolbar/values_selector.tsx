@@ -62,20 +62,22 @@ export const ValuesSelector = ({
   });
   // Convert values to EuiSelectable options with group labels
   const options: SelectableEntry[] = useMemo(() => {
-    const groupedValues = new Map<string, string[]>();
+    const groupedValues = new Map<string, { value: string; valueMetrics: string[] }[]>();
     const selectedSet = new Set(selectedValues);
     const isAtMaxLimit = selectedValues.length >= MAX_VALUES_SELECTIONS;
 
-    values.forEach(({ value, field }) => {
+    values.forEach(({ value, field, valueMetrics }) => {
       const arr = groupedValues.get(field) ?? [];
-      arr.push(value);
+      arr.push({ value, valueMetrics });
       groupedValues.set(field, arr);
     });
 
     return Array.from(groupedValues.entries()).flatMap<SelectableEntry>(([field, fieldValues]) => [
       { label: field, isGroupLabel: true, value: field },
-      ...fieldValues.map<SelectableEntry>((value) => {
-        const key = `${field}${FIELD_VALUE_SEPARATOR}${value}`;
+      ...fieldValues.map<SelectableEntry>(({ value, valueMetrics }) => {
+        const key = `${field}${FIELD_VALUE_SEPARATOR}${value}${FIELD_VALUE_SEPARATOR}${JSON.stringify(
+          valueMetrics
+        )}`;
         const isSelected = selectedSet.has(key);
         const isDisabledByLimit = !isSelected && isAtMaxLimit;
 

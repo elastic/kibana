@@ -73,6 +73,12 @@ export const MetricsExperienceGrid = ({
     timeRange,
   });
 
+  const filters = useValueFilters(valueFilters);
+
+  const valueMetrics = useMemo(() => {
+    return [...new Set(filters.flatMap((filter) => filter.valueMetrics))];
+  }, [filters]);
+
   const {
     currentPageFields = [],
     totalPages = 0,
@@ -83,14 +89,13 @@ export const MetricsExperienceGrid = ({
     pageSize: PAGE_SIZE,
     currentPage,
     searchTerm,
+    valueMetrics,
   }) ?? {};
 
   const columns = useMemo<NonNullable<EuiFlexGridProps['columns']>>(
     () => Math.min(filteredFieldsCount, 4) as NonNullable<EuiFlexGridProps['columns']>,
     [filteredFieldsCount]
   );
-
-  const filters = useValueFilters(valueFilters);
 
   if (fields.length === 0) {
     return <EmptyState isLoading={isFieldsLoading} />;

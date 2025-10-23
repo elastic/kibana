@@ -17,14 +17,17 @@ export const usePaginatedFields = ({
   pageSize,
   currentPage,
   searchTerm,
+  valueMetrics,
 }: {
   fields: MetricField[];
   searchTerm: string;
   dimensions: string[];
   pageSize: number;
   currentPage: number;
+  valueMetrics: string[];
 }) => {
   const dimensionsSet = useMemo(() => new Set(dimensions), [dimensions]);
+  const valueMetricsSet = useMemo(() => new Set(valueMetrics), [valueMetrics]);
   const searchTermLower = useMemo(() => searchTerm.toLowerCase(), [searchTerm]);
 
   const buildPaginatedFields = useCallback(() => {
@@ -43,6 +46,13 @@ export const usePaginatedFields = ({
         }
       }
 
+      if (valueMetricsSet.size > 0) {
+        const hasMatchingMetric = valueMetricsSet.has(field.name);
+        if (!hasMatchingMetric) {
+          return false;
+        }
+      }
+
       return true;
     });
 
@@ -55,7 +65,7 @@ export const usePaginatedFields = ({
       filteredFieldsCount: filteredFields.length,
       totalPages,
     };
-  }, [fields, dimensionsSet, searchTermLower, pageSize, currentPage]);
+  }, [fields, dimensionsSet, searchTermLower, pageSize, currentPage, valueMetricsSet]);
 
   const [paginatedFieldsContext, setPaginatedFieldsContext] =
     useState<ReturnType<typeof buildPaginatedFields>>();
