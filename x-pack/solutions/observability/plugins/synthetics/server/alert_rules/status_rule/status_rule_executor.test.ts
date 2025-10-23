@@ -330,7 +330,7 @@ describe('StatusRuleExecutor', () => {
 
     it('should alert if monitor meet location threshold', async () => {
       const spy = jest.spyOn(statusRule, 'scheduleAlert');
-      statusRule.handleDownMonitorThresholdAlert({
+      await statusRule.handleDownMonitorThresholdAlert({
         downConfigs: {
           'id1-us_central_qa': {
             locationId: 'us_central_qa',
@@ -399,7 +399,7 @@ describe('StatusRuleExecutor', () => {
       };
 
       const spy = jest.spyOn(statusRule, 'scheduleAlert');
-      statusRule.handleDownMonitorThresholdAlert({
+      await statusRule.handleDownMonitorThresholdAlert({
         downConfigs: {
           'id1-us_central_qa': {
             locationId: 'us_central_qa',
@@ -429,7 +429,7 @@ describe('StatusRuleExecutor', () => {
         },
       };
       const spy = jest.spyOn(statusRule, 'scheduleAlert');
-      statusRule.handleDownMonitorThresholdAlert({
+      await statusRule.handleDownMonitorThresholdAlert({
         downConfigs: {
           'id1-us_central_qa': {
             locationId: 'us_central_qa',
@@ -472,7 +472,7 @@ describe('StatusRuleExecutor', () => {
         },
       };
       const spy = jest.spyOn(statusRule, 'scheduleAlert');
-      statusRule.handleDownMonitorThresholdAlert({
+      await statusRule.handleDownMonitorThresholdAlert({
         downConfigs: {
           'id1-us_central_qa': {
             locationId: 'us_central_qa',
@@ -553,7 +553,7 @@ describe('StatusRuleExecutor', () => {
         },
       };
       const spy = jest.spyOn(statusRule, 'scheduleAlert');
-      statusRule.handleDownMonitorThresholdAlert({
+      await statusRule.handleDownMonitorThresholdAlert({
         downConfigs: {
           'id1-us_central_qa': {
             locationId: 'us_central_qa',
@@ -744,7 +744,7 @@ describe('StatusRuleExecutor', () => {
       jest.clearAllMocks();
     });
 
-    it('should call schedulePendingAlertPerConfigId when alertOnNoData is true and groupBy is not locationId', () => {
+    it('should call schedulePendingAlertPerConfigId when alertOnNoData is true and groupBy is not locationId', async () => {
       // Set up params with alertOnNoData=true and groupBy='monitor'
       statusRule.params = {
         condition: {
@@ -754,7 +754,7 @@ describe('StatusRuleExecutor', () => {
       };
 
       // Call the method
-      statusRule.handlePendingMonitorAlert({ pendingConfigs: mockPendingConfigs });
+      await statusRule.handlePendingMonitorAlert({ pendingConfigs: mockPendingConfigs });
 
       // Verify schedulePendingAlertPerConfigId was called with the correct arguments
       expect(schedulePendingAlertPerConfigIdSpy).toHaveBeenCalledTimes(1);
@@ -766,7 +766,7 @@ describe('StatusRuleExecutor', () => {
       expect(schedulePendingAlertPerConfigIdPerLocationSpy).not.toHaveBeenCalled();
     });
 
-    it('should call schedulePendingAlertPerConfigIdPerLocation when alertOnNoData is true and groupBy is locationId', () => {
+    it('should call schedulePendingAlertPerConfigIdPerLocation when alertOnNoData is true and groupBy is locationId', async () => {
       // Set up params with alertOnNoData=true and groupBy='locationId'
       statusRule.params = {
         condition: {
@@ -776,7 +776,7 @@ describe('StatusRuleExecutor', () => {
       };
 
       // Call the method
-      statusRule.handlePendingMonitorAlert({ pendingConfigs: mockPendingConfigs });
+      await statusRule.handlePendingMonitorAlert({ pendingConfigs: mockPendingConfigs });
 
       // Verify schedulePendingAlertPerConfigIdPerLocation was called with the correct arguments
       expect(schedulePendingAlertPerConfigIdPerLocationSpy).toHaveBeenCalledTimes(1);
@@ -788,7 +788,7 @@ describe('StatusRuleExecutor', () => {
       expect(schedulePendingAlertPerConfigIdSpy).not.toHaveBeenCalled();
     });
 
-    it('should call schedulePendingAlertPerConfigIdPerLocation when alertOnNoData is true and groupBy is undefined', () => {
+    it('should call schedulePendingAlertPerConfigIdPerLocation when alertOnNoData is true and groupBy is undefined', async () => {
       // Set up params with alertOnNoData=true and groupBy undefined
       statusRule.params = {
         condition: {
@@ -797,7 +797,7 @@ describe('StatusRuleExecutor', () => {
       };
 
       // Call the method
-      statusRule.handlePendingMonitorAlert({ pendingConfigs: mockPendingConfigs });
+      await statusRule.handlePendingMonitorAlert({ pendingConfigs: mockPendingConfigs });
 
       // Verify schedulePendingAlertPerConfigIdPerLocation was called with the correct arguments
       expect(schedulePendingAlertPerConfigIdPerLocationSpy).toHaveBeenCalledTimes(1);
@@ -809,7 +809,7 @@ describe('StatusRuleExecutor', () => {
       expect(schedulePendingAlertPerConfigIdSpy).not.toHaveBeenCalled();
     });
 
-    it('should not call any scheduling methods when alertOnNoData is false', () => {
+    it('should not call any scheduling methods when alertOnNoData is false', async () => {
       // Set up params with alertOnNoData=false
       statusRule.params = {
         condition: {
@@ -819,7 +819,7 @@ describe('StatusRuleExecutor', () => {
       };
 
       // Call the method
-      statusRule.handlePendingMonitorAlert({ pendingConfigs: mockPendingConfigs });
+      await statusRule.handlePendingMonitorAlert({ pendingConfigs: mockPendingConfigs });
 
       // Verify neither method was called
       expect(schedulePendingAlertPerConfigIdSpy).not.toHaveBeenCalled();
@@ -846,9 +846,9 @@ describe('StatusRuleExecutor', () => {
         jest.clearAllMocks();
       });
 
-      it('should call scheduleAlert for each pending config with correct parameters', () => {
+      it('should call scheduleAlert for each pending config with correct parameters', async () => {
         // Call the method
-        statusRule.schedulePendingAlertPerConfigIdPerLocation({
+        await statusRule.schedulePendingAlertPerConfigIdPerLocation({
           pendingConfigs: mockPendingConfigs,
         });
 
@@ -901,9 +901,9 @@ describe('StatusRuleExecutor', () => {
         });
       });
 
-      it('should do nothing if pendingConfigs is empty', () => {
+      it('should do nothing if pendingConfigs is empty', async () => {
         // Call the method with empty pendingConfigs
-        statusRule.schedulePendingAlertPerConfigIdPerLocation({ pendingConfigs: {} });
+        await statusRule.schedulePendingAlertPerConfigIdPerLocation({ pendingConfigs: {} });
 
         // Verify scheduleAlert was not called
         expect(scheduleAlertSpy).not.toHaveBeenCalled();
@@ -930,9 +930,9 @@ describe('StatusRuleExecutor', () => {
         jest.clearAllMocks();
       });
 
-      it('should group configs by configId and call scheduleAlert with combined location information', () => {
+      it('should group configs by configId and call scheduleAlert with combined location information', async () => {
         // Call the method
-        statusRule.schedulePendingAlertPerConfigId({ pendingConfigs: mockPendingConfigs });
+        await statusRule.schedulePendingAlertPerConfigId({ pendingConfigs: mockPendingConfigs });
 
         // Verify scheduleAlert was called twice (once for each unique configId)
         expect(scheduleAlertSpy).toHaveBeenCalledTimes(2);
@@ -983,9 +983,9 @@ describe('StatusRuleExecutor', () => {
         });
       });
 
-      it('should do nothing if pendingConfigs is empty', () => {
+      it('should do nothing if pendingConfigs is empty', async () => {
         // Call the method with empty pendingConfigs
-        statusRule.schedulePendingAlertPerConfigId({ pendingConfigs: {} });
+        await statusRule.schedulePendingAlertPerConfigId({ pendingConfigs: {} });
 
         // Verify scheduleAlert was not called
         expect(scheduleAlertSpy).not.toHaveBeenCalled();
