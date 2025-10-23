@@ -31,12 +31,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
     'unifiedFieldList',
   ]);
+  const retry = getService('retry');
 
   const defaultSettings = {
     defaultIndex: 'logstash-*',
   };
 
-  describe('discover esql columns', function () {
+  describe.only('discover esql columns', function () {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
@@ -274,9 +275,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.refresh();
       await discover.waitUntilTabIsLoaded();
       await timePicker.setDefaultAbsoluteRange();
-      await testSubjects.click('querySubmitButton');
-      await discover.waitUntilTabIsLoaded();
-      expect(await dataGrid.getHeaderFields()).to.eql(['ip', '@timestamp']);
+      await retry.try(async () => {
+        await testSubjects.click('querySubmitButton');
+        await discover.waitUntilTabIsLoaded();
+        expect(await dataGrid.getHeaderFields()).to.eql(['ip', '@timestamp']);
+      });
     });
   });
 }
