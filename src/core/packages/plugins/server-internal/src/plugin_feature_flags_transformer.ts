@@ -11,26 +11,28 @@ import { cloneDeep } from 'lodash';
 import type { IConfigService } from '@kbn/config';
 
 export class PluginFeatureFlagsTransformer {
-  private enableAllPluginFlags: boolean | null = null;
+  private isEnableAllFlags: boolean | null = null;
 
   constructor(private readonly configService: IConfigService) {
     this.subscribeToMasterFlag();
   }
 
   private subscribeToMasterFlag(): void {
-    this.configService.atPath<{ featureFlags?: { enableAll?: boolean } }>('plugins').subscribe({
-      next: (pluginsConfig) => {
-        this.enableAllPluginFlags = pluginsConfig.featureFlags?.enableAll ?? null;
-      },
-      error: (_error) => {
-        // Reset to null to indicate no master flag is set
-        this.enableAllPluginFlags = null;
-      },
-    });
+    this.configService
+      .atPath<{ featureFlags?: { enableAllFlags?: boolean } }>('plugins')
+      .subscribe({
+        next: (pluginsConfig) => {
+          this.isEnableAllFlags = pluginsConfig.featureFlags?.enableAllFlags ?? null;
+        },
+        error: (_error) => {
+          // Reset to null to indicate no master flag is set
+          this.isEnableAllFlags = null;
+        },
+      });
   }
 
   public transform(path: string, config: unknown): unknown {
-    if (this.enableAllPluginFlags === null) return config;
+    if (this.isEnableAllFlags === null) return config;
 
     // Skip plugins config itself to avoid recursion
     if (path === 'plugins') return config;
@@ -57,13 +59,10 @@ export class PluginFeatureFlagsTransformer {
     // Apply master flag to all boolean feature flags
     // This overrides both schema defaults and undefined values
     Object.keys(featureFlags).forEach((key) => {
-      const value = featureFlags[key];
-
-      // Only process boolean flags
-      if (typeof value === 'boolean') {
-        featureFlags[key] = this.enableAllPluginFlags;
+      if (typeof featureFlags[key] === 'boolean') {
+        featureFlags[key] = this.isEnableAllFlags;
       }
-      // Non-boolean values are ignored (safety)
+      // Non-boolean values are ignored
     });
 
     return cloned;

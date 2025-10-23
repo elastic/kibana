@@ -43,7 +43,7 @@ const configSchema = schema.object({
   forceEnableAllPlugins: schema.maybe(schema.boolean({ defaultValue: false })),
   featureFlags: schema.maybe(
     schema.object({
-      enableAll: schema.maybe(schema.boolean()),
+      enableAllFlags: schema.maybe(schema.boolean()),
     })
   ),
 });
