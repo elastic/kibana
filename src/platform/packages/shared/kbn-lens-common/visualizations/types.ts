@@ -34,7 +34,7 @@ import {
   type LENS_LAYER_TYPES,
 } from './constants';
 import type { SeriesType, XYState } from './xy/types';
-import type { LensTagcloudState } from './tagcloud/types';
+import type { LensTagCloudState } from './tagcloud/types';
 import type { LensPartitionVisualizationState } from './partition/types';
 import type { MetricVisualizationState } from './metric/types';
 import type { LegacyMetricState } from './legacy_metric/types';
@@ -97,7 +97,7 @@ export type LensConfiguration =
   | LegacyMetricState
   | GaugeVisualizationState
   | HeatmapVisualizationState
-  | LensTagcloudState;
+  | LensTagCloudState;
 
 interface AddLayerButtonProps<T> {
   state: T;

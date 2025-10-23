@@ -90,7 +90,7 @@ export type {
   HeatmapVisualizationState,
   GaugeVisualizationState,
   MetricVisualizationState,
-  LensTagcloudState as TagcloudState,
+  LensTagCloudState as TagcloudState,
 } from '@kbn/lens-common';
 
 export type {

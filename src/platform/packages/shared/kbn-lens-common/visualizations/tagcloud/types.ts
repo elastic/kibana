@@ -11,7 +11,7 @@ import type { ColorMapping, PaletteOutput } from '@kbn/coloring';
 import type { $Values } from '@kbn/utility-types';
 import type { TAGCLOUD_ORIENTATION } from './constants';
 
-export interface LensTagcloudState {
+export interface LensTagCloudState {
   layerId: string;
   tagAccessor?: string;
   valueAccessor?: string;
@@ -26,7 +26,7 @@ export interface LensTagcloudState {
   colorMapping?: ColorMapping.Config;
 }
 
-export interface LensTagcloudConfig extends LensTagcloudState {
+export interface LensTagCloudConfig extends LensTagCloudState {
   title: string;
   description: string;
 }

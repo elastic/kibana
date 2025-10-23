@@ -221,7 +221,7 @@ export type {
   ChoroplethChartConfig,
   ChoroplethChartProps,
 } from './visualizations/region_map/types';
-export type { LensTagcloudState, LensTagcloudConfig } from './visualizations/tagcloud/types';
+export type { LensTagCloudState, LensTagCloudConfig } from './visualizations/tagcloud/types';
 export type {
   YAxisMode,
   SeriesType,
