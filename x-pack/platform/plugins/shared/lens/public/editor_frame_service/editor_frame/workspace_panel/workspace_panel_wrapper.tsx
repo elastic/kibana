@@ -13,13 +13,7 @@ import type { ChartSizeSpec } from '@kbn/chart-expressions-common';
 import type { ChartSizeUnit } from '@kbn/chart-expressions-common/types';
 import type { Interpolation, Theme } from '@emotion/react';
 import { css } from '@emotion/react';
-import type {
-  DatasourceMap,
-  FramePublicAPI,
-  UserMessagesGetter,
-  VisualizationMap,
-  Visualization,
-} from '../../../types';
+import type { FramePublicAPI, UserMessagesGetter, Visualization } from '../../../types';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../utils';
 import { MessageList } from './message_list';
 import type { DatasourceStates } from '../../../state_management';
@@ -30,19 +24,19 @@ import {
   selectChangesApplied,
   applyChanges,
   selectAutoApplyEnabled,
+  selectVisualization,
   selectVisualizationState,
 } from '../../../state_management';
 import type { LensInspector } from '../../../lens_inspector_service';
 import { WorkspaceTitle } from './title';
+import { useEditorFrameService } from '../../editor_frame_service_context';
 
 export const AUTO_APPLY_DISABLED_STORAGE_KEY = 'autoApplyDisabled';
 
 export interface WorkspacePanelWrapperProps {
   children: React.ReactNode | React.ReactNode[];
   framePublicAPI: FramePublicAPI;
-  visualizationMap: VisualizationMap;
   visualizationId: string | null;
-  datasourceMap: DatasourceMap;
   datasourceStates: DatasourceStates;
   isFullscreen: boolean;
   lensInspector: LensInspector;
@@ -70,13 +64,31 @@ const getAspectRatioStyles = ({ x, y }: { x: number; y: number }) => {
   };
 };
 
+export function VisualizationToolbarWrapper(props: { framePublicAPI: FramePublicAPI }) {
+  const { visualizationMap } = useEditorFrameService();
+  const { framePublicAPI } = props;
+  const visualization = useLensSelector(selectVisualization);
+
+  const activeVisualization = visualization.activeId
+    ? visualizationMap[visualization.activeId]
+    : null;
+
+  return activeVisualization && visualization.state ? (
+    <VisualizationToolbar
+      framePublicAPI={framePublicAPI}
+      activeVisualization={activeVisualization}
+    />
+  ) : null;
+}
+
 export function VisualizationToolbar(props: {
   activeVisualization: Visualization | null;
   framePublicAPI: FramePublicAPI;
+  enableFlyoutToolbar?: boolean;
 }) {
   const dispatchLens = useLensDispatch();
   const visualization = useLensSelector(selectVisualizationState);
-  const { activeVisualization } = props;
+  const { activeVisualization, enableFlyoutToolbar = false } = props;
   const setVisualizationState = useCallback(
     (newState: unknown) => {
       if (!activeVisualization) {
@@ -92,7 +104,15 @@ export function VisualizationToolbar(props: {
     [dispatchLens, activeVisualization]
   );
 
-  const ToolbarComponent = props.activeVisualization?.ToolbarComponent;
+  const { FlyoutToolbarComponent, ToolbarComponent: RegularToolbarComponent } =
+    activeVisualization || {};
+
+  let ToolbarComponent;
+  if (enableFlyoutToolbar) {
+    ToolbarComponent = FlyoutToolbarComponent || RegularToolbarComponent;
+  } else {
+    ToolbarComponent = RegularToolbarComponent;
+  }
 
   return (
     <>
@@ -113,12 +133,12 @@ export function WorkspacePanelWrapper({
   children,
   framePublicAPI,
   visualizationId,
-  visualizationMap,
-  datasourceMap,
   isFullscreen,
   getUserMessages,
   displayOptions,
 }: WorkspacePanelWrapperProps) {
+  const { visualizationMap } = useEditorFrameService();
+
   const dispatchLens = useLensDispatch();
 
   const euiThemeContext = useEuiTheme();
@@ -259,7 +279,7 @@ export function WorkspacePanelWrapper({
           }
           ${isFullscreen &&
           `
-            margin-bottom: 0; 
+            margin-bottom: 0;
             .lnsWorkspacePanelWrapper__content {
               padding: ${euiTheme.size.s}
             }
