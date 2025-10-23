@@ -20,7 +20,7 @@ import type {
 } from '@kbn/lens-common';
 import type { XYLegendValue } from '@kbn/chart-expressions-common';
 import { LegendSize } from '@kbn/chart-expressions-common';
-import type { LegendSettingsProps } from '../../../shared_components/legend/legend_settings_popover';
+import type { LegendSettingsProps } from '../../../shared_components/legend/legend_settings';
 import { hasBarSeries, isHorizontalChart } from '../state_helpers';
 import { hasNumericHistogramDimension, LegendSettingsPopover } from '../../../shared_components';
 import { AxisSettingsPopover } from './axis_settings_popover';
