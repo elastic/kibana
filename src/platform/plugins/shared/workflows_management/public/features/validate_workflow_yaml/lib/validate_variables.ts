@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowGraph } from '@kbn/workflows/graph';
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 import type { DynamicStepContextSchema, WorkflowYaml } from '@kbn/workflows';
-import type { VariableItem, YamlValidationResult } from '../model/types';
-import { getContextSchemaForPath } from '../../workflow_context/lib/get_context_for_path';
+import type { WorkflowGraph } from '@kbn/workflows/graph';
 import { validateVariable } from './validate_variable';
+import { getContextSchemaForPath } from '../../workflow_context/lib/get_context_for_path';
+import type { VariableItem, YamlValidationResult } from '../model/types';
 
 export function validateVariables(
   variableItems: VariableItem[],

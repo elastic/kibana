@@ -69,6 +69,11 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     sendEvent: eventEmitter,
   });
 
+  const cycleLimit = 10;
+  // langchain's recursionLimit is basically the number of nodes we can traverse before hitting a recursion limit error
+  // we have two steps per cycle (agent node + tool call node), and then a few other steps (prepare + answering), and some extra buffer
+  const graphRecursionLimit = cycleLimit * 2 + 8;
+
   const initialMessages = conversationToLangchainMessages({
     nextInput,
     previousRounds: conversation,
@@ -86,7 +91,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);
 
   const eventStream = agentGraph.streamEvents(
-    { initialMessages },
+    { initialMessages, cycleLimit },
     {
       version: 'v2',
       signal: abortSignal,
@@ -96,7 +101,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
         agentId,
         runId,
       },
-      recursionLimit: 25,
+      recursionLimit: graphRecursionLimit,
       callbacks: [],
     }
   );
