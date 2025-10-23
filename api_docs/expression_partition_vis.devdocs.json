@@ -299,9 +299,9 @@
             "signature": [
               "(string | ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
@@ -321,9 +321,9 @@
             "signature": [
               "(string | ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
@@ -343,9 +343,9 @@
             "signature": [
               "(string | ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
@@ -365,9 +365,9 @@
             "signature": [
               "(string | ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
@@ -564,9 +564,9 @@
             "signature": [
               "string | ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               }
@@ -708,9 +708,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "visualizations",
+                "pluginId": "expressionPartitionVis",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibExpressionPartitionVisPluginApi",
                 "section": "def-common.PartitionLegendValue",
                 "text": "PartitionLegendValue"
               },
@@ -989,9 +989,9 @@
             "signature": [
               "string | ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
@@ -1010,9 +1010,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "visualizations",
+                "pluginId": "expressionPartitionVis",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibExpressionPartitionVisPluginApi",
                 "section": "def-common.PartitionLegendValue",
                 "text": "PartitionLegendValue"
               },
@@ -1294,6 +1294,21 @@
           ">>"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionPartitionVis",
+        "id": "def-common.PartitionLegendValue",
+        "type": "Type",
+        "tags": [],
+        "label": "PartitionLegendValue",
+        "description": [],
+        "signature": [
+          "\"value\" | \"percent\""
+        ],
+        "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -1,0 +1,1051 @@
+{
+  "id": "@kbn/visualizations-common",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/visualizations-common",
+        "id": "def-common.PersistedState",
+        "type": "Class",
+        "tags": [],
+        "label": "PersistedState",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/visualizations-common",
+            "scope": "common",
+            "docId": "kibKbnVisualizationsCommonPluginApi",
+            "section": "def-common.PersistedState",
+            "text": "PersistedState"
+          },
+          " extends ",
+          "events",
+          "<DefaultEventMap>"
+        ],
+        "path": "src/platform/packages/shared/kbn-visualizations-common/vis_persisted_state.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualizations-common",
+            "id": "def-common.PersistedState.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/shared/kbn-visualizations-common/vis_persisted_state.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/visualizations-common",
+                "id": "def-common.PersistedState.Unnamed.$1",
+                "type": "Any",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "src/platform/packages/shared/kbn-visualizations-common/vis_persisted_state.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/visualizations-common",
+                "id": "def-common.PersistedState.Unnamed.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "signature": [
+                  "PersistedStatePath | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-visualizations-common/vis_persisted_state.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/visualizations-common",
+            "id": "def-common.PersistedState.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [],
+            "signature": [
+              "(key?: PersistedStateKey, defaultValue?: any) => any"
+            ],
+            "path": "src/platform/packages/shared/kbn-visualizations-common/vis_persisted_state.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/visualizations-common",
+                "id": "def-common.PersistedState.get.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "PersistedStateKey"
+                ],
+                "path": "src/platform/packages/shared/kbn-visualizations-common/vis_persisted_state.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/visualizations-common",
+                "id": "def-common.PersistedState.get.$2",
+                "type": "Any",
+                "tags": [],
+                "label": "defaultValue",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "src/platform/packages/shared/kbn-visualizations-common/vis_persisted_state.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/visualizations-common",
+            "id": "def-common.PersistedState.set",
+            "type": "Function",
+            "tags": [],
+            "label": "set",
+            "description": [],
+            "signature": [
+              "(key: any, value?: any) => this"
+            ],
+            "path": "src/platform/packages/shared/kbn-visualizations-common/vis_persisted_state.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/visualizations-common",
+                "id": "def-common.PersistedState.set.$1",
+                "type": "Any",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "src/platform/packages/shared/kbn-visualizations-common/vis_persisted_state.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/visualizations-common",
+                "id": "def-common.PersistedState.set.$2",
+                "type": "Any",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "src/platform/packages/shared/kbn-visualizations-common/vis_persisted_state.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/visualizations-common",
+            "id": "def-common.PersistedState.setSilent",
+            "type": "Function",
+            "tags": [],
+            "label": "setSilent",
+            "description": [],
+            "signature": [
+              "(key: any, value?: any) => this | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-visualizations-common/vis_persisted_state.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/visualizations-common",
+                "id": "def-common.PersistedState.setSilent.$1",
+                "type": "Any",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "src/platform/packages/shared/kbn-visualizations-common/vis_persisted_state.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/visualizations-common",
+                "id": "def-common.PersistedState.setSilent.$2",
+                "type": "Any",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "src/platform/packages/shared/kbn-visualizations-common/vis_persisted_state.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/visualizations-common",
+            "id": "def-common.PersistedState.clearAllKeys",
+            "type": "Function",
+            "tags": [],
+            "label": "clearAllKeys",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-visualizations-common/vis_persisted_state.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/visualizations-common",
+            "id": "def-common.PersistedState.reset",
+            "type": "Function",
+            "tags": [],
+            "label": "reset",
+            "description": [],
+            "signature": [
+              "(path: PersistedStatePath) => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-visualizations-common/vis_persisted_state.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/visualizations-common",
+                "id": "def-common.PersistedState.reset.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "signature": [
+                  "PersistedStatePath"
+                ],
+                "path": "src/platform/packages/shared/kbn-visualizations-common/vis_persisted_state.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/visualizations-common",
+            "id": "def-common.PersistedState.getChanges",
+            "type": "Function",
+            "tags": [],
+            "label": "getChanges",
+            "description": [],
+            "signature": [
+              "() => any"
+            ],
+            "path": "src/platform/packages/shared/kbn-visualizations-common/vis_persisted_state.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/visualizations-common",
+            "id": "def-common.PersistedState.toJSON",
+            "type": "Function",
+            "tags": [],
+            "label": "toJSON",
+            "description": [],
+            "signature": [
+              "() => any"
+            ],
+            "path": "src/platform/packages/shared/kbn-visualizations-common/vis_persisted_state.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/visualizations-common",
+            "id": "def-common.PersistedState.toString",
+            "type": "Function",
+            "tags": [],
+            "label": "toString",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/platform/packages/shared/kbn-visualizations-common/vis_persisted_state.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/visualizations-common",
+            "id": "def-common.PersistedState.fromString",
+            "type": "Function",
+            "tags": [],
+            "label": "fromString",
+            "description": [],
+            "signature": [
+              "(input: string) => this"
+            ],
+            "path": "src/platform/packages/shared/kbn-visualizations-common/vis_persisted_state.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/visualizations-common",
+                "id": "def-common.PersistedState.fromString.$1",
+                "type": "string",
+                "tags": [],
+                "label": "input",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-visualizations-common/vis_persisted_state.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualizations-common",
+        "id": "def-common.VisualizationError",
+        "type": "Class",
+        "tags": [],
+        "label": "VisualizationError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/visualizations-common",
+            "scope": "common",
+            "docId": "kibKbnVisualizationsCommonPluginApi",
+            "section": "def-common.VisualizationError",
+            "text": "VisualizationError"
+          },
+          " extends React.Component<VisualizationErrorProps, {}, any>"
+        ],
+        "path": "src/platform/packages/shared/kbn-visualizations-common/components/visualization_error.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualizations-common",
+            "id": "def-common.VisualizationError.render",
+            "type": "Function",
+            "tags": [],
+            "label": "render",
+            "description": [],
+            "signature": [
+              "() => React.JSX.Element"
+            ],
+            "path": "src/platform/packages/shared/kbn-visualizations-common/components/visualization_error.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/visualizations-common",
+            "id": "def-common.VisualizationError.componentDidMount",
+            "type": "Function",
+            "tags": [],
+            "label": "componentDidMount",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-visualizations-common/components/visualization_error.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/visualizations-common",
+            "id": "def-common.VisualizationError.componentDidUpdate",
+            "type": "Function",
+            "tags": [],
+            "label": "componentDidUpdate",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-visualizations-common/components/visualization_error.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualizations-common",
+        "id": "def-common.VisualizationNoResults",
+        "type": "Class",
+        "tags": [],
+        "label": "VisualizationNoResults",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/visualizations-common",
+            "scope": "common",
+            "docId": "kibKbnVisualizationsCommonPluginApi",
+            "section": "def-common.VisualizationNoResults",
+            "text": "VisualizationNoResults"
+          },
+          " extends React.Component<VisualizationNoResultsProps, {}, any>"
+        ],
+        "path": "src/platform/packages/shared/kbn-visualizations-common/components/visualization_noresults.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualizations-common",
+            "id": "def-common.VisualizationNoResults.render",
+            "type": "Function",
+            "tags": [],
+            "label": "render",
+            "description": [],
+            "signature": [
+              "() => React.JSX.Element"
+            ],
+            "path": "src/platform/packages/shared/kbn-visualizations-common/components/visualization_noresults.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/visualizations-common",
+            "id": "def-common.VisualizationNoResults.componentDidMount",
+            "type": "Function",
+            "tags": [],
+            "label": "componentDidMount",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-visualizations-common/components/visualization_noresults.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/visualizations-common",
+            "id": "def-common.VisualizationNoResults.componentDidUpdate",
+            "type": "Function",
+            "tags": [],
+            "label": "componentDidUpdate",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-visualizations-common/components/visualization_noresults.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/visualizations-common",
+        "id": "def-common.getTimeZone",
+        "type": "Function",
+        "tags": [],
+        "label": "getTimeZone",
+        "description": [
+          "\nGet timeZone from uiSettings"
+        ],
+        "signature": [
+          "(uiSettings: ",
+          "IUiSettingsClient",
+          ") => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-visualizations-common/timezone.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualizations-common",
+            "id": "def-common.getTimeZone.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "uiSettings",
+            "description": [],
+            "signature": [
+              "IUiSettingsClient"
+            ],
+            "path": "src/platform/packages/shared/kbn-visualizations-common/timezone.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualizations-common",
+        "id": "def-common.prepareLogTable",
+        "type": "Function",
+        "tags": [],
+        "label": "prepareLogTable",
+        "description": [],
+        "signature": [
+          "(datatable: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Datatable",
+            "text": "Datatable"
+          },
+          ", dimensions: ",
+          {
+            "pluginId": "@kbn/visualizations-common",
+            "scope": "common",
+            "docId": "kibKbnVisualizationsCommonPluginApi",
+            "section": "def-common.LayerDimension",
+            "text": "LayerDimension"
+          },
+          "[] | ",
+          {
+            "pluginId": "@kbn/visualizations-common",
+            "scope": "common",
+            "docId": "kibKbnVisualizationsCommonPluginApi",
+            "section": "def-common.Dimension",
+            "text": "Dimension"
+          },
+          "[], removeUnmappedColumns?: boolean) => { columns: { meta: { dimensionType?: string | undefined; dimensionName: string | undefined; type: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumnType",
+            "text": "DatatableColumnType"
+          },
+          "; esType?: string | undefined; field?: string | undefined; index?: string | undefined; params?: ",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "common",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-common.SerializedFieldFormat",
+            "text": "SerializedFieldFormat"
+          },
+          "<{}, ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          "> | undefined; source?: string | undefined; sourceParams?: ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          " | undefined; }; id: string; name: string; isNull?: boolean | undefined; variable?: string | undefined; }[]; type: \"datatable\"; meta?: ",
+          "DatatableMeta",
+          " | undefined; rows: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableRow",
+            "text": "DatatableRow"
+          },
+          "[]; warning?: string | undefined; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-visualizations-common/prepare_log_table.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualizations-common",
+            "id": "def-common.prepareLogTable.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "datatable",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-visualizations-common/prepare_log_table.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/visualizations-common",
+            "id": "def-common.prepareLogTable.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "dimensions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/visualizations-common",
+                "scope": "common",
+                "docId": "kibKbnVisualizationsCommonPluginApi",
+                "section": "def-common.LayerDimension",
+                "text": "LayerDimension"
+              },
+              "[] | ",
+              {
+                "pluginId": "@kbn/visualizations-common",
+                "scope": "common",
+                "docId": "kibKbnVisualizationsCommonPluginApi",
+                "section": "def-common.Dimension",
+                "text": "Dimension"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-visualizations-common/prepare_log_table.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/visualizations-common",
+            "id": "def-common.prepareLogTable.$3",
+            "type": "boolean",
+            "tags": [],
+            "label": "removeUnmappedColumns",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "src/platform/packages/shared/kbn-visualizations-common/prepare_log_table.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualizations-common",
+        "id": "def-common.VisualizationContainer",
+        "type": "Function",
+        "tags": [],
+        "label": "VisualizationContainer",
+        "description": [],
+        "signature": [
+          "({ \"data-test-subj\": dataTestSubj, className, children, handlers, showNoResult, error, renderComplete, }: ",
+          "VisualizationContainerProps",
+          ") => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-visualizations-common/components/visualization_container.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualizations-common",
+            "id": "def-common.VisualizationContainer.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  'data-test-subj': dataTestSubj = '',\n  className,\n  children,\n  handlers,\n  showNoResult = false,\n  error,\n  renderComplete,\n}",
+            "description": [],
+            "signature": [
+              "VisualizationContainerProps"
+            ],
+            "path": "src/platform/packages/shared/kbn-visualizations-common/components/visualization_container.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/visualizations-common",
+        "id": "def-common.VisParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "VisParams",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-visualizations-common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualizations-common",
+            "id": "def-common.VisParams.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[key: string]: any",
+            "description": [],
+            "signature": [
+              "[key: string]:  any"
+            ],
+            "path": "src/platform/packages/shared/kbn-visualizations-common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/visualizations-common",
+        "id": "def-common.Dimension",
+        "type": "Type",
+        "tags": [],
+        "label": "Dimension",
+        "description": [],
+        "signature": [
+          "[DimensionColumn[] | undefined, string]"
+        ],
+        "path": "src/platform/packages/shared/kbn-visualizations-common/prepare_log_table.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualizations-common",
+        "id": "def-common.GLOBAL_STATE_STORAGE_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "GLOBAL_STATE_STORAGE_KEY",
+        "description": [],
+        "signature": [
+          "\"_g\""
+        ],
+        "path": "src/platform/packages/shared/kbn-visualizations-common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualizations-common",
+        "id": "def-common.LayerDimension",
+        "type": "Type",
+        "tags": [],
+        "label": "LayerDimension",
+        "description": [],
+        "signature": [
+          "[DimensionColumn[] | undefined, string, ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DimensionType",
+            "text": "DimensionType"
+          },
+          "]"
+        ],
+        "path": "src/platform/packages/shared/kbn-visualizations-common/prepare_log_table.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualizations-common",
+        "id": "def-common.SAVED_OBJECTS_LIMIT_SETTING",
+        "type": "string",
+        "tags": [],
+        "label": "SAVED_OBJECTS_LIMIT_SETTING",
+        "description": [],
+        "signature": [
+          "\"savedObjects:listingLimit\""
+        ],
+        "path": "src/platform/packages/shared/kbn-visualizations-common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualizations-common",
+        "id": "def-common.SAVED_OBJECTS_PER_PAGE_SETTING",
+        "type": "string",
+        "tags": [],
+        "label": "SAVED_OBJECTS_PER_PAGE_SETTING",
+        "description": [],
+        "signature": [
+          "\"savedObjects:perPage\""
+        ],
+        "path": "src/platform/packages/shared/kbn-visualizations-common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualizations-common",
+        "id": "def-common.STATE_STORAGE_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "STATE_STORAGE_KEY",
+        "description": [],
+        "signature": [
+          "\"_a\""
+        ],
+        "path": "src/platform/packages/shared/kbn-visualizations-common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualizations-common",
+        "id": "def-common.VISUALIZE_APP_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "VISUALIZE_APP_NAME",
+        "description": [],
+        "signature": [
+          "\"visualize\""
+        ],
+        "path": "src/platform/packages/shared/kbn-visualizations-common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualizations-common",
+        "id": "def-common.VISUALIZE_EMBEDDABLE_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "VISUALIZE_EMBEDDABLE_TYPE",
+        "description": [],
+        "signature": [
+          "\"visualization\""
+        ],
+        "path": "src/platform/packages/shared/kbn-visualizations-common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualizations-common",
+        "id": "def-common.VISUALIZE_SAVED_OBJECT_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "VISUALIZE_SAVED_OBJECT_TYPE",
+        "description": [],
+        "signature": [
+          "\"visualization\""
+        ],
+        "path": "src/platform/packages/shared/kbn-visualizations-common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualizations-common",
+        "id": "def-common.visualizeClassName",
+        "type": "string",
+        "tags": [],
+        "label": "visualizeClassName",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-visualizations-common/vis.styles.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/visualizations-common",
+        "id": "def-common.visContainerStyle",
+        "type": "Object",
+        "tags": [],
+        "label": "visContainerStyle",
+        "description": [],
+        "signature": [
+          "SerializedStyles"
+        ],
+        "path": "src/platform/packages/shared/kbn-visualizations-common/vis.styles.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualizations-common",
+        "id": "def-common.VisualizeConstants",
+        "type": "Object",
+        "tags": [],
+        "label": "VisualizeConstants",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-visualizations-common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualizations-common",
+            "id": "def-common.VisualizeConstants.VISUALIZE_BASE_PATH",
+            "type": "string",
+            "tags": [],
+            "label": "VISUALIZE_BASE_PATH",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-visualizations-common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/visualizations-common",
+            "id": "def-common.VisualizeConstants.LANDING_PAGE_PATH",
+            "type": "string",
+            "tags": [],
+            "label": "LANDING_PAGE_PATH",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-visualizations-common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/visualizations-common",
+            "id": "def-common.VisualizeConstants.LANDING_PAGE_PATH_WITH_TAB",
+            "type": "string",
+            "tags": [],
+            "label": "LANDING_PAGE_PATH_WITH_TAB",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-visualizations-common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/visualizations-common",
+            "id": "def-common.VisualizeConstants.WIZARD_STEP_1_PAGE_PATH",
+            "type": "string",
+            "tags": [],
+            "label": "WIZARD_STEP_1_PAGE_PATH",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-visualizations-common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/visualizations-common",
+            "id": "def-common.VisualizeConstants.WIZARD_STEP_2_PAGE_PATH",
+            "type": "string",
+            "tags": [],
+            "label": "WIZARD_STEP_2_PAGE_PATH",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-visualizations-common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/visualizations-common",
+            "id": "def-common.VisualizeConstants.CREATE_PATH",
+            "type": "string",
+            "tags": [],
+            "label": "CREATE_PATH",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-visualizations-common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/visualizations-common",
+            "id": "def-common.VisualizeConstants.EDIT_PATH",
+            "type": "string",
+            "tags": [],
+            "label": "EDIT_PATH",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-visualizations-common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/visualizations-common",
+            "id": "def-common.VisualizeConstants.EDIT_BY_VALUE_PATH",
+            "type": "string",
+            "tags": [],
+            "label": "EDIT_BY_VALUE_PATH",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-visualizations-common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/visualizations-common",
+            "id": "def-common.VisualizeConstants.APP_ID",
+            "type": "string",
+            "tags": [],
+            "label": "APP_ID",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-visualizations-common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}
