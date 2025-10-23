@@ -224,7 +224,9 @@ describe('MetricsExperienceGrid', () => {
     useMetricsGridStateMock.mockReturnValue({
       currentPage: 0,
       dimensions: ['foo'],
-      valueFilters: [`foo${FIELD_VALUE_SEPARATOR}bar`],
+      valueFilters: [
+        `foo${FIELD_VALUE_SEPARATOR}bar${FIELD_VALUE_SEPARATOR}${JSON.stringify(['avg'])}`,
+      ],
       onDimensionsChange: jest.fn(),
       onPageChange: jest.fn(),
       onValuesChange: jest.fn(),

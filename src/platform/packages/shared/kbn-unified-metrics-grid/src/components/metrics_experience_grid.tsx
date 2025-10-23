@@ -76,7 +76,7 @@ export const MetricsExperienceGrid = ({
   const filters = useValueFilters(valueFilters);
 
   const valueMetrics = useMemo(() => {
-    return [...new Set(filters.flatMap((filter) => filter.valueMetrics))];
+    return [...new Set(filters?.flatMap((filter) => filter.valueMetrics))];
   }, [filters]);
 
   const {
