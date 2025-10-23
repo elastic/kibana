@@ -138,9 +138,8 @@ export const useDashboardMenuItems = ({
   const saveFromShareModal = useCallback(async () => {
     if (lastSavedId) {
       quickSaveDashboard();
-      return Promise.resolve({});
     } else {
-      return dashboardInteractiveSave();
+      dashboardInteractiveSave();
     }
   }, [quickSaveDashboard, dashboardInteractiveSave, lastSavedId]);
 

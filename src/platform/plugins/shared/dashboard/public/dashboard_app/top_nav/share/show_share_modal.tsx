@@ -39,7 +39,6 @@ import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilit
 import { DASHBOARD_STATE_STORAGE_KEY } from '../../../utils/urls';
 import { shareModalStrings } from '../../_dashboard_app_strings';
 import { dashboardUrlParams } from '../../dashboard_router';
-import type { SaveDashboardReturn } from '../../../services/dashboard_content_management_service/types';
 
 const showFilterBarId = 'showFilterBar';
 
@@ -53,7 +52,7 @@ export interface ShowShareModalProps {
   accessControl?: Partial<SavedObjectAccessControl>;
   createdBy?: string;
   accessControlClient: AccessControlClient;
-  saveDashboard: () => Promise<SaveDashboardReturn | undefined>;
+  saveDashboard: () => Promise<void>;
   changeAccessMode: (accessMode: SavedObjectAccessControl['accessMode']) => Promise<void>;
 }
 
