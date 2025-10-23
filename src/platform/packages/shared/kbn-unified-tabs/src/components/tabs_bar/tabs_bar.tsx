@@ -77,7 +77,7 @@ export type TabsBarProps = Pick<
   onEBTEvent: (event: TabsEBTEvent) => void;
   onClearRecentlyClosed: TabsBarMenuProps['onClearRecentlyClosed'];
   customNewTabButton?: React.ReactElement;
-  disableTabsBarMenu?: boolean; // defaults to `true`
+  disableTabsBarMenu?: boolean;
 };
 
 export interface TabsBarApi {

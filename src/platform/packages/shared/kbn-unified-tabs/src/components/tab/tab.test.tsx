@@ -256,7 +256,7 @@ describe('Tab', () => {
     expect(onLabelEdited).not.toHaveBeenCalled();
   });
 
-  it('shows preview when enablePreview is true', async () => {
+  it('shows preview when disablePreview is false', async () => {
     const user = userEvent.setup({ delay: null, advanceTimers: jest.advanceTimersByTime });
     const onLabelEdited = jest.fn();
     const onSelect = jest.fn();
