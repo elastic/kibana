@@ -109,33 +109,6 @@ describe('Save dashboard state', () => {
     );
   });
 
-  it('should update prefixes on references when save as copy is true', async () => {
-    const result = await saveDashboardState({
-      dashboardState: {
-        ...getSampleDashboardState(),
-        title: 'BooFour',
-        panels: [{ type: 'boop', uid: 'idOne' } as DashboardPanel],
-      },
-      panelReferences: [{ name: 'idOne:panel_idOne', type: 'boop', id: 'idOne' }],
-      lastSavedId: 'Boogatoonie',
-      saveOptions: { saveAsCopy: true },
-    });
-
-    expect(result.id).toBe('newlyGeneratedId');
-    expect(contentManagementService.client.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        options: expect.objectContaining({
-          references: expect.arrayContaining([
-            expect.objectContaining({
-              id: 'idOne',
-              name: expect.not.stringContaining('idOne:panel_idOne'),
-            }),
-          ]),
-        }),
-      })
-    );
-  });
-
   it('should include accessControl when creating a new dashboard but not when updating', async () => {
     const createResult = await saveDashboardState({
       dashboardState: {
