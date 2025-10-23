@@ -66,12 +66,12 @@ export const PartitionEdge = ({ content, parentDocuments, currentDocuments, id }
               defaultMessage: 'Routing Condition',
             })}</h4>
           </EuiText>
-          <EuiText size='s'>
+          {!Number.isNaN(matches) && <EuiText size='s'>
             {i18n.translate('xpack.streams.streamsGraph.partitionEdge.matchPercentageLabel', {
               defaultMessage: '{matches}% Match',
               values: { matches: matches.toFixed(2) },
             })}
-          </EuiText>
+          </EuiText>}
         </EuiFlexGroup>
         {content}
       </EuiFlexGroup>
