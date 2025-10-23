@@ -129,7 +129,10 @@ const unifiedTracesByIdRoute = createApmServerRoute({
     path: t.type({
       traceId: t.string,
     }),
-    query: t.intersection([rangeRt, t.partial({ maxTraceItems: toNumberRt })]),
+    query: t.intersection([
+      rangeRt,
+      t.partial({ maxTraceItems: toNumberRt, serviceName: t.string }),
+    ]),
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (
@@ -142,7 +145,7 @@ const unifiedTracesByIdRoute = createApmServerRoute({
 
     const { params, config } = resources;
     const { traceId } = params.path;
-    const { start, end } = params.query;
+    const { start, end, serviceName } = params.query;
 
     const unifiedTraceErrors = await getUnifiedTraceErrors({
       apmEventClient,
@@ -160,6 +163,7 @@ const unifiedTracesByIdRoute = createApmServerRoute({
       maxTraceItemsFromUrlParam: params.query.maxTraceItems,
       config,
       unifiedTraceErrors,
+      serviceName,
     });
 
     return {

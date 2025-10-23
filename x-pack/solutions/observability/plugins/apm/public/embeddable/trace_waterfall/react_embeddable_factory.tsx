@@ -42,7 +42,7 @@ export interface ApmTraceWaterfallEmbeddableEntryProps extends BaseProps, Serial
   onNodeClick?: (nodeSpanId: string) => void;
   getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
   onErrorClick?: OnErrorClick;
-  mode: 'full';
+  mode: 'full' | 'filtered';
 }
 
 export type ApmTraceWaterfallEmbeddableProps =
@@ -190,7 +190,7 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
             mode$
           );
           const content =
-            mode === 'full' ? (
+            mode !== 'summary' ? (
               <TraceWaterfallEmbeddable
                 serviceName={serviceName}
                 traceId={traceId}
@@ -201,6 +201,7 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
                 scrollElement={scrollElement}
                 getRelatedErrorsHref={getRelatedErrorsHref}
                 onErrorClick={onErrorClick}
+                mode={mode}
               />
             ) : (
               <FocusedTraceWaterfallEmbeddable
