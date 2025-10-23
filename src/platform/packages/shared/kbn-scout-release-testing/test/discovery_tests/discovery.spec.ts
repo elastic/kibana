@@ -8,6 +8,7 @@
  */
 
 import { expect, test } from '@kbn/scout';
+import { uiSettingsFixture } from '@kbn/scout/src/playwright/fixtures/scope/worker';
 
 const defaultSettings = {
   defaultIndex: 'logstash-*',
@@ -48,16 +49,25 @@ test.describe('discover test', { tag: ['@ess'] }, () => {
       expect(rowData).toContain('Sep 22, 2015 @ 23:50:13.253');
     });
 
-    test('save query should show toast message and display query name', async ({ pageObjects }) => {
-      await pageObjects.timePicker.setDefaultAbsoluteRange();
+    test('save query should show toast message and display query name', async ({
+      pageObjects,
+      uiSettings,
+    }) => {
+      await uiSettings.setDefaultTime({
+        from: pageObjects.timePicker.defaultStartTime,
+        to: pageObjects.timePicker.defaultEndTime,
+      });
       await pageObjects.discover.saveSearch(queryName1);
       const actualQueryNameString = await pageObjects.discover.getCurrentQueryName();
       expect(actualQueryNameString).toBe(queryName1);
     });
 
-    test('should refetch when autofresh is enabled', async ({ pageObjects }) => {
+    test('should refetch when autofresh is enabled', async ({ pageObjects, uiSettings }) => {
       const interval = 5;
-      await pageObjects.timePicker.setDefaultAbsoluteRange();
+      await uiSettings.setDefaultTime({
+        from: pageObjects.timePicker.defaultStartTime,
+        to: pageObjects.timePicker.defaultEndTime,
+      });
       await pageObjects.timePicker.startAutoRefresh(interval);
 
       const getRequestTimestamp = async () => {
@@ -89,8 +99,11 @@ test.describe('discover test', { tag: ['@ess'] }, () => {
         .toBe(true);
     });
 
-    test('load query should show query name', async ({ pageObjects }) => {
-      await pageObjects.timePicker.setDefaultAbsoluteRange();
+    test('load query should show query name', async ({ pageObjects, uiSettings }) => {
+      await uiSettings.setDefaultTime({
+        from: pageObjects.timePicker.defaultStartTime,
+        to: pageObjects.timePicker.defaultEndTime,
+      });
       await pageObjects.discover.saveSearch(queryName2);
       await pageObjects.discover.loadSavedSearch(queryName2);
       await expect
@@ -98,23 +111,35 @@ test.describe('discover test', { tag: ['@ess'] }, () => {
         .toBe(queryName2);
     });
 
-    test('should show the correct hit count', async ({ pageObjects }) => {
+    test('should show the correct hit count', async ({ pageObjects, uiSettings }) => {
       const expectedHitCount = '14,004';
-      await pageObjects.timePicker.setDefaultAbsoluteRange();
+      await uiSettings.setDefaultTime({
+        from: pageObjects.timePicker.defaultStartTime,
+        to: pageObjects.timePicker.defaultEndTime,
+      });
       await expect
         .poll(async () => await pageObjects.discover.getHitCount())
         .toBe(expectedHitCount);
     });
 
-    test('should show correct time range string in chart', async ({ pageObjects }) => {
-      await pageObjects.timePicker.setDefaultAbsoluteRange();
+    test('should show correct time range string in chart', async ({ pageObjects, uiSettings }) => {
+      await uiSettings.setDefaultTime({
+        from: pageObjects.timePicker.defaultStartTime,
+        to: pageObjects.timePicker.defaultEndTime,
+      });
       const actualTimeString = await pageObjects.discover.getChartTimespan();
       const expectedTimeString = `${pageObjects.timePicker.defaultStartTime} - ${pageObjects.timePicker.defaultEndTime} (interval: Auto - 30 seconds)`;
       expect(actualTimeString).toBe(expectedTimeString);
     });
 
-    test('should modify the time range when a bar is clicked', async ({ pageObjects }) => {
-      await pageObjects.timePicker.setDefaultAbsoluteRange();
+    test('should modify the time range when a bar is clicked', async ({
+      pageObjects,
+      uiSettings,
+    }) => {
+      await uiSettings.setDefaultTime({
+        from: pageObjects.timePicker.defaultStartTime,
+        to: pageObjects.timePicker.defaultEndTime,
+      });
       await pageObjects.discover.clickHistogramBar();
       await pageObjects.discover.waitUntilSearchingHasFinished();
 
@@ -133,8 +158,15 @@ test.describe('discover test', { tag: ['@ess'] }, () => {
         .toBe(true);
     });
 
-    test('should show correct initial chart interval of Auto', async ({ page, pageObjects }) => {
-      await pageObjects.timePicker.setDefaultAbsoluteRange();
+    test('should show correct initial chart interval of Auto', async ({
+      page,
+      pageObjects,
+      uiSettings,
+    }) => {
+      await uiSettings.setDefaultTime({
+        from: pageObjects.timePicker.defaultStartTime,
+        to: pageObjects.timePicker.defaultEndTime,
+      });
       await pageObjects.discover.waitUntilSearchingHasFinished();
       await page.testSubj.click('discoverQueryHits'); // cancel out tooltips
 
@@ -143,19 +175,28 @@ test.describe('discover test', { tag: ['@ess'] }, () => {
       expect(actualInterval).toBe(expectedInterval);
     });
 
-    test('should show "no results"', async ({ pageObjects }) => {
-      await pageObjects.timePicker.setTimeRangeWithoutResults();
+    test('should show "no results"', async ({ pageObjects, uiSettings }) => {
+      await uiSettings.setDefaultTime({
+        from: pageObjects.timePicker.defaultStartTime,
+        to: pageObjects.timePicker.endTimeNoResults,
+      });
       await expect.poll(async () => await pageObjects.discover.hasNoResults()).toBe(true);
     });
 
-    test('should suggest a new time range is picked', async ({ pageObjects }) => {
-      await pageObjects.timePicker.setTimeRangeWithoutResults();
+    test('should suggest a new time range is picked', async ({ pageObjects, uiSettings }) => {
+      await uiSettings.setDefaultTime({
+        from: pageObjects.timePicker.defaultStartTime,
+        to: pageObjects.timePicker.endTimeNoResults,
+      });
       const isVisible = await pageObjects.discover.hasNoResultsTimepicker();
       expect(isVisible).toBe(true);
     });
 
-    test('should show matches when time range is expanded', async ({ pageObjects }) => {
-      await pageObjects.timePicker.setTimeRangeWithoutResults();
+    test('should show matches when time range is expanded', async ({ pageObjects, uiSettings }) => {
+      await uiSettings.setDefaultTime({
+        from: pageObjects.timePicker.defaultStartTime,
+        to: pageObjects.timePicker.endTimeNoResults,
+      });
       await pageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
 
       await expect.poll(async () => await pageObjects.discover.hasNoResults()).toBe(false);
