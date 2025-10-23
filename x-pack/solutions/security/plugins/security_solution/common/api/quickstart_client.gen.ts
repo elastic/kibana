@@ -1073,7 +1073,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
   }
   /**
     * Delete a single entity in Entity Store.
-The entity will be immediately gone from the latest index.  It will remain available in historical snapshots if it has been snapshotted.  The delete operation does not prevent the entity from being recreated if it is observed again in the future. 
+The entity will be immediately deleted from the latest index.  It will remain available in historical snapshots if it has been snapshotted.  The delete operation does not prevent the entity from being recreated if it is observed again in the future. 
 
     */
   async deleteSingleEntity(props: DeleteSingleEntityProps) {
