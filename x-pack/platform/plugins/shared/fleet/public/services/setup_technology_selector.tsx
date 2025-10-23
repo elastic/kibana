@@ -16,8 +16,6 @@ import {
   EuiSpacer,
   EuiBadge,
   EuiTitle,
-  EuiCallOut,
-  EuiLink,
 } from '@elastic/eui';
 
 import { useStartServices } from '../hooks';
@@ -32,7 +30,6 @@ interface SetupTechnologySelectorProps {
   setupTechnology?: SetupTechnology;
   isAgentlessDefault?: boolean;
   showBetaBadge?: boolean;
-  showLimitationsMessage?: boolean;
   useDescribedFormGroup?: boolean;
 }
 
@@ -43,7 +40,6 @@ export const SetupTechnologySelector = ({
   onSetupTechnologyChange,
   isAgentlessDefault = false,
   showBetaBadge = true,
-  showLimitationsMessage = false,
   useDescribedFormGroup = true,
 }: SetupTechnologySelectorProps) => {
   const { docLinks } = useStartServices();
@@ -148,37 +144,6 @@ export const SetupTechnologySelector = ({
     />
   );
 
-  const limitationsMessage = showLimitationsMessage && (
-    <>
-      <EuiSpacer size="s" />
-      <EuiCallOut
-        color="warning"
-        iconType="alert"
-        size="s"
-        title={
-          <FormattedMessage
-            id="xpack.fleet.setupTechnology.comingSoon"
-            defaultMessage="Agentless deployment is not supported if you are using {link}."
-            values={{
-              link: (
-                <EuiLink
-                  href="https://www.elastic.co/guide/en/cloud-enterprise/current/ece-traffic-filtering-deployment-configuration.html"
-                  target="_blank"
-                >
-                  <FormattedMessage
-                    id="xpack.fleet.setupTechnology.comingSoon.trafficFilteringLinkText"
-                    defaultMessage="Traffic filtering"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        }
-      />
-      <EuiSpacer size="s" />
-    </>
-  );
-
   if (useDescribedFormGroup) {
     return (
       <EuiDescribedFormGroup
@@ -191,13 +156,10 @@ export const SetupTechnologySelector = ({
           </h3>
         }
         description={
-          <>
-            <FormattedMessage
-              id="xpack.fleet.setupTechnology.setupTechnologyDescription"
-              defaultMessage="Select a deployment mode for this integration."
-            />
-            {limitationsMessage}
-          </>
+          <FormattedMessage
+            id="xpack.fleet.setupTechnology.setupTechnologyDescription"
+            defaultMessage="Select a deployment mode for this integration."
+          />
         }
       >
         {radioGroup}
@@ -216,7 +178,7 @@ export const SetupTechnologySelector = ({
           />
         </h2>
       </EuiTitle>
-      {limitationsMessage || <EuiSpacer size="s" />}
+      <EuiSpacer size="s" />
       {radioGroup}
     </>
   );

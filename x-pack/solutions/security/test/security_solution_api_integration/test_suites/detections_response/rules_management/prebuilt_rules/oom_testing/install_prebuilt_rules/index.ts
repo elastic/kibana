@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export * from './indices_metadata';
-export * from './task_manager';
+import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
+
+export default ({ loadTestFile }: FtrProviderContext): void => {
+  loadTestFile(require.resolve('./install_prebuilt_rules'));
+};

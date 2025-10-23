@@ -5,9 +5,5 @@
  * 2.0.
  */
 
-export * from './create_rule';
-export * from './delete_all_rules';
-export * from './delete_rule';
-export * from './get_rule_for_alert_testing';
-export * from './wait_for_rule_status';
-export * from './manual_run';
+import { casesSchema as casesSchemaV6 } from './v6';
+export const casesSchema = casesSchemaV6;
