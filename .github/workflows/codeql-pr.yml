@@ -12,7 +12,6 @@ jobs:
     if: |
       contains(github.event.pull_request.labels.*.name, 'ci:codeql') &&
       contains(fromJSON('["MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.pull_request.author_association)
-      github.event.pull_request.user.login != 'app/elastic-renovate-prod' &&
       github.event.pull_request.user.type != 'Bot' &&
       github.event.pull_request.draft == false
     permissions:
