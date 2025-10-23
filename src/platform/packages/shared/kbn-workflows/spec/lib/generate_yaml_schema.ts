@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import type { JsonSchema7Type } from 'zod-to-json-schema';
 import { zodToJsonSchema } from 'zod-to-json-schema';
+import { z } from '@kbn/zod';
+import type { ConnectorContractUnion } from '../..';
 import {
   BaseConnectorStepSchema,
   getForEachStepSchema,
@@ -22,36 +24,8 @@ import {
   WorkflowSchema,
 } from '../schema';
 
-export interface ConnectorContract {
-  type: string;
-  paramsSchema: z.ZodType;
-  connectorIdRequired?: boolean;
-  outputSchema: z.ZodType;
-  description?: string;
-  summary?: string;
-}
-
-export interface InternalConnectorContract extends ConnectorContract {
-  /** HTTP method(s) for this API endpoint */
-  methods?: string[];
-  /** Summary for this API endpoint */
-  summary?: string;
-  /** URL pattern(s) for this API endpoint */
-  patterns?: string[];
-  /** Whether this is an internal connector with hardcoded endpoint details */
-  isInternal?: boolean;
-  /** Documentation URL for this API endpoint */
-  documentation?: string | null;
-  /** Parameter type metadata for proper request building */
-  parameterTypes?: {
-    pathParams?: string[];
-    urlParams?: string[];
-    bodyParams?: string[];
-  };
-}
-
 function generateStepSchemaForConnector(
-  connector: ConnectorContract,
+  connector: ConnectorContractUnion,
   stepSchema: z.ZodType,
   loose: boolean = false
 ) {
@@ -64,7 +38,7 @@ function generateStepSchemaForConnector(
 }
 
 function createRecursiveStepSchema(
-  connectors: ConnectorContract[],
+  connectors: ConnectorContractUnion[],
   loose: boolean = false
 ): z.ZodType {
   // Use a simpler approach to avoid infinite recursion during validation
@@ -99,7 +73,7 @@ function createRecursiveStepSchema(
 }
 
 export function generateYamlSchemaFromConnectors(
-  connectors: ConnectorContract[],
+  connectors: ConnectorContractUnion[],
   loose: boolean = false
 ) {
   const recursiveStepSchema = createRecursiveStepSchema(connectors, loose);
@@ -116,7 +90,8 @@ export function generateYamlSchemaFromConnectors(
   });
 }
 
-export function getJsonSchemaFromYamlSchema(yamlSchema: z.ZodType) {
+export function getJsonSchemaFromYamlSchema(yamlSchema: z.ZodType): JsonSchema7Type {
+  // eslint-disable-next-line no-useless-catch
   try {
     // Generate the full schema - this should work and give us the full schema
     const jsonSchema = zodToJsonSchema(yamlSchema, {
@@ -136,6 +111,7 @@ export function getJsonSchemaFromYamlSchema(yamlSchema: z.ZodType) {
  * Recursively fix additionalProperties in the schema object
  * This ensures all object schemas have additionalProperties: false for strict validation
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function fixAdditionalPropertiesInSchema(obj: any, path: string = '', visited = new Set()): void {
   // Prevent infinite recursion with circular references
   if (typeof obj !== 'object' || obj === null || visited.has(obj)) {
@@ -202,6 +178,7 @@ function fixAdditionalPropertiesInSchema(obj: any, path: string = '', visited = 
   });
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function fixBrokenSchemaReferencesAndEnforceStrictValidation(schema: any): any {
   const schemaString = JSON.stringify(schema);
   let fixedSchemaString = schemaString;
@@ -319,5 +296,7 @@ function fixBrokenSchemaReferencesAndEnforceStrictValidation(schema: any): any {
 }
 
 export function getStepId(stepName: string): string {
-  return stepName.toLowerCase().replace(/\s+/g, '-');
+  // Using step name as is, don't do any escaping to match the workflow engine behavior
+  // Leaving this function in case we'd to change behaviour in future.
+  return stepName;
 }

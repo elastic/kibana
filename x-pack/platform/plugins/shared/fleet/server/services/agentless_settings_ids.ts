@@ -35,13 +35,26 @@ export async function ensureCorrectAgentlessSettingsIds(esClient: ElasticsearchC
   const internalSoClientWithoutSpaceExtension =
     appContextService.getInternalUserSOClientWithoutSpaceExtension();
 
-  const agentlessOutputIdsToFix = correctOutputId
+  const agentlessDataOutputIdsToFix = correctOutputId
     ? (
         await internalSoClientWithoutSpaceExtension.find<AgentPolicySOAttributes>({
           type: agentPolicySavedObjectType,
           page: 1,
           perPage: SO_SEARCH_LIMIT,
           filter: `${agentPolicySavedObjectType}.attributes.supports_agentless:true AND NOT ${agentPolicySavedObjectType}.attributes.data_output_id:${correctOutputId}`,
+          fields: [`id`],
+          namespaces: ['*'],
+        })
+      )?.saved_objects.map((so) => so.id)
+    : [];
+
+  const agentlessMonitoringOutputIdsToFix = correctOutputId
+    ? (
+        await internalSoClientWithoutSpaceExtension.find<AgentPolicySOAttributes>({
+          type: agentPolicySavedObjectType,
+          page: 1,
+          perPage: SO_SEARCH_LIMIT,
+          filter: `${agentPolicySavedObjectType}.attributes.supports_agentless:true AND NOT ${agentPolicySavedObjectType}.attributes.monitoring_output_id:${correctOutputId}`,
           fields: [`id`],
           namespaces: ['*'],
         })
@@ -63,33 +76,31 @@ export async function ensureCorrectAgentlessSettingsIds(esClient: ElasticsearchC
 
   try {
     // Check that the output ID exists
-    if (correctOutputId && agentlessOutputIdsToFix?.length > 0) {
-      const output = await outputService.get(
-        internalSoClientWithoutSpaceExtension,
-        correctOutputId
-      );
+    if (
+      correctOutputId &&
+      (agentlessDataOutputIdsToFix?.length > 0 || agentlessMonitoringOutputIdsToFix?.length > 0)
+    ) {
+      const output = await outputService.get(correctOutputId);
       fixOutput = output != null;
     }
   } catch (e) {
-    // Silently swallow
+    // Silently swallow so that output will not be fixed if the correct output ID does not exist
   }
 
   try {
     // Check that the fleet server host ID exists
     if (correctFleetServerId && agentlessFleetServerIdsToFix?.length > 0) {
-      const fleetServerHost = await fleetServerHostService.get(
-        internalSoClientWithoutSpaceExtension,
-        correctFleetServerId
-      );
+      const fleetServerHost = await fleetServerHostService.get(correctFleetServerId);
       fixFleetServer = fleetServerHost != null;
     }
   } catch (e) {
-    // Silently swallow
+    // Silently swallow so that fleet server host will not be fixed if the correct fleet server host ID does not exist
   }
 
   const allIdsToFix = Array.from(
     new Set([
-      ...(fixOutput ? agentlessOutputIdsToFix : []),
+      ...(fixOutput ? agentlessDataOutputIdsToFix : []),
+      ...(fixOutput ? agentlessMonitoringOutputIdsToFix : []),
       ...(fixFleetServer ? agentlessFleetServerIdsToFix : []),
     ])
   );
@@ -100,9 +111,7 @@ export async function ensureCorrectAgentlessSettingsIds(esClient: ElasticsearchC
 
   appContextService
     .getLogger()
-    .debug(
-      `Fixing output and/or fleet server host IDs on agent policies: ${agentlessOutputIdsToFix}`
-    );
+    .debug(`Fixing output and/or fleet server host IDs on agent policies: ${allIdsToFix}`);
 
   await pMap(
     allIdsToFix,
@@ -113,6 +122,7 @@ export async function ensureCorrectAgentlessSettingsIds(esClient: ElasticsearchC
         agentPolicyId,
         {
           data_output_id: correctOutputId,
+          monitoring_output_id: correctOutputId,
           fleet_server_host_id: correctFleetServerId,
         },
         {
