@@ -29,7 +29,7 @@ const SolutionOptions: Record<
     iconType: 'logoElasticsearch',
     label: (
       <FormattedMessage
-        id="xpack.spaces.spaceSolutionBadge.workplace_ai"
+        id="xpack.spaces.spaceSolutionBadge.workplaceai"
         defaultMessage="Workplace AI"
       />
     ),

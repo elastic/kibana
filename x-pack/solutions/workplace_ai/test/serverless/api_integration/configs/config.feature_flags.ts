@@ -13,7 +13,7 @@ import { services } from '../services';
  * These tests most likely will fail on default MKI project
  */
 export default createTestConfig({
-  serverlessProject: 'workplace_ai',
+  serverlessProject: 'workplaceai',
   services,
   junit: {
     reportName: 'Serverless Workplace AI Feature Flags API Integration Tests',

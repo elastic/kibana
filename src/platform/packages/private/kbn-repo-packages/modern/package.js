@@ -237,7 +237,7 @@ class Package {
       group = this.manifest.group ?? 'common';
       // if the group is 'private-only', enforce it
       //  BOOKMARK - List of Kibana solutions - FIXME we could use KIBANA_SOLUTIONS array here once we modernize this / get rid of Bazel
-      visibility = ['search', 'security', 'observability', 'workplace_ai'].includes(group)
+      visibility = ['search', 'security', 'observability', 'workplaceai'].includes(group)
         ? 'private'
         : this.manifest.visibility ?? 'shared';
     }

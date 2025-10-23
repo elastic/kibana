@@ -8,7 +8,7 @@
 import { createTestConfig } from '../../config.base';
 
 export default createTestConfig({
-  serverlessProject: 'workplace_ai',
+  serverlessProject: 'workplaceai',
   testFiles: [
     require.resolve('../../test_suites/core'),
     require.resolve('../../test_suites/elasticsearch_api'),

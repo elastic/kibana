@@ -9,7 +9,7 @@ import { createTestConfig } from '@kbn/test-suites-xpack-platform/serverless/fun
 import { services } from '../services';
 
 export default createTestConfig({
-  serverlessProject: 'workplace_ai',
+  serverlessProject: 'workplaceai',
   services,
   testFiles: [require.resolve('.')],
   junit: {
