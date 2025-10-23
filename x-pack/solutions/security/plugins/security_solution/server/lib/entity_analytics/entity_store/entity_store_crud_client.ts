@@ -172,16 +172,16 @@ export class EntityStoreCrudClient {
       conflicts: 'proceed',
     });
 
-    if (!deleteByQueryResp.deleted) {
-      throw new EntityNotFoundError(type, id);
-    }
-
     if (deleteByQueryResp.failures !== undefined && deleteByQueryResp.failures.length > 0) {
       throw new Error(`Failed to delete entity of type '${type}' and ID '${id}'`);
     }
 
     if (deleteByQueryResp.version_conflicts) {
       throw new DocumentVersionConflictError();
+    }
+
+    if (!deleteByQueryResp.deleted) {
+      throw new EntityNotFoundError(type, id);
     }
 
     return { deleted: true };
