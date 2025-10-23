@@ -12,6 +12,8 @@ import { AlertDetailsRightPanelPage } from './alert_details_right_panel';
 import { SecurityNavigation } from './security_navigation';
 import { AssistantPage } from './assistant_page';
 import { SecurityCommonPage } from './security_common';
+import { RulesManagementPage } from './rules_management_page';
+import { TimelinePage } from './timeline_page';
 
 export interface SecurityPageObjects extends PageObjects {
   alertsTablePage: AlertsTablePage;
@@ -19,6 +21,8 @@ export interface SecurityPageObjects extends PageObjects {
   securityNavigation: SecurityNavigation;
   assistantPage: AssistantPage;
   securityCommon: SecurityCommonPage;
+  rulesManagementPage: RulesManagementPage;
+  timelinePage: TimelinePage;
 }
 
 export function extendPageObjects(pageObjects: PageObjects, page: ScoutPage): SecurityPageObjects {
@@ -29,5 +33,7 @@ export function extendPageObjects(pageObjects: PageObjects, page: ScoutPage): Se
     securityNavigation: createLazyPageObject(SecurityNavigation, page),
     assistantPage: createLazyPageObject(AssistantPage, page),
     securityCommon: createLazyPageObject(SecurityCommonPage, page),
+    rulesManagementPage: createLazyPageObject(RulesManagementPage, page),
+    timelinePage: createLazyPageObject(TimelinePage, page),
   };
 }

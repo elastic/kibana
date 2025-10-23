@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect, spaceTest, TIMEOUTS } from '@kbn/scout-security';
+import { expect, spaceTest } from '@kbn/scout-security';
 import { CUSTOM_QUERY_RULE } from '@kbn/scout-security/src/playwright/constants/detection_rules';
 import { RULE_MANAGEMENT_CONTEXT_DESCRIPTION } from '../../../../../public/detection_engine/common/translations';
 
@@ -95,25 +95,11 @@ spaceTest.describe(
 
         const createdRule = await apiServices.detectionRule.createCustomQueryRule(rule);
 
-        // Navigate to rules management table
-        await page.gotoApp('security', { path: '/rules/management' });
+        // Navigate to rules management page using page object
+        await pageObjects.rulesManagementPage.navigateAndDismissOnboarding();
 
-        // Wait for URL to change to rules page
-        await page.waitForURL('**/app/security/rules/management**');
-
-        // Dismiss onboarding modal if present
-        await page
-          .getByRole('button', { name: 'Close tour' })
-          .click({ timeout: TIMEOUTS.UI_ELEMENT_STANDARD })
-          .catch(() => {});
-
-        // Wait for the rules table to load
-        // await page.testSubj.locator('allRulesTable').waitFor({ state: 'visible' });
-
-        // Select the rule using its checkbox (using the rule ID from the API response)
-        const ruleCheckbox = page.testSubj.locator(`checkboxSelectRow-${createdRule.id}`);
-        await ruleCheckbox.waitFor({ state: 'visible' });
-        await ruleCheckbox.click();
+        // Select the rule using its checkbox
+        await pageObjects.rulesManagementPage.selectRuleByCheckbox(createdRule.id);
 
         // Open assistant from rule context
         await pageObjects.assistantPage.openFromRule();
@@ -128,15 +114,8 @@ spaceTest.describe(
       'When invoked from alert details',
       async ({ page, pageObjects, apiServices, scoutSpace }) => {
         const ruleName = `New Rule Test_${scoutSpace.id}_${Date.now()}`;
-        const rule = {
-          ...CUSTOM_QUERY_RULE,
-          name: ruleName,
-          from: 'now-1m',
-        };
 
-        await apiServices.detectionRule.createCustomQueryRule(rule);
-
-        // Generate test data to trigger alert
+        // Generate test data FIRST before creating the rule
         await apiServices.detectionRule.indexTestDocument('logs-test', {
           'event.category': 'security',
           'event.type': 'alert',
@@ -145,19 +124,20 @@ spaceTest.describe(
           'user.name': 'test-user',
         });
 
-        // Navigate to alerts page
-        await page.gotoApp('security', { path: '/alerts' });
+        // Create rule that will match the already-indexed document
+        const rule = {
+          ...CUSTOM_QUERY_RULE,
+          name: ruleName,
+          from: 'now-1m',
+          enabled: true,
+        };
 
-        // Wait for URL to change to alerts page
-        await page.waitForURL('**/app/security/alerts**');
+        await apiServices.detectionRule.createCustomQueryRule(rule);
 
-        // Dismiss onboarding modal if present
-        await page
-          .getByRole('button', { name: 'Close tour' })
-          .click({ timeout: TIMEOUTS.UI_ELEMENT_STANDARD })
-          .catch(() => {});
+        // Navigate to alerts page using page object
+        await pageObjects.alertsTablePage.navigateAndDismissOnboarding();
 
-        // Wait for alerts to load (rule execution + indexing)
+        // Wait for rule to execute and alert to be generated
         await pageObjects.alertsTablePage.waitForDetectionsAlertsWrapper(ruleName);
 
         // Expand the first alert
@@ -241,15 +221,8 @@ spaceTest.describe.serial(
       'Last conversation persists in memory from page to page',
       async ({ page, pageObjects, apiServices, scoutSpace }) => {
         const ruleName = `New Rule Test_${scoutSpace.id}_${Date.now()}`;
-        const rule = {
-          ...CUSTOM_QUERY_RULE,
-          name: ruleName,
-          from: 'now-1m',
-        };
 
-        await apiServices.detectionRule.createCustomQueryRule(rule);
-
-        // Generate test data to trigger alert
+        // Generate test data FIRST before creating the rule
         await apiServices.detectionRule.indexTestDocument('logs-test', {
           'event.category': 'security',
           'event.type': 'alert',
@@ -258,15 +231,20 @@ spaceTest.describe.serial(
           'user.name': 'test-user',
         });
 
-        // Navigate to alerts page
-        await page.gotoApp('security', { path: '/alerts' });
+        // Create rule that will match the already-indexed document
+        const rule = {
+          ...CUSTOM_QUERY_RULE,
+          name: ruleName,
+          from: 'now-1m',
+          enabled: true,
+        };
 
-        // Wait for URL to change to alerts page
-        await page.waitForURL('**/app/security/alerts**');
+        await apiServices.detectionRule.createCustomQueryRule(rule);
 
-        // Dismiss onboarding modal if present
-        await pageObjects.securityCommon.dismissOnboardingModal();
+        // Navigate to alerts page using page object
+        await pageObjects.alertsTablePage.navigateAndDismissOnboarding();
 
+        // Wait for the rule to execute and alert to be generated
         await pageObjects.alertsTablePage.waitForDetectionsAlertsWrapper(ruleName);
 
         // Expand alert
@@ -291,7 +269,10 @@ spaceTest.describe.serial(
 
     spaceTest(
       'Properly switches back and forth between conversations',
-      async ({ page, pageObjects }) => {
+      async ({ page, pageObjects }, testInfo) => {
+        // Increase timeout for this test - multiple AI responses in serverless can be slow
+        testInfo.setTimeout(120000); // 2 minutes
+
         await page.gotoApp('security', { path: '/get_started' });
         await pageObjects.assistantPage.open();
 

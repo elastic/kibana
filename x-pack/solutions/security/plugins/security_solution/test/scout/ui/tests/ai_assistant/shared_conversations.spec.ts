@@ -155,11 +155,7 @@ spaceTest.describe.skip('Assistant Conversation Sharing', { tag: ['@ess', '@svlS
       await assistantPage.expectCalloutState('shared-by-me');
 
       // Close any toast notifications
-      const toast = page.testSubj.locator('euiToastCloseButton');
-      // eslint-disable-next-line playwright/no-conditional-in-test
-      if (await toast.isVisible()) {
-        await toast.click();
-      }
+      await pageObjects.securityCommon.dismissToasts();
 
       await assistantPage.openShareMenu();
       await assistantPage.expectShareMenuStatus('Shared');
@@ -400,15 +396,13 @@ spaceTest.describe.skip('Assistant Conversation Sharing', { tag: ['@ess', '@svlS
       );
 
       // Assert access error toast appears
-      const accessErrorToast = page.testSubj.locator('errorComment');
-      await expect(accessErrorToast).toBeVisible();
+      await pageObjects.securityCommon.expectErrorComment();
 
       // Try to access non-existent conversation
       await page.goto(`${origin}/app/security/get_started?assistant=does-not-exist`);
 
       // Assert generic conversation error toast appears
-      const genericErrorToast = page.testSubj.locator('errorComment');
-      await expect(genericErrorToast).toBeVisible();
+      await pageObjects.securityCommon.expectErrorComment();
     }
   );
 });

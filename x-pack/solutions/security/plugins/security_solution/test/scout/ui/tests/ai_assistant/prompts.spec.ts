@@ -352,23 +352,15 @@ spaceTest.describe(
 
         await apiServices.detectionRule.createCustomQueryRule(ruleConfig);
 
-        // Navigate to alerts page
-        await page.gotoApp('security', { path: '/alerts' });
-
-        // Wait for URL to change to alerts page
-        await page.waitForURL('**/app/security/alerts**');
-
-        // Dismiss onboarding modal if present
-        await pageObjects.securityCommon.dismissOnboardingModal();
+        // Navigate to alerts page using page object
+        await pageObjects.alertsTablePage.navigateAndDismissOnboarding();
 
         // Wait for alerts page to be fully loaded
         // eslint-disable-next-line playwright/no-wait-for-timeout
         await page.waitForTimeout(TIMEOUTS.NETWORK_IDLE);
 
-        // Expand first alert if available, otherwise skip
-        const firstAlert = page.testSubj.locator('expand-event');
-        // eslint-disable-next-line playwright/no-nth-methods
-        await firstAlert.first().click();
+        // Expand first alert if available
+        await pageObjects.alertsTablePage.expandFirstAlert();
 
         // Open assistant from alert context
         await pageObjects.assistantPage.openFromAlert();
