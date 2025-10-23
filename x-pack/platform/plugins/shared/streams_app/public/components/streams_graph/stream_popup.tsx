@@ -6,15 +6,19 @@
  */
 
 import React from 'react';
-import { EuiPopover, EuiPopoverTitle, EuiText, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiPopover, EuiPopoverTitle, EuiPopoverFooter, EuiText, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { DataQualityColumn } from '../stream_list_view/data_quality_column';
 import { RetentionColumn } from '../stream_list_view/retention_column';
 import { DocumentsColumn } from '../stream_list_view/documents_column';
+import { DiscoverBadgeButton } from '../stream_badges';
 import { useStreamDocCountsFetch } from '../../hooks/use_streams_doc_counts_fetch';
 import { useTimefilter } from '../../hooks/use_timefilter';
+import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import type { EnrichedStream } from '../stream_list_view/utils';
 import { css } from '@emotion/react';
 import { DATA_QUALITY_COLUMN_HEADER, RETENTION_COLUMN_HEADER, DOCUMENTS_COLUMN_HEADER } from '../stream_list_view/translations';
+import { Streams } from '@kbn/streams-schema';
+import { i18n } from '@kbn/i18n';
 
 interface StreamNodePopupProps {
   isOpen: boolean;
@@ -25,6 +29,7 @@ interface StreamNodePopupProps {
 
 export const StreamNodePopover = ({ isOpen, onClose, stream, button }: StreamNodePopupProps) => {
   const {effective_lifecycle: lifecycle, data_stream: dataStream, stream: { name: streamName, description: streamDescription }} = stream;
+  const router = useStreamsAppRouter();
 
   const numDataPoints = 25;
   const { getStreamDocCounts } = useStreamDocCountsFetch({
@@ -112,6 +117,60 @@ export const StreamNodePopover = ({ isOpen, onClose, stream, button }: StreamNod
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      <EuiPopoverFooter>
+        <EuiFlexGroup direction="column" gutterSize="m">
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued">
+              <strong>
+                {i18n.translate('xpack.streams.streamPopup.actionsLabel', {
+                  defaultMessage: 'Actions',
+                })}
+              </strong>
+            </EuiText>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+              <EuiFlexItem grow={true}>
+                <EuiText size="s" color="subdued">
+                  {i18n.translate('xpack.streams.streamPopup.viewStreamDetailsLabel', {
+                    defaultMessage: 'View stream details',
+                  })}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiLink
+                  data-test-subj={`streamsNameLink-${streamName}`}
+                  href={router.link('/{key}', { path: { key: streamName } })}
+                >
+                  {streamName}
+                </EuiLink>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+              <EuiFlexItem grow={true}>
+                <EuiText size="s" color="subdued">
+                  {i18n.translate('xpack.streams.streamPopup.navigateToDiscoverLabel', {
+                    defaultMessage: 'Navigate to Discover',
+                  })}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <DiscoverBadgeButton
+                  definition={{
+                    stream: stream.stream,
+                    data_stream_exists: !!dataStream,
+                  } as Streams.ingest.all.GetResponse}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPopoverFooter>
     </EuiPopover>
   );
 };
