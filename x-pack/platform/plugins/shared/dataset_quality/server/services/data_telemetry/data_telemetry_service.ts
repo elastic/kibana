@@ -67,6 +67,29 @@ function isLicenseError(error: any): boolean {
   );
 }
 
+/**
+ * Checks if an error is a timeout error (request took too long)
+ */
+function isTimeoutError(error: any): boolean {
+  const errorType = error?.constructor?.name;
+  const errorName = error?.name;
+  const errorMessage = error?.message?.toLowerCase() || '';
+
+  return (
+    errorType === 'TimeoutError' ||
+    errorName === 'TimeoutError' ||
+    errorMessage.includes('timeout') ||
+    errorMessage.includes('timed out')
+  );
+}
+
+/**
+ * Checks if an error is expected during telemetry collection and should be logged as debug
+ */
+function isExpectedTelemetryError(error: any): boolean {
+  return isLicenseError(error) || isTimeoutError(error);
+}
+
 export class DataTelemetryService {
   private readonly logger: Logger;
 
@@ -179,11 +202,12 @@ export class DataTelemetryService {
               } catch (e) {
                 if (e.message === SKIP_COLLECTION) {
                   data = null; // Collection is skipped, skip reporting
-                } else if (isLicenseError(e)) {
-                  // License-related errors are expected in certain deployments (e.g., basic license)
-                  // and should not be logged as errors since they don't indicate a system problem
+                } else if (isExpectedTelemetryError(e)) {
+                  // Expected errors (license restrictions, timeouts) are operational issues,
+                  // not system problems, so they should be logged as debug
+                  const errorType = isLicenseError(e) ? 'license restriction' : 'timeout';
                   service.logger.debug(
-                    `[Logs Data Telemetry] Skipping telemetry collection due to license restriction: ${e.message}`
+                    `[Logs Data Telemetry] Skipping telemetry collection due to ${errorType}: ${e.message}`
                   );
                   data = null;
                 } else {

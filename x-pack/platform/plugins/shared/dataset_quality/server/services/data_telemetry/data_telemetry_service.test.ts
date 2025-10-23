@@ -328,6 +328,31 @@ describe('DataTelemetryService', () => {
     );
 
     it(
+      'should handle timeout errors gracefully and log as debug',
+      async () => {
+        jest.spyOn(service as any, 'shouldCollectTelemetry').mockResolvedValue(true);
+
+        // Mock a timeout error from Elasticsearch
+        const timeoutError = new Error('Request timed out');
+        timeoutError.name = 'TimeoutError';
+
+        (mockEsClient.indices.getDataStream as jest.Mock).mockRejectedValue(timeoutError);
+
+        const taskResult = await runTask();
+
+        // Task should complete successfully with null data
+        expect(taskResult?.state.data).toBeNull();
+
+        // Error should be logged as debug, not error
+        expect(mockLogger.debug).toHaveBeenCalledWith(
+          expect.stringContaining('Skipping telemetry collection due to timeout')
+        );
+        expect(mockLogger.error).not.toHaveBeenCalled();
+      },
+      TEST_TIMEOUT
+    );
+
+    it(
       'should not include stats of excluded indices',
       async () => {
         jest.spyOn(service as any, 'shouldCollectTelemetry').mockResolvedValue(true);
