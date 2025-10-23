@@ -57,6 +57,14 @@ export function WorkflowsRoutes({ history }: WorkflowsAppDeps) {
       <I18nProvider>
         <Routes>
           <Route
+            path="/create"
+            render={() => (
+              <WorkflowsPermissionsWrapper permissions={['createWorkflow']}>
+                <WorkflowDetailPage />
+              </WorkflowsPermissionsWrapper>
+            )}
+          />
+          <Route
             path="/:id"
             render={(props) => (
               <WorkflowsPermissionsWrapper permissions={['read', 'readWorkflow']}>

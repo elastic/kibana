@@ -14,10 +14,11 @@ import { useSelector } from 'react-redux';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { WorkflowDetailDto, WorkflowYaml } from '@kbn/workflows';
 import { WorkflowDetailHeader } from './workflow_detail_header';
 import { WorkflowEditorLayout } from './workflow_detail_layout';
 import { WorkflowEditor } from './workflow_editor';
-import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
+import { useWorkflowActions as useWorkflowActionsHook } from '../../../entities/workflows/model/use_workflow_actions';
 import { useWorkflowDetail } from '../../../entities/workflows/model/use_workflow_detail';
 import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
 import { WorkflowExecuteModal } from '../../../features/run_workflow/ui/workflow_execute_modal';
@@ -27,46 +28,83 @@ import { useWorkflowsBreadcrumbs } from '../../../hooks/use_workflow_breadcrumbs
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { selectWorkflowDefinition } from '../../../widgets/workflow_yaml_editor/lib/store/selectors';
 
-export function WorkflowDetailPage({ id }: { id: string }) {
+const workflowTemplateYaml = `name: New workflow
+enabled: false
+triggers:
+  - type: manual
+steps:
+  - name: first-step
+    type: console
+    with:
+      message: First step executed
+`;
+
+const useCreateMode = (setHasChanges: (value: boolean) => void, id?: string) => {
+  const isCreateMode = !id;
   const { application, notifications } = useKibana().services;
-  const {
-    data: workflow,
-    isLoading: isLoadingWorkflow,
-    error: workflowError,
-  } = useWorkflowDetail(id);
-  useWorkflowsBreadcrumbs(workflow?.name);
+  const { createWorkflow } = useWorkflowActionsHook();
 
-  const { activeTab, selectedExecutionId, selectedStepId, setActiveTab, setSelectedExecution } =
-    useWorkflowUrlState();
+  const handleCreateSave = useCallback(
+    (workflowYaml: string) => {
+      createWorkflow.mutate(
+        { yaml: workflowYaml },
+        {
+          onSuccess: (data) => {
+            // Reset changes immediately after successful creation to prevent confirmation dialog
+            setHasChanges(false);
+            notifications?.toasts.addSuccess(
+              i18n.translate('workflows.create.success.workflowCreated', {
+                defaultMessage: 'Workflow created successfully',
+              }),
+              { toastLifeTimeMs: 3000 }
+            );
+            if (application) {
+              application.navigateToUrl(
+                application.getUrlForApp('workflows', { path: `/${data.id}` })
+              );
+            }
+          },
+          onError: (err) => {
+            if (err.body?.message) {
+              err.message = err.body.message;
+            }
+            notifications?.toasts.addError(err, {
+              toastLifeTimeMs: 3000,
+              title: i18n.translate('workflows.create.error.workflowCreationFailed', {
+                defaultMessage: 'Error creating workflow',
+              }),
+            });
+          },
+        }
+      );
+    },
+    [createWorkflow, notifications?.toasts, application, setHasChanges]
+  );
 
-  const { data: execution } = useWorkflowExecution(selectedExecutionId ?? null);
+  return { isCreateMode, handleCreateSave };
+};
 
-  const [workflowYaml, setWorkflowYaml] = useState(workflow?.yaml ?? '');
-  const originalWorkflowYaml = useMemo(() => workflow?.yaml ?? '', [workflow]);
-  const [hasChanges, setHasChanges] = useState(false);
-  const [highlightDiff, setHighlightDiff] = useState(false);
+const useWorkflowActions = (
+  id: string | null | undefined,
+  workflowYaml: string,
+  workflow: WorkflowDetailDto | undefined
+) => {
+  const { notifications } = useKibana().services;
+  const { updateWorkflow, testWorkflow } = useWorkflowActionsHook();
+  const { setSelectedExecution } = useWorkflowUrlState();
 
-  const [workflowExecuteModalOpen, setWorkflowExecuteModalOpen] = useState(false);
-  const closeModal = useCallback(() => {
-    setWorkflowExecuteModalOpen(false);
-  }, []);
-
-  const yamlValue = selectedExecutionId && execution ? execution.yaml : workflowYaml;
-
-  const { updateWorkflow, testWorkflow } = useWorkflowActions();
-
-  const canSaveWorkflow = Boolean(application?.capabilities.workflowsManagement.updateWorkflow);
-  const canRunWorkflow = Boolean(application?.capabilities.workflowsManagement.executeWorkflow);
-
-  const handleSave = useCallback(
+  const handleUpdateSave = useCallback(
     (onSuccess?: () => void) => {
+      if (!id) {
+        return;
+      }
       updateWorkflow.mutate(
         { id, workflow: { yaml: workflowYaml } },
         {
           ...(onSuccess && { onSuccess }),
           onError: (err) => {
             if (err.body?.message) {
-              err.message = err.body.message; // Extract message from HTTP error body and update the error message
+              err.message = err.body.message;
             }
             notifications?.toasts.addError(err, {
               toastLifeTimeMs: 3000,
@@ -85,7 +123,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
 
   const handleRun = useCallback(() => {
     setWorkflowExecuteModalOpen(true);
-  }, [setWorkflowExecuteModalOpen]);
+  }, []);
 
   const handleRunWorkflow = useCallback(
     (event: Record<string, unknown>) => {
@@ -103,7 +141,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
           },
           onError: (err) => {
             if (err.body?.message) {
-              err.message = err.body.message; // Extract message from HTTP error body and update the error message
+              err.message = err.body.message;
             }
             notifications?.toasts.addError(err as Error, {
               toastLifeTimeMs: 3000,
@@ -118,11 +156,10 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     [notifications?.toasts, setSelectedExecution, testWorkflow, workflowYaml]
   );
 
-  const handleSaveAndRun = useCallback(() => {
-    handleSave(() => handleRun());
-  }, [handleRun, handleSave]);
-
   const handleToggleWorkflow = useCallback(() => {
+    if (!id) {
+      return;
+    }
     if (!workflow) {
       notifications?.toasts.addError(new Error('Workflow is not loaded'), {
         toastLifeTimeMs: 3000,
@@ -150,10 +187,26 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     );
   }, [notifications?.toasts, updateWorkflow, id, workflow]);
 
+  return { handleUpdateSave, handleRunWorkflow, handleToggleWorkflow };
+};
+
+const useWorkflowState = (isCreateMode: boolean, workflow: WorkflowDetailDto | undefined) => {
+  const [workflowYaml, setWorkflowYaml] = useState(
+    isCreateMode ? workflowTemplateYaml : workflow?.yaml ?? ''
+  );
+  const originalWorkflowYaml = useMemo(
+    () => (isCreateMode ? workflowTemplateYaml : workflow?.yaml ?? ''),
+    [workflow, isCreateMode]
+  );
+  const [hasChanges, setHasChanges] = useState(false);
+  const [highlightDiff, setHighlightDiff] = useState(false);
+
   useEffect(() => {
-    setWorkflowYaml(workflow?.yaml ?? '');
-    setHasChanges(false);
-  }, [workflow]);
+    if (!isCreateMode) {
+      setWorkflowYaml(workflow?.yaml ?? '');
+      setHasChanges(false);
+    }
+  }, [workflow, isCreateMode]);
 
   const handleChange = useCallback(
     (wfString: string = '') => {
@@ -162,6 +215,88 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     },
     [originalWorkflowYaml]
   );
+
+  return {
+    workflowYaml,
+    hasChanges,
+    highlightDiff,
+    setHighlightDiff,
+    handleChange,
+    setHasChanges,
+  };
+};
+
+export function WorkflowDetailPage({ id }: { id?: string }) {
+  const { application } = useKibana().services;
+  const isCreateMode = !id;
+  const {
+    data: workflow,
+    isLoading: isLoadingWorkflow,
+    error: workflowError,
+  } = useWorkflowDetail(id);
+
+  useWorkflowsBreadcrumbs(isCreateMode ? 'Create workflow' : workflow?.name);
+
+  const { activeTab, selectedExecutionId, selectedStepId, setActiveTab, setSelectedExecution } =
+    useWorkflowUrlState();
+
+  const { data: execution } = useWorkflowExecution(selectedExecutionId ?? null);
+  const { workflowYaml, hasChanges, highlightDiff, setHighlightDiff, handleChange, setHasChanges } =
+    useWorkflowState(isCreateMode, workflow);
+
+  const { handleCreateSave } = useCreateMode(setHasChanges, id);
+
+  const [workflowExecuteModalOpen, setWorkflowExecuteModalOpen] = useState(false);
+  const closeModal = useCallback(() => {
+    setWorkflowExecuteModalOpen(false);
+  }, []);
+
+  const yamlValue = selectedExecutionId && execution ? execution.yaml : workflowYaml;
+
+  const { handleUpdateSave, handleRunWorkflow, handleToggleWorkflow } = useWorkflowActions(
+    id,
+    workflowYaml,
+    workflow
+  );
+
+  const canSaveWorkflow = Boolean(
+    isCreateMode
+      ? application?.capabilities.workflowsManagement.createWorkflow
+      : application?.capabilities.workflowsManagement.updateWorkflow
+  );
+  const canRunWorkflow = Boolean(application?.capabilities.workflowsManagement.executeWorkflow);
+
+  const handleSave = useCallback(
+    (onSuccess?: () => void) => {
+      if (isCreateMode) {
+        handleCreateSave(workflowYaml);
+      } else {
+        handleUpdateSave(onSuccess);
+      }
+    },
+    [isCreateMode, workflowYaml, handleCreateSave, handleUpdateSave]
+  );
+
+  const definitionFromCurrentYaml: WorkflowYaml | null = useMemo(() => {
+    const dynamicConnectorTypes = getCachedDynamicConnectorTypes() || {};
+    const parsingResult = parseWorkflowYamlToJSON(
+      workflowYaml,
+      getWorkflowZodSchemaLoose(dynamicConnectorTypes)
+    );
+
+    if (!parsingResult.success) {
+      return null;
+    }
+    return parsingResult.data as WorkflowYaml;
+  }, [workflowYaml]);
+
+  const handleRun = useCallback(() => {
+    setWorkflowExecuteModalOpen(true);
+  }, [setWorkflowExecuteModalOpen]);
+
+  const handleSaveAndRun = useCallback(() => {
+    handleSave(() => handleRun());
+  }, [handleRun, handleSave]);
 
   if (workflowError) {
     const error = workflowError as Error;
@@ -184,8 +319,9 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     <EuiFlexGroup direction="column" gutterSize="none" css={kbnFullBodyHeightCss()}>
       <EuiFlexItem grow={false}>
         <WorkflowDetailHeader
-          name={workflow?.name}
-          isLoading={isLoadingWorkflow}
+          isCreateMode={isCreateMode}
+          name={isCreateMode ? 'New workflow' : workflow?.name}
+          isLoading={isCreateMode ? false : isLoadingWorkflow}
           activeTab={activeTab}
           canRunWorkflow={canRunWorkflow}
           canSaveWorkflow={canSaveWorkflow}

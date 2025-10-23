@@ -11,7 +11,7 @@ import { useQuery } from '@tanstack/react-query';
 import type { WorkflowDetailDto } from '@kbn/workflows';
 import { useKibana } from '../../../hooks/use_kibana';
 
-export function useWorkflowDetail(id: string | null) {
+export function useWorkflowDetail(id?: string) {
   const { http } = useKibana().services;
 
   return useQuery<WorkflowDetailDto>({

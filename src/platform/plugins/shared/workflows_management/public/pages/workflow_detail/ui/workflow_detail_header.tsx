@@ -54,6 +54,7 @@ const Translations = {
   }),
 };
 export interface WorkflowDetailHeaderProps {
+  isCreateMode: boolean;
   name: string | undefined;
   isLoading: boolean;
   activeTab: WorkflowUrlStateTabType;
@@ -73,6 +74,7 @@ export interface WorkflowDetailHeaderProps {
 
 export const WorkflowDetailHeader = React.memo<WorkflowDetailHeaderProps>(
   ({
+    isCreateMode,
     name,
     isLoading,
     activeTab,
@@ -124,7 +126,7 @@ export const WorkflowDetailHeader = React.memo<WorkflowDetailHeaderProps>(
     }, [handleSave]);
 
     const handleRunClickWithUnsavedCheck = () => {
-      if (hasUnsavedChanges) {
+      if (hasUnsavedChanges && !isCreateMode) {
         setShowRunConfirmation(true);
       } else {
         handleRunClick();
@@ -180,7 +182,7 @@ export const WorkflowDetailHeader = React.memo<WorkflowDetailHeaderProps>(
                     loadingContent={<EuiSkeletonRectangle width="80px" height="20px" />}
                     loadedContent={
                       <WorkflowUnsavedChangesBadge
-                        hasChanges={hasUnsavedChanges}
+                        hasChanges={isCreateMode || hasUnsavedChanges}
                         highlightDiff={highlightDiff}
                         setHighlightDiff={setHighlightDiff}
                         lastUpdatedAt={lastUpdatedAt}
@@ -190,25 +192,27 @@ export const WorkflowDetailHeader = React.memo<WorkflowDetailHeaderProps>(
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPageHeaderSection>
-            <EuiPageHeaderSection
-              css={{
-                flexBasis: '15%',
-              }}
-            >
-              <EuiFlexGroup justifyContent="center">
-                <EuiFlexItem grow={false}>
-                  <EuiButtonGroup
-                    buttonSize="compressed"
-                    color="primary"
-                    options={buttonGroupOptions}
-                    idSelected={activeTab}
-                    legend="Switch between workflow and executions"
-                    type="single"
-                    onChange={(id) => handleTabChange(id as WorkflowUrlStateTabType)}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPageHeaderSection>
+            {!isCreateMode && (
+              <EuiPageHeaderSection
+                css={{
+                  flexBasis: '15%',
+                }}
+              >
+                <EuiFlexGroup justifyContent="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonGroup
+                      buttonSize="compressed"
+                      color="primary"
+                      options={buttonGroupOptions}
+                      idSelected={activeTab}
+                      legend="Switch between workflow and executions"
+                      type="single"
+                      onChange={(id) => handleTabChange(id as WorkflowUrlStateTabType)}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPageHeaderSection>
+            )}
             <EuiPageHeaderSection
               css={{
                 flexBasis: '40%',
