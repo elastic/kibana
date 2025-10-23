@@ -257,6 +257,8 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
             );
           }
 
+          // The empty state is a single disabled workflow with no ID, so we distinguish
+          // between actual disabled workflows and the empty state by checking for ID
           const hoverTooltip =
             isDisabled && workflow.id ? i18n.DISABLED_WORKFLOW_TOOLTIP : undefined;
 
