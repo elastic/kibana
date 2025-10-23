@@ -6,22 +6,10 @@
  */
 
 import React from 'react';
-import styled from 'styled-components';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiPanel,
-  EuiLink,
-  EuiText,
-  EuiForm,
-  EuiRadioGroup,
-  EuiSpacer,
-  EuiSwitch,
-  EuiIconTip,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiPanel, EuiLink, EuiText, EuiForm, EuiRadioGroup, EuiSpacer } from '@elastic/eui';
 
 import { useStartServices } from '../../../hooks';
 
@@ -36,15 +24,6 @@ export interface Props {
   initialType: IntegrationPreferenceType;
   onChange: (type: IntegrationPreferenceType) => void;
 }
-
-
-const EuiSwitchNoWrap = styled(EuiSwitch)`
-  white-space: nowrap;
-`
-
-const Item = styled(EuiFlexItem)`
-  padding-left: ${(props) => props.theme.eui.euiSizeXS};
-`;
 
 const options: Option[] = [
   {
