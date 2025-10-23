@@ -12,8 +12,9 @@ import { parse } from 'query-string';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import { decompressFromEncodedURIComponent } from 'lz-string';
 import { i18n } from '@kbn/i18n';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { DEFAULT_INPUT_VALUE } from '../../../../../common/constants';
+import { useEditorActionContext } from '../../../contexts';
 
 interface QueryParams {
   load_from: string;
@@ -47,7 +48,7 @@ export const readLoadFromParam = () => {
 export const useSetInitialValue = (params: SetInitialValueParams) => {
   const { localStorageValue, setValue, toasts } = params;
   const isInitialValueSet = useRef<boolean>(false);
-  const [loadFromData, setLoadFromData] = useState('');
+  const editorDispatch = useEditorActionContext();
 
   useEffect(() => {
     const ALLOWED_PATHS = ['/guide/', '/docs/'];
@@ -70,7 +71,7 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
         ) {
           const resp = await fetch(parsedURL);
           const data = await resp.text();
-          setLoadFromData(data);
+          editorDispatch({ type: 'setRequestToRestore', payload: { request: data } });
         } else {
           toasts.addWarning(
             i18n.translate('console.monaco.loadFromDataUnrecognizedUrlErrorMessage', {
@@ -96,7 +97,7 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
           return;
         }
 
-        setLoadFromData(data);
+        editorDispatch({ type: 'setRequestToRestore', payload: { request: data } });
       }
     };
 
@@ -111,13 +112,8 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
 
     window.addEventListener('hashchange', onHashChange);
 
-    const loadFromParam = readLoadFromParam();
-
     // Only set the value in the editor if an initial value hasn't been set yet
     if (!isInitialValueSet.current) {
-      if (loadFromParam) {
-        loadBufferFromRemote(loadFromParam);
-      }
       // Only set to default input value if the localstorage value is undefined
       setValue(localStorageValue ?? DEFAULT_INPUT_VALUE);
       isInitialValueSet.current = true;
@@ -126,7 +122,5 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
     return () => {
       window.removeEventListener('hashchange', onHashChange);
     };
-  }, [localStorageValue, setValue, toasts]);
-
-  return { loadFromData };
+  }, [localStorageValue, setValue, toasts, editorDispatch]);
 };
