@@ -211,7 +211,7 @@ export const AwsCredentialsForm = ({
             }}
           />
           <EuiSpacer size="m" />
-          {group.info}
+          {group?.info}
           <EuiSpacer size="m" />
           <ReadDocumentation url={elasticDocLink} />
           <EuiSpacer size="l" />
