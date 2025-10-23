@@ -9,7 +9,7 @@ Here’s how it works in the context of the Saved Objects Repository (SOR) secur
 When the Security Extension intercepts an operation, it delegates to ACS to determine whether the object type supports access control and if object‑level rules should be applied. The rules being:
 
 - Objects need to support access control, which is determined during SO registration.
-- An object, when in read_only mode, can only be modified by the current owner or the Kibana admin.
+- An object, when in write_restricted mode, can only be modified by the current owner or the Kibana admin.
 - An object, which supports access control, but is in default accessMode can be modified by anyone who has the appropriate space-level privileges.
 
 ACS returns either an empty set (no further checks needed) or a list of objects requiring RBAC verification.

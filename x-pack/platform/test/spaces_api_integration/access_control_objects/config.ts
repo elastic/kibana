@@ -17,13 +17,13 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     require.resolve('../../api_integration/config.ts')
   );
 
-  const readOnlyObjectsPlugin = resolve(
+  const accessControlTestPlugin = resolve(
     __dirname,
-    '../common/plugins/read_only_objects_test_plugin'
+    '../common/plugins/access_control_test_plugin'
   );
 
   return {
-    testFiles: [resolve(__dirname, './apis/spaces/read_only_objects.ts')],
+    testFiles: [resolve(__dirname, './apis/spaces/access_control_objects.ts')],
     services: {
       ...kibanaAPITestsConfig.get('services'),
       ...xPackAPITestsConfig.get('services'),
@@ -35,7 +35,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...xPackAPITestsConfig.get('kbnTestServer'),
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
-        `--plugin-path=${readOnlyObjectsPlugin}`,
+        `--plugin-path=${accessControlTestPlugin}`,
         `--savedObjects.enableAccessControl=true`,
       ],
     },

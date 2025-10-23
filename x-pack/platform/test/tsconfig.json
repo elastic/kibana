@@ -172,6 +172,6 @@
     "@kbn/onechat-plugin",
     "@kbn/field-formats-common",
     "@kbn/reporting-test-routes",
-    "@kbn/read-only-objects-test-plugin",
+    "@kbn/access-control-test-plugin",
   ]
 }

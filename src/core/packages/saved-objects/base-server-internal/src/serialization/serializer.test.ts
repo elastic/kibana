@@ -709,13 +709,13 @@ describe('#rawToSavedObject', () => {
             type: 'foo',
             accessControl: {
               owner: 'my_user_id',
-              accessMode: 'read_only',
+              accessMode: 'write_restricted',
             },
           },
         });
         expect(actual).toHaveProperty('accessControl', {
           owner: 'my_user_id',
-          accessMode: 'read_only',
+          accessMode: 'write_restricted',
         });
       });
 
@@ -738,7 +738,7 @@ describe('#rawToSavedObject', () => {
             type: 'foo',
             accessControl: {
               owner: 'my_user_id',
-              accessMode: 'read_only',
+              accessMode: 'write_restricted',
             },
           },
         });
@@ -1032,14 +1032,14 @@ describe('#savedObjectToRaw', () => {
       type: 'foo',
       accessControl: {
         owner: 'my_user_id',
-        accessMode: 'read_only',
+        accessMode: 'write_restricted',
       },
       attributes: {},
     } as any);
 
     expect(actual._source).toHaveProperty('accessControl', {
       owner: 'my_user_id',
-      accessMode: 'read_only',
+      accessMode: 'write_restricted',
     });
   });
 
