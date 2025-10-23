@@ -261,7 +261,7 @@ export function MochaReporterProvider({ getService }) {
         return '';
       }
 
-      const percentage = Math.round((completed / total) * 100);
+      const percentage = Math.floor((completed / total) * 100);
       return colors.suite(`[${completed}/${total} (${percentage}%), ${remaining} remaining]`);
     };
 
