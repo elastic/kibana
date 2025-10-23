@@ -6,6 +6,7 @@
  */
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import { getLogsIndices } from './get_logs_indices';
 import { getApmIndices } from './get_apm_indices';
 import type {
@@ -14,7 +15,7 @@ import type {
   ObservabilityAgentPluginStartDependencies,
 } from '../types';
 
-export async function getIndexPatterns({
+export async function getObservabilityDataSources({
   core,
   plugins,
   logger,
@@ -23,16 +24,15 @@ export async function getIndexPatterns({
   plugins: ObservabilityAgentPluginSetupDependencies;
   logger: Logger;
 }): Promise<{
-  apmIndexPatterns: string[];
+  apmIndices: APMIndices;
   logIndexPatterns: string[];
   metricIndexPatterns: string[];
   alertsIndexPattern: string[];
 }> {
   const apmIndices = await getApmIndices({ core, plugins, logger });
-  const apmIndexPatterns = Object.values(apmIndices);
   const logIndexPatterns = await getLogsIndices({ core, logger });
   const metricIndexPatterns = ['metrics-*'];
   const alertsIndexPattern = ['alerts-observability-*'];
 
-  return { apmIndexPatterns, logIndexPatterns, metricIndexPatterns, alertsIndexPattern };
+  return { apmIndices, logIndexPatterns, metricIndexPatterns, alertsIndexPattern };
 }

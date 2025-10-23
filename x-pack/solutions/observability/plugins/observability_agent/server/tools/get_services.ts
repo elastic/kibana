@@ -19,9 +19,8 @@ import type {
   ObservabilityAgentPluginStartDependencies,
 } from '../types';
 import { timeRangeSchema } from '../utils/tool_schemas';
-import { getIndexPatterns } from '../utils/get_index_patterns';
+import { getObservabilityDataSources } from '../utils/get_observability_data_sources';
 import { toISOString } from '../utils/time';
-import { getApmIndices } from '../utils/get_apm_indices';
 
 export const OBSERVABILITY_GET_SERVICES_TOOL_ID = 'observability.get_services';
 
@@ -64,12 +63,12 @@ export async function createObservabilityGetServicesTool({
   plugins: ObservabilityAgentPluginSetupDependencies;
   logger: Logger;
 }) {
-  const { apmIndexPatterns, logIndexPatterns, metricIndexPatterns } = await getIndexPatterns({
+  const { apmIndices, logIndexPatterns, metricIndexPatterns } = await getObservabilityDataSources({
     core,
     plugins,
     logger,
   });
-  const apmIndices = await getApmIndices({ core, plugins, logger });
+
   const defaultIndexPatterns = [...apmIndices.metric, ...logIndexPatterns, ...metricIndexPatterns];
   const serviceInventorySchema = createServiceInventorySchema(defaultIndexPatterns);
 
@@ -92,7 +91,7 @@ export async function createObservabilityGetServicesTool({
 
       const typedSearch = getTypedSearch(esClient.asCurrentUser);
       const dslQuery = {
-        index: apmIndexPatterns,
+        index: indexPatterns,
         allow_no_indices: true,
         ignore_unavailable: true,
         size: 0,
