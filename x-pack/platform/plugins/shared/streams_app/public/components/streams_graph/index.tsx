@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiPanel, EuiText, EuiSpacer, EuiEmptyPrompt, EuiLoadingElastic, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
@@ -22,6 +22,9 @@ import {
   addEdge,
   Connection,
   BackgroundVariant,
+  useStore,
+  useReactFlow,
+  ReactFlowProvider,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { ConditionPanel } from '../data_management/shared/condition_display';
@@ -88,6 +91,24 @@ export function StreamsGraph({ streams, loading = false }: StreamsGraphProps) {
       </EuiPanel>
     );
   }
+
+  return (
+    <ReactFlowProvider>
+      <Graph streams={streams} loading={loading} />
+    </ReactFlowProvider>
+  );
+}
+
+const Graph = ({ streams, loading = false }: StreamsGraphProps) => {
+  const widthSelector = (state: { width: any }) => state.width;
+  const heightSelector = (state: { height: any }) => state.height;
+  const reactFlowWidth = useStore(widthSelector);
+  const reactFlowHeight = useStore(heightSelector);
+  const reactFlow = useReactFlow();
+
+  useEffect(() => {
+    reactFlow.fitView();
+  }, [reactFlowWidth, reactFlowHeight, reactFlow]);
 
   const { getStreamDocCounts } = useStreamDocCountsFetch({
     groupTotalCountByTimestamp: false,
@@ -209,4 +230,4 @@ export function StreamsGraph({ streams, loading = false }: StreamsGraphProps) {
       </div>
     </EuiPanel>
   );
-}
+};

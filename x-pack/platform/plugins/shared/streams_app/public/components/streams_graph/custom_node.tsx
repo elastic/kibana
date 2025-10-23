@@ -2,6 +2,7 @@ import React from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { EuiFlexGroup, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
+import { truncateText } from '../../util/truncate_text';
 
 export interface StreamNodeData extends Record<string, unknown> {
     label: string;
@@ -41,8 +42,9 @@ export const StreamNode = ({ data: { label, type, hasParent, hasChildren }}: { d
             <EuiFlexGroup alignItems="center" gutterSize='xs'>
                 {type === 'root' && <EuiIcon type="aggregate" size="s" />}
                 <EuiText size='xs'>
-                    {label.length > 20 ? label.substring(0, 17) + '...' : label}
+                    {label.length > 20 ? truncateText(label, 17) : label}
                 </EuiText>
+                {hasChildren && <EuiIcon type="arrowDown" size="s" />}
             </EuiFlexGroup>
         </div>
     );
