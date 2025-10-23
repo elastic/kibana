@@ -16,7 +16,10 @@ import type { AssetInventoryCloudConnectorUsageStats } from '../type';
 /**
  * Checks if the cloud connector has valid credentials based on cloud provider
  */
-const hasValidCredentials = (cloudProvider: string, vars: Record<string, any>): boolean => {
+const hasValidCredentials = (
+  cloudProvider: string,
+  vars: Record<string, { value?: string }>
+): boolean => {
   switch (cloudProvider) {
     case 'aws':
       return !!(vars.role_arn?.value && vars.external_id?.value);
