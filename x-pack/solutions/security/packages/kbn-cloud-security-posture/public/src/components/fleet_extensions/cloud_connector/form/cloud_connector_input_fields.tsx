@@ -53,7 +53,7 @@ export const CloudConnectorInputFields = ({
         const invalid = fieldIsInvalid(field.value, hasInvalidRequiredVars);
         const invalidError = getInvalidError(field.label);
 
-        if (field.type === 'password' && field.isSecret === true) {
+        if ((field.type === 'password' || field.type === 'text') && field.isSecret === true) {
           return (
             <React.Fragment key={field.id}>
               <EuiSpacer size="m" />
@@ -64,7 +64,7 @@ export const CloudConnectorInputFields = ({
                       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                       ...findVariableDef(packageInfo, field.id)!,
                       required: true,
-                      type: 'password',
+                      type: field.type,
                     }}
                     value={field.value || ''}
                     onChange={(value) => onChange(field.id, value)}
