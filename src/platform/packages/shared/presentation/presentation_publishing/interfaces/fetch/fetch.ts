@@ -12,37 +12,40 @@ import {
   BehaviorSubject,
   combineLatest,
   combineLatestWith,
-  debounceTime,
   distinctUntilChanged,
-  exhaustMap,
   filter,
   map,
-  mergeMap,
+  merge,
   of,
   switchMap,
-  tap,
+  withLatestFrom,
   type Observable,
 } from 'rxjs';
+
 import { useStateFromPublishingSubject } from '../../publishing_subject';
 import { apiHasParentApi } from '../has_parent_api';
-import { isReloadTimeFetchContextEqual, type FetchContext } from './fetch_context';
+import {
+  isReloadTimeFetchContextEqual,
+  type FetchContext,
+  type ReloadTimeFetchContext,
+} from './fetch_context';
 import { apiPublishesPauseFetch } from './publishes_pause_fetch';
+import { apiPublishesReload } from './publishes_reload';
 import { apiPublishesTimeRange, apiPublishesUnifiedSearch } from './publishes_unified_search';
 
 function hasLocalTimeRange(api: unknown) {
   return apiPublishesTimeRange(api) ? typeof api.timeRange$.value === 'object' : false;
 }
 
-function getFetchContext$(api: unknown) {
+function getFetchContext$(api: unknown): Observable<Omit<FetchContext, 'isReload'>> {
   const observables: {
-    [key in keyof FetchContext]: Observable<FetchContext[key]>;
+    [key in keyof Omit<FetchContext, 'isReload'>]: Observable<FetchContext[key]>;
   } = {
     filters: of(undefined),
     query: of(undefined),
     searchSessionId: of(undefined),
     timeRange: of(undefined),
     timeslice: of(undefined),
-    isReload: of(false),
   };
 
   if (apiPublishesTimeRange(api)) {
@@ -61,12 +64,6 @@ function getFetchContext$(api: unknown) {
     }
   }
 
-  // if (apiHasParentApi(api) && apiPublishesReload(api.parentApi)) {
-  //   api.parentApi.reload$.subscribe(() => {
-  //     observables.isReload(true);
-  //   });
-  // }
-  console.log(observables);
   return combineLatest(observables);
 }
 
@@ -84,20 +81,33 @@ export function fetch$(api: unknown): Observable<FetchContext> {
     )
   );
 
-  return fetchContext$.pipe(
+  const reload$: Observable<ReloadTimeFetchContext> = (
+    apiHasParentApi(api) && apiPublishesReload(api.parentApi) ? api.parentApi.reload$ : of()
+  ).pipe(
+    withLatestFrom(fetchContext$),
+    map(([, context]) => ({
+      ...context,
+      reloadTimestamp: Date.now(),
+    }))
+  );
+
+  return merge(fetchContext$, reload$).pipe(
     combineLatestWith(isFetchPaused$.pipe(distinctUntilChanged())),
     filter(([, isFetchPaused]) => !isFetchPaused),
     map(([fetchContext]) => fetchContext),
     distinctUntilChanged((prevContext, nextContext) =>
       isReloadTimeFetchContextEqual(prevContext, nextContext)
     ),
-    switchMap(async (context) => {
+    switchMap(async (reloadTimeFetchContext) => {
       const searchSessionId = await ((api as any).parentApi as any).requestSearchSessionId();
-      console.log({ context });
+      const { reloadTimestamp, ...rest } = {
+        reloadTimestamp: undefined,
+        ...reloadTimeFetchContext,
+      };
       return {
-        ...context,
+        ...rest,
         searchSessionId,
-        // isReload: Boolean(reloadTimeFetchContext.reloadTimestamp),
+        isReload: Boolean(reloadTimestamp),
       };
     })
     // debounceTime(0)

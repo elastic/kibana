@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { v4 } from 'uuid';
-import { BehaviorSubject, Subject, debounceTime, first } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import type { DashboardApi, DashboardCreationOptions, DashboardInternalApi } from '../types';
+
 import { dataService } from '../../services/kibana_services';
+import type { DashboardApi, DashboardCreationOptions, DashboardInternalApi } from '../types';
 import { startDashboardSearchSessionIntegration } from './start_dashboard_search_session_integration';
 
 export function initializeSearchSessionManager(

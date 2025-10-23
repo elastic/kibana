@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, Subject, combineLatest, debounceTime, filter, skip, tap } from 'rxjs';
+import { type BehaviorSubject, combineLatest, filter, skip } from 'rxjs';
 
 import { noSearchSessionStorageCapabilityMessage } from '@kbn/data-plugin/public';
 
@@ -16,7 +16,6 @@ import { dataService } from '../../services/kibana_services';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import type { DashboardInternalApi } from '../types';
 import { newSession$ } from './new_session';
-import { v4 } from 'uuid';
 
 /**
  * Enables dashboard search sessions.
@@ -73,13 +72,11 @@ export function startDashboardSearchSessionIntegration(
     dashboardApi.isFetchPaused$,
   ])
     .pipe(
-      filter(([, isFetchPaused]) => !isFetchPaused), // don't generate new search session until fetch is unpaused
-      tap(() => {
-        console.log('IN PROGRESS');
-        searchSessionGenerationInProgress$.next(true);
-      })
+      filter(([, isFetchPaused]) => !isFetchPaused) // don't generate new search session until fetch is unpaused
     )
     .subscribe(() => {
+      searchSessionGenerationInProgress$.next(true);
+
       const currentSearchSessionId = dashboardApi.searchSessionId$.value;
 
       const updatedSearchSessionId: string | undefined = (() => {
@@ -102,7 +99,7 @@ export function startDashboardSearchSessionIntegration(
       if (updatedSearchSessionId && updatedSearchSessionId !== currentSearchSessionId) {
         setSearchSessionId(updatedSearchSessionId);
       }
-      console.log('NOT IN PROGRESS');
+
       searchSessionGenerationInProgress$.next(false);
     });
 
