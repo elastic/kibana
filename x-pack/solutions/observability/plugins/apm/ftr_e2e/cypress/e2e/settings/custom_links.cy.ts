@@ -60,10 +60,10 @@ describe('Custom links', () => {
       const emptyPrompt = cy.getByTestSubj('customLinksEmptyPrompt');
       cy.contains('Create custom link').click();
       cy.contains('Create link');
-      cy.contains('Save').should('be.disabled');
+      cy.contains('Save').should('be.euiDisabled');
       cy.get('input[name="label"]').type('foo');
       cy.get('input[name="url"]').type('https://foo.com');
-      cy.contains('Save').should('not.be.disabled');
+      cy.contains('Save').should('not.be.euiDisabled');
       cy.contains('Save').click();
       emptyPrompt.should('not.exist');
       cy.contains('foo');
@@ -78,7 +78,7 @@ describe('Custom links', () => {
 
     it('shows disabled create button and edit button', () => {
       cy.visitKibana(basePath);
-      cy.contains('Create custom link').should('be.disabled');
+      cy.contains('Create custom link').should('be.euiDisabled');
       cy.getByTestSubj('editCustomLink').should('not.exist');
     });
   });
@@ -90,7 +90,7 @@ describe('Custom links', () => {
 
     it('shows disabled create button and edit button', () => {
       cy.visitKibana(basePath);
-      cy.contains('Create custom link').should('be.disabled');
+      cy.contains('Create custom link').should('be.euiDisabled');
       cy.getByTestSubj('editCustomLink').should('not.exist');
     });
   });
@@ -102,7 +102,7 @@ describe('Custom links', () => {
 
     it('shows create button', () => {
       cy.visitKibana(basePath);
-      cy.contains('Create custom link').should('not.be.disabled');
+      cy.contains('Create custom link').should('not.be.euiDisabled');
     });
 
     it('deletes custom link', () => {

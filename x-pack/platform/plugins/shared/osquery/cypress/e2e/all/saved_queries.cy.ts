@@ -157,7 +157,7 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
       checkResults();
 
       // Disabled submit button in test configuration
-      cy.contains('Submit').should('not.be.disabled');
+      cy.contains('Submit').should('not.be.euiDisabled');
       cy.getBySel('osquery-save-query-flyout').within(() => {
         cy.contains('Query is a required field').should('not.exist');
         // this clears the input

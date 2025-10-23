@@ -38,7 +38,7 @@ export const shouldBeChecked = (selector: string) => {
  * @param selector the selector for the DOM element to check the disabled state
  */
 export const shouldBeDisabled = (selector: string) => {
-  cy.get(selector).should('be.disabled');
+  cy.get(selector).should('be.euiDisabled');
 };
 
 /**
@@ -46,7 +46,7 @@ export const shouldBeDisabled = (selector: string) => {
  * @param selector the selector for the DOM element to check the enabled state
  */
 export const shouldBeEnabled = (selector: string) => {
-  cy.get(selector).should('be.enabled');
+  cy.get(selector).should('be.euiEnabled');
 };
 
 export const shouldBeSelected = (selector: string) => {

@@ -115,10 +115,10 @@ describe(
       it('allows editing of a rule to change its suppression configuration', () => {
         // check saved suppression settings
         cy.get(ALERT_SUPPRESSION_DURATION_VALUE_INPUT)
-          .should('be.enabled')
+          .should('be.euiEnabled')
           .should('have.value', 360);
         cy.get(ALERT_SUPPRESSION_DURATION_UNIT_INPUT)
-          .should('be.enabled')
+          .should('be.euiEnabled')
           .should('have.value', 's');
 
         cy.get(ALERT_SUPPRESSION_FIELDS).should('contain', suppressByFields.join(''));
@@ -139,10 +139,10 @@ describe(
       it('allows editing of a rule to remove suppression configuration', () => {
         // check saved suppression settings
         cy.get(ALERT_SUPPRESSION_DURATION_VALUE_INPUT)
-          .should('be.enabled')
+          .should('be.euiEnabled')
           .should('have.value', 360);
         cy.get(ALERT_SUPPRESSION_DURATION_UNIT_INPUT)
-          .should('be.enabled')
+          .should('be.euiEnabled')
           .should('have.value', 's');
 
         cy.get(ALERT_SUPPRESSION_FIELDS).should('contain', suppressByFields.join(''));

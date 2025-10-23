@@ -105,7 +105,7 @@ describe(
         openExceptionFlyoutFromEmptyViewerPrompt();
 
         // submit button is disabled if no paramerters were added
-        cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
+        cy.get(CONFIRM_BTN).should('be.euiDisabled');
 
         // for endpoint exceptions, must specify OS
         selectOs('windows');
@@ -118,7 +118,7 @@ describe(
         });
 
         // Name is required so want to check that submit is still disabled
-        cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
+        cy.get(CONFIRM_BTN).should('be.euiDisabled');
 
         // add exception item name
         addExceptionFlyoutItemName(ITEM_NAME);

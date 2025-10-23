@@ -113,20 +113,20 @@ describe.skip('Exceptions flyout', { tags: ['@ess', '@serverless', '@skipInServe
     // add an entry with a value and submit button should enable
     addExceptionEntryFieldValue('agent.name', 0);
     addExceptionEntryFieldValueValue('test', 0);
-    cy.get(CONFIRM_BTN).should('be.enabled');
+    cy.get(CONFIRM_BTN).should('be.euiEnabled');
 
     // remove the value and should see warning and button disabled
     cy.get(VALUES_INPUT).eq(0).type('{backspace}{enter}');
     cy.get(EXCEPTION_FLYOUT_TITLE).click();
-    cy.get(CONFIRM_BTN).should('be.disabled');
+    cy.get(CONFIRM_BTN).should('be.euiDisabled');
 
     // change operators
     addExceptionEntryOperatorValue('is one of', 0);
-    cy.get(CONFIRM_BTN).should('be.disabled');
+    cy.get(CONFIRM_BTN).should('be.euiDisabled');
 
     // add value again and button should be enabled again
     addExceptionEntryFieldMatchAnyValue(['test'], 0);
-    cy.get(CONFIRM_BTN).should('be.enabled');
+    cy.get(CONFIRM_BTN).should('be.euiEnabled');
   });
 
   it('Validates custom fields correctly', () => {
@@ -139,7 +139,7 @@ describe.skip('Exceptions flyout', { tags: ['@ess', '@serverless', '@skipInServe
     // add an entry with a value and submit button should enable
     addExceptionEntryFieldValue('blooberty', 0);
     addExceptionEntryFieldValueValue('blah', 0);
-    cy.get(CONFIRM_BTN).should('be.enabled');
+    cy.get(CONFIRM_BTN).should('be.euiEnabled');
   });
 
   it('Does not overwrite values and-ed together', () => {
@@ -308,7 +308,7 @@ describe.skip('Exceptions flyout', { tags: ['@ess', '@serverless', '@skipInServe
     addExceptionEntryFieldValue('agent.type', 0);
     cy.get(VALUES_INPUT).eq(0).type(`{enter}`);
     cy.get(VALUES_INPUT).eq(0).type(`{downarrow}{enter}`);
-    cy.get(CONFIRM_BTN).should('be.enabled');
+    cy.get(CONFIRM_BTN).should('be.euiEnabled');
   });
 
   it.skip('Warns users about mapping conflicts on problematic field selection', async () => {

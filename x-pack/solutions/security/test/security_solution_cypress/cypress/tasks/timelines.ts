@@ -42,7 +42,7 @@ export const selectAllTimelines = () => {
 
 export const exportSelectedTimelines = () => {
   cy.get(BULK_ACTIONS).click();
-  cy.get(EXPORT_TIMELINE_ACTION).should('not.be.disabled');
+  cy.get(EXPORT_TIMELINE_ACTION).should('not.be.euiDisabled');
   cy.get(EXPORT_TIMELINE_ACTION).click();
 };
 /**

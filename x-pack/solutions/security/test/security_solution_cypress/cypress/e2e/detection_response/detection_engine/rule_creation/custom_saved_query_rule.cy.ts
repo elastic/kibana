@@ -52,7 +52,7 @@ describe('Saved query rules - Rule Creation', { tags: ['@ess', '@serverless'] },
 
     // when clicking load query dynamically checkbox, saved query should be shown in query input and input should be disabled
     checkLoadQueryDynamically();
-    getCustomQueryInput().should('have.value', savedQueryQuery).should('be.disabled');
+    getCustomQueryInput().should('have.value', savedQueryQuery).should('be.euiDisabled');
     cy.get(QUERY_BAR).should('contain', savedQueryFilterKey);
 
     cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click();

@@ -315,7 +315,7 @@ export const fillRelatedIntegrations = (): void => {
 
 const addFirstIntegration = (): void => {
   cy.get('button').contains('Add integration').click();
-  cy.get(RELATED_INTEGRATION_COMBO_BOX_INPUT).last().should('be.enabled').click();
+  cy.get(RELATED_INTEGRATION_COMBO_BOX_INPUT).last().should('be.euiEnabled').click();
   cy.get(COMBO_BOX_OPTION).first().click();
 };
 
@@ -505,9 +505,9 @@ export const fillRequiredFields = (): void => {
 };
 
 const addRequiredField = (): void => {
-  cy.contains('button', 'Add required field').should('be.enabled').click();
+  cy.contains('button', 'Add required field').should('be.euiEnabled').click();
 
-  cy.get(REQUIRED_FIELD_COMBO_BOX_INPUT).last().should('be.enabled').click();
+  cy.get(REQUIRED_FIELD_COMBO_BOX_INPUT).last().should('be.euiEnabled').click();
   cy.get(COMBO_BOX_OPTION).first().click();
 };
 
@@ -601,8 +601,8 @@ export const fillDefineEqlRule = (rule: EqlRuleCreateProps) => {
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('be.visible');
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).type(rule.query);
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_VALIDATION_SPINNER).should('not.exist');
-  cy.get(RULES_CREATION_PREVIEW_BUTTON).should('not.be.disabled').click({ force: true });
-  cy.get(RULES_CREATION_PREVIEW_REFRESH_BUTTON).should('not.be.disabled').click({ force: true });
+  cy.get(RULES_CREATION_PREVIEW_BUTTON).should('not.be.euiDisabled').click({ force: true });
+  cy.get(RULES_CREATION_PREVIEW_REFRESH_BUTTON).should('not.be.euiDisabled').click({ force: true });
   cy.get(PREVIEW_HISTOGRAM)
     .invoke('text')
     .then((text) => {
@@ -642,7 +642,7 @@ export const fillDefineNewTermsRuleAndContinue = (rule: NewTermsRuleCreateProps)
 
 const typeEsqlQueryBar = (query: string) => {
   // eslint-disable-next-line cypress/no-force
-  cy.get(ESQL_QUERY_BAR_INPUT_AREA).should('not.be.disabled').type(query, { force: true });
+  cy.get(ESQL_QUERY_BAR_INPUT_AREA).should('not.be.euiDisabled').type(query, { force: true });
 };
 
 /**
@@ -924,9 +924,11 @@ export const enablesAndPopulatesThresholdSuppression = (
   timeUnit: 's' | 'm' | 'h'
 ) => {
   // enable suppression is unchecked so the rest of suppression components are disabled
-  cy.get(ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL).should('be.disabled').should('be.checked');
+  cy.get(ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL)
+    .should('be.euiDisabled')
+    .should('be.checked');
   cy.get(ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION)
-    .should('be.disabled')
+    .should('be.euiDisabled')
     .should('not.be.checked');
 
   // enables suppression for threshold rule
@@ -937,8 +939,8 @@ export const enablesAndPopulatesThresholdSuppression = (
   setAlertSuppressionDuration(interval, timeUnit);
 
   // rule execution radio option is disabled, per time interval becomes enabled when suppression enabled
-  cy.get(ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION).should('be.disabled');
-  cy.get(ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL).should('be.enabled').should('be.checked');
+  cy.get(ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION).should('be.euiDisabled');
+  cy.get(ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL).should('be.euiEnabled').should('be.checked');
 };
 
 /**
@@ -947,7 +949,7 @@ export const enablesAndPopulatesThresholdSuppression = (
  * If there are many fields in combobox, they are might be visible only after scrolling down menu.
  */
 export const fillAlertSuppressionFields = (fields: string[], checkFieldsInComboBox?: boolean) => {
-  cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).should('not.be.disabled');
+  cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).should('not.be.euiDisabled');
   cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).click();
   fields.forEach((field) => {
     if (checkFieldsInComboBox) {
@@ -959,7 +961,7 @@ export const fillAlertSuppressionFields = (fields: string[], checkFieldsInComboB
 };
 
 export const clearAlertSuppressionFields = () => {
-  cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).should('not.be.disabled');
+  cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).should('not.be.euiDisabled');
   cy.get(ALERT_SUPPRESSION_FIELDS).within(() => {
     cy.get(COMBO_BOX_CLEAR_BTN).click();
   });
@@ -990,7 +992,7 @@ export const setAlertSuppressionDuration = (interval: number, timeUnit: 's' | 'm
  * Suppression fields are disabled when app has insufficient license
  */
 export const openSuppressionFieldsTooltipAndCheckLicense = () => {
-  cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).should('be.disabled');
+  cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).should('be.euiDisabled');
   cy.get(ALERT_SUPPRESSION_FIELDS).trigger('mouseover');
   // Platinum license is required, tooltip on disabled alert suppression checkbox should tell this
   cy.get(TOOLTIP).contains('Platinum license');

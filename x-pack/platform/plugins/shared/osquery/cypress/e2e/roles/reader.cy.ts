@@ -54,11 +54,11 @@ describe('Reader - only READ', { tags: ['@ess'] }, () => {
   it('should not be able to add nor run saved queries', () => {
     navigateTo('/app/osquery/saved_queries');
     cy.contains(savedQueryName);
-    cy.contains('Add saved query').should('be.disabled');
+    cy.contains('Add saved query').should('be.euiDisabled');
     cy.get(customActionRunSavedQuerySelector(savedQueryName)).should('not.exist');
     cy.get(customActionEditSavedQuerySelector(savedQueryName)).click();
-    cy.get(formFieldInputSelector('id')).should('be.disabled');
-    cy.get(formFieldInputSelector('description')).should('be.disabled');
+    cy.get(formFieldInputSelector('id')).should('be.euiDisabled');
+    cy.get(formFieldInputSelector('description')).should('be.euiDisabled');
 
     cy.contains('Update query').should('not.exist');
     cy.contains(`Delete query`).should('not.exist');
@@ -71,7 +71,7 @@ describe('Reader - only READ', { tags: ['@ess'] }, () => {
 
   it('should not be able to play in live queries history', () => {
     navigateTo('/app/osquery/live_queries');
-    cy.contains('New live query').should('be.disabled');
+    cy.contains('New live query').should('be.euiDisabled');
     cy.contains(liveQueryQuery);
     cy.get(customActionRunSavedQuerySelector(savedQueryName)).should('not.exist');
     cy.get(`[aria-label="Details"]`).should('exist');
@@ -79,15 +79,15 @@ describe('Reader - only READ', { tags: ['@ess'] }, () => {
 
   it('should not be able to add nor edit packs', () => {
     navigateTo('/app/osquery/packs');
-    cy.contains('Add pack').should('be.disabled');
+    cy.contains('Add pack').should('be.euiDisabled');
     cy.getBySel('tablePaginationPopoverButton').click();
     cy.getBySel('tablePagination-50-rows').click();
 
-    cy.get(activeStateSwitchComponentSelector(packName)).should('be.disabled');
+    cy.get(activeStateSwitchComponentSelector(packName)).should('be.euiDisabled');
 
     cy.contains(packName).click();
     cy.contains(`${packName} details`);
-    cy.contains('Edit').should('be.disabled');
+    cy.contains('Edit').should('be.euiDisabled');
     cy.get(customActionRunSavedQuerySelector(savedQueryName)).should('not.exist');
     cy.get(customActionEditSavedQuerySelector(savedQueryName)).should('not.exist');
   });

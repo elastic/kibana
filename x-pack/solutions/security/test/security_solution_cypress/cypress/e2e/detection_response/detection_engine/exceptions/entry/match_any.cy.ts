@@ -68,7 +68,7 @@ describe('Exceptions match_any', { tags: ['@ess', '@serverless'] }, () => {
     // it could be for other reasons, like rule failure)
     addExceptionEntryOperatorValue('is not one of', 0);
     addExceptionEntryFieldMatchAnyValue(['foo', 'FOO'], 0);
-    cy.get(CONFIRM_BTN).should('be.enabled');
+    cy.get(CONFIRM_BTN).should('be.euiEnabled');
     submitNewExceptionItem();
 
     clickEnableRuleSwitch();

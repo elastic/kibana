@@ -145,8 +145,8 @@ describe.skip('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
       it('should not be able to update prebuilt pack', () => {
         cy.contains(PREBUILD_PACK_NAME).click();
         cy.getBySel(EDIT_PACK_HEADER_BUTTON).click();
-        cy.get(formFieldInputSelector('name')).should('be.disabled');
-        cy.get(formFieldInputSelector('description')).should('be.disabled');
+        cy.get(formFieldInputSelector('name')).should('be.euiDisabled');
+        cy.get(formFieldInputSelector('description')).should('be.euiDisabled');
         cy.contains('Add Query').should('not.exist');
         cy.get('.euiTableRowCell--hasActions').should('not.exist');
       });

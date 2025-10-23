@@ -41,22 +41,22 @@ describe(
 
     it('Alert suppression is enabled for essentials tier for rule types that support it', () => {
       //  default custom query rule
-      cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).should('be.enabled');
+      cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).should('be.euiEnabled');
 
       selectIndicatorMatchType();
-      cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).should('be.enabled');
+      cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).should('be.euiEnabled');
 
       selectNewTermsRuleType();
-      cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).should('be.enabled');
+      cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).should('be.euiEnabled');
 
       selectThresholdRuleType();
-      cy.get(THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX).should('be.enabled');
+      cy.get(THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX).should('be.euiEnabled');
 
       selectEsqlRuleType();
-      cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).should('be.enabled');
+      cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).should('be.euiEnabled');
 
       // ML Rules require Complete tier
-      cy.get(MACHINE_LEARNING_TYPE).get('button').should('be.disabled');
+      cy.get(MACHINE_LEARNING_TYPE).get('button').should('be.euiDisabled');
     });
   }
 );

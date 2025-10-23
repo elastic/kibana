@@ -49,11 +49,11 @@ describe('Block list with invalid indicators', { tags: ['@ess'] }, () => {
 
   it('should disabled blocklist in the indicators table context menu item and flyout context menu items', () => {
     openIndicatorsTableMoreActions(3);
-    cy.get(INDICATORS_TABLE_ADD_TO_BLOCK_LIST_BUTTON_ICON).should('be.disabled');
+    cy.get(INDICATORS_TABLE_ADD_TO_BLOCK_LIST_BUTTON_ICON).should('be.euiDisabled');
 
     openFlyout(3);
     openFlyoutTakeAction();
-    cy.get(FLYOUT_ADD_TO_BLOCK_LIST_ITEM).should('be.disabled');
+    cy.get(FLYOUT_ADD_TO_BLOCK_LIST_ITEM).should('be.euiDisabled');
   });
 });
 

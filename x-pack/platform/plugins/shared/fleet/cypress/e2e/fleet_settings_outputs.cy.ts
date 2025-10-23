@@ -79,7 +79,7 @@ describe('Outputs', () => {
 
           cy.getBySel(SETTINGS_OUTPUTS.PRESET_INPUT)
             .should('have.value', 'custom')
-            .should('be.disabled');
+            .should('be.euiDisabled');
         });
       }
 
@@ -95,7 +95,7 @@ queue:
 
         cy.getBySel(SETTINGS_OUTPUTS.PRESET_INPUT)
           .should('have.value', 'custom')
-          .should('be.disabled');
+          .should('be.euiDisabled');
       });
 
       it('allows balanced when reserved key is not included in config yaml box', () => {
@@ -105,7 +105,7 @@ queue:
 
         cy.getBySel(SETTINGS_OUTPUTS.PRESET_INPUT)
           .should('have.value', 'balanced')
-          .should('be.enabled');
+          .should('be.euiEnabled');
       });
 
       const cases = [
@@ -345,8 +345,8 @@ queue:
         cy.getBySel(SETTINGS_OUTPUTS_KAFKA.HEADERS_PANEL).within(() => {
           cy.getBySel(SETTINGS_OUTPUTS_KAFKA.HEADERS_KEY_INPUT);
           cy.getBySel(SETTINGS_OUTPUTS_KAFKA.HEADERS_VALUE_INPUT);
-          cy.getBySel(SETTINGS_OUTPUTS_KAFKA.HEADERS_ADD_ROW_BUTTON).should('be.disabled');
-          cy.getBySel(SETTINGS_OUTPUTS_KAFKA.HEADERS_REMOVE_ROW_BUTTON).should('be.disabled');
+          cy.getBySel(SETTINGS_OUTPUTS_KAFKA.HEADERS_ADD_ROW_BUTTON).should('be.euiDisabled');
+          cy.getBySel(SETTINGS_OUTPUTS_KAFKA.HEADERS_REMOVE_ROW_BUTTON).should('be.euiDisabled');
           cy.getBySel(SETTINGS_OUTPUTS_KAFKA.HEADERS_CLIENT_ID_INPUT).should(
             'have.value',
             'Elastic'
@@ -356,21 +356,21 @@ queue:
         // Verify add header
         cy.getBySel(SETTINGS_OUTPUTS_KAFKA.HEADERS_KEY_INPUT).type('key');
         cy.getBySel(SETTINGS_OUTPUTS_KAFKA.HEADERS_VALUE_INPUT).type('value');
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.HEADERS_ADD_ROW_BUTTON).should('be.enabled');
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.HEADERS_REMOVE_ROW_BUTTON).should('be.disabled');
+        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.HEADERS_ADD_ROW_BUTTON).should('be.euiEnabled');
+        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.HEADERS_REMOVE_ROW_BUTTON).should('be.euiDisabled');
 
         cy.getBySel(SETTINGS_OUTPUTS_KAFKA.HEADERS_ADD_ROW_BUTTON).click();
         cy.getBySel(getSpecificSelectorId(SETTINGS_OUTPUTS_KAFKA.HEADERS_KEY_INPUT, 1));
         cy.getBySel(getSpecificSelectorId(SETTINGS_OUTPUTS_KAFKA.HEADERS_VALUE_INPUT, 1));
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.HEADERS_ADD_ROW_BUTTON).should('be.enabled');
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.HEADERS_REMOVE_ROW_BUTTON).should('be.enabled');
+        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.HEADERS_ADD_ROW_BUTTON).should('be.euiEnabled');
+        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.HEADERS_REMOVE_ROW_BUTTON).should('be.euiEnabled');
 
         // Verify remove header
         cy.getBySel(
           getSpecificSelectorId(SETTINGS_OUTPUTS_KAFKA.HEADERS_REMOVE_ROW_BUTTON, 1)
         ).click();
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.HEADERS_ADD_ROW_BUTTON).should('be.enabled');
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.HEADERS_REMOVE_ROW_BUTTON).should('be.disabled');
+        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.HEADERS_ADD_ROW_BUTTON).should('be.euiEnabled');
+        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.HEADERS_REMOVE_ROW_BUTTON).should('be.euiDisabled');
 
         // Compression
         cy.getBySel(SETTINGS_OUTPUTS_KAFKA.COMPRESSION_CODEC_INPUT).should('not.exist');

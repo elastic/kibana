@@ -496,7 +496,7 @@ const closeRefreshSettingsPopover = () => {
 };
 
 export const expectAutoRefreshIsDisabled = () => {
-  cy.get(AUTO_REFRESH_POPOVER_TRIGGER_BUTTON).should('be.enabled');
+  cy.get(AUTO_REFRESH_POPOVER_TRIGGER_BUTTON).should('be.euiEnabled');
   cy.get(AUTO_REFRESH_POPOVER_TRIGGER_BUTTON).should('have.text', 'Off');
   openRefreshSettingsPopover();
   cy.get(REFRESH_SETTINGS_SWITCH).should('have.attr', 'aria-checked', 'false');
@@ -504,7 +504,7 @@ export const expectAutoRefreshIsDisabled = () => {
 };
 
 export const expectAutoRefreshIsEnabled = () => {
-  cy.get(AUTO_REFRESH_POPOVER_TRIGGER_BUTTON).should('be.enabled');
+  cy.get(AUTO_REFRESH_POPOVER_TRIGGER_BUTTON).should('be.euiEnabled');
   cy.get(AUTO_REFRESH_POPOVER_TRIGGER_BUTTON).should('have.text', 'On');
   openRefreshSettingsPopover();
   cy.get(REFRESH_SETTINGS_SWITCH).should('have.attr', 'aria-checked', 'true');
@@ -514,7 +514,7 @@ export const expectAutoRefreshIsEnabled = () => {
 // Expects the auto refresh to be deactivated which means it's disabled without an ability to enable it
 // so it's even impossible to open the popover
 export const expectAutoRefreshIsDeactivated = () => {
-  cy.get(AUTO_REFRESH_POPOVER_TRIGGER_BUTTON).should('be.disabled');
+  cy.get(AUTO_REFRESH_POPOVER_TRIGGER_BUTTON).should('be.euiDisabled');
   cy.get(AUTO_REFRESH_POPOVER_TRIGGER_BUTTON).should('have.text', 'Off');
 };
 
@@ -563,7 +563,7 @@ export const goToEditRuleActionsSettingsOf = (name: string) => {
   goToRuleDetailsOf(name);
   goToRuleEditSettings();
   // wait until first step loads completely. Otherwise cypress stuck at the first edit page
-  cy.get(EDIT_SUBMIT_BUTTON).should('be.enabled');
+  cy.get(EDIT_SUBMIT_BUTTON).should('be.euiEnabled');
   goToActionsStepTab();
 };
 

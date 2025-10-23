@@ -430,7 +430,7 @@ export const waitForBulkEditActionToFinish = ({
   failedCount?: number;
   showDataViewsWarning?: boolean;
 }) => {
-  cy.get(BULK_ACTIONS_PROGRESS_BTN).should('be.disabled');
+  cy.get(BULK_ACTIONS_PROGRESS_BTN).should('be.euiDisabled');
 
   if (updatedCount !== undefined) {
     cy.contains(TOASTER_BODY, `You've successfully updated ${updatedCount} rule`);

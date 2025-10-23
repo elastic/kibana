@@ -67,7 +67,7 @@ export const checkOsqueryResponseActionsPermissions = (enabled: boolean) => {
       cy.contains('Select an endpoint response action.');
     } else {
       cy.contains('Upgrade your license to Endpoint Complete to use Osquery Response Actions.');
-      cy.getBySel(ENDPOINT_RESPONSE_ACTION_ADD_BUTTON).should('be.disabled');
+      cy.getBySel(ENDPOINT_RESPONSE_ACTION_ADD_BUTTON).should('be.euiDisabled');
     }
   });
 };

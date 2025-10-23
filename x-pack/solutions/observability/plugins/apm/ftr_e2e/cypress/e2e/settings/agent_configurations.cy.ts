@@ -88,7 +88,7 @@ describe('Agent configuration', () => {
     });
 
     it('shows create button as disabled', () => {
-      cy.contains('Create configuration').should('be.disabled');
+      cy.contains('Create configuration').should('be.euiDisabled');
     });
   });
 
@@ -99,7 +99,7 @@ describe('Agent configuration', () => {
     });
 
     it('shows create button as enabled', () => {
-      cy.contains('Create configuration').should('not.be.disabled');
+      cy.contains('Create configuration').should('not.be.euiDisabled');
     });
   });
 
@@ -110,7 +110,7 @@ describe('Agent configuration', () => {
     });
 
     it('shows create button as disabled', () => {
-      cy.contains('Create configuration').should('be.disabled');
+      cy.contains('Create configuration').should('be.euiDisabled');
     });
   });
 
@@ -121,7 +121,7 @@ describe('Agent configuration', () => {
     });
 
     it('shows create button as enabled', () => {
-      cy.contains('Create configuration').should('not.be.disabled');
+      cy.contains('Create configuration').should('not.be.euiDisabled');
     });
 
     it('persists service environment when clicking on edit button', () => {

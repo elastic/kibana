@@ -20,7 +20,7 @@ export const BIG_QUERY = 'select * from processes, users limit 110;';
 
 export const selectAllAgents = () => {
   cy.getBySel('globalLoadingIndicator').should('not.exist');
-  cy.getBySel('agentSelection').find('input').should('not.be.disabled');
+  cy.getBySel('agentSelection').find('input').should('not.be.euiDisabled');
   cy.getBySel('agentSelection').within(() => {
     cy.getBySel('comboBoxInput').click();
   });

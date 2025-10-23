@@ -90,7 +90,7 @@ describe.skip('Use Value list in exception entry', { tags: ['@ess', '@serverless
 
     // The Close all alerts that match attributes in this exception option is disabled
     cy.get(CLOSE_ALERTS_CHECKBOX).should('exist');
-    cy.get(CLOSE_ALERTS_CHECKBOX).should('have.attr', 'disabled');
+    cy.get(CLOSE_ALERTS_CHECKBOX).should('be.euiDisabled');
 
     // Create exception
     submitNewExceptionItem();

@@ -31,7 +31,7 @@ export const fillComboBox = ({
   const comboBoxInputSelector = getComboBoxInputSelector(parentSelector);
   const comboBoxSelectionsSelector = getComboBoxSelectionsSelector(parentSelector);
 
-  cy.get(comboBoxInputSelector).should('not.be.disabled');
+  cy.get(comboBoxInputSelector).should('not.be.euiDisabled');
 
   _options.forEach((option, index) => {
     cy.get(comboBoxSelector).type(`${option}{downArrow}{enter}`);

@@ -293,5 +293,5 @@ export const validateImportExceptionListFailedBecauseExistingListFound = () => {
 };
 
 export const validateImportExceptionListCreateNewOptionDisabled = () => {
-  cy.get(IMPORT_SHARED_EXCEPTION_LISTS_OVERWRITE_CREATE_NEW_CHECKBOX).should('be.disabled');
+  cy.get(IMPORT_SHARED_EXCEPTION_LISTS_OVERWRITE_CREATE_NEW_CHECKBOX).should('be.euiDisabled');
 };

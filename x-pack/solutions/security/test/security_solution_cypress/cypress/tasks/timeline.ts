@@ -106,7 +106,7 @@ const hostExistsQuery = 'host.name: *';
 
 export const addNameToTimelineAndSave = (name: string) => {
   cy.get(SAVE_TIMELINE_ACTION_BTN).first().click();
-  cy.get(TIMELINE_TITLE_INPUT).should('not.be.disabled').clear();
+  cy.get(TIMELINE_TITLE_INPUT).should('not.be.euiDisabled').clear();
   cy.get(TIMELINE_TITLE_INPUT).type(`${name}{enter}`);
   cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', name);
   cy.get(TIMELINE_SAVE_MODAL_SAVE_BUTTON).click();
@@ -115,7 +115,7 @@ export const addNameToTimelineAndSave = (name: string) => {
 
 export const addNameToTimelineAndSaveAsNew = (name: string) => {
   cy.get(SAVE_TIMELINE_ACTION_BTN).first().click();
-  cy.get(TIMELINE_TITLE_INPUT).should('not.be.disabled').clear();
+  cy.get(TIMELINE_TITLE_INPUT).should('not.be.euiDisabled').clear();
   cy.get(TIMELINE_TITLE_INPUT).type(`${name}{enter}`);
   cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', name);
   cy.get(TIMELINE_SAVE_MODAL_SAVE_AS_NEW_SWITCH).should('exist');
@@ -177,7 +177,7 @@ export const addNotesToTimeline = (notes: string) => {
       });
 
       cy.get(ADD_NOTE_BUTTON).click();
-      cy.get(ADD_NOTE_BUTTON).should('have.attr', 'disabled');
+      cy.get(ADD_NOTE_BUTTON).should('be.euiDisabled');
 
       cy.get(`${NOTES_TAB_BUTTON} .euiBadge`).should('have.text', `${notesCount + 1}`);
     });
@@ -329,9 +329,9 @@ export const saveTimeline = () => {
 
   cy.get(TIMELINE_SAVE_MODAL).within(() => {
     cy.get(TIMELINE_PROGRESS_BAR).should('not.exist');
-    cy.get(TIMELINE_TITLE_INPUT).should('not.be.disabled');
+    cy.get(TIMELINE_TITLE_INPUT).should('not.be.euiDisabled');
 
-    cy.get(TIMELINE_SAVE_MODAL_SAVE_BUTTON).should('not.be.disabled');
+    cy.get(TIMELINE_SAVE_MODAL_SAVE_BUTTON).should('not.be.euiDisabled');
     cy.get(TIMELINE_SAVE_MODAL_SAVE_BUTTON).click();
 
     cy.get(TIMELINE_PROGRESS_BAR).should('exist');
@@ -360,7 +360,7 @@ export const createRuntimeFieldFromTimelne = (
 };
 
 export const openTimelineInspectButton = () => {
-  cy.get(TIMELINE_INSPECT_BUTTON).should('not.be.disabled');
+  cy.get(TIMELINE_INSPECT_BUTTON).should('not.be.euiDisabled');
   cy.get(TIMELINE_INSPECT_BUTTON).click();
 };
 

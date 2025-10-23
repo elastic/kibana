@@ -71,7 +71,7 @@ describe(
         });
 
         it('disables the suppression fields and displays a message', () => {
-          cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).should('be.disabled');
+          cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).should('be.euiDisabled');
           cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).realHover();
           cy.get(TOOLTIP).should(
             'contain.text',
@@ -101,7 +101,7 @@ describe(
           });
 
           it('displays a warning message on the suppression fields', () => {
-            cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).should('be.enabled');
+            cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).should('be.euiEnabled');
             cy.get(ALERT_SUPPRESSION_WARNING).should(
               'contain.text',
               'This list of fields might be incomplete as some Machine Learning jobs are not running. Start all relevant jobs for a complete list.'

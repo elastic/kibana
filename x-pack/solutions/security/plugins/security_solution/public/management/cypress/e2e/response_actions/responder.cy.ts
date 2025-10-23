@@ -107,7 +107,7 @@ describe(
         loadPage(caseUrlPath);
         closeAllToasts();
         openCaseAlertDetails();
-        cy.getByTestSubj('endpointResponseActions-action-item').should('be.enabled');
+        cy.getByTestSubj('endpointResponseActions-action-item').should('be.euiEnabled');
       });
 
       it('should display Responder response action interface', () => {

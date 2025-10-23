@@ -12,12 +12,12 @@ const getAbleToModifyCase = () => {
     const newErrorIndex = 'logs-*';
     cy.visitKibana(basePath);
     const input = cy.get('input[name="error"]');
-    input.should('not.be.disabled');
+    input.should('not.be.euiDisabled');
     input.clear().type(newErrorIndex);
     cy.intercept('POST', '/internal/apm-sources/settings/apm-indices/save*').as(
       'saveSettingsApiRequest'
     );
-    cy.contains('Apply changes').should('not.be.disabled').click();
+    cy.contains('Apply changes').should('not.be.euiDisabled').click();
     cy.wait('@saveSettingsApiRequest', { timeout: 15000 })
       .its('response.statusCode')
       .should('eq', 200);
@@ -28,8 +28,8 @@ const getUnableToModifyCase = () => {
   it('should not be able to modify settings', () => {
     cy.visitKibana(basePath);
     const input = cy.get('input[name="error"]');
-    input.should('be.disabled');
-    cy.contains('Apply changes').should('be.disabled');
+    input.should('be.euiDisabled');
+    cy.contains('Apply changes').should('be.euiDisabled');
   });
 };
 

@@ -30,7 +30,7 @@ export const addIntegration = ({ useExistingPolicy } = { useExistingPolicy: fals
     // speeding up creating with unchecking system integration
     cy.getBySel(AGENT_POLICY_SYSTEM_MONITORING_CHECKBOX).uncheck({ force: true });
   }
-  cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).should('be.enabled').click();
+  cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).should('be.euiEnabled').click();
 
   // sometimes agent is assigned to default policy, sometimes not
   cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();

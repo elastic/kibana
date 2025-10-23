@@ -175,7 +175,7 @@ describe(
           addExceptionConditions(getException());
 
           // Name is required so want to check that submit is still disabled
-          cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
+          cy.get(CONFIRM_BTN).should('be.euiDisabled');
 
           // add exception item name
           addExceptionFlyoutItemName('My item name');
@@ -206,7 +206,7 @@ describe(
           addExceptionConditions(getException());
 
           // Name is required so want to check that submit is still disabled
-          cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
+          cy.get(CONFIRM_BTN).should('be.euiDisabled');
 
           // add exception item name
           addExceptionFlyoutItemName('My item name');
@@ -277,7 +277,7 @@ describe(
         });
 
         // Name is required so want to check that submit is still disabled
-        cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
+        cy.get(CONFIRM_BTN).should('be.euiDisabled');
 
         // add exception item name
         addExceptionFlyoutItemName('My item name');
@@ -287,7 +287,7 @@ describe(
 
         // Check that add to shared list is disabled, should be unless
         // rule has shared lists attached to it already
-        cy.get(ADD_TO_SHARED_LIST_RADIO_INPUT).should('have.attr', 'disabled');
+        cy.get(ADD_TO_SHARED_LIST_RADIO_INPUT).should('be.euiDisabled');
 
         // Close matching alerts
         selectBulkCloseAlerts();

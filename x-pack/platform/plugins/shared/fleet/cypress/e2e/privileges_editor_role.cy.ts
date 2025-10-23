@@ -72,7 +72,7 @@ describe('When the user has Editor built-in role', () => {
       loginWithUserAndWaitForPage(INTEGRATIONS, BuiltInEditorUser);
       scrollToIntegration(getIntegrationCard('apache'));
       cy.getBySel(getIntegrationCard('apache')).click();
-      cy.getBySel(ADD_INTEGRATION_POLICY_BTN).should('not.be.disabled');
+      cy.getBySel(ADD_INTEGRATION_POLICY_BTN).should('not.be.euiDisabled');
     });
   });
 });

@@ -47,7 +47,7 @@ describe('Bulk Edit - Alert Suppression, Basic License', { tags: ['@ess'] }, () 
       selectAllRules();
       clickBulkActionsButton();
 
-      cy.get(ALERT_SUPPRESSION_RULE_BULK_MENU_ITEM).should('be.disabled');
+      cy.get(ALERT_SUPPRESSION_RULE_BULK_MENU_ITEM).should('be.euiDisabled');
       cy.get(`${ALERT_SUPPRESSION_RULE_BULK_MENU_ITEM}`).parent().trigger('mouseover');
       // Platinum license is required for this option to be enabled
       cy.get(TOOLTIP).contains('Platinum license');

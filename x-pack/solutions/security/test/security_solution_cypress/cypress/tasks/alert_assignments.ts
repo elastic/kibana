@@ -90,7 +90,7 @@ export const checkEmptyAssigneesStateInAlertDetailsFlyout = () => {
 };
 
 export const alertsTableMoreActionsAreNotAvailable = () => {
-  cy.get(TIMELINE_CONTEXT_MENU_BTN).should('be.disabled');
+  cy.get(TIMELINE_CONTEXT_MENU_BTN).should('be.euiDisabled');
 };
 
 export const asigneesMenuItemsAreNotAvailable = () => {
@@ -100,7 +100,7 @@ export const asigneesMenuItemsAreNotAvailable = () => {
 };
 
 export const cannotAddAssigneesViaDetailsFlyout = () => {
-  cy.get(ALERT_DETAILS_ASSIGN_BUTTON).should('be.disabled');
+  cy.get(ALERT_DETAILS_ASSIGN_BUTTON).should('be.euiDisabled');
 };
 
 export const alertsTableShowsAssigneesForAlert = (users: string[], alertIndex = 0) => {

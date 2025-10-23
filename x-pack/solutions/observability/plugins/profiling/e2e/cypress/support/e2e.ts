@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import { setupEuiCypressMatchers } from '@elastic/eui/lib/test/cypress/matchers';
+
+setupEuiCypressMatchers();
+
 Cypress.on('uncaught:exception', (err, runnable) => {
   return false;
 });

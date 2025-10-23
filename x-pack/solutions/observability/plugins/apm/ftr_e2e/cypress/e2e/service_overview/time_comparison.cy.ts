@@ -165,17 +165,17 @@ describe.skip('Service overview: Time Comparison', () => {
       cy.contains('opbeans-java');
 
       // Comparison is enabled by default
-      cy.getByTestSubj('comparisonSelect').should('be.enabled');
+      cy.getByTestSubj('comparisonSelect').should('be.euiEnabled');
 
       // toggles off comparison
       cy.contains('Comparison').click();
-      cy.getByTestSubj('comparisonSelect').should('be.disabled');
+      cy.getByTestSubj('comparisonSelect').should('be.euiDisabled');
     });
 
     it('calls APIs without comparison time range', () => {
       cy.visitKibana(serviceOverviewHref);
 
-      cy.getByTestSubj('comparisonSelect').should('be.enabled');
+      cy.getByTestSubj('comparisonSelect').should('be.euiEnabled');
       const offset = `offset=1d`;
 
       // When the page loads it fetches all APIs with comparison time range
@@ -189,7 +189,7 @@ describe.skip('Service overview: Time Comparison', () => {
 
       // toggles off comparison
       cy.contains('Comparison').click();
-      cy.getByTestSubj('comparisonSelect').should('be.disabled');
+      cy.getByTestSubj('comparisonSelect').should('be.euiDisabled');
       // When comparison is disabled APIs are called withou comparison time range
       cy.wait(apisToIntercept.map(({ name }) => `@${name}`)).then((interceptions) => {
         interceptions.map((interception) => {

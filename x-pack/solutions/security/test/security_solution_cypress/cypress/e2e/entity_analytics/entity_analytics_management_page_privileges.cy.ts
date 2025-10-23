@@ -52,7 +52,7 @@ describe(
       cy.get(RISK_SCORE_PRIVILEGES_CALLOUT).should('contain', 'manage_index_templates');
       cy.get(RISK_SCORE_PRIVILEGES_CALLOUT).should('contain', 'manage_transform');
       cy.get(RISK_SCORE_PREVIEW_PRIVILEGES_CALLOUT);
-      cy.get(RISK_SCORE_SWITCH).should('be.disabled');
+      cy.get(RISK_SCORE_SWITCH).should('be.euiDisabled');
     });
   }
 );

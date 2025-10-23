@@ -150,7 +150,7 @@ describe('Package policy', () => {
       url: '/api/fleet/package_policies',
     }).as('createPackagePolicy');
 
-    cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).should('be.enabled').click();
+    cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).should('be.euiEnabled').click();
     cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
 
     cy.wait('@createPackagePolicy').then((interception) => {

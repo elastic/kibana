@@ -87,15 +87,15 @@ describe(
           visitRuleEditPage(prebuiltRuleId)
         );
 
-        cy.get(SCHEDULE_EDIT_TAB).should('be.disabled');
+        cy.get(SCHEDULE_EDIT_TAB).should('be.euiDisabled');
         cy.get(SCHEDULE_EDIT_TAB).realHover();
         cy.contains('Without the Enterprise subscription');
 
-        cy.get(DEFINITION_EDIT_TAB).should('be.disabled');
+        cy.get(DEFINITION_EDIT_TAB).should('be.euiDisabled');
         cy.get(DEFINITION_EDIT_TAB).realHover();
         cy.contains('Without the Enterprise subscription');
 
-        cy.get(ABOUT_EDIT_TAB).should('be.disabled');
+        cy.get(ABOUT_EDIT_TAB).should('be.euiDisabled');
         cy.get(ABOUT_EDIT_TAB).realHover();
         cy.contains('Without the Enterprise subscription');
       });

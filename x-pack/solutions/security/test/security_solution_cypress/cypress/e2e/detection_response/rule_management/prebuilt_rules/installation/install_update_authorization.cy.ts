@@ -95,13 +95,13 @@ describe(
         loadPageAsReadOnlyUser(RULES_MANAGEMENT_URL);
 
         // Check that Add Elastic Rules button is disabled
-        cy.get(ADD_ELASTIC_RULES_BTN).should('be.disabled');
+        cy.get(ADD_ELASTIC_RULES_BTN).should('be.euiDisabled');
 
         // Navigate to Add Elastic Rules page anyways via URL
         // and assert that rules cannot be selected and all
         // installation buttons are disabled
         cy.visit(`${APP_PATH}${RULES_ADD_PATH}`);
-        cy.get(INSTALL_ALL_RULES_BUTTON).should('be.disabled');
+        cy.get(INSTALL_ALL_RULES_BUTTON).should('be.euiDisabled');
         cy.get(getInstallSingleRuleButtonByRuleId(UPDATED_RULE_1['security-rule'].rule_id)).should(
           'not.exist'
         );
@@ -141,12 +141,12 @@ describe(
         loginPageAsWriteAuthorizedUser(RULES_MANAGEMENT_URL);
 
         // Check that Add Elastic Rules button is enabled
-        cy.get(ADD_ELASTIC_RULES_BTN).should('not.be.disabled');
+        cy.get(ADD_ELASTIC_RULES_BTN).should('not.be.euiDisabled');
 
         // Navigate to Add Elastic Rules page and assert that rules can be selected
         // and all installation buttons are enabled
         cy.get(ADD_ELASTIC_RULES_BTN).click();
-        cy.get(INSTALL_ALL_RULES_BUTTON).should('not.be.disabled');
+        cy.get(INSTALL_ALL_RULES_BUTTON).should('not.be.euiDisabled');
         cy.get(getInstallSingleRuleButtonByRuleId(RULE_2['security-rule'].rule_id)).should('exist');
         cy.get(RULE_CHECKBOX).should('exist');
 
@@ -176,7 +176,7 @@ describe(
         // Navigate to Rule Update tab and assert that rules can be selected
         // and all upgrade buttons are enabled
         cy.get(RULES_UPDATES_TAB).click();
-        cy.get(UPGRADE_ALL_RULES_BUTTON).should('not.be.disabled');
+        cy.get(UPGRADE_ALL_RULES_BUTTON).should('not.be.euiDisabled');
         cy.get(RULE_CHECKBOX).should('exist');
         cy.get(getUpgradeSingleRuleButtonByRuleId(OUTDATED_RULE_1['security-rule'].rule_id)).should(
           'exist'

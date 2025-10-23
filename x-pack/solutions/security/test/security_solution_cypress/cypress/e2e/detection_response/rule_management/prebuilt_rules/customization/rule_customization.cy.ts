@@ -133,10 +133,10 @@ describe(
         );
 
         goToRuleEditSettings();
-        cy.get(DEFINITION_EDIT_TAB).should('be.enabled');
-        cy.get(ABOUT_EDIT_TAB).should('be.enabled');
-        cy.get(SCHEDULE_EDIT_TAB).should('be.enabled');
-        cy.get(ACTIONS_EDIT_TAB).should('be.enabled');
+        cy.get(DEFINITION_EDIT_TAB).should('be.euiEnabled');
+        cy.get(ABOUT_EDIT_TAB).should('be.euiEnabled');
+        cy.get(SCHEDULE_EDIT_TAB).should('be.euiEnabled');
+        cy.get(ACTIONS_EDIT_TAB).should('be.euiEnabled');
       });
 
       it('navigates from the rule management page', () => {
@@ -145,10 +145,10 @@ describe(
         filterByElasticRules();
         editFirstRule();
 
-        cy.get(DEFINITION_EDIT_TAB).should('be.enabled');
-        cy.get(ABOUT_EDIT_TAB).should('be.enabled');
-        cy.get(SCHEDULE_EDIT_TAB).should('be.enabled');
-        cy.get(ACTIONS_EDIT_TAB).should('be.enabled');
+        cy.get(DEFINITION_EDIT_TAB).should('be.euiEnabled');
+        cy.get(ABOUT_EDIT_TAB).should('be.euiEnabled');
+        cy.get(SCHEDULE_EDIT_TAB).should('be.euiEnabled');
+        cy.get(ACTIONS_EDIT_TAB).should('be.euiEnabled');
       });
     });
 

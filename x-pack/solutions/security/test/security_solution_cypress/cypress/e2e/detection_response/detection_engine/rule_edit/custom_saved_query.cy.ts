@@ -74,11 +74,11 @@ describe.skip('Saved query rules, rule edit', { tags: ['@ess', '@serverless'] },
     });
 
     // query input should be disabled and has value of saved query
-    getCustomQueryInput().should('have.value', savedQueryQuery).should('be.disabled');
+    getCustomQueryInput().should('have.value', savedQueryQuery).should('be.euiDisabled');
 
     // after unchecking Load Query Dynamically checkbox, query input becomes enabled, type custom query
     uncheckLoadQueryDynamically();
-    getCustomQueryInput().should('be.enabled').clear().type(expectedCustomTestQuery);
+    getCustomQueryInput().should('be.euiEnabled').clear().type(expectedCustomTestQuery);
 
     cy.intercept('PUT', '/api/detection_engine/rules').as('editedRule');
     saveEditedRule();

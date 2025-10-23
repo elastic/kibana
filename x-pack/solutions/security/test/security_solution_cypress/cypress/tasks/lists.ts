@@ -56,7 +56,7 @@ export const waitForListsIndex = () => {
 
 export const waitForValueListsModalToBeLoaded = () => {
   cy.get(VALUE_LISTS_MODAL_ACTIVATOR).should('exist');
-  cy.get(VALUE_LISTS_MODAL_ACTIVATOR).should('not.be.disabled');
+  cy.get(VALUE_LISTS_MODAL_ACTIVATOR).should('not.be.euiDisabled');
 };
 
 export const openValueListsModal = (): Cypress.Chainable<JQuery<HTMLElement>> => {

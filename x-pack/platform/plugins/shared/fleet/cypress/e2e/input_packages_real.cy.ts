@@ -112,7 +112,7 @@ describe('Input package with custom data stream type', () => {
     cy.get('[data-test-subj="packagePolicyDataStreamType"')
       .find('input')
       .should('have.length', 3)
-      .each(($el) => cy.wrap($el).should('be.disabled'));
+      .each(($el) => cy.wrap($el).should('be.euiDisabled'));
   });
 
   it('has an index template', () => {
@@ -236,7 +236,7 @@ describe('OTel input package with custom data stream type', () => {
     cy.get('[data-test-subj="packagePolicyDataStreamType"')
       .find('input')
       .should('have.length', 3)
-      .each(($el) => cy.wrap($el).should('be.disabled'));
+      .each(($el) => cy.wrap($el).should('be.euiDisabled'));
   });
 
   it('has an index template', () => {

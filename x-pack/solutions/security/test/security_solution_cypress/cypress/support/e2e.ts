@@ -12,6 +12,7 @@ import {
   KNOWN_ESS_ROLE_DEFINITIONS,
   KNOWN_SERVERLESS_ROLE_DEFINITIONS,
 } from '@kbn/security-solution-plugin/common/test';
+import { setupEuiCypressMatchers } from '@elastic/eui/lib/test/cypress/matchers';
 import { setupUsers } from './setup_users';
 import { CLOUD_SERVERLESS, IS_SERVERLESS } from '../env_var_names_constants';
 
@@ -33,6 +34,7 @@ if (!Cypress.env(IS_SERVERLESS) && !Cypress.env(CLOUD_SERVERLESS)) {
 }
 
 registerCypressGrep();
+setupEuiCypressMatchers();
 
 Cypress.on('uncaught:exception', () => {
   return false;

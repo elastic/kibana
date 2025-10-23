@@ -59,7 +59,7 @@ describe('AI Assistant Messages', { tags: ['@ess', '@serverless'] }, () => {
     visitGetStartedPage();
     openAssistant();
     selectConversation(mockConvo.title);
-    cy.get(SEND_TO_TIMELINE_BUTTON).should('be.disabled');
+    cy.get(SEND_TO_TIMELINE_BUTTON).should('be.euiDisabled');
     visit(CASES_URL);
     openAssistant();
     sendQueryToTimeline();

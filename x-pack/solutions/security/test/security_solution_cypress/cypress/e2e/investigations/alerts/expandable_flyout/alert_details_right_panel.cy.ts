@@ -236,7 +236,7 @@ describe('Alert details expandable flyout right panel', { tags: ['@ess', '@serve
     // TODO figure out why this option is disabled in Cypress but not running the app locally
     //  https://github.com/elastic/security-team/issues/6300
     openTakeActionButton();
-    cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_ENDPOINT_EXCEPTION).should('be.disabled');
+    cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_ENDPOINT_EXCEPTION).should('be.euiDisabled');
 
     cy.log('should add rule exception');
 
@@ -253,14 +253,14 @@ describe('Alert details expandable flyout right panel', { tags: ['@ess', '@serve
     // TODO this will change when respond is improved
     //  https://github.com/elastic/security-team/issues/6302
     openTakeActionButton();
-    cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_ISOLATE_HOST).should('be.disabled');
+    cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_ISOLATE_HOST).should('be.euiDisabled');
 
     cy.log('should respond');
 
     // TODO this will change when respond is improved
     //  https://github.com/elastic/security-team/issues/6303
     openTakeActionButton();
-    cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_RESPOND).should('be.disabled');
+    cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_RESPOND).should('be.euiDisabled');
 
     cy.log('should investigate in timeline');
 

@@ -76,7 +76,7 @@ describe('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
     openTimelineUsingToggle();
     createNewTimeline();
     cy.get(TIMELINE_PANEL).should('be.visible');
-    cy.get(SAVE_TIMELINE_ACTION_BTN).should('be.disabled');
+    cy.get(SAVE_TIMELINE_ACTION_BTN).should('be.euiDisabled');
     cy.get(SAVE_TIMELINE_ACTION_BTN).first().realHover();
     cy.get(SAVE_TIMELINE_TOOLTIP).should('be.visible');
     cy.get(SAVE_TIMELINE_TOOLTIP).should(

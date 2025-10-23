@@ -71,7 +71,7 @@ describe.skip('Manage exceptions', { tags: ['@ess', '@serverless'] }, () => {
       editException(FIELD_DIFFERENT_FROM_EXISTING_ITEM_FIELD, 0, 0);
 
       // Confirm button should disabled until a rule(s) is selected
-      cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
+      cy.get(CONFIRM_BTN).should('be.euiDisabled');
 
       // select rule
       linkFirstRuleOnExceptionFlyout();
@@ -173,7 +173,7 @@ describe.skip('Manage exceptions', { tags: ['@ess', '@serverless'] }, () => {
       );
 
       // submit button should be disabled due to comment length
-      cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
+      cy.get(CONFIRM_BTN).should('be.euiDisabled');
 
       // update exception comment to a reasonable (length wise) text
       editExceptionComment('Exceptional comment');

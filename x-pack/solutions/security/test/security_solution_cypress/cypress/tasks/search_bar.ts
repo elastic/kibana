@@ -19,7 +19,7 @@ import {
 } from '../screens/search_bar';
 
 export const openAddFilterPopover = () => {
-  cy.get(GLOBAL_SEARCH_BAR_SUBMIT_BUTTON).should('be.enabled');
+  cy.get(GLOBAL_SEARCH_BAR_SUBMIT_BUTTON).should('be.euiEnabled');
   cy.get(GLOBAL_SEARCH_BAR_ADD_FILTER).click();
 };
 
@@ -43,7 +43,7 @@ export const removeKqlFilter = () => {
 export const fillAddFilterForm = ({ key, operator, value }: SearchBarFilter) => {
   // workaround for field input sometimes rerenders losing focus
   cy.waitUntil(() => {
-    cy.get(ADD_FILTER_FORM_FIELD_INPUT).should('be.enabled');
+    cy.get(ADD_FILTER_FORM_FIELD_INPUT).should('be.euiEnabled');
     cy.get(ADD_FILTER_FORM_FIELD_INPUT).focus();
     cy.get(ADD_FILTER_FORM_FIELD_INPUT).invoke('val', ''); // .clear() not working well
     cy.get(ADD_FILTER_FORM_FIELD_INPUT).type(`${key}{downarrow}{enter}`);

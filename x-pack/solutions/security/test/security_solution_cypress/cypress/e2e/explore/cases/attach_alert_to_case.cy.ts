@@ -43,12 +43,12 @@ describe('Alerts timeline', () => {
 
     it('should not allow user with read only privileges to attach alerts to existing cases', () => {
       // Disabled actions for read only users are hidden, so the ... icon is not even shown
-      cy.get(TIMELINE_CONTEXT_MENU_BTN).should('be.disabled');
+      cy.get(TIMELINE_CONTEXT_MENU_BTN).should('be.euiDisabled');
     });
 
     it('should not allow user with read only privileges to attach alerts to a new case', () => {
       // Disabled actions for read only users are hidden, so the ... icon is not even shown
-      cy.get(TIMELINE_CONTEXT_MENU_BTN).should('be.disabled');
+      cy.get(TIMELINE_CONTEXT_MENU_BTN).should('be.euiDisabled');
     });
   });
 
@@ -60,7 +60,7 @@ describe('Alerts timeline', () => {
 
     it('should allow a user with crud privileges to attach alerts to cases', () => {
       expandFirstAlertActions();
-      cy.get(ATTACH_ALERT_TO_CASE_BUTTON).first().should('not.be.disabled');
+      cy.get(ATTACH_ALERT_TO_CASE_BUTTON).first().should('not.be.euiDisabled');
     });
   });
 });

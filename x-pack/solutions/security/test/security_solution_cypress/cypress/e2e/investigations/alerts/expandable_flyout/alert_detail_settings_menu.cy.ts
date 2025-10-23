@@ -83,6 +83,6 @@ describe('Alert details expandable flyout', { tags: ['@ess', '@serverless'] }, (
       'not.have.class',
       'euiButtonGroupButton-isSelected'
     );
-    cy.get(DOCUMENT_DETAILS_FLYOUT_FLYOUT_TYPE_BUTTON_GROUP).should('be.disabled');
+    cy.get(DOCUMENT_DETAILS_FLYOUT_FLYOUT_TYPE_BUTTON_GROUP).should('be.euiDisabled');
   });
 });

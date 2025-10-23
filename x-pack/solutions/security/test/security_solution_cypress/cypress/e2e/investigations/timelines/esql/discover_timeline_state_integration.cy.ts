@@ -92,7 +92,7 @@ describe.skip(
         addNameToTimelineAndSave('Timerange timeline');
         createNewTimeline();
         goToEsqlTab();
-        cy.get(GET_LOCAL_SHOW_DATES_BUTTON(DISCOVER_CONTAINER)).should('be.disabled'); // default state
+        cy.get(GET_LOCAL_SHOW_DATES_BUTTON(DISCOVER_CONTAINER)).should('be.euiDisabled'); // default state
       });
 
       it('should save/restore esql tab dataview/timerange/filter/query/columns when saving/restoring timeline', () => {

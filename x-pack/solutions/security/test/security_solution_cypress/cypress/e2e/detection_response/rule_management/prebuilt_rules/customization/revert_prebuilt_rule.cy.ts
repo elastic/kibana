@@ -112,7 +112,7 @@ describe(
         cy.get(RULE_NAME).contains('Customized prebuilt rule').click();
 
         cy.get(POPOVER_ACTIONS_TRIGGER_BUTTON).click();
-        cy.get(RULE_DETAILS_REVERT_RULE_BTN).should('be.disabled');
+        cy.get(RULE_DETAILS_REVERT_RULE_BTN).should('be.euiDisabled');
         cy.get(RULE_DETAILS_REVERT_RULE_BTN).trigger('mouseover', { force: true }); // Have to force because button element is disabled
         cy.get(RULE_DETAILS_REVERT_RULE_TOOLTIP).should('exist');
       });

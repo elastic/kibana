@@ -116,10 +116,10 @@ describe(
 
         // check saved suppression settings
         cy.get(ALERT_SUPPRESSION_DURATION_VALUE_INPUT)
-          .should('be.enabled')
+          .should('be.euiEnabled')
           .should('have.value', 360);
         cy.get(ALERT_SUPPRESSION_DURATION_UNIT_INPUT)
-          .should('be.enabled')
+          .should('be.euiEnabled')
           .should('have.value', 's');
 
         cy.get(ALERT_SUPPRESSION_FIELDS).should('contain', SUPPRESS_BY_FIELDS.join(''));

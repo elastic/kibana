@@ -11,7 +11,7 @@ const getAbleToModifyCase = () => {
   it('should be able to modify settings', () => {
     cy.visitKibana(basePath);
     const button = cy.get('button[name="Inspect ES queries"]');
-    button.should('not.be.disabled');
+    button.should('not.be.euiDisabled');
     button.click();
     cy.intercept('POST', '/internal/kibana/settings').as('saveSettings');
     cy.contains('Save changes').click();
@@ -23,7 +23,7 @@ const getUnableToModifyCase = () => {
   it('should not be able to modify settings', () => {
     cy.visitKibana(basePath);
     const button = cy.get('button[name="Inspect ES queries"]');
-    button.should('be.disabled');
+    button.should('be.euiDisabled');
     cy.contains('Save changes').should('not.exist');
   });
 };

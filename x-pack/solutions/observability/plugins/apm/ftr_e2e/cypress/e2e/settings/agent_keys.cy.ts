@@ -45,7 +45,7 @@ const getAbleToModifyCase = () => {
   it('should be able to modify settings', () => {
     cy.visitKibana(basePath);
     const button = cy.get('button[data-test-subj="apmAgentKeysContentCreateApmAgentKeyButton"]');
-    button.should('not.be.disabled');
+    button.should('not.be.euiDisabled');
     button.click();
     cy.get('input[data-test-subj="apmCreateAgentKeyFlyoutFieldText"]').type(TEST_AGENT_KEY);
     cy.get('button[data-test-subj="apmCreateAgentKeyFlyoutButton"]').click();
@@ -56,7 +56,7 @@ const getUnableToModifyCase = () => {
   it('should not be able to modify settings', () => {
     cy.visitKibana(basePath);
     const button = cy.get('button[data-test-subj="apmAgentKeysContentCreateApmAgentKeyButton"]');
-    button.should('be.disabled');
+    button.should('be.euiDisabled');
   });
 };
 

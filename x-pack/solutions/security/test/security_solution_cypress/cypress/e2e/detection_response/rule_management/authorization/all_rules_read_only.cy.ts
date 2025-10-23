@@ -46,7 +46,7 @@ describe('All rules - read only', { tags: ['@ess', '@serverless', '@skipInServer
   });
 
   it('Disables value lists upload', () => {
-    cy.get(VALUE_LISTS_MODAL_ACTIVATOR).should('be.disabled');
+    cy.get(VALUE_LISTS_MODAL_ACTIVATOR).should('be.euiDisabled');
   });
 
   it('Does not display action options', () => {

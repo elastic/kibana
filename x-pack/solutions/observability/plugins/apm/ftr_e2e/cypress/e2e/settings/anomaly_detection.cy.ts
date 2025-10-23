@@ -64,7 +64,7 @@ const getAbleToModifyCase = () => {
 
     cy.visitKibana(basePath);
     const button = cy.get('button[data-test-subj="apmJobsListCreateJobButton"]');
-    button.should('not.be.disabled');
+    button.should('not.be.euiDisabled');
     button.click();
     cy.get('div[data-test-subj="comboBoxInput"]').click({ force: true });
     cy.get(`button[title="${TEST_ENV}"]`).click({ force: true });
@@ -94,7 +94,7 @@ const getAbleToModifyCase = () => {
 
     cy.visitKibana(basePath);
     const button = cy.get('button[data-test-subj="apmJobsListCreateJobButton"]');
-    button.should('not.be.disabled');
+    button.should('not.be.euiDisabled');
     button.click();
     cy.get('div[data-test-subj="comboBoxInput"]').click({ force: true });
     cy.get(`button[title="${TEST_ENV}"]`).click({ force: true });
@@ -107,7 +107,7 @@ const getUnableToModifyCase = () => {
   it('should not be able to modify settings', () => {
     cy.visitKibana(basePath);
     const button = cy.get('button[data-test-subj="apmJobsListCreateJobButton"]');
-    button.should('be.disabled');
+    button.should('be.euiDisabled');
   });
 };
 

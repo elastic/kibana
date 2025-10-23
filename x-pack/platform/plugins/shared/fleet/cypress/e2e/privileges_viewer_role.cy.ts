@@ -60,7 +60,7 @@ describe('When the user has Viewer built-in role', () => {
       navigateToTab(AGENT_POLICIES_TAB);
 
       // Not write actions
-      cy.getBySel(ADD_AGENT_POLICY_BTN).should('not.be.enabled');
+      cy.getBySel(ADD_AGENT_POLICY_BTN).should('not.be.euiEnabled');
     });
 
     it('is accessible but user cannot perform any write actions on settings tabs', () => {
@@ -78,7 +78,7 @@ describe('When the user has Viewer built-in role', () => {
       loginWithUserAndWaitForPage(INTEGRATIONS, BuiltInViewerUser);
       scrollToIntegration(getIntegrationCard('apache'));
       cy.getBySel(getIntegrationCard('apache')).click();
-      cy.getBySel(ADD_INTEGRATION_POLICY_BTN).should('be.disabled');
+      cy.getBySel(ADD_INTEGRATION_POLICY_BTN).should('be.euiDisabled');
     });
   });
 });

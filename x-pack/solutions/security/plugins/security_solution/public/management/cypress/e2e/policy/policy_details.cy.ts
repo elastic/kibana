@@ -34,8 +34,8 @@ describe(
     const clickProtectionUpdatesSaveButton = () => getProtectionUpdatesSaveButton().click();
 
     const [expectSavedButtonToBeDisabled, expectSavedButtonToBeEnabled] = [
-      () => getProtectionUpdatesSaveButton().should('be.disabled'),
-      () => getProtectionUpdatesSaveButton().should('be.enabled'),
+      () => getProtectionUpdatesSaveButton().should('be.euiDisabled'),
+      () => getProtectionUpdatesSaveButton().should('be.euiEnabled'),
     ];
 
     describe('Protection updates', () => {
@@ -373,9 +373,9 @@ describe(
         });
         it('should render disabled button and display modal if unsaved changes are present', () => {
           loadSettingsUrl(policy.id);
-          cy.getByTestSubj('policyDetailsSaveButton').should('be.disabled');
+          cy.getByTestSubj('policyDetailsSaveButton').should('be.euiDisabled');
           cy.getByTestSubj('endpointPolicyForm-malware-enableDisableSwitch').click();
-          cy.getByTestSubj('policyDetailsSaveButton').should('not.be.disabled');
+          cy.getByTestSubj('policyDetailsSaveButton').should('not.be.euiDisabled');
           cy.getByTestSubj('policyProtectionUpdatesTab').click();
           cy.getByTestSubj('policyDetailsUnsavedChangesModal').within(() => {
             cy.getByTestSubj('confirmModalCancelButton').click();

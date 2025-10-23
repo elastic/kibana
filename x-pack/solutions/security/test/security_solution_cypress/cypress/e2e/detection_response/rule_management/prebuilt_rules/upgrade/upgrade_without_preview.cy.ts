@@ -378,7 +378,7 @@ describe(
         clickRuleUpdatesTab();
 
         selectRulesByName(['Customized Prebuilt Rule A', 'Customized Prebuilt Rule B']);
-        cy.get(UPGRADE_SELECTED_RULES_BUTTON).should('be.disabled');
+        cy.get(UPGRADE_SELECTED_RULES_BUTTON).should('be.euiDisabled');
       });
     });
 
@@ -446,7 +446,7 @@ describe(
           'Custom Query Non-Customized Prebuilt Rule A',
           'Custom Query Prebuilt Rule B',
         ]);
-        cy.get(UPGRADE_SELECTED_RULES_BUTTON).should('be.disabled');
+        cy.get(UPGRADE_SELECTED_RULES_BUTTON).should('be.euiDisabled');
       });
     });
 

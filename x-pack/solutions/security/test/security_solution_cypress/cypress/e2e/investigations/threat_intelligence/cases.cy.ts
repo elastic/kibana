@@ -48,14 +48,14 @@ describe('Cases with invalid indicators', { tags: ['@ess'] }, () => {
     const documentsNumber = 22;
     openIndicatorsTableMoreActions(documentsNumber - 1);
 
-    cy.get(INDICATORS_TABLE_ADD_TO_EXISTING_CASE_BUTTON_ICON).should('be.disabled');
-    cy.get(INDICATORS_TABLE_ADD_TO_NEW_CASE_BUTTON_ICON).should('be.disabled');
+    cy.get(INDICATORS_TABLE_ADD_TO_EXISTING_CASE_BUTTON_ICON).should('be.euiDisabled');
+    cy.get(INDICATORS_TABLE_ADD_TO_NEW_CASE_BUTTON_ICON).should('be.euiDisabled');
 
     openFlyout(documentsNumber - 1);
     openFlyoutTakeAction();
 
-    cy.get(FLYOUT_ADD_TO_EXISTING_CASE_ITEM).should('be.disabled');
-    cy.get(FLYOUT_ADD_TO_NEW_CASE_ITEM).should('be.disabled');
+    cy.get(FLYOUT_ADD_TO_EXISTING_CASE_ITEM).should('be.euiDisabled');
+    cy.get(FLYOUT_ADD_TO_NEW_CASE_ITEM).should('be.euiDisabled');
   });
 });
 

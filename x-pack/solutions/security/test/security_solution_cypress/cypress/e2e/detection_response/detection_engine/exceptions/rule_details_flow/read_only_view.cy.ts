@@ -66,7 +66,7 @@ describe.skip('Exceptions viewer read only', { tags: ['@ess'] }, () => {
     cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('exist');
 
     // cannot add an exception from empty view
-    cy.get(ADD_EXCEPTIONS_BTN_FROM_EMPTY_PROMPT_BTN).should('have.attr', 'disabled');
+    cy.get(ADD_EXCEPTIONS_BTN_FROM_EMPTY_PROMPT_BTN).should('be.euiDisabled');
   });
 
   it('Cannot take actions on exception', () => {
@@ -96,7 +96,7 @@ describe.skip('Exceptions viewer read only', { tags: ['@ess'] }, () => {
     cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
 
     // cannot access edit/delete actions of item
-    cy.get(EXCEPTION_ITEM_ACTIONS_BUTTON).should('have.attr', 'disabled');
+    cy.get(EXCEPTION_ITEM_ACTIONS_BUTTON).should('be.euiDisabled');
 
     // does not display add exception button
     cy.get(ADD_EXCEPTIONS_BTN_FROM_VIEWER_HEADER).should('not.exist');

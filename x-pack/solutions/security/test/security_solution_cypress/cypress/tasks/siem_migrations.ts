@@ -80,7 +80,7 @@ export const uploadRules = (splunkRulesJSON: object) => {
     fileName: 'rules.json',
     mimeType: 'text/plain',
   });
-  cy.get(SELECTORS.UPLOAD_FILE_BTN).should('not.be.disabled').click();
+  cy.get(SELECTORS.UPLOAD_FILE_BTN).should('not.be.euiDisabled').click();
 };
 
 export const uploadDashboards = (splunkDashboardsJSON: object) => {
@@ -89,21 +89,21 @@ export const uploadDashboards = (splunkDashboardsJSON: object) => {
     fileName: 'rules.json',
     mimeType: 'text/plain',
   });
-  cy.get(SELECTORS.UPLOAD_FILE_BTN).should('not.be.disabled').click();
+  cy.get(SELECTORS.UPLOAD_FILE_BTN).should('not.be.euiDisabled').click();
 };
 
 export const startMigrationFromFlyout = () => {
-  cy.get(SELECTORS.START_MIGRATION_FROM_FLYOUT_BTN).should('not.be.disabled');
+  cy.get(SELECTORS.START_MIGRATION_FROM_FLYOUT_BTN).should('not.be.euiDisabled');
   cy.get(SELECTORS.START_MIGRATION_FROM_FLYOUT_BTN).click();
-  cy.get(SELECTORS.START_MIGRATION_MODAL.START_MIGRATION_BTN).should('not.be.disabled');
+  cy.get(SELECTORS.START_MIGRATION_MODAL.START_MIGRATION_BTN).should('not.be.euiDisabled');
   cy.get(SELECTORS.START_MIGRATION_MODAL.START_MIGRATION_BTN).click();
   cy.get(SELECTORS.UPLOAD_RULES_FLYOUT).should('not.exist');
 };
 
 export const startDashboardMigrationFromFlyout = () => {
-  cy.get(SELECTORS.START_MIGRATION_FROM_FLYOUT_BTN).should('not.be.disabled');
+  cy.get(SELECTORS.START_MIGRATION_FROM_FLYOUT_BTN).should('not.be.euiDisabled');
   cy.get(SELECTORS.START_MIGRATION_FROM_FLYOUT_BTN).click();
-  cy.get(SELECTORS.START_MIGRATION_MODAL.START_MIGRATION_BTN).should('not.be.disabled');
+  cy.get(SELECTORS.START_MIGRATION_MODAL.START_MIGRATION_BTN).should('not.be.euiDisabled');
   cy.get(SELECTORS.START_MIGRATION_MODAL.START_MIGRATION_BTN).click();
   cy.get(SELECTORS.UPLOAD_DASHBOARDS_FLYOUT).should('not.exist');
 };

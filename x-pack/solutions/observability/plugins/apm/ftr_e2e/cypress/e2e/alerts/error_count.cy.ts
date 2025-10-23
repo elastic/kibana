@@ -74,7 +74,7 @@ describe('Alerts', () => {
       // has loaded.
       cy.contains('for the last');
       cy.contains('Actions');
-      cy.contains('Next').should('not.be.disabled');
+      cy.contains('Next').should('not.be.euiDisabled');
 
       // Update "Is above" to "0"
       cy.contains('is above').click();
@@ -83,7 +83,7 @@ describe('Alerts', () => {
 
       // Navigate to Rule Details step
       cy.getByTestSubj('ruleFormStep-details').click();
-      cy.get(saveButtonSelector).should('not.be.disabled');
+      cy.get(saveButtonSelector).should('not.be.euiDisabled');
 
       // Save, with no actions
       cy.get(saveButtonSelector).click();

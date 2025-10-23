@@ -1199,11 +1199,11 @@ describe(
         visitRulesUpgradeTable();
         openPrebuiltRuleUpgradeFlyoutFor('Customized prebuilt rule');
 
-        cy.get(UPDATE_PREBUILT_RULE_BUTTON).should('be.disabled');
+        cy.get(UPDATE_PREBUILT_RULE_BUTTON).should('be.euiDisabled');
 
         saveFieldValue('name');
 
-        cy.get(UPDATE_PREBUILT_RULE_BUTTON).should('be.enabled');
+        cy.get(UPDATE_PREBUILT_RULE_BUTTON).should('be.euiEnabled');
       });
 
       it('is disabled when num fields in edit mode >= 1', () => {
@@ -1230,11 +1230,11 @@ describe(
         toggleFieldAccordion('name');
         switchFieldToEditMode('name');
 
-        cy.get(UPDATE_PREBUILT_RULE_BUTTON).should('be.disabled');
+        cy.get(UPDATE_PREBUILT_RULE_BUTTON).should('be.euiDisabled');
 
         saveFieldValue('name');
 
-        cy.get(UPDATE_PREBUILT_RULE_BUTTON).should('be.enabled');
+        cy.get(UPDATE_PREBUILT_RULE_BUTTON).should('be.euiEnabled');
       });
 
       it('is disabled when num of conflicts >= 1 and num fields in edit mode >= 1', () => {
@@ -1263,18 +1263,18 @@ describe(
         toggleFieldAccordion('tags');
         switchFieldToEditMode('tags');
 
-        cy.get(UPDATE_PREBUILT_RULE_BUTTON).should('be.disabled');
+        cy.get(UPDATE_PREBUILT_RULE_BUTTON).should('be.euiDisabled');
 
         // Resolve name field conflicts
         saveFieldValue('name');
 
         // Make sure the "Update rule" button is still disabled
-        cy.get(UPDATE_PREBUILT_RULE_BUTTON).should('be.disabled');
+        cy.get(UPDATE_PREBUILT_RULE_BUTTON).should('be.euiDisabled');
 
         // Cancel tags field value unchanged
         cancelFieldValue('tags');
 
-        cy.get(UPDATE_PREBUILT_RULE_BUTTON).should('be.enabled');
+        cy.get(UPDATE_PREBUILT_RULE_BUTTON).should('be.euiEnabled');
       });
     });
   }

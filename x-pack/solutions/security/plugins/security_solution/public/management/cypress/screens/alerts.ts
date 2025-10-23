@@ -14,7 +14,7 @@ export const navigateToAlertsList = (urlQueryParams: string = '') => {
 
 export const clickAlertListRefreshButton = (): Cypress.Chainable => {
   cy.getByTestSubj('querySubmitButton').first().click();
-  return cy.getByTestSubj('querySubmitButton').should('be.enabled');
+  return cy.getByTestSubj('querySubmitButton').should('be.euiEnabled');
 };
 
 /**

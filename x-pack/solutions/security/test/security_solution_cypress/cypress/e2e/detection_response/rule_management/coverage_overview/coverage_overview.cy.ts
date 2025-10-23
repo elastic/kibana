@@ -234,7 +234,7 @@ describe('Coverage overview', { tags: ['@ess', '@serverless', '@skipInServerless
       cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES)
         .contains('Disabled custom rule')
         .should('not.exist');
-      cy.get(COVERAGE_OVERVIEW_ENABLE_ALL_DISABLED_BUTTON).should('be.disabled');
+      cy.get(COVERAGE_OVERVIEW_ENABLE_ALL_DISABLED_BUTTON).should('be.euiDisabled');
     });
 
     describe('filtering tests', () => {
@@ -376,7 +376,7 @@ describe('Coverage overview', { tags: ['@ess', '@serverless', '@skipInServerless
       cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES)
         .contains('Disabled prebuilt rule')
         .should('not.exist');
-      cy.get(COVERAGE_OVERVIEW_ENABLE_ALL_DISABLED_BUTTON).should('be.disabled');
+      cy.get(COVERAGE_OVERVIEW_ENABLE_ALL_DISABLED_BUTTON).should('be.euiDisabled');
     });
   });
 

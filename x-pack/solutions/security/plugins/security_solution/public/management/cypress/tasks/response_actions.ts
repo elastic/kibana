@@ -119,7 +119,9 @@ export const getRunningProcesses = (command: string): Cypress.Chainable<number> 
 
 export const tryAddingDisabledResponseAction = (itemNumber = 0) => {
   cy.getByTestSubj('response-actions-wrapper').within(() => {
-    cy.getByTestSubj('Elastic Defend-response-action-type-selection-option').should('be.disabled');
+    cy.getByTestSubj('Elastic Defend-response-action-type-selection-option').should(
+      'be.euiDisabled'
+    );
   });
   // Try adding new action, should not add list item.
   cy.getByTestSubj('Elastic Defend-response-action-type-selection-option').click({

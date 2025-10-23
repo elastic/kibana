@@ -82,19 +82,19 @@ describe(
         editFirstRule();
 
         cy.get(ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL)
-          .should('be.enabled')
+          .should('be.euiEnabled')
           .should('be.checked');
         cy.get(ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION)
-          .should('be.disabled')
+          .should('be.euiDisabled')
           .should('not.be.checked');
 
         // ensures enable suppression checkbox is checked and suppression options displayed correctly
-        cy.get(THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX).should('be.enabled').should('be.checked');
+        cy.get(THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX).should('be.euiEnabled').should('be.checked');
         cy.get(ALERT_SUPPRESSION_DURATION_VALUE_INPUT)
-          .should('be.enabled')
+          .should('be.euiEnabled')
           .should('have.value', 360);
         cy.get(ALERT_SUPPRESSION_DURATION_UNIT_INPUT)
-          .should('be.enabled')
+          .should('be.euiEnabled')
           .should('have.value', 's');
 
         goBackToRuleDetails();

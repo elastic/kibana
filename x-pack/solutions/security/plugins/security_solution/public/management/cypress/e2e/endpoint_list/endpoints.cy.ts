@@ -107,7 +107,7 @@ describe('Endpoints page', { tags: ['@ess', '@serverless'] }, () => {
       .should('be.visible')
       .as('blocklistSwitch');
     cy.get('@blocklistSwitch').click();
-    cy.get('@blocklistSwitch').should('be.enabled');
+    cy.get('@blocklistSwitch').should('be.euiEnabled');
 
     cy.getByTestSubj('policyDetailsSaveButton').should('be.visible').click();
     cy.getByTestSubj('policyDetailsConfirmModal').should('be.visible').click();

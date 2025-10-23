@@ -190,7 +190,7 @@ describe(
             cy.getByTestSubj('unassigned-assign-artifacts-button').should('exist').click();
 
             cy.getByTestSubj('artifacts-assign-flyout').should('exist');
-            cy.getByTestSubj('artifacts-assign-confirm-button').should('be.disabled');
+            cy.getByTestSubj('artifacts-assign-confirm-button').should('be.euiDisabled');
 
             cy.getByTestSubj(`${testData.artifactName}_checkbox`).click();
             cy.getByTestSubj('artifacts-assign-confirm-button').click();

@@ -266,10 +266,10 @@ const assertConversationTitleReadOnly = () => {
 
 export const assertConversationReadOnly = () => {
   assertConversationTitleReadOnly();
-  cy.get(ADD_NEW_CONNECTOR).should('be.disabled');
-  cy.get(CHAT_CONTEXT_MENU).should('be.disabled');
-  cy.get(FLYOUT_NAV_TOGGLE).should('be.disabled');
-  cy.get(NEW_CHAT).should('be.disabled');
+  cy.get(ADD_NEW_CONNECTOR).should('be.euiDisabled');
+  cy.get(CHAT_CONTEXT_MENU).should('be.euiDisabled');
+  cy.get(FLYOUT_NAV_TOGGLE).should('be.euiDisabled');
+  cy.get(NEW_CHAT).should('be.euiDisabled');
 };
 
 export const openShareMenu = () => {

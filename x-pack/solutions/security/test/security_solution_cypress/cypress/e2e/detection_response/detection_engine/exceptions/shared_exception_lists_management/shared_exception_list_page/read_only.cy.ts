@@ -59,6 +59,6 @@ describe('Shared exception lists - read only', { tags: ['@ess', '@skipInServerle
   });
 
   it('Exception list actions should be disabled', () => {
-    cy.get(EXCEPTIONS_OVERFLOW_ACTIONS_BTN).first().should('be.disabled');
+    cy.get(EXCEPTIONS_OVERFLOW_ACTIONS_BTN).first().should('be.euiDisabled');
   });
 });

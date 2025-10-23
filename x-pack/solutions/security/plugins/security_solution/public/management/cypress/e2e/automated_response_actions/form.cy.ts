@@ -63,7 +63,7 @@ describe(
         focusAndOpenCommandDropdown(1);
         validateAvailableCommands();
         // tested command selected in previous action, should be disabled.
-        cy.getByTestSubj(`command-type-${testedCommand}`).should('have.attr', 'disabled');
+        cy.getByTestSubj(`command-type-${testedCommand}`).should('be.euiDisabled');
         // Remove first response action, this should unlock tested command as an option
         cy.getByTestSubj(`response-actions-list-item-0`).within(() => {
           cy.getByTestSubj('remove-response-action').click();
@@ -256,7 +256,7 @@ describe(
         cy.getByTestSubj(`response-actions-list-item-0`).within(() => {
           cy.getByTestSubj('commandTypeField').should('have.text', 'isolate, ').and('be.disabled'); // Note: the trailing `, ` comes from screen-reader-only text
           cy.getByTestSubj('input').should('have.value', 'Isolate host').and('be.disabled');
-          cy.getByTestSubj('remove-response-action').should('be.disabled');
+          cy.getByTestSubj('remove-response-action').should('be.euiDisabled');
           // Try removing action
           cy.getByTestSubj('remove-response-action').click({ force: true });
         });

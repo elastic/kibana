@@ -202,9 +202,9 @@ describe(
         openBulkActionsMenu();
 
         // when no rule selected all bulk edit options should be disabled
-        cy.get(TAGS_RULE_BULK_MENU_ITEM).should('be.disabled');
-        cy.get(INDEX_PATTERNS_RULE_BULK_MENU_ITEM).should('be.disabled');
-        cy.get(APPLY_TIMELINE_RULE_BULK_MENU_ITEM).should('be.disabled');
+        cy.get(TAGS_RULE_BULK_MENU_ITEM).should('be.euiDisabled');
+        cy.get(INDEX_PATTERNS_RULE_BULK_MENU_ITEM).should('be.euiDisabled');
+        cy.get(APPLY_TIMELINE_RULE_BULK_MENU_ITEM).should('be.euiDisabled');
       });
 
       it('should not lose rules selection after edit action', () => {

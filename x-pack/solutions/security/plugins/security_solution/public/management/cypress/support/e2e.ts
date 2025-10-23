@@ -23,6 +23,7 @@
 // ***********************************************************
 
 import { subj as testSubjSelector } from '@kbn/test-subj-selector';
+import { setupEuiCypressMatchers } from '@elastic/eui/lib/test/cypress/matchers';
 import 'cypress-data-session';
 // @ts-ignore
 import registerCypressGrep from '@cypress/grep';
@@ -31,6 +32,7 @@ import { login, ROLE } from '../tasks/login';
 import { loadPage } from '../tasks/common';
 
 registerCypressGrep();
+setupEuiCypressMatchers();
 
 Cypress.Commands.addQuery<'getByTestSubj'>(
   'getByTestSubj',

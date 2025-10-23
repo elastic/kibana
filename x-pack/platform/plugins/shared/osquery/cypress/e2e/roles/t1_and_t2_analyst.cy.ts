@@ -57,8 +57,8 @@ describe(`T1 and T2 analysts`, { tags: ['@ess', '@serverless', '@skipInServerles
       it('should be able to run saved queries but not add new ones', () => {
         navigateTo('/app/osquery/saved_queries');
         cy.contains(savedQueryName);
-        cy.contains('Add saved query').should('be.disabled');
-        cy.get(`[aria-label="Run ${savedQueryName}"]`).should('not.be.disabled');
+        cy.contains('Add saved query').should('be.euiDisabled');
+        cy.get(`[aria-label="Run ${savedQueryName}"]`).should('not.be.euiDisabled');
         cy.get(`[aria-label="Run ${savedQueryName}"]`).click();
 
         selectAllAgents();
@@ -75,9 +75,9 @@ describe(`T1 and T2 analysts`, { tags: ['@ess', '@serverless', '@skipInServerles
 
       it('should be able to play in live queries history', () => {
         navigateTo('/app/osquery/live_queries');
-        cy.contains('New live query').should('not.be.disabled');
+        cy.contains('New live query').should('not.be.euiDisabled');
         cy.contains(liveQueryQuery);
-        cy.get(`[aria-label="Run query"]`).first().should('not.be.disabled');
+        cy.get(`[aria-label="Run query"]`).first().should('not.be.euiDisabled');
         cy.get(`[aria-label="Run query"]`).first().click();
         cy.get('[data-test-subj="savedQuerySelect"]')
           .find('input')
@@ -88,7 +88,7 @@ describe(`T1 and T2 analysts`, { tags: ['@ess', '@serverless', '@skipInServerles
 
       it('should be able to use saved query in a new query', () => {
         navigateTo('/app/osquery/live_queries');
-        cy.contains('New live query').should('not.be.disabled').click();
+        cy.contains('New live query').should('not.be.euiDisabled').click();
         selectAllAgents();
         cy.getBySel('savedQuerySelect').type(`${savedQueryName}{downArrow} {enter}`);
         cy.contains('select * from uptime');
@@ -100,12 +100,12 @@ describe(`T1 and T2 analysts`, { tags: ['@ess', '@serverless', '@skipInServerles
         navigateTo('/app/osquery/packs');
         cy.getBySel('tablePaginationPopoverButton').click();
         cy.getBySel('tablePagination-50-rows').click();
-        cy.contains('Add pack').should('be.disabled');
-        cy.get(`[aria-label="${packName}"]`).should('be.disabled');
+        cy.contains('Add pack').should('be.euiDisabled');
+        cy.get(`[aria-label="${packName}"]`).should('be.euiDisabled');
 
         cy.contains(packName).click();
         cy.contains(`${packName} details`);
-        cy.contains('Edit').should('be.disabled');
+        cy.contains('Edit').should('be.euiDisabled');
         cy.get(`[aria-label="Run ${savedQueryId}"]`).should('not.exist');
         cy.get(`[aria-label="Edit ${savedQueryId}"]`).should('not.exist');
       });

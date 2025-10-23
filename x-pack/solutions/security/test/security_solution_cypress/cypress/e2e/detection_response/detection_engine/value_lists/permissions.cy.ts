@@ -17,7 +17,7 @@ describe('value list permissions', { tags: ['@ess', '@skipInServerless'] }, () =
     it('Does not allow a t1 analyst user to upload a value list', () => {
       login(ROLES.t1_analyst);
       visit(RULES_MANAGEMENT_URL);
-      cy.get(VALUE_LISTS_MODAL_ACTIVATOR).should('have.attr', 'disabled');
+      cy.get(VALUE_LISTS_MODAL_ACTIVATOR).should('be.euiDisabled');
     });
   });
 });

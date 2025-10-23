@@ -47,7 +47,7 @@ describe('when navigating to integration page', () => {
 
     requiredFields.map((field) => {
       cy.getByTestSubj(field.selector).clear();
-      cy.getByTestSubj('createPackagePolicySaveButton').should('be.disabled');
+      cy.getByTestSubj('createPackagePolicySaveButton').should('be.euiDisabled');
       cy.getByTestSubj(field.selector).type(field.value);
     });
   });
