@@ -17,6 +17,7 @@ export enum QuerySource {
   STARRED = 'starred',
   MANUAL = 'manual',
   HELP = 'help',
+  AUTOCOMPLETE = 'autocomplete',
 }
 
 export interface TelemetryQuerySubmittedProps {
