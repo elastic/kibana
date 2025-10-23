@@ -92,6 +92,7 @@ export type {
   CheckDuplicateTitleProps,
   LensSaveResult,
   DatasourceFixAction,
+  LensAttributesService,
 } from './types';
 export type {
   FormBasedLayer,

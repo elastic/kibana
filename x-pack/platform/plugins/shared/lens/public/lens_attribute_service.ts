@@ -15,32 +15,11 @@ import type {
   LensRuntimeState,
   LensSavedObjectAttributes,
   CheckDuplicateTitleProps,
+  LensAttributesService,
 } from '@kbn/lens-common';
 import { extract, inject } from '../common/embeddable_factory';
 import { LensDocumentService } from './persistence';
 import { DOC_TYPE } from '../common/constants';
-
-export interface LensAttributesService {
-  loadFromLibrary: (savedObjectId: string) => Promise<{
-    attributes: LensSavedObjectAttributes;
-    sharingSavedObjectProps: SharingSavedObjectProps;
-    managed: boolean;
-  }>;
-  saveToLibrary: (
-    attributes: LensSavedObjectAttributes,
-    references: Reference[],
-    savedObjectId?: string
-  ) => Promise<string>;
-  checkForDuplicateTitle: (props: CheckDuplicateTitleProps) => Promise<{ isDuplicate: boolean }>;
-  injectReferences: (
-    runtimeState: LensRuntimeState,
-    references: Reference[] | undefined
-  ) => LensRuntimeState;
-  extractReferences: (runtimeState: LensRuntimeState) => {
-    rawState: LensRuntimeState;
-    references: Reference[];
-  };
-}
 
 export const savedObjectToEmbeddableAttributes = (
   savedObject: SavedObjectCommon<LensSavedObjectAttributes>
