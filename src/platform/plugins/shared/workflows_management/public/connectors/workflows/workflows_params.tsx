@@ -9,23 +9,25 @@
 
 import {
   EuiBadge,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiBadgeGroup,
   EuiFormRow,
   EuiHighlight,
   EuiIcon,
   EuiInputPopover,
   EuiLink,
   EuiLoadingSpinner,
+  EuiPopover,
+  EuiPopoverFooter,
   EuiSelectable,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 
+import React, { useCallback, useEffect, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import type { WorkflowListDto } from '@kbn/workflows';
-import React, { useCallback, useEffect, useState } from 'react';
 import * as i18n from './translations';
 import type { WorkflowsActionParams } from './types';
 
@@ -43,8 +45,50 @@ interface WorkflowOption {
   data?: {
     secondaryContent?: string;
   };
-  [key: string]: any;
+  [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
+
+const TagsBadge: React.FC<{ tags: string[] }> = ({ tags }) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  if (tags.length === 0) {
+    return null;
+  }
+
+  const handlePopoverToggle = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    event.preventDefault();
+    setIsPopoverOpen(!isPopoverOpen);
+  };
+
+  return (
+    <EuiPopover
+      button={
+        <EuiBadge
+          color="hollow"
+          iconType="tag"
+          onClick={handlePopoverToggle}
+          onClickAriaLabel="Show tags"
+          style={{ cursor: 'pointer' }}
+        >
+          {tags.length}
+        </EuiBadge>
+      }
+      isOpen={isPopoverOpen}
+      closePopover={() => setIsPopoverOpen(false)}
+      panelPaddingSize="s"
+      anchorPosition="downLeft"
+    >
+      <EuiBadgeGroup>
+        {tags.map((tag) => (
+          <EuiBadge key={tag} color="hollow" style={{ maxWidth: '150px' }}>
+            {tag}
+          </EuiBadge>
+        ))}
+      </EuiBadgeGroup>
+    </EuiPopover>
+  );
+};
 
 const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<WorkflowsActionParams>> = ({
   actionParams,
@@ -63,6 +107,7 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
   const [inputValue, setInputValue] = useState('');
   const [isSearching, setIsSearching] = useState(true);
   const { http, application } = useKibana().services;
+  const { euiTheme } = useEuiTheme();
 
   // Custom render function for workflow options
   const renderWorkflowOption = useCallback((option: WorkflowOption, searchValue: string) => {
@@ -100,7 +145,7 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
   );
 
   const onWorkflowChange = useCallback(
-    (newOptions: WorkflowOption[], event: any, changedOption: WorkflowOption) => {
+    (newOptions: WorkflowOption[], event: unknown, changedOption: WorkflowOption) => {
       setWorkflows(newOptions);
       setIsPopoverOpen(false);
 
@@ -135,27 +180,12 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
     }
   }, [workflowId, workflows, isSearching]);
 
-  const handleCreateNewWorkflow = useCallback(() => {
+  const handleOpenWorkflowManagementApp = useCallback(() => {
     const url = application?.getUrlForApp
       ? application.getUrlForApp('workflows')
       : '/app/workflows';
     window.open(url, '_blank');
   }, [application]);
-
-  const handleOpenWorkflow = useCallback(
-    (workflowIdToOpen: string, event: React.MouseEvent | React.KeyboardEvent) => {
-      // Prevent the click from selecting the workflow option
-      event.stopPropagation();
-      event.preventDefault();
-      event.nativeEvent.stopImmediatePropagation();
-
-      const url = application?.getUrlForApp
-        ? application.getUrlForApp('workflows', { path: `/${workflowIdToOpen}` })
-        : `/app/workflows/${workflowIdToOpen}`;
-      window.open(url, '_blank');
-    },
-    [application]
-  );
 
   // Fetch workflows from internal Kibana API
   useEffect(() => {
@@ -206,46 +236,7 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
             prependElement = <EuiBadge color="default">{i18n.DISABLED_BADGE_LABEL}</EuiBadge>;
           }
 
-          // Create tags badges if workflow has tags
           const workflowTags = workflow.definition?.tags || [];
-          const tagsElement =
-            workflowTags.length > 0 ? (
-              <EuiFlexGroup gutterSize="xs" wrap>
-                {workflowTags.map((tag: string, tagIndex: number) => (
-                  <EuiFlexItem grow={false} key={tagIndex}>
-                    <EuiBadge color="hollow">{tag}</EuiBadge>
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            ) : undefined;
-
-          // Create the append element with tags and workflow link
-          const appendElement = (
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              {tagsElement && <EuiFlexItem grow={false}>{tagsElement}</EuiFlexItem>}
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="popout"
-                  aria-label={i18n.OPEN_WORKFLOW_LINK}
-                  title={i18n.OPEN_WORKFLOW_LINK}
-                  size="s"
-                  color="text"
-                  style={{ flexShrink: 0 }}
-                  onMouseDown={(event: React.MouseEvent) => {
-                    event.stopPropagation();
-                    event.preventDefault();
-                    event.nativeEvent.stopImmediatePropagation();
-                  }}
-                  onClick={(event: React.MouseEvent) => {
-                    event.stopPropagation();
-                    event.preventDefault();
-                    event.nativeEvent.stopImmediatePropagation();
-                    handleOpenWorkflow(workflow.id, event);
-                  }}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          );
 
           return {
             workflowOption: {
@@ -258,7 +249,7 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
               disabled: isDisabled,
               checked: isSelected ? 'on' : undefined,
               prepend: prependElement,
-              append: appendElement,
+              append: <TagsBadge tags={workflowTags} />,
               data: {
                 secondaryContent: workflow.description,
               },
@@ -293,7 +284,7 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
     };
 
     fetchWorkflows();
-  }, [http, workflowId, handleOpenWorkflow]);
+  }, [http, workflowId]);
 
   // Update input value when workflowId changes
   useEffect(() => {
@@ -335,7 +326,7 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
     <EuiFormRow
       label={i18n.WORKFLOW_ID_LABEL}
       labelAppend={
-        <EuiLink onClick={handleCreateNewWorkflow} external>
+        <EuiLink onClick={handleOpenWorkflowManagementApp} external>
           {i18n.CREATE_NEW_WORKFLOW} <EuiIcon type="plusInCircle" size="s" />
         </EuiLink>
       }
@@ -349,8 +340,8 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
       ) : (
         <EuiSelectable
           aria-label="Select workflow"
-          options={workflowOptions as any}
-          onChange={onWorkflowChange as any}
+          options={workflowOptions as any} // eslint-disable-line @typescript-eslint/no-explicit-any
+          onChange={onWorkflowChange}
           singleSelection
           searchable
           searchProps={{
@@ -389,11 +380,25 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
               disableFocusTrap
               closeOnScroll
               isOpen={isPopoverOpen}
-              input={search!}
+              input={search!} // eslint-disable-line @typescript-eslint/no-non-null-assertion
               panelPaddingSize="none"
               fullWidth
             >
               {list}
+              <EuiPopoverFooter
+                paddingSize="s"
+                css={{ backgroundColor: euiTheme.colors.backgroundBaseSubdued }}
+              >
+                <EuiText size="s" textAlign="right">
+                  <EuiLink onClick={handleOpenWorkflowManagementApp} external>
+                    <FormattedMessage
+                      id="workflows.params.viewAllWorkflowsLinkText"
+                      defaultMessage="View all workflows"
+                    />
+                    <EuiIcon type="popout" size="s" />
+                  </EuiLink>
+                </EuiText>
+              </EuiPopoverFooter>
             </EuiInputPopover>
           )}
         </EuiSelectable>

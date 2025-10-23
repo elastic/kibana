@@ -8,9 +8,9 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useEffect, useRef } from 'react';
 import type { CoreStart } from '@kbn/core/public';
-import { useRef, useEffect } from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ConnectorInstance, ConnectorTypeInfo } from '@kbn/workflows';
 import { addDynamicConnectorsToCache } from '../../../../common/schema';
 
@@ -37,15 +37,7 @@ export function useAvailableConnectors(): UseAvailableConnectorsResult {
 
   const { data, isLoading, error, refetch } = useQuery<ConnectorsResponse>({
     queryKey: ['workflows', 'connectors'],
-    queryFn: async () => {
-      try {
-        return await http.get<ConnectorsResponse>('/api/workflows/connectors');
-      } catch (err) {
-        // Log error for debugging but don't throw - let React Query handle retries
-        // console.warn('Failed to fetch connectors:', err);
-        throw err;
-      }
-    },
+    queryFn: async () => http.get<ConnectorsResponse>('/api/workflows/connectors'),
     staleTime: 5 * 60 * 1000, // 5 minutes - connectors don't change frequently
     cacheTime: 10 * 60 * 1000, // 10 minutes
     retry: 3,
@@ -58,7 +50,7 @@ export function useAvailableConnectors(): UseAvailableConnectorsResult {
 
   // Add dynamic connectors to cache when data is fetched
   // Use a ref to track the last processed connector types to avoid unnecessary re-processing
-  const lastConnectorTypesRef = useRef<Record<string, any> | null>(null);
+  const lastConnectorTypesRef = useRef<Record<string, unknown> | null>(null);
 
   useEffect(() => {
     if (data?.connectorTypes) {

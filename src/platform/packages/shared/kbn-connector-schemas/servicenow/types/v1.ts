@@ -17,6 +17,8 @@ import type {
   ExecutorSubActionCommonFieldsParamsSchema,
   ExternalIncidentServiceConfigurationSchema,
 } from '../schemas/v1';
+import type { ActionParamsType as ServiceNowITSMActionParams } from '../../servicenow_itsm';
+import type { ActionParamsType as ServiceNowSIRActionParams } from '../../servicenow_sir';
 
 export type ServiceNowPublicConfigurationBaseType = z.infer<
   typeof ExternalIncidentServiceConfigurationBaseSchema
@@ -49,3 +51,5 @@ export type ExecutorSubActionCommonFieldsParams = z.infer<
 export type ServiceNowPublicConfigurationType = z.infer<
   typeof ExternalIncidentServiceConfigurationSchema
 >;
+
+export type ServiceNowActionParams = ServiceNowITSMActionParams | ServiceNowSIRActionParams;

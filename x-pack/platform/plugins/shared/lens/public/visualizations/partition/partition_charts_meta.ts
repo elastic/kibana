@@ -18,7 +18,7 @@ import {
   IconDonutHoleMedium,
   IconDonutHoleLarge,
 } from '@kbn/chart-icons';
-import type { PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
+import type { PartitionLegendValue } from '@kbn/expression-partition-vis-plugin/common';
 import { LegendValue } from '@elastic/charts';
 import { EmptySizeRatios } from '../../../common/types';
 import { CategoryDisplay, NumberDisplay } from '../../../common/constants';

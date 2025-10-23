@@ -367,6 +367,35 @@ export function createMessage(
 const createError = (messageId: string, location: ESQLLocation, message: string = '') =>
   createMessage('error', message, location, messageId);
 
+/**
+ * Tags an error as semantic, indicating it requires runtime data to validate.
+ *
+ * Semantic errors depend on external data (indices, columns, policies) that can only
+ * be determined at runtime. When the required callback is not available, these errors
+ * will be filtered out during validation to avoid false positives.
+ *
+ * This is the core mechanism of the Error Tagging system, which eliminates the need
+ * for manual maintenance of error-to-callback mappings.
+ *
+ * @param error - The base error message to tag
+ * @param requiresCallback - The name of the callback required to validate this error
+ *                          Common values: 'getColumnsFor', 'getSources', 'getPolicies', 'getJoinIndices'
+ * @returns The error with semantic metadata attached
+ *
+ * @example
+ * ```typescript
+ * // Error that requires column information
+ * unknownColumn: (column) =>
+ *   tagSemanticError(
+ *     errors.byId('unknownColumn', column.location, { name: column.name }),
+ *     'getColumnsFor'  // Will be filtered if getColumnsFor callback is missing
+ *   )
+ * ```
+ */
+export function tagSemanticError(error: ESQLMessage, requiresCallback: string): ESQLMessage {
+  return { ...error, errorType: 'semantic', requiresCallback };
+}
+
 export const errors = {
   unexpected: (
     location: ESQLLocation,
@@ -392,9 +421,19 @@ export const errors = {
     errors.byId('unknownFunction', fn.location, fn),
 
   unknownColumn: (column: ESQLColumn | ESQLIdentifier): ESQLMessage =>
-    errors.byId('unknownColumn', column.location, {
-      name: column.name,
-    }),
+    tagSemanticError(
+      errors.byId('unknownColumn', column.location, { name: column.name }),
+      'getColumnsFor'
+    ),
+
+  unknownIndex: (source: ESQLSource): ESQLMessage =>
+    tagSemanticError(
+      errors.byId('unknownIndex', source.location, { name: source.name }),
+      'getSources'
+    ),
+
+  unknownPolicy: (policyName: string, location: ESQLLocation): ESQLMessage =>
+    tagSemanticError(errors.byId('unknownPolicy', location, { name: policyName }), 'getPolicies'),
 
   tooManyForks: (command: ESQLCommand): ESQLMessage =>
     errors.byId('tooManyForks', command.location, {}),
@@ -415,9 +454,10 @@ export const errors = {
     }),
 
   invalidJoinIndex: (identifier: ESQLSource): ESQLMessage =>
-    errors.byId('invalidJoinIndex', identifier.location, {
-      identifier: identifier.name,
-    }),
+    tagSemanticError(
+      errors.byId('invalidJoinIndex', identifier.location, { identifier: identifier.name }),
+      'getJoinIndices'
+    ),
 
   noMatchingCallSignature: (
     fn: ESQLFunction,
@@ -431,11 +471,14 @@ export const errors = {
         return `${definitionArgTypes}`;
       });
 
-    return errors.byId('noMatchingCallSignature', fn.location, {
-      functionName: fn.name,
-      argTypes: argTypes.join(', '),
-      validSignatures,
-    });
+    return tagSemanticError(
+      errors.byId('noMatchingCallSignature', fn.location, {
+        functionName: fn.name,
+        argTypes: argTypes.join(', '),
+        validSignatures,
+      }),
+      'getColumnsFor'
+    );
   },
 
   licenseRequired: (fn: ESQLFunction, license: string): ESQLMessage =>

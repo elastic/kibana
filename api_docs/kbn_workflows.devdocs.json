@@ -2055,7 +2055,14 @@
             "label": "output",
             "description": [],
             "signature": [
-              "Record<string, unknown> | null | undefined"
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.JsonValue",
+                "text": "JsonValue"
+              },
+              " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
             "deprecated": false,
@@ -2069,7 +2076,14 @@
             "label": "input",
             "description": [],
             "signature": [
-              "Record<string, unknown> | null | undefined"
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.JsonValue",
+                "text": "JsonValue"
+              },
+              " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
             "deprecated": false,
@@ -4274,7 +4288,23 @@
             "section": "def-common.ExecutionStatus",
             "text": "ExecutionStatus"
           },
-          "; input?: Record<string, unknown> | null | undefined; output?: Record<string, unknown> | null | undefined; startedAt: string; workflowId: string; stepId: string; workflowRunId: string; stepType?: string | undefined; scopeStack: ",
+          "; input?: ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.JsonValue",
+            "text": "JsonValue"
+          },
+          " | undefined; output?: ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.JsonValue",
+            "text": "JsonValue"
+          },
+          " | undefined; startedAt: string; workflowId: string; stepId: string; workflowRunId: string; stepType?: string | undefined; scopeStack: ",
           {
             "pluginId": "@kbn/workflows",
             "scope": "common",

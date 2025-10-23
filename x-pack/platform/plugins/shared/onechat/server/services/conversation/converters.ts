@@ -83,9 +83,13 @@ function deserializeStepResults(rounds: PersistentConversationRound[]): Conversa
 
 export const fromEs = (document: Document): Conversation => {
   const base = convertBaseFromEs(document);
+
+  // Migration: prefer legacy 'rounds' field, fallback to new 'conversation_rounds' field
+  const rounds = document._source!.rounds ?? document._source!.conversation_rounds;
+
   return {
     ...base,
-    rounds: deserializeStepResults(document._source!.rounds),
+    rounds: deserializeStepResults(rounds),
   };
 };
 
@@ -102,7 +106,9 @@ export const toEs = (conversation: Conversation, space: string): ConversationPro
     title: conversation.title,
     created_at: conversation.created_at,
     updated_at: conversation.updated_at,
-    rounds: serializeStepResults(conversation.rounds),
+    // Explicitly omit rounds to ensure migration
+    rounds: undefined,
+    conversation_rounds: serializeStepResults(conversation.rounds),
   };
 };
 
@@ -146,6 +152,6 @@ export const createRequestToEs = ({
     title: conversation.title,
     created_at: creationDate.toISOString(),
     updated_at: creationDate.toISOString(),
-    rounds: serializeStepResults(conversation.rounds),
+    conversation_rounds: serializeStepResults(conversation.rounds),
   };
 };

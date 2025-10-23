@@ -15,7 +15,7 @@ import {
   isManualPointAnnotationConfig,
   isRangeAnnotationConfig,
 } from '@kbn/event-annotation-common';
-import { LegendSize } from '@kbn/visualizations-plugin/public';
+import { LegendSize } from '@kbn/chart-expressions-common';
 import type {
   AvailableReferenceLineIcon,
   DataDecorationConfigFn,

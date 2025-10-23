@@ -24,7 +24,7 @@ const storageSettings = {
       title: types.text({}),
       created_at: types.date({}),
       updated_at: types.date({}),
-      rounds: types.object({ dynamic: true }),
+      conversation_rounds: types.object({ dynamic: false, properties: {} }),
     },
   },
 } satisfies IndexStorageSettings;
@@ -37,7 +37,9 @@ export interface ConversationProperties {
   title: string;
   created_at: string;
   updated_at: string;
-  rounds: PersistentConversationRound[];
+  conversation_rounds: PersistentConversationRound[];
+  // legacy field
+  rounds?: PersistentConversationRound[];
 }
 
 export type ConversationStorageSettings = typeof storageSettings;

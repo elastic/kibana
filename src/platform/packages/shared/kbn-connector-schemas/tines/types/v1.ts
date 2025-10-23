@@ -18,7 +18,7 @@ import type {
   TinesWebhookObjectSchema,
   TinesWebhookActionConfigSchema,
   TinesStoryObjectSchema,
-} from '../schemas/latest';
+} from '../schemas/v1';
 
 export type TinesConfig = z.infer<typeof TinesConfigSchema>;
 export type TinesSecrets = z.infer<typeof TinesSecretsSchema>;

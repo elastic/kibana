@@ -113,7 +113,7 @@ export class EsqlStarredQueriesService {
     });
   }
 
-  private checkIfQueryIsStarred(queryString: string) {
+  checkIfQueryIsStarred(queryString: string) {
     return this.starredQueries.some((item) => item.queryString === queryString);
   }
 
