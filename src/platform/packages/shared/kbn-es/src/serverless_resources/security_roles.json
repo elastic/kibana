@@ -46,8 +46,7 @@
           ],
           "siemV4": [
             "read",
-            "read_alerts",
-            "endpoint_exceptions_read"
+            "read_alerts"
           ],
           "securitySolutionAssistant": [
             "all"
@@ -127,8 +126,7 @@
           ],
           "siemV4": [
             "read",
-            "read_alerts",
-            "endpoint_exceptions_read"
+            "read_alerts"
           ],
           "securitySolutionAssistant": [
             "all"

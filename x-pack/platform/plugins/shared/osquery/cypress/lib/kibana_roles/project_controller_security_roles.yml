@@ -1,7 +1,7 @@
 # -----
 # Source: https://github.com/elastic/elasticsearch-controller/blob/main/internal/config/roles/security.yaml
 
-# modeled after the t1_analyst minus osquery run saved queries privilege
+# modeled after the t1_analyst minus osquery run saved queries privilege, plus endpoint exceptions read
 viewer:
   cluster: []
   indices:
@@ -195,7 +195,6 @@ t1_analyst:
         - feature_siemV4.read
         - feature_siemV4.read_alerts
         - feature_siemV4.endpoint_list_read
-        - feature_siemV4.endpoint_exceptions_read
         - feature_securitySolutionCases.read
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -257,7 +256,6 @@ t2_analyst:
         - feature_siemV4.read
         - feature_siemV4.read_alerts
         - feature_siemV4.endpoint_list_read
-        - feature_siemV4.endpoint_exceptions_read
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all

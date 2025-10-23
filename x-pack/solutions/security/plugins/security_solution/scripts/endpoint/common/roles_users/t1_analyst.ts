@@ -17,7 +17,7 @@ export const getT1Analyst: () => Omit<Role, 'name'> = () => {
         ...noResponseActionsRole.kibana[0],
         feature: {
           ...noResponseActionsRole.kibana[0].feature,
-          siemV4: ['read', 'endpoint_exceptions_read'],
+          siemV4: ['read'],
           securitySolutionTimeline: ['all'],
           securitySolutionNotes: ['all'],
         },
