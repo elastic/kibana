@@ -13,6 +13,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import type { ReportApiJSON } from '@kbn/reporting-common/types';
 import type { BulkGetResult } from '@kbn/task-manager-plugin/server/task_store';
 import { isOk } from '@kbn/task-manager-plugin/server/lib/result_type';
+import type { BulkOperationError } from './types';
 import type { ListScheduledReportApiJSON, ScheduledReportType } from '../../types';
 
 const SCHEDULED_REPORT_ID_FIELD = 'scheduled_report_id';
@@ -92,7 +93,7 @@ export function transformSingleResponse(
   };
 }
 
-export function transformResponse(
+export function transformListResponse(
   logger: Logger,
   result: SavedObjectsFindResponse<ScheduledReportType>,
   lastResponse?: CreatedAtSearchResponse,
@@ -105,5 +106,19 @@ export function transformResponse(
     data: result.saved_objects.map((so) =>
       transformSingleResponse(logger, so, lastResponse, nextRunResponse)
     ),
+  };
+}
+
+export function transformBulkDeleteResponse({
+  deletedSchedulesIds,
+  errors,
+}: {
+  deletedSchedulesIds: string[];
+  errors: BulkOperationError[];
+}) {
+  return {
+    scheduled_report_ids: deletedSchedulesIds,
+    errors,
+    total: deletedSchedulesIds.length + errors.length,
   };
 }
