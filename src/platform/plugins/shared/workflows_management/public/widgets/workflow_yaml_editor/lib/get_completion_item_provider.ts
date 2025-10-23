@@ -8,6 +8,9 @@
  */
 // TODO: refactor this file to be more composable, easier to read and test
 
+// TODO: Remove the eslint-disable comments to use the proper types.
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 import moment from 'moment-timezone';
 import type { Document, Node, Pair, Scalar } from 'yaml';
 import { isMap, isPair, isScalar, parseDocument, visit, YAMLParseError } from 'yaml';
@@ -27,6 +30,11 @@ import {
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import { z } from '@kbn/zod';
 import { getCachedAllConnectors } from './connectors_cache';
+import {
+  createLiquidBlockKeywordCompletions,
+  createLiquidFilterCompletions,
+  createLiquidSyntaxCompletions,
+} from './liquid_completions';
 import { generateBuiltInStepSnippet } from './snippets/generate_builtin_step_snippet';
 import {
   connectorTypeRequiresConnectorId,
@@ -42,19 +50,14 @@ import {
   generateTriggerSnippet,
 } from './snippets/generate_trigger_snippet';
 import {
-  createLiquidFilterCompletions,
-  createLiquidSyntaxCompletions,
-  createLiquidBlockKeywordCompletions,
-} from './liquid_completions';
-import {
-  LIQUID_FILTER_REGEX,
+  LIQUID_BLOCK_END_REGEX,
   LIQUID_BLOCK_FILTER_REGEX,
   LIQUID_BLOCK_KEYWORD_REGEX,
   LIQUID_BLOCK_START_REGEX,
-  LIQUID_BLOCK_END_REGEX,
-  VARIABLE_REGEX_GLOBAL,
+  LIQUID_FILTER_REGEX,
   PROPERTY_PATH_REGEX,
   UNFINISHED_VARIABLE_REGEX_GLOBAL,
+  VARIABLE_REGEX_GLOBAL,
 } from '../../../../common/lib/regex';
 import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import { getDetailedTypeDescription, getSchemaAtPath, parsePath } from '../../../../common/lib/zod';
@@ -1453,6 +1456,7 @@ export function getCompletionItemProvider(
               // Skip if parameter already exists (unless it's an empty value)
               if (existingParams.has(key)) {
                 // Skipping existing parameter
+                // eslint-disable-next-line no-continue
                 continue;
               }
 
@@ -1463,6 +1467,7 @@ export function getCompletionItemProvider(
                 lastPathSegment && !key.startsWith(lastPathSegment) && !isManualTrigger;
 
               if (shouldSkip) {
+                // eslint-disable-next-line no-continue
                 continue;
               }
 
@@ -1525,6 +1530,7 @@ export function getCompletionItemProvider(
 
               // If it's kbn-xsrf, skip it since we don't need to suggest it
               if (key === 'kbn-xsrf') {
+                // eslint-disable-next-line no-continue
                 continue;
               }
 
@@ -1701,6 +1707,7 @@ export function getCompletionItemProvider(
             completionContext.triggerKind === monaco.languages.CompletionTriggerKind.Invoke;
 
           if (lastPathSegment && !key.startsWith(lastPathSegment) && !isManualTrigger) {
+            // eslint-disable-next-line no-continue
             continue;
           }
 

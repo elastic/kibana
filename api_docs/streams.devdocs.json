@@ -1046,6 +1046,24 @@
             "StreamsRouteHandlerResources",
             ", ",
             "ListDashboardsResponse",
+            ", undefined>; \"GET /internal/streams/ingest/processor_suggestions\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"GET /internal/streams/ingest/processor_suggestions\", Zod.ZodObject<{}, \"strip\", Zod.ZodTypeAny, {}, {}>, ",
+            "StreamsRouteHandlerResources",
+            ", ",
+            {
+              "pluginId": "streams",
+              "scope": "common",
+              "docId": "kibStreamsPluginApi",
+              "section": "def-common.ProcessorSuggestionsResponse",
+              "text": "ProcessorSuggestionsResponse"
+            },
             ", undefined>; \"POST /internal/streams/{name}/_describe_stream\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
@@ -1804,15 +1822,15 @@
             "label": "value",
             "description": [],
             "signature": [
-              "{ [x: string]: ",
+              "{ [x: string]: unknown[] | ",
               "Primitive",
               " | ",
               "Primitive",
-              "[]; [x: number]: ",
+              "[]; [x: number]: unknown[] | ",
               "Primitive",
               " | ",
               "Primitive",
-              "[]; [x: symbol]: ",
+              "[]; [x: symbol]: unknown[] | ",
               "Primitive",
               " | ",
               "Primitive",
@@ -2819,6 +2837,24 @@
           "StreamsRouteHandlerResources",
           ", ",
           "ListDashboardsResponse",
+          ", undefined>; \"GET /internal/streams/ingest/processor_suggestions\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/streams/ingest/processor_suggestions\", Zod.ZodObject<{}, \"strip\", Zod.ZodTypeAny, {}, {}>, ",
+          "StreamsRouteHandlerResources",
+          ", ",
+          {
+            "pluginId": "streams",
+            "scope": "common",
+            "docId": "kibStreamsPluginApi",
+            "section": "def-common.ProcessorSuggestionsResponse",
+            "text": "ProcessorSuggestionsResponse"
+          },
           ", undefined>; \"POST /internal/streams/{name}/_describe_stream\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
@@ -3420,7 +3456,157 @@
   "common": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "streams",
+        "id": "def-common.ProcessorPropertySuggestion",
+        "type": "Interface",
+        "tags": [],
+        "label": "ProcessorPropertySuggestion",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/streams/common/ingest_processor_suggestions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "streams",
+            "id": "def-common.ProcessorPropertySuggestion.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/streams/common/ingest_processor_suggestions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "streams",
+            "id": "def-common.ProcessorPropertySuggestion.template",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "template",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.JsonValue",
+                "text": "JsonValue"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/streams/common/ingest_processor_suggestions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "streams",
+        "id": "def-common.ProcessorSuggestion",
+        "type": "Interface",
+        "tags": [],
+        "label": "ProcessorSuggestion",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/streams/common/ingest_processor_suggestions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "streams",
+            "id": "def-common.ProcessorSuggestion.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/streams/common/ingest_processor_suggestions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "streams",
+            "id": "def-common.ProcessorSuggestion.template",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "template",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.JsonValue",
+                "text": "JsonValue"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/streams/common/ingest_processor_suggestions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "streams",
+        "id": "def-common.ProcessorSuggestionsResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "ProcessorSuggestionsResponse",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/streams/common/ingest_processor_suggestions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "streams",
+            "id": "def-common.ProcessorSuggestionsResponse.processors",
+            "type": "Array",
+            "tags": [],
+            "label": "processors",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "streams",
+                "scope": "common",
+                "docId": "kibStreamsPluginApi",
+                "section": "def-common.ProcessorSuggestion",
+                "text": "ProcessorSuggestion"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/plugins/shared/streams/common/ingest_processor_suggestions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "streams",
+            "id": "def-common.ProcessorSuggestionsResponse.propertiesByProcessor",
+            "type": "Object",
+            "tags": [],
+            "label": "propertiesByProcessor",
+            "description": [],
+            "signature": [
+              "{ [x: string]: ",
+              {
+                "pluginId": "streams",
+                "scope": "common",
+                "docId": "kibStreamsPluginApi",
+                "section": "def-common.ProcessorPropertySuggestion",
+                "text": "ProcessorPropertySuggestion"
+              },
+              "[]; }"
+            ],
+            "path": "x-pack/platform/plugins/shared/streams/common/ingest_processor_suggestions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [
       {

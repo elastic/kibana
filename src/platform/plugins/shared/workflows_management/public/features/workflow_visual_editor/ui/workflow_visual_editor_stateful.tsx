@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import type { WorkflowYaml } from '@kbn/workflows';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { WorkflowYaml } from '@kbn/workflows';
 import { WorkflowVisualEditor } from './workflow_visual_editor';
+import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import {
   getCachedDynamicConnectorTypes,
   getWorkflowZodSchemaLoose,
 } from '../../../../common/schema';
-import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
 
 interface WorkflowVisualEditorStatefulProps {
