@@ -14,6 +14,7 @@ import { useUsageTracker } from '../contexts/usage_tracker_context';
 import { SearchGettingStartedPageTemplate } from '../layout/page_template';
 import { ConsoleTutorialsGroup } from './tutorials/console_tutorials_group';
 import { SearchGettingStartedConnectCode } from './connect_code';
+import { GettingStartedFooter } from './footer';
 
 export const SearchGettingStartedPage: React.FC = () => {
   const usageTracker = useUsageTracker();
@@ -35,6 +36,9 @@ export const SearchGettingStartedPage: React.FC = () => {
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section data-test-subj="search-getting-code-example">
         <SearchGettingStartedConnectCode />
+      </EuiPageTemplate.Section>
+      <EuiPageTemplate.Section paddingSize="xl">
+        <GettingStartedFooter />
       </EuiPageTemplate.Section>
     </SearchGettingStartedPageTemplate>
   );
