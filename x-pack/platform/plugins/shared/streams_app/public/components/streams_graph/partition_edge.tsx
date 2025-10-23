@@ -17,10 +17,9 @@ interface PartitionEdgeProps {
   content?: ReactNode;
   parentDocuments?: StreamDocCountsFetch;
   currentDocuments: StreamDocCountsFetch;
-  id: string;
 }
 
-export const PartitionEdge = ({ content, parentDocuments, currentDocuments, id }: PartitionEdgeProps) => {
+export const PartitionEdge = ({ content, parentDocuments, currentDocuments }: PartitionEdgeProps) => {
   const { euiTheme } = useEuiTheme();
   let matches = 0;
   if (parentDocuments) {

@@ -4,15 +4,15 @@ import { EuiFlexGroup, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { truncateText } from '../../util/truncate_text';
 
+export const STREAM_NODE_TYPE = 'streamNode';
+
 export interface StreamNodeData extends Record<string, unknown> {
     label: string;
     type: 'wired' | 'root' | 'classic';
-    level: number;
-    hasParent?: boolean;
-    hasChildren?: boolean;
+    hasChildren: boolean;
 }
 
-export const StreamNode = ({ data: { label, type, hasParent, hasChildren }}: { data: StreamNodeData }) => {
+export const StreamNode = ({ data: { label, type, hasChildren }}: { data: StreamNodeData }) => {
     const { euiTheme } = useEuiTheme();
 
     const nodeClass = css`
@@ -37,7 +37,7 @@ export const StreamNode = ({ data: { label, type, hasParent, hasChildren }}: { d
                 type="target"
                 position={Position.Top}
                 id="target"
-                className={css`visibility: ${!hasParent ? 'hidden' : ''};`}
+                className={css`visibility: ${type === 'root' ? 'hidden' : ''};`}
             />
             <EuiFlexGroup alignItems="center" gutterSize='xs'>
                 {type === 'root' && <EuiIcon type="aggregate" size="s" />}

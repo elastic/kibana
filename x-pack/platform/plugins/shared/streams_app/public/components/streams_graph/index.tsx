@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiPanel, EuiText, EuiSpacer, EuiEmptyPrompt, EuiLoadingElastic, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import { Streams } from '@kbn/streams-schema';
-import { asTrees, enrichStream } from '../stream_list_view/utils';
+import { enrichStream } from '../stream_list_view/utils';
 import {
   ReactFlow,
   Node,
@@ -28,54 +28,18 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { ConditionPanel } from '../data_management/shared/condition_display';
-import { CustomEdge } from './custom_edge';
-import { StreamNode, StreamNodeData } from './custom_node';
+import { CUSTOM_EDGE_TYPE, CustomEdge } from './custom_edge';
+import { STREAM_NODE_TYPE, StreamNode, StreamNodeData } from './custom_node';
 import { PartitionEdge } from './partition_edge';
 import { css } from '@emotion/css';
 import { useStreamDocCountsFetch } from '../../hooks/use_streams_doc_counts_fetch';
-import Dagre from '@dagrejs/dagre';
-
-const NODE_DIMENSIONS = {
-  WIDTH: 200,
-  HEIGHT: 100,
-}
-
-const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = 'TB') => {
-  const g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
-  g.setGraph({ rankdir: direction });
-
-  edges.forEach((edge) => {
-    g.setEdge(edge.source, edge.target);
-  });
-
-  nodes.forEach((node) => {
-    g.setNode(node.id, {
-      width: NODE_DIMENSIONS.WIDTH,
-      height: NODE_DIMENSIONS.HEIGHT
-    });
-  });
-
-  Dagre.layout(g);
-
-  return {
-    nodes: nodes.map((node) => {
-      const position = g.node(node.id);
-      return {
-        ...node,
-        position: {
-          x: position.x - NODE_DIMENSIONS.WIDTH / 2,
-          y: position.y - NODE_DIMENSIONS.HEIGHT / 2,
-        },
-      };
-    }), edges
-  };
-};
+import { getLayoutedElements } from './layout_helper';
 
 const nodeTypes = {
-  'streamNode': StreamNode,
+  [STREAM_NODE_TYPE]: StreamNode,
 };
 const edgeTypes = {
-  'custom-edge': CustomEdge,
+  [CUSTOM_EDGE_TYPE]: CustomEdge,
 };
 
 interface StreamsGraphProps {
@@ -151,69 +115,46 @@ const Graph = ({ streams, loading = false }: StreamsGraphProps) => {
       return { initialNodes: [], initialEdges: [] };
     }
 
-    const wiredStreams = streams?.filter((stream) =>
+    const wiredStreams = streams.filter((stream) =>
       Streams.WiredStream.Definition.is(stream.stream)
     );
 
     const enrichedStreams = wiredStreams.map(enrichStream);
-    const trees = asTrees(enrichedStreams);
 
     const nodes: Node<StreamNodeData>[] = [];
     const edges: Edge[] = [];
 
-    const buildGraph = (treeNodes: any[], level = 0, parentId?: string) => {
-      treeNodes.forEach((node) => {
-        const nodeId = node.stream.name;
+    for (const s of enrichedStreams) {
+      if (!Streams.WiredStream.Definition.is(s.stream)) continue;
+      const streamName = s.stream.name;
+      const reactFlowNode: Node<StreamNodeData> = {
+        id: streamName,
+        type: STREAM_NODE_TYPE,
+        position: { x: 0, y: 0 },
+        data: {
+          label: streamName,
+          type: s.type,
+          hasChildren:  s.stream.ingest.wired.routing && s.stream.ingest.wired.routing.length > 0,
+        },
+      };
+      nodes.push(reactFlowNode);
 
-        const reactFlowNode: Node<StreamNodeData> = {
-          id: nodeId,
-          type: 'streamNode',
-          position: { x: 0, y: 0 },
-          data: {
-            label: node.stream.name,
-            type: node.type || 'wired',
-            level,
-            hasParent: !!parentId,
-            hasChildren: node.children && node.children.length > 0,
-          },
-        };
+      for (const routingCondition of s.stream.ingest.wired.routing) {
+        const childStreamName = routingCondition.destination;
+        edges.push({
+          id: `${streamName}-${childStreamName}`,
+          source: streamName,
+          target: childStreamName,
+          type: CUSTOM_EDGE_TYPE,
+          label: <PartitionEdge
+            content={<ConditionPanel condition={routingCondition.where} />}
+            parentDocuments={getStreamDocCounts(`${streamName}*`)}
+            currentDocuments={getStreamDocCounts(`${childStreamName}*`)}
+          />,
+        });
+      }
+    }
 
-        nodes.push(reactFlowNode);
-
-        // Create edge to parent
-        if (parentId) {
-          console.log(`Creating edge from ${parentId} to ${nodeId}`);
-
-          const parentStream = streams.find(s => s.stream.name === parentId);
-          const routingCondition = parentStream && 'ingest' in parentStream.stream &&
-            'wired' in parentStream.stream.ingest &&
-            parentStream.stream.ingest.wired?.routing?.find((x: any) => x.destination === nodeId)?.where;
-          const routingConditionPanel = routingCondition ? <ConditionPanel condition={routingCondition} /> : null;
-
-          edges.push({
-            id: `${parentId}-${nodeId}`,
-            source: parentId,
-            target: nodeId,
-            type: 'custom-edge',
-            label: <PartitionEdge
-              content={routingConditionPanel}
-              parentDocuments={getStreamDocCounts(`${parentId}*`)}
-              currentDocuments={getStreamDocCounts(`${nodeId}*`)}
-              id={`${parentId}-${nodeId}`}
-            />,
-          });
-        }
-
-        // Recursively process children
-        if (node.children && node.children.length > 0) {
-          buildGraph(node.children, level + 1, nodeId);
-        }
-      });
-    };
-
-    buildGraph(trees);
-
-    // Apply Dagre layout
     const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(nodes, edges);
 
     return { initialNodes: layoutedNodes, initialEdges: layoutedEdges };

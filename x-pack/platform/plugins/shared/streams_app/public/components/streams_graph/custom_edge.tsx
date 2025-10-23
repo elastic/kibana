@@ -1,6 +1,8 @@
 import { BaseEdge, EdgeLabelRenderer, EdgeProps, getSmoothStepPath } from '@xyflow/react';
 import React from 'react';
 
+export const CUSTOM_EDGE_TYPE = 'custom-edge';
+
 export function CustomEdge({
     id,
     sourceX,
