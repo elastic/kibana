@@ -33,8 +33,9 @@ import {
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import type { TraceItem } from '../../../common/waterfall/unified_trace_item';
 import { MAX_ITEMS_PER_PAGE } from './get_trace_items';
-import type { UnifiedTraceErrors } from './get_unified_trace_errors';
+import { getUnifiedTraceErrors, type UnifiedTraceErrors } from './get_unified_trace_errors';
 import { parseOtelDuration } from '../../lib/helpers/parse_otel_duration';
+import type { LogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
 
 const fields = asMutableArray(['@timestamp', 'trace.id', 'service.name'] as const);
 
@@ -85,25 +86,33 @@ export function getErrorsByDocId(unifiedTraceErrors: UnifiedTraceErrors) {
  */
 export async function getUnifiedTraceItems({
   apmEventClient,
+  logsClient,
   maxTraceItemsFromUrlParam,
   traceId,
   start,
   end,
   config,
-  unifiedTraceErrors,
 }: {
   apmEventClient: APMEventClient;
+  logsClient: LogsClient;
   maxTraceItemsFromUrlParam?: number;
   traceId: string;
   start: number;
   end: number;
   config: APMConfig;
-  unifiedTraceErrors: UnifiedTraceErrors;
-}): Promise<TraceItem[]> {
+}): Promise<{ traceItems: TraceItem[]; unifiedTraceErrors: UnifiedTraceErrors }> {
   const maxTraceItems = maxTraceItemsFromUrlParam ?? config.ui.maxTraceItems;
   const size = Math.min(maxTraceItems, MAX_ITEMS_PER_PAGE);
 
-  const response = await apmEventClient.search(
+  const unifiedTraceErrorsPromise = getUnifiedTraceErrors({
+    apmEventClient,
+    logsClient,
+    traceId,
+    start,
+    end,
+  });
+
+  const unifiedTracePromise = apmEventClient.search(
     'get_unified_trace_items',
     {
       apm: {
@@ -148,36 +157,45 @@ export async function getUnifiedTraceItems({
     { skipProcessorEventFilter: true }
   );
 
-  const errorsByDocId = getErrorsByDocId(unifiedTraceErrors);
-  return response.hits.hits
-    .map((hit) => {
-      const event = unflattenKnownApmEventFields(hit.fields, fields);
-      const apmDuration = event.span?.duration?.us || event.transaction?.duration?.us;
-      const id = event.span?.id || event.transaction?.id;
-      if (!id) {
-        return undefined;
-      }
+  const [unifiedTraceErrors, unifiedTraceItems] = await Promise.all([
+    unifiedTraceErrorsPromise,
+    unifiedTracePromise,
+  ]);
 
-      const docErrors = errorsByDocId[id] || [];
-      return {
-        id: event.span?.id ?? event.transaction?.id,
-        timestampUs: event.timestamp?.us ?? toMicroseconds(event[AT_TIMESTAMP]),
-        name: event.span?.name ?? event.transaction?.name,
-        traceId: event.trace.id,
-        duration: resolveDuration(apmDuration, event.duration),
-        ...((event.event?.outcome || event.status?.code) && {
-          status: {
-            fieldName: event.event?.outcome ? EVENT_OUTCOME : STATUS_CODE,
-            value: event.event?.outcome || event.status?.code,
-          },
-        }),
-        errors: docErrors,
-        parentId: event.parent?.id,
-        serviceName: event.service.name,
-        type: event.span?.subtype || event.span?.type || event.kind,
-      } as TraceItem;
-    })
-    .filter((_) => _) as TraceItem[];
+  const errorsByDocId = getErrorsByDocId(unifiedTraceErrors);
+
+  return {
+    traceItems: unifiedTraceItems.hits.hits
+      .map((hit) => {
+        const event = unflattenKnownApmEventFields(hit.fields, fields);
+        const apmDuration = event.span?.duration?.us || event.transaction?.duration?.us;
+        const id = event.span?.id || event.transaction?.id;
+        if (!id) {
+          return undefined;
+        }
+
+        const docErrors = errorsByDocId[id] || [];
+        return {
+          id: event.span?.id ?? event.transaction?.id,
+          timestampUs: event.timestamp?.us ?? toMicroseconds(event[AT_TIMESTAMP]),
+          name: event.span?.name ?? event.transaction?.name,
+          traceId: event.trace.id,
+          duration: resolveDuration(apmDuration, event.duration),
+          ...((event.event?.outcome || event.status?.code) && {
+            status: {
+              fieldName: event.event?.outcome ? EVENT_OUTCOME : STATUS_CODE,
+              value: event.event?.outcome || event.status?.code,
+            },
+          }),
+          errors: docErrors,
+          parentId: event.parent?.id,
+          serviceName: event.service.name,
+          type: event.span?.subtype || event.span?.type || event.kind,
+        } as TraceItem;
+      })
+      .filter((_) => _) as TraceItem[],
+    unifiedTraceErrors,
+  };
 }
 
 /**
