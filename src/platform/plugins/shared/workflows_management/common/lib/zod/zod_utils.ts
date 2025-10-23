@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { zodToJsonSchema } from 'zod-to-json-schema';
 import type { ZodFirstPartySchemaTypes } from '@kbn/zod';
 import { z } from '@kbn/zod';
-import { zodToJsonSchema } from 'zod-to-json-schema';
 
 export function parsePath(path: string) {
   const segments = path
@@ -118,7 +118,10 @@ export function isValidSchemaPath(schema: z.ZodType, path: string) {
  * @param isConst - If true, the schema will use a literal instead of the inferred type.
  * @returns The inferred zod schema.
  */
-export function inferZodType(obj: any, { isConst = false }: { isConst?: boolean } = {}): z.ZodType {
+export function inferZodType(
+  obj: unknown,
+  { isConst = false }: { isConst?: boolean } = {}
+): z.ZodType {
   if (obj === null) return z.null();
   if (obj === undefined) return z.undefined();
 
@@ -126,31 +129,32 @@ export function inferZodType(obj: any, { isConst = false }: { isConst?: boolean 
 
   if (type === 'string') {
     if (isConst) {
-      return z.literal(obj);
+      return z.literal(obj as string);
     }
     return z.string();
   }
   if (type === 'number') {
     if (isConst) {
-      return z.literal(obj);
+      return z.literal(obj as number);
     }
     return z.number();
   }
   if (type === 'boolean') {
     if (isConst) {
-      return z.literal(obj);
+      return z.literal(obj as boolean);
     }
     return z.boolean();
   }
 
   if (Array.isArray(obj)) {
     if (obj.length === 0) return z.array(z.unknown());
-    return z.array(inferZodType(obj[0], { isConst })).length(obj.length);
+    const first = obj[0] as unknown;
+    return z.array(inferZodType(first, { isConst })).length(obj.length);
   }
 
   if (type === 'object') {
     const shape: Record<string, z.ZodSchema> = {};
-    for (const [key, value] of Object.entries(obj)) {
+    for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
       shape[key] = inferZodType(value, { isConst });
     }
     return z.object(shape);
@@ -164,7 +168,16 @@ export function expectZodSchemaEqual(a: z.ZodType, b: z.ZodType) {
 }
 
 export function getZodTypeName(schema: z.ZodType) {
-  const typedSchema = schema as ZodFirstPartySchemaTypes;
+  // Unwrap ZodOptional and ZodDefault to get the actual schema type
+  let unwrappedSchema = schema;
+  if (unwrappedSchema instanceof z.ZodOptional) {
+    unwrappedSchema = unwrappedSchema.unwrap();
+  }
+  if (unwrappedSchema instanceof z.ZodDefault) {
+    unwrappedSchema = unwrappedSchema.removeDefault();
+  }
+
+  const typedSchema = unwrappedSchema as ZodFirstPartySchemaTypes;
   const def = typedSchema._def;
   switch (def.typeName) {
     case 'ZodString':
@@ -187,6 +200,17 @@ export function getZodTypeName(schema: z.ZodType) {
       return 'unknown';
     case 'ZodLiteral':
       return 'literal';
+    case 'ZodUnion': {
+      // Check if all union members are arrays - if so, treat as array type
+      const unionSchema = unwrappedSchema as z.ZodUnion<[z.ZodType, ...z.ZodType[]]>;
+      const allMembersAreArrays = unionSchema.options.every(
+        (option: z.ZodType) => option instanceof z.ZodArray
+      );
+      if (allMembersAreArrays) {
+        return 'array';
+      }
+      return 'union';
+    }
     default:
       return 'unknown';
   }
