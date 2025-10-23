@@ -101,9 +101,9 @@ export function asFiltersBySpaceId(
 
 export function ensureFieldIsSafeForQuery(field: string, value: string): boolean {
   const MAX_LENGTH = 1000;
-  const invalidChars = '>=<*:()';
   const errors = [];
   const whitespaceRegex = /\s/;
+  const invalidCharsRegex = /[>=<*:()]/;
 
   if (value.length > MAX_LENGTH) {
     throw new Error(`Input exceeds maximum allowed length of ${MAX_LENGTH} characters`);
@@ -114,9 +114,8 @@ export function ensureFieldIsSafeForQuery(field: string, value: string): boolean
   }
 
   const foundInvalidChars = [
-    ...new Set(value.split('').filter((char) => invalidChars.includes(char))),
+    ...new Set(value.split('').filter((char) => invalidCharsRegex.test(char))),
   ];
-
   if (foundInvalidChars.length > 0) {
     const charsDescription = `invalid character${
       foundInvalidChars.length > 1 ? 's' : ''
