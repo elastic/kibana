@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { z } from '@kbn/zod';
-import type { ConfigProperties } from '@kbn/inference-endpoint-ui-common';
 import type {
   ConfigSchema,
   SecretsSchema,
@@ -50,5 +49,3 @@ export type StreamingResponse = z.infer<typeof StreamingResponseSchema>;
 
 export type DashboardActionParams = z.infer<typeof DashboardActionParamsSchema>;
 export type DashboardActionResponse = z.infer<typeof DashboardActionResponseSchema>;
-
-export type FieldsConfiguration = Record<string, ConfigProperties>;

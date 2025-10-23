@@ -62,4 +62,5 @@ export type {
   SentinelOneGetRemoteScriptResultsApiResponse,
   SentinelOneGetRemoteScriptStatusApiResponse,
   SentinelOneRemoteScriptExecutionStatus,
+  SentinelOneActivityRecord,
 } from './types/latest';

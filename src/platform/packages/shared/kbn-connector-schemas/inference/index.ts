@@ -41,5 +41,4 @@ export type {
   StreamingResponse,
   DashboardActionParams,
   DashboardActionResponse,
-  FieldsConfiguration,
 } from './types/latest';
