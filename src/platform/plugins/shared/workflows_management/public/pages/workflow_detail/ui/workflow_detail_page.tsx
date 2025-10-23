@@ -87,7 +87,8 @@ const useCreateMode = (setHasChanges: (value: boolean) => void, id?: string) => 
 const useWorkflowActions = (
   id: string | null | undefined,
   workflowYaml: string,
-  workflow: WorkflowDetailDto | undefined
+  workflow: WorkflowDetailDto | undefined,
+  setWorkflowExecuteModalOpen: (open: boolean) => void
 ) => {
   const { notifications } = useKibana().services;
   const { updateWorkflow, testWorkflow } = useWorkflowActionsHook();
@@ -118,12 +119,6 @@ const useWorkflowActions = (
     },
     [id, workflowYaml, updateWorkflow, notifications?.toasts]
   );
-
-  const definition = useSelector(selectWorkflowDefinition) ?? null;
-
-  const handleRun = useCallback(() => {
-    setWorkflowExecuteModalOpen(true);
-  }, []);
 
   const handleRunWorkflow = useCallback(
     (event: Record<string, unknown>) => {
@@ -252,11 +247,29 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   }, []);
 
   const yamlValue = selectedExecutionId && execution ? execution.yaml : workflowYaml;
+  const definition = useSelector(selectWorkflowDefinition) ?? null;
+
+  // Parse YAML to determine if workflow is enabled in create mode
+  const definitionFromCurrentYaml: WorkflowYaml | null = useMemo(() => {
+    try {
+      return workflowYaml ? JSON.parse(workflowYaml) : null;
+    } catch {
+      return null;
+    }
+  }, [workflowYaml]);
+
+  const isWorkflowEnabled = useMemo(() => {
+    if (isCreateMode) {
+      return definitionFromCurrentYaml?.enabled ?? false;
+    }
+    return workflow?.enabled ?? false;
+  }, [isCreateMode, definitionFromCurrentYaml?.enabled, workflow?.enabled]);
 
   const { handleUpdateSave, handleRunWorkflow, handleToggleWorkflow } = useWorkflowActions(
     id,
     workflowYaml,
-    workflow
+    workflow,
+    setWorkflowExecuteModalOpen
   );
 
   const canSaveWorkflow = Boolean(
@@ -276,19 +289,6 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     },
     [isCreateMode, workflowYaml, handleCreateSave, handleUpdateSave]
   );
-
-  const definitionFromCurrentYaml: WorkflowYaml | null = useMemo(() => {
-    const dynamicConnectorTypes = getCachedDynamicConnectorTypes() || {};
-    const parsingResult = parseWorkflowYamlToJSON(
-      workflowYaml,
-      getWorkflowZodSchemaLoose(dynamicConnectorTypes)
-    );
-
-    if (!parsingResult.success) {
-      return null;
-    }
-    return parsingResult.data as WorkflowYaml;
-  }, [workflowYaml]);
 
   const handleRun = useCallback(() => {
     setWorkflowExecuteModalOpen(true);
@@ -325,7 +325,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
           activeTab={activeTab}
           canRunWorkflow={canRunWorkflow}
           canSaveWorkflow={canSaveWorkflow}
-          isEnabled={workflow?.enabled ?? false}
+          isEnabled={isWorkflowEnabled}
           handleRunClick={handleRun}
           handleSave={handleSave}
           handleToggleWorkflow={handleToggleWorkflow}

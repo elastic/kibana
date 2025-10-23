@@ -60,7 +60,9 @@ export function WorkflowsRoutes({ history }: WorkflowsAppDeps) {
             path="/create"
             render={() => (
               <WorkflowsPermissionsWrapper permissions={['createWorkflow']}>
-                <WorkflowDetailPage />
+                <WorkflowEditorStoreProvider>
+                  <WorkflowDetailPage />
+                </WorkflowEditorStoreProvider>
               </WorkflowsPermissionsWrapper>
             )}
           />
