@@ -219,7 +219,7 @@ export const MonacoEditor = ({
     [esqlCallbacks]
   );
 
-  useSetInitialValue({ localStorageValue, setValue, toasts });
+  const { loadFromData } = useSetInitialValue({ localStorageValue, setValue, toasts });
 
   useSetupAutocompletePolling({ autocompleteInfo, settingsService });
 
@@ -236,12 +236,16 @@ export const MonacoEditor = ({
       );
     }
 
+    if (loadFromData) {
+      await actionsProvider.current?.appendRequestToEditor({ request: loadFromData });
+    }
+
     // Import a request file if one is provided
     if (fileToImport) {
       editorDispatch({ type: 'setFileToImport', payload: null });
       await actionsProvider.current?.importRequestsToEditor(fileToImport);
     }
-  }, [fileToImport, requestToRestoreFromHistory, dispatch, context, editorDispatch]);
+  }, [fileToImport, requestToRestoreFromHistory, dispatch, context, editorDispatch, loadFromData]);
 
   useEffect(() => {
     updateEditor();

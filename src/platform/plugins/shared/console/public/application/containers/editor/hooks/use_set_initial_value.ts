@@ -12,7 +12,7 @@ import { parse } from 'query-string';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import { decompressFromEncodedURIComponent } from 'lz-string';
 import { i18n } from '@kbn/i18n';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { DEFAULT_INPUT_VALUE } from '../../../../../common/constants';
 
 interface QueryParams {
@@ -47,6 +47,7 @@ export const readLoadFromParam = () => {
 export const useSetInitialValue = (params: SetInitialValueParams) => {
   const { localStorageValue, setValue, toasts } = params;
   const isInitialValueSet = useRef<boolean>(false);
+  const [loadFromData, setLoadFromData] = useState('');
 
   useEffect(() => {
     const ALLOWED_PATHS = ['/guide/', '/docs/'];
@@ -69,7 +70,7 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
         ) {
           const resp = await fetch(parsedURL);
           const data = await resp.text();
-          setValue(`${localStorageValue ?? ''}\n\n${data}`);
+          setLoadFromData(data);
         } else {
           toasts.addWarning(
             i18n.translate('console.monaco.loadFromDataUnrecognizedUrlErrorMessage', {
@@ -95,7 +96,7 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
           return;
         }
 
-        setValue(data);
+        setLoadFromData(data);
       }
     };
 
@@ -116,10 +117,9 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
     if (!isInitialValueSet.current) {
       if (loadFromParam) {
         loadBufferFromRemote(loadFromParam);
-      } else {
-        // Only set to default input value if the localstorage value is undefined
-        setValue(localStorageValue ?? DEFAULT_INPUT_VALUE);
       }
+      // Only set to default input value if the localstorage value is undefined
+      setValue(localStorageValue ?? DEFAULT_INPUT_VALUE);
       isInitialValueSet.current = true;
     }
 
@@ -127,4 +127,6 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
       window.removeEventListener('hashchange', onHashChange);
     };
   }, [localStorageValue, setValue, toasts]);
+
+  return { loadFromData };
 };
