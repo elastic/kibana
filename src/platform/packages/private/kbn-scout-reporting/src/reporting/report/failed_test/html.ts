@@ -8,9 +8,10 @@
  */
 
 import fs from 'fs';
+import path from 'path';
 import type { TestFailure } from './test_failure';
 
-export const buildFailureHtml = (testFailure: TestFailure): string => {
+export const buildFailureHtml = (testFailure: TestFailure, destinationDir?: string): string => {
   const {
     suite,
     title,
@@ -29,12 +30,36 @@ export const buildFailureHtml = (testFailure: TestFailure): string => {
 
   const screenshots = attachments
     .filter((a) => a.contentType.startsWith('image/'))
-    .map((s) => {
-      const base64 = fs.readFileSync(s.path!).toString('base64');
+    .map((s, index) => {
       const escapedName = (s.name || 'screenshot').replace(/"/g, '&quot;');
+      let imgSrc: string;
+
+      if (destinationDir && s.path) {
+        // Copy screenshot to destination directory and reference it relatively
+        const ext = path.extname(s.path) || '.png';
+        const screenshotFileName = `${testFailure.id}-screenshot-${index}${ext}`;
+        const screenshotDestPath = path.join(destinationDir, screenshotFileName);
+
+        try {
+          fs.copyFileSync(s.path, screenshotDestPath);
+          // Use relative path for Buildkite artifact:// scheme compatibility
+          imgSrc = screenshotFileName;
+        } catch (copyError) {
+          // Fallback to base64 if copy fails
+          const base64 = fs.readFileSync(s.path).toString('base64');
+          imgSrc = `data:${s.contentType};base64,${base64}`;
+        }
+      } else if (s.path) {
+        // Fallback to base64 embedding
+        const base64 = fs.readFileSync(s.path).toString('base64');
+        imgSrc = `data:${s.contentType};base64,${base64}`;
+      } else {
+        return ''; // No path available
+      }
+
       return `
         <div class="screenshotContainer">
-          <img class="screenshot img-fluid img-thumbnail" src="data:${s.contentType};base64,${base64}" alt="${escapedName}" />
+          <img class="screenshot img-fluid img-thumbnail" src="${imgSrc}" alt="${escapedName}" />
         </div>
       `;
     });
@@ -47,7 +72,6 @@ export const buildFailureHtml = (testFailure: TestFailure): string => {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: 'unsafe-inline'; img-src 'self' data:; style-src 'self' 'unsafe-inline';" />
     <style>
       /* Reset and base styles */
       * {
