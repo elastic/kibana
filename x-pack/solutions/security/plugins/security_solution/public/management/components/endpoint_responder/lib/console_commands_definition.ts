@@ -612,7 +612,6 @@ const adjustCommandsForSentinelOne = ({
   platform: string;
 }): CommandDefinition[] => {
   const featureFlags = ExperimentalFeaturesService.get();
-  const isKillProcessEnabled = featureFlags.responseActionsSentinelOneKillProcessEnabled;
   const isRunscriptEnabled = featureFlags.responseActionsSentinelOneRunScriptEnabled;
 
   return commandList.map((command) => {
@@ -636,7 +635,6 @@ const adjustCommandsForSentinelOne = ({
 
     if (
       command.name === 'status' ||
-      (command.name === 'kill-process' && !isKillProcessEnabled) ||
       !isAgentTypeAndActionSupported(
         'sentinel_one',
         RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP[command.name as ConsoleResponseActionCommands],
@@ -864,13 +862,11 @@ const adjustCommandsForMicrosoftDefenderEndpoint = ({
   microsoftDefenderEndpointRunScriptEnabled: boolean;
 }): CommandDefinition[] => {
   const featureFlags = ExperimentalFeaturesService.get();
-  const isMicrosoftDefenderEndpointEnabled = featureFlags.responseActionsMSDefenderEndpointEnabled;
   const microsoftDefenderEndpointCancelEnabled =
     featureFlags.microsoftDefenderEndpointCancelEnabled;
 
   return commandList.map((command) => {
     if (
-      !isMicrosoftDefenderEndpointEnabled ||
       command.name === 'status' ||
       !isAgentTypeAndActionSupported(
         'microsoft_defender_endpoint',

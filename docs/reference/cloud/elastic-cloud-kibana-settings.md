@@ -108,6 +108,12 @@ stack: ga 9.1
 `xpack.product_intercept.interval`:
 :   Set the time that elapses between Elastic product feedback prompts. The time is formatted as a number and a time unit (d,h,m,s). For example, 20m, 24h, 7d. Defaults to `90d`.
 
+`xpack.fleet.autoUpgrades.taskInterval`:
+:   Configure the interval of the automatic upgrade task for {{fleet}}-managed {{agents}}. Defaults to `30m`.
+
+`xpack.fleet.autoUpgrades.retryDelays`:
+:   Configure the retry delays of the automatic upgrade task for {{fleet}}-managed {{agents}}. The array's length indicates the maximum number of retries. Defaults to `['30m', '1h', '2h', '4h', '8h', '16h', '24h']`.
+
 ### Version 8.18+ [ec_version_8_18]
 
 `xpack.fleet.enableManagedLogsAndMetricsDataviews`
@@ -496,7 +502,7 @@ Support for the The option `auto` was included here, when the config value is se
 
 
 `xpack.screenshotting.capture.timeouts.openUrl`
-:   Specify how long to allow the Reporting browser to wait for the "Loading…​" screen to dismiss and find the initial data for the Kibana page.  If the time is exceeded, a page screenshot is captured showing the current state, and the download link shows a warning message.
+:   Specify how long to allow the Reporting browser to wait for the "Loading…" screen to dismiss and find the initial data for the Kibana page.  If the time is exceeded, a page screenshot is captured showing the current state, and the download link shows a warning message.
 
     Defaults to `30000` (30 seconds).
 
