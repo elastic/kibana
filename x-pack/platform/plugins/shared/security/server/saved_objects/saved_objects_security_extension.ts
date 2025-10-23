@@ -672,7 +672,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         .map((obj) => `${obj.type}:${obj.id}`)
         .sort()
         .join(',');
-      const msg = `Unable to ${authzAction} ${targetTypes}}${
+      const msg = `Unable to ${authzAction} ${targetTypes}${
         allAccessControlObjectsAreInaccessible
           ? ', access control restrictions for ' + inaccessibleObjectsString
           : ''
@@ -1250,15 +1250,15 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     };
   }
 
-  getTypesRequiringAccessControlCheck(
-    objects: AuthorizeObject[],
-    action: SecurityAction = SecurityAction.CHANGE_OWNERSHIP
-  ) {
-    return this.accessControlService.getObjectsRequiringPrivilegeCheck({
-      objects,
-      actions: new Set([action]),
-    }) as GetObjectsRequiringPrivilegeCheckResult;
-  }
+  // getTypesRequiringAccessControlCheck(
+  //   objects: AuthorizeObject[],
+  //   action: SecurityAction = SecurityAction.CHANGE_OWNERSHIP
+  // ) {
+  //   return this.accessControlService.getObjectsRequiringPrivilegeCheck({
+  //     objects,
+  //     actions: new Set([action]),
+  //   }) as GetObjectsRequiringPrivilegeCheckResult;
+  // }
 
   auditClosePointInTime() {
     this.addAuditEvent({

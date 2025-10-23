@@ -122,7 +122,6 @@ describe('#importSavedObjectsFromStream', () => {
       createNewCopies,
       compatibilityMode,
       managed,
-      request,
     };
   };
 

@@ -42,14 +42,11 @@ import {
 } from './import_saved_objects';
 import type { ImportStateMap } from './lib';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { KibanaRequest } from '@kbn/core-http-server';
 
 const request = httpServerMock.createKibanaRequest();
 
 // Simple implementation of createAccessControlImportTransforms just so we can test that it is called
 const createAccessControlImportTransforms: AccessControlImportTransformsFactory = (
-  // eslint-disable-next-line @typescript-eslint/no-shadow
-  request: KibanaRequest,
   registry: ISavedObjectTypeRegistry,
   errors: SavedObjectsImportFailure[]
 ): AccessControlImportTransforms => {
@@ -125,7 +122,6 @@ describe('#importSavedObjectsFromStream', () => {
       importHooks,
       managed,
       log: logger,
-      request,
       ...(accessControl && {
         createAccessControlImportTransforms,
       }),

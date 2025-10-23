@@ -138,7 +138,6 @@ export const registerResolveImportErrorsRoute = (
           retries: req.body.retries,
           createNewCopies,
           compatibilityMode,
-          request: req,
         });
 
         return res.ok({ body: result });

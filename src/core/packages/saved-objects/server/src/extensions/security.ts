@@ -494,21 +494,6 @@ export interface ISavedObjectsSecurityExtension {
    * Performs authorization for the CHANGE_OWNERSHIP or CHANGE_ACCESS_MODE security actions
    * @param params the namespace and object to authorize for changing ownership
    * @param operation the operation to authorize - one of 'changeAccessMode' or 'changeOwnership'
-   * @returns AuthorizationResult - the resulting authorization level and authorization map
-   */
-  authorizeChangeAccessControl: <A extends string>(
-    params: AuthorizeChangeAccessControlParams,
-    operation: 'changeAccessMode' | 'changeOwnership'
-  ) => Promise<AuthorizationResult<A>>;
-
-  getTypesRequiringAccessControlCheck: (
-    objects: AuthorizeObject[]
-  ) => GetObjectsRequiringPrivilegeCheckResult;
-
-  /**
-   * Performs authorization for the CHANGE_OWNERSHIP or CHANGE_ACCESS_MODE security actions
-   * @param params the namespace and object to authorize for changing ownership
-   * @param operation the operation to authorize - one of 'changeAccessMode' or 'changeOwnership'
    * @returns CheckAuthorizationResult - the resulting authorization level and authorization map
    */
   authorizeChangeAccessControl: <A extends string>(
@@ -516,9 +501,14 @@ export interface ISavedObjectsSecurityExtension {
     operation: 'changeAccessMode' | 'changeOwnership'
   ) => Promise<CheckAuthorizationResult<A>>;
 
-  getTypesRequiringAccessControlCheck: (
-    objects: AuthorizeObject[]
-  ) => GetTypesRequiringAccessControlCheckResult;
+  // /**
+  //  * Gets the objects that require a privilege check for access control
+  //  * @param objects the requested objects
+  //  * @returns GetObjectsRequiringPrivilegeCheckResult - the resulting arrays of types and objects that require a privilege check
+  //  */
+  // getTypesRequiringAccessControlCheck: (
+  //   objects: AuthorizeObject[]
+  // ) => GetObjectsRequiringPrivilegeCheckResult;
 
   /**
    * Performs audit logging for the CLOSE_POINT_IN_TIME security action

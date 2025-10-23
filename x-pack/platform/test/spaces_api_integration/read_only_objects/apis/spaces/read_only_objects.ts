@@ -129,6 +129,19 @@ export default function ({ getService }: FtrProviderContext) {
         expect(response.body).to.have.property('type');
         const { type } = response.body;
         expect(type).to.be('read_only_type');
+        const { id: createdId } = response.body;
+
+        const getResponse = await supertestWithoutAuth
+          .get(`/read_only_objects/${createdId}`)
+          .set('kbn-xsrf', 'true')
+          .set(
+            'Authorization',
+            `Basic ${Buffer.from(`${adminTestUser.username}:${adminTestUser.password}`).toString(
+              'base64'
+            )}`
+          )
+          .expect(200);
+        expect(getResponse.body).not.to.have.property('accessControl');
       });
 
       it('should throw when trying to create read only object with no user', async () => {
@@ -139,7 +152,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(400);
         expect(response.body).to.have.property('message');
         expect(response.body.message).to.contain(
-          'Unable to create "read_only" "read_only_type" saved object. User profile ID not found.: Bad Request'
+          'Unable to create "read_only_type" with "accessMode". User profile ID not found.: Bad Request'
         );
       });
 
@@ -273,7 +286,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(overwriteResponse.body).to.have.property('error', 'Forbidden');
         expect(overwriteResponse.body).to.have.property(
           'message',
-          'Unable to create read_only_type'
+          `Unable to create read_only_type, access control restrictions for read_only_type:${objectId}`
         );
       });
     });
@@ -297,6 +310,40 @@ export default function ({ getService }: FtrProviderContext) {
         for (const { accessControl } of bulkCreateResponse.body.saved_objects) {
           expect(accessControl).to.have.property('owner', objectOwnerProfileUid);
           expect(accessControl).to.have.property('accessMode', 'read_only');
+        }
+      });
+
+      it('should objects that support access control without metadata when there is no active user profile', async () => {
+        const bulkCreateResponse = await supertestWithoutAuth
+          .post('/read_only_objects/bulk_create')
+          .set('kbn-xsrf', 'xxxxx')
+          .set(
+            'Authorization',
+            `Basic ${Buffer.from(`${adminTestUser.username}:${adminTestUser.password}`).toString(
+              'base64'
+            )}`
+          )
+          .send({
+            objects: [{ type: READ_ONLY_TYPE }, { type: READ_ONLY_TYPE }],
+          })
+          .expect(200);
+
+        expect(bulkCreateResponse.body.saved_objects).to.have.length(2);
+        for (const createdObj of bulkCreateResponse.body.saved_objects) {
+          expect(createdObj).not.to.have.property('accessControl');
+          expect(createdObj).not.to.have.property('error');
+
+          const getResponse = await supertestWithoutAuth
+            .get(`/read_only_objects/${createdObj.id}`)
+            .set('kbn-xsrf', 'true')
+            .set(
+              'Authorization',
+              `Basic ${Buffer.from(`${adminTestUser.username}:${adminTestUser.password}`).toString(
+                'base64'
+              )}`
+            )
+            .expect(200);
+          expect(getResponse.body).not.to.have.property('accessControl');
         }
       });
 
@@ -498,7 +545,12 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(403);
 
         expect(res.body).to.have.property('error', 'Forbidden');
-        expect(res.body).to.have.property('message', 'Unable to bulk_create read_only_type');
+        expect(res.body).to.have.property('message');
+        expect(res.body.message).to.contain(
+          'Unable to bulk_create read_only_type, access control restrictions for read_only_type:'
+        );
+        expect(res.body.message).to.contain(`read_only_type:${objectId1}`);
+        expect(res.body.message).to.contain(`read_only_type:${objectId2}`);
 
         // ToDo: read back objects and confirm the owner has not changed
         const getResponse = await supertestWithoutAuth
@@ -1041,7 +1093,11 @@ export default function ({ getService }: FtrProviderContext) {
             })
             .expect(403);
           expect(res.body).to.have.property('message');
-          expect(res.body.message).to.equal('Unable to bulk_delete read_only_type');
+          expect(res.body.message).to.contain(
+            'Unable to bulk_delete read_only_type, access control restrictions for read_only_type:'
+          );
+          expect(res.body.message).to.contain(`read_only_type:${objectId1}`);
+          expect(res.body.message).to.contain(`read_only_type:${objectId2}`);
         });
 
         it('allows non-owner non-admin to bulk delete objects in default mode', async () => {
@@ -1190,6 +1246,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(success).to.be(true);
           }
         });
+
         it('does not allow non-owner to bulk delete objects marked as read only', async () => {
           await activateSimpleUserProfile();
           const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
@@ -1232,7 +1289,12 @@ export default function ({ getService }: FtrProviderContext) {
             })
             .expect(403);
           expect(res.body).to.have.property('message');
-          expect(res.body.message).to.equal('Unable to bulk_delete read_only_type');
+          expect(res.body).to.have.property('message');
+          expect(res.body.message).to.contain(
+            'Unable to bulk_delete read_only_type, access control restrictions for read_only_type:'
+          );
+          expect(res.body.message).to.contain(`read_only_type:${objectId1}`);
+          expect(res.body.message).to.contain(`read_only_type:${objectId2}`);
         });
       });
     });
