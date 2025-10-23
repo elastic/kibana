@@ -17,11 +17,20 @@ import { SetupTechnology } from '@kbn/fleet-plugin/public';
 
 import { AzureCredentialsFormAgentless } from './azure_credentials_form_agentless';
 
+// Mock functions
+const mockCloudConnectorSetup = jest.fn(() => (
+  <div data-test-subj="azureLaunchCloudConnectorArmTemplate" />
+));
+
 // Mock the hooks and utilities
 jest.mock('../hooks/use_cloud_setup_context');
 jest.mock('../utils');
 jest.mock('./get_azure_credentials_form_options');
-jest.mock('./azure_credential_guides');
+
+// Mock CloudConnectorSetup component
+jest.mock('../cloud_connector/cloud_connector_setup', () => ({
+  CloudConnectorSetup: (props: unknown) => mockCloudConnectorSetup(),
+}));
 
 // Mock the utilities
 jest.mock('../utils', () => ({
@@ -113,15 +122,6 @@ jest.mock('./azure_credential_type_selector', () => ({
   ),
 }));
 
-// Mock azure_credential_guides
-jest.mock('./azure_credential_guides', () => ({
-  AzureSelectedCredentialsGuide: () => (
-    <div data-test-subj="azure-selected-credentials-guide">
-      <span data-test-subj="credential-type" />
-    </div>
-  ),
-}));
-
 // Get mocked functions from jest modules
 const { useCloudSetup: mockUseCloudSetup } = jest.requireMock('../hooks/use_cloud_setup_context');
 const {
@@ -208,6 +208,7 @@ describe('AzureCredentialsFormAgentless', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockCloudConnectorSetup.mockClear();
     mockUseCloudSetup.mockReturnValue(defaultCloudSetup);
     mockGetAgentlessCredentialsType.mockReturnValue('cloud_connectors');
     mockGetAzureAgentlessCredentialFormOptions.mockReturnValue({
@@ -236,10 +237,9 @@ describe('AzureCredentialsFormAgentless', () => {
     it('cloud connectors form', () => {
       renderWithIntl(<AzureCredentialsFormAgentless {...defaultProps} />);
       expect(screen.getByTestId('azure-setup-info')).toBeInTheDocument();
-      expect(screen.getByTestId('azure-input-var-fields')).toBeInTheDocument();
-      expect(screen.getByTestId('azure-selected-credentials-guide')).toBeInTheDocument();
       expect(screen.getByTestId('azure-credentials-type-selector')).toBeInTheDocument();
       expect(screen.getByTestId('azureLaunchCloudConnectorArmTemplate')).toBeInTheDocument();
+      expect(screen.queryByTestId('azure-input-var-fields')).not.toBeInTheDocument();
       expect(screen.getByTestId('doc-link')).toHaveTextContent(
         '/app/cloud-security-posture/overview/azure'
       );
@@ -254,7 +254,6 @@ describe('AzureCredentialsFormAgentless', () => {
 
       expect(screen.getByTestId('azure-setup-info')).toBeInTheDocument();
       expect(screen.getByTestId('azure-input-var-fields')).toBeInTheDocument();
-      expect(screen.getByTestId('azure-selected-credentials-guide')).toBeInTheDocument();
       expect(screen.queryByTestId('azure-credentials-type-selector')).not.toBeInTheDocument();
       expect(screen.queryByTestId('azureLaunchCloudConnectorArmTemplate')).not.toBeInTheDocument();
 
