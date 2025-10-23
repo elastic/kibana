@@ -31,6 +31,14 @@ export default function ({ getService }: FtrProviderContext) {
       namespaceType: schema.string(),
       hiddenType: schema.boolean(),
     }),
+    managed: schema.maybe(schema.boolean()),
+    references: schema.arrayOf(
+      schema.object({
+        name: schema.string(),
+        type: schema.string(),
+        id: schema.string(),
+      })
+    ),
   });
   const invalidRelationSchema = schema.object({
     id: schema.string(),
