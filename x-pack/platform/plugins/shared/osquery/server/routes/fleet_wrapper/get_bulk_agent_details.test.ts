@@ -24,6 +24,12 @@ describe('getBulkAgentDetailsRoute', () => {
 
   const mockGetByIds = jest.fn();
 
+  const mockLogger = {
+    debug: jest.fn(),
+    info: jest.fn(),
+    error: jest.fn(),
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -35,11 +41,7 @@ describe('getBulkAgentDetailsRoute', () => {
     // Create mock context
     mockOsqueryContext = {
       logFactory: {
-        get: jest.fn().mockReturnValue({
-          debug: jest.fn(),
-          info: jest.fn(),
-          error: jest.fn(),
-        }),
+        get: jest.fn().mockReturnValue(mockLogger),
       },
       service: {
         getActiveSpace: jest.fn().mockResolvedValue({ id: 'default', name: 'Default' }),
@@ -355,16 +357,13 @@ describe('getBulkAgentDetailsRoute', () => {
       const errorMessage = 'Fleet service connection failed';
       mockGetByIds.mockRejectedValue(new Error(errorMessage));
 
-      const mockLogger = {
-        debug: jest.fn(),
-        info: jest.fn(),
-        error: jest.fn(),
-      };
-
       const mockContext = {
         core: Promise.resolve({
           logger: {
-            get: jest.fn().mockReturnValue(mockLogger),
+            get: jest.fn().mockReturnValue({
+              debug: jest.fn(),
+              error: jest.fn(),
+            }),
           },
         }),
       };
@@ -379,7 +378,7 @@ describe('getBulkAgentDetailsRoute', () => {
 
       await routeHandler(mockContext as never, mockRequest as never, mockResponse);
 
-      // Verify error was logged
+      // Verify error was logged using the module-level mockLogger
       expect(mockLogger.error).toHaveBeenCalledWith(
         expect.stringContaining('Failed to fetch bulk agent details')
       );
