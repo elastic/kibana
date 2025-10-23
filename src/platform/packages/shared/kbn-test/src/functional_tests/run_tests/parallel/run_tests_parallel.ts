@@ -411,10 +411,6 @@ export async function runTestsParallel(
         runBuildkiteMetaSet(`config_${runner.getConfigPath()}`, 'true');
       } else {
         failedConfigs.push(runner.getConfigPath());
-        log.error(`Exiting because of failed config: ${runner.getConfigPath()}`);
-        setTimeout(() => {
-          process.exit(1);
-        }, 50).unref();
       }
     } finally {
       if (!released) {
