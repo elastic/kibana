@@ -106,6 +106,12 @@ export class NavigationPublicPlugin
         activeSpace,
       });
 
+      const feedbackUrlParams = this.buildFeedbackUrlParams(
+        isServerless,
+        cloud?.isCloudEnabled ?? false
+      );
+      chrome.project.setFeedbackUrlParams(feedbackUrlParams);
+
       if (!this.isSolutionNavEnabled) return;
 
       if (cloud) {
@@ -199,6 +205,15 @@ export class NavigationPublicPlugin
   private getIsUnauthenticated(http: HttpStart) {
     const { anonymousPaths } = http;
     return anonymousPaths.isAnonymous(window.location.pathname);
+  }
+
+  private buildFeedbackUrlParams(isServerless: boolean, isCloudEnabled: boolean) {
+    const version = this.initializerContext.env.packageInfo.version;
+    const type = isServerless ? 'serverless' : isCloudEnabled ? 'ech' : 'local';
+    return new URLSearchParams({
+      version,
+      type,
+    });
   }
 }
 
