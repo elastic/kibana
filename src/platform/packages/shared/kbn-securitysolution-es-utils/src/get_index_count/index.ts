@@ -27,6 +27,7 @@ export const getIndexCount = async ({
   const response = await esClient.count(
     {
       index,
+      expand_wildcards: ['open', 'hidden'],
     },
     { meta: true }
   );
