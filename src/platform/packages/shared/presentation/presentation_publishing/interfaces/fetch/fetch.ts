@@ -23,7 +23,7 @@ import {
 } from 'rxjs';
 
 import { useStateFromPublishingSubject } from '../../publishing_subject';
-import { apiHasParentApi } from '../has_parent_api';
+import { apiHasParentApi, type HasParentApi } from '../has_parent_api';
 import {
   isReloadTimeFetchContextEqual,
   type FetchContext,
@@ -31,7 +31,13 @@ import {
 } from './fetch_context';
 import { apiPublishesPauseFetch } from './publishes_pause_fetch';
 import { apiPublishesReload } from './publishes_reload';
-import { apiPublishesTimeRange, apiPublishesUnifiedSearch } from './publishes_unified_search';
+import type { PublishesSearchSession } from './publishes_search_session';
+import {
+  apiPublishesTimeRange,
+  apiPublishesUnifiedSearch,
+  type PublishesTimeRange,
+  type PublishesUnifiedSearch,
+} from './publishes_unified_search';
 
 function hasLocalTimeRange(api: unknown) {
   return apiPublishesTimeRange(api) ? typeof api.timeRange$.value === 'object' : false;
@@ -99,7 +105,6 @@ export function fetch$(api: unknown): Observable<FetchContext> {
       isReloadTimeFetchContextEqual(prevContext, nextContext)
     ),
     switchMap(async (reloadTimeFetchContext) => {
-      console.log({ reloadTimeFetchContext });
       const searchSessionId = await ((api as any).parentApi as any).requestSearchSessionId();
       const { reloadTimestamp, ...rest } = reloadTimeFetchContext;
       return {
@@ -112,18 +117,25 @@ export function fetch$(api: unknown): Observable<FetchContext> {
 }
 
 export const useFetchContext = (api: unknown): FetchContext => {
-  const context$: BehaviorSubject<FetchContext> = useMemo(() => {
+  const context$ = useMemo(() => {
+    const typeApi = api as Partial<
+      PublishesTimeRange & HasParentApi<Partial<PublishesUnifiedSearch & PublishesSearchSession>>
+    >;
     return new BehaviorSubject<FetchContext>({
-      ...getReloadTimeFetchContext(api),
+      filters: typeApi?.parentApi?.filters$?.value,
+      query: typeApi?.parentApi?.query$?.value,
+      searchSessionId: typeApi?.parentApi?.searchSessionId$?.value,
+      timeRange: typeApi?.timeRange$?.value ?? typeApi?.parentApi?.timeRange$?.value,
+      timeslice: typeApi?.timeRange$?.value ? undefined : typeApi?.parentApi?.timeslice$?.value,
       isReload: false,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    const subsctription = fetch$(api).subscribe((nextContext) => context$.next(nextContext));
+    const subscription = fetch$(api).subscribe((nextContext) => context$.next(nextContext));
 
-    return () => subsctription.unsubscribe();
+    return () => subscription.unsubscribe();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

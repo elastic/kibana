@@ -46,18 +46,17 @@ export function initializeSearchSessionManager(
         : dataService.search.session.start());
     searchSessionId$.next(initialSearchSessionId);
 
+    // `requestSearchSessionId` should be used when you need to ensure that you have the up-to-date search session ID
     const searchSessionGenerationInProgress$ = new BehaviorSubject<boolean>(false);
     requestSearchSessionId = async () => {
       if (!searchSessionGenerationInProgress$.getValue()) return searchSessionId$.getValue();
       return new Promise((resolve) => {
-        const subscription = searchSessionGenerationInProgress$
-          // .pipe(debounceTime(0))
-          .subscribe((inProgress) => {
-            if (!inProgress) {
-              resolve(searchSessionId$.getValue());
-              subscription.unsubscribe();
-            }
-          });
+        const subscription = searchSessionGenerationInProgress$.subscribe((inProgress) => {
+          if (!inProgress) {
+            resolve(searchSessionId$.getValue());
+            subscription.unsubscribe();
+          }
+        });
       });
     };
 
