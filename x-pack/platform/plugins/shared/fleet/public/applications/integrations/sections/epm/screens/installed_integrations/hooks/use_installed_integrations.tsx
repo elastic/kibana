@@ -62,6 +62,7 @@ export function useInstalledIntegrations(
 ) {
   const { data, isInitialLoading, isLoading } = useGetPackagesQuery({
     withPackagePoliciesCount: true,
+    prerelease: true,
   });
 
   const internalInstalledPackages: InstalledPackageUIPackageListItem[] = useMemo(
