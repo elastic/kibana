@@ -10,7 +10,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { memoize, once } from 'lodash';
 import type { Observable, Subscription } from 'rxjs';
-import { BehaviorSubject, EMPTY, defer, from, fromEvent, of, throwError } from 'rxjs';
+import { BehaviorSubject, EMPTY, from, fromEvent, of, throwError } from 'rxjs';
 import {
   catchError,
   filter,
@@ -401,7 +401,7 @@ export class SearchInterceptor {
             [EVENT_PROPERTY_SEARCH_TIMEOUT_MS]: this.searchTimeout,
             [EVENT_PROPERTY_EXECUTION_CONTEXT]: options.executionContext,
           });
-          return defer(() =>
+          return from(
             this.runSearch({ id, ...request }, { ...options, retrieveResults: true })
           ).pipe(
             map((response) =>
@@ -437,13 +437,13 @@ export class SearchInterceptor {
    * @internal
    * @throws `AbortError` | `ErrorLike`
    */
-  private async runSearch(
+  private runSearch(
     request: IKibanaSearchRequest,
     options?: ISearchOptions
   ): Promise<IKibanaSearchResponse> {
     const { abortSignal } = options || {};
 
-    const requestHash = await createRequestHash(request.params);
+    const requestHash = createRequestHash(request.params);
 
     if (request.id) {
       // just polling an existing search, no need to send the body, just the hash
