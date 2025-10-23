@@ -35,17 +35,9 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
   }
 
   public getInput() {
-    // Get current context for templating
-    const context = this.stepExecutionRuntime.contextManager.getContext();
-    // Render inputs from 'with'
-    return Object.entries(this.step.with ?? {}).reduce((acc: Record<string, any>, [key, value]) => {
-      if (typeof value === 'string') {
-        acc[key] = this.templatingEngine.render(value, context);
-      } else {
-        acc[key] = value;
-      }
-      return acc;
-    }, {});
+    return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
+      this.step.with || {}
+    );
   }
 
   public async _run(withInputs?: any): Promise<RunStepResult> {
