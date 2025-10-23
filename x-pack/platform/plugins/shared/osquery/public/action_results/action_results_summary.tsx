@@ -135,24 +135,24 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     return map;
   }, [agentsData]);
 
+  // Placeholders are edges without completed_at that represent pending/non-responsive agents
   useEffect(() => {
-    if (error) {
-      data.edges.forEach((edge) => {
-        if (edge.fields) {
-          edge.fields['error.skipped'] = edge.fields.error = [error];
-        }
-      });
-    } else if (expired) {
-      data.edges.forEach((edge) => {
-        if (!edge.fields?.completed_at && edge.fields) {
-          edge.fields['error.keyword'] = edge.fields.error = [
-            i18n.translate('xpack.osquery.liveQueryActionResults.table.expiredErrorText', {
-              defaultMessage: 'The action request timed out.',
-            }),
-          ];
-        }
-      });
-    }
+    data.edges.forEach((edge) => {
+      // Ensure fields object exists for all edges
+      if (!edge.fields) {
+        edge.fields = {};
+      }
+
+      if (error) {
+        edge.fields['error.skipped'] = edge.fields.error = [error];
+      } else if (expired && !edge.fields?.completed_at) {
+        edge.fields['error.keyword'] = edge.fields.error = [
+          i18n.translate('xpack.osquery.liveQueryActionResults.table.expiredErrorText', {
+            defaultMessage: 'The action request timed out.',
+          }),
+        ];
+      }
+    });
   }, [data.edges, error, expired]);
 
   const renderAgentIdColumn = useCallback(
