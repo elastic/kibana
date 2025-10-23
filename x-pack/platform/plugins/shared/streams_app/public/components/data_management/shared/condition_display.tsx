@@ -22,7 +22,13 @@ import {
 import { css } from '@emotion/css';
 import { ConditionEditor } from './condition_editor';
 
-export const ConditionPanel = ({ condition }: { condition: Condition }) => {
+export const ConditionPanel = ({
+  condition,
+  keywordWrapper,
+}: {
+  condition: Condition;
+  keywordWrapper?: (children: React.ReactNode) => React.ReactNode;
+}) => {
   const { euiTheme } = useEuiTheme();
   return (
     <EuiPanel
@@ -32,7 +38,12 @@ export const ConditionPanel = ({ condition }: { condition: Condition }) => {
         border-radius: ${euiTheme.size.s};
       `}
     >
-      <ConditionDisplay condition={condition} showKeyword={true} keyword="WHERE" />
+      <ConditionDisplay
+        condition={condition}
+        showKeyword={true}
+        keyword="WHERE"
+        keywordWrapper={keywordWrapper}
+      />
     </EuiPanel>
   );
 };
@@ -57,16 +68,18 @@ interface ConditionDisplayProps {
   condition: Condition;
   showKeyword?: boolean;
   keyword?: string;
+  keywordWrapper?: (children: React.ReactNode) => React.ReactNode;
 }
 
 export const ConditionDisplay = ({
   condition,
   showKeyword = false,
   keyword = 'WHERE',
+  keywordWrapper = (children: React.ReactNode) => children,
 }: ConditionDisplayProps) => {
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
-      {showKeyword && <OperatorText operator={keyword} bold />}
+      {showKeyword && keywordWrapper(<OperatorText operator={keyword} bold />)}
       <RecursiveConditionDisplay condition={condition} />
     </EuiFlexGroup>
   );

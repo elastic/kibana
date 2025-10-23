@@ -34,7 +34,7 @@ describe('conversation model converters', () => {
           user_id: 'user_id',
           user_name: 'user_name',
           space: 'space',
-          rounds: [
+          conversation_rounds: [
             {
               id: 'round-1',
               input: {
@@ -52,7 +52,7 @@ describe('conversation model converters', () => {
       };
     };
 
-    it('deserialize the conversation', () => {
+    it('deserializes the conversation with new conversation_rounds field', () => {
       const serialized = documentBase();
 
       const deserialized = fromEs(serialized);
@@ -82,9 +82,53 @@ describe('conversation model converters', () => {
       });
     });
 
+    it('deserializes the conversation with legacy rounds field', () => {
+      const serialized = documentBase();
+      // @ts-ignore simulating legacy document
+      delete serialized._source.conversation_rounds;
+      serialized._source!.rounds = [
+        {
+          id: 'round-legacy',
+          input: {
+            message: 'legacy message',
+          },
+          response: {
+            message: 'legacy response',
+          },
+          steps: [],
+        },
+      ];
+
+      const deserialized = fromEs(serialized);
+
+      expect(deserialized).toEqual({
+        id: 'conv_id',
+        title: 'conv_title',
+        agent_id: 'agent_id',
+        user: {
+          id: 'user_id',
+          username: 'user_name',
+        },
+        created_at: '2024-09-04T06:44:17.944Z',
+        updated_at: '2025-08-04T06:44:19.123Z',
+        rounds: [
+          {
+            id: 'round-legacy',
+            input: {
+              message: 'legacy message',
+            },
+            response: {
+              message: 'legacy response',
+            },
+            steps: [],
+          },
+        ],
+      });
+    });
+
     it('deserializes the steps', () => {
       const serialized = documentBase();
-      serialized._source!.rounds[0].steps = [
+      serialized._source!.conversation_rounds[0].steps = [
         {
           type: ConversationRoundStepType.toolCall,
           tool_call_id: 'tool_call_id',
@@ -128,7 +172,7 @@ describe('conversation model converters', () => {
 
     it('adds tool_call_id for results without it', () => {
       const serialized = documentBase();
-      serialized._source!.rounds[0].steps = [
+      serialized._source!.conversation_rounds[0].steps = [
         {
           type: ConversationRoundStepType.toolCall,
           tool_call_id: 'tool_call_id',
@@ -179,7 +223,7 @@ describe('conversation model converters', () => {
       };
     };
 
-    it('serializes the conversation', () => {
+    it('serializes the conversation using new conversation_rounds field', () => {
       const conversation = conversationBase();
       const serialized = toEs(conversation, 'another-space');
 
@@ -189,7 +233,7 @@ describe('conversation model converters', () => {
         user_id: 'user_id',
         user_name: 'user_name',
         space: 'another-space',
-        rounds: [
+        conversation_rounds: [
           {
             id: 'round-1',
             input: {
@@ -204,6 +248,8 @@ describe('conversation model converters', () => {
         created_at: creationDate,
         updated_at: updateDate,
       });
+      // Verify rounds is not present
+      expect(serialized.rounds).toBeUndefined();
     });
 
     it('serializes the steps', () => {
@@ -225,7 +271,7 @@ describe('conversation model converters', () => {
       ];
       const serialized = toEs(conversation, 'space');
 
-      expect(serialized.rounds[0].steps).toEqual([
+      expect(serialized.conversation_rounds[0].steps).toEqual([
         {
           type: ConversationRoundStepType.toolCall,
           tool_call_id: 'tool_call_id',

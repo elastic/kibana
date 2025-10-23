@@ -49,6 +49,20 @@ describe('transformAttackDiscoveryScheduleUpdatePropsFromApi', () => {
           throttle: '10m',
         },
       },
+      {
+        action_type_id: '.cases',
+        id: 'system-connector-.cases',
+        params: {
+          subAction: 'run',
+          subActionParams: {
+            timeWindow: '7d',
+            reopenClosedCases: false,
+            groupingBy: [],
+            templateId: null,
+          },
+        },
+        uuid: '2c749fe6-9ae0-4518-98c6-02add52a1fa6',
+      },
     ],
   };
 
@@ -95,6 +109,20 @@ describe('transformAttackDiscoveryScheduleUpdatePropsFromApi', () => {
             throttle: '10m',
           },
         },
+        {
+          actionTypeId: '.cases',
+          id: 'system-connector-.cases',
+          params: {
+            subAction: 'run',
+            subActionParams: {
+              groupingBy: [],
+              reopenClosedCases: false,
+              templateId: null,
+              timeWindow: '7d',
+            },
+          },
+          uuid: '2c749fe6-9ae0-4518-98c6-02add52a1fa6',
+        },
       ],
     });
   });
@@ -112,7 +140,21 @@ describe('transformAttackDiscoveryScheduleUpdatePropsFromApi', () => {
 
     const result = transformAttackDiscoveryScheduleUpdatePropsFromApi(propsWithoutFrequency);
 
-    expect(result.actions[0].frequency).toBeUndefined();
+    expect(result.actions[0]).toEqual({
+      actionTypeId: '.slack',
+      alertsFilter: {
+        query: {
+          match_all: {},
+        },
+      },
+      frequency: undefined,
+      group: 'default',
+      id: 'action1',
+      params: {
+        message: 'Updated test message',
+      },
+      uuid: 'test-uuid',
+    });
   });
 
   it('should transform multiple actions correctly', () => {

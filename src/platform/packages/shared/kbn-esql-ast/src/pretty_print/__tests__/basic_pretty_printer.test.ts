@@ -177,6 +177,16 @@ describe('single line query', () => {
 
         expect(text).toBe('FROM search-movies | GROK Awards "text"');
       });
+
+      test('multiple patterns', () => {
+        const { text } = reprint(
+          'FROM logs | GROK message "%{IP:client}", "%{WORD:method}", "%{NUMBER:status}"'
+        );
+
+        expect(text).toBe(
+          'FROM logs | GROK message "%{IP:client}", "%{WORD:method}", "%{NUMBER:status}"'
+        );
+      });
     });
 
     describe('DISSECT', () => {

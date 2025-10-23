@@ -149,21 +149,22 @@ export class CstToAstConverter {
     const setCommandCtxs = ctx.setCommand_list();
     const singleStatement = ctx.singleStatement();
 
+    let header: ast.ESQLAstSetHeaderCommand[] | undefined;
+    // Process SET instructions and create header if they exist
+    if (setCommandCtxs && setCommandCtxs.length > 0) {
+      header = this.fromSetCommands(setCommandCtxs);
+    }
+
     // Get the main query from singleStatement
     const query = this.fromSingleStatement(singleStatement);
 
     if (!query) {
-      return undefined;
+      const emptyQuery = Builder.expression.query([], this.getParserFields(ctx), header);
+      emptyQuery.incomplete = true;
+      return emptyQuery;
     }
 
-    // Process SET instructions and create header if they exist
-    if (setCommandCtxs && setCommandCtxs.length > 0) {
-      const header = this.fromSetCommands(setCommandCtxs);
-
-      if (header && header.length > 0) {
-        query.header = header;
-      }
-    }
+    query.header = header;
 
     return query;
   }
@@ -271,18 +272,29 @@ export class CstToAstConverter {
 
   private fromSetCommand(ctx: cst.SetCommandContext): ast.ESQLAstSetHeaderCommand {
     const setFieldCtx = ctx.setField();
-    const arg = this.fromSetFieldContext(setFieldCtx);
-    const command = Builder.header.command.set([arg], {}, this.getParserFields(ctx));
+    const binaryExpression = this.fromSetFieldContext(setFieldCtx);
+
+    const args = binaryExpression ? [binaryExpression] : [];
+    const command = Builder.header.command.set(args, {}, this.getParserFields(ctx));
 
     return command;
   }
 
-  private fromSetFieldContext(ctx: cst.SetFieldContext): ast.ESQLBinaryExpression<'='> {
+  private fromSetFieldContext(ctx: cst.SetFieldContext): ast.ESQLBinaryExpression<'='> | null {
     const leftCtx = ctx.identifier();
     const rightCtx = ctx.constant();
+
+    if (!leftCtx || !rightCtx) {
+      return null;
+    }
+
     const left = this.toIdentifierFromContext(leftCtx);
     const right = this.fromConstant(rightCtx) as ast.ESQLLiteral;
     const expression = this.toBinaryExpression('=', ctx, [left, right]);
+
+    if (left.incomplete || right.incomplete) {
+      expression.incomplete = true;
+    }
 
     return expression;
   }
@@ -886,21 +898,24 @@ export class CstToAstConverter {
   private fromGrokCommand(ctx: cst.GrokCommandContext): ast.ESQLCommand<'grok'> {
     const command = this.createCommand('grok', ctx);
     const primaryExpression = this.visitPrimaryExpression(ctx.primaryExpression());
-    const stringContext = ctx.string_();
-    const pattern = stringContext.getToken(cst.default.QUOTED_STRING, 0);
-    const doParseStringAndOptions = pattern && textExistsAndIsValid(pattern.getText());
 
     command.args.push(primaryExpression);
 
-    if (doParseStringAndOptions) {
-      const stringNode = this.toStringLiteral(stringContext);
+    const stringContexts = ctx.string__list();
 
-      command.args.push(stringNode);
+    for (let i = 0; i < stringContexts.length; i++) {
+      const stringContext = stringContexts[i];
+      const pattern = stringContext.getToken(cst.default.QUOTED_STRING, 0);
+      const doParseStringAndOptions = pattern && textExistsAndIsValid(pattern.getText());
+
+      if (doParseStringAndOptions) {
+        const stringNode = this.toStringLiteral(stringContext);
+        command.args.push(stringNode);
+      }
     }
 
     return command;
   }
-
   // ------------------------------------------------------------------- ENRICH
 
   private fromEnrichCommand(ctx: cst.EnrichCommandContext): ast.ESQLCommand<'enrich'> {

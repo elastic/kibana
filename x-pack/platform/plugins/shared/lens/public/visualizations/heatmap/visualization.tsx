@@ -35,7 +35,7 @@ import {
   LEGEND_FUNCTION,
   LENS_HEATMAP_ID,
 } from './constants';
-import { HeatmapToolbar } from './toolbar_component';
+import { HeatmapToolbar, HeatmapFlyoutToolbar } from './toolbar_component';
 import { HeatmapDimensionEditor } from './dimension_editor';
 import { getSafePaletteParams } from './utils';
 import type { FormBasedPersistedState } from '../..';
@@ -280,6 +280,10 @@ export const getHeatmapVisualization = ({
 
   ToolbarComponent(props) {
     return <HeatmapToolbar {...props} />;
+  },
+
+  FlyoutToolbarComponent(props) {
+    return <HeatmapFlyoutToolbar {...props} />;
   },
 
   getSupportedLayers() {
