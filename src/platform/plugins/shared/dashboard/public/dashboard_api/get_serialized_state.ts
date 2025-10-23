@@ -13,9 +13,8 @@ import type { Moment } from 'moment';
 import moment from 'moment';
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { DashboardAttributes } from '../../server';
+import type { DashboardState } from '../../server';
 
-import type { DashboardState } from '../../common';
 import { LATEST_VERSION } from '../../common/content_management';
 import { dataService, savedObjectsTaggingService } from '../services/kibana_services';
 import type { DashboardApi } from './types';
@@ -85,9 +84,9 @@ export const getSerializedState = ({
       ]) as RefreshInterval)
     : undefined;
 
-  const attributes: DashboardAttributes = {
+  const attributes: DashboardState = {
     version: LATEST_VERSION,
-    controlGroupInput: controlGroupInput as DashboardAttributes['controlGroupInput'],
+    controlGroupInput: controlGroupInput as DashboardState['controlGroupInput'],
     description: description ?? '',
     ...(filters ? { filters } : {}),
     ...(query ? { query } : {}),
