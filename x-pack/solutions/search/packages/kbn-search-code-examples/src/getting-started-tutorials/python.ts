@@ -77,12 +77,10 @@ ingestion_timeout=300 # Allow time for semantic ML model to load
 bulk_response = helpers.bulk(
     client.options(request_timeout=ingestion_timeout),
     docs,
-    index=index_name
+    index=index_name,
+    refresh="wait_for" # Wait until indexed documents are visible for search before returning the response
 )
 print(bulk_response)
-
-# Force refresh before searching to ensure documents are available
-client.indices.refresh(index=index_name)
 
 # -----------------------------
 # Define semantic search query

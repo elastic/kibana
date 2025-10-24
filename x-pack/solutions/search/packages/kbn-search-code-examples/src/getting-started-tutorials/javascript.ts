@@ -86,13 +86,11 @@ const bulkIngestResponse = await client.helpers.bulk({
     // Return an empty index object to indicate a new document insertion
       index: {},
     };
-  }
+  },
+  refresh: "wait_for", // Wait until indexed documents are visible for search before returning the response
 });
 
 console.log(bulkIngestResponse);
-
-// Force refresh before searching to ensure the documents are available
-await client.indices.refresh({ index });
 
 // Define a search query body
 // This uses a "retriever" query with multi_match to search the "text" field
