@@ -58,6 +58,8 @@ export const createLensEmbeddableFactory = (
      * @returns an object with the Lens API and the React component to render in the Embeddable
      */
     buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
+      performance.mark('embeddable_requested');
+
       const titleManager = initializeTitleManager(initialState.rawState);
 
       const dynamicActionsManager = services.embeddableEnhanced?.initializeEmbeddableDynamicActions(
@@ -220,6 +222,8 @@ export const createLensEmbeddableFactory = (
         actionsConfig.cleanup();
         searchContextConfig.cleanup();
       };
+
+      performance.mark('embeddable_built');
 
       return {
         api,

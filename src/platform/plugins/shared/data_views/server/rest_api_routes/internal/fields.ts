@@ -77,6 +77,8 @@ export const createHandler: (
         indices,
       };
 
+      // Serialize response synchronously to send it in one atomic operation
+      // Field processing already yielded during computation, so other requests had time to start
       const bodyAsString = JSON.stringify(body);
 
       const etag = calculateHash(Buffer.from(bodyAsString));

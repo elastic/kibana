@@ -12,6 +12,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { shouldReadFieldFromDocValues } from './should_read_field_from_doc_values';
 import type { FieldDescriptor } from '../..';
+import { yieldToEventLoop } from '../async_processing_utils';
 
 // The array will have different values if values vary across indices
 const unitsArrayToFormatter = (unitArr: string[]) => {
@@ -74,15 +75,24 @@ const unitsArrayToFormatter = (unitArr: string[]) => {
  *  @param {FieldCapsResponse} fieldCapsResponse
  *  @return {Array<FieldDescriptor>}
  */
-export function readFieldCapsResponse(
+export async function readFieldCapsResponse(
   fieldCapsResponse: estypes.FieldCapsResponse
-): FieldDescriptor[] {
+): Promise<FieldDescriptor[]> {
   const capsByNameThenType = fieldCapsResponse.fields;
-  const kibanaFormattedCaps = Object.keys(capsByNameThenType).reduce<{
+  const fieldNames = Object.keys(capsByNameThenType);
+
+  // Process fields in chunks to avoid blocking the event loop
+  const chunkSize = 100;
+  const kibanaFormattedCaps: {
     array: FieldDescriptor[];
     hash: Record<string, FieldDescriptor>;
-  }>(
-    (agg, fieldName) => {
+  } = { array: [], hash: {} };
+
+  for (let i = 0; i < fieldNames.length; i += chunkSize) {
+    const chunk = fieldNames.slice(i, Math.min(i + chunkSize, fieldNames.length));
+
+    // Process this chunk of fields
+    for (const fieldName of chunk) {
       const capsByType = capsByNameThenType[fieldName];
       const types = Object.keys(capsByType);
 
@@ -123,9 +133,9 @@ export function readFieldCapsResponse(
           metadata_field: capsByType[types[0]].metadata_field,
         };
         // This is intentionally using a "hash" and a "push" to be highly optimized with very large indexes
-        agg.array.push(field);
-        agg.hash[fieldName] = field;
-        return agg;
+        kibanaFormattedCaps.array.push(field);
+        kibanaFormattedCaps.hash[fieldName] = field;
+        continue;
       }
 
       let timeSeriesMetricType: 'gauge' | 'counter' | 'position' | undefined;
@@ -163,55 +173,61 @@ export function readFieldCapsResponse(
       }
 
       // This is intentionally using a "hash" and a "push" to be highly optimized with very large indexes
-      agg.array.push(field);
-      agg.hash[fieldName] = field;
-      return agg;
-    },
-    {
-      array: [],
-      hash: {},
+      kibanaFormattedCaps.array.push(field);
+      kibanaFormattedCaps.hash[fieldName] = field;
     }
-  );
+
+    // Yield to event loop after each chunk to allow other requests to be processed
+    await yieldToEventLoop();
+  }
 
   // Get all types of sub fields. These could be multi fields or children of nested/object types
   const subFields = kibanaFormattedCaps.array.filter((field) => {
     return field.name.includes('.');
   });
 
-  // Determine the type of each sub field.
-  subFields.forEach((field) => {
-    const parentFieldNames = field.name
-      .split('.')
-      .slice(0, -1)
-      .map((_, index, parentFieldNameParts) => {
-        return parentFieldNameParts.slice(0, index + 1).join('.');
-      });
-    const parentFieldCaps = parentFieldNames.map(
-      (parentFieldName) => kibanaFormattedCaps.hash[parentFieldName]
-    );
-    const parentFieldCapsAscending = parentFieldCaps.reverse();
+  // Determine the type of each sub field, processing in chunks to avoid blocking
+  const subFieldChunkSize = 100;
+  for (let i = 0; i < subFields.length; i += subFieldChunkSize) {
+    const chunk = subFields.slice(i, Math.min(i + subFieldChunkSize, subFields.length));
 
-    if (parentFieldCaps && parentFieldCaps.length > 0) {
-      let subType = {};
-      // If the parent field is not an object or nested field the child must be a multi field.
-      const firstParent = parentFieldCapsAscending[0];
-      if (firstParent && !['object', 'nested'].includes(firstParent.type)) {
-        subType = { ...subType, multi: { parent: firstParent.name } };
-      }
-
-      // We need to know if some parent field is nested
-      const nestedParentCaps = parentFieldCapsAscending.find(
-        (parentCaps) => parentCaps && parentCaps.type === 'nested'
+    for (const field of chunk) {
+      const parentFieldNames = field.name
+        .split('.')
+        .slice(0, -1)
+        .map((_, index, parentFieldNameParts) => {
+          return parentFieldNameParts.slice(0, index + 1).join('.');
+        });
+      const parentFieldCaps = parentFieldNames.map(
+        (parentFieldName) => kibanaFormattedCaps.hash[parentFieldName]
       );
-      if (nestedParentCaps) {
-        subType = { ...subType, nested: { path: nestedParentCaps.name } };
-      }
+      const parentFieldCapsAscending = parentFieldCaps.reverse();
 
-      if (Object.keys(subType).length > 0) {
-        field.subType = subType;
+      if (parentFieldCaps && parentFieldCaps.length > 0) {
+        let subType = {};
+        // If the parent field is not an object or nested field the child must be a multi field.
+        const firstParent = parentFieldCapsAscending[0];
+        if (firstParent && !['object', 'nested'].includes(firstParent.type)) {
+          subType = { ...subType, multi: { parent: firstParent.name } };
+        }
+
+        // We need to know if some parent field is nested
+        const nestedParentCaps = parentFieldCapsAscending.find(
+          (parentCaps) => parentCaps && parentCaps.type === 'nested'
+        );
+        if (nestedParentCaps) {
+          subType = { ...subType, nested: { path: nestedParentCaps.name } };
+        }
+
+        if (Object.keys(subType).length > 0) {
+          field.subType = subType;
+        }
       }
     }
-  });
+
+    // Yield to event loop after each chunk to allow other requests to be processed
+    await yieldToEventLoop();
+  }
 
   return kibanaFormattedCaps.array.filter((field) => {
     return !['object', 'nested'].includes(field.type);

@@ -257,7 +257,25 @@ export function DashboardApp({
         locator={locator}
         onApiAvailable={(dashboard) => {
           if (dashboard && !dashboardApi) {
+            // performance.mark('setDashboardApi-start');
             setDashboardApi(dashboard);
+            // performance.mark('setDashboardApi-end');
+            // performance.measure(
+            //   'setDashboardApi-execution',
+            //   'setDashboardApi-start',
+            //   'setDashboardApi-end'
+            // );
+
+            const setDashboardApiMeasure = performance.getEntriesByName(
+              'setDashboardApi-execution'
+            )[0];
+            if (setDashboardApiMeasure) {
+              // eslint-disable-next-line no-console
+              console.log(
+                `setDashboardApi execution took: ${setDashboardApiMeasure.duration.toFixed(2)}ms`
+              );
+            }
+
             if (expandedPanelId) {
               dashboard?.expandPanel(expandedPanelId);
             }

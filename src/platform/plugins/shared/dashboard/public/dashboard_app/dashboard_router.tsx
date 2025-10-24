@@ -96,6 +96,7 @@ export async function mountApp({
   const renderDashboard = (
     routeProps: RouteComponentProps<{ id?: string; expandedPanelId?: string }>
   ) => {
+    performance.mark('dashboard_render_initiated');
     const routeParams = parse(routeProps.history.location.search);
     if (routeParams.embed === 'true' && !globalEmbedSettings) {
       globalEmbedSettings = getDashboardEmbedSettings(routeParams);

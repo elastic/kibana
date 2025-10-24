@@ -299,6 +299,8 @@ export function XYChart({
   const onRenderChange = useCallback(
     (isRendered: boolean = true) => {
       if (isRendered) {
+        performance.mark('render_complete');
+
         renderComplete();
       }
     },

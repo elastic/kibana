@@ -338,6 +338,7 @@ export interface HttpFetchOptionsWithPath extends HttpFetchOptions {
    * The path on the Kibana server to send the request to. Should not include the basePath.
    */
   path: string;
+  mark?: boolean;
 }
 
 /**
@@ -352,7 +353,8 @@ export interface HttpFetchOptionsWithPath extends HttpFetchOptions {
 export interface HttpHandler {
   <TResponseBody = unknown>(
     path: string,
-    options: HttpFetchOptions & { asResponse: true }
+    options: HttpFetchOptions & { asResponse: true },
+    mark?: boolean
   ): Promise<HttpResponse<TResponseBody>>;
 
   <TResponseBody = unknown>(options: HttpFetchOptionsWithPath & { asResponse: true }): Promise<
