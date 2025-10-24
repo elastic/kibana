@@ -92,7 +92,6 @@
     "@kbn/controls-renderer",
     "@kbn/presentation-util",
     "@kbn/background-search",
-    "@kbn/visualizations-plugin"
   ],
   "exclude": ["target/**/*"]
 }
