@@ -80,7 +80,7 @@ export const CreateArchivesSources: Task = {
           );
 
           // Copy solution config.yml
-          const WORKPLACE_AI_CONFIGS = ['serverless.workplace_ai.yml'];
+          const WORKPLACE_AI_CONFIGS = ['serverless.workplaceai.yml'];
           const SEARCH_CONFIGS = ['serverless.es.yml'];
           const OBSERVABILITY_CONFIGS = [
             'serverless.oblt.yml',
@@ -128,7 +128,7 @@ export const CreateArchivesSources: Task = {
             await removeSolutions(solutionsToRemove, platform);
           }
         } else if (config.isRelease) {
-          // For stateful release builds, remove the workplace_ai solution.
+          // For stateful release builds, remove the workplaceai solution.
           // Snapshot builds support all solutions to faciliate functional testing
           await removeSolutions(['workplaceai'], platform);
         }
