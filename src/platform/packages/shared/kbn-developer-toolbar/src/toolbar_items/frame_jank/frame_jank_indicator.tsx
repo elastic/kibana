@@ -61,8 +61,8 @@ const getContainerStyles = (euiTheme: EuiThemeComputed) => css`
   width: ${WIDTH}px;
   height: ${HEIGHT}px;
 
-  background-color: ${euiTheme.components.badgeBackground};
-  border-radius: 2px; // badge border radius is 2px
+  background-color: ${euiTheme.colors.emptyShade};
+  border-radius: 2px; // badge border radius is 2px, TODO: not available in euiTheme.border
   overflow: hidden;
 `;
 
@@ -122,7 +122,7 @@ export const FrameJankIndicator: React.FC = () => {
   });
 
   useEffect(() => {
-    const performanceMonitor = new PerformanceMonitor(Math.floor(WIDTH / 4));
+    const performanceMonitor = new PerformanceMonitor(Math.ceil(WIDTH / 4));
     const longTaskMonitor = new LongTaskMonitor();
     const inpMonitor = new INPMonitor();
 

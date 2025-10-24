@@ -72,6 +72,7 @@ export const DeveloperToolbar: React.FC<DeveloperToolbarProps> = (props) => {
 const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({ envInfo, onHeightChange }) => {
   const { euiTheme } = useEuiTheme();
   const { isMinimized, toggleMinimized } = useMinimized();
+  const [isHidden, setIsHidden] = useState(false);
   const state = useToolbarState();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
@@ -84,16 +85,25 @@ const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({ envInfo, on
     }
   }, [onHeightChange, isMinimized]);
 
+  if (isHidden) return null;
+
   if (isMinimized) {
     return ReactDOM.createPortal(
       <EuiThemeProvider colorMode={'dark'}>
         <div css={getMinimizedToolbarStyles(euiTheme)}>
-          <EuiToolTip content="Expand developer toolbar" disableScreenReaderOutput={true}>
+          <EuiToolTip
+            content="Expand developer toolbar. Right-click to hide."
+            disableScreenReaderOutput={true}
+          >
             <EuiButtonIcon
               color={'text'}
               iconType="wrench"
               size="xs"
               onClick={toggleMinimized}
+              onContextMenu={(e: React.MouseEvent) => {
+                setIsHidden(true);
+                e.preventDefault();
+              }}
               aria-label={'Expand developer toolbar'}
             />
           </EuiToolTip>
@@ -105,7 +115,11 @@ const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({ envInfo, on
 
   return (
     <div css={getToolbarContainerStyles(euiTheme)}>
-      {state.isEnabled('errorsMonitor') && <ConsoleErrorIndicator />}
+      {state.isEnabled('errorsMonitor') && (
+        <EuiThemeProvider colorMode={'light'}>
+          <ConsoleErrorIndicator />
+        </EuiThemeProvider>
+      )}
       <EuiPanel css={getToolbarPanelStyles(euiTheme)} hasShadow={false} hasBorder={false}>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
           <EuiFlexItem>

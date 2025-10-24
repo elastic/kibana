@@ -31,7 +31,7 @@ export const EnvironmentIndicator: React.FC<EnvironmentIndicatorProps> = ({
   customLabel,
 }) => {
   const isProduction = mode.name === 'production';
-  const badgeColor = isProduction ? 'warning' : 'default';
+  const badgeColor = isProduction ? 'warning' : '#0B1628';
   const iconType = isProduction ? 'logoKibana' : 'wrench';
 
   const tooltipContent = (

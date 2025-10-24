@@ -56,23 +56,6 @@ const getErrorOverlayStyles = (euiTheme: EuiThemeComputed, errorType: 'error' | 
   padding: ${euiTheme.size.xxs} ${euiTheme.size.s};
   height: 100%;
   z-index: 100;
-
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: -90px;
-    bottom: 0;
-    width: 90px;
-    background: linear-gradient(
-      270deg,
-      transparent,
-      ${errorType === 'error'
-          ? euiTheme.colors.backgroundBaseDanger
-          : euiTheme.colors.backgroundBaseWarning}
-        100%
-    );
-  }
 `;
 
 export const ConsoleErrorIndicator: React.FC = () => {
