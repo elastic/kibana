@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { trackRuntimeMigration } from '../../../runtime_state';
 import type { MetricVisualizationState } from '../types';
 
 export const convertToRunTimeState = (
@@ -13,8 +14,10 @@ export const convertToRunTimeState = (
   // Remove legacy state properties if they exist
   const { secondaryPrefix, valuesTextAlign, ...restState } = state;
   let newState = { ...restState };
+  let wasMigrated = false;
 
   if (valuesTextAlign) {
+    wasMigrated = true;
     newState = {
       ...newState,
       primaryAlign: state.primaryAlign ?? valuesTextAlign,
@@ -23,10 +26,15 @@ export const convertToRunTimeState = (
   }
 
   if (secondaryPrefix && !newState.secondaryLabel) {
+    wasMigrated = true;
     newState = {
       ...newState,
       secondaryLabel: secondaryPrefix,
     };
+  }
+
+  if (wasMigrated) {
+    trackRuntimeMigration('metric');
   }
 
   return newState;

@@ -8,6 +8,7 @@
 import { LegendValue } from '@elastic/charts';
 
 import type { PieLayerState, PieVisualizationState } from '../../../../../common/types';
+import { trackRuntimeMigration } from '../../../../runtime_state';
 
 /** @deprecated */
 type DeprecatedLegendValueLayer = PieLayerState & {
@@ -28,6 +29,8 @@ export function convertToLegendStats(
 ) {
   state.layers.forEach((l) => {
     if ('showValuesInLegend' in l) {
+      trackRuntimeMigration('legendStats', 'partition');
+
       l.legendStats = [
         ...new Set([
           ...(l.showValuesInLegend ? [LegendValue.Value] : []),
