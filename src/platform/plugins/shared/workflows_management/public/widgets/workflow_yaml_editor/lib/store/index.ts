@@ -31,7 +31,6 @@ export {
   selectFocusedStepInfo,
   selectStepExecutions,
   selectHighlightedStepId,
-  selectWorkflowDefinition,
   selectConnectorsData,
   selectSchemaLoose,
 } from './selectors';

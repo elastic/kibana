@@ -18,7 +18,7 @@ import type { ConnectorsResponse } from '../../../../entities/connectors/model/u
 
 // State interface - only serializable data
 export interface WorkflowEditorState {
-  isInitialized: boolean;
+  isInitialized?: boolean;
   yamlString?: string;
   connectors?: ConnectorsResponse; // This will hold connector types info
   schemaLoose: WorkflowZodSchemaLooseType;
