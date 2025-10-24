@@ -33,17 +33,19 @@ export const profilingClientFixture = coreWorkerFixtures.extend<
   profilingClient: [
     async ({ config, kbnClient, log, esClient }, use) => {
       log.info('Setting up profiling users for profilingClientFixture');
-      await esClient.security.putUser({
-        username: 'viewer',
-        password: 'changeme',
-        roles: ['viewer'],
-      });
 
-      await esClient.security.putUser({
-        username: 'no_access_user',
-        password: 'changeme',
-        roles: [],
-      });
+      await Promise.all([
+        esClient.security.putUser({
+          username: 'viewer',
+          password: 'changeme',
+          roles: ['viewer'],
+        }),
+        esClient.security.putUser({
+          username: 'no_access_user',
+          password: 'changeme',
+          roles: [],
+        }),
+      ]);
 
       const kibanaServer = new URL(config.hosts.kibana);
 
