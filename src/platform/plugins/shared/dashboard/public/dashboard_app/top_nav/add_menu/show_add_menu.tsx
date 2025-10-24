@@ -20,7 +20,6 @@ import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import { openLazyFlyout } from '@kbn/presentation-util';
-import { Embeddable } from '@kbn/visualizations-plugin/public/legacy/embeddable/embeddable';
 import { executeCreateTimeSliderControlPanelAction } from '../../../dashboard_actions/execute_create_time_slider_control_panel_action';
 import { executeCreateESQLControlPanelAction } from '../../../dashboard_actions/execute_create_esql_control_panel_action copy';
 import { executeCreateControlPanelAction } from '../../../dashboard_actions/execute_create_control_panel_action copy 2';
