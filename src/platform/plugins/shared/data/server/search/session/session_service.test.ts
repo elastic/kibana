@@ -94,7 +94,7 @@ describe('SearchSessionService', () => {
       await service.trackId({ savedObjectsClient }, mockUser1, '123', {
         sessionId: '321',
         strategy: MOCK_STRATEGY,
-        requestHash: faker.string.uuid(),
+        requestHash: faker.string.alpha(64),
       });
 
       expect(savedObjectsClient.update).not.toHaveBeenCalled();
@@ -692,7 +692,7 @@ describe('SearchSessionService', () => {
 
     describe('trackId', () => {
       it('updates the saved object if search session already exists', async () => {
-        const requestHash = faker.string.uuid();
+        const requestHash = faker.string.alpha(64);
         const searchId = 'FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0';
 
         const mockUpdateSavedObject = {
@@ -727,7 +727,7 @@ describe('SearchSessionService', () => {
         await service.trackId({ savedObjectsClient }, mockUser1, searchId, {
           sessionId,
           strategy: MOCK_STRATEGY,
-          requestHash: faker.string.uuid(),
+          requestHash: faker.string.alpha(64),
         });
 
         expect(savedObjectsClient.update).toHaveBeenCalled();
@@ -740,13 +740,13 @@ describe('SearchSessionService', () => {
         const sessionId1 = 'sessiondId1';
         const sessionId2 = 'sessiondId2';
 
-        const requestHash1 = faker.string.uuid();
+        const requestHash1 = faker.string.alpha(64);
         const searchId1 = 'searchId1';
 
-        const requestHash2 = faker.string.uuid();
+        const requestHash2 = faker.string.alpha(64);
         const searchId2 = 'searchId1';
 
-        const requestHash3 = faker.string.uuid();
+        const requestHash3 = faker.string.alpha(64);
         const searchId3 = 'searchId3';
 
         const mockUpdateSavedObject = {
@@ -850,7 +850,7 @@ describe('SearchSessionService', () => {
 
       it('returns the search ID from the saved object ID mapping', async () => {
         const searchRequest = { params: {} };
-        const requestHash = faker.string.uuid();
+        const requestHash = faker.string.alpha(64);
         const searchId = 'FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0';
         const mockSession = {
           ...mockSavedObject,
