@@ -220,7 +220,7 @@ export function MachineLearningAnomalyExplorerProvider(
     },
 
     async assertSingleMetricViewerButtonEnabled(expectedEnabled = true) {
-      const isEnabled = await testSubjects.isEnabled(
+      const isEnabled = await testSubjects.isEuiEnabled(
         'mlAnomalyResultsViewSelectorSingleMetricViewer'
       );
       expect(isEnabled).to.eql(

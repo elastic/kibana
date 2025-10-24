@@ -99,7 +99,7 @@ export class SavedObjectsPageObject extends FtrService {
     await this.testSubjects.click('importObjects');
     this.log.debug(`Finding import button`);
     const importButton = await this.testSubjects.find('importSavedObjectsImportBtn');
-    return await importButton.getAttribute('disabled');
+    return await importButton.isEuiDisabled();
   }
 
   async checkImportSucceeded() {

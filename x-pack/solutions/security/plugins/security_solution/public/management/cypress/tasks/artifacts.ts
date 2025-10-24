@@ -392,7 +392,7 @@ export const blocklistFormSelectors = {
   },
   expectSubmitButtonToBe: (state: 'disabled' | 'enabled') => {
     cy.getByTestSubj('blocklistPage-flyout-submitButton').should(
-      state === 'disabled' ? 'be.disabled' : 'not.be.disabled'
+      state === 'disabled' ? 'be.euiDisabled' : 'not.be.euiDisabled'
     );
   },
   clearMultiValueInput: () => {

@@ -122,7 +122,7 @@ describe('Description', () => {
       )
     ).toBeInTheDocument();
 
-    expect(await screen.findByTestId('editable-save-markdown')).toHaveAttribute('disabled');
+    expect(await screen.findByTestId('editable-save-markdown')).toBeEuiDisabled();
   });
 
   it('should hide the edit button when the user does not have update permissions', async () => {

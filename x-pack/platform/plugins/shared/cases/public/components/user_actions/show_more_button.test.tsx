@@ -29,7 +29,7 @@ describe('ShowMoreButton', () => {
     const btn = screen.getByTestId('cases-show-more-user-actions');
 
     expect(btn).toBeInTheDocument();
-    expect(btn).toHaveAttribute('disabled');
+    expect(btn).toBeEuiDisabled();
     expect(screen.getByRole('progressbar')).toBeTruthy();
   });
 

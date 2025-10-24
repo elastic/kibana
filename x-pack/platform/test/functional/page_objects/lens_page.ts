@@ -823,8 +823,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async expectSaveAndReturnButtonDisabled() {
       const button = await testSubjects.find('lnsApp_saveAndReturnButton', 10000);
-      const disabledAttr = await button.getAttribute('disabled');
-      expect(disabledAttr).to.be('true');
+      const disabledAttr = await button.isEuiDisabled();
+      expect(disabledAttr).to.be(true);
     },
 
     async editDimensionLabel(label: string) {

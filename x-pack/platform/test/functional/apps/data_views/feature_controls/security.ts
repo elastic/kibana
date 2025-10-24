@@ -137,7 +137,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await settings.clickKibanaIndexPatterns();
         await testSubjects.existOrFail('noDataViewsPrompt');
         const createDataViewButton = await testSubjects.find('createDataViewButton');
-        const isDisabled = await createDataViewButton.getAttribute('disabled');
+        const isDisabled = await createDataViewButton.isEuiDisabled();
         expect(isDisabled).to.be('true');
       });
 

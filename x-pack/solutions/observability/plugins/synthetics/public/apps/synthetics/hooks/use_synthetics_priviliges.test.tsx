@@ -7,6 +7,7 @@
 
 import { renderHook } from '@testing-library/react';
 import React from 'react';
+import { isEuiDisabled } from '@elastic/eui/lib/test/rtl/matchers';
 import { render, WrappedHelper } from '../utils/testing';
 import { useSyntheticsPrivileges } from './use_synthetics_priviliges';
 
@@ -28,8 +29,8 @@ function wrapper({ children }: React.PropsWithChildren) {
 
 describe('useSyntheticsPrivileges', () => {
   it.each([
-    [true, null],
-    [false, ''],
+    [true, false],
+    [false, true],
   ])(
     'should correctly set the disabled prop of the license nav button if `licenseManagement` enabled is %s',
     (enabled, expectedDisabledAttribute) => {
@@ -51,7 +52,7 @@ describe('useSyntheticsPrivileges', () => {
 
       // there should only be an href if the license management is enabled, otherwise we render a disabled button with no handler
       expect(!!licenseNavButton.getAttribute('href')).toEqual(enabled);
-      expect(licenseNavButton.getAttribute('disabled')).toEqual(expectedDisabledAttribute);
+      expect(isEuiDisabled(licenseNavButton)).toEqual(expectedDisabledAttribute);
     }
   );
 });

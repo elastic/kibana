@@ -74,13 +74,13 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
   it('should display `Cancel` button enabled', async () => {
     await render();
 
-    expect(renderResult.getByTestId('testPage-flyout-cancelButton')).toBeEnabled();
+    expect(renderResult.getByTestId('testPage-flyout-cancelButton')).toBeEuiEnabled();
   });
 
   it('should display `Submit` button as disabled', async () => {
     await render();
 
-    expect(renderResult.getByTestId('testPage-flyout-submitButton')).not.toBeEnabled();
+    expect(renderResult.getByTestId('testPage-flyout-submitButton')).not.toBeEuiEnabled();
   });
 
   it.each([
@@ -172,7 +172,7 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
     it('should enable the `Submit` button', async () => {
       await render();
 
-      expect(renderResult.getByTestId('testPage-flyout-submitButton')).toBeEnabled();
+      expect(renderResult.getByTestId('testPage-flyout-submitButton')).toBeEuiEnabled();
     });
 
     describe('and user clicks submit', () => {
@@ -200,8 +200,8 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
 
       it('should disable all buttons while an update is in flight', async () => {
         await waitFor(() => {
-          expect(getByTestId('testPage-flyout-cancelButton')).not.toBeEnabled();
-          expect(getByTestId('testPage-flyout-submitButton')).not.toBeEnabled();
+          expect(getByTestId('testPage-flyout-cancelButton')).not.toBeEuiEnabled();
+          expect(getByTestId('testPage-flyout-submitButton')).not.toBeEuiEnabled();
         });
       });
 
@@ -268,9 +268,9 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
       it.skip('should re-enable `Cancel` and `Submit` buttons', async () => {
         await render();
 
-        expect(renderResult.getByTestId('testPage-flyout-cancelButton')).not.toBeEnabled();
+        expect(renderResult.getByTestId('testPage-flyout-cancelButton')).not.toBeEuiEnabled();
 
-        expect(renderResult.getByTestId('testPage-flyout-submitButton')).not.toBeEnabled();
+        expect(renderResult.getByTestId('testPage-flyout-submitButton')).not.toBeEuiEnabled();
       });
 
       // FIXME:PT investigate test failure
@@ -314,9 +314,9 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
       it('should use custom submit handler when submit button is used', async () => {
         expect(handleSubmitCallback).toHaveBeenCalled();
 
-        expect(renderResult.getByTestId('testPage-flyout-cancelButton')).not.toBeEnabled();
+        expect(renderResult.getByTestId('testPage-flyout-cancelButton')).not.toBeEuiEnabled();
 
-        expect(renderResult.getByTestId('testPage-flyout-submitButton')).not.toBeEnabled();
+        expect(renderResult.getByTestId('testPage-flyout-submitButton')).not.toBeEuiEnabled();
       });
 
       it('should catch and show error if one is encountered', async () => {

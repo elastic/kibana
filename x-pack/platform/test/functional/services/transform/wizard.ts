@@ -360,7 +360,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       const subj = 'transformRuntimeMappingsApplyButton';
       await testSubjects.existOrFail(subj);
       await testSubjects.clickWhenNotDisabled(subj);
-      const isEnabled = await testSubjects.isEnabled(subj);
+      const isEnabled = await testSubjects.isEuiEnabled(subj);
       expect(isEnabled).to.eql(
         false,
         `Expected runtime mappings 'Apply changes' button to be disabled, got enabled.`

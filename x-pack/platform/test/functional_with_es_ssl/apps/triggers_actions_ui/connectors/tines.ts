@@ -34,8 +34,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   let simulatorUrl: string;
 
   // isEnabled helper uses "disabled" attribute, testSubjects.isEnabled() gives inconsistent results for comboBoxes.
-  const isEnabled = async (selector: string) =>
-    testSubjects.getAttribute(selector, 'disabled').then((disabled) => disabled !== 'true');
+  const isEnabled = async (selector: string) => testSubjects.isEuiEnabled(selector);
 
   describe('Tines', () => {
     before(async () => {

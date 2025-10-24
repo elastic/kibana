@@ -48,7 +48,7 @@ export class SavedQueryManagementComponentService extends FtrService {
     await this.testSubjects.click('savedQueryFormSaveButton');
 
     await this.retry.waitForWithTimeout('save button to be disabled', 1000, async () => {
-      const saveQueryFormSaveButtonStatus = await this.testSubjects.isEnabled(
+      const saveQueryFormSaveButtonStatus = await this.testSubjects.isEuiEnabled(
         'savedQueryFormSaveButton'
       );
       return saveQueryFormSaveButtonStatus === false;
@@ -233,8 +233,8 @@ export class SavedQueryManagementComponentService extends FtrService {
 
     if (expectedButtonState === 'disabled') {
       const saveFilterSetBtn = await this.testSubjects.find('saved-query-management-save-button');
-      const isDisabled = await saveFilterSetBtn.getAttribute('disabled');
-      expect(isDisabled).to.equal('true');
+      const isDisabled = await saveFilterSetBtn.isEuiDisabled();
+      expect(isDisabled).to.equal(true);
     } else {
       await this.testSubjects.missingOrFail('saved-query-management-save-button');
     }

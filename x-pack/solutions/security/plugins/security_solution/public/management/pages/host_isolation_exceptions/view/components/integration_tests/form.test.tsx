@@ -10,6 +10,7 @@ import type {
   FoundExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import userEvent from '@testing-library/user-event';
+import { isEuiDisabled } from '@elastic/eui/lib/test/rtl/matchers';
 import React from 'react';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
@@ -39,11 +40,11 @@ describe('When on the host isolation exceptions entry form', () => {
   };
 
   const submitButtonDisabledState = (): boolean => {
-    return (
+    return isEuiDisabled(
       renderResult.getByTestId(
         'hostIsolationExceptionsListPage-flyout-submitButton'
       ) as HTMLButtonElement
-    ).disabled;
+    );
   };
 
   beforeEach(() => {
@@ -58,9 +59,16 @@ describe('When on the host isolation exceptions entry form', () => {
         ).resolves.toHaveLength(10);
       });
 
-      await userEvent.click(
+      const isDisabled = isEuiDisabled(
         renderResult.getByTestId('hostIsolationExceptionsListPage-pageAddButton')
       );
+
+      // NOTE: disabled buttons can't be clicked
+      if (!isDisabled) {
+        await userEvent.click(
+          renderResult.getByTestId('hostIsolationExceptionsListPage-pageAddButton')
+        );
+      }
 
       await waitFor(() => {
         expect(renderResult.getByTestId('hostIsolationExceptions-form')).toBeTruthy();

@@ -53,8 +53,8 @@ describe('ValueListsForm', () => {
     );
 
     expect(
-      container.find('button[data-test-subj="value-lists-form-import-action"]').prop('disabled')
-    ).toEqual(true);
+      container.find('button[data-test-subj="value-lists-form-import-action"]').props()
+    ).toHaveEuiDisabledProp();
   });
 
   it('calls importList when upload is clicked', async () => {
@@ -102,8 +102,8 @@ describe('ValueListsForm', () => {
     await mockSelectFile(container, badMockFile);
 
     expect(
-      container.find('button[data-test-subj="value-lists-form-import-action"]').prop('disabled')
-    ).toEqual(true);
+      container.find('button[data-test-subj="value-lists-form-import-action"]').props()
+    ).toHaveEuiDisabledProp();
 
     expect(container.find('div[data-test-subj="value-list-file-picker-row"]').text()).toContain(
       'File must be one of the following types: [text/csv, text/plain]'

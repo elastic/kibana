@@ -369,8 +369,7 @@ export function AddCisIntegrationFormPageProvider({
 
   const isSaveButtonEnabled = async () => {
     const saveButton = await testSubjects.find(TEST_IDS.CREATE_PACKAGE_POLICY_SAVE_BUTTON);
-    const isEnabled = await saveButton.getAttribute('disabled');
-    return isEnabled === null; // If the button is enabled, it won't have a 'disabled' attribute
+    return await saveButton.isEuiEnabled();
   };
 
   const clickAwsPolicyOption = async () => {

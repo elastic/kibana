@@ -49,7 +49,7 @@ export function UptimeSettingsProvider({ getService }: FtrProviderContext) {
       };
     },
     applyButtonIsDisabled: async () => {
-      return !!(await (await testSubjects.find('apply-settings-button')).getAttribute('disabled'));
+      return !!(await testSubjects.isEuiDisabled('apply-settings-button'));
     },
     apply: async () => {
       await (await testSubjects.find('apply-settings-button')).click();
@@ -57,8 +57,8 @@ export function UptimeSettingsProvider({ getService }: FtrProviderContext) {
         // When the form submit is complete the form will no longer be disabled
         const disabled = await (
           await testSubjects.find('heartbeat-indices-input-loaded', 5000)
-        ).getAttribute('disabled');
-        return disabled === null;
+        ).isEuiDisabled();
+        return disabled === false;
       });
     },
   };

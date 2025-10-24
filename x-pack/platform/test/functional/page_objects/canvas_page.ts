@@ -86,15 +86,15 @@ export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderCo
     async expectCreateWorkpadButtonEnabled() {
       log.debug('CanvasPage.expectCreateWorkpadButtonEnabled');
       const button = await testSubjects.find('create-workpad-button', 20000);
-      const disabledAttr = await button.getAttribute('disabled');
-      expect(disabledAttr).to.be(null);
+      const isDisabled = await button.isEuiEnabled();
+      expect(isDisabled).to.be(true);
     },
 
     async expectCreateWorkpadButtonDisabled() {
       log.debug('CanvasPage.expectCreateWorkpadButtonDisabled');
       const button = await testSubjects.find('create-workpad-button', 20000);
-      const disabledAttr = await button.getAttribute('disabled');
-      expect(disabledAttr).to.be('true');
+      const disabledAttr = await button.isEuiDisabled();
+      expect(disabledAttr).to.be(true);
     },
 
     async openAddElementMenu() {

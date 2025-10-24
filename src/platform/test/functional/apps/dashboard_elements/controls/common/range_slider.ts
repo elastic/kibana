@@ -145,9 +145,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.editExistingControl(firstId);
 
         const saveButton = await testSubjects.find('control-editor-save');
-        expect(await saveButton.isEnabled()).to.be(true);
+        expect(await saveButton.isEuiEnabled()).to.be(true);
         await dashboardControls.controlsEditorSetDataView('kibana_sample_data_flights');
-        expect(await saveButton.isEnabled()).to.be(false);
+        expect(await saveButton.isEuiEnabled()).to.be(false);
         await dashboardControls.controlsEditorSetfield('dayOfWeek');
         await dashboardControls.controlsEditorSetControlType(RANGE_SLIDER_CONTROL);
         await dashboardControls.controlEditorSave();

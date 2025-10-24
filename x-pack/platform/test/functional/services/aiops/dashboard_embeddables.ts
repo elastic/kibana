@@ -52,7 +52,7 @@ export function AiopsDashboardEmbeddablesProvider({ getService }: FtrProviderCon
     async assertInitializerConfirmButtonEnabled(subj: string, expectEnabled = true) {
       await retry.tryForTime(60 * 1000, async () => {
         await testSubjects.existOrFail(subj);
-        const isEnabled = await testSubjects.isEnabled(subj);
+        const isEnabled = await testSubjects.isEuiEnabled(subj);
         if (expectEnabled) {
           expect(isEnabled).to.be(true);
         } else {

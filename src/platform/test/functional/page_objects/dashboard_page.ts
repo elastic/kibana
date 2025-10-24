@@ -859,7 +859,7 @@ export class DashboardPageObject extends FtrService {
   public async expectDiscardChangesButtonEnabled() {
     this.log.debug('expectDiscardChangesButtonEnabled');
     const quickSaveButton = await this.testSubjects.find('dashboardDiscardChangesMenuItem');
-    const isDisabled = await quickSaveButton.getAttribute('disabled');
+    const isDisabled = await quickSaveButton.isEuiDisabled();
     if (isDisabled) {
       throw new Error('Discard changes button disabled');
     }
@@ -868,7 +868,7 @@ export class DashboardPageObject extends FtrService {
   public async expectQuickSaveButtonEnabled() {
     this.log.debug('expectQuickSaveButtonEnabled');
     const quickSaveButton = await this.testSubjects.find('dashboardQuickSaveMenuItem');
-    const isDisabled = await quickSaveButton.getAttribute('disabled');
+    const isDisabled = await quickSaveButton.isEuiDisabled();
     if (isDisabled) {
       throw new Error('Quick save button disabled');
     }
@@ -877,7 +877,7 @@ export class DashboardPageObject extends FtrService {
   public async expectQuickSaveButtonDisabled() {
     this.log.debug('expectQuickSaveButtonDisabled');
     const quickSaveButton = await this.testSubjects.find('dashboardQuickSaveMenuItem');
-    const isDisabled = await quickSaveButton.getAttribute('disabled');
+    const isDisabled = await quickSaveButton.isEuiDisabled();
     if (!isDisabled) {
       throw new Error('Quick save button not disabled');
     }

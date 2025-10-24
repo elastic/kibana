@@ -377,7 +377,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       const subj = 'mlDataFrameAnalyticsRuntimeMappingsApplyButton';
       await testSubjects.existOrFail(subj);
       await testSubjects.clickWhenNotDisabledWithoutRetry(subj);
-      const isEnabled = await testSubjects.isEnabled(subj);
+      const isEnabled = await testSubjects.isEuiEnabled(subj);
       expect(isEnabled).to.eql(
         false,
         `Expected runtime mappings 'Apply changes' button to be disabled, got enabled.`

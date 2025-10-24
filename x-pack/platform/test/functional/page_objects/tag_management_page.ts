@@ -149,8 +149,7 @@ class TagModal extends FtrService {
    * Return true if the confirm button is disabled, false otherwise.
    */
   async isConfirmDisabled() {
-    const disabled = await this.testSubjects.getAttribute('createModalConfirmButton', 'disabled');
-    return disabled === 'true';
+    return await this.testSubjects.isEuiDisabled('createModalConfirmButton');
   }
 
   /**

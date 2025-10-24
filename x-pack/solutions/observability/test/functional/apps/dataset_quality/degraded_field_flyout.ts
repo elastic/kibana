@@ -901,9 +901,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
           const currentFieldLimitValue = await currentFieldLimitInput.getAttribute('value');
           const currentFieldLimit = parseInt(currentFieldLimitValue as string, 10);
-          const currentFieldLimitDisabledStatus = await currentFieldLimitInput.getAttribute(
-            'disabled'
-          );
+          const currentFieldLimitDisabledStatus = await currentFieldLimitInput.isEuiDisabled();
 
           expect(currentFieldLimit).to.be(43);
           expect(currentFieldLimitDisabledStatus).to.be('true');
@@ -930,7 +928,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           const applyButton = await testSubjects.find(
             'datasetQualityIncreaseFieldMappingLimitButton'
           );
-          const applyButtonDisabledStatus = await applyButton.getAttribute('disabled');
+          const applyButtonDisabledStatus = await applyButton.isEuiDisabled();
 
           // The apply button should be active
           expect(applyButtonDisabledStatus).to.be(null);
@@ -955,10 +953,10 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           const applyButton = await testSubjects.find(
             'datasetQualityIncreaseFieldMappingLimitButton'
           );
-          const applyButtonDisabledStatus = await applyButton.getAttribute('disabled');
+          const applyButtonDisabledStatus = await applyButton.isEuiDisabled();
 
           // The apply button should be active
-          expect(applyButtonDisabledStatus).to.be('true');
+          expect(applyButtonDisabledStatus).to.be(true);
 
           const newFieldLimitInput = await testSubjects.find(
             'datasetQualityIncreaseFieldMappingProposedLimitFieldText'

@@ -32,8 +32,8 @@ export default function ({ getService, getPageObjects }) {
 
     it('should disable Map application save button', async () => {
       const mapSaveButton = await testSubjects.find('mapSaveButton');
-      const isDisabled = await mapSaveButton.getAttribute('disabled');
-      expect(isDisabled).to.be('true');
+      const isDisabled = await mapSaveButton.isEuiDisabled();
+      expect(isDisabled).to.be(true);
     });
 
     it('should remove layer on cancel', async () => {

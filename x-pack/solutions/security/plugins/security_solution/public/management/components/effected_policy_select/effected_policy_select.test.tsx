@@ -260,7 +260,7 @@ describe('when using EffectedPolicySelect component', () => {
       });
       const { getByTestId } = await render();
 
-      expect((getByTestId('test-global') as HTMLButtonElement).disabled).toBe(true);
+      expect(getByTestId('test-global') as HTMLButtonElement).toBeEuiDisabled();
     });
 
     it('should preserve assignment to policies not currently accessible in active space', async () => {

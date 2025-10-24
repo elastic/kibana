@@ -42,7 +42,7 @@ export function MachineLearningOverviewPageProvider({ getService }: FtrProviderC
     },
 
     async assertADJobButtonEnabled(subject: string, expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled(subject);
+      const isEnabled = await testSubjects.isEuiEnabled(subject);
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected AD "Create job" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
