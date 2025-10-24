@@ -64,7 +64,11 @@ export default function createAlertsAsDataDynamicTemplatesTest({ getService }: F
 
         await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 1 }]]));
 
-        const existingFields = alertFieldMap;
+        // unmapped fields are ignored since they are not added to the index mappings
+        const existingFields = Object.values(alertFieldMap).filter(
+          (field) => field.type !== 'unmapped'
+        );
+
         const numberOfExistingFields = Object.keys(existingFields).length;
         // there is no way to get the real number of fields from ES.
         // Even though we have only as many as alertFieldMap fields,
