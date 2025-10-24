@@ -20,7 +20,7 @@ import { v4 } from 'uuid';
 import { transparentize } from '@elastic/eui';
 import { euiLightVars } from '@kbn/ui-theme';
 import { groupBy } from 'lodash';
-import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-plugin/public/data_views';
+import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import { getDefaultQueryLanguage } from '../../../../application/components/lib/get_default_query_language';
 import { ICON_TYPES_MAP } from '../../../../application/visualizations/constants';
 import { SUPPORTED_METRICS } from '../../metrics';

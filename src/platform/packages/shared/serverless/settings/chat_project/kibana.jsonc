@@ -1,7 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/serverless-chat-settings",
-  "owner": "@elastic/search-kibana",
-  "group": "platform",
-  "visibility": "shared"
-}

@@ -122,8 +122,7 @@ class AgentlessAgentService {
 
     const { fleetUrl, fleetToken } = await this.getFleetUrlAndTokenForAgentlessAgent(
       esClient,
-      agentlessAgentPolicy,
-      soClient
+      agentlessAgentPolicy
     );
 
     logger.debug(
@@ -397,8 +396,7 @@ class AgentlessAgentService {
 
   private async getFleetUrlAndTokenForAgentlessAgent(
     esClient: ElasticsearchClient,
-    policy: AgentPolicy,
-    soClient: SavedObjectsClientContract
+    policy: AgentPolicy
   ) {
     const { items: enrollmentApiKeys } = await listEnrollmentApiKeys(esClient, {
       perPage: SO_SEARCH_LIMIT,
@@ -417,7 +415,7 @@ class AgentlessAgentService {
     let defaultFleetHost: FleetServerHost;
 
     try {
-      defaultFleetHost = await fleetServerHostService.get(soClient, policy.fleet_server_host_id);
+      defaultFleetHost = await fleetServerHostService.get(policy.fleet_server_host_id);
     } catch (e) {
       throw new AgentlessAgentConfigError('missing default Fleet server host');
     }
