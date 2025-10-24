@@ -9,11 +9,13 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiFieldNumber, EuiButtonGroup } from '@elastic/eui';
 import { useDebouncedValue } from '@kbn/visualization-utils';
+import type {
+  LensPartitionVisualizationState as PieVisualizationState,
+  VisualizationToolbarProps,
+} from '@kbn/lens-common';
 import { DEFAULT_PERCENT_DECIMALS } from '../constants';
 import { PartitionChartsMeta } from '../partition_charts_meta';
-import type { PieVisualizationState } from '../../../../common/types';
 import { NumberDisplay } from '../../../../common/constants';
-import type { VisualizationToolbarProps } from '../../../types';
 
 export function PartitionTitlesAndTextSettings(
   props: VisualizationToolbarProps<PieVisualizationState>
