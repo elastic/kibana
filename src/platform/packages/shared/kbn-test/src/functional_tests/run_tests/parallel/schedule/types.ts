@@ -41,6 +41,7 @@ export interface ScheduleConfigTestGroup {
     cpus: number;
     memoryMb: number;
   };
+  expectedDurationMins: number;
 }
 
 export interface ScheduleConfigTestGroupResults {

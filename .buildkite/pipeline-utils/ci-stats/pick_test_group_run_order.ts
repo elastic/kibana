@@ -50,6 +50,7 @@ interface ScheduleConfigOutput extends ScheduleConfigInput {
 interface ScheduleGroup {
   configs: ScheduleConfigOutput[];
   machine: ScheduleMachineOptions;
+  expectedDurationMins: number;
 }
 
 interface ScheduleResponse {
@@ -64,12 +65,9 @@ const MEMORY_PER_CPU_MB_BY_PROFILE: Record<string, number> = {
 
 const CONFIG_DURATION_REQUEST_CONCURRENCY = 10;
 
-function createMachineDefinition(queueName: string): ScheduleMachineOptions {
-  const agentOptions = expandAgentQueue(queueName);
-  const machineType = agentOptions.machineType;
-
+function createMachineDefinition(machineType: string): ScheduleMachineOptions {
   if (!machineType) {
-    throw new Error(`Unable to determine machine type for queue "${queueName}"`);
+    throw new Error('Machine type must be provided');
   }
 
   const machineTokens = machineType.split('-');
@@ -91,7 +89,7 @@ function createMachineDefinition(queueName: string): ScheduleMachineOptions {
     MEMORY_PER_CPU_MB_BY_PROFILE.standard;
 
   return {
-    name: queueName,
+    name: machineType,
     cpus: cpuCount,
     memoryMb: cpuCount * memoryPerCpu,
   };
@@ -648,7 +646,7 @@ export async function pickTestGroupRunOrder() {
   // the map that we will write to the artifacts for informing ftr config jobs of what they should do
   const ftrRunOrder: Record<
     string,
-    { title: string; expectedDurationMin: number; names: string[] }
+    { title: string; expectedDurationMins: number; names: string[] }
   > = {};
 
   if (ftrConfigsByQueue.size) {
@@ -672,7 +670,7 @@ export async function pickTestGroupRunOrder() {
         defaultMin: 60,
         maxMin: FUNCTIONAL_MAX_MINUTES * FUNCTIONAL_PARALLELISM,
         minimumIsolationMin: FUNCTIONAL_MINIMUM_ISOLATION_MIN,
-        overheadMin: 1.5,
+        overheadMin: 0,
       };
 
       const scheduleInputs = await buildScheduleInputs(runGroup, FUNCTIONAL_MAX_MINUTES, {
@@ -686,10 +684,17 @@ export async function pickTestGroupRunOrder() {
         continue;
       }
 
-      // Provide multiple machine type options, sorted largest to smallest
-      const machineTypes = ['n2-8-spot', 'n2-4-spot'].map((typeName) =>
-        createMachineDefinition(typeName)
+      const queueAgentOptions = expandAgentQueue(resolvedQueue);
+      const preferredMachineTypes = [
+        queueAgentOptions.machineType,
+        'n2-standard-8',
+        'n2-standard-4',
+      ].filter(
+        (typeName): typeName is string => typeof typeName === 'string' && typeName.length > 0
       );
+
+      const uniqueMachineTypes = Array.from(new Set(preferredMachineTypes));
+      const machineTypes = uniqueMachineTypes.map((typeName) => createMachineDefinition(typeName));
 
       let scheduleResponse: ScheduleResponse;
 
@@ -713,9 +718,7 @@ export async function pickTestGroupRunOrder() {
 
         const key = `ftr_configs_${configCounter++}`;
         const configPaths = scheduledGroup.configs.map((config) => config.path);
-        const expectedDurationMin = scheduledGroup.configs.reduce((total, config) => {
-          return total + config.testDurationMins;
-        }, 0);
+        const expectedDurationMins = scheduledGroup.expectedDurationMins;
 
         let title: string;
         let sortBy: number | string;
@@ -728,19 +731,16 @@ export async function pickTestGroupRunOrder() {
           title = `FTR Configs #${sortBy}`;
         }
 
-        // Use the queue corresponding to the scheduled machine type
-        const assignedQueue = scheduledGroup.machine.name;
-
         functionalGroups.push({
           title,
           key,
           sortBy,
-          queue: assignedQueue,
+          queue: resolvedQueue,
         });
 
         ftrRunOrder[key] = {
           title,
-          expectedDurationMin,
+          expectedDurationMins,
           names: configPaths,
         };
 

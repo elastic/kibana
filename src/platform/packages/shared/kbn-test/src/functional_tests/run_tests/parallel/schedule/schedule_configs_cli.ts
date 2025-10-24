@@ -23,7 +23,7 @@ export function runTestsScheduleCli() {
         machines,
       });
 
-      process.stdout.write(`${JSON.stringify(scheduleResult)}\n`);
+      process.stdout.write(`${JSON.stringify(scheduleResult, null, 2)}\n`);
     },
     {
       description: `Schedule Functional Tests`,
