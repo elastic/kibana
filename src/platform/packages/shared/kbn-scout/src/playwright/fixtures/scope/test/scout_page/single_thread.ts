@@ -95,7 +95,7 @@ export function extendPlaywrightPage({
       state: 'attached',
     });
   // Method to press a key until an element with the provided selector is in focus.
-  extendedPage.keyTo = async (selector: string, key: string = 'Tab') => {
+  extendedPage.keyTo = async (selector: string, key: string) => {
     return await keyTo(page, selector, key);
   };
   return extendedPage;

@@ -18,11 +18,10 @@ const verifyValidSelector = async (selector: string, page: Page): Promise<void> 
 const keyToElement = async (
   page: Page,
   selector: string,
-  key: string = 'Tab',
+  key: string,
   visited: Set<string> = new Set()
 ): Promise<void> => {
   await page.keyboard.press(key);
-  await page.screenshot();
 
   const focusedOuterHTML = await page.evaluate(() => {
     const focused = document.activeElement;
@@ -47,7 +46,7 @@ const keyToElement = async (
   if (!isTargetFocused) return keyToElement(page, selector, key, visited);
 };
 
-export const keyTo = async (page: Page, selector: string, key: string = 'Tab'): Promise<void> => {
+export const keyTo = async (page: Page, selector: string, key: string): Promise<void> => {
   await verifyValidSelector(selector, page);
   await keyToElement(page, selector, key);
 };
