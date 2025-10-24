@@ -61,11 +61,6 @@ export const allowedExperimentalValues = Object.freeze({
   newUserDetailsFlyoutManagedUser: false,
 
   /**
-   * Enables experimental Entity Analytics HTTP endpoints
-   */
-  riskScoringRoutesEnabled: true,
-
-  /**
    * Disables ESQL-based risk scoring
    */
   disableESQLRiskScoring: false,
