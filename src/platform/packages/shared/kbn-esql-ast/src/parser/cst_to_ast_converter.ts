@@ -2407,11 +2407,13 @@ export class CstToAstConverter {
         'binary-expression'
       ) as ast.ESQLBinaryExpression;
 
-      assignment.args.push(
-        this.toColumn(ctx.qualifiedName()!),
-        // TODO: The second argument here is an array, should be a single item.
-        this.collectBooleanExpression(ctx.booleanExpression())
-      );
+      const left = this.toColumn(ctx.qualifiedName()!);
+      const right = this.fromBooleanExpression(ctx.booleanExpression());
+
+      assignment.args.push(left);
+
+      // TODO: Remove array boxing here.
+      assignment.args.push([right]);
 
       // TODO: Avoid using `computeLocationExtends` here. Location should be computed
       //       without that function, and we should eventually remove it.
