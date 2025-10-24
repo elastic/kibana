@@ -2577,10 +2577,10 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
-    key: 'linux.advanced.limits.free_disk_space_gb',
+    key: 'linux.advanced.utilization_limits.free_disk_space_gb',
     first_supported_version: '9.3',
     documentation: i18n.translate(
-      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.limits.free_disk_space_gb',
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.utilization_limits.free_disk_space_gb',
       {
         defaultMessage:
           'Keep at least gigabytes of free space on the volume where Endpoint is installed. If free space falls below this threshold, certain features, such as response actions that require additional storage space, will no longer function. Default: no limit.',
@@ -2588,10 +2588,10 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
-    key: 'mac.advanced.limits.free_disk_space_gb',
+    key: 'mac.advanced.utilization_limits.free_disk_space_gb',
     first_supported_version: '9.3',
     documentation: i18n.translate(
-      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.limits.free_disk_space_gb',
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.utilization_limits.free_disk_space_gb',
       {
         defaultMessage:
           'Keep at least gigabytes of free space on the volume where Endpoint is installed. If free space falls below this threshold, certain features, such as response actions that require additional storage space, will no longer function. Default: no limit.',
@@ -2599,10 +2599,10 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
-    key: 'windows.advanced.limits.free_disk_space_gb',
+    key: 'windows.advanced.utilization_limits.free_disk_space_gb',
     first_supported_version: '9.3',
     documentation: i18n.translate(
-      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.limits.free_disk_space_gb',
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.utilization_limits.free_disk_space_gb',
       {
         defaultMessage:
           'Keep at least gigabytes of free space on the volume where Endpoint is installed. If free space falls below this threshold, certain features, such as response actions that require additional storage space, will no longer function. Default: no limit.',
@@ -2610,10 +2610,10 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
-    key: 'linux.advanced.limits.free_disk_space_percent',
+    key: 'linux.advanced.utilization_limits.free_disk_space_percent',
     first_supported_version: '9.3',
     documentation: i18n.translate(
-      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.limits.free_disk_space_percent',
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.utilization_limits.free_disk_space_percent',
       {
         defaultMessage:
           'Maintain a minimum percentage of free space on the volume where Endpoint is installed. If free space falls below this threshold, certain features, such as response actions that require additional space, will no longer function. Default: no limit.',
@@ -2621,10 +2621,10 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
-    key: 'mac.advanced.limits.free_disk_space_percent',
+    key: 'mac.advanced.utilization_limits.free_disk_space_percent',
     first_supported_version: '9.3',
     documentation: i18n.translate(
-      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.limits.free_disk_space_percent',
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.utilization_limits.free_disk_space_percent',
       {
         defaultMessage:
           'Maintain a minimum percentage of free space on the volume where Endpoint is installed. If free space falls below this threshold, certain features, such as response actions that require additional space, will no longer function. Default: no limit.',
@@ -2632,10 +2632,10 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
-    key: 'windows.advanced.limits.free_disk_space_percent',
+    key: 'windows.advanced.utilization_limits.free_disk_space_percent',
     first_supported_version: '9.3',
     documentation: i18n.translate(
-      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.limits.free_disk_space_percent',
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.utilization_limits.free_disk_space_percent',
       {
         defaultMessage:
           'Maintain a minimum percentage of free space on the volume where Endpoint is installed. If free space falls below this threshold, certain features, such as response actions that require additional space, will no longer function. Default: no limit.',
