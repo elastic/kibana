@@ -25,6 +25,7 @@ import type {
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { CheckPrivileges, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { AutomaticImportService } from './services';
 
 export const PLUGIN_ID = 'automaticImportV2' as const;
 
@@ -65,6 +66,7 @@ export interface AutomaticImportV2PluginApiRequestHandlerContext {
   savedObjectsClient: SavedObjectsClientContract;
   checkPrivileges: () => CheckPrivileges;
   getSpaceId: () => string;
+  automaticImportService: AutomaticImportService;
 }
 
 /**

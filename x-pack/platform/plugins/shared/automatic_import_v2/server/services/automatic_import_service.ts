@@ -10,7 +10,7 @@ import type { ElasticsearchClient, LoggerFactory } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { AutomaticImportSamplesIndexService } from './samples_index/index_service';
 
-export class AutomaticImportSetupService {
+export class AutomaticImportService {
   private pluginStop$: Subject<void>;
   private samplesIndexService: AutomaticImportSamplesIndexService;
 
@@ -25,13 +25,6 @@ export class AutomaticImportSetupService {
       esClientPromise,
       securityPromise
     );
-  }
-
-  public getSamplesIndexService() {
-    if (!this.samplesIndexService) {
-      throw new Error('Samples index service not initialized');
-    }
-    return this.samplesIndexService;
   }
 
   public stop() {

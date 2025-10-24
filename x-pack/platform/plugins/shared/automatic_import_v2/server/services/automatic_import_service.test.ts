@@ -8,7 +8,7 @@
 import expect from 'expect';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { AutomaticImportSetupService } from './automatic_import_start_service';
+import { AutomaticImportService } from './automatic_import_service';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 
 // Mock the AutomaticImportSamplesIndexService
@@ -21,7 +21,7 @@ jest.mock('./samples_index/index_service', () => {
 });
 
 describe('AutomaticImportSetupService', () => {
-  let service: AutomaticImportSetupService;
+  let service: AutomaticImportService;
   let mockLoggerFactory: ReturnType<typeof loggerMock.create>;
   let mockEsClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let mockSecurity: jest.Mocked<SecurityPluginStart>;
@@ -40,7 +40,7 @@ describe('AutomaticImportSetupService', () => {
       },
     } as any;
 
-    service = new AutomaticImportSetupService(
+    service = new AutomaticImportService(
       mockLoggerFactory,
       Promise.resolve(mockEsClient),
       Promise.resolve(mockSecurity)
@@ -63,34 +63,6 @@ describe('AutomaticImportSetupService', () => {
     it('should initialize the pluginStop$ subject', () => {
       expect((service as any).pluginStop$).toBeDefined();
       expect((service as any).pluginStop$.subscribe).toBeDefined();
-    });
-  });
-
-  describe('getSamplesIndexService', () => {
-    it('should return the samples index service', () => {
-      const samplesIndexService = service.getSamplesIndexService();
-
-      expect(samplesIndexService).toBeDefined();
-      expect(samplesIndexService.createSamplesDocs).toBeDefined();
-    });
-
-    it('should throw error if service is not initialized', () => {
-      // Create a new service and clear the samplesIndexService
-      const uninitializedService = Object.create(
-        AutomaticImportSetupService.prototype
-      ) as AutomaticImportSetupService;
-      (uninitializedService as any).samplesIndexService = null;
-
-      expect(() => uninitializedService.getSamplesIndexService()).toThrow(
-        'Samples index service not initialized'
-      );
-    });
-
-    it('should return the same instance on multiple calls', () => {
-      const service1 = service.getSamplesIndexService();
-      const service2 = service.getSamplesIndexService();
-
-      expect(service1).toBe(service2);
     });
   });
 
@@ -154,10 +126,6 @@ describe('AutomaticImportSetupService', () => {
         expect.any(Promise)
       );
 
-      // Get the service
-      const samplesIndexService = service.getSamplesIndexService();
-      expect(samplesIndexService).toBeDefined();
-
       // Stop the service
       service.stop();
 
@@ -167,9 +135,6 @@ describe('AutomaticImportSetupService', () => {
 
     it('should maintain the same pluginStop$ instance throughout lifecycle', () => {
       const pluginStop$Before = (service as any).pluginStop$;
-
-      service.getSamplesIndexService();
-
       const pluginStop$After = (service as any).pluginStop$;
 
       expect(pluginStop$Before).toBe(pluginStop$After);

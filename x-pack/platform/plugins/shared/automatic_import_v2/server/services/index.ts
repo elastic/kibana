@@ -7,4 +7,4 @@
 
 export { AutomaticImportSamplesIndexService } from './samples_index/index_service';
 
-export { AutomaticImportSetupService } from './automatic_import_start_service';
+export { AutomaticImportService } from './automatic_import_service';

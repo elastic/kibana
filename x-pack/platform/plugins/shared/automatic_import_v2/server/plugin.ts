@@ -24,7 +24,7 @@ import type {
   AutomaticImportV2PluginRequestHandlerContext,
 } from './types';
 import { RequestContextFactory } from './request_context_factory';
-import { AutomaticImportSetupService } from './services';
+import { AutomaticImportService } from './services';
 
 export class AutomaticImportV2Plugin
   implements
@@ -38,7 +38,7 @@ export class AutomaticImportV2Plugin
   private readonly logger: Logger;
   private pluginStop$: Subject<void>;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
-  private automaticImportSetupService: AutomaticImportSetupService | null = null;
+  private automaticImportService: AutomaticImportService | null = null;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.pluginStop$ = new ReplaySubject(1);
@@ -57,27 +57,27 @@ export class AutomaticImportV2Plugin
     plugins: AutomaticImportV2PluginSetupDependencies
   ) {
     this.logger.debug('automaticImportV2: Setup');
+
+    const coreStartServices = core.getStartServices().then(([coreStart, startPlugins]) => ({
+      esClient: coreStart.elasticsearch.client.asInternalUser as ElasticsearchClient,
+      security: startPlugins.security as SecurityPluginStart,
+    }));
+    const esClientPromise = coreStartServices.then(({ esClient }) => esClient);
+    const securityPromise = coreStartServices.then(({ security }) => security);
+
+    this.automaticImportService = new AutomaticImportService(
+      this.logger,
+      esClientPromise,
+      securityPromise
+    );
+
     const requestContextFactory = new RequestContextFactory({
       logger: this.logger,
       core,
       plugins,
       kibanaVersion: this.kibanaVersion,
+      automaticImportService: this.automaticImportService,
     });
-
-    // Get ES client from core
-    const esClientPromise = core
-      .getStartServices()
-      .then(([coreStart]) => coreStart.elasticsearch.client.asInternalUser as ElasticsearchClient);
-
-    const securityPromise = core
-      .getStartServices()
-      .then(([_, { security }]) => security as SecurityPluginStart);
-
-    this.automaticImportSetupService = new AutomaticImportSetupService(
-      this.logger,
-      esClientPromise,
-      securityPromise
-    );
 
     core.http.registerRouteHandlerContext<
       AutomaticImportV2PluginRequestHandlerContext,
@@ -115,6 +115,6 @@ export class AutomaticImportV2Plugin
   public stop() {
     this.pluginStop$.next();
     this.pluginStop$.complete();
-    this.automaticImportSetupService?.stop();
+    this.automaticImportService?.stop();
   }
 }
