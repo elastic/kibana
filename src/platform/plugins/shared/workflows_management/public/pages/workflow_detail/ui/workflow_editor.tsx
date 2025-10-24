@@ -24,6 +24,9 @@ import { ExecutionGraph } from '../../../features/debug-graph/execution_graph';
 import { TestStepModal } from '../../../features/run_workflow/ui/test_step_modal';
 import type { WorkflowUrlStateTabType } from '../../../hooks/use_workflow_url_state';
 import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
+import { selectWorkflowGraph } from '@kbn/workflows-management-plugin/public/widgets/workflow_yaml_editor/lib/store';
+import { useSelector } from 'react-redux';
+import { selectWorkflowDefinition } from '@kbn/workflows-management-plugin/public/widgets/workflow_yaml_editor/lib/store/selectors';
 
 const WorkflowYAMLEditor = React.lazy(() =>
   import('../../../widgets/workflow_yaml_editor').then((module) => ({
@@ -70,6 +73,8 @@ export function WorkflowEditor({
 }: WorkflowEditorProps) {
   const styles = useMemoCss(componentStyles);
   const { uiSettings } = useKibana().services;
+  const workflowGraph = useSelector(selectWorkflowGraph);
+  const workflowDefinition = useSelector(selectWorkflowDefinition);
 
   const { runIndividualStep } = useWorkflowActions();
 
@@ -79,8 +84,17 @@ export function WorkflowEditor({
   const yamlValue = selectedExecutionId && execution ? execution.yaml : workflowYaml;
 
   const handleStepRun = async (params: { stepId: string; actionType: string }) => {
+    if (!workflowGraph || !workflowDefinition) {
+      // the workflow is not properly loaded yet (not parsed correctly for example)
+      return;
+    }
+
     if (params.actionType === 'run') {
-      const contextOverrideData = buildContextOverrideForStep(workflowYaml, params.stepId);
+      const contextOverrideData = buildContextOverrideForStep(
+        workflowGraph,
+        workflowDefinition,
+        params.stepId
+      );
 
       if (!Object.keys(contextOverrideData.stepContext).length) {
         submitStepRun(params.stepId, {});
