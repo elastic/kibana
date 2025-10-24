@@ -1459,6 +1459,216 @@ describe('Authenticator', () => {
         );
       });
     });
+
+    describe('with origin config', () => {
+      const headersWithOrigin = { authorization: 'Basic .....', origin: 'http://localhost:5601' };
+
+      const request = httpServerMock.createKibanaRequest({ headers: headersWithOrigin });
+      const user = mockAuthenticatedUser();
+
+      beforeEach(() => {
+        mockOptions.session.create.mockResolvedValue(mockSessVal);
+
+        mockBasicAuthenticationProvider.login.mockResolvedValue(
+          AuthenticationResult.succeeded(user, {
+            authHeaders: headersWithOrigin,
+            state: {}, // to ensure a new session is created
+          })
+        );
+      });
+
+      it('allows requests with matching origin header', async () => {
+        jest
+          .requireMock('./providers/basic')
+          .BasicAuthenticationProvider.mockImplementation(() => ({
+            type: 'basic',
+            origin: 'http://localhost:5601',
+            ...mockBasicAuthenticationProvider,
+          }));
+
+        authenticator = new Authenticator(
+          getMockOptions({
+            providers: {
+              basic: { basic1: { order: 0 } },
+            },
+          })
+        );
+
+        await expect(
+          authenticator.login(request, {
+            provider: { type: 'basic', name: 'basic1' },
+            value: {},
+          })
+        ).resolves.toEqual(
+          AuthenticationResult.succeeded(user, {
+            authHeaders: headersWithOrigin,
+            state: {},
+          })
+        );
+        expectAuditEvents({ action: 'user_login', outcome: 'success' });
+        expect(mockBasicAuthenticationProvider.login).toHaveBeenCalled();
+      });
+
+      it('allows requests without an origin header', async () => {
+        jest
+          .requireMock('./providers/basic')
+          .BasicAuthenticationProvider.mockImplementation(() => ({
+            type: 'basic',
+            origin: 'http://localhost:5601',
+            ...mockBasicAuthenticationProvider,
+          }));
+
+        authenticator = new Authenticator(
+          getMockOptions({
+            providers: {
+              basic: { basic1: { order: 0 } },
+            },
+          })
+        );
+
+        await expect(
+          authenticator.login(httpServerMock.createKibanaRequest(), {
+            provider: { type: 'basic', name: 'basic1' },
+            value: {},
+          })
+        ).resolves.toEqual(
+          AuthenticationResult.succeeded(user, {
+            authHeaders: headersWithOrigin,
+            state: {},
+          })
+        );
+        expectAuditEvents({ action: 'user_login', outcome: 'success' });
+        expect(mockBasicAuthenticationProvider.login).toHaveBeenCalled();
+      });
+
+      it('does not attempt to login for requests with non-matching origin header', async () => {
+        jest
+          .requireMock('./providers/basic')
+          .BasicAuthenticationProvider.mockImplementation(() => ({
+            type: 'basic',
+            origin: 'http://127.0.0.1:5601',
+            ...mockBasicAuthenticationProvider,
+          }));
+
+        jest.requireMock('./providers/http').HTTPAuthenticationProvider.mockImplementation(() => ({
+          type: 'http',
+          origin: 'http://127.0.0.1:5601',
+          ...mockHTTPAuthenticationProvider,
+        }));
+
+        const mockSamlAuthenticationProvider = jest
+          .requireMock('./providers/saml')
+          .SAMLAuthenticationProvider.mockImplementation(() => ({
+            type: 'saml',
+            origin: 'http://127.0.0.1:5601',
+            login: jest.fn(),
+            authenticate: jest.fn(),
+            logout: jest.fn(),
+            getHTTPAuthenticationScheme: jest.fn(),
+          }));
+
+        authenticator = new Authenticator(
+          getMockOptions({
+            providers: {
+              basic: { basic1: { order: 0 } },
+              saml: { saml1: { order: 1, realm: 'saml1' } },
+            },
+          })
+        );
+
+        await expect(
+          authenticator.login(request, {
+            provider: { type: 'basic', name: 'basic1' },
+            value: {},
+          })
+        ).resolves.toEqual(AuthenticationResult.notHandled());
+
+        await expect(
+          authenticator.login(request, {
+            provider: { type: 'http' },
+            value: {},
+          })
+        ).resolves.toEqual(AuthenticationResult.notHandled());
+
+        await expect(
+          authenticator.login(request, {
+            provider: { type: 'saml', name: 'saml1' },
+            value: {},
+          })
+        ).resolves.toEqual(AuthenticationResult.notHandled());
+
+        expect(auditLogger.log).not.toHaveBeenCalled();
+        expect(mockBasicAuthenticationProvider.login).not.toHaveBeenCalled();
+        expect(mockHTTPAuthenticationProvider.login).not.toHaveBeenCalled();
+        expect(mockSamlAuthenticationProvider.login).not.toHaveBeenCalled();
+      });
+
+      it('skips over providers that do not match the origin config', async () => {
+        const mockSAMLAuthenticationProvider1: jest.Mocked<
+          PublicMethodsOf<SAMLAuthenticationProvider>
+        > = {
+          login: jest.fn(),
+          authenticate: jest.fn(),
+          logout: jest.fn(),
+          getHTTPAuthenticationScheme: jest.fn(),
+        };
+
+        const mockSAMLAuthenticationProvider2: jest.Mocked<
+          PublicMethodsOf<SAMLAuthenticationProvider>
+        > = {
+          login: jest.fn().mockResolvedValue(
+            AuthenticationResult.succeeded(user, {
+              authHeaders: headersWithOrigin,
+              state: {}, // to ensure a new session is created
+            })
+          ),
+          authenticate: jest.fn(),
+          logout: jest.fn(),
+          getHTTPAuthenticationScheme: jest.fn(),
+        };
+
+        jest
+          .requireMock('./providers/saml')
+          .SAMLAuthenticationProvider.mockImplementationOnce(() => ({
+            type: 'saml',
+            origin: 'http://127.0.0.1:5601',
+            name: 'saml1',
+            order: 0,
+            ...mockSAMLAuthenticationProvider1,
+          }))
+          .mockImplementationOnce(() => ({
+            type: 'saml',
+            origin: ['http://localhost:5601', 'http://127.0.0.1:5601'],
+            name: 'saml2',
+            order: 1,
+            ...mockSAMLAuthenticationProvider2,
+          }));
+
+        authenticator = new Authenticator(
+          getMockOptions({
+            providers: {
+              saml: { saml1: { order: 0, realm: 'saml1' }, saml2: { order: 1, realm: 'saml1' } },
+            },
+          })
+        );
+
+        await expect(
+          authenticator.login(request, {
+            provider: { type: 'saml' },
+            value: {},
+          })
+        ).resolves.toEqual(
+          AuthenticationResult.succeeded(user, {
+            authHeaders: headersWithOrigin,
+            state: {},
+          })
+        );
+
+        expectAuditEvents({ action: 'user_login', outcome: 'success' });
+        expect(mockSAMLAuthenticationProvider1.login).not.toHaveBeenCalled();
+        expect(mockSAMLAuthenticationProvider2.login).toHaveBeenCalled();
+      });
+    });
   });
 
   describe('`authenticate` method', () => {

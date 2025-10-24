@@ -75,11 +75,17 @@ export abstract class BaseAuthenticationProvider {
   protected readonly logger: Logger;
 
   /**
+   * The origins that can the provider can be used to authenticate requests from.
+   */
+  public readonly origin: string | string[] | undefined;
+
+  /**
    * Instantiates AuthenticationProvider.
    * @param options Provider options object.
    */
   constructor(protected readonly options: Readonly<AuthenticationProviderOptions>) {
     this.logger = options.logger;
+    this.origin = options.origin;
   }
 
   /**
@@ -147,12 +153,5 @@ export abstract class BaseAuthenticationProvider {
         authenticationInfo.authentication_realm.type === 'saml' &&
         authenticationInfo.authentication_realm.name === ELASTIC_CLOUD_SSO_REALM_NAME,
     } as AuthenticatedUser);
-  }
-
-  /**
-   * Returns the origin option associated with the provider.
-   */
-  getOrigin(): string | string[] | undefined {
-    return this.options.origin;
   }
 }

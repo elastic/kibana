@@ -15,6 +15,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { findTestSubject, mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { LoginForm, MessageType, PageMode } from './login_form';
+import { i18n } from '@kbn/i18n';
 
 function expectPageMode(wrapper: ReactWrapper, mode: PageMode) {
   const assertions: Array<[string, boolean]> =
@@ -396,6 +397,137 @@ describe('LoginForm', () => {
         { title: 'Login w/SAML', hint: 'SAML hint', icon: 'empty' },
         { title: 'Log in with pki/pki1', hint: '', icon: 'some-icon' },
       ]);
+    });
+
+    it('does not render providers with origin configs that to not match current page', async () => {
+      const currentURL = `https://some-host.com/login?next=${encodeURIComponent(
+        '/some-base-path/app/kibana#/home?_g=()'
+      )}`;
+
+      const coreStartMock = coreMock.createStart({ basePath: '/some-base-path' });
+
+      window.location = { ...window.location, href: currentURL, origin: 'https://some-host.com' };
+      const wrapper = mountWithIntl(
+        <EuiProvider>
+          <LoginForm
+            http={coreStartMock.http}
+            notifications={coreStartMock.notifications}
+            loginAssistanceMessage=""
+            selector={{
+              enabled: true,
+              providers: [
+                {
+                  type: 'basic',
+                  name: 'basic',
+                  usesLoginForm: true,
+                  hint: 'Basic hint',
+                  icon: 'logoElastic',
+                  showInSelector: true,
+                },
+                {
+                  type: 'saml',
+                  name: 'saml1',
+                  description: 'Log in w/SAML',
+                  origin: ['https://some-host.com', 'https://some-other-host.com'],
+                  usesLoginForm: false,
+                  showInSelector: true,
+                },
+                {
+                  type: 'pki',
+                  name: 'pki1',
+                  description: 'Log in w/PKI',
+                  hint: 'PKI hint',
+                  origin: 'https://not-some-host.com',
+                  usesLoginForm: false,
+                  showInSelector: true,
+                },
+              ],
+            }}
+          />
+        </EuiProvider>
+      );
+
+      expect(window.location.origin).toBe('https://some-host.com');
+
+      expectPageMode(wrapper, PageMode.Selector);
+
+      const result = findTestSubject(wrapper, 'loginCard-', '^=').map((card) => {
+        const hint = findTestSubject(card, 'card-hint');
+        return {
+          title: findTestSubject(card, 'card-title').text(),
+          hint: hint.exists() ? hint.text() : '',
+          icon: card.find(EuiIcon).props().type,
+        };
+      });
+
+      expect(result).toEqual([
+        { title: 'Log in with basic/basic', hint: 'Basic hint', icon: 'logoElastic' },
+        { title: 'Log in w/SAML', hint: '', icon: 'empty' },
+      ]);
+    });
+
+    it('does not render any providers and shows error message if no providers match current origin', async () => {
+      const currentURL = `https://some-host.com/login?next=${encodeURIComponent(
+        '/some-base-path/app/kibana#/home?_g=()'
+      )}`;
+
+      const coreStartMock = coreMock.createStart({ basePath: '/some-base-path' });
+
+      window.location = { ...window.location, href: currentURL, origin: 'https://some-host.com' };
+      const wrapper = mountWithIntl(
+        <EuiProvider>
+          <LoginForm
+            http={coreStartMock.http}
+            notifications={coreStartMock.notifications}
+            loginAssistanceMessage=""
+            selector={{
+              enabled: true,
+              providers: [
+                {
+                  type: 'basic',
+                  name: 'basic',
+                  usesLoginForm: true,
+                  hint: 'Basic hint',
+                  icon: 'logoElastic',
+                  origin: 'https://not-some-host.com',
+                  showInSelector: true,
+                },
+                {
+                  type: 'saml',
+                  name: 'saml1',
+                  description: 'Log in w/SAML',
+                  origin: ['https://not-some-host.com', 'https://not-some-other-host.com'],
+                  usesLoginForm: false,
+                  showInSelector: true,
+                },
+                {
+                  type: 'pki',
+                  name: 'pki1',
+                  description: 'Log in w/PKI',
+                  hint: 'PKI hint',
+                  origin: 'https://not-some-host.com',
+                  usesLoginForm: false,
+                  showInSelector: true,
+                },
+              ],
+            }}
+          />
+        </EuiProvider>
+      );
+
+      expect(window.location.origin).toBe('https://some-host.com');
+
+      expect(findTestSubject(wrapper, 'loginForm').exists()).toBe(false);
+      expect(findTestSubject(wrapper, 'loginSelector').exists()).toBe(false);
+      expect(findTestSubject(wrapper, 'loginHelp').exists()).toBe(false);
+      expect(findTestSubject(wrapper, 'autoLoginOverlay').exists()).toBe(false);
+      expect(findTestSubject(wrapper, 'loginCard-', '^=').exists()).toBe(false);
+
+      expect(findTestSubject(wrapper, 'loginErrorMessage').text()).toEqual(
+        i18n.translate('xpack.security.noAuthProvidersForDomain', {
+          defaultMessage: 'No authentication providers have been configured for this domain.',
+        })
+      );
     });
 
     it('properly redirects after successful login', async () => {

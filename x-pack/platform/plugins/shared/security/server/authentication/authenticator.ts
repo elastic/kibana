@@ -343,7 +343,7 @@ export class Authenticator {
     const { origin: originHeader } = request.headers;
 
     const filteredProviders = providers.filter(([name, provider]) => {
-      const providerOrigin = provider.getOrigin();
+      const providerOrigin = provider.origin;
 
       return (
         !originHeader ||

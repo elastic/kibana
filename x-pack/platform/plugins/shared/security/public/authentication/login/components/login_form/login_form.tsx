@@ -130,6 +130,10 @@ const assistanceCss = (theme: UseEuiTheme) => css`
   }
 `;
 
+const noProvidersMessage = i18n.translate('xpack.security.noAuthProvidersForDomain', {
+  defaultMessage: 'No authentication providers have been configured for this domain.',
+});
+
 export class LoginForm extends Component<LoginFormProps, State> {
   private readonly validator: LoginValidator;
 
@@ -173,9 +177,7 @@ export class LoginForm extends Component<LoginFormProps, State> {
         (this.availableProviders.length === 0
           ? {
               type: MessageType.Danger,
-              content: i18n.translate('xpack.security.noAuthProvidersForDomain', {
-                defaultMessage: 'No authentication providers have been configured for this domain.',
-              }),
+              content: noProvidersMessage,
             }
           : { type: MessageType.None }),
       mode,
