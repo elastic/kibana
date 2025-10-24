@@ -29,6 +29,7 @@ export const deleteEntity = (router: EntityAnalyticsRoutesDeps['router'], logger
       path: '/api/entity_store/entities/{entityType}',
       options: {
         availability: {
+          since: '9.3.0',
           stability: 'beta',
         },
       },
