@@ -2196,7 +2196,6 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/solutions/**/test/serverless/**/test_suites/platform_security/ @elastic/kibana-security
 /x-pack/platform/test/serverless/**/test_suites/platform_security/ @elastic/kibana-security
 /src/core/packages/http/server-internal/src/cdn_config/ @elastic/kibana-security @elastic/kibana-core
-/x-pack/solutions/observability/test/serverless/api_integration/configs/config.feature_flags.ts @elastic/kibana-security
 /x-pack/platform/test/serverless/functional/test_suites/spaces/multiple_spaces_enabled.ts @elastic/kibana-security
 /x-pack/platform/test/serverless/functional/page_objects/svl_management_page.ts @elastic/kibana-security
 
