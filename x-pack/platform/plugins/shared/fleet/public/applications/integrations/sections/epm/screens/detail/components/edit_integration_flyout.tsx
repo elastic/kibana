@@ -68,7 +68,7 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
 
   // Get all the possible categories
   const { data: categoriesData } = useGetCategoriesQuery({
-    prerelease: false,
+    prerelease: true,
   });
   // We only need the parent categories for now, filter out any with parent_id fields to only leave the parents
   const parentCategories = categoriesData?.items.filter((item) => item.parent_id === undefined);
