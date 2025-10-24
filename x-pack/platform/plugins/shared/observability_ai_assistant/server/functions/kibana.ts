@@ -7,7 +7,7 @@
 
 import axios from 'axios';
 import { format } from 'url';
-import { castArray, first, pickBy } from 'lodash';
+import { pickBy } from 'lodash';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { FunctionRegistrationParameters } from '.';
 import { addSpaceIdToPath, getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
@@ -81,15 +81,10 @@ export function registerKibanaFunction({
         query: query ? (query as Record<string, string>) : undefined,
       };
 
-      const originUrl = first(castArray(request.headers.origin));
       logger.info(
-        `kibana tool: originUrl = ${originUrl}, parsedBaseUrl = ${JSON.stringify(
-          parsedBaseUrl
-        )}, requestUrl = ${JSON.stringify(requestUrl)}, nextUrl = ${JSON.stringify(nextUrl)}`
-      );
-
-      logger.info(
-        `Forwarding requests from ${parsedBaseUrl} to call Kibana API: ${method} ${format(nextUrl)}`
+        `Calling Kibana API by forwarding request from "${requestUrl}" to: ${method} ${format(
+          nextUrl
+        )}`
       );
 
       const copiedHeaderNames = [
