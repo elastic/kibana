@@ -6,47 +6,53 @@
  */
 import type { GetDescriptionFieldsFn } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { RULE_PREBUILD_DESCRIPTION_FIELDS } from '@kbn/triggers-actions-ui-plugin/public';
-import type { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query/latest';
-import type { SearchConfigurationType } from '@kbn/response-ops-rule-params/common';
+import { isOfQueryType } from '@kbn/es-query';
+import type {
+  EsQueryRuleParams,
+  OnlyEsQueryRuleParams,
+  OnlyEsqlQueryRuleParams,
+  OnlySearchSourceRuleParams,
+} from './types';
 
-export const getDescriptionFields: GetDescriptionFieldsFn<
-  Omit<EsQueryRuleParams, 'searchConfiguration'> & { searchConfiguration: SearchConfigurationType }
-> = ({ rule, prebuildFields }) => {
+export const getDescriptionFields: GetDescriptionFieldsFn<EsQueryRuleParams> = ({
+  rule,
+  prebuildFields,
+}) => {
   if (!rule || !prebuildFields) return [];
 
   if (rule.params.searchType === 'esQuery') {
+    const params = rule.params as OnlyEsQueryRuleParams;
     return [
-      prebuildFields[RULE_PREBUILD_DESCRIPTION_FIELDS.INDEX_PATTERN](rule.params.index),
-      prebuildFields[RULE_PREBUILD_DESCRIPTION_FIELDS.CUSTOM_QUERY](rule.params.esQuery),
+      prebuildFields[RULE_PREBUILD_DESCRIPTION_FIELDS.INDEX_PATTERN](params.index),
+      prebuildFields[RULE_PREBUILD_DESCRIPTION_FIELDS.CUSTOM_QUERY](params.esQuery),
     ];
   }
 
   if (rule.params.searchType === 'esqlQuery') {
-    return [
-      prebuildFields[RULE_PREBUILD_DESCRIPTION_FIELDS.ESQL_QUERY](rule.params.esqlQuery.esql),
-    ];
+    const params = rule.params as OnlyEsqlQueryRuleParams;
+    return [prebuildFields[RULE_PREBUILD_DESCRIPTION_FIELDS.ESQL_QUERY](params.esqlQuery.esql)];
   }
 
   if (rule.params.searchType === 'searchSource' && rule.params.searchConfiguration) {
-    const searchConfiguration = rule.params.searchConfiguration;
+    const params = rule.params as OnlySearchSourceRuleParams;
+    const searchConfig = params.searchConfiguration;
     const queryField = [];
 
     if (
-      searchConfiguration.query.query != null &&
-      typeof searchConfiguration.query.query === 'string'
+      searchConfig?.query &&
+      isOfQueryType(searchConfig.query) &&
+      typeof searchConfig.query.query === 'string'
     ) {
       queryField.push(
-        prebuildFields[RULE_PREBUILD_DESCRIPTION_FIELDS.CUSTOM_QUERY](
-          searchConfiguration.query.query
-        )
+        prebuildFields[RULE_PREBUILD_DESCRIPTION_FIELDS.CUSTOM_QUERY](searchConfig.query.query)
       );
     }
 
     return [
-      ...(searchConfiguration.index
+      ...(searchConfig?.index && typeof searchConfig.index === 'string'
         ? [
             prebuildFields[RULE_PREBUILD_DESCRIPTION_FIELDS.DATA_VIEW_INDEX_PATTERN](
-              searchConfiguration.index
+              searchConfig.index
             ),
           ]
         : []),

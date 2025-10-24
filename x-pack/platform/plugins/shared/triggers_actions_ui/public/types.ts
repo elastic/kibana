@@ -303,7 +303,7 @@ export interface RuleTypeParamsExpressionProps<
 export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
   id: string;
   description: string;
-  getDescriptionFields?: GetDescriptionFieldsFn;
+  getDescriptionFields?: GetDescriptionFieldsFn<Params>;
   iconClass: string;
   documentationUrl: string | ((docLinks: DocLinksStart) => string) | null;
   validate: (ruleParams: Params, isServerless?: boolean) => ValidationResult;
