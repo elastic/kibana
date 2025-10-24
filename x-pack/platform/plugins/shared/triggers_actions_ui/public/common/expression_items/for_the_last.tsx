@@ -57,8 +57,8 @@ const FOR_LAST_LABEL = i18n.translate(
   }
 );
 
-const MINIMUM_TIMESIZE_ERROR = i18n.translate(
-  'xpack.triggersActionsUI.common.expressionItems.forTheLast.minimumTimeSizeError',
+const RECOMMENDED_TIMESIZE_WARNING = i18n.translate(
+  'xpack.triggersActionsUI.common.expressionItems.forTheLast.recommendedTimeSizeError',
   {
     defaultMessage: 'Minimum 5 minutes recommended',
   }
@@ -116,7 +116,7 @@ export const ForLastExpression = ({
               isInvalid={Number(errors.timeWindowSize?.length) > 0 || isTimeSizeBelowRecommended}
               error={
                 isTimeSizeBelowRecommended
-                  ? [MINIMUM_TIMESIZE_ERROR]
+                  ? [RECOMMENDED_TIMESIZE_WARNING]
                   : (errors.timeWindowSize as string[])
               }
             >
@@ -172,7 +172,10 @@ function RecommendedTimeSizeWarning() {
     <>
       <EuiSpacer size="s" />
       <EuiCallOut
-        title={`Value is too low, possible alerting noise`}
+        title={i18n.translate(
+          'xpack.observability.rules.custom_threshold.recommendedTimeSizeWarning.title',
+          { defaultMessage: `Value is too low, possible alerting noise` }
+        )}
         color="warning"
         iconType="warning"
         size="s"

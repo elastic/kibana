@@ -149,14 +149,6 @@ export function validateCustomThreshold({
       );
     }
 
-    // if (c.timeSize && c.timeSize < 5) {
-    //   errors[id].timeWindowSize.push(
-    //     i18n.translate('xpack.observability.customThreshold.rule.alertFlyout.error.timeTooSmall', {
-    //       defaultMessage: 'Time size must be at least 5 min.',
-    //     })
-    //   );
-    // }
-
     if (!c.metrics || (c.metrics && c.metrics.length < 1)) {
       errors[id].metricsError = i18n.translate(
         'xpack.observability.customThreshold.rule.alertFlyout.error.metricsError',
