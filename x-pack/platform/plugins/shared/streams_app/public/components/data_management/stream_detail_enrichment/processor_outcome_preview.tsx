@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import type { GrokProcessor } from '@kbn/streamlang';
 import { isActionBlock } from '@kbn/streamlang';
+import useAsync from 'react-use/lib/useAsync';
 import { useDocViewerSetup } from '../../../hooks/use_doc_viewer_setup';
 import { useDocumentExpansion } from '../../../hooks/use_document_expansion';
 import { getPercentageFormatter } from '../../../util/formatters';
@@ -51,6 +52,7 @@ import {
 import { PreviewFlyout, MemoPreviewTable } from '../shared';
 import { toDataTableRecordWithIndex } from '../stream_detail_routing/utils';
 import { RowSelectionContext } from '../shared/preview_table';
+import { useKibana } from '../../../hooks/use_kibana';
 
 export const ProcessorOutcomePreview = () => {
   const samples = useSimulatorSelector((snapshot) => snapshot.context.samples);
@@ -192,6 +194,18 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
   const hasSimulatedRecords = useSimulatorSelector((snapshot) =>
     selectHasSimulatedRecords(snapshot.context)
   );
+
+  const {
+    dependencies: {
+      start: { data },
+    },
+  } = useKibana();
+
+  // Create a simple data view for the stream
+  const { value: dataView } = useAsync(async () => {
+    if (!streamName) return undefined;
+    return data.dataViews.create({ title: streamName });
+  }, [streamName, data.dataViews]);
 
   const shouldShowRowSourceAvatars = useStreamEnrichmentSelector(
     (state) => state.context.dataSourcesRefs.length >= 2
@@ -394,6 +408,8 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
           setSorting={setPreviewColumnsSorting}
           columnOrderHint={previewColumnsOrder}
           renderCellValue={renderCellValue}
+          showSummaryColumn={!grokMode}
+          dataView={dataView}
         />
       </RowSelectionContext.Provider>
       <DocViewerContext.Provider value={docViewerContext}>

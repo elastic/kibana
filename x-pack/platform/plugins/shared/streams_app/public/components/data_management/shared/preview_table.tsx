@@ -27,6 +27,9 @@ import type {
   IgnoredField,
   DocumentWithIgnoredFields,
 } from '@kbn/streams-schema/src/shared/record_types';
+import { LazySummaryColumn } from '@kbn/discover-contextual-components';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { DataGridDensity } from '@kbn/unified-data-table';
 import { recalcColumnWidths } from '../stream_detail_enrichment/utils';
 import type {
   SampleDocumentWithUIAttributes,
@@ -35,6 +38,7 @@ import type {
 import { DATA_SOURCES_I18N } from '../stream_detail_enrichment/data_sources_flyout/translations';
 import { useDataSourceSelectorById } from '../stream_detail_enrichment/state_management/data_source_state_machine';
 import type { EnrichmentDataSourceWithUIAttributes } from '../stream_detail_enrichment/types';
+import { useKibana } from '../../../hooks/use_kibana';
 
 const emptyCell = <>&nbsp;</>;
 
@@ -93,6 +97,8 @@ export function PreviewTable({
   showLeadingControlColumns = true,
   originalSamples,
   cellActions,
+  showSummaryColumn = false,
+  dataView,
 }: {
   documents: SampleDocument[] | DocumentWithIgnoredFields[];
   displayColumns?: string[];
@@ -112,11 +118,26 @@ export function PreviewTable({
   showLeadingControlColumns?: boolean;
   originalSamples?: SampleDocumentWithUIAttributes[];
   cellActions?: EuiDataGridColumnCellAction[];
+  showSummaryColumn?: boolean;
+  dataView?: DataView;
 }) {
   const { euiTheme: theme } = useEuiTheme();
+  const {
+    core,
+    dependencies: {
+      start: { share, fieldFormats },
+    },
+  } = useKibana();
+
   // Determine canonical column order
   const canonicalColumnOrder = useMemo(() => {
     const cols = new Set<string>();
+
+    // Add summary column first if enabled
+    if (showSummaryColumn && dataView) {
+      cols.add('_source');
+    }
+
     documents.forEach((doc) => {
       const document = isDocumentWithIgnoredFields(doc) ? doc.values : doc;
 
@@ -131,6 +152,10 @@ export function PreviewTable({
 
     // Sort columns by displayColumns or alphabetically as baseline
     allColumns = allColumns.sort((a, b) => {
+      // Keep _source first if it's present
+      if (a === '_source') return -1;
+      if (b === '_source') return 1;
+
       const indexA = (displayColumns || []).indexOf(a);
       const indexB = (displayColumns || []).indexOf(b);
       if (indexA === -1 && indexB === -1) {
@@ -156,7 +181,7 @@ export function PreviewTable({
       ];
     }
     return allColumns;
-  }, [columnOrderHint, displayColumns, documents]);
+  }, [columnOrderHint, displayColumns, documents, showSummaryColumn, dataView]);
 
   const sortingConfig = useMemo(() => {
     if (!sorting && !setSorting) {
@@ -246,6 +271,22 @@ export function PreviewTable({
 
   const gridColumns = useMemo(() => {
     return canonicalColumnOrder.map((column) => {
+      // Special handling for summary column
+      if (column === '_source' && showSummaryColumn && dataView) {
+        return {
+          id: column,
+          display: (
+            <ColumnHeaderTruncateContainer>
+              {i18n.translate('xpack.streams.resultPanel.euiDataGrid.summaryColumnLabel', {
+                defaultMessage: 'Summary',
+              })}
+            </ColumnHeaderTruncateContainer>
+          ),
+          actions: false as false,
+          initialWidth: 400,
+        };
+      }
+
       const columnparts = column.split('.');
       // interlave the columnparts with a dot and a breakable non-whitespace character
       const interleavedColumnParts = columnparts.reduce((acc, part, index) => {
@@ -276,7 +317,15 @@ export function PreviewTable({
         cellActions,
       };
     });
-  }, [cellActions, canonicalColumnOrder, setSorting, setVisibleColumns, columnWidths]);
+  }, [
+    cellActions,
+    canonicalColumnOrder,
+    setSorting,
+    setVisibleColumns,
+    columnWidths,
+    showSummaryColumn,
+    dataView,
+  ]);
 
   return (
     <EuiDataGrid
@@ -299,7 +348,15 @@ export function PreviewTable({
       rowCount={documents.length}
       rowHeightsOptions={rowHeightsOptions}
       onColumnResize={onColumnResize}
-      renderCellValue={({ rowIndex, columnId, setCellProps }) => {
+      renderCellValue={({
+        rowIndex,
+        columnId,
+        setCellProps,
+        isDetails,
+        isExpanded,
+        isExpandable,
+        colIndex,
+      }) => {
         // eslint-disable-next-line react-hooks/rules-of-hooks
         const { selectedRowIndex } = useRowSelection();
 
@@ -321,6 +378,37 @@ export function PreviewTable({
 
         if (!document || typeof document !== 'object') {
           return emptyCell;
+        }
+
+        // Special rendering for summary column
+        if (columnId === '_source' && showSummaryColumn && dataView) {
+          // Convert to DataTableRecord format expected by SummaryColumn
+          const dataTableRecord = {
+            raw: document,
+            flattened: document,
+            id: `${rowIndex}-summary`,
+          };
+
+          return (
+            <LazySummaryColumn
+              dataView={dataView}
+              row={dataTableRecord}
+              rowIndex={rowIndex}
+              columnId={columnId}
+              isDetails={isDetails}
+              setCellProps={setCellProps}
+              isExpandable={isExpandable}
+              isExpanded={isExpanded}
+              colIndex={colIndex}
+              closePopover={() => {}}
+              density={DataGridDensity.COMPACT}
+              rowHeight={undefined}
+              shouldShowFieldHandler={() => true}
+              core={core}
+              share={share}
+              fieldFormats={fieldFormats}
+            />
+          );
         }
 
         if (renderCellValue) {
