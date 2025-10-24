@@ -14,15 +14,28 @@ export function LoadingObservability() {
   const { ObservabilityPageTemplate } = usePluginContext();
 
   return (
-    <ObservabilityPageTemplate pageSectionProps={{ alignment: 'center' }} showSolutionNav={false}>
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="xl" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
-          <EuiText>{observabilityLoadingMessage}</EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+    <ObservabilityPageTemplate
+      pageSectionProps={{
+        alignment: 'center',
+        style: {
+          height: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+        },
+      }}
+      showSolutionNav={false}
+    >
+      <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="xl" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
+            <EuiText>{observabilityLoadingMessage}</EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
     </ObservabilityPageTemplate>
   );
 }
