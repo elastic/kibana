@@ -178,6 +178,7 @@ describe('findRelationships', () => {
         relationship: 'child',
         type: 'some-type',
         meta: expect.any(Object),
+        managed: false,
         references: [],
       },
       {
@@ -185,6 +186,7 @@ describe('findRelationships', () => {
         relationship: 'child',
         type: 'another-type',
         meta: expect.any(Object),
+        managed: false,
         references: [],
       },
       {
@@ -192,6 +194,7 @@ describe('findRelationships', () => {
         relationship: 'parent',
         type: 'parent-type',
         meta: expect.any(Object),
+        managed: false,
         references: [],
       },
     ]);
@@ -253,6 +256,7 @@ describe('findRelationships', () => {
         relationship: 'child',
         type: 'another-type',
         meta: expect.any(Object),
+        managed: false,
         references: [],
       },
     ]);
@@ -327,7 +331,9 @@ describe('findRelationships', () => {
             path: 'path',
             uiCapabilitiesPath: 'uiCapabilitiesPath',
           },
+          namespaceType: undefined,
         },
+        managed: false,
         references: [],
       },
     ]);

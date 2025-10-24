@@ -112,7 +112,7 @@ export const RelationshipsTable = ({
         const isManaged = object.managed === true;
         const hasTags = object.references?.some((ref) => ref.type === 'tag') === true;
 
-        const showTags = TagListComponent && hasTags;
+        const showTags = !!TagListComponent && hasTags;
         const showBadges = isManaged || showTags;
 
         return (
@@ -134,10 +134,7 @@ export const RelationshipsTable = ({
                   </EuiBadge>
                 )}
                 {showTags && (
-                  <TagListComponent
-                    object={{ references: object.references || [] }}
-                    data-test-subj="relationshipsTags"
-                  />
+                  <TagListComponent object={object} data-test-subj="relationshipsTags" />
                 )}
               </EuiBadgeGroup>
             )}
