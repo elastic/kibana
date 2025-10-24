@@ -202,7 +202,7 @@ async function runScheduleScript(options: {
   const payload = JSON.stringify(options);
   const { stdout } = await execa(
     'node',
-    ['scripts/functional_test_schedule.js', `--options=${payload}`],
+    ['--no-warnings', 'scripts/functional_test_schedule.js', `--options=${payload}`],
     {
       cwd: process.cwd(),
       stdio: 'pipe',
