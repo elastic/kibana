@@ -158,8 +158,8 @@ const Graph = ({ streams, loading = false }: StreamsGraphProps) => {
     return { initialNodes: layoutedNodes, initialEdges: layoutedEdges };
   }, [streams, loading, getStreamDocCounts]);
 
-  const [nodes] = useNodesState(initialNodes);
-  const [edges] = useEdgesState(initialEdges);
+  const [nodes, , onNodesChange] = useNodesState(initialNodes);
+  const [edges, , onEdgesChange] = useEdgesState(initialEdges);
 
   return (
     <EuiPanel paddingSize="l">
@@ -181,6 +181,8 @@ const Graph = ({ streams, loading = false }: StreamsGraphProps) => {
         <ReactFlow
           nodes={nodes}
           edges={edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
           fitView
