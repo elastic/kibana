@@ -9,7 +9,7 @@ import React from 'react';
 
 import { EuiAccordion, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { VisualizationToolbarProps } from '../../../types';
+import type { VisualizationToolbarProps } from '@kbn/lens-common';
 import type { ToolbarContentMap } from '../../../shared_components/flyout_toolbar';
 import { FlyoutToolbar } from '../../../shared_components/flyout_toolbar';
 import type { HeatmapVisualizationState } from '../types';
