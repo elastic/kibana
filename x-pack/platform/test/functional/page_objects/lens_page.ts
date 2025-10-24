@@ -872,6 +872,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await testSubjects.exists('lnsTextOptionsPopover_title');
       });
     },
+    async closeTitlesAndTextOptionsPopover() {
+      if (await testSubjects.exists('lnsTextOptionsPopover_title', { timeout: 50 })) {
+        await testSubjects.click('lnsTextOptionsButton');
+      }
+    },
     async retrySetValue(
       input: string,
       value: string,

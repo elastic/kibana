@@ -498,6 +498,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // enable value labels
       await lens.openTextOptions();
       await testSubjects.click('lns_valueLabels_inside');
+      await lens.closeTitlesAndTextOptionsPopover();
 
       // check for value labels
       let data = await lens.getCurrentChartDebugState('xyVisChart');
