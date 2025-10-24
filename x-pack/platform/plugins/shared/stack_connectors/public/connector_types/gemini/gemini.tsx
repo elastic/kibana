@@ -11,6 +11,7 @@ import type { GenericValidationResult } from '@kbn/triggers-actions-ui-plugin/pu
 import { SUB_ACTION } from '../../../common/gemini/constants';
 import { GEMINI_CONNECTOR_ID, GEMINI_TITLE } from '../../../common/gemini/constants';
 import type { GeminiActionParams, GeminiConnector } from './types';
+import { REPLACEMENT_LABEL, REPLACEMENT_DESCRIPTION } from '../../common/translations';
 
 interface ValidationErrors {
   subAction: string[];
@@ -20,6 +21,11 @@ export function getConnectorType(): GeminiConnector {
   return {
     id: GEMINI_CONNECTOR_ID,
     iconClass: lazy(() => import('./logo')),
+    deprecationBadgeProps: {
+      label: REPLACEMENT_LABEL,
+      color: 'subdued',
+      tooltipContent: REPLACEMENT_DESCRIPTION,
+    },
     deprecationMessage: lazy(() => import('../../common/genai_connectors/deprecated_callout')),
     selectMessage: i18n.translate('xpack.stackConnectors.components.gemini.selectMessageText', {
       defaultMessage: 'Send a request to Google Gemini.',

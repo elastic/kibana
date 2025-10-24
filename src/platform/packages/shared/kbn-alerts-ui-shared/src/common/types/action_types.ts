@@ -9,7 +9,7 @@
 
 import type { ComponentType, ReactNode } from 'react';
 import type { RuleActionParam, ActionVariable } from '@kbn/alerting-types';
-import type { IconType, RecursivePartial } from '@elastic/eui';
+import type { IconType, RecursivePartial, EuiBetaBadgeProps } from '@elastic/eui';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionType, SubFeature } from '@kbn/actions-types';
 import type { TypeRegistry } from '../type_registry';
@@ -128,6 +128,11 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   defaultRecoveredActionParams?: RecursivePartial<ActionParams>;
   customConnectorSelectItem?: CustomConnectorSelectionItem;
   isExperimental?: boolean;
+  deprecationBadgeProps?: {
+    label: string;
+    color?: EuiBetaBadgeProps['color'];
+    tooltipContent: string;
+  };
   deprecationMessage?: React.LazyExoticComponent<ComponentType<any>>;
   subtype?: Array<{ id: string; name: string }>;
   convertParamsBetweenGroups?: (params: ActionParams) => ActionParams | {};

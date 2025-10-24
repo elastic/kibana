@@ -11,6 +11,7 @@ import type { GenericValidationResult } from '@kbn/triggers-actions-ui-plugin/pu
 import { SUB_ACTION } from '../../../common/bedrock/constants';
 import { BEDROCK_CONNECTOR_ID, BEDROCK_TITLE } from '../../../common/bedrock/constants';
 import type { BedrockActionParams, BedrockConnector } from './types';
+import { REPLACEMENT_LABEL, REPLACEMENT_DESCRIPTION } from '../../common/translations';
 
 interface ValidationErrors {
   subAction: string[];
@@ -20,6 +21,11 @@ export function getConnectorType(): BedrockConnector {
   return {
     id: BEDROCK_CONNECTOR_ID,
     iconClass: lazy(() => import('./logo')),
+    deprecationBadgeProps: {
+      label: REPLACEMENT_LABEL,
+      color: 'subdued',
+      tooltipContent: REPLACEMENT_DESCRIPTION,
+    },
     deprecationMessage: lazy(() => import('../../common/genai_connectors/deprecated_callout')),
     selectMessage: i18n.translate('xpack.stackConnectors.components.bedrock.selectMessageText', {
       defaultMessage: 'Send a request to Amazon Bedrock.',

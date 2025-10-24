@@ -36,7 +36,6 @@ import {
   hasExecuteActionsCapability,
 } from '../../../lib/capabilities';
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
-import { REPLACEMENT_LABEL, REPLACEMENT_DESCRIPTION } from '../../translations';
 
 import type { ActionConnector, ActionConnectorTableItem, ActionTypeIndex } from '../../../../types';
 import { EditConnectorTabs } from '../../../../types';
@@ -89,6 +88,7 @@ const ActionsConnectorsList = ({
     setBreadcrumbs,
     chrome,
     docLinks,
+    actionTypeRegistry,
   } = useKibana().services;
 
   const { euiTheme } = useEuiTheme();
@@ -150,6 +150,10 @@ const ActionsConnectorsList = ({
 
   const actionConnectorTableItems: ActionConnectorTableItem[] = actionTypesIndex
     ? actions.map((action) => {
+        const actionTypeModel = actionTypeRegistry.has(action.actionTypeId)
+          ? actionTypeRegistry.get(action.actionTypeId)
+          : undefined;
+
         return {
           ...action,
           actionType: actionTypesIndex[action.actionTypeId]
@@ -158,6 +162,7 @@ const ActionsConnectorsList = ({
           compatibility: actionTypesIndex[action.actionTypeId]
             ? getConnectorCompatibility(actionTypesIndex[action.actionTypeId].supportedFeatureIds)
             : [],
+          deprecationBadgeProps: actionTypeModel?.deprecationBadgeProps,
         };
       })
     : [];
@@ -283,13 +288,13 @@ const ActionsConnectorsList = ({
         return (
           <EuiFlexGroup>
             <EuiFlexItem>{value}</EuiFlexItem>
-            {item.isDeprecated ? (
+            {item.deprecationBadgeProps ? (
               <EuiFlexItem grow={false}>
                 <EuiBetaBadge
                   data-test-subj="replacementSoonLabelMessage"
-                  label={REPLACEMENT_LABEL}
-                  color="subdued"
-                  tooltipContent={REPLACEMENT_DESCRIPTION}
+                  label={item.deprecationBadgeProps.label}
+                  color={item.deprecationBadgeProps.color}
+                  tooltipContent={item.deprecationBadgeProps.tooltipContent}
                 />
               </EuiFlexItem>
             ) : null}
@@ -346,6 +351,12 @@ const ActionsConnectorsList = ({
                       )}
                     >
                       <EuiButtonEmpty
+                        aria-label={i18n.translate(
+                          'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.fixButtonAriaLabel',
+                          {
+                            defaultMessage: 'Fix button',
+                          }
+                        )}
                         size="xs"
                         data-test-subj="fixConnectorButton"
                         onClick={() => editItem(item, EditConnectorTabs.Configuration, true)}

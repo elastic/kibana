@@ -19,6 +19,7 @@ import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import type { HttpSetup } from '@kbn/core/public';
 import type { KueryNode } from '@kbn/es-query';
 import type { ActionType, AsApiContract } from '@kbn/actions-plugin/common';
+import type { ActionTypeModel } from '@kbn/alerts-ui-shared/src/common/types';
 import {
   ALERT_HISTORY_PREFIX,
   AlertHistoryDefaultIndexName,
@@ -230,6 +231,7 @@ export type ActionConnectorWithoutId<
 export type ActionConnectorTableItem = ActionConnector & {
   actionType: ActionType['name'];
   compatibility: string[];
+  deprecationBadgeProps?: ActionTypeModel['deprecationBadgeProps'];
 };
 
 export type RuleUpdates = Omit<Rule, 'id' | 'executionStatus' | 'lastRun' | 'nextRun'>;
