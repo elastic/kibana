@@ -203,6 +203,14 @@ export default function ({ getService }: FtrProviderContext) {
               namespaceType: 'multiple-isolated',
               hiddenType: false,
             },
+            managed: false,
+            references: [
+              {
+                id: '8963ca30-3224-11e8-a572-ffca06da1357',
+                name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                type: 'index-pattern',
+              },
+            ],
           },
           {
             id: 'a42c0580-3224-11e8-a572-ffca06da1357',
@@ -214,6 +222,14 @@ export default function ({ getService }: FtrProviderContext) {
               namespaceType: 'multiple-isolated',
               hiddenType: false,
             },
+            managed: false,
+            references: [
+              {
+                id: '960372e0-3224-11e8-a572-ffca06da1357',
+                name: 'search_0',
+                type: 'search',
+              },
+            ],
           },
         ]);
       });
@@ -239,6 +255,14 @@ export default function ({ getService }: FtrProviderContext) {
               namespaceType: 'multiple-isolated',
               hiddenType: false,
             },
+            managed: false,
+            references: [
+              {
+                id: '8963ca30-3224-11e8-a572-ffca06da1357',
+                name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                type: 'index-pattern',
+              },
+            ],
           },
           {
             id: 'b70c7ae0-3224-11e8-a572-ffca06da1357',
@@ -254,6 +278,19 @@ export default function ({ getService }: FtrProviderContext) {
               namespaceType: 'multiple-isolated',
               hiddenType: false,
             },
+            managed: false,
+            references: [
+              {
+                id: 'add810b0-3224-11e8-a572-ffca06da1357',
+                name: 'panel_0',
+                type: 'visualization',
+              },
+              {
+                id: 'a42c0580-3224-11e8-a572-ffca06da1357',
+                name: 'panel_1',
+                type: 'visualization',
+              },
+            ],
           },
         ]);
       });
@@ -279,6 +316,14 @@ export default function ({ getService }: FtrProviderContext) {
               namespaceType: 'multiple-isolated',
               hiddenType: false,
             },
+            managed: false,
+            references: [
+              {
+                id: '8963ca30-3224-11e8-a572-ffca06da1357',
+                name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                type: 'index-pattern',
+              },
+            ],
           },
           {
             id: 'add810b0-3224-11e8-a572-ffca06da1357',
@@ -290,6 +335,14 @@ export default function ({ getService }: FtrProviderContext) {
               namespaceType: 'multiple-isolated',
               hiddenType: false,
             },
+            managed: false,
+            references: [
+              {
+                id: '8963ca30-3224-11e8-a572-ffca06da1357',
+                name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                type: 'index-pattern',
+              },
+            ],
           },
         ]);
       });
