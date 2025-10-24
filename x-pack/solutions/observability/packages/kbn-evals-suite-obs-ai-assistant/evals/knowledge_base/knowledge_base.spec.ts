@@ -166,4 +166,104 @@ evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
       }
     );
   });
+  evaluate.describe('kb source isolation (Lens)', () => {
+    evaluate.beforeEach(async ({ knowledgeBaseClient }) => {
+      await knowledgeBaseClient.importEntries({
+        entries: [
+          {
+            id: 'lens_internal_policy',
+            title: 'Lens: Internal Usage & Best Practices (ACME)',
+            text:
+              'Internal-only: Lens is ACME’s standard tool for observability dashboards.\n' +
+              'Access: Only Observability Admins edit shared templates; team Editors manage dashboards in team spaces.\n' +
+              'Naming: <team>::<service>::<purpose>.\n' +
+              'Required tags: owner, env, data_domain, pii_level, retention_days.\n' +
+              'Data views: "acme-*", "metrics-acme-*", "logs-acme-*".\n' +
+              'Prod dashboards require env:prod filter; default time 24h; refresh ≥ 30s.\n' +
+              'PII fields (*_email, *_user_id) must be masked. Include Data Health embeddable.\n' +
+              'Use company palette; red reserved for SLA/SLO breach; max 10 visualizations.\n',
+          },
+        ],
+      });
+    });
+
+    evaluate.afterEach(async ({ knowledgeBaseClient, conversationsClient }) => {
+      await knowledgeBaseClient.clear();
+      await conversationsClient.clear();
+    });
+
+    evaluate(
+      'returns ONLY internal KB for internal Lens usage questions',
+      async ({ evaluateDataset }) => {
+        await evaluateDataset({
+          dataset: {
+            name: 'kb: source isolation',
+            description:
+              'Queries about internal Lens governance should retrieve only internal entries, excluding product docs.',
+            examples: [
+              {
+                input: {
+                  question:
+                    'What are our internal Lens rules for production dashboards (naming, required tags, allowed data views, and minimum refresh)?',
+                },
+                output: {
+                  criteria: [
+                    'Calls the "context" function to retrieve knowledge.',
+                    'Retrieves the internal policy entry (id "lens_internal_policy").',
+                    'Mentions naming format <team>::<service>::<purpose>, required tags (owner, env, data_domain, pii_level, retention_days).',
+                    'Mentions allowed data views ("acme-*", "metrics-acme-*", "logs-acme-*"), default time 24h, and refresh ≥ 30s.',
+                    'Does NOT include product usage instructions.',
+                    'Does not hallucinate details not present in the internal policy.',
+                  ],
+                },
+                metadata: {},
+              },
+              {
+                input: {
+                  question:
+                    'Summarize our security/PII rules for Lens dashboards and the visualization standards used in prod.',
+                },
+                output: {
+                  criteria: [
+                    'Uses context function response to pull ONLY from the internal policy.',
+                    'Mentions masking PII fields (e.g., *_email, *_user_id), use of company color palette, red for SLA/SLO breaches, and Data Health embeddable.',
+                  ],
+                },
+                metadata: {},
+              },
+            ],
+          },
+        });
+      }
+    );
+
+    evaluate(
+      'context learnings exclude product docs for internal question',
+      async ({ chatClient }) => {
+        const conversation = await chatClient.complete({
+          messages:
+            'What are our internal Lens rules for production dashboards (naming, required tags, allowed data views, and minimum refresh)?',
+        });
+
+        const contextResponseMessage = conversation.messages.find((m) => m.name === 'context');
+        if (!contextResponseMessage) {
+          throw new Error('No context function message returned');
+        }
+
+        const { learnings } = JSON.parse(contextResponseMessage.content!);
+
+        if (!Array.isArray(learnings) || learnings.length < 1) {
+          throw new Error('Expected at least 1 learning from context');
+        }
+
+        const top = learnings[0];
+        if (!(top.llmScore > 4)) {
+          throw new Error(`Expected top learning LLM score > 4, got ${top.llmScore}`);
+        }
+        if (top.id !== 'lens_internal_policy') {
+          throw new Error(`Expected top learning id "lens_internal_policy", got "${top.id}"`);
+        }
+      }
+    );
+  });
 });
