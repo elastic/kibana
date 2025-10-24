@@ -299,5 +299,5 @@ xpack.genAiSettings:
   showAiAssistantsVisibilitySetting: false
 
 # Cross Project Search
-cps.enabled: false
+cps.enabled: true
 cps.cpsEnabled: false
