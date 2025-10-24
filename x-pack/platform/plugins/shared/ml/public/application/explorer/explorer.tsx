@@ -39,7 +39,8 @@ import type { SeverityThreshold } from '../../../common/types/anomalies';
 import { HelpPopover } from '../components/help_popover';
 // @ts-ignore
 import { AnnotationsTable } from '../components/annotations/annotations_table';
-import { ExplorerNoJobsSelected, ExplorerNoResultsFound } from './components';
+import { ExplorerNoResultsFound } from './components';
+import { AnomalyDetectionNoJobsSelected } from '../components/anomaly_detection_no_jobs_selected';
 import { InfluencersList } from '../components/influencers_list';
 import { CheckboxShowCharts } from '../components/controls/checkbox_showcharts';
 import { JobSelector } from '../components/job_selector';
@@ -473,7 +474,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
   if (noJobsSelected) {
     return (
       <ExplorerPage dataViews={dataViews} jobSelectorProps={jobSelectorProps}>
-        <ExplorerNoJobsSelected />
+        <AnomalyDetectionNoJobsSelected />
       </ExplorerPage>
     );
   }

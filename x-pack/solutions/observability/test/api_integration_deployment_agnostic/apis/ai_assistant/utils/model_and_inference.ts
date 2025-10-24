@@ -10,7 +10,6 @@ import { errors } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import pRetry, { AbortError } from 'p-retry';
-import pTimeout, { TimeoutError } from 'p-timeout';
 import { SUPPORTED_TRAINED_MODELS } from '@kbn/test-suites-xpack-platform/functional/services/ml/api';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { setupKnowledgeBase, waitForKnowledgeBaseReady } from './knowledge_base';
@@ -256,11 +255,27 @@ export async function stopTinyElserModel(
   }
 }
 
+class TimeoutError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'TimeoutError';
+  }
+}
+
+async function withTimeout<T>(promise: Promise<T>, timeout: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => {
+      setTimeout(() => reject(new TimeoutError(`Operation timed out after ${timeout}ms`)), timeout);
+    }),
+  ]);
+}
+
 async function retryOnTimeout<T>(fn: () => Promise<T>, timeout = 60_000): Promise<T> {
   return pRetry(
     async () => {
       try {
-        return await pTimeout(fn(), { milliseconds: timeout });
+        return await withTimeout(fn(), timeout);
       } catch (err: any) {
         if (!(err instanceof TimeoutError)) {
           throw new AbortError(err); // don't retry on non-timeout errors

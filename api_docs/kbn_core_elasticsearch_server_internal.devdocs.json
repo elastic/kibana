@@ -1137,43 +1137,6 @@
       },
       {
         "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-        "id": "def-server.isRetryableEsClientError",
-        "type": "Function",
-        "tags": [],
-        "label": "isRetryableEsClientError",
-        "description": [
-          "\nReturns true if the given elasticsearch error should be retried\nby retry-based resiliency systems such as the SO migration, false otherwise."
-        ],
-        "signature": [
-          "(e: ",
-          "ElasticsearchClientError",
-          ") => boolean"
-        ],
-        "path": "src/core/packages/elasticsearch/server-internal/src/retryable_es_client_errors.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-            "id": "def-server.isRetryableEsClientError.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "e",
-            "description": [],
-            "signature": [
-              "ElasticsearchClientError"
-            ],
-            "path": "src/core/packages/elasticsearch/server-internal/src/retryable_es_client_errors.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-elasticsearch-server-internal",
         "id": "def-server.isSupportedEsServer",
         "type": "Function",
         "tags": [],

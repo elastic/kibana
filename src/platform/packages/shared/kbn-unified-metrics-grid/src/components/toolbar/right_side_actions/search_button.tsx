@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import {
   EuiFieldSearch,
@@ -52,6 +52,12 @@ export const SearchButton = ({
   const onShowSearch = useCallback(() => {
     setShowSearchInput(true);
   }, []);
+
+  useEffect(() => {
+    if (searchTerm || value) {
+      onShowSearch();
+    }
+  }, [onShowSearch, searchTerm, value]);
 
   const onClearSearch = useCallback(() => {
     setShowSearchInput(false);

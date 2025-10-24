@@ -35,5 +35,6 @@ export function runFeatureIdentification({
     logger,
     stream,
     features,
+    dropUnmapped: true,
   });
 }
