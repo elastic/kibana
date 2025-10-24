@@ -31,7 +31,8 @@ export const profilingClientFixture = coreWorkerFixtures.extend<
   { profilingClient: ProfilingClientFixture }
 >({
   profilingClient: [
-    async ({ config, log, esClient }, use) => {
+    async ({ config, kbnClient, log, esClient }, use) => {
+      log.info('Setting up profiling users for profilingClientFixture');
       await esClient.security.putUser({
         username: 'viewer',
         password: 'changeme',
@@ -45,14 +46,12 @@ export const profilingClientFixture = coreWorkerFixtures.extend<
       });
 
       const kibanaServer = new URL(config.hosts.kibana);
-      kibanaServer.username = config.auth.username;
-      kibanaServer.password = config.auth.password;
 
       function getProfilingApiClient({ username }: { username: ProfilingUsername | 'elastic' }) {
-        const url = formatUrl({
-          ...kibanaServer,
-          auth: `${username}:${PROFILING_TEST_PASSWORD}`,
-        });
+        kibanaServer.username = username;
+        kibanaServer.password =
+          username === 'elastic' ? config.auth.password : PROFILING_TEST_PASSWORD;
+        const url = formatUrl(kibanaServer);
         return createProfilingApiClient(supertest(url));
       }
       await use({

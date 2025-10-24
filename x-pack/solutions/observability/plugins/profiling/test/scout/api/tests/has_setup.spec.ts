@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect, apiTest, test } from '@kbn/scout-oblt';
+import { expect, apiTest } from '@kbn/scout-oblt';
 import type { ScoutTestConfig } from '@kbn/scout-oblt';
 import { format as formatUrl } from 'url';
 import supertest from 'supertest';
@@ -14,6 +14,7 @@ import {
   cleanUpProfilingData,
   loadProfilingData,
   setupProfiling,
+  getProfilingPackagePolicyIds,
 } from '../../common/utils/profiling_data';
 
 const profilingRoutePaths = getRoutePaths();
@@ -35,11 +36,10 @@ apiTest.describe('Profiling is not setup and no data is loaded', { tag: ['@svlOb
     });
   });
 
-  test('Admin user', async ({ profilingClient }) => {
+  apiTest('Admin user', async ({ profilingClient, apiServices }) => {
     const adminRes = await profilingClient.adminUser({
       endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
     });
-
     const adminStatus = adminRes.body;
     expect(adminStatus.has_setup).toBeFalsy();
     expect(adminStatus.has_data).toBe(false);
@@ -57,12 +57,12 @@ apiTest.describe('Profiling is not setup and no data is loaded', { tag: ['@svlOb
   });
 });
 
-test.describe('APM integration not installed but setup completed', { tag: ['@svlOblt'] }, () => {
-  test.beforeEach(async ({ esClient, config, log }) => {
+apiTest.describe('APM integration not installed but setup completed', { tag: ['@svlOblt'] }, () => {
+  apiTest.beforeEach(async ({ esClient, apiServices, config, log }) => {
     const st = getSupertest(config);
-    await setupProfiling(st, log);
+    await setupProfiling(st, apiServices, log);
   });
-  test('Admin user', async ({ profilingClient }) => {
+  apiTest('Admin user', async ({ profilingClient }) => {
     const adminRes = await profilingClient.adminUser({
       endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
     });
@@ -84,24 +84,24 @@ test.describe('APM integration not installed but setup completed', { tag: ['@svl
   });
 });
 
-test.describe('Profiling is setup', { tag: ['@svlOblt'] }, () => {
-  test.beforeAll(async ({ esClient, apiServices, config, log }) => {
+apiTest.describe('Profiling is setup', { tag: ['@svlOblt'] }, () => {
+  apiTest.beforeAll(async ({ esClient, apiServices, config, log }) => {
     const st = getSupertest(config);
     await cleanUpProfilingData({
       es: esClient,
       apiServices,
       logger: log,
     });
-    await setupProfiling(st, log);
+    await setupProfiling(st, apiServices, log);
   });
-  test.afterAll(async ({ esClient, apiServices, log }) => {
+  apiTest.afterAll(async ({ esClient, apiServices, log }) => {
     await cleanUpProfilingData({
       es: esClient,
       apiServices,
       logger: log,
     });
   });
-  test('without data', async ({ profilingClient }) => {
+  apiTest('without data', async ({ profilingClient }) => {
     const adminRes = await profilingClient.adminUser({
       endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
     });
@@ -120,7 +120,7 @@ test.describe('Profiling is setup', { tag: ['@svlOblt'] }, () => {
     expect(readStatus.has_required_role).toBe(false);
   });
 
-  test('admin user with data', async ({ esClient, profilingClient, log }) => {
+  apiTest('admin user with data', async ({ esClient, profilingClient, log }) => {
     await loadProfilingData(esClient, log);
     const adminRes = await profilingClient.adminUser({
       endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
@@ -141,13 +141,14 @@ test.describe('Profiling is setup', { tag: ['@svlOblt'] }, () => {
   });
 });
 
-test.describe('Collector integration is not installed', { tag: ['@svlOblt'] }, () => {
-  test.beforeAll(async ({ esClient, config, log }) => {
+apiTest.describe('Collector integration is not installed', { tag: ['@svlOblt'] }, () => {
+  apiTest.beforeAll(async ({ esClient, apiServices, config, log }) => {
     const st = getSupertest(config);
-    await setupProfiling(st, log);
+    await setupProfiling(st, apiServices, log);
   });
-  apiTest('Collector integration missing', async ({ profilingClient, apiServices, config }) => {
-    const ids = await apiServices.fleet.agent_policies.get();
+
+  apiTest('Collector integration missing', async ({ profilingClient, apiServices }) => {
+    const ids = await getProfilingPackagePolicyIds(apiServices);
     const collectorId = ids.collectorId;
     await apiServices.fleet.agent_policies.delete(collectorId!);
 
@@ -171,12 +172,8 @@ test.describe('Collector integration is not installed', { tag: ['@svlOblt'] }, (
     expect(readStatus.has_required_role).toBe(false);
   });
 
-  test('Symbolizer integration is not installed', async ({
-    profilingClient,
-    apiServices,
-    config,
-  }) => {
-    const ids = await apiServices.fleet.agent_policies.get();
+  apiTest('Symbolizer integration is not installed', async ({ profilingClient, apiServices }) => {
+    const ids = await getProfilingPackagePolicyIds(apiServices);
 
     const symbolizerId = ids.symbolizerId;
 
