@@ -17,7 +17,6 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import { noop } from 'lodash';
 import { useFetchRule } from '../../../hooks/use_fetch_rule';
 import { useKibana } from '../../../utils/kibana_react';
@@ -49,14 +48,7 @@ export function HeaderActions({
       getUntrackModal: UntrackAlertsModal,
       getRuleHelpers,
     },
-    http,
-    notifications: { toasts },
   } = services;
-
-  const { ruleTypesState } = useGetRuleTypesPermissions({
-    http,
-    toasts,
-  });
 
   const [isRuleEditPopoverOpen, setIsRuleEditPopoverOpen] = useState(false);
   const [snoozeModalOpen, setSnoozeModalOpen] = useState<boolean>(false);
@@ -129,7 +121,7 @@ export function HeaderActions({
     ruleId,
   });
 
-  const { navigateToLinkedApp } = useAppLink({ rule });
+  const { navigateToLinkedApp, buttonText } = useAppLink({ rule });
 
   if (!isRuleEditable || !rule) {
     return null;
@@ -195,8 +187,6 @@ export function HeaderActions({
     },
   ];
 
-  const ruleType = ruleTypesState.data.get(rule.ruleTypeId);
-
   return (
     <>
       <EuiFlexGroup
@@ -235,31 +225,23 @@ export function HeaderActions({
             />
           </EuiPopover>
         </EuiFlexItem>
-        <EuiFlexItem>
-          {ruleType?.displayAppLinkForRule ? (
-            <EuiFlexItem grow={false} data-test-subj="ruleSidebarViewInAppAction">
-              <EuiButton
-                color={'primary'}
-                title={i18n.translate('xpack.observability.ruleDetails.viewInAppButtonTooltip', {
-                  defaultMessage: 'View in app',
-                })}
-                className="ruleSidebarItem__action"
-                data-test-subj="editActionHoverButton"
-                iconType={'eye'}
-                aria-label={i18n.translate('xpack.observability.ruleDetails.viewInAppAriaLabel', {
-                  defaultMessage: 'View in app',
-                })}
-                onClick={() => {
-                  navigateToLinkedApp();
-                }}
-              >
-                {i18n.translate('xpack.observability.ruleDetails.viewInAppButtonTooltip', {
-                  defaultMessage: 'View in app',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
-          ) : null}
-        </EuiFlexItem>
+        {navigateToLinkedApp ? (
+          <EuiFlexItem grow={false} data-test-subj="ruleSidebarViewInAppAction">
+            <EuiButton
+              color={'primary'}
+              title={buttonText}
+              className="ruleSidebarItem__action"
+              data-test-subj="editActionHoverButton"
+              iconType={'eye'}
+              aria-label={buttonText}
+              onClick={() => {
+                navigateToLinkedApp();
+              }}
+            >
+              {buttonText}
+            </EuiButton>
+          </EuiFlexItem>
+        ) : null}
         <EuiFlexItem grow={1}>
           <EuiButtonIcon
             className="snoozeButton"

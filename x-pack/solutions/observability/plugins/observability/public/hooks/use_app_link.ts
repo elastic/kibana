@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { useKibana } from '../utils/kibana_react';
@@ -21,15 +22,15 @@ export function useAppLink({ rule }: Props) {
     },
   } = useKibana().services;
 
-  const linkMap: Record<string, () => void> = {
-    [SLO_BURN_RATE_RULE_TYPE_ID]: () =>
-      locators.get(sloDetailsLocatorID)?.navigate({ sloId: rule?.params.sloId as string }),
-    empty: () => {},
+  const linkMap: Record<string, { navigateToLinkedApp: () => void; buttonText: string }> = {
+    [SLO_BURN_RATE_RULE_TYPE_ID]: {
+      navigateToLinkedApp: () =>
+        locators.get(sloDetailsLocatorID)?.navigate({ sloId: rule?.params.sloId as string }),
+      buttonText: i18n.translate('xpack.observability.ruleDetails.viewLinkedSLOButton', {
+        defaultMessage: 'View linked SLO',
+      }),
+    },
   };
 
-  const navigate = rule?.ruleTypeId ? linkMap[rule.ruleTypeId] : linkMap.empty;
-
-  return {
-    navigateToLinkedApp: navigate,
-  };
+  return rule?.ruleTypeId ? linkMap[rule.ruleTypeId] : undefined;
 }
