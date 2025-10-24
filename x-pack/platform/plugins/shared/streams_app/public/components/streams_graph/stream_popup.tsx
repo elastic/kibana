@@ -126,7 +126,6 @@ export const StreamNodePopover = ({ isOpen, onClose, stream, button }: StreamNod
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <DataQualityColumn
-                histogramQueryFetch={getStreamDocCounts(streamName)}
                 streamName={streamName}
               />
             </EuiFlexItem>
