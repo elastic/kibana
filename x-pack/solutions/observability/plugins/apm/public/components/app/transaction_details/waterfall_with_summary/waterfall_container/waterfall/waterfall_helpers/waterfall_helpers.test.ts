@@ -721,7 +721,6 @@ describe('waterfall_helpers', () => {
         skew: 0,
       } as IWaterfallTransaction;
 
-      // Child starts 150us before parent, should return 150 as skew
       expect(getClockSkew(child, parent)).toBe(150);
     });
 
@@ -745,9 +744,6 @@ describe('waterfall_helpers', () => {
         skew: 10,
       } as IWaterfallTransaction;
 
-      // parentStart = 200 + 10 = 210
-      // offsetStart = 210 - 250 = -40 (child starts after parent)
-      // Since offsetStart is negative but not significantly, should return parent.skew
       expect(getClockSkew(child, parent)).toBe(10);
     });
 

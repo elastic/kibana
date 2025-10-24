@@ -252,25 +252,6 @@ export function WaterfallItem({
   const width = (item.duration / totalDuration) * widthFactor * 100;
   const left = (((item.offset + item.skew) / totalDuration) * widthFactor - widthFactor + 1) * 100;
 
-  // Add debug logging for problematic spans
-  if (left < 0 || width < 0) {
-    console.warn('Waterfall item calculation issue:', {
-      itemId: item.id,
-      itemName:
-        item.docType === 'transaction'
-          ? item.doc.transaction.name
-          : (item as IWaterfallSpan).doc.span.name,
-      offset: item.offset,
-      skew: item.skew,
-      duration: item.duration,
-      totalDuration,
-      widthFactor,
-      calculatedLeft: left,
-      calculatedWidth: width,
-      agent: item.docType === 'span' ? (item as IWaterfallSpan).doc.agent?.name : 'N/A',
-    });
-  }
-
   const isCompositeSpan = item.docType === 'span' && item.doc.span.composite;
 
   const itemBarStyle = getItemBarStyle(item, color, width, left);
