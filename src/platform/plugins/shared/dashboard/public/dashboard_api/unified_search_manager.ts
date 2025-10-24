@@ -368,8 +368,10 @@ export function initializeUnifiedSearchManager(
           setQuery(lastSavedState.query);
         }
         if (lastSavedState.timeRange) {
-          setAndSyncRefreshInterval(lastSavedState.refreshInterval);
           setAndSyncTimeRange(lastSavedState.timeRange);
+        }
+        if (lastSavedState.refreshInterval) {
+          setAndSyncRefreshInterval(lastSavedState.refreshInterval);
         }
       },
       getState,
