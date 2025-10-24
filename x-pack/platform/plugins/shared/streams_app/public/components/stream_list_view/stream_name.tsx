@@ -6,26 +6,34 @@
  */
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiHighlight, EuiLink, EuiPopover, useEuiTheme } from '@elastic/eui';
-import React from 'react';
-import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
-import { useBoolean } from '@kbn/react-hooks/src/use_boolean';
 import { css } from '@emotion/css';
+import { useBoolean } from '@kbn/react-hooks/src/use_boolean';
+import React, { useEffect } from 'react';
+import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 
 export function StreamName({
   name,
   dataTestSubj,
   searchQuery,
   preview,
+  forceHidePreview,
 }: {
   name: string;
   searchQuery: string;
   dataTestSubj?: string;
   preview?: React.ReactNode;
+  forceHidePreview?: boolean;
 }) {
   const { euiTheme } = useEuiTheme();
   const router = useStreamsAppRouter();
   const [previewActionVisible, { off: hideAction, on: showAction }] = useBoolean(false);
   const [isPreviewOpen, {off: hidePreview, toggle: togglePreview }] = useBoolean(false);
+
+  useEffect(() => {
+    if (forceHidePreview) {
+      hidePreview();
+    }
+  }, [forceHidePreview, hidePreview]);
 
   const handleHideAction = () => {
     if (!isPreviewOpen) {

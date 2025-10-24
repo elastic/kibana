@@ -43,14 +43,15 @@ const edgeTypes = {
 interface StreamsGraphProps {
   streams?: ListStreamDetail[];
   loading?: boolean;
+  showTitle?: boolean;
 }
 
-export function StreamsGraph({ streams, loading = false }: StreamsGraphProps) {
+export function StreamsGraph({ streams, loading = false, showTitle = true }: StreamsGraphProps) {
   if (loading || !streams) {
     return (
       <EuiPanel paddingSize="l">
         <EuiFlexGroup direction='column' className={css`height: 100%;`}>
-          <EuiText>
+          {showTitle && (<EuiText>
             <h3>
               {i18n.translate('xpack.streams.streamsGraph.title', {
                 defaultMessage: 'Streams Graph',
@@ -61,7 +62,7 @@ export function StreamsGraph({ streams, loading = false }: StreamsGraphProps) {
                 defaultMessage: 'Visual representation of wired streams and their hierarchical relationships.',
               })}
             </p>
-          </EuiText>
+          </EuiText>)}
           <EuiFlexItem grow={1}>
             <EuiEmptyPrompt
               icon={<EuiLoadingElastic size="xl" />}
@@ -87,12 +88,12 @@ export function StreamsGraph({ streams, loading = false }: StreamsGraphProps) {
 
   return (
     <ReactFlowProvider>
-      <Graph streams={streams} loading={loading} />
+      <Graph streams={streams} loading={loading} showTitle={showTitle} />
     </ReactFlowProvider>
   );
 }
 
-const Graph = ({ streams, loading = false }: StreamsGraphProps) => {
+const Graph = ({ streams, loading = false, showTitle = true }: StreamsGraphProps) => {
   const widthSelector = (state: { width: any }) => state.width;
   const heightSelector = (state: { height: any }) => state.height;
   const reactFlowWidth = useStore(widthSelector);
@@ -163,20 +164,23 @@ const Graph = ({ streams, loading = false }: StreamsGraphProps) => {
 
   return (
     <EuiPanel paddingSize="l">
-      <EuiText>
+      {showTitle && (
+        <>
+          <EuiText>
             <h3>
               {i18n.translate('xpack.streams.streamsGraph.title', {
                 defaultMessage: 'Streams Graph',
               })}
             </h3>
-        <p>
-          {i18n.translate('xpack.streams.streamsGraph.description', {
-            defaultMessage: 'Visual representation of wired streams and their hierarchical relationships.',
-          })}
-        </p>
-      </EuiText>
-      <EuiSpacer size="m" />
-
+            <p>
+              {i18n.translate('xpack.streams.streamsGraph.description', {
+                defaultMessage: 'Visual representation of wired streams and their hierarchical relationships.',
+              })}
+            </p>
+          </EuiText>
+          <EuiSpacer size="m" />
+        </>
+      )}
       <div style={{ width: '100%', height: '600px', border: '1px solid #d3dae6', borderRadius: '6px' }}>
         <ReactFlow
           nodes={nodes}

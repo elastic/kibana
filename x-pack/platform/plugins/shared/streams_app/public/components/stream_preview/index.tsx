@@ -20,13 +20,14 @@ import { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/str
 interface StreamPreviewProps {
   current: EnrichedStream;
   parent?: ListStreamDetail;
-  onExpandArchitecture: () => void;
+  onViewArchitecture: () => void;
 }
 
-export const StreamPreview = ({ current, parent, onExpandArchitecture }: StreamPreviewProps) => {
+export const StreamPreview = ({ current, parent, onViewArchitecture }: StreamPreviewProps) => {
   const { euiTheme } = useEuiTheme();
   const parentRoutingConditions = parent && Streams.WiredStream.Definition.is(parent.stream) ? parent.stream.ingest.wired.routing : undefined;
   const currentRoutingCondition = parentRoutingConditions?.find(cond => cond.destination === current.stream.name && cond.status === 'enabled')?.where;
+  const isWiredStream = Streams.WiredStream.Definition.is(current.stream);
 
   const title = css`
     font-weight: ${euiTheme.font.weight.bold};
@@ -56,6 +57,22 @@ export const StreamPreview = ({ current, parent, onExpandArchitecture }: StreamP
         <>
           <ConditionPanel condition={currentRoutingCondition} className={css`margin: ${euiTheme.size.s} 0; div * { font-size: ${euiTheme.font.scale.xxs}rem } `}/>
         </>
+      }
+      {isWiredStream &&
+        <EuiFlexGroup gutterSize="s" justifyContent='spaceBetween'>
+          <EuiText className={subTitle}>
+            {i18n.translate('xpack.streamsApp.streamPreview.viewArchitectureTitle', { defaultMessage: 'Architecture Viewer' })}
+          </EuiText>
+          <EuiButtonIcon
+            iconType="expand"
+            display="base"
+            color='text'
+            aria-label={i18n.translate('xpack.streamsApp.streamPreview.viewArchitectureLabel', {
+              defaultMessage: 'View architecture',
+            })}
+            onClick={onViewArchitecture}
+          />
+        </EuiFlexGroup>
       }
     </EuiFlexGroup>
   );
