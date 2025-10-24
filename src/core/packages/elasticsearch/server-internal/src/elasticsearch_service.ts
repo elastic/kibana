@@ -143,6 +143,7 @@ export class ElasticsearchService
       publicBaseUrl: config.publicBaseUrl,
       setCpsFeatureFlag: (enabled) => {
         this.cpsEnabled = enabled;
+        this.log.info(`CPS feature flag set to ${enabled}`);
       },
     };
   }

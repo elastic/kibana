@@ -8,8 +8,6 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import type { Observable } from 'rxjs';
-import { firstValueFrom } from 'rxjs';
 import { registerRoutes } from './routes';
 import type { CPSConfig } from './config';
 import type { CPSServerSetup } from './types';
@@ -17,28 +15,28 @@ import type { CPSServerSetup } from './types';
 export class CPSServerPlugin implements Plugin<CPSServerSetup> {
   private readonly initContext: PluginInitializerContext;
   private readonly isServerless: boolean;
-  private readonly config$: Observable<CPSConfig>;
+  private readonly config$: CPSConfig;
 
   constructor(initContext: PluginInitializerContext) {
     this.initContext = { ...initContext };
     this.isServerless = initContext.env.packageInfo.buildFlavor === 'serverless';
-    this.config$ = initContext.config.create();
+    this.config$ = initContext.config.get();
   }
 
   public setup(core: CoreSetup) {
-    void this.setCpsFeatureFlagAsync(core);
     const { initContext, config$ } = this;
+    const { cpsEnabled } = config$;
 
     // Register route only for serverless
     if (this.isServerless) {
       registerRoutes(core, initContext);
     }
 
+    // Set CPS feature flag in Elasticsearch service
+    core.elasticsearch.setCpsFeatureFlag(cpsEnabled);
+
     return {
-      getCpsEnabled: async () => {
-        const { cpsEnabled } = await firstValueFrom(config$);
-        return cpsEnabled;
-      },
+      getCpsEnabled: () => cpsEnabled,
     };
   }
 
@@ -47,9 +45,4 @@ export class CPSServerPlugin implements Plugin<CPSServerSetup> {
   }
 
   public stop() {}
-
-  private async setCpsFeatureFlagAsync(core: CoreSetup) {
-    const config = await firstValueFrom(this.config$);
-    core.elasticsearch.setCpsFeatureFlag(config.cpsEnabled);
-  }
 }

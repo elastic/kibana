@@ -99,8 +99,8 @@ export interface ElasticsearchServiceSetup {
   readonly publicBaseUrl?: string;
 
   /**
-   * By default, CPS is disabled for all plugins. Once plugins have verified they support
-   * CPS, they must explicitly opt-in by calling this method.
+   * Sets the CPS feature flag in the Elasticsearch service. 
+   * This should only be called from the CPS plugin.
    *
    * @example
    * ```ts
