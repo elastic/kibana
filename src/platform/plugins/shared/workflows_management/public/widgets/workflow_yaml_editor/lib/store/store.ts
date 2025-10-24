@@ -9,6 +9,7 @@
 
 import { configureStore } from '@reduxjs/toolkit';
 import { workflowComputationMiddleware } from './middleware';
+import { schemaGenerationMiddleware } from './schema_generation_middleware';
 import { workflowEditorReducer } from './slice';
 
 // Store factory
@@ -27,11 +28,15 @@ export const createWorkflowEditorStore = () => {
             'workflow.computed.workflowGraph',
             'workflow.computed.workflowLookup',
             'workflow.computed.workflowDefinition',
+            'workflow.schemaLoose',
           ],
           // Ignore these specific action types that contain non-serializable data
-          ignoredActions: ['workflow/_setComputedDataInternal'],
+          ignoredActions: [
+            'workflow/_setComputedDataInternal',
+            'workflow/_setGeneratedSchemaInternal',
+          ],
         },
-      }).concat(workflowComputationMiddleware),
+      }).concat(workflowComputationMiddleware, schemaGenerationMiddleware),
   });
 };
 
