@@ -59,10 +59,9 @@ paths:
              }'
       x-labels: [ess, serverless]
       operationId: CreateAttackDiscoverySchedules
-      description: Creates a new Attack discovery schedule that analyzes security alerts at specified intervals. The schedule defines when and how Attack discovery analysis should run, including which alerts to analyze, which AI connector to use, and what actions to take when discoveries are found.
+      x-state: Technical Preview; added in 9.2.0
+      description: Creates a new Attack discovery schedule that analyzes security alerts at specified intervals. The schedule defines when and how Attack discovery analysis should run, including which alerts to analyze, which AI connector to use, and what actions to take when discoveries are found. `Technical preview`
       summary: Create Attack discovery schedule
-      tags:
-        - Attack discovery API
       requestBody:
         required: true
         description: Attack discovery schedule configuration including name, parameters, schedule interval, and actions
@@ -136,10 +135,9 @@ paths:
              --header "Content-Type: application/json"
       x-labels: [ess, serverless]
       operationId: GetAttackDiscoverySchedules
-      description: Retrieves a specific Attack discovery schedule by its unique identifier. Returns complete schedule configuration including parameters, interval settings, associated actions, and execution history.
+      x-state: Technical Preview; added in 9.2.0
+      description: Retrieves a specific Attack discovery schedule by its unique identifier. Returns complete schedule configuration including parameters, interval settings, associated actions, and execution history. `Technical preview`
       summary: Get Attack discovery schedule by ID
-      tags:
-        - Attack discovery API
       parameters:
         - name: id
           in: path
@@ -219,10 +217,9 @@ paths:
              }'
       x-labels: [ess, serverless]
       operationId: UpdateAttackDiscoverySchedules
-      description: Updates an existing Attack discovery schedule with new configuration. All schedule properties can be modified including name, parameters, interval, and actions. The update operation replaces the entire schedule configuration with the provided values.
+      x-state: Technical Preview; added in 9.2.0
+      description: Updates an existing Attack discovery schedule with new configuration. All schedule properties can be modified including name, parameters, interval, and actions. The update operation replaces the entire schedule configuration with the provided values. `Technical preview`
       summary: Update Attack discovery schedule
-      tags:
-        - Attack discovery API
       parameters:
         - name: id
           in: path
@@ -301,10 +298,9 @@ paths:
              --header "Content-Type: application/json"
       x-labels: [ess, serverless]
       operationId: DeleteAttackDiscoverySchedules
-      description: Permanently deletes an Attack discovery schedule and all associated configuration.
+      x-state: Technical Preview; added in 9.2.0
+      description: Permanently deletes an Attack discovery schedule and all associated configuration. `Technical preview`
       summary: Delete Attack discovery schedule
-      tags:
-        - Attack discovery API
       parameters:
         - name: id
           in: path
@@ -352,10 +348,9 @@ paths:
              --header "Content-Type: application/json"
       x-labels: [ess, serverless]
       operationId: EnableAttackDiscoverySchedules
-      description: Enables a previously disabled Attack discovery schedule, allowing it to run according to its configured interval. Once enabled, the schedule will begin executing at the next scheduled time based on its interval configuration.
+      x-state: Technical Preview; added in 9.2.0
+      description: Enables a previously disabled Attack discovery schedule, allowing it to run according to its configured interval. Once enabled, the schedule will begin executing at the next scheduled time based on its interval configuration. `Technical preview`
       summary: Enable Attack discovery schedule
-      tags:
-        - Attack discovery API
       parameters:
         - name: id
           in: path
@@ -403,10 +398,9 @@ paths:
              --header "Content-Type: application/json"
       x-labels: [ess, serverless]
       operationId: DisableAttackDiscoverySchedules
-      description: Disables an Attack discovery schedule, preventing it from running according to its configured interval. The schedule configuration is preserved and can be re-enabled later. Any currently running executions will complete, but no new executions will be started.
+      x-state: Technical Preview; added in 9.2.0
+      description: Disables an Attack discovery schedule, preventing it from running according to its configured interval. The schedule configuration is preserved and can be re-enabled later. Any currently running executions will complete, but no new executions will be started. `Technical preview`
       summary: Disable Attack discovery schedule
-      tags:
-        - Attack discovery API
       parameters:
         - name: id
           in: path

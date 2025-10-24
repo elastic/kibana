@@ -15,13 +15,13 @@ import { z } from '@kbn/zod';
 describe('getForeachStateSchema', () => {
   it('should return plain foreach state if item type is not inferable', () => {
     const stepContext = DynamicStepContextSchema;
-    expect(() =>
-      getForeachStateSchema(stepContext, {
-        foreach: '{{some.path.to.items}}',
-        type: 'foreach',
-        name: 'foreach-step',
-      })
-    ).toThrow(
+    const foreachStateSchema = getForeachStateSchema(stepContext, {
+      foreach: '{{some.path.to.items}}',
+      type: 'foreach',
+      name: 'foreach-step',
+    });
+    expect(foreachStateSchema).toBeDefined();
+    expect(foreachStateSchema.shape.item.description).toMatch(
       /Foreach step must iterate over an array type, but received no valid path or JSON string/
     );
   });
@@ -76,12 +76,14 @@ describe('getForeachStateSchema', () => {
         items: z.object({ name: z.string(), surname: z.string() }),
       }),
     });
-    expect(() =>
-      getForeachStateSchema(stepContext, {
-        foreach: 'consts.items',
-        type: 'foreach',
-        name: 'foreach-step',
-      })
-    ).toThrow(/Foreach step must iterate over an array/);
+    const foreachStateSchema = getForeachStateSchema(stepContext, {
+      foreach: 'consts.items',
+      type: 'foreach',
+      name: 'foreach-step',
+    });
+    expect(foreachStateSchema).toBeDefined();
+    expect(foreachStateSchema.shape.item.description).toMatch(
+      /Foreach step must iterate over an array type, but received:/
+    );
   });
 });

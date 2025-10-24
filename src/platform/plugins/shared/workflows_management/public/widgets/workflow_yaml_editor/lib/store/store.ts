@@ -23,8 +23,10 @@ export const createWorkflowEditorStore = () => {
           // Ignore these non-serializable fields in the state
           ignoredPaths: [
             'workflow.computed.yamlDocument',
+            'workflow.computed.yamlLineCounter',
             'workflow.computed.workflowGraph',
             'workflow.computed.workflowLookup',
+            'workflow.computed.workflowDefinition',
           ],
           // Ignore these specific action types that contain non-serializable data
           ignoredActions: ['workflow/_setComputedDataInternal'],

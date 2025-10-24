@@ -61,17 +61,11 @@ describe('Agent Status API route handler', () => {
       (await apiTestSetup.httpHandlerContextMock.actions).getActionsClient as jest.Mock
     ).mockReturnValue(sentinelOneMock.createConnectorActionsClient());
 
-    apiTestSetup.endpointAppContextMock.experimentalFeatures = {
-      ...apiTestSetup.endpointAppContextMock.experimentalFeatures,
-      responseActionsCrowdstrikeManualHostIsolationEnabled: true,
-    };
-
     registerAgentStatusRoute(apiTestSetup.routerMock, apiTestSetup.endpointAppContextMock);
   });
 
   it.each`
     agentType                        | featureFlag
-    ${'crowdstrike'}                 | ${'responseActionsCrowdstrikeManualHostIsolationEnabled'}
     ${'microsoft_defender_endpoint'} | ${'responseActionsMSDefenderEndpointEnabled'}
   `(
     'should error if the $agentType feature flag ($featureFlag) is turned off',

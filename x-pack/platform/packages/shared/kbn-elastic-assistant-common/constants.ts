@@ -164,3 +164,6 @@ export const INFERENCE_CHAT_MODEL_DISABLED_FEATURE_FLAG =
 
 export const ELASTIC_AI_ASSISTANT_CHECKPOINT_SAVER_ENABLED_FEATURE_FLAG =
   'elasticAssistant.checkpointSaverEnabled' as const;
+
+export const ASSISTANT_INTERRUPTS_ENABLED_FEATURE_FLAG =
+  'securitySolution.assistantInterruptsEnabled' as const;

@@ -72,11 +72,8 @@ export const getAgentStatusRouteHandler = (
     //        `getter` function), we need to include this additional validation here, since
     //        `agent_type` is included in the schema independent of the feature flag
     if (
-      (agentType === 'crowdstrike' &&
-        !endpointContext.experimentalFeatures
-          .responseActionsCrowdstrikeManualHostIsolationEnabled) ||
-      (agentType === 'microsoft_defender_endpoint' &&
-        !endpointContext.experimentalFeatures.responseActionsMSDefenderEndpointEnabled)
+      agentType === 'microsoft_defender_endpoint' &&
+      !endpointContext.experimentalFeatures.responseActionsMSDefenderEndpointEnabled
     ) {
       return errorHandler(
         logger,

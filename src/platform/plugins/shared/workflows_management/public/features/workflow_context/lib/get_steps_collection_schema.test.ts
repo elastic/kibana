@@ -104,4 +104,69 @@ describe('getStepsCollectionSchema', () => {
     expect(step1Schema.shape.output._def.typeName).toBe('ZodOptional');
     expect(step1Schema.shape.error._def.typeName).toBe('ZodOptional');
   });
+
+  it('should use step names as is', () => {
+    const definition = {
+      version: '1' as const,
+      name: 'Weird Step Names',
+      enabled: true,
+      triggers: [
+        {
+          type: 'manual' as const,
+          enabled: true,
+        },
+      ],
+      steps: [
+        {
+          name: 'Step with spaces',
+          type: 'console',
+          with: {
+            message: 'Hello, world!',
+          },
+        },
+        {
+          name: 'CamelCaseStep',
+          type: 'console',
+          with: {
+            message: 'Hello, world!',
+          },
+        },
+        {
+          name: '$pecial*$ymb0l$',
+          type: 'console',
+          with: {
+            message: 'Hello, world!',
+          },
+        },
+        {
+          name: 'point-of-access',
+          type: 'console',
+          with: {
+            message: 'Hello, world!',
+          },
+        },
+      ],
+    };
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
+    const stepsCollectionSchema = getStepsCollectionSchema(
+      DynamicStepContextSchema,
+      workflowGraph,
+      'point-of-access'
+    );
+
+    expect(stepsCollectionSchema).toBeDefined();
+    expect((stepsCollectionSchema.shape as any)['Step with spaces']).toBeDefined();
+    expect((stepsCollectionSchema.shape as any).CamelCaseStep).toBeDefined();
+    expect((stepsCollectionSchema.shape as any)['$pecial*$ymb0l$']).toBeDefined();
+
+    expect(() =>
+      getStepsCollectionSchema(DynamicStepContextSchema, workflowGraph, 'Step with spaces')
+    ).not.toThrow();
+    expect(() =>
+      getStepsCollectionSchema(DynamicStepContextSchema, workflowGraph, 'CamelCaseStep')
+    ).not.toThrow();
+    expect(() =>
+      getStepsCollectionSchema(DynamicStepContextSchema, workflowGraph, '$pecial*$ymb0l$')
+    ).not.toThrow();
+  });
 });

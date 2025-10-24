@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLCommand } from '../../../types';
+import type { ESQLAstAllCommands } from '../../../types';
 import { pipeCompleteItem, commaCompleteItem } from '../../complete_items';
 import {
   getSourcesFromCommands,
@@ -22,7 +22,7 @@ import { getOverlapRange, isRestartingExpression } from '../../../definitions/ut
 
 export async function autocomplete(
   query: string,
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
   cursorPosition?: number

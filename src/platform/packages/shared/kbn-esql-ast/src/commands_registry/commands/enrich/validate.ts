@@ -11,7 +11,8 @@ import { errors, getMessageFromId } from '../../../definitions/utils/errors';
 import { validateCommandArguments } from '../../../definitions/utils/validation';
 import type {
   ESQLAst,
-  ESQLCommand,
+  ESQLAstAllCommands,
+  ESQLAstCommand,
   ESQLCommandOption,
   ESQLMessage,
   ESQLSource,
@@ -20,13 +21,14 @@ import type { ESQLPolicy, ICommandCallbacks, ICommandContext } from '../../types
 import { ENRICH_MODES } from './util';
 
 export const validate = (
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   ast: ESQLAst,
   context?: ICommandContext,
   callbacks?: ICommandCallbacks
 ): ESQLMessage[] => {
+  const enrichCommand = command as ESQLAstCommand;
   const messages: ESQLMessage[] = [];
-  const source = command.args[0] as ESQLSource;
+  const source = enrichCommand.args[0] as ESQLSource;
   const cluster = source.prefix;
   const index = source.index;
   const policies = context?.policies || new Map<string, ESQLPolicy>();
@@ -61,7 +63,7 @@ export const validate = (
   }
 
   const policy = index && policies.get(index.valueUnquoted);
-  const withOption = command.args.find(
+  const withOption = enrichCommand.args.find(
     (arg) => isOptionNode(arg) && arg.name === 'with'
   ) as ESQLCommandOption;
 
@@ -79,9 +81,9 @@ export const validate = (
   messages.push(
     ...validateCommandArguments(
       {
-        ...command,
+        ...enrichCommand,
         // exclude WITH from generic validation since it shouldn't be compared against the generic column list
-        args: command.args.filter((arg) => arg !== withOption),
+        args: enrichCommand.args.filter((arg) => arg !== withOption),
       },
       ast,
       context,

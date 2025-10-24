@@ -12,20 +12,28 @@ import {
   EuiSelectable,
   EuiHighlight,
   EuiText,
-  EuiIcon,
   EuiFlexItem,
   EuiFlexGroup,
   EuiButtonEmpty,
   EuiTitle,
   euiFontSize,
   useEuiTheme,
+  EuiIcon,
 } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import type { ActionOptionData } from '../types';
+import { getBaseConnectorType } from '../../../shared/ui/step_icons/get_base_connector_type';
+import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
+import {
+  isActionConnectorGroup,
+  isActionConnectorOption,
+  isActionGroup,
+  isActionOption,
+  type ActionOptionData,
+} from '../types';
 import { flattenOptions, getActionOptions } from '../lib/get_action_options';
 
 export interface ActionsMenuProps {
@@ -46,19 +54,34 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
       <EuiFlexGroup alignItems="center" css={styles.actionOption}>
         <EuiFlexItem
           grow={false}
-          css={[styles.iconOuter, option.options ? styles.groupIconOuter : styles.actionIconOuter]}
+          css={[
+            styles.iconOuter,
+            isActionGroup(option) ? styles.groupIconOuter : styles.actionIconOuter,
+          ]}
         >
-          <span css={option.options ? styles.groupIconInner : styles.actionIconInner}>
-            <EuiIcon type={option.iconType} size="m" color={option?.iconColor} />
+          <span css={isActionGroup(option) ? styles.groupIconInner : styles.actionIconInner}>
+            {isActionConnectorGroup(option) || isActionConnectorOption(option) ? (
+              <StepIcon
+                stepType={getBaseConnectorType(option.connectorType)}
+                executionStatus={null}
+              />
+            ) : isActionGroup(option) || isActionOption(option) ? (
+              <EuiIcon type={option.iconType} size="m" color={option.iconColor} />
+            ) : null}
           </span>
         </EuiFlexItem>
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexItem>
-            <EuiTitle size="xxxs" css={styles.actionTitle}>
-              <h6>
-                <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
-              </h6>
-            </EuiTitle>
+            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="none">
+              <EuiTitle size="xxxs" css={styles.actionTitle}>
+                <h6>
+                  <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+                </h6>
+              </EuiTitle>
+              <EuiText color="subdued" size="xs">
+                {option.instancesLabel}
+              </EuiText>
+            </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText size="xs" className="eui-displayBlock" css={styles.actionDescription}>
@@ -71,7 +94,7 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
   };
 
   const handleChange = (_: Array<ActionOptionData>, __: any, selectedOption: ActionOptionData) => {
-    if (selectedOption?.options) {
+    if (isActionGroup(selectedOption)) {
       setCurrentPath([...currentPath, selectedOption.id]);
       setSearchTerm('');
       setOptions(selectedOption.options);
@@ -79,12 +102,16 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
       onActionSelected(selectedOption);
     }
   };
-
   const handleBack = () => {
     const nextPath = currentPath.slice(0, -1);
     let nextOptions: ActionOptionData[] = defaultOptions;
     for (const id of nextPath) {
-      nextOptions = nextOptions.find((option) => option.id === id)?.options || [];
+      const nextOption = nextOptions.find((option) => option.id === id);
+      if (nextOption && isActionGroup(nextOption)) {
+        nextOptions = nextOption.options;
+      } else {
+        nextOptions = [];
+      }
     }
     setCurrentPath(nextPath);
     setOptions(nextOptions);

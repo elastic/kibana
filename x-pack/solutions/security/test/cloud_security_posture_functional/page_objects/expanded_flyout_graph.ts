@@ -28,6 +28,11 @@ const {
   GRAPH_ACTIONS_TOGGLE_SEARCH_ID,
   GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID,
   GRAPH_CONTROL_FIT_TO_VIEW_TEST_ID,
+  GRAPH_IPS_PLUS_COUNT_BUTTON_ID,
+  GRAPH_IPS_POPOVER_ID,
+  GRAPH_IPS_POPOVER_CONTENT_ID,
+  GRAPH_IPS_POPOVER_IP_ID,
+  PREVIEW_SECTION_BANNER_PANEL,
 } = testSubjectIds;
 
 type Filter = Parameters<FilterBarService['addFilter']>[0];
@@ -185,5 +190,36 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
   async clickOnFitGraphIntoViewControl(): Promise<void> {
     await this.testSubjects.click(GRAPH_CONTROL_FIT_TO_VIEW_TEST_ID);
     await this.pageObjects.header.waitUntilLoadingHasFinished();
+  }
+
+  async clickOnIpsPlusButton(): Promise<void> {
+    const ipsPlusButton = await this.testSubjects.find(GRAPH_IPS_PLUS_COUNT_BUTTON_ID);
+    await ipsPlusButton.click();
+  }
+
+  async assertIpsPopoverIsOpen(): Promise<void> {
+    await this.testSubjects.existOrFail(GRAPH_IPS_POPOVER_ID);
+    await this.testSubjects.existOrFail(GRAPH_IPS_POPOVER_CONTENT_ID);
+  }
+
+  async clickOnFirstIpInPopover(): Promise<void> {
+    await this.testSubjects.existOrFail(GRAPH_IPS_POPOVER_CONTENT_ID);
+    const popoverContent = await this.testSubjects.find(GRAPH_IPS_POPOVER_CONTENT_ID);
+    const firstIpElement = await popoverContent.findByTestSubject(GRAPH_IPS_POPOVER_IP_ID);
+    await firstIpElement.click();
+  }
+
+  async assertPreviewPopoverIsOpen(): Promise<void> {
+    await this.testSubjects.existOrFail(PREVIEW_SECTION_BANNER_PANEL);
+  }
+
+  async assertIpsPopoverContainsIps(expectedIps: string[]): Promise<void> {
+    await this.testSubjects.existOrFail(GRAPH_IPS_POPOVER_CONTENT_ID);
+    const popoverContent = await this.testSubjects.find(GRAPH_IPS_POPOVER_CONTENT_ID);
+
+    for (const expectedIp of expectedIps) {
+      const ipText = await popoverContent.getVisibleText();
+      expect(ipText).to.contain(expectedIp);
+    }
   }
 }

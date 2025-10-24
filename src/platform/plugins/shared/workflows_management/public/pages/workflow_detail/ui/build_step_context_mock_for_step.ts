@@ -9,7 +9,10 @@
 
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import { v4 as generateUuid } from 'uuid';
-import { getWorkflowZodSchemaLoose } from '../../../../common/schema';
+import {
+  getCachedDynamicConnectorTypes,
+  getWorkflowZodSchemaLoose,
+} from '../../../../common/schema';
 import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
 import { buildContextOverride } from '../../../shared/utils/build_step_context_override/build_step_context_override';
@@ -18,7 +21,11 @@ export function buildContextOverrideForStep(
   workflowYaml: string,
   stepId: string
 ): ContextOverrideData {
-  const parsingResult = parseWorkflowYamlToJSON(workflowYaml, getWorkflowZodSchemaLoose());
+  const dynamicConnectorTypes = getCachedDynamicConnectorTypes() || {};
+  const parsingResult = parseWorkflowYamlToJSON(
+    workflowYaml,
+    getWorkflowZodSchemaLoose(dynamicConnectorTypes)
+  );
 
   if (!parsingResult.success) {
     throw parsingResult.error;

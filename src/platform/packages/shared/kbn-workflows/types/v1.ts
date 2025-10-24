@@ -65,7 +65,7 @@ export interface EsWorkflowExecution {
   workflowId: string;
   isTestRun: boolean;
   status: ExecutionStatus;
-  context: Record<string, any>;
+  context: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
   workflowDefinition: WorkflowYaml;
   yaml: string;
   currentNodeId?: string; // The node currently being executed
@@ -95,7 +95,7 @@ export interface ProviderInput {
 
 export interface Provider {
   type: string;
-  action: (stepInputs?: Record<string, any>) => Promise<Record<string, any> | void>;
+  action: (stepInputs?: Record<string, unknown>) => Promise<Record<string, unknown> | void>;
   inputsDefinition: Record<string, ProviderInput>;
 }
 
@@ -126,11 +126,11 @@ export interface EsWorkflowStepExecution {
    */
   stepExecutionIndex: number;
   error?: string | null;
-  output?: Record<string, any> | null;
-  input?: Record<string, any> | null;
+  output?: Record<string, unknown> | null;
+  input?: Record<string, unknown> | null;
 
   /** Specific step execution instance state. Used by loops, retries, etc to track execution context. */
-  state?: Record<string, any>;
+  state?: Record<string, unknown>;
 }
 
 export type WorkflowStepExecutionDto = Omit<EsWorkflowStepExecution, 'spaceId'>;
@@ -228,20 +228,20 @@ export const SearchWorkflowCommandSchema = z.object({
 });
 
 export const RunWorkflowCommandSchema = z.object({
-  inputs: z.record(z.any()),
+  inputs: z.record(z.unknown()),
 });
 export type RunWorkflowCommand = z.infer<typeof RunWorkflowCommandSchema>;
 
 export const RunStepCommandSchema = z.object({
   workflowYaml: z.string(),
   stepId: z.string(),
-  contextOverride: z.record(z.any()).optional(),
+  contextOverride: z.record(z.unknown()).optional(),
 });
 export type RunStepCommand = z.infer<typeof RunStepCommandSchema>;
 
 export const TestWorkflowCommandSchema = z.object({
   workflowYaml: z.string(),
-  inputs: z.record(z.any()),
+  inputs: z.record(z.unknown()),
 });
 export type TestWorkflowCommand = z.infer<typeof TestWorkflowCommandSchema>;
 
@@ -340,3 +340,85 @@ export interface WorkflowAggsDto {
     label: string;
   }[];
 }
+
+export interface ConnectorSubAction {
+  name: string;
+  displayName: string;
+}
+
+export interface ConnectorInstance {
+  id: string;
+  name: string;
+  isPreconfigured: boolean;
+  isDeprecated: boolean;
+}
+
+export interface ConnectorTypeInfo {
+  actionTypeId: string;
+  displayName: string;
+  instances: ConnectorInstance[];
+  enabled: boolean;
+  enabledInConfig: boolean;
+  enabledInLicense: boolean;
+  minimumLicenseRequired: string;
+  subActions: ConnectorSubAction[];
+}
+
+export type ConnectorTypeInfoMinimal = Pick<ConnectorTypeInfo, 'actionTypeId' | 'displayName'>;
+
+export interface ConnectorContract {
+  type: string;
+  paramsSchema: z.ZodType;
+  connectorIdRequired?: boolean;
+  connectorId?: z.ZodType;
+  outputSchema: z.ZodType;
+  description?: string;
+  summary?: string;
+  instances?: ConnectorInstance[];
+}
+
+export interface DynamicConnectorContract extends ConnectorContract {
+  /** Action type ID from Kibana actions plugin */
+  actionTypeId: string;
+  /** Available connector instances */
+  instances: Array<{
+    id: string;
+    name: string;
+    isPreconfigured: boolean;
+    isDeprecated: boolean;
+  }>;
+  /** Whether this connector type is enabled */
+  enabled?: boolean;
+  /** Whether this is a system action type */
+  isSystemActionType?: boolean;
+}
+
+export interface InternalConnectorContract extends ConnectorContract {
+  /** HTTP method(s) for this API endpoint */
+  methods?: string[];
+  /** Summary for this API endpoint */
+  summary?: string;
+  /** URL pattern(s) for this API endpoint */
+  patterns?: string[];
+  /** Whether this is an internal connector with hardcoded endpoint details */
+  isInternal?: boolean;
+  /** Documentation URL for this API endpoint */
+  documentation?: string | null;
+  /** Parameter type metadata for proper request building */
+  parameterTypes?: {
+    pathParams?: string[];
+    urlParams?: string[];
+    bodyParams?: string[];
+  };
+}
+
+export interface ConnectorExamples {
+  params?: Record<string, string>;
+  snippet?: string;
+}
+
+export interface EnhancedInternalConnectorContract extends InternalConnectorContract {
+  examples?: ConnectorExamples;
+}
+
+export type ConnectorContractUnion = DynamicConnectorContract | EnhancedInternalConnectorContract;

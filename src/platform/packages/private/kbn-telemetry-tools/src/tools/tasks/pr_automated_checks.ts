@@ -117,13 +117,17 @@ function validateSchemaDiff(
       }
 
       // Modified field. Make sure that the description is present
-      if (!newSchema._meta?.description) {
-        errors.push(`The _meta.description of ${fullKey} is missing. Please add it.`);
+      if (newSchema.type !== 'array' && !newSchema._meta?.description) {
+        errors.push(
+          `The _meta.description of ${fullKey} is missing. Please add it in the '.ts' file where you updated the field, and then run the 'scripts/telemetry_check --fix' to automatically update the JSON files.`
+        );
       }
     } else {
       // New field. Make sure that the description is present
-      if (!newSchema._meta?.description) {
-        errors.push(`The _meta.description of ${fullKey} is missing. Please add it.`);
+      if (newSchema.type !== 'array' && !newSchema._meta?.description) {
+        errors.push(
+          `The _meta.description of ${fullKey} is missing. Please add it in the '.ts' file where you added the new field, and then run the 'scripts/telemetry_check --fix' to automatically update the JSON files.`
+        );
       }
     }
   } else {

@@ -9,9 +9,10 @@
 
 import type { GraphEdge } from '@dagrejs/dagre';
 import { graphlib } from '@dagrejs/dagre';
-import type { GraphNodeUnion } from '../types';
-import { convertToWorkflowGraph } from '../build_execution_graph/build_execution_graph';
 import { createTypedGraph } from './create_typed_graph';
+import type { WorkflowYaml } from '../..';
+import { convertToWorkflowGraph } from '../build_execution_graph/build_execution_graph';
+import type { GraphNodeUnion } from '../types';
 
 /**
  * A class that encapsulates the logic of workflow graph operations and provides
@@ -36,8 +37,8 @@ export class WorkflowGraph {
     this.graph = graph;
   }
 
-  public static fromWorkflowDefinition(workflowDefinition: any): WorkflowGraph {
-    return new WorkflowGraph(convertToWorkflowGraph(workflowDefinition));
+  public static fromWorkflowDefinition(workflowDefinition: Record<string, unknown>): WorkflowGraph {
+    return new WorkflowGraph(convertToWorkflowGraph(workflowDefinition as WorkflowYaml)); // TODO: use the correct type in the parameter
   }
 
   public get topologicalOrder(): string[] {
@@ -90,6 +91,7 @@ export class WorkflowGraph {
   public getStepGraph(stepId: string): WorkflowGraph {
     // Find the boundaries of the step in topological order
     const beginNodeIndex = this.topologicalOrder.findIndex(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (id) => (this.getNode(id) as any).stepId === stepId
     );
 
@@ -101,6 +103,7 @@ export class WorkflowGraph {
     let endNodeIndex = -1;
     for (let i = this.topologicalOrder.length - 1; i >= beginNodeIndex; i--) {
       const nodeId = this.topologicalOrder[i];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if ((this.getNode(nodeId) as any).stepId === stepId) {
         endNodeIndex = i;
         break;

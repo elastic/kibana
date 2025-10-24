@@ -25,10 +25,10 @@ interface UseRegisterKeyboardCommandsReturn {
 }
 
 export function useRegisterKeyboardCommands(): UseRegisterKeyboardCommandsReturn {
-  const actionsMenuAction = useRef<monaco.IDisposable[]>([]);
+  const keyboardActions = useRef<monaco.IDisposable[]>([]);
 
   const unregisterKeyboardCommands = useCallback(() => {
-    actionsMenuAction.current.forEach((action) => action.dispose());
+    keyboardActions.current.forEach((action) => action.dispose());
   }, []);
 
   const registerKeyboardCommands = useCallback(
@@ -37,7 +37,7 @@ export function useRegisterKeyboardCommands(): UseRegisterKeyboardCommandsReturn
 
       const { editor, openActionsPopover, save, run, saveAndRun } = params;
 
-      actionsMenuAction.current = [
+      keyboardActions.current = [
         // Toggle comments action
         // This addresses keyboard layout issues where Ctrl+/ doesn't work on non-US layouts
         // See: https://github.com/microsoft/monaco-editor/issues/1233

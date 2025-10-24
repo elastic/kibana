@@ -146,7 +146,6 @@ const alertsMockData = {
 
 export const Default: Story = {
   args: {
-    title: 'Step Execution Data View',
     mode: 'input',
     stepExecution: {
       ...stepExecution,
@@ -157,7 +156,6 @@ export const Default: Story = {
 
 export const ArrayData: Story = {
   args: {
-    title: 'Step Execution Data',
     mode: 'input',
     stepExecution: {
       ...stepExecution,
@@ -186,7 +184,6 @@ export const ArrayData: Story = {
 
 export const Empty: Story = {
   args: {
-    title: 'Step Execution Data',
     mode: 'input',
     stepExecution: {
       ...stepExecution,

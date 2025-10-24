@@ -22,7 +22,7 @@ import { ML_DETECTOR_RULE_CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from './detector_
 export enum ML_ENTITY_FIELD_TYPE {
   BY = 'by',
   OVER = 'over',
-  PARTITON = 'partition',
+  PARTITION = 'partition',
 }
 
 /**
@@ -229,7 +229,7 @@ export function getEntityFieldList(record: MlAnomalyRecordDoc): MlEntityField[] 
     entityFields.push({
       fieldName: record.partition_field_name,
       fieldValue: record.partition_field_value,
-      fieldType: ML_ENTITY_FIELD_TYPE.PARTITON,
+      fieldType: ML_ENTITY_FIELD_TYPE.PARTITION,
     });
   }
 

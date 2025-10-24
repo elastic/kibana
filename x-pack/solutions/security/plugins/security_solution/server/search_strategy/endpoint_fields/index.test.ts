@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import type {
-  SearchStrategyDependencies,
-  DataViewsServerPluginStart,
-} from '@kbn/data-plugin/server';
+import type { SearchStrategyDependencies } from '@kbn/data-plugin/server';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { fieldsBeat as beatFields } from '@kbn/timelines-plugin/server/utils/beat_schema/fields.json';
-import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
+import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import { requestEndpointFieldsSearch } from '.';
 import { createMockEndpointAppContextService } from '../../endpoint/mocks';
 import { getEndpointAuthzInitialStateMock } from '../../../common/endpoint/service/authz/mocks';

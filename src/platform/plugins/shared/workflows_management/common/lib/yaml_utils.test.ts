@@ -15,12 +15,12 @@ import {
   formatValidationError,
   getStepNodeAtPosition,
 } from './yaml_utils';
-import type { ConnectorContract, WorkflowYaml } from '@kbn/workflows';
+import type { ConnectorContractUnion, WorkflowYaml } from '@kbn/workflows';
 import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
 import { YAMLMap, parseDocument } from 'yaml';
 
 describe('parseWorkflowYamlToJSON', () => {
-  const mockConnectors: ConnectorContract[] = [
+  const mockConnectors: ConnectorContractUnion[] = [
     {
       type: 'noop',
       paramsSchema: z.object({

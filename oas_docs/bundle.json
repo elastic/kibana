@@ -20669,6 +20669,9 @@
                     "isReady": {
                       "type": "boolean"
                     },
+                    "is_action_secrets_storage_enabled": {
+                      "type": "boolean"
+                    },
                     "is_secrets_storage_enabled": {
                       "type": "boolean"
                     },
@@ -25287,6 +25290,9 @@
                               "installed_kibana_space_id": {
                                 "type": "string"
                               },
+                              "is_rollback_ttl_expired": {
+                                "type": "boolean"
+                              },
                               "latest_executed_state": {
                                 "additionalProperties": true,
                                 "properties": {
@@ -27476,6 +27482,9 @@
                             "installed_kibana_space_id": {
                               "type": "string"
                             },
+                            "is_rollback_ttl_expired": {
+                              "type": "boolean"
+                            },
                             "latest_executed_state": {
                               "additionalProperties": true,
                               "properties": {
@@ -28443,6 +28452,9 @@
                             },
                             "installed_kibana_space_id": {
                               "type": "string"
+                            },
+                            "is_rollback_ttl_expired": {
+                              "type": "boolean"
                             },
                             "latest_executed_state": {
                               "additionalProperties": true,

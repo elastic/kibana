@@ -26,15 +26,21 @@ import type {
   WorkflowExecutionListDto,
   WorkflowListDto,
   WorkflowYaml,
-} from '@kbn/workflows';
-import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
-import type {
   ExecutionStatus,
   ExecutionType,
   WorkflowAggsDto,
   WorkflowStatsDto,
-} from '@kbn/workflows/types/v1';
+  ConnectorTypeInfo,
+} from '@kbn/workflows';
+import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
 import { v4 as generateUuid } from 'uuid';
+import type { z } from '@kbn/zod';
+import type { FindActionResult } from '@kbn/actions-plugin/server/types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { ActionsClient, IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
+import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import { UNSUPPORTED_CONNECTOR_TYPES } from '../../common';
+import { CONNECTOR_SUB_ACTIONS_MAP } from '../../common/connector_sub_actions_map';
 import {
   WORKFLOWS_EXECUTION_LOGS_INDEX,
   WORKFLOWS_EXECUTIONS_INDEX,
@@ -56,6 +62,7 @@ import { searchWorkflowExecutions } from './lib/search_workflow_executions';
 import type { IWorkflowEventLogger, LogSearchResult } from './lib/workflow_logger';
 import { SimpleWorkflowLogger } from './lib/workflow_logger';
 import type {
+  GetAvailableConnectorsResponse,
   GetExecutionLogsParams,
   GetStepExecutionParams,
   GetStepLogsParams,
@@ -78,13 +85,22 @@ export class WorkflowsService {
   private readonly logger: Logger;
   private workflowEventLoggerService: SimpleWorkflowLogger | null = null;
   private security?: SecurityServiceStart;
+  private getActionsClient: () => Promise<IUnsecuredActionsClient>;
+  private getActionsClientWithRequest: (
+    request: KibanaRequest
+  ) => Promise<PublicMethodsOf<ActionsClient>>;
 
   constructor(
     esClientPromise: Promise<ElasticsearchClient>,
     logger: Logger,
-    enableConsoleLogging: boolean = false
+    enableConsoleLogging: boolean = false,
+    getActionsStart: () => Promise<ActionsPluginStartContract>
   ) {
     this.logger = logger;
+    this.getActionsClient = () =>
+      getActionsStart().then((actions) => actions.getUnsecuredActionsClient());
+    this.getActionsClientWithRequest = (request: KibanaRequest) =>
+      getActionsStart().then((actions) => actions.getActionsClientWithRequest(request));
     void this.initialize(esClientPromise, enableConsoleLogging);
   }
 
@@ -155,7 +171,10 @@ export class WorkflowsService {
       throw new Error('WorkflowsService not initialized');
     }
 
-    const parsedYaml = parseWorkflowYamlToJSON(workflow.yaml, getWorkflowZodSchemaLoose());
+    const parsedYaml = parseWorkflowYamlToJSON(
+      workflow.yaml,
+      await this.getWorkflowZodSchema({ loose: true }, spaceId, request)
+    );
     if (!parsedYaml.success) {
       throw new Error('Invalid workflow yaml: ' + parsedYaml.error.message);
     }
@@ -262,7 +281,10 @@ export class WorkflowsService {
       if (workflow.yaml) {
         // we always update the yaml, even if it's not valid, to allow users to save draft
         updatedData.yaml = workflow.yaml;
-        const parsedYaml = parseWorkflowYamlToJSON(workflow.yaml, getWorkflowZodSchema());
+        const parsedYaml = parseWorkflowYamlToJSON(
+          workflow.yaml,
+          await this.getWorkflowZodSchema({ loose: false }, spaceId, request)
+        );
         if (!parsedYaml.success) {
           updatedData.definition = undefined;
           updatedData.enabled = false;
@@ -465,7 +487,7 @@ export class WorkflowsService {
     const { limit = 20, page = 1, enabled, createdBy, query } = params;
     const from = (page - 1) * limit;
 
-    const must: any[] = [];
+    const must: estypes.QueryDslQueryContainer[] = [];
 
     // Filter by spaceId
     must.push({ term: { spaceId } });
@@ -1026,5 +1048,74 @@ export class WorkflowsService {
 
   private generateWorkflowId(): string {
     return `workflow-${generateUuid()}`;
+  }
+
+  public async getAvailableConnectors(
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<GetAvailableConnectorsResponse> {
+    const actionsClient = await this.getActionsClient();
+    const actionsClientWithRequest = await this.getActionsClientWithRequest(request);
+
+    // Get both connectors and action types
+    const [connectors, actionTypes] = await Promise.all([
+      actionsClient.getAll(spaceId),
+      actionsClientWithRequest.listTypes({ includeSystemActionTypes: false }),
+    ]);
+
+    // Note: We now get display names directly from actionTypes, no need for the map
+
+    // Initialize connectorsByType with ALL available action types
+    const connectorsByType: Record<string, ConnectorTypeInfo> = {};
+
+    // First, add all action types (even those without instances), excluding filtered types
+    actionTypes.forEach((actionType) => {
+      // Skip filtered connector types
+      if (UNSUPPORTED_CONNECTOR_TYPES.includes(actionType.id)) {
+        return;
+      }
+
+      // Get sub-actions from our static mapping
+      const subActions = CONNECTOR_SUB_ACTIONS_MAP[actionType.id];
+
+      connectorsByType[actionType.id] = {
+        actionTypeId: actionType.id,
+        displayName: actionType.name,
+        instances: [],
+        enabled: actionType.enabled,
+        enabledInConfig: actionType.enabledInConfig,
+        enabledInLicense: actionType.enabledInLicense,
+        minimumLicenseRequired: actionType.minimumLicenseRequired,
+        ...(subActions && { subActions }),
+      };
+    });
+
+    // Then, populate instances for action types that have connectors
+    connectors.forEach((connector: FindActionResult) => {
+      if (connectorsByType[connector.actionTypeId]) {
+        connectorsByType[connector.actionTypeId].instances.push({
+          id: connector.id,
+          name: connector.name,
+          isPreconfigured: connector.isPreconfigured,
+          isDeprecated: connector.isDeprecated,
+        });
+      }
+    });
+
+    return { connectorsByType, totalConnectors: connectors.length };
+  }
+
+  public async getWorkflowZodSchema(
+    options: {
+      loose: boolean;
+    },
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<z.ZodType> {
+    const { connectorsByType } = await this.getAvailableConnectors(spaceId, request);
+    if (options.loose) {
+      return getWorkflowZodSchemaLoose(connectorsByType);
+    }
+    return getWorkflowZodSchema(connectorsByType);
   }
 }

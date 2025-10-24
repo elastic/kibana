@@ -18,5 +18,7 @@
     "@kbn/core-saved-objects-common",
     "@kbn/esql-utils",
     "@kbn/config-schema",
+    "@kbn/coloring",
+    "@kbn/content-management-utils",
   ]
 }

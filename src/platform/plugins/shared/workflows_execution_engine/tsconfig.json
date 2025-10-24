@@ -9,7 +9,8 @@
     "public/**/*",
     "server/**/*",
     "../../../../../typings/**/*",
-    ".storybook/**/*"
+    ".storybook/**/*",
+    "integration_tests/**/*"
   ],
   "kbn_references": [
     "@kbn/core",

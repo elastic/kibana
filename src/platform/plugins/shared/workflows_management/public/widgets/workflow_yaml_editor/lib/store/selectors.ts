@@ -27,6 +27,11 @@ export const selectYamlDocument = createSelector(
   (computed) => computed?.yamlDocument
 );
 
+export const selectYamlLineCounter = createSelector(
+  selectComputedState,
+  (computed) => computed?.yamlLineCounter
+);
+
 export const selectWorkflowLookup = createSelector(
   selectComputedState,
   (computed) => computed?.workflowLookup
@@ -35,6 +40,11 @@ export const selectWorkflowLookup = createSelector(
 export const selectWorkflowGraph = createSelector(
   selectComputedState,
   (computed) => computed?.workflowGraph
+);
+
+export const selectWorkflowDefinition = createSelector(
+  selectComputedState,
+  (computed) => computed?.workflowDefinition
 );
 
 export const selectFocusedStepId = createSelector(

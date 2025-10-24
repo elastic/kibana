@@ -65,7 +65,6 @@ describe('When using `useAlertResponseActionsSupport()` hook', () => {
 
     // Enable feature flags by default
     appContextMock.setExperimentalFlag({
-      responseActionsCrowdstrikeManualHostIsolationEnabled: true,
       responseActionsMSDefenderEndpointEnabled: true,
     });
 
@@ -183,10 +182,8 @@ describe('When using `useAlertResponseActionsSupport()` hook', () => {
         // SentinelOne is always enabled now
         return;
       case 'crowdstrike':
-        appContextMock.setExperimentalFlag({
-          responseActionsCrowdstrikeManualHostIsolationEnabled: false,
-        });
-        break;
+        // Crowdstrike is always enabled now
+        return;
       case 'microsoft_defender_endpoint':
         appContextMock.setExperimentalFlag({
           responseActionsMSDefenderEndpointEnabled: false,

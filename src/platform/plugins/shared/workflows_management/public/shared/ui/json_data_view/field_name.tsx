@@ -17,37 +17,13 @@ interface FieldNameProps {
   highlight?: string;
 }
 
-export function FieldName({ fieldName, fieldType, highlight = '' }: FieldNameProps) {
-  const fieldDisplayName = fieldName;
-
-  return (
-    <EuiFlexGroup responsive={false} gutterSize="s" alignItems="flexStart">
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup
-          gutterSize="s"
-          responsive={false}
-          alignItems="center"
-          direction="row"
-          wrap={false}
-          className="kbnDocViewer__fieldName_icon"
-        >
-          <EuiFlexItem grow={false}>
-            <FieldIcon type={fieldType} size="s" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-
-      <EuiFlexItem>
-        <EuiFlexGroup gutterSize="none" responsive={false} alignItems="center" direction="row" wrap>
-          <EuiFlexItem
-            className="kbnDocViewer__fieldName eui-textBreakAll"
-            grow={false}
-            data-test-subj={`tableDocViewRow-${fieldName}-name`}
-          >
-            <EuiHighlight search={highlight}>{fieldDisplayName}</EuiHighlight>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-}
+export const FieldName = React.memo<FieldNameProps>(({ fieldName, fieldType, highlight = '' }) => (
+  <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+    <EuiFlexItem grow={false}>
+      <FieldIcon type={fieldType} size="s" />
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <EuiHighlight search={highlight}>{fieldName}</EuiHighlight>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+));

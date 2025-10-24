@@ -18,13 +18,27 @@ export class ConnectorExecutor {
     connectorType: string,
     connectorName: string,
     inputs: Record<string, any>,
-    spaceId: string
+    spaceId: string,
+    abortController: AbortController
   ): Promise<ActionTypeExecutorResult<unknown>> {
     if (!connectorType) {
       throw new Error('Connector type is required');
     }
 
-    return await this.runConnector(connectorName, inputs, spaceId);
+    const runConnectorPromise = this.runConnector(connectorName, inputs, spaceId);
+    const abortPromise = new Promise<void>((resolve, reject) => {
+      abortController.signal.addEventListener('abort', () =>
+        reject(new Error(`"${connectorName}" with type "${connectorType}" was aborted`))
+      );
+    });
+
+    // If the abort signal is triggered, the abortPromise will reject first
+    // Otherwise, the runConnectorPromise will resolve first
+    // This ensures that we handle cancellation properly.
+    // This is a workaround for the fact that connectors do not natively support cancellation.
+    // In the future, if connectors support cancellation, we can remove this logic.
+    await Promise.race([abortPromise, runConnectorPromise]);
+    return await runConnectorPromise;
   }
 
   private async runConnector(

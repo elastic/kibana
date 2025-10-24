@@ -21,7 +21,10 @@ import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { WorkflowStepExecutionDetails } from './workflow_step_execution_details';
 import { useWorkflowExecutionPolling } from './hooks/use_workflow_execution_polling';
 import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
-import { getWorkflowZodSchemaLoose } from '../../../../common/schema';
+import {
+  getCachedDynamicConnectorTypes,
+  getWorkflowZodSchemaLoose,
+} from '../../../../common/schema';
 import { WorkflowStepExecutionList } from './workflow_execution_list';
 
 const WidthStorageKey = 'WORKFLOWS_EXECUTION_DETAILS_WIDTH';
@@ -41,8 +44,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = (
   onClose,
 }) => {
   const { workflowExecution, isLoading, error } = useWorkflowExecutionPolling(workflowExecutionId);
-  const { setSelectedStepExecution, selectedStepExecutionId, setSelectedStep } =
-    useWorkflowUrlState();
+  const { setSelectedStepExecution, selectedStepExecutionId } = useWorkflowUrlState();
   const [sidebarWidth = DefaultSidebarWidth, setSidebarWidth] = useLocalStorage(
     WidthStorageKey,
     DefaultSidebarWidth
@@ -69,7 +71,11 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = (
     if (workflowExecution) {
       return workflowExecution.workflowDefinition;
     }
-    const parsingResult = parseWorkflowYamlToJSON(workflowYaml, getWorkflowZodSchemaLoose());
+    const dynamicConnectorTypes = getCachedDynamicConnectorTypes() || {};
+    const parsingResult = parseWorkflowYamlToJSON(
+      workflowYaml,
+      getWorkflowZodSchemaLoose(dynamicConnectorTypes)
+    );
     if (!parsingResult.success) {
       return null;
     }
@@ -106,7 +112,6 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = (
           <WorkflowStepExecutionDetails
             workflowExecutionId={workflowExecutionId}
             stepExecution={selectedStepExecution}
-            setSelectedStepId={setSelectedStep}
             isLoading={isLoading}
           />
         }

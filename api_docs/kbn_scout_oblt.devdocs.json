@@ -3525,7 +3525,7 @@
             "label": "elasticsearch",
             "description": [],
             "signature": [
-              "{ cluster: string[]; indices: { names: string[]; privileges: string[]; allow_restricted_indices?: boolean | undefined; }[]; }"
+              "{ cluster: string[]; indices?: { names: string[]; privileges: string[]; allow_restricted_indices?: boolean | undefined; }[] | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/common/services/custom_role.ts",
             "deprecated": false,

@@ -9,12 +9,9 @@ import { from } from 'rxjs';
 import { isEmpty, get } from 'lodash';
 import deepmerge from 'deepmerge';
 import type { ElasticsearchClient, StartServicesAccessor } from '@kbn/core/server';
-import type {
-  DataViewsServerPluginStart,
-  ISearchStrategy,
-  SearchStrategyDependencies,
-} from '@kbn/data-plugin/server';
-import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
+import type { ISearchStrategy, SearchStrategyDependencies } from '@kbn/data-plugin/server';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { DELETED_SECURITY_SOLUTION_DATA_VIEW } from '../../../common/constants';
