@@ -9295,6 +9295,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/workplace-ai-connectors-plugin@link:x-pack/solutions/workplace_ai/plugins/workplace_ai_connectors":
+  version "0.0.0"
+  uid ""
+
 "@kbn/workspaces@link:src/platform/packages/shared/kbn-workspaces":
   version "0.0.0"
   uid ""
