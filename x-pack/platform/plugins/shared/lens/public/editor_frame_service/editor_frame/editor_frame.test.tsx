@@ -144,7 +144,7 @@ describe('editor_frame', () => {
           visualization: {
             activeId: mockVisualization.id,
             state: 'initialState',
-            selectedLayerId: null,
+            selectedLayerId: 'layer1',
           },
           datasourceStates: {
             testDatasource: {
