@@ -18,6 +18,12 @@ export enum ToolResultType {
 
 interface ToolResultMixin<TType extends ToolResultType, TData extends Object> {
   tool_result_id: string;
+  // TODO: actually do that.
+  /**
+   * if this tool result is supposed to update/replace an existing artifact,
+   * the id of the artifact to update.
+   */
+  artifact_id?: string;
   type: TType;
   data: TData;
 }

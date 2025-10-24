@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { ConversationWithoutRounds } from '@kbn/onechat-common';
 import {
   type UserIdAndName,
@@ -16,9 +17,10 @@ import type {
   ConversationCreateRequest,
   ConversationUpdateRequest,
   ConversationListOptions,
-} from '../../../common/conversations';
-import { createSpaceDslFilter } from '../../utils/spaces';
+} from '../../../../common/conversations';
+import { createSpaceDslFilter } from '../../../utils/spaces';
 import type { ConversationStorage } from './storage';
+import { createStorage } from './storage';
 import {
   fromEs,
   fromEsWithoutRounds,
@@ -39,13 +41,16 @@ export interface ConversationClient {
 
 export const createClient = ({
   space,
-  storage,
+  logger,
+  esClient,
   user,
 }: {
   space: string;
-  storage: ConversationStorage;
+  logger: Logger;
+  esClient: ElasticsearchClient;
   user: UserIdAndName;
 }): ConversationClient => {
+  const storage = createStorage({ logger, esClient });
   return new ConversationClientImpl({ storage, user, space });
 };
 

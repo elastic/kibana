@@ -19,7 +19,7 @@ import { getToolResultId } from '@kbn/onechat-server';
 import type {
   ConversationCreateRequest,
   ConversationUpdateRequest,
-} from '../../../common/conversations';
+} from '../../../../common/conversations';
 import type { ConversationProperties } from './storage';
 import type { PersistentConversationRound, PersistentConversationRoundStep } from './types';
 
