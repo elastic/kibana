@@ -14,11 +14,9 @@ import type {
   FormBasedPersistedState,
   GenericIndexPatternColumn,
   PersistedIndexPatternLayer,
-} from '@kbn/lens-plugin/public';
-import type {
   TextBasedLayerColumn,
   TextBasedPersistedState,
-} from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
+} from '@kbn/lens-common';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { Reference } from '@kbn/content-management-utils';
