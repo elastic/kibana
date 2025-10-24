@@ -1,0 +1,16 @@
+{
+  "type": "plugin",
+  "id": "@kbn/workplace-ai-connectors-plugin",
+  "owner": "@elastic/workchat-eng",
+  "group": "workplace_ai",
+  "visibility": "private",
+  "plugin": {
+    "id": "workplaceAIConnectors",
+    "browser": true,
+    "server": true,
+    "configPath": ["xpack", "workplaceAIConnectors"],
+    "requiredPlugins": [],
+    "optionalPlugins": [],
+    "requiredBundles": ["kibanaReact"],
+  }
+}

@@ -7,16 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ONECHAT_APP_ID, WORKPLACE_AI_APP_ID } from './constants';
-
-export type WorkplaceAIApp = typeof WORKPLACE_AI_APP_ID;
-export type OnechatApp = typeof ONECHAT_APP_ID;
-
-export type WorkplaceAILinkId = 'agents' | 'integrations';
-export type OnechatLinkId = 'conversations' | 'tools' | 'agents';
-
-export type DeepLinkId =
-  | WorkplaceAIApp
-  | `${WorkplaceAIApp}:${WorkplaceAILinkId}`
-  | OnechatApp
-  | `${OnechatApp}:${OnechatLinkId}`;
+export { WORKPLACE_AI_APP_ID } from './constants';
+export type { WorkplaceAIApp, DeepLinkId } from './deep_links';

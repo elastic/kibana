@@ -20,7 +20,8 @@
     "requiredPlugins": [
       "serverless",
       "onechat",
-      "workflowsManagement"
+      "workflowsManagement",
+      "workplaceAIConnectors"
     ],
     "optionalPlugins": [],
     "requiredBundles": []
