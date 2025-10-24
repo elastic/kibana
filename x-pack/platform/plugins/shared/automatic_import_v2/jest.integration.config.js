@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-/**
- * The identifier in a saved object's `namespaces` array when it is shared to an unknown space (e.g., one that the end user is not authorized to see).
- */
-export const UNKNOWN_SPACE = '?';
-
-export const ALL_SPACES_ID = '*';
+module.exports = {
+  preset: '@kbn/test/jest_integration',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/platform/plugins/shared/automatic_import_v2'],
+};
