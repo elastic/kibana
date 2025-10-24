@@ -26,22 +26,6 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
             title: 'Home',
           },
           {
-            link: 'discover',
-            spaceBefore: 'l',
-          },
-          {
-            link: 'dashboards',
-            getIsActive: ({ pathNameSerialized, prepend }) => {
-              return pathNameSerialized.startsWith(prepend('/app/dashboards'));
-            },
-          },
-          {
-            iconV2: agentsIcon, // Temp svg until we have icon in EUI
-            link: 'agent_builder',
-            withBadge: true,
-            badgeTypeV2: 'techPreview',
-          },
-          {
             link: 'workflows',
             withBadge: true,
             badgeTypeV2: 'techPreview' as const,
@@ -51,6 +35,22 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
                 defaultMessage:
                   'This functionality is experimental and not supported. It may change or be removed at any time.',
               }),
+            },
+          },
+          {
+            iconV2: agentsIcon, // Temp svg until we have icon in EUI
+            link: 'agent_builder',
+            withBadge: true,
+            badgeTypeV2: 'techPreview',
+          },
+          {
+            link: 'discover',
+            spaceBefore: 'l',
+          },
+          {
+            link: 'dashboards',
+            getIsActive: ({ pathNameSerialized, prepend }) => {
+              return pathNameSerialized.startsWith(prepend('/app/dashboards'));
             },
           },
         ],

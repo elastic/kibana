@@ -1,7 +1,7 @@
 # Workplace AI Project Config
 
 # Make sure the plugins belonging to this project type are loaded
-plugins.allowlistPluginGroups: ['platform', 'search', 'workplace_ai']
+plugins.allowlistPluginGroups: ['platform', 'workplace_ai']
 
 ## Enable the Serverless Workplace AI plugin
 xpack.serverless.workplaceAI.enabled: true
@@ -14,7 +14,6 @@ uiSettings.overrides.defaultRoute: /app/workplace_ai
 
 ## Enable tech-preview pages
 uiSettings.overrides:
-  agentBuilder:enabled: true
   workflows:ui:enabled: true
 
 ## Enable workplace_ai plugins
