@@ -40,7 +40,7 @@ import {
   computeInterval,
 } from '@kbn/visualization-utils';
 import type { LegendSize } from '@kbn/chart-expressions-common';
-import type { XYConfiguration } from '@kbn/visualizations-plugin/common';
+import type { XYState as XYConfiguration } from '@kbn/lens-common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import { fieldSupportsBreakdown } from '@kbn/field-utils';
 import type { UnifiedHistogramSuggestionContext, UnifiedHistogramVisContext } from '../types';
