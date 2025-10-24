@@ -12,9 +12,14 @@ import type { FtrConfigProviderContext } from '@kbn/test';
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../../../config.base.js'));
   const kbnTestServer = functionalConfig.get('kbnTestServer');
+  const esTestCluster = functionalConfig.get('esTestCluster');
 
   return {
     ...functionalConfig.getAll(),
+    esTestCluster: {
+      ...esTestCluster,
+      license: 'trial', // required to test categorize grouping
+    },
     kbnTestServer: {
       ...kbnTestServer,
       serverArgs: [

@@ -311,7 +311,7 @@ export function useEsqlDataCascadeRowHeaderComponents(
 
       if (/categorize/i.test(type)) {
         return (
-          <React.Fragment>
+          <div data-test-subj={`${rowData.id}-dscCascadeRowTitlePatternCellRenderer`}>
             {getPatternCellRenderer(
               // @ts-expect-error - necessary to match the data shape expectation
               { flattened: rowData },
@@ -319,7 +319,7 @@ export function useEsqlDataCascadeRowHeaderComponents(
               false,
               48
             )}
-          </React.Fragment>
+          </div>
         );
       }
 

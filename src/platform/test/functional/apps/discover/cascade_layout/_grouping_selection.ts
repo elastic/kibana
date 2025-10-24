@@ -11,7 +11,7 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { discover } = getPageObjects(['discover']);
+  const { discover, unifiedTabs } = getPageObjects(['discover', 'unifiedTabs']);
 
   const monacoEditor = getService('monacoEditor');
   const testSubjects = getService('testSubjects');
@@ -30,11 +30,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('querySubmitButton');
       await discover.waitUntilTabIsLoaded();
 
-      expect(await testSubjects.exists('data-cascade')).to.be(true);
-      expect(await testSubjects.exists('discoverEnableCascadeLayoutSwitch')).to.be(true);
+      expect(await discover.isShowingCascadeLayout()).to.be(true);
     });
 
-    it('should switch to back to classic mode from the grouped experience without any errors', async () => {
+    it('should switch back to classic mode from the grouped experience without any errors', async () => {
       await discover.selectTextBaseLang();
       await discover.waitUntilTabIsLoaded();
 
@@ -45,8 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('querySubmitButton');
       await discover.waitUntilTabIsLoaded();
 
-      expect(await testSubjects.exists('data-cascade')).to.be(true);
-      expect(await testSubjects.exists('discoverEnableCascadeLayoutSwitch')).to.be(true);
+      expect(await discover.isShowingCascadeLayout()).to.be(true);
 
       await testSubjects.click('switch-to-dataviews');
     });
@@ -62,7 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('querySubmitButton');
       await discover.waitUntilTabIsLoaded();
 
-      expect(await testSubjects.exists('discoverEnableCascadeLayoutSwitch')).to.be(true);
+      expect(await discover.isShowingCascadeLayout()).to.be(true);
 
       await testSubjects.click('discoverEnableCascadeLayoutSwitch');
 
@@ -72,7 +70,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await discover.waitUntilTabIsLoaded();
 
-      expect(await testSubjects.exists('data-cascade')).not.to.be(true);
+      expect(await discover.isShowingCascadeLayout()).to.be(false);
     });
 
     it('should display row action context menu when row context action button is clicked', async () => {
@@ -86,15 +84,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('querySubmitButton');
       await discover.waitUntilTabIsLoaded();
 
-      expect(await testSubjects.exists('data-cascade')).to.be(true);
-      expect(await testSubjects.exists('discoverEnableCascadeLayoutSwitch')).to.be(true);
+      expect(await discover.isShowingCascadeLayout()).to.be(true);
 
       // click the first group row context action button
       await find.clickByCssSelector('[data-test-subj*="dscCascadeRowContextActionButton"]');
       expect(await testSubjects.exists('dscCascadeRowContextActionMenu')).to.be(true);
     });
 
-    it('should copy to clipboard when copy to clipboard context menu item is clicked', async () => {
+    it('should copy to clipboard when "copy to clipboard" context menu item is clicked', async () => {
       await discover.selectTextBaseLang();
       await discover.waitUntilTabIsLoaded();
 
@@ -105,8 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('querySubmitButton');
       await discover.waitUntilTabIsLoaded();
 
-      expect(await testSubjects.exists('data-cascade')).to.be(true);
-      expect(await testSubjects.exists('discoverEnableCascadeLayoutSwitch')).to.be(true);
+      expect(await discover.isShowingCascadeLayout()).to.be(true);
 
       // click the first group row context action button
       await find.clickByCssSelector('[data-test-subj*="dscCascadeRowContextActionButton"]');
@@ -123,6 +119,64 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // expect the clipboard text to be a valid IP address pattern
         expect(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(clipboardText)).to.be(true);
       }
+    });
+
+    describe('categorize', () => {
+      const statsQueryWithCategorize =
+        'FROM logstash-* | STATS count = COUNT(bytes), average = AVG(memory) BY CATEGORIZE(@message)';
+
+      it('should render categorize grouping using the pattern cell renderer', async () => {
+        await discover.selectTextBaseLang();
+        await discover.waitUntilTabIsLoaded();
+
+        // Type in an ESQL query that will trigger the cascade layout, for categorization
+        await monacoEditor.setCodeEditorValue(statsQueryWithCategorize);
+        await testSubjects.click('querySubmitButton');
+        await discover.waitUntilTabIsLoaded();
+
+        expect(await discover.isShowingCascadeLayout()).to.be(true);
+
+        // assert that for categorize rows, the pattern cell renderer is used
+        expect(
+          (await testSubjects.findAll('*-dscCascadeRowTitlePatternCellRenderer')).length
+        ).to.be.greaterThan(0);
+      });
+
+      it('should have the open in new tab action in the row context menu', async () => {
+        await discover.selectTextBaseLang();
+        await discover.waitUntilTabIsLoaded();
+
+        // Type in an ESQL query that will trigger the cascade layout
+        await monacoEditor.setCodeEditorValue(statsQueryWithCategorize);
+        await testSubjects.click('querySubmitButton');
+        await discover.waitUntilTabIsLoaded();
+
+        expect(await discover.isShowingCascadeLayout()).to.be(true);
+
+        const tabCount = await unifiedTabs.getNumberOfTabs();
+        expect(tabCount).to.be(1);
+
+        // click the first group row context action button
+        await find.clickByCssSelector('[data-test-subj*="dscCascadeRowContextActionButton"]');
+        expect(await testSubjects.exists('dscCascadeRowContextActionMenu')).to.be(true);
+
+        expect(await testSubjects.exists('dscCascadeRowContextActionOpenInNewTab')).to.be(true);
+
+        await testSubjects.click('dscCascadeRowContextActionOpenInNewTab');
+
+        expect(await unifiedTabs.getNumberOfTabs()).to.be(tabCount + 1);
+        expect(await discover.isShowingCascadeLayout()).to.be(false);
+
+        const newTabQuery = await monacoEditor.getCodeEditorValue();
+        expect(newTabQuery).not.to.be(statsQueryWithCategorize);
+
+        // assert new tab query contains the correct match query for the categorize function in the new tab
+        expect(
+          /FROM logstash-\* \| WHERE MATCH\(@message, .*, \{"auto_generate_synonyms_phrase_query": FALSE, "fuzziness": 0, "operator": "AND"\}\)/.test(
+            newTabQuery
+          )
+        ).to.be(true);
+      });
     });
   });
 }
