@@ -687,7 +687,7 @@ export async function pickTestGroupRunOrder() {
       }
 
       // Provide multiple machine type options, sorted largest to smallest
-      const machineTypes = ['n2-standard-8', 'n2-standard-4'].map((typeName) =>
+      const machineTypes = ['n2-8-spot', 'n2-4-spot'].map((typeName) =>
         createMachineDefinition(typeName)
       );
 
