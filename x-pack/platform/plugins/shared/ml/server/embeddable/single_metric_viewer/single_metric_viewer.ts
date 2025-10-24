@@ -9,13 +9,14 @@ import { schema } from '@kbn/config-schema';
 import { filterSchema, querySchema, timeRangeSchema } from '@kbn/es-query-server';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
+import { mlEntityFieldValueSchema } from '@kbn/ml-anomaly-utils/schemas';
 
 const baseUserInputProps = schema.object({
   forecastId: schema.maybe(schema.string()),
   functionDescription: schema.maybe(schema.string()),
   jobIds: schema.arrayOf(schema.string()),
   selectedDetectorIndex: schema.number(),
-  selectedEntities: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+  selectedEntities: schema.maybe(mlEntityFieldValueSchema),
 });
 
 export const singleMetricViewerEmbeddableUserInputSchema = schema.object({
