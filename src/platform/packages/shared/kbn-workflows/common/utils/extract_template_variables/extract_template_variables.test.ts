@@ -20,7 +20,7 @@ describe('extractTemplateVariables', () => {
     `;
 
     const variables = extractTemplateVariables(template);
-    expect(variables).toEqual(['user.name', 'order.id', 'user.isMember']);
+    expect(variables).toEqual(['user.name', 'user.isMember', 'order.id']);
   });
 
   it('should return an empty array if no variables are found', () => {
@@ -45,9 +45,9 @@ describe('extractTemplateVariables', () => {
     const variables = extractTemplateVariables(template);
     expect(variables).toEqual([
       'user.profile.firstName',
-      'order.items[0].name',
       'user.isAdmin',
       'user.getFullName',
+      'order.items[0].name',
     ]);
   });
 
@@ -93,7 +93,7 @@ describe('extractTemplateVariables', () => {
     `;
 
     const variables = extractTemplateVariables(template);
-    expect(variables).toEqual(['user.isActive', 'product.stock', 'user.permissions']);
+    expect(variables).toEqual(['user.isActive', 'user.permissions', 'product.stock']);
   });
 
   it('should handle QuotedToken (string literals)', () => {
@@ -212,7 +212,7 @@ describe('extractTemplateVariables', () => {
     `;
 
     const variables = extractTemplateVariables(template);
-    expect(variables).toEqual(['user.isPremium', 'upgrade.message', 'user.name']);
+    expect(variables).toEqual(['user.isPremium', 'user.name', 'upgrade.message']);
   });
 
   it('should handle case/when statements', () => {
@@ -251,7 +251,7 @@ describe('extractTemplateVariables', () => {
     `;
 
     const variables = extractTemplateVariables(template);
-    expect(variables).toEqual(['user.age', 'user.benefits', 'senior.discount', 'user.name']);
+    expect(variables).toEqual(['user.age', 'user.benefits', 'user.name', 'senior.discount']);
   });
 
   it('should handle capture tag', () => {
@@ -276,7 +276,7 @@ describe('extractTemplateVariables', () => {
     `;
 
     const variables = extractTemplateVariables(template);
-    expect(variables).toEqual(['user.name', 'counter']);
+    expect(variables).toEqual(['user.name']);
   });
 
   it('should handle tablerow tag', () => {
@@ -355,14 +355,14 @@ describe('extractTemplateVariables', () => {
     const variables = extractTemplateVariables(template);
     expect(variables).toEqual([
       'user.age',
-      'minAge',
-      'maxAge',
       'user.isVIP',
       'user.discount',
+      'minAge',
+      'maxAge',
       'product.inStock',
       'product.price',
-      'budget',
       'product.name',
+      'budget',
     ]);
   });
 
@@ -399,7 +399,7 @@ describe('extractTemplateVariables', () => {
     `;
 
     const variables = extractTemplateVariables(template);
-    expect(variables).toEqual(['items', 'forloop.index', 'forloop.first', 'forloop.last']);
+    expect(variables).toEqual(['items']);
   });
 
   it('should handle unless with elsif', () => {
@@ -416,10 +416,10 @@ describe('extractTemplateVariables', () => {
     const variables = extractTemplateVariables(template);
     expect(variables).toEqual([
       'user.isActive',
-      'inactiveMessage',
       'user.isPending',
-      'pendingMessage',
       'user.status',
+      'inactiveMessage',
+      'pendingMessage',
     ]);
   });
 
@@ -521,6 +521,17 @@ describe('extractTemplateVariables', () => {
   it('should handle reversed for loops', () => {
     const template = `
       {% for item in products reversed %}
+        {{ item.name }}
+      {% endfor %}
+    `;
+
+    const variables = extractTemplateVariables(template);
+    expect(variables).toEqual(['products']);
+  });
+
+  it('should handle json_parse filters', () => {
+    const template = `
+      {% for item in products | json_parse %}
         {{ item.name }}
       {% endfor %}
     `;
