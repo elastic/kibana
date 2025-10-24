@@ -119,7 +119,7 @@ export const AddColumnHeader = ({
   const onSubmit = useCallback(
     (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
-      // event.stopPropagation();
+      event.stopPropagation();
 
       if (columnName && !validationError) {
         setEditMode(null);
@@ -191,7 +191,6 @@ export const AddColumnHeader = ({
                 }
               }}
               css={{
-                outline: 'none',
                 '&:focus-within': {
                   outline: 'none',
                 },
