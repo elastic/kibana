@@ -91,7 +91,6 @@ export function registerKibanaFunction({
       );
 
       const copiedHeaderNames = [
-        'authorization',
         'accept-encoding',
         'accept-language',
         'accept',
