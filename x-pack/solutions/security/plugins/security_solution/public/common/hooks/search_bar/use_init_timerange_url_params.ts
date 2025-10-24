@@ -9,8 +9,8 @@ import { useCallback } from 'react';
 import { get, isEmpty } from 'lodash/fp';
 import { useDispatch } from 'react-redux';
 import type { Dispatch } from 'redux';
-import { useIsExperimentalFeatureEnabled } from '../use_experimental_features';
 import type { TimeRangeKinds } from '../../store/inputs/constants';
+import { InputsModelId } from '../../store/inputs/constants';
 import type {
   AbsoluteTimeRange,
   LinkTo,
@@ -22,16 +22,14 @@ import { inputsActions } from '../../store/inputs';
 import { formatDate } from '../../components/super_date_picker';
 import { useInitializeUrlParam } from '../../utils/global_query_string';
 import { URL_PARAM_KEY } from '../use_url_state';
-import { InputsModelId } from '../../store/inputs/constants';
 
 export const useInitTimerangeFromUrlParam = () => {
   const dispatch = useDispatch();
-  const isSocTrendsEnabled = useIsExperimentalFeatureEnabled('socTrendsEnabled');
 
   const onInitialize = useCallback(
     (initialState: UrlInputsModel | null) =>
-      initializeTimerangeFromUrlParam(initialState, dispatch, isSocTrendsEnabled),
-    [dispatch, isSocTrendsEnabled]
+      initializeTimerangeFromUrlParam(initialState, dispatch),
+    [dispatch]
   );
 
   useInitializeUrlParam(URL_PARAM_KEY.timerange, onInitialize);
@@ -39,8 +37,7 @@ export const useInitTimerangeFromUrlParam = () => {
 
 const initializeTimerangeFromUrlParam = (
   initialState: UrlInputsModel | null,
-  dispatch: Dispatch,
-  isSocTrendsEnabled: boolean
+  dispatch: Dispatch
 ) => {
   if (initialState != null) {
     const globalLinkTo: LinkTo = { linkTo: get('global.linkTo', initialState) };
@@ -49,28 +46,11 @@ const initializeTimerangeFromUrlParam = (
     const timelineLinkTo: LinkTo = { linkTo: get('timeline.linkTo', initialState) };
     const timelineTimerangeKind: TimeRangeKinds = get('timeline.timerange.kind', initialState);
 
-    const socTrendsLinkTo: LinkTo = { linkTo: get('socTrends.linkTo', initialState) };
-    const socTrendsType: TimeRangeKinds = get('socTrends.timerange.kind', initialState);
-
     const valueReportType: TimeRangeKinds = get('valueReport.timerange.kind', initialState);
-    if (isSocTrendsEnabled) {
-      if (isEmpty(socTrendsLinkTo.linkTo)) {
-        dispatch(inputsActions.removeLinkTo([InputsModelId.global, InputsModelId.socTrends]));
-      } else {
-        dispatch(inputsActions.addLinkTo([InputsModelId.global, InputsModelId.socTrends]));
-      }
-    }
-
     if (isEmpty(globalLinkTo.linkTo)) {
       dispatch(inputsActions.removeLinkTo([InputsModelId.global, InputsModelId.timeline]));
-      if (isSocTrendsEnabled) {
-        dispatch(inputsActions.removeLinkTo([InputsModelId.global, InputsModelId.socTrends]));
-      }
     } else {
       dispatch(inputsActions.addLinkTo([InputsModelId.global, InputsModelId.timeline]));
-      if (isSocTrendsEnabled) {
-        dispatch(inputsActions.addLinkTo([InputsModelId.global, InputsModelId.socTrends]));
-      }
     }
 
     if (isEmpty(timelineLinkTo.linkTo)) {
@@ -146,39 +126,6 @@ const initializeTimerangeFromUrlParam = (
       }
     }
 
-    if (isSocTrendsEnabled && socTrendsType) {
-      if (socTrendsType === 'absolute') {
-        const absoluteRange = normalizeTimeRange<AbsoluteTimeRange>(
-          get('socTrends.timerange', initialState)
-        );
-
-        dispatch(
-          inputsActions.setAbsoluteRangeDatePicker({
-            ...absoluteRange,
-            id: InputsModelId.socTrends,
-          })
-        );
-      }
-
-      if (socTrendsType === 'relative') {
-        const relativeRange = normalizeTimeRange<RelativeTimeRange>(
-          get('socTrends.timerange', initialState)
-        );
-
-        // Updates date values when timerange is relative
-        relativeRange.from = formatDate(relativeRange.fromStr);
-        relativeRange.to = formatDate(relativeRange.toStr, {
-          roundUp: true,
-        });
-
-        dispatch(
-          inputsActions.setRelativeRangeDatePicker({
-            ...relativeRange,
-            id: InputsModelId.socTrends,
-          })
-        );
-      }
-    }
     if (valueReportType) {
       if (valueReportType === 'absolute') {
         const absoluteRange = normalizeTimeRange<AbsoluteTimeRange>(
