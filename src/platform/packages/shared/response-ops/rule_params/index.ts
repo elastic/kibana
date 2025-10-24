@@ -29,19 +29,17 @@ export {
 export type {
   RuleParams,
   RuleParamsWithDefaultValue,
-  RuleParamsForUpdate,
-  RuleParamsWithDefaultValueForUpdate,
   RuleParamsWithRuleTypeId,
   RuleParamsWithDefaultValueWithRuleTypeId,
+  RuleParamsForUpdate,
+  RuleParamsWithDefaultValueForUpdate,
 } from './latest';
 
 export type {
   RuleParams as RuleParamsV1,
   RuleParamsWithDefaultValue as RuleParamsWithDefaultValueV1,
-  RuleParamsForUpdate as RuleParamsForUpdateV1,
-  RuleParamsWithDefaultValueForUpdate as RuleParamsWithDefaultValueForUpdateV1,
   RuleParamsWithRuleTypeId as RuleParamsWithRuleTypeIdV1,
   RuleParamsWithDefaultValueWithRuleTypeId as RuleParamsWithDefaultValueWithRuleTypeIdV1,
+  RuleParamsForUpdate as RuleParamsForUpdateV1,
+  RuleParamsWithDefaultValueForUpdate as RuleParamsWithDefaultValueForUpdateV1,
 } from './v1';
-
-export { RULE_TYPE_ID } from './v1';
