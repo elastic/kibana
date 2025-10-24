@@ -55,9 +55,9 @@ export const createProfileProviderSharedServices = async ({
   metricsExperience,
 }: ProfileProviderSharedServicesDeps): Promise<ProfileProviderSharedServices> => {
   const [logsContextService, apmContextService, metricsContextService] = await Promise.all([
-    await createLogsContextService({ logsDataAccess }),
-    await createApmContextService({ apmSourcesAccess }),
-    await createMetricsContextService({ metricsExperience }),
+    createLogsContextService({ logsDataAccess }),
+    createApmContextService({ apmSourcesAccess }),
+    createMetricsContextService({ metricsExperience }),
   ]);
 
   return { logsContextService, apmContextService, metricsContextService };
