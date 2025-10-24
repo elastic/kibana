@@ -40,8 +40,8 @@ jest.mock('../../../features/validate_workflow_yaml/lib/use_yaml_validation', ()
 }));
 
 // Mock the completion provider
-jest.mock('../lib/get_completion_item_provider', () => ({
-  getCompletionItemProvider: () => ({}),
+jest.mock('./hooks/use_completion_provider', () => ({
+  useCompletionProvider: jest.fn().mockReturnValue({}),
 }));
 
 // Mock the UnsavedChangesPrompt
@@ -56,7 +56,7 @@ jest.mock('./workflow_yaml_validation_errors', () => ({
 
 // Mock the useAvailableConnectors hook
 jest.mock('../../../entities/connectors/model/use_available_connectors', () => ({
-  useAvailableConnectors: () => ({
+  useAvailableConnectors: jest.fn().mockReturnValue({
     data: {
       connectorTypes: {},
       totalConnectors: 0,
