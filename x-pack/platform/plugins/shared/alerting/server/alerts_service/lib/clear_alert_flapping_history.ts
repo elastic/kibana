@@ -13,7 +13,6 @@ import {
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
-  ALERT_UUID,
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
 } from '@kbn/rule-data-utils';
@@ -115,15 +114,6 @@ export const clearAlertFlappingHistory = async (
     if (total === 0) {
       return [];
     }
-
-    // Fetch and return updated rule and alert instance UUIDs
-    await esClient.search({
-      index: indices,
-      allow_no_indices: true,
-      _source: [ALERT_RULE_UUID, ALERT_UUID, ALERT_FLAPPING, ALERT_FLAPPING_HISTORY],
-      size: total,
-      query: clearAlertFlappingHistoryQuery(ruleIds),
-    });
   } catch (err) {
     logger.error(
       `Error clearing alert flapping for indices: ${indices}, ruleIds: ${ruleIds} - ${err.message}`

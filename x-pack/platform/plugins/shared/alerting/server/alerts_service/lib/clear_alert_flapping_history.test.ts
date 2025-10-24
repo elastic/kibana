@@ -115,64 +115,6 @@ describe('clearAlertFlappingHistory()', () => {
         },
       ]
     `);
-
-    expect(clusterClient.search).toHaveBeenCalledTimes(1);
-    expect(clusterClient.search.mock.lastCall).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "_source": Array [
-            "kibana.alert.rule.uuid",
-            "kibana.alert.uuid",
-            "kibana.alert.flapping",
-            "kibana.alert.flapping_history",
-          ],
-          "allow_no_indices": true,
-          "index": Array [
-            "test-index",
-          ],
-          "query": Object {
-            "bool": Object {
-              "must": Array [
-                Object {
-                  "bool": Object {
-                    "should": Array [
-                      Object {
-                        "term": Object {
-                          "kibana.alert.status": Object {
-                            "value": "active",
-                          },
-                        },
-                      },
-                      Object {
-                        "term": Object {
-                          "kibana.alert.status": Object {
-                            "value": "recovered",
-                          },
-                        },
-                      },
-                    ],
-                  },
-                },
-                Object {
-                  "bool": Object {
-                    "should": Array [
-                      Object {
-                        "term": Object {
-                          "kibana.alert.rule.uuid": Object {
-                            "value": "test-rule",
-                          },
-                        },
-                      },
-                    ],
-                  },
-                },
-              ],
-            },
-          },
-          "size": 1,
-        },
-      ]
-    `);
   });
 
   test('should throw if either indices or ruleIds is empty', async () => {
@@ -209,7 +151,6 @@ describe('clearAlertFlappingHistory()', () => {
     ).rejects.toThrow('something went wrong!');
 
     expect(clusterClient.updateByQuery).toHaveBeenCalledTimes(1);
-    expect(clusterClient.search).toHaveBeenCalledTimes(0);
 
     expect(logger.error).toHaveBeenCalledWith(
       'Error clearing alert flapping for indices: test-index, ruleIds: test-rule - something went wrong!'
@@ -238,6 +179,5 @@ describe('clearAlertFlappingHistory()', () => {
     });
 
     expect(clusterClient.updateByQuery).toHaveBeenCalledTimes(3);
-    expect(clusterClient.search).toHaveBeenCalledTimes(1);
   });
 });
