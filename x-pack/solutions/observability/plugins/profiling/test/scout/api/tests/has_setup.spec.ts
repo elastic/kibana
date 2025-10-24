@@ -10,7 +10,6 @@ import type { ScoutTestConfig } from '@kbn/scout-oblt';
 import { format as formatUrl } from 'url';
 import supertest from 'supertest';
 import { getRoutePaths } from '../../../../common';
-import { getProfilingPackagePolicyIds, deletePackagePolicy } from '../../common/utils/fleet';
 import {
   cleanUpProfilingData,
   loadProfilingData,
@@ -20,19 +19,18 @@ import {
 const profilingRoutePaths = getRoutePaths();
 
 function getSupertest(config: ScoutTestConfig) {
-  const kibanaServer = config.metadata.config.servers.kibana;
-  const url = formatUrl({
-    ...kibanaServer,
-    auth: 'elastic:changeme',
-  });
-  return supertest(url);
+  const kbnUrl = new URL(config.hosts.kibana);
+  kbnUrl.username = config.auth.username;
+  kbnUrl.password = config.auth.password;
+
+  return supertest(formatUrl(kbnUrl));
 }
 
 apiTest.describe('Profiling is not setup and no data is loaded', { tag: ['@svlOblt'] }, () => {
-  apiTest.beforeAll(async ({ esClient, log, config }) => {
+  apiTest.beforeAll(async ({ esClient, apiServices, log, config }) => {
     await cleanUpProfilingData({
       es: esClient,
-      st: getSupertest(config),
+      apiServices,
       logger: log,
     });
   });
@@ -87,20 +85,19 @@ test.describe('APM integration not installed but setup completed', { tag: ['@svl
 });
 
 test.describe('Profiling is setup', { tag: ['@svlOblt'] }, () => {
-  test.beforeAll(async ({ esClient, config, log }) => {
+  test.beforeAll(async ({ esClient, apiServices, config, log }) => {
     const st = getSupertest(config);
     await cleanUpProfilingData({
       es: esClient,
-      st,
+      apiServices,
       logger: log,
     });
     await setupProfiling(st, log);
   });
-  test.afterAll(async ({ esClient, config, log }) => {
-    const st = getSupertest(config);
+  test.afterAll(async ({ esClient, apiServices, log }) => {
     await cleanUpProfilingData({
       es: esClient,
-      st,
+      apiServices,
       logger: log,
     });
   });
@@ -149,11 +146,10 @@ test.describe('Collector integration is not installed', { tag: ['@svlOblt'] }, (
     const st = getSupertest(config);
     await setupProfiling(st, log);
   });
-  test('Collector integration missing', async ({ profilingClient, log, config }) => {
-    const st = getSupertest(config);
-    const ids = await getProfilingPackagePolicyIds(st);
+  apiTest('Collector integration missing', async ({ profilingClient, apiServices, config }) => {
+    const ids = await apiServices.fleet.agent_policies.get();
     const collectorId = ids.collectorId;
-    await deletePackagePolicy(st, collectorId);
+    await apiServices.fleet.agent_policies.delete(collectorId!);
 
     expect(collectorId).toBeDefined();
 
@@ -175,12 +171,17 @@ test.describe('Collector integration is not installed', { tag: ['@svlOblt'] }, (
     expect(readStatus.has_required_role).toBe(false);
   });
 
-  test('Symbolizer integration is not installed', async ({ profilingClient, config }) => {
-    const st = getSupertest(config);
-    const ids = await getProfilingPackagePolicyIds(st);
+  test('Symbolizer integration is not installed', async ({
+    profilingClient,
+    apiServices,
+    config,
+  }) => {
+    const ids = await apiServices.fleet.agent_policies.get();
 
     const symbolizerId = ids.symbolizerId;
-    await deletePackagePolicy(st, symbolizerId);
+
+    await apiServices.fleet.agent_policies.delete(symbolizerId!);
+
     expect(symbolizerId).toBeDefined();
 
     const adminRes = await profilingClient.adminUser({

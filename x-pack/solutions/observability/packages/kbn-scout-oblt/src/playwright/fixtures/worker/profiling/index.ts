@@ -44,7 +44,9 @@ export const profilingClientFixture = coreWorkerFixtures.extend<
         roles: [],
       });
 
-      const kibanaServer = config.metadata.config.servers.kibana;
+      const kibanaServer = new URL(config.hosts.kibana);
+      kibanaServer.username = config.auth.username;
+      kibanaServer.password = config.auth.password;
 
       function getProfilingApiClient({ username }: { username: ProfilingUsername | 'elastic' }) {
         const url = formatUrl({

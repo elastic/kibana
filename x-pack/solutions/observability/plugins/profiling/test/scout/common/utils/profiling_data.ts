@@ -9,7 +9,12 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import fs from 'fs';
 import Path from 'path';
 import type TestAgent from 'supertest/lib/agent';
-import { deletePackagePolicy, getProfilingPackagePolicyIds } from './fleet';
+import type { ApiServicesFixture } from '@kbn/scout-oblt';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import {
+  COLLECTOR_PACKAGE_POLICY_NAME,
+  SYMBOLIZER_PACKAGE_POLICY_NAME,
+} from '@kbn/profiling-data-access-plugin/common';
 import { getRoutePaths } from '../../../../common';
 
 const esArchiversPath = Path.posix.join(
@@ -67,13 +72,26 @@ export async function setupProfiling(st: TestAgent, logger: ToolingLog) {
   log(`Universal Profiling set up`);
 }
 
+function getProfilingPackagePolicyIds(apiServices: ApiServicesFixture) {
+  return apiServices.fleet.agent_policies.get().then((response) => {
+    const policies: PackagePolicy[] = response.body.items;
+
+    const collector = policies.find((item) => item.name === COLLECTOR_PACKAGE_POLICY_NAME);
+    const symbolizer = policies.find((item) => item.name === SYMBOLIZER_PACKAGE_POLICY_NAME);
+    return {
+      collectorId: collector?.id,
+      symbolizerId: symbolizer?.id,
+    };
+  });
+}
+
 export async function cleanUpProfilingData({
   es,
-  st,
+  apiServices,
   logger,
 }: {
   es: Client;
-  st: TestAgent;
+  apiServices: ApiServicesFixture;
   logger: ToolingLog;
 }) {
   const log = logWithTimer(logger);
@@ -81,7 +99,7 @@ export async function cleanUpProfilingData({
 
   const [indices, { collectorId, symbolizerId }] = await Promise.all([
     es.cat.indices({ format: 'json' }),
-    getProfilingPackagePolicyIds(st),
+    getProfilingPackagePolicyIds(apiServices),
   ]);
 
   const profilingIndices = indices
@@ -91,13 +109,13 @@ export async function cleanUpProfilingData({
       return index!.startsWith('profiling') || index!.startsWith('.profiling');
     }) as string[];
 
-  await Promise.all([
-    ...profilingIndices.map((index) => es.indices.delete({ index })),
-    es.indices.deleteDataStream({
-      name: 'profiling-events*',
-    }),
-    collectorId ? deletePackagePolicy(st, collectorId) : Promise.resolve(),
-    symbolizerId ? deletePackagePolicy(st, symbolizerId) : Promise.resolve(),
-  ]);
+  // await Promise.all([
+  //   ...profilingIndices.map((index) => es.indices.delete({ index })),
+  //   es.indices.deleteDataStream({
+  //     name: 'profiling-events*',
+  //   }),
+  // collectorId ? fleet.agent_policies.delete(collectorId) : Promise.resolve(),
+  // symbolizerId ? fleet.agent_policies.delete(symbolizerId) : Promise.resolve(),
+  // ]);
   log('Unloaded Profiling data');
 }
