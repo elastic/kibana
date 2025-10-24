@@ -20005,7 +20005,7 @@
           },
           ", ",
           "IKibanaResponse",
-          "<any> | { suggestedDashboards: { id: string; title: string; description: string; score: number; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; tags?: string[] | undefined; }[]; linkedDashboards: { id: string; title: string; description: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; linked?: boolean | undefined; }; tags?: string[] | undefined; }[]; }, ",
+          "<any> | { suggestedDashboards: { id: string; title: string; score: number; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; tags?: string[] | undefined; description?: string | undefined; }[]; linkedDashboards: { id: string; title: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; linked?: boolean | undefined; }; tags?: string[] | undefined; description?: string | undefined; }[]; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -20163,7 +20163,7 @@
           },
           ", ",
           "IKibanaResponse",
-          "<any> | { suggestedDashboards: { id: string; title: string; description: string; score: number; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; tags?: string[] | undefined; }[]; linkedDashboards: { id: string; title: string; description: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; linked?: boolean | undefined; }; tags?: string[] | undefined; }[]; }, ",
+          "<any> | { suggestedDashboards: { id: string; title: string; score: number; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; tags?: string[] | undefined; description?: string | undefined; }[]; linkedDashboards: { id: string; title: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; linked?: boolean | undefined; }; tags?: string[] | undefined; description?: string | undefined; }[]; }, ",
           {
             "pluginId": "observability",
             "scope": "server",

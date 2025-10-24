@@ -88,9 +88,9 @@
             "signature": [
               "((params?: ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/visualizations-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnVisualizationsCommonPluginApi",
                 "section": "def-common.VisParams",
                 "text": "VisParams"
               },
@@ -404,9 +404,9 @@
             "signature": [
               "((visParams: ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/visualizations-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnVisualizationsCommonPluginApi",
                 "section": "def-common.VisParams",
                 "text": "VisParams"
               },
@@ -580,9 +580,9 @@
               },
               "<",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/visualizations-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnVisualizationsCommonPluginApi",
                 "section": "def-common.VisParams",
                 "text": "VisParams"
               },
@@ -602,9 +602,9 @@
             "signature": [
               "((params: ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/visualizations-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnVisualizationsCommonPluginApi",
                 "section": "def-common.VisParams",
                 "text": "VisParams"
               },
@@ -1264,9 +1264,9 @@
               },
               "<",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/visualizations-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnVisualizationsCommonPluginApi",
                 "section": "def-common.VisParams",
                 "text": "VisParams"
               },
@@ -1471,9 +1471,9 @@
               },
               "<",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/visualizations-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnVisualizationsCommonPluginApi",
                 "section": "def-common.VisParams",
                 "text": "VisParams"
               },
@@ -2095,9 +2095,9 @@
         "signature": [
           "<TVisParams extends ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/visualizations-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnVisualizationsCommonPluginApi",
             "section": "def-common.VisParams",
             "text": "VisParams"
           },
@@ -2173,144 +2173,6 @@
       },
       {
         "parentPluginId": "visualizations",
-        "id": "def-public.prepareLogTable",
-        "type": "Function",
-        "tags": [],
-        "label": "prepareLogTable",
-        "description": [],
-        "signature": [
-          "(datatable: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.Datatable",
-            "text": "Datatable"
-          },
-          ", dimensions: ",
-          "LayerDimension",
-          "[] | ",
-          {
-            "pluginId": "visualizations",
-            "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
-            "section": "def-common.Dimension",
-            "text": "Dimension"
-          },
-          "[], removeUnmappedColumns?: boolean) => { columns: { meta: { dimensionType?: string | undefined; dimensionName: string | undefined; type: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DatatableColumnType",
-            "text": "DatatableColumnType"
-          },
-          "; esType?: string | undefined; field?: string | undefined; index?: string | undefined; params?: ",
-          {
-            "pluginId": "fieldFormats",
-            "scope": "common",
-            "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.SerializedFieldFormat",
-            "text": "SerializedFieldFormat"
-          },
-          "<{}, ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          },
-          "> | undefined; source?: string | undefined; sourceParams?: ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          },
-          " | undefined; }; id: string; name: string; isNull?: boolean | undefined; variable?: string | undefined; }[]; type: \"datatable\"; meta?: ",
-          "DatatableMeta",
-          " | undefined; rows: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DatatableRow",
-            "text": "DatatableRow"
-          },
-          "[]; warning?: string | undefined; }"
-        ],
-        "path": "src/platform/plugins/shared/visualizations/common/utils/prepare_log_table.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-public.prepareLogTable.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "datatable",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.Datatable",
-                "text": "Datatable"
-              }
-            ],
-            "path": "src/platform/plugins/shared/visualizations/common/utils/prepare_log_table.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-public.prepareLogTable.$2",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "dimensions",
-            "description": [],
-            "signature": [
-              "LayerDimension",
-              "[] | ",
-              {
-                "pluginId": "visualizations",
-                "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
-                "section": "def-common.Dimension",
-                "text": "Dimension"
-              },
-              "[]"
-            ],
-            "path": "src/platform/plugins/shared/visualizations/common/utils/prepare_log_table.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-public.prepareLogTable.$3",
-            "type": "boolean",
-            "tags": [],
-            "label": "removeUnmappedColumns",
-            "description": [],
-            "signature": [
-              "boolean"
-            ],
-            "path": "src/platform/plugins/shared/visualizations/common/utils/prepare_log_table.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
         "id": "def-public.urlFor",
         "type": "Function",
         "tags": [],
@@ -2341,127 +2203,9 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
-        "id": "def-public.VisualizationContainer",
-        "type": "Function",
-        "tags": [],
-        "label": "VisualizationContainer",
-        "description": [],
-        "signature": [
-          "({ \"data-test-subj\": dataTestSubj, className, children, handlers, showNoResult, error, renderComplete, }: ",
-          "VisualizationContainerProps",
-          ") => React.JSX.Element"
-        ],
-        "path": "src/platform/plugins/shared/visualizations/public/components/visualization_container.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-public.VisualizationContainer.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  'data-test-subj': dataTestSubj = '',\n  className,\n  children,\n  handlers,\n  showNoResult = false,\n  error,\n  renderComplete,\n}",
-            "description": [],
-            "signature": [
-              "VisualizationContainerProps"
-            ],
-            "path": "src/platform/plugins/shared/visualizations/public/components/visualization_container.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
       }
     ],
     "interfaces": [
-      {
-        "parentPluginId": "visualizations",
-        "id": "def-public.DateHistogramParams",
-        "type": "Interface",
-        "tags": [],
-        "label": "DateHistogramParams",
-        "description": [],
-        "path": "src/platform/plugins/shared/visualizations/common/expression_functions/xy_dimension.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-public.DateHistogramParams.date",
-            "type": "boolean",
-            "tags": [],
-            "label": "date",
-            "description": [],
-            "path": "src/platform/plugins/shared/visualizations/common/expression_functions/xy_dimension.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-public.DateHistogramParams.interval",
-            "type": "number",
-            "tags": [],
-            "label": "interval",
-            "description": [],
-            "path": "src/platform/plugins/shared/visualizations/common/expression_functions/xy_dimension.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-public.DateHistogramParams.intervalESValue",
-            "type": "number",
-            "tags": [],
-            "label": "intervalESValue",
-            "description": [],
-            "path": "src/platform/plugins/shared/visualizations/common/expression_functions/xy_dimension.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-public.DateHistogramParams.intervalESUnit",
-            "type": "string",
-            "tags": [],
-            "label": "intervalESUnit",
-            "description": [],
-            "path": "src/platform/plugins/shared/visualizations/common/expression_functions/xy_dimension.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-public.DateHistogramParams.format",
-            "type": "string",
-            "tags": [],
-            "label": "format",
-            "description": [],
-            "path": "src/platform/plugins/shared/visualizations/common/expression_functions/xy_dimension.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-public.DateHistogramParams.bounds",
-            "type": "Object",
-            "tags": [],
-            "label": "bounds",
-            "description": [],
-            "signature": [
-              "{ min: string | number; max: string | number; } | undefined"
-            ],
-            "path": "src/platform/plugins/shared/visualizations/common/expression_functions/xy_dimension.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "visualizations",
         "id": "def-public.EditorRenderProps",
@@ -2642,31 +2386,6 @@
       },
       {
         "parentPluginId": "visualizations",
-        "id": "def-public.FakeParams",
-        "type": "Interface",
-        "tags": [],
-        "label": "FakeParams",
-        "description": [],
-        "path": "src/platform/plugins/shared/visualizations/common/expression_functions/xy_dimension.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-public.FakeParams.defaultValue",
-            "type": "string",
-            "tags": [],
-            "label": "defaultValue",
-            "description": [],
-            "path": "src/platform/plugins/shared/visualizations/common/expression_functions/xy_dimension.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
         "id": "def-public.GetVisOptions",
         "type": "Interface",
         "tags": [],
@@ -2758,31 +2477,6 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
-        "id": "def-public.HistogramParams",
-        "type": "Interface",
-        "tags": [],
-        "label": "HistogramParams",
-        "description": [],
-        "path": "src/platform/plugins/shared/visualizations/common/expression_functions/xy_dimension.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-public.HistogramParams.interval",
-            "type": "number",
-            "tags": [],
-            "label": "interval",
-            "description": [],
-            "path": "src/platform/plugins/shared/visualizations/common/expression_functions/xy_dimension.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3788,9 +3482,9 @@
               },
               "<",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/visualizations-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnVisualizationsCommonPluginApi",
                 "section": "def-common.VisParams",
                 "text": "VisParams"
               },
@@ -3930,34 +3624,6 @@
               }
             ],
             "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
-        "id": "def-public.VisParams",
-        "type": "Interface",
-        "tags": [],
-        "label": "VisParams",
-        "description": [],
-        "path": "src/platform/plugins/shared/visualizations/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-public.VisParams.Unnamed",
-            "type": "IndexSignature",
-            "tags": [],
-            "label": "[key: string]: any",
-            "description": [],
-            "signature": [
-              "[key: string]:  any"
-            ],
-            "path": "src/platform/plugins/shared/visualizations/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4627,9 +4293,9 @@
             "signature": [
               "((params?: ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/visualizations-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnVisualizationsCommonPluginApi",
                 "section": "def-common.VisParams",
                 "text": "VisParams"
               },
@@ -4648,9 +4314,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "visualizations",
+                    "pluginId": "@kbn/visualizations-common",
                     "scope": "common",
-                    "docId": "kibVisualizationsPluginApi",
+                    "docId": "kibKbnVisualizationsCommonPluginApi",
                     "section": "def-common.VisParams",
                     "text": "VisParams"
                   },
@@ -4850,9 +4516,9 @@
             "signature": [
               "((visParams: ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/visualizations-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnVisualizationsCommonPluginApi",
                 "section": "def-common.VisParams",
                 "text": "VisParams"
               },
@@ -4887,9 +4553,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "visualizations",
+                    "pluginId": "@kbn/visualizations-common",
                     "scope": "common",
-                    "docId": "kibVisualizationsPluginApi",
+                    "docId": "kibKbnVisualizationsCommonPluginApi",
                     "section": "def-common.VisParams",
                     "text": "VisParams"
                   }
@@ -5137,9 +4803,9 @@
               },
               "<",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/visualizations-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnVisualizationsCommonPluginApi",
                 "section": "def-common.VisParams",
                 "text": "VisParams"
               },
@@ -5166,9 +4832,9 @@
                   },
                   "<",
                   {
-                    "pluginId": "visualizations",
+                    "pluginId": "@kbn/visualizations-common",
                     "scope": "common",
-                    "docId": "kibVisualizationsPluginApi",
+                    "docId": "kibKbnVisualizationsCommonPluginApi",
                     "section": "def-common.VisParams",
                     "text": "VisParams"
                   },
@@ -5304,9 +4970,9 @@
             "signature": [
               "((params: ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/visualizations-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnVisualizationsCommonPluginApi",
                 "section": "def-common.VisParams",
                 "text": "VisParams"
               },
@@ -5325,9 +4991,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "visualizations",
+                    "pluginId": "@kbn/visualizations-common",
                     "scope": "common",
-                    "docId": "kibVisualizationsPluginApi",
+                    "docId": "kibKbnVisualizationsCommonPluginApi",
                     "section": "def-common.VisParams",
                     "text": "VisParams"
                   }
@@ -5968,9 +5634,9 @@
               },
               "<",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/visualizations-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnVisualizationsCommonPluginApi",
                 "section": "def-common.VisParams",
                 "text": "VisParams"
               },
@@ -6050,9 +5716,9 @@
               },
               "<",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/visualizations-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnVisualizationsCommonPluginApi",
                 "section": "def-common.VisParams",
                 "text": "VisParams"
               },
@@ -6179,18 +5845,6 @@
       }
     ],
     "enums": [
-      {
-        "parentPluginId": "visualizations",
-        "id": "def-public.LegendSize",
-        "type": "Enum",
-        "tags": [],
-        "label": "LegendSize",
-        "description": [],
-        "path": "src/platform/plugins/shared/visualizations/common/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "visualizations",
         "id": "def-public.VisGroups",
@@ -6339,117 +5993,6 @@
       },
       {
         "parentPluginId": "visualizations",
-        "id": "def-public.DEFAULT_LEGEND_SIZE",
-        "type": "string",
-        "tags": [],
-        "label": "DEFAULT_LEGEND_SIZE",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "visualizations",
-            "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
-            "section": "def-common.LegendSize",
-            "text": "LegendSize"
-          },
-          ".MEDIUM"
-        ],
-        "path": "src/platform/plugins/shared/visualizations/common/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
-        "id": "def-public.Dimension",
-        "type": "Type",
-        "tags": [],
-        "label": "Dimension",
-        "description": [],
-        "signature": [
-          "[DimensionColumn[] | undefined, string]"
-        ],
-        "path": "src/platform/plugins/shared/visualizations/common/utils/prepare_log_table.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
-        "id": "def-public.ExpressionValueVisDimension",
-        "type": "Type",
-        "tags": [],
-        "label": "ExpressionValueVisDimension",
-        "description": [],
-        "signature": [
-          "{ type: \"vis_dimension\"; } & { accessor: number | ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DatatableColumn",
-            "text": "DatatableColumn"
-          },
-          "; format: { id?: string | undefined; params?: Record<string, any> | undefined; }; }"
-        ],
-        "path": "src/platform/plugins/shared/visualizations/common/expression_functions/vis_dimension.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
-        "id": "def-public.ExpressionValueXYDimension",
-        "type": "Type",
-        "tags": [],
-        "label": "ExpressionValueXYDimension",
-        "description": [],
-        "signature": [
-          "{ type: \"xy_dimension\"; } & { label: string; aggType: string; params: {} | ",
-          {
-            "pluginId": "visualizations",
-            "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
-            "section": "def-common.DateHistogramParams",
-            "text": "DateHistogramParams"
-          },
-          " | ",
-          "HistogramParams",
-          " | ",
-          "FakeParams",
-          "; accessor: number | ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DatatableColumn",
-            "text": "DatatableColumn"
-          },
-          "; format: ",
-          {
-            "pluginId": "fieldFormats",
-            "scope": "common",
-            "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.SerializedFieldFormat",
-            "text": "SerializedFieldFormat"
-          },
-          "<{}, ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          },
-          ">; }"
-        ],
-        "path": "src/platform/plugins/shared/visualizations/common/expression_functions/xy_dimension.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
         "id": "def-public.HasVisualizeConfig",
         "type": "Type",
         "tags": [],
@@ -6473,45 +6016,15 @@
           },
           "<",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/visualizations-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnVisualizationsCommonPluginApi",
             "section": "def-common.VisParams",
             "text": "VisParams"
           },
           ">; }"
         ],
         "path": "src/platform/plugins/shared/visualizations/public/embeddable/interfaces/has_visualize_config.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
-        "id": "def-public.SAVED_OBJECTS_LIMIT_SETTING",
-        "type": "string",
-        "tags": [],
-        "label": "SAVED_OBJECTS_LIMIT_SETTING",
-        "description": [],
-        "signature": [
-          "\"savedObjects:listingLimit\""
-        ],
-        "path": "src/platform/plugins/shared/visualizations/common/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
-        "id": "def-public.SAVED_OBJECTS_PER_PAGE_SETTING",
-        "type": "string",
-        "tags": [],
-        "label": "SAVED_OBJECTS_PER_PAGE_SETTING",
-        "description": [],
-        "signature": [
-          "\"savedObjects:perPage\""
-        ],
-        "path": "src/platform/plugins/shared/visualizations/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6558,18 +6071,6 @@
           "<Agg>; }[Aggs]"
         ],
         "path": "src/platform/plugins/shared/visualizations/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
-        "id": "def-public.visContainerClassName",
-        "type": "string",
-        "tags": [],
-        "label": "visContainerClassName",
-        "description": [],
-        "path": "src/platform/plugins/shared/visualizations/public/vis.styles.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6697,21 +6198,6 @@
       },
       {
         "parentPluginId": "visualizations",
-        "id": "def-public.VISUALIZE_EMBEDDABLE_TYPE",
-        "type": "string",
-        "tags": [],
-        "label": "VISUALIZE_EMBEDDABLE_TYPE",
-        "description": [],
-        "signature": [
-          "\"visualization\""
-        ],
-        "path": "src/platform/plugins/shared/visualizations/common/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
         "id": "def-public.VisualizeEditorInput",
         "type": "Type",
         "tags": [],
@@ -6730,9 +6216,9 @@
           },
           "<",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/visualizations-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnVisualizationsCommonPluginApi",
             "section": "def-common.VisParams",
             "text": "VisParams"
           },
@@ -6754,9 +6240,9 @@
           },
           "<",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/visualizations-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnVisualizationsCommonPluginApi",
             "section": "def-common.VisParams",
             "text": "VisParams"
           },
@@ -6817,9 +6303,9 @@
           },
           "<",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/visualizations-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnVisualizationsCommonPluginApi",
             "section": "def-common.VisParams",
             "text": "VisParams"
           },
@@ -6938,21 +6424,6 @@
     "objects": [
       {
         "parentPluginId": "visualizations",
-        "id": "def-public.LegendSizeToPixels",
-        "type": "Object",
-        "tags": [],
-        "label": "LegendSizeToPixels",
-        "description": [],
-        "signature": [
-          "{ readonly auto: undefined; readonly small: 80; readonly medium: 130; readonly large: 180; readonly xlarge: 230; }"
-        ],
-        "path": "src/platform/plugins/shared/visualizations/common/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
         "id": "def-public.VIS_EVENT_TO_TRIGGER",
         "type": "Object",
         "tags": [],
@@ -7051,21 +6522,6 @@
       },
       {
         "parentPluginId": "visualizations",
-        "id": "def-public.visContainerStyle",
-        "type": "Object",
-        "tags": [],
-        "label": "visContainerStyle",
-        "description": [],
-        "signature": [
-          "SerializedStyles"
-        ],
-        "path": "src/platform/plugins/shared/visualizations/public/vis.styles.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
         "id": "def-public.XYCurveTypes",
         "type": "Object",
         "tags": [],
@@ -7092,9 +6548,9 @@
       "signature": [
         "{ createBaseVisualization: <TVisParams extends ",
         {
-          "pluginId": "visualizations",
+          "pluginId": "@kbn/visualizations-common",
           "scope": "common",
-          "docId": "kibVisualizationsPluginApi",
+          "docId": "kibKbnVisualizationsCommonPluginApi",
           "section": "def-common.VisParams",
           "text": "VisParams"
         },
@@ -7118,17 +6574,17 @@
         "VisEditorConstructor",
         "<",
         {
-          "pluginId": "visualizations",
+          "pluginId": "@kbn/visualizations-common",
           "scope": "common",
-          "docId": "kibVisualizationsPluginApi",
+          "docId": "kibKbnVisualizationsCommonPluginApi",
           "section": "def-common.VisParams",
           "text": "VisParams"
         },
         ">) => void; register: <TVisParams extends ",
         {
-          "pluginId": "visualizations",
+          "pluginId": "@kbn/visualizations-common",
           "scope": "common",
-          "docId": "kibVisualizationsPluginApi",
+          "docId": "kibKbnVisualizationsCommonPluginApi",
           "section": "def-common.VisParams",
           "text": "VisParams"
         },
@@ -7179,9 +6635,9 @@
         },
         "<",
         {
-          "pluginId": "visualizations",
+          "pluginId": "@kbn/visualizations-common",
           "scope": "common",
-          "docId": "kibVisualizationsPluginApi",
+          "docId": "kibKbnVisualizationsCommonPluginApi",
           "section": "def-common.VisParams",
           "text": "VisParams"
         },
@@ -7437,929 +6893,6 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
-        "id": "def-common.findAccessor",
-        "type": "Function",
-        "tags": [],
-        "label": "findAccessor",
-        "description": [],
-        "signature": [
-          "(accessor: string, columns: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DatatableColumn",
-            "text": "DatatableColumn"
-          },
-          "[]) => ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DatatableColumn",
-            "text": "DatatableColumn"
-          },
-          " | undefined"
-        ],
-        "path": "src/platform/plugins/shared/visualizations/common/utils/accessors.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-common.findAccessor.$1",
-            "type": "string",
-            "tags": [],
-            "label": "accessor",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "src/platform/plugins/shared/visualizations/common/utils/accessors.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-common.findAccessor.$2",
-            "type": "Array",
-            "tags": [],
-            "label": "columns",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.DatatableColumn",
-                "text": "DatatableColumn"
-              },
-              "[]"
-            ],
-            "path": "src/platform/plugins/shared/visualizations/common/utils/accessors.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
-        "id": "def-common.findAccessor",
-        "type": "Function",
-        "tags": [],
-        "label": "findAccessor",
-        "description": [],
-        "signature": [
-          "(accessor: number, columns: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DatatableColumn",
-            "text": "DatatableColumn"
-          },
-          "[]) => number | ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DatatableColumn",
-            "text": "DatatableColumn"
-          },
-          " | undefined"
-        ],
-        "path": "src/platform/plugins/shared/visualizations/common/utils/accessors.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-common.findAccessor.$1",
-            "type": "number",
-            "tags": [],
-            "label": "accessor",
-            "description": [],
-            "signature": [
-              "number"
-            ],
-            "path": "src/platform/plugins/shared/visualizations/common/utils/accessors.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-common.findAccessor.$2",
-            "type": "Array",
-            "tags": [],
-            "label": "columns",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.DatatableColumn",
-                "text": "DatatableColumn"
-              },
-              "[]"
-            ],
-            "path": "src/platform/plugins/shared/visualizations/common/utils/accessors.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
-        "id": "def-common.findAccessor",
-        "type": "Function",
-        "tags": [],
-        "label": "findAccessor",
-        "description": [],
-        "signature": [
-          "(accessor: string | number, columns: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DatatableColumn",
-            "text": "DatatableColumn"
-          },
-          "[]) => number | ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DatatableColumn",
-            "text": "DatatableColumn"
-          },
-          " | undefined"
-        ],
-        "path": "src/platform/plugins/shared/visualizations/common/utils/accessors.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-common.findAccessor.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "accessor",
-            "description": [],
-            "signature": [
-              "string | number"
-            ],
-            "path": "src/platform/plugins/shared/visualizations/common/utils/accessors.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-common.findAccessor.$2",
-            "type": "Array",
-            "tags": [],
-            "label": "columns",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.DatatableColumn",
-                "text": "DatatableColumn"
-              },
-              "[]"
-            ],
-            "path": "src/platform/plugins/shared/visualizations/common/utils/accessors.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
-        "id": "def-common.findAccessor",
-        "type": "Function",
-        "tags": [],
-        "label": "findAccessor",
-        "description": [],
-        "signature": [
-          "(accessor: string | number, columns: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DatatableColumn",
-            "text": "DatatableColumn"
-          },
-          "[]) => number | ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DatatableColumn",
-            "text": "DatatableColumn"
-          },
-          " | undefined"
-        ],
-        "path": "src/platform/plugins/shared/visualizations/common/utils/accessors.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-common.findAccessor.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "accessor",
-            "description": [],
-            "signature": [
-              "string | number"
-            ],
-            "path": "src/platform/plugins/shared/visualizations/common/utils/accessors.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-common.findAccessor.$2",
-            "type": "Array",
-            "tags": [],
-            "label": "columns",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.DatatableColumn",
-                "text": "DatatableColumn"
-              },
-              "[]"
-            ],
-            "path": "src/platform/plugins/shared/visualizations/common/utils/accessors.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
-        "id": "def-common.findAccessorOrFail",
-        "type": "Function",
-        "tags": [],
-        "label": "findAccessorOrFail",
-        "description": [],
-        "signature": [
-          "(accessor: string, columns: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DatatableColumn",
-            "text": "DatatableColumn"
-          },
-          "[]) => ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DatatableColumn",
-            "text": "DatatableColumn"
-          }
-        ],
-        "path": "src/platform/plugins/shared/visualizations/common/utils/accessors.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-common.findAccessorOrFail.$1",
-            "type": "string",
-            "tags": [],
-            "label": "accessor",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "src/platform/plugins/shared/visualizations/common/utils/accessors.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-common.findAccessorOrFail.$2",
-            "type": "Array",
-            "tags": [],
-            "label": "columns",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.DatatableColumn",
-                "text": "DatatableColumn"
-              },
-              "[]"
-            ],
-            "path": "src/platform/plugins/shared/visualizations/common/utils/accessors.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
-        "id": "def-common.findAccessorOrFail",
-        "type": "Function",
-        "tags": [],
-        "label": "findAccessorOrFail",
-        "description": [],
-        "signature": [
-          "(accessor: number, columns: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DatatableColumn",
-            "text": "DatatableColumn"
-          },
-          "[]) => number | ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DatatableColumn",
-            "text": "DatatableColumn"
-          }
-        ],
-        "path": "src/platform/plugins/shared/visualizations/common/utils/accessors.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-common.findAccessorOrFail.$1",
-            "type": "number",
-            "tags": [],
-            "label": "accessor",
-            "description": [],
-            "signature": [
-              "number"
-            ],
-            "path": "src/platform/plugins/shared/visualizations/common/utils/accessors.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-common.findAccessorOrFail.$2",
-            "type": "Array",
-            "tags": [],
-            "label": "columns",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.DatatableColumn",
-                "text": "DatatableColumn"
-              },
-              "[]"
-            ],
-            "path": "src/platform/plugins/shared/visualizations/common/utils/accessors.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
-        "id": "def-common.findAccessorOrFail",
-        "type": "Function",
-        "tags": [],
-        "label": "findAccessorOrFail",
-        "description": [],
-        "signature": [
-          "(accessor: string | number, columns: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DatatableColumn",
-            "text": "DatatableColumn"
-          },
-          "[]) => number | ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DatatableColumn",
-            "text": "DatatableColumn"
-          }
-        ],
-        "path": "src/platform/plugins/shared/visualizations/common/utils/accessors.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-common.findAccessorOrFail.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "accessor",
-            "description": [],
-            "signature": [
-              "string | number"
-            ],
-            "path": "src/platform/plugins/shared/visualizations/common/utils/accessors.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-common.findAccessorOrFail.$2",
-            "type": "Array",
-            "tags": [],
-            "label": "columns",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.DatatableColumn",
-                "text": "DatatableColumn"
-              },
-              "[]"
-            ],
-            "path": "src/platform/plugins/shared/visualizations/common/utils/accessors.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
-        "id": "def-common.findAccessorOrFail",
-        "type": "Function",
-        "tags": [],
-        "label": "findAccessorOrFail",
-        "description": [],
-        "signature": [
-          "(accessor: string | number, columns: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DatatableColumn",
-            "text": "DatatableColumn"
-          },
-          "[]) => number | ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DatatableColumn",
-            "text": "DatatableColumn"
-          }
-        ],
-        "path": "src/platform/plugins/shared/visualizations/common/utils/accessors.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-common.findAccessorOrFail.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "accessor",
-            "description": [],
-            "signature": [
-              "string | number"
-            ],
-            "path": "src/platform/plugins/shared/visualizations/common/utils/accessors.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-common.findAccessorOrFail.$2",
-            "type": "Array",
-            "tags": [],
-            "label": "columns",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.DatatableColumn",
-                "text": "DatatableColumn"
-              },
-              "[]"
-            ],
-            "path": "src/platform/plugins/shared/visualizations/common/utils/accessors.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
-        "id": "def-common.getAccessor",
-        "type": "Function",
-        "tags": [],
-        "label": "getAccessor",
-        "description": [],
-        "signature": [
-          "(dimension: string | ",
-          {
-            "pluginId": "visualizations",
-            "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
-            "section": "def-common.ExpressionValueVisDimension",
-            "text": "ExpressionValueVisDimension"
-          },
-          ") => string | number | ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DatatableColumn",
-            "text": "DatatableColumn"
-          }
-        ],
-        "path": "src/platform/plugins/shared/visualizations/common/utils/accessors.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-common.getAccessor.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "dimension",
-            "description": [],
-            "signature": [
-              "string | ",
-              {
-                "pluginId": "visualizations",
-                "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
-                "section": "def-common.ExpressionValueVisDimension",
-                "text": "ExpressionValueVisDimension"
-              }
-            ],
-            "path": "src/platform/plugins/shared/visualizations/common/utils/accessors.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
-        "id": "def-common.getAccessorByDimension",
-        "type": "Function",
-        "tags": [],
-        "label": "getAccessorByDimension",
-        "description": [],
-        "signature": [
-          "(dimension: string | ",
-          {
-            "pluginId": "visualizations",
-            "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
-            "section": "def-common.ExpressionValueVisDimension",
-            "text": "ExpressionValueVisDimension"
-          },
-          ", columns: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DatatableColumn",
-            "text": "DatatableColumn"
-          },
-          "[]) => string"
-        ],
-        "path": "src/platform/plugins/shared/visualizations/common/utils/accessors.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-common.getAccessorByDimension.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "dimension",
-            "description": [],
-            "signature": [
-              "string | ",
-              {
-                "pluginId": "visualizations",
-                "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
-                "section": "def-common.ExpressionValueVisDimension",
-                "text": "ExpressionValueVisDimension"
-              }
-            ],
-            "path": "src/platform/plugins/shared/visualizations/common/utils/accessors.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-common.getAccessorByDimension.$2",
-            "type": "Array",
-            "tags": [],
-            "label": "columns",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.DatatableColumn",
-                "text": "DatatableColumn"
-              },
-              "[]"
-            ],
-            "path": "src/platform/plugins/shared/visualizations/common/utils/accessors.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
-        "id": "def-common.getColumnByAccessor",
-        "type": "Function",
-        "tags": [],
-        "label": "getColumnByAccessor",
-        "description": [],
-        "signature": [
-          "(accessor: string | ",
-          {
-            "pluginId": "visualizations",
-            "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
-            "section": "def-common.ExpressionValueVisDimension",
-            "text": "ExpressionValueVisDimension"
-          },
-          ", columns?: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DatatableColumn",
-            "text": "DatatableColumn"
-          },
-          "[]) => ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DatatableColumn",
-            "text": "DatatableColumn"
-          },
-          " | undefined"
-        ],
-        "path": "src/platform/plugins/shared/visualizations/common/utils/accessors.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-common.getColumnByAccessor.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "accessor",
-            "description": [],
-            "signature": [
-              "string | ",
-              {
-                "pluginId": "visualizations",
-                "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
-                "section": "def-common.ExpressionValueVisDimension",
-                "text": "ExpressionValueVisDimension"
-              }
-            ],
-            "path": "src/platform/plugins/shared/visualizations/common/utils/accessors.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-common.getColumnByAccessor.$2",
-            "type": "Array",
-            "tags": [],
-            "label": "columns",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.DatatableColumn",
-                "text": "DatatableColumn"
-              },
-              "[]"
-            ],
-            "path": "src/platform/plugins/shared/visualizations/common/utils/accessors.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
-        "id": "def-common.getFormatByAccessor",
-        "type": "Function",
-        "tags": [],
-        "label": "getFormatByAccessor",
-        "description": [],
-        "signature": [
-          "(dimension: string | ",
-          {
-            "pluginId": "visualizations",
-            "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
-            "section": "def-common.ExpressionValueVisDimension",
-            "text": "ExpressionValueVisDimension"
-          },
-          ", columns: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DatatableColumn",
-            "text": "DatatableColumn"
-          },
-          "[], defaultColumnFormat: ",
-          {
-            "pluginId": "fieldFormats",
-            "scope": "common",
-            "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.SerializedFieldFormat",
-            "text": "SerializedFieldFormat"
-          },
-          "<{}, ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          },
-          "> | undefined) => ",
-          {
-            "pluginId": "fieldFormats",
-            "scope": "common",
-            "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.SerializedFieldFormat",
-            "text": "SerializedFieldFormat"
-          },
-          "<{}, ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          },
-          "> | undefined"
-        ],
-        "path": "src/platform/plugins/shared/visualizations/common/utils/accessors.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-common.getFormatByAccessor.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "dimension",
-            "description": [],
-            "signature": [
-              "string | ",
-              {
-                "pluginId": "visualizations",
-                "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
-                "section": "def-common.ExpressionValueVisDimension",
-                "text": "ExpressionValueVisDimension"
-              }
-            ],
-            "path": "src/platform/plugins/shared/visualizations/common/utils/accessors.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-common.getFormatByAccessor.$2",
-            "type": "Array",
-            "tags": [],
-            "label": "columns",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.DatatableColumn",
-                "text": "DatatableColumn"
-              },
-              "[]"
-            ],
-            "path": "src/platform/plugins/shared/visualizations/common/utils/accessors.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-common.getFormatByAccessor.$3",
-            "type": "Object",
-            "tags": [],
-            "label": "defaultColumnFormat",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.SerializedFieldFormat",
-                "text": "SerializedFieldFormat"
-              },
-              "<{}, ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
-              "> | undefined"
-            ],
-            "path": "src/platform/plugins/shared/visualizations/common/utils/accessors.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -8690,193 +7223,6 @@
       },
       {
         "parentPluginId": "visualizations",
-        "id": "def-common.isVisDimension",
-        "type": "Function",
-        "tags": [],
-        "label": "isVisDimension",
-        "description": [],
-        "signature": [
-          "(accessor: string | ",
-          {
-            "pluginId": "visualizations",
-            "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
-            "section": "def-common.ExpressionValueVisDimension",
-            "text": "ExpressionValueVisDimension"
-          },
-          " | undefined) => boolean"
-        ],
-        "path": "src/platform/plugins/shared/visualizations/common/utils/accessors.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-common.isVisDimension.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "accessor",
-            "description": [],
-            "signature": [
-              "string | ",
-              {
-                "pluginId": "visualizations",
-                "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
-                "section": "def-common.ExpressionValueVisDimension",
-                "text": "ExpressionValueVisDimension"
-              },
-              " | undefined"
-            ],
-            "path": "src/platform/plugins/shared/visualizations/common/utils/accessors.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
-        "id": "def-common.prepareLogTable",
-        "type": "Function",
-        "tags": [],
-        "label": "prepareLogTable",
-        "description": [],
-        "signature": [
-          "(datatable: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.Datatable",
-            "text": "Datatable"
-          },
-          ", dimensions: ",
-          "LayerDimension",
-          "[] | ",
-          {
-            "pluginId": "visualizations",
-            "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
-            "section": "def-common.Dimension",
-            "text": "Dimension"
-          },
-          "[], removeUnmappedColumns?: boolean) => { columns: { meta: { dimensionType?: string | undefined; dimensionName: string | undefined; type: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DatatableColumnType",
-            "text": "DatatableColumnType"
-          },
-          "; esType?: string | undefined; field?: string | undefined; index?: string | undefined; params?: ",
-          {
-            "pluginId": "fieldFormats",
-            "scope": "common",
-            "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.SerializedFieldFormat",
-            "text": "SerializedFieldFormat"
-          },
-          "<{}, ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          },
-          "> | undefined; source?: string | undefined; sourceParams?: ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          },
-          " | undefined; }; id: string; name: string; isNull?: boolean | undefined; variable?: string | undefined; }[]; type: \"datatable\"; meta?: ",
-          "DatatableMeta",
-          " | undefined; rows: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DatatableRow",
-            "text": "DatatableRow"
-          },
-          "[]; warning?: string | undefined; }"
-        ],
-        "path": "src/platform/plugins/shared/visualizations/common/utils/prepare_log_table.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-common.prepareLogTable.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "datatable",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.Datatable",
-                "text": "Datatable"
-              }
-            ],
-            "path": "src/platform/plugins/shared/visualizations/common/utils/prepare_log_table.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-common.prepareLogTable.$2",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "dimensions",
-            "description": [],
-            "signature": [
-              "LayerDimension",
-              "[] | ",
-              {
-                "pluginId": "visualizations",
-                "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
-                "section": "def-common.Dimension",
-                "text": "Dimension"
-              },
-              "[]"
-            ],
-            "path": "src/platform/plugins/shared/visualizations/common/utils/prepare_log_table.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-common.prepareLogTable.$3",
-            "type": "boolean",
-            "tags": [],
-            "label": "removeUnmappedColumns",
-            "description": [],
-            "signature": [
-              "boolean"
-            ],
-            "path": "src/platform/plugins/shared/visualizations/common/utils/prepare_log_table.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
         "id": "def-common.range",
         "type": "Function",
         "tags": [],
@@ -8929,85 +7275,6 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
-        "id": "def-common.validateAccessor",
-        "type": "Function",
-        "tags": [],
-        "label": "validateAccessor",
-        "description": [],
-        "signature": [
-          "(accessor: string | ",
-          {
-            "pluginId": "visualizations",
-            "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
-            "section": "def-common.ExpressionValueVisDimension",
-            "text": "ExpressionValueVisDimension"
-          },
-          " | undefined, columns: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DatatableColumn",
-            "text": "DatatableColumn"
-          },
-          "[]) => void"
-        ],
-        "path": "src/platform/plugins/shared/visualizations/common/utils/accessors.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-common.validateAccessor.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "accessor",
-            "description": [],
-            "signature": [
-              "string | ",
-              {
-                "pluginId": "visualizations",
-                "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
-                "section": "def-common.ExpressionValueVisDimension",
-                "text": "ExpressionValueVisDimension"
-              },
-              " | undefined"
-            ],
-            "path": "src/platform/plugins/shared/visualizations/common/utils/accessors.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          },
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-common.validateAccessor.$2",
-            "type": "Array",
-            "tags": [],
-            "label": "columns",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.DatatableColumn",
-                "text": "DatatableColumn"
-              },
-              "[]"
-            ],
-            "path": "src/platform/plugins/shared/visualizations/common/utils/accessors.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -10320,9 +8587,9 @@
             "signature": [
               "string | ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
@@ -10342,9 +8609,9 @@
             "signature": [
               "string | ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
@@ -10364,9 +8631,9 @@
             "signature": [
               "string | ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
@@ -10386,9 +8653,9 @@
             "signature": [
               "string | ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
@@ -10408,9 +8675,9 @@
             "signature": [
               "string | ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
@@ -10689,9 +8956,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.LegendSize",
                 "text": "LegendSize"
               },
@@ -11046,9 +9313,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.LegendSize",
                 "text": "LegendSize"
               },
@@ -11067,9 +9334,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.XYLegendValue",
                 "text": "XYLegendValue"
               },
@@ -11725,9 +9992,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "visualizations",
+                "pluginId": "expressionPartitionVis",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibExpressionPartitionVisPluginApi",
                 "section": "def-common.PartitionLegendValue",
                 "text": "PartitionLegendValue"
               },
@@ -11802,9 +10069,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.LegendSize",
                 "text": "LegendSize"
               },
@@ -13021,34 +11288,6 @@
       },
       {
         "parentPluginId": "visualizations",
-        "id": "def-common.VisParams",
-        "type": "Interface",
-        "tags": [],
-        "label": "VisParams",
-        "description": [],
-        "path": "src/platform/plugins/shared/visualizations/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-common.VisParams.Unnamed",
-            "type": "IndexSignature",
-            "tags": [],
-            "label": "[key: string]: any",
-            "description": [],
-            "signature": [
-              "[key: string]:  any"
-            ],
-            "path": "src/platform/plugins/shared/visualizations/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
         "id": "def-common.VisualizationSavedObject",
         "type": "Interface",
         "tags": [],
@@ -14158,32 +12397,7 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [
-      {
-        "parentPluginId": "visualizations",
-        "id": "def-common.LegendLayout",
-        "type": "Enum",
-        "tags": [],
-        "label": "LegendLayout",
-        "description": [],
-        "path": "src/platform/plugins/shared/visualizations/common/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
-        "id": "def-common.LegendSize",
-        "type": "Enum",
-        "tags": [],
-        "label": "LegendSize",
-        "description": [],
-        "path": "src/platform/plugins/shared/visualizations/common/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "enums": [],
     "misc": [
       {
         "parentPluginId": "visualizations",
@@ -14879,28 +13093,6 @@
       },
       {
         "parentPluginId": "visualizations",
-        "id": "def-common.DEFAULT_LEGEND_SIZE",
-        "type": "string",
-        "tags": [],
-        "label": "DEFAULT_LEGEND_SIZE",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "visualizations",
-            "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
-            "section": "def-common.LegendSize",
-            "text": "LegendSize"
-          },
-          ".MEDIUM"
-        ],
-        "path": "src/platform/plugins/shared/visualizations/common/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
         "id": "def-common.DerivativeColumn",
         "type": "Type",
         "tags": [],
@@ -14952,21 +13144,6 @@
       },
       {
         "parentPluginId": "visualizations",
-        "id": "def-common.Dimension",
-        "type": "Type",
-        "tags": [],
-        "label": "Dimension",
-        "description": [],
-        "signature": [
-          "[DimensionColumn[] | undefined, string]"
-        ],
-        "path": "src/platform/plugins/shared/visualizations/common/utils/prepare_log_table.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
         "id": "def-common.ExpressionFunctionVisDimension",
         "type": "Type",
         "tags": [],
@@ -14998,9 +13175,9 @@
           },
           ", ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.ExpressionValueVisDimension",
             "text": "ExpressionValueVisDimension"
           },
@@ -15021,29 +13198,6 @@
             "text": "Adapters"
           },
           ">>"
-        ],
-        "path": "src/platform/plugins/shared/visualizations/common/expression_functions/vis_dimension.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
-        "id": "def-common.ExpressionValueVisDimension",
-        "type": "Type",
-        "tags": [],
-        "label": "ExpressionValueVisDimension",
-        "description": [],
-        "signature": [
-          "{ type: \"vis_dimension\"; } & { accessor: number | ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DatatableColumn",
-            "text": "DatatableColumn"
-          },
-          "; format: { id?: string | undefined; params?: Record<string, any> | undefined; }; }"
         ],
         "path": "src/platform/plugins/shared/visualizations/common/expression_functions/vis_dimension.ts",
         "deprecated": false,
@@ -15663,21 +13817,6 @@
       },
       {
         "parentPluginId": "visualizations",
-        "id": "def-common.PartitionLegendValue",
-        "type": "Type",
-        "tags": [],
-        "label": "PartitionLegendValue",
-        "description": [],
-        "signature": [
-          "\"value\" | \"percent\""
-        ],
-        "path": "src/platform/plugins/shared/visualizations/common/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
         "id": "def-common.PercentageModeConfig",
         "type": "Type",
         "tags": [],
@@ -16190,21 +14329,6 @@
       },
       {
         "parentPluginId": "visualizations",
-        "id": "def-common.XYLegendValue",
-        "type": "Type",
-        "tags": [],
-        "label": "XYLegendValue",
-        "description": [],
-        "signature": [
-          "\"min\" | \"max\" | \"median\" | \"count\" | \"total\" | \"range\" | \"currentAndLastValue\" | \"lastValue\" | \"lastNonNullValue\" | \"average\" | \"firstValue\" | \"firstNonNullValue\" | \"distinctCount\" | \"variance\" | \"stdDeviation\" | \"difference\" | \"differencePercent\""
-        ],
-        "path": "src/platform/plugins/shared/visualizations/common/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
         "id": "def-common.YAxisMode",
         "type": "Type",
         "tags": [],
@@ -16381,21 +14505,6 @@
           "{ readonly DEFAULT: \"default\"; readonly SHOW: \"show\"; readonly HIDE: \"hide\"; }"
         ],
         "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
-        "id": "def-common.LegendSizeToPixels",
-        "type": "Object",
-        "tags": [],
-        "label": "LegendSizeToPixels",
-        "description": [],
-        "signature": [
-          "{ readonly auto: undefined; readonly small: 80; readonly medium: 130; readonly large: 180; readonly xlarge: 230; }"
-        ],
-        "path": "src/platform/plugins/shared/visualizations/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
