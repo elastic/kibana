@@ -191,9 +191,18 @@ export function Detail() {
     packageInfo.installationInfo?.version &&
     semverLt(packageInfo.installationInfo.version, packageInfo.latestVersion);
 
-  const { isInitialLoading: isSettingsInitialLoading } = useGetSettingsQuery({
+  const [prereleaseIntegrationsEnabled, setPrereleaseIntegrationsEnabled] = React.useState<
+    boolean | undefined
+  >();
+
+  const { data: settings, isInitialLoading: isSettingsInitialLoading } = useGetSettingsQuery({
     enabled: authz.fleet.readSettings,
   });
+
+  useEffect(() => {
+    const isEnabled = Boolean(settings?.item.prerelease_integrations_enabled) || prerelease;
+    setPrereleaseIntegrationsEnabled(isEnabled);
+  }, [settings?.item.prerelease_integrations_enabled, prerelease]);
 
   const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
   // Fetch package info
@@ -207,7 +216,7 @@ export function Detail() {
     pkgName,
     pkgVersion,
     {
-      prerelease: true,
+      prerelease: prereleaseIntegrationsEnabled,
       withMetadata: true,
     },
     {
@@ -232,9 +241,14 @@ export function Detail() {
     }
   }, [packageInfoLatestGAData?.item]);
 
+  // fetch latest Prerelease version (prerelease=true)
+  const { data: packageInfoLatestPrereleaseData } = useGetPackageInfoByKeyQuery(pkgName, '', {
+    prerelease: true,
+  });
+
   useEffect(() => {
-    setLatestPrereleaseVersion(packageInfoData?.item.version);
-  }, [packageInfoData?.item.version]);
+    setLatestPrereleaseVersion(packageInfoLatestPrereleaseData?.item.version);
+  }, [packageInfoLatestPrereleaseData?.item.version]);
 
   const { isFirstTimeAgentUser = false, isLoading: firstTimeUserLoading } =
     useIsFirstTimeAgentUserQuery();
@@ -460,13 +474,14 @@ export function Detail() {
 
   const showVersionSelect = useMemo(
     () =>
+      prereleaseIntegrationsEnabled &&
       latestGAVersion &&
       latestPrereleaseVersion &&
       latestGAVersion !== latestPrereleaseVersion &&
       (!packageInfo?.version ||
         packageInfo.version === latestGAVersion ||
         packageInfo.version === latestPrereleaseVersion),
-    [latestGAVersion, latestPrereleaseVersion, packageInfo?.version]
+    [prereleaseIntegrationsEnabled, latestGAVersion, latestPrereleaseVersion, packageInfo?.version]
   );
 
   const versionOptions = useMemo(
@@ -838,7 +853,6 @@ export function Detail() {
               packageMetadata={packageInfoData?.metadata}
               startServices={services}
               isCustomPackage={isCustomPackage}
-              latestGAVersion={latestGAVersion}
             />
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_assets}>
