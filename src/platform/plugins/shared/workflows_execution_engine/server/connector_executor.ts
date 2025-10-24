@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// TODO: Remove eslint exceptions comments and fix the issues
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import { validate as validateUuid } from 'uuid';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
-import { validate as validateUuid } from 'uuid';
 
 export class ConnectorExecutor {
   constructor(private actionsClient: IUnsecuredActionsClient) {}
@@ -38,7 +41,7 @@ export class ConnectorExecutor {
     // This is a workaround for the fact that connectors do not natively support cancellation.
     // In the future, if connectors support cancellation, we can remove this logic.
     await Promise.race([abortPromise, runConnectorPromise]);
-    return await runConnectorPromise;
+    return runConnectorPromise;
   }
 
   private async runConnector(
@@ -61,7 +64,7 @@ export class ConnectorExecutor {
       connectorId = connector?.id;
     }
 
-    return await this.actionsClient.execute({
+    return this.actionsClient.execute({
       id: connectorId,
       params: connectorParams,
       spaceId,
