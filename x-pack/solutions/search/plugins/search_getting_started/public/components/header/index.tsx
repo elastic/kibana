@@ -17,21 +17,22 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { SEARCH_HOMEPAGE } from '@kbn/deeplinks-search';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 import { useKibana } from '../../hooks/use_kibana';
 import { PLUGIN_NAME } from '../../../common';
 import { SearchGettingStartedSectionHeading } from '../section_heading';
 import { AddDataButton } from './add_data_button';
 
+const skipAndGoHomeLabel = i18n.translate('xpack.search.gettingStarted.page.headerCtaEmpty', {
+  defaultMessage: 'Skip and go to Home',
+});
+
 export const SearchGettingStartedHeader: React.FC = () => {
   const assetBasePath = useAssetBasePath();
   const {
     services: { application },
   } = useKibana();
-
-  const skipAndGoHomeLabel = i18n.translate('xpack.search.gettingStarted.page.headerCtaEmpty', {
-    defaultMessage: 'Skip and go to Home',
-  });
 
   return (
     <EuiFlexGroup gutterSize="m" alignItems="stretch" direction="rowReverse">
@@ -45,7 +46,7 @@ export const SearchGettingStartedHeader: React.FC = () => {
           <EuiTitle size="l">
             <h1>
               {i18n.translate('xpack.search.gettingStarted.page.title', {
-                defaultMessage: 'Start your building with Elasticsearch.',
+                defaultMessage: 'Start building with Elasticsearch.',
               })}
             </h1>
           </EuiTitle>
@@ -68,7 +69,7 @@ export const SearchGettingStartedHeader: React.FC = () => {
                 aria-label={skipAndGoHomeLabel}
                 data-test-subj="elasticLLMCostsTourCloseBtn"
                 onClick={() => {
-                  application.navigateToUrl('/app/elasticsearch/home');
+                  application.navigateToApp(SEARCH_HOMEPAGE);
                 }}
                 color="text"
               >

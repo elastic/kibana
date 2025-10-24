@@ -49,7 +49,7 @@ export const ElasticsearchConnectionDetails = () => {
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiFlexGroup alignItems="center" gutterSize="m" wrap>
-          <EuiFlexItem grow={false} style={{ minWidth: '300px' }}>
+          <EuiFlexItem grow={false}>
             <FormInfoField
               value={elasticsearchUrl}
               copyValue={elasticsearchUrl}
@@ -57,7 +57,7 @@ export const ElasticsearchConnectionDetails = () => {
               copyValueDataTestSubj="copyEndpointButton"
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false} style={{ minWidth: '300px' }}>
+          <EuiFlexItem grow={false}>
             <ApiKeyForm hasTitle={false} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

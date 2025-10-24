@@ -8,6 +8,7 @@ import React, { useState } from 'react';
 import { EuiButton, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { SEARCH_INDICES } from '@kbn/deeplinks-search';
 import { useKibana } from '../../hooks/use_kibana';
 
 export const AddDataButton: React.FC = () => {
@@ -28,9 +29,10 @@ export const AddDataButton: React.FC = () => {
     <EuiContextMenuItem
       key="upload"
       icon="exportAction"
+      data-test-subj="gettingStartedUploadMenuItem"
       onClick={() => {
         closePopover();
-        application.navigateToUrl('/app/ml/filedatavisualizer');
+        application.navigateToApp('ml', { path: 'filedatavisualizer' });
       }}
     >
       {i18n.translate('xpack.search.gettingStarted.addDataButton.uploadFile', {
@@ -40,21 +42,23 @@ export const AddDataButton: React.FC = () => {
     <EuiContextMenuItem
       key="sample"
       icon="folderOpen"
+      data-test-subj="gettingStartedSampleDataMenuItem"
       onClick={() => {
         closePopover();
-        application.navigateToUrl('/app/home#/tutorial_directory/sampleData');
+        application.navigateToApp('home', { path: '#/tutorial_directory/sampleData' });
       }}
     >
       {i18n.translate('xpack.search.gettingStarted.addDataButton.browseSampleData', {
-        defaultMessage: 'Browse sample data sets',
+        defaultMessage: 'Browse sample datasets',
       })}
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       key="empty"
       icon="indexOpen"
+      data-test-subj="gettingStartedCreateIndexMenuItem"
       onClick={() => {
         closePopover();
-        application.navigateToUrl('/app/elasticsearch/indices/create');
+        application.navigateToApp(SEARCH_INDICES, { path: 'create' });
       }}
     >
       {i18n.translate('xpack.search.gettingStarted.addDataButton.createEmptyIndex', {
