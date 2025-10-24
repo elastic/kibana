@@ -50,6 +50,22 @@ import { SimplifiedPackagePolicy } from '@kbn/fleet-plugin/common/services/simpl
 import { type FleetUsage } from '@kbn/fleet-plugin/server/collectors/register';
 import { testUsers } from '../test_users';
 
+function expectStatusCode200(res: Response) {
+  if (res.statusCode === 200) {
+    return;
+  }
+
+  if (res.statusCode === 404) {
+    throw new Error('404 "Not Found"');
+  } else {
+    throw new Error(
+      `${res.statusCode}${res.body?.error ? ` "${res.body?.error}"` : ''}${
+        res.body?.message ? ` ${res.body?.message}` : ''
+      }`
+    );
+  }
+}
+
 export class SpaceTestApiClient {
   constructor(
     private readonly supertest: Agent,
