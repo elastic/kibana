@@ -26,7 +26,7 @@ import { CodeEditor } from '@kbn/code-editor';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
-import type { FieldType } from '@kbn/esql-ast';
+import { BasicPrettyPrinter, Parser, type FieldType } from '@kbn/esql-ast';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
 import type { ESQLTelemetryCallbacks } from '@kbn/esql-types';
 import {
@@ -217,9 +217,11 @@ const ESQLEditorInternal = function ESQLEditor({
 
         // TODO: add rest of options
         if (currentValue) {
+          const { root } = Parser.parse(currentValue);
+          const prettyQuery = BasicPrettyPrinter.print(root);
           telemetryService.trackQuerySubmitted({
             query_source: source,
-            query_length: editor1.current?.getModel()?.getValueLength().toString() ?? '0',
+            query_length: prettyQuery.length.toString(),
             query_lines: editor1.current?.getModel()?.getLineCount().toString() ?? '0',
             anti_limit_before_aggregate: hasLimitBeforeAggregate(currentValue),
             anti_missing_sort_before_limit: missingSortBeforeLimit(currentValue),
