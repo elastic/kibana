@@ -364,7 +364,7 @@ describe('MetricsExperienceGrid', () => {
       totalPages: 2,
       filteredFieldsCount: allFieldsSomeWithCpu.filter((f) => f.name.includes('cpu')).length,
       currentPageFields: fieldsWithCpu,
-      dimensionFilteredMetrics: fieldsWithCpu.map((f) => f.name),
+      dimensionFilteredMetrics: fieldsWithCpu.map((f) => ({ name: f.name, index: f.index })),
     });
 
     const { getByText } = render(<MetricsExperienceGrid {...defaultProps} />, {
