@@ -53,6 +53,8 @@ import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
 import { DashboardCreationOptions } from './types';
 import { DashboardState } from '../../common';
 
+export const COMPARE_DEBOUNCE = 100;
+
 export function initializeUnifiedSearchManager(
   initialState: DashboardState,
   controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>,
@@ -343,8 +345,14 @@ export function initializeUnifiedSearchManager(
     internalApi: {
       controlGroupReload$,
       startComparing$: (lastSavedState$: BehaviorSubject<DashboardState>) => {
-        return combineLatest([unifiedSearchFilters$, query$, refreshInterval$, timeRange$]).pipe(
-          debounceTime(100),
+        return combineLatest([
+          unifiedSearchFilters$,
+          query$,
+          refreshInterval$,
+          timeRange$,
+          timeRestore$,
+        ]).pipe(
+          debounceTime(COMPARE_DEBOUNCE),
           map(([filters, query, refreshInterval, timeRange]) => ({
             filters: filters ?? DEFAULT_DASHBOARD_STATE.filters,
             query: query ?? DEFAULT_DASHBOARD_STATE.query,
