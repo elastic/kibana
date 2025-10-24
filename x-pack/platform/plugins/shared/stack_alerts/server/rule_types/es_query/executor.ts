@@ -187,7 +187,7 @@ export async function executor(
     alertsClient.report({
       id,
       actionGroup: ActionGroupId,
-      state: { latestTimestamp, dateStart, dateEnd }, // We don't use dateStart and dateEnd. We generate them from the params
+      state: { latestTimestamp, dateStart, dateEnd },
       context: actionContext,
       payload: {
         [ALERT_URL]: actionContext.link,
