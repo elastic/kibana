@@ -9,10 +9,13 @@ import React from 'react';
 
 import { EuiAccordion, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type {
+  VisualizationToolbarProps,
+  LensPartitionVisualizationState as PieVisualizationState,
+} from '@kbn/lens-common';
+import { PARTITION_EMPTY_SIZE_RADIUS as EmptySizeRatios } from '@kbn/lens-common';
 import type { ToolbarContentMap } from '../../../shared_components/flyout_toolbar';
 import { FlyoutToolbar } from '../../../shared_components/flyout_toolbar';
-import type { VisualizationToolbarProps } from '../../../types';
-import { EmptySizeRatios, type PieVisualizationState } from '../../../../common/types';
 import { PartitionAppearanceSettings } from './appearance_settings';
 import { PartitionTitlesAndTextSettings } from './titles_and_text_setttings';
 import { PartitionChartsMeta } from '../partition_charts_meta';

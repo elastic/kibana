@@ -68,6 +68,7 @@
     "@kbn/securitysolution-exceptions-common",
     "@kbn/std",
     "@kbn/securitysolution-utils",
-    "@kbn/security-solution-test-api-clients"
+    "@kbn/security-solution-test-api-clients",
+    "@kbn/cloud-security-posture-common"
   ]
 }
