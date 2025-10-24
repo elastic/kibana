@@ -11,6 +11,7 @@ import {
   EuiIcon,
   EuiLink,
   EuiScreenReaderOnly,
+  EuiTitle,
   EuiToolTip,
   euiTextTruncate,
   useEuiTheme,
@@ -112,28 +113,31 @@ export const PresentationPanelTitle = ({
           tabIndex={0}
         >
           {!hideTitle ? (
-            <h2
+            <EuiTitle
+              size="xs"
               // styles necessary for applying ellipsis and showing the info icon if description is present
               css={css`
                 overflow: hidden;
               `}
             >
-              <EuiScreenReaderOnly>
-                <span id={headerId}>
-                  {panelTitle
-                    ? i18n.translate('presentationPanel.ariaLabel', {
-                        defaultMessage: 'Panel: {title}',
-                        values: {
-                          title: panelTitle,
-                        },
-                      })
-                    : i18n.translate('presentationPanel.untitledPanelAriaLabel', {
-                        defaultMessage: 'Untitled panel',
-                      })}
-                </span>
-              </EuiScreenReaderOnly>
-              {panelTitleElement}
-            </h2>
+              <>
+                <EuiScreenReaderOnly>
+                  <span id={headerId}>
+                    {panelTitle
+                      ? i18n.translate('presentationPanel.ariaLabel', {
+                          defaultMessage: 'Panel: {title}',
+                          values: {
+                            title: panelTitle,
+                          },
+                        })
+                      : i18n.translate('presentationPanel.untitledPanelAriaLabel', {
+                          defaultMessage: 'Untitled panel',
+                        })}
+                  </span>
+                </EuiScreenReaderOnly>
+                {panelTitleElement}
+              </>
+            </EuiTitle>
           ) : null}
           <EuiIcon
             type="info"
