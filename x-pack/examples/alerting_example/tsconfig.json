@@ -33,5 +33,6 @@
     "@kbn/response-ops-rule-form",
     "@kbn/fields-metadata-plugin",
     "@kbn/i18n-react",
+    "@kbn/rule-data-utils",
   ]
 }
