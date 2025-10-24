@@ -12,13 +12,14 @@ import type { PackagePolicyClient } from '../../package_policy_service';
 import { sendTelemetryEvents } from '../../upgrade_sender';
 
 import { installPackage } from './install';
-import { rollbackInstallation } from './rollback';
+import { isIntegrationRollbackTTLExpired, rollbackInstallation } from './rollback';
 
 jest.mock('../..', () => ({
   appContextService: {
     getLogger: jest.fn().mockReturnValue({ info: jest.fn(), debug: jest.fn() } as any),
     getInternalUserSOClientWithoutSpaceExtension: jest.fn(),
     getTelemetryEventsSender: jest.fn(),
+    getConfig: jest.fn().mockReturnValue({}),
   },
   packagePolicyService: {
     getPackagePolicySavedObjects: jest.fn(),
@@ -101,6 +102,28 @@ describe('rollbackInstallation', () => {
     await expect(
       rollbackInstallation({ esClient, currentUserPolicyIds: [], pkgName, spaceId })
     ).rejects.toThrow('test-package was not installed from the registry (install source: upload)');
+  });
+
+  it('should throw an error if TTL expired', async () => {
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue({
+      find: jest.fn().mockResolvedValue({
+        saved_objects: [
+          {
+            id: pkgName,
+            type: PACKAGES_SAVED_OBJECT_TYPE,
+            attributes: {
+              install_source: 'registry',
+              previous_version: oldPkgVersion,
+              install_started_at: '2023-01-01T00:00:00Z',
+            },
+          },
+        ],
+      }),
+    });
+
+    await expect(
+      rollbackInstallation({ esClient, currentUserPolicyIds: [], pkgName, spaceId })
+    ).rejects.toThrow('Rollback not allowed as TTL expired');
   });
 
   it('should throw an error if at least one package policy does not have a previous version', async () => {
@@ -440,5 +463,37 @@ describe('rollbackInstallation', () => {
     await expect(
       rollbackInstallation({ esClient, currentUserPolicyIds: [], pkgName, spaceId })
     ).rejects.toThrow('Not authorized to rollback integration policies in all spaces');
+  });
+});
+
+describe('isIntegrationRollbackTTLExpired', () => {
+  it('should return true if integration rollback TTL is expired', () => {
+    const installStartedAt = new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(); // 8 days ago
+    const isExpired = isIntegrationRollbackTTLExpired(installStartedAt);
+    expect(isExpired).toBe(true);
+  });
+
+  it('should return false if integration rollback TTL is not expired', () => {
+    const installStartedAt = new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(); // 6 days ago
+    const isExpired = isIntegrationRollbackTTLExpired(installStartedAt);
+    expect(isExpired).toBe(false);
+  });
+
+  it('should return true if integration rollback TTL is expired with changed config', () => {
+    (appContextService.getConfig as jest.Mock).mockReturnValue({
+      integrationRollbackTTL: '1h',
+    });
+    const installStartedAt = new Date(Date.now() - 60 * 60 * 1000 - 100).toISOString();
+    const isExpired = isIntegrationRollbackTTLExpired(installStartedAt);
+    expect(isExpired).toBe(true);
+  });
+
+  it('should return false if integration rollback TTL is not expired with changed config', () => {
+    (appContextService.getConfig as jest.Mock).mockReturnValue({
+      integrationRollbackTTL: '1h',
+    });
+    const installStartedAt = new Date(Date.now() - 60 * 60 * 1000 + 100).toISOString();
+    const isExpired = isIntegrationRollbackTTLExpired(installStartedAt);
+    expect(isExpired).toBe(false);
   });
 });
