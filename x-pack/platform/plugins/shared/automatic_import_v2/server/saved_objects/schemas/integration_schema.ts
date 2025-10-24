@@ -12,7 +12,7 @@ import { TASK_STATUSES } from "../constants";
 
 export const integrationSchemaV1 = schema.object({
   integration_id: schema.string(),
-  data_stream_count: schema.number(),
+  data_stream_count: schema.maybe(schema.number()),
   created_by: schema.string({ minLength: 1 }),
   status: schema.oneOf(Object.values(TASK_STATUSES).map(status => schema.literal(status)) as [Type<string>]),
   metadata: schema.object({
