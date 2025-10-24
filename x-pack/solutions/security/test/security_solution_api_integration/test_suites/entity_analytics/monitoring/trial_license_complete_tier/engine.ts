@@ -430,7 +430,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe.only('integrations sync', async () => {
+    describe('integrations sync', async () => {
       beforeEach(async () => {
         await esArchiver.load(
           'x-pack/solutions/security/test/fixtures/es_archives/privileged_monitoring/integrations/okta',
