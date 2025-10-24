@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type { GeneralDatasourceStates } from '@kbn/lens-common';
 import type { DeprecatedColorMappingConfig } from '../../../../runtime_state/converters/raw_color_mappings';
 import {
   convertToRawColorMappings,
   getColumnMetaFn,
 } from '../../../../runtime_state/converters/raw_color_mappings';
 import { isDeprecatedColorMapping } from '../../../../runtime_state/converters/raw_color_mappings/converter';
-import type { GeneralDatasourceStates } from '../../../../state_management';
 import type { TagcloudState } from '../../types';
 
 /**
