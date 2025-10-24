@@ -123,7 +123,7 @@ export default function apiKeyBackfillTests({ getService }: FtrProviderContext) 
     }
 
     it('should wait to invalidate API key until backfill for rule is complete', async () => {
-      const start = moment().utc().startOf('day').subtract(6, 'days').toISOString();
+      const start = moment().utc().startOf('day').subtract(7, 'days').toISOString();
       const end = moment().utc().startOf('day').subtract(4, 'day').toISOString();
       const spaceId = SuperuserAtSpace1.space.id;
 
