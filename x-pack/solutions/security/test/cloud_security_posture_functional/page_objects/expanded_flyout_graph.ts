@@ -33,6 +33,7 @@ const {
   GRAPH_IPS_POPOVER_CONTENT_ID,
   GRAPH_IPS_POPOVER_IP_ID,
   PREVIEW_SECTION_BANNER_PANEL,
+  GRAPH_GROUPED_NODE_TEST_ID,
 } = testSubjectIds;
 
 type Filter = Parameters<FilterBarService['addFilter']>[0];
@@ -62,7 +63,7 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
     await this.waitGraphIsLoaded();
     const graph = await this.testSubjects.find(GRAPH_INVESTIGATION_TEST_ID);
     await graph.scrollIntoView();
-    const nodes = await graph.findAllByCssSelector('[data-test-subj="label-node-stacked-shape"]');
+    const nodes = await graph.findAllByTestSubject(GRAPH_GROUPED_NODE_TEST_ID);
     expect(nodes.length).to.be(expected);
   }
 

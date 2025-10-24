@@ -16,6 +16,7 @@ export const testSubjectIds = {
   GRAPH_PREVIEW_TITLE_LINK_TEST_ID: 'securitySolutionFlyoutGraphPreviewTitleLink',
   NODE_EXPAND_BUTTON_TEST_ID: 'cloudSecurityGraphNodeExpandButton',
   GRAPH_INVESTIGATION_TEST_ID: 'cloudSecurityGraphGraphInvestigation',
+  GRAPH_GROUPED_NODE_TEST_ID: 'label-node-stacked-shape',
   GRAPH_NODE_EXPAND_POPOVER_TEST_ID: 'cloudSecurityGraphGraphInvestigationGraphNodeExpandPopover',
   GRAPH_NODE_POPOVER_EXPLORE_RELATED_TEST_ID:
     'cloudSecurityGraphGraphInvestigationExploreRelatedEntities',
