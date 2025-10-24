@@ -15,11 +15,7 @@ The rest of this doc dives into the implementation details of each of the above 
 
 ## Quick steps for testing
 
-**Note:** Since Rollups has been deprecated, the UI is hidden unless there is an existing rollup job in the cluster. To test the Rollup UI, you must first create a rollup job using the workaround described below.
-
-### Creating a Rollup Job for Testing
-
-Elasticsearch only allows creating a rollup job if there is existing rollup usage in the cluster. To work around this:
+**Note:** Since Rollups has been deprecated, the UI is hidden unless there is an existing rollup job in the cluster. To test the Rollup UI, you must first create a rollup job using the workaround described below:
 
 1. **Start Elasticsearch and Kibana**
 
@@ -77,14 +73,16 @@ Elasticsearch only allows creating a rollup job if there is existing rollup usag
    DELETE /mock_rollup_index
    ```
 
-6. **Navigate to Stack Management > Rollup Jobs** to view and manage the rollup job. Wait for the job to process some documents.
+6. **Navigate to Stack Management > Rollup Jobs** to view the list of rollup jobs.
 
-7. **Create a rollup index pattern** in Stack Management > Data Views with an index pattern that matches the created rollup index (e.g., `rollup*`).
+### Steps for creating and running a rollup job in the UI
 
-8. **Test rollup features:**
-   - View rollup indices in Index Management (toggle "Include rollup indices")
-   - Create visualizations using the rollup index pattern
-   - Verify rollup badges appear in the Data Views list and Index Management
+1. Create a rollup job with an index pattern that captures an existing data (e.g. `kibana_sample_data_logs`).
+2. Set frequency to "minute". Clear the latency buffer field.
+3. Select the time field which is the same time field selected in the installed index pattern (`timestamp` without an `@` in the case of web logs).
+4. Specify a time bucket size (`10m` will do).
+5. Select a few terms, histogram, and metrics fields.
+6. Create and start the rollup job. Wait a minute for the job to run. You should see the numbers for documents and pages processed change in the detail panel.
 
 ---
 
