@@ -6755,6 +6755,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/fs@link:x-pack/platform/packages/shared/kbn-fs":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ftr-apis-plugin@link:src/platform/plugins/private/ftr_apis":
   version "0.0.0"
   uid ""
