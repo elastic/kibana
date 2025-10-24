@@ -6,7 +6,6 @@
  */
 
 import { lastValueFrom } from 'rxjs';
-import { reverse, uniqBy, flatten } from 'lodash';
 import type { IRouter } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
@@ -32,6 +31,7 @@ import type {
 } from '../../../common/search_strategy';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
+import { getAgentIdFromFields } from '../../../common/utils/agent_fields';
 
 export const getActionResultsRoute = (
   router: IRouter<DataRequestHandlerContext>,
@@ -116,31 +116,44 @@ export const getActionResultsRoute = (
             agentIdsForCurrentPage = requestedAgentIds.slice(startIndex, endIndex);
           } else {
             // Fetch action details to get agent IDs (internal UI usage)
-            const { actionDetails } = await lastValueFrom(
-              search.search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
-                {
-                  actionId: request.params.actionId,
-                  factoryQueryType: OsqueryQueries.actionDetails,
-                  spaceId:
-                    (await context.core).savedObjects.client.getCurrentNamespace() || 'default',
+            try {
+              const { actionDetails } = await lastValueFrom(
+                search.search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
+                  {
+                    actionId: request.params.actionId,
+                    factoryQueryType: OsqueryQueries.actionDetails,
+                    spaceId:
+                      (await context.core).savedObjects.client.getCurrentNamespace() || 'default',
+                  },
+                  { abortSignal, strategy: 'osquerySearchStrategy' }
+                )
+              );
+
+              // Extract agent IDs from action document
+              if (actionDetails?._source) {
+                // Check if actionId is a child query action_id
+                const queries = actionDetails._source.queries || [];
+                const matchingQuery = queries.find((q) => q.action_id === request.params.actionId);
+
+                // Use query-specific agents if found, otherwise use parent action's agents
+                agentIds = matchingQuery?.agents || actionDetails._source.agents || [];
+              } else {
+                agentIds = [];
+              }
+            } catch (fetchError) {
+              logger.error(
+                `Failed to fetch action details for actionId ${request.params.actionId}: ${fetchError}`
+              );
+
+              return response.customError({
+                statusCode: 404,
+                body: {
+                  message: `Action with ID "${request.params.actionId}" not found or inaccessible. Please verify the action exists and you have the necessary permissions.`,
                 },
-                { abortSignal, strategy: 'osquerySearchStrategy' }
-              )
-            );
-
-            // Extract agent IDs from action document
-            if (actionDetails?._source) {
-              // Check if actionId is a child query action_id
-              const queries = actionDetails._source.queries || [];
-              const matchingQuery = queries.find((q) => q.action_id === request.params.actionId);
-
-              // Use query-specific agents if found, otherwise use parent action's agents
-              agentIds = matchingQuery?.agents || actionDetails._source.agents || [];
-            } else {
-              agentIds = [];
+              });
             }
 
-            // Apply pagination to agent IDs for internal UI (Issue 3 fix)
+            // Apply pagination to agent IDs for internal UI
             const page = request.query.page ?? 0;
             const pageSize = request.query.pageSize ?? 100;
             const startIndex = page * pageSize;
@@ -184,32 +197,36 @@ export const getActionResultsRoute = (
             totalResponded,
             successful: aggsBuckets?.find((bucket) => bucket.key === 'success')?.doc_count ?? 0,
             failed: aggsBuckets?.find((bucket) => bucket.key === 'error')?.doc_count ?? 0,
-            pending: Math.max(0, agentIds.length - totalResponded),
+            pending: Math.max(0, (agentIds?.length ?? 0) - totalResponded),
           };
 
           let processedEdges = res.edges;
 
           // Only process edges for internal UI (when agentIds NOT provided in request)
           if (!requestedAgentIds && agentIdsForCurrentPage.length > 0) {
-            // Create placeholder edges for CURRENT PAGE agents only (Issue 3 pagination fix)
-            const placeholderEdges = agentIdsForCurrentPage.map((agentId) => ({
-              _index: '.logs-osquery_manager.action.responses-default',
-              _id: `placeholder-${agentId}`,
-              _source: {},
-              fields: { agent_id: [agentId] },
-            }));
+            // Extract agent IDs that already have responses
+            const respondedAgentIds = new Set(
+              res.edges.map((edge) => getAgentIdFromFields(edge.fields)).filter(Boolean)
+            );
 
-            // Merge real results with placeholders, keeping real results when duplicates exist
-            // reverse() ensures proper ordering, uniqBy keeps first occurrence (real data)
-            processedEdges = reverse(
-              uniqBy(flatten([res.edges, placeholderEdges]), 'fields.agent_id[0]')
-            ) as typeof res.edges;
+            // Create placeholder edges ONLY for agents that haven't responded
+            const placeholderEdges = agentIdsForCurrentPage
+              .filter((agentId) => !respondedAgentIds.has(agentId))
+              .map((agentId) => ({
+                _index: '.logs-osquery_manager.action.responses-default',
+                _id: `placeholder-${agentId}`,
+                _source: {},
+                fields: { agent_id: [agentId] },
+              }));
+
+            // Merge real results with placeholders (no deduplication needed since placeholders are non-overlapping)
+            processedEdges = [...res.edges, ...placeholderEdges] as typeof res.edges;
           }
 
           // Calculate pagination metadata
           const currentPage = request.query.page ?? 0;
           const currentPageSize = request.query.pageSize ?? 100;
-          const totalAgents = agentIds.length;
+          const totalAgents = agentIds?.length ?? 0;
           const totalPages = Math.ceil(totalAgents / currentPageSize);
 
           return response.ok({

@@ -1110,7 +1110,6 @@ describe('getActionResultsRoute', () => {
     });
 
     it('should create placeholders only for current page, not all agents', async () => {
-      // This is the CRITICAL test for Issue 3 fix - memory efficiency
       // Validates that ES query receives ONLY current page agent IDs (100), not all 10,000
       const totalAgents = 10000;
       const allAgents = Array.from({ length: totalAgents }, (_, i) => `agent-${i}`);
@@ -1138,7 +1137,6 @@ describe('getActionResultsRoute', () => {
       await routeHandler(mockContext, mockRequest, mockResponse);
 
       // CRITICAL ASSERTION: Verify Elasticsearch query receives ONLY 100 agent IDs, not all 10,000
-      // This is the core Issue 3 fix - prevents memory exhaustion with large agent sets
       const actionResultsCall = mockSearchFn.mock.calls.find(
         (call) => call[0].factoryQueryType === OsqueryQueries.actionResults
       );

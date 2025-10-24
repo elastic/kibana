@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import type { Criteria } from '@elastic/eui';
 import { EuiBasicTable, EuiCodeBlock, EuiLink, EuiToolTip } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
@@ -18,6 +18,7 @@ import { Direction } from '../../common/search_strategy';
 import { useKibana } from '../common/lib/kibana';
 import { API_VERSIONS } from '../../common/constants';
 import { useErrorToast } from '../common/hooks/use_error_toast';
+import { getAgentIdFromFields } from '../../common/utils/agent_fields';
 
 interface ActionResultsSummaryProps {
   actionId: string;
@@ -30,13 +31,18 @@ interface ActionResultsSummaryProps {
 // Use Elasticsearch's native SearchHit type for result edges
 type ResultEdge = estypes.SearchHit<object>;
 
+const DEFAULT_PAGE_SIZE = 20;
+const DEFAULT_PAGE_INDEX = 0;
+const AGENT_DETAILS_CACHE_TIME_MS = 30000; // 30 seconds
+const TABLE_MAX_HEIGHT_PX = 500;
+
 const renderErrorMessage = (error: string) => (
   <EuiCodeBlock language="shell" fontSize="s" paddingSize="none" transparentBackground>
     {error}
   </EuiCodeBlock>
 );
 
-// CSS-in-JS styles for fixed-height scrollable table (moved outside component for performance)
+// CSS-in-JS styles for scrollable table with dynamic height
 const statusTableCss = {
   '.euiTable': {
     display: 'block',
@@ -48,8 +54,7 @@ const statusTableCss = {
   },
   '.euiTable tbody': {
     display: 'block',
-    minHeight: '400px',
-    maxHeight: '400px',
+    maxHeight: `${TABLE_MAX_HEIGHT_PX}px`,
     overflowY: 'auto' as const,
   },
   '.euiTable tbody tr': {
@@ -68,8 +73,8 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
 }) => {
   const { http, application } = useKibana().services;
   const setErrorToast = useErrorToast();
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(20); // Match EuiBasicTable default
+  const [pageIndex, setPageIndex] = useState(DEFAULT_PAGE_INDEX);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const expired = useMemo(
     () => (!expirationDate ? false : new Date(expirationDate) < new Date()),
     [expirationDate]
@@ -87,12 +92,9 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   });
 
   // Extract agent IDs from current page edges
-  // Note: Check both bracket notation ['agent.id'] (ECS formatted) and legacy format (agent_id)
+  // Note: Supports both ECS formatted ['agent.id'] and legacy format (agent_id)
   const currentPageAgentIds = useMemo(
-    () =>
-      data.edges
-        .map((edge) => edge.fields?.['agent.id']?.[0] || edge.fields?.agent_id?.[0])
-        .filter(Boolean) as string[],
+    () => data.edges.map((edge) => getAgentIdFromFields(edge.fields)).filter(Boolean) as string[],
     [data.edges]
   );
 
@@ -113,11 +115,15 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     },
     {
       enabled: currentPageAgentIds.length > 0,
-      staleTime: 60000, // Cache for 1 minute
+      staleTime: AGENT_DETAILS_CACHE_TIME_MS,
       onError: (err) => {
         setErrorToast(err, {
           title: i18n.translate('xpack.osquery.bulkAgentDetails.fetchError', {
-            defaultMessage: 'Error while fetching agent details',
+            defaultMessage: 'Error fetching agent details',
+          }),
+          toastMessage: i18n.translate('xpack.osquery.bulkAgentDetails.fetchErrorMessage', {
+            defaultMessage:
+              'Failed to load agent names. Please check your network connection and try again.',
           }),
         });
       },
@@ -135,25 +141,36 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     return map;
   }, [agentsData]);
 
-  // Placeholders are edges without completed_at that represent pending/non-responsive agents
-  useEffect(() => {
-    data.edges.forEach((edge) => {
-      // Ensure fields object exists for all edges
-      if (!edge.fields) {
-        edge.fields = {};
-      }
+  // Enrich edges with error states immutably
+  const enrichedEdges = useMemo(
+    () =>
+      data.edges.map((edge) => {
+        // If edge already has error/completed state, return as-is
+        if (edge.fields?.error || edge.fields?.['error.skipped'] || edge.fields?.completed_at) {
+          return edge;
+        }
 
-      if (error) {
-        edge.fields['error.skipped'] = edge.fields.error = [error];
-      } else if (expired && !edge.fields?.completed_at) {
-        edge.fields['error.keyword'] = edge.fields.error = [
-          i18n.translate('xpack.osquery.liveQueryActionResults.table.expiredErrorText', {
-            defaultMessage: 'The action request timed out.',
-          }),
-        ];
-      }
-    });
-  }, [data.edges, error, expired]);
+        // Create new edge with error fields if needed
+        const fields = { ...(edge.fields || {}) };
+
+        if (error) {
+          fields['error.skipped'] = [error];
+          fields.error = [error];
+        } else if (expired && !edge.fields?.completed_at) {
+          const expiredMessage = i18n.translate(
+            'xpack.osquery.liveQueryActionResults.table.expiredErrorText',
+            {
+              defaultMessage: 'The action request timed out.',
+            }
+          );
+          fields['error.keyword'] = [expiredMessage];
+          fields.error = [expiredMessage];
+        }
+
+        return { ...edge, fields };
+      }),
+    [data.edges, error, expired]
+  );
 
   const renderAgentIdColumn = useCallback(
     (agentId: string) => {
@@ -254,7 +271,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
 
   const pagination = useMemo(
     () => ({
-      initialPageSize: 20,
+      initialPageSize: DEFAULT_PAGE_SIZE,
       pageIndex,
       pageSize,
       totalItemCount: agentIds?.length ?? 0,
@@ -264,19 +281,27 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     [pageIndex, pageSize, agentIds?.length]
   );
 
-  useEffect(() => {
-    setIsLive(() => {
-      if (!agentIds?.length || expired || error) return false;
+  // Guard against race conditions when updating isLive
+  const currentAgentCountRef = useRef(agentIds?.length);
 
-      return data.aggregations.totalResponded !== agentIds?.length;
-    });
+  useEffect(() => {
+    // Only update if agentIds length hasn't changed during render (prevents race conditions)
+    if (currentAgentCountRef.current === agentIds?.length) {
+      setIsLive(() => {
+        if (!agentIds?.length || expired || error) return false;
+
+        return data.aggregations.totalResponded !== agentIds?.length;
+      });
+    }
+
+    currentAgentCountRef.current = agentIds?.length;
   }, [agentIds?.length, data.aggregations.totalResponded, error, expired]);
 
   return (
     <div css={statusTableCss}>
       <EuiBasicTable
         loading={isLive}
-        items={data.edges as ResultEdge[]}
+        items={enrichedEdges as ResultEdge[]}
         columns={columns}
         pagination={pagination}
         onChange={onTableChange}
