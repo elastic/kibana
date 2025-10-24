@@ -9,8 +9,17 @@
 
 import { isEmpty, filter } from 'lodash';
 
+import type { DashboardState } from '@kbn/dashboard-plugin/server';
 import type { DashboardItem } from '../../types';
 import { dashboardServices } from '../../services/kibana_services';
+
+function getDashboardItem(id: string, dashboardState: DashboardState) {
+  return {
+    id,
+    title: dashboardState.title,
+    ...(dashboardState.description && { description: dashboardState.description }),
+  };
+}
 
 /**
  * ----------------------------------
@@ -24,7 +33,7 @@ export const fetchDashboard = async (dashboardId: string): Promise<DashboardItem
   if (response.status === 'error') {
     throw new Error(response.error.message);
   }
-  return response;
+  return getDashboardItem(response.id, response.attributes);
 };
 
 /**
@@ -53,7 +62,9 @@ export const fetchDashboards = async ({
     options: { onlyTitle: true },
   });
 
-  let dashboardList: DashboardItem[] = responses.hits;
+  let dashboardList: DashboardItem[] = responses.hits.map((hit) => {
+    return getDashboardItem(hit.id, hit.attributes);
+  });
 
   /** If there is no search string... */
   if (isEmpty(search)) {
@@ -78,10 +89,5 @@ export const fetchDashboards = async ({
     }
   }
 
-  /** Then, only return the parts of the dashboard object that we need */
-  const simplifiedDashboardList = dashboardList.map((hit) => {
-    return { id: hit.id, attributes: hit.attributes };
-  });
-
-  return simplifiedDashboardList;
+  return dashboardList;
 };
