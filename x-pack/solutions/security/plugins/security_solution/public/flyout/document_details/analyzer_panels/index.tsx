@@ -6,12 +6,12 @@
  */
 
 import React, { useCallback } from 'react';
-import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import type { FlyoutPanelProps } from '@kbn/flyout';
+import { useFlyoutApi } from '@kbn/flyout';
 import type { DocumentDetailsAnalyzerPanelKey } from '../shared/constants/panel_keys';
+import { DocumentDetailsPreviewPanelKey } from '../shared/constants/panel_keys';
 import { DetailsPanel } from '../../../resolver/view/details_panel';
 import type { NodeEventOnClick } from '../../../resolver/view/panels/node_events_of_type';
-import { DocumentDetailsPreviewPanelKey } from '../shared/constants/panel_keys';
 import { ALERT_PREVIEW_BANNER, EVENT_PREVIEW_BANNER } from '../preview/constants';
 import { FlyoutBody } from '../../shared/components/flyout_body';
 
@@ -31,23 +31,26 @@ export interface AnalyzerPanelExpandableFlyoutProps extends FlyoutPanelProps {
  * Displays node details panel for analyzer
  */
 export const AnalyzerPanel: React.FC<AnalyzerPanelProps> = ({ resolverComponentInstanceID }) => {
-  const { openPreviewPanel } = useExpandableFlyoutApi();
+  const { openChildPanel } = useFlyoutApi();
 
-  const openPreview = useCallback<NodeEventOnClick>(
+  const openChild = useCallback<NodeEventOnClick>(
     ({ documentId, indexName, scopeId, isAlert }) =>
       () => {
-        openPreviewPanel({
-          id: DocumentDetailsPreviewPanelKey,
-          params: {
-            id: documentId,
-            indexName,
-            scopeId,
-            isPreviewMode: true,
-            banner: isAlert ? ALERT_PREVIEW_BANNER : EVENT_PREVIEW_BANNER,
+        openChildPanel(
+          {
+            id: DocumentDetailsPreviewPanelKey,
+            params: {
+              id: documentId,
+              indexName,
+              scopeId,
+              isChild: true,
+              banner: isAlert ? ALERT_PREVIEW_BANNER : EVENT_PREVIEW_BANNER,
+            },
           },
-        });
+          's'
+        );
       },
-    [openPreviewPanel]
+    [openChildPanel]
   );
 
   return (
@@ -55,7 +58,7 @@ export const AnalyzerPanel: React.FC<AnalyzerPanelProps> = ({ resolverComponentI
       <div css={{ marginTop: '-15px' }}>
         <DetailsPanel
           resolverComponentInstanceID={resolverComponentInstanceID}
-          nodeEventOnClick={openPreview}
+          nodeEventOnClick={openChild}
         />
       </div>
     </FlyoutBody>

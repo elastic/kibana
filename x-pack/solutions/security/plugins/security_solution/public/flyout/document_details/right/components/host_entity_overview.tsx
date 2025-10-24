@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -90,8 +90,8 @@ export const HOST_PREVIEW_BANNER = {
 /**
  * Host preview content for the entities preview in right flyout. It contains ip addresses and risk level
  */
-export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName }) => {
-  const { scopeId } = useDocumentDetailsContext();
+export const HostEntityOverview: React.FC<HostEntityOverviewProps> = memo(({ hostName }) => {
+  const { isChild, scopeId } = useDocumentDetailsContext();
   const { from, to } = useGlobalTime();
   const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
 
@@ -217,7 +217,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
     hasMisconfigurationFindings,
     hasVulnerabilitiesFindings,
     hasNonClosedAlerts,
-    isPreviewMode: true, // setting to true to always open a new host flyout
+    isChild: true, // setting to true to always open a new host flyout
     contextID: 'HostEntityOverview',
   });
 
@@ -239,6 +239,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
               value={hostName}
               scopeId={scopeId}
               data-test-subj={ENTITIES_HOST_OVERVIEW_LINK_TEST_ID}
+              isChild={isChild}
             >
               <EuiText
                 css={css`
@@ -306,6 +307,6 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
       />
     </EuiFlexGroup>
   );
-};
+});
 
 HostEntityOverview.displayName = 'HostEntityOverview';

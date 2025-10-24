@@ -53,7 +53,7 @@ export interface RiskSummaryProps<T extends EntityType> {
   recalculatingScore: boolean;
   queryId: string;
   openDetailsPanel: (path: EntityDetailsPath) => void;
-  isPreviewMode: boolean;
+  isChild: boolean;
 }
 
 const FlyoutRiskSummaryComponent = <T extends EntityType>({
@@ -62,7 +62,7 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
   recalculatingScore,
   queryId,
   openDetailsPanel,
-  isPreviewMode,
+  isChild,
 }: RiskSummaryProps<T>) => {
   const { telemetry } = useKibana().services;
   const { data } = riskScoreData;
@@ -202,7 +202,7 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
             />
           ),
           link: riskScoreData.loading ? undefined : link,
-          iconType: !isPreviewMode ? 'arrowStart' : undefined,
+          iconType: !isChild ? 'arrowStart' : undefined,
         }}
         expand={{
           expandable: false,

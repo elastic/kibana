@@ -19,7 +19,7 @@ import { ExpandablePanel } from '../../../shared/components/expandable_panel';
  * Analyzer preview under Overview, Visualizations. It shows a tree representation of analyzer.
  */
 export const AnalyzerPreviewContainer: React.FC = () => {
-  const { dataAsNestedObject, isRulePreview, eventId, indexName, scopeId, isPreviewMode } =
+  const { dataAsNestedObject, isRulePreview, eventId, indexName, scopeId, isChild } =
     useDocumentDetailsContext();
 
   // decide whether to show the analyzer preview or not
@@ -28,12 +28,10 @@ export const AnalyzerPreviewContainer: React.FC = () => {
   const { navigateToAnalyzer } = useNavigateToAnalyzer({
     eventId,
     indexName,
-    isFlyoutOpen: true,
     scopeId,
-    isPreviewMode,
   });
 
-  const iconType = useMemo(() => (!isPreviewMode ? 'arrowStart' : undefined), [isPreviewMode]);
+  const iconType = useMemo(() => (!isChild ? 'arrowStart' : undefined), [isChild]);
 
   // if the analyzer is not enabled or in rule preview mode, the navigation is not enabled
   const isNavigationEnabled = useMemo(

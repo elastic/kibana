@@ -14,16 +14,16 @@ import { connect } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { InPortal } from 'react-reverse-portal';
 import { DataLoadingState } from '@kbn/unified-data-table';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import { useFlyoutApi } from '@kbn/flyout';
 import { PageScope } from '../../../../../data_view_manager/constants';
+import {
+  DocumentDetailsNotesPanelKey,
+  DocumentDetailsRightPanelKey,
+} from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import { useFetchNotes } from '../../../../../notes/hooks/use_fetch_notes';
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
-import {
-  DocumentDetailsLeftPanelKey,
-  DocumentDetailsRightPanelKey,
-} from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { timelineSelectors } from '../../../../store';
@@ -43,7 +43,6 @@ import { UnifiedTimelineBody } from '../../body/unified_timeline_body';
 import { EqlTabHeader } from './header';
 import { useTimelineColumns } from '../shared/use_timeline_columns';
 import { useTimelineControlColumn } from '../shared/use_timeline_control_columns';
-import { LeftPanelNotesTab } from '../../../../../flyout/document_details/left';
 import { DocumentEventTypes, NotesEventTypes } from '../../../../../common/lib/telemetry';
 import { TimelineRefetch } from '../../refetch_timeline';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
@@ -168,7 +167,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
    */
   const onUpdatePageIndex = useCallback((newPageIndex: number) => setPageIndex(newPageIndex), []);
 
-  const { openFlyout } = useExpandableFlyoutApi();
+  const { openFlyout } = useFlyoutApi();
 
   const onToggleShowNotes = useCallback(
     (eventId?: string) => {
@@ -177,27 +176,27 @@ export const EqlTabContentComponent: React.FC<Props> = ({
       }
 
       const indexName = selectedPatterns.join(',');
-      openFlyout({
-        right: {
-          id: DocumentDetailsRightPanelKey,
-          params: {
-            id: eventId,
-            indexName,
-            scopeId: timelineId,
+      openFlyout(
+        {
+          main: {
+            id: DocumentDetailsNotesPanelKey,
+            params: {
+              id: eventId,
+              indexName,
+              scopeId: timelineId,
+            },
+          },
+          child: {
+            id: DocumentDetailsRightPanelKey,
+            params: {
+              id: eventId,
+              indexName,
+              scopeId: timelineId,
+            },
           },
         },
-        left: {
-          id: DocumentDetailsLeftPanelKey,
-          path: {
-            tab: LeftPanelNotesTab,
-          },
-          params: {
-            id: eventId,
-            indexName,
-            scopeId: timelineId,
-          },
-        },
-      });
+        { mainSize: 'm' }
+      );
       telemetry.reportEvent(NotesEventTypes.OpenNoteInExpandableFlyoutClicked, {
         location: timelineId,
       });
@@ -206,7 +205,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
         panel: 'left',
       });
     },
-    [openFlyout, selectedPatterns, telemetry, timelineId]
+    [selectedPatterns, telemetry, timelineId, openFlyout]
   );
 
   const leadingControlColumns = useTimelineControlColumn({

@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import { EuiFlyoutFooter, EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter, EuiPanel } from '@elastic/eui';
 import { TakeAction } from '../shared/components/take_action';
 
 export const HostPanelFooter = ({ hostName }: { hostName: string }) => {
   return (
     <EuiFlyoutFooter>
-      <EuiPanel color="transparent">
+      <EuiPanel color="transparent" paddingSize="none">
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
           <EuiFlexItem grow={false}>
             <TakeAction isDisabled={!hostName} kqlQuery={`host.name: "${hostName}"`} />

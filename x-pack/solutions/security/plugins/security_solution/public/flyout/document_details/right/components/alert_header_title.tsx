@@ -46,6 +46,7 @@ export const AlertHeaderTitle = memo(() => {
     refetchFlyoutData,
     getFieldsData,
   } = useDocumentDetailsContext();
+
   const { ruleName, timestamp, ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
   const title = useMemo(() => getAlertTitle({ ruleName }), [ruleName]);
   const href = useRuleDetailsLink({ ruleId: !isRulePreview ? ruleId : null });

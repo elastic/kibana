@@ -66,7 +66,7 @@ export interface DocumentDetailsContext {
   /**
    * Boolean to indicate whether it is a preview panel
    */
-  isPreviewMode: boolean;
+  isChild: boolean;
   /**
    * To allow communication between the SessionView in the left panel and its preview panels
    */
@@ -75,6 +75,10 @@ export interface DocumentDetailsContext {
    * To allow communication between the SessionView in the left panel and its preview panels
    */
   jumpToCursor?: string;
+  /**
+   *
+   */
+  isPreview: boolean;
 }
 
 /**
@@ -96,8 +100,9 @@ export const DocumentDetailsProvider = memo(
     scopeId,
     jumpToEntityId,
     jumpToCursor,
-    isPreviewMode,
+    isChild,
     children,
+    isPreview = true,
   }: DocumentDetailsProviderProps) => {
     const {
       browserFields,
@@ -132,9 +137,10 @@ export const DocumentDetailsProvider = memo(
               refetchFlyoutData,
               getFieldsData,
               isRulePreview: scopeId === TableId.rulePreview,
-              isPreviewMode: Boolean(isPreviewMode),
+              isChild: Boolean(isChild),
               jumpToEntityId,
               jumpToCursor,
+              isPreview: Boolean(isPreview),
             }
           : undefined,
       [
@@ -144,7 +150,7 @@ export const DocumentDetailsProvider = memo(
         getFieldsData,
         id,
         indexName,
-        isPreviewMode,
+        isChild,
         jumpToCursor,
         jumpToEntityId,
         refetchFlyoutData,

@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
+import { LeftPanelCorrelationsTab } from '../../insights';
 import { CORRELATIONS_RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEST_ID } from './test_ids';
 import { InsightsSummaryRow } from './insights_summary_row';
 import { useFetchRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_fetch_related_alerts_by_same_source_event';
@@ -51,7 +51,7 @@ export const RelatedAlertsBySameSourceEvent: React.VFC<RelatedAlertsBySameSource
       loading={loading}
       text={text}
       value={dataCount}
-      expandedSubTab={CORRELATIONS_TAB_ID}
+      expandedTab={LeftPanelCorrelationsTab}
       data-test-subj={CORRELATIONS_RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEST_ID}
       key={`correlation-row-${text}`}
     />

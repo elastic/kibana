@@ -40,7 +40,7 @@ const mockProps = {
   hasMisconfigurationFindings: false,
   hasNonClosedAlerts: false,
   contextID: 'testContextID',
-  isPreviewMode: false,
+  isChild: false,
   email: ['test@test.com'],
 };
 
@@ -81,9 +81,7 @@ describe('useNavigateToUserDetails', () => {
   });
 
   it('returns callback that opens flyout when in preview mode', () => {
-    const { result } = renderHook(() =>
-      useNavigateToUserDetails({ ...mockProps, isPreviewMode: true })
-    );
+    const { result } = renderHook(() => useNavigateToUserDetails({ ...mockProps, isChild: true }));
 
     result.current({ tab, subTab });
 

@@ -14,8 +14,10 @@ import { useQueryInspector } from '../../../../common/components/page/manage_que
 import { MANAGED_USER_QUERY_ID } from '../constants';
 import * as i18n from '../translations';
 
-export interface ManagedUserData {
+interface ManagedUserData {
   data: ManagedUserHits;
+  isLoading: boolean;
+  isIntegrationEnabled: boolean;
 }
 
 export const useManagedUser = (): ManagedUserData => {

@@ -7,7 +7,7 @@
 
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useFlyoutApi } from '@kbn/flyout';
 import type { EntityDetailsPath } from '../../shared/components/left_panel/left_panel_header';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
@@ -24,7 +24,7 @@ export const useOpenGenericEntityDetailsLeftPanel = (
   } & UseGetGenericEntityParams
 ) => {
   const { insightsField, insightsValue, entityDocId, entityId, scopeId } = params;
-  const { openLeftPanel } = useExpandableFlyoutApi();
+  const { openChildPanel } = useFlyoutApi();
   const { hasMisconfigurationFindings } = useHasMisconfigurations(insightsField, insightsValue);
   const { hasVulnerabilitiesFindings } = useHasVulnerabilities(insightsField, insightsValue);
   const { to, from } = useGlobalTime();
@@ -37,7 +37,7 @@ export const useOpenGenericEntityDetailsLeftPanel = (
   });
 
   const openGenericEntityDetails = (path: EntityDetailsPath) => {
-    return openLeftPanel({
+    openChildPanel({
       id: GenericEntityDetailsPanelKey,
       params: {
         entityDocId,
@@ -50,6 +50,7 @@ export const useOpenGenericEntityDetailsLeftPanel = (
         hasVulnerabilitiesFindings,
         hasNonClosedAlerts,
         path,
+        isChild: true,
       },
     });
   };

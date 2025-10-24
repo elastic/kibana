@@ -105,12 +105,7 @@ export const hostIdRenderer = ({
             noLink ? (
               <>{id}</>
             ) : (
-              <FlyoutLink
-                field={'host.name'}
-                value={hostName}
-                scopeId={scopeId}
-                isFlyoutOpen={isFlyoutOpen}
-              >
+              <FlyoutLink field={'host.name'} value={hostName} scopeId={scopeId} isChild={true}>
                 {id}
               </FlyoutLink>
             )
@@ -139,12 +134,7 @@ export const hostNameRenderer = ({
 }: HostNameRendererTypes): React.ReactElement =>
   host.name && host.name[0] && host.ip && (!(ipFilter != null) || host.ip.includes(ipFilter)) ? (
     <CellActionsRenderer field={'host.name'} value={host.name[0]} scopeId={scopeId}>
-      <FlyoutLink
-        field={'host.name'}
-        value={host.name[0]}
-        scopeId={scopeId}
-        isFlyoutOpen={isFlyoutOpen}
-      />
+      <FlyoutLink field={'host.name'} value={host.name[0]} scopeId={scopeId} isChild={true} />
     </CellActionsRenderer>
   ) : (
     getEmptyTagValue()

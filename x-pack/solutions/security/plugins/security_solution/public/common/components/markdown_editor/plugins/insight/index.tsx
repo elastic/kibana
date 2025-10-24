@@ -45,7 +45,7 @@ import { useAppToasts } from '../../../../hooks/use_app_toasts';
 import { useKibana } from '../../../../lib/kibana';
 import { useInsightQuery } from './use_insight_query';
 import { type Provider, useInsightDataProviders } from './use_insight_data_providers';
-import { BasicAlertDataContext } from '../../../../../flyout/document_details/left/components/investigation_guide_view';
+import { BasicAlertDataContext } from '../../../../../flyout/document_details/investigation_guide/components/investigation_guide_view';
 import { InvestigateInTimelineButton } from '../../../event_details/investigate_in_timeline_button';
 import {
   DEFAULT_FROM_MOMENT,

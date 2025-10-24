@@ -7,8 +7,6 @@
 
 import React from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { EntityHighlightsAccordion } from '../../../entity_analytics/components/entity_details_flyout/components/entity_highlights';
 import { FlyoutBody } from '../../shared/components/flyout_body';
 import { EntityInsight } from '../../../cloud_security_posture/components/entity_insight';
 import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
@@ -31,7 +29,7 @@ interface HostPanelContentProps {
   hostName: string;
   onAssetCriticalityChange: () => void;
   recalculatingScore: boolean;
-  isPreviewMode: boolean;
+  isChild: boolean;
 }
 
 export const HostPanelContent = ({
@@ -43,19 +41,12 @@ export const HostPanelContent = ({
   scopeId,
   openDetailsPanel,
   onAssetCriticalityChange,
-  isPreviewMode,
+  isChild,
 }: HostPanelContentProps) => {
   const observedFields = useObservedHostFields(observedHost);
 
-  const isEntityDetailsHighlightsAIEnabled = useIsExperimentalFeatureEnabled(
-    'entityDetailsHighlightsEnabled'
-  );
-
   return (
     <FlyoutBody>
-      {isEntityDetailsHighlightsAIEnabled && (
-        <EntityHighlightsAccordion entityIdentifier={hostName} entityType={EntityType.host} />
-      )}
       {riskScoreState.hasEngineBeenInstalled && riskScoreState.data?.length !== 0 && (
         <>
           <FlyoutRiskSummary
@@ -64,7 +55,7 @@ export const HostPanelContent = ({
             recalculatingScore={recalculatingScore}
             queryId={HOST_PANEL_RISK_SCORE_QUERY_ID}
             openDetailsPanel={openDetailsPanel}
-            isPreviewMode={isPreviewMode}
+            isChild={isChild}
           />
           <EuiHorizontalRule />
         </>
@@ -76,7 +67,7 @@ export const HostPanelContent = ({
       <EntityInsight
         value={hostName}
         field={EntityIdentifierFields.hostName}
-        isPreviewMode={isPreviewMode}
+        isChild={isChild}
         openDetailsPanel={openDetailsPanel}
       />
       <ObservedEntity
@@ -85,6 +76,7 @@ export const HostPanelContent = ({
         scopeId={scopeId}
         observedFields={observedFields}
         queryId={HOST_PANEL_OBSERVED_HOST_QUERY_ID}
+        isChild={isChild}
       />
     </FlyoutBody>
   );

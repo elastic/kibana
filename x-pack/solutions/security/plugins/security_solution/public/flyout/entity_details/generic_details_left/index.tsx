@@ -6,19 +6,19 @@
  */
 
 import React, { useMemo } from 'react';
-import { type FlyoutPanelProps, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { type FlyoutPanelProps, useFlyoutApi } from '@kbn/flyout';
 import { LeftPanelContent } from '../shared/components/left_panel/left_panel_content';
 import {
-  LeftPanelHeader,
   type CspInsightLeftPanelSubTab,
   type EntityDetailsLeftPanelTab,
+  LeftPanelHeader,
   type LeftPanelTabsType,
 } from '../shared/components/left_panel/left_panel_header';
 import type { UseGetGenericEntityParams } from '../generic_right/hooks/use_get_generic_entity';
 import { useGetGenericEntity } from '../generic_right/hooks/use_get_generic_entity';
 import {
-  getInsightsInputTab,
   getFieldsTableTab,
+  getInsightsInputTab,
 } from '../../../entity_analytics/components/entity_details_flyout';
 import { GENERIC_FLYOUT_STORAGE_KEYS } from '../generic_right/constants';
 
@@ -48,7 +48,7 @@ export const GenericEntityDetailsPanelKey: GenericEntityDetailsExpandableFlyoutP
   'generic_entity_details';
 
 const useSelectedTab = (params: GenericEntityDetailsPanelProps, tabs: LeftPanelTabsType) => {
-  const { openLeftPanel } = useExpandableFlyoutApi();
+  const { openChildPanel } = useFlyoutApi();
   const path = params.path;
 
   const selectedTabId = useMemo(() => {
@@ -58,13 +58,14 @@ const useSelectedTab = (params: GenericEntityDetailsPanelProps, tabs: LeftPanelT
   }, [path, tabs]);
 
   const setSelectedTabId = (tabId: EntityDetailsLeftPanelTab) => {
-    openLeftPanel({
+    openChildPanel({
       id: GenericEntityDetailsPanelKey,
       params: {
         ...params,
         path: {
           tab: tabId,
         },
+        isChild: true,
       },
     });
   };

@@ -9,12 +9,12 @@ import { isArray, isEmpty, isString, uniq } from 'lodash/fp';
 import React, { useCallback, useContext, useMemo } from 'react';
 import deepEqual from 'fast-deep-equal';
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useFlyoutApi } from '@kbn/flyout';
+import { NetworkPanelKey } from '../../../flyout/network_details';
 import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import { getOrEmptyTagFromValue } from '../../../common/components/empty_value';
 import { NetworkDetailsLink } from '../../../common/components/links';
-import { NetworkPanelKey } from '../../../flyout/network_details';
 import { FlyoutLink } from '../../../flyout/shared/components/flyout_link';
 
 const tryStringify = (value: string | object | null | undefined): string => {
@@ -53,7 +53,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
   onClick,
   title,
 }) => {
-  const { openFlyout } = useExpandableFlyoutApi();
+  const { openFlyout } = useFlyoutApi();
 
   const eventContext = useContext(StatefulEventContext);
 
@@ -65,7 +65,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
 
       if (eventContext) {
         openFlyout({
-          right: {
+          main: {
             id: NetworkPanelKey,
             params: {
               ip,
@@ -99,6 +99,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
           value={address}
           scopeId={eventContext?.timelineID ?? ''}
           data-test-subj="network-details"
+          isChild={true}
         />
       ),
     [

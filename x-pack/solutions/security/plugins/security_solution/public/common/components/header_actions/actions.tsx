@@ -85,7 +85,6 @@ const ActionsComponent: React.FC<ActionsComponentProps> = ({
   const eventType = getEventType(ecsData);
 
   const { navigateToAnalyzer } = useNavigateToAnalyzer({
-    isFlyoutOpen: false,
     eventId,
     indexName: ecsData._index,
     scopeId: timelineId,
@@ -101,7 +100,7 @@ const ActionsComponent: React.FC<ActionsComponentProps> = ({
   const handleClick = useCallback(() => {
     startTransaction({ name: ALERTS_ACTIONS.OPEN_ANALYZER });
     navigateToAnalyzer();
-  }, [startTransaction, navigateToAnalyzer]);
+  }, [navigateToAnalyzer, startTransaction]);
 
   const sessionViewConfig = useMemo(() => {
     const { process, _id, _index, timestamp, kibana } = ecsData;

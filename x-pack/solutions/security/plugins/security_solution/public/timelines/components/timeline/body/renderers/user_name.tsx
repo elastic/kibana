@@ -8,7 +8,7 @@
 import React, { useCallback, useContext, useMemo } from 'react';
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { isString } from 'lodash/fp';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useFlyoutApi } from '@kbn/flyout';
 import { UserPanelKey } from '../../../../../flyout/entity_details/shared/constants';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
@@ -36,7 +36,7 @@ const UserNameComponent: React.FC<Props> = ({
   const eventContext = useContext(StatefulEventContext);
   const userName = `${value}`;
   const isInTimelineContext = userName && eventContext?.timelineID;
-  const { openFlyout } = useExpandableFlyoutApi();
+  const { openFlyout } = useFlyoutApi();
 
   const isInSecurityApp = useIsInSecurityApp();
 
@@ -55,7 +55,7 @@ const UserNameComponent: React.FC<Props> = ({
       const { timelineID } = eventContext;
 
       openFlyout({
-        right: {
+        main: {
           id: UserPanelKey,
           params: {
             userName,

@@ -4,36 +4,44 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useCallback } from 'react';
-import { EntityType } from '../../../../../common/search_strategy';
+import { useFlyoutApi } from '@kbn/flyout';
 import type { EntityDetailsPath } from '../../shared/components/left_panel/left_panel_header';
-import { useKibana } from '../../../../common/lib/kibana';
-import { EntityEventTypes } from '../../../../common/lib/telemetry';
 import { ServiceDetailsPanelKey } from '../../service_details_left';
+import { ServicePanelKey } from '../../shared/constants';
 
 interface UseNavigateToServiceDetailsParams {
   serviceName: string;
+  email?: string[];
   scopeId: string;
+  contextID: string;
   isRiskScoreExist: boolean;
+  isChild?: boolean;
+}
+
+interface UseNavigateToServiceDetailsResult {
+  /**
+   * Opens the service details panel
+   */
+  openDetailsPanel: (path: EntityDetailsPath) => void;
+  /**
+   * Whether the link is enabled
+   */
+  isLinkEnabled: boolean;
 }
 
 export const useNavigateToServiceDetails = ({
   serviceName,
   scopeId,
+  contextID,
   isRiskScoreExist,
+  isChild,
 }: UseNavigateToServiceDetailsParams): ((path: EntityDetailsPath) => void) => {
-  const { telemetry } = useKibana().services;
-  const { openLeftPanel } = useExpandableFlyoutApi();
+  const { openFlyout, openChildPanel } = useFlyoutApi();
 
   return useCallback(
     (path: EntityDetailsPath) => {
-      telemetry.reportEvent(EntityEventTypes.RiskInputsExpandedFlyoutOpened, {
-        entity: EntityType.service,
-      });
-
-      openLeftPanel({
+      const left = {
         id: ServiceDetailsPanelKey,
         params: {
           isRiskScoreExist,
@@ -42,9 +50,29 @@ export const useNavigateToServiceDetails = ({
             name: serviceName,
           },
           path,
+          isChild: false,
         },
-      });
+      };
+
+      const right = {
+        id: ServicePanelKey,
+        params: {
+          contextID,
+          serviceName,
+          scopeId,
+          isChild: true,
+        },
+      };
+
+      if (isChild) {
+        openFlyout({
+          main: right,
+          child: left,
+        });
+      } else {
+        openChildPanel(left);
+      }
     },
-    [isRiskScoreExist, openLeftPanel, scopeId, serviceName, telemetry]
+    [contextID, isChild, isRiskScoreExist, openFlyout, openChildPanel, scopeId, serviceName]
   );
 };

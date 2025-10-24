@@ -7,8 +7,8 @@
 
 import type { FC } from 'react';
 import React, { useCallback } from 'react';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import { useFlyoutApi } from '@kbn/flyout';
 import { DocumentDetailsRightPanelKey } from '../shared/constants/panel_keys';
 import { useBasicDataFromDetailsData } from '../shared/hooks/use_basic_data_from_details_data';
 import {
@@ -24,7 +24,7 @@ import { FLYOUT_HOST_ISOLATION_PANEL_TEST_ID } from './test_ids';
  * Document details expandable flyout section content for the isolate host component, displaying the form or the success banner
  */
 export const PanelContent: FC = () => {
-  const { openRightPanel } = useExpandableFlyoutApi();
+  const { openMainPanel } = useFlyoutApi();
   const { dataFormattedForFieldBrowser, eventId, scopeId, indexName, isolateAction } =
     useIsolateHostPanelContext();
 
@@ -32,18 +32,17 @@ export const PanelContent: FC = () => {
 
   const { alertId, hostName } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
 
-  const showAlertDetails = useCallback(
-    () =>
-      openRightPanel({
-        id: DocumentDetailsRightPanelKey,
-        params: {
-          id: eventId,
-          indexName,
-          scopeId,
-        },
-      }),
-    [eventId, indexName, scopeId, openRightPanel]
-  );
+  const showAlertDetails = useCallback(() => {
+    openMainPanel({
+      id: DocumentDetailsRightPanelKey,
+      params: {
+        id: eventId,
+        indexName,
+        scopeId,
+        isChild: false,
+      },
+    });
+  }, [openMainPanel, eventId, indexName, scopeId]);
 
   return (
     <IsolateHostPanelContent

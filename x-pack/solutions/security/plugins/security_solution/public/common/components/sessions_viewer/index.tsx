@@ -9,7 +9,6 @@ import React, { useEffect, useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { ENTRY_SESSION_ENTITY_ID_PROPERTY } from '@kbn/session-view-plugin/public';
 import { useDispatch } from 'react-redux';
-import { EVENT_ACTION } from '@kbn/rule-data-utils';
 import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useAddBulkToTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/use_add_bulk_to_timeline';
@@ -32,17 +31,6 @@ export const defaultSessionsFilter: Required<Pick<Filter, 'meta' | 'query'>> = {
   query: {
     bool: {
       filter: [
-        {
-          bool: {
-            // show sessions table results by filtering events where event.action is fork, exec, or end
-            should: [
-              { term: { [EVENT_ACTION]: 'exec' } }, // exec event.action is used by Endpoint and Cloud Defend
-              { term: { [EVENT_ACTION]: 'executed' } }, // executed event.action is used by auditbeat
-              { term: { [EVENT_ACTION]: 'fork' } },
-              { term: { [EVENT_ACTION]: 'end' } },
-            ],
-          },
-        },
         {
           bool: {
             filter: {

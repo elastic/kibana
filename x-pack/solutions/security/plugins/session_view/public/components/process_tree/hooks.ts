@@ -6,22 +6,22 @@
  */
 import memoizeOne from 'memoize-one';
 import { sortedUniqBy } from 'lodash';
-import { useState, useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type {
   AlertStatusEventEntityIdMap,
   EventAction,
   EventKind,
   Process,
   ProcessEvent,
-  ProcessMap,
   ProcessEventsPage,
+  ProcessMap,
 } from '../../../common';
 import {
+  autoExpandProcessTree,
   inferProcessFromLeaderInfo,
-  updateAlertEventStatus,
   processNewEvents,
   searchProcessTree,
-  autoExpandProcessTree,
+  updateAlertEventStatus,
 } from './helpers';
 import { sortProcesses } from '../../../common/utils/sort_processes';
 
@@ -241,7 +241,7 @@ export class ProcessImpl implements Process {
     const filtered = events.filter((processEvent) => {
       const action = processEvent?.event?.action;
 
-      return action?.includes('fork') || action?.includes('exec') || action?.includes('end');
+      return true;
     });
 
     // there are some anomalous processes which are omitting event.action

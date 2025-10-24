@@ -6,14 +6,12 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useFlyoutApi } from '@kbn/flyout';
 import type { Maybe } from '@kbn/timelines-plugin/common/search_strategy/common';
-import { LeftPanelVisualizeTab } from '../../left';
-import { useKibana } from '../../../../common/lib/kibana';
-import { SESSION_VIEW_ID } from '../../left/components/session_view';
-import { DocumentDetailsLeftPanelKey, DocumentDetailsRightPanelKey } from '../constants/panel_keys';
-import { DocumentEventTypes } from '../../../../common/lib/telemetry';
+import {
+  DocumentDetailsMainSessionViewPanelKey,
+  DocumentDetailsRightPanelKey,
+} from '../constants/panel_keys';
 
 export interface UseNavigateToSessionViewParams {
   /**
@@ -36,7 +34,7 @@ export interface UseNavigateToSessionViewParams {
   /**
    * Whether the preview mode is enabled
    */
-  isPreviewMode?: boolean;
+  isChild?: boolean;
 }
 
 export interface UseNavigateToSessionViewResult {
@@ -54,62 +52,36 @@ export const useNavigateToSessionView = ({
   eventId,
   indexName,
   scopeId,
-  isPreviewMode,
+  isChild,
 }: UseNavigateToSessionViewParams): UseNavigateToSessionViewResult => {
-  const { telemetry } = useKibana().services;
-  const { openLeftPanel, openFlyout } = useExpandableFlyoutApi();
-
-  const right: FlyoutPanelProps = useMemo(
-    () => ({
-      id: DocumentDetailsRightPanelKey,
-      params: {
-        id: eventId,
-        indexName,
-        scopeId,
-      },
-    }),
-    [eventId, indexName, scopeId]
-  );
-
-  const left: FlyoutPanelProps = useMemo(
-    () => ({
-      id: DocumentDetailsLeftPanelKey,
-      params: {
-        id: eventId,
-        indexName,
-        scopeId,
-      },
-      path: {
-        tab: LeftPanelVisualizeTab,
-        subTab: SESSION_VIEW_ID,
-      },
-    }),
-    [eventId, indexName, scopeId]
-  );
+  const { openFlyout } = useFlyoutApi();
 
   const navigateToSessionView = useCallback(() => {
-    // open left panel if not in preview mode
-    if (isFlyoutOpen && !isPreviewMode) {
-      openLeftPanel(left);
-      telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutTabClicked, {
-        location: scopeId,
-        panel: 'left',
-        tabId: LeftPanelVisualizeTab,
-      });
-    }
-    // if flyout is not currently open, open flyout with right and left panels
-    // if new navigation is enabled and in preview mode, open flyout with right and left panels
-    else {
-      openFlyout({
-        right,
-        left,
-      });
-      telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
-        location: scopeId,
-        panel: 'left',
-      });
-    }
-  }, [openFlyout, openLeftPanel, right, left, scopeId, telemetry, isFlyoutOpen, isPreviewMode]);
+    openFlyout(
+      {
+        main: {
+          id: DocumentDetailsMainSessionViewPanelKey,
+          params: {
+            id: eventId,
+            indexName,
+            scopeId,
+            isChild: false,
+          },
+        },
+        child: {
+          id: DocumentDetailsRightPanelKey,
+          params: {
+            id: eventId,
+            indexName,
+            scopeId,
+            isChild: true,
+            isPreview: false,
+          },
+        },
+      },
+      { mainSize: 'm' }
+    );
+  }, [eventId, indexName, openFlyout, scopeId]);
 
   return useMemo(() => ({ navigateToSessionView }), [navigateToSessionView]);
 };

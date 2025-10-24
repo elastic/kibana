@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
+import type { FlyoutPanelProps, PanelPath } from '@kbn/flyout';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { DocumentDetailsAlertReasonPanelKey } from '../shared/constants/panel_keys';
 import { AlertReason } from './alert_reason';
