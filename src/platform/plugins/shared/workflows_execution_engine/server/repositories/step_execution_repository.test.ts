@@ -8,8 +8,8 @@
  */
 
 import { ExecutionStatus } from '@kbn/workflows';
-import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 import { StepExecutionRepository } from './step_execution_repository';
+import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 
 describe('StepExecutionRepository', () => {
   let repository: StepExecutionRepository;

@@ -17,6 +17,7 @@ import { renderWithReduxStore } from '../../../mocks';
 import { mockVisualizationMap, mockDatasourceMap, mockDataPlugin } from '../../../mocks';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { createMockStartDependencies } from '../../../editor_frame_service/mocks';
+import { EditorFrameServiceProvider } from '../../../editor_frame_service/editor_frame_service_context';
 import { LensEditConfigurationFlyout } from './lens_configuration_flyout';
 import type { EditConfigPanelProps } from './types';
 import type { TypedLensSerializedState } from '../../../react_embeddable/types';
@@ -137,19 +138,19 @@ describe('LensEditConfigurationFlyout', () => {
     query?: Query | AggregateQuery
   ) {
     const { container, ...rest } = renderWithReduxStore(
-      <LensEditConfigurationFlyout
-        attributes={lensAttributes}
-        updatePanelState={jest.fn()}
-        coreStart={coreMock.createStart()}
-        startDependencies={startDependencies}
-        datasourceMap={datasourceMap}
-        visualizationMap={visualizationMap}
-        closeFlyout={jest.fn()}
-        datasourceId={'testDatasource' as EditConfigPanelProps['datasourceId']}
-        onApply={jest.fn()}
-        onCancel={jest.fn()}
-        {...propsOverrides}
-      />,
+      <EditorFrameServiceProvider visualizationMap={visualizationMap} datasourceMap={datasourceMap}>
+        <LensEditConfigurationFlyout
+          attributes={lensAttributes}
+          updatePanelState={jest.fn()}
+          coreStart={coreMock.createStart()}
+          startDependencies={startDependencies}
+          closeFlyout={jest.fn()}
+          datasourceId={'testDatasource' as EditConfigPanelProps['datasourceId']}
+          onApply={jest.fn()}
+          onCancel={jest.fn()}
+          {...propsOverrides}
+        />
+      </EditorFrameServiceProvider>,
       {},
       {
         preloadedState: {
