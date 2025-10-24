@@ -176,15 +176,26 @@ describe('test fetchAll', () => {
       'getCascadeLayoutEnabled'
     );
 
-    // configure cascade layout feature flag to be true
     cascadeLayoutFeatureFlagSpy.mockReturnValue(true);
+
+    // invoke getDiscoverStateMock to that the version of appState we receive is our spied on version of the feature flag util
+    const { appState, internalState, getCurrentTab } = getDiscoverStateMock({
+      services: discoverServiceMock,
+    });
+
+    const enhancedDeps = {
+      ...deps,
+      appStateContainer: appState,
+      internalState,
+      getCurrentTab,
+    };
 
     const editorQuery: AggregateQuery = {
       esql: 'FROM my_index | STATS count = COUNT(message) BY my_field',
     };
 
     // configure state to have an ESQL query with cascade groupings
-    deps.appStateContainer.update({
+    enhancedDeps.appStateContainer.update({
       query: editorQuery,
     });
 
@@ -193,10 +204,13 @@ describe('test fetchAll', () => {
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
     mockFetchDocuments.mockResolvedValue({ records: documents });
 
-    fetchAll(deps);
+    fetchAll(enhancedDeps);
     await waitForNextTick();
 
     expect(mutateQueryStatsGrouping).toHaveBeenCalledWith(editorQuery, ['my_field']);
+
+    // revert to default value of the feature flag util
+    cascadeLayoutFeatureFlagSpy.mockReturnValue(false);
   });
 
   test('should use charts query to fetch total hit count when chart is visible', async () => {
