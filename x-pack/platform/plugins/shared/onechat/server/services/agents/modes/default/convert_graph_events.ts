@@ -35,7 +35,8 @@ import {
   toolIdentifierFromToolCall,
 } from '@kbn/onechat-genai-utils/langchain';
 import type { Logger } from '@kbn/logging';
-import type { StateType } from './graph';
+import type { StateType } from './state';
+import { steps, tags } from './constants';
 
 export type ConvertedEvents =
   | MessageChunkEvent
@@ -64,7 +65,7 @@ export const convertGraphEvents = ({
         }
 
         // stream answering text chunks for the UI
-        if (matchEvent(event, 'on_chat_model_stream') && hasTag(event, 'answering-step')) {
+        if (matchEvent(event, 'on_chat_model_stream') && hasTag(event, tags.answerAgent)) {
           const chunk: AIMessageChunk = event.data.chunk;
           const textContent = extractTextContent(chunk);
           if (textContent) {
@@ -72,11 +73,9 @@ export const convertGraphEvents = ({
           }
         }
 
-        // emit tool calls for agent step
-        if (matchEvent(event, 'on_chain_end') && matchName(event, 'agent')) {
+        // emit tool calls for research agent steps
+        if (matchEvent(event, 'on_chain_end') && matchName(event, steps.researchAgent)) {
           const events: ConvertedEvents[] = [];
-
-          // process last emitted message
           const lastMessage: BaseMessage = event.data.output.nextMessage;
           const toolCalls = extractToolCalls(lastMessage);
 
@@ -112,7 +111,7 @@ export const convertGraphEvents = ({
         }
 
         // emit messages for answering step
-        if (matchEvent(event, 'on_chain_end') && matchName(event, 'answer')) {
+        if (matchEvent(event, 'on_chain_end') && matchName(event, steps.answerAgent)) {
           const events: ConvertedEvents[] = [];
 
           // process last emitted message
@@ -128,7 +127,7 @@ export const convertGraphEvents = ({
         }
 
         // emit tool result events
-        if (matchEvent(event, 'on_chain_end') && matchName(event, 'tools')) {
+        if (matchEvent(event, 'on_chain_end') && matchName(event, steps.executeTool)) {
           const toolMessages = ((event.data.output as StateType).addedMessages ?? []).filter(
             isToolMessage
           );

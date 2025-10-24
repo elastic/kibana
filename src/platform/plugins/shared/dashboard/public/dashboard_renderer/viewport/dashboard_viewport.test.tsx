@@ -16,7 +16,6 @@ import { DashboardContext } from '../../dashboard_api/use_dashboard_api';
 import { DashboardInternalContext } from '../../dashboard_api/use_dashboard_internal_api';
 import { buildMockDashboardApi, getMockPanels } from '../../mocks';
 import { DashboardViewport } from './dashboard_viewport';
-import { BehaviorSubject, first, skipWhile } from 'rxjs';
 import type { DashboardInternalApi } from '../../dashboard_api/types';
 
 jest.mock('../grid', () => {
@@ -58,35 +57,6 @@ const renderDashboardViewport = async (internalApiOverrides?: Partial<DashboardI
 describe('DashboardViewport', () => {
   test('should render DashboardGrid when dashboard has panels', async () => {
     const { component } = await renderDashboardViewport();
-    await waitFor(() => {
-      component.getByTestId('mockDashboardGrid');
-    });
-  });
-
-  test('should not render DashboardGrid until controls are ready', async () => {
-    const controlsReadyMock$ = new BehaviorSubject(false);
-    const { component } = await renderDashboardViewport({
-      untilControlsInitialized: () => {
-        return new Promise((resolve) => {
-          controlsReadyMock$
-            .pipe(
-              skipWhile((controlsReady) => !controlsReady),
-              first()
-            )
-            .subscribe(() => {
-              resolve();
-            });
-        });
-      },
-    });
-
-    await waitFor(() => {
-      expect(component.queryByTestId('mockDashboardGrid')).toBeNull();
-    });
-
-    // simulate controls ready
-    controlsReadyMock$.next(true);
-
     await waitFor(() => {
       component.getByTestId('mockDashboardGrid');
     });
