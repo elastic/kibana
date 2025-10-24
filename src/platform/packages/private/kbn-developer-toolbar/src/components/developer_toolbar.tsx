@@ -88,7 +88,7 @@ const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({ envInfo, on
           <EuiButtonIcon
             display={'fill'}
             color={'accentSecondary'}
-            iconType="devToolsApp"
+            iconType="wrench"
             size="xs"
             onClick={toggleMinimized}
             aria-label={'Expand developer toolbar'}
