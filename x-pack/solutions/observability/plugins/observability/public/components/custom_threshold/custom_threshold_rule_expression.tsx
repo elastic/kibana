@@ -41,7 +41,6 @@ import type { SearchBarProps } from '@kbn/unified-search-plugin/public';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import moment from 'moment';
-import type { MinimumTimeSize } from '@kbn/triggers-actions-ui-plugin/public/common/expression_items/for_the_last';
 import { useKibana } from '../../utils/kibana_react';
 import {
   Aggregators,
@@ -120,10 +119,10 @@ export default function Expressions(props: Props) {
     [dataView]
   );
 
-  const showMinimumTimeWarning = useShowMinimumTimeSize({
+  const showRecommendedTimeSizeWarning = useShowRecommendedTimeSize({
     timeSize,
     timeUnit,
-    minimumTimeSize: { value: 5, unit: 'm' },
+    recommendedTimeSize: { timeSize: 5, timeUnit: 'm' },
   });
 
   const initSearchSource = async (resetDataView: boolean, thisData: DataPublicPluginStart) => {
@@ -643,7 +642,7 @@ export default function Expressions(props: Props) {
         onChangeWindowSize={updateTimeSize}
         onChangeWindowUnit={updateTimeUnit}
         display="fullWidth"
-        isTimeLimit={showMinimumTimeWarning}
+        isTimeSizeBelowRecommended={showRecommendedTimeSizeWarning}
       />
 
       <EuiSpacer size="m" />
@@ -746,35 +745,35 @@ export default function Expressions(props: Props) {
   );
 }
 
-interface MinimumTimeSize {
-  value: number;
-  unit: TimeUnitChar;
+interface RecommendedTimeSize {
+  timeSize: number;
+  timeUnit: TimeUnitChar;
 }
 
-function useShowMinimumTimeSize({
+function useShowRecommendedTimeSize({
   timeSize,
   timeUnit,
-  minimumTimeSize,
+  recommendedTimeSize,
 }: {
   timeSize?: number;
   timeUnit?: TimeUnitChar;
-  minimumTimeSize?: MinimumTimeSize;
+  recommendedTimeSize?: RecommendedTimeSize;
 }) {
-  const [showMinimumTimeSizeWarning, setShowMinimumTimeSizeWarning] = useState(false);
+  const [showRecommendedTimeSizeWarning, setShowRecommendedTimeSizeWarning] = useState(false);
 
   useEffect(() => {
-    if (timeSize === undefined || minimumTimeSize === undefined) {
+    if (timeSize === undefined || recommendedTimeSize === undefined) {
       return;
     }
 
     const currentTimeSize = moment.duration(timeSize, timeUnit).asMilliseconds();
-    const minimumWindowSizeAsMillis = moment
-      .duration(minimumTimeSize.value, minimumTimeSize.unit)
+    const recommendedWindowSizeAsMillis = moment
+      .duration(recommendedTimeSize.timeSize, recommendedTimeSize.timeUnit)
       .asMilliseconds();
 
-    const shouldShow = currentTimeSize < minimumWindowSizeAsMillis;
-    setShowMinimumTimeSizeWarning(shouldShow);
-  }, [timeSize, timeUnit, minimumTimeSize]);
+    const shouldShow = currentTimeSize < recommendedWindowSizeAsMillis;
+    setShowRecommendedTimeSizeWarning(shouldShow);
+  }, [timeSize, timeUnit, recommendedTimeSize]);
 
-  return showMinimumTimeSizeWarning;
+  return showRecommendedTimeSizeWarning;
 }

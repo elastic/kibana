@@ -17,8 +17,9 @@ import {
   EuiFlexItem,
   EuiFieldNumber,
   EuiCallOut,
+  EuiSpacer,
 } from '@elastic/eui';
-import type { TimeUnitChar } from '@kbn/response-ops-rule-params/common/utils';
+import { css } from '@emotion/react';
 import { getTimeUnitLabel } from '../lib/get_time_unit_label';
 import type { TIME_UNITS } from '../../application/constants';
 import { getTimeOptions } from '../lib/get_time_options';
@@ -30,7 +31,7 @@ export interface ForLastExpressionProps {
   timeWindowSize?: number;
   timeWindowUnit?: string;
   errors: IErrorObject;
-  isTimeLimit?: boolean;
+  isTimeSizeBelowRecommended?: boolean;
   onChangeWindowSize: (selectedWindowSize: number | undefined) => void;
   onChangeWindowUnit: (selectedWindowUnit: string) => void;
   popupPosition?:
@@ -55,6 +56,13 @@ const FOR_LAST_LABEL = i18n.translate(
     defaultMessage: 'for the last',
   }
 );
+
+const MINIMUM_TIMESIZE_ERROR = i18n.translate(
+  'xpack.triggersActionsUI.common.expressionItems.forTheLast.minimumTimeSizeError',
+  {
+    defaultMessage: 'Minimum 5 minutes recommended',
+  }
+);
 export const ForLastExpression = ({
   timeWindowSize,
   timeWindowUnit = 's',
@@ -63,7 +71,7 @@ export const ForLastExpression = ({
   onChangeWindowSize,
   onChangeWindowUnit,
   popupPosition,
-  isTimeLimit = false,
+  isTimeSizeBelowRecommended = false,
   description = FOR_LAST_LABEL,
 }: ForLastExpressionProps) => {
   const [alertDurationPopoverOpen, setAlertDurationPopoverOpen] = useState(false);
@@ -105,12 +113,16 @@ export const ForLastExpression = ({
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiFormRow
-              isInvalid={Number(errors.timeWindowSize?.length) > 0}
-              error={errors.timeWindowSize as string[]}
+              isInvalid={Number(errors.timeWindowSize?.length) > 0 || isTimeSizeBelowRecommended}
+              error={
+                isTimeSizeBelowRecommended
+                  ? [MINIMUM_TIMESIZE_ERROR]
+                  : (errors.timeWindowSize as string[])
+              }
             >
               <EuiFieldNumber
                 data-test-subj="timeWindowSizeNumber"
-                isInvalid={Number(errors.timeWindowSize?.length) > 0}
+                isInvalid={Number(errors.timeWindowSize?.length) > 0 || isTimeSizeBelowRecommended}
                 min={0}
                 value={timeWindowSize || ''}
                 onChange={(e) => {
@@ -138,7 +150,7 @@ export const ForLastExpression = ({
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-        {isTimeLimit && <MinimumTimeSizeWarning />}
+        {isTimeSizeBelowRecommended && <RecommendedTimeSizeWarning />}
       </div>
     </EuiPopover>
   );
@@ -147,19 +159,29 @@ export const ForLastExpression = ({
 // eslint-disable-next-line import/no-default-export
 export { ForLastExpression as default };
 
-function MinimumTimeSizeWarning() {
-  const description = i18n.translate('xpack.observability.alertTypes.minimumTimeSize.description', {
-    defaultMessage:
-      'Recommended minimum value is 5 minutes. This is to ensure, that the alert has enough data to evaluate. If you choose a lower values, the alert may not work as expected.',
-  });
+function RecommendedTimeSizeWarning() {
+  const description = i18n.translate(
+    'xpack.observability.rules.custom_threshold.recommendedTimeSizeWarning.description',
+    {
+      defaultMessage:
+        'Recommended minimum value is 5 minutes. This is to ensure, that the alert has enough data to evaluate. If you choose a lower values, the alert may not work as expected.',
+    }
+  );
 
   return (
-    <EuiCallOut
-      title={`Value is too low, possible alerting noise`}
-      color="warning"
-      iconType="warning"
-    >
-      <p>{description}</p>
-    </EuiCallOut>
+    <>
+      <EuiSpacer size="s" />
+      <EuiCallOut
+        title={`Value is too low, possible alerting noise`}
+        color="warning"
+        iconType="warning"
+        size="s"
+        css={css`
+          max-width: 400px;
+        `}
+      >
+        <p>{description}</p>
+      </EuiCallOut>
+    </>
   );
 }
