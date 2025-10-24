@@ -411,6 +411,7 @@ export enum RRuleFrequency {
   MONTHLY = 1,
   WEEKLY = 2,
   DAILY = 3,
+  HOURLY = 4,
 }
 
 export interface RecurrenceSchedule {

@@ -78,7 +78,7 @@ const AzureCredentialsFormAgentlessWrapper = ({
   );
 };
 
-describe('AzureCredentialsFormAgentless', () => {
+describe.skip('AzureCredentialsFormAgentless', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });

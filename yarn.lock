@@ -8913,6 +8913,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/visualizations-common@link:src/platform/packages/shared/kbn-visualizations-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/visualizations-plugin@link:src/platform/plugins/shared/visualizations":
   version "0.0.0"
   uid ""
@@ -16633,7 +16637,7 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@^141.0.0:
+chromedriver@^141.0.1:
   version "141.0.2"
   resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-141.0.2.tgz#071dded2f6fb4fc6ba403ed8e2e597ebf69abfe4"
   integrity sha512-MNtgzm5SjTtbHDXlpuXkQ7brxkOYTK+qDbnmr7UrurfuhqJfIkL+nnKo7hev/hR6sFL8mV8r5+1Kn51Mo9zsDg==
@@ -24443,7 +24447,7 @@ linkify-it@^5.0.0:
   dependencies:
     uc.micro "^2.0.0"
 
-liquidjs@^10.21.1:
+liquidjs@^10.22.0:
   version "10.22.0"
   resolved "https://registry.yarnpkg.com/liquidjs/-/liquidjs-10.22.0.tgz#06f2be823d897986fc92f88855caf903c381498c"
   integrity sha512-SGBYxl7U7vqmmAQdP/PTP3P3q11f99xUjdtxVICqNQqPecl+JIMCsTshDObGzicHaAqWAnPW0o25a9hDaJxOng==
