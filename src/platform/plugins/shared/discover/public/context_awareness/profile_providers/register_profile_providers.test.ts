@@ -55,7 +55,7 @@ describe('registerProfileProviders', () => {
       createContextAwarenessMocks({
         shouldRegisterProviders: false,
       });
-    await registerProfileProviders({
+    registerProfileProviders({
       rootProfileService: rootProfileServiceMock,
       dataSourceProfileService: dataSourceProfileServiceMock,
       documentProfileService: documentProfileServiceMock,
@@ -93,7 +93,7 @@ describe('registerProfileProviders', () => {
       createContextAwarenessMocks({
         shouldRegisterProviders: false,
       });
-    await registerProfileProviders({
+    registerProfileProviders({
       rootProfileService: rootProfileServiceMock,
       dataSourceProfileService: dataSourceProfileServiceMock,
       documentProfileService: documentProfileServiceMock,
@@ -129,7 +129,7 @@ describe('registerProfileProviders', () => {
       createContextAwarenessMocks({
         shouldRegisterProviders: false,
       });
-    await registerProfileProviders({
+    registerProfileProviders({
       rootProfileService: rootProfileServiceMock,
       dataSourceProfileService: dataSourceProfileServiceMock,
       documentProfileService: documentProfileServiceMock,
@@ -152,7 +152,7 @@ describe('registerProfileProviders', () => {
       createContextAwarenessMocks({
         shouldRegisterProviders: false,
       });
-    await registerProfileProviders({
+    registerProfileProviders({
       rootProfileService: rootProfileServiceMock,
       dataSourceProfileService: dataSourceProfileServiceMock,
       documentProfileService: documentProfileServiceMock,

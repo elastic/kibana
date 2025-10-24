@@ -39,7 +39,7 @@ import { createObservabilityMetricsDataSourceProfileProviders } from './metrics_
  * Register profile providers for root, data source, and document contexts to the profile profile services
  * @param options Register profile provider options
  */
-export const registerProfileProviders = async ({
+export const registerProfileProviders = ({
   rootProfileService,
   dataSourceProfileService,
   documentProfileService,
