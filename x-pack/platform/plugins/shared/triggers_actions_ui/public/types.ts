@@ -51,7 +51,7 @@ import type {
   ActionTypeRegistryContract,
 } from '@kbn/alerts-ui-shared/src/common/types';
 import type { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
-import type { RULE_DETAIL_DESCRIPTION_FIELD_TYPES } from './application/sections/rule_details/components/rule_detail_description_type';
+import type { RULE_PREBUILD_DESCRIPTION_FIELDS } from '.';
 import type { ComponentOpts as RuleStatusDropdownProps } from './application/sections/rules_list/components/rule_status_dropdown';
 import type { RuleTagFilterProps } from './application/sections/rules_list/components/rule_tag_filter';
 import type { RuleStatusFilterProps } from './application/sections/rules_list/components/rule_status_filter';
@@ -126,11 +126,11 @@ type PrebuildField<T> = (props: T) => {
 };
 
 export interface PrebuildFieldsMap {
-  [RULE_DETAIL_DESCRIPTION_FIELD_TYPES.INDEX_PATTERN]: PrebuildField<string[]>;
-  [RULE_DETAIL_DESCRIPTION_FIELD_TYPES.CUSTOM_QUERY]: PrebuildField<string>;
-  [RULE_DETAIL_DESCRIPTION_FIELD_TYPES.ESQL_QUERY]: PrebuildField<string>;
-  [RULE_DETAIL_DESCRIPTION_FIELD_TYPES.DATA_VIEW_ID]: PrebuildField<string>;
-  [RULE_DETAIL_DESCRIPTION_FIELD_TYPES.DATA_VIEW_INDEX_PATTERN]: PrebuildField<string>;
+  [RULE_PREBUILD_DESCRIPTION_FIELDS.INDEX_PATTERN]: PrebuildField<string[]>;
+  [RULE_PREBUILD_DESCRIPTION_FIELDS.CUSTOM_QUERY]: PrebuildField<string>;
+  [RULE_PREBUILD_DESCRIPTION_FIELDS.ESQL_QUERY]: PrebuildField<string>;
+  [RULE_PREBUILD_DESCRIPTION_FIELDS.DATA_VIEW_ID]: PrebuildField<string>;
+  [RULE_PREBUILD_DESCRIPTION_FIELDS.DATA_VIEW_INDEX_PATTERN]: PrebuildField<string>;
 }
 
 export type GetDescriptionFieldsFn<T> = ({

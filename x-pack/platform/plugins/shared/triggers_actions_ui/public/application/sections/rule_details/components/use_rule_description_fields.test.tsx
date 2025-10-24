@@ -10,7 +10,7 @@ import { AsyncField, createPrebuildFields } from './use_rule_description_fields'
 import { screen, render } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { HttpSetup } from '@kbn/core/public';
-import { RULE_DETAIL_DESCRIPTION_FIELD_TYPES } from './rule_detail_description_type';
+import { RULE_PREBUILD_DESCRIPTION_FIELDS } from './rule_detail_description_type';
 
 describe('use_rule_description_fields', () => {
   let queryClient: QueryClient;
@@ -77,7 +77,7 @@ describe('use_rule_description_fields', () => {
       });
 
       const node =
-        prebuildFields[RULE_DETAIL_DESCRIPTION_FIELD_TYPES.DATA_VIEW_INDEX_PATTERN](DATA_VIEW_ID);
+        prebuildFields[RULE_PREBUILD_DESCRIPTION_FIELDS.DATA_VIEW_INDEX_PATTERN](DATA_VIEW_ID);
 
       render(node.description, { wrapper });
 
@@ -102,7 +102,7 @@ describe('use_rule_description_fields', () => {
       });
 
       const node =
-        prebuildFields[RULE_DETAIL_DESCRIPTION_FIELD_TYPES.DATA_VIEW_INDEX_PATTERN](DATA_VIEW_ID);
+        prebuildFields[RULE_PREBUILD_DESCRIPTION_FIELDS.DATA_VIEW_INDEX_PATTERN](DATA_VIEW_ID);
 
       render(node.description, { wrapper });
 
