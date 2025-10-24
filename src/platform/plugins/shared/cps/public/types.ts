@@ -14,3 +14,8 @@ export interface CPSPluginSetup {
 export interface CPSConfigType {
   cpsEnabled: boolean;
 }
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface CPSServerStart {}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface CPSServerStop {}
