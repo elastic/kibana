@@ -11,6 +11,7 @@ import fs from 'fs/promises';
 import { join } from 'path';
 
 import type { FtrConfigProviderContext } from '@kbn/test';
+import { SERVICE_NAMESPACE } from '@kbn/test-services';
 import { getDataPath } from '@kbn/utils';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -18,7 +19,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     require.resolve('./manual_configuration_flow_without_tls.config.ts')
   );
 
-  const tempKibanaYamlFile = join(getDataPath(), `interactive_setup_kibana_${Date.now()}.yml`);
+  const dirName = join(getDataPath(), SERVICE_NAMESPACE);
+
+  await fs.mkdir(dirName, { recursive: true });
+
+  const tempKibanaYamlFile = join(dirName, `interactive_setup_kibana_${Date.now()}.yml`);
   await fs.writeFile(tempKibanaYamlFile, '');
 
   return {

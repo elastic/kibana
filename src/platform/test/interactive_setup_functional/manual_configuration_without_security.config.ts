@@ -22,11 +22,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     '../interactive_setup_api_integration/plugins/test_endpoints'
   );
 
-  const tempKibanaYamlFile = join(
-    getDataPath(),
-    SERVICE_NAMESPACE,
-    `interactive_setup_kibana_${Date.now()}.yml`
-  );
+  const dirName = join(getDataPath(), SERVICE_NAMESPACE);
+
+  await fs.mkdir(dirName, { recursive: true });
+
+  const tempKibanaYamlFile = join(dirName, `interactive_setup_kibana_${Date.now()}.yml`);
   await fs.writeFile(tempKibanaYamlFile, '');
 
   return {

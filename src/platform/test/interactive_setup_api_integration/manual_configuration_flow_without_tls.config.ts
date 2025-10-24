@@ -12,6 +12,7 @@ import { join, resolve } from 'path';
 
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import type { FtrConfigProviderContext } from '@kbn/test';
+import { SERVICE_NAMESPACE } from '@kbn/test-services';
 import { getDataPath } from '@kbn/utils';
 
 import { services } from './services';
@@ -21,7 +22,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   const testEndpointsPlugin = resolve(__dirname, './plugins/test_endpoints');
 
-  const tempKibanaYamlFile = join(getDataPath(), `interactive_setup_kibana_${Date.now()}.yml`);
+  const dirName = join(getDataPath(), SERVICE_NAMESPACE);
+
+  await fs.mkdir(dirName, { recursive: true });
+
+  const tempKibanaYamlFile = join(dirName, `interactive_setup_kibana_${Date.now()}.yml`);
   await fs.writeFile(tempKibanaYamlFile, '');
 
   return {
