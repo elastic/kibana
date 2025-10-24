@@ -17,7 +17,7 @@ import {
   mockStoreDeps,
 } from '../../../mocks';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { Visualization, LensLayerType as LayerType } from '@kbn/lens-common';
+import type { Visualization } from '@kbn/lens-common';
 import { LayerPanels } from './config_panel';
 import { LayerPanel } from './layer_panel';
 import { coreMock } from '@kbn/core/public/mocks';

@@ -9,6 +9,10 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import type { ReactWrapper } from 'enzyme';
 
+import type { LensLayerType, TypedLensSerializedState } from '@kbn/lens-common';
+import { coreMock } from '@kbn/core/public/mocks';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+
 import {
   createMockFramePublicAPI,
   mockVisualizationMap,
@@ -19,13 +23,10 @@ import {
 import { createMockStartDependencies } from '../../../editor_frame_service/mocks';
 import type { MountStoreProps } from '../../../mocks';
 import type { LensPluginStartDependencies } from '../../../plugin';
-import type { TypedLensSerializedState } from '../../../react_embeddable/types';
-import { LayerTabsWrapper } from './layer_tabs';
-import { coreMock } from '@kbn/core/public/mocks';
 import { generateId } from '../../../id_generator';
-import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import type { LayerType } from '@kbn/visualizations-plugin/common';
 import { EditorFrameServiceProvider } from '../../../editor_frame_service/editor_frame_service_context';
+
+import { LayerTabsWrapper } from './layer_tabs';
 
 jest.mock('../../../id_generator');
 
@@ -39,7 +40,7 @@ jest.mock('@kbn/kibana-utils-plugin/public', () => {
   };
 });
 
-const addNewLayer = (instance: ReactWrapper, type: LayerType = LayerTypes.REFERENCELINE) =>
+const addNewLayer = (instance: ReactWrapper, type: LensLayerType = LayerTypes.REFERENCELINE) =>
   act(() => {
     instance.find(`button[data-test-subj="${type}"]`).first().simulate('click');
   });
