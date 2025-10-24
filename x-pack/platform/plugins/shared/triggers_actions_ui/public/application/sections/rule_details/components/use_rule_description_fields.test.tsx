@@ -85,7 +85,7 @@ describe('use_rule_description_fields', () => {
         body: expect.stringContaining(`\"id\":\"${DATA_VIEW_ID}\"`),
       });
 
-      expect(await screen.findByTestId('rule-descriptiont-index-patterns')).toBeInTheDocument();
+      expect(await screen.findByTestId('rule-description-index-patterns')).toBeInTheDocument();
       expect(screen.getByText(DATA_VIEW_INDEX_PATTERN)).toBeInTheDocument();
     });
 

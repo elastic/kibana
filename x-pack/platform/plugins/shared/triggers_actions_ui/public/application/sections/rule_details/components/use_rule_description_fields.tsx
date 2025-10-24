@@ -32,6 +32,21 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
   }
 }
 
+const AsyncContent = <T,>({
+  queryKey,
+  queryFn,
+  children,
+}: {
+  queryKey: string[];
+  queryFn: () => Promise<HttpResponse<T>>;
+  children: (data: T) => React.ReactNode;
+}) => {
+  const { data } = useQuery<HttpResponse<T>, Error>(queryKey, queryFn, {
+    suspense: true,
+  });
+  return <>{children(data as T)}</>;
+};
+
 export const AsyncField = <T,>({
   queryKey,
   queryFn,
@@ -41,17 +56,12 @@ export const AsyncField = <T,>({
   queryFn: () => Promise<HttpResponse<T>>;
   children: (data: T) => React.ReactNode;
 }) => {
-  const AsyncContent = () => {
-    const { data } = useQuery<HttpResponse<T>, Error>(queryKey, queryFn, {
-      suspense: true,
-    });
-    return <>{children(data as T)}</>;
-  };
-
   return (
     <ErrorBoundary>
       <Suspense fallback={<EuiLoadingSpinner size="m" />}>
-        <AsyncContent />
+        <AsyncContent queryFn={queryFn} queryKey={queryKey}>
+          {children}
+        </AsyncContent>
       </Suspense>
     </ErrorBoundary>
   );
@@ -63,7 +73,7 @@ const IndexPattern = ({ patterns }: { patterns: string[] }) => {
       responsive={false}
       gutterSize="xs"
       wrap
-      data-test-subj="rule-descriptiont-index-patterns"
+      data-test-subj="rule-description-index-patterns"
     >
       {patterns.map((pattern) => (
         <EuiBadge key={pattern} color="hollow">
