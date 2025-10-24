@@ -9,7 +9,7 @@
 
 import type { Page } from '@playwright/test';
 
-// selector should be on the page and match at least
+// selector should be on the page and match at least one element
 const verifyValidSelector = async (selector: string, page: Page): Promise<void> => {
   const matchingElements = await page.locator(selector).count();
   if (matchingElements === 0) throw new Error(`No elements found with selector: ${selector}`);

@@ -175,35 +175,4 @@ test.describe('Onboarding UI Validation', () => {
       });
     }
   );
-
-  // TODO - remove, this test is only used to provide an example of basic keyTo usage with the tab key
-  test('basic tab example', { tag: ['@ess', '@svlOblt'] }, async ({ page }) => {
-    // this element is not on the page and should throw an error with a useful message
-    // await page.keyTo('[data-test-subj="fake-test-subject"]');
-
-    // this element is not focusable and should result in a tab cycle error
-    // await page.keyTo('[data-test-subj="obltOnboardingHomeTitle"]');
-
-    // this should have multiple elements matching the selector and focus the first one
-    // await page.keyTo('button');
-
-    // happy path - this element is focusable and should result in focus ending on the provided element
-    await page.keyTo('[data-test-subj="observabilityOnboardingFooterExploreDemoLink"]');
-
-    await expect(
-      page.locator('[data-test-subj="observabilityOnboardingFooterExploreDemoLink"]')
-    ).toBeFocused();
-  });
-
-  // TODO - remove, used an example of tabTo with a key other than tab
-  test('basic tab + arrow key example', { tag: ['@ess', '@svlOblt'] }, async ({ page }) => {
-    await page.keyTo('[data-test-subj="observabilityOnboardingUseCaseCard-host"] input');
-    await page.keyTo(
-      '[data-test-subj="observabilityOnboardingUseCaseCard-cloud"] input',
-      'ArrowRight'
-    );
-    await expect(
-      page.locator('[data-test-subj="observabilityOnboardingUseCaseCard-cloud"] input')
-    ).toBeFocused();
-  });
 });
