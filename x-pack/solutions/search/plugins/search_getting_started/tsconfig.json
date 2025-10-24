@@ -29,6 +29,7 @@
     "@kbn/config-schema",
     "@kbn/search-shared-ui",
     "@kbn/search-code-examples",
+    "@kbn/search-api-keys-components",
   ],
   "exclude": [
     "target/**/*"
