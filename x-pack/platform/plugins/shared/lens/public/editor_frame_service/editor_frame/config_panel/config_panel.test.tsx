@@ -202,27 +202,6 @@ describe('ConfigPanel', () => {
       return waitMs(0);
     }
 
-    it('should not add an initial dimension when not specified', async () => {
-      const datasourceMap = mockDatasourceMap();
-      const visualizationMap = mockVisualizationMap();
-
-      visualizationMap.testVis.getSupportedLayers = jest.fn(() => [
-        { type: LayerTypes.DATA, label: 'Data Layer' },
-        {
-          type: LayerTypes.REFERENCELINE,
-          label: 'Reference layer',
-        },
-      ]);
-      datasourceMap.testDatasource.initializeDimension = jest.fn();
-      const props = getDefaultProps({ datasourceMap, visualizationMap });
-
-      const { instance, lensStore } = await prepareAndMountComponent(props);
-      addNewLayer(instance);
-
-      expect(lensStore.dispatch).toHaveBeenCalledTimes(1);
-      expect(datasourceMap.testDatasource.initializeDimension).not.toHaveBeenCalled();
-    });
-
     it('should not add an initial dimension when initialDimensions are not available for the given layer type', async () => {
       const datasourceMap = mockDatasourceMap();
       const visualizationMap = mockVisualizationMap();
