@@ -12,6 +12,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { existsSync, readFileSync, writeFileSync, unlinkSync } from 'fs';
 import { resolve } from 'path';
 import type { FtrProviderContext } from '../../ftr_provider_context';
+import { LARGE_INPUT } from './large_input';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
@@ -271,6 +272,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // Clean up downloaded file
         unlinkSync(downloadPath);
+      });
+    });
+
+    it('should work fine with a large content', async () => {
+      await retry.try(async () => {
+        await PageObjects.console.enterText(LARGE_INPUT);
+
+        // The autocomplete should still show up without causing stack overflow
+        await PageObjects.console.enterText(`GET _search\n`);
+        await PageObjects.console.enterText(`{\n\t"query": {`);
+        await PageObjects.console.pressEnter();
+        await PageObjects.console.sleepForDebouncePeriod();
+        await PageObjects.console.promptAutocomplete();
+        expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
       });
     });
   });
