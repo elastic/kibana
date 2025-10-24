@@ -163,6 +163,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.editDimensionLabel('Test of label');
       await PageObjects.lens.editDimensionFormat('Percent');
       await PageObjects.lens.editDimensionColor('#ff0000');
+      await PageObjects.lens.closeDimensionEditor();
+
       await PageObjects.lens.openVisualOptions();
 
       await PageObjects.lens.setCurvedLines('CURVE_MONOTONE_X');
