@@ -7,10 +7,15 @@
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ChartType, mapVisToChartType } from '@kbn/visualization-utils';
+import type {
+  DatasourceMap,
+  VisualizationMap,
+  VisualizeEditorContext,
+  Suggestion,
+  DataViewsState,
+  TypedLensByValueInput,
+} from '@kbn/lens-common';
 import { getSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
-import type { DatasourceMap, VisualizationMap, VisualizeEditorContext, Suggestion } from '../types';
-import type { DataViewsState } from '../state_management';
-import type { TypedLensByValueInput } from '../react_embeddable/types';
 import { mergeSuggestionWithVisContext, switchVisualizationType } from './helpers';
 
 interface SuggestionsApiProps {
