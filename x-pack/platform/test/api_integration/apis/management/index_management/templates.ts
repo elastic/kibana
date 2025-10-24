@@ -360,13 +360,12 @@ export default function ({ getService }: FtrProviderContext) {
           { enabled: false, prior_logs_usage: true, indexMode: undefined },
           // In stateful Kibana, if prior_logs_usage is set to true, the cluster.logsdb.enabled setting is false by default, so index mode is undefined
           { enabled: null, prior_logs_usage: true, indexMode: undefined },
-          // In stateful Kibana, when cluster.logsb.enabled setting is not set, the index mode is always standard
           // For versions 9.0+, if prior_logs_usage is set to false, the cluster.logsdb.enabled setting is true by default, so logsdb index mode
-          { enabled: null, prior_logs_usage: true, indexMode: 'standard' },
+          // Otherwise, index mode is undefined
           {
             enabled: null,
             prior_logs_usage: false,
-            indexMode: esVersion.matchRange('>=9.0.0') ? 'logsdb' : 'standard',
+            indexMode: esVersion.matchRange('>=9.0.0') ? 'logsdb' : undefined,
           },
         ];
 
