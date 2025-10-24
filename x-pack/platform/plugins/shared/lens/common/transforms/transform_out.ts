@@ -6,8 +6,8 @@
  */
 
 import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
+import type { LensByValueSerializedState } from '@kbn/lens-common';
 import type { LensTransformDependencies } from '.';
-import type { LensByValueSerializedState } from '../../public/react_embeddable/types';
 import { LENS_ITEM_VERSION_V1, transformToV1LensItemAttributes } from '../content_management/v1';
 import { injectLensReferences } from '../references';
 import type {

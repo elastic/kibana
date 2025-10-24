@@ -7,8 +7,7 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 
-import type { LensSerializedState } from '../../public';
-import type { LensByRefSerializedState } from '../../public/react_embeddable/types';
+import type { LensByRefSerializedState, LensSerializedState } from '@kbn/lens-common';
 import { DOC_TYPE } from '../constants';
 
 export const LENS_SAVED_OBJECT_REF_NAME = 'savedObjectRef';

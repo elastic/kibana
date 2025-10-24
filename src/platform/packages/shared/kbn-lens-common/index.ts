@@ -252,8 +252,8 @@ export type {
   DocumentToExpressionReturnType,
   PreventableEvent,
   LensOverrides,
-  LensByReference,
-  LensPropsVariants,
+  LensByValueSerializedState,
+  LensByRefSerializedState,
   ViewInDiscoverCallbacks,
   IntegrationCallbacks,
   LensPublicCallbacks,
@@ -276,6 +276,7 @@ export type {
   TypedLensSerializedState,
   LensEmbeddableOutput,
   ESQLVariablesCompatibleDashboardApi,
+  LensByValueBase,
 } from './embeddable/types';
 export type {
   LensAppLocatorParams,

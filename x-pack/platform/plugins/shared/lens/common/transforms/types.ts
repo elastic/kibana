@@ -11,7 +11,7 @@ import type {
   LensSerializedState,
   LensByRefSerializedState,
   LensByValueSerializedState,
-} from '../../public/react_embeddable/types';
+} from '@kbn/lens-common';
 
 export type LensTransforms = Required<
   EmbeddableTransforms<LensSerializedState, LensSerializedState>

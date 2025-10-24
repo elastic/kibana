@@ -126,9 +126,9 @@ export interface PreventableEvent {
   preventDefault(): void;
 }
 
-interface LensByValue {
-  // by-value
-  attributes?: Simplify<LensSavedObjectAttributes>;
+export interface LensByValueBase {
+  savedObjectId?: string;
+  attributes?: LensSavedObjectAttributes;
 }
 
 export interface LensOverrides {
@@ -150,10 +150,9 @@ export interface LensOverrides {
 /**
  * Lens embeddable props broken down by type
  */
-
-export interface LensByReference {
-  // by-reference
-  savedObjectId?: string;
+interface LensByReferenceBase {
+  savedObjectId?: string; // really should be never
+  attributes?: never;
 }
 
 interface ContentManagementProps {
@@ -161,9 +160,12 @@ interface ContentManagementProps {
   managed?: boolean;
 }
 
-export type LensPropsVariants = (LensByValue & LensByReference) & {
+interface LensWithReferences {
+  /**
+   * @deprecated use `state.attributes.references`
+   */
   references?: Reference[];
-};
+}
 
 export interface ViewInDiscoverCallbacks extends LensApiProps {
   canViewUnderlyingData$: PublishingSubject<boolean>;
@@ -259,15 +261,28 @@ interface LensRequestHandlersProps {
  * * Panel settings
  * * other props from the embeddable
  */
-export type LensSerializedState = Simplify<
-  LensPropsVariants &
-    LensOverrides &
+type LensSerializedSharedState = Simplify<
+  LensOverrides &
+    LensWithReferences &
     LensUnifiedSearchContext &
     LensPanelProps &
     SerializedTitles &
     Omit<LensSharedProps, 'noPadding'> &
     Partial<DynamicActionsSerializedState> & { isNewPanel?: boolean }
 >;
+
+export type LensByValueSerializedState = Simplify<LensSerializedSharedState & LensByValueBase>;
+export type LensByRefSerializedState = Simplify<LensSerializedSharedState & LensByReferenceBase>;
+
+/**
+ * Combined properties of serialized state stored on dashboard panel
+ *
+ *  Includes:
+ * - Lens document state (for by-value)
+ * - Panel settings
+ * - other props from the embeddable
+ */
+export type LensSerializedState = LensByRefSerializedState | LensByValueSerializedState;
 
 /**
  * Custom props exposed on the Lens exported component

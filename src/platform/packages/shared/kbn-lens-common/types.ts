@@ -144,14 +144,6 @@ export interface LensAttributesService {
     savedObjectId?: string
   ) => Promise<string>;
   checkForDuplicateTitle: (props: CheckDuplicateTitleProps) => Promise<{ isDuplicate: boolean }>;
-  injectReferences: (
-    runtimeState: LensRuntimeState,
-    references: Reference[] | undefined
-  ) => LensRuntimeState;
-  extractReferences: (runtimeState: LensRuntimeState) => {
-    rawState: LensRuntimeState;
-    references: Reference[];
-  };
 }
 
 export interface LensAppServices extends StartServices {
