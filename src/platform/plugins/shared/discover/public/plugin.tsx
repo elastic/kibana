@@ -337,15 +337,15 @@ export class DiscoverPlugin
     const { createProfileProviderSharedServices, registerProfileProviders } = await import(
       './context_awareness/profile_providers'
     );
-
-    this.profileProviderSharedServices ??= createProfileProviderSharedServices(services);
+    const sharedServices = await (this.profileProviderSharedServices ??=
+      createProfileProviderSharedServices(services));
 
     await registerProfileProviders({
       rootProfileService,
       dataSourceProfileService,
       documentProfileService,
       enabledExperimentalProfileIds: this.experimentalFeatures.enabledProfiles ?? [],
-      sharedServices: await this.profileProviderSharedServices,
+      sharedServices,
       services,
     });
 
