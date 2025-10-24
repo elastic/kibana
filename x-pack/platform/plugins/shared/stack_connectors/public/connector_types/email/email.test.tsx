@@ -13,7 +13,7 @@ import type { ValidatedEmail, ValidateEmailAddressesOptions } from '@kbn/actions
 import { InvalidEmailReason, MustacheInEmailRegExp } from '@kbn/actions-plugin/common';
 import { experimentalFeaturesMock } from '../../mocks';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
-import { serviceParamValueToKbnSettingMap } from '../../../common/email/constants';
+import { serviceParamValueToKbnSettingMap } from '@kbn/connector-schemas/email/constants';
 
 const CONNECTOR_TYPE_ID = '.email';
 let connectorTypeModel: ConnectorTypeModel;

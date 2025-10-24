@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
+import type { z } from '@kbn/zod';
 import type { Logger } from '@kbn/logging';
 import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import type {
@@ -16,12 +16,12 @@ import type {
   SwimlaneServiceConfigurationSchema,
 } from './schema';
 
-export type SwimlanePublicConfigurationType = TypeOf<typeof SwimlaneServiceConfigurationSchema>;
-export type SwimlaneSecretConfigurationType = TypeOf<typeof SwimlaneSecretsConfigurationSchema>;
+export type SwimlanePublicConfigurationType = z.infer<typeof SwimlaneServiceConfigurationSchema>;
+export type SwimlaneSecretConfigurationType = z.infer<typeof SwimlaneSecretsConfigurationSchema>;
 
-export type MappingConfigType = TypeOf<typeof ConfigMappingSchema>;
-export type ExecutorParams = TypeOf<typeof ExecutorParamsSchema>;
-export type ExecutorSubActionPushParams = TypeOf<typeof ExecutorSubActionPushParamsSchema>;
+export type MappingConfigType = z.infer<typeof ConfigMappingSchema>;
+export type ExecutorParams = z.infer<typeof ExecutorParamsSchema>;
+export type ExecutorSubActionPushParams = z.infer<typeof ExecutorSubActionPushParamsSchema>;
 
 export interface ExternalServiceCredentials {
   config: SwimlanePublicConfigurationType;
