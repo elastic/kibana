@@ -11,6 +11,7 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { StepContext, WorkflowDetailDto, WorkflowExecutionDto } from '@kbn/workflows';
@@ -24,9 +25,8 @@ import { ExecutionGraph } from '../../../features/debug-graph/execution_graph';
 import { TestStepModal } from '../../../features/run_workflow/ui/test_step_modal';
 import type { WorkflowUrlStateTabType } from '../../../hooks/use_workflow_url_state';
 import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
-import { selectWorkflowGraph } from '@kbn/workflows-management-plugin/public/widgets/workflow_yaml_editor/lib/store';
-import { useSelector } from 'react-redux';
-import { selectWorkflowDefinition } from '@kbn/workflows-management-plugin/public/widgets/workflow_yaml_editor/lib/store/selectors';
+import { selectWorkflowGraph } from '../../../widgets/workflow_yaml_editor/lib/store';
+import { selectWorkflowDefinition } from '../../../widgets/workflow_yaml_editor/lib/store/selectors';
 
 const WorkflowYAMLEditor = React.lazy(() =>
   import('../../../widgets/workflow_yaml_editor').then((module) => ({
