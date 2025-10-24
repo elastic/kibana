@@ -168,6 +168,7 @@ export const AssetInventoryDataTable = ({
         entityName: source.entity?.name,
         scopeId: ASSET_INVENTORY_TABLE_ID,
         contextId: ASSET_INVENTORY_TABLE_ID,
+        entityId: source.entity?.id,
       });
     } else {
       closeDynamicFlyout();

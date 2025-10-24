@@ -45,3 +45,10 @@ export const EntityPanelParamByType: Record<EntityType, string | undefined> = {
   [EntityType.service]: 'serviceName',
   [EntityType.generic]: undefined, // TODO create generic flyout?
 };
+
+export const EntityPanelIdParamByType: Record<EntityType, string | undefined> = {
+  [EntityType.host]: 'hostId',
+  [EntityType.user]: 'userId',
+  [EntityType.service]: undefined,
+  [EntityType.generic]: undefined,
+};

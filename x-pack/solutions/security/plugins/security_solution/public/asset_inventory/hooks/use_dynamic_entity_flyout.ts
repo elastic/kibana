@@ -28,6 +28,7 @@ interface InventoryFlyoutProps {
   entityName?: string;
   scopeId?: string;
   contextId?: string;
+  entityId?: string;
 }
 
 export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () => void }) => {
@@ -41,6 +42,7 @@ export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () =>
     entityName,
     scopeId,
     contextId,
+    entityId,
   }: InventoryFlyoutProps) => {
     // User, Host, and Service entity flyouts rely on entity name to fetch required data
     if (entityType && ['user', 'host', 'service'].includes(entityType) && !entityName) {
@@ -63,12 +65,18 @@ export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () =>
     switch (entityType) {
       case 'user':
         openFlyout({
-          right: { id: UserPanelKey, params: { userName: entityName, scopeId, contextId } },
+          right: {
+            id: UserPanelKey,
+            params: { userName: entityName, userId: entityId, scopeId, contextId },
+          },
         });
         break;
       case 'host':
         openFlyout({
-          right: { id: HostPanelKey, params: { hostName: entityName, scopeId, contextId } },
+          right: {
+            id: HostPanelKey,
+            params: { hostName: entityName, hostId: entityId, scopeId, contextId },
+          },
         });
         break;
       case 'service':

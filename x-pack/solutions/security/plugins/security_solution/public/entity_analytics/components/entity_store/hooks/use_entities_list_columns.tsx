@@ -18,6 +18,7 @@ import {
 import {
   EntityPanelKeyByType,
   EntityPanelParamByType,
+  EntityPanelIdParamByType,
 } from '../../../../flyout/entity_details/shared/constants';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import { RiskScoreLevel } from '../../severity/common';
@@ -32,6 +33,7 @@ import { formatRiskScore } from '../../../common';
 
 export type EntitiesListColumns = [
   Columns<Entity>,
+  Columns<string, Entity>,
   Columns<string, Entity>,
   Columns<string | undefined, Entity>,
   Columns<CriticalityLevels, Entity>,
@@ -56,15 +58,21 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
       render: (record: Entity) => {
         const entityType = getEntityType(record);
 
-        const value = record.entity.name;
+        // entity.name contains the original user.name or host.name value
+        // entity.id contains the computed unique identifier
+        // We pass entity.name as userName/hostName and entity.id as userId/hostId
+        const entityName = record.entity.name;
+        const entityId = record.entity.id;
         const onClick = () => {
           const id = EntityPanelKeyByType[entityType];
-
           if (id) {
+            const nameParam = EntityPanelParamByType[entityType];
+            const idParam = EntityPanelIdParamByType[entityType];
             openRightPanel({
               id,
               params: {
-                [EntityPanelParamByType[entityType] ?? '']: value,
+                ...(nameParam ? { [nameParam]: entityName } : {}),
+                ...(idParam ? { [idParam]: entityId } : {}),
                 contextID: ENTITIES_LIST_TABLE_ID,
                 scopeId: ENTITIES_LIST_TABLE_ID,
               },
@@ -72,7 +80,9 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
           }
         };
 
-        if (!value || !EntityPanelKeyByType[entityType]) {
+        // Only show the expand button if entity.name is available
+        // If entity.name is not set, the entity hasn't been processed through the updated pipeline yet
+        if (!entityId || !EntityPanelKeyByType[entityType]) {
           return null;
         }
 
@@ -84,7 +94,7 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
               'xpack.securitySolution.entityAnalytics.entityStore.entitiesList.entityPreview.ariaLabel',
               {
                 defaultMessage: 'Preview entity with name {name}',
-                values: { name: value },
+                values: { name: entityName || entityId },
               }
             )}
           />
@@ -104,14 +114,31 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
       truncateText: { lines: 2 },
       render: (_: string, record: Entity) => {
         const entityType = getEntityType(record);
+        // Display entity.name if available, otherwise show entity.id
+        const displayName = record.entity.name || record.entity.id;
         return (
           <span>
             <EuiIcon type={EntityIconByType[entityType]} />
-            <span css={{ paddingLeft: euiTheme.size.s }}>{record.entity.name}</span>
+            <span css={{ paddingLeft: euiTheme.size.s }}>{displayName}</span>
           </span>
         );
       },
-      width: '25%',
+      width: '20%',
+    },
+    {
+      field: 'entity.id',
+      name: (
+        <FormattedMessage
+          id="xpack.securitySolution.entityAnalytics.entityStore.entitiesList.idColumn.title"
+          defaultMessage="ID"
+        />
+      ),
+      sortable: true,
+      truncateText: { lines: 2 },
+      render: (id: string) => {
+        return <span>{id}</span>;
+      },
+      width: '20%',
     },
     {
       field: 'entity.source',
@@ -121,7 +148,7 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
           defaultMessage="Source"
         />
       ),
-      width: '25%',
+      width: '15%',
       truncateText: { lines: 2 },
       render: (source: string | undefined) => {
         if (source != null) {

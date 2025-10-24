@@ -23,13 +23,19 @@ import type { ObservedEntityData } from '../shared/components/observed_entity/ty
 
 interface UserPanelHeaderProps {
   userName: string;
+  userId?: string;
   observedUser: ObservedEntityData<UserItem>;
   managedUser: ManagedUserData;
 }
 
 const linkTitleCSS = { width: 'fit-content' };
 
-export const UserPanelHeader = ({ userName, observedUser, managedUser }: UserPanelHeaderProps) => {
+export const UserPanelHeader = ({
+  userName,
+  userId,
+  observedUser,
+  managedUser,
+}: UserPanelHeaderProps) => {
   const oktaTimestamp = managedUser.data?.[ManagedUserDatasetKey.OKTA]?.fields?.[
     '@timestamp'
   ][0] as string | undefined;
@@ -65,6 +71,11 @@ export const UserPanelHeader = ({ userName, observedUser, managedUser }: UserPan
           >
             <FlyoutTitle title={userName} iconType={'user'} isLink />
           </SecuritySolutionLinkAnchor>
+          {userId && (
+            <EuiText size="xs" color="subdued">
+              {`ID: ${userId}`}
+            </EuiText>
+          )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>

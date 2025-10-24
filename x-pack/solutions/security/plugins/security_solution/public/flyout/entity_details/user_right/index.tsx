@@ -41,6 +41,7 @@ export interface UserPanelProps extends Record<string, unknown> {
   contextID: string;
   scopeId: string;
   userName: string;
+  userId?: string;
   isPreviewMode?: boolean;
 }
 
@@ -56,7 +57,13 @@ const FIRST_RECORD_PAGINATION = {
   querySize: 1,
 };
 
-export const UserPanel = ({ contextID, scopeId, userName, isPreviewMode }: UserPanelProps) => {
+export const UserPanel = ({
+  contextID,
+  scopeId,
+  userName,
+  userId,
+  isPreviewMode,
+}: UserPanelProps) => {
   const { uiSettings } = useKibana().services;
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
 
@@ -172,6 +179,7 @@ export const UserPanel = ({ contextID, scopeId, userName, isPreviewMode }: UserP
             />
             <UserPanelHeader
               userName={userName}
+              userId={userId}
               observedUser={observedUserWithAnomalies}
               managedUser={managedUser}
             />

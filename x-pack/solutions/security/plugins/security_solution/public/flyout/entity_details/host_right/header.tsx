@@ -19,12 +19,13 @@ import type { ObservedEntityData } from '../shared/components/observed_entity/ty
 
 interface HostPanelHeaderProps {
   hostName: string;
+  hostId?: string;
   observedHost: ObservedEntityData<HostItem>;
 }
 
 const linkTitleCSS = { width: 'fit-content' };
 
-export const HostPanelHeader = ({ hostName, observedHost }: HostPanelHeaderProps) => {
+export const HostPanelHeader = ({ hostName, hostId, observedHost }: HostPanelHeaderProps) => {
   const lastSeenDate = useMemo(
     () => observedHost.lastSeen.date && new Date(observedHost.lastSeen.date),
     [observedHost.lastSeen.date]
@@ -49,6 +50,11 @@ export const HostPanelHeader = ({ hostName, observedHost }: HostPanelHeaderProps
           >
             <FlyoutTitle title={hostName} iconType={'storage'} isLink />
           </SecuritySolutionLinkAnchor>
+          {hostId && (
+            <EuiText size="xs" color="subdued">
+              {`ID: ${hostId}`}
+            </EuiText>
+          )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
