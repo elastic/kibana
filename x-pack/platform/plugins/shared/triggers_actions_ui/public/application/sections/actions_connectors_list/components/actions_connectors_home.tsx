@@ -193,6 +193,12 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
 
   const documentationButton = (
     <EuiButtonEmpty
+      aria-label={i18n.translate(
+        'xpack.triggersActionsUI.connectors.home.documentationButtonAriaLabel',
+        {
+          defaultMessage: 'Documentation button',
+        }
+      )}
       data-test-subj="documentationButton"
       key="documentation-button"
       target="_blank"

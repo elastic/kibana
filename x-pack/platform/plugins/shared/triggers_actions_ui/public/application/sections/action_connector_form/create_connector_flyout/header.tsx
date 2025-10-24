@@ -32,7 +32,7 @@ interface Props {
   actionTypeMessage?: string | null;
   compatibility?: string[] | null;
   isExperimental?: boolean;
-  isDeprecated?: boolean;
+  showDeprecationBadge?: boolean;
 }
 
 const FlyoutHeaderComponent: React.FC<Props> = ({
@@ -41,7 +41,7 @@ const FlyoutHeaderComponent: React.FC<Props> = ({
   actionTypeMessage,
   compatibility,
   isExperimental,
-  isDeprecated,
+  showDeprecationBadge,
 }) => {
   return (
     <EuiFlyoutHeader hasBorder data-test-subj="create-connector-flyout-header">
@@ -80,7 +80,7 @@ const FlyoutHeaderComponent: React.FC<Props> = ({
                     />
                   </EuiFlexItem>
                 ) : null}
-                {actionTypeName && isDeprecated ? (
+                {actionTypeName && showDeprecationBadge ? (
                   <EuiFlexItem grow={false}>
                     <EuiBetaBadge
                       color="subdued"

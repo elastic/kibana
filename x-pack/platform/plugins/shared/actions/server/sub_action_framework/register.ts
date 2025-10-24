@@ -47,5 +47,6 @@ export const register = <Config extends ActionTypeConfig, Secrets extends Action
     preSaveHook: connector.preSaveHook,
     postSaveHook: connector.postSaveHook,
     postDeleteHook: connector.postDeleteHook,
+    isDeprecated: connector.isDeprecated,
   });
 };

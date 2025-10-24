@@ -46,6 +46,7 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
   ],
   minimumLicenseRequired: 'enterprise' as const,
   renderParameterTemplates,
+  isDeprecated: true,
 });
 
 const secretsValidator = (secretsObject: Secrets) => {
