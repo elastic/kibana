@@ -44641,7 +44641,18 @@ Object {
                       "error": [Function],
                       "presence": "optional",
                     },
+                    "metas": Array [
+                      Object {
+                        "x-oas-max-length": 200,
+                      },
+                    ],
                     "rules": Array [
+                      Object {
+                        "args": Object {
+                          "method": [Function],
+                        },
+                        "name": "custom",
+                      },
                       Object {
                         "args": Object {
                           "method": [Function],
