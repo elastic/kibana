@@ -31,7 +31,7 @@ import type { ProfileProviderServices } from './profile_provider_services';
 import { createProfileProviderServices } from './profile_provider_services';
 import { createSecurityDocumentProfileProvider } from './security/security_document_profile';
 import { createSecurityRootProfileProvider } from './security/security_root_profile';
-import { createObservabilityMetricsDataSourceProfileProviders } from './metrics_data_source_profile';
+import { createObservabilityMetricsDataSourceProfileProviders } from './common/metrics_data_source_profile';
 
 /**
  * Register profile providers for root, data source, and document contexts to the profile profile services

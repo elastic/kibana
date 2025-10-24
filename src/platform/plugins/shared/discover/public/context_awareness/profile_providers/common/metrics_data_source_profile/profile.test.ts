@@ -6,14 +6,14 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { DataSourceType } from '../../../../common/data_sources';
+import { DataSourceType } from '../../../../../common/data_sources';
 import type { MetricsExperienceDataSourceProfileProvider } from './profile';
 import { METRICS_DATA_SOURCE_PROFILE_ID, createMetricsDataSourceProfileProvider } from './profile';
-import { createContextAwarenessMocks } from '../../__mocks__';
-import type { ContextWithProfileId } from '../../profile_service';
+import { createContextAwarenessMocks } from '../../../__mocks__';
+import type { ContextWithProfileId } from '../../../profile_service';
 import type { MetricsExperienceClient } from '@kbn/metrics-experience-plugin/public';
-import type { DataSourceProfileProviderParams, RootContext } from '../../profiles';
-import { DataSourceCategory, SolutionType } from '../../profiles';
+import type { DataSourceProfileProviderParams, RootContext } from '../../../profiles';
+import { DataSourceCategory, SolutionType } from '../../../profiles';
 
 const mockServices = createContextAwarenessMocks().profileProviderServices;
 
