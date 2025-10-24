@@ -3,8 +3,16 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["../../../../../typings/**/*", "common/**/*", "public/**/*", "server/**/*"],
-  "exclude": ["target/**/*", ".storybook/**/*.js"],
+  "include": [
+    "../../../../../typings/**/*",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*"
+  ],
+  "exclude": [
+    "target/**/*",
+    ".storybook/**/*.js"
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/logging",
@@ -78,7 +86,9 @@
     "@kbn/licensing-types",
     "@kbn/licensing-plugin",
     "@kbn/lens-embeddable-utils",
-    "@kbn/maps-plugin",
+    "@kbn/ai-assistant-connector-selector-action",
+    "@kbn/elastic-assistant",
     "@kbn/react-kibana-mount",
+    "@kbn/maps-plugin"
   ]
 }
