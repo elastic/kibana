@@ -61,7 +61,7 @@ export const getCloudConnectorsHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
   const { internalSoClient } = fleetContext;
-  const { page, perPage } = request.query;
+  const { page, perPage, cloudProvider } = request.query;
   const logger = appContextService
     .getLogger()
     .get('CloudConnectorService getCloudConnectorsHandler');
@@ -73,9 +73,14 @@ export const getCloudConnectorsHandler: FleetRequestHandler<
       perPage: perPage ? parseInt(perPage, 10) : undefined,
     });
 
+    // Filter by cloudProvider if provided
+    const filteredConnectors = cloudProvider
+      ? cloudConnectors.filter((connector) => connector.cloudProvider === cloudProvider)
+      : cloudConnectors;
+
     logger.info('Successfully retrieved cloud connectors list');
     const body: GetCloudConnectorsResponse = {
-      items: cloudConnectors,
+      items: filteredConnectors,
     };
     return response.ok({ body });
   } catch (error) {

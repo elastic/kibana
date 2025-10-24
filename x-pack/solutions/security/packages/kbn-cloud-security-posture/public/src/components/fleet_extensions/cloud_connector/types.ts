@@ -28,9 +28,9 @@ export interface AwsCloudConnectorCredentials extends BaseCloudConnectorCredenti
 }
 
 export interface AzureCloudConnectorCredentials extends BaseCloudConnectorCredentials {
-  tenantId?: string;
-  clientId?: string;
-  azure_credentials_cloud_connector_id?: string;
+  tenantId?: string | CloudConnectorSecretReference;
+  clientId?: string | CloudConnectorSecretReference;
+  azure_credentials_cloud_connector_id?: string | CloudConnectorSecretReference;
 }
 
 export type CloudConnectorCredentials =
