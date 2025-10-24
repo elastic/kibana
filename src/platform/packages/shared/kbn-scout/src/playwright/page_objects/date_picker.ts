@@ -10,8 +10,18 @@
 import type { ScoutPage } from '..';
 import { expect } from '..';
 
+export enum DateUnitSelector {
+  Seconds = 's',
+  Minutes = 'm',
+  Hours = 'h',
+}
+
 export class DatePicker {
   constructor(private readonly page: ScoutPage) {}
+
+  public readonly defaultStartTime = 'Sep 19, 2015 @ 06:31:44.000';
+  public readonly defaultEndTime = 'Sep 23, 2015 @ 18:31:44.000';
+  public readonly endTimeNoResults = 'Sep 19, 2015 @ 20:45:00.000';
 
   private async showStartEndTimes() {
     // This first await makes sure the superDatePicker has loaded before we check for the ShowDatesButton
@@ -41,6 +51,11 @@ export class DatePicker {
     }
   }
 
+  async clickSubmitButton() {
+    await this.page.testSubj.click('querySubmitButton');
+    await this.page.testSubj.waitForSelector('unifiedHistogramProgressBar', { state: 'hidden' });
+  }
+
   async setAbsoluteRange({ from, to }: { from: string; to: string }) {
     await this.showStartEndTimes();
     // we start with end date
@@ -68,6 +83,35 @@ export class DatePicker {
       this.page.testSubj.locator('superDatePickerendDatePopoverButton'),
       `Date picker 'end date' should be set correctly`
     ).toHaveText(to);
-    await this.page.testSubj.click('querySubmitButton');
+    await this.clickSubmitButton();
+  }
+
+  async getTimeConfig(): Promise<{ start: string; end: string }> {
+    await this.showStartEndTimes();
+    const start = await this.page.testSubj.innerText('superDatePickerstartDatePopoverButton');
+    const end = await this.page.testSubj.innerText('superDatePickerendDatePopoverButton');
+    return { start, end };
+  }
+
+  async startAutoRefresh(
+    interval: number = 5,
+    dateUnit: DateUnitSelector = DateUnitSelector.Seconds
+  ) {
+    await this.page.testSubj.click('superDatePickerToggleQuickMenuButton');
+    // Check if refresh is already running
+    const toggleButton = this.page.testSubj.locator('superDatePickerToggleRefreshButton');
+    const isPaused = (await toggleButton.getAttribute('aria-checked')) === 'false';
+    if (isPaused) {
+      await toggleButton.click();
+    }
+    // Set interval
+    const intervalInput = this.page.testSubj.locator('superDatePickerRefreshIntervalInput');
+    await intervalInput.clear();
+    await intervalInput.fill(interval.toString());
+    const timeUnit = this.page.testSubj.locator('superDatePickerRefreshIntervalUnitsSelect');
+    await timeUnit.selectOption({ value: dateUnit });
+    await intervalInput.press('Enter');
+
+    await this.page.testSubj.click('superDatePickerToggleQuickMenuButton');
   }
 }

@@ -78,6 +78,7 @@ export class DiscoverApp {
   }
 
   async getChartTimespan(): Promise<string> {
+    await this.page.testSubj.waitForSelector('unifiedHistogramProgressBar', { state: 'hidden' });
     return (
       (await this.page.testSubj.getAttribute('unifiedHistogramChart', 'data-time-range')) || ''
     );

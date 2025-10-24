@@ -25,22 +25,11 @@ export class Inspector {
     }
   }
 
-  async getTableData(): Promise<string[][]> {
-    const table = this.page.locator('[data-test-subj="inspectorPanel"] table');
-    await table.waitFor({ state: 'visible' });
-
-    const rows = await table.locator('tbody tr').all();
-    const data: string[][] = [];
-
-    for (const row of rows) {
-      const cells = await row.locator('td').all();
-      const rowData: string[] = [];
-
-      for (const cell of cells) {
-        rowData.push(await cell.innerText());
-      }
-      data.push(rowData);
-    }
-    return data;
+  async getRequestTimestamp(): Promise<string> {
+    await this.page.testSubj.waitForSelector('inspectorPanel', { state: 'visible' });
+    const timeStamp = await this.page.testSubj
+      .locator('inspector.statistics.requestTimestamp')
+      .innerText();
+    return timeStamp;
   }
 }
