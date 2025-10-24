@@ -164,21 +164,25 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
 
   // We render an editable header for columns that are not saved in the index.
   const customGridColumnsConfiguration = useMemo<CustomGridColumnsConfiguration>(() => {
-    return renderedColumns.reduce<CustomGridColumnsConfiguration>((acc, columnName) => {
-      if (!props.dataView.fields.getByName(columnName)) {
-        acc[columnName] = getColumnInputRenderer(
-          columnName,
-          indexUpdateService,
-          indexEditorTelemetryService
-        );
-      } else {
-        acc[columnName] = (customGridColumnProps: CustomGridColumnProps) => ({
-          ...customGridColumnProps.column,
-          actions: { showHide: false },
-        });
-      }
-      return acc;
-    }, {} as CustomGridColumnsConfiguration);
+    return renderedColumns.reduce<CustomGridColumnsConfiguration>(
+      (acc, columnName, columnIndex) => {
+        if (!props.dataView.fields.getByName(columnName)) {
+          acc[columnName] = getColumnInputRenderer(
+            columnName,
+            columnIndex,
+            indexUpdateService,
+            indexEditorTelemetryService
+          );
+        } else {
+          acc[columnName] = (customGridColumnProps: CustomGridColumnProps) => ({
+            ...customGridColumnProps.column,
+            actions: { showHide: false },
+          });
+        }
+        return acc;
+      },
+      {} as CustomGridColumnsConfiguration
+    );
   }, [renderedColumns, props.dataView.fields, indexUpdateService, indexEditorTelemetryService]);
 
   const bulkActions = useMemo<
