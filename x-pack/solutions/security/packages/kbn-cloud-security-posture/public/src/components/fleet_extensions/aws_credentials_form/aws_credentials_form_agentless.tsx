@@ -123,31 +123,14 @@ const updatePolicyCloudConnectorSupport = (
 
 const getCloudFormationConfig = (
   awsCredentialsType: string,
-  automationCredentialTemplate: string | undefined,
-  awsCloudConnectorRemoteRoleTemplate: string | undefined
+  automationCredentialTemplate: string | undefined
 ) => {
-  const settings = {
-    [AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS]: {
-      accordianTitleLink: <EuiLink>{'Steps to Generate AWS Account Credentials'}</EuiLink>,
-      templateUrl: automationCredentialTemplate,
-    },
-    [AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS]: {
-      accordianTitleLink: <EuiLink>{'Steps to Generate Cloud Connection'}</EuiLink>,
-      templateUrl: awsCloudConnectorRemoteRoleTemplate,
-    },
-  };
-
-  const isSupported =
-    awsCredentialsType === AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS ||
-    awsCredentialsType === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS;
-
-  const currentSettings = settings[awsCredentialsType as keyof typeof settings];
+  const isSupported = awsCredentialsType === AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS;
 
   return {
-    settings,
     isSupported,
-    accordionTitleLink: currentSettings?.accordianTitleLink || '',
-    templateUrl: currentSettings?.templateUrl || '',
+    accordionTitleLink: <EuiLink>{'Steps to Generate AWS Account Credentials'}</EuiLink> || '',
+    templateUrl: automationCredentialTemplate || '',
   };
 };
 
@@ -169,7 +152,6 @@ export const AwsCredentialsFormAgentless = ({
     templateName,
     showCloudTemplates,
     shortName,
-    awsCloudConnectorRemoteRoleTemplate,
     isAwsCloudConnectorEnabled,
   } = useCloudSetup();
 
@@ -192,8 +174,7 @@ export const AwsCredentialsFormAgentless = ({
 
   const cloudFormationConfig = getCloudFormationConfig(
     awsCredentialsType,
-    automationCredentialTemplate,
-    awsCloudConnectorRemoteRoleTemplate
+    automationCredentialTemplate
   );
 
   const isOrganization = accountType === ORGANIZATION_ACCOUNT;
@@ -203,7 +184,7 @@ export const AwsCredentialsFormAgentless = ({
 
   const group =
     agentlessCredentialFormGroups[awsCredentialsType as keyof typeof agentlessCredentialFormGroups];
-  const fields = getInputVarsFields(input, group.fields);
+  const fields = getInputVarsFields(input, group?.fields || {});
 
   const selectorOptions = getSelectorOptions(
     isEditPage,
@@ -217,7 +198,10 @@ export const AwsCredentialsFormAgentless = ({
     awsCredentialsType === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS &&
     isAwsCloudConnectorEnabled;
 
-  const showCloudFormationAccordion = cloudFormationConfig.isSupported && showCloudTemplates;
+  const showCloudFormationAccordion =
+    awsCredentialsType !== 'cloud_connectors' &&
+    cloudFormationConfig.isSupported &&
+    showCloudTemplates;
 
   return (
     <>
