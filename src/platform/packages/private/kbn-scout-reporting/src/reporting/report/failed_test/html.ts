@@ -35,25 +35,34 @@ export const buildFailureHtml = (testFailure: TestFailure, destinationDir?: stri
       let imgSrc: string;
 
       if (destinationDir && s.path) {
-        // Copy screenshot to destination directory and reference it relatively
+        // Copy screenshot to destination directory
         const ext = path.extname(s.path) || '.png';
         const screenshotFileName = `${testFailure.id}-screenshot-${index}${ext}`;
         const screenshotDestPath = path.join(destinationDir, screenshotFileName);
 
         try {
           fs.copyFileSync(s.path, screenshotDestPath);
-          // Use simple relative path - Buildkite's native HTML artifact support
-          // handles relative paths within the same artifact directory
-          imgSrc = `./${screenshotFileName}`;
+          // Get full path from workspace root for artifact:// URL
+          const relativePath = path.relative(process.cwd(), screenshotDestPath);
+          // Use artifact:// without leading ./ and with forward slashes
+          imgSrc = `artifact://${relativePath.replace(/\\/g, '/')}`;
         } catch (copyError) {
           // Fallback to base64 if copy fails
-          const base64 = fs.readFileSync(s.path).toString('base64');
-          imgSrc = `data:${s.contentType};base64,${base64}`;
+          try {
+            const base64 = fs.readFileSync(s.path).toString('base64');
+            imgSrc = `data:${s.contentType};base64,${base64}`;
+          } catch (readError) {
+            return ''; // Skip if can't read file
+          }
         }
       } else if (s.path) {
         // Fallback to base64 embedding
-        const base64 = fs.readFileSync(s.path).toString('base64');
-        imgSrc = `data:${s.contentType};base64,${base64}`;
+        try {
+          const base64 = fs.readFileSync(s.path).toString('base64');
+          imgSrc = `data:${s.contentType};base64,${base64}`;
+        } catch (readError) {
+          return ''; // Skip if can't read file
+        }
       } else {
         return ''; // No path available
       }
