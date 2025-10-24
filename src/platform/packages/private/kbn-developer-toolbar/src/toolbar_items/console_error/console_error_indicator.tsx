@@ -123,7 +123,7 @@ export const ConsoleErrorIndicator: React.FC = () => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
-    // monitorRef.current?.dismiss();
+    monitorRef.current?.dismiss();
   }, []);
 
   if (!error) {
