@@ -5,26 +5,48 @@
  * 2.0.
  */
 
+import { parseEsqlQuery } from '@kbn/securitysolution-utils';
+import { isEmpty } from 'lodash/fp';
+
+import type { Logger, ElasticsearchClient } from '@kbn/core/server';
+
+interface ValidateEsqlQueryNodeParams {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+}
+
 import type { RuleCreationState } from '../state';
-// interface CreateEsqlRuleNodeParams {
-//   //   model: InferenceChatModel;
-//   //   esClient: ElasticsearchClient;
-//   //   connectorId: string;
-//   //   inference: InferenceServerStart;
-//   //   logger: Logger;
-//   //   request: KibanaRequest;
-//   //   createLlmInstance: () => Promise<InferenceChatModel>;
-// }
 
-export const validateEsqlQueryNode = () => {
+export const validateEsqlQueryNode = ({ logger, esClient }: ValidateEsqlQueryNodeParams) => {
   return async (state: RuleCreationState) => {
-    try {
-      const match = state.rule.query.match(/```esql\s*([\s\S]*?)```/);
-      const esql = match ? match[1].trim() : undefined;
+    let error: string | undefined;
+    let esqlQuery = state.rule.query;
+    const match = state.rule.query.match(/```esql\s*([\s\S]*?)```/);
+    esqlQuery = match ? match[1].trim() : undefined;
 
-      return { ...state, rule: { ...state.rule, query: esql } };
-    } catch (e) {
-      return { error: e.message };
+    const { errors, isEsqlQueryAggregating, hasMetadataOperator } = parseEsqlQuery(esqlQuery);
+    if (!isEmpty(errors)) {
+      error = JSON.stringify(errors);
+    } else if (!isEsqlQueryAggregating && !hasMetadataOperator) {
+      error = `Queries that do't use the STATS...BY function (non-aggregating queries) must include the "metadata _id, _version, _index" operator after the source command. For example: FROM logs* metadata _id, _version, _index.`;
     }
+
+    try {
+      if (!error) {
+        await esClient.esql.query({
+          query: `${esqlQuery}\n| LIMIT 0`,
+          format: 'json',
+        });
+      }
+    } catch (err) {
+      error = err.message;
+      logger.debug(`Error executing ESQL query: ${error}`);
+    }
+
+    return {
+      ...state,
+      rule: { ...state.rule, query: esqlQuery },
+      validationErrors: { esqlErrors: error },
+    };
   };
 };

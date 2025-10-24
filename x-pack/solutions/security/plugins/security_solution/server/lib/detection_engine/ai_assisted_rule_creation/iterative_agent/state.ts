@@ -20,6 +20,7 @@ export const RuleCreationAnnotation = Annotation.Root({
       { indexPattern: string; containsRequiredData: boolean; context: string }
     >;
   }>(),
+  validationErrors: Annotation<{ esqlErrors: string }>(),
 });
 
 export type RuleCreationState = typeof RuleCreationAnnotation.State;

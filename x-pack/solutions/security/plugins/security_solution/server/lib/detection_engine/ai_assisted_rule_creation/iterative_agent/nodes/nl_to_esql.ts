@@ -46,7 +46,6 @@ export const nlToEsqlQueryNode = async ({
         naturalLanguageToEsql({
           client: inference.getClient({ request }),
           connectorId,
-          // input: state.userQuery,
           logger,
           messages: messagesToInference([
             new HumanMessage(
@@ -64,6 +63,14 @@ export const nlToEsqlQueryNode = async ({
               - Do not include any explanations, only provide the ES|QL query string.
               - Any referred field in ES|QL command must exist in list of fields for given index patterns context:
                 ${indexPatternsContext.join('')}
+              - Each line in index patterns context represents single hierarchy branch of properties.
+              For example: 
+              agent:{ephemeral_id,id,name,type,version:keyword,build:{original:keyword}}
+              can be transformed into
+              agent.ephemeral_id:keyword, agent.id:keyword, agent.name:keyword, agent.type:keyword, agent.version:keyword, agent.build.original:keyword
+              Always use fields in query that exist in index patterns context after their transformation in "." notation view
+              - when referring to fields take into account their data types as well. For example, do not use text field in arithmetic operations.
+              - use only full name of the fields in referred index patterns context. Name should contain all parent nodes separated by dot. For example use "host.name" instead of just "name". Each new line separated by new line symbol in index patterns context represents a full branch of fields hierarchy.
               - Do not include any fields that do not exist in the provided index patterns context.`
             ),
             new HumanMessage({ content: state.userQuery }),
@@ -76,7 +83,7 @@ export const nlToEsqlQueryNode = async ({
       //   const lastMessage = messages[messages.length - 1];
       return { ...state, rule: { query: content, language: 'esql', type: 'esql' } };
     } catch (e) {
-      return { error: e.message };
+      return { ...state, error: e.message };
     }
   };
 };

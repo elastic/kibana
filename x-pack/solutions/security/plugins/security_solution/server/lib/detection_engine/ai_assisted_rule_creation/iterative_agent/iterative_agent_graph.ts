@@ -26,6 +26,7 @@ import { validateEsqlQueryNode } from './nodes/validate_esql_query';
 import { createRuleNameAndDescriptionNode } from './nodes/create_rule_name_and_description';
 import { getIndexPatternNode } from './nodes/get_index_patterns';
 import { getTagsNode } from './nodes/get_tags';
+import { fixEsqlQueryNode } from './nodes/fix_esql_query';
 
 export interface GetRuleCreationAgentParams {
   model: InferenceChatModel;
@@ -73,16 +74,29 @@ export const getIterativeRuleCreationAgent = async ({
         createLlmInstance,
       })
     )
-    .addNode('validateEsqlQuery', validateEsqlQueryNode())
-    .addNode('getTagsNode', getTagsNode({ rulesClient, savedObjectsClient, model }))
+    .addNode('validateEsqlQuery', validateEsqlQueryNode({ logger, esClient }))
+    .addNode('getTags', getTagsNode({ rulesClient, savedObjectsClient, model }))
     .addNode('getIndexPattern', getIndexPatternNode({ createLlmInstance, esClient }))
     .addNode('createRuleNameAndDescription', createRuleNameAndDescriptionNode({ model }))
     .addNode('addDefaultFieldsToRules', addDefaultFieldsToRulesNode({ model }))
+    .addNode(
+      'fixEsqlQuery',
+      await fixEsqlQueryNode({
+        model,
+        esClient,
+        connectorId,
+        inference,
+        logger,
+        request,
+        createLlmInstance,
+      })
+    )
     .addEdge(START, 'getIndexPattern')
     .addEdge('getIndexPattern', 'createEsqlQuery')
     .addEdge('createEsqlQuery', 'validateEsqlQuery')
-    .addEdge('validateEsqlQuery', 'getTagsNode')
-    .addEdge('getTagsNode', 'createRuleNameAndDescription')
+    .addConditionalEdges('validateEsqlQuery', shouldFixEsqlQuery, ['fixEsqlQuery', 'getTags'])
+    .addEdge('fixEsqlQuery', 'getTags')
+    .addEdge('getTags', 'createRuleNameAndDescription')
     .addConditionalEdges('createRuleNameAndDescription', shouldAddDefaultFieldsToRule, [
       'addDefaultFieldsToRules',
       END,
@@ -99,4 +113,11 @@ const shouldAddDefaultFieldsToRule = (state: RuleCreationState) => {
     return 'addDefaultFieldsToRules';
   }
   return END;
+};
+
+const shouldFixEsqlQuery = (state: RuleCreationState) => {
+  if (state.validationErrors?.esqlErrors) {
+    return 'fixEsqlQuery';
+  }
+  return 'getTags';
 };
