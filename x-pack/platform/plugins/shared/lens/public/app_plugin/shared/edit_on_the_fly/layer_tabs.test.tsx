@@ -251,5 +251,83 @@ describe('LayerTabs', () => {
       expect(lensStore.dispatch).toHaveBeenCalledTimes(2);
       expect(datasourceMap.testDatasource.initializeDimension).not.toHaveBeenCalled();
     });
+
+    it('should not add an initial dimension when initialDimensions are not available for the given layer type', async () => {
+      const datasourceMap = mockDatasourceMap();
+      const visualizationMap = mockVisualizationMap();
+      datasourceMap.testDatasource.initializeDimension = jest.fn();
+
+      visualizationMap.testVis.getSupportedLayers = jest.fn(() => [
+        {
+          type: LayerTypes.DATA,
+          label: 'Data Layer',
+          initialDimensions: [
+            {
+              groupId: 'testGroup',
+              columnId: 'myColumn',
+              staticValue: 100,
+            },
+          ],
+        },
+        {
+          type: LayerTypes.REFERENCELINE,
+          label: 'Reference layer',
+        },
+      ]);
+      const props = getDefaultProps({ datasourceMap, visualizationMap });
+      const { instance, lensStore } = await prepareAndMountComponent(props);
+
+      addNewLayer(instance);
+      // One call for adding the layer, one call for setting it as the current selected layer
+      expect(lensStore.dispatch).toHaveBeenCalledTimes(2);
+      expect(datasourceMap.testDatasource.initializeDimension).not.toHaveBeenCalled();
+    });
+
+    it('should use group initial dimension value when adding a new layer if available', async () => {
+      const datasourceMap = mockDatasourceMap();
+      const visualizationMap = mockVisualizationMap();
+      visualizationMap.testVis.getSupportedLayers = jest.fn(() => [
+        { type: LayerTypes.DATA, label: 'Data Layer' },
+        {
+          type: LayerTypes.REFERENCELINE,
+          label: 'Reference layer',
+          initialDimensions: [
+            {
+              groupId: 'testGroup',
+              columnId: 'myColumn',
+              staticValue: 100,
+            },
+          ],
+        },
+      ]);
+      datasourceMap.testDatasource.initializeDimension = jest.fn();
+      const props = getDefaultProps({ datasourceMap, visualizationMap });
+
+      const { instance, lensStore } = await prepareAndMountComponent(props);
+      addNewLayer(instance);
+
+      // One call for adding the layer, one call for setting it as the current selected layer
+      expect(lensStore.dispatch).toHaveBeenCalledTimes(2);
+      expect(datasourceMap.testDatasource.initializeDimension).toHaveBeenCalledWith(
+        {},
+        'newId',
+        frame.dataViews.indexPatterns,
+        {
+          columnId: 'myColumn',
+          groupId: 'testGroup',
+          staticValue: 100,
+          visualizationGroups: [
+            expect.objectContaining({
+              accessors: [],
+              dataTestSubj: 'mockVisA',
+              groupId: 'a',
+              groupLabel: 'a',
+              layerId: 'layer1',
+              supportsMoreColumns: true,
+            }),
+          ],
+        }
+      );
+    });
   });
 });
