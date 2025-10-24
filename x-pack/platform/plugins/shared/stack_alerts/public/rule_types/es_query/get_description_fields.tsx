@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { GetDescriptionFieldsFn } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { RULE_DETAIL_DESCRIPTION_FIELD_TYPES } from '@kbn/triggers-actions-ui-plugin/public';
+import { RULE_PREBUILD_DESCRIPTION_FIELDS } from '@kbn/triggers-actions-ui-plugin/public';
 import type { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query/latest';
 import type { SearchConfigurationType } from '@kbn/response-ops-rule-params/common';
 
@@ -16,14 +16,14 @@ export const getDescriptionFields: GetDescriptionFieldsFn<
 
   if (rule.params.searchType === 'esQuery') {
     return [
-      prebuildFields[RULE_DETAIL_DESCRIPTION_FIELD_TYPES.INDEX_PATTERN](rule.params.index),
-      prebuildFields[RULE_DETAIL_DESCRIPTION_FIELD_TYPES.CUSTOM_QUERY](rule.params.esQuery),
+      prebuildFields[RULE_PREBUILD_DESCRIPTION_FIELDS.INDEX_PATTERN](rule.params.index),
+      prebuildFields[RULE_PREBUILD_DESCRIPTION_FIELDS.CUSTOM_QUERY](rule.params.esQuery),
     ];
   }
 
   if (rule.params.searchType === 'esqlQuery') {
     return [
-      prebuildFields[RULE_DETAIL_DESCRIPTION_FIELD_TYPES.ESQL_QUERY](rule.params.esqlQuery.esql),
+      prebuildFields[RULE_PREBUILD_DESCRIPTION_FIELDS.ESQL_QUERY](rule.params.esqlQuery.esql),
     ];
   }
 
@@ -34,7 +34,7 @@ export const getDescriptionFields: GetDescriptionFieldsFn<
     if (searchConfiguration.query.query) {
       if (typeof searchConfiguration.query.query === 'string') {
         queryField.push(
-          prebuildFields[RULE_DETAIL_DESCRIPTION_FIELD_TYPES.CUSTOM_QUERY](
+          prebuildFields[RULE_PREBUILD_DESCRIPTION_FIELDS.CUSTOM_QUERY](
             searchConfiguration.query.query
           )
         );
@@ -42,7 +42,7 @@ export const getDescriptionFields: GetDescriptionFieldsFn<
 
       if (Array.isArray(searchConfiguration.query.query)) {
         queryField.push(
-          prebuildFields[RULE_DETAIL_DESCRIPTION_FIELD_TYPES.CUSTOM_QUERY](
+          prebuildFields[RULE_PREBUILD_DESCRIPTION_FIELDS.CUSTOM_QUERY](
             `[${searchConfiguration.query.query.map(
               (query, index) =>
                 `${query}${index === searchConfiguration.query.query.length - 1 ? '' : ','}`
@@ -55,7 +55,7 @@ export const getDescriptionFields: GetDescriptionFieldsFn<
     return [
       ...(searchConfiguration.index
         ? [
-            prebuildFields[RULE_DETAIL_DESCRIPTION_FIELD_TYPES.DATA_VIEW_INDEX_PATTERN](
+            prebuildFields[RULE_PREBUILD_DESCRIPTION_FIELDS.DATA_VIEW_INDEX_PATTERN](
               searchConfiguration.index
             ),
           ]

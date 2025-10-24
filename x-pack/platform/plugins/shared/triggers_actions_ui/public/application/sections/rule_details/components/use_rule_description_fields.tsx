@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { HttpResponse, HttpSetup } from '@kbn/core/public';
-import { RULE_DETAIL_DESCRIPTION_FIELD_TYPES } from './rule_detail_description_type';
+import { RULE_PREBUILD_DESCRIPTION_FIELDS } from './rule_detail_description_type';
 import type { PrebuildFieldsMap, RuleDefinitionProps } from '../../../../types';
 
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
@@ -90,31 +90,31 @@ export const createPrebuildFields = ({
   http: HttpSetup | undefined;
 }): PrebuildFieldsMap => {
   return {
-    [RULE_DETAIL_DESCRIPTION_FIELD_TYPES.INDEX_PATTERN]: (patterns: string[]) => ({
+    [RULE_PREBUILD_DESCRIPTION_FIELDS.INDEX_PATTERN]: (patterns: string[]) => ({
       title: i18n.translate('xpack.triggersActionsUI.ruleDetails.indexPatternTitle', {
         defaultMessage: 'Index pattern',
       }),
       description: <IndexPattern patterns={patterns} />,
     }),
-    [RULE_DETAIL_DESCRIPTION_FIELD_TYPES.CUSTOM_QUERY]: (query: string) => ({
+    [RULE_PREBUILD_DESCRIPTION_FIELDS.CUSTOM_QUERY]: (query: string) => ({
       title: i18n.translate('xpack.triggersActionsUI.ruleDetails.customQueryTitle', {
         defaultMessage: 'Custom query',
       }),
       description: <CodeBlock border={border}>{query}</CodeBlock>,
     }),
-    [RULE_DETAIL_DESCRIPTION_FIELD_TYPES.ESQL_QUERY]: (query: string) => ({
+    [RULE_PREBUILD_DESCRIPTION_FIELDS.ESQL_QUERY]: (query: string) => ({
       title: i18n.translate('xpack.triggersActionsUI.ruleDetails.esqlQueryTitle', {
         defaultMessage: 'ES|QL query',
       }),
       description: <CodeBlock border={border}>{query}</CodeBlock>,
     }),
-    [RULE_DETAIL_DESCRIPTION_FIELD_TYPES.DATA_VIEW_ID]: (id: string) => ({
+    [RULE_PREBUILD_DESCRIPTION_FIELDS.DATA_VIEW_ID]: (id: string) => ({
       title: i18n.translate('xpack.triggersActionsUI.ruleDetails.dataViewIdTitle', {
         defaultMessage: 'Data view id',
       }),
       description: <span>{id}</span>,
     }),
-    [RULE_DETAIL_DESCRIPTION_FIELD_TYPES.DATA_VIEW_INDEX_PATTERN]: (indexId: string) => ({
+    [RULE_PREBUILD_DESCRIPTION_FIELDS.DATA_VIEW_INDEX_PATTERN]: (indexId: string) => ({
       title: i18n.translate('xpack.triggersActionsUI.ruleDetails.dataViewIndexPatternTitle', {
         defaultMessage: 'Data view index patterns',
       }),
