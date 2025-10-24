@@ -14,7 +14,7 @@ import {
 } from '@kbn/esql-ast/src/commands_registry/commands/enrich/util';
 import {
   getFunctionDefinition,
-  getFunctionSignatures,
+  getFormattedFunctionSignature,
   getValidSignaturesAndTypesToSuggestNext,
 } from '@kbn/esql-ast/src/definitions/utils';
 import {
@@ -28,6 +28,7 @@ import type { ESQLCallbacks } from '../shared/types';
 import { getColumnsByTypeRetriever } from '../autocomplete/autocomplete';
 import { getPolicyHelper } from '../shared/resources_helpers';
 import { getVariablesHoverContent } from './helpers';
+import { getQueryForFields } from '../autocomplete/get_query_for_fields';
 
 interface HoverContent {
   contents: Array<{ value: string }>;
@@ -116,16 +117,8 @@ export async function getHoverItem(fullText: string, offset: number, callbacks?:
   }
 
   if (node.type === 'function') {
-    const fnDefinition = getFunctionDefinition(node.name);
-
-    if (fnDefinition) {
-      hoverContent.contents.push(
-        ...[
-          { value: getFunctionSignatures(fnDefinition)[0].declaration },
-          { value: fnDefinition.description },
-        ]
-      );
-    }
+    const functionSignature = await getFunctionSignatureHover(node, fullText, root, callbacks);
+    hoverContent.contents.push(...functionSignature);
   }
 
   if (node.type === 'source' && node.sourceType === 'policy') {
@@ -200,12 +193,10 @@ async function getHintForFunctionArg(
     columns: columnsMap,
   };
 
-  const { typesToSuggestNext, enrichedArgs } = getValidSignaturesAndTypesToSuggestNext(
+  const { compatibleParamDefs, enrichedArgs } = getValidSignaturesAndTypesToSuggestNext(
     fnNode,
     references,
-    fnDefinition,
-    query,
-    offset
+    fnDefinition
   );
 
   const hoveredArg: ESQLAstItem & {
@@ -224,9 +215,9 @@ async function getHintForFunctionArg(
     }
   }
 
-  if (typesToSuggestNext.length > 0) {
+  if (compatibleParamDefs.length > 0) {
     contents.push({
-      value: `**${ACCEPTABLE_TYPES_HOVER}**: ${typesToSuggestNext
+      value: `**${ACCEPTABLE_TYPES_HOVER}**: ${compatibleParamDefs
         .map(
           ({ type, constantOnly }) =>
             `${constantOnly ? '_constant_ ' : ''}**${type}**` +
@@ -238,4 +229,34 @@ async function getHintForFunctionArg(
   }
 
   return contents;
+}
+
+async function getFunctionSignatureHover(
+  fnNode: ESQLFunction,
+  fullText: string,
+  root: ESQLAstQueryExpression,
+  callbacks?: ESQLCallbacks
+) {
+  const fnDefinition = getFunctionDefinition(fnNode.name);
+  if (fnDefinition) {
+    const { getColumnMap } = getColumnsByTypeRetriever(
+      getQueryForFields(fullText, root),
+      fullText,
+      callbacks
+    );
+    const columnsMap = await getColumnMap();
+
+    const formattedSignature = getFormattedFunctionSignature(fnDefinition, fnNode, columnsMap);
+
+    return [
+      {
+        value: `\`\`\`none
+${formattedSignature}
+\`\`\``,
+      },
+      { value: fnDefinition.description },
+    ];
+  } else {
+    return [];
+  }
 }

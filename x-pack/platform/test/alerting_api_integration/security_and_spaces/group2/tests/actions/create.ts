@@ -78,6 +78,7 @@ export default function createConnectorTests({ getService }: FtrProviderContext)
                 config: {
                   unencrypted: `This value shouldn't get encrypted`,
                 },
+                is_connector_type_deprecated: false,
               });
               expect(typeof response.body.id).to.be('string');
               // Ensure AAD isn't broken
@@ -315,6 +316,7 @@ export default function createConnectorTests({ getService }: FtrProviderContext)
                 config: {
                   unencrypted: `This value shouldn't get encrypted`,
                 },
+                is_connector_type_deprecated: false,
               });
               expect(typeof response.body.id).to.be('string');
               // Ensure AAD isn't broken

@@ -15,13 +15,6 @@ export const INFORMATION_LEVEL_HEADER = i18n.translate(
   }
 );
 
-export const INFORMATION_ARIA_LABEL = i18n.translate(
-  'xpack.securitySolution.riskInformation.informationAriaLabel',
-  {
-    defaultMessage: 'Information',
-  }
-);
-
 export const INFORMATION_RISK_HEADER = i18n.translate(
   'xpack.securitySolution.riskInformation.riskHeader',
   {

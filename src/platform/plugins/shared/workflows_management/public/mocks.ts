@@ -8,13 +8,23 @@
  */
 
 import { coreLifecycleMock } from '@kbn/core-lifecycle-browser-mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { navigationPluginMock } from '@kbn/navigation-plugin/public/mocks';
 import { serverlessMock } from '@kbn/serverless/public/mocks';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 
 export const createStartServicesMock = () => ({
   ...coreLifecycleMock.createCoreStart(),
   navigation: navigationPluginMock.createStartContract(),
   serverless: serverlessMock.createStart(),
   storage: new Storage(localStorage),
+  dataViews: dataViewPluginMocks.createStartContract(),
+  fieldFormats: fieldFormatsServiceMock.createStartContract(),
+  unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+  data: dataPluginMock.createStartContract(),
+  spaces: spacesPluginMock.createStartContract(),
 });

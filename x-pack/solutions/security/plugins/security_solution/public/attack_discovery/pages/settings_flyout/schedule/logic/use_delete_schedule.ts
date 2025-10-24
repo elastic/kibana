@@ -14,6 +14,7 @@ import { deleteAttackDiscoverySchedule } from '../api';
 import { useInvalidateGetAttackDiscoverySchedule } from './use_get_schedule';
 import { useInvalidateFindAttackDiscoverySchedule } from './use_find_schedules';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
+import { useKibanaFeatureFlags } from '../../../use_kibana_feature_flags';
 
 export const DELETE_ATTACK_DISCOVERY_SCHEDULE_MUTATION_KEY = [
   'DELETE',
@@ -26,6 +27,7 @@ interface DeleteAttackDiscoveryScheduleParams {
 
 export const useDeleteAttackDiscoverySchedule = () => {
   const { addError, addSuccess } = useAppToasts();
+  const { attackDiscoveryPublicApiEnabled } = useKibanaFeatureFlags();
 
   const invalidateGetAttackDiscoverySchedule = useInvalidateGetAttackDiscoverySchedule();
   const invalidateFindAttackDiscoverySchedule = useInvalidateFindAttackDiscoverySchedule();
@@ -34,7 +36,7 @@ export const useDeleteAttackDiscoverySchedule = () => {
     DeleteAttackDiscoverySchedulesResponse,
     Error,
     DeleteAttackDiscoveryScheduleParams
-  >(({ id }) => deleteAttackDiscoverySchedule({ id }), {
+  >(({ id }) => deleteAttackDiscoverySchedule({ attackDiscoveryPublicApiEnabled, id }), {
     mutationKey: DELETE_ATTACK_DISCOVERY_SCHEDULE_MUTATION_KEY,
     onSuccess: ({ id }) => {
       invalidateGetAttackDiscoverySchedule(id);

@@ -8,38 +8,38 @@
  */
 
 import {
-  DEFAULT_APP_CATEGORIES,
   type AppMountParameters,
   type CoreSetup,
   type CoreStart,
+  DEFAULT_APP_CATEGORIES,
   type Plugin,
 } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
-import { PLUGIN_ID, PLUGIN_NAME } from '../common';
-// Lazy import to avoid bundling connector dependencies in main plugin
 import type {
-  WorkflowsPluginSetup,
-  WorkflowsPluginSetupDependencies,
-  WorkflowsPluginStart,
-  WorkflowsPluginStartAdditionalServices,
-  WorkflowsPluginStartDependencies,
+  WorkflowsPublicPluginSetup,
+  WorkflowsPublicPluginSetupDependencies,
+  WorkflowsPublicPluginStart,
+  WorkflowsPublicPluginStartAdditionalServices,
+  WorkflowsPublicPluginStartDependencies,
   WorkflowsServices,
 } from './types';
+import { PLUGIN_ID, PLUGIN_NAME } from '../common';
+// Lazy import to avoid bundling connector dependencies in main plugin
 
 export class WorkflowsPlugin
   implements
     Plugin<
-      WorkflowsPluginSetup,
-      WorkflowsPluginStart,
-      WorkflowsPluginSetupDependencies,
-      WorkflowsPluginStartDependencies
+      WorkflowsPublicPluginSetup,
+      WorkflowsPublicPluginStart,
+      WorkflowsPublicPluginSetupDependencies,
+      WorkflowsPublicPluginStartDependencies
     >
 {
   public setup(
-    core: CoreSetup<WorkflowsPluginStartDependencies, WorkflowsPluginStart>,
-    plugins: WorkflowsPluginSetupDependencies
-  ): WorkflowsPluginSetup {
+    core: CoreSetup<WorkflowsPublicPluginStartDependencies, WorkflowsPublicPluginStart>,
+    plugins: WorkflowsPublicPluginSetupDependencies
+  ): WorkflowsPublicPluginSetup {
     // Register workflows connector UI component lazily to reduce main bundle size
     const registerConnectorType = async () => {
       const { getWorkflowsConnectorType } = await import('./connectors/workflows');
@@ -57,7 +57,7 @@ export class WorkflowsPlugin
         id: PLUGIN_ID,
         title: PLUGIN_NAME,
         appRoute: '/app/workflows',
-        euiIconType: 'merge', // TODO: use "workflowsAll" when available
+        euiIconType: 'workflowsApp',
         visibleIn: ['globalSearch', 'home', 'kibanaOverview', 'sideNav'],
         category: DEFAULT_APP_CATEGORIES.management,
         order: 9015,
@@ -83,7 +83,7 @@ export class WorkflowsPlugin
     return {};
   }
 
-  public start(core: CoreStart): WorkflowsPluginStart {
+  public start(core: CoreStart): WorkflowsPublicPluginStart {
     return {};
   }
 
@@ -91,12 +91,12 @@ export class WorkflowsPlugin
 
   /** Creates the start services to be used in the Kibana services context of the workflows application */
   private async createWorkflowsStartServices(
-    core: CoreSetup<WorkflowsPluginStartDependencies, WorkflowsPluginStart>
+    core: CoreSetup<WorkflowsPublicPluginStartDependencies, WorkflowsPublicPluginStart>
   ): Promise<WorkflowsServices> {
     // Get start services as specified in kibana.jsonc
     const [coreStart, depsStart] = await core.getStartServices();
 
-    const additionalServices: WorkflowsPluginStartAdditionalServices = {
+    const additionalServices: WorkflowsPublicPluginStartAdditionalServices = {
       storage: new Storage(localStorage),
     };
 

@@ -8,11 +8,12 @@
 import type { Logger } from '@kbn/logging';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
-import { last } from 'lodash';
+import { castArray, last } from 'lodash';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import type { APMConfig } from '../..';
 import {
+  ID,
   ERROR_CULPRIT,
   ERROR_EXC_HANDLED,
   ERROR_EXC_MESSAGE,
@@ -59,6 +60,7 @@ export const requiredFields = asMutableArray([
   ERROR_ID,
   ERROR_GROUP_ID,
   PROCESSOR_EVENT,
+  ID,
 ] as const);
 
 export const optionalFields = asMutableArray([
@@ -173,10 +175,11 @@ export async function getApmTraceError({
   return response.hits.hits.map((hit) => {
     const errorSource = 'error' in hit._source ? hit._source : undefined;
 
-    const event = unflattenKnownApmEventFields(hit.fields, requiredFields);
+    const { _id: id, ...event } = unflattenKnownApmEventFields(hit.fields, requiredFields);
 
     const waterfallErrorEvent: WaterfallError = {
       ...event,
+      id: castArray(id)[0] as string,
       parent: {
         ...event?.parent,
         id: event?.parent?.id ?? event?.span?.id,

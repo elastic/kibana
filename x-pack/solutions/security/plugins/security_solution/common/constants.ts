@@ -156,7 +156,7 @@ export const SIEM_MIGRATIONS_LANDING_PATH = `${SIEM_MIGRATIONS_PATH}/landing` as
 export const SIEM_MIGRATIONS_RULES_PATH = `${SIEM_MIGRATIONS_PATH}/rules` as const;
 export const SIEM_MIGRATIONS_DASHBOARDS_PATH = `${SIEM_MIGRATIONS_PATH}/dashboards` as const;
 
-// AI SOC exclusive paths
+// EASE exclusive paths
 export const CONFIGURATIONS_PATH = '/configurations' as const;
 export const CONFIGURATIONS_INTEGRATIONS_PATH =
   `${APP_PATH}/${CONFIGURATIONS_PATH}/integrations/browse` as const;
@@ -181,8 +181,15 @@ export const DEFAULT_INDEX_PATTERN = [...INCLUDE_INDEX_PATTERN, ...EXCLUDE_ELAST
 /** This Kibana Advanced Setting enables the `Security news` feed widget */
 export const ENABLE_NEWS_FEED_SETTING = 'securitySolution:enableNewsFeed' as const;
 
-/** This Kibana Advanced Setting sets a default AI connector for serverless AI features (AI for SOC) */
+/** This Kibana Advanced Setting sets a default AI connector for serverless AI features (EASE) */
 export const DEFAULT_AI_CONNECTOR = 'securitySolution:defaultAIConnector' as const;
+
+/** Feature flag for the default AI connector setting */
+export const AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED =
+  'aiAssistant.defaultLlmSettingEnabled' as const;
+
+/** The default value for the default AI connector setting */
+export const AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED_VALUE = true as const;
 
 /** This Kibana Advanced Setting sets a default AI value report minutes per alert */
 export const DEFAULT_VALUE_REPORT_MINUTES = 'securitySolution:defaultValueReportMinutes' as const;
@@ -259,6 +266,10 @@ export const ENABLE_SIEM_READINESS_SETTING = 'securitySolution:enableSiemReadine
 /** This Kibana Advanced Setting allows users to enable/disable the privilged user monitoring feature */
 export const ENABLE_PRIVILEGED_USER_MONITORING_SETTING =
   'securitySolution:enablePrivilegedUserMonitoring' as const;
+
+/** This Kibana Advanced Setting allows users to enable/disable ESQL-based risk scoring */
+export const ENABLE_ESQL_RISK_SCORING = 'securitySolution:enableEsqlRiskScoring' as const;
+
 /**
  * Id for the notifications alerting type
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
@@ -549,7 +560,7 @@ export const MAX_BULK_FILL_RULE_GAPS_BULK_SIZE = 100;
 export const JEST_ENVIRONMENT = typeof jest !== 'undefined';
 
 /*
- * The tag to mark promotion rules that are related to the AI for SOC integrations
+ * The tag to mark promotion rules that are related to EASE integrations
  */
 export const PROMOTION_RULE_TAGS = [
   'Promotion', // This is the legacy tag for promotion rules and can be safely removed once promotion rules go live

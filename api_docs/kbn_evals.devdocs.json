@@ -118,6 +118,20 @@
                     "path": "x-pack/platform/packages/shared/kbn-evals/src/kibana_phoenix_client/client.ts",
                     "deprecated": false,
                     "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/evals",
+                    "id": "def-common.KibanaPhoenixClient.Unnamed.$1.repetitions",
+                    "type": "number",
+                    "tags": [],
+                    "label": "repetitions",
+                    "description": [],
+                    "signature": [
+                      "number | undefined"
+                    ],
+                    "path": "x-pack/platform/packages/shared/kbn-evals/src/kibana_phoenix_client/client.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -142,7 +156,7 @@
               },
               ", TTaskOutput extends ",
               "TaskOutput",
-              ">({ dataset, task, }: { dataset: TEvaluationDataset; task: ",
+              ">({ dataset, metadata, task, }: { dataset: TEvaluationDataset; metadata?: Record<string, unknown> | undefined; task: ",
               "ExperimentTask",
               "<TEvaluationDataset[\"examples\"][number], TTaskOutput>; }, evaluators: ",
               "Evaluator",
@@ -159,7 +173,7 @@
                 "id": "def-common.KibanaPhoenixClient.runExperiment.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n      dataset,\n      task,\n    }",
+                "label": "{\n      dataset,\n      task,\n      metadata: experimentMetadata,\n    }",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-evals/src/kibana_phoenix_client/client.ts",
                 "deprecated": false,
@@ -219,6 +233,20 @@
                         "trackAdoption": false
                       }
                     ]
+                  },
+                  {
+                    "parentPluginId": "@kbn/evals",
+                    "id": "def-common.KibanaPhoenixClient.runExperiment.$1.metadata",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "metadata",
+                    "description": [],
+                    "signature": [
+                      "Record<string, unknown> | undefined"
+                    ],
+                    "path": "x-pack/platform/packages/shared/kbn-evals/src/kibana_phoenix_client/client.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
@@ -517,51 +545,9 @@
             "section": "def-common.ScoutTestConfig",
             "text": "ScoutTestConfig"
           },
-          "; } & { inferenceClient: ",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.BoundInferenceClient",
-            "text": "BoundInferenceClient"
-          },
-          "; phoenixClient: ",
-          {
-            "pluginId": "@kbn/evals",
-            "scope": "common",
-            "docId": "kibKbnEvalsPluginApi",
-            "section": "def-common.KibanaPhoenixClient",
-            "text": "KibanaPhoenixClient"
-          },
-          "; evaluators: ",
-          {
-            "pluginId": "@kbn/evals",
-            "scope": "common",
-            "docId": "kibKbnEvalsPluginApi",
-            "section": "def-common.DefaultEvaluators",
-            "text": "DefaultEvaluators"
-          },
-          "; fetch: ",
-          "HttpHandler",
-          "; connector: ",
-          {
-            "pluginId": "@kbn/gen-ai-functional-testing",
-            "scope": "common",
-            "docId": "kibKbnGenAiFunctionalTestingPluginApi",
-            "section": "def-common.AvailableConnectorWithId",
-            "text": "AvailableConnectorWithId"
-          },
-          "; evaluationConnector: ",
-          {
-            "pluginId": "@kbn/gen-ai-functional-testing",
-            "scope": "common",
-            "docId": "kibKbnGenAiFunctionalTestingPluginApi",
-            "section": "def-common.AvailableConnectorWithId",
-            "text": "AvailableConnectorWithId"
-          },
-          "; repetitions: number; evaluationAnalysisService: ",
-          "EvaluationAnalysisService",
-          "; }>"
+          "; } & ",
+          "EvaluationSpecificWorkerFixtures",
+          ">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluate.ts",
         "deprecated": false,
@@ -738,6 +724,176 @@
             "description": [],
             "signature": [
               "undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/evals",
+        "id": "def-common.EvaluationWorkerFixtures",
+        "type": "Interface",
+        "tags": [],
+        "label": "EvaluationWorkerFixtures",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/evals",
+            "scope": "common",
+            "docId": "kibKbnEvalsPluginApi",
+            "section": "def-common.EvaluationWorkerFixtures",
+            "text": "EvaluationWorkerFixtures"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ScoutWorkerFixtures",
+            "text": "ScoutWorkerFixtures"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/evals",
+            "id": "def-common.EvaluationWorkerFixtures.inferenceClient",
+            "type": "Object",
+            "tags": [],
+            "label": "inferenceClient",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.BoundInferenceClient",
+                "text": "BoundInferenceClient"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/evals",
+            "id": "def-common.EvaluationWorkerFixtures.phoenixClient",
+            "type": "Object",
+            "tags": [],
+            "label": "phoenixClient",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/evals",
+                "scope": "common",
+                "docId": "kibKbnEvalsPluginApi",
+                "section": "def-common.KibanaPhoenixClient",
+                "text": "KibanaPhoenixClient"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/evals",
+            "id": "def-common.EvaluationWorkerFixtures.evaluators",
+            "type": "Object",
+            "tags": [],
+            "label": "evaluators",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/evals",
+                "scope": "common",
+                "docId": "kibKbnEvalsPluginApi",
+                "section": "def-common.DefaultEvaluators",
+                "text": "DefaultEvaluators"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/evals",
+            "id": "def-common.EvaluationWorkerFixtures.fetch",
+            "type": "Function",
+            "tags": [],
+            "label": "fetch",
+            "description": [],
+            "signature": [
+              "HttpHandler"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/evals",
+            "id": "def-common.EvaluationWorkerFixtures.connector",
+            "type": "Object",
+            "tags": [],
+            "label": "connector",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/gen-ai-functional-testing",
+                "scope": "common",
+                "docId": "kibKbnGenAiFunctionalTestingPluginApi",
+                "section": "def-common.AvailableConnectorWithId",
+                "text": "AvailableConnectorWithId"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/evals",
+            "id": "def-common.EvaluationWorkerFixtures.evaluationConnector",
+            "type": "Object",
+            "tags": [],
+            "label": "evaluationConnector",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/gen-ai-functional-testing",
+                "scope": "common",
+                "docId": "kibKbnGenAiFunctionalTestingPluginApi",
+                "section": "def-common.AvailableConnectorWithId",
+                "text": "AvailableConnectorWithId"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/evals",
+            "id": "def-common.EvaluationWorkerFixtures.repetitions",
+            "type": "number",
+            "tags": [],
+            "label": "repetitions",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/evals",
+            "id": "def-common.EvaluationWorkerFixtures.evaluationAnalysisService",
+            "type": "Object",
+            "tags": [],
+            "label": "evaluationAnalysisService",
+            "description": [],
+            "signature": [
+              "EvaluationAnalysisService"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/types.ts",
             "deprecated": false,

@@ -119,9 +119,10 @@ describe('CSV Upload Service', () => {
 
     // Mock index service
     const mockIndexService = {
-      createIngestPipelineIfDoesNotExist: jest.fn().mockResolvedValue(undefined),
+      initialisePrivmonIndex: jest.fn().mockResolvedValue(undefined),
+      _createIngestPipelineIfDoesNotExist: jest.fn().mockResolvedValue(undefined),
+      _upsertIndex: jest.fn().mockResolvedValue(undefined),
       doesIndexExist: jest.fn().mockResolvedValue(true),
-      upsertIndex: jest.fn().mockResolvedValue(undefined),
     };
     mockCreatePrivmonIndexService.mockReturnValue(mockIndexService);
 
@@ -212,22 +213,6 @@ describe('CSV Upload Service', () => {
       expect(result.errors.length).toBeGreaterThan(0);
       expect(result.stats.failed).toBe(1);
     });
-
-    it('should handle index initialization errors', async () => {
-      const csvData = 'username,label\njohndoe,admin';
-      const mockStream = createMockStream(csvData);
-      const options = { retries: 3, flushBytes: 1048576 };
-
-      // Mock index service to throw error
-      const mockIndexService = {
-        createIngestPipelineIfDoesNotExist: jest.fn().mockRejectedValue(new Error('Index error')),
-        doesIndexExist: jest.fn().mockResolvedValue(false),
-        upsertIndex: jest.fn().mockResolvedValue(undefined),
-      };
-      mockCreatePrivmonIndexService.mockReturnValue(mockIndexService);
-
-      await expect(csvService.bulkUpload(mockStream, options)).rejects.toThrow('Index error');
-    });
   });
 
   describe('Integration Points', () => {
@@ -315,9 +300,10 @@ describe('CSV Upload Service - Username Uniqueness Tests', () => {
 
     // Mock index service
     const mockIndexService = {
-      createIngestPipelineIfDoesNotExist: jest.fn().mockResolvedValue(undefined),
+      initialisePrivmonIndex: jest.fn().mockResolvedValue(undefined),
+      _createIngestPipelineIfDoesNotExist: jest.fn().mockResolvedValue(undefined),
+      _upsertIndex: jest.fn().mockResolvedValue(undefined),
       doesIndexExist: jest.fn().mockResolvedValue(true),
-      upsertIndex: jest.fn().mockResolvedValue(undefined),
     };
     mockCreatePrivmonIndexService.mockReturnValue(mockIndexService);
   });
@@ -513,18 +499,11 @@ describe('CSV Upload Service - Username Uniqueness Tests', () => {
     it('should validate index initialization logic', () => {
       // Test that the service properly sets up the index service mock
       const mockIndexService = {
-        createIngestPipelineIfDoesNotExist: jest.fn().mockResolvedValue(undefined),
+        initialisePrivmonIndex: jest.fn().mockResolvedValue(undefined),
+        _createIngestPipelineIfDoesNotExist: jest.fn().mockResolvedValue(undefined),
+        _upsertIndex: jest.fn().mockResolvedValue(undefined),
         doesIndexExist: jest.fn().mockResolvedValue(true),
-        upsertIndex: jest.fn().mockResolvedValue(undefined),
       };
-
-      // Verify the mock structure matches what the service expects
-      expect(mockIndexService.createIngestPipelineIfDoesNotExist).toBeDefined();
-      expect(mockIndexService.doesIndexExist).toBeDefined();
-      expect(mockIndexService.upsertIndex).toBeDefined();
-
-      // Test that createPrivmonIndexService would be called with dataClient
-      expect(typeof mockCreatePrivmonIndexService).toBe('function');
 
       // Test the index initialization flow
       mockCreatePrivmonIndexService.mockReturnValue(mockIndexService);

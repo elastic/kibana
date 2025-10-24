@@ -247,6 +247,7 @@ export interface RuleTableItem extends Rule {
   isEditable: boolean;
   enabledInLicense: boolean;
   showIntervalWarning?: boolean;
+  isInternallyManaged: boolean;
 }
 
 export interface RuleTypeParamsExpressionProps<
@@ -291,6 +292,7 @@ export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
   alertDetailsAppSection?:
     | React.FunctionComponent<any>
     | React.LazyExoticComponent<ComponentType<any>>;
+  isInternallyManaged?: boolean;
 }
 
 export interface IErrorObject {
@@ -384,6 +386,7 @@ export enum RRuleFrequency {
   MONTHLY = 1,
   WEEKLY = 2,
   DAILY = 3,
+  HOURLY = 4,
 }
 
 export interface RecurrenceSchedule {

@@ -41,6 +41,7 @@ import * as i18n from './translations';
 import { RuleMigrationsUploadMissingPanel } from './upload_missing_panel';
 import { MigrationsLastError } from '../../../common/components/migration_panels/last_error';
 import { MigrationPanelTitle } from '../../../common/components/migration_panels/migration_title';
+import { TotalExecutionTime } from '../../../common/components/total_execution_time';
 
 const headerStyle = css`
   &:hover {
@@ -95,6 +96,12 @@ export const RuleMigrationResultPanel = React.memo<RuleMigrationResultPanelProps
                         moment(migrationStats.last_updated_at).fromNow()
                       )}
                     </p>
+                    {migrationStats.last_execution?.total_execution_time_ms && (
+                      <TotalExecutionTime
+                        migrationType="rule"
+                        milliseconds={migrationStats.last_execution.total_execution_time_ms}
+                      />
+                    )}
                   </PanelText>
                 </EuiFlexItem>
               </EuiFlexGroup>

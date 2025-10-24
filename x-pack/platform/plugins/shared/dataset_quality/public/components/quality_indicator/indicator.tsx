@@ -6,17 +6,20 @@
  */
 
 import type { IconType } from '@elastic/eui';
-import { EuiBadge, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiBadge, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import React from 'react';
+import { css } from '@emotion/react';
 import type { QualityIndicators } from '../../../common/types';
 
 export function QualityIndicator({
   quality,
   description,
+  dataTestSubj,
 }: {
   quality: QualityIndicators;
   description: string | ReactNode;
+  dataTestSubj?: string;
 }) {
   const { euiTheme } = useEuiTheme();
   const qualityColors: Record<QualityIndicators, string> = {
@@ -37,9 +40,20 @@ export function QualityIndicator({
     good: 'checkCircle',
   };
 
+  const BadgeIconType = () => (
+    <EuiIcon size="s" type={qualityIcons[quality]} color={qualityTextColors[quality]} />
+  );
+
   return (
-    <EuiBadge color={qualityColors[quality]} iconType={qualityIcons[quality]}>
-      <EuiText color={qualityTextColors[quality]} size="relative">
+    <EuiBadge color={qualityColors[quality]} iconType={BadgeIconType}>
+      <EuiText
+        color={qualityTextColors[quality]}
+        size="xs"
+        css={css`
+          margin-left: ${euiTheme.size.xs};
+        `}
+        data-test-subj={dataTestSubj}
+      >
         {description}
       </EuiText>
     </EuiBadge>

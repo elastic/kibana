@@ -14,6 +14,7 @@ import { disableAttackDiscoverySchedule } from '../api';
 import { useInvalidateGetAttackDiscoverySchedule } from './use_get_schedule';
 import { useInvalidateFindAttackDiscoverySchedule } from './use_find_schedules';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
+import { useKibanaFeatureFlags } from '../../../use_kibana_feature_flags';
 
 export const DISABLE_ATTACK_DISCOVERY_SCHEDULE_MUTATION_KEY = [
   'POST',
@@ -26,6 +27,7 @@ interface DisableAttackDiscoveryScheduleParams {
 
 export const useDisableAttackDiscoverySchedule = () => {
   const { addError, addSuccess } = useAppToasts();
+  const { attackDiscoveryPublicApiEnabled } = useKibanaFeatureFlags();
 
   const invalidateGetAttackDiscoverySchedule = useInvalidateGetAttackDiscoverySchedule();
   const invalidateFindAttackDiscoverySchedule = useInvalidateFindAttackDiscoverySchedule();
@@ -34,7 +36,7 @@ export const useDisableAttackDiscoverySchedule = () => {
     DisableAttackDiscoverySchedulesResponse,
     Error,
     DisableAttackDiscoveryScheduleParams
-  >(({ id }) => disableAttackDiscoverySchedule({ id }), {
+  >(({ id }) => disableAttackDiscoverySchedule({ attackDiscoveryPublicApiEnabled, id }), {
     mutationKey: DISABLE_ATTACK_DISCOVERY_SCHEDULE_MUTATION_KEY,
     onSuccess: ({ id }) => {
       invalidateGetAttackDiscoverySchedule(id);

@@ -9,7 +9,7 @@
 
 import { run } from '../lib/spawn.mjs';
 
-/** @type {import("../lib/command").Command} */
+/** @type {import('../lib/command').Command} */
 export const command = {
   name: 'build-shared',
   intro: 'Builds shared packages with webpack',
@@ -35,6 +35,10 @@ export const command = {
       [':build-webpack'].concat(!cache ? ['-u'] : []).concat(dist ? ['--', '--dist'] : []),
       {
         pipe: !quiet,
+        env: {
+          ...process.env,
+          ...(!cache ? { MOON_CACHE: 'off' } : {}),
+        },
       }
     );
 

@@ -11,6 +11,8 @@ jobs:
   request_review:
     name: Request review from Copilot
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     if: github.event.repository.fork == false
     steps:
       - name: Check for team labels
@@ -40,8 +42,13 @@ jobs:
           GITHUB_TOKEN: ${{secrets.KIBANAMACHINE_TOKEN}}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          echo "Requesting Copilot review for PR #$PR_NUMBER"
+          # "Requesting Copilot review for PR #$PR_NUMBER"
 
           # Workaround from https://github.com/cli/cli/issues/10598
-          gh api --method POST "/repos/elastic/kibana/pulls/${PR_NUMBER}/requested_reviewers" \
-            -f "reviewers[]=copilot-pull-request-reviewer[bot]"
+          if gh api --method POST "/repos/elastic/kibana/pulls/${PR_NUMBER}/requested_reviewers" \
+            -f "reviewers[]=copilot-pull-request-reviewer[bot]" > /dev/null; then
+            echo "Successfully requested Copilot review"
+          else
+            echo "Failed to request Copilot review"
+            exit 1
+          fi

@@ -72,6 +72,9 @@ export const SizeOptions: React.FC<TitlePositionProps> = ({ state, setState }) =
           iconType="plus"
           onClick={() => changeSize(1)}
           isDisabled={currSizeIndex === titleSizes.length - 1}
+          aria-label={i18n.translate('xpack.lens.legacyMetric.sizeOptions.increaseSizeAriaLabel', {
+            defaultMessage: 'Increase title size',
+          })}
         />
       }
       prepend={
@@ -79,6 +82,9 @@ export const SizeOptions: React.FC<TitlePositionProps> = ({ state, setState }) =
           iconType="minus"
           onClick={() => changeSize(-1)}
           isDisabled={currSizeIndex === 0}
+          aria-label={i18n.translate('xpack.lens.legacyMetric.sizeOptions.decreaseSizeAriaLabel', {
+            defaultMessage: 'Decrease title size',
+          })}
         />
       }
       data-test-subj="lnsLegacyMetricSizeSelect"
@@ -97,6 +103,9 @@ export const SizeOptions: React.FC<TitlePositionProps> = ({ state, setState }) =
       itemLayoutAlign="top"
       hasDividers
       fullWidth
+      aria-label={i18n.translate('xpack.lens.legacyMetric.sizeOptions.titleSizeAriaLabel', {
+        defaultMessage: 'Title size',
+      })}
     />
   );
 };

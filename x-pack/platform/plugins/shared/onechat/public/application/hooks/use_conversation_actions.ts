@@ -22,10 +22,10 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { queryKeys } from '../query_keys';
 import { storageKeys } from '../storage_keys';
 import { appPaths } from '../utils/app_paths';
-import { usePrefetchAgentById } from './agents/use_agent_by_id';
 import { createNewConversation, newConversationId } from '../utils/new_conversation';
 import { useConversationId } from './use_conversation_id';
 import { useNavigation } from './use_navigation';
+import { useOnechatServices } from './use_onechat_service';
 
 const pendingRoundId = '__pending__';
 
@@ -33,6 +33,7 @@ export const useConversationActions = () => {
   const queryClient = useQueryClient();
   const conversationId = useConversationId();
   const [, setAgentIdStorage] = useLocalStorage<string>(storageKeys.agentId);
+  const { conversationsService } = useOnechatServices();
   const queryKey = queryKeys.conversations.byId(conversationId ?? newConversationId);
   const setConversation = (updater: (conversation?: Conversation) => Conversation) => {
     queryClient.setQueryData<Conversation>(queryKey, updater);
@@ -56,15 +57,14 @@ export const useConversationActions = () => {
     };
   }, []);
   const navigateToConversation = ({ nextConversationId }: { nextConversationId: string }) => {
-    // Navigate to the new conversation if user is still on the "new" conversation page
-    if (!conversationId && shouldAllowConversationRedirectRef.current) {
+    // Navigate to the conversation if redirect is allowed
+    if (shouldAllowConversationRedirectRef.current) {
       const path = appPaths.chat.conversation({ conversationId: nextConversationId });
       const params = undefined;
       const state = { shouldStickToBottom: false };
       navigateToOnechatUrl(path, params, state);
     }
   };
-  const prefetchAgentById = usePrefetchAgentById();
 
   return {
     removeNewConversationQuery: () => {
@@ -116,7 +116,6 @@ export const useConversationActions = () => {
           draft.agent_id = agentId;
         })
       );
-      prefetchAgentById(agentId);
       setAgentIdStorage(agentId);
     },
     addReasoningStep: ({ step }: { step: ReasoningStep }) => {
@@ -186,6 +185,22 @@ export const useConversationActions = () => {
       // 2. Invalidate conversation list to get updated data from server - this updates the conversations view in the sidebar
       queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
       navigateToConversation({ nextConversationId: id });
+    },
+    deleteConversation: async (id: string) => {
+      await conversationsService.delete({ conversationId: id });
+
+      // Check if we're deleting the current conversation
+      const isCurrentConversation = conversationId === id;
+
+      if (isCurrentConversation) {
+        // If deleting current conversation, navigate to new conversation
+        const path = appPaths.chat.new;
+        navigateToOnechatUrl(path, undefined, { shouldStickToBottom: true });
+      }
+      // If deleting other conversations, stay at current conversation (no navigation needed)
+
+      queryClient.removeQueries({ queryKey: queryKeys.conversations.byId(id) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
     },
   };
 };

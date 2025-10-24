@@ -31,9 +31,9 @@ describe('RERANK columnsAfter', () => {
   });
 
   it('should add a new column for the target field', () => {
-    const command = cmd`RERANK score = "query" ON field` as ESQLAstRerankCommand;
+    const command = cmd`RERANK rerankScore = "query" ON field` as ESQLAstRerankCommand;
     const result = columnsAfter(command, previousColumns);
-    const newColumn = result.find((c) => c.name === 'score');
+    const newColumn = result.find((c) => c.name === 'rerankScore');
 
     expect(newColumn).toBeDefined();
     expect(newColumn?.type).toBe('keyword');

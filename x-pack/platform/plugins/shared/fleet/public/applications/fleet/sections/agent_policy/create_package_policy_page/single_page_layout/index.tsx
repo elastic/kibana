@@ -38,6 +38,7 @@ import {
   checkIntegrationFipsLooseCompatibility,
   getInheritedNamespace,
   getRootPrivilegedDataStreams,
+  isPackagePrerelease,
   isRootPrivilegesRequired,
 } from '../../../../../../../common/services';
 import type { NewAgentPolicy, PackagePolicyEditExtensionComponentProps } from '../../../../types';
@@ -77,6 +78,8 @@ import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/
 import { packageHasAtLeastOneSecret } from '../utils';
 
 import { SetupTechnologySelector } from '../../../../../../services/setup_technology_selector';
+
+import { PrereleaseCallout } from '../../../../../integrations/sections/epm/screens/detail/overview/prerelease_callout';
 
 import {
   AddIntegrationFlyoutConfigureHeader,
@@ -121,8 +124,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   } = useConfig();
   const hasFleetAddAgentsPrivileges = useAuthz().fleet.addAgents;
   const fleetStatus = useFleetStatus();
-  const { docLinks, cloud } = useStartServices();
-  const isServerless = !!cloud?.isServerlessEnabled;
+  const { docLinks } = useStartServices();
   const spaceSettings = useSpaceSettingsContext();
   const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>(
     generateNewAgentPolicyWithDefaults({
@@ -472,7 +474,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
           {/* Show SetupTechnologySelector for all agentless integrations, including extension views */}
           {!isAddIntegrationFlyout && isAgentlessIntegration(packageInfo) && (
             <SetupTechnologySelector
-              showLimitationsMessage={!isServerless}
               disabled={false}
               allowedSetupTechnologies={allowedSetupTechnologies}
               setupTechnology={selectedSetupTechnology}
@@ -481,7 +482,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                 // agentless doesn't need system integration
                 setWithSysMonitoring(value === SetupTechnology.AGENT_BASED);
               }}
-              showBetaBadge={isAgentlessDefault}
+              isAgentlessDefault={isAgentlessDefault}
+              showBetaBadge={!isAgentlessDefault}
             />
           )}
 
@@ -531,7 +533,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       handleSetupTechnologyChange,
       allowedSetupTechnologies,
       isAddIntegrationFlyout,
-      isServerless,
     ]
   );
 
@@ -607,6 +608,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       {fipsAgentsCount > 0 && !fipsCompatibleIntegration && (
         <>
           <EuiCallOut
+            announceOnMount
             size="m"
             color="warning"
             iconType="warning"
@@ -639,6 +641,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       {showSecretsDisabledCallout && (
         <>
           <EuiCallOut
+            announceOnMount
             size="m"
             color="warning"
             title={
@@ -668,6 +671,15 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
           <EuiSpacer size="m" />
         </>
       )}
+      {isAddIntegrationFlyout &&
+        packageInfo?.version &&
+        isPackagePrerelease(packageInfo.version) && (
+          <>
+            <PrereleaseCallout packageInfo={packageInfo} />
+
+            <EuiSpacer size="m" />
+          </>
+        )}
       <StepsWithLessPadding steps={steps} />
     </>
   );

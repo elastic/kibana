@@ -17,6 +17,7 @@ import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { EsqlEsqlShardFailure } from '@elastic/elasticsearch/lib/api/types';
+import { hasStartEndParams } from '@kbn/esql-utils';
 import type { EsqlTable } from '../../../../common';
 import { getEsqlQueryHits } from '../../../../common';
 import type { OnlyEsqlQueryRuleParams, EsQuerySourceFields } from '../types';
@@ -130,6 +131,9 @@ export const getEsqlQuery = (
         filter: rangeFilter,
       },
     },
+    ...(hasStartEndParams(params.esqlQuery.esql)
+      ? { params: [{ _tstart: dateStart }, { _tend: dateEnd }] }
+      : {}),
   };
   return query;
 };

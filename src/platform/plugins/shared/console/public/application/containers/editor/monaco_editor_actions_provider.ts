@@ -36,7 +36,6 @@ import {
   getUrlParamsCompletionItems,
   getUrlPathCompletionItems,
   replaceRequestVariables,
-  SELECTED_REQUESTS_CLASSNAME,
   shouldTriggerSuggestions,
   trackSentRequests,
   getRequestFromEditor,
@@ -60,15 +59,19 @@ export class MonacoEditorActionsProvider {
   private highlightedLines: monaco.editor.IEditorDecorationsCollection;
   constructor(
     private editor: monaco.editor.IStandaloneCodeEditor,
-    private setEditorActionsCss: (css: CSSProperties) => void
+    private setEditorActionsCss: (css: CSSProperties) => void,
+    private highlightedLinesClassName: string,
+    customParsedRequestsProvider?: ConsoleParsedRequestsProvider
   ) {
-    this.parsedRequestsProvider = getParsedRequestsProvider(this.editor.getModel());
+    // Use custom provider if provided, otherwise fallback to default
+    this.parsedRequestsProvider =
+      customParsedRequestsProvider || getParsedRequestsProvider(this.editor.getModel());
     this.highlightedLines = this.editor.createDecorationsCollection();
 
     const debouncedHighlightRequests = debounce(
       async () => {
         if (editor.hasTextFocus()) {
-          await this.highlightRequests();
+          await this.highlightRequests(this.highlightedLinesClassName);
         } else {
           this.clearEditorDecorations();
         }
@@ -145,7 +148,7 @@ export class MonacoEditorActionsProvider {
     }
   }
 
-  private async highlightRequests(): Promise<void> {
+  private async highlightRequests(highlightedLinesClassName: string): Promise<void> {
     // get the requests in the selected range
     const parsedRequests = await this.getSelectedParsedRequests();
     // if any requests are selected, highlight the lines and update the position of actions buttons
@@ -167,7 +170,7 @@ export class MonacoEditorActionsProvider {
           range: selectedRange,
           options: {
             isWholeLine: true,
-            blockClassName: SELECTED_REQUESTS_CLASSNAME,
+            blockClassName: highlightedLinesClassName,
           },
         },
       ]);
@@ -350,7 +353,12 @@ export class MonacoEditorActionsProvider {
       setTimeout(() => trackSentRequests(requests, trackUiMetric), 0);
 
       const selectedHost = settings.getSelectedHost();
-      const results = await sendRequest({ http, requests, host: selectedHost || undefined });
+      const results = await sendRequest({
+        http,
+        requests,
+        host: selectedHost || undefined,
+        isPackagedEnvironment: context.config.isPackagedEnvironment,
+      });
 
       let saveToHistoryError: undefined | Error;
       const isHistoryEnabled = settings.getIsHistoryEnabled();

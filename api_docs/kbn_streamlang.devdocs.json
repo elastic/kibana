@@ -37,7 +37,7 @@
           },
           ") => string"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-streamlang/src/conditions/condition_to_esql.ts",
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/esql/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -57,7 +57,7 @@
                 "text": "Condition"
               }
             ],
-            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/conditions/condition_to_esql.ts",
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/esql/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -589,7 +589,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          ") => { name: string; type: \"string\" | \"number\"; }[]"
+          ") => { name: string; type: \"string\" | \"number\" | \"boolean\"; }[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/src/conditions/helpers.ts",
         "deprecated": false,
@@ -1490,6 +1490,70 @@
       },
       {
         "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.isProcessWithIgnoreMissingOption",
+        "type": "Function",
+        "tags": [],
+        "label": "isProcessWithIgnoreMissingOption",
+        "description": [],
+        "signature": [
+          "<TValue extends any>(value: TValue) => value is Extract<TValue, any>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.isProcessWithIgnoreMissingOption.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "TValue"
+            ],
+            "path": "src/platform/packages/shared/kbn-zod-helpers/src/schema.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.isProcessWithOverrideOption",
+        "type": "Function",
+        "tags": [],
+        "label": "isProcessWithOverrideOption",
+        "description": [],
+        "signature": [
+          "<TValue extends any>(value: TValue) => value is Extract<TValue, any>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.isProcessWithOverrideOption.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "TValue"
+            ],
+            "path": "src/platform/packages/shared/kbn-zod-helpers/src/schema.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
         "id": "def-common.isUnaryFilterCondition",
         "type": "Function",
         "tags": [],
@@ -1624,6 +1688,71 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.transpile",
+        "type": "Function",
+        "tags": [],
+        "label": "transpile",
+        "description": [],
+        "signature": [
+          "(streamlang: ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.StreamlangDSL",
+            "text": "StreamlangDSL"
+          },
+          ", transpilationOptions?: ",
+          "ESQLTranspilationOptions",
+          ") => ",
+          "ESQLTranspilationResult"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/esql/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.transpile.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "streamlang",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streamlang",
+                "scope": "common",
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.StreamlangDSL",
+                "text": "StreamlangDSL"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/esql/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.transpile.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "transpilationOptions",
+            "description": [],
+            "signature": [
+              "ESQLTranspilationOptions"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/esql/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -2682,12 +2811,12 @@
           {
             "parentPluginId": "@kbn/streamlang",
             "id": "def-common.SetProcessor.value",
-            "type": "string",
+            "type": "Unknown",
             "tags": [],
             "label": "value",
             "description": [],
             "signature": [
-              "string | undefined"
+              "unknown"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
             "deprecated": false,

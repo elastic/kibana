@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { platformCoreTools } from '@kbn/onechat-common';
+import { platformCoreTools, ToolType } from '@kbn/onechat-common';
 import { runSearchTool } from '@kbn/onechat-genai-utils/tools';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 
@@ -23,6 +23,7 @@ const searchSchema = z.object({
 export const searchTool = (): BuiltinToolDefinition<typeof searchSchema> => {
   return {
     id: platformCoreTools.search,
+    type: ToolType.builtin,
     description: `A powerful tool for searching and analyzing data within your Elasticsearch cluster.
 It supports both full-text relevance searches and structured analytical queries.
 

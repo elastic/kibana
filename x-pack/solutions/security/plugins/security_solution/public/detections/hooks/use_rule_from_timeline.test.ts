@@ -174,16 +174,6 @@ describe('useRuleFromTimeline', () => {
       expect(result.current.loading).toEqual(true);
       await waitFor(() => new Promise((resolve) => resolve(null)));
       expect(setRuleQuery).toHaveBeenCalled();
-
-      expect(mockDispatch).toHaveBeenCalledTimes(2);
-      expect(mockDispatch).toHaveBeenNthCalledWith(1, {
-        type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_DATA_VIEW',
-        payload: {
-          id: 'timeline',
-          selectedDataViewId: selectedTimeline.timeline.dataViewId,
-          selectedPatterns: selectedTimeline.timeline.indexNames,
-        },
-      });
     });
 
     it('when from timeline data view id === selected data view id and browser fields is not empty, set rule data to match from timeline query', async () => {
@@ -347,21 +337,6 @@ describe('useRuleFromTimeline', () => {
       expect(appToastsMock.addError.mock.calls[0][0]).toEqual(
         TypeError('dataProvider.and is not iterable')
       );
-    });
-
-    it('resets timeline sourcerer if it originally had different data view from the timeline used in the rule', async () => {
-      renderHook(() => useRuleFromTimeline(setRuleQuery));
-      await waitFor(() => {
-        expect(setRuleQuery).toHaveBeenCalled();
-        expect(mockDispatch).toHaveBeenNthCalledWith(2, {
-          type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_DATA_VIEW',
-          payload: {
-            id: 'timeline',
-            selectedDataViewId: 'security-solution',
-            selectedPatterns: ['auditbeat-*'],
-          },
-        });
-      });
     });
   });
 });

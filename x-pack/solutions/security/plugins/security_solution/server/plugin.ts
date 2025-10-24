@@ -309,6 +309,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       telemetry: core.analytics,
       kibanaVersion: pluginContext.env.packageInfo.version,
       experimentalFeatures,
+      config: this.config,
     });
 
     const requestContextFactory = new RequestContextFactory({
@@ -646,9 +647,9 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.telemetryConfigProvider.start(plugins.telemetry.isOptedIn$);
 
     // Assistant Tool and Feature Registration
-    const filteredTools = config.experimentalFeatures.riskScoreAssistantToolEnabled
-      ? assistantTools
-      : assistantTools.filter(({ id }) => id !== ENTITY_RISK_SCORE_TOOL_ID);
+    const filteredTools = config.experimentalFeatures.riskScoreAssistantToolDisabled
+      ? assistantTools.filter(({ id }) => id !== ENTITY_RISK_SCORE_TOOL_ID)
+      : assistantTools;
 
     plugins.elasticAssistant.registerTools(APP_UI_ID, filteredTools);
     const features = {

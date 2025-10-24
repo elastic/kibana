@@ -151,4 +151,12 @@ If no relevant information is found, inform the user you could not locate the re
       default: 'Call this for Elastic Defend insights.',
     },
   },
+  {
+    promptId: 'IntegrationKnowledgeTool',
+    promptGroupId,
+    prompt: {
+      default:
+        'Call this for knowledge from Fleet-installed integrations, which contains information on how to configure and use integrations for data ingestion.',
+    },
+  },
 ];

@@ -8,17 +8,13 @@ import type { CoreStart } from '@kbn/core/public';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { TypedLensSerializedState } from '../../../react_embeddable/types';
 import type { LensPluginStartDependencies } from '../../../plugin';
-import type {
-  DatasourceMap,
-  VisualizationMap,
-  FramePublicAPI,
-  UserMessagesGetter,
-} from '../../../types';
+import type { FramePublicAPI, UserMessagesGetter } from '../../../types';
 import type { LensInspector } from '../../../lens_inspector_service';
 import type { LensDocument } from '../../../persistence';
 
 export interface FlyoutWrapperProps {
   children: JSX.Element;
+  toolbar?: JSX.Element;
   isInlineFlyoutVisible: boolean;
   isScrollable: boolean;
   displayFlyoutHeader?: boolean;
@@ -29,13 +25,12 @@ export interface FlyoutWrapperProps {
   onApply?: () => void;
   navigateToLensEditor?: () => void;
   isReadOnly?: boolean;
+  applyButtonLabel?: string;
 }
 
 export interface EditConfigPanelProps {
   coreStart: CoreStart;
   startDependencies: LensPluginStartDependencies;
-  visualizationMap: VisualizationMap;
-  datasourceMap: DatasourceMap;
   /** The attributes of the Lens embeddable */
   attributes: TypedLensSerializedState['attributes'];
   /** Callback for updating the visualization and datasources state.*/
@@ -92,6 +87,8 @@ export interface EditConfigPanelProps {
   isReadOnly?: boolean;
   /** The dashboard api, important for creating controls from the ES|QL editor */
   parentApi?: unknown;
+  /** Text for the apply button. Defaults to "Apply and close" */
+  applyButtonLabel?: string;
 }
 
 export interface LayerConfigurationProps {
@@ -102,8 +99,6 @@ export interface LayerConfigurationProps {
   lensAdapters?: ReturnType<LensInspector['getInspectorAdapters']>;
   coreStart: CoreStart;
   startDependencies: LensPluginStartDependencies;
-  visualizationMap: VisualizationMap;
-  datasourceMap: DatasourceMap;
   datasourceId: 'formBased' | 'textBased';
   framePublicAPI: FramePublicAPI;
   hasPadding?: boolean;

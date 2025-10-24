@@ -33,8 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const controlId = 'cd881630-fd28-4e9c-aec5-ae9711d48369';
 
     before(async () => {
-      await dashboard.loadSavedDashboard('Test Options List Validation');
-      await dashboard.ensureDashboardIsInEditMode();
+      await dashboard.loadDashboardInEditMode('Test Options List Validation');
     });
 
     describe('Options List dashboard validation', () => {

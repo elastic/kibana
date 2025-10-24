@@ -7,22 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 import {
   EuiBetaBadge,
   EuiButton,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiPageHeader,
   EuiPageTemplate,
-  EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import React, { useState } from 'react';
 import { WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID } from '@kbn/workflows/common/constants';
 import { useWorkflowActions } from '../../entities/workflows/model/use_workflow_actions';
 import { useWorkflowFiltersOptions } from '../../entities/workflows/model/use_workflow_stats';
@@ -30,11 +30,11 @@ import { useWorkflows } from '../../entities/workflows/model/use_workflows';
 import { WorkflowExecutionStatsBar } from '../../features/workflow_executions_stats/ui';
 import { WorkflowList } from '../../features/workflow_list';
 import { WORKFLOWS_TABLE_INITIAL_PAGE_SIZE } from '../../features/workflow_list/constants';
+import { useWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import { shouldShowWorkflowsEmptyState } from '../../shared/utils/workflow_utils';
 import type { WorkflowsSearchParams } from '../../types';
 import { WorkflowsFilterPopover } from '../../widgets/workflow_filter_popover/workflow_filter_popover';
 import { WorkflowSearchField } from '../../widgets/workflow_search_field/ui/workflow_search_field';
-import { useWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 
 const workflowTemplateYaml = `name: New workflow
 enabled: false
@@ -91,7 +91,7 @@ export function WorkflowsPage() {
             'message' in error.body &&
             typeof error.body.message === 'string'
           ) {
-            (error as any).message = error.body.message;
+            (error as any).message = error.body.message; // eslint-disable-line @typescript-eslint/no-explicit-any
           }
 
           notifications!.toasts.addError(error, {
@@ -152,7 +152,8 @@ export function WorkflowsPage() {
                 <EuiButton
                   iconType="plusInCircle"
                   color="primary"
-                  size="s"
+                  size="m"
+                  fill
                   onClick={handleCreateWorkflow}
                 >
                   <FormattedMessage
@@ -211,10 +212,7 @@ export function WorkflowsPage() {
                 </EuiFilterGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
-
-            <EuiSpacer size="l" />
             {isExecutionStatsBarEnabled && <WorkflowExecutionStatsBar height={140} />}
-            <EuiHorizontalRule />
           </>
         )}
 

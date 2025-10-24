@@ -5860,7 +5860,14 @@
             "label": "stage",
             "description": [],
             "signature": [
-              "\"experimental\" | \"beta\" | \"production\""
+              {
+                "pluginId": "visualizations",
+                "scope": "public",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-public.VisualizationStage",
+                "text": "VisualizationStage"
+              },
+              " | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false,
@@ -5981,7 +5988,7 @@
             "label": "editor",
             "description": [],
             "signature": [
-              "{ editUrl: string; editApp?: string | undefined; } | { onEdit: (savedObjectId: string) => Promise<void>; }"
+              "{ editUrl: string; editApp?: string | undefined; } | { onEdit: (savedObjectId: string) => Promise<void>; } | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false,

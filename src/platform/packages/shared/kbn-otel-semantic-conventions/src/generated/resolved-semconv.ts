@@ -13,13 +13,13 @@
  * This file is auto-generated. Do not edit manually.
  * Sources: resolved-semconv.yaml + hardcoded OTLP mappings
  * Registry groups: 136
- * Metric groups: 420
+ * Metric groups: 438
  * Hardcoded fields: 34
- * Total fields: 1142
+ * Total fields: 1155
  *
  * @internal
  *
- * WARNING: This object contains 1142+ field definitions (~50KB+ minified).
+ * WARNING: This object contains 1155+ field definitions (~50KB+ minified).
  * Direct import will significantly increase client bundle size.
  *
  * RECOMMENDED USAGE:
@@ -91,6 +91,19 @@ export const semconvFlat = {
     description: 'The y (vertical) component of a screen coordinate, in screen pixels.',
     type: 'long',
     example: '12',
+  },
+  'app.screen.id': {
+    name: 'app.screen.id',
+    description:
+      'An identifier that uniquely differentiates this screen from other screens in the same application.',
+    type: 'keyword',
+    example: 'f9bc787d-ff05-48ad-90e1-fca1d46130b3',
+  },
+  'app.screen.name': {
+    name: 'app.screen.name',
+    description: 'The name of an application screen.',
+    type: 'keyword',
+    example: 'MainActivity',
   },
   'app.widget.id': {
     name: 'app.widget.id',
@@ -1375,10 +1388,9 @@ export const semconvFlat = {
   },
   'error.type': {
     name: 'error.type',
-    description:
-      'A low-cardinality description of the failure reason. SDK Batching Span Processors MUST use `queue_full` for spans dropped due to a full queue.',
+    description: 'Describes a class of error the operation ended with.',
     type: 'keyword',
-    example: 'queue_full',
+    example: 'timeout',
   },
   'event.name': {
     name: 'event.name',
@@ -2800,6 +2812,20 @@ export const semconvFlat = {
     type: 'keyword',
     example: 'opentelemetry-pod-autoconf',
   },
+  'k8s.pod.status.phase': {
+    name: 'k8s.pod.status.phase',
+    description:
+      'The phase for the pod. Corresponds to the `phase` field of the: [K8s PodStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.33/#podstatus-v1-core)',
+    type: 'keyword',
+    example: 'Pending',
+  },
+  'k8s.pod.status.reason': {
+    name: 'k8s.pod.status.reason',
+    description:
+      'The reason for the pod state. Corresponds to the `reason` field of the: [K8s PodStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.33/#podstatus-v1-core)',
+    type: 'keyword',
+    example: 'Evicted',
+  },
   'k8s.pod.uid': {
     name: 'k8s.pod.uid',
     description: 'The UID of the Pod.',
@@ -3434,9 +3460,29 @@ export const semconvFlat = {
     description: 'Container filesystem usage.',
     type: 'double',
   },
+  'metrics.container.memory.available': {
+    name: 'metrics.container.memory.available',
+    description: 'Container memory available.',
+    type: 'double',
+  },
+  'metrics.container.memory.paging.faults': {
+    name: 'metrics.container.memory.paging.faults',
+    description: 'Container memory paging faults.',
+    type: 'double',
+  },
+  'metrics.container.memory.rss': {
+    name: 'metrics.container.memory.rss',
+    description: 'Container memory RSS.',
+    type: 'double',
+  },
   'metrics.container.memory.usage': {
     name: 'metrics.container.memory.usage',
     description: 'Memory usage of the container.',
+    type: 'double',
+  },
+  'metrics.container.memory.working_set': {
+    name: 'metrics.container.memory.working_set',
+    description: 'Container memory working set.',
     type: 'double',
   },
   'metrics.container.network.io': {
@@ -4343,9 +4389,29 @@ export const semconvFlat = {
     description: 'Node filesystem usage.',
     type: 'double',
   },
+  'metrics.k8s.node.memory.available': {
+    name: 'metrics.k8s.node.memory.available',
+    description: 'Node memory available.',
+    type: 'double',
+  },
+  'metrics.k8s.node.memory.paging.faults': {
+    name: 'metrics.k8s.node.memory.paging.faults',
+    description: 'Node memory paging faults.',
+    type: 'double',
+  },
+  'metrics.k8s.node.memory.rss': {
+    name: 'metrics.k8s.node.memory.rss',
+    description: 'Node memory RSS.',
+    type: 'double',
+  },
   'metrics.k8s.node.memory.usage': {
     name: 'metrics.k8s.node.memory.usage',
     description: 'Memory usage of the Node.',
+    type: 'double',
+  },
+  'metrics.k8s.node.memory.working_set': {
+    name: 'metrics.k8s.node.memory.working_set',
+    description: 'Node memory working set.',
     type: 'double',
   },
   'metrics.k8s.node.network.errors': {
@@ -4389,9 +4455,29 @@ export const semconvFlat = {
     description: 'Pod filesystem usage.',
     type: 'double',
   },
+  'metrics.k8s.pod.memory.available': {
+    name: 'metrics.k8s.pod.memory.available',
+    description: 'Pod memory available.',
+    type: 'double',
+  },
+  'metrics.k8s.pod.memory.paging.faults': {
+    name: 'metrics.k8s.pod.memory.paging.faults',
+    description: 'Pod memory paging faults.',
+    type: 'double',
+  },
+  'metrics.k8s.pod.memory.rss': {
+    name: 'metrics.k8s.pod.memory.rss',
+    description: 'Pod memory RSS.',
+    type: 'double',
+  },
   'metrics.k8s.pod.memory.usage': {
     name: 'metrics.k8s.pod.memory.usage',
     description: 'Memory usage of the Pod.',
+    type: 'double',
+  },
+  'metrics.k8s.pod.memory.working_set': {
+    name: 'metrics.k8s.pod.memory.working_set',
+    description: 'Pod memory working set.',
     type: 'double',
   },
   'metrics.k8s.pod.network.errors': {
@@ -4402,6 +4488,17 @@ export const semconvFlat = {
   'metrics.k8s.pod.network.io': {
     name: 'metrics.k8s.pod.network.io',
     description: 'Network bytes for the Pod.',
+    type: 'double',
+  },
+  'metrics.k8s.pod.status.phase': {
+    name: 'metrics.k8s.pod.status.phase',
+    description: 'Describes number of K8s Pods that are currently in a given phase.',
+    type: 'double',
+  },
+  'metrics.k8s.pod.status.reason': {
+    name: 'metrics.k8s.pod.status.reason',
+    description:
+      'Describes the number of K8s Pods that are currently in a state for a given reason.',
     type: 'double',
   },
   'metrics.k8s.pod.uptime': {
@@ -4964,19 +5061,9 @@ export const semconvFlat = {
     description: 'Measures the size of RPC request messages (uncompressed).',
     type: 'double',
   },
-  'metrics.rpc.client.requests_per_rpc': {
-    name: 'metrics.rpc.client.requests_per_rpc',
-    description: 'Measures the number of messages received per RPC.',
-    type: 'double',
-  },
   'metrics.rpc.client.response.size': {
     name: 'metrics.rpc.client.response.size',
     description: 'Measures the size of RPC response messages (uncompressed).',
-    type: 'double',
-  },
-  'metrics.rpc.client.responses_per_rpc': {
-    name: 'metrics.rpc.client.responses_per_rpc',
-    description: 'Measures the number of messages sent per RPC.',
     type: 'double',
   },
   'metrics.rpc.server.duration': {
@@ -4989,19 +5076,9 @@ export const semconvFlat = {
     description: 'Measures the size of RPC request messages (uncompressed).',
     type: 'double',
   },
-  'metrics.rpc.server.requests_per_rpc': {
-    name: 'metrics.rpc.server.requests_per_rpc',
-    description: 'Measures the number of messages received per RPC.',
-    type: 'double',
-  },
   'metrics.rpc.server.response.size': {
     name: 'metrics.rpc.server.response.size',
     description: 'Measures the size of RPC response messages (uncompressed).',
-    type: 'double',
-  },
-  'metrics.rpc.server.responses_per_rpc': {
-    name: 'metrics.rpc.server.responses_per_rpc',
-    description: 'Measures the number of messages sent per RPC.',
     type: 'double',
   },
   'metrics.signalr.server.active_connections': {
@@ -5183,19 +5260,19 @@ export const semconvFlat = {
     description: 'Garbage collection duration.',
     type: 'double',
   },
-  'metrics.v8js.heap.space.available_size': {
-    name: 'metrics.v8js.heap.space.available_size',
-    description: 'Heap space available size.',
-    type: 'double',
-  },
-  'metrics.v8js.heap.space.physical_size': {
-    name: 'metrics.v8js.heap.space.physical_size',
-    description: 'Committed size of a heap space.',
-    type: 'double',
-  },
   'metrics.v8js.memory.heap.limit': {
     name: 'metrics.v8js.memory.heap.limit',
     description: 'Total heap memory size pre-allocated.',
+    type: 'double',
+  },
+  'metrics.v8js.memory.heap.space.available_size': {
+    name: 'metrics.v8js.memory.heap.space.available_size',
+    description: 'Heap space available size.',
+    type: 'double',
+  },
+  'metrics.v8js.memory.heap.space.physical_size': {
+    name: 'metrics.v8js.memory.heap.space.physical_size',
+    description: 'Committed size of a heap space.',
     type: 'double',
   },
   'metrics.v8js.memory.heap.used': {
@@ -5598,8 +5675,8 @@ export const semconvFlat = {
     type: 'keyword',
     example: 'C:\\cmd\\otecol --config="my directory\\config.yaml"',
   },
-  'process.context_switch_type': {
-    name: 'process.context_switch_type',
+  'process.context_switch.type': {
+    name: 'process.context_switch.type',
     description:
       'Specifies whether the context switches for this data point were voluntary or involuntary.',
     type: 'keyword',
@@ -5685,12 +5762,6 @@ export const semconvFlat = {
     description: 'The username of the user that owns the process.',
     type: 'keyword',
     example: 'root',
-  },
-  'process.paging.fault_type': {
-    name: 'process.paging.fault_type',
-    description:
-      'The type of page fault for this data point. Type `major` is for major/hard page faults, and `minor` is for minor/soft page faults.',
-    type: 'keyword',
   },
   'process.parent_pid': {
     name: 'process.parent_pid',
@@ -5890,8 +5961,7 @@ export const semconvFlat = {
   },
   'rpc.method': {
     name: 'rpc.method',
-    description:
-      'The name of the (logical) method being called, must be equal to the $method part in the span name.',
+    description: 'This is the logical name of the method from the RPC interface perspective.',
     type: 'keyword',
     example: 'e',
   },
@@ -6134,17 +6204,17 @@ export const semconvFlat = {
     type: 'keyword',
     example: 'in',
   },
+  'system.paging.fault.type': {
+    name: 'system.paging.fault.type',
+    description: 'The paging fault type',
+    type: 'keyword',
+    example: 'minor',
+  },
   'system.paging.state': {
     name: 'system.paging.state',
     description: 'The memory paging state',
     type: 'keyword',
     example: 'free',
-  },
-  'system.paging.type': {
-    name: 'system.paging.type',
-    description: 'The memory paging type',
-    type: 'keyword',
-    example: 'minor',
   },
   'system.process.status': {
     name: 'system.process.status',

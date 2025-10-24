@@ -765,6 +765,7 @@ exports[`NetworkHttp Table Component rendering it renders the default NetworkHtt
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <nav
+          aria-label="Table pagination"
           class="euiPagination emotion-euiPagination"
           data-test-subj="numberedPagination"
         >

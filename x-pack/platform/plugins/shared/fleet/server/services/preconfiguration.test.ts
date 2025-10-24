@@ -1211,6 +1211,51 @@ describe('policy preconfiguration', () => {
           expect(packages).toEqual(['test_package-1.0.0']);
           expect(nonFatalErrors).toEqual([]);
         });
+
+        it('should not install newer version if package was rolled back', async () => {
+          mockedGetBundledPackages.mockResolvedValue([
+            {
+              name: 'test_package',
+              version: '1.0.0',
+              getBuffer: () => Promise.resolve(Buffer.from('test_package')),
+            },
+          ]);
+
+          const soClient = getPutPreconfiguredPackagesMock();
+          const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+          jest
+            .mocked(appContextService)
+            .getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
+
+          // Install an older version of a test package
+          mockInstalledPackages.set('test_package', {
+            version: '0.9.0',
+            rolled_back: true,
+          });
+
+          const { policies, packages, nonFatalErrors } =
+            await ensurePreconfiguredPackagesAndPolicies(
+              soClient,
+              esClient,
+              [],
+              [
+                {
+                  name: 'test_package',
+                  version: 'latest',
+                },
+              ],
+              mockDefaultOutput,
+              mockDefaultDownloadService,
+              DEFAULT_SPACE_ID
+            );
+
+          // Package version should not be updated
+          expect(mockInstalledPackages.get('test_package').version).toEqual('0.9.0');
+
+          expect(policies).toEqual([]);
+          expect(packages).toEqual([]);
+          expect(nonFatalErrors).toEqual([]);
+        });
       });
 
       describe('when bundled package is not a newer version', () => {

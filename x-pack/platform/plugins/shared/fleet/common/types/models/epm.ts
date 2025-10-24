@@ -87,6 +87,7 @@ export enum KibanaSavedObjectType {
   osqueryPackAsset = 'osquery-pack-asset',
   osquerySavedQuery = 'osquery-saved-query',
   tag = 'tag',
+  alert = 'alert',
 }
 
 export enum ElasticsearchAssetType {
@@ -100,6 +101,7 @@ export enum ElasticsearchAssetType {
   mlModel = 'ml_model',
   knowledgeBase = 'knowledge_base',
 }
+
 export type FleetElasticsearchAssetType = Exclude<
   ElasticsearchAssetType,
   ElasticsearchAssetType.index
@@ -653,6 +655,7 @@ export enum INSTALL_STATES {
   CREATE_RESTART_INSTALLATION = 'create_restart_installation',
   INSTALL_KIBANA_ASSETS = 'install_kibana_assets',
   INSTALL_ILM_POLICIES = 'install_ilm_policies',
+  CREATE_ALERTING_RULES = 'create_alerting_rules',
   INSTALL_ML_MODEL = 'install_ml_model',
   INSTALL_INDEX_TEMPLATE_PIPELINES = 'install_index_template_pipelines',
   REMOVE_LEGACY_TEMPLATES = 'remove_legacy_templates',
@@ -705,6 +708,8 @@ export interface Installation {
   latest_executed_state?: InstallLatestExecutedState;
   latest_custom_asset_install_failed_attempts?: { [asset: string]: CustomAssetFailedAttempt };
   previous_version?: string | null;
+  rolled_back?: boolean;
+  is_rollback_ttl_expired?: boolean;
 }
 
 export interface PackageUsageStats {
@@ -749,6 +754,7 @@ export interface KibanaAssetReference {
   id: string;
   originId?: string;
   type: KibanaSavedObjectType;
+  deferred?: boolean;
 }
 export interface EsAssetReference {
   id: string;

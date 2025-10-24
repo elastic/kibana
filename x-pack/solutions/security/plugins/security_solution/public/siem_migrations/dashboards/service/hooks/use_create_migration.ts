@@ -8,9 +8,9 @@
 import { useCallback, useReducer } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { CreateDashboardMigrationDashboardsRequestBody } from '../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
-import type { DashboardMigrationTaskStats } from '../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { reducer, initialState } from '../../../common/service';
+import type { DashboardMigrationStats } from '../../types';
 
 export const DASHBOARDS_DATA_INPUT_CREATE_MIGRATION_SUCCESS_TITLE = i18n.translate(
   'xpack.securitySolution.siemMigrations.dashboards.service.createDashboardSuccess.title',
@@ -30,7 +30,7 @@ export type CreateMigration = (
   migrationName: string,
   dashboards: CreateDashboardMigrationDashboardsRequestBody
 ) => void;
-export type OnSuccess = (migrationStats: DashboardMigrationTaskStats) => void;
+export type OnSuccess = (migrationStats: DashboardMigrationStats) => void;
 
 export const useCreateMigration = (onSuccess?: OnSuccess) => {
   const { siemMigrations, notifications } = useKibana().services;

@@ -5397,6 +5397,31 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.UseGenAIConnectorsResult.isConnectorSelectionRestricted",
+            "type": "boolean",
+            "tags": [],
+            "label": "isConnectorSelectionRestricted",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_genai_connectors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.UseGenAIConnectorsResult.defaultConnector",
+            "type": "string",
+            "tags": [],
+            "label": "defaultConnector",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_genai_connectors.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5561,21 +5586,6 @@
         "description": [],
         "signature": [
           "\"observability:logSources\""
-        ],
-        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/ui_settings/settings_keys.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityAIAssistant",
-        "id": "def-public.aiAssistantPreferredAIAssistantType",
-        "type": "string",
-        "tags": [],
-        "label": "aiAssistantPreferredAIAssistantType",
-        "description": [],
-        "signature": [
-          "\"aiAssistant:preferredAIAssistantType\""
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/ui_settings/settings_keys.ts",
         "deprecated": false,
@@ -8848,7 +8858,7 @@
                         "section": "def-server.ConnectorWithExtraFindData",
                         "text": "ConnectorWithExtraFindData"
                       },
-                      "[]>; getBulk: ({ ids, throwIfSystemAction, }: { ids: string[]; throwIfSystemAction?: boolean | undefined; }) => Promise<",
+                      "[]>; getBulk: ({ ids, throwIfSystemAction, }: { ids: string[]; throwIfSystemAction?: boolean | undefined; }) => Promise<(",
                       {
                         "pluginId": "actions",
                         "scope": "server",
@@ -8856,7 +8866,19 @@
                         "section": "def-server.Connector",
                         "text": "Connector"
                       },
-                      "[]>; getOAuthAccessToken: ({ type, options }: Readonly<{} & { type: \"jwt\" | \"client\"; options: Readonly<{} & { tokenUrl: string; config: Readonly<{} & { clientId: string; jwtKeyId: string; userIdentifierValue: string; }>; secrets: Readonly<{ privateKeyPassword?: string | undefined; } & { clientSecret: string; privateKey: string; }>; }> | Readonly<{} & { tokenUrl: string; config: Readonly<{} & { clientId: string; }>; secrets: Readonly<{} & { clientSecret: string; }>; scope: string; }>; }>, configurationUtilities: ",
+                      " | ",
+                      {
+                        "pluginId": "actions",
+                        "scope": "server",
+                        "docId": "kibActionsPluginApi",
+                        "section": "def-server.InMemoryConnector",
+                        "text": "InMemoryConnector"
+                      },
+                      "<",
+                      "ActionTypeConfig",
+                      ", ",
+                      "ActionTypeSecrets",
+                      ">)[]>; getOAuthAccessToken: ({ type, options }: Readonly<{} & { type: \"jwt\" | \"client\"; options: Readonly<{} & { tokenUrl: string; config: Readonly<{} & { clientId: string; jwtKeyId: string; userIdentifierValue: string; }>; secrets: Readonly<{ privateKeyPassword?: string | undefined; } & { clientSecret: string; privateKey: string; }>; }> | Readonly<{} & { tokenUrl: string; config: Readonly<{} & { clientId: string; }>; secrets: Readonly<{} & { clientSecret: string; }>; scope: string; }>; }>, configurationUtilities: ",
                       "ActionsConfigurationUtilities",
                       ") => Promise<{ accessToken: string | null; }>; delete: ({ id }: { id: string; }) => Promise<{}>; bulkEnqueueExecution: (options: ",
                       "ExecuteOptions",
@@ -8865,7 +8887,13 @@
                       ">; listTypes: ({ featureId, includeSystemActionTypes, }?: ",
                       "ListTypesParams",
                       ") => Promise<",
-                      "ConnectorType",
+                      {
+                        "pluginId": "actions",
+                        "scope": "server",
+                        "docId": "kibActionsPluginApi",
+                        "section": "def-server.ConnectorType",
+                        "text": "ConnectorType"
+                      },
                       "[]>; isActionTypeEnabled: (actionTypeId: string, options?: { notifyUsage: boolean; }) => boolean; isPreconfigured: (connectorId: string) => boolean; isSystemAction: (connectorId: string) => boolean; getGlobalExecutionLogWithAuth: ({ dateStart, dateEnd, filter, page, perPage, sort, namespaces, }: ",
                       {
                         "pluginId": "actions",
@@ -9023,6 +9051,26 @@
                         "text": "AssistantScope"
                       },
                       "[]"
+                    ],
+                    "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "observabilityAIAssistant",
+                    "id": "def-server.ObservabilityAIAssistantClient.Unnamed.$1.analytics",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "analytics",
+                    "description": [],
+                    "signature": [
+                      "{ optIn: (optInConfig: ",
+                      "OptInConfig",
+                      ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
+                      "Observable",
+                      "<",
+                      "TelemetryCounter",
+                      ">; }"
                     ],
                     "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
                     "deprecated": false,

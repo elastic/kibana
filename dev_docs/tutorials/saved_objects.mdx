@@ -354,3 +354,55 @@ export const foo: SavedObjectsType = {
 [1] Needs to be `false` to use the `hiddenFromHttpApis` option
 
 [2] Set this to `true` to build your own HTTP API and have complete control over the route handler.
+
+## Troubleshooting
+
+### CI is failing for my PR
+
+CI automatically performs some validations on _Saved Object_ type definitions.
+Whenever a new SO type is added, or a new field is added to an existing type, a CI step will _Check changes in saved objects_.
+
+Please find your error in the list below, to understand what scenario your PR is falling into:
+
+```
+❌ Modifications have been detected in the '<soType>.migrations'. This property is deprected and no modifications are allowed.
+```
+**Problem:** Migration functions cannot be altered. The `migrations` property was deprecated in favor of `modelVersions`, but the existing `migrations` must be kept in order to allow importing old documents.
+**Solution:** Do not perform any modifications in the `migrations` property of your SO type. If you haven't modified the field, please check that your PR branch is up-to-date and consider updating.
+
+```
+❌ Some modelVersions have been updated for SO type '<soType>' after they were defined: 5.
+```
+**Problem:** The existing `modelVersions` cannot be mutated. This would cause inconsistencies between deployments.
+
+**Scenario 1:** I am not modifying an existing `modelVersion`, but rather trying to create a new one. Most likely someone else added another `modelVersion` for the same SO type which then got released in Serverless (baseline for comparison).
+**Scenario 2:** I detected a bug and wanted to modify the `modelVersion`. Unfortunately, it might already be to late to fix it. Once a `modelVersion` is defined in a PR, and that PR is merged, it could be released in Serverless anytime (or in a Customer Zero deployment). Thus, some deployments/projects might already updated to that `modelVersion`. Either you just merged the PR and can guarantee nobody has loaded it, or you'll probably have to create a new model version.
+
+```
+❌ Some model versions have been deleted for SO type '<soType>'.
+```
+**Problem:** For the same reasons as the previous error, `modelVersions` cannot be deleted. In this scenario, it could happen that your PR stems from a commit that is older than the current serverless release, and is missing `modelVersions` for some SO types.
+**Solution:** Rebase your PR to get the latest SO type definitions.
+
+```
+❌ Invalid model version 'five' for SO type '<soType>'. Model versions must be consecutive integer numbers starting at 1.
+❌ The '<soType>' SO type is missing model version '4'. Model versions defined: 1,2,3,5.
+```
+These errors are pretty obvious. Model versions must be defined as consecutive numeric strings, e.g. '1', '2', '3', ...
+
+```
+❌ The '<soType>' SO type has changes in the mappings, but is missing a modelVersion that defines these changes.
+```
+**Problem:** Whenever we update the mappings for a SO type, we must signal the migration logic that this types' mappings must be updated in the SO index.
+**Solution:** Create a new `modelVersion` that includes the `type: 'mappings_addition'`, as well as the `schemas.forwardCompatibility` properties.
+
+```
+❌ The SO type '<soType>' is defining two (or more) new model versions.
+```
+**Problem:** To ensure seamless rollouts, and safe rollbacks, some features need to be rolled out as several incremental changes where each incremental change is guaranteed to be released before the next. See more details in [this document](https://docs.google.com/document/d/1e1vZldfwqUXEdbspSSO3C3ltGQTErp7oKhzUDNSG01Y/edit?tab=t.0).
+**Scenario 1:** I am developing a large feature and including multiple changes in my SO type. If changes are unrelated (in the sense that they don't require a 2-step rollout), you should be able to condense them into a single `modelVersion`.
+**Scenario 2:** I have only defined 1 new `modelVersion`. My PR was green before and all of a sudden it started failing :shrug:. The sanity checks on SO changes are performed against 2 baselines:
+* Your PR merge base commit (or one of its ancestors). This should not change, so likely not the culprit.
+* The current serverless release. If a high-severity issue occurs, Serverless might be rolled back to a previous version. This could in turn impact CI pipelines for PRs that would otherwise be fine. In other words, _"from the current serverless standpoint, your PR is not releasable at the moment"_ . This should only happen exceptionally. Please take a look at the `#kibana-mission-control` channel to see if something is going on.
+  * **Scenario 2.1**: Kibana has been rolled back. Please wait until the situation goes back to normal, i.e. an emergency release is performed after the rollback, and Kibana gets to a normal release state.
+  * **Scenario 2.2**: Kibana has NOT been rolled back. Reach out to `#kibana-core` and we will help you figure out what's going on.

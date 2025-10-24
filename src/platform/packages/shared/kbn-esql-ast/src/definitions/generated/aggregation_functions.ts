@@ -45,6 +45,16 @@ const absentDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'aggregate_metric_double',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'boolean',
           optional: false,
         },
@@ -244,6 +254,16 @@ const avgDefinition: FunctionDefinition = {
       params: [
         {
           name: 'number',
+          type: 'aggregate_metric_double',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number',
           type: 'double',
           optional: false,
         },
@@ -292,9 +312,18 @@ const countDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'aggregate_metric_double',
+          optional: true,
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'boolean',
           optional: true,
-          supportsWildcard: true,
         },
       ],
       returnType: 'long',
@@ -1054,7 +1083,7 @@ const firstDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: 'first',
   description: i18n.translate('kbn-esql-ast.esql.definitions.first', {
-    defaultMessage: 'The earliest value of a field.',
+    defaultMessage: 'Calculates the earliest value of a field.',
   }),
   ignoreAsSuggestion: true,
   preview: false,
@@ -1222,7 +1251,7 @@ const lastDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: 'last',
   description: i18n.translate('kbn-esql-ast.esql.definitions.last', {
-    defaultMessage: 'The latest value of a field.',
+    defaultMessage: 'Calculates the latest value of a field.',
   }),
   ignoreAsSuggestion: true,
   preview: false,
@@ -1395,6 +1424,16 @@ const maxDefinition: FunctionDefinition = {
   preview: false,
   alias: undefined,
   signatures: [
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'aggregate_metric_double',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
     {
       params: [
         {
@@ -1621,6 +1660,16 @@ const minDefinition: FunctionDefinition = {
   preview: false,
   alias: undefined,
   signatures: [
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'aggregate_metric_double',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
     {
       params: [
         {
@@ -1913,6 +1962,16 @@ const presentDefinition: FunctionDefinition = {
   preview: false,
   alias: undefined,
   signatures: [
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'aggregate_metric_double',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
     {
       params: [
         {
@@ -2542,6 +2601,16 @@ const sumDefinition: FunctionDefinition = {
       params: [
         {
           name: 'number',
+          type: 'aggregate_metric_double',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number',
           type: 'double',
           optional: false,
         },
@@ -2599,10 +2668,26 @@ const topDefinition: FunctionDefinition = {
           optional: false,
           constantOnly: true,
         },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'boolean',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
         {
           name: 'order',
           type: 'keyword',
-          optional: false,
+          optional: true,
           constantOnly: true,
           suggestedValues: ['asc', 'desc'],
         },
@@ -2622,10 +2707,26 @@ const topDefinition: FunctionDefinition = {
           optional: false,
           constantOnly: true,
         },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
         {
           name: 'order',
           type: 'keyword',
-          optional: false,
+          optional: true,
           constantOnly: true,
           suggestedValues: ['asc', 'desc'],
         },
@@ -2645,10 +2746,26 @@ const topDefinition: FunctionDefinition = {
           optional: false,
           constantOnly: true,
         },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
         {
           name: 'order',
           type: 'keyword',
-          optional: false,
+          optional: true,
           constantOnly: true,
           suggestedValues: ['asc', 'desc'],
         },
@@ -2668,10 +2785,26 @@ const topDefinition: FunctionDefinition = {
           optional: false,
           constantOnly: true,
         },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
         {
           name: 'order',
           type: 'keyword',
-          optional: false,
+          optional: true,
           constantOnly: true,
           suggestedValues: ['asc', 'desc'],
         },
@@ -2691,10 +2824,26 @@ const topDefinition: FunctionDefinition = {
           optional: false,
           constantOnly: true,
         },
+      ],
+      returnType: 'ip',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'ip',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
         {
           name: 'order',
           type: 'keyword',
-          optional: false,
+          optional: true,
           constantOnly: true,
           suggestedValues: ['asc', 'desc'],
         },
@@ -2714,10 +2863,26 @@ const topDefinition: FunctionDefinition = {
           optional: false,
           constantOnly: true,
         },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'keyword',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
         {
           name: 'order',
           type: 'keyword',
-          optional: false,
+          optional: true,
           constantOnly: true,
           suggestedValues: ['asc', 'desc'],
         },
@@ -2735,11 +2900,30 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
+          constantOnly: true,
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
         },
         {
           name: 'order',
           type: 'keyword',
-          optional: false,
+          optional: true,
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
         },
       ],
       returnType: 'long',
@@ -2755,11 +2939,30 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
+          constantOnly: true,
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'text',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
         },
         {
           name: 'order',
           type: 'keyword',
-          optional: false,
+          optional: true,
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
         },
       ],
       returnType: 'keyword',

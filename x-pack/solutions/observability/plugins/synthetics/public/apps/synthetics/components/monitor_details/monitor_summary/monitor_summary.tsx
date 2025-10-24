@@ -30,15 +30,12 @@ import { MonitorDetailsPanelContainer } from './monitor_details_panel_container'
 import { LastTestRun } from './last_test_run';
 import { LAST_10_TEST_RUNS, TestRunsTable } from './test_runs_table';
 import { MonitorPendingWrapper } from '../monitor_pending_wrapper';
-import { useMonitorScreenContext } from '../hooks/use_monitor_screen_context';
 
 export const MonitorSummary = () => {
   const { from, to } = useMonitorRangeFrom();
 
   const dateLabel = from === 'now-30d/d' ? LAST_30_DAYS_LABEL : TO_DATE_LABEL;
   const isMediumDevice = useIsWithinBreakpoints(['xs', 's', 'm', 'l']);
-
-  useMonitorScreenContext();
 
   const redirect = useMonitorDetailsPage();
   if (redirect) {

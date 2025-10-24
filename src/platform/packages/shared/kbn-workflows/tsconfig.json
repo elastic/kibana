@@ -5,6 +5,9 @@
     "types": ["jest", "node"]
   },
   "include": ["**/*.ts"],
-  "kbn_references": ["@kbn/zod", "@kbn/es-query"],
+  "kbn_references": [
+    "@kbn/zod",
+    "@kbn/es-query",
+    "@kbn/utility-types"  ],
   "exclude": ["target/**/*"]
 }

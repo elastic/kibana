@@ -15,8 +15,8 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   describe('main', () => {
-    it('sets top level default values', async () => {
-      const title = `foo-${Date.now()}-${Math.random()}`;
+    it('should create a dashboard', async () => {
+      const title = 'Hello world dashboard';
 
       const response = await supertest
         .post(PUBLIC_API_PATH)
@@ -28,15 +28,12 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
       expect(response.status).to.be(200);
-      expect(response.body.data.kibanaSavedObjectMeta.searchSource).to.eql({});
-      expect(response.body.data.panels).to.eql([]);
-      expect(response.body.data.timeRestore).to.be(false);
-      expect(response.body.data.options).to.eql({
-        hidePanelTitles: false,
-        useMargins: true,
-        syncColors: true,
-        syncTooltips: true,
-        syncCursor: true,
+      expect(response.body.data).to.eql({
+        namespaces: ['default'],
+        panels: [],
+        references: [],
+        timeRestore: false,
+        title,
       });
     });
 
@@ -53,13 +50,13 @@ export default function ({ getService }: FtrProviderContext) {
           panels: [
             {
               type: 'visualization',
-              gridData: {
+              grid: {
                 x: 0,
                 y: 0,
                 w: 24,
                 h: 15,
               },
-              panelConfig: {},
+              config: {},
             },
           ],
         });
@@ -67,10 +64,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.status).to.be(200);
       expect(response.body.data.panels).to.be.an('array');
       // panel index is a random uuid when not provided
-      expect(response.body.data.panels[0].panelIndex).match(/^[0-9a-f-]{36}$/);
-      expect(response.body.data.panels[0].panelIndex).to.eql(
-        response.body.data.panels[0].gridData.i
-      );
+      expect(response.body.data.panels[0].uid).match(/^[0-9a-f-]{36}$/);
     });
 
     it('sets controls default values', async () => {
@@ -143,15 +137,14 @@ export default function ({ getService }: FtrProviderContext) {
           panels: [
             {
               type: 'visualization',
-              gridData: {
+              grid: {
                 x: 0,
                 y: 0,
                 w: 24,
                 h: 15,
-                i: 'bizz',
               },
-              panelConfig: {},
-              panelIndex: 'bizz',
+              config: {},
+              uid: 'bizz',
             },
           ],
           references: [

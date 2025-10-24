@@ -72,6 +72,9 @@ const CollapsibleNavigationFlyout: FunctionComponent<{
         hideCloseButton={true}
         onClose={() => {}}
         className="hide-for-sharing"
+        css={css`
+          border-inline-end: none; // Remove default euiFlyout border when used as a sidenav
+        `}
       >
         <div css={{ height: '100%', display: 'flex' }}>{children(childrenProps)}</div>
       </EuiFlyout>

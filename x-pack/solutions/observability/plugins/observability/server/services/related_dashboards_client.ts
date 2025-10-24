@@ -8,7 +8,7 @@ import { isEmpty, omit } from 'lodash';
 import type { IContentClient } from '@kbn/content-management-plugin/server/types';
 import type { Logger, SavedObjectsFindResult } from '@kbn/core/server';
 import { isDashboardPanel } from '@kbn/dashboard-plugin/common';
-import type { DashboardAttributes, DashboardPanel } from '@kbn/dashboard-plugin/server';
+import type { DashboardState, DashboardPanel } from '@kbn/dashboard-plugin/server';
 import type {
   FieldBasedIndexPatternColumn,
   GenericIndexPatternColumn,
@@ -28,7 +28,7 @@ import {
 } from './helpers';
 import type { ReferencedPanelManager } from './referenced_panel_manager';
 
-type Dashboard = SavedObjectsFindResult<DashboardAttributes>;
+type Dashboard = SavedObjectsFindResult<DashboardState>;
 
 export class RelatedDashboardsClient {
   public dashboardsById = new Map<string, Dashboard>();
@@ -69,11 +69,11 @@ export class RelatedDashboardsClient {
     (panel: DashboardPanel) => Set<string> | undefined
   > = {
     lens: (panel: DashboardPanel) => {
-      let references = this.isLensVizAttributes(panel.panelConfig.attributes)
-        ? panel.panelConfig.attributes.references
+      let references = this.isLensVizAttributes(panel.config)
+        ? panel.config.attributes.references
         : undefined;
-      if (!references && panel.panelIndex) {
-        references = this.referencedPanelManager.getByIndex(panel.panelIndex)?.references;
+      if (!references && panel.uid) {
+        references = this.referencedPanelManager.getByUid(panel.uid)?.references;
       }
       if (references?.length) {
         return new Set(
@@ -88,11 +88,11 @@ export class RelatedDashboardsClient {
     (panel: DashboardPanel) => Set<string> | undefined
   > = {
     lens: (panel: DashboardPanel) => {
-      let state: unknown = this.isLensVizAttributes(panel.panelConfig.attributes)
-        ? panel.panelConfig.attributes.state
+      let state: unknown = this.isLensVizAttributes(panel.config)
+        ? panel.config.attributes.state
         : undefined;
-      if (!state && panel.panelIndex) {
-        state = this.referencedPanelManager.getByIndex(panel.panelIndex)?.state;
+      if (!state && panel.uid) {
+        state = this.referencedPanelManager.getByUid(panel.uid)?.state;
       }
       if (this.isLensAttributesState(state)) {
         const fields = new Set<string>();
@@ -181,7 +181,7 @@ export class RelatedDashboardsClient {
         if (
           isDashboardPanel(panel) &&
           isSuggestedDashboardsValidPanelType(panel.type) &&
-          (isEmpty(panel.panelConfig) || !panel.panelConfig.attributes)
+          (isEmpty(panel.config) || !(panel.config as Record<string, unknown>).attributes)
         ) {
           this.referencedPanelManager.addReferencedPanel({ dashboard, panel });
         }
@@ -293,7 +293,8 @@ export class RelatedDashboardsClient {
     return fields ?? new Set<string>();
   }
 
-  private isLensVizAttributes(attributes: unknown): attributes is LensAttributes {
+  private isLensVizAttributes(config: object): config is { attributes: LensAttributes } {
+    const { attributes } = (config ?? {}) as Record<string, unknown>;
     if (!attributes) {
       return false;
     }

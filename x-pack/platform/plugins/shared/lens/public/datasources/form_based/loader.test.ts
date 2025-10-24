@@ -13,7 +13,11 @@ import {
   injectReferences,
 } from './loader';
 import type { FormBasedPersistedState, FormBasedPrivateState } from './types';
-import type { DateHistogramIndexPatternColumn, TermsIndexPatternColumn } from './operations';
+import type {
+  DateHistogramIndexPatternColumn,
+  FormulaIndexPatternColumn,
+  TermsIndexPatternColumn,
+} from './operations';
 import { sampleIndexPatterns } from '../../data_views_service/mocks';
 
 const createMockStorage = (lastData?: Record<string, string>) => {
@@ -238,6 +242,179 @@ describe('loader', () => {
       expect(storage.set).toHaveBeenCalledWith('lens-settings', {
         indexPatternId: '2',
       });
+    });
+
+    it('should expand formula columns correctly', () => {
+      const savedState: FormBasedPersistedState = {
+        layers: {
+          layerb: {
+            columnOrder: ['col1', 'col2'],
+            columns: {
+              col1: {
+                dataType: 'number',
+                isBucketed: false,
+                label: 'Formula 1',
+                operationType: 'formula',
+                params: {
+                  formula: 'sum(bytes) + 100',
+                },
+                references: [],
+              } as FormulaIndexPatternColumn,
+              col2: {
+                dataType: 'number',
+                isBucketed: false,
+                label: 'Formula 2',
+                operationType: 'formula',
+                params: {
+                  formula: 'average(bytes) + 100',
+                },
+                references: [],
+              } as FormulaIndexPatternColumn,
+            },
+          },
+        },
+      };
+      const storage = createMockStorage({ indexPatternId: '1' });
+      const state = loadInitialState({
+        persistedState: savedState,
+        references: [
+          { name: 'indexpattern-datasource-layer-layerb', id: '2', type: 'index-pattern' },
+        ],
+
+        indexPatternRefs,
+        indexPatterns: {
+          '2': sampleIndexPatterns['2'],
+        },
+        storage,
+      });
+
+      // First shallow check: formula columns should be expanded
+      expect(state.layers.layerb.columnOrder).toHaveLength(
+        Object.keys(savedState.layers.layerb.columns).length * 3
+      );
+
+      // Deep check: the formulas should be correctly expanded
+      expect(state.layers.layerb).toMatchInlineSnapshot(`
+        Object {
+          "columnOrder": Array [
+            "col1",
+            "col2",
+            "col1X0",
+            "col1X1",
+            "col2X0",
+            "col2X1",
+          ],
+          "columns": Object {
+            "col1": Object {
+              "dataType": "number",
+              "isBucketed": false,
+              "label": "sum(bytes) + 100",
+              "operationType": "formula",
+              "params": Object {
+                "formula": "sum(bytes) + 100",
+                "isFormulaBroken": false,
+              },
+              "references": Array [
+                "col1X1",
+              ],
+            },
+            "col1X0": Object {
+              "customLabel": true,
+              "dataType": "number",
+              "filter": undefined,
+              "isBucketed": false,
+              "label": "Part of sum(bytes) + 100",
+              "operationType": "sum",
+              "params": Object {
+                "emptyAsNull": false,
+              },
+              "reducedTimeRange": undefined,
+              "sourceField": "bytes",
+              "timeScale": undefined,
+              "timeShift": undefined,
+            },
+            "col1X1": Object {
+              "customLabel": true,
+              "dataType": "number",
+              "isBucketed": false,
+              "label": "Part of sum(bytes) + 100",
+              "operationType": "math",
+              "params": Object {
+                "tinymathAst": Object {
+                  "args": Array [
+                    "col1X0",
+                    100,
+                  ],
+                  "location": Object {
+                    "max": 16,
+                    "min": 0,
+                  },
+                  "name": "add",
+                  "text": "sum(bytes) + 100",
+                  "type": "function",
+                },
+              },
+              "references": Array [
+                "col1X0",
+              ],
+            },
+            "col2": Object {
+              "dataType": "number",
+              "isBucketed": false,
+              "label": "average(bytes) + 100",
+              "operationType": "formula",
+              "params": Object {
+                "formula": "average(bytes) + 100",
+                "isFormulaBroken": false,
+              },
+              "references": Array [
+                "col2X1",
+              ],
+            },
+            "col2X0": Object {
+              "customLabel": true,
+              "dataType": "number",
+              "filter": undefined,
+              "isBucketed": false,
+              "label": "Part of average(bytes) + 100",
+              "operationType": "average",
+              "params": Object {
+                "emptyAsNull": false,
+              },
+              "reducedTimeRange": undefined,
+              "sourceField": "bytes",
+              "timeScale": undefined,
+              "timeShift": undefined,
+            },
+            "col2X1": Object {
+              "customLabel": true,
+              "dataType": "number",
+              "isBucketed": false,
+              "label": "Part of average(bytes) + 100",
+              "operationType": "math",
+              "params": Object {
+                "tinymathAst": Object {
+                  "args": Array [
+                    "col2X0",
+                    100,
+                  ],
+                  "location": Object {
+                    "max": 20,
+                    "min": 0,
+                  },
+                  "name": "add",
+                  "text": "average(bytes) + 100",
+                  "type": "function",
+                },
+              },
+              "references": Array [
+                "col2X0",
+              ],
+            },
+          },
+          "indexPatternId": "2",
+        }
+      `);
     });
   });
 

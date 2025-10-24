@@ -42,10 +42,11 @@ const tabs = [
 
 interface MetricFlyoutBodyProps {
   metric: MetricField;
+  description?: string;
   esqlQuery?: string;
 }
 
-export const MetricFlyoutBody = ({ metric, esqlQuery }: MetricFlyoutBodyProps) => {
+export const MetricFlyoutBody = ({ metric, esqlQuery, description }: MetricFlyoutBodyProps) => {
   const [selectedTabId, setSelectedTabId] = useState<TabId>(tabIds.OVERVIEW);
 
   const onSelectedTabChanged = (id: TabId) => {
@@ -67,7 +68,9 @@ export const MetricFlyoutBody = ({ metric, esqlQuery }: MetricFlyoutBodyProps) =
   return (
     <>
       <EuiTabs size="s">{renderTabs()}</EuiTabs>
-      {selectedTabId === tabIds.OVERVIEW && <OverviewTab metric={metric} />}
+      {selectedTabId === tabIds.OVERVIEW && (
+        <OverviewTab metric={metric} description={description} />
+      )}
       {selectedTabId === tabIds.ESQL_QUERY && (
         <EsqlQueryTab esqlQuery={esqlQuery} metric={metric} />
       )}

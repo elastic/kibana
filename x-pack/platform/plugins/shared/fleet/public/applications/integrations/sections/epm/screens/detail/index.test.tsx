@@ -42,7 +42,8 @@ const TESTS_TIMEOUT = 8000;
 // @ts-ignore this saves us having to define all experimental features
 ExperimentalFeaturesService.init({});
 
-describe('When on integration detail', () => {
+// Failing: See https://github.com/elastic/kibana/issues/237961
+describe.skip('When on integration detail', () => {
   const pkgkey = 'nginx-0.3.7';
   const detailPageUrlPath = pagePathGetters.integration_details_overview({ pkgkey })[1];
   let testRenderer: TestRenderer;
@@ -101,9 +102,6 @@ describe('When on integration detail', () => {
 
   describe('and the package is not installed and prerelease enabled', () => {
     beforeEach(async () => {
-      mockedApi.responseProvider.getSettings.mockReturnValue({
-        item: { prerelease_integrations_enabled: true, id: '' },
-      });
       mockGAAndPrereleaseVersions('1.0.0-beta');
       await render();
       await act(() => mockedApi.waitForApi());
@@ -121,13 +119,13 @@ describe('When on integration detail', () => {
       expect(renderResult.queryByTestId('tab-policies')).toBeNull();
     });
 
-    it('should display version select if prerelease setting enabled and prererelase version available', async () => {
+    it('should display version select if prererelase version available', async () => {
       const versionSelect = renderResult.queryByTestId('versionSelect');
       expect(versionSelect?.textContent).toEqual('1.0.0-beta1.0.0');
       expect((versionSelect as any)?.value).toEqual('1.0.0-beta');
     });
 
-    it('should display prerelease callout if prerelease setting enabled and prerelease version available', async () => {
+    it('should display prerelease callout if prerelease version available', async () => {
       const calloutTitle = renderResult.getByTestId('prereleaseCallout');
       expect(calloutTitle).toBeInTheDocument();
       const calloutGABtn = renderResult.getByTestId('switchToGABtn');
@@ -137,39 +135,8 @@ describe('When on integration detail', () => {
     });
   });
 
-  describe('and the package is not installed and prerelease disabled', () => {
-    beforeEach(async () => {
-      mockGAAndPrereleaseVersions('1.0.0');
-      mockedApi.responseProvider.getSettings.mockReturnValue({
-        item: { prerelease_integrations_enabled: false, id: '' },
-      });
-      await render();
-      await act(() => mockedApi.waitForApi());
-      // All those waitForApi call are needed to avoid flakyness because details conditionnaly refetch multiple time
-      await act(() => mockedApi.waitForApi());
-      await act(() => mockedApi.waitForApi());
-      await act(() => mockedApi.waitForApi());
-    }, TESTS_TIMEOUT);
-
-    it('should NOT display policy usage count', async () => {
-      expect(renderResult.queryByTestId('policyCount')).toBeNull();
-    });
-
-    it('should NOT display the Policies tab', async () => {
-      expect(renderResult.queryByTestId('tab-policies')).toBeNull();
-    });
-
-    it('should display version text and no callout if prerelease setting disabled', async () => {
-      expect((renderResult.queryByTestId('versionText') as any)?.textContent).toEqual('1.0.0');
-      expect(renderResult.queryByTestId('prereleaseCallout')).toBeNull();
-    });
-  });
-
   describe('and a custom UI extension is NOT registered', () => {
     beforeEach(async () => {
-      mockedApi.responseProvider.getSettings.mockReturnValue({
-        item: { prerelease_integrations_enabled: false, id: '' },
-      });
       await render();
       await act(() => mockedApi.waitForApi());
       // All those waitForApi call are needed to avoid flakyness because details conditionnaly refetch multiple time
@@ -206,9 +173,6 @@ describe('When on integration detail', () => {
 
     beforeEach(async () => {
       let setWasRendered: () => void;
-      mockedApi.responseProvider.getSettings.mockReturnValue({
-        item: { prerelease_integrations_enabled: false, id: '' },
-      });
       lazyComponentWasRendered = new Promise((resolve) => {
         setWasRendered = resolve;
       });

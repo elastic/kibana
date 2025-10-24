@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Boom from '@hapi/boom';
 import { v4 as uuidv4 } from 'uuid';
 
 import type { SavedObjectReference } from '@kbn/core/server';
@@ -16,13 +17,10 @@ import type {
   SavedDashboardPanel,
   SavedDashboardSection,
 } from '../../../../dashboard_saved_object';
-import type { DashboardAttributes, DashboardPanel, DashboardSection } from '../../types';
+import type { DashboardState, DashboardPanel, DashboardSection } from '../../types';
 import { embeddableService, logger } from '../../../../kibana_services';
 
-export function transformPanelsIn(
-  widgets: DashboardAttributes['panels'] | undefined,
-  dropSections: boolean = false
-): {
+export function transformPanelsIn(widgets: DashboardState['panels'] | undefined): {
   panelsJSON: DashboardSavedObjectAttributes['panelsJSON'];
   sections: DashboardSavedObjectAttributes['sections'];
   references: SavedObjectReference[];
@@ -33,14 +31,14 @@ export function transformPanelsIn(
 
   widgets?.forEach((widget) => {
     if (isDashboardSection(widget)) {
-      const { panels: sectionPanels, gridData, ...restOfSection } = widget as DashboardSection;
-      const idx = gridData.i ?? uuidv4();
-      sections.push({ ...restOfSection, gridData: { ...gridData, i: idx } });
-      (sectionPanels as DashboardPanel[]).forEach((panel) => {
+      const { panels: sectionPanels, grid, uid, ...restOfSection } = widget as DashboardSection;
+      const idx = uid ?? uuidv4();
+      sections.push({ ...restOfSection, gridData: { ...grid, i: idx } });
+      sectionPanels.forEach((panel) => {
         const { storedPanel, references } = transformPanelIn(panel);
         panels.push({
           ...storedPanel,
-          gridData: { ...storedPanel.gridData, ...(!dropSections && { sectionId: idx }) },
+          gridData: { ...storedPanel.gridData, sectionId: idx },
         });
         panelReferences.push(...references);
       });
@@ -58,15 +56,26 @@ function transformPanelIn(panel: DashboardPanel): {
   storedPanel: SavedDashboardPanel;
   references: SavedObjectReference[];
 } {
-  const { panelIndex, gridData, panelConfig, ...restPanel } = panel as DashboardPanel;
-  const idx = panelIndex ?? uuidv4();
+  const { uid, grid, config, ...restPanel } = panel;
+  const idx = uid ?? uuidv4();
 
   const transforms = embeddableService?.getTransforms(panel.type);
-  let transformedPanelConfig = panelConfig;
+
+  if (transforms?.schema) {
+    try {
+      transforms.schema.validate(config);
+    } catch (error) {
+      throw Boom.badRequest(
+        `Panel config validation failed. Panel uid: ${uid}, type: ${restPanel.type}, validation error: ${error.message}`
+      );
+    }
+  }
+
+  let transformedPanelConfig = config;
   let references: undefined | SavedObjectReference[];
   try {
     if (transforms?.transformIn) {
-      const transformed = transforms.transformIn(panelConfig);
+      const transformed = transforms.transformIn(config);
       transformedPanelConfig = transformed.state;
       references = transformed.references;
     }
@@ -83,7 +92,7 @@ function transformPanelIn(panel: DashboardPanel): {
       embeddableConfig: transformedPanelConfig as SavedDashboardPanel['embeddableConfig'],
       panelIndex: idx,
       gridData: {
-        ...gridData,
+        ...grid,
         i: idx,
       },
     },

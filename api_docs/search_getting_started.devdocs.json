@@ -1,0 +1,82 @@
+{
+  "id": "searchGettingStarted",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "searchGettingStarted",
+        "id": "def-common.AnalyticsEvents",
+        "type": "string",
+        "tags": [],
+        "label": "AnalyticsEvents",
+        "description": [],
+        "path": "x-pack/solutions/search/plugins/search_getting_started/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "searchGettingStarted",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"searchGettingStarted\""
+        ],
+        "path": "x-pack/solutions/search/plugins/search_getting_started/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "searchGettingStarted",
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_NAME",
+        "description": [],
+        "path": "x-pack/solutions/search/plugins/search_getting_started/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "searchGettingStarted",
+        "id": "def-common.PLUGIN_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_PATH",
+        "description": [],
+        "signature": [
+          "\"/app/elasticsearch/getting_started\""
+        ],
+        "path": "x-pack/solutions/search/plugins/search_getting_started/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

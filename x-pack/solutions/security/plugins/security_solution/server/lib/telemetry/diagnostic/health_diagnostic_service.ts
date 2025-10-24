@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { bufferCount, from, mergeMap, take, tap } from 'rxjs';
+import { bufferCount, defaultIfEmpty, from, mergeMap, take, tap } from 'rxjs';
 import { cloneDeep } from 'lodash';
 import type {
   TaskManagerSetupContract,
@@ -127,8 +127,21 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
             // publish N documents in the same EBT
             bufferCount(telemetryConfiguration.health_diagnostic_config.query.bufferSize),
 
+            // emit empty array if no items were buffered (ensures EBT is always sent)
+            defaultIfEmpty([]),
+
             // apply filterlist
-            mergeMap((result) => from(applyFilterlist(result, query.filterlist, this.salt)))
+            mergeMap((result) =>
+              from(
+                applyFilterlist(
+                  result,
+                  query.filterlist,
+                  this.salt,
+                  query,
+                  telemetryConfiguration.encryption_public_keys
+                )
+              )
+            )
           )
           .subscribe({
             next: (data) => {
