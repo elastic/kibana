@@ -17,7 +17,7 @@ export type WorkflowsActionParamsType = ExecutorParams;
 export interface RunWorkflowParams {
   workflowId: string;
   spaceId: string;
-  alerts?: any[];
+  alerts?: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
   inputs?: Record<string, unknown>;
   [key: string]: unknown;
 }

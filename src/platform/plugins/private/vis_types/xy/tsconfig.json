@@ -24,6 +24,10 @@
     "@kbn/i18n-react",
     "@kbn/config-schema",
     "@kbn/css-utils",
+    "@kbn/chart-expressions-common",
+    "@kbn/visualizations-common",
+    "@kbn/lens-common",
+    "@kbn/expression-xy-plugin",
   ],
   "exclude": [
     "target/**/*",
