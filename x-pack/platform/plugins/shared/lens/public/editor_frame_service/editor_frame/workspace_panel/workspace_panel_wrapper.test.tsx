@@ -7,13 +7,6 @@
 
 import React from 'react';
 import type { Visualization, LensAppState } from '@kbn/lens-common';
-import type { FrameMock } from '../../../mocks';
-import {
-  createMockVisualization,
-  createMockFramePublicAPI,
-  renderWithReduxStore,
-} from '../../../mocks';
-import type { Visualization } from '../../../types';
 import { createMockVisualization, renderWithReduxStore } from '../../../mocks';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 import { updateVisualizationState } from '../../../state_management';
