@@ -25,8 +25,6 @@ import type {
   IndexPattern,
   IndexPatternField,
   VisualizationDimensionGroupConfig,
-} from '@kbn/lens-common';
-import type {
   FormulaIndexPatternColumn,
   BaseIndexPatternColumn,
   DatasourceFixAction,
