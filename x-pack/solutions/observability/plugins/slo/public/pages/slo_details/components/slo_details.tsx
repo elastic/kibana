@@ -17,6 +17,7 @@ import { Definition } from './definition/definition';
 import { SloDetailsAlerts } from './slo_detail_alerts';
 import { SloHealthCallout } from './slo_health_callout';
 import { SloRemoteCallout } from './slo_remote_callout';
+import { ActionModalProvider } from '../../../context/action_modal';
 
 export const TAB_ID_URL_PARAM = 'tabId';
 export const OVERVIEW_TAB_ID = 'overview';
@@ -69,15 +70,17 @@ export function SloDetails({ slo, isAutoRefreshing, selectedTabId }: Props) {
   }
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="xl">
-      <SloRemoteCallout slo={slo} />
-      <SloHealthCallout slo={slo} />
+    <ActionModalProvider>
+      <EuiFlexGroup direction="column" gutterSize="xl">
+        <SloRemoteCallout slo={slo} />
+        <SloHealthCallout slo={slo} />
 
-      <EuiFlexGroup direction="column" gutterSize="l">
-        <BurnRatePanel slo={slo} isAutoRefreshing={isAutoRefreshing} />
-        <HistoricalDataCharts slo={slo} isAutoRefreshing={isAutoRefreshing} />
-        <EventsChartPanel slo={slo} range={range} />
+        <EuiFlexGroup direction="column" gutterSize="l">
+          <BurnRatePanel slo={slo} isAutoRefreshing={isAutoRefreshing} />
+          <HistoricalDataCharts slo={slo} isAutoRefreshing={isAutoRefreshing} />
+          <EventsChartPanel slo={slo} range={range} />
+        </EuiFlexGroup>
       </EuiFlexGroup>
-    </EuiFlexGroup>
+    </ActionModalProvider>
   );
 }

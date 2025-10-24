@@ -177,7 +177,10 @@ function computeState(
 function getTransformHealth(
   transformStat?: TransformGetTransformStatsTransformStats
 ): HealthStatus {
-  return transformStat?.health?.status?.toLowerCase() === 'green' ? 'healthy' : 'unhealthy';
+  if (!transformStat) {
+    return 'missing';
+  }
+  return transformStat.health?.status?.toLowerCase() === 'green' ? 'healthy' : 'unhealthy';
 }
 
 function computeHealth(

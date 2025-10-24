@@ -38540,34 +38540,6 @@ Object {
           ],
           "type": "string",
         },
-        "path": Object {
-          "flags": Object {
-            "error": [Function],
-          },
-          "rules": Array [
-            Object {
-              "args": Object {
-                "method": [Function],
-              },
-              "name": "custom",
-            },
-          ],
-          "type": "string",
-        },
-        "secret": Object {
-          "flags": Object {
-            "error": [Function],
-          },
-          "rules": Array [
-            Object {
-              "args": Object {
-                "method": [Function],
-              },
-              "name": "custom",
-            },
-          ],
-          "type": "string",
-        },
         "storyId": Object {
           "flags": Object {
             "error": [Function],
@@ -38580,6 +38552,11 @@ Object {
           "x-oas-optional": true,
         },
       ],
+      "preferences": Object {
+        "stripUnknown": Object {
+          "objects": true,
+        },
+      },
       "type": "object",
     },
     "webhookUrl": Object {
@@ -38659,34 +38636,6 @@ Object {
           ],
           "type": "string",
         },
-        "path": Object {
-          "flags": Object {
-            "error": [Function],
-          },
-          "rules": Array [
-            Object {
-              "args": Object {
-                "method": [Function],
-              },
-              "name": "custom",
-            },
-          ],
-          "type": "string",
-        },
-        "secret": Object {
-          "flags": Object {
-            "error": [Function],
-          },
-          "rules": Array [
-            Object {
-              "args": Object {
-                "method": [Function],
-              },
-              "name": "custom",
-            },
-          ],
-          "type": "string",
-        },
         "storyId": Object {
           "flags": Object {
             "error": [Function],
@@ -38699,6 +38648,11 @@ Object {
           "x-oas-optional": true,
         },
       ],
+      "preferences": Object {
+        "stripUnknown": Object {
+          "objects": true,
+        },
+      },
       "type": "object",
     },
     "webhookUrl": Object {
