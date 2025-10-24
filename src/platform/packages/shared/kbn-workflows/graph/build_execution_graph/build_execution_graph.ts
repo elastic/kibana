@@ -753,7 +753,8 @@ function createForeachGraphForStepWithForeach(
 }
 
 export function convertToWorkflowGraph(
-  workflowSchema: WorkflowYaml
+  workflowSchema: WorkflowYaml,
+  defaultSettings?: WorkflowSettings
 ): graphlib.Graph<GraphNodeUnion> {
   const context: GraphBuildContext = {
     settings: workflowSchema.settings,
@@ -763,11 +764,13 @@ export function convertToWorkflowGraph(
 
   let finalGraph = createStepsSequence(workflowSchema.steps, context);
 
-  if (workflowSchema.settings?.timeout) {
+  const workflowTimeout = workflowSchema.settings?.timeout || defaultSettings?.timeout;
+
+  if (workflowTimeout) {
     finalGraph = handleTimeout(
       'workflow_level_timeout',
       'workflow_level_timeout',
-      workflowSchema.settings.timeout,
+      workflowTimeout,
       finalGraph,
       context
     );
