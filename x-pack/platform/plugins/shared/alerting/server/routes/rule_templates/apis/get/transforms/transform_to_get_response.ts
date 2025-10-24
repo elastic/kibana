@@ -12,8 +12,8 @@ import type { RuleTemplate } from '../../../../../application/rule_template/type
 export const transformGetResponse = (ruleTemplate: RuleTemplate): RuleTemplateResponse => ({
   id: ruleTemplate.id,
   name: ruleTemplate.name,
-  params: ruleTemplate.params,
   rule_type_id: ruleTemplate.ruleTypeId,
+  params: ruleTemplate.params,
   schedule: ruleTemplate.schedule,
   tags: ruleTemplate.tags,
   ...(ruleTemplate.alertDelay ? { alert_delay: ruleTemplate.alertDelay } : {}),
