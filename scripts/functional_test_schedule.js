@@ -10,8 +10,11 @@
 require('../src/setup_node_env');
 require('@kbn/test')
   .runTestsScheduleCli()
-  .finally(function () {
-    if (process.exitCode === undefined) {
-      process.exitCode = 1;
-    }
+  .then(function () {
+    process.exit(0);
+  })
+  .catch(function (err) {
+    process.stdout.write(require('util').format(err), function () {
+      process.exit(1);
+    });
   });
