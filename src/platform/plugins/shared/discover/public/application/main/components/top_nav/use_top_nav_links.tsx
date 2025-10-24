@@ -29,6 +29,8 @@ import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import type { DiscoverServices } from '../../../../build_services';
 import { STREAMS_APP_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import { esqlToStreamlangProcessors, esqlToStreamlangSteps } from '@kbn/streamlang';
+import type { StreamsAppLocatorParams } from '@kbn/streams-app-plugin/common';
+import type { EnrichmentUrlState } from '@kbn/streams-app-plugin/common/url_schema/enrichment_url_schema';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import type { AppMenuDiscoverParams } from './app_menu_actions';
 import {
@@ -232,9 +234,11 @@ export const useTopNavLinks = ({
 
   return useMemo(() => {
     // Compute ES|QL materialization eligibility and navigation
-    const esqlQuery: string | undefined = isEsqlMode
-      ? ((state.appState.getState()?.query as any)?.esql as string | undefined)
-      : undefined;
+    const getEsqlFromState = (): string | undefined => {
+      const q = state.appState.getState()?.query;
+      return q && typeof (q as any).esql === 'string' ? (q as { esql: string }).esql : undefined;
+    };
+    const esqlQuery: string | undefined = isEsqlMode ? getEsqlFromState() : undefined;
     const indexPattern = esqlQuery ? getIndexPatternFromESQLQuery(esqlQuery) : '';
     const isSingleTarget = Boolean(indexPattern) && !indexPattern.includes(',') && !indexPattern.includes('*') && !indexPattern.includes(' ');
     const processors = esqlQuery ? esqlToStreamlangProcessors(esqlQuery) : [];
@@ -264,11 +268,12 @@ export const useTopNavLinks = ({
         iconType: 'indexEdit',
         run: async () => {
           if (!isEligible) return;
-          const locator = services.share?.url.locators.get(STREAMS_APP_LOCATOR_ID);
+          const locator = services.share?.url.locators.get<StreamsAppLocatorParams>(STREAMS_APP_LOCATOR_ID);
           if (!locator) return;
-          const pageState = stepsV3.length > 0
-            ? ({ v: 3, dataSources: [], stepsToAppend: stepsV3 } as any)
-            : ({ v: 2, dataSources: [], processorsToAppend: processors as any } as any);
+          const pageState: EnrichmentUrlState =
+            stepsV3.length > 0
+              ? { v: 3, dataSources: [], stepsToAppend: stepsV3 }
+              : { v: 2, dataSources: [], processorsToAppend: processors };
           if (stepsV3.length === 0 && processors.length > 0) {
             services.notifications.toasts.addInfo({
               title: i18n.translate('discover.materialize.debug.noStepsV3', {
@@ -280,11 +285,12 @@ export const useTopNavLinks = ({
               }),
             });
           }
-          const url = await locator.getRedirectUrl({
+          const params = {
             name: indexPattern,
             managementTab: 'processing',
             pageState,
-          } as any);
+          } as unknown as StreamsAppLocatorParams;
+          const url = await locator.getRedirectUrl(params);
           services.application.navigateToUrl(url);
         },
         disableButton: !isEligible,

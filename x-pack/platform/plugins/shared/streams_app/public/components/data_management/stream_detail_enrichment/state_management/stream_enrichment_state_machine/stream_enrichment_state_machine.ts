@@ -22,6 +22,7 @@ import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { Streams } from '@kbn/streams-schema';
 import { GrokCollection } from '@kbn/grok-ui';
 import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
+import { isActionBlock } from '@kbn/streamlang';
 import {
   ALWAYS_CONDITION,
   convertStepsForUI,
@@ -671,19 +672,16 @@ export const createStreamEnrichmentMachineImplementations = ({
       toasts: core.notifications.toasts,
     }),
     consumeProcessorsFromUrl: assign(({ context, spawn, self }) => {
-      const urlState = context.urlState as any;
-      const processors: any[] | undefined = urlState && urlState.v === 2 ? urlState.processorsToAppend : undefined;
-
-      if (!processors || processors.length === 0) {
+      const urlState: EnrichmentUrlState = context.urlState;
+      if (urlState.v !== 2 || !urlState.processorsToAppend?.length) {
         return {};
       }
 
       const isWired = getStreamTypeFromDefinition(context.definition.stream) === 'wired';
-      const appendedRefs = processors.map((processor) => {
+      const appendedRefs = urlState.processorsToAppend.map((processor) => {
         const converted = stepConverter.toUIDefinition(processor, { parentId: null });
-        // Convert ECS→OTel field names in WHERE for Wired streams
-        if ((converted as any).where) {
-          (converted as any).where = rewriteConditionFieldsToOtel((converted as any).where, isWired);
+        if (isActionBlock(converted) && converted.where) {
+          converted.where = rewriteConditionFieldsToOtel(converted.where, isWired);
         }
         return spawnStep(converted, { spawn, self }, { isNew: true });
       });
@@ -693,29 +691,26 @@ export const createStreamEnrichmentMachineImplementations = ({
       };
     }),
     stripProcessorsFromUrl: assign(({ context }) => {
-      const urlState = context.urlState as any;
-      if (!urlState || urlState.v !== 2 || !urlState.processorsToAppend) {
+      const urlState: EnrichmentUrlState = context.urlState;
+      if (urlState.v !== 2 || !urlState.processorsToAppend) {
         return {};
       }
-
-      const { processorsToAppend, ...rest } = urlState;
+      const { processorsToAppend: _drop, ...rest } = urlState;
       return {
         urlState: { ...rest },
       };
     }),
     // v3 steps consumption (where blocks + processors)
     consumeStepsFromUrl: assign(({ context, spawn, self }) => {
-      const urlState = context.urlState as any;
-      const steps: any[] | undefined = urlState && urlState.v === 3 ? urlState.stepsToAppend : undefined;
-      if (!steps || steps.length === 0) {
+      const urlState: EnrichmentUrlState = context.urlState;
+      if (urlState.v !== 3 || !urlState.stepsToAppend?.length) {
         return {};
       }
       const isWired = getStreamTypeFromDefinition(context.definition.stream) === 'wired';
-      const appendRefs = steps.map((step) => {
+      const appendRefs = urlState.stepsToAppend.map((step) => {
         const converted = stepConverter.toUIDefinition(step, { parentId: null });
-        // Convert ECS→OTel field names in WHERE for Wired streams
-        if ((converted as any).where) {
-          (converted as any).where = rewriteConditionFieldsToOtel((converted as any).where, isWired);
+        if (isActionBlock(converted) && converted.where) {
+          converted.where = rewriteConditionFieldsToOtel(converted.where, isWired);
         }
         return spawnStep(converted, { spawn, self }, { isNew: true });
       });
@@ -724,11 +719,11 @@ export const createStreamEnrichmentMachineImplementations = ({
       };
     }),
     stripStepsFromUrl: assign(({ context }) => {
-      const urlState = context.urlState as any;
-      if (!urlState || urlState.v !== 3 || !urlState.stepsToAppend) {
+      const urlState: EnrichmentUrlState = context.urlState;
+      if (urlState.v !== 3 || !urlState.stepsToAppend) {
         return {};
       }
-      const { stepsToAppend, ...rest } = urlState;
+      const { stepsToAppend: _drop, ...rest } = urlState;
       return {
         urlState: { ...rest },
       };

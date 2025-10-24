@@ -10,32 +10,29 @@ import type {
   ESQLLiteral,
   ESQLFunction,
 } from '@kbn/esql-ast/src/types';
-import type { Condition, FilterCondition } from '../../../types/conditions';
+import type { Condition, FilterCondition, StringOrNumberOrBoolean } from '../../../types/conditions';
 import { isFilterCondition } from '../../../types/conditions';
 
 function isColumn(item: ESQLAstItem): item is ESQLColumn {
-  return (item as any)?.type === 'column';
+  return (item as unknown as { type?: string }).type === 'column';
 }
 
 function isLiteral(item: ESQLAstItem): item is ESQLLiteral {
-  return (item as any)?.type === 'literal';
+  return (item as unknown as { type?: string }).type === 'literal';
 }
 
 function isFunc(item: ESQLAstItem, name?: string): item is ESQLFunction {
-  const isFunction = (item as any)?.type === 'function';
+  const isFunction = (item as unknown as { type?: string }).type === 'function';
   if (!isFunction) return false;
   if (!name) return true;
-  return String((item as any)?.name || '').toLowerCase() === name.toLowerCase();
+  return String((item as unknown as { name?: string }).name || '').toLowerCase() === name.toLowerCase();
 }
 
 function literalToJs(lit: ESQLLiteral): unknown {
-  const anyLit = lit as any;
-  // Prefer unquoted value for strings when available from the AST
-  if (typeof anyLit.valueUnquoted === 'string') {
-    return anyLit.valueUnquoted;
-  }
-  if (anyLit.value !== undefined) {
-    const v = anyLit.value;
+  const l = lit as unknown as { valueUnquoted?: unknown; value?: unknown; text?: string };
+  if (typeof l.valueUnquoted === 'string') return l.valueUnquoted;
+  if (l.value !== undefined) {
+    const v = l.value;
     if (typeof v === 'string') {
       const s = String(v);
       if ((s.startsWith('"') && s.endsWith('"')) || (s.startsWith("'") && s.endsWith("'"))) {
@@ -45,7 +42,7 @@ function literalToJs(lit: ESQLLiteral): unknown {
     }
     return v;
   }
-  const t = String(anyLit.text ?? '').trim();
+  const t = String(l.text ?? '').trim();
   if ((t.startsWith('"') && t.endsWith('"')) || (t.startsWith("'") && t.endsWith("'"))) {
     return t.slice(1, -1);
   }
@@ -79,7 +76,7 @@ function likeToFilter(field: string, pattern: string): FilterCondition | undefin
   const hasPercent = pattern.includes('%');
   const hasUnderscore = pattern.includes('_');
   if (hasUnderscore) return undefined; // not supported safely
-  if (!hasPercent) return { field, eq: pattern } as any;
+  if (!hasPercent) return { field, eq: pattern };
   const startsWithPercent = pattern.startsWith('%');
   const endsWithPercent = pattern.endsWith('%');
   const core = pattern.replace(/^%|%$/g, '');
@@ -101,11 +98,11 @@ function tryBinary(expr: ESQLFunction): Condition | undefined {
       const left = esqlAstExpressionToCondition(a as ESQLSingleAstItem);
       const right = esqlAstExpressionToCondition(b as ESQLSingleAstItem);
       if (!left || !right) return undefined;
-      return name === 'and' ? ({ and: [left, right] } as any) : ({ or: [left, right] } as any);
+      return name === 'and' ? { and: [left, right] } : { or: [left, right] };
     }
     // Binary comparisons
-    if (isColumn(a) && isLiteral(b)) return makeBinary(a.text, expr.name, literalToJs(b));
-    if (isLiteral(a) && isColumn(b)) return makeBinary(b.text, expr.name, literalToJs(a));
+    if (isColumn(a) && isLiteral(b)) return makeBinary(a.text, expr.name, literalToJs(b) as any);
+    if (isLiteral(a) && isColumn(b)) return makeBinary(b.text, expr.name, literalToJs(a) as any);
   }
   return undefined;
 }
@@ -113,7 +110,7 @@ function tryBinary(expr: ESQLFunction): Condition | undefined {
 export function esqlAstExpressionToCondition(expr: ESQLSingleAstItem): Condition | undefined {
   // LIKE(column, literal)
   if (isFunc(expr, 'like')) {
-    const args = (expr as any).args as ESQLAstItem[];
+    const args = (expr as unknown as { args?: ESQLAstItem[] }).args as ESQLAstItem[];
     const col = args && isColumn(args[0]) ? (args[0] as ESQLColumn) : undefined;
     const lit = args && isLiteral(args[1]) ? (args[1] as ESQLLiteral) : undefined;
     if (col && lit) return likeToFilter(col.text, String(literalToJs(lit)));
@@ -122,22 +119,27 @@ export function esqlAstExpressionToCondition(expr: ESQLSingleAstItem): Condition
 
   // NOT IN(column, [literals...]) -> AND of inequality
   if (isFunc(expr)) {
-    const name = String((expr as any).name || '').toUpperCase();
+    const name = String((expr as unknown as { name?: string }).name || '').toUpperCase();
     if (name === 'NOT IN') {
-      const args = (expr as any).args as ESQLAstItem[];
+      const args = (expr as unknown as { args?: ESQLAstItem[] }).args as ESQLAstItem[];
       const col = args && isColumn(args[0]) ? (args[0] as ESQLColumn) : undefined;
       if (!col) return undefined;
-      const rhsNode: any = args.length > 1 ? (args[1] as any) : undefined;
+      const rhsNode = (args.length > 1 ? (args[1] as unknown as { type?: string; values?: ESQLAstItem[] }) : undefined);
       let rhsItems: ESQLAstItem[] = [];
       if (rhsNode && rhsNode.type === 'list' && Array.isArray(rhsNode.values)) {
         rhsItems = rhsNode.values as ESQLAstItem[];
       } else {
         rhsItems = (args.slice(1) as any[]).flatMap((a) => (Array.isArray(a) ? a : [a])) as ESQLAstItem[];
       }
-      const values: unknown[] = rhsItems.filter(isLiteral).map((l) => literalToJs(l as any));
+      const values = rhsItems
+        .filter(isLiteral)
+        .map((l) => literalToJs(l as ESQLLiteral))
+        .filter((v): v is StringOrNumberOrBoolean =>
+          typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean'
+        );
       if (values.length === 0) return undefined;
-      if (values.length === 1) return { field: col.text, neq: values[0] } as any;
-      return { and: values.map((v) => ({ field: col.text, neq: v } as any)) } as any;
+      if (values.length === 1) return { field: col.text, neq: values[0] };
+      return { and: values.map((v) => ({ field: col.text, neq: v })) };
     }
   }
 
@@ -145,11 +147,11 @@ export function esqlAstExpressionToCondition(expr: ESQLSingleAstItem): Condition
 
   // IN(column, [literals...]) -> OR of equality
   if (isFunc(expr, 'in')) {
-    const args = (expr as any).args as ESQLAstItem[];
+    const args = (expr as unknown as { args?: ESQLAstItem[] }).args as ESQLAstItem[];
     const col = args && isColumn(args[0]) ? (args[0] as ESQLColumn) : undefined;
     if (!col) return undefined;
     // Prefer tuple-style lists: the AST provides a node with type 'list' and a 'values' array
-    const rhsNode: any = args.length > 1 ? (args[1] as any) : undefined;
+    const rhsNode = (args.length > 1 ? (args[1] as unknown as { type?: string; values?: ESQLAstItem[] }) : undefined);
     let rhsItems: ESQLAstItem[] = [];
     if (rhsNode && rhsNode.type === 'list' && Array.isArray(rhsNode.values)) {
       rhsItems = rhsNode.values as ESQLAstItem[];
@@ -157,34 +159,42 @@ export function esqlAstExpressionToCondition(expr: ESQLSingleAstItem): Condition
       // Fallback: deep-flatten remaining args in case of different shapes
       rhsItems = (args.slice(1) as any[]).flatMap((a) => (Array.isArray(a) ? a : [a])) as ESQLAstItem[];
     }
-    const values: unknown[] = rhsItems.filter(isLiteral).map((l) => literalToJs(l as any));
+    const values = rhsItems
+      .filter(isLiteral)
+      .map((l) => literalToJs(l as ESQLLiteral))
+      .filter((v): v is StringOrNumberOrBoolean =>
+        typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean'
+      );
     if (values.length === 0) return undefined;
-    if (values.length === 1) return { field: col.text, eq: values[0] } as any;
-    return { or: values.map((v) => ({ field: col.text, eq: v } as any)) } as any;
+    if (values.length === 1) return { field: col.text, eq: values[0] };
+    return { or: values.map((v) => ({ field: col.text, eq: v })) };
   }
 
   // NOT(...) -> negate condition
   if (isFunc(expr, 'not')) {
-    const args = (expr as any).args as ESQLAstItem[];
+    const args = (expr as unknown as { args?: ESQLAstItem[] }).args as ESQLAstItem[];
     const inner = args && (args[0] as ESQLSingleAstItem);
     const c = inner ? esqlAstExpressionToCondition(inner) : undefined;
     // Normalize NOT(IS NULL col) -> { field, exists: true }
-    if (c && isFilterCondition(c) && 'exists' in (c as any)) {
-      return { field: (c as any).field, exists: !(c as any).exists } as any;
+    if (c && isFilterCondition(c) && 'field' in c) {
+      const cf = c as FilterCondition;
+      if ('exists' in cf) {
+        return { field: (cf as { field: string }).field, exists: !(cf as { exists?: boolean }).exists };
+      }
     }
-    return c ? ({ not: c } as any) : undefined;
+    return c ? { not: c } : undefined;
   }
 
   // IS NULL postfix and NOT(IS NULL)
   if (isFunc(expr)) {
-    const name = String((expr as any).name || '').toUpperCase();
+    const name = String((expr as unknown as { name?: string }).name || '').toUpperCase();
     if (name === 'IS NULL') {
-      const col = (expr as any).args?.[0];
-      if (col && isColumn(col)) return { field: (col as ESQLColumn).text, exists: false } as any;
+      const col = (expr as unknown as { args?: ESQLAstItem[] }).args?.[0];
+      if (col && isColumn(col)) return { field: (col as ESQLColumn).text, exists: false };
     }
     if (name === 'IS NOT NULL') {
-      const col = (expr as any).args?.[0];
-      if (col && isColumn(col)) return { field: (col as ESQLColumn).text, exists: true } as any;
+      const col = (expr as unknown as { args?: ESQLAstItem[] }).args?.[0];
+      if (col && isColumn(col)) return { field: (col as ESQLColumn).text, exists: true };
     }
   }
 

@@ -195,8 +195,8 @@ export const getFormStateFromActionStep = (
       (pattern) => new DraftGrokExpression(formStateDependencies.grokCollection, pattern)
     );
     // Ensure Advanced settings shows the condition editor even when not prepopulated
-    if ((clone as any).where === undefined) {
-      (clone as any).where = ALWAYS_CONDITION;
+    if (clone.where === undefined) {
+      clone.where = ALWAYS_CONDITION;
     }
 
     return clone;
@@ -212,7 +212,7 @@ export const getFormStateFromActionStep = (
     return structuredClone({
       ...restStep,
       // Ensure condition editor is available when not prepopulated
-      where: (restStep as any).where ?? ALWAYS_CONDITION,
+      where: restStep.where ?? ALWAYS_CONDITION,
     });
   }
 
@@ -343,11 +343,14 @@ export const convertFormStateToProcessor = (
       };
     }
 
-    if (configDrivenProcessors[formState.action]) {
+    if (formState.action === 'rename') {
       return {
-        processorDefinition: configDrivenProcessors[formState.action].convertFormStateToConfig(
-          formState as any
-        ),
+        processorDefinition: configDrivenProcessors.rename.convertFormStateToConfig(formState),
+      };
+    }
+    if (formState.action === 'append') {
+      return {
+        processorDefinition: configDrivenProcessors.append.convertFormStateToConfig(formState),
       };
     }
   }

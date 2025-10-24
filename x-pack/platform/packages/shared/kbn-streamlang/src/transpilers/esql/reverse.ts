@@ -13,7 +13,14 @@ import type {
   ESQLSingleAstItem,
   ESQLFunction,
 } from '@kbn/esql-ast/src/types';
-import type { StreamlangProcessorDefinition } from '../../../types/processors';
+import type {
+  StreamlangProcessorDefinition,
+  GrokProcessor,
+  DissectProcessor,
+  SetProcessor,
+  DateProcessor,
+  RenameProcessor,
+} from '../../../types/processors';
 import type { StreamlangStep } from '../../../types/streamlang';
 import type { Condition } from '../../../types/conditions';
 import { esqlAstExpressionToCondition } from './esql_ast_to_condition';
@@ -62,16 +69,18 @@ export function esqlToStreamlangProcessors(
 
   let activeCondition: Condition | undefined;
   const withWhere = <T extends StreamlangProcessorDefinition>(proc: T): T =>
-    (activeCondition ? ({ ...proc, where: activeCondition } as any) : proc);
+    activeCondition ? ({ ...proc, where: activeCondition } as T) : proc;
 
   for (const cmd of (root as ESQLAstQueryExpression).commands) {
     const command = cmd as ESQLCommand;
 
     if (isName(command, 'where')) {
-      const expr = (command as any).args?.[0] as ESQLSingleAstItem | undefined;
+      const expr = (command as unknown as { args?: ESQLAstItem[] }).args?.[0] as
+        | ESQLSingleAstItem
+        | undefined;
       const cond = expr ? esqlAstExpressionToCondition(expr) : undefined;
       if (!cond) continue;
-      activeCondition = activeCondition ? ({ and: [activeCondition, cond] } as any) : cond;
+      activeCondition = activeCondition ? { and: [activeCondition, cond] } : cond;
       continue;
     }
 
@@ -79,7 +88,8 @@ export function esqlToStreamlangProcessors(
       const field = asColumn(command.args[0]);
       const pattern = asStringLiteral(command.args[1]);
       if (field && pattern) {
-        processors.push(withWhere({ action: 'grok', from: field.text, patterns: [pattern] } as any));
+        const grok: GrokProcessor = { action: 'grok', from: field.text, patterns: [pattern] };
+        processors.push(withWhere(grok));
       }
       continue;
     }
@@ -88,14 +98,15 @@ export function esqlToStreamlangProcessors(
       const field = asColumn(command.args[0]);
       const pattern = asStringLiteral(command.args[1]);
       if (field && pattern) {
-        processors.push(withWhere({ action: 'dissect', from: field.text, pattern } as any));
+        const dissect: DissectProcessor = { action: 'dissect', from: field.text, pattern };
+        processors.push(withWhere(dissect));
       }
       continue;
     }
 
     if (isName(command, 'eval')) {
       // EVAL a = b, c = "lit" → set/copy_from/date steps
-      for (const arg of (command as any).args as ESQLAstItem[]) {
+      for (const arg of (command as unknown as { args?: ESQLAstItem[] }).args ?? []) {
         const assign = asBinaryFunc(arg, '=');
         if (!assign) continue;
         const [leftRaw, rightRaw] = (assign.args || []) as (ESQLAstItem | ESQLAstItem[])[];
@@ -105,23 +116,32 @@ export function esqlToStreamlangProcessors(
         if (!target) continue;
         const rightCol = right ? asColumn(right) : undefined;
         if (rightCol) {
-          processors.push(withWhere({ action: 'set', to: target.text, copy_from: rightCol.text } as any));
+          const setCopy: SetProcessor = { action: 'set', to: target.text, copy_from: rightCol.text };
+          processors.push(withWhere(setCopy));
           continue;
         }
         // Map EVAL target = DATE_PARSE(source, pattern)
         const dateFn = right ? asFunction(right, 'date_parse') : undefined;
-        if (dateFn && Array.isArray((dateFn as any).args)) {
-          const [srcArg, patternArg] = ((dateFn as any).args as ESQLAstItem[]);
+        if (dateFn && Array.isArray((dateFn as unknown as { args?: ESQLAstItem[] }).args)) {
+          const [srcArg, patternArg] = ((dateFn as unknown as { args?: ESQLAstItem[] }).args ?? []) as ESQLAstItem[];
           const srcCol = srcArg ? asColumn(srcArg) : undefined;
-          const pattern = patternArg && (patternArg as any).type === 'literal' ? asStringLiteral(patternArg) : undefined;
+          const pattern = patternArg && (patternArg as unknown as { type?: string }).type === 'literal' ? asStringLiteral(patternArg as ESQLAstItem) : undefined;
           if (srcCol && pattern) {
-            processors.push(withWhere({ action: 'date', from: srcCol.text, to: target.text, formats: [pattern] } as any));
+            const dateProc: DateProcessor = {
+              action: 'date',
+              from: srcCol.text,
+              to: target.text,
+              formats: [pattern],
+            };
+            processors.push(withWhere(dateProc));
             continue;
           }
         }
         
         if (right && isLiteral(right)) {
-          processors.push(withWhere({ action: 'set', to: target.text, value: (right as any).value ?? asStringLiteral(right) } as any));
+          const value = (right as unknown as { value?: unknown }).value ?? asStringLiteral(right);
+          const setVal: SetProcessor = { action: 'set', to: target.text, value };
+          processors.push(withWhere(setVal));
         }
       }
       continue;
@@ -129,14 +149,15 @@ export function esqlToStreamlangProcessors(
 
     if (isName(command, 'rename')) {
       // RENAME old AS new → rename
-      for (const arg of (command as any).args as ESQLAstItem[]) {
+      for (const arg of (command as unknown as { args?: ESQLAstItem[] }).args ?? []) {
         const asCall = asBinaryFunc(arg, 'as');
         if (!asCall) continue;
         const [oldRef, newRef] = (asCall.args || []) as ESQLAstItem[];
         const oldCol = asColumn(oldRef);
         const newName = asStringLiteral(newRef) || (asColumn(newRef)?.text);
         if (oldCol && newName) {
-          processors.push(withWhere({ action: 'rename', from: oldCol.text, to: newName } as any));
+          const rename: RenameProcessor = { action: 'rename', from: oldCol.text, to: newName };
+          processors.push(withWhere(rename));
         }
       }
       continue;
@@ -177,17 +198,19 @@ export function esqlToStreamlangSteps(
 
   let activeCondition: Condition | undefined;
   const withWhere = <T extends StreamlangProcessorDefinition>(proc: T): T =>
-    (activeCondition ? ({ ...proc, where: activeCondition } as any) : proc);
+    activeCondition ? ({ ...proc, where: activeCondition } as T) : proc;
 
   for (const cmd of (root as ESQLAstQueryExpression).commands) {
     const command = cmd as ESQLCommand;
 
     if (isName(command, 'where')) {
-      const expr = (command as any).args?.[0] as ESQLSingleAstItem | undefined;
+      const expr = (command as unknown as { args?: ESQLAstItem[] }).args?.[0] as
+        | ESQLSingleAstItem
+        | undefined;
       const cond = expr ? esqlAstExpressionToCondition(expr) : undefined;
       if (!cond) continue;
       // WHERE compounds for subsequent processors
-      activeCondition = activeCondition ? ({ and: [activeCondition, cond] } as any) : cond;
+      activeCondition = activeCondition ? { and: [activeCondition, cond] } : cond;
       continue;
     }
 
@@ -195,7 +218,8 @@ export function esqlToStreamlangSteps(
       const field = asColumn(command.args[0]);
       const pattern = asStringLiteral(command.args[1]);
       if (field && pattern) {
-        steps.push(withWhere({ action: 'grok', from: field.text, patterns: [pattern] } as any));
+        const grok: GrokProcessor = { action: 'grok', from: field.text, patterns: [pattern] };
+        steps.push(withWhere(grok));
       }
       continue;
     }
@@ -204,13 +228,14 @@ export function esqlToStreamlangSteps(
       const field = asColumn(command.args[0]);
       const pattern = asStringLiteral(command.args[1]);
       if (field && pattern) {
-        steps.push(withWhere({ action: 'dissect', from: field.text, pattern } as any));
+        const dissect: DissectProcessor = { action: 'dissect', from: field.text, pattern };
+        steps.push(withWhere(dissect));
       }
       continue;
     }
 
     if (isName(command, 'eval')) {
-      for (const arg of (command as any).args as ESQLAstItem[]) {
+      for (const arg of (command as unknown as { args?: ESQLAstItem[] }).args ?? []) {
         const assign = asBinaryFunc(arg, '=');
         if (!assign) continue;
         const [leftRaw, rightRaw] = (assign.args || []) as (ESQLAstItem | ESQLAstItem[])[];
@@ -220,37 +245,47 @@ export function esqlToStreamlangSteps(
         if (!target) continue;
         const rightCol = right ? asColumn(right) : undefined;
         if (rightCol) {
-          steps.push(withWhere({ action: 'set', to: target.text, copy_from: rightCol.text } as any));
+          const setCopy: SetProcessor = { action: 'set', to: target.text, copy_from: rightCol.text };
+          steps.push(withWhere(setCopy));
           continue;
         }
         // Map EVAL target = DATE_PARSE(source, pattern)
         const dateFn = right ? asFunction(right, 'date_parse') : undefined;
-        if (dateFn && Array.isArray((dateFn as any).args)) {
-          const [srcArg, patternArg] = ((dateFn as any).args as ESQLAstItem[]);
+        if (dateFn && Array.isArray((dateFn as unknown as { args?: ESQLAstItem[] }).args)) {
+          const [srcArg, patternArg] = ((dateFn as unknown as { args?: ESQLAstItem[] }).args ?? []) as ESQLAstItem[];
           const srcCol = srcArg ? asColumn(srcArg) : undefined;
-          const pattern = patternArg && (patternArg as any).type === 'literal' ? asStringLiteral(patternArg) : undefined;
+          const pattern = patternArg && (patternArg as unknown as { type?: string }).type === 'literal' ? asStringLiteral(patternArg as ESQLAstItem) : undefined;
           if (srcCol && pattern) {
-            steps.push(withWhere({ action: 'date', from: srcCol.text, to: target.text, formats: [pattern] } as any));
+            const dateProc: DateProcessor = {
+              action: 'date',
+              from: srcCol.text,
+              to: target.text,
+              formats: [pattern],
+            };
+            steps.push(withWhere(dateProc));
             continue;
           }
         }
         
         if (right && isLiteral(right)) {
-          steps.push(withWhere({ action: 'set', to: target.text, value: (right as any).value ?? asStringLiteral(right) } as any));
+          const value = (right as unknown as { value?: unknown }).value ?? asStringLiteral(right);
+          const setVal: SetProcessor = { action: 'set', to: target.text, value };
+          steps.push(withWhere(setVal));
         }
       }
       continue;
     }
 
     if (isName(command, 'rename')) {
-      for (const arg of (command as any).args as ESQLAstItem[]) {
+      for (const arg of (command as unknown as { args?: ESQLAstItem[] }).args ?? []) {
         const asCall = asBinaryFunc(arg, 'as');
         if (!asCall) continue;
         const [oldRef, newRef] = (asCall.args || []) as ESQLAstItem[];
         const oldCol = asColumn(oldRef);
         const newName = asStringLiteral(newRef) || (asColumn(newRef)?.text);
         if (oldCol && newName) {
-          steps.push(withWhere({ action: 'rename', from: oldCol.text, to: newName } as any));
+          const rename: RenameProcessor = { action: 'rename', from: oldCol.text, to: newName };
+          steps.push(withWhere(rename));
         }
       }
       continue;

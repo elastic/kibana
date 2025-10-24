@@ -10,6 +10,12 @@ import type { SampleDocument } from '@kbn/streams-schema/src/shared/record_types
 import { sampleDocument } from '@kbn/streams-schema/src/shared/record_types';
 import { z } from '@kbn/zod';
 import type { StreamlangProcessorDefinition, StreamlangStep } from '@kbn/streamlang';
+import { streamlangProcessorSchema, streamlangDSLSchema } from '@kbn/streamlang';
+
+const streamlangStepsSchema: z.ZodType<StreamlangStep[]> = z.custom<StreamlangStep[]>((val) => {
+  if (!Array.isArray(val)) return false;
+  return streamlangDSLSchema.safeParse({ steps: val }).success;
+}, { message: 'Invalid Streamlang steps' });
 
 /**
  * Base interface for all data source types with common properties
@@ -131,13 +137,13 @@ const enrichmentUrlSchemaV1 = z.object({
 const enrichmentUrlSchemaV2 = z.object({
   v: z.literal(2),
   dataSources: z.array(enrichmentDataSourceSchema),
-  processorsToAppend: z.array(z.any()).optional(),
+  processorsToAppend: z.array(streamlangProcessorSchema).optional(),
 }) satisfies z.Schema<EnrichmentUrlStateV2>;
 
 const enrichmentUrlSchemaV3 = z.object({
   v: z.literal(3),
   dataSources: z.array(enrichmentDataSourceSchema),
-  stepsToAppend: z.array(z.any()).optional(),
+  stepsToAppend: streamlangStepsSchema.optional(),
 }) satisfies z.Schema<EnrichmentUrlStateV3>;
 
 export const enrichmentUrlSchema = z.union([
