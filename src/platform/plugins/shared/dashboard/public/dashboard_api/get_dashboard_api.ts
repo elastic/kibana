@@ -120,7 +120,7 @@ export function getDashboardApi({
     const { panels, references: panelReferences } = layoutManager.internalApi.serializeLayout();
     const unifiedSearchState = unifiedSearchManager.internalApi.getState();
     const dashboardState: DashboardState = {
-      ...settingsManager.api.getSettings(),
+      ...settingsManager.internalApi.serializeSettings(),
       ...unifiedSearchState,
       panels,
     };

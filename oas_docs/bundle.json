@@ -17398,7 +17398,7 @@
     },
     "/api/fleet/agent_policies/{agentPolicyId}/download": {
       "get": {
-        "description": "Download an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read AND fleet-setup.",
+        "description": "Download an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-setup.",
         "operationId": "get-fleet-agent-policies-agentpolicyid-download",
         "parameters": [
           {
@@ -25288,6 +25288,9 @@
                               "installed_kibana_space_id": {
                                 "type": "string"
                               },
+                              "is_rollback_ttl_expired": {
+                                "type": "boolean"
+                              },
                               "latest_executed_state": {
                                 "additionalProperties": true,
                                 "properties": {
@@ -27477,6 +27480,9 @@
                             "installed_kibana_space_id": {
                               "type": "string"
                             },
+                            "is_rollback_ttl_expired": {
+                              "type": "boolean"
+                            },
                             "latest_executed_state": {
                               "additionalProperties": true,
                               "properties": {
@@ -28444,6 +28450,9 @@
                             },
                             "installed_kibana_space_id": {
                               "type": "string"
+                            },
+                            "is_rollback_ttl_expired": {
+                              "type": "boolean"
                             },
                             "latest_executed_state": {
                               "additionalProperties": true,
@@ -31031,7 +31040,7 @@
     },
     "/api/fleet/kubernetes": {
       "get": {
-        "description": "[Required authorization] Route required privileges: fleet-agent-policies-read AND fleet-setup.",
+        "description": "[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-setup.",
         "operationId": "get-fleet-kubernetes",
         "parameters": [
           {
@@ -31117,7 +31126,7 @@
     },
     "/api/fleet/kubernetes/download": {
       "get": {
-        "description": "[Required authorization] Route required privileges: fleet-agent-policies-read AND fleet-setup.",
+        "description": "[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-setup.",
         "operationId": "get-fleet-kubernetes-download",
         "parameters": [
           {
@@ -46292,6 +46301,7 @@
                           "type": "array"
                         },
                         "prerelease_integrations_enabled": {
+                          "deprecated": true,
                           "type": "boolean"
                         },
                         "secret_storage_requirements_met": {
@@ -46403,6 +46413,7 @@
                 "additionalProperties": false,
                 "properties": {
                   "additional_yaml_config": {
+                    "deprecated": true,
                     "type": "string"
                   },
                   "delete_unenrolled_agents": {
@@ -46422,12 +46433,15 @@
                     "type": "object"
                   },
                   "has_seen_add_data_notice": {
+                    "deprecated": true,
                     "type": "boolean"
                   },
                   "kibana_ca_sha256": {
+                    "deprecated": true,
                     "type": "string"
                   },
                   "kibana_urls": {
+                    "deprecated": true,
                     "items": {
                       "format": "uri",
                       "type": "string"
@@ -46435,6 +46449,7 @@
                     "type": "array"
                   },
                   "prerelease_integrations_enabled": {
+                    "deprecated": true,
                     "type": "boolean"
                   }
                 },
@@ -46491,6 +46506,7 @@
                           "type": "array"
                         },
                         "prerelease_integrations_enabled": {
+                          "deprecated": true,
                           "type": "boolean"
                         },
                         "secret_storage_requirements_met": {
@@ -54177,6 +54193,10 @@
                                                                 },
                                                                 "type": "array"
                                                               },
+                                                              {
+                                                                "items": {},
+                                                                "type": "array"
+                                                              },
                                                               {}
                                                             ]
                                                           },
@@ -61022,6 +61042,10 @@
                                                                     }
                                                                   ]
                                                                 },
+                                                                "type": "array"
+                                                              },
+                                                              {
+                                                                "items": {},
                                                                 "type": "array"
                                                               },
                                                               {}
@@ -68142,6 +68166,10 @@
                                                 },
                                                 "type": "array"
                                               },
+                                              {
+                                                "items": {},
+                                                "type": "array"
+                                              },
                                               {}
                                             ]
                                           },
@@ -71330,6 +71358,10 @@
                                                     }
                                                   ]
                                                 },
+                                                "type": "array"
+                                              },
+                                              {
+                                                "items": {},
                                                 "type": "array"
                                               },
                                               {}

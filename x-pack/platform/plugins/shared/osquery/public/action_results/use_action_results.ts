@@ -77,7 +77,7 @@ export const useActionResults = ({
           sortOrder: direction,
           ...(kuery && { kuery }),
           ...(startDate && { startDate }),
-          ...(agentIds?.length && { agentIds: agentIds.join(',') }),
+          // Note: agentIds NOT included - server fetches from action document
         },
       }),
     {
@@ -100,7 +100,7 @@ export const useActionResults = ({
       },
       refetchInterval: isLive ? 5000 : false,
       keepPreviousData: true,
-      enabled: !!agentIds?.length,
+      enabled: !!actionId && !!agentIds?.length,
       onSuccess: () => setErrorToast(),
       onError: (error) =>
         setErrorToast(error, {
