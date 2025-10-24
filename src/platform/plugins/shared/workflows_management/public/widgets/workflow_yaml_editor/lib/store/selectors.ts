@@ -13,8 +13,8 @@ import type { RootState } from './types';
 // Selectors
 
 // Base selectors - these are simple property accessors that don't need memoization
-const selectDetailState = (state: RootState) => state.detail;
-const selectDetailComputedState = (state: RootState) => state.detail.computed;
+export const selectDetailState = (state: RootState) => state.detail;
+export const selectDetailComputedState = (state: RootState) => state.detail.computed;
 
 // Exported memoized selectors for final properties
 export const selectWorkflow = createSelector(selectDetailState, (detail) => detail.workflow);
@@ -85,3 +85,10 @@ export const selectIsTestModalOpen = createSelector(
   selectDetailState,
   (detail) => detail.isTestModalOpen
 );
+
+export const selectConnectorsData = createSelector(
+  selectDetailState,
+  (detail) => detail.connectors
+);
+
+export const selectSchemaLoose = createSelector(selectDetailState, (detail) => detail.schemaLoose);

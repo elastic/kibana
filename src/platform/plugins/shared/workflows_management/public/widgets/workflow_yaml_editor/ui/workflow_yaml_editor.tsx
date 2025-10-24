@@ -19,6 +19,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { monaco } from '@kbn/monaco';
 import { isTriggerType } from '@kbn/workflows';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows/types/v1';
+import type { z } from '@kbn/zod';
 import {
   useAlertTriggerDecorations,
   useConnectorTypeDecorations,
@@ -27,10 +28,11 @@ import {
   useStepDecorationsInExecution,
   useTriggerTypeDecorations,
 } from './decorations';
+import { useCompletionProvider } from './hooks/use_completion_provider';
 import { StepActions } from './step_actions';
 import { WorkflowYAMLEditorShortcuts } from './workflow_yaml_editor_shortcuts';
 import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors';
-import { addDynamicConnectorsToCache, getWorkflowZodSchemaLoose } from '../../../../common/schema';
+import { addDynamicConnectorsToCache } from '../../../../common/schema';
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
 import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import { ActionsMenuPopover } from '../../../features/actions_menu_popover';
@@ -42,7 +44,6 @@ import { useWorkflowJsonSchema } from '../../../features/validate_workflow_yaml/
 import { useKibana } from '../../../hooks/use_kibana';
 import { UnsavedChangesPrompt } from '../../../shared/ui/unsaved_changes_prompt';
 import { YamlEditor } from '../../../shared/ui/yaml_editor';
-import { getCompletionItemProvider } from '../lib/get_completion_item_provider';
 import {
   ElasticsearchMonacoConnectorHandler,
   GenericMonacoConnectorHandler,
@@ -57,12 +58,14 @@ import { insertTriggerSnippet } from '../lib/snippets/insert_trigger_snippet';
 import type { StepInfo } from '../lib/store';
 import {
   selectFocusedStepInfo,
+  selectSchemaLoose,
   selectYamlDocument,
+  _setConnectors as setConnectors,
   setCursorPosition,
   setStepExecutions,
   setYamlString,
 } from '../lib/store';
-import { selectHasChanges, selectWorkflow, selectYamlString } from '../lib/store/selectors';
+import { selectHasChanges, selectWorkflow } from '../lib/store/selectors';
 import { setIsTestModalOpen } from '../lib/store/slice';
 import { useRegisterKeyboardCommands } from '../lib/use_register_keyboard_commands';
 import { navigateToErrorPosition } from '../lib/utils';
@@ -113,6 +116,7 @@ const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
 };
 
 export interface WorkflowYAMLEditorProps {
+  workflowYaml: string;
   readOnly?: boolean;
   highlightStep?: string;
   stepExecutions?: WorkflowStepExecutionDto[];
@@ -127,6 +131,7 @@ export interface WorkflowYAMLEditorProps {
 }
 
 export const WorkflowYAMLEditor = ({
+  workflowYaml,
   readOnly = false,
   highlightStep,
   stepExecutions,
@@ -146,7 +151,6 @@ export const WorkflowYAMLEditor = ({
 
   const hasChanges = useSelector(selectHasChanges);
   const workflow = useSelector(selectWorkflow);
-  const workflowYaml = useSelector(selectYamlString) ?? '';
 
   const originalValue = workflow?.yaml ?? '';
   const workflowId = workflow?.id ?? '';
@@ -187,6 +191,7 @@ export const WorkflowYAMLEditor = ({
   const disposablesRef = useRef<monaco.IDisposable[]>([]);
   const focusedStepInfo = useSelector(selectFocusedStepInfo);
   const yamlDocument = useSelector(selectYamlDocument);
+  const workflowYamlSchemaLoose = useSelector(selectSchemaLoose);
   const yamlDocumentRef = useRef<YAML.Document | null>(null);
   yamlDocumentRef.current = yamlDocument || null;
 
@@ -195,6 +200,10 @@ export const WorkflowYAMLEditor = ({
 
   // Data
   const { data: connectorsData } = useAvailableConnectors();
+
+  useEffect(() => {
+    dispatch(setConnectors(connectorsData));
+  }, [connectorsData, dispatch]);
 
   useEffect(() => {
     if (connectorsData?.connectorTypes) {
@@ -231,14 +240,6 @@ export const WorkflowYAMLEditor = ({
     ];
   }, [workflowJsonSchemaStrict, workflowSchemaUriStrict]);
 
-  // TODO: move the schema generation up to detail page or some wrapper component
-  const workflowYamlSchemaLoose = useMemo(() => {
-    if (!connectorsData?.connectorTypes) {
-      return getWorkflowZodSchemaLoose({});
-    }
-    return getWorkflowZodSchemaLoose(connectorsData.connectorTypes);
-  }, [connectorsData?.connectorTypes]);
-
   const { error: errorValidating, isLoading: isLoadingValidation } = useYamlValidation(
     editorRef.current
   );
@@ -246,7 +247,7 @@ export const WorkflowYAMLEditor = ({
   const { validationErrors, transformMonacoMarkers, handleMarkersChanged } =
     useMonacoMarkersChangedInterceptor({
       yamlDocumentRef,
-      workflowYamlSchema: workflowYamlSchemaLoose,
+      workflowYamlSchema: workflowYamlSchemaLoose as z.ZodSchema,
     });
 
   const handleErrorClick = useCallback((error: YamlValidationResult) => {
@@ -401,48 +402,6 @@ export const WorkflowYAMLEditor = ({
     };
   }, []);
 
-  // Track the last value we set internally to distinguish from external changes
-  const lastInternalValueRef = useRef<string | undefined>(workflowYaml);
-  // Force refresh of decorations when workflowYaml changes externally (e.g., switching executions)
-  useEffect(() => {
-    if (isEditorMounted && editorRef.current && workflowYaml !== undefined) {
-      // Check if this is an external change (not from our own typing)
-      const isExternalChange = workflowYaml !== lastInternalValueRef.current;
-
-      if (isExternalChange) {
-        // Check if Monaco editor content matches workflowYaml
-        const model = editorRef.current.getModel();
-        if (model) {
-          const currentContent = model.getValue();
-          if (currentContent !== workflowYaml) {
-            // Wait a bit longer for Monaco to update its content, then force re-parse
-            setTimeout(() => {
-              changeSideEffects();
-            }, 50); // Longer delay to ensure Monaco editor content is updated
-          } else {
-            // Content matches, just force re-parse to be safe
-            setTimeout(() => {
-              changeSideEffects();
-            }, 10);
-          }
-        }
-
-        // Update our tracking ref
-        lastInternalValueRef.current = workflowYaml;
-      }
-    }
-  }, [workflowYaml, isEditorMounted, changeSideEffects]);
-
-  // Force decoration refresh specifically when switching to readonly mode (executions view)
-  useEffect(() => {
-    if (isEditorMounted) {
-      // Small delay to ensure all state is settled
-      setTimeout(() => {
-        changeSideEffects();
-      }, 50);
-    }
-  }, [isEditorMounted, changeSideEffects]);
-
   // Decorations
   useTriggerTypeDecorations({
     editor: editorRef.current,
@@ -535,9 +494,7 @@ export const WorkflowYAMLEditor = ({
     [closeActionsPopover]
   );
 
-  const completionProvider = useMemo(() => {
-    return getCompletionItemProvider(workflowYamlSchemaLoose, connectorsData?.connectorTypes);
-  }, [workflowYamlSchemaLoose, connectorsData?.connectorTypes]);
+  const completionProvider = useCompletionProvider();
 
   const options = useMemo(() => {
     return { ...editorOptions, readOnly };

@@ -9,7 +9,7 @@
 
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -19,16 +19,12 @@ import { WorkflowDetailHeader } from './workflow_detail_header';
 import { WorkflowEditorLayout } from './workflow_detail_layout';
 import { WorkflowDetailTestModal } from './workflow_detail_test_modal';
 import { useLoadWorkflow } from '../../../entities/workflows/model/use_load_workflow';
-import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
 import { WorkflowExecutionDetail } from '../../../features/workflow_execution_detail';
 import { WorkflowExecutionList } from '../../../features/workflow_execution_list/ui/workflow_execution_list_stateful';
 import { useWorkflowsBreadcrumbs } from '../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { setYamlString } from '../../../widgets/workflow_yaml_editor/lib/store';
-import {
-  selectWorkflowName,
-  selectYamlString,
-} from '../../../widgets/workflow_yaml_editor/lib/store/selectors';
+import { selectWorkflowName } from '../../../widgets/workflow_yaml_editor/lib/store/selectors';
 
 export function WorkflowDetailPage({ id }: { id?: string }) {
   const [loadWorkflow, { isLoading, error }] = useLoadWorkflow();
@@ -45,15 +41,14 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   const workflowName = useSelector(selectWorkflowName);
   useWorkflowsBreadcrumbs(workflowName);
 
-  const { activeTab, selectedExecutionId, selectedStepId, setActiveTab, setSelectedExecution } =
-    useWorkflowUrlState();
+  const { activeTab, selectedExecutionId, setSelectedExecution } = useWorkflowUrlState();
 
-  const { data: execution } = useWorkflowExecution(selectedExecutionId ?? null);
   // TODO: manage it in a workflow state context
   const [highlightDiff, setHighlightDiff] = useState(false);
 
-  const workflowYaml = useSelector(selectYamlString);
-  const yamlValue = selectedExecutionId && execution ? execution.yaml : workflowYaml ?? '';
+  const onCloseExecutionDetail = useCallback(() => {
+    setSelectedExecution(null);
+  }, [setSelectedExecution]);
 
   if (error) {
     return (
@@ -86,24 +81,13 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
       <EuiFlexItem grow={false}>
         <WorkflowDetailHeader
           isLoading={isLoading}
-          activeTab={activeTab}
-          handleTabChange={setActiveTab}
           highlightDiff={highlightDiff}
           setHighlightDiff={setHighlightDiff}
         />
       </EuiFlexItem>
       <EuiFlexItem css={css({ overflow: 'hidden', minHeight: 0 })}>
         <WorkflowEditorLayout
-          editor={
-            <WorkflowDetailEditor
-              execution={execution}
-              activeTab={activeTab}
-              selectedExecutionId={selectedExecutionId}
-              selectedStepId={selectedStepId}
-              highlightDiff={highlightDiff}
-              setSelectedExecution={setSelectedExecution}
-            />
-          }
+          editor={<WorkflowDetailEditor highlightDiff={highlightDiff} />}
           executionList={
             id && activeTab === 'executions' && !selectedExecutionId ? (
               <WorkflowExecutionList workflowId={id} />
@@ -112,10 +96,8 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
           executionDetail={
             selectedExecutionId ? (
               <WorkflowExecutionDetail
-                workflowExecutionId={selectedExecutionId}
-                workflowYaml={yamlValue}
-                showBackButton={activeTab === 'executions'}
-                onClose={() => setSelectedExecution(null)}
+                executionId={selectedExecutionId}
+                onClose={onCloseExecutionDetail}
               />
             ) : null
           }

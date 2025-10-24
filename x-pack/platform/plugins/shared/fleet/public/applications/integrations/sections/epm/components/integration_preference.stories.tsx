@@ -32,11 +32,5 @@ export default {
 } as Meta;
 
 export const IntegrationPreference = () => {
-  return (
-    <Component
-      initialType="recommended"
-      onChange={action('onChange')}
-      prereleaseIntegrationsEnabled={false}
-    />
-  );
+  return <Component initialType="agent" onChange={action('onChange')} />;
 };

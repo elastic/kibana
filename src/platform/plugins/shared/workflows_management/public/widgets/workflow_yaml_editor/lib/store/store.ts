@@ -9,11 +9,12 @@
 
 import { configureStore } from '@reduxjs/toolkit';
 import { workflowComputationMiddleware } from './middleware';
+import { schemaGenerationMiddleware } from './schema_generation_middleware';
 import { ignoredActions, ignoredPaths, workflowDetailReducer } from './slice';
 import type { WorkflowsServices } from '../../../../types';
 
 // Store factory
-export const createWorkflowsStore = (services: WorkflowsServices) => {
+export const createWorkflowDetailStore = (services: WorkflowsServices) => {
   return configureStore({
     reducer: {
       detail: workflowDetailReducer,
@@ -27,8 +28,8 @@ export const createWorkflowsStore = (services: WorkflowsServices) => {
           // Ignore these specific action types that contain non-serializable data
           ignoredActions,
         },
-      }).concat(workflowComputationMiddleware),
+      }).concat(workflowComputationMiddleware, schemaGenerationMiddleware),
   });
 };
 
-export type AppDispatch = ReturnType<typeof createWorkflowsStore>['dispatch'];
+export type AppDispatch = ReturnType<typeof createWorkflowDetailStore>['dispatch'];
