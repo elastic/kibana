@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidV4 } from 'uuid';
-import type { Agent } from 'supertest';
+import type { Agent, Response } from 'supertest';
 import {
   CreateAgentPolicyRequest,
   CreateAgentPolicyResponse,
