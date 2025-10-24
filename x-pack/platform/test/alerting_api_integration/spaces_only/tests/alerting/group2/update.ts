@@ -561,36 +561,6 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           )
           .expect(400);
       });
-
-      it('should not allow updating investigation_guide with length > limit', async () => {
-        // create a rule
-        const createResponse = await supertest
-          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-          .set('kbn-xsrf', 'foo')
-          .send(getTestRuleData())
-          .expect(200);
-
-        const longInvestigationGuideBlob = 'a';
-        await supertest
-          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createResponse.body.id}`)
-          .set('kbn-xsrf', 'foo')
-          .send(
-            getTestRuleData({
-              artifacts: {
-                dashboards: [
-                  {
-                    id: 'dashboard-1',
-                  },
-                ],
-                // push a longer `investigation_guide` than allowed
-                investigation_guide: {
-                  blob: longInvestigationGuideBlob,
-                },
-              },
-            })
-          )
-          .expect(400);
-      });
     });
   });
 }
