@@ -11,21 +11,17 @@ import type { Payload } from '@hapi/boom';
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
 import type { SavedObjectsRawDocSource, SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import type {
-  SavedObjectsCheckConflictsObject,
-  SavedObjectsBaseOptions,
-  SavedObjectsCheckConflictsResponse,
-} from '@kbn/core-saved-objects-api-server';
-import type { Either } from './utils';
 import {
-  errorContent,
+  type SavedObjectsCheckConflictsObject,
+  type SavedObjectsBaseOptions,
+  type SavedObjectsCheckConflictsResponse,
+  type Either,
   left,
   right,
-  isLeft,
   isRight,
-  isMgetDoc,
-  rawDocExistsInNamespace,
-} from './utils';
+  isLeft,
+} from '@kbn/core-saved-objects-api-server';
+import { errorContent, isMgetDoc, rawDocExistsInNamespace } from './utils';
 import type { ApiExecutionContext } from './types';
 
 export interface PerformCheckConflictsParams<T = unknown> {

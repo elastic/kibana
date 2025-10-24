@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Either } from '@kbn/core-saved-objects-api-server-internal/src/lib/apis/utils';
-
 import type {
+  Either,
   SavedObjectAccessControl,
   SavedObjectReferenceWithContext,
   SavedObjectsFindResult,
@@ -507,21 +506,6 @@ export interface ISavedObjectsSecurityExtension {
   getTypesRequiringAccessControlCheck: (
     objects: AuthorizeObject[]
   ) => GetObjectsRequiringPrivilegeCheckResult;
-
-  /**
-   * Performs authorization for the CHANGE_OWNERSHIP or CHANGE_ACCESS_MODE security actions
-   * @param params the namespace and object to authorize for changing ownership
-   * @param operation the operation to authorize - one of 'changeAccessMode' or 'changeOwnership'
-   * @returns CheckAuthorizationResult - the resulting authorization level and authorization map
-   */
-  authorizeChangeAccessControl: <A extends string>(
-    params: AuthorizeChangeAccessControlParams,
-    operation: 'changeAccessMode' | 'changeOwnership'
-  ) => Promise<CheckAuthorizationResult<A>>;
-
-  getTypesRequiringAccessControlCheck: (
-    objects: AuthorizeObject[]
-  ) => GetTypesRequiringAccessControlCheckResult;
 
   /**
    * Performs audit logging for the CLOSE_POINT_IN_TIME security action

@@ -20,23 +20,23 @@ import type {
 import { SavedObjectsErrorHelpers, type SavedObject } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { encodeVersion } from '@kbn/core-saved-objects-base-server-internal';
-import type {
-  SavedObjectsBulkUpdateObject,
-  SavedObjectsBulkUpdateOptions,
-  SavedObjectsBulkUpdateResponse,
+import {
+  isLeft,
+  isRight,
+  left,
+  right,
+  type Either,
+  type SavedObjectsBulkUpdateObject,
+  type SavedObjectsBulkUpdateOptions,
+  type SavedObjectsBulkUpdateResponse,
 } from '@kbn/core-saved-objects-api-server';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
 import {
-  type Either,
   errorContent,
   getBulkOperationError,
   getCurrentTime,
   getExpectedVersionProperties,
   isMgetDoc,
-  left,
-  right,
-  isLeft,
-  isRight,
   rawDocExistsInNamespace,
   getSavedObjectFromSource,
   mergeForUpdate,

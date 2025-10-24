@@ -22,10 +22,11 @@ import {
   getObjectKey,
   type LegacyUrlAlias,
 } from '@kbn/core-saved-objects-base-server-internal';
+import { isLeft, isRight, left, right } from '@kbn/core-saved-objects-api-server';
+import type { Either } from '@kbn/core-saved-objects-api-server';
 import { findLegacyUrlAliases } from './find_legacy_url_aliases';
 import type { CreatePointInTimeFinderFn } from '../../point_in_time_finder';
 import type { RepositoryEsClient } from '../../repository_es_client';
-import { left, right, isLeft, isRight, rawDocExistsInNamespaces, type Either } from '../utils';
 
 /**
  * If the object will be created in this many spaces (or "*" all current and future spaces), we use find to fetch all aliases.
@@ -75,7 +76,6 @@ export interface PreflightCheckForCreateResult {
     metadata?: {
       spacesWithConflictingAliases?: string[];
       isNotOverwritable?: boolean;
-      // requiresManageAccessControl?: boolean;
     };
   };
 }

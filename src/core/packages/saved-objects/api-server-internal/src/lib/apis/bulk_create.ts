@@ -15,22 +15,22 @@ import {
   type SavedObjectSanitizedDoc,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
-import type {
-  SavedObjectsCreateOptions,
-  SavedObjectsBulkCreateObject,
-  SavedObjectsBulkResponse,
-  SavedObjectAccessControl,
+import {
+  type SavedObjectsCreateOptions,
+  type SavedObjectsBulkCreateObject,
+  type SavedObjectsBulkResponse,
+  type SavedObjectAccessControl,
+  type Either,
+  left,
+  right,
+  isRight,
+  isLeft,
 } from '@kbn/core-saved-objects-api-server';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
-import type { Either } from './utils';
 import {
   getBulkOperationError,
   getCurrentTime,
   getExpectedVersionProperties,
-  left,
-  right,
-  isLeft,
-  isRight,
   normalizeNamespace,
   setManaged,
   errorContent,

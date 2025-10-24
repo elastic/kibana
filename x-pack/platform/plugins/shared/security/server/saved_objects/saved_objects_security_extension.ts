@@ -8,20 +8,18 @@
 import type { EcsEvent } from '@elastic/ecs';
 import type { Payload } from '@hapi/boom';
 
-import type {
-  SavedObjectAccessControl,
-  SavedObjectReferenceWithContext,
-  SavedObjectsFindResult,
-  SavedObjectsResolveResponse,
+import {
+  type Either,
+  isLeft,
+  left,
+  type SavedObjectAccessControl,
+  type SavedObjectReferenceWithContext,
+  type SavedObjectsFindResult,
+  type SavedObjectsResolveResponse,
 } from '@kbn/core-saved-objects-api-server';
 import type { SavedObjectsClient } from '@kbn/core-saved-objects-api-server-internal';
 import { isBulkResolveError } from '@kbn/core-saved-objects-api-server-internal/src/lib/apis/internals/internal_bulk_resolve';
-import {
-  type Either,
-  errorContent,
-  isLeft,
-  left,
-} from '@kbn/core-saved-objects-api-server-internal/src/lib/apis/utils';
+import { errorContent } from '@kbn/core-saved-objects-api-server-internal/src/lib/apis/utils';
 import { LEGACY_URL_ALIAS_TYPE } from '@kbn/core-saved-objects-base-server-internal';
 import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';

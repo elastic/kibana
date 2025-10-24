@@ -16,22 +16,22 @@ import type {
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
-import type {
-  SavedObjectsBulkDeleteObject,
-  SavedObjectsBulkDeleteOptions,
-  SavedObjectsBulkDeleteResponse,
+import {
+  isLeft,
+  isRight,
+  left,
+  right,
+  type SavedObjectsBulkDeleteObject,
+  type SavedObjectsBulkDeleteOptions,
+  type SavedObjectsBulkDeleteResponse,
 } from '@kbn/core-saved-objects-api-server';
 import { DEFAULT_REFRESH_SETTING, MAX_CONCURRENT_ALIAS_DELETIONS } from '../constants';
 import {
   errorContent,
   getBulkOperationError,
   getExpectedVersionProperties,
-  isLeft,
   isMgetDoc,
   rawDocExistsInNamespace,
-  isRight,
-  left,
-  right,
 } from './utils';
 import type { ApiExecutionContext } from './types';
 import { deleteLegacyUrlAliases } from './internals/delete_legacy_url_aliases';
