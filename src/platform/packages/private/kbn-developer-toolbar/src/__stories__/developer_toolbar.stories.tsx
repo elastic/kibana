@@ -21,7 +21,7 @@ import {
 
 import { DeveloperToolbar, type DeveloperToolbarProps } from '../components/developer_toolbar';
 import { DeveloperToolbarItem } from '../components/developer_toolbar_item';
-import type { EnvironmentInfo } from '../indicators/environment/environment_indicator';
+import type { EnvironmentInfo } from '../toolbar_items/environment/environment_indicator';
 
 const mockEnvInfo: EnvironmentInfo = {
   mode: {

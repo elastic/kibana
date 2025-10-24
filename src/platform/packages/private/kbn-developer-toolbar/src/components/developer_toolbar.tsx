@@ -19,11 +19,13 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ConsoleErrorIndicator } from '../indicators/console_error/console_error_indicator';
-import { MemoryUsageIndicator } from '../indicators/memory/memory_usage_indicator';
-import { FrameJankIndicator } from '../indicators/frame_jank/frame_jank_indicator';
-import type { EnvironmentInfo } from '../indicators/environment/environment_indicator';
-import { EnvironmentIndicator } from '../indicators/environment/environment_indicator';
+import { ConsoleErrorIndicator } from '../toolbar_items/console_error/console_error_indicator';
+import { MemoryUsageIndicator } from '../toolbar_items/memory/memory_usage_indicator';
+import { FrameJankIndicator } from '../toolbar_items/frame_jank/frame_jank_indicator';
+import {
+  EnvironmentIndicator,
+  type EnvironmentInfo,
+} from '../toolbar_items/environment/environment_indicator';
 import { useMinimized } from '../hooks/use_minimized';
 import { SettingsModal } from './settings_modal';
 import { useToolbarState } from '../hooks/use_toolbar_state';
