@@ -33,9 +33,10 @@ const createMockedRowInstance = (overrides: Partial<Row<any>> = {}) => {
 describe('accessibility', () => {
   describe('useTreeGridContainerARIAAttributes', () => {
     it('should return the correct ARIA attributes for the tree grid container', () => {
-      const { result } = renderHook(() => useTreeGridContainerARIAAttributes());
+      const { result } = renderHook(() => useTreeGridContainerARIAAttributes('some-id'));
       expect(result.current).toMatchInlineSnapshot(`
         Object {
+          "aria-labelledby": "some-id",
           "aria-multiselectable": false,
           "aria-readonly": true,
           "aria-rowcount": -1,

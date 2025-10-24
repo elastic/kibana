@@ -7,6 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import React, { Fragment, useCallback, useMemo, type ComponentProps } from 'react';
 import type { StoryObj, Meta } from '@storybook/react';
 import { i18n } from '@kbn/i18n';
@@ -26,6 +35,7 @@ import {
   type HorizontalAlignment,
 } from '@elastic/eui';
 import { faker } from '@faker-js/faker';
+import { getESQLStatsQueryMeta } from '@kbn/esql-utils';
 import {
   DataCascade,
   DataCascadeRow,
@@ -34,10 +44,9 @@ import {
   type DataCascadeProps,
   type DataCascadeRowProps,
   type DataCascadeRowCellProps,
-} from '.';
-import type { MockGroupData } from './src/__fixtures__/types';
-import { getESQLStatsQueryMeta } from './src/lib/parse_esql';
-import mdx from './doc.mdx';
+} from '../components';
+import type { MockGroupData } from '../__fixtures__/types';
+import mdx from './guide.mdx';
 
 /**
  * @description story for data document cascade component which allows rendering of data in a quasi tree structure',
@@ -45,6 +54,8 @@ import mdx from './doc.mdx';
  */
 export default {
   title: 'Data Cascade/Configuration Examples',
+  component: DataCascade,
+  subcomponents: { DataCascadeRow, DataCascadeRowCell },
   parameters: {
     docs: {
       page: mdx,
@@ -101,7 +112,10 @@ export const CascadeNestedGridImplementation: StoryObj<
 > = {
   name: 'Nested Groups with Default Header',
   render: function DataCascadeWrapper(args) {
-    const { groupByFields } = getESQLStatsQueryMeta(args.query);
+    const groupByFields = useMemo(
+      () => getESQLStatsQueryMeta(args.query).groupByFields.map(({ field }) => field),
+      [args.query]
+    );
 
     const generateGroupFieldRecord = useCallback(
       (nodePath?: string[], nodePathMap?: Record<string, string>) => {
@@ -334,7 +348,6 @@ export const CascadeNestedGridImplementation: StoryObj<
   },
   argTypes: {
     query: {
-      name: 'ES|QL Editor Query',
       type: 'string' as const,
       description: 'Simulation of The ES|QL query that the user provided into the esql editor',
     },
@@ -357,7 +370,10 @@ export const CascadeCustomHeaderImplementation: StoryObj<
 > = {
   name: 'Custom header with one level of grouping',
   render: function DataCascadeWrapper(args) {
-    const { groupByFields } = getESQLStatsQueryMeta(args.query);
+    const groupByFields = useMemo(
+      () => getESQLStatsQueryMeta(args.query).groupByFields.map(({ field }) => field),
+      [args.query]
+    );
 
     const generateGroupFieldRecord = useCallback(
       (nodePath?: string[], nodePathMap?: Record<string, string>) => {
@@ -600,7 +616,6 @@ export const CascadeCustomHeaderImplementation: StoryObj<
   },
   argTypes: {
     query: {
-      name: 'ES|QL Editor Query',
       type: 'string' as const,
       description: 'Simulation of The ES|QL query that the user provided into the esql editor',
     },
@@ -625,7 +640,11 @@ export const CascadeCustomHeaderWithCustomRowActionsImplementation: StoryObj<
 > = {
   name: 'Custom header with custom row actions',
   render: function DataCascadeWrapper(args) {
-    const { groupByFields } = useMemo(() => getESQLStatsQueryMeta(args.query), [args.query]);
+    const groupByFields = useMemo(
+      () => getESQLStatsQueryMeta(args.query).groupByFields.map(({ field }) => field),
+      [args.query]
+    );
+
     const customerEmailPopoverRef = React.useRef<HTMLElement | null>(null);
     const [alertsCandidates, setAlertsCandidates] = React.useState<string[]>([]);
 
@@ -873,7 +892,6 @@ export const CascadeCustomHeaderWithCustomRowActionsImplementation: StoryObj<
   },
   argTypes: {
     query: {
-      name: 'ES|QL Editor Query',
       type: 'string' as const,
       description: 'Simulation of The ES|QL query that the user provided into the esql editor',
     },
@@ -897,7 +915,10 @@ export const CascadeCustomHeaderWithHiddenRowActions: StoryObj<
 > = {
   name: 'Custom header with hidden row actions',
   render: function DataCascadeWrapper(args) {
-    const { groupByFields } = useMemo(() => getESQLStatsQueryMeta(args.query), [args.query]);
+    const groupByFields = useMemo(
+      () => getESQLStatsQueryMeta(args.query).groupByFields.map(({ field }) => field),
+      [args.query]
+    );
 
     const generateGroupFieldRecord = useCallback(
       (nodePath?: string[], nodePathMap?: Record<string, string>) => {
@@ -1152,9 +1173,9 @@ export const CascadeCustomHeaderWithHiddenRowActions: StoryObj<
   },
   argTypes: {
     query: {
-      name: 'ES|QL Editor Query',
       type: 'string' as const,
-      description: 'Simulation of The ES|QL query that the user provided into the esql editor',
+      description:
+        'Simulation of The ES|QL query that the user provided into the esql editor, used to generate group by fields used to generate group by fields used to generate group by fields',
     },
     size: {
       name: 'Size',
@@ -1176,7 +1197,10 @@ export const CascadeCustomHeaderWithRowSelectionActionEnabled: StoryObj<
 > = {
   name: 'Custom header with row selection action enabled',
   render: function DataCascadeWrapper(args) {
-    const { groupByFields } = useMemo(() => getESQLStatsQueryMeta(args.query), [args.query]);
+    const groupByFields = useMemo(
+      () => getESQLStatsQueryMeta(args.query).groupByFields.map(({ field }) => field),
+      [args.query]
+    );
 
     const generateGroupFieldRecord = useCallback(
       (nodePath?: string[], nodePathMap?: Record<string, string>) => {
@@ -1484,12 +1508,10 @@ export const CascadeCustomHeaderWithRowSelectionActionEnabled: StoryObj<
   },
   argTypes: {
     query: {
-      name: 'ES|QL Editor Query',
       type: 'string' as const,
-      description: 'Simulation of The ES|QL query that the user provided into the esql editor',
+      description: 'Simulation of The ES|QL query that the user provided into the esql editor,',
     },
     size: {
-      name: 'Size',
       control: 'radio',
       options: ['s', 'm', 'l'],
       description: 'Size of the cascade rows',

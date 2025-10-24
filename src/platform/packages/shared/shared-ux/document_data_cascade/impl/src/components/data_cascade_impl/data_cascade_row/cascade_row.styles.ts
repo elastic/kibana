@@ -22,7 +22,7 @@ export const styles = (
 ) => {
   const { border, size: euiSizing, colors } = euiTheme;
 
-  // we use the native system link text color, see https://developer.mozilla.org/en-US/docs/Web/CSS/system-color
+  // we use the native system selected item color, see https://developer.mozilla.org/en-US/docs/Web/CSS/system-color
   // for our pseudo focus outline color
   const OUTLINE_COLOR = 'LinkText';
 
@@ -155,8 +155,7 @@ export const styles = (
     [`[data-row-type="${childRowAttribute}"][aria-level="3"]:focus-visible:has(+ [aria-level]) &:after`]:
       {
         borderBottom: `${border.width.thick} solid ${OUTLINE_COLOR}`,
-        borderBottomLeftRadius: border.radius.small,
-        borderBottomRightRadius: border.radius.small,
+        borderRadius: border.radius.small,
       },
   });
 
@@ -232,7 +231,8 @@ export const styles = (
           [`& ~ [data-row-type="${childRowAttribute}"]:has(+ [data-row-type="${rootRowAttribute}"]):before`]:
             {
               borderBottom: `${border.width.thick} solid ${OUTLINE_COLOR}`,
-              borderRadius: border.radius.small,
+              borderBottomLeftRadius: border.radius.small,
+              borderBottomRightRadius: border.radius.small,
             },
         },
 

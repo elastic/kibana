@@ -93,7 +93,7 @@ export const CascadeRowActions = function RowActions({
   );
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s" css={styles.cascadeRowActions}>
+    <EuiFlexGroup alignItems="center" gutterSize="s" css={styles.wrapper}>
       <>{visibleActions}</>
       {headerRowActions.length > maxActionCount && (
         <EuiFlexItem grow={false}>

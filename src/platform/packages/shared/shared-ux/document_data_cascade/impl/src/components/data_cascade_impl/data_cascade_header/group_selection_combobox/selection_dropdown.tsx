@@ -8,26 +8,18 @@
  */
 
 import React, { useCallback, useState, type ComponentProps } from 'react';
+import type { EuiDragDropContext } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiContextMenu,
-  EuiDragDropContext,
-  EuiDraggable,
-  EuiDroppable,
-  EuiToken,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiListGroup,
   EuiPopover,
-  EuiPanel,
   EuiPopoverFooter,
   EuiText,
   euiDragDropReorder,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDataCascadeState, useDataCascadeActions } from '../../../../store_provider';
-
-const MAX_SELECTABLE_COLUMNS = 3;
+import { SelectedListComponent, SelectionButtonComponent } from './blocks';
 
 export interface SelectionDropdownProps {
   onSelectionChange: (groupByColumn: string[]) => void;
@@ -35,26 +27,28 @@ export interface SelectionDropdownProps {
 
 export function SelectionDropdown({ onSelectionChange }: SelectionDropdownProps) {
   const [isPopoverOpen, setPopover] = useState(false);
-  const [availableColumnsIsOpen, setAvailableColumnsIsOpen] = useState(false);
   const { groupByColumns, currentGroupByColumns } = useDataCascadeState();
   const actions = useDataCascadeActions();
 
-  const onButtonClick = () => {
+  const onButtonClick = useCallback(() => {
     setPopover(!isPopoverOpen);
-  };
+  }, [setPopover, isPopoverOpen]);
 
-  const closePopover = () => {
+  const closePopover = useCallback(() => {
     setPopover(false);
-  };
+  }, [setPopover]);
 
-  const onGroupByColumnSelection = (groupByColumn: string) => {
-    onSelectionChange([...currentGroupByColumns, groupByColumn]);
-    closePopover();
-  };
+  const onGroupByColumnSelection = useCallback(
+    (groupByColumn: string) => {
+      onSelectionChange([...currentGroupByColumns, groupByColumn]);
+      closePopover();
+    },
+    [currentGroupByColumns, onSelectionChange, closePopover]
+  );
 
-  const clearSelectedGroupByColumn = () => {
+  const clearSelectedGroupByColumn = useCallback(() => {
     actions.resetActiveCascadeGroups();
-  };
+  }, [actions]);
 
   const onDragEnd = useCallback<ComponentProps<typeof EuiDragDropContext>['onDragEnd']>(
     ({ source, destination }) => {
@@ -82,6 +76,35 @@ export function SelectionDropdown({ onSelectionChange }: SelectionDropdownProps)
     </EuiButtonEmpty>
   );
 
+  const selectedListRenderer = useCallback(() => {
+    return currentGroupByColumns.length ? (
+      <SelectedListComponent selectionListItems={currentGroupByColumns} onDragEnd={onDragEnd} />
+    ) : (
+      <EuiText>
+        {i18n.translate('sharedUXPackages.data_cascade.selection_dropdown.no_selection_message', {
+          defaultMessage: 'No selection',
+        })}
+      </EuiText>
+    );
+  }, [currentGroupByColumns, onDragEnd]);
+
+  const selectionButtonRenderer = useCallback(() => {
+    const availableColumnsForSelection = groupByColumns?.filter(
+      (groupByColumn) => currentGroupByColumns.indexOf(groupByColumn) === -1
+    );
+
+    return (
+      <EuiPopoverFooter paddingSize="s">
+        <SelectionButtonComponent
+          selectionOptions={availableColumnsForSelection}
+          selectedOptions={currentGroupByColumns}
+          onSelection={onGroupByColumnSelection}
+          clearSelection={clearSelectedGroupByColumn}
+        />
+      </EuiPopoverFooter>
+    );
+  }, [groupByColumns, currentGroupByColumns, onGroupByColumnSelection, clearSelectedGroupByColumn]);
+
   return (
     <EuiPopover
       button={button}
@@ -99,121 +122,10 @@ export function SelectionDropdown({ onSelectionChange }: SelectionDropdownProps)
             id: 0,
             items: [
               {
-                renderItem: () => {
-                  return currentGroupByColumns.length ? (
-                    <EuiDragDropContext onDragEnd={onDragEnd}>
-                      <EuiDroppable droppableId="data-cascade-grouping">
-                        {currentGroupByColumns.map((groupColumn, idx) => (
-                          <EuiDraggable
-                            draggableId={`data-cascade-grouping-${groupColumn}`}
-                            index={idx}
-                            key={groupColumn}
-                            spacing="m"
-                            usePortal
-                          >
-                            {(provided, state) => (
-                              <EuiPanel
-                                hasBorder={false}
-                                hasShadow={state.isDragging}
-                                paddingSize="xs"
-                                panelRef={provided.innerRef}
-                                data-test-subj={`DataCascadeColumnSelection-${groupColumn}`}
-                              >
-                                <EuiFlexGroup alignItems="center" gutterSize="s">
-                                  <EuiToken iconType="tokenString" />
-                                  <EuiText size="s">{groupColumn}</EuiText>
-                                </EuiFlexGroup>
-                              </EuiPanel>
-                            )}
-                          </EuiDraggable>
-                        ))}
-                      </EuiDroppable>
-                    </EuiDragDropContext>
-                  ) : (
-                    <EuiText>
-                      {i18n.translate(
-                        'sharedUXPackages.data_cascade.selection_dropdown.no_selection_message',
-                        { defaultMessage: 'No selection' }
-                      )}
-                    </EuiText>
-                  );
-                },
+                renderItem: selectedListRenderer,
               },
               {
-                renderItem: () => {
-                  const availableColumnsForSelection = groupByColumns?.filter(
-                    (groupByColumn) => currentGroupByColumns.indexOf(groupByColumn) === -1
-                  );
-
-                  return (
-                    <EuiPopoverFooter paddingSize="s">
-                      <EuiFlexGroup
-                        direction="row"
-                        justifyContent="spaceBetween"
-                        responsive={false}
-                      >
-                        <EuiFlexItem grow={false}>
-                          <EuiPopover
-                            panelPaddingSize="xs"
-                            isOpen={availableColumnsIsOpen}
-                            onClick={() => setAvailableColumnsIsOpen(!availableColumnsIsOpen)}
-                            closePopover={() => setAvailableColumnsIsOpen(false)}
-                            button={
-                              <EuiButtonEmpty
-                                aria-label={i18n.translate(
-                                  'sharedUXPackages.data_cascade.selection_dropdown.open_popover',
-                                  { defaultMessage: 'Open available columns popover' }
-                                )}
-                                size="xs"
-                                flush="left"
-                                iconType="arrowDown"
-                                iconSide="right"
-                                disabled={
-                                  !availableColumnsForSelection?.length ||
-                                  currentGroupByColumns.length - 1 >= MAX_SELECTABLE_COLUMNS
-                                }
-                              >
-                                {i18n.translate(
-                                  'sharedUXPackages.data_cascade.selection_dropdown.available_selection_btn_text',
-                                  { defaultMessage: 'Pick items to groupBy' }
-                                )}
-                              </EuiButtonEmpty>
-                            }
-                          >
-                            <EuiListGroup
-                              flush={true}
-                              maxWidth={false}
-                              listItems={availableColumnsForSelection?.map((groupColumn) => ({
-                                label: <EuiText size="s">{groupColumn}</EuiText>,
-                                icon: <EuiToken iconType="tokenString" />,
-                                onClick: onGroupByColumnSelection.bind(null, groupColumn),
-                                'data-test-subj': `DataCascadeColumnSelectionPopover-${groupColumn}`,
-                              }))}
-                            />
-                          </EuiPopover>
-                        </EuiFlexItem>
-                        {Boolean(currentGroupByColumns.length) && (
-                          <EuiFlexItem grow={false}>
-                            <EuiButtonEmpty
-                              aria-label={i18n.translate(
-                                'sharedUXPackages.data_cascade.selection_dropdown.clear_selection_btn_text',
-                                { defaultMessage: 'Clear selection' }
-                              )}
-                              onClick={clearSelectedGroupByColumn}
-                              size="xs"
-                              flush="right"
-                            >
-                              {i18n.translate(
-                                'sharedUXPackages.data_cascade.selection_dropdown.clear_selection_btn_text',
-                                { defaultMessage: 'Clear selection' }
-                              )}
-                            </EuiButtonEmpty>
-                          </EuiFlexItem>
-                        )}
-                      </EuiFlexGroup>
-                    </EuiPopoverFooter>
-                  );
-                },
+                renderItem: selectionButtonRenderer,
               },
             ],
           },

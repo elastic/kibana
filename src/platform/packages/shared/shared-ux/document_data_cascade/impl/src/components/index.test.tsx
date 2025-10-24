@@ -17,7 +17,7 @@ import {
   type DataCascadeRowProps,
   type DataCascadeRowCellProps,
 } from '.';
-import { getESQLStatsQueryMeta } from '../lib/parse_esql';
+import { getESQLStatsQueryMeta } from '@kbn/esql-utils';
 import type { MockGroupData } from '../__fixtures__/types';
 
 interface RenderComponentProps
@@ -29,7 +29,7 @@ interface RenderComponentProps
 }
 
 const generateGroupRecord = (
-  groupByFields: ReturnType<typeof getESQLStatsQueryMeta>['groupByFields'],
+  groupByFields: string[],
   nodePath?: string[],
   nodePathMap?: Record<string, string>
 ) => {
@@ -84,11 +84,11 @@ function renderESQLUseCaseComponent({
             <DataCascade<MockGroupData>
               size="m"
               data={initData}
-              cascadeGroups={groupByFields}
+              cascadeGroups={groupBy}
               tableTitleSlot={tableTitleSlot}
               onCascadeGroupingChange={onCascadeGroupingChange}
             >
-              <DataCascadeRow<MockGroupData>
+              <DataCascadeRow<MockGroupData, any>
                 rowHeaderTitleSlot={rowHeaderTitleSlot}
                 rowHeaderActions={rowHeaderActions}
                 rowHeaderMetaSlots={rowHeaderMetaSlots}
@@ -102,7 +102,7 @@ function renderESQLUseCaseComponent({
           </div>
         );
       },
-      { recordCount: dataRecordCount, groupBy: groupByFields }
+      { recordCount: dataRecordCount, groupBy: groupByFields.map(({ field }) => field) }
     )
   );
 }

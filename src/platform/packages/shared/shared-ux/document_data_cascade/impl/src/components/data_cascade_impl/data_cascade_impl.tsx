@@ -8,7 +8,13 @@
  */
 
 import React, { Children, isValidElement, useRef, useMemo, useCallback } from 'react';
-import { EuiAutoSizer, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import {
+  EuiAutoSizer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  useEuiTheme,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { CascadeHeaderPrimitive } from './data_cascade_header';
 import { CascadeRowPrimitive } from './data_cascade_row';
 import { CascadeRowCellPrimitive } from './data_cascade_row_cell';
@@ -27,18 +33,18 @@ import { dataCascadeImplStyles, relativePosition } from './data_cascade_impl.sty
 import type { DataCascadeImplProps, DataCascadeRowProps, DataCascadeRowCellProps } from './types';
 
 /**
- * @description Public Component for rendering a data cascade row cell
+ * @description Public Component for configuring the rendering of a data cascade row cell
  */
-export const DataCascadeRowCell = <G extends GroupNode = GroupNode, L extends LeafNode = LeafNode>(
+export const DataCascadeRowCell = <G extends GroupNode, L extends LeafNode>(
   props: DataCascadeRowCellProps<G, L>
 ) => {
   return null;
 };
 
 /**
- * @description Public Component for rendering a data cascade row
+ * @description Public Component for configuring the rendering of a data cascade row
  */
-export const DataCascadeRow = <G extends GroupNode = GroupNode, L extends LeafNode = LeafNode>(
+export const DataCascadeRow = <G extends GroupNode, L extends LeafNode>(
   props: DataCascadeRowProps<G, L>
 ) => {
   return null;
@@ -70,7 +76,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
   }
 
   const { euiTheme } = useEuiTheme();
-
+  const headerId = useGeneratedHtmlId({ prefix: 'dataCascade' });
   const scrollElementRef = useRef<HTMLDivElement | null>(null);
   const cascadeWrapperRef = useRef<HTMLDivElement | null>(null);
   const activeStickyRenderSlotRef = useRef<HTMLDivElement | null>(null);
@@ -87,6 +93,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
     ({ table }: { table: Table<G> }) => {
       return (
         <CascadeHeaderPrimitive<G, L>
+          id={headerId}
           tableInstance={table}
           customTableHeader={customTableHeader}
           tableTitleSlot={TableTitleSlot!}
@@ -94,7 +101,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
         />
       );
     },
-    [TableTitleSlot, customTableHeader, onCascadeGroupingChange]
+    [TableTitleSlot, customTableHeader, headerId, onCascadeGroupingChange]
   );
 
   const cascadeRowCell = useCallback(
@@ -167,7 +174,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
     [size, enableRowSelection, rowElement.props, measureElement]
   );
 
-  const treeGridContainerARIAAttributes = useTreeGridContainerARIAAttributes();
+  const treeGridContainerARIAAttributes = useTreeGridContainerARIAAttributes(headerId);
 
   return (
     <div ref={cascadeWrapperRef} data-test-subj="data-cascade" css={styles.container}>
