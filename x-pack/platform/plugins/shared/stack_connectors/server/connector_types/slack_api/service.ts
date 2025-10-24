@@ -172,7 +172,11 @@ export const createExternalService = (
   const validateChannels = (channels?: string[], allowedList?: string[]) => {
     if (!channels || !channels.length || !allowedList) return;
 
-    const hasDisallowedChannel = channels?.some((name) => !allowedList.includes(name));
+    const normalizeChannel = (name: string) => name.replace(/^#/, '');
+
+    const hasDisallowedChannel = channels?.some(
+      (name) => !allowedList.some((allowed) => normalizeChannel(allowed) === normalizeChannel(name))
+    );
 
     if (hasDisallowedChannel) {
       throw new Error(
@@ -182,7 +186,7 @@ export const createExternalService = (
   };
 
   const getChannelToUse = ({
-    channels,
+    channels = [],
     channelIds = [],
     channelNames = [],
   }: {
@@ -190,8 +194,7 @@ export const createExternalService = (
     channelIds?: string[];
     channelNames?: string[];
   }): string => {
-    const hasChannels =
-      channelNames.length > 0 || channelIds.length > 0 || (channels?.length ?? 0) > 0;
+    const hasChannels = channelNames.length > 0 || channelIds.length > 0 || channels?.length > 0;
 
     if (!hasChannels) {
       throw new Error(`The channel is empty`);
@@ -215,7 +218,7 @@ export const createExternalService = (
   };
 
   const postMessage = async ({
-    channels,
+    channels = [],
     channelIds = [],
     channelNames = [],
     text,
@@ -241,7 +244,7 @@ export const createExternalService = (
   };
 
   const postBlockkit = async ({
-    channels,
+    channels = [],
     channelIds = [],
     channelNames = [],
     text,
