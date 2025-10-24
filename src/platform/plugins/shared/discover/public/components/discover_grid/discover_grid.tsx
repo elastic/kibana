@@ -24,14 +24,24 @@ import {
 } from '../../application/main/components/layout/cascaded_documents';
 import type { CascadeDocumentsRestorableState } from '../../application/main/components/layout/cascaded_documents/esql_data_cascade_restorable_state';
 
-export interface DiscoverGridProps extends UnifiedDataTableProps {
+export type DiscoverGridProps = UnifiedDataTableProps & {
   query?: DiscoverAppState['query'];
-  viewModeToggle: React.ReactElement | undefined;
-  cascadeConfig?: CascadeDocumentsRestorableState;
-  isCascadeLayoutSelected: boolean;
   onUpdateESQLQuery?: DiscoverStateContainer['actions']['updateESQLQuery'];
-  onCascadeGroupingChange: DiscoverStateContainer['actions']['onCascadeGroupingChange'];
-}
+} & (
+    | {
+        cascadeConfig?: undefined;
+        onCascadeGroupingChange?: never;
+        isCascadeLayoutSelected?: never;
+        viewModeToggle?: never;
+      }
+    | {
+        // when cascade config is passed to the discover grid component, we expect that all it's supporting props are passed along
+        cascadeConfig?: CascadeDocumentsRestorableState;
+        onCascadeGroupingChange: DiscoverStateContainer['actions']['onCascadeGroupingChange'];
+        isCascadeLayoutSelected: boolean;
+        viewModeToggle: React.ReactElement | undefined;
+      }
+  );
 
 /**
  * Customized version of the UnifiedDataTable
@@ -96,7 +106,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
    */
   const cascadeGroupingChangeHandler = useCallback(
     (cascadeGrouping: string[]) => {
-      return onCascadeGroupingChange({ query: query as AggregateQuery, cascadeGrouping });
+      return onCascadeGroupingChange?.({ query: query as AggregateQuery, cascadeGrouping });
     },
     [onCascadeGroupingChange, query]
   );

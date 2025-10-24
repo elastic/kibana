@@ -202,7 +202,7 @@ const ESQLDataCascade = React.memo(
         initialGroupColumn={[...cascadeConfig.selectedCascadeGroups]}
         customTableHeader={customTableHeading}
       >
-        <DataCascadeRow<ESQLDataGroupNode>
+        <DataCascadeRow<ESQLDataGroupNode, DataTableRecord>
           rowHeaderTitleSlot={rowHeaderTitle}
           rowHeaderMetaSlots={rowHeaderMeta}
           rowHeaderActions={rowActions}
