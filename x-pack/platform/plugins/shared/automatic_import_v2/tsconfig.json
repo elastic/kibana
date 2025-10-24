@@ -25,6 +25,7 @@
     "@kbn/zod-helpers",
     "@kbn/logging-mocks",
     "@kbn/security-plugin-types-server",
-    "@kbn/core-test-helpers-kbn-server"
+    "@kbn/core-test-helpers-kbn-server",
+    "@kbn/core-lifecycle-server-internal"
   ]
 }
