@@ -128,7 +128,7 @@ describe('Column Identifier Expressions', () => {
     });
   });
 
-  it('IS NOT NULL', () => {
+  it('IS NULL', () => {
     const text = 'ROW col IS NULL';
     const { root, errors } = Parser.parse(text);
     const expression = root.commands[0].args[0];
@@ -138,6 +138,378 @@ describe('Column Identifier Expressions', () => {
       type: 'function',
       subtype: 'postfix-unary-expression',
       name: 'is null',
+    });
+  });
+
+  it('IS NOT NULL', () => {
+    const text = 'ROW col IS NOT NULL';
+    const { root, errors } = Parser.parse(text);
+    const expression = root.commands[0].args[0];
+
+    expect(errors.length).toBe(0);
+    expect(expression).toMatchObject({
+      type: 'function',
+      subtype: 'postfix-unary-expression',
+      name: 'is not null',
+    });
+  });
+
+  it('logical OR', () => {
+    const text = 'ROW col1 OR col2';
+    const { root, errors } = Parser.parse(text);
+    const expression = root.commands[0].args[0];
+
+    expect(errors.length).toBe(0);
+    expect(expression).toMatchObject({
+      type: 'function',
+      subtype: 'binary-expression',
+      name: 'or',
+      args: [
+        {
+          type: 'column',
+          name: 'col1',
+        },
+        {
+          type: 'column',
+          name: 'col2',
+        },
+      ],
+    });
+  });
+
+  it('combined AND and OR with precedence', () => {
+    const text = 'ROW col1 AND col2 OR col3';
+    const { root, errors } = Parser.parse(text);
+    const expression = root.commands[0].args[0];
+
+    expect(errors.length).toBe(0);
+    expect(expression).toMatchObject({
+      type: 'function',
+      name: 'or',
+      args: [
+        {
+          type: 'function',
+          name: 'and',
+        },
+        {
+          type: 'column',
+          name: 'col3',
+        },
+      ],
+    });
+  });
+
+  it('comparison: equals', () => {
+    const text = 'ROW col == 5';
+    const { root, errors } = Parser.parse(text);
+    const expression = root.commands[0].args[0];
+
+    expect(errors.length).toBe(0);
+    expect(expression).toMatchObject({
+      type: 'function',
+      subtype: 'binary-expression',
+      name: '==',
+      args: [
+        {
+          type: 'column',
+          name: 'col',
+        },
+        {
+          type: 'literal',
+          value: 5,
+        },
+      ],
+    });
+  });
+
+  it('comparison: not equals', () => {
+    const text = 'ROW col != 5';
+    const { root, errors } = Parser.parse(text);
+    const expression = root.commands[0].args[0];
+
+    expect(errors.length).toBe(0);
+    expect(expression).toMatchObject({
+      type: 'function',
+      subtype: 'binary-expression',
+      name: '!=',
+      args: [
+        {
+          type: 'column',
+          name: 'col',
+        },
+        {
+          type: 'literal',
+          value: 5,
+        },
+      ],
+    });
+  });
+
+  it('comparison: less than', () => {
+    const text = 'ROW col < 10';
+    const { root, errors } = Parser.parse(text);
+    const expression = root.commands[0].args[0];
+
+    expect(errors.length).toBe(0);
+    expect(expression).toMatchObject({
+      type: 'function',
+      subtype: 'binary-expression',
+      name: '<',
+      args: [
+        {
+          type: 'column',
+          name: 'col',
+        },
+        {
+          type: 'literal',
+          value: 10,
+        },
+      ],
+    });
+  });
+
+  it('IN operator with list', () => {
+    const text = 'ROW col IN (1, 2, 3)';
+    const { root, errors } = Parser.parse(text);
+    const expression = root.commands[0].args[0];
+
+    expect(errors.length).toBe(0);
+    expect(expression).toMatchObject({
+      type: 'function',
+      subtype: 'binary-expression',
+      name: 'in',
+      args: [
+        {
+          type: 'column',
+          name: 'col',
+        },
+        {
+          type: 'list',
+        },
+      ],
+    });
+  });
+
+  it('NOT IN operator', () => {
+    const text = 'ROW col NOT IN (1, 2, 3)';
+    const { root, errors } = Parser.parse(text);
+    const expression = root.commands[0].args[0];
+
+    expect(errors.length).toBe(0);
+    expect(expression).toMatchObject({
+      type: 'function',
+      subtype: 'binary-expression',
+      name: 'not in',
+    });
+  });
+
+  it('LIKE operator', () => {
+    const text = 'ROW name LIKE "test*"';
+    const { root, errors } = Parser.parse(text);
+    const expression = root.commands[0].args[0];
+
+    expect(errors.length).toBe(0);
+    expect(expression).toMatchObject({
+      type: 'function',
+      name: 'like',
+      args: [
+        {
+          type: 'column',
+          name: 'name',
+        },
+        {
+          type: 'literal',
+          literalType: 'keyword',
+        },
+      ],
+    });
+  });
+
+  it('NOT LIKE operator', () => {
+    const text = 'ROW name NOT LIKE "test*"';
+    const { root, errors } = Parser.parse(text);
+    const expression = root.commands[0].args[0];
+
+    expect(errors.length).toBe(0);
+    expect(expression).toMatchObject({
+      type: 'function',
+      name: 'not like',
+    });
+  });
+
+  it('RLIKE operator', () => {
+    const text = 'ROW name RLIKE "test.*"';
+    const { root, errors } = Parser.parse(text);
+    const expression = root.commands[0].args[0];
+
+    expect(errors.length).toBe(0);
+    expect(expression).toMatchObject({
+      type: 'function',
+      name: 'rlike',
+      args: [
+        {
+          type: 'column',
+          name: 'name',
+        },
+        {
+          type: 'literal',
+          literalType: 'keyword',
+        },
+      ],
+    });
+  });
+
+  it('NOT RLIKE operator', () => {
+    const text = 'ROW name NOT RLIKE "test.*"';
+    const { root, errors } = Parser.parse(text);
+    const expression = root.commands[0].args[0];
+
+    expect(errors.length).toBe(0);
+    expect(expression).toMatchObject({
+      type: 'function',
+      name: 'not rlike',
+    });
+  });
+
+  it('complex nested boolean expression', () => {
+    const text = 'ROW (col1 > 5 AND col2 < 10) OR (col3 == "value" AND NOT col4)';
+    const { root, errors } = Parser.parse(text);
+    const expression = root.commands[0].args[0];
+
+    expect(errors.length).toBe(0);
+    expect(expression).toMatchObject({
+      type: 'function',
+      name: 'or',
+      args: [
+        {
+          type: 'function',
+          name: 'and',
+          args: [
+            {
+              type: 'function',
+              name: '>',
+            },
+            {
+              type: 'function',
+              name: '<',
+            },
+          ],
+        },
+        {
+          type: 'function',
+          name: 'and',
+          args: [
+            {
+              type: 'function',
+              name: '==',
+            },
+            {
+              type: 'function',
+              name: 'not',
+            },
+          ],
+        },
+      ],
+    });
+  });
+
+  it('chained comparisons with AND', () => {
+    const text = 'ROW col1 > 5 AND col1 < 10';
+    const { root, errors } = Parser.parse(text);
+    const expression = root.commands[0].args[0];
+
+    expect(errors.length).toBe(0);
+    expect(expression).toMatchObject({
+      type: 'function',
+      name: 'and',
+      args: [
+        {
+          type: 'function',
+          name: '>',
+        },
+        {
+          type: 'function',
+          name: '<',
+        },
+      ],
+    });
+  });
+
+  it('multiple NOT operations', () => {
+    const text = 'ROW NOT NOT col';
+    const { root, errors } = Parser.parse(text);
+    const expression = root.commands[0].args[0];
+
+    expect(errors.length).toBe(0);
+    expect(expression).toMatchObject({
+      type: 'function',
+      name: 'not',
+      args: [
+        {
+          type: 'function',
+          name: 'not',
+          args: [
+            {
+              type: 'column',
+              name: 'col',
+            },
+          ],
+        },
+      ],
+    });
+  });
+
+  it('boolean with arithmetic expression', () => {
+    const text = 'ROW col1 + col2 > 10';
+    const { root, errors } = Parser.parse(text);
+    const expression = root.commands[0].args[0];
+
+    expect(errors.length).toBe(0);
+    expect(expression).toMatchObject({
+      type: 'function',
+      name: '>',
+      args: [
+        {
+          type: 'function',
+          name: '+',
+          args: [
+            {
+              type: 'column',
+              name: 'col1',
+            },
+            {
+              type: 'column',
+              name: 'col2',
+            },
+          ],
+        },
+        {
+          type: 'literal',
+          value: 10,
+        },
+      ],
+    });
+  });
+
+  it('boolean with function call', () => {
+    const text = 'ROW LENGTH(name) > 5';
+    const { root, errors } = Parser.parse(text);
+    const expression = root.commands[0].args[0];
+
+    expect(errors.length).toBe(0);
+    expect(expression).toMatchObject({
+      type: 'function',
+      name: '>',
+      args: [
+        {
+          type: 'function',
+          name: 'length',
+        },
+        {
+          type: 'literal',
+          value: 5,
+        },
+      ],
     });
   });
 });
