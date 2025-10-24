@@ -40,7 +40,7 @@ export const PostMessageSubActionParamsSchema = schema.object({
   channels: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1 })),
   channelIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1 })),
   channelNames: schema.maybe(
-    schema.arrayOf(schema.string({ validate: validateChannelName }), { maxSize: 1 })
+    schema.arrayOf(schema.string({ maxLength: 200, validate: validateChannelName }), { maxSize: 1 })
   ),
   text: schema.string({ minLength: 1 }),
 });
