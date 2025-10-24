@@ -179,6 +179,7 @@ export type DataCascadeRowProps<G extends GroupNode, L extends LeafNode> = Pick<
 };
 
 export interface CascadeHeaderPrimitiveProps<G extends GroupNode> {
+  id: string;
   tableInstance: Table<G>;
   onCascadeGroupingChange?: SelectionDropdownProps['onSelectionChange'];
   customTableHeader?: (props: {
@@ -204,9 +205,9 @@ interface DataCascadeImplBaseProps<G extends GroupNode, L extends LeafNode>
    */
   data: G[];
   /**
-   * Callback function that is called when the group by selection changes, use this if you aren't using the data cascade component as a controlled component.
+   * Callback function that is called when the group by selection changes.
    */
-  onCascadeGroupingChange?: SelectionDropdownProps['onSelectionChange'];
+  onCascadeGroupingChange: SelectionDropdownProps['onSelectionChange'];
   /**
    * The spacing size of the component, can be 's' (small), 'm' (medium), or 'l' (large). Default is 'm'.
    */

@@ -1,6 +1,6 @@
 
-import { Story } from '@storybook/addon-docs';
-import { DataCascade, DataCascadeRow, DataCascadeRowCell } from './index';
+import { Story, Controls } from '@storybook/addon-docs';
+import { DataCascade, DataCascadeRow, DataCascadeRowCell } from '../components';
 
 # Data Cascade
 
@@ -46,9 +46,14 @@ Which would in turn yield something of this sort;
 
 <Story id="data-cascade-configuration-examples--cascade-nested-grid-implementation" />
 
+
 ## Features
 
 The cascade component by default supports up to 3 levels of visual nesting, for the data it's rendering, further more all levels of rendering are 
 virtualized for performance, and it's also possible to have a cell's content virtualized, and connect it to the overall virtualization strategy,
 such that the scroll of the entire component also controls the cell and it turns determines the content the cell renders.
 
+## Component Props
+
+{/* Note: Excluding `query` from the controls as it's not a prop of the component, but rather a simulation of user input for generating group by fields. */}
+<Controls exclude={['query']} />

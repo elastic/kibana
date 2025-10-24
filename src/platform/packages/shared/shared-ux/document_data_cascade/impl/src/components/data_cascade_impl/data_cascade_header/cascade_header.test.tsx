@@ -17,6 +17,7 @@ describe('CascadeHeaderPrimitive', () => {
     render(
       <DataCascadeProvider cascadeGroups={['group1', 'group2']} initialGroupColumn={['group1']}>
         <CascadeHeaderPrimitive
+          id="test-id"
           tableInstance={null as any} // Ignored in test
           tableTitleSlot={() => <div>Table Title</div>}
           onCascadeGroupingChange={jest.fn()}
@@ -31,6 +32,7 @@ describe('CascadeHeaderPrimitive', () => {
     render(
       <DataCascadeProvider cascadeGroups={['group1', 'group2']} initialGroupColumn={['group1']}>
         <CascadeHeaderPrimitive
+          id="test-id"
           tableInstance={null as any} // Ignored in test
           customTableHeader={(props) => (
             <div>Custom Header - Selected: {props.currentSelectedColumns.join(', ')}</div>

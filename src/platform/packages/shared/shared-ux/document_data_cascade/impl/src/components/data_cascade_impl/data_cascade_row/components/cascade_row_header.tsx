@@ -180,7 +180,7 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem css={flexHelper}>
-          <EuiFlexGroup justifyContent="spaceBetween" direction="row">
+          <EuiFlexGroup justifyContent="spaceBetween" direction="row" responsive={false}>
             <EuiFlexItem grow={4} css={styles.rowHeaderTitleWrapper}>
               <RowTitleSlot rowData={rowInstance.original} nodePath={nodePath} />
             </EuiFlexItem>

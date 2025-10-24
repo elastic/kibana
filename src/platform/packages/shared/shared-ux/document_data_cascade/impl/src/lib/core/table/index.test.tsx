@@ -181,7 +181,9 @@ describe('table', () => {
         const secondChildRow = firstRootRow.subRows[1];
         act(() => secondChildRow.getToggleExpandedHandler()());
         expect(Object.keys(cascadeState.table.expanded)).toHaveLength(2);
+        // @ts-expect-error -- the check above ensures cascadeState.table.expanded is an object
         expect(cascadeState.table.expanded?.[firstChildRow.id]).toBeUndefined();
+        // @ts-expect-error -- the check above ensures cascadeState.table.expanded is an object
         expect(cascadeState.table.expanded?.[secondChildRow.id]).toBe(true);
       });
     });
