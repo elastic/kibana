@@ -183,6 +183,9 @@ tags:
   - description: Manage and interact with Security Assistant resources.
     name: Security AI Assistant API
     x-displayName: Security AI assistant
+  - description: Use the Attack discovery APIs to generate and manage Attack discoveries. Attack Discovery leverages large language models (LLMs) to analyze alerts in your environment and identify threats. Each "discovery" represents a potential attack and describes relationships among multiple alerts to tell you which users and hosts are involved, how alerts correspond to the MITRE ATT&CK matrix, and which threat actor might be responsible. `Technical preview`
+    name: Security Attack discovery API
+    x-displayName: Security Attack discovery
   - description: |
       Use the detections APIs to create and manage detection rules. Detection rules search events and external alerts sent to Elastic Security and generate detection alerts from any hits. Alerts are displayed on the **Alerts** page and can be assigned and triaged, using the alert status to mark them as open, closed, or acknowledged.
 
@@ -8150,7 +8153,7 @@ paths:
           name: product_name
   /api/attack_discovery/_bulk:
     post:
-      description: Performs bulk updates on multiple Attack discovery alerts, including workflow status changes and visibility settings. This endpoint allows efficient batch processing of alert modifications without requiring individual API calls for each alert.
+      description: Performs bulk updates on multiple Attack discoveries, including workflow status changes and visibility settings. This endpoint allows efficient batch processing of alert modifications without requiring individual API calls for each alert. `Technical preview`
       operationId: PostAttackDiscoveryBulk
       requestBody:
         content:
@@ -8199,7 +8202,7 @@ paths:
                     - ids
               required:
                 - update
-        description: Bulk update parameters for Attack discovery alerts
+        description: Bulk update parameters for Attack discoveries
         required: true
       responses:
         '200':
@@ -8211,7 +8214,7 @@ paths:
                   data:
                     description: Array of updated Attack discovery alert objects. Each item includes the applied modifications from the bulk update request.
                     items:
-                      $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiAlert'
+                      $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiAlert'
                     type: array
                 required:
                   - data
@@ -8239,9 +8242,9 @@ paths:
                   - error
                   - message
           description: Generic Error
-      summary: Bulk update Attack discovery alerts
+      summary: Bulk update Attack discoveries
       tags:
-        - Security AI Assistant API
+        - Security Attack discovery API
       x-code-samples:
         - label: Example request
           lang: curl
@@ -8259,12 +8262,13 @@ paths:
                  "kibana_alert_workflow_status": "acknowledged"
                }
              }'
+      x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/attack_discovery/_find:
     get:
-      description: Finds Attack discoveries that match the search criteria. Supports free text search, filtering, pagination, and sorting.
+      description: Find Attack discoveries that match the search criteria. Supports free text search, filtering, pagination, and sorting. `Technical preview`
       operationId: AttackDiscoveryFind
       parameters:
         - description: Filter results to Attack discoveries that include any of the provided alert IDs
@@ -8350,7 +8354,7 @@ paths:
           name: sort_field
           required: false
           schema:
-            $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryFindSortField'
+            $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryFindSortField'
             default: '@timestamp'
         - description: Sort order direction `asc` for ascending or `desc` for descending. Defaults to `desc`.
           example: desc
@@ -8358,7 +8362,7 @@ paths:
           name: sort_order
           required: false
           schema:
-            $ref: '#/components/schemas/Security_AI_Assistant_API_SortOrder'
+            $ref: '#/components/schemas/Security_Attack_discovery_API_SortOrder'
             default: desc
         - description: Start of the time range for the search. Accepts absolute timestamps (ISO 8601) or relative date math (e.g. "now-7d").
           example: now-24h
@@ -8405,7 +8409,7 @@ paths:
                   data:
                     description: Array of matched Attack discovery objects. Each item follows the `AttackDiscoveryApiAlert` schema.
                     items:
-                      $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiAlert'
+                      $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiAlert'
                     type: array
                   page:
                     description: Current page number of the paginated result set.
@@ -8451,9 +8455,9 @@ paths:
                     example: 400
                     type: number
           description: Generic Error
-      summary: Finds Attack discoveries that match the search criteria
+      summary: Find Attack discoveries that match the search criteria
       tags:
-        - Security AI Assistant API
+        - Security Attack discovery API
       x-code-samples:
         - label: Example request
           lang: curl
@@ -8462,18 +8466,19 @@ paths:
              --request GET 'http://localhost:5601/api/attack_discovery/_find?end=now&include_unique_alert_ids=false&page=1&per_page=10&search=&sort_field=%40timestamp&sort_order=desc&start=now-24h&status=open&status=acknowledged' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
+      x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/attack_discovery/_generate:
     post:
-      description: Initiates the generation of attack discoveries by analyzing security alerts using AI. Returns an execution UUID that can be used to track the generation progress and retrieve results. Results may also be retrieved via the find endpoint.
+      description: Initiates the generation of attack discoveries by analyzing security alerts using AI. Returns an execution UUID that can be used to track the generation progress and retrieve results. Results may also be retrieved via the find endpoint. `Technical preview`
       operationId: PostAttackDiscoveryGenerate
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryGenerationConfig'
+              $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryGenerationConfig'
         required: true
       responses:
         '200':
@@ -8483,7 +8488,7 @@ paths:
                 type: object
                 properties:
                   execution_uuid:
-                    $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+                    $ref: '#/components/schemas/Security_Attack_discovery_API_NonEmptyString'
                     description: The unique identifier for the attack discovery generation process. Use this UUID to track the generation progress and retrieve results via the find endpoint.
                     example: edd26039-0990-4d9f-9829-2a1fcacb77b5
                 required:
@@ -8514,7 +8519,7 @@ paths:
           description: Bad request - Invalid input parameters or configuration
       summary: Generate attack discoveries from alerts
       tags:
-        - Security AI Assistant API
+        - Security Attack discovery API
       x-code-samples:
         - label: Example request
           lang: curl
@@ -8523,62 +8528,946 @@ paths:
              --request POST 'http://localhost:5601/api/attack_discovery/_generate' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json" \
-             --header "elastic-api-version: 2023-10-31" \
              --data '{
-               "alertsIndexPattern": ".alerts-security.alerts-default",
-               "anonymizationFields": [
-                 {
-                   "field": "host.name",
-                   "allowed": true,
-                   "anonymized": true
-                 },
-                 {
-                   "field": "user.name",
-                   "allowed": true,
-                   "anonymized": true
-                 },
-                 {
-                   "field": "_id",
-                   "allowed": true,
-                   "anonymized": false
-                 },
-                 {
-                   "field": "source.ip",
-                   "allowed": true,
-                   "anonymized": false
-                 },
-                 {
-                   "field": "destination.ip",
-                   "allowed": true,
-                   "anonymized": false
-                 },
-                 {
-                   "field": "rule.name",
-                   "allowed": true,
-                   "anonymized": false
-                 },
-                 {
-                   "field": "kibana.alert.risk_score",
-                   "allowed": true,
-                   "anonymized": false
-                 }
-               ],
-               "apiConfig": {
-                 "connectorId": "my-connector-id",
-                 "actionTypeId": ".gen-ai"
-               },
-               "connectorName": "GPT-4 Chat",
-               "size": 100,
-               "subAction": "invokeAI",
-               "start": "now-24h",
-               "end": "now"
-             }'
+                "alertsIndexPattern": ".alerts-security.alerts-default",
+                "anonymizationFields": [
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "@timestamp",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "aKiJW5gB4U27o8XO8oLf"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "Ransomware.feature",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "saiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "Ransomware.files.data",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "sqiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "Ransomware.files.entropy",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "s6iJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "Ransomware.files.extension",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "tKiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "Ransomware.files.metrics",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "taiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "Ransomware.files.operation",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "tqiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "Ransomware.files.path",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "t6iJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "Ransomware.files.score",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "uKiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "Ransomware.version",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "uaiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "_id",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "Z6iJW5gB4U27o8XO8oLf"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "agent.id",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "aaiJW5gB4U27o8XO8oLf"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "cloud.availability_zone",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "aqiJW5gB4U27o8XO8oLf"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "cloud.provider",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "a6iJW5gB4U27o8XO8oLf"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "cloud.region",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "bKiJW5gB4U27o8XO8oLf"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "destination.ip",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "baiJW5gB4U27o8XO8oLf"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "dns.question.name",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "bqiJW5gB4U27o8XO8oLf"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "dns.question.type",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "b6iJW5gB4U27o8XO8oLf"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "event.category",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "cKiJW5gB4U27o8XO8oLf"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "event.dataset",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "caiJW5gB4U27o8XO8oLf"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "event.module",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "cqiJW5gB4U27o8XO8oLf"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "event.outcome",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "c6iJW5gB4U27o8XO8oLf"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "file.Ext.original.path",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "dKiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "file.hash.sha256",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "daiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "file.name",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "dqiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "file.path",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "d6iJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "group.id",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "eKiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "group.name",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "eaiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "host.asset.criticality",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "eqiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "host.name",
+                    "allowed": true,
+                    "anonymized": true,
+                    "namespace": "default",
+                    "id": "e6iJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "host.os.name",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "fKiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "host.os.version",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "faiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "host.risk.calculated_level",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "fqiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "host.risk.calculated_score_norm",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "f6iJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "kibana.alert.original_time",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "gKiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "kibana.alert.risk_score",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "gaiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "kibana.alert.rule.description",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "gqiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "kibana.alert.rule.name",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "g6iJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "kibana.alert.rule.references",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "hKiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "kibana.alert.rule.threat.framework",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "haiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "kibana.alert.rule.threat.tactic.id",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "hqiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "kibana.alert.rule.threat.tactic.name",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "h6iJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "kibana.alert.rule.threat.tactic.reference",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "iKiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "kibana.alert.rule.threat.technique.id",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "iaiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "kibana.alert.rule.threat.technique.name",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "iqiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "kibana.alert.rule.threat.technique.reference",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "i6iJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "kibana.alert.rule.threat.technique.subtechnique.id",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "jKiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "kibana.alert.rule.threat.technique.subtechnique.name",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "jaiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "kibana.alert.rule.threat.technique.subtechnique.reference",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "jqiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "kibana.alert.severity",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "j6iJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "kibana.alert.workflow_status",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "kKiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "message",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "kaiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "network.protocol",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "kqiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.Ext.memory_region.bytes_compressed_present",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "nKiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.Ext.memory_region.malware_signature.all_names",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "naiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.Ext.memory_region.malware_signature.primary.matches",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "nqiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.Ext.memory_region.malware_signature.primary.signature.name",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "n6iJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.Ext.token.integrity_level_name",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "oKiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.args",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "k6iJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.code_signature.exists",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "lKiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.code_signature.signing_id",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "laiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.code_signature.status",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "lqiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.code_signature.subject_name",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "l6iJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.code_signature.trusted",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "mKiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.command_line",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "maiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.executable",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "mqiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.exit_code",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "m6iJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.hash.md5",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "oaiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.hash.sha1",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "oqiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.hash.sha256",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "o6iJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.name",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "pKiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.parent.args",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "paiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.parent.args_count",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "pqiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.parent.code_signature.exists",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "p6iJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.parent.code_signature.status",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "qKiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.parent.code_signature.subject_name",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "qaiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.parent.code_signature.trusted",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "qqiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.parent.command_line",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "q6iJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.parent.executable",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "rKiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.parent.name",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "raiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.pe.original_file_name",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "rqiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.pid",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "r6iJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "process.working_directory",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "sKiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "rule.name",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "uqiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "rule.reference",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "u6iJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "source.ip",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "vKiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "threat.framework",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "vaiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "threat.tactic.id",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "vqiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "threat.tactic.name",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "v6iJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "threat.tactic.reference",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "wKiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "threat.technique.id",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "waiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "threat.technique.name",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "wqiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "threat.technique.reference",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "w6iJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "threat.technique.subtechnique.id",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "xKiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "threat.technique.subtechnique.name",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "xaiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "threat.technique.subtechnique.reference",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "xqiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "user.asset.criticality",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "x6iJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "user.domain",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "yKiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "user.name",
+                    "allowed": true,
+                    "anonymized": true,
+                    "namespace": "default",
+                    "id": "yaiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "user.risk.calculated_level",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "yqiJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "user.risk.calculated_score_norm",
+                    "allowed": true,
+                    "anonymized": false,
+                    "namespace": "default",
+                    "id": "y6iJW5gB4U27o8XO8oLg"
+                  },
+                  {
+                    "timestamp": "2025-07-30T13:33:44.029Z",
+                    "createdAt": "2025-07-30T13:33:44.029Z",
+                    "field": "user.target.name",
+                    "allowed": true,
+                    "anonymized": true,
+                    "namespace": "default",
+                    "id": "zKiJW5gB4U27o8XO8oLg"
+                  }
+                ],
+                "replacements": {},
+                "size": 100,
+                "subAction": "invokeAI",
+                "apiConfig": {
+                  "connectorId": "example-connector-id",
+                  "actionTypeId": ".gen-ai"
+                },
+                "connectorName": "GPT-5 Chat",
+                "end": "now",
+                "start": "now-24h"
+              }'
+      x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/attack_discovery/generations:
     get:
-      description: Get the latest attack discovery generations (that are not dismissed) for the current user. This endpoint retrieves generation metadata including execution status and statistics for Attack discovery generations.
+      description: Get the latest attack discovery generations metadata (that are not dismissed) for the current user. This endpoint retrieves generation metadata including execution status and statistics for Attack discovery generations. `Technical preview`
       operationId: GetAttackDiscoveryGenerations
       parameters:
         - description: End of the time range for filtering generations. Accepts absolute timestamps (ISO 8601) or relative date math (e.g. "now", "now-24h").
@@ -8592,8 +9481,9 @@ paths:
           example: 50
           in: query
           name: size
-          required: true
+          required: false
           schema:
+            default: 50
             minimum: 1
             type: number
         - description: Start of the time range for filtering generations. Accepts absolute timestamps (ISO 8601) or relative date math (e.g. "now-7d").
@@ -8613,7 +9503,7 @@ paths:
                   generations:
                     description: List of attack discovery generations
                     items:
-                      $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryGeneration'
+                      $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryGeneration'
                     type: array
                 required:
                   - generations
@@ -8637,9 +9527,9 @@ paths:
                     example: 400
                     type: number
           description: Bad request
-      summary: Get the latest attack discovery generations (that are not dismissed) for the current user
+      summary: Get the latest attack discovery generations metadata for the current user
       tags:
-        - Security AI Assistant API
+        - Security Attack discovery API
       x-code-samples:
         - label: Example request
           lang: curl
@@ -8648,12 +9538,13 @@ paths:
              --request GET 'http://localhost:5601/api/attack_discovery/generations?size=50&start=now-24h&end=now' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
+      x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/attack_discovery/generations/{execution_uuid}:
     get:
-      description: Returns a specific Attack discovery generation, including all generated Attack discoveries and associated metadata, including execution status and statistics.
+      description: Returns a specific Attack discovery generation, including all generated Attack discoveries and associated metadata, including execution status and statistics. `Technical preview`
       operationId: GetAttackDiscoveryGeneration
       parameters:
         - description: The unique identifier for the Attack discovery generation execution. This UUID is returned at the start of an Attack discovery generation.
@@ -8662,7 +9553,7 @@ paths:
           name: execution_uuid
           required: true
           schema:
-            $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+            $ref: '#/components/schemas/Security_Attack_discovery_API_NonEmptyString'
         - description: Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack discovery views within Kibana. Defaults to `false`.
           example: false
           in: query
@@ -8689,10 +9580,10 @@ paths:
                   data:
                     description: Array of Attack discoveries generated during this execution.
                     items:
-                      $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiAlert'
+                      $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiAlert'
                     type: array
                   generation:
-                    $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryGeneration'
+                    $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryGeneration'
                     description: Optional metadata about the attack discovery generation process, metadata including execution status and statistics. This metadata may not be available for all generations.
                 required:
                   - data
@@ -8722,7 +9613,7 @@ paths:
           description: Generic Error
       summary: Get a single Attack discovery generation, including its discoveries and (optional) generation metadata
       tags:
-        - Security AI Assistant API
+        - Security Attack discovery API
       x-code-samples:
         - label: Example request
           lang: curl
@@ -8731,12 +9622,13 @@ paths:
              --request GET 'http://localhost:5601/api/attack_discovery/generations/2e13f386-46cf-4d65-9e2b-68609e132ba5' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
+      x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/attack_discovery/generations/{execution_uuid}/_dismiss:
     post:
-      description: Dismisses an attack discovery generation for the current user, indicating that it's status should not be reported in the UI. This sets the generation's status to "dismissed" and affects how the generation appears in subsequent queries.
+      description: Dismisses an attack discovery generation for the current user, indicating that it's status should not be reported in the UI. This sets the generation's status to "dismissed" and affects how the generation appears in subsequent queries. `Technical preview`
       operationId: PostAttackDiscoveryGenerationsDismiss
       parameters:
         - description: The unique identifier for the Attack discovery generation execution. This UUID is returned when an attack discovery generation is created and can be found in generation responses.
@@ -8745,7 +9637,7 @@ paths:
           name: execution_uuid
           required: true
           schema:
-            $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+            $ref: '#/components/schemas/Security_Attack_discovery_API_NonEmptyString'
       responses:
         '200':
           content:
@@ -8840,7 +9732,7 @@ paths:
           description: Generic Error
       summary: Dismiss an attack discovery generation
       tags:
-        - Security AI Assistant API
+        - Security Attack discovery API
       x-code-samples:
         - label: Example request
           lang: curl
@@ -8849,12 +9741,13 @@ paths:
              --request POST 'http://localhost:5601/api/attack_discovery/generations/46b218d5-535d-4329-be56-d0f6af6986b7/_dismiss' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
+      x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/attack_discovery/schedules:
     post:
-      description: Creates a new Attack discovery schedule that analyzes security alerts at specified intervals. The schedule defines when and how Attack discovery analysis should run, including which alerts to analyze, which AI connector to use, and what actions to take when discoveries are found.
+      description: Creates a new Attack discovery schedule that analyzes security alerts at specified intervals. The schedule defines when and how Attack discovery analysis should run, including which alerts to analyze, which AI connector to use, and what actions to take when discoveries are found. `Technical preview`
       operationId: CreateAttackDiscoverySchedules
       requestBody:
         content:
@@ -8864,7 +9757,7 @@ paths:
               enabled: true
               name: Daily Security Analysis
               params:
-                alerts_index_pattern: .alerts-security.alerts-*
+                alerts_index_pattern: .alerts-security.alerts-default
                 api_config:
                   actionTypeId: bedrock
                   connectorId: my-bedrock-connector
@@ -8875,7 +9768,7 @@ paths:
               schedule:
                 interval: 24h
             schema:
-              $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiScheduleCreateProps'
+              $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleCreateProps'
         description: Attack discovery schedule configuration including name, parameters, schedule interval, and actions
         required: true
       responses:
@@ -8890,7 +9783,7 @@ paths:
                 id: 12345678-1234-1234-1234-123456789012
                 name: Daily Security Analysis
                 params:
-                  alerts_index_pattern: .alerts-security.alerts-*
+                  alerts_index_pattern: .alerts-security.alerts-default
                   api_config:
                     actionTypeId: bedrock
                     connectorId: my-bedrock-connector
@@ -8903,7 +9796,7 @@ paths:
                 updated_at: '2023-10-31T10:00:00.000Z'
                 updated_by: elastic
               schema:
-                $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiSchedule'
+                $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiSchedule'
           description: Successfully created Attack discovery schedule
         '400':
           content:
@@ -8913,11 +9806,11 @@ paths:
                 message: Invalid request parameters
                 status_code: 400
               schema:
-                $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryGenericError'
+                $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryGenericError'
           description: Generic Error
       summary: Create Attack discovery schedule
       tags:
-        - Security AI Assistant API
+        - Security Attack discovery API
       x-code-samples:
         - label: Create an Attack discovery schedule
           lang: curl
@@ -8930,7 +9823,7 @@ paths:
                "name": "Daily Security Analysis",
                "enabled": true,
                "params": {
-                 "alerts_index_pattern": ".alerts-security.alerts-*",
+                 "alerts_index_pattern": ".alerts-security.alerts-default",
                  "api_config": {
                    "actionTypeId": "bedrock",
                    "connectorId": "my-bedrock-connector",
@@ -8943,14 +9836,30 @@ paths:
                "schedule": {
                  "interval": "24h"
                },
-               "actions": []
+               "actions": [
+                  {
+                     "action_type_id": ".cases",
+                     "id": "system-connector-.cases",
+                     "params": {
+                       "subAction": "run",
+                       "subActionParams": {
+                         "timeWindow": "7d",
+                         "reopenClosedCases": false,
+                         "groupingBy": [],
+                         "templateId": null
+                       }
+                     },
+                     "uuid": "12345678-1234-1234-1234-123456789012"
+                   }
+               ]
              }'
+      x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/attack_discovery/schedules/_find:
     get:
-      description: Finds Attack discovery schedules that match the search criteria. Supports pagination and sorting by various fields.
+      description: Finds Attack discovery schedules that match the search criteria. Supports pagination and sorting by various fields. `Technical preview`
       operationId: FindAttackDiscoverySchedules
       parameters:
         - description: Page number to return (used for pagination). Defaults to 1.
@@ -8973,7 +9882,7 @@ paths:
           name: sort_field
           required: false
           schema:
-            $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+            $ref: '#/components/schemas/Security_Attack_discovery_API_NonEmptyString'
         - description: Sort order direction. Use 'asc' for ascending or 'desc' for descending. Defaults to 'asc'.
           example: asc
           in: query
@@ -8994,7 +9903,7 @@ paths:
                   data:
                     description: Array of matched Attack discovery schedule objects.
                     items:
-                      $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiSchedule'
+                      $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiSchedule'
                     type: array
                   page:
                     description: Current page number of the paginated result set.
@@ -9032,21 +9941,22 @@ paths:
           description: Generic Error
       summary: Finds Attack discovery schedules that match the search criteria
       tags:
-        - Security AI Assistant API
+        - Security Attack discovery API
       x-code-samples:
         - label: Example request
           lang: curl
           source: |
             curl \
-             --request GET 'http://localhost:5601/api/attack_discovery/schedules/_find?page=1&per_page=10&sort_field=name&sort_direction=asc' \
+             --request GET 'http://localhost:5601/api/attack_discovery/schedules/_find' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
+      x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/attack_discovery/schedules/{id}:
     delete:
-      description: Permanently deletes an Attack discovery schedule and all associated configuration.
+      description: Permanently deletes an Attack discovery schedule and all associated configuration. `Technical preview`
       operationId: DeleteAttackDiscoverySchedules
       parameters:
         - description: The unique identifier (UUID) of the Attack Discovery schedule to delete. This ID is returned when creating a schedule and can be found in schedule listings.
@@ -9055,7 +9965,7 @@ paths:
           name: id
           required: true
           schema:
-            $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+            $ref: '#/components/schemas/Security_Attack_discovery_API_NonEmptyString'
       responses:
         '200':
           content:
@@ -9066,7 +9976,7 @@ paths:
                 type: object
                 properties:
                   id:
-                    $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+                    $ref: '#/components/schemas/Security_Attack_discovery_API_NonEmptyString'
                     description: The unique identifier of the deleted Attack Discovery schedule
                 required:
                   - id
@@ -9079,11 +9989,11 @@ paths:
                 message: Invalid request parameters
                 status_code: 400
               schema:
-                $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryGenericError'
+                $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryGenericError'
           description: Generic Error
       summary: Delete Attack discovery schedule
       tags:
-        - Security AI Assistant API
+        - Security Attack discovery API
       x-code-samples:
         - label: Delete an Attack discovery schedule
           lang: curl
@@ -9092,11 +10002,12 @@ paths:
              --request DELETE 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
+      x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
     get:
-      description: Retrieves a specific Attack discovery schedule by its unique identifier. Returns complete schedule configuration including parameters, interval settings, associated actions, and execution history.
+      description: Retrieves a specific Attack discovery schedule by its unique identifier. Returns complete schedule configuration including parameters, interval settings, associated actions, and execution history. `Technical preview`
       operationId: GetAttackDiscoverySchedules
       parameters:
         - description: The unique identifier (UUID) of the Attack Discovery schedule to retrieve. This ID is returned when creating a schedule and can be found in schedule listings.
@@ -9105,7 +10016,7 @@ paths:
           name: id
           required: true
           schema:
-            $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+            $ref: '#/components/schemas/Security_Attack_discovery_API_NonEmptyString'
       responses:
         '200':
           content:
@@ -9122,7 +10033,7 @@ paths:
                   status: ok
                 name: Daily Security Analysis
                 params:
-                  alerts_index_pattern: .alerts-security.alerts-*
+                  alerts_index_pattern: .alerts-security.alerts-default
                   api_config:
                     actionTypeId: bedrock
                     connectorId: my-bedrock-connector
@@ -9135,7 +10046,7 @@ paths:
                 updated_at: '2023-10-31T10:00:00.000Z'
                 updated_by: elastic
               schema:
-                $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiSchedule'
+                $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiSchedule'
           description: Successfully retrieved Attack Discovery schedule with complete configuration and metadata
         '400':
           content:
@@ -9145,11 +10056,11 @@ paths:
                 message: Invalid request parameters
                 status_code: 400
               schema:
-                $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryGenericError'
+                $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryGenericError'
           description: Generic Error
       summary: Get Attack discovery schedule by ID
       tags:
-        - Security AI Assistant API
+        - Security Attack discovery API
       x-code-samples:
         - label: Get an Attack discovery schedule by ID
           lang: curl
@@ -9158,11 +10069,12 @@ paths:
              --request GET 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
+      x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
     put:
-      description: Updates an existing Attack discovery schedule with new configuration. All schedule properties can be modified including name, parameters, interval, and actions. The update operation replaces the entire schedule configuration with the provided values.
+      description: Updates an existing Attack discovery schedule with new configuration. All schedule properties can be modified including name, parameters, interval, and actions. The update operation replaces the entire schedule configuration with the provided values. `Technical preview`
       operationId: UpdateAttackDiscoverySchedules
       parameters:
         - description: The unique identifier (UUID) of the Attack Discovery schedule to update. This ID is returned when creating a schedule and can be found in schedule listings.
@@ -9171,7 +10083,7 @@ paths:
           name: id
           required: true
           schema:
-            $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+            $ref: '#/components/schemas/Security_Attack_discovery_API_NonEmptyString'
       requestBody:
         content:
           application/json:
@@ -9179,7 +10091,7 @@ paths:
               actions: []
               name: Updated Daily Security Analysis
               params:
-                alerts_index_pattern: .alerts-security.alerts-*
+                alerts_index_pattern: .alerts-security.alerts-default
                 api_config:
                   actionTypeId: bedrock
                   connectorId: my-bedrock-connector
@@ -9190,7 +10102,7 @@ paths:
               schedule:
                 interval: 12h
             schema:
-              $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiScheduleUpdateProps'
+              $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleUpdateProps'
         description: Updated Attack discovery schedule configuration. All fields are required as this replaces the entire schedule configuration.
         required: true
       responses:
@@ -9205,7 +10117,7 @@ paths:
                 id: 12345678-1234-1234-1234-123456789012
                 name: Updated Daily Security Analysis
                 params:
-                  alerts_index_pattern: .alerts-security.alerts-*
+                  alerts_index_pattern: .alerts-security.alerts-default
                   api_config:
                     actionTypeId: bedrock
                     connectorId: my-bedrock-connector
@@ -9218,7 +10130,7 @@ paths:
                 updated_at: '2023-10-31T12:00:00.000Z'
                 updated_by: elastic
               schema:
-                $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiSchedule'
+                $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiSchedule'
           description: Successfully updated Attack Discovery schedule with the new configuration and metadata
         '400':
           content:
@@ -9228,11 +10140,11 @@ paths:
                 message: Invalid request parameters
                 status_code: 400
               schema:
-                $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryGenericError'
+                $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryGenericError'
           description: Generic Error
       summary: Update Attack discovery schedule
       tags:
-        - Security AI Assistant API
+        - Security Attack discovery API
       x-code-samples:
         - label: Update an Attack discovery schedule
           lang: curl
@@ -9244,7 +10156,7 @@ paths:
              --data '{
                "name": "Updated Daily Security Analysis",
                "params": {
-                 "alerts_index_pattern": ".alerts-security.alerts-*",
+                 "alerts_index_pattern": ".alerts-security.alerts-default",
                  "api_config": {
                    "actionTypeId": "bedrock",
                    "connectorId": "my-bedrock-connector",
@@ -9259,12 +10171,13 @@ paths:
                },
                "actions": []
              }'
+      x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/attack_discovery/schedules/{id}/_disable:
-    put:
-      description: Disables an Attack discovery schedule, preventing it from running according to its configured interval. The schedule configuration is preserved and can be re-enabled later. Any currently running executions will complete, but no new executions will be started.
+    post:
+      description: Disables an Attack discovery schedule, preventing it from running according to its configured interval. The schedule configuration is preserved and can be re-enabled later. Any currently running executions will complete, but no new executions will be started. `Technical preview`
       operationId: DisableAttackDiscoverySchedules
       parameters:
         - description: The unique identifier (UUID) of the Attack Discovery schedule to disable. This ID is returned when creating a schedule and can be found in schedule listings.
@@ -9273,7 +10186,7 @@ paths:
           name: id
           required: true
           schema:
-            $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+            $ref: '#/components/schemas/Security_Attack_discovery_API_NonEmptyString'
       responses:
         '200':
           content:
@@ -9284,7 +10197,7 @@ paths:
                 type: object
                 properties:
                   id:
-                    $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+                    $ref: '#/components/schemas/Security_Attack_discovery_API_NonEmptyString'
                     description: The unique identifier of the disabled Attack Discovery schedule
                 required:
                   - id
@@ -9297,25 +10210,26 @@ paths:
                 message: Invalid request parameters
                 status_code: 400
               schema:
-                $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryGenericError'
+                $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryGenericError'
           description: Generic Error
       summary: Disable Attack discovery schedule
       tags:
-        - Security AI Assistant API
+        - Security Attack discovery API
       x-code-samples:
         - label: Disable an Attack discovery schedule
           lang: curl
           source: |
             curl \
-             --request PUT 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012/_disable' \
+             --request POST 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012/_disable' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
+      x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/attack_discovery/schedules/{id}/_enable:
-    put:
-      description: Enables a previously disabled Attack discovery schedule, allowing it to run according to its configured interval. Once enabled, the schedule will begin executing at the next scheduled time based on its interval configuration.
+    post:
+      description: Enables a previously disabled Attack discovery schedule, allowing it to run according to its configured interval. Once enabled, the schedule will begin executing at the next scheduled time based on its interval configuration. `Technical preview`
       operationId: EnableAttackDiscoverySchedules
       parameters:
         - description: The unique identifier (UUID) of the Attack Discovery schedule to enable. This ID is returned when creating a schedule and can be found in schedule listings.
@@ -9324,7 +10238,7 @@ paths:
           name: id
           required: true
           schema:
-            $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+            $ref: '#/components/schemas/Security_Attack_discovery_API_NonEmptyString'
       responses:
         '200':
           content:
@@ -9335,7 +10249,7 @@ paths:
                 type: object
                 properties:
                   id:
-                    $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+                    $ref: '#/components/schemas/Security_Attack_discovery_API_NonEmptyString'
                     description: The unique identifier of the enabled Attack Discovery schedule
                 required:
                   - id
@@ -9348,19 +10262,20 @@ paths:
                 message: Invalid request parameters
                 status_code: 400
               schema:
-                $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryGenericError'
+                $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryGenericError'
           description: Generic Error
       summary: Enable Attack discovery schedule
       tags:
-        - Security AI Assistant API
+        - Security Attack discovery API
       x-code-samples:
         - label: Enable an Attack discovery schedule
           lang: curl
           source: |
             curl \
-             --request PUT 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012/_enable' \
+             --request POST 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012/_enable' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
+      x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -13826,7 +14741,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Security_Endpoint_Management_API_GetEndpointActionResponse'
+                $ref: '#/components/schemas/Security_Endpoint_Management_API_ActionDetailsResponse'
           description: OK
       summary: Get action details
       tags:
@@ -23136,7 +24051,7 @@ paths:
           name: product_name
   /api/fleet/agent_policies/{agentPolicyId}/download:
     get:
-      description: 'Download an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read AND fleet-setup.'
+      description: 'Download an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-setup.'
       operationId: get-fleet-agent-policies-agentpolicyid-download
       parameters:
         - in: path
@@ -28791,6 +29706,8 @@ paths:
                               type: array
                             installed_kibana_space_id:
                               type: string
+                            is_rollback_ttl_expired:
+                              type: boolean
                             latest_executed_state:
                               additionalProperties: true
                               type: object
@@ -30024,6 +30941,8 @@ paths:
                             type: array
                           installed_kibana_space_id:
                             type: string
+                          is_rollback_ttl_expired:
+                            type: boolean
                           latest_executed_state:
                             additionalProperties: true
                             type: object
@@ -30686,6 +31605,8 @@ paths:
                             type: array
                           installed_kibana_space_id:
                             type: string
+                          is_rollback_ttl_expired:
+                            type: boolean
                           latest_executed_state:
                             additionalProperties: true
                             type: object
@@ -32650,7 +33571,7 @@ paths:
           name: product_name
   /api/fleet/kubernetes:
     get:
-      description: '[Required authorization] Route required privileges: fleet-agent-policies-read AND fleet-setup.'
+      description: '[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-setup.'
       operationId: get-fleet-kubernetes
       parameters:
         - in: query
@@ -32708,7 +33629,7 @@ paths:
           name: product_name
   /api/fleet/kubernetes/download:
     get:
-      description: '[Required authorization] Route required privileges: fleet-agent-policies-read AND fleet-setup.'
+      description: '[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-setup.'
       operationId: get-fleet-kubernetes-download
       parameters:
         - in: query
@@ -42525,6 +43446,7 @@ paths:
                           type: string
                         type: array
                       prerelease_integrations_enabled:
+                        deprecated: true
                         type: boolean
                       secret_storage_requirements_met:
                         type: boolean
@@ -42599,6 +43521,7 @@ paths:
               type: object
               properties:
                 additional_yaml_config:
+                  deprecated: true
                   type: string
                 delete_unenrolled_agents:
                   additionalProperties: false
@@ -42612,15 +43535,19 @@ paths:
                     - enabled
                     - is_preconfigured
                 has_seen_add_data_notice:
+                  deprecated: true
                   type: boolean
                 kibana_ca_sha256:
+                  deprecated: true
                   type: string
                 kibana_urls:
+                  deprecated: true
                   items:
                     format: uri
                     type: string
                   type: array
                 prerelease_integrations_enabled:
+                  deprecated: true
                   type: boolean
       responses:
         '200':
@@ -42660,6 +43587,7 @@ paths:
                           type: string
                         type: array
                       prerelease_integrations_enabled:
+                        deprecated: true
                         type: boolean
                       secret_storage_requirements_met:
                         type: boolean
@@ -51821,6 +52749,8 @@ paths:
                                                                     nullable: true
                                                                   - not: {}
                                                               type: array
+                                                            - items: {}
+                                                              type: array
                                                             - {}
                                                         type: object
                                                       - anyOf:
@@ -55364,6 +56294,8 @@ paths:
                                                                       - 'null'
                                                                     nullable: true
                                                                   - not: {}
+                                                              type: array
+                                                            - items: {}
                                                               type: array
                                                             - {}
                                                         type: object
@@ -59091,6 +60023,8 @@ paths:
                                                     nullable: true
                                                   - not: {}
                                               type: array
+                                            - items: {}
+                                              type: array
                                             - {}
                                         type: object
                                       - anyOf:
@@ -60736,6 +61670,8 @@ paths:
                                                       - 'null'
                                                     nullable: true
                                                   - not: {}
+                                              type: array
+                                            - items: {}
                                               type: array
                                             - {}
                                         type: object
@@ -66573,7 +67509,7 @@ components:
           example: 404
           type: integer
     Data_views_allownoindex:
-      description: Allows the data view saved object to exist before the data is available.
+      description: Allows the data view saved object to exist before the data is available. Defaults to `false`.
       type: boolean
     Data_views_create_data_view_request_object:
       title: Create data view request
@@ -67519,438 +68455,6 @@ components:
       required:
         - connectorId
         - actionTypeId
-    Security_AI_Assistant_API_AttackDiscoveryApiAlert:
-      description: An attack discovery that's also an alert (Public API with snake_case)
-      type: object
-      properties:
-        alert_ids:
-          description: The alert IDs that the attack discovery is based on
-          items:
-            type: string
-          type: array
-        alert_rule_uuid:
-          description: The optional kibana.alert.rule.uuid of the rule that generated this attack discovery (not applicable to ad hock runs)
-          type: string
-        alert_start:
-          description: The optional time the attack discovery alert was created
-          type: string
-        alert_updated_at:
-          description: The optional time the attack discovery alert was last updated
-          type: string
-        alert_updated_by_user_id:
-          description: The optional id of the user who last updated the attack discovery alert
-          type: string
-        alert_updated_by_user_name:
-          description: The optional username of the user who updated the attack discovery alert
-          type: string
-        alert_workflow_status:
-          description: The optional kibana.alert.workflow_status of this attack discovery
-          type: string
-        alert_workflow_status_updated_at:
-          description: The optional time the attack discovery alert workflow status was last updated
-          type: string
-        connector_id:
-          description: The ID of the connector that generated the attack discovery
-          type: string
-        connector_name:
-          description: The (human readable) name of the connector that generated the attack discovery
-          type: string
-        details_markdown:
-          description: Details of the attack with bulleted markdown that always uses special syntax for field names and values from the source data.
-          type: string
-        entity_summary_markdown:
-          description: An optional, short (no more than a sentence) summary of the attack discovery featuring only the host.name and user.name fields (when they are applicable), using the same syntax
-          type: string
-        generation_uuid:
-          description: The generation ID of the run that created the attack discovery
-          type: string
-        id:
-          description: The unique ID of the attack discovery
-          type: string
-        mitre_attack_tactics:
-          description: An optional array of MITRE ATT&CK tactic for the attack discovery
-          items:
-            type: string
-          type: array
-        replacements:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_Replacements'
-          description: Key-value pairs that are used to replace placeholders in the markdown fields
-        risk_score:
-          description: The optional, (but typically populated after generation) risk score of the alert
-          type: integer
-        summary_markdown:
-          description: A markdown summary of attack discovery, using the same syntax
-          type: string
-        timestamp:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyTimestamp'
-          description: The time the attack discovery was generated
-        title:
-          description: A title for the attack discovery, in plain text
-          type: string
-        user_id:
-          description: The optional id of the user who generated the attack discovery
-          type: string
-        user_name:
-          description: The optional username of the user who generated the attack discovery, (not applicable to attack discoveries generated by rules)
-          type: string
-        users:
-          description: The optional array of users who may view the attack discovery. When empty, (or not present), all users may view the attack discovery.
-          items:
-            $ref: '#/components/schemas/Security_AI_Assistant_API_User'
-          type: array
-      required:
-        - alert_ids
-        - connector_id
-        - connector_name
-        - details_markdown
-        - generation_uuid
-        - id
-        - summary_markdown
-        - timestamp
-        - title
-    Security_AI_Assistant_API_AttackDiscoveryApiSchedule:
-      description: An attack discovery schedule
-      type: object
-      properties:
-        actions:
-          description: The attack discovery schedule actions
-          items:
-            $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiScheduleAction'
-          type: array
-        created_at:
-          description: The date the schedule was created
-          format: date-time
-          type: string
-        created_by:
-          description: The name of the user that created the schedule
-          type: string
-        enabled:
-          description: Indicates whether the schedule is enabled
-          type: boolean
-        id:
-          description: UUID of attack discovery schedule
-          type: string
-        last_execution:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiScheduleExecution'
-          description: The attack discovery schedule last execution summary
-        name:
-          description: The name of the schedule
-          type: string
-        params:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiScheduleParams'
-          description: The attack discovery schedule configuration parameters
-        schedule:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_IntervalApiSchedule'
-          description: The attack discovery schedule interval
-        updated_at:
-          description: The date the schedule was updated
-          format: date-time
-          type: string
-        updated_by:
-          description: The name of the user that updated the schedule
-          type: string
-      required:
-        - id
-        - name
-        - created_by
-        - updated_by
-        - created_at
-        - updated_at
-        - enabled
-        - params
-        - schedule
-        - actions
-    Security_AI_Assistant_API_AttackDiscoveryApiScheduleAction:
-      type: object
-      properties:
-        action_type_id:
-          description: The action type used for sending notifications.
-          type: string
-        alerts_filter:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiScheduleActionAlertsFilter'
-        frequency:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiScheduleActionFrequency'
-        group:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiScheduleActionGroup'
-        id:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiScheduleActionId'
-        params:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiScheduleActionParams'
-        uuid:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
-      required:
-        - action_type_id
-        - id
-        - params
-    Security_AI_Assistant_API_AttackDiscoveryApiScheduleActionAlertsFilter:
-      additionalProperties: true
-      type: object
-    Security_AI_Assistant_API_AttackDiscoveryApiScheduleActionFrequency:
-      description: The action frequency defines when the action runs (for example, only on schedule execution or at specific time intervals).
-      type: object
-      properties:
-        notify_when:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiScheduleActionNotifyWhen'
-        summary:
-          description: Action summary indicates whether we will send a summary notification about all the generate alerts or notification per individual alert
-          type: boolean
-        throttle:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiScheduleActionThrottle'
-          nullable: true
-      required:
-        - summary
-        - notify_when
-        - throttle
-    Security_AI_Assistant_API_AttackDiscoveryApiScheduleActionGroup:
-      description: Groups actions by use cases. Use `default` for alert notifications.
-      type: string
-    Security_AI_Assistant_API_AttackDiscoveryApiScheduleActionId:
-      description: The connector ID.
-      type: string
-    Security_AI_Assistant_API_AttackDiscoveryApiScheduleActionNotifyWhen:
-      description: 'The condition for throttling the notification: `onActionGroupChange`, `onActiveAlert`,  or `onThrottleInterval`'
-      enum:
-        - onActiveAlert
-        - onThrottleInterval
-        - onActionGroupChange
-      type: string
-    Security_AI_Assistant_API_AttackDiscoveryApiScheduleActionParams:
-      additionalProperties: true
-      description: Object containing the allowed connector fields, which varies according to the connector type.
-      type: object
-    Security_AI_Assistant_API_AttackDiscoveryApiScheduleActionThrottle:
-      description: Defines how often schedule actions are taken. Time interval in seconds, minutes, hours, or days.
-      example: 1h
-      pattern: ^[1-9]\d*[smhd]$
-      type: string
-    Security_AI_Assistant_API_AttackDiscoveryApiScheduleCreateProps:
-      description: An attack discovery schedule create properties
-      type: object
-      properties:
-        actions:
-          description: The attack discovery schedule actions
-          items:
-            $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiScheduleAction'
-          type: array
-        enabled:
-          description: Indicates whether the schedule is enabled
-          type: boolean
-        name:
-          description: The name of the schedule
-          type: string
-        params:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiScheduleParams'
-          description: The attack discovery schedule configuration parameters
-        schedule:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_IntervalApiSchedule'
-          description: The attack discovery schedule interval
-      required:
-        - name
-        - params
-        - schedule
-    Security_AI_Assistant_API_AttackDiscoveryApiScheduleExecution:
-      description: An attack discovery schedule execution information
-      type: object
-      properties:
-        date:
-          description: Date of the execution
-          format: date-time
-          type: string
-        duration:
-          description: Duration of the execution
-          type: number
-        message:
-          type: string
-        status:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiScheduleExecutionStatus'
-          description: Status of the execution
-      required:
-        - date
-        - status
-        - last_duration
-    Security_AI_Assistant_API_AttackDiscoveryApiScheduleExecutionStatus:
-      description: An attack discovery schedule execution status
-      enum:
-        - ok
-        - active
-        - error
-        - unknown
-        - warning
-      type: string
-    Security_AI_Assistant_API_AttackDiscoveryApiScheduleParams:
-      description: An attack discovery schedule params
-      type: object
-      properties:
-        alerts_index_pattern:
-          description: The index pattern to get alerts from
-          type: string
-        api_config:
-          allOf:
-            - $ref: '#/components/schemas/Security_AI_Assistant_API_ApiConfig'
-            - type: object
-              properties:
-                name:
-                  description: The name of the connector
-                  type: string
-              required:
-                - name
-          description: LLM API configuration.
-        combined_filter:
-          additionalProperties: true
-          type: object
-        end:
-          type: string
-        filters:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_Filters'
-        query:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_Query'
-        size:
-          type: number
-        start:
-          type: string
-      required:
-        - alerts_index_pattern
-        - api_config
-        - size
-    Security_AI_Assistant_API_AttackDiscoveryApiScheduleUpdateProps:
-      description: An attack discovery schedule update properties
-      type: object
-      properties:
-        actions:
-          description: The attack discovery schedule actions
-          items:
-            $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiScheduleAction'
-          type: array
-        name:
-          description: The name of the schedule
-          type: string
-        params:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_AttackDiscoveryApiScheduleParams'
-          description: The attack discovery schedule configuration parameters
-        schedule:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_IntervalApiSchedule'
-          description: The attack discovery schedule interval
-      required:
-        - name
-        - params
-        - schedule
-        - actions
-    Security_AI_Assistant_API_AttackDiscoveryFindSortField:
-      description: Allowed field names to sort Attack discovery results by. Clients should only pass one of the listed values.
-      enum:
-        - '@timestamp'
-      type: string
-    Security_AI_Assistant_API_AttackDiscoveryGeneration:
-      type: object
-      properties:
-        alerts_context_count:
-          description: The number of alerts sent as context (max kibana.alert.rule.execution.metrics.alert_counts.active) to the LLM for the generation
-          type: number
-        connector_id:
-          description: The connector id (event.dataset) for this generation
-          type: string
-        connector_stats:
-          description: Stats applicable to the connector for this generation
-          type: object
-          properties:
-            average_successful_duration_nanoseconds:
-              description: The average duration (avg event.duration) in nanoseconds of successful generations for the same connector id, for the current user
-              type: number
-            successful_generations:
-              description: The number of successful generations for the same connector id, for the current user
-              type: number
-        discoveries:
-          description: The number of new Attack discovery alerts (max kibana.alert.rule.execution.metrics.alert_counts.new) for this generation
-          type: number
-        end:
-          description: When generation ended (max event.end)
-          type: string
-        execution_uuid:
-          description: The unique identifier (kibana.alert.rule.execution.uuid) for the generation
-          type: string
-        loading_message:
-          description: Generation loading message (kibana.alert.rule.execution.status)
-          type: string
-        reason:
-          description: Reason for failed generations (event.reason)
-          type: string
-        start:
-          description: When generation started (min event.start)
-          type: string
-        status:
-          description: The status of the attack discovery generation
-          enum:
-            - canceled
-            - dismissed
-            - failed
-            - started
-            - succeeded
-          type: string
-      required:
-        - connector_id
-        - discoveries
-        - execution_uuid
-        - loading_message
-        - start
-        - status
-    Security_AI_Assistant_API_AttackDiscoveryGenerationConfig:
-      type: object
-      properties:
-        alertsIndexPattern:
-          type: string
-        anonymizationFields:
-          items:
-            $ref: '#/components/schemas/Security_AI_Assistant_API_AnonymizationFieldResponse'
-          type: array
-        apiConfig:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_ApiConfig'
-          description: LLM API configuration.
-        connectorName:
-          type: string
-        end:
-          type: string
-        filter:
-          additionalProperties: true
-          type: object
-        langSmithApiKey:
-          type: string
-        langSmithProject:
-          type: string
-        model:
-          type: string
-        replacements:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_Replacements'
-        size:
-          type: number
-        start:
-          type: string
-        subAction:
-          enum:
-            - invokeAI
-            - invokeStream
-          type: string
-      required:
-        - apiConfig
-        - alertsIndexPattern
-        - anonymizationFields
-        - size
-        - subAction
-    Security_AI_Assistant_API_AttackDiscoveryGenericError:
-      description: Generic error response for Attack discovery schedule operations
-      type: object
-      properties:
-        error:
-          description: Error type
-          example: Bad Request
-          type: string
-        message:
-          description: Human-readable error message describing what went wrong
-          example: Invalid request parameters
-          type: string
-        status_code:
-          description: HTTP status code
-          example: 400
-          type: number
     Security_AI_Assistant_API_BaseContentReference:
       description: The basis of a content reference
       type: object
@@ -67966,6 +68470,35 @@ components:
       required:
         - id
         - type
+    Security_AI_Assistant_API_BaseInterruptResumeValue:
+      description: The basis of an interrupt resume value
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_InterruptType'
+          description: Type of the resume value
+          example: SELECT_OPTION
+      required:
+        - type
+    Security_AI_Assistant_API_BaseInterruptValue:
+      description: The basis of an agent interrupt
+      type: object
+      properties:
+        expired:
+          description: Whether the interrupt has expired and can no longer be resumed.
+          example: false
+          type: boolean
+        threadId:
+          description: Thread ID of the graph execution that produced this message.
+          example: <UUID>
+          type: string
+        type:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_InterruptType'
+          description: Type of the interrupt
+          example: SELECT_OPTION
+      required:
+        - type
+        - threadId
     Security_AI_Assistant_API_BulkCrudActionSummary:
       type: object
       properties:
@@ -68383,10 +68916,6 @@ components:
             - query
             - label
       description: References an ESQL query
-    Security_AI_Assistant_API_Filters:
-      description: The filter array used to define the conditions for when alerts are selected as an attack discovery context. Defaults to an empty array.
-      items: {}
-      type: array
     Security_AI_Assistant_API_FindAnonymizationFieldsSortField:
       enum:
         - created_at
@@ -68589,14 +69118,65 @@ components:
           - fieldType
           - description
       type: array
-    Security_AI_Assistant_API_IntervalApiSchedule:
-      type: object
-      properties:
-        interval:
-          description: The schedule interval
-          type: string
-      required:
-        - interval
+    Security_AI_Assistant_API_InputTextInterruptResumeValue:
+      allOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_BaseInterruptResumeValue'
+        - type: object
+          properties:
+            type:
+              enum:
+                - INPUT_TEXT
+              example: INPUT_TEXT
+              type: string
+            value:
+              description: Text value used to resume the graph execution with.
+              example: .logs*
+              type: string
+          required:
+            - value
+            - type
+      description: A resume value for input text
+    Security_AI_Assistant_API_InputTextInterruptValue:
+      allOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_BaseInterruptValue'
+        - type: object
+          properties:
+            description:
+              description: Description of action required
+              example: What is the index you would like to use for the query.
+              type: string
+            placeholder:
+              description: Placeholder text for the input field
+              example: Enter index pattern here...
+              type: string
+            type:
+              enum:
+                - INPUT_TEXT
+              example: INPUT_TEXT
+              type: string
+          required:
+            - type
+      description: Interrupt that requests user to provide text input
+    Security_AI_Assistant_API_InterruptResumeValue:
+      description: Union of the interrupt resume values
+      oneOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_SelectOptionInterruptResumeValue'
+          additionalProperties: false
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_InputTextInterruptResumeValue'
+          additionalProperties: false
+    Security_AI_Assistant_API_InterruptType:
+      description: The type of interrupt
+      enum:
+        - SELECT_OPTION
+        - INPUT_TEXT
+      type: string
+    Security_AI_Assistant_API_InterruptValue:
+      description: Union of the interrupt values
+      oneOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_SelectOptionInterruptValue'
+          additionalProperties: false
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_InputTextInterruptValue'
+          additionalProperties: false
     Security_AI_Assistant_API_KnowledgeBaseEntryBulkActionSkipReason:
       description: Reason why a Knowledge Base Entry was skipped during the bulk action.
       enum:
@@ -68876,6 +69456,12 @@ components:
         contentReferences:
           $ref: '#/components/schemas/Security_AI_Assistant_API_ContentReferences'
           description: Data referred to by the message content.
+        interruptResumeValue:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_InterruptResumeValue'
+          description: When the agent is resumed after an interrupt, this field is populated with the details of the resume value.
+        interruptValue:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_InterruptValue'
+          description: When the agent is interrupted (for example, when user input is required), this field is populated with the details of the interrupt. Messages containing interruptValues in the metadata are excluded from the LLM context.
     Security_AI_Assistant_API_MessageRole:
       description: Message role.
       enum:
@@ -69234,20 +69820,6 @@ components:
         - Other
       example: OpenAI
       type: string
-    Security_AI_Assistant_API_Query:
-      description: An query condition to filter alerts
-      type: object
-      properties:
-        language:
-          type: string
-        query:
-          oneOf:
-            - type: string
-            - additionalProperties: true
-              type: object
-      required:
-        - query
-        - language
     Security_AI_Assistant_API_Reader:
       additionalProperties: true
       type: object
@@ -69314,6 +69886,77 @@ components:
           required:
             - type
       description: References the security alerts page
+    Security_AI_Assistant_API_SelectOptionInterruptOption:
+      description: A request approval option
+      type: object
+      properties:
+        buttonColor:
+          enum:
+            - text
+            - accent
+            - accentSecondary
+            - primary
+            - success
+            - warning
+            - danger
+            - neutral
+            - risk
+          example: danger
+          type: string
+        label:
+          example: Option 1
+          type: string
+        value:
+          example: option_1
+          type: string
+      required:
+        - label
+        - value
+    Security_AI_Assistant_API_SelectOptionInterruptResumeValue:
+      allOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_BaseInterruptResumeValue'
+        - type: object
+          properties:
+            type:
+              enum:
+                - SELECT_OPTION
+              example: SELECT_OPTION
+              type: string
+            value:
+              description: The value of the selected option to resume the graph execution with
+              example: option_1
+              type: string
+          required:
+            - value
+            - type
+      description: A request approval resume schema
+    Security_AI_Assistant_API_SelectOptionInterruptValue:
+      allOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_BaseInterruptValue'
+        - type: object
+          properties:
+            description:
+              description: Description of action required
+              example: Select one of the options
+              type: string
+            options:
+              description: List of actions to choose from
+              example:
+                - label: Option 1
+                - label: Option 2
+              items:
+                $ref: '#/components/schemas/Security_AI_Assistant_API_SelectOptionInterruptOption'
+              type: array
+            type:
+              enum:
+                - SELECT_OPTION
+              example: SELECT_OPTION
+              type: string
+          required:
+            - type
+            - description
+            - options
+      description: Interrupt that requests user to select one of the provided options
     Security_AI_Assistant_API_SortOrder:
       description: The order in which results are sorted.
       enum:
@@ -69364,6 +70007,625 @@ components:
       required:
         - modelId
         - tokens
+    Security_Attack_discovery_API_AnonymizationFieldResponse:
+      type: object
+      properties:
+        allowed:
+          description: Whether this field is allowed to be sent to the model.
+          example: true
+          type: boolean
+        anonymized:
+          description: Whether this field should be anonymized.
+          example: false
+          type: boolean
+        createdAt:
+          description: Timestamp of when the anonymization field was created.
+          example: '2023-10-31T12:00:00Z'
+          type: string
+        createdBy:
+          description: Username of the person who created the anonymization field.
+          example: user1
+          type: string
+        field:
+          description: Name of the anonymization field.
+          example: url.domain
+          type: string
+        id:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_NonEmptyString'
+          description: The ID of the anonymization field.
+        namespace:
+          description: Kibana space in which this anonymization field exists.
+          example: default
+          type: string
+        timestamp:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_NonEmptyTimestamp'
+          description: Timestamp when the anonymization field was initially created.
+        updatedAt:
+          description: Timestamp of the last update.
+          example: '2023-10-31T12:00:00Z'
+          type: string
+        updatedBy:
+          description: Username of the person who last updated the field.
+          example: user1
+          type: string
+      required:
+        - id
+        - field
+    Security_Attack_discovery_API_ApiConfig:
+      type: object
+      properties:
+        actionTypeId:
+          description: Action type ID
+          example: actionType456
+          type: string
+        connectorId:
+          description: Connector ID
+          example: connector123
+          type: string
+        defaultSystemPromptId:
+          description: Default system prompt ID
+          example: systemPrompt001
+          type: string
+        model:
+          description: Model
+          example: gpt-4
+          type: string
+        provider:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_Provider'
+          description: Provider
+          example: OpenAI
+      required:
+        - connectorId
+        - actionTypeId
+    Security_Attack_discovery_API_AttackDiscoveryApiAlert:
+      description: An attack discovery that's also an alert (Public API with snake_case)
+      type: object
+      properties:
+        alert_ids:
+          description: The alert IDs that the attack discovery is based on
+          items:
+            type: string
+          type: array
+        alert_rule_uuid:
+          description: The optional kibana.alert.rule.uuid of the rule that generated this attack discovery (not applicable to ad hock runs)
+          type: string
+        alert_start:
+          description: The optional time the attack discovery alert was created
+          type: string
+        alert_updated_at:
+          description: The optional time the attack discovery alert was last updated
+          type: string
+        alert_updated_by_user_id:
+          description: The optional id of the user who last updated the attack discovery alert
+          type: string
+        alert_updated_by_user_name:
+          description: The optional username of the user who updated the attack discovery alert
+          type: string
+        alert_workflow_status:
+          description: The optional kibana.alert.workflow_status of this attack discovery
+          type: string
+        alert_workflow_status_updated_at:
+          description: The optional time the attack discovery alert workflow status was last updated
+          type: string
+        connector_id:
+          description: The ID of the connector that generated the attack discovery
+          type: string
+        connector_name:
+          description: The (human readable) name of the connector that generated the attack discovery
+          type: string
+        details_markdown:
+          description: Details of the attack with bulleted markdown that always uses special syntax for field names and values from the source data.
+          type: string
+        entity_summary_markdown:
+          description: An optional, short (no more than a sentence) summary of the attack discovery featuring only the host.name and user.name fields (when they are applicable), using the same syntax
+          type: string
+        generation_uuid:
+          description: The generation ID of the run that created the attack discovery
+          type: string
+        id:
+          description: The unique ID of the attack discovery
+          type: string
+        mitre_attack_tactics:
+          description: An optional array of MITRE ATT&CK tactic for the attack discovery
+          items:
+            type: string
+          type: array
+        replacements:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_Replacements'
+          description: Key-value pairs that are used to replace placeholders in the markdown fields
+        risk_score:
+          description: The optional, (but typically populated after generation) risk score of the alert
+          type: integer
+        summary_markdown:
+          description: A markdown summary of attack discovery, using the same syntax
+          type: string
+        timestamp:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_NonEmptyTimestamp'
+          description: The time the attack discovery was generated
+        title:
+          description: A title for the attack discovery, in plain text
+          type: string
+        user_id:
+          description: The optional id of the user who generated the attack discovery
+          type: string
+        user_name:
+          description: The optional username of the user who generated the attack discovery, (not applicable to attack discoveries generated by rules)
+          type: string
+        users:
+          description: The optional array of users who may view the attack discovery. When empty, (or not present), all users may view the attack discovery.
+          items:
+            $ref: '#/components/schemas/Security_Attack_discovery_API_User'
+          type: array
+      required:
+        - alert_ids
+        - connector_id
+        - connector_name
+        - details_markdown
+        - generation_uuid
+        - id
+        - summary_markdown
+        - timestamp
+        - title
+    Security_Attack_discovery_API_AttackDiscoveryApiSchedule:
+      description: An attack discovery schedule
+      type: object
+      properties:
+        actions:
+          description: The attack discovery schedule actions
+          items:
+            $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleAction'
+          type: array
+        created_at:
+          description: The date the schedule was created
+          format: date-time
+          type: string
+        created_by:
+          description: The name of the user that created the schedule
+          type: string
+        enabled:
+          description: Indicates whether the schedule is enabled
+          type: boolean
+        id:
+          description: UUID of attack discovery schedule
+          type: string
+        last_execution:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleExecution'
+          description: The attack discovery schedule last execution summary
+        name:
+          description: The name of the schedule
+          type: string
+        params:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleParams'
+          description: The attack discovery schedule configuration parameters
+        schedule:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_IntervalApiSchedule'
+          description: The attack discovery schedule interval
+        updated_at:
+          description: The date the schedule was updated
+          format: date-time
+          type: string
+        updated_by:
+          description: The name of the user that updated the schedule
+          type: string
+      required:
+        - id
+        - name
+        - created_by
+        - updated_by
+        - created_at
+        - updated_at
+        - enabled
+        - params
+        - schedule
+        - actions
+    Security_Attack_discovery_API_AttackDiscoveryApiScheduleAction:
+      oneOf:
+        - $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleGeneralAction'
+        - $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleSystemAction'
+    Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionAlertsFilter:
+      additionalProperties: true
+      type: object
+    Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionFrequency:
+      description: The action frequency defines when the action runs (for example, only on schedule execution or at specific time intervals).
+      type: object
+      properties:
+        notify_when:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionNotifyWhen'
+        summary:
+          description: Action summary indicates whether we will send a summary notification about all the generate alerts or notification per individual alert
+          type: boolean
+        throttle:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionThrottle'
+          nullable: true
+      required:
+        - summary
+        - notify_when
+        - throttle
+    Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionGroup:
+      description: Groups actions by use cases. Use `default` for alert notifications.
+      type: string
+    Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionId:
+      description: The connector ID.
+      type: string
+    Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionNotifyWhen:
+      description: 'The condition for throttling the notification: `onActionGroupChange`, `onActiveAlert`,  or `onThrottleInterval`'
+      enum:
+        - onActiveAlert
+        - onThrottleInterval
+        - onActionGroupChange
+      type: string
+    Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionParams:
+      additionalProperties: true
+      description: Object containing the allowed connector fields, which varies according to the connector type.
+      type: object
+    Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionThrottle:
+      description: Defines how often schedule actions are taken. Time interval in seconds, minutes, hours, or days.
+      example: 1h
+      pattern: ^[1-9]\d*[smhd]$
+      type: string
+    Security_Attack_discovery_API_AttackDiscoveryApiScheduleCreateProps:
+      description: An attack discovery schedule create properties
+      type: object
+      properties:
+        actions:
+          description: The attack discovery schedule actions
+          items:
+            $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleAction'
+          type: array
+        enabled:
+          description: Indicates whether the schedule is enabled
+          type: boolean
+        name:
+          description: The name of the schedule
+          type: string
+        params:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleParams'
+          description: The attack discovery schedule configuration parameters
+        schedule:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_IntervalApiSchedule'
+          description: The attack discovery schedule interval
+      required:
+        - name
+        - params
+        - schedule
+    Security_Attack_discovery_API_AttackDiscoveryApiScheduleExecution:
+      description: An attack discovery schedule execution information
+      type: object
+      properties:
+        date:
+          description: Date of the execution
+          format: date-time
+          type: string
+        duration:
+          description: Duration of the execution
+          type: number
+        message:
+          type: string
+        status:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleExecutionStatus'
+          description: Status of the execution
+      required:
+        - date
+        - status
+        - last_duration
+    Security_Attack_discovery_API_AttackDiscoveryApiScheduleExecutionStatus:
+      description: An attack discovery schedule execution status
+      enum:
+        - ok
+        - active
+        - error
+        - unknown
+        - warning
+      type: string
+    Security_Attack_discovery_API_AttackDiscoveryApiScheduleGeneralAction:
+      type: object
+      properties:
+        action_type_id:
+          description: The action type used for sending notifications.
+          type: string
+        alerts_filter:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionAlertsFilter'
+        frequency:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionFrequency'
+        group:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionGroup'
+        id:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionId'
+        params:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionParams'
+        uuid:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_NonEmptyString'
+      required:
+        - action_type_id
+        - group
+        - id
+        - params
+    Security_Attack_discovery_API_AttackDiscoveryApiScheduleParams:
+      description: An attack discovery schedule params
+      type: object
+      properties:
+        alerts_index_pattern:
+          description: The index pattern to get alerts from
+          type: string
+        api_config:
+          allOf:
+            - $ref: '#/components/schemas/Security_Attack_discovery_API_ApiConfig'
+            - type: object
+              properties:
+                name:
+                  description: The name of the connector
+                  type: string
+              required:
+                - name
+          description: LLM API configuration.
+        combined_filter:
+          additionalProperties: true
+          type: object
+        end:
+          type: string
+        filters:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_Filters'
+        query:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_Query'
+        size:
+          type: number
+        start:
+          type: string
+      required:
+        - alerts_index_pattern
+        - api_config
+        - size
+    Security_Attack_discovery_API_AttackDiscoveryApiScheduleSystemAction:
+      type: object
+      properties:
+        action_type_id:
+          description: The action type used for sending notifications.
+          type: string
+        id:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionId'
+        params:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionParams'
+        uuid:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_NonEmptyString'
+      required:
+        - action_type_id
+        - id
+        - params
+    Security_Attack_discovery_API_AttackDiscoveryApiScheduleUpdateProps:
+      description: An attack discovery schedule update properties
+      type: object
+      properties:
+        actions:
+          description: The attack discovery schedule actions
+          items:
+            $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleAction'
+          type: array
+        name:
+          description: The name of the schedule
+          type: string
+        params:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleParams'
+          description: The attack discovery schedule configuration parameters
+        schedule:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_IntervalApiSchedule'
+          description: The attack discovery schedule interval
+      required:
+        - name
+        - params
+        - schedule
+        - actions
+    Security_Attack_discovery_API_AttackDiscoveryFindSortField:
+      description: Allowed field names to sort Attack discovery results by. Clients should only pass one of the listed values.
+      enum:
+        - '@timestamp'
+      type: string
+    Security_Attack_discovery_API_AttackDiscoveryGeneration:
+      type: object
+      properties:
+        alerts_context_count:
+          description: The number of alerts sent as context (max kibana.alert.rule.execution.metrics.alert_counts.active) to the LLM for the generation
+          type: number
+        connector_id:
+          description: The connector id (event.dataset) for this generation
+          type: string
+        connector_stats:
+          description: Stats applicable to the connector for this generation
+          type: object
+          properties:
+            average_successful_duration_nanoseconds:
+              description: The average duration (avg event.duration) in nanoseconds of successful generations for the same connector id, for the current user
+              type: number
+            successful_generations:
+              description: The number of successful generations for the same connector id, for the current user
+              type: number
+        discoveries:
+          description: The number of new Attack discovery alerts (max kibana.alert.rule.execution.metrics.alert_counts.new) for this generation
+          type: number
+        end:
+          description: When generation ended (max event.end)
+          type: string
+        execution_uuid:
+          description: The unique identifier (kibana.alert.rule.execution.uuid) for the generation
+          type: string
+        loading_message:
+          description: Generation loading message (kibana.alert.rule.execution.status)
+          type: string
+        reason:
+          description: Reason for failed generations (event.reason)
+          type: string
+        start:
+          description: When generation started (min event.start)
+          type: string
+        status:
+          description: The status of the attack discovery generation
+          enum:
+            - canceled
+            - dismissed
+            - failed
+            - started
+            - succeeded
+          type: string
+      required:
+        - connector_id
+        - discoveries
+        - execution_uuid
+        - loading_message
+        - start
+        - status
+    Security_Attack_discovery_API_AttackDiscoveryGenerationConfig:
+      type: object
+      properties:
+        alertsIndexPattern:
+          description: |
+            The (space specific) index pattern that contains the alerts to use as
+            context for the attack discovery.
+            Example: .alerts-security.alerts-default
+          type: string
+        anonymizationFields:
+          description: The list of fields, and whether or not they are anonymized, allowed to be sent to LLMs. Consider using the output of the `/api/security_ai_assistant/anonymization_fields/_find` API (for a specific Kibana space) to provide this value.
+          items:
+            $ref: '#/components/schemas/Security_Attack_discovery_API_AnonymizationFieldResponse'
+          type: array
+        apiConfig:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_ApiConfig'
+          description: LLM API configuration.
+        connectorName:
+          type: string
+        end:
+          type: string
+        filter:
+          additionalProperties: true
+          description: |-
+            An Elasticsearch-style query DSL object used to filter alerts. For example:
+            ```json {
+              "filter": {
+                "bool": {
+                  "must": [],
+                  "filter": [
+                    {
+                      "bool": {
+                        "should": [
+                          {
+                            "term": {
+                              "user.name": { "value": "james" }
+                            }
+                          }
+                        ],
+                        "minimum_should_match": 1
+                      }
+                    }
+                  ],
+                  "should": [],
+                  "must_not": []
+                }
+              }
+            } ```
+          type: object
+        model:
+          type: string
+        replacements:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_Replacements'
+        size:
+          type: number
+        start:
+          type: string
+        subAction:
+          enum:
+            - invokeAI
+            - invokeStream
+          type: string
+      required:
+        - apiConfig
+        - alertsIndexPattern
+        - anonymizationFields
+        - size
+        - subAction
+    Security_Attack_discovery_API_AttackDiscoveryGenericError:
+      description: Generic error response for Attack discovery schedule operations
+      type: object
+      properties:
+        error:
+          description: Error type
+          example: Bad Request
+          type: string
+        message:
+          description: Human-readable error message describing what went wrong
+          example: Invalid request parameters
+          type: string
+        status_code:
+          description: HTTP status code
+          example: 400
+          type: number
+    Security_Attack_discovery_API_Filters:
+      description: The filter array used to define the conditions for when alerts are selected as an attack discovery context. Defaults to an empty array.
+      items: {}
+      type: array
+    Security_Attack_discovery_API_IntervalApiSchedule:
+      type: object
+      properties:
+        interval:
+          description: The schedule interval
+          type: string
+      required:
+        - interval
+    Security_Attack_discovery_API_NonEmptyString:
+      description: A string that does not contain only whitespace characters.
+      example: I am a string
+      format: nonempty
+      minLength: 1
+      type: string
+    Security_Attack_discovery_API_NonEmptyTimestamp:
+      description: A string that represents a timestamp in ISO 8601 format and does not contain only whitespace characters.
+      example: '2023-10-31T12:00:00Z'
+      format: nonempty
+      minLength: 1
+      type: string
+    Security_Attack_discovery_API_Provider:
+      description: Provider
+      enum:
+        - OpenAI
+        - Azure OpenAI
+        - Other
+      example: OpenAI
+      type: string
+    Security_Attack_discovery_API_Query:
+      description: An query condition to filter alerts
+      type: object
+      properties:
+        language:
+          type: string
+        query:
+          oneOf:
+            - type: string
+            - additionalProperties: true
+              type: object
+      required:
+        - query
+        - language
+    Security_Attack_discovery_API_Replacements:
+      additionalProperties:
+        type: string
+      description: Replacements object used to anonymize/deanonymize messages
+      type: object
+    Security_Attack_discovery_API_SortOrder:
+      description: The order in which results are sorted.
+      enum:
+        - asc
+        - desc
+      example: asc
+      type: string
+    Security_Attack_discovery_API_User:
+      description: Could be any string, not necessarily a UUID.
+      type: object
+      properties:
+        id:
+          description: User id.
+          example: user123
+          type: string
+        name:
+          description: User name.
+          example: John Doe
+          type: string
     Security_Detections_API_AlertAssignees:
       type: object
       properties:
@@ -75794,6 +77056,33 @@ components:
       required:
         - status_code
         - message
+    Security_Endpoint_Management_API_ActionDetailsResponse:
+      discriminator:
+        mapping:
+          cancel: '#/components/schemas/Security_Endpoint_Management_API_Cancel'
+          execute: '#/components/schemas/Security_Endpoint_Management_API_Execute'
+          get-file: '#/components/schemas/Security_Endpoint_Management_API_GetFile'
+          isolate: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
+          kill-process: '#/components/schemas/Security_Endpoint_Management_API_KillProcess'
+          running-processes: '#/components/schemas/Security_Endpoint_Management_API_RunningProcesses'
+          runscript: '#/components/schemas/Security_Endpoint_Management_API_Runscript'
+          scan: '#/components/schemas/Security_Endpoint_Management_API_Scan'
+          suspend-process: '#/components/schemas/Security_Endpoint_Management_API_SuspendProcess'
+          unisolate: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
+          upload: '#/components/schemas/Security_Endpoint_Management_API_Upload'
+        propertyName: command
+      oneOf:
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_KillProcess'
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_GetFile'
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_Execute'
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_Runscript'
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_Upload'
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_Scan'
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_Cancel'
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_Isolate'
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_Unisolate'
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_SuspendProcess'
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_RunningProcesses'
     Security_Endpoint_Management_API_ActionStateSuccessResponse:
       type: object
       properties:
@@ -75856,6 +77145,27 @@ components:
         - microsoft_defender_endpoint
       example: endpoint
       type: string
+    Security_Endpoint_Management_API_Cancel:
+      allOf:
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
+        - type: object
+          properties:
+            outputs:
+              additionalProperties:
+                type: object
+                properties:
+                  content:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+              type: object
+            parameters:
+              type: object
+              properties:
+                id:
+                  format: uuid
+                  type: string
     Security_Endpoint_Management_API_CancelRouteRequestBody:
       allOf:
         - type: object
@@ -75922,7 +77232,7 @@ components:
       required:
         - cloudFile
     Security_Endpoint_Management_API_Command:
-      description: The command to be executed (cannot be an empty string)
+      description: The command for the response action
       enum:
         - isolate
         - unisolate
@@ -75933,6 +77243,8 @@ components:
         - execute
         - upload
         - scan
+        - runscript
+        - cancel
       minLength: 1
       type: string
     Security_Endpoint_Management_API_Commands:
@@ -75947,6 +77259,16 @@ components:
       description: Optional comment
       example: This is a comment
       type: string
+    Security_Endpoint_Management_API_DownloadUri:
+      type: object
+      properties:
+        downloadUri:
+          description: |
+            The server relative URI to download the file associated with the output of the response action.
+            URI does **not** include the space prefix
+          example: /api/endpoint/action/497f6eca-6276/file/35645-6276-4993/download
+          format: uri-reference
+          type: string
     Security_Endpoint_Management_API_EndDate:
       description: An end date in ISO format or Date Math format.
       example: '2023-10-31T23:59:59.999Z'
@@ -76047,6 +77369,48 @@ components:
               revision: 2
       type: object
       properties: {}
+    Security_Endpoint_Management_API_Execute:
+      allOf:
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
+        - type: object
+          properties:
+            outputs:
+              additionalProperties:
+                type: object
+                properties:
+                  content:
+                    allOf:
+                      - $ref: '#/components/schemas/Security_Endpoint_Management_API_DownloadUri'
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                          cwd:
+                            type: string
+                          output_file_id:
+                            type: string
+                          output_file_stderr_truncated:
+                            type: boolean
+                          output_file_stdout_truncated:
+                            type: boolean
+                          shell_code:
+                            type: number
+                          stderr:
+                            type: string
+                          stderr_truncated:
+                            type: boolean
+                          stdout:
+                            type: string
+                          stdout_truncated:
+                            type: boolean
+              type: object
+            parameters:
+              type: object
+              properties:
+                command:
+                  type: string
+                timeout:
+                  type: number
     Security_Endpoint_Management_API_ExecuteRouteRequestBody:
       allOf:
         - type: object
@@ -76187,35 +77551,45 @@ components:
         total: 4
       type: object
       properties: {}
-    Security_Endpoint_Management_API_GetEndpointActionResponse:
-      example:
-        data:
-          agents:
-            - afdc366c-e2e0-4cdb-ae1d-94575bd2d8e0
-          agentType: endpoint
-          command: running-processes
-          completedAt: '2022-08-08T09:50:47.672Z'
-          createdBy: elastic
-          id: b3d6de74-36b0-4fa8-be46-c375bf1771bf
-          isCompleted: true
-          isExpired: false
-          outputs:
-            afdc366c-e2e0-4cdb-ae1d-94575bd2d8e0:
-              content:
-                entries:
-                  - command: /opt/cmd1
-                    entity_id: fk2ym7bl3oiu3okjcik0xosc0i0m75x3eh49nu3uaqt4dqanjt
-                    pid: '822'
-                    user: Dexter
-                  - command: /opt/cmd3/opt/cmd3/opt/cmd3/opt/cmd3
-                    entity_id: pwvz91m48wpj9j7ov9gtw8fp7u2rat4eu5ipte37hnhdcbi2pt
-                    pid: '984'
-                    user: Jada
-              type: json
-          startedAt: '2022-08-08T15:24:57.402Z'
-          wasSuccessful: true
-      type: object
-      properties: {}
+    Security_Endpoint_Management_API_GetFile:
+      allOf:
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
+        - type: object
+          properties:
+            outputs:
+              additionalProperties:
+                type: object
+                properties:
+                  content:
+                    allOf:
+                      - $ref: '#/components/schemas/Security_Endpoint_Management_API_DownloadUri'
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                          contents:
+                            items:
+                              type: object
+                              properties:
+                                file_name:
+                                  type: string
+                                path:
+                                  type: string
+                                sha256:
+                                  type: string
+                                size:
+                                  type: number
+                                type:
+                                  type: string
+                            type: array
+                          zip_size:
+                            type: number
+              type: object
+            parameters:
+              type: object
+              properties:
+                path:
+                  type: string
     Security_Endpoint_Management_API_GetFileRouteRequestBody:
       allOf:
         - type: object
@@ -76384,6 +77758,8 @@ components:
           - unenrolled
         type: string
       type: array
+    Security_Endpoint_Management_API_Isolate:
+      $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
     Security_Endpoint_Management_API_IsolateRouteResponse:
       example:
         action: 233db9ea-6733-4849-9226-5a7039c7161d
@@ -76410,6 +77786,61 @@ components:
           wasSuccessful: true
       type: object
       properties: {}
+    Security_Endpoint_Management_API_KillProcess:
+      allOf:
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
+        - type: object
+          properties:
+            outputs:
+              additionalProperties:
+                type: object
+                properties:
+                  content:
+                    oneOf:
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                          command:
+                            type: string
+                          pid:
+                            type: number
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                          command:
+                            type: string
+                          entity_id:
+                            type: string
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                          command:
+                            type: string
+                          process_name:
+                            type: string
+              type: object
+            parameters:
+              oneOf:
+                - type: object
+                  properties:
+                    pid:
+                      description: The process ID (PID) of the process to terminate.
+                      minimum: 1
+                      type: number
+                - type: object
+                  properties:
+                    entity_id:
+                      description: The entity ID of the process to terminate.
+                      minLength: 1
+                      type: string
+                - type: object
+                  properties:
+                    process_name:
+                      description: The name of the process to terminate. Valid for SentinelOne agent type only.
+                      type: string
     Security_Endpoint_Management_API_KillProcessRouteRequestBody:
       allOf:
         - type: object
@@ -76792,85 +78223,196 @@ components:
       type: object
       properties:
         data:
-          description: The created response action details
+          $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
+    Security_Endpoint_Management_API_ResponseActionDetails:
+      type: object
+      properties:
+        agents:
+          description: The agent IDs for the hosts that the response action was sent to
+          items:
+            format: uuid
+            type: string
+          type: array
+        agentState:
+          additionalProperties:
+            format: uuid
+            type: object
+            properties:
+              completedAt:
+                description: The date and time the response action was completed for the agent ID
+                type: string
+              isCompleted:
+                description: Whether the response action is completed for the agent ID
+                type: boolean
+              wasSuccessful:
+                description: Whether the response action was successful for the agent ID
+                type: boolean
+          description: The state of the response action for each agent ID that it was sent to
           type: object
+        agentType:
+          $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
+        command:
+          $ref: '#/components/schemas/Security_Endpoint_Management_API_Command'
+        completedAt:
+          description: The response action completion time
+          format: date-time
+          type: string
+        createdBy:
+          description: The user who created the response action
+          type: string
+        hosts:
+          additionalProperties:
+            format: uuid
+            type: object
+            properties:
+              name:
+                description: The host name
+                type: string
+          description: An object containing the host names associated with the agent IDs the response action was sent to
+          type: object
+        id:
+          description: The response action ID
+          format: uuid
+          type: string
+        isComplete:
+          description: Whether the response action is complete
+          type: boolean
+        isExpired:
+          description: Whether the response action is expired
+          type: boolean
+        outputs:
+          additionalProperties:
+            description: The agent id
+            format: uuid
+            properties:
+              content:
+                description: The response action output content for the agent ID. Exact format depends on the response action command.
+                oneOf:
+                  - type: object
+                  - type: string
+              type:
+                enum:
+                  - json
+                  - text
+                type: string
+            required:
+              - type
+              - content
+            title: Agent ID
+            type: object
+          description: |
+            The outputs of the response action for each agent ID that it was sent to. Content different depending on the
+            response action command and will only be present for agents that have responded to the response action
+          type: object
+        parameters:
+          description: The parameters of the response action. Content different depending on the response action command
+          type: object
+        startedAt:
+          description: The response action start time
+          format: date-time
+          type: string
+        status:
+          description: The response action status
+          type: string
+        wasSuccessful:
+          description: Whether the response action was successful
+          type: boolean
+      required:
+        - command
+    Security_Endpoint_Management_API_RunningProcesses:
+      allOf:
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
+        - type: object
           properties:
-            agents:
-              description: The agent IDs for the hosts that the response action was sent to
-              type: object
-            agentState:
-              additionalProperties:
-                type: object
-                properties:
-                  completedAt:
-                    description: The date and time the response action was completed for the agent ID
-                    type: string
-                  isCompleted:
-                    description: Whether the response action is completed for the agent ID
-                    type: boolean
-                  wasSuccessful:
-                    description: Whether the response action was successful for the agent ID
-                    type: boolean
-              description: The state of the response action for each agent ID that it was sent to
-              type: object
-            agentType:
-              description: The response action agent type
-              type: string
-            command:
-              description: The response action command
-              type: string
-            createdBy:
-              description: The user who created the response action
-              type: string
-            hosts:
-              additionalProperties:
-                type: object
-                properties:
-                  name:
-                    description: The host name
-                    type: string
-              description: An object containing the host names associated with the agent IDs the response action was sent to
-              type: object
-            id:
-              description: The response action ID
-              type: string
-            isComplete:
-              description: Whether the response action is complete
-              type: boolean
-            isExpired:
-              description: Whether the response action is expired
-              type: boolean
             outputs:
               additionalProperties:
                 type: object
                 properties:
                   content:
-                    description: The response action output content for the agent ID. Exact format depends on the response action command.
                     oneOf:
+                      - $ref: '#/components/schemas/Security_Endpoint_Management_API_RunningProcessesOutputEndpoint'
+                      - $ref: '#/components/schemas/Security_Endpoint_Management_API_RunningProcessesOutputSentinelOne'
+              type: object
+    Security_Endpoint_Management_API_RunningProcessesOutputEndpoint:
+      description: Processes output for `agentType` of `endpoint`
+      type: object
+      properties:
+        code:
+          type: string
+        entries:
+          items:
+            type: object
+            properties:
+              command:
+                type: string
+              entity_id:
+                type: string
+              pid:
+                type: number
+              user:
+                type: string
+          type: array
+    Security_Endpoint_Management_API_RunningProcessesOutputSentinelOne:
+      allOf:
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_DownloadUri'
+        - description: Processes output for `agentType` of `sentinel_one`
+          type: object
+          properties:
+            code:
+              type: string
+    Security_Endpoint_Management_API_Runscript:
+      allOf:
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
+        - type: object
+          properties:
+            outputs:
+              additionalProperties:
+                type: object
+                properties:
+                  content:
+                    allOf:
+                      - $ref: '#/components/schemas/Security_Endpoint_Management_API_DownloadUri'
                       - type: object
-                      - type: string
-                  type:
-                    enum:
-                      - json
-                      - text
-                    type: string
-                required:
-                  - type
-                  - content
-              description: The outputs of the response action for each agent ID that it was sent to
+                        properties:
+                          code:
+                            type: string
+                          stderr:
+                            type: string
+                          stdout:
+                            type: string
               type: object
             parameters:
-              description: The parameters of the response action. Content different depending on the response action command
-              type: object
-            startedAt:
-              description: The response action start time
-              type: string
-            status:
-              description: The response action status
-              type: string
-            wasSuccessful:
-              description: Whether the response action was successful
-              type: boolean
+              oneOf:
+                - $ref: '#/components/schemas/Security_Endpoint_Management_API_RunscriptParamsCrowdStrike'
+                - $ref: '#/components/schemas/Security_Endpoint_Management_API_RunscriptParamsMicrosoft'
+                - $ref: '#/components/schemas/Security_Endpoint_Management_API_RunscriptParamsSentinelOne'
+    Security_Endpoint_Management_API_RunscriptParamsCrowdStrike:
+      type: object
+      properties:
+        cloudFile:
+          type: string
+        commandLine:
+          type: string
+        hostPath:
+          type: string
+        raw:
+          type: string
+        timeout:
+          type: number
+    Security_Endpoint_Management_API_RunscriptParamsMicrosoft:
+      type: object
+      properties:
+        args:
+          type: string
+        scriptName:
+          type: string
+    Security_Endpoint_Management_API_RunscriptParamsSentinelOne:
+      type: object
+      properties:
+        scriptId:
+          type: string
+        scriptInput:
+          type: string
     Security_Endpoint_Management_API_RunScriptRouteRequestBody:
       allOf:
         - type: object
@@ -76918,6 +78460,26 @@ components:
                 - $ref: '#/components/schemas/Security_Endpoint_Management_API_MDERunScriptParameters'
           required:
             - parameters
+    Security_Endpoint_Management_API_Scan:
+      allOf:
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
+        - type: object
+          properties:
+            outputs:
+              additionalProperties:
+                type: object
+                properties:
+                  content:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+              type: object
+            parameters:
+              type: object
+              properties:
+                path:
+                  type: string
     Security_Endpoint_Management_API_ScanRouteRequestBody:
       allOf:
         - type: object
@@ -77047,6 +78609,48 @@ components:
     Security_Endpoint_Management_API_SuccessResponse:
       type: object
       properties: {}
+    Security_Endpoint_Management_API_SuspendProcess:
+      allOf:
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
+        - type: object
+          properties:
+            outputs:
+              additionalProperties:
+                type: object
+                properties:
+                  content:
+                    oneOf:
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                          command:
+                            type: string
+                          pid:
+                            type: number
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                          command:
+                            type: string
+                          entity_id:
+                            type: string
+              type: object
+            parameters:
+              oneOf:
+                - type: object
+                  properties:
+                    pid:
+                      description: The process ID (PID) of the process to terminate.
+                      minimum: 1
+                      type: number
+                - type: object
+                  properties:
+                    entity_id:
+                      description: The entity ID of the process to terminate.
+                      minLength: 1
+                      type: string
     Security_Endpoint_Management_API_SuspendProcessRouteRequestBody:
       allOf:
         - type: object
@@ -77152,6 +78756,8 @@ components:
       maxLength: 2
       minLength: 1
       type: array
+    Security_Endpoint_Management_API_Unisolate:
+      $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
     Security_Endpoint_Management_API_UnisolateRouteResponse:
       example:
         action: 233db9ea-6733-4849-9226-5a7039c7161d
@@ -77178,6 +78784,39 @@ components:
           wasSuccessful: true
       type: object
       properties: {}
+    Security_Endpoint_Management_API_Upload:
+      allOf:
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
+        - type: object
+          properties:
+            outputs:
+              additionalProperties:
+                type: object
+                properties:
+                  content:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                      disk_free_space:
+                        type: number
+                      path:
+                        type: string
+              type: object
+            parameters:
+              description: |
+                The parameters for upload returned on the details are derived via the API from the file that
+                was uploaded at the time that the response action was submitted
+              type: object
+              properties:
+                file_id:
+                  type: string
+                file_name:
+                  type: string
+                file_sha256:
+                  type: string
+                file_size:
+                  type: number
     Security_Endpoint_Management_API_UploadRouteRequestBody:
       allOf:
         - type: object
@@ -82117,7 +83756,7 @@ components:
           type: string
           description: |
             The generative artificial intelligence model for Amazon Bedrock to use. Current support is for the Anthropic Claude models.
-          default: us.anthropic.claude-3-7-sonnet-20250219-v1:0
+          default: us.anthropic.claude-sonnet-4-5-20250929-v1:0
     crowdstrike_config:
       title: Connector request config properties for a Crowdstrike connector
       required:

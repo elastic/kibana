@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MonitorableNode } from '../step/node_implementation';
-import { WorkflowScopeStack } from '../workflow_context_manager/workflow_scope_stack';
-import type { WorkflowExecutionLoopParams } from './types';
 import { cancelWorkflowIfRequested } from './cancel_workflow_if_requested';
+import type { WorkflowExecutionLoopParams } from './types';
+import type { MonitorableNode } from '../step/node_implementation';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
+import { WorkflowScopeStack } from '../workflow_context_manager/workflow_scope_stack';
 
 /**
  * Runs a monitoring loop that continuously checks workflow execution state and invokes
@@ -81,6 +81,7 @@ export async function runStackMonitor(
     let nodeStack = WorkflowScopeStack.fromStackFrames(nodeStackFrames);
 
     while (!nodeStack.isEmpty() && !monitorAbortController.signal.aborted) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const scopeData = nodeStack.getCurrentScope()!;
       nodeStack = nodeStack.exitScope();
       const scopeStepExecutionRuntime =

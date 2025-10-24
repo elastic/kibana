@@ -20,10 +20,14 @@ interface StreamConfigurationProps {
 
 export function StreamFeatureConfiguration({ definition }: StreamConfigurationProps) {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const { identifyFeatures } = useStreamFeaturesApi(definition);
+  const { identifyFeatures, abort } = useStreamFeaturesApi(definition);
   const aiFeatures = useAIFeatures();
   const [features, setFeatures] = useState<Feature[]>([]);
-  const { features: existingFeatures, refresh, loading } = useStreamFeatures(definition);
+  const {
+    features: existingFeatures,
+    refreshFeatures,
+    featuresLoading,
+  } = useStreamFeatures(definition);
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -70,22 +74,28 @@ export function StreamFeatureConfiguration({ definition }: StreamConfigurationPr
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiSpacer size="m" />
-        <StreamFeaturesAccordion
-          definition={definition}
-          features={existingFeatures}
-          loading={loading}
-          refresh={refresh}
-        />
+        {existingFeatures.length > 0 && (
+          <>
+            <EuiSpacer size="m" />
+            <StreamFeaturesAccordion
+              definition={definition}
+              features={existingFeatures}
+              loading={featuresLoading}
+              refresh={refreshFeatures}
+            />
+          </>
+        )}
         {isFlyoutVisible && (
           <StreamFeaturesFlyout
             definition={definition}
             features={features}
             isLoading={isLoading}
             closeFlyout={() => {
-              refresh();
+              abort();
+              refreshFeatures();
               setIsFlyoutVisible(false);
             }}
+            setFeatures={setFeatures}
           />
         )}
       </EuiFlexGroup>

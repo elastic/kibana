@@ -10731,7 +10731,7 @@
                 "section": "def-common.AgentPolicy",
                 "text": "AgentPolicy"
               },
-              " | null | undefined) => Promise<void>"
+              " | null | undefined, options?: { throwOnAgentlessError?: boolean | undefined; } | undefined) => Promise<void>"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/server/services/index.ts",
             "deprecated": false,
@@ -10779,6 +10779,20 @@
                     "text": "AgentPolicy"
                   },
                   " | null | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.AgentPolicyServiceInterface.deployPolicy.$4",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "{ throwOnAgentlessError?: boolean | undefined; } | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts",
                 "deprecated": false,
@@ -25994,6 +26008,20 @@
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.Installation.is_rollback_ttl_expired",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "is_rollback_ttl_expired",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -33135,6 +33163,54 @@
             "type": "Function",
             "tags": [],
             "label": "postBulkMigrateAgents",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.agentRouteService.postChangeAgentPrivilegeLevel",
+            "type": "Function",
+            "tags": [],
+            "label": "postChangeAgentPrivilegeLevel",
+            "description": [],
+            "signature": [
+              "(agentId: string) => string"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-common.agentRouteService.postChangeAgentPrivilegeLevel.$1",
+                "type": "string",
+                "tags": [],
+                "label": "agentId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.agentRouteService.postBulkChangeAgentPrivilegeLevel",
+            "type": "Function",
+            "tags": [],
+            "label": "postBulkChangeAgentPrivilegeLevel",
             "description": [],
             "signature": [
               "() => string"

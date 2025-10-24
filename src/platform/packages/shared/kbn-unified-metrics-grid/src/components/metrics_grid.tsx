@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState, useRef, useEffect } from 'react';
+import React, { useCallback, useMemo, useState, useRef } from 'react';
 import type { EuiFlexGridProps } from '@elastic/eui';
 import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -15,7 +15,6 @@ import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
 import type { Observable } from 'rxjs';
 import { css } from '@emotion/react';
-import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import type { ChartSize } from './chart';
 import { Chart } from './chart';
 import { MetricInsightsFlyout } from './flyout/metrics_insights_flyout';
@@ -31,7 +30,7 @@ export type MetricsGridProps = Pick<
 > & {
   filters?: Array<{ field: string; value: string }>;
   dimensions: string[];
-  columns: EuiFlexGridProps['columns'];
+  columns: NonNullable<EuiFlexGridProps['columns']>;
   discoverFetch$: Observable<UnifiedHistogramInputMessage>;
 } & (
     | {
@@ -60,6 +59,7 @@ export const MetricsGrid = ({
 }: MetricsGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const chartRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const { euiTheme } = useEuiTheme();
 
   const chartSize = useMemo(() => (columns === 2 || columns === 4 ? 's' : 'm'), [columns]);
 
@@ -101,23 +101,26 @@ export const MetricsGrid = ({
 
   const handleViewDetails = useCallback(
     (esqlQuery: string, metric: MetricField, chartId: string) => {
-      const chartIndex = rows.findIndex((row) => `chart-${row.key}` === chartId);
+      const chartIndex = rows.findIndex((row) => row.key === chartId);
       const { rowIndex, colIndex } = getRowColFromIndex(chartIndex);
 
       setExpandedMetric({ metric, esqlQuery, chartId, rowIndex, colIndex });
-      dismissAllFlyoutsExceptFor(DiscoverFlyouts.metricInsights);
     },
     [rows, getRowColFromIndex]
   );
 
   const handleCloseFlyout = useCallback(() => {
-    if (expandedMetric) {
-      // Use requestAnimationFrame to ensure the flyout is fully closed before focusing
-      requestAnimationFrame(() => {
-        focusCell(expandedMetric.rowIndex, expandedMetric.colIndex);
-      });
+    if (!expandedMetric) {
+      return;
     }
+
+    const rowIndex = expandedMetric.rowIndex;
+    const colIndex = expandedMetric.colIndex;
     setExpandedMetric(undefined);
+    // Use requestAnimationFrame to ensure the flyout is fully closed before focusing
+    requestAnimationFrame(() => {
+      focusCell(rowIndex, colIndex);
+    });
   }, [expandedMetric, focusCell]);
 
   const getChartRefForFocus = useCallback(() => {
@@ -129,26 +132,6 @@ export const MetricsGrid = ({
     }
     return { current: null };
   }, [expandedMetric?.chartId]);
-
-  // TODO: find a better way to handle conflicts with other flyouts
-  // https://github.com/elastic/kibana/issues/237965
-  useEffect(() => {
-    const handleClick = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-
-      if (target.closest('[data-test-subj="embeddablePanelAction-openInspector"]')) {
-        if (expandedMetric) {
-          handleCloseFlyout();
-        }
-      }
-    };
-
-    document.addEventListener('click', handleClick);
-
-    return () => {
-      document.removeEventListener('click', handleClick);
-    };
-  }, [expandedMetric, handleCloseFlyout]);
 
   const normalizedFields = useMemo(() => (Array.isArray(fields) ? fields : [fields]), [fields]);
 
@@ -168,7 +151,21 @@ export const MetricsGrid = ({
         onKeyDown={handleKeyDown}
         data-test-subj="unifiedMetricsExperienceGrid"
       >
-        <EuiFlexGrid columns={columns} gutterSize="s">
+        <EuiFlexGrid
+          gutterSize="s"
+          css={css`
+            grid-template-columns: repeat(${Math.min(columns, 4)}, 1fr);
+            @container (max-width: ${euiTheme.breakpoint.xl}px) {
+              grid-template-columns: repeat(${Math.min(columns, 3)}, 1fr);
+            }
+            @container (max-width: ${euiTheme.breakpoint.l}px) {
+              grid-template-columns: repeat(${Math.min(columns, 2)}, 1fr);
+            }
+            @container (max-width: ${euiTheme.breakpoint.s}px) {
+              grid-template-columns: repeat(${Math.min(columns, 1)}, 1fr);
+            }
+          `}
+        >
           {rows.map(({ key, metric }, index) => {
             return (
               <EuiFlexItem key={index}>
@@ -202,7 +199,6 @@ export const MetricsGrid = ({
           chartRef={getChartRefForFocus()}
           metric={expandedMetric.metric}
           esqlQuery={expandedMetric.esqlQuery}
-          isOpen
           onClose={handleCloseFlyout}
         />
       )}
@@ -320,9 +316,10 @@ const A11yGridWrapper = React.forwardRef(
         onKeyDown={onKeyDown}
         data-test-subj="unifiedMetricsExperienceGrid"
         tabIndex={0}
-        style={{
-          outline: 'none',
-        }}
+        css={css`
+          outline: none;
+          container-type: inline-size;
+        `}
       >
         {children}
       </div>

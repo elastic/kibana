@@ -75,6 +75,7 @@ export default function theHiveTest({ getService }: FtrProviderContext) {
           connector_type_id: connectorTypeId,
           is_missing_secrets: false,
           config,
+          is_connector_type_deprecated: false,
         });
       });
 
@@ -99,6 +100,7 @@ export default function theHiveTest({ getService }: FtrProviderContext) {
           connector_type_id: connectorTypeId,
           is_missing_secrets: false,
           config: { ...config, organisation: 'test-organisation' },
+          is_connector_type_deprecated: false,
         });
       });
 

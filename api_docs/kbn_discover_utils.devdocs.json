@@ -3327,6 +3327,90 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.prepareDataViewForEditing",
+        "type": "Function",
+        "tags": [],
+        "label": "prepareDataViewForEditing",
+        "description": [],
+        "signature": [
+          "(dataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          ", dataViewsService: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "public",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-public.DataViewsServicePublic",
+            "text": "DataViewsServicePublic"
+          },
+          ") => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          ">"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/prepare_data_view_for_editing.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.prepareDataViewForEditing.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/prepare_data_view_for_editing.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.prepareDataViewForEditing.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "dataViewsService",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "public",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-public.DataViewsServicePublic",
+                "text": "DataViewsServicePublic"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/prepare_data_view_for_editing.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.usePager",
         "type": "Function",
         "tags": [],
@@ -6062,6 +6146,45 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.ALL_RECOMMENDED_FIELDS_FOR_ESQL",
+        "type": "Array",
+        "tags": [],
+        "label": "ALL_RECOMMENDED_FIELDS_FOR_ESQL",
+        "description": [
+          "\nMerged list of all recommended fields for ES|QL autocomplete."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.RecommendedField",
+            "text": "RecommendedField"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/recommended_fields/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.ApacheErrorLogsProfile",
+        "type": "Type",
+        "tags": [],
+        "label": "ApacheErrorLogsProfile",
+        "description": [],
+        "signature": [
+          "{ readonly pattern: \"logs-apache.error\"; readonly recommendedFields: readonly [\"client.ip\", \"destination.ip\", \"http.request.method\", \"http.response.bytes\", \"http.response.status_code\", \"log.level\", \"message\", \"referrer\", \"source.ip\", \"url.path\", \"user.agent\"]; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/recommended_fields/apache_error_logs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.AppMenuActionSubmenuCustom",
         "type": "Type",
         "tags": [],
@@ -6684,6 +6807,21 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.DefaultLogsProfile",
+        "type": "Type",
+        "tags": [],
+        "label": "DefaultLogsProfile",
+        "description": [],
+        "signature": [
+          "{ readonly pattern: \"logs-*\"; readonly recommendedFields: readonly [\"event.dataset\", \"host.name\", \"log.level\", \"message\", \"service.name\"]; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/recommended_fields/default_logs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.DOC_HIDE_TIME_COLUMN_SETTING",
         "type": "string",
         "tags": [],
@@ -6950,6 +7088,21 @@
           "\"_index\""
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.KubernetesContainerLogsProfile",
+        "type": "Type",
+        "tags": [],
+        "label": "KubernetesContainerLogsProfile",
+        "description": [],
+        "signature": [
+          "{ readonly pattern: \"logs-kubernetes.container_logs\"; readonly recommendedFields: readonly [\"container.image.name\", \"kubernetes.container.name\", \"kubernetes.namespace\", \"kubernetes.node.name\", \"kubernetes.pod.name\", \"log.level\", \"message\", \"orchestrator.resource.name\"]; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/recommended_fields/kubernetes_container_logs.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -7851,6 +8004,23 @@
     "objects": [
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.APACHE_ERROR_LOGS_PROFILE",
+        "type": "Object",
+        "tags": [],
+        "label": "APACHE_ERROR_LOGS_PROFILE",
+        "description": [
+          "\nConfiguration for Apache Error Logs profile recommended fields"
+        ],
+        "signature": [
+          "{ readonly pattern: \"logs-apache.error\"; readonly recommendedFields: readonly [\"client.ip\", \"destination.ip\", \"http.request.method\", \"http.response.bytes\", \"http.response.status_code\", \"log.level\", \"message\", \"referrer\", \"source.ip\", \"url.path\", \"user.agent\"]; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/recommended_fields/apache_error_logs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.CONTENT_FIELD_CONFIGURATION",
         "type": "Object",
         "tags": [],
@@ -7907,6 +8077,23 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.DEFAULT_LOGS_PROFILE",
+        "type": "Object",
+        "tags": [],
+        "label": "DEFAULT_LOGS_PROFILE",
+        "description": [
+          "\nConfiguration for Default Logs profile recommended fields.\nThis is used as a fallback when no specific log sub-profile matches.\nThe wildcard pattern 'logs-*' ensures these fields are available for\nany logs index that doesn't have more specific profile."
+        ],
+        "signature": [
+          "{ readonly pattern: \"logs-*\"; readonly recommendedFields: readonly [\"event.dataset\", \"host.name\", \"log.level\", \"message\", \"service.name\"]; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/recommended_fields/default_logs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.DEGRADED_DOCS_FIELDS",
         "type": "Object",
         "tags": [],
@@ -7931,6 +8118,23 @@
           "readonly string[]"
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.KUBERNETES_CONTAINER_LOGS_PROFILE",
+        "type": "Object",
+        "tags": [],
+        "label": "KUBERNETES_CONTAINER_LOGS_PROFILE",
+        "description": [
+          "\nConfiguration for Kubernetes Container Logs profile recommended fields"
+        ],
+        "signature": [
+          "{ readonly pattern: \"logs-kubernetes.container_logs\"; readonly recommendedFields: readonly [\"container.image.name\", \"kubernetes.container.name\", \"kubernetes.namespace\", \"kubernetes.node.name\", \"kubernetes.pod.name\", \"log.level\", \"message\", \"orchestrator.resource.name\"]; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/recommended_fields/kubernetes_container_logs.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

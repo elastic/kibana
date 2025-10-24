@@ -9,7 +9,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { VISUALIZE_APP_NAME } from '@kbn/visualizations-plugin/common/constants';
+import { VISUALIZE_APP_NAME } from '@kbn/visualizations-common';
 import { ANNOTATIONS_LISTING_VIEW_ID } from '@kbn/event-annotation-plugin/common';
 import type {
   LayerAction,

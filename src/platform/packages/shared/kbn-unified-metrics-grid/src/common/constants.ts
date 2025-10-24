@@ -22,7 +22,7 @@ export const METRICS_VALUES_SELECTOR_DATA_TEST_SUBJ = 'metricsExperienceValuesSe
 
 // Selection limits
 export const MAX_VALUES_SELECTIONS = 10;
-export const MAX_DIMENSIONS_SELECTIONS = 10;
+export const MAX_DIMENSIONS_SELECTIONS = 1;
 export const PAGE_SIZE = 20;
 
 export const DIMENSION_TYPES = [
