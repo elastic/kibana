@@ -1741,48 +1741,6 @@ export class CstToAstConverter {
     return args;
   }
 
-  private fromLogicalNot(ctx: cst.LogicalNotContext): ast.ESQLUnaryExpression {
-    const args = this.collectBooleanExpression(ctx.booleanExpression());
-    const fn = this.toFunction(
-      'not',
-      ctx,
-      undefined,
-      'unary-expression',
-      args
-    ) as ast.ESQLUnaryExpression;
-    return fn;
-  }
-
-  private visitLogicalAndsOrs(ctx: cst.LogicalBinaryContext) {
-    const fn = this.toFunction(ctx.AND() ? 'and' : 'or', ctx, undefined, 'binary-expression');
-    fn.args.push(
-      ...this.collectBooleanExpression(ctx._left),
-      ...this.collectBooleanExpression(ctx._right)
-    );
-    // update the location of the assign based on arguments
-    const argsLocationExtends = this.computeLocationExtends(fn);
-    fn.location = argsLocationExtends;
-    return fn;
-  }
-
-  private visitLogicalIns(ctx: cst.LogicalInContext) {
-    const [leftCtx, ...rightCtxs] = ctx.valueExpression_list();
-    const left = resolveItem(
-      this.visitValueExpression(leftCtx) ?? this.fromParserRuleToUnknown(leftCtx)
-    ) as ast.ESQLAstExpression;
-    const right = this.toTuple(rightCtxs, ctx.LP(), ctx.RP());
-    const expression = this.toFunction(
-      ctx.NOT() ? 'not in' : 'in',
-      ctx,
-      { min: ctx.start.start, max: ctx.stop?.stop ?? ctx.RP().symbol.stop },
-      'binary-expression',
-      [left, right],
-      left.incomplete || right.incomplete
-    );
-
-    return expression;
-  }
-
   private getMathOperation(ctx: cst.ArithmeticBinaryContext) {
     return (
       (ctx.PLUS() || ctx.MINUS() || ctx.ASTERISK() || ctx.SLASH() || ctx.PERCENT()).getText() || ''
@@ -1934,19 +1892,6 @@ export class CstToAstConverter {
     );
   }
 
-  private collectLogicalExpression(ctx: cst.BooleanExpressionContext) {
-    if (ctx instanceof cst.LogicalNotContext) {
-      return [this.fromLogicalNot(ctx)];
-    }
-    if (ctx instanceof cst.LogicalBinaryContext) {
-      return [this.visitLogicalAndsOrs(ctx)];
-    }
-    if (ctx instanceof cst.LogicalInContext) {
-      return [this.visitLogicalIns(ctx)];
-    }
-    return [];
-  }
-
   private collectRegexExpression(ctx: cst.BooleanExpressionContext): ast.ESQLFunction[] {
     const regexes = ctx.getTypedRuleContexts(cst.RegexBooleanExpressionContext);
     const ret: ast.ESQLFunction[] = [];
@@ -1999,6 +1944,64 @@ export class CstToAstConverter {
     return arg ? [arg] : [];
   }
 
+  private fromLogicalNot(ctx: cst.LogicalNotContext): ast.ESQLUnaryExpression {
+    const args = this.collectBooleanExpression(ctx.booleanExpression());
+    const fn = this.toFunction(
+      'not',
+      ctx,
+      undefined,
+      'unary-expression',
+      args
+    ) as ast.ESQLUnaryExpression;
+    return fn;
+  }
+
+  private fromLogicalBinary(ctx: cst.LogicalBinaryContext) {
+    const fn = this.toFunction(ctx.AND() ? 'and' : 'or', ctx, undefined, 'binary-expression');
+    fn.args.push(
+      ...this.collectBooleanExpression(ctx._left),
+      ...this.collectBooleanExpression(ctx._right)
+    );
+    // update the location of the assign based on arguments
+    const argsLocationExtends = this.computeLocationExtends(fn);
+    fn.location = argsLocationExtends;
+    return fn;
+  }
+
+  private visitLogicalIns(ctx: cst.LogicalInContext) {
+    const [leftCtx, ...rightCtxs] = ctx.valueExpression_list();
+    const left = resolveItem(
+      this.visitValueExpression(leftCtx) ?? this.fromParserRuleToUnknown(leftCtx)
+    ) as ast.ESQLAstExpression;
+    const right = this.toTuple(rightCtxs, ctx.LP(), ctx.RP());
+    const expression = this.toFunction(
+      ctx.NOT() ? 'not in' : 'in',
+      ctx,
+      { min: ctx.start.start, max: ctx.stop?.stop ?? ctx.RP().symbol.stop },
+      'binary-expression',
+      [left, right],
+      left.incomplete || right.incomplete
+    );
+
+    return expression;
+  }
+
+  private fromBooleanExpression0(
+    ctx: cst.BooleanExpressionContext
+  ): ast.ESQLAstExpression | undefined {
+    if (ctx instanceof cst.LogicalNotContext) {
+      return this.fromLogicalNot(ctx);
+    }
+    if (ctx instanceof cst.LogicalBinaryContext) {
+      return this.fromLogicalBinary(ctx);
+    }
+    if (ctx instanceof cst.LogicalInContext) {
+      return this.visitLogicalIns(ctx);
+    }
+
+    return undefined;
+  }
+
   private collectBooleanExpression(
     ctx: cst.BooleanExpressionContext | undefined
   ): ast.ESQLAstItem[] {
@@ -2012,10 +2015,15 @@ export class CstToAstConverter {
       return [this.visitMatchExpression(ctx)];
     }
 
+    const logicalExpression = this.fromBooleanExpression0(ctx);
+
+    if (logicalExpression) {
+      return [logicalExpression];
+    }
+
     // TODO: Remove these list traversals and concatenations.
     return list
       .concat(
-        this.collectLogicalExpression(ctx),
         this.collectRegexExpression(ctx),
         this.collectIsNullExpression(ctx),
         this.collectDefaultExpression(ctx)

@@ -8,7 +8,7 @@
  */
 
 import { Parser } from '..';
-import type { ESQLAstExpression, ESQLFunction, ESQLProperNode } from '../../types';
+import type { ESQLAstExpression, ESQLFunction } from '../../types';
 
 describe('Column Identifier Expressions', () => {
   it('a literal/constant', () => {
