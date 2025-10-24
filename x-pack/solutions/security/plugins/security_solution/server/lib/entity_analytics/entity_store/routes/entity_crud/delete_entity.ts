@@ -8,7 +8,10 @@
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import type { DeleteSingleEntityResponse } from '../../../../../../common/api/entity_analytics/entity_store/entities/delete_entity.gen';
-import { DeleteSingleEntityRequestParams } from '../../../../../../common/api/entity_analytics/entity_store/entities/delete_entity.gen';
+import {
+  DeleteSingleEntityRequestParams,
+  DeleteSingleEntityRequestBody,
+} from '../../../../../../common/api/entity_analytics/entity_store/entities/delete_entity.gen';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { API_VERSIONS, APP_ID } from '../../../../../../common/constants';
 import {
@@ -23,7 +26,7 @@ export const deleteEntity = (router: EntityAnalyticsRoutesDeps['router'], logger
   router.versioned
     .delete({
       access: 'public',
-      path: '/api/entity_store/entities/{entityType}/{entityId}',
+      path: '/api/entity_store/entities/{entityType}',
       options: {
         availability: {
           stability: 'beta',
@@ -41,6 +44,7 @@ export const deleteEntity = (router: EntityAnalyticsRoutesDeps['router'], logger
         validate: {
           request: {
             params: buildRouteValidationWithZod(DeleteSingleEntityRequestParams),
+            body: buildRouteValidationWithZod(DeleteSingleEntityRequestBody),
           },
         },
       },
@@ -50,7 +54,7 @@ export const deleteEntity = (router: EntityAnalyticsRoutesDeps['router'], logger
         try {
           await secSol
             .getEntityStoreCrudClient()
-            .deleteEntity(request.params.entityType, request.params.entityId);
+            .deleteEntity(request.params.entityType, request.body);
 
           return response.ok({
             body: {

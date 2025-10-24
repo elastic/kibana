@@ -41,7 +41,7 @@ describe('EntityStoreCrudClient', () => {
     it('when Entity Store disabled throw error', async () => {
       dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(false));
 
-      await expect(async () => client.deleteEntity('user', 'x')).rejects.toThrow(
+      await expect(async () => client.deleteEntity('user', { id: 'x' })).rejects.toThrow(
         new EngineNotRunningError('user')
       );
 
@@ -52,7 +52,7 @@ describe('EntityStoreCrudClient', () => {
       dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(true));
       dataClientMock.isCapabilityEnabled.mockReturnValueOnce(Promise.resolve(false));
 
-      await expect(async () => client.deleteEntity('user', 'x')).rejects.toThrow(
+      await expect(async () => client.deleteEntity('user', { id: 'x' })).rejects.toThrow(
         new CapabilityNotEnabledError(EntityStoreCapability.CRUD_API)
       );
 
@@ -68,9 +68,9 @@ describe('EntityStoreCrudClient', () => {
       dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(true));
       esClientMock.deleteByQuery.mockReturnValueOnce(Promise.resolve({ deleted: 0 }));
 
-      await expect(async () => client.deleteEntity('host', 'does-not-exist')).rejects.toThrow(
-        new EntityNotFoundError('host', 'does-not-exist')
-      );
+      await expect(async () =>
+        client.deleteEntity('host', { id: 'does-not-exist' })
+      ).rejects.toThrow(new EntityNotFoundError('host', 'does-not-exist'));
     });
 
     it('when version conflicts throw', async () => {
@@ -78,9 +78,9 @@ describe('EntityStoreCrudClient', () => {
       dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(true));
       esClientMock.deleteByQuery.mockReturnValueOnce(Promise.resolve({ version_conflicts: 1 }));
 
-      await expect(async () => client.deleteEntity('host', 'does-not-exist')).rejects.toThrow(
-        new DocumentVersionConflictError()
-      );
+      await expect(async () =>
+        client.deleteEntity('host', { id: 'does-not-exist' })
+      ).rejects.toThrow(new DocumentVersionConflictError());
     });
 
     it('when successful responds OK', async () => {
@@ -88,7 +88,7 @@ describe('EntityStoreCrudClient', () => {
       dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(true));
       esClientMock.deleteByQuery.mockReturnValueOnce(Promise.resolve({ deleted: 1 }));
 
-      const response = await client.deleteEntity('service', 'entity-id');
+      const response = await client.deleteEntity('service', { id: 'entity-id' });
       expect(response).toStrictEqual({ deleted: true });
 
       expect(dataClientMock.isEngineRunning).toBeCalledWith('service');

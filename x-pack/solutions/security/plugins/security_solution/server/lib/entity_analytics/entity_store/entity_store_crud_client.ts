@@ -42,6 +42,10 @@ interface CustomEntityFieldsAttributesHolder {
   relationships?: Record<string, unknown>;
 }
 
+interface DeleteRequestBody {
+  id: string;
+}
+
 type CustomECSEntityField = EntityField & CustomEntityFieldsAttributesHolder;
 
 type CustomECSDocument = Entity & { entity: CustomECSEntityField };
@@ -154,11 +158,11 @@ export class EntityStoreCrudClient {
     });
   }
 
-  public async deleteEntity(type: APIEntityType, id: string) {
+  public async deleteEntity(type: APIEntityType, body: DeleteRequestBody) {
     await this.assertEngineIsRunning(type);
     await this.assertCRUDApiIsEnabled(type);
 
-    if (id === '') {
+    if (body.id === '') {
       throw new BadCRUDRequestError(`The entity ID cannot be blank`);
     }
 
@@ -166,14 +170,14 @@ export class EntityStoreCrudClient {
       index: getEntitiesIndexName(type, this.namespace),
       query: {
         term: {
-          'entity.id': id,
+          'entity.id': body.id,
         },
       },
       conflicts: 'proceed',
     });
 
     if (deleteByQueryResp.failures !== undefined && deleteByQueryResp.failures.length > 0) {
-      throw new Error(`Failed to delete entity of type '${type}' and ID '${id}'`);
+      throw new Error(`Failed to delete entity of type '${type}' and ID '${body.id}'`);
     }
 
     if (deleteByQueryResp.version_conflicts) {
@@ -181,7 +185,7 @@ export class EntityStoreCrudClient {
     }
 
     if (!deleteByQueryResp.deleted) {
-      throw new EntityNotFoundError(type, id);
+      throw new EntityNotFoundError(type, body.id);
     }
 
     return { deleted: true };

@@ -21,11 +21,18 @@ paths:
           required: true
           schema:
             $ref: '../common.schema.yaml#/components/schemas/EntityType'
-        - in: path
-          name: entityId
-          required: true
-          schema:
-            type: string
+      requestBody:
+        description: Schema for the deleting entity
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  description: Identifier of the entity to be deleted, commonly entity.id value.
+              required: ["id"]
       responses:
         '200':
           content:
