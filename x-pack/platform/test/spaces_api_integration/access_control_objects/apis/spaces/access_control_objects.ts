@@ -135,7 +135,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { id: createdId } = response.body;
 
         const getResponse = await supertestWithoutAuth
-          .get(`/read_only_objects/${createdId}`)
+          .get(`/access_control_objects/${createdId}`)
           .set('kbn-xsrf', 'true')
           .set(
             'Authorization',
@@ -330,7 +330,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should objects that support access control without metadata when there is no active user profile', async () => {
         const bulkCreateResponse = await supertestWithoutAuth
-          .post('/read_only_objects/bulk_create')
+          .post('/access_control_objects/bulk_create')
           .set('kbn-xsrf', 'xxxxx')
           .set(
             'Authorization',
@@ -339,7 +339,7 @@ export default function ({ getService }: FtrProviderContext) {
             )}`
           )
           .send({
-            objects: [{ type: READ_ONLY_TYPE }, { type: READ_ONLY_TYPE }],
+            objects: [{ type: ACCESS_CONTROL_TYPE }, { type: ACCESS_CONTROL_TYPE }],
           })
           .expect(200);
 
@@ -349,7 +349,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(createdObj).not.to.have.property('error');
 
           const getResponse = await supertestWithoutAuth
-            .get(`/read_only_objects/${createdObj.id}`)
+            .get(`/access_control_objects/${createdObj.id}`)
             .set('kbn-xsrf', 'true')
             .set(
               'Authorization',

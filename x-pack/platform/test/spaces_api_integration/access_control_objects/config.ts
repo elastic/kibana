@@ -24,7 +24,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     testFiles: [
-      resolve(__dirname, './apis/spaces/read_only_objects.ts'),
+      resolve(__dirname, './apis/spaces/access_control_objects.ts'),
       resolve(__dirname, './apis/spaces/import_export.ts'),
     ],
     services: {

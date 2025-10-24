@@ -6,9 +6,12 @@
  */
 import { parse as parseCookie } from 'tough-cookie';
 
+import {
+  ACCESS_CONTROL_TYPE,
+  NON_ACCESS_CONTROL_TYPE,
+} from '@kbn/access-control-test-plugin/server';
 import type { SavedObjectsImportRetry } from '@kbn/core/public';
 import expect from '@kbn/expect';
-import { NON_READ_ONLY_TYPE, READ_ONLY_TYPE } from '@kbn/read-only-objects-test-plugin/server';
 import { adminTestUser } from '@kbn/test';
 
 import type { FtrProviderContext } from '../../../../functional/ftr_provider_context';
@@ -105,7 +108,7 @@ export default function ({ getService }: FtrProviderContext) {
             id: '11111111111111111111111111111111',
             managed: false,
             references: [],
-            type: NON_READ_ONLY_TYPE,
+            type: NON_ACCESS_CONTROL_TYPE,
             updated_at: '2025-07-16T10:03:03.253Z',
             updated_by: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
             version: 'WzY5LDFd',
@@ -139,7 +142,7 @@ export default function ({ getService }: FtrProviderContext) {
           const toImport = [
             {
               // some data in the file that defines a specific user and mode
-              accessControl: { accessMode: 'read_only', owner: 'some_user' },
+              accessControl: { accessMode: 'write_restricted', owner: 'some_user' },
               attributes: { description: 'test' },
               coreMigrationVersion: '8.8.0',
               created_at: '2025-07-16T10:03:03.253Z',
@@ -147,7 +150,7 @@ export default function ({ getService }: FtrProviderContext) {
               id: '11111111111111111111111111111111',
               managed: false,
               references: [],
-              type: READ_ONLY_TYPE,
+              type: ACCESS_CONTROL_TYPE,
               updated_at: '2025-07-16T10:03:03.253Z',
               updated_by: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
               version: 'WzY5LDFd',
@@ -161,7 +164,7 @@ export default function ({ getService }: FtrProviderContext) {
               id: '22222222222222222222222222222222',
               managed: false,
               references: [],
-              type: NON_READ_ONLY_TYPE,
+              type: NON_ACCESS_CONTROL_TYPE,
               updated_at: '2025-07-16T10:03:03.253Z',
               updated_by: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
               version: 'WzY5LDFd',
@@ -180,11 +183,11 @@ export default function ({ getService }: FtrProviderContext) {
           const results = response.body.successResults;
           expect(Array.isArray(results)).to.be(true);
           expect(results.length).to.be(2);
-          expect(results[0].type).to.be(READ_ONLY_TYPE);
-          expect(results[1].type).to.be(NON_READ_ONLY_TYPE);
+          expect(results[0].type).to.be(ACCESS_CONTROL_TYPE);
+          expect(results[1].type).to.be(NON_ACCESS_CONTROL_TYPE);
 
           let getResponse = await supertestWithoutAuth
-            .get(`/read_only_objects/${results[0].destinationId}`)
+            .get(`/access_control_objects/${results[0].destinationId}`)
             .set('kbn-xsrf', 'true')
             .set('cookie', objectOwnerCookie.cookieString())
             .expect(200);
@@ -194,7 +197,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(getResponse.body.accessControl).to.have.property('owner', testProfileId);
 
           getResponse = await supertestWithoutAuth
-            .get(`/non_read_only_objects/${results[1].destinationId}`)
+            .get(`/non_access_control_objects/${results[1].destinationId}`)
             .set('kbn-xsrf', 'true')
             .set('cookie', objectOwnerCookie.cookieString())
             .expect(200);
@@ -205,7 +208,7 @@ export default function ({ getService }: FtrProviderContext) {
           const toImport = [
             {
               // some data in the file that defines a specific user and mode
-              accessControl: { accessMode: 'read_only', owner: 'some_user' },
+              accessControl: { accessMode: 'write_restricted', owner: 'some_user' },
               attributes: { description: 'test' },
               coreMigrationVersion: '8.8.0',
               created_at: '2025-07-16T10:03:03.253Z',
@@ -213,7 +216,7 @@ export default function ({ getService }: FtrProviderContext) {
               id: '11111111111111111111111111111111',
               managed: false,
               references: [],
-              type: READ_ONLY_TYPE,
+              type: ACCESS_CONTROL_TYPE,
               updated_at: '2025-07-16T10:03:03.253Z',
               updated_by: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
               version: 'WzY5LDFd',
@@ -227,7 +230,7 @@ export default function ({ getService }: FtrProviderContext) {
               id: '22222222222222222222222222222222',
               managed: false,
               references: [],
-              type: NON_READ_ONLY_TYPE,
+              type: NON_ACCESS_CONTROL_TYPE,
               updated_at: '2025-07-16T10:03:03.253Z',
               updated_by: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
               version: 'WzY5LDFd',
@@ -260,16 +263,16 @@ export default function ({ getService }: FtrProviderContext) {
           expect(Array.isArray(response.body.successResults)).to.be(true);
           const results = response.body.successResults;
           expect(results.length).to.be(2);
-          expect(results[0]).to.have.property('type', READ_ONLY_TYPE);
+          expect(results[0]).to.have.property('type', ACCESS_CONTROL_TYPE);
           expect(results[0]).to.have.property('destinationId');
-          expect(results[1]).to.have.property('type', NON_READ_ONLY_TYPE);
+          expect(results[1]).to.have.property('type', NON_ACCESS_CONTROL_TYPE);
           expect(results[1]).to.have.property('destinationId');
 
           const importedId1 = results[0].destinationId;
           const importedId2 = results[1].destinationId;
 
           let getResponse = await supertestWithoutAuth
-            .get(`/read_only_objects/${importedId1}`)
+            .get(`/access_control_objects/${importedId1}`)
             .set('kbn-xsrf', 'true')
             .set(
               'Authorization',
@@ -281,7 +284,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(getResponse.body).not.to.have.property('accessControl');
 
           getResponse = await supertestWithoutAuth
-            .get(`/non_read_only_objects/${importedId2}`)
+            .get(`/non_access_control_objects/${importedId2}`)
             .set('kbn-xsrf', 'true')
             .set(
               'Authorization',
@@ -308,7 +311,7 @@ export default function ({ getService }: FtrProviderContext) {
               id: '11111111111111111111111111111111',
               managed: false,
               references: [],
-              type: READ_ONLY_TYPE,
+              type: ACCESS_CONTROL_TYPE,
               updated_at: '2025-07-16T10:03:03.253Z',
               updated_by: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
               version: 'WzY5LDFd',
@@ -321,7 +324,7 @@ export default function ({ getService }: FtrProviderContext) {
               id: '22222222222222222222222222222222',
               managed: false,
               references: [],
-              type: NON_READ_ONLY_TYPE,
+              type: NON_ACCESS_CONTROL_TYPE,
               updated_at: '2025-07-16T10:03:03.253Z',
               updated_by: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
               version: 'WzY5LDFd',
@@ -340,11 +343,11 @@ export default function ({ getService }: FtrProviderContext) {
           const results = response.body.successResults;
           expect(Array.isArray(results)).to.be(true);
           expect(results.length).to.be(2);
-          expect(results[0].type).to.be(READ_ONLY_TYPE);
-          expect(results[1].type).to.be(NON_READ_ONLY_TYPE);
+          expect(results[0].type).to.be(ACCESS_CONTROL_TYPE);
+          expect(results[1].type).to.be(NON_ACCESS_CONTROL_TYPE);
 
           let getResponse = await supertestWithoutAuth
-            .get(`/read_only_objects/${results[0].destinationId}`)
+            .get(`/access_control_objects/${results[0].destinationId}`)
             .set('kbn-xsrf', 'true')
             .set('cookie', objectOwnerCookie.cookieString())
             .expect(200);
@@ -354,7 +357,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(getResponse.body.accessControl).to.have.property('owner', testProfileId);
 
           getResponse = await supertestWithoutAuth
-            .get(`/non_read_only_objects/${results[1].destinationId}`)
+            .get(`/non_access_control_objects/${results[1].destinationId}`)
             .set('kbn-xsrf', 'true')
             .set('cookie', objectOwnerCookie.cookieString())
             .expect(200);
@@ -367,14 +370,17 @@ export default function ({ getService }: FtrProviderContext) {
           const { cookie: adminCookie, profileUid: adminProfileId } = await loginAsKibanaAdmin();
 
           let createResponse = await supertestWithoutAuth
-            .post('/read_only_objects/create')
+            .post('/access_control_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', adminCookie.cookieString())
-            .send({ type: READ_ONLY_TYPE, isReadOnly: true })
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
             .expect(200);
-          expect(createResponse.body.type).to.eql(READ_ONLY_TYPE);
+          expect(createResponse.body.type).to.eql(ACCESS_CONTROL_TYPE);
           expect(createResponse.body).to.have.property('accessControl');
-          expect(createResponse.body.accessControl).to.have.property('accessMode', 'read_only');
+          expect(createResponse.body.accessControl).to.have.property(
+            'accessMode',
+            'write_restricted'
+          );
           expect(createResponse.body.accessControl).to.have.property('owner', adminProfileId);
           const adminObjId = createResponse.body.id;
 
@@ -384,21 +390,24 @@ export default function ({ getService }: FtrProviderContext) {
           );
 
           createResponse = await supertestWithoutAuth
-            .post('/read_only_objects/create')
+            .post('/access_control_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', testUserCookie.cookieString())
-            .send({ type: READ_ONLY_TYPE, isReadOnly: true })
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
             .expect(200);
-          expect(createResponse.body.type).to.eql(READ_ONLY_TYPE);
+          expect(createResponse.body.type).to.eql(ACCESS_CONTROL_TYPE);
           expect(createResponse.body).to.have.property('accessControl');
-          expect(createResponse.body.accessControl).to.have.property('accessMode', 'read_only');
+          expect(createResponse.body.accessControl).to.have.property(
+            'accessMode',
+            'write_restricted'
+          );
           expect(createResponse.body.accessControl).to.have.property('owner', testProfileId);
           const testUserObjId = createResponse.body.id;
 
           const toImport = [
             {
               // this first object will import ok
-              accessControl: { accessMode: 'read_only', owner: testProfileId },
+              accessControl: { accessMode: 'write_restricted', owner: testProfileId },
               attributes: { description: 'test' },
               coreMigrationVersion: '8.8.0',
               created_at: '2025-07-16T10:03:03.253Z',
@@ -406,14 +415,14 @@ export default function ({ getService }: FtrProviderContext) {
               id: testUserObjId,
               managed: false,
               references: [],
-              type: READ_ONLY_TYPE,
+              type: ACCESS_CONTROL_TYPE,
               updated_at: '2025-07-16T10:03:03.253Z',
               updated_by: testProfileId,
               version: 'WzY5LDFd',
             },
             {
               // this second object will be rejected because it is owned by another user
-              accessControl: { accessMode: 'read_only', owner: adminProfileId },
+              accessControl: { accessMode: 'write_restricted', owner: adminProfileId },
               attributes: { description: 'test' },
               coreMigrationVersion: '8.8.0',
               created_at: '2025-07-16T10:03:03.253Z',
@@ -421,7 +430,7 @@ export default function ({ getService }: FtrProviderContext) {
               id: adminObjId,
               managed: false,
               references: [],
-              type: READ_ONLY_TYPE,
+              type: ACCESS_CONTROL_TYPE,
               updated_at: '2025-07-16T10:03:03.253Z',
               updated_by: adminProfileId,
               version: 'WzY5LDFd',
@@ -451,7 +460,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(result).to.have.property('successResults');
           expect(result.successResults).to.eql([
             {
-              type: READ_ONLY_TYPE,
+              type: ACCESS_CONTROL_TYPE,
               id: testUserObjId,
               meta: {},
               managed: false,
@@ -462,7 +471,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(result.errors).to.eql([
             {
               id: adminObjId,
-              type: READ_ONLY_TYPE,
+              type: ACCESS_CONTROL_TYPE,
               meta: {},
               error: {
                 message:
@@ -480,26 +489,32 @@ export default function ({ getService }: FtrProviderContext) {
           const { cookie: adminCookie, profileUid: adminProfileId } = await loginAsKibanaAdmin();
 
           let createResponse = await supertestWithoutAuth
-            .post('/read_only_objects/create')
+            .post('/access_control_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', adminCookie.cookieString())
-            .send({ type: READ_ONLY_TYPE, isReadOnly: true })
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
             .expect(200);
-          expect(createResponse.body.type).to.eql(READ_ONLY_TYPE);
+          expect(createResponse.body.type).to.eql(ACCESS_CONTROL_TYPE);
           expect(createResponse.body).to.have.property('accessControl');
-          expect(createResponse.body.accessControl).to.have.property('accessMode', 'read_only');
+          expect(createResponse.body.accessControl).to.have.property(
+            'accessMode',
+            'write_restricted'
+          );
           expect(createResponse.body.accessControl).to.have.property('owner', adminProfileId);
           const firstObjId = createResponse.body.id;
 
           createResponse = await supertestWithoutAuth
-            .post('/read_only_objects/create')
+            .post('/access_control_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', adminCookie.cookieString())
-            .send({ type: READ_ONLY_TYPE, isReadOnly: true })
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
             .expect(200);
-          expect(createResponse.body.type).to.eql(READ_ONLY_TYPE);
+          expect(createResponse.body.type).to.eql(ACCESS_CONTROL_TYPE);
           expect(createResponse.body).to.have.property('accessControl');
-          expect(createResponse.body.accessControl).to.have.property('accessMode', 'read_only');
+          expect(createResponse.body.accessControl).to.have.property(
+            'accessMode',
+            'write_restricted'
+          );
           expect(createResponse.body.accessControl).to.have.property('owner', adminProfileId);
           const secondObjId = createResponse.body.id;
 
@@ -508,7 +523,7 @@ export default function ({ getService }: FtrProviderContext) {
           const toImport = [
             {
               // this first object will be rejected because it is owned by another user
-              accessControl: { accessMode: 'read_only', owner: adminProfileId },
+              accessControl: { accessMode: 'write_restricted', owner: adminProfileId },
               attributes: { description: 'test' },
               coreMigrationVersion: '8.8.0',
               created_at: '2025-07-16T10:03:03.253Z',
@@ -516,14 +531,14 @@ export default function ({ getService }: FtrProviderContext) {
               id: firstObjId,
               managed: false,
               references: [],
-              type: READ_ONLY_TYPE,
+              type: ACCESS_CONTROL_TYPE,
               updated_at: '2025-07-16T10:03:03.253Z',
               updated_by: adminProfileId,
               version: 'WzY5LDFd',
             },
             {
               // this second object will be rejected because it is owned by another user
-              accessControl: { accessMode: 'read_only', owner: adminProfileId },
+              accessControl: { accessMode: 'write_restricted', owner: adminProfileId },
               attributes: { description: 'test' },
               coreMigrationVersion: '8.8.0',
               created_at: '2025-07-16T10:03:03.253Z',
@@ -531,7 +546,7 @@ export default function ({ getService }: FtrProviderContext) {
               id: secondObjId,
               managed: false,
               references: [],
-              type: READ_ONLY_TYPE,
+              type: ACCESS_CONTROL_TYPE,
               updated_at: '2025-07-16T10:03:03.253Z',
               updated_by: adminProfileId,
               version: 'WzY5LDFd',
@@ -560,10 +575,10 @@ export default function ({ getService }: FtrProviderContext) {
           expect(results[0]).to.have.property('error', 'Forbidden');
           expect(results[0]).to.have.property('message');
           expect(results[0].message).to.contain(
-            'Unable to bulk_create read_only_type, access control restrictions for read_only_type:'
+            `Unable to bulk_create ${ACCESS_CONTROL_TYPE}, access control restrictions for ${ACCESS_CONTROL_TYPE}:`
           );
-          expect(results[0].message).to.contain(`read_only_type:${firstObjId}`); // the order may vary
-          expect(results[0].message).to.contain(`read_only_type:${secondObjId}`);
+          expect(results[0].message).to.contain(`${ACCESS_CONTROL_TYPE}:${firstObjId}`); // the order may vary
+          expect(results[0].message).to.contain(`${ACCESS_CONTROL_TYPE}:${secondObjId}`);
         });
 
         it('should allow overwrite of owned objects, but maintain original access control metadata, if owned by the current user', async () => {
@@ -573,15 +588,18 @@ export default function ({ getService }: FtrProviderContext) {
           );
 
           const createResponse = await supertestWithoutAuth
-            .post('/read_only_objects/create')
+            .post('/access_control_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', testUserCookie.cookieString())
-            .send({ type: READ_ONLY_TYPE, isReadOnly: true })
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
             .expect(200);
-          expect(createResponse.body.type).to.eql(READ_ONLY_TYPE);
+          expect(createResponse.body.type).to.eql(ACCESS_CONTROL_TYPE);
           expect(createResponse.body.attributes).to.have.property('description', 'test');
           expect(createResponse.body).to.have.property('accessControl');
-          expect(createResponse.body.accessControl).to.have.property('accessMode', 'read_only');
+          expect(createResponse.body.accessControl).to.have.property(
+            'accessMode',
+            'write_restricted'
+          );
           expect(createResponse.body.accessControl).to.have.property('owner', testProfileId);
 
           const toImport = [
@@ -594,7 +612,7 @@ export default function ({ getService }: FtrProviderContext) {
               id: createResponse.body.id,
               managed: false,
               references: [],
-              type: READ_ONLY_TYPE,
+              type: ACCESS_CONTROL_TYPE,
               updated_at: '2025-07-16T10:03:03.253Z',
               updated_by: testProfileId,
               version: 'WzY5LDFd',
@@ -618,18 +636,18 @@ export default function ({ getService }: FtrProviderContext) {
           const results = importResponse.body.successResults;
           expect(Array.isArray(results)).to.be(true);
           expect(results.length).to.be(1);
-          expect(results[0].type).to.be(READ_ONLY_TYPE);
+          expect(results[0].type).to.be(ACCESS_CONTROL_TYPE);
           expect(results[0].overwrite).to.be(true);
 
           const getResponse = await supertestWithoutAuth
-            .get(`/read_only_objects/${results[0].id}`)
+            .get(`/access_control_objects/${results[0].id}`)
             .set('kbn-xsrf', 'true')
             .set('cookie', testUserCookie.cookieString())
             .expect(200);
 
           expect(getResponse.body.attributes).to.have.property('description', 'overwritten');
           expect(getResponse.body).to.have.property('accessControl');
-          expect(getResponse.body.accessControl).to.have.property('accessMode', 'read_only');
+          expect(getResponse.body.accessControl).to.have.property('accessMode', 'write_restricted');
           expect(getResponse.body.accessControl).to.have.property('owner', testProfileId);
         });
 
@@ -638,15 +656,18 @@ export default function ({ getService }: FtrProviderContext) {
           const { cookie: testUserCookie, profileUid: testProfileId } = loginResponse;
 
           const createResponse = await supertestWithoutAuth
-            .post('/read_only_objects/create')
+            .post('/access_control_objects/create')
             .set('kbn-xsrf', 'true')
             .set('cookie', testUserCookie.cookieString())
-            .send({ type: READ_ONLY_TYPE, isReadOnly: true })
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
             .expect(200);
-          expect(createResponse.body.type).to.eql(READ_ONLY_TYPE);
+          expect(createResponse.body.type).to.eql(ACCESS_CONTROL_TYPE);
           expect(createResponse.body.attributes).to.have.property('description', 'test');
           expect(createResponse.body).to.have.property('accessControl');
-          expect(createResponse.body.accessControl).to.have.property('accessMode', 'read_only');
+          expect(createResponse.body.accessControl).to.have.property(
+            'accessMode',
+            'write_restricted'
+          );
           expect(createResponse.body.accessControl).to.have.property('owner', testProfileId);
 
           const { cookie: adminCookie, profileUid: adminProfileId } = await loginAsKibanaAdmin();
@@ -663,7 +684,7 @@ export default function ({ getService }: FtrProviderContext) {
               id: createResponse.body.id,
               managed: false,
               references: [],
-              type: READ_ONLY_TYPE,
+              type: ACCESS_CONTROL_TYPE,
               updated_at: '2025-07-16T10:03:03.253Z',
               updated_by: testProfileId,
               version: 'WzY5LDFd',
@@ -687,19 +708,19 @@ export default function ({ getService }: FtrProviderContext) {
           const results = importResponse.body.successResults;
           expect(Array.isArray(results)).to.be(true);
           expect(results.length).to.be(1);
-          expect(results[0].type).to.be(READ_ONLY_TYPE);
+          expect(results[0].type).to.be(ACCESS_CONTROL_TYPE);
           expect(results[0].overwrite).to.be(true);
           expect(results[0].id).to.be(createResponse.body.id);
 
           const getResponse = await supertestWithoutAuth
-            .get(`/read_only_objects/${results[0].id}`)
+            .get(`/access_control_objects/${results[0].id}`)
             .set('kbn-xsrf', 'true')
             .set('cookie', testUserCookie.cookieString())
             .expect(200);
 
           expect(getResponse.body.attributes).to.have.property('description', 'overwritten');
           expect(getResponse.body).to.have.property('accessControl');
-          expect(getResponse.body.accessControl).to.have.property('accessMode', 'read_only');
+          expect(getResponse.body.accessControl).to.have.property('accessMode', 'write_restricted');
           expect(getResponse.body.accessControl).to.have.property('owner', testProfileId); // retain the original owner
         });
       });
@@ -720,7 +741,7 @@ export default function ({ getService }: FtrProviderContext) {
       //         id: '11111111111111111111111111111111d',
       //         managed: false,
       //         references: [],
-      //         type: READ_ONLY_TYPE,
+      //         type: ACCESS_CONTROL_TYPE,
       //         updated_at: '2025-07-16T10:03:03.253Z',
       //         updated_by: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
       //         version: 'WzY5LDFd',
@@ -756,7 +777,7 @@ export default function ({ getService }: FtrProviderContext) {
       //       id: '11111111111111111111111111111111',
       //       managed: false,
       //       references: [],
-      //       type: READ_ONLY_TYPE,
+      //       type: ACCESS_CONTROL_TYPE,
       //       updated_at: '2025-07-16T10:03:03.253Z',
       //       updated_by: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
       //       version: 'WzY5LDFd',
@@ -801,24 +822,27 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         let createResponse = await supertestWithoutAuth
-          .post('/read_only_objects/create')
+          .post('/access_control_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', testUserCookie.cookieString())
-          .send({ type: READ_ONLY_TYPE, isReadOnly: true })
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
           .expect(200);
-        expect(createResponse.body.type).to.eql(READ_ONLY_TYPE);
+        expect(createResponse.body.type).to.eql(ACCESS_CONTROL_TYPE);
         expect(createResponse.body).to.have.property('accessControl');
-        expect(createResponse.body.accessControl).to.have.property('accessMode', 'read_only');
+        expect(createResponse.body.accessControl).to.have.property(
+          'accessMode',
+          'write_restricted'
+        );
         expect(createResponse.body.accessControl).to.have.property('owner', testProfileId);
         const readOnlyId = createResponse.body.id;
 
         createResponse = await supertestWithoutAuth
-          .post('/read_only_objects/create')
+          .post('/access_control_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', testUserCookie.cookieString())
-          .send({ type: NON_READ_ONLY_TYPE })
+          .send({ type: NON_ACCESS_CONTROL_TYPE })
           .expect(200);
-        expect(createResponse.body.type).to.eql(NON_READ_ONLY_TYPE);
+        expect(createResponse.body.type).to.eql(NON_ACCESS_CONTROL_TYPE);
         expect(createResponse.body).not.to.have.property('accessControl');
         const nonReadOnlyId = createResponse.body.id;
 
@@ -829,11 +853,11 @@ export default function ({ getService }: FtrProviderContext) {
           .send({
             objects: [
               {
-                type: READ_ONLY_TYPE,
+                type: ACCESS_CONTROL_TYPE,
                 id: readOnlyId,
               },
               {
-                type: NON_READ_ONLY_TYPE,
+                type: NON_ACCESS_CONTROL_TYPE,
                 id: nonReadOnlyId,
               },
             ],
@@ -846,7 +870,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(results[0]).to.have.property('id', readOnlyId);
         expect(results[0]).to.have.property('accessControl');
-        expect(results[0].accessControl).to.have.property('accessMode', 'read_only');
+        expect(results[0].accessControl).to.have.property('accessMode', 'write_restricted');
         expect(results[0].accessControl).to.have.property('owner', testProfileId);
 
         expect(results[1]).to.have.property('id', nonReadOnlyId);
@@ -861,14 +885,17 @@ export default function ({ getService }: FtrProviderContext) {
         const { cookie: adminCookie, profileUid: adminProfileId } = await loginAsKibanaAdmin();
 
         let createResponse = await supertestWithoutAuth
-          .post('/read_only_objects/create')
+          .post('/access_control_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', adminCookie.cookieString())
-          .send({ type: READ_ONLY_TYPE, isReadOnly: true })
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
           .expect(200);
-        expect(createResponse.body.type).to.eql(READ_ONLY_TYPE);
+        expect(createResponse.body.type).to.eql(ACCESS_CONTROL_TYPE);
         expect(createResponse.body).to.have.property('accessControl');
-        expect(createResponse.body.accessControl).to.have.property('accessMode', 'read_only');
+        expect(createResponse.body.accessControl).to.have.property(
+          'accessMode',
+          'write_restricted'
+        );
         expect(createResponse.body.accessControl).to.have.property('owner', adminProfileId);
         const adminObjId = createResponse.body.id;
 
@@ -878,21 +905,24 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         createResponse = await supertestWithoutAuth
-          .post('/read_only_objects/create')
+          .post('/access_control_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', testUserCookie.cookieString())
-          .send({ type: READ_ONLY_TYPE, isReadOnly: true })
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
           .expect(200);
-        expect(createResponse.body.type).to.eql(READ_ONLY_TYPE);
+        expect(createResponse.body.type).to.eql(ACCESS_CONTROL_TYPE);
         expect(createResponse.body).to.have.property('accessControl');
-        expect(createResponse.body.accessControl).to.have.property('accessMode', 'read_only');
+        expect(createResponse.body.accessControl).to.have.property(
+          'accessMode',
+          'write_restricted'
+        );
         expect(createResponse.body.accessControl).to.have.property('owner', testProfileId);
         const testUserObjId = createResponse.body.id;
 
         const toImport = [
           {
             // this first object will import ok
-            accessControl: { accessMode: 'read_only', owner: testProfileId },
+            accessControl: { accessMode: 'write_restricted', owner: testProfileId },
             attributes: { description: 'test' },
             coreMigrationVersion: '8.8.0',
             created_at: '2025-07-16T10:03:03.253Z',
@@ -900,14 +930,14 @@ export default function ({ getService }: FtrProviderContext) {
             id: testUserObjId,
             managed: false,
             references: [],
-            type: READ_ONLY_TYPE,
+            type: ACCESS_CONTROL_TYPE,
             updated_at: '2025-07-16T10:03:03.253Z',
             updated_by: testProfileId,
             version: 'WzY5LDFd',
           },
           {
             // this second object will be rejected because it is owned by another user
-            accessControl: { accessMode: 'read_only', owner: adminProfileId },
+            accessControl: { accessMode: 'write_restricted', owner: adminProfileId },
             attributes: { description: 'test' },
             coreMigrationVersion: '8.8.0',
             created_at: '2025-07-16T10:03:03.253Z',
@@ -915,7 +945,7 @@ export default function ({ getService }: FtrProviderContext) {
             id: adminObjId,
             managed: false,
             references: [],
-            type: READ_ONLY_TYPE,
+            type: ACCESS_CONTROL_TYPE,
             updated_at: '2025-07-16T10:03:03.253Z',
             updated_by: adminProfileId,
             version: 'WzY5LDFd',
@@ -934,13 +964,13 @@ export default function ({ getService }: FtrProviderContext) {
           testUserCookie.cookieString(),
           [
             {
-              type: READ_ONLY_TYPE,
+              type: ACCESS_CONTROL_TYPE,
               id: testUserObjId,
               overwrite: true, // retry will never occur
               replaceReferences: [],
             },
             {
-              type: READ_ONLY_TYPE,
+              type: ACCESS_CONTROL_TYPE,
               id: adminObjId,
               overwrite: true, // retry will never occur
               replaceReferences: [],
@@ -960,13 +990,13 @@ export default function ({ getService }: FtrProviderContext) {
         expect(Array.isArray(result.successResults)).to.be(true);
         expect(result.successResults.length).to.be(2);
 
-        expect(result.successResults[0]).to.have.property('type', READ_ONLY_TYPE);
+        expect(result.successResults[0]).to.have.property('type', ACCESS_CONTROL_TYPE);
         expect(result.successResults[0]).to.have.property('id', testUserObjId);
         expect(result.successResults[0]).to.have.property('managed', false);
         expect(result.successResults[0]).to.have.property('overwrite', true);
         expect(result.successResults[0]).to.have.property('destinationId'); // generated ID for new copy
 
-        expect(result.successResults[1]).to.have.property('type', READ_ONLY_TYPE);
+        expect(result.successResults[1]).to.have.property('type', ACCESS_CONTROL_TYPE);
         expect(result.successResults[1]).to.have.property('id', adminObjId);
         expect(result.successResults[1]).to.have.property('managed', false);
         expect(result.successResults[1]).to.have.property('overwrite', true);
@@ -977,14 +1007,17 @@ export default function ({ getService }: FtrProviderContext) {
         const { cookie: adminCookie, profileUid: adminProfileId } = await loginAsKibanaAdmin();
 
         let createResponse = await supertestWithoutAuth
-          .post('/read_only_objects/create')
+          .post('/access_control_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', adminCookie.cookieString())
-          .send({ type: READ_ONLY_TYPE, isReadOnly: true })
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
           .expect(200);
-        expect(createResponse.body.type).to.eql(READ_ONLY_TYPE);
+        expect(createResponse.body.type).to.eql(ACCESS_CONTROL_TYPE);
         expect(createResponse.body).to.have.property('accessControl');
-        expect(createResponse.body.accessControl).to.have.property('accessMode', 'read_only');
+        expect(createResponse.body.accessControl).to.have.property(
+          'accessMode',
+          'write_restricted'
+        );
         expect(createResponse.body.accessControl).to.have.property('owner', adminProfileId);
         const adminObjId = createResponse.body.id;
 
@@ -994,21 +1027,24 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         createResponse = await supertestWithoutAuth
-          .post('/read_only_objects/create')
+          .post('/access_control_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', testUserCookie.cookieString())
-          .send({ type: READ_ONLY_TYPE, isReadOnly: true })
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
           .expect(200);
-        expect(createResponse.body.type).to.eql(READ_ONLY_TYPE);
+        expect(createResponse.body.type).to.eql(ACCESS_CONTROL_TYPE);
         expect(createResponse.body).to.have.property('accessControl');
-        expect(createResponse.body.accessControl).to.have.property('accessMode', 'read_only');
+        expect(createResponse.body.accessControl).to.have.property(
+          'accessMode',
+          'write_restricted'
+        );
         expect(createResponse.body.accessControl).to.have.property('owner', testProfileId);
         const testUserObjId = createResponse.body.id;
 
         const toImport = [
           {
             // this first object will import ok
-            accessControl: { accessMode: 'read_only', owner: testProfileId },
+            accessControl: { accessMode: 'write_restricted', owner: testProfileId },
             attributes: { description: 'test' },
             coreMigrationVersion: '8.8.0',
             created_at: '2025-07-16T10:03:03.253Z',
@@ -1016,14 +1052,14 @@ export default function ({ getService }: FtrProviderContext) {
             id: testUserObjId,
             managed: false,
             references: [],
-            type: READ_ONLY_TYPE,
+            type: ACCESS_CONTROL_TYPE,
             updated_at: '2025-07-16T10:03:03.253Z',
             updated_by: testProfileId,
             version: 'WzY5LDFd',
           },
           {
             // this second object will be rejected because it is owned by another user
-            accessControl: { accessMode: 'read_only', owner: adminProfileId },
+            accessControl: { accessMode: 'write_restricted', owner: adminProfileId },
             attributes: { description: 'test' },
             coreMigrationVersion: '8.8.0',
             created_at: '2025-07-16T10:03:03.253Z',
@@ -1031,7 +1067,7 @@ export default function ({ getService }: FtrProviderContext) {
             id: adminObjId,
             managed: false,
             references: [],
-            type: READ_ONLY_TYPE,
+            type: ACCESS_CONTROL_TYPE,
             updated_at: '2025-07-16T10:03:03.253Z',
             updated_by: adminProfileId,
             version: 'WzY5LDFd',
@@ -1050,13 +1086,13 @@ export default function ({ getService }: FtrProviderContext) {
           testUserCookie.cookieString(),
           [
             {
-              type: READ_ONLY_TYPE,
+              type: ACCESS_CONTROL_TYPE,
               id: testUserObjId,
               overwrite: true,
               replaceReferences: [],
             },
             {
-              type: READ_ONLY_TYPE,
+              type: ACCESS_CONTROL_TYPE,
               id: adminObjId,
               overwrite: true,
               replaceReferences: [],
@@ -1074,7 +1110,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(result).to.have.property('successResults');
         expect(result.successResults).to.eql([
           {
-            type: READ_ONLY_TYPE,
+            type: ACCESS_CONTROL_TYPE,
             id: testUserObjId,
             meta: {},
             managed: false,
@@ -1085,7 +1121,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(result.errors).to.eql([
           {
             id: adminObjId,
-            type: READ_ONLY_TYPE,
+            type: ACCESS_CONTROL_TYPE,
             meta: {},
             error: {
               message:
@@ -1103,14 +1139,17 @@ export default function ({ getService }: FtrProviderContext) {
         const { cookie: adminCookie, profileUid: adminProfileId } = await loginAsKibanaAdmin();
 
         let createResponse = await supertestWithoutAuth
-          .post('/read_only_objects/create')
+          .post('/access_control_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', adminCookie.cookieString())
-          .send({ type: READ_ONLY_TYPE, isReadOnly: true })
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
           .expect(200);
-        expect(createResponse.body.type).to.eql(READ_ONLY_TYPE);
+        expect(createResponse.body.type).to.eql(ACCESS_CONTROL_TYPE);
         expect(createResponse.body).to.have.property('accessControl');
-        expect(createResponse.body.accessControl).to.have.property('accessMode', 'read_only');
+        expect(createResponse.body.accessControl).to.have.property(
+          'accessMode',
+          'write_restricted'
+        );
         expect(createResponse.body.accessControl).to.have.property('owner', adminProfileId);
         const adminObjId = createResponse.body.id;
 
@@ -1120,21 +1159,24 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         createResponse = await supertestWithoutAuth
-          .post('/read_only_objects/create')
+          .post('/access_control_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', testUserCookie.cookieString())
-          .send({ type: READ_ONLY_TYPE, isReadOnly: true })
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
           .expect(200);
-        expect(createResponse.body.type).to.eql(READ_ONLY_TYPE);
+        expect(createResponse.body.type).to.eql(ACCESS_CONTROL_TYPE);
         expect(createResponse.body).to.have.property('accessControl');
-        expect(createResponse.body.accessControl).to.have.property('accessMode', 'read_only');
+        expect(createResponse.body.accessControl).to.have.property(
+          'accessMode',
+          'write_restricted'
+        );
         expect(createResponse.body.accessControl).to.have.property('owner', testProfileId);
         const testUserObjId = createResponse.body.id;
 
         const toImport = [
           {
             // this first object will import ok
-            accessControl: { accessMode: 'read_only', owner: testProfileId },
+            accessControl: { accessMode: 'write_restricted', owner: testProfileId },
             attributes: { description: 'test' },
             coreMigrationVersion: '8.8.0',
             created_at: '2025-07-16T10:03:03.253Z',
@@ -1142,14 +1184,14 @@ export default function ({ getService }: FtrProviderContext) {
             id: testUserObjId,
             managed: false,
             references: [],
-            type: READ_ONLY_TYPE,
+            type: ACCESS_CONTROL_TYPE,
             updated_at: '2025-07-16T10:03:03.253Z',
             updated_by: testProfileId,
             version: 'WzY5LDFd',
           },
           {
             // this second object will be rejected because it is owned by another user
-            accessControl: { accessMode: 'read_only', owner: adminProfileId },
+            accessControl: { accessMode: 'write_restricted', owner: adminProfileId },
             attributes: { description: 'test' },
             coreMigrationVersion: '8.8.0',
             created_at: '2025-07-16T10:03:03.253Z',
@@ -1157,7 +1199,7 @@ export default function ({ getService }: FtrProviderContext) {
             id: adminObjId,
             managed: false,
             references: [],
-            type: READ_ONLY_TYPE,
+            type: ACCESS_CONTROL_TYPE,
             updated_at: '2025-07-16T10:03:03.253Z',
             updated_by: adminProfileId,
             version: 'WzY5LDFd',
@@ -1176,13 +1218,13 @@ export default function ({ getService }: FtrProviderContext) {
           testUserCookie.cookieString(),
           [
             {
-              type: READ_ONLY_TYPE,
+              type: ACCESS_CONTROL_TYPE,
               id: testUserObjId,
               overwrite: true,
               replaceReferences: [],
             },
             {
-              type: READ_ONLY_TYPE,
+              type: ACCESS_CONTROL_TYPE,
               id: adminObjId,
               overwrite: false,
               createNewCopy: true,
@@ -1202,7 +1244,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(result).to.have.property('successResults');
         expect(result.successResults).to.eql([
           {
-            type: READ_ONLY_TYPE,
+            type: ACCESS_CONTROL_TYPE,
             id: testUserObjId,
             meta: {},
             managed: false,
@@ -1213,7 +1255,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(result.errors).to.eql([
           {
             id: adminObjId,
-            type: READ_ONLY_TYPE,
+            type: ACCESS_CONTROL_TYPE,
             meta: {},
             error: {
               type: 'conflict',
@@ -1226,14 +1268,17 @@ export default function ({ getService }: FtrProviderContext) {
         const { cookie: adminCookie, profileUid: adminProfileId } = await loginAsKibanaAdmin();
 
         let createResponse = await supertestWithoutAuth
-          .post('/read_only_objects/create')
+          .post('/access_control_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', adminCookie.cookieString())
-          .send({ type: READ_ONLY_TYPE, isReadOnly: true })
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
           .expect(200);
-        expect(createResponse.body.type).to.eql(READ_ONLY_TYPE);
+        expect(createResponse.body.type).to.eql(ACCESS_CONTROL_TYPE);
         expect(createResponse.body).to.have.property('accessControl');
-        expect(createResponse.body.accessControl).to.have.property('accessMode', 'read_only');
+        expect(createResponse.body.accessControl).to.have.property(
+          'accessMode',
+          'write_restricted'
+        );
         expect(createResponse.body.accessControl).to.have.property('owner', adminProfileId);
         const adminObjId = createResponse.body.id;
 
@@ -1243,21 +1288,24 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         createResponse = await supertestWithoutAuth
-          .post('/read_only_objects/create')
+          .post('/access_control_objects/create')
           .set('kbn-xsrf', 'true')
           .set('cookie', testUserCookie.cookieString())
-          .send({ type: READ_ONLY_TYPE, isReadOnly: true })
+          .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
           .expect(200);
-        expect(createResponse.body.type).to.eql(READ_ONLY_TYPE);
+        expect(createResponse.body.type).to.eql(ACCESS_CONTROL_TYPE);
         expect(createResponse.body).to.have.property('accessControl');
-        expect(createResponse.body.accessControl).to.have.property('accessMode', 'read_only');
+        expect(createResponse.body.accessControl).to.have.property(
+          'accessMode',
+          'write_restricted'
+        );
         expect(createResponse.body.accessControl).to.have.property('owner', testProfileId);
         const testUserObjId = createResponse.body.id;
 
         const toImport = [
           {
             // this first object will import ok
-            accessControl: { accessMode: 'read_only', owner: testProfileId },
+            accessControl: { accessMode: 'write_restricted', owner: testProfileId },
             attributes: { description: 'test' },
             coreMigrationVersion: '8.8.0',
             created_at: '2025-07-16T10:03:03.253Z',
@@ -1265,14 +1313,14 @@ export default function ({ getService }: FtrProviderContext) {
             id: testUserObjId,
             managed: false,
             references: [],
-            type: READ_ONLY_TYPE,
+            type: ACCESS_CONTROL_TYPE,
             updated_at: '2025-07-16T10:03:03.253Z',
             updated_by: testProfileId,
             version: 'WzY5LDFd',
           },
           {
             // this second object will be rejected because it is owned by another user
-            accessControl: { accessMode: 'read_only', owner: adminProfileId },
+            accessControl: { accessMode: 'write_restricted', owner: adminProfileId },
             attributes: { description: 'test' },
             coreMigrationVersion: '8.8.0',
             created_at: '2025-07-16T10:03:03.253Z',
@@ -1280,7 +1328,7 @@ export default function ({ getService }: FtrProviderContext) {
             id: adminObjId,
             managed: false,
             references: [],
-            type: READ_ONLY_TYPE,
+            type: ACCESS_CONTROL_TYPE,
             updated_at: '2025-07-16T10:03:03.253Z',
             updated_by: adminProfileId,
             version: 'WzY5LDFd',
@@ -1301,13 +1349,13 @@ export default function ({ getService }: FtrProviderContext) {
           testUserCookie.cookieString(),
           [
             {
-              type: READ_ONLY_TYPE,
+              type: ACCESS_CONTROL_TYPE,
               id: testUserObjId,
               overwrite: true,
               replaceReferences: [],
             },
             {
-              type: READ_ONLY_TYPE,
+              type: ACCESS_CONTROL_TYPE,
               id: adminObjId,
               overwrite: false,
               createNewCopy: true,
@@ -1328,14 +1376,14 @@ export default function ({ getService }: FtrProviderContext) {
         expect(result).to.have.property('successResults');
         expect(result.successResults).to.eql([
           {
-            type: READ_ONLY_TYPE,
+            type: ACCESS_CONTROL_TYPE,
             id: testUserObjId,
             meta: {},
             managed: false,
             overwrite: true,
           },
           {
-            type: READ_ONLY_TYPE,
+            type: ACCESS_CONTROL_TYPE,
             id: adminObjId,
             destinationId,
             meta: {},
