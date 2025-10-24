@@ -6,25 +6,73 @@
  */
 
 import type { FC } from 'react';
-import React, { useState, useEffect } from 'react';
-import useMountedState from 'react-use/lib/useMountedState';
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { useMlKibana } from '../../contexts/kibana';
 import { useEnabledFeatures } from '../../contexts/ml';
 
-import { useJobsApiService } from '../../services/ml_api_service/jobs';
 import { useCloudCheck } from '../node_available_warning/hooks';
-import { FeatureFeedbackButton } from './feature_feedback_button';
 
 interface Props {
   jobIds: string[];
 }
 
+const KIBANA_VERSION_QUERY_PARAM = 'version';
+const KIBANA_DEPLOYMENT_TYPE_PARAM = 'deployment_type';
+const SANITIZED_PATH_PARAM = 'path';
+const FEEDBACK_BUTTON_DEFAULT_TEXT = i18n.translate('xpack.ml.featureFeedbackButton.defaultText', {
+  defaultMessage: 'Give feedback',
+});
+const ANOMALY_DETECTION_FEEDBACK_URL = 'https://ela.st/anomaly-detection-feedback';
+
+const getDeploymentType = (isCloudEnv?: boolean, isServerlessEnv?: boolean): string | undefined => {
+  if (isCloudEnv === undefined || isServerlessEnv === undefined) {
+    return undefined;
+  }
+  if (isServerlessEnv) {
+    return 'Serverless';
+  }
+  if (isCloudEnv) {
+    return 'Elastic Cloud';
+  }
+  return 'Self-Managed';
+};
+
+export const getSurveyFeedbackURL = ({
+  formUrl,
+  kibanaVersion,
+  sanitizedPath,
+  isCloudEnv,
+  isServerlessEnv,
+}: {
+  formUrl: string;
+  kibanaVersion?: string;
+  sanitizedPath?: string;
+  isCloudEnv?: boolean;
+  isServerlessEnv?: boolean;
+}) => {
+  const deploymentType = getDeploymentType(isCloudEnv, isServerlessEnv);
+
+  const url = new URL(formUrl);
+  if (kibanaVersion) {
+    url.searchParams.append(KIBANA_VERSION_QUERY_PARAM, kibanaVersion);
+  }
+  if (deploymentType) {
+    url.searchParams.append(KIBANA_DEPLOYMENT_TYPE_PARAM, deploymentType);
+  }
+  if (sanitizedPath) {
+    url.searchParams.append(SANITIZED_PATH_PARAM, sanitizedPath);
+  }
+
+  return url.href;
+};
+
 export const FeedBackButton: FC<Props> = ({ jobIds }) => {
-  const { jobs: getJobs } = useJobsApiService();
   const {
     services: { kibanaVersion },
   } = useMlKibana();
-  const { isCloud } = useCloudCheck();
+  const { isCloud: isCloudEnv } = useCloudCheck();
   // ML does not have an explicit isServerless flag,
   // it does however have individual feature flags which are set depending
   // whether the environment is serverless or not.
@@ -32,40 +80,28 @@ export const FeedBackButton: FC<Props> = ({ jobIds }) => {
   // and true in a non-serverless environment.
   const { showNodeInfo } = useEnabledFeatures();
 
-  const [jobIdsString, setJobIdsString] = useState<string | null>(null);
-  const [showButton, setShowButton] = useState(false);
-
-  const isMounted = useMountedState();
-
-  const ANOMALY_DETECTION_FEEDBACK_URL = 'https://ela.st/anomaly-detection-feedback';
-
-  useEffect(() => {
-    const tempJobIdsString = jobIds.join(',');
-    if (tempJobIdsString === jobIdsString || tempJobIdsString === '') {
-      return;
-    }
-    setShowButton(false);
-    setJobIdsString(tempJobIdsString);
-
-    getJobs(jobIds).then((resp) => {
-      if (isMounted()) {
-        setShowButton(resp.length > 0);
-      }
-    });
-  }, [jobIds, getJobs, jobIdsString, isMounted]);
-
-  if (showButton === false) {
+  if (jobIds.length === 0) {
     return null;
   }
 
   return (
-    <FeatureFeedbackButton
-      data-test-subj="mlFeatureFeedbackButton"
-      formUrl={ANOMALY_DETECTION_FEEDBACK_URL}
-      kibanaVersion={kibanaVersion}
-      isCloudEnv={isCloud}
-      isServerlessEnv={showNodeInfo === false}
-      sanitizedPath={window.location.pathname}
-    />
+    <EuiButtonEmpty
+      aria-label={FEEDBACK_BUTTON_DEFAULT_TEXT}
+      href={getSurveyFeedbackURL({
+        formUrl: ANOMALY_DETECTION_FEEDBACK_URL,
+        kibanaVersion,
+        isCloudEnv,
+        isServerlessEnv: showNodeInfo === false,
+        sanitizedPath: window.location.pathname,
+      })}
+      size="s"
+      iconType={'popout'}
+      iconSide="right"
+      target="_blank"
+      data-test-subj={'mlFeatureFeedbackButton'}
+      color="primary"
+    >
+      {FEEDBACK_BUTTON_DEFAULT_TEXT}
+    </EuiButtonEmpty>
   );
 };
