@@ -64,29 +64,6 @@ export default function ({ getService }: FtrProviderContext) {
     })
   );
 
-  const misConfigurationMockData = [
-    {
-      ['@timestamp']: new Date().toISOString(),
-      cluster_id: 'my-k8s-cluster-5555',
-      rule: {
-        benchmark: {
-          id: 'cis_k8s',
-          version: 'v1.0.0',
-          name: 'CIS Kubernetes V1.23',
-        },
-      },
-      resource: {
-        type: 'process',
-        sub_type: 'process',
-        id: '1111',
-      },
-      agent: { id: '07bd3686-98ef-4b23-99cb-9ff544b25ae3' },
-      result: { evaluation: 'failed' },
-      host: { name: hostName },
-      cloudbeat: { kubernetes: { version: 'v1.23.0' } },
-    },
-  ];
-
   const vulnerabilityMockData = [
     {
       ['@timestamp']: new Date().toISOString(),
@@ -174,12 +151,6 @@ export default function ({ getService }: FtrProviderContext) {
         'cspm'
       );
       packagePolicyId = packagePolicyItem.id;
-      await indexDocuments({
-        es,
-        index: FINDINGS_LATEST_INDEX,
-        documents: misConfigurationMockData,
-        log,
-      });
       await indexDocuments({
         es,
         index: VULNERABILITIES_LATEST_INDEX,
@@ -270,13 +241,6 @@ export default function ({ getService }: FtrProviderContext) {
             score: [expect.any(Number)],
           },
         ],
-        failedMisconfigurations: [
-          {
-            '@timestamp': [expect.any(String)],
-            _id: [expect.any(String)],
-            'host.name': [expect.any(String)],
-          },
-        ],
         vulnerabilities: [
           {
             '@timestamp': [expect.any(String)],
@@ -330,7 +294,6 @@ export default function ({ getService }: FtrProviderContext) {
       expect(body.summary).toEqual({
         assetCriticality: [],
         riskScore: [],
-        failedMisconfigurations: [],
         vulnerabilities: [],
         vulnerabilitiesTotal: {
           CRITICAL: 0,
