@@ -67,6 +67,8 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     },
   } = useKibana<KibanaContextExtra>();
 
+  const [columnBeingEdited, setColumnBeingEdited] = useState<number | null>(null);
+
   const isFetching = useObservable(indexUpdateService.isFetching$, false);
   const sortOrder = useObservable(indexUpdateService.sortOrder$, []);
 
@@ -167,23 +169,32 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     return renderedColumns.reduce<CustomGridColumnsConfiguration>(
       (acc, columnName, columnIndex) => {
         if (!props.dataView.fields.getByName(columnName)) {
+          const editMode = columnBeingEdited === columnIndex;
           acc[columnName] = getColumnInputRenderer(
             columnName,
             columnIndex,
+            editMode,
+            setColumnBeingEdited,
             indexUpdateService,
             indexEditorTelemetryService
           );
         } else {
           acc[columnName] = (customGridColumnProps: CustomGridColumnProps) => ({
             ...customGridColumnProps.column,
-            actions: { showHide: false },
+            actions: { showHide: false, showSortAsc: false, showSortDesc: false },
           });
         }
         return acc;
       },
       {} as CustomGridColumnsConfiguration
     );
-  }, [renderedColumns, props.dataView.fields, indexUpdateService, indexEditorTelemetryService]);
+  }, [
+    renderedColumns,
+    props.dataView.fields,
+    columnBeingEdited,
+    indexUpdateService,
+    indexEditorTelemetryService,
+  ]);
 
   const bulkActions = useMemo<
     React.ComponentProps<typeof UnifiedDataTable>['customBulkActions']
