@@ -29,6 +29,9 @@ interface MachineState {
   index: number;
 }
 
+const RESOURCE_EPSILON = 0.000001;
+const MEMORY_RESERVE_MB = 2048;
+
 export async function scheduleConfigs({
   configs,
   maxDurationMins,
@@ -60,14 +63,18 @@ export async function scheduleConfigs({
     })
   );
 
-  const machineStates = machines
-    .map((machine, index) => ({
-      machine,
-      configs: [] as ScheduleConfigOutput[],
-      totalDuration: 0,
-      index,
-    }))
-    .sort(compareMachinePreference);
+  // machines input is a list of machine TYPES. We'll expand them into runtime
+  // instances (MachineState) on demand. Sort types by preference (largest
+  // capacity first) so we always create new instances from the largest type when
+  // needed.
+  const machineTypes = machines.slice().sort((a, b) => {
+    if (a.cpus !== b.cpus) return b.cpus - a.cpus;
+    if (a.memoryMb !== b.memoryMb) return b.memoryMb - a.memoryMb;
+    return a.name.localeCompare(b.name);
+  });
+
+  const machineStates: MachineState[] = [];
+  const typeInstanceCounters = new Map<string, number>();
 
   // Sort by duration (largest first) for a greedy longest-processing-time assignment.
   const sortedConfigs = [...configsWithResources].sort(
@@ -75,55 +82,71 @@ export async function scheduleConfigs({
   );
 
   for (const configOutput of sortedConfigs) {
-    const requiredCpu = getPeakCpu(configOutput.resources);
-    const requiredMemory = getPeakMemory(configOutput.resources);
-
-    const eligibleMachines = machineStates.filter(
-      (state) => state.machine.cpus >= requiredCpu && state.machine.memoryMb >= requiredMemory
+    // determine which machine types are capable of running this config
+    const eligibleTypes = machineTypes.filter((type) =>
+      canRunConfigOnMachine(type, configOutput.resources)
     );
 
-    if (eligibleMachines.length === 0) {
-      const formattedCpu = requiredCpu.toFixed(2);
-      const formattedMemory = requiredMemory.toFixed(0);
-      throw new Error(
-        `Config ${configOutput.path} requires ${formattedCpu} CPUs / ${formattedMemory}MB but no machines provide sufficient resources`
-      );
+    if (eligibleTypes.length === 0) {
+      throw new Error(`Config ${configOutput.path} requires resources that no machines provide`);
     }
 
-    const machinesWithinLimit = eligibleMachines.filter(
+    // Try to pack into existing runtime instances of eligible types. Prefer
+    // filling larger types first.
+    const eligibleInstances = machineStates.filter((state) =>
+      canRunConfigOnMachine(state.machine, configOutput.resources)
+    );
+
+    const machinesWithinLimit = eligibleInstances.filter(
       (state) => state.totalDuration + configOutput.testDurationMins <= maxDurationMins
     );
 
     const preferPacking = machinesWithinLimit.length > 0;
-    const candidatePool = preferPacking ? machinesWithinLimit : eligibleMachines;
+    const candidatePool = preferPacking ? machinesWithinLimit : eligibleInstances;
 
-    const selectedMachine = candidatePool.reduce<MachineState | undefined>((best, candidate) => {
-      if (!best) {
-        return candidate;
+    function candidateComparator(a: MachineState, b: MachineState): number {
+      // prefer larger machines first
+      if (a.machine.cpus !== b.machine.cpus) {
+        return b.machine.cpus - a.machine.cpus;
       }
 
+      if (a.machine.memoryMb !== b.machine.memoryMb) {
+        return b.machine.memoryMb - a.machine.memoryMb;
+      }
+
+      // when packing prefer machines with more already assigned work (fill them up)
       if (preferPacking) {
-        if (candidate.totalDuration > best.totalDuration) {
-          return candidate;
-        }
-
-        if (candidate.totalDuration === best.totalDuration) {
-          return pickLargerMachine(candidate, best);
-        }
-
-        return best;
+        if (a.totalDuration !== b.totalDuration) return b.totalDuration - a.totalDuration;
+      } else {
+        if (a.totalDuration !== b.totalDuration) return a.totalDuration - b.totalDuration;
       }
 
-      if (candidate.totalDuration < best.totalDuration) {
-        return candidate;
-      }
+      return a.index - b.index;
+    }
 
-      if (candidate.totalDuration === best.totalDuration) {
-        return pickLargerMachine(candidate, best);
-      }
+    let selectedMachine = candidatePool.slice().sort(candidateComparator)[0];
 
-      return best;
-    }, undefined);
+    // If no existing instance could be used, create a new instance on the
+    // largest eligible type.
+    if (!selectedMachine) {
+      const chosenType = eligibleTypes[0];
+      const nextCount = (typeInstanceCounters.get(chosenType.name) ?? 0) + 1;
+      typeInstanceCounters.set(chosenType.name, nextCount);
+
+      const newInstance: MachineState = {
+        machine: {
+          name: `${chosenType.name}-${nextCount}`,
+          cpus: chosenType.cpus,
+          memoryMb: chosenType.memoryMb,
+        },
+        configs: [],
+        totalDuration: 0,
+        index: machineStates.length,
+      };
+
+      machineStates.push(newInstance);
+      selectedMachine = newInstance;
+    }
 
     if (!selectedMachine) {
       throw new Error(`Unable to select machine for config ${configOutput.path}`);
@@ -147,35 +170,59 @@ function resolveConfigPath(config: ScheduleConfigInput): string {
     : path.resolve(REPO_ROOT, config.path);
   return require.resolve(resolvedPath);
 }
+// Mirrors the resource admission checks from ResourcePool to determine whether a
+// slot can run on the provided machine definition. We assume warming lasts a
+// few minutes (1-3m) just like ResourcePool does when dealing with real runs.
+function canRunConfigOnMachine(
+  machine: ScheduleConfigOptions['machines'][number],
+  resources: ScheduleConfigOutput['resources']
+): boolean {
+  const cpuCapacity = Math.max(1, machine.cpus);
+  const memoryCapacity = Math.max(machine.memoryMb - MEMORY_RESERVE_MB, 0);
 
-function compareMachinePreference(left: MachineState, right: MachineState): number {
-  if (left.machine.cpus !== right.machine.cpus) {
-    return right.machine.cpus - left.machine.cpus;
+  const warmingFits = phaseFitsCapacity(
+    resources.warming.cpu,
+    resources.warming.memory,
+    cpuCapacity,
+    memoryCapacity
+  );
+
+  if (!warmingFits) {
+    return false;
   }
 
-  if (left.machine.memoryMb !== right.machine.memoryMb) {
-    return right.machine.memoryMb - left.machine.memoryMb;
+  const idleFits = phaseFitsCapacity(
+    resources.idle.cpu,
+    resources.idle.memory,
+    cpuCapacity,
+    memoryCapacity
+  );
+
+  if (!idleFits) {
+    return false;
   }
 
-  return left.index - right.index;
+  return phaseFitsCapacity(
+    resources.running.cpu,
+    resources.running.memory,
+    cpuCapacity,
+    memoryCapacity
+  );
 }
 
-function pickLargerMachine(candidate: MachineState, current: MachineState): MachineState {
-  if (candidate.machine.cpus !== current.machine.cpus) {
-    return candidate.machine.cpus > current.machine.cpus ? candidate : current;
+function phaseFitsCapacity(
+  cpuRequired: number,
+  memoryRequired: number,
+  cpuCapacity: number,
+  memoryCapacity: number
+): boolean {
+  if (cpuRequired - cpuCapacity > RESOURCE_EPSILON) {
+    return false;
   }
 
-  if (candidate.machine.memoryMb !== current.machine.memoryMb) {
-    return candidate.machine.memoryMb > current.machine.memoryMb ? candidate : current;
+  if (memoryRequired - memoryCapacity > RESOURCE_EPSILON) {
+    return false;
   }
 
-  return candidate.index < current.index ? candidate : current;
-}
-
-function getPeakCpu(resources: ScheduleConfigOutput['resources']): number {
-  return Math.max(resources.warming.cpu, resources.idle.cpu, resources.running.cpu);
-}
-
-function getPeakMemory(resources: ScheduleConfigOutput['resources']): number {
-  return Math.max(resources.warming.memory, resources.idle.memory, resources.running.memory);
+  return true;
 }

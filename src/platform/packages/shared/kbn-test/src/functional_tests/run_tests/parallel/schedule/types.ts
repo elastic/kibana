@@ -22,11 +22,16 @@ export interface ScheduleConfigOutput extends ScheduleConfigInput {
 export interface ScheduleConfigOptions {
   maxDurationMins: number;
   configs: ScheduleConfigInput[];
+  // machine types (one entry per type). The scheduler will expand these into
+  // actual instances (bins) according to the `instances` count.
   machines: Array<{
     name: string;
     cpus: number;
     memoryMb: number;
   }>;
+  // The scheduler treats `machines` as machine types and will expand them into
+  // as many runtime groups (instances) as needed to keep wall-to-wall time
+  // near `maxDurationMins`.
 }
 
 export interface ScheduleConfigTestGroup {

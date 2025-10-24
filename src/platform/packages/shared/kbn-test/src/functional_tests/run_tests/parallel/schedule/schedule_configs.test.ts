@@ -115,6 +115,24 @@ describe('scheduleConfigs', () => {
         maxDurationMins: 45,
         machines: [{ name: 'machine-1', cpus: 8, memoryMb: 32 * 1024 }],
       })
-    ).rejects.toThrow(/no machines provide sufficient resources/);
+    ).rejects.toThrow(/no machines provide/);
+  });
+
+  it('rejects configs whose warming phase exceeds machine memory', async () => {
+    const warmingHeavyResources = {
+      warming: { cpu: 2, memory: 40 * 1024, exclusive: false },
+      idle: { cpu: 1, memory: 8 * 1024, exclusive: false },
+      running: { cpu: 1, memory: 8 * 1024, exclusive: false },
+    };
+
+    createConfigMock(new Map([[CONFIG_A_PATH, warmingHeavyResources]]));
+
+    await expect(
+      scheduleConfigs({
+        configs: [{ path: CONFIG_A_PATH, testDurationMins: 20 }],
+        maxDurationMins: 45,
+        machines: [{ name: 'machine-1', cpus: 4, memoryMb: 32 * 1024 }],
+      })
+    ).rejects.toThrow(/no machines provide/);
   });
 });
