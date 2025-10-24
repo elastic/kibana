@@ -19,9 +19,7 @@ import type { estypes } from '@elastic/elasticsearch';
  * const agentId = getAgentIdFromFields(searchHit.fields);
  * ```
  */
-export const getAgentIdFromFields = (
-  fields?: estypes.SearchHit['fields']
-): string | undefined => {
+export const getAgentIdFromFields = (fields?: estypes.SearchHit['fields']): string | undefined => {
   if (!fields) return undefined;
 
   // Check ECS format first (preferred), then fall back to legacy format
