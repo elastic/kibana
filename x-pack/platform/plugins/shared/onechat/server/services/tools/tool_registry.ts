@@ -46,6 +46,7 @@ interface CreateToolClientParams {
   getRunner: () => Runner;
   persistedProvider: WritableToolProvider;
   builtinProvider: ReadonlyToolProvider;
+  mcpProvider?: ReadonlyToolProvider; // Optional MCP provider
   request: KibanaRequest;
   space: string;
 }
@@ -57,18 +58,26 @@ export const createToolRegistry = (params: CreateToolClientParams): ToolRegistry
 class ToolRegistryImpl implements ToolRegistry {
   private readonly persistedProvider: WritableToolProvider;
   private readonly builtinProvider: ReadonlyToolProvider;
+  private readonly mcpProvider?: ReadonlyToolProvider;
   private readonly request: KibanaRequest;
   private readonly getRunner: () => Runner;
 
-  constructor({ persistedProvider, builtinProvider, request, getRunner }: CreateToolClientParams) {
+  constructor({ persistedProvider, builtinProvider, mcpProvider, request, getRunner }: CreateToolClientParams) {
     this.persistedProvider = persistedProvider;
     this.builtinProvider = builtinProvider;
+    this.mcpProvider = mcpProvider;
     this.request = request;
     this.getRunner = getRunner;
   }
 
   private get orderedProviders(): ToolProvider[] {
-    return [this.builtinProvider, this.persistedProvider];
+    // MCP provider is added last (after builtin and persisted)
+    // This ensures platform tools and user-created tools take precedence
+    const providers: ToolProvider[] = [this.builtinProvider, this.persistedProvider];
+    if (this.mcpProvider) {
+      providers.push(this.mcpProvider);
+    }
+    return providers;
   }
 
   async execute<TParams extends object = Record<string, unknown>, TResult = unknown>(

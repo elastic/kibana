@@ -10,6 +10,7 @@ import type { Runner } from '@kbn/onechat-server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { isAllowedBuiltinTool } from '@kbn/onechat-server/allow_lists';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import {
   createBuiltinToolRegistry,
@@ -20,6 +21,7 @@ import {
 import type { ToolsServiceSetup, ToolsServiceStart } from './types';
 import { getToolTypeDefinitions } from './tool_types';
 import { createPersistedProviderFn } from './persisted';
+import { createMcpToolProvider } from './mcp';
 import { createToolRegistry } from './tool_registry';
 import { getToolTypeInfo } from './utils';
 
@@ -32,6 +34,7 @@ export interface ToolsServiceStartDeps {
   getRunner: () => Runner;
   elasticsearch: ElasticsearchServiceStart;
   spaces?: SpacesPluginStart;
+  actions: ActionsPluginStart;
 }
 
 export class ToolsService {
@@ -59,7 +62,7 @@ export class ToolsService {
     };
   }
 
-  start({ getRunner, elasticsearch, spaces }: ToolsServiceStartDeps): ToolsServiceStart {
+  start({ getRunner, elasticsearch, spaces, actions }: ToolsServiceStartDeps): ToolsServiceStart {
     const { logger, workflowsManagement } = this.setupDeps!;
 
     const toolTypes = getToolTypeDefinitions({ workflowsManagement });
@@ -79,12 +82,23 @@ export class ToolsService {
       const builtinProvider = await builtinProviderFn({ request, space });
       const persistedProvider = await persistedProviderFn({ request, space });
 
+      // Create MCP provider if actions plugin is available
+      // This provider discovers tools from MCP connectors
+      const actionsClient = await actions.getActionsClientWithRequest(request);
+      const mcpProvider = createMcpToolProvider({
+        actionsClient,
+        logger: logger.get('mcp-provider'),
+        request,
+        space,
+      });
+
       return createToolRegistry({
         getRunner,
         space,
         request,
         builtinProvider,
         persistedProvider,
+        mcpProvider, // Add MCP provider to registry
       });
     };
 

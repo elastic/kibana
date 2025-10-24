@@ -113,7 +113,7 @@ export function validateToolNamespace(toolId: string, allowedNamespaces: string[
   const topLevelNamespace = toolId.substring(0, firstDotIndex);
 
   // Check if this top-level namespace is protected
-  const isProtected = protectedNamespaces.includes(topLevelNamespace);
+  const isProtected = (protectedNamespaces as readonly string[]).includes(topLevelNamespace);
 
   if (isProtected) {
     // Check if this namespace is allowed
