@@ -33,6 +33,7 @@ import { getCategorizationField } from '@kbn/aiops-utils';
 import type { IUnifiedSearchPluginServices } from '../types';
 import { ESQLEditorTelemetryService } from '@kbn/esql-editor/src/telemetry/telemetry_service';
 import { QuerySource } from '@kbn/esql-types/src/esql_telemetry_types';
+import { BasicPrettyPrinter, Parser } from '@kbn/esql-ast';
 
 export interface ESQLMenuPopoverProps {
   onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
@@ -58,7 +59,7 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
     RecommendedQuery[]
   >([]);
 
-  const telemetryService = useRef(new ESQLEditorTelemetryService(analytics)).current;
+  const { current: telemetryService } = useRef(new ESQLEditorTelemetryService(analytics));
 
   const { queryForRecommendedQueries, timeFieldName, categorizationField } = useMemo(() => {
     if (adHocDataview && typeof adHocDataview !== 'string') {
@@ -242,9 +243,18 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
           return {
             name: query.label,
             onClick: () => {
-              onESQLQuerySubmit?.(query.queryString);
-              setIsESQLMenuPopoverOpen(false);
               telemetryService.trackRecommendedQueryClicked(QuerySource.HELP);
+              onESQLQuerySubmit?.(query.queryString);
+              const { root } = Parser.parse(query.queryString);
+              const prettyQuery = BasicPrettyPrinter.print(root);
+              telemetryService.trackQuerySubmitted({
+                query_source: QuerySource.HELP,
+                query_length: prettyQuery.length.toString(),
+                query_lines: query.queryString.split('\n').length.toString(),
+                anti_limit_before_aggregate: false,
+                anti_missing_sort_before_limit: false,
+              });
+              setIsESQLMenuPopoverOpen(false);
             },
           };
         }),
