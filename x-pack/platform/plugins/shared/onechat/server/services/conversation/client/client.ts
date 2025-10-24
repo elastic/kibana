@@ -17,7 +17,7 @@ import type {
   ConversationCreateRequest,
   ConversationUpdateRequest,
   ConversationListOptions,
-} from '../../../../common/conversations';
+} from './types';
 import { createSpaceDslFilter } from '../../../utils/spaces';
 import type { ConversationStorage } from './storage';
 import { createStorage } from './storage';

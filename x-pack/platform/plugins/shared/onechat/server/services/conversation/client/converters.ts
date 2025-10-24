@@ -19,9 +19,10 @@ import { getToolResultId } from '@kbn/onechat-server';
 import type {
   ConversationCreateRequest,
   ConversationUpdateRequest,
-} from '../../../../common/conversations';
+  PersistentConversationRound,
+  PersistentConversationRoundStep,
+} from './types';
 import type { ConversationProperties } from './storage';
-import type { PersistentConversationRound, PersistentConversationRoundStep } from './types';
 
 export type Document = Pick<
   GetResponse<ConversationProperties>,

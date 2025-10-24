@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-interface ConversationArtifact {
+export interface ConversationArtifact {
   /* id of the artifact */
   id: string;
   /* type of the artifact */
@@ -14,12 +14,12 @@ interface ConversationArtifact {
   events: ArtifactEvent[];
 }
 
-interface ArtifactEventSource {
+export interface ArtifactEventSource {
   type: 'attachment' | 'result';
   id: string;
 }
 
-interface ArtifactAddEvent {
+export interface ArtifactAddEvent {
   event_type: 'artifact_add';
   source: ArtifactEventSource;
   round_id: string;
@@ -27,7 +27,7 @@ interface ArtifactAddEvent {
   content: unknown;
 }
 
-interface ArtifactUpdateEvent {
+export interface ArtifactUpdateEvent {
   event_type: 'artifact_update';
   source: ArtifactEventSource;
   round_id: string;
@@ -35,10 +35,10 @@ interface ArtifactUpdateEvent {
   content: unknown;
 }
 
-interface ArtifactRemoveEvent {
+export interface ArtifactRemoveEvent {
   event_type: 'artifact_remove';
   source: ArtifactEventSource;
   round_id: string;
 }
 
-type ArtifactEvent = ArtifactAddEvent | ArtifactUpdateEvent | ArtifactRemoveEvent;
+export type ArtifactEvent = ArtifactAddEvent | ArtifactUpdateEvent | ArtifactRemoveEvent;
