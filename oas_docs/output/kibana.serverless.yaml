@@ -43446,7 +43446,6 @@ paths:
                           type: string
                         type: array
                       prerelease_integrations_enabled:
-                        deprecated: true
                         type: boolean
                       secret_storage_requirements_met:
                         type: boolean
@@ -43547,7 +43546,6 @@ paths:
                     type: string
                   type: array
                 prerelease_integrations_enabled:
-                  deprecated: true
                   type: boolean
       responses:
         '200':
@@ -43587,7 +43585,6 @@ paths:
                           type: string
                         type: array
                       prerelease_integrations_enabled:
-                        deprecated: true
                         type: boolean
                       secret_storage_requirements_met:
                         type: boolean
@@ -78317,6 +78314,8 @@ components:
         wasSuccessful:
           description: Whether the response action was successful
           type: boolean
+      required:
+        - command
     Security_Endpoint_Management_API_RunningProcesses:
       allOf:
         - $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
