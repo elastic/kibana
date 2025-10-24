@@ -49,7 +49,7 @@ import {
   NoPreviewDocumentsEmptyPrompt,
   NoProcessingDataAvailableEmptyPrompt,
 } from './empty_prompts';
-import { PreviewFlyout, MemoPreviewTable } from '../shared';
+import { PreviewFlyout, MemoPreviewTable, SUMMARY_COLUMN_ID } from '../shared';
 import { toDataTableRecordWithIndex } from '../stream_detail_routing/utils';
 import { RowSelectionContext } from '../shared/preview_table';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -276,8 +276,8 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     });
 
     if (cols.length === 0) {
-      // If no columns are detected, we fall back to all fields from the preview documents
-      cols = allColumns;
+      // If no columns are detected, fall back to all fields from the preview documents
+      cols = [];
     }
     // Filter out columns that are explicitly disabled
     const filteredCols = cols.filter((col) => !explicitlyDisabledPreviewColumns.includes(col));
@@ -287,6 +287,13 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
         filteredCols.push(col);
       }
     });
+
+    // If no columns are left (all filtered out), return empty array
+    // This will trigger the summary column to be shown automatically
+    if (filteredCols.length === 0) {
+      return [];
+    }
+
     return filteredCols;
   }, [
     allColumns,
@@ -310,30 +317,38 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
 
   const setVisibleColumns = useCallback(
     (visibleColumns: string[]) => {
-      if (visibleColumns.length === 0) {
-        // If no columns are visible, we reset the explicitly enabled and disabled columns
-        setExplicitlyDisabledPreviewColumns(allColumns);
+      // Filter out Summary column from the visible columns list as it's automatically managed
+      const nonSummaryColumns = visibleColumns.filter((col) => col !== SUMMARY_COLUMN_ID);
+
+      if (nonSummaryColumns.length === 0) {
+        // If no non-summary columns are visible, reset to show only summary column
+        // This clears all explicit preferences and triggers the default state
+        setExplicitlyDisabledPreviewColumns([]);
+        setExplicitlyEnabledPreviewColumns([]);
+        setPreviewColumnsOrder([]);
         return;
       }
+
       // find which columns got added or removed comparing visibleColumns with the current displayColumns
-      const addedColumns = visibleColumns.filter((col) => !previewColumns.includes(col));
+      const addedColumns = nonSummaryColumns.filter((col) => !previewColumns.includes(col));
       if (addedColumns.length > 0) {
         setExplicitlyEnabledPreviewColumns([
           ...explicitlyEnabledPreviewColumns,
           ...addedColumns.filter((col) => !explicitlyEnabledPreviewColumns.includes(col)),
         ]);
       }
-      const removedColumns = previewColumns.filter((col) => !visibleColumns.includes(col));
+      const removedColumns = previewColumns.filter(
+        (col) => !nonSummaryColumns.includes(col) && col !== SUMMARY_COLUMN_ID
+      );
       if (removedColumns.length > 0) {
         setExplicitlyDisabledPreviewColumns([
           ...explicitlyDisabledPreviewColumns,
           ...removedColumns.filter((col) => !explicitlyDisabledPreviewColumns.includes(col)),
         ]);
       }
-      setPreviewColumnsOrder(visibleColumns);
+      setPreviewColumnsOrder(nonSummaryColumns);
     },
     [
-      allColumns,
       explicitlyDisabledPreviewColumns,
       explicitlyEnabledPreviewColumns,
       previewColumns,
