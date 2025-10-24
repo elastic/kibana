@@ -20,7 +20,7 @@ export class AutomaticImportSamplesIndexService {
 
   constructor(logger: LoggerFactory, esClientPromise: Promise<ElasticsearchClient>) {
     this.logger = logger.get('samplesIndexService');
-    this.initialize(esClientPromise);
+    void this.initialize(esClientPromise);
   }
 
   private async initialize(esClientPromise: Promise<ElasticsearchClient>) {
