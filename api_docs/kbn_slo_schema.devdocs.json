@@ -1029,7 +1029,7 @@
         "label": "FetchSLOHealthParams",
         "description": [],
         "signature": [
-          "{ list: { sloId: string; sloInstanceId: string; }[]; }"
+          "{ list: { sloId: string; sloInstanceId: string; }[]; } & { page?: number | undefined; perPage?: number | undefined; statusFilter?: \"healthy\" | \"unhealthy\" | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/get_slo_health.ts",
         "deprecated": false,
@@ -1044,7 +1044,7 @@
         "label": "FetchSLOHealthResponse",
         "description": [],
         "signature": [
-          "{ sloId: string; sloRevision: number; sloName: string; state: \"running\" | \"indexing\" | \"no_data\" | \"stale\"; health: { overall: \"missing\" | \"healthy\" | \"unhealthy\"; rollup: \"missing\" | \"healthy\" | \"unhealthy\"; summary: \"missing\" | \"healthy\" | \"unhealthy\"; }; }[]"
+          "{ data: { sloId: string; sloRevision: number; sloName: string; state: \"running\" | \"indexing\" | \"no_data\" | \"stale\"; health: { overall: \"missing\" | \"healthy\" | \"unhealthy\"; rollup: \"missing\" | \"healthy\" | \"unhealthy\"; summary: \"missing\" | \"healthy\" | \"unhealthy\"; }; }[]; total: number; page: number; perPage: number; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/get_slo_health.ts",
         "deprecated": false,
@@ -4142,6 +4142,8 @@
         "signature": [
           "TypeC",
           "<{ body: ",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ list: ",
           "ArrayC",
@@ -4155,7 +4157,19 @@
           "LiteralC",
           "<\"*\">, ",
           "StringC",
-          "]>; }>>; }>; }>"
+          "]>; }>>; }>, ",
+          "PartialC",
+          "<{ page: ",
+          "NumberC",
+          "; perPage: ",
+          "NumberC",
+          "; statusFilter: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"healthy\">, ",
+          "LiteralC",
+          "<\"unhealthy\">]>; }>]>; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/get_slo_health.ts",
         "deprecated": false,
@@ -4170,6 +4184,8 @@
         "label": "fetchSLOHealthResponseSchema",
         "description": [],
         "signature": [
+          "TypeC",
+          "<{ data: ",
           "ArrayC",
           "<",
           "TypeC",
@@ -4215,7 +4231,13 @@
           "LiteralC",
           "<\"unhealthy\">, ",
           "LiteralC",
-          "<\"missing\">]>; }>; }>>"
+          "<\"missing\">]>; }>; }>>; total: ",
+          "NumberC",
+          "; page: ",
+          "NumberC",
+          "; perPage: ",
+          "NumberC",
+          "; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/get_slo_health.ts",
         "deprecated": false,

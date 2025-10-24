@@ -45,8 +45,11 @@ import { FakeDimensionButton } from './buttons/fake_dimension_button';
 import { getLongMessage } from '../../../user_messages_utils';
 import { isApiESQLVariablesCompatible } from '../../../react_embeddable/types';
 import { ESQLEditor } from './esql_editor';
+import { useEditorFrameService } from '../../editor_frame_service_context';
 
 export function LayerPanel(props: LayerPanelProps) {
+  const { datasourceMap } = useEditorFrameService();
+
   const [openDimension, setOpenDimension] = useState<{
     isComplete?: boolean;
     openColumnId?: string;
@@ -66,8 +69,6 @@ export function LayerPanel(props: LayerPanelProps) {
     registerNewLayerRef,
     layerIndex,
     activeVisualization,
-    visualizationMap,
-    datasourceMap,
     updateVisualization,
     updateDatasource,
     toggleFullscreen,
@@ -150,7 +151,7 @@ export function LayerPanel(props: LayerPanelProps) {
       layerDatasourceState = datasourceStates[aliasId].state;
     }
   }
-  const layerDatasource = datasourceId ? props.datasourceMap[datasourceId] : undefined;
+  const layerDatasource = datasourceId ? datasourceMap[datasourceId] : undefined;
 
   const layerDatasourceConfigProps = {
     state: layerDatasourceState,
@@ -413,8 +414,6 @@ export function LayerPanel(props: LayerPanelProps) {
                       }),
                   }}
                   activeVisualizationId={activeVisualization.id}
-                  visualizationMap={visualizationMap}
-                  datasourceMap={datasourceMap}
                   onlyAllowSwitchToSubtypes={onlyAllowSwitchToSubtypes}
                 />
               </EuiFlexItem>
@@ -450,9 +449,7 @@ export function LayerPanel(props: LayerPanelProps) {
               uiSettings={core.uiSettings}
               isTextBasedLanguage={isTextBasedLanguage}
               framePublicAPI={framePublicAPI}
-              datasourceMap={datasourceMap}
               layerId={layerId}
-              visualizationMap={visualizationMap}
               {...editorProps}
             />
             {activeVisualization.LayerPanelComponent && (
