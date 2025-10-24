@@ -12,15 +12,15 @@ import {
 } from '@kbn/es-query';
 import { omit } from 'lodash';
 import { type HasSerializableState, type SerializedPanelState } from '@kbn/presentation-publishing';
-import { isTextBasedLanguage, transformOutputState } from '../helper';
 import type {
   GetStateType,
   LensByRefSerializedState,
   LensByValueSerializedState,
   LensRuntimeState,
   LensSerializedState,
-} from '../types';
-import type { IntegrationCallbacks } from '../types';
+  IntegrationCallbacks,
+} from '@kbn/lens-common';
+import { isTextBasedLanguage, transformOutputState } from '../helper';
 
 function cleanupSerializedState(state: LensRuntimeState) {
   const cleanedState = omit(state, 'searchSessionId');

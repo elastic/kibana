@@ -15,10 +15,9 @@ import {
   DEFAULT_AUTO_APPLY_SELECTIONS,
   CONTROLS_GROUP_TYPE,
 } from '@kbn/controls-constants';
-import type { LensAppServices } from './types';
+import type { LensAppServices, LensSerializedState } from '@kbn/lens-common';
 import { LENS_EMBEDDABLE_TYPE } from '../../common/constants';
 import { extractLensReferences } from '../../common/references';
-import type { LensSerializedState } from '../react_embeddable/types';
 
 /**
  * Transforms control panels state into controls group state format.

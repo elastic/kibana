@@ -6,35 +6,17 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { noop } from 'lodash';
 import type { HttpStart } from '@kbn/core/public';
+import type {
+  SharingSavedObjectProps,
+  LensSavedObjectAttributes,
+  CheckDuplicateTitleProps,
+  LensAttributesService,
+} from '@kbn/lens-common';
 import { LensDocumentService } from './persistence';
 import { DOC_TYPE } from '../common/constants';
-import type { SharingSavedObjectProps } from './types';
-import type { LensSavedObjectAttributes } from './react_embeddable/types';
-
-type CheckDuplicateTitleProps = OnSaveProps & {
-  id?: string;
-  displayName: string;
-  lastSavedTitle: string;
-  copyOnSave: boolean;
-};
-
-export interface LensAttributesService {
-  loadFromLibrary: (savedObjectId: string) => Promise<{
-    attributes: LensSavedObjectAttributes;
-    sharingSavedObjectProps: SharingSavedObjectProps;
-    managed: boolean;
-  }>;
-  saveToLibrary: (
-    attributes: LensSavedObjectAttributes,
-    references: Reference[],
-    savedObjectId?: string
-  ) => Promise<string>;
-  checkForDuplicateTitle: (props: CheckDuplicateTitleProps) => Promise<{ isDuplicate: boolean }>;
-}
 
 export const savedObjectToEmbeddableAttributes = (
   savedObject: SavedObjectCommon<LensSavedObjectAttributes>
