@@ -36,18 +36,20 @@ export interface DeveloperToolbarProps {
 }
 
 const HEIGHT = 32;
+const TOOLBAR_BACKGROUND_COLOR = `rgb(11, 100, 221);`; // punchy blue
 
 const getMinimizedToolbarStyles = (euiTheme: EuiThemeComputed) => css`
   position: fixed;
   bottom: ${euiTheme.size.xs};
-  right: ${euiTheme.size.s};
+  left: ${euiTheme.size.s};
   z-index: ${euiTheme.levels.toast};
+  background-color: ${TOOLBAR_BACKGROUND_COLOR};
+  border-radius: ${euiTheme.border.radius.medium};
 `;
 
 const getToolbarPanelStyles = (euiTheme: EuiThemeComputed) => css`
   border-radius: 0;
-  border-top: 1px solid ${euiTheme.colors.borderBaseAccentSecondary};
-  background-color: ${euiTheme.colors.backgroundLightAccentSecondary};
+  background-color: ${TOOLBAR_BACKGROUND_COLOR};
   padding: ${euiTheme.size.xs} ${euiTheme.size.s};
 `;
 
@@ -86,8 +88,7 @@ const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({ envInfo, on
       <div css={getMinimizedToolbarStyles(euiTheme)}>
         <EuiToolTip content="Expand developer toolbar" disableScreenReaderOutput={true}>
           <EuiButtonIcon
-            display={'fill'}
-            color={'accentSecondary'}
+            color={'text'}
             iconType="wrench"
             size="xs"
             onClick={toggleMinimized}
@@ -101,10 +102,22 @@ const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({ envInfo, on
   return (
     <div css={getToolbarContainerStyles(euiTheme)}>
       {state.isEnabled('errorsMonitor') && <ConsoleErrorIndicator />}
-      <EuiPanel css={getToolbarPanelStyles(euiTheme)}>
+      <EuiPanel css={getToolbarPanelStyles(euiTheme)} hasShadow={false} hasBorder={false}>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content="Minimize">
+                  <EuiButtonIcon
+                    iconType="minimize"
+                    size="xs"
+                    color="text"
+                    onClick={toggleMinimized}
+                    aria-label="Minimize developer toolbar"
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+
               {envInfo && state.isEnabled('environmentInfo') && (
                 <EuiFlexItem grow={false}>
                   <EnvironmentIndicator env={envInfo} />
@@ -169,17 +182,6 @@ const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({ envInfo, on
                     color="text"
                     onClick={() => setIsSettingsOpen(true)}
                     aria-label="Open developer toolbar settings"
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip content="Minimize">
-                  <EuiButtonIcon
-                    iconType="arrowDown"
-                    size="xs"
-                    color="text"
-                    onClick={toggleMinimized}
-                    aria-label="Minimize developer toolbar"
                   />
                 </EuiToolTip>
               </EuiFlexItem>

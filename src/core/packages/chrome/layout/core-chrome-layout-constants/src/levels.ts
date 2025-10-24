@@ -14,12 +14,12 @@ export const layoutLevels = {
 
   // Primary layout components that should appear above content
   header: 100,
-  footer: 100,
 
   // Interactive layout components that need higher priority than euiFlyout (1000)
   sidebar: 1050,
   navigation: 1050,
   banner: 1050,
+  footer: 1050,
 
   // Application-level bars that appear within main content
   applicationTopBar: 100,
