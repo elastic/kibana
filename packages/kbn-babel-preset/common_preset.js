@@ -15,7 +15,6 @@ module.exports = (api) => ({
     {
       plugins: [
         require.resolve('@kbn/lazy-object/src/plugin/lazy_babel_plugin'),
-        require.resolve('@kbn/babel-plugin-lazy-require/src/plugin/lazy_require_plugin'),
         require.resolve('babel-plugin-add-module-exports'),
         // The class properties proposal was merged with the private fields proposal
         // into the "class fields" proposal. Babel doesn't support this combined

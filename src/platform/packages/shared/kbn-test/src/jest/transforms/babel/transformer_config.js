@@ -20,6 +20,11 @@ module.exports = () => ({
       },
     ],
   ],
+  plugins: [
+    // Lazy require plugin for Jest tests - defers module loading until first access
+    // Note: The plugin's own tests use a custom transformer that excludes this plugin
+    require.resolve('@kbn/babel-plugin-lazy-require/src/plugin/lazy_require_plugin'),
+  ],
   overrides: [
     {
       exclude: require('@kbn/babel-preset/styled_components_files').USES_STYLED_COMPONENTS,

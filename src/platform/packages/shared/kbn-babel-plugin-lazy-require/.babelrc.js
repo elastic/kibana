@@ -7,4 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { lazyRequire } from './src/lazy_require';
+/**
+ * Custom Babel config for the lazy-require plugin tests.
+ * Uses the standard node preset WITHOUT the lazy-require plugin to avoid
+ * transforming the plugin's test files.
+ */
+
+module.exports = {
+  presets: [
+    [
+      require.resolve('@kbn/babel-preset/node_preset'),
+      {
+        '@babel/preset-env': {
+          useBuiltIns: false,
+          corejs: false,
+        },
+      },
+    ],
+  ],
+};
+
