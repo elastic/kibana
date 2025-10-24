@@ -34,11 +34,11 @@ import { searchParamNames } from '../../search_param_names';
 
 const pendingRoundId = '__pending__';
 
-interface RoutedConversationProviderProps {
+interface RoutedConversationsProviderProps {
   children: React.ReactNode;
 }
 
-export const RoutedConversationProvider: React.FC<RoutedConversationProviderProps> = ({
+export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderProps> = ({
   children,
 }) => {
   const { conversationId: conversationIdParam } = useParams<{ conversationId?: string }>();

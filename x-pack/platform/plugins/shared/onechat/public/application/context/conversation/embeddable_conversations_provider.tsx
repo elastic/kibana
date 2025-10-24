@@ -31,11 +31,11 @@ import { createNewConversation, newConversationId } from '../../utils/new_conver
 const queryClient = new QueryClient();
 const pendingRoundId = '__pending__';
 
-interface EmbeddableConversationProviderProps extends EmbeddableConversationInternalProps {
+interface EmbeddableConversationsProviderProps extends EmbeddableConversationInternalProps {
   children: React.ReactNode;
 }
 
-export const EmbeddableConversationProvider: React.FC<EmbeddableConversationProviderProps> = ({
+export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsProviderProps> = ({
   children,
   coreStart,
   services,

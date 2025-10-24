@@ -11,7 +11,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { EmbeddableConversationInternalProps } from './types';
-import { EmbeddableConversationProvider } from '../application/context/conversation/embeddable_conversation_provider';
+import { EmbeddableConversationsProvider } from '../application/context/conversation/embeddable_conversations_provider';
 import { Conversation } from '../application/components/conversations/conversation';
 import { ConversationHeader } from '../application/components/conversations/conversation_header';
 
@@ -50,7 +50,7 @@ export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInte
   };
 
   return (
-    <EmbeddableConversationProvider {...props}>
+    <EmbeddableConversationsProvider {...props}>
       <KibanaPageTemplate>
         <KibanaPageTemplate.Header
           css={headerStyles}
@@ -71,6 +71,6 @@ export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInte
           <Conversation />
         </KibanaPageTemplate.Section>
       </KibanaPageTemplate>
-    </EmbeddableConversationProvider>
+    </EmbeddableConversationsProvider>
   );
 };
