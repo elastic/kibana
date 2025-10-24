@@ -40,6 +40,8 @@ import type {
   PostFleetServerHostsResponse,
   PostOutputRequest,
   GetOneOutputResponse,
+  GetSettingsResponse,
+  PutSettingsRequest,
 } from '@kbn/fleet-plugin/common/types';
 import type {
   GetUninstallTokenResponse,
@@ -462,6 +464,27 @@ export class SpaceTestApiClient {
       .get(`${this.getBaseUrl(spaceId)}/internal/fleet/telemetry/usage`)
       .set('kbn-xsrf', 'xxxx')
       .set('elastic-api-version', '1');
+
+    expectStatusCode200(res);
+
+    return res.body;
+  }
+  // Settings
+  async getSettings(spaceId?: string): Promise<GetSettingsResponse> {
+    const res = await this.supertest.get(`${this.getBaseUrl(spaceId)}/api/fleet/settings`);
+
+    expectStatusCode200(res);
+
+    return res.body;
+  }
+  async putSettings(
+    data: PutSettingsRequest['body'],
+    spaceId?: string
+  ): Promise<GetSettingsResponse> {
+    const res = await this.supertest
+      .put(`${this.getBaseUrl(spaceId)}/api/fleet/settings`)
+      .set('kbn-xsrf', 'xxxx')
+      .send(data);
 
     expectStatusCode200(res);
 

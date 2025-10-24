@@ -176,6 +176,10 @@ export interface ElasticAssistantApiRequestHandlerContext {
   savedObjectsClient: SavedObjectsClientContract;
   telemetry: AnalyticsServiceSetup;
   checkPrivileges: () => CheckPrivileges;
+  /**
+   * Test purpose only.
+   */
+  updateAnonymizationFields: () => Promise<void>;
   userProfile: UserProfileServiceStart;
 }
 /**
