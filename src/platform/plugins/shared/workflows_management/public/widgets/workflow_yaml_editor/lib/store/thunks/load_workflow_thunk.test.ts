@@ -55,6 +55,9 @@ describe('loadWorkflowThunk', () => {
 
     const result = await store.dispatch(loadWorkflowThunk({ id: 'test-workflow-1' }));
 
+    expect(mockServices.notifications.toasts.addError).toHaveBeenCalledWith('Network Error', {
+      title: 'Failed to load workflow',
+    });
     expect(result.type).toBe('detail/loadWorkflowThunk/rejected');
     expect(result.payload).toBe('Network Error');
   });
@@ -66,6 +69,12 @@ describe('loadWorkflowThunk', () => {
 
     const result = await store.dispatch(loadWorkflowThunk({ id: 'test-workflow-1' }));
 
+    expect(mockServices.notifications.toasts.addError).toHaveBeenCalledWith(
+      'Failed to load workflow',
+      {
+        title: 'Failed to load workflow',
+      }
+    );
     expect(result.type).toBe('detail/loadWorkflowThunk/rejected');
     expect(result.payload).toBe('Failed to load workflow');
   });

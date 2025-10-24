@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { WorkflowDetailDto } from '@kbn/workflows/types/latest';
 import { loadWorkflowThunk } from './load_workflow_thunk';
 import { PLUGIN_ID } from '../../../../../../common';
+import { queryClient } from '../../../../../shared/lib/query_client';
 import type { WorkflowsServices } from '../../../../../types';
 import { selectYamlString } from '../selectors';
 import { setWorkflow } from '../slice';
@@ -30,6 +31,7 @@ export const saveYamlThunk = createAsyncThunk<
 >(
   'detail/saveYamlThunk',
   async ({ id }, { getState, dispatch, rejectWithValue, extra: { services } }) => {
+    const { http, notifications, application } = services;
     try {
       const yamlString = selectYamlString(getState());
       if (!yamlString) {
@@ -37,7 +39,7 @@ export const saveYamlThunk = createAsyncThunk<
       }
       if (id) {
         // Update the workflow in the API if the id is provided
-        await services.http.put<void>(`/api/workflows/${id}`, {
+        await http.put<void>(`/api/workflows/${id}`, {
           body: JSON.stringify({ yaml: yamlString }),
         });
 
@@ -45,14 +47,22 @@ export const saveYamlThunk = createAsyncThunk<
         await dispatch(loadWorkflowThunk({ id }));
       } else {
         // Create the workflow in the API if the id is not provided
-        const workflow = await services.http.post<WorkflowDetailDto>('/api/workflows', {
+        const workflow = await http.post<WorkflowDetailDto>('/api/workflows', {
           body: JSON.stringify({ yaml: yamlString }),
         });
+
+        // Update the workflow in the store
         dispatch(setWorkflow(workflow));
-        services.application.navigateToApp(PLUGIN_ID, { path: workflow.id });
+
+        // Invalidate relevant queries to refresh the UI
+        queryClient.invalidateQueries({ queryKey: ['workflows'] });
+        queryClient.invalidateQueries({ queryKey: ['workflows', id] });
+
+        // Navigate to the workflow detail page
+        application.navigateToApp(PLUGIN_ID, { path: workflow.id });
       }
-      services.notifications.toasts.addSuccess(
-        i18n.translate('workflows.detail.success.workflowSaved', {
+      notifications.toasts.addSuccess(
+        i18n.translate('workflows.detail.saveYaml.success', {
           defaultMessage: 'Workflow saved',
         }),
         { toastLifeTimeMs: 2000 }
@@ -60,6 +70,12 @@ export const saveYamlThunk = createAsyncThunk<
     } catch (error) {
       // Extract error message from HTTP error body if available
       const errorMessage = error.body?.message || error.message || 'Failed to save workflow';
+
+      notifications.toasts.addError(new Error(errorMessage), {
+        title: i18n.translate('workflows.detail.saveYaml.error', {
+          defaultMessage: 'Failed to save workflow',
+        }),
+      });
       return rejectWithValue(errorMessage);
     }
   }

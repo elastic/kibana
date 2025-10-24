@@ -45,6 +45,10 @@ describe('testWorkflowThunk', () => {
         inputs: testInputs,
       }),
     });
+    expect(mockServices.notifications.toasts.addSuccess).toHaveBeenCalledWith(
+      'Workflow test execution started',
+      { toastLifeTimeMs: 2000 }
+    );
     expect(result.type).toBe('detail/testWorkflowThunk/fulfilled');
     expect(result.payload).toEqual(mockResponse);
   });
@@ -70,6 +74,12 @@ describe('testWorkflowThunk', () => {
 
     const result = await store.dispatch(testWorkflowThunk({ inputs: {} }));
 
+    expect(mockServices.notifications.toasts.addError).toHaveBeenCalledWith(
+      new Error('Workflow test failed'),
+      {
+        title: 'Failed to test workflow',
+      }
+    );
     expect(result.type).toBe('detail/testWorkflowThunk/rejected');
     expect(result.payload).toBe('Workflow test failed');
   });
@@ -84,6 +94,12 @@ describe('testWorkflowThunk', () => {
 
     const result = await store.dispatch(testWorkflowThunk({ inputs: {} }));
 
+    expect(mockServices.notifications.toasts.addError).toHaveBeenCalledWith(
+      new Error('Network Error'),
+      {
+        title: 'Failed to test workflow',
+      }
+    );
     expect(result.type).toBe('detail/testWorkflowThunk/rejected');
     expect(result.payload).toBe('Network Error');
   });
@@ -96,6 +112,12 @@ describe('testWorkflowThunk', () => {
 
     const result = await store.dispatch(testWorkflowThunk({ inputs: {} }));
 
+    expect(mockServices.notifications.toasts.addError).toHaveBeenCalledWith(
+      new Error('Failed to test workflow'),
+      {
+        title: 'Failed to test workflow',
+      }
+    );
     expect(result.type).toBe('detail/testWorkflowThunk/rejected');
     expect(result.payload).toBe('Failed to test workflow');
   });
@@ -116,6 +138,10 @@ describe('testWorkflowThunk', () => {
         inputs: {},
       }),
     });
+    expect(mockServices.notifications.toasts.addSuccess).toHaveBeenCalledWith(
+      'Workflow test execution started',
+      { toastLifeTimeMs: 2000 }
+    );
     expect(result.type).toBe('detail/testWorkflowThunk/fulfilled');
     expect(result.payload).toEqual(mockResponse);
   });

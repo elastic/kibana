@@ -8,10 +8,12 @@
  */
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
+import { i18n } from '@kbn/i18n';
 import type { EsWorkflow } from '@kbn/workflows';
+import { queryClient } from '../../../../../shared/lib/query_client';
 import type { WorkflowsServices } from '../../../../../types';
-import type { RootState } from '../types';
 import { updateWorkflow } from '../slice';
+import type { RootState } from '../types';
 
 export interface UpdateWorkflowParams {
   id: string;
@@ -27,16 +29,36 @@ export const updateWorkflowThunk = createAsyncThunk<
 >(
   'detail/updateWorkflowThunk',
   async ({ id, workflow }, { dispatch, rejectWithValue, extra: { services } }) => {
+    const { http, notifications } = services;
     try {
       // Make the API call to update the workflow
-      await services.http.put<void>(`/api/workflows/${id}`, {
+      await http.put<void>(`/api/workflows/${id}`, {
         body: JSON.stringify(workflow),
       });
+
+      // Invalidate relevant queries to refresh the UI
+      queryClient.invalidateQueries({ queryKey: ['workflows'] });
+      queryClient.invalidateQueries({ queryKey: ['workflows', id] });
+
+      // Show success notification
+      notifications.toasts.addSuccess(
+        i18n.translate('workflows.detail.updateWorkflow.success', {
+          defaultMessage: 'Workflow updated',
+        }),
+        { toastLifeTimeMs: 2000 }
+      );
+
       // Update the workflow in the store
       dispatch(updateWorkflow(workflow));
     } catch (error) {
       // Extract error message from HTTP error body if available
       const errorMessage = error.body?.message || error.message || 'Failed to update workflow';
+
+      notifications.toasts.addError(new Error(errorMessage), {
+        title: i18n.translate('workflows.detail.updateWorkflow.error', {
+          defaultMessage: 'Failed to update workflow',
+        }),
+      });
       return rejectWithValue(errorMessage);
     }
   }

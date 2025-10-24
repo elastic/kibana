@@ -33,10 +33,9 @@ const workflowDetailSlice = createSlice({
       state.yamlString = action.payload.yaml;
     },
     updateWorkflow: (state, action: { payload: Partial<EsWorkflow> }) => {
-      if (!state.workflow) {
-        return;
+      if (state.workflow) {
+        Object.assign(state.workflow, action.payload);
       }
-      Object.assign(state.workflow, action.payload);
     },
     setYamlString: (state, action: { payload: string }) => {
       state.yamlString = action.payload;

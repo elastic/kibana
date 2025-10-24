@@ -32,6 +32,7 @@ import { WorkflowYAMLEditorShortcuts } from './workflow_yaml_editor_shortcuts';
 import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors';
 import { addDynamicConnectorsToCache, getWorkflowZodSchemaLoose } from '../../../../common/schema';
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
+import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import { ActionsMenuPopover } from '../../../features/actions_menu_popover';
 import type { ActionOptionData } from '../../../features/actions_menu_popover/types';
 import { useMonacoMarkersChangedInterceptor } from '../../../features/validate_workflow_yaml/lib/use_monaco_markers_changed_interceptor';
@@ -61,7 +62,6 @@ import {
   setStepExecutions,
   setYamlString,
 } from '../lib/store';
-import { useSaveYaml } from '../lib/store/hooks/use_save_yaml';
 import { selectHasChanges, selectWorkflow, selectYamlString } from '../lib/store/selectors';
 import { setIsTestModalOpen } from '../lib/store/slice';
 import { useRegisterKeyboardCommands } from '../lib/use_register_keyboard_commands';
@@ -143,7 +143,6 @@ export const WorkflowYAMLEditor = ({
   const { http, notifications } = useKibana().services;
 
   const dispatch = useDispatch();
-  const { saveYaml } = useSaveYaml();
 
   const hasChanges = useSelector(selectHasChanges);
   const workflow = useSelector(selectWorkflow);
@@ -159,16 +158,20 @@ export const WorkflowYAMLEditor = ({
     [dispatch]
   );
 
+  const [saveYaml] = useSaveYaml();
+  const handleSave = useCallback(() => {
+    saveYaml({ id: workflowId });
+  }, [saveYaml, workflowId]);
+
   const handleRun = useCallback(() => {
     dispatch(setIsTestModalOpen({ isTestModalOpen: true }));
   }, [dispatch]);
 
-  const handleSaveAndRun = useCallback(async () => {
-    const { success } = await saveYaml();
-    if (success) {
+  const handleSaveAndRun = useCallback(() => {
+    saveYaml({ id: workflowId }).then(() => {
       handleRun();
-    }
-  }, [saveYaml, handleRun]);
+    });
+  }, [saveYaml, handleRun, workflowId]);
 
   // Refs
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -279,7 +282,7 @@ export const WorkflowYAMLEditor = ({
       registerKeyboardCommands({
         editor,
         openActionsPopover,
-        save: saveYaml,
+        save: handleSave,
         run: handleRun,
         saveAndRun: handleSaveAndRun,
       });

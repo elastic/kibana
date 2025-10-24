@@ -10,25 +10,29 @@
 import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { WorkflowExecuteModal } from '../../../features/run_workflow/ui/workflow_execute_modal';
-import { useTestWorkflow } from '../../../widgets/workflow_yaml_editor/lib/store/hooks/use_test_workflow';
+import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
+import { useAsyncThunkPromise } from '../../../widgets/workflow_yaml_editor/lib/store/hooks/use_async_thunk';
 import {
   selectIsTestModalOpen,
   selectWorkflowDefinition,
 } from '../../../widgets/workflow_yaml_editor/lib/store/selectors';
 import { setIsTestModalOpen } from '../../../widgets/workflow_yaml_editor/lib/store/slice';
+import { testWorkflowThunk } from '../../../widgets/workflow_yaml_editor/lib/store/thunks/test_workflow_thunk';
 
 export const WorkflowDetailTestModal = () => {
   const dispatch = useDispatch();
+  const { setSelectedExecution } = useWorkflowUrlState();
   const isTestModalOpen = useSelector(selectIsTestModalOpen);
   const definition = useSelector(selectWorkflowDefinition);
 
-  const { testWorkflow } = useTestWorkflow();
+  const testWorkflow = useAsyncThunkPromise(testWorkflowThunk);
 
   const handleRunWorkflow = useCallback(
-    (inputs: Record<string, unknown>) => {
-      testWorkflow(inputs);
+    async (inputs: Record<string, unknown>) => {
+      const { workflowExecutionId } = await testWorkflow({ inputs });
+      setSelectedExecution(workflowExecutionId);
     },
-    [testWorkflow]
+    [testWorkflow, setSelectedExecution]
   );
 
   const onClose = useCallback(() => {

@@ -19,7 +19,15 @@ jest.mock('./load_workflow_thunk', () => ({
   loadWorkflowThunk: jest.fn(() => ({ type: 'loadWorkflowThunk/fulfilled' })),
 }));
 
+// Mock the query client
+jest.mock('../../../../../shared/lib/query_client', () => ({
+  queryClient: {
+    invalidateQueries: jest.fn(),
+  },
+}));
+
 const mockLoadWorkflowThunk = jest.requireMock('./load_workflow_thunk').loadWorkflowThunk;
+const { queryClient } = jest.requireMock('../../../../../shared/lib/query_client');
 
 // Set up initial state with workflow and yaml
 const mockWorkflow: WorkflowDetailDto = {
@@ -81,6 +89,12 @@ describe('saveYamlThunk', () => {
 
       const result = await store.dispatch(saveYamlThunk({ id: 'test-workflow-1' }));
 
+      expect(mockServices.notifications.toasts.addError).toHaveBeenCalledWith(
+        new Error('Update failed'),
+        {
+          title: 'Failed to save workflow',
+        }
+      );
       expect(result.type).toBe('detail/saveYamlThunk/rejected');
       expect(result.payload).toBe('Update failed');
     });
@@ -99,6 +113,10 @@ describe('saveYamlThunk', () => {
 
       expect(mockServices.http.post).toHaveBeenCalledWith('/api/workflows', {
         body: JSON.stringify({ yaml: 'name: New Workflow\nsteps: []' }),
+      });
+      expect(queryClient.invalidateQueries).toHaveBeenCalledWith({ queryKey: ['workflows'] });
+      expect(queryClient.invalidateQueries).toHaveBeenCalledWith({
+        queryKey: ['workflows', undefined],
       });
       expect(mockServices.application.navigateToApp).toHaveBeenCalledWith('workflows', {
         path: 'test-workflow-1',
@@ -119,6 +137,12 @@ describe('saveYamlThunk', () => {
 
       const result = await store.dispatch(saveYamlThunk({ id: undefined }));
 
+      expect(mockServices.notifications.toasts.addError).toHaveBeenCalledWith(
+        new Error('Creation failed'),
+        {
+          title: 'Failed to save workflow',
+        }
+      );
       expect(result.type).toBe('detail/saveYamlThunk/rejected');
       expect(result.payload).toBe('Creation failed');
     });
@@ -142,6 +166,12 @@ describe('saveYamlThunk', () => {
 
     const result = await store.dispatch(saveYamlThunk({ id: 'test-workflow-1' }));
 
+    expect(mockServices.notifications.toasts.addError).toHaveBeenCalledWith(
+      new Error('Failed to save workflow'),
+      {
+        title: 'Failed to save workflow',
+      }
+    );
     expect(result.type).toBe('detail/saveYamlThunk/rejected');
     expect(result.payload).toBe('Failed to save workflow');
   });

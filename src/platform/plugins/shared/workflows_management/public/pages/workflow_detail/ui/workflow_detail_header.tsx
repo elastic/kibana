@@ -33,12 +33,12 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { PLUGIN_ID } from '../../../../common';
+import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
+import { useUpdateWorkflow } from '../../../entities/workflows/model/use_update_workflow';
 import { useCapabilities } from '../../../hooks/use_capabilities';
 import { useKibana } from '../../../hooks/use_kibana';
 import type { WorkflowUrlStateTabType } from '../../../hooks/use_workflow_url_state';
 import { getRunWorkflowTooltipContent } from '../../../shared/ui';
-import { useSaveYaml } from '../../../widgets/workflow_yaml_editor/lib/store/hooks/use_save_yaml';
-import { useToggleWorkflow } from '../../../widgets/workflow_yaml_editor/lib/store/hooks/use_toggle_workflow';
 import {
   selectHasChanges,
   selectIsYamlSyntaxValid,
@@ -115,15 +115,17 @@ export const WorkflowDetailHeader = ({
   );
   const hasUnsavedChanges = useSelector(selectHasChanges);
 
-  const { saveYaml } = useSaveYaml();
+  const [saveYaml] = useSaveYaml();
   const handleSaveWorkflow = useCallback(() => {
-    saveYaml();
-  }, [saveYaml]);
+    saveYaml({ id: workflowId });
+  }, [saveYaml, workflowId]);
 
-  const { toggleWorkflow } = useToggleWorkflow();
+  const [updateWorkflow] = useUpdateWorkflow();
   const handleToggleWorkflow = useCallback(() => {
-    toggleWorkflow(!isEnabled);
-  }, [toggleWorkflow, isEnabled]);
+    if (workflowId) {
+      updateWorkflow({ id: workflowId, workflow: { enabled: !isEnabled } });
+    }
+  }, [updateWorkflow, workflowId, isEnabled]);
 
   const openTestModal = useCallback(() => {
     dispatch(setIsTestModalOpen({ isTestModalOpen: true }));
@@ -243,9 +245,15 @@ export const WorkflowDetailHeader = ({
                 }
               >
                 <EuiSwitch
-                  disabled={isLoading || !canWriteWorkflow || !isSyntaxValid || hasUnsavedChanges}
+                  disabled={
+                    !workflowId ||
+                    isLoading ||
+                    !canWriteWorkflow ||
+                    !isSyntaxValid ||
+                    hasUnsavedChanges
+                  }
                   checked={isEnabled}
-                  onChange={() => handleToggleWorkflow()}
+                  onChange={handleToggleWorkflow}
                   label={i18n.translate('workflows.workflowDetailHeader.enabled', {
                     defaultMessage: 'Enabled',
                   })}

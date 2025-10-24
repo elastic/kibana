@@ -18,25 +18,25 @@ import { WorkflowDetailEditor } from './workflow_detail_editor';
 import { WorkflowDetailHeader } from './workflow_detail_header';
 import { WorkflowEditorLayout } from './workflow_detail_layout';
 import { WorkflowDetailTestModal } from './workflow_detail_test_modal';
+import { useLoadWorkflow } from '../../../entities/workflows/model/use_load_workflow';
 import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
 import { WorkflowExecutionDetail } from '../../../features/workflow_execution_detail';
 import { WorkflowExecutionList } from '../../../features/workflow_execution_list/ui/workflow_execution_list_stateful';
 import { useWorkflowsBreadcrumbs } from '../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { setYamlString } from '../../../widgets/workflow_yaml_editor/lib/store';
-import { useLoadWorkflow } from '../../../widgets/workflow_yaml_editor/lib/store/hooks/use_load_workflow';
 import {
   selectWorkflowName,
   selectYamlString,
 } from '../../../widgets/workflow_yaml_editor/lib/store/selectors';
 
 export function WorkflowDetailPage({ id }: { id?: string }) {
-  const { loadWorkflow, error, isLoading: isLoadingWorkflow } = useLoadWorkflow();
+  const [loadWorkflow, { isLoading, error }] = useLoadWorkflow();
   const dispatch = useDispatch();
 
   useEffect(() => {
     if (id) {
-      loadWorkflow(id);
+      loadWorkflow({ id });
     } else {
       dispatch(setYamlString(workflowDefaultYaml));
     }
@@ -85,7 +85,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     <EuiFlexGroup direction="column" gutterSize="none" css={kbnFullBodyHeightCss()}>
       <EuiFlexItem grow={false}>
         <WorkflowDetailHeader
-          isLoading={isLoadingWorkflow}
+          isLoading={isLoading}
           activeTab={activeTab}
           handleTabChange={setActiveTab}
           highlightDiff={highlightDiff}

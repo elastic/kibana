@@ -8,12 +8,13 @@
  */
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
+import { i18n } from '@kbn/i18n';
 import type { WorkflowsServices } from '../../../../../types';
-import type { RootState } from '../types';
 import { selectYamlString } from '../selectors';
+import type { RootState } from '../types';
 
 export interface TestWorkflowParams {
-  inputs: Record<string, any>;
+  inputs: Record<string, unknown>;
 }
 
 export interface TestWorkflowResponse {
@@ -27,6 +28,7 @@ export const testWorkflowThunk = createAsyncThunk<
 >(
   'detail/testWorkflowThunk',
   async ({ inputs }, { getState, rejectWithValue, extra: { services } }) => {
+    const { http, notifications } = services;
     try {
       const yamlString = selectYamlString(getState());
       if (!yamlString) {
@@ -34,14 +36,28 @@ export const testWorkflowThunk = createAsyncThunk<
       }
 
       // Make the API call to test the workflow
-      const response = await services.http.post<TestWorkflowResponse>(`/api/workflows/test`, {
+      const response = await http.post<TestWorkflowResponse>(`/api/workflows/test`, {
         body: JSON.stringify({ workflowYaml: yamlString, inputs }),
       });
+
+      // Show success notification
+      notifications.toasts.addSuccess(
+        i18n.translate('workflows.detail.testWorkflow.success', {
+          defaultMessage: 'Workflow test execution started',
+        }),
+        { toastLifeTimeMs: 2000 }
+      );
 
       return response;
     } catch (error) {
       // Extract error message from HTTP error body if available
       const errorMessage = error.body?.message || error.message || 'Failed to test workflow';
+
+      notifications.toasts.addError(new Error(errorMessage), {
+        title: i18n.translate('workflows.detail.testWorkflow.error', {
+          defaultMessage: 'Failed to test workflow',
+        }),
+      });
       return rejectWithValue(errorMessage);
     }
   }
