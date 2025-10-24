@@ -28,50 +28,46 @@ export const buildFailureHtml = (testFailure: TestFailure, destinationDir?: stri
 
   const testDuration = duration < 1000 ? `${duration}ms` : `${(duration / 1000).toFixed(2)}s`;
 
+  const isCI = process.env.CI === 'true';
+
   const screenshots = attachments
     .filter((a) => a.contentType.startsWith('image/'))
     .map((s, index) => {
-      const escapedName = (s.name || 'screenshot').replace(/"/g, '&quot;');
-      let imgSrc: string;
-
-      if (destinationDir && s.path) {
-        // Copy screenshot to destination directory
-        const ext = path.extname(s.path) || '.png';
-        const screenshotFileName = `${testFailure.id}-screenshot-${index}${ext}`;
-        const screenshotDestPath = path.join(destinationDir, screenshotFileName);
-
-        try {
-          fs.copyFileSync(s.path, screenshotDestPath);
-          // Get full path from workspace root for artifact:// URL
-          const relativePath = path.relative(process.cwd(), screenshotDestPath);
-          // Use artifact:// without leading ./ and with forward slashes
-          imgSrc = `artifact://${relativePath.replace(/\\/g, '/')}`;
-        } catch (copyError) {
-          // Fallback to base64 if copy fails
-          try {
-            const base64 = fs.readFileSync(s.path).toString('base64');
-            imgSrc = `data:${s.contentType};base64,${base64}`;
-          } catch (readError) {
-            return ''; // Skip if can't read file
-          }
-        }
-      } else if (s.path) {
-        // Fallback to base64 embedding
-        try {
-          const base64 = fs.readFileSync(s.path).toString('base64');
-          imgSrc = `data:${s.contentType};base64,${base64}`;
-        } catch (readError) {
-          return ''; // Skip if can't read file
-        }
-      } else {
+      if (!s.path) {
         return ''; // No path available
       }
 
-      return `
-        <div class="screenshotContainer">
-          <img class="screenshot img-fluid img-thumbnail" src="${imgSrc}" alt="${escapedName}" />
-        </div>
-      `;
+      try {
+        const base64 = fs.readFileSync(s.path).toString('base64');
+        let imgSrc: string;
+
+        // In CI with destination dir, copy screenshot and use artifact:// scheme
+        if (isCI && destinationDir) {
+          const ext = path.extname(s.path) || '.png';
+          const screenshotFileName = `${testFailure.id}-screenshot-${index}${ext}`;
+          const screenshotDestPath = path.join(destinationDir, screenshotFileName);
+
+          try {
+            fs.copyFileSync(s.path, screenshotDestPath);
+            // Use artifact:// with just the filename for Buildkite
+            imgSrc = `artifact://${screenshotFileName}`;
+          } catch (copyError) {
+            // Fallback to base64 if copy fails
+            imgSrc = `data:image/png;base64,${base64}`;
+          }
+        } else {
+          // Local development - always use base64
+          imgSrc = `data:image/png;base64,${base64}`;
+        }
+
+        return `
+          <div class="screenshotContainer">
+            <img class="screenshot img-fluid img-thumbnail" src="${imgSrc}" alt="screenshot" />
+          </div>
+        `;
+      } catch (readError) {
+        return ''; // Skip if can't read file
+      }
     });
 
   const errorStackTrace = error?.stack_trace || 'No stack trace available';
