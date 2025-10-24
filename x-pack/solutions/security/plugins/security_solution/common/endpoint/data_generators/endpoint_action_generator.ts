@@ -476,6 +476,9 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       'ra_scan_error_scan-invalid-input',
       'ra_scan_error_not-found',
       'ra_scan_error_scan-queue-quota',
+      'ra_scan_error_queue-quota',
+      'ra_scan_error_processing',
+      'ra_scan_error_processing-interrupted',
     ]);
   }
 
