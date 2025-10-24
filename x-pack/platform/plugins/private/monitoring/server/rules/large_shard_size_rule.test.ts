@@ -11,6 +11,7 @@ import { fetchIndexShardSize } from '../lib/alerts/fetch_index_shard_size';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { P } from 'oas/dist/extensions-ViDsWf_9.cjs';
 
 type ILargeShardSizeRuleMock = LargeShardSizeRule & {
   defaultParams: {
@@ -116,92 +117,95 @@ describe('LargeShardSizeRule', () => {
         ...executorOptions,
         params: rule.ruleOptions.defaultParams,
       } as any);
+
+      const alertStates = [
+        {
+          ccs: undefined,
+          cluster: {
+            clusterName: 'testCluster',
+            clusterUuid: 'abc123',
+          },
+          itemLabel: 'apm-8.0.0-onboarding-2021.06.30',
+          meta: {
+            instanceId: 'abc123:apm-8.0.0-onboarding-2021.06.30',
+            itemLabel: 'apm-8.0.0-onboarding-2021.06.30',
+            shardIndex: 'apm-8.0.0-onboarding-2021.06.30',
+            shardSize: 0,
+          },
+          nodeId: 'abc123:apm-8.0.0-onboarding-2021.06.30',
+          nodeName: 'apm-8.0.0-onboarding-2021.06.30',
+          ui: {
+            isFiring: true,
+            lastCheckedMS: 0,
+            message: {
+              nextSteps: [
+                {
+                  text: '#start_linkInvestigate detailed index stats#end_link',
+                  tokens: [
+                    {
+                      endToken: '#end_link',
+                      startToken: '#start_link',
+                      type: 'link',
+                      url: 'elasticsearch/indices/apm-8.0.0-onboarding-2021.06.30/advanced',
+                    },
+                  ],
+                },
+                {
+                  text: '#start_linkHow to size your shards (Docs)#end_link',
+                  tokens: [
+                    {
+                      endToken: '#end_link',
+                      partialUrl:
+                        '{elasticWebsiteUrl}guide/en/elasticsearch/reference/current/size-your-shards.html',
+                      startToken: '#start_link',
+                      type: 'docLink',
+                    },
+                  ],
+                },
+                {
+                  text: '#start_linkShard sizing tips (Blog)#end_link',
+                  tokens: [
+                    {
+                      endToken: '#end_link',
+                      partialUrl:
+                        '{elasticWebsiteUrl}blog/how-many-shards-should-i-have-in-my-elasticsearch-cluster',
+                      startToken: '#start_link',
+                      type: 'docLink',
+                    },
+                  ],
+                },
+              ],
+              text: 'The following index: #start_linkapm-8.0.0-onboarding-2021.06.30#end_link has a large average shard size of: 0GB at #absolute',
+              tokens: [
+                {
+                  isAbsolute: true,
+                  isRelative: false,
+                  startToken: '#absolute',
+                  timestamp: 1,
+                  type: 'time',
+                },
+                {
+                  endToken: '#end_link',
+                  startToken: '#start_link',
+                  type: 'link',
+                  url: 'elasticsearch/indices/apm-8.0.0-onboarding-2021.06.30',
+                },
+              ],
+            },
+            severity: 'danger',
+            triggeredMS: 1,
+          },
+        },
+      ];
       expect(services.alertsClient.report).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.setAlertData).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.report).toHaveBeenCalledWith({
         id: 'abc123:apm-8.0.0-onboarding-2021.06.30',
         actionGroup: 'default',
         state: {
-          alertStates: [
-            {
-              ccs: undefined,
-              cluster: {
-                clusterName: 'testCluster',
-                clusterUuid: 'abc123',
-              },
-              itemLabel: 'apm-8.0.0-onboarding-2021.06.30',
-              meta: {
-                instanceId: 'abc123:apm-8.0.0-onboarding-2021.06.30',
-                itemLabel: 'apm-8.0.0-onboarding-2021.06.30',
-                shardIndex: 'apm-8.0.0-onboarding-2021.06.30',
-                shardSize: 0,
-              },
-              nodeId: 'abc123:apm-8.0.0-onboarding-2021.06.30',
-              nodeName: 'apm-8.0.0-onboarding-2021.06.30',
-              ui: {
-                isFiring: true,
-                lastCheckedMS: 0,
-                message: {
-                  nextSteps: [
-                    {
-                      text: '#start_linkInvestigate detailed index stats#end_link',
-                      tokens: [
-                        {
-                          endToken: '#end_link',
-                          startToken: '#start_link',
-                          type: 'link',
-                          url: 'elasticsearch/indices/apm-8.0.0-onboarding-2021.06.30/advanced',
-                        },
-                      ],
-                    },
-                    {
-                      text: '#start_linkHow to size your shards (Docs)#end_link',
-                      tokens: [
-                        {
-                          endToken: '#end_link',
-                          partialUrl:
-                            '{elasticWebsiteUrl}guide/en/elasticsearch/reference/current/size-your-shards.html',
-                          startToken: '#start_link',
-                          type: 'docLink',
-                        },
-                      ],
-                    },
-                    {
-                      text: '#start_linkShard sizing tips (Blog)#end_link',
-                      tokens: [
-                        {
-                          endToken: '#end_link',
-                          partialUrl:
-                            '{elasticWebsiteUrl}blog/how-many-shards-should-i-have-in-my-elasticsearch-cluster',
-                          startToken: '#start_link',
-                          type: 'docLink',
-                        },
-                      ],
-                    },
-                  ],
-                  text: 'The following index: #start_linkapm-8.0.0-onboarding-2021.06.30#end_link has a large average shard size of: 0GB at #absolute',
-                  tokens: [
-                    {
-                      isAbsolute: true,
-                      isRelative: false,
-                      startToken: '#absolute',
-                      timestamp: 1,
-                      type: 'time',
-                    },
-                    {
-                      endToken: '#end_link',
-                      startToken: '#start_link',
-                      type: 'link',
-                      url: 'elasticsearch/indices/apm-8.0.0-onboarding-2021.06.30',
-                    },
-                  ],
-                },
-                severity: 'danger',
-                triggeredMS: 1,
-              },
-            },
-          ],
+          alertStates,
         },
+        payload: { alertStates },
       });
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'abc123:apm-8.0.0-onboarding-2021.06.30',
@@ -237,92 +241,96 @@ describe('LargeShardSizeRule', () => {
         ...executorOptions,
         params: rule.ruleOptions.defaultParams,
       } as any);
+
+      const alertStates = [
+        {
+          ccs: 'testCluster',
+          cluster: {
+            clusterName: 'testCluster',
+            clusterUuid: 'abc123',
+          },
+          itemLabel: 'apm-8.0.0-onboarding-2021.06.30',
+          meta: {
+            instanceId: 'abc123:apm-8.0.0-onboarding-2021.06.30',
+            itemLabel: 'apm-8.0.0-onboarding-2021.06.30',
+            shardIndex: 'apm-8.0.0-onboarding-2021.06.30',
+            shardSize: 0,
+          },
+          nodeId: 'abc123:apm-8.0.0-onboarding-2021.06.30',
+          nodeName: 'apm-8.0.0-onboarding-2021.06.30',
+          ui: {
+            isFiring: true,
+            lastCheckedMS: 0,
+            message: {
+              nextSteps: [
+                {
+                  text: '#start_linkInvestigate detailed index stats#end_link',
+                  tokens: [
+                    {
+                      endToken: '#end_link',
+                      startToken: '#start_link',
+                      type: 'link',
+                      url: 'elasticsearch/indices/apm-8.0.0-onboarding-2021.06.30/advanced',
+                    },
+                  ],
+                },
+                {
+                  text: '#start_linkHow to size your shards (Docs)#end_link',
+                  tokens: [
+                    {
+                      endToken: '#end_link',
+                      partialUrl:
+                        '{elasticWebsiteUrl}guide/en/elasticsearch/reference/current/size-your-shards.html',
+                      startToken: '#start_link',
+                      type: 'docLink',
+                    },
+                  ],
+                },
+                {
+                  text: '#start_linkShard sizing tips (Blog)#end_link',
+                  tokens: [
+                    {
+                      endToken: '#end_link',
+                      partialUrl:
+                        '{elasticWebsiteUrl}blog/how-many-shards-should-i-have-in-my-elasticsearch-cluster',
+                      startToken: '#start_link',
+                      type: 'docLink',
+                    },
+                  ],
+                },
+              ],
+              text: 'The following index: #start_linkapm-8.0.0-onboarding-2021.06.30#end_link has a large average shard size of: 0GB at #absolute',
+              tokens: [
+                {
+                  isAbsolute: true,
+                  isRelative: false,
+                  startToken: '#absolute',
+                  timestamp: 1,
+                  type: 'time',
+                },
+                {
+                  endToken: '#end_link',
+                  startToken: '#start_link',
+                  type: 'link',
+                  url: 'elasticsearch/indices/apm-8.0.0-onboarding-2021.06.30',
+                },
+              ],
+            },
+            severity: 'danger',
+            triggeredMS: 1,
+          },
+        },
+      ];
+
       expect(services.alertsClient.report).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.setAlertData).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.report).toHaveBeenCalledWith({
         id: 'abc123:apm-8.0.0-onboarding-2021.06.30',
         actionGroup: 'default',
         state: {
-          alertStates: [
-            {
-              ccs: 'testCluster',
-              cluster: {
-                clusterName: 'testCluster',
-                clusterUuid: 'abc123',
-              },
-              itemLabel: 'apm-8.0.0-onboarding-2021.06.30',
-              meta: {
-                instanceId: 'abc123:apm-8.0.0-onboarding-2021.06.30',
-                itemLabel: 'apm-8.0.0-onboarding-2021.06.30',
-                shardIndex: 'apm-8.0.0-onboarding-2021.06.30',
-                shardSize: 0,
-              },
-              nodeId: 'abc123:apm-8.0.0-onboarding-2021.06.30',
-              nodeName: 'apm-8.0.0-onboarding-2021.06.30',
-              ui: {
-                isFiring: true,
-                lastCheckedMS: 0,
-                message: {
-                  nextSteps: [
-                    {
-                      text: '#start_linkInvestigate detailed index stats#end_link',
-                      tokens: [
-                        {
-                          endToken: '#end_link',
-                          startToken: '#start_link',
-                          type: 'link',
-                          url: 'elasticsearch/indices/apm-8.0.0-onboarding-2021.06.30/advanced',
-                        },
-                      ],
-                    },
-                    {
-                      text: '#start_linkHow to size your shards (Docs)#end_link',
-                      tokens: [
-                        {
-                          endToken: '#end_link',
-                          partialUrl:
-                            '{elasticWebsiteUrl}guide/en/elasticsearch/reference/current/size-your-shards.html',
-                          startToken: '#start_link',
-                          type: 'docLink',
-                        },
-                      ],
-                    },
-                    {
-                      text: '#start_linkShard sizing tips (Blog)#end_link',
-                      tokens: [
-                        {
-                          endToken: '#end_link',
-                          partialUrl:
-                            '{elasticWebsiteUrl}blog/how-many-shards-should-i-have-in-my-elasticsearch-cluster',
-                          startToken: '#start_link',
-                          type: 'docLink',
-                        },
-                      ],
-                    },
-                  ],
-                  text: 'The following index: #start_linkapm-8.0.0-onboarding-2021.06.30#end_link has a large average shard size of: 0GB at #absolute',
-                  tokens: [
-                    {
-                      isAbsolute: true,
-                      isRelative: false,
-                      startToken: '#absolute',
-                      timestamp: 1,
-                      type: 'time',
-                    },
-                    {
-                      endToken: '#end_link',
-                      startToken: '#start_link',
-                      type: 'link',
-                      url: 'elasticsearch/indices/apm-8.0.0-onboarding-2021.06.30',
-                    },
-                  ],
-                },
-                severity: 'danger',
-                triggeredMS: 1,
-              },
-            },
-          ],
+          alertStates,
         },
+        payload: { alertStates },
       });
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'abc123:apm-8.0.0-onboarding-2021.06.30',

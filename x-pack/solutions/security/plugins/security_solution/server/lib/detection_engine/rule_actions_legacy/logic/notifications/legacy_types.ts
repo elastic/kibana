@@ -97,7 +97,7 @@ export type LegacyNotificationExecutorOptions = RuleExecutorOptions<
   AlertInstanceState,
   AlertInstanceContext,
   'default',
-  DefaultAlert
+  DefaultAlert & { signals_count: number }
 >;
 
 /**

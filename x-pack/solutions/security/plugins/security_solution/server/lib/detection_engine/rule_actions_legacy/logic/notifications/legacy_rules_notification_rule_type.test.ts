@@ -138,6 +138,9 @@ const reported = {
   state: {
     signals_count: 1,
   },
+  payload: {
+    signals_count: 1,
+  },
 };
 
 /**
@@ -357,6 +360,9 @@ describe('legacyRules_notification_rule_type', () => {
           },
         },
         state: {
+          signals_count: 100,
+        },
+        payload: {
           signals_count: 100,
         },
       });

@@ -117,6 +117,14 @@ const mockCommonAlertDocumentFields = (monitorInfo: GetMonitorStatusResult['moni
     ? [monitorInfo.observer.geo.name]
     : undefined,
   'observer.name': [],
+  'kibana.alert.current_trigger_started': expect.any(String),
+  'kibana.alert.first_checked_at': expect.any(String),
+  'kibana.alert.first_triggered_at': expect.any(String),
+  'kibana.alert.is_triggered': true,
+  'kibana.alert.last_checked_at': expect.any(String),
+  'kibana.alert.last_resolved_at': expect.any(String),
+  'kibana.alert.last_triggered_at': expect.any(String),
+  'kibana.alert.status_message': expect.any(String),
 });
 
 const mockStatusAlertDocument = (

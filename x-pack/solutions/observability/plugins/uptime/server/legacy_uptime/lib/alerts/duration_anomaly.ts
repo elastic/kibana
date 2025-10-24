@@ -39,7 +39,7 @@ import {
 import { CLIENT_ALERT_TYPES, DURATION_ANOMALY } from '../../../../common/constants/uptime_alerts';
 import { commonStateTranslations, durationAnomalyTranslations } from './translations';
 import type { UptimeCorePluginsSetup } from '../adapters/framework';
-import type { UptimeAlertTypeFactory } from './types';
+import type { DurationAnomalyAlert, UptimeAlertTypeFactory } from './types';
 import type { Ping } from '../../../../common/runtime_types/ping';
 import { getMLJobId } from '../../../../common/lib';
 
@@ -98,11 +98,10 @@ const getAnomalies = async (
   );
 };
 
-export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
-  server,
-  libs,
-  plugins
-) => ({
+export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<
+  ActionGroupIds,
+  DurationAnomalyAlert
+> = (server, libs, plugins) => ({
   id: CLIENT_ALERT_TYPES.DURATION_ANOMALY,
   category: DEFAULT_APP_CATEGORIES.observability.id,
   producer: 'uptime',
@@ -174,6 +173,7 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
         );
 
         const alertId = DURATION_ANOMALY.id + index;
+        const legacyState = updateState(state, true);
 
         const { start, uuid } = alertsClient?.report({
           id: alertId,
@@ -187,6 +187,24 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
             [ALERT_EVALUATION_VALUE]: anomaly.actualSort,
             [ALERT_EVALUATION_THRESHOLD]: anomaly.typicalSort,
             [ALERT_REASON]: alertReasonMessage,
+            // state
+            'kibana.alert.current_trigger_started': legacyState.currentTriggerStarted,
+            'kibana.alert.first_checked_at': legacyState.firstCheckedAt,
+            'kibana.alert.first_triggered_at': legacyState.firstTriggeredAt,
+            'kibana.alert.is_triggered': legacyState.isTriggered,
+            'kibana.alert.last_triggered_at': legacyState.lastTriggeredAt,
+            'kibana.alert.last_checked_at': legacyState.lastCheckedAt,
+            'kibana.alert.last_resolved_at': legacyState.currentTriggerStarted,
+            // summary
+            'anomaly.severity': summary.severity,
+            'anomaly.severity_score': summary.severityScore,
+            'anomaly.monitor': summary.monitor,
+            'anomaly.slowest_anomaly_response': summary.slowestAnomalyResponse,
+            'anomaly.expected_response_time': summary.expectedResponseTime,
+            // 'anomaly.anomalyStartTimestamp.'   -> already added as 'anomaly.start'
+            // 'anomaly.monitorUrl'               -> already added as 'url.full'
+            // 'anomaly.observerLocation'         -> already added as 'observer.geo.name'
+            // 'anomaly.bucketSpan'               -> already added as 'anomaly.bucket_span.minutes'
           },
           state: {
             ...updateState(state, false),

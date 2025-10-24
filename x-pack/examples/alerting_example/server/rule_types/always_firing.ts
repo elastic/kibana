@@ -50,7 +50,7 @@ export const ruleType: RuleType<
   never,
   AlwaysFiringActionGroupIds,
   never,
-  DefaultAlert
+  DefaultAlert & { triggeredOnCycle: number }
 > = {
   id: 'example.always-firing',
   name: 'Always firing',
@@ -80,6 +80,7 @@ export const ruleType: RuleType<
           id,
           actionGroup: getTShirtSizeByIdAndThreshold(id, thresholds),
           state: { triggerdOnCycle: count },
+          payload: { triggeredOnCycle: count },
         });
       });
 

@@ -152,49 +152,51 @@ describe('NodesChangedAlert', () => {
         ...executorOptions,
         params: rule.ruleOptions.defaultParams,
       } as any);
+      const alertStates = [
+        {
+          cluster: { clusterUuid, clusterName },
+          ccs,
+          itemLabel: undefined,
+          nodeId: undefined,
+          nodeName: undefined,
+          meta: {
+            ccs,
+            clusterUuid,
+            recentNodes: [
+              {
+                nodeUuid,
+                nodeEphemeralId: nodeEphemeralIdChanged,
+                nodeName,
+              },
+            ],
+            priorNodes: [
+              {
+                nodeUuid,
+                nodeEphemeralId,
+                nodeName,
+              },
+            ],
+          },
+          ui: {
+            isFiring: true,
+            message: {
+              text: "Elasticsearch nodes 'test' restarted in this cluster.",
+            },
+            severity: 'warning',
+            triggeredMS: 1,
+            lastCheckedMS: 0,
+          },
+        },
+      ];
       expect(services.alertsClient.report).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.setAlertData).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.report).toHaveBeenCalledWith({
         id: 'abc123',
         actionGroup: 'default',
         state: {
-          alertStates: [
-            {
-              cluster: { clusterUuid, clusterName },
-              ccs,
-              itemLabel: undefined,
-              nodeId: undefined,
-              nodeName: undefined,
-              meta: {
-                ccs,
-                clusterUuid,
-                recentNodes: [
-                  {
-                    nodeUuid,
-                    nodeEphemeralId: nodeEphemeralIdChanged,
-                    nodeName,
-                  },
-                ],
-                priorNodes: [
-                  {
-                    nodeUuid,
-                    nodeEphemeralId,
-                    nodeName,
-                  },
-                ],
-              },
-              ui: {
-                isFiring: true,
-                message: {
-                  text: "Elasticsearch nodes 'test' restarted in this cluster.",
-                },
-                severity: 'warning',
-                triggeredMS: 1,
-                lastCheckedMS: 0,
-              },
-            },
-          ],
+          alertStates,
         },
+        payload: { alertStates },
       });
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'abc123',
@@ -227,59 +229,61 @@ describe('NodesChangedAlert', () => {
         ...executorOptions,
         params: rule.ruleOptions.defaultParams,
       } as any);
+      const alertStates = [
+        {
+          cluster: { clusterUuid, clusterName },
+          ccs,
+          itemLabel: undefined,
+          nodeId: undefined,
+          nodeName: undefined,
+          meta: {
+            ccs,
+            clusterUuid,
+            recentNodes: [
+              {
+                nodeUuid,
+                nodeEphemeralId: nodeEphemeralIdChanged,
+                nodeName,
+              },
+              {
+                nodeUuid: 'newNodeId',
+                nodeEphemeralId: 'newNodeEmpheralId',
+                nodeName: 'newNodeName',
+              },
+            ],
+            priorNodes: [
+              {
+                nodeUuid,
+                nodeEphemeralId,
+                nodeName,
+              },
+              {
+                nodeUuid: 'removedNodeId',
+                nodeEphemeralId: 'removedNodeEmpheralId',
+                nodeName: 'removedNodeName',
+              },
+            ],
+          },
+          ui: {
+            isFiring: true,
+            message: {
+              text: "Elasticsearch nodes 'newNodeName' added to this cluster. Elasticsearch nodes 'removedNodeName' removed from this cluster. Elasticsearch nodes 'test' restarted in this cluster.",
+            },
+            severity: 'warning',
+            triggeredMS: 1,
+            lastCheckedMS: 0,
+          },
+        },
+      ];
       expect(services.alertsClient.report).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.setAlertData).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.report).toHaveBeenCalledWith({
         id: 'abc123',
         actionGroup: 'default',
         state: {
-          alertStates: [
-            {
-              cluster: { clusterUuid, clusterName },
-              ccs,
-              itemLabel: undefined,
-              nodeId: undefined,
-              nodeName: undefined,
-              meta: {
-                ccs,
-                clusterUuid,
-                recentNodes: [
-                  {
-                    nodeUuid,
-                    nodeEphemeralId: nodeEphemeralIdChanged,
-                    nodeName,
-                  },
-                  {
-                    nodeUuid: 'newNodeId',
-                    nodeEphemeralId: 'newNodeEmpheralId',
-                    nodeName: 'newNodeName',
-                  },
-                ],
-                priorNodes: [
-                  {
-                    nodeUuid,
-                    nodeEphemeralId,
-                    nodeName,
-                  },
-                  {
-                    nodeUuid: 'removedNodeId',
-                    nodeEphemeralId: 'removedNodeEmpheralId',
-                    nodeName: 'removedNodeName',
-                  },
-                ],
-              },
-              ui: {
-                isFiring: true,
-                message: {
-                  text: "Elasticsearch nodes 'newNodeName' added to this cluster. Elasticsearch nodes 'removedNodeName' removed from this cluster. Elasticsearch nodes 'test' restarted in this cluster.",
-                },
-                severity: 'warning',
-                triggeredMS: 1,
-                lastCheckedMS: 0,
-              },
-            },
-          ],
+          alertStates,
         },
+        payload: { alertStates },
       });
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'abc123',

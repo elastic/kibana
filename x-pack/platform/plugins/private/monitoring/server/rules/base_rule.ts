@@ -69,6 +69,9 @@ const defaultRuleOptions = (): RuleOptions => {
     actionVariables: [],
   };
 };
+
+type BaseAlert = DefaultAlert & { alertStates: AlertState[] };
+
 export class BaseRule {
   protected scopedLogger: Logger;
 
@@ -93,7 +96,7 @@ export class BaseRule {
     AlertInstanceContext,
     'default',
     never,
-    DefaultAlert
+    BaseAlert
   > {
     const { id, name, actionVariables } = this.ruleOptions;
     return {
@@ -117,7 +120,7 @@ export class BaseRule {
           AlertInstanceState,
           AlertInstanceContext,
           'default',
-          DefaultAlert
+          BaseAlert
         >
       ): Promise<any> => this.execute(options),
       category: DEFAULT_APP_CATEGORIES.management.id,
@@ -261,7 +264,7 @@ export class BaseRule {
     AlertInstanceState,
     AlertInstanceContext,
     'default',
-    DefaultAlert
+    BaseAlert
   >): Promise<any> {
     this.scopedLogger.debug(
       () =>
@@ -306,12 +309,7 @@ export class BaseRule {
   protected async processData(
     data: AlertData[],
     clusters: AlertCluster[],
-    services: RuleExecutorServices<
-      AlertInstanceState,
-      AlertInstanceContext,
-      'default',
-      DefaultAlert
-    >,
+    services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default', BaseAlert>,
     state: ExecutedState
   ) {
     const currentUTC = +new Date();
@@ -356,6 +354,9 @@ export class BaseRule {
               id: alertId,
               actionGroup: 'default',
               state: alertInstanceState,
+              payload: {
+                alertStates: newAlertStates,
+              },
             });
             this.executeActions(services, alertId, alertInstanceState, null, cluster);
             state.lastExecutedAction = currentUTC;

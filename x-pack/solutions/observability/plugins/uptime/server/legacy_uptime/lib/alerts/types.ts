@@ -20,7 +20,68 @@ import type { UptimeCorePluginsSetup, UptimeServerSetup } from '../adapters';
  *
  * When we register all the alerts we can inject this field.
  */
-export type DefaultUptimeAlertInstance<TActionGroupIds extends string> = RuleType<
+
+export type DurationAnomalyAlert = ObservabilityUptimeAlert & {
+  'kibana.alert.current_trigger_started'?: string;
+  'kibana.alert.first_triggered_at'?: string;
+  'kibana.alert.last_triggered_at'?: string;
+  'kibana.alert.last_resolved_at'?: string;
+  'kibana.alert.first_checked_at': string;
+  'kibana.alert.last_checked_at': string;
+  'kibana.alert.is_triggered': boolean;
+  'anomaly.severity': string;
+  'anomaly.severity_score': number;
+  'anomaly.monitor': string;
+  'anomaly.slowest_anomaly_response': string;
+  'anomaly.expected_response_time': string;
+};
+
+export type StatusCheckAlert = ObservabilityUptimeAlert & {
+  'kibana.alert.current_trigger_started'?: string;
+  'kibana.alert.first_triggered_at'?: string;
+  'kibana.alert.last_triggered_at'?: string;
+  'kibana.alert.last_resolved_at'?: string;
+  'kibana.alert.first_checked_at': string;
+  'kibana.alert.last_checked_at': string;
+  'kibana.alert.is_triggered': boolean;
+  'kibana.alert.status_message': string;
+};
+
+export type LegacyTlsAlert = ObservabilityUptimeAlert & {
+  'kibana.alert.current_trigger_started'?: string;
+  'kibana.alert.first_triggered_at'?: string;
+  'kibana.alert.last_triggered_at'?: string;
+  'kibana.alert.last_resolved_at'?: string;
+  'kibana.alert.first_checked_at': string;
+  'kibana.alert.last_checked_at': string;
+  'kibana.alert.is_triggered': boolean;
+  'certs.count': number;
+  'certs.aging.count': number;
+  'certs.aging.common_name_and_date': string;
+  'certs.expiring.count': number;
+  'certs.expiring.common_name_and_date': string;
+  'certs.has_aging': boolean | null;
+  'certs.has_expired': boolean | null;
+};
+
+export type TlsAlert = ObservabilityUptimeAlert & {
+  'kibana.alert.current_trigger_started'?: string;
+  'kibana.alert.first_triggered_at'?: string;
+  'kibana.alert.last_triggered_at'?: string;
+  'kibana.alert.last_resolved_at'?: string;
+  'kibana.alert.first_checked_at': string;
+  'kibana.alert.last_checked_at': string;
+  'kibana.alert.is_triggered': boolean;
+  'certs.common_name': string;
+  'certs.issuer': string;
+  'certs.summary': string;
+  'certs.status': string;
+};
+
+export type DefaultUptimeAlertInstance<
+  TActionGroupIds extends string,
+  TAlert extends ObservabilityUptimeAlert
+> = RuleType<
   Record<string, any>,
   never,
   Record<string, any>,
@@ -28,16 +89,22 @@ export type DefaultUptimeAlertInstance<TActionGroupIds extends string> = RuleTyp
   AlertInstanceContext,
   TActionGroupIds,
   RecoveredActionGroupId,
-  ObservabilityUptimeAlert
+  TAlert
 >;
 
-export type UptimeAlertTypeFactory<TActionGroupIds extends string> = (
+export type UptimeAlertTypeFactory<
+  TActionGroupIds extends string,
+  TAlert extends ObservabilityUptimeAlert
+> = (
   server: UptimeServerSetup,
   libs: UMServerLibs,
   plugins: UptimeCorePluginsSetup
-) => DefaultUptimeAlertInstance<TActionGroupIds>;
+) => DefaultUptimeAlertInstance<TActionGroupIds, TAlert>;
 
-export type LegacyUptimeRuleTypeFactory<TActionGroupIds extends string> = (
+export type LegacyUptimeRuleTypeFactory<
+  TActionGroupIds extends string,
+  TAlert extends DefaultAlert
+> = (
   server: UptimeServerSetup,
   libs: UMServerLibs,
   plugins: UptimeCorePluginsSetup
@@ -49,7 +116,7 @@ export type LegacyUptimeRuleTypeFactory<TActionGroupIds extends string> = (
   AlertInstanceContext,
   TActionGroupIds,
   RecoveredActionGroupId,
-  DefaultAlert
+  TAlert
 >;
 
 export interface MonitorSummary {

@@ -153,6 +153,9 @@ export const legacyRulesNotificationRuleType = ({
           rule: mapKeys(snakeCase, ruleParams),
           alerts: formatAlertsForNotificationActions(signals),
         },
+        payload: {
+          signals_count: signalsCount,
+        },
       });
     }
   },

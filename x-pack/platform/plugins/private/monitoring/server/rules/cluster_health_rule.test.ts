@@ -102,48 +102,54 @@ describe('ClusterHealthRule', () => {
         ...executorOptions,
         params: {},
       } as any);
+
+      const alertStates = [
+        {
+          cluster: { clusterUuid: 'abc123', clusterName: 'testCluster' },
+          ccs,
+          itemLabel: undefined,
+          nodeId: undefined,
+          nodeName: undefined,
+          meta: {
+            ccs,
+            clusterUuid,
+            health: AlertClusterHealthType.Yellow,
+          },
+          ui: {
+            isFiring: true,
+            message: {
+              text: 'Elasticsearch cluster health is yellow.',
+              nextSteps: [
+                {
+                  text: 'Allocate missing replica shards. #start_linkView now#end_link',
+                  tokens: [
+                    {
+                      startToken: '#start_link',
+                      endToken: '#end_link',
+                      type: 'link',
+                      url: 'elasticsearch/indices',
+                    },
+                  ],
+                },
+              ],
+            },
+            severity: AlertSeverity.Warning,
+            triggeredMS: 1,
+            lastCheckedMS: 0,
+          },
+        },
+      ];
+
       expect(services.alertsClient.report).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.setAlertData).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.report).toHaveBeenCalledWith({
         id: 'abc123',
         actionGroup: 'default',
         state: {
-          alertStates: [
-            {
-              cluster: { clusterUuid: 'abc123', clusterName: 'testCluster' },
-              ccs,
-              itemLabel: undefined,
-              nodeId: undefined,
-              nodeName: undefined,
-              meta: {
-                ccs,
-                clusterUuid,
-                health: AlertClusterHealthType.Yellow,
-              },
-              ui: {
-                isFiring: true,
-                message: {
-                  text: 'Elasticsearch cluster health is yellow.',
-                  nextSteps: [
-                    {
-                      text: 'Allocate missing replica shards. #start_linkView now#end_link',
-                      tokens: [
-                        {
-                          startToken: '#start_link',
-                          endToken: '#end_link',
-                          type: 'link',
-                          url: 'elasticsearch/indices',
-                        },
-                      ],
-                    },
-                  ],
-                },
-                severity: AlertSeverity.Warning,
-                triggeredMS: 1,
-                lastCheckedMS: 0,
-              },
-            },
-          ],
+          alertStates,
+        },
+        payload: {
+          alertStates,
         },
       });
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({

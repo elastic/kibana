@@ -62,7 +62,7 @@ export const ruleType: RuleType<
   never,
   'default',
   'hasLandedBackOnEarth',
-  DefaultAlert
+  DefaultAlert & { craft: string }
 > = {
   id: 'example.people-in-space',
   name: 'People In Space Right Now',
@@ -90,7 +90,12 @@ export const ruleType: RuleType<
 
     if (getOperator(op)(peopleInCraft.length, outerSpaceCapacity)) {
       peopleInCraft.forEach(({ craft, name }) => {
-        alertsClient.report({ id: name, actionGroup: 'default', state: { craft } });
+        alertsClient.report({
+          id: name,
+          actionGroup: 'default',
+          state: { craft },
+          payload: { craft },
+        });
       });
     }
 

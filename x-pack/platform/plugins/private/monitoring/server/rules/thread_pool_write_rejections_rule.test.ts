@@ -110,115 +110,117 @@ describe('ThreadpoolWriteRejectionsAlert', () => {
         ...executorOptions,
         params: rule.ruleOptions.defaultParams,
       } as any);
+      const alertStates = [
+        {
+          ccs: null,
+          cluster: { clusterUuid, clusterName },
+          nodeId,
+          nodeName,
+          itemLabel: undefined,
+          meta: {
+            rejectionCount,
+            clusterUuid,
+            type: threadPoolType,
+            nodeId,
+            nodeName,
+            ccs: null,
+          },
+          ui: {
+            isFiring: true,
+            message: {
+              text: `Node #start_link${nodeName}#end_link is reporting ${rejectionCount} ${threadPoolType} rejections at #absolute`,
+              nextSteps: [
+                {
+                  text: '#start_linkMonitor this node#end_link',
+                  tokens: [
+                    {
+                      startToken: '#start_link',
+                      endToken: '#end_link',
+                      type: 'link',
+                      url: 'elasticsearch/nodes/esNode1/advanced',
+                    },
+                  ],
+                },
+                {
+                  text: '#start_linkOptimize complex queries#end_link',
+                  tokens: [
+                    {
+                      startToken: '#start_link',
+                      endToken: '#end_link',
+                      type: 'docLink',
+                      partialUrl:
+                        '{elasticWebsiteUrl}blog/advanced-tuning-finding-and-fixing-slow-elasticsearch-queries',
+                    },
+                  ],
+                },
+                {
+                  text: '#start_linkAdd more nodes#end_link',
+                  tokens: [
+                    {
+                      startToken: '#start_link',
+                      endToken: '#end_link',
+                      type: 'docLink',
+                      partialUrl:
+                        '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/add-elasticsearch-nodes.html',
+                    },
+                  ],
+                },
+                {
+                  text: '#start_linkResize your deployment (ECE)#end_link',
+                  tokens: [
+                    {
+                      startToken: '#start_link',
+                      endToken: '#end_link',
+                      type: 'docLink',
+                      partialUrl:
+                        '{elasticWebsiteUrl}guide/en/cloud-enterprise/current/ece-resize-deployment.html',
+                    },
+                  ],
+                },
+                {
+                  text: '#start_linkThread pool settings#end_link',
+                  tokens: [
+                    {
+                      startToken: '#start_link',
+                      endToken: '#end_link',
+                      type: 'docLink',
+                      partialUrl:
+                        '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/modules-threadpool.html',
+                    },
+                  ],
+                },
+              ],
+              tokens: [
+                {
+                  startToken: '#absolute',
+                  type: 'time',
+                  isAbsolute: true,
+                  isRelative: false,
+                  timestamp: 1,
+                },
+                {
+                  startToken: '#start_link',
+                  endToken: '#end_link',
+                  type: 'link',
+                  url: `elasticsearch/nodes/${nodeId}`,
+                },
+              ],
+            },
+            severity: 'danger',
+            triggeredMS: 1,
+            lastCheckedMS: 0,
+          },
+        },
+      ];
       expect(services.alertsClient.report).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.setAlertData).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.report).toHaveBeenCalledWith({
         id: 'esNode1',
         actionGroup: 'default',
         state: {
-          alertStates: [
-            {
-              ccs: null,
-              cluster: { clusterUuid, clusterName },
-              nodeId,
-              nodeName,
-              itemLabel: undefined,
-              meta: {
-                rejectionCount,
-                clusterUuid,
-                type: threadPoolType,
-                nodeId,
-                nodeName,
-                ccs: null,
-              },
-              ui: {
-                isFiring: true,
-                message: {
-                  text: `Node #start_link${nodeName}#end_link is reporting ${rejectionCount} ${threadPoolType} rejections at #absolute`,
-                  nextSteps: [
-                    {
-                      text: '#start_linkMonitor this node#end_link',
-                      tokens: [
-                        {
-                          startToken: '#start_link',
-                          endToken: '#end_link',
-                          type: 'link',
-                          url: 'elasticsearch/nodes/esNode1/advanced',
-                        },
-                      ],
-                    },
-                    {
-                      text: '#start_linkOptimize complex queries#end_link',
-                      tokens: [
-                        {
-                          startToken: '#start_link',
-                          endToken: '#end_link',
-                          type: 'docLink',
-                          partialUrl:
-                            '{elasticWebsiteUrl}blog/advanced-tuning-finding-and-fixing-slow-elasticsearch-queries',
-                        },
-                      ],
-                    },
-                    {
-                      text: '#start_linkAdd more nodes#end_link',
-                      tokens: [
-                        {
-                          startToken: '#start_link',
-                          endToken: '#end_link',
-                          type: 'docLink',
-                          partialUrl:
-                            '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/add-elasticsearch-nodes.html',
-                        },
-                      ],
-                    },
-                    {
-                      text: '#start_linkResize your deployment (ECE)#end_link',
-                      tokens: [
-                        {
-                          startToken: '#start_link',
-                          endToken: '#end_link',
-                          type: 'docLink',
-                          partialUrl:
-                            '{elasticWebsiteUrl}guide/en/cloud-enterprise/current/ece-resize-deployment.html',
-                        },
-                      ],
-                    },
-                    {
-                      text: '#start_linkThread pool settings#end_link',
-                      tokens: [
-                        {
-                          startToken: '#start_link',
-                          endToken: '#end_link',
-                          type: 'docLink',
-                          partialUrl:
-                            '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/modules-threadpool.html',
-                        },
-                      ],
-                    },
-                  ],
-                  tokens: [
-                    {
-                      startToken: '#absolute',
-                      type: 'time',
-                      isAbsolute: true,
-                      isRelative: false,
-                      timestamp: 1,
-                    },
-                    {
-                      startToken: '#start_link',
-                      endToken: '#end_link',
-                      type: 'link',
-                      url: `elasticsearch/nodes/${nodeId}`,
-                    },
-                  ],
-                },
-                severity: 'danger',
-                triggeredMS: 1,
-                lastCheckedMS: 0,
-              },
-            },
-          ],
+          alertStates,
         },
+        payload: { alertStates },
       });
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'esNode1',
@@ -274,115 +276,117 @@ describe('ThreadpoolWriteRejectionsAlert', () => {
         params: rule.ruleOptions.defaultParams,
       } as any);
       const count = 1;
+      const alertStates = [
+        {
+          ccs: 'testCluster',
+          cluster: { clusterUuid, clusterName },
+          nodeId,
+          nodeName,
+          itemLabel: undefined,
+          meta: {
+            rejectionCount,
+            clusterUuid,
+            type: threadPoolType,
+            nodeId,
+            nodeName,
+            ccs: 'testCluster',
+          },
+          ui: {
+            isFiring: true,
+            message: {
+              text: `Node #start_link${nodeName}#end_link is reporting ${rejectionCount} ${threadPoolType} rejections at #absolute`,
+              nextSteps: [
+                {
+                  text: '#start_linkMonitor this node#end_link',
+                  tokens: [
+                    {
+                      startToken: '#start_link',
+                      endToken: '#end_link',
+                      type: 'link',
+                      url: 'elasticsearch/nodes/esNode1/advanced',
+                    },
+                  ],
+                },
+                {
+                  text: '#start_linkOptimize complex queries#end_link',
+                  tokens: [
+                    {
+                      startToken: '#start_link',
+                      endToken: '#end_link',
+                      type: 'docLink',
+                      partialUrl:
+                        '{elasticWebsiteUrl}blog/advanced-tuning-finding-and-fixing-slow-elasticsearch-queries',
+                    },
+                  ],
+                },
+                {
+                  text: '#start_linkAdd more nodes#end_link',
+                  tokens: [
+                    {
+                      startToken: '#start_link',
+                      endToken: '#end_link',
+                      type: 'docLink',
+                      partialUrl:
+                        '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/add-elasticsearch-nodes.html',
+                    },
+                  ],
+                },
+                {
+                  text: '#start_linkResize your deployment (ECE)#end_link',
+                  tokens: [
+                    {
+                      startToken: '#start_link',
+                      endToken: '#end_link',
+                      type: 'docLink',
+                      partialUrl:
+                        '{elasticWebsiteUrl}guide/en/cloud-enterprise/current/ece-resize-deployment.html',
+                    },
+                  ],
+                },
+                {
+                  text: '#start_linkThread pool settings#end_link',
+                  tokens: [
+                    {
+                      startToken: '#start_link',
+                      endToken: '#end_link',
+                      type: 'docLink',
+                      partialUrl:
+                        '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/modules-threadpool.html',
+                    },
+                  ],
+                },
+              ],
+              tokens: [
+                {
+                  startToken: '#absolute',
+                  type: 'time',
+                  isAbsolute: true,
+                  isRelative: false,
+                  timestamp: 1,
+                },
+                {
+                  startToken: '#start_link',
+                  endToken: '#end_link',
+                  type: 'link',
+                  url: `elasticsearch/nodes/${nodeId}`,
+                },
+              ],
+            },
+            severity: 'danger',
+            triggeredMS: 1,
+            lastCheckedMS: 0,
+          },
+        },
+      ];
       expect(services.alertsClient.report).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.setAlertData).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.report).toHaveBeenCalledWith({
         id: 'esNode1',
         actionGroup: 'default',
         state: {
-          alertStates: [
-            {
-              ccs: 'testCluster',
-              cluster: { clusterUuid, clusterName },
-              nodeId,
-              nodeName,
-              itemLabel: undefined,
-              meta: {
-                rejectionCount,
-                clusterUuid,
-                type: threadPoolType,
-                nodeId,
-                nodeName,
-                ccs: 'testCluster',
-              },
-              ui: {
-                isFiring: true,
-                message: {
-                  text: `Node #start_link${nodeName}#end_link is reporting ${rejectionCount} ${threadPoolType} rejections at #absolute`,
-                  nextSteps: [
-                    {
-                      text: '#start_linkMonitor this node#end_link',
-                      tokens: [
-                        {
-                          startToken: '#start_link',
-                          endToken: '#end_link',
-                          type: 'link',
-                          url: 'elasticsearch/nodes/esNode1/advanced',
-                        },
-                      ],
-                    },
-                    {
-                      text: '#start_linkOptimize complex queries#end_link',
-                      tokens: [
-                        {
-                          startToken: '#start_link',
-                          endToken: '#end_link',
-                          type: 'docLink',
-                          partialUrl:
-                            '{elasticWebsiteUrl}blog/advanced-tuning-finding-and-fixing-slow-elasticsearch-queries',
-                        },
-                      ],
-                    },
-                    {
-                      text: '#start_linkAdd more nodes#end_link',
-                      tokens: [
-                        {
-                          startToken: '#start_link',
-                          endToken: '#end_link',
-                          type: 'docLink',
-                          partialUrl:
-                            '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/add-elasticsearch-nodes.html',
-                        },
-                      ],
-                    },
-                    {
-                      text: '#start_linkResize your deployment (ECE)#end_link',
-                      tokens: [
-                        {
-                          startToken: '#start_link',
-                          endToken: '#end_link',
-                          type: 'docLink',
-                          partialUrl:
-                            '{elasticWebsiteUrl}guide/en/cloud-enterprise/current/ece-resize-deployment.html',
-                        },
-                      ],
-                    },
-                    {
-                      text: '#start_linkThread pool settings#end_link',
-                      tokens: [
-                        {
-                          startToken: '#start_link',
-                          endToken: '#end_link',
-                          type: 'docLink',
-                          partialUrl:
-                            '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/modules-threadpool.html',
-                        },
-                      ],
-                    },
-                  ],
-                  tokens: [
-                    {
-                      startToken: '#absolute',
-                      type: 'time',
-                      isAbsolute: true,
-                      isRelative: false,
-                      timestamp: 1,
-                    },
-                    {
-                      startToken: '#start_link',
-                      endToken: '#end_link',
-                      type: 'link',
-                      url: `elasticsearch/nodes/${nodeId}`,
-                    },
-                  ],
-                },
-                severity: 'danger',
-                triggeredMS: 1,
-                lastCheckedMS: 0,
-              },
-            },
-          ],
+          alertStates,
         },
+        payload: { alertStates },
       });
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'esNode1',

@@ -27,7 +27,7 @@ import {
 } from '@kbn/observability-plugin/common';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { asyncForEach } from '@kbn/std';
-import type { MonitorSummary, UptimeAlertTypeFactory } from './types';
+import type { MonitorSummary, StatusCheckAlert, UptimeAlertTypeFactory } from './types';
 import type {
   StatusCheckFilters,
   Ping,
@@ -284,7 +284,7 @@ const uniqueAvailMonitorIds = (items: GetMonitorAvailabilityResult[]): Set<strin
     new Set<string>()
   );
 
-export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
+export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds, StatusCheckAlert> = (
   server,
   libs,
   plugins
@@ -398,20 +398,47 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
 
         const statusMessage = getStatusMessage(monitorStatusMessageParams);
         const monitorSummary = getMonitorSummary(monitorInfo, statusMessage);
+
         const alertId = getInstanceId(monitorInfo, monitorLoc.location);
         const context = {
           ...monitorSummary,
           statusMessage,
         };
 
+        const legacyState = updateState(state, true);
+
         const { uuid, start } = alertsClient.report({
           id: alertId,
           actionGroup: MONITOR_STATUS.id,
-          payload: getMonitorAlertDocument(monitorSummary),
+          payload: {
+            ...getMonitorAlertDocument(monitorSummary),
+            // state
+            'kibana.alert.current_trigger_started': legacyState.currentTriggerStarted,
+            'kibana.alert.first_checked_at': legacyState.firstCheckedAt,
+            'kibana.alert.first_triggered_at': legacyState.firstTriggeredAt,
+            'kibana.alert.is_triggered': legacyState.isTriggered,
+            'kibana.alert.last_triggered_at': legacyState.lastTriggeredAt,
+            'kibana.alert.last_checked_at': legacyState.lastCheckedAt,
+            'kibana.alert.last_resolved_at': legacyState.currentTriggerStarted,
+
+            // context
+            'kibana.alert.status_message': context.statusMessage,
+            // checkedAt,             --> already in monitorSummary as 'checkedAt'
+            // monitorUrl             --> already in monitorSummary as 'url.full'
+            // monitorId,             --> already in monitorSummary as 'monitor.id'
+            // configId,              --> already in monitorSummary as 'configId'
+            // monitorName,           --> already in monitorSummary as 'monitor.name'
+            // monitorType,           --> already in monitorSummary as 'monitor.type'
+            // latestErrorMessage,    --> already in monitorSummary as 'error.message'
+            // observerLocation       --> already in monitorSummary as 'observer.geo.name'
+            // observerName           --> already in monitorSummary as 'observer.name'
+            // observerHostname       --> already in monitorSummary as 'agent.name'
+            // monitorTags            --> already in monitorSummary as 'tags'
+          },
           state: {
             ...state,
             ...context,
-            ...updateState(state, true),
+            ...legacyState,
           },
         });
 
@@ -499,12 +526,38 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
         statusMessage,
       };
 
+      const legacyState = updateState(state, true);
+
       const { uuid, start } = alertsClient.report({
         id: alertId,
         actionGroup: MONITOR_STATUS.id,
-        payload: getMonitorAlertDocument(monitorSummary),
+        payload: {
+          ...getMonitorAlertDocument(monitorSummary),
+          // state
+          'kibana.alert.current_trigger_started': legacyState.currentTriggerStarted,
+          'kibana.alert.first_checked_at': legacyState.firstCheckedAt,
+          'kibana.alert.first_triggered_at': legacyState.firstTriggeredAt,
+          'kibana.alert.is_triggered': legacyState.isTriggered,
+          'kibana.alert.last_triggered_at': legacyState.lastTriggeredAt,
+          'kibana.alert.last_checked_at': legacyState.lastCheckedAt,
+          'kibana.alert.last_resolved_at': legacyState.currentTriggerStarted,
+
+          // context
+          'kibana.alert.status_message': context.statusMessage,
+          // checkedAt,
+          // monitorUrl             --> already in monitorSummary as 'url.full'
+          // monitorId,             --> already in monitorSummary as 'monitor.id'
+          // configId,              --> already in monitorSummary as 'configId'
+          // monitorName,           --> already in monitorSummary as 'monitor.name'
+          // monitorType,           --> already in monitorSummary as 'monitor.type'
+          // latestErrorMessage,    --> already in monitorSummary as 'error.message'
+          // observerLocation       --> already in monitorSummary as 'observer.geo.name'
+          // observerName           --> already in monitorSummary as 'observer.name'
+          // observerHostname       --> already in monitorSummary as 'agent.name'
+          // monitorTags            --> already in monitorSummary as 'tags'
+        },
         state: {
-          ...updateState(state, true),
+          ...legacyState,
           ...context,
         },
       });

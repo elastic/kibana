@@ -154,6 +154,19 @@ describe('tls alert', () => {
           id: `${cert.common_name}-${cert.issuer?.replace(/\s/g, '_')}-${cert.sha256}`,
           actionGroup: 'xpack.uptime.alerts.actionGroups.tlsCertificate',
           state: expect.objectContaining(context),
+          payload: {
+            'certs.common_name': expect.any(String),
+            'certs.issuer': 'Sample issuer',
+            'certs.status': 'expired',
+            'certs.summary': expect.any(String),
+            'kibana.alert.current_trigger_started': 'date',
+            'kibana.alert.first_checked_at': 'date',
+            'kibana.alert.first_triggered_at': 'date',
+            'kibana.alert.is_triggered': true,
+            'kibana.alert.last_checked_at': 'date',
+            'kibana.alert.last_resolved_at': 'date',
+            'kibana.alert.last_triggered_at': 'date',
+          },
         });
 
         expect(alertsClient.setAlertData).toBeCalledWith({

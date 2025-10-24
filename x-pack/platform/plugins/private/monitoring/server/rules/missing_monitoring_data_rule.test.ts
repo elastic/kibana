@@ -109,64 +109,66 @@ describe('MissingMonitoringDataRule', () => {
         params: rule.ruleOptions.defaultParams,
       } as any);
       const count = 1;
+      const alertStates = [
+        {
+          ccs: undefined,
+          cluster: { clusterUuid, clusterName },
+          nodeId,
+          nodeName,
+          gapDuration,
+          itemLabel: undefined,
+          meta: {
+            clusterUuid,
+            gapDuration,
+            limit: 86400000,
+            nodeId,
+            nodeName,
+          },
+          ui: {
+            isFiring: true,
+            message: {
+              text: 'For the past an hour, we have not detected any monitoring data from the Elasticsearch node: esName1, starting at #absolute',
+              nextSteps: [
+                {
+                  text: '#start_linkView all Elasticsearch nodes#end_link',
+                  tokens: [
+                    {
+                      startToken: '#start_link',
+                      endToken: '#end_link',
+                      type: 'link',
+                      url: 'elasticsearch/nodes',
+                    },
+                  ],
+                },
+                {
+                  text: 'Verify monitoring settings on the node',
+                },
+              ],
+              tokens: [
+                {
+                  startToken: '#absolute',
+                  type: 'time',
+                  isAbsolute: true,
+                  isRelative: false,
+                  timestamp: 1,
+                },
+              ],
+            },
+            severity: 'danger',
+            triggeredMS: 1,
+            lastCheckedMS: 0,
+          },
+        },
+      ];
       expect(services.alertsClient.report).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.setAlertData).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.report).toHaveBeenCalledWith({
         id: 'esNode1',
         actionGroup: 'default',
         state: {
-          alertStates: [
-            {
-              ccs: undefined,
-              cluster: { clusterUuid, clusterName },
-              nodeId,
-              nodeName,
-              gapDuration,
-              itemLabel: undefined,
-              meta: {
-                clusterUuid,
-                gapDuration,
-                limit: 86400000,
-                nodeId,
-                nodeName,
-              },
-              ui: {
-                isFiring: true,
-                message: {
-                  text: 'For the past an hour, we have not detected any monitoring data from the Elasticsearch node: esName1, starting at #absolute',
-                  nextSteps: [
-                    {
-                      text: '#start_linkView all Elasticsearch nodes#end_link',
-                      tokens: [
-                        {
-                          startToken: '#start_link',
-                          endToken: '#end_link',
-                          type: 'link',
-                          url: 'elasticsearch/nodes',
-                        },
-                      ],
-                    },
-                    {
-                      text: 'Verify monitoring settings on the node',
-                    },
-                  ],
-                  tokens: [
-                    {
-                      startToken: '#absolute',
-                      type: 'time',
-                      isAbsolute: true,
-                      isRelative: false,
-                      timestamp: 1,
-                    },
-                  ],
-                },
-                severity: 'danger',
-                triggeredMS: 1,
-                lastCheckedMS: 0,
-              },
-            },
-          ],
+          alertStates,
         },
+        payload: { alertStates },
       });
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'esNode1',
@@ -224,65 +226,68 @@ describe('MissingMonitoringDataRule', () => {
         params: rule.ruleOptions.defaultParams,
       } as any);
       const count = 1;
+      const alertStates = [
+        {
+          ccs: 'testCluster',
+          cluster: { clusterUuid, clusterName },
+          nodeId,
+          nodeName,
+          gapDuration,
+          itemLabel: undefined,
+          meta: {
+            ccs: 'testCluster',
+            clusterUuid,
+            gapDuration,
+            limit: 86400000,
+            nodeId,
+            nodeName,
+          },
+          ui: {
+            isFiring: true,
+            message: {
+              text: 'For the past an hour, we have not detected any monitoring data from the Elasticsearch node: esName1, starting at #absolute',
+              nextSteps: [
+                {
+                  text: '#start_linkView all Elasticsearch nodes#end_link',
+                  tokens: [
+                    {
+                      startToken: '#start_link',
+                      endToken: '#end_link',
+                      type: 'link',
+                      url: 'elasticsearch/nodes',
+                    },
+                  ],
+                },
+                {
+                  text: 'Verify monitoring settings on the node',
+                },
+              ],
+              tokens: [
+                {
+                  startToken: '#absolute',
+                  type: 'time',
+                  isAbsolute: true,
+                  isRelative: false,
+                  timestamp: 1,
+                },
+              ],
+            },
+            severity: 'danger',
+            triggeredMS: 1,
+            lastCheckedMS: 0,
+          },
+        },
+      ];
+
       expect(services.alertsClient.report).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.setAlertData).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.report).toHaveBeenCalledWith({
         id: 'esNode1',
         actionGroup: 'default',
         state: {
-          alertStates: [
-            {
-              ccs: 'testCluster',
-              cluster: { clusterUuid, clusterName },
-              nodeId,
-              nodeName,
-              gapDuration,
-              itemLabel: undefined,
-              meta: {
-                ccs: 'testCluster',
-                clusterUuid,
-                gapDuration,
-                limit: 86400000,
-                nodeId,
-                nodeName,
-              },
-              ui: {
-                isFiring: true,
-                message: {
-                  text: 'For the past an hour, we have not detected any monitoring data from the Elasticsearch node: esName1, starting at #absolute',
-                  nextSteps: [
-                    {
-                      text: '#start_linkView all Elasticsearch nodes#end_link',
-                      tokens: [
-                        {
-                          startToken: '#start_link',
-                          endToken: '#end_link',
-                          type: 'link',
-                          url: 'elasticsearch/nodes',
-                        },
-                      ],
-                    },
-                    {
-                      text: 'Verify monitoring settings on the node',
-                    },
-                  ],
-                  tokens: [
-                    {
-                      startToken: '#absolute',
-                      type: 'time',
-                      isAbsolute: true,
-                      isRelative: false,
-                      timestamp: 1,
-                    },
-                  ],
-                },
-                severity: 'danger',
-                triggeredMS: 1,
-                lastCheckedMS: 0,
-              },
-            },
-          ],
+          alertStates,
         },
+        payload: { alertStates },
       });
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'esNode1',

@@ -93,6 +93,8 @@ export type LogThresholdRuleTypeState = RuleTypeState; // no specific state used
 export type LogThresholdAlertState = AlertState; // no specific state used
 export type LogThresholdAlertContext = AlertContext; // no specific instance context used
 
+export const ALERT_STATE = 'kibana.alert.alert_state';
+
 export type LogThresholdAlert = Omit<
   ObservabilityLogsAlert,
   'kibana.alert.evaluation.values' | 'kibana.alert.group'
@@ -100,6 +102,7 @@ export type LogThresholdAlert = Omit<
   // Defining a custom type for this because the schema generation script doesn't allow explicit null values
   'kibana.alert.evaluation.values'?: Array<number | null>;
   [ALERT_GROUP]?: Group[];
+  [ALERT_STATE]?: AlertStates;
 };
 
 export type LogThresholdAlertReporter = (
@@ -217,6 +220,7 @@ export const createLogThresholdExecutor =
               [ALERT_GROUP]: groups,
               [ALERT_GROUPING]: grouping,
               [ALERT_INDEX_PATTERN]: indices,
+              [ALERT_STATE]: AlertStates.ALERT,
               ...flattenAdditionalContext(rootLevelContext),
               ...getEcsGroupsFromFlattenGrouping(flattenGrouping),
             };

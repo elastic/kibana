@@ -41,7 +41,7 @@ import { fetchEsQuery } from './lib/fetch_es_query';
 import { fetchSearchSourceQuery } from './lib/fetch_search_source_query';
 import { isEsqlQueryRule, isSearchSourceRule } from './util';
 import { fetchEsqlQuery } from './lib/fetch_esql_query';
-import { ALERT_EVALUATION_CONDITIONS, ALERT_TITLE } from '..';
+import { ALERT_EVALUATION_CONDITIONS, ALERT_LATEST_TIMESTAMP, ALERT_TITLE } from '..';
 
 export async function executor(
   core: CoreSetup,
@@ -186,7 +186,7 @@ export async function executor(
     alertsClient.report({
       id,
       actionGroup: ActionGroupId,
-      state: { latestTimestamp, dateStart, dateEnd },
+      state: { latestTimestamp, dateStart, dateEnd }, // We don't use dateStart and dateEnd. We generate them from the params
       context: actionContext,
       payload: {
         [ALERT_URL]: actionContext.link,
@@ -196,6 +196,7 @@ export async function executor(
         [ALERT_EVALUATION_VALUE]: `${actionContext.value}`,
         [ALERT_EVALUATION_THRESHOLD]: params.threshold?.length === 1 ? params.threshold[0] : null,
         [ALERT_GROUPING]: groupingObject,
+        [ALERT_LATEST_TIMESTAMP]: latestTimestamp,
         ...ecsGroups,
         ...actionContext.sourceFields,
       },

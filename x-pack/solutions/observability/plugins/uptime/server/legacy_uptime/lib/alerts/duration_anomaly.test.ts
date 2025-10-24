@@ -200,7 +200,9 @@ describe('duration anomaly alert', () => {
       mockAnomaliesResult.anomalies.forEach((anomaly, index) => {
         const slowestResponse = Math.round(anomaly.actualSort / 1000);
         const typicalResponse = Math.round(anomaly.typicalSort / 1000);
-        expect(alertsClient.report).toHaveBeenCalledWith({
+
+        const nthCall = index + 1;
+        expect(alertsClient.report).toHaveBeenNthCalledWith(nthCall, {
           id: `${DURATION_ANOMALY.id}${index}`,
           actionGroup: DURATION_ANOMALY.id,
           payload: {
@@ -219,6 +221,18 @@ describe('duration anomaly alert', () => {
 Response times as high as ${slowestResponse} ms have been detected from location ${
               anomaly.entityValue
             }. Expected response time is ${typicalResponse} ms.`,
+            'anomaly.expected_response_time': nthCall === 1 ? '10 ms' : '20 ms',
+            'anomaly.slowest_anomaly_response': nthCall === 1 ? '200 ms' : '300 ms',
+            'anomaly.severity': nthCall === 1 ? 'minor' : 'warning',
+            'anomaly.severity_score': nthCall === 1 ? 25 : 10,
+            'anomaly.monitor': 'uptime-monitor',
+            'kibana.alert.current_trigger_started': 'date',
+            'kibana.alert.first_checked_at': 'date',
+            'kibana.alert.first_triggered_at': 'date',
+            'kibana.alert.is_triggered': true,
+            'kibana.alert.last_checked_at': 'date',
+            'kibana.alert.last_resolved_at': 'date',
+            'kibana.alert.last_triggered_at': 'date',
           },
           state: {
             firstCheckedAt: 'date',

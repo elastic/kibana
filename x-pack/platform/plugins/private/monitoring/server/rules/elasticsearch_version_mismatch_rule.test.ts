@@ -106,36 +106,40 @@ describe('ElasticsearchVersionMismatchAlert', () => {
         ...executorOptions,
         params: rule.ruleOptions.defaultParams,
       } as any);
+
+      const alertStates = [
+        {
+          cluster: { clusterUuid: 'abc123', clusterName: 'testCluster' },
+          ccs,
+          itemLabel: undefined,
+          nodeId: undefined,
+          nodeName: undefined,
+          meta: {
+            ccs,
+            clusterUuid,
+            versions: ['8.0.0', '7.2.1'],
+          },
+          ui: {
+            isFiring: true,
+            message: {
+              text: 'Multiple versions of Elasticsearch (8.0.0, 7.2.1) running in this cluster.',
+            },
+            severity: 'warning',
+            triggeredMS: 1,
+            lastCheckedMS: 0,
+          },
+        },
+      ];
+
       expect(services.alertsClient.report).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.setAlertData).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.report).toHaveBeenCalledWith({
         id: 'abc123',
         actionGroup: 'default',
         state: {
-          alertStates: [
-            {
-              cluster: { clusterUuid: 'abc123', clusterName: 'testCluster' },
-              ccs,
-              itemLabel: undefined,
-              nodeId: undefined,
-              nodeName: undefined,
-              meta: {
-                ccs,
-                clusterUuid,
-                versions: ['8.0.0', '7.2.1'],
-              },
-              ui: {
-                isFiring: true,
-                message: {
-                  text: 'Multiple versions of Elasticsearch (8.0.0, 7.2.1) running in this cluster.',
-                },
-                severity: 'warning',
-                triggeredMS: 1,
-                lastCheckedMS: 0,
-              },
-            },
-          ],
+          alertStates,
         },
+        payload: { alertStates },
       });
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'abc123',
