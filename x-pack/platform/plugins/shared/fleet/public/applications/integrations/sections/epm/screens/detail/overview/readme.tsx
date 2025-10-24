@@ -12,10 +12,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeSanitize from 'rehype-sanitize';
 import rehypeRaw from 'rehype-raw';
-import deepmerge from 'deepmerge';
-// Importing GitHub schema from transitive dependency as recommended in rehype-sanitize docs
-// eslint-disable-next-line import/no-extraneous-dependencies
-import githubSchema from 'hast-util-sanitize/lib/github.json';
+import type { Schema } from 'hast-util-sanitize';
 
 import MarkdownIt from 'markdown-it';
 
@@ -46,15 +43,56 @@ export function Readme({
     [toRelativeImage, packageName, version]
   );
 
-  // Extend GitHub's sanitize schema to allow className on spans for tooltip support
-  // The schema already includes 'title' globally and all standard markdown tags
-  const sanitizeSchema = useMemo(
-    () =>
-      deepmerge(githubSchema, {
-        attributes: {
-          span: ['className'], // Add className for tooltip wrapper
-        },
-      }),
+  // Custom sanitize schema that replicates the default allowed tags
+  // while explicitly allowing className and title on spans for tooltip support
+  const sanitizeSchema: Schema = useMemo(
+    () => ({
+      tagNames: [
+        // Text content
+        'p',
+        'span',
+        'div',
+        'br',
+        'strong',
+        'em',
+        'blockquote',
+        'hr',
+        // Links and media
+        'a',
+        'img',
+        // Code
+        'code',
+        'pre',
+        // Lists
+        'ul',
+        'ol',
+        'li',
+        // Tables
+        'table',
+        'thead',
+        'tbody',
+        'tr',
+        'th',
+        'td',
+        // Headings
+        'h1',
+        'h2',
+        'h3',
+        'h4',
+        'h5',
+        'h6',
+        // Details/Summary for collapsible sections
+        'details',
+        'summary',
+      ],
+      attributes: {
+        '*': ['className', 'id'],
+        a: ['href', 'target', 'rel'],
+        img: ['src', 'alt', 'width', 'height'],
+        code: ['className'],
+        span: ['className', 'title'], // For tooltip support
+      },
+    }),
     []
   );
 
