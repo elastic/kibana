@@ -9,3 +9,10 @@ export const STANDARD_INDEX_MODE = 'standard';
 export const LOGSDB_INDEX_MODE = 'logsdb';
 export const TIME_SERIES_MODE = 'time_series';
 export const LOOKUP_INDEX_MODE = 'lookup';
+
+export const IndexMode = {
+  standard: STANDARD_INDEX_MODE,
+  logsdb: LOGSDB_INDEX_MODE,
+  time_series: TIME_SERIES_MODE,
+  lookup: LOOKUP_INDEX_MODE,
+} as const;
