@@ -192,29 +192,12 @@ describe('SelectInferenceId', () => {
       error: null,
     });
 
-    const TestComponent = () => {
-      const { form } = useForm();
-      return (
-        <Form form={form}>
-          <SelectInferenceId data-test-subj="data-inference-endpoint-list" />
-        </Form>
-      );
-    };
+    find('inferenceIdButton').simulate('click');
 
-    const setup = registerTestBed(TestComponent, {
-      memoryRouter: { wrapComponent: false },
-    });
-
-    return act(async () => {
-      const testBed = await setup();
-
-      find('inferenceIdButton').simulate('click');
-
-      const elserOption = findTestSubject(
-        find('data-inference-endpoint-list'),
-        'custom-inference_.elser-2-elasticsearch'
-      );
-      expect(elserOption.prop('aria-checked')).toEqual(true);
-    });
+    const elserOption = findTestSubject(
+      find('data-inference-endpoint-list'),
+      'custom-inference_.elser-2-elasticsearch'
+    );
+    expect(elserOption.prop('aria-checked')).toEqual(true);
   });
 });
