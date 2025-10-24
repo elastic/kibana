@@ -1279,7 +1279,7 @@ describe('Outputs preconfiguration', () => {
 
         expect(mockedOutputService.delete).toBeCalled();
         expect(mockedOutputService.delete).toBeCalledTimes(1);
-        expect(mockedOutputService.delete.mock.calls[0][1]).toEqual('output2');
+        expect(mockedOutputService.delete.mock.calls[0][0]).toEqual('output2');
       });
 
       it('should update default deleted preconfigured output', async () => {
