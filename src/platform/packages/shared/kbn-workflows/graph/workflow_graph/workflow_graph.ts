@@ -38,12 +38,10 @@ export class WorkflowGraph {
   }
 
   public static fromWorkflowDefinition(
-    workflowDefinition: Record<string, unknown>,
+    workflowDefinition: WorkflowYaml,
     defaultSettings?: WorkflowSettings
   ): WorkflowGraph {
-    return new WorkflowGraph(
-      convertToWorkflowGraph(workflowDefinition as WorkflowYaml, defaultSettings)
-    ); // TODO: use the correct type in the parameter
+    return new WorkflowGraph(convertToWorkflowGraph(workflowDefinition, defaultSettings)); // TODO: use the correct type in the parameter
   }
 
   public get topologicalOrder(): string[] {

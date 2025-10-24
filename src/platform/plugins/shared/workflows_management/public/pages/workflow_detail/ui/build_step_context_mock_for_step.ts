@@ -10,6 +10,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 import { v4 as generateUuid } from 'uuid';
+import type { WorkflowYaml } from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import {
@@ -34,8 +35,9 @@ export function buildContextOverrideForStep(
   }
   const workflowDefinition = parsingResult.data;
 
-  const stepSubGraph =
-    WorkflowGraph.fromWorkflowDefinition(workflowDefinition).getStepGraph(stepId);
+  const stepSubGraph = WorkflowGraph.fromWorkflowDefinition(
+    workflowDefinition as WorkflowYaml
+  ).getStepGraph(stepId);
   return buildContextOverride(stepSubGraph, {
     consts: workflowDefinition.consts,
     workflow: {
