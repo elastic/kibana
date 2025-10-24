@@ -244,13 +244,6 @@ export class StorageIndexAdapter<
       name: getBackingIndexName(this.storage.name, 999999),
     });
 
-    if (simulateIndexTemplateResponse.template.settings) {
-      await this.esClient.indices.putSettings({
-        index: name,
-        settings: simulateIndexTemplateResponse.template.settings,
-      });
-    }
-
     if (simulateIndexTemplateResponse.template.mappings) {
       await this.esClient.indices.putMapping({
         index: name,
