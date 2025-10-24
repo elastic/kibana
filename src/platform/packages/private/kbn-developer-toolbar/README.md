@@ -1,51 +1,57 @@
 # @kbn/developer-toolbar
 
-A development toolbar for Kibana that provides real-time performance monitoring and debugging tools.
+A development toolbar for Kibana with real-time performance monitoring and custom debugging tools.
 
 ## Features
 
-- **Performance Monitoring**: Frame jank detection, long task tracking, and memory usage indicators
-- **Console Error Tracking**: Automatic capture and display of console errors and warnings
-- **Environment Info**: Display current environment and build information
-- **Extensible Items**: Add custom toolbar items using React components
+- **Frame Jank Monitor**: Tracks FPS, frame drops, long tasks, and interaction delays
+- **Memory Usage**: Displays current memory consumption and detects potential leaks
+- **Console Errors**: Captures and displays console errors and warnings in real-time
+- **Environment Info**: Shows current environment and build information
+- **Custom Items**: Add your own toolbar items declaratively
 
-## Usage
+## Setup
+
+Wrap your app with the provider and add the toolbar component:
 
 ```tsx
-import {
-  DeveloperToolbar,
-  DeveloperToolbarProvider,
-  DeveloperToolbarItem,
-} from '@kbn/developer-toolbar';
+import { DeveloperToolbar, DeveloperToolbarProvider } from '@kbn/developer-toolbar';
 
-// Wrap your app with the provider
 function App() {
   return (
     <DeveloperToolbarProvider>
       <MyApp />
-      <DeveloperToolbar />
+      <DeveloperToolbar envInfo={{ version: '1.0.0' }} />
     </DeveloperToolbarProvider>
-  );
-}
-
-// Add custom items anywhere in your component tree
-function MyComponent() {
-  return (
-    <div>
-      <h1>My Feature</h1>
-      <DeveloperToolbarItem priority={10} name="Debug Feature">
-        <EuiButtonIcon iconType="inspect" onClick={handleDebug} />
-      </DeveloperToolbarItem>
-    </div>
   );
 }
 ```
 
-## Item System
+## Adding Custom Items
 
-Items are rendered declaratively using `<DeveloperToolbarItem>` components:
+Register custom toolbar items anywhere in your component tree:
 
-- **Auto-registration**: Items appear when components mount, disappear when they unmount
-- **Priority ordering**: Higher priority numbers appear first in the toolbar
-- **Flexible content**: Any React component can be used as item content
-- **Context-aware**: Works across bundle boundaries via global registry
+```tsx
+import { DeveloperToolbarItem } from '@kbn/developer-toolbar';
+import { EuiButtonIcon } from '@elastic/eui';
+
+function MyComponent() {
+  return (
+    <>
+      <h1>My Feature</h1>
+      <DeveloperToolbarItem id="my-debug-tool" priority={10}>
+        <EuiButtonIcon iconType="inspect" onClick={handleDebug} />
+      </DeveloperToolbarItem>
+    </>
+  );
+}
+```
+
+- Items automatically appear when mounted, disappear when unmounted
+- Higher `priority` values appear first
+- Use any React component as content
+- Works across bundle boundaries
+
+## Settings
+
+Settings are automatically saved to localStorage. Users can toggle monitors on/off via the toolbar settings modal (gear icon).
