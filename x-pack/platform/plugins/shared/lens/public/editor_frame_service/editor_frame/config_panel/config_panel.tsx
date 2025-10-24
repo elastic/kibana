@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, memo, useCallback } from 'react';
+import React, { useMemo, memo, useCallback } from 'react';
 import { EuiForm, euiBreakpoint, useEuiTheme, useEuiOverflowScroll } from '@elastic/eui';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import {
@@ -264,13 +264,6 @@ export function LayerPanels(
   const registerLibraryAnnotationGroupFunction = useCallback<
     LayerPanelProps['registerLibraryAnnotationGroup']
   >((groupInfo) => dispatchLens(registerLibraryAnnotationGroup(groupInfo)), [dispatchLens]);
-
-  // if the selected tab got removed, switch back first tab
-  useEffect(() => {
-    if (selectedLayerId === null || (!layerIds.includes(selectedLayerId) && layerIds.length > 0)) {
-      dispatchLens(setSelectedLayerId({ layerId: layerIds[0] }));
-    }
-  }, [dispatchLens, selectedLayerId, layerIds]);
 
   const layerConfigs = useMemo(() => {
     return layerIds.map((layerId) => ({
