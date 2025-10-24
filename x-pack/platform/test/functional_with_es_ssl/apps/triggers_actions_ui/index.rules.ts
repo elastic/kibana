@@ -11,5 +11,6 @@ export default ({ loadTestFile }: FtrProviderContext) => {
   describe('Actions and Triggers app - Rules', function () {
     loadTestFile(require.resolve('./rules_list'));
     loadTestFile(require.resolve('./details'));
+    loadTestFile(require.resolve('./rules_settings'));
   });
 };

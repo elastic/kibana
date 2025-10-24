@@ -13,7 +13,6 @@ export default ({ loadTestFile }: FtrProviderContext) => {
     loadTestFile(require.resolve('./alert_create_flyout'));
     loadTestFile(require.resolve('./connectors'));
     loadTestFile(require.resolve('./logs_list'));
-    loadTestFile(require.resolve('./rules_settings'));
     loadTestFile(require.resolve('./stack_alerts_page'));
     loadTestFile(require.resolve('./maintenance_windows'));
     loadTestFile(require.resolve('./email'));
