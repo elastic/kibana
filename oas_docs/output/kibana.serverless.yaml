@@ -43491,6 +43491,7 @@ paths:
                           type: string
                         type: array
                       prerelease_integrations_enabled:
+                        deprecated: true
                         type: boolean
                       secret_storage_requirements_met:
                         type: boolean
@@ -43591,6 +43592,7 @@ paths:
                     type: string
                   type: array
                 prerelease_integrations_enabled:
+                  deprecated: true
                   type: boolean
       responses:
         '200':
@@ -43630,6 +43632,7 @@ paths:
                           type: string
                         type: array
                       prerelease_integrations_enabled:
+                        deprecated: true
                         type: boolean
                       secret_storage_requirements_met:
                         type: boolean
@@ -67551,7 +67554,7 @@ components:
           example: 404
           type: integer
     Data_views_allownoindex:
-      description: Allows the data view saved object to exist before the data is available.
+      description: Allows the data view saved object to exist before the data is available. Defaults to `false`.
       type: boolean
     Data_views_create_data_view_request_object:
       title: Create data view request
@@ -78359,6 +78362,8 @@ components:
         wasSuccessful:
           description: Whether the response action was successful
           type: boolean
+      required:
+        - command
     Security_Endpoint_Management_API_RunningProcesses:
       allOf:
         - $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'

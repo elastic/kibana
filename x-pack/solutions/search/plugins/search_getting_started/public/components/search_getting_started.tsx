@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import { EuiPageTemplate } from '@elastic/eui';
 import React, { useEffect } from 'react';
-import { AnalyticsEvents } from '../../common';
+import { EuiPageTemplate } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { AnalyticsEvents, PLUGIN_NAME } from '../../common';
 import { useUsageTracker } from '../contexts/usage_tracker_context';
 import { SearchGettingStartedPageTemplate } from '../layout/page_template';
 import { ConsoleTutorialsGroup } from './tutorials/console_tutorials_group';
+import { SearchGettingStartedConnectCode } from './connect_code';
 
 export const SearchGettingStartedPage: React.FC = () => {
   const usageTracker = useUsageTracker();
@@ -21,8 +24,17 @@ export const SearchGettingStartedPage: React.FC = () => {
 
   return (
     <SearchGettingStartedPageTemplate>
+      <KibanaPageTemplate.Header
+        pageTitle={PLUGIN_NAME}
+        description={i18n.translate('xpack.search.gettingStarted.page.description', {
+          defaultMessage: 'Get started with Elasticsearch',
+        })}
+      />
       <EuiPageTemplate.Section paddingSize="xl">
         <ConsoleTutorialsGroup />
+      </EuiPageTemplate.Section>
+      <EuiPageTemplate.Section data-test-subj="search-getting-code-example">
+        <SearchGettingStartedConnectCode />
       </EuiPageTemplate.Section>
     </SearchGettingStartedPageTemplate>
   );

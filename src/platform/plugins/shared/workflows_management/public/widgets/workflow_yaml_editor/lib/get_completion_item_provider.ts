@@ -13,7 +13,7 @@
 
 import moment from 'moment-timezone';
 import type { Document, Node, Pair, Scalar } from 'yaml';
-import { isMap, isPair, isScalar, parseDocument, visit, YAMLParseError } from 'yaml';
+import { isMap, isPair, isScalar, visit, YAMLParseError } from 'yaml';
 import { monaco } from '@kbn/monaco';
 import type { BuiltInStepType, ConnectorTypeInfo, TriggerType } from '@kbn/workflows';
 import {
@@ -27,7 +27,6 @@ import {
   ScheduledTriggerSchema,
   WaitStepSchema,
 } from '@kbn/workflows';
-import { WorkflowGraph } from '@kbn/workflows/graph';
 import { z } from '@kbn/zod';
 import { getCachedAllConnectors } from './connectors_cache';
 import {
@@ -49,6 +48,8 @@ import {
   generateRRuleTriggerSnippet,
   generateTriggerSnippet,
 } from './snippets/generate_trigger_snippet';
+import type { WorkflowEditorState } from './store';
+import type { StepPropInfo } from './store/utils/build_workflow_lookup';
 import {
   LIQUID_BLOCK_END_REGEX,
   LIQUID_BLOCK_FILTER_REGEX,
@@ -61,7 +62,6 @@ import {
 } from '../../../../common/lib/regex';
 import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import { getDetailedTypeDescription, getSchemaAtPath, parsePath } from '../../../../common/lib/zod';
-import { getCachedDynamicConnectorTypes } from '../../../../common/schema';
 import { getContextSchemaForPath } from '../../../features/workflow_context/lib/get_context_for_path';
 
 // Cache for built-in step types extracted from schema
@@ -911,7 +911,8 @@ export function getSuggestion(
   scalarType: Scalar.Type | null,
   shouldBeQuoted: boolean,
   type: string,
-  description?: string
+  description?: string,
+  useCurlyBraces: boolean = true
 ): monaco.languages.CompletionItem {
   let keyToInsert = key;
   const isAt = context.triggerCharacter === '@';
@@ -927,7 +928,11 @@ export function getSuggestion(
   let insertText = keyToInsert;
   let insertTextRules = monaco.languages.CompletionItemInsertTextRule.None;
   if (isAt) {
-    insertText = `{{ ${key}$0 }}`;
+    insertText = `${key}$0`;
+    if (useCurlyBraces) {
+      insertText = `{{ ${insertText} }}`;
+    }
+
     insertTextRules = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
   }
   if (shouldBeQuoted) {
@@ -959,8 +964,7 @@ export function getSuggestion(
 }
 
 export function getCompletionItemProvider(
-  workflowYamlSchema: z.ZodSchema,
-  dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>
+  getState: () => WorkflowEditorState | undefined
 ): monaco.languages.CompletionItemProvider {
   return {
     // Trigger characters for completion:
@@ -972,9 +976,51 @@ export function getCompletionItemProvider(
     triggerCharacters: ['@', '.', ' ', '|', '{'],
     provideCompletionItems: (model, position, completionContext) => {
       try {
-        // Get the latest connector data from cache instead of relying on closure
-        const currentDynamicConnectorTypes =
-          getCachedDynamicConnectorTypes() || dynamicConnectorTypes;
+        const editorState = getState();
+        const currentDynamicConnectorTypes = editorState?.connectors?.connectorTypes;
+        const workflowYamlSchema = editorState?.schemaLoose;
+        const workflowGraph = editorState?.computed?.workflowGraph;
+        const yamlDocument = editorState?.computed?.yamlDocument;
+        const workflowLookup = editorState?.computed?.workflowLookup;
+        const focusedStepId = editorState?.focusedStepId;
+        const absolutePosition = model.getOffsetAt(position);
+        let useCurlyBraces = true;
+
+        if (!yamlDocument) {
+          return {
+            suggestions: [],
+            incomplete: false,
+          };
+        }
+
+        if (completionContext.triggerCharacter === '@') {
+          if (!workflowLookup || !focusedStepId) {
+            return {
+              suggestions: [],
+              incomplete: false,
+            };
+          }
+
+          const focusedStepInfo = workflowLookup.steps[focusedStepId]!;
+
+          const focusedProp: StepPropInfo | undefined = Object.entries(focusedStepInfo.propInfos)
+            .map(([, stepPropInfo]) => stepPropInfo)
+            .find(
+              (stepPropInfo) =>
+                stepPropInfo.valueNode.range &&
+                stepPropInfo.valueNode.range[0] <= absolutePosition &&
+                absolutePosition <= stepPropInfo.valueNode.range[2]
+            );
+
+          if (!focusedProp) {
+            return {
+              suggestions: [],
+              incomplete: false,
+            };
+          }
+
+          useCurlyBraces = focusedProp.keyNode.value !== 'foreach';
+        }
 
         const { lineNumber } = position;
         const line = model.getLineContent(lineNumber);
@@ -1003,16 +1049,11 @@ export function getCompletionItemProvider(
           };
         }
 
-        const absolutePosition = model.getOffsetAt(position);
         const suggestions: monaco.languages.CompletionItem[] = [];
         const value = model.getValue();
 
-        const yamlDocument = parseDocument(value);
-        // TODO: use the yaml document from the store
-        // const yamlDocument = useSelector(selectYamlDocument);
-
         // Try to parse with the strict schema first
-        const result = parseWorkflowYamlToJSON(value, workflowYamlSchema);
+        const result = parseWorkflowYamlToJSON(value, workflowYamlSchema as z.ZodSchema);
 
         // If strict parsing fails, try with a more lenient approach for completion
         let workflowData = 'success' in result && result.success ? result.data : null;
@@ -1042,10 +1083,6 @@ export function getCompletionItemProvider(
           }
         }
 
-        const workflowGraph =
-          workflowData && workflowData.steps
-            ? WorkflowGraph.fromWorkflowDefinition(workflowData)
-            : null;
         const path = getCurrentPath(yamlDocument, absolutePosition);
         const yamlNode = yamlDocument.getIn(path, true);
         const scalarType = isScalar(yamlNode) ? yamlNode.type ?? null : null;
@@ -1062,7 +1099,7 @@ export function getCompletionItemProvider(
           context = getContextSchemaForPath(workflowData, workflowGraph!, path);
         } catch (contextError) {
           // Fallback to the main workflow schema if context detection fails
-          context = workflowYamlSchema;
+          context = workflowYamlSchema as z.ZodType;
         }
 
         const lineUpToCursor = line.substring(0, position.column - 1);
@@ -1152,7 +1189,8 @@ export function getCompletionItemProvider(
                   scalarType,
                   shouldBeQuoted,
                   propertyTypeName,
-                  keySchema?.description
+                  keySchema?.description,
+                  useCurlyBraces
                 )
               );
             }
@@ -1764,7 +1802,8 @@ export function getCompletionItemProvider(
                 scalarType,
                 shouldBeQuoted,
                 propertyTypeName,
-                'Connector type - choose from available connectors'
+                'Connector type - choose from available connectors',
+                useCurlyBraces
               );
 
               // Override the completion to trigger suggest after insertion
@@ -1798,7 +1837,8 @@ export function getCompletionItemProvider(
                 scalarType,
                 shouldBeQuoted,
                 propertyTypeName,
-                currentSchema?.description
+                currentSchema?.description,
+                useCurlyBraces
               )
             );
 
