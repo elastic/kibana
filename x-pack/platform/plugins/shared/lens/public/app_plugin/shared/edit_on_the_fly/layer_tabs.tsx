@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useRef } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { EuiSpacer } from '@elastic/eui';
 
@@ -116,6 +116,13 @@ export function LayerTabs(
   const registerLibraryAnnotationGroupFunction = useCallback<
     LayerPanelProps['registerLibraryAnnotationGroup']
   >((groupInfo) => dispatchLens(registerLibraryAnnotationGroup(groupInfo)), [dispatchLens]);
+
+  // if the selected tab got removed, switch back first tab
+  useEffect(() => {
+    if (selectedLayerId === null || (!layerIds.includes(selectedLayerId) && layerIds.length > 0)) {
+      dispatchLens(setSelectedLayerId({ layerId: layerIds[0] }));
+    }
+  }, [dispatchLens, selectedLayerId, layerIds]);
 
   const hideAddLayerButton = query && isOfAggregateQueryType(query);
 
