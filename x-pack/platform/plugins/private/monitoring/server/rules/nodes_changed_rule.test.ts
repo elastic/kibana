@@ -10,7 +10,7 @@ import { RULE_NODES_CHANGED } from '../../common/constants';
 import { fetchNodesFromClusterStats } from '../lib/alerts/fetch_nodes_from_cluster_stats';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { ALERT_REASON, ALERT_STATE_NAMESPACE } from '@kbn/rule-data-utils';
 
 const RealDate = Date;
 
@@ -196,7 +196,7 @@ describe('NodesChangedAlert', () => {
         state: {
           alertStates,
         },
-        payload: { alertStates },
+        payload: { [ALERT_STATE_NAMESPACE]: alertStates },
       });
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'abc123',
@@ -283,7 +283,7 @@ describe('NodesChangedAlert', () => {
         state: {
           alertStates,
         },
-        payload: { alertStates },
+        payload: { [ALERT_STATE_NAMESPACE]: alertStates },
       });
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'abc123',

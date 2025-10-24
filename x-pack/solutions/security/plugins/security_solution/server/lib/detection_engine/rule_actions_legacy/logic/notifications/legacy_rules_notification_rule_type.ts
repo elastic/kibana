@@ -29,6 +29,7 @@ import { getSignals } from './get_signals';
 import { legacyExtractReferences } from './legacy_saved_object_references/legacy_extract_references';
 // eslint-disable-next-line no-restricted-imports
 import { legacyInjectReferences } from './legacy_saved_object_references/legacy_inject_references';
+import { ALERT_STATE_NAMESPACE } from '@kbn/rule-data-utils';
 
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
@@ -148,13 +149,13 @@ export const legacyRulesNotificationRuleType = ({
         state: {
           signals_count: signalsCount,
         },
+        payload: {
+          [ALERT_STATE_NAMESPACE]: { signals_count: signalsCount },
+        },
         context: {
           results_link: resultsLink,
           rule: mapKeys(snakeCase, ruleParams),
           alerts: formatAlertsForNotificationActions(signals),
-        },
-        payload: {
-          signals_count: signalsCount,
         },
       });
     }

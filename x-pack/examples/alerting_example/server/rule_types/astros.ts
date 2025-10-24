@@ -10,6 +10,7 @@ import type { RuleType, RuleTypeParams, RuleTypeState } from '@kbn/alerting-plug
 import { DEFAULT_AAD_CONFIG, AlertsClientError } from '@kbn/alerting-plugin/server';
 import { schema } from '@kbn/config-schema';
 import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
+import { ALERT_STATE_NAMESPACE } from '@kbn/rule-data-utils';
 import { Operator, Craft, ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
 
 interface PeopleInSpace {
@@ -31,6 +32,10 @@ interface State extends RuleTypeState {
 interface AlertState {
   craft: string;
 }
+
+type AstrosAlert = DefaultAlert & {
+  [ALERT_STATE_NAMESPACE]: AlertState;
+};
 
 function getOperator(op: string) {
   switch (op) {
@@ -62,7 +67,7 @@ export const ruleType: RuleType<
   never,
   'default',
   'hasLandedBackOnEarth',
-  DefaultAlert & { craft: string }
+  AstrosAlert
 > = {
   id: 'example.people-in-space',
   name: 'People In Space Right Now',
@@ -94,7 +99,7 @@ export const ruleType: RuleType<
           id: name,
           actionGroup: 'default',
           state: { craft },
-          payload: { craft },
+          payload: { [ALERT_STATE_NAMESPACE]: { craft } },
         });
       });
     }

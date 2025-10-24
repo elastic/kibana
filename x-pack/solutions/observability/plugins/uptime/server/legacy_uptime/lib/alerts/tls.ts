@@ -18,7 +18,7 @@ import {
   observabilityPaths,
 } from '@kbn/observability-plugin/common';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
-import { ALERT_REASON, ALERT_UUID } from '@kbn/rule-data-utils';
+import { ALERT_REASON, ALERT_STATE_NAMESPACE, ALERT_UUID } from '@kbn/rule-data-utils';
 import { asyncForEach } from '@kbn/std';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { uptimeTLSRuleParamsSchema } from '@kbn/response-ops-rule-params/uptime_tls';
@@ -211,28 +211,17 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds, TlsAlert> =
 
         const alertId = `${cert.common_name}-${cert.issuer?.replace(/\s/g, '_')}-${cert.sha256}`;
 
-        const legacyState = updateState(state, true);
+        const alertState = {
+          ...updateState(state, true),
+          ...summary,
+        };
+
         const { uuid, start } = alertsClient.report({
           id: alertId,
           actionGroup: TLS.id,
-          state: {
-            ...legacyState,
-            ...summary,
-          },
+          state: alertState,
           payload: {
-            // state
-            'kibana.alert.current_trigger_started': legacyState.currentTriggerStarted,
-            'kibana.alert.first_checked_at': legacyState.firstCheckedAt,
-            'kibana.alert.first_triggered_at': legacyState.firstTriggeredAt,
-            'kibana.alert.is_triggered': legacyState.isTriggered,
-            'kibana.alert.last_triggered_at': legacyState.lastTriggeredAt,
-            'kibana.alert.last_checked_at': legacyState.lastCheckedAt,
-            'kibana.alert.last_resolved_at': legacyState.currentTriggerStarted,
-            // summary
-            'certs.common_name': summary.commonName,
-            'certs.issuer': summary.issuer,
-            'certs.summary': summary.summary,
-            'certs.status': summary.status,
+            [ALERT_STATE_NAMESPACE]: alertState,
           },
         });
 

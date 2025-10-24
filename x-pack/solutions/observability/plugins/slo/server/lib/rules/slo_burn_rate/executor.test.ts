@@ -31,6 +31,7 @@ import {
   ALERT_GROUP,
   ALERT_GROUPING,
   ALERT_REASON,
+  ALERT_STATE_NAMESPACE,
   SLO_BURN_RATE_RULE_TYPE_ID,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
@@ -56,7 +57,7 @@ import { SLONotFound } from '../../../errors';
 import { SO_SLO_TYPE } from '../../../saved_objects';
 import { createSLO } from '../../../services/fixtures/slo';
 import type { BurnRateAlert } from './executor';
-import { ALERT_STATE, getRuleExecutor } from './executor';
+import { getRuleExecutor } from './executor';
 import {
   LONG_WINDOW,
   SHORT_WINDOW,
@@ -442,7 +443,7 @@ describe('BurnRateRuleExecutor', () => {
             client: { geo: { continent_name: 'asia' } },
           },
           'client.geo.continent_name': 'asia',
-          [ALERT_STATE]: AlertStates.ALERT,
+          [ALERT_STATE_NAMESPACE]: { alertState: AlertStates.ALERT },
         },
       });
       expect(servicesMock.alertsClient?.report).toBeCalledWith({
@@ -474,7 +475,7 @@ describe('BurnRateRuleExecutor', () => {
             client: { geo: { continent_name: 'asia' } },
           },
           'client.geo.continent_name': 'asia',
-          [ALERT_STATE]: AlertStates.ALERT,
+          [ALERT_STATE_NAMESPACE]: { alertState: AlertStates.ALERT },
         },
       });
       expect(servicesMock.alertsClient?.setAlertData).toHaveBeenCalledTimes(2);
@@ -603,7 +604,7 @@ describe('BurnRateRuleExecutor', () => {
           [ALERT_GROUPING]: {
             group: { by: { field: 'foo' } },
           },
-          [ALERT_STATE]: AlertStates.ALERT,
+          [ALERT_STATE_NAMESPACE]: { alertState: AlertStates.ALERT },
         },
       });
       expect(servicesMock.alertsClient?.report).toBeCalledWith({
@@ -629,7 +630,7 @@ describe('BurnRateRuleExecutor', () => {
           [ALERT_GROUPING]: {
             group: { by: { field: 'bar' } },
           },
-          [ALERT_STATE]: AlertStates.ALERT,
+          [ALERT_STATE_NAMESPACE]: { alertState: AlertStates.ALERT },
         },
       });
       expect(servicesMock.alertsClient?.setAlertData).toHaveBeenNthCalledWith(1, {
@@ -744,7 +745,7 @@ describe('BurnRateRuleExecutor', () => {
           [ALERT_GROUPING]: {
             group: { by: { field: 'foo' } },
           },
-          [ALERT_STATE]: AlertStates.ALERT,
+          [ALERT_STATE_NAMESPACE]: { alertState: AlertStates.ALERT },
         },
       });
       expect(servicesMock.alertsClient!.report).toBeCalledWith({
@@ -770,7 +771,7 @@ describe('BurnRateRuleExecutor', () => {
           [ALERT_GROUPING]: {
             group: { by: { field: 'bar' } },
           },
-          [ALERT_STATE]: AlertStates.ALERT,
+          [ALERT_STATE_NAMESPACE]: { alertState: AlertStates.ALERT },
         },
       });
 

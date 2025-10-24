@@ -20,6 +20,7 @@ import {
   ALERT_GROUPING,
   ALERT_GROUP,
   ALERT_REASON,
+  ALERT_STATE_NAMESPACE,
 } from '@kbn/rule-data-utils';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
@@ -55,11 +56,9 @@ import type {
 } from './types';
 import { AlertStates } from './types';
 
-export const ALERT_STATE = 'kibana.alert.alert_state';
-
 export type BurnRateAlert = Omit<ObservabilitySloAlert, 'kibana.alert.group'> & {
   [ALERT_GROUP]?: Group[];
-  [ALERT_STATE]?: AlertStates;
+  [ALERT_STATE_NAMESPACE]: { alertState: AlertStates };
 };
 
 export const getRuleExecutor = (basePath: IBasePath) =>
@@ -191,7 +190,7 @@ export const getRuleExecutor = (basePath: IBasePath) =>
               [SLO_REVISION_FIELD]: slo.revision,
               [SLO_INSTANCE_ID_FIELD]: instanceId,
               [SLO_DATA_VIEW_ID_FIELD]: slo.indicator.params.dataViewId,
-              [ALERT_STATE]: AlertStates.ALERT,
+              [ALERT_STATE_NAMESPACE]: { alertState: AlertStates.ALERT },
               ...getEcsGroupsFromFlattenGrouping(groupingsFlattened),
             },
           });

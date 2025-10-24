@@ -12,6 +12,7 @@ import { schema } from '@kbn/config-schema';
 import type { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import type { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import { AlertsClientError, DEFAULT_AAD_CONFIG } from '@kbn/alerting-plugin/server';
+import { ALERT_STATE_NAMESPACE } from '@kbn/rule-data-utils';
 import type { LegacyTlsAlert, LegacyUptimeRuleTypeFactory } from './types';
 import { updateState } from './common';
 import { CLIENT_ALERT_TYPES, TLS_LEGACY } from '../../../../common/constants/uptime_alerts';
@@ -166,32 +167,17 @@ export const tlsLegacyRuleFactory: LegacyUptimeRuleTypeFactory<ActionGroupIds, L
         .valueOf();
       const summary = getCertSummary(certs, absoluteExpirationThreshold, absoluteAgeThreshold);
 
-      const legacyState = updateState(state, true);
+      const alertState = {
+        ...updateState(state, true),
+        ...summary,
+      };
 
       alertsClient.report({
         id: TLS_LEGACY.id,
         actionGroup: TLS_LEGACY.id,
-        state: {
-          ...legacyState,
-          ...summary,
-        },
+        state: alertState,
         payload: {
-          // state
-          'kibana.alert.current_trigger_started': legacyState.currentTriggerStarted,
-          'kibana.alert.first_checked_at': legacyState.firstCheckedAt,
-          'kibana.alert.first_triggered_at': legacyState.firstTriggeredAt,
-          'kibana.alert.is_triggered': legacyState.isTriggered,
-          'kibana.alert.last_triggered_at': legacyState.lastTriggeredAt,
-          'kibana.alert.last_checked_at': legacyState.lastCheckedAt,
-          'kibana.alert.last_resolved_at': legacyState.currentTriggerStarted,
-          // summary
-          'certs.count': summary.count,
-          'certs.aging.count': summary.agingCount,
-          'certs.aging.common_name_and_date': summary.agingCommonNameAndDate,
-          'certs.expiring.count': summary.expiringCount,
-          'certs.expiring.common_name_and_date': summary.expiringCommonNameAndDate,
-          'certs.has_aging': summary.hasAging,
-          'certs.has_expired': summary.hasExpired,
+          [ALERT_STATE_NAMESPACE]: alertState,
         },
       });
     }

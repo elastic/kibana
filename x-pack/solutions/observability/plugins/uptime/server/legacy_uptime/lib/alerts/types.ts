@@ -11,6 +11,7 @@ import type {
 } from '@kbn/alerting-plugin/common';
 import type { RuleType } from '@kbn/alerting-plugin/server';
 import type { DefaultAlert, ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
+import type { ALERT_STATE_NAMESPACE } from '@kbn/rule-data-utils';
 import type { UMServerLibs } from '../lib';
 import type { UptimeCorePluginsSetup, UptimeServerSetup } from '../adapters';
 
@@ -22,60 +23,19 @@ import type { UptimeCorePluginsSetup, UptimeServerSetup } from '../adapters';
  */
 
 export type DurationAnomalyAlert = ObservabilityUptimeAlert & {
-  'kibana.alert.current_trigger_started'?: string;
-  'kibana.alert.first_triggered_at'?: string;
-  'kibana.alert.last_triggered_at'?: string;
-  'kibana.alert.last_resolved_at'?: string;
-  'kibana.alert.first_checked_at': string;
-  'kibana.alert.last_checked_at': string;
-  'kibana.alert.is_triggered': boolean;
-  'anomaly.severity': string;
-  'anomaly.severity_score': number;
-  'anomaly.monitor': string;
-  'anomaly.slowest_anomaly_response': string;
-  'anomaly.expected_response_time': string;
+  [ALERT_STATE_NAMESPACE]: AlertInstanceState;
 };
 
 export type StatusCheckAlert = ObservabilityUptimeAlert & {
-  'kibana.alert.current_trigger_started'?: string;
-  'kibana.alert.first_triggered_at'?: string;
-  'kibana.alert.last_triggered_at'?: string;
-  'kibana.alert.last_resolved_at'?: string;
-  'kibana.alert.first_checked_at': string;
-  'kibana.alert.last_checked_at': string;
-  'kibana.alert.is_triggered': boolean;
-  'kibana.alert.status_message': string;
+  [ALERT_STATE_NAMESPACE]: AlertInstanceState;
 };
 
 export type LegacyTlsAlert = ObservabilityUptimeAlert & {
-  'kibana.alert.current_trigger_started'?: string;
-  'kibana.alert.first_triggered_at'?: string;
-  'kibana.alert.last_triggered_at'?: string;
-  'kibana.alert.last_resolved_at'?: string;
-  'kibana.alert.first_checked_at': string;
-  'kibana.alert.last_checked_at': string;
-  'kibana.alert.is_triggered': boolean;
-  'certs.count': number;
-  'certs.aging.count': number;
-  'certs.aging.common_name_and_date': string;
-  'certs.expiring.count': number;
-  'certs.expiring.common_name_and_date': string;
-  'certs.has_aging': boolean | null;
-  'certs.has_expired': boolean | null;
+  [ALERT_STATE_NAMESPACE]: AlertInstanceState;
 };
 
 export type TlsAlert = ObservabilityUptimeAlert & {
-  'kibana.alert.current_trigger_started'?: string;
-  'kibana.alert.first_triggered_at'?: string;
-  'kibana.alert.last_triggered_at'?: string;
-  'kibana.alert.last_resolved_at'?: string;
-  'kibana.alert.first_checked_at': string;
-  'kibana.alert.last_checked_at': string;
-  'kibana.alert.is_triggered': boolean;
-  'certs.common_name': string;
-  'certs.issuer': string;
-  'certs.summary': string;
-  'certs.status': string;
+  [ALERT_STATE_NAMESPACE]: AlertInstanceState;
 };
 
 export type DefaultUptimeAlertInstance<

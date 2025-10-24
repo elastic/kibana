@@ -10,7 +10,7 @@ import { RULE_LARGE_SHARD_SIZE } from '../../common/constants';
 import { fetchIndexShardSize } from '../lib/alerts/fetch_index_shard_size';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { ALERT_REASON, ALERT_STATE_NAMESPACE } from '@kbn/rule-data-utils';
 import { P } from 'oas/dist/extensions-ViDsWf_9.cjs';
 
 type ILargeShardSizeRuleMock = LargeShardSizeRule & {
@@ -205,7 +205,7 @@ describe('LargeShardSizeRule', () => {
         state: {
           alertStates,
         },
-        payload: { alertStates },
+        payload: { [ALERT_STATE_NAMESPACE]: alertStates },
       });
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'abc123:apm-8.0.0-onboarding-2021.06.30',
@@ -330,7 +330,7 @@ describe('LargeShardSizeRule', () => {
         state: {
           alertStates,
         },
-        payload: { alertStates },
+        payload: { [ALERT_STATE_NAMESPACE]: alertStates },
       });
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'abc123:apm-8.0.0-onboarding-2021.06.30',

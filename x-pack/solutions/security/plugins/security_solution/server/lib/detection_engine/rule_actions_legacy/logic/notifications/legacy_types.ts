@@ -20,6 +20,7 @@ import type {
 } from '@kbn/alerting-plugin/server';
 import type { Rule, RuleAction } from '@kbn/alerting-plugin/common';
 import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
+import type { ALERT_STATE_NAMESPACE } from '@kbn/rule-data-utils';
 import { LEGACY_NOTIFICATIONS_ID } from '../../../../../../common/constants';
 
 /**
@@ -88,6 +89,10 @@ export const isLegacyRuleType = (
   return partialRule.alertTypeId === LEGACY_NOTIFICATIONS_ID;
 };
 
+type LegacyNotificationAlert = DefaultAlert & {
+  [ALERT_STATE_NAMESPACE]: { signals_count: number };
+};
+
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
@@ -97,7 +102,7 @@ export type LegacyNotificationExecutorOptions = RuleExecutorOptions<
   AlertInstanceState,
   AlertInstanceContext,
   'default',
-  DefaultAlert & { signals_count: number }
+  LegacyNotificationAlert
 >;
 
 /**

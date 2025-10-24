@@ -10,7 +10,7 @@ import { RULE_CCR_READ_EXCEPTIONS } from '../../common/constants';
 import { fetchCCRReadExceptions } from '../lib/alerts/fetch_ccr_read_exceptions';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { ALERT_REASON, ALERT_STATE_NAMESPACE } from '@kbn/rule-data-utils';
 
 type ICCRReadExceptionsRuleMock = CCRReadExceptionsRule & {
   defaultParams: {
@@ -267,8 +267,6 @@ describe('CCRReadExceptionsRule', () => {
         },
       ];
 
-      const reportPayload = { alertStates };
-
       await type.executor({
         ...executorOptions,
         params: rule.ruleOptions.defaultParams,
@@ -280,7 +278,7 @@ describe('CCRReadExceptionsRule', () => {
         state: {
           alertStates,
         },
-        payload: reportPayload,
+        payload: { [ALERT_STATE_NAMESPACE]: alertStates },
       });
       expect(services.alertsClient.setAlertData).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
@@ -457,7 +455,7 @@ describe('CCRReadExceptionsRule', () => {
         state: {
           alertStates,
         },
-        payload: { alertStates },
+        payload: { [ALERT_STATE_NAMESPACE]: alertStates },
       });
       expect(services.alertsClient.setAlertData).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({

@@ -7,8 +7,8 @@
 
 import type { StackAlert } from '@kbn/alerts-as-data-utils';
 import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { ALERT_STATE_NAMESPACE } from '@kbn/rule-data-utils';
 import type { AlertingServerSetup, StackAlertsStartDeps } from '../types';
-import type { ALERT_LATEST_TIMESTAMP } from './constants';
 
 export interface RegisterRuleTypesParams {
   logger: Logger;
@@ -20,5 +20,9 @@ export interface RegisterRuleTypesParams {
 export type StackAlertType = Omit<StackAlert, 'kibana.alert.evaluation.threshold'> & {
   // Defining a custom type for this because the schema generation script doesn't allow explicit null values
   'kibana.alert.evaluation.threshold'?: string | number | null;
-  [ALERT_LATEST_TIMESTAMP]?: string;
+  [ALERT_STATE_NAMESPACE]?: {
+    latestTimestamp?: string;
+    dateStart?: string;
+    dateEnd?: string;
+  };
 };

@@ -11,6 +11,7 @@ import type { RuleType, RuleTypeState } from '@kbn/alerting-plugin/server';
 import { DEFAULT_AAD_CONFIG, AlertsClientError } from '@kbn/alerting-plugin/server';
 import { schema } from '@kbn/config-schema';
 import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
+import { ALERT_STATE_NAMESPACE } from '@kbn/rule-data-utils';
 import type { AlwaysFiringParams, AlwaysFiringActionGroupIds } from '../../common/constants';
 import { DEFAULT_INSTANCES_TO_GENERATE, ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
 
@@ -21,6 +22,11 @@ interface State extends RuleTypeState {
 interface AlertState {
   triggerdOnCycle: number;
 }
+
+type AlwaysFiringRuleAlert = DefaultAlert & {
+  [ALERT_STATE_NAMESPACE]: AlertState;
+};
+
 const DEFAULT_ACTION_GROUP: ActionGroups = 'small';
 
 function getTShirtSizeByIdAndThreshold(
@@ -50,7 +56,7 @@ export const ruleType: RuleType<
   never,
   AlwaysFiringActionGroupIds,
   never,
-  DefaultAlert & { triggeredOnCycle: number }
+  AlwaysFiringRuleAlert
 > = {
   id: 'example.always-firing',
   name: 'Always firing',
@@ -80,7 +86,7 @@ export const ruleType: RuleType<
           id,
           actionGroup: getTShirtSizeByIdAndThreshold(id, thresholds),
           state: { triggerdOnCycle: count },
-          payload: { triggeredOnCycle: count },
+          payload: { [ALERT_STATE_NAMESPACE]: { triggerdOnCycle: count } },
         });
       });
 

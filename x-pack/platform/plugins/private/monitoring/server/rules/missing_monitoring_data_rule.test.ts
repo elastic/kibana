@@ -10,7 +10,7 @@ import { RULE_MISSING_MONITORING_DATA } from '../../common/constants';
 import { fetchMissingMonitoringData } from '../lib/alerts/fetch_missing_monitoring_data';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { ALERT_REASON, ALERT_STATE_NAMESPACE } from '@kbn/rule-data-utils';
 
 const RealDate = Date;
 
@@ -168,7 +168,7 @@ describe('MissingMonitoringDataRule', () => {
         state: {
           alertStates,
         },
-        payload: { alertStates },
+        payload: { [ALERT_STATE_NAMESPACE]: alertStates },
       });
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'esNode1',
@@ -287,7 +287,7 @@ describe('MissingMonitoringDataRule', () => {
         state: {
           alertStates,
         },
-        payload: { alertStates },
+        payload: { [ALERT_STATE_NAMESPACE]: alertStates },
       });
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'esNode1',

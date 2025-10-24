@@ -10,7 +10,7 @@ import { RULE_THREAD_POOL_SEARCH_REJECTIONS } from '../../common/constants';
 import { fetchThreadPoolRejectionStats } from '../lib/alerts/fetch_thread_pool_rejections_stats';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { ALERT_REASON, ALERT_STATE_NAMESPACE } from '@kbn/rule-data-utils';
 
 const RealDate = Date;
 
@@ -220,7 +220,7 @@ describe('ThreadpoolSearchRejectionsRule', () => {
         state: {
           alertStates,
         },
-        payload: { alertStates },
+        payload: { [ALERT_STATE_NAMESPACE]: alertStates },
       });
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'esNode1',
@@ -386,7 +386,7 @@ describe('ThreadpoolSearchRejectionsRule', () => {
         state: {
           alertStates,
         },
-        payload: { alertStates },
+        payload: { [ALERT_STATE_NAMESPACE]: alertStates },
       });
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'esNode1',

@@ -25,6 +25,7 @@ import type {
 } from '@kbn/alerting-plugin/common';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { parseDuration } from '@kbn/alerting-plugin/common';
+import { ALERT_STATE_NAMESPACE } from '@kbn/rule-data-utils';
 import type {
   AlertState,
   AlertNodeState,
@@ -70,7 +71,9 @@ const defaultRuleOptions = (): RuleOptions => {
   };
 };
 
-type BaseAlert = DefaultAlert & { alertStates: AlertState[] };
+type BaseAlert = DefaultAlert & {
+  [ALERT_STATE_NAMESPACE]: AlertState[];
+};
 
 export class BaseRule {
   protected scopedLogger: Logger;
@@ -355,7 +358,7 @@ export class BaseRule {
               actionGroup: 'default',
               state: alertInstanceState,
               payload: {
-                alertStates: newAlertStates,
+                [ALERT_STATE_NAMESPACE]: newAlertStates,
               },
             });
             this.executeActions(services, alertId, alertInstanceState, null, cluster);

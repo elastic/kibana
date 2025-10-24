@@ -18,7 +18,7 @@ import type { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
 import type { FetchEsQueryOpts } from './lib/fetch_es_query';
 import type { FetchSearchSourceQueryOpts } from './lib/fetch_search_source_query';
 import type { FetchEsqlQueryOpts } from './lib/fetch_esql_query';
-import { ALERT_GROUPING } from '@kbn/rule-data-utils';
+import { ALERT_GROUPING, ALERT_STATE_NAMESPACE } from '@kbn/rule-data-utils';
 
 const logger = loggerMock.create();
 const scopedClusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
@@ -330,6 +330,11 @@ describe('es_query executor', () => {
           'kibana.alert.title': "rule 'test-rule-name' matched query",
           'kibana.alert.url':
             'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+          [ALERT_STATE_NAMESPACE]: {
+            latestTimestamp: undefined,
+            dateStart: new Date(mockNow).toISOString(),
+            dateEnd: new Date(mockNow).toISOString(),
+          },
         },
       });
       expect(mockSetLimitReached).toHaveBeenCalledTimes(1);
@@ -392,6 +397,11 @@ describe('es_query executor', () => {
           'kibana.alert.title': "rule 'test-rule-name' matched query",
           'kibana.alert.url':
             'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+          [ALERT_STATE_NAMESPACE]: {
+            latestTimestamp: undefined,
+            dateStart: new Date(mockNow).toISOString(),
+            dateEnd: new Date(mockNow).toISOString(),
+          },
         },
       });
       expect(mockSetLimitReached).toHaveBeenCalledTimes(1);
@@ -488,6 +498,11 @@ describe('es_query executor', () => {
           'kibana.alert.url':
             'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
           'kibana.alert.grouping': { host: { name: 'host-1' } },
+          [ALERT_STATE_NAMESPACE]: {
+            latestTimestamp: undefined,
+            dateStart: new Date(mockNow).toISOString(),
+            dateEnd: new Date(mockNow).toISOString(),
+          },
         },
       });
       expect(mockReport).toHaveBeenNthCalledWith(2, {
@@ -526,6 +541,11 @@ describe('es_query executor', () => {
           'kibana.alert.url':
             'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
           'kibana.alert.grouping': { host: { name: 'host-2' } },
+          [ALERT_STATE_NAMESPACE]: {
+            latestTimestamp: undefined,
+            dateStart: new Date(mockNow).toISOString(),
+            dateEnd: new Date(mockNow).toISOString(),
+          },
         },
       });
       expect(mockReport).toHaveBeenNthCalledWith(3, {
@@ -564,6 +584,11 @@ describe('es_query executor', () => {
           'kibana.alert.url':
             'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
           'kibana.alert.grouping': { host: { name: 'host-3' } },
+          [ALERT_STATE_NAMESPACE]: {
+            latestTimestamp: undefined,
+            dateStart: new Date(mockNow).toISOString(),
+            dateEnd: new Date(mockNow).toISOString(),
+          },
         },
       });
       expect(mockSetLimitReached).toHaveBeenCalledTimes(1);
@@ -620,6 +645,11 @@ describe('es_query executor', () => {
           'kibana.alert.title': "rule 'test-rule-name' matched query",
           'kibana.alert.url':
             'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+          [ALERT_STATE_NAMESPACE]: {
+            latestTimestamp: undefined,
+            dateStart: new Date(mockNow).toISOString(),
+            dateEnd: new Date(mockNow).toISOString(),
+          },
         },
         state: {
           dateEnd: new Date(mockNow).toISOString(),
@@ -996,6 +1026,11 @@ describe('es_query executor', () => {
           'host.hostname': ['host-1'],
           'host.id': ['1'],
           'host.name': ['host-1'],
+          [ALERT_STATE_NAMESPACE]: {
+            latestTimestamp: undefined,
+            dateStart: new Date(mockNow).toISOString(),
+            dateEnd: new Date(mockNow).toISOString(),
+          },
         },
       });
       expect(mockSetLimitReached).toHaveBeenCalledTimes(1);

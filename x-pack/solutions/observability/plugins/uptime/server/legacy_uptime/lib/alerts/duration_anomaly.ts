@@ -14,6 +14,7 @@ import {
   ALERT_EVALUATION_VALUE,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_REASON,
+  ALERT_STATE_NAMESPACE,
 } from '@kbn/rule-data-utils';
 import type { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import type { MlAnomaliesTableRecord } from '@kbn/ml-anomaly-utils';
@@ -173,7 +174,11 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<
         );
 
         const alertId = DURATION_ANOMALY.id + index;
-        const legacyState = updateState(state, true);
+
+        const alertState = {
+          ...updateState(state, false),
+          ...summary,
+        };
 
         const { start, uuid } = alertsClient?.report({
           id: alertId,
@@ -187,29 +192,9 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<
             [ALERT_EVALUATION_VALUE]: anomaly.actualSort,
             [ALERT_EVALUATION_THRESHOLD]: anomaly.typicalSort,
             [ALERT_REASON]: alertReasonMessage,
-            // state
-            'kibana.alert.current_trigger_started': legacyState.currentTriggerStarted,
-            'kibana.alert.first_checked_at': legacyState.firstCheckedAt,
-            'kibana.alert.first_triggered_at': legacyState.firstTriggeredAt,
-            'kibana.alert.is_triggered': legacyState.isTriggered,
-            'kibana.alert.last_triggered_at': legacyState.lastTriggeredAt,
-            'kibana.alert.last_checked_at': legacyState.lastCheckedAt,
-            'kibana.alert.last_resolved_at': legacyState.currentTriggerStarted,
-            // summary
-            'anomaly.severity': summary.severity,
-            'anomaly.severity_score': summary.severityScore,
-            'anomaly.monitor': summary.monitor,
-            'anomaly.slowest_anomaly_response': summary.slowestAnomalyResponse,
-            'anomaly.expected_response_time': summary.expectedResponseTime,
-            // 'anomaly.anomalyStartTimestamp.'   -> already added as 'anomaly.start'
-            // 'anomaly.monitorUrl'               -> already added as 'url.full'
-            // 'anomaly.observerLocation'         -> already added as 'observer.geo.name'
-            // 'anomaly.bucketSpan'               -> already added as 'anomaly.bucket_span.minutes'
+            [ALERT_STATE_NAMESPACE]: alertState,
           },
-          state: {
-            ...updateState(state, false),
-            ...summary,
-          },
+          state: alertState,
         });
 
         const indexedStartedAt = start ?? startedAt.toISOString();

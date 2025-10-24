@@ -14,7 +14,7 @@ import datemath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 import type { JsonObject } from '@kbn/utility-types';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { ALERT_REASON, ALERT_STATE_NAMESPACE } from '@kbn/rule-data-utils';
 import type { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import { uptimeMonitorStatusRuleParamsSchema } from '@kbn/response-ops-rule-params/uptime_monitor_status';
 import type { AlertsLocatorParams, TimeUnitChar } from '@kbn/observability-plugin/common';
@@ -405,41 +405,20 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds, Sta
           statusMessage,
         };
 
-        const legacyState = updateState(state, true);
+        const alertState = {
+          ...state,
+          ...context,
+          ...updateState(state, true),
+        };
 
         const { uuid, start } = alertsClient.report({
           id: alertId,
           actionGroup: MONITOR_STATUS.id,
           payload: {
             ...getMonitorAlertDocument(monitorSummary),
-            // state
-            'kibana.alert.current_trigger_started': legacyState.currentTriggerStarted,
-            'kibana.alert.first_checked_at': legacyState.firstCheckedAt,
-            'kibana.alert.first_triggered_at': legacyState.firstTriggeredAt,
-            'kibana.alert.is_triggered': legacyState.isTriggered,
-            'kibana.alert.last_triggered_at': legacyState.lastTriggeredAt,
-            'kibana.alert.last_checked_at': legacyState.lastCheckedAt,
-            'kibana.alert.last_resolved_at': legacyState.currentTriggerStarted,
-
-            // context
-            'kibana.alert.status_message': context.statusMessage,
-            // checkedAt,             --> already in monitorSummary as 'checkedAt'
-            // monitorUrl             --> already in monitorSummary as 'url.full'
-            // monitorId,             --> already in monitorSummary as 'monitor.id'
-            // configId,              --> already in monitorSummary as 'configId'
-            // monitorName,           --> already in monitorSummary as 'monitor.name'
-            // monitorType,           --> already in monitorSummary as 'monitor.type'
-            // latestErrorMessage,    --> already in monitorSummary as 'error.message'
-            // observerLocation       --> already in monitorSummary as 'observer.geo.name'
-            // observerName           --> already in monitorSummary as 'observer.name'
-            // observerHostname       --> already in monitorSummary as 'agent.name'
-            // monitorTags            --> already in monitorSummary as 'tags'
+            [ALERT_STATE_NAMESPACE]: alertState,
           },
-          state: {
-            ...state,
-            ...context,
-            ...legacyState,
-          },
+          state: alertState,
         });
 
         const indexedStartedAt = start ?? startedAt.toISOString();
@@ -526,40 +505,19 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds, Sta
         statusMessage,
       };
 
-      const legacyState = updateState(state, true);
+      const alertState = {
+        ...updateState(state, true),
+        ...context,
+      };
 
       const { uuid, start } = alertsClient.report({
         id: alertId,
         actionGroup: MONITOR_STATUS.id,
         payload: {
           ...getMonitorAlertDocument(monitorSummary),
-          // state
-          'kibana.alert.current_trigger_started': legacyState.currentTriggerStarted,
-          'kibana.alert.first_checked_at': legacyState.firstCheckedAt,
-          'kibana.alert.first_triggered_at': legacyState.firstTriggeredAt,
-          'kibana.alert.is_triggered': legacyState.isTriggered,
-          'kibana.alert.last_triggered_at': legacyState.lastTriggeredAt,
-          'kibana.alert.last_checked_at': legacyState.lastCheckedAt,
-          'kibana.alert.last_resolved_at': legacyState.currentTriggerStarted,
-
-          // context
-          'kibana.alert.status_message': context.statusMessage,
-          // checkedAt,
-          // monitorUrl             --> already in monitorSummary as 'url.full'
-          // monitorId,             --> already in monitorSummary as 'monitor.id'
-          // configId,              --> already in monitorSummary as 'configId'
-          // monitorName,           --> already in monitorSummary as 'monitor.name'
-          // monitorType,           --> already in monitorSummary as 'monitor.type'
-          // latestErrorMessage,    --> already in monitorSummary as 'error.message'
-          // observerLocation       --> already in monitorSummary as 'observer.geo.name'
-          // observerName           --> already in monitorSummary as 'observer.name'
-          // observerHostname       --> already in monitorSummary as 'agent.name'
-          // monitorTags            --> already in monitorSummary as 'tags'
+          [ALERT_STATE_NAMESPACE]: alertState,
         },
-        state: {
-          ...legacyState,
-          ...context,
-        },
+        state: alertState,
       });
 
       const indexedStartedAt = start ?? startedAt.toISOString();

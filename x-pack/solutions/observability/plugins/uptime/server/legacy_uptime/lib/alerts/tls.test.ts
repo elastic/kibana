@@ -12,6 +12,7 @@ import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 
 import type { UMSavedObjectsAdapter } from '../saved_objects/saved_objects';
 import { savedObjectsAdapter } from '../saved_objects/saved_objects';
+import { ALERT_STATE_NAMESPACE } from '@kbn/rule-data-utils';
 
 /**
  * This function aims to provide an easy way to give mock props that will
@@ -155,17 +156,7 @@ describe('tls alert', () => {
           actionGroup: 'xpack.uptime.alerts.actionGroups.tlsCertificate',
           state: expect.objectContaining(context),
           payload: {
-            'certs.common_name': expect.any(String),
-            'certs.issuer': 'Sample issuer',
-            'certs.status': 'expired',
-            'certs.summary': expect.any(String),
-            'kibana.alert.current_trigger_started': 'date',
-            'kibana.alert.first_checked_at': 'date',
-            'kibana.alert.first_triggered_at': 'date',
-            'kibana.alert.is_triggered': true,
-            'kibana.alert.last_checked_at': 'date',
-            'kibana.alert.last_resolved_at': 'date',
-            'kibana.alert.last_triggered_at': 'date',
+            [ALERT_STATE_NAMESPACE]: expect.objectContaining(context),
           },
         });
 

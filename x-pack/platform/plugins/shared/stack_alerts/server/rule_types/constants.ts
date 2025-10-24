@@ -18,7 +18,6 @@ export const STACK_AAD_INDEX_NAME = 'stack';
 export const ALERT_TITLE = `${ALERT_NAMESPACE}.title` as const;
 // kibana.alert.evaluation.conditions - human readable string that shows the conditions set by the user
 export const ALERT_EVALUATION_CONDITIONS = `${ALERT_NAMESPACE}.evaluation.conditions` as const;
-export const ALERT_LATEST_TIMESTAMP = `${ALERT_NAMESPACE}.latest_timestamp` as const;
 
 export const STACK_ALERTS_AAD_CONFIG: IRuleTypeAlerts<StackAlertType> = {
   context: STACK_AAD_INDEX_NAME,

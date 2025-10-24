@@ -19,6 +19,7 @@ import {
   ALERT_EVALUATION_VALUE,
   ALERT_GROUPING,
   ALERT_REASON,
+  ALERT_STATE_NAMESPACE,
   ALERT_URL,
 } from '@kbn/rule-data-utils';
 
@@ -41,7 +42,7 @@ import { fetchEsQuery } from './lib/fetch_es_query';
 import { fetchSearchSourceQuery } from './lib/fetch_search_source_query';
 import { isEsqlQueryRule, isSearchSourceRule } from './util';
 import { fetchEsqlQuery } from './lib/fetch_esql_query';
-import { ALERT_EVALUATION_CONDITIONS, ALERT_LATEST_TIMESTAMP, ALERT_TITLE } from '..';
+import { ALERT_EVALUATION_CONDITIONS, ALERT_TITLE } from '..';
 
 export async function executor(
   core: CoreSetup,
@@ -196,7 +197,7 @@ export async function executor(
         [ALERT_EVALUATION_VALUE]: `${actionContext.value}`,
         [ALERT_EVALUATION_THRESHOLD]: params.threshold?.length === 1 ? params.threshold[0] : null,
         [ALERT_GROUPING]: groupingObject,
-        [ALERT_LATEST_TIMESTAMP]: latestTimestamp,
+        [ALERT_STATE_NAMESPACE]: { latestTimestamp, dateStart, dateEnd },
         ...ecsGroups,
         ...actionContext.sourceFields,
       },
