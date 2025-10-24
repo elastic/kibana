@@ -610,7 +610,7 @@ export default ({ getService }: FtrProviderContext) => {
           id: privMonUtils.integrationsSync.OKTA_USER_IDS.mable,
           indexPattern: privMonUtils.integrationsSync.OKTA_INDEX,
         });
-        // Run sync - deletion detection expected to run and rem ove the user
+        // Run sync - deletion detection expected to run and remove the user
         await privMonUtils.runSync();
         const users = await privMonUtils.integrationsSync.expectUserCount(6);
         const mable = privMonUtils.findUser(users, EXPECTED_DELETED_USERNAME);
