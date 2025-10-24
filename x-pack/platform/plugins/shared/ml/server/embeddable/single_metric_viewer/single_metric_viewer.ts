@@ -16,7 +16,9 @@ const baseUserInputProps = schema.object({
   functionDescription: schema.maybe(schema.string()),
   jobIds: schema.arrayOf(schema.string()),
   selectedDetectorIndex: schema.number(),
-  selectedEntities: schema.maybe(mlEntityFieldValueSchema),
+  selectedEntities: schema.maybe(
+    schema.recordOf(schema.string(), schema.maybe(mlEntityFieldValueSchema))
+  ),
 });
 
 export const singleMetricViewerEmbeddableUserInputSchema = schema.object({
