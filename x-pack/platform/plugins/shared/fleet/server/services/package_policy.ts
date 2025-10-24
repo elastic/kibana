@@ -85,6 +85,7 @@ import type {
   AwsCloudConnectorVars,
   PackagePolicyConfigRecord,
 } from '../../common/types';
+import type { AzureCloudConnectorVars } from '../../common/types/models/cloud_connector';
 import {
   FleetError,
   fleetErrorToResponseOptions,
@@ -304,6 +305,39 @@ const extractPackagePolicyVars = (
       return awsCloudConnectorVars;
     }
   }
+
+  if (packagePolicy.supports_cloud_connector && cloudProvider === 'azure') {
+    const vars = packagePolicy.inputs.find((input) => input.enabled)?.streams[0]?.vars;
+
+    if (!vars) {
+      logger.error('Package policy must contain vars');
+      throw new CloudConnectorInvalidVarsError('Package policy must contain vars');
+    }
+
+    const tenantId = vars.tenant_id || vars['azure.credentials.tenant_id'];
+    const clientId = vars.client_id || vars['azure.credentials.client_id'];
+    const azureCredentials =
+      vars.azure_credentials_cloud_connector_id ||
+      vars['azure.credentials.azure_credentials_cloud_connector_id'];
+
+    if (tenantId && clientId && azureCredentials) {
+      const azureCloudConnectorVars: AzureCloudConnectorVars = {
+        tenant_id: tenantId as CloudConnectorSecretVar,
+        client_id: clientId as CloudConnectorSecretVar,
+        azure_credentials_cloud_connector_id: azureCredentials as CloudConnectorSecretVar,
+      };
+
+      logger.debug(
+        `Extracted Azure cloud connector vars: tenant_id=${!!tenantId}, client_id=${!!clientId}, azure_credentials=${!!azureCredentials}`
+      );
+
+      return azureCloudConnectorVars;
+    } else {
+      logger.error(
+        `Missing required Azure vars: tenant_id=${!!tenantId}, client_id=${!!clientId}, azure_credentials=${!!azureCredentials}`
+      );
+    }
+  }
 };
 
 class PackagePolicyClientImpl implements PackagePolicyClient {
@@ -494,6 +528,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       secretReferences = secretsRes.secretReferences;
 
       // Create cloud connector for package policy if it is supported and package supports agentless
+      logger.debug(
+        `Cloud connector check: supports_agentless=${enrichedPackagePolicy?.supports_agentless}, supports_cloud_connector=${enrichedPackagePolicy?.supports_cloud_connector}, cloud_connector_id=${enrichedPackagePolicy?.cloud_connector_id}`
+      );
+
       if (
         enrichedPackagePolicy?.supports_agentless &&
         enrichedPackagePolicy?.supports_cloud_connector
@@ -2945,7 +2983,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     const agentlessCloudConnectorsEnabled = agentPolicy.agentless?.cloud_connectors?.enabled;
 
     if (!agentlessCloudConnectorsEnabled) {
-      logger.debug('No agentless cloud connectors enabled for cloud provider');
+      logger.debug(
+        'No agentless cloud connectors enabled for cloud provider - cloud connector will not be created'
+      );
       return;
     }
 
@@ -2960,7 +3000,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
           enrichedPackagePolicy.cloud_connector_id
         );
-        logger.info(`Updating cloud connector: ${enrichedPackagePolicy.cloud_connector_id}`);
+        logger.debug(`Updating cloud connector: ${enrichedPackagePolicy.cloud_connector_id}`);
         try {
           const cloudConnector = await cloudConnectorService.update(
             soClient,
@@ -2970,21 +3010,21 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
               packagePolicyCount: existingCloudConnector.attributes.packagePolicyCount + 1,
             }
           );
-          logger.info(`Successfully updated cloud connector: ${cloudConnector.id}`);
+          logger.debug(`Successfully updated cloud connector: ${cloudConnector.id}`);
           return cloudConnector;
         } catch (e) {
           logger.error(`Error updating cloud connector: ${e}`);
           throw new CloudConnectorUpdateError(`${e}`);
         }
       } else {
-        logger.info(`Creating cloud connector: ${enrichedPackagePolicy.cloud_connector_id}`);
+        logger.debug(`Creating cloud connector for package policy: ${enrichedPackagePolicy.name}`);
         try {
           const cloudConnector = await cloudConnectorService.create(soClient, {
             name: `${cloudProvider}-cloud-connector: ${enrichedPackagePolicy.name}`,
             vars: cloudConnectorVars,
             cloudProvider,
           });
-          logger.info(`Successfully created cloud connector: ${cloudConnector.id}`);
+          logger.debug(`Successfully created cloud connector: ${cloudConnector.id}`);
           return cloudConnector;
         } catch (error) {
           logger.error(`Error creating cloud connector: ${error}`);

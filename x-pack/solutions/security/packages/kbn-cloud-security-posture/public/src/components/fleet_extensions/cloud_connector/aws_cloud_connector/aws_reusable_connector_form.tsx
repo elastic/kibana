@@ -51,9 +51,9 @@ export const AWSReusableConnectorForm: React.FC<{
 
   // Find the currently selected connector based on credentials
   const selectedConnector = useMemo(() => {
-    const targetId = (isEditPage && cloudConnectorId) || credentials?.cloudConnectorId;
+    const targetId = cloudConnectorId || credentials?.cloudConnectorId;
     return targetId ? comboBoxOptions.find((opt) => opt.value === targetId) || null : null;
-  }, [isEditPage, cloudConnectorId, credentials?.cloudConnectorId, comboBoxOptions]);
+  }, [cloudConnectorId, credentials?.cloudConnectorId, comboBoxOptions]);
 
   const handleConnectorChange = useCallback(
     (selected: Array<{ label: string; value?: string }>) => {

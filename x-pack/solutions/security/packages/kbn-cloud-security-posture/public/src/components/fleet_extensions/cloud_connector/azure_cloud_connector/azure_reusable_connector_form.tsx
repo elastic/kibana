@@ -52,9 +52,9 @@ export const AzureReusableConnectorForm: React.FC<{
 
   // Find the currently selected connector based on credentials
   const selectedConnector = useMemo(() => {
-    const targetId = (isEditPage && cloudConnectorId) || credentials?.cloudConnectorId;
+    const targetId = cloudConnectorId || credentials?.cloudConnectorId;
     return targetId ? comboBoxOptions.find((opt) => opt.value === targetId) || null : null;
-  }, [isEditPage, cloudConnectorId, credentials?.cloudConnectorId, comboBoxOptions]);
+  }, [cloudConnectorId, credentials?.cloudConnectorId, comboBoxOptions]);
 
   const handleConnectorChange = useCallback(
     (selected: Array<{ label: string; value?: string }>) => {
@@ -68,18 +68,12 @@ export const AzureReusableConnectorForm: React.FC<{
           connector?.clientId?.value &&
           connector?.azure_credentials_cloud_connector_id?.value
         ) {
-          const tenantIdValue = connector.tenantId.value;
-          const clientIdValue = connector.clientId.value;
-          const azureCredentialsValue = connector.azure_credentials_cloud_connector_id.value;
-
           setCredentials({
-            tenantId: typeof tenantIdValue === 'string' ? tenantIdValue : tenantIdValue.id,
-            clientId: typeof clientIdValue === 'string' ? clientIdValue : clientIdValue.id,
+            tenantId: connector.tenantId.value,
+            clientId: connector.clientId.value,
             azure_credentials_cloud_connector_id:
-              typeof azureCredentialsValue === 'string'
-                ? azureCredentialsValue
-                : azureCredentialsValue.id,
-            cloudConnectorId: connector.id,
+              connector.azure_credentials_cloud_connector_id.value,
+            cloudConnectorId: connector.id, // Store the cloud connector ID for selection
           });
         }
       } else {
