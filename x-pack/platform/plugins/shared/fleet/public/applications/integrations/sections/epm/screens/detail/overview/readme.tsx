@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { EuiText, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
+import {
+  EuiText,
+  EuiSkeletonText,
+  EuiSpacer,
+  EuiMarkdownFormat,
+  getDefaultEuiMarkdownPlugins,
+} from '@elastic/eui';
 import React, { useMemo } from 'react';
 import type { MutableRefObject } from 'react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import rehypeSanitize from 'rehype-sanitize';
-import rehypeRaw from 'rehype-raw';
 
 import MarkdownIt from 'markdown-it';
 
 import { useLinks } from '../../../../../hooks';
-
-import { markdownRenderers } from './markdown_renderers';
 
 export function Readme({
   packageName,
@@ -31,13 +31,18 @@ export function Readme({
   refs: MutableRefObject<Map<string, HTMLDivElement | null>>;
 }) {
   const { toRelativeImage } = useLinks();
-  const handleImageUri = React.useCallback(
+
+  // Get markdown plugins without tooltip support
+  const { parsingPlugins, processingPlugins } = getDefaultEuiMarkdownPlugins({
+    exclude: ['tooltip'], // Exclude tooltip plugin from the viewer
+  });
+
+  // Transform image URIs to relative paths for the package
+  const transformImageUri = React.useCallback(
     (uri: string) => {
       const isRelative =
         uri.indexOf('http://') === 0 || uri.indexOf('https://') === 0 ? false : true;
-
-      const fullUri = isRelative ? toRelativeImage({ packageName, version, path: uri }) : uri;
-      return fullUri;
+      return isRelative ? toRelativeImage({ packageName, version, path: uri }) : uri;
     },
     [toRelativeImage, packageName, version]
   );
@@ -108,25 +113,37 @@ export function Readme({
     });
   };
 
+  // Transform image URLs in the markdown
+  const transformMarkdownImages = React.useCallback(
+    (content: string | undefined): string | undefined => {
+      if (!content) return content;
+      // Replace markdown image syntax: ![alt](url) with transformed URLs
+      return content.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_match, alt, url) => {
+        const transformedUrl = transformImageUri(url);
+        return `![${alt}](${transformedUrl})`;
+      });
+    },
+    [transformImageUri]
+  );
+
   const processedMarkdown = useMemo(() => {
     if (!markdown) return markdown;
     let processedContent = wrapAllExportedFieldsTables(markdown);
     processedContent = wrapSampleEvents(processedContent);
+    processedContent = transformMarkdownImages(processedContent);
     return processedContent;
-  }, [markdown]);
+  }, [markdown, transformMarkdownImages]);
 
   return (
     <>
       {processedMarkdown !== undefined ? (
         <EuiText grow={true}>
-          <ReactMarkdown
-            transformImageUri={handleImageUri}
-            components={markdownRenderers(refs)}
-            rehypePlugins={[rehypeRaw, [rehypeSanitize]]}
-            remarkPlugins={[remarkGfm]}
+          <EuiMarkdownFormat
+            parsingPluginList={parsingPlugins}
+            processingPluginList={processingPlugins}
           >
             {processedMarkdown}
-          </ReactMarkdown>
+          </EuiMarkdownFormat>
         </EuiText>
       ) : (
         <EuiText>
