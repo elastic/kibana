@@ -78317,6 +78317,8 @@ components:
         wasSuccessful:
           description: Whether the response action was successful
           type: boolean
+      required:
+        - command
     Security_Endpoint_Management_API_RunningProcesses:
       allOf:
         - $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
