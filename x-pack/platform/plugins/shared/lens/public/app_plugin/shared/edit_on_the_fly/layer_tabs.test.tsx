@@ -87,7 +87,7 @@ describe('LayerTabs', () => {
           visualization: {
             activeId: 'testVis',
             state: 'state',
-            selectedLayerId: null,
+            selectedLayerId: 'layer1',
           },
           query: undefined,
         },
