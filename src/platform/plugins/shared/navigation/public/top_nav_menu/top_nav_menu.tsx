@@ -31,6 +31,7 @@ export type TopNavMenuProps<QT extends Query | AggregateQuery = Query> = Omit<
   showQueryInput?: boolean;
   showDatePicker?: boolean;
   showFilterBar?: boolean;
+  showProjectPicker?: boolean;
   unifiedSearch?: UnifiedSearchPublicPluginStart;
   className?: string;
   visible?: boolean;
@@ -157,4 +158,5 @@ TopNavMenu.defaultProps = {
   showDatePicker: true,
   showFilterBar: true,
   screenTitle: '',
+  showProjectPicker: false,
 };

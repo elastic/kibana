@@ -777,18 +777,6 @@ export const QueryBarTopRow = React.memo(
       }
     }
 
-    function renderProjectPicker() {
-      // temporarily adding a local storage key to toggle the project picker visibility
-      if (props.showProjectPicker && localStorage.getItem(SHOW_PROJECT_PICKER_KEY) === 'true') {
-        return (
-          <EuiFlexItem grow={isMobile}>
-            <ProjectPicker />
-          </EuiFlexItem>
-        );
-      }
-      return null;
-    }
-
     function renderAddButton() {
       return (
         Boolean(props.showAddFilter) && (
@@ -952,7 +940,8 @@ export const QueryBarTopRow = React.memo(
               justifyContent={shouldShowDatePickerAsBadge() ? 'flexStart' : 'flexEnd'}
               wrap
             >
-              {props.showProjectPicker && renderProjectPicker()}
+              {props.showProjectPicker &&
+                localStorage.getItem(SHOW_PROJECT_PICKER_KEY) === 'true' && <ProjectPicker />}
               {props.dataViewPickerOverride || renderDataViewsPicker()}
               {Boolean(isQueryLangSelected) && (
                 <ESQLMenuPopover

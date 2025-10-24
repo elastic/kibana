@@ -20,10 +20,13 @@ import {
   EuiTitle,
   useEuiTheme,
   useEuiOverflowScroll,
+  EuiNotificationBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import { QueryClientProvider, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ProjectListItem } from './project_list_item';
 
 export const strings = {
@@ -63,141 +66,165 @@ export interface Project {
   [key: string]: string;
 }
 
-const response: { origin: Record<string, Project>; linked_projects: Record<string, Project> } = {
-  origin: {
-    c56c4f8849c64cc6ae59c261f40bd195: {
-      _id: 'c56c4f8849c64cc6ae59c261f40bd195',
-      _csp: 'aws',
-      _alias: 'my-project-b72b95',
-      _region: 'N. Virginia (us-east-1)',
-      _type: 'security',
-      mytag1: 'foo',
-      mytag2: 'bar',
-      mytag3: 'baz',
-      mytag4: 'qux',
+const mockResponse: { origin: Record<string, Project>; linked_projects: Record<string, Project> } =
+  {
+    origin: {
+      c56c4f8849c64cc6ae59c261f40bd195: {
+        _id: 'c56c4f8849c64cc6ae59c261f40bd195',
+        _csp: 'aws',
+        _alias: 'my-project-b72b95',
+        _region: 'N. Virginia (us-east-1)',
+        _type: 'security',
+        mytag1: 'foo',
+        mytag2: 'bar',
+        mytag3: 'baz',
+        mytag4: 'qux',
+      },
     },
-  },
-  linked_projects: {
-    a3b88ea3f195a336ae59c261f40bd195: {
-      _id: 'a3b88ea3f195a336ae59c261f40bd195',
-      _alias: 'customer-alias-a3b88e',
-      _type: 'security',
-      _csp: 'azure',
-      _region: 'eu-central-2',
-      mytag1: 'foo',
-      mytag2: 'bar',
+    linked_projects: {
+      a3b88ea3f195a336ae59c261f40bd195: {
+        _id: 'a3b88ea3f195a336ae59c261f40bd195',
+        _alias: 'customer-alias-a3b88e',
+        _type: 'security',
+        _csp: 'azure',
+        _region: 'eu-central-2',
+        mytag1: 'foo',
+        mytag2: 'bar',
+      },
+      f40bd195389s3761023ca7aa8a3r0932: {
+        _id: 'f40bd195389s3761023ca7aa8a3r0932',
+        _alias: 'customer-alias-f40bd',
+        _type: 'observability',
+        _csp: 'aws',
+        _region: 'us-west-1',
+      },
+      g023ca7aa8a3r0932f40bd195389s376: {
+        _id: 'g023ca7aa8a3r0932f40bd195389s376',
+        _alias: 'big-query-analytics-616b96',
+        _csp: 'azure',
+        _region: 'Virginia (eastus2)',
+        _type: 'observability',
+        mytag1: 'foo',
+        mytag2: 'bar',
+      },
+      h8a3r0932f40bd195389s3761023ca7aa: {
+        _id: 'h8a3r0932f40bd195389s3761023ca7aa',
+        _alias: 'cloud-backup-c91q12',
+        _csp: 'azure',
+        _region: 'Virginia (eastus2)',
+        _type: 'security',
+        mytag1: 'foo',
+        mytag2: 'bar',
+      },
+      r0932f40bd195389s3761023ca7aa8a3: {
+        _id: 'r0932f40bd195389s3761023ca7aa8a3',
+        _alias: 'customer-portal-p61068',
+        _csp: 'aws',
+        _region: 'N. Virginia (us-east-1)',
+        _type: 'observability',
+      },
+      j023ca7aa8a3r0932f40bd195389s376: {
+        _id: 'j023ca7aa8a3r0932f40bd195389s376',
+        _alias: 'data-analysis-platform-j4962a',
+        _csp: 'azure',
+        _region: 'Virginia (eastus2)',
+        _type: 'observability',
+        mytag1: 'foo',
+        mytag2: 'bar',
+      },
+      k40bd195389s3761023ca7aa8a3r0932: {
+        _id: 'k40bd195389s3761023ca7aa8a3r0932',
+        _alias: 'dev-environment-b19a81',
+        _csp: 'azure',
+        _region: 'Virginia (eastus2)',
+        _type: 'security',
+        mytag1: 'foo',
+        mytag2: 'bar',
+      },
+      eaa8a3r0932f40bd195389s3761023ca: {
+        _id: 'eaa8a3r0932f40bd195389s3761023ca',
+        _alias: 'engineering-dev-ops-k416e1',
+        _csp: 'gcp',
+        _region: 'N. Virginia (us-east-1)',
+        _type: 'elasticsearch',
+      },
+      t40bd195389s3761023ca7aa8a3r0932: {
+        _id: 't40bd195389s3761023ca7aa8a3r0932',
+        _alias: 'feature-beta-t149a4',
+        _csp: 'gcp',
+        _region: 'N. Virginia (us-east-1)',
+        _type: 'elasticsearch',
+        mytag1: 'foo',
+        mytag2: 'bar',
+        mytag3: 'baz',
+      },
+      y023ca7aa8a3r0932f40bd195389s376: {
+        _id: 'y023ca7aa8a3r0932f40bd195389s376',
+        _alias: 'marketing-site-y7021b',
+        _csp: 'gcp',
+        _region: 'N. Virginia (us-east-1)',
+        _type: 'elasticsearch',
+      },
+      u8a3r0932f40bd195389s3761023ca7aa: {
+        _id: 'u8a3r0932f40bd195389s3761023ca7aa',
+        _alias: 'customer-data-u7021b',
+        _csp: 'azure',
+        _region: 'N. Virginia (us-east-1)',
+        _type: 'security',
+        mytag1: 'foo',
+        mytag2: 'bar',
+      },
+      p0932f40bd195389s3761023ca7aa8a3: {
+        _id: 'p0932f40bd195389s3761023ca7aa8a3',
+        _alias: 'customer-analytics-p7021b',
+        _csp: 'aws',
+        _region: 'N. Virginia (us-east-1)',
+        _type: 'observability',
+      },
     },
-    f40bd195389s3761023ca7aa8a3r0932: {
-      _id: 'f40bd195389s3761023ca7aa8a3r0932',
-      _alias: 'customer-alias-f40bd',
-      _type: 'observability',
-      _csp: 'aws',
-      _region: 'us-west-1',
-    },
-    g023ca7aa8a3r0932f40bd195389s376: {
-      _id: 'g023ca7aa8a3r0932f40bd195389s376',
-      _alias: 'big-query-analytics-616b96',
-      _csp: 'azure',
-      _region: 'Virginia (eastus2)',
-      _type: 'observability',
-      mytag1: 'foo',
-      mytag2: 'bar',
-    },
-    h8a3r0932f40bd195389s3761023ca7aa: {
-      _id: 'h8a3r0932f40bd195389s3761023ca7aa',
-      _alias: 'cloud-backup-c91q12',
-      _csp: 'azure',
-      _region: 'Virginia (eastus2)',
-      _type: 'security',
-      mytag1: 'foo',
-      mytag2: 'bar',
-    },
-    r0932f40bd195389s3761023ca7aa8a3: {
-      _id: 'r0932f40bd195389s3761023ca7aa8a3',
-      _alias: 'customer-portal-p61068',
-      _csp: 'aws',
-      _region: 'N. Virginia (us-east-1)',
-      _type: 'observability',
-    },
-    j023ca7aa8a3r0932f40bd195389s376: {
-      _id: 'j023ca7aa8a3r0932f40bd195389s376',
-      _alias: 'data-analysis-platform-j4962a',
-      _csp: 'azure',
-      _region: 'Virginia (eastus2)',
-      _type: 'observability',
-      mytag1: 'foo',
-      mytag2: 'bar',
-    },
-    k40bd195389s3761023ca7aa8a3r0932: {
-      _id: 'k40bd195389s3761023ca7aa8a3r0932',
-      _alias: 'dev-environment-b19a81',
-      _csp: 'azure',
-      _region: 'Virginia (eastus2)',
-      _type: 'security',
-      mytag1: 'foo',
-      mytag2: 'bar',
-    },
-    eaa8a3r0932f40bd195389s3761023ca: {
-      _id: 'eaa8a3r0932f40bd195389s3761023ca',
-      _alias: 'engineering-dev-ops-k416e1',
-      _csp: 'gcp',
-      _region: 'N. Virginia (us-east-1)',
-      _type: 'elasticsearch',
-    },
-    t40bd195389s3761023ca7aa8a3r0932: {
-      _id: 't40bd195389s3761023ca7aa8a3r0932',
-      _alias: 'feature-beta-t149a4',
-      _csp: 'gcp',
-      _region: 'N. Virginia (us-east-1)',
-      _type: 'elasticsearch',
-      mytag1: 'foo',
-      mytag2: 'bar',
-      mytag3: 'baz',
-    },
-    y023ca7aa8a3r0932f40bd195389s376: {
-      _id: 'y023ca7aa8a3r0932f40bd195389s376',
-      _alias: 'marketing-site-y7021b',
-      _csp: 'gcp',
-      _region: 'N. Virginia (us-east-1)',
-      _type: 'elasticsearch',
-    },
-    u8a3r0932f40bd195389s3761023ca7aa: {
-      _id: 'u8a3r0932f40bd195389s3761023ca7aa',
-      _alias: 'customer-data-u7021b',
-      _csp: 'azure',
-      _region: 'N. Virginia (us-east-1)',
-      _type: 'security',
-      mytag1: 'foo',
-      mytag2: 'bar',
-    },
-    p0932f40bd195389s3761023ca7aa8a3: {
-      _id: 'p0932f40bd195389s3761023ca7aa8a3',
-      _alias: 'customer-analytics-p7021b',
-      _csp: 'aws',
-      _region: 'N. Virginia (us-east-1)',
-      _type: 'observability',
-    },
-  },
-};
+  };
 
 export const ProjectPicker = () => {
   const [crossProjectSearchScope, setCrossProjectSearchScope] = useState<string>('all');
   const [showProjectPickerPopover, setShowProjectPickerPopover] = useState(false);
-  const [linkedProjects, setProjects] = useState<Project[]>([]);
+  const [originProject, setOriginProject] = useState<Project>();
+  const [linkedProjects, setLinkedProjects] = useState<Project[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const { euiTheme } = useEuiTheme();
 
-  const originProject: Project = Object.values(response.origin)[0];
-
-  const projects =
-    crossProjectSearchScope === 'origin' ? [originProject] : [originProject, ...linkedProjects];
+  const { services } = useKibana();
 
   useEffect(() => {
-    // TODO: replace with fetch linked projects from cross project API
-    setProjects(
-      Object.values(response.linked_projects).sort((a, b) => a._alias.localeCompare(b._alias))
-    );
-  }, []);
+    setIsLoading(true);
+    async function fetchProjects() {
+      if (services.http) {
+        try {
+          const response: {
+            origin: { [key: string]: Project };
+            linked_projects: { [key: string]: Project };
+          } = await services.http.get('/api/projects/_tags');
+          console.log({ response });
+
+          setOriginProject(Object.values(response.origin)[0]);
+          setLinkedProjects(
+            Object.values(response.linked_projects).sort((a, b) => a._alias.localeCompare(b._alias))
+          );
+          setIsLoading(false);
+        } catch (error) {
+          console.error('Error fetching projects:', error);
+          setIsLoading(false);
+        }
+      }
+    }
+    fetchProjects();
+  }, [services.http, setOriginProject, setLinkedProjects]);
+
+  const projects = originProject
+    ? crossProjectSearchScope === 'origin'
+      ? [originProject]
+      : [originProject, ...linkedProjects]
+    : [];
 
   const button = (
     <EuiToolTip
@@ -205,19 +232,26 @@ export const ProjectPicker = () => {
       content={strings.getProjectPickerButtonLabel(projects.length, linkedProjects.length + 1)}
       disableScreenReaderOutput
     >
-      <EuiButtonIcon
-        type="link"
-        display="base"
-        iconType="cluster" // TODO: replace with cross project icon when available in EUI
-        aria-label={strings.getProjectPickerButtonAriaLabel()}
-        data-test-subj="addFilter"
-        onClick={() => setShowProjectPickerPopover(!showProjectPickerPopover)}
-        size="s"
-        css={{
-          backgroundColor: euiTheme.colors.backgroundBaseFormsPrepend,
-          border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
-        }}
-      />
+      <>
+        <EuiButtonIcon
+          type="link"
+          display="base"
+          iconType="cluster" // TODO: replace with cross project icon when available in EUI
+          aria-label={strings.getProjectPickerButtonAriaLabel()}
+          data-test-subj="addFilter"
+          onClick={() => setShowProjectPickerPopover(!showProjectPickerPopover)}
+          size="s"
+          css={{
+            backgroundColor: euiTheme.colors.backgroundBaseFormsPrepend,
+            border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
+          }}
+        />
+        {crossProjectSearchScope === 'origin' && (
+          <EuiNotificationBadge color="success" size="s">
+            {'1'}
+          </EuiNotificationBadge>
+        )}
+      </>
     </EuiToolTip>
   );
 
@@ -234,6 +268,8 @@ export const ProjectPicker = () => {
         />
       );
     });
+
+  console.log(projects);
 
   return (
     <EuiPopover
@@ -340,7 +376,7 @@ export const ProjectPicker = () => {
           `}
         >
           <EuiFlexGroup direction="column" gutterSize="none" justifyContent="center">
-            {renderProjectsList()}
+            {!isLoading && renderProjectsList()}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>

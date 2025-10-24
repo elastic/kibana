@@ -230,6 +230,7 @@ export function createSearchBar({
             showQueryInput={props.showQueryInput}
             showSaveQuery={showSaveQuery}
             showSubmitButton={props.showSubmitButton}
+            showProjectPicker={props.showProjectPicker}
             submitButtonStyle={props.submitButtonStyle}
             isDisabled={props.isDisabled}
             screenTitle={props.screenTitle}
