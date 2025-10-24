@@ -122,17 +122,19 @@ const FlyoutSession: React.FC<FlyoutSessionProps> = React.memo((props) => {
         </EuiFlyoutFooter>
         {childSize && childFlyoutIsOpen && (
           <EuiFlyout
-            aria-label="Child flyout"
-            flyoutMenuProps={{
-              title: `Child flyout from ${title}`,
-            }}
+            id={`childFlyout-${title}`}
+            aria-labelledby="childFlyoutTitle"
+            size={childSize}
+            maxWidth={childMaxWidth}
             onActive={childFlyoutOnActive}
             onClose={() => {
               setChildFlyoutIsOpen(false);
               childFlyoutOnClose();
             }}
-            size={childSize}
-            maxWidth={childMaxWidth}
+            flyoutMenuProps={{
+              title: `Child flyout from ${title}`,
+              titleId: 'childFlyoutTitle',
+            }}
           >
             <EuiFlyoutBody>
               <EuiText>
@@ -167,7 +169,8 @@ const FlyoutSession: React.FC<FlyoutSessionProps> = React.memo((props) => {
 
   const openFlyout = () => {
     flyoutRef.current = overlays.openSystemFlyout(<FlyoutContent />, {
-      title: `${title} - Main`,
+      id: `mainFlyout-${title}`,
+      title,
       type: flyoutType,
       ownFocus: false,
       size: mainSize,

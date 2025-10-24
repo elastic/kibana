@@ -19,6 +19,7 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
+  EuiFlyoutHeader,
   EuiSpacer,
   EuiSwitch,
   EuiText,
@@ -94,10 +95,7 @@ const FlyoutSessionFromComponents: React.FC<FlyoutSessionFromComponents> = React
         <EuiFlyout
           id={`mainFlyout-${title}`}
           session="start"
-          flyoutMenuProps={{
-            title: `${title} - Main`,
-          }}
-          aria-labelledby="flyoutTitle"
+          aria-labelledby="sessionFlyoutTitle"
           size={mainSize}
           maxWidth={mainMaxWidth}
           type={flyoutType}
@@ -105,7 +103,13 @@ const FlyoutSessionFromComponents: React.FC<FlyoutSessionFromComponents> = React
           pushAnimation={true}
           onActive={mainFlyoutOnActive}
           onClose={mainFlyoutOnClose}
+          flyoutMenuProps={{ title }}
         >
+          <EuiFlyoutHeader hasBorder>
+            <EuiText>
+              <h2 id="sessionFlyoutTitle">{title}</h2>
+            </EuiText>
+          </EuiFlyoutHeader>
           <EuiFlyoutBody>
             <EuiText>
               <p>
@@ -147,14 +151,15 @@ const FlyoutSessionFromComponents: React.FC<FlyoutSessionFromComponents> = React
           {childSize && isChildFlyoutVisible && (
             <EuiFlyout
               id={`childFlyout-${title}`}
-              flyoutMenuProps={{
-                title: `${title} - Child`,
-              }}
               aria-labelledby="childFlyoutTitle"
               size={childSize}
               maxWidth={childMaxWidth}
               onActive={childFlyoutOnActive}
               onClose={childFlyoutOnClose}
+              flyoutMenuProps={{
+                title: `${title} - Child`,
+                titleId: 'childFlyoutTitle',
+              }}
             >
               <EuiFlyoutBody>
                 <EuiText>
@@ -236,7 +241,7 @@ const NonSessionFlyout: React.FC = () => {
       </EuiFlexGroup>
       {isFlyoutVisible && (
         <EuiFlyout
-          aria-label="Non-session flyout"
+          aria-labelledby="nonSessionFlyoutTitle"
           onActive={flyoutOnActive}
           onClose={flyoutOnClose}
           type={flyoutType}
@@ -245,6 +250,11 @@ const NonSessionFlyout: React.FC = () => {
           ownFocus={false}
           session="never"
         >
+          <EuiFlyoutHeader hasBorder>
+            <EuiText>
+              <h2 id="nonSessionFlyoutTitle">Non-session flyout</h2>
+            </EuiText>
+          </EuiFlyoutHeader>
           <EuiFlyoutBody>
             <EuiText>
               <p>
