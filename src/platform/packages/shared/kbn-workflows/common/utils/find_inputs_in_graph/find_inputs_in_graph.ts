@@ -11,13 +11,13 @@ import type { AtomicGraphNode, EnterForeachNode, EnterIfNode, WorkflowGraph } fr
 import { extractPropertyPathsFromKql } from '../extract_property_paths_from_kql/extract_property_paths_from_kql';
 import { extractTemplateVariables } from '../extract_template_variables/extract_template_variables';
 
-function recursive(obj: unknown): string[] {
+function scanNodeRecursievly(obj: unknown): string[] {
   if (typeof obj === 'string') {
     return extractTemplateVariables(obj);
   }
 
   if (typeof obj === 'object') {
-    return Object.values(obj as Object).flatMap((value) => recursive(value));
+    return Object.values(obj as Object).flatMap((value) => scanNodeRecursievly(value));
   }
 
   return [];
@@ -61,7 +61,7 @@ export function findInputsInGraph(workflowGraph: WorkflowGraph): Record<string, 
       // Not good, mostlikely and other nodes will need to be subset of atomic node, or somehting else
       const genericNode = node as AtomicGraphNode;
       stepInputsKey = genericNode.stepId;
-      stepInputs.push(...recursive(genericNode));
+      stepInputs.push(...scanNodeRecursievly(genericNode));
     }
 
     if (isInForeach) {
