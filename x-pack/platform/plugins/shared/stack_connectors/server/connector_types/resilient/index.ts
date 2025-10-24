@@ -14,23 +14,23 @@ import {
 } from '@kbn/actions-plugin/common';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
 
-import type { ResilientConfig, ResilientSecrets } from './types';
-import { RESILIENT_CONNECTOR_ID } from './constants';
-import * as i18n from './translations';
+import type { ResilientConfig, ResilientSecrets } from '@kbn/connector-schemas/resilient';
 import {
+  CONNECTOR_ID,
+  CONNECTOR_NAME,
   ExternalIncidentServiceConfigurationSchema,
   ExternalIncidentServiceSecretConfigurationSchema,
   PushToServiceIncidentSchema,
-} from './schema';
+} from '@kbn/connector-schemas/resilient';
 import { ResilientConnector } from './resilient';
 
 export const getResilientConnectorType = (): SubActionConnectorType<
   ResilientConfig,
   ResilientSecrets
 > => ({
-  id: RESILIENT_CONNECTOR_ID,
+  id: CONNECTOR_ID,
   minimumLicenseRequired: 'platinum',
-  name: i18n.NAME,
+  name: CONNECTOR_NAME,
   getService: (params) => new ResilientConnector(params, PushToServiceIncidentSchema),
   schema: {
     config: ExternalIncidentServiceConfigurationSchema,

@@ -20,7 +20,6 @@ import type { HttpSetup } from '@kbn/core/public';
 import type { KueryNode } from '@kbn/es-query';
 import type { ActionType, AsApiContract } from '@kbn/actions-plugin/common';
 import {
-  ALERT_HISTORY_PREFIX,
   AlertHistoryDefaultIndexName,
   AlertHistoryDocumentTemplate,
   AlertHistoryEsIndexConnectorId,
@@ -120,7 +119,6 @@ type ResolvedRule = Omit<
 };
 
 export {
-  ALERT_HISTORY_PREFIX,
   AlertHistoryDefaultIndexName,
   AlertHistoryDocumentTemplate,
   AlertHistoryEsIndexConnectorId,

@@ -7,7 +7,7 @@
 
 import axios from 'axios';
 import type { Logger } from '@kbn/core/server';
-import type { ConnectorTypeConfigType, ConnectorTypeSecretsType, XmattersConnectorType } from '.';
+import type { XmattersConnectorType } from '.';
 import { getConnectorType } from '.';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import type { Services } from '@kbn/actions-plugin/server/types';
@@ -22,6 +22,10 @@ import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.moc
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { loggerMock } from '@kbn/logging-mocks';
 import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
+import type {
+  ConnectorTypeConfigType,
+  ConnectorTypeSecretsType,
+} from '@kbn/connector-schemas/xmatters';
 
 jest.mock('axios');
 jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {

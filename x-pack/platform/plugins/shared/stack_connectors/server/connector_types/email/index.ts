@@ -7,8 +7,6 @@
 
 import { curry } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
 import nodemailerGetService from 'nodemailer/lib/well-known';
 import type SMTPConnection from 'nodemailer/lib/smtp-connection';
@@ -18,6 +16,19 @@ import type {
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
   ValidatorServices,
 } from '@kbn/actions-plugin/server/types';
+import type {
+  ConnectorTypeConfigType,
+  ConnectorTypeSecretsType,
+  ActionParamsType,
+} from '@kbn/connector-schemas/email';
+import {
+  CONNECTOR_ID,
+  CONNECTOR_NAME,
+  serviceParamValueToKbnSettingMap as emailKbnSettings,
+  ConfigSchema,
+  SecretsSchema,
+  ParamsSchema,
+} from '@kbn/connector-schemas/email';
 import {
   AlertingConnectorFeatureId,
   UptimeConnectorFeatureId,
@@ -33,8 +44,6 @@ import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { AdditionalEmailServices } from '../../../common';
 import type { SendEmailOptions, Transport } from './send_email';
 import { sendEmail, JSON_TRANSPORT_SERVICE } from './send_email';
-import { portSchema } from '../lib/schemas';
-import { serviceParamValueToKbnSettingMap as emailKbnSettings } from '../../../common/email/constants';
 
 export type EmailConnectorType = ConnectorType<
   ConnectorTypeConfigType,
@@ -48,9 +57,6 @@ export type EmailConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions<
   ActionParamsType
 >;
 
-// config definition
-export type ConnectorTypeConfigType = TypeOf<typeof ConfigSchema>;
-
 // these values for `service` require users to fill in host/port/secure
 export const CUSTOM_HOST_PORT_SERVICES: string[] = [AdditionalEmailServices.OTHER];
 
@@ -61,20 +67,6 @@ export const ELASTIC_CLOUD_SERVICE: SMTPConnection.Options = {
 };
 
 const EMAIL_FOOTER_DIVIDER = '\n\n---\n\n';
-
-const ConfigSchemaProps = {
-  service: schema.string({ defaultValue: 'other' }),
-  host: schema.nullable(schema.string()),
-  port: schema.nullable(portSchema()),
-  secure: schema.nullable(schema.boolean()),
-  from: schema.string(),
-  hasAuth: schema.boolean({ defaultValue: true }),
-  tenantId: schema.nullable(schema.string()),
-  clientId: schema.nullable(schema.string()),
-  oauthTokenUrl: schema.nullable(schema.string()),
-};
-
-const ConfigSchema = schema.object(ConfigSchemaProps);
 
 function validateConfig(
   configObject: ConnectorTypeConfigType,
@@ -170,53 +162,6 @@ function validateConfig(
   }
 }
 
-// secrets definition
-
-export type ConnectorTypeSecretsType = TypeOf<typeof SecretsSchema>;
-
-const SecretsSchemaProps = {
-  user: schema.nullable(schema.string()),
-  password: schema.nullable(schema.string()),
-  clientSecret: schema.nullable(schema.string()),
-};
-
-const SecretsSchema = schema.object(SecretsSchemaProps);
-
-// params definition
-
-export type ActionParamsType = TypeOf<typeof ParamsSchema>;
-
-const AttachmentSchemaProps = {
-  content: schema.string(),
-  contentType: schema.maybe(schema.string()),
-  filename: schema.string(),
-  encoding: schema.maybe(schema.string()),
-};
-export const AttachmentSchema = schema.object(AttachmentSchemaProps);
-export type Attachment = TypeOf<typeof AttachmentSchema>;
-
-const ParamsSchemaProps = {
-  to: schema.arrayOf(schema.string(), { defaultValue: [] }),
-  cc: schema.arrayOf(schema.string(), { defaultValue: [] }),
-  bcc: schema.arrayOf(schema.string(), { defaultValue: [] }),
-  subject: schema.string(),
-  message: schema.string(),
-  messageHTML: schema.nullable(schema.string()),
-  // kibanaFooterLink isn't inteded for users to set, this is here to be able to programatically
-  // provide a more contextual URL in the footer (ex: URL to the alert details page)
-  kibanaFooterLink: schema.object({
-    path: schema.string({ defaultValue: '/' }),
-    text: schema.string({
-      defaultValue: i18n.translate('xpack.stackConnectors.email.kibanaFooterLinkText', {
-        defaultMessage: 'Go to Elastic',
-      }),
-    }),
-  }),
-  attachments: schema.maybe(schema.arrayOf(AttachmentSchema)),
-};
-
-export const ParamsSchema = schema.object(ParamsSchemaProps);
-
 function validateParams(paramsObject: unknown, validatorServices: ValidatorServices) {
   const { configurationUtilities } = validatorServices;
 
@@ -263,15 +208,12 @@ function validateConnector(
 }
 
 // connector type definition
-export const ConnectorTypeId = '.email';
 export function getConnectorType(params: GetConnectorTypeParams): EmailConnectorType {
   const { publicBaseUrl } = params;
   return {
-    id: ConnectorTypeId,
+    id: CONNECTOR_ID,
     minimumLicenseRequired: 'gold',
-    name: i18n.translate('xpack.stackConnectors.email.title', {
-      defaultMessage: 'Email',
-    }),
+    name: CONNECTOR_NAME,
     supportedFeatureIds: [
       AlertingConnectorFeatureId,
       UptimeConnectorFeatureId,

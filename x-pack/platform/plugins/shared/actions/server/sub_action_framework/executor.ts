@@ -89,7 +89,7 @@ export const buildExecutor = <
 
     if (action.schema) {
       try {
-        _subActionParams = action.schema.validate(subActionParams) as typeof subActionParams;
+        _subActionParams = action.schema.parse(subActionParams) as typeof subActionParams;
       } catch (reqValidationError) {
         throw createTaskRunError(
           new Error(`Request validation failed (${reqValidationError})`),

@@ -9,9 +9,9 @@ import expect from '@kbn/expect';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import {
-  SENTINELONE_CONNECTOR_ID,
+  CONNECTOR_ID as SENTINELONE_CONNECTOR_ID,
   SUB_ACTION,
-} from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
+} from '@kbn/connector-schemas/sentinelone/constants';
 import { SuperuserAtSpace1, systemActionScenario, UserAtSpaceScenarios } from '../../../scenarios';
 import type { TaskManagerDoc } from '../../../../common/lib';
 import {

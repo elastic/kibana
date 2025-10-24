@@ -27,6 +27,7 @@
     "@kbn/alerting-api-integration-helpers",
     "@kbn/alerts-as-data-utils",
     "@kbn/data-plugin",
+    "@kbn/zod",
   ],
   "exclude": [
     "target/**/*",

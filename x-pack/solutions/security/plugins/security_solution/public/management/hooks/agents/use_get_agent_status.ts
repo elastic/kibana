@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SentinelOneGetAgentsResponse } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
+import type { SentinelOneGetAgentsResponse } from '@kbn/connector-schemas/sentinelone';
 import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
