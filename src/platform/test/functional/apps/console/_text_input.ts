@@ -31,6 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('with a data URI in the load_from query', () => {
       it('loads the data from the URI', async () => {
+        await PageObjects.console.clearEditorText();
         await PageObjects.common.navigateToApp('console', {
           hash: '#/console/shell?load_from=data:text/plain,BYUwNmD2Q',
         });
