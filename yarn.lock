@@ -2479,10 +2479,10 @@
     semver "^7.6.3"
     topojson-client "^3.1.0"
 
-"@elastic/eslint-plugin-eui@2.4.0":
-  version "2.4.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.4.0.tgz#b793170bec1dbf7c15f7a7e7c5a64f4a8e622f23"
-  integrity sha512-M+eV/dBtTlr8bazzkyyZKOU1N4dL483GtNNFYA1mrMpxVqroassB9rawmBHav0IATUhNVGzTevbv1nG9U4Zm5w==
+"@elastic/eslint-plugin-eui@2.5.0":
+  version "2.5.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.5.0.tgz#99ca807edeb157baf38fef9e39fd031f19b702a5"
+  integrity sha512-dW6U7N4HAdSst+Iqhaw1In8zxT8rE4AMnIJIN6C/vNM8XDKmFyzkw/AddpvW5oZHdV0D7+3w/VI9petN4RnWBQ==
 
 "@elastic/eui-theme-borealis@3.6.0":
   version "3.6.0"
@@ -2498,13 +2498,13 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@107.0.0":
-  version "107.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-107.0.0.tgz#31a9d6ebe90495224fd136b9ae89318271b014cd"
-  integrity sha512-rFcO5Tdb46HHgNf6L3UH1lR+wZrm4a4qTuGbDM/Pru6Mc9/3vhoxGzpA8VlHIad3BaokVHRL+UqySiPl36WL+A==
+"@elastic/eui@107.0.1":
+  version "107.0.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-107.0.1.tgz#7d7bcae7115b5e6c92a1994971170190149f817b"
+  integrity sha512-Uk8W3yI4DOdWRHHJiAZ+Q3tr8COeU6MiC+AitZLDbBGNiQ7a3lr/C8pNc8yFhpOVCPQpjofALEZiENg2AzFrGA==
   dependencies:
     "@elastic/eui-theme-common" "5.0.0"
-    "@elastic/prismjs-esql" "^1.1.0"
+    "@elastic/prismjs-esql" "^1.1.2"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
     "@types/numeral" "^2.0.5"
@@ -2662,10 +2662,10 @@
     json-bigint "^1.0.0"
     safe-stable-stringify "^2.4.3"
 
-"@elastic/prismjs-esql@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/prismjs-esql/-/prismjs-esql-1.1.0.tgz#c7f84de21bb453831df7e8565be7430b1b078836"
-  integrity sha512-k2zZfCL4l+qCXfmc9jrnDdEWW2jDPFAHlCq1JAh3x7zWN6Eyc6ACn3oj9oy49xsuAO+BAhQ345uueL8K/3UIKg==
+"@elastic/prismjs-esql@^1.1.2":
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/@elastic/prismjs-esql/-/prismjs-esql-1.1.2.tgz#0f16d98d73b49117b50a22f8a38a2938d34b7b05"
+  integrity sha512-cW/fYEfB/mkqURmEhxz7AX1yqxexKNwSO2VQOAWCkwvXLQirg9AnjDgMZIVTsPc8s4JdI3grA5p5rUruJq9GpA==
 
 "@elastic/react-search-ui-views@1.24.1", "@elastic/react-search-ui-views@^1.24.0":
   version "1.24.1"
@@ -6781,6 +6781,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/lens-common@link:src/platform/packages/shared/kbn-lens-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/lens-config-builder-example-plugin@link:x-pack/examples/lens_config_builder_example":
   version "0.0.0"
   uid ""
@@ -8910,6 +8914,10 @@
   uid ""
 
 "@kbn/visualization-utils@link:src/platform/packages/shared/kbn-visualization-utils":
+  version "0.0.0"
+  uid ""
+
+"@kbn/visualizations-common@link:src/platform/packages/shared/kbn-visualizations-common":
   version "0.0.0"
   uid ""
 
@@ -16633,7 +16641,7 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@^141.0.0:
+chromedriver@^141.0.1:
   version "141.0.2"
   resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-141.0.2.tgz#071dded2f6fb4fc6ba403ed8e2e597ebf69abfe4"
   integrity sha512-MNtgzm5SjTtbHDXlpuXkQ7brxkOYTK+qDbnmr7UrurfuhqJfIkL+nnKo7hev/hR6sFL8mV8r5+1Kn51Mo9zsDg==
@@ -24443,7 +24451,7 @@ linkify-it@^5.0.0:
   dependencies:
     uc.micro "^2.0.0"
 
-liquidjs@^10.21.1:
+liquidjs@^10.22.0:
   version "10.22.0"
   resolved "https://registry.yarnpkg.com/liquidjs/-/liquidjs-10.22.0.tgz#06f2be823d897986fc92f88855caf903c381498c"
   integrity sha512-SGBYxl7U7vqmmAQdP/PTP3P3q11f99xUjdtxVICqNQqPecl+JIMCsTshDObGzicHaAqWAnPW0o25a9hDaJxOng==
