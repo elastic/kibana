@@ -1498,19 +1498,20 @@ export class CstToAstConverter {
         ) as ast.ESQLBinaryExpression;
 
         if (ctx.booleanExpression()) {
-          const right = this.collectBooleanExpression(ctx.booleanExpression());
-          // Mark as incomplete if RHS is empty, contains incomplete items, or the parser raised an exception
-          const hasItems = right.length > 0;
-          const hasIncompleteItem = right.some((item) =>
-            Array.isArray(item) ? false : !!item?.incomplete
-          );
+          const right = this.fromBooleanExpressionStrict(ctx.booleanExpression());
+          const hasIncompleteItem = !!right?.incomplete;
           const hasException = !!ctx.booleanExpression()?.exception;
 
-          if (!hasItems || hasIncompleteItem || hasException) {
+          if (!right || hasIncompleteItem || hasException) {
             assignment.incomplete = true;
           }
 
-          assignment.args.push(left, right);
+          assignment.args.push(left);
+
+          if (right) {
+            assignment.args.push(right);
+          }
+
           assignment.location = this.computeLocationExtends(assignment);
         } else {
           // User typed something like `ON col0 =` and stopped.
@@ -1964,11 +1965,13 @@ export class CstToAstConverter {
     return list;
   }
 
-  public fromBooleanExpressionStrict(ctx: cst.BooleanExpressionContext): ast.ESQLAstItem {
-    return this.collectBooleanExpression(ctx)[0];
+  public fromBooleanExpressionStrict(
+    ctx: cst.BooleanExpressionContext
+  ): ast.ESQLAstExpression | undefined {
+    return firstItem(this.collectBooleanExpression(ctx));
   }
 
-  public fromBooleanExpression(ctx: cst.BooleanExpressionContext): ast.ESQLAstItem {
+  public fromBooleanExpression(ctx: cst.BooleanExpressionContext): ast.ESQLAstExpression {
     return this.fromBooleanExpressionStrict(ctx) || this.fromParserRuleToUnknown(ctx);
   }
 
