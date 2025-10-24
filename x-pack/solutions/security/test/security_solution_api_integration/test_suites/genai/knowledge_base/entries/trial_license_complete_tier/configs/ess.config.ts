@@ -6,6 +6,7 @@
  */
 
 import type { FtrConfigProviderContext } from '@kbn/test';
+import { TEST_ES_HOST, TEST_ES_PORT } from '@kbn/test-services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(
@@ -27,7 +28,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
                 a.startsWith('--elasticsearch.ssl.certificateAuthorities=')
               )
           ),
-        '--elasticsearch.hosts=http://localhost:9220',
+        `--elasticsearch.hosts=http://${TEST_ES_HOST}:${TEST_ES_PORT}`,
       ],
     },
     testFiles: [require.resolve('..')],

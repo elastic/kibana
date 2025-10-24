@@ -8,4 +8,13 @@
  */
 
 require('../src/setup_node_env');
-require('@kbn/test').runTestsCli();
+
+require('@kbn/test-services')
+  .assignPorts()
+  .then(function () {
+    require('@kbn/test').runTestsCli();
+  })
+  .catch(function (error) {
+    process.stdout.write(require('util').format(error));
+    process.exitCode = 1;
+  });

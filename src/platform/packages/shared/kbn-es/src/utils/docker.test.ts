@@ -45,6 +45,7 @@ import {
 import * as waitClusterUtil from './wait_until_cluster_ready';
 import * as waitForSecurityIndexUtil from './wait_for_security_index';
 import * as mockIdpPluginUtil from '@kbn/mock-idp-utils';
+import { ELASTIC_DOCKER_NETWORK_NAME } from '@kbn/test-services';
 
 jest.mock('execa');
 const execa = jest.requireMock('execa');
@@ -263,7 +264,7 @@ describe('maybeCreateDockerNetwork()', () => {
           Array [
             "network",
             "create",
-            "elastic",
+            "elastic-default",
           ],
         ],
       ]
@@ -271,7 +272,7 @@ describe('maybeCreateDockerNetwork()', () => {
 
     expect(logWriter.messages).toMatchInlineSnapshot(`
       Array [
-        " [34minfo[39m [1mChecking status of elastic Docker network.[22m",
+        " [34minfo[39m [1mChecking status of elastic-default Docker network.[22m",
         "   │ [34minfo[39m Created new network.",
       ]
     `);
@@ -279,14 +280,14 @@ describe('maybeCreateDockerNetwork()', () => {
 
   test('should use an existing network', async () => {
     execa.mockImplementationOnce(() =>
-      Promise.reject({ message: 'network with name elastic already exists' })
+      Promise.reject({ message: `network with name ${ELASTIC_DOCKER_NETWORK_NAME} already exists` })
     );
 
     await maybeCreateDockerNetwork(log);
 
     expect(logWriter.messages).toMatchInlineSnapshot(`
       Array [
-        " [34minfo[39m [1mChecking status of elastic Docker network.[22m",
+        " [34minfo[39m [1mChecking status of elastic-default Docker network.[22m",
         "   │ [34minfo[39m Using existing network.",
       ]
     `);
@@ -729,6 +730,7 @@ describe('runServerlessEsNode()', () => {
     params: ['--env', 'foo=bar', '--volume', 'foo/bar'],
     name: 'es01',
     image: ES_SERVERLESS_DEFAULT_IMAGE,
+    masterNodes: ['es01', 'es02', 'es03'],
   };
 
   test('should call the correct Docker command', async () => {
@@ -748,7 +750,7 @@ describe('runServerlessEsNode()', () => {
         'run',
         '--detach',
         '--net',
-        'elastic',
+        ELASTIC_DOCKER_NETWORK_NAME,
       ])
     );
   });
@@ -765,14 +767,28 @@ describe('runServerlessCluster()', () => {
     await runServerlessCluster(log, { projectType, basePath: baseEsPath });
 
     // docker version (1)
-    // docker ps (1)
-    // docker container rm (3)
+    // docker ps (2)
     // docker network create (1)
     // docker pull (1)
     // docker inspect (1)
     // docker run (3)
-    // docker logs (1)
-    expect(execa.mock.calls).toHaveLength(12);
+    // docker ps (1)
+    const commandsWithFirstArg = execa.mock.calls.map((call: (string | string[])[]) =>
+      call.flat().slice(0, 2).flat().join(' ')
+    );
+
+    expect(commandsWithFirstArg).toEqual([
+      'docker --version',
+      'docker ps',
+      'docker ps',
+      'docker network',
+      'docker pull',
+      'docker inspect',
+      'docker run',
+      'docker run',
+      'docker run',
+      'docker ps',
+    ]);
   });
 
   test(`should wait for serverless nodes to return 'green' status`, async () => {
@@ -840,7 +856,7 @@ describe('runServerlessCluster()', () => {
 
 describe('stopServerlessCluster()', () => {
   test('should stop passed in nodes', async () => {
-    const nodes = ['es01', 'es02', 'es03'];
+    const nodes = ['es-default-01', 'es-default-02', 'es-default-03'];
     execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
 
     await stopServerlessCluster(log, nodes);
@@ -853,19 +869,18 @@ describe('stopServerlessCluster()', () => {
 });
 
 describe('teardownServerlessClusterSync()', () => {
-  const defaultOptions = { projectType, basePath: 'foo/bar' };
-
   test('should kill running serverless nodes', () => {
-    const nodes = ['es01', 'es02', 'es03'];
+    const nodes = ['es-default-01', 'es-default-02', 'es-default-03'];
     execa.commandSync.mockImplementation(() => ({
       stdout: nodes.join('\n'),
     }));
 
-    teardownServerlessClusterSync(log, defaultOptions);
+    teardownServerlessClusterSync(log);
 
     expect(execa.commandSync.mock.calls).toHaveLength(2);
+
     expect(execa.commandSync.mock.calls[0][0]).toEqual(
-      expect.stringContaining(ES_SERVERLESS_DEFAULT_IMAGE)
+      'docker ps --filter status=running --filter name=es-default --quiet'
     );
     expect(execa.commandSync.mock.calls[1][0]).toEqual(`docker kill ${nodes.join(' ')}`);
   });
@@ -875,7 +890,7 @@ describe('teardownServerlessClusterSync()', () => {
       stdout: '\n',
     }));
 
-    teardownServerlessClusterSync(log, defaultOptions);
+    teardownServerlessClusterSync(log);
 
     expect(execa.commandSync.mock.calls).toHaveLength(1);
   });
@@ -906,14 +921,19 @@ describe('runDockerContainer()', () => {
   test('should resolve', async () => {
     execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
     await expect(runDockerContainer(log, {})).resolves.toBeUndefined();
-    // docker version (1)
-    // docker ps (1)
-    // docker container rm (3)
-    // docker network create (1)
-    // docker pull (1)
-    // docker inspect (1)
-    // docker run (1)
-    expect(execa.mock.calls).toHaveLength(9);
+    const commandsWithFirstArg = execa.mock.calls.map((call: (string | string[])[]) =>
+      call.flat().slice(0, 2).flat().join(' ')
+    );
+
+    expect(commandsWithFirstArg).toEqual([
+      'docker --version',
+      'docker ps',
+      'docker ps',
+      'docker network',
+      'docker pull',
+      'docker inspect',
+      'docker run',
+    ]);
   });
 });
 

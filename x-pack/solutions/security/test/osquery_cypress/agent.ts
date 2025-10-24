@@ -14,6 +14,7 @@ import {
 } from '@kbn/security-solution-plugin/scripts/endpoint/common/fleet_services';
 
 import chalk from 'chalk';
+import { ELASTIC_DOCKER_NETWORK_NAME } from '@kbn/test-services';
 import { Manager } from './resource_manager';
 import { generateRandomString, getLatestAvailableAgentVersion } from './utils';
 
@@ -54,7 +55,7 @@ export class AgentManager extends Manager {
     const dockerArgs = [
       'run',
       '--net',
-      'elastic',
+      ELASTIC_DOCKER_NETWORK_NAME,
       '--detach',
       '--add-host',
       'host.docker.internal:host-gateway',

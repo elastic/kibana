@@ -6,6 +6,8 @@
  */
 
 import type { FtrConfigProviderContext } from '@kbn/test';
+import { TEST_ES_HOST, TEST_ES_PORT } from '@kbn/test-services';
+
 import { PRECONFIGURED_BEDROCK_ACTION } from '../../../../../config/shared';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -28,7 +30,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
                 a.startsWith('--elasticsearch.ssl.certificateAuthorities=')
               )
           ),
-        '--elasticsearch.hosts=http://localhost:9220',
+        `--elasticsearch.hosts=http://${TEST_ES_HOST}:${TEST_ES_PORT}`,
         '--coreApp.allowDynamicConfigOverrides=true',
         `--xpack.actions.preconfigured=${JSON.stringify(PRECONFIGURED_BEDROCK_ACTION)}`,
       ],

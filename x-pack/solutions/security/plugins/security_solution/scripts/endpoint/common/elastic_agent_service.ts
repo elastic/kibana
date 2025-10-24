@@ -12,6 +12,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import chalk from 'chalk';
 import execa from 'execa';
 import { dump } from 'js-yaml';
+import { ELASTIC_DOCKER_NETWORK_NAME } from '@kbn/test-services';
 import {
   fetchFleetServerUrl,
   getAgentVersionMatchingCurrentStack,
@@ -160,7 +161,7 @@ const getElasticAgentDockerArgs = ({
   return [
     'run',
     '--net',
-    'elastic',
+    ELASTIC_DOCKER_NETWORK_NAME,
     '--detach',
     '--add-host',
     'host.docker.internal:host-gateway',

@@ -14,6 +14,11 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 
+import {
+  TEST_REMOTE_ES_HOST,
+  TEST_REMOTE_ES_PORT,
+  TEST_REMOTE_KIBANA_PORT,
+} from '@kbn/test-services';
 import { applyFipsOverrides } from '../lib/fips_overrides';
 import { Config, readConfigFile } from '../../functional_test_runner';
 
@@ -106,15 +111,22 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
         };
 
         let shutdownEs;
+        const kibanaProcessNames: string[] = [];
+
         try {
           if (process.env.TEST_ES_DISABLE_STARTUP !== 'true') {
-            shutdownEs = await runElasticsearch({ ...options, log, config, onEarlyExit });
+            shutdownEs = await runElasticsearch({
+              ...options,
+              log,
+              config,
+              onEarlyExit,
+            });
             if (abortCtrl.signal.aborted) {
               return;
             }
           }
 
-          await runKibanaServer({
+          const mainKibanaProcesses = await runKibanaServer({
             procs,
             config,
             logsDir: options.logsDir,
@@ -127,27 +139,31 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
             ],
           });
 
+          kibanaProcessNames.push(...mainKibanaProcesses);
+
           const startRemoteKibana = config.get('kbnTestServer.startRemoteKibana');
 
           if (startRemoteKibana) {
-            await runKibanaServer({
-              procs,
-              config: new Config({
-                settings: {
-                  ...config.getAll(),
-                  kbnTestServer: {
-                    sourceArgs: ['--no-base-path'],
-                    serverArgs: [
-                      ...config.get('kbnTestServer.serverArgs'),
-                      `--xpack.fleet.syncIntegrations.taskInterval=5s`,
-                      `--elasticsearch.hosts=http://localhost:9221`,
-                      `--server.port=5621`,
-                    ],
-                  },
+            const remoteConfig = new Config({
+              settings: {
+                ...config.getAll(),
+                kbnTestServer: {
+                  sourceArgs: ['--no-base-path'],
+                  serverArgs: [
+                    ...config.get('kbnTestServer.serverArgs'),
+                    `--xpack.fleet.syncIntegrations.taskInterval=5s`,
+                    `--elasticsearch.hosts=http://${TEST_REMOTE_ES_HOST}:${TEST_REMOTE_ES_PORT}`,
+                    `--server.port=${TEST_REMOTE_KIBANA_PORT}`,
+                  ],
                 },
-                path: config.path,
-                module: config.module,
-              }),
+              },
+              path: config.path,
+              module: config.module,
+            });
+
+            const remoteKibanaProcesses = await runKibanaServer({
+              procs,
+              config: remoteConfig,
               logsDir: options.logsDir,
               installDir: options.installDir,
               onEarlyExit,
@@ -158,6 +174,8 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
               ],
               remote: true,
             });
+
+            kibanaProcessNames.push(...remoteKibanaProcesses);
           }
 
           if (abortCtrl.signal.aborted) {
@@ -178,7 +196,18 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
               await setTimeout(delay);
             }
 
-            await procs.stop('kibana');
+            while (kibanaProcessNames.length > 0) {
+              const name = kibanaProcessNames.pop();
+              if (!name) {
+                continue;
+              }
+
+              try {
+                await procs.stop(name);
+              } catch (error) {
+                log.debug(`Failed to stop process ${name}`, error);
+              }
+            }
           } finally {
             if (shutdownEs) {
               await shutdownEs();

@@ -11,6 +11,7 @@ import {
   fleetPackageRegistryDockerImage as ingestDockerImage,
   defineDockerServersConfig,
 } from '@kbn/test';
+import { FLEET_PACKAGE_REGISTRY_PORT } from '@kbn/test-services';
 
 export function SecuritySolutionEndpointRegistryHelpers() {
   /**
@@ -19,7 +20,7 @@ export function SecuritySolutionEndpointRegistryHelpers() {
    * will spin up a local docker package registry locally for you
    * if this is defined it takes precedence over the `packageRegistryOverride` variable
    */
-  const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
+  const dockerRegistryPort = FLEET_PACKAGE_REGISTRY_PORT;
 
   /**
    * If you don't want to use the docker image version pinned below and instead want to run your own

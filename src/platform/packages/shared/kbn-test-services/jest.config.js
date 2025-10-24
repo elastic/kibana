@@ -7,14 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const job = process.env.JOB ? `job-${process.env.JOB}-` : '';
-const num = process.env.CI_PARALLEL_PROCESS_NUMBER
-  ? `worker-${process.env.CI_PARALLEL_PROCESS_NUMBER}-`
-  : '';
-
-/**
- * A prefix string that is unique for each parallel CI process that
- * is an empty string outside of CI, so it can be safely injected
- * into strings as a prefix
- */
-export const CI_PARALLEL_PROCESS_PREFIX = `${job}${num}`;
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/kbn-test-services'],
+};

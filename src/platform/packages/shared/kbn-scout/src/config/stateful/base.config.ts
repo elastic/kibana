@@ -21,6 +21,13 @@ import { fleetPackageRegistryDockerImage, defineDockerServersConfig } from '@kbn
 import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { STATEFUL_ROLES_ROOT_PATH } from '@kbn/es';
+import {
+  FLEET_PACKAGE_REGISTRY_PORT,
+  TEST_ES_HOST,
+  TEST_ES_PORT,
+  TEST_KIBANA_HOST,
+  TEST_KIBANA_PORT,
+} from '@kbn/test-services';
 import type { ScoutServerConfig } from '../../types';
 import { SAML_IDP_PLUGIN_PATH, STATEFUL_IDP_METADATA_PATH } from '../constants';
 
@@ -33,7 +40,7 @@ const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/
  * will spin up a local docker package registry locally for you
  * if this is defined it takes precedence over the `packageRegistryOverride` variable
  */
-const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
+const dockerRegistryPort = FLEET_PACKAGE_REGISTRY_PORT;
 
 // if config is executed on CI or locally
 const isRunOnCI = process.env.CI;
@@ -41,15 +48,15 @@ const isRunOnCI = process.env.CI;
 const servers = {
   elasticsearch: {
     protocol: 'http',
-    hostname: 'localhost',
-    port: 9220,
+    hostname: TEST_ES_HOST,
+    port: TEST_ES_PORT,
     username: 'kibana_system',
     password: 'changeme',
   },
   kibana: {
     protocol: 'http',
-    hostname: 'localhost',
-    port: 5620,
+    hostname: TEST_KIBANA_HOST,
+    port: TEST_KIBANA_PORT,
     username: 'elastic',
     password: 'changeme',
   },

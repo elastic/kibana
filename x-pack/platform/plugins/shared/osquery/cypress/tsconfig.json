@@ -32,5 +32,6 @@
     "@kbn/security-plugin",
     "@kbn/test",
     "@kbn/tooling-log",
+    "@kbn/test-services",
   ]
 }

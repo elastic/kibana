@@ -26,6 +26,7 @@ import {
 
 import { createFailError } from '@kbn/dev-cli-errors';
 import pRetry from 'p-retry';
+import { TEST_ES_PORT, TEST_KIBANA_PORT, TEST_FLEET_PORT } from '@kbn/test-services';
 import { prefixedOutputLogger } from '../endpoint/common/utils';
 import { createToolingLogger } from '../../common/endpoint/data_loaders/utils';
 import { createKbnClient } from '../endpoint/common/stack_services';
@@ -158,13 +159,13 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
         return process.exit(0);
       }
 
-      const esPorts: number[] = [9200, 9220];
-      const kibanaPorts: number[] = [5601, 5620];
-      const fleetServerPorts: number[] = [8220];
+      const esPorts: number[] = _.uniq([9200, TEST_ES_PORT]);
+      const kibanaPorts: number[] = _.uniq([5601, TEST_KIBANA_PORT]);
+      const fleetServerPorts: number[] = _.uniq([8220, TEST_FLEET_PORT]);
 
       const getEsPort = <T>(): T | number => {
         if (isOpen) {
-          return 9220;
+          return TEST_ES_PORT;
         }
 
         const esPort = parseInt(`92${Math.floor(Math.random() * 89) + 10}`, 10);
@@ -177,7 +178,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 
       const getKibanaPort = <T>(): T | number => {
         if (isOpen) {
-          return 5620;
+          return TEST_KIBANA_PORT;
         }
 
         const kibanaPort = parseInt(`56${Math.floor(Math.random() * 89) + 10}`, 10);

@@ -30,5 +30,6 @@
     "@kbn/dev-utils",
     "@kbn/spaces-plugin",
     "@kbn/config-schema",
+    "@kbn/test-services",
   ]
 }

@@ -61,8 +61,6 @@ export {
 // @internal
 export { setupJUnitReportGeneration, escapeCdata } from './src/mocha';
 
-export { CI_PARALLEL_PROCESS_PREFIX } from './src/ci_parallel_process_prefix';
-
 export * from './src/functional_test_runner';
 
 export { getUrl } from './src/jest/get_url';

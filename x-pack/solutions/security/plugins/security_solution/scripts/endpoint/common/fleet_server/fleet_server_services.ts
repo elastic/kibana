@@ -38,8 +38,9 @@ import {
   FLEET_SERVER_KEY_PATH,
   fleetServerDevServiceAccount,
 } from '@kbn/dev-utils';
-import { maybeCreateDockerNetwork, SERVERLESS_NODES, verifyDockerInstalled } from '@kbn/es';
+import { getServerlessNodeArgs, maybeCreateDockerNetwork, verifyDockerInstalled } from '@kbn/es';
 import { resolve } from 'path';
+import { ELASTIC_DOCKER_NETWORK_NAME } from '@kbn/test-services';
 import { isServerlessKibanaFlavor } from '../../../../common/endpoint/utils/kibana_status';
 import { captureCallingStack, dump, prefixedOutputLogger } from '../utils';
 import { createToolingLogger } from '../../../../common/endpoint/data_loaders/utils';
@@ -306,11 +307,11 @@ const startFleetServerWithDocker = async ({
         assert.ok(!!serviceToken, '`serviceToken` is required');
       }
 
-      // Create the `elastic` network to use with all containers
+      // Create the `elastic-${SERVICE_NAMESPACE}` network to use with all containers
       await maybeCreateDockerNetwork(log);
       try {
         const dockerArgs = isServerless
-          ? getFleetServerStandAloneDockerArgs({
+          ? await getFleetServerStandAloneDockerArgs({
               containerName,
               hostname,
               port,
@@ -467,7 +468,7 @@ const getFleetServerManagedDockerArgs = ({
     'no',
 
     '--net',
-    'elastic',
+    ELASTIC_DOCKER_NETWORK_NAME,
 
     '--add-host',
     'host.docker.internal:host-gateway',
@@ -507,15 +508,15 @@ type GetFleetServerStandAloneDockerArgsOptions = Pick<
   'esUrl' | 'hostname' | 'containerName' | 'port' | 'agentVersion'
 >;
 
-const getFleetServerStandAloneDockerArgs = ({
+const getFleetServerStandAloneDockerArgs = async ({
   containerName,
   hostname,
   esUrl,
   agentVersion,
   port,
-}: GetFleetServerStandAloneDockerArgsOptions): string[] => {
+}: GetFleetServerStandAloneDockerArgsOptions): Promise<string[]> => {
   const esURL = new URL(esUrl);
-  esURL.hostname = SERVERLESS_NODES[0].name;
+  esURL.hostname = (await getServerlessNodeArgs(undefined, undefined))[0].name;
 
   return [
     'run',
@@ -524,8 +525,7 @@ const getFleetServerStandAloneDockerArgs = ({
     'no',
 
     '--net',
-    'elastic',
-
+    ELASTIC_DOCKER_NETWORK_NAME,
     '--add-host',
     'host.docker.internal:host-gateway',
 

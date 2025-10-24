@@ -26,6 +26,7 @@ import {
   setupLockManagerIndex,
 } from '@kbn/lock-manager/src/setup_lock_manager_index';
 
+import { TEST_ES_PORT } from '@kbn/test-services';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { getLoggerMock } from '../utils/kibana_mocks';
 import { dateAsTimestamp, durationAsMs, sleep } from '../utils/time';
@@ -132,7 +133,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         function addElasticsearchMock({ numberOfMocks }: { numberOfMocks: number }) {
-          nock(/localhost:9220/, { allowUnmocked: true })
+          nock(new RegExp(`localhost:${TEST_ES_PORT}`), { allowUnmocked: true })
             .filteringRequestBody(() => '*')
             .post(`/${LOCKS_CONCRETE_INDEX_NAME}/_update/${LOCK_ID}`)
             .times(numberOfMocks)
