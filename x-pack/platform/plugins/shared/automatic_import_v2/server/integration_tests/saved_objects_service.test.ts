@@ -24,9 +24,9 @@ import {
 import type { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import { integrationSavedObjectType } from '../saved_objects/integration';
 import { dataStreamSavedObjectType } from '../saved_objects/data_stream';
+import { createMockSecurity } from './__mocks__/security';
 
 describe('AutomaticImportSavedObjectService', () => {
-  let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   let mockLogger: jest.Mocked<Logger>;
   let mockSecurity: jest.Mocked<SecurityPluginStart>;
   let mockRequest: KibanaRequest;
@@ -59,35 +59,22 @@ describe('AutomaticImportSavedObjectService', () => {
 
   afterAll(async () => {
     if (kbnRoot) {
-      await kbnRoot.shutdown().catch((err) => {
-        console.error('Error shutting down Kibana:', err.message);
-      });
+      await kbnRoot.shutdown().catch(() => { });
     }
     if (manageES) {
-      await manageES.stop().catch((err) => {
-        console.error('Error stopping ES:', err.message);
-      });
+      await manageES.stop().catch(() => { });
     }
   });
 
   beforeEach(() => {
     mockLogger = loggerMock.create();
     mockRequest = httpServerMock.createKibanaRequest();
-    mockSecurity = {
-      authc: {
-        getCurrentUser: jest.fn().mockReturnValue({
-          username: 'test-user',
-          email: 'test@example.com',
-          full_name: 'Test User',
-          roles: ['admin'],
-        }),
-      },
-    } as any;
+    mockSecurity = createMockSecurity();
   });
 
   describe('Constructor', () => {
     it('should initialize AutomaticImportSavedObjectService with provided savedObjectsClient and logger', () => {
-      mockSavedObjectsClient = savedObjectsClientMock.create();
+      const mockSavedObjectsClient = savedObjectsClientMock.create();
       const newService = new AutomaticImportSavedObjectService({
         savedObjectsClient: mockSavedObjectsClient,
         logger: mockLogger,
