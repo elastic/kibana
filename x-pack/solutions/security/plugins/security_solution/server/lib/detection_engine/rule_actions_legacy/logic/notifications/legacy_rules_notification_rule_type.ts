@@ -10,6 +10,7 @@ import type { Logger } from '@kbn/core/server';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { AlertsClientError, DEFAULT_AAD_CONFIG } from '@kbn/alerting-plugin/server';
+import { ALERT_STATE_NAMESPACE } from '@kbn/rule-data-utils';
 import {
   DEFAULT_RULE_NOTIFICATION_QUERY_SIZE,
   LEGACY_NOTIFICATIONS_ID,
@@ -29,7 +30,6 @@ import { getSignals } from './get_signals';
 import { legacyExtractReferences } from './legacy_saved_object_references/legacy_extract_references';
 // eslint-disable-next-line no-restricted-imports
 import { legacyInjectReferences } from './legacy_saved_object_references/legacy_inject_references';
-import { ALERT_STATE_NAMESPACE } from '@kbn/rule-data-utils';
 
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
