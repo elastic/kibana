@@ -6,6 +6,7 @@
  */
 
 export { generateStreamDescription } from './src/description/generate_description';
+export { generateSemanticSearchData } from './src/description/generate_semantic_search_data';
 export { identifyFeatures } from './src/features/identify_features';
 export { partitionStream } from './workflows/partition_stream';
 export { generateSignificantEvents } from './src/significant_events/generate_significant_events';
