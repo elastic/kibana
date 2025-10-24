@@ -41,4 +41,5 @@ export const testSubjectIds = {
   GRAPH_IPS_POPOVER_CONTENT_ID: 'cloudSecurityGraphGraphInvestigationIpsPopoverContent',
   GRAPH_IPS_POPOVER_IP_ID: 'cloudSecurityGraphGraphInvestigationIpsPopoverId',
   PREVIEW_SECTION_BANNER_PANEL: 'previewSectionBannerPanel',
+  GROUPED_ITEM_TEST_ID: 'GraphGroupedNodePreviewPanelGroupedItem',
 };
