@@ -34,9 +34,37 @@ export type {
   CallToolRequest,
   CallToolResponse,
   Tool,
+  ToolProviderMetadata,
   ListToolsResponse,
   ContentPart,
   TextPart,
 } from './src/client';
 
 export { MCP_CONNECTOR_TYPE_ID, MCP_CONNECTOR_TITLE } from './src/constants';
+
+export {
+  protectedNamespaces,
+  MCP_NAMESPACE_PREFIX,
+  isMcpToolId,
+  createMcpToolId,
+  parseMcpToolId,
+  validateToolNamespace,
+} from './src/namespaces';
+
+export { createProviderMetadata } from './src/provider_metadata';
+
+export type {
+  MCPConnectorAuth,
+  MCPConnectorAuthNone,
+  MCPConnectorAuthHeader,
+  MCPConnectorAuthOAuth,
+  MCPConnectorAuthType as MCPConnectorAuthTypeNew,
+  Header,
+} from './src/auth';
+
+export {
+  createBasicAuthHeader,
+  createBearerTokenHeader,
+  createApiKeyHeader,
+  buildAuthHeaders,
+} from './src/auth';

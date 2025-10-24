@@ -20,6 +20,7 @@ target
 .jruby
 .idea
 .claude
+claude.md
 .cursor
 .windsurf
 *.iml
