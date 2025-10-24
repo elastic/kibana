@@ -320,25 +320,25 @@ export class DiscoverPlugin
     scopedHistory?: ScopedHistory;
     setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
   }) {
-    const {
-      rootProfileService,
-      dataSourceProfileService,
-      documentProfileService,
-      profilesManager,
-    } = await this.createProfileServices();
-    const services = await this.getDiscoverServices({
-      core,
-      plugins,
-      profilesManager,
-      ebtManager,
-      scopedHistory,
-      setHeaderActionMenu,
-    });
-    const { createProfileProviderSharedServices, registerProfileProviders } = await import(
-      './context_awareness/profile_providers'
-    );
-    const sharedServices = await (this.profileProviderSharedServices ??=
-      createProfileProviderSharedServices(plugins));
+    const [
+      { rootProfileService, dataSourceProfileService, documentProfileService, profilesManager },
+      { createProfileProviderSharedServices, registerProfileProviders },
+    ] = await Promise.all([
+      this.createProfileServices(),
+      import('./context_awareness/profile_providers'),
+    ]);
+
+    const [sharedServices, services] = await Promise.all([
+      (this.profileProviderSharedServices ??= createProfileProviderSharedServices(plugins)),
+      this.getDiscoverServices({
+        core,
+        plugins,
+        profilesManager,
+        ebtManager,
+        scopedHistory,
+        setHeaderActionMenu,
+      }),
+    ]);
 
     await registerProfileProviders({
       rootProfileService,
