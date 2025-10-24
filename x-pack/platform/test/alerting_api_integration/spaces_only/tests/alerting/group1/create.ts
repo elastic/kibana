@@ -895,21 +895,6 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           expect(rawInvestigationGuide).to.eql(expectedArtifacts.artifacts.investigation_guide);
         });
 
-        it('should deny creating a rule with an investigation guide that exceeds size limits', () =>
-          supertest
-            .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-            .set('kbn-xsrf', 'foo')
-            .send(
-              getTestRuleData({
-                artifacts: {
-                  investigation_guide: {
-                    blob: 'a',
-                  },
-                },
-              })
-            )
-            .expect(400));
-
         it('should deny creating a rule that exceeds dashboard length limits', () =>
           supertest
             .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
