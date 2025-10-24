@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { LegendSize } from '@kbn/chart-expressions-common';
 import { EuiIconAxisLeft, EuiIconAxisBottom } from '@kbn/chart-icons';
 import { TooltipWrapper } from '@kbn/visualization-utils';
-import type { VisualizationToolbarProps } from '../../../types';
+import type { VisualizationToolbarProps } from '@kbn/lens-common';
 import { LegendSettingsPopover, ToolbarPopover } from '../../../shared_components';
 
 import type { HeatmapVisualizationState } from '../types';
