@@ -27,8 +27,10 @@ import { createObservabilityLogsDataSourceProfileProviders } from './observabili
 import { createObservabilityDocumentProfileProviders } from './observability/observability_profile_providers';
 import { createObservabilityRootProfileProvider } from './observability/observability_root_profile/profile';
 import { createObservabilityTracesDataSourceProfileProviders } from './observability/traces_data_source_profile/create_profile_providers';
-import type { ProfileProviderServices } from './profile_provider_services';
-import { createProfileProviderServices } from './profile_provider_services';
+import type {
+  ProfileProviderServices,
+  ProfileProviderSharedServices,
+} from './profile_provider_services';
 import { createSecurityDocumentProfileProvider } from './security/security_document_profile';
 import { createSecurityRootProfileProvider } from './security/security_root_profile';
 import { createObservabilityMetricsDataSourceProfileProviders } from './metrics_data_source_profile';
@@ -42,6 +44,7 @@ export const registerProfileProviders = async ({
   dataSourceProfileService,
   documentProfileService,
   enabledExperimentalProfileIds,
+  sharedServices,
   services,
 }: {
   /**
@@ -60,9 +63,16 @@ export const registerProfileProviders = async ({
    * Array of experimental profile IDs which are enabled in `kibana.yml`
    */
   enabledExperimentalProfileIds: string[];
+  /**
+   * Shared services for profile providers
+   */
+  sharedServices: ProfileProviderSharedServices;
+  /**
+   * The base Discover services
+   */
   services: DiscoverServices;
 }) => {
-  const providerServices = await createProfileProviderServices(services);
+  const providerServices: ProfileProviderServices = { ...sharedServices, ...services };
   const rootProfileProviders = createRootProfileProviders(providerServices);
   const dataSourceProfileProviders = createDataSourceProfileProviders(providerServices);
   const documentProfileProviders = createDocumentProfileProviders(providerServices);

@@ -67,6 +67,7 @@ describe('registerProfileProviders', () => {
         exampleDataSourceProfileProvider.profileId,
         exampleDocumentProfileProvider.profileId,
       ],
+      sharedServices: profileProviderServices,
       services: profileProviderServices,
     });
     const rootContext = await rootProfileServiceMock.resolve({ solutionNavId: null });
@@ -103,6 +104,7 @@ describe('registerProfileProviders', () => {
       dataSourceProfileService: dataSourceProfileServiceMock,
       documentProfileService: documentProfileServiceMock,
       enabledExperimentalProfileIds: [],
+      sharedServices: profileProviderServices,
       services: profileProviderServices,
     });
     const rootContext = await rootProfileServiceMock.resolve({ solutionNavId: null });
@@ -141,6 +143,7 @@ describe('registerProfileProviders', () => {
       dataSourceProfileService: dataSourceProfileServiceMock,
       documentProfileService: documentProfileServiceMock,
       enabledExperimentalProfileIds: [],
+      sharedServices: profileProviderServices,
       services: profileProviderServices,
     });
 
@@ -166,6 +169,7 @@ describe('registerProfileProviders', () => {
       dataSourceProfileService: dataSourceProfileServiceMock,
       documentProfileService: documentProfileServiceMock,
       enabledExperimentalProfileIds: [],
+      sharedServices: profileProviderServices,
       services: profileProviderServices,
     });
 
