@@ -87,14 +87,14 @@ export async function scheduleConfigs({
       canRunConfigOnMachine(type, configOutput.resources)
     );
 
-    if (eligibleTypes.length === 0) {
-      throw new Error(`Config ${configOutput.path} requires resources that no machines provide`);
-    }
+    // If no machine type can fit this config, fall back to the largest machine type
+    // (which is already sorted at the front of machineTypes)
+    const typesToConsider = eligibleTypes.length > 0 ? eligibleTypes : [machineTypes[0]];
 
     // Try to pack into existing runtime instances of eligible types. Prefer
     // filling larger types first.
     const eligibleInstances = machineStates.filter((state) =>
-      canRunConfigOnMachine(state.machineType, configOutput.resources)
+      typesToConsider.some((type) => type.name === state.machineType.name)
     );
 
     const machinesWithinLimit = eligibleInstances.filter(
@@ -132,7 +132,7 @@ export async function scheduleConfigs({
     // If no existing instance could be used, create a new instance on the
     // largest eligible type.
     if (!selectedMachine) {
-      const chosenType = eligibleTypes[0];
+      const chosenType = typesToConsider[0];
       const nextCount = (typeInstanceCounters.get(chosenType.name) ?? 0) + 1;
       typeInstanceCounters.set(chosenType.name, nextCount);
 

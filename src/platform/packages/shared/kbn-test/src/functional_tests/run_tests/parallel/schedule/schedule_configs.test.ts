@@ -106,19 +106,24 @@ describe('scheduleConfigs', () => {
     expect(secondary.configs.every((config) => config.tooLong === false)).toBe(true);
   });
 
-  it('throws when no machine can satisfy a config resource requirement', async () => {
+  it('uses largest machine type as fallback when no machine can satisfy config requirements', async () => {
     createConfigMock(new Map([[CONFIG_A_PATH, createResources(10, 64 * 1024)]]));
 
-    await expect(
-      scheduleConfigs({
-        configs: [{ path: CONFIG_A_PATH, testDurationMins: 10 }],
-        maxDurationMins: 45,
-        machines: [{ name: 'machine-1', cpus: 8, memoryMb: 32 * 1024 }],
-      })
-    ).rejects.toThrow(/no machines provide/);
+    const result = await scheduleConfigs({
+      configs: [{ path: CONFIG_A_PATH, testDurationMins: 10 }],
+      maxDurationMins: 45,
+      machines: [
+        { name: 'machine-large', cpus: 8, memoryMb: 32 * 1024 },
+        { name: 'machine-small', cpus: 4, memoryMb: 16 * 1024 },
+      ],
+    });
+
+    expect(result.groups).toHaveLength(1);
+    expect(result.groups[0].machine.name).toBe('machine-large');
+    expect(result.groups[0].configs[0].path).toBe(CONFIG_A_PATH);
   });
 
-  it('rejects configs whose warming phase exceeds machine memory', async () => {
+  it('uses largest machine type as fallback for warming phase that exceeds all machines', async () => {
     const warmingHeavyResources = {
       warming: { cpu: 2, memory: 40 * 1024, exclusive: false },
       idle: { cpu: 1, memory: 8 * 1024, exclusive: false },
@@ -127,12 +132,17 @@ describe('scheduleConfigs', () => {
 
     createConfigMock(new Map([[CONFIG_A_PATH, warmingHeavyResources]]));
 
-    await expect(
-      scheduleConfigs({
-        configs: [{ path: CONFIG_A_PATH, testDurationMins: 20 }],
-        maxDurationMins: 45,
-        machines: [{ name: 'machine-1', cpus: 4, memoryMb: 32 * 1024 }],
-      })
-    ).rejects.toThrow(/no machines provide/);
+    const result = await scheduleConfigs({
+      configs: [{ path: CONFIG_A_PATH, testDurationMins: 20 }],
+      maxDurationMins: 45,
+      machines: [
+        { name: 'machine-large', cpus: 4, memoryMb: 32 * 1024 },
+        { name: 'machine-small', cpus: 2, memoryMb: 16 * 1024 },
+      ],
+    });
+
+    expect(result.groups).toHaveLength(1);
+    expect(result.groups[0].machine.name).toBe('machine-large');
+    expect(result.groups[0].configs[0].path).toBe(CONFIG_A_PATH);
   });
 });

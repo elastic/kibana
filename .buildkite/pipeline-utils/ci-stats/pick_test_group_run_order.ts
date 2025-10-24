@@ -686,7 +686,10 @@ export async function pickTestGroupRunOrder() {
         continue;
       }
 
-      const machineType = createMachineDefinition(resolvedQueue);
+      // Provide multiple machine type options, sorted largest to smallest
+      const machineTypes = ['n2-standard-8', 'n2-standard-4'].map((typeName) =>
+        createMachineDefinition(typeName)
+      );
 
       let scheduleResponse: ScheduleResponse;
 
@@ -694,7 +697,7 @@ export async function pickTestGroupRunOrder() {
         scheduleResponse = await runScheduleScript({
           configs: scheduleInputs,
           maxDurationMins: FUNCTIONAL_MAX_MINUTES,
-          machines: [machineType],
+          machines: machineTypes,
         });
       } catch (error) {
         const err = error instanceof Error ? error : new Error(String(error));
@@ -725,11 +728,14 @@ export async function pickTestGroupRunOrder() {
           title = `FTR Configs #${sortBy}`;
         }
 
+        // Use the queue corresponding to the scheduled machine type
+        const assignedQueue = scheduledGroup.machine.name;
+
         functionalGroups.push({
           title,
           key,
           sortBy,
-          queue: resolvedQueue,
+          queue: assignedQueue,
         });
 
         ftrRunOrder[key] = {
