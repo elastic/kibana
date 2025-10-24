@@ -9,7 +9,6 @@ import type { Client as ElasticsearchClient8 } from 'elasticsearch-8.x';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ProductName } from '@kbn/product-doc-common';
-import { getSourceNamesFromProductName, getProductNameFromSource } from '../artifact/product_name';
 
 /** the list of fields to import from the source cluster */
 const fields = [
