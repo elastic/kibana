@@ -17,7 +17,7 @@ function scanNodeRecursievly(obj: unknown): string[] {
   }
 
   if (typeof obj === 'object') {
-    return Object.values(obj as Object).flatMap((value) => scanNodeRecursievly(value));
+    return Object.values(obj as object).flatMap((value) => scanNodeRecursievly(value));
   }
 
   return [];
@@ -58,7 +58,7 @@ export function findInputsInGraph(workflowGraph: WorkflowGraph): Record<string, 
       }
     } else {
       // We try to scan the whole node, because otherwise, we would need a special case for each node type such as http, kibana, elasticsearch, etc
-      // Not good, mostlikely and other nodes will need to be subset of atomic node, or somehting else
+      // Not good, most likely and other nodes will need to be subset of atomic node, or something else
       const genericNode = node as AtomicGraphNode;
       stepInputsKey = genericNode.stepId;
       stepInputs.push(...scanNodeRecursievly(genericNode));
