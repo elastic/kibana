@@ -1058,11 +1058,21 @@ paths:
           required: true
           schema:
             $ref: '#/components/schemas/EntityType'
-        - in: path
-          name: entityId
-          required: true
-          schema:
-            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  description: >-
+                    Identifier of the entity to be deleted, commonly entity.id
+                    value.
+                  type: string
+              required:
+                - id
+        description: Schema for the deleting entity
+        required: true
       responses:
         '200':
           content:
