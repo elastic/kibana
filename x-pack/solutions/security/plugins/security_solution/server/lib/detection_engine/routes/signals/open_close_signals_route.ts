@@ -15,7 +15,7 @@ import {
 } from '@kbn/rule-data-utils';
 import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { ALERTS_API_ALL, ALERTS_API_READ } from '@kbn/security-solution-features/constants';
+import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
 import { SetAlertsStatusRequestBody } from '../../../../../common/api/detection_engine/signals';
 import { AlertStatusEnum } from '../../../../../common/api/model';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
@@ -42,7 +42,7 @@ export const setSignalsStatusRoute = (
       access: 'public',
       security: {
         authz: {
-          requiredPrivileges: [ALERTS_API_ALL, ALERTS_API_READ],
+          requiredPrivileges: [ALERTS_API_READ],
         },
       },
     })
