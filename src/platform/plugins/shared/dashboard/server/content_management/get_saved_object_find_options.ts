@@ -17,7 +17,7 @@ import type { DashboardSearchOptions, DashboardState } from './latest';
 type DashboardStateKeys = keyof DashboardState;
 type StoredDashboardStateKeys = keyof DashboardSavedObjectAttributes;
 
-// Dashboard API field names can not be passed directly
+// Dashboard API fields can not be passed directly
 // to saved object search since dashboard API and
 // saved object fields have diverged.
 function getSavedObjectFields(fields: DashboardStateKeys[]): StoredDashboardStateKeys[] {

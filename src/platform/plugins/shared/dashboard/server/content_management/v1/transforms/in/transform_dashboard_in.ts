@@ -65,7 +65,9 @@ export const transformDashboardIn = ({
         panelsJSON,
       }),
       ...(sections?.length && { sections }),
-      ...(timeRange && { timeFrom: timeRange.from, timeTo: timeRange.to, timeRestore: true }),
+      ...(timeRange
+        ? { timeFrom: timeRange.from, timeTo: timeRange.to, timeRestore: true }
+        : { timeRestore: false }),
       kibanaSavedObjectMeta: { searchSourceJSON },
     };
     return {
