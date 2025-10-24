@@ -181,6 +181,32 @@ export const ALERT_SUMMARY_SYSTEM_PROMPT =
   'The response should look like this:\n' +
   '{{"summary":"Markdown-formatted summary text.","recommendedActions":"Markdown-formatted action list starting with a ### header."}}';
 
+export const ENTITY_DETAILS_HIGHLIGHTS_PROMPT = `Generate markdown text with most important information for entity so a Security analyst can act. Your response should take all the important elements of the entity into consideration. Limit your response to 500 characters. Only reply with the required sections, and nothing else.
+  ### Format  
+  Return a string with markdown text without any explanations, or variable assignments. Do **not** wrap the output in triple backticks. 
+    The result must be a list of bullet points, nothing more.
+    Generate summaries for the following sections, but omit any section that if the information isn't available in the context:
+      - Risk score: Summarize the entity's risk score and the main factors contributing to it.
+      - Criticality: Note the entity's criticality level and its impact on the risk score.
+      - Vulnerabilities: Summarize any significant Vulnerability and briefly explain why it is significant.
+      - Anomalies: Summarize unusual activities or anomalies detected for the entity and briefly explain why it is significant.  
+    The generated data **MUST** follow this pattern:
+  """- **{title1}**: {description1}
+  - **{title2}**: {description2}
+  ...
+  - **{titleN}**: {descriptionN}
+  
+  **Recommended action**: {description}"""
+  
+    **Strict rules**:
+      _ Only reply with the required sections, and nothing else.
+      - Limit your total response to 500 characters.
+      - Never return an section which there is no data available in the context.
+      - Use inline code (backticks) for technical values like file paths, process names, arguments, etc.
+      - Recommended action title should be bold and text should be inline.    
+      - **Do not** include any extra explanation, reasoning or text.
+    `;
+
 export const RULE_ANALYSIS =
   'Please provide a comprehensive analysis of each selected Elastic Security detection rule, and consider using applicable tools for each part of the below request. Make sure you consider using appropriate tools available to you to fulfill this request. For each rule, include:\n' +
   '- The rule name and a brief summary of its purpose.\n' +
