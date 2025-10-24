@@ -62,6 +62,7 @@ interface Props {
   saveTableOptionsToUrl?: boolean;
   showPerPageOptions?: boolean;
   onLoadTable?: () => void;
+  tableCaption?: string;
 }
 
 const defaultSorting = {
@@ -77,6 +78,7 @@ export function ErrorGroupList({
   saveTableOptionsToUrl,
   showPerPageOptions = true,
   onLoadTable,
+  tableCaption,
 }: Props) {
   const { query } = useAnyOfApmParams(
     '/services/{serviceName}/overview',
@@ -316,6 +318,7 @@ export function ErrorGroupList({
 
   return (
     <ManagedTable
+      tableCaption={tableCaption}
       noItemsMessage={
         isMainStatsLoading
           ? i18n.translate('xpack.apm.errorsTable.loading', {
