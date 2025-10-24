@@ -182,7 +182,7 @@ export class SearchInterceptor {
     const sessionOptions = this.deps.session.getSearchOptions(options.sessionId);
     if (sessionOptions?.isRestore) return of(undefined); // don't use cache if restoring a session
 
-    return of(createRequestHash(hashOptions));
+    return from(Promise.resolve(createRequestHash(hashOptions)));
   }
 
   /*
@@ -446,7 +446,7 @@ export class SearchInterceptor {
   ): Promise<IKibanaSearchResponse> {
     const { abortSignal } = options || {};
 
-    const requestHash = createRequestHash(request.params);
+    const requestHash = request.params ? createRequestHash(request.params) : undefined;
 
     if (request.id) {
       // just polling an existing search, no need to send the body, just the hash

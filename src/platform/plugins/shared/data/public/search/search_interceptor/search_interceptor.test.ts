@@ -35,7 +35,8 @@ jest.mock('./create_request_hash', () => {
   return {
     ...originalModule,
     createRequestHash: jest.fn().mockImplementation((input) => {
-      return Promise.resolve(JSON.stringify(input));
+      const { preference, ...params } = input;
+      return JSON.stringify(params);
     }),
   };
 });
