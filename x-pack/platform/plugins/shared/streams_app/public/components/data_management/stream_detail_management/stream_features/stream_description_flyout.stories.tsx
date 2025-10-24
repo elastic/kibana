@@ -59,6 +59,7 @@ And it can render !{tooltip[tooltips like this](Look! I'm a very helpful tooltip
           classic: {},
         },
       }}
+      setFeatures={() => {}}
     />
   );
 };

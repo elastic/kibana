@@ -50,6 +50,7 @@ import {
   getNormalizedInputs,
   isRootPrivilegesRequired,
   checkIntegrationFipsLooseCompatibility,
+  varsReducer,
 } from '../../common/services';
 import {
   SO_SEARCH_LIMIT,
@@ -82,6 +83,7 @@ import type {
   CloudConnectorVars,
   CloudConnectorSecretVar,
   AwsCloudConnectorVars,
+  PackagePolicyConfigRecord,
 } from '../../common/types';
 import {
   FleetError,
@@ -3463,6 +3465,7 @@ export function updatePackageInputs(
   if (!inputsUpdated) return basePackagePolicy;
 
   const availablePolicyTemplates = packageInfo.policy_templates ?? [];
+  const limitedPackage = isPackageLimited(packageInfo);
 
   const inputs = [
     ...basePackagePolicy.inputs.filter((input) => {
@@ -3516,6 +3519,10 @@ export function updatePackageInputs(
     // take the override value from the new package as-is. This case typically
     // occurs when inputs or package policy templates are added/removed between versions.
     if (originalInput === undefined) {
+      // Do not enable new inputs for limited packages
+      if (limitedPackage) {
+        update.enabled = false;
+      }
       inputs.push(update as NewPackagePolicyInput);
       continue;
     }
@@ -3523,7 +3530,7 @@ export function updatePackageInputs(
     // For flags like this, we only want to override the original value if it was set
     // as `undefined` in the original object. An explicit true/false value should be
     // persisted from the original object to the result after the override process is complete.
-    if (originalInput.enabled === undefined && update.enabled !== undefined) {
+    if (!limitedPackage && originalInput.enabled === undefined && update.enabled !== undefined) {
       originalInput.enabled = update.enabled;
     }
 
@@ -3537,9 +3544,11 @@ export function updatePackageInputs(
       originalInput.policy_template = update.policy_template;
     }
 
-    if (update.vars) {
+    if (update.vars || originalInput.vars) {
       const indexOfInput = inputs.indexOf(originalInput);
-      inputs[indexOfInput] = deepMergeVars(originalInput, update, true) as NewPackagePolicyInput;
+      const mergedVars = deepMergeVars(originalInput, update, true) as NewPackagePolicyInput;
+      const filteredVars = removeStaleVars<NewPackagePolicyInput>(mergedVars, update);
+      inputs[indexOfInput] = filteredVars;
       originalInput = inputs[indexOfInput];
     }
 
@@ -3572,16 +3581,14 @@ export function updatePackageInputs(
           originalStream.enabled = stream.enabled;
         }
 
-        if (stream.vars) {
+        if (stream.vars || originalStream.vars) {
           // streams wont match for input pkgs
           const indexOfStream = isInputPkgUpdate
             ? 0
             : originalInput.streams.indexOf(originalStream);
-          originalInput.streams[indexOfStream] = deepMergeVars(
-            originalStream,
-            stream as InputsOverride,
-            true
-          );
+          const mergedVars = deepMergeVars(originalStream, stream as InputsOverride, true);
+          const filteredVars = removeStaleVars(mergedVars, stream);
+          originalInput.streams[indexOfStream] = filteredVars;
           originalStream = originalInput.streams[indexOfStream];
         }
       }
@@ -3596,9 +3603,12 @@ export function updatePackageInputs(
     });
   }
 
+  const vars = getUpdatedGlobalVars(packageInfo, basePackagePolicy);
+
   const resultingPackagePolicy: NewPackagePolicy = {
     ...basePackagePolicy,
     inputs,
+    vars,
   };
 
   const validationResults = validatePackagePolicy(resultingPackagePolicy, packageInfo, load);
@@ -3854,6 +3864,9 @@ export function sendUpdatePackagePolicyTelemetryEvent(
 }
 
 function deepMergeVars(original: any, override: any, keepOriginalValue = false): any {
+  if (!override.vars) {
+    return original;
+  }
   if (!original.vars) {
     original.vars = { ...override.vars };
   }
@@ -3880,6 +3893,51 @@ function deepMergeVars(original: any, override: any, keepOriginalValue = false):
   }
 
   return result;
+}
+
+function getUpdatedGlobalVars(packageInfo: PackageInfo, packagePolicy: NewPackagePolicy) {
+  if (!packageInfo.vars) {
+    return undefined;
+  }
+
+  const packageInfoVars = packageInfo.vars.reduce(varsReducer, {});
+  const result = deepMergeVars(packagePolicy, { vars: packageInfoVars }, true);
+  return removeStaleVars(result, { vars: packageInfoVars }).vars;
+}
+
+interface SupportsVars {
+  vars?: PackagePolicyConfigRecord;
+}
+
+function removeStaleVars<T extends SupportsVars>(
+  currentWithVars: T,
+  expectedVars: SupportsVars
+): T {
+  if (!currentWithVars.vars) {
+    return currentWithVars;
+  }
+
+  if (!expectedVars.vars) {
+    return {
+      ...currentWithVars,
+      vars: {},
+    };
+  }
+
+  const filteredVars = Object.entries(currentWithVars.vars).reduce<PackagePolicyConfigRecord>(
+    (acc, [key, val]) => {
+      if (key in expectedVars.vars!) {
+        acc[key] = val;
+      }
+      return acc;
+    },
+    {}
+  );
+
+  return {
+    ...currentWithVars,
+    vars: filteredVars,
+  };
 }
 
 async function requireUniqueName(

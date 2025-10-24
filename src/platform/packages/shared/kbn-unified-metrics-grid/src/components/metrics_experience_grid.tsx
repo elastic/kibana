@@ -85,8 +85,8 @@ export const MetricsExperienceGrid = ({
     searchTerm,
   }) ?? {};
 
-  const columns = useMemo<EuiFlexGridProps['columns']>(
-    () => Math.min(filteredFieldsCount, 4) as EuiFlexGridProps['columns'],
+  const columns = useMemo<NonNullable<EuiFlexGridProps['columns']>>(
+    () => Math.min(filteredFieldsCount, 4) as NonNullable<EuiFlexGridProps['columns']>,
     [filteredFieldsCount]
   );
 
