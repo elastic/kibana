@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-declare global {
-  interface Window {
-    _checkCanSendTelemetry: (signal?: AbortSignal) => Promise<boolean>;
-    _resetTelemetry: (signal?: AbortSignal) => Promise<void>;
-  }
-}
+import type { DiscoverSession } from './types';
 
-// Turn this file into a module
-export {};
+export const createDiscoverSessionMock = (
+  params: Partial<DiscoverSession> & Pick<DiscoverSession, 'id'>
+): DiscoverSession => ({
+  title: 'test title',
+  description: 'test description',
+  tabs: [],
+  managed: false,
+  ...params,
+});
