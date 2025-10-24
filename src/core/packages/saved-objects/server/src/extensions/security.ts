@@ -503,10 +503,6 @@ export interface ISavedObjectsSecurityExtension {
     operation: 'changeAccessMode' | 'changeOwnership'
   ) => Promise<AuthorizationResult<A>>;
 
-  getTypesRequiringAccessControlCheck: (
-    objects: AuthorizeObject[]
-  ) => GetObjectsRequiringPrivilegeCheckResult;
-
   /**
    * Performs audit logging for the CLOSE_POINT_IN_TIME security action
    */

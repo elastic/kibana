@@ -1277,16 +1277,6 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     };
   }
 
-  getTypesRequiringAccessControlCheck(
-    objects: AuthorizeObject[],
-    action: SecurityAction = SecurityAction.CHANGE_OWNERSHIP
-  ) {
-    return this.accessControlService.getObjectsRequiringPrivilegeCheck({
-      objects,
-      actions: new Set([action]),
-    }) as GetObjectsRequiringPrivilegeCheckResult;
-  }
-
   auditClosePointInTime() {
     this.addAuditEvent({
       action: AuditAction.CLOSE_POINT_IN_TIME,
