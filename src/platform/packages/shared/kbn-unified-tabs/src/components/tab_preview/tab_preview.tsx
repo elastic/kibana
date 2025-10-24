@@ -158,6 +158,7 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
                   transparentBackground
                   paddingSize="none"
                   css={codeBlockCss}
+                  data-test-subj={`unifiedTabs_tabPreviewCodeBlock_${tabItem.id}`}
                 >
                   {getPreviewQuery(tabPreviewData)}
                 </EuiCodeBlock>

@@ -68,6 +68,7 @@ describe(
 
         cy.visit(APP_PATH);
 
+        serverlessSecurityHeaders.showMoreItems();
         serverlessSecurityHeaders.openNavigationPanelFor(
           serverlessSecurityHeaders.ENDPOINT_EXCEPTIONS
         );
