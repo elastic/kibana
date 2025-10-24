@@ -6,13 +6,10 @@
  */
 
 import type {
-  SavedObjectsImportAccessControlConflict,
   SavedObjectsImportAmbiguousConflictError,
   SavedObjectsImportConflictError,
   SavedObjectsImportFailure,
-  SavedObjectsImportMissingAccessControlMetadataError,
   SavedObjectsImportMissingReferencesError,
-  SavedObjectsImportRequiresProfileIdError,
   SavedObjectsImportResponse,
   SavedObjectsImportSuccess,
   SavedObjectsImportUnexpectedAccessControlMetadataError,
@@ -28,10 +25,7 @@ export interface FailedImport {
     | SavedObjectsImportUnsupportedTypeError
     | SavedObjectsImportMissingReferencesError
     | SavedObjectsImportUnknownError
-    | SavedObjectsImportMissingAccessControlMetadataError
-    | SavedObjectsImportRequiresProfileIdError
-    | SavedObjectsImportUnexpectedAccessControlMetadataError
-    | SavedObjectsImportAccessControlConflict;
+    | SavedObjectsImportUnexpectedAccessControlMetadataError;
 }
 
 export interface ProcessedImportResponse {

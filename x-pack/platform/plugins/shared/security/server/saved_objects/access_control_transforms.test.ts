@@ -7,34 +7,31 @@
 
 import { Transform } from 'stream';
 
-import type { AuthenticatedUser, ISavedObjectTypeRegistry } from '@kbn/core/server';
-import { httpServerMock } from '@kbn/core/server/mocks';
+import type { ISavedObjectTypeRegistry } from '@kbn/core/server';
 
 import { getImportTransformsFactory } from './access_control_transforms';
 
 describe('Access Control Transforms', () => {
-  const request = httpServerMock.createKibanaRequest();
-
   // Mock type registry (expand to satisfy ISavedObjectTypeRegistry)
   const typeRegistry = {
     supportsAccessControl: (type: string) => type === 'dashboard',
   } as unknown as jest.Mocked<ISavedObjectTypeRegistry>;
 
   // Full AuthenticatedUser mock
-  const makeUser = (profileUid: string | null): AuthenticatedUser | null =>
-    profileUid
-      ? {
-          username: profileUid,
-          profile_uid: profileUid,
-          authentication_realm: { name: '', type: '' },
-          lookup_realm: { name: '', type: '' },
-          authentication_provider: { name: 'basic', type: 'basic' },
-          authentication_type: 'basic',
-          roles: [],
-          enabled: true,
-          elastic_cloud_user: false,
-        }
-      : null;
+  // const makeUser = (profileUid: string | null): AuthenticatedUser | null =>
+  //   profileUid
+  //     ? {
+  //         username: profileUid,
+  //         profile_uid: profileUid,
+  //         authentication_realm: { name: '', type: '' },
+  //         lookup_realm: { name: '', type: '' },
+  //         authentication_provider: { name: 'basic', type: 'basic' },
+  //         authentication_type: 'basic',
+  //         roles: [],
+  //         enabled: true,
+  //         elastic_cloud_user: false,
+  //       }
+  //     : null;
 
   // describe('exportTransform', () => {
   //   it('strips the owner field for all objects that contain access control metadata', () => {
@@ -79,12 +76,10 @@ describe('Access Control Transforms', () => {
   // });
 
   describe('getImportTransformsFactory', () => {
-    const getCurrentUser = jest.fn().mockImplementation(() => makeUser('alice_profile_id'));
-
     it(`returns a function that creates the import transforms`, () => {
-      const createImportTransforms = getImportTransformsFactory(getCurrentUser);
+      const createImportTransforms = getImportTransformsFactory();
       expect(createImportTransforms).toBeInstanceOf(Function);
-      const importTransforms = createImportTransforms(request, typeRegistry, []);
+      const importTransforms = createImportTransforms(typeRegistry, []);
       expect(importTransforms).toHaveProperty('mapStream');
       expect(importTransforms).toHaveProperty('filterStream');
       expect(importTransforms.mapStream).toBeInstanceOf(Transform);

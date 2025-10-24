@@ -159,7 +159,6 @@ Exported saved objects are not backwards compatible and cannot be imported into 
           overwrite,
           createNewCopies,
           compatibilityMode,
-          request,
         });
 
         return response.ok({ body: result });

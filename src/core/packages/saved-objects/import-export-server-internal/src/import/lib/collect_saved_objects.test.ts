@@ -12,16 +12,14 @@ import { SavedObjectsImportError } from '../errors';
 import { collectSavedObjects } from './collect_saved_objects';
 import { createLimitStream } from './create_limit_stream';
 import { getNonUniqueEntries } from './get_non_unique_entries';
-import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
-import {
+import type {
   AccessControlImportTransforms,
   AccessControlImportTransformsFactory,
   ISavedObjectTypeRegistry,
   SavedObject,
 } from '@kbn/core-saved-objects-server';
-import { KibanaRequest } from '@kbn/core-http-server';
-import { SavedObjectsImportFailure } from '@kbn/core-saved-objects-common';
+import type { SavedObjectsImportFailure } from '@kbn/core-saved-objects-common';
 import { createFilterStream } from '@kbn/utils';
 
 jest.mock('./create_limit_stream');
@@ -32,14 +30,11 @@ const getMockFn = <T extends (...args: any[]) => any, U>(fn: (...args: Parameter
 
 let limitStreamPush: jest.SpyInstance;
 let typeRegistry: jest.Mocked<ISavedObjectTypeRegistry>;
-let request: KibanaRequest;
 
 const READ_ONLY_TYPE = 'read-only-type';
 
 // Simple implementation of createAccessControlImportTransforms just so we can test that it is called
 const createAccessControlImportTransforms: AccessControlImportTransformsFactory = (
-  // eslint-disable-next-line @typescript-eslint/no-shadow
-  request: KibanaRequest,
   registry: ISavedObjectTypeRegistry,
   errors: SavedObjectsImportFailure[]
 ): AccessControlImportTransforms => {
@@ -54,7 +49,7 @@ const createAccessControlImportTransforms: AccessControlImportTransformsFactory 
           type: obj.type,
           meta: { title },
           error: {
-            type: 'missing_access_control_metadata',
+            type: 'unexpected_access_control_metadata',
           },
         });
         return false;
@@ -74,7 +69,6 @@ beforeEach(() => {
 
   typeRegistry = typeRegistryMock.create();
   typeRegistry.supportsAccessControl.mockImplementation((type: string) => type === READ_ONLY_TYPE);
-  request = httpServerMock.createKibanaRequest();
 });
 
 describe('collectSavedObjects()', () => {
@@ -123,7 +117,6 @@ describe('collectSavedObjects()', () => {
         supportedTypes: [],
         objectLimit,
         typeRegistry,
-        request,
       });
 
       expect(createLimitStream).toHaveBeenCalledWith(objectLimit);
@@ -134,7 +127,7 @@ describe('collectSavedObjects()', () => {
     test('limit stream with non-empty input stream is called with all objects', async () => {
       const readStream = createReadStream(obj1, obj2, obj3);
       const supportedTypes = [obj2.type];
-      await collectSavedObjects({ readStream, supportedTypes, objectLimit, typeRegistry, request });
+      await collectSavedObjects({ readStream, supportedTypes, objectLimit, typeRegistry });
 
       expect(createLimitStream).toHaveBeenCalledWith(objectLimit);
       expect(limitStreamPush).toHaveBeenCalledTimes(4);
@@ -151,7 +144,6 @@ describe('collectSavedObjects()', () => {
         supportedTypes: [],
         objectLimit,
         typeRegistry,
-        request,
       });
 
       expect(getNonUniqueEntries).toHaveBeenCalledWith([]);
@@ -160,7 +152,7 @@ describe('collectSavedObjects()', () => {
     test('get non-unique entries with non-empty input stream is called with all entries', async () => {
       const readStream = createReadStream(obj1, obj2, obj3);
       const supportedTypes = [obj2.type];
-      await collectSavedObjects({ readStream, supportedTypes, objectLimit, typeRegistry, request });
+      await collectSavedObjects({ readStream, supportedTypes, objectLimit, typeRegistry });
 
       expect(getNonUniqueEntries).toHaveBeenCalledWith([
         { type: obj1.type, id: obj1.id },
@@ -178,7 +170,6 @@ describe('collectSavedObjects()', () => {
         objectLimit,
         filter,
         typeRegistry,
-        request,
       });
 
       expect(filter).not.toHaveBeenCalled();
@@ -194,7 +185,6 @@ describe('collectSavedObjects()', () => {
         objectLimit,
         filter,
         typeRegistry,
-        request,
       });
 
       expect(filter).toHaveBeenCalledTimes(1);
@@ -210,7 +200,6 @@ describe('collectSavedObjects()', () => {
           supportedTypes,
           objectLimit,
           typeRegistry,
-          request,
           createAccessControlImportTransforms,
         });
 
@@ -235,7 +224,6 @@ describe('collectSavedObjects()', () => {
           supportedTypes,
           objectLimit,
           typeRegistry,
-          request,
         });
 
         const collectedObjects = [
@@ -265,7 +253,6 @@ describe('collectSavedObjects()', () => {
           supportedTypes: [],
           objectLimit,
           typeRegistry,
-          request,
         });
       } catch (e) {
         expect(e).toBeInstanceOf(SavedObjectsImportError);
@@ -282,7 +269,6 @@ describe('collectSavedObjects()', () => {
         supportedTypes: [],
         objectLimit,
         typeRegistry,
-        request,
       });
 
       expect(result).toEqual({ collectedObjects: [], errors: [], importStateMap: new Map() });
@@ -296,7 +282,6 @@ describe('collectSavedObjects()', () => {
         supportedTypes,
         objectLimit,
         typeRegistry,
-        request,
       });
 
       const collectedObjects = [
@@ -319,7 +304,6 @@ describe('collectSavedObjects()', () => {
         supportedTypes,
         objectLimit,
         typeRegistry,
-        request,
       });
 
       const error = { type: 'unsupported_type' };
@@ -336,7 +320,6 @@ describe('collectSavedObjects()', () => {
         supportedTypes,
         objectLimit,
         typeRegistry,
-        request,
       });
 
       const collectedObjects = [{ ...obj1, typeMigrationVersion: '', managed: false }];
@@ -364,7 +347,6 @@ describe('collectSavedObjects()', () => {
         supportedTypes,
         objectLimit,
         typeRegistry,
-        request,
       });
 
       expect(result).toEqual(expect.objectContaining({ collectedObjects }));
@@ -381,7 +363,6 @@ describe('collectSavedObjects()', () => {
           objectLimit,
           filter,
           typeRegistry,
-          request,
         });
 
         const error = { type: 'unsupported_type' };
@@ -401,7 +382,6 @@ describe('collectSavedObjects()', () => {
           filter,
           managed: false,
           typeRegistry,
-          request,
         });
 
         const collectedObjects = [{ ...obj2, typeMigrationVersion: '', managed: false }];

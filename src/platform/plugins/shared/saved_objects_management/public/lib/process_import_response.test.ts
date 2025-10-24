@@ -13,8 +13,6 @@ import type {
   SavedObjectsImportUnknownError,
   SavedObjectsImportMissingReferencesError,
   SavedObjectsImportResponse,
-  SavedObjectsImportMissingAccessControlMetadataError,
-  SavedObjectsImportRequiresProfileIdError,
   SavedObjectsImportUnexpectedAccessControlMetadataError,
 } from '@kbn/core/public';
 import { processImportResponse } from './process_import_response';
@@ -246,73 +244,75 @@ describe('processImportResponse()', () => {
   });
 
   describe('access control', () => {
-    test('objects with missing access control metadata get added to failedImports and result in success status', () => {
-      const response: SavedObjectsImportResponse = {
-        success: false,
-        successCount: 0,
-        errors: [
-          {
-            type: 'a',
-            id: '1',
-            error: {
-              type: 'missing_access_control_metadata',
-            } as SavedObjectsImportMissingAccessControlMetadataError,
-            meta: {},
-          },
-        ],
-        warnings: [],
-      };
-      const result = processImportResponse(response);
-      expect(result.failedImports).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "error": Object {
-            "type": "missing_access_control_metadata",
-          },
-          "obj": Object {
-            "id": "1",
-            "meta": Object {},
-            "type": "a",
-          },
-        },
-      ]
-    `);
-      expect(result.status).toBe('success');
-    });
+    // Note: for phase 2 of write-restricted dashboards when we support importing
+    // access control metadata for admins
+    // test('objects with missing access control metadata get added to failedImports and result in success status', () => {
+    //   const response: SavedObjectsImportResponse = {
+    //     success: false,
+    //     successCount: 0,
+    //     errors: [
+    //       {
+    //         type: 'a',
+    //         id: '1',
+    //         error: {
+    //           type: 'missing_access_control_owner',
+    //         } as SavedObjectsImportMissingAccessControlOwnerMetadataError,
+    //         meta: {},
+    //       },
+    //     ],
+    //     warnings: [],
+    //   };
+    //   const result = processImportResponse(response);
+    //   expect(result.failedImports).toMatchInlineSnapshot(`
+    //   Array [
+    //     Object {
+    //       "error": Object {
+    //         "type": "missing_access_control_owner",
+    //       },
+    //       "obj": Object {
+    //         "id": "1",
+    //         "meta": Object {},
+    //         "type": "a",
+    //       },
+    //     },
+    //   ]
+    // `);
+    //   expect(result.status).toBe('success');
+    // });
 
-    test(`objects that fail with 'requires_profile_id' get added to failedImports and result in success status`, () => {
-      const response: SavedObjectsImportResponse = {
-        success: false,
-        successCount: 0,
-        errors: [
-          {
-            type: 'a',
-            id: '1',
-            error: {
-              type: 'requires_profile_id',
-            } as SavedObjectsImportRequiresProfileIdError,
-            meta: {},
-          },
-        ],
-        warnings: [],
-      };
-      const result = processImportResponse(response);
-      expect(result.failedImports).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "error": Object {
-            "type": "requires_profile_id",
-          },
-          "obj": Object {
-            "id": "1",
-            "meta": Object {},
-            "type": "a",
-          },
-        },
-      ]
-    `);
-      expect(result.status).toBe('success');
-    });
+    // test(`objects that fail with 'requires_profile_id' get added to failedImports and result in success status`, () => {
+    //   const response: SavedObjectsImportResponse = {
+    //     success: false,
+    //     successCount: 0,
+    //     errors: [
+    //       {
+    //         type: 'a',
+    //         id: '1',
+    //         error: {
+    //           type: 'requires_profile_id',
+    //         } as SavedObjectsImportRequiresProfileIdError,
+    //         meta: {},
+    //       },
+    //     ],
+    //     warnings: [],
+    //   };
+    //   const result = processImportResponse(response);
+    //   expect(result.failedImports).toMatchInlineSnapshot(`
+    //   Array [
+    //     Object {
+    //       "error": Object {
+    //         "type": "requires_profile_id",
+    //       },
+    //       "obj": Object {
+    //         "id": "1",
+    //         "meta": Object {},
+    //         "type": "a",
+    //       },
+    //     },
+    //   ]
+    // `);
+    //   expect(result.status).toBe('success');
+    // });
 
     test('objects with unexpected access control metadata get added to failedImports and result in success status', () => {
       const response: SavedObjectsImportResponse = {

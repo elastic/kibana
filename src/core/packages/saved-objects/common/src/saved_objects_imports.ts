@@ -61,15 +61,17 @@ export interface SavedObjectsImportUnsupportedTypeError {
   type: 'unsupported_type';
 }
 
+// Note: the following two interfaces are not needed until we support importing
+// access control metadata for admins (phase 2 of write-restricted dashboards).
 /**
  * Represents a failure to import due to missing access control mode metadata.
  * This metadata is required only for objects that support access control when
  * an Admin chooses to apply access control on import.
  * @public
  */
-export interface SavedObjectsImportMissingAccessControlModeMetadataError {
-  type: 'missing_access_control_mode';
-}
+// export interface SavedObjectsImportMissingAccessControlModeMetadataError {
+//   type: 'missing_access_control_mode';
+// }
 
 /**
  * Represents a failure to import due to missing access control owner metadata.
@@ -77,9 +79,9 @@ export interface SavedObjectsImportMissingAccessControlModeMetadataError {
  * an Admin chooses to apply access control on import.
  * @public
  */
-export interface SavedObjectsImportMissingAccessControlOwnerMetadataError {
-  type: 'missing_access_control_owner';
-}
+// export interface SavedObjectsImportMissingAccessControlOwnerMetadataError {
+//   type: 'missing_access_control_owner';
+// }
 
 /**
  * Represents a failure to import due to unexpected access control metadata.
@@ -88,26 +90,6 @@ export interface SavedObjectsImportMissingAccessControlOwnerMetadataError {
  */
 export interface SavedObjectsImportUnexpectedAccessControlMetadataError {
   type: 'unexpected_access_control_metadata';
-}
-
-/**
- * Represents a failure to import due to an access control conflict.
- * This happens when attempting to import and overwrite an object owned by another user.
- * @public
- */
-export interface SavedObjectsImportAccessControlConflict {
-  type: 'access_control_conflict';
-}
-
-/**
- * Represents a failure to import due to requiring a profile ID when the
- * current user does not have one (never activated), or there is no
- * authenticated user.
- * The profile ID is required only for objects that support access control.
- * @public
- */
-export interface SavedObjectsImportRequiresProfileIdError {
-  type: 'requires_profile_id';
 }
 
 /**
@@ -148,11 +130,7 @@ export interface SavedObjectsImportFailure {
     | SavedObjectsImportUnsupportedTypeError
     | SavedObjectsImportMissingReferencesError
     | SavedObjectsImportUnknownError
-    | SavedObjectsImportMissingAccessControlOwnerMetadataError
-    | SavedObjectsImportMissingAccessControlModeMetadataError
-    | SavedObjectsImportRequiresProfileIdError
-    | SavedObjectsImportUnexpectedAccessControlMetadataError
-    | SavedObjectsImportAccessControlConflict;
+    | SavedObjectsImportUnexpectedAccessControlMetadataError;
 }
 
 /**

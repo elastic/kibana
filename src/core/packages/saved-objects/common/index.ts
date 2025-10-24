@@ -32,11 +32,7 @@ export type {
   SavedObjectsImportUnknownError,
   SavedObjectsImportActionRequiredWarning,
   SavedObjectsImportConflictError,
-  SavedObjectsImportMissingAccessControlModeMetadataError,
-  SavedObjectsImportMissingAccessControlOwnerMetadataError,
-  SavedObjectsImportRequiresProfileIdError,
   SavedObjectsImportUnexpectedAccessControlMetadataError,
-  SavedObjectsImportAccessControlConflict,
 } from './src/saved_objects_imports';
 
 export type { SavedObjectTypeIdTuple, LegacyUrlAliasTarget } from './src/types';
