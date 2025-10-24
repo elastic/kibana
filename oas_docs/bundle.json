@@ -46309,7 +46309,6 @@
                           "type": "array"
                         },
                         "prerelease_integrations_enabled": {
-                          "deprecated": true,
                           "type": "boolean"
                         },
                         "secret_storage_requirements_met": {
@@ -46457,7 +46456,6 @@
                     "type": "array"
                   },
                   "prerelease_integrations_enabled": {
-                    "deprecated": true,
                     "type": "boolean"
                   }
                 },
@@ -46514,7 +46512,6 @@
                           "type": "array"
                         },
                         "prerelease_integrations_enabled": {
-                          "deprecated": true,
                           "type": "boolean"
                         },
                         "secret_storage_requirements_met": {
