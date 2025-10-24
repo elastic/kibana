@@ -16,7 +16,7 @@ function scanNodeRecursievly(obj: unknown): string[] {
     return extractTemplateVariables(obj);
   }
 
-  if (typeof obj === 'object') {
+  if (typeof obj === 'object' && obj !== null) {
     return Object.values(obj as object).flatMap((value) => scanNodeRecursievly(value));
   }
 
