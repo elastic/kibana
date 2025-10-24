@@ -43,7 +43,7 @@ export const executeAgent$ = ({
         defaultConnectorId,
         agentParams: {
           nextInput,
-          conversation: conversation.rounds,
+          conversation,
           capabilities,
         },
         onEvent: (event) => {

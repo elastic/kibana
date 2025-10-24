@@ -6,11 +6,12 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import {
-  type ConversationRound,
-  type RoundInput,
-  type ChatAgentEvent,
-  type AgentCapabilities,
+import type {
+  Conversation,
+  ConversationRound,
+  RoundInput,
+  ChatAgentEvent,
+  AgentCapabilities,
 } from '@kbn/onechat-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -87,10 +88,9 @@ export interface AgentEventEmitter {
 
 export interface AgentParams {
   /**
-   * Previous rounds of conversation.
-   * Defaults to an empty list (new conversation)
+   * Current conversation
    */
-  conversation?: ConversationRound[];
+  conversation?: Conversation;
   /**
    * The input triggering this round.
    */

@@ -109,7 +109,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     },
     runAgent: (params) => {
       const { request, defaultConnectorId, ...otherParams } = params;
-      const resultStore = createResultStore(params.agentParams.conversation);
+      const resultStore = createResultStore(params.agentParams.conversation?.rounds);
       const allDeps = { ...deps, request, defaultConnectorId, resultStore };
       const runner = createScopedRunner(allDeps);
       return runner.runAgent(otherParams);

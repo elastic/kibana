@@ -55,6 +55,17 @@ export function registerChatRoutes({
         },
       })
     ),
+    // TODO: proper type
+    attachments: schema.maybe(
+      schema.arrayOf(
+        schema.object({
+          id: schema.maybe(schema.string()),
+          type: schema.string(),
+          data: schema.any(),
+        }),
+        {}
+      )
+    ),
     input: schema.string({
       meta: { description: 'The user input message to send to the agent.' },
     }),
@@ -97,6 +108,7 @@ export function registerChatRoutes({
       conversation_id: conversationId,
       input,
       capabilities,
+      attachments,
     } = payload;
 
     return chatService.converse({
@@ -105,7 +117,10 @@ export function registerChatRoutes({
       conversationId,
       capabilities,
       abortSignal,
-      nextInput: { message: input },
+      nextInput: {
+        message: input,
+        attachments,
+      },
       request,
     });
   };

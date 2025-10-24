@@ -37,7 +37,7 @@ export type RunChatAgentFn = (
 export const runDefaultAgentMode: RunChatAgentFn = async (
   {
     nextInput,
-    conversation = [],
+    conversation,
     agentConfiguration,
     capabilities,
     runId = uuidv4(),
@@ -76,7 +76,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   const initialMessages = conversationToLangchainMessages({
     nextInput,
-    previousRounds: conversation,
+    previousRounds: conversation?.rounds ?? [],
   });
 
   const agentGraph = createAgentGraph({

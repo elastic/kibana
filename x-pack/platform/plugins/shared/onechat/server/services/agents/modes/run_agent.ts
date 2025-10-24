@@ -7,6 +7,7 @@
 
 import type {
   AgentCapabilities,
+  Conversation,
   ConversationRound,
   RoundInput,
   AgentConfiguration,
@@ -22,7 +23,7 @@ export interface RunAgentParams {
   /**
    * Previous rounds of conversation.
    */
-  conversation: ConversationRound[];
+  conversation?: Conversation;
   /**
    * Configuration of the agent to run
    */
