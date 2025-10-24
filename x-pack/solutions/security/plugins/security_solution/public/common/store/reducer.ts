@@ -14,7 +14,7 @@ import { enableMapSet } from 'immer';
 import { appReducer, initialAppState } from './app';
 import { dragAndDropReducer, initialDragAndDropState } from './drag_and_drop';
 import { createInitialInputsState, inputsReducer } from './inputs';
-import { sourcererReducer, sourcererModel } from '../../sourcerer/store';
+import { sourcererModel, sourcererReducer } from '../../sourcerer/store';
 
 import type { HostsPluginReducer } from '../../explore/hosts/store';
 import type { NetworkPluginReducer } from '../../explore/network/store';
@@ -100,7 +100,7 @@ export const createInitialState = (
     ...pluginsInitState,
     app: { ...initialAppState, enableExperimental },
     dragAndDrop: initialDragAndDropState,
-    inputs: createInitialInputsState(enableExperimental.socTrendsEnabled),
+    inputs: createInitialInputsState(),
     sourcerer: {
       ...sourcererModel.initialSourcererState,
       sourcererScopes: {
