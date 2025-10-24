@@ -341,6 +341,46 @@ export default function (providerContext: FtrProviderContext) {
         );
       });
 
+      it('should prevent updating agent policy to target multiple spaces when name conflicts exists with integration policies', async () => {
+        const testSpaceOnlyPolicy = await apiClient.createAgentPolicy(TEST_SPACE_1);
+        const testSpacePackagePolicy = await apiClient.createPackagePolicy(TEST_SPACE_1, {
+          policy_ids: [testSpaceOnlyPolicy.item.id],
+          name: `test-nginx-${Date.now()}`,
+          description: 'test',
+          package: {
+            name: 'nginx',
+            version: '1.20.0',
+          },
+          inputs: {},
+        });
+
+        const defaultSpaceOnlyPolicy = await apiClient.createAgentPolicy('default');
+        await apiClient.createPackagePolicy(undefined, {
+          policy_ids: [defaultSpaceOnlyPolicy.item.id],
+          name: testSpacePackagePolicy.item.name,
+          description: 'test',
+          package: {
+            name: 'nginx',
+            version: '1.20.0',
+          },
+          inputs: {},
+        });
+
+        await expectToRejectWithError(
+          () =>
+            apiClient.putAgentPolicy(
+              defaultSpaceOnlyPolicy.item.id,
+              {
+                name: defaultSpaceOnlyPolicy.item.name,
+                namespace: 'default',
+                space_ids: ['default', TEST_SPACE_1],
+              },
+              'default'
+            ),
+          /409 "Conflict" An integration policy with the name\s.* already exists in space\s.*$/i
+        );
+      });
+
       it('should prevent updating agent policy name already in multiple spaces when name conflicts exist', async () => {
         const testSpaceOnlyPolicy = await apiClient.createAgentPolicy(TEST_SPACE_1);
 
