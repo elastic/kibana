@@ -76,15 +76,15 @@
             "section": "def-common.MlAnomalyRecordDoc",
             "text": "MlAnomalyRecordDoc"
           },
-          ") => ",
+          ") => Readonly<{ operation?: \"+\" | \"-\" | undefined; cardinality?: number | undefined; fieldValue?: string | number | undefined; fieldType?: ",
           {
             "pluginId": "@kbn/ml-anomaly-utils",
             "scope": "common",
             "docId": "kibKbnMlAnomalyUtilsPluginApi",
-            "section": "def-common.MlEntityField",
-            "text": "MlEntityField"
+            "section": "def-common.ML_ENTITY_FIELD_TYPE",
+            "text": "ML_ENTITY_FIELD_TYPE"
           },
-          "[]"
+          " | undefined; } & { fieldName: string; }>[]"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
         "deprecated": false,
@@ -2616,113 +2616,6 @@
       },
       {
         "parentPluginId": "@kbn/ml-anomaly-utils",
-        "id": "def-common.MlEntityField",
-        "type": "Interface",
-        "tags": [],
-        "label": "MlEntityField",
-        "description": [
-          "\nInterface of an entity field"
-        ],
-        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/ml-anomaly-utils",
-            "id": "def-common.MlEntityField.fieldName",
-            "type": "string",
-            "tags": [],
-            "label": "fieldName",
-            "description": [
-              "\nThe field name"
-            ],
-            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ml-anomaly-utils",
-            "id": "def-common.MlEntityField.fieldValue",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "fieldValue",
-            "description": [
-              "\nThe field value"
-            ],
-            "signature": [
-              "string | number | undefined"
-            ],
-            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ml-anomaly-utils",
-            "id": "def-common.MlEntityField.fieldType",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "fieldType",
-            "description": [
-              "\nOptional field type"
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/ml-anomaly-utils",
-                "scope": "common",
-                "docId": "kibKbnMlAnomalyUtilsPluginApi",
-                "section": "def-common.ML_ENTITY_FIELD_TYPE",
-                "text": "ML_ENTITY_FIELD_TYPE"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ml-anomaly-utils",
-            "id": "def-common.MlEntityField.operation",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "operation",
-            "description": [
-              "\nOptional entity field operation"
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/ml-anomaly-utils",
-                "scope": "common",
-                "docId": "kibKbnMlAnomalyUtilsPluginApi",
-                "section": "def-common.MlEntityFieldOperation",
-                "text": "MlEntityFieldOperation"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ml-anomaly-utils",
-            "id": "def-common.MlEntityField.cardinality",
-            "type": "number",
-            "tags": [],
-            "label": "cardinality",
-            "description": [
-              "\nOptional cardinality of field"
-            ],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/ml-anomaly-utils",
         "id": "def-common.MlInfluencer",
         "type": "Interface",
         "tags": [],
@@ -3160,6 +3053,29 @@
       },
       {
         "parentPluginId": "@kbn/ml-anomaly-utils",
+        "id": "def-common.CriteriaField",
+        "type": "Type",
+        "tags": [],
+        "label": "CriteriaField",
+        "description": [],
+        "signature": [
+          "{ readonly fieldValue?: any; readonly fieldType?: ",
+          {
+            "pluginId": "@kbn/ml-anomaly-utils",
+            "scope": "common",
+            "docId": "kibKbnMlAnomalyUtilsPluginApi",
+            "section": "def-common.ML_ENTITY_FIELD_TYPE",
+            "text": "ML_ENTITY_FIELD_TYPE"
+          },
+          " | undefined; readonly fieldName: string; }"
+        ],
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-anomaly-utils",
         "id": "def-common.DOC_COUNT",
         "type": "string",
         "tags": [],
@@ -3205,6 +3121,21 @@
           "string"
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-anomaly-utils",
+        "id": "def-common.Influencer",
+        "type": "Type",
+        "tags": [],
+        "label": "Influencer",
+        "description": [],
+        "signature": [
+          "{ readonly fieldValue?: any; readonly fieldName: string; }"
+        ],
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3375,6 +3306,31 @@
           "\"mlcategory\""
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/field_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-anomaly-utils",
+        "id": "def-common.MlEntityField",
+        "type": "Type",
+        "tags": [],
+        "label": "MlEntityField",
+        "description": [
+          "\nInterface of an entity field"
+        ],
+        "signature": [
+          "{ readonly operation?: \"+\" | \"-\" | undefined; readonly cardinality?: number | undefined; readonly fieldValue?: string | number | undefined; readonly fieldType?: ",
+          {
+            "pluginId": "@kbn/ml-anomaly-utils",
+            "scope": "common",
+            "docId": "kibKbnMlAnomalyUtilsPluginApi",
+            "section": "def-common.ML_ENTITY_FIELD_TYPE",
+            "text": "ML_ENTITY_FIELD_TYPE"
+          },
+          " | undefined; readonly fieldName: string; }"
+        ],
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

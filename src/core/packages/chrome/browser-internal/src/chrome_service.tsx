@@ -487,6 +487,7 @@ export class ChromeService {
     const loadingCount$ = http.getLoadingCount$();
     const recentlyAccessed$ = recentlyAccessed.get$();
     const activeDataTestSubj$ = projectNavigation.getActiveDataTestSubj$();
+    const feedbackUrlParams$ = projectNavigation.getFeedbackUrlParams$();
 
     const navProps: SideNavV2NavigationProps = {
       basePath: http.basePath,
@@ -502,6 +503,7 @@ export class ChromeService {
       dataTestSubj$: activeDataTestSubj$,
       isFeedbackBtnVisible$: this.isFeedbackBtnVisible$,
       navigationTourManager: projectNavigation.tourManager,
+      feedbackUrlParams$,
     };
 
     const getProjectHeader = ({
@@ -786,6 +788,7 @@ export class ChromeService {
       project: {
         setHome: setProjectHome,
         setCloudUrls: projectNavigation.setCloudUrls.bind(projectNavigation),
+        setFeedbackUrlParams: projectNavigation.setFeedbackUrlParams.bind(projectNavigation),
         setProjectName,
         initNavigation: initProjectNavigation,
         getNavigationTreeUi$: () => projectNavigation.getNavigationTreeUi$(),

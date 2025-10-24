@@ -379,7 +379,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         },
         makeSelection: (key: string | undefined, showOnlySelected: boolean) => {
           const field = api.field$.getValue();
-          if (!key || !field) {
+          if (key == null || !field) {
             api.setBlockingError(
               new Error(OptionsListStrings.control.getInvalidSelectionMessage())
             );
