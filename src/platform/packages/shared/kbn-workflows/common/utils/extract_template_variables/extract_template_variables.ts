@@ -6,7 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-/* eslint-disable no-continue */
 
 import { Liquid } from 'liquidjs';
 
@@ -79,7 +78,6 @@ export function extractTemplateVariables(template: string): string[] {
 
       if (currentChar === '[') {
         isBracketOpen = true;
-        continue;
       } else if (currentChar === ']') {
         isBracketOpen = false;
         if (!isLiteral(valueInBrackets)) {
@@ -88,13 +86,11 @@ export function extractTemplateVariables(template: string): string[] {
 
         resultVariable += `[${valueInBrackets}]`;
         valueInBrackets = '';
-        continue;
       } else if (isBracketOpen) {
         valueInBrackets += currentChar;
-        continue;
+      } else {
+        resultVariable += currentChar;
       }
-
-      resultVariable += currentChar;
     }
 
     if (resultVariable) {
