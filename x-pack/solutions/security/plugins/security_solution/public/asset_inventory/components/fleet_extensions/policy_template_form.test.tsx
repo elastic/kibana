@@ -355,7 +355,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       );
       expect(getByTestId('externalLink')).toHaveAttribute(
         'href',
-        'https://ela.st/cloud-asset-discovery-get-started-aws.html'
+        'https://www.elastic.co/docs/solutions/security/cloud/asset-disc-aws'
       );
     });
     it(`documentation Hyperlink should have correct URL to redirect users to AWS page if user chose Cloudformation`, () => {
@@ -576,7 +576,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       );
       expect(getByText('documentation')).toHaveAttribute(
         'href',
-        'https://ela.st/cloud-asset-discovery-get-started-gcp.html'
+        'https://www.elastic.co/docs/solutions/security/cloud/asset-disc-gcp'
       );
     });
 
