@@ -17,23 +17,35 @@ import type { SynthtraceEsClient, SynthtraceEsClientOptions } from '../shared/ba
 import { SynthtraceEsClientBase } from '../shared/base_client';
 import { internalKibanaHeaders } from '../shared/client_headers';
 import { getSerializeTransform } from '../shared/get_serialize_transform';
+import type { KibanaClientFetchOptions } from '../shared/base_kibana_client';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface StreamsDocument {}
 
 export interface StreamsSynthtraceClient extends SynthtraceEsClient<StreamsDocument> {
-  forkStream(
+  forkStream<TFetchOptions extends KibanaClientFetchOptions | undefined>(
     streamName: string,
-    request: { stream: { name: string }; where: Condition }
-  ): Promise<{ acknowledged: true }>;
-  putStream(
+    request: { stream: { name: string }; where: Condition },
+    requestOptions?: TFetchOptions
+  ): Promise<TFetchOptions extends { ignore: number[] } ? undefined : { acknowledged: true }>;
+  putStream<TFetchOptions extends KibanaClientFetchOptions | undefined>(
     streamName: string,
-    request: Streams.all.UpsertRequest
-  ): Promise<{ acknowledged: true; result: 'created' | 'updated' }>;
-  putIngestStream(
+    request: Streams.all.UpsertRequest,
+    requestOptions?: TFetchOptions
+  ): Promise<
+    TFetchOptions extends { ignore: number[] }
+      ? undefined
+      : { acknowledged: true; result: 'created' | 'updated' }
+  >;
+  putIngestStream<TFetchOptions extends KibanaClientFetchOptions | undefined>(
     streamName: string,
-    request: Streams.all.Definition
-  ): Promise<{ acknowledged: true; result: 'created' | 'updated' }>;
+    request: Streams.all.Definition,
+    requestOptions?: TFetchOptions
+  ): Promise<
+    TFetchOptions extends { ignore: number[] }
+      ? undefined
+      : { acknowledged: true; result: 'created' | 'updated' }
+  >;
   enableFailureStore(streamName: string): Promise<unknown>;
   enable(): Promise<void>;
   disable(): Promise<void>;
@@ -52,44 +64,42 @@ export class StreamsSynthtraceClientImpl
     this.dataStreams = ['logs', 'logs.*', 'logs-generic-default'];
   }
 
-  async forkStream(
-    streamName: string,
-    request: { stream: { name: string }; where: Condition }
-  ): Promise<{ acknowledged: true }> {
+  forkStream: StreamsSynthtraceClient['forkStream'] = (streamName, request, requestOptions) => {
     return this.kibana.fetch(`/api/streams/${streamName}/_fork`, {
+      ...requestOptions,
       method: 'POST',
       headers: {
         ...internalKibanaHeaders(),
       },
       body: JSON.stringify(request),
     });
-  }
+  };
 
-  async putStream(
-    streamName: string,
-    request: Streams.all.UpsertRequest
-  ): Promise<{ acknowledged: true; result: 'created' | 'updated' }> {
+  putStream: StreamsSynthtraceClient['putStream'] = (streamName, request, requestOptions) => {
     return this.kibana.fetch(`/api/streams/${streamName}`, {
+      ...requestOptions,
       method: 'PUT',
       headers: {
         ...internalKibanaHeaders(),
       },
       body: JSON.stringify(request),
     });
-  }
+  };
 
-  async putIngestStream(
-    streamName: string,
-    request: Streams.all.Definition
-  ): Promise<{ acknowledged: true; result: 'created' | 'updated' }> {
+  putIngestStream: StreamsSynthtraceClient['putIngestStream'] = (
+    streamName,
+    request,
+    requestOptions
+  ) => {
     return this.kibana.fetch(`/api/streams/${streamName}/_ingest`, {
+      ...requestOptions,
       method: 'PUT',
       headers: {
         ...internalKibanaHeaders(),
       },
       body: JSON.stringify(request),
     });
-  }
+  };
 
   async enableFailureStore(streamName: string) {
     return this.client.indices.putDataStreamOptions({

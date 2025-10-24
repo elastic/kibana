@@ -6,11 +6,13 @@
  */
 
 export { describeDataset } from './src/tools/describe_dataset';
-export { sortAndTruncateAnalyzedFields } from './src/tools/describe_dataset/sort_and_truncate_analyzed_fields';
+
+export { formatDocumentAnalysis } from './src/tools/describe_dataset/format_document_analysis';
+
 export { mergeSampleDocumentsWithFieldCaps } from './src/tools/describe_dataset/merge_sample_documents_with_field_caps';
 export type {
   DocumentAnalysis,
-  TruncatedDocumentAnalysis,
+  FormattedDocumentAnalysis,
 } from './src/tools/describe_dataset/document_analysis';
 export {
   getLogPatterns,

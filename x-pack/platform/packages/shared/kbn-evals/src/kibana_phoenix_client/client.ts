@@ -84,14 +84,11 @@ export class KibanaPhoenixClient {
   }
 
   async runExperiment<TEvaluationDataset extends EvaluationDataset, TTaskOutput extends TaskOutput>(
-    {
-      dataset,
-      metadata,
-      task,
-    }: {
+    options: {
       dataset: TEvaluationDataset;
       metadata?: Record<string, unknown>;
       task: ExperimentTask<TEvaluationDataset['examples'][number], TTaskOutput>;
+      concurrency?: number;
     },
     evaluators: Array<Evaluator<TEvaluationDataset['examples'][number], TTaskOutput>>
   ): Promise<RanExperiment>;
@@ -101,10 +98,12 @@ export class KibanaPhoenixClient {
       dataset,
       task,
       metadata: experimentMetadata,
+      concurrency,
     }: {
       dataset: EvaluationDataset;
       task: ExperimentTask<Example, TaskOutput>;
       metadata?: Record<string, unknown>;
+      concurrency?: number;
     },
     evaluators: Evaluator[]
   ): Promise<RanExperiment> {
@@ -143,6 +142,7 @@ export class KibanaPhoenixClient {
           log: this.options.log.info.bind(this.options.log),
         },
         repetitions: this.options.repetitions ?? 1,
+        concurrency,
       });
 
       this.experiments.push(ranExperiment);

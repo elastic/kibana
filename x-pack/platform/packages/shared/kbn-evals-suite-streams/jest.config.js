@@ -8,5 +8,5 @@
 module.exports = {
   preset: '@kbn/test/jest_node',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/platform/packages/private/kbn-evals-suite-streams'],
+  roots: ['<rootDir>/x-pack/platform/packages/shared/kbn-evals-suite-streams'],
 };
