@@ -7,49 +7,42 @@
 
 import { get } from 'lodash/fp';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
-
 import { InputsModelId } from './constants';
 import { getIntervalSettings, getTimeRangeSettings } from '../../utils/default_date_settings';
 import {
+  addLinkTo,
   deleteAllQuery,
+  deleteOneQuery,
+  removeLinkTo,
   setAbsoluteRangeDatePicker,
   setDuration,
+  setFilterQuery,
   setFullScreen,
   setInspectionParameter,
   setQuery,
   setRelativeRangeDatePicker,
+  setSavedQuery,
+  setSearchBarFilter,
   setTimelineRangeDatePicker,
   startAutoReload,
   stopAutoReload,
   toggleTimelineLinkTo,
-  deleteOneQuery,
-  setFilterQuery,
-  setSavedQuery,
-  setSearchBarFilter,
-  removeLinkTo,
-  addLinkTo,
-  toggleSocTrendsLinkTo,
 } from './actions';
 import {
+  addInputLink,
+  deleteOneQuery as helperDeleteOneQuery,
+  removeInputLink,
   setIsInspected,
   toggleLockTimeline,
+  updateInputFullScreen,
   updateInputTimerange,
   upsertQuery,
-  addInputLink,
-  removeInputLink,
-  deleteOneQuery as helperDeleteOneQuery,
-  updateInputFullScreen,
-  toggleLockSocTrends,
 } from './helpers';
 import type { InputsModel, TimeRange } from './model';
 
 export type InputsState = InputsModel;
 
-const {
-  socTrends: socTrendsUnused,
-  valueReport: valueReportSettings,
-  ...timeRangeSettings
-} = getTimeRangeSettings(false);
+const { valueReport: valueReportSettings, ...timeRangeSettings } = getTimeRangeSettings(false);
 
 export const initialInputsState: InputsState = {
   global: {
@@ -89,8 +82,8 @@ export const initialInputsState: InputsState = {
   },
 };
 
-export const createInitialInputsState = (socTrendsEnabled: boolean): InputsState => {
-  const { from, fromStr, to, toStr, valueReport, socTrends } = getTimeRangeSettings();
+export const createInitialInputsState = (): InputsState => {
+  const { from, fromStr, to, toStr, valueReport } = getTimeRangeSettings();
   const { kind, duration } = getIntervalSettings();
   return {
     global: {
@@ -106,7 +99,7 @@ export const createInitialInputsState = (socTrendsEnabled: boolean): InputsState
         kind,
         duration,
       },
-      linkTo: [InputsModelId.timeline, ...(socTrendsEnabled ? [InputsModelId.socTrends] : [])],
+      linkTo: [InputsModelId.timeline],
       query: {
         query: '',
         language: 'kuery',
@@ -143,18 +136,6 @@ export const createInitialInputsState = (socTrendsEnabled: boolean): InputsState
         duration,
       },
     },
-    ...(socTrendsEnabled
-      ? {
-          socTrends: {
-            timerange: socTrends,
-            linkTo: [InputsModelId.global],
-            policy: {
-              kind,
-              duration,
-            },
-          },
-        }
-      : {}),
   };
 };
 
@@ -164,7 +145,6 @@ export const inputsReducer = reducerWithInitialState(initialInputsState)
       ...state,
       global: {
         ...state.global,
-        // needs to be emptied, but socTrends should remain if defined
         linkTo: state.global.linkTo.filter((i) => i !== InputsModelId.timeline),
       },
       timeline: {
@@ -248,7 +228,6 @@ export const inputsReducer = reducerWithInitialState(initialInputsState)
     },
   }))
   .case(toggleTimelineLinkTo, (state) => toggleLockTimeline(state))
-  .case(toggleSocTrendsLinkTo, (state) => toggleLockSocTrends(state))
   .case(
     setInspectionParameter,
     (state, { id, inputId, isInspected, selectedInspectIndex, searchSessionId }) =>
