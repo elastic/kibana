@@ -58,8 +58,25 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
     expect(nodes.length).to.be(expected);
   }
 
+  async assertGraphGroupNodesNumber(expected: number): Promise<void> {
+    await this.waitGraphIsLoaded();
+    const graph = await this.testSubjects.find(GRAPH_INVESTIGATION_TEST_ID);
+    await graph.scrollIntoView();
+    const nodes = await graph.findAllByCssSelector('[data-test-subj="label-node-stacked-shape"]');
+    expect(nodes.length).to.be(expected);
+  }
+
   async toggleSearchBar(): Promise<void> {
     await this.testSubjects.click(GRAPH_ACTIONS_TOGGLE_SEARCH_ID);
+  }
+
+  async showSearchBar(): Promise<void> {
+    const isSearchBarVisible = await this.testSubjects.exists(
+      `${GRAPH_INVESTIGATION_TEST_ID} > addFilter`
+    );
+    if (!isSearchBarVisible) {
+      await this.testSubjects.click(GRAPH_ACTIONS_TOGGLE_SEARCH_ID);
+    }
   }
 
   async selectNode(nodeId: string): Promise<WebElementWrapper> {
