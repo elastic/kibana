@@ -574,3 +574,33 @@ export const getCategorizeField = (esql: string): string[] => {
 
   return columns;
 };
+
+export const hasLimitBeforeAggregate = (esql: string): boolean => {
+  const {
+    root: { commands },
+  } = Parser.parse(esql);
+  const statsCommand = commands.find(({ name }) => name === 'stats');
+  const limitCommand = commands.find(({ name }) => name === 'limit');
+
+  if (statsCommand && limitCommand) {
+    return commands.indexOf(limitCommand) < commands.indexOf(statsCommand);
+  }
+  return false;
+};
+
+export const missingSortBeforeLimit = (esql: string): boolean => {
+  const {
+    root: { commands },
+  } = Parser.parse(esql);
+  const sortCommand = commands.find(({ name }) => name === 'sort');
+  const limitCommand = commands.find(({ name }) => name === 'limit');
+
+  if (limitCommand) {
+    if (sortCommand) {
+      return commands.indexOf(sortCommand) > commands.indexOf(limitCommand);
+    } else {
+      return false;
+    }
+  }
+  return false;
+};
