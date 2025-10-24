@@ -47,6 +47,7 @@ export function getFunctionDefinition({
       args,
       { inspectorAdapters, abortSignal, getSearchSessionId, getExecutionContext, getSearchContext }
     ) {
+      performance.mark('requester_fn');
       return defer(async () => {
         const [{ aggs, dataViews, searchSource, getNow }, { handleEsaggsRequest }] =
           await Promise.all([getStartDependencies(), import('../../../common/search/expressions')]);

@@ -200,6 +200,7 @@ export async function loadIndexPatterns({
     ))
   );
 
+  const start = performance.now();
   const indexPatternsObject = indexPatterns.reduce(
     (acc, indexPattern) => ({
       [indexPattern.id!]: convertDataViewIntoLensIndexPattern(indexPattern, onRestrictionMapping),
@@ -207,6 +208,9 @@ export async function loadIndexPatterns({
     }),
     { ...cache }
   );
+
+  const end = performance.now();
+  // console.log(`Data view transformations took: ${(end - start).toFixed(2)}ms`);
 
   return indexPatternsObject;
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
 import type {
   ExpressionRendererEvent,
   ReactExpressionRendererProps,
@@ -74,7 +74,15 @@ export function ExpressionWrapper({
   noPadding,
   abortController,
 }: ExpressionWrapperProps) {
+  const hasMarkedExpressionSent = useRef(false);
+
   if (!expression) return null;
+
+  if (!hasMarkedExpressionSent.current) {
+    performance.mark('expression_sent_to_engine');
+    hasMarkedExpressionSent.current = true;
+  }
+
   return (
     <div
       className={classNames('lnsExpressionRenderer', 'eui-scrollBar', className)}

@@ -112,6 +112,57 @@ export function loadEmbeddableData(
   };
 
   const onRenderComplete = () => {
+    // list performance marks
+    performance.measure('time_to_navigate', 'navigate_to_dashboard', 'dashboard_render_initiated');
+    performance.measure(
+      'time_until_embeddable_factory_requested',
+      'dashboard_render_initiated',
+      'embeddable_factory_requested'
+    );
+    performance.measure(
+      'time_until_embeddable_requested',
+      'embeddable_factory_requested',
+      'embeddable_requested'
+    );
+    performance.measure(
+      'time_until_embeddable_executes_expression',
+      'embeddable_requested',
+      'expression_sent_to_engine'
+    );
+    performance.measure('time_to_requester_fn', 'expression_sent_to_engine', 'requester_fn');
+    performance.measure('time_until_data_request', 'requester_fn', 'search_initiated');
+    performance.measure('time_to_data', 'search_initiated', 'search_response_received');
+    performance.measure('time_to_charts_lib', 'search_response_received', 'charts_lib_invoked');
+    performance.measure('time_in_charts_lib', 'charts_lib_invoked', 'render_complete');
+
+    performance.measure('total', 'navigate_to_dashboard', 'render_complete');
+
+    // log them
+    const measures = performance.getEntriesByType('measure').sort((a, b) => {
+      // Keep "total" measure at the end
+      if (a.name === 'total') return 1;
+      if (b.name === 'total') return -1;
+      return a.startTime - b.startTime;
+    });
+
+    let totalTime = 0;
+    for (const measure of measures) {
+      totalTime += measure.duration;
+    }
+
+    // Print performance data in TSV format for Google Sheets
+    let tsvOutput = '';
+    for (let i = 0; i < measures.length; i++) {
+      const measure = measures[i];
+      const percentage = totalTime > 0 ? ((measure.duration / totalTime) * 100).toFixed(1) : '0.0';
+      tsvOutput += `${measure.name}\t${measure.duration.toFixed(2)}\t${percentage}\n`;
+    }
+
+    console.log(`Performance TSV:\nMeasure\tDuration (ms)\tPercentage\n${tsvOutput}`);
+
+    performance.clearMarks();
+    performance.clearMeasures();
+
     updateMessages(getUserMessages('embeddableBadge'));
     // No issues so far, blocking errors are handled directly by Lens from this point on
     if (!dispatchBlockingErrorIfAny()) {

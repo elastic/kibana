@@ -6,7 +6,7 @@
  */
 
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { ExpressionWrapper } from '../expression_wrapper';
 import type { LensInternalApi, LensApi } from '../types';
 import { UserMessages } from '../user_messages/container';
@@ -46,6 +46,9 @@ export function LensEmbeddableComponent({
 
   const [warningOrErrors, infoMessages] = useMessages(internalApi);
 
+  // Track the previous expression to detect changes
+  const previousExpression = useRef<string | null>(null);
+
   // On unmount call all the cleanups
   useEffect(() => {
     addLog(`Mounting Lens Embeddable component: ${api.defaultTitle$?.getValue()}`);
@@ -68,6 +71,20 @@ export function LensEmbeddableComponent({
         'data-description': api.description$?.getValue() ?? api.defaultDescription$?.getValue(),
       }
     : undefined;
+
+  // // Check if expression has changed across renders and throw error
+  // if (expressionParams?.expression) {
+  //   if (previousExpression.current === null) {
+  //     // First time we have an expression, store it
+  //     previousExpression.current = expressionParams.expression;
+  //   } else if (previousExpression.current !== expressionParams.expression) {
+  //     // Expression has changed, throw an error
+  //     throw new Error(
+  //       'Expression cannot change across component renders. ' +
+  //         `Previous: ${previousExpression.current}, Current: ${expressionParams.expression}`
+  //     );
+  //   }
+  // }
 
   return (
     <div

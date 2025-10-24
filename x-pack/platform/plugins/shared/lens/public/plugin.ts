@@ -384,6 +384,7 @@ export class LensPlugin {
     if (embeddable) {
       // Let Kibana know about the Lens embeddable
       embeddable.registerReactEmbeddableFactory(LENS_EMBEDDABLE_TYPE, async () => {
+        performance.mark('embeddable_factory_requested');
         const [deps, { createLensEmbeddableFactory }] = await Promise.all([
           getStartServicesForEmbeddable(),
           import('./async_services'),
