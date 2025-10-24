@@ -75,7 +75,11 @@ export * from './src/commands_registry/constants';
 export * from './src/definitions/constants';
 export * from './src/definitions/types';
 export { METADATA_FIELDS } from './src/commands_registry/options/metadata';
-export { TIME_SYSTEM_PARAMS } from './src/definitions/utils/literals';
+export {
+  TIME_SYSTEM_PARAMS,
+  AUTO_INTERVAL_PARAM,
+  getUnitDuration,
+} from './src/definitions/utils/literals';
 export { withAutoSuggest } from './src/definitions/utils/autocomplete/helpers';
 
 export { getNoValidCallSignatureError } from './src/definitions/utils/validation/utils';

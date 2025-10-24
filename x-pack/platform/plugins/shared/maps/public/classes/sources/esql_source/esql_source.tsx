@@ -15,14 +15,14 @@ import {
   getESQLAdHocDataview,
   getIndexPatternFromESQLQuery,
   getLimitFromESQLQuery,
-  getStartEndParams,
   hasStartEndParams,
+  getNamedParams,
 } from '@kbn/esql-utils';
 import { buildEsQuery } from '@kbn/es-query';
 import type { Filter, Query } from '@kbn/es-query';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import { getEsQueryConfig } from '@kbn/data-service/src/es_query';
-import { getTime } from '@kbn/data-plugin/public';
+import { getTime, UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-plugin/common';
 import type { GeoJsonProperties } from 'geojson';
 import { asyncMap } from '@kbn/std';
@@ -276,13 +276,16 @@ export class ESQLSource
         filters.push(timeFilter);
       }
     }
+    const settings = getUiSettings();
 
-    const namedParams = getStartEndParams(this._descriptor.esql, timeRange);
+    const namedParams = getNamedParams(this._descriptor.esql, timeRange, [], {
+      histogramBarTarget: settings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
+    });
     if (namedParams.length) {
       params.params = namedParams;
     }
 
-    params.filter = buildEsQuery(undefined, query, filters, getEsQueryConfig(getUiSettings()));
+    params.filter = buildEsQuery(undefined, query, filters, getEsQueryConfig(settings));
 
     const requestResponder = inspectorAdapters.requests!.start(
       getLayerFeaturesRequestName(layerName),

@@ -9,7 +9,9 @@
 import {
   esqlCommandRegistry,
   TIME_SYSTEM_PARAMS,
+  AUTO_INTERVAL_PARAM,
   timeUnitsToSuggest,
+  getUnitDuration,
   withAutoSuggest,
   METADATA_FIELDS,
   ESQL_STRING_TYPES,
@@ -287,6 +289,19 @@ describe('autocomplete', () => {
 
       // trigger character case for comparison
       testSuggestions('FROM a | EVAL DATE_DIFF("day", /)', expectedDateDiff2ndArgSuggestions, ' ');
+
+      testSuggestions('FROM a | EVAL DATE_TRUNC(/ ', [
+        ...getUnitDuration(1)
+          .map((s) => `${s}, `)
+          .map(attachTriggerCommand),
+        AUTO_INTERVAL_PARAM + ', ',
+        ...getFunctionSignaturesByReturnType(Location.EVAL, ['time_duration', 'date_period'], {
+          scalar: true,
+        }).map((s) => ({
+          ...s,
+          text: `${s.text},`,
+        })),
+      ]);
     });
 
     // FROM source

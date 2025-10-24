@@ -8,7 +8,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import dateMath from '@kbn/datemath';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { TimeRange } from '@kbn/es-query';
@@ -16,42 +15,7 @@ import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { ESQLColumn, ESQLSearchResponse, ESQLSearchParams } from '@kbn/es-types';
 import { lastValueFrom } from 'rxjs';
 import { type ESQLControlVariable } from '@kbn/esql-types';
-
-export const hasStartEndParams = (query: string) => /\?_tstart|\?_tend/i.test(query);
-
-export const getStartEndParams = (query: string, time?: TimeRange) => {
-  const startNamedParams = /\?_tstart/i.test(query);
-  const endNamedParams = /\?_tend/i.test(query);
-  if (time && (startNamedParams || endNamedParams)) {
-    const timeParams = {
-      start: startNamedParams ? dateMath.parse(time.from)?.toISOString() : undefined,
-      end: endNamedParams ? dateMath.parse(time.to, { roundUp: true })?.toISOString() : undefined,
-    };
-    const namedParams = [];
-    if (timeParams?.start) {
-      namedParams.push({ _tstart: timeParams.start });
-    }
-    if (timeParams?.end) {
-      namedParams.push({ _tend: timeParams.end });
-    }
-    return namedParams;
-  }
-  return [];
-};
-
-export const getNamedParams = (
-  query: string,
-  timeRange?: TimeRange,
-  variables?: ESQLControlVariable[]
-) => {
-  const namedParams: ESQLSearchParams['params'] = getStartEndParams(query, timeRange);
-  if (variables?.length) {
-    variables?.forEach(({ key, value }) => {
-      namedParams.push({ [key]: value });
-    });
-  }
-  return namedParams;
-};
+import { getNamedParams } from './named_params';
 
 export function formatESQLColumns(columns: ESQLColumn[]): DatatableColumn[] {
   return columns.map(({ name, type }) => {

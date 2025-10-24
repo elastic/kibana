@@ -18,6 +18,8 @@ import {
   getCategorizeField,
   convertTimeseriesCommandToFrom,
 } from '@kbn/esql-utils';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type {
   CountIndexPatternColumn,
@@ -40,7 +42,6 @@ import {
 import type { LegendSize } from '@kbn/chart-expressions-common';
 import type { XYConfiguration } from '@kbn/visualizations-plugin/common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { fieldSupportsBreakdown } from '@kbn/field-utils';
 import type { UnifiedHistogramSuggestionContext, UnifiedHistogramVisContext } from '../types';
 import { UnifiedHistogramExternalVisContextStatus, UnifiedHistogramSuggestionType } from '../types';
@@ -72,7 +73,7 @@ interface LensVisServiceState {
 }
 
 interface Services {
-  data: DataPublicPluginStart;
+  uiSettings: IUiSettingsClient;
 }
 
 interface LensVisServiceParams {
@@ -513,7 +514,8 @@ export class LensVisService {
       isOfAggregateQueryType(query) &&
       !hasTransformationalCommand(query.esql)
     ) {
-      const interval = computeInterval(timeRange, this.services.data);
+      const settings = this.services.uiSettings;
+      const interval = computeInterval(timeRange, settings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET));
       const esqlQuery = this.getESQLHistogramQuery({
         dataView,
         query,
@@ -615,7 +617,9 @@ export class LensVisService {
     interval?: string;
     breakdownColumn?: DatatableColumn;
   }): string => {
-    const queryInterval = interval ?? computeInterval(timeRange, this.services.data);
+    const settings = this.services.uiSettings;
+    const queryInterval =
+      interval ?? computeInterval(timeRange, settings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET));
     const language = getAggregateQueryMode(query);
     const safeQuery = removeDropCommandsFromESQLQuery(query[language]);
     const normalizedQuery = convertTimeseriesCommandToFrom(safeQuery);

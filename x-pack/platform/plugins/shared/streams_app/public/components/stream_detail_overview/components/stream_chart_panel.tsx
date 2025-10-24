@@ -33,7 +33,6 @@ export function StreamChartPanel({ definition }: StreamChartPanelProps) {
   const {
     dependencies: {
       start: {
-        data,
         dataViews,
         streams: { streamsRepositoryClient },
         share,
@@ -53,8 +52,8 @@ export function StreamChartPanel({ definition }: StreamChartPanelProps) {
   );
 
   const bucketSize = useMemo(
-    () => computeInterval(timeState.asAbsoluteTimeRange, data),
-    [data, timeState.asAbsoluteTimeRange]
+    () => computeInterval(timeState.asAbsoluteTimeRange),
+    [timeState.asAbsoluteTimeRange]
   );
 
   const queries = useMemo(() => {
