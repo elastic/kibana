@@ -91,7 +91,7 @@ function createMachineDefinition(queueName: string): ScheduleMachineOptions {
     MEMORY_PER_CPU_MB_BY_PROFILE.standard;
 
   return {
-    name: machineType,
+    name: queueName,
     cpus: cpuCount,
     memoryMb: cpuCount * memoryPerCpu,
   };
