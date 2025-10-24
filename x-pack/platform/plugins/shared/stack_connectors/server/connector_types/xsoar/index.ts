@@ -9,9 +9,13 @@ import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_acti
 import { ValidatorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
-import { XSOAR_CONNECTOR_ID, XSOAR_TITLE } from '../../../common/xsoar/constants';
-import { ConfigSchema, SecretsSchema } from '../../../common/xsoar/schema';
-import type { Config, Secrets } from '../../../common/xsoar/types';
+import type { Config, Secrets } from '@kbn/connector-schemas/xsoar';
+import {
+  CONNECTOR_ID,
+  CONNECTOR_NAME,
+  ConfigSchema,
+  SecretsSchema,
+} from '@kbn/connector-schemas/xsoar';
 import { XSOARConnector } from './xsoar';
 import { renderParameterTemplates } from './render';
 
@@ -19,9 +23,9 @@ export type XSOARConnectorType = SubActionConnectorType<Config, Secrets>;
 
 export function getConnectorType(): XSOARConnectorType {
   return {
-    id: XSOAR_CONNECTOR_ID,
+    id: CONNECTOR_ID,
     minimumLicenseRequired: 'platinum',
-    name: XSOAR_TITLE,
+    name: CONNECTOR_NAME,
     getService: (params) => new XSOARConnector(params),
     supportedFeatureIds: [SecurityConnectorFeatureId],
     schema: {

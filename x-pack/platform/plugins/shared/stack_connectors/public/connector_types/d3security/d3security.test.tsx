@@ -9,16 +9,15 @@ import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application
 import { registerConnectorTypes } from '..';
 import type { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { experimentalFeaturesMock, registrationServicesMock } from '../../mocks';
-import { SUB_ACTION } from '../../../common/d3security/constants';
+import { CONNECTOR_ID, SUB_ACTION } from '@kbn/connector-schemas/d3security/constants';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 
-const CONNECTOR_TYPE_ID = '.d3security';
 let connectorTypeModel: ConnectorTypeModel;
 beforeAll(() => {
   const connectorTypeRegistry = new TypeRegistry<ConnectorTypeModel>();
   ExperimentalFeaturesService.init({ experimentalFeatures: experimentalFeaturesMock });
   registerConnectorTypes({ connectorTypeRegistry, services: registrationServicesMock });
-  const getResult = connectorTypeRegistry.get(CONNECTOR_TYPE_ID);
+  const getResult = connectorTypeRegistry.get(CONNECTOR_ID);
   if (getResult !== null) {
     connectorTypeModel = getResult;
   }
@@ -26,7 +25,7 @@ beforeAll(() => {
 
 describe('actionTypeRegistry.get() works', () => {
   test('action type static data is as expected', () => {
-    expect(connectorTypeModel.id).toEqual(CONNECTOR_TYPE_ID);
+    expect(connectorTypeModel.id).toEqual(CONNECTOR_ID);
   });
 });
 
