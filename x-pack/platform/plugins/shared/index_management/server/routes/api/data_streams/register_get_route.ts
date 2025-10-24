@@ -174,6 +174,9 @@ export function registerGetAllRoute({ router, lib: { handleEsError }, config }: 
           enabled:
             persistent?.data_streams?.failure_store?.enabled ??
             defaults?.data_streams?.failure_store?.enabled,
+          defaultRetentionPeriod:
+            persistent?.data_streams?.lifecycle?.retention?.failures_default ??
+            defaults?.data_streams?.lifecycle?.retention?.failures_default,
         };
 
         // Only take the lifecycle of the first data stream since all data streams have the same global retention period
@@ -255,6 +258,9 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
             enabled:
               persistent?.data_streams?.failure_store?.enabled ??
               defaults?.data_streams?.failure_store?.enabled,
+            defaultRetentionPeriod:
+              persistent?.data_streams?.lifecycle?.retention?.failures_default ??
+              defaults?.data_streams?.lifecycle?.retention?.failures_default,
           };
 
           const enhancedDataStreams = enhanceDataStreams({

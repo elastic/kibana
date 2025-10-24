@@ -8,9 +8,12 @@
  */
 // TODO: refactor this file to be more composable, easier to read and test
 
+// TODO: Remove the eslint-disable comments to use the proper types.
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 import moment from 'moment-timezone';
 import type { Document, Node, Pair, Scalar } from 'yaml';
-import { isMap, isPair, isScalar, parseDocument, visit, YAMLParseError } from 'yaml';
+import { isMap, isPair, isScalar, visit, YAMLParseError } from 'yaml';
 import { monaco } from '@kbn/monaco';
 import type { BuiltInStepType, ConnectorTypeInfo, TriggerType } from '@kbn/workflows';
 import {
@@ -24,9 +27,13 @@ import {
   ScheduledTriggerSchema,
   WaitStepSchema,
 } from '@kbn/workflows';
-import { WorkflowGraph } from '@kbn/workflows/graph';
 import { z } from '@kbn/zod';
 import { getCachedAllConnectors } from './connectors_cache';
+import {
+  createLiquidBlockKeywordCompletions,
+  createLiquidFilterCompletions,
+  createLiquidSyntaxCompletions,
+} from './liquid_completions';
 import { generateBuiltInStepSnippet } from './snippets/generate_builtin_step_snippet';
 import {
   connectorTypeRequiresConnectorId,
@@ -41,14 +48,20 @@ import {
   generateRRuleTriggerSnippet,
   generateTriggerSnippet,
 } from './snippets/generate_trigger_snippet';
+import type { WorkflowEditorState } from './store';
+import type { StepPropInfo } from './store/utils/build_workflow_lookup';
 import {
+  LIQUID_BLOCK_END_REGEX,
+  LIQUID_BLOCK_FILTER_REGEX,
+  LIQUID_BLOCK_KEYWORD_REGEX,
+  LIQUID_BLOCK_START_REGEX,
+  LIQUID_FILTER_REGEX,
   PROPERTY_PATH_REGEX,
   UNFINISHED_VARIABLE_REGEX_GLOBAL,
   VARIABLE_REGEX_GLOBAL,
 } from '../../../../common/lib/regex';
 import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import { getDetailedTypeDescription, getSchemaAtPath, parsePath } from '../../../../common/lib/zod';
-import { getCachedDynamicConnectorTypes } from '../../../../common/schema';
 import { getContextSchemaForPath } from '../../../features/workflow_context/lib/get_context_for_path';
 
 // Cache for built-in step types extracted from schema
@@ -266,6 +279,10 @@ export interface LineParseResult {
     | 'variable-complete'
     | 'variable-unfinished'
     | 'foreach-variable'
+    | 'liquid-filter'
+    | 'liquid-block-filter'
+    | 'liquid-syntax'
+    | 'liquid-block-keyword'
     | null;
   match: RegExpMatchArray | null;
 }
@@ -279,6 +296,42 @@ function cleanKey(key: string) {
   return key.endsWith('.') ? key.slice(0, -1) : key;
 }
 
+/**
+ * Checks if the current position is inside a liquid block by looking for {%- liquid ... -%} tags
+ *
+ * A position is considered "inside" a liquid block when:
+ * - The cursor is positioned after a `{%- liquid` (or `{% liquid`) opening tag
+ * - AND before the corresponding `-%}` (or `%}`) closing tag
+ *
+ * Examples:
+ * ```
+ * {%- liquid
+ *   assign x = 1  <-- INSIDE (cursor here shows liquid block keywords)
+ *   echo x        <-- INSIDE
+ * -%}
+ * regular text    <-- OUTSIDE (no liquid block keywords)
+ * ```
+ *
+ * Note: This implementation uses simple counting (openings > closings)
+ */
+function isInsideLiquidBlock(fullText: string, position: monaco.Position): boolean {
+  // Get text from start to cursor position
+  const textUpToPosition =
+    fullText.split('\n').slice(0, position.lineNumber).join('\n') +
+    fullText.split('\n')[position.lineNumber - 1].substring(0, position.column - 1);
+
+  // Reset regex lastIndex to ensure fresh matching
+  LIQUID_BLOCK_START_REGEX.lastIndex = 0;
+  LIQUID_BLOCK_END_REGEX.lastIndex = 0;
+
+  // Count opening and closing liquid blocks - simple and effective
+  const openingMatches = Array.from(textUpToPosition.matchAll(LIQUID_BLOCK_START_REGEX));
+  const closingMatches = Array.from(textUpToPosition.matchAll(LIQUID_BLOCK_END_REGEX));
+
+  // If we have more openings than closings, we're inside a liquid block
+  return openingMatches.length > closingMatches.length;
+}
+
 export function parseLineForCompletion(lineUpToCursor: string): LineParseResult {
   // Try @ trigger first (e.g., "@const" or "@steps.step1")
   const atMatch = [...lineUpToCursor.matchAll(/@(?<key>\S+?)?\.?(?=\s|$)/g)].pop();
@@ -289,6 +342,42 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
       pathSegments: parsePath(fullKey),
       matchType: 'at',
       match: atMatch,
+    };
+  }
+
+  // Check for Liquid filter completion FIRST (e.g., "{{ variable | fil")
+  const liquidFilterMatch = lineUpToCursor.match(LIQUID_FILTER_REGEX);
+  if (liquidFilterMatch) {
+    const filterPrefix = liquidFilterMatch[1] || '';
+    return {
+      fullKey: filterPrefix,
+      pathSegments: null,
+      matchType: 'liquid-filter',
+      match: liquidFilterMatch,
+    };
+  }
+
+  // Check for Liquid block filter completion (e.g., "assign variable = value | fil")
+  const liquidBlockFilterMatch = lineUpToCursor.match(LIQUID_BLOCK_FILTER_REGEX);
+  if (liquidBlockFilterMatch) {
+    const filterPrefix = liquidBlockFilterMatch[1] || '';
+    return {
+      fullKey: filterPrefix,
+      pathSegments: null,
+      matchType: 'liquid-block-filter',
+      match: liquidBlockFilterMatch,
+    };
+  }
+
+  // Check for Liquid block keyword completion (e.g., "  assign" or "  cas")
+  const liquidBlockKeywordMatch = lineUpToCursor.match(LIQUID_BLOCK_KEYWORD_REGEX);
+  if (liquidBlockKeywordMatch) {
+    const keywordPrefix = liquidBlockKeywordMatch[1] || '';
+    return {
+      fullKey: keywordPrefix,
+      pathSegments: null,
+      matchType: 'liquid-block-keyword',
+      match: liquidBlockKeywordMatch,
     };
   }
 
@@ -323,6 +412,16 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
       fullKey,
       pathSegments: parsePath(fullKey),
       matchType: 'foreach-variable',
+      match: null,
+    };
+  }
+
+  // Check for Liquid syntax completion (e.g., "{% ")
+  if (lineUpToCursor.match(/\{\%\s*\w*$/)) {
+    return {
+      fullKey: lastWordBeforeCursor || '',
+      pathSegments: null,
+      matchType: 'liquid-syntax',
       match: null,
     };
   }
@@ -812,7 +911,8 @@ export function getSuggestion(
   scalarType: Scalar.Type | null,
   shouldBeQuoted: boolean,
   type: string,
-  description?: string
+  description?: string,
+  useCurlyBraces: boolean = true
 ): monaco.languages.CompletionItem {
   let keyToInsert = key;
   const isAt = context.triggerCharacter === '@';
@@ -828,7 +928,11 @@ export function getSuggestion(
   let insertText = keyToInsert;
   let insertTextRules = monaco.languages.CompletionItemInsertTextRule.None;
   if (isAt) {
-    insertText = `{{ ${key}$0 }}`;
+    insertText = `${key}$0`;
+    if (useCurlyBraces) {
+      insertText = `{{ ${insertText} }}`;
+    }
+
     insertTextRules = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
   }
   if (shouldBeQuoted) {
@@ -860,16 +964,63 @@ export function getSuggestion(
 }
 
 export function getCompletionItemProvider(
-  workflowYamlSchema: z.ZodSchema,
-  dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>
+  getState: () => WorkflowEditorState | undefined
 ): monaco.languages.CompletionItemProvider {
   return {
-    triggerCharacters: ['@', '.', ' '],
+    // Trigger characters for completion:
+    // '@' - variable references
+    // '.' - property access within variables
+    // ' ' - space, used for separating tokens in Liquid syntax
+    // '|' - Liquid filters (e.g., {{ variable | filter }})
+    // '{' - start of Liquid blocks (e.g., {{ ... }})
+    triggerCharacters: ['@', '.', ' ', '|', '{'],
     provideCompletionItems: (model, position, completionContext) => {
       try {
-        // Get the latest connector data from cache instead of relying on closure
-        const currentDynamicConnectorTypes =
-          getCachedDynamicConnectorTypes() || dynamicConnectorTypes;
+        const editorState = getState();
+        const currentDynamicConnectorTypes = editorState?.connectors?.connectorTypes;
+        const workflowYamlSchema = editorState?.schemaLoose;
+        const workflowGraph = editorState?.computed?.workflowGraph;
+        const yamlDocument = editorState?.computed?.yamlDocument;
+        const workflowLookup = editorState?.computed?.workflowLookup;
+        const focusedStepId = editorState?.focusedStepId;
+        const absolutePosition = model.getOffsetAt(position);
+        let useCurlyBraces = true;
+
+        if (!yamlDocument) {
+          return {
+            suggestions: [],
+            incomplete: false,
+          };
+        }
+
+        if (completionContext.triggerCharacter === '@') {
+          if (!workflowLookup || !focusedStepId) {
+            return {
+              suggestions: [],
+              incomplete: false,
+            };
+          }
+
+          const focusedStepInfo = workflowLookup.steps[focusedStepId]!;
+
+          const focusedProp: StepPropInfo | undefined = Object.entries(focusedStepInfo.propInfos)
+            .map(([, stepPropInfo]) => stepPropInfo)
+            .find(
+              (stepPropInfo) =>
+                stepPropInfo.valueNode.range &&
+                stepPropInfo.valueNode.range[0] <= absolutePosition &&
+                absolutePosition <= stepPropInfo.valueNode.range[2]
+            );
+
+          if (!focusedProp) {
+            return {
+              suggestions: [],
+              incomplete: false,
+            };
+          }
+
+          useCurlyBraces = focusedProp.keyNode.value !== 'foreach';
+        }
 
         const { lineNumber } = position;
         const line = model.getLineContent(lineNumber);
@@ -898,16 +1049,11 @@ export function getCompletionItemProvider(
           };
         }
 
-        const absolutePosition = model.getOffsetAt(position);
         const suggestions: monaco.languages.CompletionItem[] = [];
         const value = model.getValue();
 
-        const yamlDocument = parseDocument(value);
-        // TODO: use the yaml document from the store
-        // const yamlDocument = useSelector(selectYamlDocument);
-
         // Try to parse with the strict schema first
-        const result = parseWorkflowYamlToJSON(value, workflowYamlSchema);
+        const result = parseWorkflowYamlToJSON(value, workflowYamlSchema as z.ZodSchema);
 
         // If strict parsing fails, try with a more lenient approach for completion
         let workflowData = 'success' in result && result.success ? result.data : null;
@@ -937,10 +1083,6 @@ export function getCompletionItemProvider(
           }
         }
 
-        const workflowGraph =
-          workflowData && workflowData.steps
-            ? WorkflowGraph.fromWorkflowDefinition(workflowData)
-            : null;
         const path = getCurrentPath(yamlDocument, absolutePosition);
         const yamlNode = yamlDocument.getIn(path, true);
         const scalarType = isScalar(yamlNode) ? yamlNode.type ?? null : null;
@@ -957,7 +1099,7 @@ export function getCompletionItemProvider(
           context = getContextSchemaForPath(workflowData, workflowGraph!, path);
         } catch (contextError) {
           // Fallback to the main workflow schema if context detection fails
-          context = workflowYamlSchema;
+          context = workflowYamlSchema as z.ZodType;
         }
 
         const lineUpToCursor = line.substring(0, position.column - 1);
@@ -1047,7 +1189,8 @@ export function getCompletionItemProvider(
                   scalarType,
                   shouldBeQuoted,
                   propertyTypeName,
-                  keySchema?.description
+                  keySchema?.description,
+                  useCurlyBraces
                 )
               );
             }
@@ -1056,6 +1199,60 @@ export function getCompletionItemProvider(
             return {
               suggestions,
               incomplete: true,
+            };
+          }
+        }
+        // SPECIAL CASE: Liquid filter completion
+        if (parseResult.matchType === 'liquid-filter') {
+          const filterPrefix = parseResult.fullKey;
+          const liquidFilterSuggestions = createLiquidFilterCompletions(range, filterPrefix);
+
+          return {
+            suggestions: liquidFilterSuggestions,
+            incomplete: false,
+          };
+        }
+
+        // SPECIAL CASE: Liquid block filter completion (pipe within liquid blocks)
+        if (parseResult.matchType === 'liquid-block-filter') {
+          // Check if we're actually inside a liquid block
+          const isInLiquidBlock = isInsideLiquidBlock(model.getValue(), position);
+
+          if (isInLiquidBlock) {
+            const filterPrefix = parseResult.fullKey;
+            const liquidFilterSuggestions = createLiquidFilterCompletions(range, filterPrefix);
+
+            return {
+              suggestions: liquidFilterSuggestions,
+              incomplete: false,
+            };
+          }
+        }
+
+        // SPECIAL CASE: Liquid syntax completion ({% %})
+        if (parseResult.matchType === 'liquid-syntax') {
+          const syntaxSuggestions = createLiquidSyntaxCompletions(range);
+
+          return {
+            suggestions: syntaxSuggestions,
+            incomplete: false,
+          };
+        }
+
+        // SPECIAL CASE: Liquid block keyword completion (inside {%- liquid ... -%})
+        if (parseResult.matchType === 'liquid-block-keyword') {
+          // Check if we're actually inside a liquid block
+          const isInLiquidBlock = isInsideLiquidBlock(model.getValue(), position);
+
+          if (isInLiquidBlock) {
+            const keywordSuggestions = createLiquidBlockKeywordCompletions(
+              range,
+              parseResult.fullKey
+            );
+
+            return {
+              suggestions: keywordSuggestions,
+              incomplete: false,
             };
           }
         }
@@ -1297,6 +1494,7 @@ export function getCompletionItemProvider(
               // Skip if parameter already exists (unless it's an empty value)
               if (existingParams.has(key)) {
                 // Skipping existing parameter
+                // eslint-disable-next-line no-continue
                 continue;
               }
 
@@ -1307,6 +1505,7 @@ export function getCompletionItemProvider(
                 lastPathSegment && !key.startsWith(lastPathSegment) && !isManualTrigger;
 
               if (shouldSkip) {
+                // eslint-disable-next-line no-continue
                 continue;
               }
 
@@ -1369,6 +1568,7 @@ export function getCompletionItemProvider(
 
               // If it's kbn-xsrf, skip it since we don't need to suggest it
               if (key === 'kbn-xsrf') {
+                // eslint-disable-next-line no-continue
                 continue;
               }
 
@@ -1545,6 +1745,7 @@ export function getCompletionItemProvider(
             completionContext.triggerKind === monaco.languages.CompletionTriggerKind.Invoke;
 
           if (lastPathSegment && !key.startsWith(lastPathSegment) && !isManualTrigger) {
+            // eslint-disable-next-line no-continue
             continue;
           }
 
@@ -1601,7 +1802,8 @@ export function getCompletionItemProvider(
                 scalarType,
                 shouldBeQuoted,
                 propertyTypeName,
-                'Connector type - choose from available connectors'
+                'Connector type - choose from available connectors',
+                useCurlyBraces
               );
 
               // Override the completion to trigger suggest after insertion
@@ -1635,7 +1837,8 @@ export function getCompletionItemProvider(
                 scalarType,
                 shouldBeQuoted,
                 propertyTypeName,
-                currentSchema?.description
+                currentSchema?.description,
+                useCurlyBraces
               )
             );
 
