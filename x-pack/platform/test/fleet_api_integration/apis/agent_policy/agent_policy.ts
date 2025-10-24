@@ -2161,6 +2161,7 @@ export default function (providerContext: FtrProviderContext) {
             agents: ['agent-2'],
             action_id: 'test-action-automatic',
             data: {},
+            is_automatic: true,
             type: 'UPGRADE',
           },
         });
