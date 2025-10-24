@@ -10,7 +10,7 @@
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -25,15 +25,10 @@ import { WorkflowExecutionDetail } from '../../../features/workflow_execution_de
 import { WorkflowExecutionList } from '../../../features/workflow_execution_list/ui/workflow_execution_list_stateful';
 import { useWorkflowsBreadcrumbs } from '../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
-import {
-  selectWorkflowDefinition,
-  selectYamlString,
-  setYamlString,
-} from '../../../widgets/workflow_yaml_editor/lib/store';
+import { selectWorkflowDefinition } from '../../../widgets/workflow_yaml_editor/lib/store/selectors';
 
 export function WorkflowDetailPage({ id }: { id: string }) {
   const { application, notifications } = useKibana().services;
-  const dispatch = useDispatch();
   const {
     data: workflow,
     isLoading: isLoadingWorkflow,
@@ -46,16 +41,17 @@ export function WorkflowDetailPage({ id }: { id: string }) {
 
   const { data: execution } = useWorkflowExecution(selectedExecutionId ?? null);
 
-  // const [workflowYaml, setWorkflowYaml] = useState(workflow?.yaml ?? '');
+  const [workflowYaml, setWorkflowYaml] = useState(workflow?.yaml ?? '');
   const originalWorkflowYaml = useMemo(() => workflow?.yaml ?? '', [workflow]);
   const [hasChanges, setHasChanges] = useState(false);
   const [highlightDiff, setHighlightDiff] = useState(false);
-  const workflowYaml = useSelector(selectYamlString);
 
   const [workflowExecuteModalOpen, setWorkflowExecuteModalOpen] = useState(false);
   const closeModal = useCallback(() => {
     setWorkflowExecuteModalOpen(false);
   }, []);
+
+  const yamlValue = selectedExecutionId && execution ? execution.yaml : workflowYaml;
 
   const { updateWorkflow, testWorkflow } = useWorkflowActions();
 
@@ -155,17 +151,17 @@ export function WorkflowDetailPage({ id }: { id: string }) {
   }, [notifications?.toasts, updateWorkflow, id, workflow]);
 
   useEffect(() => {
-    if (!execution) {
-      return;
-    }
-
-    dispatch(setYamlString(execution.yaml));
-  }, [dispatch, execution]);
-
-  useEffect(() => {
-    dispatch(setYamlString(workflow?.yaml ?? ''));
+    setWorkflowYaml(workflow?.yaml ?? '');
     setHasChanges(false);
-  }, [workflow, dispatch]);
+  }, [workflow]);
+
+  const handleChange = useCallback(
+    (wfString: string = '') => {
+      setWorkflowYaml(wfString);
+      setHasChanges(originalWorkflowYaml !== wfString);
+    },
+    [originalWorkflowYaml]
+  );
 
   if (workflowError) {
     const error = workflowError as Error;
@@ -209,6 +205,8 @@ export function WorkflowDetailPage({ id }: { id: string }) {
           editor={
             <WorkflowEditor
               workflow={workflow}
+              workflowYaml={yamlValue}
+              onWorkflowYamlChange={handleChange}
               handleSave={handleSave}
               handleRun={handleRun}
               handleSaveAndRun={handleSaveAndRun}
@@ -230,7 +228,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
             workflow && selectedExecutionId ? (
               <WorkflowExecutionDetail
                 workflowExecutionId={selectedExecutionId}
-                workflowYaml={workflowYaml}
+                workflowYaml={yamlValue}
                 showBackButton={activeTab === 'executions'}
                 onClose={() => setSelectedExecution(null)}
               />

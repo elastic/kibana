@@ -59,7 +59,6 @@ import {
   selectFocusedStepInfo,
   selectSchemaLoose,
   selectYamlDocument,
-  selectYamlString,
   setConnectors,
   setCursorPosition,
   setStepExecutions,
@@ -123,7 +122,9 @@ export interface WorkflowYAMLEditorProps {
   stepExecutions?: WorkflowStepExecutionDto[];
   'data-testid'?: string;
   highlightDiff?: boolean;
+  value: string;
   onMount?: (editor: monaco.editor.IStandaloneCodeEditor, monacoInstance: typeof monaco) => void;
+  onChange?: (value: string | undefined) => void;
   onSave: () => void;
   onRun: () => void;
   onSaveAndRun: () => void;
@@ -144,6 +145,7 @@ export const WorkflowYAMLEditor = ({
   stepExecutions,
   highlightDiff = false,
   onMount,
+  onChange,
   onSave,
   onRun,
   onSaveAndRun,
@@ -174,7 +176,6 @@ export const WorkflowYAMLEditor = ({
   const dispatch = useDispatch();
   const focusedStepInfo = useSelector(selectFocusedStepInfo);
   const yamlDocument = useSelector(selectYamlDocument);
-  const yamlString = useSelector(selectYamlString);
   const workflowYamlSchemaLoose = useSelector(selectSchemaLoose);
   const yamlDocumentRef = useRef<YAML.Document | null>(null);
   yamlDocumentRef.current = yamlDocument || null;
@@ -370,9 +371,13 @@ export const WorkflowYAMLEditor = ({
 
   const handleChange = useCallback(
     (value: string | undefined) => {
+      if (onChange) {
+        onChange(value);
+      }
+
       changeSideEffects();
     },
-    [changeSideEffects]
+    [onChange, changeSideEffects]
   );
 
   useEffect(() => {
@@ -397,6 +402,48 @@ export const WorkflowYAMLEditor = ({
     };
   }, []);
 
+  // Track the last value we set internally to distinguish from external changes
+  const lastInternalValueRef = useRef<string | undefined>(props.value);
+  // Force refresh of decorations when props.value changes externally (e.g., switching executions)
+  useEffect(() => {
+    if (isEditorMounted && editorRef.current && props.value !== undefined) {
+      // Check if this is an external change (not from our own typing)
+      const isExternalChange = props.value !== lastInternalValueRef.current;
+
+      if (isExternalChange) {
+        // Check if Monaco editor content matches props.value
+        const model = editorRef.current.getModel();
+        if (model) {
+          const currentContent = model.getValue();
+          if (currentContent !== props.value) {
+            // Wait a bit longer for Monaco to update its content, then force re-parse
+            setTimeout(() => {
+              changeSideEffects();
+            }, 50); // Longer delay to ensure Monaco editor content is updated
+          } else {
+            // Content matches, just force re-parse to be safe
+            setTimeout(() => {
+              changeSideEffects();
+            }, 10);
+          }
+        }
+
+        // Update our tracking ref
+        lastInternalValueRef.current = props.value;
+      }
+    }
+  }, [props.value, isEditorMounted, changeSideEffects]);
+
+  // Force decoration refresh specifically when switching to readonly mode (executions view)
+  useEffect(() => {
+    if (isEditorMounted) {
+      // Small delay to ensure all state is settled
+      setTimeout(() => {
+        changeSideEffects();
+      }, 50);
+    }
+  }, [isEditorMounted, changeSideEffects]);
+
   // Decorations
   useTriggerTypeDecorations({
     editor: editorRef.current,
@@ -415,7 +462,7 @@ export const WorkflowYAMLEditor = ({
     isEditorMounted,
     highlightDiff,
     originalValue,
-    currentValue: yamlString,
+    currentValue: props.value,
   });
 
   useAlertTriggerDecorations({
@@ -588,7 +635,6 @@ export const WorkflowYAMLEditor = ({
           schemas={schemas}
           suggestionProvider={completionProvider}
           {...props}
-          value={yamlString || ''}
         />
       </div>
       <div css={styles.validationErrorsContainer}>
