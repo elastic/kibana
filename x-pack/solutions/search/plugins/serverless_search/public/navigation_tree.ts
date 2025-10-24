@@ -12,11 +12,13 @@ import { DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { i18n } from '@kbn/i18n';
 
 const LazyIconAgents = lazy(() =>
-  import('@kbn/search-shared-ui').then((m) => ({ default: m.iconRobot }))
+  import('@kbn/search-shared-ui/src/v2_icons/robot').then((m) => ({ default: m.iconRobot }))
 );
 
 const LazyIconPlayground = lazy(() =>
-  import('@kbn/search-shared-ui').then((m) => ({ default: m.iconPlayground }))
+  import('@kbn/search-shared-ui/src/v2_icons/playground').then((m) => ({
+    default: m.iconPlayground,
+  }))
 );
 
 const NAV_TITLE = i18n.translate('xpack.serverlessSearch.nav.title', {

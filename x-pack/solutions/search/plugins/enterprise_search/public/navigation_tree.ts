@@ -18,11 +18,13 @@ import { i18n } from '@kbn/i18n';
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
 
 const LazyIconAgents = lazy(() =>
-  import('@kbn/search-shared-ui').then((m) => ({ default: m.iconRobot }))
+  import('@kbn/search-shared-ui/src/v2_icons/robot').then((m) => ({ default: m.iconRobot }))
 );
 
 const LazyIconPlayground = lazy(() =>
-  import('@kbn/search-shared-ui').then((m) => ({ default: m.iconPlayground }))
+  import('@kbn/search-shared-ui/src/v2_icons/playground').then((m) => ({
+    default: m.iconPlayground,
+  }))
 );
 
 export interface DynamicSideNavItems {
