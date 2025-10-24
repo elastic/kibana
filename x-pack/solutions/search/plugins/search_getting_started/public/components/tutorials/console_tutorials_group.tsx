@@ -94,7 +94,7 @@ export const ConsoleTutorialsGroup = () => {
         icon={commandLineIllustration}
         description={i18n.translate('xpack.searchGettingStarted.consoleTutorials.description', {
           defaultMessage:
-            'Choose a tutorial and use Console to quickly start interacting with the elasticsearch API.',
+            'Choose a tutorial and use Console to quickly start interacting with the Elasticsearch API.',
         })}
       />
       <EuiFlexItem grow={false}>

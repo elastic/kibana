@@ -28,7 +28,7 @@ export const GettingStartedFooter = () => {
       <EuiFlexGroup direction={'column'} justifyContent="spaceBetween" gutterSize="l">
         <SearchGettingStartedSectionHeading
           title={i18n.translate('xpack.searchGettingStarted.footer.label', {
-            defaultMessage: 'Dive Deeper with Elasticsearch',
+            defaultMessage: 'Dive deeper with Elasticsearch',
           })}
           icon="documentation"
           description={i18n.translate('xpack.searchGettingStarted.footer.description', {
