@@ -11,8 +11,7 @@ import type { GenericValidationResult } from '@kbn/triggers-actions-ui-plugin/pu
 import { SUB_ACTION } from '../../../common/openai/constants';
 import { OPENAI_CONNECTOR_ID, OPENAI_TITLE } from '../../../common/openai/constants';
 import type { ActionParams, OpenAIConnector } from './types';
-import { formSerializer } from './form_serialization';
-import { formDeserializer } from '../lib/webhook/form_serialization';
+import { formSerializer, formDeserializer } from './form_serialization';
 
 interface ValidationErrors {
   subAction: string[];
