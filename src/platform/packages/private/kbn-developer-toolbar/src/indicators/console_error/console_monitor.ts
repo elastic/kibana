@@ -7,41 +7,50 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Subject, distinctUntilChanged, debounceTime } from 'rxjs';
+import type { Monitor } from '../monitor';
 
-export class ConsoleMonitor {
-  /**
-   * List of error messages to ignore.
-   * @private
-   */
-  private IGNORE_ERRORS = [
+export interface ConsoleErrorInfo {
+  message: string;
+  type: 'error' | 'warn';
+}
+
+/**
+ * Console monitor - tracks console errors and warnings
+ * Note: Unlike other monitors, this can emit null values when errors are dismissed
+ */
+export class ConsoleMonitor implements Monitor<ConsoleErrorInfo | null> {
+  private static readonly IGNORE_ERRORS = [
     // We're ignoring this error until we migrate to React 18's createRoot API.
     'Warning: ReactDOM.render is no longer supported in React 18. Use createRoot instead.',
-  ];
+  ] as const;
 
-  private errorSubject: Subject<{ message: string; type: 'error' | 'warn' } | null> = new Subject<{
-    message: string;
-    type: 'error' | 'warn';
-  } | null>();
+  private static readonly DEBOUNCE_DELAY = 100 as const; // ms
 
-  error$ = this.errorSubject.asObservable().pipe(
-    distinctUntilChanged(
-      (prev, curr) => prev?.message === curr?.message && prev?.type === curr?.type
-    ),
-    debounceTime(100)
-  );
-
-  private originalMethods = {
+  private readonly originalMethods = {
     // eslint-disable-next-line no-console
     error: console.error.bind(console),
     // eslint-disable-next-line no-console
     warn: console.warn.bind(console),
   };
 
+  private callbacks = new Set<(error: ConsoleErrorInfo | null) => void>();
+  private lastError: ConsoleErrorInfo | null = null;
+  private debounceTimeout?: ReturnType<typeof setTimeout>;
   private inFlight = false;
+  private isMonitoring = false;
+  private cleanupHandlers?: () => void;
+
+  isSupported(): boolean {
+    return typeof window !== 'undefined' && typeof console !== 'undefined';
+  }
 
   dismiss() {
-    this.errorSubject.next(null);
+    this.lastError = null;
+    if (this.debounceTimeout) {
+      clearTimeout(this.debounceTimeout);
+      this.debounceTimeout = undefined;
+    }
+    this.notifyCallbacks(null);
   }
 
   private createStackFromCaller(wrapperFn: Function): Error {
@@ -53,49 +62,46 @@ export class ConsoleMonitor {
     return err;
   }
 
-  init() {
-    const createConsoleInterceptor = (method: 'error' | 'warn') => {
-      const original = this.originalMethods[method];
-
-      // Use a named function so we can pass it to captureStackTrace
-      const intercept = (...args: unknown[]) => {
-        // Avoid infinite loops if showError logs again
-        if (this.inFlight) return original(...args);
-        this.inFlight = true;
-
+  private createConsoleInterceptor(method: 'error' | 'warn') {
+    const original = this.originalMethods[method];
+    // Use a named function so we can pass it to captureStackTrace
+    const intercept = (...args: unknown[]) => {
+      // Avoid infinite loops if our subscribers log again
+      if (this.inFlight) return original(...args);
+      this.inFlight = true;
+      try {
+        // Side-effect: record/emit
         try {
-          // 1) Handle our side-effects/telemetry
-          try {
-            this.showError({ message: this.formatError(...args), type: method });
-          } catch {
-            // Ignore errors in our own handling
-          }
-
-          // 2) Preserve useful stack in DevTools
-          // If the caller already passed an Error, keep it
-          const hasError = args.some((a) => a instanceof Error);
-
-          if (hasError) {
-            // Just forward as-is (best fidelity)
-            return original(...args);
-          } else {
-            // Inject an Error whose stack starts at the *original caller*
-            const callerStack = this.createStackFromCaller(intercept);
-            return original(...args, callerStack);
-          }
-        } finally {
-          this.inFlight = false;
+          this.showError({ message: this.formatError(...args), type: method });
+        } catch {
+          // swallow internal errors
         }
-      };
 
-      return intercept;
+        // Preserve/augment stack in DevTools
+        const hasError = args.some((a) => a instanceof Error);
+        return hasError
+          ? original(...args)
+          : original(...args, this.createStackFromCaller(intercept));
+      } finally {
+        this.inFlight = false;
+      }
     };
+    return intercept;
+  }
+
+  startMonitoring() {
+    if (this.isMonitoring || !this.isSupported()) return;
+
+    this.isMonitoring = true;
+
+    const interceptError = this.createConsoleInterceptor('error');
+    const interceptWarn = this.createConsoleInterceptor('warn');
 
     // Override console methods
     // eslint-disable-next-line no-console
-    console.error = createConsoleInterceptor('error');
+    console.error = interceptError;
     // eslint-disable-next-line no-console
-    console.warn = createConsoleInterceptor('warn');
+    console.warn = interceptWarn;
 
     // Global error handler for unhandled errors (including React errors)
     const handleGlobalError = (event: ErrorEvent) => {
@@ -108,7 +114,10 @@ export class ConsoleMonitor {
     // Global unhandled promise rejection handler
     const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
       this.showError({
-        message: event.reason?.message || String(event.reason) || 'Unhandled promise rejection',
+        message:
+          (event as any)?.reason?.message ||
+          String((event as any)?.reason) ||
+          'Unhandled promise rejection',
         type: 'error',
       });
     };
@@ -116,12 +125,12 @@ export class ConsoleMonitor {
     window.addEventListener('error', handleGlobalError);
     window.addEventListener('unhandledrejection', handleUnhandledRejection);
 
-    return () => {
-      // Restore original console methods
+    this.cleanupHandlers = () => {
+      // Restore original console methods only if we still own them
       // eslint-disable-next-line no-console
-      console.error = this.originalMethods.error;
+      if (console.error === interceptError) console.error = this.originalMethods.error;
       // eslint-disable-next-line no-console
-      console.warn = this.originalMethods.warn;
+      if (console.warn === interceptWarn) console.warn = this.originalMethods.warn;
 
       // Remove global error handlers
       window.removeEventListener('error', handleGlobalError);
@@ -129,76 +138,134 @@ export class ConsoleMonitor {
     };
   }
 
-  private showError(error: { message: string; type: 'error' | 'warn' }) {
-    if (this.IGNORE_ERRORS.some((ignore) => error.message.includes(ignore))) return;
+  stopMonitoring() {
+    if (!this.isMonitoring) return;
+    this.isMonitoring = false;
 
-    this.errorSubject.next(error);
+    if (this.cleanupHandlers) {
+      this.cleanupHandlers();
+      this.cleanupHandlers = undefined;
+    }
+  }
+
+  destroy() {
+    this.stopMonitoring();
+    if (this.debounceTimeout) {
+      clearTimeout(this.debounceTimeout);
+      this.debounceTimeout = undefined;
+    }
+    this.callbacks.clear();
+    this.lastError = null;
+  }
+
+  subscribe(callback: (error: ConsoleErrorInfo | null) => void) {
+    this.callbacks.add(callback);
+    // Emit current state to the new subscriber
+    try {
+      callback(this.lastError);
+    } catch {
+      // isolate subscriber errors
+    }
+    return () => {
+      this.callbacks.delete(callback);
+    };
+  }
+
+  getLast(): ConsoleErrorInfo | null {
+    return this.lastError;
+  }
+
+  private showError(error: { message: string; type: 'error' | 'warn' }) {
+    if (ConsoleMonitor.IGNORE_ERRORS.some((ignore) => error.message.includes(ignore))) return;
+
+    const isNewError =
+      !this.lastError ||
+      this.lastError.message !== error.message ||
+      this.lastError.type !== error.type;
+
+    if (!isNewError) return;
+
+    this.lastError = error;
+
+    // Debounce burst emissions: schedule once per burst and emit latest
+    if (this.debounceTimeout) return;
+    this.debounceTimeout = setTimeout(() => {
+      this.debounceTimeout = undefined;
+      this.notifyCallbacks(this.lastError);
+    }, ConsoleMonitor.DEBOUNCE_DELAY);
+  }
+
+  private notifyCallbacks(error: ConsoleErrorInfo | null) {
+    for (const cb of this.callbacks) {
+      try {
+        cb(error);
+      } catch {
+        // isolate subscriber failures
+      }
+    }
   }
 
   private formatError(...args: unknown[]): string {
-    if (args.length === 0) {
-      return 'Unknown error';
-    }
+    if (args.length === 0) return 'Unknown error';
+    const [template, ...rest] = args;
 
-    const template = args[0];
-
-    // Handle non-string templates (objects, errors, etc.)
     if (typeof template !== 'string') {
-      return args.map(this.stringifyArg).join(' ');
+      return args.map((a) => this.stringifyArg(a)).join(' ');
     }
 
-    // Handle string templates with %s placeholders
-    const values = args.slice(1);
-    let result = template;
-    let valueIndex = 0;
-
-    // Replace %s placeholders with formatted values
-    result = result.replace(/%s/g, () => {
-      if (valueIndex < values.length) {
-        return this.stringifyArg(values[valueIndex++]);
+    // Support common console printf tokens: %s %d/%i %f %o
+    let idx = 0;
+    const formatted = template.replace(/%[sdifo]/g, (m) => {
+      const v = rest[idx++];
+      switch (m) {
+        case '%s':
+          return String(this.stringifyArg(v));
+        case '%d':
+        case '%i':
+          return Number(v).toString();
+        case '%f':
+          return Number(v).toString();
+        case '%o':
+          return this.stringifyArg(v);
+        default:
+          return m;
       }
-      return '%s'; // Keep unreplaced placeholders
     });
 
-    // Append any remaining values that weren't used in placeholders
-    const remainingValues = values.slice(valueIndex);
-    if (remainingValues.length > 0) {
-      result += ' ' + remainingValues.map(this.stringifyArg).join(' ');
-    }
-
-    return result;
+    const tail = rest.slice(idx).map((a) => this.stringifyArg(a));
+    return tail.length ? `${formatted} ${tail.join(' ')}` : formatted;
   }
 
   private stringifyArg(arg: unknown): string {
-    if (arg === null) return 'null';
-    if (arg === undefined) return 'undefined';
-    if (typeof arg === 'string') return arg;
-    if (typeof arg === 'number' || typeof arg === 'boolean') return String(arg);
+    if (arg == null) return String(arg);
+    const t = typeof arg;
+    if (t === 'string' || t === 'number' || t === 'boolean') return String(arg);
 
-    // Handle Error objects
     if (arg instanceof Error) {
       return arg.message || arg.name || 'Error';
     }
 
-    // Handle React elements and complex objects
-    if (typeof arg === 'object') {
-      try {
-        // For React elements, try to extract component name
-        if (arg && typeof arg === 'object' && 'type' in arg) {
-          const reactElement = arg as { type?: { name?: string; displayName?: string } };
-          if (reactElement.type?.name || reactElement.type?.displayName) {
-            return `<${reactElement.type.name || reactElement.type.displayName}>`;
-          }
-        }
-
-        // For other objects, use JSON with fallback
-        const json = JSON.stringify(arg);
-        return json.length > 100 ? `${json.substring(0, 100)}...` : json;
-      } catch {
-        return '[Object]';
-      }
+    // React elements: show component name if possible
+    if (t === 'object' && (arg as any)?.type) {
+      const comp = (arg as any).type;
+      const name = comp?.displayName || comp?.name;
+      if (name) return `<${name}>`;
     }
 
-    return String(arg);
+    // Safe JSON with circular guard + size cap
+    try {
+      const seen = new WeakSet<object>();
+      const json = JSON.stringify(arg, (_k, v) => {
+        if (typeof v === 'object' && v !== null) {
+          if (seen.has(v as object)) return '[Circular]';
+          seen.add(v as object);
+        }
+        return v;
+      });
+      const s = json ?? '[Object]';
+      return s.length > 200 ? `${s.slice(0, 200)}…` : s;
+    } catch {
+      return '[Object]';
+    }
   }
 }

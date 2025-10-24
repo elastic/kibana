@@ -132,7 +132,7 @@ export const FrameJankIndicator: React.FC = () => {
     let longTaskUnsubscribe = () => {};
     let inpUnsubscribe = () => {};
 
-    if (longTaskMonitor.isMonitoringSupported()) {
+    if (longTaskMonitor.isSupported()) {
       longTaskMonitor.startMonitoring();
 
       longTaskUnsubscribe = longTaskMonitor.subscribe((taskInfo) => {
@@ -144,7 +144,7 @@ export const FrameJankIndicator: React.FC = () => {
       });
     }
 
-    if (inpMonitor.isMonitoringSupported()) {
+    if (inpMonitor.isSupported()) {
       inpMonitor.startMonitoring();
 
       inpUnsubscribe = inpMonitor.subscribe((inpInfo) => {

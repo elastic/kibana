@@ -20,6 +20,8 @@ export const MemoryUsageIndicator: React.FC = () => {
   const [memoryInfo, setMemoryInfo] = useState<MemoryInfo | null>(null);
 
   useEffect(() => {
+    if (!MemoryMonitor.isSupported()) return;
+
     const monitor = new MemoryMonitor();
     monitor.startMonitoring();
 

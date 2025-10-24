@@ -7,50 +7,67 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Monitor } from '../monitor';
+
 export interface LongTaskInfo {
-  duration: number;
-  totalBlockingTime: number;
-  tasksInLast30Seconds: number;
+  duration: number; // last task duration (ms)
+  totalBlockingTime: number; // sum over window of max(0, duration - 50)
+  tasksInLast30Seconds: number; // number of long tasks in the window
 }
 
-// Type definition for PerformanceLongTaskTiming
-export type PerformanceLongTaskTiming = PerformanceEntry;
+// Long Task entries are PerformanceEntry with startTime/duration (+ optional attribution)
+export type PerformanceLongTaskTiming = PerformanceEntry & {
+  duration: number;
+  startTime: number;
+};
 
-export class LongTaskMonitor {
-  private callbacks: ((info: LongTaskInfo) => void)[] = [];
+export class LongTaskMonitor implements Monitor<LongTaskInfo> {
+  // Good defaults
+  private static readonly HISTORY_DURATION = 30_000; // 30s sliding window
+  private static readonly SEVERE_THRESHOLD = 100; // only emit tasks >= 100ms
+  private static readonly TBT_BASELINE = 50; // TBT counts duration beyond 50ms
+  private static readonly MAX_TASKS = 500; // soft cap to bound memory
+
+  private callbacks: Array<(info: LongTaskInfo) => void> = [];
   private observer?: PerformanceObserver;
-  private isSupported: boolean;
+  private supportedFlag: boolean;
+
   private taskHistory: Array<{ duration: number; startTime: number }> = [];
   private lastTaskDuration = 0;
 
-  private readonly SEVERE_THRESHOLD = 100; // ms - threshold for tracking and reporting
-  private readonly HISTORY_DURATION = 30000; // 30 seconds
-
   constructor() {
-    this.isSupported = this.checkLongTaskSupport();
+    this.supportedFlag = this.checkLongTaskSupport();
   }
 
   private checkLongTaskSupport(): boolean {
     return (
       typeof PerformanceObserver !== 'undefined' &&
-      PerformanceObserver.supportedEntryTypes &&
+      Array.isArray(PerformanceObserver.supportedEntryTypes) &&
       PerformanceObserver.supportedEntryTypes.includes('longtask')
     );
   }
 
+  isSupported(): boolean {
+    return this.supportedFlag;
+  }
+
   startMonitoring() {
-    if (!this.isSupported) {
-      return;
-    }
+    if (!this.supportedFlag) return;
+    if (this.observer) return; // idempotent
 
     try {
       this.observer = new PerformanceObserver((list) => {
-        list.getEntries().forEach((entry) => {
-          this.handleLongTask(entry as PerformanceLongTaskTiming);
-        });
+        const entries = list.getEntries() as PerformanceLongTaskTiming[];
+        for (const entry of entries) this.handleLongTask(entry);
       });
 
-      this.observer.observe({ entryTypes: ['longtask'] });
+      // Prefer single-type API to get buffered entries when available.
+      // Fallback to entryTypes for older browsers.
+      try {
+        this.observer.observe({ type: 'longtask', buffered: true });
+      } catch {
+        this.observer.observe({ entryTypes: ['longtask'] });
+      }
     } catch (error) {
       // eslint-disable-next-line no-console
       console.warn('Failed to start long task monitoring:', error);
@@ -58,41 +75,63 @@ export class LongTaskMonitor {
   }
 
   private handleLongTask(entry: PerformanceLongTaskTiming) {
-    // Only track and report tasks above severe threshold (≥100ms)
-    if (entry.duration >= this.SEVERE_THRESHOLD) {
-      // Add to history
-      this.taskHistory.push({
-        duration: entry.duration,
-        startTime: entry.startTime,
-      });
-      this.lastTaskDuration = entry.duration;
+    const { duration, startTime } = entry;
+    if (duration < LongTaskMonitor.SEVERE_THRESHOLD) return;
 
-      // Clean up old tasks and calculate current stats
-      this.cleanupHistory();
+    // Record
+    this.pushTask({ duration, startTime });
+    this.lastTaskDuration = duration;
 
-      const info: LongTaskInfo = {
-        duration: entry.duration,
-        totalBlockingTime: this.calculateTotalBlockingTime(),
-        tasksInLast30Seconds: this.taskHistory.length,
-      };
+    // Maintain window
+    this.cleanupHistory();
 
-      this.callbacks.forEach((cb) => cb(info));
+    // Emit snapshot
+    const info: LongTaskInfo = {
+      duration: this.lastTaskDuration,
+      totalBlockingTime: this.calculateTotalBlockingTime(),
+      tasksInLast30Seconds: this.taskHistory.length,
+    };
+    for (const cb of this.callbacks) cb(info);
+  }
+
+  private pushTask(task: { duration: number; startTime: number }) {
+    this.taskHistory.push(task);
+
+    // Bound memory: drop oldest if we exceed the cap.
+    if (this.taskHistory.length > LongTaskMonitor.MAX_TASKS) {
+      const extra = this.taskHistory.length - LongTaskMonitor.MAX_TASKS;
+      this.taskHistory.splice(0, extra);
     }
   }
 
   private cleanupHistory() {
-    const cutoffTime = performance.now() - this.HISTORY_DURATION;
-    this.taskHistory = this.taskHistory.filter((task) => task.startTime >= cutoffTime);
+    const cutoff = performance.now() - LongTaskMonitor.HISTORY_DURATION;
+    // Entries arrive roughly in time order; filter is still safe if they don't.
+    if (this.taskHistory.length) {
+      this.taskHistory = this.taskHistory.filter((t) => t.startTime >= cutoff);
+    }
   }
 
   private calculateTotalBlockingTime(): number {
-    return this.taskHistory.reduce((total, task) => total + task.duration, 0);
+    // TBT sums the amount beyond 50ms per long task.
+    let total = 0;
+    const baseline = LongTaskMonitor.TBT_BASELINE;
+    for (const t of this.taskHistory) {
+      const block = t.duration - baseline;
+      if (block > 0) total += block;
+    }
+    return total;
   }
 
   stopMonitoring() {
     if (this.observer) {
-      this.observer.disconnect();
-      this.observer = undefined;
+      try {
+        this.observer.disconnect();
+      } catch {
+        // ignore
+      } finally {
+        this.observer = undefined;
+      }
     }
   }
 
@@ -110,11 +149,7 @@ export class LongTaskMonitor {
     };
   }
 
-  isMonitoringSupported(): boolean {
-    return this.isSupported;
-  }
-
-  // Get current stats without waiting for new long task
+  // Snapshot current stats (cleans window first)
   getCurrentStats(): LongTaskInfo {
     this.cleanupHistory();
     return {

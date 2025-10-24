@@ -85,9 +85,9 @@ export const ConsoleErrorIndicator: React.FC = () => {
   useEffect(() => {
     const monitor = new ConsoleMonitor();
     monitorRef.current = monitor;
-    const destroy = monitor.init();
+    monitor.startMonitoring();
 
-    const sub = monitor.error$.subscribe((newError) => {
+    const unsubscribe = monitor.subscribe((newError) => {
       setError(newError);
 
       // Track error count - increment when new error, reset when cleared
@@ -111,8 +111,8 @@ export const ConsoleErrorIndicator: React.FC = () => {
     });
 
     return () => {
-      sub.unsubscribe();
-      destroy();
+      unsubscribe();
+      monitor.destroy();
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
@@ -123,7 +123,7 @@ export const ConsoleErrorIndicator: React.FC = () => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
-    monitorRef.current?.dismiss();
+    // monitorRef.current?.dismiss();
   }, []);
 
   if (!error) {
@@ -133,13 +133,16 @@ export const ConsoleErrorIndicator: React.FC = () => {
   const iconType = error.type === 'error' ? 'warning' : 'alert';
   const iconColor = error.type === 'error' ? 'danger' : 'warning';
 
-  // Truncate long messages to fit in the overlay
-  const truncatedMessage =
-    error.message.length > 60 ? `${error.message.substring(0, 60)}...` : error.message;
-
   return (
-    <div css={getErrorOverlayStyles(euiTheme, error.type)} key={truncatedMessage}>
-      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+    <div css={getErrorOverlayStyles(euiTheme, error.type)} key={error.message}>
+      <EuiFlexGroup
+        gutterSize="xs"
+        alignItems="center"
+        responsive={false}
+        css={css`
+          min-width: 0; // allow text truncation;
+        `}
+      >
         <EuiFlexItem grow={false}>
           {errorCount > 1 ? (
             <EuiToolTip content={`Total recent errors: ${errorCount}`}>
@@ -151,9 +154,13 @@ export const ConsoleErrorIndicator: React.FC = () => {
             <EuiIcon type={iconType} color={iconColor} size="s" />
           )}
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText size="xs" color="inherit">
-            <span>{truncatedMessage}</span>
+        <EuiFlexItem
+          css={css`
+            min-width: 0; // allow text truncation;
+          `}
+        >
+          <EuiText size="xs" color="inherit" className="eui-textTruncate">
+            <span>{error.message}</span>
           </EuiText>
         </EuiFlexItem>
 

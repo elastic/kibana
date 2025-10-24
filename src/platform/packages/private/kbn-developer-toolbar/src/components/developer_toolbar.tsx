@@ -17,9 +17,6 @@ import {
   EuiThemeProvider,
   EuiToolTip,
   useEuiTheme,
-  shade,
-  isColorDark,
-  hexToRgb,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ConsoleErrorIndicator } from '../indicators/console_error/console_error_indicator';
@@ -41,7 +38,7 @@ const HEIGHT = 32;
 const getMinimizedToolbarStyles = (euiTheme: EuiThemeComputed) => css`
   position: fixed;
   bottom: ${euiTheme.size.xs};
-  right: ${euiTheme.size.xs}
+  right: ${euiTheme.size.s};
   z-index: ${euiTheme.levels.toast};
 `;
 
@@ -49,6 +46,7 @@ const getToolbarPanelStyles = (euiTheme: EuiThemeComputed) => css`
   border-radius: 0;
   border-top: 1px solid ${euiTheme.colors.borderBaseAccentSecondary};
   background-color: ${euiTheme.colors.backgroundLightAccentSecondary};
+  padding: ${euiTheme.size.xs} ${euiTheme.size.s};
 `;
 
 const getToolbarContainerStyles = (euiTheme: EuiThemeComputed) => [
@@ -59,18 +57,8 @@ const getToolbarContainerStyles = (euiTheme: EuiThemeComputed) => [
 ];
 
 export const DeveloperToolbar: React.FC<DeveloperToolbarProps> = (props) => {
-  const state = useToolbarState();
-  const settings = state.settings;
-  const customBackgroundColor = settings.customBackgroundColor;
-
-  const colorMode = customBackgroundColor
-    ? isColorDark(...hexToRgb(customBackgroundColor))
-      ? 'dark'
-      : 'light'
-    : 'dark';
-
   return (
-    <EuiThemeProvider colorMode={colorMode}>
+    <EuiThemeProvider colorMode={'dark'}>
       <DeveloperToolbarInternal {...props} />
     </EuiThemeProvider>
   );
@@ -80,11 +68,7 @@ const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({ envInfo, on
   const { euiTheme } = useEuiTheme();
   const { isMinimized, toggleMinimized } = useMinimized();
   const state = useToolbarState();
-  const settings = state.settings;
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-
-  const customBackgroundColor = settings?.customBackgroundColor;
-  const customBorderColor = customBackgroundColor && shade(customBackgroundColor, 0.2);
 
   useEffect(() => {
     if (onHeightChange) {
@@ -114,32 +98,24 @@ const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({ envInfo, on
 
   return (
     <div css={getToolbarContainerStyles(euiTheme)}>
-      {settings?.consoleErrorsEnabled && <ConsoleErrorIndicator />}
-      <EuiPanel
-        paddingSize="xs"
-        color="subdued"
-        css={getToolbarPanelStyles(euiTheme)}
-        style={{ backgroundColor: customBackgroundColor, borderTopColor: customBorderColor }}
-      >
+      {state.isEnabled('errorsMonitor') && <ConsoleErrorIndicator />}
+      <EuiPanel css={getToolbarPanelStyles(euiTheme)}>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              {envInfo && settings?.environmentEnabled && (
+              {envInfo && state.isEnabled('environmentInfo') && (
                 <EuiFlexItem grow={false}>
-                  <EnvironmentIndicator
-                    env={envInfo}
-                    customLabel={settings.customEnvironmentLabel}
-                  />
+                  <EnvironmentIndicator env={envInfo} />
                 </EuiFlexItem>
               )}
 
-              {settings?.frameJankEnabled && (
+              {state.isEnabled('frameJank') && (
                 <EuiFlexItem grow={false}>
                   <FrameJankIndicator />
                 </EuiFlexItem>
               )}
 
-              {settings?.memoryUsageEnabled && (
+              {state.isEnabled('memoryMonitor') && (
                 <EuiFlexItem grow={false}>
                   <MemoryUsageIndicator />
                 </EuiFlexItem>

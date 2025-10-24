@@ -8,24 +8,21 @@
  */
 
 import type React from 'react';
-import { useEffect, useMemo, type ReactNode } from 'react';
+import { type ReactNode, useEffect } from 'react';
 import { useToolbarState } from '../hooks';
 
 export interface DeveloperToolbarItemProps {
   /**
-   * Unique identifier for this item. If not provided, a random ID will be generated.
-   * Used as user-facing identifier settings and data-test-subj attributes.
+   * Unique identifier for this item.
+   * Used as user-facing identifier in settings and data-test-subj attributes.
    */
-  id?: string;
+  id: string;
 
-  /**
-   * Optional name for this item, used in settings UI. If not provided, the ID will be used.
-   */
-  name?: string;
   /**
    * The React component(s) to render in the toolbar
    */
   children: ReactNode;
+
   /**
    * Priority for ordering items. Higher numbers appear first. Defaults to 0.
    */
@@ -38,29 +35,21 @@ export interface DeveloperToolbarItemProps {
  * The children will be portaled to the developer toolbar automatically.
  */
 export const DeveloperToolbarItem: React.FC<DeveloperToolbarItemProps> = ({
-  id: providedId,
-  name,
+  id,
   children,
-  priority = 0,
+  priority,
 }) => {
   const { registerItem } = useToolbarState();
-
-  // Generate stable ID if none provided
-  const id = useMemo(
-    () => providedId ?? `item-${Math.random().toString(36).substring(2, 9)}`,
-    [providedId]
-  );
 
   useEffect(() => {
     const unregister = registerItem({
       id,
-      name,
       children,
       priority,
     });
 
     return unregister;
-  }, [id, children, priority, registerItem, name]);
+  }, [children, priority, registerItem, id]);
 
   // This component doesn't render anything - it just registers the item
   return null;

@@ -202,9 +202,9 @@ export const Default: StoryObj<DeveloperToolbarProps> = {
 const ExtensibleDemoApp = (props: DeveloperToolbarProps) => {
   const [debugEnabled, setDebugEnabled] = useState(false);
   const [notifications, setNotifications] = useState(0);
-  const [testItems, setTestItems] = useState<
-    Array<{ id: string; name: string; icon: string; priority: number }>
-  >([]);
+  const [testItems, setTestItems] = useState<Array<{ id: string; icon: string; priority: number }>>(
+    []
+  );
 
   const addNotification = () => {
     setNotifications((prev) => prev + 1);
@@ -229,7 +229,6 @@ const ExtensibleDemoApp = (props: DeveloperToolbarProps) => {
     ];
     const newItems = Array.from({ length: 30 }, (_, index) => ({
       id: `test-item-${index + 1}`,
-      name: `Test Item ${index + 1}`,
       icon: icons[index % icons.length],
       priority: 100 + index,
     }));
@@ -294,7 +293,7 @@ const ExtensibleDemoApp = (props: DeveloperToolbarProps) => {
       </EuiPanel>
 
       {/* Items that appear in the toolbar - render anywhere in the component tree! */}
-      <DeveloperToolbarItem priority={10} name="Debug current state">
+      <DeveloperToolbarItem priority={10} id="Debug current state">
         <EuiButtonIcon
           iconType="inspect"
           size="xs"
@@ -304,7 +303,7 @@ const ExtensibleDemoApp = (props: DeveloperToolbarProps) => {
         />
       </DeveloperToolbarItem>
 
-      <DeveloperToolbarItem priority={5} name="Refresh data">
+      <DeveloperToolbarItem priority={5} id="Refresh data">
         <EuiButtonIcon
           iconType="refresh"
           size="xs"
@@ -316,7 +315,7 @@ const ExtensibleDemoApp = (props: DeveloperToolbarProps) => {
 
       {/* Conditional items - only show when debug mode is enabled */}
       {debugEnabled && (
-        <DeveloperToolbarItem priority={8} name="Advanced debug options">
+        <DeveloperToolbarItem priority={8} id="Advanced debug options">
           <EuiButtonIcon
             iconType="bug"
             size="xs"
@@ -329,7 +328,7 @@ const ExtensibleDemoApp = (props: DeveloperToolbarProps) => {
 
       {/* Dynamic items - show notification count when there are notifications */}
       {notifications > 0 && (
-        <DeveloperToolbarItem priority={3} name={`${notifications} notifications`}>
+        <DeveloperToolbarItem priority={3} id={`${notifications} notifications`}>
           <EuiButtonIcon
             iconType="bell"
             size="xs"
@@ -342,16 +341,16 @@ const ExtensibleDemoApp = (props: DeveloperToolbarProps) => {
 
       {/* Render test items */}
       {testItems.map((item) => (
-        <DeveloperToolbarItem key={item.id} priority={item.priority} name={item.name}>
+        <DeveloperToolbarItem key={item.id} priority={item.priority} id={item.id}>
           <EuiButtonIcon
             iconType={item.icon}
             size="xs"
             color="primary"
             onClick={() => {
               // eslint-disable-next-line no-console
-              console.log(`Clicked ${item.name}`);
+              console.log(`Clicked ${item.id}`);
             }}
-            aria-label={`Test item: ${item.name}`}
+            aria-label={`Test item: ${item.id}`}
           />
         </DeveloperToolbarItem>
       ))}

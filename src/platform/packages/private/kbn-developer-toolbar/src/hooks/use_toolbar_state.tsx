@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useState, useCallback, useEffect } from 'react';
-import type { DeveloperToolbarItem, ToolbarSettings } from '../state/developer_toolbar_state';
+import { useCallback, useEffect, useState } from 'react';
+import type { DeveloperToolbarItem, ItemId } from '../state/developer_toolbar_state';
 import { ToolbarStateManager } from '../state/developer_toolbar_state';
 
 /**
@@ -39,12 +39,9 @@ const getGlobalStateManager = (): ToolbarStateManager => {
 export interface DeveloperToolbarState {
   items: DeveloperToolbarItem[];
   enabledItems: DeveloperToolbarItem[];
-  settings: ToolbarSettings;
   registerItem: (item: DeveloperToolbarItem) => () => void;
-  toggleSetting: (key: keyof ToolbarSettings) => void;
-  toggleItemEnabled: (itemId: string) => void;
-  updateCustomEnvironmentLabel: (label: string) => void;
-  updateCustomBackgroundColor: (color: string | undefined) => void;
+  toggleItemEnabled: (itemId: ItemId) => void;
+  isEnabled: (itemId: ItemId) => boolean;
 }
 
 /**
@@ -53,15 +50,15 @@ export interface DeveloperToolbarState {
 export const useToolbarState = (): DeveloperToolbarState => {
   const developerToolbarStateManager = getGlobalStateManager();
   const [state, setState] = useState(() => ({
+    enabledItems: developerToolbarStateManager.getEnabledItems(),
     items: developerToolbarStateManager.getItems(),
-    settings: developerToolbarStateManager.getSettings(),
   }));
 
   useEffect(() => {
     return developerToolbarStateManager.subscribe(() => {
       setState({
+        enabledItems: developerToolbarStateManager.getEnabledItems(),
         items: developerToolbarStateManager.getItems(),
-        settings: developerToolbarStateManager.getSettings(),
       });
     });
   }, [developerToolbarStateManager]);
@@ -73,43 +70,26 @@ export const useToolbarState = (): DeveloperToolbarState => {
     [developerToolbarStateManager]
   );
 
-  const toggleSetting = useCallback(
-    (key: keyof ToolbarSettings) => {
-      developerToolbarStateManager.toggleSetting(key);
-    },
-    [developerToolbarStateManager]
-  );
-
   const toggleItemEnabled = useCallback(
-    (itemId: string) => {
+    (itemId: ItemId) => {
       developerToolbarStateManager.toggleItemEnabled(itemId);
     },
     [developerToolbarStateManager]
   );
 
-  const updateCustomEnvironmentLabel = useCallback(
-    (label: string) => {
-      developerToolbarStateManager.updateCustomEnvironmentLabel(label);
-    },
-    [developerToolbarStateManager]
-  );
-
-  const updateCustomBackgroundColor = useCallback(
-    (color: string | undefined) => {
-      developerToolbarStateManager.updateCustomBackgroundColor(color);
+  const isEnabled = useCallback(
+    (itemId: ItemId) => {
+      return developerToolbarStateManager.isEnabled(itemId);
     },
     [developerToolbarStateManager]
   );
 
   const result: DeveloperToolbarState = {
+    enabledItems: state.enabledItems,
     items: state.items,
-    enabledItems: developerToolbarStateManager.getEnabledItems(),
-    settings: state.settings,
     registerItem,
-    toggleSetting,
     toggleItemEnabled,
-    updateCustomEnvironmentLabel,
-    updateCustomBackgroundColor,
+    isEnabled,
   };
 
   return result;

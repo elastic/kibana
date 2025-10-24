@@ -13,29 +13,20 @@ const SETTINGS_STORAGE_KEY = 'kbn_developer_toolbar_settings';
 
 export interface DeveloperToolbarItem {
   id: string;
-  name?: string;
   children: ReactNode;
-  priority: number;
+  priority?: number;
 }
 
+export type KnownItemIds = 'environmentInfo' | 'frameJank' | 'memoryMonitor' | 'errorsMonitor';
+
+export type ItemId = KnownItemIds | string;
+
 export interface ToolbarSettings {
-  environmentEnabled: boolean;
-  frameJankEnabled: boolean;
-  memoryUsageEnabled: boolean;
-  consoleErrorsEnabled: boolean;
-  disabledItemIds: string[];
-  customEnvironmentLabel: string;
-  customBackgroundColor: string;
+  disableItemsIds: ItemId[];
 }
 
 const DEFAULT_SETTINGS: ToolbarSettings = {
-  environmentEnabled: true,
-  frameJankEnabled: true,
-  memoryUsageEnabled: true,
-  consoleErrorsEnabled: true,
-  disabledItemIds: [],
-  customEnvironmentLabel: '',
-  customBackgroundColor: '',
+  disableItemsIds: [],
 };
 
 export class ToolbarStateManager {
@@ -74,7 +65,7 @@ export class ToolbarStateManager {
       return () => {}; // Return no-op if already exists
     }
 
-    this.items = [...this.items, item].sort((a, b) => b.priority - a.priority);
+    this.items = [...this.items, item].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
     this.notifySubscribers();
 
     return () => {
@@ -83,12 +74,16 @@ export class ToolbarStateManager {
     };
   }
 
+  isEnabled(itemId: ItemId): boolean {
+    return !this.settings.disableItemsIds.includes(itemId);
+  }
+
   getItems(): DeveloperToolbarItem[] {
     return this.items;
   }
 
   getEnabledItems(): DeveloperToolbarItem[] {
-    return this.items.filter((item) => !this.settings.disabledItemIds.includes(item.id));
+    return this.items.filter((item) => this.isEnabled(item.id));
   }
 
   getSettings(): ToolbarSettings {
@@ -101,33 +96,13 @@ export class ToolbarStateManager {
     this.notifySubscribers();
   }
 
-  toggleSetting(key: keyof ToolbarSettings): void {
-    if (
-      key === 'disabledItemIds' ||
-      key === 'customEnvironmentLabel' ||
-      key === 'customBackgroundColor'
-    )
-      return; // Prevent direct manipulation
-    const currentValue = this.settings[key];
-    if (typeof currentValue === 'boolean') {
-      this.updateSettings({ [key]: !currentValue });
-    }
-  }
+  toggleItemEnabled(itemId: ItemId): void {
+    const isCurrentlyEnabled = this.isEnabled(itemId);
+    const newDisabledIds = isCurrentlyEnabled
+      ? [...this.settings.disableItemsIds, itemId]
+      : this.settings.disableItemsIds.filter((id) => id !== itemId);
 
-  updateCustomEnvironmentLabel(label: string): void {
-    this.updateSettings({ customEnvironmentLabel: label });
-  }
-
-  updateCustomBackgroundColor(color: string | undefined): void {
-    this.updateSettings({ customBackgroundColor: color });
-  }
-
-  toggleItemEnabled(itemId: string): void {
-    const isCurrentlyDisabled = this.settings.disabledItemIds.includes(itemId);
-    const newDisabledIds = isCurrentlyDisabled
-      ? this.settings.disabledItemIds.filter((id) => id !== itemId)
-      : [...this.settings.disabledItemIds, itemId];
-    this.updateSettings({ disabledItemIds: newDisabledIds });
+    this.updateSettings({ disableItemsIds: newDisabledIds });
   }
 
   subscribe(callback: () => void): () => void {
