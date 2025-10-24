@@ -192,10 +192,22 @@ export function getClockSkew(
     return 0;
   }
   switch (item.docType) {
-    // don't calculate skew for spans and errors. Just use parent's skew
+    // don't calculate skew for errors. Just use parent's skew
     case 'error':
-    case 'span':
       return parentItem.skew;
+    case 'span': {
+      // For spans crossing service boundaries, calculate clock skew
+      const isDifferentService = item.doc.service.name !== parentItem.doc.service.name;
+      if (isDifferentService) {
+        const parentStart = parentItem.doc.timestamp.us + parentItem.skew;
+        const offsetStart = parentStart - item.doc.timestamp.us;
+
+        if (offsetStart > 0) {
+          return offsetStart;
+        }
+      }
+      return parentItem.skew;
+    }
     // transaction is the initial entry in a service. Calculate skew for this, and it will be propagated to all child spans
     case 'transaction': {
       const parentStart = parentItem.doc.timestamp.us + parentItem.skew;

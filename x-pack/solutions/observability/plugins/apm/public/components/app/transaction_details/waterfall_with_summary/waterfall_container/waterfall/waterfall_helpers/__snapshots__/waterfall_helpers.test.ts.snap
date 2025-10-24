@@ -4,6 +4,9 @@ exports[`waterfall_helpers getWaterfallItems should handle cyclic references 1`]
 Array [
   Object {
     "doc": Object {
+      "service": Object {
+        "name": "opbeans-java",
+      },
       "timestamp": Object {
         "us": 10,
       },
@@ -22,6 +25,9 @@ Array [
       "parent": Object {
         "id": "a",
       },
+      "service": Object {
+        "name": "opbeans-java",
+      },
       "span": Object {
         "id": "b",
       },
@@ -34,6 +40,9 @@ Array [
     "offset": 10,
     "parent": Object {
       "doc": Object {
+        "service": Object {
+          "name": "opbeans-java",
+        },
         "timestamp": Object {
           "us": 10,
         },

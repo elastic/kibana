@@ -590,6 +590,7 @@ describe('waterfall_helpers', () => {
           id: 'a',
           doc: {
             transaction: { id: 'a' },
+            service: { name: 'opbeans-java' },
             timestamp: { us: 10 },
           } as unknown as WaterfallTransaction,
         } as IWaterfallSpanOrTransaction,
@@ -602,6 +603,7 @@ describe('waterfall_helpers', () => {
               id: 'b',
             },
             parent: { id: 'a' },
+            service: { name: 'opbeans-java' },
             timestamp: { us: 20 },
           } as unknown as WaterfallSpan,
         } as IWaterfallSpanOrTransaction,
@@ -676,21 +678,77 @@ describe('waterfall_helpers', () => {
       expect(getClockSkew(child, parent)).toBe(0);
     });
 
-    it('should return parent skew for spans', () => {
+    it('should return parent skew for spans in same service', () => {
       const child = {
         docType: 'span',
+        doc: {
+          timestamp: { us: 150 },
+          service: { name: 'same-service' },
+        },
+        duration: 50,
       } as IWaterfallItem;
 
       const parent = {
         docType: 'span',
         doc: {
           timestamp: { us: 100 },
+          service: { name: 'same-service' },
         },
         duration: 100,
         skew: 5,
       } as IWaterfallSpanOrTransaction;
 
       expect(getClockSkew(child, parent)).toBe(5);
+    });
+
+    it('should calculate clock skew for spans crossing service boundaries', () => {
+      const child = {
+        docType: 'span',
+        doc: {
+          service: { name: 'backend-service' },
+          timestamp: { us: 50 },
+        },
+        duration: 100,
+      } as IWaterfallSpan;
+
+      const parent = {
+        docType: 'transaction',
+        doc: {
+          timestamp: { us: 200 },
+          service: { name: 'rum-service' },
+        },
+        duration: 500,
+        skew: 0,
+      } as IWaterfallTransaction;
+
+      // Child starts 150us before parent, should return 150 as skew
+      expect(getClockSkew(child, parent)).toBe(150);
+    });
+
+    it('should apply latency-adjusted skew for cross-service spans starting after parent', () => {
+      const child = {
+        docType: 'span',
+        doc: {
+          service: { name: 'backend-service' },
+          timestamp: { us: 250 },
+        },
+        duration: 50,
+      } as IWaterfallSpan;
+
+      const parent = {
+        docType: 'transaction',
+        doc: {
+          timestamp: { us: 200 },
+          service: { name: 'rum-service' },
+        },
+        duration: 500,
+        skew: 10,
+      } as IWaterfallTransaction;
+
+      // parentStart = 200 + 10 = 210
+      // offsetStart = 210 - 250 = -40 (child starts after parent)
+      // Since offsetStart is negative but not significantly, should return parent.skew
+      expect(getClockSkew(child, parent)).toBe(10);
     });
 
     it('should return parent skew for errors', () => {
