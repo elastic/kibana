@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './data_view';
-export * from './es_hits';
-export * from './logs_context_service';
-export * from './additional_field_groups';
-export * from './data_table_record';
-export * from './metrics_context_service';
-export * from './apm_context_service';
+import { createErrorsContextServiceMock } from './apm_errors_context_service';
+import { createTracesContextServiceMock } from './traces_context_service';
+
+export const createApmContextServiceMock = () => ({
+  tracesService: createTracesContextServiceMock(),
+  errorsService: createErrorsContextServiceMock(),
+});
