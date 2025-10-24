@@ -9,8 +9,8 @@ import axios from 'axios';
 import { format } from 'url';
 import { pickBy } from 'lodash';
 import type { KibanaRequest } from '@kbn/core/server';
-import type { FunctionRegistrationParameters } from '.';
 import { addSpaceIdToPath, getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
+import type { FunctionRegistrationParameters } from '.';
 import { KIBANA_FUNCTION_NAME } from '..';
 
 export function registerKibanaFunction({
@@ -55,10 +55,13 @@ export function registerKibanaFunction({
       const core = await resources.plugins.core.start();
 
       function getParsedBaseUrl() {
-        const { protocol, host } = requestUrl;
         const { publicBaseUrl } = core.http.basePath;
-        const baseUrl = publicBaseUrl || `${protocol}//${host}`;
-        const parsedBaseUrl = new URL(baseUrl);
+        if (!publicBaseUrl) {
+          const errorMessage = `Cannot invoke Kibana tool: "server.publicBaseUrl" must be configured in kibana.yml`;
+          logger.error(errorMessage);
+          throw new Error(errorMessage);
+        }
+        const parsedBaseUrl = new URL(publicBaseUrl);
         return parsedBaseUrl;
       }
 
