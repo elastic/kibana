@@ -55,6 +55,35 @@ export interface TestGroupRunOrderResponse {
   }>;
 }
 
+export type PickTestGroupRunOrderSource =
+  | {
+      branch: string;
+      jobName: string;
+    }
+  | {
+      prId: string;
+      jobName: string;
+    }
+  | {
+      commit: string;
+      jobName: string;
+    };
+
+export interface PickTestGroupRunOrderGroup {
+  type: string;
+  queue?: string;
+  defaultMin?: number;
+  maxMin: number;
+  minimumIsolationMin?: number;
+  overheadMin?: number;
+  names: string[];
+}
+
+export interface PickTestGroupRunOrderRequest {
+  sources: PickTestGroupRunOrderSource[];
+  groups: PickTestGroupRunOrderGroup[];
+}
+
 interface RequestOptions {
   path: string;
   method?: Method;
@@ -149,31 +178,7 @@ export class CiStatsClient {
     return resp.data;
   };
 
-  pickTestGroupRunOrder = async (body: {
-    sources: Array<
-      | {
-          branch: string;
-          jobName: string;
-        }
-      | {
-          prId: string;
-          jobName: string;
-        }
-      | {
-          commit: string;
-          jobName: string;
-        }
-    >;
-    groups: Array<{
-      type: string;
-      queue?: string;
-      defaultMin?: number;
-      maxMin: number;
-      minimumIsolationMin?: number;
-      overheadMin?: number;
-      names: string[];
-    }>;
-  }) => {
+  pickTestGroupRunOrder = async (body: PickTestGroupRunOrderRequest) => {
     console.log('requesting test group run order from ci-stats:');
     console.log(JSON.stringify(body, null, 2));
 

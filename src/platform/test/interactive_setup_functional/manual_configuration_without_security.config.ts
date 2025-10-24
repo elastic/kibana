@@ -11,6 +11,7 @@ import fs from 'fs/promises';
 import { join, resolve } from 'path';
 
 import type { FtrConfigProviderContext } from '@kbn/test';
+import { SERVICE_NAMESPACE } from '@kbn/test-services';
 import { getDataPath } from '@kbn/utils';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -21,7 +22,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     '../interactive_setup_api_integration/plugins/test_endpoints'
   );
 
-  const tempKibanaYamlFile = join(getDataPath(), `interactive_setup_kibana_${Date.now()}.yml`);
+  const tempKibanaYamlFile = join(
+    getDataPath(),
+    SERVICE_NAMESPACE,
+    `interactive_setup_kibana_${Date.now()}.yml`
+  );
   await fs.writeFile(tempKibanaYamlFile, '');
 
   return {

@@ -7,7 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { runTestsCli } from './cli';
-export { runTests } from './run_tests';
-export { runTestsCliParallel } from './parallel/cli_parallel';
-export { runTestsScheduleCli } from './parallel/schedule/schedule_configs_cli';
+module.exports = {};

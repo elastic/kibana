@@ -950,6 +950,7 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
   );
 
   const names = await getEsContainers(false);
+
   // The serverless cluster has to be started detached, so we attach a logger afterwards for output
   Promise.all(
     names.map((name) =>

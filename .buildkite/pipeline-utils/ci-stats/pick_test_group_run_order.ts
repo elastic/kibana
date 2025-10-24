@@ -11,12 +11,17 @@ import * as Fs from 'fs';
 
 import * as globby from 'globby';
 import minimatch from 'minimatch';
+import execa from 'execa';
 
 import { load as loadYaml } from 'js-yaml';
 
 import type { BuildkiteStep } from '../buildkite';
 import { BuildkiteClient } from '../buildkite';
-import type { TestGroupRunOrderResponse } from './client';
+import type {
+  TestGroupRunOrderResponse,
+  PickTestGroupRunOrderRequest,
+  PickTestGroupRunOrderGroup,
+} from './client';
 import { CiStatsClient } from './client';
 
 import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
@@ -26,6 +31,199 @@ import { collectEnvFromLabels, expandAgentQueue } from '#pipeline-utils';
 const ALL_FTR_MANIFEST_REL_PATHS = serverless.concat(stateful);
 
 type RunGroup = TestGroupRunOrderResponse['types'][0];
+
+interface ScheduleMachineOptions {
+  name: string;
+  cpus: number;
+  memoryMb: number;
+}
+
+interface ScheduleConfigInput {
+  path: string;
+  testDurationMins: number;
+}
+
+interface ScheduleConfigOutput extends ScheduleConfigInput {
+  tooLong: boolean;
+}
+
+interface ScheduleGroup {
+  configs: ScheduleConfigOutput[];
+}
+
+interface ScheduleResponse {
+  groups: ScheduleGroup[];
+}
+
+const MEMORY_PER_CPU_MB_BY_PROFILE: Record<string, number> = {
+  standard: 4 * 1024,
+  highmem: 8 * 1024,
+  highcpu: 1 * 1024,
+};
+
+const CONFIG_DURATION_REQUEST_CONCURRENCY = 10;
+
+function createMachineDefinitions(
+  queueName: string,
+  machineCount: number
+): ScheduleMachineOptions[] {
+  const agentOptions = expandAgentQueue(queueName);
+  const machineType = agentOptions.machineType;
+
+  if (!machineType) {
+    throw new Error(`Unable to determine machine type for queue "${queueName}"`);
+  }
+
+  const machineTokens = machineType.split('-');
+  const cpuToken = machineTokens.at(-1);
+
+  if (!cpuToken) {
+    throw new Error(`Unable to parse CPU count from machine type "${machineType}"`);
+  }
+
+  const cpuCount = Number(cpuToken);
+
+  if (!Number.isFinite(cpuCount) || cpuCount <= 0) {
+    throw new Error(`Invalid CPU count parsed from machine type "${machineType}"`);
+  }
+
+  const profileToken = machineTokens.length >= 2 ? machineTokens.at(-2) ?? 'standard' : 'standard';
+  const memoryPerCpu =
+    MEMORY_PER_CPU_MB_BY_PROFILE[profileToken ?? 'standard'] ??
+    MEMORY_PER_CPU_MB_BY_PROFILE.standard;
+
+  const machineDefinition: ScheduleMachineOptions = {
+    name: machineType,
+    cpus: cpuCount,
+    memoryMb: cpuCount * memoryPerCpu,
+  };
+
+  return Array.from({ length: machineCount }, (_, idx) => ({
+    ...machineDefinition,
+    name: `${machineType}-${idx + 1}`,
+  }));
+}
+
+async function mapWithConcurrency<T, R>(
+  items: readonly T[],
+  concurrency: number,
+  task: (item: T) => Promise<R>
+): Promise<R[]> {
+  if (items.length === 0) {
+    return [];
+  }
+
+  const results: R[] = new Array(items.length);
+  let currentIndex = 0;
+
+  const workerCount = Math.max(1, Math.min(concurrency, items.length));
+  const workers = Array.from({ length: workerCount }, async () => {
+    while (true) {
+      const index = currentIndex++;
+      if (index >= items.length) {
+        break;
+      }
+
+      results[index] = await task(items[index]);
+    }
+  });
+
+  await Promise.all(workers);
+
+  return results;
+}
+
+async function buildScheduleInputs(
+  runGroup: RunGroup,
+  fallbackDurationMinutes: number,
+  options: {
+    ciStats: CiStatsClient;
+    sources: PickTestGroupRunOrderRequest['sources'];
+    groupTemplate: Omit<PickTestGroupRunOrderGroup, 'names'>;
+    durationCache: Map<string, number>;
+  }
+): Promise<ScheduleConfigInput[]> {
+  const sanitizedFallback = Math.max(fallbackDurationMinutes, 1);
+  const configNames = new Set<string>();
+
+  for (const group of runGroup.groups) {
+    for (const name of group.names) {
+      configNames.add(name);
+    }
+  }
+
+  const configsToFetch = Array.from(configNames).filter((name) => !options.durationCache.has(name));
+
+  if (configsToFetch.length > 0) {
+    const fetchResults = await mapWithConcurrency(
+      configsToFetch,
+      CONFIG_DURATION_REQUEST_CONCURRENCY,
+      async (configName) => {
+        try {
+          const { types } = await options.ciStats.pickTestGroupRunOrder({
+            sources: options.sources,
+            groups: [
+              {
+                ...options.groupTemplate,
+                names: [configName],
+              },
+            ],
+          });
+
+          const targetType = types.find(
+            (typeResult) => typeResult.type === options.groupTemplate.type
+          );
+          const configGroup = targetType?.groups?.[0];
+          const durationMin = configGroup?.durationMin;
+
+          const sanitizedDuration =
+            typeof durationMin === 'number' && durationMin > 0 ? durationMin : sanitizedFallback;
+
+          return { configName, duration: sanitizedDuration };
+        } catch (error) {
+          const err = error instanceof Error ? error : new Error(String(error));
+          console.warn(
+            `Unable to retrieve ci-stats duration for config "${configName}": ${err.message}`
+          );
+          return { configName, duration: sanitizedFallback };
+        }
+      }
+    );
+
+    for (const { configName, duration } of fetchResults) {
+      options.durationCache.set(configName, duration);
+    }
+  }
+
+  return Array.from(configNames).map((name) => ({
+    path: name,
+    testDurationMins: options.durationCache.get(name) ?? sanitizedFallback,
+  }));
+}
+
+async function runScheduleScript(options: {
+  configs: ScheduleConfigInput[];
+  maxDurationMins: number;
+  machines: ScheduleMachineOptions[];
+}): Promise<ScheduleResponse> {
+  const payload = JSON.stringify(options);
+  const { stdout } = await execa(
+    'node',
+    ['scripts/functional_test_schedule.js', `--options=${payload}`],
+    {
+      cwd: process.cwd(),
+      stdio: 'pipe',
+    }
+  );
+
+  const trimmedOutput = stdout.trim();
+
+  if (!trimmedOutput) {
+    throw new Error('Scheduling script produced no output');
+  }
+
+  return JSON.parse(trimmedOutput) as ScheduleResponse;
+}
 
 const getRequiredEnv = (name: string) => {
   const value = process.env[name];
@@ -228,10 +426,12 @@ export async function pickTestGroupRunOrder() {
 
   const FUNCTIONAL_MAX_MINUTES = process.env.FUNCTIONAL_MAX_MINUTES
     ? parseFloat(process.env.FUNCTIONAL_MAX_MINUTES)
-    : 37 * 2;
+    : 25;
   if (Number.isNaN(FUNCTIONAL_MAX_MINUTES)) {
     throw new Error(`invalid FUNCTIONAL_MAX_MINUTES: ${process.env.FUNCTIONAL_MAX_MINUTES}`);
   }
+
+  const FUNCTIONAL_PARALLELISM = 2;
 
   /**
    * This env variable corresponds to the env stanza within
@@ -253,6 +453,7 @@ export async function pickTestGroupRunOrder() {
         .map((t) => t.trim())
         .filter(Boolean)
     : undefined;
+
   if (LIMIT_SOLUTIONS) {
     const validSolutions = ['observability', 'search', 'security', 'workplace_ai'];
     const invalidSolutions = LIMIT_SOLUTIONS.filter((s) => !validSolutions.includes(s));
@@ -268,6 +469,7 @@ export async function pickTestGroupRunOrder() {
   const FUNCTIONAL_MINIMUM_ISOLATION_MIN = process.env.FUNCTIONAL_MINIMUM_ISOLATION_MIN
     ? parseFloat(process.env.FUNCTIONAL_MINIMUM_ISOLATION_MIN)
     : undefined;
+
   if (
     FUNCTIONAL_MINIMUM_ISOLATION_MIN !== undefined &&
     Number.isNaN(FUNCTIONAL_MINIMUM_ISOLATION_MIN)
@@ -354,80 +556,84 @@ export async function pickTestGroupRunOrder() {
   const pipelineSlug = process.env.BUILDKITE_PIPELINE_SLUG as string;
   const prNumber = process.env.GITHUB_PR_NUMBER as string | undefined;
 
+  const pickRequestSources: PickTestGroupRunOrderRequest['sources'] = [
+    // try to get times from a recent successful job on this PR
+    ...(prNumber
+      ? [
+          {
+            prId: prNumber,
+            jobName: 'kibana-pull-request',
+          },
+        ]
+      : []),
+    // if we are running on a external job, like kibana-code-coverage-main, try finding times that are specific to that job
+    // kibana-elasticsearch-serverless-verify-and-promote is not necessarily run in commit order -
+    // using kibana-on-merge groups will provide a closer approximation, with a failure mode -
+    // of too many ftr groups instead of potential timeouts.
+    ...(!prNumber &&
+    pipelineSlug !== 'kibana-on-merge' &&
+    pipelineSlug !== 'kibana-elasticsearch-serverless-verify-and-promote'
+      ? [
+          {
+            branch: ownBranch,
+            jobName: pipelineSlug,
+          },
+          {
+            branch: trackedBranch,
+            jobName: pipelineSlug,
+          },
+        ]
+      : []),
+    // try to get times from the mergeBase commit
+    ...(process.env.GITHUB_PR_MERGE_BASE
+      ? [
+          {
+            commit: process.env.GITHUB_PR_MERGE_BASE,
+            jobName: 'kibana-on-merge',
+          },
+        ]
+      : []),
+    // fallback to the latest times from the tracked branch
+    {
+      branch: trackedBranch,
+      jobName: 'kibana-on-merge',
+    },
+    // finally fallback to the latest times from the main branch in case this branch is brand new
+    {
+      branch: 'main',
+      jobName: 'kibana-on-merge',
+    },
+  ];
+
+  const pickRequestGroups: PickTestGroupRunOrderGroup[] = [
+    {
+      type: UNIT_TYPE,
+      defaultMin: 4,
+      maxMin: JEST_MAX_MINUTES,
+      overheadMin: 0.2,
+      names: jestUnitConfigs,
+    },
+    {
+      type: INTEGRATION_TYPE,
+      defaultMin: 60,
+      maxMin: JEST_MAX_MINUTES,
+      overheadMin: 0.2,
+      names: jestIntegrationConfigs,
+    },
+    ...Array.from(ftrConfigsByQueue).map<PickTestGroupRunOrderGroup>(([queue, names]) => ({
+      type: FUNCTIONAL_TYPE,
+      defaultMin: 60,
+      queue,
+      maxMin: FUNCTIONAL_MAX_MINUTES * FUNCTIONAL_PARALLELISM,
+      minimumIsolationMin: FUNCTIONAL_MINIMUM_ISOLATION_MIN,
+      overheadMin: 1.5,
+      names,
+    })),
+  ];
+
   const { sources, types } = await ciStats.pickTestGroupRunOrder({
-    sources: [
-      // try to get times from a recent successful job on this PR
-      ...(prNumber
-        ? [
-            {
-              prId: prNumber,
-              jobName: 'kibana-pull-request',
-            },
-          ]
-        : []),
-      // if we are running on a external job, like kibana-code-coverage-main, try finding times that are specific to that job
-      // kibana-elasticsearch-serverless-verify-and-promote is not necessarily run in commit order -
-      // using kibana-on-merge groups will provide a closer approximation, with a failure mode -
-      // of too many ftr groups instead of potential timeouts.
-      ...(!prNumber &&
-      pipelineSlug !== 'kibana-on-merge' &&
-      pipelineSlug !== 'kibana-elasticsearch-serverless-verify-and-promote'
-        ? [
-            {
-              branch: ownBranch,
-              jobName: pipelineSlug,
-            },
-            {
-              branch: trackedBranch,
-              jobName: pipelineSlug,
-            },
-          ]
-        : []),
-      // try to get times from the mergeBase commit
-      ...(process.env.GITHUB_PR_MERGE_BASE
-        ? [
-            {
-              commit: process.env.GITHUB_PR_MERGE_BASE,
-              jobName: 'kibana-on-merge',
-            },
-          ]
-        : []),
-      // fallback to the latest times from the tracked branch
-      {
-        branch: trackedBranch,
-        jobName: 'kibana-on-merge',
-      },
-      // finally fallback to the latest times from the main branch in case this branch is brand new
-      {
-        branch: 'main',
-        jobName: 'kibana-on-merge',
-      },
-    ],
-    groups: [
-      {
-        type: UNIT_TYPE,
-        defaultMin: 4,
-        maxMin: JEST_MAX_MINUTES,
-        overheadMin: 0.2,
-        names: jestUnitConfigs,
-      },
-      {
-        type: INTEGRATION_TYPE,
-        defaultMin: 60,
-        maxMin: JEST_MAX_MINUTES,
-        overheadMin: 0.2,
-        names: jestIntegrationConfigs,
-      },
-      ...Array.from(ftrConfigsByQueue).map(([queue, names]) => ({
-        type: FUNCTIONAL_TYPE,
-        defaultMin: 60,
-        queue,
-        maxMin: FUNCTIONAL_MAX_MINUTES,
-        minimumIsolationMin: FUNCTIONAL_MINIMUM_ISOLATION_MIN,
-        overheadMin: 1.5,
-        names,
-      })),
-    ],
+    sources: pickRequestSources,
+    groups: pickRequestGroups,
   });
 
   console.log('test run order is determined by builds:');
@@ -453,17 +659,74 @@ export async function pickTestGroupRunOrder() {
   > = {};
 
   if (ftrConfigsByQueue.size) {
-    for (const { groups, queue } of getRunGroups(bk, types, FUNCTIONAL_TYPE)) {
-      for (const group of groups) {
-        if (!group.names.length) {
+    const functionalRunGroups = getRunGroups(bk, types, FUNCTIONAL_TYPE);
+    const ciStatsFunctionalTooLongs = new Set<string>();
+    const scheduledTooLong: Array<{ config: string; durationMin: number }> = [];
+    const configDurationCache = new Map<string, number>();
+
+    for (const runGroup of functionalRunGroups) {
+      runGroup.tooLong?.forEach(({ config }) => ciStatsFunctionalTooLongs.add(config));
+
+      const resolvedQueue = runGroup.queue ?? defaultQueue;
+
+      if (!resolvedQueue) {
+        throw new Error('Unable to resolve queue for functional test scheduling');
+      }
+
+      const machineCount = Math.max(runGroup.count, 1);
+      const groupTemplate: Omit<PickTestGroupRunOrderGroup, 'names'> = {
+        type: FUNCTIONAL_TYPE,
+        queue: resolvedQueue,
+        defaultMin: 60,
+        maxMin: FUNCTIONAL_MAX_MINUTES * FUNCTIONAL_PARALLELISM,
+        minimumIsolationMin: FUNCTIONAL_MINIMUM_ISOLATION_MIN,
+        overheadMin: 1.5,
+      };
+
+      const scheduleInputs = await buildScheduleInputs(runGroup, FUNCTIONAL_MAX_MINUTES, {
+        ciStats,
+        sources: pickRequestSources,
+        groupTemplate,
+        durationCache: configDurationCache,
+      });
+
+      if (scheduleInputs.length === 0) {
+        continue;
+      }
+
+      const machines = createMachineDefinitions(resolvedQueue, machineCount);
+
+      let scheduleResponse: ScheduleResponse;
+
+      try {
+        scheduleResponse = await runScheduleScript({
+          configs: scheduleInputs,
+          maxDurationMins: FUNCTIONAL_MAX_MINUTES,
+          machines,
+        });
+      } catch (error) {
+        const err = error instanceof Error ? error : new Error(String(error));
+        throw new Error(
+          `Failed to schedule functional configs for queue "${resolvedQueue}": ${err.message}`
+        );
+      }
+
+      for (const scheduledGroup of scheduleResponse.groups) {
+        if (!scheduledGroup.configs.length) {
           continue;
         }
 
         const key = `ftr_configs_${configCounter++}`;
-        let sortBy;
-        let title;
-        if (group.names.length === 1) {
-          title = group.names[0];
+        const configPaths = scheduledGroup.configs.map((config) => config.path);
+        const expectedDurationMin = scheduledGroup.configs.reduce((total, config) => {
+          return total + config.testDurationMins;
+        }, 0);
+
+        let title: string;
+        let sortBy: number | string;
+
+        if (configPaths.length === 1) {
+          [title] = configPaths;
           sortBy = title;
         } else {
           sortBy = ++groupCounter;
@@ -474,14 +737,48 @@ export async function pickTestGroupRunOrder() {
           title,
           key,
           sortBy,
-          queue: queue ?? defaultQueue,
+          queue: resolvedQueue,
         });
+
         ftrRunOrder[key] = {
           title,
-          expectedDurationMin: group.durationMin,
-          names: group.names,
+          expectedDurationMin,
+          names: configPaths,
         };
+
+        for (const config of scheduledGroup.configs) {
+          if (config.tooLong && !ciStatsFunctionalTooLongs.has(config.path)) {
+            scheduledTooLong.push({
+              config: config.path,
+              durationMin: config.testDurationMins,
+            });
+          }
+        }
       }
+    }
+
+    if (scheduledTooLong.length > 0) {
+      const longestDurationByConfig = new Map<string, number>();
+
+      for (const entry of scheduledTooLong) {
+        const previous = longestDurationByConfig.get(entry.config) ?? 0;
+        longestDurationByConfig.set(entry.config, Math.max(previous, entry.durationMin));
+      }
+
+      const warningLines = [
+        `The following "${FUNCTIONAL_TYPE}" configs have durations that exceed the maximum amount of time desired for a single CI job.`,
+        'If you own these configs please split them up or reduce runtime. Ask Operations if you have questions about how to proceed.',
+        '',
+        ...Array.from(longestDurationByConfig.entries()).map(
+          ([configPath, duration]) => ` - ${configPath}: ${duration.toFixed(1)} minutes`
+        ),
+      ];
+
+      bk.setAnnotation(
+        `test-group-scheduler-too-long:${FUNCTIONAL_TYPE}`,
+        'warning',
+        warningLines.join('\n')
+      );
     }
   }
 
