@@ -36,9 +36,7 @@ const streamsAppRoutes = {
     ),
     children: {
       '/': {
-        element: (
-          <RedirectTo path="/list" />
-        ),
+        element: <RedirectTo path="/list" />,
       },
       '/list': {
         element: <StreamsViews />,

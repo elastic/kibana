@@ -12,7 +12,6 @@ import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useDatasetQuality } from '../../hooks/use_dataset_quality';
 
 export function DataQualityColumn({ streamName }: { streamName: string }) {
-
   const { quality, isQualityLoading: isLoading } = useDatasetQuality({
     streamName,
     canReadFailureStore: true,

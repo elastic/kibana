@@ -305,7 +305,13 @@ export function StreamsTreeTable({
                     <StreamName
                       name={item.stream.name}
                       searchQuery={searchQuery}
-                      preview={<StreamPreview current={item} parent={getParentStream(item.stream.name)} onViewArchitecture={() => setPreviewStream(item.stream.name)} />}
+                      preview={
+                        <StreamPreview
+                          current={item}
+                          parent={getParentStream(item.stream.name)}
+                          onViewArchitecture={() => setPreviewStream(item.stream.name)}
+                        />
+                      }
                       forceHidePreview={!!previewStream}
                     />
                   </EuiFlexItem>
@@ -361,11 +367,7 @@ export function StreamsTreeTable({
             sortable: false,
             dataType: 'number',
             render: (_: unknown, item: TableRow) =>
-              item.data_stream ? (
-                <DataQualityColumn
-                  streamName={item.stream.name}
-                />
-              ) : null,
+              item.data_stream ? <DataQualityColumn streamName={item.stream.name} /> : null,
           },
           {
             field: 'retentionMs',
@@ -379,10 +381,13 @@ export function StreamsTreeTable({
             render: (_: unknown, item: TableRow) => (
               <RetentionColumn
                 lifecycle={item.effective_lifecycle!}
-                aria-label={i18n.translate('xpack.streams.streamsTreeTable.retentionCellAriaLabel', {
-                  defaultMessage: 'Retention policy for {name}',
-                  values: { name: item.stream.name },
-                })}
+                aria-label={i18n.translate(
+                  'xpack.streams.streamsTreeTable.retentionCellAriaLabel',
+                  {
+                    defaultMessage: 'Retention policy for {name}',
+                    values: { name: item.stream.name },
+                  }
+                )}
                 dataTestSubj={`retentionColumn-${item.stream.name}`}
               />
             ),
@@ -433,7 +438,9 @@ export function StreamsTreeTable({
         }}
         tableCaption={STREAMS_TABLE_CAPTION_ARIA_LABEL}
       />
-    {previewStream && <StreamPreviewFlyout stream={previewStream} onClose={() => setPreviewStream(null)} />}
+      {previewStream && (
+        <StreamPreviewFlyout stream={previewStream} onClose={() => setPreviewStream(null)} />
+      )}
     </>
   );
 }

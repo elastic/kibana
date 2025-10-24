@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiHighlight, EuiLink, EuiPopover, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHighlight,
+  EuiLink,
+  EuiPopover,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/css';
 import { useBoolean } from '@kbn/react-hooks/src/use_boolean';
 import React, { useEffect } from 'react';
@@ -27,7 +35,7 @@ export function StreamName({
   const { euiTheme } = useEuiTheme();
   const router = useStreamsAppRouter();
   const [previewActionVisible, { off: hideAction, on: showAction }] = useBoolean(false);
-  const [isPreviewOpen, {off: hidePreview, toggle: togglePreview }] = useBoolean(false);
+  const [isPreviewOpen, { off: hidePreview, toggle: togglePreview }] = useBoolean(false);
 
   useEffect(() => {
     if (forceHidePreview) {
@@ -39,19 +47,20 @@ export function StreamName({
     if (!isPreviewOpen) {
       hideAction();
     }
-  }
+  };
 
   const handleClosePreview = () => {
     hidePreview();
     hideAction();
-  }
+  };
 
   return (
-    <EuiFlexGroup gutterSize="s"
+    <EuiFlexGroup
+      gutterSize="s"
       onMouseEnter={showAction}
       onMouseLeave={handleHideAction}
       data-test-subj={dataTestSubj}
-      alignItems='center'
+      alignItems="center"
     >
       <EuiFlexItem grow={false}>
         <EuiLink
@@ -61,7 +70,7 @@ export function StreamName({
           <EuiHighlight search={searchQuery}>{name}</EuiHighlight>
         </EuiLink>
       </EuiFlexItem>
-      {previewActionVisible &&
+      {previewActionVisible && (
         <EuiFlexItem grow={false}>
           <EuiPopover
             button={
@@ -92,7 +101,7 @@ export function StreamName({
             {preview}
           </EuiPopover>
         </EuiFlexItem>
-      }
+      )}
     </EuiFlexGroup>
   );
 }

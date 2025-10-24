@@ -70,8 +70,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
             },
           } as WiredIngest,
         } as WiredStream.Definition);
-        
-        
+
         await streamsClient.forkStream('logs.android', {
           stream: { name: 'logs.android.android-systemui' },
           where: { field: 'attributes.process.name', eq: 'com.android.systemui' },
@@ -91,7 +90,6 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
           stream: { name: 'logs.android.android-phone' },
           where: { field: 'resource.attributes.host.name', eq: 'android-device-3' },
         });
-
       } catch (error) {
         logger.error(`Error occurred while forking streams: ${error.message}`);
       }

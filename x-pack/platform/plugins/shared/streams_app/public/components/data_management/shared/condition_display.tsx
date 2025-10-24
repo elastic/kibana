@@ -54,11 +54,7 @@ export const ConditionPanel = ({
     return panel;
   }
 
-  return (
-    <div className={className ? ` ${className}` : ''}>
-      {panel}
-    </div>
-  );
+  return <div className={className ? ` ${className}` : ''}>{panel}</div>;
 };
 
 export const EditableConditionPanel = ({

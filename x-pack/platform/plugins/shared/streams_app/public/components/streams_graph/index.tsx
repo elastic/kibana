@@ -7,14 +7,20 @@
 
 import React, { useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiPanel, EuiText, EuiSpacer, EuiEmptyPrompt, EuiLoadingElastic, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiText,
+  EuiSpacer,
+  EuiEmptyPrompt,
+  EuiLoadingElastic,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import { Streams } from '@kbn/streams-schema';
-import { enrichStream } from '../stream_list_view/utils';
+import type { Node, Edge } from '@xyflow/react';
 import {
   ReactFlow,
-  Node,
-  Edge,
   Controls,
   Background,
   useNodesState,
@@ -24,12 +30,14 @@ import {
   useReactFlow,
   ReactFlowProvider,
 } from '@xyflow/react';
+import { css } from '@emotion/css';
+import { enrichStream } from '../stream_list_view/utils';
 import '@xyflow/react/dist/style.css';
 import { ConditionPanel } from '../data_management/shared/condition_display';
 import { CUSTOM_EDGE_TYPE, CustomEdge } from './custom_edge';
-import { STREAM_NODE_TYPE, StreamNode, StreamNodeData } from './custom_node';
+import type { StreamNodeData } from './custom_node';
+import { STREAM_NODE_TYPE, StreamNode } from './custom_node';
 import { PartitionEdge } from './partition_edge';
-import { css } from '@emotion/css';
 import { useStreamDocCountsFetch } from '../../hooks/use_streams_doc_counts_fetch';
 import { getLayoutedElements } from './layout_helper';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
@@ -59,10 +67,16 @@ export function StreamsGraph({ streams, loading = false }: StreamsGraphProps) {
   if (loading || !streams) {
     return (
       <EuiPanel paddingSize="l">
-        <EuiFlexGroup direction='column' className={css`height: 100%;`}>
+        <EuiFlexGroup
+          direction="column"
+          className={css`
+            height: 100%;
+          `}
+        >
           <EuiText>
             {i18n.translate('xpack.streams.streamsGraph.description', {
-              defaultMessage: 'Visual representation of wired streams and their hierarchical relationships.',
+              defaultMessage:
+                'Visual representation of wired streams and their hierarchical relationships.',
             })}
           </EuiText>
           <EuiFlexItem grow={1}>
@@ -92,7 +106,8 @@ export function StreamsGraph({ streams, loading = false }: StreamsGraphProps) {
     <>
       <EuiText>
         {i18n.translate('xpack.streams.streamsGraph.description', {
-          defaultMessage: 'Visual representation of wired streams and their hierarchical relationships.',
+          defaultMessage:
+            'Visual representation of wired streams and their hierarchical relationships.',
         })}
       </EuiText>
       <div className={datePickerStyle}>
@@ -159,11 +174,13 @@ const Graph = ({ streams, loading = false }: StreamsGraphProps) => {
           source: streamName,
           target: childStreamName,
           type: CUSTOM_EDGE_TYPE,
-          label: <PartitionEdge
-            content={<ConditionPanel condition={routingCondition.where} />}
-            parentDocuments={getStreamDocCounts(`${streamName}*`)}
-            currentDocuments={getStreamDocCounts(`${childStreamName}*`)}
-          />,
+          label: (
+            <PartitionEdge
+              content={<ConditionPanel condition={routingCondition.where} />}
+              parentDocuments={getStreamDocCounts(`${streamName}*`)}
+              currentDocuments={getStreamDocCounts(`${childStreamName}*`)}
+            />
+          ),
         });
       }
     }
@@ -176,7 +193,9 @@ const Graph = ({ streams, loading = false }: StreamsGraphProps) => {
   const [edges, , onEdgesChange] = useEdgesState(initialEdges);
 
   return (
-    <div style={{ width: '100%', height: '600px', border: '1px solid #d3dae6', borderRadius: '6px' }}>
+    <div
+      style={{ width: '100%', height: '600px', border: '1px solid #d3dae6', borderRadius: '6px' }}
+    >
       <ReactFlow
         nodes={nodes}
         edges={edges}

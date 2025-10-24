@@ -6,7 +6,19 @@
  */
 
 import React from 'react';
-import { EuiPopover, EuiPopoverTitle, EuiPopoverFooter, EuiText, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import {
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiPopoverFooter,
+  EuiText,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import type { Streams } from '@kbn/streams-schema';
+import { i18n } from '@kbn/i18n';
 import { DataQualityColumn } from '../stream_list_view/data_quality_column';
 import { RetentionColumn } from '../stream_list_view/retention_column';
 import { DocumentsColumn } from '../stream_list_view/documents_column';
@@ -17,10 +29,11 @@ import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useDataStreamStats } from '../data_management/stream_detail_lifecycle/hooks/use_data_stream_stats';
 import { formatBytes } from '../data_management/stream_detail_lifecycle/helpers/format_bytes';
 import type { EnrichedStream } from '../stream_list_view/utils';
-import { css } from '@emotion/react';
-import { DATA_QUALITY_COLUMN_HEADER, RETENTION_COLUMN_HEADER, DOCUMENTS_COLUMN_HEADER } from '../stream_list_view/translations';
-import { Streams } from '@kbn/streams-schema';
-import { i18n } from '@kbn/i18n';
+import {
+  DATA_QUALITY_COLUMN_HEADER,
+  RETENTION_COLUMN_HEADER,
+  DOCUMENTS_COLUMN_HEADER,
+} from '../stream_list_view/translations';
 
 interface StreamNodePopupProps {
   isOpen: boolean;
@@ -30,7 +43,11 @@ interface StreamNodePopupProps {
 }
 
 export const StreamNodePopover = ({ isOpen, onClose, stream, button }: StreamNodePopupProps) => {
-  const { effective_lifecycle: lifecycle, data_stream: dataStream, stream: { name: streamName, description: streamDescription } } = stream;
+  const {
+    effective_lifecycle: lifecycle,
+    data_stream: dataStream,
+    stream: { name: streamName, description: streamDescription },
+  } = stream;
   const router = useStreamsAppRouter();
 
   const numDataPoints = 25;
@@ -50,15 +67,8 @@ export const StreamNodePopover = ({ isOpen, onClose, stream, button }: StreamNod
   });
 
   return (
-    <EuiPopover
-      button={button}
-      isOpen={isOpen}
-      closePopover={onClose}
-      anchorPosition="upCenter"
-    >
-      <EuiPopoverTitle>
-        {streamName}
-      </EuiPopoverTitle>
+    <EuiPopover button={button} isOpen={isOpen} closePopover={onClose} anchorPosition="upCenter">
+      <EuiPopoverTitle>{streamName}</EuiPopoverTitle>
       {streamDescription && (
         <>
           <EuiText size="s" color="subdued">
@@ -69,9 +79,8 @@ export const StreamNodePopover = ({ isOpen, onClose, stream, button }: StreamNod
       )}
 
       <EuiFlexGroup direction="column" gutterSize="m">
-
         {dataStream && (
-          <EuiFlexItem >
+          <EuiFlexItem>
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem grow={false}>
                 <EuiText size="s" color="subdued">
@@ -82,7 +91,8 @@ export const StreamNodePopover = ({ isOpen, onClose, stream, button }: StreamNod
                 <div
                   css={css`
                     width: 180px;
-                  `}>
+                  `}
+                >
                   <DocumentsColumn
                     indexPattern={streamName}
                     histogramQueryFetch={getStreamDocCounts(streamName)}
@@ -101,7 +111,9 @@ export const StreamNodePopover = ({ isOpen, onClose, stream, button }: StreamNod
               <EuiFlexItem grow={false}>
                 <EuiText size="s" color="subdued">
                   <strong>
-                    {i18n.translate('xpack.streams.streamDetailLifecycle.storageSize.title', { defaultMessage: 'Storage size' })}
+                    {i18n.translate('xpack.streams.streamDetailLifecycle.storageSize.title', {
+                      defaultMessage: 'Storage size',
+                    })}
                   </strong>
                 </EuiText>
               </EuiFlexItem>
@@ -109,8 +121,7 @@ export const StreamNodePopover = ({ isOpen, onClose, stream, button }: StreamNod
                 <EuiText size="s" color="subdued">
                   {storageError || !storageStats.ds?.stats?.sizeBytes
                     ? '-'
-                    : formatBytes(storageStats.ds.stats.sizeBytes)
-                  }
+                    : formatBytes(storageStats.ds.stats.sizeBytes)}
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -125,9 +136,7 @@ export const StreamNodePopover = ({ isOpen, onClose, stream, button }: StreamNod
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <DataQualityColumn
-                streamName={streamName}
-              />
+              <DataQualityColumn streamName={streamName} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -192,10 +201,12 @@ export const StreamNodePopover = ({ isOpen, onClose, stream, button }: StreamNod
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <DiscoverBadgeButton
-                  definition={{
-                    stream: stream.stream,
-                    data_stream_exists: !!dataStream,
-                  } as Streams.ingest.all.GetResponse}
+                  definition={
+                    {
+                      stream: stream.stream,
+                      data_stream_exists: !!dataStream,
+                    } as Streams.ingest.all.GetResponse
+                  }
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

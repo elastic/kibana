@@ -5,17 +5,27 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiSkeletonText, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSkeletonText,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
 import React, { useMemo } from 'react';
+import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { ConditionPanel } from '../data_management/shared';
-import { formatBytes, formatIngestionRate } from '../data_management/stream_detail_lifecycle/helpers/format_bytes';
+import {
+  formatBytes,
+  formatIngestionRate,
+} from '../data_management/stream_detail_lifecycle/helpers/format_bytes';
 import { useDataStreamStats } from '../data_management/stream_detail_lifecycle/hooks/use_data_stream_stats';
-import { EnrichedStream } from '../stream_list_view/utils';
-import { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
+import type { EnrichedStream } from '../stream_list_view/utils';
 
 interface StreamPreviewProps {
   current: EnrichedStream;
@@ -25,8 +35,13 @@ interface StreamPreviewProps {
 
 export const StreamPreview = ({ current, parent, onViewArchitecture }: StreamPreviewProps) => {
   const { euiTheme } = useEuiTheme();
-  const parentRoutingConditions = parent && Streams.WiredStream.Definition.is(parent.stream) ? parent.stream.ingest.wired.routing : undefined;
-  const currentRoutingCondition = parentRoutingConditions?.find(cond => cond.destination === current.stream.name && cond.status === 'enabled')?.where;
+  const parentRoutingConditions =
+    parent && Streams.WiredStream.Definition.is(parent.stream)
+      ? parent.stream.ingest.wired.routing
+      : undefined;
+  const currentRoutingCondition = parentRoutingConditions?.find(
+    (cond) => cond.destination === current.stream.name && cond.status === 'enabled'
+  )?.where;
   const isWiredStream = Streams.WiredStream.Definition.is(current.stream);
 
   const title = css`
@@ -44,41 +59,74 @@ export const StreamPreview = ({ current, parent, onViewArchitecture }: StreamPre
   `}`;
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s" className={css`min-width: 250px;`}>
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
+      className={css`
+        min-width: 250px;
+      `}
+    >
       <EuiText className={principalTitle}>
-        {i18n.translate('xpack.streamsApp.streamPreview.title', { defaultMessage: 'Stream Preview' })}
+        {i18n.translate('xpack.streamsApp.streamPreview.title', {
+          defaultMessage: 'Stream Preview',
+        })}
       </EuiText>
-      <EuiFlexGroup gutterSize="s" justifyContent='spaceBetween' className={css` > div { width: 50% }`}>
-        <Stat stream={current} className={subTitle} type='ingestionRate' />
-        <Stat stream={current} className={subTitle} type='storageSize' />
+      <EuiFlexGroup
+        gutterSize="s"
+        justifyContent="spaceBetween"
+        className={css`
+          > div {
+            width: 50%;
+          }
+        `}
+      >
+        <Stat stream={current} className={subTitle} type="ingestionRate" />
+        <Stat stream={current} className={subTitle} type="storageSize" />
       </EuiFlexGroup>
-      {
-      currentRoutingCondition &&
+      {currentRoutingCondition && (
         <>
-          <ConditionPanel condition={currentRoutingCondition} className={css`margin: ${euiTheme.size.s} 0; div * { font-size: ${euiTheme.font.scale.xxs}rem } `}/>
+          <ConditionPanel
+            condition={currentRoutingCondition}
+            className={css`
+              margin: ${euiTheme.size.s} 0;
+              div * {
+                font-size: ${euiTheme.font.scale.xxs}rem;
+              }
+            `}
+          />
         </>
-      }
-      {isWiredStream &&
-        <EuiFlexGroup gutterSize="s" justifyContent='spaceBetween'>
+      )}
+      {isWiredStream && (
+        <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
           <EuiText className={subTitle}>
-            {i18n.translate('xpack.streamsApp.streamPreview.viewArchitectureTitle', { defaultMessage: 'Architecture Viewer' })}
+            {i18n.translate('xpack.streamsApp.streamPreview.viewArchitectureTitle', {
+              defaultMessage: 'Architecture Viewer',
+            })}
           </EuiText>
           <EuiButtonIcon
             iconType="expand"
             display="base"
-            color='text'
+            color="text"
             aria-label={i18n.translate('xpack.streamsApp.streamPreview.viewArchitectureLabel', {
               defaultMessage: 'View architecture',
             })}
             onClick={onViewArchitecture}
           />
         </EuiFlexGroup>
-      }
+      )}
     </EuiFlexGroup>
   );
 };
 
-const Stat = ({stream, className, type}: {stream: EnrichedStream; className?: string; type: 'ingestionRate' | 'storageSize'}) => {
+const Stat = ({
+  stream,
+  className,
+  type,
+}: {
+  stream: EnrichedStream;
+  className?: string;
+  type: 'ingestionRate' | 'storageSize';
+}) => {
   const { euiTheme } = useEuiTheme();
   const { timeState } = useTimefilter();
   const definition = useMemo(() => {
@@ -97,34 +145,41 @@ const Stat = ({stream, className, type}: {stream: EnrichedStream; className?: st
     font-size: ${euiTheme.font.scale.xs}rem;
   `;
 
-  const label = type === 'ingestionRate'
-    ? i18n.translate('xpack.streamsApp.streamPreview.ingestionRateLabel', { defaultMessage: 'Ingestion rate' })
-    : i18n.translate('xpack.streamsApp.streamPreview.storageSizeLabel', { defaultMessage: 'Storage size' });
+  const label =
+    type === 'ingestionRate'
+      ? i18n.translate('xpack.streamsApp.streamPreview.ingestionRateLabel', {
+          defaultMessage: 'Ingestion rate',
+        })
+      : i18n.translate('xpack.streamsApp.streamPreview.storageSizeLabel', {
+          defaultMessage: 'Storage size',
+        });
 
   const value = isLoading
     ? '-'
     : type === 'ingestionRate'
-      ? stats?.ds.stats.bytesPerDay
-        ? formatIngestionRate(stats.ds.stats.bytesPerDay || 0, true)
-        : '-'
-      : stats?.ds.stats.sizeBytes
-        ? formatBytes(stats.ds.stats.sizeBytes)
-        : '-';
+    ? stats?.ds.stats.bytesPerDay
+      ? formatIngestionRate(stats.ds.stats.bytesPerDay || 0, true)
+      : '-'
+    : stats?.ds.stats.sizeBytes
+    ? formatBytes(stats.ds.stats.sizeBytes)
+    : '-';
 
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
-      <EuiText className={className}>
-        {label}
-      </EuiText>
+      <EuiText className={className}>{label}</EuiText>
       <EuiFlexItem className={stat} grow={false}>
         <EuiSkeletonText
           size="xs"
           lines={1}
           isLoading={isLoading}
-          className={css`span { inline-size: ${euiTheme.size.xxxl} }`}
-          contentAriaLabel={
-            i18n.translate('xpack.streamsApp.streamPreview.statLoadingLabel', { defaultMessage: 'Loading value' })
-          }
+          className={css`
+            span {
+              inline-size: ${euiTheme.size.xxxl};
+            }
+          `}
+          contentAriaLabel={i18n.translate('xpack.streamsApp.streamPreview.statLoadingLabel', {
+            defaultMessage: 'Loading value',
+          })}
         >
           {value}
         </EuiSkeletonText>
