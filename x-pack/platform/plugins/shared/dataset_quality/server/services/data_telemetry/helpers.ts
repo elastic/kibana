@@ -623,6 +623,10 @@ async function safeEsCall<T>(fn: () => Promise<T>): Promise<T> {
   try {
     return await fn();
   } catch (error) {
+    // Handle 404 errors (index not found)
+    if (error.meta?.statusCode === 404 || error.meta?.body?.status === 404) {
+      return {} as T;
+    }
     throw error;
   }
 }
