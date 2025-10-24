@@ -1709,9 +1709,9 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       );
     }
 
-    if (!createdBy && accessMode === 'read_only') {
+    if (!createdBy && accessMode === 'write_restricted') {
       throw SavedObjectsErrorHelpers.createBadRequestError(
-        `Unable to create "read_only" "${type}" saved object. User profile ID not found.`
+        `Unable to create "write_restricted" "${type}" saved object. User profile ID not found.`
       );
     }
 

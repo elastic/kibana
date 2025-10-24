@@ -1,9 +1,9 @@
 {
   "type": "plugin",
-  "id": "@kbn/read-only-objects-test-plugin",
+  "id": "@kbn/access-control-test-plugin",
   "owner": "@elastic/kibana-security",
   "plugin": {
-    "id": "readOnlyObjectsTestPlugin",
+    "id": "accessControlTestPlugin",
     "server": true,
     "browser": false
   }

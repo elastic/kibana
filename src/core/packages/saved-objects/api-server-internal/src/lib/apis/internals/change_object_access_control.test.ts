@@ -36,8 +36,8 @@ jest.mock('../utils', () => ({
 
 type SetupParams = Partial<Pick<ChangeAccessControlParams, 'objects'>>;
 
-const READ_ONLY_TYPE = 'read-only-type';
-const NON_READ_ONLY_TYPE = 'non-read-only-type';
+const ACCESS_CONTROL_TYPE = 'access-control-type';
+const NON_ACCESS_CONTROL_TYPE = 'non-access-control-type';
 
 const BULK_ERROR = {
   error: 'Oh no, a bulk error!',
@@ -58,14 +58,14 @@ describe('changeObjectAccessControl', () => {
     securityExtension?: ISavedObjectsSecurityExtension
   ) {
     const registry = typeRegistryMock.create();
-    registry.supportsAccessControl.mockImplementation((type) => type === READ_ONLY_TYPE);
+    registry.supportsAccessControl.mockImplementation((type) => type === ACCESS_CONTROL_TYPE);
     client = elasticsearchClientMock.createElasticsearchClient();
     const serializer = new SavedObjectsSerializer(registry);
 
     return {
       mappings: { properties: {} }, // doesn't matter, only used as an argument to deleteLegacyUrlAliases which is mocked
       registry,
-      allowedTypes: [READ_ONLY_TYPE, NON_READ_ONLY_TYPE],
+      allowedTypes: [ACCESS_CONTROL_TYPE, NON_ACCESS_CONTROL_TYPE],
       client,
       serializer,
       logger: loggerMock.create(),
@@ -90,8 +90,8 @@ describe('changeObjectAccessControl', () => {
     const result = results.map((x) =>
       x.found
         ? {
-            _id: `${x.type ?? READ_ONLY_TYPE}:${x.id ?? 'id-unknown'}`,
-            _index: `index-for-${x.type ?? READ_ONLY_TYPE}`,
+            _id: `${x.type ?? ACCESS_CONTROL_TYPE}:${x.id ?? 'id-unknown'}`,
+            _index: `index-for-${x.type ?? ACCESS_CONTROL_TYPE}`,
             _source: { namespaces: x.namespaces, accessControl: x.accessControl },
             _seq_no: VERSION_PROPS._seq_no,
             _primary_term: VERSION_PROPS._primary_term,
@@ -130,7 +130,7 @@ describe('changeObjectAccessControl', () => {
     describe('validation', () => {
       it('throws if owner is not specified', async () => {
         const params = setup({
-          objects: [{ type: READ_ONLY_TYPE, id: 'id-1' }],
+          objects: [{ type: ACCESS_CONTROL_TYPE, id: 'id-1' }],
         });
 
         await expect(() =>
@@ -149,7 +149,7 @@ describe('changeObjectAccessControl', () => {
 
       it('throws if owner has invalid user profile id', async () => {
         const params = setup({
-          objects: [{ type: READ_ONLY_TYPE, id: 'id-1' }],
+          objects: [{ type: ACCESS_CONTROL_TYPE, id: 'id-1' }],
         });
 
         await expect(() =>
@@ -166,11 +166,11 @@ describe('changeObjectAccessControl', () => {
         );
       });
 
-      it('returns error if no read-only objects are specified', async () => {
+      it('returns error if no access control objects are specified', async () => {
         const params = setup({
           objects: [
-            { type: NON_READ_ONLY_TYPE, id: 'id-1' },
-            { type: NON_READ_ONLY_TYPE, id: 'id-2' },
+            { type: NON_ACCESS_CONTROL_TYPE, id: 'id-1' },
+            { type: NON_ACCESS_CONTROL_TYPE, id: 'id-2' },
           ],
         });
 
@@ -186,7 +186,7 @@ describe('changeObjectAccessControl', () => {
         const error = result.objects[0].error;
         expect(error).toBeTruthy();
         expect(error!.message).toBe(
-          `The type ${NON_READ_ONLY_TYPE} does not support access control: Bad Request`
+          `The type ${NON_ACCESS_CONTROL_TYPE} does not support access control: Bad Request`
         );
       });
     });
@@ -194,7 +194,7 @@ describe('changeObjectAccessControl', () => {
     describe('bulk and mget behavior', () => {
       it('does not call bulk if no objects need to be updated', async () => {
         const params = setup({
-          objects: [{ type: NON_READ_ONLY_TYPE, id: 'id-1' }],
+          objects: [{ type: NON_ACCESS_CONTROL_TYPE, id: 'id-1' }],
         });
         mockMgetResults([{ found: true, namespaces: ['default'] }]);
         const result = await changeObjectAccessControl({
@@ -212,13 +212,13 @@ describe('changeObjectAccessControl', () => {
     describe('authorization of operations', () => {
       it('successfully delegates to security extension for change ownership', async () => {
         const params = setup({
-          objects: [{ type: READ_ONLY_TYPE, id: 'id-1' }],
+          objects: [{ type: ACCESS_CONTROL_TYPE, id: 'id-1' }],
         });
         mockMgetResults([
           {
             found: true,
             namespaces: ['default'],
-            type: READ_ONLY_TYPE,
+            type: ACCESS_CONTROL_TYPE,
             id: 'id-1',
             accessControl: {
               owner: 'new-owner',
@@ -239,7 +239,7 @@ describe('changeObjectAccessControl', () => {
             namespace: 'default',
             objects: [
               {
-                type: READ_ONLY_TYPE,
+                type: ACCESS_CONTROL_TYPE,
                 id: 'id-1',
                 accessControl: {
                   owner: 'new-owner',
@@ -259,7 +259,7 @@ describe('changeObjectAccessControl', () => {
     describe('validation', () => {
       it('throws if access mode is not specified', async () => {
         const params = setup({
-          objects: [{ type: READ_ONLY_TYPE, id: 'id-1' }],
+          objects: [{ type: ACCESS_CONTROL_TYPE, id: 'id-1' }],
         });
 
         await expect(() =>
@@ -276,15 +276,15 @@ describe('changeObjectAccessControl', () => {
         );
       });
 
-      it('returns error if no read-only objects are specified', async () => {
+      it('returns error if no access control objects are specified', async () => {
         const params = setup({
-          objects: [{ type: NON_READ_ONLY_TYPE, id: 'id-1' }],
+          objects: [{ type: NON_ACCESS_CONTROL_TYPE, id: 'id-1' }],
         });
 
         const result = await changeObjectAccessControl({
           ...params,
           options: {
-            accessMode: 'read_only',
+            accessMode: 'write_restricted',
           },
           actionType: 'changeAccessMode',
           currentUserProfileUid: mockUserProfileId,
@@ -293,20 +293,20 @@ describe('changeObjectAccessControl', () => {
         const error = result.objects[0].error;
         expect(error).toBeTruthy();
         expect(error!.message).toBe(
-          `The type ${NON_READ_ONLY_TYPE} does not support access control: Bad Request`
+          `The type ${NON_ACCESS_CONTROL_TYPE} does not support access control: Bad Request`
         );
       });
     });
     describe('authorization of operations', () => {
       it('successfully delegates to security extension for change access mode', async () => {
         const params = setup({
-          objects: [{ type: READ_ONLY_TYPE, id: 'id-1' }],
+          objects: [{ type: ACCESS_CONTROL_TYPE, id: 'id-1' }],
         });
         mockMgetResults([
           {
             found: true,
             namespaces: ['default'],
-            type: READ_ONLY_TYPE,
+            type: ACCESS_CONTROL_TYPE,
             id: 'id-1',
             accessControl: {
               owner: 'new-owner',
@@ -318,7 +318,7 @@ describe('changeObjectAccessControl', () => {
         await changeObjectAccessControl({
           ...params,
           securityExtension: params.securityExtension,
-          options: { accessMode: 'read_only', namespace: 'default' },
+          options: { accessMode: 'write_restricted', namespace: 'default' },
           actionType: 'changeAccessMode',
           currentUserProfileUid: mockUserProfileId,
         });
@@ -327,7 +327,7 @@ describe('changeObjectAccessControl', () => {
             namespace: 'default',
             objects: [
               {
-                type: READ_ONLY_TYPE,
+                type: ACCESS_CONTROL_TYPE,
                 id: 'id-1',
                 accessControl: {
                   owner: 'new-owner',

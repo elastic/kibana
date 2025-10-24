@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ReadOnlyObjectsPlugin } from './plugin';
+import { AccessControlTestPlugin } from './plugin';
 
-export const plugin = async () => new ReadOnlyObjectsPlugin();
-export { READ_ONLY_TYPE, NON_READ_ONLY_TYPE } from './plugin';
+export const plugin = async () => new AccessControlTestPlugin();
+export { ACCESS_CONTROL_TYPE, NON_ACCESS_CONTROL_TYPE } from './plugin';
