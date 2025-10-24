@@ -2182,6 +2182,7 @@ export default function (providerContext: FtrProviderContext) {
               agents: 0,
               failedUpgradeAgents: 1,
               version: '8.16.3',
+              failedUpgradeActionIds: ['test-action-automatic'],
             },
           ],
           totalAgents: 2,
