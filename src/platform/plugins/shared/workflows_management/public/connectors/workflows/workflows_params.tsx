@@ -23,10 +23,11 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
+import React, { useCallback, useEffect, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import type { WorkflowListDto } from '@kbn/workflows';
-import React, { useCallback, useEffect, useState } from 'react';
 import * as i18n from './translations';
 import type { WorkflowsActionParams } from './types';
 
@@ -44,7 +45,7 @@ interface WorkflowOption {
   data?: {
     secondaryContent?: string;
   };
-  [key: string]: any;
+  [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 const TagsBadge: React.FC<{ tags: string[] }> = ({ tags }) => {
@@ -144,7 +145,7 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
   );
 
   const onWorkflowChange = useCallback(
-    (newOptions: WorkflowOption[], event: any, changedOption: WorkflowOption) => {
+    (newOptions: WorkflowOption[], event: unknown, changedOption: WorkflowOption) => {
       setWorkflows(newOptions);
       setIsPopoverOpen(false);
 
@@ -339,8 +340,8 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
       ) : (
         <EuiSelectable
           aria-label="Select workflow"
-          options={workflowOptions as any}
-          onChange={onWorkflowChange as any}
+          options={workflowOptions as any} // eslint-disable-line @typescript-eslint/no-explicit-any
+          onChange={onWorkflowChange}
           singleSelection
           searchable
           searchProps={{
@@ -379,7 +380,7 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
               disableFocusTrap
               closeOnScroll
               isOpen={isPopoverOpen}
-              input={search!}
+              input={search!} // eslint-disable-line @typescript-eslint/no-non-null-assertion
               panelPaddingSize="none"
               fullWidth
             >
@@ -390,7 +391,11 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
               >
                 <EuiText size="s" textAlign="right">
                   <EuiLink onClick={handleOpenWorkflowManagementApp} external>
-                    View all workflows <EuiIcon type="popout" size="s" />
+                    <FormattedMessage
+                      id="workflows.params.viewAllWorkflowsLinkText"
+                      defaultMessage="View all workflows"
+                    />
+                    <EuiIcon type="popout" size="s" />
                   </EuiLink>
                 </EuiText>
               </EuiPopoverFooter>
