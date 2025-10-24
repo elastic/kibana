@@ -42,19 +42,17 @@ export const fetchDashboard = async (dashboardId: string): Promise<DashboardItem
  * ----------------------------------
  */
 
-interface FetchDashboardsProps {
-  size?: number;
-  search?: string;
-  parentDashboardId?: string;
-  selectedDashboardId?: string;
-}
-
 export const fetchDashboards = async ({
   search = '',
   size = 10,
   parentDashboardId,
   selectedDashboardId,
-}: FetchDashboardsProps): Promise<DashboardItem[]> => {
+}: {
+  size?: number;
+  search?: string;
+  parentDashboardId?: string;
+  selectedDashboardId?: string;
+}): Promise<DashboardItem[]> => {
   const findDashboardsService = await dashboardServices.findDashboardsService();
   const responses = await findDashboardsService.search({
     search,
