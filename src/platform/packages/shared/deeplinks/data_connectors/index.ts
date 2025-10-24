@@ -7,5 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { WORKPLACE_AI_APP_ID } from './constants';
-export type { WorkplaceAIApp, WorkplaceAILinkId, DeepLinkId } from './deep_links';
+export type { DeepLinkId } from './deep_links';
