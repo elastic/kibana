@@ -31,14 +31,15 @@ export const getDescriptionFields: GetDescriptionFieldsFn<
     const searchConfiguration = rule.params.searchConfiguration;
     const queryField = [];
 
-    if (searchConfiguration.query.query != null) {
-      if (typeof searchConfiguration.query.query === 'string') {
-        queryField.push(
-          prebuildFields[RULE_PREBUILD_DESCRIPTION_FIELDS.CUSTOM_QUERY](
-            searchConfiguration.query.query
-          )
-        );
-      }
+    if (
+      searchConfiguration.query.query != null &&
+      typeof searchConfiguration.query.query === 'string'
+    ) {
+      queryField.push(
+        prebuildFields[RULE_PREBUILD_DESCRIPTION_FIELDS.CUSTOM_QUERY](
+          searchConfiguration.query.query
+        )
+      );
     }
 
     return [
