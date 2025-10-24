@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiIconTip, EuiToolTip, RIGHT_ALIGNMENT } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiIconTip,
+  EuiToolTip,
+  RIGHT_ALIGNMENT,
+  EuiScreenReaderOnly,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from '@emotion/styled';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -141,9 +147,6 @@ export function ErrorGroupList({
             size="s"
             type="question"
             color="subdued"
-            iconProps={{
-              className: 'eui-alignTop',
-            }}
             content={i18n.translate('xpack.apm.errorsTable.groupIdColumnDescription', {
               defaultMessage:
                 'Hash of the stack trace. Groups similar errors together, even when the error message is different due to dynamic parameters.',
@@ -226,7 +229,15 @@ export function ErrorGroupList({
         ? []
         : [
             {
-              name: '',
+              name: (
+                <EuiScreenReaderOnly>
+                  <span>
+                    {i18n.translate('xpack.apm.errorsTable.unhandledLabel', {
+                      defaultMessage: 'Unhandled',
+                    })}
+                  </span>
+                </EuiScreenReaderOnly>
+              ),
               field: 'handled',
               sortable: false,
               align: RIGHT_ALIGNMENT,
@@ -318,6 +329,7 @@ export function ErrorGroupList({
 
   return (
     <ManagedTable
+      rowHeader="groupId"
       tableCaption={tableCaption}
       noItemsMessage={
         isMainStatsLoading
