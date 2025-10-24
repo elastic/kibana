@@ -12,26 +12,26 @@ import React, { Suspense } from 'react';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 
 import { BehaviorSubject } from 'rxjs';
-import type { DeveloperToolbarAction } from './toolbar';
+import type { DeveloperToolbarItemProps } from '@kbn/developer-toolbar';
 
-export type UnregisterActionFn = () => void;
-export interface DeveloperToolbarActionRegistry {
-  registerAction: (action: DeveloperToolbarAction) => UnregisterActionFn;
+export type UnregisterItemFn = () => void;
+export interface DeveloperToolbarItemRegistry {
+  registerItem: (item: DeveloperToolbarItemProps) => UnregisterItemFn;
 }
 
-export type DeveloperToolbarSetup = DeveloperToolbarActionRegistry;
-export type DeveloperToolbarStart = DeveloperToolbarActionRegistry;
+export type DeveloperToolbarSetup = DeveloperToolbarItemRegistry;
+export type DeveloperToolbarStart = DeveloperToolbarItemRegistry;
 
 export class DeveloperToolbarPlugin
   implements Plugin<DeveloperToolbarSetup, DeveloperToolbarStart>
 {
-  private actions$ = new BehaviorSubject<DeveloperToolbarAction[]>([]);
+  private items$ = new BehaviorSubject<DeveloperToolbarItemProps[]>([]);
 
   constructor(private readonly context: PluginInitializerContext) {}
 
   public setup(core: CoreSetup) {
     return {
-      registerAction: this.registerAction,
+      registerItem: this.registerItem.bind(this),
     };
   }
 
@@ -39,32 +39,32 @@ export class DeveloperToolbarPlugin
     const LazyToolbar = React.lazy(() => import('./toolbar'));
     core.chrome.setGlobalFooter(
       <Suspense>
-        <LazyToolbar actions$={this.actions$} envInfo={this.context.env} />
+        <LazyToolbar items$={this.items$} envInfo={this.context.env} />
       </Suspense>
     );
 
     return {
-      registerAction: this.registerAction,
+      registerItem: this.registerItem.bind(this),
     };
   }
 
   public stop() {}
 
-  private registerAction = (action: DeveloperToolbarAction) => {
-    const currentActions = this.actions$.value;
-    const existingIndex = currentActions.findIndex((a) => a.id === action.id);
+  private registerItem = (item: DeveloperToolbarItemProps) => {
+    const currentItems = this.items$.value;
+    const existingIndex = currentItems.findIndex((a) => a.id === item.id);
 
     if (existingIndex >= 0) {
-      const updatedActions = [...currentActions];
-      updatedActions[existingIndex] = action;
-      this.actions$.next(updatedActions);
+      const updatedItems = [...currentItems];
+      updatedItems[existingIndex] = item;
+      this.items$.next(updatedItems);
     } else {
-      this.actions$.next([...currentActions, action]);
+      this.items$.next([...currentItems, item]);
     }
 
     return () => {
-      const filteredActions = this.actions$.value.filter((a) => action.id !== a.id);
-      this.actions$.next(filteredActions);
+      const filteredItems = this.items$.value.filter((a) => item.id !== a.id);
+      this.items$.next(filteredItems);
     };
   };
 }

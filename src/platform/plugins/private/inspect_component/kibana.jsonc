@@ -12,5 +12,6 @@
     "configPath": "inspect_component",
     "requiredPlugins": [],
     "requiredBundles": [],
+    "optionalPlugins": ["developerToolbar"]
   }
 }

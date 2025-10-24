@@ -10,26 +10,19 @@
 import { useLayoutUpdate } from '@kbn/core-chrome-layout-components';
 import React, { useCallback } from 'react';
 import type { Observable } from 'rxjs';
-import type { DeveloperToolbarProps } from '@kbn/developer-toolbar';
+import type { DeveloperToolbarProps, DeveloperToolbarItemProps } from '@kbn/developer-toolbar';
 import { DeveloperToolbar, DeveloperToolbarItem } from '@kbn/developer-toolbar';
 import useObservable from 'react-use/lib/useObservable';
 
-export interface DeveloperToolbarAction {
-  id?: string;
-  name?: string;
-  priority?: number;
-  children: React.ReactNode;
-}
-
 export const Toolbar = ({
-  actions$,
+  items$,
   envInfo,
 }: {
-  actions$: Observable<DeveloperToolbarAction[]>;
+  items$: Observable<DeveloperToolbarItemProps[]>;
   envInfo: DeveloperToolbarProps['envInfo'];
 }) => {
   const updateLayout = useLayoutUpdate();
-  const registeredActions = useObservable(actions$) || [];
+  const registeredItems = useObservable(items$) || [];
 
   const onHeightChange = useCallback(
     (height: number) => {
@@ -43,14 +36,9 @@ export const Toolbar = ({
   return (
     <>
       <DeveloperToolbar envInfo={envInfo} onHeightChange={onHeightChange} />
-      {registeredActions.map((action: DeveloperToolbarAction) => (
-        <DeveloperToolbarItem
-          key={action.id}
-          id={action.id}
-          priority={action.priority}
-          name={action.name}
-        >
-          {action.children}
+      {registeredItems.map((item: DeveloperToolbarItemProps) => (
+        <DeveloperToolbarItem key={item.id} id={item.id} priority={item.priority}>
+          {item.children}
         </DeveloperToolbarItem>
       ))}
     </>
