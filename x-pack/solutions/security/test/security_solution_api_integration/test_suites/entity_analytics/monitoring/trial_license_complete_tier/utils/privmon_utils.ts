@@ -59,9 +59,7 @@ export const PrivMonUtils = (
   const config = getService('config');
   const isServerless = config.get('serverless');
   const roleScopedSupertest = isServerless ? getService('roleScopedSupertest') : null;
-
   log.info(`Monitoring: Privileged Users: Using namespace ${namespace}`);
-
   const _callInitAsAdmin = async () => {
     // we have to use cookie auth to call this API because the init route creates an API key
     // and Kibana does not allow this with API key auth (which is the default in @serverless tests)

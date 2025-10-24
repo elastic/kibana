@@ -441,7 +441,7 @@ export default ({ getService }: FtrProviderContext) => {
           indexPattern: privMonUtils.integrationsSync.OKTA_INDEX,
         });
         await enablePrivmonSetting(kibanaServer);
-        await privMonUtils.initPrivMonEngine(); // does NOT guarantee sync will run
+        await privMonUtils.initPrivMonEngine();
       });
 
       afterEach(async () => {
