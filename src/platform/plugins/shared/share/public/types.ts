@@ -397,6 +397,7 @@ export interface ShowShareMenuOptions extends Omit<ShareContext, 'onClose'> {
   allowShortUrl: boolean;
   onClose?: () => void;
   publicAPIEnabled?: boolean;
+  onSave?: () => Promise<void | object>;
 }
 
 export interface ClientConfigType {

@@ -85,23 +85,29 @@ export const externalLinkSchema = schema.object({
   ),
 });
 
+// Shared schema for links array - used by both saved objects and embeddables
+export const linksArraySchema = schema.arrayOf(
+  schema.oneOf([dashboardLinkSchema, externalLinkSchema]),
+  {
+    meta: { description: 'The list of links to display' },
+  }
+);
+
+// Shared schema for layout - used by both saved objects and embeddables
+export const layoutSchema = schema.maybe(
+  schema.oneOf([schema.literal(LINKS_HORIZONTAL_LAYOUT), schema.literal(LINKS_VERTICAL_LAYOUT)], {
+    meta: {
+      description: 'Denote whether to display the links in a horizontal or vertical layout',
+    },
+  })
+);
+
 export const linksSchema = schema.object(
   {
     title: schema.string({ meta: { description: 'A human-readable title' } }),
     description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
-    links: schema.arrayOf(schema.oneOf([dashboardLinkSchema, externalLinkSchema]), {
-      meta: { description: 'The list of links to display' },
-    }),
-    layout: schema.maybe(
-      schema.oneOf(
-        [schema.literal(LINKS_HORIZONTAL_LAYOUT), schema.literal(LINKS_VERTICAL_LAYOUT)],
-        {
-          meta: {
-            description: 'Denote whether to display the links in a horizontal or vertical layout',
-          },
-        }
-      )
-    ),
+    links: linksArraySchema,
+    layout: layoutSchema,
   },
   { unknowns: 'forbid' }
 );
