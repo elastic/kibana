@@ -84,44 +84,39 @@ export const AdditionalFormFields = React.memo<{
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(additionalFieldsFormField);
 
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      const transformedFields = additionalFields.reduce((acc, field) => {
-        const key = field.value;
-        const value = fields[key || ''];
-        if (key === undefined) {
-          return acc;
-        }
-        // Dates need to be sent to the resilient API as numbers
-        if (
-          isObject(value) &&
-          'toDate' in value &&
-          typeof value.toDate === 'function' &&
-          (fieldsMetadataRecord[key].input_type === 'datetimepicker' ||
-            fieldsMetadataRecord[key].input_type === 'datepicker')
-        ) {
-          // DatePickerFields return Moment objects but resilient expects numbers
-          acc[key] = value.toDate().getTime();
-        } else if (typeof value === 'string' && fieldsMetadataRecord[key].input_type === 'select') {
-          // SelectFields return strings but resilient expects numbers
-          acc[key] = Number(value);
-        } else if (Array.isArray(value) && fieldsMetadataRecord[key].input_type === 'multiselect') {
-          // MultiSelectFields return string[] but resilient expects number[]
-          acc[key] = value.map((v) => Number(v));
-        } else if (typeof value === 'string' && fieldsMetadataRecord[key].input_type === 'number') {
-          acc[key] = Number(value);
-        } else {
-          acc[key] = value;
-        }
+    const transformedFields = additionalFields.reduce((acc, field) => {
+      const key = field.value;
+      const value = fields[key || ''];
+      if (key === undefined) {
         return acc;
-      }, {} as Record<string, unknown>);
-      const newValue = JSON.stringify(transformedFields);
-      if (newValue !== additionalFieldsFormField.value) {
-        additionalFieldsFormField.setValue(JSON.stringify(transformedFields));
       }
-    }, 500);
-    return () => {
-      clearTimeout(timeout);
-    };
+      // Dates need to be sent to the resilient API as numbers
+      if (
+        isObject(value) &&
+        'toDate' in value &&
+        typeof value.toDate === 'function' &&
+        (fieldsMetadataRecord[key].input_type === 'datetimepicker' ||
+          fieldsMetadataRecord[key].input_type === 'datepicker')
+      ) {
+        // DatePickerFields return Moment objects but resilient expects numbers
+        acc[key] = value.toDate().getTime();
+      } else if (typeof value === 'string' && fieldsMetadataRecord[key].input_type === 'select') {
+        // SelectFields return strings but resilient expects numbers
+        acc[key] = Number(value);
+      } else if (Array.isArray(value) && fieldsMetadataRecord[key].input_type === 'multiselect') {
+        // MultiSelectFields return string[] but resilient expects number[]
+        acc[key] = value.map((v) => Number(v));
+      } else if (typeof value === 'string' && fieldsMetadataRecord[key].input_type === 'number') {
+        acc[key] = Number(value);
+      } else {
+        acc[key] = value;
+      }
+      return acc;
+    }, {} as Record<string, unknown>);
+    const newValue = JSON.stringify(transformedFields);
+    if (newValue !== additionalFieldsFormField.value) {
+      additionalFieldsFormField.setValue(JSON.stringify(transformedFields));
+    }
   }, [additionalFields, additionalFieldsFormField, fields, fieldsMetadataRecord]);
 
   return (
