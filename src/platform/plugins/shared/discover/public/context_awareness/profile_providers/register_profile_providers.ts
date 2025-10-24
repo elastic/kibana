@@ -15,7 +15,7 @@ import type {
 } from '../profiles';
 import { createClassicNavRootProfileProvider } from './common/classic_nav_root_profile';
 import { createDeprecationLogsDataSourceProfileProvider } from './common/deprecation_logs_data_source_profile';
-import { createPatternDataSourceProfileProvider } from './common/patterns';
+import { createPatternDataSourceProfileProvider } from './common/patterns_data_source_profile';
 import { registerEnabledProfileProviders } from './register_enabled_profile_providers';
 import { createExampleDataSourceProfileProvider } from './example/example_data_source_profile/profile';
 import { createExampleDocumentProfileProvider } from './example/example_document_profile';
