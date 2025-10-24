@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { ruleParamsSchemaWithRuleTypeId } from '@kbn/response-ops-rule-params';
 import { ruleSchema } from '../../rule/schemas';
 
 ruleSchema.getPropSchemas();
@@ -18,7 +19,7 @@ export const ruleTemplateSchema = schema.object({
   schedule: ruleSchema.getPropSchemas().schedule,
   flapping: ruleSchema.getPropSchemas().flapping,
   alertDelay: ruleSchema.getPropSchemas().alertDelay,
-  params: ruleSchema.getPropSchemas().params,
   artifacts: ruleSchema.getPropSchemas().artifacts,
   description: schema.maybe(schema.string()),
+  params: ruleParamsSchemaWithRuleTypeId('ruleTypeId'),
 });

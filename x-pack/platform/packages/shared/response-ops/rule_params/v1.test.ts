@@ -14,9 +14,9 @@ import {
 
 describe('rule params schemas', () => {
   describe('ruleParamsSchemaWithRuleTypeId', () => {
-    it('validates correctly for rule_type_id', () => {
+    it('validates correctly for key rule_type_id', () => {
       expect(() =>
-        ruleParamsSchemaWithRuleTypeId.validate({
+        ruleParamsSchemaWithRuleTypeId().validate({
           [RULE_TYPE_ID]: '.es-query',
           params: {
             searchType: 'searchSource',
@@ -30,9 +30,25 @@ describe('rule params schemas', () => {
       ).not.toThrow();
     });
 
-    it('throws when no rule_type_id', () => {
+    it('validates correctly for other key', () => {
       expect(() =>
-        ruleParamsSchemaWithRuleTypeId.validate({
+        ruleParamsSchemaWithRuleTypeId('alertTypeId').validate({
+          ['alertTypeId']: '.es-query',
+          params: {
+            searchType: 'searchSource',
+            threshold: [0],
+            thresholdComparator: '>',
+            size: 100,
+            timeWindowUnit: 'm',
+            timeWindowSize: 5,
+          },
+        })
+      ).not.toThrow();
+    });
+
+    it('throws when no key is provided', () => {
+      expect(() =>
+        ruleParamsSchemaWithRuleTypeId().validate({
           params: {},
         })
       ).toThrow(`[${RULE_TYPE_ID}]: expected at least one defined value`);
@@ -40,7 +56,7 @@ describe('rule params schemas', () => {
 
     it('throws when rule_type_id is unknown', () => {
       expect(() =>
-        ruleParamsSchemaWithRuleTypeId.validate({ [RULE_TYPE_ID]: 'unknown', params: {} })
+        ruleParamsSchemaWithRuleTypeId().validate({ [RULE_TYPE_ID]: 'unknown', params: {} })
       ).toThrowError('');
     });
 
@@ -56,7 +72,7 @@ describe('rule params schemas', () => {
         },
       };
 
-      expect(() => ruleParamsSchemaWithRuleTypeId.validate(payload)).toThrowError(
+      expect(() => ruleParamsSchemaWithRuleTypeId().validate(payload)).toThrowError(
         `[params.timeWindowSize]: expected value of type [number] but got [undefined]`
       );
     });
@@ -75,7 +91,7 @@ describe('rule params schemas', () => {
         },
       };
 
-      expect(() => ruleParamsSchemaWithRuleTypeId.validate(payload)).toThrowError(
+      expect(() => ruleParamsSchemaWithRuleTypeId().validate(payload)).toThrowError(
         `[params.foo]: definition for this key is missing`
       );
     });
