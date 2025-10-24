@@ -58,6 +58,10 @@ const extractVarValue = (
 // Helper function to create initial credentials based on existing vars
 const createInitialCredentials = (vars: PackagePolicyConfigRecord): CloudConnectorCredentials => {
   if (isAzureCloudConnectorVars(vars, 'azure')) {
+    const azureCredentialsId =
+      extractVarValue(vars.azure_credentials_cloud_connector_id) ||
+      extractVarValue(vars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID]);
+
     return {
       tenantId:
         extractVarValue(vars.tenant_id) ||
@@ -65,11 +69,7 @@ const createInitialCredentials = (vars: PackagePolicyConfigRecord): CloudConnect
       clientId:
         extractVarValue(vars.client_id) ||
         extractVarValue(vars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CLIENT_ID]),
-      azure_credentials_cloud_connector_id:
-        extractVarValue(vars.azure_credentials_cloud_connector_id) ||
-        extractVarValue(
-          vars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID]
-        ),
+      azure_credentials_cloud_connector_id: azureCredentialsId,
     };
   }
 
