@@ -75,6 +75,10 @@ const IndexPattern = ({ patterns }: { patterns: string[] }) => {
 };
 
 const CodeBlock = ({ children, border }: { children: React.ReactNode; border: string }) => {
+  if (!children) {
+    return <span>-</span>;
+  }
+
   return (
     <EuiCodeBlock language="text" isCopyable overflowHeight={100} paddingSize="m" css={{ border }}>
       {children}
