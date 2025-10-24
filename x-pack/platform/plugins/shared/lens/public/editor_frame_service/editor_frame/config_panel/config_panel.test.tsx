@@ -92,6 +92,11 @@ describe('ConfigPanel', () => {
           },
           activeDatasourceId: 'testDatasource',
           query: query as Query,
+          visualization: {
+            activeId: 'testVis',
+            state: 'state',
+            selectedLayerId: 'first',
+          },
         },
         storeDeps: mockStoreDeps({
           datasourceMap,
