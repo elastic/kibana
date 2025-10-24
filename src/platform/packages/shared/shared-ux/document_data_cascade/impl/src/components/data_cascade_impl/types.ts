@@ -205,9 +205,9 @@ interface DataCascadeImplBaseProps<G extends GroupNode, L extends LeafNode>
    */
   data: G[];
   /**
-   * Callback function that is called when the group by selection changes.
+   * Callback function that is called when the group by selection changes. Only required if component is not used in a controlled manner
    */
-  onCascadeGroupingChange: SelectionDropdownProps['onSelectionChange'];
+  onCascadeGroupingChange?: SelectionDropdownProps['onSelectionChange'];
   /**
    * The spacing size of the component, can be 's' (small), 'm' (medium), or 'l' (large). Default is 'm'.
    */
