@@ -7,6 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import type { Client } from '@elastic/elasticsearch';
+import YAML from 'yaml';
+import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import type {
   CoreStart,
   ElasticsearchServiceStart,
@@ -14,22 +20,20 @@ import type {
   KibanaRequest,
   Logger,
 } from '@kbn/core/server';
-import type { Client } from '@elastic/elasticsearch';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
-import YAML from 'yaml';
 import type { EsWorkflowExecution, WorkflowYaml } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
-import type { WorkflowsExecutionEngineConfig } from '../server/config';
-import { UnsecuredActionsClientMock } from './mocks/actions_plugin_mock';
 import {
   LogsRepositoryMock,
   StepExecutionRepositoryMock,
   WorkflowExecutionRepositoryMock,
 } from './mocks';
-import { runWorkflow } from '../server/execution_functions/run_workflow';
-import { TaskManagerMock } from './mocks/task_manager_mock';
+import { UnsecuredActionsClientMock } from './mocks/actions_plugin.mock';
+import { TaskManagerMock } from './mocks/task_manager.mock';
+import type { WorkflowsExecutionEngineConfig } from '../server/config';
 import { resumeWorkflow } from '../server/execution_functions';
+import { runWorkflow } from '../server/execution_functions/run_workflow';
+import type { ContextDependencies } from '../server/workflow_context_manager/types';
 
 export class WorkflowRunFixture {
   /** This prop is just to satisfy runWorkflow function params. Consider having real mock once needed. */
@@ -42,6 +46,9 @@ export class WorkflowRunFixture {
       } as IClusterClient,
     } as ElasticsearchServiceStart,
   } as CoreStart;
+  public readonly dependencies: ContextDependencies = {
+    cloudSetup: cloudMock.createSetup(),
+  };
   public readonly taskManagerMock = TaskManagerMock.create() as TaskManagerStartContract;
   public readonly loggerMock = {
     info: jest.fn(),
@@ -101,11 +108,12 @@ export class WorkflowRunFixture {
     return runWorkflow({
       workflowRunId: 'fake_workflow_execution_id',
       spaceId: 'fake_space_id',
-      workflowExecutionRepository: this.workflowExecutionRepositoryMock as unknown as any,
-      stepExecutionRepository: this.stepExecutionRepositoryMock as unknown as any,
-      logsRepository: this.logsRepositoryMock as unknown as any,
+      workflowExecutionRepository: this.workflowExecutionRepositoryMock as any,
+      stepExecutionRepository: this.stepExecutionRepositoryMock as any,
+      logsRepository: this.logsRepositoryMock as any,
       taskAbortController: this.taskAbortController,
       coreStart: this.coreStartMock,
+      dependencies: this.dependencies,
       esClient: this.esClientMock,
       actions: this.actionsClientMock,
       taskManager: this.taskManagerMock,
@@ -119,9 +127,9 @@ export class WorkflowRunFixture {
     return resumeWorkflow({
       workflowRunId: 'fake_workflow_execution_id',
       spaceId: 'fake_space_id',
-      workflowExecutionRepository: this.workflowExecutionRepositoryMock as unknown as any,
-      stepExecutionRepository: this.stepExecutionRepositoryMock as unknown as any,
-      logsRepository: this.logsRepositoryMock as unknown as any,
+      workflowExecutionRepository: this.workflowExecutionRepositoryMock as any,
+      stepExecutionRepository: this.stepExecutionRepositoryMock as any,
+      logsRepository: this.logsRepositoryMock as any,
       taskAbortController: this.taskAbortController,
       coreStart: this.coreStartMock,
       esClient: this.esClientMock,
@@ -130,6 +138,7 @@ export class WorkflowRunFixture {
       logger: this.loggerMock,
       config: this.configMock,
       fakeRequest: this.fakeKibanaRequest,
+      dependencies: this.dependencies,
     });
   }
 
@@ -167,11 +176,12 @@ export class WorkflowRunFixture {
     return runWorkflow({
       workflowRunId: 'fake_workflow_execution_id',
       spaceId: 'fake_space_id',
-      workflowExecutionRepository: this.workflowExecutionRepositoryMock as unknown as any,
-      stepExecutionRepository: this.stepExecutionRepositoryMock as unknown as any,
-      logsRepository: this.logsRepositoryMock as unknown as any,
+      workflowExecutionRepository: this.workflowExecutionRepositoryMock as any,
+      stepExecutionRepository: this.stepExecutionRepositoryMock as any,
+      logsRepository: this.logsRepositoryMock as any,
       taskAbortController: this.taskAbortController,
       coreStart: this.coreStartMock,
+      dependencies: this.dependencies,
       esClient: this.esClientMock,
       actions: this.actionsClientMock,
       taskManager: this.taskManagerMock,
