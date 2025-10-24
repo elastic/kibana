@@ -58,7 +58,6 @@ describe('MetricsGrid', () => {
       <MetricsGrid
         columns={3}
         dimensions={[]}
-        pivotOn="metric"
         discoverFetch$={new Subject()}
         fields={fields}
         requestParams={requestParams}
@@ -76,7 +75,6 @@ describe('MetricsGrid', () => {
       <MetricsGrid
         columns={3}
         dimensions={['host.name']}
-        pivotOn="metric"
         discoverFetch$={new Subject()}
         fields={fields}
         requestParams={requestParams}
@@ -91,7 +89,6 @@ describe('MetricsGrid', () => {
       <MetricsGrid
         columns={4}
         dimensions={['host.name']}
-        pivotOn="metric"
         discoverFetch$={new Subject()}
         fields={fields}
         requestParams={requestParams}
@@ -113,7 +110,6 @@ describe('MetricsGrid', () => {
         <MetricsGrid
           columns={2}
           dimensions={[]}
-          pivotOn="metric"
           discoverFetch$={new Subject()}
           fields={fields}
           requestParams={requestParams}
@@ -138,7 +134,6 @@ describe('MetricsGrid', () => {
         <MetricsGrid
           columns={2}
           dimensions={[]}
-          pivotOn="metric"
           discoverFetch$={new Subject()}
           fields={fields}
           requestParams={requestParams}
@@ -168,7 +163,6 @@ describe('MetricsGrid', () => {
         <MetricsGrid
           columns={2}
           dimensions={[]}
-          pivotOn="metric"
           discoverFetch$={new Subject()}
           fields={fields}
           requestParams={requestParams}
@@ -201,7 +195,6 @@ describe('MetricsGrid', () => {
         <MetricsGrid
           columns={2}
           dimensions={[]}
-          pivotOn="metric"
           discoverFetch$={new Subject()}
           fields={fields}
           requestParams={requestParams}
@@ -241,7 +234,6 @@ describe('MetricsGrid', () => {
         <MetricsGrid
           columns={2}
           dimensions={[]}
-          pivotOn="metric"
           discoverFetch$={new Subject()}
           fields={multipleFields}
           requestParams={requestParams}
@@ -288,7 +280,6 @@ describe('MetricsGrid', () => {
           <MetricsGrid
             columns={2}
             dimensions={[]}
-            pivotOn="metric"
             discoverFetch$={new Subject()}
             fields={fields}
             requestParams={requestParams}
@@ -309,7 +300,6 @@ describe('MetricsGrid', () => {
           <MetricsGrid
             columns={2}
             dimensions={[]}
-            pivotOn="metric"
             discoverFetch$={new Subject()}
             fields={fields}
             requestParams={requestParams}
@@ -334,7 +324,6 @@ describe('MetricsGrid', () => {
           <MetricsGrid
             columns={2}
             dimensions={[]}
-            pivotOn="metric"
             discoverFetch$={new Subject()}
             fields={fields}
             requestParams={requestParams}
@@ -358,7 +347,6 @@ describe('MetricsGrid', () => {
           <MetricsGrid
             columns={2}
             dimensions={[]}
-            pivotOn="metric"
             discoverFetch$={new Subject()}
             fields={fields}
             requestParams={requestParams}
