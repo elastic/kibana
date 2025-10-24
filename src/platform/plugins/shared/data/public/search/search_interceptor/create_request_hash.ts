@@ -13,8 +13,12 @@ import stringify from 'json-stable-stringify';
 /**
  * Generate the hash for this request. Ignores the `preference` parameter since it generally won't
  * match from one request to another identical request.
+ *
+ * (Preference is used to ensure all queries go to the same set of shards and it doesn't need to be hashed
+ * https://www.elastic.co/guide/en/elasticsearch/reference/current/search-shard-routing.html#shard-and-node-preference)
  */
 export function createRequestHash(keys: Record<string, any>) {
   const { preference, ...params } = keys;
-  return new Sha256().update(stringify(params), 'utf8').digest('hex');
+  const hash = new Sha256().update(stringify(params), 'utf8').digest('hex');
+  return hash;
 }

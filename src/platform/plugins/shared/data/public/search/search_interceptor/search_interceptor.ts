@@ -173,11 +173,8 @@ export class SearchInterceptor {
     options: IAsyncSearchOptions
   ): Observable<string | undefined> {
     const { sessionId } = options;
-    // Preference is used to ensure all queries go to the same set of shards and it doesn't need to be hashed
-    // https://www.elastic.co/guide/en/elasticsearch/reference/current/search-shard-routing.html#shard-and-node-preference
-    const { preference, ...params } = request.params || {};
     const hashOptions = {
-      ...params,
+      ...request.params,
       sessionId,
     };
 
@@ -185,7 +182,7 @@ export class SearchInterceptor {
     const sessionOptions = this.deps.session.getSearchOptions(options.sessionId);
     if (sessionOptions?.isRestore) return of(undefined); // don't use cache if restoring a session
 
-    return from(createRequestHash(hashOptions));
+    return of(createRequestHash(hashOptions));
   }
 
   /*
