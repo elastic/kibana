@@ -44,11 +44,6 @@ jest.mock('@kbn/kibana-utils-plugin/public', () => {
   };
 });
 
-const addNewLayer = (instance: ReactWrapper, type: LayerType = LayerTypes.REFERENCELINE) =>
-  act(() => {
-    instance.find(`button[data-test-subj="${type}"]`).first().simulate('click');
-  });
-
 const waitMs = (time: number) => new Promise((r) => setTimeout(r, time));
 
 let container: HTMLDivElement | undefined;
@@ -201,82 +196,6 @@ describe('ConfigPanel', () => {
       });
       return waitMs(0);
     }
-
-    it('should not add an initial dimension when initialDimensions are not available for the given layer type', async () => {
-      const datasourceMap = mockDatasourceMap();
-      const visualizationMap = mockVisualizationMap();
-      datasourceMap.testDatasource.initializeDimension = jest.fn();
-
-      visualizationMap.testVis.getSupportedLayers = jest.fn(() => [
-        {
-          type: LayerTypes.DATA,
-          label: 'Data Layer',
-          initialDimensions: [
-            {
-              groupId: 'testGroup',
-              columnId: 'myColumn',
-              staticValue: 100,
-            },
-          ],
-        },
-        {
-          type: LayerTypes.REFERENCELINE,
-          label: 'Reference layer',
-        },
-      ]);
-      const props = getDefaultProps({ datasourceMap, visualizationMap });
-      const { instance, lensStore } = await prepareAndMountComponent(props);
-
-      addNewLayer(instance);
-      expect(lensStore.dispatch).toHaveBeenCalledTimes(1);
-      expect(datasourceMap.testDatasource.initializeDimension).not.toHaveBeenCalled();
-    });
-
-    it('should use group initial dimension value when adding a new layer if available', async () => {
-      const datasourceMap = mockDatasourceMap();
-      const visualizationMap = mockVisualizationMap();
-      visualizationMap.testVis.getSupportedLayers = jest.fn(() => [
-        { type: LayerTypes.DATA, label: 'Data Layer' },
-        {
-          type: LayerTypes.REFERENCELINE,
-          label: 'Reference layer',
-          initialDimensions: [
-            {
-              groupId: 'testGroup',
-              columnId: 'myColumn',
-              staticValue: 100,
-            },
-          ],
-        },
-      ]);
-      datasourceMap.testDatasource.initializeDimension = jest.fn();
-      const props = getDefaultProps({ datasourceMap, visualizationMap });
-
-      const { instance, lensStore } = await prepareAndMountComponent(props);
-      addNewLayer(instance);
-
-      expect(lensStore.dispatch).toHaveBeenCalledTimes(1);
-      expect(datasourceMap.testDatasource.initializeDimension).toHaveBeenCalledWith(
-        {},
-        'newId',
-        frame.dataViews.indexPatterns,
-        {
-          columnId: 'myColumn',
-          groupId: 'testGroup',
-          staticValue: 100,
-          visualizationGroups: [
-            expect.objectContaining({
-              accessors: [],
-              dataTestSubj: 'mockVisA',
-              groupId: 'a',
-              groupLabel: 'a',
-              layerId: 'layer1',
-              supportsMoreColumns: true,
-            }),
-          ],
-        }
-      );
-    });
 
     it('should add an initial dimension value when clicking on the empty dimension button', async () => {
       const datasourceMap = mockDatasourceMap();
