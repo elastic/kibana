@@ -264,4 +264,88 @@ describe('WorkflowTemplatingEngine', () => {
       expect(result).toBe('This is not JSON');
     });
   });
+
+  describe('evaluateExpression', () => {
+    describe('invalid expression', () => {
+      it('should throw error for non-output template', () => {
+        const template = `{% if true %}foo{% endif %}`;
+        expect(() => templatingEngine.evaluateExpression(template, {})).toThrowError(
+          'The provided expression is invalid. Got: {% if true %}foo{% endif %}'
+        );
+      });
+
+      it('should throw error for multi-node template', () => {
+        const template = `{{ "foo" }} {{ "bar" }}`;
+        expect(() => templatingEngine.evaluateExpression(template, {})).toThrowError(
+          'The provided expression is invalid. Got: {{ "foo" }} {{ "bar" }}'
+        );
+      });
+    });
+
+    describe('expressions without curly braces', () => {
+      it('should evaluate expression without curly braces', () => {
+        const template = `"foo,bar,dak" | split: ","`;
+        const actual = templatingEngine.evaluateExpression(template, {});
+        expect(actual).toEqual(['foo', 'bar', 'dak']);
+      });
+    });
+
+    describe('string manipulation', () => {
+      it('should evaluate split filter over string', () => {
+        const template = `{{ "foo,bar,dak" | split: "," }}`;
+        const actual = templatingEngine.evaluateExpression(template, {});
+        expect(actual).toEqual(['foo', 'bar', 'dak']);
+      });
+
+      it('should evaluate split filter over variable', () => {
+        const template = `{{ my_string | split: "," }}`;
+        const actual = templatingEngine.evaluateExpression(template, {
+          my_string: 'foo,bar,dak',
+        });
+        expect(actual).toEqual(['foo', 'bar', 'dak']);
+      });
+
+      it('should evaluate split filter with variable separator', () => {
+        const template = `{{ my_string | split: separator }}`;
+        const actual = templatingEngine.evaluateExpression(template, {
+          my_string: 'foo|bar|dak',
+          separator: '|',
+        });
+        expect(actual).toEqual(['foo', 'bar', 'dak']);
+      });
+    });
+
+    describe('array manipulation', () => {
+      it('should evaluate join filter over array', () => {
+        const template = `{{ my_array | join: "," }}`;
+        const actual = templatingEngine.evaluateExpression(template, {
+          my_array: ['foo', 'bar', 'dak'],
+        });
+        expect(actual).toEqual('foo,bar,dak');
+      });
+
+      it('should evaluate join filter with variable separator', () => {
+        const template = `{{ my_array | join: separator }}`;
+        const actual = templatingEngine.evaluateExpression(template, {
+          my_array: ['foo', 'bar', 'dak'],
+          separator: '|',
+        });
+        expect(actual).toEqual('foo|bar|dak');
+      });
+    });
+
+    describe('object manipulation', () => {
+      it('should evaluate to key value array', () => {
+        const template = `{{ my_object | to_key_value: "foo" }}`;
+        const actual = templatingEngine.evaluateExpression(template, {
+          my_object: { foo: 'bar', dak: 'baz', zap: 'zop' },
+        });
+        expect(actual).toEqual([
+          { key: 'foo', value: 'bar' },
+          { key: 'dak', value: 'baz' },
+          { key: 'zap', value: 'zop' },
+        ]);
+      });
+    });
+  });
 });

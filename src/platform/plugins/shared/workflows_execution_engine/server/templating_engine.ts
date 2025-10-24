@@ -29,10 +29,41 @@ export class WorkflowTemplatingEngine {
         return value;
       }
     });
+
+    this.engine.registerFilter('to_key_value', (obj: Record<string, unknown>) => {
+      if (typeof obj !== 'object' || obj === null) {
+        return [];
+      }
+      return Object.entries(obj).map(([key, value]) => ({ key, value }));
+    });
+
+    this.engine.registerFilter('length', (input: unknown) => {
+      if (typeof input === 'string' || Array.isArray(input)) {
+        return input.length;
+      }
+      return null;
+    });
   }
 
   public render<T>(obj: T, context: Record<string, unknown>): T {
     return this.renderValueRecursively(obj, context) as T;
+  }
+
+  public evaluateExpression(template: string, context: Record<string, unknown>): unknown {
+    let resolvedExpression = template;
+    const openExpressionIndex = resolvedExpression.indexOf('{{');
+    const closeExpressionIndex = resolvedExpression.lastIndexOf('}}');
+    if (openExpressionIndex !== -1 && closeExpressionIndex !== -1) {
+      resolvedExpression = resolvedExpression
+        .substring(openExpressionIndex + 2, closeExpressionIndex)
+        .trim();
+    }
+
+    try {
+      return this.engine.evalValueSync(resolvedExpression, context);
+    } catch (err) {
+      throw new Error(`The provided expression is invalid. Got: ${template}`);
+    }
   }
 
   private renderValueRecursively(value: unknown, context: Record<string, unknown>): unknown {
