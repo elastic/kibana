@@ -12,20 +12,31 @@ import {
   getLookupIndexCreateSuggestion,
   handleFragment,
 } from '../../../definitions/utils/autocomplete/helpers';
-import type { ESQLAstAllCommands } from '../../../types';
+import type {
+  ESQLAstAllCommands,
+  ESQLAstJoinCommand,
+  ESQLCommandOption,
+  ESQLSingleAstItem,
+} from '../../../types';
 import type { ICommandCallbacks } from '../../types';
-import { type ISuggestionItem, type ICommandContext } from '../../types';
+import { type ISuggestionItem, type ICommandContext, Location } from '../../types';
 import { pipeCompleteItem, commaCompleteItem } from '../../complete_items';
 import { getFullCommandMnemonics, getPosition, suggestFields } from './utils';
 import { specialIndicesToSuggestions } from '../../../definitions/utils/sources';
 import { esqlCommandRegistry } from '../..';
+import { suggestForExpression } from '../../../definitions/utils';
+import { isFunctionExpression, isOptionNode } from '../../../ast/is';
+import { within } from '../../../ast/location';
+import { logicalOperators, operatorsDefinitions } from '../../../definitions/all_operators';
+
+const asOperator = operatorsDefinitions.find((op) => op.name === 'as')!;
 
 export async function autocomplete(
   query: string,
   command: ESQLAstAllCommands,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
-  cursorPosition?: number
+  cursorPosition: number = query.length
 ): Promise<ISuggestionItem[]> {
   if (!callbacks?.getByType || !callbacks?.getColumnsForQuery) {
     return [];
@@ -128,20 +139,59 @@ export async function autocomplete(
     }
 
     case 'condition': {
-      if (/(?<!\,)\s+$/.test(innerText)) {
-        // this trailing whitespace was not proceeded by a comma
-        return [commaCompleteItem, pipeCompleteItem];
+      const joinCommand = command as ESQLAstJoinCommand;
+      const onOption = joinCommand.args?.find((arg) => isOptionNode(arg) && arg.name === 'on') as
+        | ESQLCommandOption
+        | undefined;
+
+      let expressionRoot = onOption?.args?.[onOption.args.length - 1] as
+        | ESQLSingleAstItem
+        | undefined;
+
+      const textBeforeCursor = innerText.slice(0, cursorPosition);
+      const afterLastComma = textBeforeCursor.split(',').pop() || '';
+      const isAfterComma = textBeforeCursor.includes(',') && afterLastComma.trim() === '';
+
+      // After a comma, we start a new expression. Without reset, suggestForExpression would think
+      // we're still inside the previous expression and suggest AND/OR instead of fields/functions
+      if (isAfterComma) {
+        expressionRoot = undefined;
       }
 
-      const fields = await suggestFields(
-        innerText,
+      const suggestions = await suggestForExpression({
+        query,
+        expressionRoot,
         command,
-        callbacks?.getByType,
-        callbacks?.getColumnsForQuery,
-        context
+        cursorPosition,
+        location: Location.JOIN,
+        context,
+        callbacks,
+        options: {
+          preferredExpressionType: 'boolean',
+        },
+      });
+
+      // Filter out AS operator - it's not valid in boolean expressions
+      const filteredSuggestions = suggestions.filter(
+        ({ label }) => label !== asOperator.name.toUpperCase()
       );
 
-      return fields;
+      const insideFunction =
+        expressionRoot &&
+        isFunctionExpression(expressionRoot) &&
+        within(cursorPosition, expressionRoot);
+
+      const logicalOperatorNames = logicalOperators.map(({ name }) => name.toUpperCase());
+      const hasLogicalOperators = filteredSuggestions.some(({ label }) =>
+        logicalOperatorNames.includes(label)
+      );
+
+      if (hasLogicalOperators && !insideFunction) {
+        filteredSuggestions.push(commaCompleteItem);
+        filteredSuggestions.push(pipeCompleteItem);
+      }
+
+      return filteredSuggestions;
     }
   }
 
