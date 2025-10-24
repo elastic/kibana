@@ -13,7 +13,7 @@ import { useConversationActions } from './use_conversation_actions';
 import { appPaths } from '../utils/app_paths';
 
 // Mock dependencies
-jest.mock('./use_conversation_id', () => ({
+jest.mock('../context/conversation/use_conversation_id', () => ({
   useConversationId: jest.fn(() => 'current-conversation-id'),
 }));
 
