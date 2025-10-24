@@ -19,5 +19,6 @@
     "@kbn/content-management-utils",
     "@kbn/lens-common",
     "@kbn/chart-expressions-common",
+    "@kbn/lens-plugin",
   ]
 }
