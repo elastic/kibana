@@ -79,11 +79,7 @@ import type { InspectorOptions } from '@kbn/inspector-plugin/public';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { NavigateToLensContext } from './convert_to_lens_types';
 import type { LensAppLocator, MainHistoryLocationState } from './locator_types';
-import type {
-  LensRuntimeState,
-  LensSavedObjectAttributes,
-  StructuredDatasourceStates,
-} from './embeddable/types';
+import type { LensSavedObjectAttributes, StructuredDatasourceStates } from './embeddable/types';
 import type {
   DimensionLink,
   LensConfiguration,
