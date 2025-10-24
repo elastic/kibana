@@ -5,6 +5,8 @@ import { css } from '@emotion/css';
 import { truncateText } from '../../util/truncate_text';
 import { StreamNodePopover } from './stream_popup';
 import type { EnrichedStream } from '../stream_list_view/utils';
+import { QualityIndicators } from '@kbn/dataset-quality-plugin/common';
+import { useDatasetQuality } from '../../hooks/use_dataset_quality';
 
 export const STREAM_NODE_TYPE = 'streamNode';
 
@@ -19,14 +21,25 @@ export const StreamNode = ({ data: { label, type, hasChildren, stream } }: { dat
     const { euiTheme } = useEuiTheme();
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
+    const qualityColors: Record<QualityIndicators, string> = {
+        poor: euiTheme.colors.backgroundLightDanger,
+        degraded: euiTheme.colors.backgroundLightWarning,
+        good: euiTheme.colors.backgroundLightSuccess,
+    };
+
+    const { quality } = useDatasetQuality({
+        streamName: stream.stream.name,
+        canReadFailureStore: true,
+    });
+
     const nodeClass = css`
-        background: ${euiTheme.colors.emptyShade};
-        border: 1px solid ${euiTheme.colors.lightShade};
-        border-radius: 6px;
-        padding: ${euiTheme.size.m};
-        font-size: ${euiTheme.font.scale.xs}rem;
-        cursor: pointer;
-    `;
+      background: ${euiTheme.colors.emptyShade};
+      border: 3px solid ${qualityColors[quality]};
+      border-radius: 6px;
+      padding: ${euiTheme.size.m};
+      font-size: ${euiTheme.font.scale.xs}rem;
+      cursor: pointer;
+  `;
 
     const nodeContent = (
         <div
