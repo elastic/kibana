@@ -100,7 +100,7 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
   const [selectedRelationships, setSelectedRelationships] = useState<
     Record<string, SavedObjectRelation[]>
   >({});
-  const [deleteFlyoutOpen, setDeleteFlyoutOpen] = useState<boolean>(false);
+  const [deleteFlyoutOpen, setDeleteFlyoutOpen] = useState(false);
   const [dataViewController] = useState(
     () =>
       new DataViewTableController({
