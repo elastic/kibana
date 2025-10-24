@@ -21,6 +21,7 @@ export const RuleCreationAnnotation = Annotation.Root({
     >;
   }>(),
   validationErrors: Annotation<{ esqlErrors: string }>(),
+  queryFixRetries: Annotation<number>(),
 });
 
 export type RuleCreationState = typeof RuleCreationAnnotation.State;

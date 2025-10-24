@@ -62,6 +62,7 @@ export const fixEsqlQueryNode = async ({
       return {
         ...state,
         rule: { ...state.rule, query: esqlQuery },
+        queryFixRetries: (state.queryFixRetries || 0) + 1,
       };
     } catch (err) {
       logger.debug(`Error fixing ESQL query: ${err}`);
