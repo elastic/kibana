@@ -21,7 +21,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { CoreStart } from '@kbn/core/public';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import type { IToasts } from '@kbn/core-notifications-browser';
-import type { LayerAction, StateSetter } from '../../../../types';
+import type { LayerAction, StateSetter } from '@kbn/lens-common';
 import type { XYState, XYByReferenceAnnotationLayerConfig } from '../../types';
 import { annotationLayerHasUnsavedChanges } from '../../state_helpers';
 import { getAnnotationLayerTitle } from '../../visualization_helpers';

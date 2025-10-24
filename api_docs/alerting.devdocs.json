@@ -5028,7 +5028,7 @@
           },
           " = never>(params: Readonly<{ includeLegacyId?: boolean | undefined; includeSnoozeData?: boolean | undefined; excludeFromPublicApi?: boolean | undefined; } & { ids: string[]; }>) => Promise<",
           "BulkGetRulesResponse",
-          "<Params>>; bulkDeleteRules: (options: Readonly<{ filter?: string | undefined; ids?: string[] | undefined; } & {}>) => Promise<",
+          "<Params>>; bulkDeleteRules: (options: Readonly<{ filter?: string | undefined; ids?: string[] | undefined; ignoreInternalRuleTypes?: boolean | undefined; } & {}>) => Promise<",
           "BulkDeleteRulesResult",
           "<Record<string, any>>>; bulkEdit: <Params extends ",
           {
