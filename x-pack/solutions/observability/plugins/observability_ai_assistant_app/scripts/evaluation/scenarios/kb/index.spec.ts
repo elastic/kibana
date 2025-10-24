@@ -148,6 +148,80 @@ describe('Knowledge base', () => {
       expect(result.passed).to.be(true);
     });
 
+    describe('kb source isolation', () => {
+      beforeEach(async () => {
+        await kibanaClient.callKibana(
+          'post',
+          { pathname: '/internal/observability_ai_assistant/kb/entries/import' },
+          {
+            entries: [
+              {
+                id: 'lens_internal_policy',
+                title: 'Lens: Internal Usage & Best Practices (ACME)',
+                text:
+                  'Internal-only: Lens is ACME’s standard tool for observability dashboards. ' +
+                  'Production dashboards must follow internal naming, metadata, and data access rules. ' +
+                  'Allowed data views: "acme-*", "metrics-acme-*", "logs-acme-*". ' +
+                  'Each dashboard must use company color palette. ' +
+                  'Default time range is 24h; refresh ≥ 30s; red color reserved for SLA/SLO breaches.',
+              },
+            ],
+          }
+        );
+      });
+
+      afterEach(async () => {
+        await esClient.deleteByQuery({
+          index: KB_INDEX,
+          ignore_unavailable: true,
+          refresh: true,
+          query: {
+            terms: {
+              id: ['lens_internal_policy'],
+            },
+          },
+        });
+      });
+
+      it('context learnings favor internal KB and exclude product docs for internal-use questions', async () => {
+        const conversation = await chatClient.complete({
+          messages:
+            'What are our internal Lens rules for production dashboards and allowed data views?',
+        });
+
+        const contextResponseMessage = conversation.messages.find(
+          (m) => m.name === CONTEXT_FUNCTION_NAME
+        );
+        if (!contextResponseMessage) {
+          throw new Error('No context function message returned');
+        }
+
+        const { learnings } = JSON.parse(contextResponseMessage.content!);
+        expect(Array.isArray(learnings)).to.be(true);
+        expect(learnings.length).to.be.greaterThan(0);
+
+        const top = learnings[0];
+        expect(top.llmScore).to.be.greaterThan(4);
+        expect(top.id).to.be('lens_internal_policy');
+      });
+
+      it('answer mentions only internal Lens practices', async () => {
+        const conversation = await chatClient.complete({
+          messages:
+            'Summarize internal Lens dashboard requirements for naming, refresh, and visualization standards.',
+        });
+
+        const result = await chatClient.evaluate(conversation, [
+          'Uses context function response to retrieve internal Lens policy (id "lens_internal_policy").',
+          'Mentions internal naming and metadata rules, refresh ≥ 30s, and use of company color palette.',
+          'Does NOT include product usage how-to instructions.',
+          'Does not hallucinate details not present in the internal policy.',
+        ]);
+
+        expect(result.passed).to.be(true);
+      });
+    });
+
     after(async () => {
       await esClient.deleteByQuery({
         index: KB_INDEX,
