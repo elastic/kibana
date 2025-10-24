@@ -57,6 +57,9 @@ export const GetCloudConnectorsRequestSchema = {
   query: schema.object({
     page: schema.maybe(schema.string()),
     perPage: schema.maybe(schema.string()),
+    cloudProvider: schema.maybe(
+      schema.oneOf([schema.literal('aws'), schema.literal('azure'), schema.literal('gcp')])
+    ),
   }),
 };
 

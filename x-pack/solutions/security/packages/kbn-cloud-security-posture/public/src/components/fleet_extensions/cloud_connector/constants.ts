@@ -48,6 +48,10 @@ export const AZURE_CLOUD_CONNECTOR_FIELD_NAMES = {
   AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID: 'azure_credentials_cloud_connector_id',
 } as const;
 
-// Minimum version required for cloud connector reusability feature
-export const CLOUD_CONNECTOR_CSPM_REUSABLE_MIN_VERSION = '3.1.0-preview06';
-export const CLOUD_CONNECTOR_ASSET_INVENTORY_REUSABLE_MIN_VERSION = '1.1.5';
+// Minimum version required for AWS cloud connector reusability feature
+export const CLOUD_CONNECTOR_AWS_CSPM_REUSABLE_MIN_VERSION = '3.1.0-preview06';
+export const CLOUD_CONNECTOR_AWS_ASSET_INVENTORY_REUSABLE_MIN_VERSION = '1.1.5';
+
+// Minimum version required for Azure cloud connector reusability feature
+export const CLOUD_CONNECTOR_AZURE_CSPM_REUSABLE_MIN_VERSION = '3.1.0';
+export const CLOUD_CONNECTOR_AZURE_ASSET_INVENTORY_REUSABLE_MIN_VERSION = '1.2.2';

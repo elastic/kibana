@@ -30,16 +30,12 @@ export interface AwsCloudConnectorVars {
 }
 
 export interface AzureCloudConnectorVars {
-  tenant_id: CloudConnectorVar;
-  client_id: CloudConnectorVar;
-  azure_credentials_cloud_connector_id: CloudConnectorVar;
+  tenant_id: CloudConnectorSecretVar;
+  client_id: CloudConnectorSecretVar;
+  azure_credentials_cloud_connector_id: CloudConnectorSecretVar;
 }
 
-export type CloudConnectorVars =
-  | AwsCloudConnectorVars
-  | AzureCloudConnectorVars
-  // TODO: Remove Record<string, unknown> in https://github.com/elastic/security-team/issues/14284
-  | Record<string, unknown>;
+export type CloudConnectorVars = AwsCloudConnectorVars | AzureCloudConnectorVars;
 
 export interface CloudConnector {
   id: string;
