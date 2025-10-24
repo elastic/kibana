@@ -616,10 +616,9 @@ export class CstToAstConverter {
 
   private fromWhereCommand(ctx: cst.WhereCommandContext): ast.ESQLCommand<'where'> {
     const command = this.createCommand('where', ctx);
+    const expression = this.fromBooleanExpression(ctx.booleanExpression());
 
-    const expressions = this.collectBooleanExpression(ctx.booleanExpression());
-
-    command.args.push(expressions[0]);
+    command.args.push(expression);
 
     return command;
   }
@@ -690,7 +689,7 @@ export class CstToAstConverter {
       return field;
     }
 
-    const condition = this.collectBooleanExpression(booleanExpression)[0];
+    const condition = this.fromBooleanExpression(booleanExpression);
     const aggField = Builder.expression.where(
       [field, condition],
       {},
@@ -752,7 +751,7 @@ export class CstToAstConverter {
   private fromOrderExpression(
     ctx: cst.OrderExpressionContext
   ): ast.ESQLOrderExpression | ast.ESQLAstItem {
-    const arg = this.collectBooleanExpression(ctx.booleanExpression())[0];
+    const arg = this.fromBooleanExpression(ctx.booleanExpression());
 
     let order: ast.ESQLOrderExpression['order'] = '';
     let nulls: ast.ESQLOrderExpression['nulls'] = '';
@@ -1844,7 +1843,9 @@ export class CstToAstConverter {
     } else if (ctx instanceof cst.DereferenceContext) {
       return this.toColumn(ctx.qualifiedName());
     } else if (ctx instanceof cst.ParenthesizedExpressionContext) {
-      return this.collectBooleanExpression(ctx.booleanExpression());
+      const node = this.fromBooleanExpression(ctx.booleanExpression());
+
+      return node ? [node] : [];
     } else if (ctx instanceof cst.FunctionContext) {
       return this.fromFunction(ctx);
     } else if (ctx instanceof cst.InlineCastContext) {
@@ -1944,62 +1945,31 @@ export class CstToAstConverter {
     return arg ? [arg] : [];
   }
 
-  private fromLogicalNot(ctx: cst.LogicalNotContext): ast.ESQLUnaryExpression {
-    const args = this.collectBooleanExpression(ctx.booleanExpression());
-    const fn = this.toFunction(
-      'not',
-      ctx,
-      undefined,
-      'unary-expression',
-      args
-    ) as ast.ESQLUnaryExpression;
-    return fn;
-  }
+  private fromBooleanExpressions(
+    ctx: cst.BooleanExpressionContext[] | undefined
+  ): ast.ESQLAstItem[] {
+    const list: ast.ESQLAstItem[] = [];
 
-  private fromLogicalBinary(ctx: cst.LogicalBinaryContext) {
-    const fn = this.toFunction(ctx.AND() ? 'and' : 'or', ctx, undefined, 'binary-expression');
-    fn.args.push(
-      ...this.collectBooleanExpression(ctx._left),
-      ...this.collectBooleanExpression(ctx._right)
-    );
-    // update the location of the assign based on arguments
-    const argsLocationExtends = this.computeLocationExtends(fn);
-    fn.location = argsLocationExtends;
-    return fn;
-  }
-
-  private visitLogicalIns(ctx: cst.LogicalInContext) {
-    const [leftCtx, ...rightCtxs] = ctx.valueExpression_list();
-    const left = resolveItem(
-      this.visitValueExpression(leftCtx) ?? this.fromParserRuleToUnknown(leftCtx)
-    ) as ast.ESQLAstExpression;
-    const right = this.toTuple(rightCtxs, ctx.LP(), ctx.RP());
-    const expression = this.toFunction(
-      ctx.NOT() ? 'not in' : 'in',
-      ctx,
-      { min: ctx.start.start, max: ctx.stop?.stop ?? ctx.RP().symbol.stop },
-      'binary-expression',
-      [left, right],
-      left.incomplete || right.incomplete
-    );
-
-    return expression;
-  }
-
-  private fromBooleanExpression0(
-    ctx: cst.BooleanExpressionContext
-  ): ast.ESQLAstExpression | undefined {
-    if (ctx instanceof cst.LogicalNotContext) {
-      return this.fromLogicalNot(ctx);
-    }
-    if (ctx instanceof cst.LogicalBinaryContext) {
-      return this.fromLogicalBinary(ctx);
-    }
-    if (ctx instanceof cst.LogicalInContext) {
-      return this.visitLogicalIns(ctx);
+    if (!ctx) {
+      return list;
     }
 
-    return undefined;
+    for (const expr of ctx) {
+      const node = this.fromBooleanExpression(expr);
+
+      if (node) {
+        list.push(node);
+      }
+    }
+    return list;
+  }
+
+  public fromBooleanExpressionStrict(ctx: cst.BooleanExpressionContext): ast.ESQLAstItem {
+    return this.collectBooleanExpression(ctx)[0];
+  }
+
+  public fromBooleanExpression(ctx: cst.BooleanExpressionContext): ast.ESQLAstItem {
+    return this.fromBooleanExpressionStrict(ctx) || this.fromParserRuleToUnknown(ctx);
   }
 
   private collectBooleanExpression(
@@ -2031,23 +2001,64 @@ export class CstToAstConverter {
       .flat();
   }
 
-  private fromBooleanExpressions(
-    ctx: cst.BooleanExpressionContext[] | undefined
-  ): ast.ESQLAstItem[] {
-    const list: ast.ESQLAstItem[] = [];
-
-    if (!ctx) {
-      return list;
+  private fromBooleanExpression0(
+    ctx: cst.BooleanExpressionContext
+  ): ast.ESQLAstExpression | undefined {
+    if (ctx instanceof cst.LogicalNotContext) {
+      return this.fromLogicalNot(ctx);
+    }
+    if (ctx instanceof cst.LogicalBinaryContext) {
+      return this.fromLogicalBinary(ctx);
+    }
+    if (ctx instanceof cst.LogicalInContext) {
+      return this.visitLogicalIns(ctx);
     }
 
-    for (const expr of ctx) {
-      list.push(...this.collectBooleanExpression(expr));
-    }
-    return list;
+    return undefined;
   }
 
-  public fromBooleanExpression(ctx: cst.BooleanExpressionContext): ast.ESQLAstItem {
-    return this.collectBooleanExpression(ctx)[0] || this.fromParserRuleToUnknown(ctx);
+  private fromLogicalNot(ctx: cst.LogicalNotContext): ast.ESQLUnaryExpression {
+    const child = this.fromBooleanExpression(ctx.booleanExpression());
+    const args = [child];
+    const fn = this.toFunction(
+      'not',
+      ctx,
+      undefined,
+      'unary-expression',
+      args
+    ) as ast.ESQLUnaryExpression;
+
+    return fn;
+  }
+
+  /** @todo Revisit this */
+  private fromLogicalBinary(ctx: cst.LogicalBinaryContext) {
+    const fn = this.toFunction(ctx.AND() ? 'and' : 'or', ctx, undefined, 'binary-expression');
+    const leftNode = this.fromBooleanExpression(ctx._left);
+    const rightNode = this.fromBooleanExpression(ctx._right);
+    fn.args.push(leftNode, rightNode);
+    // update the location of the assign based on arguments
+    const argsLocationExtends = this.computeLocationExtends(fn);
+    fn.location = argsLocationExtends;
+    return fn;
+  }
+
+  private visitLogicalIns(ctx: cst.LogicalInContext) {
+    const [leftCtx, ...rightCtxs] = ctx.valueExpression_list();
+    const left = resolveItem(
+      this.visitValueExpression(leftCtx) ?? this.fromParserRuleToUnknown(leftCtx)
+    ) as ast.ESQLAstExpression;
+    const right = this.toTuple(rightCtxs, ctx.LP(), ctx.RP());
+    const expression = this.toFunction(
+      ctx.NOT() ? 'not in' : 'in',
+      ctx,
+      { min: ctx.start.start, max: ctx.stop?.stop ?? ctx.RP().symbol.stop },
+      'binary-expression',
+      [left, right],
+      left.incomplete || right.incomplete
+    );
+
+    return expression;
   }
 
   private visitMatchExpression(ctx: cst.MatchExpressionContext): ESQLAstMatchBooleanExpression {
@@ -2408,9 +2419,8 @@ export class CstToAstConverter {
 
     // The boolean expression parsing might result into no fields, this
     // happens when ANTLR continues to try to parse an invalid query.
-    return this.collectBooleanExpression(ctx.booleanExpression())[0]! as
-      | ast.ESQLAstField
-      | undefined;
+    const node = this.fromBooleanExpressionStrict(ctx.booleanExpression());
+    return node as ast.ESQLAstField | undefined;
   }
 
   // --------------------------------------------------- expression: "function"
