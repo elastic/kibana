@@ -79,7 +79,7 @@ const SPECIAL_KQL_CHARACTERS = '\\(){}:<>"*';
 const escapeSpecialCharacters = (val: string) =>
   val.replace(new RegExp(`[${SPECIAL_KQL_CHARACTERS.split('').join('\\')}]`, 'g'), '\\$&');
 
-const simplifyWhitespace = (val: string) => val.replace(/\s+|\t+|\r+|\n+/g, ' ');
+const simplifyWhitespace = (val: string) => val.replace(/\s+/g, ' ');
 
 const trim = (val: string) => val.trim();
 

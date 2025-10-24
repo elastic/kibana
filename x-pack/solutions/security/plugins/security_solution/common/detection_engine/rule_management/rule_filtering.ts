@@ -60,7 +60,7 @@ export function convertRulesFilterToKQL({
 }: Partial<RulesFilterOptions>): string {
   const kql: string[] = [];
 
-  if (searchTerm?.length) {
+  if (searchTerm?.trim().length) {
     kql.push(`(${convertRuleSearchTermToKQL(searchTerm)})`);
   }
 

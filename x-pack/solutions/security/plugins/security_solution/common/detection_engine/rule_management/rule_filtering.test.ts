@@ -15,8 +15,20 @@ describe('convertRulesFilterToKQL', () => {
     tags: [],
   };
 
-  it('returns empty string if filter options are empty', () => {
+  it('returns empty string if filter is an empty string', () => {
     const kql = convertRulesFilterToKQL(filterOptions);
+
+    expect(kql).toBe('');
+  });
+
+  it('returns empty string if filter contains only whitespace', () => {
+    const kql = convertRulesFilterToKQL({ ...filterOptions, filter: ' \n\t' });
+
+    expect(kql).toBe('');
+  });
+
+  it('returns empty string if filter is undefined', () => {
+    const kql = convertRulesFilterToKQL({ ...filterOptions, filter: undefined });
 
     expect(kql).toBe('');
   });
@@ -58,6 +70,16 @@ describe('convertRulesFilterToKQL', () => {
     );
   });
 
+  it('allows partial name matches for single term searches', () => {
+    const kql = convertRulesFilterToKQL({
+      ...filterOptions,
+      filter: 'sql',
+    });
+
+    expect(kql.startsWith('(alert.attributes.name.keyword: *sql*')).toBe(true);
+    expect(kql).not.toContain('alert.attributes.name: "sql"');
+  });
+
   it('escapes "filter" value for multiple term searches', () => {
     const kql = convertRulesFilterToKQL({
       ...filterOptions,
@@ -76,6 +98,16 @@ describe('convertRulesFilterToKQL', () => {
         'OR alert.attributes.params.threat.technique.subtechnique.name: "\\"a <detection rule with)\\\\a< surprise:"' +
         ')'
     );
+  });
+
+  it('allows only exact matching for multi-term searches', () => {
+    const kql = convertRulesFilterToKQL({
+      ...filterOptions,
+      filter: 'sql server',
+    });
+
+    expect(kql.startsWith('(alert.attributes.name: "sql server"')).toBe(true);
+    expect(kql).not.toContain('alert.attributes.name.keyword: *sql server*');
   });
 
   it('handles presence of "showCustomRules" properly', () => {
