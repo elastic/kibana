@@ -26,6 +26,9 @@ export const dataStreamSavedObjectType: SavedObjectsType = {
         // Foreign key to parent integration
         type: "keyword",
       },
+      created_by: {
+        type: "keyword",
+      },
       job_info: {
         type: "nested",
         properties: {
@@ -43,6 +46,7 @@ export const dataStreamSavedObjectType: SavedObjectsType = {
       metadata: {
         properties: {
           sample_count: { type: 'integer', index: false },
+          version: { type: 'keyword', index: false },
           created_at: { type: 'date', index: false },
         },
       },

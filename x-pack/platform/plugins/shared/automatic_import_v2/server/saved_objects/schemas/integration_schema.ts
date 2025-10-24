@@ -13,10 +13,14 @@ import { TASK_STATUSES } from "../constants";
 export const integrationSchemaV1 = schema.object({
   integration_id: schema.string(),
   data_stream_count: schema.number(),
+  created_by: schema.string({ minLength: 1 }),
   status: schema.oneOf(Object.values(TASK_STATUSES).map(status => schema.literal(status)) as [Type<string>]),
   metadata: schema.object({
     title: schema.maybe(schema.string()),
-    version: schema.number(),
+    version: schema.maybe(schema.string({
+      minLength: 5,
+      maxLength: 20,
+    })),
     description: schema.maybe(schema.string()),
     created_at: schema.maybe(schema.string()),
     // allow other fields not explicitly defined here

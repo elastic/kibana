@@ -17,7 +17,6 @@ import type {
   AutomaticImportV2PluginRequestHandlerContext,
 } from './types';
 import { RequestContextFactory } from './request_context_factory';
-import { dataStreamSavedObjectType, integrationSavedObjectType } from './saved_objects';
 import { AutomaticImportSavedObjectService } from './saved_objects/saved_objects_service';
 
 export class AutomaticImportV2Plugin
@@ -60,13 +59,6 @@ export class AutomaticImportV2Plugin
       AutomaticImportV2PluginRequestHandlerContext,
       'automaticImportv2'
     >('automaticImportv2', (context, request) => requestContextFactory.create(context, request));
-
-    // check if I can register types in 1 line
-    core.savedObjects.registerType(integrationSavedObjectType);
-    core.savedObjects.registerType(dataStreamSavedObjectType);
-
-    this.logger.debug('automaticImportV2: Setup complete');
-
     return {
       actions: plugins.actions,
     };
@@ -88,6 +80,7 @@ export class AutomaticImportV2Plugin
     const savedObjectService = new AutomaticImportSavedObjectService({
       savedObjectsClient,
       logger: this.logger.get('saved-objects-service'),
+      security: plugins.security,
     });
 
     return {

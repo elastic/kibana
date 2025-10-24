@@ -20,12 +20,13 @@ export const integrationSavedObjectType: SavedObjectsType = {
     properties: {
       integration_id: { type: "keyword" },
       data_stream_count: { type: "integer" },
+      created_by: { type: "keyword" },
       status: { type: "keyword" },
       metadata: {
         type: "object",
         properties: {
           title: { type: 'keyword', index: false },
-          version: { type: 'integer', index: false },
+          version: { type: 'keyword', index: false },
           description: { type: 'text', index: false },
           created_at: { type: 'date', index: false },
         },

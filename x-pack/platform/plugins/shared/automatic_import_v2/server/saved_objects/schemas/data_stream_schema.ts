@@ -13,14 +13,19 @@ import { TASK_STATUSES } from "../constants";
 export const dataStreamSchemaV1 = schema.object({
   integration_id: schema.string({ maxLength: 50, minLength: 1 }),
   data_stream_id: schema.string({ maxLength: 50, minLength: 1 }),
+  created_by: schema.string({ minLength: 1 }),
   job_info: schema.object({
     job_id: schema.string({ maxLength: 50, minLength: 1 }),
     job_type: schema.string({ maxLength: 50, minLength: 1 }), // TODO: Add Enum
     status: schema.oneOf(Object.values(TASK_STATUSES).map(status => schema.literal(status)) as [Type<string>]),
   }),
   metadata: schema.object({
-    sample_count: schema.number(),
+    sample_count: schema.maybe(schema.number()),
     created_at: schema.maybe(schema.string({ minLength: 1 })),
+    version: schema.maybe(schema.string({
+      minLength: 5,
+      maxLength: 20,
+    })),
   }, { unknowns: 'allow' }),
   result: schema.object({
     ingest_pipeline: schema.maybe(schema.string()),
