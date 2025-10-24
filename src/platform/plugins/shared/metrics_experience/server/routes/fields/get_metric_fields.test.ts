@@ -15,16 +15,13 @@ import type { EpochTimeRange } from '../../types';
 import type { MetricField } from '../../../common/types';
 import { getMetricFields } from './get_metric_fields';
 import { retrieveFieldCaps } from '../../lib/fields/retrieve_fieldcaps';
-import { enrichMetricFields } from '../../lib/fields/enrich_metric_fields';
+import { applyPagination } from '../../lib/pagination/apply_pagination';
 
 jest.mock('../../lib/fields/retrieve_fieldcaps');
-jest.mock('../../lib/fields/enrich_metric_fields', () => ({
-  ...jest.requireActual('../../lib/fields/enrich_metric_fields'),
-  enrichMetricFields: jest.fn(),
-}));
+jest.mock('../../lib/pagination/apply_pagination');
 
 const mockRetrieveFieldCaps = retrieveFieldCaps as jest.MockedFunction<typeof retrieveFieldCaps>;
-const mockEnrichMetricFields = enrichMetricFields as jest.MockedFunction<typeof enrichMetricFields>;
+const mockApplyPagination = applyPagination as jest.MockedFunction<typeof applyPagination>;
 
 describe('getMetricFields', () => {
   let logger: Logger;
@@ -85,24 +82,10 @@ describe('getMetricFields', () => {
   });
 
   it('should sort fields alphabetically by index and name', async () => {
-    const mockDataStreamFieldCapsMap = new Map([
-      [
-        TEST_FIELDS.METRIC_A_INDEX_A.index,
-        {
-          [TEST_FIELDS.METRIC_A_INDEX_A.name]: {
-            [TEST_FIELDS.METRIC_A_INDEX_A.type]: createMockFieldCapability(
-              TEST_FIELDS.METRIC_A_INDEX_A.type,
-              TEST_FIELDS.METRIC_A_INDEX_A.instrument
-            ),
-          },
-          [TEST_FIELDS.METRIC_Z_INDEX_A.name]: {
-            [TEST_FIELDS.METRIC_Z_INDEX_A.type]: createMockFieldCapability(
-              TEST_FIELDS.METRIC_Z_INDEX_A.type,
-              TEST_FIELDS.METRIC_Z_INDEX_A.instrument
-            ),
-          },
-        },
-      ],
+    const mockDataStreamFieldCapsMap = new Map<
+      string,
+      Record<string, Record<string, FieldCapsFieldCapability>>
+    >([
       [
         TEST_FIELDS.METRIC_Z_INDEX_B.index,
         {
@@ -110,6 +93,23 @@ describe('getMetricFields', () => {
             [TEST_FIELDS.METRIC_Z_INDEX_B.type]: createMockFieldCapability(
               TEST_FIELDS.METRIC_Z_INDEX_B.type,
               TEST_FIELDS.METRIC_Z_INDEX_B.instrument
+            ),
+          },
+        },
+      ],
+      [
+        TEST_FIELDS.METRIC_A_INDEX_A.index,
+        {
+          [TEST_FIELDS.METRIC_Z_INDEX_A.name]: {
+            [TEST_FIELDS.METRIC_Z_INDEX_A.type]: createMockFieldCapability(
+              TEST_FIELDS.METRIC_Z_INDEX_A.type,
+              TEST_FIELDS.METRIC_Z_INDEX_A.instrument
+            ),
+          },
+          [TEST_FIELDS.METRIC_A_INDEX_A.name]: {
+            [TEST_FIELDS.METRIC_A_INDEX_A.type]: createMockFieldCapability(
+              TEST_FIELDS.METRIC_A_INDEX_A.type,
+              TEST_FIELDS.METRIC_A_INDEX_A.instrument
             ),
           },
         },
@@ -135,8 +135,8 @@ describe('getMetricFields', () => {
       TEST_FIELDS.METRIC_Z_INDEX_B.instrument
     );
 
-    mockRetrieveFieldCaps.mockResolvedValue(mockDataStreamFieldCapsMap as any);
-    mockEnrichMetricFields.mockResolvedValue([field3, field1, field2]);
+    mockRetrieveFieldCaps.mockResolvedValue(mockDataStreamFieldCapsMap);
+    mockApplyPagination.mockReturnValue([field1, field2, field3]);
 
     const result = await getMetricFields({
       esClient: mockEsClient,
@@ -147,12 +147,16 @@ describe('getMetricFields', () => {
       logger,
     });
 
-    expect(mockEnrichMetricFields).toHaveBeenCalledWith(
+    expect(mockApplyPagination).toHaveBeenCalledWith(
       expect.objectContaining({
         metricFields: [field1, field2, field3],
       })
     );
 
-    expect(result.fields).toEqual(expect.arrayContaining([field1, field2, field3]));
+    expect(result.fields).toEqual([
+      expect.objectContaining(field1),
+      expect.objectContaining(field2),
+      expect.objectContaining(field3),
+    ]);
   });
 });
