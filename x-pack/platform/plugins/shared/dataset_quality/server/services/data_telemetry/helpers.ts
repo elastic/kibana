@@ -674,13 +674,19 @@ async function safeEsCall<T>(fn: () => Promise<T>): Promise<T> {
     // Handle transient errors during telemetry collection:
     // - 404: index/resource not found
     // - Custom ES errors: deleted or unavailable resources
+    // - Cluster state errors: master not discovered, cluster blocks
     const is404 = error.meta?.statusCode === 404 || error.meta?.body?.status === 404;
     const isCustomError = error.meta?.body?.ok === false;
     const errorMessage = error.meta?.body?.message?.toLowerCase() || '';
-    const isTransientError =
+    const errorType = error.meta?.body?.error?.type || '';
+    const isTransientResourceError =
       errorMessage.includes('deleted') || errorMessage.includes('unavailable');
+    const isClusterStateError =
+      errorType === 'master_not_discovered_exception' ||
+      errorType === 'cluster_block_exception' ||
+      errorType === 'no_master_block_exception';
 
-    if (is404 || (isCustomError && isTransientError)) {
+    if (is404 || (isCustomError && isTransientResourceError) || isClusterStateError) {
       return {} as T;
     }
 
