@@ -172,6 +172,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.assertMissingValues('Linear');
 
+      await PageObjects.lens.closeVisualOptionsPopover();
+
       await PageObjects.lens.openDimensionEditor('lnsXY_yDimensionPanel > lns-dimensionTrigger');
       await PageObjects.lens.assertColor('#ff0000');
 
