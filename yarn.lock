@@ -12598,14 +12598,6 @@
     "@storybook/icons" "^1.2.12"
     ts-dedent "^2.0.0"
 
-"@storybook/blocks@8.6.3":
-  version "8.6.3"
-  resolved "https://registry.yarnpkg.com/@storybook/blocks/-/blocks-8.6.3.tgz#1df08fb3acffa3d8fc389a9d61ad72ab40e1ad84"
-  integrity sha512-Ieu6kwqdeAcrLzcX2QIqnCd0XWZi46i4eem8W54JRiOMQMYUpZ7onbciRAP58qxEWrZWqgxPS+tiCTaJe48VVQ==
-  dependencies:
-    "@storybook/icons" "^1.2.12"
-    ts-dedent "^2.0.0"
-
 "@storybook/builder-webpack5@8.6.14":
   version "8.6.14"
   resolved "https://registry.yarnpkg.com/@storybook/builder-webpack5/-/builder-webpack5-8.6.14.tgz#18e9f0d34b989ad1e4ed5b79a71c82b2bc727fd4"
@@ -12682,13 +12674,6 @@
   dependencies:
     unplugin "^1.3.1"
 
-"@storybook/csf-plugin@8.6.3":
-  version "8.6.3"
-  resolved "https://registry.yarnpkg.com/@storybook/csf-plugin/-/csf-plugin-8.6.3.tgz#3cbaca9562627df9e1aee22138ac606b92e57070"
-  integrity sha512-0QDLBcMOxSEt1yH28cvIsoiaIokIxDDShMnxVJHWk/7+KZ3xe4lZBfKCWZspZoJmrxgz10gLRifj1b3ysIFlyA==
-  dependencies:
-    unplugin "^1.3.1"
-
 "@storybook/global@^5.0.0":
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/@storybook/global/-/global-5.0.0.tgz#b793d34b94f572c1d7d9e0f44fac4e0dbc9572ed"
@@ -12751,11 +12736,6 @@
   version "8.6.14"
   resolved "https://registry.yarnpkg.com/@storybook/react-dom-shim/-/react-dom-shim-8.6.14.tgz#02fc8aeab701040744d93b6ef46b9e5727123370"
   integrity sha512-0hixr3dOy3f3M+HBofp3jtMQMS+sqzjKNgl7Arfuj3fvjmyXOks/yGjDImySR4imPtEllvPZfhiQNlejheaInw==
-
-"@storybook/react-dom-shim@8.6.3":
-  version "8.6.3"
-  resolved "https://registry.yarnpkg.com/@storybook/react-dom-shim/-/react-dom-shim-8.6.3.tgz#aed690e9f2c4d659754aafa6dc90e635ec7a598c"
-  integrity sha512-vE3LA2TxbzDF1Fso2IgvUtoHc+8a6laKhuJdx8frP5A8M1KGOBfuEPFCCcE49Q90HUlDgwb/zQl1GNq/QjLgWQ==
 
 "@storybook/react-webpack5@^8.6.14":
   version "8.6.14"
