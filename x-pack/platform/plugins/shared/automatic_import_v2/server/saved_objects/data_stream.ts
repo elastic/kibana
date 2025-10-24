@@ -1,45 +1,43 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { SavedObjectsType } from "@kbn/core/server";
-import { dataStreamSchemaV1 } from "./schemas/data_stream_schema";
-import { DATA_STREAM_SAVED_OBJECT_TYPE } from "./constants";
+import type { SavedObjectsType } from '@kbn/core/server';
+import { dataStreamSchemaV1 } from './schemas/data_stream_schema';
+import { DATA_STREAM_SAVED_OBJECT_TYPE } from './constants';
 
 export const dataStreamSavedObjectType: SavedObjectsType = {
   name: DATA_STREAM_SAVED_OBJECT_TYPE,
   hidden: false,
-  namespaceType: "multiple-isolated",
+  namespaceType: 'multiple-isolated',
   mappings: {
     dynamic: false,
     properties: {
       data_stream_id: {
         // Unique identifier for this data_stream
-        type: "keyword",
+        type: 'keyword',
       },
       integration_id: {
         // Foreign key to parent integration
-        type: "keyword",
+        type: 'keyword',
       },
       created_by: {
-        type: "keyword",
+        type: 'keyword',
       },
       job_info: {
-        type: "nested",
+        type: 'nested',
         properties: {
           job_id: {
-            type: "keyword",
+            type: 'keyword',
           },
           job_type: {
-            type: "keyword",
+            type: 'keyword',
           },
           status: {
-            type: "keyword",
+            type: 'keyword',
           },
         },
       },
@@ -53,19 +51,20 @@ export const dataStreamSavedObjectType: SavedObjectsType = {
       result: {
         properties: {
           ingest_pipeline: {
-            type: 'text', index: false,
+            type: 'text',
+            index: false,
           },
           field_mapping: {
-            type: "flattened",
+            type: 'flattened',
             index: false,
           },
         },
       },
-    }
+    },
   },
   management: {
-    icon: "data_stream",
-    defaultSearchField: "data_stream_id",
+    icon: 'data_stream',
+    defaultSearchField: 'data_stream_id',
     importableAndExportable: true,
     getTitle(obj) {
       return obj.attributes.data_stream_id;
@@ -75,9 +74,9 @@ export const dataStreamSavedObjectType: SavedObjectsType = {
     1: {
       changes: [],
       schemas: {
-        forwardCompatibility: dataStreamSchemaV1.extends({}, { unknowns: "ignore" }),
+        forwardCompatibility: dataStreamSchemaV1.extends({}, { unknowns: 'ignore' }),
         create: dataStreamSchemaV1,
       },
     },
   },
-}
+};

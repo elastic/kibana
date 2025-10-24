@@ -1,10 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -19,14 +17,18 @@ import {
   type KibanaRequest,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { IntegrationAttributes, DataStreamAttributes } from './schemas/types';
-import { DATA_STREAM_SAVED_OBJECT_TYPE, INTEGRATION_SAVED_OBJECT_TYPE, TASK_STATUSES } from './constants';
-import { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import {
+  DATA_STREAM_SAVED_OBJECT_TYPE,
+  INTEGRATION_SAVED_OBJECT_TYPE,
+  TASK_STATUSES,
+} from './constants';
 
 interface SavedObjectServiceOptions {
   savedObjectsClient: SavedObjectsClientContract;
   logger: Logger;
-  security: SecurityPluginStart
+  security: SecurityPluginStart;
 }
 
 export class AutomaticImportSavedObjectService {
@@ -50,7 +52,6 @@ export class AutomaticImportSavedObjectService {
     currentVersion: string | undefined,
     incrementType: 'major' | 'minor' | 'patch' = 'patch'
   ): string {
-
     if (!currentVersion) {
       return '0.0.0';
     }
@@ -60,7 +61,7 @@ export class AutomaticImportSavedObjectService {
       return '0.0.0';
     }
 
-    let [major, minor, patch] = versionParts.map(v => parseInt(v, 10));
+    let [major, minor, patch] = versionParts.map((v) => parseInt(v, 10));
 
     if (isNaN(major) || isNaN(minor) || isNaN(patch)) {
       return '0.0.0';
@@ -96,7 +97,11 @@ export class AutomaticImportSavedObjectService {
    * @param options - The options for the create
    * @returns The saved object
    */
-  public async insertIntegration(request: KibanaRequest, data: IntegrationAttributes, options?: SavedObjectsCreateOptions): Promise<SavedObject<IntegrationAttributes>> {
+  public async insertIntegration(
+    request: KibanaRequest,
+    data: IntegrationAttributes,
+    options?: SavedObjectsCreateOptions
+  ): Promise<SavedObject<IntegrationAttributes>> {
     const authenticatedUser = this.security?.authc.getCurrentUser(request);
     if (!authenticatedUser) {
       throw new Error('No user authenticated');
@@ -143,15 +148,14 @@ export class AutomaticImportSavedObjectService {
     }
   }
 
-
   /**
-  * Create or update an integration
-  * @param data - The integration data. Must include an integration_id.
-  * @param expectedVersion - The expected version for optimistic concurrency control at the application layer. Required to ensure data consistency.
-  * @param versionUpdate - Optional: specify which version part to increment ('major' | 'minor' | 'patch'). Defaults to incrementing 'patch'.
-  * @param options - The options for the update.
-  * @returns The saved object
-  */
+   * Create or update an integration
+   * @param data - The integration data. Must include an integration_id.
+   * @param expectedVersion - The expected version for optimistic concurrency control at the application layer. Required to ensure data consistency.
+   * @param versionUpdate - Optional: specify which version part to increment ('major' | 'minor' | 'patch'). Defaults to incrementing 'patch'.
+   * @param options - The options for the update.
+   * @returns The saved object
+   */
   public async updateIntegration(
     data: IntegrationAttributes,
     expectedVersion: string,
@@ -175,13 +179,12 @@ export class AutomaticImportSavedObjectService {
       const currentVersion = existingIntegration.attributes.metadata?.version || '0.0.0';
 
       if (currentVersion !== expectedVersion) {
-        throw new Error(`Version conflict: Integration ${integration_id} has been updated. Expected version ${expectedVersion}, but current version is ${currentVersion}. Please fetch the latest version and try again.`);
+        throw new Error(
+          `Version conflict: Integration ${integration_id} has been updated. Expected version ${expectedVersion}, but current version is ${currentVersion}. Please fetch the latest version and try again.`
+        );
       }
 
-      const newVersion = this.incrementSemanticVersion(
-        currentVersion,
-        versionUpdate
-      );
+      const newVersion = this.incrementSemanticVersion(currentVersion, versionUpdate);
 
       const integrationData: IntegrationAttributes = {
         integration_id,
@@ -237,8 +240,7 @@ export class AutomaticImportSavedObjectService {
       return await this.savedObjectsClient.find<IntegrationAttributes>({
         type: INTEGRATION_SAVED_OBJECT_TYPE,
       });
-    }
-    catch (error) {
+    } catch (error) {
       this.logger.error(`Failed to get all integrations: ${error}`);
       throw error;
     }
@@ -253,7 +255,11 @@ export class AutomaticImportSavedObjectService {
   public async deleteIntegration(
     integrationId: string,
     options?: SavedObjectsDeleteOptions
-  ): Promise<{ success: boolean; dataStreamsDeleted: number; errors: Array<{ id: string; error: string }> }> {
+  ): Promise<{
+    success: boolean;
+    dataStreamsDeleted: number;
+    errors: Array<{ id: string; error: string }>;
+  }> {
     this.logger.debug(`Starting cascade deletion for integration: ${integrationId}`);
 
     const deletionErrors: Array<{ id: string; error: string }> = [];
@@ -270,7 +276,9 @@ export class AutomaticImportSavedObjectService {
         try {
           const dataStreamsResponse = await this.savedObjectsClient.find<DataStreamAttributes>({
             type: DATA_STREAM_SAVED_OBJECT_TYPE,
-            filter: `${DATA_STREAM_SAVED_OBJECT_TYPE}.attributes.integration_id: ${JSON.stringify(integrationId)}`,
+            filter: `${DATA_STREAM_SAVED_OBJECT_TYPE}.attributes.integration_id: ${JSON.stringify(
+              integrationId
+            )}`,
             page,
             perPage,
             fields: ['integration_id'],
@@ -298,7 +306,6 @@ export class AutomaticImportSavedObjectService {
         `Found ${dataStreamsToDelete.length} data streams to delete for integration ${integrationId}`
       );
 
-
       const CHUNK_SIZE = 50;
       if (dataStreamsToDelete.length > 0) {
         for (let i = 0; i < dataStreamsToDelete.length; i += CHUNK_SIZE) {
@@ -315,9 +322,7 @@ export class AutomaticImportSavedObjectService {
                 dataStreamsDeleted++;
               } else {
                 const errorMessage = status.error?.message || 'Unknown error';
-                this.logger.warn(
-                  `Failed to delete data stream ${status.id}: ${errorMessage}`
-                );
+                this.logger.warn(`Failed to delete data stream ${status.id}: ${errorMessage}`);
                 deletionErrors.push({
                   id: status.id,
                   error: errorMessage,
@@ -332,7 +337,10 @@ export class AutomaticImportSavedObjectService {
             chunk.forEach((ds) => {
               deletionErrors.push({
                 id: ds.id,
-                error: bulkDeleteError instanceof Error ? bulkDeleteError.message : String(bulkDeleteError),
+                error:
+                  bulkDeleteError instanceof Error
+                    ? bulkDeleteError.message
+                    : String(bulkDeleteError),
               });
             });
           }
@@ -343,13 +351,14 @@ export class AutomaticImportSavedObjectService {
         );
       }
 
-
       // Delete the integration if we successfully deleted all data streams OR the a force option is provided
       const allDataStreamsDeleted = deletionErrors.length === 0;
       if (!allDataStreamsDeleted && !options?.force) {
         throw new Error(
           `Cannot delete integration ${integrationId}: Failed to delete ${deletionErrors.length} data streams. ` +
-          `Use force option to delete the integration anyway. Errors: ${JSON.stringify(deletionErrors)}`
+            `Use force option to delete the integration anyway. Errors: ${JSON.stringify(
+              deletionErrors
+            )}`
         );
       }
 
@@ -375,7 +384,6 @@ export class AutomaticImportSavedObjectService {
     }
   }
 
-
   /**
    * Data Stream Operations
    */
@@ -397,7 +405,13 @@ export class AutomaticImportSavedObjectService {
       throw new Error('No user authenticated');
     }
 
-    const { integration_id, data_stream_id, job_info = { status: TASK_STATUSES.pending, job_id: '', job_type: '' }, metadata, result = {} } = data;
+    const {
+      integration_id,
+      data_stream_id,
+      job_info = { status: TASK_STATUSES.pending, job_id: '', job_type: '' },
+      metadata,
+      result = {},
+    } = data;
 
     if (!integration_id) {
       throw new Error('Integration ID is required');
@@ -411,9 +425,13 @@ export class AutomaticImportSavedObjectService {
     // Check for existing integration
     try {
       existingIntegration = await this.getIntegration(integration_id);
-      this.logger.debug(`Integration ${integration_id} found, will update count after data stream creation`);
+      this.logger.debug(
+        `Integration ${integration_id} found, will update count after data stream creation`
+      );
     } catch (error) {
-      this.logger.debug(`Integration ${integration_id} not found, will create after data stream creation`);
+      this.logger.debug(
+        `Integration ${integration_id} not found, will create after data stream creation`
+      );
     }
 
     // Create the data stream first since we need it before we need to create a missing integration
@@ -450,7 +468,9 @@ export class AutomaticImportSavedObjectService {
       // or create a new integration if it doesn't exist
       try {
         if (existingIntegration) {
-          this.logger.debug(`Data stream created successfully, incrementing integration ${integration_id} count`);
+          this.logger.debug(
+            `Data stream created successfully, incrementing integration ${integration_id} count`
+          );
 
           const updatedIntegrationData: IntegrationAttributes = {
             ...existingIntegration.attributes,
@@ -459,10 +479,12 @@ export class AutomaticImportSavedObjectService {
 
           await this.updateIntegration(
             updatedIntegrationData,
-            existingIntegration.attributes.metadata?.version || '0.0.0',
+            existingIntegration.attributes.metadata?.version || '0.0.0'
           );
         } else {
-          this.logger.debug(`Data stream created successfully, creating new integration ${integration_id}`);
+          this.logger.debug(
+            `Data stream created successfully, creating new integration ${integration_id}`
+          );
 
           const defaultIntegrationData: IntegrationAttributes = {
             integration_id,
@@ -479,11 +501,12 @@ export class AutomaticImportSavedObjectService {
           await this.insertIntegration(request, defaultIntegrationData);
         }
       } catch (integrationError) {
-        this.logger.error(`Failed to update/create integration ${integration_id} after creating data stream ${data_stream_id}: ${integrationError}`);
+        this.logger.error(
+          `Failed to update/create integration ${integration_id} after creating data stream ${data_stream_id}: ${integrationError}`
+        );
       }
 
       return createdDataStream;
-
     } catch (error) {
       if (SavedObjectsErrorHelpers.isConflictError(error)) {
         throw new Error(`Data stream ${data_stream_id} already exists`);
@@ -506,8 +529,13 @@ export class AutomaticImportSavedObjectService {
     versionUpdate?: 'major' | 'minor' | 'patch',
     options?: SavedObjectsUpdateOptions<DataStreamAttributes>
   ): Promise<SavedObjectsUpdateResponse<DataStreamAttributes>> {
-    const { integration_id, data_stream_id, job_info, metadata = { sample_count: 0 }, result = {} } = data;
-
+    const {
+      integration_id,
+      data_stream_id,
+      job_info,
+      metadata = { sample_count: 0 },
+      result = {},
+    } = data;
 
     if (!integration_id) {
       throw new Error('Integration ID is required');
@@ -529,14 +557,12 @@ export class AutomaticImportSavedObjectService {
       const currentVersion = existingDataStream.attributes.metadata?.version || '0.0.0';
 
       if (currentVersion !== expectedVersion) {
-        throw new Error(`Version conflict: Data stream ${data_stream_id} has been updated. Expected version ${expectedVersion}, but current version is ${currentVersion}. Please fetch the latest version and try again.`);
+        throw new Error(
+          `Version conflict: Data stream ${data_stream_id} has been updated. Expected version ${expectedVersion}, but current version is ${currentVersion}. Please fetch the latest version and try again.`
+        );
       }
 
-      const newVersion = this.incrementSemanticVersion(
-        currentVersion,
-        versionUpdate
-      );
-
+      const newVersion = this.incrementSemanticVersion(currentVersion, versionUpdate);
 
       const dataStreamData: DataStreamAttributes = {
         integration_id,
@@ -563,7 +589,9 @@ export class AutomaticImportSavedObjectService {
       );
     } catch (error) {
       if (SavedObjectsErrorHelpers.isConflictError(error)) {
-        throw new Error(`Data stream ${data_stream_id} has been updated since you last fetched it. Please fetch the latest version and try again.`);
+        throw new Error(
+          `Data stream ${data_stream_id} has been updated since you last fetched it. Please fetch the latest version and try again.`
+        );
       }
       this.logger.error(`Failed to update data stream: ${error}`);
       throw error;
@@ -598,8 +626,7 @@ export class AutomaticImportSavedObjectService {
       return await this.savedObjectsClient.find<DataStreamAttributes>({
         type: DATA_STREAM_SAVED_OBJECT_TYPE,
       });
-    }
-    catch (error) {
+    } catch (error) {
       this.logger.error(`Failed to get all data streams: ${error}`);
       throw error;
     }
@@ -610,16 +637,22 @@ export class AutomaticImportSavedObjectService {
    * @param integrationId - The ID of the integration
    * @returns All data streams for the integration
    */
-  public async findAllDataStreamsByIntegrationId(integrationId: string): Promise<SavedObjectsFindResponse<DataStreamAttributes>> {
+  public async findAllDataStreamsByIntegrationId(
+    integrationId: string
+  ): Promise<SavedObjectsFindResponse<DataStreamAttributes>> {
     try {
       this.logger.debug(`Finding all data streams for integration: ${integrationId}`);
 
       return await this.savedObjectsClient.find<DataStreamAttributes>({
         type: DATA_STREAM_SAVED_OBJECT_TYPE,
-        filter: `${DATA_STREAM_SAVED_OBJECT_TYPE}.attributes.integration_id: ${JSON.stringify(integrationId)}`,
+        filter: `${DATA_STREAM_SAVED_OBJECT_TYPE}.attributes.integration_id: ${JSON.stringify(
+          integrationId
+        )}`,
       });
     } catch (error) {
-      this.logger.error(`Failed to find all data streams for integration ${integrationId}: ${error}`);
+      this.logger.error(
+        `Failed to find all data streams for integration ${integrationId}: ${error}`
+      );
       throw error;
     }
   }
@@ -630,10 +663,12 @@ export class AutomaticImportSavedObjectService {
    * @param options - The options for the delete
    * @returns The deleted data stream
    */
-  public async deleteDataStream(dataStreamId: string, options?: SavedObjectsDeleteOptions): Promise<void> {
+  public async deleteDataStream(
+    dataStreamId: string,
+    options?: SavedObjectsDeleteOptions
+  ): Promise<void> {
     let parentIntegrationId: string | undefined;
     try {
-
       const dataStream = await this.getDataStream(dataStreamId);
       parentIntegrationId = dataStream.attributes.integration_id;
 
@@ -648,7 +683,9 @@ export class AutomaticImportSavedObjectService {
     try {
       const parentIntegration = await this.getIntegration(parentIntegrationId);
       if (!parentIntegration) {
-        throw new Error(`Integration associated with this data stream ${parentIntegrationId} not found`);
+        throw new Error(
+          `Integration associated with this data stream ${parentIntegrationId} not found`
+        );
       }
 
       const updatedIntegrationData: IntegrationAttributes = {
@@ -661,8 +698,9 @@ export class AutomaticImportSavedObjectService {
         parentIntegration.attributes.metadata?.version || '0.0.0'
       );
     } catch (integrationError) {
-      this.logger.error(`Failed to update integration ${parentIntegrationId} after deleting data stream ${dataStreamId}: ${integrationError}`);
+      this.logger.error(
+        `Failed to update integration ${parentIntegrationId} after deleting data stream ${dataStreamId}: ${integrationError}`
+      );
     }
   }
 }
-

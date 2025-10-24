@@ -1,16 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import type {
-  SavedObjectsClientContract,
-  Logger,
-  KibanaRequest,
-} from '@kbn/core/server';
+
+import type { SavedObjectsClientContract, Logger, KibanaRequest } from '@kbn/core/server';
 import { savedObjectsClientMock, httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
@@ -21,8 +16,12 @@ import {
   INTEGRATION_SAVED_OBJECT_TYPE,
   TASK_STATUSES,
 } from '../saved_objects/constants';
-import { createRootWithCorePlugins, createTestServers, type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
-import { InternalCoreStart } from '@kbn/core/packages/lifecycle/server-internal';
+import {
+  createRootWithCorePlugins,
+  createTestServers,
+  type TestElasticsearchUtils,
+} from '@kbn/core-test-helpers-kbn-server';
+import type { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import { integrationSavedObjectType } from '../saved_objects/integration';
 import { dataStreamSavedObjectType } from '../saved_objects/data_stream';
 
@@ -38,7 +37,7 @@ describe('AutomaticImportSavedObjectService', () => {
   beforeAll(async () => {
     try {
       const { startES } = createTestServers({
-        adjustTimeout: jest.setTimeout
+        adjustTimeout: jest.setTimeout,
       });
       manageES = await startES();
       kbnRoot = createRootWithCorePlugins({}, { oss: false });
@@ -49,10 +48,10 @@ describe('AutomaticImportSavedObjectService', () => {
       coreStart = await kbnRoot.start();
     } catch (error) {
       if (kbnRoot) {
-        await kbnRoot.shutdown().catch(() => { });
+        await kbnRoot.shutdown().catch(() => {});
       }
       if (manageES) {
-        await manageES.stop().catch(() => { });
+        await manageES.stop().catch(() => {});
       }
       throw error;
     }
@@ -86,7 +85,6 @@ describe('AutomaticImportSavedObjectService', () => {
     } as any;
   });
 
-
   describe('Constructor', () => {
     it('should initialize AutomaticImportSavedObjectService with provided savedObjectsClient and logger', () => {
       mockSavedObjectsClient = savedObjectsClientMock.create();
@@ -110,7 +108,7 @@ describe('AutomaticImportSavedObjectService', () => {
       savedObjectsClient = internalRepo as SavedObjectsClientContract;
 
       savedObjectService = new AutomaticImportSavedObjectService({
-        savedObjectsClient: savedObjectsClient,
+        savedObjectsClient,
         logger: mockLogger,
         security: mockSecurity,
       });
@@ -141,9 +139,9 @@ describe('AutomaticImportSavedObjectService', () => {
           metadata: {},
         };
 
-        await expect(savedObjectService.insertIntegration(mockRequest, invalidData)).rejects.toThrow(
-          'Integration ID is required'
-        );
+        await expect(
+          savedObjectService.insertIntegration(mockRequest, invalidData)
+        ).rejects.toThrow('Integration ID is required');
       });
 
       it('should throw error when integration already exists', async () => {
@@ -157,9 +155,9 @@ describe('AutomaticImportSavedObjectService', () => {
         await savedObjectService.insertIntegration(mockRequest, integrationData);
 
         // Try to create duplicate
-        await expect(savedObjectService.insertIntegration(mockRequest, integrationData)).rejects.toThrow(
-          'Integration duplicate-integration already exists'
-        );
+        await expect(
+          savedObjectService.insertIntegration(mockRequest, integrationData)
+        ).rejects.toThrow('Integration duplicate-integration already exists');
 
         // Cleanup
         await savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, 'duplicate-integration');
@@ -185,7 +183,9 @@ describe('AutomaticImportSavedObjectService', () => {
       });
 
       it('should throw error when integration does not exist', async () => {
-        await expect(savedObjectService.getIntegration('non-existent-integration')).rejects.toThrow();
+        await expect(
+          savedObjectService.getIntegration('non-existent-integration')
+        ).rejects.toThrow();
       });
     });
 
@@ -199,13 +199,16 @@ describe('AutomaticImportSavedObjectService', () => {
           metadata: { title: 'Original Title' },
         });
 
-        const result = await savedObjectService.updateIntegration({
-          integration_id: 'test-update-integration',
-          data_stream_count: 3,
-          created_by: 'test-user',
-          status: TASK_STATUSES.completed,
-          metadata: { title: 'Updated Title' },
-        }, '0.0.0');
+        const result = await savedObjectService.updateIntegration(
+          {
+            integration_id: 'test-update-integration',
+            data_stream_count: 3,
+            created_by: 'test-user',
+            status: TASK_STATUSES.completed,
+            metadata: { title: 'Updated Title' },
+          },
+          '0.0.0'
+        );
 
         expect(result.attributes.data_stream_count).toBe(3);
         expect(result.attributes.status).toBe(TASK_STATUSES.completed);
@@ -254,9 +257,7 @@ describe('AutomaticImportSavedObjectService', () => {
           metadata: {},
         };
 
-        await expect(
-          savedObjectService.updateIntegration(updateData, '0.0.0')
-        ).rejects.toThrow();
+        await expect(savedObjectService.updateIntegration(updateData, '0.0.0')).rejects.toThrow();
       });
 
       it('should throw error when integration_id is missing', async () => {
@@ -268,9 +269,9 @@ describe('AutomaticImportSavedObjectService', () => {
           metadata: {},
         };
 
-        await expect(
-          savedObjectService.updateIntegration(invalidData, '0.0.0')
-        ).rejects.toThrow('Integration ID is required');
+        await expect(savedObjectService.updateIntegration(invalidData, '0.0.0')).rejects.toThrow(
+          'Integration ID is required'
+        );
       });
 
       it('should throw version conflict when expectedVersion does not match', async () => {
@@ -295,7 +296,9 @@ describe('AutomaticImportSavedObjectService', () => {
             { ...integrationData, data_stream_count: 3 },
             '0.0.0'
           )
-        ).rejects.toThrow('Version conflict: Integration test-app-version-conflict has been updated. Expected version 0.0.0, but current version is 0.0.1');
+        ).rejects.toThrow(
+          'Version conflict: Integration test-app-version-conflict has been updated. Expected version 0.0.0, but current version is 0.0.1'
+        );
 
         await savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, 'test-app-version-conflict');
       });
@@ -355,17 +358,9 @@ describe('AutomaticImportSavedObjectService', () => {
 
         await savedObjectService.insertIntegration(mockRequest, integrationData);
 
-        await savedObjectService.updateIntegration(
-          { ...integrationData },
-          '0.0.0',
-          'minor'
-        );
+        await savedObjectService.updateIntegration({ ...integrationData }, '0.0.0', 'minor');
 
-        await savedObjectService.updateIntegration(
-          { ...integrationData },
-          '0.1.0',
-          'patch'
-        );
+        await savedObjectService.updateIntegration({ ...integrationData }, '0.1.0', 'patch');
 
         const updated = await savedObjectService.updateIntegration(
           { ...integrationData },
@@ -389,17 +384,9 @@ describe('AutomaticImportSavedObjectService', () => {
 
         await savedObjectService.insertIntegration(mockRequest, integrationData);
 
-        await savedObjectService.updateIntegration(
-          { ...integrationData },
-          '0.0.0',
-          'patch'
-        );
+        await savedObjectService.updateIntegration({ ...integrationData }, '0.0.0', 'patch');
 
-        await savedObjectService.updateIntegration(
-          { ...integrationData },
-          '0.0.1',
-          'patch'
-        );
+        await savedObjectService.updateIntegration({ ...integrationData }, '0.0.1', 'patch');
 
         const updated = await savedObjectService.updateIntegration(
           { ...integrationData },
@@ -439,19 +426,25 @@ describe('AutomaticImportSavedObjectService', () => {
           const result = await savedObjectService.getAllIntegrations();
 
           expect(result.total).toBe(2);
-          const ids = result.saved_objects.map(obj => obj.id);
+          const ids = result.saved_objects.map((obj) => obj.id);
           expect(ids).toContain('test-getall-1');
           expect(ids).toContain('test-getall-2');
         } finally {
-          await savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, 'test-getall-1').catch(() => { });
-          await savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, 'test-getall-2').catch(() => { });
+          await savedObjectsClient
+            .delete(INTEGRATION_SAVED_OBJECT_TYPE, 'test-getall-1')
+            .catch(() => {});
+          await savedObjectsClient
+            .delete(INTEGRATION_SAVED_OBJECT_TYPE, 'test-getall-2')
+            .catch(() => {});
         }
       });
 
       it('should return empty array when no integrations exist', async () => {
         const existing = await savedObjectService.getAllIntegrations();
         for (const integration of existing.saved_objects) {
-          await savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, integration.id).catch(() => { });
+          await savedObjectsClient
+            .delete(INTEGRATION_SAVED_OBJECT_TYPE, integration.id)
+            .catch(() => {});
         }
 
         const result = await savedObjectService.getAllIntegrations();
@@ -464,7 +457,7 @@ describe('AutomaticImportSavedObjectService', () => {
       it('should cascade delete integration and all associated data streams', async () => {
         const integrationId = 'test-cascade-delete-integration';
 
-        // Create integrations for testing cascade deletion 
+        // Create integrations for testing cascade deletion
         await savedObjectService.insertIntegration(mockRequest, {
           integration_id: integrationId,
           created_by: 'test-user',
@@ -512,7 +505,9 @@ describe('AutomaticImportSavedObjectService', () => {
         });
 
         // Verify 3 data streams exist
-        const dataStreamsBefore = await savedObjectService.findAllDataStreamsByIntegrationId(integrationId);
+        const dataStreamsBefore = await savedObjectService.findAllDataStreamsByIntegrationId(
+          integrationId
+        );
         expect(dataStreamsBefore.total).toBe(3);
 
         const result = await savedObjectService.deleteIntegration(integrationId);
@@ -543,7 +538,7 @@ describe('AutomaticImportSavedObjectService', () => {
       savedObjectsClient = internalRepo as SavedObjectsClientContract;
 
       savedObjectService = new AutomaticImportSavedObjectService({
-        savedObjectsClient: savedObjectsClient,
+        savedObjectsClient,
         logger: mockLogger,
         security: mockSecurity,
       });
@@ -659,9 +654,9 @@ describe('AutomaticImportSavedObjectService', () => {
         await savedObjectService.insertDataStream(mockRequest, dataStreamData);
 
         // Try to create duplicate
-        await expect(savedObjectService.insertDataStream(mockRequest, dataStreamData)).rejects.toThrow(
-          'Data stream duplicate-data-stream already exists'
-        );
+        await expect(
+          savedObjectService.insertDataStream(mockRequest, dataStreamData)
+        ).rejects.toThrow('Data stream duplicate-data-stream already exists');
 
         // Cleanup
         await savedObjectsClient.delete(DATA_STREAM_SAVED_OBJECT_TYPE, 'duplicate-data-stream');
@@ -694,7 +689,9 @@ describe('AutomaticImportSavedObjectService', () => {
       });
 
       it('should throw error when data stream does not exist', async () => {
-        await expect(savedObjectService.getDataStream('non-existent-data-stream')).rejects.toThrow();
+        await expect(
+          savedObjectService.getDataStream('non-existent-data-stream')
+        ).rejects.toThrow();
       });
     });
 
@@ -713,18 +710,23 @@ describe('AutomaticImportSavedObjectService', () => {
           result: {},
         });
 
-        const result = await savedObjectService.updateDataStream({
-          integration_id: 'update-ds-integration',
-          data_stream_id: 'test-update-data-stream',
-          created_by: 'test-user',
-          job_info: {
-            job_id: 'update-job',
-            job_type: 'import',
-            status: TASK_STATUSES.completed,
+        const result = await savedObjectService.updateDataStream(
+          {
+            integration_id: 'update-ds-integration',
+            data_stream_id: 'test-update-data-stream',
+            created_by: 'test-user',
+            job_info: {
+              job_id: 'update-job',
+              job_type: 'import',
+              status: TASK_STATUSES.completed,
+            },
+            metadata: { sample_count: 250 },
+            result: { ingest_pipeline: 'updated-pipeline' },
           },
-          metadata: { sample_count: 250 },
-          result: { ingest_pipeline: 'updated-pipeline' },
-        }, '0.0.0', undefined, { version: created.version! });
+          '0.0.0',
+          undefined,
+          { version: created.version! }
+        );
 
         expect(result.attributes.job_info?.status).toBe(TASK_STATUSES.completed);
         expect(result.attributes.metadata?.sample_count).toBe(250);
@@ -815,10 +817,18 @@ describe('AutomaticImportSavedObjectService', () => {
             { ...dataStreamData, metadata: { sample_count: 300 } },
             '0.0.0'
           )
-        ).rejects.toThrow('Version conflict: Data stream test-app-version-conflict-ds has been updated. Expected version 0.0.0, but current version is 0.0.1');
+        ).rejects.toThrow(
+          'Version conflict: Data stream test-app-version-conflict-ds has been updated. Expected version 0.0.0, but current version is 0.0.1'
+        );
 
-        await savedObjectsClient.delete(DATA_STREAM_SAVED_OBJECT_TYPE, 'test-app-version-conflict-ds');
-        await savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, 'app-version-conflict-ds-integration');
+        await savedObjectsClient.delete(
+          DATA_STREAM_SAVED_OBJECT_TYPE,
+          'test-app-version-conflict-ds'
+        );
+        await savedObjectsClient.delete(
+          INTEGRATION_SAVED_OBJECT_TYPE,
+          'app-version-conflict-ds-integration'
+        );
       });
 
       it('should increment major version for data stream', async () => {
@@ -846,7 +856,10 @@ describe('AutomaticImportSavedObjectService', () => {
         expect(updated.attributes.metadata?.version).toBe('1.0.0');
 
         await savedObjectsClient.delete(DATA_STREAM_SAVED_OBJECT_TYPE, 'test-ds-major-version');
-        await savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, 'ds-major-version-integration');
+        await savedObjectsClient.delete(
+          INTEGRATION_SAVED_OBJECT_TYPE,
+          'ds-major-version-integration'
+        );
       });
 
       it('should increment minor version for data stream', async () => {
@@ -874,7 +887,10 @@ describe('AutomaticImportSavedObjectService', () => {
         expect(updated.attributes.metadata?.version).toBe('0.1.0');
 
         await savedObjectsClient.delete(DATA_STREAM_SAVED_OBJECT_TYPE, 'test-ds-minor-version');
-        await savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, 'ds-minor-version-integration');
+        await savedObjectsClient.delete(
+          INTEGRATION_SAVED_OBJECT_TYPE,
+          'ds-minor-version-integration'
+        );
       });
 
       it('should reset minor and patch when incrementing major version for data stream', async () => {
@@ -893,17 +909,9 @@ describe('AutomaticImportSavedObjectService', () => {
 
         await savedObjectService.insertDataStream(mockRequest, dataStreamData);
 
-        await savedObjectService.updateDataStream(
-          { ...dataStreamData },
-          '0.0.0',
-          'minor'
-        );
+        await savedObjectService.updateDataStream({ ...dataStreamData }, '0.0.0', 'minor');
 
-        await savedObjectService.updateDataStream(
-          { ...dataStreamData },
-          '0.1.0',
-          'patch'
-        );
+        await savedObjectService.updateDataStream({ ...dataStreamData }, '0.1.0', 'patch');
 
         const updated = await savedObjectService.updateDataStream(
           { ...dataStreamData },
@@ -914,7 +922,10 @@ describe('AutomaticImportSavedObjectService', () => {
         expect(updated.attributes.metadata?.version).toBe('1.0.0');
 
         await savedObjectsClient.delete(DATA_STREAM_SAVED_OBJECT_TYPE, 'test-ds-major-reset');
-        await savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, 'ds-major-reset-integration');
+        await savedObjectsClient.delete(
+          INTEGRATION_SAVED_OBJECT_TYPE,
+          'ds-major-reset-integration'
+        );
       });
 
       it('should reset patch when incrementing minor version for data stream', async () => {
@@ -933,17 +944,9 @@ describe('AutomaticImportSavedObjectService', () => {
 
         await savedObjectService.insertDataStream(mockRequest, dataStreamData);
 
-        await savedObjectService.updateDataStream(
-          { ...dataStreamData },
-          '0.0.0',
-          'patch'
-        );
+        await savedObjectService.updateDataStream({ ...dataStreamData }, '0.0.0', 'patch');
 
-        await savedObjectService.updateDataStream(
-          { ...dataStreamData },
-          '0.0.1',
-          'patch'
-        );
+        await savedObjectService.updateDataStream({ ...dataStreamData }, '0.0.1', 'patch');
 
         const updated = await savedObjectService.updateDataStream(
           { ...dataStreamData },
@@ -954,7 +957,10 @@ describe('AutomaticImportSavedObjectService', () => {
         expect(updated.attributes.metadata?.version).toBe('0.1.0');
 
         await savedObjectsClient.delete(DATA_STREAM_SAVED_OBJECT_TYPE, 'test-ds-minor-reset');
-        await savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, 'ds-minor-reset-integration');
+        await savedObjectsClient.delete(
+          INTEGRATION_SAVED_OBJECT_TYPE,
+          'ds-minor-reset-integration'
+        );
       });
     });
 
@@ -995,13 +1001,19 @@ describe('AutomaticImportSavedObjectService', () => {
 
           // Check that we have at least the 2 data streams we created
           expect(result.total).toBeGreaterThanOrEqual(2);
-          const ids = result.saved_objects.map(obj => obj.id);
+          const ids = result.saved_objects.map((obj) => obj.id);
           expect(ids).toContain('test-getall-ds-1');
           expect(ids).toContain('test-getall-ds-2');
         } finally {
-          await savedObjectsClient.delete(DATA_STREAM_SAVED_OBJECT_TYPE, 'test-getall-ds-1').catch(() => { });
-          await savedObjectsClient.delete(DATA_STREAM_SAVED_OBJECT_TYPE, 'test-getall-ds-2').catch(() => { });
-          await savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, 'getall-ds-integration').catch(() => { });
+          await savedObjectsClient
+            .delete(DATA_STREAM_SAVED_OBJECT_TYPE, 'test-getall-ds-1')
+            .catch(() => {});
+          await savedObjectsClient
+            .delete(DATA_STREAM_SAVED_OBJECT_TYPE, 'test-getall-ds-2')
+            .catch(() => {});
+          await savedObjectsClient
+            .delete(INTEGRATION_SAVED_OBJECT_TYPE, 'getall-ds-integration')
+            .catch(() => {});
         }
       });
     });
@@ -1044,10 +1056,10 @@ describe('AutomaticImportSavedObjectService', () => {
         const result = await savedObjectService.findAllDataStreamsByIntegrationId(integrationId);
 
         expect(result.total).toBe(2);
-        result.saved_objects.forEach(obj => {
+        result.saved_objects.forEach((obj) => {
           expect(obj.attributes.integration_id).toBe(integrationId);
         });
-        const ids = result.saved_objects.map(obj => obj.id);
+        const ids = result.saved_objects.map((obj) => obj.id);
         expect(ids).toContain('test-find-ds-1');
         expect(ids).toContain('test-find-ds-2');
 
@@ -1058,7 +1070,9 @@ describe('AutomaticImportSavedObjectService', () => {
       });
 
       it('should return empty results when integration has no data streams', async () => {
-        const result = await savedObjectService.findAllDataStreamsByIntegrationId('non-existent-integration');
+        const result = await savedObjectService.findAllDataStreamsByIntegrationId(
+          'non-existent-integration'
+        );
 
         expect(result.total).toBe(0);
         expect(result.saved_objects).toEqual([]);
@@ -1096,9 +1110,7 @@ describe('AutomaticImportSavedObjectService', () => {
         expect(integration.attributes.data_stream_count).toBe(1);
 
         await savedObjectService.deleteDataStream('test-delete-data-stream');
-        await expect(
-          savedObjectService.getDataStream('test-delete-data-stream')
-        ).rejects.toThrow();
+        await expect(savedObjectService.getDataStream('test-delete-data-stream')).rejects.toThrow();
 
         // Verify integration count was decremented to 0
         integration = await savedObjectService.getIntegration(integrationId);
@@ -1198,7 +1210,7 @@ describe('AutomaticImportSavedObjectService', () => {
       savedObjectsClient = internalRepo as unknown as SavedObjectsClientContract;
 
       savedObjectService = new AutomaticImportSavedObjectService({
-        savedObjectsClient: savedObjectsClient,
+        savedObjectsClient,
         logger: mockLogger,
         security: mockSecurity,
       });
@@ -1217,7 +1229,10 @@ describe('AutomaticImportSavedObjectService', () => {
           version: '0.0.0',
         },
       };
-      const createdIntegration = await savedObjectService.insertIntegration(mockRequest, integrationData);
+      const createdIntegration = await savedObjectService.insertIntegration(
+        mockRequest,
+        integrationData
+      );
       expect(createdIntegration.attributes.status).toBe(TASK_STATUSES.pending);
 
       await savedObjectService.insertDataStream(mockRequest, {
@@ -1298,4 +1313,3 @@ describe('AutomaticImportSavedObjectService', () => {
     });
   });
 });
-
