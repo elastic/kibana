@@ -7,13 +7,10 @@
 
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import { GenericValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
-import {
-  MCPExecutorParams,
-  MCP_CONNECTOR_TYPE_ID,
-  MCP_CONNECTOR_TITLE,
-} from '@kbn/mcp-connector-common';
-import { MCPConnector } from './types';
+import type { GenericValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { MCPExecutorParams } from '@kbn/mcp-connector-common';
+import { MCP_CONNECTOR_TYPE_ID, MCP_CONNECTOR_TITLE } from '@kbn/mcp-connector-common';
+import type { MCPConnector } from './types';
 
 export function getConnectorType(): MCPConnector {
   return {

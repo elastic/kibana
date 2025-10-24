@@ -11,28 +11,32 @@ import { MCP_NAMESPACE_PREFIX } from './namespaces';
 /**
  * Create provider metadata for an MCP connector tool.
  *
- * @param connectorId - The ID of the MCP connector
+ * @param uniqueId - The unique ID of the MCP connector (from config.uniqueId)
  * @param connectorName - The human-readable name of the connector
+ * @param description - Optional description of when to use this MCP server (for LLM context)
  * @returns ToolProviderMetadata object
  *
  * @example
- * const metadata = createProviderMetadata('github-connector', 'GitHub MCP Server');
+ * const metadata = createProviderMetadata('github', 'GitHub MCP Server', 'Use for GitHub operations');
  * // Returns:
  * // {
- * //   id: 'mcp.github-connector',
+ * //   id: 'mcp.github',
  * //   name: 'GitHub MCP Server',
  * //   type: 'mcp',
- * //   connectorId: 'github-connector'
+ * //   uniqueId: 'github',
+ * //   description: 'Use for GitHub operations'
  * // }
  */
 export function createProviderMetadata(
-  connectorId: string,
-  connectorName: string
+  uniqueId: string,
+  connectorName: string,
+  description?: string
 ): ToolProviderMetadata {
   return {
-    id: `${MCP_NAMESPACE_PREFIX}.${connectorId}`,
+    id: `${MCP_NAMESPACE_PREFIX}.${uniqueId}`,
     name: connectorName,
     type: 'mcp' as const,
-    connectorId,
+    uniqueId,
+    ...(description && { description }),
   };
 }

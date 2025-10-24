@@ -6,13 +6,14 @@
  */
 
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
-import {
+import type {
   MCPCallToolParams,
   MCPConnectorSubActionType,
   MCPExecutorParams,
   MCPListToolsParams,
 } from '@kbn/mcp-connector-common';
-import { ActionConnectorMode, ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EVENT_ACTION_LABEL } from './translations';
 

@@ -232,16 +232,21 @@ async function discoverToolsFromConnector({
       return [];
     }
 
+    // Extract uniqueId and description from connector config
+    // If uniqueId is not provided in config, default to connector.id
+    const uniqueId = ((connector.config as any)?.uniqueId as string | undefined) || connector.id;
+    const description = (connector.config as any)?.description as string | undefined;
+
     // Transform each MCP tool to OneChat format
     const tools = response.tools.map((mcpTool) => {
       // Add provider metadata to the tool
       const toolWithMetadata: MCPToolWithMetadata = {
         ...mcpTool,
-        provider: createProviderMetadata(connector.id, connector.name),
+        provider: createProviderMetadata(uniqueId, connector.name, description),
       };
 
       // Override the provider ID to include the full tool ID
-      toolWithMetadata.provider.id = createMcpToolId(connector.id, mcpTool.name);
+      toolWithMetadata.provider.id = createMcpToolId(uniqueId, mcpTool.name);
 
       return convertMcpToolToOnechatTool(toolWithMetadata, connector.id, actionsClient);
     });

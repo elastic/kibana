@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Type, schema } from '@kbn/config-schema';
-import {
+import type { Type } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type {
   CallToolRequest,
   MCPConnectorConfig,
   MCPConnectorSecrets,
@@ -14,27 +15,62 @@ import {
   MCPCallToolParams,
   MCPListToolsParams,
   MCPConnectorHTTPServiceConfig,
+  MCPConnectorSecretsNoAuth,
+} from '@kbn/mcp-connector-common';
+import {
   MCP_CONNECTOR_AUTH_TYPE_NONE,
   MCP_CONNECTOR_AUTH_TYPE_API_KEY,
   MCP_CONNECTOR_AUTH_TYPE_BASIC,
-  MCPConnectorSecretsNoAuth,
 } from '@kbn/mcp-connector-common';
+import type { MCPConnectorAuth } from '@kbn/mcp-connector-common/src/auth';
+
+// Schema for new extensible auth system (Epic 4)
+const MCPConnectorAuthNoneSchema = schema.object({
+  type: schema.literal('none'),
+});
+
+const MCPConnectorAuthHeaderSchema = schema.object({
+  type: schema.literal('header'),
+  headers: schema.arrayOf(
+    schema.object({
+      name: schema.string({ minLength: 1 }),
+      value: schema.string(),
+    })
+  ),
+});
+
+const MCPConnectorAuthOAuthSchema = schema.object({
+  type: schema.literal('oauth'),
+  oauthConfig: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+});
+
+const MCPConnectorAuthSchema: Type<MCPConnectorAuth> = schema.oneOf([
+  MCPConnectorAuthNoneSchema,
+  MCPConnectorAuthHeaderSchema,
+  MCPConnectorAuthOAuthSchema,
+]);
 
 export const MCPConnectorHTTPServiceConfigSchema: Type<MCPConnectorHTTPServiceConfig> =
   schema.object({
     http: schema.object({
       url: schema.string(),
     }),
-    authType: schema.oneOf([
-      schema.literal(MCP_CONNECTOR_AUTH_TYPE_NONE),
-      schema.literal(MCP_CONNECTOR_AUTH_TYPE_BASIC),
-      schema.literal(MCP_CONNECTOR_AUTH_TYPE_API_KEY),
-    ]),
+    // New extensible auth field (Epic 4)
+    auth: schema.maybe(MCPConnectorAuthSchema),
+    // Legacy authType field (kept for backward compatibility)
+    authType: schema.maybe(
+      schema.oneOf([
+        schema.literal(MCP_CONNECTOR_AUTH_TYPE_NONE),
+        schema.literal(MCP_CONNECTOR_AUTH_TYPE_BASIC),
+        schema.literal(MCP_CONNECTOR_AUTH_TYPE_API_KEY),
+      ])
+    ),
   });
 
 export const MCPConnectorConfigSchema: Type<MCPConnectorConfig> = schema.allOf([
   schema.object({
-    version: schema.maybe(schema.string()),
+    uniqueId: schema.maybe(schema.string({ minLength: 1 })),
+    description: schema.maybe(schema.string()),
     service: schema.oneOf([MCPConnectorHTTPServiceConfigSchema]),
   }),
 ]);

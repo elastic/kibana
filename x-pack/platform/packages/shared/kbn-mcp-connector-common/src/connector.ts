@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { MCPConnectorAuth } from './auth';
+
+// Legacy auth types (kept for backward compatibility)
 export const MCP_CONNECTOR_AUTH_TYPE_BASIC = 'basic';
 export const MCP_CONNECTOR_AUTH_TYPE_API_KEY = 'apiKey';
 export const MCP_CONNECTOR_AUTH_TYPE_NONE = 'none';
@@ -13,21 +16,29 @@ export type MCPConnectorAuthTypeNone = typeof MCP_CONNECTOR_AUTH_TYPE_NONE;
 export type MCPConnectorAuthTypeBasic = typeof MCP_CONNECTOR_AUTH_TYPE_BASIC;
 export type MCPConnectorAuthTypeApiKey = typeof MCP_CONNECTOR_AUTH_TYPE_API_KEY;
 
-export interface MCPConnectorHTTPServiceConfig {
-  http: {
-    url: string;
-  };
-  authType: MCPConnectorAuthType;
-}
-
-export type MCPConnectorAuthType =
+// Legacy authType field for backward compatibility
+export type MCPConnectorLegacyAuthType =
   | MCPConnectorAuthTypeBasic
   | MCPConnectorAuthTypeApiKey
   | MCPConnectorAuthTypeNone;
 
+export interface MCPConnectorHTTPServiceConfig {
+  http: {
+    url: string;
+  };
+  // New extensible auth system (Epic 4)
+  auth?: MCPConnectorAuth;
+  // Legacy authType field (kept for backward compatibility)
+  authType?: MCPConnectorLegacyAuthType;
+}
+
+// Deprecated: Use MCPConnectorLegacyAuthType instead
+export type MCPConnectorAuthType = MCPConnectorLegacyAuthType;
+
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type MCPConnectorConfig = {
-  version?: string;
+  uniqueId?: string;
+  description?: string;
   service: MCPConnectorHTTPServiceConfig;
 };
 

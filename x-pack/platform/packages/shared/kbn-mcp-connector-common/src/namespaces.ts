@@ -32,55 +32,55 @@ export function isMcpToolId(toolId: string): boolean {
 }
 
 /**
- * Create an MCP tool ID from a connector ID and tool name.
+ * Create an MCP tool ID from a unique ID and tool name.
  *
- * @param connectorId The ID of the MCP connector
+ * @param uniqueId The unique ID of the MCP connector (from config.uniqueId)
  * @param toolName The name of the tool from the MCP server
  * @returns The namespaced MCP tool ID
  *
  * @example
- * createMcpToolId('github-connector', 'get_issues')
- * // Returns: 'mcp.github-connector.get_issues'
+ * createMcpToolId('github', 'get_issues')
+ * // Returns: 'mcp.github.get_issues'
  */
-export function createMcpToolId(connectorId: string, toolName: string): string {
-  return `${MCP_NAMESPACE_PREFIX}.${connectorId}.${toolName}`;
+export function createMcpToolId(uniqueId: string, toolName: string): string {
+  return `${MCP_NAMESPACE_PREFIX}.${uniqueId}.${toolName}`;
 }
 
 /**
- * Parse an MCP tool ID to extract the connector ID and tool name.
+ * Parse an MCP tool ID to extract the unique ID and tool name.
  *
  * @param toolId The MCP tool ID to parse
- * @returns Object with connectorId and toolName, or null if not a valid MCP tool ID
+ * @returns Object with uniqueId and toolName, or null if not a valid MCP tool ID
  *
  * @example
- * parseMcpToolId('mcp.github-connector.get_issues')
- * // Returns: { connectorId: 'github-connector', toolName: 'get_issues' }
+ * parseMcpToolId('mcp.github.get_issues')
+ * // Returns: { uniqueId: 'github', toolName: 'get_issues' }
  *
  * parseMcpToolId('platform.core.search')
  * // Returns: null (not an MCP tool)
  */
-export function parseMcpToolId(toolId: string): { connectorId: string; toolName: string } | null {
+export function parseMcpToolId(toolId: string): { uniqueId: string; toolName: string } | null {
   if (!isMcpToolId(toolId)) {
     return null;
   }
 
-  // Split on dots: ['mcp', connectorId, ...toolNameParts]
+  // Split on dots: ['mcp', uniqueId, ...toolNameParts]
   const parts = toolId.split('.');
 
   if (parts.length < 3) {
     return null;
   }
 
-  const [_mcp, connectorId, ...toolNameParts] = parts;
+  const [_mcp, uniqueId, ...toolNameParts] = parts;
   const toolName = toolNameParts.join('.');
 
-  // Validate that connectorId and toolName are not empty
-  if (!connectorId || !toolName) {
+  // Validate that uniqueId and toolName are not empty
+  if (!uniqueId || !toolName) {
     return null;
   }
 
   return {
-    connectorId,
+    uniqueId,
     toolName,
   };
 }

@@ -17,38 +17,54 @@ describe('Provider Metadata', () => {
         id: 'mcp.github-connector',
         name: 'GitHub MCP Server',
         type: 'mcp',
-        connectorId: 'github-connector',
+        uniqueId: 'github-connector',
+      });
+    });
+
+    it('should include optional description when provided', () => {
+      const metadata = createProviderMetadata(
+        'github-connector',
+        'GitHub MCP Server',
+        'Use for GitHub operations'
+      );
+
+      expect(metadata).toEqual({
+        id: 'mcp.github-connector',
+        name: 'GitHub MCP Server',
+        type: 'mcp',
+        uniqueId: 'github-connector',
+        description: 'Use for GitHub operations',
       });
     });
 
     it('should handle different connector IDs', () => {
       const testCases: Array<{
-        connectorId: string;
+        uniqueId: string;
         connectorName: string;
         expectedId: string;
       }> = [
         {
-          connectorId: 'slack',
+          uniqueId: 'slack',
           connectorName: 'Slack Connector',
           expectedId: 'mcp.slack',
         },
         {
-          connectorId: 'github-enterprise',
+          uniqueId: 'github-enterprise',
           connectorName: 'GitHub Enterprise',
           expectedId: 'mcp.github-enterprise',
         },
         {
-          connectorId: 'filesystem-local',
+          uniqueId: 'filesystem-local',
           connectorName: 'Local Filesystem',
           expectedId: 'mcp.filesystem-local',
         },
       ];
 
-      testCases.forEach(({ connectorId, connectorName, expectedId }) => {
-        const metadata = createProviderMetadata(connectorId, connectorName);
+      testCases.forEach(({ uniqueId, connectorName, expectedId }) => {
+        const metadata = createProviderMetadata(uniqueId, connectorName);
         expect(metadata.id).toBe(expectedId);
         expect(metadata.name).toBe(connectorName);
-        expect(metadata.connectorId).toBe(connectorId);
+        expect(metadata.uniqueId).toBe(uniqueId);
       });
     });
 
@@ -78,7 +94,7 @@ describe('Provider Metadata', () => {
         'id',
         'name',
         'type',
-        'connectorId',
+        'uniqueId',
       ];
 
       requiredFields.forEach((field) => {
@@ -123,7 +139,7 @@ describe('Provider Metadata', () => {
       expect(tool.provider).toBeDefined();
       expect(tool.provider?.id).toBe('mcp.slack-connector');
       expect(tool.provider?.type).toBe('mcp');
-      expect(tool.provider?.connectorId).toBe('slack-connector');
+      expect(tool.provider?.uniqueId).toBe('slack-connector');
     });
 
     it('should work with CallToolResponse interface', () => {
@@ -153,10 +169,10 @@ describe('Provider Metadata', () => {
       expect(metadata.id).toBeDefined(); // Unique identifier
       expect(metadata.name).toBeDefined(); // Human-readable name
       expect(metadata.type).toBeDefined(); // Provider type
-      expect(metadata.connectorId).toBeDefined(); // Source connector
+      expect(metadata.uniqueId).toBeDefined(); // Source connector unique ID
 
       // Verify we can construct an audit message
-      const auditMessage = `Tool provided by ${metadata.name} (${metadata.type}) via connector ${metadata.connectorId}`;
+      const auditMessage = `Tool provided by ${metadata.name} (${metadata.type}) via connector ${metadata.uniqueId}`;
       expect(auditMessage).toBe(
         'Tool provided by Production MCP Connector (mcp) via connector production-connector'
       );

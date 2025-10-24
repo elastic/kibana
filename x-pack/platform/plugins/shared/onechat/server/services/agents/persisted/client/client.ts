@@ -65,7 +65,7 @@ export const createClient = async ({
   const storage = createStorage({ logger, esClient });
   const user = { id: authUser.profile_uid!, username: authUser.username };
 
-  return new AgentClientImpl({ storage, user, request, space, toolsService });
+  return new AgentClientImpl({ storage, user, request, space, toolsService, logger });
 };
 
 class AgentClientImpl implements AgentClient {
@@ -74,6 +74,7 @@ class AgentClientImpl implements AgentClient {
   private readonly storage: AgentProfileStorage;
   private readonly toolsService: ToolsServiceStart;
   private readonly user: UserIdAndName;
+  private readonly logger: Logger;
 
   constructor({
     storage,
@@ -81,18 +82,21 @@ class AgentClientImpl implements AgentClient {
     user,
     request,
     space,
+    logger,
   }: {
     storage: AgentProfileStorage;
     toolsService: ToolsServiceStart;
     user: UserIdAndName;
     request: KibanaRequest;
     space: string;
+    logger: Logger;
   }) {
     this.storage = storage;
     this.toolsService = toolsService;
     this.request = request;
     this.user = user;
     this.space = space;
+    this.logger = logger;
   }
 
   async get(agentId: string): Promise<PersistedAgentDefinition> {
@@ -169,8 +173,14 @@ class AgentClientImpl implements AgentClient {
       throw createAgentNotFoundError({ agentId });
     }
 
+    // Validate and auto-filter unavailable tools
     if (profileUpdate.configuration?.tools) {
-      await this.validateAgentToolSelection(profileUpdate.configuration.tools);
+      const filteredTools = await this.validateAgentToolSelection(
+        profileUpdate.configuration.tools,
+        { autoFilter: true }
+      );
+      // Update the profile with filtered tools
+      profileUpdate.configuration.tools = filteredTools;
     }
 
     const updatedConversation = updateRequestToEs({
@@ -205,17 +215,31 @@ class AgentClientImpl implements AgentClient {
   }
 
   // Agent tool selection validation helper
-  private async validateAgentToolSelection(toolSelection: ToolSelection[]) {
-    const errors = await validateToolSelection({
+  private async validateAgentToolSelection(
+    toolSelection: ToolSelection[],
+    options: { autoFilter?: boolean } = {}
+  ): Promise<ToolSelection[]> {
+    const result = await validateToolSelection({
       toolRegistry: await this.toolsService.getRegistry({ request: this.request }),
       request: this.request,
       toolSelection,
+      autoFilter: options.autoFilter,
     });
-    if (errors.length > 0) {
+
+    if (result.errors.length > 0) {
       throw createBadRequestError(
-        `Agent tool selection validation failed:\n` + errors.map((e) => `- ${e}`).join('\n')
+        `Agent tool selection validation failed:\n` + result.errors.map((e) => `- ${e}`).join('\n')
       );
     }
+
+    // Log warning if tools were filtered out
+    if (result.filteredTools.length > 0) {
+      this.logger.warn(
+        `Agent tools auto-filtered: removed ${result.filteredTools.length} unavailable tools: ${result.filteredTools.join(', ')}`
+      );
+    }
+
+    return result.filteredSelection;
   }
 
   private async exists(agentId: string): Promise<boolean> {

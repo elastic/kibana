@@ -72,19 +72,19 @@ describe('MCP Namespaces', () => {
   describe('parseMcpToolId', () => {
     it('should parse valid MCP tool IDs', () => {
       expect(parseMcpToolId('mcp.github.get_issues')).toEqual({
-        connectorId: 'github',
+        uniqueId: 'github',
         toolName: 'get_issues',
       });
 
       expect(parseMcpToolId('mcp.slack-connector.send_message')).toEqual({
-        connectorId: 'slack-connector',
+        uniqueId: 'slack-connector',
         toolName: 'send_message',
       });
     });
 
     it('should handle tool names with dots', () => {
       expect(parseMcpToolId('mcp.my-connector.namespace.tool.name')).toEqual({
-        connectorId: 'my-connector',
+        uniqueId: 'my-connector',
         toolName: 'namespace.tool.name',
       });
     });
@@ -104,14 +104,14 @@ describe('MCP Namespaces', () => {
     });
 
     it('should be reversible with createMcpToolId', () => {
-      const connectorId = 'github-connector';
+      const uniqueId = 'github-connector';
       const toolName = 'get.issues';
 
-      const toolId = createMcpToolId(connectorId, toolName);
+      const toolId = createMcpToolId(uniqueId, toolName);
       const parsed = parseMcpToolId(toolId);
 
       expect(parsed).not.toBeNull();
-      expect(parsed!.connectorId).toBe(connectorId);
+      expect(parsed!.uniqueId).toBe(uniqueId);
       expect(parsed!.toolName).toBe(toolName);
     });
   });
@@ -241,11 +241,11 @@ describe('MCP Namespaces', () => {
 
   describe('integration scenarios', () => {
     it('should enforce MCP namespace for MCP connector tools', () => {
-      const connectorId = 'github-connector';
+      const uniqueId = 'github-connector';
       const toolName = 'get_issues';
 
       // Create MCP tool ID
-      const toolId = createMcpToolId(connectorId, toolName);
+      const toolId = createMcpToolId(uniqueId, toolName);
       expect(toolId).toBe('mcp.github-connector.get_issues');
 
       // Verify it's an MCP tool
@@ -253,7 +253,7 @@ describe('MCP Namespaces', () => {
 
       // Parse it back
       const parsed = parseMcpToolId(toolId);
-      expect(parsed).toEqual({ connectorId, toolName });
+      expect(parsed).toEqual({ uniqueId, toolName });
 
       // Validate namespace (MCP tools should use 'mcp' namespace)
       expect(() => {

@@ -17,7 +17,7 @@ import { getHandlerWrapper } from './wrap_handler';
  * These routes provide discovery and inspection of MCP connectors
  * and their tools for use in OneChat agents.
  */
-export function registerMCPConnectorRoutes({ router, logger }: RouteDependencies) {
+export function registerMCPConnectorRoutes({ router, logger, coreSetup }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
   /**
@@ -44,21 +44,23 @@ export function registerMCPConnectorRoutes({ router, logger }: RouteDependencies
     })
     .addVersion(
       {
-        version: '2023-10-31',
+        version: '1',
         validate: {
           request: {},
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { actions } = ctx;
-
         try {
+          // Get actions client from start services
+          const [, { actions }] = await coreSetup.getStartServices();
+          const actionsClient = await actions.getActionsClientWithRequest(request);
+
           // Get all connectors via Actions client (automatically space-filtered)
-          const allConnectors = await actions.getActionsClient().getAll();
+          const allConnectors = await actionsClient.getAll();
 
           // Filter to MCP connectors only
           const mcpConnectors = allConnectors.filter(
-            (connector) => connector.actionTypeId === MCP_CONNECTOR_TYPE_ID
+            (connector: any) => connector.actionTypeId === MCP_CONNECTOR_TYPE_ID
           );
 
           logger.debug(`Found ${mcpConnectors.length} MCP connectors in current space`);
@@ -66,7 +68,7 @@ export function registerMCPConnectorRoutes({ router, logger }: RouteDependencies
           // Return connector metadata
           return response.ok({
             body: {
-              connectors: mcpConnectors.map((connector) => ({
+              connectors: mcpConnectors.map((connector: any) => ({
                 id: connector.id,
                 name: connector.name,
                 actionTypeId: connector.actionTypeId,
@@ -111,7 +113,7 @@ export function registerMCPConnectorRoutes({ router, logger }: RouteDependencies
     })
     .addVersion(
       {
-        version: '2023-10-31',
+        version: '1',
         validate: {
           request: {
             params: schema.object({
@@ -123,11 +125,12 @@ export function registerMCPConnectorRoutes({ router, logger }: RouteDependencies
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { actions } = ctx;
         const { id: connectorId } = request.params;
 
         try {
-          const actionsClient = actions.getActionsClient();
+          // Get actions client from start services
+          const [, { actions }] = await coreSetup.getStartServices();
+          const actionsClient = await actions.getActionsClientWithRequest(request);
 
           // Verify connector exists and is MCP type
           const connector = await actionsClient.get({ id: connectorId });

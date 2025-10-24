@@ -52,17 +52,31 @@ export class MCPConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
 
     const headers = new Headers();
 
-    if (service.authType === 'apiKey') {
-      const apiKeySecrets = secrets as MCPConnectorSecretsAPIKey;
-      headers.set('Authorization', `ApiKey ${apiKeySecrets.auth.apiKey}`);
-    } else if (service.authType === 'basic') {
-      const basicAuth = secrets as MCPConnectorSecretsBasicAuth;
-      headers.set(
-        'Authorization',
-        `Basic ${Buffer.from(`${basicAuth.auth.username}:${basicAuth.auth.password}`).toString(
-          'base64'
-        )}`
-      );
+    // New extensible auth system (Epic 4) - preferred over legacy
+    if (service.auth) {
+      // Use new auth system with buildAuthHeaders()
+      const { buildAuthHeaders } = await import('@kbn/mcp-connector-common/src/auth');
+      const authHeaders = buildAuthHeaders(service.auth);
+
+      // Convert Record<string, string> to Headers
+      Object.entries(authHeaders).forEach(([name, value]) => {
+        headers.set(name, value);
+      });
+    } else if (service.authType) {
+      // Legacy auth system (backward compatibility)
+      if (service.authType === 'apiKey') {
+        const apiKeySecrets = secrets as MCPConnectorSecretsAPIKey;
+        headers.set('Authorization', `ApiKey ${apiKeySecrets.auth.apiKey}`);
+      } else if (service.authType === 'basic') {
+        const basicAuth = secrets as MCPConnectorSecretsBasicAuth;
+        headers.set(
+          'Authorization',
+          `Basic ${Buffer.from(`${basicAuth.auth.username}:${basicAuth.auth.password}`).toString(
+            'base64'
+          )}`
+        );
+      }
+      // 'none' - no headers added
     }
 
     const transport = new StreamableHTTPClientTransport(new URL(service.http.url), {

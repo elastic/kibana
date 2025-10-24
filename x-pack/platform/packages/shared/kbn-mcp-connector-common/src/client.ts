@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { OpenAPIV3 } from 'openapi-types';
+import type { OpenAPIV3 } from 'openapi-types';
 
 export interface CallToolRequest {
   name: string;
@@ -33,7 +33,7 @@ export interface CallToolResponse {
  */
 export interface ToolProviderMetadata {
   /**
-   * Provider identifier (e.g., 'mcp.github-connector')
+   * Provider identifier (e.g., 'mcp.github')
    */
   id: string;
   /**
@@ -45,9 +45,13 @@ export interface ToolProviderMetadata {
    */
   type: 'mcp';
   /**
-   * ID of the connector providing this tool
+   * Unique ID of the MCP connector (from config.uniqueId)
    */
-  connectorId: string;
+  uniqueId: string;
+  /**
+   * Optional description of when to use this MCP server (for LLM context)
+   */
+  description?: string;
 }
 
 export interface Tool {
