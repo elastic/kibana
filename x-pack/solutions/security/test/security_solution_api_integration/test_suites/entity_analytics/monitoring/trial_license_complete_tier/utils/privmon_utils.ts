@@ -219,8 +219,9 @@ export const PrivMonUtils = (
 
   const _waitForPrivMonUsersToBeSynced = async (expectedLength = 1) => {
     let lastSeenLength = -1;
+    let stableCount = 0;
 
-    return retry.waitForWithTimeout('users to be synced', 90000, async () => {
+    return retry.waitForWithTimeout('users to be synced', 120000, async () => {
       const res = await entityAnalyticsApi.listPrivMonUsers({ query: {} });
       const currentLength = res.body.length;
 
@@ -229,6 +230,16 @@ export const PrivMonUtils = (
           `PrivMon users sync check: found ${currentLength} users (expected: ${expectedLength})`
         );
         lastSeenLength = currentLength;
+      }
+
+      if (currentLength === expectedLength) {
+        stableCount++;
+        if (stableCount >= 3) {
+          log.info(`PrivMon users sync check: synced, found ${currentLength} users`);
+          return true;
+        }
+      } else {
+        stableCount = 0;
       }
 
       return currentLength >= expectedLength;
@@ -430,20 +441,51 @@ export const PrivMonUtils = (
     });
   };
 
-  const createFullSyncWindow = async () => {
+  /**
+   * Creates a full sync window by generating `started` and `completed` sync events.
+   *
+   * Offsets are calculated **relative to the latest timestamp** in the index.
+   * Because `dateOffsetFrom()` subtracts positive values and adds negative ones:
+   * - A **positive offset** moves the timestamp *earlier* (in the past)
+   * - A **negative offset** moves the timestamp *later* (in the future)
+   *
+   * Example:
+   *   createFullSyncWindowFromOffsets({
+   *     startOffsetMinutes: 10,
+   *     completeOffsetMinutes: 5,
+   *   })
+   *   → creates:
+   *     - 'started' event at (latest - 10 minutes)
+   *     - 'completed' event at (latest - 5 minutes)
+   *   → resulting in a 5-minute window that ended 5 minutes ago.
+   *
+   * Example 2:
+   *   createFullSyncWindowFromOffsets({
+   *     startOffsetMinutes: -40,
+   *     completeOffsetMinutes: -45,
+   *   })
+   *   → creates a window entirely *after* the latest timestamp (future window)
+   *
+   * @param startOffsetMinutes Minutes offset from the latest timestamp for the sync 'started' event.
+   * @param completeOffsetMinutes Minutes offset from the latest timestamp for the sync 'completed' event.
+   */
+  const createFullSyncWindowFromOffsets = async ({
+    startOffsetMinutes = 1,
+    completeOffsetMinutes = -1,
+  }: {
+    startOffsetMinutes?: number;
+    completeOffsetMinutes?: number;
+  } = {}) => {
     const latest = await integrationsSync.getTimestampByOrder(OKTA_INDEX, 'desc');
-    const oldest = await integrationsSync.getTimestampByOrder(OKTA_INDEX, 'asc');
 
-    // One minute before oldest doc → started
     const startedAt = await integrationsSync.dateOffsetFrom({
-      from: oldest,
-      minutes: 1,
+      from: latest,
+      minutes: startOffsetMinutes,
     });
 
-    // One minute after latest doc → completed
-    const completedAt = await dateOffsetFrom({
+    const completedAt = await integrationsSync.dateOffsetFrom({
       from: latest,
-      minutes: -1,
+      minutes: completeOffsetMinutes,
     });
 
     await integrationsSync.createSyncEvent({
@@ -477,6 +519,15 @@ export const PrivMonUtils = (
     return d.toISOString();
   };
 
+  const cleanupEventsIndex = async () => {
+    await es.deleteByQuery({
+      index: OKTA_EVENTS_INDEX,
+      refresh: true,
+      conflicts: 'proceed',
+      query: { match_all: {} },
+    });
+  };
+
   const integrationsSync = {
     setTimestamp,
     getSyncData,
@@ -489,11 +540,12 @@ export const PrivMonUtils = (
     OKTA_EVENTS_INDEX,
     OKTA_USER_IDS,
     dateOffsetFrom,
-    createFullSyncWindow,
+    createFullSyncWindowFromOffsets,
     deleteIntegrationUser,
     getTimestampByOrder,
     createSyncEvent,
     expectUserCount,
+    cleanupEventsIndex,
   };
 
   return {

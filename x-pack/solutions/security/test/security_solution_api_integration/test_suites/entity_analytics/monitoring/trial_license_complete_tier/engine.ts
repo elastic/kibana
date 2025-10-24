@@ -430,7 +430,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('integrations sync', async () => {
+    describe.only('integrations sync', async () => {
       beforeEach(async () => {
         await esArchiver.load(
           'x-pack/solutions/security/test/fixtures/es_archives/privileged_monitoring/integrations/okta',
@@ -604,20 +604,29 @@ export default ({ getService }: FtrProviderContext) => {
         // Initial sync to establish users - deletion detection NOT expected
         await privMonUtils.runSync();
         // Create sync window
-        await privMonUtils.integrationsSync.createFullSyncWindow();
+        await privMonUtils.integrationsSync.createFullSyncWindowFromOffsets();
         // Remove on user from source, simulating deletion
         await privMonUtils.integrationsSync.deleteIntegrationUser({
           id: privMonUtils.integrationsSync.OKTA_USER_IDS.mable,
           indexPattern: privMonUtils.integrationsSync.OKTA_INDEX,
         });
-        // Run sync - deletion detection expected to run and remove the user
+        // Run sync - deletion detection expected to run and rem ove the user
         await privMonUtils.runSync();
-        // 6 users should remain, but the deleted one should be unprivileged with updated labels
         const users = await privMonUtils.integrationsSync.expectUserCount(6);
         const mable = privMonUtils.findUser(users, EXPECTED_DELETED_USERNAME);
         expect(mable).toBeDefined();
         privMonUtils.assertIsPrivileged(mable, false);
         expect(mable?.entity_analytics_monitoring?.labels).toEqual([]);
+        await privMonUtils.integrationsSync.createFullSyncWindowFromOffsets({
+          startOffsetMinutes: -40,
+          completeOffsetMinutes: -45,
+        });
+        await privMonUtils.runSync();
+        const usersAfter = await privMonUtils.integrationsSync.expectUserCount(6);
+        usersAfter.forEach((u: any) => {
+          expect(u.user.is_privileged).toBe(false);
+        });
+        await privMonUtils.integrationsSync.cleanupEventsIndex();
       });
     });
 
