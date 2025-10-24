@@ -33,6 +33,11 @@ import {
   hasLegacyURLTransform,
   getLegacyURLTransform,
 } from './transforms_registry';
+import {
+  getComposableFetchContextFactory,
+  hasComposableFetchContextFactory,
+  registerComposableFetchContextFactory,
+} from './react_embeddable_system/react_embeddable_registry';
 
 export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private stateTransferService: EmbeddableStateTransfer = {} as EmbeddableStateTransfer;
@@ -49,6 +54,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       registerReactEmbeddableFactory,
       registerAddFromLibraryType,
       registerLegacyURLTransform,
+      registerComposableFetchContextFactory,
       registerEnhancement: this.enhancementsRegistry.registerEnhancement,
       transformEnhancementsIn: this.enhancementsRegistry.transformIn,
       transformEnhancementsOut: this.enhancementsRegistry.transformOut,
@@ -67,6 +73,8 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     );
 
     const embeddableStart: EmbeddableStart = {
+      hasComposableFetchContextFactory,
+      getComposableFetchContextFactory,
       getAddFromLibraryComponent: async () => {
         const { AddFromLibraryFlyout } = await import('./add_from_library/add_from_library_flyout');
         return AddFromLibraryFlyout;

@@ -31,7 +31,12 @@ export {
   type CanLockHoverActions,
 } from './interfaces/can_lock_hover_actions';
 export { fetch$, useFetchContext } from './interfaces/fetch/fetch';
-export type { FetchContext } from './interfaces/fetch/fetch_context';
+export {
+  type FetchContext,
+  areFiltersEqualForFetch,
+  areVariablesEqualForFetch,
+  isTimeSliceEqualForFetch,
+} from './interfaces/fetch/fetch_context';
 export {
   type PublishesPauseFetch,
   apiPublishesPauseFetch,
@@ -56,6 +61,11 @@ export {
   type PublishesUnifiedSearch,
   type PublishesWritableUnifiedSearch,
 } from './interfaces/fetch/publishes_unified_search';
+export {
+  type ComposableFetchContext,
+  type PublishesComposableFetchContext,
+  apiPublishesComposableFetchContext,
+} from './interfaces/fetch/composable_fetch_context';
 export {
   apiHasAppContext,
   type EmbeddableAppContext,

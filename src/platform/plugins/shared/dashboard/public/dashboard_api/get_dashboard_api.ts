@@ -38,6 +38,8 @@ import { initializeUnifiedSearchManager } from './unified_search_manager';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { initializeViewModeManager } from './view_mode_manager';
 import { mergeControlGroupStates } from './merge_control_group_states';
+import { initializeComposableFetchContextManager } from './composable_fetch_context_manager';
+import { initializeFetchContextCombiner } from './fetch_context_combiner';
 
 export function getDashboardApi({
   creationOptions,
@@ -89,16 +91,15 @@ export function getDashboardApi({
   );
 
   const controlGroupManager = initializeControlGroupManager(mergedControlGroupState, getReferences);
-
   const dataLoadingManager = initializeDataLoadingManager(layoutManager.api.children$);
   const dataViewsManager = initializeDataViewsManager(
     controlGroupManager.api.controlGroupApi$,
     layoutManager.api.children$
   );
   const settingsManager = initializeSettingsManager(initialState);
+  const composableFetchContextManager = initializeComposableFetchContextManager(layoutManager);
   const unifiedSearchManager = initializeUnifiedSearchManager(
     initialState,
-    controlGroupManager.api.controlGroupApi$,
     settingsManager.api.timeRestore$,
     dataLoadingManager.internalApi.waitForPanelsToLoad$,
     () => unsavedChangesManager.internalApi.getLastSavedState(),
@@ -138,7 +139,13 @@ export function getDashboardApi({
 
   const trackOverlayApi = initializeTrackOverlay(trackPanel.setFocusedPanelId);
 
+  const fetchContextCombiner = initializeFetchContextCombiner({
+    controlGroupManager,
+    unifiedSearchManager,
+    composableFetchContextManager,
+  });
   const dashboardApi = {
+    ...fetchContextCombiner.api,
     ...viewModeManager.api,
     ...dataLoadingManager.api,
     ...dataViewsManager.api,
@@ -252,12 +259,15 @@ export function getDashboardApi({
     },
     internalApi,
     cleanup: () => {
-      dataLoadingManager.cleanup();
-      dataViewsManager.cleanup();
-      searchSessionManager.cleanup();
-      unifiedSearchManager.cleanup();
-      unsavedChangesManager.cleanup();
       layoutManager.cleanup();
+      dataViewsManager.cleanup();
+      dataLoadingManager.cleanup();
+      unifiedSearchManager.cleanup();
+      controlGroupManager.cleanup();
+      searchSessionManager.cleanup();
+      fetchContextCombiner.cleanup();
+      unsavedChangesManager.cleanup();
+      composableFetchContextManager.cleanup();
     },
   };
 }

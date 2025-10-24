@@ -117,13 +117,17 @@ export const listenForCompatibleApi = <ApiType extends unknown>(
   };
 };
 
-export const combineCompatibleChildrenApis = <ApiType extends unknown, PublishingSubjectType>(
+export const combineCompatibleChildrenApis = <
+  ApiType extends unknown,
+  PublishingSubjectType,
+  FlattenedType = PublishingSubjectType
+>(
   api: unknown,
   observableKey: keyof ApiType,
   isCompatible: (api: unknown) => api is ApiType,
-  emptyState: PublishingSubjectType,
-  flattenMethod?: (array: PublishingSubjectType[]) => PublishingSubjectType
-): Observable<PublishingSubjectType> => {
+  emptyState: FlattenedType,
+  flattenMethod?: (array: PublishingSubjectType[]) => FlattenedType
+): Observable<FlattenedType> => {
   if (!api || !apiPublishesChildren(api)) return of();
 
   return api.children$.pipe(
@@ -141,7 +145,7 @@ export const combineCompatibleChildrenApis = <ApiType extends unknown, Publishin
           flattenMethod
             ? flattenMethod
             : (nextCompatible) =>
-                nextCompatible.flat().filter((value) => Boolean(value)) as PublishingSubjectType
+                nextCompatible.flat().filter((value) => Boolean(value)) as FlattenedType
         )
       );
     })

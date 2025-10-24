@@ -9,6 +9,7 @@
 
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { COMPARE_ALL_OPTIONS, onlyDisabledFiltersChanged } from '@kbn/es-query';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import fastIsEqual from 'fast-deep-equal';
 
 export interface FetchContext {
@@ -45,6 +46,14 @@ export const areFiltersEqualForFetch = (currentFilters?: Filter[], lastFilters?:
     // do not compare $state to avoid refreshing when filter is pinned/unpinned (which does not impact results)
     state: false,
   });
+};
+
+export const areVariablesEqualForFetch = (
+  currentVariables?: ESQLControlVariable[],
+  lastVariables?: ESQLControlVariable[]
+) => {
+  // TODO: Actually diff ESQL variables
+  return false;
 };
 
 export const isReloadTimestampEqualForFetch = (

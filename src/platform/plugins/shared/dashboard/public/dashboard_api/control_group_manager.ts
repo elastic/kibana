@@ -10,7 +10,9 @@
 import type { Reference } from '@kbn/content-management-utils';
 import type { ControlsGroupState } from '@kbn/controls-schemas';
 import type { ControlGroupApi } from '@kbn/controls-plugin/public';
-import { BehaviorSubject, first, from, skipWhile, startWith, switchMap } from 'rxjs';
+import { BehaviorSubject, Subscription, first, of, skipWhile, switchMap } from 'rxjs';
+import type { ESQLControlVariable } from '@kbn/esql-types';
+import { areVariablesEqualForFetch } from '@kbn/presentation-publishing';
 
 export const CONTROL_GROUP_EMBEDDABLE_ID = 'CONTROL_GROUP_EMBEDDABLE_ID';
 
@@ -36,18 +38,43 @@ export function initializeControlGroupManager(
     });
   }
 
-  const unPauseWhenControlsAreAvailable = async () => {
-    await untilControlsInitialized();
-    return false;
-  };
-  const isFetchPaused$ = from(unPauseWhenControlsAreAvailable()).pipe(startWith(true));
+  // --------------------------------------------------------------------------------------
+  // Set up control group integration
+  // --------------------------------------------------------------------------------------
+  const controlGroupSubscriptions: Subscription = new Subscription();
+  const controlGroupFilters$ = controlGroupApi$.pipe(
+    switchMap((controlGroupApi) => (controlGroupApi ? controlGroupApi.filters$ : of(undefined)))
+  );
+  const controlGroupTimeslice$ = controlGroupApi$.pipe(
+    switchMap((controlGroupApi) => (controlGroupApi ? controlGroupApi.timeslice$ : of(undefined)))
+  );
+
+  // forward ESQL variables from the control group.
+  const controlGroupEsqlVariables$ = new BehaviorSubject<ESQLControlVariable[]>([]);
+  controlGroupSubscriptions.add(
+    controlGroupApi$
+      .pipe(
+        switchMap((controlGroupApi) => {
+          if (!controlGroupApi) return of([] as ESQLControlVariable[]);
+          return controlGroupApi.esqlVariables$;
+        })
+      )
+      .subscribe((latestVariables) => {
+        if (!areVariablesEqualForFetch(latestVariables, controlGroupEsqlVariables$.value)) {
+          controlGroupEsqlVariables$.next(latestVariables);
+        }
+      })
+  );
 
   return {
     api: {
       controlGroupApi$,
-      isFetchPaused$,
     },
     internalApi: {
+      controlGroupFilters$,
+      controlGroupTimeslice$,
+      controlGroupEsqlVariables$,
+      untilControlsInitialized,
       getStateForControlGroup: () => {
         return {
           rawState: initialState
@@ -77,5 +104,6 @@ export function initializeControlGroupManager(
       setControlGroupApi: (controlGroupApi: ControlGroupApi) =>
         controlGroupApi$.next(controlGroupApi),
     },
+    cleanup: () => {},
   };
 }

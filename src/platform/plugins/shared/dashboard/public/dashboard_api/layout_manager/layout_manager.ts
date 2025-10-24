@@ -358,6 +358,7 @@ export function initializeLayoutManager(
 
   return {
     internalApi: {
+      getInitialChildState: () => initialChildState,
       getSerializedStateForPanel: (panelId: string) => currentChildState[panelId],
       getLastSavedStateForPanel: (panelId: string) => lastSavedChildState[panelId],
       layout$,

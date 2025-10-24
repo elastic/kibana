@@ -33,6 +33,7 @@ export function deserializeLayout(
       },
     };
     childState[panelId] = {
+      type: panel.type,
       rawState: {
         ...panel.config,
       },

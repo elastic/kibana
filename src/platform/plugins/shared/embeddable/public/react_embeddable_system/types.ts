@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ComposableFetchContext } from '@kbn/presentation-publishing';
 import type { DefaultPresentationPanelApi } from '@kbn/presentation-panel-plugin/public/panel_component/types';
 import type {
   CanLockHoverActions,
@@ -86,4 +87,15 @@ export interface EmbeddableFactory<
   buildEmbeddable: (
     props: BuildEmbeddableProps<SerializedState, Api>
   ) => Promise<{ Component: React.FC<{}>; api: Api }>;
+}
+
+export interface ComposableFetchContextFactory<SerializedState extends object = object> {
+  /**
+   * An optional async function that takes the current serialized state and an optional API and returns a
+   * fetchContext. This allows parent APIs to compose fetch context from their children before any fetches
+   * are begun, and regardless of API creation.
+   */
+  buildFetchContext: (
+    serializedState: SerializedPanelState<SerializedState>
+  ) => Promise<ComposableFetchContext>;
 }

@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ControlGroupApi } from '@kbn/controls-plugin/public';
 import type { GlobalQueryStateFromUrl, RefreshInterval } from '@kbn/data-plugin/public';
 import { connectToQueryState, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { COMPARE_ALL_OPTIONS, compareFilters, isFilterPinned } from '@kbn/es-query';
-import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import { diffComparators } from '@kbn/presentation-publishing';
 import fastIsEqual from 'fast-deep-equal';
@@ -30,7 +28,6 @@ import {
   distinctUntilChanged,
   finalize,
   map,
-  of,
   switchMap,
   tap,
 } from 'rxjs';
@@ -45,7 +42,6 @@ export const COMPARE_DEBOUNCE = 100;
 
 export function initializeUnifiedSearchManager(
   initialState: DashboardState,
-  controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>,
   timeRestore$: PublishingSubject<boolean>,
   waitForPanelsToLoad$: Observable<void>,
   getLastSavedState: () => DashboardState | undefined,
@@ -58,7 +54,6 @@ export function initializeUnifiedSearchManager(
   } = dataService.query;
 
   const controlGroupReload$ = new Subject<void>();
-  const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
   const panelsReload$ = new Subject<void>();
   const query$ = new BehaviorSubject<Query | undefined>(initialState.query);
   // setAndSyncQuery method not needed since query synced with 2-way data binding
@@ -96,7 +91,6 @@ export function initializeUnifiedSearchManager(
       timefilterService.setTime(timeRangeOrDefault);
     }
   }
-  const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
   const unifiedSearchFilters$ = new BehaviorSubject<Filter[] | undefined>(initialState.filters);
   // setAndSyncUnifiedSearchFilters method not needed since filters synced with 2-way data binding
   function setUnifiedSearchFilters(unifiedSearchFilters: Filter[] | undefined) {
@@ -104,42 +98,6 @@ export function initializeUnifiedSearchManager(
       unifiedSearchFilters$.next(unifiedSearchFilters);
     }
   }
-
-  // --------------------------------------------------------------------------------------
-  // Set up control group integration
-  // --------------------------------------------------------------------------------------
-  const controlGroupSubscriptions: Subscription = new Subscription();
-  const controlGroupFilters$ = controlGroupApi$.pipe(
-    switchMap((controlGroupApi) => (controlGroupApi ? controlGroupApi.filters$ : of(undefined)))
-  );
-  const controlGroupTimeslice$ = controlGroupApi$.pipe(
-    switchMap((controlGroupApi) => (controlGroupApi ? controlGroupApi.timeslice$ : of(undefined)))
-  );
-
-  // forward ESQL variables from the control group. TODO, this is overcomplicated by the fact that
-  // the control group API is a publishing subject. Instead, the control group API should be a constant
-  const esqlVariables$ = new BehaviorSubject<ESQLControlVariable[]>([]);
-  const controlGroupEsqlVariables$ = controlGroupApi$.pipe(
-    switchMap((controlGroupApi) =>
-      controlGroupApi ? controlGroupApi.esqlVariables$ : of([] as ESQLControlVariable[])
-    )
-  );
-  controlGroupSubscriptions.add(
-    controlGroupEsqlVariables$.subscribe((latestVariables) => esqlVariables$.next(latestVariables))
-  );
-
-  controlGroupSubscriptions.add(
-    combineLatest([unifiedSearchFilters$, controlGroupFilters$]).subscribe(
-      ([unifiedSearchFilters, controlGroupFilters]) => {
-        filters$.next([...(unifiedSearchFilters ?? []), ...(controlGroupFilters ?? [])]);
-      }
-    )
-  );
-  controlGroupSubscriptions.add(
-    controlGroupTimeslice$.subscribe((timeslice) => {
-      if (timeslice !== timeslice$.value) timeslice$.next(timeslice);
-    })
-  );
 
   // --------------------------------------------------------------------------------------
   // Set up unified search integration.
@@ -306,22 +264,20 @@ export function initializeUnifiedSearchManager(
 
   return {
     api: {
-      filters$,
-      esqlVariables$,
+      query$,
+      timeRange$,
+      refreshInterval$,
+      unifiedSearchFilters$,
       forceRefresh: () => {
         controlGroupReload$.next();
         panelsReload$.next();
       },
-      query$,
-      refreshInterval$,
       setFilters: setUnifiedSearchFilters,
       setQuery,
       setTimeRange: setAndSyncTimeRange,
-      timeRange$,
-      timeslice$,
-      unifiedSearchFilters$,
     },
     internalApi: {
+      unifiedSearchFilters$,
       controlGroupReload$,
       startComparing$: (lastSavedState$: BehaviorSubject<DashboardState>) => {
         return combineLatest([
@@ -361,7 +317,6 @@ export function initializeUnifiedSearchManager(
       getState,
     },
     cleanup: () => {
-      controlGroupSubscriptions.unsubscribe();
       unifiedSearchSubscriptions.unsubscribe();
       stopSyncingWithUrl?.();
       stopSyncingAppFilters?.();
