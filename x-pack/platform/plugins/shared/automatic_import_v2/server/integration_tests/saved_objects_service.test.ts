@@ -59,10 +59,10 @@ describe('AutomaticImportSavedObjectService', () => {
 
   afterAll(async () => {
     if (kbnRoot) {
-      await kbnRoot.shutdown().catch(() => { });
+      await kbnRoot.shutdown().catch(() => {});
     }
     if (manageES) {
-      await manageES.stop().catch(() => { });
+      await manageES.stop().catch(() => {});
     }
   });
 
