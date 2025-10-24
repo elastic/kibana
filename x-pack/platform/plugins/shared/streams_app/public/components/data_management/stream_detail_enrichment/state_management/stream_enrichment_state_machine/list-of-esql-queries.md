@@ -62,7 +62,7 @@ FROM logs.linux
 - EVAL literal assignment + GROK
 ```esql
 FROM logs.linux
-| WHERE message LIKE "%ftpd%"
+| WHERE body.text LIKE "%ftpd%"
 | EVAL service.name = "ftpd"
 | GROK body.text "%{IP:client_ip}"
 ```
@@ -70,9 +70,18 @@ FROM logs.linux
 - EVAL copy (simple assignment)
 ```esql
 FROM logs.linux
-| EVAL line = message
+| EVAL line = body.text
 | DISSECT line "%{month} %{rest}"
 ```
+
+- EVAL date parse to date processor
+```esql
+FROM logs.linux
+| GROK message "%{SYSLOGTIMESTAMP:ts} %{GREEDYDATA:_}"
+| EVAL @timestamp = DATE_PARSE(ts, "MMM d HH:mm:ss")
+| GROK body.text "%{IP:client_ip}"
+```
+
 
 ### Windows examples (Wired mapping focus)
 
@@ -104,6 +113,25 @@ FROM logs.linux
 | WHERE host.name IN ("host1", "host2")
 | GROK body.text "%{IP:client_ip}"
 ```
+
+- NOT IN list
+```esql
+FROM logs.linux
+| WHERE host.name NOT IN ("host3", "host4")
+| GROK body.text "%{IP:client_ip}"
+```
+
+<!-- Range examples (BETWEEN) skipped: ES|QL has no BETWEEN; use other examples -->
+
+FROM logs.linux
+| WHERE @timestamp BETWEEN "2025-10-24T09:04:40Z" AND "2025-10-24T09:05:00Z"
+| GROK body.text "%{IP:client_ip}"
+
+
+FROM logs.android
+| WHERE @timestamp BETWEEN "2025-10-24T09:04:45Z" AND "2025-10-24T09:05:10Z"
+| KEEP @timestamp, message
+
 
 ### Mixed field name cases
 

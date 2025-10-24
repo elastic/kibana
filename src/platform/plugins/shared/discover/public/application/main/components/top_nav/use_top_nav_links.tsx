@@ -28,7 +28,7 @@ import { createDataViewDataSource } from '../../../../../common/data_sources';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import type { DiscoverServices } from '../../../../build_services';
 import { STREAMS_APP_LOCATOR_ID } from '@kbn/deeplinks-observability';
-import { esqlReverse } from '@kbn/streamlang';
+import { esqlToStreamlangProcessors, esqlToStreamlangSteps } from '@kbn/streamlang';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import type { AppMenuDiscoverParams } from './app_menu_actions';
 import {
@@ -237,8 +237,8 @@ export const useTopNavLinks = ({
       : undefined;
     const indexPattern = esqlQuery ? getIndexPatternFromESQLQuery(esqlQuery) : '';
     const isSingleTarget = Boolean(indexPattern) && !indexPattern.includes(',') && !indexPattern.includes('*') && !indexPattern.includes(' ');
-    const processors = esqlQuery ? esqlReverse.esqlToStreamlangProcessors(esqlQuery) : [];
-    const stepsV3 = esqlQuery ? esqlReverse.esqlToStreamlangSteps(esqlQuery) : [];
+    const processors = esqlQuery ? esqlToStreamlangProcessors(esqlQuery) : [];
+    const stepsV3 = esqlQuery ? esqlToStreamlangSteps(esqlQuery) : [];
     // Temporary debug removed
     const hasMaterializable = stepsV3.length > 0 || processors.length > 0;
     const isEligible = Boolean(isEsqlMode && isSingleTarget && hasMaterializable);

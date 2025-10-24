@@ -10,6 +10,7 @@ export { streamlangDSLSchema, isActionBlock, isWhereBlock } from './types/stream
 export { transpile as transpileIngestPipeline } from './src/transpilers/ingest_pipeline';
 export { transpile as transpileEsql, conditionToESQL } from './src/transpilers/esql';
 export { reverse as esqlReverse } from './src/transpilers/esql';
+export * from './src/transpilers/esql';
 export * from './types/processors';
 export * from './types/conditions';
 export type * from './types/ui';

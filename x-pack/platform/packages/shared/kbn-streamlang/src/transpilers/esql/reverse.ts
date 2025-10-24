@@ -94,7 +94,7 @@ export function esqlToStreamlangProcessors(
     }
 
     if (isName(command, 'eval')) {
-      // EVAL a = b, c = "lit" → set/copy_from steps
+      // EVAL a = b, c = "lit" → set/copy_from/date steps
       for (const arg of (command as any).args as ESQLAstItem[]) {
         const assign = asBinaryFunc(arg, '=');
         if (!assign) continue;
@@ -106,7 +106,21 @@ export function esqlToStreamlangProcessors(
         const rightCol = right ? asColumn(right) : undefined;
         if (rightCol) {
           processors.push(withWhere({ action: 'set', to: target.text, copy_from: rightCol.text } as any));
-        } else if (right && isLiteral(right)) {
+          continue;
+        }
+        // Map EVAL target = DATE_PARSE(source, pattern)
+        const dateFn = right ? asFunction(right, 'date_parse') : undefined;
+        if (dateFn && Array.isArray((dateFn as any).args)) {
+          const [srcArg, patternArg] = ((dateFn as any).args as ESQLAstItem[]);
+          const srcCol = srcArg ? asColumn(srcArg) : undefined;
+          const pattern = patternArg && (patternArg as any).type === 'literal' ? asStringLiteral(patternArg) : undefined;
+          if (srcCol && pattern) {
+            processors.push(withWhere({ action: 'date', from: srcCol.text, to: target.text, formats: [pattern] } as any));
+            continue;
+          }
+        }
+        
+        if (right && isLiteral(right)) {
           processors.push(withWhere({ action: 'set', to: target.text, value: (right as any).value ?? asStringLiteral(right) } as any));
         }
       }
@@ -140,6 +154,14 @@ function asBinaryFunc(item: ESQLAstItem, name: string): ESQLFunction | undefined
   const isFunction = (item as any)?.type === 'function';
   if (!isFunction) return undefined;
   const f = item as ESQLFunction;
+  return String((f as any).name || '').toLowerCase() === name.toLowerCase() ? f : undefined;
+}
+
+function asFunction(item: ESQLAstItem, name?: string): ESQLFunction | undefined {
+  const isFunction = (item as any)?.type === 'function';
+  if (!isFunction) return undefined;
+  const f = item as ESQLFunction;
+  if (!name) return f;
   return String((f as any).name || '').toLowerCase() === name.toLowerCase() ? f : undefined;
 }
 
@@ -199,7 +221,21 @@ export function esqlToStreamlangSteps(
         const rightCol = right ? asColumn(right) : undefined;
         if (rightCol) {
           steps.push(withWhere({ action: 'set', to: target.text, copy_from: rightCol.text } as any));
-        } else if (right && isLiteral(right)) {
+          continue;
+        }
+        // Map EVAL target = DATE_PARSE(source, pattern)
+        const dateFn = right ? asFunction(right, 'date_parse') : undefined;
+        if (dateFn && Array.isArray((dateFn as any).args)) {
+          const [srcArg, patternArg] = ((dateFn as any).args as ESQLAstItem[]);
+          const srcCol = srcArg ? asColumn(srcArg) : undefined;
+          const pattern = patternArg && (patternArg as any).type === 'literal' ? asStringLiteral(patternArg) : undefined;
+          if (srcCol && pattern) {
+            steps.push(withWhere({ action: 'date', from: srcCol.text, to: target.text, formats: [pattern] } as any));
+            continue;
+          }
+        }
+        
+        if (right && isLiteral(right)) {
           steps.push(withWhere({ action: 'set', to: target.text, value: (right as any).value ?? asStringLiteral(right) } as any));
         }
       }

@@ -120,6 +120,29 @@ export function esqlAstExpressionToCondition(expr: ESQLSingleAstItem): Condition
     return undefined;
   }
 
+  // NOT IN(column, [literals...]) -> AND of inequality
+  if (isFunc(expr)) {
+    const name = String((expr as any).name || '').toUpperCase();
+    if (name === 'NOT IN') {
+      const args = (expr as any).args as ESQLAstItem[];
+      const col = args && isColumn(args[0]) ? (args[0] as ESQLColumn) : undefined;
+      if (!col) return undefined;
+      const rhsNode: any = args.length > 1 ? (args[1] as any) : undefined;
+      let rhsItems: ESQLAstItem[] = [];
+      if (rhsNode && rhsNode.type === 'list' && Array.isArray(rhsNode.values)) {
+        rhsItems = rhsNode.values as ESQLAstItem[];
+      } else {
+        rhsItems = (args.slice(1) as any[]).flatMap((a) => (Array.isArray(a) ? a : [a])) as ESQLAstItem[];
+      }
+      const values: unknown[] = rhsItems.filter(isLiteral).map((l) => literalToJs(l as any));
+      if (values.length === 0) return undefined;
+      if (values.length === 1) return { field: col.text, neq: values[0] } as any;
+      return { and: values.map((v) => ({ field: col.text, neq: v } as any)) } as any;
+    }
+  }
+
+  // BETWEEN is not supported in ES|QL; no handler
+
   // IN(column, [literals...]) -> OR of equality
   if (isFunc(expr, 'in')) {
     const args = (expr as any).args as ESQLAstItem[];
