@@ -24,7 +24,7 @@ import type { DiscoverServices } from '../../build_services';
 /**
  * Dependencies required by profile provider implementations
  */
-export interface ProfileProviderDeps extends DiscoverServices {
+export interface ProfileProviderSharedServicesDeps {
   logsDataAccess?: LogsDataAccessPluginStart;
   apmSourcesAccess?: ApmSourceAccessPluginStart;
   metricsExperience?: MetricsExperiencePluginStart;
@@ -53,7 +53,7 @@ export const createProfileProviderSharedServices = async ({
   logsDataAccess,
   apmSourcesAccess,
   metricsExperience,
-}: ProfileProviderDeps): Promise<ProfileProviderSharedServices> => {
+}: ProfileProviderSharedServicesDeps): Promise<ProfileProviderSharedServices> => {
   const [logsContextService, apmContextService, metricsContextService] = await Promise.all([
     await createLogsContextService({ logsDataAccess }),
     await createApmContextService({ apmSourcesAccess }),
