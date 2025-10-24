@@ -15,7 +15,6 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiPortal,
-  EuiIcon,
   EuiThemeProvider,
   EuiToolTip,
   useEuiTheme,
@@ -54,7 +53,7 @@ const getMinimizedToolbarStyles = (euiTheme: EuiThemeComputed, position: DragPos
         left: ${position.left}px;
       `
     : css`
-        bottom: ${euiTheme.size.xs};
+        bottom: ${euiTheme.size.s};
         left: ${euiTheme.size.s};
       `,
 ];
@@ -62,24 +61,45 @@ const getMinimizedToolbarStyles = (euiTheme: EuiThemeComputed, position: DragPos
 const getMinimizedContentStyles = (euiTheme: EuiThemeComputed) => css`
   display: flex;
   align-items: center;
-  gap: ${euiTheme.size.xs};
-  padding: ${euiTheme.size.xs} ${euiTheme.size.s};
+  gap: 0;
+  padding: 0;
 `;
 
-const getDragHandleStyles = (euiTheme: EuiThemeComputed) => css`
-  display: flex;
+const getMinimizedPanelStyles = (euiTheme: EuiThemeComputed) => css`
+  background-color: ${euiTheme.colors.backgroundBasePlain};
+  border: none;
+  box-shadow: none;
+`;
+
+const getExpandTilePanelStyles = (euiTheme: EuiThemeComputed) => css`
+  background-color:rgb(11, 100, 221);
+  border: none;
+  box-shadow: none;
+`;
+
+const getDragIconStyles = (euiTheme: EuiThemeComputed) => css`
+  width: 24px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  cursor: grab;
-  padding: 0 ${euiTheme.size.xs};
-  user-select: none;
+  border: none;
+  box-shadow: none;
+  background: transparent;
+  &:hover,
+  &:focus,
+  &:active {
+    background: transparent;
+    box-shadow: none;
+  }
 `;
 
+// no-op
+
 const getToolbarPanelStyles = (euiTheme: EuiThemeComputed) => css`
-  border-radius: 0;
-  border-top: 1px solid ${euiTheme.colors.borderBaseAccentSecondary};
-  background-color: ${euiTheme.colors.backgroundLightAccentSecondary};
+  border-radius: 4px 4px 0 0; // top-left, top-right rounded
+  background-color:rgb(11, 100, 221);
   padding: ${euiTheme.size.xs} ${euiTheme.size.s};
+  box-shadow: none; // ensure no top shadow line
 `;
 
 const getToolbarContainerStyles = (euiTheme: EuiThemeComputed) => [
@@ -167,7 +187,7 @@ const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({ envInfo, on
     return () => window.removeEventListener('resize', handleResize);
   }, [dragPosition]);
 
-  const onPointerDown: React.PointerEventHandler<HTMLDivElement> = (event) => {
+  const onPointerDown = (event: React.PointerEvent) => {
     if (!dragRef.current) return;
     const rect = dragRef.current.getBoundingClientRect();
     dragStateRef.current = {
@@ -230,20 +250,30 @@ const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({ envInfo, on
     return (
       <EuiPortal>
         <div ref={dragRef} css={getMinimizedToolbarStyles(euiTheme, dragPosition)}>
-          <EuiPanel paddingSize="none" hasShadow={true} hasBorder={true} css={getMinimizedContentStyles(euiTheme)}>
-            <div onPointerDown={onPointerDown} css={getDragHandleStyles(euiTheme)} aria-label="Drag developer toolbar" title="Drag">
-              <EuiIcon type="grabHorizontal" size="m" />
-            </div>
-            <EuiToolTip content="Expand developer toolbar" disableScreenReaderOutput={true}>
+          <EuiPanel paddingSize="none" hasShadow={false} hasBorder={false} css={[getMinimizedPanelStyles(euiTheme), getMinimizedContentStyles(euiTheme)]}>
+            <EuiToolTip content="Drag" delay="regular">
               <EuiButtonIcon
-                display={'fill'}
-                color={'accentSecondary'}
-                iconType="wrench"
-                size="xs"
-                onClick={onExpandClick}
-                aria-label={'Expand developer toolbar'}
+                iconType="grabHorizontal"
+                color="text"
+                display="empty"
+                size="s"
+                onPointerDown={onPointerDown}
+                aria-label="Drag developer toolbar"
+                css={getDragIconStyles(euiTheme)}
               />
             </EuiToolTip>
+            <EuiPanel paddingSize="none" hasShadow={false} hasBorder={false} css={getExpandTilePanelStyles(euiTheme)}>
+              <EuiToolTip content="Expand developer toolbar" disableScreenReaderOutput={true}>
+                <EuiButtonIcon
+                  display={'empty'}
+                  color={'text'}
+                  iconType="expand"
+                  size="s"
+                  onClick={onExpandClick}
+                  aria-label={'Expand developer toolbar'}
+                />
+              </EuiToolTip>
+            </EuiPanel>
           </EuiPanel>
         </div>
       </EuiPortal>
@@ -252,11 +282,26 @@ const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({ envInfo, on
 
   return (
     <div css={getToolbarContainerStyles(euiTheme)}>
-      {state.isEnabled('errorsMonitor') && <ConsoleErrorIndicator />}
       <EuiPanel css={getToolbarPanelStyles(euiTheme)}>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content="Minimize">
+                  <EuiButtonIcon
+                    iconType="minimize"
+                    size="xs"
+                    color="text"
+                    onClick={toggleMinimized}
+                    aria-label="Minimize developer toolbar"
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+              {state.isEnabled('errorsMonitor') && (
+                <EuiFlexItem grow={false}>
+                  <ConsoleErrorIndicator />
+                </EuiFlexItem>
+              )}
               {envInfo && state.isEnabled('environmentInfo') && (
                 <EuiFlexItem grow={false}>
                   <EnvironmentIndicator env={envInfo} />
@@ -321,17 +366,6 @@ const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({ envInfo, on
                     color="text"
                     onClick={() => setIsSettingsOpen(true)}
                     aria-label="Open developer toolbar settings"
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip content="Minimize">
-                  <EuiButtonIcon
-                    iconType="arrowDown"
-                    size="xs"
-                    color="text"
-                    onClick={toggleMinimized}
-                    aria-label="Minimize developer toolbar"
                   />
                 </EuiToolTip>
               </EuiFlexItem>

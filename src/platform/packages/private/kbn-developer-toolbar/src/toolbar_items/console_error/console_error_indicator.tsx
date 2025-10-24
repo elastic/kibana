@@ -18,123 +18,39 @@ import {
   EuiText,
   useEuiTheme,
   EuiToolTip,
+  EuiThemeProvider,
 } from '@elastic/eui';
-import { css, keyframes } from '@emotion/react';
+import { css } from '@emotion/react';
 import { ConsoleMonitor } from './console_monitor';
 
-const DISPLAY_DURATION = 5000;
+// No auto-dismiss animation in inline light mode
 
-const fadeOut = keyframes`
-  0% {
-    opacity: 1;
-  }
-  95% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
-`;
+const getErrorBoxStyles = (euiTheme: EuiThemeComputed, errorType: 'error' | 'warn') => css`
+  background-color: #FCD883;
+  color: ${euiTheme.colors.text};
 
-const getErrorOverlayStyles = (euiTheme: EuiThemeComputed, errorType: 'error' | 'warn') => css`
-  background-color: ${errorType === 'error'
-    ? euiTheme.colors.backgroundBaseDanger
-    : euiTheme.colors.backgroundBaseWarning};
-  color: ${euiTheme.colors.textParagraph};
-
-  display: flex;
+  display: inline-flex;
   align-items: center;
   white-space: nowrap;
-  animation: ${fadeOut} ${DISPLAY_DURATION}ms ease-out forwards;
-  position: absolute;
+  animation: none;
+  position: relative; // ensure it flows inside toolbar layout
 
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: auto;
   max-width: min(720px, 100%);
   padding: ${euiTheme.size.xxs} ${euiTheme.size.s};
-  height: 100%;
-  z-index: 100;
-
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: -90px;
-    bottom: 0;
-    width: 90px;
-    background: linear-gradient(
-      270deg,
-      transparent,
-      ${errorType === 'error'
-          ? euiTheme.colors.backgroundBaseDanger
-          : euiTheme.colors.backgroundBaseWarning}
-        100%
-    );
-  }
+  border-radius: 4px;
+  margin-top: calc(-1 * ${euiTheme.size.xs});
 `;
 
-export const ConsoleErrorIndicator: React.FC = () => {
+const ErrorInlineBox: React.FC<{
+  error: { message: string; type: 'error' | 'warn' };
+  errorCount: number;
+  iconType: any;
+  iconColor: any;
+  dismissError: () => void;
+}> = ({ error, errorCount, iconType, iconColor, dismissError }) => {
   const { euiTheme } = useEuiTheme();
-  const [error, setError] = useState<{ message: string; type: 'error' | 'warn' } | null>(null);
-  const [errorCount, setErrorCount] = useState<number>(0);
-  const monitorRef = useRef<ConsoleMonitor | null>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    const monitor = new ConsoleMonitor();
-    monitorRef.current = monitor;
-    monitor.startMonitoring();
-
-    const unsubscribe = monitor.subscribe((newError) => {
-      setError(newError);
-
-      // Track error count - increment when new error, reset when cleared
-      if (newError) {
-        setErrorCount((prev) => prev + 1);
-      } else {
-        setErrorCount(0);
-      }
-
-      // Clear any existing timeout
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-
-      // Set auto-dismiss timeout if there's an error
-      if (newError) {
-        timeoutRef.current = setTimeout(() => {
-          monitorRef.current?.dismiss();
-        }, DISPLAY_DURATION);
-      }
-    });
-
-    return () => {
-      unsubscribe();
-      monitor.destroy();
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, []);
-
-  const dismissError = useCallback(() => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-    monitorRef.current?.dismiss();
-  }, []);
-
-  if (!error) {
-    return null;
-  }
-
-  const iconType = error.type === 'error' ? 'warning' : 'alert';
-  const iconColor = error.type === 'error' ? 'danger' : 'warning';
-
   return (
-    <div css={getErrorOverlayStyles(euiTheme, error.type)} key={error.message}>
+    <div css={getErrorBoxStyles(euiTheme, error.type)} key={error.message}>
       <EuiFlexGroup
         gutterSize="xs"
         alignItems="center"
@@ -175,5 +91,70 @@ export const ConsoleErrorIndicator: React.FC = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>
+  );
+};
+
+export const ConsoleErrorIndicator: React.FC = () => {
+  const [error, setError] = useState<{ message: string; type: 'error' | 'warn' } | null>(null);
+  const [errorCount, setErrorCount] = useState<number>(0);
+  const monitorRef = useRef<ConsoleMonitor | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    const monitor = new ConsoleMonitor();
+    monitorRef.current = monitor;
+    monitor.startMonitoring();
+
+    const unsubscribe = monitor.subscribe((newError) => {
+      setError(newError);
+
+      // Track error count - increment when new error, reset when cleared
+      if (newError) {
+        setErrorCount((prev) => prev + 1);
+      } else {
+        setErrorCount(0);
+      }
+
+      // Clear any existing timeout
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+
+      // Do not auto-dismiss; keep visible until user closes
+    });
+
+    return () => {
+      unsubscribe();
+      monitor.destroy();
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
+  const dismissError = useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    monitorRef.current?.dismiss();
+  }, []);
+
+  if (!error) {
+    return null;
+  }
+
+  const iconType = error.type === 'error' ? 'warning' : 'alert';
+  const iconColor = error.type === 'error' ? 'danger' : 'warning';
+
+  return (
+    <EuiThemeProvider colorMode={'light'} wrapperProps={{ cloneElement: true }}>
+      <ErrorInlineBox
+        error={error}
+        errorCount={errorCount}
+        iconType={iconType}
+        iconColor={iconColor}
+        dismissError={dismissError}
+      />
+    </EuiThemeProvider>
   );
 };
