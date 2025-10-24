@@ -20,12 +20,20 @@ tags: ['kibana', 'onboarding', 'dev', 'architecture']
 - Modify data view and save it
 - Delete data view
 
-#### Get list of data view titles and ids
+#### Get list of saved data view titles and ids
 
 ```
-const idsAndTitles = await data.indexPatterns.getIdsWithTitle();
+const idsAndTitles = await data.indexPatterns.getSavedIdsWithTitle();
 idsAndTitles.forEach(({id, title}) => console.log(`Data view id: ${id} title: ${title}`));
 ```
+
+#### Get list of cached data view titles and ids
+
+```
+const idsAndTitles = await data.indexPatterns.getCachedIdsWithTitle();
+idsAndTitles.forEach(({id, title}) => console.log(`Data view id: ${id} title: ${title}`));
+```
+
 
 #### Get default data view and examine fields
 

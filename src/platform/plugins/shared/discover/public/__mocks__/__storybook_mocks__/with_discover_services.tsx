@@ -125,7 +125,7 @@ export const services = {
       },
     },
     dataViews: {
-      getIdsWithTitle: () => Promise.resolve([]),
+      getSavedIdsWithTitle: () => Promise.resolve([]),
       get: () => Promise.resolve({}),
       find: () => Promise.resolve([]),
     },

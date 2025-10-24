@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { within, waitFor, screen } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import type { AppMockRenderer } from '../../../lib/test_utils';
 import { createAppMockRenderer } from '../../../lib/test_utils';
 import type { CreateMaintenanceWindowFormProps } from './create_maintenance_windows_form';
@@ -73,7 +73,7 @@ describe('CreateMaintenanceWindowForm', () => {
         data: {
           dataViews: {
             get: jest.fn(),
-            getIdsWithTitle: jest.fn().mockResolvedValue([]),
+            getSavedIdsWithTitle: jest.fn().mockResolvedValue([]),
             getDefaultDataView: jest.fn(),
           },
         },

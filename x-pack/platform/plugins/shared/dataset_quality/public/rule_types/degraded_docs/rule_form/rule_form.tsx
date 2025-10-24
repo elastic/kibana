@@ -8,20 +8,20 @@
 import {
   EuiComboBox,
   EuiExpression,
+  EuiFormErrorText,
   EuiFormRow,
   EuiSpacer,
   EuiTitle,
-  EuiFormErrorText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataViewSelectPopover } from '@kbn/stack-alerts-plugin/public';
 import {
   ForLastExpression,
   type RuleTypeParamsExpressionProps,
+  ThresholdExpression,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { ThresholdExpression } from '@kbn/triggers-actions-ui-plugin/public';
 import type { DegradedDocsRuleParams } from '@kbn/response-ops-rule-params/degraded_docs';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { i18n } from '@kbn/i18n';
@@ -88,7 +88,7 @@ export const RuleForm: React.FunctionComponent<
         return;
       }
       if (searchConfiguration?.index && !dataView) {
-        const savedDataViews = await dataViews.getIdsWithTitle();
+        const savedDataViews = await dataViews.getSavedIdsWithTitle();
         const savedDataViewId = savedDataViews.find(
           (dv) => dv.title === searchConfiguration?.index
         )?.id;

@@ -36,7 +36,7 @@ async function getTestProps(
   stateContainer.appState.replaceUrlState = replaceUrlState;
   stateContainer.appState.update({ columns: [], ...appState });
   const dataViewList = [dataViewMock as DataViewListItem];
-  jest.spyOn(dataViewsService, 'getIdsWithTitle').mockResolvedValue(dataViewList);
+  jest.spyOn(dataViewsService, 'getSavedIdsWithTitle').mockResolvedValue(dataViewList);
   await stateContainer.internalState.dispatch(internalStateActions.loadDataViewList());
 
   const msgLoading = {

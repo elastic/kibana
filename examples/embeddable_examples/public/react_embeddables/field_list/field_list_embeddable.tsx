@@ -18,12 +18,12 @@ import {
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
-  type SerializedPanelState,
-  type WithAllKeys,
   initializeStateManager,
   initializeTitleManager,
+  type SerializedPanelState,
   titleComparators,
   useBatchedPublishingSubjects,
+  type WithAllKeys,
 } from '@kbn/presentation-publishing';
 import { LazyDataViewPicker, withSuspense } from '@kbn/presentation-util-plugin/public';
 import {
@@ -37,9 +37,9 @@ import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { FIELD_LIST_DATA_VIEW_REF_NAME, FIELD_LIST_ID } from './constants';
 import type {
   FieldListApi,
-  Services,
-  FieldListSerializedState,
   FieldListRuntimeState,
+  FieldListSerializedState,
+  Services,
 } from './types';
 
 const DataViewPicker = withSuspense(LazyDataViewPicker, null);
@@ -76,7 +76,7 @@ const deserializeState = async (
   }
 
   const [allDataViews, defaultDataViewId] = await Promise.all([
-    dataViews.getIdsWithTitle(),
+    dataViews.getSavedIdsWithTitle(),
     dataViews.getDefaultId(),
   ]);
   if (!defaultDataViewId || allDataViews.length === 0) {
@@ -103,7 +103,7 @@ export const getFieldListFactory = (
     type: FIELD_LIST_ID,
     buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
       const state = await deserializeState(dataViews, initialState);
-      const allDataViews = await dataViews.getIdsWithTitle();
+      const allDataViews = await dataViews.getSavedIdsWithTitle();
       const subscriptions = new Subscription();
       const titleManager = initializeTitleManager(initialState?.rawState ?? {});
       const fieldListStateManager = initializeStateManager(state, defaultFieldListState);

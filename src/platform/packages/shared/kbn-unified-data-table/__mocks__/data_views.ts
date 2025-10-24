@@ -32,7 +32,7 @@ export function createDataViewsMock() {
     },
     getDefaultDataView: jest.fn(() => dataViewMock),
     updateSavedObject: jest.fn(),
-    getIdsWithTitle: jest.fn(() => {
+    getSavedIdsWithTitle: jest.fn(() => {
       return Promise.resolve(dataViewMockList);
     }),
     createFilter: jest.fn(),

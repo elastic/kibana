@@ -11,11 +11,11 @@ import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { mockDataViewsService } from '../../../data_views_service/mocks';
 import {
-  getIndexPatternFromTextBasedQuery,
-  loadIndexPatternRefs,
-  getStateFromAggregateQuery,
-  getAllColumns,
   canColumnBeUsedBeInMetricDimension,
+  getAllColumns,
+  getIndexPatternFromTextBasedQuery,
+  getStateFromAggregateQuery,
+  loadIndexPatternRefs,
 } from './utils';
 import type { TextBasedLayerColumn } from './types';
 import { type AggregateQuery } from '@kbn/es-query';
@@ -262,7 +262,7 @@ describe('Text based languages utils', () => {
         { esql: 'FROM my-fake-index-pattern' },
         {
           ...dataViewsMock,
-          getIdsWithTitle: jest.fn().mockReturnValue(
+          getSavedIdsWithTitle: jest.fn().mockReturnValue(
             Promise.resolve([
               { id: '1', title: 'my-fake-index-pattern' },
               { id: '2', title: 'my-fake-restricted-pattern' },
@@ -366,7 +366,7 @@ describe('Text based languages utils', () => {
         { esql: 'FROM my-fake-index-pattern | WHERE time <= ?_tend' },
         {
           ...dataViewsMock,
-          getIdsWithTitle: jest.fn().mockReturnValue(
+          getSavedIdsWithTitle: jest.fn().mockReturnValue(
             Promise.resolve([
               { id: '1', title: 'my-fake-index-pattern' },
               { id: '2', title: 'my-fake-restricted-pattern' },
@@ -470,7 +470,7 @@ describe('Text based languages utils', () => {
         { esql: 'FROM my-fake-index-*' },
         {
           ...dataViewsMock,
-          getIdsWithTitle: jest.fn().mockReturnValue(
+          getSavedIdsWithTitle: jest.fn().mockReturnValue(
             Promise.resolve([
               { id: '1', title: 'my-fake-index-pattern' },
               { id: '2', title: 'my-fake-restricted-pattern' },

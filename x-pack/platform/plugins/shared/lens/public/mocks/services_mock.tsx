@@ -113,7 +113,7 @@ export function makeDefaultServices(
       })
     ) as unknown as DataViewsPublicPluginStart['get']
   );
-  dataViewsMock.getIdsWithTitle.mockImplementation(jest.fn(async () => []));
+  dataViewsMock.getSavedIdsWithTitle.mockImplementation(jest.fn(async () => []));
 
   const navigationStartMock = navigationPluginMock.createStartContract();
 

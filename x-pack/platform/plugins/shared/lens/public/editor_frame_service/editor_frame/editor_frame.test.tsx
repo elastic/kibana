@@ -20,9 +20,10 @@ import type {
 import { coreMock } from '@kbn/core/public/mocks';
 import type { DatasourceMock } from '../../mocks';
 import {
-  createMockVisualization,
-  createMockDatasource,
   createExpressionRendererMock,
+  createMockDatasource,
+  createMockVisualization,
+  mockDataPlugin,
   mockStoreDeps,
   renderWithReduxStore,
 } from '../../mocks';
@@ -30,7 +31,6 @@ import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
-import { mockDataPlugin } from '../../mocks';
 import type { LensAppState } from '../../state_management';
 import { setState } from '../../state_management';
 import { getLensInspectorService } from '../../lens_inspector_service';
@@ -43,7 +43,7 @@ function wrapDataViewsContract() {
   const dataViewsContract = dataViewPluginMocks.createStartContract();
   return {
     ...dataViewsContract,
-    getIdsWithTitle: jest.fn(async () => [
+    getSavedIdsWithTitle: jest.fn(async () => [
       { id: '1', title: 'IndexPatternTitle' },
       { id: '2', title: 'OtherIndexPatternTitle' },
     ]),
