@@ -47,15 +47,51 @@ export function isFullyCompatible(storedFilter: any): boolean {
 }
 
 /**
- * TIER 1.5: High-Fidelity Detection - Requires DSL preservation
+ * Check if this is a phrase filter that can be converted to a simple condition
  */
-export function requiresHighFidelity(storedFilter: any): boolean {
-  // match_phrase queries must preserve exact semantics
+export function isPhraseFilterWithQuery(storedFilter: any): boolean {
+  // match_phrase queries that can be simplified to phrase conditions
   if (storedFilter.query?.match_phrase) {
     return true;
   }
 
-  // Complex match queries with advanced parameters
+  // match queries with phrase type that can be simplified
+  if (storedFilter.query?.match) {
+    const matchValues = Object.values(storedFilter.query.match);
+    const isSimplePhrase = matchValues.some((value: any) => {
+      return (
+        typeof value === 'object' &&
+        value !== null &&
+        value.type === 'phrase' &&
+        !value.analyzer &&
+        !value.fuzziness &&
+        !value.minimum_should_match
+      );
+    });
+    if (isSimplePhrase) {
+      return true;
+    }
+  }
+
+  // meta.type indicates this should be treated as phrase filter
+  if (storedFilter.meta?.type === 'phrase' && storedFilter.query) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * TIER 1.5: High-Fidelity Detection - Requires DSL preservation
+ * Updated to exclude simple phrase filters
+ */
+export function requiresHighFidelity(storedFilter: any): boolean {
+  // Simple phrase filters should be converted, not preserved
+  if (isPhraseFilterWithQuery(storedFilter)) {
+    return false;
+  }
+
+  // Complex match queries with advanced parameters still need DSL preservation
   if (storedFilter.query?.match) {
     const matchValues = Object.values(storedFilter.query.match);
     const hasComplexParams = matchValues.some((value: any) => {

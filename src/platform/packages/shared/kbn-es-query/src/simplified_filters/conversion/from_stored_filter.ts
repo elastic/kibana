@@ -26,6 +26,7 @@ import {
   isEnhancedCompatible,
   isStoredGroupFilter,
   requiresHighFidelity,
+  isPhraseFilterWithQuery,
 } from './type_guards';
 
 /**
@@ -42,14 +43,6 @@ export function fromStoredFilter(storedFilter: any): SimplifiedFilter {
     // Extract base properties from stored filter
     const baseProperties = extractBaseProperties(storedFilter);
 
-    // TIER 1.5: High-Fidelity Check - Preserve as DSL if fidelity required
-    if (requiresHighFidelity(storedFilter)) {
-      return {
-        ...baseProperties,
-        dsl: convertToRawDSLWithReason(storedFilter),
-      } as SimplifiedFilter;
-    }
-
     // TIER 1: Full Compatibility - Direct SimplifiedFilter conversion
     if (isFullyCompatible(storedFilter)) {
       try {
@@ -59,12 +52,13 @@ export function fromStoredFilter(storedFilter: any): SimplifiedFilter {
           condition,
         } as SimplifiedFilter;
       } catch (conversionError) {
-        // If conversion fails, fall through to DSL handling
+        // If conversion fails, fall through to enhanced handling
       }
     }
 
     // TIER 2: Enhanced Compatibility - Parse and simplify when possible
-    if (isEnhancedCompatible(storedFilter)) {
+    // This now includes phrase filters with match_phrase queries
+    if (isEnhancedCompatible(storedFilter) || isPhraseFilterWithQuery(storedFilter)) {
       try {
         const condition = convertWithEnhancement(storedFilter);
         return {
@@ -74,6 +68,14 @@ export function fromStoredFilter(storedFilter: any): SimplifiedFilter {
       } catch (conversionError) {
         // If conversion fails, fall through to DSL handling
       }
+    }
+
+    // TIER 2.5: High-Fidelity Check - Preserve as DSL only for truly complex cases
+    if (requiresHighFidelity(storedFilter)) {
+      return {
+        ...baseProperties,
+        dsl: convertToRawDSLWithReason(storedFilter),
+      } as SimplifiedFilter;
     }
 
     // Handle grouped filters

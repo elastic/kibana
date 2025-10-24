@@ -102,26 +102,20 @@ export function convertFromSimpleCondition(
       break;
 
     case 'is':
-      // Use match query for phrase filters to maintain compatibility
+      // Use match_phrase for better compatibility with original filters
       query = {
-        match: {
-          [condition.field]: {
-            query: condition.value,
-            type: 'phrase',
-          },
+        match_phrase: {
+          [condition.field]: condition.value,
         },
       };
       meta = { ...meta, params: { query: condition.value } };
       break;
 
     case 'is_not':
-      // Use match query for phrase filters to maintain compatibility
+      // Use match_phrase for better compatibility with original filters
       query = {
-        match: {
-          [condition.field]: {
-            query: condition.value,
-            type: 'phrase',
-          },
+        match_phrase: {
+          [condition.field]: condition.value,
         },
       };
       meta = { ...meta, negate: true, params: { query: condition.value } };
@@ -258,12 +252,50 @@ export function convertFromFilterGroup(group: FilterGroup, baseStored: StoredFil
 }
 
 /**
- * Convert DSL filter to stored filter
+ * Convert DSL filter to stored filter with smart type detection
  */
 export function convertFromDSLFilter(dsl: RawDSLFilter, baseStored: StoredFilter): StoredFilter {
+  // Smart type detection - preserve semantic types when possible
+  let type = 'custom';
+  let params: any;
+
+  // Check if this is actually a phrase filter in DSL form
+  if (dsl.query.match_phrase) {
+    type = 'phrase';
+    const field = Object.keys(dsl.query.match_phrase)[0];
+    const value = dsl.query.match_phrase[field];
+    params = { query: typeof value === 'object' ? value.query || value : value };
+  } else if (dsl.query.match) {
+    const field = Object.keys(dsl.query.match)[0];
+    const config = dsl.query.match[field];
+
+    // Check if this is a phrase-type match query
+    if (typeof config === 'object' && config.type === 'phrase') {
+      type = 'phrase';
+      params = { query: config.query };
+    }
+  } else if (dsl.query.term) {
+    type = 'phrase';
+    const field = Object.keys(dsl.query.term)[0];
+    const value = dsl.query.term[field];
+    params = { query: value };
+  } else if (dsl.query.terms) {
+    type = 'phrases';
+    const field = Object.keys(dsl.query.terms)[0];
+    const values = dsl.query.terms[field];
+    params = values;
+  } else if (dsl.query.range) {
+    type = 'range';
+    const field = Object.keys(dsl.query.range)[0];
+    params = dsl.query.range[field];
+  } else if (dsl.query.exists) {
+    type = 'exists';
+  }
+
   const meta = {
     ...baseStored.meta,
-    type: 'custom',
+    type,
+    ...(params ? { params } : {}),
   };
 
   return {
