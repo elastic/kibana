@@ -4,51 +4,50 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import type { Direction, EuiSearchBarProps, CriteriaWithPagination } from '@elastic/eui';
+import type { CriteriaWithPagination, Direction, EuiSearchBarProps } from '@elastic/eui';
 import {
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiIcon,
+  EuiIconTip,
   EuiInMemoryTable,
   useEuiTheme,
-  EuiHighlight,
-  EuiIconTip,
-  EuiButtonIcon,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
+import { i18n } from '@kbn/i18n';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import { Streams } from '@kbn/streams-schema';
-import type { TableRow, SortableField } from './utils';
-import {
-  buildStreamRows,
-  asTrees,
-  enrichStream,
-  shouldComposeTree,
-  filterStreamsByQuery,
-  filterCollapsedStreamRows,
-} from './utils';
-import { StreamsAppSearchBar } from '../streams_app_search_bar';
-import { DocumentsColumn } from './documents_column';
-import { DataQualityColumn } from './data_quality_column';
-import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
+import React, { useState } from 'react';
 import { useStreamDocCountsFetch } from '../../hooks/use_streams_doc_counts_fetch';
 import { useTimefilter } from '../../hooks/use_timefilter';
+import { DiscoverBadgeButton } from '../stream_badges';
+import { StreamPreview } from '../stream_preview';
+import { StreamsAppSearchBar } from '../streams_app_search_bar';
+import { DataQualityColumn } from './data_quality_column';
+import { DocumentsColumn } from './documents_column';
 import { RetentionColumn } from './retention_column';
+import { StreamName } from './stream_name';
 import {
-  NAME_COLUMN_HEADER,
-  RETENTION_COLUMN_HEADER,
-  STREAMS_TABLE_SEARCH_ARIA_LABEL,
-  STREAMS_TABLE_CAPTION_ARIA_LABEL,
-  RETENTION_COLUMN_HEADER_ARIA_LABEL,
-  NO_STREAMS_MESSAGE,
   DATA_QUALITY_COLUMN_HEADER,
   DOCUMENTS_COLUMN_HEADER,
   FAILURE_STORE_PERMISSIONS_ERROR,
+  NAME_COLUMN_HEADER,
+  NO_STREAMS_MESSAGE,
+  RETENTION_COLUMN_HEADER,
+  RETENTION_COLUMN_HEADER_ARIA_LABEL,
+  STREAMS_TABLE_CAPTION_ARIA_LABEL,
+  STREAMS_TABLE_SEARCH_ARIA_LABEL,
 } from './translations';
-import { DiscoverBadgeButton } from '../stream_badges';
+import type { SortableField, TableRow } from './utils';
+import {
+  asTrees,
+  buildStreamRows,
+  enrichStream,
+  filterCollapsedStreamRows,
+  filterStreamsByQuery,
+  shouldComposeTree,
+} from './utils';
 
 const datePickerStyle = css`
   .euiFormControlLayout {
@@ -68,7 +67,6 @@ export function StreamsTreeTable({
   canReadFailureStore?: boolean;
   loading?: boolean;
 }) {
-  const router = useStreamsAppRouter();
   const { euiTheme } = useEuiTheme();
   const { timeState } = useTimefilter();
 
@@ -192,6 +190,19 @@ export function StreamsTreeTable({
     setPagination((prev) => ({ ...prev, pageIndex: 0 }));
   }, [streams, searchQuery, sortField, sortDirection]);
 
+  const getParentStream = (childName?: string): ListStreamDetail | undefined => {
+    if (!childName) return undefined;
+    for (const s of streams) {
+      if (!Streams.WiredStream.Definition.is(s.stream)) continue;
+      const routing = (s.stream as any)?.ingest?.wired?.routing as Array<any> | undefined;
+      if (!routing) continue;
+      if (routing.some((r) => r.destination === childName)) {
+        return s;
+      }
+    }
+    return undefined;
+  };
+
   // Expand/Collapse all button for the name column header
   const expandCollapseAllButton = (
     <EuiButtonIcon
@@ -237,6 +248,7 @@ export function StreamsTreeTable({
             const treeMode = shouldComposeTree(sortField);
             const hasChildren = !!item.children && item.children.length > 0;
             const isCollapsed = collapsed.has(item.stream.name);
+
             return (
               <EuiFlexGroup
                 alignItems="center"
@@ -286,13 +298,12 @@ export function StreamsTreeTable({
                     <EuiIcon type="empty" color="text" size="m" aria-hidden="true" />
                   </EuiFlexItem>
                 )}
-                <EuiFlexItem grow={false}>
-                  <EuiLink
-                    data-test-subj={`streamsNameLink-${item.stream.name}`}
-                    href={router.link('/{key}', { path: { key: item.stream.name } })}
-                  >
-                    <EuiHighlight search={searchQuery}>{item.stream.name}</EuiHighlight>
-                  </EuiLink>
+                <EuiFlexItem>
+                  <StreamName
+                    name={item.stream.name}
+                    searchQuery={searchQuery}
+                    preview={<StreamPreview current={item} parent={getParentStream(item.stream.name)} onExpandArchitecture={() => {console.log('Expand Architecture Clicked')}} />}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             );

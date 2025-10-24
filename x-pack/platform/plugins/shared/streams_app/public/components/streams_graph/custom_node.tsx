@@ -24,7 +24,7 @@ export const StreamNode = ({ data: { label, type, hasChildren, stream } }: { dat
         border: 1px solid ${euiTheme.colors.lightShade};
         border-radius: 6px;
         padding: ${euiTheme.size.m};
-        font-size: ${euiTheme.font.scale.xs};
+        font-size: ${euiTheme.font.scale.xs}rem;
         cursor: pointer;
     `;
 
