@@ -68,6 +68,7 @@ const generateTransformPutRequest = ({
     source: {
       index: definition.indexPatterns,
       query: filter,
+      ...(definition.runtimeMappings ? { runtime_mappings: definition.runtimeMappings } : {}),
     },
     dest: {
       index: `${generateLatestIndexName({ id: 'noop' } as EntityDefinition)}`,
@@ -123,8 +124,11 @@ function generateFilters(definition: EntityDefinition) {
     filter.bool.must.push(getElasticsearchQueryOrThrow(definition.filter));
   }
 
-  definition.identityFields.forEach(({ field }) => {
-    filter.bool.must.push({ exists: { field } });
+  definition.identityFields.forEach(({ field, optional }) => {
+    // Only add exists filter for non-optional fields (runtime fields should be optional)
+    if (!optional) {
+      filter.bool.must.push({ exists: { field } });
+    }
     filter.bool.must_not.push({
       term: { [field]: '' }, // identity field can't be empty
     });

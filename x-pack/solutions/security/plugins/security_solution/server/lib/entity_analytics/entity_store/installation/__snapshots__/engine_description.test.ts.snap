@@ -1122,8 +1122,8 @@ Object {
   "id": "security_host_test",
   "identityFields": Array [
     Object {
-      "field": "host.name",
-      "optional": false,
+      "field": "_computed_entity_id",
+      "optional": true,
     },
   ],
   "indexPatterns": Array [
@@ -1145,27 +1145,61 @@ Object {
   "metadata": Array [
     Object {
       "aggregation": Object {
-        "limit": 10,
-        "type": "terms",
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
       },
-      "destination": "host.domain",
-      "source": "host.domain",
+      "destination": "host.name",
+      "source": "host.name",
     },
     Object {
       "aggregation": Object {
-        "limit": 10,
-        "type": "terms",
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "host.id",
+      "source": "host.id",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
       },
       "destination": "host.hostname",
       "source": "host.hostname",
     },
     Object {
       "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "host.mac",
+      "source": "host.mac",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "host.ip",
+      "source": "host.ip",
+    },
+    Object {
+      "aggregation": Object {
         "limit": 10,
         "type": "terms",
       },
-      "destination": "host.id",
-      "source": "host.id",
+      "destination": "host.domain",
+      "source": "host.domain",
     },
     Object {
       "aggregation": Object {
@@ -1182,22 +1216,6 @@ Object {
       },
       "destination": "host.os.type",
       "source": "host.os.type",
-    },
-    Object {
-      "aggregation": Object {
-        "limit": 10,
-        "type": "terms",
-      },
-      "destination": "host.ip",
-      "source": "host.ip",
-    },
-    Object {
-      "aggregation": Object {
-        "limit": 10,
-        "type": "terms",
-      },
-      "destination": "host.mac",
-      "source": "host.mac",
     },
     Object {
       "aggregation": Object {
@@ -1557,8 +1575,29 @@ Object {
     },
   ],
   "name": "Security 'host' Entity Store Definition",
+  "runtimeMappings": Object {
+    "_computed_entity_id": Object {
+      "script": Object {
+        "source": "String label = null;
+if (doc.containsKey('host.name') && !doc['host.name'].empty) { label = doc['host.name'].value; }
+else if (doc.containsKey('host.hostname') && !doc['host.hostname'].empty) { label = doc['host.hostname'].value; }
+if (doc.containsKey('host.entity.id') && !doc['host.entity.id'].empty) { emit(doc['host.entity.id'].value); return; }
+if (doc.containsKey('host.id') && !doc['host.id'].empty && label != null) { emit(label + '|' + doc['host.id'].value); return; }
+if (doc.containsKey('host.mac') && !doc['host.mac'].empty && label != null) { emit(label + '|' + doc['host.mac'].value); return; }
+if (doc.containsKey('host.name') && !doc['host.name'].empty && doc.containsKey('host.ip') && !doc['host.ip'].empty) { emit(doc['host.name'].value + '|' + doc['host.ip'].value); return; }
+if (doc.containsKey('host.hostname') && !doc['host.hostname'].empty && doc.containsKey('host.ip') && !doc['host.ip'].empty) { emit(doc['host.hostname'].value + '|' + doc['host.ip'].value); return; }
+if (doc.containsKey('host.id') && !doc['host.id'].empty) { emit(doc['host.id'].value); return; }
+if (doc.containsKey('host.mac') && !doc['host.mac'].empty) { emit(doc['host.mac'].value); return; }
+if (doc.containsKey('host.name') && !doc['host.name'].empty) { emit(doc['host.name'].value); return; }
+if (doc.containsKey('host.hostname') && !doc['host.hostname'].empty) { emit(doc['host.hostname'].value); return; }
+if (doc.containsKey('host.ip') && !doc['host.ip'].empty) { emit(doc['host.ip'].value); return; }
+emit('');",
+      },
+      "type": "keyword",
+    },
+  },
   "type": "host",
-  "version": "1.0.0",
+  "version": "2.0.0",
 }
 `;
 
@@ -1567,6 +1606,9 @@ Object {
   "properties": Object {
     "@timestamp": Object {
       "type": "date",
+    },
+    "_computed_entity_id": Object {
+      "type": "keyword",
     },
     "asset.business_unit": Object {
       "type": "keyword",
@@ -2304,8 +2346,8 @@ Object {
   "id": "security_user_test",
   "identityFields": Array [
     Object {
-      "field": "user.name",
-      "optional": false,
+      "field": "_computed_entity_id",
+      "optional": true,
     },
   ],
   "indexPatterns": Array [
@@ -2327,19 +2369,91 @@ Object {
   "metadata": Array [
     Object {
       "aggregation": Object {
-        "limit": 10,
-        "type": "terms",
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
       },
-      "destination": "user.domain",
-      "source": "user.domain",
+      "destination": "user.name",
+      "source": "user.name",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "user.id",
+      "source": "user.id",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "user.email",
+      "source": "user.email",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "host.name",
+      "source": "host.name",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "host.id",
+      "source": "host.id",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "host.hostname",
+      "source": "host.hostname",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "host.mac",
+      "source": "host.mac",
+    },
+    Object {
+      "aggregation": Object {
+        "sort": Object {
+          "@timestamp": "desc",
+        },
+        "type": "top_value",
+      },
+      "destination": "host.ip",
+      "source": "host.ip",
     },
     Object {
       "aggregation": Object {
         "limit": 10,
         "type": "terms",
       },
-      "destination": "user.email",
-      "source": "user.email",
+      "destination": "user.domain",
+      "source": "user.domain",
     },
     Object {
       "aggregation": Object {
@@ -2356,14 +2470,6 @@ Object {
       },
       "destination": "user.hash",
       "source": "user.hash",
-    },
-    Object {
-      "aggregation": Object {
-        "limit": 10,
-        "type": "terms",
-      },
-      "destination": "user.id",
-      "source": "user.id",
     },
     Object {
       "aggregation": Object {
@@ -2707,8 +2813,35 @@ Object {
     },
   ],
   "name": "Security 'user' Entity Store Definition",
+  "runtimeMappings": Object {
+    "_computed_entity_id": Object {
+      "script": Object {
+        "source": "// Determine best host identity (per new ranking) — NO host.entity.id
+String h = null;
+if (doc.containsKey('host.id') && !doc['host.id'].empty) { h = doc['host.id'].value; }
+else if (doc.containsKey('host.name') && !doc['host.name'].empty) { h = doc['host.name'].value; }
+else if (doc.containsKey('host.hostname') && !doc['host.hostname'].empty) { h = doc['host.hostname'].value; }
+else if (doc.containsKey('host.mac') && !doc['host.mac'].empty) { h = doc['host.mac'].value; }
+else if (doc.containsKey('host.ip') && !doc['host.ip'].empty) { h = doc['host.ip'].value; }
+// Global top priority: user.entity.id, then user.email
+if (doc.containsKey('user.entity.id') && !doc['user.entity.id'].empty) { emit(doc['user.entity.id'].value); return; }
+if (doc.containsKey('user.email') && !doc['user.email'].empty) { emit(doc['user.email'].value); return; }
+// When a host identity field is available
+if (h != null) {
+// Prefer user.name @ host..., then user.id @ host...
+if (doc.containsKey('user.name') && !doc['user.name'].empty) { emit(doc['user.name'].value + '@' + h); return; }
+if (doc.containsKey('user.id') && !doc['user.id'].empty) { emit(doc['user.id'].value + '@' + h); return; }
+}
+// No host identity available (or neither user.name/id present with host): fall back to user.id, then user.name
+if (doc.containsKey('user.id') && !doc['user.id'].empty) { emit(doc['user.id'].value); return; }
+if (doc.containsKey('user.name') && !doc['user.name'].empty) { emit(doc['user.name'].value); return; }
+emit('');",
+      },
+      "type": "keyword",
+    },
+  },
   "type": "user",
-  "version": "1.0.0",
+  "version": "2.0.0",
 }
 `;
 
@@ -2717,6 +2850,14 @@ Object {
   "properties": Object {
     "@timestamp": Object {
       "type": "date",
+    },
+    "_computed_entity_id": Object {
+      "fields": Object {
+        "text": Object {
+          "type": "match_only_text",
+        },
+      },
+      "type": "keyword",
     },
     "asset.business_unit": Object {
       "type": "keyword",
@@ -2808,6 +2949,21 @@ Object {
     "entity.url": Object {
       "type": "keyword",
     },
+    "host.hostname": Object {
+      "type": "keyword",
+    },
+    "host.id": Object {
+      "type": "keyword",
+    },
+    "host.ip": Object {
+      "type": "ip",
+    },
+    "host.mac": Object {
+      "type": "keyword",
+    },
+    "host.name": Object {
+      "type": "keyword",
+    },
     "user.domain": Object {
       "type": "keyword",
     },
@@ -2829,11 +2985,6 @@ Object {
       "type": "keyword",
     },
     "user.name": Object {
-      "fields": Object {
-        "text": Object {
-          "type": "match_only_text",
-        },
-      },
       "type": "keyword",
     },
     "user.risk.calculated_level": Object {

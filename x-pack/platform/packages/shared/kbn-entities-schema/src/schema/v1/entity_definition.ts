@@ -32,6 +32,19 @@ export const entityDefinitionSchema = z.object({
   metrics: z.optional(z.array(keyMetricSchema)),
   staticFields: z.optional(z.record(z.string(), z.string())),
   managed: z.optional(z.boolean()).default(false),
+  runtimeMappings: z.optional(
+    z.record(
+      z.string(),
+      z.object({
+        type: z.string(),
+        script: z.optional(
+          z.object({
+            source: z.string(),
+          })
+        ),
+      })
+    )
+  ),
   latest: z.object({
     timestampField: z.string(),
     lookbackPeriod: z.optional(durationSchema).default('24h'),

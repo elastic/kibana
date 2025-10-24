@@ -519,6 +519,7 @@ export class EntityStoreDataClient {
         debugMode: pipelineDebugMode,
         logger,
         esClient: this.esClient,
+        displayNameTemplate: definition.displayNameTemplate,
       });
       this.log(`debug`, entityType, `Created @platform pipeline`);
 

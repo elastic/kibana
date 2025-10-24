@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { collectValues as collect } from './field_utils';
+import { collectValues as collect, newestValue } from './field_utils';
 import type { EntityDescription } from '../types';
 import { getCommonFieldDescriptions, getEntityFieldsDescriptions } from './common';
 
-export const HOST_DEFINITION_VERSION = '1.0.0';
-export const HOST_IDENTITY_FIELD = 'host.name';
+export const HOST_DEFINITION_VERSION = '2.0.0';
+// Runtime mapping field that computes the entity ID based on ranking system
+// See: entity-store-docs/architecture/0003-entity-id-unique-identifier/HOST_ENTITY.md
+export const HOST_IDENTITY_FIELD = '_computed_entity_id';
 
 const HOST_ENTITY_TYPE = 'Host';
 export const hostEntityEngineDescription: EntityDescription = {
@@ -31,9 +33,19 @@ export const hostEntityEngineDescription: EntityDescription = {
     },
   ],
   fields: [
+    // Store single keyword values for display and querying (must come first to avoid array conversion)
+    newestValue({ source: 'host.name' }),
+    newestValue({ source: 'host.id' }),
+    newestValue({ source: 'host.hostname' }),
+    newestValue({ source: 'host.mac' }),
+    newestValue({
+      source: 'host.ip',
+      mapping: {
+        type: 'ip',
+      },
+    }),
+    // Additional host fields
     collect({ source: 'host.domain' }),
-    collect({ source: 'host.hostname' }),
-    collect({ source: 'host.id' }),
     collect({
       source: 'host.os.name',
       mapping: {
@@ -46,13 +58,6 @@ export const hostEntityEngineDescription: EntityDescription = {
       },
     }),
     collect({ source: 'host.os.type' }),
-    collect({
-      source: 'host.ip',
-      mapping: {
-        type: 'ip',
-      },
-    }),
-    collect({ source: 'host.mac' }),
     collect({ source: 'host.type' }),
     collect({ source: 'host.architecture' }),
     ...getCommonFieldDescriptions('host'),

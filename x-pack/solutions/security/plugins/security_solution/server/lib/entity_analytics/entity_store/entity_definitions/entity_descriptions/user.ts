@@ -6,10 +6,12 @@
  */
 import type { EntityDescription } from '../types';
 import { getCommonFieldDescriptions, getEntityFieldsDescriptions } from './common';
-import { collectValues as collect } from './field_utils';
+import { collectValues as collect, newestValue } from './field_utils';
 
-export const USER_DEFINITION_VERSION = '1.0.0';
-export const USER_IDENTITY_FIELD = 'user.name';
+export const USER_DEFINITION_VERSION = '2.0.0';
+// Runtime mapping field that computes the entity ID based on ranking system
+// See: entity-store-docs/architecture/0003-entity-id-unique-identifier/USER_ENTITY.md
+export const USER_IDENTITY_FIELD = '_computed_entity_id';
 
 const USER_ENTITY_TYPE = 'Identity';
 
@@ -38,8 +40,22 @@ export const userEntityEngineDescription: EntityDescription = {
     },
   ],
   fields: [
+    // Store single keyword values for display and querying (must come first to avoid array conversion)
+    newestValue({ source: 'user.name' }),
+    newestValue({ source: 'user.id' }),
+    newestValue({ source: 'user.email' }),
+    newestValue({ source: 'host.name' }),
+    newestValue({ source: 'host.id' }),
+    newestValue({ source: 'host.hostname' }),
+    newestValue({ source: 'host.mac' }),
+    newestValue({
+      source: 'host.ip',
+      mapping: {
+        type: 'ip',
+      },
+    }),
+    // Additional user fields
     collect({ source: 'user.domain' }),
-    collect({ source: 'user.email' }),
     collect({
       source: 'user.full_name',
       mapping: {
@@ -52,7 +68,6 @@ export const userEntityEngineDescription: EntityDescription = {
       },
     }),
     collect({ source: 'user.hash' }),
-    collect({ source: 'user.id' }),
     collect({ source: 'user.roles' }),
     ...getCommonFieldDescriptions('user'),
     ...getEntityFieldsDescriptions('user'),
