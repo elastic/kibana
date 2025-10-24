@@ -101,7 +101,6 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
     Record<string, SavedObjectRelation[]>
   >({});
   const [deleteFlyoutOpen, setDeleteFlyoutOpen] = useState<boolean>(false);
-  const [editFlyoutOpen, setEditFlyoutOpen] = useState<boolean>(false);
   const [dataViewController] = useState(
     () =>
       new DataViewTableController({
@@ -148,7 +147,6 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
   };
 
   const onEditFlyoutClose = () => {
-    setEditFlyoutOpen(false);
     setEditDataView(undefined);
   };
 
@@ -255,7 +253,6 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
         onClick: async (dataView: RemoveDataViewProps) => {
           const fullDataView = await dataViews.get(dataView.id);
           setEditDataView(fullDataView);
-          setEditFlyoutOpen(true);
         },
         'data-test-subj': 'action-edit',
       },
@@ -436,7 +433,7 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
           onClose={onDeleteFlyoutClose}
         />
       )}
-      {editFlyoutOpen && (
+      {!!editDataView && (
         <IndexPatternEditor
           onSave={() => {
             dataViewController.loadDataViews();
