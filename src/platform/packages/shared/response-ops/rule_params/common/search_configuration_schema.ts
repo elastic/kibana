@@ -15,6 +15,7 @@ export const searchConfigurationSchema = schema.object({
     query: schema.oneOf([schema.string(), schema.recordOf(schema.string(), schema.any())]),
     language: schema.string(),
   }),
+  index: schema.maybe(schema.string()),
 });
 
 export type SearchConfigurationType = TypeOf<typeof searchConfigurationSchema>;

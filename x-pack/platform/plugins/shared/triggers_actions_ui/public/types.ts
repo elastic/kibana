@@ -133,12 +133,12 @@ export interface PrebuildFieldsMap {
   [RULE_DETAIL_DESCRIPTION_FIELD_TYPES.DATA_VIEW_INDEX_PATTERN]: PrebuildField<string>;
 }
 
-export type GetDescriptionFieldsFn = ({
+export type GetDescriptionFieldsFn<T> = ({
   rule,
   prebuildFields,
   http,
 }: {
-  rule: Rule;
+  rule: { params: T };
   prebuildFields: PrebuildFieldsMap | undefined;
   http: HttpSetup | undefined;
 }) => { title: string; description: NonNullable<ReactNode> }[];

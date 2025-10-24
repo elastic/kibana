@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const RULE_DETAIL_DESCRIPTION_FIELD_TYPES = {
+export const RULE_PREBUILD_DESCRIPTION_FIELDS = {
   INDEX_PATTERN: 'indexPattern',
   CUSTOM_QUERY: 'customQuery',
   ESQL_QUERY: 'esqlQuery',
