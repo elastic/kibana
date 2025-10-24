@@ -11,14 +11,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
-import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
-import { IndicatorFieldValue } from '../common/field_value';
-import { unwrapValue } from '../../utils/unwrap_value';
+import type { Indicator } from '../../../../common/threat_intelligence/types/indicator';
+import { IndicatorFieldValue } from '../../../threat_intelligence/modules/indicators/components/common/field_value';
+import { unwrapValue } from '../../../threat_intelligence/modules/indicators/utils/unwrap_value';
 import {
   CellActionsMode,
   SecurityCellActions,
   SecurityCellActionsTrigger,
-} from '../../../../../common/components/cell_actions';
+} from '../../../common/components/cell_actions';
 
 const euiTableSearchOptions: EuiSearchBarProps = {
   box: {
