@@ -59,8 +59,8 @@ const ConnectorFormComponent: React.FC<Props> = ({
 }) => {
   const { form } = useForm({
     defaultValue: connector,
-    serializer: actionTypeModel?.formSerializer,
-    deserializer: actionTypeModel?.formDeserializer,
+    serializer: actionTypeModel?.connectorForm?.serializer,
+    deserializer: actionTypeModel?.connectorForm?.deserializer,
   });
 
   const { submit, isValid: isFormValid, isSubmitted, isSubmitting, reset } = form;

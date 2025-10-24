@@ -125,8 +125,10 @@ export function getConnectorType(): InferenceConnector {
     actionConnectorFields: lazy(() => import('./connector')),
     actionParamsFields: lazy(() => import('./params')),
     actionReadOnlyExtraComponent: lazy(() => import('./usage_cost_message')),
-    formSerializer,
-    formDeserializer,
-    shouldHideConnectorSettingsTitle: true,
+    connectorForm: {
+      serializer: formSerializer,
+      deserializer: formDeserializer,
+      hideSettingsTitle: true,
+    },
   };
 }

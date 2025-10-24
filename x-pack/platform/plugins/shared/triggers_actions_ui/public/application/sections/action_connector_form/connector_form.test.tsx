@@ -151,8 +151,10 @@ describe('ConnectorForm', () => {
     const formDeserializer = jest.fn((data) => data);
     const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
       actionConnectorFields: lazy(() => import('./connector_mock')),
-      formSerializer,
-      formDeserializer,
+      connectorForm: {
+        serializer: formSerializer,
+        deserializer: formDeserializer,
+      },
     });
 
     appMockRenderer.render(

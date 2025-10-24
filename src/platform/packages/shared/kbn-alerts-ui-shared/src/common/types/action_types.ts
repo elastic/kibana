@@ -150,9 +150,26 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   modalWidth?: number;
   isSystemActionType?: boolean;
   subFeature?: SubFeature;
-  formSerializer?: SerializerFunc<ConnectorFormSchema, InternalConnectorForm>;
-  formDeserializer?: SerializerFunc<InternalConnectorForm, ConnectorFormSchema>;
-  shouldHideConnectorSettingsTitle?: boolean;
+  /**
+   * Connector form config
+   */
+  connectorForm: {
+    /**
+     * Form hook lib deserializer used in the connector form
+     * Use this to transform the connector object to an intermediate state used in the form
+     */
+    deserializer?: SerializerFunc<InternalConnectorForm, ConnectorFormSchema>;
+    /**
+     * Form hook lib serializer used in the connector form
+     * Use this to transform the intermediate state used in the form into a connector object
+     */
+    serializer?: SerializerFunc<ConnectorFormSchema, InternalConnectorForm>;
+    /**
+     * If true, hides the settings title of the connector form
+     * @default false
+     */
+    hideSettingsTitle?: boolean;
+  };
 }
 
 export type ActionTypeRegistryContract<Connector = unknown, Params = unknown> = PublicMethodsOf<

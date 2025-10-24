@@ -39,7 +39,7 @@ const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
       <EuiSpacer size="m" />
       {FieldsComponent !== null ? (
         <>
-          {Boolean(actionTypeModel?.shouldHideConnectorSettingsTitle) ? null : (
+          {Boolean(actionTypeModel?.connectorForm?.hideSettingsTitle) ? null : (
             <>
               <EuiTitle size="xxs" data-test-subj="connector-settings-label">
                 <h4>

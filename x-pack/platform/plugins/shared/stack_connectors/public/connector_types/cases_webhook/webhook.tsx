@@ -53,7 +53,9 @@ export function getConnectorType(): ConnectorTypeModel<
     },
     actionConnectorFields: lazy(() => import('./webhook_connectors')),
     actionParamsFields: lazy(() => import('./webhook_params')),
-    formSerializer,
-    formDeserializer,
+    connectorForm: {
+      serializer: formSerializer,
+      deserializer: formDeserializer,
+    },
   };
 }
