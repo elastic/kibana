@@ -163,7 +163,6 @@ export const MetricsExperienceGrid = ({
         <EuiFlexItem grow>
           {isDiscoverLoading && <MetricsGridLoadingProgress />}
           <MetricsGrid
-            pivotOn="metric"
             columns={columns}
             dimensions={dimensions}
             filters={filters}

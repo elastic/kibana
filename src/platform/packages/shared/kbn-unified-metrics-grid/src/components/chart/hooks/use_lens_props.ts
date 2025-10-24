@@ -10,23 +10,31 @@
 import type { LensAttributes, LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
 import { LensConfigBuilder, type LensSeriesLayer } from '@kbn/lens-embeddable-utils/config_builder';
 import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
-import useAsync from 'react-use/lib/useAsync';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
+import useLatest from 'react-use/lib/useLatest';
+import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useStableCallback } from '@kbn/unified-histogram';
 import {
-  BehaviorSubject,
   debounceTime,
   filter,
-  merge,
-  withLatestFrom,
   startWith,
   Observable,
   distinctUntilChanged,
+  withLatestFrom,
+  from,
+  merge,
+  shareReplay,
+  BehaviorSubject,
+  switchMap,
+  defer,
 } from 'rxjs';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import { useEuiTheme } from '@elastic/eui';
-import type { LensYBoundsConfig } from '@kbn/lens-embeddable-utils/config_builder/types';
+import type {
+  LensYBoundsConfig,
+  LensESQLDataset,
+} from '@kbn/lens-embeddable-utils/config_builder/types';
 export type LensProps = Pick<
   EmbeddableComponentProps,
   | 'id'
@@ -59,67 +67,48 @@ export const useLensProps = ({
   yBounds?: LensYBoundsConfig;
 } & Pick<ChartSectionProps, 'services' | 'searchSessionId'>) => {
   const { euiTheme } = useEuiTheme();
-  const attributes$ = useRef(new BehaviorSubject<LensAttributes | undefined>(undefined));
-  const lensParams = useMemo<LensConfig | undefined>(
-    () =>
-      chartLayers.length > 0
-        ? {
-            chartType: 'xy',
-            dataset: {
-              esql: query,
-            },
-            title,
-            legend: {
-              show: false,
-            },
-            axisTitleVisibility: {
-              showXAxisTitle: false,
-              showYAxisTitle: false,
-              showYRightAxisTitle: false,
-            },
-            layers: chartLayers,
-            fittingFunction: 'Linear',
-            yBounds,
-          }
-        : undefined,
-    [query, title, chartLayers, yBounds]
-  );
+  const chartConfigUpdates$ = useRef<BehaviorSubject<void>>(new BehaviorSubject<void>(undefined));
 
-  useAsync(async () => {
-    if (!lensParams) {
-      attributes$.current.next(undefined);
-      return;
-    }
+  useEffect(() => {
+    chartConfigUpdates$.current.next(void 0);
+  }, [query, title, chartLayers, yBounds]);
 
+  // creates a stable function that builds the Lens attributes
+  const buildAttributesFn = useLatest(async () => {
+    const lensParams = buildLensParams({ query, title, chartLayers, yBounds });
     const builder = new LensConfigBuilder(services.dataViews);
 
-    attributes$.current.next(
-      (await builder.build(lensParams, {
-        query: {
-          esql: query,
-        },
-      })) as LensAttributes
-    );
-  }, [lensParams, query, services.dataViews]);
+    const result = (await builder.build(lensParams, {
+      query: {
+        esql: (lensParams.dataset as LensESQLDataset).esql,
+      },
+    })) as LensAttributes;
+    return result;
+  });
+
+  // loads the Lens attributes
+  const [attributesState, loadAttributes] = useAsyncFn(
+    () => buildAttributesFn.current(),
+    [buildAttributesFn]
+  );
 
   const buildLensProps = useCallback(() => {
-    if (!attributes$.current.value) {
+    if (!attributesState.value) {
       return;
     }
-
     return getLensProps({
       searchSessionId,
       getTimeRange,
-      attributes: attributes$.current.value,
+      attributes: attributesState.value,
     });
-  }, [searchSessionId, getTimeRange]);
+  }, [searchSessionId, attributesState, getTimeRange]);
 
   const [lensPropsContext, setLensPropsContext] = useState<ReturnType<typeof buildLensProps>>();
   const updateLensPropsContext = useStableCallback(() => setLensPropsContext(buildLensProps()));
 
   useEffect(() => {
-    const attributesCurrent$ = attributes$.current;
     const chartRefCurrent = chartRef?.current;
+    const configUpdates$ = chartConfigUpdates$.current;
 
     // progressively load Lens when the chart becomes visible
     const intersecting$ = new Observable<boolean>((subscriber) => {
@@ -136,35 +125,70 @@ export const useLensProps = ({
       }
 
       return () => observer.disconnect();
-    }).pipe(startWith(!!chartRefCurrent), distinctUntilChanged());
+    }).pipe(startWith(!!chartRefCurrent), distinctUntilChanged(), shareReplay(1));
 
-    const subscription = merge(
-      discoverFetch$,
-      // Emit the current attributes value immediately to handle cases where
-      // attributes are already set but discoverFetch$ emitted before this hook mounted.
-      // This ensures we don't miss an update that occurred between unmount and mount.
-      attributesCurrent$.pipe(startWith(attributesCurrent$.value)),
-      intersecting$
-    )
+    // load attributes when any trigger emits; cancel previous loads if new one comes
+    const loadTriggers$ = merge(
+      // initial load on mount
+      defer(() => [true]),
+      // dependencies that change the chart configuration
+      configUpdates$.pipe(debounceTime(100)),
+      // discover state update
+      discoverFetch$
+    );
+
+    const attributesLoaded$ = loadTriggers$.pipe(
+      // any new emission cancels previous load to avoid race conditions
+      switchMap(() => from(loadAttributes()))
+    );
+
+    // Update Lens props only when chart is visible
+    const subscription = merge(attributesLoaded$, intersecting$)
       .pipe(
-        // prevent rapid successive updates
-        debounceTime(100),
-        withLatestFrom(attributesCurrent$, intersecting$),
-        filter(([, attr, isIntersecting]) => {
-          return !!attr && isIntersecting;
-        })
+        withLatestFrom(intersecting$),
+        filter(([, isIntersecting]) => isIntersecting)
       )
-      .subscribe(() =>
-        // schedule update in the next animation frame to ensure React state updates have completed
-        requestAnimationFrame(() => updateLensPropsContext())
-      );
+      .subscribe(() => {
+        updateLensPropsContext();
+      });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [discoverFetch$, updateLensPropsContext, chartRef, euiTheme.size.base]);
+  }, [discoverFetch$, loadAttributes, updateLensPropsContext, chartRef, euiTheme.size.base]);
 
   return lensPropsContext;
+};
+
+const buildLensParams = ({
+  query,
+  title,
+  chartLayers,
+  yBounds,
+}: {
+  query: string;
+  title: string;
+  chartLayers: LensSeriesLayer[];
+  yBounds?: LensYBoundsConfig;
+}): LensConfig => {
+  return {
+    chartType: 'xy',
+    dataset: {
+      esql: query,
+    },
+    title,
+    legend: {
+      show: false,
+    },
+    axisTitleVisibility: {
+      showXAxisTitle: false,
+      showYAxisTitle: false,
+      showYRightAxisTitle: false,
+    },
+    layers: chartLayers,
+    fittingFunction: 'Linear',
+    yBounds,
+  };
 };
 
 const getLensProps = ({
