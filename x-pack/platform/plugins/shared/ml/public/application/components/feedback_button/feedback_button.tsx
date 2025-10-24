@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { useMlKibana } from '../../contexts/kibana';
@@ -21,7 +21,7 @@ interface Props {
 const KIBANA_VERSION_QUERY_PARAM = 'version';
 const KIBANA_DEPLOYMENT_TYPE_PARAM = 'deployment_type';
 const SANITIZED_PATH_PARAM = 'path';
-const FEEDBACK_BUTTON_DEFAULT_TEXT = i18n.translate('xpack.ml.featureFeedbackButton.defaultText', {
+const FEEDBACK_BUTTON_DEFAULT_TEXT = i18n.translate('xpack.ml.feedbackButton.defaultText', {
   defaultMessage: 'Give feedback',
 });
 const ANOMALY_DETECTION_FEEDBACK_URL = 'https://ela.st/anomaly-detection-feedback';
@@ -80,6 +80,19 @@ export const FeedBackButton: FC<Props> = ({ jobIds }) => {
   // and true in a non-serverless environment.
   const { showNodeInfo } = useEnabledFeatures();
 
+  const href = useMemo(() => {
+    if (jobIds.length === 0) {
+      return;
+    }
+    return getSurveyFeedbackURL({
+      formUrl: ANOMALY_DETECTION_FEEDBACK_URL,
+      kibanaVersion,
+      isCloudEnv,
+      isServerlessEnv: showNodeInfo === false,
+      sanitizedPath: window.location.pathname,
+    });
+  }, [isCloudEnv, jobIds.length, kibanaVersion, showNodeInfo]);
+
   if (jobIds.length === 0) {
     return null;
   }
@@ -87,13 +100,7 @@ export const FeedBackButton: FC<Props> = ({ jobIds }) => {
   return (
     <EuiButtonEmpty
       aria-label={FEEDBACK_BUTTON_DEFAULT_TEXT}
-      href={getSurveyFeedbackURL({
-        formUrl: ANOMALY_DETECTION_FEEDBACK_URL,
-        kibanaVersion,
-        isCloudEnv,
-        isServerlessEnv: showNodeInfo === false,
-        sanitizedPath: window.location.pathname,
-      })}
+      href={href}
       size="s"
       iconType={'popout'}
       iconSide="right"
