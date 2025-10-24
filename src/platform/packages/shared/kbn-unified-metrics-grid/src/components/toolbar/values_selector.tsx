@@ -21,6 +21,7 @@ import {
 import type { TimeRange } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
+import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import { FIELD_VALUE_SEPARATOR } from '../../common/constants';
 import { useDimensionsQuery } from '../../hooks';
 import { ClearAllSection } from './clear_all_section';
@@ -35,7 +36,7 @@ interface ValuesFilterProps {
   indices?: string[];
   disabled?: boolean;
   timeRange: TimeRange;
-  metrics: string[];
+  dimensionFilteredMetrics: Pick<MetricField, 'name' | 'index'>[];
   onChange: (values: string[]) => void;
   onClear: () => void;
 }
@@ -45,7 +46,7 @@ export const ValuesSelector = ({
   indices = [],
   disabled = false,
   timeRange,
-  metrics,
+  dimensionFilteredMetrics,
   onChange,
   onClear,
 }: ValuesFilterProps) => {
@@ -56,7 +57,7 @@ export const ValuesSelector = ({
   } = useDimensionsQuery({
     dimensions: selectedDimensions,
     indices,
-    metrics,
+    metrics: dimensionFilteredMetrics,
     from: timeRange.from,
     to: timeRange.to,
   });
@@ -67,6 +68,8 @@ export const ValuesSelector = ({
     const isAtMaxLimit = selectedValues.length >= MAX_VALUES_SELECTIONS;
 
     values.forEach(({ value, field, valueMetrics }) => {
+      // skip if no metrics are available for the selected dimension value
+      if (!valueMetrics?.length) return;
       const arr = groupedValues.get(field) ?? [];
       arr.push({ value, valueMetrics });
       groupedValues.set(field, arr);

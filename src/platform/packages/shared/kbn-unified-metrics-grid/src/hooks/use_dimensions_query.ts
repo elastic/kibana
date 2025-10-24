@@ -8,11 +8,12 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
+import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import { useMetricsExperience } from './use_metrics_experience';
 
 export const useDimensionsQuery = (params: {
   dimensions: string[];
-  metrics: string[];
+  metrics: Pick<MetricField, 'name' | 'index'>[];
   indices?: string[];
   from?: string;
   to?: string;

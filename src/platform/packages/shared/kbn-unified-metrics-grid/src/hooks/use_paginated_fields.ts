@@ -67,7 +67,10 @@ export const usePaginatedFields = ({
     return {
       currentPageFields: filteredFields.slice(start, end),
       filteredFieldsCount: filteredFields.length,
-      dimensionFilteredMetrics: dimensionFilteredFields.map((field) => field.name),
+      dimensionFilteredMetrics: dimensionFilteredFields.map((field) => ({
+        name: field.name,
+        index: field.index,
+      })),
       totalPages,
     };
   }, [fields, dimensionsSet, searchTermLower, pageSize, currentPage, valueMetricsSet]);

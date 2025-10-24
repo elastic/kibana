@@ -19,7 +19,7 @@ interface CreateDimensionsParams {
   from: number;
   to: number;
   logger: Logger;
-  metrics: string[];
+  metrics: Array<{ name: string; index: string }>;
 }
 
 export const getDimensions = async ({
@@ -56,9 +56,11 @@ export const getDimensions = async ({
             order: { _key: 'asc' },
           },
           aggs: metrics.reduce((metAcc, metric) => {
-            metAcc[metric] = {
+            metAcc[metric.name] = {
               filter: {
-                exists: { field: metric },
+                bool: {
+                  must: [{ exists: { field: metric.name } }, { term: { _index: metric.index } }],
+                },
               },
             };
             return metAcc;
@@ -77,7 +79,9 @@ export const getDimensions = async ({
         agg?.buckets?.map((bucket) => ({
           value: String(bucket.key ?? ''),
           field: dimension,
-          valueMetrics: metrics.filter((metric) => bucket[metric].doc_count > 0),
+          valueMetrics: metrics
+            .filter((metric) => bucket[metric.name]?.doc_count > 0)
+            .map((metric) => metric.name),
         })) ?? []
       );
     });

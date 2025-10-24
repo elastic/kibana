@@ -22,7 +22,7 @@ import { MAX_DIMENSIONS_SELECTIONS } from '../../../common/constants';
 interface UseToolbarActionsProps
   extends Pick<ChartSectionProps, 'requestParams' | 'renderToggleActions'> {
   fields: MetricField[];
-  dimensionFilteredMetrics: string[];
+  dimensionFilteredMetrics: Pick<MetricField, 'name' | 'index'>[];
   indexPattern: string;
   hideDimensionsSelector?: boolean;
 }
@@ -68,7 +68,7 @@ export const useToolbarActions = ({
           indices={[indexPattern]}
           timeRange={requestParams.getTimeRange()}
           onClear={onClearValues}
-          metrics={dimensionFilteredMetrics}
+          dimensionFilteredMetrics={dimensionFilteredMetrics}
         />
       ) : null,
     ],

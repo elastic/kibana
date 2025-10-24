@@ -32,7 +32,7 @@ export interface MetricsGridWrapperProps
   indexPattern: string;
   chartToolbarCss?: SerializedStyles;
   fields: MetricField[];
-  dimensionFilteredMetrics?: string[];
+  dimensionFilteredMetrics?: Pick<MetricField, 'name' | 'index'>[];
   children?: React.ReactNode;
   hideRightSideActions?: boolean;
   hideDimensionsSelector?: boolean;

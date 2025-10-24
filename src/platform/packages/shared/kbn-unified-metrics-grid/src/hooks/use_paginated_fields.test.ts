@@ -126,7 +126,10 @@ describe('usePaginatedFields', () => {
 
     await waitFor(() => {
       expect(result.current?.currentPageFields.map((f) => f.name)).toEqual(['field1', 'field3']);
-      expect(result.current?.dimensionFilteredMetrics).toEqual(['field1', 'field3']);
+      expect(result.current?.dimensionFilteredMetrics).toEqual([
+        { name: 'field1', index: 'metrics-*' },
+        { name: 'field3', index: 'metrics-*' },
+      ]);
       expect(result.current?.totalPages).toBe(1);
     });
   });
@@ -154,7 +157,11 @@ describe('usePaginatedFields', () => {
 
     await waitFor(() => {
       expect(result.current?.currentPageFields.map((f) => f.name)).toEqual(['metric1', 'metric3']);
-      expect(result.current?.dimensionFilteredMetrics).toEqual(['metric1', 'metric3', 'metric4']);
+      expect(result.current?.dimensionFilteredMetrics).toEqual([
+        { name: 'metric1', index: 'metrics-*' },
+        { name: 'metric3', index: 'metrics-*' },
+        { name: 'metric4', index: 'metrics-*' },
+      ]);
       expect(result.current?.filteredFieldsCount).toBe(2);
       expect(result.current?.totalPages).toBe(1);
     });

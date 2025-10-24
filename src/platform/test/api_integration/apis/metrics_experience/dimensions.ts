@@ -40,7 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
       const { body, status } = await sendRequest({
         indices: 'fieldsense-station-metrics',
         dimensions: ['station.name'],
-        metrics: ['FieldSense-station-01'],
+        metrics: [{ name: 'FieldSense-station-01', index: 'fieldsense-station-metrics' }],
         from: timerange.min,
         to: timerange.max,
       });
@@ -53,7 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
       const { body, status } = await sendRequest({
         indices: 'fieldsense-station-metrics',
         dimensions: ['station.name', 'sensor.type', 'network.interface'],
-        metrics: ['FieldSense-station-01'],
+        metrics: [{ name: 'FieldSense-station-01', index: 'fieldsense-station-metrics' }],
         from: timerange.min,
         to: timerange.max,
       });
@@ -117,7 +117,7 @@ export default function ({ getService }: FtrProviderContext) {
       const { status } = await sendRequest({
         indices: 'fieldsense-station-metrics',
         dimensions: ['station.name'],
-        metrics: ['FieldSense-station-01'],
+        metrics: [{ name: 'FieldSense-station-01', index: 'fieldsense-station-metrics' }],
         from: timerange.min,
         to: timerange.max,
       });

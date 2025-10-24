@@ -116,11 +116,11 @@ describe('MetricsExperienceGrid', () => {
       totalPages: 1,
       filteredFieldsCount: 1,
       currentPageFields: [allFields[0]],
-      dimensionFilteredMetrics: [allFields[0].name],
+      dimensionFilteredMetrics: [{ name: allFields[0].name, index: allFields[0].index }],
     });
 
     useDimensionsQueryMock.mockReturnValue({
-      data: dimensions,
+      data: dimensions.map((d) => ({ value: d.name, field: d.name, valueMetrics: ['avg'] })),
     } as unknown as ReturnType<typeof hooks.useDimensionsQuery>);
 
     useMetricFieldsQueryMock.mockReturnValue({
