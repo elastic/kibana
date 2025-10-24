@@ -58,9 +58,6 @@ export class RequestContextFactory implements IRequestContextFactory {
       getServerBasePath: () => core.http.basePath.serverBasePath,
       getSpaceId,
       getCurrentUser: async () => coreContext.security.authc.getCurrentUser(),
-      checkPrivileges: () => {
-        return startPlugins.security.authz.checkPrivilegesWithRequest(request);
-      },
       automaticImportService: this.options.automaticImportService,
       inference: startPlugins.inference,
       savedObjectsClient,

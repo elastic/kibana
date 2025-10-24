@@ -9,7 +9,6 @@ import expect from 'expect';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AutomaticImportService } from './automatic_import_service';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 
 // Mock the AutomaticImportSamplesIndexService
 jest.mock('./samples_index/index_service', () => {
@@ -24,27 +23,13 @@ describe('AutomaticImportSetupService', () => {
   let service: AutomaticImportService;
   let mockLoggerFactory: ReturnType<typeof loggerMock.create>;
   let mockEsClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
-  let mockSecurity: jest.Mocked<SecurityPluginStart>;
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockLoggerFactory = loggerMock.create();
     mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
 
-    mockSecurity = {
-      authc: {
-        getCurrentUser: jest.fn().mockReturnValue({
-          username: 'test-user',
-          roles: [],
-        }),
-      },
-    } as any;
-
-    service = new AutomaticImportService(
-      mockLoggerFactory,
-      Promise.resolve(mockEsClient),
-      Promise.resolve(mockSecurity)
-    );
+    service = new AutomaticImportService(mockLoggerFactory, Promise.resolve(mockEsClient));
   });
 
   describe('constructor', () => {
@@ -53,11 +38,7 @@ describe('AutomaticImportSetupService', () => {
         './samples_index/index_service'
       );
 
-      expect(MockedService).toHaveBeenCalledWith(
-        mockLoggerFactory,
-        expect.any(Promise),
-        expect.any(Promise)
-      );
+      expect(MockedService).toHaveBeenCalledWith(mockLoggerFactory, expect.any(Promise));
     });
 
     it('should initialize the pluginStop$ subject', () => {
@@ -120,11 +101,7 @@ describe('AutomaticImportSetupService', () => {
       );
 
       // Verify constructor was called
-      expect(MockedService).toHaveBeenCalledWith(
-        mockLoggerFactory,
-        expect.any(Promise),
-        expect.any(Promise)
-      );
+      expect(MockedService).toHaveBeenCalledWith(mockLoggerFactory, expect.any(Promise));
 
       // Stop the service
       service.stop();
@@ -148,7 +125,6 @@ describe('AutomaticImportSetupService', () => {
       const constructorCall = MockedService.mock.calls[0];
       expect(constructorCall[0]).toBe(mockLoggerFactory);
       expect(constructorCall[1]).toBeInstanceOf(Promise);
-      expect(constructorCall[2]).toBeInstanceOf(Promise);
     });
   });
 });

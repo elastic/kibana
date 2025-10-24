@@ -19,10 +19,10 @@ import { z } from '@kbn/zod';
 import { NonEmptyString } from './primitive.gen';
 
 /**
- * The index samples metadata object with its settings.
+ * The data stream samples metadata object with its settings.
  */
-export type IndexSamplesMetaData = z.infer<typeof IndexSamplesMetaData>;
-export const IndexSamplesMetaData = z.object({
+export type DataStreamSamplesMetaData = z.infer<typeof DataStreamSamplesMetaData>;
+export const DataStreamSamplesMetaData = z.object({
   /**
    * The user profile ID of the user who created the samples.
    */
@@ -38,10 +38,10 @@ export const IndexSamplesMetaData = z.object({
 });
 
 /**
- * The index samples object with its settings.
+ * The data stream samples object with its settings.
  */
-export type IndexSamples = z.infer<typeof IndexSamples>;
-export const IndexSamples = z
+export type DataStreamSamples = z.infer<typeof DataStreamSamples>;
+export const DataStreamSamples = z
   .object({
     /**
      * The integration id
@@ -56,8 +56,8 @@ export const IndexSamples = z
      */
     projectId: NonEmptyString.optional(),
     /**
-     * The log data
+     * The log samples
      */
-    logData: NonEmptyString,
+    logData: z.array(z.string()),
   })
-  .merge(IndexSamplesMetaData);
+  .merge(DataStreamSamplesMetaData);

@@ -6,8 +6,8 @@ paths: {}
 components:
   x-codegen-enabled: true
   schemas:
-    IndexSamples:
-      description: The index samples object with its settings.
+    DataStreamSamples:
+      description: The data stream samples object with its settings.
       allOf:
         - type: object
           required:
@@ -25,12 +25,14 @@ components:
               description: The Serverless project id
               $ref: '../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString'
             logData:
-              description: The log data
-              $ref: '../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString'
-        - $ref: '#/components/schemas/IndexSamplesMetaData'
-    IndexSamplesMetaData:
+              type: array
+              description: The log samples
+              items:
+                type: string
+        - $ref: '#/components/schemas/DataStreamSamplesMetaData'
+    DataStreamSamplesMetaData:
       type: object
-      description: The index samples metadata object with its settings.
+      description: The data stream samples metadata object with its settings.
       required:
         - createdBy
         - createdAt

@@ -16,11 +16,10 @@ const automaticImportSamplesIndexAdapterSettings = {
   schema: {
     properties: {
       // ONLY map fields we actively search/filter/aggregate on
-      integration_id: types.keyword({ fields: { keyword: { ignore_above: 256 } } }),
-      data_stream_id: types.keyword({ fields: { keyword: { ignore_above: 256 } } }),
-      project_id: types.keyword({ fields: { keyword: { ignore_above: 256 } } }),
-      created_by: types.keyword({ fields: { keyword: { ignore_above: 256 } } }), // We can filter by this
-      original_filename: types.keyword({ fields: { keyword: { ignore_above: 256 } } }), // For scenarios to remove samples based on filename
+      integration_id: types.keyword({ ignore_above: 256 }),
+      data_stream_id: types.keyword({ ignore_above: 256 }),
+      created_by: types.keyword({ ignore_above: 256 }), // We can filter by this
+      original_filename: types.keyword({ ignore_above: 256 }), // For scenarios to remove samples based on filename
       // Non-searchable fields (stored but not indexed)
       log_data: types.text({ index: false }), // Log samples are stored but not indexed
       metadata: types.object({
@@ -35,7 +34,6 @@ const automaticImportSamplesIndexAdapterSettings = {
 export interface AutomaticImportSamplesProperties {
   integration_id: string;
   data_stream_id: string;
-  project_id?: string;
   created_by: string;
   original_filename: string;
   log_data: string;

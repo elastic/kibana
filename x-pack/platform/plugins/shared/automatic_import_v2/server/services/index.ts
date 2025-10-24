@@ -8,3 +8,5 @@
 export { AutomaticImportSamplesIndexService } from './samples_index/index_service';
 
 export { AutomaticImportService } from './automatic_import_service';
+
+export { automaticImportSamplesIndexName as AutomaticImportSamplesIndexName } from './samples_index/storage';

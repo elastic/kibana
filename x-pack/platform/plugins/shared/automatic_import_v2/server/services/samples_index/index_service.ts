@@ -6,9 +6,8 @@
  */
 
 import type { ElasticsearchClient, Logger, LoggerFactory } from '@kbn/core/server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import type { KibanaRequest } from '@kbn/core/server';
-import type { IndexSamples } from '../../../common';
+import type { AuthenticatedUser } from '@kbn/security-plugin/server';
+import type { DataStreamSamples } from '../../../common';
 import type {
   AutomaticImportSamplesIndexAdapter,
   AutomaticImportSamplesProperties,
@@ -17,55 +16,40 @@ import { createIndexAdapter } from './storage';
 
 export class AutomaticImportSamplesIndexService {
   private logger: Logger;
-  private security: SecurityPluginStart | null = null;
   private samplesIndexAdapter: AutomaticImportSamplesIndexAdapter | null = null;
-  private esClient: ElasticsearchClient | null = null;
 
-  constructor(
-    logger: LoggerFactory,
-    esClientPromise: Promise<ElasticsearchClient>,
-    securityPromise: Promise<SecurityPluginStart>
-  ) {
+  constructor(logger: LoggerFactory, esClientPromise: Promise<ElasticsearchClient>) {
     this.logger = logger.get('samplesIndexService');
-    this.initialize(esClientPromise, securityPromise);
+    this.initialize(esClientPromise);
   }
 
-  private async initialize(
-    esClientPromise: Promise<ElasticsearchClient>,
-    securityPromise: Promise<SecurityPluginStart>
-  ) {
-    const [esClient, security] = await Promise.all([esClientPromise, securityPromise]);
-    this.esClient = esClient;
-    this.security = security;
-
+  private async initialize(esClientPromise: Promise<ElasticsearchClient>) {
+    const [esClient] = await Promise.all([esClientPromise]);
     // Initialize samples index adapter
     this.samplesIndexAdapter = createIndexAdapter({
       logger: this.logger,
-      esClient: this.esClient,
+      esClient,
     });
   }
 
   /**
    * Creates samples documents in the samples index.
    */
-  public async createSamplesDocs(request: KibanaRequest, docs: Array<IndexSamples>) {
+  public async addSamplesToDataStream(
+    currentAuthenticatedUser: AuthenticatedUser,
+    dataStream: DataStreamSamples
+  ) {
     if (!this.samplesIndexAdapter) {
       throw new Error('Samples index adapter not initialized');
     }
 
-    const authenticatedUser = this.security?.authc.getCurrentUser(request);
-    if (!authenticatedUser) {
-      throw new Error('No user authenticated');
-    }
-
-    const operations = docs.map((sample) => {
+    const operations = dataStream.logData.map((logData: string) => {
       const document: Omit<AutomaticImportSamplesProperties, '_id'> = {
-        integration_id: sample.integrationId,
-        data_stream_id: sample.dataStreamId,
-        ...(sample.projectId ? { project_id: sample.projectId } : {}),
-        log_data: sample.logData,
-        created_by: authenticatedUser.username,
-        original_filename: sample.originalFilename,
+        integration_id: dataStream.integrationId,
+        data_stream_id: dataStream.dataStreamId,
+        log_data: logData,
+        created_by: currentAuthenticatedUser.username,
+        original_filename: dataStream.originalFilename,
         metadata: {
           created_at: new Date().toISOString(),
         },
@@ -78,5 +62,34 @@ export class AutomaticImportSamplesIndexService {
     });
 
     return this.samplesIndexAdapter.getClient().bulk({ operations });
+  }
+
+  /**
+   * Gets samples for a data stream
+   * @param integrationId - The integration ID
+   * @param dataStreamId - The data stream ID
+   * @returns The samples for the data stream
+   * @throws If the samples index adapter is not initialized
+   */
+  public async getSamplesForDataStream(integrationId: string, dataStreamId: string) {
+    if (!this.samplesIndexAdapter) {
+      throw new Error('Samples index adapter not initialized');
+    }
+    const results = await this.samplesIndexAdapter.getClient().search({
+      query: {
+        bool: {
+          must: [
+            { term: { integration_id: integrationId } },
+            { term: { data_stream_id: dataStreamId } },
+          ],
+        },
+      },
+      size: 500, // TODO: Make this configurable
+      track_total_hits: false,
+    });
+    const samples: string[] = results.hits.hits.map(
+      (hit) => (hit._source as AutomaticImportSamplesProperties).log_data
+    );
+    return samples;
   }
 }

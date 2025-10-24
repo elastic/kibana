@@ -6,29 +6,38 @@
  */
 
 import { ReplaySubject, type Subject } from 'rxjs';
-import type { ElasticsearchClient, LoggerFactory } from '@kbn/core/server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type {
+  ElasticsearchClient,
+  KibanaRequest,
+  LoggerFactory,
+  SecurityServiceStart,
+} from '@kbn/core/server';
+import type { DataStreamSamples } from '../../common';
 import { AutomaticImportSamplesIndexService } from './samples_index/index_service';
+import { getAuthenticatedUser } from './lib/get_user';
 
 export class AutomaticImportService {
   private pluginStop$: Subject<void>;
   private samplesIndexService: AutomaticImportSamplesIndexService;
+  private security?: SecurityServiceStart;
 
-  constructor(
-    logger: LoggerFactory,
-    esClientPromise: Promise<ElasticsearchClient>,
-    securityPromise: Promise<SecurityPluginStart>
-  ) {
+  constructor(logger: LoggerFactory, esClientPromise: Promise<ElasticsearchClient>) {
     this.pluginStop$ = new ReplaySubject(1);
-    this.samplesIndexService = new AutomaticImportSamplesIndexService(
-      logger,
-      esClientPromise,
-      securityPromise
-    );
+    this.samplesIndexService = new AutomaticImportSamplesIndexService(logger, esClientPromise);
+  }
+
+  public setSecurityService(security: SecurityServiceStart) {
+    this.security = security;
+  }
+
+  public async addSamplesToDataStream(dataStream: DataStreamSamples, request: KibanaRequest) {
+    const currentAuthenticatedUser = getAuthenticatedUser(request, this.security);
+    await this.samplesIndexService.addSamplesToDataStream(currentAuthenticatedUser, dataStream);
   }
 
   public stop() {
     this.pluginStop$.next();
     this.pluginStop$.complete();
+    // Should we remove the samples index when the plugin stops?
   }
 }

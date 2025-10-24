@@ -14,7 +14,6 @@ import type {
 } from '@kbn/core/server';
 
 import { ReplaySubject, type Subject } from 'rxjs';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type {
   AutomaticImportV2PluginCoreSetupDependencies,
   AutomaticImportV2PluginSetup,
@@ -60,16 +59,10 @@ export class AutomaticImportV2Plugin
 
     const coreStartServices = core.getStartServices().then(([coreStart, startPlugins]) => ({
       esClient: coreStart.elasticsearch.client.asInternalUser as ElasticsearchClient,
-      security: startPlugins.security as SecurityPluginStart,
     }));
     const esClientPromise = coreStartServices.then(({ esClient }) => esClient);
-    const securityPromise = coreStartServices.then(({ security }) => security);
 
-    this.automaticImportService = new AutomaticImportService(
-      this.logger,
-      esClientPromise,
-      securityPromise
-    );
+    this.automaticImportService = new AutomaticImportService(this.logger, esClientPromise);
 
     const requestContextFactory = new RequestContextFactory({
       logger: this.logger,
@@ -101,11 +94,17 @@ export class AutomaticImportV2Plugin
     plugins: AutomaticImportV2PluginStartDependencies
   ): AutomaticImportV2PluginStart {
     this.logger.debug('automaticImportV2: Started');
+
+    if (this.automaticImportService) {
+      if (plugins.security) {
+        this.automaticImportService.setSecurityService(core.security);
+      }
+    }
+
     return {
       actions: plugins.actions,
       inference: plugins.inference,
       licensing: plugins.licensing,
-      security: plugins.security,
     };
   }
 
