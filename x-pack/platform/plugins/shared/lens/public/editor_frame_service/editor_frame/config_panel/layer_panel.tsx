@@ -13,6 +13,7 @@ import {
   EuiFormRow,
   EuiText,
   EuiIconTip,
+  EuiButtonIcon,
   useEuiTheme,
 } from '@elastic/eui';
 import { BehaviorSubject } from 'rxjs';
@@ -23,8 +24,7 @@ import { ReorderProvider } from '@kbn/dom-drag-drop';
 import { DimensionButton } from '@kbn/visualization-ui-components';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import type { LayerAction, VisualizationDimensionGroupConfig } from '@kbn/lens-common';
-import { LayerActions } from './layer_actions';
+import type { VisualizationDimensionGroupConfig } from '@kbn/lens-common';
 import { isOperation } from '../../../types_guards';
 import { LayerHeader } from './layer_header';
 import type { LayerPanelProps } from './types';
@@ -38,13 +38,13 @@ import {
   selectResolvedDateRange,
   selectDatasourceStates,
 } from '../../../state_management';
-import { getSharedActions } from './layer_actions/layer_actions';
 import { FlyoutContainer } from '../../../shared_components/flyout_container';
 import { FakeDimensionButton } from './buttons/fake_dimension_button';
 import { getLongMessage } from '../../../user_messages_utils';
 import { isApiESQLVariablesCompatible } from '../../../react_embeddable/type_guards';
 import { ESQLEditor } from './esql_editor';
 import { useEditorFrameService } from '../../editor_frame_service_context';
+import { getOpenLayerSettingsAction } from './layer_actions/open_layer_settings';
 
 export function LayerPanel(props: LayerPanelProps) {
   const { datasourceMap } = useEditorFrameService();
@@ -313,64 +313,20 @@ export function LayerPanel(props: LayerPanelProps) {
     [activeVisualization, layerId, props.framePublicAPI, visualizationState]
   );
 
-  const compatibleActions = useMemo<LayerAction[]>(
-    () =>
-      [
-        ...(activeVisualization
-          .getSupportedActionsForLayer?.(
-            layerId,
-            visualizationState,
-            updateVisualization,
-            props.registerLibraryAnnotationGroup,
-            isSaveable
-          )
-          .map((action) => ({
-            ...action,
-            execute: () => {
-              action.execute(layerActionsFlyoutRef.current);
-            },
-          })) || []),
-
-        ...getSharedActions({
-          layerId,
-          activeVisualization,
-          core,
-          layerIndex,
-          layerType: activeVisualization.getLayerType(layerId, visualizationState),
-          isOnlyLayer,
-          isTextBasedLanguage,
-          hasLayerSettings: Boolean(
-            (Object.values(visualizationLayerSettings).some(Boolean) &&
-              activeVisualization.LayerSettingsComponent) ||
-              layerDatasource?.LayerSettingsComponent
-          ),
-          openLayerSettings: () => setPanelSettingsOpen(true),
-          onCloneLayer,
-          onRemoveLayer: () => onRemoveLayer(layerId),
-          customRemoveModalText: activeVisualization.getCustomRemoveLayerText?.(
-            layerId,
-            visualizationState
-          ),
-        }),
-      ].filter((i) => i.isCompatible),
-    [
-      activeVisualization,
-      layerId,
-      visualizationState,
-      updateVisualization,
-      props.registerLibraryAnnotationGroup,
-      isSaveable,
-      core,
-      layerIndex,
-      isOnlyLayer,
-      isTextBasedLanguage,
-      visualizationLayerSettings,
-      layerDatasource?.LayerSettingsComponent,
-      onCloneLayer,
-      onRemoveLayer,
-    ]
+  const hasLayerSettings = Boolean(
+    (Object.values(visualizationLayerSettings).some(Boolean) &&
+      activeVisualization.LayerSettingsComponent) ||
+      layerDatasource?.LayerSettingsComponent
   );
-  const layerActionsFlyoutRef = useRef<HTMLDivElement | null>(null);
+
+  const layerSettingsAction = useMemo(
+    () =>
+      getOpenLayerSettingsAction({
+        openLayerSettings: () => setPanelSettingsOpen(true),
+        hasLayerSettings,
+      }),
+    [hasLayerSettings]
+  );
 
   return (
     <>
@@ -416,14 +372,14 @@ export function LayerPanel(props: LayerPanelProps) {
                   onlyAllowSwitchToSubtypes={onlyAllowSwitchToSubtypes}
                 />
               </EuiFlexItem>
-              {props.displayLayerSettings && (
+              {props.displayLayerSettings && layerSettingsAction.isCompatible && (
                 <EuiFlexItem grow={false}>
-                  <LayerActions
-                    actions={compatibleActions}
-                    layerIndex={layerIndex}
-                    mountingPoint={layerActionsFlyoutRef.current}
+                  <EuiButtonIcon
+                    iconType={layerSettingsAction.icon}
+                    aria-label={layerSettingsAction.displayName}
+                    onClick={() => layerSettingsAction.execute(null)}
+                    data-test-subj={layerSettingsAction['data-test-subj']}
                   />
-                  <div ref={layerActionsFlyoutRef} />
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>

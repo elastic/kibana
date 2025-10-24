@@ -261,8 +261,6 @@ export function LayerTabs(
               layerIds.length
             ) === 'clear',
           isTextBasedLanguage,
-          hasLayerSettings: false,
-          openLayerSettings: () => {},
           onCloneLayer: () => {
             dispatchLens(
               cloneLayer({
