@@ -81,4 +81,4 @@ export enum RuleFormStepId {
   DETAILS = 'rule-details',
 }
 
-export const MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH = 1000;
+export const MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH = 10000;
