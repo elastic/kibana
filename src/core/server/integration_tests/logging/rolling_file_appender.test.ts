@@ -303,13 +303,27 @@ describe('RollingFileAppender', () => {
       logger.info(message(3));
       logger.info(message(4));
 
+      await waitForNextRollingTime();
+
+      logger.info(message(5));
+      logger.info(message(6));
+
       await flush();
 
       const files = await readdir(testDir);
 
-      expect(files.sort()).toEqual(['kibana-1.log', 'kibana.log']);
-      expect(await getFileContent('kibana.log')).toEqual(expectedFileContent([3, 4]));
-      expect(await getFileContent('kibana-1.log')).toEqual(expectedFileContent([1, 2]));
+      const sortedLogFiles = files.sort();
+      expect(sortedLogFiles).toEqual(['kibana-1.log', 'kibana-2.log', 'kibana.log']);
+
+      // the "rolling time sync" mechanism above is not perfect, so the test is going to guarantee:
+      // - that something has been rolled over
+      // - that no log entries have been lost
+      const oldestEntries = await getFileContent('kibana-2.log');
+      const newerEntries = await getFileContent('kibana-1.log');
+      const newestEntries = await getFileContent('kibana.log');
+      const allEntries = oldestEntries + newerEntries + newestEntries;
+      expect(oldestEntries.length + newerEntries.length).toBeGreaterThan(40);
+      expect(allEntries).toEqual(expectedFileContent([1, 2, 3, 4, 5, 6]));
     });
   });
 });
