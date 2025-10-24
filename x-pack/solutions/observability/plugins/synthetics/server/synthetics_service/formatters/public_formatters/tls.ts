@@ -19,4 +19,5 @@ export const tlsFormatters: TLSFormatMap = {
   [ConfigKey.TLS_KEY_PASSPHRASE]: null,
   [ConfigKey.TLS_VERIFICATION_MODE]: null,
   [ConfigKey.TLS_VERSION]: arrayFormatter,
+  [ConfigKey.TLS_CIPHER_SUITES]: arrayFormatter,
 };
