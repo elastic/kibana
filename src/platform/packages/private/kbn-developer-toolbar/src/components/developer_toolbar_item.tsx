@@ -31,7 +31,7 @@ export interface DeveloperToolbarItemProps {
 
 /**
  * Component that registers an item to be displayed in the developer toolbar.
- * This component should be rendered anywhere in the app tree within a DeveloperToolbarProvider.
+ * This component can be rendered anywhere in the app tree.
  * The children will be portaled to the developer toolbar automatically.
  */
 export const DeveloperToolbarItem: React.FC<DeveloperToolbarItemProps> = ({

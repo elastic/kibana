@@ -32,7 +32,7 @@ const getGlobalRegistry = (): DeveloperToolbarRegistry => {
 const registry = getGlobalRegistry();
 
 // Reuse global state manager or create new one
-const getGlobalStateManager = (): ToolbarStateManager => {
+const getOrCreateGlobalStateManager = (): ToolbarStateManager => {
   return (registry.developerToolbarStateManager ??= new ToolbarStateManager());
 };
 
@@ -48,7 +48,7 @@ export interface DeveloperToolbarState {
  * Hook to access the global toolbar state manager
  */
 export const useToolbarState = (): DeveloperToolbarState => {
-  const developerToolbarStateManager = getGlobalStateManager();
+  const developerToolbarStateManager = getOrCreateGlobalStateManager();
   const [state, setState] = useState(() => ({
     enabledItems: developerToolbarStateManager.getEnabledItems(),
     items: developerToolbarStateManager.getItems(),

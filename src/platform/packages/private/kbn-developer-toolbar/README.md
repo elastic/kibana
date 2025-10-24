@@ -12,17 +12,17 @@ A development toolbar for Kibana with real-time performance monitoring and custo
 
 ## Setup
 
-Wrap your app with the provider and add the toolbar component:
+The toolbar meant to be rendered once by chrome
 
 ```tsx
-import { DeveloperToolbar, DeveloperToolbarProvider } from '@kbn/developer-toolbar';
+import { DeveloperToolbar } from '@kbn/developer-toolbar/toolbar';
 
 function App() {
   return (
-    <DeveloperToolbarProvider>
+    <>
       <MyApp />
       <DeveloperToolbar envInfo={{ version: '1.0.0' }} />
-    </DeveloperToolbarProvider>
+    </>
   );
 }
 ```
