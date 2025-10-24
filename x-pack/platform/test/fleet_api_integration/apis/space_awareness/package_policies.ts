@@ -178,7 +178,7 @@ export default function (providerContext: FtrProviderContext) {
               },
               inputs: {},
             }),
-          /409 "Conflict" A package policy with the name 'test-nginx-.*' already exists on the agent policy '.*'/
+          /409 "Conflict" An integration policy with the name test-nginx-.* already exists. Please rename it or choose a different name./
         );
       });
     });
@@ -330,7 +330,7 @@ export default function (providerContext: FtrProviderContext) {
               },
               TEST_SPACE_1
             ),
-          /409 "Conflict" A package policy with the name 'test-nginx-.*' already exists on the agent policy '.*'/
+          /409 "Conflict" An integration policy with the name test-nginx-.* already exists. Please rename it or choose a different name./
         );
       });
     });
