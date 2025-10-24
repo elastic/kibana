@@ -14,9 +14,9 @@ import { VisGroups } from '../../vis_types';
 import type { GroupSelectionProps } from './group_selection';
 import { GroupSelection } from './group_selection';
 import type { DocLinksStart } from '@kbn/core/public';
-import type { VisParams } from '../../../common';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { VisParams } from '@kbn/visualizations-common';
 
 describe('GroupSelection', () => {
   const defaultVisTypeParams = {

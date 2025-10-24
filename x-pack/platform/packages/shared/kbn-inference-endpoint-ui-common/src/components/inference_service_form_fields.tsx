@@ -100,6 +100,7 @@ interface InferenceServicesProps {
     isPreconfigured?: boolean;
     allowContextWindowLength?: boolean;
     enableCustomHeaders?: boolean;
+    reenterSecretsOnEdit?: boolean;
   };
   http: HttpSetup;
   toasts: IToasts;
@@ -115,6 +116,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
     isPreconfigured,
     currentSolution,
     enableCustomHeaders,
+    reenterSecretsOnEdit,
   },
 }) => {
   const { data: providers, isLoading } = useProviders(http, toasts);
@@ -594,6 +596,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
                 setConfigEntry={onSetProviderConfigEntry}
                 isEdit={isEdit}
                 isPreconfigured={isPreconfigured}
+                reenterSecretsOnEdit={reenterSecretsOnEdit}
               />
               <EuiHorizontalRule margin="m" />
             </>

@@ -9,6 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { TooltipWrapper } from '@kbn/visualization-utils';
 import { PointVisibilityOptions } from '@kbn/expression-xy-plugin/public';
+import type { FramePublicAPI } from '@kbn/lens-common';
 import { BarOrientationSettings } from '../../../../shared_components/bar_orientation';
 import { ToolbarDivider } from '../../../../shared_components/toolbar_divider';
 import { ToolbarPopover } from '../../../../shared_components';
@@ -26,7 +27,6 @@ import {
   isBarLayer,
   isHorizontalChart,
 } from '../../state_helpers';
-import type { FramePublicAPI } from '../../../../types';
 import { getDataLayers } from '../../visualization_helpers';
 
 export function getValueLabelDisableReason({
