@@ -41,7 +41,7 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
   const es = getService('es');
   const bettertest = getBettertest(supertest);
   const configService = getService('config');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
+  const synthtraceKibanaClient = getService('synthtraceKibanaClient');
 
   function createEsClientWithApiKeyAuth({ id, apiKey }: { id: string; apiKey: string }) {
     return createEsClientForFtrConfig(configService, { auth: { apiKey: { id, api_key: apiKey } } });
@@ -116,7 +116,8 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
 
     before(async () => {
       await setupFleet(bettertest);
-      await apmSynthtraceEsClient.initializePackage({ skipInstallation: false });
+      const latestApmPackageVersion = await synthtraceKibanaClient.fetchLatestApmPackageVersion();
+      await synthtraceKibanaClient.installApmPackage(latestApmPackageVersion);
       agentPolicyId = await createAgentPolicy({ bettertest });
       packagePolicyId = await createPackagePolicy({ bettertest, agentPolicyId });
       apmPackagePolicy = await getPackagePolicy(bettertest, packagePolicyId); // make sure to get the latest package policy
@@ -125,7 +126,7 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
     after(async () => {
       await deleteAgentPolicy(bettertest, agentPolicyId);
       await deletePackagePolicy(bettertest, packagePolicyId);
-      await apmSynthtraceEsClient.uninstallPackage();
+      await synthtraceKibanaClient.uninstallApmPackage();
       expect(await getActiveApiKeysCount(packagePolicyId)).to.eql(0); // make sure all api keys for the policy are invalidated
     });
 
