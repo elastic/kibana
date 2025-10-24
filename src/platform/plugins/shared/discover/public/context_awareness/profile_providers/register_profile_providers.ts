@@ -14,7 +14,7 @@ import type {
   RootProfileService,
 } from '../profiles';
 import { createClassicNavRootProfileProvider } from './common/classic_nav_root_profile';
-import { createDeprecationLogsDataSourceProfileProvider } from './common/deprecation_logs';
+import { createDeprecationLogsDataSourceProfileProvider } from './common/deprecation_logs_data_source_profile';
 import { createPatternDataSourceProfileProvider } from './common/patterns';
 import { registerEnabledProfileProviders } from './register_enabled_profile_providers';
 import { createExampleDataSourceProfileProvider } from './example/example_data_source_profile/profile';
