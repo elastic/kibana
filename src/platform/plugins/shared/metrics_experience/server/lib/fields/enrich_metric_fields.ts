@@ -30,7 +30,7 @@ function isErrorResponseBase(subject: unknown): subject is ErrorResponseBase {
 }
 
 export function generateMapKey(indexName: string, fieldName: string) {
-  return `${indexName}>${fieldName}`;
+  return `${fieldName}>${indexName}`;
 }
 
 function buildMetricMetadataMap(

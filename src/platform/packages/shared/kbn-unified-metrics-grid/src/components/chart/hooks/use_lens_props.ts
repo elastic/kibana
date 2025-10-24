@@ -127,24 +127,26 @@ export const useLensProps = ({
       return () => observer.disconnect();
     }).pipe(startWith(!!chartRefCurrent), distinctUntilChanged(), shareReplay(1));
 
-    // load attributes when any trigger emits; cancel previous loads if new one comes
-    const loadTriggers$ = merge(
-      // initial load on mount
-      defer(() => [true]),
+    // load lens props when any trigger emits;
+    const triggers$ = merge(
       // dependencies that change the chart configuration
       configUpdates$.pipe(debounceTime(100)),
       // discover state update
       discoverFetch$
-    );
-
-    const attributesLoaded$ = loadTriggers$.pipe(
+    ).pipe(
       // any new emission cancels previous load to avoid race conditions
       switchMap(() => from(loadAttributes()))
     );
-
     // Update Lens props only when chart is visible
-    const subscription = merge(attributesLoaded$, intersecting$)
+    const subscription = merge(
+      // initial load on mount
+      defer(() => from(loadAttributes())),
+      triggers$,
+      intersecting$
+    )
       .pipe(
+        // debounce to avoid multiple updates in quick succession
+        debounceTime(100),
         withLatestFrom(intersecting$),
         filter(([, isIntersecting]) => isIntersecting)
       )
