@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import { ServiceProviderFilter } from './service_provider_filter';
 
 describe('ServiceProviderFilter', () => {
@@ -15,7 +16,7 @@ describe('ServiceProviderFilter', () => {
       <ServiceProviderFilter
         optionKeys={[]}
         onChange={jest.fn}
-        uniqueProviders={new Set(['elasticsearch', 'unknownProvider'])}
+        uniqueProviders={new Set(['elasticsearch', 'unknownProvider'] as ServiceProviderKeys[])}
       />
     );
     expect(getByTestId('service-field-endpoints')).toBeInTheDocument();

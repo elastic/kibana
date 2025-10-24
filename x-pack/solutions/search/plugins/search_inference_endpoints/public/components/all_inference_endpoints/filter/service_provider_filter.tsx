@@ -14,9 +14,9 @@ import { MultiSelectFilter } from './multi_select_filter';
 import * as i18n from './translations';
 
 interface Props {
-  optionKeys: Array<ServiceProviderKeys | string>;
+  optionKeys: ServiceProviderKeys[];
   onChange: (newFilterOptions: Partial<FilterOptions>) => void;
-  uniqueProviders: Set<ServiceProviderKeys | string>;
+  uniqueProviders: Set<ServiceProviderKeys>;
 }
 
 export const ServiceProviderFilter: React.FC<Props> = ({
@@ -36,7 +36,7 @@ export const ServiceProviderFilter: React.FC<Props> = ({
   const filteredOptions = useMemo<MultiSelectFilterOption[]>(() => {
     return Array.from(uniqueProviders).map((provider) => ({
       key: provider,
-      label: SERVICE_PROVIDERS[provider as ServiceProviderKeys]?.name ?? provider,
+      label: SERVICE_PROVIDERS[provider]?.name ?? provider,
     }));
   }, [uniqueProviders]);
 
