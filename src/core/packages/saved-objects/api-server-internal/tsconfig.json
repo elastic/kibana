@@ -8,7 +8,7 @@
     ]
   },
   "include": [
-    "**/*.ts", "../api-server/src/utils/either.ts",
+    "**/*.ts",
   ],
   "kbn_references": [
     "@kbn/config-schema",
