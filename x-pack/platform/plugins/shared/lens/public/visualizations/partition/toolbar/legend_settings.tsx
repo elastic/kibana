@@ -11,10 +11,13 @@ import type { Position } from '@elastic/charts';
 import { LegendValue } from '@elastic/charts';
 import { LegendSize } from '@kbn/chart-expressions-common';
 import { type PartitionLegendValue } from '@kbn/expression-partition-vis-plugin/common';
+import type {
+  LensPartitionVisualizationState as PieVisualizationState,
+  SharedPartitionLayerState as SharedPieLayerState,
+  VisualizationToolbarProps,
+} from '@kbn/lens-common';
 import { PartitionChartsMeta } from '../partition_charts_meta';
-import type { PieVisualizationState, SharedPieLayerState } from '../../../../common/types';
 import { LegendDisplay } from '../../../../common/constants';
-import type { VisualizationToolbarProps } from '../../../types';
 import { getDefaultVisualValuesForLayer } from '../../../shared_components/datasource_default_values';
 import { getLegendStats } from '../render_helpers';
 import { LegendSettings } from '../../../shared_components';

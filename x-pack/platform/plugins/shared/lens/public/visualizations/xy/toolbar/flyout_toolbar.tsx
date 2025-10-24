@@ -13,14 +13,13 @@ import { ScaleType } from '@elastic/charts';
 import type { AxisExtentConfig, YScaleType } from '@kbn/expression-xy-plugin/common';
 
 import { TooltipWrapper } from '@kbn/visualization-utils';
-import type { AxesSettingsConfig, VisualizationToolbarProps } from '@kbn/lens-common';
+import type { AxesSettingsConfig, VisualizationToolbarProps, XYState } from '@kbn/lens-common';
 import {
   hasNumericHistogramDimension,
   type AxesSettingsConfigKeys,
 } from '../../../shared_components';
 import type { ToolbarContentMap } from '../../../shared_components/flyout_toolbar';
 import { FlyoutToolbar } from '../../../shared_components/flyout_toolbar';
-import type { XYState } from '../types';
 import { XyAppearanceSettings, getValueLabelDisableReason } from './visual_options_popover';
 import { XyTitlesAndTextSettings } from './titles_and_text_popover';
 import { XyAxisSettings, popoverConfig } from './axis_settings_popover';
