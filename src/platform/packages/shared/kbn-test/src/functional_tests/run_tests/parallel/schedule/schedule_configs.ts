@@ -114,11 +114,20 @@ export async function scheduleConfigs({
   // instances (MachineState) on demand. Sort types by preference (largest
   // capacity first) so we always create new instances from the largest type when
   // needed.
-  const machineTypes = machines.slice().sort((a, b) => {
-    if (a.cpus !== b.cpus) return b.cpus - a.cpus;
-    if (a.memoryMb !== b.memoryMb) return b.memoryMb - a.memoryMb;
-    return a.name.localeCompare(b.name);
-  });
+  const machineTypes = machines
+    .slice()
+    .sort((a, b) => {
+      if (a.cpus !== b.cpus) return b.cpus - a.cpus;
+      if (a.memoryMb !== b.memoryMb) return b.memoryMb - a.memoryMb;
+      return a.name.localeCompare(b.name);
+    })
+    .map((machine) => {
+      return {
+        ...machine,
+        // subtract one cpu for the config orchestrator
+        cpus: machine.cpus - 1,
+      };
+    });
 
   const machineStates: MachineState[] = [];
 

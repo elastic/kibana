@@ -11,6 +11,7 @@ import fs from 'fs/promises';
 import path from 'path';
 
 import type { PluginInitializer, PrebootPlugin } from '@kbn/core/server';
+import { SERVICE_NAMESPACE } from '@kbn/test-services';
 
 export const plugin: PluginInitializer<void, never> = async (
   initializerContext
@@ -36,7 +37,12 @@ export const plugin: PluginInitializer<void, never> = async (
           // `__dirname` that depends on the physical location of the file where it's used. This is the reason why we
           // end up with different data paths in Kibana built-in and test plugins. To workaround that we use Kibana
           // `process.cwd()` to construct data path manually.
-          const verificationCodePath = path.join(process.cwd(), 'data', 'verification_code');
+          const verificationCodePath = path.join(
+            process.cwd(),
+            SERVICE_NAMESPACE,
+            'data',
+            'verification_code'
+          );
           initializerContext.logger.get().info(`Will read code from ${verificationCodePath}`);
           return response.ok({
             body: {

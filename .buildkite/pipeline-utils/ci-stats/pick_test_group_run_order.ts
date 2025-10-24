@@ -698,12 +698,17 @@ export async function pickTestGroupRunOrder() {
 
       let scheduleResponse: ScheduleResponse;
 
+      const options = {
+        configs: scheduleInputs,
+        maxDurationMins: FUNCTIONAL_MAX_MINUTES,
+        machines: machineTypes,
+      };
+
+      console.log(JSON.stringify(options));
+
       try {
-        scheduleResponse = await runScheduleScript({
-          configs: scheduleInputs,
-          maxDurationMins: FUNCTIONAL_MAX_MINUTES,
-          machines: machineTypes,
-        });
+        scheduleResponse = await runScheduleScript(options);
+        console.log(JSON.stringify(scheduleResponse));
       } catch (error) {
         const err = error instanceof Error ? error : new Error(String(error));
         throw new Error(

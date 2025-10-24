@@ -56,6 +56,24 @@ interface RunnerState {
   exitCode?: number | string;
 }
 
+interface Deferred<T> {
+  promise: Promise<T>;
+  resolve: (value: T | PromiseLike<T>) => void;
+  reject: (reason?: unknown) => void;
+}
+
+function createDeferred<T>(): Deferred<T> {
+  let resolve!: (value: T | PromiseLike<T>) => void;
+  let reject!: (reason?: unknown) => void;
+
+  const promise = new Promise<T>((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+
+  return { promise, resolve, reject };
+}
+
 /*
  * Run functional test configs in sequence, mirroring the behavior from
  * .buildkite/scripts/steps/test/ftr_configs.sh.
@@ -201,6 +219,8 @@ export async function runTestsParallel(
     totalCpu: totalCpuCapacity,
     minMbAvailable: MIN_MB_AVAILABLE,
   });
+
+  const runningOrderSignals = runners.map(() => createDeferred<void>());
 
   let statsTimer: NodeJS.Timeout | undefined;
 
@@ -350,6 +370,20 @@ export async function runTestsParallel(
 
     runnerStates.set(path, state);
     let released = false;
+    let resolvedRunningSignal = false;
+
+    const resolveRunningSignal = () => {
+      if (resolvedRunningSignal) {
+        return;
+      }
+
+      const signal = runningOrderSignals[runnerIndex];
+      if (signal) {
+        signal.resolve();
+      }
+
+      resolvedRunningSignal = true;
+    };
 
     try {
       log.debug(`Waiting for warming slot for ${runner.getConfigPath()}`);
@@ -364,6 +398,10 @@ export async function runTestsParallel(
       state.warmFinishedAt = startFinishTime;
       state.idleStartedAt = startFinishTime;
 
+      if (runnerIndex > 0) {
+        await runningOrderSignals[runnerIndex - 1].promise;
+      }
+
       log.info(`Waiting for running slot for ${runner.getConfigPath()}`);
       await slot.waitForRunning();
       log.info(`Running slot acquired for ${runner.getConfigPath()}`);
@@ -372,6 +410,7 @@ export async function runTestsParallel(
       state.idleDurationMs = Math.max(0, runStartTime - (state.idleStartedAt ?? runStartTime));
       state.runStartedAt = runStartTime;
       const runProc = await runner.run();
+      resolveRunningSignal();
       const runFinishTime = Date.now();
 
       log.info(`Completed ${runner.getConfigPath()} (exitCode ${runProc.exitCode})`);
@@ -413,6 +452,7 @@ export async function runTestsParallel(
         failedConfigs.push(runner.getConfigPath());
       }
     } finally {
+      resolveRunningSignal();
       if (!released) {
         slot.release();
         released = true;
