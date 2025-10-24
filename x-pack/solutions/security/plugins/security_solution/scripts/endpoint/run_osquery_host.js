@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export * from './flyout_create_drilldown';
-export * from './flyout_edit_drilldown';
+require('../../../../../../../src/setup_node_env');
+require('./osquery_host').cli();
