@@ -19,7 +19,7 @@ import type { ProfileProviderServices } from '../../profile_provider_services';
 
 const DOC_LIMIT = 10000;
 
-export const createPatternDataSourceProfileProvider = (
+export const createPatternsDataSourceProfileProvider = (
   services: ProfileProviderServices
 ): DataSourceProfileProvider<{
   patternColumns: string[];
