@@ -12,12 +12,15 @@ import { LegendValue, ScaleType } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { AxisExtentConfig, YScaleType } from '@kbn/expression-xy-plugin/common';
 import { TooltipWrapper } from '@kbn/visualization-utils';
-import type { AxesSettingsConfig } from '@kbn/visualizations-plugin/common';
+import type {
+  AxesSettingsConfig,
+  VisualizationToolbarProps,
+  FramePublicAPI,
+  XYState,
+} from '@kbn/lens-common';
 import type { XYLegendValue } from '@kbn/chart-expressions-common';
 import { LegendSize } from '@kbn/chart-expressions-common';
 import type { LegendSettingsPopoverProps } from '../../../shared_components/legend/legend_settings_popover';
-import type { VisualizationToolbarProps, FramePublicAPI } from '../../../types';
-import type { State, XYState } from '../types';
 import { hasBarSeries, isHorizontalChart } from '../state_helpers';
 import { hasNumericHistogramDimension, LegendSettingsPopover } from '../../../shared_components';
 import { AxisSettingsPopover } from './axis_settings_popover';
@@ -33,10 +36,10 @@ import type { AxesSettingsConfigKeys } from '../../../shared_components';
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 
 export function updateLayer(
-  state: State,
-  layer: UnwrapArray<State['layers']>,
+  state: XYState,
+  layer: UnwrapArray<XYState['layers']>,
   index: number
-): State {
+): XYState {
   return {
     ...state,
     layers: state.layers.map((l, i) => (i === index ? layer : l)),
@@ -296,7 +299,7 @@ const defaultLegendTitle = i18n.translate('xpack.lens.xyChart.legendTitle', {
   defaultMessage: 'Legend',
 });
 
-export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProps<State>) {
+export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProps<XYState>) {
   const { state, setState, frame } = props;
   const dataLayers = getDataLayers(state?.layers);
   const shouldRotate = state?.layers.length ? isHorizontalChart(state.layers) : false;

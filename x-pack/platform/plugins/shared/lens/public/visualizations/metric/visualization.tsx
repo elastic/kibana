@@ -15,10 +15,6 @@ import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
 import { IconChartMetric } from '@kbn/chart-icons';
 import type { AccessorConfig } from '@kbn/visualization-ui-components';
 import type { ThemeServiceStart } from '@kbn/core/public';
-import { isNumericFieldForDatatable } from '../../../common/expressions/impl/datatable/utils';
-import { layerTypes } from '../../../common/layer_types';
-import type { FormBasedPersistedState } from '../../datasources/form_based/types';
-import { getSuggestions } from './suggestions';
 import type {
   Visualization,
   OperationMetadata,
@@ -26,7 +22,11 @@ import type {
   VisualizationDimensionGroupConfig,
   Suggestion,
   UserMessage,
-} from '../../types';
+  FormBasedPersistedState,
+} from '@kbn/lens-common';
+import { LENS_LAYER_TYPES as layerTypes } from '@kbn/lens-common';
+import { isNumericFieldForDatatable } from '../../../common/expressions/impl/datatable/utils';
+import { getSuggestions } from './suggestions';
 import { GROUP_ID, LENS_METRIC_ID } from './constants';
 import {
   DimensionEditor,
