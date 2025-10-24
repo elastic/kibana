@@ -32,6 +32,7 @@ import { PartitionEdge } from './partition_edge';
 import { css } from '@emotion/css';
 import { useStreamDocCountsFetch } from '../../hooks/use_streams_doc_counts_fetch';
 import { getLayoutedElements } from './layout_helper';
+import { StreamsAppSearchBar } from '../streams_app_search_bar';
 
 const nodeTypes = {
   [STREAM_NODE_TYPE]: StreamNode,
@@ -40,38 +41,39 @@ const edgeTypes = {
   [CUSTOM_EDGE_TYPE]: CustomEdge,
 };
 
+const datePickerStyle = css`
+  .euiFormControlLayout {
+    height: 40px;
+  }
+  .euiButton {
+    height: 40px;
+  }
+`;
+
 interface StreamsGraphProps {
   streams?: ListStreamDetail[];
   loading?: boolean;
-  showTitle?: boolean;
 }
 
-export function StreamsGraph({ streams, loading = false, showTitle = true }: StreamsGraphProps) {
+export function StreamsGraph({ streams, loading = false }: StreamsGraphProps) {
   if (loading || !streams) {
     return (
       <EuiPanel paddingSize="l">
         <EuiFlexGroup direction='column' className={css`height: 100%;`}>
-          {showTitle && (<EuiText>
-            <h3>
-              {i18n.translate('xpack.streams.streamsGraph.title', {
-                defaultMessage: 'Streams Graph',
-              })}
-            </h3>
-            <p>
-              {i18n.translate('xpack.streams.streamsGraph.description', {
-                defaultMessage: 'Visual representation of wired streams and their hierarchical relationships.',
-              })}
-            </p>
-          </EuiText>)}
+          <EuiText>
+            {i18n.translate('xpack.streams.streamsGraph.description', {
+              defaultMessage: 'Visual representation of wired streams and their hierarchical relationships.',
+            })}
+          </EuiText>
           <EuiFlexItem grow={1}>
             <EuiEmptyPrompt
               icon={<EuiLoadingElastic size="xl" />}
               title={
-                  <h2>
-                      {i18n.translate('xpack.streams.streamsGraph.loading', {
-                          defaultMessage: 'Loading graph',
-                      })}
-                  </h2>
+                <h2>
+                  {i18n.translate('xpack.streams.streamsGraph.loading', {
+                    defaultMessage: 'Loading graph',
+                  })}
+                </h2>
               }
               className={css`
                 display: flex;
@@ -87,13 +89,24 @@ export function StreamsGraph({ streams, loading = false, showTitle = true }: Str
   }
 
   return (
-    <ReactFlowProvider>
-      <Graph streams={streams} loading={loading} showTitle={showTitle} />
-    </ReactFlowProvider>
+    <>
+      <EuiText>
+        {i18n.translate('xpack.streams.streamsGraph.description', {
+          defaultMessage: 'Visual representation of wired streams and their hierarchical relationships.',
+        })}
+      </EuiText>
+      <div className={datePickerStyle}>
+        <StreamsAppSearchBar showDatePicker />
+      </div>
+      <EuiSpacer size="m" />
+      <ReactFlowProvider>
+        <Graph streams={streams} loading={loading} />
+      </ReactFlowProvider>
+    </>
   );
 }
 
-const Graph = ({ streams, loading = false, showTitle = true }: StreamsGraphProps) => {
+const Graph = ({ streams, loading = false }: StreamsGraphProps) => {
   const widthSelector = (state: { width: any }) => state.width;
   const heightSelector = (state: { height: any }) => state.height;
   const reactFlowWidth = useStore(widthSelector);
@@ -133,7 +146,7 @@ const Graph = ({ streams, loading = false, showTitle = true }: StreamsGraphProps
         data: {
           label: streamName,
           type: s.type,
-          hasChildren:  s.stream.ingest.wired.routing && s.stream.ingest.wired.routing.length > 0,
+          hasChildren: s.stream.ingest.wired.routing && s.stream.ingest.wired.routing.length > 0,
           stream: s,
         },
       };
@@ -163,39 +176,20 @@ const Graph = ({ streams, loading = false, showTitle = true }: StreamsGraphProps
   const [edges, , onEdgesChange] = useEdgesState(initialEdges);
 
   return (
-    <EuiPanel paddingSize="l">
-      {showTitle && (
-        <>
-          <EuiText>
-            <h3>
-              {i18n.translate('xpack.streams.streamsGraph.title', {
-                defaultMessage: 'Streams Graph',
-              })}
-            </h3>
-            <p>
-              {i18n.translate('xpack.streams.streamsGraph.description', {
-                defaultMessage: 'Visual representation of wired streams and their hierarchical relationships.',
-              })}
-            </p>
-          </EuiText>
-          <EuiSpacer size="m" />
-        </>
-      )}
-      <div style={{ width: '100%', height: '600px', border: '1px solid #d3dae6', borderRadius: '6px' }}>
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          nodeTypes={nodeTypes}
-          edgeTypes={edgeTypes}
-          fitView
-          fitViewOptions={{ padding: 0.2 }}
-        >
-          <Controls />
-          <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
-        </ReactFlow>
-      </div>
-    </EuiPanel>
+    <div style={{ width: '100%', height: '600px', border: '1px solid #d3dae6', borderRadius: '6px' }}>
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
+        fitView
+        fitViewOptions={{ padding: 0.2 }}
+      >
+        <Controls />
+        <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
+      </ReactFlow>
+    </div>
   );
 };
