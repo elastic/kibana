@@ -236,20 +236,22 @@ export const getDiscoverAppStateContainer = ({
                 get selectedCascadeGroups() {
                   if (
                     !currentTabState.uiState.cascade ||
-                    // if the query has changed, reset the cascade groupings to the first group
-                    (currentTabState.initialAppState?.query as AggregateQuery)?.esql !==
-                      (value!.query as AggregateQuery).esql
+                    (currentTabState.uiState.cascade &&
+                      // if the proposed available groups is different in length or contains a value the existing one doesn't have, we want to reset by defaulting to the first group
+                      (this.availableCascadeGroups.length !==
+                        currentTabState.uiState.cascade.availableCascadeGroups.length ||
+                        this.availableCascadeGroups.some(
+                          (group) =>
+                            (currentTabState.uiState.cascade?.availableCascadeGroups ?? []).indexOf(
+                              group
+                            ) < 0
+                        )))
                   ) {
                     return [this.availableCascadeGroups[0]].filter(Boolean);
                   }
 
-                  const validSelectionFromCurrentTab =
-                    currentTabState.uiState.cascade!.selectedCascadeGroups.filter((group) =>
-                      this.availableCascadeGroups.includes(group)
-                    );
-
-                  // if no valid selection from previous state, select the first group by default
-                  return validSelectionFromCurrentTab;
+                  // return existing selection since we've asserted that there's been no change to the available groups default
+                  return currentTabState.uiState.cascade!.selectedCascadeGroups;
                 },
               },
             })
