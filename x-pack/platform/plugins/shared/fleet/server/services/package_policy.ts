@@ -527,6 +527,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       enrichedPackagePolicy = secretsRes.packagePolicy;
       secretReferences = secretsRes.secretReferences;
 
+      // Create cloud connector for package policy if it is supported and package supports agentless
       if (
         enrichedPackagePolicy?.supports_agentless &&
         enrichedPackagePolicy?.supports_cloud_connector
