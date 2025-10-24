@@ -5,9 +5,5 @@
  * 2.0.
  */
 
-/**
- * The identifier in a saved object's `namespaces` array when it is shared to an unknown space (e.g., one that the end user is not authorized to see).
- */
-export const UNKNOWN_SPACE = '?';
-
-export const ALL_SPACES_ID = '*';
+export { registerFileUploadAnalyticsEvents, FILE_UPLOAD_EVENT } from './register_telemetry';
+export { FileUploadTelemetryService } from './telemetry_service';
