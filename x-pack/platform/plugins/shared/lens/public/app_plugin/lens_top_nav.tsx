@@ -45,6 +45,7 @@ import { changeIndexPattern } from '../state_management/lens_slice';
 import type { ShareableConfiguration } from './share_action';
 import { DEFAULT_LENS_LAYOUT_DIMENSIONS, getLocatorParams, getShareURL } from './share_action';
 import { getDatasourceLayers } from '../state_management/utils';
+import { useEditorFrameService } from '../editor_frame_service/editor_frame_service_context';
 
 function getSaveButtonMeta({
   contextFromEmbeddable,
@@ -315,8 +316,6 @@ export const LensTopNavMenu = ({
   runSave,
   onAppLeave,
   redirectToOrigin,
-  datasourceMap,
-  visualizationMap,
   title,
   goBackToOriginatingApp,
   contextOriginatingApp,
@@ -340,6 +339,8 @@ export const LensTopNavMenu = ({
     dataViewEditor,
     dataViews: dataViewsService,
   } = useKibana<LensAppServices>().services;
+
+  const { datasourceMap, visualizationMap } = useEditorFrameService();
 
   const {
     isSaveable,

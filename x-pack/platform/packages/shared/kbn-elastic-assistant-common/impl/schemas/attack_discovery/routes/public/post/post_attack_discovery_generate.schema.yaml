@@ -14,7 +14,6 @@ paths:
              --request POST 'http://localhost:5601/api/attack_discovery/_generate' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json" \
-             --header "elastic-api-version: 2023-10-31" \
              --data '{
                 "alertsIndexPattern": ".alerts-security.alerts-default",
                 "anonymizationFields": [

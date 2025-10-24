@@ -106,12 +106,6 @@ export const allowedExperimentalValues = Object.freeze({
   protectionUpdatesEnabled: true,
 
   /**
-   * Enables Response actions telemetry collection
-   * Should be enabled in 8.17.0
-   */
-  responseActionsTelemetryEnabled: true,
-
-  /**
    * Enables experimental Microsoft Defender for Endpoint integration data to be available in Analyzer
    */
   microsoftDefenderEndpointDataInAnalyzerEnabled: true,
@@ -130,11 +124,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables scheduling gap fills for rules
    */
   bulkFillRuleGapsEnabled: true,
-
-  /**
-   * Adds a new option to filter descendants of a process for Management / Event Filters
-   */
-  filterProcessDescendantsForEventFiltersEnabled: true,
 
   /**
    * Adds a new option to filter descendants of a process for Management / Trusted Apps
@@ -178,21 +167,10 @@ export const allowedExperimentalValues = Object.freeze({
   newExpandableFlyoutNavigationDisabled: false,
 
   /**
-   * Enables the ability to edit highlighted fields in the alertflyout
-   */
-  editHighlightedFields: true,
-
-  /**
    * Enables CrowdStrike's RunScript RTR command
    * Release: 8.18/9.0
    */
   crowdstrikeRunScriptEnabled: true,
-
-  /**
-   * Enabled Microsoft Defender for  Endpoint actions: Isolate and Release.
-   * Release: 8.18/9.0
-   */
-  responseActionsMSDefenderEndpointEnabled: true,
 
   /** Enables new Data View Picker */
   newDataViewPickerEnabled: true,
