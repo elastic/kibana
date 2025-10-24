@@ -6,11 +6,10 @@
  */
 
 import React, { useCallback } from 'react';
-
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useFlyoutApi } from '@kbn/flyout';
+import { UserPanelKey } from '../../flyout/entity_details/shared/constants';
 import { UserDetailsLink } from '../../common/components/links';
 import { getEmptyTagValue } from '../../common/components/empty_value';
-import { UserPanelKey } from '../../flyout/entity_details/shared/constants';
 
 interface Props {
   userName: string | undefined | null;
@@ -19,14 +18,14 @@ interface Props {
 }
 
 const UserNameComponent: React.FC<Props> = ({ userName, scopeId, contextId }) => {
-  const { openFlyout } = useExpandableFlyoutApi();
+  const { openFlyout } = useFlyoutApi();
 
   const openUserDetailsSidePanel = useCallback(
     (e: React.SyntheticEvent) => {
       e.preventDefault();
 
       openFlyout({
-        right: {
+        main: {
           id: UserPanelKey,
           params: {
             userName,

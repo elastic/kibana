@@ -13,18 +13,17 @@ import deepEqual from 'fast-deep-equal';
 import { type EuiDataGridControlColumn } from '@elastic/eui';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { DataLoadingState } from '@kbn/unified-data-table';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import { useFlyoutApi } from '@kbn/flyout';
 import { PageScope } from '../../../../../data_view_manager/constants';
+import {
+  DocumentDetailsNotesPanelKey,
+  DocumentDetailsRightPanelKey,
+} from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { useSelectedPatterns } from '../../../../../data_view_manager/hooks/use_selected_patterns';
 import { useBrowserFields } from '../../../../../data_view_manager/hooks/use_browser_fields';
 import { useFetchNotes } from '../../../../../notes/hooks/use_fetch_notes';
-import {
-  DocumentDetailsLeftPanelKey,
-  DocumentDetailsRightPanelKey,
-} from '../../../../../flyout/document_details/shared/constants/panel_keys';
-import { LeftPanelNotesTab } from '../../../../../flyout/document_details/left';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useTimelineDataFilters } from '../../../../containers/use_timeline_data_filters';
@@ -250,7 +249,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
    */
   const onUpdatePageIndex = useCallback((newPageIndex: number) => setPageIndex(newPageIndex), []);
 
-  const { openFlyout } = useExpandableFlyoutApi();
+  const { openFlyout } = useFlyoutApi();
 
   const onToggleShowNotes = useCallback(
     (eventId?: string) => {
@@ -259,27 +258,27 @@ export const QueryTabContentComponent: React.FC<Props> = ({
       }
 
       const indexName = selectedPatterns.join(',');
-      openFlyout({
-        right: {
-          id: DocumentDetailsRightPanelKey,
-          params: {
-            id: eventId,
-            indexName,
-            scopeId: timelineId,
+      openFlyout(
+        {
+          main: {
+            id: DocumentDetailsNotesPanelKey,
+            params: {
+              id: eventId,
+              indexName,
+              scopeId: timelineId,
+            },
+          },
+          child: {
+            id: DocumentDetailsRightPanelKey,
+            params: {
+              id: eventId,
+              indexName,
+              scopeId: timelineId,
+            },
           },
         },
-        left: {
-          id: DocumentDetailsLeftPanelKey,
-          path: {
-            tab: LeftPanelNotesTab,
-          },
-          params: {
-            id: eventId,
-            indexName,
-            scopeId: timelineId,
-          },
-        },
-      });
+        { mainSize: 'm' }
+      );
       telemetry.reportEvent(NotesEventTypes.OpenNoteInExpandableFlyoutClicked, {
         location: timelineId,
       });
@@ -288,7 +287,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         panel: 'left',
       });
     },
-    [openFlyout, selectedPatterns, telemetry, timelineId]
+    [selectedPatterns, telemetry, timelineId, openFlyout]
   );
 
   const leadingControlColumns = useTimelineControlColumn({

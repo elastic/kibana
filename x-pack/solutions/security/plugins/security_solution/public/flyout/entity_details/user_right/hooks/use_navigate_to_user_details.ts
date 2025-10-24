@@ -4,13 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useCallback } from 'react';
-import { EntityType } from '../../../../../common/search_strategy';
+import { useFlyoutApi } from '@kbn/flyout';
 import type { EntityDetailsPath } from '../../shared/components/left_panel/left_panel_header';
-import { useKibana } from '../../../../common/lib/kibana';
-import { EntityEventTypes } from '../../../../common/lib/telemetry';
 import { UserDetailsPanelKey } from '../../user_details_left';
 import { UserPanelKey } from '../../shared/constants';
 
@@ -22,7 +18,7 @@ interface UseNavigateToUserDetailsParams {
   isRiskScoreExist: boolean;
   hasMisconfigurationFindings: boolean;
   hasNonClosedAlerts: boolean;
-  isPreviewMode: boolean;
+  isChild?: boolean;
 }
 
 export const useNavigateToUserDetails = ({
@@ -33,17 +29,12 @@ export const useNavigateToUserDetails = ({
   isRiskScoreExist,
   hasMisconfigurationFindings,
   hasNonClosedAlerts,
-  isPreviewMode,
+  isChild,
 }: UseNavigateToUserDetailsParams): ((path: EntityDetailsPath) => void) => {
-  const { telemetry } = useKibana().services;
-  const { openLeftPanel, openFlyout } = useExpandableFlyoutApi();
+  const { openFlyout, openMainPanel } = useFlyoutApi();
 
   return useCallback(
     (path: EntityDetailsPath) => {
-      telemetry.reportEvent(EntityEventTypes.RiskInputsExpandedFlyoutOpened, {
-        entity: EntityType.user,
-      });
-
       const left = {
         id: UserDetailsPanelKey,
         params: {
@@ -56,6 +47,7 @@ export const useNavigateToUserDetails = ({
           path,
           hasMisconfigurationFindings,
           hasNonClosedAlerts,
+          isChild: true,
         },
       };
 
@@ -65,27 +57,33 @@ export const useNavigateToUserDetails = ({
           contextID,
           userName,
           scopeId,
+          isChild: false,
         },
       };
 
-      if (isPreviewMode) {
-        openFlyout({ right, left });
+      if (isChild) {
+        openFlyout(
+          {
+            main: right,
+            child: left,
+          },
+          { mainSize: 's', childSize: 'm' }
+        );
       } else {
-        openLeftPanel(left);
+        openMainPanel(left, 's');
       }
     },
     [
-      telemetry,
-      openLeftPanel,
       isRiskScoreExist,
       scopeId,
       userName,
       email,
       hasMisconfigurationFindings,
       hasNonClosedAlerts,
-      isPreviewMode,
-      openFlyout,
       contextID,
+      isChild,
+      openFlyout,
+      openMainPanel,
     ]
   );
 };

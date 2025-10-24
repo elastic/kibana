@@ -33,7 +33,7 @@ export const useNavigateToLeftPanel = ({
 }: UseNavigateToLeftPanelParams): (() => void) => {
   const { telemetry } = useKibana().services;
   const { openLeftPanel, openFlyout } = useExpandableFlyoutApi();
-  const { eventId, indexName, scopeId, isPreviewMode } = useDocumentDetailsContext();
+  const { eventId, indexName, scopeId, isChild } = useDocumentDetailsContext();
 
   const right: FlyoutPanelProps = useMemo(
     () => ({
@@ -64,7 +64,7 @@ export const useNavigateToLeftPanel = ({
   );
 
   return useCallback(() => {
-    if (!isPreviewMode) {
+    if (!isChild) {
       openLeftPanel(left);
       telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutTabClicked, {
         location: scopeId,
@@ -81,5 +81,5 @@ export const useNavigateToLeftPanel = ({
         panel: 'left',
       });
     }
-  }, [openFlyout, openLeftPanel, right, left, scopeId, telemetry, isPreviewMode, tab]);
+  }, [openFlyout, openLeftPanel, right, left, scopeId, telemetry, isChild, tab]);
 };

@@ -6,10 +6,10 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { EuiButtonIcon } from '@elastic/eui';
 import type { Alert } from '@kbn/alerting-types';
 import { i18n } from '@kbn/i18n';
+import { useFlyoutApi } from '@kbn/flyout';
 import { EasePanelKey } from '../../../../flyout/ease/constants/panel_keys';
 
 export const ROW_ACTION_FLYOUT_ICON_TEST_ID = 'alert-summary-table-row-action-flyout-icon';
@@ -25,20 +25,18 @@ export interface ActionsCellProps {
  * Renders a icon to open EASE alert summary flyout.
  */
 export const OpenFlyoutRowControlColumn = memo(({ alert }: ActionsCellProps) => {
-  const { openFlyout } = useExpandableFlyoutApi();
-  const onOpenFlyout = useCallback(
-    () =>
-      openFlyout({
-        right: {
-          id: EasePanelKey,
-          params: {
-            id: alert._id,
-            indexName: alert._index,
-          },
+  const { openFlyout } = useFlyoutApi();
+  const onOpenFlyout = useCallback(() => {
+    openFlyout({
+      main: {
+        id: EasePanelKey,
+        params: {
+          id: alert._id,
+          indexName: alert._index,
         },
-      }),
-    [alert, openFlyout]
-  );
+      },
+    });
+  }, [alert._id, alert._index, openFlyout]);
 
   return (
     <EuiButtonIcon

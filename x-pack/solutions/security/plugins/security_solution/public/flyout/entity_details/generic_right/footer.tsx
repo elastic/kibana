@@ -6,12 +6,11 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiFlyoutFooter, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter, EuiLink, EuiPanel } from '@elastic/eui';
 import type { EntityEcs } from '@kbn/securitysolution-ecs/src/entity';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
 import { NewChatByTitle } from '@kbn/elastic-assistant';
-import { DocumentEventTypes } from '../../../common/lib/telemetry';
+import { useFlyoutApi } from '@kbn/flyout';
 import { TakeAction } from '../shared/components/take_action';
 import {
   GENERIC_ENTITY_FLYOUT_FOOTER_DETAILS_LINK_TEST_SUBJ,
@@ -19,7 +18,6 @@ import {
 } from './constants';
 import { GenericEntityPanelKey } from '../shared/constants';
 import { GENERIC_ENTITY_PREVIEW_BANNER } from '../../document_details/preview/constants';
-import { useKibana } from '../../../common/lib/kibana';
 import { ASK_AI_ASSISTANT } from '../shared/translations';
 import { useAssetInventoryAssistant } from './hooks/use_asset_inventory_assistant';
 import type { AssetCriticalityLevel } from '../../../../common/api/entity_analytics/asset_criticality';
@@ -27,7 +25,7 @@ import { useAgentBuilderAvailability } from '../../../agent_builder/hooks/use_ag
 
 interface GenericEntityFlyoutFooterProps {
   entityId: EntityEcs['id'];
-  isPreviewMode: boolean;
+  isChild: boolean;
   scopeId: string;
   entityFields: Record<string, string[]>;
   assetCriticalityLevel?: AssetCriticalityLevel;
@@ -35,18 +33,17 @@ interface GenericEntityFlyoutFooterProps {
 
 export const GenericEntityFlyoutFooter = ({
   entityId,
-  isPreviewMode,
+  isChild,
   scopeId,
   entityFields,
   assetCriticalityLevel,
 }: GenericEntityFlyoutFooterProps) => {
-  const { openFlyout } = useExpandableFlyoutApi();
-  const { telemetry } = useKibana().services;
+  const { openFlyout } = useFlyoutApi();
 
   const { showAssistant, showAssistantOverlay } = useAssetInventoryAssistant({
     entityId,
     entityFields,
-    isPreviewMode,
+    isChild,
     assetCriticalityLevel,
   });
 
@@ -54,20 +51,17 @@ export const GenericEntityFlyoutFooter = ({
 
   const openDocumentFlyout = useCallback(() => {
     openFlyout({
-      right: {
+      main: {
         id: GenericEntityPanelKey,
         params: {
           scopeId,
           entityId,
           banner: GENERIC_ENTITY_PREVIEW_BANNER,
+          isChild: false,
         },
       },
     });
-    telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
-      location: scopeId,
-      panel: 'right',
-    });
-  }, [openFlyout, scopeId, entityId, telemetry]);
+  }, [scopeId, entityId, openFlyout]);
 
   const fullDetailsLink = useMemo(
     () => (
@@ -88,7 +82,7 @@ export const GenericEntityFlyoutFooter = ({
     <EuiFlyoutFooter data-test-subj={GENERIC_ENTITY_FLYOUT_FOOTER_TEST_SUBJ}>
       <EuiPanel color="transparent">
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-          {isPreviewMode && <EuiFlexItem grow={false}>{fullDetailsLink}</EuiFlexItem>}
+          {isChild && <EuiFlexItem grow={false}>{fullDetailsLink}</EuiFlexItem>}
 
           {showAssistant && !isAgentChatExperienceEnabled && (
             <EuiFlexItem grow={false}>

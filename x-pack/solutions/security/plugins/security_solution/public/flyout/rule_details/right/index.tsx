@@ -7,22 +7,22 @@
 
 import type { FC } from 'react';
 import React, { memo } from 'react';
-import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
+import type { FlyoutPanelProps } from '@kbn/flyout';
 import { i18n } from '@kbn/i18n';
+import { RulePreviewBanner } from '../preview/preview_banner';
 import { PanelContent } from './content';
 import { PanelHeader } from './header';
 import { PreviewFooter } from '../preview/footer';
 import { useRuleDetails } from '../hooks/use_rule_details';
 import { LOADING_TEST_ID } from './test_ids';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
-import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { FlyoutError } from '../../shared/components/flyout_error';
 
 export interface RulePanelExpandableFlyoutProps extends FlyoutPanelProps {
   key: 'rule-panel' | 'rule-preview-panel';
   params: {
     ruleId: string;
-    isPreviewMode?: boolean;
+    isChild?: boolean;
   };
 }
 
@@ -45,23 +45,23 @@ export interface RulePanelProps extends Record<string, unknown> {
   /**
    * If in preview mode, show preview banner and footer
    */
-  isPreviewMode?: boolean;
+  isChild?: boolean;
 }
 
 /**
  * Displays a rule overview panel
  */
-export const RulePanel: FC<RulePanelProps> = memo(({ ruleId, isPreviewMode }) => {
+export const RulePanel: FC<RulePanelProps> = memo(({ ruleId, isChild }) => {
   const { rule, loading, isExistingRule } = useRuleDetails({ ruleId });
 
   return loading ? (
     <FlyoutLoading data-test-subj={LOADING_TEST_ID} />
   ) : rule ? (
     <>
-      <FlyoutNavigation flyoutIsExpandable={false} isPreviewMode={isPreviewMode} />
+      {isChild && <RulePreviewBanner />}
       <PanelHeader rule={rule} isSuppressed={!isExistingRule} />
-      <PanelContent rule={rule} />
-      {isPreviewMode && <PreviewFooter ruleId={ruleId} />}
+      <PanelContent rule={rule} isChild={Boolean(isChild)} />
+      {isChild && <PreviewFooter ruleId={ruleId} />}
     </>
   ) : (
     <FlyoutError />

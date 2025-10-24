@@ -28,7 +28,7 @@ export const Default: StoryFn = () => {
             riskScoreData={{ ...mockRiskScoreState, data: [] }}
             queryId={'testQuery'}
             recalculatingScore={false}
-            isPreviewMode={false}
+            isChild={false}
             entityType={EntityType.user}
           />
         </div>
@@ -47,7 +47,7 @@ export const InPreviewMode: StoryFn = () => {
             queryId={'testQuery'}
             recalculatingScore={false}
             openDetailsPanel={() => {}}
-            isPreviewMode
+            isChild
             entityType={EntityType.user}
           />
         </div>

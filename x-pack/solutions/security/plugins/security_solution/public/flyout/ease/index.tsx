@@ -14,7 +14,6 @@ import { AlertSummarySection } from './components/alert_summary_section';
 import { HighlightedFields } from '../document_details/right/components/highlighted_fields';
 import { useEaseDetailsContext } from './context';
 import { FlyoutBody } from '../shared/components/flyout_body';
-import { FlyoutNavigation } from '../shared/components/flyout_navigation';
 import type { EaseDetailsProps } from './types';
 import { PanelFooter } from './footer';
 import { FlyoutHeader } from '../shared/components/flyout_header';
@@ -36,7 +35,6 @@ export const EasePanel: React.FC<Partial<EaseDetailsProps>> = memo(() => {
 
   return (
     <>
-      <FlyoutNavigation flyoutIsExpandable={false} />
       <FlyoutHeader>
         <HeaderTitle />
       </FlyoutHeader>

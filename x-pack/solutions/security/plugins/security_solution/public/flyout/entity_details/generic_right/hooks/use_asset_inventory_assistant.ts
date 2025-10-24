@@ -27,7 +27,7 @@ const useAssistantNoop = () => ({
 export interface UseAssetInventoryAssistantParams {
   entityId: EntityEcs['id'];
   entityFields: Record<string, string[]>;
-  isPreviewMode: boolean;
+  isChild: boolean;
   assetCriticalityLevel?: AssetCriticalityLevel;
 }
 
@@ -52,7 +52,7 @@ export interface UseAssetInventoryAssistantResult {
 export const useAssetInventoryAssistant = ({
   entityId,
   entityFields,
-  isPreviewMode,
+  isChild,
   assetCriticalityLevel,
 }: UseAssetInventoryAssistantParams): UseAssetInventoryAssistantResult => {
   const { hasAssistantPrivilege, isAssistantEnabled, isAssistantVisible } =
@@ -102,7 +102,7 @@ export const useAssetInventoryAssistant = ({
       hasAssistantPrivilege &&
       promptContextId !== null &&
       isAssistantVisible &&
-      !isPreviewMode,
+      !isChild,
     showAssistantOverlay,
     promptContextId: promptContextId || '',
   };

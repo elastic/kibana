@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
+import type { FlyoutPanelProps } from '@kbn/flyout';
 import type {
   DocumentDetailsLeftPanelKey,
   DocumentDetailsRightPanelKey,
@@ -13,13 +13,14 @@ import type {
 
 export interface DocumentDetailsProps extends FlyoutPanelProps {
   key: typeof DocumentDetailsLeftPanelKey | typeof DocumentDetailsRightPanelKey;
-  path?: PanelPath;
+  path?: string;
   params?: {
     id: string;
     indexName: string;
     scopeId: string;
-    isPreviewMode?: boolean;
+    isChild: boolean;
     jumpToEntityId?: string;
     jumpToCursor?: string;
+    isPreview?: boolean;
   };
 }

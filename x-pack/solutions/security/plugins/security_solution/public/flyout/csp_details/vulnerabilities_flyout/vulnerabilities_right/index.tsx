@@ -7,16 +7,15 @@
 
 import React from 'react';
 import {
-  SeverityStatusBadge,
-  getNormalizedSeverity,
-  type FindingVulnerabilityFullFlyoutContentProps,
   type FindingsVulnerabilityPanelExpandableFlyoutProps,
+  type FindingVulnerabilityFullFlyoutContentProps,
+  getNormalizedSeverity,
+  SeverityStatusBadge,
 } from '@kbn/cloud-security-posture';
 import { EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
-import { FlyoutNavigation } from '../../../shared/components/flyout_navigation';
 import { useKibana } from '../../../../common/lib/kibana';
 import { FlyoutHeader } from '../../../shared/components/flyout_header';
 import { FlyoutBody } from '../../../shared/components/flyout_body';
@@ -28,14 +27,13 @@ export const FindingsVulnerabilityPanel = ({
   packageName,
   packageVersion,
   eventId,
-  isPreviewMode,
+  isChild,
 }: FindingsVulnerabilityPanelExpandableFlyoutProps['params']) => {
   const { cloudSecurityPosture } = useKibana().services;
   const CspVulnerabilityFlyout = cloudSecurityPosture.getCloudSecurityPostureVulnerabilityFlyout();
 
   return (
     <>
-      <FlyoutNavigation flyoutIsExpandable={false} isPreviewMode={isPreviewMode} />
       <CspVulnerabilityFlyout.Component
         vulnerabilityId={vulnerabilityId}
         resourceId={resourceId}
@@ -94,7 +92,7 @@ export const FindingsVulnerabilityPanel = ({
               <FlyoutBody>
                 <CspVulnerabilityFlyout.Body finding={finding} />
               </FlyoutBody>
-              {!isPreviewMode && (
+              {!isChild && (
                 <EuiFlyoutFooter>
                   <CspVulnerabilityFlyout.Footer createRuleFn={createRuleFn} />
                 </EuiFlyoutFooter>

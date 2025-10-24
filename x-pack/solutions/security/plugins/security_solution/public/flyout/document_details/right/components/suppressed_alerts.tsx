@@ -6,16 +6,15 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiBetaBadge } from '@elastic/eui';
+import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { i18n } from '@kbn/i18n';
-
-import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
+import { LeftPanelCorrelationsTab } from '../../insights';
 import { InsightsSummaryRow } from './insights_summary_row';
 import {
-  CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID,
   CORRELATIONS_SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID,
+  CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID,
 } from './test_ids';
 import { isSuppressionRuleInGA } from '../../../../../common/detection_engine/utils';
 
@@ -61,7 +60,7 @@ export const SuppressedAlerts: React.VFC<SuppressedAlertsProps> = ({
         <InsightsSummaryRow
           text={text}
           value={alertSuppressionCount}
-          expandedSubTab={CORRELATIONS_TAB_ID}
+          expandedTab={LeftPanelCorrelationsTab}
           data-test-subj={CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID}
           key={`correlation-row-suppressed-alerts`}
         />

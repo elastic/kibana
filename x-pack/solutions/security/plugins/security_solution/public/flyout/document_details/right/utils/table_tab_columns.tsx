@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiText, type EuiBasicTableColumn } from '@elastic/eui';
+import { type EuiBasicTableColumn, EuiButtonIcon, EuiText } from '@elastic/eui';
 import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { getFieldFromBrowserField } from '../tabs/table_tab';
 import { TableFieldNameCell } from '../components/table_field_name_cell';
@@ -60,6 +60,10 @@ export type ColumnsProvider = (providerOptions: {
    * Function to toggle pinned fields
    */
   onTogglePinned: (field: string, action: 'pin' | 'unpin') => void;
+  /**
+   *
+   */
+  isChild: boolean;
 }) => Array<EuiBasicTableColumn<TimelineEventsDetailsItem>>;
 
 /**
@@ -73,6 +77,7 @@ export const getTableTabColumns: ColumnsProvider = ({
   ruleId,
   isRulePreview,
   onTogglePinned,
+  isChild,
 }) => [
   {
     name: ' ',
@@ -126,6 +131,7 @@ export const getTableTabColumns: ColumnsProvider = ({
             ruleId={ruleId}
             isRulePreview={isRulePreview}
             values={values}
+            isChild={isChild}
           />
         </CellActions>
       );

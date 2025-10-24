@@ -28,9 +28,10 @@ export interface PanelContentProps {
  * of the overview, table and json tabs.
  */
 export const PanelContent: FC<PanelContentProps> = ({ selectedTabId, tabs }) => {
-  const selectedTabContent = useMemo(() => {
-    return tabs.find((tab) => tab.id === selectedTabId)?.content;
-  }, [selectedTabId, tabs]);
+  const selectedTabContent = useMemo(
+    () => tabs.find((tab) => tab.id === selectedTabId)?.content,
+    [selectedTabId, tabs]
+  );
 
   return <FlyoutBody data-test-subj={FLYOUT_BODY_TEST_ID}>{selectedTabContent}</FlyoutBody>;
 };

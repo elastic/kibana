@@ -211,7 +211,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
           ),
         },
       ],
-      [data, scopeId, indexNames, hostName, isFlyoutOpen]
+      [data, scopeId, isFlyoutOpen, indexNames, hostName]
     );
     const firstColumn = useMemo(
       () =>
@@ -259,12 +259,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
                 scopeId={scopeId}
                 render={(ip) =>
                   ip != null ? (
-                    <FlyoutLink
-                      field={'host.ip'}
-                      value={ip}
-                      scopeId={scopeId}
-                      isFlyoutOpen={isFlyoutOpen}
-                    />
+                    <FlyoutLink field={'host.ip'} value={ip} scopeId={scopeId} isChild={true} />
                   ) : (
                     getEmptyTagValue()
                   )
@@ -303,7 +298,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
           },
         ],
       ],
-      [contextID, scopeId, data, firstColumn, getDefaultRenderer, isFlyoutOpen]
+      [firstColumn, data, contextID, scopeId, getDefaultRenderer, isFlyoutOpen]
     );
     return (
       <>

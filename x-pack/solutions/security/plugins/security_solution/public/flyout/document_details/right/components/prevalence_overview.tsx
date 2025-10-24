@@ -6,48 +6,25 @@
  */
 
 import type { FC } from 'react';
-import React, { useMemo } from 'react';
-import { EuiBadge, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
+import { EuiBadge, EuiFlexGroup } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '../../../../common/lib/kibana';
+import { useFlyoutApi } from '@kbn/flyout';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
 import { PREVALENCE_TEST_ID } from './test_ids';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { LeftPanelInsightsTab } from '../../left';
-import { PREVALENCE_TAB_ID } from '../../left/components/prevalence_details';
 import { InsightsSummaryRow } from './insights_summary_row';
-import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
-import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
+import {
+  DocumentDetailsInsightsPanelKey,
+  DocumentDetailsRightPanelKey,
+} from '../../shared/constants/panel_keys';
+import { InsightsPanelPrevalenceTab } from '../../insights';
 
 const UNCOMMON = (
   <FormattedMessage
     id="xpack.securitySolution.flyout.right.insights.prevalence.uncommonLabel"
     defaultMessage="Uncommon"
-  />
-);
-const DEFAULT_TIME_RANGE_LABEL = (
-  <FormattedMessage
-    id="xpack.securitySolution.flyout.right.insights.threatIntelligence.defaultTimeRangeApplied.badgeLabel"
-    defaultMessage="Time range applied"
-  />
-);
-const CUSTOM_TIME_RANGE_LABEL = (
-  <FormattedMessage
-    id="xpack.securitySolution.flyout.right.insights.threatIntelligence.customTimeRangeApplied.badgeLabel"
-    defaultMessage="Custom time range applied"
-  />
-);
-const DEFAULT_TIME_RANGE_TOOLTIP = (
-  <FormattedMessage
-    id="xpack.securitySolution.flyout.right.insights.threatIntelligence.defaultTimeRangeApplied.tooltipLabel"
-    defaultMessage="Prevalence measures how frequently data from this alert is observed across hosts or users in your environment over the last 30 days. To choose a custom time range, click the section title, then use the date time picker in the left panel."
-  />
-);
-const CUSTOM_TIME_RANGE_TOOLTIP = (
-  <FormattedMessage
-    id="xpack.securitySolution.flyout.right.insights.threatIntelligence.customTimeRangeApplied.tooltipLabel"
-    defaultMessage="Prevalence measures how frequently data from this alert is observed across hosts or users in your environment over the time range that you chose. To choose a different custom time range, click the section title, then use the date time picker in the left panel."
   />
 );
 
@@ -60,23 +37,52 @@ const DEFAULT_TO = 'now';
  * The component fetches the necessary data at once. The loading and error states are handled by the ExpandablePanel component.
  */
 export const PrevalenceOverview: FC = () => {
-  const { storage } = useKibana().services;
-  const timeSavedInLocalStorage = storage.get(FLYOUT_STORAGE_KEYS.PREVALENCE_TIME_RANGE);
+  const {
+    dataFormattedForFieldBrowser,
+    eventId,
+    scopeId,
+    indexName,
+    investigationFields,
+    isChild,
+  } = useDocumentDetailsContext();
 
-  const { dataFormattedForFieldBrowser, investigationFields, isPreviewMode } =
-    useDocumentDetailsContext();
-
-  const goToPrevalenceTab = useNavigateToLeftPanel({
-    tab: LeftPanelInsightsTab,
-    subTab: PREVALENCE_TAB_ID,
-  });
+  const { openFlyout } = useFlyoutApi();
+  const openEntitiesFlyout = useCallback(
+    () =>
+      openFlyout(
+        {
+          main: {
+            id: DocumentDetailsInsightsPanelKey,
+            path: InsightsPanelPrevalenceTab,
+            params: {
+              id: eventId,
+              indexName,
+              scopeId,
+              isChild: false,
+            },
+          },
+          child: {
+            id: DocumentDetailsRightPanelKey,
+            params: {
+              id: eventId,
+              indexName,
+              scopeId,
+              isChild: true,
+              isPreview: false,
+            },
+          },
+        },
+        { mainSize: 'm' }
+      ),
+    [eventId, indexName, openFlyout, scopeId]
+  );
 
   const { loading, error, data } = usePrevalence({
     dataFormattedForFieldBrowser,
     investigationFields,
     interval: {
-      from: timeSavedInLocalStorage?.start || DEFAULT_FROM,
-      to: timeSavedInLocalStorage?.end || DEFAULT_TO,
+      from: DEFAULT_FROM,
+      to: DEFAULT_TO,
     },
   });
 
@@ -91,10 +97,9 @@ export const PrevalenceOverview: FC = () => {
       ),
     [data]
   );
-
   const link = useMemo(
     () => ({
-      callback: goToPrevalenceTab,
+      callback: openEntitiesFlyout,
       tooltip: (
         <FormattedMessage
           id="xpack.securitySolution.flyout.right.insights.prevalence.prevalenceTooltip"
@@ -102,7 +107,7 @@ export const PrevalenceOverview: FC = () => {
         />
       ),
     }),
-    [goToPrevalenceTab]
+    [openEntitiesFlyout]
   );
 
   return (
@@ -115,18 +120,7 @@ export const PrevalenceOverview: FC = () => {
           />
         ),
         link,
-        iconType: !isPreviewMode ? 'arrowStart' : undefined,
-        headerContent: (
-          <EuiToolTip
-            content={
-              timeSavedInLocalStorage ? CUSTOM_TIME_RANGE_TOOLTIP : DEFAULT_TIME_RANGE_TOOLTIP
-            }
-          >
-            <EuiBadge color="hollow" iconSide="left" iconType="clock" tabIndex={0}>
-              {timeSavedInLocalStorage ? CUSTOM_TIME_RANGE_LABEL : DEFAULT_TIME_RANGE_LABEL}
-            </EuiBadge>
-          </EuiToolTip>
-        ),
+        iconType: !isChild ? 'arrowStart' : undefined,
       }}
       content={{ loading, error }}
       data-test-subj={PREVALENCE_TEST_ID}

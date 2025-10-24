@@ -9,19 +9,19 @@ import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import {
+  ALERT_DESCRIPTION_DETAILS_TEST_ID,
   ALERT_DESCRIPTION_TITLE_TEST_ID,
   RULE_SUMMARY_BUTTON_TEST_ID,
-  ALERT_DESCRIPTION_DETAILS_TEST_ID,
 } from './test_ids';
 import { AlertDescription } from './alert_description';
 import { DocumentDetailsContext } from '../../shared/context';
 import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { TestProviders } from '../../../../common/mock';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { ExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
-import { RulePreviewPanelKey, RULE_PREVIEW_BANNER } from '../../../rule_details/right';
+import { RULE_PREVIEW_BANNER, RulePanelKey } from '../../../rule_details/right';
 
 const mockedTelemetry = createTelemetryServiceMock();
 jest.mock('../../../../common/lib/kibana', () => {
@@ -150,7 +150,7 @@ describe('<AlertDescription />', () => {
       getByTestId(RULE_SUMMARY_BUTTON_TEST_ID).click();
 
       expect(flyoutContextValue.openPreviewPanel).toHaveBeenCalledWith({
-        id: RulePreviewPanelKey,
+        id: RulePanelKey,
         params: {
           banner: RULE_PREVIEW_BANNER,
           ruleId: ruleUuid.values[0],

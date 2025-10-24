@@ -43,6 +43,10 @@ const panelViewStyle = css`
 
 export interface RuleDetailsProps {
   /**
+   *
+   */
+  isChild: boolean;
+  /**
    * Rule object that represents relevant information about a rule
    */
   rule: RuleResponse;
@@ -51,7 +55,7 @@ export interface RuleDetailsProps {
 /**
  * Rule details content on the right section of expandable flyout
  */
-export const PanelContent = memo(({ rule }: RuleDetailsProps) => {
+export const PanelContent = memo(({ isChild, rule }: RuleDetailsProps) => {
   const { ruleActionsData } = useMemo(
     () => (rule != null ? getStepsData({ rule, detailsView: true }) : { ruleActionsData: null }),
     [rule]
@@ -73,6 +77,7 @@ export const PanelContent = memo(({ rule }: RuleDetailsProps) => {
   return (
     <FlyoutBody>
       <EuiPanel
+        color={isChild ? 'transparent' : 'plain'}
         hasBorder={false}
         hasShadow={false}
         data-test-subj={BODY_TEST_ID}

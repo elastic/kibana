@@ -7,13 +7,12 @@
 
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { LeftPanelNotesTab } from '../../../../flyout/document_details/left';
-import { useKibana } from '../../../lib/kibana';
+import { useFlyoutApi } from '@kbn/flyout';
 import {
-  DocumentDetailsLeftPanelKey,
+  DocumentDetailsNotesPanelKey,
   DocumentDetailsRightPanelKey,
 } from '../../../../flyout/document_details/shared/constants/panel_keys';
+import { useKibana } from '../../../lib/kibana';
 import type {
   ControlColumnProps,
   SetEventsDeleted,
@@ -68,8 +67,9 @@ const RowActionComponent = ({
   width,
 }: RowActionProps) => {
   const { data: timelineNonEcsData, ecs: ecsData, _id: eventId, _index: indexName } = data ?? {};
-  const { telemetry } = useKibana().services;
-  const { openFlyout } = useExpandableFlyoutApi();
+  const services = useKibana().services;
+  const { telemetry } = services;
+  const { openFlyout, openMainPanel } = useFlyoutApi();
 
   const columnValues = useMemo(
     () =>
@@ -93,8 +93,8 @@ const RowActionComponent = ({
   const showNotes = canReadNotes;
 
   const handleOnEventDetailPanelOpened = useCallback(() => {
-    openFlyout({
-      right: {
+    openMainPanel(
+      {
         id: DocumentDetailsRightPanelKey,
         params: {
           id: eventId,
@@ -102,35 +102,36 @@ const RowActionComponent = ({
           scopeId: tableId,
         },
       },
-    });
+      's'
+    );
     telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
       location: tableId,
       panel: 'right',
     });
-  }, [eventId, indexName, tableId, openFlyout, telemetry]);
+  }, [eventId, indexName, tableId, telemetry, openMainPanel]);
 
   const toggleShowNotes = useCallback(() => {
-    openFlyout({
-      right: {
-        id: DocumentDetailsRightPanelKey,
-        params: {
-          id: eventId,
-          indexName,
-          scopeId: tableId,
+    openFlyout(
+      {
+        main: {
+          id: DocumentDetailsNotesPanelKey,
+          params: {
+            id: eventId,
+            indexName,
+            scopeId: tableId,
+          },
+        },
+        child: {
+          id: DocumentDetailsRightPanelKey,
+          params: {
+            id: eventId,
+            indexName,
+            scopeId: tableId,
+          },
         },
       },
-      left: {
-        id: DocumentDetailsLeftPanelKey,
-        path: {
-          tab: LeftPanelNotesTab,
-        },
-        params: {
-          id: eventId,
-          indexName,
-          scopeId: tableId,
-        },
-      },
-    });
+      { mainSize: 'm' }
+    );
     telemetry.reportEvent(NotesEventTypes.OpenNoteInExpandableFlyoutClicked, {
       location: tableId,
     });
@@ -138,7 +139,7 @@ const RowActionComponent = ({
       location: tableId,
       panel: 'left',
     });
-  }, [eventId, indexName, openFlyout, tableId, telemetry]);
+  }, [eventId, indexName, openMainPanel, tableId, telemetry]);
 
   const Action = controlColumn.rowCellRender;
 

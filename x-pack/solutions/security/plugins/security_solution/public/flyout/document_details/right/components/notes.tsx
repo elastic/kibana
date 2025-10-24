@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useMemo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -18,6 +18,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useFlyoutApi } from '@kbn/flyout';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { FormattedCount } from '../../../../common/components/formatted_number';
@@ -41,8 +42,10 @@ import {
 } from '../../../../notes/store/notes.slice';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { AlertHeaderBlock } from '../../../shared/components/alert_header_block';
-import { LeftPanelNotesTab } from '../../left';
-import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
+import {
+  DocumentDetailsNotesPanelKey,
+  DocumentDetailsRightPanelKey,
+} from '../../shared/constants/panel_keys';
 
 export const FETCH_NOTES_ERROR = i18n.translate(
   'xpack.securitySolution.flyout.right.notes.fetchNotesErrorLabel',
@@ -69,13 +72,38 @@ export const VIEW_NOTES_BUTTON_ARIA_LABEL = i18n.translate(
 export const Notes = memo(() => {
   const { euiTheme } = useEuiTheme();
   const dispatch = useDispatch();
-  const { eventId, isRulePreview } = useDocumentDetailsContext();
+  const { eventId, scopeId, indexName, isRulePreview } = useDocumentDetailsContext();
   const { addError: addErrorToast } = useAppToasts();
   const { notesPrivileges } = useUserPrivileges();
 
-  const openExpandedFlyoutNotesTab = useNavigateToLeftPanel({
-    tab: LeftPanelNotesTab,
-  });
+  const { openFlyout } = useFlyoutApi();
+  const openNotesFlyout = useCallback(
+    () =>
+      openFlyout(
+        {
+          main: {
+            id: DocumentDetailsNotesPanelKey,
+            params: {
+              id: eventId,
+              indexName,
+              scopeId,
+              isChild: false,
+            },
+          },
+          child: {
+            id: DocumentDetailsRightPanelKey,
+            params: {
+              id: eventId,
+              indexName,
+              scopeId,
+              isChild: true,
+            },
+          },
+        },
+        { mainSize: 'm' }
+      ),
+    [eventId, indexName, openFlyout, scopeId]
+  );
 
   const cannotAddNotes = isRulePreview || !notesPrivileges.crud;
   const cannotReadNotes = isRulePreview || !notesPrivileges.read;
@@ -104,7 +132,7 @@ export const Notes = memo(() => {
   const viewNotesButton = useMemo(
     () => (
       <EuiButtonEmpty
-        onClick={openExpandedFlyoutNotesTab}
+        onClick={openNotesFlyout}
         size="s"
         disabled={cannotReadNotes}
         aria-label={VIEW_NOTES_BUTTON_ARIA_LABEL}
@@ -117,13 +145,13 @@ export const Notes = memo(() => {
         />
       </EuiButtonEmpty>
     ),
-    [cannotReadNotes, notes.length, openExpandedFlyoutNotesTab]
+    [cannotReadNotes, notes.length, openNotesFlyout]
   );
   const addNoteButton = useMemo(
     () => (
       <EuiButtonEmpty
         iconType="plusInCircle"
-        onClick={openExpandedFlyoutNotesTab}
+        onClick={openNotesFlyout}
         size="s"
         disabled={cannotAddNotes}
         aria-label={ADD_NOTE_BUTTON}
@@ -132,12 +160,12 @@ export const Notes = memo(() => {
         {ADD_NOTE_BUTTON}
       </EuiButtonEmpty>
     ),
-    [cannotAddNotes, openExpandedFlyoutNotesTab]
+    [cannotAddNotes, openNotesFlyout]
   );
   const addNoteButtonIcon = useMemo(
     () => (
       <EuiButtonIcon
-        onClick={openExpandedFlyoutNotesTab}
+        onClick={openNotesFlyout}
         iconType="plusInCircle"
         disabled={cannotAddNotes}
         css={css`
@@ -147,7 +175,7 @@ export const Notes = memo(() => {
         data-test-subj={NOTES_ADD_NOTE_ICON_BUTTON_TEST_ID}
       />
     ),
-    [euiTheme.size.xs, cannotAddNotes, openExpandedFlyoutNotesTab]
+    [euiTheme.size.xs, cannotAddNotes, openNotesFlyout]
   );
 
   return (
