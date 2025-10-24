@@ -41,7 +41,9 @@ export const buildFailureHtml = (testFailure: TestFailure, destinationDir?: stri
         const base64 = fs.readFileSync(s.path).toString('base64');
         let imgSrc: string;
 
-        // In CI with destination dir, copy screenshot and use artifact:// scheme
+        // In CI with destination dir, copy screenshot and use relative path
+        // Buildkite's native HTML artifact support (Sept 2025) authorizes access to all
+        // artifacts in the same job when viewing HTML, so relative links work
         if (isCI && destinationDir) {
           const ext = path.extname(s.path) || '.png';
           const screenshotFileName = `${testFailure.id}-screenshot-${index}${ext}`;
@@ -49,8 +51,8 @@ export const buildFailureHtml = (testFailure: TestFailure, destinationDir?: stri
 
           try {
             fs.copyFileSync(s.path, screenshotDestPath);
-            // Use artifact:// with just the filename for Buildkite
-            imgSrc = `artifact://${screenshotFileName}`;
+            // Use relative path - Buildkite authorizes access to all job artifacts
+            imgSrc = screenshotFileName;
           } catch (copyError) {
             // Fallback to base64 if copy fails
             imgSrc = `data:image/png;base64,${base64}`;
