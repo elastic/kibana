@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
-import { render, fireEvent, waitFor, act } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { SearchBarComponent } from '.';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import { FilterManager } from '@kbn/data-plugin/public';
@@ -296,7 +296,7 @@ describe('SearchBarComponent', () => {
         expect(mockUpdateUrlParam).toHaveBeenCalledWith(
           expect.objectContaining({
             global: {
-              linkTo: [InputsModelId.timeline, InputsModelId.socTrends],
+              linkTo: [InputsModelId.timeline],
               timerange: newTimerange,
             },
           })
@@ -332,7 +332,7 @@ describe('SearchBarComponent', () => {
         expect(mockUpdateUrlParam).toHaveBeenCalledWith(
           expect.objectContaining({
             timeline: {
-              linkTo: [InputsModelId.global, InputsModelId.socTrends],
+              linkTo: [InputsModelId.global],
               timerange: newTimerange,
             },
           })

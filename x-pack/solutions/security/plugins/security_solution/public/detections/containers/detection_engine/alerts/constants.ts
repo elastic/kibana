@@ -20,7 +20,6 @@ export const ALERTS_QUERY_NAMES = {
   COUNT: `${APP_UI_ID} fetchAlerts count`,
   HISTOGRAM: `${APP_UI_ID} fetchAlerts histogram`,
   PREVALENCE: `${APP_UI_ID} fetchAlerts prevalence`,
-  SOC_TRENDS: `${APP_UI_ID} fetchAlerts socTrends`,
   TREE_MAP: `${APP_UI_ID} fetchAlerts treeMap`,
   VULNERABLE_HOSTS: `${APP_UI_ID} fetchAlerts vulnerableHosts`,
   VULNERABLE_USERS: `${APP_UI_ID} fetchAlerts vulnerableUsers`,

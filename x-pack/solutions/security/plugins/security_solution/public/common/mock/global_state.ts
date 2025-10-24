@@ -290,7 +290,7 @@ export const mockGlobalState: State = {
         from: '2020-07-07T08:20:18.966Z',
         to: '2020-07-08T08:20:18.966Z',
       },
-      linkTo: [InputsModelId.timeline, InputsModelId.socTrends],
+      linkTo: [InputsModelId.timeline],
       queries: [],
       policy: { kind: DEFAULT_INTERVAL_TYPE, duration: DEFAULT_INTERVAL_VALUE },
       query: {
@@ -307,7 +307,7 @@ export const mockGlobalState: State = {
         from: '2020-07-07T08:20:18.966Z',
         to: '2020-07-08T08:20:18.966Z',
       },
-      linkTo: [InputsModelId.global, InputsModelId.socTrends],
+      linkTo: [InputsModelId.global],
       queries: [],
       policy: { kind: DEFAULT_INTERVAL_TYPE, duration: DEFAULT_INTERVAL_VALUE },
       query: {
@@ -315,17 +315,6 @@ export const mockGlobalState: State = {
         language: 'kuery',
       },
       filters: [],
-    },
-    socTrends: {
-      timerange: {
-        kind: 'relative',
-        fromStr: DEFAULT_FROM,
-        toStr: DEFAULT_TO,
-        from: '2020-07-06T08:20:18.966Z',
-        to: '2020-07-07T08:20:18.966Z',
-      },
-      linkTo: [InputsModelId.global, InputsModelId.timeline],
-      policy: { kind: DEFAULT_INTERVAL_TYPE, duration: DEFAULT_INTERVAL_VALUE },
     },
     valueReport: {
       timerange: {
