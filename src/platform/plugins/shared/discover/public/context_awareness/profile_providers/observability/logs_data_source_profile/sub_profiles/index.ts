@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { createCuratedLogsDataSourceProfileProviders } from './curated_logs';
+export { createIntegrationLogsDataSourceProfileProviders } from './integration_logs';

@@ -15,13 +15,13 @@ import { extendProfileProvider } from '../../../extend_profile_provider';
 import { createGetDefaultAppState, createRecommendedFields } from '../accessors';
 import { createResolve } from './create_resolve';
 
-type CuratedLogsProfileProvider = Pick<LogsDataSourceProfileProvider, 'profileId'> & {
+type IntegrationLogsProfileProvider = Pick<LogsDataSourceProfileProvider, 'profileId'> & {
   baseIndexPattern: string;
   defaultAppState: CreateGetDefaultAppStateParams;
   recommendedFields?: string[];
 };
 
-const curatedLogsProfileProviders: CuratedLogsProfileProvider[] = [
+const integrationLogsProfileProviders: IntegrationLogsProfileProvider[] = [
   {
     profileId: 'observability-apache-error-logs-data-source-profile',
     baseIndexPattern: APACHE_ERROR_LOGS_PROFILE.pattern,
@@ -98,10 +98,10 @@ const curatedLogsProfileProviders: CuratedLogsProfileProvider[] = [
   },
 ];
 
-export const createCuratedLogsDataSourceProfileProviders = (
+export const createIntegrationLogsDataSourceProfileProviders = (
   logsDataSourceProfileProvider: LogsDataSourceProfileProvider
 ) => {
-  return curatedLogsProfileProviders.map(
+  return integrationLogsProfileProviders.map(
     ({ profileId, baseIndexPattern, defaultAppState, recommendedFields }) =>
       extendProfileProvider(logsDataSourceProfileProvider, {
         profileId,

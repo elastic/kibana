@@ -9,7 +9,7 @@
 
 import type { ProfileProviderServices } from '../../profile_provider_services';
 import { createLogsDataSourceProfileProvider } from './profile';
-import { createCuratedLogsDataSourceProfileProviders } from './sub_profiles';
+import { createIntegrationLogsDataSourceProfileProviders } from './sub_profiles';
 
 export const createObservabilityLogsDataSourceProfileProviders = (
   providerServices: ProfileProviderServices
@@ -17,7 +17,7 @@ export const createObservabilityLogsDataSourceProfileProviders = (
   const logsDataSourceProfileProvider = createLogsDataSourceProfileProvider(providerServices);
 
   return [
-    ...createCuratedLogsDataSourceProfileProviders(logsDataSourceProfileProvider),
+    ...createIntegrationLogsDataSourceProfileProviders(logsDataSourceProfileProvider),
     logsDataSourceProfileProvider,
   ];
 };

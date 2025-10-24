@@ -15,7 +15,7 @@ import { createContextAwarenessMocks } from '../../../../__mocks__';
 import { createLogsDataSourceProfileProvider } from '../profile';
 import type { ContextWithProfileId } from '../../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../../consts';
-import { createCuratedLogsDataSourceProfileProviders } from './curated_logs';
+import { createIntegrationLogsDataSourceProfileProviders } from './integration_logs';
 import { RESOLUTION_MATCH } from '../__mocks__';
 
 const ROOT_CONTEXT: ContextWithProfileId<RootContext> = {
@@ -25,8 +25,8 @@ const ROOT_CONTEXT: ContextWithProfileId<RootContext> = {
 const { profileProviderServices } = createContextAwarenessMocks();
 const logsDataSourceProfileProvider = createLogsDataSourceProfileProvider(profileProviderServices);
 
-describe('createCuratedLogsDataSourceProfileProviders', () => {
-  const providers = createCuratedLogsDataSourceProfileProviders(logsDataSourceProfileProvider);
+describe('createIntegrationLogsDataSourceProfileProviders', () => {
+  const providers = createIntegrationLogsDataSourceProfileProviders(logsDataSourceProfileProvider);
 
   // Helper to get the expected columns for each profile
   const expectedColumnsMap: Record<string, Array<{ name: string; width?: number }>> = {
