@@ -164,6 +164,9 @@ class ConversationClientImpl implements ConversationClient {
     await this.storage.getClient().index({
       id: conversationUpdate.id,
       document: attributes,
+      // use optimistic concurrency control to prevent concurrent update conflicts
+      if_seq_no: document._seq_no,
+      if_primary_term: document._primary_term,
     });
 
     return this.get(conversationUpdate.id);

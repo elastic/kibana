@@ -23,7 +23,10 @@ import type {
 import type { ConversationProperties } from './storage';
 import type { PersistentConversationRound, PersistentConversationRoundStep } from './types';
 
-export type Document = Pick<GetResponse<ConversationProperties>, '_source' | '_id'>;
+export type Document = Pick<
+  GetResponse<ConversationProperties>,
+  '_source' | '_id' | '_seq_no' | '_primary_term'
+>;
 
 const convertBaseFromEs = (document: Document) => {
   if (!document._source) {
