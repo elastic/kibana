@@ -66,7 +66,7 @@ const Translations = {
   }),
 };
 
-const buttonGroupOptions: EuiButtonGroupOptionProps[] = [
+const ButtonGroupOptions: EuiButtonGroupOptionProps[] = [
   {
     id: 'workflow',
     label: i18n.translate('workflows.workflowDetailHeader.workflow', {
@@ -96,12 +96,13 @@ export const WorkflowDetailHeader = React.memo(
     const { application } = useKibana().services;
     const styles = useMemoCss(componentStyles);
     const dispatch = useDispatch();
-    const { canWriteWorkflow, canExecuteWorkflow } = useCapabilities();
+    const { canCreateWorkflow, canUpdateWorkflow, canExecuteWorkflow } = useCapabilities();
 
     const { activeTab, setActiveTab } = useWorkflowUrlState();
 
     const workflow = useSelector(selectWorkflow);
     const isSyntaxValid = useSelector(selectIsYamlSyntaxValid);
+    const hasUnsavedChanges = useSelector(selectHasChanges);
 
     const { name, isEnabled, lastUpdatedAt } = useMemo(
       () => ({
@@ -111,22 +112,19 @@ export const WorkflowDetailHeader = React.memo(
       }),
       [workflow]
     );
-    const hasUnsavedChanges = useSelector(selectHasChanges);
 
-    const [saveYaml] = useSaveYaml();
+    const saveYaml = useSaveYaml();
     const handleSaveWorkflow = useCallback(() => {
-      saveYaml({ id: workflowId });
-    }, [saveYaml, workflowId]);
+      saveYaml();
+    }, [saveYaml]);
 
-    const [updateWorkflow] = useUpdateWorkflow();
+    const updateWorkflow = useUpdateWorkflow();
     const handleToggleWorkflow = useCallback(() => {
-      if (workflowId) {
-        updateWorkflow({ id: workflowId, workflow: { enabled: !isEnabled } });
-      }
-    }, [updateWorkflow, workflowId, isEnabled]);
+      updateWorkflow({ workflow: { enabled: !isEnabled } });
+    }, [updateWorkflow, isEnabled]);
 
     const openTestModal = useCallback(() => {
-      dispatch(setIsTestModalOpen({ isTestModalOpen: true }));
+      dispatch(setIsTestModalOpen(true));
     }, [dispatch]);
 
     const [showRunConfirmation, setShowRunConfirmation] = useState(false);
@@ -151,6 +149,10 @@ export const WorkflowDetailHeader = React.memo(
     const handleCancelRun = useCallback(() => {
       setShowRunConfirmation(false);
     }, []);
+
+    const canSaveWorkflow = useMemo(() => {
+      return workflowId ? canUpdateWorkflow : canCreateWorkflow;
+    }, [canUpdateWorkflow, canCreateWorkflow, workflowId]);
 
     return (
       <>
@@ -213,7 +215,7 @@ export const WorkflowDetailHeader = React.memo(
                     <EuiButtonGroup
                       buttonSize="compressed"
                       color="primary"
-                      options={buttonGroupOptions}
+                      options={ButtonGroupOptions}
                       idSelected={activeTab}
                       legend="Switch between workflow and executions"
                       type="single"
@@ -246,7 +248,7 @@ export const WorkflowDetailHeader = React.memo(
                     disabled={
                       !workflowId ||
                       isLoading ||
-                      !canWriteWorkflow ||
+                      !canUpdateWorkflow ||
                       !isSyntaxValid ||
                       hasUnsavedChanges
                     }
@@ -265,7 +267,7 @@ export const WorkflowDetailHeader = React.memo(
                     iconType="play"
                     size="s"
                     onClick={handleRunClickWithUnsavedCheck}
-                    disabled={!canExecuteWorkflow || !isEnabled || isLoading || !isSyntaxValid}
+                    disabled={!canExecuteWorkflow || isLoading || !isSyntaxValid}
                     title={runWorkflowTooltipContent ?? undefined}
                     aria-label={Translations.runWorkflow}
                     data-test-subj="runWorkflowHeaderButton"
@@ -276,7 +278,7 @@ export const WorkflowDetailHeader = React.memo(
                   color="primary"
                   size="s"
                   onClick={handleSaveWorkflow}
-                  disabled={!canWriteWorkflow || isLoading}
+                  disabled={!canSaveWorkflow || isLoading}
                 >
                   <FormattedMessage id="keepWorkflows.buttonText" defaultMessage="Save" ignoreTag />
                 </EuiButton>

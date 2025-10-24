@@ -60,7 +60,6 @@ import {
   selectFocusedStepInfo,
   selectSchemaLoose,
   selectYamlDocument,
-  _setConnectors as setConnectors,
   setCursorPosition,
   setStepExecutions,
   setYamlString,
@@ -155,27 +154,14 @@ export const WorkflowYAMLEditor = ({
   const originalValue = workflow?.yaml ?? '';
   const workflowId = workflow?.id ?? '';
 
+  const saveYaml = useSaveYaml();
+
   const onChange = useCallback(
     (yaml: string) => {
       dispatch(setYamlString(yaml));
     },
     [dispatch]
   );
-
-  const [saveYaml] = useSaveYaml();
-  const handleSave = useCallback(() => {
-    saveYaml({ id: workflowId });
-  }, [saveYaml, workflowId]);
-
-  const handleRun = useCallback(() => {
-    dispatch(setIsTestModalOpen({ isTestModalOpen: true }));
-  }, [dispatch]);
-
-  const handleSaveAndRun = useCallback(() => {
-    saveYaml({ id: workflowId }).then(() => {
-      handleRun();
-    });
-  }, [saveYaml, handleRun, workflowId]);
 
   // Refs
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -199,11 +185,7 @@ export const WorkflowYAMLEditor = ({
   focusedStepInfoRef.current = focusedStepInfo;
 
   // Data
-  const { data: connectorsData } = useAvailableConnectors();
-
-  useEffect(() => {
-    dispatch(setConnectors(connectorsData));
-  }, [connectorsData, dispatch]);
+  const connectorsData = useAvailableConnectors();
 
   useEffect(() => {
     if (connectorsData?.connectorTypes) {
@@ -276,6 +258,17 @@ export const WorkflowYAMLEditor = ({
 
   const { registerKeyboardCommands, unregisterKeyboardCommands } = useRegisterKeyboardCommands();
 
+  // handlers for the keyboard commands, passed only the first time the component is mounted
+  // they should not have any dependencies, so they are not affected by the changes in the component
+  const keyboardHandlers = useMemo(
+    () => ({
+      save: () => saveYaml(),
+      run: () => dispatch(setIsTestModalOpen(true)),
+      saveAndRun: () => saveYaml().then(() => dispatch(setIsTestModalOpen(true))),
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
   const handleEditorDidMount = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
       editorRef.current = editor;
@@ -283,9 +276,7 @@ export const WorkflowYAMLEditor = ({
       registerKeyboardCommands({
         editor,
         openActionsPopover,
-        save: handleSave,
-        run: handleRun,
-        saveAndRun: handleSaveAndRun,
+        ...keyboardHandlers,
       });
 
       // Listen to content changes to detect typing

@@ -68,15 +68,20 @@ export const useAsyncThunkState = <R, P, C extends {}>(
 };
 
 /** Generic hook to dispatch an async thunk and return a promise of the thunk result */
-export const useAsyncThunkPromise = <R, P, C extends {}>(
+export const useAsyncThunk = <R, P, C extends {}>(
   asyncThunk: AsyncThunk<R, P, C>
-): ((params: P) => Promise<R>) => {
+): ((params: P) => Promise<R | undefined>) => {
   const dispatchAsyncThunk = useDispatch<AsyncThunkDispatch>();
 
   const start = useCallback(
-    async (params: P): Promise<R> => {
-      const result = await dispatchAsyncThunk(asyncThunk(params));
-      return unwrapResult(result);
+    async (params: P): Promise<R | undefined> => {
+      try {
+        const result = await dispatchAsyncThunk(asyncThunk(params));
+        return unwrapResult(result);
+      } catch (err) {
+        // Error already handled and notified to the user by the thunk, just return undefined
+        return undefined;
+      }
     },
     [dispatchAsyncThunk, asyncThunk]
   );

@@ -12,11 +12,11 @@ import { i18n } from '@kbn/i18n';
 import type { EsWorkflow } from '@kbn/workflows';
 import { queryClient } from '../../../../../shared/lib/query_client';
 import type { WorkflowsServices } from '../../../../../types';
+import { selectWorkflowId } from '../selectors';
 import { updateWorkflow } from '../slice';
 import type { RootState } from '../types';
 
 export interface UpdateWorkflowParams {
-  id: string;
   workflow: Partial<EsWorkflow>;
 }
 
@@ -28,9 +28,14 @@ export const updateWorkflowThunk = createAsyncThunk<
   { state: RootState; extra: { services: WorkflowsServices } }
 >(
   'detail/updateWorkflowThunk',
-  async ({ id, workflow }, { dispatch, rejectWithValue, extra: { services } }) => {
+  async ({ workflow }, { getState, dispatch, rejectWithValue, extra: { services } }) => {
     const { http, notifications } = services;
     try {
+      const id = selectWorkflowId(getState());
+      if (!id) {
+        throw new Error('No workflow ID to update');
+      }
+
       // Make the API call to update the workflow
       await http.put<void>(`/api/workflows/${id}`, {
         body: JSON.stringify(workflow),

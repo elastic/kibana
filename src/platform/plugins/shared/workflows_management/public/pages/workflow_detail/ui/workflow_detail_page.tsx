@@ -18,21 +18,31 @@ import { WorkflowDetailEditor } from './workflow_detail_editor';
 import { WorkflowDetailHeader } from './workflow_detail_header';
 import { WorkflowEditorLayout } from './workflow_detail_layout';
 import { WorkflowDetailTestModal } from './workflow_detail_test_modal';
-import { useLoadWorkflow } from '../../../entities/workflows/model/use_load_workflow';
 import { WorkflowExecutionDetail } from '../../../features/workflow_execution_detail';
 import { WorkflowExecutionList } from '../../../features/workflow_execution_list/ui/workflow_execution_list_stateful';
 import { useWorkflowsBreadcrumbs } from '../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { setYamlString } from '../../../widgets/workflow_yaml_editor/lib/store';
+import {
+  useAsyncThunk,
+  useAsyncThunkState,
+} from '../../../widgets/workflow_yaml_editor/lib/store/hooks/use_async_thunk';
 import { selectWorkflowName } from '../../../widgets/workflow_yaml_editor/lib/store/selectors';
+import { loadConnectorsThunk } from '../../../widgets/workflow_yaml_editor/lib/store/thunks/load_connectors_thunk';
+import { loadWorkflowThunk } from '../../../widgets/workflow_yaml_editor/lib/store/thunks/load_workflow_thunk';
 
 export function WorkflowDetailPage({ id }: { id?: string }) {
-  const [loadWorkflow, { isLoading, error }] = useLoadWorkflow();
   const dispatch = useDispatch();
+  const loadConnectors = useAsyncThunk(loadConnectorsThunk);
+  const [loadWorkflow, { isLoading, error }] = useAsyncThunkState(loadWorkflowThunk);
+
+  useEffect(() => {
+    loadConnectors(); // dispatch load connectors on mount
+  }, [loadConnectors]);
 
   useEffect(() => {
     if (id) {
-      loadWorkflow({ id });
+      loadWorkflow({ id }); // sets loaded yaml string
     } else {
       dispatch(setYamlString(workflowDefaultYaml));
     }

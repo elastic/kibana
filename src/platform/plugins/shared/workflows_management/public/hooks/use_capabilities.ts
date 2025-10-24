@@ -9,15 +9,26 @@
 
 import { useKibana } from './use_kibana';
 
-export interface WorkflowsManagementCapabilities {
-  canWriteWorkflow: boolean;
-  canExecuteWorkflow: boolean;
-}
+const CapabilitiesMap = {
+  canCreateWorkflow: 'createWorkflow',
+  canReadWorkflow: 'readWorkflow',
+  canUpdateWorkflow: 'updateWorkflow',
+  canDeleteWorkflow: 'deleteWorkflow',
+  canExecuteWorkflow: 'executeWorkflow',
+  canReadWorkflowExecution: 'readWorkflowExecution',
+  canCancelWorkflowExecution: 'cancelWorkflowExecution',
+} as const;
+
+export type CapabilitiesKey = keyof typeof CapabilitiesMap;
+export type WorkflowsManagementCapabilities = Record<CapabilitiesKey, boolean>;
 
 export const useCapabilities = (): WorkflowsManagementCapabilities => {
   const { application } = useKibana().services;
-  return {
-    canWriteWorkflow: Boolean(application?.capabilities.workflowsManagement.updateWorkflow),
-    canExecuteWorkflow: Boolean(application?.capabilities.workflowsManagement.executeWorkflow),
-  };
+
+  return Object.fromEntries(
+    Object.entries(CapabilitiesMap).map(([key, value]) => [
+      key,
+      Boolean(application?.capabilities.workflowsManagement?.[value]),
+    ])
+  ) as WorkflowsManagementCapabilities;
 };

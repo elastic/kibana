@@ -10,59 +10,41 @@
 import React from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
 import type { ScopedHistory } from '@kbn/core-application-browser';
+import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
+import { useCapabilities } from './hooks/use_capabilities';
 import { WorkflowDetailPage } from './pages/workflow_detail';
 import { WorkflowsPage } from './pages/workflows';
 import { WorkflowEditorStoreProvider } from './widgets/workflow_yaml_editor/lib/store/provider';
 import { AccessDenied } from '../common/components/access_denied';
 
-type WorkflowsPermissionsWrapperParams = React.PropsWithChildren<{
-  permissions: string[];
-}>;
-/** Wrapper component to check if the user has the required permissions to access the workflows management page */
-const WorkflowsPermissionsWrapper = React.memo<WorkflowsPermissionsWrapperParams>(
-  ({ permissions, children }) => {
-    const { services } = useKibana();
-    const capabilities = services.application?.capabilities?.workflowsManagement;
-
-    let havePermissions = false;
-    if (capabilities) {
-      havePermissions = permissions.some((permission) => !!capabilities[permission]);
-    }
-
-    if (!havePermissions) {
-      return <AccessDenied requirements={permissions} />;
-    }
-
-    return children;
-  }
+const ReadWorkflowPermissionText = i18n.translate(
+  'platform.plugins.shared.workflows_management.readWorkflowPermissionText',
+  { defaultMessage: 'Workflows: Read' }
 );
-WorkflowsPermissionsWrapper.displayName = 'WorkflowsPermissionsWrapper';
+
+/** Wrapper component to check if the user has the required permissions to access the workflows management page */
+const WorkflowsReadPermissionsWrapper: React.FC<React.PropsWithChildren> = ({ children }) => {
+  const capabilities = useCapabilities();
+  if (!capabilities.canReadWorkflow) {
+    return <AccessDenied requirements={[ReadWorkflowPermissionText]} />;
+  }
+
+  return children;
+};
+WorkflowsReadPermissionsWrapper.displayName = 'WorkflowsReadPermissionsWrapper';
 
 /** Route component to display the workflow detail page to edit or create a workflow */
 type WorkflowDetailPageRouteProps = RouteComponentProps<{ id?: string }>;
 const WorkflowDetailPageRoute = React.memo<WorkflowDetailPageRouteProps>((props) => {
   return (
-    <WorkflowsPermissionsWrapper permissions={['read', 'readWorkflow']}>
-      <WorkflowEditorStoreProvider>
-        <WorkflowDetailPage id={props.match.params.id} />
-      </WorkflowEditorStoreProvider>
-    </WorkflowsPermissionsWrapper>
+    <WorkflowEditorStoreProvider>
+      <WorkflowDetailPage id={props.match.params.id} />
+    </WorkflowEditorStoreProvider>
   );
 });
 WorkflowDetailPageRoute.displayName = 'WorkflowDetailPageRoute';
-
-/** Route component to display the workflows list page */
-const WorkflowsListPageRoute = React.memo(() => {
-  return (
-    <WorkflowsPermissionsWrapper permissions={['read', 'readWorkflow']}>
-      <WorkflowsPage />
-    </WorkflowsPermissionsWrapper>
-  );
-});
-WorkflowsListPageRoute.displayName = 'WorkflowsListPageRoute';
 
 // The exported router component
 interface WorkflowsAppDeps {
@@ -71,10 +53,12 @@ interface WorkflowsAppDeps {
 export const WorkflowsRoutes = React.memo<WorkflowsAppDeps>(({ history }) => (
   <Router history={history}>
     <I18nProvider>
-      <Routes>
-        <Route path={['/create', '/:id']} component={WorkflowDetailPageRoute} />
-        <Route path="/" exact component={WorkflowsListPageRoute} />
-      </Routes>
+      <WorkflowsReadPermissionsWrapper>
+        <Routes>
+          <Route path={['/create', '/:id']} component={WorkflowDetailPageRoute} />
+          <Route path="/" exact component={WorkflowsPage} />
+        </Routes>
+      </WorkflowsReadPermissionsWrapper>
     </I18nProvider>
   </Router>
 ));

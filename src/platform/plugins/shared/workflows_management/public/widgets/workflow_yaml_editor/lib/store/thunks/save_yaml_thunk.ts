@@ -14,14 +14,11 @@ import { loadWorkflowThunk } from './load_workflow_thunk';
 import { PLUGIN_ID } from '../../../../../../common';
 import { queryClient } from '../../../../../shared/lib/query_client';
 import type { WorkflowsServices } from '../../../../../types';
-import { selectYamlString } from '../selectors';
+import { selectWorkflowId, selectYamlString } from '../selectors';
 import { setWorkflow } from '../slice';
 import type { RootState } from '../types';
 
-export interface SaveYamlParams {
-  id: string | undefined;
-}
-
+export type SaveYamlParams = void;
 export type SaveYamlResponse = void;
 
 export const saveYamlThunk = createAsyncThunk<
@@ -30,13 +27,16 @@ export const saveYamlThunk = createAsyncThunk<
   { state: RootState; extra: { services: WorkflowsServices } }
 >(
   'detail/saveYamlThunk',
-  async ({ id }, { getState, dispatch, rejectWithValue, extra: { services } }) => {
+  async (_, { getState, dispatch, rejectWithValue, extra: { services } }) => {
     const { http, notifications, application } = services;
     try {
-      const yamlString = selectYamlString(getState());
+      const state = getState();
+      const yamlString = selectYamlString(state);
       if (!yamlString) {
         return rejectWithValue('No YAML content to save');
       }
+
+      const id = selectWorkflowId(state);
       if (id) {
         // Update the workflow in the API if the id is provided
         await http.put<void>(`/api/workflows/${id}`, {

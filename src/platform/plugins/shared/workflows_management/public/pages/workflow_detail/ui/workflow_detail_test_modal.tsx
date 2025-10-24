@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { i18n } from '@kbn/i18n';
 import { WorkflowExecuteModal } from '../../../features/run_workflow/ui/workflow_execute_modal';
+import { useCapabilities } from '../../../hooks/use_capabilities';
+import { useKibana } from '../../../hooks/use_kibana';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
-import { useAsyncThunkPromise } from '../../../widgets/workflow_yaml_editor/lib/store/hooks/use_async_thunk';
+import { useAsyncThunk } from '../../../widgets/workflow_yaml_editor/lib/store/hooks/use_async_thunk';
 import {
   selectIsTestModalOpen,
   selectWorkflowDefinition,
@@ -21,29 +24,60 @@ import { testWorkflowThunk } from '../../../widgets/workflow_yaml_editor/lib/sto
 
 export const WorkflowDetailTestModal = () => {
   const dispatch = useDispatch();
+  const { notifications } = useKibana().services;
+  const { canExecuteWorkflow } = useCapabilities();
+
   const { setSelectedExecution } = useWorkflowUrlState();
+
   const isTestModalOpen = useSelector(selectIsTestModalOpen);
   const definition = useSelector(selectWorkflowDefinition);
 
-  const testWorkflow = useAsyncThunkPromise(testWorkflowThunk);
-
+  const testWorkflow = useAsyncThunk(testWorkflowThunk);
   const handleRunWorkflow = useCallback(
     async (inputs: Record<string, unknown>) => {
-      const { workflowExecutionId } = await testWorkflow({ inputs });
-      setSelectedExecution(workflowExecutionId);
+      const result = await testWorkflow({ inputs });
+      if (result) {
+        setSelectedExecution(result.workflowExecutionId);
+      }
     },
     [testWorkflow, setSelectedExecution]
   );
 
-  const onClose = useCallback(() => {
-    dispatch(setIsTestModalOpen({ isTestModalOpen: false }));
+  const closeModal = useCallback(() => {
+    dispatch(setIsTestModalOpen(false));
   }, [dispatch]);
 
-  if (!isTestModalOpen || !definition) {
+  useEffect(() => {
+    if (isTestModalOpen) {
+      if (!canExecuteWorkflow) {
+        notifications.toasts.addWarning(
+          i18n.translate('workflows.detail.testModal.warningNoPermissions', {
+            defaultMessage: 'You do not have permission to run workflows.',
+          }),
+          { toastLifeTimeMs: 3000 }
+        );
+        closeModal();
+      } else if (!definition) {
+        notifications.toasts.addWarning(
+          i18n.translate('workflows.detail.testModal.warningInvalidDefinition', {
+            defaultMessage: 'Please fix the errors to run the workflow.',
+          }),
+          { toastLifeTimeMs: 3000 }
+        );
+        closeModal();
+      }
+    }
+  }, [closeModal, canExecuteWorkflow, isTestModalOpen, definition, notifications.toasts]);
+
+  if (!isTestModalOpen || !definition || !canExecuteWorkflow) {
     return null;
   }
 
   return (
-    <WorkflowExecuteModal definition={definition} onClose={onClose} onSubmit={handleRunWorkflow} />
+    <WorkflowExecuteModal
+      definition={definition}
+      onClose={closeModal}
+      onSubmit={handleRunWorkflow}
+    />
   );
 };

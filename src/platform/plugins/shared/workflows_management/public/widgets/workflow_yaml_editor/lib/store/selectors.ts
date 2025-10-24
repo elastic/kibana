@@ -20,6 +20,7 @@ export const selectDetailComputedState = (state: RootState) => state.detail.comp
 export const selectWorkflow = createSelector(selectDetailState, (detail) => detail.workflow);
 export const selectYamlString = createSelector(selectDetailState, (detail) => detail.yamlString);
 
+export const selectWorkflowId = createSelector(selectWorkflow, (workflow) => workflow?.id);
 export const selectIsEnabled = createSelector(selectWorkflow, (workflow) => !!workflow?.enabled);
 export const selectWorkflowName = createSelector(selectWorkflow, (workflow) => workflow?.name);
 
@@ -86,9 +87,5 @@ export const selectIsTestModalOpen = createSelector(
   (detail) => detail.isTestModalOpen
 );
 
-export const selectConnectorsData = createSelector(
-  selectDetailState,
-  (detail) => detail.connectors
-);
-
+export const selectConnectors = createSelector(selectDetailState, (detail) => detail.connectors);
 export const selectSchemaLoose = createSelector(selectDetailState, (detail) => detail.schemaLoose);

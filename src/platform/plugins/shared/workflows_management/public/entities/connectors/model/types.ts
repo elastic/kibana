@@ -6,8 +6,13 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { ConnectorTypeInfo } from '@kbn/workflows';
 
-import { useAsyncThunkState } from '../../../widgets/workflow_yaml_editor/lib/store/hooks/use_async_thunk';
-import { testWorkflowThunk } from '../../../widgets/workflow_yaml_editor/lib/store/thunks/test_workflow_thunk';
+export interface ConnectorTypes {
+  [key: string]: ConnectorTypeInfo;
+}
 
-export const useTestWorkflow = () => useAsyncThunkState(testWorkflowThunk);
+export interface ConnectorsResponse {
+  connectorTypes: ConnectorTypes;
+  totalConnectors: number;
+}

@@ -33,7 +33,6 @@ const workflowDetailSlice = createSlice({
   reducers: {
     setWorkflow: (state, action: { payload: WorkflowDetailDto }) => {
       state.workflow = action.payload;
-      state.yamlString = action.payload.yaml;
     },
     updateWorkflow: (state, action: { payload: Partial<EsWorkflow> }) => {
       if (state.workflow) {
@@ -62,8 +61,11 @@ const workflowDetailSlice = createSlice({
     setHighlightedStepId: (state, action: { payload: { stepId: string } }) => {
       state.highlightedStepId = action.payload.stepId;
     },
-    setIsTestModalOpen: (state, action: { payload: { isTestModalOpen: boolean } }) => {
-      state.isTestModalOpen = action.payload.isTestModalOpen;
+    setIsTestModalOpen: (state, action: { payload: boolean }) => {
+      state.isTestModalOpen = action.payload;
+    },
+    setConnectors: (state, action: { payload: WorkflowDetailState['connectors'] }) => {
+      state.connectors = action.payload;
     },
 
     // Internal actions - these are not for components usage
@@ -78,9 +80,6 @@ const workflowDetailSlice = createSlice({
       action: { payload: WorkflowDetailState['schemaLoose'] }
     ) => {
       state.schemaLoose = action.payload;
-    },
-    _setConnectors: (state, action: { payload: WorkflowDetailState['connectors'] }) => {
-      state.connectors = action.payload;
     },
   },
 });
@@ -97,11 +96,11 @@ export const {
   setStepExecutions,
   setHighlightedStepId,
   setIsTestModalOpen,
+  setConnectors,
 
   // Internal action creators for middleware use only
   _setComputedDataInternal,
   _clearComputedData,
-  _setConnectors,
   _setGeneratedSchemaInternal,
 } = workflowDetailSlice.actions;
 
