@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { useOnechatAgents } from '../../hooks/agents/use_agents';
 import { useHasActiveConversation } from '../../hooks/use_conversation';
-import { useConversationActions } from '../../hooks/use_conversation_actions';
+import { useConversationContext } from '../../context/conversation/conversation_context';
 import { AgentSelectDropdown } from './agent_select_dropdown';
 
 interface ConversationAgentSelectorProps {
@@ -21,7 +21,7 @@ export const ConversationAgentSelector: React.FC<ConversationAgentSelectorProps>
 }) => {
   const { agents, isLoading: isLoadingAgents } = useOnechatAgents();
   const hasActiveConversation = useHasActiveConversation();
-  const { setAgentId } = useConversationActions();
+  const { setAgentId } = useConversationContext();
 
   const handleAgentChange = (newAgentId: string) => {
     setAgentId(newAgentId);

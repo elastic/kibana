@@ -60,8 +60,8 @@ export const OnechatConversationsView: React.FC<{}> = () => {
   const { conversations = [], isLoading } = useConversationList();
 
   return (
-    <SendMessageProvider>
-      <RoutedConversationProvider>
+    <RoutedConversationProvider>
+      <SendMessageProvider>
         <KibanaPageTemplate
           offset={0}
           restrictWidth={false}
@@ -103,7 +103,7 @@ export const OnechatConversationsView: React.FC<{}> = () => {
             <Conversation />
           </KibanaPageTemplate.Section>
         </KibanaPageTemplate>
-      </RoutedConversationProvider>
-    </SendMessageProvider>
+      </SendMessageProvider>
+    </RoutedConversationProvider>
   );
 };

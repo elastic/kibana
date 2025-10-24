@@ -8,7 +8,7 @@
 import { useMutation } from '@kbn/react-query';
 import { useRef, useState } from 'react';
 import { useAgentId } from '../../hooks/use_conversation';
-import { useConversationActions } from '../../hooks/use_conversation_actions';
+import { useConversationContext } from '../conversation/conversation_context';
 import { useConversationId } from '../conversation/use_conversation_id';
 import { useOnechatServices } from '../../hooks/use_onechat_service';
 import { useReportConverseError } from '../../hooks/use_report_error';
@@ -23,7 +23,7 @@ interface UseSendMessageMutationProps {
 export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {}) => {
   const { chatService } = useOnechatServices();
   const { reportConverseError } = useReportConverseError();
-  const conversationActions = useConversationActions();
+  const conversationActions = useConversationContext();
   const [isResponseLoading, setIsResponseLoading] = useState(false);
   const [agentReasoning, setAgentReasoning] = useState<string | null>(null);
   const conversationId = useConversationId();

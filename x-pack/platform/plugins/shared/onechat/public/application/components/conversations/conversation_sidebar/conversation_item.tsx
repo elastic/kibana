@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
-import { useConversationActions } from '../../../hooks/use_conversation_actions';
+import { useConversationContext } from '../../../context/conversation/conversation_context';
 
 interface ConversationItemProps {
   conversation: ConversationWithoutRounds;
@@ -22,7 +22,7 @@ interface ConversationItemProps {
 export const ConversationItem: React.FC<ConversationItemProps> = ({ conversation }) => {
   const { createOnechatUrl } = useNavigation();
   const currentConversationId = useConversationId();
-  const { deleteConversation } = useConversationActions();
+  const { deleteConversation } = useConversationContext();
   const isActive = currentConversationId === conversation.id;
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const confirmModalTitleId = useGeneratedHtmlId({ prefix: 'deleteConversationModal' });
