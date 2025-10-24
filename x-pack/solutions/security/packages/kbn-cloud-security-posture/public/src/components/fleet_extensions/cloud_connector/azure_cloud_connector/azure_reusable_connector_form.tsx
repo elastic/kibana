@@ -8,33 +8,34 @@
 import React, { useMemo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiComboBox, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
-import type { AwsCloudConnectorVars } from '@kbn/fleet-plugin/common/types';
+import type { AzureCloudConnectorVars } from '@kbn/fleet-plugin/common/types';
 import type {
-  AwsCloudConnectorCredentials,
-  AwsCloudConnectorOption,
+  AzureCloudConnectorCredentials,
+  AzureCloudConnectorOption,
   ComboBoxOption,
 } from '../types';
 import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
-import { AWS_PROVIDER } from '../constants';
+import { AZURE_PROVIDER } from '../constants';
 
-export const AWSReusableConnectorForm: React.FC<{
+export const AzureReusableConnectorForm: React.FC<{
   cloudConnectorId: string | undefined;
   isEditPage: boolean;
-  credentials: AwsCloudConnectorCredentials;
-  setCredentials: (credentials: AwsCloudConnectorCredentials) => void;
+  credentials: AzureCloudConnectorCredentials;
+  setCredentials: (credentials: AzureCloudConnectorCredentials) => void;
 }> = ({ credentials, setCredentials, isEditPage, cloudConnectorId }) => {
-  const { data: cloudConnectors = [] } = useGetCloudConnectors(AWS_PROVIDER);
+  const { data: cloudConnectors = [] } = useGetCloudConnectors(AZURE_PROVIDER);
 
-  // Map connectors to AWS format
-  const awsConnectionData: AwsCloudConnectorOption[] = useMemo(() => {
+  // Map connectors to Azure format
+  const azureConnectionData: AzureCloudConnectorOption[] = useMemo(() => {
     return cloudConnectors.map((connector) => {
-      const awsVars = connector.vars as AwsCloudConnectorVars;
+      const azureVars = connector.vars as AzureCloudConnectorVars;
       return {
         label: connector.name,
         value: connector.id,
         id: connector.id,
-        roleArn: awsVars.role_arn,
-        externalId: awsVars.external_id,
+        tenantId: azureVars.tenant_id,
+        clientId: azureVars.client_id,
+        azure_credentials_cloud_connector_id: azureVars.azure_credentials_cloud_connector_id,
       };
     });
   }, [cloudConnectors]);
@@ -42,11 +43,11 @@ export const AWSReusableConnectorForm: React.FC<{
   // Convert cloud connectors to combo box options (only standard properties for EuiComboBox)
   const comboBoxOptions: ComboBoxOption[] = useMemo(
     () =>
-      awsConnectionData.map((connector) => ({
+      azureConnectionData.map((connector) => ({
         label: connector.label,
         value: connector.value,
       })),
-    [awsConnectionData]
+    [azureConnectionData]
   );
 
   // Find the currently selected connector based on credentials
@@ -60,25 +61,38 @@ export const AWSReusableConnectorForm: React.FC<{
       const [selectedOption] = selected;
 
       if (selectedOption?.value) {
-        const connector = awsConnectionData.find((opt) => opt.id === selectedOption.value);
+        const connector = azureConnectionData.find((opt) => opt.id === selectedOption.value);
 
-        if (connector?.roleArn?.value && connector?.externalId?.value) {
+        if (
+          connector?.tenantId?.value &&
+          connector?.clientId?.value &&
+          connector?.azure_credentials_cloud_connector_id?.value
+        ) {
+          const tenantIdValue = connector.tenantId.value;
+          const clientIdValue = connector.clientId.value;
+          const azureCredentialsValue = connector.azure_credentials_cloud_connector_id.value;
+
           setCredentials({
-            roleArn: connector.roleArn.value,
-            externalId: connector.externalId.value,
+            tenantId: typeof tenantIdValue === 'string' ? tenantIdValue : tenantIdValue.id,
+            clientId: typeof clientIdValue === 'string' ? clientIdValue : clientIdValue.id,
+            azure_credentials_cloud_connector_id:
+              typeof azureCredentialsValue === 'string'
+                ? azureCredentialsValue
+                : azureCredentialsValue.id,
             cloudConnectorId: connector.id,
           });
         }
       } else {
         // Handle deselection
         setCredentials({
-          roleArn: undefined,
-          externalId: undefined,
+          tenantId: undefined,
+          clientId: undefined,
+          azure_credentials_cloud_connector_id: undefined,
           cloudConnectorId: undefined,
         });
       }
     },
-    [awsConnectionData, setCredentials]
+    [azureConnectionData, setCredentials]
   );
 
   return (
@@ -86,15 +100,15 @@ export const AWSReusableConnectorForm: React.FC<{
       <EuiSpacer size="m" />
       <EuiText size="s" color="subdued">
         <FormattedMessage
-          id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.cloudFormation.cloudConnectorInstructions"
-          defaultMessage="To streamline your AWS integration process, you can reuse the same Role ARN for different use cases within Elastic. Simply choose the existing Role ARN from the options below:"
+          id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.azure.cloudConnectorInstructions"
+          defaultMessage="To streamline your Azure integration process, you can reuse the same cloud connector for different use cases within Elastic. Simply choose the existing connection from the options below:"
         />
       </EuiText>
       <EuiSpacer size="m" />
-      <EuiFormRow label="Role ARN" fullWidth>
+      <EuiFormRow label="Azure Cloud Connector" fullWidth>
         <EuiComboBox
-          aria-label="Select Role ARN"
-          placeholder="Select a Role ARN"
+          aria-label="Select Azure Cloud Connector"
+          placeholder="Select a cloud connector"
           options={comboBoxOptions}
           fullWidth
           singleSelection={true}

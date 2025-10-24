@@ -13,29 +13,37 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 const fetchCloudConnectors = async (
   http: HttpStart,
-  options?: CloudConnectorListOptions
+  options?: CloudConnectorListOptions & { cloudProvider?: string }
 ): Promise<CloudConnector[]> => {
-  const queryParams = new URLSearchParams();
+  const query: Record<string, string> = {};
 
   if (options?.page !== undefined) {
-    queryParams.append('page', options.page.toString());
+    query.page = options.page.toString();
   }
 
   if (options?.perPage !== undefined) {
-    queryParams.append('perPage', options.perPage.toString());
+    query.perPage = options.perPage.toString();
   }
 
-  const url = `${CLOUD_CONNECTOR_API_ROUTES.LIST_PATTERN}`;
+  if (options?.cloudProvider) {
+    query.cloudProvider = options.cloudProvider;
+  }
 
   return http
-    .get<{ items: CloudConnector[] }>(url)
+    .get<{ items: CloudConnector[] }>(CLOUD_CONNECTOR_API_ROUTES.LIST_PATTERN, {
+      query,
+    })
     .then((res: { items: CloudConnector[] }) => res.items);
 };
 
-export const useGetCloudConnectors = () => {
+export const useGetCloudConnectors = (cloudProvider?: string) => {
   const CLOUD_CONNECTOR_QUERY_KEY = 'get-cloud-connectors';
   const { http } = useKibana<CoreStart>().services;
-  return useQuery([CLOUD_CONNECTOR_QUERY_KEY], () => fetchCloudConnectors(http), {
-    enabled: true,
-  });
+  return useQuery(
+    [CLOUD_CONNECTOR_QUERY_KEY, cloudProvider],
+    () => fetchCloudConnectors(http, { cloudProvider }),
+    {
+      enabled: true,
+    }
+  );
 };
