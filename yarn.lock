@@ -12503,7 +12503,7 @@
     dequal "^2.0.2"
     ts-dedent "^2.0.0"
 
-"@storybook/addon-docs@8.6.14":
+"@storybook/addon-docs@8.6.14", "@storybook/addon-docs@^8.2.10":
   version "8.6.14"
   resolved "https://registry.yarnpkg.com/@storybook/addon-docs/-/addon-docs-8.6.14.tgz#71fcf4cf06dae91cecd5668915a8c234b82748e9"
   integrity sha512-Obpd0OhAF99JyU5pp5ci17YmpcQtMNgqW2pTXV8jAiiipWpwO++hNDeQmLmlSXB399XjtRDOcDVkoc7rc6JzdQ==
@@ -12512,19 +12512,6 @@
     "@storybook/blocks" "8.6.14"
     "@storybook/csf-plugin" "8.6.14"
     "@storybook/react-dom-shim" "8.6.14"
-    react "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0"
-    react-dom "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0"
-    ts-dedent "^2.0.0"
-
-"@storybook/addon-docs@^8.2.10":
-  version "8.6.3"
-  resolved "https://registry.yarnpkg.com/@storybook/addon-docs/-/addon-docs-8.6.3.tgz#1eae8f04397a5606f46ceeffa3a9380aa60c1a94"
-  integrity sha512-FRABH+r2huMpAK8iUQiFlYZtYenbqtudX3fNKFK9b38eV1R14kWggVG02lsa6upXbzxWVbMLUdOqaZJHxNbO/A==
-  dependencies:
-    "@mdx-js/react" "^3.0.0"
-    "@storybook/blocks" "8.6.3"
-    "@storybook/csf-plugin" "8.6.3"
-    "@storybook/react-dom-shim" "8.6.3"
     react "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0"
     react-dom "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0"
     ts-dedent "^2.0.0"
