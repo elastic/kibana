@@ -29,5 +29,8 @@ export const integrationsCardConfig: OnboardingCardConfig<IntegrationCardMetadat
       )
   ),
   checkComplete: checkIntegrationsCardComplete,
-  capabilitiesRequired: [['fleet.read', `${SECURITY_FEATURE_ID}.detections`], ['fleet.read', RULES_UI_DETECTIONS_PRIVILEGE]],
+  capabilitiesRequired: [
+    ['fleet.read', `${SECURITY_FEATURE_ID}.detections`],
+    ['fleet.read', RULES_UI_DETECTIONS_PRIVILEGE],
+  ],
 };
