@@ -22,13 +22,16 @@ import type {
   PostBlockkitSubActionParams,
   SlackApiService,
   PostMessageResponse,
-  SlackAPiResponse,
+  SlackApiResponse,
   ValidChannelResponse,
+  SearchChannelsSubActionParams,
+  SearchChannelsResponse,
 } from '../../../common/slack_api/types';
 import {
   retryResultSeconds,
   retryResult,
   serviceErrorResult,
+  searchErrorResult,
   errorResult,
   successResult,
 } from '../../../common/slack_api/lib';
@@ -86,7 +89,7 @@ const buildSlackExecutorErrorResponse = ({
   return errorResult(SLACK_API_CONNECTOR_ID, errorMessage, errorSource);
 };
 
-const buildSlackExecutorSuccessResponse = <T extends SlackAPiResponse>({
+const buildSlackExecutorSuccessResponse = <T extends SlackApiResponse>({
   slackApiResponseData,
 }: {
   slackApiResponseData: T;
@@ -113,13 +116,13 @@ export const createExternalService = (
     secrets,
   }: {
     config?: { allowedChannels?: Array<{ id: string; name: string }> };
-    secrets: { token: string };
+    secrets: { token: string; userToken?: string };
   },
   logger: Logger,
   configurationUtilities: ActionsConfigurationUtilities,
   connectorUsageCollector: ConnectorUsageCollector
 ): SlackApiService => {
-  const { token } = secrets;
+  const { token, userToken } = secrets;
   const { allowedChannels } = config || { allowedChannels: [] };
   const allowedChannelIds = allowedChannels?.map((ac) => ac.id);
 
@@ -249,9 +252,77 @@ export const createExternalService = (
     }
   };
 
+  const searchChannels = async ({
+    query,
+    count = 20,
+    page = 1,
+  }: SearchChannelsSubActionParams): Promise<ConnectorTypeExecutorResult<unknown>> => {
+    try {
+      // Check if userToken is configured
+      if (!userToken) {
+        const errorMessage =
+          'User token is required for search operations. Please configure a user token (xoxp-...) in the connector settings.';
+        logger.error(`searchChannels failed: ${errorMessage}`);
+        return searchErrorResult(SLACK_API_CONNECTOR_ID, errorMessage);
+      }
+
+      if (query.length === 0) {
+        const errorMessage = 'The search query is empty';
+        logger.error(`searchChannels failed: ${errorMessage}`);
+        return searchErrorResult(SLACK_API_CONNECTOR_ID, errorMessage);
+      }
+
+      // Build URL with query parameters
+      const searchParams = new URLSearchParams({
+        query,
+        count: count.toString(),
+        page: page.toString(),
+      });
+
+      const searchUrl = `${SLACK_URL}search.messages?${searchParams.toString()}`;
+      logger.debug(`Slack API searchChannels: calling ${searchUrl} with query="${query}"`);
+
+      // Use userToken for search (search.messages requires a user token, not bot token)
+      const searchHeaders = {
+        Authorization: `Bearer ${userToken}`,
+        'Content-type': 'application/json; charset=UTF-8',
+      };
+
+      const result: AxiosResponse<SearchChannelsResponse> = await request({
+        axios: axiosInstance,
+        method: 'get',
+        url: searchUrl,
+        logger,
+        headers: searchHeaders,
+        configurationUtilities,
+        connectorUsageCollector,
+      });
+
+      logger.debug(
+        `Slack API searchChannels response: ok=${result.data.ok}, error=${result.data.error}`
+      );
+
+      // Check if Slack returned an error in the response body
+      if (!result.data.ok && result.data.error) {
+        const errorMessage = `Slack API error: ${result.data.error}`;
+        logger.error(`searchChannels failed: ${errorMessage}`);
+        return searchErrorResult(SLACK_API_CONNECTOR_ID, errorMessage);
+      }
+
+      return buildSlackExecutorSuccessResponse<SearchChannelsResponse>({
+        slackApiResponseData: result.data,
+      });
+    } catch (error) {
+      logger.error(`searchChannels exception: ${error.message}`);
+      const errorMessage = error.message || 'Unknown error occurred';
+      return searchErrorResult(SLACK_API_CONNECTOR_ID, errorMessage);
+    }
+  };
+
   return {
     validChannelId,
     postMessage,
     postBlockkit,
+    searchChannels,
   };
 };

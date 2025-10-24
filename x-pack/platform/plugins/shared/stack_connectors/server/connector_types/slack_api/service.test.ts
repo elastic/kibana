@@ -115,6 +115,25 @@ const postBlockkitResponse = createAxiosResponse({
   },
 });
 
+const searchChannelsResponse = createAxiosResponse({
+  data: {
+    ok: true,
+    messages: {
+      matches: [
+        {
+          channel: { id: 'C123', name: 'general' },
+          text: 'test message',
+          user: 'U123',
+          username: 'testuser',
+          ts: '1234567890.123456',
+          permalink: 'https://slack.com/archives/C123/p1234567890123456',
+        },
+      ],
+      total: 1,
+    },
+  },
+});
+
 describe('Slack API service', () => {
   let service: SlackApiService;
 
@@ -191,7 +210,7 @@ describe('Slack API service', () => {
 
       expect(await service.validChannelId('channel_id_1')).toEqual({
         actionId: SLACK_API_CONNECTOR_ID,
-        message: 'error posting slack message',
+        message: 'error posting slack message: request fail',
         serviceMessage: 'request fail',
         status: 'error',
       });
@@ -275,7 +294,7 @@ describe('Slack API service', () => {
         await service.postMessage({ channels: ['general', 'privat'], text: 'a message' })
       ).toEqual({
         actionId: SLACK_API_CONNECTOR_ID,
-        message: 'error posting slack message',
+        message: 'error posting slack message: request fail',
         serviceMessage: 'request fail',
         status: 'error',
       });
@@ -364,7 +383,7 @@ describe('Slack API service', () => {
         })
       ).toEqual({
         actionId: SLACK_API_CONNECTOR_ID,
-        message: 'error posting slack message',
+        message: 'error posting slack message: Unexpected token \'a\', "abc" is not valid JSON',
         serviceMessage: 'Unexpected token \'a\', "abc" is not valid JSON',
         status: 'error',
       });
@@ -382,7 +401,139 @@ describe('Slack API service', () => {
         })
       ).toEqual({
         actionId: SLACK_API_CONNECTOR_ID,
-        message: 'error posting slack message',
+        message: 'error posting slack message: request fail',
+        serviceMessage: 'request fail',
+        status: 'error',
+      });
+    });
+  });
+
+  describe('searchChannels', () => {
+    let serviceWithUserToken: SlackApiService;
+
+    beforeAll(() => {
+      serviceWithUserToken = createExternalService(
+        {
+          secrets: { token: 'token', userToken: 'userToken' },
+        },
+        logger,
+        configurationUtilities,
+        connectorUsageCollector
+      );
+    });
+
+    test('should search slack messages successfully', async () => {
+      requestMock.mockImplementation(() => searchChannelsResponse);
+      const res = await serviceWithUserToken.searchChannels({
+        query: 'test',
+        count: 20,
+        page: 1,
+      });
+      expect(res).toEqual({
+        actionId: SLACK_API_CONNECTOR_ID,
+        data: {
+          ok: true,
+          messages: {
+            matches: [
+              {
+                channel: { id: 'C123', name: 'general' },
+                text: 'test message',
+                user: 'U123',
+                username: 'testuser',
+                ts: '1234567890.123456',
+                permalink: 'https://slack.com/archives/C123/p1234567890123456',
+              },
+            ],
+            total: 1,
+          },
+        },
+        status: 'ok',
+      });
+    });
+
+    test('should call request with correct arguments', async () => {
+      requestMock.mockImplementation(() => searchChannelsResponse);
+
+      await serviceWithUserToken.searchChannels({ query: 'test query', count: 10, page: 2 });
+      expect(requestMock).toHaveBeenCalledWith({
+        axios,
+        headers: {
+          Authorization: 'Bearer userToken',
+          'Content-type': 'application/json; charset=UTF-8',
+        },
+        logger,
+        configurationUtilities,
+        method: 'get',
+        url: 'https://slack.com/api/search.messages?query=test+query&count=10&page=2',
+        connectorUsageCollector,
+      });
+    });
+
+    test('should use default count and page values', async () => {
+      requestMock.mockImplementation(() => searchChannelsResponse);
+
+      await serviceWithUserToken.searchChannels({ query: 'test' });
+      expect(requestMock).toHaveBeenCalledWith({
+        axios,
+        headers: {
+          Authorization: 'Bearer userToken',
+          'Content-type': 'application/json; charset=UTF-8',
+        },
+        logger,
+        configurationUtilities,
+        method: 'get',
+        url: 'https://slack.com/api/search.messages?query=test&count=20&page=1',
+        connectorUsageCollector,
+      });
+    });
+
+    test('should return error when userToken is not configured', async () => {
+      const res = await service.searchChannels({ query: 'test' });
+      expect(res).toEqual({
+        actionId: SLACK_API_CONNECTOR_ID,
+        message: 'error searching slack messages: User token is required for search operations. Please configure a user token (xoxp-...) in the connector settings.',
+        serviceMessage: 'User token is required for search operations. Please configure a user token (xoxp-...) in the connector settings.',
+        status: 'error',
+      });
+    });
+
+    test('should return error when query is empty', async () => {
+      const res = await serviceWithUserToken.searchChannels({ query: '' });
+      expect(res).toEqual({
+        actionId: SLACK_API_CONNECTOR_ID,
+        message: 'error searching slack messages: The search query is empty',
+        serviceMessage: 'The search query is empty',
+        status: 'error',
+      });
+    });
+
+    test('should handle Slack API errors in response', async () => {
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({
+          data: {
+            ok: false,
+            error: 'invalid_auth',
+          },
+        })
+      );
+
+      const res = await serviceWithUserToken.searchChannels({ query: 'test' });
+      expect(res).toEqual({
+        actionId: SLACK_API_CONNECTOR_ID,
+        message: 'error searching slack messages: Slack API error: invalid_auth',
+        serviceMessage: 'Slack API error: invalid_auth',
+        status: 'error',
+      });
+    });
+
+    test('should throw an error if request to slack fails', async () => {
+      requestMock.mockImplementation(() => {
+        throw new Error('request fail');
+      });
+
+      expect(await serviceWithUserToken.searchChannels({ query: 'test' })).toEqual({
+        actionId: SLACK_API_CONNECTOR_ID,
+        message: 'error searching slack messages: request fail',
         serviceMessage: 'request fail',
         status: 'error',
       });

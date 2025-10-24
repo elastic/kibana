@@ -11,24 +11,33 @@ import { api } from './api';
 const createMock = (): jest.Mocked<SlackApiService> => {
   const service = {
     postMessage: jest.fn().mockImplementation(() => ({
-      ok: true,
-      channel: 'general',
-      message: {
-        text: 'a message',
-        type: 'message',
+      status: 'ok',
+      data: {
+        ok: true,
+        channel: 'general',
+        message: {
+          text: 'a message',
+          type: 'message',
+        },
       },
+      actionId: '.slack_api',
     })),
     postBlockkit: jest.fn().mockImplementation(() => ({
-      ok: true,
-      channel: 'general',
-      message: {
-        text: 'a blockkit message',
-      },
-    })),
-    validChannelId: jest.fn().mockImplementation(() => [
-      {
+      status: 'ok',
+      data: {
         ok: true,
-        channels: {
+        channel: 'general',
+        message: {
+          text: 'a blockkit message',
+        },
+      },
+      actionId: '.slack_api',
+    })),
+    validChannelId: jest.fn().mockImplementation(() => ({
+      status: 'ok',
+      data: {
+        ok: true,
+        channel: {
           id: 'channel_id_1',
           name: 'general',
           is_channel: true,
@@ -36,7 +45,28 @@ const createMock = (): jest.Mocked<SlackApiService> => {
           is_private: true,
         },
       },
-    ]),
+      actionId: '.slack_api',
+    })),
+    searchChannels: jest.fn().mockImplementation(() => ({
+      status: 'ok',
+      data: {
+        ok: true,
+        messages: {
+          matches: [
+            {
+              channel: { id: 'C123', name: 'general' },
+              text: 'test message',
+              user: 'U123',
+              username: 'testuser',
+              ts: '1234567890.123456',
+              permalink: 'https://slack.com/archives/C123/p1234567890123456',
+            },
+          ],
+          total: 1,
+        },
+      },
+      actionId: '.slack_api',
+    })),
   };
 
   return service;
@@ -59,19 +89,20 @@ describe('api', () => {
       params: { channelId: 'channel_id_1' },
     });
 
-    expect(res).toEqual([
-      {
-        channels: {
-          id: 'channel_id_1',
-          is_archived: false,
-          is_channel: true,
-          is_private: true,
-          name: 'general',
-        },
-
+    expect(res).toEqual({
+      status: 'ok',
+      data: {
         ok: true,
+        channel: {
+          id: 'channel_id_1',
+          name: 'general',
+          is_channel: true,
+          is_archived: false,
+          is_private: true,
+        },
       },
-    ]);
+      actionId: '.slack_api',
+    });
   });
 
   test('postMessage with channels params', async () => {
@@ -81,12 +112,16 @@ describe('api', () => {
     });
 
     expect(res).toEqual({
-      channel: 'general',
-      message: {
-        text: 'a message',
-        type: 'message',
+      status: 'ok',
+      data: {
+        ok: true,
+        channel: 'general',
+        message: {
+          text: 'a message',
+          type: 'message',
+        },
       },
-      ok: true,
+      actionId: '.slack_api',
     });
   });
 
@@ -97,12 +132,16 @@ describe('api', () => {
     });
 
     expect(res).toEqual({
-      channel: 'general',
-      message: {
-        text: 'a message',
-        type: 'message',
+      status: 'ok',
+      data: {
+        ok: true,
+        channel: 'general',
+        message: {
+          text: 'a message',
+          type: 'message',
+        },
       },
-      ok: true,
+      actionId: '.slack_api',
     });
   });
 
@@ -113,11 +152,43 @@ describe('api', () => {
     });
 
     expect(res).toEqual({
-      channel: 'general',
-      message: {
-        text: 'a blockkit message',
+      status: 'ok',
+      data: {
+        ok: true,
+        channel: 'general',
+        message: {
+          text: 'a blockkit message',
+        },
       },
-      ok: true,
+      actionId: '.slack_api',
+    });
+  });
+
+  test('searchChannels', async () => {
+    const res = await api.searchChannels({
+      externalService,
+      params: { query: 'test', count: 20, page: 1 },
+    });
+
+    expect(res).toEqual({
+      status: 'ok',
+      data: {
+        ok: true,
+        messages: {
+          matches: [
+            {
+              channel: { id: 'C123', name: 'general' },
+              text: 'test message',
+              user: 'U123',
+              username: 'testuser',
+              ts: '1234567890.123456',
+              permalink: 'https://slack.com/archives/C123/p1234567890123456',
+            },
+          ],
+          total: 1,
+        },
+      },
+      actionId: '.slack_api',
     });
   });
 });

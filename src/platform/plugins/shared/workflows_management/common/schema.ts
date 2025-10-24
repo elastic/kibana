@@ -97,6 +97,7 @@ import {
   SlackApiPostMessageParamsSchema,
   SlackApiGetChannelsParamsSchema,
   SlackApiGetUsersParamsSchema,
+  SlackApiSearchChannelsParamsSchema,
   SlackApiResponseSchema,
   // Tines connector schemas
   TinesStoriesParamsSchema,
@@ -355,6 +356,8 @@ function getSubActionParamsSchema(actionTypeId: string, subActionName: string): 
         return SlackApiGetChannelsParamsSchema;
       case 'getUsers':
         return SlackApiGetUsersParamsSchema;
+      case 'searchChannels':
+        return SlackApiSearchChannelsParamsSchema;
     }
   }
 

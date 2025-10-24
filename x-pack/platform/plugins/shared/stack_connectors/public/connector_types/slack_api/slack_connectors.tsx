@@ -34,8 +34,21 @@ const getSecretsFormSchema = (docLinks: DocLinksStart): SecretsFieldSchema[] => 
     helpText: (
       <EuiLink href={docLinks.links.alerting.slackApiAction} target="_blank">
         <FormattedMessage
-          id="xpack.stackConnectors.components.slack_api.apiKeyDocumentation"
-          defaultMessage="Create a Slack Web API token"
+          id="xpack.stackConnectors.components.slack_api.botTokenDocumentation"
+          defaultMessage="Create a Slack Bot Token (xoxb-...)"
+        />
+      </EuiLink>
+    ),
+  },
+  {
+    id: 'userToken',
+    label: i18n.USER_TOKEN_LABEL,
+    isPasswordField: true,
+    helpText: (
+      <EuiLink href={docLinks.links.alerting.slackApiAction} target="_blank">
+        <FormattedMessage
+          id="xpack.stackConnectors.components.slack_api.userTokenDocumentation"
+          defaultMessage="Create a Slack User Token (xoxp-...) for search operations. Required for searchChannels subAction."
         />
       </EuiLink>
     ),

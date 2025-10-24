@@ -31,7 +31,13 @@ import { SLACK_CONNECTOR_NAME } from './translations';
 import { api } from './api';
 import { createExternalService } from './service';
 
-const supportedSubActions = ['getAllowedChannels', 'validChannelId', 'postMessage', 'postBlockkit'];
+const supportedSubActions = [
+  'getAllowedChannels',
+  'validChannelId',
+  'postMessage',
+  'postBlockkit',
+  'searchChannels',
+];
 
 export const getConnectorType = (): SlackApiConnectorType => {
   return {
@@ -149,6 +155,13 @@ const slackApiExecutor = async ({
 
   if (subAction === 'postBlockkit') {
     return await api.postBlockkit({
+      externalService,
+      params: params.subActionParams,
+    });
+  }
+
+  if (subAction === 'searchChannels') {
+    return await api.searchChannels({
       externalService,
       params: params.subActionParams,
     });

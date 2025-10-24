@@ -32,9 +32,38 @@ export function serviceErrorResult(
   actionId: string,
   serviceMessage?: string
 ): ConnectorTypeExecutorResult<void> {
-  const errMessage = i18n.translate('xpack.stackConnectors.slack.errorPostingErrorMessage', {
-    defaultMessage: 'error posting slack message',
-  });
+  const errMessage = serviceMessage
+    ? i18n.translate('xpack.stackConnectors.slack.errorPostingErrorMessageWithDetails', {
+        defaultMessage: 'error posting slack message: {serviceMessage}',
+        values: {
+          serviceMessage,
+        },
+      })
+    : i18n.translate('xpack.stackConnectors.slack.errorPostingErrorMessage', {
+        defaultMessage: 'error posting slack message',
+      });
+  return {
+    status: 'error',
+    message: errMessage,
+    actionId,
+    serviceMessage,
+  };
+}
+
+export function searchErrorResult(
+  actionId: string,
+  serviceMessage?: string
+): ConnectorTypeExecutorResult<void> {
+  const errMessage = serviceMessage
+    ? i18n.translate('xpack.stackConnectors.slack.errorSearchingErrorMessageWithDetails', {
+        defaultMessage: 'error searching slack messages: {serviceMessage}',
+        values: {
+          serviceMessage,
+        },
+      })
+    : i18n.translate('xpack.stackConnectors.slack.errorSearchingErrorMessage', {
+        defaultMessage: 'error searching slack messages',
+      });
   return {
     status: 'error',
     message: errMessage,

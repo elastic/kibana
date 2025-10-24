@@ -35,6 +35,12 @@ export const SlackApiGetUsersParamsSchema = z.object({
   limit: z.number().optional(),
 });
 
+export const SlackApiSearchChannelsParamsSchema = z.object({
+  query: z.string().min(1),
+  count: z.number().min(1).max(100).optional(),
+  page: z.number().min(1).optional(),
+});
+
 // Slack API connector response schema
 export const SlackApiResponseSchema = z.object({
   ok: z.boolean(),
@@ -66,6 +72,24 @@ export const SlackApiResponseSchema = z.object({
         real_name: z.string().optional(),
       })
     )
+    .optional(),
+  messages: z
+    .object({
+      matches: z.array(
+        z.object({
+          channel: z.object({
+            id: z.string(),
+            name: z.string(),
+          }),
+          text: z.string(),
+          user: z.string(),
+          username: z.string(),
+          ts: z.string(),
+          permalink: z.string(),
+        })
+      ),
+      total: z.number(),
+    })
     .optional(),
   error: z.string().optional(),
 });

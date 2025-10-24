@@ -49,6 +49,10 @@ import {
   SUB_ACTION as SENTINELONE_SUB_ACTION,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
 import {
+  SLACK_API_CONNECTOR_ID,
+  SUB_ACTION as SLACK_API_SUB_ACTION,
+} from '@kbn/stack-connectors-plugin/common/slack_api/constants';
+import {
   THEHIVE_CONNECTOR_ID,
   SUB_ACTION as THEHIVE_SUB_ACTION,
 } from '@kbn/stack-connectors-plugin/common/thehive/constants';
@@ -137,6 +141,7 @@ function createSubActionsMapping() {
     },
     { id: JIRA_SERVICE_MANAGEMENT_CONNECTOR_TYPE_ID, actions: JiraServiceManagementSubActions },
     { id: OpsgenieConnectorTypeId, actions: OpsgenieSubActions },
+    { id: SLACK_API_CONNECTOR_ID, actions: SLACK_API_SUB_ACTION },
     // Legacy connectors (using older ActionType pattern)
     { id: '.jira', actions: JIRA_SUB_ACTIONS },
     { id: '.servicenow-itsm', actions: SERVICENOW_ITSM_SUB_ACTIONS },

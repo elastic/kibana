@@ -22,7 +22,13 @@ export const CHANNEL_REQUIRED = i18n.translate(
 export const TOKEN_LABEL = i18n.translate(
   'xpack.stackConnectors.components.slack_api.tokenTextFieldLabel',
   {
-    defaultMessage: 'API Token',
+    defaultMessage: 'Bot Token',
+  }
+);
+export const USER_TOKEN_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.slack_api.userTokenTextFieldLabel',
+  {
+    defaultMessage: 'User Token (optional)',
   }
 );
 export const WEB_API = i18n.translate('xpack.stackConnectors.components.slack_api.webApi', {

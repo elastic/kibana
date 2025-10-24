@@ -18,6 +18,8 @@ import type {
   SlackApiParamsSchema,
   SlackApiConfigSchema,
   ValidChannelIdSubActionParamsSchema,
+  SearchChannelsSubActionParamsSchema,
+  SearchChannelsParamsSchema,
 } from './schema';
 
 export type SlackApiSecrets = TypeOf<typeof SlackApiSecretsSchema>;
@@ -28,6 +30,8 @@ export type PostMessageSubActionParams = TypeOf<typeof PostMessageSubActionParam
 export type PostBlockkitSubActionParams = TypeOf<typeof PostBlockkitSubActionParamsSchema>;
 export type PostBlockkitParams = TypeOf<typeof PostBlockkitParamsSchema>;
 export type ValidChannelIdSubActionParams = TypeOf<typeof ValidChannelIdSubActionParamsSchema>;
+export type SearchChannelsSubActionParams = TypeOf<typeof SearchChannelsSubActionParamsSchema>;
+export type SearchChannelsParams = TypeOf<typeof SearchChannelsParamsSchema>;
 export type SlackApiParams = TypeOf<typeof SlackApiParamsSchema>;
 export type SlackApiConnectorType = ConnectorType<
   SlackApiConfig,
@@ -50,7 +54,7 @@ export type SlackExecutorOptions = ConnectorTypeExecutorOptions<
 
 export type SlackApiActionParams = TypeOf<typeof SlackApiParamsSchema>;
 
-export interface SlackAPiResponse {
+export interface SlackApiResponse {
   ok: boolean;
   error?: string;
   message?: {
@@ -69,12 +73,26 @@ export interface ChannelResponse {
   is_private: boolean;
 }
 
-export interface ValidChannelResponse extends SlackAPiResponse {
+export interface ValidChannelResponse extends SlackApiResponse {
   channel?: ChannelResponse;
 }
 
-export interface PostMessageResponse extends SlackAPiResponse {
+export interface PostMessageResponse extends SlackApiResponse {
   channel?: string;
+}
+
+export interface SearchChannelsResponse extends SlackApiResponse {
+  messages?: {
+    matches: Array<{
+      channel: { id: string; name: string };
+      text: string;
+      user: string;
+      username: string;
+      ts: string;
+      permalink: string;
+    }>;
+    total: number;
+  };
 }
 
 export interface ValidChannelRouteResponse {
@@ -96,4 +114,9 @@ export interface SlackApiService {
     channelIds,
     text,
   }: PostBlockkitSubActionParams) => Promise<ConnectorTypeExecutorResult<unknown>>;
+  searchChannels: ({
+    query,
+    count,
+    page,
+  }: SearchChannelsSubActionParams) => Promise<ConnectorTypeExecutorResult<unknown>>;
 }

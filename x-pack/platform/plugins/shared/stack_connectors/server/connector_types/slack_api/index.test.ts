@@ -82,7 +82,8 @@ describe('validate params', () => {
       "error validating action params: types that failed validation:
       - [0.subAction]: expected value to equal [validChannelId]
       - [1.subAction]: expected value to equal [postMessage]
-      - [2.subAction]: expected value to equal [postBlockkit]"
+      - [2.subAction]: expected value to equal [postBlockkit]
+      - [3.subAction]: expected value to equal [searchChannels]"
     `);
 
     expect(() => {
@@ -91,7 +92,8 @@ describe('validate params', () => {
       "error validating action params: types that failed validation:
       - [0.subAction]: expected value to equal [validChannelId]
       - [1.subAction]: expected value to equal [postMessage]
-      - [2.subAction]: expected value to equal [postBlockkit]"
+      - [2.subAction]: expected value to equal [postBlockkit]
+      - [3.subAction]: expected value to equal [searchChannels]"
     `);
   });
 
@@ -134,6 +136,35 @@ describe('validate params', () => {
     ).toEqual({
       subAction: 'validChannelId',
       subActionParams: { channelId: 'KJHGFD867' },
+    });
+  });
+
+  test('should validate and pass when params are valid for searchChannels', () => {
+    expect(
+      validateParams(
+        connectorType,
+        { subAction: 'searchChannels', subActionParams: { query: 'test query' } },
+        { configurationUtilities }
+      )
+    ).toEqual({
+      subAction: 'searchChannels',
+      subActionParams: { query: 'test query' },
+    });
+  });
+
+  test('should validate and pass when params include count and page for searchChannels', () => {
+    expect(
+      validateParams(
+        connectorType,
+        {
+          subAction: 'searchChannels',
+          subActionParams: { query: 'test', count: 50, page: 2 },
+        },
+        { configurationUtilities }
+      )
+    ).toEqual({
+      subAction: 'searchChannels',
+      subActionParams: { query: 'test', count: 50, page: 2 },
     });
   });
 });
@@ -217,7 +248,7 @@ describe('execute', () => {
     );
   });
 
-  test('should fail if subAction is not postMessage/postBlockkit/validChannelId', async () => {
+  test('should fail if subAction is not postMessage/postBlockkit/validChannelId/searchChannels', async () => {
     requestMock.mockImplementation(() => ({
       data: {
         ok: true,
@@ -569,6 +600,64 @@ describe('execute', () => {
         },
         ok: true,
       },
+      status: 'ok',
+    });
+  });
+
+  test('should execute with success for searchChannels', async () => {
+    const searchResponse = {
+      ok: true,
+      messages: {
+        matches: [
+          {
+            channel: { id: 'C123', name: 'general' },
+            text: 'test message',
+            user: 'U123',
+            username: 'testuser',
+            ts: '1234567890.123456',
+            permalink: 'https://slack.com/archives/C123/p1234567890123456',
+          },
+        ],
+        total: 1,
+      },
+    };
+    requestMock.mockImplementation(() => ({
+      data: searchResponse,
+    }));
+    const response = await connectorType.executor({
+      actionId: SLACK_API_CONNECTOR_ID,
+      services,
+      config: {},
+      secrets: { token: 'some token', userToken: 'some user token' },
+      params: {
+        subAction: 'searchChannels',
+        subActionParams: {
+          query: 'test query',
+          count: 20,
+          page: 1,
+        },
+      },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    expect(requestMock).toHaveBeenCalledWith({
+      axios,
+      configurationUtilities,
+      headers: {
+        Authorization: 'Bearer some user token',
+        'Content-type': 'application/json; charset=UTF-8',
+      },
+      logger: mockedLogger,
+      method: 'get',
+      url: 'https://slack.com/api/search.messages?query=test+query&count=20&page=1',
+      connectorUsageCollector,
+    });
+
+    expect(response).toEqual({
+      actionId: SLACK_API_CONNECTOR_ID,
+      data: searchResponse,
       status: 'ok',
     });
   });

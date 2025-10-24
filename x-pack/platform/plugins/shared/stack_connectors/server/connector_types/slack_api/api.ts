@@ -10,6 +10,7 @@ import type {
   PostBlockkitSubActionParams,
   SlackApiService,
   ValidChannelIdSubActionParams,
+  SearchChannelsSubActionParams,
 } from '../../../common/slack_api/types';
 
 const validChannelIdHandler = async ({
@@ -36,8 +37,17 @@ const postBlockkitHandler = async ({
   params: PostBlockkitSubActionParams;
 }) => await externalService.postBlockkit({ channelIds, channels, text });
 
+const searchChannelsHandler = async ({
+  externalService,
+  params: { query, count, page },
+}: {
+  externalService: SlackApiService;
+  params: SearchChannelsSubActionParams;
+}) => await externalService.searchChannels({ query, count, page });
+
 export const api = {
   validChannelId: validChannelIdHandler,
   postMessage: postMessageHandler,
   postBlockkit: postBlockkitHandler,
+  searchChannels: searchChannelsHandler,
 };

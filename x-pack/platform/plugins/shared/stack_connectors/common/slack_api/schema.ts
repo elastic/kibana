@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 export const SlackApiSecretsSchema = schema.object({
   token: schema.string({ minLength: 1 }),
+  userToken: schema.maybe(schema.string({ minLength: 1 })),
 });
 
 export const SlackApiConfigSchema = schema.object({
@@ -56,6 +57,12 @@ export const PostBlockkitSubActionParamsSchema = schema.object({
   text: schema.string({ validate: validateBlockkit }),
 });
 
+export const SearchChannelsSubActionParamsSchema = schema.object({
+  query: schema.string({ minLength: 1 }),
+  count: schema.maybe(schema.number({ min: 1, max: 100 })),
+  page: schema.maybe(schema.number({ min: 1 })),
+});
+
 export const PostMessageParamsSchema = schema.object({
   subAction: schema.literal('postMessage'),
   subActionParams: PostMessageSubActionParamsSchema,
@@ -66,8 +73,14 @@ export const PostBlockkitParamsSchema = schema.object({
   subActionParams: PostBlockkitSubActionParamsSchema,
 });
 
+export const SearchChannelsParamsSchema = schema.object({
+  subAction: schema.literal('searchChannels'),
+  subActionParams: SearchChannelsSubActionParamsSchema,
+});
+
 export const SlackApiParamsSchema = schema.oneOf([
   ValidChannelIdParamsSchema,
   PostMessageParamsSchema,
   PostBlockkitParamsSchema,
+  SearchChannelsParamsSchema,
 ]);

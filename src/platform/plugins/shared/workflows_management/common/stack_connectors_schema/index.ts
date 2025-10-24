@@ -146,6 +146,7 @@ export {
   SlackApiPostMessageParamsSchema,
   SlackApiGetChannelsParamsSchema,
   SlackApiGetUsersParamsSchema,
+  SlackApiSearchChannelsParamsSchema,
   SlackApiResponseSchema,
 } from './slack_api';
 
