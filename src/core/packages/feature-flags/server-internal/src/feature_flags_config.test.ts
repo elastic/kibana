@@ -18,7 +18,6 @@ describe('FeatureFlagsConfig schema validation', () => {
     expect(() => featureFlagsConfig.schema.validate(validConfig)).not.toThrow();
   });
 
-
   it('accepts both enableAllFlags and overrides together', () => {
     const validConfig = {
       enableAllFlags: true,
@@ -44,3 +43,4 @@ describe('FeatureFlagsConfig schema validation', () => {
 
     expect(() => featureFlagsConfig.schema.validate(invalidConfig)).toThrow();
   });
+});
