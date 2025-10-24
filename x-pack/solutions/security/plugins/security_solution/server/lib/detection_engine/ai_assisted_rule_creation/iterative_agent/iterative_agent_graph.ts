@@ -20,7 +20,7 @@ import { RuleCreationAnnotation } from './state';
 import { addDefaultFieldsToRulesNode } from './nodes/add_default_fields_to_rule';
 import { createRuleNameAndDescriptionNode } from './nodes/create_rule_name_and_description';
 import { getTagsNode } from './nodes/get_tags';
-import { getEsqlQueryGraph } from './esql_query_graph';
+import { getEsqlQueryGraph } from './sub_graphs/esql/esql_query_graph';
 import { getIndexPatternNode } from './nodes/get_index_patterns';
 
 export interface GetRuleCreationAgentParams {

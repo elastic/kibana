@@ -11,8 +11,8 @@ import { lastValueFrom } from 'rxjs';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import { RESOLVE_ESQL_ERRORS_TEMPLATE } from './prompts';
-import type { RuleCreationState } from '../state';
+import { RESOLVE_ESQL_ERRORS_TEMPLATE } from '../prompts';
+import type { RuleCreationState } from '../../../state';
 
 interface FixEsqlQueryParams {
   model: InferenceChatModel;

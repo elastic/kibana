@@ -15,7 +15,7 @@ interface ValidateEsqlQueryNodeParams {
   logger: Logger;
 }
 
-import type { RuleCreationState } from '../state';
+import type { RuleCreationState } from '../../../state';
 
 export const validateEsqlQueryNode = ({ logger, esClient }: ValidateEsqlQueryNodeParams) => {
   return async (state: RuleCreationState) => {

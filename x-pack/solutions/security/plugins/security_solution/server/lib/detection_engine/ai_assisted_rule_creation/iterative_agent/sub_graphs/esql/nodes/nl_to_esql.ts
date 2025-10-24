@@ -14,7 +14,7 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { HumanMessage } from '@langchain/core/messages';
 
-import type { RuleCreationAnnotation } from '../state';
+import type { RuleCreationAnnotation } from '../../../state';
 
 interface CreateEsqlRuleNodeParams {
   model: InferenceChatModel;

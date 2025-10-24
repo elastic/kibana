@@ -9,8 +9,8 @@ import type { Logger, KibanaRequest, ElasticsearchClient } from '@kbn/core/serve
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { END, START, StateGraph } from '@langchain/langgraph';
-import type { RuleCreationState } from './state';
-import { RuleCreationAnnotation } from './state';
+import type { RuleCreationState } from '../../state';
+import { RuleCreationAnnotation } from '../../state';
 import { nlToEsqlQueryNode } from './nodes/nl_to_esql';
 import { validateEsqlQueryNode } from './nodes/validate_esql_query';
 import { fixEsqlQueryNode } from './nodes/fix_esql_query';

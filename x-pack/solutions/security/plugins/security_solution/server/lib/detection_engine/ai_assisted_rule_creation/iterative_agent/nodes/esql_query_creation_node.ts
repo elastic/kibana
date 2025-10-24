@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { GetEsqlQueryGraphParams } from '../esql_query_graph';
-import { getEsqlQueryGraph } from '../esql_query_graph';
+import type { GetEsqlQueryGraphParams } from '../sub_graphs/esql/esql_query_graph';
+import { getEsqlQueryGraph } from '../sub_graphs/esql/esql_query_graph';
 import type { RuleCreationState } from '../state';
 
 export const createEsqlQueryCreationNode = async (params: GetEsqlQueryGraphParams) => {

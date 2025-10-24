@@ -10,8 +10,8 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 
-import type { RuleCreationAnnotation } from '../state';
-import { getGenerateEsqlGraph } from '../../../../../assistant/tools/esql/graphs/generate_esql/generate_esql';
+import type { RuleCreationAnnotation } from '../../../state';
+import { getGenerateEsqlGraph } from '../../../../../../../assistant/tools/esql/graphs/generate_esql/generate_esql';
 interface CreateEsqlRuleNodeParams {
   model: InferenceChatModel;
   esClient: ElasticsearchClient;
