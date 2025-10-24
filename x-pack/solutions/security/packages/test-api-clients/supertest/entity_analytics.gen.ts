@@ -243,7 +243,7 @@ If a record already exists for the specified entity, that record is overwritten 
     },
     /**
       * Delete a single entity in Entity Store.
-The entity will be immediately gone from the latest index.  It will remain available in historical snapshots if it has been snapshotted.  The delete operation does not prevent the entity from being recreated if it is observed again in the future. 
+The entity will be immediately deleted from the latest index.  It will remain available in historical snapshots if it has been snapshotted.  The delete operation does not prevent the entity from being recreated if it is observed again in the future. 
 
       */
     deleteSingleEntity(props: DeleteSingleEntityProps, kibanaSpace: string = 'default') {
