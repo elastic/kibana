@@ -10,7 +10,7 @@
 import React from 'react';
 
 interface LogoProps {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 const Logo = (props: LogoProps) => (

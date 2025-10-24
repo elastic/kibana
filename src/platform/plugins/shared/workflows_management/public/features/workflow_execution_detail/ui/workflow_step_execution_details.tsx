@@ -176,6 +176,8 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
 );
 WorkflowStepExecutionDetails.displayName = 'WorkflowStepExecutionDetails';
 
+WorkflowStepExecutionDetails.displayName = 'WorkflowStepExecutionDetails';
+
 const componentStyles = {
   title: ({ euiTheme }: UseEuiTheme) =>
     css({
