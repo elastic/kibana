@@ -43520,6 +43520,7 @@ paths:
               type: object
               properties:
                 additional_yaml_config:
+                  deprecated: true
                   type: string
                 delete_unenrolled_agents:
                   additionalProperties: false
@@ -43533,10 +43534,13 @@ paths:
                     - enabled
                     - is_preconfigured
                 has_seen_add_data_notice:
+                  deprecated: true
                   type: boolean
                 kibana_ca_sha256:
+                  deprecated: true
                   type: string
                 kibana_urls:
+                  deprecated: true
                   items:
                     format: uri
                     type: string
@@ -67502,7 +67506,7 @@ components:
           example: 404
           type: integer
     Data_views_allownoindex:
-      description: Allows the data view saved object to exist before the data is available.
+      description: Allows the data view saved object to exist before the data is available. Defaults to `false`.
       type: boolean
     Data_views_create_data_view_request_object:
       title: Create data view request
@@ -78310,6 +78314,8 @@ components:
         wasSuccessful:
           description: Whether the response action was successful
           type: boolean
+      required:
+        - command
     Security_Endpoint_Management_API_RunningProcesses:
       allOf:
         - $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'

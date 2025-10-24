@@ -210,6 +210,8 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
               expect(result[0].end).to.eql(defaultEnd);
               expect(result[0].status).to.eql('pending');
               expect(result[0].space_id).to.eql(space.id);
+              expect(result[0].initiator).to.eql('user');
+              expect(result[0].initiator_id).to.be(undefined);
               expect(typeof result[0].created_at).to.be('string');
               testExpectedRule(result[0], ruleId1, false);
 
@@ -230,6 +232,8 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
               expect(result[1].end).to.eql(moment(defaultStart).add(12, 'hours').toISOString());
               expect(result[1].status).to.eql('pending');
               expect(result[1].space_id).to.eql(space.id);
+              expect(result[1].initiator).to.eql('user');
+              expect(result[1].initiator_id).to.be(undefined);
               expect(typeof result[1].created_at).to.be('string');
               testExpectedRule(result[1], ruleId2, false);
               expect(result[1].schedule[0].interval).to.eql('12h');
