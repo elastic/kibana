@@ -229,5 +229,27 @@ describe('LayerTabs', () => {
       });
       expect(datasourceMap.testDatasource.initializeDimension).not.toHaveBeenCalled();
     });
+
+    it('should not add an initial dimension when not specified', async () => {
+      const datasourceMap = mockDatasourceMap();
+      const visualizationMap = mockVisualizationMap();
+
+      visualizationMap.testVis.getSupportedLayers = jest.fn(() => [
+        { type: LayerTypes.DATA, label: 'Data Layer' },
+        {
+          type: LayerTypes.REFERENCELINE,
+          label: 'Reference layer',
+        },
+      ]);
+      datasourceMap.testDatasource.initializeDimension = jest.fn();
+      const props = getDefaultProps({ datasourceMap, visualizationMap });
+
+      const { instance, lensStore } = await prepareAndMountComponent(props);
+      addNewLayer(instance);
+
+      // One call for adding the layer, one call for setting it as the current selected layer
+      expect(lensStore.dispatch).toHaveBeenCalledTimes(2);
+      expect(datasourceMap.testDatasource.initializeDimension).not.toHaveBeenCalled();
+    });
   });
 });
