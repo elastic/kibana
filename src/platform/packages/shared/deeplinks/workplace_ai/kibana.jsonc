@@ -1,6 +1,6 @@
 {
   "type": "shared-common",
-  "id": "@kbn/deeplinks-chat",
+  "id": "@kbn/deeplinks-workplace-ai",
   "owner": "@elastic/search-kibana",
   "group": "platform",
   "visibility": "shared"
