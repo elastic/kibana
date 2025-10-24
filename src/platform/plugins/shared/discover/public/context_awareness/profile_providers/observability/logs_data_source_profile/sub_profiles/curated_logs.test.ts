@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
 import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
 import { createEsqlDataSource } from '../../../../../../common/data_sources';
 import type { RootContext } from '../../../../profiles';
-import { DataSourceCategory, SolutionType } from '../../../../profiles';
+import { SolutionType } from '../../../../profiles';
 import { createContextAwarenessMocks } from '../../../../__mocks__';
-import { createLogsDataSourceProfileProvider, type LogOverviewContext } from '../profile';
+import { createLogsDataSourceProfileProvider } from '../profile';
 import type { ContextWithProfileId } from '../../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../../consts';
+import { createCuratedLogsDataSourceProfileProviders } from './curated_logs';
+import { RESOLUTION_MATCH } from '../__mocks__';
 
 const ROOT_CONTEXT: ContextWithProfileId<RootContext> = {
   profileId: OBSERVABILITY_ROOT_PROFILE_ID,
@@ -23,8 +24,6 @@ const ROOT_CONTEXT: ContextWithProfileId<RootContext> = {
 };
 const { profileProviderServices } = createContextAwarenessMocks();
 const logsDataSourceProfileProvider = createLogsDataSourceProfileProvider(profileProviderServices);
-
-import { createCuratedLogsDataSourceProfileProviders } from './curated_logs';
 
 describe('createCuratedLogsDataSourceProfileProviders', () => {
   const providers = createCuratedLogsDataSourceProfileProviders(logsDataSourceProfileProvider);
@@ -123,13 +122,7 @@ describe('createCuratedLogsDataSourceProfileProviders', () => {
           dataSource: createEsqlDataSource(),
           query: { esql: `FROM ${indexPatternMap[profileId].valid}` },
         });
-        expect(result).toEqual({
-          isMatch: true,
-          context: {
-            category: DataSourceCategory.Logs,
-            logOverviewContext$: new BehaviorSubject<LogOverviewContext | undefined>(undefined),
-          },
-        });
+        expect(result).toEqual(RESOLUTION_MATCH);
       });
 
       it('should not match an invalid index pattern', async () => {
@@ -143,10 +136,7 @@ describe('createCuratedLogsDataSourceProfileProviders', () => {
 
       it('should return default app state', () => {
         const getDefaultAppState = provider.profile.getDefaultAppState?.(() => ({}), {
-          context: {
-            category: DataSourceCategory.Logs,
-            logOverviewContext$: new BehaviorSubject<LogOverviewContext | undefined>(undefined),
-          },
+          context: RESOLUTION_MATCH.context,
         });
         expect(getDefaultAppState?.({ dataView: dataViewWithTimefieldMock })).toEqual({
           columns: expectedColumnsMap[profileId],
