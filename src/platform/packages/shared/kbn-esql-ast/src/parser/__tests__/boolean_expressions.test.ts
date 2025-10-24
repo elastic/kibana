@@ -8,6 +8,7 @@
  */
 
 import { Parser } from '..';
+import type { ESQLAstExpression, ESQLFunction, ESQLProperNode } from '../../types';
 
 describe('Column Identifier Expressions', () => {
   it('a literal/constant', () => {
@@ -81,7 +82,7 @@ describe('Column Identifier Expressions', () => {
   it('logical NOT', () => {
     const text = 'ROW NOT col';
     const { root, errors } = Parser.parse(text);
-    const expression = root.commands[0].args[0];
+    const expression = root.commands[0].args[0] as ESQLAstExpression;
 
     expect(errors.length).toBe(0);
     expect(expression).toMatchObject({
@@ -95,6 +96,10 @@ describe('Column Identifier Expressions', () => {
         },
       ],
     });
+
+    const textNot = text.slice(expression.location.min, expression.location.max + 1);
+
+    expect(textNot).toBe('NOT col');
   });
 
   it('logical NOT with nested expression', () => {
@@ -144,7 +149,7 @@ describe('Column Identifier Expressions', () => {
   it('IS NOT NULL', () => {
     const text = 'ROW col IS NOT NULL';
     const { root, errors } = Parser.parse(text);
-    const expression = root.commands[0].args[0];
+    const expression = root.commands[0].args[0] as ESQLFunction;
 
     expect(errors.length).toBe(0);
     expect(expression).toMatchObject({
@@ -152,6 +157,10 @@ describe('Column Identifier Expressions', () => {
       subtype: 'postfix-unary-expression',
       name: 'is not null',
     });
+
+    const textIs = text.slice(expression.location.min, expression.location.max + 1);
+
+    expect(textIs).toBe('col IS NOT NULL');
   });
 
   it('logical OR', () => {

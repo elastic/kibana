@@ -1741,12 +1741,15 @@ export class CstToAstConverter {
     return args;
   }
 
-  private visitLogicalNot(ctx: cst.LogicalNotContext) {
-    const fn = this.toFunction('not', ctx, undefined, 'unary-expression');
-    fn.args.push(...this.collectBooleanExpression(ctx.booleanExpression()));
-    // update the location of the assign based on arguments
-    const argsLocationExtends = this.computeLocationExtends(fn);
-    fn.location = argsLocationExtends;
+  private fromLogicalNot(ctx: cst.LogicalNotContext): ast.ESQLUnaryExpression {
+    const args = this.collectBooleanExpression(ctx.booleanExpression());
+    const fn = this.toFunction(
+      'not',
+      ctx,
+      undefined,
+      'unary-expression',
+      args
+    ) as ast.ESQLUnaryExpression;
     return fn;
   }
 
@@ -1933,7 +1936,7 @@ export class CstToAstConverter {
 
   private collectLogicalExpression(ctx: cst.BooleanExpressionContext) {
     if (ctx instanceof cst.LogicalNotContext) {
-      return [this.visitLogicalNot(ctx)];
+      return [this.fromLogicalNot(ctx)];
     }
     if (ctx instanceof cst.LogicalBinaryContext) {
       return [this.visitLogicalAndsOrs(ctx)];
