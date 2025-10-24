@@ -22,6 +22,9 @@
     "@kbn/core-saved-objects-utils-server",
     "@kbn/config-schema",
     "@kbn/zod",
-    "@kbn/zod-helpers"
+    "@kbn/zod-helpers",
+    "@kbn/logging-mocks",
+    "@kbn/security-plugin-types-server",
+    "@kbn/core-test-helpers-kbn-server"
   ]
 }
