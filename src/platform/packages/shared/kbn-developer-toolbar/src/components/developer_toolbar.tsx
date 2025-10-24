@@ -8,6 +8,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import ReactDOM from 'react-dom';
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiButtonIcon,
@@ -84,18 +85,21 @@ const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({ envInfo, on
   }, [onHeightChange, isMinimized]);
 
   if (isMinimized) {
-    return (
-      <div css={getMinimizedToolbarStyles(euiTheme)}>
-        <EuiToolTip content="Expand developer toolbar" disableScreenReaderOutput={true}>
-          <EuiButtonIcon
-            color={'text'}
-            iconType="wrench"
-            size="xs"
-            onClick={toggleMinimized}
-            aria-label={'Expand developer toolbar'}
-          />
-        </EuiToolTip>
-      </div>
+    return ReactDOM.createPortal(
+      <EuiThemeProvider colorMode={'dark'}>
+        <div css={getMinimizedToolbarStyles(euiTheme)}>
+          <EuiToolTip content="Expand developer toolbar" disableScreenReaderOutput={true}>
+            <EuiButtonIcon
+              color={'text'}
+              iconType="wrench"
+              size="xs"
+              onClick={toggleMinimized}
+              aria-label={'Expand developer toolbar'}
+            />
+          </EuiToolTip>
+        </div>
+      </EuiThemeProvider>,
+      document.body
     );
   }
 

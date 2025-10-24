@@ -62,7 +62,7 @@ const getContainerStyles = (euiTheme: EuiThemeComputed) => css`
   height: ${HEIGHT}px;
 
   background-color: ${euiTheme.components.badgeBackground};
-  border-radius: ${euiTheme.border.radius.small};
+  border-radius: 2px; // badge border radius is 2px
   overflow: hidden;
 `;
 
