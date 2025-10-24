@@ -12,7 +12,6 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeSanitize from 'rehype-sanitize';
 import rehypeRaw from 'rehype-raw';
-import type { Schema } from 'hast-util-sanitize';
 
 import MarkdownIt from 'markdown-it';
 
@@ -41,59 +40,6 @@ export function Readme({
       return fullUri;
     },
     [toRelativeImage, packageName, version]
-  );
-
-  // Custom sanitize schema that replicates the default allowed tags
-  // while explicitly allowing className and title on spans for tooltip support
-  const sanitizeSchema: Schema = useMemo(
-    () => ({
-      tagNames: [
-        // Text content
-        'p',
-        'span',
-        'div',
-        'br',
-        'strong',
-        'em',
-        'blockquote',
-        'hr',
-        // Links and media
-        'a',
-        'img',
-        // Code
-        'code',
-        'pre',
-        // Lists
-        'ul',
-        'ol',
-        'li',
-        // Tables
-        'table',
-        'thead',
-        'tbody',
-        'tr',
-        'th',
-        'td',
-        // Headings
-        'h1',
-        'h2',
-        'h3',
-        'h4',
-        'h5',
-        'h6',
-        // Details/Summary for collapsible sections
-        'details',
-        'summary',
-      ],
-      attributes: {
-        '*': ['className', 'id'],
-        a: ['href', 'target', 'rel'],
-        img: ['src', 'alt', 'width', 'height'],
-        code: ['className'],
-        span: ['className', 'title'], // For tooltip support
-      },
-    }),
-    []
   );
 
   const wrapAllExportedFieldsTables = (content: string | undefined): string | undefined => {
@@ -162,29 +108,10 @@ export function Readme({
     });
   };
 
-  const convertTooltipSyntax = (content: string | undefined): string | undefined => {
-    if (!content) return content;
-
-    // Matches EUI tooltip syntax: !{tooltip[anchor text](tooltip content)}
-    // This regex captures the anchor text and tooltip content separately
-    const tooltipRegex = /!\{tooltip\[([^\]]+)\]\(([^)]+)\)\}/g;
-
-    // Replace with a custom HTML structure that we can render with a custom component
-    return content.replace(tooltipRegex, (_match, anchorText, tooltipContent) => {
-      // Use title attribute which is allowed by default in rehype-sanitize
-      // We'll render this with EuiToolTip in the custom component
-      return `<span class="eui-tooltip-wrapper" title="${tooltipContent.replace(
-        /"/g,
-        '&quot;'
-      )}">${anchorText}</span>`;
-    });
-  };
-
   const processedMarkdown = useMemo(() => {
     if (!markdown) return markdown;
     let processedContent = wrapAllExportedFieldsTables(markdown);
     processedContent = wrapSampleEvents(processedContent);
-    processedContent = convertTooltipSyntax(processedContent);
     return processedContent;
   }, [markdown]);
 
@@ -195,7 +122,7 @@ export function Readme({
           <ReactMarkdown
             transformImageUri={handleImageUri}
             components={markdownRenderers(refs)}
-            rehypePlugins={[rehypeRaw, [rehypeSanitize, sanitizeSchema]]}
+            rehypePlugins={[rehypeRaw, [rehypeSanitize]]}
             remarkPlugins={[remarkGfm]}
           >
             {processedMarkdown}

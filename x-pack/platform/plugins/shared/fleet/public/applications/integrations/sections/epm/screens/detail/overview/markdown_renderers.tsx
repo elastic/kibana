@@ -15,7 +15,6 @@ import {
   EuiTableRowCell,
   EuiAccordion,
   EuiSpacer,
-  EuiToolTip,
 } from '@elastic/eui';
 import React from 'react';
 import type { MutableRefObject } from 'react';
@@ -148,22 +147,6 @@ export const markdownRenderers = (
           </EuiAccordion>
           <EuiSpacer size="m" />
         </>
-      );
-    },
-    span: ({ children, className, title, ...props }: React.HTMLAttributes<HTMLSpanElement>) => {
-      // Check if this is a tooltip wrapper
-      if (className === 'eui-tooltip-wrapper' && title) {
-        return (
-          <EuiToolTip content={title}>
-            <EuiLink color="primary">{children}</EuiLink>
-          </EuiToolTip>
-        );
-      }
-      // Otherwise render a regular span
-      return (
-        <span className={className} title={title} {...props}>
-          {children}
-        </span>
       );
     },
   };
