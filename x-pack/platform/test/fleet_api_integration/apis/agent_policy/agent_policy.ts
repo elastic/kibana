@@ -12,7 +12,6 @@ import { FLEET_AGENT_POLICIES_SCHEMA_VERSION } from '@kbn/fleet-plugin/server/co
 import { skipIfNoDockerRegistry, generateAgent } from '../../helpers';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { setupMockServer } from '../agents/helpers/mock_agentless_api';
-import { createFleetAction } from '../space_awareness/change_space_agent_policies';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
