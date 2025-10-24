@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import type { SearchConfigurationType } from '@kbn/response-ops-rule-params/common';
 import { RULE_PREBUILD_DESCRIPTION_FIELDS } from '@kbn/triggers-actions-ui-plugin/public';
-import type { GetDescriptionFieldsFn, Rule } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { GetDescriptionFieldsFn } from '@kbn/triggers-actions-ui-plugin/public/types';
 
-export const getDescriptionFields: GetDescriptionFieldsFn<
-  Omit<Rule, 'searchConfiguration'> & { searchConfiguration: SearchConfigurationType }
-> = ({ rule, prebuildFields }) => {
+import type { CustomThresholdParams } from '@kbn/response-ops-rule-params/custom_threshold/latest';
+
+export const getDescriptionFields: GetDescriptionFieldsFn<CustomThresholdParams> = ({
+  rule,
+  prebuildFields,
+}) => {
   if (!rule || !prebuildFields) return [];
 
   const searchConfig = rule.params.searchConfiguration;
@@ -19,7 +21,7 @@ export const getDescriptionFields: GetDescriptionFieldsFn<
 
   const fields = [];
 
-  if (searchConfig.index) {
+  if (typeof searchConfig.index === 'string') {
     fields.push(
       prebuildFields[RULE_PREBUILD_DESCRIPTION_FIELDS.DATA_VIEW_INDEX_PATTERN](searchConfig.index)
     );
