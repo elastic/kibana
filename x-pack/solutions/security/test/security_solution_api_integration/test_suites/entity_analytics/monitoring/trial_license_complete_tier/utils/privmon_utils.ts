@@ -238,8 +238,7 @@ export const PrivMonUtils = (
   const scheduleEngineAndWaitForUserCount = async (expectedCount: number) => {
     log.info(`Scheduling engine and waiting for user count: ${expectedCount}`);
 
-    await scheduleMonitoringEngineNow({ ignoreConflict: true });
-    await waitForSyncTaskRun();
+    await runSync();
     await _waitForPrivMonUsersToBeSynced(expectedCount);
     const res = await entityAnalyticsApi.listPrivMonUsers({ query: {} });
 

@@ -441,7 +441,7 @@ export default ({ getService }: FtrProviderContext) => {
           indexPattern: privMonUtils.integrationsSync.OKTA_INDEX,
         });
         await enablePrivmonSetting(kibanaServer);
-        await privMonUtils.initPrivMonEngine();
+        await privMonUtils.initPrivMonEngine(); // does NOT guarantee sync will run
       });
 
       afterEach(async () => {
@@ -462,8 +462,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(monitoringSource?.name).toBe(
           '.entity_analytics.monitoring.sources.entityanalytics_okta-default'
         );
-        await privMonUtils.scheduleMonitoringEngineNow({ ignoreConflict: true });
-        await privMonUtils.waitForSyncTaskRun();
+        await privMonUtils.runSync();
 
         const { body: usersBefore } = await api.listPrivMonUsers({ query: {} });
         // each user should be privileged and have correct source
@@ -505,8 +504,7 @@ export default ({ getService }: FtrProviderContext) => {
           indexPattern: privMonUtils.integrationsSync.OKTA_INDEX,
         });
         // schedule another sync
-        await privMonUtils.scheduleMonitoringEngineNow({ ignoreConflict: true });
-        await privMonUtils.waitForSyncTaskRun();
+        await privMonUtils.runSync();
         const { body: usersAfter } = await api.listPrivMonUsers({ query: {} });
 
         // find the updated user
