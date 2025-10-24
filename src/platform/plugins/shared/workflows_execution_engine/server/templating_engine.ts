@@ -95,7 +95,7 @@ export class WorkflowTemplatingEngine {
     return value;
   }
 
-  public renderString(template: string, context: Record<string, unknown>): string {
+  private renderString(template: string, context: Record<string, unknown>): string {
     try {
       return this.engine.parseAndRenderSync(template, context);
     } catch (error) {
