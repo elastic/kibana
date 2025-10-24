@@ -7,9 +7,10 @@
 
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import { HeaderRow } from './header_row';
-import { groupedItemClick$, __resetGroupedItemClickDedupe } from '../../../events';
 import { DOCUMENT_TYPE_ENTITY } from '@kbn/cloud-security-posture-common/schema/graph/v1';
+import { groupedItemClick$, __resetGroupedItemClickDedupe } from '../../../events';
+import { GROUPED_ITEM_TITLE_TEST_ID } from '../../../test_ids';
+import { HeaderRow } from './header_row';
 
 const flushMicrotasks = () => new Promise((r) => setTimeout(r, 0));
 
@@ -25,7 +26,7 @@ describe('<HeaderRow />', () => {
 
     const { getByTestId } = render(<HeaderRow item={item} />);
 
-    fireEvent.click(getByTestId('cspGraphGroupedItemTitle')); // GROUPED_ITEM_TITLE_TEST_ID value
+    fireEvent.click(getByTestId(GROUPED_ITEM_TITLE_TEST_ID));
     await flushMicrotasks();
 
     expect(next).toHaveBeenCalledTimes(1);
@@ -40,7 +41,7 @@ describe('<HeaderRow />', () => {
 
     const { getByTestId } = render(<HeaderRow item={item} />);
 
-    const link = getByTestId('cspGraphGroupedItemTitle');
+    const link = getByTestId(GROUPED_ITEM_TITLE_TEST_ID);
     fireEvent.click(link);
     fireEvent.click(link);
     fireEvent.click(link);
