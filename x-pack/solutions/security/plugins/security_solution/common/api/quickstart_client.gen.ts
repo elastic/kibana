@@ -249,6 +249,7 @@ import type {
 } from './entity_analytics/entity_store/engine/stop.gen';
 import type {
   DeleteSingleEntityRequestParamsInput,
+  DeleteSingleEntityRequestBodyInput,
   DeleteSingleEntityResponse,
 } from './entity_analytics/entity_store/entities/delete_entity.gen';
 import type {
@@ -1085,6 +1086,7 @@ The entity will be immediately deleted from the latest index.  It will remain av
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'DELETE',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -3232,6 +3234,7 @@ export interface DeleteRuleMigrationProps {
 }
 export interface DeleteSingleEntityProps {
   params: DeleteSingleEntityRequestParamsInput;
+  body: DeleteSingleEntityRequestBodyInput;
 }
 export interface DeleteTimelinesProps {
   body: DeleteTimelinesRequestBodyInput;
