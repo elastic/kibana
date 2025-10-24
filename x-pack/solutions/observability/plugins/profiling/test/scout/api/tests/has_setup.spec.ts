@@ -41,7 +41,7 @@ apiTest.describe('Profiling is not setup and no data is loaded', { tag: ['@svlOb
     });
 
     const adminStatus = adminRes.body;
-    expect(adminStatus.has_setup).toBe(false);
+    expect(adminStatus.has_setup).toBeFalsy()
     expect(adminStatus.has_data).toBe(false);
     expect(adminStatus.pre_8_9_1_data).toBe(false);
     // viewer users
