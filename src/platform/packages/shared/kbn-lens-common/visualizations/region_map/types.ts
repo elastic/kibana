@@ -7,9 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type * from './common';
-export type * from './params';
-export type * from './operations';
-export type * from './columns';
-export type * from './context';
-export * from './configurations';
+import type { Datatable } from '@kbn/expressions-plugin/common';
+
+export interface ChoroplethChartState {
+  layerId: string;
+  emsLayerId?: string;
+  emsField?: string;
+  regionAccessor?: string;
+  valueAccessor?: string;
+}
+
+export interface ChoroplethChartConfig extends ChoroplethChartState {
+  title: string;
+  description: string;
+}
+
+export interface ChoroplethChartProps {
+  data: Datatable;
+  args: ChoroplethChartConfig;
+}

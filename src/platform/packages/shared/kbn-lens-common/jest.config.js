@@ -7,20 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Column } from './columns';
-import type { Configuration } from './configurations';
-
-export interface Layer {
-  indexPatternId: string;
-  layerId: string;
-  columns: Column[];
-  columnOrder: string[];
-  ignoreGlobalFilters: boolean;
-}
-
-export interface NavigateToLensContext<T extends Configuration = Configuration> {
-  layers: Layer[];
-  type: string;
-  configuration: T;
-  indexPatternIds: string[];
-}
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/kbn-lens-common'],
+};

@@ -9,18 +9,17 @@ import React, { useCallback, useMemo } from 'react';
 
 import { EuiAccordion, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { AxesSettingsConfig, AxisExtentConfig } from '@kbn/visualizations-plugin/common';
 import { ScaleType } from '@elastic/charts';
-import type { YScaleType } from '@kbn/expression-xy-plugin/common';
+import type { AxisExtentConfig, YScaleType } from '@kbn/expression-xy-plugin/common';
 
 import { TooltipWrapper } from '@kbn/visualization-utils';
+import type { AxesSettingsConfig, VisualizationToolbarProps } from '@kbn/lens-common';
 import {
   hasNumericHistogramDimension,
   type AxesSettingsConfigKeys,
 } from '../../../shared_components';
 import type { ToolbarContentMap } from '../../../shared_components/flyout_toolbar';
 import { FlyoutToolbar } from '../../../shared_components/flyout_toolbar';
-import type { VisualizationToolbarProps } from '../../../types';
 import type { XYState } from '../types';
 import { XyAppearanceSettings, getValueLabelDisableReason } from './visual_options_popover';
 import { XyTitlesAndTextSettings } from './titles_and_text_popover';

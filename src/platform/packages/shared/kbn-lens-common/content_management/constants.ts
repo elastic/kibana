@@ -7,9 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { $Values } from '@kbn/utility-types';
-import type { Operations, OperationsWithReferences, OperationsWithSourceField } from '../constants';
+import { LENS_ITEM_VERSION_V1 } from './v1/constants';
 
-export type Operation = $Values<typeof Operations>;
-export type OperationWithSourceField = $Values<typeof OperationsWithSourceField>;
-export type OperationWithReferences = $Values<typeof OperationsWithReferences>;
+export { LENS_ITEM_VERSION_V1 } from './v1/constants';
+
+/**
+ * Latest Lens CM Item Version
+ */
+export const LENS_ITEM_LATEST_VERSION = LENS_ITEM_VERSION_V1;
+export type LENS_ITEM_LATEST_VERSION = typeof LENS_ITEM_LATEST_VERSION;
+
+/**
+ * Lens CM Item content type
+ */
+export const LENS_CONTENT_TYPE = 'lens';
+export type LENS_CONTENT_TYPE = typeof LENS_CONTENT_TYPE;
