@@ -29,7 +29,7 @@ import { LegendSizeSettings } from './size/legend_size_settings';
 import { nonNullable } from '../../utils';
 import { ToolbarTitleSettings } from '../axis/title/toolbar_title_settings';
 
-export interface LegendSettingsPopoverProps<LegendStats extends LegendValue = XYLegendValue> {
+export interface LegendSettingsProps<LegendStats extends LegendValue = XYLegendValue> {
   /**
    * Determines the legend display options
    */
@@ -209,7 +209,7 @@ export function shouldDisplayTable(legendValues: LegendValue[]) {
 }
 
 export function LegendSettingsPopover<LegendStats extends LegendValue = XYLegendValue>(
-  props: LegendSettingsPopoverProps<LegendStats>
+  props: LegendSettingsProps<LegendStats>
 ) {
   const { groupPosition = 'none' } = props;
 
@@ -228,7 +228,7 @@ export function LegendSettingsPopover<LegendStats extends LegendValue = XYLegend
   );
 }
 
-function LegendSettings<LegendStats extends LegendValue = XYLegendValue>({
+export function LegendSettings<LegendStats extends LegendValue = XYLegendValue>({
   allowedLegendStats = [],
   legendOptions,
   mode,
@@ -258,7 +258,7 @@ function LegendSettings<LegendStats extends LegendValue = XYLegendValue>({
   onLegendSizeChange,
   showAutoLegendSizeOption,
   titlePlaceholder,
-}: LegendSettingsPopoverProps<LegendStats>) {
+}: LegendSettingsProps<LegendStats>) {
   const isLegendNotHidden = mode !== 'hide';
 
   const showsStatisticsSetting = isLegendNotHidden && allowedLegendStats.length > 1;

@@ -23,9 +23,11 @@
     "@kbn/config-schema",
     "@kbn/zod",
     "@kbn/zod-helpers",
-    "@kbn/logging-mocks",
-    "@kbn/security-plugin-types-server",
+    "@kbn/core-lifecycle-server-internal",
     "@kbn/core-test-helpers-kbn-server",
-    "@kbn/core-lifecycle-server-internal"
+    "@kbn/security-plugin-types-server",
+    "@kbn/logging-mocks",
+    "@kbn/core-security-common",
+    "@kbn/storage-adapter"
   ]
 }
