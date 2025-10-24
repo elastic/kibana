@@ -11,7 +11,9 @@ import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from '@emotion/styled';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { FlyoutLink } from '../../../flyout/shared/components/flyout_link';
+import { FlyoutLink as FlyoutLinkV2 } from '../../../flyoutV2/shared/components/flyout_link';
 import { RiskScoreHeaderTitle } from '../../../entity_analytics/components/risk_score_header_title';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
@@ -85,6 +87,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
     jobNameById,
     isFlyoutOpen = false,
   }) => {
+    const newFlyoutEnabled = useIsExperimentalFeatureEnabled('newFlyout');
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
     const darkMode = useKibanaIsDarkMode();
@@ -185,6 +188,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
                   noLink: true,
                   scopeId,
                   isFlyoutOpen,
+                  newFlyoutEnabled,
                 })
               : getEmptyTagValue(),
         },
@@ -211,7 +215,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
           ),
         },
       ],
-      [data, scopeId, indexNames, hostName, isFlyoutOpen]
+      [data, scopeId, isFlyoutOpen, newFlyoutEnabled, indexNames, hostName]
     );
     const firstColumn = useMemo(
       () =>
@@ -259,12 +263,16 @@ export const HostOverview = React.memo<HostSummaryProps>(
                 scopeId={scopeId}
                 render={(ip) =>
                   ip != null ? (
-                    <FlyoutLink
-                      field={'host.ip'}
-                      value={ip}
-                      scopeId={scopeId}
-                      isFlyoutOpen={isFlyoutOpen}
-                    />
+                    newFlyoutEnabled ? (
+                      <FlyoutLinkV2 field={'host.ip'} value={ip} scopeId={scopeId} />
+                    ) : (
+                      <FlyoutLink
+                        field={'host.ip'}
+                        value={ip}
+                        scopeId={scopeId}
+                        isFlyoutOpen={isFlyoutOpen}
+                      />
+                    )
                   ) : (
                     getEmptyTagValue()
                   )
@@ -303,7 +311,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
           },
         ],
       ],
-      [contextID, scopeId, data, firstColumn, getDefaultRenderer, isFlyoutOpen]
+      [firstColumn, data, contextID, scopeId, getDefaultRenderer, newFlyoutEnabled, isFlyoutOpen]
     );
     return (
       <>

@@ -22,6 +22,7 @@ import { ReputationLink, WhoIsLink } from '../../../../common/components/links';
 import * as i18n from '../details/translations';
 import type { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { FlyoutLink } from '../../../../flyout/shared/components/flyout_link';
+import { FlyoutLink as FlyoutLinkV2 } from '../../../../flyoutV2/shared/components/flyout_link';
 
 export const IpOverviewId = 'ip-overview';
 
@@ -82,6 +83,7 @@ interface HostIdRendererTypes {
   noLink?: boolean;
   scopeId: string;
   isFlyoutOpen: boolean;
+  newFlyoutEnabled: boolean;
 }
 
 export const hostIdRenderer = ({
@@ -91,6 +93,7 @@ export const hostIdRenderer = ({
   noLink,
   scopeId,
   isFlyoutOpen,
+  newFlyoutEnabled,
 }: HostIdRendererTypes): React.ReactElement => {
   const hostName = host.name && host.name[0];
   return host.id && host.ip && (ipFilter == null || host.ip.includes(ipFilter)) ? (
@@ -104,6 +107,10 @@ export const hostIdRenderer = ({
           render={(id) =>
             noLink ? (
               <>{id}</>
+            ) : newFlyoutEnabled ? (
+              <FlyoutLinkV2 field={'host.name'} value={hostName} scopeId={scopeId}>
+                {id}
+              </FlyoutLinkV2>
             ) : (
               <FlyoutLink
                 field={'host.name'}
@@ -130,21 +137,27 @@ interface HostNameRendererTypes {
   host: HostEcs;
   ipFilter?: string;
   isFlyoutOpen: boolean;
+  newFlyoutEnabled: boolean;
 }
 export const hostNameRenderer = ({
   scopeId,
   host,
   ipFilter,
   isFlyoutOpen,
+  newFlyoutEnabled,
 }: HostNameRendererTypes): React.ReactElement =>
   host.name && host.name[0] && host.ip && (!(ipFilter != null) || host.ip.includes(ipFilter)) ? (
     <CellActionsRenderer field={'host.name'} value={host.name[0]} scopeId={scopeId}>
-      <FlyoutLink
-        field={'host.name'}
-        value={host.name[0]}
-        scopeId={scopeId}
-        isFlyoutOpen={isFlyoutOpen}
-      />
+      {newFlyoutEnabled ? (
+        <FlyoutLinkV2 field={'host.name'} value={host.name[0]} scopeId={scopeId} />
+      ) : (
+        <FlyoutLink
+          field={'host.name'}
+          value={host.name[0]}
+          scopeId={scopeId}
+          isFlyoutOpen={isFlyoutOpen}
+        />
+      )}
     </CellActionsRenderer>
   ) : (
     getEmptyTagValue()

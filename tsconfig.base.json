@@ -1120,6 +1120,8 @@
       "@kbn/fleet-plugin/*": ["x-pack/platform/plugins/shared/fleet/*"],
       "@kbn/flot-charts": ["src/platform/packages/shared/kbn-flot-charts"],
       "@kbn/flot-charts/*": ["src/platform/packages/shared/kbn-flot-charts/*"],
+      "@kbn/flyout": ["x-pack/solutions/security/packages/flyout"],
+      "@kbn/flyout/*": ["x-pack/solutions/security/packages/flyout/*"],
       "@kbn/flyout-system-example-plugin": ["examples/flyout_system"],
       "@kbn/flyout-system-example-plugin/*": ["examples/flyout_system/*"],
       "@kbn/foo-plugin": ["x-pack/platform/test/ui_capabilities/common/plugins/foo_plugin"],

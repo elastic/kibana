@@ -16,6 +16,11 @@ import { InPortal } from 'react-reverse-portal';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import { useFlyoutApi } from '@kbn/flyout';
+import {
+  DocumentDetailsLeftPanelKeyV2,
+  DocumentDetailsRightPanelKeyV2,
+} from '../../../../../flyoutV2/document_details/shared/constants/panel_keys';
 import { useFetchNotes } from '../../../../../notes/hooks/use_fetch_notes';
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -170,6 +175,8 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   const onUpdatePageIndex = useCallback((newPageIndex: number) => setPageIndex(newPageIndex), []);
 
   const { openFlyout } = useExpandableFlyoutApi();
+  const { openFlyout: openFlyoutV2 } = useFlyoutApi();
+  const newFlyoutEnabled = useIsExperimentalFeatureEnabled('newFlyout');
 
   const onToggleShowNotes = useCallback(
     (eventId?: string) => {
@@ -178,27 +185,54 @@ export const EqlTabContentComponent: React.FC<Props> = ({
       }
 
       const indexName = selectedPatterns.join(',');
-      openFlyout({
-        right: {
-          id: DocumentDetailsRightPanelKey,
-          params: {
-            id: eventId,
-            indexName,
-            scopeId: timelineId,
+      if (newFlyoutEnabled) {
+        openFlyoutV2(
+          {
+            main: {
+              id: DocumentDetailsRightPanelKeyV2,
+              params: {
+                id: eventId,
+                indexName,
+                scopeId: timelineId,
+              },
+            },
+            child: {
+              id: DocumentDetailsLeftPanelKeyV2,
+              path: {
+                tab: LeftPanelNotesTab,
+              },
+              params: {
+                id: eventId,
+                indexName,
+                scopeId: timelineId,
+              },
+            },
           },
-        },
-        left: {
-          id: DocumentDetailsLeftPanelKey,
-          path: {
-            tab: LeftPanelNotesTab,
+          { mainSize: 's', childSize: 'm' }
+        );
+      } else {
+        openFlyout({
+          right: {
+            id: DocumentDetailsRightPanelKey,
+            params: {
+              id: eventId,
+              indexName,
+              scopeId: timelineId,
+            },
           },
-          params: {
-            id: eventId,
-            indexName,
-            scopeId: timelineId,
+          left: {
+            id: DocumentDetailsLeftPanelKey,
+            path: {
+              tab: LeftPanelNotesTab,
+            },
+            params: {
+              id: eventId,
+              indexName,
+              scopeId: timelineId,
+            },
           },
-        },
-      });
+        });
+      }
       telemetry.reportEvent(NotesEventTypes.OpenNoteInExpandableFlyoutClicked, {
         location: timelineId,
       });
@@ -207,7 +241,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
         panel: 'left',
       });
     },
-    [openFlyout, selectedPatterns, telemetry, timelineId]
+    [selectedPatterns, newFlyoutEnabled, telemetry, timelineId, openFlyoutV2, openFlyout]
   );
 
   const leadingControlColumns = useTimelineControlColumn({

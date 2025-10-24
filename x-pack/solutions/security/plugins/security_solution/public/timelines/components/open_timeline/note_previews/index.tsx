@@ -21,6 +21,8 @@ import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useFlyoutApi } from '@kbn/flyout';
+import { DocumentDetailsRightPanelKeyV2 } from '../../../../flyoutV2/document_details/shared/constants/panel_keys';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -68,23 +70,46 @@ const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps>
 
   const { telemetry } = useKibana().services;
   const { openFlyout } = useExpandableFlyoutApi();
+  const { openFlyout: openFlyoutV2 } = useFlyoutApi();
+  const newFlyoutEnabled = useIsExperimentalFeatureEnabled('newFlyout');
 
   const handleClick = useCallback(() => {
-    openFlyout({
-      right: {
-        id: DocumentDetailsRightPanelKey,
-        params: {
-          id: eventId,
-          indexName: selectedPatterns.join(','),
-          scopeId: timelineId,
+    if (newFlyoutEnabled) {
+      openFlyoutV2({
+        main: {
+          id: DocumentDetailsRightPanelKeyV2,
+          params: {
+            id: eventId,
+            indexName: selectedPatterns.join(','),
+            scopeId: timelineId,
+          },
         },
-      },
-    });
+      });
+    } else {
+      openFlyout({
+        right: {
+          id: DocumentDetailsRightPanelKey,
+          params: {
+            id: eventId,
+            indexName: selectedPatterns.join(','),
+            scopeId: timelineId,
+          },
+        },
+      });
+    }
     telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
       location: timelineId,
       panel: 'right',
     });
-  }, [eventId, openFlyout, selectedPatterns, telemetry, timelineId]);
+  }, [
+    eventId,
+    newFlyoutEnabled,
+    openFlyout,
+    openFlyoutV2,
+    selectedPatterns,
+    telemetry,
+    timelineId,
+  ]);
 
   return (
     <EuiButtonIcon

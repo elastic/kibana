@@ -10,6 +10,9 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { EuiButtonIcon } from '@elastic/eui';
 import type { Alert } from '@kbn/alerting-types';
 import { i18n } from '@kbn/i18n';
+import { useFlyoutApi } from '@kbn/flyout';
+import { EasePanelKeyV2 } from '../../../../flyoutV2/ease/constants/panel_keys';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { EasePanelKey } from '../../../../flyout/ease/constants/panel_keys';
 
 export const ROW_ACTION_FLYOUT_ICON_TEST_ID = 'alert-summary-table-row-action-flyout-icon';
@@ -26,8 +29,20 @@ export interface ActionsCellProps {
  */
 export const OpenFlyoutRowControlColumn = memo(({ alert }: ActionsCellProps) => {
   const { openFlyout } = useExpandableFlyoutApi();
-  const onOpenFlyout = useCallback(
-    () =>
+  const { openFlyout: openFlyoutV2 } = useFlyoutApi();
+  const newFlyoutEnabled = useIsExperimentalFeatureEnabled('newFlyout');
+  const onOpenFlyout = useCallback(() => {
+    if (newFlyoutEnabled) {
+      openFlyoutV2({
+        main: {
+          id: EasePanelKeyV2,
+          params: {
+            id: alert._id,
+            indexName: alert._index,
+          },
+        },
+      });
+    } else {
       openFlyout({
         right: {
           id: EasePanelKey,
@@ -36,9 +51,9 @@ export const OpenFlyoutRowControlColumn = memo(({ alert }: ActionsCellProps) => 
             indexName: alert._index,
           },
         },
-      }),
-    [alert, openFlyout]
-  );
+      });
+    }
+  }, [alert._id, alert._index, newFlyoutEnabled, openFlyout, openFlyoutV2]);
 
   return (
     <EuiButtonIcon

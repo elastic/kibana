@@ -12,6 +12,10 @@ import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { CaseViewAlertsTableProps } from '@kbn/cases-plugin/public/components/case_view/types';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { useFlyoutApi } from '@kbn/flyout';
+import { EasePanelKeyV2 } from '../../flyoutV2/ease/constants/panel_keys';
+import { RulePanelKeyV2 } from '../../flyoutV2/rule_details/right';
+import { DocumentDetailsRightPanelKeyV2 } from '../../flyoutV2/document_details/shared/constants/panel_keys';
 import { EasePanelKey } from '../../flyout/ease/constants/panel_keys';
 import { AlertsTable } from '../../detections/components/alerts_table';
 import { CaseDetailsRefreshContext } from '../../common/components/endpoint';
@@ -39,6 +43,7 @@ import { DocumentEventTypes } from '../../common/lib/telemetry';
 import { EaseAlertsTable } from '../components/ease/wrapper';
 import { EventsTableForCases } from '../components/case_events/table';
 import { CASES_FEATURES } from '..';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 const CaseContainerComponent: React.FC = () => {
   const {
@@ -50,6 +55,8 @@ const CaseContainerComponent: React.FC = () => {
   const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
   const dispatch = useDispatch();
   const { openFlyout } = useExpandableFlyoutApi();
+  const { openFlyout: openFlyoutV2 } = useFlyoutApi();
+  const newFlyoutEnabled = useIsExperimentalFeatureEnabled('newFlyout');
   const {
     timelinePrivileges: { read: canSeeTimeline },
   } = useUserPrivileges();
@@ -64,33 +71,58 @@ const CaseContainerComponent: React.FC = () => {
     (alertId: string, index: string) => {
       //  For EASE we need to show the AI alert flyout.
       if (EASE) {
-        openFlyout({
-          right: {
-            id: EasePanelKey,
-            params: {
-              id: alertId,
-              indexName: index,
+        if (newFlyoutEnabled) {
+          openFlyoutV2({
+            main: {
+              id: EasePanelKeyV2,
+              params: {
+                id: alertId,
+                indexName: index,
+              },
             },
-          },
-        });
+          });
+        } else {
+          openFlyout({
+            right: {
+              id: EasePanelKey,
+              params: {
+                id: alertId,
+                indexName: index,
+              },
+            },
+          });
+        }
       } else {
-        openFlyout({
-          right: {
-            id: DocumentDetailsRightPanelKey,
-            params: {
-              id: alertId,
-              indexName: index,
-              scopeId: TimelineId.casePage,
+        if (newFlyoutEnabled) {
+          openFlyoutV2({
+            main: {
+              id: DocumentDetailsRightPanelKeyV2,
+              params: {
+                id: alertId,
+                indexName: index,
+                scopeId: TimelineId.casePage,
+              },
             },
-          },
-        });
+          });
+        } else {
+          openFlyout({
+            right: {
+              id: DocumentDetailsRightPanelKey,
+              params: {
+                id: alertId,
+                indexName: index,
+                scopeId: TimelineId.casePage,
+              },
+            },
+          });
+        }
         telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
           location: TimelineId.casePage,
           panel: 'right',
         });
       }
     },
-    [EASE, openFlyout, telemetry]
+    [EASE, newFlyoutEnabled, openFlyout, openFlyoutV2, telemetry]
   );
 
   const renderAlertsTable = useCallback(
@@ -108,10 +140,14 @@ const CaseContainerComponent: React.FC = () => {
   const onRuleDetailsClick = useCallback(
     (ruleId: string | null | undefined) => {
       if (ruleId) {
-        openFlyout({ right: { id: RulePanelKey, params: { ruleId } } });
+        if (newFlyoutEnabled) {
+          openFlyoutV2({ main: { id: RulePanelKeyV2, params: { ruleId } } });
+        } else {
+          openFlyout({ right: { id: RulePanelKey, params: { ruleId } } });
+        }
       }
     },
-    [openFlyout]
+    [newFlyoutEnabled, openFlyout, openFlyoutV2]
   );
 
   const { onLoad: onAlertsTableLoaded } = useFetchNotes();

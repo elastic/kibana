@@ -6,22 +6,24 @@
  */
 import React, { useState } from 'react';
 import {
-  useEuiTheme,
-  EuiPanel,
-  EuiFlexGroup,
-  EuiText,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiHorizontalRule,
-  EuiButtonEmpty,
   EuiBasicTable,
-  EuiProgress,
+  EuiButtonEmpty,
   EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiPanel,
+  EuiProgress,
+  EuiSpacer,
+  EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
+import { useFlyoutApi } from '@kbn/flyout';
+import { UserPanelKeyV2 } from '../../../../../flyoutV2/entity_details/shared/constants';
 import { InspectButtonContainer } from '../../../../../common/components/inspect';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../../../common/components/page/manage_query';
@@ -31,6 +33,7 @@ import { UserPanelKey } from '../../../../../flyout/entity_details/shared/consta
 import { buildPrivilegedUsersTableColumns } from './columns';
 import { HeaderSection } from '../../../../../common/components/header_section';
 import { usePrivilegedUsersTableData } from './hooks';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 
 export const DEFAULT_PAGE_SIZE = 10;
 
@@ -45,18 +48,33 @@ const PRIVILEGED_USERS_TABLE_ID = 'PrivilegedUsers-table';
 
 const useOpenUserFlyout = () => {
   const { openFlyout } = useExpandableFlyoutApi();
+  const { openFlyout: openFlyoutV2 } = useFlyoutApi();
+  const newFlyoutEnabled = useIsExperimentalFeatureEnabled('newFlyout');
 
   return (userName: string) => {
-    openFlyout({
-      right: {
-        id: UserPanelKey,
-        params: {
-          contextID: PRIVILEGED_USERS_TABLE_ID,
-          userName,
-          scopeId: PRIVILEGED_USERS_TABLE_ID,
+    if (newFlyoutEnabled) {
+      openFlyoutV2({
+        main: {
+          id: UserPanelKeyV2,
+          params: {
+            contextID: PRIVILEGED_USERS_TABLE_ID,
+            userName,
+            scopeId: PRIVILEGED_USERS_TABLE_ID,
+          },
         },
-      },
-    });
+      });
+    } else {
+      openFlyout({
+        right: {
+          id: UserPanelKey,
+          params: {
+            contextID: PRIVILEGED_USERS_TABLE_ID,
+            userName,
+            scopeId: PRIVILEGED_USERS_TABLE_ID,
+          },
+        },
+      });
+    }
   };
 };
 

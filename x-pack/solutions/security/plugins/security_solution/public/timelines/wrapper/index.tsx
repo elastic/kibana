@@ -6,10 +6,11 @@
  */
 
 import { EuiFocusTrap, EuiWindowEvent, keys } from '@elastic/eui';
-import React, { useMemo, useCallback, useRef } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import type { AppLeaveHandler } from '@kbn/core/public';
 import { useDispatch } from 'react-redux';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useFlyoutApi } from '@kbn/flyout';
 import { TimelineModal } from '../components/modal';
 import type { TimelineId } from '../../../common/types';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
@@ -18,6 +19,7 @@ import { getTimelineShowStatusByIdSelector } from '../store/selectors';
 import { useTimelineSavePrompt } from '../../common/hooks/timeline/use_timeline_save_prompt';
 import { timelineActions } from '../store';
 import { isTimelineFlyoutOpen } from '../../flyout/document_details/shared/hooks/use_which_flyout';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 interface TimelineWrapperProps {
   /**
@@ -45,6 +47,8 @@ export const TimelineWrapper: React.FC<TimelineWrapperProps> = React.memo(
       dispatch(timelineActions.showTimeline({ id: timelineId, show: false }));
     }, [dispatch, timelineId]);
     const { closeFlyout } = useExpandableFlyoutApi();
+    const { closeFlyout: closeFlyoutV2 } = useFlyoutApi();
+    const newFlyoutEnabled = useIsExperimentalFeatureEnabled('newFlyout');
 
     // pressing the ESC key closes the timeline portal unless a flyout is opened on top of it
     const onKeyDown = useCallback(
@@ -54,7 +58,11 @@ export const TimelineWrapper: React.FC<TimelineWrapperProps> = React.memo(
           const timelineFlyoutOpen = isTimelineFlyoutOpen(query);
 
           if (timelineFlyoutOpen) {
-            closeFlyout();
+            if (newFlyoutEnabled) {
+              closeFlyoutV2();
+            } else {
+              closeFlyout();
+            }
             return;
           }
           handleClose();

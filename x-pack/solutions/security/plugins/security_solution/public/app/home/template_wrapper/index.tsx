@@ -7,14 +7,16 @@
 
 import React, { type ReactNode, useMemo } from 'react';
 import styled from 'styled-components';
-import { EuiThemeProvider, useEuiTheme, type EuiThemeComputed } from '@elastic/eui';
+import { type EuiThemeComputed, EuiThemeProvider, useEuiTheme } from '@elastic/eui';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { AlertsContextProvider } from '../../../detections/components/alerts_table/alerts_context';
 import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
 import { SecuritySolutionFlyout, TimelineFlyout } from '../../../flyout';
+import { SecuritySolutionFlyoutV2 } from '../../../flyoutV2';
 import { useSecuritySolutionNavigation } from '../../../common/components/navigation/use_security_solution_navigation';
 import { TimelineId } from '../../../../common/types/timeline';
 import { getTimelineShowStatusByIdSelector } from '../../../timelines/store/selectors';
@@ -64,6 +66,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateW
     );
     const [routeProps] = useRouteSpy();
     const isPreview = routeProps?.pageName === SecurityPageName.rulesCreate;
+    const newFlyoutEnabled = useIsExperimentalFeatureEnabled('newFlyout');
 
     // The bottomBar by default has a set 'dark' colorMode that doesn't match the global colorMode from the Advanced Settings
     // To keep the mode in sync, we pass in the globalColorMode to the bottom bar here
@@ -102,7 +105,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateW
               <AlertsContextProvider>
                 <ExpandableFlyoutProvider urlKey={isPreview ? undefined : URL_PARAM_KEY.flyout}>
                   {children}
-                  <SecuritySolutionFlyout />
+                  {newFlyoutEnabled ? <SecuritySolutionFlyoutV2 /> : <SecuritySolutionFlyout />}
                 </ExpandableFlyoutProvider>
               </AlertsContextProvider>
             </KibanaPageTemplate.Section>
@@ -111,7 +114,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateW
                 <EuiThemeProvider colorMode={globalColorMode}>
                   <ExpandableFlyoutProvider urlKey={URL_PARAM_KEY.timelineFlyout}>
                     <Timeline />
-                    <TimelineFlyout />
+                    {!newFlyoutEnabled && <TimelineFlyout />}
                   </ExpandableFlyoutProvider>
                 </EuiThemeProvider>
               </KibanaPageTemplate.BottomBar>

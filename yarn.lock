@@ -2650,15 +2650,6 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui-theme-common@7.0.0":
-  version "7.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-7.0.0.tgz#9550ea1b575f0e3052a6f40977e686d9ea44a9f0"
-  integrity sha512-zt4F4wwlUUaAV38B2ESbVUL5AMeGHozq7Xw2tYBgz/FXkYGGTMBsLIwBm7lPipEGjQ7N7Nkjff9l3h635yLdrQ==
-  dependencies:
-    "@types/lodash" "^4.14.202"
-    chroma-js "^2.4.2"
-    lodash "^4.17.21"
-
 "@elastic/eui@file:./elastic_eui_108.0.0_feat_flyout_system_0036.tgz":
   version "108.0.0"
   resolved "file:./elastic_eui_108.0.0_feat_flyout_system_0036.tgz#6f0b77fb1e08dfd3bd3afa32859185f16342d084"
@@ -6748,6 +6739,10 @@
   uid ""
 
 "@kbn/flyout-system-example-plugin@link:examples/flyout_system":
+  version "0.0.0"
+  uid ""
+
+"@kbn/flyout@link:x-pack/solutions/security/packages/flyout":
   version "0.0.0"
   uid ""
 

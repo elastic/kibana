@@ -37,8 +37,11 @@ import { AlertContextMenu } from '../../../detections/components/alerts_table/ti
 import { InvestigateInTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
 import * as i18n from './translations';
 import { DEFAULT_ACTION_BUTTON_WIDTH, isAlert } from './helpers';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { useNavigateToAnalyzer } from '../../../flyout/document_details/shared/hooks/use_navigate_to_analyzer';
+import { useNavigateToAnalyzer as useNavigateToAnalyzerV2 } from '../../../flyoutV2/document_details/shared/hooks/use_navigate_to_analyzer';
 import { useNavigateToSessionView } from '../../../flyout/document_details/shared/hooks/use_navigate_to_session_view';
+import { useNavigateToSessionView as useNavigateToSessionViewV2 } from '../../../flyoutV2/document_details/shared/hooks/use_navigate_to_session_view';
 
 const ActionsContainer = styled.div`
   align-items: center;
@@ -63,6 +66,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
   disablePinAction = true,
   disableTimelineAction = false,
 }) => {
+  const newFlyoutEnabled = useIsExperimentalFeatureEnabled('newFlyout');
   const dispatch = useDispatch();
 
   const { timelineType, savedObjectId } = useShallowEqualSelector((state) =>
@@ -100,8 +104,19 @@ const ActionsComponent: React.FC<ActionProps> = ({
     indexName: ecsData._index,
     scopeId: timelineId,
   });
+  const { navigateToAnalyzer: navigateToAnalyzerV2 } = useNavigateToAnalyzerV2({
+    eventId,
+    indexName: ecsData._index,
+    scopeId: timelineId,
+  });
 
   const { navigateToSessionView } = useNavigateToSessionView({
+    isFlyoutOpen: false,
+    eventId,
+    indexName: ecsData._index,
+    scopeId: timelineId,
+  });
+  const { navigateToSessionView: navigateToSessionViewV2 } = useNavigateToSessionViewV2({
     isFlyoutOpen: false,
     eventId,
     indexName: ecsData._index,
@@ -110,8 +125,12 @@ const ActionsComponent: React.FC<ActionProps> = ({
 
   const handleClick = useCallback(() => {
     startTransaction({ name: ALERTS_ACTIONS.OPEN_ANALYZER });
-    navigateToAnalyzer();
-  }, [startTransaction, navigateToAnalyzer]);
+    if (newFlyoutEnabled) {
+      navigateToAnalyzerV2();
+    } else {
+      navigateToAnalyzer();
+    }
+  }, [navigateToAnalyzer, navigateToAnalyzerV2, newFlyoutEnabled, startTransaction]);
 
   const sessionViewConfig = useMemo(() => {
     const { process, _id, _index, timestamp, kibana } = ecsData;
@@ -140,8 +159,12 @@ const ActionsComponent: React.FC<ActionProps> = ({
 
   const openSessionView = useCallback(() => {
     startTransaction({ name: ALERTS_ACTIONS.OPEN_SESSION_VIEW });
-    navigateToSessionView();
-  }, [navigateToSessionView, startTransaction]);
+    if (newFlyoutEnabled) {
+      navigateToSessionViewV2();
+    } else {
+      navigateToSessionView();
+    }
+  }, [navigateToSessionView, navigateToSessionViewV2, newFlyoutEnabled, startTransaction]);
 
   const onExpandEvent = useCallback(() => {
     onEventDetailsPanelOpened();
