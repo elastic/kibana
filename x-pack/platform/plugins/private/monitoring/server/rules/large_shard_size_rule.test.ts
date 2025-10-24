@@ -11,7 +11,6 @@ import { fetchIndexShardSize } from '../lib/alerts/fetch_index_shard_size';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { ALERT_REASON, ALERT_STATE_NAMESPACE } from '@kbn/rule-data-utils';
-import { P } from 'oas/dist/extensions-ViDsWf_9.cjs';
 
 type ILargeShardSizeRuleMock = LargeShardSizeRule & {
   defaultParams: {
