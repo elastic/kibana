@@ -185,6 +185,7 @@ describe('Initializing the store', () => {
           visualization: {
             activeId: 'testVis',
             state: {},
+            selectedLayerId: null,
           },
           activeDatasourceId: 'testDatasource',
           datasourceStates: {
@@ -204,6 +205,7 @@ describe('Initializing the store', () => {
           visualization: {
             state: 'testVis initial state', // new vis gets initialized
             activeId: 'testVis',
+            selectedLayerId: null,
           },
           activeDatasourceId: 'testDatasource2', // resets to first on the list
           datasourceStates: {
