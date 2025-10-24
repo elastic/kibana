@@ -16,10 +16,10 @@ import type {
   DatasourceMap,
   DocumentToExpressionReturnType,
   LensDocument,
+  LensAttributesService,
 } from '@kbn/lens-common';
 import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 import type { RecursiveReadonly } from '@kbn/utility-types';
-import type { LensAttributesService } from '../lens_attribute_service';
 import type { LensPluginStartDependencies } from '../plugin';
 
 export type LensEmbeddableStartServices = Simplify<

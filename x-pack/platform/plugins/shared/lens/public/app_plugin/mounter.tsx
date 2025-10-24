@@ -37,6 +37,7 @@ import type {
   LensAppServices,
   EditorFrameStart,
   LensTopNavMenuEntryGenerator,
+  LensAttributesService,
 } from '@kbn/lens-common';
 import { LENS_SHARE_STATE_ACTION } from '@kbn/lens-common';
 import { App } from './app';
@@ -49,7 +50,6 @@ import { makeConfigureStore, navigateAway, loadInitial, setState } from '../stat
 import { getPreloadedState } from '../state_management/lens_slice';
 import { getLensInspectorService } from '../lens_inspector_service';
 import { LensDocumentService } from '../persistence';
-import type { LensAttributesService } from '../lens_attribute_service';
 import type { LensPluginStartDependencies } from '../plugin';
 import { EditorFrameServiceProvider } from '../editor_frame_service/editor_frame_service_context';
 
