@@ -29,6 +29,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { difference, intersection, isEqual } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { memoize } from 'lodash';
 import { RowColumnCreator } from './row_column_creator';
 import { getColumnInputRenderer } from './grid_custom_renderers/column_input_renderer';
 import { type KibanaContextExtra } from '../types';
@@ -170,13 +171,15 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       (acc, columnName, columnIndex) => {
         if (!props.dataView.fields.getByName(columnName)) {
           const editMode = columnBeingEdited === columnIndex;
-          acc[columnName] = getColumnInputRenderer(
-            columnName,
-            columnIndex,
-            editMode,
-            setColumnBeingEdited,
-            indexUpdateService,
-            indexEditorTelemetryService
+          acc[columnName] = memoize(
+            getColumnInputRenderer(
+              columnName,
+              columnIndex,
+              editMode,
+              setColumnBeingEdited,
+              indexUpdateService,
+              indexEditorTelemetryService
+            )
           );
         } else {
           acc[columnName] = (customGridColumnProps: CustomGridColumnProps) => ({

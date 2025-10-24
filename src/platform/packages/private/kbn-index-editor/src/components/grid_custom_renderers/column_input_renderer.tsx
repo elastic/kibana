@@ -26,7 +26,7 @@ import type { IndexUpdateService } from '../../index_update_service';
 import { useAddColumnName, errorMessages } from '../../hooks/use_add_column_name';
 import type { IndexEditorTelemetryService } from '../../telemetry/telemetry_service';
 
-const COLUMN_INDEX_PROP = 'data-header-index';
+const COLUMN_INDEX_PROP = 'data-column-index';
 
 export const getColumnInputRenderer = (
   columnName: string,
