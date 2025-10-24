@@ -49,6 +49,7 @@ interface ScheduleConfigOutput extends ScheduleConfigInput {
 
 interface ScheduleGroup {
   configs: ScheduleConfigOutput[];
+  machine: ScheduleMachineOptions;
 }
 
 interface ScheduleResponse {
@@ -63,10 +64,7 @@ const MEMORY_PER_CPU_MB_BY_PROFILE: Record<string, number> = {
 
 const CONFIG_DURATION_REQUEST_CONCURRENCY = 10;
 
-function createMachineDefinitions(
-  queueName: string,
-  machineCount: number
-): ScheduleMachineOptions[] {
+function createMachineDefinition(queueName: string): ScheduleMachineOptions {
   const agentOptions = expandAgentQueue(queueName);
   const machineType = agentOptions.machineType;
 
@@ -92,16 +90,11 @@ function createMachineDefinitions(
     MEMORY_PER_CPU_MB_BY_PROFILE[profileToken ?? 'standard'] ??
     MEMORY_PER_CPU_MB_BY_PROFILE.standard;
 
-  const machineDefinition: ScheduleMachineOptions = {
+  return {
     name: machineType,
     cpus: cpuCount,
     memoryMb: cpuCount * memoryPerCpu,
   };
-
-  return Array.from({ length: machineCount }, (_, idx) => ({
-    ...machineDefinition,
-    name: `${machineType}-${idx + 1}`,
-  }));
 }
 
 async function mapWithConcurrency<T, R>(
@@ -673,7 +666,6 @@ export async function pickTestGroupRunOrder() {
         throw new Error('Unable to resolve queue for functional test scheduling');
       }
 
-      const machineCount = Math.max(runGroup.count, 1);
       const groupTemplate: Omit<PickTestGroupRunOrderGroup, 'names'> = {
         type: FUNCTIONAL_TYPE,
         queue: resolvedQueue,
@@ -694,7 +686,7 @@ export async function pickTestGroupRunOrder() {
         continue;
       }
 
-      const machines = createMachineDefinitions(resolvedQueue, machineCount);
+      const machineType = createMachineDefinition(resolvedQueue);
 
       let scheduleResponse: ScheduleResponse;
 
@@ -702,7 +694,7 @@ export async function pickTestGroupRunOrder() {
         scheduleResponse = await runScheduleScript({
           configs: scheduleInputs,
           maxDurationMins: FUNCTIONAL_MAX_MINUTES,
-          machines,
+          machines: [machineType],
         });
       } catch (error) {
         const err = error instanceof Error ? error : new Error(String(error));

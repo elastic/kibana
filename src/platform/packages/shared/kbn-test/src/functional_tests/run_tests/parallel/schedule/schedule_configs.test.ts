@@ -101,7 +101,7 @@ describe('scheduleConfigs', () => {
     expect(primary.configs.map((config) => config.path)).toEqual([CONFIG_A_PATH]);
     expect(primary.configs[0].tooLong).toBe(true);
 
-    expect(secondary.machine.name).toBe('machine-2');
+    expect(secondary.machine.name).toBe('machine-1');
     expect(secondary.configs.map((config) => config.path)).toEqual([CONFIG_B_PATH, CONFIG_C_PATH]);
     expect(secondary.configs.every((config) => config.tooLong === false)).toBe(true);
   });

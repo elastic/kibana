@@ -23,7 +23,7 @@ import type {
 } from './types';
 
 interface MachineState {
-  machine: ScheduleConfigOptions['machines'][number];
+  machineType: ScheduleConfigOptions['machines'][number];
   configs: ScheduleConfigOutput[];
   totalDuration: number;
   index: number;
@@ -94,7 +94,7 @@ export async function scheduleConfigs({
     // Try to pack into existing runtime instances of eligible types. Prefer
     // filling larger types first.
     const eligibleInstances = machineStates.filter((state) =>
-      canRunConfigOnMachine(state.machine, configOutput.resources)
+      canRunConfigOnMachine(state.machineType, configOutput.resources)
     );
 
     const machinesWithinLimit = eligibleInstances.filter(
@@ -102,16 +102,15 @@ export async function scheduleConfigs({
     );
 
     const preferPacking = machinesWithinLimit.length > 0;
-    const candidatePool = preferPacking ? machinesWithinLimit : eligibleInstances;
 
     function candidateComparator(a: MachineState, b: MachineState): number {
       // prefer larger machines first
-      if (a.machine.cpus !== b.machine.cpus) {
-        return b.machine.cpus - a.machine.cpus;
+      if (a.machineType.cpus !== b.machineType.cpus) {
+        return b.machineType.cpus - a.machineType.cpus;
       }
 
-      if (a.machine.memoryMb !== b.machine.memoryMb) {
-        return b.machine.memoryMb - a.machine.memoryMb;
+      if (a.machineType.memoryMb !== b.machineType.memoryMb) {
+        return b.machineType.memoryMb - a.machineType.memoryMb;
       }
 
       // when packing prefer machines with more already assigned work (fill them up)
@@ -124,7 +123,11 @@ export async function scheduleConfigs({
       return a.index - b.index;
     }
 
-    let selectedMachine = candidatePool.slice().sort(candidateComparator)[0];
+    // Only pack into existing instances if they stay within the duration limit.
+    // Otherwise create a new instance.
+    let selectedMachine = preferPacking
+      ? machinesWithinLimit.slice().sort(candidateComparator)[0]
+      : undefined;
 
     // If no existing instance could be used, create a new instance on the
     // largest eligible type.
@@ -134,11 +137,7 @@ export async function scheduleConfigs({
       typeInstanceCounters.set(chosenType.name, nextCount);
 
       const newInstance: MachineState = {
-        machine: {
-          name: `${chosenType.name}-${nextCount}`,
-          cpus: chosenType.cpus,
-          memoryMb: chosenType.memoryMb,
-        },
+        machineType: chosenType,
         configs: [],
         totalDuration: 0,
         index: machineStates.length,
@@ -158,7 +157,7 @@ export async function scheduleConfigs({
 
   const groups: ScheduleConfigTestGroup[] = machineStates.map((state) => ({
     configs: state.configs,
-    machine: state.machine,
+    machine: state.machineType,
   }));
 
   return { groups };
