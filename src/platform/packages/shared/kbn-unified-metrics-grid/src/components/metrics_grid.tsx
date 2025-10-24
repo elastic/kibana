@@ -92,7 +92,7 @@ export const MetricsGrid = ({
   }, []);
 
   const handleCloseFlyout = useCallback(() => {
-    if (expandedMetric === undefined) {
+    if (!expandedMetric) {
       return;
     }
 
