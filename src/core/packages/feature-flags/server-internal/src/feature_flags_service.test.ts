@@ -335,4 +335,79 @@ describe('FeatureFlagsService Server', () => {
       expect(mockGetter).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('master flag integration', () => {
+    let startContract: FeatureFlagsStart;
+
+    beforeEach(() => {
+      featureFlagsService.setup();
+      startContract = featureFlagsService.start();
+    });
+
+    test('respects master flag when no override exists', async () => {
+      config$.next({
+        overrides: {},
+        enableAllFlags: true,
+      });
+
+      const value = await startContract.getBooleanValue('my-flag', false);
+      expect(value).toBe(true);
+    });
+
+    test('overrides take precedence over master flag', async () => {
+      config$.next({
+        overrides: { 'my-flag': false },
+        enableAllFlags: true,
+      });
+
+      const value = await startContract.getBooleanValue('my-flag', false);
+      expect(value).toBe(false);
+    });
+
+    test('master flag only applies to boolean flags', async () => {
+      config$.next({
+        overrides: {},
+        enableAllFlags: true,
+      });
+
+      // String flags should not be affected by master flag
+      const stringValue = await startContract.getStringValue('my-string-flag', 'default');
+      expect(stringValue).toBe('default');
+
+      // Number flags should not be affected by master flag
+      const numberValue = await startContract.getNumberValue('my-number-flag', 42);
+      expect(numberValue).toBe(42);
+    });
+
+    test('precedence: overrides > master flag > provider evaluation', async () => {
+      const getBooleanValueSpy = jest.spyOn(featureFlagsClient, 'getBooleanValue');
+
+      // Test 1: Override should win
+      config$.next({
+        overrides: { 'test-flag': false },
+        enableAllFlags: true,
+      });
+      let value = await startContract.getBooleanValue('test-flag', true);
+      expect(value).toBe(false);
+      expect(getBooleanValueSpy).not.toHaveBeenCalled();
+
+      // Test 2: Master flag should win when no override
+      config$.next({
+        overrides: {},
+        enableAllFlags: false,
+      });
+      value = await startContract.getBooleanValue('test-flag', true);
+      expect(value).toBe(false);
+      expect(getBooleanValueSpy).not.toHaveBeenCalled();
+
+      // Test 3: Provider should be called when no override and no master flag
+      config$.next({
+        overrides: {},
+        enableAllFlags: null as any,
+      });
+      value = await startContract.getBooleanValue('test-flag', true);
+      expect(value).toBe(true);
+      expect(getBooleanValueSpy).toHaveBeenCalledWith('test-flag', true);
+    });
+  });
 });
