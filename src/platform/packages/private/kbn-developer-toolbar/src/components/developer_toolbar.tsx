@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
+  EuiPortal,
+  EuiIcon,
   EuiThemeProvider,
   EuiToolTip,
   useEuiTheme,
@@ -37,11 +39,40 @@ export interface DeveloperToolbarProps {
 
 const HEIGHT = 32;
 
-const getMinimizedToolbarStyles = (euiTheme: EuiThemeComputed) => css`
-  position: fixed;
-  bottom: ${euiTheme.size.xs};
-  right: ${euiTheme.size.s};
-  z-index: ${euiTheme.levels.toast};
+type DragPosition = { top: number; left: number } | null;
+
+const POSITION_STORAGE_KEY = 'kbn_developer_toolbar_minimized_position';
+
+const getMinimizedToolbarStyles = (euiTheme: EuiThemeComputed, position: DragPosition) => [
+  css`
+    position: fixed;
+    z-index: ${euiTheme.levels.toast};
+  `,
+  position
+    ? css`
+        top: ${position.top}px;
+        left: ${position.left}px;
+      `
+    : css`
+        bottom: ${euiTheme.size.xs};
+        left: ${euiTheme.size.s};
+      `,
+];
+
+const getMinimizedContentStyles = (euiTheme: EuiThemeComputed) => css`
+  display: flex;
+  align-items: center;
+  gap: ${euiTheme.size.xs};
+  padding: ${euiTheme.size.xs} ${euiTheme.size.s};
+`;
+
+const getDragHandleStyles = (euiTheme: EuiThemeComputed) => css`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  padding: 0 ${euiTheme.size.xs};
+  user-select: none;
 `;
 
 const getToolbarPanelStyles = (euiTheme: EuiThemeComputed) => css`
@@ -71,6 +102,32 @@ const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({ envInfo, on
   const { isMinimized, toggleMinimized } = useMinimized();
   const state = useToolbarState();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [dragPosition, setDragPosition] = useState<DragPosition>(() => {
+    try {
+      const raw = typeof window !== 'undefined' ? window.localStorage.getItem(POSITION_STORAGE_KEY) : null;
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (
+        parsed &&
+        typeof parsed.top === 'number' &&
+        typeof parsed.left === 'number' &&
+        isFinite(parsed.top) &&
+        isFinite(parsed.left)
+      ) {
+        return { top: parsed.top, left: parsed.left };
+      }
+    } catch {}
+    return null;
+  });
+  const dragRef = useRef<HTMLDivElement | null>(null);
+  const dragStateRef = useRef<{
+    startPointerX: number;
+    startPointerY: number;
+    elementStartLeft: number;
+    elementStartTop: number;
+    didDrag: boolean;
+  } | null>(null);
+  const prevIsMinimizedRef = useRef<boolean>(isMinimized);
 
   useEffect(() => {
     if (onHeightChange) {
@@ -81,20 +138,115 @@ const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({ envInfo, on
     }
   }, [onHeightChange, isMinimized]);
 
+  // Reset position to default when transitioning from expanded -> minimized
+  useEffect(() => {
+    if (prevIsMinimizedRef.current === false && isMinimized === true) {
+      setDragPosition(null);
+      try {
+        window.localStorage.removeItem(POSITION_STORAGE_KEY);
+      } catch {}
+    }
+    prevIsMinimizedRef.current = isMinimized;
+  }, [isMinimized]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (!dragRef.current || !dragPosition) return;
+      const rect = dragRef.current.getBoundingClientRect();
+      const clampedLeft = Math.max(0, Math.min(dragPosition.left, window.innerWidth - rect.width));
+      const clampedTop = Math.max(0, Math.min(dragPosition.top, window.innerHeight - rect.height));
+      if (clampedLeft !== dragPosition.left || clampedTop !== dragPosition.top) {
+        const next = { top: clampedTop, left: clampedLeft };
+        setDragPosition(next);
+        try {
+          window.localStorage.setItem(POSITION_STORAGE_KEY, JSON.stringify(next));
+        } catch {}
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [dragPosition]);
+
+  const onPointerDown: React.PointerEventHandler<HTMLDivElement> = (event) => {
+    if (!dragRef.current) return;
+    const rect = dragRef.current.getBoundingClientRect();
+    dragStateRef.current = {
+      startPointerX: event.clientX,
+      startPointerY: event.clientY,
+      elementStartLeft: rect.left,
+      elementStartTop: rect.top,
+      didDrag: false,
+    };
+
+    const onMove = (e: PointerEvent) => {
+      if (!dragStateRef.current || !dragRef.current) return;
+      const deltaX = e.clientX - dragStateRef.current.startPointerX;
+      const deltaY = e.clientY - dragStateRef.current.startPointerY;
+      if (!dragStateRef.current.didDrag) {
+        const distance = Math.hypot(deltaX, deltaY);
+        if (distance < 3) return;
+        dragStateRef.current.didDrag = true;
+      }
+      const rectNow = dragRef.current.getBoundingClientRect();
+      const width = rectNow.width;
+      const height = rectNow.height;
+      const nextLeft = Math.max(
+        0,
+        Math.min(dragStateRef.current.elementStartLeft + deltaX, window.innerWidth - width)
+      );
+      const nextTop = Math.max(
+        0,
+        Math.min(dragStateRef.current.elementStartTop + deltaY, window.innerHeight - height)
+      );
+      const next = { top: Math.round(nextTop), left: Math.round(nextLeft) };
+      setDragPosition(next);
+    };
+
+    const onUp = () => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      const didDrag = !!dragStateRef.current?.didDrag;
+      const finalPosition = dragPosition;
+      dragStateRef.current = null;
+      if (didDrag && finalPosition) {
+        try {
+          window.localStorage.setItem(POSITION_STORAGE_KEY, JSON.stringify(finalPosition));
+        } catch {}
+      }
+    };
+
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp, { once: true } as AddEventListenerOptions);
+  };
+
+  const onExpandClick = () => {
+    if (dragStateRef.current && dragStateRef.current.didDrag) {
+      return;
+    }
+    toggleMinimized();
+  };
+
   if (isMinimized) {
     return (
-      <div css={getMinimizedToolbarStyles(euiTheme)}>
-        <EuiToolTip content="Expand developer toolbar" disableScreenReaderOutput={true}>
-          <EuiButtonIcon
-            display={'fill'}
-            color={'accentSecondary'}
-            iconType="wrench"
-            size="xs"
-            onClick={toggleMinimized}
-            aria-label={'Expand developer toolbar'}
-          />
-        </EuiToolTip>
-      </div>
+      <EuiPortal>
+        <div ref={dragRef} css={getMinimizedToolbarStyles(euiTheme, dragPosition)}>
+          <EuiPanel paddingSize="none" hasShadow={true} hasBorder={true} css={getMinimizedContentStyles(euiTheme)}>
+            <div onPointerDown={onPointerDown} css={getDragHandleStyles(euiTheme)} aria-label="Drag developer toolbar" title="Drag">
+              <EuiIcon type="grabHorizontal" size="m" />
+            </div>
+            <EuiToolTip content="Expand developer toolbar" disableScreenReaderOutput={true}>
+              <EuiButtonIcon
+                display={'fill'}
+                color={'accentSecondary'}
+                iconType="wrench"
+                size="xs"
+                onClick={onExpandClick}
+                aria-label={'Expand developer toolbar'}
+              />
+            </EuiToolTip>
+          </EuiPanel>
+        </div>
+      </EuiPortal>
     );
   }
 
