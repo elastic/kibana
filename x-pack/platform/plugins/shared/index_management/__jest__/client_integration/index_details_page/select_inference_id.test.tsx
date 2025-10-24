@@ -180,8 +180,8 @@ describe('SelectInferenceId', () => {
 
   describe('when ELSER endpoint is available', () => {
     const endpointsMock = [
-      { inference_id: '.elser-2-elasticsearch', task_type: 'sparse_embedding' },
       { inference_id: '.preconfigured-e5', task_type: 'text_embedding' },
+      { inference_id: '.elser-2-elasticsearch', task_type: 'sparse_embedding' },
       { inference_id: 'endpoint-1', task_type: 'text_embedding' },
     ] as InferenceAPIConfigResponse[];
 
