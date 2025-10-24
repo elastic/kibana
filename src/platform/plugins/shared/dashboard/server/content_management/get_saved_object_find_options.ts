@@ -69,7 +69,7 @@ export function getSavedObjectFindOptions(
   return {
     type: DASHBOARD_SAVED_OBJECT_TYPE,
     searchFields: options?.onlyTitle ? ['title'] : ['title^3', 'description'],
-    fields: getSavedObjectFields(options?.fields as DashboardStateKeys[]),
+    fields: getSavedObjectFields((options?.fields ?? []) as DashboardStateKeys[]),
     search: query.text,
     perPage: query.limit,
     page: query.cursor ? +query.cursor : undefined,
