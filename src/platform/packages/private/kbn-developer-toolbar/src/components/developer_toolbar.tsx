@@ -96,7 +96,7 @@ const getDragIconStyles = (euiTheme: EuiThemeComputed) => css`
 // no-op
 
 const getToolbarPanelStyles = (euiTheme: EuiThemeComputed) => css`
-  border-radius: 4px 4px 0 0; // top-left, top-right rounded
+  border-radius: none;
   background-color:rgb(11, 100, 221);
   padding: ${euiTheme.size.xs} ${euiTheme.size.s};
   box-shadow: none; // ensure no top shadow line
