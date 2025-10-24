@@ -14,7 +14,7 @@ import { BehaviorSubject } from 'rxjs';
 import { createDataViewDataSource, createEsqlDataSource } from '../../../../../common/data_sources';
 import type { DataSourceProfileProviderParams, RootContext } from '../../../profiles';
 import { DataSourceCategory, SolutionType } from '../../../profiles';
-import { createContextAwarenessMocks } from '../../../__mocks__';
+import { createProfileProviderSharedServicesMock } from '../../../__mocks__';
 import {
   type LogOverviewContext,
   createLogsDataSourceProfileProvider,
@@ -25,7 +25,7 @@ import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_
 import type { ContextWithProfileId } from '../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
 
-const mockServices = createContextAwarenessMocks().profileProviderServices;
+const mockServices = createProfileProviderSharedServicesMock();
 
 describe('logsDataSourceProfileProvider', () => {
   const logsDataSourceProfileProvider = createLogsDataSourceProfileProvider(mockServices);
