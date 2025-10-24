@@ -20,6 +20,10 @@ import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import { openLazyFlyout } from '@kbn/presentation-util';
+import { Embeddable } from '@kbn/visualizations-plugin/public/legacy/embeddable/embeddable';
+import { executeCreateTimeSliderControlPanelAction } from '../../../dashboard_actions/execute_create_time_slider_control_panel_action';
+import { executeCreateESQLControlPanelAction } from '../../../dashboard_actions/execute_create_esql_control_panel_action copy';
+import { executeCreateControlPanelAction } from '../../../dashboard_actions/execute_create_control_panel_action copy 2';
 import { executeAddLensPanelAction } from '../../../dashboard_actions/execute_add_lens_panel_action';
 import type { DashboardApi } from '../../../dashboard_api/types';
 import { addFromLibrary } from '../../../dashboard_renderer/add_panel_from_library';
@@ -30,6 +34,26 @@ interface AddMenuProps {
   anchorElement: HTMLElement;
   coreServices: CoreStart;
 }
+
+const getControlButtonTitle = () =>
+  i18n.translate('dashboard.solutionToolbar.controlsMenuButtonLabel', {
+    defaultMessage: 'Controls',
+  });
+
+const getAddControlButtonTitle = () =>
+  i18n.translate('dashboard.solutionToolbar.addControlButtonLabel', {
+    defaultMessage: 'Control',
+  });
+
+const getAddESQLControlButtonTitle = () =>
+  i18n.translate('dashboard.solutionToolbar.addESQLControlButtonLabel', {
+    defaultMessage: 'Variable Control',
+  });
+
+const getAddTimeSliderControlButtonTitle = () =>
+  i18n.translate('dashboard.solutionToolbar.addTimeSliderControlButtonLabel', {
+    defaultMessage: 'Time slider control',
+  });
 
 const container = document.createElement('div');
 let isOpen = false;
@@ -46,10 +70,6 @@ function cleanup() {
 export const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuProps) => {
   /** TODO: Set this as part of the timeslider conversion */
   const [hasTimeSliderControl, setHasTimeSliderControl] = useState(false);
-
-  const onSave = () => {
-    dashboardApi.scrollToTop();
-  };
 
   const closePopover = useCallback(() => {
     cleanup();
@@ -104,6 +124,14 @@ export const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuPr
           },
         },
         {
+          name: i18n.translate('dashboard.solutionToolbar.controlsMenuButtonLabel', {
+            defaultMessage: 'Controls',
+          }),
+          icon: 'controlsHorizontal',
+          'data-test-subj': 'dashboard-controls-menu-button',
+          panel: 1,
+        },
+        {
           name: i18n.translate('dashboard.solutionToolbar.addSectionButtonLabel', {
             defaultMessage: 'Collapsible section',
           }),
@@ -125,6 +153,41 @@ export const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuPr
           icon: 'folderOpen',
           onClick: () => {
             addFromLibrary(dashboardApi);
+            closePopover();
+          },
+        },
+      ],
+    },
+    {
+      id: 1,
+      title: getControlButtonTitle(),
+      initialFocusedItemIndex: 0,
+      items: [
+        {
+          name: getAddControlButtonTitle(),
+          icon: 'empty',
+          'data-test-subj': 'controls-create-button',
+          onClick: async () => {
+            await executeCreateControlPanelAction(dashboardApi);
+            closePopover();
+          },
+        },
+        {
+          name: getAddESQLControlButtonTitle(),
+          icon: 'empty',
+          'data-test-subj': 'esql-control-create-button',
+          onClick: async () => {
+            await executeCreateESQLControlPanelAction(dashboardApi);
+            closePopover();
+          },
+        },
+        {
+          name: getAddTimeSliderControlButtonTitle(),
+          icon: 'empty',
+          'data-test-subj': 'controls-create-timeslider-button',
+          disabled: hasTimeSliderControl,
+          onClick: async () => {
+            await executeCreateTimeSliderControlPanelAction(dashboardApi);
             closePopover();
           },
         },
@@ -163,4 +226,7 @@ export function showAddMenu({ dashboardApi, anchorElement, coreServices }: AddMe
     </KibanaContextProvider>,
     container
   );
+}
+function uuidv4() {
+  throw new Error('Function not implemented.');
 }
