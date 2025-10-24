@@ -49,12 +49,22 @@ export const slo: SavedObjectsType = {
         },
       ],
     },
+    2: {
+      changes: [
+        { type: 'mappings_addition', addedMappings: { name_keyword: { type: 'keyword' } } },
+        {
+          type: 'data_backfill',
+          backfillFn: (doc) => ({ attributes: { name_keyword: doc.attributes.name ?? '' } }),
+        },
+      ],
+    },
   },
   mappings: {
     dynamic: false,
     properties: {
       id: { type: 'keyword' },
       name: { type: 'text' },
+      name_keyword: { type: 'keyword' },
       description: { type: 'text' },
       indicator: {
         properties: {
