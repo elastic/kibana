@@ -35,6 +35,7 @@
     "@kbn/code-editor",
     "@kbn/react-kibana-context-render",
     "@kbn/css-utils",
+    "@kbn/visualizations-common",
   ],
   "exclude": [
     "target/**/*",
