@@ -13,9 +13,8 @@ import {
   type MockedICommandCallbacks,
 } from '../../../__tests__/context_fixtures';
 import { autocomplete } from './autocomplete';
-import { expectSuggestions, suggest, getFieldNamesByType } from '../../../__tests__/autocomplete';
+import { expectSuggestions, suggest } from '../../../__tests__/autocomplete';
 import type { ICommandCallbacks } from '../../types';
-import { uniq } from 'lodash';
 import {
   comparisonFunctions,
   patternMatchOperators,
@@ -233,26 +232,21 @@ describe('JOIN Autocomplete', () => {
       await joinExpectSuggestions('FROM index | LOOKUP JOIN join_index ', ['ON '], mockCallbacks);
     });
 
-    test('suggests fields after ON keyword', async () => {
-      const suggestions = await suggest(
+    test('suggests fields and functions after ON keyword', async () => {
+      await joinExpectSuggestions(
         'FROM index | LOOKUP JOIN join_index ON ',
-        mockContext,
-        'join',
-        mockCallbacks,
-        autocomplete
+        {
+          contains: [
+            'textField',
+            'keywordField',
+            'booleanField',
+            'joinIndexOnlyField ',
+            'STARTS_WITH($0)',
+            'CONTAINS($0)',
+          ],
+        },
+        mockCallbacks
       );
-      const labels = suggestions.map(({ text }) => text.trim()).sort();
-      const expected = getFieldNamesByType('any')
-        .sort()
-        .map((field) => field.trim());
-
-      for (const { name } of lookupIndexFields) {
-        expected.push(name.trim());
-      }
-
-      expected.sort();
-
-      expect(labels).toEqual(uniq(expected));
     });
 
     test('suggests fields after comma', async () => {
@@ -298,7 +292,7 @@ describe('JOIN Autocomplete', () => {
     test('suggests boolean operators after IS NULL', async () => {
       await joinExpectSuggestions(
         'FROM index | LOOKUP JOIN join_index ON textField IS NULL ',
-        { contains: ['AND $0', 'OR $0', ',', '| '] },
+        { contains: ['AND $0', 'OR $0', ', ', '| '] },
         mockCallbacks
       );
     });
@@ -333,7 +327,7 @@ describe('JOIN Autocomplete', () => {
       test('suggests logical operators, comma and pipe after complete expression', async () => {
         await joinExpectSuggestions(
           'FROM index | LOOKUP JOIN join_index ON keywordField == "value" ',
-          { contains: [...addPlaceholder(['AND', 'OR']), ',', '| '] },
+          { contains: [...addPlaceholder(['AND', 'OR']), ', ', '| '] },
           mockCallbacks
         );
       });
