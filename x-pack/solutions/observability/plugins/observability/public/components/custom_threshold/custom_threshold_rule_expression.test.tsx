@@ -155,7 +155,7 @@ describe('Expression', () => {
         ],
         comparator: COMPARATORS.GREATER_THAN,
         threshold: [100],
-        timeSize: 1,
+        timeSize: 5,
         timeUnit: 'm',
       },
     ]);
