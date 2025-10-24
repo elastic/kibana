@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { NodeWithErrorCatching } from '../step/node_implementation';
 import type { WorkflowExecutionLoopParams } from './types';
+import type { NodeWithErrorCatching } from '../step/node_implementation';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import { WorkflowScopeStack } from '../workflow_context_manager/workflow_scope_stack';
 
@@ -71,6 +71,7 @@ export async function catchError(
 
     if (failedStepExecutionRuntime.stepExecutionExists()) {
       await failedStepExecutionRuntime.failStep(
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         params.workflowExecutionState.getWorkflowExecution().error!
       );
     }
@@ -82,6 +83,7 @@ export async function catchError(
       const workflowScopeStack = WorkflowScopeStack.fromStackFrames(
         params.workflowExecutionState.getWorkflowExecution().scopeStack
       );
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const scopeEntry = workflowScopeStack.getCurrentScope()!;
       const newWorkflowScopeStack = workflowScopeStack.exitScope();
       params.workflowExecutionState.updateWorkflowExecution({
@@ -111,6 +113,7 @@ export async function catchError(
       if (params.workflowExecutionState.getWorkflowExecution().error) {
         if (stepExecutionRuntime.stepExecutionExists()) {
           await stepExecutionRuntime.failStep(
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             params.workflowExecutionState.getWorkflowExecution().error!
           );
         }

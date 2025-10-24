@@ -9,14 +9,11 @@
 
 import { asyncMap } from '@kbn/std';
 import type { Reference } from '@kbn/content-management-utils';
-import type { DashboardAttributes, DashboardPanel } from '../../../server';
+import type { DashboardState, DashboardPanel } from '../../../server';
 import { getReferencesForPanelId, isDashboardSection } from '../../../common';
 import { embeddableService } from '../../services/kibana_services';
 
-export async function transformPanels(
-  panels: DashboardAttributes['panels'],
-  references?: Reference[]
-) {
+export async function transformPanels(panels: DashboardState['panels'], references?: Reference[]) {
   function filterReferences(panelId?: string) {
     return !references || !panelId ? undefined : getReferencesForPanelId(panelId, references);
   }

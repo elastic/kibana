@@ -1,7 +1,7 @@
 pageLoadAssetSize:
   actions: 20000
   advancedSettings: 6196
-  aiAssistantManagementSelection: 9214
+  aiAssistantManagementSelection: 10000
   aiops: 15440
   alerting: 28395
   apm: 38573
@@ -56,7 +56,7 @@ pageLoadAssetSize:
   expressionGauge: 15748
   expressionHeatmap: 17563
   expressionLegacyMetricVis: 11834
-  expressionMetricVis: 17490
+  expressionMetricVis: 17559
   expressionPartitionVis: 29826
   expressions: 105113
   expressionTagcloud: 12643
@@ -90,7 +90,7 @@ pageLoadAssetSize:
   kibanaReact: 24699
   kibanaUsageCollection: 1736
   kibanaUtils: 54848
-  lens: 66734
+  lens: 77230
   licenseManagement: 8265
   licensing: 10078
   links: 8620

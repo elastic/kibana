@@ -8,10 +8,10 @@
  */
 
 import type { ExitRetryNode } from '@kbn/workflows/graph';
-import { ExitRetryNodeImpl } from '../exit_retry_node_impl';
+import type { StepExecutionRuntime } from '../../../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../../../workflow_event_logger/workflow_event_logger';
-import type { StepExecutionRuntime } from '../../../../workflow_context_manager/step_execution_runtime';
+import { ExitRetryNodeImpl } from '../exit_retry_node_impl';
 
 describe('ExitRetryNodeImpl', () => {
   let underTest: ExitRetryNodeImpl;
