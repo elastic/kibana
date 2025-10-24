@@ -3,5 +3,5 @@
   "id": "@kbn/developer-toolbar",
   "owner": "@elastic/appex-sharedux",
   "group": "platform",
-  "visibility": "private"
+  "visibility": "shared"
 }

@@ -510,7 +510,7 @@
     "@kbn/dependency-injection-example-plugin": "link:examples/dependency_injection",
     "@kbn/dev-tools-plugin": "link:src/platform/plugins/shared/dev_tools",
     "@kbn/developer-examples-plugin": "link:examples/developer_examples",
-    "@kbn/developer-toolbar": "link:src/platform/packages/private/kbn-developer-toolbar",
+    "@kbn/developer-toolbar": "link:src/platform/packages/shared/kbn-developer-toolbar",
     "@kbn/developer-toolbar-plugin": "link:src/platform/plugins/shared/developer_toolbar",
     "@kbn/discover-contextual-components": "link:src/platform/packages/shared/kbn-discover-contextual-components",
     "@kbn/discover-customization-examples-plugin": "link:examples/discover_customization_examples",

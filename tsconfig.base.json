@@ -886,8 +886,8 @@
       "@kbn/dev-utils/*": ["src/platform/packages/shared/kbn-dev-utils/*"],
       "@kbn/developer-examples-plugin": ["examples/developer_examples"],
       "@kbn/developer-examples-plugin/*": ["examples/developer_examples/*"],
-      "@kbn/developer-toolbar": ["src/platform/packages/private/kbn-developer-toolbar"],
-      "@kbn/developer-toolbar/*": ["src/platform/packages/private/kbn-developer-toolbar/*"],
+      "@kbn/developer-toolbar": ["src/platform/packages/shared/kbn-developer-toolbar"],
+      "@kbn/developer-toolbar/*": ["src/platform/packages/shared/kbn-developer-toolbar/*"],
       "@kbn/developer-toolbar-plugin": ["src/platform/plugins/shared/developer_toolbar"],
       "@kbn/developer-toolbar-plugin/*": ["src/platform/plugins/shared/developer_toolbar/*"],
       "@kbn/discover-contextual-components": ["src/platform/packages/shared/kbn-discover-contextual-components"],
@@ -2389,27 +2389,17 @@
       // END AUTOMATED PACKAGE LISTING
       // Map @elastic/kibana-d3-color to @types/d3-color for TypeScript compatibility.
       // Can be removed once we're able to update d3-color to the v3.1.0 ESM-only package.
-      "@elastic/kibana-d3-color": [
-        "node_modules/@types/d3-color"
-      ],
+      "@elastic/kibana-d3-color": ["node_modules/@types/d3-color"],
       // Allows for importing from `kibana` package for the exported types.
-      "@emotion/core": [
-        "typings/@emotion"
-      ],
+      "@emotion/core": ["typings/@emotion"],
       // We need the custom typings "proxy" because our current import-resolver doesn't support "exports" in package.json.
       // We should be able to remove this once we support cjs/esm interop.
-      "@elastic/opentelemetry-node/sdk": [
-        "typings/@elastic/opentelemetry-node/sdk"
-      ],
+      "@elastic/opentelemetry-node/sdk": ["typings/@elastic/opentelemetry-node/sdk"],
       "@opentelemetry/semantic-conventions/incubating": [
         "typings/@opentelemetry/semantic-conventions/incubating"
       ],
-      "@typescript-eslint/parser": [
-        "typings/@typescript-eslint/parser"
-      ],
-      "@a2a-js/sdk/server": [
-        "typings/@a2a-js-sdk/server"
-      ],
+      "@typescript-eslint/parser": ["typings/@typescript-eslint/parser"],
+      "@a2a-js/sdk/server": ["typings/@a2a-js-sdk/server"]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",
