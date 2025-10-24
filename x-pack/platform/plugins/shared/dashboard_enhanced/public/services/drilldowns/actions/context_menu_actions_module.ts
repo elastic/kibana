@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export * from './flyout_create_drilldown';
-export * from './flyout_edit_drilldown';
+export { flyoutCreateDrilldownAction } from './flyout_create_drilldown';
+export { flyoutEditDrilldownAction } from './flyout_edit_drilldown';
