@@ -16,6 +16,62 @@ describe('WorkflowTemplatingEngine', () => {
     templatingEngine = new WorkflowTemplatingEngine();
   });
 
+  describe('object rendering', () => {
+    it('should render object with string templates', () => {
+      const obj = {
+        message: 'Hello, {{user.name}}!',
+        details: {
+          age: '{{user.age}}',
+          address: '{{user.address.street}}, {{user.address.city}}',
+        },
+        tags: ['{{user.tag1}}', '{{user.tag2}}'],
+      };
+
+      const context = {
+        user: {
+          name: 'Alice',
+          age: 30,
+          address: {
+            street: '123 Main St',
+            city: 'Wonderland',
+          },
+          tag1: 'admin',
+          tag2: 'editor',
+        },
+      };
+
+      const rendered = templatingEngine.render(obj, context);
+
+      expect(rendered).toEqual({
+        message: 'Hello, Alice!',
+        details: {
+          age: '30',
+          address: '123 Main St, Wonderland',
+        },
+        tags: ['admin', 'editor'],
+      });
+    });
+
+    it('should handle non-string values without modification', () => {
+      const obj = {
+        number: 42,
+        boolean: true,
+        nullValue: null,
+        undefinedValue: undefined,
+        array: [1, 2, 3],
+        nested: {
+          value: 3.14,
+        },
+      };
+
+      const context = {};
+
+      const rendered = templatingEngine.render(obj, context);
+
+      expect(rendered).toEqual(obj);
+    });
+  });
+
   describe('basic rendering', () => {
     it('should render simple variables', () => {
       const template = 'Hello {{ name }}!';

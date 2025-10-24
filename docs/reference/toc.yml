@@ -47,6 +47,7 @@ toc:
       - file: connectors-kibana/obs-ai-assistant-action-type.md
       - file: connectors-kibana/openai-action-type.md
       - file: connectors-kibana/opsgenie-action-type.md
+      - file: connectors-kibana/jsm-action-type.md
       - file: connectors-kibana/pagerduty-action-type.md
       - file: connectors-kibana/sentinelone-action-type.md
       - file: connectors-kibana/server-log-action-type.md
@@ -71,3 +72,4 @@ toc:
       - file: commands/kibana-verification-code.md
   - file: osquery-exported-fields.md
   - file: osquery-manager-prebuilt-packs.md
+  - file: case-analytics-indices-schema.md
