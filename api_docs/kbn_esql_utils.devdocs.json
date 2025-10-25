@@ -2252,7 +2252,9 @@
         "type": "Function",
         "tags": [],
         "label": "hasTransformationalCommand",
-        "description": [],
+        "description": [
+          "\nDetermines if an ES|QL query contains transformational commands.\n\nFor ES|QL, we consider the following as transformational commands:\n- `stats`: Performs aggregations and transformations\n- `keep`: Filters and selects specific fields\n- `fork` commands where ALL branches contain only transformational commands\n"
+        ],
         "signature": [
           "(esql: string | undefined) => boolean"
         ],
@@ -2266,7 +2268,9 @@
             "type": "string",
             "tags": [],
             "label": "esql",
-            "description": [],
+            "description": [
+              "- The ES|QL query string to analyze"
+            ],
             "signature": [
               "string | undefined"
             ],
@@ -2276,7 +2280,9 @@
             "isRequired": false
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "true if the query contains transformational commands or fork commands with all transformational branches"
+        ],
         "initialIsOpen": false
       },
       {

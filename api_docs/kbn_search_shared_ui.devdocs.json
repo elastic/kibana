@@ -44,7 +44,7 @@
         "label": "FormInfoField",
         "description": [],
         "signature": [
-          "({ actions, label, value, copyValue, dataTestSubj, copyValueDataTestSubj, }: FormInfoFieldProps) => React.JSX.Element"
+          "({ actions, label, value, copyValue, dataTestSubj, copyValueDataTestSubj, maxWidth, minWidth, }: FormInfoFieldProps) => React.JSX.Element"
         ],
         "path": "x-pack/solutions/search/packages/shared-ui/src/form_info_field/form_info_field.tsx",
         "deprecated": false,
@@ -55,7 +55,7 @@
             "id": "def-public.FormInfoField.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  actions = [],\n  label,\n  value,\n  copyValue,\n  dataTestSubj,\n  copyValueDataTestSubj,\n}",
+            "label": "{\n  actions = [],\n  label,\n  value,\n  copyValue,\n  dataTestSubj,\n  copyValueDataTestSubj,\n  maxWidth,\n  minWidth,\n}",
             "description": [],
             "signature": [
               "FormInfoFieldProps"
