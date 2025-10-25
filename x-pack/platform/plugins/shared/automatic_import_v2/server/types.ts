@@ -43,7 +43,6 @@ export interface AutomaticImportV2PluginStart {
   licensing: LicensingPluginStart;
   spaces?: SpacesPluginStart;
   security: SecurityPluginStart;
-  automaticImportSOService: AutomaticImportSavedObjectService;
 }
 
 export interface AutomaticImportV2PluginSetupDependencies {

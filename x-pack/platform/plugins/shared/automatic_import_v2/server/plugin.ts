@@ -24,6 +24,8 @@ import type {
 } from './types';
 import { RequestContextFactory } from './request_context_factory';
 import { AutomaticImportSavedObjectService } from './saved_objects/saved_objects_service';
+import { integrationSavedObjectType } from './saved_objects/integration';
+import { dataStreamSavedObjectType } from './saved_objects/data_stream';
 import { AutomaticImportService } from './services';
 
 export class AutomaticImportV2Plugin
@@ -58,8 +60,12 @@ export class AutomaticImportV2Plugin
   ) {
     this.logger.debug('automaticImportV2: Setup');
 
+    core.savedObjects.registerType(integrationSavedObjectType);
+    core.savedObjects.registerType(dataStreamSavedObjectType);
+
     const coreStartServices = core.getStartServices().then(([coreStart, startPlugins]) => ({
       esClient: coreStart.elasticsearch.client.asInternalUser as ElasticsearchClient,
+      savedObjectsClient: coreStart.savedObjects.createInternalRepository(),
     }));
     const esClientPromise = coreStartServices.then(({ esClient }) => esClient);
 
@@ -94,12 +100,6 @@ export class AutomaticImportV2Plugin
   ): AutomaticImportV2PluginStart {
     this.logger.debug('automaticImportV2: Started');
 
-    const savedObjectsClient = core.savedObjects.createInternalRepository();
-    const savedObjectService = new AutomaticImportSavedObjectService({
-      savedObjectsClient,
-      logger: this.logger.get('saved-objects-service'),
-      security: plugins.security,
-    });
     if (this.automaticImportService) {
       this.automaticImportService.setSecurityService(core.security);
     }
@@ -109,7 +109,6 @@ export class AutomaticImportV2Plugin
       inference: plugins.inference,
       licensing: plugins.licensing,
       security: plugins.security,
-      automaticImportSOService: savedObjectService,
     };
   }
 
