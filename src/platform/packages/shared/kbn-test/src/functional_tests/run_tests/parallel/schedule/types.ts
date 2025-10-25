@@ -17,6 +17,7 @@ export interface ScheduleConfigInput {
 export interface ScheduleConfigOutput extends ScheduleConfigInput {
   resources: SlotResources;
   tooLong: boolean;
+  startTimeMins?: number;
 }
 
 export interface ScheduleConfigOptions {

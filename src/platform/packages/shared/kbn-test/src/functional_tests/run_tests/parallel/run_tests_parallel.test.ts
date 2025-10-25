@@ -147,7 +147,7 @@ describe('runTestsParallel', () => {
     jest.clearAllMocks();
   });
 
-  it('prevents later configs from running before earlier configs enter running phase', async () => {
+  it('enforces sequential warming and running order', async () => {
     const { __mockConfigRunnerInstances } = jest.requireMock('./config_runner') as {
       __mockConfigRunnerInstances: Array<{
         start: jest.Mock;
@@ -183,6 +183,13 @@ describe('runTestsParallel', () => {
       isCanceled: false,
     };
 
+    expect(runnerA.start).toHaveBeenCalledTimes(1);
+    expect(runnerB.start).toHaveBeenCalledTimes(1);
+
+    const startOrderA = runnerA.start.mock.invocationCallOrder?.[0] ?? 0;
+    const startOrderB = runnerB.start.mock.invocationCallOrder?.[0] ?? Number.MAX_SAFE_INTEGER;
+    expect(startOrderA).toBeLessThan(startOrderB);
+
     runnerB.startDeferred.resolve();
     await flushPromises();
 
@@ -192,12 +199,15 @@ describe('runTestsParallel', () => {
     await flushPromises();
 
     expect(runnerA.run).toHaveBeenCalledTimes(1);
-    expect(runnerB.run).not.toHaveBeenCalled();
 
     runnerA.runDeferred.resolve(mockResult);
     await flushPromises();
 
     expect(runnerB.run).toHaveBeenCalledTimes(1);
+
+    const runOrderA = runnerA.run.mock.invocationCallOrder?.[0] ?? 0;
+    const runOrderB = runnerB.run.mock.invocationCallOrder?.[0] ?? Number.MAX_SAFE_INTEGER;
+    expect(runOrderA).toBeLessThan(runOrderB);
 
     runnerB.runDeferred.resolve(mockResult);
     await runPromise;

@@ -11,6 +11,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { execSync } from 'child_process';
 import dedent from 'dedent';
 import execa from 'execa';
+import type { ExecaReturnValue } from 'execa';
 import Fs from 'fs';
 import os from 'os';
 import Path from 'path';
@@ -209,7 +210,7 @@ export async function runTestsParallel(
   }
 
   const MIN_MB_AVAILABLE = 2048;
-  const totalCpuCapacity = Math.max(1, os.cpus().length - 1);
+  const totalCpuCapacity = Math.max(1, os.cpus().length);
   const initialAvailableMemory = getAvailableMemory();
 
   log.info(`Available resources: ${totalCpuCapacity} cpus, ${initialAvailableMemory}mb free`);
@@ -220,6 +221,7 @@ export async function runTestsParallel(
     minMbAvailable: MIN_MB_AVAILABLE,
   });
 
+  const warmingOrderSignals = runners.map(() => createDeferred<void>());
   const runningOrderSignals = runners.map(() => createDeferred<void>());
 
   let statsTimer: NodeJS.Timeout | undefined;
@@ -370,7 +372,21 @@ export async function runTestsParallel(
 
     runnerStates.set(path, state);
     let released = false;
+    let resolvedWarmingSignal = false;
     let resolvedRunningSignal = false;
+
+    const resolveWarmingSignal = () => {
+      if (resolvedWarmingSignal) {
+        return;
+      }
+
+      const signal = warmingOrderSignals[runnerIndex];
+      if (signal) {
+        signal.resolve();
+      }
+
+      resolvedWarmingSignal = true;
+    };
 
     const resolveRunningSignal = () => {
       if (resolvedRunningSignal) {
@@ -386,33 +402,50 @@ export async function runTestsParallel(
     };
 
     try {
+      if (runnerIndex > 0) {
+        await warmingOrderSignals[runnerIndex - 1].promise;
+      }
+
       log.debug(`Waiting for warming slot for ${runner.getConfigPath()}`);
       await slot.waitForWarming();
       log.info(`Warming slot acquired for ${runner.getConfigPath()}`);
 
       const startTime = Date.now();
       state.warmStartedAt = startTime;
-      await runner.start();
+      let warmPromise: Promise<void>;
+      try {
+        warmPromise = runner.start();
+      } catch (error) {
+        resolveWarmingSignal();
+        throw error;
+      }
+      resolveWarmingSignal();
+      await warmPromise;
       const startFinishTime = Date.now();
       state.warmDurationMs = startFinishTime - startTime;
       state.warmFinishedAt = startFinishTime;
       state.idleStartedAt = startFinishTime;
 
-      log.info(`Waiting for running slot for ${runner.getConfigPath()}`);
-      const runningSlotPromise = slot.waitForRunning();
-
       if (runnerIndex > 0) {
         await runningOrderSignals[runnerIndex - 1].promise;
       }
 
-      await runningSlotPromise;
+      log.info(`Waiting for running slot for ${runner.getConfigPath()}`);
+      await slot.waitForRunning();
       log.info(`Running slot acquired for ${runner.getConfigPath()}`);
 
+      let runPromise: Promise<ExecaReturnValue<string>>;
+      try {
+        runPromise = runner.run();
+      } catch (error) {
+        resolveRunningSignal();
+        throw error;
+      }
       const runStartTime = Date.now();
       state.idleDurationMs = Math.max(0, runStartTime - (state.idleStartedAt ?? runStartTime));
       state.runStartedAt = runStartTime;
-      const runProc = await runner.run();
       resolveRunningSignal();
+      const runProc = await runPromise;
       const runFinishTime = Date.now();
 
       log.info(`Completed ${runner.getConfigPath()} (exitCode ${runProc.exitCode})`);
@@ -454,6 +487,7 @@ export async function runTestsParallel(
         failedConfigs.push(runner.getConfigPath());
       }
     } finally {
+      resolveWarmingSignal();
       resolveRunningSignal();
       if (!released) {
         slot.release();

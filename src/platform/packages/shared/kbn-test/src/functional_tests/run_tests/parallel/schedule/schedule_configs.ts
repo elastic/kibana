@@ -438,6 +438,9 @@ function applySimulation(
   simulation: SimulationResult,
   config: ScheduleConfigOutput
 ) {
+  const startTime = simulation.phases[0]?.start ?? machine.finishTime;
+  config.startTimeMins = startTime;
+
   if (simulation.phases.length === 0) {
     machine.configs.push(config);
     machine.totalAssignedDuration += config.testDurationMins;
@@ -692,8 +695,19 @@ export async function scheduleConfigs({
   const groups = machineInstances
     .filter((instance) => instance.configs.length > 0)
     .map((instance) => {
+      const configsOrderedByStart = [...instance.configs].sort((a, b) => {
+        const startA = a.startTimeMins ?? Number.POSITIVE_INFINITY;
+        const startB = b.startTimeMins ?? Number.POSITIVE_INFINITY;
+
+        if (Math.abs(startA - startB) > EPSILON) {
+          return startA - startB;
+        }
+
+        return a.path.localeCompare(b.path);
+      });
+
       return {
-        configs: instance.configs,
+        configs: configsOrderedByStart,
         machine: { ...instance.machine },
         expectedDurationMins: Number(instance.finishTime.toFixed(2)),
       };

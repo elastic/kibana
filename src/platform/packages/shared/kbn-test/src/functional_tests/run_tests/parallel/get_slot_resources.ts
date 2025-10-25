@@ -109,9 +109,9 @@ export function getSlotResources(capabilities: ServerCapabilities): SlotResource
 
   const kibanaMemory = kibanaNodes * 1024;
 
-  const esCpu = 0.5 * numNodes;
+  const esCpu = hasBrowser ? 0.5 : 0.5 * numNodes;
   const browserCpu = hasBrowser ? 1 : 0;
-  const kibanaCpu = Math.max(1, kibanaNodes * 0.5);
+  const kibanaCpu = hasBrowser ? 0.5 : Math.max(1, kibanaNodes * 0.5);
 
   return {
     idle: {
