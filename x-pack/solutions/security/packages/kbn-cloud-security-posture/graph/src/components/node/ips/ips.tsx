@@ -9,7 +9,6 @@ import React from 'react';
 import { EuiFlexGroup, EuiText, EuiButtonEmpty, useEuiFontSize, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import {
   useNodeDetailsPopover,
   type UseNodeDetailsPopoverReturn,
@@ -24,8 +23,7 @@ import {
   GRAPH_IPS_BUTTON_ID,
   GRAPH_IPS_VALUE_ID,
 } from '../../test_ids';
-import { createPreviewItems, FlowTargetSourceDest } from '../utils';
-import { GRAPH_SCOPE_ID, NETWORK_PREVIEW_BANNER } from '../../constants';
+import { createPreviewItems } from '../utils';
 
 export const VISIBLE_IPS_LIMIT = 1;
 
@@ -74,22 +72,8 @@ export interface IpsProps {
 export const Ips = ({ ips, onIpClick }: IpsProps) => {
   const sFontSize = useEuiFontSize('s');
   const xsFontSize = useEuiFontSize('xs');
-  const { openPreviewPanel } = useExpandableFlyoutApi();
 
   if (ips.length === 0) return null;
-
-  const handleSingleIpClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    openPreviewPanel({
-      id: 'network-preview',
-      params: {
-        ip: ips[0],
-        scopeId: GRAPH_SCOPE_ID,
-        flowTarget: FlowTargetSourceDest.source,
-        banner: NETWORK_PREVIEW_BANNER,
-        isPreviewMode: true,
-      },
-    });
-  };
 
   const visibleIps = (
     <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center" wrap={false}>
@@ -108,12 +92,12 @@ export const Ips = ({ ips, onIpClick }: IpsProps) => {
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        {ips.length === 1 ? (
+        {ips.length === 1 && onIpClick ? (
           <EuiButtonEmpty
             size="s"
             color="text"
             data-test-subj={GRAPH_IPS_BUTTON_ID}
-            onClick={handleSingleIpClick}
+            onClick={onIpClick}
             aria-label={popoverTipAriaLabel}
             flush="both"
             css={css`

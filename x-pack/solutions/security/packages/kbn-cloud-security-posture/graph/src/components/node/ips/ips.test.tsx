@@ -47,7 +47,8 @@ describe('Ips', () => {
     renderWithProvider(<Ips ips={[testIp]} />);
 
     expect(screen.getByTestId(GRAPH_IPS_TEXT_ID)).toHaveTextContent('IP:');
-    expect(screen.getByTestId(GRAPH_IPS_BUTTON_ID)).toHaveTextContent(testIp);
+    expect(screen.getByTestId(GRAPH_IPS_VALUE_ID)).toHaveTextContent(testIp);
+    expect(screen.queryByTestId(GRAPH_IPS_BUTTON_ID)).not.toBeInTheDocument();
     expect(screen.queryByTestId(GRAPH_IPS_PLUS_COUNT_ID)).not.toBeInTheDocument();
     expect(screen.queryByTestId(GRAPH_IPS_PLUS_COUNT_BUTTON_ID)).not.toBeInTheDocument();
   });
@@ -82,9 +83,9 @@ describe('Ips', () => {
     expect(screen.queryByTestId(GRAPH_IPS_PLUS_COUNT_ID)).not.toBeInTheDocument();
   });
 
-  test('renders aria-label in focusable button for single IP', () => {
+  test('renders aria-label in focusable button for single IP when onIpClick is provided', () => {
     const testIps = ['192.168.1.1'];
-    renderWithProvider(<Ips ips={testIps} />);
+    renderWithProvider(<Ips ips={testIps} onIpClick={mockOnIpClick} />);
 
     const popoverButton = screen.getByTestId(GRAPH_IPS_BUTTON_ID);
     expect(popoverButton).toHaveAccessibleName('Show IP address details');
@@ -100,39 +101,24 @@ describe('Ips', () => {
 
   describe('click behavior', () => {
     describe('single IP', () => {
-      test('clicking single IP button calls openPreviewPanel with correct params', async () => {
-        const testIp = '192.168.1.1';
-        renderWithProvider(<Ips ips={[testIp]} />);
-
-        const ipButton = screen.getByTestId(GRAPH_IPS_BUTTON_ID);
-        await userEvent.click(ipButton);
-
-        expect(mockOpenPreviewPanel).toHaveBeenCalledTimes(1);
-        expect(mockOpenPreviewPanel).toHaveBeenCalledWith({
-          id: 'network-preview',
-          params: {
-            ip: testIp,
-            scopeId: 'graph',
-            flowTarget: 'source',
-            banner: {
-              title: 'Preview network details',
-              backgroundColor: 'warning',
-              textColor: 'warning',
-            },
-            isPreviewMode: true,
-          },
-        });
-      });
-
-      test('clicking single IP button does NOT call onIpClick prop', async () => {
+      test('clicking single IP button calls onIpClick prop when provided', async () => {
         const testIp = '192.168.1.1';
         renderWithProvider(<Ips ips={[testIp]} onIpClick={mockOnIpClick} />);
 
         const ipButton = screen.getByTestId(GRAPH_IPS_BUTTON_ID);
         await userEvent.click(ipButton);
 
-        expect(mockOnIpClick).not.toHaveBeenCalled();
-        expect(mockOpenPreviewPanel).toHaveBeenCalledTimes(1);
+        expect(mockOnIpClick).toHaveBeenCalledTimes(1);
+        expect(mockOpenPreviewPanel).not.toHaveBeenCalled();
+      });
+
+      test('single IP button is not clickable when onIpClick is not provided', async () => {
+        const testIp = '192.168.1.1';
+        renderWithProvider(<Ips ips={[testIp]} />);
+
+        // When onIpClick is not provided, single IP should render as text, not button
+        expect(screen.queryByTestId(GRAPH_IPS_BUTTON_ID)).not.toBeInTheDocument();
+        expect(screen.getByTestId(GRAPH_IPS_VALUE_ID)).toHaveTextContent(testIp);
       });
     });
 

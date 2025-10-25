@@ -8,7 +8,6 @@
 import React from 'react';
 import { euiDarkVars } from '@kbn/ui-theme';
 import { ThemeProvider } from '@emotion/react';
-import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 
 interface Props {
   children?: React.ReactNode;
@@ -16,9 +15,7 @@ interface Props {
 
 export const TestProvidersComponent = ({ children }: Props) => {
   return (
-    <TestProvider>
-      <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>{children}</ThemeProvider>
-    </TestProvider>
+    <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>{children}</ThemeProvider>
   );
 };
 
