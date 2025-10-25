@@ -12,6 +12,12 @@ import type { AssignArgs } from 'xstate5';
 import { isActionBlock, isWhereBlock } from '@kbn/streamlang/types/streamlang';
 import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
 import type { Condition } from '@kbn/streamlang';
+import {
+  isAndCondition,
+  isFilterCondition,
+  isNotCondition,
+  isOrCondition,
+} from '@kbn/streamlang/types/conditions';
 import type { StreamEnrichmentContextType } from './types';
 import type { SampleDocumentWithUIAttributes } from '../simulation_state_machine';
 import {
@@ -158,7 +164,12 @@ export function getUpsertFields(context: StreamEnrichmentContextType): FieldDefi
  *  - This is intentionally conservative and can be replaced with a metadata-driven translation later.
  */
 export function mapEcsFieldToOtel(field: string): string {
-  if (!field || field.startsWith('resource.attributes.') || field.startsWith('attributes.')) {
+  if (
+    !field ||
+    field.startsWith('resource.attributes.') ||
+    field.startsWith('attributes.') ||
+    field.startsWith('body.')
+  ) {
     return field;
   }
   if (field === '@timestamp') return '@timestamp';
@@ -192,30 +203,22 @@ export function mapEcsFieldToOtel(field: string): string {
   return `attributes.${field}`;
 }
 
-type AnyCondition = Condition;
 
-export function rewriteConditionFieldsToOtel(
-  cond: AnyCondition,
-  isWired: boolean
-): AnyCondition {
-  if (!cond || !isWired) return cond;
+export function rewriteConditionFieldsToOtel(cond: Condition, isWired: boolean): Condition {
+  if (!isWired) return cond;
 
-  if (typeof (cond as any).field === 'string') {
-    return { ...(cond as any), field: mapEcsFieldToOtel((cond as any).field) } as AnyCondition;
+  if (isFilterCondition(cond)) {
+    return { ...cond, field: mapEcsFieldToOtel(cond.field) };
   }
 
-  if ((cond as any).and) {
-    return {
-      and: (cond as any).and.map((c: AnyCondition) => rewriteConditionFieldsToOtel(c, isWired)),
-    } as AnyCondition;
+  if (isAndCondition(cond)) {
+    return { and: cond.and.map((c) => rewriteConditionFieldsToOtel(c, isWired)) };
   }
-  if ((cond as any).or) {
-    return {
-      or: (cond as any).or.map((c: AnyCondition) => rewriteConditionFieldsToOtel(c, isWired)),
-    } as AnyCondition;
+  if (isOrCondition(cond)) {
+    return { or: cond.or.map((c) => rewriteConditionFieldsToOtel(c, isWired)) };
   }
-  if ((cond as any).not) {
-    return { not: rewriteConditionFieldsToOtel((cond as any).not, isWired) } as AnyCondition;
+  if (isNotCondition(cond)) {
+    return { not: rewriteConditionFieldsToOtel(cond.not, isWired) };
   }
 
   return cond;

@@ -30,18 +30,20 @@ function isName(command: ESQLCommand, name: string) {
 }
 
 function asColumn(arg: ESQLAstItem): ESQLColumn | undefined {
-  return (arg as any)?.type === 'column' ? (arg as ESQLColumn) : undefined;
+  if (Array.isArray(arg)) return undefined;
+  return arg.type === 'column' ? arg : undefined;
 }
 
 function asStringLiteral(arg: ESQLAstItem): string | undefined {
-  const lit = (arg as any)?.type === 'literal' ? (arg as ESQLLiteral) : undefined;
+  if (Array.isArray(arg)) return undefined;
+  const lit = arg.type === 'literal' ? arg : undefined;
   if (!lit) return undefined;
   // Prefer the AST's unquoted value when available (ESQLStringLiteral)
   const unquoted = (lit as any).valueUnquoted ?? (lit as any).value;
   if (typeof unquoted === 'string') return unquoted;
 
   // Fallback: strip surrounding quotes and minimally unescape quotes/backslashes
-  const raw = String((lit as any).text ?? '');
+  const raw = String(lit.text ?? '');
   const startsWithQuote = raw.startsWith('"') || raw.startsWith("'");
   const endsWithQuote = raw.endsWith('"') || raw.endsWith("'");
   if (startsWithQuote && endsWithQuote && raw.length >= 2) {
@@ -75,7 +77,7 @@ export function esqlToStreamlangProcessors(
     const command = cmd as ESQLCommand;
 
     if (isName(command, 'where')) {
-      const expr = (command as unknown as { args?: ESQLAstItem[] }).args?.[0] as
+      const expr = command.args?.[0] as
         | ESQLSingleAstItem
         | undefined;
       const cond = expr ? esqlAstExpressionToCondition(expr) : undefined;
@@ -106,12 +108,12 @@ export function esqlToStreamlangProcessors(
 
     if (isName(command, 'eval')) {
       // EVAL a = b, c = "lit" → set/copy_from/date steps
-      for (const arg of (command as unknown as { args?: ESQLAstItem[] }).args ?? []) {
+      for (const arg of command.args ?? []) {
         const assign = asBinaryFunc(arg, '=');
         if (!assign) continue;
-        const [leftRaw, rightRaw] = (assign.args || []) as (ESQLAstItem | ESQLAstItem[])[];
-        const left = unwrapAst(leftRaw) as ESQLAstItem | undefined;
-        const right = unwrapAst(rightRaw) as ESQLAstItem | undefined;
+        const [leftRaw, rightRaw] = assign.args || [];
+        const left = unwrapAst(leftRaw);
+        const right = unwrapAst(rightRaw);
         const target = left ? asColumn(left) : undefined;
         if (!target) continue;
         const rightCol = right ? asColumn(right) : undefined;
@@ -122,10 +124,10 @@ export function esqlToStreamlangProcessors(
         }
         // Map EVAL target = DATE_PARSE(source, pattern)
         const dateFn = right ? asFunction(right, 'date_parse') : undefined;
-        if (dateFn && Array.isArray((dateFn as unknown as { args?: ESQLAstItem[] }).args)) {
-          const [srcArg, patternArg] = ((dateFn as unknown as { args?: ESQLAstItem[] }).args ?? []) as ESQLAstItem[];
+        if (dateFn && dateFn.args) {
+          const [srcArg, patternArg] = dateFn.args;
           const srcCol = srcArg ? asColumn(srcArg) : undefined;
-          const pattern = patternArg && (patternArg as unknown as { type?: string }).type === 'literal' ? asStringLiteral(patternArg as ESQLAstItem) : undefined;
+          const pattern = patternArg && (patternArg as unknown as { type?: string }).type === 'literal' ? asStringLiteral(patternArg) : undefined;
           if (srcCol && pattern) {
             const dateProc: DateProcessor = {
               action: 'date',
@@ -139,7 +141,7 @@ export function esqlToStreamlangProcessors(
         }
         
         if (right && isLiteral(right)) {
-          const value = (right as unknown as { value?: unknown }).value ?? asStringLiteral(right);
+          const value = right.value ?? asStringLiteral(right);
           const setVal: SetProcessor = { action: 'set', to: target.text, value };
           processors.push(withWhere(setVal));
         }
@@ -149,10 +151,10 @@ export function esqlToStreamlangProcessors(
 
     if (isName(command, 'rename')) {
       // RENAME old AS new → rename
-      for (const arg of (command as unknown as { args?: ESQLAstItem[] }).args ?? []) {
+      for (const arg of command.args ?? []) {
         const asCall = asBinaryFunc(arg, 'as');
         if (!asCall) continue;
-        const [oldRef, newRef] = (asCall.args || []) as ESQLAstItem[];
+        const [oldRef, newRef] = asCall.args || [];
         const oldCol = asColumn(oldRef);
         const newName = asStringLiteral(newRef) || (asColumn(newRef)?.text);
         if (oldCol && newName) {
@@ -168,22 +170,25 @@ export function esqlToStreamlangProcessors(
 }
 
 function isLiteral(item: ESQLAstItem): item is ESQLLiteral {
-  return (item as any)?.type === 'literal';
+  if (Array.isArray(item)) return false;
+  return item.type === 'literal';
 }
 
 function asBinaryFunc(item: ESQLAstItem, name: string): ESQLFunction | undefined {
-  const isFunction = (item as any)?.type === 'function';
+  if (Array.isArray(item)) return undefined;
+  const isFunction = item.type === 'function';
   if (!isFunction) return undefined;
-  const f = item as ESQLFunction;
-  return String((f as any).name || '').toLowerCase() === name.toLowerCase() ? f : undefined;
+  return String(item.name || '').toLowerCase() === name.toLowerCase() ? item : undefined;
 }
 
 function asFunction(item: ESQLAstItem, name?: string): ESQLFunction | undefined {
-  const isFunction = (item as any)?.type === 'function';
+  if (Array.isArray(item)) return undefined;
+  const isFunction = item.type === 'function';
+
   if (!isFunction) return undefined;
   const f = item as ESQLFunction;
   if (!name) return f;
-  return String((f as any).name || '').toLowerCase() === name.toLowerCase() ? f : undefined;
+  return String(f.name || '').toLowerCase() === name.toLowerCase() ? f : undefined;
 }
 
 /**
@@ -200,11 +205,11 @@ export function esqlToStreamlangSteps(
   const withWhere = <T extends StreamlangProcessorDefinition>(proc: T): T =>
     activeCondition ? ({ ...proc, where: activeCondition } as T) : proc;
 
-  for (const cmd of (root as ESQLAstQueryExpression).commands) {
-    const command = cmd as ESQLCommand;
+  for (const cmd of root.commands) {
+    const command = cmd;
 
     if (isName(command, 'where')) {
-      const expr = (command as unknown as { args?: ESQLAstItem[] }).args?.[0] as
+      const expr = command.args?.[0] as
         | ESQLSingleAstItem
         | undefined;
       const cond = expr ? esqlAstExpressionToCondition(expr) : undefined;
@@ -235,12 +240,12 @@ export function esqlToStreamlangSteps(
     }
 
     if (isName(command, 'eval')) {
-      for (const arg of (command as unknown as { args?: ESQLAstItem[] }).args ?? []) {
+      for (const arg of command.args ?? []) {
         const assign = asBinaryFunc(arg, '=');
         if (!assign) continue;
-        const [leftRaw, rightRaw] = (assign.args || []) as (ESQLAstItem | ESQLAstItem[])[];
-        const left = unwrapAst(leftRaw) as ESQLAstItem | undefined;
-        const right = unwrapAst(rightRaw) as ESQLAstItem | undefined;
+        const [leftRaw, rightRaw] = assign.args || [];
+        const left = unwrapAst(leftRaw);
+        const right = unwrapAst(rightRaw);
         const target = left ? asColumn(left) : undefined;
         if (!target) continue;
         const rightCol = right ? asColumn(right) : undefined;
@@ -251,10 +256,10 @@ export function esqlToStreamlangSteps(
         }
         // Map EVAL target = DATE_PARSE(source, pattern)
         const dateFn = right ? asFunction(right, 'date_parse') : undefined;
-        if (dateFn && Array.isArray((dateFn as unknown as { args?: ESQLAstItem[] }).args)) {
-          const [srcArg, patternArg] = ((dateFn as unknown as { args?: ESQLAstItem[] }).args ?? []) as ESQLAstItem[];
+        if (dateFn && dateFn.args) {
+          const [srcArg, patternArg] = dateFn.args;
           const srcCol = srcArg ? asColumn(srcArg) : undefined;
-          const pattern = patternArg && (patternArg as unknown as { type?: string }).type === 'literal' ? asStringLiteral(patternArg as ESQLAstItem) : undefined;
+          const pattern = patternArg && (patternArg as unknown as { type?: string }).type === 'literal' ? asStringLiteral(patternArg) : undefined;
           if (srcCol && pattern) {
             const dateProc: DateProcessor = {
               action: 'date',
@@ -268,7 +273,7 @@ export function esqlToStreamlangSteps(
         }
         
         if (right && isLiteral(right)) {
-          const value = (right as unknown as { value?: unknown }).value ?? asStringLiteral(right);
+          const value = right.value ?? asStringLiteral(right);
           const setVal: SetProcessor = { action: 'set', to: target.text, value };
           steps.push(withWhere(setVal));
         }
@@ -277,10 +282,10 @@ export function esqlToStreamlangSteps(
     }
 
     if (isName(command, 'rename')) {
-      for (const arg of (command as unknown as { args?: ESQLAstItem[] }).args ?? []) {
+      for (const arg of command.args ?? []) {
         const asCall = asBinaryFunc(arg, 'as');
         if (!asCall) continue;
-        const [oldRef, newRef] = (asCall.args || []) as ESQLAstItem[];
+        const [oldRef, newRef] = asCall.args || [];
         const oldCol = asColumn(oldRef);
         const newName = asStringLiteral(newRef) || (asColumn(newRef)?.text);
         if (oldCol && newName) {
