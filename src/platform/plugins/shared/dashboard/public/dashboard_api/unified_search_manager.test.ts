@@ -10,7 +10,7 @@
 import { BehaviorSubject, Subject } from 'rxjs';
 import { getSampleDashboardState } from '../mocks';
 import type { DashboardState } from '../../common';
-import { COMPARE_DEBOUNCE, initializeUnifiedSearchManager } from './unified_search_manager';
+import { initializeUnifiedSearchManager } from './unified_search_manager';
 import type { ControlGroupApi } from '@kbn/controls-plugin/public';
 
 describe('initializeUnifiedSearchManager', () => {
