@@ -201,6 +201,34 @@ module.exports = function lazyRequirePlugin({ types: t }) {
               });
             }
 
+            // Check if any imported names are re-exported
+            let hasReExport = false;
+            for (const specifier of path.node.specifiers) {
+              const localName = specifier.local.name;
+              const binding = path.scope.getBinding(localName);
+
+              if (binding) {
+                // Check if this binding is referenced in any export
+                for (const refPath of binding.referencePaths) {
+                  if (
+                    refPath.isReferencedIdentifier() &&
+                    (t.isExportSpecifier(refPath.parent) ||
+                      t.isExportDefaultDeclaration(refPath.parent) ||
+                      t.isExportNamedDeclaration(refPath.parent))
+                  ) {
+                    hasReExport = true;
+                    break;
+                  }
+                }
+              }
+              if (hasReExport) break;
+            }
+
+            // Skip transformation if this import is re-exported
+            if (hasReExport) {
+              return;
+            }
+
             // Handle different import types
             for (const specifier of path.node.specifiers) {
               if (t.isImportDefaultSpecifier(specifier)) {
@@ -264,6 +292,16 @@ module.exports = function lazyRequirePlugin({ types: t }) {
               return;
             }
 
+            // Skip export/import specifiers (e.g., 'foo' in 'export { foo }' or 'import { foo }')
+            if (
+              t.isExportSpecifier(path.parent) ||
+              t.isImportSpecifier(path.parent) ||
+              t.isImportDefaultSpecifier(path.parent) ||
+              t.isImportNamespaceSpecifier(path.parent)
+            ) {
+              return;
+            }
+
             // Skip object property keys (non-computed)
             if (
               (t.isObjectProperty(path.parent) || t.isObjectMethod(path.parent)) &&
@@ -273,9 +311,9 @@ module.exports = function lazyRequirePlugin({ types: t }) {
               return;
             }
 
-            // Skip member expression properties (e.g., 'bar' in 'foo.bar')
+            // Skip member expression properties (e.g., 'bar' in 'foo.bar' or 'foo?.bar')
             if (
-              t.isMemberExpression(path.parent) &&
+              (t.isMemberExpression(path.parent) || t.isOptionalMemberExpression(path.parent)) &&
               path.parent.property === path.node &&
               !path.parent.computed
             ) {
@@ -289,6 +327,35 @@ module.exports = function lazyRequirePlugin({ types: t }) {
               !path.parent.computed
             ) {
               return;
+            }
+
+            // Skip TypeScript type annotations (types are not runtime code)
+            // But allow type assertions (as Type) and other runtime TS features
+            let currentPath = path;
+            while (currentPath) {
+              const parentNode = currentPath.parent;
+              if (!parentNode) break;
+
+              // Skip only pure type contexts, not runtime contexts with type info
+              if (
+                parentNode.type &&
+                (t.isTSTypeAnnotation(parentNode) ||
+                  t.isTSTypeReference(parentNode) ||
+                  t.isTSTypeParameterDeclaration(parentNode) ||
+                  t.isTSTypeParameter(parentNode) ||
+                  t.isTSInterfaceDeclaration(parentNode) ||
+                  t.isTSTypeAliasDeclaration(parentNode) ||
+                  t.isTSTypeQuery(parentNode) ||
+                  t.isTSTypeLiteral(parentNode) ||
+                  t.isTSIndexedAccessType(parentNode) ||
+                  t.isTSMappedType(parentNode) ||
+                  t.isTSConditionalType(parentNode) ||
+                  t.isTSExpressionWithTypeArguments(parentNode))
+              ) {
+                return;
+              }
+
+              currentPath = currentPath.parentPath;
             }
 
             // Check scope: only replace if binding is from program scope
