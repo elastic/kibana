@@ -971,7 +971,7 @@
             "label": "role_arn",
             "description": [],
             "signature": [
-              "CloudConnectorRoleArn"
+              "CloudConnectorVar"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
             "deprecated": false,
@@ -1119,12 +1119,15 @@
           {
             "parentPluginId": "fleet",
             "id": "def-public.CloudConnector.vars",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "vars",
             "description": [],
             "signature": [
-              "CloudConnectorVars"
+              "Record<string, unknown> | ",
+              "AwsCloudConnectorVars",
+              " | ",
+              "AzureCloudConnectorVars"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
             "deprecated": false,
@@ -1280,50 +1283,6 @@
       },
       {
         "parentPluginId": "fleet",
-        "id": "def-public.CloudConnectorVars",
-        "type": "Interface",
-        "tags": [],
-        "label": "CloudConnectorVars",
-        "description": [],
-        "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "fleet",
-            "id": "def-public.CloudConnectorVars.role_arn",
-            "type": "Object",
-            "tags": [],
-            "label": "role_arn",
-            "description": [],
-            "signature": [
-              "CloudConnectorRoleArn",
-              " | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-public.CloudConnectorVars.external_id",
-            "type": "Object",
-            "tags": [],
-            "label": "external_id",
-            "description": [],
-            "signature": [
-              "CloudConnectorSecretVar",
-              " | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "fleet",
         "id": "def-public.CreateCloudConnectorRequest",
         "type": "Interface",
         "tags": [],
@@ -1347,12 +1306,15 @@
           {
             "parentPluginId": "fleet",
             "id": "def-public.CreateCloudConnectorRequest.vars",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "vars",
             "description": [],
             "signature": [
-              "CloudConnectorVars"
+              "Record<string, unknown> | ",
+              "AwsCloudConnectorVars",
+              " | ",
+              "AzureCloudConnectorVars"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
             "deprecated": false,
@@ -2677,6 +2639,10 @@
               {
                 "plugin": "@kbn/cloud-security-posture",
                 "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/cloud_connector/hooks/use_cloud_connector_setup.test.ts"
+              },
+              {
+                "plugin": "@kbn/cloud-security-posture",
+                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/cloud_connector/test/mock.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -4680,7 +4646,7 @@
         "label": "AvailablePackagesHookType",
         "description": [],
         "signature": [
-          "({ prereleaseIntegrationsEnabled, }: { prereleaseIntegrationsEnabled: boolean; }) => { initialSelectedCategory: string; selectedCategory: string; setCategory: React.Dispatch<React.SetStateAction<string>>; allCategories: ",
+          "({ prereleaseIntegrationsEnabled }?: { prereleaseIntegrationsEnabled: boolean; }) => { initialSelectedCategory: string; selectedCategory: string; setCategory: React.Dispatch<React.SetStateAction<string>>; allCategories: ",
           {
             "pluginId": "fleet",
             "scope": "public",
@@ -4746,6 +4712,24 @@
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-public.CloudConnectorVars",
+        "type": "Type",
+        "tags": [],
+        "label": "CloudConnectorVars",
+        "description": [],
+        "signature": [
+          "Record<string, unknown> | ",
+          "AwsCloudConnectorVars",
+          " | ",
+          "AzureCloudConnectorVars"
+        ],
+        "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -26986,6 +26970,10 @@
               {
                 "plugin": "@kbn/cloud-security-posture",
                 "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/cloud_connector/hooks/use_cloud_connector_setup.test.ts"
+              },
+              {
+                "plugin": "@kbn/cloud-security-posture",
+                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/cloud_connector/test/mock.ts"
               },
               {
                 "plugin": "securitySolution",

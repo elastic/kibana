@@ -2988,9 +2988,9 @@
             "signature": [
               "{ show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.XYLegendValue",
                 "text": "XYLegendValue"
               },
@@ -3870,9 +3870,9 @@
           },
           "[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -3902,9 +3902,9 @@
           },
           "; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -4070,9 +4070,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -4200,9 +4200,9 @@
           },
           "; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -4324,9 +4324,9 @@
           },
           "[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -4607,9 +4607,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },

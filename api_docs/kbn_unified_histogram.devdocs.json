@@ -1726,27 +1726,6 @@
           },
           {
             "parentPluginId": "@kbn/unified-histogram",
-            "id": "def-public.UnifiedHistogramChartProps.esqlVariables",
-            "type": "Array",
-            "tags": [],
-            "label": "esqlVariables",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/esql-types",
-                "scope": "common",
-                "docId": "kibKbnEsqlTypesPluginApi",
-                "section": "def-common.ESQLControlVariable",
-                "text": "ESQLControlVariable"
-              },
-              "[] | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/unified-histogram",
             "id": "def-public.UnifiedHistogramChartProps.controlsState",
             "type": "Object",
             "tags": [],
