@@ -25,7 +25,6 @@ import type {
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { AutomaticImportSavedObjectService } from './saved_objects/saved_objects_service';
 import type { AutomaticImportService } from './services';
 
 export const PLUGIN_ID = 'automaticImportV2' as const;

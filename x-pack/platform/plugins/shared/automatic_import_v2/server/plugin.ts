@@ -23,20 +23,18 @@ import type {
   AutomaticImportV2PluginRequestHandlerContext,
 } from './types';
 import { RequestContextFactory } from './request_context_factory';
-import { AutomaticImportSavedObjectService } from './saved_objects/saved_objects_service';
 import { integrationSavedObjectType } from './saved_objects/integration';
 import { dataStreamSavedObjectType } from './saved_objects/data_stream';
 import { AutomaticImportService } from './services';
 
 export class AutomaticImportV2Plugin
   implements
-    Plugin<
-      AutomaticImportV2PluginSetup,
-      AutomaticImportV2PluginStart,
-      AutomaticImportV2PluginSetupDependencies,
-      AutomaticImportV2PluginStartDependencies
-    >
-{
+  Plugin<
+    AutomaticImportV2PluginSetup,
+    AutomaticImportV2PluginStart,
+    AutomaticImportV2PluginSetupDependencies,
+    AutomaticImportV2PluginStartDependencies
+  > {
   private readonly logger: Logger;
   private pluginStop$: Subject<void>;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
