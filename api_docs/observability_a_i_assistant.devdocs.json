@@ -8522,7 +8522,15 @@
                   "section": "def-public.ObservabilityAIAssistantService",
                   "text": "ObservabilityAIAssistantService"
                 },
-                "; initialMessages: ",
+                "; scopes: ",
+                {
+                  "pluginId": "@kbn/ai-assistant-common",
+                  "scope": "common",
+                  "docId": "kibKbnAiAssistantCommonPluginApi",
+                  "section": "def-common.AssistantScope",
+                  "text": "AssistantScope"
+                },
+                "[]; initialMessages: ",
                 {
                   "pluginId": "observabilityAIAssistant",
                   "scope": "common",
@@ -8562,15 +8570,7 @@
                   "section": "def-common.Message",
                   "text": "Message"
                 },
-                "[]) => void) | undefined; scopes: ",
-                {
-                  "pluginId": "@kbn/ai-assistant-common",
-                  "scope": "common",
-                  "docId": "kibKbnAiAssistantCommonPluginApi",
-                  "section": "def-common.AssistantScope",
-                  "text": "AssistantScope"
-                },
-                "[]; }"
+                "[]) => void) | undefined; }"
               ],
               "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_chat.ts",
               "deprecated": false,
@@ -10158,7 +10158,7 @@
                     "label": "entry",
                     "description": [],
                     "signature": [
-                      "{ id: string; text: string; title?: string | undefined; labels?: Record<string, string> | undefined; public: boolean; user?: { name: string; } | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; is_correction?: boolean | undefined; }"
+                      "{ id: string; text: string; title?: string | undefined; user?: { name: string; } | undefined; labels?: Record<string, string> | undefined; public: boolean; confidence?: \"medium\" | \"high\" | \"low\" | undefined; is_correction?: boolean | undefined; }"
                     ],
                     "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
                     "deprecated": false,
@@ -10218,7 +10218,7 @@
                         "section": "def-common.KnowledgeBaseEntryRole",
                         "text": "KnowledgeBaseEntryRole"
                       },
-                      "; labels?: Record<string, string> | undefined; public: boolean; user?: { name: string; } | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; is_correction?: boolean | undefined; }"
+                      "; user?: { name: string; } | undefined; labels?: Record<string, string> | undefined; public: boolean; confidence?: \"medium\" | \"high\" | \"low\" | undefined; is_correction?: boolean | undefined; }"
                     ],
                     "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
                     "deprecated": false,

@@ -680,16 +680,20 @@
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/telemetry/fleet_usage_sender.ts"
               },
               {
+                "plugin": "spaces",
+                "path": "x-pack/platform/plugins/shared/spaces/public/analytics/event_tracker.ts"
+              },
+              {
+                "plugin": "@kbn/file-upload-common",
+                "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/telemetry_service.ts"
+              },
+              {
                 "plugin": "@kbn/index-editor",
                 "path": "src/platform/packages/private/kbn-index-editor/src/telemetry/telemetry_service.ts"
               },
               {
                 "plugin": "@kbn/esql-editor",
                 "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/public/analytics/event_tracker.ts"
               },
               {
                 "plugin": "observabilityAIAssistant",
@@ -1342,18 +1346,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/actions/clients/crowdstrike/crowdstrike_actions_client.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/actions/clients/lib/base_response_actions_client.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/actions/clients/lib/base_response_actions_client.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/actions/clients/lib/base_response_actions_client.test.ts"
               },
               {
                 "plugin": "securitySolution",

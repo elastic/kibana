@@ -2188,6 +2188,19 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
+            "id": "def-server.IElasticsearchConfig.healthCheckRetry",
+            "type": "number",
+            "tags": [],
+            "label": "healthCheckRetry",
+            "description": [
+              "\nThe number of times to retry the health check request"
+            ],
+            "path": "src/core/packages/elasticsearch/server/src/elasticsearch_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server",
             "id": "def-server.IElasticsearchConfig.ignoreVersionMismatch",
             "type": "boolean",
             "tags": [],
