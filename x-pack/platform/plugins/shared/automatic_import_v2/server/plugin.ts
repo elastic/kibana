@@ -29,12 +29,13 @@ import { AutomaticImportService } from './services';
 
 export class AutomaticImportV2Plugin
   implements
-  Plugin<
-    AutomaticImportV2PluginSetup,
-    AutomaticImportV2PluginStart,
-    AutomaticImportV2PluginSetupDependencies,
-    AutomaticImportV2PluginStartDependencies
-  > {
+    Plugin<
+      AutomaticImportV2PluginSetup,
+      AutomaticImportV2PluginStart,
+      AutomaticImportV2PluginSetupDependencies,
+      AutomaticImportV2PluginStartDependencies
+    >
+{
   private readonly logger: Logger;
   private pluginStop$: Subject<void>;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
