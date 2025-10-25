@@ -24,20 +24,24 @@ export async function createEsCacheSymlink(namespace: string): Promise<void> {
   }
 
   const cacheNamespaceDir = Path.join(REPO_ROOT, '.es', namespace);
-  const cacheCopyPath = Path.join(cacheNamespaceDir, 'cache');
+  const cacheSymlinkPath = Path.join(cacheNamespaceDir, 'cache');
 
   // Reuse the shared Elasticsearch cache when tests run in parallel namespaces
   await fs.mkdir(cacheNamespaceDir, { recursive: true });
 
-  const existingEntry = await fs.lstat(cacheCopyPath).catch(() => undefined);
+  const existingEntry = await fs.lstat(cacheSymlinkPath).catch(() => undefined);
 
   if (existingEntry) {
-    if (existingEntry.isDirectory()) {
-      await fs.rm(cacheCopyPath, { recursive: true, force: true });
+    if (existingEntry.isSymbolicLink()) {
+      const currentTarget = await fs.readlink(cacheSymlinkPath);
+      if (currentTarget === cacheDir) {
+        return;
+      }
+      await fs.unlink(cacheSymlinkPath);
     } else {
-      await fs.unlink(cacheCopyPath);
+      await fs.rm(cacheSymlinkPath, { recursive: true, force: true });
     }
   }
 
-  await fs.cp(cacheDir, cacheCopyPath, { recursive: true, force: true });
+  await fs.symlink(cacheDir, cacheSymlinkPath, 'dir');
 }
