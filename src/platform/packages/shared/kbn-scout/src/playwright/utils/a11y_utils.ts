@@ -9,30 +9,19 @@
 
 import type { Page } from '@playwright/test';
 
-// selector should be on the page and match at least one element
-const verifyValidSelector = async (selector: string, page: Page): Promise<void> => {
-  const matchingElements = await page.locator(selector).count();
-  if (matchingElements === 0) throw new Error(`No elements found with selector: ${selector}`);
-};
-
 const keyToElement = async (
   page: Page,
   selector: string,
   key: string,
-  visited: Set<string> = new Set()
+  maxElementsToTraverse: number,
+  numVisitedElements: number
 ): Promise<void> => {
   await page.keyboard.press(key);
 
-  const focusedOuterHTML = await page.evaluate(() => {
-    const focused = document.activeElement;
-    if (!focused) throw new Error('No focusable elements found on the page.');
-    return focused.outerHTML;
-  });
-  if (visited.has(focusedOuterHTML))
+  if (numVisitedElements >= maxElementsToTraverse)
     throw new Error(
-      `A cycle was detected with key ${key} before finding element with selector: ${selector}`
+      `${key} key pressed ${numVisitedElements} times without the element with selector ${selector} being focused. Max elements for keyTo to traverse is set to ${maxElementsToTraverse}.`
     );
-  visited.add(focusedOuterHTML);
 
   const isTargetFocused = await page.evaluate(
     ({ targetSelector }) => {
@@ -43,10 +32,15 @@ const keyToElement = async (
     { targetSelector: selector }
   );
 
-  if (!isTargetFocused) return keyToElement(page, selector, key, visited);
+  if (!isTargetFocused)
+    return keyToElement(page, selector, key, maxElementsToTraverse, numVisitedElements + 1);
 };
 
-export const keyTo = async (page: Page, selector: string, key: string): Promise<void> => {
-  await verifyValidSelector(selector, page);
-  await keyToElement(page, selector, key);
+export const keyTo = async (
+  page: Page,
+  selector: string,
+  key: string,
+  maxElementsToTraverse: number
+): Promise<void> => {
+  await keyToElement(page, selector, key, maxElementsToTraverse, 0);
 };

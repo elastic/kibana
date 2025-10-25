@@ -36,9 +36,10 @@ export type ScoutPage = Page & {
    * press the key until the first occurrence of the element is focused.
    * @param selector - The css selector for the element.
    * @param key The key to press for keyboard navigation. Corresponds with the playwright keyboard api https://playwright.dev/docs/api/class-keyboard.
+   * @param maxElementsToTraverse The maximum number of times the key will be pressed before throwing an error. Defaults to 1000.
    * @returns A Promise that resolves once the the element with the css selector is focused, or an error occurs.
    */
-  keyTo: (selector: string, key: string) => Promise<void>;
+  keyTo: (selector: string, key: string, maxElementsToTraverse?: number) => Promise<void>;
   /**
    * Simplified API to interact with elements using Kibana's 'data-test-subj' attribute.
    */
