@@ -118,7 +118,10 @@ export class ConfigRunner {
     this.proc.disconnect();
 
     return this.proc.finally(async () => {
-      await Fs.promises.rmdir(Path.join(REPO_ROOT, '.es', this.options.index));
+      await Fs.promises.rm(Path.join(REPO_ROOT, '.es', this.options.index), {
+        recursive: true,
+        force: true,
+      });
     });
   }
 }
