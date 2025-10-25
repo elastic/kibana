@@ -116,7 +116,11 @@ describe('@kbn/babel-plugin-lazy-require', () => {
     it.each(['const', 'let', 'var'])('transforms %s declarations', (kind) => {
       const code = transformCode(`${kind} foo = require('./foo');`);
       expect(code).toContain('get foo()');
-      expect(code).toContain(kind === 'const' ? '})' : 'set foo('); // Only const has no setter
+      if (kind === 'const') {
+        expect(code).not.toContain('set foo(');
+      } else {
+        expect(code).toContain('set foo(');
+      }
     });
 
     it('allows let/var reassignment and loads module for side effects', () => {
