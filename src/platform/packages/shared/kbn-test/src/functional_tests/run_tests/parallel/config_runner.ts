@@ -10,6 +10,8 @@
 import type { ExecaChildProcess, ExecaReturnValue, StdioOption } from 'execa';
 import execa from 'execa';
 import { REPO_ROOT } from '@kbn/repo-info';
+import Fs from 'fs';
+import Path from 'path';
 
 import type { ToolingLog } from '@kbn/tooling-log';
 
@@ -115,6 +117,8 @@ export class ConfigRunner {
 
     this.proc.disconnect();
 
-    return this.proc;
+    return this.proc.finally(async () => {
+      await Fs.promises.rmdir(Path.join(REPO_ROOT, '.es', this.options.index));
+    });
   }
 }
