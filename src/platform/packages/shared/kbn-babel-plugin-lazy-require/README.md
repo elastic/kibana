@@ -14,9 +14,11 @@ This plugin addresses these issues by deferring module loading until actually ne
 
 ## How it Works
 
-The plugin transforms top-level CommonJS `require()` declarations into getter-based lazy loading. The actual module is only loaded when its exports are first accessed.
+The plugin transforms top-level `require()` calls and ES6 `import` statements into getter-based lazy loading. The actual module is only loaded when its exports are first accessed.
 
-### Simple Import
+**Note**: The plugin runs before Babel's preset transformations, so it directly handles ES6 `import` statements. TypeScript and modern JavaScript are automatically supported.
+
+### Simple Import (CommonJS)
 
 **Before:**
 ```javascript
@@ -51,6 +53,44 @@ const _imports = {
 console.log('Starting...'); // Neither module loaded yet
 _imports.foo.doSomething(); // Only foo loads here, bar never loads
 ```
+
+### ES6 Import
+
+**Before:**
+```javascript
+import React from 'react';
+import { useState } from 'react';
+
+console.log('Starting...');
+const [state] = useState(); // React already loaded
+```
+
+**After:**
+```javascript
+const _module = { initialized: false, value: undefined };
+const _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+const _imports = {
+  get React() {
+    if (!_module.initialized) {
+      _module.value = _interopRequireDefault(require('react'));
+      _module.initialized = true;
+    }
+    return _module.value.default;
+  },
+  get useState() {
+    if (!_module.initialized) {
+      _module.value = _interopRequireDefault(require('react'));
+      _module.initialized = true;
+    }
+    return _module.value.useState;
+  }
+};
+
+console.log('Starting...'); // React not loaded yet
+const [state] = _imports.useState(); // Only loads React when useState is accessed
+```
+
+**Note**: Default and named imports from the same module share the same cache.
 
 ### Destructured Import
 
@@ -98,7 +138,7 @@ The plugin is configured in:
 src/platform/packages/shared/kbn-test/src/jest/transforms/babel/transformer_config.js
 ```
 
-No code changes are required - all top-level `require()` calls in Jest tests are automatically transformed.
+No code changes are required - all top-level `require()` calls and ES6 `import` statements in Jest tests are automatically transformed.
 
 ## What Gets Transformed
 
@@ -107,6 +147,13 @@ No code changes are required - all top-level `require()` calls in Jest tests are
 const foo = require('./foo');
 let bar = require('./bar');
 var baz = require('./baz');
+```
+
+✅ **ES6 import statements:**
+```javascript
+import React from 'react';                    // Default import
+import { useState, useEffect } from 'react';  // Named imports
+import * as utils from './utils';             // Namespace import
 ```
 
 ✅ **Destructured requires:**

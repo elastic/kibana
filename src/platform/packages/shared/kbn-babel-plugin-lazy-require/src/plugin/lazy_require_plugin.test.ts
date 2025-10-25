@@ -272,4 +272,97 @@ describe('@kbn/babel-plugin-lazy-require', () => {
       if (consoleIdx !== -1) expect(moduleIdx).toBeLessThan(consoleIdx);
     });
   });
+
+  describe('ES6 import statements', () => {
+    it('transforms default imports', () => {
+      const code = transformCode(`
+        import foo from './bar';
+        console.log(foo);
+      `);
+
+      expect(code).toContain('_interopRequireDefault');
+      expect(code).toContain('get foo()');
+      expect(code).toContain('_interopRequireDefault(require("./bar"))');
+      expect(code).toContain('return _module.value.default');
+    });
+
+    it('transforms named imports', () => {
+      const code = transformCode(`
+        import { foo, bar } from './utils';
+        console.log(foo, bar);
+      `);
+
+      expect(code).toContain('get foo()');
+      expect(code).toContain('get bar()');
+      expect(code).toContain('require("./utils")');
+      expect(code).toContain('_module.value.foo');
+      expect(code).toContain('_module.value.bar');
+    });
+
+    it('transforms namespace imports', () => {
+      const code = transformCode(`
+        import * as utils from './utils';
+        console.log(utils);
+      `);
+
+      expect(code).toContain('get utils()');
+      expect(code).toContain('require("./utils")');
+      expect(code).toContain('return _module.value');
+      expect(code).not.toContain('_interopRequireDefault');
+    });
+
+    it('shares module cache for named imports from same module', () => {
+      const code = transformCode(`
+        import { foo, bar } from './utils';
+        console.log(foo, bar);
+      `);
+
+      const moduleCaches = code.match(/const _module\d* = \{/g);
+      expect(moduleCaches).toHaveLength(1);
+      expect(code.split('require("./utils")').length).toBe(3); // 2 getters + 1 definition
+    });
+
+    it('handles mixed import types', () => {
+      const code = transformCode(`
+        import React from 'react';
+        import { useState } from 'react';
+        import * as ReactDOM from 'react-dom';
+        console.log(React, useState, ReactDOM);
+      `);
+
+      expect(code).toContain('_interopRequireDefault');
+      expect(code).toContain('get React()');
+      expect(code).toContain('get useState()');
+      expect(code).toContain('get ReactDOM()');
+    });
+
+    it('lazy loads default imports', () => {
+      const loadLog: string[] = [];
+      const code = `
+        import foo from './delayed-module';
+        loadLog.push('start');
+        foo.doSomething();
+        loadLog.push('end');
+      `;
+
+      const transformed = transformCode(code);
+      const context = {
+        loadLog,
+        console,
+        require: (path: string) => {
+          if (path === '@babel/runtime/helpers/interopRequireDefault') {
+            return (obj: any) => (obj && obj.__esModule ? obj : { default: obj });
+          }
+          if (path === './delayed-module') {
+            loadLog.push('loaded');
+            return { __esModule: true, default: { doSomething: () => {} } };
+          }
+          throw new Error(`Unexpected require: ${path}`);
+        },
+      };
+
+      runInNewContext(transformed, context);
+      expect(loadLog).toEqual(['start', 'loaded', 'end']);
+    });
+  });
 });
