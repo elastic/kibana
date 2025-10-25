@@ -90,7 +90,7 @@ describe('initializeUnifiedSearchManager', () => {
         });
       });
 
-      test('Should not return timeRanage change when timeRestore resets to false', async () => {
+      test('Should not return timeRanage change when timeRestore resets to false', (done) => {
         const lastSavedState$ = new BehaviorSubject<DashboardState>(getSampleDashboardState());
         const timeRestore$ = new BehaviorSubject<boolean>(false);
         const unifiedSearchManager = initializeUnifiedSearchManager(
@@ -103,9 +103,27 @@ describe('initializeUnifiedSearchManager', () => {
             useUnifiedSearchIntegration: false,
           }
         );
-        let unsavedChanges: object | undefined;
+        let emitCount = 0;
         unifiedSearchManager.internalApi.startComparing$(lastSavedState$).subscribe((changes) => {
-          unsavedChanges = changes;
+          emitCount++;
+
+          if (emitCount === 1) {
+            expect(changes).toMatchInlineSnapshot(`
+              Object {
+                "timeRange": Object {
+                  "from": "now-30m",
+                  "to": "now",
+                },
+              }
+            `);
+            // reset timeRestore to false
+            timeRestore$.next(false);
+          }
+
+          if (emitCount === 2) {
+            expect(changes).toMatchInlineSnapshot(`Object {}`);
+            done();
+          }
         });
 
         timeRestore$.next(true);
@@ -113,24 +131,6 @@ describe('initializeUnifiedSearchManager', () => {
           to: 'now',
           from: 'now-30m',
         });
-
-        await new Promise((resolve) => setTimeout(resolve, COMPARE_DEBOUNCE + 1));
-
-        expect(unsavedChanges).toMatchInlineSnapshot(`
-            Object {
-              "timeRange": Object {
-                "from": "now-30m",
-                "to": "now",
-              },
-            }
-          `);
-
-        // reset timeRestore to false
-        timeRestore$.next(false);
-
-        await new Promise((resolve) => setTimeout(resolve, COMPARE_DEBOUNCE + 1));
-
-        expect(unsavedChanges).toMatchInlineSnapshot(`Object {}`);
       });
     });
   });
