@@ -61,7 +61,10 @@ function getAgentImageConfig({ returnYaml = false } = {}): string | BuildkiteAge
   return config;
 }
 
-const expandAgentQueue = (queueName: string = 'n2-4-spot') => {
+const expandAgentQueue = (
+  queueName: string = 'n2-4-spot',
+  machineProps?: { diskSizeGb?: number }
+) => {
   const [kind, cores, addition] = queueName.split('-');
   const additionalProps =
     {
@@ -73,6 +76,7 @@ const expandAgentQueue = (queueName: string = 'n2-4-spot') => {
     ...getAgentImageConfig(),
     machineType: `${kind}-standard-${cores}`,
     ...additionalProps,
+    ...machineProps,
   };
 };
 

@@ -864,7 +864,7 @@ export async function pickTestGroupRunOrder() {
                   label: title,
                   command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
                   timeout_in_minutes: 120,
-                  agents: expandAgentQueue('n2-8-spot'),
+                  agents: expandAgentQueue('n2-8-spot', { diskSizeGb: 150 }),
                   env: {
                     SCOUT_TARGET_TYPE: 'local',
                     FTR_CONFIG_GROUP_KEY: key,
