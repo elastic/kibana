@@ -9,7 +9,6 @@
 
 import { transform } from '@babel/core';
 import { runInNewContext } from 'vm';
-// @ts-expect-error - no types available
 import lazyRequirePlugin from './lazy_require_plugin';
 
 describe('@kbn/babel-plugin-lazy-require', () => {

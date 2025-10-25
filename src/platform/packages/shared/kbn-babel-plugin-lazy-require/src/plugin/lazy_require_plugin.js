@@ -83,11 +83,11 @@ module.exports = function lazyRequirePlugin({ types: t }) {
         // PHASE 1: Collect all top-level require declarations
         // ============================================================
         programPath.traverse({
-    VariableDeclaration(path) {
+          VariableDeclaration(path) {
             // Only transform top-level declarations
             if (path.parent !== programPath.node) {
-        return;
-      }
+              return;
+            }
 
             const declarations = path.node.declarations;
             const declarationsToRemove = [];
@@ -199,39 +199,37 @@ module.exports = function lazyRequirePlugin({ types: t }) {
               (t.isObjectProperty(path.parent) || t.isObjectMethod(path.parent)) &&
               path.parent.key === path.node &&
               !path.parent.computed
-      ) {
-        return;
-      }
+            ) {
+              return;
+            }
 
             // Skip member expression properties (e.g., 'bar' in 'foo.bar')
-      if (
-        t.isMemberExpression(path.parent) &&
-        path.parent.property === path.node &&
-        !path.parent.computed
-      ) {
-        return;
-      }
+            if (
+              t.isMemberExpression(path.parent) &&
+              path.parent.property === path.node &&
+              !path.parent.computed
+            ) {
+              return;
+            }
 
             // Skip class method/property keys
-      if (
+            if (
               (t.isClassMethod(path.parent) || t.isClassProperty(path.parent)) &&
               path.parent.key === path.node &&
               !path.parent.computed
-      ) {
-        return;
-      }
+            ) {
+              return;
+            }
 
             // Check scope: only replace if binding is from program scope
             const binding = path.scope.getBinding(varName);
             if (binding && binding.scope !== programPath.scope) {
               // This is a local variable shadowing our import, don't replace
-        return;
-      }
+              return;
+            }
 
             // Replace: foo → _imports.foo
-            path.replaceWith(
-              t.memberExpression(importsVar, t.identifier(varName))
-            );
+            path.replaceWith(t.memberExpression(importsVar, t.identifier(varName)));
           },
         });
 
@@ -240,20 +238,14 @@ module.exports = function lazyRequirePlugin({ types: t }) {
         // ============================================================
         const moduleCacheDeclarations = [];
 
-        for (const [requirePath, moduleInfo] of modules) {
+        for (const [, moduleInfo] of modules) {
           moduleCacheDeclarations.push(
-          t.variableDeclaration('const', [
-            t.variableDeclarator(
+            t.variableDeclaration('const', [
+              t.variableDeclarator(
                 moduleInfo.cacheId,
-              t.objectExpression([
-                  t.objectProperty(
-                    t.identifier('initialized'),
-                    t.booleanLiteral(false)
-                  ),
-                  t.objectProperty(
-                    t.identifier('value'),
-                    t.identifier('undefined')
-                  ),
+                t.objectExpression([
+                  t.objectProperty(t.identifier('initialized'), t.booleanLiteral(false)),
+                  t.objectProperty(t.identifier('value'), t.identifier('undefined')),
                 ])
               ),
             ])
@@ -270,20 +262,13 @@ module.exports = function lazyRequirePlugin({ types: t }) {
           const cacheId = moduleInfo.cacheId;
 
           // Build the require expression: require('path')
-          const requireCall = t.callExpression(
-            t.identifier('require'),
-            [t.stringLiteral(propInfo.moduleRequirePath)]
-          );
+          const requireCall = t.callExpression(t.identifier('require'), [
+            t.stringLiteral(propInfo.moduleRequirePath),
+          ]);
 
           // References to cache fields
-          const cacheInitialized = t.memberExpression(
-            cacheId,
-            t.identifier('initialized')
-          );
-          const cacheValue = t.memberExpression(
-            cacheId,
-            t.identifier('value')
-          );
+          const cacheInitialized = t.memberExpression(cacheId, t.identifier('initialized'));
+          const cacheValue = t.memberExpression(cacheId, t.identifier('value'));
 
           // Determine what to return from getter
           let returnExpression;
@@ -292,10 +277,7 @@ module.exports = function lazyRequirePlugin({ types: t }) {
             returnExpression = cacheValue;
           } else {
             // Destructured property: return _module_foo.value.propertyKey
-            returnExpression = t.memberExpression(
-              cacheValue,
-              t.identifier(propInfo.propertyKey)
-            );
+            returnExpression = t.memberExpression(cacheValue, t.identifier(propInfo.propertyKey));
           }
 
           // Create getter
@@ -310,9 +292,7 @@ module.exports = function lazyRequirePlugin({ types: t }) {
                   t.unaryExpression('!', cacheInitialized),
                   t.blockStatement([
                     // _module_foo.value = require('...');
-                    t.expressionStatement(
-                      t.assignmentExpression('=', cacheValue, requireCall)
-                    ),
+                    t.expressionStatement(t.assignmentExpression('=', cacheValue, requireCall)),
                     // _module_foo.initialized = true;
                     t.expressionStatement(
                       t.assignmentExpression('=', cacheInitialized, t.booleanLiteral(true))
@@ -337,9 +317,7 @@ module.exports = function lazyRequirePlugin({ types: t }) {
                   t.ifStatement(
                     t.unaryExpression('!', cacheInitialized),
                     t.blockStatement([
-                      t.expressionStatement(
-                        t.assignmentExpression('=', cacheValue, requireCall)
-                      ),
+                      t.expressionStatement(t.assignmentExpression('=', cacheValue, requireCall)),
                       t.expressionStatement(
                         t.assignmentExpression('=', cacheInitialized, t.booleanLiteral(true))
                       ),
@@ -361,12 +339,9 @@ module.exports = function lazyRequirePlugin({ types: t }) {
 
         // Insert _imports object
         programPath.unshiftContainer(
-        'body',
-        t.variableDeclaration('const', [
-            t.variableDeclarator(
-              importsVar,
-              t.objectExpression(importProperties)
-            ),
+          'body',
+          t.variableDeclaration('const', [
+            t.variableDeclarator(importsVar, t.objectExpression(importProperties)),
           ])
         );
 
