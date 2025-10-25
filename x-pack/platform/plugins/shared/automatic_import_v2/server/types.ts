@@ -55,7 +55,7 @@ export interface AutomaticImportV2PluginStartDependencies {
   actions: ActionsPluginStart;
   inference: InferenceServerStart;
   licensing: LicensingPluginStart;
-  security?: SecurityPluginStart;
+  security: SecurityPluginStart;
 }
 
 export interface AutomaticImportV2PluginApiRequestHandlerContext {

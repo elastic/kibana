@@ -23,6 +23,11 @@ export const integrationSchemaV1 = schema.object({
         schema.string({
           minLength: 5,
           maxLength: 20,
+          validate(value) {
+            if (!/^\d+\.\d+\.\d+$/.test(value)) {
+              return 'version must be in semantic versioning format (x.y.z)';
+            }
+          },
         })
       ),
       description: schema.maybe(schema.string()),

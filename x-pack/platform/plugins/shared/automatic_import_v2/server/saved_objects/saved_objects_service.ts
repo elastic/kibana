@@ -34,7 +34,7 @@ interface SavedObjectServiceOptions {
 export class AutomaticImportSavedObjectService {
   private savedObjectsClient: SavedObjectsClientContract;
   private logger: Logger;
-  private security: SecurityPluginStart | null = null;
+  private security: SecurityPluginStart;
 
   constructor({ savedObjectsClient, logger, security }: SavedObjectServiceOptions) {
     this.savedObjectsClient = savedObjectsClient;
@@ -102,7 +102,7 @@ export class AutomaticImportSavedObjectService {
     data: IntegrationAttributes,
     options?: SavedObjectsCreateOptions
   ): Promise<SavedObject<IntegrationAttributes>> {
-    const authenticatedUser = this.security?.authc.getCurrentUser(request);
+    const authenticatedUser = this.security.authc.getCurrentUser(request);
     if (!authenticatedUser) {
       throw new Error('No user authenticated');
     }
@@ -409,7 +409,7 @@ export class AutomaticImportSavedObjectService {
     data: DataStreamAttributes,
     options?: SavedObjectsCreateOptions
   ): Promise<SavedObject<DataStreamAttributes>> {
-    const authenticatedUser = this.security?.authc.getCurrentUser(request);
+    const authenticatedUser = this.security.authc.getCurrentUser(request);
     if (!authenticatedUser) {
       throw new Error('No user authenticated');
     }
