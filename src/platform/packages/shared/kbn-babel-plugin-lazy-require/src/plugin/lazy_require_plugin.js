@@ -72,6 +72,9 @@ module.exports = function lazyRequirePlugin({ types: t }) {
         // Track properties by their variable name (what the user accesses)
         const properties = new Map();
 
+        // Track import declarations to remove (only remove after checking top-level usage)
+        const importDeclarationsToRemove = new Map(); // varName -> path
+
         // Generate unique identifier for imports object
         const importsVar = programPath.scope.generateUidIdentifier('imports');
 
@@ -242,6 +245,7 @@ module.exports = function lazyRequirePlugin({ types: t }) {
                   isConst,
                   needsInterop: true,
                 });
+                importDeclarationsToRemove.set(varName, path);
               } else if (t.isImportNamespaceSpecifier(specifier)) {
                 // import * as foo from './bar' -> foo = require('./bar')
                 const varName = specifier.local.name;
@@ -250,6 +254,7 @@ module.exports = function lazyRequirePlugin({ types: t }) {
                   propertyKey: null, // entire module
                   isConst,
                 });
+                importDeclarationsToRemove.set(varName, path);
               } else if (t.isImportSpecifier(specifier)) {
                 // import { foo } from './bar' -> foo = require('./bar').foo
                 const varName = specifier.local.name;
@@ -259,17 +264,119 @@ module.exports = function lazyRequirePlugin({ types: t }) {
                   propertyKey: importedName,
                   isConst,
                 });
+                importDeclarationsToRemove.set(varName, path);
               }
             }
 
-            // Remove the import declaration
-            path.remove();
+            // Don't remove yet - we'll check for top-level usage first
           },
         });
 
         // If no requires found, nothing to transform
         if (properties.size === 0) {
           return;
+        }
+
+        // ============================================================
+        // PHASE 1.5: Detect module-level variable declarations (skip lazy loading for these)
+        // ============================================================
+        // Module-level const/let/var with initializers that use imports can cause issues
+        // (e.g., JSX constants, circular dependencies) because they run during initialization
+        const importsUsedInModuleLevelDeclarations = new Set();
+
+        // Check top-level variable declarations
+        programPath.traverse({
+          VariableDeclaration(varDeclPath) {
+            // Only check top-level declarations
+            if (varDeclPath.parent !== programPath.node) {
+              return;
+            }
+
+            // Skip our own import transformations
+            if (
+              varDeclPath.node.declarations.some(
+                (decl) => decl.init && isSimpleRequireCall(decl.init)
+              )
+            ) {
+              return;
+            }
+
+            // Check if any declarations use our imports in their initializers
+            for (const decl of varDeclPath.node.declarations) {
+              if (decl.init) {
+                varDeclPath.traverse({
+                  Identifier(idPath) {
+                    const name = idPath.node.name;
+                    if (properties.has(name) && idPath.isReferencedIdentifier()) {
+                      importsUsedInModuleLevelDeclarations.add(name);
+                    }
+                  },
+                  // Also check JSXIdentifier for JSX element names
+                  JSXIdentifier(jsxIdPath) {
+                    const name = jsxIdPath.node.name;
+                    if (properties.has(name)) {
+                      importsUsedInModuleLevelDeclarations.add(name);
+                    }
+                  },
+                });
+              }
+            }
+          },
+        });
+
+        // Remove imports that are used in module-level declarations from transformation
+        for (const varName of importsUsedInModuleLevelDeclarations) {
+          properties.delete(varName);
+          importDeclarationsToRemove.delete(varName);
+        }
+
+        // Remove modules that no longer have any properties
+        const modulesToRemove = [];
+        for (const [modulePath] of modules) {
+          let hasProperties = false;
+          for (const [, propInfo] of properties) {
+            if (propInfo.moduleRequirePath === modulePath) {
+              hasProperties = true;
+              break;
+            }
+          }
+          if (!hasProperties) {
+            modulesToRemove.push(modulePath);
+          }
+        }
+        for (const modulePath of modulesToRemove) {
+          modules.delete(modulePath);
+        }
+
+        // If all imports are used in module-level declarations, nothing to transform
+        if (properties.size === 0) {
+          return;
+        }
+
+        // Remove import declarations that we're transforming
+        // Group by path to handle multi-specifier imports
+        const pathsToRemove = new Set();
+        for (const [, importPath] of importDeclarationsToRemove) {
+          pathsToRemove.add(importPath);
+        }
+        for (const importPath of pathsToRemove) {
+          // Check if ALL specifiers from this import are being transformed
+          const specifiers = importPath.node.specifiers;
+          const allTransformed = specifiers.every((spec) => {
+            const localName = spec.local.name;
+            return properties.has(localName);
+          });
+
+          if (allTransformed) {
+            // Remove the entire import
+            importPath.remove();
+          } else {
+            // Partial removal - only remove the specifiers we're transforming
+            const remainingSpecifiers = specifiers.filter((spec) => {
+              return !properties.has(spec.local.name);
+            });
+            importPath.node.specifiers = remainingSpecifiers;
+          }
         }
 
         // ============================================================
