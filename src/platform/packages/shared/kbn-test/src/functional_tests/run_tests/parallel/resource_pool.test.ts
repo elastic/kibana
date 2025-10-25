@@ -91,28 +91,22 @@ describe('ResourcePool', () => {
     slotTwo.release();
   });
 
-  it('queues running requests until capacity becomes available', async () => {
-    const pool = new ResourcePool({ log, totalCpu: 3, minMbAvailable: 0 });
-    const slotOne = acquireSlot(pool, 'config-1', { running: { cpu: 2 } });
+  it('moves warmed slots to running immediately regardless of capacity', async () => {
+    const pool = new ResourcePool({ log, totalCpu: 4, minMbAvailable: 0 });
+    const slotOne = acquireSlot(pool, 'config-1', { running: { cpu: 3 } });
     await slotOne.waitForWarming();
     await slotOne.waitForRunning();
 
-    const slotTwo = acquireSlot(pool, 'config-2', { running: { cpu: 2 } });
+    const slotTwo = acquireSlot(pool, 'config-2', { running: { cpu: 3 } });
     await slotTwo.waitForWarming();
 
-    let running = false;
-    const runningPromise = slotTwo.waitForRunning().then(() => {
-      running = true;
-    });
+    await slotTwo.waitForRunning();
 
-    await flushTasks();
-    expect(running).toBe(false);
-
-    slotOne.release();
-    await runningPromise;
-
+    const running = slotTwo.getPhase() === Phase.Running;
     expect(running).toBe(true);
     expect(slotTwo.getPhase()).toBe(Phase.Running);
+
+    slotOne.release();
     slotTwo.release();
   });
 

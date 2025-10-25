@@ -406,6 +406,7 @@ export async function runTestsParallel(
         resolveWarmingSignal();
         throw error;
       }
+
       resolveWarmingSignal();
       await warmPromise;
       const startFinishTime = Date.now();

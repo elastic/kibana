@@ -341,29 +341,7 @@ export class ResourcePool {
 
     if (phase === Phase.Running) {
       const runningResources = metadata.resources.running;
-      const warmingResources = metadata.resources.warming;
-
-      if (runningResources.exclusive && this.runningExclusiveCount > 0) {
-        return false;
-      }
-
-      const cpuAfter = this.usedCpu - warmingResources.cpu + runningResources.cpu;
-      if (cpuAfter - this.totalCpuBudget > EPSILON) {
-        return false;
-      }
-      if (cpuAfter < -EPSILON) {
-        return false;
-      }
-
-      const memoryAfter = this.usedMemory - warmingResources.memory + runningResources.memory;
-      if (memoryAfter - this.memoryCapacity > EPSILON) {
-        return false;
-      }
-      if (memoryAfter < -EPSILON) {
-        return false;
-      }
-
-      return true;
+      return !(runningResources.exclusive && this.runningExclusiveCount > 0);
     }
 
     return false;
