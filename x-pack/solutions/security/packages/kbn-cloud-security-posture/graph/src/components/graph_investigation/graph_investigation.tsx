@@ -290,7 +290,6 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       return lastValidEsQuery.current;
     }, [dataView, kquery, notifications, searchFilters, uiSettings]);
 
-    // Calculate event time range for accurate log filtering
     const eventTimeRange = useMemo(() => getEventTimeRange(originEventIds), [originEventIds]);
 
     const { data, refresh, isFetching, isError, error } = useFetchGraphData({

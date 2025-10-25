@@ -15,14 +15,11 @@
 export const getEventTimeRange = (
   originEventIds: Array<{ id: string; isAlert: boolean; originalTime?: string }>
 ): { eventTimeStart?: string; eventTimeEnd?: string } => {
-  // Extract original times from alerts
   const originalTimes = originEventIds
     .filter((event) => event.isAlert && event.originalTime)
     .map((event) => event.originalTime as string);
 
   if (originalTimes.length === 0) {
-    // No original times available, don't provide event time range
-    // Server will use single time range for backward compatibility
     return { eventTimeStart: undefined, eventTimeEnd: undefined };
   }
 

@@ -9,6 +9,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { getGraph, type GetGraphParams } from './v1';
 import { fetchGraph } from './fetch_graph';
 import { parseRecords } from './parse_records';
+import { getDefaultIndexPatterns } from './constants';
 
 jest.mock('./fetch_graph');
 jest.mock('./parse_records');
@@ -91,7 +92,7 @@ describe('getGraph', () => {
 
     expect(fetchGraph).toHaveBeenCalledWith(
       expect.objectContaining({
-        indexPatterns: [`.alerts-security.alerts-defaultSpace`, 'logs-*'],
+        indexPatterns: getDefaultIndexPatterns('defaultSpace'),
       })
     );
   });
@@ -134,7 +135,7 @@ describe('getGraph', () => {
       eventTimeStart: '2025-01-15T10:00:00.000Z||-30m',
       eventTimeEnd: '2025-01-15T14:00:00.000Z||+30m',
       originEventIds,
-      indexPatterns: [`.alerts-security.alerts-production`, 'logs-*'],
+      indexPatterns: getDefaultIndexPatterns('production'),
       spaceId: 'production',
       esQuery: undefined,
     });

@@ -10,6 +10,7 @@ import { fetchGraph } from './fetch_graph';
 import type { Logger } from '@kbn/core/server';
 import type { OriginEventId, EsQuery } from './types';
 import { getEnrichPolicyId } from '@kbn/cloud-security-posture-common/utils/helpers';
+import { LOGS_INDEX_PATTERN, getSecurityAlertsIndexPattern } from './constants';
 
 describe('fetchGraph', () => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -318,7 +319,7 @@ describe('fetchGraph', () => {
       eventTimeEnd: '2025-10-25T14:17:38.544Z||+30m',
       originEventIds,
       showUnknownTarget: false,
-      indexPatterns: ['logs-*', '.alerts-security.alerts-default'],
+      indexPatterns: [LOGS_INDEX_PATTERN, getSecurityAlertsIndexPattern('default')],
       spaceId: 'default',
       esQuery: undefined as EsQuery | undefined,
     };
@@ -329,7 +330,6 @@ describe('fetchGraph', () => {
     const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
     const filterArg = esqlCallArgs[0].filter as any;
 
-    // Verify dual time range logic is applied
     expect(filterArg?.bool?.filter?.[0]?.bool?.should).toHaveLength(2);
 
     // Check alert time range
@@ -344,9 +344,7 @@ describe('fetchGraph', () => {
     // Check log time range
     const logFilter = filterArg?.bool?.filter?.[0]?.bool?.should?.[1]?.bool?.filter;
     expect(logFilter).toContainEqual({
-      bool: {
-        must_not: [{ wildcard: { _index: '*.alerts-security.alerts-*' } }],
-      },
+      wildcard: { _index: LOGS_INDEX_PATTERN },
     });
     expect(logFilter).toContainEqual({
       range: { '@timestamp': { gte: params.eventTimeStart, lte: params.eventTimeEnd } },
@@ -362,7 +360,7 @@ describe('fetchGraph', () => {
       end: '2025-10-25T15:47:38.544Z||+30m',
       originEventIds,
       showUnknownTarget: false,
-      indexPatterns: ['logs-*', '.alerts-security.alerts-default'],
+      indexPatterns: [LOGS_INDEX_PATTERN, getSecurityAlertsIndexPattern('default')],
       spaceId: 'default',
       esQuery: undefined as EsQuery | undefined,
     };
@@ -373,7 +371,6 @@ describe('fetchGraph', () => {
     const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
     const filterArg = esqlCallArgs[0].filter as any;
 
-    // Verify single time range logic is applied (backward compatibility)
     expect(filterArg?.bool?.filter?.[0]?.range).toBeDefined();
     expect(filterArg?.bool?.filter?.[0]?.range?.['@timestamp']).toEqual({
       gte: params.start,

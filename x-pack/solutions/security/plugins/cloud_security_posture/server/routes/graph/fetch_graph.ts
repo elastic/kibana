@@ -17,6 +17,7 @@ import {
 } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { getEnrichPolicyId } from '@kbn/cloud-security-posture-common/utils/helpers';
 import type { EsQuery, GraphEdge, OriginEventId } from './types';
+import { SECURITY_ALERTS_PARTIAL_IDENTIFIER, LOGS_INDEX_PATTERN } from './constants';
 
 interface BuildEsqlQueryParams {
   indexPatterns: string[];
@@ -66,7 +67,6 @@ export const fetchGraph = async ({
 
   const isEnrichPolicyExists = await checkEnrichPolicyExists(esClient, logger, spaceId);
 
-  const SECURITY_ALERTS_PARTIAL_IDENTIFIER = '.alerts-security.alerts-';
   const alertsMappingsIncluded = indexPatterns.some((indexPattern) =>
     indexPattern.includes(SECURITY_ALERTS_PARTIAL_IDENTIFIER)
   );
@@ -116,8 +116,6 @@ const buildDslFilter = (
   eventTimeStart?: string | number,
   eventTimeEnd?: string | number
 ) => {
-  const SECURITY_ALERTS_PARTIAL_IDENTIFIER = '.alerts-security.alerts-';
-
   // Determine if we should use dual time ranges
   const useDualTimeRange = eventTimeStart !== undefined && eventTimeEnd !== undefined;
   return {
@@ -143,13 +141,7 @@ const buildDslFilter = (
                     {
                       bool: {
                         filter: [
-                          {
-                            bool: {
-                              must_not: [
-                                { wildcard: { _index: `*${SECURITY_ALERTS_PARTIAL_IDENTIFIER}*` } },
-                              ],
-                            },
-                          },
+                          { wildcard: { _index: LOGS_INDEX_PATTERN } },
                           { range: { '@timestamp': { gte: eventTimeStart, lte: eventTimeEnd } } },
                         ],
                       },
@@ -228,7 +220,6 @@ const buildEsqlQuery = ({
   spaceId,
   alertsMappingsIncluded,
 }: BuildEsqlQueryParams): string => {
-  const SECURITY_ALERTS_PARTIAL_IDENTIFIER = '.alerts-security.alerts-';
   const enrichPolicyName = getEnrichPolicyId(spaceId);
 
   const query = `FROM ${indexPatterns
