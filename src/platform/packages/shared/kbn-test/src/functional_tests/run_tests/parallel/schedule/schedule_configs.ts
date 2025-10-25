@@ -31,11 +31,10 @@ interface MachineCapacity {
   memory: number;
 }
 
-type PhaseName = 'warming' | 'idle' | 'running';
+type PhaseName = 'warming' | 'running';
 
 const ZERO_SLOT_RESOURCES: SlotResources = {
   warming: { cpu: 0, memory: 0, exclusive: false },
-  idle: { cpu: 0, memory: 0 },
   running: { cpu: 0, memory: 0, exclusive: false },
 };
 
@@ -101,57 +100,35 @@ interface CandidateScore {
 const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
 
 function estimatePhaseDurations(totalMinutes: number): Record<PhaseName, number> {
-  // Estimate phase durations based on historic behaviour: warm ~15%, idle ~5%,
-  // keep at least half of the time for the actual run. This keeps the scheduler
-  // aware of phase contention without needing exact timings per config.
+  // Estimate phase durations based on historic behaviour: warm ~15%,
+  // keep at least half of the time for the actual run. Without an idle phase
+  // we reserve the rest of the time for running.
   if (totalMinutes <= 0) {
     return {
       warming: 0,
-      idle: 0,
       running: 0,
     };
   }
 
-  const desiredWarm = clamp(totalMinutes * 0.15, 1, Math.min(4, totalMinutes));
-  const desiredIdle = clamp(totalMinutes * 0.05, 0.25, Math.min(2, totalMinutes));
-
-  let warming = Math.min(desiredWarm, totalMinutes);
-  let idle = Math.min(desiredIdle, totalMinutes - warming);
-  let running = Math.max(totalMinutes - warming - idle, 0);
+  let warming = Math.min(clamp(totalMinutes * 0.15, 1, Math.min(4, totalMinutes)), totalMinutes);
+  let running = Math.max(totalMinutes - warming, 0);
 
   const minimumRunning = clamp(totalMinutes * 0.5, 0, totalMinutes);
 
   if (running < minimumRunning) {
-    let deficit = minimumRunning - running;
-
-    const idleReduction = Math.min(deficit, Math.max(0, idle - 0.25));
-    idle -= idleReduction;
-    deficit -= idleReduction;
-
-    const warmReduction = Math.min(deficit, Math.max(0, warming - 0.5));
-    warming -= warmReduction;
-    deficit -= warmReduction;
-
-    running = Math.max(totalMinutes - warming - idle, 0);
-
-    if (deficit > 0 && warming + idle > 0) {
-      const scale = totalMinutes / (warming + idle + running || totalMinutes);
-      warming *= scale;
-      idle *= scale;
-      running = Math.max(totalMinutes - warming - idle, 0);
-    }
+    const deficit = minimumRunning - running;
+    warming = Math.max(0, warming - deficit);
+    running = Math.max(totalMinutes - warming, minimumRunning);
   }
 
-  if (warming + idle + running > totalMinutes + EPSILON) {
-    const scale = totalMinutes / (warming + idle + running);
+  if (warming + running > totalMinutes + EPSILON) {
+    const scale = totalMinutes / (warming + running);
     warming *= scale;
-    idle *= scale;
-    running = Math.max(totalMinutes - warming - idle, 0);
+    running = Math.max(totalMinutes - warming, 0);
   }
 
   return {
     warming,
-    idle,
     running,
   };
 }
@@ -165,17 +142,6 @@ function buildPhaseEstimates(config: ScheduleConfigOutput): PhaseEstimate[] {
       name: 'warming',
       duration: durations.warming,
       resources: config.resources.warming,
-    });
-  }
-
-  if (durations.idle > 0) {
-    phases.push({
-      name: 'idle',
-      duration: durations.idle,
-      resources: {
-        cpu: config.resources.idle.cpu,
-        memory: config.resources.idle.memory,
-      },
     });
   }
 

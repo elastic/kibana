@@ -40,10 +40,6 @@ export interface SlotResources {
     memory: number;
     exclusive: boolean;
   };
-  idle: {
-    cpu: number;
-    memory: number;
-  };
   running: {
     cpu: number;
     memory: number;
@@ -114,10 +110,6 @@ export function getSlotResources(capabilities: ServerCapabilities): SlotResource
   const kibanaCpu = hasBrowser ? 0.5 : Math.max(1, kibanaNodes * 0.5);
 
   return {
-    idle: {
-      cpu: numNodes * 0.5,
-      memory: esMemory + kibanaMemory,
-    },
     warming: {
       cpu: numNodes * 1.5,
       memory: esMemory,

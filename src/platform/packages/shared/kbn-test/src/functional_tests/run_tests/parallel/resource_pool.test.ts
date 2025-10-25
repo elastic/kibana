@@ -27,7 +27,6 @@ describe('ResourcePool', () => {
   const createResources = (overrides?: PartialSlotResources): SlotResources => {
     return {
       warming: { cpu: 1, memory: 512, exclusive: false, ...overrides?.warming },
-      idle: { cpu: 0.5, memory: 128, ...overrides?.idle },
       running: { cpu: 1, memory: 1024, exclusive: false, ...overrides?.running },
     };
   };
@@ -180,6 +179,5 @@ describe('ResourcePool', () => {
 
 interface PartialSlotResources {
   warming?: Partial<SlotResources['warming']>;
-  idle?: Partial<SlotResources['idle']>;
   running?: Partial<SlotResources['running']>;
 }

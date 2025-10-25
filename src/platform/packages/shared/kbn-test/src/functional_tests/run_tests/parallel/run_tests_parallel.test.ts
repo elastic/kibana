@@ -48,7 +48,6 @@ jest.mock('./read_config', () => ({
 jest.mock('./get_slot_resources', () => ({
   getSlotResources: jest.fn(() => ({
     warming: { cpu: 1, memory: 1024, exclusive: false },
-    idle: { cpu: 0.5, memory: 512, exclusive: false },
     running: { cpu: 1, memory: 1024, exclusive: false },
   })),
 }));

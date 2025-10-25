@@ -49,8 +49,6 @@ interface RunnerState {
   warmStartedAt?: number;
   warmDurationMs?: number;
   warmFinishedAt?: number;
-  idleStartedAt?: number;
-  idleDurationMs?: number;
   runStartedAt?: number;
   runDurationMs?: number;
   completedAt?: number;
@@ -286,15 +284,6 @@ export async function runTestsParallel(
           parts.push(`warm=${msToDuration(warmMs)}`);
         }
 
-        const idleMs =
-          state.idleDurationMs ??
-          (state.idleStartedAt && phase !== Phase.Warming
-            ? Math.max(0, now - state.idleStartedAt)
-            : undefined);
-        if (idleMs !== undefined && (phase === Phase.IdleBeforeRun || phase === Phase.Running)) {
-          parts.push(`idle=${msToDuration(idleMs)}`);
-        }
-
         const runningMs =
           state.runDurationMs ??
           (state.runStartedAt && phase === Phase.Running
@@ -314,8 +303,6 @@ export async function runTestsParallel(
 
         if (phase === Phase.Running) {
           coloredLine = chalk.cyan(baseLine);
-        } else if (phase === Phase.IdleBeforeRun) {
-          coloredLine = chalk.cyan.dim(baseLine);
         } else if (phase === Phase.Warming) {
           coloredLine = chalk.yellow(baseLine);
         } else if (phase === Phase.BeforeStart) {
@@ -424,7 +411,6 @@ export async function runTestsParallel(
       const startFinishTime = Date.now();
       state.warmDurationMs = startFinishTime - startTime;
       state.warmFinishedAt = startFinishTime;
-      state.idleStartedAt = startFinishTime;
 
       if (runnerIndex > 0) {
         await runningOrderSignals[runnerIndex - 1].promise;
@@ -442,7 +428,6 @@ export async function runTestsParallel(
         throw error;
       }
       const runStartTime = Date.now();
-      state.idleDurationMs = Math.max(0, runStartTime - (state.idleStartedAt ?? runStartTime));
       state.runStartedAt = runStartTime;
       resolveRunningSignal();
       const runProc = await runPromise;

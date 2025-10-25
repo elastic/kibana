@@ -17,7 +17,6 @@ const EPSILON = 0.000001;
 export enum Phase {
   BeforeStart = 'before_start',
   Warming = 'warming',
-  IdleBeforeRun = 'idle_before_run',
   Running = 'running',
   Done = 'done',
 }
@@ -142,11 +141,10 @@ export class ResourcePool {
   private async waitForRunning(slot: Slot) {
     const phase = this.getPhase(slot);
 
-    if (phase === Phase.Warming) {
-      this.applyPhaseChange(slot, Phase.IdleBeforeRun);
-      this.logStats('warming-finished');
-      this.allocate();
-    } else if (phase !== Phase.IdleBeforeRun) {
+    if (phase !== Phase.Warming) {
+      if (phase === Phase.Running) {
+        return;
+      }
       throw new Error(`Cannot run slot in phase [${phase}]`);
     }
 
@@ -173,9 +171,6 @@ export class ResourcePool {
     } else if (phase === Phase.Warming) {
       this.removeResources(metadata.resources.warming, Phase.Warming);
       this.logStats('release-warming');
-    } else if (phase === Phase.IdleBeforeRun) {
-      this.removeResources(metadata.resources.idle, Phase.IdleBeforeRun);
-      this.logStats('release-idle');
     } else if (phase === Phase.Running) {
       this.removeResources(metadata.resources.running, Phase.Running);
       this.logStats('release-running');
@@ -247,7 +242,7 @@ export class ResourcePool {
     let selectedIndex = -1;
     let selectedMetadata: SlotMetadata | undefined;
 
-    const expectedPhase = phase === Phase.Warming ? Phase.BeforeStart : Phase.IdleBeforeRun;
+    const expectedPhase = phase === Phase.Warming ? Phase.BeforeStart : Phase.Warming;
 
     for (let index = 0; index < queue.length; index += 1) {
       const entry = queue[index];
@@ -315,10 +310,7 @@ export class ResourcePool {
       return metadata.resources.running;
     }
 
-    return {
-      cpu: metadata.resources.idle.cpu,
-      memory: metadata.resources.idle.memory,
-    };
+    throw new Error(`Unsupported phase resource lookup [${phase}]`);
   }
 
   private canAllocatePhase(slot: Slot, phase: Phase): boolean {
@@ -349,13 +341,13 @@ export class ResourcePool {
 
     if (phase === Phase.Running) {
       const runningResources = metadata.resources.running;
-      const idleResources = metadata.resources.idle;
+      const warmingResources = metadata.resources.warming;
 
       if (runningResources.exclusive && this.runningExclusiveCount > 0) {
         return false;
       }
 
-      const cpuAfter = this.usedCpu - idleResources.cpu + runningResources.cpu;
+      const cpuAfter = this.usedCpu - warmingResources.cpu + runningResources.cpu;
       if (cpuAfter - this.totalCpuBudget > EPSILON) {
         return false;
       }
@@ -363,7 +355,7 @@ export class ResourcePool {
         return false;
       }
 
-      const memoryAfter = this.usedMemory - idleResources.memory + runningResources.memory;
+      const memoryAfter = this.usedMemory - warmingResources.memory + runningResources.memory;
       if (memoryAfter - this.memoryCapacity > EPSILON) {
         return false;
       }
@@ -387,16 +379,12 @@ export class ResourcePool {
 
     if (previousPhase === Phase.Warming) {
       this.removeResources(metadata.resources.warming, Phase.Warming);
-    } else if (previousPhase === Phase.IdleBeforeRun) {
-      this.removeResources(metadata.resources.idle, Phase.IdleBeforeRun);
     } else if (previousPhase === Phase.Running) {
       this.removeResources(metadata.resources.running, Phase.Running);
     }
 
     if (phase === Phase.Warming) {
       this.addResources(metadata.resources.warming, Phase.Warming);
-    } else if (phase === Phase.IdleBeforeRun) {
-      this.addResources(metadata.resources.idle, Phase.IdleBeforeRun);
     } else if (phase === Phase.Running) {
       this.addResources(metadata.resources.running, Phase.Running);
     }
