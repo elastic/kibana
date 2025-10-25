@@ -33,8 +33,13 @@ describe('@kbn/babel-plugin-lazy-require', () => {
     return ctx;
   }
 
-  function transformCode(code: string): string {
-    const result = transform(code, { plugins: [lazyRequirePlugin], filename: 'test.js' });
+  function transformCode(code: string, filename = 'test.js'): string {
+    const plugins: any[] = [lazyRequirePlugin];
+    // Add JSX support if the code contains JSX
+    if (code.includes('<') && code.includes('>')) {
+      plugins.unshift('@babel/plugin-syntax-jsx');
+    }
+    const result = transform(code, { plugins, filename });
     return result?.code || '';
   }
 
@@ -363,6 +368,60 @@ describe('@kbn/babel-plugin-lazy-require', () => {
 
       runInNewContext(transformed, context);
       expect(loadLog).toEqual(['start', 'loaded', 'end']);
+    });
+  });
+
+  describe('module-level usage exclusion', () => {
+    it('does not transform imports used in module-level variable declarations', () => {
+      const code = transformCode(`
+        import { foo } from './utils';
+        const x = foo;
+      `);
+
+      expect(code).toMatch(/import\s+\{/); // Import statement kept
+      expect(code).toContain('foo');
+      expect(code).not.toContain('_imports');
+    });
+
+    it('does not transform requires used in module-level function calls', () => {
+      const code = transformCode(`
+        const Path = require('path');
+        const findRoot = () => Path.parse(__dirname);
+        const { root } = findRoot();
+      `);
+
+      expect(code).toContain('const Path = require');
+      expect(code).toContain('Path.parse');
+      expect(code).not.toContain('_imports');
+    });
+
+    it('partially transforms imports when some used at module-level', () => {
+      const code = transformCode(`
+        import { EuiCode, EuiButton } from '@elastic/eui';
+        const directive = <EuiCode>test</EuiCode>;
+        function Component() {
+          return <EuiButton />;
+        }
+      `);
+
+      // EuiCode should be kept as import (used in module-level const)
+      expect(code).toContain('EuiCode');
+      expect(code).not.toContain('get EuiCode');
+
+      // EuiButton should be lazy (used in function)
+      expect(code).toContain('get EuiButton');
+    });
+
+    it('transforms imports used only in functions', () => {
+      const code = transformCode(`
+        import { foo } from './utils';
+        function test() {
+          return foo;
+        }
+      `);
+
+      expect(code).toContain('get foo');
+      expect(code).not.toMatch(/import\s+\{/); // No import statement
     });
   });
 });

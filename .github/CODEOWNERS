@@ -444,6 +444,7 @@ src/platform/packages/shared/kbn-apm-ui-shared @elastic/obs-ux-infra_services-te
 src/platform/packages/shared/kbn-apm-utils @elastic/obs-ux-infra_services-team
 src/platform/packages/shared/kbn-avc-banner @elastic/security-defend-workflows
 src/platform/packages/shared/kbn-axe-config @elastic/appex-qa
+src/platform/packages/shared/kbn-babel-plugin-lazy-require @elastic/kibana-operations
 src/platform/packages/shared/kbn-babel-register @elastic/kibana-operations
 src/platform/packages/shared/kbn-background-search @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-bench @elastic/obs-ui-devex-team

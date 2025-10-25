@@ -72,8 +72,8 @@ module.exports = function lazyRequirePlugin({ types: t }) {
         // Track properties by their variable name (what the user accesses)
         const properties = new Map();
 
-        // Track import declarations to remove (only remove after checking top-level usage)
-        const importDeclarationsToRemove = new Map(); // varName -> path
+        // Track declarations to remove (only remove after checking module-level usage)
+        const declarationsToRemove = new Map(); // varName -> { type: 'import'|'require', path, index? }
 
         // Generate unique identifier for imports object
         const importsVar = programPath.scope.generateUidIdentifier('imports');
@@ -89,7 +89,7 @@ module.exports = function lazyRequirePlugin({ types: t }) {
             }
 
             const declarations = path.node.declarations;
-            const declarationsToRemove = [];
+            const declIndicesToRemove = [];
 
             for (let i = 0; i < declarations.length; i++) {
               const decl = declarations[i];
@@ -138,7 +138,8 @@ module.exports = function lazyRequirePlugin({ types: t }) {
                   propertyKey: null, // null = return entire module
                   isConst,
                 });
-                declarationsToRemove.push(i);
+                declIndicesToRemove.push(i);
+                declarationsToRemove.set(varName, { type: 'require', path, index: i });
               } else if (t.isObjectPattern(decl.id)) {
                 // Destructured: const { a, b } = require('./foo')
                 let canTransform = true;
@@ -166,24 +167,17 @@ module.exports = function lazyRequirePlugin({ types: t }) {
                       propertyKey: propKey,
                       isConst,
                     });
+                    // Store removal info for the first property (they all share the same declaration)
+                    if (!declarationsToRemove.has(varName)) {
+                      declarationsToRemove.set(varName, { type: 'require', path, index: i });
+                    }
                   }
-                  declarationsToRemove.push(i);
+                  declIndicesToRemove.push(i);
                 }
               }
             }
 
-            // Remove transformed declarations from the original statement
-            if (declarationsToRemove.length > 0) {
-              // Remove in reverse order to maintain indices
-              for (let i = declarationsToRemove.length - 1; i >= 0; i--) {
-                declarations.splice(declarationsToRemove[i], 1);
-              }
-
-              // If all declarations removed, remove the entire statement
-              if (declarations.length === 0) {
-                path.remove();
-              }
-            }
+            // Don't remove yet - we'll check for module-level usage first
           },
 
           ImportDeclaration(path) {
@@ -245,7 +239,7 @@ module.exports = function lazyRequirePlugin({ types: t }) {
                   isConst,
                   needsInterop: true,
                 });
-                importDeclarationsToRemove.set(varName, path);
+                declarationsToRemove.set(varName, { type: 'import', path });
               } else if (t.isImportNamespaceSpecifier(specifier)) {
                 // import * as foo from './bar' -> foo = require('./bar')
                 const varName = specifier.local.name;
@@ -254,7 +248,7 @@ module.exports = function lazyRequirePlugin({ types: t }) {
                   propertyKey: null, // entire module
                   isConst,
                 });
-                importDeclarationsToRemove.set(varName, path);
+                declarationsToRemove.set(varName, { type: 'import', path });
               } else if (t.isImportSpecifier(specifier)) {
                 // import { foo } from './bar' -> foo = require('./bar').foo
                 const varName = specifier.local.name;
@@ -264,7 +258,7 @@ module.exports = function lazyRequirePlugin({ types: t }) {
                   propertyKey: importedName,
                   isConst,
                 });
-                importDeclarationsToRemove.set(varName, path);
+                declarationsToRemove.set(varName, { type: 'import', path });
               }
             }
 
@@ -278,13 +272,15 @@ module.exports = function lazyRequirePlugin({ types: t }) {
         }
 
         // ============================================================
-        // PHASE 1.5: Detect module-level variable declarations (skip lazy loading for these)
+        // PHASE 1.5: Detect module-level code that uses imports (skip lazy loading)
         // ============================================================
-        // Module-level const/let/var with initializers that use imports can cause issues
-        // (e.g., JSX constants, circular dependencies) because they run during initialization
-        const importsUsedInModuleLevelDeclarations = new Set();
+        // Module-level code runs during initialization, so lazy loading doesn't help
+        // and can cause errors. We need to detect imports used in:
+        // 1. Module-level variable initializers (including JSX)
+        // 2. Module-level function calls (even if the import is used deep in the call chain)
+        const importsUsedInModuleLevelCode = new Set();
 
-        // Check top-level variable declarations
+        // Check top-level variable declarations that might use imports
         programPath.traverse({
           VariableDeclaration(varDeclPath) {
             // Only check top-level declarations
@@ -301,33 +297,29 @@ module.exports = function lazyRequirePlugin({ types: t }) {
               return;
             }
 
-            // Check if any declarations use our imports in their initializers
-            for (const decl of varDeclPath.node.declarations) {
-              if (decl.init) {
-                varDeclPath.traverse({
-                  Identifier(idPath) {
-                    const name = idPath.node.name;
-                    if (properties.has(name) && idPath.isReferencedIdentifier()) {
-                      importsUsedInModuleLevelDeclarations.add(name);
-                    }
-                  },
-                  // Also check JSXIdentifier for JSX element names
-                  JSXIdentifier(jsxIdPath) {
-                    const name = jsxIdPath.node.name;
-                    if (properties.has(name)) {
-                      importsUsedInModuleLevelDeclarations.add(name);
-                    }
-                  },
-                });
-              }
-            }
+            // Check if any declarations' initializers use imports
+            varDeclPath.traverse({
+              Identifier(idPath) {
+                const name = idPath.node.name;
+                if (properties.has(name) && idPath.isReferencedIdentifier()) {
+                  importsUsedInModuleLevelCode.add(name);
+                }
+              },
+              // Also check JSXIdentifier for JSX element names
+              JSXIdentifier(jsxIdPath) {
+                const name = jsxIdPath.node.name;
+                if (properties.has(name)) {
+                  importsUsedInModuleLevelCode.add(name);
+                }
+              },
+            });
           },
         });
 
-        // Remove imports that are used in module-level declarations from transformation
-        for (const varName of importsUsedInModuleLevelDeclarations) {
+        // Remove imports/requires that are used in module-level code from transformation
+        for (const varName of importsUsedInModuleLevelCode) {
           properties.delete(varName);
-          importDeclarationsToRemove.delete(varName);
+          declarationsToRemove.delete(varName);
         }
 
         // Remove modules that no longer have any properties
@@ -348,18 +340,28 @@ module.exports = function lazyRequirePlugin({ types: t }) {
           modules.delete(modulePath);
         }
 
-        // If all imports are used in module-level declarations, nothing to transform
+        // If all imports are used in module-level code, nothing to transform
         if (properties.size === 0) {
           return;
         }
 
-        // Remove import declarations that we're transforming
-        // Group by path to handle multi-specifier imports
-        const pathsToRemove = new Set();
-        for (const [, importPath] of importDeclarationsToRemove) {
-          pathsToRemove.add(importPath);
+        // Remove declarations that we're transforming
+        const requirePathsToProcess = new Set();
+        const importPathsToRemove = new Set();
+
+        for (const [varName, declInfo] of declarationsToRemove) {
+          // Only process if this property is still being transformed
+          if (properties.has(varName)) {
+            if (declInfo.type === 'import') {
+              importPathsToRemove.add(declInfo.path);
+            } else if (declInfo.type === 'require') {
+              requirePathsToProcess.add(declInfo.path);
+            }
+          }
         }
-        for (const importPath of pathsToRemove) {
+
+        // Handle import removals (can be partial)
+        for (const importPath of importPathsToRemove) {
           // Check if ALL specifiers from this import are being transformed
           const specifiers = importPath.node.specifiers;
           const allTransformed = specifiers.every((spec) => {
@@ -376,6 +378,48 @@ module.exports = function lazyRequirePlugin({ types: t }) {
               return !properties.has(spec.local.name);
             });
             importPath.node.specifiers = remainingSpecifiers;
+          }
+        }
+
+        // Handle require removals
+        for (const requirePath of requirePathsToProcess) {
+          const declarations = requirePath.node.declarations;
+          const indicesToRemove = [];
+
+          for (let i = 0; i < declarations.length; i++) {
+            const decl = declarations[i];
+            // Check if this declaration should be removed
+            let shouldRemove = false;
+
+            if (t.isIdentifier(decl.id) && properties.has(decl.id.name)) {
+              shouldRemove = true;
+            } else if (t.isObjectPattern(decl.id)) {
+              // Check if any property is being transformed
+              const allPropsTransformed = decl.id.properties.every((prop) => {
+                return (
+                  t.isObjectProperty(prop) &&
+                  t.isIdentifier(prop.value) &&
+                  properties.has(prop.value.name)
+                );
+              });
+              if (allPropsTransformed) {
+                shouldRemove = true;
+              }
+            }
+
+            if (shouldRemove) {
+              indicesToRemove.push(i);
+            }
+          }
+
+          // Remove in reverse order to maintain indices
+          for (let i = indicesToRemove.length - 1; i >= 0; i--) {
+            declarations.splice(indicesToRemove[i], 1);
+          }
+
+          // If all declarations removed, remove the entire statement
+          if (declarations.length === 0) {
+            requirePath.remove();
           }
         }
 
