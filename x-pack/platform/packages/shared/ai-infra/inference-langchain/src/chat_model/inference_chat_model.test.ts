@@ -581,48 +581,22 @@ describe('InferenceChatModel', () => {
       const response = createStreamResponse([
         {
           tool_calls: [
-            {
-              toolCallId: 'my-tool-call-id',
-              index: 0,
-              function: { name: 'myfunction', arguments: '' },
-            },
+            { toolCallId: 'my-tool-call-id', index: 0, function: { name: '', arguments: '' } },
           ],
         },
         {
-          tool_calls: [
-            {
-              toolCallId: 'my-tool-call-id',
-              index: 0,
-              function: { name: 'myfunction', arguments: '' },
-            },
-          ],
+          tool_calls: [{ toolCallId: '', index: 0, function: { name: 'myfun', arguments: '' } }],
         },
         {
           tool_calls: [
-            {
-              toolCallId: 'my-tool-call-id',
-              index: 0,
-              function: { name: 'myfunction', arguments: ' { "' },
-            },
+            { toolCallId: '', index: 0, function: { name: 'ction', arguments: ' { "' } },
           ],
         },
         {
-          tool_calls: [
-            {
-              toolCallId: 'my-tool-call-id',
-              index: 0,
-              function: { name: 'myfunction', arguments: 'arg1": ' },
-            },
-          ],
+          tool_calls: [{ toolCallId: '', index: 0, function: { name: '', arguments: 'arg1": ' } }],
         },
         {
-          tool_calls: [
-            {
-              toolCallId: 'my-tool-call-id',
-              index: 0,
-              function: { name: 'myfunction', arguments: '42 }' },
-            },
-          ],
+          tool_calls: [{ toolCallId: '', index: 0, function: { name: '', arguments: '42 }' } }],
         },
       ]);
       chatComplete.mockReturnValue(response);
