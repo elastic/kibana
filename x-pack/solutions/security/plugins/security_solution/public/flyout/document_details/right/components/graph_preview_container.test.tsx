@@ -100,6 +100,7 @@ describe('<GraphPreviewContainer />', () => {
       eventIds: [],
       hasGraphRepresentation: true,
       isAlert: true,
+      originalTime: null,
     });
 
     const { getByTestId, queryByTestId, findByTestId } = renderGraphPreview();
@@ -158,6 +159,7 @@ describe('<GraphPreviewContainer />', () => {
       eventIds: ['eventId'],
       isAlert: true,
       hasGraphRepresentation: true,
+      originalTime: timestamp,
     });
 
     const { getByTestId, queryByTestId, findByTestId } = renderGraphPreview();
@@ -183,9 +185,11 @@ describe('<GraphPreviewContainer />', () => {
     expect(mockUseFetchGraphData.mock.calls[0][0]).toEqual({
       req: {
         query: {
-          originEventIds: [{ id: 'eventId', isAlert: true }],
+          originEventIds: [{ id: 'eventId', isAlert: true, originalTime: timestamp }],
           start: `${timestamp}||-30m`,
           end: `${timestamp}||+30m`,
+          eventTimeStart: `${timestamp}||-30m`,
+          eventTimeEnd: `${timestamp}||+30m`,
         },
       },
       options: {
@@ -219,6 +223,7 @@ describe('<GraphPreviewContainer />', () => {
       eventIds: ['eventId'],
       isAlert: false,
       hasGraphRepresentation: true,
+      originalTime: null,
     });
 
     const { getByTestId, queryByTestId, findByTestId } = renderGraphPreview();
@@ -244,7 +249,7 @@ describe('<GraphPreviewContainer />', () => {
     expect(mockUseFetchGraphData.mock.calls[0][0]).toEqual({
       req: {
         query: {
-          originEventIds: [{ id: 'eventId', isAlert: false }],
+          originEventIds: [{ id: 'eventId', isAlert: false, originalTime: undefined }],
           start: `${timestamp}||-30m`,
           end: `${timestamp}||+30m`,
         },
@@ -280,6 +285,7 @@ describe('<GraphPreviewContainer />', () => {
       eventIds: [],
       hasGraphRepresentation: true,
       isAlert: true,
+      originalTime: null,
     });
 
     const { getByTestId, queryByTestId, findByTestId } = renderGraphPreview({
@@ -334,6 +340,7 @@ describe('<GraphPreviewContainer />', () => {
       eventIds: [],
       hasGraphRepresentation: true,
       isAlert: true,
+      originalTime: null,
     });
 
     const { getByTestId, queryByTestId, findByTestId } = renderGraphPreview({
@@ -388,6 +395,7 @@ describe('<GraphPreviewContainer />', () => {
       eventIds: [],
       hasGraphRepresentation: false,
       isAlert: true,
+      originalTime: null,
     });
 
     const { getByTestId, queryByTestId, findByTestId } = renderGraphPreview();

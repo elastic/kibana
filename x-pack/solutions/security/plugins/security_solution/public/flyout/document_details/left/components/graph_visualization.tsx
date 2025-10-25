@@ -70,6 +70,7 @@ export const GraphVisualization: React.FC = memo(() => {
     eventIds,
     timestamp = new Date().toISOString(),
     isAlert,
+    originalTime,
   } = useGraphPreview({
     getFieldsData,
     ecsData: dataAsNestedObject,
@@ -152,7 +153,11 @@ export const GraphVisualization: React.FC = memo(() => {
     [toasts, openPreviewPanel, scopeId, dataViewIndexPattern]
   );
 
-  const originEventIds = eventIds.map((id) => ({ id, isAlert }));
+  const originEventIds = eventIds.map((id) => ({
+    id,
+    isAlert,
+    originalTime: isAlert ? originalTime ?? undefined : undefined,
+  }));
   const { investigateInTimeline } = useInvestigateInTimeline();
   const openTimelineCallback = useCallback(
     (query: Query | undefined, filters: Filter[], timeRange: TimeRange) => {

@@ -10,6 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiBetaBadge, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useFetchGraphData } from '@kbn/cloud-security-posture-graph/src/hooks';
+import { getEventTimeRangeForSingleAlert } from '@kbn/cloud-security-posture-graph/src/components/utils/get_event_time_range';
 import {
   GRAPH_PREVIEW,
   uiMetricService,
@@ -55,19 +56,31 @@ export const GraphPreviewContainer: React.FC = () => {
     timestamp = new Date().toISOString(),
     hasGraphRepresentation,
     isAlert,
+    originalTime,
   } = useGraphPreview({
     getFieldsData,
     ecsData: dataAsNestedObject,
     dataFormattedForFieldBrowser,
   });
 
+  // Calculate event time range for accurate log filtering
+  const eventTimeRange = useMemo(
+    () => getEventTimeRangeForSingleAlert(isAlert, originalTime),
+    [isAlert, originalTime]
+  );
+
   // TODO: default start and end might not capture the original event
   const { isLoading, isError, data } = useFetchGraphData({
     req: {
       query: {
-        originEventIds: eventIds.map((id) => ({ id, isAlert })),
+        originEventIds: eventIds.map((id) => ({
+          id,
+          isAlert,
+          originalTime: isAlert ? originalTime ?? undefined : undefined,
+        })),
         start: `${timestamp}||-30m`,
         end: `${timestamp}||+30m`,
+        ...eventTimeRange,
       },
     },
     options: {

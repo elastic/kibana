@@ -30,10 +30,12 @@ const defaultProps: GraphInvestigationProps = {
       {
         id: '1',
         isAlert: false,
+        originalTime: undefined,
       },
       {
         id: '2',
         isAlert: true,
+        originalTime: hourAgo.toISOString(),
       },
     ],
     timeRange: {

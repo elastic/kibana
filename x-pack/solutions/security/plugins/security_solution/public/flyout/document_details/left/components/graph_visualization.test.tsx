@@ -88,6 +88,7 @@ jest.mock('../../shared/hooks/use_graph_preview', () => ({
     eventIds: ['event-1', 'event-2'],
     timestamp: new Date().toISOString(),
     isAlert: false,
+    originalTime: null,
   }),
 }));
 

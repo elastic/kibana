@@ -17,7 +17,7 @@ import type {
   LabelNodeViewModel,
   GroupNodeViewModel,
   EdgeViewModel,
-} from './types';
+} from '../types';
 
 export const isEntityNode = (node: NodeViewModel): node is EntityNodeViewModel =>
   node.shape === 'ellipse' ||

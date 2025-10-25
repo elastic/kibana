@@ -36,6 +36,7 @@ import type { NodeViewModel } from '../types';
 import { isLabelNode, showErrorToast } from '../utils';
 import { FlowTargetSourceDest } from '../node/utils';
 import { GRAPH_SCOPE_ID, NETWORK_PREVIEW_BANNER } from '../constants';
+import { getEventTimeRange } from '../utils/get_event_time_range';
 
 const useGraphPopovers = ({
   dataViewId,
@@ -180,6 +181,12 @@ export interface GraphInvestigationProps {
        * A flag indicating whether the origin event is an alert or not.
        */
       isAlert: boolean;
+
+      /**
+       * Optional: The original event time from kibana.alert.original_time.
+       * Used for accurate time range filtering on log indices.
+       */
+      originalTime?: string;
     }>;
 
     /**
@@ -283,6 +290,9 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       return lastValidEsQuery.current;
     }, [dataView, kquery, notifications, searchFilters, uiSettings]);
 
+    // Calculate event time range for accurate log filtering
+    const eventTimeRange = useMemo(() => getEventTimeRange(originEventIds), [originEventIds]);
+
     const { data, refresh, isFetching, isError, error } = useFetchGraphData({
       req: {
         query: {
@@ -291,6 +301,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
           esQuery,
           start: timeRange.from,
           end: timeRange.to,
+          ...eventTimeRange,
         },
         nodesLimit: GRAPH_NODES_LIMIT,
       },

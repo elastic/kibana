@@ -306,4 +306,78 @@ describe('fetchGraph', () => {
     expect(query).not.toContain(`ENRICH ${getEnrichPolicyId()}`);
     expect(result).toEqual([{ id: 'dummy' }]);
   });
+
+  it('should use dual time ranges when eventTimeStart and eventTimeEnd are provided', async () => {
+    const originEventIds: OriginEventId[] = [{ id: '1', isAlert: true }];
+    const params = {
+      esClient,
+      logger,
+      start: '2025-10-25T15:47:38.544Z||-30m',
+      end: '2025-10-25T15:47:38.544Z||+30m',
+      eventTimeStart: '2025-10-25T14:17:38.544Z||-30m',
+      eventTimeEnd: '2025-10-25T14:17:38.544Z||+30m',
+      originEventIds,
+      showUnknownTarget: false,
+      indexPatterns: ['logs-*', '.alerts-security.alerts-default'],
+      spaceId: 'default',
+      esQuery: undefined as EsQuery | undefined,
+    };
+
+    await fetchGraph(params);
+
+    expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+    const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+    const filterArg = esqlCallArgs[0].filter as any;
+
+    // Verify dual time range logic is applied
+    expect(filterArg?.bool?.filter?.[0]?.bool?.should).toHaveLength(2);
+
+    // Check alert time range
+    const alertFilter = filterArg?.bool?.filter?.[0]?.bool?.should?.[0]?.bool?.filter;
+    expect(alertFilter).toContainEqual({
+      wildcard: { _index: '*.alerts-security.alerts-*' },
+    });
+    expect(alertFilter).toContainEqual({
+      range: { '@timestamp': { gte: params.start, lte: params.end } },
+    });
+
+    // Check log time range
+    const logFilter = filterArg?.bool?.filter?.[0]?.bool?.should?.[1]?.bool?.filter;
+    expect(logFilter).toContainEqual({
+      bool: {
+        must_not: [{ wildcard: { _index: '*.alerts-security.alerts-*' } }],
+      },
+    });
+    expect(logFilter).toContainEqual({
+      range: { '@timestamp': { gte: params.eventTimeStart, lte: params.eventTimeEnd } },
+    });
+  });
+
+  it('should use single time range when eventTimeStart and eventTimeEnd are not provided', async () => {
+    const originEventIds: OriginEventId[] = [{ id: '1', isAlert: true }];
+    const params = {
+      esClient,
+      logger,
+      start: '2025-10-25T15:47:38.544Z||-30m',
+      end: '2025-10-25T15:47:38.544Z||+30m',
+      originEventIds,
+      showUnknownTarget: false,
+      indexPatterns: ['logs-*', '.alerts-security.alerts-default'],
+      spaceId: 'default',
+      esQuery: undefined as EsQuery | undefined,
+    };
+
+    await fetchGraph(params);
+
+    expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+    const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+    const filterArg = esqlCallArgs[0].filter as any;
+
+    // Verify single time range logic is applied (backward compatibility)
+    expect(filterArg?.bool?.filter?.[0]?.range).toBeDefined();
+    expect(filterArg?.bool?.filter?.[0]?.range?.['@timestamp']).toEqual({
+      gte: params.start,
+      lte: params.end,
+    });
+  });
 });

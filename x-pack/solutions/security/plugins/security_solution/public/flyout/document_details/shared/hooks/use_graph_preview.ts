@@ -66,6 +66,11 @@ export interface UseGraphPreviewResult {
    * Boolean indicating if the event is an alert or not
    */
   isAlert: boolean;
+
+  /**
+   * The original event time from kibana.alert.original_time (for alerts)
+   */
+  originalTime?: string | null;
 }
 
 /**
@@ -91,6 +96,16 @@ export const useGraphPreview = ({
     eventIds.length > 0 &&
     targetIds.length > 0;
   const { isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
+  const originalTime = getField(getFieldsData('kibana.alert.original_time'));
 
-  return { timestamp, eventIds, actorIds, action, targetIds, hasGraphRepresentation, isAlert };
+  return {
+    timestamp,
+    eventIds,
+    actorIds,
+    action,
+    targetIds,
+    hasGraphRepresentation,
+    isAlert,
+    originalTime,
+  };
 };

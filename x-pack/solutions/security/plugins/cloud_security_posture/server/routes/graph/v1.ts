@@ -24,6 +24,8 @@ export interface GetGraphParams {
     spaceId?: string;
     start: string | number;
     end: string | number;
+    eventTimeStart?: string | number;
+    eventTimeEnd?: string | number;
     esQuery?: EsQuery;
   };
   showUnknownTarget: boolean;
@@ -32,16 +34,25 @@ export interface GetGraphParams {
 
 export const getGraph = async ({
   services: { esClient, logger },
-  query: { originEventIds, spaceId = 'default', indexPatterns, start, end, esQuery },
+  query: {
+    originEventIds,
+    spaceId = 'default',
+    indexPatterns,
+    start,
+    end,
+    eventTimeStart,
+    eventTimeEnd,
+    esQuery,
+  },
   showUnknownTarget,
   nodesLimit,
 }: GetGraphParams): Promise<Pick<GraphResponse, 'nodes' | 'edges' | 'messages'>> => {
   indexPatterns = indexPatterns ?? [`.alerts-security.alerts-${spaceId}`, 'logs-*'];
 
   logger.trace(
-    `Fetching graph for [originEventIds: ${originEventIds.join(
-      ', '
-    )}] in [spaceId: ${spaceId}] [indexPatterns: ${indexPatterns.join(',')}]`
+    `Fetching graph for [originEventIds: ${originEventIds
+      .map((e) => e.id)
+      .join(', ')}] in [spaceId: ${spaceId}] [indexPatterns: ${indexPatterns.join(',')}]`
   );
 
   const results = await fetchGraph({
@@ -50,6 +61,8 @@ export const getGraph = async ({
     logger,
     start,
     end,
+    eventTimeStart,
+    eventTimeEnd,
     originEventIds,
     indexPatterns,
     spaceId,
