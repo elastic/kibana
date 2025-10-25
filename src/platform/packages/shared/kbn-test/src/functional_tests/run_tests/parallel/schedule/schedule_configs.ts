@@ -7,20 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import path from 'node:path';
+import Path from 'node:path';
 
-import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 
-import { getSlotResources, type ServerCapabilities } from '../get_slot_resources';
+import { REPO_ROOT } from '@kbn/repo-info';
+import {
+  getSlotResources,
+  type ServerCapabilities,
+  type SlotResources,
+} from '../get_slot_resources';
 import { readConfig } from '../read_config';
 import type {
-  ScheduleConfigInput,
   ScheduleConfigOptions,
   ScheduleConfigOutput,
-  ScheduleConfigTestGroup,
   ScheduleConfigTestGroupResults,
 } from './types';
+import { checkForEnabledTestsInFtrConfig } from '../../../lib';
+import { EsVersion } from '../../../../functional_test_runner';
 
 interface MachineCapacity {
   cpu: number;
@@ -29,55 +33,503 @@ interface MachineCapacity {
 
 type PhaseName = 'warming' | 'idle' | 'running';
 
-interface PhaseSegment {
+const ZERO_SLOT_RESOURCES: SlotResources = {
+  warming: { cpu: 0, memory: 0, exclusive: false },
+  idle: { cpu: 0, memory: 0 },
+  running: { cpu: 0, memory: 0, exclusive: false },
+};
+
+const resolveConfigPath = (v: string) => Path.resolve(REPO_ROOT, v);
+
+const EPSILON = 0.000001;
+const SCHEDULE_BUFFER_MINUTES = 2;
+
+interface PhaseEstimate {
+  name: PhaseName;
+  duration: number;
+  resources: {
+    cpu: number;
+    memory: number;
+    exclusive?: boolean;
+  };
+}
+
+interface PhaseAllocation {
+  phase: PhaseName;
   start: number;
   end: number;
   cpu: number;
   memory: number;
   exclusive: boolean;
+}
+
+interface SimulationPhase {
   phase: PhaseName;
+  start: number;
+  end: number;
+  resources: PhaseEstimate['resources'];
 }
 
-interface ScheduledAssignment {
-  config: ScheduleConfigOutput;
-  warmStart: number;
-  runStart: number;
+interface SimulationResult {
+  phases: SimulationPhase[];
+  finishTime: number;
 }
 
-interface MachineState {
-  machineType: ScheduleConfigOptions['machines'][number];
+interface MachineInstance {
+  id: number;
+  machine: {
+    name: string;
+    cpus: number;
+    memoryMb: number;
+  };
   capacity: MachineCapacity;
-  segments: PhaseSegment[];
-  assignments: ScheduledAssignment[];
-  wallClockEnd: number;
-  index: number;
-  enforceCapacity: boolean;
+  allocations: PhaseAllocation[];
+  finishTime: number;
+  totalAssignedDuration: number;
+  configs: ScheduleConfigOutput[];
+  warmStartGuard: number;
 }
 
-interface PlacementResult {
-  segments: PhaseSegment[];
-  warmStart: number;
-  warmEnd: number;
-  runStart: number;
-  runEnd: number;
+interface CandidateScore {
+  exceedsTarget: boolean;
+  finishTime: number;
+  projectedLoad: number;
+  configCount: number;
+  extension: number;
 }
 
-interface ScheduleAttempt {
-  segments: PhaseSegment[];
-  warmStart: number;
-  warmEnd: number;
-  runStart: number;
-  runEnd: number;
-  wallTime: number;
+const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
+
+function estimatePhaseDurations(totalMinutes: number): Record<PhaseName, number> {
+  // Estimate phase durations based on historic behaviour: warm ~15%, idle ~5%,
+  // keep at least half of the time for the actual run. This keeps the scheduler
+  // aware of phase contention without needing exact timings per config.
+  if (totalMinutes <= 0) {
+    return {
+      warming: 0,
+      idle: 0,
+      running: 0,
+    };
+  }
+
+  const desiredWarm = clamp(totalMinutes * 0.15, 1, Math.min(4, totalMinutes));
+  const desiredIdle = clamp(totalMinutes * 0.05, 0.25, Math.min(2, totalMinutes));
+
+  let warming = Math.min(desiredWarm, totalMinutes);
+  let idle = Math.min(desiredIdle, totalMinutes - warming);
+  let running = Math.max(totalMinutes - warming - idle, 0);
+
+  const minimumRunning = clamp(totalMinutes * 0.5, 0, totalMinutes);
+
+  if (running < minimumRunning) {
+    let deficit = minimumRunning - running;
+
+    const idleReduction = Math.min(deficit, Math.max(0, idle - 0.25));
+    idle -= idleReduction;
+    deficit -= idleReduction;
+
+    const warmReduction = Math.min(deficit, Math.max(0, warming - 0.5));
+    warming -= warmReduction;
+    deficit -= warmReduction;
+
+    running = Math.max(totalMinutes - warming - idle, 0);
+
+    if (deficit > 0 && warming + idle > 0) {
+      const scale = totalMinutes / (warming + idle + running || totalMinutes);
+      warming *= scale;
+      idle *= scale;
+      running = Math.max(totalMinutes - warming - idle, 0);
+    }
+  }
+
+  if (warming + idle + running > totalMinutes + EPSILON) {
+    const scale = totalMinutes / (warming + idle + running);
+    warming *= scale;
+    idle *= scale;
+    running = Math.max(totalMinutes - warming - idle, 0);
+  }
+
+  return {
+    warming,
+    idle,
+    running,
+  };
 }
 
-const RESOURCE_EPSILON = 0.000001;
-const MEMORY_RESERVE_MB = 2048;
-const MEMORY_BUFFER_RATIO = 0.2;
-const WARMING_DURATION_MINUTES = 90 / 60;
-const MIN_TIME_INCREMENT = 0.01;
-const TIME_EPSILON = 0.000001;
-const MAX_SCHEDULING_ATTEMPTS = 1000;
+function buildPhaseEstimates(config: ScheduleConfigOutput): PhaseEstimate[] {
+  const phases: PhaseEstimate[] = [];
+  const durations = estimatePhaseDurations(config.testDurationMins);
+
+  if (durations.warming > 0) {
+    phases.push({
+      name: 'warming',
+      duration: durations.warming,
+      resources: config.resources.warming,
+    });
+  }
+
+  if (durations.idle > 0) {
+    phases.push({
+      name: 'idle',
+      duration: durations.idle,
+      resources: {
+        cpu: config.resources.idle.cpu,
+        memory: config.resources.idle.memory,
+      },
+    });
+  }
+
+  if (durations.running > 0) {
+    phases.push({
+      name: 'running',
+      duration: durations.running,
+      resources: config.resources.running,
+    });
+  }
+
+  return phases;
+}
+function computeTotalPhaseDuration(phases: PhaseEstimate[]): number {
+  return phases.reduce((sum, phase) => sum + phase.duration, 0);
+}
+
+function getFinishLimit(
+  machine: MachineInstance,
+  targetDuration: number,
+  totalPhaseDuration: number
+): number {
+  const base = Math.max(machine.finishTime, targetDuration);
+  return Math.max(base, totalPhaseDuration) + SCHEDULE_BUFFER_MINUTES;
+}
+
+function collectOverlaps(
+  start: number,
+  end: number,
+  allocations: PhaseAllocation[]
+): PhaseAllocation[] {
+  return allocations.filter(
+    (allocation) => allocation.start - end < EPSILON && allocation.end - start > EPSILON
+  );
+}
+
+function hasCapacityInWindow(
+  start: number,
+  end: number,
+  allocations: PhaseAllocation[],
+  pending: PhaseAllocation[],
+  capacity: MachineCapacity,
+  phase: PhaseEstimate
+): boolean {
+  const overlapping = [
+    ...collectOverlaps(start, end, allocations),
+    ...collectOverlaps(start, end, pending),
+  ];
+
+  if (
+    phase.resources.cpu - capacity.cpu > EPSILON ||
+    phase.resources.memory - capacity.memory > EPSILON
+  ) {
+    return false;
+  }
+
+  if (overlapping.length === 0) {
+    if (phase.resources.exclusive) {
+      return true;
+    }
+    return (
+      phase.resources.cpu - capacity.cpu <= EPSILON &&
+      phase.resources.memory - capacity.memory <= EPSILON
+    );
+  }
+
+  const eventPoints = new Set<number>([start, end]);
+
+  for (const allocation of overlapping) {
+    const overlapStart = Math.max(allocation.start, start);
+    const overlapEnd = Math.min(allocation.end, end);
+
+    eventPoints.add(overlapStart);
+    eventPoints.add(overlapEnd);
+  }
+
+  const sortedPoints = Array.from(eventPoints).sort((a, b) => a - b);
+
+  for (let index = 0; index < sortedPoints.length - 1; index += 1) {
+    const segmentStart = sortedPoints[index];
+    const segmentEnd = sortedPoints[index + 1];
+
+    if (segmentEnd - segmentStart <= EPSILON) {
+      continue;
+    }
+
+    const sample = (segmentStart + segmentEnd) / 2;
+    let cpuUsage = phase.resources.cpu;
+    let memoryUsage = phase.resources.memory;
+    let warmingExclusiveCount = phase.name === 'warming' && phase.resources.exclusive ? 1 : 0;
+    let runningExclusiveCount = phase.name === 'running' && phase.resources.exclusive ? 1 : 0;
+
+    for (const allocation of overlapping) {
+      if (allocation.start - sample > EPSILON || sample - allocation.end > EPSILON) {
+        continue;
+      }
+
+      cpuUsage += allocation.cpu;
+      memoryUsage += allocation.memory;
+
+      if (allocation.phase === 'warming' && allocation.exclusive) {
+        warmingExclusiveCount += 1;
+      }
+
+      if (allocation.phase === 'running' && allocation.exclusive) {
+        runningExclusiveCount += 1;
+      }
+    }
+
+    if (cpuUsage - capacity.cpu > EPSILON || memoryUsage - capacity.memory > EPSILON) {
+      return false;
+    }
+
+    if (warmingExclusiveCount > 1 || runningExclusiveCount > 1) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function findNextCandidateTime(
+  start: number,
+  end: number,
+  allocations: PhaseAllocation[],
+  pending: PhaseAllocation[]
+): number | null {
+  let nextTime = Number.POSITIVE_INFINITY;
+
+  for (const allocation of allocations) {
+    if (allocation.start - end >= EPSILON || start - allocation.end >= EPSILON) {
+      continue;
+    }
+
+    if (allocation.end - start > EPSILON) {
+      nextTime = Math.min(nextTime, allocation.end);
+    }
+  }
+
+  for (const allocation of pending) {
+    if (allocation.start - end >= EPSILON || start - allocation.end >= EPSILON) {
+      continue;
+    }
+
+    if (allocation.end - start > EPSILON) {
+      nextTime = Math.min(nextTime, allocation.end);
+    }
+  }
+
+  return Number.isFinite(nextTime) ? nextTime : null;
+}
+
+function findPhaseStart(
+  machine: MachineInstance,
+  pending: PhaseAllocation[],
+  phase: PhaseEstimate,
+  earliestStart: number,
+  finishLimit: number
+): number | null {
+  const duration = phase.duration;
+
+  if (duration <= EPSILON) {
+    return earliestStart;
+  }
+
+  let candidateStart = Math.max(earliestStart, machine.warmStartGuard);
+
+  while (true) {
+    const candidateEnd = candidateStart + duration;
+
+    if (candidateEnd - finishLimit > EPSILON) {
+      return null;
+    }
+
+    if (
+      hasCapacityInWindow(
+        candidateStart,
+        candidateEnd,
+        machine.allocations,
+        pending,
+        machine.capacity,
+        phase
+      )
+    ) {
+      return candidateStart;
+    }
+
+    const nextCandidate = findNextCandidateTime(
+      candidateStart,
+      candidateEnd,
+      machine.allocations,
+      pending
+    );
+
+    if (nextCandidate === null) {
+      return null;
+    }
+
+    candidateStart = Math.max(nextCandidate, candidateStart + EPSILON);
+  }
+}
+
+function simulatePlacement(
+  machine: MachineInstance,
+  phases: PhaseEstimate[],
+  finishLimit: number
+): SimulationResult | null {
+  if (phases.length === 0) {
+    return {
+      phases: [],
+      finishTime: machine.finishTime,
+    };
+  }
+
+  const pendingAllocations: PhaseAllocation[] = [];
+  const phaseResults: SimulationPhase[] = [];
+  let earliestStart = machine.warmStartGuard;
+
+  for (const phase of phases) {
+    const start = findPhaseStart(machine, pendingAllocations, phase, earliestStart, finishLimit);
+    if (start === null) {
+      return null;
+    }
+
+    const end = start + phase.duration;
+
+    pendingAllocations.push({
+      phase: phase.name,
+      start,
+      end,
+      cpu: phase.resources.cpu,
+      memory: phase.resources.memory,
+      exclusive: Boolean(phase.resources.exclusive),
+    });
+
+    phaseResults.push({
+      phase: phase.name,
+      start,
+      end,
+      resources: phase.resources,
+    });
+
+    earliestStart = end;
+  }
+
+  const finishTime = phaseResults[phaseResults.length - 1]?.end ?? machine.finishTime;
+
+  if (finishTime - finishLimit > EPSILON) {
+    return null;
+  }
+
+  return {
+    phases: phaseResults,
+    finishTime,
+  };
+}
+
+function applySimulation(
+  machine: MachineInstance,
+  simulation: SimulationResult,
+  config: ScheduleConfigOutput
+) {
+  if (simulation.phases.length === 0) {
+    machine.configs.push(config);
+    machine.totalAssignedDuration += config.testDurationMins;
+    return;
+  }
+
+  for (const phase of simulation.phases) {
+    machine.allocations.push({
+      phase: phase.phase,
+      start: phase.start,
+      end: phase.end,
+      cpu: phase.resources.cpu,
+      memory: phase.resources.memory,
+      exclusive: Boolean(phase.resources.exclusive),
+    });
+  }
+
+  machine.allocations.sort((a, b) => a.start - b.start);
+  machine.finishTime = Math.max(machine.finishTime, simulation.finishTime);
+  machine.totalAssignedDuration += config.testDurationMins;
+  machine.configs.push(config);
+
+  const warmStart = simulation.phases.find((phaseEntry) => phaseEntry.phase === 'warming')?.start;
+  if (warmStart !== undefined) {
+    machine.warmStartGuard = Math.max(machine.warmStartGuard, warmStart + EPSILON);
+  }
+}
+
+function scoreSimulation(
+  simulation: SimulationResult,
+  machine: MachineInstance,
+  finishLimit: number,
+  addedDuration: number
+): CandidateScore {
+  const finishTime = simulation.finishTime;
+  const projectedLoad = machine.totalAssignedDuration + addedDuration;
+  const exceedsTarget = finishTime - finishLimit > EPSILON && addedDuration > EPSILON;
+  const extension = Math.max(0, finishTime - machine.finishTime);
+
+  return {
+    exceedsTarget,
+    finishTime,
+    projectedLoad,
+    configCount: machine.configs.length,
+    extension,
+  };
+}
+
+function isBetterScore(candidate: CandidateScore, incumbent: CandidateScore | undefined): boolean {
+  if (!incumbent) {
+    return true;
+  }
+
+  if (candidate.exceedsTarget !== incumbent.exceedsTarget) {
+    return candidate.exceedsTarget < incumbent.exceedsTarget;
+  }
+
+  if (Math.abs(candidate.finishTime - incumbent.finishTime) > EPSILON) {
+    return candidate.finishTime < incumbent.finishTime;
+  }
+
+  if (Math.abs(candidate.extension - incumbent.extension) > EPSILON) {
+    return candidate.extension < incumbent.extension;
+  }
+
+  if (Math.abs(candidate.projectedLoad - incumbent.projectedLoad) > EPSILON) {
+    return candidate.projectedLoad < incumbent.projectedLoad;
+  }
+
+  return candidate.configCount < incumbent.configCount;
+}
+
+function createMachineInstance(
+  id: number,
+  machineTemplate: { name: string; cpus: number; memoryMb: number }
+): MachineInstance {
+  const effectiveCpu = Math.max(1, machineTemplate.cpus);
+
+  return {
+    id,
+    machine: { ...machineTemplate },
+    capacity: {
+      cpu: effectiveCpu,
+      memory: machineTemplate.memoryMb,
+    },
+    allocations: [],
+    finishTime: 0,
+    totalAssignedDuration: 0,
+    configs: [],
+    warmStartGuard: 0,
+  };
+}
 
 export async function scheduleConfigs({
   configs,
@@ -93,11 +545,26 @@ export async function scheduleConfigs({
     writeTo: process.stdout,
   });
 
-  // Load config metadata and derive the required resources for each run.
   const configsWithResources = await Promise.all(
     configs.map(async (configInput): Promise<ScheduleConfigOutput> => {
-      const absoluteConfigPath = resolveConfigPath(configInput);
+      const absoluteConfigPath = resolveConfigPath(configInput.path);
       const configObject = await readConfig(toolingLog, absoluteConfigPath, {});
+
+      const hasTests = await checkForEnabledTestsInFtrConfig({
+        config: configObject,
+        esVersion: EsVersion.getDefault(),
+        log: toolingLog,
+      });
+
+      if (!hasTests) {
+        return {
+          path: configInput.path,
+          testDurationMins: 0,
+          resources: ZERO_SLOT_RESOURCES,
+          tooLong: false,
+        };
+      }
+
       const capabilities = configObject.getAll() as unknown as ServerCapabilities;
       const slotResources = getSlotResources(capabilities);
 
@@ -110,575 +577,129 @@ export async function scheduleConfigs({
     })
   );
 
-  // machines input is a list of machine TYPES. We'll expand them into runtime
-  // instances (MachineState) on demand. Sort types by preference (largest
-  // capacity first) so we always create new instances from the largest type when
-  // needed.
-  const machineTypes = machines
-    .slice()
-    .sort((a, b) => {
-      if (a.cpus !== b.cpus) return b.cpus - a.cpus;
-      if (a.memoryMb !== b.memoryMb) return b.memoryMb - a.memoryMb;
-      return a.name.localeCompare(b.name);
-    })
-    .map((machine) => {
-      return {
-        ...machine,
-        // subtract one cpu for the config orchestrator
-        cpus: machine.cpus - 1,
-      };
-    });
-
-  const machineStates: MachineState[] = [];
-
-  // Sort by duration (largest first) for a greedy longest-processing-time assignment.
-  const sortedConfigs = [...configsWithResources].sort(
-    (left, right) => right.testDurationMins - left.testDurationMins
-  );
-
-  for (const configOutput of sortedConfigs) {
-    // determine which machine types are capable of running this config
-    const eligibleTypes = machineTypes.filter((type) =>
-      canRunConfigOnMachine(type, configOutput.resources)
-    );
-
-    // If no machine type can fit this config, fall back to the largest machine type
-    // (which is already sorted at the front of machineTypes)
-    const typesToConsider = eligibleTypes.length > 0 ? eligibleTypes : [machineTypes[0]];
-
-    const eligibleInstances = machineStates.filter((state) =>
-      typesToConsider.some((type) => type.name === state.machineType.name)
-    );
-
-    const placementAttempts = eligibleInstances
-      .map((state) => {
-        const attempt = tryScheduleOnMachine(state, configOutput);
-        return attempt ? { state, attempt } : undefined;
-      })
-      .filter(
-        (value): value is { state: MachineState; attempt: ScheduleAttempt } => value !== undefined
-      );
-
-    const placementsWithinTarget = placementAttempts.filter(
-      ({ attempt }) => attempt.wallTime <= maxDurationMins + TIME_EPSILON
-    );
-
-    const placementsWithoutExtension = placementAttempts.filter(({ state, attempt }) => {
-      if (state.assignments.length === 0) {
-        return false;
-      }
-
-      return attempt.wallTime <= state.wallClockEnd + TIME_EPSILON;
-    });
-
-    const candidatePlacements =
-      placementsWithinTarget.length > 0 ? placementsWithinTarget : placementsWithoutExtension;
-
-    let selectedPlacement: { state: MachineState; attempt: ScheduleAttempt } | undefined;
-
-    if (candidatePlacements.length > 0) {
-      candidatePlacements.sort((left, right) => {
-        const cpuDiff = right.state.machineType.cpus - left.state.machineType.cpus;
-        if (cpuDiff !== 0) {
-          return cpuDiff;
-        }
-
-        const memoryDiff = right.state.machineType.memoryMb - left.state.machineType.memoryMb;
-        if (memoryDiff !== 0) {
-          return memoryDiff;
-        }
-
-        const wallDiff = left.attempt.wallTime - right.attempt.wallTime;
-        if (Math.abs(wallDiff) > TIME_EPSILON) {
-          return wallDiff;
-        }
-
-        return left.state.index - right.state.index;
-      });
-
-      [selectedPlacement] = candidatePlacements;
-    }
-
-    if (!selectedPlacement) {
-      const chosenType = typesToConsider[0];
-      const isForcedPlacement = eligibleTypes.length === 0;
-
-      const newInstance: MachineState = {
-        machineType: chosenType,
-        capacity: createMachineCapacity(chosenType),
-        segments: [],
-        assignments: [],
-        wallClockEnd: 0,
-        index: machineStates.length,
-        enforceCapacity: !isForcedPlacement,
-      };
-
-      const attempt = tryScheduleOnMachine(newInstance, configOutput);
-
-      if (!attempt) {
-        throw new Error(`Unable to schedule config ${configOutput.path} on ${chosenType.name}`);
-      }
-
-      applyScheduleAttempt(newInstance, attempt, configOutput);
-      machineStates.push(newInstance);
-      continue;
-    }
-
-    applyScheduleAttempt(selectedPlacement.state, selectedPlacement.attempt, configOutput);
-  }
-
-  const groups: ScheduleConfigTestGroup[] = machineStates
-    .filter((state) => state.assignments.length > 0)
-    .map((state) => {
-      const orderedConfigs = [...state.assignments]
-        .sort((left, right) => {
-          if (Math.abs(left.warmStart - right.warmStart) > TIME_EPSILON) {
-            return left.warmStart - right.warmStart;
-          }
-
-          return left.runStart - right.runStart;
-        })
-        .map((assignment) => assignment.config);
-
-      return {
-        configs: orderedConfigs,
-        machine: state.machineType,
-        expectedDurationMins: Math.max(0, state.wallClockEnd),
-      };
-    });
-
-  return { groups };
-}
-
-function resolveConfigPath(config: ScheduleConfigInput): string {
-  const resolvedPath = path.isAbsolute(config.path)
-    ? config.path
-    : path.resolve(REPO_ROOT, config.path);
-  return require.resolve(resolvedPath);
-}
-// Mirrors the resource admission checks from ResourcePool to determine whether a
-// slot can run on the provided machine definition. We assume warming lasts a
-// few minutes (1-3m) just like ResourcePool does when dealing with real runs.
-function canRunConfigOnMachine(
-  machine: ScheduleConfigOptions['machines'][number],
-  resources: ScheduleConfigOutput['resources']
-): boolean {
-  const cpuCapacity = Math.max(1, machine.cpus);
-  const memoryCapacity = applyMemorySafetyBuffer(machine.memoryMb);
-
-  const warmingFits = phaseFitsCapacity(
-    resources.warming.cpu,
-    resources.warming.memory,
-    cpuCapacity,
-    memoryCapacity
-  );
-
-  if (!warmingFits) {
-    return false;
-  }
-
-  const idleFits = phaseFitsCapacity(
-    resources.idle.cpu,
-    resources.idle.memory,
-    cpuCapacity,
-    memoryCapacity
-  );
-
-  if (!idleFits) {
-    return false;
-  }
-
-  return phaseFitsCapacity(
-    resources.running.cpu,
-    resources.running.memory,
-    cpuCapacity,
-    memoryCapacity
-  );
-}
-
-function phaseFitsCapacity(
-  cpuRequired: number,
-  memoryRequired: number,
-  cpuCapacity: number,
-  memoryCapacity: number
-): boolean {
-  if (cpuRequired - cpuCapacity > RESOURCE_EPSILON) {
-    return false;
-  }
-
-  if (memoryRequired - memoryCapacity > RESOURCE_EPSILON) {
-    return false;
-  }
-
-  return true;
-}
-
-function tryScheduleOnMachine(
-  state: MachineState,
-  config: ScheduleConfigOutput
-): ScheduleAttempt | undefined {
-  const placement = computePlacement(state.segments, state.capacity, config, state.enforceCapacity);
-
-  if (!placement) {
-    return undefined;
-  }
-
-  return {
-    ...placement,
-    wallTime: Math.max(state.wallClockEnd, placement.runEnd),
-  };
-}
-
-function applyScheduleAttempt(
-  state: MachineState,
-  attempt: ScheduleAttempt,
-  config: ScheduleConfigOutput
-): void {
-  state.segments = mergeSegments(state.segments, attempt.segments);
-  state.wallClockEnd = Math.max(state.wallClockEnd, attempt.wallTime);
-  state.assignments.push({
-    config,
-    warmStart: attempt.warmStart,
-    runStart: attempt.runStart,
-  });
-}
-
-function computePlacement(
-  existingSegments: PhaseSegment[],
-  capacity: MachineCapacity,
-  config: ScheduleConfigOutput,
-  enforceCapacity: boolean
-): PlacementResult | null {
-  const forceExclusive = !enforceCapacity;
-  const warmStart = findIntervalStart(
-    existingSegments,
-    capacity,
-    0,
-    WARMING_DURATION_MINUTES,
-    config.resources.warming,
-    'warming',
-    enforceCapacity,
-    forceExclusive
-  );
-
-  if (warmStart === null) {
-    return null;
-  }
-
-  const warmEnd = warmStart + WARMING_DURATION_MINUTES;
-  const warmSegment = createSegment(
-    'warming',
-    warmStart,
-    warmEnd,
-    config.resources.warming,
-    forceExclusive
-  );
-  const segmentsWithWarm = mergeSegments(existingSegments, [warmSegment]);
-
-  const runPlacement = findRunPlacement(
-    segmentsWithWarm,
-    capacity,
-    warmEnd,
-    config,
-    enforceCapacity,
-    forceExclusive
-  );
-
-  if (!runPlacement) {
-    return null;
-  }
-
-  const newSegments: PhaseSegment[] = [warmSegment];
-
-  if (runPlacement.idleSegment) {
-    newSegments.push(runPlacement.idleSegment);
-  }
-
-  newSegments.push(runPlacement.runSegment);
-
-  newSegments.sort((left, right) => {
-    if (Math.abs(left.start - right.start) > TIME_EPSILON) {
-      return left.start - right.start;
-    }
-
-    return left.end - right.end;
+  const sortedMachines = machines.slice().sort((a, b) => {
+    if (a.cpus !== b.cpus) return b.cpus - a.cpus;
+    if (a.memoryMb !== b.memoryMb) return b.memoryMb - a.memoryMb;
+    return a.name.localeCompare(b.name);
   });
 
-  return {
-    segments: newSegments,
-    warmStart,
-    warmEnd,
-    runStart: runPlacement.runStart,
-    runEnd: runPlacement.runSegment.end,
+  const largestMachineOriginal = sortedMachines[0];
+
+  if (!largestMachineOriginal) {
+    throw new Error('Unable to determine largest machine type for scheduling');
+  }
+
+  const largestMachineType = {
+    ...largestMachineOriginal,
+    cpus: largestMachineOriginal.cpus,
   };
-}
 
-interface RunPlacementResult {
-  runStart: number;
-  runSegment: PhaseSegment;
-  idleSegment?: PhaseSegment;
-}
+  const maxParallelism = Math.max(1, Math.floor(largestMachineType.cpus / 2));
+  const totalDuration = configsWithResources.reduce(
+    (sum, cfg) => sum + Math.max(cfg.testDurationMins, 0),
+    0
+  );
+  const sanitizedMaxDuration = Math.max(maxDurationMins, 1);
+  const minimumInstances = Math.max(
+    1,
+    Math.ceil(totalDuration / (maxParallelism * sanitizedMaxDuration))
+  );
 
-function findRunPlacement(
-  segments: PhaseSegment[],
-  capacity: MachineCapacity,
-  earliestRunStart: number,
-  config: ScheduleConfigOutput,
-  enforceCapacity: boolean,
-  forceExclusive: boolean
-): RunPlacementResult | null {
-  const runDuration = Math.max(config.testDurationMins, 0);
-  const runningResources = config.resources.running;
-  const idleResources = config.resources.idle;
+  const machineInstances: MachineInstance[] = [];
 
-  let attempts = 0;
-  let runStart = earliestRunStart;
+  for (let index = 0; index < minimumInstances; index += 1) {
+    machineInstances.push(createMachineInstance(index, largestMachineType));
+  }
 
-  while (attempts < MAX_SCHEDULING_ATTEMPTS) {
-    const runCheck = intervalFits(
-      segments,
-      capacity,
-      runStart,
-      runStart + runDuration,
-      runningResources,
-      'running',
-      enforceCapacity,
-      forceExclusive
-    );
+  let nextInstanceId = machineInstances.length;
 
-    if (!runCheck.ok) {
-      runStart = Math.max(runCheck.nextStart, runStart + MIN_TIME_INCREMENT);
-      attempts += 1;
-      continue;
+  const sortedConfigs = configsWithResources.slice().sort((a, b) => {
+    if (b.testDurationMins !== a.testDurationMins) {
+      return b.testDurationMins - a.testDurationMins;
     }
 
-    const idleStart = earliestRunStart;
-    const idleEnd = runStart;
+    return a.path.localeCompare(b.path);
+  });
 
-    if (idleEnd - idleStart > TIME_EPSILON) {
-      const idleCheck = intervalFits(
-        segments,
-        capacity,
-        idleStart,
-        idleEnd,
-        idleResources,
-        'idle',
-        enforceCapacity,
-        forceExclusive
-      );
+  for (const config of sortedConfigs) {
+    const phases = buildPhaseEstimates(config);
+    const totalPhaseDuration = computeTotalPhaseDuration(phases);
 
-      if (!idleCheck.ok) {
-        runStart = Math.max(idleCheck.nextStart, runStart + MIN_TIME_INCREMENT);
-        attempts += 1;
+    let bestMachine: MachineInstance | null = null;
+    let bestSimulation: SimulationResult | null = null;
+    let bestScore: CandidateScore | undefined;
+    let isNewMachine = false;
+
+    for (const machine of machineInstances) {
+      const finishLimit = getFinishLimit(machine, sanitizedMaxDuration, totalPhaseDuration);
+      const simulation = simulatePlacement(machine, phases, finishLimit);
+
+      if (!simulation) {
         continue;
       }
-    }
 
-    const runSegment = createSegment(
-      'running',
-      runStart,
-      runStart + runDuration,
-      runningResources,
-      forceExclusive
-    );
-    const idleSegment =
-      idleEnd - idleStart > TIME_EPSILON
-        ? createSegment('idle', idleStart, idleEnd, idleResources, forceExclusive)
-        : undefined;
+      const score = scoreSimulation(simulation, machine, finishLimit, config.testDurationMins);
 
-    return {
-      runStart,
-      runSegment,
-      idleSegment,
-    };
-  }
-
-  return null;
-}
-
-function findIntervalStart(
-  segments: PhaseSegment[],
-  capacity: MachineCapacity,
-  earliestStart: number,
-  duration: number,
-  resources: ScheduleConfigOutput['resources'][keyof ScheduleConfigOutput['resources']],
-  phase: PhaseName,
-  enforceCapacity: boolean,
-  forceExclusive: boolean
-): number | null {
-  if (duration <= TIME_EPSILON) {
-    return Math.max(0, earliestStart);
-  }
-
-  let start = Math.max(0, earliestStart);
-  let attempts = 0;
-
-  while (attempts < MAX_SCHEDULING_ATTEMPTS) {
-    const check = intervalFits(
-      segments,
-      capacity,
-      start,
-      start + duration,
-      resources,
-      phase,
-      enforceCapacity,
-      forceExclusive
-    );
-
-    if (check.ok) {
-      return start;
-    }
-
-    start = Math.max(check.nextStart, start + MIN_TIME_INCREMENT);
-    attempts += 1;
-  }
-
-  return null;
-}
-
-function intervalFits(
-  segments: PhaseSegment[],
-  capacity: MachineCapacity,
-  start: number,
-  end: number,
-  resources: ScheduleConfigOutput['resources'][keyof ScheduleConfigOutput['resources']],
-  phase: PhaseName,
-  enforceCapacity: boolean,
-  forceExclusive: boolean
-): { ok: true } | { ok: false; nextStart: number } {
-  if (end - start <= TIME_EPSILON) {
-    return { ok: true };
-  }
-
-  const exclusivePhase = forceExclusive || isExclusivePhase(resources);
-  const eventTimes = new Set<number>([start, end]);
-
-  for (const segment of segments) {
-    eventTimes.add(segment.start);
-    eventTimes.add(segment.end);
-  }
-
-  const sortedEvents = Array.from(eventTimes).sort((left, right) => left - right);
-
-  for (let index = 0; index < sortedEvents.length - 1; index += 1) {
-    const windowStart = Math.max(sortedEvents[index], start);
-    const windowEnd = Math.min(sortedEvents[index + 1], end);
-
-    if (windowEnd - windowStart <= TIME_EPSILON) {
-      continue;
-    }
-
-    const sample = windowStart + (windowEnd - windowStart) / 2;
-    const usage = usageAt(sample, segments, phase);
-
-    if (enforceCapacity) {
-      const cpuTotal = usage.cpu + resources.cpu;
-      if (cpuTotal - capacity.cpu > RESOURCE_EPSILON) {
-        return {
-          ok: false,
-          nextStart: Math.max(sortedEvents[index + 1], start + MIN_TIME_INCREMENT),
-        };
-      }
-
-      const memoryTotal = usage.memory + resources.memory;
-      if (memoryTotal - capacity.memory > RESOURCE_EPSILON) {
-        return {
-          ok: false,
-          nextStart: Math.max(sortedEvents[index + 1], start + MIN_TIME_INCREMENT),
-        };
+      if (isBetterScore(score, bestScore)) {
+        bestMachine = machine;
+        bestSimulation = simulation;
+        bestScore = score;
+        isNewMachine = false;
       }
     }
 
-    if (exclusivePhase && usage.hasExclusivePhase) {
+    const shouldConsiderNewMachine =
+      (!bestScore || bestScore.exceedsTarget) && config.testDurationMins > EPSILON;
+
+    if (shouldConsiderNewMachine) {
+      const newMachineCandidate = createMachineInstance(nextInstanceId, largestMachineType);
+      const finishLimit = getFinishLimit(
+        newMachineCandidate,
+        sanitizedMaxDuration,
+        totalPhaseDuration
+      );
+      const newMachineSimulation = simulatePlacement(newMachineCandidate, phases, finishLimit);
+
+      if (newMachineSimulation) {
+        const score = scoreSimulation(
+          newMachineSimulation,
+          newMachineCandidate,
+          finishLimit,
+          config.testDurationMins
+        );
+
+        if (isBetterScore(score, bestScore)) {
+          bestMachine = newMachineCandidate;
+          bestSimulation = newMachineSimulation;
+          bestScore = score;
+          isNewMachine = true;
+        }
+      }
+    }
+
+    if (!bestMachine || !bestSimulation) {
+      throw new Error(`Unable to schedule config ${config.path}`);
+    }
+
+    applySimulation(bestMachine, bestSimulation, config);
+
+    if (isNewMachine) {
+      machineInstances.push(bestMachine);
+      nextInstanceId += 1;
+    }
+  }
+
+  const groups = machineInstances
+    .filter((instance) => instance.configs.length > 0)
+    .map((instance) => {
       return {
-        ok: false,
-        nextStart: Math.max(sortedEvents[index + 1], start + MIN_TIME_INCREMENT),
+        configs: instance.configs,
+        machine: { ...instance.machine },
+        expectedDurationMins: Number(instance.finishTime.toFixed(2)),
       };
-    }
-  }
+    });
 
-  return { ok: true };
-}
-
-function usageAt(time: number, segments: PhaseSegment[], phase: PhaseName) {
-  let cpu = 0;
-  let memory = 0;
-  let hasExclusivePhase = false;
-
-  for (const segment of segments) {
-    if (!segmentActiveAt(segment, time)) {
-      continue;
-    }
-
-    cpu += segment.cpu;
-    memory += segment.memory;
-
-    if (segment.phase === phase && segment.exclusive) {
-      hasExclusivePhase = true;
-    }
-  }
-
-  return { cpu, memory, hasExclusivePhase };
-}
-
-function segmentActiveAt(segment: PhaseSegment, time: number): boolean {
-  return time >= segment.start - TIME_EPSILON && time < segment.end - TIME_EPSILON;
-}
-
-function mergeSegments(existing: PhaseSegment[], additions: PhaseSegment[]): PhaseSegment[] {
-  const filtered = additions.filter((segment) => segment.end - segment.start > TIME_EPSILON);
-  return [...existing, ...filtered].sort((left, right) => {
-    if (Math.abs(left.start - right.start) > TIME_EPSILON) {
-      return left.start - right.start;
-    }
-
-    if (Math.abs(left.end - right.end) > TIME_EPSILON) {
-      return left.end - right.end;
-    }
-
-    return left.phase.localeCompare(right.phase);
-  });
-}
-
-function createMachineCapacity(
-  machine: ScheduleConfigOptions['machines'][number]
-): MachineCapacity {
   return {
-    cpu: Math.max(1, machine.cpus),
-    memory: applyMemorySafetyBuffer(machine.memoryMb),
+    groups,
   };
-}
-
-function createSegment(
-  phase: PhaseName,
-  start: number,
-  end: number,
-  resources: ScheduleConfigOutput['resources'][keyof ScheduleConfigOutput['resources']],
-  forceExclusive = false
-): PhaseSegment {
-  return {
-    start,
-    end,
-    cpu: resources.cpu,
-    memory: resources.memory,
-    exclusive: forceExclusive ? true : isExclusivePhase(resources),
-    phase,
-  };
-}
-
-function isExclusivePhase(
-  resources: ScheduleConfigOutput['resources'][keyof ScheduleConfigOutput['resources']]
-): boolean {
-  return 'exclusive' in resources && Boolean((resources as { exclusive?: boolean }).exclusive);
-}
-
-function applyMemorySafetyBuffer(memoryMb: number): number {
-  if (memoryMb <= 0) {
-    return 0;
-  }
-
-  const availableMemory = Math.max(memoryMb - MEMORY_RESERVE_MB, 0);
-  const bufferedMemory = availableMemory * (1 - MEMORY_BUFFER_RATIO);
-
-  return Math.max(bufferedMemory, 0);
 }

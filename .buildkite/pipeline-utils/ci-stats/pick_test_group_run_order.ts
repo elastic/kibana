@@ -417,12 +417,10 @@ export async function pickTestGroupRunOrder() {
 
   const FUNCTIONAL_MAX_MINUTES = process.env.FUNCTIONAL_MAX_MINUTES
     ? parseFloat(process.env.FUNCTIONAL_MAX_MINUTES)
-    : 25;
+    : 30;
   if (Number.isNaN(FUNCTIONAL_MAX_MINUTES)) {
     throw new Error(`invalid FUNCTIONAL_MAX_MINUTES: ${process.env.FUNCTIONAL_MAX_MINUTES}`);
   }
-
-  const FUNCTIONAL_PARALLELISM = 2;
 
   /**
    * This env variable corresponds to the env stanza within
@@ -615,7 +613,7 @@ export async function pickTestGroupRunOrder() {
       type: FUNCTIONAL_TYPE,
       defaultMin: 60,
       queue,
-      maxMin: FUNCTIONAL_MAX_MINUTES * FUNCTIONAL_PARALLELISM,
+      maxMin: FUNCTIONAL_MAX_MINUTES,
       minimumIsolationMin: FUNCTIONAL_MINIMUM_ISOLATION_MIN,
       overheadMin: 1.5,
       names,
@@ -668,7 +666,7 @@ export async function pickTestGroupRunOrder() {
         type: FUNCTIONAL_TYPE,
         queue: resolvedQueue,
         defaultMin: 60,
-        maxMin: FUNCTIONAL_MAX_MINUTES * FUNCTIONAL_PARALLELISM,
+        maxMin: FUNCTIONAL_MAX_MINUTES,
         minimumIsolationMin: FUNCTIONAL_MINIMUM_ISOLATION_MIN,
         overheadMin: 0,
       };
