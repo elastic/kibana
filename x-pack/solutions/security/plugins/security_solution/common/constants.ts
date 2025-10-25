@@ -156,7 +156,7 @@ export const SIEM_MIGRATIONS_LANDING_PATH = `${SIEM_MIGRATIONS_PATH}/landing` as
 export const SIEM_MIGRATIONS_RULES_PATH = `${SIEM_MIGRATIONS_PATH}/rules` as const;
 export const SIEM_MIGRATIONS_DASHBOARDS_PATH = `${SIEM_MIGRATIONS_PATH}/dashboards` as const;
 
-// AI SOC exclusive paths
+// EASE exclusive paths
 export const CONFIGURATIONS_PATH = '/configurations' as const;
 export const CONFIGURATIONS_INTEGRATIONS_PATH =
   `${APP_PATH}/${CONFIGURATIONS_PATH}/integrations/browse` as const;
@@ -181,7 +181,7 @@ export const DEFAULT_INDEX_PATTERN = [...INCLUDE_INDEX_PATTERN, ...EXCLUDE_ELAST
 /** This Kibana Advanced Setting enables the `Security news` feed widget */
 export const ENABLE_NEWS_FEED_SETTING = 'securitySolution:enableNewsFeed' as const;
 
-/** This Kibana Advanced Setting sets a default AI connector for serverless AI features (AI for SOC) */
+/** This Kibana Advanced Setting sets a default AI connector for serverless AI features (EASE) */
 export const DEFAULT_AI_CONNECTOR = 'securitySolution:defaultAIConnector' as const;
 
 /** Feature flag for the default AI connector setting */
@@ -560,7 +560,7 @@ export const MAX_BULK_FILL_RULE_GAPS_BULK_SIZE = 100;
 export const JEST_ENVIRONMENT = typeof jest !== 'undefined';
 
 /*
- * The tag to mark promotion rules that are related to the AI for SOC integrations
+ * The tag to mark promotion rules that are related to EASE integrations
  */
 export const PROMOTION_RULE_TAGS = [
   'Promotion', // This is the legacy tag for promotion rules and can be safely removed once promotion rules go live

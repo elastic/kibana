@@ -66,6 +66,7 @@ export default function jiraServiceManagementTest({ getService }: FtrProviderCon
           config: {
             apiUrl: simulatorUrl,
           },
+          is_connector_type_deprecated: false,
         });
       });
 

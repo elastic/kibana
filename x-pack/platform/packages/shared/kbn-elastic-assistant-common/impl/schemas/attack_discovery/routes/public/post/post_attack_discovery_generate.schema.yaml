@@ -14,7 +14,6 @@ paths:
              --request POST 'http://localhost:5601/api/attack_discovery/_generate' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json" \
-             --header "elastic-api-version: 2023-10-31" \
              --data '{
                 "alertsIndexPattern": ".alerts-security.alerts-default",
                 "anonymizationFields": [
@@ -950,6 +949,7 @@ paths:
               }'
       x-labels: [ess, serverless]
       operationId: PostAttackDiscoveryGenerate
+      x-state: Technical Preview; added in 9.2.0
       summary: Generate attack discoveries from alerts
       description: >-
         Initiates the generation of attack discoveries by analyzing security alerts using AI.

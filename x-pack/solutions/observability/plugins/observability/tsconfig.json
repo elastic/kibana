@@ -134,6 +134,7 @@
     "@kbn/saved-objects-tagging-plugin",
     "@kbn/core-elasticsearch-server-utils",
     "@kbn/core-http-browser-mocks",
+    "@kbn/discover-utils",
     "@kbn/deeplinks-management",
     "@kbn/observability-nav-icons"
   ],
