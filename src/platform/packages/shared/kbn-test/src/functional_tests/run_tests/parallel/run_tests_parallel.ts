@@ -398,12 +398,14 @@ export async function runTestsParallel(
       state.warmFinishedAt = startFinishTime;
       state.idleStartedAt = startFinishTime;
 
+      log.info(`Waiting for running slot for ${runner.getConfigPath()}`);
+      const runningSlotPromise = slot.waitForRunning();
+
       if (runnerIndex > 0) {
         await runningOrderSignals[runnerIndex - 1].promise;
       }
 
-      log.info(`Waiting for running slot for ${runner.getConfigPath()}`);
-      await slot.waitForRunning();
+      await runningSlotPromise;
       log.info(`Running slot acquired for ${runner.getConfigPath()}`);
 
       const runStartTime = Date.now();
