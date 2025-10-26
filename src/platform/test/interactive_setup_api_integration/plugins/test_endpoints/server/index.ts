@@ -39,8 +39,8 @@ export const plugin: PluginInitializer<void, never> = async (
           // `process.cwd()` to construct data path manually.
           const verificationCodePath = path.join(
             process.cwd(),
-            SERVICE_NAMESPACE,
             'data',
+            SERVICE_NAMESPACE,
             'verification_code'
           );
           initializerContext.logger.get().info(`Will read code from ${verificationCodePath}`);

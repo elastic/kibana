@@ -11,6 +11,7 @@ import fs from 'fs';
 import path from 'path';
 
 import type { Logger } from '@kbn/core/server';
+import { SERVICE_NAMESPACE } from '@kbn/test-services';
 import { getDataPath } from '@kbn/utils';
 
 import { getDetailedErrorMessage } from './errors';
@@ -20,7 +21,7 @@ export class VerificationService {
   private fileName: string;
 
   constructor(private readonly logger: Logger) {
-    this.fileName = path.join(getDataPath(), 'verification_code');
+    this.fileName = path.join(getDataPath(), SERVICE_NAMESPACE, 'verification_code');
   }
 
   public setup() {
