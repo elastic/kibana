@@ -8,7 +8,7 @@
  */
 
 import type { ComponentProps } from 'react';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -34,17 +34,21 @@ interface GroupBySelectorRendererProps {
 
 const NONE_GROUP_OPTION = 'none';
 
-/**
- * Renders the "Group By" selector used in the data cascade header.
- */
-export function useGetGroupBySelectorRenderer({
+function CascadeGroupingSelectionPopover({
+  availableColumns,
+  currentSelectedColumns,
   cascadeGroupingChangeHandler,
   width = 300,
-}: GroupBySelectorRendererProps) {
+}: {
+  availableColumns: string[];
+  currentSelectedColumns: string[];
+  cascadeGroupingChangeHandler: (cascadeGrouping: string[]) => void;
+  width?: number;
+}) {
   const [cascadeSelectOpen, setCascadeSelectOpen] = useState(false);
 
-  const getSelectionOptions = useCallback(
-    (availableColumns: string[], currentSelectedColumns: string[]) =>
+  const selectionOptions = useMemo(
+    () =>
       [NONE_GROUP_OPTION].concat(availableColumns).map((field) => ({
         label: field,
         'data-test-subj':
@@ -57,63 +61,89 @@ export function useGetGroupBySelectorRenderer({
             ? ('on' as const)
             : undefined,
       })),
-    []
+    [availableColumns, currentSelectedColumns]
   );
+
+  const closeSelectionPopover = useCallback(() => {
+    setCascadeSelectOpen(false);
+  }, []);
+
+  const openSelectionPopover = useCallback(() => {
+    setCascadeSelectOpen(true);
+  }, []);
 
   const onSelectionChange = useCallback<
     NonNullable<ComponentProps<typeof EuiSelectable>['onActiveOptionChange']>
   >(
     (option) => {
       if (option) {
+        // we send an array of the selected columns, in the case of none we send an empty array
         cascadeGroupingChangeHandler([option.label].filter((o) => o !== NONE_GROUP_OPTION));
       }
 
-      setCascadeSelectOpen(false);
+      closeSelectionPopover();
     },
-    [cascadeGroupingChangeHandler]
+    [cascadeGroupingChangeHandler, closeSelectionPopover]
   );
 
-  return useCallback(
-    (availableColumns: string[], currentSelectedColumns: string[]) => (
-      <EuiPopover
-        isOpen={cascadeSelectOpen}
-        closePopover={() => setCascadeSelectOpen(false)}
-        panelPaddingSize="none"
-        button={
-          <EuiFilterGroup compressed>
-            <EuiFilterButton
-              iconSide="left"
-              iconType="inspect"
-              color="text"
-              badgeColor="subdued"
-              onClick={() => setCascadeSelectOpen(true)}
-              hasActiveFilters={true}
-              numFilters={currentSelectedColumns.length}
-              data-test-subj="discoverEnableCascadeLayoutSwitch"
-            >
-              <FormattedMessage
-                id="discover.cascade.header.layoutSwitchLabel"
-                defaultMessage="Group By"
-              />
-            </EuiFilterButton>
-          </EuiFilterGroup>
-        }
+  return (
+    <EuiPopover
+      isOpen={cascadeSelectOpen}
+      closePopover={closeSelectionPopover}
+      panelPaddingSize="none"
+      button={
+        <EuiFilterGroup compressed>
+          <EuiFilterButton
+            iconSide="left"
+            iconType="inspect"
+            color="text"
+            badgeColor="subdued"
+            onClick={openSelectionPopover}
+            hasActiveFilters={true}
+            numFilters={currentSelectedColumns.length}
+            data-test-subj="discoverEnableCascadeLayoutSwitch"
+          >
+            <FormattedMessage
+              id="discover.cascade.header.layoutSwitchLabel"
+              defaultMessage="Group By"
+            />
+          </EuiFilterButton>
+        </EuiFilterGroup>
+      }
+    >
+      <EuiSelectable
+        searchable={false}
+        listProps={{
+          isVirtualized: false,
+        }}
+        data-test-subj="discoverGroupBySelectionList"
+        options={selectionOptions}
+        singleSelection="always"
+        onActiveOptionChange={onSelectionChange}
       >
-        <EuiSelectable
-          searchable={false}
-          listProps={{
-            isVirtualized: false,
-          }}
-          data-test-subj="discoverGroupBySelectionList"
-          options={getSelectionOptions(availableColumns, currentSelectedColumns)}
-          singleSelection="always"
-          onActiveOptionChange={onSelectionChange}
-        >
-          {(list) => <div style={{ width }}>{list}</div>}
-        </EuiSelectable>
-      </EuiPopover>
-    ),
-    [cascadeSelectOpen, getSelectionOptions, onSelectionChange, width]
+        {(list) => <div style={{ width }}>{list}</div>}
+      </EuiSelectable>
+    </EuiPopover>
+  );
+}
+
+/**
+ * Renders the "Group By" selector used in the data cascade header.
+ */
+export function useGetGroupBySelectorRenderer({
+  cascadeGroupingChangeHandler,
+}: GroupBySelectorRendererProps) {
+  return useCallback(
+    (availableColumns: string[], currentSelectedColumns: string[]) => {
+      return (
+        <CascadeGroupingSelectionPopover
+          availableColumns={availableColumns}
+          currentSelectedColumns={currentSelectedColumns}
+          cascadeGroupingChangeHandler={cascadeGroupingChangeHandler}
+        />
+      );
+    },
+    [cascadeGroupingChangeHandler]
   );
 }
 
