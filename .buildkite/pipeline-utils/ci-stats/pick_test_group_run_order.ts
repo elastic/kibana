@@ -14,11 +14,6 @@ import minimatch from 'minimatch';
 import execa from 'execa';
 
 import { load as loadYaml } from 'js-yaml';
-
-import type {
-  ScheduleConfigInput,
-  ScheduleConfigTestGroup,
-} from '@kbn/test/src/functional_tests/run_tests/parallel/schedule/types';
 import type { BuildkiteStep } from '../buildkite';
 import { BuildkiteClient } from '../buildkite';
 import type {
@@ -43,7 +38,22 @@ interface ScheduleMachineOptions {
 }
 
 interface ScheduleResponse {
-  groups: ScheduleConfigTestGroup[];
+  groups: Array<ScheduleConfigTestGroup>;
+}
+
+interface ScheduleConfigInput {
+  path: string;
+}
+
+interface ScheduleConfigOutput {
+  path: string;
+  tooLong: boolean;
+  testDurationMins: number;
+}
+
+interface ScheduleConfigTestGroup {
+  configs: ScheduleConfigOutput[];
+  expectedDurationMins: number;
 }
 
 const MEMORY_PER_CPU_MB_BY_PROFILE: Record<string, number> = {
