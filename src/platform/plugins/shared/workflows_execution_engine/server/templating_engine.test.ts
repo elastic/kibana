@@ -290,6 +290,5 @@ describe('WorkflowTemplatingEngine', () => {
       const result = templatingEngine.render(template, {});
       expect(result).toBe('');
     });
-
   });
 });
