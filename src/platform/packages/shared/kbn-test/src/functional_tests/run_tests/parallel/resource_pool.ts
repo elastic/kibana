@@ -436,6 +436,14 @@ export class ResourcePool {
   private roundToPrecision(value: number): number {
     return Math.round(value * 1_000_000) / 1_000_000;
   }
+
+  getMemoryUsage() {
+    return {
+      used: this.usedMemory,
+      capacity: this.memoryCapacity,
+      budget: this.totalMemoryBudget,
+    };
+  }
 }
 
 export interface Slot {

@@ -52,6 +52,10 @@ jest.mock('./get_slot_resources', () => ({
   })),
 }));
 
+jest.mock('./get_available_memory', () => ({
+  getAvailableMemory: jest.fn(() => 64 * 1024),
+}));
+
 jest.mock('./prepare_chrome', () => ({
   prepareChrome: jest.fn(async () => undefined),
 }));

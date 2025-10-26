@@ -28,6 +28,7 @@ import { prepareChrome } from './prepare_chrome';
 import { readConfig } from './read_config';
 import { getSlotResources } from './get_slot_resources';
 import type { SlotResources } from './get_slot_resources';
+import { getAvailableMemory } from './get_available_memory';
 import { startWatchingFiles } from './start_watching_files';
 
 function booleanFromEnv(varName: string, defaultValue: boolean = false): boolean {
@@ -246,6 +247,13 @@ export async function runTestsParallel(
       const usage = process.resourceUsage();
       const memory = process.memoryUsage();
       const totalMemMb = os.totalmem() / (1024 * 1024);
+      const poolMemory = pool.getMemoryUsage();
+      const expectedAvailableMb = Math.max(0, totalMemMb - (poolMemory.used + MEMORY_BUFFER_MB));
+      const availableMemMb = getAvailableMemory();
+      const memoryDiffPct =
+        expectedAvailableMb > 0
+          ? ((availableMemMb - expectedAvailableMb) / expectedAvailableMb) * 100
+          : undefined;
 
       const userDelta = previousResourceUsage
         ? usage.userCPUTime - previousResourceUsage.userCPUTime
@@ -266,6 +274,13 @@ export async function runTestsParallel(
         `system=${formatSeconds(systemDelta)}s`,
         `load=[${loadString}]`,
         `totalMem=${totalMemMb.toFixed(0)}mb`,
+        `expectedAvail=${expectedAvailableMb.toFixed(0)}mb`,
+        `availableMem=${availableMemMb.toFixed(0)}mb`,
+        `memDiffPct=${
+          memoryDiffPct !== undefined && Number.isFinite(memoryDiffPct)
+            ? memoryDiffPct.toFixed(2)
+            : 'n/a'
+        }`,
       ];
 
       log.info(`Stats: ${messageParts.join(' ')}`);

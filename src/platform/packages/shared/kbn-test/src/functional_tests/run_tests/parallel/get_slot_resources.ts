@@ -111,12 +111,12 @@ export function getSlotResources(capabilities: ServerCapabilities): SlotResource
 
   return {
     warming: {
-      cpu: numNodes * 1.5,
+      cpu: numNodes,
       memory: esMemory,
       exclusive: false,
     },
     running: {
-      cpu: esCpu + browserCpu + kibanaCpu,
+      cpu: Math.max(1.75, esCpu + browserCpu + kibanaCpu),
       memory: esMemory + kibanaMemory + containerMemory + browserMemory,
       exclusive: false,
     },

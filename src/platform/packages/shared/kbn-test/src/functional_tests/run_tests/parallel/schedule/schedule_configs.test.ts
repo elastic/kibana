@@ -141,4 +141,64 @@ describe('scheduleConfigs', () => {
     expect(groupForB).toBeDefined();
     expect(groupForB?.machine.memoryMb).toBe(16384);
   });
+
+  it('distributes zero-resource configs across machines and lanes', async () => {
+    setResources('configs/nonzero_a.ts', {
+      warming: { cpu: 1, memory: 4096, exclusive: false },
+      running: { cpu: 1, memory: 4096, exclusive: false },
+    });
+    setResources('configs/nonzero_b.ts', {
+      warming: { cpu: 1, memory: 2048, exclusive: false },
+      running: { cpu: 1, memory: 2048, exclusive: false },
+    });
+    setResources('configs/nonzero_c.ts', {
+      warming: { cpu: 2, memory: 8192, exclusive: false },
+      running: { cpu: 2, memory: 8192, exclusive: false },
+    });
+
+    const zeroResources: SlotResources = {
+      warming: { cpu: 0, memory: 0, exclusive: false },
+      running: { cpu: 0, memory: 0, exclusive: false },
+    };
+
+    ['noop_1', 'noop_2', 'noop_3', 'noop_4'].forEach((name) => {
+      setResources(`configs/${name}.ts`, zeroResources);
+    });
+
+    const result = await scheduleConfigs({
+      maxDurationMins: 60,
+      configs: [
+        { path: 'configs/nonzero_a.ts', testDurationMins: 20 },
+        { path: 'configs/nonzero_b.ts', testDurationMins: 10 },
+        { path: 'configs/nonzero_c.ts', testDurationMins: 15 },
+        { path: 'configs/noop_1.ts', testDurationMins: 0 },
+        { path: 'configs/noop_2.ts', testDurationMins: 0 },
+        { path: 'configs/noop_3.ts', testDurationMins: 0 },
+        { path: 'configs/noop_4.ts', testDurationMins: 0 },
+      ],
+      machines: [
+        { name: 'm-primary', cpus: 8, memoryMb: 8192 },
+        { name: 'm-secondary', cpus: 8, memoryMb: 8192 },
+      ],
+    });
+
+    expect(result.groups).toHaveLength(2);
+
+    const groupWithHeavy = result.groups.find((group) =>
+      group.configs.some((cfg) => cfg.path === 'configs/nonzero_c.ts')
+    );
+    const groupWithLight = result.groups.find((group) => group !== groupWithHeavy);
+
+    expect(groupWithHeavy).toBeDefined();
+    expect(groupWithLight).toBeDefined();
+
+    const zeroOnHeavy = groupWithHeavy!.configs.filter((cfg) => cfg.testDurationMins === 0);
+    const zeroOnLight = groupWithLight!.configs.filter((cfg) => cfg.testDurationMins === 0);
+
+    expect(zeroOnHeavy).toHaveLength(2);
+    expect(zeroOnLight).toHaveLength(2);
+
+    const lightLaneStartTimes = new Set(zeroOnLight.map((cfg) => cfg.startTimeMins));
+    expect(lightLaneStartTimes.size).toBeGreaterThan(1);
+  });
 });

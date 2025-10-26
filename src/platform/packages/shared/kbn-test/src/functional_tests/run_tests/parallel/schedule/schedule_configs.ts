@@ -35,6 +35,15 @@ const ZERO_SLOT_RESOURCES: SlotResources = {
 
 const resolveConfigPath = (value: string) => Path.resolve(REPO_ROOT, value);
 
+function isZeroConfigStats(stats: ConfigStats): boolean {
+  return (
+    Math.abs(stats.duration) <= EPSILON &&
+    Math.abs(stats.memoryWidth) <= EPSILON &&
+    Math.abs(stats.warmCpu) <= EPSILON &&
+    Math.abs(stats.runCpu) <= EPSILON
+  );
+}
+
 interface ConfigStats {
   config: ScheduleConfigOutput;
   duration: number;
@@ -48,6 +57,8 @@ interface LaneState {
   warmCpuWidth: number;
   runCpuWidth: number;
   totalDuration: number;
+  configCount: number;
+  zeroConfigCount: number;
 }
 
 interface MachineTemplate {
@@ -65,6 +76,8 @@ interface MachineState {
   memoryUsage: number;
   warmCpuUsage: number;
   runCpuUsage: number;
+  configCount: number;
+  zeroConfigCount: number;
 }
 
 interface PlacementCandidate {
@@ -83,6 +96,15 @@ interface PlacementCandidate {
   overallFinish: number;
   isNewLane: boolean;
   isNewMachine: boolean;
+  isZeroConfig: boolean;
+  laneConfigCountAfter: number;
+  laneConfigCountBefore: number;
+  machineConfigCountAfter: number;
+  machineConfigCountBefore: number;
+  laneZeroCountAfter: number;
+  laneZeroCountBefore: number;
+  machineZeroCountAfter: number;
+  machineZeroCountBefore: number;
 }
 
 export async function scheduleConfigs({
@@ -262,6 +284,7 @@ function findBestPlacement({
 }): PlacementCandidate | undefined {
   let bestCandidate: PlacementCandidate | undefined;
   const currentOverallMax = computeOverallMax(machineInstances);
+  const zeroConfig = isZeroConfigStats(stats);
 
   for (const machine of machineInstances) {
     const otherMaxFinish = computeOtherMax(machineInstances, machine.id);
@@ -293,15 +316,17 @@ function findBestPlacement({
     }
   }
 
-  for (const template of machineTemplates) {
-    const candidate = createNewMachineCandidate({
-      template,
-      stats,
-      currentOverallMax,
-    });
+  if (!zeroConfig || machineInstances.length === 0) {
+    for (const template of machineTemplates) {
+      const candidate = createNewMachineCandidate({
+        template,
+        stats,
+        currentOverallMax,
+      });
 
-    if (candidate && isBetterCandidate({ candidate, incumbent: bestCandidate, targetDuration })) {
-      bestCandidate = candidate;
+      if (candidate && isBetterCandidate({ candidate, incumbent: bestCandidate, targetDuration })) {
+        bestCandidate = candidate;
+      }
     }
   }
 
@@ -320,6 +345,7 @@ function createExistingLaneCandidate({
   otherMaxFinish: number;
 }): PlacementCandidate | undefined {
   const lane = machine.lanes[laneIndex];
+  const isZero = isZeroConfigStats(stats);
 
   const nextLaneMemory = Math.max(lane.memoryWidth, stats.memoryWidth);
   const nextLaneWarm = Math.max(lane.warmCpuWidth, stats.warmCpu);
@@ -344,6 +370,10 @@ function createExistingLaneCandidate({
   const nextLaneDuration = startTime + stats.duration;
   const nextMachineFinish = Math.max(machine.finishTime, nextLaneDuration);
   const overallFinish = Math.max(nextMachineFinish, otherMaxFinish);
+  const nextLaneConfigCount = lane.configCount + 1;
+  const nextMachineConfigCount = machine.configCount + 1;
+  const nextLaneZeroCount = isZero ? lane.zeroConfigCount + 1 : lane.zeroConfigCount;
+  const nextMachineZeroCount = isZero ? machine.zeroConfigCount + 1 : machine.zeroConfigCount;
 
   return {
     machine,
@@ -361,6 +391,15 @@ function createExistingLaneCandidate({
     overallFinish,
     isNewLane: false,
     isNewMachine: false,
+    isZeroConfig: isZero,
+    laneConfigCountAfter: nextLaneConfigCount,
+    laneConfigCountBefore: lane.configCount,
+    machineConfigCountAfter: nextMachineConfigCount,
+    machineConfigCountBefore: machine.configCount,
+    laneZeroCountAfter: nextLaneZeroCount,
+    laneZeroCountBefore: lane.zeroConfigCount,
+    machineZeroCountAfter: nextMachineZeroCount,
+    machineZeroCountBefore: machine.zeroConfigCount,
   };
 }
 
@@ -373,6 +412,7 @@ function createNewLaneCandidate({
   stats: ConfigStats;
   otherMaxFinish: number;
 }): PlacementCandidate | undefined {
+  const isZero = isZeroConfigStats(stats);
   const nextMemoryUsage = machine.memoryUsage + stats.memoryWidth;
   if (nextMemoryUsage - machine.template.memoryMb > EPSILON) {
     return undefined;
@@ -391,6 +431,10 @@ function createNewLaneCandidate({
   const nextLaneDuration = stats.duration;
   const nextMachineFinish = Math.max(machine.finishTime, nextLaneDuration);
   const overallFinish = Math.max(nextMachineFinish, otherMaxFinish);
+  const nextLaneConfigCount = 1;
+  const nextMachineConfigCount = machine.configCount + 1;
+  const nextLaneZeroCount = isZero ? 1 : 0;
+  const nextMachineZeroCount = isZero ? machine.zeroConfigCount + 1 : machine.zeroConfigCount;
 
   return {
     machine,
@@ -408,6 +452,15 @@ function createNewLaneCandidate({
     overallFinish,
     isNewLane: true,
     isNewMachine: false,
+    isZeroConfig: isZero,
+    laneConfigCountAfter: nextLaneConfigCount,
+    laneConfigCountBefore: 0,
+    machineConfigCountAfter: nextMachineConfigCount,
+    machineConfigCountBefore: machine.configCount,
+    laneZeroCountAfter: nextLaneZeroCount,
+    laneZeroCountBefore: 0,
+    machineZeroCountAfter: nextMachineZeroCount,
+    machineZeroCountBefore: machine.zeroConfigCount,
   };
 }
 
@@ -420,6 +473,7 @@ function createNewMachineCandidate({
   stats: ConfigStats;
   currentOverallMax: number;
 }): PlacementCandidate | undefined {
+  const isZero = isZeroConfigStats(stats);
   if (stats.memoryWidth - template.memoryMb > EPSILON) {
     return undefined;
   }
@@ -434,6 +488,10 @@ function createNewMachineCandidate({
 
   const machineFinish = stats.duration;
   const overallFinish = Math.max(machineFinish, currentOverallMax);
+  const nextLaneConfigCount = 1;
+  const nextMachineConfigCount = 1;
+  const nextLaneZeroCount = isZero ? 1 : 0;
+  const nextMachineZeroCount = isZero ? 1 : 0;
 
   return {
     machine: null,
@@ -451,6 +509,15 @@ function createNewMachineCandidate({
     overallFinish,
     isNewLane: true,
     isNewMachine: true,
+    isZeroConfig: isZero,
+    laneConfigCountAfter: nextLaneConfigCount,
+    laneConfigCountBefore: 0,
+    machineConfigCountAfter: nextMachineConfigCount,
+    machineConfigCountBefore: 0,
+    laneZeroCountAfter: nextLaneZeroCount,
+    laneZeroCountBefore: 0,
+    machineZeroCountAfter: nextMachineZeroCount,
+    machineZeroCountBefore: 0,
   };
 }
 
@@ -465,6 +532,46 @@ function isBetterCandidate({
 }): boolean {
   if (!incumbent) {
     return true;
+  }
+
+  if (candidate.isZeroConfig) {
+    if (!incumbent.isZeroConfig) {
+      return true;
+    }
+
+    if (candidate.machineZeroCountAfter !== incumbent.machineZeroCountAfter) {
+      return candidate.machineZeroCountAfter < incumbent.machineZeroCountAfter;
+    }
+
+    if (candidate.machineZeroCountBefore !== incumbent.machineZeroCountBefore) {
+      return candidate.machineZeroCountBefore < incumbent.machineZeroCountBefore;
+    }
+
+    if (candidate.laneZeroCountAfter !== incumbent.laneZeroCountAfter) {
+      return candidate.laneZeroCountAfter < incumbent.laneZeroCountAfter;
+    }
+
+    if (candidate.laneZeroCountBefore !== incumbent.laneZeroCountBefore) {
+      return candidate.laneZeroCountBefore < incumbent.laneZeroCountBefore;
+    }
+
+    if (candidate.machineConfigCountAfter !== incumbent.machineConfigCountAfter) {
+      return candidate.machineConfigCountAfter < incumbent.machineConfigCountAfter;
+    }
+
+    if (candidate.machineConfigCountBefore !== incumbent.machineConfigCountBefore) {
+      return candidate.machineConfigCountBefore < incumbent.machineConfigCountBefore;
+    }
+
+    if (candidate.laneConfigCountAfter !== incumbent.laneConfigCountAfter) {
+      return candidate.laneConfigCountAfter < incumbent.laneConfigCountAfter;
+    }
+
+    if (candidate.laneConfigCountBefore !== incumbent.laneConfigCountBefore) {
+      return candidate.laneConfigCountBefore < incumbent.laneConfigCountBefore;
+    }
+  } else if (incumbent.isZeroConfig) {
+    return false;
   }
 
   if (candidate.overallFinish < incumbent.overallFinish - EPSILON) {
@@ -523,7 +630,7 @@ function applyPlacement({
   let isNewMachine = false;
 
   if (!machine) {
-    machine = {
+    const newMachine: MachineState = {
       id: updatedNextId,
       template: { ...candidate.machineTemplate },
       lanes: [],
@@ -532,12 +639,16 @@ function applyPlacement({
       memoryUsage: 0,
       warmCpuUsage: 0,
       runCpuUsage: 0,
+      configCount: 0,
+      zeroConfigCount: 0,
     };
-    machineInstances.push(machine);
+    machineInstances.push(newMachine);
+    machine = newMachine;
     updatedNextId += 1;
     isNewMachine = true;
   }
 
+  const resolvedMachine = machine;
   const assignedConfig = stats.config;
   assignedConfig.startTimeMins = candidate.startTime;
 
@@ -547,23 +658,29 @@ function applyPlacement({
       warmCpuWidth: candidate.laneWarmAfter,
       runCpuWidth: candidate.laneRunAfter,
       totalDuration: candidate.laneDurationAfter,
+      configCount: candidate.laneConfigCountAfter,
+      zeroConfigCount: candidate.laneZeroCountAfter,
     };
-    machine.lanes.push(newLane);
+    resolvedMachine.lanes.push(newLane);
   } else {
-    const lane = machine.lanes[candidate.laneIndex];
+    const lane = resolvedMachine.lanes[candidate.laneIndex];
     lane.memoryWidth = candidate.laneMemoryAfter;
     lane.warmCpuWidth = candidate.laneWarmAfter;
     lane.runCpuWidth = candidate.laneRunAfter;
     lane.totalDuration = candidate.laneDurationAfter;
+    lane.configCount = candidate.laneConfigCountAfter;
+    lane.zeroConfigCount = candidate.laneZeroCountAfter;
   }
 
-  machine.memoryUsage = candidate.memoryUsageAfter;
-  machine.warmCpuUsage = candidate.warmCpuUsageAfter;
-  machine.runCpuUsage = candidate.runCpuUsageAfter;
-  machine.finishTime = candidate.machineFinish;
-  machine.configs.push(assignedConfig);
+  resolvedMachine.memoryUsage = candidate.memoryUsageAfter;
+  resolvedMachine.warmCpuUsage = candidate.warmCpuUsageAfter;
+  resolvedMachine.runCpuUsage = candidate.runCpuUsageAfter;
+  resolvedMachine.finishTime = candidate.machineFinish;
+  resolvedMachine.configCount = candidate.machineConfigCountAfter;
+  resolvedMachine.zeroConfigCount = candidate.machineZeroCountAfter;
+  resolvedMachine.configs.push(assignedConfig);
 
-  return { machine, isNewMachine, nextId: updatedNextId };
+  return { machine: resolvedMachine, isNewMachine, nextId: updatedNextId };
 }
 
 function computeOverallMax(machines: MachineState[]): number {
