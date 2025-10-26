@@ -10,6 +10,8 @@
 import {
   EuiBadge,
   EuiBadgeGroup,
+  EuiButton,
+  EuiEmptyPrompt,
   EuiFormRow,
   EuiHighlight,
   EuiIcon,
@@ -19,6 +21,7 @@ import {
   EuiPopover,
   EuiPopoverFooter,
   EuiSelectable,
+  EuiSelectableMessage,
   EuiText,
   EuiToolTip,
   useEuiTheme,
@@ -45,7 +48,6 @@ interface WorkflowOption {
   namePrepend?: React.ReactNode;
   prepend?: React.ReactNode;
   append?: React.ReactNode;
-  hoverTooltip?: string;
   data?: {
     secondaryContent?: string;
   };
@@ -94,6 +96,39 @@ const TagsBadge: React.FC<{ tags: string[] }> = ({ tags }) => {
   );
 };
 
+const WorkflowsEmptyState: React.FC<{ onCreateWorkflow: () => void }> = ({ onCreateWorkflow }) => {
+  return (
+    <EuiSelectableMessage>
+      <EuiEmptyPrompt
+        title={
+          <EuiText size="s" textAlign="center" color="textParagraph">
+            <h2>{i18n.EMPTY_STATE_TITLE}</h2>
+          </EuiText>
+        }
+        body={
+          <EuiText size="s" textAlign="center" color="textSubdued">
+            <p>{i18n.EMPTY_STATE_DESCRIPTION}</p>
+          </EuiText>
+        }
+        actions={
+          <EuiButton
+            color="primary"
+            fill={false}
+            onClick={onCreateWorkflow}
+            iconType="plusInCircle"
+            size="s"
+            disabled={false}
+            isLoading={false}
+          >
+            {i18n.EMPTY_STATE_BUTTON_TEXT}
+          </EuiButton>
+        }
+        paddingSize="l"
+      />
+    </EuiSelectableMessage>
+  );
+};
+
 const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<WorkflowsActionParams>> = ({
   actionParams,
   editAction,
@@ -135,9 +170,8 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
       </>
     );
 
-    // Add hoverTooltip if defined
-    if (option.hoverTooltip) {
-      return <EuiToolTip content={option.hoverTooltip}>{content}</EuiToolTip>;
+    if (option.disabled) {
+      return <EuiToolTip content={i18n.DISABLED_WORKFLOW_TOOLTIP}>{content}</EuiToolTip>;
     }
 
     return content;
@@ -260,11 +294,6 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
             );
           }
 
-          // The empty state is a single disabled workflow with no ID, so we distinguish
-          // between actual disabled workflows and the empty state by checking for ID
-          const hoverTooltip =
-            isDisabled && workflow.id ? i18n.DISABLED_WORKFLOW_TOOLTIP : undefined;
-
           const workflowTags = workflow.definition?.tags || [];
 
           return {
@@ -279,7 +308,6 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
               checked: isSelected ? 'on' : undefined,
               namePrepend: prependNameElement,
               append: <TagsBadge tags={workflowTags} />,
-              hoverTooltip,
               data: {
                 secondaryContent: workflow.description || 'No description',
               },
@@ -330,19 +358,7 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
     }
   }, [workflowId, workflows]);
 
-  const workflowOptions =
-    workflows.length > 0
-      ? workflows
-      : [
-          {
-            id: '',
-            name: i18n.NO_WORKFLOWS_AVAILABLE,
-            description: '',
-            status: '',
-            label: i18n.NO_WORKFLOWS_AVAILABLE,
-            disabled: true,
-          },
-        ];
+  const workflowOptions = workflows;
 
   const errorMessages = errors['subActionParams.workflowId'];
   const errorMessage = Array.isArray(errorMessages) ? errorMessages[0] : errorMessages;
@@ -391,6 +407,7 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
           }}
           isPreFiltered={isSearching ? false : { highlightSearch: false }}
           data-test-subj="workflowIdSelect"
+          emptyMessage={<WorkflowsEmptyState onCreateWorkflow={handleOpenWorkflowManagementApp} />}
           listProps={{
             rowHeight: 60, // Increased height to accommodate secondary content and tags
             showIcons: false,
@@ -415,20 +432,22 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
               fullWidth
             >
               {list}
-              <EuiPopoverFooter
-                paddingSize="s"
-                css={{ backgroundColor: euiTheme.colors.backgroundBaseSubdued }}
-              >
-                <EuiText size="s" textAlign="right">
-                  <EuiLink onClick={handleOpenWorkflowManagementApp} external>
-                    <FormattedMessage
-                      id="workflows.params.viewAllWorkflowsLinkText"
-                      defaultMessage="View all workflows"
-                    />
-                    <EuiIcon type="popout" size="s" />
-                  </EuiLink>
-                </EuiText>
-              </EuiPopoverFooter>
+              {workflows.length > 0 && (
+                <EuiPopoverFooter
+                  paddingSize="s"
+                  css={{ backgroundColor: euiTheme.colors.backgroundBaseSubdued }}
+                >
+                  <EuiText size="s" textAlign="right">
+                    <EuiLink onClick={handleOpenWorkflowManagementApp} external>
+                      <FormattedMessage
+                        id="workflows.params.viewAllWorkflowsLinkText"
+                        defaultMessage="View all workflows"
+                      />
+                      <EuiIcon type="popout" size="s" />
+                    </EuiLink>
+                  </EuiText>
+                </EuiPopoverFooter>
+              )}
             </EuiInputPopover>
           )}
         </EuiSelectable>
