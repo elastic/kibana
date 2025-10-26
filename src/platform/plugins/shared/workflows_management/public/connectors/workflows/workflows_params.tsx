@@ -105,8 +105,8 @@ const WorkflowsEmptyState: React.FC<{ onCreateWorkflow: () => void }> = ({ onCre
             {i18n.EMPTY_STATE_TITLE}
           </EuiText>
         }
-        body={i18n.EMPTY_STATE_DESCRIPTION}
         titleSize="s"
+        body={i18n.EMPTY_STATE_DESCRIPTION}
         actions={
           <EuiButton
             color="primary"
