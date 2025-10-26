@@ -253,8 +253,8 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
             // Show disabled icon for disabled workflows
             prependNameElement = (
               <IconDisabledWorkflow
-                size="s"
-                style={{ marginRight: '8px' }}
+                size="m"
+                style={{ marginRight: '2.5px' }}
                 aria-label={i18n.DISABLED_BADGE_LABEL}
               />
             );
