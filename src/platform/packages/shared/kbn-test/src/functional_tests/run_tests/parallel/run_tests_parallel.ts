@@ -65,6 +65,7 @@ function formatMinutes(minutes?: number): string | undefined {
 interface RunnerState {
   slot: Slot;
   startedAt: number;
+  laneIndex?: number;
   warmStartedAt?: number;
   warmDurationMs?: number;
   warmFinishedAt?: number;
@@ -173,9 +174,18 @@ export async function runTestsParallel(
     });
   }
 
-  const configs = initialConfigs?.length
-    ? initialConfigs
-    : group?.configs.map((config) => config.path) ?? [];
+  let configs: string[];
+  if (group) {
+    const schedulerOrder = group.configs.map((config) => config.path);
+    if (initialConfigs?.length) {
+      const initialSet = new Set(initialConfigs);
+      configs = schedulerOrder.filter((path) => initialSet.has(path));
+    } else {
+      configs = schedulerOrder;
+    }
+  } else {
+    configs = initialConfigs ?? [];
+  }
 
   const portConfigEntries = await Promise.all(
     configs.map(async (config) => {
@@ -399,7 +409,9 @@ export async function runTestsParallel(
           parts.push(`exit=${state.exitCode}`);
         }
 
-        const baseLine = `${path}: ${parts.join(' ')}`;
+        const laneLabel = scheduledConfig?.laneIndex ?? state.laneIndex;
+        const lanePrefix = laneLabel !== undefined ? `[${laneLabel}] ` : '';
+        const baseLine = `${lanePrefix}${path}: ${parts.join(' ')}`;
 
         let coloredLine: string;
 
@@ -465,6 +477,7 @@ export async function runTestsParallel(
     const state: RunnerState = {
       slot,
       startedAt: Date.now(),
+      laneIndex: laneInfo.laneIndex,
     };
 
     runnerStates.set(path, state);

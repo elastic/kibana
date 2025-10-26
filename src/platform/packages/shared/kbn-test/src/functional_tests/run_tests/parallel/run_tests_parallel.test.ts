@@ -242,6 +242,10 @@ describe('runTestsParallel', () => {
           startTimeMins: 0,
           laneIndex: 0,
           testConfigCategory: undefined,
+          hasTests: true,
+          warmupDurationMins: 2,
+          expectedStartTimeMins: 0,
+          expectedDurationMins: 12,
         },
         {
           path: CONFIG_B,
@@ -254,10 +258,14 @@ describe('runTestsParallel', () => {
           startTimeMins: 0,
           laneIndex: 1,
           testConfigCategory: undefined,
+          hasTests: true,
+          warmupDurationMins: 2,
+          expectedStartTimeMins: 0,
+          expectedDurationMins: 12,
         },
       ],
       machine: { name: 'demo', cpus: 4, memoryMb: 8192 },
-      expectedDurationMins: 10,
+      expectedDurationMins: 12,
     };
 
     const runPromise = runTestsParallel(log, {

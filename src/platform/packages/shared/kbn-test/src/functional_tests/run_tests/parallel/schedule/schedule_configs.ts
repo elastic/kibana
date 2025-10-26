@@ -185,23 +185,14 @@ export async function scheduleConfigs({
     }
   }
 
+  finalizeMachineSchedules(machineInstances);
+
   const groups = machineInstances
     .filter((instance) => instance.configs.length > 0)
     .sort((a, b) => a.id - b.id)
     .map((instance) => {
-      const configsOrderedByStart = [...instance.configs].sort((a, b) => {
-        const startA = a.startTimeMins ?? Number.POSITIVE_INFINITY;
-        const startB = b.startTimeMins ?? Number.POSITIVE_INFINITY;
-
-        if (Math.abs(startA - startB) > EPSILON) {
-          return startA - startB;
-        }
-
-        return a.path.localeCompare(b.path);
-      });
-
       return {
-        configs: configsOrderedByStart,
+        configs: [...instance.configs],
         machine: { ...instance.template },
         expectedDurationMins: Number(instance.finishTime.toFixed(2)),
       };
@@ -713,6 +704,133 @@ function applyPlacement({
   resolvedMachine.configs.push(assignedConfig);
 
   return { machine: resolvedMachine, isNewMachine, nextId: updatedNextId };
+}
+
+function finalizeMachineSchedules(machineInstances: MachineState[]) {
+  for (const machine of machineInstances) {
+    let machineMaxDuration = 0;
+    let machineZeroCount = 0;
+    const machineConfigs: ScheduleConfigOutput[] = [];
+
+    machine.laneAssignments.forEach((laneConfigs, laneIndex) => {
+      if (!laneConfigs || laneConfigs.length === 0) {
+        machine.laneAssignments[laneIndex] = [];
+        return;
+      }
+
+      const sortedLane = laneConfigs.slice().sort((a, b) => {
+        const warmCpuDiff = a.resources.warming.cpu - b.resources.warming.cpu;
+        if (Math.abs(warmCpuDiff) > EPSILON) {
+          return warmCpuDiff;
+        }
+
+        const warmMemDiff = a.resources.warming.memory - b.resources.warming.memory;
+        if (Math.abs(warmMemDiff) > EPSILON) {
+          return warmMemDiff;
+        }
+
+        const durationA = a.expectedDurationMins ?? a.testDurationMins;
+        const durationB = b.expectedDurationMins ?? b.testDurationMins;
+        if (Math.abs(durationA - durationB) > EPSILON) {
+          return durationA - durationB;
+        }
+
+        return a.path.localeCompare(b.path);
+      });
+
+      const orderedLane = spreadLaneConfigs(sortedLane);
+      machine.laneAssignments[laneIndex] = orderedLane;
+
+      let laneOffset = 0;
+      let laneZeroCount = 0;
+      let laneMemoryWidth = 0;
+      let laneWarmCpuWidth = 0;
+      let laneRunCpuWidth = 0;
+
+      orderedLane.forEach((config) => {
+        const warmDuration = config.warmupDurationMins ?? 0;
+        const testDuration = config.hasTests ? Math.max(config.testDurationMins, 0) : 0;
+        const configDuration = config.expectedDurationMins ?? warmDuration + testDuration;
+
+        config.startTimeMins = laneOffset;
+        config.expectedStartTimeMins = laneOffset;
+        config.expectedDurationMins = configDuration;
+
+        laneOffset += configDuration;
+
+        laneMemoryWidth = Math.max(
+          laneMemoryWidth,
+          config.resources.warming.memory,
+          config.resources.running.memory
+        );
+        laneWarmCpuWidth = Math.max(laneWarmCpuWidth, config.resources.warming.cpu);
+        laneRunCpuWidth = Math.max(laneRunCpuWidth, config.resources.running.cpu);
+
+        if (!config.hasTests) {
+          laneZeroCount += 1;
+        }
+
+        machineConfigs.push(config);
+      });
+
+      const laneState = machine.lanes[laneIndex];
+      if (laneState) {
+        laneState.totalDuration = laneOffset;
+        laneState.configCount = orderedLane.length;
+        laneState.zeroConfigCount = laneZeroCount;
+        laneState.memoryWidth = laneMemoryWidth;
+        laneState.warmCpuWidth = laneWarmCpuWidth;
+        laneState.runCpuWidth = laneRunCpuWidth;
+      }
+
+      machineZeroCount += laneZeroCount;
+      machineMaxDuration = Math.max(machineMaxDuration, laneOffset);
+    });
+
+    machine.configs = machineConfigs.slice().sort((a, b) => {
+      const startA = a.expectedStartTimeMins ?? Number.POSITIVE_INFINITY;
+      const startB = b.expectedStartTimeMins ?? Number.POSITIVE_INFINITY;
+
+      if (Math.abs(startA - startB) > EPSILON) {
+        return startA - startB;
+      }
+
+      const laneA = a.laneIndex ?? Number.POSITIVE_INFINITY;
+      const laneB = b.laneIndex ?? Number.POSITIVE_INFINITY;
+
+      if (laneA !== laneB) {
+        return laneA - laneB;
+      }
+
+      return a.path.localeCompare(b.path);
+    });
+
+    machine.configCount = machine.configs.length;
+    machine.zeroConfigCount = machineZeroCount;
+    machine.finishTime = machineMaxDuration;
+  }
+}
+
+function spreadLaneConfigs(configs: ScheduleConfigOutput[]): ScheduleConfigOutput[] {
+  if (configs.length <= 2) {
+    return configs.slice();
+  }
+
+  const result: ScheduleConfigOutput[] = [];
+  let left = 0;
+  let right = configs.length - 1;
+
+  while (left <= right) {
+    result.push(configs[left]);
+    left += 1;
+
+    if (left <= right) {
+      result.push(configs[right]);
+      right -= 1;
+    }
+  }
+
+  return result;
 }
 
 function computeOverallMax(machines: MachineState[]): number {

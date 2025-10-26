@@ -114,7 +114,7 @@ describe('scheduleConfigs', () => {
     expect(group.configs.map((cfg) => cfg.path)).toEqual(['configs/a.ts', 'configs/b.ts']);
     expect(group.configs.map((cfg) => cfg.startTimeMins)).toEqual([0, 0]);
     expect(group.configs.map((cfg) => cfg.laneIndex)).toEqual([0, 1]);
-    expect(group.expectedDurationMins).toBeCloseTo(20, 5);
+    expect(group.expectedDurationMins).toBeCloseTo(22, 5);
   });
 
   it('prefers reusing existing machines when capacity allows', async () => {
@@ -268,12 +268,53 @@ describe('scheduleConfigs', () => {
     expect(zeroOnHeavy).toHaveLength(2);
     expect(zeroOnLight).toHaveLength(2);
 
-    const lightLaneStartTimes = new Set(zeroOnLight.map((cfg) => cfg.startTimeMins));
-    expect(lightLaneStartTimes.size).toBeGreaterThan(1);
+    const lightLaneAssignments = new Set(zeroOnLight.map((cfg) => cfg.laneIndex));
+    expect(lightLaneAssignments.size).toBeGreaterThan(1);
 
     const laneCountHeavy = new Set(groupWithHeavy!.configs.map((cfg) => cfg.laneIndex));
     const laneCountLight = new Set(groupWithLight!.configs.map((cfg) => cfg.laneIndex));
     expect(laneCountHeavy.size).toBeGreaterThan(0);
     expect(laneCountLight.size).toBeGreaterThan(0);
+  });
+
+  it('spreads configs within a lane after scheduling', async () => {
+    setResources('configs/a.ts', {
+      warming: { cpu: 1, memory: 2048, exclusive: false },
+      running: { cpu: 1, memory: 2048, exclusive: false },
+    });
+    setResources('configs/b.ts', {
+      warming: { cpu: 1, memory: 2048, exclusive: false },
+      running: { cpu: 1, memory: 2048, exclusive: false },
+    });
+    setResources('configs/c.ts', {
+      warming: { cpu: 1, memory: 2048, exclusive: false },
+      running: { cpu: 1, memory: 2048, exclusive: false },
+    });
+    setResources('configs/d.ts', {
+      warming: { cpu: 1, memory: 2048, exclusive: false },
+      running: { cpu: 1, memory: 2048, exclusive: false },
+    });
+
+    const result = await scheduleConfigs({
+      maxDurationMins: 240,
+      configs: [
+        { path: 'configs/a.ts', testDurationMins: 10 },
+        { path: 'configs/b.ts', testDurationMins: 20 },
+        { path: 'configs/c.ts', testDurationMins: 30 },
+        { path: 'configs/d.ts', testDurationMins: 40 },
+      ],
+      machines: [{ name: 'single-lane', cpus: 1, memoryMb: 4096 }],
+    });
+
+    expect(result.groups).toHaveLength(1);
+    const [group] = result.groups;
+    expect(group.configs.map((cfg) => cfg.path)).toEqual([
+      'configs/a.ts',
+      'configs/d.ts',
+      'configs/b.ts',
+      'configs/c.ts',
+    ]);
+    expect(group.configs.map((cfg) => cfg.startTimeMins)).toEqual([0, 12, 54, 76]);
+    expect(group.expectedDurationMins).toBeCloseTo(108, 5);
   });
 });
