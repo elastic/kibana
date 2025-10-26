@@ -29,8 +29,11 @@ export interface UpdateWorkflowParams {
   workflow: Partial<EsWorkflow>;
 }
 
+// Context type for storing previous query data to enable rollback on mutation errors
 interface OptimisticContext {
+  // Map of query keys to their previous data for workflow lists
   previousData: Map<string, WorkflowListDto>;
+  // Previous workflow detail data for individual workflow view
   previousWorkflowDetail?: WorkflowDetailDto;
 }
 
@@ -58,18 +61,23 @@ export function useWorkflowActions() {
         body: JSON.stringify(workflow),
       });
     },
+    // Optimistic update: immediately update UI before server responds
     onMutate: async ({ id, workflow }) => {
+      // Cancel any outgoing refetches to avoid overwriting optimistic update
       await queryClient.cancelQueries({ queryKey: ['workflows'] });
 
       const previousData = new Map<string, WorkflowListDto>();
 
+      // Update all workflow list queries (e.g., different pages, filters)
       queryClient
         .getQueriesData<WorkflowListDto>({ queryKey: ['workflows'] })
         .forEach(([queryKey, data]) => {
           if (data && data.results) {
             const queryKeyString = JSON.stringify(queryKey);
+            // Store previous data for rollback on error
             previousData.set(queryKeyString, data);
 
+            // Immediately update the workflow in the list with new data
             const optimisticData: WorkflowListDto = {
               ...data,
               results: data.results.map((w) => (w.id === id ? { ...w, ...workflow } : w)),
@@ -79,8 +87,10 @@ export function useWorkflowActions() {
           }
         });
 
+      // Update workflow detail query (used in YAML editor view)
       const previousWorkflowDetail = queryClient.getQueryData<WorkflowDetailDto>(['workflows', id]);
       if (previousWorkflowDetail) {
+        // Immediately update the workflow detail with new data
         const optimisticWorkflowDetail: WorkflowDetailDto = {
           ...previousWorkflowDetail,
           ...workflow,
@@ -88,20 +98,25 @@ export function useWorkflowActions() {
         queryClient.setQueryData(['workflows', id], optimisticWorkflowDetail);
       }
 
+      // Return previous data for potential rollback
       return { previousData, previousWorkflowDetail };
     },
+    // Rollback: restore previous data if update fails
     onError: (err, variables, context) => {
+      // Restore previous workflow list data
       if (context?.previousData) {
         context.previousData.forEach((data, queryKeyString) => {
           const queryKey = JSON.parse(queryKeyString);
           queryClient.setQueryData(queryKey, data);
         });
       }
+      // Restore previous workflow detail data
       if (context?.previousWorkflowDetail) {
         queryClient.setQueryData(['workflows', variables.id], context.previousWorkflowDetail);
       }
     },
     onSuccess: () => {
+      // Refetch to ensure data is in sync with server
       queryClient.invalidateQueries({ queryKey: ['workflows'] });
     },
   });
@@ -113,18 +128,23 @@ export function useWorkflowActions() {
         body: JSON.stringify({ ids }),
       });
     },
+    // Optimistic update: immediately remove workflows from UI before server responds
     onMutate: async ({ ids }) => {
+      // Cancel any outgoing refetches to avoid overwriting optimistic update
       await queryClient.cancelQueries({ queryKey: ['workflows'] });
 
       const previousData = new Map<string, WorkflowListDto>();
 
+      // Update all workflow list queries (e.g., different pages, filters)
       queryClient
         .getQueriesData<WorkflowListDto>({ queryKey: ['workflows'] })
         .forEach(([queryKey, data]) => {
           if (data && data.results) {
             const queryKeyString = JSON.stringify(queryKey);
+            // Store previous data for rollback on error
             previousData.set(queryKeyString, data);
 
+            // Immediately remove deleted workflows from the list and update pagination
             const optimisticData: WorkflowListDto = {
               ...data,
               results: data.results.filter((w) => !ids.includes(w.id)),
@@ -138,9 +158,12 @@ export function useWorkflowActions() {
           }
         });
 
+      // Return previous data for potential rollback
       return { previousData };
     },
+    // Rollback: restore deleted workflows if deletion fails
     onError: (err, variables, context) => {
+      // Restore previous workflow list data (brings back deleted workflows)
       if (context?.previousData) {
         context.previousData.forEach((data, queryKeyString) => {
           const queryKey = JSON.parse(queryKeyString);
@@ -149,6 +172,7 @@ export function useWorkflowActions() {
       }
     },
     onSuccess: () => {
+      // Refetch to ensure data is in sync with server
       queryClient.invalidateQueries({ queryKey: ['workflows'] });
     },
   });
