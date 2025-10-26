@@ -9,7 +9,6 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 
-import { getAvailableMemory } from './get_available_memory';
 import type { SlotResources } from './get_slot_resources';
 
 const EPSILON = 0.000001;
@@ -49,7 +48,7 @@ interface QueueItem {
 export class ResourcePool {
   private readonly log: ToolingLog;
   private readonly totalCpuBudget: number;
-  private readonly minMbAvailable: number;
+  private readonly totalMemoryBudget: number;
 
   private readonly slotStates = new WeakMap<Slot, Phase>();
   private readonly slotMetadata = new WeakMap<Slot, SlotMetadata>();
@@ -66,15 +65,15 @@ export class ResourcePool {
   constructor({
     log,
     totalCpu,
-    minMbAvailable,
+    totalMemory,
   }: {
     log: ToolingLog;
     totalCpu: number;
-    minMbAvailable: number;
+    totalMemory: number;
   }) {
     this.log = log;
     this.totalCpuBudget = Math.max(1, totalCpu);
-    this.minMbAvailable = Math.max(0, minMbAvailable);
+    this.totalMemoryBudget = Math.max(0, totalMemory);
     this.recalculateCapacity();
   }
 
@@ -412,8 +411,7 @@ export class ResourcePool {
   }
 
   private recalculateCapacity() {
-    const freeMemory = Math.max(getAvailableMemory() - this.minMbAvailable, 0);
-    this.memoryCapacity = this.usedMemory + freeMemory;
+    this.memoryCapacity = this.totalMemoryBudget;
   }
 
   private getPhase(slot: Slot) {

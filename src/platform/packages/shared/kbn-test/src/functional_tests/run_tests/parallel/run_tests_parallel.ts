@@ -210,13 +210,14 @@ export async function runTestsParallel(
   const MIN_MB_AVAILABLE = 2048;
   const totalCpuCapacity = Math.max(1, os.cpus().length);
   const initialAvailableMemory = getAvailableMemory();
+  const totalMemoryBudget = Math.max(0, initialAvailableMemory - MIN_MB_AVAILABLE);
 
   log.info(`Available resources: ${totalCpuCapacity} cpus, ${initialAvailableMemory}mb free`);
 
   const pool = new ResourcePool({
     log,
     totalCpu: totalCpuCapacity,
-    minMbAvailable: MIN_MB_AVAILABLE,
+    totalMemory: totalMemoryBudget,
   });
 
   const warmingOrderSignals = runners.map(() => createDeferred<void>());

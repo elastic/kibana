@@ -12,17 +12,10 @@ import { Writable } from 'stream';
 
 import { Phase, ResourcePool } from './resource_pool';
 import type { SlotResources } from './get_slot_resources';
-import { getAvailableMemory } from './get_available_memory';
-
-jest.mock('./get_available_memory', () => ({
-  getAvailableMemory: jest.fn(() => 64 * 1024),
-}));
 
 describe('ResourcePool', () => {
   let log: ToolingLog;
-  const mockedGetAvailableMemory = getAvailableMemory as jest.MockedFunction<
-    typeof getAvailableMemory
-  >;
+  const defaultMemoryMb = 64 * 1024;
 
   const createResources = (overrides?: PartialSlotResources): SlotResources => {
     return {
@@ -57,11 +50,10 @@ describe('ResourcePool', () => {
         },
       }),
     });
-    mockedGetAvailableMemory.mockReturnValue(64 * 1024);
   });
 
   it('acquires warming capacity when available', async () => {
-    const pool = new ResourcePool({ log, totalCpu: 1, minMbAvailable: 0 });
+    const pool = new ResourcePool({ log, totalCpu: 1, totalMemory: defaultMemoryMb });
     const slot = acquireSlot(pool, 'config-1');
 
     await slot.waitForWarming();
@@ -70,7 +62,7 @@ describe('ResourcePool', () => {
   });
 
   it('queues warming requests until resources are freed', async () => {
-    const pool = new ResourcePool({ log, totalCpu: 1, minMbAvailable: 0 });
+    const pool = new ResourcePool({ log, totalCpu: 1, totalMemory: defaultMemoryMb });
     const slotOne = acquireSlot(pool, 'config-1');
     await slotOne.waitForWarming();
 
@@ -92,7 +84,7 @@ describe('ResourcePool', () => {
   });
 
   it('moves warmed slots to running immediately regardless of capacity', async () => {
-    const pool = new ResourcePool({ log, totalCpu: 4, minMbAvailable: 0 });
+    const pool = new ResourcePool({ log, totalCpu: 4, totalMemory: defaultMemoryMb });
     const slotOne = acquireSlot(pool, 'config-1', { running: { cpu: 3 } });
     await slotOne.waitForWarming();
     await slotOne.waitForRunning();
@@ -111,7 +103,7 @@ describe('ResourcePool', () => {
   });
 
   it('releases warming resources when slot is released before running', async () => {
-    const pool = new ResourcePool({ log, totalCpu: 1, minMbAvailable: 0 });
+    const pool = new ResourcePool({ log, totalCpu: 1, totalMemory: defaultMemoryMb });
     const slot = acquireSlot(pool, 'config-1');
     await slot.waitForWarming();
 
@@ -129,7 +121,7 @@ describe('ResourcePool', () => {
   });
 
   it('prevents multiple exclusive running slots but allows non-exclusive slots', async () => {
-    const pool = new ResourcePool({ log, totalCpu: 4, minMbAvailable: 0 });
+    const pool = new ResourcePool({ log, totalCpu: 4, totalMemory: defaultMemoryMb });
     const exclusiveSlot = acquireSlot(pool, 'exclusive-runner', {
       running: { exclusive: true },
     });
