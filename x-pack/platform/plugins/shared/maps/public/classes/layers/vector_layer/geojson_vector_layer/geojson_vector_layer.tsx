@@ -85,18 +85,42 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
   }
 
   _isTiled(): boolean {
-    // Uses untiled maplibre source 'geojson'
+    // When using MVT scaling, use tiled maplibre source 'vector'
+    const source = this.getSource();
+    if ('isMvt' in source && typeof source.isMvt === 'function' && source.isMvt()) {
+      return true;
+    }
+    // Otherwise uses untiled maplibre source 'geojson'
     return false;
   }
 
   async getBounds(getDataRequestContext: (layerId: string) => DataRequestContext) {
-    const isStaticLayer = !this.getSource().isBoundsAware();
+    // When using MVT scaling, use bounds from parent (tile-based bounds)
+    const source = this.getSource();
+    const useMvtRendering = 'isMvt' in source && typeof source.isMvt === 'function' && source.isMvt();
+    if (useMvtRendering) {
+      return super.getBounds(getDataRequestContext);
+    }
+    
+    const isStaticLayer = !source.isBoundsAware();
     return isStaticLayer || this.hasJoins()
       ? getFeatureCollectionBounds(this._getSourceFeatureCollection(), this.hasJoins())
       : super.getBounds(getDataRequestContext);
   }
 
   getLayerIcon(isTocIcon: boolean): LayerIcon {
+    // When using MVT scaling, we don't have a feature collection - return simple icon
+    const source = this.getSource();
+    const useMvtRendering = 'isMvt' in source && typeof source.isMvt === 'function' && source.isMvt();
+    
+    if (useMvtRendering) {
+      return {
+        icon: this.getCurrentStyle().getIcon(false),
+        tooltipContent: null,
+        areResultsTrimmed: false,
+      };
+    }
+
     const featureCollection = this._getSourceFeatureCollection();
 
     if (!featureCollection || featureCollection.features.length === 0) {
@@ -136,6 +160,13 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
   }
 
   getFeatureById(id: string | number) {
+    // When using MVT scaling, feature lookup is not supported
+    const source = this.getSource();
+    const useMvtRendering = 'isMvt' in source && typeof source.isMvt === 'function' && source.isMvt();
+    if (useMvtRendering) {
+      return null;
+    }
+    
     const featureCollection = this._getSourceFeatureCollection();
     if (!featureCollection) {
       return null;
@@ -148,6 +179,13 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
   }
 
   async getStyleMetaDescriptorFromLocalFeatures(): Promise<StyleMetaDescriptor | null> {
+    // When using MVT scaling, style meta comes from tile meta features (handled by parent)
+    const source = this.getSource();
+    const useMvtRendering = 'isMvt' in source && typeof source.isMvt === 'function' && source.isMvt();
+    if (useMvtRendering) {
+      return null;
+    }
+    
     const sourceDataRequest = this.getSourceDataRequest();
     const style = this.getCurrentStyle();
     if (!style || !sourceDataRequest) {
@@ -156,7 +194,7 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
 
     return await pluckStyleMetaFromFeatures(
       _.get(sourceDataRequest.getData(), 'features', []),
-      await this.getSource().getSupportedShapeTypes(),
+      await source.getSupportedShapeTypes(),
       this.getCurrentStyle().getDynamicPropertiesArray()
     );
   }
@@ -185,27 +223,78 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
       return false;
     }
 
+    // When using MVT scaling, expect vector source type
+    const source = this.getSource();
+    const useMvtRendering = 'isMvt' in source && typeof source.isMvt === 'function' && source.isMvt();
+    
+    if (useMvtRendering) {
+      // For MVT rendering, check if source type changed or tile URL changed
+      if (mbSource.type !== 'vector') {
+        return true;
+      }
+      
+      // Check if tile URL changed (similar to MvtVectorLayer logic)
+      const sourceDataRequest = this.getSourceDataRequest();
+      if (!sourceDataRequest) {
+        return false;
+      }
+      const sourceData = sourceDataRequest.getData() as any;
+      if (!sourceData || !sourceData.tileUrl) {
+        return false;
+      }
+      
+      const mbTileSource = mbSource as any;
+      return mbTileSource.tiles?.[0] !== sourceData.tileUrl;
+    }
+
     return mbSource.type !== 'geojson';
   }
 
   syncLayerWithMB(mbMap: MbMap, timeslice?: Timeslice) {
     this._removeStaleMbSourcesAndLayers(mbMap);
 
+    // When using MVT scaling, use vector tile source instead of geojson source
+    const source = this.getSource();
+    const useMvtRendering = 'isMvt' in source && typeof source.isMvt === 'function' && source.isMvt();
+
     const mbSourceId = this.getMbSourceId();
     const mbSource = mbMap.getSource(mbSourceId);
+    
     if (!mbSource) {
-      mbMap.addSource(mbSourceId, {
-        type: 'geojson',
-        data: EMPTY_FEATURE_COLLECTION,
-      });
+      if (useMvtRendering) {
+        // For MVT, we'll add the source when we have tile URL data
+        // This is similar to how MvtVectorLayer._syncSourceBindingWithMb works
+        const sourceDataRequest = this.getSourceDataRequest();
+        if (sourceDataRequest) {
+          const sourceData = sourceDataRequest.getData() as any;
+          if (sourceData && sourceData.tileUrl) {
+            mbMap.addSource(mbSourceId, {
+              type: 'vector',
+              tiles: [sourceData.tileUrl],
+              minzoom: sourceData.tileMinZoom,
+              maxzoom: sourceData.tileMaxZoom,
+            });
+          }
+        }
+      } else {
+        mbMap.addSource(mbSourceId, {
+          type: 'geojson',
+          data: EMPTY_FEATURE_COLLECTION,
+        });
+      }
     }
 
-    this._syncFeatureCollectionWithMb(mbMap);
+    if (!useMvtRendering) {
+      this._syncFeatureCollectionWithMb(mbMap);
+    }
 
     const timesliceMaskConfig = this._getTimesliceMaskConfig(timeslice);
-    this._setMbLabelProperties(mbMap, undefined, timesliceMaskConfig);
-    this._setMbPointsProperties(mbMap, undefined, timesliceMaskConfig);
-    this._setMbLinePolygonProperties(mbMap, undefined, timesliceMaskConfig);
+    const tileSourceLayer = useMvtRendering && 'getTileSourceLayer' in source
+      ? (source as any).getTileSourceLayer()
+      : undefined;
+    this._setMbLabelProperties(mbMap, tileSourceLayer, timesliceMaskConfig);
+    this._setMbPointsProperties(mbMap, tileSourceLayer, timesliceMaskConfig);
+    this._setMbLinePolygonProperties(mbMap, tileSourceLayer, timesliceMaskConfig);
   }
 
   _getJoinFilterExpression(): FilterSpecification | undefined {
@@ -280,8 +369,58 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
     }
 
     try {
+      // When using MVT scaling, use MVT sync logic similar to MvtVectorLayer
+      const useMvtSync = 'isMvt' in source && typeof source.isMvt === 'function' && source.isMvt();
+      
+      if (useMvtSync) {
+        // Use MVT-specific sync (similar to MvtVectorLayer.syncData)
+        const { syncMvtSourceData } = await import('../mvt_vector_layer/mvt_source_data');
+        const { VECTOR_STYLES } = await import('../../../../../common/constants');
+        
+        await this._syncSourceStyleMeta(syncContext, source, style);
+        await this._syncSourceFormatters(syncContext, source, style);
+        await this._syncSupportsFeatureEditing({ syncContext, source });
+        
+        // Calculate buffer for line width (same logic as MvtVectorLayer)
+        let maxLineWidth = 0;
+        const lineWidth = style
+          .getAllStyleProperties()
+          .find((styleProperty) => {
+            return styleProperty.getStyleName() === VECTOR_STYLES.LINE_WIDTH;
+          });
+        if (lineWidth) {
+          if (!lineWidth.isDynamic() && lineWidth.isComplete()) {
+            maxLineWidth = (lineWidth as any).getOptions().size;
+          } else if (lineWidth.isDynamic() && lineWidth.isComplete()) {
+            maxLineWidth = (lineWidth as any).getOptions().maxSize;
+          }
+        }
+        const buffer = Math.ceil(3.5 * maxLineWidth);
+
+        await syncMvtSourceData({
+          buffer,
+          hasLabels: style.hasLabels(),
+          layerId: this.getId(),
+          layerName: await this.getDisplayName(source),
+          prevDataRequest: this.getSourceDataRequest(),
+          requestMeta: await this._getVectorSourceRequestMeta(
+            syncContext.isForceRefresh,
+            syncContext.dataFilters,
+            source,
+            style,
+            syncContext.isFeatureEditorOpenForLayer
+          ),
+          source: source as any,
+          syncContext,
+        });
+        
+        return;
+      }
+
+      // Regular GeoJSON sync
       await this._syncSourceStyleMeta(syncContext, source, style);
       await this._syncSourceFormatters(syncContext, source, style);
+      
       const sourceResult = await syncGeojsonSourceData({
         layerId: this.getId(),
         layerName: await this.getDisplayName(source),

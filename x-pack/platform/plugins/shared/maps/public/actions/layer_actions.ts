@@ -715,7 +715,10 @@ function updateStyleProperties(layerId: string, previousFields?: IField[]) {
 }
 
 export function updateLayerStyle(layerId: string, styleDescriptor: StyleDescriptor) {
-  return (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
+  return (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>, getState: () => MapStoreState) => {
+    const layer = getLayerById(layerId, getState());
+    const previousLayerDescriptor = layer ? getLayerDescriptor(getState(), layerId) : undefined;
+    
     dispatch({
       type: UPDATE_LAYER_STYLE,
       layerId,
@@ -733,8 +736,45 @@ export function updateLayerStyle(layerId: string, styleDescriptor: StyleDescript
     // syncDataForLayer may not trigger endDataLoad if no re-fetch is required
     dispatch(updateStyleMeta(layerId));
 
+    // Check if label styling changed for layers using MVT scaling - this requires tile refresh
+    let shouldForceRefresh = false;
+    if (
+      layer &&
+      previousLayerDescriptor &&
+      styleDescriptor.type === LAYER_STYLE_TYPE.VECTOR &&
+      previousLayerDescriptor.style?.type === LAYER_STYLE_TYPE.VECTOR
+    ) {
+      // Check if layer is using MVT (vector tiles) scaling
+      const layerDescriptor = previousLayerDescriptor as VectorLayerDescriptor;
+      const sourceDescriptor = layerDescriptor.sourceDescriptor;
+      const isUsingMvtScaling =
+        sourceDescriptor &&
+        'scalingType' in sourceDescriptor &&
+        sourceDescriptor.scalingType === SCALING_TYPES.MVT;
+      
+      if (isUsingMvtScaling) {
+        const prevStyle = previousLayerDescriptor.style as VectorStyleDescriptor;
+        const nextStyle = styleDescriptor as VectorStyleDescriptor;
+        
+        // Check if label text property changed
+        const prevLabelProp = prevStyle.properties?.labelText;
+        const nextLabelProp = nextStyle.properties?.labelText;
+        
+        // Label changed if:
+        // 1. Previous had no label and next has label
+        // 2. Previous had label and next has no label
+        // 3. Label configuration changed (static value, dynamic field, etc)
+        const labelChanged = JSON.stringify(prevLabelProp) !== JSON.stringify(nextLabelProp);
+        
+        if (labelChanged) {
+          shouldForceRefresh = true;
+        }
+      }
+    }
+
     // Style update may require re-fetch, for example ES search may need to retrieve field used for dynamic styling
-    dispatch(syncDataForLayerId(layerId, false));
+    // For MVT layers with label changes, force refresh to get new tiles with/without labels
+    dispatch(syncDataForLayerId(layerId, shouldForceRefresh));
   };
 }
 

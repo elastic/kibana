@@ -62,13 +62,15 @@ export async function syncMvtSourceData({
         return true;
       },
     });
+  
     const canSkip =
       !syncContext.forceRefreshDueToDrawing &&
+      !syncContext.isForceRefresh &&
       noChangesInSourceState &&
       noChangesInSearchState &&
       prevData.hasLabels === hasLabels &&
       prevData.buffer === buffer;
-
+  
     if (canSkip) {
       return;
     }
@@ -76,12 +78,17 @@ export async function syncMvtSourceData({
 
   syncContext.startLoading(SOURCE_DATA_REQUEST_ID, requestToken, requestMeta);
   try {
-    const refreshToken =
+    // Only generate new token when we actually need to invalidate tiles:
+    // - No previous data
+    // - Drawing changes (new features)
+    // - hasLabels changed (label styling added/removed)
+    // - buffer changed (line width changed)
+    const needsNewToken =
       !prevData ||
       syncContext.forceRefreshDueToDrawing ||
-      (requestMeta.isForceRefresh && requestMeta.applyForceRefresh)
-        ? uuidv4()
-        : prevData.refreshToken;
+      (prevData && (prevData.hasLabels !== hasLabels || prevData.buffer !== buffer));
+    
+    const refreshToken = needsNewToken ? uuidv4() : prevData.refreshToken;
 
     const tileUrl = await source.getTileUrl(requestMeta, refreshToken, hasLabels, buffer);
     if (isESVectorTileSource(source)) {
