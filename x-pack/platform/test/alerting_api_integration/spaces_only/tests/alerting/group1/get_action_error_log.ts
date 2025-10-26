@@ -16,6 +16,7 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
   const supertest = getService('supertest');
   const retry = getService('retry');
   const es = getService('es');
+  const log = getService('log');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
 
   const dateStart = new Date(Date.now() - 600000).toISOString();
@@ -148,7 +149,7 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
         .send(
           getTestRuleData({
             rule_type_id: 'test.cumulative-firing',
-            schedule: { interval: '6s' },
+            schedule: { interval: '1d' },
             actions: [
               {
                 id: createdConnector1.id,
@@ -176,6 +177,7 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
       );
 
       expect(response.body.totalErrors).to.eql(2);
+      log.info(`response.body: ${JSON.stringify(response.body)}`);
 
       const filteredResponse = await supertest.get(
         `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${
@@ -184,6 +186,7 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
       );
 
       expect(filteredResponse.body.totalErrors).to.eql(1);
+      log.info(`filteredResponse.body: ${JSON.stringify(filteredResponse.body)}`);
 
       // Fetch rule execution, try to filter on that
       const execResponse = await supertest.get(
@@ -191,6 +194,7 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
           createdRule.id
         }/_execution_log?date_start=${dateStart}`
       );
+      log.info(`execResponse.body: ${JSON.stringify(execResponse.body)}`);
 
       const runId = execResponse.body.data[0].id;
 
@@ -200,6 +204,7 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
         }/_action_error_log?filter=kibana.alert.rule.execution.uuid:${runId}&date_start=${dateStart}`
       );
       expect(filteredByIdResponse.body.totalErrors).to.eql(2);
+      log.info(`filteredByIdResponse.body: ${JSON.stringify(filteredByIdResponse.body)}`);
 
       const filteredByInvalidResponse = await supertest.get(
         `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${
@@ -207,6 +212,7 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
         }/_action_error_log?filter=kibana.alert.rule.execution.uuid:doesnt_exist&date_start=${dateStart}`
       );
       expect(filteredByInvalidResponse.body.totalErrors).to.eql(0);
+      log.info(`filteredByInvalidResponse.body: ${JSON.stringify(filteredByInvalidResponse.body)}`);
     });
   });
 
