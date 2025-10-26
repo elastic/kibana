@@ -31,18 +31,6 @@ export const LIQUID_FILTERS = [
       '{{ ["apple", "banana", "cherry"] | array_to_sentence_string }} => "apple, banana, and cherry"',
   },
   {
-    name: 'base64_decode',
-    description: 'Decodes a base64-encoded string',
-    insertText: 'base64_decode',
-    example: '{{ "SGVsbG8gV29ybGQ=" | base64_decode }} => "Hello World"',
-  },
-  {
-    name: 'base64_encode',
-    description: 'Encodes a string to base64',
-    insertText: 'base64_encode',
-    example: '{{ "Hello World" | base64_encode }} => "SGVsbG8gV29ybGQ="',
-  },
-  {
     name: 'at_least',
     description: 'Limits a number to a minimum value',
     insertText: 'at_least: ${1:number}',
@@ -53,6 +41,18 @@ export const LIQUID_FILTERS = [
     description: 'Limits a number to a maximum value',
     insertText: 'at_most: ${1:number}',
     example: '{{ 4 | at_most: 5 }} => 4',
+  },
+  {
+    name: 'base64_decode',
+    description: 'Decodes a base64-encoded string',
+    insertText: 'base64_decode',
+    example: '{{ "SGVsbG8gV29ybGQ=" | base64_decode }} => "Hello World"',
+  },
+  {
+    name: 'base64_encode',
+    description: 'Encodes a string to base64',
+    insertText: 'base64_encode',
+    example: '{{ "Hello World" | base64_encode }} => "SGVsbG8gV29ybGQ="',
   },
   {
     name: 'capitalize',
