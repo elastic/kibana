@@ -142,7 +142,8 @@ export const styles = (
     [`[data-row-type="${childRowAttribute}"][aria-level="2"]:focus-visible:has(+ [aria-level="3"]) ~ [aria-level="3"]:has(+ [aria-level="2"]) &:before`]:
       {
         borderBottom: `${border.width.thick} solid ${OUTLINE_COLOR}`,
-        borderRadius: border.radius.small,
+        borderBottomLeftRadius: border.radius.small,
+        borderBottomRightRadius: border.radius.small,
       },
 
     [`[data-row-type="${childRowAttribute}"][aria-level="3"]:focus-visible &:after`]: {
