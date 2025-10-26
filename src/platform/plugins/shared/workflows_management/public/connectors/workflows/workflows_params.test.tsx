@@ -218,7 +218,8 @@ describe('WorkflowsParamsFields', () => {
     fireEvent.click(input);
 
     await waitFor(() => {
-      expect(screen.getByText('Create your first workflow')).toBeInTheDocument();
+      const createButtons = screen.getAllByText('Create your first workflow');
+      expect(createButtons.length).toBeGreaterThan(0);
     });
   });
 
@@ -448,7 +449,11 @@ describe('WorkflowsParamsFields', () => {
 
     // Should show no workflows available
     await waitFor(() => {
-      expect(screen.getByText('Create your first workflow')).toBeInTheDocument();
+      // Check that the empty state is shown
+      expect(screen.getAllByText("You don't have any workflows yet").length).toBeGreaterThan(0);
+      // Check that there's at least one "Create your first workflow" button
+      const createButtons = screen.getAllByText('Create your first workflow');
+      expect(createButtons.length).toBeGreaterThan(0);
     });
   });
 
