@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ScoutTestRunConfigCategory } from '@kbn/scout-info';
+
 import type { SlotResources } from '../get_slot_resources';
 
 export interface ScheduleConfigInput {
@@ -18,6 +20,8 @@ export interface ScheduleConfigOutput extends ScheduleConfigInput {
   resources: SlotResources;
   tooLong: boolean;
   startTimeMins?: number;
+  laneIndex?: number;
+  testConfigCategory?: ScoutTestRunConfigCategory;
 }
 
 export interface ScheduleConfigOptions {

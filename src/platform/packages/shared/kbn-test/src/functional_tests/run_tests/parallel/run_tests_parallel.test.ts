@@ -9,8 +9,10 @@
 
 import type { ExecaReturnValue } from 'execa';
 
-import { runTestsParallel } from './run_tests_parallel';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { runTestsParallel } from './run_tests_parallel';
+import { readConfig } from './read_config';
+import type { ScheduleConfigTestGroup } from './schedule/types';
 
 jest.mock('child_process', () => ({
   execSync: jest.fn(() => ''),
@@ -98,6 +100,8 @@ jest.mock('./config_runner', () => {
   };
 });
 
+const readConfigMock = readConfig as jest.MockedFunction<typeof readConfig>;
+
 function createDeferred<T>() {
   let resolve!: (value: T | PromiseLike<T>) => void;
   let reject!: (reason?: unknown) => void;
@@ -123,6 +127,13 @@ describe('runTestsParallel', () => {
   let log: jest.Mocked<ToolingLog>;
 
   beforeEach(() => {
+    jest.clearAllMocks();
+
+    const configRunnerModule = jest.requireMock('./config_runner') as {
+      __mockConfigRunnerInstances: Array<unknown>;
+    };
+    configRunnerModule.__mockConfigRunnerInstances.length = 0;
+
     log = {
       info: jest.fn(),
       debug: jest.fn(),
@@ -139,11 +150,6 @@ describe('runTestsParallel', () => {
       USE_CHROME_BETA: undefined,
       SCOUT_REPORTER_ENABLED: undefined,
     });
-  });
-
-  afterEach(() => {
-    jest.resetModules();
-    jest.clearAllMocks();
   });
 
   it('enforces sequential warming and running order', async () => {
@@ -209,6 +215,92 @@ describe('runTestsParallel', () => {
     expect(runOrderA).toBeLessThan(runOrderB);
 
     runnerB.runDeferred.resolve(mockResult);
+    await runPromise;
+  });
+
+  it('runs lane-leading configs without waiting when schedule group is provided', async () => {
+    const { __mockConfigRunnerInstances } = jest.requireMock('./config_runner') as {
+      __mockConfigRunnerInstances: Array<{
+        start: jest.Mock;
+        run: jest.Mock;
+        startDeferred: ReturnType<typeof createDeferred<void>>;
+        runDeferred: ReturnType<typeof createDeferred<ExecaReturnValue<string>>>;
+      }>;
+    };
+
+    const group: ScheduleConfigTestGroup = {
+      configs: [
+        {
+          path: CONFIG_A,
+          testDurationMins: 10,
+          resources: {
+            warming: { cpu: 1, memory: 1024, exclusive: false },
+            running: { cpu: 1, memory: 1024, exclusive: false },
+          },
+          tooLong: false,
+          startTimeMins: 0,
+          laneIndex: 0,
+          testConfigCategory: undefined,
+        },
+        {
+          path: CONFIG_B,
+          testDurationMins: 10,
+          resources: {
+            warming: { cpu: 1, memory: 1024, exclusive: false },
+            running: { cpu: 1, memory: 1024, exclusive: false },
+          },
+          tooLong: false,
+          startTimeMins: 0,
+          laneIndex: 1,
+          testConfigCategory: undefined,
+        },
+      ],
+      machine: { name: 'demo', cpus: 4, memoryMb: 8192 },
+      expectedDurationMins: 10,
+    };
+
+    const runPromise = runTestsParallel(log, [CONFIG_A, CONFIG_B], {
+      extraArgs: [],
+      stdio: 'suppress',
+      group,
+    });
+
+    await flushPromises();
+
+    expect(__mockConfigRunnerInstances).toHaveLength(2);
+    expect(readConfigMock).not.toHaveBeenCalled();
+
+    const [runnerA, runnerB] = __mockConfigRunnerInstances;
+
+    const mockResult: ExecaReturnValue<string> = {
+      command: 'node scripts/functional_tests',
+      escapedCommand: 'node scripts/functional_tests',
+      exitCode: 0,
+      stdout: '',
+      stderr: '',
+      all: '',
+      failed: false,
+      timedOut: false,
+      killed: false,
+      signal: undefined,
+      signalDescription: undefined,
+      isCanceled: false,
+    };
+
+    runnerB.startDeferred.resolve();
+    await flushPromises();
+
+    expect(runnerB.run).toHaveBeenCalledTimes(1);
+    expect(runnerA.run).not.toHaveBeenCalled();
+
+    runnerB.runDeferred.resolve(mockResult);
+    await flushPromises();
+
+    runnerA.startDeferred.resolve();
+    await flushPromises();
+    expect(runnerA.run).toHaveBeenCalledTimes(1);
+
+    runnerA.runDeferred.resolve(mockResult);
     await runPromise;
   });
 });

@@ -19,6 +19,7 @@ export JOB="$FTR_CONFIG_GROUP_KEY"
 FAILED_CONFIGS_KEY="${BUILDKITE_STEP_ID}${FTR_CONFIG_GROUP_KEY}"
 
 configs="${FTR_CONFIG:-}"
+group_json=""
 
 # The first retry should only run the configs that failed in the previous attempt
 # Any subsequent retries, which would generally only happen by someone clicking the button in the UI, will run everything
@@ -34,6 +35,7 @@ if [ "$configs" == "" ] && [ "$FTR_CONFIG_GROUP_KEY" != "" ]; then
   echo "--- downloading ftr test run order"
   download_artifact ftr_run_order.json .
   configs=$(jq -r '.[env.FTR_CONFIG_GROUP_KEY].names[]' ftr_run_order.json)
+  group_json=$(jq -c '.[env.FTR_CONFIG_GROUP_KEY].group' ftr_run_order.json)
 fi
 
 if [ "$configs" == "" ]; then
@@ -54,6 +56,10 @@ if [[ ${#config_args[@]} -eq 0 ]]; then
 fi
 
 cmd=(node scripts/functional_tests_parallel --bail --inherit --stats)
+
+if [[ -n "${group_json:-}" && "${group_json:-null}" != "null" ]]; then
+  cmd+=(--group "$group_json")
+fi
 
 if [[ -n "${KIBANA_BUILD_LOCATION:-}" ]]; then
   cmd+=(--kibana-install-dir "$KIBANA_BUILD_LOCATION")

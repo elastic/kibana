@@ -15,6 +15,10 @@ import execa from 'execa';
 
 import { load as loadYaml } from 'js-yaml';
 
+import type {
+  ScheduleConfigInput,
+  ScheduleConfigTestGroup,
+} from '@kbn/test/src/functional_tests/run_tests/parallel/schedule/types';
 import type { BuildkiteStep } from '../buildkite';
 import { BuildkiteClient } from '../buildkite';
 import type {
@@ -38,23 +42,8 @@ interface ScheduleMachineOptions {
   memoryMb: number;
 }
 
-interface ScheduleConfigInput {
-  path: string;
-  testDurationMins: number;
-}
-
-interface ScheduleConfigOutput extends ScheduleConfigInput {
-  tooLong: boolean;
-}
-
-interface ScheduleGroup {
-  configs: ScheduleConfigOutput[];
-  machine: ScheduleMachineOptions;
-  expectedDurationMins: number;
-}
-
 interface ScheduleResponse {
-  groups: ScheduleGroup[];
+  groups: ScheduleConfigTestGroup[];
 }
 
 const MEMORY_PER_CPU_MB_BY_PROFILE: Record<string, number> = {
@@ -644,7 +633,7 @@ export async function pickTestGroupRunOrder() {
   // the map that we will write to the artifacts for informing ftr config jobs of what they should do
   const ftrRunOrder: Record<
     string,
-    { title: string; expectedDurationMins: number; names: string[] }
+    { title: string; expectedDurationMins: number; names: string[]; group: ScheduleConfigTestGroup }
   > = {};
 
   if (ftrConfigsByQueue.size) {
@@ -740,6 +729,7 @@ export async function pickTestGroupRunOrder() {
           title,
           expectedDurationMins,
           names: configPaths,
+          group: scheduledGroup,
         };
 
         for (const config of scheduledGroup.configs) {

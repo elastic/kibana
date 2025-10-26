@@ -30,6 +30,7 @@ import { getSlotResources } from './get_slot_resources';
 import type { SlotResources } from './get_slot_resources';
 import { getAvailableMemory } from './get_available_memory';
 import { startWatchingFiles } from './start_watching_files';
+import type { ScheduleConfigTestGroup } from './schedule/types';
 
 function booleanFromEnv(varName: string, defaultValue: boolean = false): boolean {
   const envValue = process.env[varName];
@@ -73,6 +74,13 @@ function createDeferred<T>(): Deferred<T> {
   return { promise, resolve, reject };
 }
 
+function cloneSlotResources(resources: SlotResources): SlotResources {
+  return {
+    warming: { ...resources.warming },
+    running: { ...resources.running },
+  };
+}
+
 /*
  * Run functional test configs in sequence, mirroring the behavior from
  * .buildkite/scripts/steps/test/ftr_configs.sh.
@@ -92,14 +100,22 @@ export interface ParallelRunOptions {
   stdio?: 'suppress' | 'buffer' | 'inherit';
   stats?: boolean;
   category?: ScoutTestRunConfigCategory;
+  group?: ScheduleConfigTestGroup;
+  configs?: string[];
 }
 
 export async function runTestsParallel(
   log: ToolingLog,
-  configs: string[],
   options: ParallelRunOptions
 ): Promise<number> {
-  const { extraArgs, stdio = 'inherit', stats = false, category } = options;
+  const {
+    extraArgs,
+    stdio = 'inherit',
+    stats = false,
+    category,
+    group,
+    configs: initialConfigs,
+  } = options;
 
   const extraArgsList = [...extraArgs, process.env.FTR_EXTRA_ARGS ?? process.env.EXTRA_ARGS ?? ''];
 
@@ -139,6 +155,10 @@ export async function runTestsParallel(
     });
   }
 
+  const configs = initialConfigs?.length
+    ? initialConfigs
+    : group?.configs.map((config) => config.path) ?? [];
+
   const portConfigEntries = await Promise.all(
     configs.map(async (config) => {
       return [config, await acquirePorts()] as const;
@@ -153,25 +173,45 @@ export async function runTestsParallel(
   const failedConfigs: string[] = [];
   const results: string[] = [];
   const runnerStates = new Map<string, RunnerState>();
+  const scheduleGroupMap = group ? new Map(group.configs.map((cfg) => [cfg.path, cfg])) : undefined;
+  const runnerLaneAssignments = new Map<
+    ConfigRunner,
+    { laneIndex: number; lanePosition: number }
+  >();
+  const laneCounts = new Map<number, number>();
 
   for (const config of configs) {
-    if (!config) continue;
+    if (!config) {
+      continue;
+    }
 
     const ports = portConfigs[config];
-
     const configExecutionKey = `${config}_executed`;
     const isConfigExecution = runBuildkiteMetaGet(configExecutionKey, 'false');
-
-    const configObj = await readConfig(log, require.resolve(Path.join(REPO_ROOT, config)), {});
-
-    const slotResources = getSlotResources(configObj.getAll());
 
     if (isConfigExecution === 'true') {
       results.push(`- ${config}\n    duration: 0s\n    result: already-tested`);
       continue;
     }
 
-    const testCategory = configObj.get('testConfigCategory');
+    const scheduledConfig = scheduleGroupMap?.get(config);
+    let slotResources = scheduledConfig?.resources;
+    let testCategory = scheduledConfig?.testConfigCategory;
+
+    if (!scheduledConfig || !slotResources || (category && testCategory === undefined)) {
+      const configObj = await readConfig(log, require.resolve(Path.join(REPO_ROOT, config)), {});
+      const capabilities = configObj.getAll();
+      if (!slotResources) {
+        slotResources = getSlotResources(capabilities);
+      }
+      if (testCategory === undefined) {
+        testCategory = configObj.get('testConfigCategory');
+      }
+    }
+
+    if (!slotResources) {
+      throw new Error(`Unable to determine slot resources for ${config}`);
+    }
 
     if (category && testCategory !== category) {
       results.push(
@@ -204,8 +244,27 @@ export async function runTestsParallel(
     });
 
     runners.push(runner);
-    runnerResources.set(runner, slotResources);
+    runnerResources.set(runner, cloneSlotResources(slotResources));
+
+    const laneIndex = scheduledConfig?.laneIndex ?? 0;
+    const nextLanePosition = laneCounts.get(laneIndex) ?? 0;
+    laneCounts.set(laneIndex, nextLanePosition + 1);
+    runnerLaneAssignments.set(runner, { laneIndex, lanePosition: nextLanePosition });
   }
+
+  const laneWarmingSignals = new Map<number, Array<Deferred<void>>>();
+  const laneRunningSignals = new Map<number, Array<Deferred<void>>>();
+
+  laneCounts.forEach((count, laneIndex) => {
+    const warmingSignals: Array<Deferred<void>> = [];
+    const runningSignals: Array<Deferred<void>> = [];
+    for (let index = 0; index < count; index += 1) {
+      warmingSignals.push(createDeferred<void>());
+      runningSignals.push(createDeferred<void>());
+    }
+    laneWarmingSignals.set(laneIndex, warmingSignals);
+    laneRunningSignals.set(laneIndex, runningSignals);
+  });
 
   const totalCpuCapacity = Math.max(1, os.cpus().length);
   const totalMemoryMb = Math.round(os.totalmem() / (1024 * 1024));
@@ -221,9 +280,6 @@ export async function runTestsParallel(
     totalCpu: totalCpuCapacity,
     totalMemory: totalMemoryBudget,
   });
-
-  const warmingOrderSignals = runners.map(() => createDeferred<void>());
-  const runningOrderSignals = runners.map(() => createDeferred<void>());
 
   let statsTimer: NodeJS.Timeout | undefined;
 
@@ -355,15 +411,23 @@ export async function runTestsParallel(
     delete require.cache[key];
   });
 
-  const promises = runners.map(async (runner, runnerIndex) => {
+  const promises = runners.map(async (runner) => {
     const slotResources = runnerResources.get(runner);
     if (!slotResources) {
       throw new Error(`Missing slot resources for ${runner.getConfigPath()}`);
     }
 
+    const laneInfo = runnerLaneAssignments.get(runner) ?? { laneIndex: 0, lanePosition: 0 };
+    const warmingSignals = laneWarmingSignals.get(laneInfo.laneIndex);
+    const runningSignals = laneRunningSignals.get(laneInfo.laneIndex);
+
+    if (!warmingSignals || !runningSignals) {
+      throw new Error(`Unable to resolve lane sequencing for ${runner.getConfigPath()}`);
+    }
+
     const slot = pool.acquire({
       label: runner.getConfigPath(),
-      priority: runnerIndex === 0 ? -1 : runnerIndex,
+      priority: laneInfo.lanePosition * 1000 + laneInfo.laneIndex,
       resources: slotResources,
     });
     const path = runner.getConfigPath();
@@ -382,7 +446,7 @@ export async function runTestsParallel(
         return;
       }
 
-      const signal = warmingOrderSignals[runnerIndex];
+      const signal = warmingSignals[laneInfo.lanePosition];
       if (signal) {
         signal.resolve();
       }
@@ -395,7 +459,7 @@ export async function runTestsParallel(
         return;
       }
 
-      const signal = runningOrderSignals[runnerIndex];
+      const signal = runningSignals[laneInfo.lanePosition];
       if (signal) {
         signal.resolve();
       }
@@ -404,8 +468,8 @@ export async function runTestsParallel(
     };
 
     try {
-      if (runnerIndex > 0) {
-        await warmingOrderSignals[runnerIndex - 1].promise;
+      if (laneInfo.lanePosition > 0) {
+        await warmingSignals[laneInfo.lanePosition - 1].promise;
       }
 
       log.debug(`Waiting for warming slot for ${runner.getConfigPath()}`);
@@ -428,8 +492,8 @@ export async function runTestsParallel(
       state.warmDurationMs = startFinishTime - startTime;
       state.warmFinishedAt = startFinishTime;
 
-      if (runnerIndex > 0) {
-        await runningOrderSignals[runnerIndex - 1].promise;
+      if (laneInfo.lanePosition > 0) {
+        await runningSignals[laneInfo.lanePosition - 1].promise;
       }
 
       log.info(`Waiting for running slot for ${runner.getConfigPath()}`);

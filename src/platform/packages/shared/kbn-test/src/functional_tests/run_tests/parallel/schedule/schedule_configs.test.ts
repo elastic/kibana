@@ -66,6 +66,12 @@ describe('scheduleConfigs', () => {
 
       return {
         getAll: () => capabilities,
+        get: (key: string) => {
+          if (key === 'testConfigCategory') {
+            return capabilities.testConfigCategory;
+          }
+          return undefined;
+        },
       } as unknown as Config;
     });
 
@@ -107,6 +113,7 @@ describe('scheduleConfigs', () => {
 
     expect(group.configs.map((cfg) => cfg.path)).toEqual(['configs/a.ts', 'configs/b.ts']);
     expect(group.configs.map((cfg) => cfg.startTimeMins)).toEqual([0, 0]);
+    expect(group.configs.map((cfg) => cfg.laneIndex)).toEqual([0, 1]);
     expect(group.expectedDurationMins).toBeCloseTo(20, 5);
   });
 
@@ -142,6 +149,7 @@ describe('scheduleConfigs', () => {
     expect(group.machine.name).toBe('m-primary');
     expect(group.configs).toHaveLength(3);
     expect(new Set(group.configs.map((cfg) => cfg.startTimeMins))).toEqual(new Set([0]));
+    expect(new Set(group.configs.map((cfg) => cfg.laneIndex)).size).toBe(3);
   });
 
   it('packs identical configs on the same machine when template matches', async () => {
@@ -167,6 +175,7 @@ describe('scheduleConfigs', () => {
     const group = result.groups[0];
     expect(group.configs).toHaveLength(2);
     expect(group.configs.map((cfg) => cfg.startTimeMins)).toEqual([0, 0]);
+    expect(new Set(group.configs.map((cfg) => cfg.laneIndex)).size).toBe(2);
   });
 
   it('provisions a new machine when resource width exceeds capacity', async () => {
@@ -199,6 +208,8 @@ describe('scheduleConfigs', () => {
     expect(groupForA).toBeDefined();
     expect(groupForB).toBeDefined();
     expect(groupForB?.machine.memoryMb).toBe(16384);
+    expect(groupForA?.configs[0]?.laneIndex).toBe(0);
+    expect(groupForB?.configs[0]?.laneIndex).toBe(0);
   });
 
   it('distributes zero-resource configs across machines and lanes', async () => {
@@ -259,5 +270,10 @@ describe('scheduleConfigs', () => {
 
     const lightLaneStartTimes = new Set(zeroOnLight.map((cfg) => cfg.startTimeMins));
     expect(lightLaneStartTimes.size).toBeGreaterThan(1);
+
+    const laneCountHeavy = new Set(groupWithHeavy!.configs.map((cfg) => cfg.laneIndex));
+    const laneCountLight = new Set(groupWithLight!.configs.map((cfg) => cfg.laneIndex));
+    expect(laneCountHeavy.size).toBeGreaterThan(0);
+    expect(laneCountLight.size).toBeGreaterThan(0);
   });
 });

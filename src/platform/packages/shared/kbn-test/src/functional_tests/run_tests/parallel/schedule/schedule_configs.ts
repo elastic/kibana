@@ -226,6 +226,7 @@ async function loadConfigStats({
 }): Promise<ConfigStats> {
   const absoluteConfigPath = resolveConfigPath(configInput.path);
   const configObject = await readConfig(toolingLog, absoluteConfigPath, {});
+  const testConfigCategory = configObject.get('testConfigCategory');
 
   const hasTests = await checkForEnabledTestsInFtrConfig({
     config: configObject,
@@ -239,6 +240,7 @@ async function loadConfigStats({
       testDurationMins: 0,
       resources: ZERO_SLOT_RESOURCES,
       tooLong: false,
+      testConfigCategory,
     };
 
     return {
@@ -258,6 +260,7 @@ async function loadConfigStats({
     testDurationMins: configInput.testDurationMins,
     resources: slotResources,
     tooLong: configInput.testDurationMins > maxDurationMins,
+    testConfigCategory,
   };
 
   const memoryWidth = Math.max(slotResources.warming.memory, slotResources.running.memory);
@@ -659,6 +662,7 @@ function applyPlacement({
   const resolvedMachine = machine;
   const assignedConfig = stats.config;
   assignedConfig.startTimeMins = candidate.startTime;
+  assignedConfig.laneIndex = candidate.laneIndex;
 
   if (candidate.isNewLane) {
     const newLane: LaneState = {

@@ -13,15 +13,17 @@ import dedent from 'dedent';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { FLAG_OPTIONS } from '../flags';
 import { runTestsParallel } from './run_tests_parallel';
+import type { ScheduleConfigTestGroup } from './schedule/types';
 
 export function runTestsCliParallel() {
   return run(
     async ({ flagsReader, log }) => {
-      const configs = flagsReader.requiredArrayOfStrings('config');
+      const configs = flagsReader.arrayOfStrings('config');
       const suppress = flagsReader.boolean('suppress');
       const buffer = flagsReader.boolean('buffer');
       const inherit = flagsReader.boolean('inherit');
       const stats = flagsReader.boolean('stats');
+      const groupFlag = flagsReader.string('group');
 
       const installDir = flagsReader.string('kibana-install-dir');
       const bail = flagsReader.boolean('bail');
@@ -37,14 +39,24 @@ export function runTestsCliParallel() {
         category = undefined;
       }
 
+      let group: ScheduleConfigTestGroup | undefined;
+      if (groupFlag && groupFlag !== 'null') {
+        try {
+          group = JSON.parse(groupFlag) as ScheduleConfigTestGroup;
+        } catch (error) {
+          const reason = error instanceof Error ? error.message : String(error);
+          throw new Error(`Failed to parse --group value: ${reason}`);
+        }
+      }
+
       const extraArgs: string[] = [];
 
       if (installDir) {
-        extraArgs.push(`--kibana-install-dir`, installDir);
+        extraArgs.push('--kibana-install-dir', installDir);
       }
 
       if (bail) {
-        extraArgs.push(`--bail`);
+        extraArgs.push('--bail');
       }
 
       if (debug) {
@@ -55,7 +67,8 @@ export function runTestsCliParallel() {
         extraArgs.push(`--grep="${grep}"`);
       }
 
-      const exitCode = await runTestsParallel(log, configs, {
+      const exitCode = await runTestsParallel(log, {
+        configs,
         extraArgs,
         stdio:
           buffer === true
@@ -67,6 +80,7 @@ export function runTestsCliParallel() {
             : 'buffer',
         stats,
         category,
+        group,
       });
 
       process.exitCode = exitCode;
@@ -81,7 +95,7 @@ export function runTestsCliParallel() {
       `,
       flags: {
         ...FLAG_OPTIONS,
-        string: [...(FLAG_OPTIONS.string ?? []), 'category'],
+        string: [...(FLAG_OPTIONS.string ?? []), 'category', 'group'],
         boolean: [
           ...(FLAG_OPTIONS.boolean ?? []).filter((flag) => flag !== 'pause'),
           'suppress',
@@ -96,6 +110,7 @@ export function runTestsCliParallel() {
             --inherit             Inherit logs from configs
             --stats               Log stats for each running config every 10s
             --category            Category of tests to run (defaults to all)
+            --group               JSON encoded schedule group metadata
             `)
         ),
       },
