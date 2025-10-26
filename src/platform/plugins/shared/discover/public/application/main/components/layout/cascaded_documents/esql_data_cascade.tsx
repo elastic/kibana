@@ -217,7 +217,7 @@ const ESQLDataCascade = React.memo(
   }
 );
 
-export const DataCascadeLayout = React.memo(
+export const CascadedDocumentsLayout = React.memo(
   ({
     dataView,
     viewModeToggle,
