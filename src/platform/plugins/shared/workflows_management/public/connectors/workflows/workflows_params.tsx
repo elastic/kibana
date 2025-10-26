@@ -101,15 +101,16 @@ const WorkflowsEmptyState: React.FC<{ onCreateWorkflow: () => void }> = ({ onCre
     <EuiSelectableMessage>
       <EuiEmptyPrompt
         title={
-          <EuiText size="s" textAlign="center" color="textParagraph">
-            <h2>{i18n.EMPTY_STATE_TITLE}</h2>
+          <EuiText textAlign="center" color="textParagraph">
+            {i18n.EMPTY_STATE_TITLE}
           </EuiText>
         }
         body={
-          <EuiText size="s" textAlign="center" color="textSubdued">
-            <p>{i18n.EMPTY_STATE_DESCRIPTION}</p>
+          <EuiText textAlign="center" color="textSubdued">
+            {i18n.EMPTY_STATE_DESCRIPTION}
           </EuiText>
         }
+        titleSize="s"
         actions={
           <EuiButton
             color="primary"
@@ -150,16 +151,12 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
 
   // Custom render function for workflow options
   const renderWorkflowOption = useCallback((option: WorkflowOption, searchValue: string) => {
-    const workflowName = (
-      <>
-        {option.namePrepend}
-        <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
-      </>
-    );
-
     const content = (
       <>
-        {workflowName}
+        <>
+          {option.namePrepend}
+          <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+        </>
         {option.secondaryContent && (
           <EuiText size="xs" color="subdued" className="eui-displayBlock">
             <small>
