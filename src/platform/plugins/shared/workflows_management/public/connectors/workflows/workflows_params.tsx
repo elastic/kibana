@@ -254,7 +254,7 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
             prependNameElement = (
               <IconDisabledWorkflow
                 size="m"
-                style={{ marginRight: '2.5px' }}
+                style={{ marginRight: '8px' }}
                 aria-label={i18n.DISABLED_BADGE_LABEL}
               />
             );
