@@ -18,6 +18,7 @@ import type {
   TestWorkflowCommand,
   TestWorkflowResponseDto,
   WorkflowDetailDto,
+  WorkflowListDto,
 } from '@kbn/workflows';
 import { useKibana } from '../../../hooks/use_kibana';
 
@@ -26,6 +27,11 @@ type HttpError = IHttpFetchError<ResponseErrorBody>;
 export interface UpdateWorkflowParams {
   id: string;
   workflow: Partial<EsWorkflow>;
+}
+
+interface OptimisticContext {
+  previousData: Map<string, WorkflowListDto>;
+  previousWorkflowDetail?: WorkflowDetailDto;
 }
 
 export function useWorkflowActions() {
@@ -45,24 +51,102 @@ export function useWorkflowActions() {
     },
   });
 
-  const updateWorkflow = useMutation<void, HttpError, UpdateWorkflowParams>({
+  const updateWorkflow = useMutation<void, HttpError, UpdateWorkflowParams, OptimisticContext>({
     mutationKey: ['PUT', 'workflows', 'id'],
     mutationFn: ({ id, workflow }: UpdateWorkflowParams) => {
       return http.put<void>(`/api/workflows/${id}`, {
         body: JSON.stringify(workflow),
       });
     },
+    onMutate: async ({ id, workflow }) => {
+      await queryClient.cancelQueries({ queryKey: ['workflows'] });
+
+      const previousData = new Map<string, WorkflowListDto>();
+
+      queryClient
+        .getQueriesData<WorkflowListDto>({ queryKey: ['workflows'] })
+        .forEach(([queryKey, data]) => {
+          if (data && data.results) {
+            const queryKeyString = JSON.stringify(queryKey);
+            previousData.set(queryKeyString, data);
+
+            const optimisticData: WorkflowListDto = {
+              ...data,
+              results: data.results.map((w) => (w.id === id ? { ...w, ...workflow } : w)),
+            };
+
+            queryClient.setQueryData(queryKey, optimisticData);
+          }
+        });
+
+      const previousWorkflowDetail = queryClient.getQueryData<WorkflowDetailDto>(['workflows', id]);
+      if (previousWorkflowDetail) {
+        const optimisticWorkflowDetail: WorkflowDetailDto = {
+          ...previousWorkflowDetail,
+          ...workflow,
+        };
+        queryClient.setQueryData(['workflows', id], optimisticWorkflowDetail);
+      }
+
+      return { previousData, previousWorkflowDetail };
+    },
+    onError: (err, variables, context) => {
+      if (context?.previousData) {
+        context.previousData.forEach((data, queryKeyString) => {
+          const queryKey = JSON.parse(queryKeyString);
+          queryClient.setQueryData(queryKey, data);
+        });
+      }
+      if (context?.previousWorkflowDetail) {
+        queryClient.setQueryData(['workflows', variables.id], context.previousWorkflowDetail);
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['workflows'] });
     },
   });
 
-  const deleteWorkflows = useMutation({
+  const deleteWorkflows = useMutation<void, HttpError, { ids: string[] }, OptimisticContext>({
     mutationKey: ['DELETE', 'workflows'],
     mutationFn: ({ ids }: { ids: string[] }) => {
       return http.delete(`/api/workflows`, {
         body: JSON.stringify({ ids }),
       });
+    },
+    onMutate: async ({ ids }) => {
+      await queryClient.cancelQueries({ queryKey: ['workflows'] });
+
+      const previousData = new Map<string, WorkflowListDto>();
+
+      queryClient
+        .getQueriesData<WorkflowListDto>({ queryKey: ['workflows'] })
+        .forEach(([queryKey, data]) => {
+          if (data && data.results) {
+            const queryKeyString = JSON.stringify(queryKey);
+            previousData.set(queryKeyString, data);
+
+            const optimisticData: WorkflowListDto = {
+              ...data,
+              results: data.results.filter((w) => !ids.includes(w.id)),
+              _pagination: {
+                ...data._pagination,
+                total: data._pagination.total - ids.length,
+              },
+            };
+
+            queryClient.setQueryData(queryKey, optimisticData);
+          }
+        });
+
+      return { previousData };
+    },
+    onError: (err, variables, context) => {
+      if (context?.previousData) {
+        context.previousData.forEach((data, queryKeyString) => {
+          const queryKey = JSON.parse(queryKeyString);
+          queryClient.setQueryData(queryKey, data);
+        });
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['workflows'] });
