@@ -16,7 +16,7 @@ import { ScheduleRequestHandler } from '../../../common/request_handler';
 const { SCHEDULE_PREFIX } = INTERNAL_ROUTES;
 const kibanaAccessControlTags = ['generateReport'];
 
-export const registerInternalPostScheduledReportRoute = ({
+export const registerInternalCreateScheduledReportRoute = ({
   logger,
   router,
   reporting,
