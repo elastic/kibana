@@ -108,10 +108,7 @@ export function createElasticsearchApiTool(operation: any): {
 }
 
 const schema = z.object({
-  query: z
-    .string()
-    .describe('The query uses to retrieve documentation for an Elasticsearch API endpoint'),
-  prompt: z.string().describe('prompt'),
+  query: z.string().describe('The query to execute against the Elasticsearch API'),
 });
 
 export async function createObservabilityElasticsearchApiTool({
@@ -129,45 +126,26 @@ export async function createObservabilityElasticsearchApiTool({
     description: 'generate elasticsearch api documentation to assist with elasticsearch queries',
     schema,
     tags: ['observability'],
-    handler: async ({ query, prompt }, toolHandlerContext) => {
+    handler: async ({ query }, toolHandlerContext) => {
       const { esClient, modelProvider } = toolHandlerContext;
 
-      const esApiDocResponse = await esClient.asCurrentUser.transport.request({
-        method: 'POST',
-        path: `/kibana_ai_es_api_doc/_search`,
-        body: {
-          size: 10,
-          query: {
-            bool: {
-              should: [
-                {
-                  semantic: {
-                    field: 'description',
-                    query,
-                  },
-                },
-                {
-                  semantic: {
-                    field: 'summary',
-                    query,
-                  },
-                },
-                {
-                  semantic: {
-                    field: 'title',
-                    query,
-                  },
-                },
-              ],
-            },
-          },
-          highlight: {
-            fields: {
-              description: {
-                type: 'semantic',
-                order: 'score',
-              },
-            },
+      const esApiDocResponse = await esClient.asCurrentUser.search({
+        index: 'kibana_ai_es_api_doc',
+        size: 10,
+        query: {
+          bool: {
+            should: [
+              // Semantic matches
+              { semantic: { field: 'description', query, boost: 2 } },
+              { semantic: { field: 'summary', query, boost: 2 } },
+              { semantic: { field: 'title', query, boost: 3 } },
+
+              // Lexical fallback
+              { match: { description: { query, boost: 1 } } },
+              { match: { summary: { query, boost: 1 } } },
+              { match: { title: { query, boost: 1 } } },
+            ],
+            minimum_should_match: 1,
           },
         },
       });
@@ -217,7 +195,7 @@ export async function createObservabilityElasticsearchApiTool({
         messages: [
           {
             role: MessageRole.User,
-            content: prompt,
+            content: query,
           },
         ],
         tools: toolDefinitions,

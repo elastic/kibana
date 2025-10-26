@@ -26,6 +26,15 @@ import {
   OBSERVABILITY_ELASTICSEARCH_API_TOOL_ID,
   createObservabilityElasticsearchApiTool,
 } from './tools/es_api';
+import {
+  OBSERVABILITY_KIBANA_TOOL_ID,
+  createObservabilityKibanaTool,
+} from './tools/observability_kibana';
+import {
+  OBSERVABILITY_ELASTICSEARCH_TOOL_ID,
+  createObservabilityElasticsearchTool,
+} from './tools/observability_elasticsearch';
+
 export const OBSERVABILITY_AGENT_ID = 'platform.core.observability';
 
 export const OBSERVABILITY_AGENT_NAME = 'Observability agent';
@@ -43,6 +52,8 @@ const OBSERVABILITY_AGENT_TOOL_IDS = [
   OBSERVABILITY_GET_SERVICES_TOOL_ID,
   OBSERVABILITY_EXECUTE_PATHS_TOOL_ID,
   OBSERVABILITY_ELASTICSEARCH_API_TOOL_ID,
+  OBSERVABILITY_KIBANA_TOOL_ID,
+  OBSERVABILITY_ELASTICSEARCH_TOOL_ID,
 ];
 
 export async function registerObservabilityAgent({
@@ -58,6 +69,20 @@ export async function registerObservabilityAgent({
     core,
     plugins,
     logger,
+  });
+
+  const observabilityKibanaTool = await createObservabilityKibanaTool({
+    core,
+    plugins,
+    logger,
+    observabilityPathToolClient: new PathToolClient(),
+  });
+
+  const observabilityElasticsearchTool = await createObservabilityElasticsearchTool({
+    core,
+    plugins,
+    logger,
+    observabilityPathToolClient: new PathToolClient(),
   });
 
   const observabilityElasticsearchApiTool = await createObservabilityElasticsearchApiTool({
@@ -81,6 +106,8 @@ export async function registerObservabilityAgent({
   plugins.onechat.tools.register(observabilityGetServicesTool);
   plugins.onechat.tools.register(observabilityExecutePathsTool);
   plugins.onechat.tools.register(observabilityElasticsearchApiTool);
+  plugins.onechat.tools.register(observabilityKibanaTool);
+  plugins.onechat.tools.register(observabilityElasticsearchTool);
 
   // register agent
   plugins.onechat.agents.register({

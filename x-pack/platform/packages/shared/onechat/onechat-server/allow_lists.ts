@@ -14,6 +14,8 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
   'observability.get_services',
   'observability.execute_paths',
   'observability.elasticsearch_api',
+  'observability.kibana',
+  'observability.elasticsearch',
 ];
 
 /**

@@ -14,20 +14,20 @@ import type { PathDefinition } from './types';
 // Example schema for a path structure
 export const PATH_EXAMPLE: PathDefinition = {
   name: 'paht-123',
-  description: 'A path to a location in the system',
+  description: 'An example path structure, with context, elasticsearch and kibana steps',
   root: {
     id: 'context-node',
-    description: 'The root context node of the path',
+    description: 'Add context to the conversation',
     tool: contextFunctionHandler,
     nodes: [
       {
         id: 'elasticsearch-node',
-        description: 'elasticsearch node of the path',
+        description: 'retrieve data from elasticsearch',
         tool: elasticsearchFunctionHandler,
       },
       {
         id: 'kibana-node',
-        description: 'kibana node of the path',
+        description: 'retrieve data from kibana',
         tool: kibanaFunctionHandler,
       },
     ],
@@ -36,7 +36,8 @@ export const PATH_EXAMPLE: PathDefinition = {
 
 export const RETRIEVE_ES_DOC: PathDefinition = {
   name: 'retrieve-es-doc-path',
-  description: 'A path to retrieve Elasticsearch API documentation',
+  description:
+    'Path to retrieve Elasticsearch API documentation before executing any Elasticsearch query',
   root: {
     id: 'elasticsearch-api-doc',
     description:

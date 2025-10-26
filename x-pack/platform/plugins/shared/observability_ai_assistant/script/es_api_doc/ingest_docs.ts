@@ -27,19 +27,37 @@ async function run() {
       index: indexName,
       mappings: {
         properties: {
-          description: { type: 'semantic_text' },
-          title: { type: 'semantic_text' },
-          summary: { type: 'semantic_text' },
+          description: {
+            type: 'semantic_text',
+            inference_id: '.multilingual-e5-small-elasticsearch',
+          },
+          title: {
+            type: 'semantic_text',
+            inference_id: '.multilingual-e5-small-elasticsearch',
+          },
+          summary: {
+            type: 'semantic_text',
+            inference_id: '.multilingual-e5-small-elasticsearch',
+          },
+          parameters: { type: 'nested' },
           metadata: { type: 'flattened' },
         },
       },
     });
   }
 
-  const operations = documents.reduce((ops, document) => {
-    ops!.push(...[{ index: { _index: indexName } }, document]);
-    return ops;
-  }, []);
+  // Prepare bulk operations only with the needed fields
+  const operations = documents.flatMap((doc) => {
+    const payload: Record<string, any> = {
+      parameters: doc.parameters ?? [],
+      metadata: doc.metadata ?? {},
+    };
+    if (doc.title) payload.title = doc.title;
+    if (doc.summary) payload.summary = doc.summary;
+    if (doc.description) payload.description = doc.description;
+
+    return [{ index: { _index: indexName } }, payload];
+  });
 
   const response = await esClient.bulk({
     refresh: false,
