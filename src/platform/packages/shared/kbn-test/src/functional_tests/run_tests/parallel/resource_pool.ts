@@ -152,17 +152,8 @@ export class ResourcePool {
       throw new Error(`Cannot run slot in phase [${phase}]`);
     }
 
-    if (this.canAllocatePhase(slot, Phase.Running)) {
-      this.applyPhaseChange(slot, Phase.Running);
-      this.logStats('running-acquired');
-      return;
-    }
-
-    await new Promise<void>((resolve) => {
-      this.runningQueue.push({ slot, resolve });
-      this.logStats('running-wait');
-      this.allocate();
-    });
+    this.applyPhaseChange(slot, Phase.Running);
+    this.logStats('running-acquired');
   }
 
   private release(slot: Slot) {
