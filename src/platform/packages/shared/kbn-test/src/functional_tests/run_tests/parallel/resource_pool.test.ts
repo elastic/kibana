@@ -83,22 +83,63 @@ describe('ResourcePool', () => {
     slotTwo.release();
   });
 
-  it('moves warmed slots to running immediately regardless of capacity', async () => {
+  it('prevents starting when running CPU budget would be exceeded', async () => {
     const pool = new ResourcePool({ log, totalCpu: 4, totalMemory: defaultMemoryMb });
-    const slotOne = acquireSlot(pool, 'config-1', { running: { cpu: 3 } });
+    const slotOne = acquireSlot(pool, 'config-1', {
+      warming: { cpu: 2 },
+      running: { cpu: 3 },
+    });
     await slotOne.waitForWarming();
-    await slotOne.waitForRunning();
 
-    const slotTwo = acquireSlot(pool, 'config-2', { running: { cpu: 3 } });
-    await slotTwo.waitForWarming();
+    const slotTwo = acquireSlot(pool, 'config-2', {
+      warming: { cpu: 1 },
+      running: { cpu: 3 },
+    });
 
-    await slotTwo.waitForRunning();
+    let warmed = false;
+    const warmPromise = slotTwo.waitForWarming().then(() => {
+      warmed = true;
+    });
 
-    const running = slotTwo.getPhase() === Phase.Running;
-    expect(running).toBe(true);
-    expect(slotTwo.getPhase()).toBe(Phase.Running);
+    await flushTasks();
+    expect(warmed).toBe(false);
 
     slotOne.release();
+    await warmPromise;
+
+    expect(warmed).toBe(true);
+    await slotTwo.waitForRunning();
+    expect(slotTwo.getPhase()).toBe(Phase.Running);
+    slotTwo.release();
+  });
+
+  it('prevents starting when running memory budget would be exceeded', async () => {
+    const pool = new ResourcePool({ log, totalCpu: 4, totalMemory: 4096 });
+    const slotOne = acquireSlot(pool, 'config-1', {
+      warming: { memory: 512 },
+      running: { memory: 3072 },
+    });
+    await slotOne.waitForWarming();
+
+    const slotTwo = acquireSlot(pool, 'config-2', {
+      warming: { memory: 128 },
+      running: { memory: 2048 },
+    });
+
+    let warmed = false;
+    const warmPromise = slotTwo.waitForWarming().then(() => {
+      warmed = true;
+    });
+
+    await flushTasks();
+    expect(warmed).toBe(false);
+
+    slotOne.release();
+    await warmPromise;
+
+    expect(warmed).toBe(true);
+    await slotTwo.waitForRunning();
+    expect(slotTwo.getPhase()).toBe(Phase.Running);
     slotTwo.release();
   });
 
@@ -120,7 +161,7 @@ describe('ResourcePool', () => {
     nextSlot.release();
   });
 
-  it('prevents multiple exclusive running slots but allows non-exclusive slots', async () => {
+  it('prevents reserving multiple exclusive running slots but allows non-exclusive ones', async () => {
     const pool = new ResourcePool({ log, totalCpu: 4, totalMemory: defaultMemoryMb });
     const exclusiveSlot = acquireSlot(pool, 'exclusive-runner', {
       running: { exclusive: true },
@@ -133,30 +174,28 @@ describe('ResourcePool', () => {
     });
 
     await exclusiveSlot.waitForWarming();
-    await otherExclusiveSlot.waitForWarming();
-    await nonExclusiveSlot.waitForWarming();
 
-    await exclusiveSlot.waitForRunning();
-
-    let otherRunning = false;
-    const otherRunPromise = otherExclusiveSlot.waitForRunning().then(() => {
-      otherRunning = true;
+    let otherExclusiveWarmed = false;
+    const otherExclusiveWarmPromise = otherExclusiveSlot.waitForWarming().then(() => {
+      otherExclusiveWarmed = true;
     });
 
-    let nonExclusiveRunning = false;
-    const nonExclusivePromise = nonExclusiveSlot.waitForRunning().then(() => {
-      nonExclusiveRunning = true;
+    let nonExclusiveWarmed = false;
+    const nonExclusiveWarmPromise = nonExclusiveSlot.waitForWarming().then(() => {
+      nonExclusiveWarmed = true;
     });
 
     await flushTasks();
-    expect(otherRunning).toBe(false);
-    expect(nonExclusiveRunning).toBe(true);
+    expect(otherExclusiveWarmed).toBe(false);
+    expect(nonExclusiveWarmed).toBe(true);
+    await nonExclusiveWarmPromise;
+    await nonExclusiveSlot.waitForRunning();
 
     exclusiveSlot.release();
-    await otherRunPromise;
+    await otherExclusiveWarmPromise;
 
-    expect(otherRunning).toBe(true);
-    await nonExclusivePromise;
+    expect(otherExclusiveWarmed).toBe(true);
+    await otherExclusiveSlot.waitForRunning();
 
     otherExclusiveSlot.release();
     nonExclusiveSlot.release();

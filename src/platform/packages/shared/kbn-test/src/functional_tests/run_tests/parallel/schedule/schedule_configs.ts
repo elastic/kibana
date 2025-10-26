@@ -555,6 +555,10 @@ function isBetterCandidate({
       return candidate.laneZeroCountBefore < incumbent.laneZeroCountBefore;
     }
 
+    if (Math.abs(candidate.startTime - incumbent.startTime) > EPSILON) {
+      return candidate.startTime > incumbent.startTime;
+    }
+
     if (candidate.machineConfigCountAfter !== incumbent.machineConfigCountAfter) {
       return candidate.machineConfigCountAfter < incumbent.machineConfigCountAfter;
     }
@@ -569,6 +573,10 @@ function isBetterCandidate({
 
     if (candidate.laneConfigCountBefore !== incumbent.laneConfigCountBefore) {
       return candidate.laneConfigCountBefore < incumbent.laneConfigCountBefore;
+    }
+
+    if (Math.abs(candidate.laneDurationAfter - incumbent.laneDurationAfter) > EPSILON) {
+      return candidate.laneDurationAfter < incumbent.laneDurationAfter;
     }
   } else if (incumbent.isZeroConfig) {
     return false;
@@ -591,24 +599,24 @@ function isBetterCandidate({
     return true;
   }
 
+  if (
+    candidate.isNewMachine !== incumbent.isNewMachine &&
+    candidate.machineTemplate.name === incumbent.machineTemplate.name &&
+    candidate.machineTemplate.cpus === incumbent.machineTemplate.cpus &&
+    candidate.machineTemplate.memoryMb === incumbent.machineTemplate.memoryMb
+  ) {
+    return incumbent.isNewMachine;
+  }
+
   if (candidateDeviation > incumbentDeviation + EPSILON) {
     return false;
   }
-
   if (candidate.memoryUsageAfter < incumbent.memoryUsageAfter - EPSILON) {
     return true;
   }
 
   if (candidate.memoryUsageAfter > incumbent.memoryUsageAfter + EPSILON) {
     return false;
-  }
-
-  if (candidate.isNewMachine !== incumbent.isNewMachine) {
-    return incumbent.isNewMachine;
-  }
-
-  if (candidate.isNewLane !== incumbent.isNewLane) {
-    return incumbent.isNewLane;
   }
 
   return candidate.machineTemplate.name.localeCompare(incumbent.machineTemplate.name) < 0;

@@ -38,6 +38,7 @@ interface SlotMetadata {
   resources: SlotResources;
   sequence: number;
   phase: Phase;
+  hasRunningReservation: boolean;
 }
 
 interface QueueItem {
@@ -61,6 +62,9 @@ export class ResourcePool {
   private runningExclusiveCount = 0;
   private memoryCapacity = 0;
   private sequenceCounter = 0;
+  private reservedRunningCpu = 0;
+  private reservedRunningMemory = 0;
+  private reservedRunningExclusiveCount = 0;
 
   constructor({
     log,
@@ -89,6 +93,7 @@ export class ResourcePool {
       resources,
       sequence: this.sequenceCounter++,
       phase: Phase.BeforeStart,
+      hasRunningReservation: false,
     };
 
     this.slotStates.set(typedSlot, Phase.BeforeStart);
@@ -174,6 +179,8 @@ export class ResourcePool {
       this.removeResources(metadata.resources.running, Phase.Running);
       this.logStats('release-running');
     }
+
+    this.releaseRunningResources(metadata);
 
     metadata.phase = Phase.Done;
     this.setPhase(slot, Phase.Done);
@@ -320,6 +327,23 @@ export class ResourcePool {
 
     if (phase === Phase.Warming) {
       const resources = metadata.resources.warming;
+      const runningResources = metadata.resources.running;
+
+      if (runningResources.exclusive && this.reservedRunningExclusiveCount > 0) {
+        return false;
+      }
+
+      const reservedCpuAfter =
+        this.reservedRunningCpu + (metadata.hasRunningReservation ? 0 : runningResources.cpu);
+      if (reservedCpuAfter - this.totalCpuBudget > EPSILON) {
+        return false;
+      }
+
+      const reservedMemoryAfter =
+        this.reservedRunningMemory + (metadata.hasRunningReservation ? 0 : runningResources.memory);
+      if (reservedMemoryAfter - this.memoryCapacity > EPSILON) {
+        return false;
+      }
 
       if (resources.exclusive && this.warmingExclusiveCount > 0) {
         return false;
@@ -340,7 +364,28 @@ export class ResourcePool {
 
     if (phase === Phase.Running) {
       const runningResources = metadata.resources.running;
-      return !(runningResources.exclusive && this.runningExclusiveCount > 0);
+      if (runningResources.exclusive && this.runningExclusiveCount > 0) {
+        return false;
+      }
+
+      const warmingResources = metadata.resources.warming;
+      const cpuAfter =
+        this.usedCpu -
+        (metadata.phase === Phase.Warming ? warmingResources.cpu : 0) +
+        runningResources.cpu;
+      if (cpuAfter - this.totalCpuBudget > EPSILON) {
+        return false;
+      }
+
+      const memoryAfter =
+        this.usedMemory -
+        (metadata.phase === Phase.Warming ? warmingResources.memory : 0) +
+        runningResources.memory;
+      if (memoryAfter - this.memoryCapacity > EPSILON) {
+        return false;
+      }
+
+      return true;
     }
 
     return false;
@@ -352,6 +397,10 @@ export class ResourcePool {
 
     if (previousPhase === phase) {
       return;
+    }
+
+    if (phase === Phase.Warming && previousPhase === Phase.BeforeStart) {
+      this.reserveRunningResources(metadata);
     }
 
     if (previousPhase === Phase.Warming) {
@@ -431,6 +480,44 @@ export class ResourcePool {
       throw new Error('Unknown slot');
     }
     return metadata;
+  }
+
+  private reserveRunningResources(metadata: SlotMetadata) {
+    if (metadata.hasRunningReservation) {
+      return;
+    }
+
+    const runningResources = metadata.resources.running;
+    this.reservedRunningCpu = this.roundToPrecision(this.reservedRunningCpu + runningResources.cpu);
+    this.reservedRunningMemory = this.roundToPrecision(
+      this.reservedRunningMemory + runningResources.memory
+    );
+
+    if (runningResources.exclusive) {
+      this.reservedRunningExclusiveCount += 1;
+    }
+
+    metadata.hasRunningReservation = true;
+  }
+
+  private releaseRunningResources(metadata: SlotMetadata) {
+    if (!metadata.hasRunningReservation) {
+      return;
+    }
+
+    const runningResources = metadata.resources.running;
+    this.reservedRunningCpu = this.roundToPrecision(
+      Math.max(0, this.reservedRunningCpu - runningResources.cpu)
+    );
+    this.reservedRunningMemory = this.roundToPrecision(
+      Math.max(0, this.reservedRunningMemory - runningResources.memory)
+    );
+
+    if (runningResources.exclusive) {
+      this.reservedRunningExclusiveCount = Math.max(0, this.reservedRunningExclusiveCount - 1);
+    }
+
+    metadata.hasRunningReservation = false;
   }
 
   private roundToPrecision(value: number): number {

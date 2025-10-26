@@ -48,3 +48,11 @@ export interface ScheduleConfigTestGroup {
 export interface ScheduleConfigTestGroupResults {
   groups: ScheduleConfigTestGroup[];
 }
+
+export interface ConfigStats {
+  config: ScheduleConfigOutput;
+  duration: number;
+  memoryWidth: number;
+  warmCpu: number;
+  runCpu: number;
+}

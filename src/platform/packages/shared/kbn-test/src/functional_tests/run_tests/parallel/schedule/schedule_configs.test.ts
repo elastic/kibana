@@ -110,6 +110,65 @@ describe('scheduleConfigs', () => {
     expect(group.expectedDurationMins).toBeCloseTo(20, 5);
   });
 
+  it('prefers reusing existing machines when capacity allows', async () => {
+    setResources('configs/a.ts', {
+      warming: { cpu: 1, memory: 2048, exclusive: false },
+      running: { cpu: 1, memory: 2048, exclusive: false },
+    });
+    setResources('configs/b.ts', {
+      warming: { cpu: 1, memory: 2048, exclusive: false },
+      running: { cpu: 1, memory: 2048, exclusive: false },
+    });
+    setResources('configs/c.ts', {
+      warming: { cpu: 1, memory: 2048, exclusive: false },
+      running: { cpu: 1, memory: 2048, exclusive: false },
+    });
+
+    const result = await scheduleConfigs({
+      maxDurationMins: 60,
+      configs: [
+        { path: 'configs/a.ts', testDurationMins: 30 },
+        { path: 'configs/b.ts', testDurationMins: 25 },
+        { path: 'configs/c.ts', testDurationMins: 20 },
+      ],
+      machines: [
+        { name: 'm-primary', cpus: 8, memoryMb: 8192 },
+        { name: 'm-secondary', cpus: 8, memoryMb: 8192 },
+      ],
+    });
+
+    expect(result.groups).toHaveLength(1);
+    const [group] = result.groups;
+    expect(group.machine.name).toBe('m-primary');
+    expect(group.configs).toHaveLength(3);
+    expect(new Set(group.configs.map((cfg) => cfg.startTimeMins))).toEqual(new Set([0]));
+  });
+
+  it('packs identical configs on the same machine when template matches', async () => {
+    setResources('configs/a.ts', {
+      warming: { cpu: 1, memory: 2048, exclusive: false },
+      running: { cpu: 2, memory: 4096, exclusive: false },
+    });
+    setResources('configs/b.ts', {
+      warming: { cpu: 1, memory: 2048, exclusive: false },
+      running: { cpu: 2, memory: 4096, exclusive: false },
+    });
+
+    const result = await scheduleConfigs({
+      maxDurationMins: 60,
+      configs: [
+        { path: 'configs/a.ts', testDurationMins: 30 },
+        { path: 'configs/b.ts', testDurationMins: 30 },
+      ],
+      machines: [{ name: 'n2-standard-8', cpus: 8, memoryMb: 32768 }],
+    });
+
+    expect(result.groups).toHaveLength(1);
+    const group = result.groups[0];
+    expect(group.configs).toHaveLength(2);
+    expect(group.configs.map((cfg) => cfg.startTimeMins)).toEqual([0, 0]);
+  });
+
   it('provisions a new machine when resource width exceeds capacity', async () => {
     setResources('configs/a.ts', {
       warming: { cpu: 2, memory: 2048, exclusive: false },
