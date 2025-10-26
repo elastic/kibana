@@ -142,12 +142,12 @@ export async function runTestsParallel(
     }
   };
 
-  const fileWatcher = startWatchingFiles({
-    directories: [
-      { dir: REPO_ROOT, depth: 5 },
-      { dir: os.tmpdir(), depth: 5 },
-    ],
-  });
+  // const fileWatcher = startWatchingFiles({
+  //   directories: [
+  //     { dir: REPO_ROOT, depth: 5 },
+  //     { dir: os.tmpdir(), depth: 5 },
+  //   ],
+  // });
 
   if (booleanFromEnv('USE_CHROME_BETA', false)) {
     await prepareChrome().catch((err) => {
@@ -286,13 +286,13 @@ export async function runTestsParallel(
   let previousResourceUsage: NodeJS.ResourceUsage | undefined;
 
   function logChangedFiles() {
-    log.info(`Files changed`);
-    log.indent(4);
-    const formattedChanges = fileWatcher.getFormattedFileChanges();
-    if (formattedChanges) {
-      log.write(formattedChanges);
-    }
-    log.indent(-4);
+    // log.info(`Files changed`);
+    // log.indent(4);
+    // const formattedChanges = fileWatcher.getFormattedFileChanges();
+    // if (formattedChanges) {
+    //   log.write(formattedChanges);
+    // }
+    // log.indent(-4);
   }
 
   if (stats) {

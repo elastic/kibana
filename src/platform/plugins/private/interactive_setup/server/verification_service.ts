@@ -28,6 +28,7 @@ export class VerificationService {
     const verificationCode = new VerificationCode(this.logger);
 
     try {
+      fs.mkdirSync(path.dirname(this.fileName), { recursive: true });
       fs.writeFileSync(this.fileName, verificationCode.code);
       this.logger.debug(`Successfully wrote verification code to ${this.fileName}`);
       return verificationCode;

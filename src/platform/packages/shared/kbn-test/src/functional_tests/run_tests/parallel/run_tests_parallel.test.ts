@@ -162,9 +162,10 @@ describe('runTestsParallel', () => {
       }>;
     };
 
-    const runPromise = runTestsParallel(log, [CONFIG_A, CONFIG_B], {
+    const runPromise = runTestsParallel(log, {
       extraArgs: [],
       stdio: 'suppress',
+      configs: [CONFIG_A, CONFIG_B],
     });
 
     await flushPromises();
@@ -259,10 +260,11 @@ describe('runTestsParallel', () => {
       expectedDurationMins: 10,
     };
 
-    const runPromise = runTestsParallel(log, [CONFIG_A, CONFIG_B], {
+    const runPromise = runTestsParallel(log, {
       extraArgs: [],
       stdio: 'suppress',
       group,
+      configs: [CONFIG_A, CONFIG_B],
     });
 
     await flushPromises();

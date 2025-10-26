@@ -8,6 +8,7 @@
  */
 
 import chalk from 'chalk';
+import path from 'path';
 import type { Subscription } from 'rxjs';
 
 import type { TypeOf } from '@kbn/config-schema';
@@ -18,6 +19,7 @@ import type {
   PrebootPlugin,
 } from '@kbn/core/server';
 import { unsafeConsole } from '@kbn/security-hardening';
+import { SERVICE_NAMESPACE } from '@kbn/test-services';
 import { getDataPath } from '@kbn/utils';
 
 import type { ConfigSchema, ConfigType } from './config';
@@ -75,6 +77,7 @@ export class InteractiveSetupPlugin implements PrebootPlugin {
       !core.elasticsearch.config.credentialsSpecified &&
       core.elasticsearch.config.hosts.length === 1 &&
       DEFAULT_ELASTICSEARCH_HOSTS.includes(core.elasticsearch.config.hosts[0]);
+
     if (!shouldActiveSetupMode) {
       const reason = core.elasticsearch.config.credentialsSpecified
         ? 'Kibana system user credentials are specified'
@@ -157,7 +160,7 @@ Go to ${chalk.cyanBright.underline(url)} to get started.
         preboot: { ...core.preboot, completeSetup },
         kibanaConfigWriter: new KibanaConfigWriter(
           configPath,
-          getDataPath(),
+          path.join(getDataPath(), SERVICE_NAMESPACE),
           this.#logger.get('kibana-config')
         ),
         elasticsearch,

@@ -22,6 +22,10 @@ export interface ScheduleConfigOutput extends ScheduleConfigInput {
   startTimeMins?: number;
   laneIndex?: number;
   testConfigCategory?: ScoutTestRunConfigCategory;
+  hasTests: boolean;
+  warmupDurationMins?: number;
+  expectedStartTimeMins?: number;
+  expectedDurationMins?: number;
 }
 
 export interface ScheduleConfigOptions {

@@ -27,6 +27,7 @@ import { checkForEnabledTestsInFtrConfig } from '../../../lib';
 import { EsVersion } from '../../../../functional_test_runner';
 
 const EPSILON = 0.000001;
+const WARMUP_OVERHEAD_MINS = 2;
 
 const ZERO_SLOT_RESOURCES: SlotResources = {
   warming: { cpu: 0, memory: 0, exclusive: false },
@@ -71,6 +72,7 @@ interface MachineState {
   id: number;
   template: MachineTemplate;
   lanes: LaneState[];
+  laneAssignments: Array<ScheduleConfigOutput[]>;
   configs: ScheduleConfigOutput[];
   finishTime: number;
   memoryUsage: number;
@@ -241,6 +243,10 @@ async function loadConfigStats({
       resources: ZERO_SLOT_RESOURCES,
       tooLong: false,
       testConfigCategory,
+      hasTests: false,
+      warmupDurationMins: 0,
+      expectedDurationMins: 0,
+      expectedStartTimeMins: 0,
     };
 
     return {
@@ -254,6 +260,8 @@ async function loadConfigStats({
 
   const capabilities = configObject.getAll() as unknown as ServerCapabilities;
   const slotResources = getSlotResources(capabilities);
+  const warmupDuration = WARMUP_OVERHEAD_MINS;
+  const totalDuration = Math.max(configInput.testDurationMins, 0) + warmupDuration;
 
   const scheduleOutput: ScheduleConfigOutput = {
     path: configInput.path,
@@ -261,13 +269,17 @@ async function loadConfigStats({
     resources: slotResources,
     tooLong: configInput.testDurationMins > maxDurationMins,
     testConfigCategory,
+    hasTests: true,
+    warmupDurationMins: warmupDuration,
+    expectedDurationMins: totalDuration,
+    expectedStartTimeMins: 0,
   };
 
   const memoryWidth = Math.max(slotResources.warming.memory, slotResources.running.memory);
 
   return {
     config: scheduleOutput,
-    duration: Math.max(configInput.testDurationMins, 0),
+    duration: totalDuration,
     memoryWidth,
     warmCpu: slotResources.warming.cpu,
     runCpu: slotResources.running.cpu,
@@ -645,6 +657,7 @@ function applyPlacement({
       id: updatedNextId,
       template: { ...candidate.machineTemplate },
       lanes: [],
+      laneAssignments: [],
       configs: [],
       finishTime: 0,
       memoryUsage: 0,
@@ -662,6 +675,8 @@ function applyPlacement({
   const resolvedMachine = machine;
   const assignedConfig = stats.config;
   assignedConfig.startTimeMins = candidate.startTime;
+  assignedConfig.expectedStartTimeMins = candidate.startTime;
+  assignedConfig.expectedDurationMins = assignedConfig.expectedDurationMins ?? stats.duration;
   assignedConfig.laneIndex = candidate.laneIndex;
 
   if (candidate.isNewLane) {
@@ -674,6 +689,7 @@ function applyPlacement({
       zeroConfigCount: candidate.laneZeroCountAfter,
     };
     resolvedMachine.lanes.push(newLane);
+    resolvedMachine.laneAssignments[candidate.laneIndex] = [assignedConfig];
   } else {
     const lane = resolvedMachine.lanes[candidate.laneIndex];
     lane.memoryWidth = candidate.laneMemoryAfter;
@@ -682,6 +698,10 @@ function applyPlacement({
     lane.totalDuration = candidate.laneDurationAfter;
     lane.configCount = candidate.laneConfigCountAfter;
     lane.zeroConfigCount = candidate.laneZeroCountAfter;
+    if (!resolvedMachine.laneAssignments[candidate.laneIndex]) {
+      resolvedMachine.laneAssignments[candidate.laneIndex] = [];
+    }
+    resolvedMachine.laneAssignments[candidate.laneIndex].push(assignedConfig);
   }
 
   resolvedMachine.memoryUsage = candidate.memoryUsageAfter;

@@ -37,12 +37,14 @@ export const plugin: PluginInitializer<void, never> = async (
           // `__dirname` that depends on the physical location of the file where it's used. This is the reason why we
           // end up with different data paths in Kibana built-in and test plugins. To workaround that we use Kibana
           // `process.cwd()` to construct data path manually.
+
           const verificationCodePath = path.join(
             process.cwd(),
             'data',
             SERVICE_NAMESPACE,
             'verification_code'
           );
+
           initializerContext.logger.get().info(`Will read code from ${verificationCodePath}`);
           return response.ok({
             body: {
