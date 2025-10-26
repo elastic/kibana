@@ -64,7 +64,7 @@ export async function setupDependencies(
 
   // Use scoped actions client when fakeRequest is available to preserve user context
   // Otherwise fallback to unsecured actions client
-  // @tb TODO: Consider completely disabling connectors when no fakeRequest is available
+  // TODO(tb): Consider completely disabling connectors when no fakeRequest is available
   let connectorExecutor: ConnectorExecutor;
   if (fakeRequest) {
     const scopedActionsClient = await actionsPlugin.getActionsClientWithRequest(fakeRequest);

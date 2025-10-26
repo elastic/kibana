@@ -13,6 +13,7 @@
 import { validate as validateUuid } from 'uuid';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type { ActionsClient, IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
+import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 
 export class ConnectorExecutor {
   constructor(
@@ -78,7 +79,9 @@ export class ConnectorExecutor {
       ? await (this.actionsClient as ActionsClient).getAll()
       : await (this.actionsClient as IUnsecuredActionsClient).getAll(spaceId);
 
-    const connector = allConnectors.find((c: any) => c.name === connectorName);
+    const connector = allConnectors.find(
+      (c: ConnectorWithExtraFindData) => c.name === connectorName
+    );
 
     if (!connector) {
       throw new Error(`Connector with name ${connectorName} not found`);
