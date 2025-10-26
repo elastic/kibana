@@ -26,7 +26,6 @@ import { ResourcePool, Phase } from './resource_pool';
 import type { Slot } from './resource_pool';
 import { prepareChrome } from './prepare_chrome';
 import { readConfig } from './read_config';
-import { getAvailableMemory } from './get_available_memory';
 import { getSlotResources } from './get_slot_resources';
 import type { SlotResources } from './get_slot_resources';
 import { startWatchingFiles } from './start_watching_files';
@@ -207,12 +206,14 @@ export async function runTestsParallel(
     runnerResources.set(runner, slotResources);
   }
 
-  const MIN_MB_AVAILABLE = 2048;
   const totalCpuCapacity = Math.max(1, os.cpus().length);
-  const initialAvailableMemory = getAvailableMemory();
-  const totalMemoryBudget = Math.max(0, initialAvailableMemory - MIN_MB_AVAILABLE);
+  const totalMemoryMb = Math.round(os.totalmem() / (1024 * 1024));
+  const MEMORY_BUFFER_MB = 2048;
+  const totalMemoryBudget = Math.max(0, totalMemoryMb - MEMORY_BUFFER_MB);
 
-  log.info(`Available resources: ${totalCpuCapacity} cpus, ${initialAvailableMemory}mb free`);
+  log.info(
+    `Detected resources: ${totalCpuCapacity} cpus, ${totalMemoryMb}mb total memory (budget ${totalMemoryBudget}mb)`
+  );
 
   const pool = new ResourcePool({
     log,
@@ -244,8 +245,6 @@ export async function runTestsParallel(
     function logStats() {
       const usage = process.resourceUsage();
       const memory = process.memoryUsage();
-      const loadAvg = os.loadavg();
-      const freeMemMb = getAvailableMemory();
       const totalMemMb = os.totalmem() / (1024 * 1024);
 
       const userDelta = previousResourceUsage
@@ -257,15 +256,15 @@ export async function runTestsParallel(
 
       previousResourceUsage = usage;
 
-      const loadString = loadAvg.map((value) => value.toFixed(2)).join(', ');
+      const loadAvg = os.loadavg();
+      const loadString = loadAvg.map((value: number) => value.toFixed(2)).join(', ');
       const messageParts = [
         `rss=${formatMb(memory.rss)}mb`,
         `heapUsed=${formatMb(memory.heapUsed)}mb`,
-        `external=${formatMb(memory.external)}mb`,
         `user=${formatSeconds(userDelta)}s`,
+        `memoryBudget=${totalMemoryBudget.toFixed(0)}mb`,
         `system=${formatSeconds(systemDelta)}s`,
         `load=[${loadString}]`,
-        `freeMem=${freeMemMb.toFixed(0)}mb`,
         `totalMem=${totalMemMb.toFixed(0)}mb`,
       ];
 

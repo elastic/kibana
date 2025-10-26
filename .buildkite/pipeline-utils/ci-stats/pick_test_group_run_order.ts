@@ -686,7 +686,7 @@ export async function pickTestGroupRunOrder() {
       const preferredMachineTypes = [
         queueAgentOptions.machineType,
         'n2-standard-8',
-        'n2-standard-4',
+        // 'n2-standard-4',
       ].filter(
         (typeName): typeName is string => typeof typeName === 'string' && typeName.length > 0
       );

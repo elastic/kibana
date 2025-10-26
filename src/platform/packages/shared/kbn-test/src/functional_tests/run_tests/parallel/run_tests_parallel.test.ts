@@ -94,10 +94,6 @@ jest.mock('./config_runner', () => {
   };
 });
 
-jest.mock('./get_available_memory', () => ({
-  getAvailableMemory: jest.fn(() => 64 * 1024),
-}));
-
 function createDeferred<T>() {
   let resolve!: (value: T | PromiseLike<T>) => void;
   let reject!: (reason?: unknown) => void;
