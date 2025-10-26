@@ -5,5 +5,6 @@
  * 2.0.
  */
 
+export * from './use_bulk_get_user_profiles';
 export * from './use_discover_link';
 export * from './use_osquery_integration';

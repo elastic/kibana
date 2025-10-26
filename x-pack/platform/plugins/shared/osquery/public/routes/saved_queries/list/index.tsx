@@ -28,6 +28,7 @@ import { WithHeaderLayout } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
 import { useSavedQueries } from '../../../saved_queries/use_saved_queries';
+import { UserNameDisplay } from '../../../common/components/user_name_display';
 
 export interface SavedQuerySO {
   name: string;
@@ -157,12 +158,30 @@ const SavedQueriesPageComponent = () => {
     [permissions.runSavedQueries, permissions.writeLiveQueries]
   );
 
+  const renderCreatedBy = useCallback(
+    (createdBy: string) => <UserNameDisplay userId={createdBy} />,
+    []
+  );
+
   const renderUpdatedAt = useCallback((updatedAt: any, item: any) => {
     if (!updatedAt) return '-';
 
-    const updatedBy = item.updated_by !== item.created_by ? ` @ ${item.updated_by}` : '';
+    const updatedBy =
+      item.updated_by && item.updated_by !== item.created_by ? (
+        <>
+          {' @ '}
+          <UserNameDisplay userId={item.updated_by} />
+        </>
+      ) : null;
 
-    return updatedAt ? `${moment(updatedAt).fromNow()}${updatedBy}` : '-';
+    return updatedAt ? (
+      <>
+        {moment(updatedAt).fromNow()}
+        {updatedBy}
+      </>
+    ) : (
+      '-'
+    );
   }, []);
 
   const renderDescriptionColumn = useCallback((description?: string) => {
@@ -202,6 +221,7 @@ const SavedQueriesPageComponent = () => {
         width: '15%',
         sortable: true,
         truncateText: true,
+        render: renderCreatedBy,
       },
       {
         field: 'updated_at',
@@ -220,7 +240,7 @@ const SavedQueriesPageComponent = () => {
         actions: [{ render: renderPlayAction }, { render: renderEditAction }],
       },
     ],
-    [renderDescriptionColumn, renderEditAction, renderPlayAction, renderUpdatedAt]
+    [renderCreatedBy, renderDescriptionColumn, renderEditAction, renderPlayAction, renderUpdatedAt]
   );
 
   const onTableChange = useCallback(({ page = {}, sort = {} }: any) => {

@@ -26,6 +26,7 @@ import { usePacks } from './use_packs';
 import { ActiveStateSwitch } from './active_state_switch';
 import { AgentsPolicyLink } from '../agent_policies/agents_policy_link';
 import type { PackSavedObject } from './types';
+import { UserNameDisplay } from '../common/components/user_name_display';
 
 const updatedAtCss = {
   whiteSpace: 'nowrap' as const,
@@ -97,14 +98,28 @@ const PacksTableComponent = () => {
 
   const renderActive = useCallback((_: any, item: any) => <ActiveStateSwitch item={item} />, []);
 
+  const renderCreatedBy = useCallback(
+    (createdBy: string) => <UserNameDisplay userId={createdBy} />,
+    []
+  );
+
   const renderUpdatedAt = useCallback((updatedAt: any, item: any) => {
     if (!updatedAt) return '-';
 
-    const updatedBy = item.updated_by !== item.created_by ? ` @ ${item.updated_by}` : '';
+    const updatedBy =
+      item.updated_by && item.updated_by !== item.created_by ? (
+        <>
+          {' @ '}
+          <UserNameDisplay userId={item.updated_by} />
+        </>
+      ) : null;
 
     return updatedAt ? (
-      <EuiToolTip content={`${moment(updatedAt).fromNow()}${updatedBy}`}>
-        <span tabIndex={0} css={updatedAtCss}>{`${moment(updatedAt).fromNow()}${updatedBy}`}</span>
+      <EuiToolTip content={moment(updatedAt).fromNow()}>
+        <span tabIndex={0} css={updatedAtCss}>
+          {moment(updatedAt).fromNow()}
+          {updatedBy}
+        </span>
       </EuiToolTip>
     ) : (
       '-'
@@ -178,6 +193,7 @@ const PacksTableComponent = () => {
         }),
         sortable: true,
         truncateText: true,
+        render: renderCreatedBy,
       },
       {
         field: 'updated_at',
@@ -214,6 +230,7 @@ const PacksTableComponent = () => {
       permissions.writeLiveQueries,
       renderActive,
       renderAgentPolicy,
+      renderCreatedBy,
       renderPlayAction,
       renderQueries,
       renderUpdatedAt,

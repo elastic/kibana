@@ -26,6 +26,7 @@ import { useAllLiveQueries } from './use_all_live_queries';
 import type { SearchHit } from '../../common/search_strategy';
 import { useRouterNavigate, useKibana } from '../common/lib/kibana';
 import { usePacks } from '../packs/use_packs';
+import { UserNameDisplay } from '../common/components/user_name_display';
 
 const EMPTY_ARRAY: SearchHit[] = [];
 
@@ -101,10 +102,12 @@ const ActionsTableComponent = () => {
     []
   );
 
-  const renderCreatedByColumn = useCallback(
-    (userId: any) => (isArray(userId) ? userId[0] : '-'),
-    []
-  );
+  const renderCreatedByColumn = useCallback((userId: any) => {
+    if (!userId) return '-';
+    const userIdValue = isArray(userId) ? userId[0] : userId;
+
+    return <UserNameDisplay userId={userIdValue} />;
+  }, []);
 
   const renderTimestampColumn = useCallback(
     (_: any, item: any) => <>{formatDate(item.fields['@timestamp'][0])}</>,
