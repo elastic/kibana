@@ -19,6 +19,7 @@ import { TrustedAppsApiClient } from '../service';
 import { TrustedAppsForm } from './components/form';
 import { SEARCHABLE_FIELDS } from '../constants';
 import { TrustedAppsArtifactsDocsLink } from './components/artifacts_docs_link';
+import { EventFiltersProcessDescendantIndicator } from '../../../components/artifact_entry_card/components/card_decorators/event_filters_process_descendant_indicator';
 
 const TRUSTED_APPS_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   pageTitle: i18n.translate('xpack.securitySolution.trustedApps.pageTitle', {
@@ -131,6 +132,7 @@ export const TrustedAppsList = memo(() => {
       allowCardDeleteAction={canWriteTrustedApplications}
       allowCardEditAction={canWriteTrustedApplications}
       allowCardCreateAction={canWriteTrustedApplications}
+      CardDecorator={EventFiltersProcessDescendantIndicator}
     />
   );
 });
