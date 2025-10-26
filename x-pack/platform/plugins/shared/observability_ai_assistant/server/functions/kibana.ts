@@ -54,7 +54,7 @@ export function registerKibanaFunction({
       const requestUrl = request.rewrittenUrl || request.url;
       const core = await resources.plugins.core.start();
 
-      function getParsedBaseUrl() {
+      function getParsedPublicBaseUrl() {
         const { publicBaseUrl } = core.http.basePath;
         if (!publicBaseUrl) {
           const errorMessage = `Cannot invoke Kibana tool: "server.publicBaseUrl" must be configured in kibana.yml`;
@@ -66,20 +66,16 @@ export function registerKibanaFunction({
       }
 
       function getPathnameWithSpaceId() {
-        const { spaceId } = getSpaceIdFromPath(
-          requestUrl.toString(),
-          core.http.basePath.serverBasePath
-        );
-
-        const basePath = core.http.basePath.get(request);
-        const pathnameWithSpaceId = addSpaceIdToPath(basePath, spaceId, pathname);
+        const { serverBasePath } = core.http.basePath;
+        const { spaceId } = getSpaceIdFromPath(requestUrl.pathname, serverBasePath);
+        const pathnameWithSpaceId = addSpaceIdToPath(serverBasePath, spaceId, pathname);
         return pathnameWithSpaceId;
       }
 
-      const parsedBaseUrl = getParsedBaseUrl();
+      const parsedPublicBaseUrl = getParsedPublicBaseUrl();
       const nextUrl = {
-        host: parsedBaseUrl.host,
-        protocol: parsedBaseUrl.protocol,
+        host: parsedPublicBaseUrl.host,
+        protocol: parsedPublicBaseUrl.protocol,
         pathname: getPathnameWithSpaceId(),
         query: query ? (query as Record<string, string>) : undefined,
       };
