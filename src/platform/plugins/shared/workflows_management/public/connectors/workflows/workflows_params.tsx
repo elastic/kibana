@@ -31,6 +31,7 @@ import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import type { WorkflowListDto } from '@kbn/workflows';
 import * as i18n from './translations';
 import type { WorkflowsActionParams } from './types';
+import { IconDisabledWorkflow } from '../../assets/icons';
 
 interface WorkflowOption {
   id: string;
@@ -249,11 +250,13 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
               <EuiIcon type="alert" color="warning" aria-label={i18n.WORKFLOW_DISABLED_WARNING} />
             );
           } else if (isDisabled) {
-            // Show disabled badge for disabled workflows
+            // Show disabled icon for disabled workflows
             prependNameElement = (
-              <EuiBadge color="default" style={{ marginRight: '8px' }}>
-                {i18n.DISABLED_BADGE_LABEL}
-              </EuiBadge>
+              <IconDisabledWorkflow
+                size="s"
+                style={{ marginRight: '8px' }}
+                aria-label={i18n.DISABLED_BADGE_LABEL}
+              />
             );
           }
 
