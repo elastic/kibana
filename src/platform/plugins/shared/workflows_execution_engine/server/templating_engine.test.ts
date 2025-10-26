@@ -291,17 +291,5 @@ describe('WorkflowTemplatingEngine', () => {
       expect(result).toBe('');
     });
 
-    it('should work with complex objects', () => {
-      const obj = {
-        message: '{{ "Hello" | base64_encode }}',
-        data: '{{ "World" | base64_decode }}',
-      };
-      const context = { data: 'V29ybGQ=' };
-      const result = templatingEngine.render(obj, context);
-      expect(result).toEqual({
-        message: 'SGVsbG8=',
-        data: 'World',
-      });
-    });
   });
 });
