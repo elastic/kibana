@@ -218,7 +218,7 @@ describe('WorkflowsParamsFields', () => {
     fireEvent.click(input);
 
     await waitFor(() => {
-      expect(screen.getByText('No workflows available')).toBeInTheDocument();
+      expect(screen.getByText('Create your first workflow')).toBeInTheDocument();
     });
   });
 
@@ -448,7 +448,7 @@ describe('WorkflowsParamsFields', () => {
 
     // Should show no workflows available
     await waitFor(() => {
-      expect(screen.getByText('No workflows available')).toBeInTheDocument();
+      expect(screen.getByText('Create your first workflow')).toBeInTheDocument();
     });
   });
 
@@ -850,35 +850,5 @@ describe('WorkflowsParamsFields', () => {
       expect(screen.getByText('Workflow without description')).toBeInTheDocument();
       expect(screen.getByText('No description')).toBeInTheDocument();
     });
-  });
-
-  test('should not show tooltip for empty state workflow', async () => {
-    // Mock empty workflows response
-    const mockWorkflows = {
-      results: [],
-    };
-
-    mockHttpPost.mockResolvedValue(mockWorkflows);
-
-    await act(async () => {
-      renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
-    });
-
-    await waitFor(() => {
-      expect(mockHttpPost).toHaveBeenCalled();
-    });
-
-    // Click on the input to open the popover
-    const input = screen.getByRole('searchbox');
-    fireEvent.click(input);
-
-    // Wait for the empty state to appear
-    await waitFor(() => {
-      expect(screen.getByText('No workflows available')).toBeInTheDocument();
-    });
-
-    // The empty state should not have a tooltip
-    const emptyStateOption = screen.getByText('No workflows available');
-    expect(emptyStateOption).toBeInTheDocument();
   });
 });
