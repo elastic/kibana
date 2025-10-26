@@ -44,6 +44,24 @@ function msToDuration(duration: number) {
   return display;
 }
 
+function formatMinutes(minutes?: number): string | undefined {
+  if (minutes === undefined) {
+    return undefined;
+  }
+
+  const rounded = Math.round(minutes * 10) / 10;
+  if (rounded >= 60) {
+    const hours = Math.floor(rounded / 60);
+    const remainingMinutes = Math.round((rounded - hours * 60) * 10) / 10;
+    if (remainingMinutes === 0) {
+      return `${hours}h`;
+    }
+    return `${hours}h ${remainingMinutes}m`;
+  }
+
+  return `${rounded}m`;
+}
+
 interface RunnerState {
   slot: Slot;
   startedAt: number;
@@ -347,6 +365,19 @@ export async function runTestsParallel(
       for (const [path, state] of runnerStates.entries()) {
         const phase = state.slot.getPhase();
         const parts: string[] = [`phase=${phase}`];
+        const scheduledConfig = scheduleGroupMap?.get(path);
+
+        if (scheduledConfig) {
+          const expectedStart = formatMinutes(scheduledConfig.expectedStartTimeMins);
+          if (expectedStart) {
+            parts.push(`expectedStart=${expectedStart}`);
+          }
+
+          const expectedDuration = formatMinutes(scheduledConfig.expectedDurationMins);
+          if (expectedDuration) {
+            parts.push(`expectedDuration=${expectedDuration}`);
+          }
+        }
 
         const warmMs =
           state.warmDurationMs ??
@@ -584,7 +615,7 @@ export async function runTestsParallel(
 
   logChangedFiles();
 
-  fileWatcher.unsubscribe();
+  // fileWatcher.unsubscribe();
 
   return failedConfigs.length ? 1 : 0;
 }
