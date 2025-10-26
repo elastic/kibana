@@ -146,13 +146,13 @@ export const translatedPerformantEntries = t.array(
 export type TranslatedPerformantEntries = t.TypeOf<typeof translatedPerformantEntries>;
 
 export const translatedExceptionListItem = t.union([
+  translatedEntryTrustDescendants,
   t.exact(
     t.type({
       type: t.string,
       entries: t.array(translatedEntry),
     })
   ),
-  translatedEntryTrustDescendants,
 ]);
 export type TranslatedExceptionListItem = t.TypeOf<typeof translatedExceptionListItem>;
 
