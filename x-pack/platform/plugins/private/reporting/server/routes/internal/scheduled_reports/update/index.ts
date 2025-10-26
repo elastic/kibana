@@ -6,19 +6,20 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
-import { KibanaResponse } from '@kbn/core-http-router-server-internal';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
+import { KibanaResponse } from '@kbn/core-http-router-server-internal';
 import type { ReportingCore } from '../../../..';
 import { ScheduledReportsService } from '../../../../services/scheduled_reports';
 import type { ReportingPluginRouter } from '../../../../types';
 import { authorizedUserPreRouting, getCounters } from '../../../common';
 import { handleUnavailable } from '../../../common/request_handler';
 import { validateReportingLicense } from '../utils';
+import { updateScheduledReportBodySchema, updateScheduledReportParamsSchema } from './schemas';
 
-const { SCHEDULED } = INTERNAL_ROUTES;
+const { SCHEDULE_PREFIX } = INTERNAL_ROUTES;
+const path = `${SCHEDULE_PREFIX}/{id}`;
 
-export const registerInternalBulkDisableRoute = ({
+export const registerInternalUpdateScheduledReportRoute = ({
   logger,
   router,
   reporting,
@@ -27,50 +28,53 @@ export const registerInternalBulkDisableRoute = ({
   router: ReportingPluginRouter;
   reporting: ReportingCore;
 }) => {
-  // allow scheduled reports to be disabled
-  const path = SCHEDULED.BULK_DISABLE;
-
-  router.patch(
+  router.put(
     {
       path,
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason:
+            'This route is opted out from authorization because reporting uses its own authorization model.',
         },
       },
       validate: {
-        body: schema.object({
-          ids: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 1000 }),
-        }),
+        params: updateScheduledReportParamsSchema,
+        body: updateScheduledReportBodySchema,
       },
       options: { access: 'internal' },
     },
-    authorizedUserPreRouting(reporting, async (user, context, req, res) => {
+    authorizedUserPreRouting(reporting, async (user, context, request, responseFactory) => {
       try {
-        const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
-
         // ensure the async dependencies are loaded
         if (!context.reporting) {
-          return handleUnavailable(res);
+          return handleUnavailable(responseFactory);
         }
 
-        await validateReportingLicense({ reporting, responseFactory: res });
+        await validateReportingLicense({ reporting, responseFactory });
 
-        const { ids } = req.body;
+        const { id } = request.params;
 
+        const counters = getCounters(request.route.method, path, reporting.getUsageCounter());
         const scheduledReportsService = await ScheduledReportsService.build({
           logger,
           reportingCore: reporting,
-          request: req,
-          responseFactory: res,
+          request,
+          responseFactory,
         });
 
-        const results = await scheduledReportsService.bulkDisable({ user, ids });
+        const results = await scheduledReportsService.update({
+          user,
+          id,
+          updateParams: request.body,
+        });
 
         counters.usageCounter();
 
-        return res.ok({ body: results, headers: { 'content-type': 'application/json' } });
+        return responseFactory.ok({
+          body: results,
+          headers: { 'content-type': 'application/json' },
+        });
       } catch (err) {
         if (err instanceof KibanaResponse) {
           return err;
