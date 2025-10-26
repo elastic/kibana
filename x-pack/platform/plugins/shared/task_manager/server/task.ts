@@ -295,6 +295,13 @@ interface RruleDaily extends RruleCommon {
   byweekday?: string[];
   bymonthday?: never;
 }
+interface RruleHourly extends RruleCommon {
+  freq: Frequency.HOURLY;
+  byhour?: never;
+  byminute?: number[];
+  byweekday?: never;
+  bymonthday?: never;
+}
 
 interface RruleHourly extends RruleCommon {
   freq: Frequency.HOURLY;

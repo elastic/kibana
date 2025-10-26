@@ -34,7 +34,6 @@ import { applyActionsEsSearchMock } from '../../services/actions/mocks';
 import { requestContextMock } from '../../../lib/detection_engine/routes/__mocks__';
 import type { EndpointSuggestionsSchema } from '../../../../common/api/endpoint';
 import { getEndpointSuggestionsRequestHandler, registerEndpointSuggestionsRoutes } from '.';
-import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
 import {
   eventsIndexPattern,
@@ -106,65 +105,10 @@ describe('when calling the Suggestions route handler', () => {
   });
 
   describe('having right privileges', () => {
-    describe('when space awareness feature is disabled', () => {
-      beforeEach(() => {
-        mockEndpointContext.experimentalFeatures = {
-          ...mockEndpointContext.experimentalFeatures,
-          endpointManagementSpaceAwarenessEnabled: false,
-        };
-        suggestionsRouteHandler = getEndpointSuggestionsRequestHandler(
-          config$,
-          mockEndpointContext
-        );
-      });
-
-      it('should use default events index pattern', async () => {
-        applyActionsEsSearchMock(mockScopedEsClient.asInternalUser);
-
-        const mockContext = requestContextMock.convertContext(
-          createRouteHandlerContext(mockScopedEsClient, mockSavedObjectClient)
-        );
-
-        const fieldName = 'process.id';
-        const mockRequest = httpServerMock.createKibanaRequest<
-          TypeOf<typeof EndpointSuggestionsSchema.params>,
-          never,
-          never
-        >({
-          params: { suggestion_type: 'eventFilters' },
-          body: {
-            field: 'process.id',
-            query: 'test-query',
-            filters: [{ term: { 'test.field': 'test-value' } }],
-            fieldMeta: 'test-field-meta',
-          },
-        });
-
-        await suggestionsRouteHandler(mockContext, mockRequest, mockResponse);
-
-        expect(termsEnumSuggestionsMock).toHaveBeenNthCalledWith(
-          1,
-          expect.any(Object),
-          expect.any(Object),
-          expect.any(Object),
-          eventsIndexPattern,
-          fieldName,
-          'test-query',
-          [{ term: { 'test.field': 'test-value' } }],
-          'test-field-meta',
-          expect.any(Object)
-        );
-
-        expect(mockResponse.ok).toHaveBeenCalled();
-        expect(buildIndexNameWithNamespaceMock).not.toHaveBeenCalled();
-      });
-    });
-
     describe('when space awareness feature is enabled', () => {
       beforeEach(() => {
         mockEndpointContext.experimentalFeatures = {
           ...mockEndpointContext.experimentalFeatures,
-          endpointManagementSpaceAwarenessEnabled: true,
         };
         suggestionsRouteHandler = getEndpointSuggestionsRequestHandler(
           config$,
@@ -350,53 +294,6 @@ describe('when calling the Suggestions route handler', () => {
       });
     });
 
-    it('should call service using event filters type from request', async () => {
-      // Set up context without space awareness for this legacy test
-      mockEndpointContext.experimentalFeatures = {
-        ...mockEndpointContext.experimentalFeatures,
-        endpointManagementSpaceAwarenessEnabled: false,
-      };
-      suggestionsRouteHandler = getEndpointSuggestionsRequestHandler(config$, mockEndpointContext);
-
-      applyActionsEsSearchMock(mockScopedEsClient.asInternalUser);
-
-      const mockContext = requestContextMock.convertContext(
-        createRouteHandlerContext(mockScopedEsClient, mockSavedObjectClient)
-      );
-
-      const fieldName = 'process.id';
-      const mockRequest = httpServerMock.createKibanaRequest<
-        TypeOf<typeof EndpointSuggestionsSchema.params>,
-        never,
-        never
-      >({
-        params: { suggestion_type: 'eventFilters' },
-        body: {
-          field: 'process.id',
-          query: 'test-query',
-          filters: [{ term: { 'test.field': 'test-value' } }],
-          fieldMeta: 'test-field-meta',
-        },
-      });
-
-      await suggestionsRouteHandler(mockContext, mockRequest, mockResponse);
-
-      expect(termsEnumSuggestionsMock).toHaveBeenNthCalledWith(
-        1,
-        expect.any(Object),
-        expect.any(Object),
-        expect.any(Object),
-        eventsIndexPattern,
-        fieldName,
-        'test-query',
-        [{ term: { 'test.field': 'test-value' } }],
-        'test-field-meta',
-        expect.any(Object)
-      );
-
-      expect(mockResponse.ok).toHaveBeenCalled();
-    });
-
     describe('when suggestion_type is endpoints', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let mockFleetServices: any;
@@ -418,190 +315,10 @@ describe('when calling the Suggestions route handler', () => {
         applyActionsEsSearchMock(mockScopedEsClient.asInternalUser);
       });
 
-      describe('when space awareness is disabled', () => {
-        beforeEach(() => {
-          mockEndpointContext.experimentalFeatures = {
-            ...mockEndpointContext.experimentalFeatures,
-            endpointManagementSpaceAwarenessEnabled: false,
-          };
-          suggestionsRouteHandler = getEndpointSuggestionsRequestHandler(
-            config$,
-            mockEndpointContext
-          );
-        });
-
-        it('should use metadata united index and call termsAggSuggestions without agent policy filters', async () => {
-          const mockPackagePolicies = [{ policy_ids: ['policy-1', 'policy-2'] }];
-          const mockAsyncIterable = {
-            async *[Symbol.asyncIterator]() {
-              yield mockPackagePolicies;
-            },
-          };
-          mockFleetServices.packagePolicy.fetchAllItems.mockResolvedValue(mockAsyncIterable);
-
-          const mockContext = requestContextMock.convertContext(
-            createRouteHandlerContext(mockScopedEsClient, mockSavedObjectClient)
-          );
-
-          mockContext.securitySolution = mockSecuritySolutionContext;
-
-          const fieldName = 'united.agent.policy_id';
-          const mockRequest = httpServerMock.createKibanaRequest<
-            TypeOf<typeof EndpointSuggestionsSchema.params>,
-            never,
-            never
-          >({
-            params: { suggestion_type: 'endpoints' },
-            body: {
-              field: fieldName,
-              query: 'test-query',
-              filters: [{ term: { 'some.field': 'some-value' } }],
-              fieldMeta: 'test-field-meta',
-            },
-          });
-
-          await suggestionsRouteHandler(mockContext, mockRequest, mockResponse);
-
-          // Should call fleet services when space awareness is disabled but with different parameters
-          expect(mockFleetServices.packagePolicy.fetchAllItems).toHaveBeenCalledWith(
-            mockSavedObjectClient,
-            {
-              kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:endpoint`,
-              spaceIds: ['*'],
-            }
-          );
-
-          const expectedFilters = [
-            { term: { 'some.field': 'some-value' } },
-            {
-              bool: {
-                must_not: {
-                  terms: {
-                    'agent.id': [
-                      '00000000-0000-0000-0000-000000000000',
-                      '11111111-1111-1111-1111-111111111111',
-                    ],
-                  },
-                },
-                filter: [
-                  { exists: { field: 'united.endpoint.agent.id' } },
-                  { exists: { field: 'united.agent.agent.id' } },
-                  {
-                    term: {
-                      'united.agent.active': {
-                        value: true,
-                      },
-                    },
-                  },
-                  {
-                    terms: {
-                      'united.agent.policy_id': ['policy-1', 'policy-2'],
-                    },
-                  },
-                ],
-              },
-            },
-          ];
-
-          expect(termsAggSuggestionsMock).toHaveBeenCalledWith(
-            expect.any(Object), // config
-            expect.any(Object), // savedObjects.client
-            expect.any(Object), // elasticsearch.client.asInternalUser
-            METADATA_UNITED_INDEX,
-            fieldName,
-            'test-query',
-            expectedFilters,
-            'test-field-meta',
-            expect.any(Object) // abortSignal
-          );
-
-          expect(mockResponse.ok).toHaveBeenCalled();
-        });
-
-        it('should handle requests without additional filters when space awareness is disabled', async () => {
-          const mockPackagePolicies = [{ policy_ids: ['policy-3'] }];
-          const mockAsyncIterable = {
-            async *[Symbol.asyncIterator]() {
-              yield mockPackagePolicies;
-            },
-          };
-          mockFleetServices.packagePolicy.fetchAllItems.mockResolvedValue(mockAsyncIterable);
-
-          const mockContext = requestContextMock.convertContext(
-            createRouteHandlerContext(mockScopedEsClient, mockSavedObjectClient)
-          );
-
-          mockContext.securitySolution = mockSecuritySolutionContext;
-
-          const fieldName = 'united.agent.policy_id';
-          const mockRequest = httpServerMock.createKibanaRequest<
-            TypeOf<typeof EndpointSuggestionsSchema.params>,
-            never,
-            never
-          >({
-            params: { suggestion_type: 'endpoints' },
-            body: {
-              field: fieldName,
-              query: 'test-query',
-              filters: [],
-              fieldMeta: 'test-field-meta',
-            },
-          });
-
-          await suggestionsRouteHandler(mockContext, mockRequest, mockResponse);
-
-          const expectedFilters = [
-            {
-              bool: {
-                must_not: {
-                  terms: {
-                    'agent.id': [
-                      '00000000-0000-0000-0000-000000000000',
-                      '11111111-1111-1111-1111-111111111111',
-                    ],
-                  },
-                },
-                filter: [
-                  { exists: { field: 'united.endpoint.agent.id' } },
-                  { exists: { field: 'united.agent.agent.id' } },
-                  {
-                    term: {
-                      'united.agent.active': {
-                        value: true,
-                      },
-                    },
-                  },
-                  {
-                    terms: {
-                      'united.agent.policy_id': ['policy-3'],
-                    },
-                  },
-                ],
-              },
-            },
-          ];
-
-          expect(termsAggSuggestionsMock).toHaveBeenCalledWith(
-            expect.any(Object),
-            expect.any(Object),
-            expect.any(Object),
-            METADATA_UNITED_INDEX,
-            fieldName,
-            'test-query',
-            expectedFilters,
-            'test-field-meta',
-            expect.any(Object)
-          );
-
-          expect(mockResponse.ok).toHaveBeenCalled();
-        });
-      });
-
       describe('when space awareness is enabled', () => {
         beforeEach(() => {
           mockEndpointContext.experimentalFeatures = {
             ...mockEndpointContext.experimentalFeatures,
-            endpointManagementSpaceAwarenessEnabled: true,
           };
           suggestionsRouteHandler = getEndpointSuggestionsRequestHandler(
             config$,
@@ -907,37 +624,6 @@ describe('when calling the Suggestions route handler', () => {
 
           expect(mockResponse.ok).toHaveBeenCalled();
         });
-      });
-    });
-
-    it('should respond with bad request if wrong suggestion type', async () => {
-      // Set up context without space awareness for this test
-      mockEndpointContext.experimentalFeatures = {
-        ...mockEndpointContext.experimentalFeatures,
-        endpointManagementSpaceAwarenessEnabled: false,
-      };
-      suggestionsRouteHandler = getEndpointSuggestionsRequestHandler(config$, mockEndpointContext);
-
-      applyActionsEsSearchMock(
-        mockScopedEsClient.asInternalUser,
-        new EndpointActionGenerator().toEsSearchResponse([])
-      );
-
-      const mockContext = requestContextMock.convertContext(
-        createRouteHandlerContext(mockScopedEsClient, mockSavedObjectClient)
-      );
-      const mockRequest = httpServerMock.createKibanaRequest<
-        TypeOf<typeof EndpointSuggestionsSchema.params>,
-        never,
-        never
-      >({
-        params: { suggestion_type: 'any' },
-      });
-
-      await suggestionsRouteHandler(mockContext, mockRequest, mockResponse);
-
-      expect(mockResponse.badRequest).toHaveBeenCalledWith({
-        body: 'Invalid suggestion_type: any',
       });
     });
 

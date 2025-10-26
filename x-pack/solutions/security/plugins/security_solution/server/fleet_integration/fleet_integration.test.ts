@@ -1530,9 +1530,6 @@ describe('Fleet integrations', () => {
 
     describe('and with space awareness feature enabled', () => {
       beforeEach(() => {
-        // @ts-expect-error
-        endpointServicesMock.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = true;
-
         (
           endpointServicesMock.getInternalFleetServices().isEndpointPackageInstalled as jest.Mock
         ).mockResolvedValue(true);
@@ -1554,14 +1551,6 @@ describe('Fleet integrations', () => {
               success: true,
             };
           });
-      });
-
-      it('should not update response actions if spaces feature is disabled', async () => {
-        // @ts-expect-error
-        endpointServicesMock.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = false;
-        await invokeDeleteCallback();
-
-        expect(endpointServicesMock.getInternalEsClient().updateByQuery).not.toHaveBeenCalled();
       });
 
       it('should check only policies whose package.name matches a package that supports response actions', async () => {
