@@ -17,7 +17,7 @@ export const getIndicesForProductNames = (
 ): string | string[] => {
   if (!productNames || !productNames.length) {
     return Object.values(DocumentationProduct).map((productName: ProductName) =>
-      getProductDocIndexName(productName as ProductName, inferenceId)
+      getProductDocIndexName(productName, inferenceId)
     );
   }
   return productNames.map((productName: ProductName) =>
