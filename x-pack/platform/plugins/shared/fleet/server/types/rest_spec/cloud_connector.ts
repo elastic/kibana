@@ -7,6 +7,55 @@
 
 import { schema } from '@kbn/config-schema';
 
+// Schema for CloudConnectorSecretReference
+const CloudConnectorSecretReferenceSchema = schema.object({
+  isSecretRef: schema.boolean(),
+  id: schema.string(),
+});
+
+// Schema for CloudConnectorVar (text type)
+const CloudConnectorVarSchema = schema.object({
+  type: schema.maybe(schema.literal('text')),
+  value: schema.string(),
+});
+
+// Schema for CloudConnectorSecretVar (password type with secret reference)
+const CloudConnectorSecretVarSchema = schema.object({
+  type: schema.maybe(schema.literal('password')),
+  value: CloudConnectorSecretReferenceSchema,
+  frozen: schema.maybe(schema.boolean()),
+});
+
+// Schema for Azure credentials that can be either a secret reference or a cloud connector ID string
+// TODO: we may not need schema.string() refactor this when the connector name is implemented https://github.com/elastic/security-team/issues/14283
+const AzureCredentialsVarSchema = schema.object({
+  type: schema.maybe(schema.literal('password')),
+  value: schema.oneOf([CloudConnectorSecretReferenceSchema, schema.string()]),
+  frozen: schema.maybe(schema.boolean()),
+});
+
+// Schema for AWS Cloud Connector Vars
+
+const AwsCloudConnectorVarsSchema = schema.object({
+  role_arn: CloudConnectorVarSchema,
+  external_id: CloudConnectorSecretVarSchema,
+});
+
+// Schema for Azure Cloud Connector Vars
+const AzureCloudConnectorVarsSchema = schema.object({
+  tenant_id: CloudConnectorSecretVarSchema,
+  client_id: CloudConnectorSecretVarSchema,
+  azure_credentials_cloud_connector_id: AzureCredentialsVarSchema,
+});
+
+// Conditional CloudConnectorVars schema based on cloudProvider
+const CloudConnectorVarsSchema = schema.conditional(
+  schema.siblingRef('cloudProvider'),
+  'azure',
+  AzureCloudConnectorVarsSchema,
+  AwsCloudConnectorVarsSchema
+);
+
 export const CreateCloudConnectorRequestSchema = {
   body: schema.object({
     name: schema.string({
@@ -18,27 +67,15 @@ export const CreateCloudConnectorRequestSchema = {
       schema.literal('azure'),
       schema.literal('gcp'),
     ]),
-    vars: schema.recordOf(
-      schema.string({ minLength: 1, maxLength: 100 }),
-      schema.oneOf([
-        schema.string({ maxLength: 1000 }),
-        schema.number(),
-        schema.boolean(),
-        schema.object({
-          type: schema.string({ maxLength: 50 }),
-          value: schema.oneOf([
-            schema.string({ maxLength: 1000 }),
-            schema.object({
-              isSecretRef: schema.boolean(),
-              id: schema.string({ maxLength: 255 }),
-            }),
-          ]),
-          frozen: schema.maybe(schema.boolean()),
-        }),
-      ])
-    ),
+    vars: CloudConnectorVarsSchema,
   }),
 };
+
+// Schema for response vars (union type since we're returning, not validating input)
+const CloudConnectorResponseVarsSchema = schema.oneOf([
+  AwsCloudConnectorVarsSchema,
+  AzureCloudConnectorVarsSchema,
+]);
 
 export const CreateCloudConnectorResponseSchema = schema.object({
   item: schema.object({
@@ -46,7 +83,7 @@ export const CreateCloudConnectorResponseSchema = schema.object({
     name: schema.string(),
     namespace: schema.maybe(schema.string()),
     cloudProvider: schema.string(),
-    vars: schema.recordOf(schema.string(), schema.any()),
+    vars: CloudConnectorResponseVarsSchema,
     packagePolicyCount: schema.number(),
     created_at: schema.string(),
     updated_at: schema.string(),
@@ -57,9 +94,7 @@ export const GetCloudConnectorsRequestSchema = {
   query: schema.object({
     page: schema.maybe(schema.string()),
     perPage: schema.maybe(schema.string()),
-    cloudProvider: schema.maybe(
-      schema.oneOf([schema.literal('aws'), schema.literal('azure'), schema.literal('gcp')])
-    ),
+    cloudProvider: schema.maybe(schema.oneOf([schema.literal('aws'), schema.literal('azure')])),
   }),
 };
 
@@ -70,7 +105,7 @@ export const GetCloudConnectorsResponseSchema = schema.object({
       name: schema.string(),
       namespace: schema.maybe(schema.string()),
       cloudProvider: schema.string(),
-      vars: schema.recordOf(schema.string(), schema.any()),
+      vars: CloudConnectorResponseVarsSchema,
       packagePolicyCount: schema.number(),
       created_at: schema.string(),
       updated_at: schema.string(),
@@ -90,7 +125,7 @@ export const GetCloudConnectorResponseSchema = schema.object({
     name: schema.string(),
     namespace: schema.maybe(schema.string()),
     cloudProvider: schema.string(),
-    vars: schema.recordOf(schema.string(), schema.any()),
+    vars: CloudConnectorResponseVarsSchema,
     packagePolicyCount: schema.number(),
     created_at: schema.string(),
     updated_at: schema.string(),
@@ -121,27 +156,8 @@ export const UpdateCloudConnectorRequestSchema = {
         maxLength: 255,
       })
     ),
-    vars: schema.maybe(
-      schema.recordOf(
-        schema.string({ minLength: 1, maxLength: 100 }),
-        schema.oneOf([
-          schema.string({ maxLength: 1000 }),
-          schema.number(),
-          schema.boolean(),
-          schema.object({
-            type: schema.string({ maxLength: 50 }),
-            value: schema.oneOf([
-              schema.string({ maxLength: 1000 }),
-              schema.object({
-                isSecretRef: schema.boolean(),
-                id: schema.string({ maxLength: 255 }),
-              }),
-            ]),
-            frozen: schema.maybe(schema.boolean()),
-          }),
-        ])
-      )
-    ),
+    // For updates, we accept either AWS or Azure vars structure
+    vars: schema.maybe(CloudConnectorResponseVarsSchema),
   }),
 };
 
@@ -151,7 +167,7 @@ export const UpdateCloudConnectorResponseSchema = schema.object({
     name: schema.string(),
     namespace: schema.maybe(schema.string()),
     cloudProvider: schema.string(),
-    vars: schema.recordOf(schema.string(), schema.any()),
+    vars: CloudConnectorResponseVarsSchema,
     packagePolicyCount: schema.number(),
     created_at: schema.string(),
     updated_at: schema.string(),

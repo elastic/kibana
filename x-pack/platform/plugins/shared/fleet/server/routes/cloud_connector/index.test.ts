@@ -105,7 +105,10 @@ describe('Cloud Connector API', () => {
           id: 'test-id',
           name: 'test-connector',
           cloudProvider: 'aws' as CloudProvider,
-          vars: {},
+          vars: {
+            role_arn: { value: 'arn:aws:iam::123456789012:role/test', type: 'text' },
+            external_id: { value: { id: 'test-secret-id', isSecretRef: true }, type: 'password' },
+          },
           packagePolicyCount: 1,
           created_at: '2023-01-01T00:00:00.000Z',
           updated_at: '2023-01-01T00:00:00.000Z',
@@ -153,7 +156,10 @@ describe('Cloud Connector API', () => {
             id: 'test-id',
             name: 'test-connector',
             cloudProvider: 'aws' as CloudProvider,
-            vars: {},
+            vars: {
+              role_arn: { value: 'arn:aws:iam::123456789012:role/test', type: 'text' },
+              external_id: { value: { id: 'test-secret-id', isSecretRef: true }, type: 'password' },
+            },
             packagePolicyCount: 1,
             created_at: '2023-01-01T00:00:00.000Z',
             updated_at: '2023-01-01T00:00:00.000Z',

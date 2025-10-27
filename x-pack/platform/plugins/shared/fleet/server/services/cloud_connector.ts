@@ -84,11 +84,14 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         );
       }
 
+      // TODO: refactor this to remove the string type when the connector name is implemented https://github.com/elastic/security-team/issues/14283
       let name = cloudConnector.name;
       if (cloudConnector.cloudProvider === 'aws' && isAwsCloudConnectorVars(vars)) {
         name = vars.role_arn.value;
       } else if (cloudConnector.cloudProvider === 'azure' && isAzureCloudConnectorVars(vars)) {
-        name = vars.azure_credentials_cloud_connector_id.value.id;
+        // azure_credentials_cloud_connector_id.value can be either a CloudConnectorSecretReference or a string
+        const azureCredValue = vars.azure_credentials_cloud_connector_id.value;
+        name = typeof azureCredValue === 'string' ? azureCredValue : azureCredValue.id;
       }
 
       // Check if space awareness is enabled for namespace handling
@@ -386,7 +389,20 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         );
       }
 
-      if (!azureCredentials?.value?.id || !azureCredentials?.value?.isSecretRef) {
+      
+      // azure_credentials_cloud_connector_id can be either:
+      // 1. A CloudConnectorSecretReference (with id and isSecretRef)
+      // 2. A plain string (cloud connector ID for reuse)
+      const credValue = azureCredentials?.value;
+      const isSecretRef =
+        typeof credValue === 'object' &&
+        credValue !== null &&
+        'id' in credValue &&
+        'isSecretRef' in credValue;
+      const hasValidSecretRef = isSecretRef && credValue.id && credValue.isSecretRef;
+      const hasValidStringValue = typeof credValue === 'string' && credValue.length > 0;
+
+      if (!hasValidSecretRef && !hasValidStringValue) {
         logger.error(
           `Package policy must contain valid ${AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID} secret reference`
         );
