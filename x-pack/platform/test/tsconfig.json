@@ -172,5 +172,6 @@
     "@kbn/field-formats-common",
     "@kbn/reporting-test-routes",
     "@kbn/visualizations-common",
+    "@kbn/alerting-types",
   ]
 }
