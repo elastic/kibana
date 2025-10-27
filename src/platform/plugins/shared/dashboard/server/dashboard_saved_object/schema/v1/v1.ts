@@ -25,9 +25,11 @@ export const dashboardAttributesSchema = schema.object(
     description: schema.string({ defaultValue: '' }),
 
     // Search
-    kibanaSavedObjectMeta: schema.object({
-      searchSourceJSON: schema.maybe(schema.string()),
-    }),
+    kibanaSavedObjectMeta: schema.maybe(
+      schema.object({
+        searchSourceJSON: schema.maybe(schema.string()),
+      })
+    ),
 
     // Time
     timeRestore: schema.maybe(schema.boolean()),
@@ -44,7 +46,7 @@ export const dashboardAttributesSchema = schema.object(
 
     // Dashboard Content
     controlGroupInput: schema.maybe(controlGroupInputSchema),
-    panelsJSON: schema.string({ defaultValue: '[]' }),
+    panelsJSON: schema.maybe(schema.string({ defaultValue: '[]' })),
     optionsJSON: schema.maybe(schema.string()),
 
     // Legacy

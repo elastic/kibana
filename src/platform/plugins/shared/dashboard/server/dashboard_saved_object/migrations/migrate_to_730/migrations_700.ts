@@ -16,7 +16,7 @@ import type { DashboardDoc700To720 } from './types';
 
 function migrateIndexPattern(doc: DashboardDoc700To720) {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
-  if (typeof searchSourceJSON !== 'string') {
+  if (!doc.attributes.kibanaSavedObjectMeta || typeof searchSourceJSON !== 'string') {
     return;
   }
   let searchSource;

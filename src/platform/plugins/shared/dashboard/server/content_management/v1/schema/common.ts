@@ -159,9 +159,11 @@ export function getDashboardStateSchema() {
     description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
     filters: schema.maybe(schema.arrayOf(filterSchema)),
     options: schema.maybe(optionsSchema),
-    panels: schema.arrayOf(schema.oneOf([getPanelSchema(), getSectionSchema()]), {
-      defaultValue: [],
-    }),
+    panels: schema.maybe(
+      schema.arrayOf(schema.oneOf([getPanelSchema(), getSectionSchema()]), {
+        defaultValue: [],
+      })
+    ),
     query: schema.maybe(querySchema),
     refreshInterval: schema.maybe(refreshIntervalSchema),
     tags: schema.maybe(

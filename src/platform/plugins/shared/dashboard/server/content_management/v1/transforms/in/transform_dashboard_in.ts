@@ -69,14 +69,14 @@ export const transformDashboardIn = ({
       ...(controlGroupInput && {
         controlGroupInput: transformControlGroupIn(controlGroupInput),
       }),
-      optionsJSON: JSON.stringify(options ?? {}),
+      ...(options && { optionsJSON: JSON.stringify(options) }),
       ...(panels && {
         panelsJSON,
       }),
       ...(sections?.length && { sections }),
       timeRestore,
       ...(timeRange && timeRestore && { timeFrom: timeRange.from, timeTo: timeRange.to }),
-      kibanaSavedObjectMeta: { searchSourceJSON },
+      ...((filters || query) && { kibanaSavedObjectMeta: { searchSourceJSON } }),
     };
     return {
       attributes,

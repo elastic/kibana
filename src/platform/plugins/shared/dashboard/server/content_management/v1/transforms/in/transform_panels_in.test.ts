@@ -55,7 +55,8 @@ describe('transformPanelsIn', () => {
       },
     ];
     const results = transformPanelsIn(panels);
-    expect(JSON.parse(results.panelsJSON)).toMatchInlineSnapshot(`
+    expect(results.panelsJSON).not.toBeUndefined();
+    expect(JSON.parse(results.panelsJSON!)).toMatchInlineSnapshot(`
       Array [
         Object {
           "embeddableConfig": Object {
@@ -154,7 +155,8 @@ describe('transformPanelsIn', () => {
         },
       ];
       const results = transformPanelsIn(panels);
-      expect(JSON.parse(results.panelsJSON)[0].embeddableConfig).toMatchInlineSnapshot(`
+      expect(results.panelsJSON).not.toBeUndefined();
+      expect(JSON.parse(results.panelsJSON!)[0].embeddableConfig).toMatchInlineSnapshot(`
         Object {
           "lessThan10": 7,
         }
