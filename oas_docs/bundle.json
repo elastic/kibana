@@ -27070,7 +27070,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "OK"
           },
           "400": {
             "content": {
@@ -27100,7 +27101,8 @@
                   "type": "object"
                 }
               }
-            }
+            },
+            "description": "Bad Request"
           }
         },
         "summary": "Rollback a package to previous version",
