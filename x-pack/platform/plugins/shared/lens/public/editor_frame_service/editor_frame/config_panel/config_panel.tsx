@@ -265,8 +265,8 @@ export function LayerPanels(
     LayerPanelProps['registerLibraryAnnotationGroup']
   >((groupInfo) => dispatchLens(registerLibraryAnnotationGroup(groupInfo)), [dispatchLens]);
 
-  const layerConfigs = useMemo(() => {
-    return layerIds.map((layerId) => ({
+  const layerConfig = useMemo(() => {
+    const layerConfigs = layerIds.map((layerId) => ({
       layerId,
       layerType: activeVisualization.getLayerType(layerId, visualization.state),
       config: activeVisualization.getConfiguration({
@@ -275,12 +275,9 @@ export function LayerPanels(
         state: visualization.state,
       }),
     }));
-  }, [activeVisualization, layerIds, props.framePublicAPI, visualization.state]);
 
-  const layerConfig = useMemo(
-    () => layerConfigs.find((l) => l.layerId === selectedLayerId),
-    [layerConfigs, selectedLayerId]
-  );
+    return layerConfigs.find((l) => l.layerId === selectedLayerId);
+  }, [activeVisualization, layerIds, props.framePublicAPI, selectedLayerId, visualization.state]);
 
   return (
     <EuiForm
