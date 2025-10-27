@@ -20,6 +20,7 @@ export async function getPolicyHover(
   source: ESQLSource,
   callbacks?: ESQLCallbacks
 ): Promise<Array<{ value: string }>> {
+  // Use policy name as cache key
   const cacheKey = source.name;
   const cached = fromCache(cacheKey);
   if (cached) {

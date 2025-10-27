@@ -56,12 +56,6 @@ export async function getFunctionArgumentHover(
   offset: number,
   resourceRetriever?: ESQLCallbacks
 ): Promise<Array<{ value: string }>> {
-  const { getColumnMap } = getColumnsByTypeRetriever(
-    getQueryForFields(query, root),
-    query,
-    resourceRetriever
-  );
-
   const fnDefinition = getFunctionDefinition(fnNode.name);
   if (!fnDefinition) {
     return [];
@@ -73,11 +67,18 @@ export async function getFunctionArgumentHover(
   }
 
   const argIdentifier = 'name' in argumentAtOffset ? argumentAtOffset.name : 'unknown';
+  // Use function name + argument identifier as cache key
   const cacheKey = `${fnNode.name}:${argIdentifier}`;
   const cached = fromCache(cacheKey);
   if (cached) {
     return cached;
   }
+
+  const { getColumnMap } = getColumnsByTypeRetriever(
+    getQueryForFields(query, root),
+    query,
+    resourceRetriever
+  );
 
   const columnsMap = await getColumnMap();
 
