@@ -11,7 +11,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { AlertsTableProps } from '@kbn/response-ops-alerts-table/types';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { PERSISTED_TABLE_CONFIG_KEY_PREFIX } from '../constants';
 import { EmbeddableAlertsTable } from './embeddable_alerts_table';
 import type { RuleTypeSolution } from '@kbn/alerting-types';
