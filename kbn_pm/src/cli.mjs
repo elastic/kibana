@@ -24,9 +24,8 @@ import { getCmd } from './commands/index.mjs';
 import { Log } from './lib/log.mjs';
 import External from './lib/external_packages.js';
 
-const BIG_CHANGES = 777;
 
-console.log({ BIG_CHANGES });
+
 
 const start = Date.now();
 const args = new Args(process.argv.slice(2), []);
