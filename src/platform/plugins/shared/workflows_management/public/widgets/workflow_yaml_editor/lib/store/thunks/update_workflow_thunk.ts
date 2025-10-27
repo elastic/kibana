@@ -41,7 +41,7 @@ export const updateWorkflowThunk = createAsyncThunk<
         body: JSON.stringify(workflow),
       });
 
-      // Invalidate relevant queries to refresh the UI
+      // Invalidate relevant queries from react-query cache
       queryClient.invalidateQueries({ queryKey: ['workflows'] });
       queryClient.invalidateQueries({ queryKey: ['workflows', id] });
 

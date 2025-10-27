@@ -53,8 +53,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
   const workflowYaml = useSelector(selectYamlString) ?? '';
   const workflowDefinition = useSelector(selectWorkflowDefinition);
 
-  const { activeTab, selectedExecutionId, selectedStepId, setSelectedExecution } =
-    useWorkflowUrlState();
+  const { activeTab, selectedExecutionId, setSelectedExecution } = useWorkflowUrlState();
 
   const { data: execution } = useWorkflowExecution(selectedExecutionId ?? null);
 
@@ -115,7 +114,6 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
         <EuiFlexItem css={styles.yamlEditor}>
           <React.Suspense fallback={<EuiLoadingSpinner />}>
             <WorkflowYAMLEditor
-              highlightStep={selectedStepId}
               stepExecutions={execution?.stepExecutions}
               workflowYaml={overrideYamlValue ?? workflowYaml}
               readOnly={activeTab === 'executions'}

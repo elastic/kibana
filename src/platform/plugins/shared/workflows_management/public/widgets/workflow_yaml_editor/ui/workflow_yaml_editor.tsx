@@ -117,7 +117,6 @@ const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
 export interface WorkflowYAMLEditorProps {
   workflowYaml: string;
   readOnly?: boolean;
-  highlightStep?: string;
   stepExecutions?: WorkflowStepExecutionDto[];
   'data-testid'?: string;
   highlightDiff?: boolean;
@@ -132,7 +131,6 @@ export interface WorkflowYAMLEditorProps {
 export const WorkflowYAMLEditor = ({
   workflowYaml,
   readOnly = false,
-  highlightStep,
   stepExecutions,
   highlightDiff = false,
   onMount,

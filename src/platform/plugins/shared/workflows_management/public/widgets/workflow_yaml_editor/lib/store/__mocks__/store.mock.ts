@@ -9,23 +9,12 @@
 
 import { createStartServicesMock } from '../../../../../mocks';
 import type { WorkflowsServices } from '../../../../../types';
-import { createWorkflowsStore } from '../store';
+import { createWorkflowDetailStore } from '../store';
 import type { RootState } from '../types';
-
-// Mock the slice actions to return proper action objects
-jest.mock('../slice', () => ({
-  ...jest.requireActual('../slice'),
-  setWorkflow: jest.fn((payload) => ({ type: 'detail/setWorkflow', payload })),
-  updateWorkflow: jest.fn((payload) => ({ type: 'detail/updateWorkflow', payload })),
-}));
-
-// Export the mocks for use in tests
-export const mockSetWorkflow = jest.requireMock('../slice').setWorkflow;
-export const mockUpdateWorkflow = jest.requireMock('../slice').updateWorkflow;
 
 export const createMockStore = (services?: WorkflowsServices) => {
   const mockServices = services || createStartServicesMock();
-  const store = createWorkflowsStore(mockServices);
+  const store = createWorkflowDetailStore(mockServices);
 
   // Attach services to the store for easy access in tests
   (store as any).mockServices = mockServices;

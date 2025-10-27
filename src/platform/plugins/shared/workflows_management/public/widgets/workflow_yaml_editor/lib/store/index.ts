@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 // Re-export everything from the individual modules
-export * from './types';
+export type * from './types';
 // Action creators
 export * from './slice';
 // Store
@@ -19,4 +19,4 @@ export * from './selectors';
 // Middleware (if needed for custom store setup)
 export { workflowComputationMiddleware } from './middleware';
 export type { WorkflowLookup, StepInfo } from './utils/build_workflow_lookup';
-export { WorkflowEditorStoreProvider } from './provider';
+export { WorkflowDetailStoreProvider } from './provider';

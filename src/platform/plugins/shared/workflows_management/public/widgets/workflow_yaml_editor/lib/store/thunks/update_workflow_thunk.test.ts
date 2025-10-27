@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EsWorkflow } from '@kbn/workflows';
+import type { EsWorkflow, WorkflowDetailDto } from '@kbn/workflows';
 
 import { updateWorkflowThunk } from './update_workflow_thunk';
 import { createMockStore, getMockServices } from '../__mocks__/store.mock';
 import type { MockServices, MockStore } from '../__mocks__/store.mock';
+import { setWorkflow } from '../slice';
 
 // Mock the query client
 jest.mock('../../../../../shared/lib/query_client', () => ({
@@ -19,6 +20,19 @@ jest.mock('../../../../../shared/lib/query_client', () => ({
     invalidateQueries: jest.fn(),
   },
 }));
+// Set up initial state with workflow and yaml
+const mockWorkflow: WorkflowDetailDto = {
+  id: 'test-workflow-1',
+  name: 'Test Workflow',
+  yaml: 'name: Test Workflow\nsteps: []',
+  enabled: true,
+  createdAt: '2023-01-01T00:00:00Z',
+  createdBy: 'user1',
+  lastUpdatedAt: '2023-01-01T00:00:00Z',
+  lastUpdatedBy: 'user1',
+  definition: null,
+  valid: true,
+};
 
 const { queryClient } = jest.requireMock('../../../../../shared/lib/query_client');
 
@@ -31,6 +45,7 @@ describe('updateWorkflowThunk', () => {
 
     store = createMockStore();
     mockServices = getMockServices(store);
+    store.dispatch(setWorkflow(mockWorkflow));
   });
 
   it('should update workflow successfully', async () => {
@@ -41,12 +56,7 @@ describe('updateWorkflowThunk', () => {
 
     mockServices.http.put.mockResolvedValue(undefined);
 
-    const result = await store.dispatch(
-      updateWorkflowThunk({
-        id: 'test-workflow-1',
-        workflow: workflowUpdate,
-      })
-    );
+    const result = await store.dispatch(updateWorkflowThunk({ workflow: workflowUpdate }));
 
     expect(mockServices.http.put).toHaveBeenCalledWith('/api/workflows/test-workflow-1', {
       body: JSON.stringify(workflowUpdate),
@@ -68,19 +78,14 @@ describe('updateWorkflowThunk', () => {
 
     mockServices.http.put.mockResolvedValue(undefined);
 
-    const result = await store.dispatch(
-      updateWorkflowThunk({
-        id: 'test-workflow-2',
-        workflow: workflowUpdate,
-      })
-    );
+    const result = await store.dispatch(updateWorkflowThunk({ workflow: workflowUpdate }));
 
-    expect(mockServices.http.put).toHaveBeenCalledWith('/api/workflows/test-workflow-2', {
+    expect(mockServices.http.put).toHaveBeenCalledWith('/api/workflows/test-workflow-1', {
       body: JSON.stringify(workflowUpdate),
     });
     expect(queryClient.invalidateQueries).toHaveBeenCalledWith({ queryKey: ['workflows'] });
     expect(queryClient.invalidateQueries).toHaveBeenCalledWith({
-      queryKey: ['workflows', 'test-workflow-2'],
+      queryKey: ['workflows', 'test-workflow-1'],
     });
     expect(mockServices.notifications.toasts.addSuccess).toHaveBeenCalledWith('Workflow updated', {
       toastLifeTimeMs: 2000,
@@ -93,19 +98,14 @@ describe('updateWorkflowThunk', () => {
 
     mockServices.http.put.mockResolvedValue(undefined);
 
-    const result = await store.dispatch(
-      updateWorkflowThunk({
-        id: 'test-workflow-3',
-        workflow: workflowUpdate,
-      })
-    );
+    const result = await store.dispatch(updateWorkflowThunk({ workflow: workflowUpdate }));
 
-    expect(mockServices.http.put).toHaveBeenCalledWith('/api/workflows/test-workflow-3', {
+    expect(mockServices.http.put).toHaveBeenCalledWith('/api/workflows/test-workflow-1', {
       body: JSON.stringify(workflowUpdate),
     });
     expect(queryClient.invalidateQueries).toHaveBeenCalledWith({ queryKey: ['workflows'] });
     expect(queryClient.invalidateQueries).toHaveBeenCalledWith({
-      queryKey: ['workflows', 'test-workflow-3'],
+      queryKey: ['workflows', 'test-workflow-1'],
     });
     expect(mockServices.notifications.toasts.addSuccess).toHaveBeenCalledWith('Workflow updated', {
       toastLifeTimeMs: 2000,
@@ -127,7 +127,6 @@ describe('updateWorkflowThunk', () => {
 
     const result = await store.dispatch(
       updateWorkflowThunk({
-        id: 'test-workflow-1',
         workflow: workflowUpdate,
       })
     );
@@ -153,12 +152,7 @@ describe('updateWorkflowThunk', () => {
 
     mockServices.http.put.mockRejectedValue(error);
 
-    const result = await store.dispatch(
-      updateWorkflowThunk({
-        id: 'test-workflow-1',
-        workflow: workflowUpdate,
-      })
-    );
+    const result = await store.dispatch(updateWorkflowThunk({ workflow: workflowUpdate }));
 
     expect(mockServices.notifications.toasts.addError).toHaveBeenCalledWith(
       new Error('Network Error'),
@@ -181,7 +175,6 @@ describe('updateWorkflowThunk', () => {
 
     const result = await store.dispatch(
       updateWorkflowThunk({
-        id: 'test-workflow-1',
         workflow: workflowUpdate,
       })
     );
@@ -206,19 +199,14 @@ describe('updateWorkflowThunk', () => {
 
     mockServices.http.put.mockResolvedValue(undefined);
 
-    const result = await store.dispatch(
-      updateWorkflowThunk({
-        id: 'complex-workflow-1',
-        workflow: workflowUpdate,
-      })
-    );
+    const result = await store.dispatch(updateWorkflowThunk({ workflow: workflowUpdate }));
 
-    expect(mockServices.http.put).toHaveBeenCalledWith('/api/workflows/complex-workflow-1', {
+    expect(mockServices.http.put).toHaveBeenCalledWith('/api/workflows/test-workflow-1', {
       body: JSON.stringify(workflowUpdate),
     });
     expect(queryClient.invalidateQueries).toHaveBeenCalledWith({ queryKey: ['workflows'] });
     expect(queryClient.invalidateQueries).toHaveBeenCalledWith({
-      queryKey: ['workflows', 'complex-workflow-1'],
+      queryKey: ['workflows', 'test-workflow-1'],
     });
     expect(mockServices.notifications.toasts.addSuccess).toHaveBeenCalledWith('Workflow updated', {
       toastLifeTimeMs: 2000,

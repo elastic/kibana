@@ -16,7 +16,7 @@ import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { useCapabilities } from './hooks/use_capabilities';
 import { WorkflowDetailPage } from './pages/workflow_detail';
 import { WorkflowsPage } from './pages/workflows';
-import { WorkflowEditorStoreProvider } from './widgets/workflow_yaml_editor/lib/store/provider';
+import { WorkflowDetailStoreProvider } from './widgets/workflow_yaml_editor/lib/store/provider';
 import { AccessDenied } from '../common/components/access_denied';
 
 const ReadWorkflowPermissionText = i18n.translate(
@@ -39,9 +39,9 @@ WorkflowsReadPermissionsWrapper.displayName = 'WorkflowsReadPermissionsWrapper';
 type WorkflowDetailPageRouteProps = RouteComponentProps<{ id?: string }>;
 const WorkflowDetailPageRoute = React.memo<WorkflowDetailPageRouteProps>((props) => {
   return (
-    <WorkflowEditorStoreProvider>
+    <WorkflowDetailStoreProvider>
       <WorkflowDetailPage id={props.match.params.id} />
-    </WorkflowEditorStoreProvider>
+    </WorkflowDetailStoreProvider>
   );
 });
 WorkflowDetailPageRoute.displayName = 'WorkflowDetailPageRoute';
