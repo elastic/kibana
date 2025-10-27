@@ -89,6 +89,7 @@
     "@kbn/ai-assistant-connector-selector-action",
     "@kbn/elastic-assistant",
     "@kbn/react-kibana-mount",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/maps-plugin"
   ]
 }
