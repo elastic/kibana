@@ -39,6 +39,7 @@ export class WorkflowTemplatingEngine {
     let resolvedExpression = template.trim();
     const openExpressionIndex = resolvedExpression.indexOf('{{');
     const closeExpressionIndex = resolvedExpression.lastIndexOf('}}');
+
     if (openExpressionIndex !== -1 && closeExpressionIndex !== -1) {
       resolvedExpression = resolvedExpression
         .substring(openExpressionIndex + 2, closeExpressionIndex)
