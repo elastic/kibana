@@ -242,9 +242,13 @@ class Package {
       group = this.manifest.group ?? 'common';
       // if the group is 'private-only', enforce it
       // KIBANA_SOLUTIONS - List of Kibana solutions
-      visibility = Boolean(KIBANA_SOLUTIONS.find((solution) => solution === group))
-        ? 'private'
-        : this.manifest.visibility ?? 'shared';
+      const isSolution = Boolean(KIBANA_SOLUTIONS.find((solution) => solution === group));
+      if (!isSolution && group !== 'platform') {
+        throw new Error(
+          `Detected unknown group: ${group}, this module's definition of KIBANA_SOLUTIONS is probably outdated.`
+        );
+      }
+      visibility = isSolution ? 'private' : this.manifest.visibility ?? 'shared';
     }
 
     return { group, visibility };
