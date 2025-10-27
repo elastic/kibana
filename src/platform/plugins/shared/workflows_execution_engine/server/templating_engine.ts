@@ -29,20 +29,6 @@ export class WorkflowTemplatingEngine {
         return value;
       }
     });
-
-    this.engine.registerFilter('to_key_value', (obj: Record<string, unknown>) => {
-      if (typeof obj !== 'object' || obj === null) {
-        return [];
-      }
-      return Object.entries(obj).map(([key, value]) => ({ key, value }));
-    });
-
-    this.engine.registerFilter('length', (input: unknown) => {
-      if (typeof input === 'string' || Array.isArray(input)) {
-        return input.length;
-      }
-      return null;
-    });
   }
 
   public render<T>(obj: T, context: Record<string, unknown>): T {

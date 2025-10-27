@@ -334,19 +334,5 @@ describe('WorkflowTemplatingEngine', () => {
         expect(actual).toEqual('foo|bar|dak');
       });
     });
-
-    describe('object manipulation', () => {
-      it('should evaluate to key value array', () => {
-        const template = `{{ my_object | to_key_value: "foo" }}`;
-        const actual = templatingEngine.evaluateExpression(template, {
-          my_object: { foo: 'bar', dak: 'baz', zap: 'zop' },
-        });
-        expect(actual).toEqual([
-          { key: 'foo', value: 'bar' },
-          { key: 'dak', value: 'baz' },
-          { key: 'zap', value: 'zop' },
-        ]);
-      });
-    });
   });
 });
