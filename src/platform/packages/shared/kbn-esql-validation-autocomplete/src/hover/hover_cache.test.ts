@@ -14,7 +14,7 @@ import { fromCache } from './hover_cache';
 describe('getHoverItem() caching', () => {
   test('caches function hover results by function name', async () => {
     const statement = 'from a | eval round(numberField)';
-    const triggerString = 'round';
+    const triggerString = 'round(numberField)';
     const kit = setupTestbed(statement, triggerString);
 
     // Nothing in cache initially
