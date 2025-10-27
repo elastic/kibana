@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { I18nProviderMock } from '@kbn/core-i18n-browser-mocks/src/i18n_context_mock';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { WorkflowYAMLEditorProps } from './workflow_yaml_editor';
 import { WorkflowYAMLEditor } from './workflow_yaml_editor';
 import { WorkflowEditorStoreProvider } from '../lib/store';
@@ -40,8 +40,8 @@ jest.mock('../../../features/validate_workflow_yaml/lib/use_yaml_validation', ()
 }));
 
 // Mock the completion provider
-jest.mock('../lib/get_completion_item_provider', () => ({
-  getCompletionItemProvider: () => ({}),
+jest.mock('./hooks/use_completion_provider', () => ({
+  useCompletionProvider: jest.fn().mockReturnValue({}),
 }));
 
 // Mock the UnsavedChangesPrompt
@@ -56,7 +56,7 @@ jest.mock('./workflow_yaml_validation_errors', () => ({
 
 // Mock the useAvailableConnectors hook
 jest.mock('../../../entities/connectors/model/use_available_connectors', () => ({
-  useAvailableConnectors: () => ({
+  useAvailableConnectors: jest.fn().mockReturnValue({
     data: {
       connectorTypes: {},
       totalConnectors: 0,

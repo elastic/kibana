@@ -37,13 +37,21 @@ export class FilterBar {
     );
     await this.page.click(`.euiFilterSelectItem[title="${options.field}"]`);
     // set operator
+    await expect(this.page.testSubj.locator('filterOperatorList')).not.toHaveClass(
+      /euiComboBox-isDisabled/
+    );
     await this.page.testSubj.typeWithDelay(
       'filterOperatorList > comboBoxSearchInput',
       options.operator
     );
     await this.page.click(`.euiFilterSelectItem[title="${options.operator}"]`);
     // set value
-    await this.page.testSubj.locator('filterParams').locator('input').fill(options.value);
+    const filterParamsInput = this.page.locator('[data-test-subj="filterParams"] input');
+    await expect(filterParamsInput).not.toHaveAttribute('disabled');
+    // await this.page.waitForTimeout(100); // wait for input to be ready
+    await expect(filterParamsInput).toBeEditable();
+    await filterParamsInput.focus();
+    await filterParamsInput.pressSequentially(options.value, { delay: 100 });
     // save filter
     await this.page.testSubj.click('saveFilter');
 
