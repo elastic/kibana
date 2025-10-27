@@ -226,8 +226,9 @@ export const convertProcessorSchema = processorBaseWithWhereSchema
     type: z.enum(convertTypes),
     ignore_missing: z.optional(z.boolean()),
   })
-  .refine((obj) => (obj.where && obj.to) || !obj.where, {
-    message: 'Convert processor must have the "to" parameter when there is a "where" condition.',
+  .refine((obj) => (obj.where && obj.to && obj.from !== obj.to) || !obj.where, {
+    message:
+      'Convert processor must have the "to" parameter when there is a "where" condition. It should not be the same as the source field.',
     path: ['to', 'where'],
   }) satisfies z.Schema<ConvertProcessor>;
 
@@ -241,14 +242,14 @@ export type StreamlangProcessorDefinition =
   | ConvertProcessor
   | ManualIngestPipelineProcessor;
 
-export const streamlangProcessorSchema = z.discriminatedUnion('action', [
+export const streamlangProcessorSchema = z.union([
   grokProcessorSchema,
   dissectProcessorSchema,
   dateProcessorSchema,
   renameProcessorSchema,
-  setProcessorSchema.innerType(),
+  setProcessorSchema,
   appendProcessorSchema,
-  convertProcessorSchema.innerType(),
+  convertProcessorSchema,
   manualIngestPipelineProcessorSchema,
 ]);
 
@@ -291,8 +292,14 @@ export type ProcessorType = StreamlangProcessorDefinition['action'];
  * Get all processor types as a string array (derived from the Zod schema)
  */
 export const processorTypes: ProcessorType[] = (
-  streamlangProcessorSchema._def.options as Array<z.ZodObject<any, any, any, any, any>>
-).map((schema) => schema.shape.action.value) as ProcessorType[];
+  streamlangProcessorSchema._def.options as Array<
+    z.ZodObject<any, any, any, any, any> | z.ZodEffects<any, any, any>
+  >
+).map((schema) => {
+  // Handle ZodEffects (from .refine()) by unwrapping to get the base schema
+  const baseSchema = '_def' in schema && 'schema' in schema._def ? schema._def.schema : schema;
+  return baseSchema.shape.action.value;
+}) as ProcessorType[];
 
 /**
  * Get the processor type (action) from a processor definition
