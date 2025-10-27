@@ -55,11 +55,11 @@ pageLoadAssetSize:
   exploratoryView: 45126
   expressionGauge: 15748
   expressionHeatmap: 17563
-  expressionLegacyMetricVis: 11834
-  expressionMetricVis: 17559
+  expressionLegacyMetricVis: 13200
+  expressionMetricVis: 18000
   expressionPartitionVis: 29826
   expressions: 105113
-  expressionTagcloud: 12643
+  expressionTagcloud: 14000
   expressionXY: 45000
   features: 4145
   fieldFormats: 64634
@@ -185,12 +185,12 @@ pageLoadAssetSize:
   visDefaultEditor: 35080
   visTypeGauge: 13006
   visTypeHeatmap: 12457
-  visTypeMarkdown: 8817
+  visTypeMarkdown: 9300
   visTypeMetric: 11966
   visTypePie: 9939
-  visTypeTable: 18999
+  visTypeTable: 19300
   visTypeTagcloud: 7876
-  visTypeTimelion: 12512
+  visTypeTimelion: 12800
   visTypeTimeseries: 19665
   visTypeVega: 38538
   visTypeVislib: 14679
