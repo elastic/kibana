@@ -924,6 +924,17 @@
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.kbnvisualizationscommon",
+            "type": "string",
+            "tags": [],
+            "label": "'@kbn/visualizations-common'",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
