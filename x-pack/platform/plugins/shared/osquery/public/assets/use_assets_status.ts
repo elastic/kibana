@@ -6,7 +6,7 @@
  */
 
 import type { KibanaAssetReference } from '@kbn/fleet-plugin/common';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { API_VERSIONS } from '../../common/constants';
 import { useKibana } from '../common/lib/kibana';
 import { INTEGRATION_ASSETS_STATUS_ID } from './constants';

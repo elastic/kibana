@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import type {
+  GenericIndexPatternColumn,
+  TermsIndexPatternColumn,
+  FormBasedLayer,
+} from '@kbn/lens-common';
 import { FIELD_WRONG_TYPE } from '../../../../user_messages_ids';
 import { createMockedIndexPattern } from '../../mocks';
-import type { FormBasedLayer } from '../../types';
-import type { GenericIndexPatternColumn } from './column_types';
 import { getInvalidFieldMessage, isValidNumber } from './helpers';
-import type { TermsIndexPatternColumn } from './terms';
 
 describe('helpers', () => {
   const columnId = 'column_id';

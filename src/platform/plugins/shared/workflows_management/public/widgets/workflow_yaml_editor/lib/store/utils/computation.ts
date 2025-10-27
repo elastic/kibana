@@ -7,25 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AnyAction, Dispatch, MiddlewareAPI } from '@reduxjs/toolkit';
 import YAML, { LineCounter } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
+import type { z } from '@kbn/zod';
 import { buildWorkflowLookup } from './build_workflow_lookup';
 import { parseWorkflowYamlToJSON } from '../../../../../../common/lib/yaml_utils';
-import {
-  getCachedDynamicConnectorTypes,
-  getWorkflowZodSchemaLoose,
-} from '../../../../../../common/schema';
-import { _setComputedDataInternal, clearComputedData } from '../slice';
-import type { RootState } from '../types';
+import type { WorkflowZodSchemaLooseType } from '../../../../../../common/schema';
+import type { WorkflowEditorState } from '../types';
 
 export const performComputation = (
-  store: MiddlewareAPI<Dispatch<AnyAction>, RootState>,
-  yamlString: string | undefined
-) => {
+  yamlString: string | undefined,
+  schemLoose: WorkflowZodSchemaLooseType
+): WorkflowEditorState['computed'] | undefined => {
   if (!yamlString) {
-    store.dispatch(clearComputedData());
     return;
   }
 
@@ -33,14 +28,10 @@ export const performComputation = (
   try {
     // Parse YAML document
     const lineCounter = new LineCounter();
-    const yamlDoc = YAML.parseDocument(yamlString, { lineCounter });
+    const yamlDoc = YAML.parseDocument(yamlString, { lineCounter, keepSourceTokens: true });
 
     // Parse workflow JSON for graph creation
-    const dynamicConnectorTypes = getCachedDynamicConnectorTypes() || {};
-    const parsingResult = parseWorkflowYamlToJSON(
-      yamlString,
-      getWorkflowZodSchemaLoose(dynamicConnectorTypes)
-    );
+    const parsingResult = parseWorkflowYamlToJSON(yamlString, schemLoose as z.ZodSchema);
 
     // Build workflow lookup
     const lookup = buildWorkflowLookup(yamlDoc, lineCounter);
@@ -48,20 +39,14 @@ export const performComputation = (
     // Create workflow graph
     const parsedWorkflow = parsingResult.success ? parsingResult.data : undefined;
     const graph = parsedWorkflow ? WorkflowGraph.fromWorkflowDefinition(parsedWorkflow) : undefined;
-
-    // Dispatch computed data
-    store.dispatch(
-      _setComputedDataInternal({
-        yamlLineCounter: lineCounter,
-        yamlDocument: yamlDoc,
-        workflowLookup: lookup,
-        workflowGraph: graph,
-        workflowDefinition: parsedWorkflow as WorkflowYaml,
-      })
-    );
+    return {
+      yamlLineCounter: lineCounter,
+      yamlDocument: yamlDoc,
+      workflowLookup: lookup,
+      workflowGraph: graph,
+      workflowDefinition: parsedWorkflow as WorkflowYaml,
+    };
   } catch (e) {
-    // console.error('Error performing computation', e);
     // Clear computed data on error
-    store.dispatch(clearComputedData());
   }
 };
