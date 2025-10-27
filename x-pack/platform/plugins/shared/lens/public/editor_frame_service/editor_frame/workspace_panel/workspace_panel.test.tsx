@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { DatasourceMap, UserMessage, VisualizationMap } from '../../../types';
+import type { DatasourceMap, UserMessage, VisualizationMap } from '@kbn/lens-common';
 import { fireEvent, screen, act } from '@testing-library/react';
 import {
   createMockVisualization,
