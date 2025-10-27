@@ -51,6 +51,17 @@ export const riskEngineConfigurationTypeMappings: SavedObjectsType['mappings'] =
     excludeAlertStatuses: {
       type: 'keyword',
     },
+    filters: {
+      type: 'nested',
+      properties: {
+        entity_types: {
+          type: 'keyword',
+        },
+        filter: {
+          type: 'text',
+        },
+      },
+    },
   },
 };
 
@@ -93,6 +104,13 @@ const version3: SavedObjectsModelVersion = {
       type: 'mappings_addition',
       addedMappings: {
         enableResetToZero: { type: 'boolean' },
+        filters: {
+          type: 'nested',
+          properties: {
+            entity_types: { type: 'keyword' },
+            filter: { type: 'text' },
+          },
+        },
       },
     },
     {
@@ -102,6 +120,7 @@ const version3: SavedObjectsModelVersion = {
           attributes: {
             ...document.attributes,
             enableResetToZero: false,
+            filters: document.attributes.filters || [],
           },
         };
       },

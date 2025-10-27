@@ -18,8 +18,6 @@ export const HOST_BY_RISK_TABLE_FILTER = '[data-test-subj="risk-filter-popoverBu
 
 export const HOST_BY_RISK_TABLE_FILTER_CRITICAL = '[data-test-subj="risk-filter-item-Critical"]';
 
-export const HOST_BY_RISK_TABLE_FILTER_LOW = '[data-test-subj="risk-filter-item-Low"]';
-
 export const HOST_BY_RISK_TABLE_PERPAGE_BUTTON =
   '[data-test-subj="loadingMoreSizeRowPopover"] button';
 

@@ -6,45 +6,72 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiText, EuiToolTip, useEuiFontSize } from '@elastic/eui';
+import { EuiFlexGroup, EuiText, EuiButtonEmpty, useEuiFontSize } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import { ToolTipButton } from '../styles';
+import {
+  useNodeDetailsPopover,
+  type UseNodeDetailsPopoverReturn,
+} from '../../graph_investigation/use_node_details_popover';
 import {
   GRAPH_IPS_TEXT_ID,
   GRAPH_IPS_PLUS_COUNT_ID,
-  GRAPH_IPS_TOOLTIP_CONTENT_ID,
-  GRAPH_IPS_TOOLTIP_IP_ID,
+  GRAPH_IPS_POPOVER_CONTENT_ID,
+  GRAPH_IPS_POPOVER_IP_ID,
+  GRAPH_IPS_POPOVER_ID,
+  GRAPH_IPS_PLUS_COUNT_BUTTON_ID,
 } from '../../test_ids';
+import { createPreviewItems } from '../utils';
 
 export const VISIBLE_IPS_LIMIT = 1;
-export const MAX_IPS_IN_TOOLTIP = 10;
 
-const toolTipAriaLabel = i18n.translate('securitySolutionPackages.csp.graph.ips.toolTipAriaLabel', {
-  defaultMessage: 'Show IP address details',
-});
+const popoverTipAriaLabel = i18n.translate(
+  'securitySolutionPackages.csp.graph.ips.popoverAriaLabel',
+  {
+    defaultMessage: 'Show IP address details',
+  }
+);
+
+export type UseIpPopoverReturn = UseNodeDetailsPopoverReturn & {
+  onIpClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
+};
+
+export const useIpPopover = (ips: string[], scopeId?: string): UseIpPopoverReturn => {
+  const items = scopeId
+    ? createPreviewItems('network-preview', ips, scopeId)
+    : ips.map((ip, index) => ({
+        key: `${index}-${ip}`,
+        label: ip,
+      }));
+
+  const { id, onClick, PopoverComponent, actions, state } = useNodeDetailsPopover({
+    popoverId: 'ips-popover',
+    items,
+    contentTestSubj: GRAPH_IPS_POPOVER_CONTENT_ID,
+    itemTestSubj: GRAPH_IPS_POPOVER_IP_ID,
+    popoverTestSubj: GRAPH_IPS_POPOVER_ID,
+  });
+
+  return {
+    id,
+    onIpClick: onClick,
+    PopoverComponent,
+    actions,
+    state,
+    onClick,
+  };
+};
 
 export interface IpsProps {
   ips: string[];
+  onIpClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
-export const Ips = ({ ips }: IpsProps) => {
+export const Ips = ({ ips, onIpClick }: IpsProps) => {
   const sFontSize = useEuiFontSize('s');
   const xsFontSize = useEuiFontSize('xs');
 
   if (ips.length === 0) return null;
-
-  const toolTipContent = (
-    <ul data-test-subj={GRAPH_IPS_TOOLTIP_CONTENT_ID}>
-      {ips.slice(0, MAX_IPS_IN_TOOLTIP).map((ip, index) => (
-        <li key={`${index}-${ip}`}>
-          <EuiText data-test-subj={GRAPH_IPS_TOOLTIP_IP_ID} size="m">
-            {ip}
-          </EuiText>
-        </li>
-      ))}
-    </ul>
-  );
 
   const visibleIps = (
     <EuiText
@@ -63,33 +90,40 @@ export const Ips = ({ ips }: IpsProps) => {
 
   const counter =
     ips.length > VISIBLE_IPS_LIMIT ? (
-      <EuiText
-        size="xs"
-        color="default"
-        data-test-subj={GRAPH_IPS_PLUS_COUNT_ID}
-        css={css`
-          font-weight: medium;
-          ${xsFontSize};
-        `}
-      >
-        {`+${ips.length - VISIBLE_IPS_LIMIT}`}
-      </EuiText>
+      onIpClick ? (
+        <EuiButtonEmpty
+          size="xs"
+          color="text"
+          data-test-subj={GRAPH_IPS_PLUS_COUNT_BUTTON_ID}
+          onClick={onIpClick}
+          aria-label={popoverTipAriaLabel}
+          flush="both"
+          css={css`
+            font-weight: medium;
+          `}
+        >
+          {`+${ips.length - VISIBLE_IPS_LIMIT}`}
+        </EuiButtonEmpty>
+      ) : (
+        <EuiText
+          size="xs"
+          color="subdued"
+          aria-label={popoverTipAriaLabel}
+          data-test-subj={GRAPH_IPS_PLUS_COUNT_ID}
+          css={css`
+            font-weight: medium;
+            ${xsFontSize};
+          `}
+        >
+          {`+${ips.length - VISIBLE_IPS_LIMIT}`}
+        </EuiText>
+      )
     ) : null;
 
   return (
-    <EuiToolTip position="right" content={ips.length > VISIBLE_IPS_LIMIT ? toolTipContent : null}>
-      {/* Wrap badge with button to make it focusable and open ToolTip with keyboard */}
-      <ToolTipButton aria-label={toolTipAriaLabel}>
-        <EuiFlexGroup
-          responsive={false}
-          gutterSize="xs"
-          alignItems="center"
-          justifyContent="center"
-        >
-          {visibleIps}
-          {counter}
-        </EuiFlexGroup>
-      </ToolTipButton>
-    </EuiToolTip>
+    <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center" justifyContent="center">
+      {visibleIps}
+      {counter}
+    </EuiFlexGroup>
   );
 };

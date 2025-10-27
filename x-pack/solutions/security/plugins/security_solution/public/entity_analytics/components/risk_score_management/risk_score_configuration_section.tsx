@@ -17,11 +17,8 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import * as i18n from '../../translations';
-import type {
-  RiskScoreConfiguration,
-  UIAlertFilter,
-} from './hooks/risk_score_configurable_risk_engine_settings_hooks';
 import { AlertFiltersKqlBar } from './alert_filters_kql_bar';
+import type { RiskScoreConfiguration, UIAlertFilter } from './common';
 
 export const RiskScoreConfigurationSection = ({
   selectedRiskEngineSettings,
@@ -45,7 +42,7 @@ export const RiskScoreConfigurationSection = ({
         <EuiSpacer size="s" />
         <EuiLoadingSpinner size="m" />
         <EuiText size="s">
-          <p>{'Loading risk engine settings...'}</p>
+          <p>{i18n.LOADING_RISK_ENGINE_SETTINGS}</p>
         </EuiText>
       </>
     );
@@ -57,7 +54,6 @@ export const RiskScoreConfigurationSection = ({
       </EuiTitle>
       <EuiSpacer size="s" />
 
-      {/* Alert time window section */}
       <EuiFormRow label={i18n.ALERT_TIME_WINDOW_LABEL} display="rowCompressed">
         <EuiSuperDatePicker
           start={selectedRiskEngineSettings.range.start}
@@ -71,7 +67,6 @@ export const RiskScoreConfigurationSection = ({
 
       <EuiSpacer size="xl" />
 
-      {/* Closed alerts checkbox */}
       <EuiFormRow
         label={
           <span>
@@ -95,7 +90,6 @@ export const RiskScoreConfigurationSection = ({
 
       <EuiSpacer size="xl" />
 
-      {/* Alert filters section */}
       <AlertFiltersKqlBar
         placeholder={i18n.ALERT_FILTERS_PLACEHOLDER}
         compressed={true}

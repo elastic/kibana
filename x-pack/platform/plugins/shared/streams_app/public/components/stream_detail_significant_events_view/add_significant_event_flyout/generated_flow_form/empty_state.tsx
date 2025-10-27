@@ -30,7 +30,7 @@ export function AiFlowEmptyState() {
       <EuiText size="s" textAlign="center" css={{ maxWidth: 480 }}>
         {i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.emptyState.description', {
           defaultMessage:
-            'You can generate events with AI, by giving context through systems selection. Manual entry is also available.',
+            'You can generate events with AI, by giving context through features selection. Manual entry is also available.',
         })}
       </EuiText>
     </EuiFlexGroup>

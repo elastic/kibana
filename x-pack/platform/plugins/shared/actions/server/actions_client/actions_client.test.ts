@@ -51,6 +51,7 @@ import type { GetGlobalExecutionKPIParams, GetGlobalExecutionLogParams } from '.
 
 import type { estypes } from '@elastic/elasticsearch';
 import { ConnectorRateLimiter } from '../lib/connector_rate_limiter';
+import { createMockInMemoryConnector } from '../application/connector/mocks';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -385,11 +386,8 @@ describe('create()', () => {
         secrets: {},
       },
     });
-    expect(result).toEqual({
+    expect(result).toContainConnector({
       id: '1',
-      isPreconfigured: false,
-      isSystemAction: false,
-      isDeprecated: false,
       name: 'my name',
       actionTypeId: 'my-action-type',
       isMissingSecrets: false,
@@ -535,11 +533,8 @@ describe('create()', () => {
         secrets: {},
       },
     });
-    expect(result).toEqual({
+    expect(result).toContainConnector({
       id: '1',
-      isPreconfigured: false,
-      isSystemAction: false,
-      isDeprecated: false,
       name: 'my name',
       actionTypeId: 'my-action-type',
       isMissingSecrets: false,
@@ -725,20 +720,18 @@ describe('create()', () => {
       scopedClusterClient,
       kibanaIndices,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           id: preDefinedId,
           actionTypeId: 'my-action-type',
           secrets: {
             test: 'test1',
           },
           isPreconfigured: true,
-          isDeprecated: false,
-          isSystemAction: false,
           name: 'test',
           config: {
             foo: 'bar',
           },
-        },
+        }),
       ],
 
       actionExecutor,
@@ -807,16 +800,12 @@ describe('create()', () => {
       request,
       authorization: authorization as unknown as ActionsAuthorization,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           actionTypeId: '.cases',
-          config: {},
           id: 'system-connector-.cases',
           name: 'System action: .cases',
-          secrets: {},
-          isPreconfigured: false,
-          isDeprecated: false,
           isSystemAction: true,
-        },
+        }),
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
@@ -867,20 +856,18 @@ describe('get()', () => {
         request,
         authorization: authorization as unknown as ActionsAuthorization,
         inMemoryConnectors: [
-          {
+          createMockInMemoryConnector({
             id: 'testPreconfigured',
             actionTypeId: 'my-action-type',
             secrets: {
               test: 'test1',
             },
             isPreconfigured: true,
-            isDeprecated: false,
-            isSystemAction: false,
             name: 'test',
             config: {
               foo: 'bar',
             },
-          },
+          }),
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
         getEventLogClient,
@@ -903,16 +890,12 @@ describe('get()', () => {
         request,
         authorization: authorization as unknown as ActionsAuthorization,
         inMemoryConnectors: [
-          {
+          createMockInMemoryConnector({
             actionTypeId: '.cases',
-            config: {},
             id: 'system-connector-.cases',
             name: 'System action: .cases',
-            secrets: {},
-            isPreconfigured: false,
-            isDeprecated: false,
             isSystemAction: true,
-          },
+          }),
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
         getEventLogClient,
@@ -959,20 +942,18 @@ describe('get()', () => {
         request,
         authorization: authorization as unknown as ActionsAuthorization,
         inMemoryConnectors: [
-          {
+          createMockInMemoryConnector({
             id: 'testPreconfigured',
             actionTypeId: 'my-action-type',
             secrets: {
               test: 'test1',
             },
             isPreconfigured: true,
-            isDeprecated: false,
-            isSystemAction: false,
             name: 'test',
             config: {
               foo: 'bar',
             },
-          },
+          }),
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
         getEventLogClient,
@@ -1001,16 +982,12 @@ describe('get()', () => {
         request,
         authorization: authorization as unknown as ActionsAuthorization,
         inMemoryConnectors: [
-          {
+          createMockInMemoryConnector({
             actionTypeId: '.cases',
-            config: {},
             id: 'system-connector-.cases',
             name: 'System action: .cases',
-            secrets: {},
-            isPreconfigured: false,
-            isDeprecated: false,
             isSystemAction: true,
-          },
+          }),
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
         getEventLogClient,
@@ -1091,15 +1068,18 @@ describe('get()', () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'type',
-      attributes: {},
+      attributes: {
+        name: 'Test Connector',
+        actionTypeId: '.test-connector-type',
+        isMissingSecrets: false,
+      },
       references: [],
     });
     const result = await actionsClient.get({ id: '1' });
-    expect(result).toEqual({
+
+    expect(result).toContainConnector({
       id: '1',
-      isPreconfigured: false,
-      isSystemAction: false,
-      isDeprecated: false,
+      isMissingSecrets: false,
     });
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
@@ -1122,33 +1102,30 @@ describe('get()', () => {
       request,
       authorization: authorization as unknown as ActionsAuthorization,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           id: 'testPreconfigured',
           actionTypeId: '.slack',
           secrets: {
             test: 'test1',
           },
           isPreconfigured: true,
-          isDeprecated: false,
-          isSystemAction: false,
           name: 'test',
           config: {
             foo: 'bar',
           },
-        },
+        }),
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
     });
 
     const result = await actionsClient.get({ id: 'testPreconfigured' });
-    expect(result).toEqual({
+    expect(result).toContainConnector({
       id: 'testPreconfigured',
       actionTypeId: '.slack',
       isPreconfigured: true,
-      isDeprecated: false,
-      isSystemAction: false,
       name: 'test',
+      config: undefined, // in memory connectors do not return unless exposeConfig is true
     });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
   });
@@ -1165,17 +1142,12 @@ describe('get()', () => {
       request,
       authorization: authorization as unknown as ActionsAuthorization,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           id: 'system-connector-.cases',
           actionTypeId: '.cases',
           name: 'System action: .cases',
-          config: {},
-          secrets: {},
-          isDeprecated: false,
-          isMissingSecrets: false,
-          isPreconfigured: false,
           isSystemAction: true,
-        },
+        }),
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
@@ -1198,17 +1170,12 @@ describe('get()', () => {
       request,
       authorization: authorization as unknown as ActionsAuthorization,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           id: 'system-connector-.cases',
           actionTypeId: '.cases',
           name: 'System action: .cases',
-          config: {},
-          secrets: {},
-          isDeprecated: false,
-          isMissingSecrets: false,
-          isPreconfigured: false,
           isSystemAction: true,
-        },
+        }),
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
@@ -1216,11 +1183,9 @@ describe('get()', () => {
 
     expect(
       await actionsClient.get({ id: 'system-connector-.cases', throwIfSystemAction: false })
-    ).toEqual({
+    ).toContainConnector({
       actionTypeId: '.cases',
       id: 'system-connector-.cases',
-      isDeprecated: false,
-      isPreconfigured: false,
       isSystemAction: true,
       name: 'System action: .cases',
     });
@@ -1268,18 +1233,15 @@ describe('getBulk()', () => {
         request,
         authorization: authorization as unknown as ActionsAuthorization,
         inMemoryConnectors: [
-          {
+          createMockInMemoryConnector({
             id: 'testPreconfigured',
             actionTypeId: '.slack',
-            secrets: {},
             isPreconfigured: true,
-            isDeprecated: false,
-            isSystemAction: false,
             name: 'test',
             config: {
               foo: 'bar',
             },
-          },
+          }),
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
         getEventLogClient,
@@ -1405,29 +1367,26 @@ describe('getBulk()', () => {
       request,
       authorization: authorization as unknown as ActionsAuthorization,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           id: 'testPreconfigured',
           actionTypeId: '.slack',
-          secrets: {},
           isPreconfigured: true,
+          secrets: {
+            test: 'test1',
+          },
           isDeprecated: false,
           isSystemAction: false,
           name: 'test',
           config: {
             foo: 'bar',
           },
-        },
-        {
+        }),
+        createMockInMemoryConnector({
           id: 'system-connector-.cases',
           actionTypeId: '.cases',
           name: 'System action: .cases',
-          config: {},
-          secrets: {},
-          isDeprecated: false,
-          isMissingSecrets: false,
-          isPreconfigured: false,
           isSystemAction: true,
-        },
+        }),
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
@@ -1435,16 +1394,12 @@ describe('getBulk()', () => {
 
     const result = await actionsClient.getBulk({ ids: ['1', 'testPreconfigured'] });
 
-    expect(result).toEqual([
+    expect(result).toContainConnectors([
       {
         id: 'testPreconfigured',
         actionTypeId: '.slack',
-        secrets: {},
         isPreconfigured: true,
-        isSystemAction: false,
-        isDeprecated: false,
         name: 'test',
-        config: { foo: 'bar' },
       },
       {
         id: '1',
@@ -1452,9 +1407,6 @@ describe('getBulk()', () => {
         name: 'test',
         config: { foo: 'bar' },
         isMissingSecrets: false,
-        isPreconfigured: false,
-        isSystemAction: false,
-        isDeprecated: false,
       },
     ]);
   });
@@ -1499,29 +1451,21 @@ describe('getBulk()', () => {
       request,
       authorization: authorization as unknown as ActionsAuthorization,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           id: 'testPreconfigured',
           actionTypeId: '.slack',
-          secrets: {},
           isPreconfigured: true,
-          isDeprecated: false,
-          isSystemAction: false,
           name: 'test',
           config: {
             foo: 'bar',
           },
-        },
-        {
+        }),
+        createMockInMemoryConnector({
           id: 'system-connector-.cases',
           actionTypeId: '.cases',
           name: 'System action: .cases',
-          config: {},
-          secrets: {},
-          isDeprecated: false,
-          isMissingSecrets: false,
-          isPreconfigured: false,
           isSystemAction: true,
-        },
+        }),
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
@@ -1572,29 +1516,22 @@ describe('getBulk()', () => {
       request,
       authorization: authorization as unknown as ActionsAuthorization,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           id: 'testPreconfigured',
           actionTypeId: '.slack',
-          secrets: {},
           isPreconfigured: true,
-          isDeprecated: false,
-          isSystemAction: false,
           name: 'test',
           config: {
             foo: 'bar',
           },
-        },
-        {
+        }),
+        createMockInMemoryConnector({
           id: 'system-connector-.cases',
           actionTypeId: '.cases',
           name: 'System action: .cases',
-          config: {},
-          secrets: {},
-          isDeprecated: false,
-          isMissingSecrets: false,
-          isPreconfigured: false,
           isSystemAction: true,
-        },
+          isMissingSecrets: false,
+        }),
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
@@ -1605,36 +1542,24 @@ describe('getBulk()', () => {
         ids: ['1', 'testPreconfigured', 'system-connector-.cases'],
         throwIfSystemAction: false,
       })
-    ).toEqual([
+    ).toContainConnectors([
       {
         actionTypeId: '.slack',
-        config: { foo: 'bar' },
         id: 'testPreconfigured',
-        isDeprecated: false,
         isPreconfigured: true,
-        isSystemAction: false,
         name: 'test',
-        secrets: {},
       },
       {
         actionTypeId: '.cases',
-        config: {},
         id: 'system-connector-.cases',
-        isDeprecated: false,
-        isMissingSecrets: false,
-        isPreconfigured: false,
         isSystemAction: true,
         name: 'System action: .cases',
-        secrets: {},
       },
       {
         actionTypeId: 'test',
         config: { foo: 'bar' },
         id: '1',
-        isDeprecated: false,
         isMissingSecrets: false,
-        isPreconfigured: false,
-        isSystemAction: false,
         name: 'test',
       },
     ]);
@@ -1656,18 +1581,15 @@ describe('getOAuthAccessToken()', () => {
       request,
       authorization: authorization as unknown as ActionsAuthorization,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           id: 'testPreconfigured',
           actionTypeId: '.slack',
-          secrets: {},
           isPreconfigured: true,
-          isSystemAction: false,
-          isDeprecated: false,
           name: 'test',
           config: {
             foo: 'bar',
           },
-        },
+        }),
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
@@ -2067,20 +1989,18 @@ describe('delete()', () => {
       scopedClusterClient,
       kibanaIndices,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           id: 'testPreconfigured',
           actionTypeId: 'my-action-type',
           secrets: {
             test: 'test1',
           },
           isPreconfigured: true,
-          isDeprecated: false,
-          isSystemAction: false,
           name: 'test',
           config: {
             foo: 'bar',
           },
-        },
+        }),
       ],
       actionExecutor,
       bulkExecutionEnqueuer,
@@ -2105,17 +2025,12 @@ describe('delete()', () => {
       scopedClusterClient,
       kibanaIndices,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           id: 'system-connector-.cases',
           actionTypeId: '.cases',
           name: 'System action: .cases',
-          config: {},
-          secrets: {},
-          isDeprecated: false,
-          isMissingSecrets: false,
-          isPreconfigured: false,
           isSystemAction: true,
-        },
+        }),
       ],
       actionExecutor,
       bulkExecutionEnqueuer,
@@ -2320,11 +2235,8 @@ describe('update()', () => {
         secrets: {},
       },
     });
-    expect(result).toEqual({
+    expect(result).toContainConnector({
       id: 'my-action',
-      isPreconfigured: false,
-      isSystemAction: false,
-      isDeprecated: false,
       actionTypeId: 'my-action-type',
       isMissingSecrets: false,
       name: 'my name',
@@ -2402,11 +2314,8 @@ describe('update()', () => {
         secrets: {},
       },
     });
-    expect(result).toEqual({
+    expect(result).toContainConnector({
       id: 'my-action',
-      isPreconfigured: false,
-      isSystemAction: false,
-      isDeprecated: false,
       actionTypeId: 'my-action-type',
       isMissingSecrets: true,
       name: 'my name',
@@ -2560,11 +2469,8 @@ describe('update()', () => {
         secrets: {},
       },
     });
-    expect(result).toEqual({
+    expect(result).toContainConnector({
       id: 'my-action',
-      isPreconfigured: false,
-      isSystemAction: false,
-      isDeprecated: false,
       actionTypeId: 'my-action-type',
       isMissingSecrets: true,
       name: 'my name',
@@ -2654,20 +2560,18 @@ describe('update()', () => {
       scopedClusterClient,
       kibanaIndices,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           id: 'testPreconfigured',
           actionTypeId: 'my-action-type',
           secrets: {
             test: 'test1',
           },
           isPreconfigured: true,
-          isDeprecated: false,
-          isSystemAction: false,
           name: 'test',
           config: {
             foo: 'bar',
           },
-        },
+        }),
       ],
       actionExecutor,
       bulkExecutionEnqueuer,
@@ -2699,17 +2603,12 @@ describe('update()', () => {
       scopedClusterClient,
       kibanaIndices,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           id: 'system-connector-.cases',
           actionTypeId: '.cases',
           name: 'System action: .cases',
-          config: {},
-          secrets: {},
-          isDeprecated: false,
-          isMissingSecrets: false,
-          isPreconfigured: false,
           isSystemAction: true,
-        },
+        }),
       ],
       actionExecutor,
       bulkExecutionEnqueuer,
@@ -2779,17 +2678,12 @@ describe('execute()', () => {
     test('ensures that system actions privileges are being authorized correctly', async () => {
       actionsClient = new ActionsClient({
         inMemoryConnectors: [
-          {
+          createMockInMemoryConnector({
             id: 'system-connector-.cases',
             actionTypeId: '.cases',
             name: 'System action: .cases',
-            config: {},
-            secrets: {},
-            isDeprecated: false,
-            isMissingSecrets: false,
-            isPreconfigured: false,
             isSystemAction: true,
-          },
+          }),
         ],
         logger,
         actionTypeRegistry,
@@ -2838,20 +2732,18 @@ describe('execute()', () => {
     test('does not authorize kibana privileges for non system actions', async () => {
       actionsClient = new ActionsClient({
         inMemoryConnectors: [
-          {
+          createMockInMemoryConnector({
             id: 'testPreconfigured',
             actionTypeId: 'my-action-type',
             secrets: {
               test: 'test1',
             },
             isPreconfigured: true,
-            isDeprecated: false,
-            isSystemAction: false,
             name: 'test',
             config: {
               foo: 'bar',
             },
-          },
+          }),
         ],
         logger,
         actionTypeRegistry,
@@ -2902,17 +2794,12 @@ describe('execute()', () => {
 
       actionsClient = new ActionsClient({
         inMemoryConnectors: [
-          {
+          createMockInMemoryConnector({
             id: 'system-connector-.cases',
             actionTypeId: '.cases',
             name: 'System action: .cases',
-            config: {},
-            secrets: {},
-            isDeprecated: false,
-            isMissingSecrets: false,
-            isPreconfigured: false,
             isSystemAction: true,
-          },
+          }),
         ],
         logger,
         actionTypeRegistry,
@@ -3196,31 +3083,24 @@ describe('isPreconfigured()', () => {
       request,
       authorization: authorization as unknown as ActionsAuthorization,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           id: 'testPreconfigured',
           actionTypeId: 'my-action-type',
           secrets: {
             test: 'test1',
           },
           isPreconfigured: true,
-          isDeprecated: false,
-          isSystemAction: false,
           name: 'test',
           config: {
             foo: 'bar',
           },
-        },
-        {
+        }),
+        createMockInMemoryConnector({
           id: 'system-connector-.cases',
           actionTypeId: '.cases',
           name: 'System action: .cases',
-          config: {},
-          secrets: {},
-          isDeprecated: false,
-          isMissingSecrets: false,
-          isPreconfigured: false,
           isSystemAction: true,
-        },
+        }),
       ],
       connectorTokenClient: new ConnectorTokenClient({
         unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
@@ -3245,31 +3125,24 @@ describe('isPreconfigured()', () => {
       request,
       authorization: authorization as unknown as ActionsAuthorization,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           id: 'testPreconfigured',
           actionTypeId: 'my-action-type',
           secrets: {
             test: 'test1',
           },
           isPreconfigured: true,
-          isDeprecated: false,
-          isSystemAction: false,
           name: 'test',
           config: {
             foo: 'bar',
           },
-        },
-        {
+        }),
+        createMockInMemoryConnector({
           id: 'system-connector-.cases',
           actionTypeId: '.cases',
           name: 'System action: .cases',
-          config: {},
-          secrets: {},
-          isDeprecated: false,
-          isMissingSecrets: false,
-          isPreconfigured: false,
           isSystemAction: true,
-        },
+        }),
       ],
       connectorTokenClient: new ConnectorTokenClient({
         unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
@@ -3296,31 +3169,24 @@ describe('isSystemAction()', () => {
       request,
       authorization: authorization as unknown as ActionsAuthorization,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           id: 'testPreconfigured',
           actionTypeId: 'my-action-type',
           secrets: {
             test: 'test1',
           },
           isPreconfigured: true,
-          isDeprecated: false,
-          isSystemAction: false,
           name: 'test',
           config: {
             foo: 'bar',
           },
-        },
-        {
+        }),
+        createMockInMemoryConnector({
           id: 'system-connector-.cases',
           actionTypeId: '.cases',
           name: 'System action: .cases',
-          config: {},
-          secrets: {},
-          isDeprecated: false,
-          isMissingSecrets: false,
-          isPreconfigured: false,
           isSystemAction: true,
-        },
+        }),
       ],
       connectorTokenClient: new ConnectorTokenClient({
         unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
@@ -3345,31 +3211,24 @@ describe('isSystemAction()', () => {
       request,
       authorization: authorization as unknown as ActionsAuthorization,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           id: 'testPreconfigured',
           actionTypeId: 'my-action-type',
           secrets: {
             test: 'test1',
           },
           isPreconfigured: true,
-          isDeprecated: false,
-          isSystemAction: false,
           name: 'test',
           config: {
             foo: 'bar',
           },
-        },
-        {
+        }),
+        createMockInMemoryConnector({
           id: 'system-connector-.cases',
           actionTypeId: '.cases',
           name: 'System action: .cases',
-          config: {},
-          secrets: {},
-          isDeprecated: false,
-          isMissingSecrets: false,
-          isPreconfigured: false,
           isSystemAction: true,
-        },
+        }),
       ],
       connectorTokenClient: new ConnectorTokenClient({
         unsecuredSavedObjectsClient: savedObjectsClientMock.create(),

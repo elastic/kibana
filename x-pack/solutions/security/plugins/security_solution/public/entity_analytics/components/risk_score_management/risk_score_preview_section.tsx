@@ -37,6 +37,7 @@ import { EntityIconByType } from '../entity_store/helpers';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useEntityAnalyticsTypes } from '../../hooks/use_enabled_entity_types';
+import type { AlertFilter } from './common';
 interface IRiskScorePreviewPanel {
   showMessage: React.ReactNode;
   hideMessage: React.ReactNode;
@@ -56,7 +57,7 @@ export const RiskScorePreviewSection: React.FC<{
   includeClosedAlerts: boolean;
   from: string;
   to: string;
-  alertFilters?: Array<{ entity_types: string[]; filter: string }>;
+  alertFilters?: Array<AlertFilter>;
 }> = ({ privileges, includeClosedAlerts, from, to, alertFilters }) => {
   const sectionBody = useMemo(() => {
     if (privileges.isLoading) {
@@ -151,7 +152,7 @@ const RiskEnginePreview: React.FC<{
   includeClosedAlerts: boolean;
   from: string;
   to: string;
-  alertFilters?: Array<{ entity_types: string[]; filter: string }>;
+  alertFilters?: Array<AlertFilter>;
 }> = ({ includeClosedAlerts, from, to, alertFilters }) => {
   const entityTypes = useEntityAnalyticsTypes();
 

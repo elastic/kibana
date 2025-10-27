@@ -86,6 +86,8 @@ export const parseAppLocatorParams = (params: DiscoverAppLocatorParams) => {
     viewMode,
     hideAggregatedPreview,
     breakdownField,
+    hideChart,
+    sampleSize,
     isAlertResults,
   } = params;
 
@@ -109,6 +111,8 @@ export const parseAppLocatorParams = (params: DiscoverAppLocatorParams) => {
   if (viewMode) appState.viewMode = viewMode;
   if (hideAggregatedPreview) appState.hideAggregatedPreview = hideAggregatedPreview;
   if (breakdownField) appState.breakdownField = breakdownField;
+  if (typeof hideChart === 'boolean') appState.hideChart = hideChart;
+  if (typeof sampleSize === 'number' && sampleSize > 0) appState.sampleSize = sampleSize;
 
   const state: MainHistoryLocationState = {};
 

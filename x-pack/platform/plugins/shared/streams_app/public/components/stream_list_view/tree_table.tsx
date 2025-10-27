@@ -369,6 +369,7 @@ export function StreamsTreeTable({
                 defaultMessage: 'Retention policy for {name}',
                 values: { name: item.stream.name },
               })}
+              dataTestSubj={`retentionColumn-${item.stream.name}`}
             />
           ),
         },

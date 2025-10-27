@@ -18,7 +18,12 @@ export const PanelHeaderItems: FC<PanelHeaderItems> = ({ headerItems, compressed
   const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiFlexGroup gutterSize={compressed ? 's' : 'l'} alignItems={'center'}>
+    <EuiFlexGroup
+      gutterSize={compressed ? 's' : 'l'}
+      alignItems={'center'}
+      wrap={true}
+      justifyContent={'flexEnd'}
+    >
       {headerItems.map((item, i) => {
         return (
           <EuiFlexItem key={i} grow={false}>

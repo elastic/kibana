@@ -18,7 +18,17 @@ export {
   createToolCallEvent,
   createToolResultEvent,
 } from './graph_events';
-export { extractTextContent, extractToolCalls, extractToolReturn, type ToolCall } from './messages';
+export {
+  extractTextContent,
+  extractToolCalls,
+  extractToolReturn,
+  createUserMessage,
+  createAIMessage,
+  createToolResultMessage,
+  createToolCallMessage,
+  generateFakeToolCallId,
+  type ToolCall,
+} from './messages';
 export {
   toolsToLangchain,
   toolToLangchain,

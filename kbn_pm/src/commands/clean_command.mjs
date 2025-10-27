@@ -38,6 +38,7 @@ export const command = {
     await cleanPaths(log, [
       ...(await findPluginCleanPaths(log)),
       ...collectBazelPaths(),
+      Path.resolve(REPO_ROOT, '.moon', 'cache'),
       Path.resolve(REPO_ROOT, '.es', 'cache'),
     ]);
   },

@@ -17,6 +17,8 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormControlButton,
+  EuiFormControlLayout,
   EuiHorizontalRule,
   EuiIcon,
   EuiPopover,
@@ -24,6 +26,7 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
   useIsWithinBreakpoints,
+  htmlIdGenerator,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -67,6 +70,8 @@ export function ChangeDataView({
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
   const [dataViewsList, setDataViewsList] = useState<DataViewListItemEnhanced[]>([]);
+
+  const popoverId = useMemo(() => htmlIdGenerator()(), []);
 
   const kibana = useKibana<IUnifiedSearchPluginServices>();
   const { application, data, dataViews, dataViewEditor } = kibana.services;
@@ -120,31 +125,32 @@ export function ChangeDataView({
   const createTrigger = function () {
     const { label, title, 'data-test-subj': dataTestSubj, fullWidth, ...rest } = trigger;
     return (
-      <EuiButtonEmpty
+      <EuiFormControlButton
+        compressed
         css={styles.trigger}
+        isInvalid={isMissingCurrent}
+        title={trigger.label}
+        disabled={isDisabled}
         data-test-subj={dataTestSubj}
+        aria-expanded={isPopoverOpen}
+        aria-controls={popoverId}
         onClick={() => {
           setPopoverIsOpen(!isPopoverOpen);
         }}
-        color={isMissingCurrent ? 'danger' : 'text'}
-        iconSide="right"
-        iconType="arrowDown"
-        title={trigger.label}
-        disabled={isDisabled}
-        textProps={{ className: 'eui-textTruncate' }}
-        size="s"
         {...rest}
       >
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexGroup
+          component="span"
+          alignItems="center"
+          gutterSize="s"
+          responsive={false}
+          css={{ maxWidth: '100%' }}
+        >
           {/* we don't want to display the adHoc icon on text based mode */}
-          {isAdHocSelected && (
-            <EuiFlexItem grow={false}>
-              <EuiIcon type={adhoc} color="primary" size="s" />
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem grow={false}>{trigger.label}</EuiFlexItem>
+          {isAdHocSelected && <EuiIcon type={adhoc} color="primary" size="s" />}
+          <span className="eui-textTruncate">{trigger.label}</span>
         </EuiFlexGroup>
-      </EuiButtonEmpty>
+      </EuiFormControlButton>
     );
   };
   const onDuplicate = useCallback(async () => {
@@ -321,46 +327,33 @@ export function ChangeDataView({
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <>
         <EuiFlexItem grow={true} css={shrinkableContainerCss}>
-          <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
-            <EuiFlexItem
-              grow={false}
-              css={css`
-                padding: 0 ${euiTheme.size.s};
-                height: 100%;
-                border-radius: ${euiTheme.border.radius.small} 0 0 ${euiTheme.border.radius.small};
-                background-color: ${euiTheme.colors.lightestShade};
-                border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain};
-                border-right: 0;
-                justify-content: center;
-              `}
+          <EuiFormControlLayout
+            compressed
+            isDropdown
+            prepend={i18n.translate('unifiedSearch.query.queryBar.esqlMenu.switcherLabelTitle', {
+              defaultMessage: 'Data view',
+            })}
+          >
+            <EuiPopover
+              id={popoverId}
+              panelClassName="changeDataViewPopover"
+              button={createTrigger()}
+              panelProps={{
+                ['data-test-subj']: 'changeDataViewPopover',
+              }}
+              isOpen={isPopoverOpen}
+              closePopover={() => setPopoverIsOpen(false)}
+              panelPaddingSize="none"
+              initialFocus={`[id="${searchListInputId}"]`}
+              display="block"
+              buffer={8}
+              css={{ inlineSize: '100%' }}
             >
-              <EuiText size="s">
-                {i18n.translate('unifiedSearch.query.queryBar.esqlMenu.switcherLabelTitle', {
-                  defaultMessage: 'Data view',
-                })}
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={true} css={shrinkableContainerCss}>
-              <EuiPopover
-                panelClassName="changeDataViewPopover"
-                button={createTrigger()}
-                panelProps={{
-                  ['data-test-subj']: 'changeDataViewPopover',
-                }}
-                isOpen={isPopoverOpen}
-                closePopover={() => setPopoverIsOpen(false)}
-                panelPaddingSize="none"
-                initialFocus={`[id="${searchListInputId}"]`}
-                display="block"
-                buffer={8}
-                css={{ inlineSize: '100%' }}
-              >
-                <div css={styles.popoverContent}>
-                  <EuiContextMenuPanel size="s" items={items} />
-                </div>
-              </EuiPopover>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+              <div css={styles.popoverContent}>
+                <EuiContextMenuPanel size="s" items={items} />
+              </div>
+            </EuiPopover>
+          </EuiFormControlLayout>
         </EuiFlexItem>
       </>
     </EuiFlexGroup>

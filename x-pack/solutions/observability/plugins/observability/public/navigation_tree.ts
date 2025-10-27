@@ -12,18 +12,18 @@ import { lazy } from 'react';
 import { map, of } from 'rxjs';
 import type { ObservabilityPublicPluginsStart } from './plugin';
 const LazyIconBriefcase = lazy(() =>
-  import('./v2_icons/briefcase').then(({ iconBriefcase }) => ({ default: iconBriefcase }))
+  import('@kbn/observability-nav-icons').then(({ iconBriefcase }) => ({ default: iconBriefcase }))
 );
 const LazyIconMl = lazy(() =>
-  import('./v2_icons/product_ml').then(({ iconProductMl }) => ({ default: iconProductMl }))
+  import('@kbn/observability-nav-icons').then(({ iconProductMl }) => ({ default: iconProductMl }))
 );
 const LazyIconProductStreamsWired = lazy(() =>
-  import('./v2_icons/product_streams_wired').then(({ iconProductStreamsWired }) => ({
+  import('@kbn/observability-nav-icons').then(({ iconProductStreamsWired }) => ({
     default: iconProductStreamsWired,
   }))
 );
 const LazyIconProductCloudInfra = lazy(() =>
-  import('./v2_icons/product_cloud_infra').then(({ iconProductCloudInfra }) => ({
+  import('@kbn/observability-nav-icons').then(({ iconProductCloudInfra }) => ({
     default: iconProductCloudInfra,
   }))
 );
@@ -500,7 +500,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                 spaceBefore: null,
                 children: [
                   {
-                    link: 'observability-overview:rules',
+                    link: 'management:triggersActions',
                   },
                   {
                     link: 'management:triggersActionsConnectors',

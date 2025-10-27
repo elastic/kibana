@@ -202,6 +202,10 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       customerEngineerRequestForm: `${ELASTIC_WEBSITE_URL}contact/ce-help`,
       elasticCommunity: `${ELASTIC_WEBSITE_URL}community/`,
     },
+    searchGettingStarted: {
+      visitSearchLabs: `${ELASTIC_WEBSITE_URL}search-labs`,
+      notebooksExamples: `${ELASTIC_WEBSITE_URL}search-labs/tutorials/examples`,
+    },
     metricbeat: {
       base: `${ELASTIC_DOCS}reference/beats/metricbeat`,
       configure: `${ELASTIC_DOCS}reference/beats/metricbeat/configuring-howto-metricbeat`,
@@ -728,6 +732,13 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       createApiKey: isServerless
         ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-security-create-api-key`
         : `${ELASTICSEARCH_APIS}operation/operation-security-create-api-key`,
+      createApiKeyMetadata: isServerless
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-security-create-api-key#operation-security-create-api-key-body-application-json`
+        : `${ELASTICSEARCH_APIS}operation/operation-security-create-api-key#operation-security-create-api-key-body-application-json`,
+      createApiKeyRoleDescriptors: isServerless
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-security-create-api-key#operation-security-create-api-key-body-application-json-role_descriptors`
+        : `${ELASTICSEARCH_APIS}operation/operation-security-create-api-key#operation-security-create-api-key-body-application-json-role_descriptors`,
+      createCrossClusterApiKey: `${ELASTICSEARCH_APIS}operation/operation-security-create-cross-cluster-api-key`,
       createPipeline: isServerless
         ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-ingest-put-pipeline`
         : `${ELASTICSEARCH_APIS}operation/operation-ingest-put-pipeline`,
@@ -1029,6 +1040,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     agentBuilder: {
       agentBuilder: `${ELASTIC_DOCS}solutions/search/elastic-agent-builder`,
       getStarted: `${ELASTIC_DOCS}solutions/search/agent-builder/get-started`,
+      models: `${ELASTIC_DOCS}solutions/search/agent-builder/models`,
       chat: `${ELASTIC_DOCS}solutions/search/agent-builder/chat`,
       agentBuilderAgents: `${ELASTIC_DOCS}solutions/search/agent-builder/agent-builder-agents`,
       tools: `${ELASTIC_DOCS}solutions/search/agent-builder/tools`,

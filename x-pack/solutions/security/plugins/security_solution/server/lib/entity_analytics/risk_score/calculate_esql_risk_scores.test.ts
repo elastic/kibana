@@ -49,8 +49,8 @@ describe('Calculate risk scores with ESQL', () => {
               score: riskScore,
               normalized_score: riskScore / RIEMANN_ZETA_VALUE,
               notes: [],
-              category_1_score: riskScore / RIEMANN_ZETA_VALUE,
-              category_1_count: 1,
+              category_1_score: riskScore,
+              category_1_count: 10,
               risk_inputs: [
                 {
                   index: '.alerts-security.alerts-default',

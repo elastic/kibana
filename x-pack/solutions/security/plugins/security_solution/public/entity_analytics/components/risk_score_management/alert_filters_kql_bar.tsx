@@ -25,18 +25,27 @@ import { useSourcererDataView } from '../../../sourcerer/containers';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useKibana } from '../../../common/lib/kibana';
 import * as i18n from '../../translations';
+import type { UIAlertFilter } from './common';
 
-// Define the types of entities for the combobox
-const ENTITY_OPTIONS = [
-  { label: 'Users', value: 'users' },
-  { label: 'Hosts', value: 'hosts' },
-  { label: 'Services', value: 'services' },
-];
+const COMBOBOX_LABEL_MAPPING = {
+  user: 'Users',
+  host: 'Hosts',
+  service: 'Services',
+} as const;
+
+const DEFAULT_OPTIONS: Array<{
+  label: (typeof COMBOBOX_LABEL_MAPPING)[keyof typeof COMBOBOX_LABEL_MAPPING];
+  value: keyof typeof COMBOBOX_LABEL_MAPPING;
+}> = [
+    { label: COMBOBOX_LABEL_MAPPING.user, value: 'user' },
+    { label: COMBOBOX_LABEL_MAPPING.host, value: 'host' },
+    { label: COMBOBOX_LABEL_MAPPING.service, value: 'service' },
+  ];
 
 interface AlertFiltersKqlBarProps {
   onQueryChange?: (query: Query) => void;
-  onFiltersChange?: (filters: Array<{ id: string; text: string; entityTypes: string[] }>) => void;
-  filters?: Array<{ id: string; text: string; entityTypes: string[] }>;
+  onFiltersChange?: (filters: Array<UIAlertFilter>) => void;
+  filters?: Array<UIAlertFilter>;
   placeholder?: string;
   compressed?: boolean;
   'data-test-subj'?: string;
@@ -44,44 +53,27 @@ interface AlertFiltersKqlBarProps {
 
 // Custom component to render each filter chip with a combobox
 interface CustomFilterChipProps {
-  filter: { id: string; text: string; entityTypes: string[] };
+  filter: UIAlertFilter;
   onRemove: () => void;
-  onEntityTypesChange: (entityTypes: string[]) => void;
+  onEntityTypesChange: (entityTypes: UIAlertFilter['entityTypes']) => void;
 }
 
+type ComboBoxOptions = EuiComboBoxOptionOption<UIAlertFilter['entityTypes'][number]>;
 const CustomFilterChip: React.FC<CustomFilterChipProps> = ({
   filter,
   onRemove,
   onEntityTypesChange,
 }) => {
-  // Map backend entity types to UI options
-  const mapEntityTypesToOptions = (entityTypes: string[]): EuiComboBoxOptionOption<string>[] => {
-    const mapping: Record<string, string> = {
-      user: 'users',
-      host: 'hosts',
-      service: 'services',
-    };
-    return entityTypes
-      .map((et) => ENTITY_OPTIONS.find((opt) => opt.value === (mapping[et] || et)))
-      .filter((opt): opt is { label: string; value: string } => opt !== undefined);
-  };
-
-  const [selectedEntities, setSelectedEntities] = useState<EuiComboBoxOptionOption<string>[]>(() =>
-    mapEntityTypesToOptions(
-      filter.entityTypes.length > 0 ? filter.entityTypes : ['user', 'host', 'service']
-    )
+  const [selectedEntities, setSelectedEntities] = useState<ComboBoxOptions[]>(() =>
+    filter.entityTypes.map((et) => ({ label: COMBOBOX_LABEL_MAPPING[et], value: et }))
   );
 
   const onChange = useCallback(
-    (options: EuiComboBoxOptionOption<string>[]) => {
+    (options: ComboBoxOptions[]) => {
       setSelectedEntities(options);
-      // Map UI values back to backend format
-      const mapping: Record<string, string> = {
-        users: 'user',
-        hosts: 'host',
-        services: 'service',
-      };
-      const entityTypes = options.map((opt) => mapping[opt.value || ''] || opt.value || '');
+      const entityTypes = options
+        .map((opt) => opt.value)
+        .filter((et): et is NonNullable<typeof et> => et !== undefined);
       onEntityTypesChange(entityTypes);
     },
     [onEntityTypesChange]
@@ -133,7 +125,7 @@ const CustomFilterChip: React.FC<CustomFilterChipProps> = ({
 
         <EuiFlexItem grow={false}>
           <EuiComboBox
-            options={ENTITY_OPTIONS}
+            options={DEFAULT_OPTIONS}
             selectedOptions={selectedEntities}
             onChange={onChange}
             compressed
@@ -235,7 +227,7 @@ export const AlertFiltersKqlBar: React.FC<AlertFiltersKqlBarProps> = ({
             setValidationError(undefined);
 
             // Add the query as a filter with default entity types (all)
-            const newFilter = {
+            const newFilter: UIAlertFilter = {
               id: Date.now().toString(),
               text: queryText,
               entityTypes: ['user', 'host', 'service'],
@@ -265,7 +257,7 @@ export const AlertFiltersKqlBar: React.FC<AlertFiltersKqlBarProps> = ({
   );
 
   const onEntityTypesChange = useCallback(
-    (filterId: string, entityTypes: string[]) => {
+    (filterId: string, entityTypes: UIAlertFilter['entityTypes']) => {
       const updatedFilters = filters.map((f) => (f.id === filterId ? { ...f, entityTypes } : f));
       onFiltersChange?.(updatedFilters);
     },

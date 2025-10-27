@@ -11,45 +11,21 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
 import { useConfigureSORiskEngineMutation } from '../../../api/hooks/use_configure_risk_engine_saved_object';
 import * as i18n from '../../../translations';
+import {
+  DEFAULT_ENTITY_TYPES,
+  type AlertFilter,
+  type RiskScoreConfiguration,
+  type UIAlertFilter,
+} from '../common';
 
-// Backend API format
-export interface AlertFilter {
-  entity_types: string[];
-  filter: string;
-}
-
-// UI format (used internally in components)
-export interface UIAlertFilter {
-  id: string;
-  text: string;
-  entityTypes: string[];
-}
-
-export interface RiskScoreConfiguration {
-  includeClosedAlerts: boolean;
-  range: {
-    start: string;
-    end: string;
-  };
-  enableResetToZero: boolean;
-  alertFilters: AlertFilter[];
-}
-
-// Transformation utilities
 const transformFiltersForBackend = (uiFilters: UIAlertFilter[]): AlertFilter[] => {
   return uiFilters.map((f) => ({
-    entity_types: f.entityTypes || ['host', 'user', 'service'],
+    entity_types: f.entityTypes ?? DEFAULT_ENTITY_TYPES,
     filter: f.text,
   }));
 };
 
-const transformFiltersFromBackend = (backendFilters: AlertFilter[]): UIAlertFilter[] => {
-  return backendFilters.map((f, idx) => ({
-    id: `filter-${idx}-${Date.now()}`,
-    text: f.filter,
-    entityTypes: f.entity_types,
-  }));
-};
+// Transformation utilities
 
 const settingsAreEqual = (
   first?: Partial<RiskScoreConfiguration>,
@@ -69,8 +45,8 @@ const settingsAreEqual = (
       });
   };
 
-  const firstFilters = normalizeFilters(first?.alertFilters);
-  const secondFilters = normalizeFilters(second?.alertFilters);
+  const firstFilters = normalizeFilters(first?.filters);
+  const secondFilters = normalizeFilters(second?.filters);
   const alertFiltersEqual = JSON.stringify(firstFilters) === JSON.stringify(secondFilters);
 
   return (
@@ -82,7 +58,9 @@ const settingsAreEqual = (
   );
 };
 
-const riskEngineSettingsWithDefaults = (riskEngineSettings?: Partial<RiskScoreConfiguration>) => ({
+const riskEngineSettingsWithDefaults = (
+  riskEngineSettings?: Partial<RiskScoreConfiguration>
+): RiskScoreConfiguration => ({
   includeClosedAlerts: riskEngineSettings?.includeClosedAlerts ?? false,
   range: {
     start: riskEngineSettings?.range?.start ?? 'now-30d',
@@ -92,7 +70,7 @@ const riskEngineSettingsWithDefaults = (riskEngineSettings?: Partial<RiskScoreCo
     riskEngineSettings?.enableResetToZero === undefined
       ? true
       : riskEngineSettings.enableResetToZero,
-  alertFilters: riskEngineSettings?.alertFilters ?? [],
+  filters: riskEngineSettings?.filters ?? [],
 });
 
 const FETCH_RISK_ENGINE_SETTINGS = ['GET', 'FETCH_RISK_ENGINE_SETTINGS'];
@@ -131,9 +109,9 @@ export const useConfigurableRiskEngineSettings = () => {
       const backendFilters = (riskEngineSettings as Record<string, unknown>)?.filters;
       const transformedSettings = riskEngineSettings
         ? {
-            ...riskEngineSettings,
-            alertFilters: Array.isArray(backendFilters) ? backendFilters : [],
-          }
+          ...riskEngineSettings,
+          filters: Array.isArray(backendFilters) ? backendFilters : [],
+        }
         : undefined;
 
       setSelectedRiskEngineSettings((currentValue) => {
@@ -157,7 +135,7 @@ export const useConfigurableRiskEngineSettings = () => {
 
   // Sync selected settings after a successful save and refetch completes
   useEffect(() => {
-    const currentFilterCount = savedRiskEngineSettings?.alertFilters?.length || 0;
+    const currentFilterCount = savedRiskEngineSettings?.filters?.length || 0;
 
     if (
       waitingForSaveRefetch.current &&
@@ -180,17 +158,7 @@ export const useConfigurableRiskEngineSettings = () => {
 
   const saveSelectedSettingsMutation = useMutation(async () => {
     if (selectedRiskEngineSettings) {
-      const settingsToSave = {
-        includeClosedAlerts: selectedRiskEngineSettings.includeClosedAlerts,
-        range: {
-          start: selectedRiskEngineSettings.range.start,
-          end: selectedRiskEngineSettings.range.end,
-        },
-        enableResetToZero: selectedRiskEngineSettings.enableResetToZero,
-        filters: selectedRiskEngineSettings.alertFilters,
-      };
-
-      await mutateRiskEngineSettingsAsync(settingsToSave, {
+      await mutateRiskEngineSettingsAsync(selectedRiskEngineSettings, {
         onSuccess: () => {
           addSuccess(i18n.RISK_ENGINE_SAVED_OBJECT_CONFIGURATION_SUCCESS, {
             toastLifeTimeMs: 5000,
@@ -199,7 +167,7 @@ export const useConfigurableRiskEngineSettings = () => {
       });
 
       // Track pre-save state to detect when refetch completes
-      preSaveFilterCount.current = savedRiskEngineSettings?.alertFilters?.length || 0;
+      preSaveFilterCount.current = savedRiskEngineSettings?.filters?.length || 0;
       waitingForSaveRefetch.current = true;
 
       // Trigger refetch
@@ -236,17 +204,23 @@ export const useConfigurableRiskEngineSettings = () => {
   const setAlertFilters = (filters: UIAlertFilter[]) => {
     const transformedFilters = transformFiltersForBackend(filters);
     setSelectedRiskEngineSettings((prevState) => {
-      if (!prevState) return undefined;
-      return { ...prevState, alertFilters: transformedFilters };
+      if (!prevState) {
+        return riskEngineSettingsWithDefaults({ filters: transformedFilters });
+      }
+      return { ...prevState, filters: transformedFilters };
     });
   };
 
   // Getter for UI-formatted filters - memoized to prevent unnecessary transformations
   const getUIAlertFilters = useCallback((): UIAlertFilter[] => {
-    return selectedRiskEngineSettings?.alertFilters
-      ? transformFiltersFromBackend(selectedRiskEngineSettings.alertFilters)
-      : [];
-  }, [selectedRiskEngineSettings?.alertFilters]);
+    return (
+      selectedRiskEngineSettings?.filters?.map((f, idx) => ({
+        id: `filter-${idx}-${Date.now()}`,
+        text: f.filter,
+        entityTypes: f.entity_types,
+      })) || []
+    );
+  }, [selectedRiskEngineSettings]);
 
   return {
     savedRiskEngineSettings,
