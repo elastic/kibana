@@ -19,12 +19,12 @@ import {
 } from '@kbn/esql-ast/src/definitions/utils';
 import {
   isESQLNamedParamLiteral,
-  type ESQLAstQueryExpression,
   type ESQLFunction,
   type ESQLSingleAstItem,
   type ESQLSource,
 } from '@kbn/esql-ast/src/types';
 
+import type { ESQLColumnData } from '@kbn/esql-ast/src/commands_registry/types';
 import type { ESQLCallbacks } from '../shared/types';
 import { getColumnsByTypeRetriever } from '../autocomplete/autocomplete';
 import { getPolicyHelper } from '../shared/resources_helpers';
@@ -101,6 +101,13 @@ export async function getHoverItem(fullText: string, offset: number, callbacks?:
     return hoverContent;
   }
 
+  const { getColumnMap } = getColumnsByTypeRetriever(
+    getQueryForFields(fullText, root),
+    fullText,
+    callbacks
+  );
+  const columnsMap = await getColumnMap();
+
   const variables = callbacks?.getVariables?.();
   const variablesContent = getVariablesHoverContent(node, variables);
 
@@ -109,18 +116,12 @@ export async function getHoverItem(fullText: string, offset: number, callbacks?:
   }
 
   if (containingFunction) {
-    const argHints = await getHintForFunctionArg(
-      containingFunction,
-      root,
-      fullText,
-      offset,
-      callbacks
-    );
+    const argHints = await getHintForFunctionArg(containingFunction, columnsMap);
     hoverContent.contents.push(...argHints);
   }
 
   if (node.type === 'function') {
-    const functionSignature = await getFunctionSignatureHover(node, fullText, root, callbacks);
+    const functionSignature = await getFunctionSignatureHover(node, columnsMap);
     hoverContent.contents.push(...functionSignature);
   }
 
@@ -173,24 +174,27 @@ export async function getHoverItem(fullText: string, offset: number, callbacks?:
     }
   }
 
+  if (node.type === 'column') {
+    const columnData = columnsMap.get(node.name);
+    if (columnData) {
+      hoverContent.contents.push({
+        value: `${node.name}: **${columnData.type}**`,
+      });
+    }
+  }
+
   return hoverContent;
 }
 
 async function getHintForFunctionArg(
   fnNode: ESQLFunction,
-  root: ESQLAstQueryExpression,
-  query: string,
-  offset: number,
-  resourceRetriever?: ESQLCallbacks
+  columnsMap: Map<string, ESQLColumnData>
 ) {
-  const { getColumnMap } = getColumnsByTypeRetriever(root, query, resourceRetriever);
-
   const fnDefinition = getFunctionDefinition(fnNode.name);
   // early exit on no hit
   if (!fnDefinition) {
     return [];
   }
-  const columnsMap = await getColumnMap();
 
   const references = {
     columns: columnsMap,
@@ -236,19 +240,10 @@ async function getHintForFunctionArg(
 
 async function getFunctionSignatureHover(
   fnNode: ESQLFunction,
-  fullText: string,
-  root: ESQLAstQueryExpression,
-  callbacks?: ESQLCallbacks
+  columnsMap: Map<string, ESQLColumnData>
 ) {
   const fnDefinition = getFunctionDefinition(fnNode.name);
   if (fnDefinition) {
-    const { getColumnMap } = getColumnsByTypeRetriever(
-      getQueryForFields(fullText, root),
-      fullText,
-      callbacks
-    );
-    const columnsMap = await getColumnMap();
-
     const formattedSignature = getFormattedFunctionSignature(fnDefinition, fnNode, columnsMap);
 
     return [
