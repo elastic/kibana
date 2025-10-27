@@ -104,6 +104,27 @@ const version3: SavedObjectsModelVersion = {
       type: 'mappings_addition',
       addedMappings: {
         enableResetToZero: { type: 'boolean' },
+      },
+    },
+    {
+      type: 'data_backfill',
+      backfillFn: (document) => {
+        return {
+          attributes: {
+            ...document.attributes,
+            enableResetToZero: false,
+          },
+        };
+      },
+    },
+  ],
+};
+
+const version4: SavedObjectsModelVersion = {
+  changes: [
+    {
+      type: 'mappings_addition',
+      addedMappings: {
         filters: {
           type: 'nested',
           properties: {
@@ -119,7 +140,6 @@ const version3: SavedObjectsModelVersion = {
         return {
           attributes: {
             ...document.attributes,
-            enableResetToZero: false,
             filters: document.attributes.filters || [],
           },
         };
@@ -138,5 +158,6 @@ export const riskEngineConfigurationType: SavedObjectsType = {
     1: version1,
     2: version2,
     3: version3,
+    4: version4,
   },
 };
