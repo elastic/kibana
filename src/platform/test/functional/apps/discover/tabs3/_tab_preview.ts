@@ -17,6 +17,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataViews = getService('dataViews');
   const browser = getService('browser');
 
+  const discoverSessionName = 'tab preview test';
+
   describe('tab preview', function () {
     it('should show the correct content', async () => {
       const checkTab0 = async () => {
@@ -89,6 +91,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await checkTab3();
 
       await browser.refresh();
+      await discover.waitUntilTabIsLoaded();
+
+      await checkTab0();
+      await checkTab1();
+      await checkTab2();
+      await checkTab3();
+
+      await discover.saveSearch(discoverSessionName);
+      await discover.waitUntilTabIsLoaded();
+      await discover.clickNewSearchButton();
+      await discover.waitUntilTabIsLoaded();
+      await discover.loadSavedSearch(discoverSessionName);
       await discover.waitUntilTabIsLoaded();
 
       await checkTab0();

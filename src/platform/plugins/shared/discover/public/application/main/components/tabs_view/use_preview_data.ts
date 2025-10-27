@@ -113,7 +113,7 @@ const getDataViewNameFromInitialInternalState = (
 
   if (typeof index === 'string') {
     const matchedDataView = savedDataViews.find((dv) => dv.id === index);
-    return matchedDataView?.name;
+    return matchedDataView?.name || matchedDataView?.title;
   }
 
   if (index?.name) {
@@ -155,9 +155,7 @@ const getPreviewDataObservable = (
         );
         return of({
           status: TabStatus.DEFAULT,
-          query: initialAppState?.query
-            ? getPreviewQuery(initialAppState.query, derivedDataViewName)
-            : DEFAULT_PREVIEW_QUERY,
+          query: getPreviewQuery(initialAppState?.query, derivedDataViewName),
           title: getPreviewTitle(initialAppState?.query, derivedDataViewName),
         });
       }
