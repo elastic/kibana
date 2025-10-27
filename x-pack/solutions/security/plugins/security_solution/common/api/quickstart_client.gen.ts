@@ -219,6 +219,10 @@ import type {
   UploadAssetCriticalityRecordsResponse,
 } from './entity_analytics/asset_criticality/upload_asset_criticality_csv.gen';
 import type {
+  EntityDetailsHighlightsRequestBodyInput,
+  EntityDetailsHighlightsResponse,
+} from './entity_analytics/entity_details/highlights.gen';
+import type {
   InitEntityStoreRequestBodyInput,
   InitEntityStoreResponse,
 } from './entity_analytics/entity_store/enable.gen';
@@ -1383,6 +1387,19 @@ The entity will be immediately deleted from the latest index.  It will remain av
         },
         method: 'POST',
         body: props.attachment,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async entityDetailsHighlights(props: EntityDetailsHighlightsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API EntityDetailsHighlights`);
+    return this.kbnClient
+      .request<EntityDetailsHighlightsResponse>({
+        path: '/internal/entity_details/highlights',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -3280,6 +3297,9 @@ export interface EndpointUnisolateActionProps {
 }
 export interface EndpointUploadActionProps {
   attachment: FormData;
+}
+export interface EntityDetailsHighlightsProps {
+  body: EntityDetailsHighlightsRequestBodyInput;
 }
 export interface ExportRulesProps {
   query: ExportRulesRequestQueryInput;
