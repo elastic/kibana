@@ -8,7 +8,7 @@ applies_to:
 
 This page lists fields that can appear in case analytics indices documents. These fields display general data about cases, in addition to data about case comments, attachments, and activity. 
 
-% To learn more about the indices and cases as data feature, refer to [Use cases as data](docs-content://explore-analyze/alerts-cases/cases/cases-as-data.md).
+To learn more about the indices and cases as data feature, refer to [Use cases as data](docs-content://explore-analyze/alerts-cases/cases/cases-as-data.md).
 
 ::::{important}
 The cases as data feature is in technical preview, meaning the schema for the case analytics indices is subject to change. 
