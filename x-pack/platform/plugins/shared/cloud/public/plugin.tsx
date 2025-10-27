@@ -11,13 +11,14 @@ import type { Logger } from '@kbn/logging';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 
 import type { KibanaProductTier, KibanaSolution } from '@kbn/projects-solutions-groups';
+import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { parseDeploymentIdFromDeploymentUrl } from '../common/parse_deployment_id_from_deployment_url';
 import { ELASTICSEARCH_CONFIG_ROUTE } from '../common/constants';
 import { decodeCloudId, type DecodedCloudId } from '../common/decode_cloud_id';
 import { parseOnboardingSolution } from '../common/parse_onboarding_default_solution';
-import type { ElasticsearchConfigType } from '../common/types';
+import type { CloudDataAttributes, ElasticsearchConfigType } from '../common/types';
 import type { CloudSetup, CloudStart, PublicElasticsearchConfigType } from './types';
 import { CloudUrlsService } from './urls';
 import { getSupportUrl } from './utils';
@@ -125,6 +126,19 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
 
   public start(coreStart: CoreStart): CloudStart {
     coreStart.chrome.setHelpSupportUrl(getSupportUrl(this.config));
+
+    // Deployment name is only available in ECH
+    if (this.isCloudEnabled && !this.isServerlessEnabled) {
+      coreStart.http
+        .get<CloudDataAttributes>('/internal/cloud/solution', { version: '1' })
+        .then((response) => {
+          const deploymentName = response?.resourceData?.deployment?.name;
+          if (deploymentName) {
+            (coreStart.chrome as InternalChromeStart)?.project?.setKibanaName(deploymentName);
+          }
+        })
+        .catch();
+    }
 
     // Nest all the registered context providers under the Cloud Services Provider.
     // This way, plugins only need to require Cloud's context provider to have all the enriched Cloud services.

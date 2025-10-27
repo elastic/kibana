@@ -18,10 +18,10 @@ export const useAvailableConnectors = () => useSelector(selectConnectors);
  * Helper hook to get connector instances for a specific action type
  */
 export function useConnectorInstances(actionTypeId: string): ConnectorInstance[] {
-  const { connectorTypes } = useAvailableConnectors() ?? {};
+  const data = useAvailableConnectors();
   return useMemo(
-    () => connectorTypes?.[actionTypeId]?.instances || [],
-    [connectorTypes, actionTypeId]
+    () => data?.connectorTypes[actionTypeId]?.instances || [],
+    [data?.connectorTypes, actionTypeId]
   );
 }
 
@@ -29,6 +29,6 @@ export function useConnectorInstances(actionTypeId: string): ConnectorInstance[]
  * Helper hook to get all available connector types (for schema generation)
  */
 export function useConnectorTypes(): ConnectorTypeInfo[] {
-  const { connectorTypes } = useAvailableConnectors() ?? {};
-  return useMemo(() => Object.values(connectorTypes ?? {}), [connectorTypes]);
+  const data = useAvailableConnectors();
+  return useMemo(() => Object.values(data?.connectorTypes ?? {}), [data?.connectorTypes]);
 }

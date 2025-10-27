@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient } from '@kbn/react-query';
 
 /** Workflows Management React Query Client */
 export const queryClient = new QueryClient();
