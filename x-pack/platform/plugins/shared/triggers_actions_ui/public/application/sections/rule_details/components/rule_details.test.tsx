@@ -368,7 +368,7 @@ describe('rule_details', () => {
             </EuiLink>
           </EuiText>
           <EuiLiveAnnouncer>
-            Cannot run rule, 
+            Cannot run rule,
             <EuiText
               size="xs"
             >
