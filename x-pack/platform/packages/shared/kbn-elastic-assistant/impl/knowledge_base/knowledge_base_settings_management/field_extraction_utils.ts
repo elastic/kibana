@@ -16,31 +16,35 @@ export interface ExtractedField {
 /**
  * Checks if a mapping property has nested properties
  */
-function hasProperties(property: MappingProperty): property is MappingProperty & {
+const hasProperties = (
+  property: MappingProperty
+): property is MappingProperty & {
   properties: Record<string, MappingProperty>;
-} {
+} => {
   return (
     'properties' in property &&
     typeof property.properties === 'object' &&
     property.properties !== null
   );
-}
+};
 
 /**
  * Checks if a mapping property has multi-fields
  */
-function hasFields(property: MappingProperty): property is MappingProperty & {
+const hasFields = (
+  property: MappingProperty
+): property is MappingProperty & {
   fields: Record<string, MappingProperty>;
-} {
+} => {
   return 'fields' in property && typeof property.fields === 'object' && property.fields !== null;
-}
+};
 
 /**
  * Checks if a field type is searchable for text queries
  */
-function isSearchableTextType(type: string): boolean {
+const isSearchableTextType = (type: string): boolean => {
   return type === 'text' || type === 'semantic_text';
-}
+};
 
 /**
  * Recursively extracts all searchable fields from Elasticsearch mapping properties
@@ -49,10 +53,10 @@ function isSearchableTextType(type: string): boolean {
  * @param parentPath - The parent field path (for nested fields)
  * @returns Array of extracted searchable fields
  */
-function extractFieldsFromProperties(
+const extractFieldsFromProperties = (
   properties: Record<string, MappingProperty>,
   parentPath: string = ''
-): ExtractedField[] {
+): ExtractedField[] => {
   const extractedFields: ExtractedField[] = [];
 
   for (const [fieldName, fieldMapping] of Object.entries(properties)) {
@@ -88,7 +92,7 @@ function extractFieldsFromProperties(
   }
 
   return extractedFields;
-}
+};
 
 /**
  * Extracts all searchable fields from Elasticsearch mappings
@@ -96,17 +100,17 @@ function extractFieldsFromProperties(
  * @param mappings - The mappings object from Elasticsearch
  * @returns Array of searchable fields with their full paths and types
  */
-export function extractSearchableFields(mappings: {
+export const extractSearchableFields = (mappings: {
   mappings?: {
     properties?: Record<string, MappingProperty>;
   };
-}): ExtractedField[] {
+}): ExtractedField[] => {
   if (!mappings?.mappings?.properties) {
     return [];
   }
 
   return extractFieldsFromProperties(mappings.mappings.properties);
-}
+};
 
 /**
  * Extracts all fields (not just searchable ones) from Elasticsearch mappings
@@ -115,25 +119,25 @@ export function extractSearchableFields(mappings: {
  * @param mappings - The mappings object from Elasticsearch
  * @returns Array of all fields with their full paths and types
  */
-export function extractAllFields(mappings: {
+export const extractAllFields = (mappings: {
   mappings?: {
     properties?: Record<string, MappingProperty>;
   };
-}): ExtractedField[] {
+}): ExtractedField[] => {
   if (!mappings?.mappings?.properties) {
     return [];
   }
 
   return extractAllFieldsFromProperties(mappings.mappings.properties);
-}
+};
 
 /**
  * Recursively extracts all fields (regardless of type) from mapping properties
  */
-function extractAllFieldsFromProperties(
+const extractAllFieldsFromProperties = (
   properties: Record<string, MappingProperty>,
   parentPath: string = ''
-): ExtractedField[] {
+): ExtractedField[] => {
   const extractedFields: ExtractedField[] = [];
 
   for (const [fieldName, fieldMapping] of Object.entries(properties)) {
@@ -169,4 +173,4 @@ function extractAllFieldsFromProperties(
   }
 
   return extractedFields;
-}
+};
