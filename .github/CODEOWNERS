@@ -515,6 +515,7 @@ src/platform/packages/shared/kbn-interpreter @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-io-ts-utils @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-jest-benchmarks @elastic/obs-ui-devex-team
 src/platform/packages/shared/kbn-lazy-object @elastic/kibana-operations
+src/platform/packages/shared/kbn-lens-common @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-lens-embeddable-utils @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-licensing-types @elastic/kibana-core
 src/platform/packages/shared/kbn-lock-manager @elastic/obs-ai-assistant
@@ -2166,6 +2167,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /src/platform/test/server_integration/__fixtures__ @elastic/kibana-security # Assigned per https://github.com/elastic/kibana/pull/53810
 /.github/codeql @elastic/kibana-security
 /.github/workflows/codeql.yml @elastic/kibana-security
+/.github/workflows/codeql-pr.yml @elastic/kibana-security
 /.github/workflows/codeql-stats.yml @elastic/kibana-security
 /.github/workflows/evaluate-dependency-health.yml @elastic/kibana-security
 /src/dev/eslint/security_eslint_rule_tests.ts @elastic/kibana-security
