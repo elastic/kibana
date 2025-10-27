@@ -32411,6 +32411,7 @@ paths:
                 required:
                   - version
                   - success
+          description: OK        
         '400':
           content:
             application/json:
@@ -32431,6 +32432,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: Bad Request
       summary: Rollback a package to previous version
       tags:
         - Elastic Package Manager (EPM)
