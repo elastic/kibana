@@ -70,12 +70,7 @@ export const ConsoleLang: LangModuleType = {
             unescapedQuery.length,
             esqlCallbacks
           );
-          return wrapAsMonacoSuggestions(
-            esqlSuggestions,
-            queryText,
-            false,
-            !insideTripleQuotes,
-          );
+          return wrapAsMonacoSuggestions(esqlSuggestions, queryText, false, !insideTripleQuotes);
         } else if (actionsProvider.current) {
           return actionsProvider.current?.provideCompletionItems(model, position, context);
         }
