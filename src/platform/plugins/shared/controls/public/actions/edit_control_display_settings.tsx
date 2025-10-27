@@ -44,6 +44,7 @@ import {
 } from '@elastic/eui';
 import { apiHasPrependWrapperRef, type HasPrependWrapperRef } from '@kbn/controls-renderer';
 import type { ControlWidth } from '@kbn/controls-schemas';
+import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
 import { ACTION_EDIT_CONTROL_DISPLAY_SETTINGS } from './constants';
 import { type PublishesControlsLayout, apiPublishesControlsLayout } from './types';
 
@@ -106,8 +107,8 @@ export class EditControlDisplaySettingsAction
       [layoutEntry.order, layoutState.controls]
     );
 
-    const grow = useMemo(() => layoutEntry.grow ?? false, [layoutEntry]);
-    const width = useMemo(() => layoutEntry.width ?? 'medium', [layoutEntry]);
+    const grow = useMemo(() => layoutEntry.grow ?? DEFAULT_CONTROL_GROW, [layoutEntry]);
+    const width = useMemo(() => layoutEntry.width ?? DEFAULT_CONTROL_WIDTH, [layoutEntry]);
 
     const applyNextLayout = useCallback(
       (nextGrow: boolean, nextWidth: ControlWidth) => {
