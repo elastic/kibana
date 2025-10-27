@@ -49,6 +49,10 @@ interface ConfigInputFieldProps {
   isEdit?: boolean;
   isPreconfigured?: boolean;
 }
+
+const KEY_INDEX = 0;
+const VALUE_INDEX = 1;
+
 export const ConfigInputField: React.FC<ConfigInputFieldProps> = ({
   configEntry,
   isLoading,
@@ -235,6 +239,20 @@ export const ConfigInputMapField: React.FC<ConfigInputFieldProps> = ({
 
   const iterableHeaders: [string, string][] = Object.entries(headers);
 
+  const handleHeaderChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    headerIndex,
+    elementIndex
+  ) => {
+    setHeaders((prevHeaders) => {
+      const newHeaders = [...Object.entries(prevHeaders)];
+      newHeaders[headerIndex][elementIndex] = e.target.value;
+      const headersObj = Object.fromEntries(newHeaders);
+      validateAndSetConfigValue(headersObj);
+      return headersObj;
+    });
+  };
+
   return (
     <>
       <EuiFlexGroup direction="column" gutterSize="s" data-test-subj={'config-field-map-type'}>
@@ -258,13 +276,7 @@ export const ConfigInputMapField: React.FC<ConfigInputFieldProps> = ({
                         disabled={isLoading || (isEdit && !updatable)}
                         value={header[0]}
                         onChange={(e) => {
-                          setHeaders((prevHeaders) => {
-                            const newHeaders = [...Object.entries(prevHeaders)];
-                            newHeaders[index][0] = e.target.value;
-                            const headersObj = Object.fromEntries(newHeaders);
-                            validateAndSetConfigValue(headersObj);
-                            return headersObj;
-                          });
+                          handleHeaderChange(e, index, KEY_INDEX);
                         }}
                         aria-label={HEADERS_KEY_LABEL}
                       />
@@ -277,13 +289,7 @@ export const ConfigInputMapField: React.FC<ConfigInputFieldProps> = ({
                         disabled={isLoading || (isEdit && !updatable)}
                         value={header[1]}
                         onChange={(e) => {
-                          setHeaders((prevHeaders) => {
-                            const newHeaders = [...Object.entries(prevHeaders)];
-                            newHeaders[index][1] = e.target.value;
-                            const headersObj = Object.fromEntries(newHeaders);
-                            validateAndSetConfigValue(headersObj);
-                            return headersObj;
-                          });
+                          handleHeaderChange(e, index, VALUE_INDEX);
                         }}
                         aria-label={HEADERS_VALUE_LABEL}
                       />
