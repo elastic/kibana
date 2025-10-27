@@ -15,11 +15,20 @@ import { CountryFlags } from '../country_flags/country_flags';
 export interface LabelNodeDetailsProps {
   ips?: string[];
   countryCodes?: string[];
+  onIpClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  onCountryClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
-export const LabelNodeDetails = ({ ips, countryCodes }: LabelNodeDetailsProps) => {
+export const LabelNodeDetails = ({
+  ips,
+  countryCodes,
+  onIpClick,
+  onCountryClick,
+}: LabelNodeDetailsProps) => {
   const { euiTheme } = useEuiTheme();
-  return (
+  const shouldRenderIps = ips && ips.length > 0;
+  const shouldRenderCountryFlags = countryCodes && countryCodes.length > 0;
+  return shouldRenderIps || shouldRenderCountryFlags ? (
     <div
       css={css`
         display: flex;
@@ -29,8 +38,10 @@ export const LabelNodeDetails = ({ ips, countryCodes }: LabelNodeDetailsProps) =
         margin-top: ${euiTheme.size.xs};
       `}
     >
-      {ips && ips.length > 0 && <Ips ips={ips} />}
-      {countryCodes && countryCodes.length > 0 && <CountryFlags countryCodes={countryCodes} />}
+      {shouldRenderIps && <Ips ips={ips} onIpClick={onIpClick} />}
+      {shouldRenderCountryFlags && (
+        <CountryFlags countryCodes={countryCodes} onCountryClick={onCountryClick} />
+      )}
     </div>
-  );
+  ) : null;
 };

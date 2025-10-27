@@ -159,6 +159,7 @@ describe('Detection response view', { tags: ['@ess', '@serverless'] }, () => {
 
   context('Redirection to AlertPage', () => {
     it('should redirect to alert page with host and status as the filters', () => {
+      cy.get(HOST_TABLE_ROW_TOTAL_ALERTS).first().scrollIntoView();
       cy.get(HOST_TABLE_ROW_TOTAL_ALERTS)
         .first()
         .should('be.visible')
@@ -188,6 +189,7 @@ describe('Detection response view', { tags: ['@ess', '@serverless'] }, () => {
 
     it('should redirect to alert page with host, status and severity as the filters', () => {
       const severityVal = 'high';
+      cy.get(HOST_TABLE_ROW_SEV(severityVal)).first().scrollIntoView();
       cy.get(HOST_TABLE_ROW_SEV(severityVal))
         .first()
         .should('be.visible')
@@ -213,6 +215,7 @@ describe('Detection response view', { tags: ['@ess', '@serverless'] }, () => {
         });
     });
     it('should redirect to alert page with user and status as the filters', () => {
+      cy.get(USER_TABLE_ROW_TOTAL_ALERTS).first().scrollIntoView();
       cy.get(USER_TABLE_ROW_TOTAL_ALERTS)
         .first()
         .should('be.visible')
@@ -242,6 +245,7 @@ describe('Detection response view', { tags: ['@ess', '@serverless'] }, () => {
 
     it('should redirect to alert page with user, status and severity as the filters', () => {
       const severityVal = 'high';
+      cy.get(USER_TABLE_ROW_SEV(severityVal)).first().scrollIntoView();
       cy.get(USER_TABLE_ROW_SEV(severityVal))
         .first()
         .should('be.visible')

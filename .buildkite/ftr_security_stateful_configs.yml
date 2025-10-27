@@ -36,6 +36,9 @@ disabled:
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/configs/ess/rules_management.basic.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/configs/ess/rules_management.trial.config.ts
 
+  # Detection Rules Management OOM Testing
+  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/oom_testing/configs/ess_basic_license.config.ts
+
 defaultQueue: 'n2-4-spot'
 enabled:
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/detection_engine/actions/trial_license_complete_tier/configs/ess.config.ts
@@ -73,7 +76,9 @@ enabled:
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/common/configs/edge_cases/ess_air_gapped_with_bundled_large_package.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/customization_disabled/configs/ess_basic_license.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/common/configs/edge_cases/ess_trial_license.config.ts
-  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/customization_enabled/configs/ess.config.ts
+  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/customization_enabled/customization/configs/ess.config.ts
+  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/customization_enabled/upgrade_prebuilt_rules/configs/ess.config.ts
+  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/customization_enabled/upgrade_notifications/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/customization_enabled/upgrade_prebuilt_rules/diffable_rule_fields/common_fields/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/customization_enabled/upgrade_prebuilt_rules/diffable_rule_fields/type_specific_fields/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/ml_disabled/configs/ess_basic_license.config.ts
@@ -93,6 +98,7 @@ enabled:
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/risk_engine/basic_license_essentials_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/entity_store/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/monitoring/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/entity_details/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/lists_and_exception_lists/exception_lists_items/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/lists_and_exception_lists/lists_items/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/explore/hosts/trial_license_complete_tier/configs/ess.config.ts

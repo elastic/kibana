@@ -6,7 +6,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/test/jest_node',
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/platform/plugins/private/indices_metadata'],
   coverageDirectory:
@@ -15,7 +15,4 @@ module.exports = {
   collectCoverageFrom: [
     '<rootDir>/x-pack/platform/plugins/private/indices_metadata/{common,public,server}/**/*.{ts,tsx}',
   ],
-  globals: {
-    Uint8Array: Uint8Array,
-  },
 };

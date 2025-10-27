@@ -13,20 +13,30 @@
       "onechat"
     ],
     "requiredPlugins": [
+      "actions",
       "data",
       "dataViews",
+      "uiActions",
       "esql",
       "features",
       "inference",
       "kibanaUtils",
       "lens",
-      "share"
+      "licensing",
+      "management",
+      "share",
+      "stackConnectors",
+      "licensing",
+      "triggersActionsUi"
     ],
     "requiredBundles": [
       "kibanaReact"
     ],
     "optionalPlugins": [
-      "cloud"
+      "cloud",
+      "licenseManagement",
+      "spaces",
+      "workflowsManagement"
     ],
     "extraPublicDirs": []
   }

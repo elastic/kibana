@@ -32,6 +32,7 @@ import {
   useElasticLlmCalloutDismissed,
   useObservabilityAIAssistantFlyoutStateContext,
 } from '@kbn/observability-ai-assistant-plugin/public';
+import type { ApplicationStart } from '@kbn/core/public';
 import { ChatActionsMenu } from './chat_actions_menu';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
 import { FlyoutPositionMode } from './chat_flyout';
@@ -78,6 +79,7 @@ export function ChatHeader({
   copyUrl,
   deleteConversation,
   handleArchiveConversation,
+  navigateToConnectorsManagementApp,
 }: {
   connectors: UseGenAIConnectorsResult;
   conversationId?: string;
@@ -98,6 +100,7 @@ export function ChatHeader({
   copyConversationToClipboard: (conversation: Conversation) => void;
   copyUrl: (id: string) => void;
   handleArchiveConversation: (id: string, isArchived: boolean) => Promise<void>;
+  navigateToConnectorsManagementApp: (application: ApplicationStart) => void;
 }) {
   const theme = useEuiTheme();
   const breakpoint = useCurrentEuiBreakpoint();
@@ -291,10 +294,18 @@ export function ChatHeader({
                 !tourCalloutDismissed &&
                 !(isConversationApp && isFlyoutOpen) ? (
                   <ElasticLlmTourCallout dismissTour={() => setTourCalloutDismissed(true)}>
-                    <ChatActionsMenu connectors={connectors} disabled={licenseInvalid} />
+                    <ChatActionsMenu
+                      connectors={connectors}
+                      disabled={licenseInvalid}
+                      navigateToConnectorsManagementApp={navigateToConnectorsManagementApp}
+                    />
                   </ElasticLlmTourCallout>
                 ) : (
-                  <ChatActionsMenu connectors={connectors} disabled={licenseInvalid} />
+                  <ChatActionsMenu
+                    connectors={connectors}
+                    disabled={licenseInvalid}
+                    navigateToConnectorsManagementApp={navigateToConnectorsManagementApp}
+                  />
                 )}
               </EuiFlexItem>
             </EuiFlexGroup>

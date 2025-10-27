@@ -23,6 +23,7 @@ import {
   matchGraphName,
   matchEvent,
   matchName,
+  hasTag,
   createTextChunkEvent,
   createMessageEvent,
   createToolCallEvent,
@@ -34,9 +35,8 @@ import {
   toolIdentifierFromToolCall,
 } from '@kbn/onechat-genai-utils/langchain';
 import type { Logger } from '@kbn/logging';
-import { ChunkDecisionBuffer, ChunkType } from '../utils/chunk_decision_buffer';
-import type { StateType } from './graph';
-import { toolReasoningOpeningTag } from './consts';
+import type { StateType } from './state';
+import { steps, tags } from './constants';
 
 export type ConvertedEvents =
   | MessageChunkEvent
@@ -58,84 +58,76 @@ export const convertGraphEvents = ({
     const toolCallIdToIdMap = new Map<string, string>();
     const messageId = uuidv4();
 
-    const decisionBuffer = new ChunkDecisionBuffer({ tag: toolReasoningOpeningTag });
-    let thinkingBuffer = '';
-
     return streamEvents$.pipe(
       mergeMap((event) => {
         if (!matchGraphName(event, graphName)) {
           return EMPTY;
         }
 
-        // stream text chunks for the UI
-        if (matchEvent(event, 'on_chat_model_stream')) {
+        // stream answering text chunks for the UI
+        if (matchEvent(event, 'on_chat_model_stream') && hasTag(event, tags.answerAgent)) {
           const chunk: AIMessageChunk = event.data.chunk;
           const textContent = extractTextContent(chunk);
           if (textContent) {
-            const classifiedChunks = decisionBuffer.process(textContent) ?? [];
-            const textChunks = classifiedChunks
-              .filter((cc) => cc.type === ChunkType.FinalAnswer)
-              .map((cc) => cc.text);
-
-            const thinkingChunks = classifiedChunks
-              .filter((cc) => cc.type === ChunkType.ToolReasoning)
-              .map((cc) => cc.text);
-            if (thinkingChunks.length > 0) {
-              thinkingBuffer += thinkingChunks.join('');
-            }
-
-            return of(
-              ...textChunks.map((textChunk) => createTextChunkEvent(textChunk, { messageId }))
-            );
+            return of(createTextChunkEvent(textContent, { messageId }));
           }
         }
 
-        // emit tool calls or full message on each agent step
-        if (matchEvent(event, 'on_chain_end') && matchName(event, 'agent')) {
+        // emit tool calls for research agent steps
+        if (matchEvent(event, 'on_chain_end') && matchName(event, steps.researchAgent)) {
           const events: ConvertedEvents[] = [];
-
-          // create reasoning event from thinking if present
-          if (thinkingBuffer.length > 0) {
-            events.push(createReasoningEvent(thinkingBuffer));
-          }
-
-          // reset decision and thinking buffer
-          decisionBuffer.reset();
-          thinkingBuffer = '';
-
-          // process last emitted message
-          const addedMessages: BaseMessage[] = event.data.output.addedMessages ?? [];
-          const lastMessage = addedMessages[addedMessages.length - 1];
-
+          const lastMessage: BaseMessage = event.data.output.nextMessage;
           const toolCalls = extractToolCalls(lastMessage);
+
           if (toolCalls.length > 0) {
-            const toolCallEvents: ToolCallEvent[] = [];
+            const messageText = extractTextContent(lastMessage);
+            let hasReasoningEvent = false;
 
             for (const toolCall of toolCalls) {
               const toolId = toolIdentifierFromToolCall(toolCall, toolIdMapping);
               const { toolCallId, args } = toolCall;
+
+              const { _reasoning, ...toolCallArgs } = args;
+              if (_reasoning) {
+                events.push(createReasoningEvent(_reasoning));
+                hasReasoningEvent = true;
+              }
+
               toolCallIdToIdMap.set(toolCall.toolCallId, toolId);
-              toolCallEvents.push(
+              events.push(
                 createToolCallEvent({
                   toolId,
                   toolCallId,
-                  params: args,
+                  params: toolCallArgs,
                 })
               );
             }
-            events.push(...toolCallEvents);
-          } else {
-            const messageEvent = createMessageEvent(extractTextContent(lastMessage), {
-              messageId,
-            });
-            events.push(messageEvent);
+            if (messageText && !hasReasoningEvent) {
+              events.push(createReasoningEvent(messageText));
+            }
           }
 
           return of(...events);
         }
 
+        // emit messages for answering step
+        if (matchEvent(event, 'on_chain_end') && matchName(event, steps.answerAgent)) {
+          const events: ConvertedEvents[] = [];
+
+          // process last emitted message
+          const addedMessages: BaseMessage[] = event.data.output.addedMessages ?? [];
+          const lastMessage = addedMessages[addedMessages.length - 1];
+
+          const messageEvent = createMessageEvent(extractTextContent(lastMessage), {
+            messageId,
+          });
+          events.push(messageEvent);
+
+          return of(...events);
+        }
+
         // emit tool result events
-        if (matchEvent(event, 'on_chain_end') && matchName(event, 'tools')) {
+        if (matchEvent(event, 'on_chain_end') && matchName(event, steps.executeTool)) {
           const toolMessages = ((event.data.output as StateType).addedMessages ?? []).filter(
             isToolMessage
           );

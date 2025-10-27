@@ -26,6 +26,10 @@ import {
   getArgsFromRenameFunction,
   getCategorizeField,
   findClosestColumn,
+  getKqlSearchQueries,
+  convertTimeseriesCommandToFrom,
+  hasLimitBeforeAggregate,
+  missingSortBeforeLimit,
 } from './query_parsing_helpers';
 import type { monaco } from '@kbn/monaco';
 import type { ESQLColumn } from '@kbn/esql-ast';
@@ -161,6 +165,24 @@ describe('esql query helpers', () => {
     it('should return true for timeseries with aggregations', () => {
       expect(hasTransformationalCommand('ts a | stats var = avg(b)')).toBeTruthy();
     });
+
+    it('should return true for fork with all branches containing only transformational commands', () => {
+      expect(
+        hasTransformationalCommand('from a | fork (stats count() by field1) (keep field2, field3)')
+      ).toBeTruthy();
+    });
+
+    it('should return false for fork with non-transformational commands in branches', () => {
+      expect(
+        hasTransformationalCommand('from a | fork (where field1 > 0) (eval field2 = field1 * 2)')
+      ).toBeFalsy();
+    });
+
+    it('should return false for fork with mixed transformational and non-transformational commands', () => {
+      expect(
+        hasTransformationalCommand('from a | fork (stats count() by field1) (where field2 > 0)')
+      ).toBeFalsy();
+    });
   });
 
   describe('getTimeFieldFromESQLQuery', () => {
@@ -203,6 +225,46 @@ describe('esql query helpers', () => {
     });
   });
 
+  describe('getKqlSearchQueries', () => {
+    it('should return an empty array for a regular ES|QL query', () => {
+      expect(getKqlSearchQueries('from a | where field == "value"')).toStrictEqual([]);
+    });
+
+    it('should return an empty array if there are no search functions', () => {
+      expect(getKqlSearchQueries('from a | eval b = 1')).toStrictEqual([]);
+    });
+
+    it("should return a KQL query when it's embedded in ES|QL query", () => {
+      expect(getKqlSearchQueries('FROM a | WHERE KQL("""field : "value" """)')).toStrictEqual([
+        'field : "value"',
+      ]);
+    });
+
+    it('should correctly parse KQL full text embedded query', () => {
+      expect(getKqlSearchQueries('FROM a | WHERE KQL("""full text""")')).toStrictEqual([
+        'full text',
+      ]);
+    });
+
+    it('should correctly parse long queries', () => {
+      expect(
+        getKqlSearchQueries(
+          'From a | WHERE KQL("""(category.keyword : "Men\'s Clothing" or customer_first_name.keyword : * ) AND category.keyword : "Women\'s Accessories" """)'
+        )
+      ).toStrictEqual([
+        '(category.keyword : "Men\'s Clothing" or customer_first_name.keyword : * ) AND category.keyword : "Women\'s Accessories"',
+      ]);
+    });
+
+    it('should correctly parse mixed queries, omitting ES|QL valid syntax', () => {
+      expect(
+        getKqlSearchQueries(
+          'From a | WHERE KQL("""field1: "value1" """) OR field == "value" AND KQL("""field2:value2""")'
+        )
+      ).toStrictEqual(['field1: "value1"', 'field2:value2']);
+    });
+  });
+
   describe('prettifyQuery', function () {
     it('should return the code wrapped', function () {
       const code = prettifyQuery('FROM index1 | KEEP field1, field2 | SORT field1');
@@ -216,6 +278,20 @@ describe('esql query helpers', () => {
       expect(code).toEqual(
         'FROM index1 /* cmt */\n  | KEEP field1, field2 /* cmt */\n  | SORT field1 /* cmt */'
       );
+    });
+  });
+
+  describe('convertTimeseriesCommandToFrom', function () {
+    it('should return the query as it is if no TS command is found', function () {
+      const query = convertTimeseriesCommandToFrom(
+        'FROM index1 | KEEP field1, field2 | SORT field1'
+      );
+      expect(query).toEqual('FROM index1 | KEEP field1, field2 | SORT field1');
+    });
+
+    it('should return the query with FROM command if TS command is found', function () {
+      const query = convertTimeseriesCommandToFrom('TS index1 | KEEP field1, field2 | SORT field1');
+      expect(query).toEqual('FROM index1 | KEEP field1, field2 | SORT field1');
     });
   });
 
@@ -1018,6 +1094,42 @@ describe('esql query helpers', () => {
           'FROM "cluster1:index1,cluster1:index2", "cluster2:index3", cluster3:index3, index4'
         )
       ).toEqual(['cluster3', 'cluster1', 'cluster2']);
+    });
+  });
+
+  describe('hasLimitBeforeAggregate', () => {
+    it('should return false if the query is empty', () => {
+      expect(hasLimitBeforeAggregate('')).toBe(false);
+    });
+    it('should return false if there is no limit', () => {
+      expect(hasLimitBeforeAggregate('FROM index | STATS COUNT() BY field')).toBe(false);
+    });
+    it("should return false if it's just a limit without aggregate", () => {
+      expect(hasLimitBeforeAggregate('FROM index | LIMIT 10')).toBe(false);
+    });
+    it('should return false if limit is after aggregate', () => {
+      expect(hasLimitBeforeAggregate('FROM index | STATS COUNT() BY field | LIMIT 10')).toBe(false);
+    });
+    it('should return true if limit is before aggregate', () => {
+      expect(hasLimitBeforeAggregate('FROM index | LIMIT 10 | STATS COUNT() BY field')).toBe(true);
+    });
+  });
+
+  describe('missingSortBeforeLimit', () => {
+    it('should return false if the query is empty', () => {
+      expect(missingSortBeforeLimit('')).toBe(false);
+    });
+    it('should return false if there is no limit', () => {
+      expect(missingSortBeforeLimit('FROM index | STATS COUNT() BY field')).toBe(false);
+    });
+    it("should return false if it's just a limit without sort", () => {
+      expect(missingSortBeforeLimit('FROM index | LIMIT 10')).toBe(false);
+    });
+    it('should return false if sort is before limit', () => {
+      expect(missingSortBeforeLimit('FROM index | SORT field | LIMIT 10')).toBe(false);
+    });
+    it('should return true if limit is before sort', () => {
+      expect(missingSortBeforeLimit('FROM index | LIMIT 10 | SORT field')).toBe(true);
     });
   });
 });

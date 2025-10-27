@@ -35,6 +35,8 @@ viewer:
         - 'risk-score.risk-score-*'
         - '.asset-criticality.asset-criticality-*'
         - '.entities.v1.latest.security_*'
+        - '.entities.v1.history.*.security_*'
+        - '.entities.v1.updates.security_*'
         - '.ml-anomalies-*'
         - security_solution-*.misconfiguration_latest*
       privileges:
@@ -107,9 +109,16 @@ editor:
     - names:
         - '.asset-criticality.asset-criticality-*'
         - '.entities.v1.latest.security_*'
+        - '.entities.v1.history.*.security_*'
+        - '.entities.v1.reset.*'
+        - '.entities.v1.updates.security_*'
       privileges:
         - 'read'
         - 'write'
+    - names:
+        - .entities.v1.latest.security_*
+      privileges:
+        - delete
       allow_restricted_indices: false
     - names:
         - '.ml-anomalies-*'
@@ -179,8 +188,11 @@ t1_analyst:
         - risk-score.risk-score-*
         - .asset-criticality.asset-criticality-*
         - .entities.v1.latest.security_*
+        - .entities.v1.history.*.security_*
+        - .entities.v1.updates.security_*
         - '.ml-anomalies-*'
         - security_solution-*.misconfiguration_latest*
+        - .entity_analytics.monitoring*
       privileges:
         - read
   applications:
@@ -233,8 +245,11 @@ t2_analyst:
         - .fleet-actions*
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
+        - .entities.v1.history.*.security_*
+        - .entities.v1.updates.security_*
         - '.ml-anomalies-*'
         - security_solution-*.misconfiguration_latest*
+        - .entity_analytics.monitoring*
       privileges:
         - read
     - names:
@@ -303,7 +318,10 @@ t3_analyst:
         - .fleet-actions*
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
+        - .entities.v1.history.*.security_*
+        - .entities.v1.updates.security_*
         - '.ml-anomalies-*'
+        - .entity_analytics.monitoring*
       privileges:
         - read
   applications:
@@ -384,6 +402,8 @@ threat_intelligence_analyst:
         - .fleet-actions*
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
+        - .entities.v1.history.*.security_*
+        - .entities.v1.updates.security_*
         - '.ml-anomalies-*'
       privileges:
         - read
@@ -452,7 +472,10 @@ rule_author:
         - .fleet-actions*
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
+        - .entities.v1.history.*.security_*
+        - .entities.v1.updates.security_*
         - '.ml-anomalies-*'
+        - .entity_analytics.monitoring*
       privileges:
         - read
   applications:
@@ -529,7 +552,10 @@ soc_manager:
         - .fleet-actions*
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
+        - .entities.v1.history.*.security_*
+        - .entities.v1.updates.security_*
         - '.ml-anomalies-*'
+        - .entity_analytics.monitoring*
       privileges:
         - read
   applications:
@@ -602,6 +628,7 @@ detections_admin:
         - .fleet-agents*
         - .fleet-actions*
         - '.ml-anomalies-*'
+        - .entity_analytics.monitoring*
       privileges:
         - read
     - names:
@@ -611,9 +638,15 @@ detections_admin:
     - names:
         - .asset-criticality.asset-criticality-*
         - .entities.v1.latest.security_*
+        - .entities.v1.history.*.security_*
+        - .entities.v1.updates.security_*
       privileges:
         - read
         - write
+    - names:
+        - .entities.v1.latest.security_*
+      privileges:
+        - delete
   applications:
     - application: 'kibana-.kibana'
       privileges:
@@ -666,11 +699,19 @@ platform_engineer:
     - names:
         - .asset-criticality.asset-criticality-*
         - .entities.v1.latest.security_*
+        - .entities.v1.history.*.security_*
+        - .entities.v1.reset.*
+        - .entities.v1.updates.security_*
       privileges:
         - read
         - write
     - names:
+        - .entities.v1.latest.security_*
+      privileges:
+        - delete
+    - names:
         - '.ml-anomalies-*'
+        - .entity_analytics.monitoring*
       privileges:
         - read
   applications:
@@ -731,6 +772,8 @@ endpoint_operations_analyst:
         - .items*
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
+        - .entities.v1.history.*.security_*
+        - .entities.v1.updates.security_*
         - '.ml-anomalies-*'
         - security_solution-*.misconfiguration_latest*
       privileges:
@@ -811,6 +854,8 @@ endpoint_policy_manager:
         - logstash-*
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
+        - .entities.v1.history.*.security_*
+        - .entities.v1.updates.security_*
         - security_solution-*.misconfiguration_latest*
       privileges:
         - read

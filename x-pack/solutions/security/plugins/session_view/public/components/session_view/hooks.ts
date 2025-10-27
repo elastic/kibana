@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useEffect, useMemo, useState } from 'react';
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@kbn/react-query';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type {

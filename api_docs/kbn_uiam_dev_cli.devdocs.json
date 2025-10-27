@@ -1,0 +1,101 @@
+{
+  "id": "@kbn/uiam-dev-cli",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/uiam-dev-cli",
+        "id": "def-common.runUiam",
+        "type": "Function",
+        "tags": [],
+        "label": "runUiam",
+        "description": [],
+        "signature": [
+          "({ log, signal }: { log: ",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLog",
+            "text": "ToolingLog"
+          },
+          "; signal: AbortSignal; }) => Promise<void>"
+        ],
+        "path": "x-pack/platform/packages/private/security/kbn_uiam_dev_cli/src/run_uiam.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/uiam-dev-cli",
+            "id": "def-common.runUiam.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ log, signal }",
+            "description": [],
+            "path": "x-pack/platform/packages/private/security/kbn_uiam_dev_cli/src/run_uiam.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/uiam-dev-cli",
+                "id": "def-common.runUiam.$1.log",
+                "type": "Object",
+                "tags": [],
+                "label": "log",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/tooling-log",
+                    "scope": "common",
+                    "docId": "kibKbnToolingLogPluginApi",
+                    "section": "def-common.ToolingLog",
+                    "text": "ToolingLog"
+                  }
+                ],
+                "path": "x-pack/platform/packages/private/security/kbn_uiam_dev_cli/src/run_uiam.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/uiam-dev-cli",
+                "id": "def-common.runUiam.$1.signal",
+                "type": "Object",
+                "tags": [],
+                "label": "signal",
+                "description": [],
+                "signature": [
+                  "AbortSignal"
+                ],
+                "path": "x-pack/platform/packages/private/security/kbn_uiam_dev_cli/src/run_uiam.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

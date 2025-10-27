@@ -6,7 +6,7 @@
  */
 
 import { toolIdRegexp, validateToolId, toolIdMaxLength } from './tool_ids';
-import { protectedNamespaces } from './namespaces';
+import { protectedNamespaces } from '../base/namespaces';
 
 describe('validateToolId', () => {
   test('returns undefined for valid id (non built-in)', () => {
@@ -52,14 +52,14 @@ describe('validateToolId', () => {
   test('fails when toolId equals a protected namespace name', () => {
     const protectedNamespaceName = protectedNamespaces[0];
     const error = validateToolId({ toolId: protectedNamespaceName, builtIn: false });
-    expect(error).toBe('Tool id cannot have the same name as a reserved namespaces');
+    expect(error).toBe('Tool id cannot have the same name as a reserved namespace.');
   });
 
   test('fails when non built-in tool uses a protected namespace', () => {
     const protectedNamespaceName = protectedNamespaces[0];
     const toolId = `${protectedNamespaceName}.mytool`;
     const error = validateToolId({ toolId, builtIn: false });
-    expect(error).toBe('Tool id is using a protected namespaces.');
+    expect(error).toBe('Tool id is using a protected namespace.');
   });
 
   test('allows built-in tool to use a protected namespace', () => {

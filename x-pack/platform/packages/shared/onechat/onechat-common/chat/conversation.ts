@@ -101,6 +101,8 @@ export const createReasoningStep = (reasoningStepWithResult: ReasoningStepData):
 export interface ReasoningStepData {
   /** plain text reasoning content */
   reasoning: string;
+  /** if true, will not be displayed in the thinking panel, only used as "current thinking" **/
+  transient?: boolean;
 }
 
 export type ReasoningStep = ConversationRoundStepMixin<

@@ -53,6 +53,7 @@ export interface IndexDetailsPageTestBed extends TestBed {
       isSearchBarDisabled: () => boolean;
       setSearchBarValue: (searchValue: string) => Promise<void>;
       findSearchResult: () => string;
+      isEmptyPromptVisible: () => boolean;
       isSemanticTextBannerVisible: () => boolean;
       selectSemanticTextField: (name: string, type: string) => Promise<void>;
       isReferenceFieldVisible: () => void;
@@ -270,6 +271,9 @@ export const setup = async ({
     },
     isSemanticTextBannerVisible: () => {
       return exists('indexDetailsMappingsSemanticTextBanner');
+    },
+    isEmptyPromptVisible: () => {
+      return exists('indexDetailsMappingsEmptyPrompt');
     },
     clickAddFieldButton: async () => {
       expect(exists('indexDetailsMappingsAddField')).toBe(true);

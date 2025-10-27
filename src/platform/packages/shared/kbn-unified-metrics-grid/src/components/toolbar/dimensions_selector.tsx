@@ -9,10 +9,13 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiNotificationBadge } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ToolbarSelector, type SelectableEntry } from '@kbn/shared-ux-toolbar-selector';
-import { ClearAllSection } from './clear_all_section';
+import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
+import {
+  MAX_DIMENSIONS_SELECTIONS,
+  METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ,
+} from '../../common/constants';
 
 interface DimensionsFilterProps {
   fields: Array<{
@@ -22,6 +25,7 @@ interface DimensionsFilterProps {
   selectedDimensions: string[];
   onChange: (dimensions: string[]) => void;
   onClear: () => void;
+  singleSelection?: boolean;
 }
 
 export const DimensionsSelector = ({
@@ -29,6 +33,7 @@ export const DimensionsSelector = ({
   selectedDimensions,
   onChange,
   onClear,
+  singleSelection = false,
 }: DimensionsFilterProps) => {
   // Extract all unique dimensions from fields that match the search term
   const allDimensions = useMemo(() => {
@@ -79,29 +84,44 @@ export const DimensionsSelector = ({
   }, [fields, selectedDimensions, allDimensions]);
 
   const options: SelectableEntry[] = useMemo(() => {
-    return allDimensions.map<SelectableEntry>((dimension) => ({
-      value: dimension.name,
-      label: dimension.name,
-      checked: selectedDimensions.includes(dimension.name) ? 'on' : undefined,
-      disabled: !intersectingDimensions.has(dimension.name),
-      toolTipContent: dimension.description,
-      key: dimension.name,
-    }));
-  }, [allDimensions, selectedDimensions, intersectingDimensions]);
+    const isAtMaxLimit = selectedDimensions.length >= MAX_DIMENSIONS_SELECTIONS;
+    return allDimensions.map<SelectableEntry>((dimension) => {
+      const isSelected = selectedDimensions.includes(dimension.name);
+      const isIntersecting = intersectingDimensions.has(dimension.name);
+      const isDisabledByLimit = singleSelection ? false : !isSelected && isAtMaxLimit;
+
+      return {
+        value: dimension.name,
+        label: dimension.name,
+        checked: isSelected ? 'on' : undefined,
+        // In single-selection mode, don't check intersections since we're replacing, not adding
+        disabled: singleSelection ? false : !isIntersecting || isDisabledByLimit,
+        key: dimension.name,
+      };
+    });
+  }, [allDimensions, selectedDimensions, intersectingDimensions, singleSelection]);
 
   const handleChange = useCallback(
-    (chosenOption?: SelectableEntry[]) => {
-      onChange(chosenOption?.map((p) => p.value) ?? []);
+    (chosenOption?: SelectableEntry | SelectableEntry[]) => {
+      const opts =
+        chosenOption == null ? [] : Array.isArray(chosenOption) ? chosenOption : [chosenOption];
+      const newSelection = opts.map((p) => p.value);
+      // Enforce the maximum limit
+      const limitedSelection = newSelection.slice(0, MAX_DIMENSIONS_SELECTIONS);
+      onChange(limitedSelection);
     },
     [onChange]
   );
 
   const buttonLabel = useMemo(() => {
-    if (selectedDimensions.length === 0) {
+    const count = selectedDimensions.length;
+    const dimensionLabel = selectedDimensions[0];
+    if (count === 0) {
       return (
         <FormattedMessage
           id="metricsExperience.dimensionsSelector.breakdownFieldButtonLabel"
-          defaultMessage="No dimensions selected"
+          defaultMessage="No {maxDimensions, plural, one {dimension} other {dimensions}} selected"
+          values={{ maxDimensions: MAX_DIMENSIONS_SELECTIONS }}
         />
       );
     }
@@ -110,48 +130,24 @@ export const DimensionsSelector = ({
         <EuiFlexItem grow={false}>
           <FormattedMessage
             id="metricsExperience.dimensionsSelector.breakdownFieldButtonLabelWithSelection"
-            defaultMessage="Dimensions"
+            defaultMessage="Breakdown by {dimensionLabel}"
+            values={{ dimensionLabel }}
           />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiNotificationBadge>{selectedDimensions.length}</EuiNotificationBadge>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
   }, [selectedDimensions]);
 
-  const popoverContentBelowSearch = useMemo(() => {
-    return (
-      <ClearAllSection
-        selectedOptionsLength={selectedDimensions.length}
-        onClearAllAction={onClear}
-        selectedOptionsMessage={i18n.translate(
-          'metricsExperience.dimensionsSelector.selectedStatusMessage',
-          {
-            defaultMessage:
-              '{count, plural, one {# dimension selected} other {# dimensions selected}}',
-            values: { count: selectedDimensions.length },
-          }
-        )}
-      />
-    );
-  }, [onClear, selectedDimensions.length]);
-
   return (
     <ToolbarSelector
-      data-test-subj="metricsExperienceBreakdownSelector"
+      data-test-subj={METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}
       data-selected-value={selectedDimensions}
       searchable
       buttonLabel={buttonLabel}
-      optionMatcher={({ option, normalizedSearchValue }) => {
-        return 'name' in option
-          ? String(option.name ?? '').includes(normalizedSearchValue)
-          : option.label.includes(normalizedSearchValue);
-      }}
+      optionMatcher={comboBoxFieldOptionMatcher}
       options={options}
-      singleSelection={false}
+      singleSelection={singleSelection}
       onChange={handleChange}
-      popoverContentBelowSearch={popoverContentBelowSearch}
     />
   );
 };

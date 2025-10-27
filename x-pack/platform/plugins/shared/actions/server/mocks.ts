@@ -13,6 +13,7 @@ import {
 } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import type { Logger } from '@kbn/core/server';
+import { lazyObject } from '@kbn/lazy-object';
 import type { ActionsClientMock } from './actions_client/actions_client.mock';
 import { actionsClientMock } from './actions_client/actions_client.mock';
 import type { PluginSetupContract, PluginStartContract } from './plugin';
@@ -28,7 +29,7 @@ export type { ActionsClientMock };
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 const createSetupMock = () => {
-  const mock: jest.Mocked<PluginSetupContract> = {
+  const mock: jest.Mocked<PluginSetupContract> = lazyObject({
     registerType: jest.fn(),
     registerSubActionConnectorType: jest.fn(),
     isPreconfiguredConnector: jest.fn(),
@@ -40,15 +41,16 @@ const createSetupMock = () => {
     }),
     setEnabledConnectorTypes: jest.fn(),
     isActionTypeEnabled: jest.fn(),
-  };
+  });
   return mock;
 };
 
 const createStartMock = () => {
-  const mock: jest.Mocked<PluginStartContract> = {
+  const mock: jest.Mocked<PluginStartContract> = lazyObject({
     isActionTypeEnabled: jest.fn(),
     isActionExecutable: jest.fn(),
     getAllTypes: jest.fn(),
+    listTypes: jest.fn(),
     getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientMock.create()),
     getUnsecuredActionsClient: jest.fn().mockReturnValue(unsecuredActionsClientMock.create()),
     getActionsAuthorizationWithRequest: jest
@@ -57,7 +59,8 @@ const createStartMock = () => {
     inMemoryConnectors: [],
     renderActionParameterTemplates: jest.fn(),
     isSystemActionConnector: jest.fn(),
-  };
+  });
+
   return mock;
 };
 
@@ -83,7 +86,7 @@ const createServicesMock = () => {
     Services & {
       savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
     }
-  > = {
+  > = lazyObject({
     savedObjectsClient: savedObjectsClientMock.create(),
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient().asCurrentUser,
     connectorTokenClient: new ConnectorTokenClient({
@@ -91,7 +94,7 @@ const createServicesMock = () => {
       encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
       logger,
     }),
-  };
+  });
   return mock;
 };
 
@@ -100,7 +103,7 @@ const createUnsecuredServicesMock = () => {
     UnsecuredServices & {
       savedObjectsClient: ReturnType<typeof savedObjectsRepositoryMock.create>;
     }
-  > = {
+  > = lazyObject({
     savedObjectsClient: savedObjectsRepositoryMock.create(),
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient().asCurrentUser,
     connectorTokenClient: new ConnectorTokenClient({
@@ -108,7 +111,7 @@ const createUnsecuredServicesMock = () => {
       encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
       logger,
     }),
-  };
+  });
   return mock;
 };
 

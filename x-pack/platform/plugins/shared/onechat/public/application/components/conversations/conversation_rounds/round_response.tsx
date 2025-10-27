@@ -13,7 +13,7 @@ import type {
   ConversationRoundStep,
 } from '@kbn/onechat-common';
 import React from 'react';
-import { useTimer } from '../../../hooks/use_timer';
+import { StreamingText } from './streaming_text';
 import { ChatMessageText } from './chat_message_text';
 import { RoundThinking } from './round_thinking/round_thinking';
 
@@ -30,24 +30,28 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
   steps,
   isLoading,
 }) => {
-  const timer = useTimer({ isLoading });
-  const showThinking = timer.showTimer || steps.length > 0;
+  const showThinking = steps.length > 0;
   return (
     <EuiFlexGroup
       direction="column"
-      gutterSize="s"
+      gutterSize="m"
       aria-label={i18n.translate('xpack.onechat.round.assistantResponse', {
         defaultMessage: 'Assistant response',
       })}
+      data-test-subj="agentBuilderRoundResponse"
     >
       {showThinking && (
         <EuiFlexItem grow={false}>
-          <RoundThinking steps={steps} isLoading={isLoading} timer={timer} rawRound={rawRound} />
+          <RoundThinking steps={steps} isLoading={isLoading} rawRound={rawRound} />
         </EuiFlexItem>
       )}
 
       <EuiFlexItem>
-        <ChatMessageText content={message} steps={steps} />
+        {isLoading ? (
+          <StreamingText content={message} steps={steps} />
+        ) : (
+          <ChatMessageText content={message} steps={steps} />
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

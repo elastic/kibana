@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { PackageInfo } from '@kbn/fleet-plugin/common';
+import type { PackageInfo, NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
+import { createNewPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 
 import {
   getInputHiddenVars,
@@ -16,7 +17,120 @@ import {
   getDefaultAzureCredentialsType,
   getDefaultGcpHiddenVars,
 } from './utils';
-import { getMockPolicyAWS, getPackageInfoMock, TEMPLATE_NAME } from './test/mock';
+import { AWS_PROVIDER } from './constants';
+
+// Internal test mocks
+const TEMPLATE_NAME = 'cspm';
+const CLOUDBEAT_AWS = 'cloudbeat/cis_aws';
+
+const getMockPolicyAWS = (): NewPackagePolicy => {
+  const mockPackagePolicy = createNewPackagePolicyMock();
+
+  const awsVarsMock = {
+    access_key_id: { type: 'text' },
+    secret_access_key: { type: 'password', isSecret: true },
+    session_token: { type: 'text' },
+    shared_credential_file: { type: 'text' },
+    credential_profile_name: { type: 'text' },
+    role_arn: { type: 'text' },
+    'aws.credentials.type': { value: 'cloud_formation', type: 'text' },
+  };
+
+  const dataStream = { type: 'logs', dataset: 'cloud_security_posture.findings' };
+
+  return {
+    ...mockPackagePolicy,
+    name: 'cloud_security_posture-policy',
+    package: {
+      name: 'cloud_security_posture',
+      title: 'Security Posture Management',
+      version: '1.1.1',
+    },
+    vars: {
+      posture: {
+        value: TEMPLATE_NAME,
+        type: 'text',
+      },
+      deployment: { value: AWS_PROVIDER, type: 'text' },
+    },
+    inputs: [
+      {
+        type: CLOUDBEAT_AWS,
+        policy_template: TEMPLATE_NAME,
+        enabled: true,
+        streams: [
+          {
+            enabled: true,
+            data_stream: dataStream,
+            vars: awsVarsMock,
+          },
+        ],
+      },
+    ],
+  } as NewPackagePolicy;
+};
+
+const getPackageInfoMock = (): PackageInfo => {
+  return {
+    name: TEMPLATE_NAME,
+    title: 'Cloud Security Posture Management',
+    version: '1.5.0',
+    description: 'Test package',
+    type: 'integration',
+    categories: [],
+    requirement: { kibana: { versions: '>=8.0.0' } },
+    format_version: '1.0.0',
+    release: 'ga',
+    owner: { github: 'elastic/security-team' },
+    latestVersion: '1.5.0',
+    assets: {},
+    data_streams: [
+      {
+        title: 'Cloud Security Posture Findings',
+        streams: [
+          {
+            vars: [
+              {
+                name: 'secret_access_key',
+                secret: true,
+                title: 'Secret Access Key',
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    policy_templates: [
+      {
+        name: TEMPLATE_NAME,
+        title: 'CSPM',
+        description: 'Cloud Security Posture Management',
+        inputs: [
+          {
+            type: CLOUDBEAT_AWS,
+            title: 'AWS',
+            description: 'AWS integration',
+            vars: [
+              {
+                name: 'cloud_formation_template',
+                default: 'http://example.com/cloud_formation_template',
+              },
+              {
+                name: 'cloud_shell_url',
+                default: 'https://example.com/cloud_shell_url',
+              },
+              {
+                name: 'arm_template_url',
+                default: 'https://example.com/arm_template_url',
+              },
+            ],
+          },
+        ],
+        multiple: false,
+      },
+    ],
+  } as unknown as PackageInfo;
+};
 
 describe('getPosturePolicy', () => {
   for (const [name, getPolicy, expectedVars] of [
@@ -249,16 +363,26 @@ describe('getDefaultAzureCredentialsType', () => {
 
   it('should return "service_principal_with_client_secret" for agentless', () => {
     const setupTechnology = SetupTechnology.AGENTLESS;
-    const result = getDefaultAzureCredentialsType(packageInfo, TEMPLATE_NAME, setupTechnology);
+    const result = getDefaultAzureCredentialsType(
+      packageInfo,
+      TEMPLATE_NAME,
+      setupTechnology,
+      false
+    );
 
-    expect(result).toBe('service_principal_with_client_secret');
+    expect(result['azure.credentials.type'].value).toBe('service_principal_with_client_secret');
   });
 
-  it('shold return "arm_template" for agent-based, when arm_template is available', () => {
+  it('should return "arm_template" for agent-based, when arm_template is available', () => {
     const setupTechnology = SetupTechnology.AGENT_BASED;
-    const result = getDefaultAzureCredentialsType(packageInfo, TEMPLATE_NAME, setupTechnology);
+    const result = getDefaultAzureCredentialsType(
+      packageInfo,
+      TEMPLATE_NAME,
+      setupTechnology,
+      false
+    );
 
-    expect(result).toBe('arm_template');
+    expect(result['azure.credentials.type'].value).toBe('arm_template');
   });
 
   it('should return "managed_identity" for agent-based, when arm_template is not available', () => {
@@ -281,9 +405,14 @@ describe('getDefaultAzureCredentialsType', () => {
       ],
     } as PackageInfo;
 
-    const result = getDefaultAzureCredentialsType(packageInfo, TEMPLATE_NAME, setupTechnology);
+    const result = getDefaultAzureCredentialsType(
+      packageInfo,
+      TEMPLATE_NAME,
+      setupTechnology,
+      false
+    );
 
-    expect(result).toBe('managed_identity');
+    expect(result['azure.credentials.type'].value).toBe('managed_identity');
   });
 });
 

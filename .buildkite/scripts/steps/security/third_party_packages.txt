@@ -7,3 +7,7 @@ tree-dump
 @opentelemetry/exporter-metrics-otlp-http
 inversify
 @types/d3-color
+canvas-confetti
+@types/canvas-confetti
+undici
+liquidjs

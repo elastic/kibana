@@ -25,6 +25,11 @@ options {
 import Expression,
        Join;
 
+statements
+    : {this.isDevVersion()}? setCommand+ singleStatement EOF
+    | singleStatement EOF
+    ;
+
 singleStatement
     : query EOF
     ;
@@ -38,8 +43,8 @@ sourceCommand
     : fromCommand
     | rowCommand
     | showCommand
+    | timeSeriesCommand
     // in development
-    | {this.isDevVersion()}? timeSeriesCommand
     | {this.isDevVersion()}? explainCommand
     ;
 
@@ -62,11 +67,11 @@ processingCommand
     | sampleCommand
     | forkCommand
     | rerankCommand
+    | inlineStatsCommand
+    | fuseCommand
     // in development
-    | {this.isDevVersion()}? inlinestatsCommand
     | {this.isDevVersion()}? lookupCommand
     | {this.isDevVersion()}? insistCommand
-    | {this.isDevVersion()}? fuseCommand
     ;
 
 whereCommand
@@ -102,11 +107,20 @@ fromCommand
     ;
 
 timeSeriesCommand
-    : DEV_TIME_SERIES indexPatternAndMetadataFields
+    : TS indexPatternAndMetadataFields
     ;
 
-indexPatternAndMetadataFields:
-    indexPattern (COMMA indexPattern)* metadata?
+indexPatternAndMetadataFields
+    : indexPatternOrSubquery (COMMA indexPatternOrSubquery)* metadata?
+    ;
+
+indexPatternOrSubquery
+    : indexPattern
+    | {this.isDevVersion()}? subquery
+    ;
+
+subquery
+    : LP fromCommand (PIPE processingCommand)* RP
     ;
 
 indexPattern
@@ -248,7 +262,7 @@ commandNamedParameters
     ;
 
 grokCommand
-    : GROK primaryExpression string
+    : GROK primaryExpression string (COMMA string)*
     ;
 
 mvExpandCommand
@@ -317,6 +331,23 @@ completionCommand
     : COMPLETION (targetField=qualifiedName ASSIGN)? prompt=primaryExpression commandNamedParameters
     ;
 
+inlineStatsCommand
+    : INLINE INLINE_STATS stats=aggFields (BY grouping=fields)?
+    // TODO: drop after next minor release
+    | INLINESTATS stats=aggFields (BY grouping=fields)?
+    ;
+
+fuseCommand
+    : FUSE (fuseType=identifier)? (fuseConfiguration)*
+    ;
+
+fuseConfiguration
+    : SCORE BY score=qualifiedName
+    | KEY BY key=fields
+    | GROUP BY group=qualifiedName
+    | WITH options=mapExpression
+    ;
+
 //
 // In development
 //
@@ -324,14 +355,14 @@ lookupCommand
     : DEV_LOOKUP tableName=indexPattern ON matchFields=qualifiedNamePatterns
     ;
 
-inlinestatsCommand
-    : DEV_INLINESTATS stats=aggFields (BY grouping=fields)?
-    ;
-
 insistCommand
     : DEV_INSIST qualifiedNamePatterns
     ;
 
-fuseCommand
-    : DEV_FUSE
+setCommand
+    : SET setField SEMICOLON
+    ;
+
+setField
+    : identifier ASSIGN constant
     ;

@@ -118,8 +118,10 @@
     "@kbn/shared-ux-error-boundary",
     "@kbn/field-formats-plugin",
     "@kbn/core-ui-settings-browser",
+    "@kbn/content-management-plugin",
     "@kbn/licensing-types",
-    "@kbn/content-management-plugin"
+    "@kbn/observability-synthetics-test-data",
+    "@kbn/react-query"
   ],
   "exclude": ["target/**/*"]
 }

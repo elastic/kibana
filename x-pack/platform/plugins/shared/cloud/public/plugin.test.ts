@@ -6,16 +6,20 @@
  */
 
 import { decodeCloudIdMock, parseDeploymentIdFromDeploymentUrlMock } from './plugin.test.mocks';
-import { coreMock } from '@kbn/core/public/mocks';
+import { coreMock, securityServiceMock } from '@kbn/core/public/mocks';
 import { CloudPlugin, type CloudConfigType } from './plugin';
 import type { DecodedCloudId } from '../common/decode_cloud_id';
 
 const baseConfig = {
   base_url: 'https://cloud.elastic.co',
+  billing_url: '/billing/',
+  deployments_url: '/user/deployments',
   deployment_url: '/abc123',
   profile_url: '/user/settings/',
   organization_url: '/account/',
+  performance_url: '/performance/',
   projects_url: '/projects/',
+  users_and_roles_url: '/users_and_roles/',
 };
 
 describe('Cloud Plugin', () => {
@@ -36,7 +40,13 @@ describe('Cloud Plugin', () => {
         });
         const plugin = new CloudPlugin(initContext);
 
+        const coreStart = coreMock.createStart();
+        coreStart.security.authc.getCurrentUser.mockResolvedValue(
+          securityServiceMock.createMockAuthenticatedUser()
+        );
+
         const coreSetup = coreMock.createSetup();
+        coreSetup.getStartServices.mockResolvedValue([coreStart, {}, {}]);
         coreSetup.http.get.mockResolvedValue({ elasticsearch_url: 'elasticsearch-url' });
         const setup = plugin.setup(coreSetup);
 
@@ -258,6 +268,7 @@ describe('Cloud Plugin', () => {
       });
 
       const coreStart = coreMock.createStart();
+      coreStart.http.get.mockResolvedValue({});
       plugin.start(coreStart);
 
       expect(coreStart.chrome.setHelpSupportUrl).toHaveBeenCalledTimes(1);
@@ -285,6 +296,7 @@ describe('Cloud Plugin', () => {
           serverless: undefined,
         });
         const coreStart = coreMock.createStart();
+        coreStart.http.get.mockResolvedValue({});
         const start = plugin.start(coreStart);
         expect(start.isServerlessEnabled).toBe(false);
       });

@@ -17,9 +17,9 @@ import {
   type RuntimeStateManager,
 } from '../redux';
 import { createTabsStorageManager } from '../tabs_storage_manager';
-import { TABS_ENABLED_FEATURE_FLAG_KEY } from '../../../../constants';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
+import { DiscoverSearchSessionManager } from '../discover_search_session';
 
 interface UseStateManagers {
   customizationContext: DiscoverCustomizationContext;
@@ -30,6 +30,7 @@ interface UseStateManagers {
 interface UseStateManagersReturn {
   internalState: InternalStateStore;
   runtimeStateManager: RuntimeStateManager;
+  searchSessionManager: DiscoverSearchSessionManager;
 }
 
 export const useStateManagers = ({
@@ -37,11 +38,9 @@ export const useStateManagers = ({
   urlStateStorage,
   customizationContext,
 }: UseStateManagers): UseStateManagersReturn => {
-  const tabsEnabled = services.core.featureFlags?.getBooleanValue(
-    TABS_ENABLED_FEATURE_FLAG_KEY,
-    false
-  );
-  // syncing with the _t part URL
+  const tabsEnabled = services.discoverFeatureFlags.getTabsEnabled();
+
+  // syncing with the _tab part URL
   const [tabsStorageManager] = useState(() =>
     createTabsStorageManager({
       urlStateStorage,
@@ -51,6 +50,12 @@ export const useStateManagers = ({
   );
 
   const [runtimeStateManager] = useState(() => createRuntimeStateManager());
+  const [searchSessionManager] = useState(() => {
+    return new DiscoverSearchSessionManager({
+      history: services.history,
+      session: services.data.search.session,
+    });
+  });
   const [internalState] = useState(() =>
     createInternalStateStore({
       services,
@@ -58,19 +63,17 @@ export const useStateManagers = ({
       runtimeStateManager,
       urlStateStorage,
       tabsStorageManager,
+      searchSessionManager,
     })
   );
 
   useEffect(() => {
     const stopUrlSync = tabsStorageManager.startUrlSync({
-      // if `_t` in URL changes (for example via browser history), try to restore the previous state
+      // if `_tab` in URL changes (for example via browser history), try to restore the previous state
       onChanged: (urlState) => {
         const { tabId: restoreTabId } = urlState;
         if (restoreTabId) {
           internalState.dispatch(internalStateActions.restoreTab({ restoreTabId }));
-        } else {
-          // if tabId is not present in `_t`, clear all tabs
-          internalState.dispatch(internalStateActions.clearAllTabs());
         }
       },
     });
@@ -83,7 +86,8 @@ export const useStateManagers = ({
     () => ({
       internalState,
       runtimeStateManager,
+      searchSessionManager,
     }),
-    [internalState, runtimeStateManager]
+    [internalState, runtimeStateManager, searchSessionManager]
   );
 };

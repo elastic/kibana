@@ -7,66 +7,63 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ExitRetryNode } from '@kbn/workflows';
-import { ExitRetryNodeImpl } from '../exit_retry_node_impl';
+import type { ExitRetryNode } from '@kbn/workflows/graph';
+import type { StepExecutionRuntime } from '../../../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../../../workflow_event_logger/workflow_event_logger';
+import { ExitRetryNodeImpl } from '../exit_retry_node_impl';
 
 describe('ExitRetryNodeImpl', () => {
   let underTest: ExitRetryNodeImpl;
-  let step: ExitRetryNode;
+  let node: ExitRetryNode;
+  let stepExecutionRuntime: StepExecutionRuntime;
   let workflowRuntime: WorkflowExecutionRuntimeManager;
   let workflowLogger: IWorkflowEventLogger;
 
   beforeEach(() => {
-    step = {
+    node = {
       id: 'exit-retry-1',
       type: 'exit-retry',
+      stepId: 'test-retry-step',
+      stepType: 'retry',
       startNodeId: 'enter-retry-1',
     };
-    workflowRuntime = {} as unknown as WorkflowExecutionRuntimeManager;
-    workflowLogger = {} as unknown as IWorkflowEventLogger;
-    workflowLogger.logDebug = jest.fn();
-    workflowLogger.logError = jest.fn();
-    underTest = new ExitRetryNodeImpl(step, workflowRuntime, workflowLogger);
+    stepExecutionRuntime = {
+      finishStep: jest.fn(),
+      getCurrentStepState: jest.fn().mockReturnValue({ attempt: 2 }),
+      setCurrentStepState: jest.fn(),
+    } as unknown as StepExecutionRuntime;
+    workflowRuntime = {
+      navigateToNextNode: jest.fn(),
+    } as unknown as WorkflowExecutionRuntimeManager;
+    workflowLogger = {
+      logDebug: jest.fn(),
+      logError: jest.fn(),
+    } as unknown as IWorkflowEventLogger;
+    underTest = new ExitRetryNodeImpl(node, stepExecutionRuntime, workflowRuntime, workflowLogger);
   });
 
   describe('run', () => {
-    beforeEach(() => {
-      workflowRuntime.exitScope = jest.fn();
-      workflowRuntime.goToNextStep = jest.fn();
-      workflowRuntime.getStepState = jest.fn().mockReturnValue({ attempt: 2 });
-      workflowRuntime.finishStep = jest.fn();
-      workflowRuntime.setStepState = jest.fn();
-    });
-
-    it('should exit scope', async () => {
-      await underTest.run();
-      expect(workflowRuntime.exitScope).toHaveBeenCalled();
-    });
-
     it('should finish the retry step', async () => {
-      workflowRuntime.finishStep = jest.fn();
       await underTest.run();
-      expect(workflowRuntime.finishStep).toHaveBeenCalledWith(step.startNodeId);
+      expect(stepExecutionRuntime.finishStep).toHaveBeenCalledWith();
     });
 
     it('should reset the retry step state', async () => {
-      workflowRuntime.setStepState = jest.fn();
       await underTest.run();
-      expect(workflowRuntime.setStepState).toHaveBeenCalledWith(step.startNodeId, undefined);
+      expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith(undefined);
     });
 
     it('should log debug message', async () => {
       await underTest.run();
       expect(workflowLogger.logDebug).toHaveBeenCalledWith(
-        `Exiting retry step enter-retry-1 after 2 attempts.`
+        `Exiting retry step test-retry-step after 2 attempts.`
       );
     });
 
     it('should go to next step', async () => {
       await underTest.run();
-      expect(workflowRuntime.goToNextStep).toHaveBeenCalled();
+      expect(workflowRuntime.navigateToNextNode).toHaveBeenCalled();
     });
   });
 });

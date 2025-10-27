@@ -28,6 +28,7 @@ import { transformRuleToRuleResponseV1 } from '../../transforms';
 import { validateRequiredGroupInDefaultActionsV1 } from '../../validation';
 import { transformUpdateBodyV1 } from './transforms';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
+import { validateInternalRuleType } from '../../../lib/validate_internal_rule_type';
 
 export const updateRuleRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -75,12 +76,21 @@ export const updateRuleRoute = (
           const rulesClient = await alertingContext.getRulesClient();
           const actionsClient = (await context.actions).getActionsClient();
           const rulesSettingsClient = (await context.alerting).getRulesSettingsClient(true);
+          const ruleTypes = alertingContext.listTypes();
 
           // Assert versioned inputs
           const updateRuleData: UpdateRuleRequestBodyV1<RuleParamsV1> = req.body;
           const updateRuleParams: UpdateRuleRequestParamsV1 = req.params;
 
           try {
+            const rule = await rulesClient.get({ id: updateRuleParams.id });
+
+            validateInternalRuleType({
+              ruleTypeId: rule.alertTypeId,
+              ruleTypes,
+              operationText: 'update',
+            });
+
             /**
              * Throws an error if the group is not defined in default actions
              */

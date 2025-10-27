@@ -33,7 +33,9 @@ export const RuleDurationFormat = memo((props: Props) => {
 
   return (
     <EuiToolTip data-test-subj="rule-duration-format-tooltip" content={formattedTooltip}>
-      <span data-test-subj="rule-duration-format-value">{formattedDuration}</span>
+      <span data-test-subj="rule-duration-format-value" tabIndex={0}>
+        {formattedDuration}
+      </span>
     </EuiToolTip>
   );
 });

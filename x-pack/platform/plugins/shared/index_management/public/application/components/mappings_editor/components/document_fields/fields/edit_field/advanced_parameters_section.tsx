@@ -22,7 +22,7 @@ export const AdvancedParametersSection = ({ children }: Props) => {
   };
 
   return (
-    <div className="mappingsEditor__editField__advancedSettings">
+    <div>
       <EuiHorizontalRule />
 
       <EuiButtonEmpty onClick={toggleIsVisible} flush="left" data-test-subj="toggleAdvancedSetting">

@@ -83,6 +83,7 @@ export function UserPercentile() {
       fullWidth
       prepend={I18LABELS.percentile}
       data-test-subj="uxPercentileSelect"
+      aria-label={I18LABELS.percentile}
       options={options}
       onChange={(evt) => onChange(evt.target.value)}
     />

@@ -34,4 +34,11 @@ export const testSubjectIds = {
   GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID:
     'cloudSecurityGraphGraphInvestigationInvestigateInTimeline',
   ALERT_TABLE_ROW_CSS_SELECTOR: '[data-test-subj="alertsTableIsLoaded"] .euiDataGridRow',
+  GRAPH_CONTROL_FIT_TO_VIEW_TEST_ID: 'cloudSecurityGraphGraphInvestigationFitView',
+  GRAPH_IPS_TEXT_ID: 'cloudSecurityGraphGraphInvestigationIpsText',
+  GRAPH_IPS_PLUS_COUNT_BUTTON_ID: 'cloudSecurityGraphGraphInvestigationIpsPlusCountButton',
+  GRAPH_IPS_POPOVER_ID: 'cloudSecurityGraphGraphInvestigationIpsPopover',
+  GRAPH_IPS_POPOVER_CONTENT_ID: 'cloudSecurityGraphGraphInvestigationIpsPopoverContent',
+  GRAPH_IPS_POPOVER_IP_ID: 'cloudSecurityGraphGraphInvestigationIpsPopoverId',
+  PREVIEW_SECTION_BANNER_PANEL: 'previewSectionBannerPanel',
 };

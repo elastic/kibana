@@ -20,9 +20,14 @@ export const queryKeys = {
   },
   tools: {
     all: ['tools', 'list'] as const,
+    typeInfo: ['tools', 'typeInfo'] as const,
     byId: (toolId?: string) => ['tools', toolId],
     indexSearch: {
       resolveTargets: (pattern: string) => ['tools', 'indexSearch', 'resolveTargets', pattern],
+    },
+    workflows: {
+      byId: (workflowId?: string) => ['tools', 'workflows', workflowId],
+      list: () => ['tools', 'workflows', 'list'] as const,
     },
   },
 };

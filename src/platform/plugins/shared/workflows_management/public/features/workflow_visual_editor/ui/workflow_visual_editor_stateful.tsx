@@ -7,13 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import type { WorkflowYaml } from '@kbn/workflows';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { WorkflowYaml } from '@kbn/workflows';
 import { WorkflowVisualEditor } from './workflow_visual_editor';
-import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
 import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
+import {
+  getCachedDynamicConnectorTypes,
+  getWorkflowZodSchemaLoose,
+} from '../../../../common/schema';
 import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
 
 interface WorkflowVisualEditorStatefulProps {
@@ -31,7 +34,11 @@ export function WorkflowVisualEditorStateful({
     if (!workflowYaml) {
       return null;
     }
-    const result = parseWorkflowYamlToJSON(workflowYaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
+    const dynamicConnectorTypes = getCachedDynamicConnectorTypes() || {};
+    const result = parseWorkflowYamlToJSON(
+      workflowYaml,
+      getWorkflowZodSchemaLoose(dynamicConnectorTypes)
+    );
     if (result.error) {
       return null;
     }

@@ -29,7 +29,7 @@ const createNavigationItems = (
   tree: NavigationTreeDefinitionUI = navigationTree,
   activeNodes: ChromeProjectNavigationNode[][] = []
 ) => {
-  return toNavigationItems(tree, [], activeNodes, mockPanelStateManager);
+  return toNavigationItems(tree, activeNodes, mockPanelStateManager);
 };
 
 beforeEach(() => {
@@ -96,7 +96,8 @@ describe('toNavigationItems', () => {
       • No icon found for node \\"securityGroup:assets\\". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon \\"broom\\".
       • No icon found for node \\"securityGroup:machineLearning\\". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon \\"broom\\".
       • No icon found for node \\"stack_management\\". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon \\"broom\\".
-      • Accordion items are not supported in the new navigation. Flattening them \\"stack_management, monitoring, integrations\\" and dropping accordion node \\"node-2\\"."
+      • Accordion items are not supported in the new navigation. Flattening them \\"stack_management, monitoring, integrations\\" and dropping accordion node \\"node-2\\".
+      • ID \\"endpoints\\" is used 2 times in navigation items. Each navigation item must have a unique ID."
     `);
   });
 });
@@ -209,7 +210,7 @@ describe('logo node', () => {
     const { logoItem } = createNavigationItems(treeWithLogo);
     expect(logoItem).toMatchInlineSnapshot(`
       Object {
-        "data-test-subj": "nav-item nav-item-security_solution_nav.get_started nav-item-deepLinkId-undefined nav-item-id-securityHome",
+        "data-test-subj": "nav-item nav-item-security_solution_nav.get_started nav-item-deepLinkId-undefined nav-item-id-securityHome nav-item-home",
         "href": "/tzo/s/sec/app/security/get_started",
         "iconType": "launch",
         "id": "securityHome",
@@ -236,6 +237,21 @@ describe('panel opener href', () => {
     expect(rulesPanel?.href).toBe('/tzo/s/sec/app/security/rules');
   });
 
+  it('should ignore external urls', () => {
+    const tree = structuredClone(navigationTree);
+    // @ts-expect-error to avoid excess type checking for test
+    tree.body[0]!.children![2].children[0].children[0].children[0].isExternalLink = true; // 'securityGroup:rules' first child is now external
+
+    const {
+      navItems: { primaryItems },
+    } = createNavigationItems(tree);
+
+    // Find a panel opener from the existing mock tree - 'securityGroup:rules' is a panel opener
+    const rulesPanel = primaryItems.find((item) => item.id === 'securityGroup:rules');
+    expect(rulesPanel).toBeDefined();
+    expect(rulesPanel?.href).toBe('/tzo/s/sec/app/security/cloud_security_posture/benchmarks');
+  });
+
   it('should return panel opener href as last active child href', () => {
     // Set up a last active item for the securityGroup:rules panel
     mockPanelStateManager.setPanelLastActive(
@@ -251,5 +267,18 @@ describe('panel opener href', () => {
     const rulesPanel = primaryItems.find((item) => item.id === 'securityGroup:rules');
     expect(rulesPanel).toBeDefined();
     expect(rulesPanel?.href).toBe('/tzo/s/sec/app/security/cloud_security_posture/benchmarks');
+  });
+});
+
+describe('empty panel opener', () => {
+  it('should not return panel opener if it has no children', () => {
+    const tree = structuredClone(navigationTree);
+    // @ts-expect-error to avoid excess type checking for test
+    tree.body[0]!.children![2].children = []; // 'securityGroup:rules' panel opener has no children now
+    const {
+      navItems: { primaryItems },
+    } = createNavigationItems(tree);
+
+    expect(primaryItems.find((item) => item.id === 'securityGroup:rules')).toBeUndefined();
   });
 });

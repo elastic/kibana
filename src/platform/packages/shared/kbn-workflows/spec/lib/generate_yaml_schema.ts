@@ -8,7 +8,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { zodToJsonSchema } from 'zod-to-json-schema';
+import type { ConnectorContractUnion } from '../..';
 import {
   BaseConnectorStepSchema,
   getForEachStepSchema,
@@ -22,15 +22,8 @@ import {
   WorkflowSchema,
 } from '../schema';
 
-export interface ConnectorContract {
-  type: string;
-  paramsSchema: z.ZodType;
-  connectorIdRequired?: boolean;
-  outputSchema: z.ZodType;
-}
-
 function generateStepSchemaForConnector(
-  connector: ConnectorContract,
+  connector: ConnectorContractUnion,
   stepSchema: z.ZodType,
   loose: boolean = false
 ) {
@@ -43,21 +36,26 @@ function generateStepSchemaForConnector(
 }
 
 function createRecursiveStepSchema(
-  connectors: ConnectorContract[],
+  connectors: ConnectorContractUnion[],
   loose: boolean = false
 ): z.ZodType {
+  // Use a simpler approach to avoid infinite recursion during validation
+  // Create the step schema with limited recursion depth
   const stepSchema: z.ZodType = z.lazy(() => {
     // Create step schemas with the recursive reference
+    // Use the same stepSchema reference to maintain consistency
     const forEachSchema = getForEachStepSchema(stepSchema, loose);
     const ifSchema = getIfStepSchema(stepSchema, loose);
     const parallelSchema = getParallelStepSchema(stepSchema, loose);
     const mergeSchema = getMergeStepSchema(stepSchema, loose);
     const httpSchema = getHttpStepSchema(stepSchema, loose);
+
     const connectorSchemas = connectors.map((c) =>
       generateStepSchemaForConnector(c, stepSchema, loose)
     );
 
     // Return discriminated union with all step types
+    // This creates proper JSON schema validation that Monaco YAML can handle
     return z.discriminatedUnion('type', [
       forEachSchema,
       ifSchema,
@@ -73,7 +71,7 @@ function createRecursiveStepSchema(
 }
 
 export function generateYamlSchemaFromConnectors(
-  connectors: ConnectorContract[],
+  connectors: ConnectorContractUnion[],
   loose: boolean = false
 ) {
   const recursiveStepSchema = createRecursiveStepSchema(connectors, loose);
@@ -90,12 +88,8 @@ export function generateYamlSchemaFromConnectors(
   });
 }
 
-export function getJsonSchemaFromYamlSchema(yamlSchema: z.ZodType) {
-  return zodToJsonSchema(yamlSchema, {
-    name: 'WorkflowSchema',
-  });
-}
-
 export function getStepId(stepName: string): string {
-  return stepName.toLowerCase().replace(/\s+/g, '-');
+  // Using step name as is, don't do any escaping to match the workflow engine behavior
+  // Leaving this function in case we'd to change behaviour in future.
+  return stepName;
 }

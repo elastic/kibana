@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import React, { useEffect, useRef } from 'react';
 import { Prompt, useLocation } from 'react-router-dom';
 
@@ -26,6 +28,20 @@ export const UnsavedChangesPrompt: React.FC<Props> = ({
   useEffect(() => {
     currentPathRef.current = location.pathname;
   }, [location.pathname]);
+
+  useEffect(() => {
+    const handler = (event: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        // These 2 lines of code are the recommendation from MDN for triggering a browser prompt for confirming
+        // whether or not a user wants to leave the current site.
+        event.preventDefault();
+        event.returnValue = '';
+      }
+    };
+    // Adding this handler will prompt users if they are navigating to a new page, outside of the Kibana SPA
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [hasUnsavedChanges]);
 
   const message = (nextLocation: any) => {
     const nextPath: string | undefined = nextLocation?.pathname;

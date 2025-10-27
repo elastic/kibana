@@ -23,6 +23,12 @@ export const ClearAllSection = ({
   onClearAllAction,
 }: ClearAllSectionProps) => {
   const { euiTheme } = useEuiTheme();
+  const clearSelectionButtonLabel = i18n.translate(
+    'metricsExperience.clearAllSection.clearSelectionButtonLabel',
+    {
+      defaultMessage: 'Clear selection',
+    }
+  );
   return (
     <EuiFlexGroup
       alignItems="center"
@@ -45,10 +51,13 @@ export const ClearAllSection = ({
       )}
       <EuiFlexItem grow={false}>
         {selectedOptionsLength > 0 && (
-          <EuiButtonEmpty size="s" flush="both" onClick={onClearAllAction}>
-            {i18n.translate('metricsExperience.clearAllSection.clearSelectionButtonLabel', {
-              defaultMessage: 'Clear selection',
-            })}
+          <EuiButtonEmpty
+            aria-label={clearSelectionButtonLabel}
+            size="s"
+            flush="both"
+            onClick={onClearAllAction}
+          >
+            {clearSelectionButtonLabel}
           </EuiButtonEmpty>
         )}
       </EuiFlexItem>

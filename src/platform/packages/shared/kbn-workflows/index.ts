@@ -8,7 +8,13 @@
  */
 
 export * from './spec/lib/generate_yaml_schema';
+export * from './spec/lib/get_json_schema_from_yaml_schema';
 export * from './spec/schema';
 export * from './types/latest';
 export * from './types/utils';
 export * from './common/constants';
+export * from './common/elasticsearch_request_builder';
+export * from './common/kibana_request_builder';
+
+// Export specific types that are commonly used
+export type { BuiltInStepType, TriggerType } from './spec/schema';

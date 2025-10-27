@@ -35,24 +35,4 @@ export const registerEnterpriseSearchIntegrations = (
       isBeta: false,
     });
   }
-
-  customIntegrations.registerCustomIntegration({
-    id: 'api',
-    title: i18n.translate('xpack.enterpriseSearch.integrations.apiName', {
-      defaultMessage: 'API',
-    }),
-    description: i18n.translate('xpack.enterpriseSearch.integrations.apiDescription', {
-      defaultMessage: "Add search to your application with Elasticsearch's robust APIs.",
-    }),
-    categories: ['search', 'custom', 'elastic_stack', 'sdk_search', 'language_client'],
-    uiInternalPath: '/app/elasticsearch/content/search_indices/new_index/api',
-    icons: [
-      {
-        type: 'eui',
-        src: 'logoElasticsearch',
-      },
-    ],
-    shipper: 'search',
-    isBeta: false,
-  });
 };

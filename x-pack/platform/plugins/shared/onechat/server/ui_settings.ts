@@ -20,11 +20,10 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
         defaultMessage: 'Elastic Agent Builder',
       }),
       schema: schema.boolean(),
-      value: false,
-      readonly: true,
-      readonlyMode: 'ui',
+      value: true,
       technicalPreview: true,
       requiresPageReload: true,
+      readonly: false,
     },
   });
 };

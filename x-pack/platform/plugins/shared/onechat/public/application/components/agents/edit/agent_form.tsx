@@ -16,6 +16,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
+  EuiLink,
   EuiLoadingSpinner,
   EuiNotificationBadge,
   EuiPopover,
@@ -32,8 +33,12 @@ import { filterToolsBySelection, type AgentDefinition } from '@kbn/onechat-commo
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
+import { defer } from 'lodash';
+import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 
 import { css } from '@emotion/react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { docLinks } from '../../../../../common/doc_links';
 import { useAgentEdit } from '../../../hooks/agents/use_agent_edit';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useNavigation } from '../../../hooks/use_navigation';
@@ -66,15 +71,27 @@ interface CreateAgentFormProps {
 
 type AgentFormProps = EditingAgentFormProps | CreateAgentFormProps;
 
-export type AgentFormData = Omit<AgentDefinition, 'type'>;
+export type AgentFormData = Omit<AgentDefinition, 'type' | 'readonly'>;
 
 export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }) => {
   const { euiTheme } = useEuiTheme();
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const { navigateToOnechatUrl } = useNavigation();
+  // Resolve state updates before navigation to avoid triggering unsaved changes prompt
+  const deferNavigateToOnechatUrl = useCallback(
+    (...args: Parameters<typeof navigateToOnechatUrl>) => {
+      defer(() => navigateToOnechatUrl(...args));
+    },
+    [navigateToOnechatUrl]
+  );
+  const { services } = useKibana();
   const {
-    services: { notifications },
-  } = useKibana();
+    notifications,
+    http,
+    overlays: { openConfirm },
+    application: { navigateToUrl },
+    appParams: { history },
+  } = services;
   const agentFormId = useGeneratedHtmlId({
     prefix: 'agentForm',
   });
@@ -126,14 +143,21 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
     resolver: zodResolver(agentFormSchema),
   });
   const { control, handleSubmit, reset, formState, watch } = formMethods;
-  const { errors, isDirty } = formState;
+  const { errors, isDirty, isSubmitSuccessful } = formState;
   const hasErrors = Object.keys(errors).length > 0;
+
+  const [isCancelling, setIsCancelling] = useState(false);
 
   useEffect(() => {
     if (agentState && !isLoading) {
       reset(agentState);
     }
   }, [agentState, isLoading, reset]);
+
+  const handleCancel = useCallback(() => {
+    setIsCancelling(true);
+    defer(() => navigateToOnechatUrl(appPaths.agents.list));
+  }, [navigateToOnechatUrl]);
 
   const handleSave = useCallback(
     async (
@@ -150,10 +174,10 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
         setSubmittingButtonId(undefined);
       }
       if (navigateToListView) {
-        navigateToOnechatUrl(appPaths.agents.list);
+        deferNavigateToOnechatUrl(appPaths.agents.list);
       }
     },
-    [submit, navigateToOnechatUrl]
+    [submit, deferNavigateToOnechatUrl]
   );
 
   const handleSaveAndChat = useCallback(
@@ -162,9 +186,9 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
         buttonId: BUTTON_IDS.SAVE_AND_CHAT,
         navigateToListView: false,
       });
-      navigateToOnechatUrl(appPaths.chat.newWithAgent({ agentId: data.id }));
+      deferNavigateToOnechatUrl(appPaths.chat.newWithAgent({ agentId: data.id }));
     },
-    [navigateToOnechatUrl, handleSave]
+    [deferNavigateToOnechatUrl, handleSave]
   );
 
   const isFormDisabled = isLoading || isSubmitting;
@@ -174,6 +198,15 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
   const [isAdditionalActionsMenuOpen, setAdditionalActionsMenuOpen] = useState(false);
 
   const [submittingButtonId, setSubmittingButtonId] = useState<string | undefined>();
+
+  useUnsavedChangesPrompt({
+    hasUnsavedChanges: isDirty && !isSubmitSuccessful && !isCancelling,
+    history,
+    http,
+    navigateToUrl,
+    openConfirm,
+    shouldPromptOnReplace: false,
+  });
 
   const agentTools = watch('configuration.tools');
   const activeToolsCount = useMemo(() => {
@@ -316,6 +349,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
   if (error) {
     return (
       <EuiCallOut
+        announceOnMount
         title={i18n.translate('xpack.onechat.agents.errorTitle', {
           defaultMessage: 'Error loading agent',
         })}
@@ -357,7 +391,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
             {!isCreateMode && (
               <EuiFlexItem grow={false}>
                 <AgentAvatar
-                  size="xl"
+                  size="l"
                   agent={{
                     name: agentName,
                     avatar_symbol: agentAvatarSymbol,
@@ -370,11 +404,35 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
           </EuiFlexGroup>
         }
         description={
-          isCreateMode
-            ? i18n.translate('xpack.onechat.createAgent.description', {
-                defaultMessage: 'Create an AI agent, select tools and provide custom instructions.',
-              })
-            : agentDescription
+          isCreateMode ? (
+            <FormattedMessage
+              id="xpack.onechat.createAgent.description"
+              defaultMessage="Create an AI agent with custom instructions, assign it tools to work with your data, and make it easily findable for your team. {learnMoreLink}"
+              values={{
+                learnMoreLink: (
+                  <EuiLink
+                    href={docLinks.agentBuilderAgents}
+                    target="_blank"
+                    aria-label={i18n.translate(
+                      'xpack.onechat.agents.form.settings.systemReferencesLearnMoreAriaLabel',
+                      {
+                        defaultMessage: 'Learn more about agents in the documentation',
+                      }
+                    )}
+                  >
+                    {i18n.translate(
+                      'xpack.onechat.agents.form.settings.systemReferencesLearnMore',
+                      {
+                        defaultMessage: 'Learn more',
+                      }
+                    )}
+                  </EuiLink>
+                ),
+              }}
+            />
+          ) : (
+            agentDescription
+          )
         }
         rightSideItems={[
           ...(!isCreateMode
@@ -504,14 +562,13 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
         <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              aria-label={labels.agents.settings.cancelButtonLabel}
               size="s"
               iconType="cross"
               color="text"
-              onClick={() => navigateToOnechatUrl(appPaths.agents.list)}
+              onClick={handleCancel}
             >
-              {i18n.translate('xpack.onechat.agents.cancelButtonLabel', {
-                defaultMessage: 'Cancel',
-              })}
+              {labels.agents.settings.cancelButtonLabel}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>{renderChatButton()}</EuiFlexItem>

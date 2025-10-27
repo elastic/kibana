@@ -11,15 +11,17 @@ export type {
   GridData,
   DashboardPanel,
   DashboardSection,
-  DashboardAttributes,
+  DashboardState,
   DashboardItem,
   DashboardGetIn,
+  DashboardAPIGetOut,
   DashboardGetOut,
   DashboardCreateIn,
   DashboardCreateOut,
   DashboardCreateOptions,
   DashboardSearchIn,
   DashboardSearchOut,
+  DashboardSearchAPIResult,
   DashboardSearchOptions,
   DashboardUpdateIn,
   DashboardUpdateOut,
@@ -28,14 +30,7 @@ export type {
   DashboardFilter,
   DashboardQuery,
 } from './types';
-export {
-  serviceDefinition,
-  dashboardAttributesSchema,
-  dashboardGetResultSchema,
-  dashboardCreateResultSchema,
-  dashboardItemSchema,
-  dashboardSearchResultsSchema,
-  referenceSchema,
-} from './cm_services';
+export { getServiceDefinition } from './cm_services';
+export { getDashboardAPIGetResultSchema, getDashboardSearchResultsSchema } from './schema';
 export { savedObjectToItem } from './transform_utils';
 export { transformDashboardIn } from './transforms';

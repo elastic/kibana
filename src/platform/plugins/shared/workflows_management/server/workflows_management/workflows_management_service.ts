@@ -7,87 +7,106 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable complexity, @typescript-eslint/no-non-null-assertion */
+
 import type { estypes } from '@elastic/elasticsearch';
+import { v4 as generateUuid } from 'uuid';
+import type {
+  ActionsClient,
+  PluginStartContract as ActionsPluginStartContract,
+  IUnsecuredActionsClient,
+} from '@kbn/actions-plugin/server';
+import type { FindActionResult } from '@kbn/actions-plugin/server/types';
 import type {
   ElasticsearchClient,
   KibanaRequest,
   Logger,
   SecurityServiceStart,
 } from '@kbn/core/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
+  ConnectorTypeInfo,
   CreateWorkflowCommand,
   EsWorkflow,
+  EsWorkflowExecution,
   EsWorkflowStepExecution,
+  ExecutionStatus,
+  ExecutionType,
   UpdatedWorkflowResponseDto,
+  WorkflowAggsDto,
   WorkflowDetailDto,
   WorkflowExecutionDto,
   WorkflowExecutionHistoryModel,
   WorkflowExecutionListDto,
   WorkflowListDto,
+  WorkflowStatsDto,
   WorkflowYaml,
 } from '@kbn/workflows';
 import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
-import type {
-  ExecutionStatus,
-  ExecutionType,
-  WorkflowAggsDto,
-  WorkflowStatsDto,
-} from '@kbn/workflows/types/v1';
-import { v4 as generateUuid } from 'uuid';
-import { WorkflowValidationError } from '../../common/lib/errors';
-import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
-
-import { parseWorkflowYamlToJSON, stringifyWorkflowDefinition } from '../../common/lib/yaml_utils';
-import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common/schema';
-import { getAuthenticatedUser } from '../lib/get_user';
-import type { WorkflowProperties, WorkflowStorage } from '../storage/workflow_storage';
-import { createStorage } from '../storage/workflow_storage';
-import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
-import { createOrUpdateIndex } from './lib/create_index';
+import type { z } from '@kbn/zod';
 import { getWorkflowExecution } from './lib/get_workflow_execution';
-import {
-  WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
-  WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
-} from './lib/index_mappings';
 import { searchStepExecutions } from './lib/search_step_executions';
 import { searchWorkflowExecutions } from './lib/search_workflow_executions';
 import type { IWorkflowEventLogger, LogSearchResult } from './lib/workflow_logger';
 import { SimpleWorkflowLogger } from './lib/workflow_logger';
 import type {
+  GetAvailableConnectorsResponse,
   GetExecutionLogsParams,
   GetStepExecutionParams,
   GetStepLogsParams,
   GetWorkflowsParams,
 } from './workflows_management_api';
+import {
+  UNSUPPORTED_CONNECTOR_TYPES,
+  WORKFLOWS_EXECUTION_LOGS_INDEX,
+  WORKFLOWS_EXECUTIONS_INDEX,
+  WORKFLOWS_STEP_EXECUTIONS_INDEX,
+} from '../../common';
+import { CONNECTOR_SUB_ACTIONS_MAP } from '../../common/connector_sub_actions_map';
 
+import { InvalidYamlSchemaError, WorkflowValidationError } from '../../common/lib/errors';
+import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
+import { parseWorkflowYamlToJSON, stringifyWorkflowDefinition } from '../../common/lib/yaml_utils';
+import { getWorkflowZodSchema, getWorkflowZodSchemaLoose } from '../../common/schema';
+import { getAuthenticatedUser } from '../lib/get_user';
+import { hasScheduledTriggers } from '../lib/schedule_utils';
+import type { WorkflowProperties, WorkflowStorage } from '../storage/workflow_storage';
+import { createStorage } from '../storage/workflow_storage';
+import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
+
+const DEFAULT_PAGE_SIZE = 20;
 export interface SearchWorkflowExecutionsParams {
   workflowId: string;
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
+  page?: number;
+  perPage?: number;
 }
 
 export class WorkflowsService {
-  private esClient: ElasticsearchClient | null = null;
-  private workflowStorage: WorkflowStorage | null = null;
+  private esClient!: ElasticsearchClient;
+  private workflowStorage!: WorkflowStorage;
+  private workflowEventLoggerService!: SimpleWorkflowLogger;
   private taskScheduler: WorkflowTaskScheduler | null = null;
   private readonly logger: Logger;
-  private readonly workflowsExecutionIndex: string;
-  private readonly stepsExecutionIndex: string;
-  private workflowEventLoggerService: SimpleWorkflowLogger | null = null;
   private security?: SecurityServiceStart;
+  private getActionsClient: () => Promise<IUnsecuredActionsClient>;
+  private getActionsClientWithRequest: (
+    request: KibanaRequest
+  ) => Promise<PublicMethodsOf<ActionsClient>>;
 
   constructor(
     esClientPromise: Promise<ElasticsearchClient>,
     logger: Logger,
-    workflowsExecutionIndex: string,
-    stepsExecutionIndex: string,
-    workflowExecutionLogsIndex: string,
-    enableConsoleLogging: boolean = false
+    enableConsoleLogging: boolean = false,
+    getActionsStart: () => Promise<ActionsPluginStartContract>
   ) {
     this.logger = logger;
-    this.stepsExecutionIndex = stepsExecutionIndex;
-    this.workflowsExecutionIndex = workflowsExecutionIndex;
-    void this.initialize(esClientPromise, workflowExecutionLogsIndex, enableConsoleLogging);
+    this.getActionsClient = () =>
+      getActionsStart().then((actions) => actions.getUnsecuredActionsClient());
+    this.getActionsClientWithRequest = (request: KibanaRequest) =>
+      getActionsStart().then((actions) => actions.getActionsClientWithRequest(request));
+    void this.initialize(esClientPromise, enableConsoleLogging);
   }
 
   public setTaskScheduler(taskScheduler: WorkflowTaskScheduler) {
@@ -100,7 +119,6 @@ export class WorkflowsService {
 
   private async initialize(
     esClientPromise: Promise<ElasticsearchClient>,
-    workflowExecutionLogsIndex: string,
     enableConsoleLogging: boolean = false
   ) {
     this.esClient = await esClientPromise;
@@ -114,23 +132,9 @@ export class WorkflowsService {
     this.workflowEventLoggerService = new SimpleWorkflowLogger(
       this.logger,
       this.esClient,
-      workflowExecutionLogsIndex,
+      WORKFLOWS_EXECUTION_LOGS_INDEX,
       enableConsoleLogging
     );
-
-    // Create execution indices
-    await createOrUpdateIndex({
-      esClient: this.esClient,
-      indexName: this.workflowsExecutionIndex,
-      mappings: WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
-      logger: this.logger,
-    });
-    await createOrUpdateIndex({
-      esClient: this.esClient,
-      indexName: this.stepsExecutionIndex,
-      mappings: WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
-      logger: this.logger,
-    });
   }
 
   public async getWorkflow(id: string, spaceId: string): Promise<WorkflowDetailDto | null> {
@@ -154,7 +158,7 @@ export class WorkflowsService {
       }
 
       const document = response.hits.hits[0];
-      return this.transformStorageDocumentToWorkflowDto(document._id!, document._source!);
+      return this.transformStorageDocumentToWorkflowDto(document._id, document._source);
     } catch (error) {
       if (error.statusCode === 404) {
         return null;
@@ -172,9 +176,12 @@ export class WorkflowsService {
       throw new Error('WorkflowsService not initialized');
     }
 
-    const parsedYaml = parseWorkflowYamlToJSON(workflow.yaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
+    const parsedYaml = parseWorkflowYamlToJSON(
+      workflow.yaml,
+      await this.getWorkflowZodSchema({ loose: true }, spaceId, request)
+    );
     if (!parsedYaml.success) {
-      throw new Error('Invalid workflow yaml: ' + parsedYaml.error.message);
+      throw new Error(`Invalid workflow yaml: ${parsedYaml.error.message}`);
     }
 
     // Validate step name uniqueness
@@ -187,7 +194,7 @@ export class WorkflowsService {
       );
     }
 
-    // The type of parsedYaml.data is validated by WORKFLOW_ZOD_SCHEMA_LOOSE, so this assertion is partially safe.
+    // The type of parsedYaml.data is validated by getWorkflowZodSchemaLoose(), so this assertion is partially safe.
     const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data as WorkflowYaml);
     const authenticatedUser = getAuthenticatedUser(request, this.security);
     const now = new Date();
@@ -219,7 +226,7 @@ export class WorkflowsService {
     if (this.taskScheduler && workflowToCreate.definition.triggers) {
       for (const trigger of workflowToCreate.definition.triggers) {
         if (trigger.type === 'scheduled' && trigger.enabled) {
-          await this.taskScheduler.scheduleWorkflowTask(id, 'default', trigger);
+          await this.taskScheduler.scheduleWorkflowTask(id, spaceId, trigger, request);
         }
       }
     }
@@ -260,39 +267,67 @@ export class WorkflowsService {
 
       const authenticatedUser = getAuthenticatedUser(request, this.security);
       const now = new Date();
+      const validationErrors: string[] = [];
 
       const updatedData: Partial<WorkflowProperties> = {
         lastUpdatedBy: authenticatedUser,
         updated_at: now.toISOString(),
       };
 
+      // If yaml is being updated, validate and update definition
+      let shouldUpdateScheduler = false;
+
+      // Check if enabled state is being changed
+      if (workflow.enabled !== undefined && workflow.enabled !== existingDocument._source.enabled) {
+        shouldUpdateScheduler = true;
+      }
+
       // Handle yaml updates - this will also update definition and validation
       if (workflow.yaml) {
-        const parsedYaml = parseWorkflowYamlToJSON(workflow.yaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
+        // we always update the yaml, even if it's not valid, to allow users to save draft
+        updatedData.yaml = workflow.yaml;
+        const parsedYaml = parseWorkflowYamlToJSON(
+          workflow.yaml,
+          await this.getWorkflowZodSchema({ loose: false }, spaceId, request)
+        );
         if (!parsedYaml.success) {
           updatedData.definition = undefined;
           updatedData.enabled = false;
           updatedData.valid = false;
+          if (
+            parsedYaml.error instanceof InvalidYamlSchemaError &&
+            parsedYaml.error.formattedZodError
+          ) {
+            validationErrors.push(
+              ...parsedYaml.error.formattedZodError.issues.map((error) => error.message)
+            );
+          } else {
+            validationErrors.push(parsedYaml.error.message);
+          }
+          shouldUpdateScheduler = true;
         } else {
           // Validate step name uniqueness
           const stepValidation = validateStepNameUniqueness(parsedYaml.data as WorkflowYaml);
           if (!stepValidation.isValid) {
-            const errorMessages = stepValidation.errors.map((error) => error.message);
-            throw new WorkflowValidationError(
-              'Workflow validation failed: Step names must be unique throughout the workflow.',
-              errorMessages
+            updatedData.definition = undefined;
+            updatedData.enabled = false;
+            updatedData.valid = false;
+            validationErrors.push(...stepValidation.errors.map((error) => error.message));
+            shouldUpdateScheduler = true;
+          } else {
+            const workflowDef = transformWorkflowYamlJsontoEsWorkflow(
+              parsedYaml.data as WorkflowYaml
             );
+            // Update all fields from the transformed YAML, not just definition
+            updatedData.definition = workflowDef.definition;
+            updatedData.name = workflowDef.name;
+            updatedData.enabled = workflowDef.enabled;
+            updatedData.description = workflowDef.description;
+            updatedData.tags = workflowDef.tags;
+            updatedData.valid = true;
+            updatedData.yaml = workflow.yaml;
+            shouldUpdateScheduler = true;
           }
-          const workflowDef = transformWorkflowYamlJsontoEsWorkflow(
-            parsedYaml.data as WorkflowYaml
-          );
-          // Update all fields from the transformed YAML, not just definition
-          updatedData.definition = workflowDef.definition;
-          updatedData.name = workflowDef.name;
-          updatedData.enabled = workflowDef.enabled;
-          updatedData.description = workflowDef.description;
-          updatedData.tags = workflowDef.tags;
-          updatedData.valid = true;
         }
       }
 
@@ -342,10 +377,60 @@ export class WorkflowsService {
         document: finalData,
       });
 
+      // Update task scheduler if needed
+      if (shouldUpdateScheduler && this.taskScheduler) {
+        try {
+          if (finalData.definition && finalData.valid && finalData.enabled) {
+            // Check if workflow has scheduled triggers before updating scheduler
+            const workflowHasScheduledTriggers = hasScheduledTriggers(
+              finalData.definition.triggers || []
+            );
+
+            if (workflowHasScheduledTriggers) {
+              // Get the updated workflow from storage
+              const updatedWorkflow = await this.getWorkflow(id, spaceId);
+              if (updatedWorkflow && updatedWorkflow.definition) {
+                // Convert WorkflowDetailDto to EsWorkflow for scheduler
+                const workflowForScheduler: EsWorkflow = {
+                  ...updatedWorkflow,
+                  definition: updatedWorkflow.definition, // We already checked it's not null
+                  tags: [], // TODO: Add tags support to WorkflowDetailDto
+                  deleted_at: null,
+                };
+
+                await this.taskScheduler.updateWorkflowTasks(
+                  workflowForScheduler,
+                  spaceId,
+                  request
+                );
+                this.logger.info(`Updated scheduled tasks for workflow ${id}`);
+              }
+            } else {
+              // No scheduled triggers, remove any existing scheduled tasks
+              await this.taskScheduler.unscheduleWorkflowTasks(id);
+              this.logger.info(
+                `Removed scheduled tasks for workflow ${id} (no scheduled triggers)`
+              );
+            }
+          } else {
+            // If workflow is invalid or disabled, remove all scheduled tasks
+            await this.taskScheduler.unscheduleWorkflowTasks(id);
+            this.logger.info(
+              `Removed all scheduled tasks for workflow ${id} (workflow disabled or invalid)`
+            );
+          }
+        } catch (error) {
+          this.logger.error(`Failed to update scheduled tasks for workflow ${id}: ${error}`);
+          // Don't throw the error - the workflow update should succeed even if scheduler update fails
+        }
+      }
+
       return {
         id,
         lastUpdatedAt: new Date(finalData.updated_at),
         lastUpdatedBy: finalData.lastUpdatedBy,
+        enabled: finalData.enabled,
+        validationErrors,
         valid: finalData.valid,
       };
     } catch (error) {
@@ -407,7 +492,7 @@ export class WorkflowsService {
     const { limit = 20, page = 1, enabled, createdBy, query } = params;
     const from = (page - 1) * limit;
 
-    const must: any[] = [];
+    const must: estypes.QueryDslQueryContainer[] = [];
 
     // Filter by spaceId
     must.push({ term: { spaceId } });
@@ -515,19 +600,26 @@ export class WorkflowsService {
         if (!hit._source) {
           throw new Error('Missing _source in search result');
         }
-        const workflow = this.transformStorageDocumentToWorkflowDto(hit._id!, hit._source);
-        // Skip workflows with null definition for the list
-        if (!workflow.definition) {
-          return null;
-        }
+        const workflow = this.transformStorageDocumentToWorkflowDto(hit._id, hit._source);
         return {
           ...workflow,
           description: workflow.description || '',
           definition: workflow.definition,
-          history: [], // History is loaded separately when needed for performance
+          history: [] as WorkflowExecutionHistoryModel[], // Will be populated below
         };
       })
       .filter((workflow): workflow is NonNullable<typeof workflow> => workflow !== null);
+
+    // Fetch recent execution history for all workflows
+    if (workflows.length > 0) {
+      const workflowIds = workflows.map((w) => w.id);
+      const executionHistory = await this.getRecentExecutionsForWorkflows(workflowIds, spaceId);
+
+      // Populate history for each workflow
+      workflows.forEach((workflow) => {
+        workflow.history = executionHistory[workflow.id] || [];
+      });
+    }
 
     return {
       _pagination: {
@@ -568,15 +660,15 @@ export class WorkflowsService {
       },
     });
 
-    const aggs = statsResponse.aggregations as any;
+    const aggs = statsResponse.aggregations;
 
     // Get execution history stats for the last 30 days
     const executionStats = await this.getExecutionHistoryStats(spaceId);
 
     return {
       workflows: {
-        enabled: aggs.enabled_count.doc_count,
-        disabled: aggs.disabled_count.doc_count,
+        enabled: aggs?.enabled_count.doc_count ?? 0,
+        disabled: aggs?.disabled_count.doc_count ?? 0,
       },
       executions: executionStats,
     };
@@ -587,8 +679,8 @@ export class WorkflowsService {
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-      const response = await this.esClient!.search({
-        index: this.workflowsExecutionIndex,
+      const response = await this.esClient.search({
+        index: WORKFLOWS_EXECUTIONS_INDEX,
         size: 0,
         query: {
           bool: {
@@ -626,8 +718,10 @@ export class WorkflowsService {
         },
       });
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const buckets = (response.aggregations as any)?.daily_stats?.buckets || [];
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return buckets.map((bucket: any) => ({
         date: bucket.key_as_string,
         timestamp: bucket.key,
@@ -646,6 +740,7 @@ export class WorkflowsService {
       throw new Error('WorkflowsService not initialized');
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const aggs: Record<string, any> = {};
 
     fields.forEach((field) => {
@@ -672,10 +767,12 @@ export class WorkflowsService {
     });
 
     const result: WorkflowAggsDto = {};
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const responseAggs = aggsResponse.aggregations as any;
 
     fields.forEach((field) => {
       if (responseAggs[field]) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         result[field] = responseAggs[field].buckets.map((bucket: any) => ({
           label: bucket.key_as_string,
           key: bucket.key,
@@ -693,10 +790,10 @@ export class WorkflowsService {
     spaceId: string
   ): Promise<WorkflowExecutionDto | null> {
     return getWorkflowExecution({
-      esClient: this.esClient!,
+      esClient: this.esClient,
       logger: this.logger,
-      workflowExecutionIndex: this.workflowsExecutionIndex,
-      stepsExecutionIndex: this.stepsExecutionIndex,
+      workflowExecutionIndex: WORKFLOWS_EXECUTIONS_INDEX,
+      stepsExecutionIndex: WORKFLOWS_STEP_EXECUTIONS_INDEX,
       workflowExecutionId: executionId,
       spaceId,
     });
@@ -735,15 +832,23 @@ export class WorkflowsService {
       });
     }
 
+    const page = params.page ?? 1;
+    const perPage = params.perPage ?? DEFAULT_PAGE_SIZE;
+    const from = (page - 1) * perPage;
+
     return searchWorkflowExecutions({
-      esClient: this.esClient!,
+      esClient: this.esClient,
       logger: this.logger,
-      workflowExecutionIndex: this.workflowsExecutionIndex,
+      workflowExecutionIndex: WORKFLOWS_EXECUTIONS_INDEX,
       query: {
         bool: {
           must,
         },
       },
+      size: perPage,
+      from,
+      page,
+      perPage,
     });
   }
 
@@ -751,8 +856,8 @@ export class WorkflowsService {
     executionId: string,
     spaceId: string
   ): Promise<WorkflowExecutionHistoryModel[]> {
-    const response = await this.esClient!.search<EsWorkflowStepExecution>({
-      index: this.stepsExecutionIndex,
+    const response = await this.esClient.search<EsWorkflowStepExecution>({
+      index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
       query: {
         bool: {
           must: [
@@ -769,8 +874,13 @@ export class WorkflowsService {
     });
 
     return response.hits.hits.map((hit) => {
-      const source = hit._source!;
+      if (!hit._source) {
+        throw new Error('Missing _source in search result');
+      }
+      const source = hit._source;
       const startedAt = source.startedAt;
+      // TODO: add these types
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const finishedAt = (source as any).endedAt || (source as any).finishedAt;
 
       // Calculate duration in milliseconds if both timestamps are available
@@ -787,11 +897,107 @@ export class WorkflowsService {
     });
   }
 
+  /**
+   * Efficiently fetch the most recent execution for multiple workflows
+   */
+  private async getRecentExecutionsForWorkflows(
+    workflowIds: string[],
+    spaceId: string
+  ): Promise<Record<string, WorkflowExecutionHistoryModel[]>> {
+    if (!this.esClient || workflowIds.length === 0) {
+      return {};
+    }
+
+    try {
+      const response = await this.esClient.search<EsWorkflowExecution>({
+        index: WORKFLOWS_EXECUTIONS_INDEX,
+        size: 0, // We only want aggregations
+        query: {
+          bool: {
+            must: [
+              { terms: { workflowId: workflowIds } },
+              {
+                bool: {
+                  should: [
+                    { term: { spaceId } },
+                    // Backward compatibility for objects without spaceId
+                    { bool: { must_not: { exists: { field: 'spaceId' } } } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+          },
+        },
+        aggs: {
+          workflows: {
+            terms: {
+              field: 'workflowId',
+              size: workflowIds.length,
+            },
+            aggs: {
+              recent_executions: {
+                top_hits: {
+                  size: 1, // Get only the most recent execution per workflow
+                  sort: [{ finishedAt: { order: 'desc' } }],
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const result: Record<string, WorkflowExecutionHistoryModel[]> = {};
+
+      if (response.aggregations?.workflows && 'buckets' in response.aggregations.workflows) {
+        const buckets = response.aggregations.workflows.buckets as Array<{
+          key: string;
+          recent_executions: {
+            hits: {
+              hits: Array<{
+                _source: EsWorkflowExecution;
+              }>;
+            };
+          };
+        }>;
+
+        buckets.forEach((bucket) => {
+          const workflowId = bucket.key;
+          const hits = bucket.recent_executions.hits.hits;
+
+          if (hits.length > 0) {
+            const execution = hits[0]._source;
+            result[workflowId] = [
+              {
+                id: execution.id,
+                workflowId: execution.workflowId,
+                workflowName: execution.workflowDefinition?.name || 'Unknown Workflow',
+                status: execution.status,
+                startedAt: execution.startedAt,
+                finishedAt: execution.finishedAt || execution.startedAt,
+                duration:
+                  execution.finishedAt && execution.startedAt
+                    ? new Date(execution.finishedAt).getTime() -
+                      new Date(execution.startedAt).getTime()
+                    : null,
+              },
+            ];
+          }
+        });
+      }
+
+      return result;
+    } catch (error) {
+      this.logger.error(`Failed to fetch recent executions for workflows: ${error}`);
+      return {};
+    }
+  }
+
   public async getStepExecutions(params: GetStepExecutionParams, spaceId: string) {
     return searchStepExecutions({
-      esClient: this.esClient!,
+      esClient: this.esClient,
       logger: this.logger,
-      stepsExecutionIndex: this.stepsExecutionIndex,
+      stepsExecutionIndex: WORKFLOWS_STEP_EXECUTIONS_INDEX,
       workflowExecutionId: params.executionId,
       additionalQuery: { term: { id: params.id } },
       spaceId,
@@ -818,8 +1024,8 @@ export class WorkflowsService {
     spaceId: string
   ): Promise<EsWorkflowStepExecution | null> {
     const { executionId, id } = params;
-    const response = await this.esClient!.search<EsWorkflowStepExecution>({
-      index: this.stepsExecutionIndex,
+    const response = await this.esClient.search<EsWorkflowStepExecution>({
+      index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
       query: {
         bool: {
           must: [{ term: { workflowRunId: executionId } }, { term: { id } }, { term: { spaceId } }],
@@ -837,9 +1043,12 @@ export class WorkflowsService {
   }
 
   private transformStorageDocumentToWorkflowDto(
-    id: string,
-    source: WorkflowProperties
+    id: string | undefined,
+    source: WorkflowProperties | undefined
   ): WorkflowDetailDto {
+    if (!id || !source) {
+      throw new Error('Invalid document, id or source is undefined');
+    }
     return {
       id,
       name: source.name,
@@ -857,5 +1066,74 @@ export class WorkflowsService {
 
   private generateWorkflowId(): string {
     return `workflow-${generateUuid()}`;
+  }
+
+  public async getAvailableConnectors(
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<GetAvailableConnectorsResponse> {
+    const actionsClient = await this.getActionsClient();
+    const actionsClientWithRequest = await this.getActionsClientWithRequest(request);
+
+    // Get both connectors and action types
+    const [connectors, actionTypes] = await Promise.all([
+      actionsClient.getAll(spaceId),
+      actionsClientWithRequest.listTypes({ includeSystemActionTypes: false }),
+    ]);
+
+    // Note: We now get display names directly from actionTypes, no need for the map
+
+    // Initialize connectorsByType with ALL available action types
+    const connectorsByType: Record<string, ConnectorTypeInfo> = {};
+
+    // First, add all action types (even those without instances), excluding filtered types
+    actionTypes.forEach((actionType) => {
+      // Skip filtered connector types
+      if (UNSUPPORTED_CONNECTOR_TYPES.includes(actionType.id)) {
+        return;
+      }
+
+      // Get sub-actions from our static mapping
+      const subActions = CONNECTOR_SUB_ACTIONS_MAP[actionType.id];
+
+      connectorsByType[actionType.id] = {
+        actionTypeId: actionType.id,
+        displayName: actionType.name,
+        instances: [],
+        enabled: actionType.enabled,
+        enabledInConfig: actionType.enabledInConfig,
+        enabledInLicense: actionType.enabledInLicense,
+        minimumLicenseRequired: actionType.minimumLicenseRequired,
+        ...(subActions && { subActions }),
+      };
+    });
+
+    // Then, populate instances for action types that have connectors
+    connectors.forEach((connector: FindActionResult) => {
+      if (connectorsByType[connector.actionTypeId]) {
+        connectorsByType[connector.actionTypeId].instances.push({
+          id: connector.id,
+          name: connector.name,
+          isPreconfigured: connector.isPreconfigured,
+          isDeprecated: connector.isDeprecated,
+        });
+      }
+    });
+
+    return { connectorsByType, totalConnectors: connectors.length };
+  }
+
+  public async getWorkflowZodSchema(
+    options: {
+      loose: boolean;
+    },
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<z.ZodType> {
+    const { connectorsByType } = await this.getAvailableConnectors(spaceId, request);
+    if (options.loose) {
+      return getWorkflowZodSchemaLoose(connectorsByType);
+    }
+    return getWorkflowZodSchema(connectorsByType);
   }
 }

@@ -19,7 +19,7 @@ import {
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
   const log = getService('log');
 
   describe('@ess @serverless @skipInServerlessMKI Detect prebuilt rule customization (base version is missing)', () => {
@@ -41,7 +41,7 @@ export default ({ getService }: FtrProviderContext): void => {
       ruleType?: RuleResponse['type'];
     }) => {
       // Assert the customization for "fieldName" works
-      const { body: customizedResponse } = await securitySolutionApi
+      const { body: customizedResponse } = await detectionsApi
         .patchRule({
           body: { rule_id: PREBUILT_RULE_ID, type: ruleType, [fieldName]: customizedValue },
         })
@@ -50,6 +50,8 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(customizedResponse.rule_source).toMatchObject({
         type: 'external',
         is_customized: true,
+        customized_fields: [],
+        has_base_version: false,
       });
     };
 
@@ -185,7 +187,7 @@ export default ({ getService }: FtrProviderContext): void => {
         }));
 
       it('"timeline_template" fields', async () => {
-        const { body: customizedResponse } = await securitySolutionApi
+        const { body: customizedResponse } = await detectionsApi
           .patchRule({
             body: {
               rule_id: PREBUILT_RULE_ID,
@@ -277,7 +279,7 @@ export default ({ getService }: FtrProviderContext): void => {
         }));
 
       it('"data_view_id" field', async () => {
-        const { body: customizedResponse } = await securitySolutionApi
+        const { body: customizedResponse } = await detectionsApi
           .patchRule({
             body: { rule_id: PREBUILT_RULE_ID, data_view_id: 'new-data-view', index: [] },
           })
@@ -304,6 +306,7 @@ export default ({ getService }: FtrProviderContext): void => {
       beforeEach(async () => {
         await createPrebuiltRuleAssetSavedObjects(es, [SAVED_QUERY_PREBUILT_RULE_ASSET]);
         await installPrebuiltRules(es, supertest);
+        await deleteAllPrebuiltRuleAssets(es, log);
       });
 
       it('"saved_id" field', () =>
@@ -568,6 +571,43 @@ export default ({ getService }: FtrProviderContext): void => {
             missing_fields_strategy: 'suppress',
           },
         }));
+    });
+
+    describe('when rule is previously customized', () => {
+      beforeEach(async () => {
+        await createPrebuiltRuleAssetSavedObjects(es, [QUERY_PREBUILT_RULE_ASSET]);
+        await installPrebuiltRules(es, supertest);
+      });
+
+      it('should reset customized_fields to empty array', async () => {
+        const { body: customizedResponseWithBaseVersion } = await detectionsApi
+          .patchRule({
+            body: { rule_id: PREBUILT_RULE_ID, name: 'Customized rule name' },
+          })
+          .expect(200);
+
+        expect(customizedResponseWithBaseVersion.rule_source).toMatchObject({
+          type: 'external',
+          is_customized: true,
+          customized_fields: [{ field_name: 'name' }],
+          has_base_version: true,
+        });
+
+        await deleteAllPrebuiltRuleAssets(es, log);
+
+        const { body: customizedResponseWithoutBaseVersion } = await detectionsApi
+          .patchRule({
+            body: { rule_id: PREBUILT_RULE_ID, name: 'New customized rule name' },
+          })
+          .expect(200);
+
+        expect(customizedResponseWithoutBaseVersion.rule_source).toMatchObject({
+          type: 'external',
+          is_customized: true,
+          customized_fields: [],
+          has_base_version: false,
+        });
+      });
     });
   });
 };

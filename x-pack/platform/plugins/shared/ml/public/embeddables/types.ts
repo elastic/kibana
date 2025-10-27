@@ -23,11 +23,11 @@ import type {
   SerializedTitles,
 } from '@kbn/presentation-publishing';
 import { type BehaviorSubject } from 'rxjs';
+import type { TypeOf } from '@kbn/config-schema';
 import type { SeverityThreshold } from '../../common/types/anomalies';
 import type { JobId } from '../../common/types/anomaly_detection_jobs';
 import type { MlDependencies } from '../application/app';
 import type { MlCapabilitiesService } from '../application/capabilities/check_capabilities';
-import type { SwimlaneType } from '../application/explorer/explorer_constants';
 import type { AppStateSelectedCells } from '../application/explorer/explorer_utils';
 import type { AnomalyDetectorService } from '../application/services/anomaly_detector_service';
 import type { AnomalyExplorerChartsService } from '../application/services/anomaly_explorer_charts_service';
@@ -43,6 +43,16 @@ import type {
   AnomalySwimLaneEmbeddableType,
   MlEmbeddableTypes,
 } from './constants';
+import type {
+  anomalyChartsEmbeddableOverridableStateSchema,
+  anomalyChartsEmbeddableRuntimeStateSchema,
+  anomalyChartsEmbeddableStateSchema,
+  anomalySwimlaneEmbeddableCustomInputOverallSchema,
+  anomalySwimlaneEmbeddableCustomInputSchema,
+  anomalySwimlaneEmbeddableCustomInputViewBySchema,
+  anomalySwimlaneEmbeddableUserInputSchema,
+  anomalySwimlaneInitialInputSchema,
+} from '../../server/embeddable/schemas';
 
 export type {
   AnomalySwimLaneEmbeddableState,
@@ -59,24 +69,23 @@ export interface MlEmbeddableBaseApi<StateType extends object = object>
 export type MlEntity = Record<string, MlEntityField['fieldValue']>;
 
 /** Manual input by the user */
-export interface AnomalySwimlaneEmbeddableUserInput {
-  jobIds: JobId[];
-  panelTitle?: string;
-  swimlaneType: SwimlaneType;
-  viewBy?: string;
-}
+export type AnomalySwimlaneEmbeddableUserInput = TypeOf<
+  typeof anomalySwimlaneEmbeddableUserInputSchema
+>;
 
-export interface AnomalySwimlaneEmbeddableCustomInput
-  extends Omit<AnomalySwimlaneEmbeddableUserInput, 'panelTitle'> {
-  id?: string;
-  perPage?: number;
+export type AnomalySwimlaneInitialInput = TypeOf<typeof anomalySwimlaneInitialInputSchema>;
 
-  // Embeddable inputs which are not included in the default interface
-  filters?: Filter[];
-  query?: Query;
-  refreshConfig?: RefreshInterval;
-  timeRange?: TimeRange;
-}
+export type AnomalySwimlaneEmbeddableCustomInputViewBy = TypeOf<
+  typeof anomalySwimlaneEmbeddableCustomInputViewBySchema
+>;
+
+export type AnomalySwimlaneEmbeddableCustomInputOverall = TypeOf<
+  typeof anomalySwimlaneEmbeddableCustomInputOverallSchema
+>;
+
+export type AnomalySwimlaneEmbeddableCustomInput = TypeOf<
+  typeof anomalySwimlaneEmbeddableCustomInputSchema
+>;
 
 export interface AnomalySwimlaneServices {
   anomalyDetectorService: AnomalyDetectorService;
@@ -107,17 +116,12 @@ export interface SwimLaneDrilldownContext extends EditSwimlanePanelContext {
  * Anomaly Explorer Charts
  */
 
-export interface AnomalyChartsEmbeddableRuntimeState {
-  jobIds: JobId[];
-  maxSeriesToPlot: number;
-  // Embeddable inputs which are not included in the default interface
-  severityThreshold?: SeverityThreshold[];
-  selectedEntities?: MlEntityField[];
-}
-export interface AnomalyChartsEmbeddableOverridableState
-  extends AnomalyChartsEmbeddableRuntimeState {
-  timeRange?: TimeRange;
-}
+export type AnomalyChartsEmbeddableRuntimeState = TypeOf<
+  typeof anomalyChartsEmbeddableRuntimeStateSchema
+>;
+export type AnomalyChartsEmbeddableOverridableState = TypeOf<
+  typeof anomalyChartsEmbeddableOverridableStateSchema
+>;
 export interface AnomalyChartsComponentApi {
   jobIds$: PublishingSubject<JobId[]>;
   maxSeriesToPlot$: PublishingSubject<number>;
@@ -136,9 +140,7 @@ export interface AnomalyChartsDataLoadingApi {
 /**
  * Persisted state for the Anomaly Charts Embeddable.
  */
-export interface AnomalyChartsEmbeddableState
-  extends SerializedTitles,
-    AnomalyChartsEmbeddableOverridableState {}
+export type AnomalyChartsEmbeddableState = TypeOf<typeof anomalyChartsEmbeddableStateSchema>;
 
 export type AnomalyChartsApi = AnomalyChartsComponentApi & AnomalyChartsDataLoadingApi;
 
@@ -165,13 +167,6 @@ export interface AnomalyChartsAttachmentApi extends AnomalyChartsApi {
     timeRange$: BehaviorSubject<TimeRange | undefined>;
   };
 }
-
-/**
- * Persisted state for the Anomaly Charts Embeddable.
- */
-export interface AnomalyChartsEmbeddableState
-  extends SerializedTitles,
-    AnomalyChartsEmbeddableOverridableState {}
 
 /** Manual input by the user */
 export interface SingleMetricViewerEmbeddableUserInput {

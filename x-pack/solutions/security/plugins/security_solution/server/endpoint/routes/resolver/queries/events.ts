@@ -13,6 +13,7 @@ import type { SafeResolverEvent } from '../../../../../common/endpoint/types';
 import type { PaginationBuilder } from '../utils/pagination';
 import { BaseResolverQuery } from '../tree/queries/base';
 import type { ResolverQueryParams } from '../tree/queries/base';
+import { createEventKindFilter } from '../utils/event_kind_filters';
 
 /**
  * Builds a query for retrieving events.
@@ -46,9 +47,7 @@ export class EventsQuery extends BaseResolverQuery {
             ...filters,
             ...this.getRangeFilter(),
             ...this.getColdAndFrozenTierFilter(),
-            {
-              term: { 'event.kind': 'event' },
-            },
+            createEventKindFilter(),
           ],
         },
       },

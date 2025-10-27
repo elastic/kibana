@@ -8,14 +8,15 @@
  */
 
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import type { MonacoMessage } from './helpers';
+import { SOURCES_TYPES } from '@kbn/esql-types';
 import {
-  parseErrors,
-  parseWarning,
+  filterDataErrors,
   getIndicesList,
   getRemoteIndicesList,
-  filterDataErrors,
+  parseErrors,
+  parseWarning,
 } from './helpers';
+import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
 
 describe('helpers', function () {
   describe('parseErrors', function () {
@@ -32,6 +33,7 @@ describe('helpers', function () {
           severity: 8,
           startColumn: 8,
           startLineNumber: 1,
+          code: 'errorFromES',
         },
       ]);
     });
@@ -56,6 +58,7 @@ describe('helpers', function () {
           severity: 8,
           startColumn: 7,
           startLineNumber: 3,
+          code: 'errorFromES',
         },
       ]);
     });
@@ -71,6 +74,25 @@ describe('helpers', function () {
           severity: 8,
           startColumn: 1,
           startLineNumber: 1,
+          code: 'unknownError',
+        },
+      ]);
+    });
+
+    it('should return the generic error object for an error with unexpected format', function () {
+      const error = new Error(
+        '[esql] > Unexpected error from Elasticsearch: verification_exception - Found ambiguous reference to [user_id]; matches any of [line 3:15 [user_id], line 4:15 [user_id]]'
+      );
+      const errors = [error];
+      expect(parseErrors(errors, `FROM "kibana_sample_data_ecommerce"`)).toEqual([
+        {
+          endColumn: 10,
+          endLineNumber: 1,
+          message: error.message,
+          severity: 8,
+          startColumn: 1,
+          startLineNumber: 1,
+          code: 'unknownError',
         },
       ]);
     });
@@ -89,6 +111,7 @@ describe('helpers', function () {
           severity: 4,
           startColumn: 52,
           startLineNumber: 1,
+          code: 'warningFromES',
         },
       ]);
     });
@@ -105,6 +128,7 @@ describe('helpers', function () {
           severity: 4,
           startColumn: 52,
           startLineNumber: 1,
+          code: 'warningFromES',
         },
         {
           endColumn: 169,
@@ -114,6 +138,7 @@ describe('helpers', function () {
           severity: 4,
           startColumn: 84,
           startLineNumber: 1,
+          code: 'warningFromES',
         },
       ]);
     });
@@ -130,6 +155,7 @@ describe('helpers', function () {
           severity: 4,
           startColumn: 52,
           startLineNumber: 1,
+          code: 'warningFromES',
         },
         {
           endColumn: 169,
@@ -139,6 +165,7 @@ describe('helpers', function () {
           severity: 4,
           startColumn: 84,
           startLineNumber: 1,
+          code: 'warningFromES',
         },
       ]);
     });
@@ -155,6 +182,7 @@ describe('helpers', function () {
           severity: 4,
           startColumn: 1,
           startLineNumber: 1,
+          code: 'warningFromES',
         },
         {
           endColumn: 10,
@@ -164,6 +192,7 @@ describe('helpers', function () {
           severity: 4,
           startColumn: 1,
           startLineNumber: 1,
+          code: 'warningFromES',
         },
         {
           endColumn: 10,
@@ -173,6 +202,7 @@ describe('helpers', function () {
           severity: 4,
           startColumn: 1,
           startLineNumber: 1,
+          code: 'warningFromES',
         },
       ]);
     });
@@ -188,6 +218,7 @@ describe('helpers', function () {
           severity: 4,
           startColumn: 1,
           startLineNumber: 1,
+          code: 'warningFromES',
         },
         {
           endColumn: 10,
@@ -197,6 +228,7 @@ describe('helpers', function () {
           severity: 4,
           startColumn: 1,
           startLineNumber: 1,
+          code: 'warningFromES',
         },
         {
           endColumn: 138,
@@ -206,6 +238,7 @@ describe('helpers', function () {
           severity: 4,
           startColumn: 52,
           startLineNumber: 1,
+          code: 'warningFromES',
         },
       ]);
     });
@@ -220,6 +253,7 @@ describe('helpers', function () {
           severity: 4,
           startColumn: 1,
           startLineNumber: 1,
+          code: 'warningFromES',
         },
         {
           endColumn: 40,
@@ -228,6 +262,7 @@ describe('helpers', function () {
           severity: 4,
           startColumn: 9,
           startLineNumber: 1,
+          code: 'warningFromES',
         },
         {
           endColumn: 18,
@@ -236,6 +271,7 @@ describe('helpers', function () {
           severity: 4,
           startColumn: 9,
           startLineNumber: 1,
+          code: 'warningFromES',
         },
       ]);
     });
@@ -259,8 +295,36 @@ describe('helpers', function () {
       };
       const indices = await getIndicesList(updatedDataViewsMock);
       expect(indices).toStrictEqual([
-        { name: '.system1', hidden: true, type: 'Index' },
-        { name: 'logs', hidden: false, type: 'Index' },
+        { name: '.system1', hidden: true, type: SOURCES_TYPES.INDEX },
+        { name: 'logs', hidden: false, type: SOURCES_TYPES.INDEX },
+      ]);
+    });
+
+    it('should mark the time_series indices correctly', async function () {
+      const dataViewsMock = dataViewPluginMocks.createStartContract();
+      const updatedDataViewsMock = {
+        ...dataViewsMock,
+        getIndices: jest.fn().mockResolvedValue([
+          {
+            name: 'logs',
+            title: 'logs',
+            item: {
+              mode: 'time_series',
+            },
+          },
+          {
+            name: 'metrics',
+            title: 'metrics',
+            item: {
+              mode: 'normal',
+            },
+          },
+        ]),
+      };
+      const indices = await getIndicesList(updatedDataViewsMock);
+      expect(indices).toStrictEqual([
+        { name: 'logs', hidden: false, type: SOURCES_TYPES.TIMESERIES },
+        { name: 'metrics', hidden: false, type: SOURCES_TYPES.INDEX },
       ]);
     });
 
@@ -287,8 +351,8 @@ describe('helpers', function () {
       };
       const indices = await getIndicesList(updatedDataViewsMock);
       expect(indices).toStrictEqual([
-        { name: 'alias1', hidden: false, type: 'Alias' },
-        { name: 'logs', hidden: false, type: 'Index' },
+        { name: 'alias1', hidden: false, type: SOURCES_TYPES.ALIAS },
+        { name: 'logs', hidden: false, type: SOURCES_TYPES.INDEX },
       ]);
     });
   });
@@ -321,7 +385,9 @@ describe('helpers', function () {
         ]),
       };
       const indices = await getRemoteIndicesList(updatedDataViewsMock, true);
-      expect(indices).toStrictEqual([{ name: 'remote:logs', hidden: false, type: 'Index' }]);
+      expect(indices).toStrictEqual([
+        { name: 'remote:logs', hidden: false, type: SOURCES_TYPES.INDEX },
+      ]);
     });
 
     it('should not suggest ccs indices if not allowed', async function () {
@@ -365,12 +431,9 @@ describe('helpers', function () {
         { code: 'unknownIndex' },
         { code: 'unknownColumn' },
         { code: 'other' },
-        { code: { value: 'unknownIndex' } },
-        { code: { value: 'unknownColumn' } },
-        { code: { value: 'other' } },
       ] as MonacoMessage[];
 
-      expect(filterDataErrors(errors)).toEqual([{ code: 'other' }, { code: { value: 'other' } }]);
+      expect(filterDataErrors(errors)).toEqual([{ code: 'other' }]);
     });
   });
 });

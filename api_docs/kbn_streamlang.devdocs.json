@@ -21,6 +21,53 @@
     "functions": [
       {
         "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.conditionToESQL",
+        "type": "Function",
+        "tags": [],
+        "label": "conditionToESQL",
+        "description": [],
+        "signature": [
+          "(condition: ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          ") => string"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/esql/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.conditionToESQL.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "condition",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streamlang",
+                "scope": "common",
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.Condition",
+                "text": "Condition"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/esql/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
         "id": "def-common.conditionToPainless",
         "type": "Function",
         "tags": [],
@@ -177,6 +224,200 @@
       },
       {
         "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.convertStepsForUI",
+        "type": "Function",
+        "tags": [],
+        "label": "convertStepsForUI",
+        "description": [],
+        "signature": [
+          "(dsl: ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.StreamlangDSL",
+            "text": "StreamlangDSL"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.StreamlangStepWithUIAttributes",
+            "text": "StreamlangStepWithUIAttributes"
+          },
+          "[]"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/shared/convert_for_ui.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.convertStepsForUI.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "dsl",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streamlang",
+                "scope": "common",
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.StreamlangDSL",
+                "text": "StreamlangDSL"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/shared/convert_for_ui.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.convertStepToUIDefinition",
+        "type": "Function",
+        "tags": [],
+        "label": "convertStepToUIDefinition",
+        "description": [],
+        "signature": [
+          "<TStepDefinition extends ",
+          "StreamlangStep",
+          ">(step: TStepDefinition, options: { parentId: string | null; }) => ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.StreamlangStepWithUIAttributes",
+            "text": "StreamlangStepWithUIAttributes"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/shared/convert_for_ui.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.convertStepToUIDefinition.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "step",
+            "description": [],
+            "signature": [
+              "TStepDefinition"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/shared/convert_for_ui.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.convertStepToUIDefinition.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/shared/convert_for_ui.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/streamlang",
+                "id": "def-common.convertStepToUIDefinition.$2.parentId",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "parentId",
+                "description": [],
+                "signature": [
+                  "string | null"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/shared/convert_for_ui.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.convertUIStepsToDSL",
+        "type": "Function",
+        "tags": [],
+        "label": "convertUIStepsToDSL",
+        "description": [],
+        "signature": [
+          "(steps: ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.StreamlangStepWithUIAttributes",
+            "text": "StreamlangStepWithUIAttributes"
+          },
+          "[], stripCustomIdentifiers?: boolean) => ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.StreamlangDSL",
+            "text": "StreamlangDSL"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/shared/convert_for_ui.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.convertUIStepsToDSL.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "steps",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streamlang",
+                "scope": "common",
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.StreamlangStepWithUIAttributes",
+                "text": "StreamlangStepWithUIAttributes"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/shared/convert_for_ui.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.convertUIStepsToDSL.$2",
+            "type": "boolean",
+            "tags": [],
+            "label": "stripCustomIdentifiers",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/shared/convert_for_ui.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
         "id": "def-common.getBinaryFilterField",
         "type": "Function",
         "tags": [],
@@ -238,7 +479,7 @@
             "section": "def-common.ShorthandBinaryFilterCondition",
             "text": "ShorthandBinaryFilterCondition"
           },
-          ") => \"endsWith\" | \"startsWith\" | \"range\" | \"gte\" | \"lte\" | \"gt\" | \"lt\" | \"eq\" | \"contains\" | \"neq\" | undefined"
+          ") => \"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"range\" | \"gt\" | \"lt\" | \"eq\" | \"contains\" | \"neq\" | undefined"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/src/conditions/helpers.ts",
         "deprecated": false,
@@ -348,7 +589,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          ") => { name: string; type: \"string\" | \"number\"; }[]"
+          ") => { name: string; type: \"string\" | \"number\" | \"boolean\"; }[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/src/conditions/helpers.ts",
         "deprecated": false,
@@ -864,7 +1105,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          ">(value: TValue) => value is Extract<TValue, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }>"
+          ">(value: TValue) => value is Extract<TValue, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
         "deprecated": false,
@@ -1008,7 +1249,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          ">(value: TValue) => value is Extract<TValue, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; } | { field: string; exists?: boolean | undefined; }>"
+          ">(value: TValue) => value is Extract<TValue, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; } | { field: string; exists?: boolean | undefined; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
         "deprecated": false,
@@ -1249,6 +1490,70 @@
       },
       {
         "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.isProcessWithIgnoreMissingOption",
+        "type": "Function",
+        "tags": [],
+        "label": "isProcessWithIgnoreMissingOption",
+        "description": [],
+        "signature": [
+          "<TValue extends any>(value: TValue) => value is Extract<TValue, any>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.isProcessWithIgnoreMissingOption.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "TValue"
+            ],
+            "path": "src/platform/packages/shared/kbn-zod-helpers/src/schema.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.isProcessWithOverrideOption",
+        "type": "Function",
+        "tags": [],
+        "label": "isProcessWithOverrideOption",
+        "description": [],
+        "signature": [
+          "<TValue extends any>(value: TValue) => value is Extract<TValue, any>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.isProcessWithOverrideOption.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "TValue"
+            ],
+            "path": "src/platform/packages/shared/kbn-zod-helpers/src/schema.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
         "id": "def-common.isUnaryFilterCondition",
         "type": "Function",
         "tags": [],
@@ -1285,6 +1590,40 @@
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.isWhereBlock",
+        "type": "Function",
+        "tags": [],
+        "label": "isWhereBlock",
+        "description": [],
+        "signature": [
+          "(obj: any) => obj is ",
+          "StreamlangWhereBlock"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/streamlang.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.isWhereBlock.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "obj",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/streamlang.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -1349,6 +1688,71 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.transpile",
+        "type": "Function",
+        "tags": [],
+        "label": "transpile",
+        "description": [],
+        "signature": [
+          "(streamlang: ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.StreamlangDSL",
+            "text": "StreamlangDSL"
+          },
+          ", transpilationOptions?: ",
+          "ESQLTranspilationOptions",
+          ") => ",
+          "ESQLTranspilationResult"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/esql/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.transpile.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "streamlang",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streamlang",
+                "scope": "common",
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.StreamlangDSL",
+                "text": "StreamlangDSL"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/esql/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.transpile.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "transpilationOptions",
+            "description": [],
+            "signature": [
+              "ESQLTranspilationOptions"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/esql/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -2407,12 +2811,12 @@
           {
             "parentPluginId": "@kbn/streamlang",
             "id": "def-common.SetProcessor.value",
-            "type": "string",
+            "type": "Unknown",
             "tags": [],
             "label": "value",
             "description": [],
             "signature": [
-              "string | undefined"
+              "unknown"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
             "deprecated": false,
@@ -2739,6 +3143,45 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.UIAttributes",
+        "type": "Interface",
+        "tags": [],
+        "label": "UIAttributes",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/ui.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.UIAttributes.parentId",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "parentId",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/ui.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.UIAttributes.customIdentifier",
+            "type": "string",
+            "tags": [],
+            "label": "customIdentifier",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/ui.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
@@ -2766,7 +3209,7 @@
         "label": "BINARY_OPERATORS",
         "description": [],
         "signature": [
-          "(\"endsWith\" | \"startsWith\" | \"range\" | \"gte\" | \"lte\" | \"gt\" | \"lt\" | \"eq\" | \"contains\" | \"neq\")[]"
+          "(\"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"range\" | \"gt\" | \"lt\" | \"eq\" | \"contains\" | \"neq\")[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
         "deprecated": false,
@@ -2781,7 +3224,7 @@
         "label": "BinaryOperatorKeys",
         "description": [],
         "signature": [
-          "\"endsWith\" | \"startsWith\" | \"range\" | \"gte\" | \"lte\" | \"gt\" | \"lt\" | \"eq\" | \"contains\" | \"neq\""
+          "\"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"range\" | \"gt\" | \"lt\" | \"eq\" | \"contains\" | \"neq\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
         "deprecated": false,
@@ -2961,7 +3404,7 @@
         "label": "OperatorKeys",
         "description": [],
         "signature": [
-          "\"endsWith\" | \"startsWith\" | \"exists\" | \"range\" | \"gte\" | \"lte\" | \"gt\" | \"lt\" | \"eq\" | \"contains\" | \"neq\""
+          "\"endsWith\" | \"startsWith\" | \"exists\" | \"gte\" | \"lte\" | \"range\" | \"gt\" | \"lt\" | \"eq\" | \"contains\" | \"neq\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
         "deprecated": false,
@@ -3049,6 +3492,21 @@
       },
       {
         "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.StreamlangConditionWithoutSteps",
+        "type": "Type",
+        "tags": [],
+        "label": "StreamlangConditionWithoutSteps",
+        "description": [],
+        "signature": [
+          "{}"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/ui.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
         "id": "def-common.StreamlangProcessorDefinition",
         "type": "Type",
         "tags": [],
@@ -3118,6 +3576,35 @@
       },
       {
         "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.StreamlangProcessorDefinitionWithUIAttributes",
+        "type": "Type",
+        "tags": [],
+        "label": "StreamlangProcessorDefinitionWithUIAttributes",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.StreamlangProcessorDefinition",
+            "text": "StreamlangProcessorDefinition"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.UIAttributes",
+            "text": "UIAttributes"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/ui.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
         "id": "def-common.streamlangProcessorSchema",
         "type": "Any",
         "tags": [],
@@ -3127,6 +3614,67 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.StreamlangStepWithUIAttributes",
+        "type": "Type",
+        "tags": [],
+        "label": "StreamlangStepWithUIAttributes",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.StreamlangProcessorDefinitionWithUIAttributes",
+            "text": "StreamlangProcessorDefinitionWithUIAttributes"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.StreamlangWhereBlockWithUIAttributes",
+            "text": "StreamlangWhereBlockWithUIAttributes"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/ui.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.StreamlangWhereBlockWithUIAttributes",
+        "type": "Type",
+        "tags": [],
+        "label": "StreamlangWhereBlockWithUIAttributes",
+        "description": [],
+        "signature": [
+          "Omit<",
+          "StreamlangWhereBlock",
+          ", \"where\"> & { where: ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.StreamlangConditionWithoutSteps",
+            "text": "StreamlangConditionWithoutSteps"
+          },
+          "; } & ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.UIAttributes",
+            "text": "UIAttributes"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/ui.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3222,7 +3770,14 @@
         "label": "alwaysConditionSchema",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ always: Zod.ZodObject<{}, \"strict\", Zod.ZodTypeAny, {}, {}>; }, \"strip\", Zod.ZodTypeAny, { always: {}; }, { always: {}; }>"
+          "ZodObject",
+          "<{ always: ",
+          "ZodObject",
+          "<{}, \"strict\", ",
+          "ZodTypeAny",
+          ", {}, {}>; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { always: {}; }, { always: {}; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
         "deprecated": false,
@@ -3237,7 +3792,12 @@
         "label": "andConditionSchema",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ and: Zod.ZodArray<Zod.ZodType<",
+          "ZodObject",
+          "<{ and: ",
+          "ZodArray",
+          "<",
+          "ZodType",
+          "<",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3245,7 +3805,9 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          ", Zod.ZodTypeDef, ",
+          ", ",
+          "ZodTypeDef",
+          ", ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3253,7 +3815,9 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          ">, \"many\">; }, \"strip\", Zod.ZodTypeAny, { and: ",
+          ">, \"many\">; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { and: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3284,7 +3848,8 @@
         "label": "conditionSchema",
         "description": [],
         "signature": [
-          "Zod.ZodType<",
+          "ZodType",
+          "<",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3292,7 +3857,9 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          ", Zod.ZodTypeDef, ",
+          ", ",
+          "ZodTypeDef",
+          ", ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3315,7 +3882,166 @@
         "label": "filterConditionSchema",
         "description": [],
         "signature": [
-          "Zod.ZodUnion<[Zod.ZodEffects<Zod.ZodObject<{ field: Zod.ZodEffects<Zod.ZodString, string, string>; eq: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; neq: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; lt: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; lte: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; gt: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; gte: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; contains: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; startsWith: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; endsWith: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; range: Zod.ZodOptional<Zod.ZodObject<{ gt: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; gte: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; lt: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; lte: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; }, \"strip\", Zod.ZodTypeAny, { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }, { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }>>; }, \"strip\", Zod.ZodTypeAny, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }>, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }>, Zod.ZodObject<{ field: Zod.ZodEffects<Zod.ZodString, string, string>; exists: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { field: string; exists?: boolean | undefined; }, { field: string; exists?: boolean | undefined; }>]>"
+          "ZodUnion",
+          "<[",
+          "ZodEffects",
+          "<",
+          "ZodObject",
+          "<{ field: ",
+          "ZodEffects",
+          "<",
+          "ZodString",
+          ", string, string>; eq: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; neq: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; lt: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; lte: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; gt: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; gte: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; contains: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; startsWith: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; endsWith: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; range: ",
+          "ZodOptional",
+          "<",
+          "ZodObject",
+          "<{ gt: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; gte: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; lt: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; lte: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }, { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }>>; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }>, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }>, ",
+          "ZodObject",
+          "<{ field: ",
+          "ZodEffects",
+          "<",
+          "ZodString",
+          ", string, string>; exists: ",
+          "ZodOptional",
+          "<",
+          "ZodBoolean",
+          ">; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { field: string; exists?: boolean | undefined; }, { field: string; exists?: boolean | undefined; }>]>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
         "deprecated": false,
@@ -3351,7 +4077,14 @@
         "label": "neverConditionSchema",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ never: Zod.ZodObject<{}, \"strict\", Zod.ZodTypeAny, {}, {}>; }, \"strip\", Zod.ZodTypeAny, { never: {}; }, { never: {}; }>"
+          "ZodObject",
+          "<{ never: ",
+          "ZodObject",
+          "<{}, \"strict\", ",
+          "ZodTypeAny",
+          ", {}, {}>; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { never: {}; }, { never: {}; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
         "deprecated": false,
@@ -3366,7 +4099,12 @@
         "label": "notConditionSchema",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ not: Zod.ZodLazy<Zod.ZodType<",
+          "ZodObject",
+          "<{ not: ",
+          "ZodLazy",
+          "<",
+          "ZodType",
+          "<",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3374,7 +4112,9 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          ", Zod.ZodTypeDef, ",
+          ", ",
+          "ZodTypeDef",
+          ", ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3382,7 +4122,9 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          ">>; }, \"strip\", Zod.ZodTypeAny, { not: ",
+          ">>; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { not: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3407,13 +4149,142 @@
       },
       {
         "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.operatorToHumanReadableNameMap",
+        "type": "Object",
+        "tags": [],
+        "label": "operatorToHumanReadableNameMap",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.operatorToHumanReadableNameMap.eq",
+            "type": "string",
+            "tags": [],
+            "label": "eq",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.operatorToHumanReadableNameMap.neq",
+            "type": "string",
+            "tags": [],
+            "label": "neq",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.operatorToHumanReadableNameMap.lt",
+            "type": "string",
+            "tags": [],
+            "label": "lt",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.operatorToHumanReadableNameMap.lte",
+            "type": "string",
+            "tags": [],
+            "label": "lte",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.operatorToHumanReadableNameMap.gt",
+            "type": "string",
+            "tags": [],
+            "label": "gt",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.operatorToHumanReadableNameMap.gte",
+            "type": "string",
+            "tags": [],
+            "label": "gte",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.operatorToHumanReadableNameMap.contains",
+            "type": "string",
+            "tags": [],
+            "label": "contains",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.operatorToHumanReadableNameMap.startsWith",
+            "type": "string",
+            "tags": [],
+            "label": "startsWith",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.operatorToHumanReadableNameMap.endsWith",
+            "type": "string",
+            "tags": [],
+            "label": "endsWith",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.operatorToHumanReadableNameMap.exists",
+            "type": "string",
+            "tags": [],
+            "label": "exists",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
         "id": "def-common.orConditionSchema",
         "type": "Object",
         "tags": [],
         "label": "orConditionSchema",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ or: Zod.ZodArray<Zod.ZodType<",
+          "ZodObject",
+          "<{ or: ",
+          "ZodArray",
+          "<",
+          "ZodType",
+          "<",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3421,7 +4292,9 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          ", Zod.ZodTypeDef, ",
+          ", ",
+          "ZodTypeDef",
+          ", ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3429,7 +4302,9 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          ">, \"many\">; }, \"strip\", Zod.ZodTypeAny, { or: ",
+          ">, \"many\">; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { or: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3460,7 +4335,50 @@
         "label": "rangeConditionSchema",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ gt: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; gte: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; lt: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; lte: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; }, \"strip\", Zod.ZodTypeAny, { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }, { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }>"
+          "ZodObject",
+          "<{ gt: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; gte: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; lt: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; lte: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }, { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
         "deprecated": false,
@@ -3475,7 +4393,152 @@
         "label": "shorthandBinaryFilterConditionSchema",
         "description": [],
         "signature": [
-          "Zod.ZodEffects<Zod.ZodObject<{ field: Zod.ZodEffects<Zod.ZodString, string, string>; eq: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; neq: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; lt: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; lte: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; gt: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; gte: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; contains: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; startsWith: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; endsWith: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; range: Zod.ZodOptional<Zod.ZodObject<{ gt: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; gte: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; lt: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; lte: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; }, \"strip\", Zod.ZodTypeAny, { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }, { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }>>; }, \"strip\", Zod.ZodTypeAny, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }>, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }>"
+          "ZodEffects",
+          "<",
+          "ZodObject",
+          "<{ field: ",
+          "ZodEffects",
+          "<",
+          "ZodString",
+          ", string, string>; eq: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; neq: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; lt: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; lte: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; gt: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; gte: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; contains: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; startsWith: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; endsWith: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; range: ",
+          "ZodOptional",
+          "<",
+          "ZodObject",
+          "<{ gt: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; gte: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; lt: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; lte: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }, { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }>>; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }>, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
         "deprecated": false,
@@ -3490,7 +4553,18 @@
         "label": "shorthandUnaryFilterConditionSchema",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ field: Zod.ZodEffects<Zod.ZodString, string, string>; exists: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { field: string; exists?: boolean | undefined; }, { field: string; exists?: boolean | undefined; }>"
+          "ZodObject",
+          "<{ field: ",
+          "ZodEffects",
+          "<",
+          "ZodString",
+          ", string, string>; exists: ",
+          "ZodOptional",
+          "<",
+          "ZodBoolean",
+          ">; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { field: string; exists?: boolean | undefined; }, { field: string; exists?: boolean | undefined; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
         "deprecated": false,
@@ -3507,11 +4581,20 @@
           "\nZod schema for the Streamlang DSL root"
         ],
         "signature": [
-          "Zod.ZodObject<{ steps: Zod.ZodArray<Zod.ZodType<",
+          "ZodObject",
+          "<{ steps: ",
+          "ZodArray",
+          "<",
+          "ZodType",
+          "<",
           "StreamlangStep",
-          ", Zod.ZodTypeDef, ",
+          ", ",
+          "ZodTypeDef",
+          ", ",
           "StreamlangStep",
-          ">, \"many\">; }, \"strip\", Zod.ZodTypeAny, { steps: ",
+          ">, \"many\">; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { steps: ",
           "StreamlangStep",
           "[]; }, { steps: ",
           "StreamlangStep",

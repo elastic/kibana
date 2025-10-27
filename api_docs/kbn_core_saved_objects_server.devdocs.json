@@ -4938,18 +4938,6 @@
             "references": [
               {
                 "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/browser-internal/src/simple_saved_object.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/browser-internal/src/simple_saved_object.ts"
-              },
-              {
-                "plugin": "@kbn/core",
                 "path": "src/core/packages/saved-objects/api-server-internal/src/lib/apis/utils/internal_utils.ts"
               },
               {
@@ -4967,10 +4955,6 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/browser-mocks/src/simple_saved_object.mock.ts"
               },
               {
                 "plugin": "graph",
@@ -5214,6 +5198,30 @@
           },
           {
             "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
+          },
+          {
+            "plugin": "actions",
             "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/types/types.ts"
           },
           {
@@ -5238,18 +5246,6 @@
           },
           {
             "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
-          },
-          {
-            "plugin": "actions",
             "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/create.ts"
           },
           {
@@ -5261,24 +5257,12 @@
             "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/create.ts"
           },
           {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
+            "plugin": "alerting",
+            "path": "x-pack/platform/plugins/shared/alerting/server/saved_objects/geo_containment/migrations.ts"
           },
           {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
-          },
-          {
-            "plugin": "savedSearch",
-            "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search_migrations.ts"
-          },
-          {
-            "plugin": "savedSearch",
-            "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search_migrations.ts"
+            "plugin": "alerting",
+            "path": "x-pack/platform/plugins/shared/alerting/server/saved_objects/geo_containment/migrations.ts"
           },
           {
             "plugin": "alerting",
@@ -5297,12 +5281,12 @@
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/platform/plugins/shared/alerting/server/saved_objects/geo_containment/migrations.ts"
+            "plugin": "savedSearch",
+            "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search_migrations.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/platform/plugins/shared/alerting/server/saved_objects/geo_containment/migrations.ts"
+            "plugin": "savedSearch",
+            "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search_migrations.ts"
           },
           {
             "plugin": "canvas",
@@ -9038,26 +9022,6 @@
                 "path": "src/platform/plugins/shared/data/server/search/saved_objects/search_session.ts"
               },
               {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts"
-              },
-              {
                 "plugin": "actions",
                 "path": "x-pack/platform/plugins/shared/actions/server/saved_objects/index.ts"
               },
@@ -9070,20 +9034,40 @@
                 "path": "src/platform/plugins/shared/share/server/url_service/saved_objects/register_url_service_saved_object_type.ts"
               },
               {
-                "plugin": "apmSourcesAccess",
-                "path": "x-pack/platform/plugins/shared/apm_sources_access/server/saved_objects/apm_indices.ts"
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/saved_objects/index.ts"
               },
               {
-                "plugin": "savedSearch",
-                "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search.ts"
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "apmSourcesAccess",
+                "path": "x-pack/platform/plugins/shared/apm_sources_access/server/saved_objects/apm_indices.ts"
               },
               {
                 "plugin": "lens",
                 "path": "x-pack/platform/plugins/shared/lens/server/saved_objects.ts"
               },
               {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/saved_objects/index.ts"
+                "plugin": "savedSearch",
+                "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search.ts"
               },
               {
                 "plugin": "maps",
@@ -9123,7 +9107,7 @@
               },
               {
                 "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/comments.ts"
+                "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/comments/index.ts"
               },
               {
                 "plugin": "cases",
@@ -9869,16 +9853,16 @@
                 "path": "x-pack/platform/plugins/shared/actions/server/saved_objects/index.ts"
               },
               {
-                "plugin": "savedSearch",
-                "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search.ts"
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/saved_objects/index.ts"
               },
               {
                 "plugin": "lens",
                 "path": "x-pack/platform/plugins/shared/lens/server/saved_objects.ts"
               },
               {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/saved_objects/index.ts"
+                "plugin": "savedSearch",
+                "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search.ts"
               },
               {
                 "plugin": "maps",
@@ -9910,7 +9894,7 @@
               },
               {
                 "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/comments.ts"
+                "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/comments/index.ts"
               },
               {
                 "plugin": "cases",
@@ -11408,6 +11392,8 @@
           " | undefined; 19?: ",
           "SavedObjectsModelVersion",
           " | undefined; 20?: ",
+          "SavedObjectsModelVersion",
+          " | undefined; 21?: ",
           "SavedObjectsModelVersion",
           " | undefined; }"
         ],

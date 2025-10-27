@@ -11,6 +11,6 @@ export class OnboardingHomePage {
   constructor(private readonly page: ScoutPage) {}
 
   async goto() {
-    this.page.gotoApp('observabilityOnboarding');
+    await this.page.gotoApp('observabilityOnboarding');
   }
 }

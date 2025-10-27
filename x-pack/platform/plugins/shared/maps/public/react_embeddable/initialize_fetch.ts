@@ -5,14 +5,15 @@
  * 2.0.
  */
 
+import { combineLatest, map, of } from 'rxjs';
 import type { FetchContext } from '@kbn/presentation-publishing';
-import { fetch$ } from '@kbn/presentation-publishing';
+import { apiHasParentApi, apiPublishesPauseFetch, fetch$ } from '@kbn/presentation-publishing';
 import type { Query } from '@kbn/es-query';
 import type { MapExtent } from '../../common/descriptor_types';
 import { getSearchService } from '../kibana_services';
 import type { MapStore } from '../reducers/store';
 import type { MapApi } from './types';
-import { setMapSettings, setQuery } from '../actions';
+import { setMapSettings, setQuery, setPauseSyncData } from '../actions';
 
 function getIsRestore(searchSessionId?: string) {
   if (!searchSessionId) {
@@ -77,7 +78,24 @@ export function initializeFetch({
       })
     );
   });
+
+  const parentPauseFetch =
+    apiHasParentApi(api) && apiPublishesPauseFetch(api.parentApi)
+      ? api.parentApi.isFetchPaused$
+      : of(false);
+  const apiPauseFetch = apiPublishesPauseFetch(api) ? api.isFetchPaused$ : of(false);
+  const isPausedSubscription = combineLatest([parentPauseFetch, apiPauseFetch])
+    .pipe(
+      map(([parentPause, apiPause]) => {
+        return parentPause || apiPause;
+      })
+    )
+    .subscribe((isFetchPaused) => {
+      store.dispatch<any>(setPauseSyncData(isFetchPaused));
+    });
+
   return () => {
     fetchSubscription.unsubscribe();
+    isPausedSubscription?.unsubscribe();
   };
 }

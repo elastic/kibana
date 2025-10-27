@@ -14,7 +14,7 @@ import {
   isLiteral,
   isParamLiteral,
 } from '../../ast/is';
-import type { ESQLAstItem } from '../../types';
+import type { ESQLAstItem, ESQLFunction, ESQLSingleAstItem } from '../../types';
 import { lastItem } from '../../visitor/utils';
 import type {
   FunctionDefinition,
@@ -23,9 +23,12 @@ import type {
   SupportedDataType,
 } from '../types';
 import { getFunctionDefinition } from './functions';
-import { isArrayType } from './operators';
+import { isArrayType } from '../types';
 import { getColumnForASTNode } from './shared';
 import type { ESQLColumnData } from '../../commands_registry/types';
+import { TIME_SYSTEM_PARAMS } from './literals';
+import { Walker } from '../../walker';
+import { isMarkerNode } from './ast';
 
 // #region type detection
 
@@ -48,6 +51,9 @@ export function getExpressionType(
   }
 
   if (isLiteral(root)) {
+    if (root.literalType === 'param' && TIME_SYSTEM_PARAMS.includes(root.text)) {
+      return 'keyword';
+    }
     return root.literalType;
   }
 
@@ -59,8 +65,6 @@ export function getExpressionType(
       case 'bool':
         return 'boolean';
       case 'string':
-        return 'keyword';
-      case 'text':
         return 'keyword';
       case 'datetime':
         return 'date';
@@ -164,6 +168,8 @@ export function getExpressionType(
 
 // #region signature matching
 
+// ES implicitly casts string literal arguments to these types when passed to functions that expect these types
+// e.g. EXPECTS_DATE('2020-01-01') is valid because the string literal is implicitly cast to a date
 export const PARAM_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING: FunctionParameterType[] = [
   'date',
   'date_nanos',
@@ -184,16 +190,21 @@ export function getMatchingSignatures(
   givenTypes: Array<SupportedDataType | 'unknown'>,
   // a boolean array indicating which args are literals
   literalMask: boolean[],
-  acceptUnknown: boolean
+  acceptUnknown: boolean,
+  acceptPartialMatches: boolean = false
 ): Signature[] {
   return signatures.filter((sig) => {
-    if (!matchesArity(sig, givenTypes.length)) {
+    if (!acceptPartialMatches && !matchesArity(sig, givenTypes.length)) {
       return false;
     }
 
     return givenTypes.every((givenType, index) => {
-      // safe to assume the param is there, because we checked the length above
-      const expectedType = unwrapArrayOneLevel(getParamAtPosition(sig, index)!.type);
+      const param = getParamAtPosition(sig, index);
+      if (!param) {
+        return false;
+      }
+
+      const expectedType = unwrapArrayOneLevel(param.type);
       return argMatchesParamType(givenType, expectedType, literalMask[index], acceptUnknown);
     });
   });
@@ -206,7 +217,7 @@ export function getMatchingSignatures(
  * @param expectedType
  * @param givenIsLiteral
  */
-function argMatchesParamType(
+export function argMatchesParamType(
   givenType: SupportedDataType | 'unknown',
   expectedType: FunctionParameterType,
   givenIsLiteral: boolean,
@@ -219,6 +230,8 @@ function argMatchesParamType(
     // all ES|QL functions accept null, but this is not reflected
     // in our function definitions so we let it through here
     givenType === 'null' ||
+    // Check array types
+    givenType === unwrapArrayOneLevel(expectedType) ||
     // all functions accept keywords for text parameters
     bothStringTypes(givenType, expectedType)
   ) {
@@ -276,7 +289,7 @@ function matchesArity(signature: FunctionDefinition['signatures'][number], arity
  * @param position
  * @returns
  */
-function getParamAtPosition(
+export function getParamAtPosition(
   { params, minParams }: FunctionDefinition['signatures'][number],
   position: number
 ) {
@@ -322,8 +335,9 @@ export function buildPartialMatcher(str: string) {
   return pattern;
 }
 
-const isNullMatcher = new RegExp('is ' + buildPartialMatcher('nul') + '$', 'i');
-const isNotNullMatcher = new RegExp('is ' + buildPartialMatcher('not nul') + '$', 'i');
+// Handles: "IS ", "IS N", "IS NU", "IS NUL" with flexible whitespace
+const isNullMatcher = new RegExp('is\\s*(' + buildPartialMatcher('nul') + ')?$', 'i');
+const isNotNullMatcher = new RegExp('is\\s*(' + buildPartialMatcher('not nul') + ')?$', 'i');
 
 // --- Expression types helpers ---
 
@@ -340,12 +354,73 @@ export function isExpressionComplete(
   expressionType: SupportedDataType | 'unknown',
   innerText: string
 ) {
-  return (
-    expressionType !== 'unknown' &&
-    // see https://github.com/elastic/kibana/issues/199401
-    // for the reason we need this string check.
-    !(isNullMatcher.test(innerText) || isNotNullMatcher.test(innerText))
-  );
+  if (expressionType === 'unknown') {
+    return false;
+  }
+
+  // Check for incomplete IS NULL / IS NOT NULL
+  if (isNullMatcher.test(innerText) || isNotNullMatcher.test(innerText)) {
+    return false;
+  }
+
+  return true;
 }
 
 // #endregion expression completeness
+
+/**
+ * Returns the left or right operand of a binary expression function.
+ */
+export function getBinaryExpressionOperand(
+  binaryExpression: ESQLFunction,
+  side: 'left' | 'right'
+): ESQLSingleAstItem | ESQLSingleAstItem[] | undefined {
+  const left = binaryExpression.args[0] as ESQLSingleAstItem | ESQLSingleAstItem[] | undefined;
+  const right = binaryExpression.args[1] as ESQLSingleAstItem | ESQLSingleAstItem[] | undefined;
+
+  return side === 'left' ? left : right;
+}
+
+/**
+ * Extracts a valid expression root from an assignment RHS, handling arrays and marker nodes.
+ */
+export function extractValidExpressionRoot(
+  assignmentRhs: ESQLSingleAstItem | ESQLSingleAstItem[] | undefined
+): ESQLSingleAstItem | undefined {
+  let root: ESQLSingleAstItem | undefined;
+
+  if (Array.isArray(assignmentRhs)) {
+    root = assignmentRhs[0] || undefined;
+  } else {
+    root = assignmentRhs;
+  }
+
+  if (!root || isMarkerNode(root)) {
+    return undefined;
+  }
+
+  return getRightmostNonVariadicOperator(root);
+}
+
+/**
+ * Finds the rightmost non-variadic operator in an expression tree.
+ * Useful for locating the most specific node near the cursor.
+ */
+export function getRightmostNonVariadicOperator(root: ESQLSingleAstItem): ESQLSingleAstItem {
+  if (root?.type !== 'function') {
+    return root;
+  }
+
+  let rightmostFn = root;
+  const walker = new Walker({
+    visitFunction: (fn) => {
+      if (fn.subtype !== 'variadic-call' && fn.location.min > rightmostFn.location.min) {
+        rightmostFn = fn;
+      }
+    },
+  });
+
+  walker.walkFunction(root);
+
+  return rightmostFn;
+}

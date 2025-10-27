@@ -7,24 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExecutionStatus } from '@kbn/workflows';
-import type { StoryObj } from '@storybook/react';
-import React, { type ReactNode } from 'react';
+import type { Decorator, StoryObj } from '@storybook/react';
+import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { kibanaReactDecorator } from '../../../../.storybook/decorators';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowYAMLEditor } from './workflow_yaml_editor';
+import { kibanaReactDecorator } from '../../../../.storybook/decorators';
+import { WorkflowEditorStoreProvider } from '../lib/store';
+
+const StoryProviders: Decorator = (story: Function) => {
+  const queryClient = new QueryClient();
+  return (
+    <MemoryRouter>
+      <QueryClientProvider client={queryClient}>
+        <WorkflowEditorStoreProvider>
+          <div css={{ height: '600px', display: 'flex', flexDirection: 'column' }}>{story()}</div>
+        </WorkflowEditorStoreProvider>
+      </QueryClientProvider>
+    </MemoryRouter>
+  );
+};
 
 export default {
   title: 'Workflows Management/Workflow YAML Editor',
   component: WorkflowYAMLEditor,
-  decorators: [
-    kibanaReactDecorator,
-    (story: () => ReactNode) => (
-      <MemoryRouter>
-        <div css={{ height: '600px', display: 'flex', flexDirection: 'column' }}>{story()}</div>
-      </MemoryRouter>
-    ),
-  ],
+  decorators: [kibanaReactDecorator, StoryProviders],
 };
 
 const workflowYaml = `name: Print famous people
@@ -91,7 +99,6 @@ export const Default: Story = {
     onMount: () => {},
     onChange: () => {},
     onSave: () => {},
-    onValidationErrors: () => {},
     value: workflowYaml,
   },
 };
@@ -126,8 +133,9 @@ export const WithStepExecutions: Story = {
         workflowId: '1',
         startedAt: new Date().toISOString(),
         topologicalIndex: 0,
-        executionIndex: 0,
-        path: [],
+        globalExecutionIndex: 0,
+        stepExecutionIndex: 0,
+        scopeStack: [],
       },
       {
         stepId: 'debug_ai_response',
@@ -137,8 +145,9 @@ export const WithStepExecutions: Story = {
         workflowId: '1',
         startedAt: new Date().toISOString(),
         topologicalIndex: 0,
-        executionIndex: 0,
-        path: [],
+        globalExecutionIndex: 0,
+        stepExecutionIndex: 0,
+        scopeStack: [],
       },
       {
         stepId: 'print-enter-dash',
@@ -148,8 +157,9 @@ export const WithStepExecutions: Story = {
         workflowId: '1',
         startedAt: new Date().toISOString(),
         topologicalIndex: 0,
-        executionIndex: 0,
-        path: [],
+        globalExecutionIndex: 0,
+        stepExecutionIndex: 0,
+        scopeStack: [],
       },
       {
         stepId: 'foreachstep',
@@ -159,8 +169,9 @@ export const WithStepExecutions: Story = {
         workflowId: '1',
         startedAt: new Date().toISOString(),
         topologicalIndex: 0,
-        executionIndex: 0,
-        path: [],
+        globalExecutionIndex: 0,
+        stepExecutionIndex: 0,
+        scopeStack: [],
       },
       {
         stepId: 'log-name-surname',
@@ -170,8 +181,9 @@ export const WithStepExecutions: Story = {
         workflowId: '1',
         startedAt: new Date().toISOString(),
         topologicalIndex: 0,
-        executionIndex: 0,
-        path: [],
+        globalExecutionIndex: 0,
+        stepExecutionIndex: 0,
+        scopeStack: [],
       },
       {
         stepId: 'slack_it',
@@ -181,8 +193,9 @@ export const WithStepExecutions: Story = {
         workflowId: '1',
         startedAt: new Date().toISOString(),
         topologicalIndex: 0,
-        executionIndex: 0,
-        path: [],
+        globalExecutionIndex: 0,
+        stepExecutionIndex: 0,
+        scopeStack: [],
       },
       {
         stepId: 'print-exit-dash',
@@ -192,8 +205,9 @@ export const WithStepExecutions: Story = {
         workflowId: '1',
         startedAt: new Date().toISOString(),
         topologicalIndex: 0,
-        executionIndex: 0,
-        path: [],
+        globalExecutionIndex: 0,
+        stepExecutionIndex: 0,
+        scopeStack: [],
       },
     ],
   },
