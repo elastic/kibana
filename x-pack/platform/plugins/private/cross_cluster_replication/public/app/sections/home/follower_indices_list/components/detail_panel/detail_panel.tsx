@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Component, Fragment } from 'react';
+import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
@@ -36,6 +36,354 @@ import { routing } from '../../../../../services/routing';
 import { API_STATUS } from '../../../../../constants';
 import { ContextMenu } from '../context_menu';
 
+interface FollowerIndexDetailsProps {
+  followerIndex: FollowerIndexWithPausedStatus;
+}
+
+const FollowerIndexDetails = ({ followerIndex }: FollowerIndexDetailsProps) => {
+  const {
+    remoteCluster,
+    leaderIndex,
+    isPaused,
+    shards,
+    maxReadRequestOperationCount,
+    maxOutstandingReadRequests,
+    maxReadRequestSize,
+    maxWriteRequestOperationCount,
+    maxWriteRequestSize,
+    maxOutstandingWriteRequests,
+    maxWriteBufferCount,
+    maxWriteBufferSize,
+    maxRetryDelay,
+    readPollTimeout,
+  } = followerIndex;
+
+  return (
+    <Fragment>
+      <EuiFlyoutBody>
+        <section>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiDescriptionList>
+                <EuiDescriptionListTitle>
+                  <EuiTitle size="xs">
+                    <FormattedMessage
+                      id="xpack.crossClusterReplication.followerIndexDetailPanel.statusLabel"
+                      defaultMessage="Status"
+                    />
+                  </EuiTitle>
+                </EuiDescriptionListTitle>
+
+                <EuiDescriptionListDescription data-test-subj="status">
+                  {isPaused ? (
+                    <EuiHealth color="subdued">
+                      <FormattedMessage
+                        id="xpack.crossClusterReplication.followerIndexDetailPanel.pausedStatus"
+                        defaultMessage="Paused"
+                      />
+                    </EuiHealth>
+                  ) : (
+                    <EuiHealth color="success">
+                      <FormattedMessage
+                        id="xpack.crossClusterReplication.followerIndexDetailPanel.activeStatus"
+                        defaultMessage="Active"
+                      />
+                    </EuiHealth>
+                  )}
+                </EuiDescriptionListDescription>
+              </EuiDescriptionList>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
+          <EuiSpacer size="s" />
+
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiDescriptionList>
+                <EuiDescriptionListTitle>
+                  <EuiTitle size="xs">
+                    <FormattedMessage
+                      id="xpack.crossClusterReplication.followerIndexDetailPanel.remoteClusterLabel"
+                      defaultMessage="Remote cluster"
+                    />
+                  </EuiTitle>
+                </EuiDescriptionListTitle>
+
+                <EuiDescriptionListDescription data-test-subj="remoteCluster">
+                  {remoteCluster}
+                </EuiDescriptionListDescription>
+              </EuiDescriptionList>
+            </EuiFlexItem>
+
+            <EuiFlexItem>
+              <EuiDescriptionList>
+                <EuiDescriptionListTitle>
+                  <EuiTitle size="xs">
+                    <FormattedMessage
+                      id="xpack.crossClusterReplication.followerIndexDetailPanel.leaderIndexLabel"
+                      defaultMessage="Leader index"
+                    />
+                  </EuiTitle>
+                </EuiDescriptionListTitle>
+
+                <EuiDescriptionListDescription data-test-subj="leaderIndex">
+                  {leaderIndex}
+                </EuiDescriptionListDescription>
+              </EuiDescriptionList>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </section>
+
+        <EuiSpacer size="l" />
+
+        <section
+          aria-labelledby="ccrFollowerIndexDetailSettingsTitle"
+          data-test-subj="settingsSection"
+        >
+          <EuiTitle size="s">
+            <h3 id="ccrFollowerIndexDetailSettingsTitle">
+              <FormattedMessage
+                id="xpack.crossClusterReplication.followerIndexDetailPanel.settingsTitle"
+                defaultMessage="Settings"
+              />
+            </h3>
+          </EuiTitle>
+
+          <EuiSpacer size="s" />
+
+          {isPaused ? (
+            <EuiCallOut
+              size="s"
+              title={
+                <FormattedMessage
+                  id="xpack.crossClusterReplication.followerIndexDetailPanel.pausedFollowerCalloutTitle"
+                  defaultMessage="A paused follower index does not have settings or shard statistics."
+                />
+              }
+            />
+          ) : (
+            <>
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <EuiDescriptionList data-test-subj="settingsValues">
+                    <EuiDescriptionListTitle>
+                      <EuiTitle size="xs">
+                        <FormattedMessage
+                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxReadRequestOperationCountTitle"
+                          defaultMessage="Max read request operation count"
+                        />
+                      </EuiTitle>
+                    </EuiDescriptionListTitle>
+
+                    <EuiDescriptionListDescription data-test-subj="maxReadReqOpCount">
+                      {maxReadRequestOperationCount}
+                    </EuiDescriptionListDescription>
+                  </EuiDescriptionList>
+                </EuiFlexItem>
+
+                <EuiFlexItem>
+                  <EuiDescriptionList data-test-subj="settingsValues">
+                    <EuiDescriptionListTitle>
+                      <EuiTitle size="xs">
+                        <FormattedMessage
+                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxOutstandingReadRequestsTitle"
+                          defaultMessage="Max outstanding read requests"
+                        />
+                      </EuiTitle>
+                    </EuiDescriptionListTitle>
+
+                    <EuiDescriptionListDescription data-test-subj="maxOutstandingReadReq">
+                      {maxOutstandingReadRequests}
+                    </EuiDescriptionListDescription>
+                  </EuiDescriptionList>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+
+              <EuiSpacer size="s" />
+
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <EuiDescriptionList data-test-subj="settingsValues">
+                    <EuiDescriptionListTitle>
+                      <EuiTitle size="xs">
+                        <FormattedMessage
+                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxReadRequestSizeTitle"
+                          defaultMessage="Max read request size"
+                        />
+                      </EuiTitle>
+                    </EuiDescriptionListTitle>
+
+                    <EuiDescriptionListDescription data-test-subj="maxReadReqSize">
+                      {maxReadRequestSize}
+                    </EuiDescriptionListDescription>
+                  </EuiDescriptionList>
+                </EuiFlexItem>
+
+                <EuiFlexItem>
+                  <EuiDescriptionList data-test-subj="settingsValues">
+                    <EuiDescriptionListTitle>
+                      <EuiTitle size="xs">
+                        <FormattedMessage
+                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteRequestOperationCountTitle"
+                          defaultMessage="Max write request operation count"
+                        />
+                      </EuiTitle>
+                    </EuiDescriptionListTitle>
+
+                    <EuiDescriptionListDescription data-test-subj="maxWriteReqOpCount">
+                      {maxWriteRequestOperationCount}
+                    </EuiDescriptionListDescription>
+                  </EuiDescriptionList>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+
+              <EuiSpacer size="s" />
+
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <EuiDescriptionList data-test-subj="settingsValues">
+                    <EuiDescriptionListTitle>
+                      <EuiTitle size="xs">
+                        <FormattedMessage
+                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteRequestSizeTitle"
+                          defaultMessage="Max write request size"
+                        />
+                      </EuiTitle>
+                    </EuiDescriptionListTitle>
+
+                    <EuiDescriptionListDescription data-test-subj="maxWriteReqSize">
+                      {maxWriteRequestSize}
+                    </EuiDescriptionListDescription>
+                  </EuiDescriptionList>
+                </EuiFlexItem>
+
+                <EuiFlexItem>
+                  <EuiDescriptionList data-test-subj="settingsValues">
+                    <EuiDescriptionListTitle>
+                      <EuiTitle size="xs">
+                        <FormattedMessage
+                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxOutstandingWriteRequestsTitle"
+                          defaultMessage="Max outstanding write requests"
+                        />
+                      </EuiTitle>
+                    </EuiDescriptionListTitle>
+
+                    <EuiDescriptionListDescription data-test-subj="maxOutstandingWriteReq">
+                      {maxOutstandingWriteRequests}
+                    </EuiDescriptionListDescription>
+                  </EuiDescriptionList>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+
+              <EuiSpacer size="s" />
+
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <EuiDescriptionList data-test-subj="settingsValues">
+                    <EuiDescriptionListTitle>
+                      <EuiTitle size="xs">
+                        <FormattedMessage
+                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteBufferCountTitle"
+                          defaultMessage="Max write buffer count"
+                        />
+                      </EuiTitle>
+                    </EuiDescriptionListTitle>
+
+                    <EuiDescriptionListDescription data-test-subj="maxWriteBufferCount">
+                      {maxWriteBufferCount}
+                    </EuiDescriptionListDescription>
+                  </EuiDescriptionList>
+                </EuiFlexItem>
+
+                <EuiFlexItem>
+                  <EuiDescriptionList data-test-subj="settingsValues">
+                    <EuiDescriptionListTitle>
+                      <EuiTitle size="xs">
+                        <FormattedMessage
+                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteBufferSizeTitle"
+                          defaultMessage="Max write buffer size"
+                        />
+                      </EuiTitle>
+                    </EuiDescriptionListTitle>
+
+                    <EuiDescriptionListDescription data-test-subj="maxWriteBufferSize">
+                      {maxWriteBufferSize}
+                    </EuiDescriptionListDescription>
+                  </EuiDescriptionList>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+
+              <EuiSpacer size="s" />
+
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <EuiDescriptionList data-test-subj="settingsValues">
+                    <EuiDescriptionListTitle>
+                      <EuiTitle size="xs">
+                        <FormattedMessage
+                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxRetryDelayTitle"
+                          defaultMessage="Max retry delay"
+                        />
+                      </EuiTitle>
+                    </EuiDescriptionListTitle>
+
+                    <EuiDescriptionListDescription data-test-subj="maxRetryDelay">
+                      {maxRetryDelay}
+                    </EuiDescriptionListDescription>
+                  </EuiDescriptionList>
+                </EuiFlexItem>
+
+                <EuiFlexItem>
+                  <EuiDescriptionList data-test-subj="settingsValues">
+                    <EuiDescriptionListTitle>
+                      <EuiTitle size="xs">
+                        <FormattedMessage
+                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.readPollTimeoutTitle"
+                          defaultMessage="Read poll timeout"
+                        />
+                      </EuiTitle>
+                    </EuiDescriptionListTitle>
+
+                    <EuiDescriptionListDescription data-test-subj="readPollTimeout">
+                      {readPollTimeout}
+                    </EuiDescriptionListDescription>
+                  </EuiDescriptionList>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
+          )}
+        </section>
+
+        <EuiSpacer size="l" />
+
+        <section data-test-subj="shardsStatsSection">
+          {shards &&
+            shards.map((shard, i) => (
+              <Fragment key={i}>
+                <EuiSpacer size="m" />
+                <EuiTitle size="xs">
+                  <h3>
+                    <FormattedMessage
+                      id="xpack.crossClusterReplication.followerIndexDetailPanel.shardStatsTitle"
+                      defaultMessage="Shard {id} stats"
+                      values={{
+                        id: shard.id,
+                      }}
+                    />
+                  </h3>
+                </EuiTitle>
+                <EuiSpacer size="s" />
+                <EuiCodeBlock language="json" data-test-subj="shardsStats">
+                  {JSON.stringify(shard, null, 2)}
+                </EuiCodeBlock>
+              </Fragment>
+            ))}
+        </section>
+      </EuiFlyoutBody>
+    </Fragment>
+  );
+};
+
 export interface DetailPanelProps {
   apiStatus?: ApiStatus;
   followerIndexId?: string;
@@ -43,360 +391,10 @@ export interface DetailPanelProps {
   closeDetailPanel: () => void;
 }
 
-export class DetailPanel extends Component<DetailPanelProps> {
-  renderFollowerIndex() {
-    const { followerIndex } = this.props;
+export const DetailPanel = (props: DetailPanelProps) => {
+  const { followerIndexId, closeDetailPanel, followerIndex, apiStatus } = props;
 
-    if (!followerIndex) {
-      return null;
-    }
-
-    const {
-      remoteCluster,
-      leaderIndex,
-      isPaused,
-      shards,
-      maxReadRequestOperationCount,
-      maxOutstandingReadRequests,
-      maxReadRequestSize,
-      maxWriteRequestOperationCount,
-      maxWriteRequestSize,
-      maxOutstandingWriteRequests,
-      maxWriteBufferCount,
-      maxWriteBufferSize,
-      maxRetryDelay,
-      readPollTimeout,
-    } = followerIndex;
-
-    return (
-      <Fragment>
-        <EuiFlyoutBody>
-          <section>
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiDescriptionList>
-                  <EuiDescriptionListTitle>
-                    <EuiTitle size="xs">
-                      <FormattedMessage
-                        id="xpack.crossClusterReplication.followerIndexDetailPanel.statusLabel"
-                        defaultMessage="Status"
-                      />
-                    </EuiTitle>
-                  </EuiDescriptionListTitle>
-
-                  <EuiDescriptionListDescription data-test-subj="status">
-                    {isPaused ? (
-                      <EuiHealth color="subdued">
-                        <FormattedMessage
-                          id="xpack.crossClusterReplication.followerIndexDetailPanel.pausedStatus"
-                          defaultMessage="Paused"
-                        />
-                      </EuiHealth>
-                    ) : (
-                      <EuiHealth color="success">
-                        <FormattedMessage
-                          id="xpack.crossClusterReplication.followerIndexDetailPanel.activeStatus"
-                          defaultMessage="Active"
-                        />
-                      </EuiHealth>
-                    )}
-                  </EuiDescriptionListDescription>
-                </EuiDescriptionList>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-
-            <EuiSpacer size="s" />
-
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiDescriptionList>
-                  <EuiDescriptionListTitle>
-                    <EuiTitle size="xs">
-                      <FormattedMessage
-                        id="xpack.crossClusterReplication.followerIndexDetailPanel.remoteClusterLabel"
-                        defaultMessage="Remote cluster"
-                      />
-                    </EuiTitle>
-                  </EuiDescriptionListTitle>
-
-                  <EuiDescriptionListDescription data-test-subj="remoteCluster">
-                    {remoteCluster}
-                  </EuiDescriptionListDescription>
-                </EuiDescriptionList>
-              </EuiFlexItem>
-
-              <EuiFlexItem>
-                <EuiDescriptionList>
-                  <EuiDescriptionListTitle>
-                    <EuiTitle size="xs">
-                      <FormattedMessage
-                        id="xpack.crossClusterReplication.followerIndexDetailPanel.leaderIndexLabel"
-                        defaultMessage="Leader index"
-                      />
-                    </EuiTitle>
-                  </EuiDescriptionListTitle>
-
-                  <EuiDescriptionListDescription data-test-subj="leaderIndex">
-                    {leaderIndex}
-                  </EuiDescriptionListDescription>
-                </EuiDescriptionList>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </section>
-
-          <EuiSpacer size="l" />
-
-          <section
-            aria-labelledby="ccrFollowerIndexDetailSettingsTitle"
-            data-test-subj="settingsSection"
-          >
-            <EuiTitle size="s">
-              <h3 id="ccrFollowerIndexDetailSettingsTitle">
-                <FormattedMessage
-                  id="xpack.crossClusterReplication.followerIndexDetailPanel.settingsTitle"
-                  defaultMessage="Settings"
-                />
-              </h3>
-            </EuiTitle>
-
-            <EuiSpacer size="s" />
-
-            {isPaused ? (
-              <EuiCallOut
-                size="s"
-                title={
-                  <FormattedMessage
-                    id="xpack.crossClusterReplication.followerIndexDetailPanel.pausedFollowerCalloutTitle"
-                    defaultMessage="A paused follower index does not have settings or shard statistics."
-                  />
-                }
-              />
-            ) : (
-              <>
-                <EuiFlexGroup>
-                  <EuiFlexItem>
-                    <EuiDescriptionList data-test-subj="settingsValues">
-                      <EuiDescriptionListTitle>
-                        <EuiTitle size="xs">
-                          <FormattedMessage
-                            id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxReadRequestOperationCountTitle"
-                            defaultMessage="Max read request operation count"
-                          />
-                        </EuiTitle>
-                      </EuiDescriptionListTitle>
-
-                      <EuiDescriptionListDescription data-test-subj="maxReadReqOpCount">
-                        {maxReadRequestOperationCount}
-                      </EuiDescriptionListDescription>
-                    </EuiDescriptionList>
-                  </EuiFlexItem>
-
-                  <EuiFlexItem>
-                    <EuiDescriptionList data-test-subj="settingsValues">
-                      <EuiDescriptionListTitle>
-                        <EuiTitle size="xs">
-                          <FormattedMessage
-                            id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxOutstandingReadRequestsTitle"
-                            defaultMessage="Max outstanding read requests"
-                          />
-                        </EuiTitle>
-                      </EuiDescriptionListTitle>
-
-                      <EuiDescriptionListDescription data-test-subj="maxOutstandingReadReq">
-                        {maxOutstandingReadRequests}
-                      </EuiDescriptionListDescription>
-                    </EuiDescriptionList>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-
-                <EuiSpacer size="s" />
-
-                <EuiFlexGroup>
-                  <EuiFlexItem>
-                    <EuiDescriptionList data-test-subj="settingsValues">
-                      <EuiDescriptionListTitle>
-                        <EuiTitle size="xs">
-                          <FormattedMessage
-                            id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxReadRequestSizeTitle"
-                            defaultMessage="Max read request size"
-                          />
-                        </EuiTitle>
-                      </EuiDescriptionListTitle>
-
-                      <EuiDescriptionListDescription data-test-subj="maxReadReqSize">
-                        {maxReadRequestSize}
-                      </EuiDescriptionListDescription>
-                    </EuiDescriptionList>
-                  </EuiFlexItem>
-
-                  <EuiFlexItem>
-                    <EuiDescriptionList data-test-subj="settingsValues">
-                      <EuiDescriptionListTitle>
-                        <EuiTitle size="xs">
-                          <FormattedMessage
-                            id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteRequestOperationCountTitle"
-                            defaultMessage="Max write request operation count"
-                          />
-                        </EuiTitle>
-                      </EuiDescriptionListTitle>
-
-                      <EuiDescriptionListDescription data-test-subj="maxWriteReqOpCount">
-                        {maxWriteRequestOperationCount}
-                      </EuiDescriptionListDescription>
-                    </EuiDescriptionList>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-
-                <EuiSpacer size="s" />
-
-                <EuiFlexGroup>
-                  <EuiFlexItem>
-                    <EuiDescriptionList data-test-subj="settingsValues">
-                      <EuiDescriptionListTitle>
-                        <EuiTitle size="xs">
-                          <FormattedMessage
-                            id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteRequestSizeTitle"
-                            defaultMessage="Max write request size"
-                          />
-                        </EuiTitle>
-                      </EuiDescriptionListTitle>
-
-                      <EuiDescriptionListDescription data-test-subj="maxWriteReqSize">
-                        {maxWriteRequestSize}
-                      </EuiDescriptionListDescription>
-                    </EuiDescriptionList>
-                  </EuiFlexItem>
-
-                  <EuiFlexItem>
-                    <EuiDescriptionList data-test-subj="settingsValues">
-                      <EuiDescriptionListTitle>
-                        <EuiTitle size="xs">
-                          <FormattedMessage
-                            id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxOutstandingWriteRequestsTitle"
-                            defaultMessage="Max outstanding write requests"
-                          />
-                        </EuiTitle>
-                      </EuiDescriptionListTitle>
-
-                      <EuiDescriptionListDescription data-test-subj="maxOutstandingWriteReq">
-                        {maxOutstandingWriteRequests}
-                      </EuiDescriptionListDescription>
-                    </EuiDescriptionList>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-
-                <EuiSpacer size="s" />
-
-                <EuiFlexGroup>
-                  <EuiFlexItem>
-                    <EuiDescriptionList data-test-subj="settingsValues">
-                      <EuiDescriptionListTitle>
-                        <EuiTitle size="xs">
-                          <FormattedMessage
-                            id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteBufferCountTitle"
-                            defaultMessage="Max write buffer count"
-                          />
-                        </EuiTitle>
-                      </EuiDescriptionListTitle>
-
-                      <EuiDescriptionListDescription data-test-subj="maxWriteBufferCount">
-                        {maxWriteBufferCount}
-                      </EuiDescriptionListDescription>
-                    </EuiDescriptionList>
-                  </EuiFlexItem>
-
-                  <EuiFlexItem>
-                    <EuiDescriptionList data-test-subj="settingsValues">
-                      <EuiDescriptionListTitle>
-                        <EuiTitle size="xs">
-                          <FormattedMessage
-                            id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteBufferSizeTitle"
-                            defaultMessage="Max write buffer size"
-                          />
-                        </EuiTitle>
-                      </EuiDescriptionListTitle>
-
-                      <EuiDescriptionListDescription data-test-subj="maxWriteBufferSize">
-                        {maxWriteBufferSize}
-                      </EuiDescriptionListDescription>
-                    </EuiDescriptionList>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-
-                <EuiSpacer size="s" />
-
-                <EuiFlexGroup>
-                  <EuiFlexItem>
-                    <EuiDescriptionList data-test-subj="settingsValues">
-                      <EuiDescriptionListTitle>
-                        <EuiTitle size="xs">
-                          <FormattedMessage
-                            id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxRetryDelayTitle"
-                            defaultMessage="Max retry delay"
-                          />
-                        </EuiTitle>
-                      </EuiDescriptionListTitle>
-
-                      <EuiDescriptionListDescription data-test-subj="maxRetryDelay">
-                        {maxRetryDelay}
-                      </EuiDescriptionListDescription>
-                    </EuiDescriptionList>
-                  </EuiFlexItem>
-
-                  <EuiFlexItem>
-                    <EuiDescriptionList data-test-subj="settingsValues">
-                      <EuiDescriptionListTitle>
-                        <EuiTitle size="xs">
-                          <FormattedMessage
-                            id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.readPollTimeoutTitle"
-                            defaultMessage="Read poll timeout"
-                          />
-                        </EuiTitle>
-                      </EuiDescriptionListTitle>
-
-                      <EuiDescriptionListDescription data-test-subj="readPollTimeout">
-                        {readPollTimeout}
-                      </EuiDescriptionListDescription>
-                    </EuiDescriptionList>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </>
-            )}
-          </section>
-
-          <EuiSpacer size="l" />
-
-          <section data-test-subj="shardsStatsSection">
-            {shards &&
-              shards.map((shard, i) => (
-                <Fragment key={i}>
-                  <EuiSpacer size="m" />
-                  <EuiTitle size="xs">
-                    <h3>
-                      <FormattedMessage
-                        id="xpack.crossClusterReplication.followerIndexDetailPanel.shardStatsTitle"
-                        defaultMessage="Shard {id} stats"
-                        values={{
-                          id: shard.id,
-                        }}
-                      />
-                    </h3>
-                  </EuiTitle>
-                  <EuiSpacer size="s" />
-                  <EuiCodeBlock language="json" data-test-subj="shardsStats">
-                    {JSON.stringify(shard, null, 2)}
-                  </EuiCodeBlock>
-                </Fragment>
-              ))}
-          </section>
-        </EuiFlyoutBody>
-      </Fragment>
-    );
-  }
-
-  renderContent() {
-    const { apiStatus, followerIndex } = this.props;
-
+  const renderContent = () => {
     if (apiStatus === API_STATUS.LOADING) {
       return (
         <EuiFlyoutBody>
@@ -443,12 +441,10 @@ export class DetailPanel extends Component<DetailPanelProps> {
       );
     }
 
-    return this.renderFollowerIndex();
-  }
+    return <FollowerIndexDetails followerIndex={followerIndex} />;
+  };
 
-  renderFooter() {
-    const { followerIndexId, followerIndex, closeDetailPanel } = this.props;
-
+  const renderFooter = () => {
     // Use ID instead of followerIndex, because followerIndex may not be loaded yet.
     const indexManagementUri = getIndexListUri(`name:${followerIndexId}`);
 
@@ -507,28 +503,24 @@ export class DetailPanel extends Component<DetailPanelProps> {
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     );
-  }
+  };
 
-  render() {
-    const { followerIndexId, closeDetailPanel } = this.props;
+  return (
+    <EuiFlyout
+      data-test-subj="followerIndexDetail"
+      onClose={closeDetailPanel}
+      aria-labelledby="followerIndexDetailsFlyoutTitle"
+      size="m"
+      maxWidth={600}
+    >
+      <EuiFlyoutHeader>
+        <EuiTitle size="m" id="followerIndexDetailsFlyoutTitle" data-test-subj="title">
+          <h2>{followerIndexId}</h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
 
-    return (
-      <EuiFlyout
-        data-test-subj="followerIndexDetail"
-        onClose={closeDetailPanel}
-        aria-labelledby="followerIndexDetailsFlyoutTitle"
-        size="m"
-        maxWidth={600}
-      >
-        <EuiFlyoutHeader>
-          <EuiTitle size="m" id="followerIndexDetailsFlyoutTitle" data-test-subj="title">
-            <h2>{followerIndexId}</h2>
-          </EuiTitle>
-        </EuiFlyoutHeader>
-
-        {this.renderContent()}
-        {this.renderFooter()}
-      </EuiFlyout>
-    );
-  }
-}
+      {renderContent()}
+      {renderFooter()}
+    </EuiFlyout>
+  );
+};
