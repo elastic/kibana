@@ -110,6 +110,7 @@ export interface FilterOptions {
   showRulesWithGaps?: boolean;
   gapSearchRange?: GapRangeValue;
   includeRuleTypes?: Type[];
+  allowExpensiveQueries?: boolean;
 }
 
 export interface FetchRulesResponse {

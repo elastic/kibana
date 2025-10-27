@@ -25,15 +25,79 @@ describe('convertRulesFilterToKQL', () => {
     const kql = convertRulesFilterToKQL({ ...filterOptions, filter: 'foo' });
 
     expect(kql).toBe(
-      '(alert.attributes.name: "foo" OR alert.attributes.params.index: "foo" OR alert.attributes.params.threat.tactic.id: "foo" OR alert.attributes.params.threat.tactic.name: "foo" OR alert.attributes.params.threat.technique.id: "foo" OR alert.attributes.params.threat.technique.name: "foo" OR alert.attributes.params.threat.technique.subtechnique.id: "foo" OR alert.attributes.params.threat.technique.subtechnique.name: "foo")'
+      '(' +
+        'alert.attributes.name.keyword: *foo* ' +
+        'OR alert.attributes.name: "foo" ' +
+        'OR alert.attributes.params.index: "foo" ' +
+        'OR alert.attributes.params.threat.tactic.id: "foo" ' +
+        'OR alert.attributes.params.threat.tactic.name: "foo" ' +
+        'OR alert.attributes.params.threat.technique.id: "foo" ' +
+        'OR alert.attributes.params.threat.technique.name: "foo" ' +
+        'OR alert.attributes.params.threat.technique.subtechnique.id: "foo" ' +
+        'OR alert.attributes.params.threat.technique.subtechnique.name: "foo"' +
+        ')'
     );
   });
 
-  it('escapes "filter" value properly', () => {
-    const kql = convertRulesFilterToKQL({ ...filterOptions, filter: '" OR (foo: bar)' });
+  it('escapes "filter" value for single term searches', () => {
+    const kql = convertRulesFilterToKQL({
+      ...filterOptions,
+      filter: '"a<detection\\-rule*with)a<surprise:',
+    });
 
     expect(kql).toBe(
-      '(alert.attributes.name: "\\" OR (foo: bar)" OR alert.attributes.params.index: "\\" OR (foo: bar)" OR alert.attributes.params.threat.tactic.id: "\\" OR (foo: bar)" OR alert.attributes.params.threat.tactic.name: "\\" OR (foo: bar)" OR alert.attributes.params.threat.technique.id: "\\" OR (foo: bar)" OR alert.attributes.params.threat.technique.name: "\\" OR (foo: bar)" OR alert.attributes.params.threat.technique.subtechnique.id: "\\" OR (foo: bar)" OR alert.attributes.params.threat.technique.subtechnique.name: "\\" OR (foo: bar)")'
+      '(' +
+        'alert.attributes.name.keyword: *\\"a\\<detection\\\\-rule\\*with\\)a\\<surprise\\:* ' +
+        'OR alert.attributes.name: "\\"a<detection\\\\-rule*with)a<surprise:" ' +
+        'OR alert.attributes.params.index: "\\"a<detection\\\\-rule*with)a<surprise:" ' +
+        'OR alert.attributes.params.threat.tactic.id: "\\"a<detection\\\\-rule*with)a<surprise:" ' +
+        'OR alert.attributes.params.threat.tactic.name: "\\"a<detection\\\\-rule*with)a<surprise:" ' +
+        'OR alert.attributes.params.threat.technique.id: "\\"a<detection\\\\-rule*with)a<surprise:" ' +
+        'OR alert.attributes.params.threat.technique.name: "\\"a<detection\\\\-rule*with)a<surprise:" ' +
+        'OR alert.attributes.params.threat.technique.subtechnique.id: "\\"a<detection\\\\-rule*with)a<surprise:" ' +
+        'OR alert.attributes.params.threat.technique.subtechnique.name: "\\"a<detection\\\\-rule*with)a<surprise:"' +
+        ')'
+    );
+  });
+
+  it('skips expensive queries (allowExpensiveQueries = false) for single term searches', () => {
+    const kql = convertRulesFilterToKQL({
+      ...filterOptions,
+      allowExpensiveQueries: false,
+      filter: '"a<detection\\-rule*with)a<surprise:',
+    });
+
+    expect(kql).toBe(
+      '(' +
+        'alert.attributes.name: "\\"a<detection\\\\-rule*with)a<surprise:" ' +
+        'OR alert.attributes.params.index: "\\"a<detection\\\\-rule*with)a<surprise:" ' +
+        'OR alert.attributes.params.threat.tactic.id: "\\"a<detection\\\\-rule*with)a<surprise:" ' +
+        'OR alert.attributes.params.threat.tactic.name: "\\"a<detection\\\\-rule*with)a<surprise:" ' +
+        'OR alert.attributes.params.threat.technique.id: "\\"a<detection\\\\-rule*with)a<surprise:" ' +
+        'OR alert.attributes.params.threat.technique.name: "\\"a<detection\\\\-rule*with)a<surprise:" ' +
+        'OR alert.attributes.params.threat.technique.subtechnique.id: "\\"a<detection\\\\-rule*with)a<surprise:" ' +
+        'OR alert.attributes.params.threat.technique.subtechnique.name: "\\"a<detection\\\\-rule*with)a<surprise:"' +
+        ')'
+    );
+  });
+
+  it('escapes "filter" value for multiple term searches', () => {
+    const kql = convertRulesFilterToKQL({
+      ...filterOptions,
+      filter: '"a <detection rule with)\\a< surprise:',
+    });
+
+    expect(kql).toBe(
+      '(' +
+        'alert.attributes.name: "\\"a <detection rule with)\\\\a< surprise:" ' +
+        'OR alert.attributes.params.index: "\\"a <detection rule with)\\\\a< surprise:" ' +
+        'OR alert.attributes.params.threat.tactic.id: "\\"a <detection rule with)\\\\a< surprise:" ' +
+        'OR alert.attributes.params.threat.tactic.name: "\\"a <detection rule with)\\\\a< surprise:" ' +
+        'OR alert.attributes.params.threat.technique.id: "\\"a <detection rule with)\\\\a< surprise:" ' +
+        'OR alert.attributes.params.threat.technique.name: "\\"a <detection rule with)\\\\a< surprise:" ' +
+        'OR alert.attributes.params.threat.technique.subtechnique.id: "\\"a <detection rule with)\\\\a< surprise:" ' +
+        'OR alert.attributes.params.threat.technique.subtechnique.name: "\\"a <detection rule with)\\\\a< surprise:"' +
+        ')'
     );
   });
 
@@ -74,7 +138,20 @@ describe('convertRulesFilterToKQL', () => {
     });
 
     expect(kql).toBe(
-      `(alert.attributes.name: "foo" OR alert.attributes.params.index: "foo" OR alert.attributes.params.threat.tactic.id: "foo" OR alert.attributes.params.threat.tactic.name: "foo" OR alert.attributes.params.threat.technique.id: "foo" OR alert.attributes.params.threat.technique.name: "foo" OR alert.attributes.params.threat.technique.subtechnique.id: "foo" OR alert.attributes.params.threat.technique.subtechnique.name: "foo") AND alert.attributes.params.immutable: true AND alert.attributes.tags:(\"tag1\" AND \"tag2\")`
+      `(` +
+        `alert.attributes.name.keyword: *foo* OR ` +
+        `alert.attributes.name: "foo" OR ` +
+        `alert.attributes.params.index: "foo" OR ` +
+        `alert.attributes.params.threat.tactic.id: "foo" OR ` +
+        `alert.attributes.params.threat.tactic.name: "foo" OR ` +
+        `alert.attributes.params.threat.technique.id: "foo" OR ` +
+        `alert.attributes.params.threat.technique.name: "foo" OR ` +
+        `alert.attributes.params.threat.technique.subtechnique.id: "foo" OR ` +
+        `alert.attributes.params.threat.technique.subtechnique.name: "foo")` +
+        ` AND ` +
+        `alert.attributes.params.immutable: true` +
+        ` AND ` +
+        `alert.attributes.tags:(\"tag1\" AND \"tag2\")`
     );
   });
 
