@@ -13,4 +13,4 @@ export const ELASTICSEARCH_URL_PLACEHOLDER = 'https://your_deployment_url';
 // Feature Flags
 // `searchSolution.homepage.ingestionCTA` FF is deprecated
 // SEARCH_HOMEPAGE_INGESTION_CTA_FEATURE_FLAG = 'searchSolution.homepage.ingestionCTA';
-export const SEARCH_GETTING_STARTED_FEATURE_FLAG = 'searchSolution.gettingStarted';
+export const SEARCH_GETTING_STARTED_FEATURE_FLAG = 'searchSolution.gettingStartedEnabled';
