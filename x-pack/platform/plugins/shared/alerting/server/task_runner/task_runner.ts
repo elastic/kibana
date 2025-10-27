@@ -59,6 +59,7 @@ import { RuleRunningHandler } from './rule_running_handler';
 import { RuleResultService } from '../monitoring/rule_result_service';
 import { RuleTypeRunner } from './rule_type_runner';
 import { initializeAlertsClient } from '../alerts_client';
+import type { AlertsToUpdateWithLastScheduledActions } from '../alerts_client/types';
 import {
   createTaskRunnerLogger,
   withAlertingSpan,
@@ -382,6 +383,11 @@ export class TaskRunner<
       state: this.taskInstance.state,
       validatedParams: params,
     });
+    // Get alerts affected by maintenance windows here,
+    // so we can have the maintenance windows on in-memory alerts before scheduling actions
+
+    const alertsToUpdateWithMaintenanceWindows =
+      await alertsClient.getAlertsToUpdateWithMaintenanceWindows();
 
     // if there was an error, save the stack trace and throw
     if (error) {
@@ -425,14 +431,10 @@ export class TaskRunner<
         }
       })
     );
-    await withAlertingSpan('alerting:update-alerts', () =>
-      this.timer.runWithTimer(TaskRunnerTimerSpan.UpdateAlerts, async () => {
-        await alertsClient.updatePersistedAlerts();
-      })
-    );
 
     let alertsToReturn: Record<string, RawAlertInstance> = {};
     let recoveredAlertsToReturn: Record<string, RawAlertInstance> = {};
+    let alertsToUpdateWithLastScheduledActions: AlertsToUpdateWithLastScheduledActions = {};
 
     // Only serialize alerts into task state if we're auto-recovering, otherwise
     // we don't need to keep this information around.
@@ -440,7 +442,17 @@ export class TaskRunner<
       const alerts = alertsClient.getRawAlertInstancesForState(true);
       alertsToReturn = alerts.rawActiveAlerts;
       recoveredAlertsToReturn = alerts.rawRecoveredAlerts;
+      alertsToUpdateWithLastScheduledActions =
+        alertsClient.getAlertsToUpdateWithLastScheduledActions();
     }
+    await withAlertingSpan('alerting:update-alerts', () =>
+      this.timer.runWithTimer(TaskRunnerTimerSpan.UpdateAlerts, async () => {
+        await alertsClient.updatePersistedAlerts({
+          alertsToUpdateWithLastScheduledActions,
+          alertsToUpdateWithMaintenanceWindows,
+        });
+      })
+    );
 
     return {
       metrics: ruleRunMetricsStore.getMetrics(),
