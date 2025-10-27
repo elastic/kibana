@@ -90,14 +90,16 @@ export async function getServiceNamesFromAggregatedTransactions({
       services: {
         terms: {
           field: SERVICE_NAME,
+          size: 1000,
         },
       },
     },
   });
 
-  const serviceNames = response.aggregations?.services.buckets.map((bucket): string => {
-    return bucket.key as string;
-  });
+  const serviceNames =
+    response.aggregations?.services.buckets.map((bucket): string => {
+      return bucket.key as string;
+    }) || [];
 
   return serviceNames;
 }

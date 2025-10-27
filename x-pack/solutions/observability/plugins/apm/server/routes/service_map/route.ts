@@ -83,13 +83,13 @@ const serviceMapRoute = createApmServerRoute({
     const servicesWithAggregatedTransactions =
       config.searchAggregatedTransactions === SearchAggregatedTransactionSetting.never
         ? []
-        : (await getServiceNamesFromAggregatedTransactions({
+        : await getServiceNamesFromAggregatedTransactions({
             apmEventClient,
             start,
             end,
             kuery,
             environment,
-          })) ?? [];
+          });
 
     return getServiceMap({
       mlClient,
