@@ -18,17 +18,17 @@ import {
   HeatmapTitlesAndTextSettings,
   HeatmapVerticalAxisSettings,
 } from './style_settings';
+import { HeatmapLegendSettings } from './legend_settings';
 
 export function HeatmapFlyoutToolbar(props: VisualizationToolbarProps<HeatmapVisualizationState>) {
   const datatableToolbarContentMap: ToolbarContentMap<HeatmapVisualizationState> = {
     style: HeatmapStyleSettings,
+    legend: HeatmapLegendSettings,
   };
   return <FlyoutToolbar {...props} contentMap={datatableToolbarContentMap} />;
 }
 
-type HeatmapStyleSettingsProps = VisualizationToolbarProps<HeatmapVisualizationState>;
-
-function HeatmapStyleSettings(props: HeatmapStyleSettingsProps) {
+function HeatmapStyleSettings(props: VisualizationToolbarProps<HeatmapVisualizationState>) {
   return (
     <>
       <EuiAccordion

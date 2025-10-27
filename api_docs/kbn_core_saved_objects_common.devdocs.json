@@ -1423,36 +1423,36 @@
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/record.ts"
           },
           {
-            "plugin": "savedObjects",
-            "path": "src/platform/plugins/shared/saved_objects/public/types.ts"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/platform/plugins/shared/saved_objects/public/types.ts"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/platform/plugins/shared/saved_objects/public/types.ts"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/platform/plugins/shared/saved_objects/public/types.ts"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/platform/plugins/shared/saved_objects/public/types.ts"
-          },
-          {
-            "plugin": "savedObjects",
-            "path": "src/platform/plugins/shared/saved_objects/public/types.ts"
-          },
-          {
             "plugin": "savedObjectsTagging",
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/ui_api/get_table_column_definition.tsx"
           },
           {
             "plugin": "savedObjectsTagging",
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/ui_api/get_table_column_definition.tsx"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/platform/plugins/shared/saved_objects/public/types.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/platform/plugins/shared/saved_objects/public/types.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/platform/plugins/shared/saved_objects/public/types.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/platform/plugins/shared/saved_objects/public/types.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/platform/plugins/shared/saved_objects/public/types.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/platform/plugins/shared/saved_objects/public/types.ts"
           },
           {
             "plugin": "maps",
@@ -1595,6 +1595,14 @@
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts"
           },
           {
+            "plugin": "savedObjectsTagging",
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/components/connected/tag_list.tsx"
+          },
+          {
+            "plugin": "savedObjectsTagging",
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/components/connected/tag_list.tsx"
+          },
+          {
             "plugin": "uiActionsEnhanced",
             "path": "src/platform/plugins/shared/ui_actions_enhanced/public/dynamic_actions/action_factory.ts"
           },
@@ -1621,14 +1629,6 @@
           {
             "plugin": "uiActionsEnhanced",
             "path": "src/platform/plugins/shared/ui_actions_enhanced/public/dynamic_actions/dynamic_action_enhancement.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/components/connected/tag_list.tsx"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/components/connected/tag_list.tsx"
           },
           {
             "plugin": "maps",

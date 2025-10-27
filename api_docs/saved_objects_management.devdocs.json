@@ -1028,6 +1028,32 @@
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-public.SavedObjectRelation.managed",
+            "type": "boolean",
+            "tags": [],
+            "label": "managed",
+            "description": [],
+            "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-public.SavedObjectRelation.references",
+            "type": "Array",
+            "tags": [],
+            "label": "references",
+            "description": [],
+            "signature": [
+              "SavedObjectReference",
+              "[]"
+            ],
+            "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2220,6 +2246,32 @@
                 "section": "def-common.SavedObjectMetadata",
                 "text": "SavedObjectMetadata"
               }
+            ],
+            "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-common.SavedObjectRelation.managed",
+            "type": "boolean",
+            "tags": [],
+            "label": "managed",
+            "description": [],
+            "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-common.SavedObjectRelation.references",
+            "type": "Array",
+            "tags": [],
+            "label": "references",
+            "description": [],
+            "signature": [
+              "SavedObjectReference",
+              "[]"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
             "deprecated": false,

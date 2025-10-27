@@ -19,12 +19,14 @@ import { FlyoutToolbar } from '../../../shared_components/flyout_toolbar';
 import { PartitionAppearanceSettings } from './appearance_settings';
 import { PartitionTitlesAndTextSettings } from './titles_and_text_setttings';
 import { PartitionChartsMeta } from '../partition_charts_meta';
+import { PartitionLegendSettings } from './legend_settings';
 
 export function PartitionFlyoutToolbar(props: VisualizationToolbarProps<PieVisualizationState>) {
   const { isDisabled: hasDisabledSytleSettings } =
     PartitionChartsMeta[props.state.shape].toolbarPopover;
   const datatableToolbarContentMap: ToolbarContentMap<PieVisualizationState> = {
     style: hasDisabledSytleSettings ? undefined : PartitionStyleSettings,
+    legend: PartitionLegendSettings,
   };
   return <FlyoutToolbar {...props} contentMap={datatableToolbarContentMap} />;
 }
