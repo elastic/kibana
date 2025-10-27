@@ -179,6 +179,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
               wait_for_completion_timeout: '1ms',
             },
+            requestHash: faker.string.alpha(64),
           })
           .expect(200);
 
@@ -214,6 +215,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
               wait_for_completion_timeout: '1ms',
             },
+            requestHash: faker.string.alpha(64),
           })
           .expect(200);
 
@@ -295,6 +297,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send({
           sessionId,
           params: searchParams,
+          requestHash: faker.string.alpha(64),
         })
         .expect(200);
 
@@ -573,6 +576,7 @@ export default function ({ getService }: FtrProviderContext) {
           .send({
             sessionId,
             params: searchParams,
+            requestHash: faker.string.alpha(64),
           })
           .expect(200);
 
@@ -601,6 +605,7 @@ export default function ({ getService }: FtrProviderContext) {
             sessionId,
             params: searchParams,
             isStored: true,
+            requestHash: faker.string.alpha(64),
           })
           .expect(200);
 
