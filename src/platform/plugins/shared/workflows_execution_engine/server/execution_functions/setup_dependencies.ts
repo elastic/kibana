@@ -62,8 +62,17 @@ export async function setupDependencies(
     workflowExecutionGraph = workflowExecutionGraph.getStepGraph(workflowExecution.stepId);
   }
 
-  const unsecuredActionsClient = await actionsPlugin.getUnsecuredActionsClient();
-  const connectorExecutor = new ConnectorExecutor(unsecuredActionsClient);
+  // Use scoped actions client when fakeRequest is available to preserve user context
+  // Otherwise fallback to unsecured actions client
+  // TODO(tb): Consider completely disabling connectors when no fakeRequest is available
+  let connectorExecutor: ConnectorExecutor;
+  if (fakeRequest) {
+    const scopedActionsClient = await actionsPlugin.getActionsClientWithRequest(fakeRequest);
+    connectorExecutor = new ConnectorExecutor(scopedActionsClient, true);
+  } else {
+    const unsecuredActionsClient = await actionsPlugin.getUnsecuredActionsClient();
+    connectorExecutor = new ConnectorExecutor(unsecuredActionsClient, false);
+  }
 
   const workflowLogger = new WorkflowEventLogger(
     logsRepository,
@@ -109,7 +118,7 @@ export async function setupDependencies(
     workflowExecutionGraph,
     workflowExecutionState,
     workflowLogger,
-    esClient,
+    esClient: clientToUse,
     fakeRequest,
     coreStart,
     dependencies,
