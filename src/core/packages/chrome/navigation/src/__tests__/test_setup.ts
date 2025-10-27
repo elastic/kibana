@@ -46,8 +46,3 @@ afterAll(() => {
 
   jest.clearAllMocks();
 });
-
-jest.mock('../hooks/use_raf_debounced', () =>
-  // eslint-disable-next-line @kbn/imports/no_boundary_crossing
-  jest.requireActual('../hooks/use_raf_debounced.mock')
-);
