@@ -308,8 +308,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
-    describe('when sync is true', () => {
-      let syncResponse: ConversationCreateRequest;
+    describe('when sync:true and persist:true', () => {
+      let createConversationResponse: ConversationCreateRequest;
       let persistedConversation: Conversation;
 
       before(async () => {
@@ -336,12 +336,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         await proxy.waitForAllInterceptorsToHaveBeenCalled();
 
-        syncResponse = response.body as unknown as ConversationCreateRequest;
+        createConversationResponse = response.body as ConversationCreateRequest;
 
         const searchResponse = await es.search<Conversation>({
           index: '.kibana-observability-ai-assistant-conversations-*',
           query: {
-            term: { 'conversation.id': syncResponse.conversation.id },
+            term: { 'conversation.id': createConversationResponse.conversation.id },
           },
           size: 1,
         });
@@ -357,22 +357,19 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('returns the persisted conversation payload', () => {
-        const storedConversationSubset = omit(persistedConversation, [
-          'conversation.last_updated',
-          'namespace',
-          'user',
-        ]);
-        expect(storedConversationSubset).to.eql(syncResponse);
+        expect(createConversationResponse).to.eql(persistedConversation);
       });
 
       it('includes the assistant response in the messages', () => {
-        const lastMessage = syncResponse.messages[syncResponse.messages.length - 1]?.message;
+        const lastMessage =
+          createConversationResponse.messages[createConversationResponse.messages.length - 1]
+            ?.message;
         expect(lastMessage?.role).to.eql(MessageRole.Assistant);
         expect(lastMessage?.content).to.contain('Hello');
       });
     });
 
-    describe('when sync is true without persisting', () => {
+    describe('when sync:true and persist:false', () => {
       let syncResponse: ConversationCreateRequest;
 
       before(async () => {

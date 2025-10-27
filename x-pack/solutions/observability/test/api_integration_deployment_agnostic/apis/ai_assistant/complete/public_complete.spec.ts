@@ -11,23 +11,16 @@ import type {
 } from '@kbn/observability-ai-assistant-plugin/common';
 import { MessageRole, type Message } from '@kbn/observability-ai-assistant-plugin/common';
 import { type Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
+import { last } from 'lodash';
 import type { LlmProxy } from '../utils/create_llm_proxy';
 import { createLlmProxy } from '../utils/create_llm_proxy';
+import { clearConversations } from '../utils/conversation';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
-
-  const messages: Message[] = [
-    {
-      '@timestamp': new Date().toISOString(),
-      message: {
-        role: MessageRole.User,
-        content: 'Good morning, bot!',
-      },
-    },
-  ];
+  const es = getService('es');
 
   describe('/api/observability_ai_assistant/chat/complete', function () {
     // Fails on MKI: https://github.com/elastic/kibana/issues/205581
@@ -35,32 +28,49 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     let llmProxy: LlmProxy;
     let connectorId: string;
 
+    const defaultUserPrompt = 'Good morning, bot!';
+
     async function callPublicChatComplete({
       actions,
       instructions,
       persist = true,
       sync,
+      conversationId,
+      messages,
     }: {
       actions?: Array<Pick<FunctionDefinition, 'name' | 'description' | 'parameters'>>;
       instructions?: Array<string | Instruction>;
       persist?: boolean;
       sync?: boolean;
-    }) {
-      const response = await observabilityAIAssistantAPIClient.admin({
+      conversationId?: string;
+      messages?: Message[];
+    }): Promise<string | ConversationCreateRequest> {
+      const defaultMessages: Message[] = [
+        {
+          '@timestamp': new Date().toISOString(),
+          message: {
+            role: MessageRole.User,
+            content: defaultUserPrompt,
+          },
+        },
+      ];
+
+      const { body } = await observabilityAIAssistantAPIClient.admin({
         endpoint: 'POST /api/observability_ai_assistant/chat/complete 2023-10-31',
         params: {
           body: {
-            messages,
+            messages: messages ?? defaultMessages,
             connectorId,
             persist,
             actions,
             instructions,
             sync,
+            conversationId,
           },
         },
       });
 
-      return String(response.body);
+      return sync ? (body as ConversationCreateRequest) : String(body);
     }
 
     before(async () => {
@@ -127,7 +137,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         void llmProxy.interceptTitle('My Title');
         void llmProxy.interceptWithResponse('Hello');
 
-        responseBody = await callPublicChatComplete({});
+        responseBody = (await callPublicChatComplete({})) as string;
 
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
       });
@@ -188,22 +198,115 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
-    describe('when sync is true', () => {
-      let responseBody: ConversationCreateRequest;
+    describe('when sync:true and persist:false', () => {
+      let conversationResponseBody: ConversationCreateRequest;
 
       before(async () => {
         void llmProxy.interceptWithResponse('Hello sync');
 
-        const response = await callPublicChatComplete({ sync: true, persist: false });
+        conversationResponseBody = (await callPublicChatComplete({
+          sync: true,
+          persist: false,
+        })) as ConversationCreateRequest;
 
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
-
-        responseBody = JSON.parse(response) as ConversationCreateRequest;
       });
 
       it('returns a single conversation payload', () => {
-        expect(responseBody.conversation.id).to.be.a('string');
-        expect(responseBody.messages).to.be.an('array');
+        expect(conversationResponseBody.conversation.id).to.be.a('string');
+        expect(conversationResponseBody.messages).to.be.an('array');
+      });
+    });
+
+    describe('when sync:true for existing conversation', () => {
+      const followUpQuestion = 'Can you give me more details?';
+      const followUpAnswer = 'Yes John. Here are some more details: yadadada.';
+      let createdConversationResponse: ConversationCreateRequest;
+      let updatedConversationResponse: ConversationCreateRequest;
+
+      before(async () => {
+        await clearConversations(es);
+
+        void llmProxy.interceptTitle('Conversation that will be updated');
+        void llmProxy.interceptWithResponse('Good morning, John!');
+
+        createdConversationResponse = (await callPublicChatComplete({
+          persist: true,
+          sync: true,
+        })) as ConversationCreateRequest;
+
+        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+        void llmProxy.interceptWithResponse(followUpAnswer);
+
+        updatedConversationResponse = (await callPublicChatComplete({
+          messages: [
+            ...createdConversationResponse.messages,
+            {
+              '@timestamp': new Date().toISOString(),
+              message: {
+                role: MessageRole.User,
+                content: followUpQuestion,
+              },
+            },
+          ],
+          persist: true,
+          sync: true,
+          conversationId: createdConversationResponse.conversation.id,
+        })) as ConversationCreateRequest;
+
+        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+      });
+
+      after(async () => {
+        await clearConversations(es);
+      });
+
+      it('retains the original conversation id', () => {
+        expect(updatedConversationResponse.conversation.id).to.be(
+          createdConversationResponse.conversation.id
+        );
+      });
+
+      it('includes the initial user message', () => {
+        const userMessages = updatedConversationResponse.messages.filter(
+          (message) => message.message.role === MessageRole.User
+        );
+
+        expect(userMessages.some((message) => message.message.content === defaultUserPrompt)).to.be(
+          true
+        );
+      });
+
+      it('includes the follow-up user message', () => {
+        const userMessages = updatedConversationResponse.messages.filter(
+          (message) => message.message.role === MessageRole.User
+        );
+
+        expect(userMessages.some((message) => message.message.content === followUpQuestion)).to.be(
+          true
+        );
+      });
+
+      it('includes the follow-up assistant response', () => {
+        const lastAssistantMessage = last(updatedConversationResponse.messages)?.message;
+        expect(lastAssistantMessage?.role).to.be(MessageRole.Assistant);
+        expect(lastAssistantMessage?.content).to.be(followUpAnswer);
+      });
+
+      it('the updated conversation has the expected properties', () => {
+        expect(updatedConversationResponse).to.have.keys([
+          '@timestamp',
+          'archived',
+          'conversation',
+          'labels',
+          'messages',
+          'namespace',
+          'numeric_labels',
+          'public',
+          'systemMessage',
+          'user',
+        ]);
       });
     });
   });

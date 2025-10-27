@@ -219,7 +219,7 @@ export class ObservabilityAIAssistantClient {
   } => {
     return withActiveInferenceSpan('RunTools', () => {
       const isConversationUpdate = persist && !!predefinedConversationId;
-      const conversationId = predefinedConversationId ?? v4();
+      const conversationId = persist ? predefinedConversationId ?? v4() : '';
       let resolveConversation: (value: ConversationCreateRequest | undefined) => void;
       const conversationPromise = new Promise<ConversationCreateRequest | undefined>((resolve) => {
         resolveConversation = resolve;
@@ -396,8 +396,8 @@ export class ObservabilityAIAssistantClient {
                       archived: false,
                     };
 
-                    resolveConversation(conversationCreateRequest);
                     if (!persist || isFunctionRequest) {
+                      resolveConversation(conversationCreateRequest);
                       return of();
                     }
 
@@ -425,6 +425,7 @@ export class ObservabilityAIAssistantClient {
                         )
                       ).pipe(
                         map((conversationUpdated): ConversationUpdateEvent => {
+                          resolveConversation(conversationUpdated);
                           return {
                             conversation: conversationUpdated.conversation,
                             type: StreamingChatResponseEventType.ConversationUpdate,
@@ -435,6 +436,7 @@ export class ObservabilityAIAssistantClient {
 
                     return from(this.create(conversationCreateRequest)).pipe(
                       map((conversationCreated): ConversationCreateEvent => {
+                        resolveConversation(conversationCreated);
                         return {
                           conversation: conversationCreated.conversation,
                           type: StreamingChatResponseEventType.ConversationCreate,
