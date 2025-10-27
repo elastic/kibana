@@ -242,12 +242,13 @@ yarn test:ftr --config path/to/config.ts --debug --bail
 kibana/
 ├── src/                        # Core Kibana platform
 │   ├── cli/                    # CLI command implementations
-│   ├── cli_encryption_keys/    # Encryption key CLI tools
-│   ├── cli_health_gateway/     # Health gateway CLI
-│   ├── cli_keystore/           # Keystore CLI tools
-│   ├── cli_plugin/             # Plugin CLI tools
-│   ├── cli_setup/              # Setup CLI tools
-│   ├── cli_verification_code/  # Verification code CLI
+│        ├── kibana/            # Kibana runner CLI
+│        ├── encryption_keys/   # Encryption key CLI tools
+│        ├── health_gateway/    # Health gateway CLI
+│        ├── keystore/          # Keystore CLI tools
+│        ├── plugin/            # Plugin CLI tools
+│        ├── setup/             # Setup CLI tools
+│        ├── verification_code/ # Verification code CLI
 │   ├── core/                   # Core services and APIs
 │   ├── dev/                    # Development tools and utilities
 │   ├── platform/               # Platform-level packages/plugins
