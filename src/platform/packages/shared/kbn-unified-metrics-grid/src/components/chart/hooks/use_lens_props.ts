@@ -16,7 +16,6 @@ import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
 import { useStableCallback } from '@kbn/unified-histogram';
 import {
   BehaviorSubject,
-  debounceTime,
   filter,
   merge,
   withLatestFrom,
@@ -147,8 +146,6 @@ export const useLensProps = ({
       intersecting$
     )
       .pipe(
-        // prevent rapid successive updates
-        debounceTime(100),
         withLatestFrom(attributesCurrent, intersecting$),
         filter(([, attr, isIntersecting]) => {
           return !!attr && isIntersecting;
