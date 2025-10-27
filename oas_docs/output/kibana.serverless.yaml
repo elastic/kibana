@@ -15025,6 +15025,29 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/endpoint/action/memory_dump:
+    post:
+      description: Generates memory dumps on the targeted host.
+      operationId: EndpointGetActionsDetails
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Security_Endpoint_Management_API_MemoryDumpRouteRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionCreateSuccessResponse'
+          description: Action request was successfully created
+      summary: Generate a memory dump from the host machine
+      tags:
+        - Security Endpoint Management API
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/endpoint/action/running_procs:
     post:
       description: Get a list of all processes running on an endpoint.
@@ -77110,6 +77133,7 @@ components:
           get-file: '#/components/schemas/Security_Endpoint_Management_API_GetFile'
           isolate: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
           kill-process: '#/components/schemas/Security_Endpoint_Management_API_KillProcess'
+          memory-dump: '#/components/schemas/Security_Endpoint_Management_API_MemoryDump'
           running-processes: '#/components/schemas/Security_Endpoint_Management_API_RunningProcesses'
           runscript: '#/components/schemas/Security_Endpoint_Management_API_Runscript'
           scan: '#/components/schemas/Security_Endpoint_Management_API_Scan'
@@ -77129,6 +77153,7 @@ components:
         - $ref: '#/components/schemas/Security_Endpoint_Management_API_Unisolate'
         - $ref: '#/components/schemas/Security_Endpoint_Management_API_SuspendProcess'
         - $ref: '#/components/schemas/Security_Endpoint_Management_API_RunningProcesses'
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_MemoryDump'
     Security_Endpoint_Management_API_ActionStateSuccessResponse:
       type: object
       properties:
@@ -78005,6 +78030,138 @@ components:
         - scriptName
       title: Microsoft Defender Endpoint Run Script Parameters
       type: object
+    Security_Endpoint_Management_API_MemoryDump:
+      allOf:
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
+        - type: object
+          properties:
+            outputs:
+              additionalProperties:
+                type: object
+                properties:
+                  content:
+                    properties:
+                      code:
+                        type: string
+                      disk_free_space:
+                        description: The free space on the host machine in bytes after the memory dump is written to disk
+                        type: number
+                      file_size:
+                        description: The size of the memory dump compressed file in bytes
+                        type: string
+                      path:
+                        description: The path to the memory dump compressed file on the host machine
+                        type: string
+                    title: Memory dump output
+                    type: object
+              type: object
+            parameters:
+              oneOf:
+                - properties:
+                    type:
+                      description: Kernel level memory dump
+                      enum:
+                        - kernel
+                      type: string
+                  required:
+                    - type
+                  title: Kernel memory dump
+                  type: object
+                - properties:
+                    pid:
+                      description: The process ID (PID)
+                      type: number
+                    type:
+                      description: Process level memory dump using a process ID
+                      enum:
+                        - process
+                      type: string
+                  required:
+                    - type
+                    - pid
+                  title: Process memory dump with PID
+                  type: object
+                - properties:
+                    entity_id:
+                      description: The process entity id
+                      type: string
+                    type:
+                      description: Process level memory dump using an entity id
+                      enum:
+                        - process
+                      type: string
+                  required:
+                    - type
+                    - entity_id
+                  title: Process memory dump with entity id
+                  type: object
+          required:
+            - parameters
+    Security_Endpoint_Management_API_MemoryDumpRouteRequestBody:
+      allOf:
+        - type: object
+          properties:
+            agent_type:
+              $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
+            alert_ids:
+              description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+              example:
+                - alert-id-1
+                - alert-id-2
+              items:
+                minLength: 1
+                type: string
+              minItems: 1
+              type: array
+            case_ids:
+              description: The IDs of cases where the action taken will be logged.
+              example:
+                - case-id-1
+                - case-id-2
+              items:
+                minLength: 1
+                type: string
+              minItems: 1
+              type: array
+            comment:
+              $ref: '#/components/schemas/Security_Endpoint_Management_API_Comment'
+            endpoint_ids:
+              $ref: '#/components/schemas/Security_Endpoint_Management_API_EndpointIds'
+            parameters:
+              $ref: '#/components/schemas/Security_Endpoint_Management_API_Parameters'
+          required:
+            - endpoint_ids
+        - type: object
+          properties:
+            parameters:
+              oneOf:
+                - description: Dump the entire kernel memory.
+                  type: object
+                  properties:
+                    type:
+                      enum:
+                        - kernel
+                      type: string
+                - description: Dump the entire memory of a process using the PID.
+                  type: object
+                  properties:
+                    pid:
+                      type: number
+                    type:
+                      enum:
+                        - process
+                      type: string
+                - description: Dump the entire memory of a process using the entity ID.
+                  type: object
+                  properties:
+                    entity_id:
+                      type: string
+                    type:
+                      enum:
+                        - process
+                      type: string
+          required:
+            - parameters
     Security_Endpoint_Management_API_MetadataListResponse:
       example:
         data:
