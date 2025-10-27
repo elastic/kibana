@@ -56,11 +56,15 @@ export const applyPreProcessing = (
     // This handles both subobjects and flattened fields
     const removeStatements = fieldArray
       .map((fieldName: string) => {
-        const checkMissing = ignoreMissing ? `if (ctx.containsKey('${fieldName}')) { ` : '';
-        const closeMissing = ignoreMissing ? ' }' : '';
+        // Track if any fields were removed
+        let script = 'boolean anyFieldsRemoved = false;';
 
         // Remove the field itself
-        let script = `${checkMissing}ctx.remove('${fieldName}');${closeMissing}`;
+        script += `
+      if (ctx.containsKey('${fieldName}')) {
+        ctx.remove('${fieldName}');
+        anyFieldsRemoved = true;
+      }`;
 
         // For flattened fields, remove all keys that start with the prefix
         script += `
@@ -72,7 +76,16 @@ export const applyPreProcessing = (
       }
       for (key in keysToRemove) {
         ctx.remove(key);
+        anyFieldsRemoved = true;
       }`;
+
+        // If ignore_missing is false (default), fail if no fields were removed
+        if (!ignoreMissing) {
+          script += `
+      if (!anyFieldsRemoved) {
+        throw new Exception("field [${fieldName}] not present as part of path [${fieldName}]");
+      }`;
+        }
 
         return script;
       })
