@@ -20,18 +20,8 @@ export interface AgentIconProps extends Omit<EuiIconProps, 'type'> {
 export function AgentIcon({ agentName, size = 'l', ...props }: AgentIconProps) {
   const theme = useEuiTheme();
   const icon = getAgentIcon(agentName, theme.colorMode === 'DARK');
-  const isPresentationRole =
-    ['none', 'presentation'].includes(props.role ?? '') ||
-    ['true', true].includes(props['aria-hidden'] ?? '');
 
-  return (
-    <EuiIcon
-      type={icon}
-      size={size}
-      title={!isPresentationRole ? agentName : undefined}
-      {...props}
-    />
-  );
+  return <EuiIcon type={icon} size={size} title={agentName} {...props} />;
 }
 
 // eslint-disable-next-line import/no-default-export
