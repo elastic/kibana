@@ -51,8 +51,7 @@ export default function (providerContext: FtrProviderContext) {
     }
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/238960
-  describe.skip('Package Policy - upgrade', function () {
+  describe('Package Policy - upgrade', function () {
     skipIfNoDockerRegistry(providerContext);
     let agentPolicyId: string;
     let packagePolicyId: string;
@@ -158,8 +157,7 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/214862
-      describe.skip('upgrade', function () {
+      describe('upgrade', function () {
         withTestPackage('package_policy_upgrade', '0.2.0-add-non-required-test-var');
         it('should respond with an error', async function () {
           // upgrade policy to 0.2.0
