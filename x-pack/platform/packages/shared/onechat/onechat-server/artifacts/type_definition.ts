@@ -8,7 +8,7 @@
 import type { MaybePromise } from '@kbn/utility-types';
 
 export type AttachmentParseResult<TResult = unknown> =
-  | { valid: true; result: TResult }
+  | { valid: true; data: TResult }
   | { valid: false; error: string };
 
 /**
@@ -37,7 +37,7 @@ export interface InlineAttachmentTypeDefinition<TContent = unknown> {
   /** Inline attachment type - the content is embedded  */
   type: 'inline';
   /** validation function, used to validate the input when attachment is added to a conversation */
-  parse: (input: unknown) => MaybePromise<AttachmentParseResult<TContent>>;
+  validate: (input: unknown) => MaybePromise<AttachmentParseResult<TContent>>;
   /** format the attachment to presented to the LLM */
   format: (input: TContent) => MaybePromise<AttachmentRepresentation>;
   /** Check if the attachment is different from the previous one */
@@ -56,7 +56,7 @@ export interface ReferenceAttachmentTypeDefinition<TContent = unknown> {
   /** Inline attachment type - the content is embedded  */
   type: 'reference';
   /** validation function, used to validate the input when attachment is added to a conversation */
-  parse: (input: unknown) => MaybePromise<AttachmentParseResult<TContent>>;
+  validate: (input: unknown) => MaybePromise<AttachmentParseResult<TContent>>;
   /** resolve the attachment to a value that can be used by the LLM */
   // resolve: (input: unknown) => MaybePromise<unknown>;
   /** format the attachment to presented to the LLM */

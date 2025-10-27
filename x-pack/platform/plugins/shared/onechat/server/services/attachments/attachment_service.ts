@@ -9,6 +9,7 @@ import {
   createAttachmentTypeRegistry,
   type AttachmentTypeRegistry,
 } from './attachment_type_registry';
+import { registerAttachmentTypes } from './definitions';
 import type { AttachmentServiceSetup, AttachmentServiceStart } from './types';
 
 export interface AttachmentService {
@@ -28,6 +29,8 @@ export class AttachmentServiceImpl implements AttachmentService {
   }
 
   setup(): AttachmentServiceSetup {
+    registerAttachmentTypes({ registry: this.attachmentTypeRegistry });
+
     return {
       register: (attachmentType) => this.attachmentTypeRegistry.register(attachmentType),
     };

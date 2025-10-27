@@ -8,7 +8,10 @@
 import type { TextArtifact } from './artifacts';
 import { ArtifactType } from './artifacts';
 
+// TODO: fix all of this - we need strong typed for internal + loose typed for external...
+
 export enum AttachmentType {
+  context = 'context',
   text = ArtifactType.text,
   dashboard = ArtifactType.dashboard,
 }
@@ -16,6 +19,7 @@ export enum AttachmentType {
 interface AttachmentDataMap {
   [AttachmentType.text]: TextArtifact;
   [AttachmentType.dashboard]: {};
+  [AttachmentType.context]: {};
 }
 
 type AttachmentDataOf<Type extends AttachmentType> = AttachmentDataMap[Type];
