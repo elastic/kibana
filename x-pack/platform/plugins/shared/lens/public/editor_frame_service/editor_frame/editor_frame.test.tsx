@@ -16,7 +16,8 @@ import type {
   DatasourcePublicAPI,
   Visualization,
   VisualizationMap,
-} from '../../types';
+  LensAppState,
+} from '@kbn/lens-common';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { DatasourceMock } from '../../mocks';
 import {
@@ -31,7 +32,6 @@ import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { mockDataPlugin } from '../../mocks';
-import type { LensAppState } from '../../state_management';
 import { setState } from '../../state_management';
 import { getLensInspectorService } from '../../lens_inspector_service';
 import { createIndexPatternServiceMock } from '../../mocks/data_views_service_mock';
