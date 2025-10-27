@@ -22,7 +22,7 @@ interface ConversationItemProps {
 export const ConversationItem: React.FC<ConversationItemProps> = ({ conversation }) => {
   const { createOnechatUrl } = useNavigation();
   const currentConversationId = useConversationId();
-  const { deleteConversation } = useConversationContext();
+  const { deleteConversation, isEmbeddedContext, setConversationId } = useConversationContext();
   const isActive = currentConversationId === conversation.id;
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const confirmModalTitleId = useGeneratedHtmlId({ prefix: 'deleteConversationModal' });
@@ -32,12 +32,21 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({ conversation
     await deleteConversation(conversation.id);
   }, [conversation.id, deleteConversation]);
 
+  const handleClick = useCallback(() => {
+    setConversationId?.(conversation.id);
+  }, [setConversationId, conversation.id]);
+
   return (
     <>
       <EuiListGroupItem
         color="text"
         size="s"
-        href={createOnechatUrl(appPaths.chat.conversation({ conversationId: conversation.id }))}
+        href={
+          isEmbeddedContext
+            ? undefined
+            : createOnechatUrl(appPaths.chat.conversation({ conversationId: conversation.id }))
+        }
+        onClick={isEmbeddedContext ? handleClick : undefined}
         data-test-subj={`conversationItem-${conversation.id}`}
         label={conversation.title}
         isActive={isActive}

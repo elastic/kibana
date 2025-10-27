@@ -147,7 +147,7 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
     () => ({
       conversationId,
       shouldStickToBottom,
-
+      isEmbeddedContext: false,
       // Conversation actions
       removeNewConversationQuery: () => {
         queryClient.removeQueries({ queryKey: queryKeys.conversations.byId(newConversationId) });

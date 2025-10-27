@@ -13,7 +13,6 @@ import React, { useState } from 'react';
 import { Conversation } from './conversation';
 import { ConversationHeader } from './conversation_header';
 import { ConversationSidebar } from './conversation_sidebar/conversation_sidebar';
-import { useConversationList } from '../../hooks/use_conversation_list';
 import { RoutedConversationsProvider } from '../../context/conversation/routed_conversations_provider';
 import { SendMessageProvider } from '../../context/send_message/send_message_context';
 
@@ -57,8 +56,6 @@ export const OnechatConversationsView: React.FC<{}> = () => {
     }),
   };
 
-  const { conversations = [], isLoading } = useConversationList();
-
   return (
     <RoutedConversationsProvider>
       <SendMessageProvider>
@@ -75,7 +72,7 @@ export const OnechatConversationsView: React.FC<{}> = () => {
         >
           {isSidebarOpen && (
             <KibanaPageTemplate.Sidebar data-test-subj="onechatSidebar" css={sidebarStyles}>
-              <ConversationSidebar conversations={conversations} isLoading={isLoading} />
+              <ConversationSidebar />
             </KibanaPageTemplate.Sidebar>
           )}
 

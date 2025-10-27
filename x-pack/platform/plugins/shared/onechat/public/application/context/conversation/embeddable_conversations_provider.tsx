@@ -106,8 +106,11 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
   const conversationContextValue = useMemo(
     () => ({
       conversationId,
-      shouldStickToBottom: false,
-
+      shouldStickToBottom: true,
+      isEmbeddedContext: true,
+      setConversationId: (id: string) => {
+        setConversationId(id);
+      },
       // Conversation actions
       removeNewConversationQuery: () => {
         queryClient.removeQueries({ queryKey: queryKeys.conversations.byId(newConversationId) });

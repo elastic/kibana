@@ -12,6 +12,8 @@ import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 interface ConversationContextValue {
   conversationId?: string;
   shouldStickToBottom?: boolean;
+  isEmbeddedContext: boolean;
+  setConversationId?: (conversationId: string) => void;
 
   // Conversation actions (moved from useConversationActions)
   removeNewConversationQuery: () => void;
