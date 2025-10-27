@@ -11,7 +11,7 @@ import { Position } from '@elastic/charts';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import type { XYState } from './xy_visualization';
 import { getXyVisualization } from './xy_visualization';
-import type { OperationDescriptor } from '../../types';
+import type { OperationDescriptor } from '@kbn/lens-common';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';

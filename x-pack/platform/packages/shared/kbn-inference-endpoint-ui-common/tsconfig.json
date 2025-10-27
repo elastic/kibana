@@ -29,5 +29,6 @@
     "@kbn/spaces-plugin",
     "@kbn/projects-solutions-groups",
     "@kbn/shared-ux-router"
+    "@kbn/react-query"
   ]
 }
