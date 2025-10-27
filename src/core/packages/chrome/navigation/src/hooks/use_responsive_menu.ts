@@ -81,6 +81,39 @@ const countVisibleItems = (heights: number[], gap: number, menuHeight: number): 
   return initialVisibleCount;
 };
 
+/**
+ * Get a stable reference to the items array that changes only when we need to recalculate the height.
+ * @param items - menu items
+ */
+const useStableHeightItems = (items: MenuItem[]): MenuItem[] => {
+  const ref = useRef<MenuItem[]>(items);
+  const out = isItemsHeightsEqual(ref.current, items) ? ref.current : items;
+
+  // don’t write to a ref during render
+  useLayoutEffect(() => {
+    if (!isItemsHeightsEqual(ref.current, items)) {
+      ref.current = items;
+    }
+  }, [items]);
+
+  return out;
+};
+
+/**
+ * Precheck to see if the item's height might have changed and if we need to do a full recalculation.
+ * @param prev - prev menu items
+ * @param next - next menu items
+ */
+const isItemsHeightsEqual = (prev: MenuItem[], next: MenuItem[]): boolean => {
+  if (prev === next) return true;
+  if (prev.length !== next.length) return false;
+  for (let i = 0; i < prev.length; i++) {
+    // Only compare properties that might affect height
+    if (prev[i].label !== next[i].label) return false;
+  }
+  return true;
+};
+
 interface ResponsiveMenuState {
   primaryMenuRef: MutableRefObject<HTMLElement | null>;
   visibleMenuItems: MenuItem[];
@@ -96,7 +129,6 @@ interface ResponsiveMenuState {
 export function useResponsiveMenu(isCollapsed: boolean, items: MenuItem[]): ResponsiveMenuState {
   const primaryMenuRef = useRef<HTMLElement | null>(null);
   const heightsCacheRef = useRef<number[]>([]);
-  const lastComputedCountRef = useRef<number | null>(null);
 
   const [visibleCount, setVisibleCount] = useState<number>(items.length);
 
@@ -124,10 +156,7 @@ export function useResponsiveMenu(isCollapsed: boolean, items: MenuItem[]): Resp
     const nextVisibleCount = countVisibleItems(childrenHeights, childrenGap, menuHeight);
 
     // 3. Update the visible count if needed
-    if (lastComputedCountRef.current !== nextVisibleCount) {
-      lastComputedCountRef.current = nextVisibleCount;
-      setVisibleCount(nextVisibleCount);
-    }
+    setVisibleCount(nextVisibleCount);
   }, [stableHeightItems]);
 
   const [scheduleRecalc, cancelRecalc] = useRafDebouncedCallback(recalculateMenuLayout);
@@ -136,7 +165,6 @@ export function useResponsiveMenu(isCollapsed: boolean, items: MenuItem[]): Resp
     // Invalidate the cache when items change
     setVisibleCount(stableHeightItems.length);
     heightsCacheRef.current = [];
-    lastComputedCountRef.current = null;
 
     const observer = new ResizeObserver(() => {
       scheduleRecalc();
@@ -160,28 +188,4 @@ export function useResponsiveMenu(isCollapsed: boolean, items: MenuItem[]): Resp
     visibleMenuItems,
     overflowMenuItems,
   };
-}
-
-export function useStableHeightItems(items: MenuItem[]): MenuItem[] {
-  const ref = useRef<MenuItem[]>(items);
-  const out = isItemsHeightsEqual(ref.current, items) ? ref.current : items;
-
-  // don’t write to a ref during render
-  useLayoutEffect(() => {
-    if (!isItemsHeightsEqual(ref.current, items)) {
-      ref.current = items;
-    }
-  }, [items]);
-
-  return out;
-}
-
-function isItemsHeightsEqual(prev: MenuItem[], next: MenuItem[]): boolean {
-  if (prev === next) return true;
-  if (prev.length !== next.length) return false;
-  for (let i = 0; i < prev.length; i++) {
-    // Only compare properties that might affect height
-    if (prev[i].label !== next[i].label) return false;
-  }
-  return true;
 }
