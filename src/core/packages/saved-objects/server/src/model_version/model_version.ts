@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObjectsModelVersionSchemaDefinitions } from './schemas';
+import type {
+  SavedObjectsFullModelVersionSchemaDefinitions,
+  SavedObjectsModelVersionSchemaDefinitions,
+} from './schemas';
 import type { SavedObjectsModelChange } from './model_change';
 
 /**
@@ -17,6 +20,7 @@ import type { SavedObjectsModelChange } from './model_change';
  * by exposing an unified way of describing the changes of shape or data of a type.
  *
  * @public
+ * @deprecated Use {@link SavedObjectsFullModelVersion} instead.
  */
 export interface SavedObjectsModelVersion {
   /**
@@ -79,6 +83,16 @@ export interface SavedObjectsModelVersion {
   schemas?: SavedObjectsModelVersionSchemaDefinitions;
 }
 
+export interface SavedObjectsFullModelVersion {
+  changes: SavedObjectsModelChange[];
+  /**
+   * The {@link SavedObjectsModelVersionSchemaDefinitions | schemas} associated with this version.
+   *
+   * Schemas are used to validate / convert the shape and/or content of the documents at various stages of their usages.
+   * Required for rollback safety
+   */
+  schemas: SavedObjectsFullModelVersionSchemaDefinitions;
+}
 /**
  * A record of {@link SavedObjectsModelVersion | model versions} for a given savedObjects type.
  * The record's keys must be integers, starting with 1 for the first entry, and there shouldn't be gaps.
@@ -116,7 +130,7 @@ export type SavedObjectsModelVersionMap = {
     | '18'
     | '19'
     | '20'
-    | '21']?: SavedObjectsModelVersion;
+    | '21']?: SavedObjectsModelVersion | SavedObjectsFullModelVersion;
 };
 
 /**
