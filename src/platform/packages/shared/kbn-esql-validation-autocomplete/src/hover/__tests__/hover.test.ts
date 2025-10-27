@@ -110,7 +110,6 @@ round (
 
     test('nested function name', async () => {
       await assertGetHoverItem(`from a | stats avg(round(numberField))`, 'round', [
-        '**Acceptable types**: **aggregate_metric_double** | **double** | **integer** | **long**',
         getFunctionDefinition('round')!.description,
         `\`\`\`none
 round (
@@ -119,9 +118,11 @@ round (
 ): double | integer | long | unsigned_long
 \`\`\``,
       ]);
-      await assertGetHoverItem(`from a | stats avg(nonExistentFn(numberField))`, 'nonExistentFn', [
-        '**Acceptable types**: **aggregate_metric_double** | **double** | **integer** | **long**',
-      ]);
+      await assertGetHoverItem(
+        `from a | stats avg(nonExistentFn(numberField))`,
+        'nonExistentFn',
+        []
+      );
     });
   });
 });
