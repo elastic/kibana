@@ -104,7 +104,7 @@ export async function ensureEdotCollector({
 
   // Wait for container to be running
   untilContainerReady({
-    containerName: 'kibana-dev-edot-collector',
+    containerName: 'kibana-edot-collector',
     signal,
     log,
     dockerComposeFilePath: DOCKER_COMPOSE_FILE_PATH,
@@ -131,9 +131,9 @@ export async function ensureEdotCollector({
       log.write(`  ${chalk.dim('gRPC:')} http://localhost:4317`);
       log.write(`  ${chalk.dim('HTTP:')} http://localhost:4318`);
       log.write('');
-      log.write(`${chalk.dim('Container name:')} kibana-dev-edot-collector`);
-      log.write(`${chalk.dim('To stop:')} docker stop kibana-dev-edot-collector`);
-      log.write(`${chalk.dim('To remove:')} docker rm kibana-dev-edot-collector`);
+      log.write(`${chalk.dim('Container name:')} kibana-edot-collector`);
+      log.write(`${chalk.dim('To stop:')} docker stop kibana-edot-collector`);
+      log.write(`${chalk.dim('To remove:')} docker rm kibana-edot-collector`);
     })
     .catch((error) => {
       log.error(error);

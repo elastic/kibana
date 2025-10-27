@@ -16,7 +16,7 @@ This will:
 
 1. Read Elasticsearch connection details from `config/kibana.dev.yml`
 2. Generate an OpenTelemetry Collector configuration
-3. Start a Docker container named `kibana-dev-edot-collector` with the EDOT Collector running in Gateway mode
+3. Start a Docker container named `kibana-edot-collector` with the EDOT Collector running in Gateway mode
 4. Expose OTLP endpoints (gRPC on 4317, HTTP on 4318) for application instrumentation
 5. Send telemetry data to your Elasticsearch cluster
 
@@ -137,20 +137,20 @@ Visit `http://localhost:3000` in your browser. You can now see the logs and trac
 
 ## Managing the container
 
-The EDOT Collector runs in a Docker container named `kibana-dev-edot-collector`.
+The EDOT Collector runs in a Docker container named `kibana-edot-collector`.
 
 ```bash
 # Check container status
-docker ps | grep kibana-dev-edot-collector
+docker ps | grep kibana-edot-collector
 
 # View logs
-docker logs kibana-dev-edot-collector
+docker logs kibana-edot-collector
 
 # Stop the container
-docker stop kibana-dev-edot-collector
+docker stop kibana-edot-collector
 
 # Remove the container
-docker rm kibana-dev-edot-collector
+docker rm kibana-edot-collector
 
 # Stop via docker-compose
 docker compose -f data/edot_collector/docker-compose.yaml down
