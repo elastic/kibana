@@ -56,7 +56,6 @@ import type { SharePluginStart } from '@kbn/share-plugin/server';
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
 import { RulesClientFactory } from './rules_client_factory';
-import type { RulesClient } from './rules_client';
 import {
   RulesSettingsClientFactory,
   RulesSettingsService,
@@ -75,6 +74,7 @@ import type {
   RuleType,
   RuleTypeParams,
   RuleTypeState,
+  RulesClientApi,
 } from './types';
 import { registerAlertingUsageCollector } from './usage';
 import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/task';
@@ -244,7 +244,7 @@ export class AlertingPlugin {
   private readonly connectorAdapterRegistry = new ConnectorAdapterRegistry();
   private readonly disabledRuleTypes: Set<string>;
   private readonly enabledRuleTypes: Set<string> | null = null;
-  private getRulesClientWithRequest?: (request: KibanaRequest) => Promise<RulesClient>;
+  private getRulesClientWithRequest?: (request: KibanaRequest) => Promise<RulesClientApi>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();

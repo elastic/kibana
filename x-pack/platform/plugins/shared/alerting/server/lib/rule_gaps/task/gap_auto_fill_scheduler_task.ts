@@ -15,7 +15,7 @@ import dateMath from '@kbn/datemath';
 import { findGapsSearchAfter } from '../find_gaps';
 import { processGapsBatch } from '../../../application/rule/methods/bulk_fill_gaps_by_rule_ids/process_gaps_batch';
 
-import type { RulesClient } from '../../../rules_client/rules_client';
+import type { RulesClientApi } from '../../../types';
 import { gapStatus } from '../../../../common/constants';
 import { createGapAutoFillSchedulerEventLogger } from './gap_auto_fill_scheduler_event_log';
 import type { GapAutoFillSchedulerEventLogger } from './gap_auto_fill_scheduler_event_log';
@@ -147,7 +147,7 @@ async function initRun({
   startTime,
 }: {
   fakeRequest: KibanaRequest | undefined;
-  getRulesClientWithRequest?: (request: KibanaRequest) => Promise<RulesClient> | undefined;
+  getRulesClientWithRequest?: (request: KibanaRequest) => Promise<RulesClientApi> | undefined;
   eventLogger: IEventLogger;
   taskInstance: {
     id: string;
@@ -157,7 +157,7 @@ async function initRun({
   };
   startTime: Date;
 }): Promise<{
-  rulesClient: RulesClient;
+  rulesClient: RulesClientApi;
   rulesClientContext: RulesClientContext;
   config: {
     name: string;
@@ -214,7 +214,7 @@ async function checkBackfillCapacity({
   logger,
   initiatorId,
 }: {
-  rulesClient: RulesClient;
+  rulesClient: RulesClientApi;
   maxBackfills: number;
   logger: Logger;
   initiatorId: string;
@@ -312,7 +312,7 @@ export function registerGapAutoFillSchedulerTask({
 }: {
   taskManager: TaskManagerSetupContract;
   logger: Logger;
-  getRulesClientWithRequest: (request: KibanaRequest) => Promise<RulesClient> | undefined;
+  getRulesClientWithRequest: (request: KibanaRequest) => Promise<RulesClientApi> | undefined;
   eventLogger: IEventLogger;
   schedulerConfig?: {
     timeout?: string;
@@ -336,7 +336,7 @@ export function registerGapAutoFillSchedulerTask({
           async run() {
             const startTime = new Date();
             // Step 1: Initialization
-            let rulesClient: RulesClient;
+            let rulesClient: RulesClientApi;
             let rulesClientContext: RulesClientContext;
             let config: {
               name: string;
