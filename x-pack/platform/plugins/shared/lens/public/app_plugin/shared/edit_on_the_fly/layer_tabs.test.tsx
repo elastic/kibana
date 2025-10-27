@@ -9,7 +9,7 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import type { ReactWrapper } from 'enzyme';
 
-import type { LensLayerType, TypedLensSerializedState } from '@kbn/lens-common';
+import type { LensLayerType } from '@kbn/lens-common';
 import { coreMock } from '@kbn/core/public/mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 
@@ -27,6 +27,7 @@ import { generateId } from '../../../id_generator';
 import { EditorFrameServiceProvider } from '../../../editor_frame_service/editor_frame_service_context';
 
 import { LayerTabsWrapper } from './layer_tabs';
+import type { LayerTabsProps } from './types';
 
 jest.mock('../../../id_generator');
 
@@ -109,7 +110,10 @@ describe('LayerTabs', () => {
       datasourceMap: mockDatasourceMap(),
       visualizationMap: mockVisualizationMap(),
     }
-  ) {
+  ): LayerTabsProps & {
+    visualizationMap: ReturnType<typeof mockVisualizationMap>;
+    datasourceMap: ReturnType<typeof mockDatasourceMap>;
+  } {
     frame.datasourceLayers = {
       first: datasourceMap.testDatasource.publicAPIMock,
     };
@@ -138,23 +142,9 @@ describe('LayerTabs', () => {
       datasourceMap,
       framePublicAPI: frame,
       coreStart: coreMock.createStart(),
-      startDependencies: mockStartDependencies,
-      attributes: {
-        state: {
-          query: { language: 'kuery', query: '' },
-          filters: [],
-          datasourceStates: {
-            testDatasource: {},
-          },
-          visualization: {},
-        },
-        visualizationType: 'testVis',
-        title: 'Test',
-        references: [],
-      } as unknown as TypedLensSerializedState['attributes'],
-      datasourceId: 'formBased' as const,
+      dataViews: mockStartDependencies.dataViews,
+      uiActions: mockStartDependencies.uiActions,
       setIsInlineFlyoutVisible: jest.fn(),
-      getUserMessages: jest.fn(() => []),
     };
   }
 

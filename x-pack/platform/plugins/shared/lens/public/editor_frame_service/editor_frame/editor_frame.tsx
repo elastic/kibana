@@ -45,6 +45,7 @@ import type { IndexPatternServiceAPI } from '../../data_views_service/service';
 import { getLongMessage } from '../../user_messages_utils';
 import { useEditorFrameService } from '../editor_frame_service_context';
 import { VisualizationToolbarWrapper } from './visualization_toolbar';
+import { LayerTabsWrapper } from '../../app_plugin/shared/edit_on_the_fly/layer_tabs';
 
 export interface EditorFrameProps {
   ExpressionRenderer: ReactExpressionRendererType;
@@ -166,6 +167,13 @@ export function EditorFrame(props: EditorFrameProps) {
                     <VisualizationToolbarWrapper framePublicAPI={framePublicAPI} />
                   </EuiFlexItem>
                 </EuiFlexGroup>
+                <LayerTabsWrapper
+                  coreStart={props.core}
+                  framePublicAPI={framePublicAPI}
+                  setIsInlineFlyoutVisible={() => {}}
+                  dataViews={props.plugins.dataViews}
+                  uiActions={props.plugins.uiActions}
+                />
                 <ConfigPanelWrapper
                   core={props.core}
                   framePublicAPI={framePublicAPI}
