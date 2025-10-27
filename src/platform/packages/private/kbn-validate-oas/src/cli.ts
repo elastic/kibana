@@ -36,8 +36,17 @@ run(
       process.exit(1);
     }
 
-    // Baseline file location
     const baselineFile = Path.resolve(__dirname, './oas_error_baseline.json');
+    if (assertNoErrorIncrease) {
+      if (!Fs.existsSync(baselineFile)) {
+        log.error(
+          `No file baseline found at ${baselineFile}. First generate a baseline file by running --update-baseline by running without --assert-no-error-increase.`
+        );
+        process.exit(1);
+      }
+    }
+
+    // Baseline file location
     function updateBaselineFile() {
       if (updateBaseline) {
         Fs.writeFileSync(baselineFile, JSON.stringify(errorCounts, null, 2));
@@ -102,15 +111,7 @@ run(
     }
 
     if (assertNoErrorIncrease) {
-      let baseline: Record<string, number> = {};
-      if (Fs.existsSync(baselineFile)) {
-        baseline = JSON.parse(Fs.readFileSync(baselineFile, 'utf-8'));
-      } else {
-        log.error(
-          'First generate a baseline by running --update-baseline by running without --assert-no-error-increase.'
-        );
-        process.exit(1);
-      }
+      const baseline: Record<string, number> = JSON.parse(Fs.readFileSync(baselineFile, 'utf-8'));
 
       let increased = false;
       let report = '';
