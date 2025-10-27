@@ -95,38 +95,21 @@ export const updateFiltersArray = (
   filterType: boolean,
   index?: string
 ): Filter[] => {
-  // Normalize to unique list of strings
+  // Normalize to unique non-empty strings
   const nonEmptyValues = [value].flat().filter(isNonEmptyString);
   const sanitizedValues = Array.from(new Set(nonEmptyValues));
 
   if (sanitizedValues.length === 0) return existingFilters;
 
-  // Single value
-  if (sanitizedValues.length === 1) {
-    const v = sanitizedValues[0];
-    const newFilter = createFilter({ key, value: v, negate: !filterType, index });
-    const existing = filterExistsInFiltersArray(existingFilters, key, v);
-
-    return shouldReplaceNegation(existing, filterType)
-      ? [...existingFilters.filter((f) => f !== existing), newFilter]
-      : [...existingFilters, newFilter];
-  }
-
-  // Multi-value: apply the same per-value logic, accumulating results
-  let result = existingFilters.slice();
-
-  for (const v of sanitizedValues) {
+  return sanitizedValues.reduce<Filter[]>((result, v) => {
     const existing = filterExistsInFiltersArray(result, key, v);
     const newFilter = createFilter({ key, value: v, negate: !filterType, index });
 
     if (shouldReplaceNegation(existing, filterType)) {
-      // Replace opposite-negated filter with the new one
-      result = [...result.filter((f) => f !== existing), newFilter];
-    } else {
-      // Add a new filter
-      result = [...result, newFilter];
+      // Flip negation by replacing the opposite one
+      return [...result.filter((f) => f !== existing), newFilter];
     }
-  }
 
-  return result;
+    return [...result, newFilter];
+  }, existingFilters);
 };
