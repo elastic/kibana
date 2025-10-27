@@ -7,7 +7,10 @@
 
 import { SubActionConnector, type ServiceParams } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
-import type { ConnectorToken } from '@kbn/actions-plugin/server/types';
+import type {
+  ConnectorToken,
+  ConnectorTokenClientContract,
+} from '@kbn/actions-plugin/server/types';
 import type {
   MCPConnectorConfig,
   MCPConnectorSecrets,
@@ -20,13 +23,13 @@ import type {
 } from '@kbn/mcp-connector-common';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
-import type { OpenAPIV3 } from 'openapi-types';
 import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { format } from 'node:util';
 
 export class MCPConnector extends SubActionConnector<MCPConnectorConfig, MCPConnectorSecrets> {
   private readonly client: Client;
+  private readonly connectorTokenClient: ConnectorTokenClientContract;
 
   private connected: boolean = false;
 
@@ -36,6 +39,8 @@ export class MCPConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
 
   constructor(params: ServiceParams<MCPConnectorConfig, MCPConnectorSecrets>) {
     super(params);
+
+    this.connectorTokenClient = params.services.connectorTokenClient;
 
     this.client = new Client(
       {
@@ -156,7 +161,7 @@ export class MCPConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
    * @returns List of tools with their schemas
    */
   public async listTools(): Promise<ListToolsResponse> {
-    const { connectorTokenClient } = this.services;
+    const connectorTokenClient = this.connectorTokenClient;
     const connectorId = this.connector.id;
 
     if (this.cachedTools) {
@@ -191,7 +196,7 @@ export class MCPConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
         ...tools.map((tool): Tool => {
           return {
             description: tool.description,
-            inputSchema: tool.inputSchema as OpenAPIV3.NonArraySchemaObject,
+            inputSchema: tool.inputSchema,
             name: tool.name,
           };
         }),

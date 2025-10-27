@@ -24,7 +24,7 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 jest.mock('@modelcontextprotocol/sdk/client/index.js');
 
 // Capture transport options for testing
-let capturedTransportOptions: never = null;
+let capturedTransportOptions: { url: URL; requestInit?: RequestInit } | null = null;
 
 jest.mock('@modelcontextprotocol/sdk/client/streamableHttp.js', () => {
   return {
@@ -98,7 +98,7 @@ describe('MCPConnector authentication', () => {
       expect(mockConnect).toHaveBeenCalledTimes(1);
 
       // Verify no auth headers were set
-      const headers = capturedTransportOptions?.requestInit?.headers;
+      const headers = capturedTransportOptions?.requestInit?.headers as Headers;
       expect(headers).toBeDefined();
       expect(headers.has('Authorization')).toBe(false);
       expect(headers.has('X-API-Key')).toBe(false);
@@ -125,7 +125,7 @@ describe('MCPConnector authentication', () => {
 
       expect(mockConnect).toHaveBeenCalledTimes(1);
 
-      const headers = capturedTransportOptions?.requestInit?.headers;
+      const headers = capturedTransportOptions?.requestInit?.headers as Headers;
       expect(headers).toBeDefined();
       expect(headers.get('Authorization')).toBe('Bearer test-token-123');
     });
@@ -151,7 +151,7 @@ describe('MCPConnector authentication', () => {
 
       expect(mockConnect).toHaveBeenCalledTimes(1);
 
-      const headers = capturedTransportOptions?.requestInit?.headers;
+      const headers = capturedTransportOptions?.requestInit?.headers as Headers;
       expect(headers).toBeDefined();
       expect(headers.get('X-API-Key')).toBe('test-api-key');
     });
@@ -176,7 +176,7 @@ describe('MCPConnector authentication', () => {
 
       expect(mockConnect).toHaveBeenCalledTimes(1);
 
-      const headers = capturedTransportOptions?.requestInit?.headers;
+      const headers = capturedTransportOptions?.requestInit?.headers as Headers;
       expect(headers).toBeDefined();
       expect(headers.get('X-Custom-Key')).toBe('test-api-key');
       expect(headers.has('X-API-Key')).toBe(false);
@@ -202,7 +202,7 @@ describe('MCPConnector authentication', () => {
 
       expect(mockConnect).toHaveBeenCalledTimes(1);
 
-      const headers = capturedTransportOptions?.requestInit?.headers;
+      const headers = capturedTransportOptions?.requestInit?.headers as Headers;
       expect(headers).toBeDefined();
       expect(headers.get('Authorization')).toBe('test-api-key');
     });
@@ -229,7 +229,7 @@ describe('MCPConnector authentication', () => {
 
       expect(mockConnect).toHaveBeenCalledTimes(1);
 
-      const headers = capturedTransportOptions?.requestInit?.headers;
+      const headers = capturedTransportOptions?.requestInit?.headers as Headers;
       expect(headers).toBeDefined();
 
       // dXNlcjpwYXNz is base64 encoding of "user:pass"
@@ -256,7 +256,7 @@ describe('MCPConnector authentication', () => {
 
       expect(mockConnect).toHaveBeenCalledTimes(1);
 
-      const headers = capturedTransportOptions?.requestInit?.headers;
+      const headers = capturedTransportOptions?.requestInit?.headers as Headers;
       expect(headers).toBeDefined();
 
       // Verify base64 encoding is correct
@@ -292,7 +292,7 @@ describe('MCPConnector authentication', () => {
 
       expect(mockConnect).toHaveBeenCalledTimes(1);
 
-      const headers = capturedTransportOptions?.requestInit?.headers;
+      const headers = capturedTransportOptions?.requestInit?.headers as Headers;
       expect(headers).toBeDefined();
       expect(headers.get('X-Custom-1')).toBe('value1');
       expect(headers.get('X-Custom-2')).toBe('value2');
@@ -317,7 +317,7 @@ describe('MCPConnector authentication', () => {
 
       expect(mockConnect).toHaveBeenCalledTimes(1);
 
-      const headers = capturedTransportOptions?.requestInit?.headers;
+      const headers = capturedTransportOptions?.requestInit?.headers as Headers;
       expect(headers).toBeDefined();
       expect(headers.get('X-API-Token')).toBe('custom-token-value');
     });
@@ -341,7 +341,7 @@ describe('MCPConnector authentication', () => {
 
       expect(mockConnect).toHaveBeenCalledTimes(1);
 
-      const headers = capturedTransportOptions?.requestInit?.headers;
+      const headers = capturedTransportOptions?.requestInit?.headers as Headers;
       expect(headers).toBeDefined();
       expect(headers.get('Authorization')).toBe('Custom auth-scheme custom-token');
     });
@@ -388,11 +388,11 @@ describe('MCPConnector authentication', () => {
 
       await connector.listTools();
 
-      const headers = capturedTransportOptions?.requestInit?.headers;
+      const headers = capturedTransportOptions?.requestInit?.headers as Headers;
       expect(headers.get('Authorization')).toBe('Bearer token-from-secrets');
 
       // Verify config doesn't have token
-      expect((config.service as never).token).toBeUndefined();
+      expect((config.service as { token?: string }).token).toBeUndefined();
     });
   });
 });

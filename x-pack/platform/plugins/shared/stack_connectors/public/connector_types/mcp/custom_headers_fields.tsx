@@ -8,13 +8,7 @@
 import React from 'react';
 import { UseArray, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiButtonIcon, EuiSpacer } from '@elastic/eui';
 import {
   HEADER_NAME_LABEL,
   HEADER_VALUE_LABEL,

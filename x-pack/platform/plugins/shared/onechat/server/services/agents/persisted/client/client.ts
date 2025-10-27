@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import type {
-  ElasticsearchServiceStart,
-  KibanaRequest,
-  Logger,
-  SecurityServiceStart,
-} from '@kbn/core/server';
+import type { ElasticsearchServiceStart, KibanaRequest, Logger, SecurityServiceStart, } from '@kbn/core/server';
 import { validateAgentId } from '@kbn/onechat-common/agents';
 import {
   createAgentNotFoundError,
@@ -174,11 +169,10 @@ class AgentClientImpl implements AgentClient {
     }
 
     if (profileUpdate.configuration?.tools) {
-      const filteredTools = await this.validateAgentToolSelection(
+      profileUpdate.configuration.tools = await this.validateAgentToolSelection(
         profileUpdate.configuration.tools,
         { autoFilter: true }
       );
-      profileUpdate.configuration.tools = filteredTools;
     }
 
     const updatedConversation = updateRequestToEs({

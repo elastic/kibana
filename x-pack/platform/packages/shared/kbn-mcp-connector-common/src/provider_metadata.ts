@@ -15,17 +15,6 @@ import { MCP_NAMESPACE_PREFIX } from './namespaces';
  * @param connectorName - The human-readable name of the connector
  * @param description - Optional description of when to use this MCP server (for LLM context)
  * @returns ToolProviderMetadata object
- *
- * @example
- * const metadata = createProviderMetadata('github', 'GitHub MCP Server', 'Use for GitHub operations');
- * // Returns:
- * // {
- * //   id: 'mcp.github',
- * //   name: 'GitHub MCP Server',
- * //   type: 'mcp',
- * //   uniqueId: 'github',
- * //   description: 'Use for GitHub operations'
- * // }
  */
 export function createProviderMetadata(
   uniqueId: string,

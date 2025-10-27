@@ -6,7 +6,7 @@
  */
 
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import { InferenceMCPConnector } from '@kbn/inference-common';
+import type { InferenceMCPConnector } from '@kbn/inference-common';
 import { MCP_CONNECTOR_TYPE_ID } from '@kbn/mcp-connector-common';
 
 /**

@@ -32,7 +32,6 @@ import {
   PRESET_BASIC_AUTH_LABEL,
   PRESET_BEARER_TOKEN_LABEL,
   PRESET_CUSTOM_HEADERS_LABEL,
-  PRESET_OAUTH_LABEL,
   URL_LABEL,
   UNIQUE_ID_LABEL,
   DESCRIPTION_LABEL,
@@ -81,7 +80,6 @@ export function HTTPServiceFields({ readOnly, isEdit }: { readOnly: boolean; isE
   const formContext = useFormContext<ConnectorFormData>();
   const hasInitializedRef = useRef(false);
 
-  // Initialize authPreset from config.service.authType
   const [authPreset, setAuthPreset] = useState<AuthPreset>(() => {
     return (config?.service?.authType as AuthPreset) || 'none';
   });
@@ -92,7 +90,6 @@ export function HTTPServiceFields({ readOnly, isEdit }: { readOnly: boolean; isE
     toolCount?: number;
   }>({ status: null });
 
-  // Update authPreset when config loads (for edit mode) - only once
   useEffect(() => {
     const loadedAuthType = config?.service?.authType as AuthPreset;
     if (loadedAuthType && !hasInitializedRef.current) {
@@ -101,13 +98,10 @@ export function HTTPServiceFields({ readOnly, isEdit }: { readOnly: boolean; isE
     }
   }, [config?.service?.authType]);
 
-  // Handle preset change - set authType in both config and secrets
   const handlePresetChange = useCallback(
     (newPreset: AuthPreset) => {
       setAuthPreset(newPreset);
-      // Set auth type in config (metadata)
       formContext.setFieldValue('config.service.authType', newPreset);
-      // Set auth type in secrets (discriminator for union type validation)
       formContext.setFieldValue('secrets.authType', newPreset);
     },
     [formContext]
@@ -195,7 +189,6 @@ export function HTTPServiceFields({ readOnly, isEdit }: { readOnly: boolean; isE
         </>
       )}
 
-      {/* Basic config fields */}
       <SimpleConnectorForm
         configFormSchema={CONFIG_SCHEMA}
         secretsFormSchema={[]}
@@ -203,7 +196,6 @@ export function HTTPServiceFields({ readOnly, isEdit }: { readOnly: boolean; isE
         readOnly={readOnly}
       />
 
-      {/* Hidden fields for authType (required for discriminated union validation) */}
       <div style={{ display: 'none' }}>
         <UseField
           path="config.service.authType"
@@ -215,7 +207,6 @@ export function HTTPServiceFields({ readOnly, isEdit }: { readOnly: boolean; isE
 
       <EuiSpacer size="m" />
 
-      {/* Auth preset selector */}
       <EuiFormRow label={AUTH_PRESET_LABEL} fullWidth>
         <EuiSelect
           fullWidth
@@ -227,7 +218,6 @@ export function HTTPServiceFields({ readOnly, isEdit }: { readOnly: boolean; isE
             { value: 'bearer', text: PRESET_BEARER_TOKEN_LABEL },
             { value: 'basic', text: PRESET_BASIC_AUTH_LABEL },
             { value: 'customHeaders', text: PRESET_CUSTOM_HEADERS_LABEL },
-            { value: 'oauth', text: PRESET_OAUTH_LABEL, disabled: true },
           ]}
           disabled={readOnly}
         />
@@ -235,7 +225,6 @@ export function HTTPServiceFields({ readOnly, isEdit }: { readOnly: boolean; isE
 
       <EuiSpacer size="m" />
 
-      {/* API Key header name customization */}
       {authPreset === 'apiKey' && (
         <>
           <EuiFormRow
@@ -257,8 +246,7 @@ export function HTTPServiceFields({ readOnly, isEdit }: { readOnly: boolean; isE
         </>
       )}
 
-      {/* Auth-specific fields (standard presets) */}
-      {authPreset !== 'none' && authPreset !== 'customHeaders' && authPreset !== 'oauth' && (
+      {authPreset !== 'none' && authPreset !== 'customHeaders' && (
         <SimpleConnectorForm
           configFormSchema={[]}
           secretsFormSchema={secretsSchema}
@@ -270,26 +258,6 @@ export function HTTPServiceFields({ readOnly, isEdit }: { readOnly: boolean; isE
       {/* Custom headers builder */}
       {authPreset === 'customHeaders' && <CustomHeadersFields readOnly={readOnly} />}
 
-      {/* OAuth placeholder */}
-      {authPreset === 'oauth' && (
-        <>
-          <EuiCallOut
-            announceOnMount
-            title="OAuth 2.0 authentication coming soon"
-            color="warning"
-            iconType="clock"
-          >
-            <p>
-              OAuth 2.0 authentication with PKCE support will be available in a future release (Plan
-              003). For now, please use API Key, Bearer Token, Basic Authentication, or Custom
-              Headers.
-            </p>
-          </EuiCallOut>
-          <EuiSpacer size="m" />
-        </>
-      )}
-
-      {/* Test connection */}
       <EuiFlexGroup gutterSize="s" direction="column">
         <EuiFlexItem>
           <EuiButton

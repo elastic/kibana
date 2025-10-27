@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { OpenAPIV3 } from 'openapi-types';
 
 export interface CallToolRequest {
   name: string;
@@ -57,7 +56,7 @@ export interface ToolProviderMetadata {
 export interface Tool {
   name: string;
   description?: string;
-  inputSchema: OpenAPIV3.NonArraySchemaObject;
+  inputSchema: Record<string, unknown>;
   /**
    * Optional provider metadata for attribution and audit trails.
    * When present, indicates the source of the tool (e.g., which MCP connector).

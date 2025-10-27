@@ -131,13 +131,6 @@ export const PRESET_CUSTOM_HEADERS_LABEL = i18n.translate(
   }
 );
 
-export const PRESET_OAUTH_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.mcp.presetOAuthLabel',
-  {
-    defaultMessage: 'OAuth 2.0 (Coming Soon)',
-  }
-);
-
 export const TOKEN_LABEL = i18n.translate('xpack.stackConnectors.components.mcp.tokenLabel', {
   defaultMessage: 'Token',
 });

@@ -5,22 +5,23 @@
  * 2.0.
  */
 
-import { KibanaRequest, Logger } from '@kbn/core/server';
-import { PluginStartContract as ActionsPluginsStart } from '@kbn/actions-plugin/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { PluginStartContract as ActionsPluginsStart } from '@kbn/actions-plugin/server';
 import { once } from 'lodash';
-import {
+import type {
   InferenceCallToolRequest,
   InferenceCallToolResponse,
   InferenceClient,
   InferenceListToolsResponse,
-  InferenceTaskError,
-  InferenceTaskErrorCode,
 } from '@kbn/inference-common';
-import {
+import { InferenceTaskError, InferenceTaskErrorCode } from '@kbn/inference-common';
+import type {
   CallToolResponse,
   ListToolsResponse,
   MCPCallToolParams,
   MCPListToolsParams,
+} from '@kbn/mcp-connector-common';
+import {
   MCP_CONNECTOR_SUB_ACTION_TYPE_CALL_TOOL,
   MCP_CONNECTOR_SUB_ACTION_TYPE_LIST_TOOLS,
 } from '@kbn/mcp-connector-common';

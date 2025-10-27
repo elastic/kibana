@@ -62,7 +62,7 @@ describe('MCPConnectorSecretsSchema', () => {
       const result = MCPConnectorSecretsSchema.validate({
         authType: 'bearer',
         token: longToken,
-      });
+      }) as { authType: 'bearer'; token: string };
       expect(result.token).toBe(longToken);
     });
   });
@@ -101,7 +101,7 @@ describe('MCPConnectorSecretsSchema', () => {
       const result = MCPConnectorSecretsSchema.validate({
         authType: 'apiKey',
         apiKey: specialKey,
-      });
+      }) as { authType: 'apiKey'; apiKey: string };
       expect(result.apiKey).toBe(specialKey);
     });
   });
@@ -176,7 +176,7 @@ describe('MCPConnectorSecretsSchema', () => {
         authType: 'basic',
         username: 'user@example.com',
         password: 'pass',
-      });
+      }) as { authType: 'basic'; username: string; password: string };
       expect(result.username).toBe('user@example.com');
     });
 
@@ -186,7 +186,7 @@ describe('MCPConnectorSecretsSchema', () => {
         authType: 'basic',
         username: 'user',
         password: specialPassword,
-      });
+      }) as { authType: 'basic'; username: string; password: string };
       expect(result.password).toBe(specialPassword);
     });
 
@@ -195,7 +195,7 @@ describe('MCPConnectorSecretsSchema', () => {
         authType: 'basic',
         username: 'utilisateur',
         password: 'mot_de_passe_français',
-      });
+      }) as { authType: 'basic'; username: string; password: string };
       expect(result.username).toBe('utilisateur');
       expect(result.password).toBe('mot_de_passe_français');
     });
@@ -209,7 +209,7 @@ describe('MCPConnectorSecretsSchema', () => {
           { name: 'X-Custom-1', value: 'value1' },
           { name: 'X-Custom-2', value: 'value2' },
         ],
-      });
+      }) as { authType: 'customHeaders'; headers: Array<{ name: string; value: string }> };
       expect(result.headers).toHaveLength(2);
       expect(result.headers[0]).toEqual({ name: 'X-Custom-1', value: 'value1' });
       expect(result.headers[1]).toEqual({ name: 'X-Custom-2', value: 'value2' });
@@ -246,7 +246,7 @@ describe('MCPConnectorSecretsSchema', () => {
       const result = MCPConnectorSecretsSchema.validate({
         authType: 'customHeaders',
         headers: [{ name: 'X-Custom', value: '' }],
-      });
+      }) as { authType: 'customHeaders'; headers: Array<{ name: string; value: string }> };
       expect(result.headers[0]).toEqual({ name: 'X-Custom', value: '' });
     });
 
@@ -277,7 +277,7 @@ describe('MCPConnectorSecretsSchema', () => {
       const result = MCPConnectorSecretsSchema.validate({
         authType: 'customHeaders',
         headers,
-      });
+      }) as { authType: 'customHeaders'; headers: Array<{ name: string; value: string }> };
       expect(result.headers).toHaveLength(3);
       expect(result.headers).toEqual(headers);
     });
@@ -286,7 +286,7 @@ describe('MCPConnectorSecretsSchema', () => {
       const result = MCPConnectorSecretsSchema.validate({
         authType: 'customHeaders',
         headers: [{ name: 'X-Custom-Header_123', value: 'value' }],
-      });
+      }) as { authType: 'customHeaders'; headers: Array<{ name: string; value: string }> };
       expect(result.headers[0].name).toBe('X-Custom-Header_123');
     });
 
@@ -295,7 +295,7 @@ describe('MCPConnectorSecretsSchema', () => {
       const result = MCPConnectorSecretsSchema.validate({
         authType: 'customHeaders',
         headers: [{ name: 'X-Custom', value: specialValue }],
-      });
+      }) as { authType: 'customHeaders'; headers: Array<{ name: string; value: string }> };
       expect(result.headers[0].value).toBe(specialValue);
     });
   });

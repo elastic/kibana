@@ -9,7 +9,10 @@ import {
   MCP_CONNECTOR_TYPE_ID,
   createMcpToolId,
   createProviderMetadata,
+  type MCPConnectorConfig,
 } from '@kbn/mcp-connector-common';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { Logger } from '@kbn/logging';
 import type {
   InternalToolDefinition,
   ReadonlyToolProvider,
@@ -149,8 +152,8 @@ async function listAllMcpTools({
   actionsClient,
   logger,
 }: {
-  actionsClient: any; // ActionsClient
-  logger: any; // Logger
+  actionsClient: ActionsClient;
+  logger: Logger;
 }): Promise<InternalToolDefinition[]> {
   const startTime = Date.now();
 
@@ -158,7 +161,7 @@ async function listAllMcpTools({
     const allConnectors = await actionsClient.getAll();
 
     const mcpConnectors = allConnectors.filter(
-      (connector: MCPConnector) => connector.actionTypeId === MCP_CONNECTOR_TYPE_ID
+      (connector) => connector.actionTypeId === MCP_CONNECTOR_TYPE_ID
     );
 
     logger.debug(`Found ${mcpConnectors.length} MCP connectors`);
@@ -168,7 +171,7 @@ async function listAllMcpTools({
     }
 
     const toolsPerConnector = await Promise.all(
-      mcpConnectors.map(async (connector: MCPConnector) => {
+      mcpConnectors.map(async (connector) => {
         try {
           return await discoverToolsFromConnector({ connector, actionsClient, logger });
         } catch (error) {
@@ -206,8 +209,8 @@ async function discoverToolsFromConnector({
   logger,
 }: {
   connector: MCPConnector;
-  actionsClient: any;
-  logger: any;
+  actionsClient: ActionsClient;
+  logger: Logger;
 }): Promise<InternalToolDefinition[]> {
   try {
     const result = await actionsClient.execute({
@@ -231,8 +234,9 @@ async function discoverToolsFromConnector({
       return [];
     }
 
-    const uniqueId = ((connector.config as any)?.uniqueId as string | undefined) || connector.id;
-    const description = (connector.config as any)?.description as string | undefined;
+    const config = connector.config as MCPConnectorConfig | undefined;
+    const uniqueId = config?.uniqueId || connector.id;
+    const description = config?.description;
 
     const tools = response.tools.map((mcpTool) => {
       const toolWithMetadata: MCPToolWithMetadata = {

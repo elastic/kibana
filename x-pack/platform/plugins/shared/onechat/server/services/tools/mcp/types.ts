@@ -13,7 +13,7 @@ export interface MCPConnector {
   id: string;
   name: string;
   actionTypeId: string;
-  config: Record<string, unknown>;
+  config?: Record<string, unknown>;
   isPreconfigured: boolean;
   isSystemAction: boolean;
   isDeprecated: boolean;

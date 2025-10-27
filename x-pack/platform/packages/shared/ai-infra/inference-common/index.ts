@@ -129,7 +129,6 @@ export { elasticModelDictionary } from './src/const';
 
 export type {
   InferenceCallToolRequest,
-  InferenceCallToolResponseResolved,
   InferenceCallToolResponse,
   InferenceListToolsResponse,
   InferenceMCPConnector,

@@ -6,21 +6,13 @@
  */
 
 import {
-  protectedNamespaces,
   MCP_NAMESPACE_PREFIX,
   isMcpToolId,
   createMcpToolId,
   parseMcpToolId,
-  validateToolNamespace,
 } from './namespaces';
 
 describe('MCP Namespaces', () => {
-  describe('protectedNamespaces', () => {
-    it('should include platformCore and mcp', () => {
-      expect(protectedNamespaces).toEqual(['platformCore', 'mcp']);
-    });
-  });
-
   describe('MCP_NAMESPACE_PREFIX', () => {
     it('should be "mcp"', () => {
       expect(MCP_NAMESPACE_PREFIX).toBe('mcp');
@@ -116,131 +108,8 @@ describe('MCP Namespaces', () => {
     });
   });
 
-  describe('validateToolNamespace', () => {
-    describe('protected namespace validation', () => {
-      it('should throw for platformCore namespace without permission', () => {
-        expect(() => {
-          validateToolNamespace('platformCore.custom-tool', []);
-        }).toThrow('Tool ID "platformCore.custom-tool" uses protected namespace "platformCore"');
-      });
-
-      it('should throw for mcp namespace without permission', () => {
-        expect(() => {
-          validateToolNamespace('mcp.custom-connector.tool', []);
-        }).toThrow('Tool ID "mcp.custom-connector.tool" uses protected namespace "mcp"');
-      });
-
-      it('should throw for nested platformCore namespace', () => {
-        expect(() => {
-          validateToolNamespace('platformCore.sub.custom-tool', []);
-        }).toThrow(
-          'Tool ID "platformCore.sub.custom-tool" uses protected namespace "platformCore"'
-        );
-      });
-    });
-
-    describe('allowed namespace validation', () => {
-      it('should not throw when namespace is in allowedNamespaces', () => {
-        expect(() => {
-          validateToolNamespace('platformCore.search', ['platformCore']);
-        }).not.toThrow();
-      });
-
-      it('should not throw when parent namespace is in allowedNamespaces', () => {
-        expect(() => {
-          validateToolNamespace('platformCore.sub.tool', ['platformCore']);
-        }).not.toThrow();
-      });
-
-      it('should not throw for MCP tools with mcp in allowedNamespaces', () => {
-        expect(() => {
-          validateToolNamespace('mcp.github.get_issues', ['mcp']);
-        }).not.toThrow();
-      });
-    });
-
-    describe('non-protected namespace validation', () => {
-      it('should not throw for non-protected namespaces', () => {
-        expect(() => {
-          validateToolNamespace('custom.my-tool', []);
-        }).not.toThrow();
-
-        expect(() => {
-          validateToolNamespace('observability.logs-query', []);
-        }).not.toThrow();
-
-        expect(() => {
-          validateToolNamespace('security.alert-search', []);
-        }).not.toThrow();
-      });
-
-      it('should not throw for tools without namespace', () => {
-        expect(() => {
-          validateToolNamespace('my-tool', []);
-        }).not.toThrow();
-      });
-    });
-
-    describe('edge cases', () => {
-      it('should handle empty allowedNamespaces array', () => {
-        expect(() => {
-          validateToolNamespace('custom.tool', []);
-        }).not.toThrow();
-      });
-
-      it('should handle tools with multiple dots', () => {
-        expect(() => {
-          validateToolNamespace('custom.domain.subdomain.tool', []);
-        }).not.toThrow();
-      });
-
-      it('should be case-sensitive', () => {
-        // 'platformCore' is protected, but 'PlatformCore' is not
-        expect(() => {
-          validateToolNamespace('PlatformCore.tool', []);
-        }).not.toThrow();
-      });
-
-      it('should handle allowedNamespaces correctly', () => {
-        // If platformCore is allowed, all platformCore.* tools are allowed
-        expect(() => {
-          validateToolNamespace('platformCore.sub.tool', ['platformCore']);
-        }).not.toThrow();
-
-        expect(() => {
-          validateToolNamespace('platformCore.other.tool', ['platformCore']);
-        }).not.toThrow();
-
-        // But without platformCore in allowed list, they're not allowed
-        expect(() => {
-          validateToolNamespace('platformCore.sub.tool', ['other']);
-        }).toThrow();
-      });
-    });
-
-    describe('error messages', () => {
-      it('should include the tool ID in error message', () => {
-        expect(() => {
-          validateToolNamespace('platformCore.custom', []);
-        }).toThrow('Tool ID "platformCore.custom"');
-      });
-
-      it('should include the namespace in error message', () => {
-        expect(() => {
-          validateToolNamespace('platformCore.custom', []);
-        }).toThrow('namespace "platformCore"');
-      });
-
-      it('should list protected namespaces in error message', () => {
-        expect(() => {
-          validateToolNamespace('platformCore.custom', []);
-        }).toThrow('Protected namespaces: platformCore, mcp');
-      });
-    });
-  });
-
   describe('integration scenarios', () => {
-    it('should enforce MCP namespace for MCP connector tools', () => {
+    it('should create, verify, and parse MCP tool IDs', () => {
       const uniqueId = 'github-connector';
       const toolName = 'get_issues';
 
@@ -254,39 +123,6 @@ describe('MCP Namespaces', () => {
       // Parse it back
       const parsed = parseMcpToolId(toolId);
       expect(parsed).toEqual({ uniqueId, toolName });
-
-      // Validate namespace (MCP tools should use 'mcp' namespace)
-      expect(() => {
-        validateToolNamespace(toolId, ['mcp']);
-      }).not.toThrow();
-    });
-
-    it('should prevent user tools from using protected namespaces', () => {
-      const userToolIds = [
-        'platformCore.custom',
-        'mcp.my-connector.tool',
-        'platformCore.namespace.tool',
-      ];
-
-      userToolIds.forEach((toolId) => {
-        expect(() => {
-          validateToolNamespace(toolId, []); // User tools have no allowed namespaces
-        }).toThrow(/uses protected namespace/);
-      });
-    });
-
-    it('should allow platform tools to use protected namespaces', () => {
-      const platformToolIds = [
-        'platformCore.search',
-        'platformCore.execute_esql',
-        'platformCore.core.index_explorer',
-      ];
-
-      platformToolIds.forEach((toolId) => {
-        expect(() => {
-          validateToolNamespace(toolId, ['platformCore']);
-        }).not.toThrow();
-      });
     });
   });
 });

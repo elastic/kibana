@@ -4,6 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { TypeOf } from '@kbn/config-schema';
+import type {
+  MCPConnectorHTTPServiceConfigSchema,
+  MCPConnectorConfigSchema,
+  MCPConnectorSecretsNoneSchema,
+  MCPConnectorSecretsBearerSchema,
+  MCPConnectorSecretsApiKeySchema,
+  MCPConnectorSecretsBasicSchema,
+  MCPConnectorSecretsCustomHeadersSchema,
+  MCPConnectorSecretsSchema,
+} from './schema';
 
 /**
  * Authentication type selector.
@@ -16,137 +27,53 @@ export type MCPConnectorAuthType = 'none' | 'bearer' | 'apiKey' | 'basic' | 'cus
 
 /**
  * MCP connector HTTP service configuration.
- *
- * Contains ONLY non-sensitive metadata (not encrypted).
- * Credentials are stored separately in MCPConnectorSecrets (encrypted).
+ * Derived from schema.
  */
-export interface MCPConnectorHTTPServiceConfig {
-  /**
-   * HTTP endpoint configuration.
-   */
-  http: {
-    url: string;
-  };
-  /**
-   * Authentication type selector.
-   *
-   * Required field that determines which authentication method to use.
-   * The actual credentials are stored in the secrets object.
-   */
-  authType: MCPConnectorAuthType;
-  /**
-   * Optional custom header name for API key authentication.
-   *
-   * Only used when authType is 'apiKey'. Defaults to 'X-API-Key' if not specified.
-   *
-   * @example 'Authorization' - Use Authorization header with API key
-   * @example 'X-Custom-Key' - Use custom header name
-   */
-  apiKeyHeaderName?: string;
-}
+export type MCPConnectorHTTPServiceConfig = TypeOf<typeof MCPConnectorHTTPServiceConfigSchema>;
 
 /**
  * MCP connector configuration.
- *
- * Top-level configuration object for the connector. Contains only
- * non-sensitive metadata.
+ * Derived from schema.
  */
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type MCPConnectorConfig = {
-  uniqueId?: string;
-  description?: string;
-  version?: string;
-  service: MCPConnectorHTTPServiceConfig;
-};
+export type MCPConnectorConfig = TypeOf<typeof MCPConnectorConfigSchema>;
 
 /**
  * No authentication secrets.
- *
- * Used when authType is 'none'.
+ * Derived from schema.
  */
-export interface MCPConnectorSecretsNone {
-  authType: 'none';
-}
+export type MCPConnectorSecretsNone = TypeOf<typeof MCPConnectorSecretsNoneSchema>;
 
 /**
  * Bearer token authentication secrets.
- *
- * Used when authType is 'bearer'.
+ * Derived from schema.
  */
-export interface MCPConnectorSecretsBearer {
-  authType: 'bearer';
-  /**
-   * Bearer token for authentication.
-   *
-   * Will be sent as: Authorization: Bearer <token>
-   */
-  token: string;
-}
+export type MCPConnectorSecretsBearer = TypeOf<typeof MCPConnectorSecretsBearerSchema>;
 
 /**
  * API key authentication secrets.
- *
- * Used when authType is 'apiKey'.
+ * Derived from schema.
  */
-export interface MCPConnectorSecretsApiKey {
-  authType: 'apiKey';
-  /**
-   * API key value.
-   *
-   * Header name is determined by config.service.apiKeyHeaderName (default: 'X-API-Key').
-   */
-  apiKey: string;
-}
+export type MCPConnectorSecretsApiKey = TypeOf<typeof MCPConnectorSecretsApiKeySchema>;
 
 /**
  * Basic authentication secrets.
- *
- * Used when authType is 'basic'.
+ * Derived from schema.
  */
-export interface MCPConnectorSecretsBasic {
-  authType: 'basic';
-  /**
-   * Username for basic authentication.
-   */
-  username: string;
-  /**
-   * Password for basic authentication.
-   */
-  password: string;
-}
+export type MCPConnectorSecretsBasic = TypeOf<typeof MCPConnectorSecretsBasicSchema>;
 
 /**
  * Custom headers authentication secrets.
- *
- * Used when authType is 'customHeaders'.
+ * Derived from schema.
  */
-export interface MCPConnectorSecretsCustomHeaders {
-  authType: 'customHeaders';
-  /**
-   * Array of custom headers to send with each request.
-   *
-   * Can include any headers needed for authentication.
-   */
-  headers: Array<{
-    name: string;
-    value: string;
-  }>;
-}
+export type MCPConnectorSecretsCustomHeaders = TypeOf<
+  typeof MCPConnectorSecretsCustomHeadersSchema
+>;
 
 /**
- * MCP connector secrets (credentials).
- *
- * Discriminated union type that contains actual credentials based on authType.
- * All secrets are encrypted by the encryptedSavedObjects service.
- *
- * The discriminator field (authType) must match the config.service.authType value.
+ * MCP connector secrets (discriminated union).
+ * Derived from schema.
  */
-export type MCPConnectorSecrets =
-  | MCPConnectorSecretsNone
-  | MCPConnectorSecretsBearer
-  | MCPConnectorSecretsApiKey
-  | MCPConnectorSecretsBasic
-  | MCPConnectorSecretsCustomHeaders;
+export type MCPConnectorSecrets = TypeOf<typeof MCPConnectorSecretsSchema>;
 
 export const MCP_CONNECTOR_SUB_ACTION_TYPE_LIST_TOOLS = 'listTools';
 export const MCP_CONNECTOR_SUB_ACTION_TYPE_CALL_TOOL = 'callTool';

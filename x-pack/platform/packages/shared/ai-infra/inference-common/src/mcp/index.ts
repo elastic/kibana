@@ -7,7 +7,6 @@
 
 export type {
   InferenceCallToolRequest,
-  InferenceCallToolResponseResolved,
   InferenceCallToolResponse,
   InferenceListToolsResponse,
   InferenceMCPConnector,

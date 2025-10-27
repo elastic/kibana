@@ -8,6 +8,8 @@
 import { z, type ZodObject } from '@kbn/zod';
 import { jsonSchemaToZod } from '@n8n/json-schema-to-zod';
 import { ToolType, ToolResultType } from '@kbn/onechat-common';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { ToolHandlerContext } from '@kbn/onechat-server';
 import type { InternalToolDefinition } from '../tool_provider';
 import type { MCPToolWithMetadata } from './types';
 
@@ -22,14 +24,13 @@ import type { MCPToolWithMetadata } from './types';
  *
  * @param mcpTool The MCP tool from connector
  * @param connectorId The connector ID
- * @param connectorName The connector name
  * @param actionsClient Actions client for execution
- * @returns internal tool definition
+ * @returns Internal tool definition
  */
 export function convertMcpToolToAgentBuilderTool(
   mcpTool: MCPToolWithMetadata,
   connectorId: string,
-  actionsClient: any // ActionsClient - avoiding circular dependency
+  actionsClient: ActionsClient
 ): InternalToolDefinition {
   const { name, description, inputSchema, provider } = mcpTool;
 
@@ -37,6 +38,7 @@ export function convertMcpToolToAgentBuilderTool(
     id: provider.id,
     type: ToolType.builtin,
     description: description || `Tool: ${name}`,
+    readonly: true,
     tags: ['mcp', `connector:${connectorId}`],
     configuration: {
       connectorId,
@@ -52,7 +54,7 @@ export function convertMcpToolToAgentBuilderTool(
     },
 
     getHandler: async () => {
-      return async (params: unknown, context: any) => {
+      return async (params: unknown, context: ToolHandlerContext) => {
         try {
           const result = await actionsClient.execute({
             actionId: connectorId,
@@ -70,9 +72,11 @@ export function convertMcpToolToAgentBuilderTool(
               results: [
                 {
                   type: ToolResultType.error,
-                  error: {
+                  data: {
                     message: result.message || 'Tool execution failed',
-                    details: result.serviceMessage,
+                    metadata: {
+                      serviceMessage: result.serviceMessage,
+                    },
                   },
                 },
               ],
@@ -103,7 +107,7 @@ export function convertMcpToolToAgentBuilderTool(
             results: [
               {
                 type: ToolResultType.error,
-                error: {
+                data: {
                   message: error.message || 'Unexpected error during tool execution',
                   stack: error.stack,
                 },

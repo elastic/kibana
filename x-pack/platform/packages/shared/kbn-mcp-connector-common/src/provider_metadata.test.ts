@@ -90,12 +90,7 @@ describe('Provider Metadata', () => {
       const metadata = createProviderMetadata('test-connector', 'Test Connector');
 
       // Verify it has all required fields
-      const requiredFields: Array<keyof ToolProviderMetadata> = [
-        'id',
-        'name',
-        'type',
-        'uniqueId',
-      ];
+      const requiredFields: Array<keyof ToolProviderMetadata> = ['id', 'name', 'type', 'uniqueId'];
 
       requiredFields.forEach((field) => {
         expect(metadata).toHaveProperty(field);

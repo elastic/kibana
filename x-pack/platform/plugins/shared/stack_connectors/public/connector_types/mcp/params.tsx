@@ -13,8 +13,7 @@ import type {
   MCPListToolsParams,
 } from '@kbn/mcp-connector-common';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { EVENT_ACTION_LABEL } from './translations';
 
 const MCPParamsFields: React.FunctionComponent<ActionParamsProps<MCPExecutorParams>> = ({
@@ -22,13 +21,8 @@ const MCPParamsFields: React.FunctionComponent<ActionParamsProps<MCPExecutorPara
   actionParams,
   editAction,
   index,
-  errors,
-  messageVariables,
-  executionMode,
 }) => {
   const [eventAction, setEventAction] = useState(actionParams.subAction ?? 'listTools');
-
-  const isTest = useMemo(() => executionMode === ActionConnectorMode.Test, [executionMode]);
 
   const editActionRef = useRef(editAction);
   editActionRef.current = editAction;
