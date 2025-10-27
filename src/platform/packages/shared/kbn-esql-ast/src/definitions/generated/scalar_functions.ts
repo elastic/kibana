@@ -2880,6 +2880,28 @@ const dateParseDefinition: FunctionDefinition = {
         },
         {
           name: 'dateString',
+          type: 'keyword',
+          optional: false,
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          mapParams:
+            "{name='time_zone', values=[standard], description='Coordinated Universal Time (UTC) offset or IANA time zone used to convert date values in the query string to UTC.'}, {name='locale', values=[standard], description='The locale to use when parsing the date, relevant when parsing month names or week days.'}",
+          optional: true,
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'datePattern',
+          type: 'keyword',
+          optional: true,
+        },
+        {
+          name: 'dateString',
           type: 'text',
           optional: false,
         },
