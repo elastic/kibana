@@ -23,11 +23,15 @@ describe('initializeSettingsManager', () => {
       });
     });
 
-    test('Should return no changes when timeRestore changes', (done) => {
+    test('Should return timeRestore change when timeRestoreChanges', (done) => {
       const lastSavedState$ = new BehaviorSubject<DashboardState>(getSampleDashboardState());
       const settingsManager = initializeSettingsManager(lastSavedState$.value);
       settingsManager.internalApi.startComparing$(lastSavedState$).subscribe((changes) => {
-        expect(changes).toMatchInlineSnapshot(`Object {}`);
+        expect(changes).toMatchInlineSnapshot(`
+          Object {
+            "timeRestore": false,
+          }
+        `);
         done();
       });
       const currentSettings = settingsManager.api.getSettings();
