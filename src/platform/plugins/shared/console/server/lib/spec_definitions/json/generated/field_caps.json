@@ -18,7 +18,8 @@
       "include_unmapped": "__flag__",
       "filters": "",
       "types": "",
-      "include_empty_fields": "__flag__"
+      "include_empty_fields": "__flag__",
+      "project_routing": ""
     },
     "methods": [
       "GET",

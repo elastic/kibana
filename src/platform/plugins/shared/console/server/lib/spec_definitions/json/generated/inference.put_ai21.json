@@ -1,0 +1,32 @@
+{
+  "inference.put_ai21": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "timeout": [
+        "30s",
+        "-1",
+        "0"
+      ]
+    },
+    "url_components": {
+      "task_type": [
+        "completion",
+        "chat_completion"
+      ]
+    },
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_inference/{task_type}/{ai21_inference_id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-ai21",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
+  }
+}

@@ -13,7 +13,14 @@
         "none"
       ],
       "ignore_unavailable": "__flag__",
-      "allow_no_indices": "__flag__"
+      "allow_no_indices": "__flag__",
+      "mode": [
+        "standard",
+        "time_series",
+        "logsdb",
+        "lookup"
+      ],
+      "project_routing": ""
     },
     "methods": [
       "GET"

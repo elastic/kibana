@@ -13,7 +13,8 @@
         "yaml",
         "cbor",
         "smile"
-      ]
+      ],
+      "project_routing": ""
     },
     "methods": [
       "POST",

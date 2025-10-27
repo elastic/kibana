@@ -18,8 +18,7 @@
       "version_type": [
         "internal",
         "external",
-        "external_gte",
-        "force"
+        "external_gte"
       ]
     },
     "methods": [

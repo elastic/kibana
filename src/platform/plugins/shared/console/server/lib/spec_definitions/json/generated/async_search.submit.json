@@ -41,8 +41,11 @@
       "ignore_throttled": "__flag__",
       "ignore_unavailable": "__flag__",
       "lenient": "__flag__",
-      "max_concurrent_shard_requests": "",
+      "max_concurrent_shard_requests": [
+        "5"
+      ],
       "preference": "",
+      "project_routing": "",
       "request_cache": "__flag__",
       "routing": "",
       "search_type": [

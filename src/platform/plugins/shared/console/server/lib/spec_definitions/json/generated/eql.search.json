@@ -23,6 +23,7 @@
         "0"
       ],
       "keep_on_completion": "__flag__",
+      "project_routing": "",
       "wait_for_completion_timeout": [
         "-1",
         "0"

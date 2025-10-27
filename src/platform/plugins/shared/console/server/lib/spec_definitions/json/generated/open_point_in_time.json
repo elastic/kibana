@@ -11,6 +11,7 @@
       ],
       "ignore_unavailable": "__flag__",
       "preference": "",
+      "project_routing": "",
       "routing": "",
       "expand_wildcards": [
         "all",
