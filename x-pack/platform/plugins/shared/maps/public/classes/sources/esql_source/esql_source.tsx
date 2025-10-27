@@ -13,6 +13,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import {
   getESQLAdHocDataview,
+  getESQLQueryColumnsRaw,
   getIndexPatternFromESQLQuery,
   getLimitFromESQLQuery,
   getStartEndParams,
@@ -44,17 +45,17 @@ import { AbstractVectorSource, getLayerFeaturesRequestName } from '../vector_sou
 import type { IVectorSource, GeoJsonWithMeta, SourceStatus } from '../vector_source';
 import type { IESSource } from '../es_source';
 import type { IField } from '../../fields/field';
-import { InlineField } from '../../fields/inline_field';
 import { getData, getIndexPatternService, getUiSettings } from '../../../kibana_services';
 import { convertToGeoJson } from './convert_to_geojson';
-import { getFieldType, isGeometryColumn, ESQL_GEO_SHAPE_TYPE } from './esql_utils';
+import { isGeometryColumn, ESQL_GEO_SHAPE_TYPE } from './esql_utils';
 import { UpdateSourceEditor } from './update_source_editor';
 import type { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { ESDocField } from '../../fields/es_doc_field';
+import { ESQLField } from '../../fields/esql_field';
 
 type ESQLSourceSyncMeta = Pick<
   ESQLSourceDescriptor,
-  'columns' | 'dateField' | 'esql' | 'geoField' | 'narrowByMapBounds' | 'narrowByGlobalTime'
+  'dateField' | 'esql' | 'geoField' | 'narrowByMapBounds' | 'narrowByGlobalTime'
 >;
 
 export const sourceTitle = i18n.translate('xpack.maps.source.esqlSearchTitle', {
@@ -93,7 +94,6 @@ export class ESQLSource
       id: isValidStringConfig(descriptor.id) ? descriptor.id! : uuidv4(),
       type: SOURCE_TYPES.ESQL,
       esql: descriptor.esql!,
-      columns: descriptor.columns ? descriptor.columns : [],
       dataViewId: descriptor.dataViewId!,
       narrowByGlobalSearch:
         typeof descriptor.narrowByGlobalSearch !== 'undefined'
@@ -200,8 +200,13 @@ export class ESQLSource
   }
 
   async getSupportedShapeTypes() {
-    const index = this._descriptor.columns.findIndex(isGeometryColumn);
-    return index !== -1 && this._descriptor.columns[index].type === ESQL_GEO_SHAPE_TYPE
+    const columns = await getESQLQueryColumnsRaw({
+      esqlQuery: this._descriptor.esql,
+      search: getData().search.search,
+      timeRange: getData().query.timefilter.timefilter.getAbsoluteTime(),
+    });
+    const geoColumn = columns.find(isGeometryColumn);
+    return geoColumn?.type === ESQL_GEO_SHAPE_TYPE
       ? [VECTOR_SHAPE_TYPE.POINT, VECTOR_SHAPE_TYPE.LINE, VECTOR_SHAPE_TYPE.POLYGON]
       : [VECTOR_SHAPE_TYPE.POINT];
   }
@@ -353,37 +358,21 @@ export class ESQLSource
     };
   }
 
-  getFieldByName(fieldName: string): IField | null {
-    const column = this._descriptor.columns.find(({ name }) => {
-      return name === fieldName;
+  getFieldByName(fieldName: string): IField {
+    return new ESQLField({
+      fieldName,
+      source: this,
+      origin: FIELD_ORIGIN.SOURCE,
     });
-    const fieldType = column ? getFieldType(column) : undefined;
-    return column && fieldType
-      ? new InlineField({
-          fieldName: column.name,
-          source: this,
-          origin: FIELD_ORIGIN.SOURCE,
-          dataType: fieldType,
-        })
-      : null;
   }
 
   async getFields() {
-    const fields: IField[] = [];
-    this._descriptor.columns.forEach((column) => {
-      const fieldType = getFieldType(column);
-      if (fieldType) {
-        fields.push(
-          new InlineField({
-            fieldName: column.name,
-            source: this,
-            origin: FIELD_ORIGIN.SOURCE,
-            dataType: fieldType,
-          })
-        );
-      }
+    const columns = await getESQLQueryColumnsRaw({
+      esqlQuery: this.getESQL(),
+      search: getData().search.search,
+      timeRange: getData().query.timefilter.timefilter.getAbsoluteTime(),
     });
-    return fields;
+    return columns.map(({ name }) => this.getFieldByName(name));
   }
 
   renderSourceSettingsEditor({ onChange }: SourceEditorArgs) {
@@ -392,7 +381,6 @@ export class ESQLSource
 
   getSyncMeta(): ESQLSourceSyncMeta {
     return {
-      columns: this._descriptor.columns,
       dateField: this._descriptor.dateField,
       esql: this._descriptor.esql,
       geoField: this._descriptor.geoField,
@@ -411,5 +399,9 @@ export class ESQLSource
 
   getGeoFieldName() {
     return this._descriptor.geoField;
+  }
+
+  getESQL() {
+    return this._descriptor.esql;
   }
 }

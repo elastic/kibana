@@ -128,8 +128,7 @@ export function CreateSourceEditor(props: Props) {
     () => {
       const sourceConfig =
         esql && esql.length && adhocDataViewId
-          ? {
-              columns,
+          ? ({
               dataViewId: adhocDataViewId,
               dateField,
               geoField,
@@ -137,14 +136,13 @@ export function CreateSourceEditor(props: Props) {
               narrowByGlobalSearch,
               narrowByGlobalTime,
               narrowByMapBounds,
-            }
+            } as ESQLSourceDescriptor)
           : null;
       props.onSourceConfigChange(sourceConfig);
     },
     0,
     [
       adhocDataViewId,
-      columns,
       dateField,
       geoField,
       esql,
