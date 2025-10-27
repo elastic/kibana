@@ -21,7 +21,7 @@ jobs:
     name: Analyze
     runs-on: kibana
     needs: request_analyze
-    if: needs.request_analyze.outputs.granted
+    if: needs.request_analyze.outputs.granted == 'true'
     permissions:
       security-events: write
       packages: read
