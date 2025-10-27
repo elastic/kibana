@@ -15,15 +15,14 @@ import {
   EuiWrappingPopover,
   type EuiContextMenuPanelDescriptor,
 } from '@elastic/eui';
-import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import { openLazyFlyout } from '@kbn/presentation-util';
-import { Embeddable } from '@kbn/visualizations-plugin/public/legacy/embeddable/embeddable';
+import { coreServices } from '../../../services/kibana_services';
 import { executeCreateTimeSliderControlPanelAction } from '../../../dashboard_actions/execute_create_time_slider_control_panel_action';
-import { executeCreateESQLControlPanelAction } from '../../../dashboard_actions/execute_create_esql_control_panel_action copy';
-import { executeCreateControlPanelAction } from '../../../dashboard_actions/execute_create_control_panel_action copy 2';
+import { executeCreateESQLControlPanelAction } from '../../../dashboard_actions/execute_create_esql_control_panel_action';
+import { executeCreateControlPanelAction } from '../../../dashboard_actions/execute_create_control_panel_action';
 import { executeAddLensPanelAction } from '../../../dashboard_actions/execute_add_lens_panel_action';
 import type { DashboardApi } from '../../../dashboard_api/types';
 import { addFromLibrary } from '../../../dashboard_renderer/add_panel_from_library';
@@ -32,7 +31,6 @@ import { getCreateVisualizationButtonTitle } from '../../_dashboard_app_strings'
 interface AddMenuProps {
   dashboardApi: DashboardApi;
   anchorElement: HTMLElement;
-  coreServices: CoreStart;
 }
 
 const getControlButtonTitle = () =>
@@ -67,7 +65,7 @@ function cleanup() {
   isOpen = false;
 }
 
-export const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuProps) => {
+export const AddMenu = ({ dashboardApi, anchorElement }: AddMenuProps) => {
   /** TODO: Set this as part of the timeslider conversion */
   const [hasTimeSliderControl, setHasTimeSliderControl] = useState(false);
 
@@ -96,7 +94,7 @@ export const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuPr
         triggerId: 'dashboardAddTopNavButton',
       },
     });
-  }, [coreServices, dashboardApi]);
+  }, [dashboardApi]);
 
   const panels: EuiContextMenuPanelDescriptor[] = [
     {
@@ -168,7 +166,7 @@ export const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuPr
           icon: 'empty',
           'data-test-subj': 'controls-create-button',
           onClick: async () => {
-            await executeCreateControlPanelAction(dashboardApi);
+            await executeCreateControlPanelAction(dashboardApi, true);
             closePopover();
           },
         },
@@ -177,7 +175,7 @@ export const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuPr
           icon: 'empty',
           'data-test-subj': 'esql-control-create-button',
           onClick: async () => {
-            await executeCreateESQLControlPanelAction(dashboardApi);
+            await executeCreateESQLControlPanelAction(dashboardApi, true);
             closePopover();
           },
         },
@@ -208,7 +206,7 @@ export const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuPr
   );
 };
 
-export function showAddMenu({ dashboardApi, anchorElement, coreServices }: AddMenuProps) {
+export function showAddMenu({ dashboardApi, anchorElement }: AddMenuProps) {
   if (isOpen) {
     cleanup();
     return;
@@ -218,15 +216,8 @@ export function showAddMenu({ dashboardApi, anchorElement, coreServices }: AddMe
   document.body.appendChild(container);
   ReactDOM.render(
     <KibanaContextProvider services={coreServices}>
-      <AddMenu
-        dashboardApi={dashboardApi}
-        anchorElement={anchorElement}
-        coreServices={coreServices}
-      />
+      <AddMenu dashboardApi={dashboardApi} anchorElement={anchorElement} />
     </KibanaContextProvider>,
     container
   );
-}
-function uuidv4() {
-  throw new Error('Function not implemented.');
 }

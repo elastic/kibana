@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { apiCanAddNewPanel } from '@kbn/presentation-containers';
+import { apiCanAddNewPanel, apiCanPinPanel } from '@kbn/presentation-containers';
 import { type EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
@@ -17,12 +17,14 @@ import { ESQLVariableType, EsqlControlType, apiPublishesESQLVariables } from '@k
 import { ACTION_CREATE_ESQL_CONTROL } from './constants';
 import { uiActionsService } from '../services/kibana_services';
 
-export const createESQLControlAction = (): ActionDefinition<EmbeddableApiContext> => ({
+export const createESQLControlAction = (): ActionDefinition<
+  EmbeddableApiContext & { isPinned: boolean }
+> => ({
   id: ACTION_CREATE_ESQL_CONTROL,
   order: 1,
   getIconType: () => 'controlsHorizontal',
   isCompatible: async ({ embeddable }) => apiCanAddNewPanel(embeddable),
-  execute: async ({ embeddable }) => {
+  execute: async ({ embeddable, isPinned }) => {
     if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
     const variablesInParent = apiPublishesESQLVariables(embeddable)
       ? embeddable.esqlVariables$.value
@@ -35,6 +37,18 @@ export const createESQLControlAction = (): ActionDefinition<EmbeddableApiContext
         controlType: EsqlControlType.VALUES_FROM_QUERY,
         esqlVariables: variablesInParent,
         onSaveControl: async (controlState: ESQLControlState) => {
+          if (isPinned && apiCanPinPanel(embeddable)) {
+            embeddable.addPinnedPanel({
+              panelType: 'esqlControl',
+              serializedState: {
+                rawState: {
+                  ...controlState,
+                },
+              },
+            });
+            return;
+          }
+
           embeddable.addNewPanel({
             panelType: 'esqlControl',
             serializedState: {

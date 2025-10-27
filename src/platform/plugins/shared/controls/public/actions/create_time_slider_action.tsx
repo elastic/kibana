@@ -24,6 +24,7 @@ interface PublishesControlsLayout {
     };
   }>;
 }
+
 const apiPublishesControlsLayout = (api: unknown): api is PublishesControlsLayout =>
   Boolean((api as PublishesControlsLayout).layout$);
 

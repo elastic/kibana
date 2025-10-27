@@ -245,8 +245,7 @@ export const useDashboardMenuItems = ({
         testId: 'dashboardAddTopNavButton',
         htmlId: 'dashboardAddTopNavButton',
         disableButton: disableTopNav,
-        run: (anchorElement: HTMLElement) =>
-          showAddMenu({ dashboardApi, anchorElement, coreServices }),
+        run: (anchorElement: HTMLElement) => showAddMenu({ dashboardApi, anchorElement }),
       },
     };
   }, [

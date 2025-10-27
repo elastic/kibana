@@ -10,7 +10,11 @@
 import { apiHasEditorConfig } from '@kbn/control-group-renderer/src/types';
 import type { DataControlState } from '@kbn/controls-schemas';
 import { i18n } from '@kbn/i18n';
-import { apiCanAddNewPanel, apiIsPresentationContainer } from '@kbn/presentation-containers';
+import {
+  apiCanAddNewPanel,
+  apiCanPinPanel,
+  apiIsPresentationContainer,
+} from '@kbn/presentation-containers';
 import { apiPublishesDataViews, type EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
@@ -18,12 +22,14 @@ import { openDataControlEditor } from '../controls/data_controls/open_data_contr
 import { ACTION_CREATE_CONTROL } from './constants';
 import type { CreateControlTypeContext } from './control_panel_actions';
 
-export const createControlAction = (): ActionDefinition<EmbeddableApiContext> => ({
+export const createControlAction = (): ActionDefinition<
+  EmbeddableApiContext & { isPinned: boolean }
+> => ({
   id: ACTION_CREATE_CONTROL,
   order: 1,
   getIconType: () => 'controlsHorizontal',
   isCompatible: async ({ embeddable }) => apiCanAddNewPanel(embeddable),
-  execute: async ({ embeddable }) => {
+  execute: async ({ embeddable, isPinned }) => {
     if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
     const defaultDataViewId = apiHasEditorConfig(embeddable)
       ? embeddable.getEditorConfig()?.defaultDataViewId
@@ -42,6 +48,7 @@ export const createControlAction = (): ActionDefinition<EmbeddableApiContext> =>
         dataViewId: parentDataViewId,
       },
       parentApi: embeddable,
+      isPinned,
     });
   },
   getDisplayName: () =>
@@ -57,7 +64,7 @@ export const createControlAction = (): ActionDefinition<EmbeddableApiContext> =>
 
 export const createDataControlOfType = <State extends DataControlState = DataControlState>(
   type: string,
-  { embeddable, state, controlId }: CreateControlTypeContext<State>
+  { embeddable, state, controlId, isPinned }: CreateControlTypeContext<State>
 ) => {
   if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
 
@@ -80,18 +87,29 @@ export const createDataControlOfType = <State extends DataControlState = DataCon
         rawState: state,
       },
     });
-  } else {
-    // otherwise, add a new control
-    embeddable.addNewPanel(
-      {
-        panelType: type,
-        serializedState: {
-          rawState: state,
-        },
-      },
-      {
-        displaySuccessMessage: true,
-      }
-    );
+    return;
   }
+
+  if (isPinned && apiCanPinPanel(embeddable)) {
+    embeddable.addPinnedPanel({
+      panelType: type,
+      serializedState: {
+        rawState: state,
+      },
+    });
+    return;
+  }
+
+  // otherwise, add a new control
+  embeddable.addNewPanel(
+    {
+      panelType: type,
+      serializedState: {
+        rawState: state,
+      },
+    },
+    {
+      displaySuccessMessage: true,
+    }
+  );
 };

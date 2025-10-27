@@ -13,17 +13,21 @@ import { i18n } from '@kbn/i18n';
 import { coreServices, uiActionsService } from '../services/kibana_services';
 import type { DashboardApi } from '../dashboard_api/types';
 
-export async function executeCreateControlPanelAction(dashboardApi: DashboardApi) {
+export async function executeCreateESQLControlPanelAction(
+  dashboardApi: DashboardApi,
+  isPinned?: boolean
+) {
   try {
-    const createControlPanelAction = await uiActionsService.getAction('createControl');
+    const createControlPanelAction = await uiActionsService.getAction('createESQLControl');
     createControlPanelAction.execute({
       embeddable: dashboardApi,
       trigger: addPanelMenuTrigger,
+      isPinned,
     } as ActionExecutionContext);
   } catch (error) {
     coreServices.notifications.toasts.addWarning(
-      i18n.translate('dashboard.addNewPanelError', {
-        defaultMessage: 'Unable to create new control',
+      i18n.translate('dashboard.createNewESQLControlError', {
+        defaultMessage: 'Unable to create new ESQL control',
       })
     );
   }
