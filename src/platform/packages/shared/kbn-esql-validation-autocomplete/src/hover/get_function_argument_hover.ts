@@ -17,9 +17,7 @@ import {
 import { getFunctionDefinition } from '@kbn/esql-ast/src/definitions/utils';
 import { isESQLNamedParamLiteral } from '@kbn/esql-ast/src/types';
 import type { ESQLCallbacks } from '../shared/types';
-import { getColumnsByTypeRetriever } from '../autocomplete/autocomplete';
 import { fromCache, setToCache } from './hover_cache';
-import { getQueryForFields } from '../autocomplete/get_query_for_fields';
 
 const TIME_SYSTEM_DESCRIPTIONS = {
   '?_tstart': i18n.translate(
@@ -74,14 +72,6 @@ export async function getFunctionArgumentHover(
     return cached;
   }
 
-  const { getColumnMap } = getColumnsByTypeRetriever(
-    getQueryForFields(query, root),
-    query,
-    resourceRetriever
-  );
-
-  const columnsMap = await getColumnMap();
-
   const contents: { value: string }[] = [];
   if (argumentAtOffset && isESQLNamedParamLiteral(argumentAtOffset)) {
     const bestMatch = TIME_SYSTEM_PARAMS.find((p) => p.startsWith(argumentAtOffset.text));
@@ -91,20 +81,6 @@ export async function getFunctionArgumentHover(
         contents.push({
           value: `**${key}**: ${value}`,
         });
-      });
-    }
-  }
-
-  if (argumentAtOffset && 'name' in argumentAtOffset) {
-    const column = columnsMap.get(argumentAtOffset.name);
-    if (column) {
-      contents.push({
-        value: i18n.translate('kbn-esql-validation-autocomplete.esql.hover.columnArgumentHover', {
-          defaultMessage: '**Type:** {type}',
-          values: {
-            type: column.type,
-          },
-        }),
       });
     }
   }
