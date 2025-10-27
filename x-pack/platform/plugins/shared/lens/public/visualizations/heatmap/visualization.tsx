@@ -16,14 +16,13 @@ import { CUSTOM_PALETTE, getOverridePaletteStops } from '@kbn/coloring';
 import type { ThemeServiceStart } from '@kbn/core/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import type { HeatmapConfiguration } from '@kbn/visualizations-plugin/common';
 import type {
   HeatmapExpressionFunctionDefinition,
   HeatmapGridExpressionFunctionDefinition,
   HeatmapLegendExpressionFunctionDefinition,
 } from '@kbn/expression-heatmap-plugin/common';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
-import type { OperationMetadata, Suggestion, UserMessage, Visualization } from '../../types';
+import type { OperationMetadata, Suggestion, UserMessage, Visualization } from '@kbn/lens-common';
 import type { HeatmapVisualizationState } from './types';
 import { getSuggestions } from './suggestions';
 import {
@@ -506,7 +505,7 @@ export const getHeatmapVisualization = ({
       },
       visualizationState: {
         ...allSuggestions[0].visualizationState,
-        ...(context.configuration as HeatmapConfiguration),
+        ...(context.configuration as HeatmapVisualizationState),
       },
     };
     return suggestion;
