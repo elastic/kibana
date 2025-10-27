@@ -36,5 +36,6 @@
     "@kbn/task-manager-plugin",
     "@kbn/fields-metadata-plugin",
     "@kbn/react-query",
+    "@kbn/zod"
   ]
 }

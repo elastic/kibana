@@ -32,6 +32,8 @@
     "@kbn/search-api-keys-components",
     "@kbn/react-query",
     "@kbn/doc-links",
+    "@kbn/cloud",
+    "@kbn/deeplinks-search",
   ],
   "exclude": [
     "target/**/*"
