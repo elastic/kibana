@@ -112,7 +112,7 @@ export async function ensureEdotCollector({
 
   // Wait for container to be running
   untilContainerReady({
-    containerName: 'kibana-edot-collector',
+    containerName: 'otel-collector',
     signal,
     log,
     dockerComposeFilePath: DOCKER_COMPOSE_FILE_PATH,
@@ -126,22 +126,10 @@ export async function ensureEdotCollector({
           '✔'
         )} EDOT Collector started successfully in Gateway mode and connected to ${elasticsearchHost}`
       );
-
-      log.write('');
-
-      log.write(`${chalk.green('📊')} Next steps:`);
-      log.write('');
-      log.write('  1. Instrument your applications to send OTLP data to the collector');
-      log.write('  2. Go to Kibana Observability → Applications to view traces and APM data');
-      log.write('');
-      log.write(`${chalk.green('🔌')} OTLP endpoints available for application instrumentation:`);
       log.write('');
       log.write(`  ${chalk.dim('gRPC:')} http://localhost:${grpcPort}`);
       log.write(`  ${chalk.dim('HTTP:')} http://localhost:${httpPort}`);
       log.write('');
-      log.write(`${chalk.dim('Container name:')} kibana-edot-collector`);
-      log.write(`${chalk.dim('To stop:')} docker stop kibana-edot-collector`);
-      log.write(`${chalk.dim('To remove:')} docker rm kibana-edot-collector`);
     })
     .catch((error) => {
       log.error(error);
