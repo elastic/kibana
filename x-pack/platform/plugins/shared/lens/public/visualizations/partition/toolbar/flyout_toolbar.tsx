@@ -9,19 +9,24 @@ import React from 'react';
 
 import { EuiAccordion, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type {
+  VisualizationToolbarProps,
+  LensPartitionVisualizationState as PieVisualizationState,
+} from '@kbn/lens-common';
+import { PARTITION_EMPTY_SIZE_RADIUS as EmptySizeRatios } from '@kbn/lens-common';
 import type { ToolbarContentMap } from '../../../shared_components/flyout_toolbar';
 import { FlyoutToolbar } from '../../../shared_components/flyout_toolbar';
-import type { VisualizationToolbarProps } from '../../../types';
-import { EmptySizeRatios, type PieVisualizationState } from '../../../../common/types';
 import { PartitionAppearanceSettings } from './appearance_settings';
 import { PartitionTitlesAndTextSettings } from './titles_and_text_setttings';
 import { PartitionChartsMeta } from '../partition_charts_meta';
+import { PartitionLegendSettings } from './legend_settings';
 
 export function PartitionFlyoutToolbar(props: VisualizationToolbarProps<PieVisualizationState>) {
   const { isDisabled: hasDisabledSytleSettings } =
     PartitionChartsMeta[props.state.shape].toolbarPopover;
   const datatableToolbarContentMap: ToolbarContentMap<PieVisualizationState> = {
     style: hasDisabledSytleSettings ? undefined : PartitionStyleSettings,
+    legend: PartitionLegendSettings,
   };
   return <FlyoutToolbar {...props} contentMap={datatableToolbarContentMap} />;
 }

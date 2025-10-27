@@ -65,7 +65,8 @@ interface StartDeps {
 export class ProjectNavigationService {
   private logger: Logger | undefined;
   private projectHome$ = new BehaviorSubject<string | undefined>(undefined);
-  private projectName$ = new BehaviorSubject<string | undefined>(undefined);
+  private kibanaName$ = new BehaviorSubject<string | undefined>(undefined);
+  private feedbackUrlParams$ = new BehaviorSubject<URLSearchParams | undefined>(undefined);
   private navigationTree$ = new BehaviorSubject<ChromeProjectNavigationNode[] | undefined>(
     undefined
   );
@@ -142,11 +143,17 @@ export class ProjectNavigationService {
 
         this.cloudLinks$.next(getCloudLinks(cloudUrls));
       },
-      setProjectName: (projectName: string) => {
-        this.projectName$.next(projectName);
+      setFeedbackUrlParams: (feedbackUrlParams: URLSearchParams) => {
+        this.feedbackUrlParams$.next(feedbackUrlParams);
       },
-      getProjectName$: () => {
-        return this.projectName$.asObservable();
+      setKibanaName: (kibanaName: string) => {
+        this.kibanaName$.next(kibanaName);
+      },
+      getKibanaName$: () => {
+        return this.kibanaName$.asObservable();
+      },
+      getFeedbackUrlParams$: () => {
+        return this.feedbackUrlParams$.asObservable();
       },
       initNavigation: <LinkId extends AppDeepLinkId = AppDeepLinkId>(
         id: SolutionId,
@@ -173,12 +180,12 @@ export class ProjectNavigationService {
           this.projectBreadcrumbs$,
           this.activeNodes$,
           chromeBreadcrumbs$,
-          this.projectName$,
+          this.kibanaName$,
           this.cloudLinks$,
         ]).pipe(
-          map(([projectBreadcrumbs, activeNodes, chromeBreadcrumbs, projectName, cloudLinks]) => {
+          map(([projectBreadcrumbs, activeNodes, chromeBreadcrumbs, kibanaName, cloudLinks]) => {
             return buildBreadcrumbs({
-              projectName,
+              kibanaName,
               projectBreadcrumbs,
               activeNodes,
               chromeBreadcrumbs,
