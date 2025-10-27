@@ -20,7 +20,6 @@
         "logsdb",
         "lookup"
       ],
-      "project_routing": ""
     },
     "methods": [
       "GET"
