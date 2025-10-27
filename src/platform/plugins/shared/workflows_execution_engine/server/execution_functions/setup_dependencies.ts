@@ -109,7 +109,7 @@ export async function setupDependencies(
     workflowExecutionGraph,
     workflowExecutionState,
     workflowLogger,
-    esClient,
+    esClient: clientToUse,
     fakeRequest,
     coreStart,
     dependencies,

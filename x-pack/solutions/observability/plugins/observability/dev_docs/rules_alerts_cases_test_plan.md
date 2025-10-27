@@ -1,12 +1,11 @@
 
-# Test plan for: Rules, Alerts, Overview page, and Cases
+# Test plan for: Observability Rules, Alerts, and Cases
 
-This plan will cover the UI part (not API) for:
+This plan will cover the UI part (not API) for Observability's implementation of:
 
-- Rules
-- Alerts
-- Overview page
-- Cases
+- Rules UIs
+- Alerts UIs
+- Cases UIS
 
 ## Data generation
 
@@ -85,18 +84,6 @@ Visit the alerts page, then check and test:
 - Use the UI filters (Show all, Active, Recovered, and Untracked) and see how it reflects the results in the alert table
 - Use the Search bar and see how it reflects the results in the alert table
 - Click on the Disabled and Snoozed at the top, it should lead to the rules page with the right filters
-
-## Overview page
-
-Visit the Overview page under Observability, then check and test:
-
-- The 4 sections (Alerts, Log Events, Hosts, and Services) are visible and show data.
-- Change the time range at the top of the page, it should change the data shown in the 4 sections.
-- Try the links of each section: "Show alerts", "Show logs", "Show inventory", and "Show service inventory".
-
-> [!NOTE]
->
-> If there is not data showing, check if the data generation is working, and the time range is correct.
 
 ## Cases
 
