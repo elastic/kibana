@@ -291,6 +291,19 @@ const deprecations: ConfigDeprecationProvider = () => [
         },
       });
     }
+
+    if (es.pingTimeout !== undefined) {
+      addDeprecation({
+        configPath: `${fromPath}.pingTimeout`,
+        level: 'warning',
+        message: `Setting [${fromPath}.pingTimeout] is deprecated and no longer used.`,
+        correctiveActions: {
+          manualSteps: [
+            `Remove Setting [${fromPath}.pingTimeout] from your kibana configs`,
+          ],
+        },
+      });
+    }
     return;
   },
 ];
