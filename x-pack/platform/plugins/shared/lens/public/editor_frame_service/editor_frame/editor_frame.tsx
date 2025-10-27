@@ -6,6 +6,8 @@
  */
 
 import React, { useCallback, useRef } from 'react';
+import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import type { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
 import type { DragDropIdentifier } from '@kbn/dom-drag-drop';
@@ -19,7 +21,6 @@ import type {
 } from '@kbn/lens-common';
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { getAbsoluteDateRange } from '../../utils';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
@@ -59,6 +60,7 @@ export interface EditorFrameProps {
 }
 
 export function EditorFrame(props: EditorFrameProps) {
+  const { euiTheme } = useEuiTheme();
   const { datasourceMap, visualizationMap } = useEditorFrameService();
   const dispatchLens = useLensDispatch();
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
@@ -167,13 +169,21 @@ export function EditorFrame(props: EditorFrameProps) {
                     <VisualizationToolbarWrapper framePublicAPI={framePublicAPI} />
                   </EuiFlexItem>
                 </EuiFlexGroup>
-                <LayerTabsWrapper
-                  coreStart={props.core}
-                  framePublicAPI={framePublicAPI}
-                  setIsInlineFlyoutVisible={() => {}}
-                  dataViews={props.plugins.dataViews}
-                  uiActions={props.plugins.uiActions}
-                />
+                <div
+                  css={css`
+                    pointer-events: auto;
+                    background-color: ${euiTheme.colors.emptyShade};
+                    border-bottom: ${euiTheme.border.thin};
+                  `}
+                >
+                  <LayerTabsWrapper
+                    coreStart={props.core}
+                    framePublicAPI={framePublicAPI}
+                    setIsInlineFlyoutVisible={() => {}}
+                    dataViews={props.plugins.dataViews}
+                    uiActions={props.plugins.uiActions}
+                  />
+                </div>
                 <ConfigPanelWrapper
                   core={props.core}
                   framePublicAPI={framePublicAPI}
