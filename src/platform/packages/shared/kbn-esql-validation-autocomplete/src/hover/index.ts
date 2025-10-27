@@ -24,9 +24,9 @@ import {
   type ESQLSource,
 } from '@kbn/esql-ast/src/types';
 
-import type { ESQLColumnData } from '@kbn/esql-ast/src/commands_registry/types';
 import type { ESQLCallbacks } from '../shared/types';
-import { getColumnsByTypeRetriever } from '../autocomplete/autocomplete';
+import type { ColumnsMap } from '../shared/columns';
+import { getColumnsByTypeRetriever } from '../shared/columns';
 import { getPolicyHelper } from '../shared/resources_helpers';
 import { correctQuerySyntax, getVariablesHoverContent } from './helpers';
 import { getQueryForFields } from '../autocomplete/get_query_for_fields';
@@ -186,10 +186,7 @@ export async function getHoverItem(fullText: string, offset: number, callbacks?:
   return hoverContent;
 }
 
-async function getHintForFunctionArg(
-  fnNode: ESQLFunction,
-  columnsMap: Map<string, ESQLColumnData>
-) {
+async function getHintForFunctionArg(fnNode: ESQLFunction, columnsMap: ColumnsMap) {
   const fnDefinition = getFunctionDefinition(fnNode.name);
   // early exit on no hit
   if (!fnDefinition) {
@@ -238,10 +235,7 @@ async function getHintForFunctionArg(
   return contents;
 }
 
-async function getFunctionSignatureHover(
-  fnNode: ESQLFunction,
-  columnsMap: Map<string, ESQLColumnData>
-) {
+async function getFunctionSignatureHover(fnNode: ESQLFunction, columnsMap: ColumnsMap) {
   const fnDefinition = getFunctionDefinition(fnNode.name);
   if (fnDefinition) {
     const formattedSignature = getFormattedFunctionSignature(fnDefinition, fnNode, columnsMap);
