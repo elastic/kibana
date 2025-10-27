@@ -28,6 +28,8 @@ import {
   findClosestColumn,
   getKqlSearchQueries,
   convertTimeseriesCommandToFrom,
+  hasLimitBeforeAggregate,
+  missingSortBeforeLimit,
 } from './query_parsing_helpers';
 import type { monaco } from '@kbn/monaco';
 import type { ESQLColumn } from '@kbn/esql-ast';
@@ -1092,6 +1094,42 @@ describe('esql query helpers', () => {
           'FROM "cluster1:index1,cluster1:index2", "cluster2:index3", cluster3:index3, index4'
         )
       ).toEqual(['cluster3', 'cluster1', 'cluster2']);
+    });
+  });
+
+  describe('hasLimitBeforeAggregate', () => {
+    it('should return false if the query is empty', () => {
+      expect(hasLimitBeforeAggregate('')).toBe(false);
+    });
+    it('should return false if there is no limit', () => {
+      expect(hasLimitBeforeAggregate('FROM index | STATS COUNT() BY field')).toBe(false);
+    });
+    it("should return false if it's just a limit without aggregate", () => {
+      expect(hasLimitBeforeAggregate('FROM index | LIMIT 10')).toBe(false);
+    });
+    it('should return false if limit is after aggregate', () => {
+      expect(hasLimitBeforeAggregate('FROM index | STATS COUNT() BY field | LIMIT 10')).toBe(false);
+    });
+    it('should return true if limit is before aggregate', () => {
+      expect(hasLimitBeforeAggregate('FROM index | LIMIT 10 | STATS COUNT() BY field')).toBe(true);
+    });
+  });
+
+  describe('missingSortBeforeLimit', () => {
+    it('should return false if the query is empty', () => {
+      expect(missingSortBeforeLimit('')).toBe(false);
+    });
+    it('should return false if there is no limit', () => {
+      expect(missingSortBeforeLimit('FROM index | STATS COUNT() BY field')).toBe(false);
+    });
+    it("should return false if it's just a limit without sort", () => {
+      expect(missingSortBeforeLimit('FROM index | LIMIT 10')).toBe(false);
+    });
+    it('should return false if sort is before limit', () => {
+      expect(missingSortBeforeLimit('FROM index | SORT field | LIMIT 10')).toBe(false);
+    });
+    it('should return true if limit is before sort', () => {
+      expect(missingSortBeforeLimit('FROM index | LIMIT 10 | SORT field')).toBe(true);
     });
   });
 });

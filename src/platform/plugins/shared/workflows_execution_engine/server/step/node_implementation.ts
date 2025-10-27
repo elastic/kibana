@@ -13,7 +13,6 @@
 // Import specific step types as needed from schema
 // import { evaluate } from '@marcbachmann/cel-js'
 import type { ConnectorExecutor } from '../connector_executor';
-import { WorkflowTemplatingEngine } from '../templating_engine';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 
@@ -53,7 +52,6 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
 {
   protected step: TStep;
   protected stepExecutionRuntime: StepExecutionRuntime;
-  protected templatingEngine: WorkflowTemplatingEngine;
   protected connectorExecutor: ConnectorExecutor;
   protected workflowExecutionRuntime: WorkflowExecutionRuntimeManager;
 
@@ -65,7 +63,6 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
   ) {
     this.step = step;
     this.stepExecutionRuntime = stepExecutionRuntime;
-    this.templatingEngine = new WorkflowTemplatingEngine();
     this.connectorExecutor = connectorExecutor as any;
     this.workflowExecutionRuntime = workflowExecutionRuntime;
   }
