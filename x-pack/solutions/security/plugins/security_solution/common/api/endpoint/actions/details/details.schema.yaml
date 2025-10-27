@@ -443,13 +443,15 @@ components:
       allOf:
         - $ref: '../../model/schema/common.schema.yaml#/components/schemas/ResponseActionDetails'
         - type: object
-          required: parameters
+          required:
+            - parameters
           properties:
             parameters:
               oneOf:
                 - type: object
                   title: Kernel memory dump
-                  required: type
+                  required:
+                    - type
                   properties:
                     type:
                       description: Kernel level memory dump
