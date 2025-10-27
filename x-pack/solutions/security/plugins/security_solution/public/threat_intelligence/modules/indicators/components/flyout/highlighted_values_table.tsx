@@ -15,7 +15,7 @@ import { IndicatorFieldsTable } from './fields_table';
 /**
  * Pick indicator fields starting with the indicator type
  */
-const byIndicatorType = (indicatorType: string) => (field: string) =>
+const byIndicatorType = (indicatorType: string, field: string) =>
   field.startsWith(`threat.indicator.${indicatorType}`) ||
   [
     'threat.indicator.reference',
@@ -40,12 +40,17 @@ export const HighlightedValuesTable: FC<HighlightedValuesTableProps> = ({
 }) => {
   const indicatorType = unwrapValue(indicator, RawIndicatorFieldId.Type);
 
-  const highlightedFields: string[] = useMemo(
+  const sanitisedIndicatorType = useMemo(
+    () => (!Array.isArray(indicatorType) && indicatorType) || '',
+    [indicatorType]
+  );
+
+  const highlightedFields = useMemo(
     () =>
-      Object.keys(indicator.fields).filter(
-        byIndicatorType((!Array.isArray(indicatorType) && indicatorType) || '')
+      Object.keys(indicator.fields).filter((field) =>
+        byIndicatorType(sanitisedIndicatorType, field)
       ),
-    [indicator.fields, indicatorType]
+    [sanitisedIndicatorType]
   );
 
   return (
