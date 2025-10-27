@@ -8,6 +8,45 @@
  */
 
 import dedent from 'dedent';
+import semver from 'semver';
+import { kibanaPackageJson, REPO_ROOT } from '@kbn/repo-info';
+import Fs from 'fs';
+import Path from 'path';
+
+interface VersionEntry {
+  version: string;
+  branch: string;
+  branchType: 'development' | 'release' | 'unmaintained';
+}
+
+function getLatestAgentReleaseTag(): string {
+  const currentVersion = kibanaPackageJson.version;
+
+  try {
+    const versionsFilePath = Path.join(REPO_ROOT, 'versions.json');
+    const versionsContent = Fs.readFileSync(versionsFilePath, 'utf-8');
+    const versionsData: { versions: VersionEntry[] } = JSON.parse(versionsContent);
+
+    const releaseVersions = versionsData.versions
+      .filter((v) => v.branchType === 'release')
+      .map((v) => v.version);
+
+    const { major: currentMajor, minor: currentMinor } = semver.parse(currentVersion, {}, true);
+
+    const matchingMinor = releaseVersions.find((version) => {
+      const { major, minor } = semver.parse(version, {}, true);
+      return major === currentMajor && minor === currentMinor;
+    });
+
+    if (matchingMinor) {
+      return matchingMinor;
+    }
+
+    return releaseVersions[0];
+  } catch (error) {
+    return currentVersion;
+  }
+}
 
 /**
  * Generates a Docker Compose configuration for running the EDOT Collector (Elastic Distribution of OpenTelemetry Collector) in Gateway mode.
@@ -16,11 +55,12 @@ import dedent from 'dedent';
  * @returns Docker Compose YAML configuration string
  */
 export function getDockerComposeYaml({ collectorConfigPath }: { collectorConfigPath: string }) {
+  const agentVersion = getLatestAgentReleaseTag();
   return dedent(`
     services:
       otel-collector:
-        image: docker.elastic.co/elastic-agent/elastic-otel-collector:9.0.0
-        container_name: kibana-dev-edot-collector
+        image: docker.elastic.co/elastic-agent/elastic-otel-collector:${agentVersion}
+        container_name: kibana-edot-collector
         restart: unless-stopped
         command: ["--config", "/etc/otelcol-config.yml"]
         volumes:
