@@ -10,6 +10,7 @@
     "id": "workflowsExecutionEngine",
     "browser": false,
     "server": true,
-    "requiredPlugins": ["taskManager", "actions"]
+    "requiredPlugins": ["taskManager", "actions"],
+    "optionalPlugins": ["cloud", "encryptedSavedObjects"]
   }
 }

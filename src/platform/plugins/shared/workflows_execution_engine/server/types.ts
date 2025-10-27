@@ -14,6 +14,10 @@ import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/act
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import type { KibanaRequest } from '@kbn/core/server';
 import type {
+  EncryptedSavedObjectsPluginSetup,
+  EncryptedSavedObjectsPluginStart,
+} from '@kbn/encrypted-saved-objects-plugin/server';
+import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
@@ -47,11 +51,13 @@ export interface WorkflowsExecutionEnginePluginStart {
 
 export interface WorkflowsExecutionEnginePluginSetupDeps {
   taskManager: TaskManagerSetupContract;
-  cloud: CloudSetup;
+  cloud?: CloudSetup;
+  encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
 }
 
 export interface WorkflowsExecutionEnginePluginStartDeps {
   taskManager: TaskManagerStartContract;
   actions: ActionsPluginStartContract;
-  cloud: CloudStart;
+  cloud?: CloudStart;
+  encryptedSavedObjects?: EncryptedSavedObjectsPluginStart;
 }

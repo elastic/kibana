@@ -9,7 +9,7 @@
     "browser": true,
     "server": true,
     "configPath": ["xpack", "workplaceAIConnectors"],
-    "requiredPlugins": [],
+    "requiredPlugins": ["encryptedSavedObjects", "workflowsManagement", "onechat"],
     "optionalPlugins": [],
     "requiredBundles": ["kibanaReact"],
   }

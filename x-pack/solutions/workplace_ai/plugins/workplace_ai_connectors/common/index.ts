@@ -6,3 +6,12 @@
  */
 
 export { WORKPLACE_AI_CONNECTORS_ROUTE } from './routes';
+export type {
+  WorkplaceConnectorAttributes,
+  WorkplaceConnector,
+  WorkplaceConnectorResponse,
+  CreateWorkplaceConnectorRequest,
+  UpdateWorkplaceConnectorRequest,
+  WorkplaceConnectorType,
+} from './types';
+export { WORKPLACE_CONNECTOR_TYPES } from './types';

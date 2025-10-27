@@ -89,9 +89,62 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
   private async executeHttpRequest(input?: any): Promise<RunStepResult> {
     const { url, method, headers, body, fetcher: fetcherOptions } = input;
 
+    // Resolve workplace connector secret references if available
+    const dependencies = this.stepExecutionRuntime.contextManager.getDependencies();
+    const coreStart = this.stepExecutionRuntime.contextManager.getCoreStart();
+    const fakeRequest = this.stepExecutionRuntime.contextManager.getFakeRequest();
+
+    let finalUrl: string = url;
+    let finalHeaders: HttpHeaders | undefined = headers;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let finalBody: any = body;
+
+    if (dependencies?.secretResolver && coreStart && fakeRequest) {
+      const savedObjectsClient = coreStart.savedObjects.getScopedClient(fakeRequest);
+      const context = this.stepExecutionRuntime.contextManager.getContext?.();
+      const namespace =
+        (context as any)?.workflow?.spaceId ||
+        (savedObjectsClient as any).getCurrentNamespace?.() ||
+        ((fakeRequest as any).headers?.['x-elastic-project-id'] as string | undefined);
+
+      // Resolve URL secrets
+      if (typeof finalUrl === 'string') {
+        finalUrl = await dependencies.secretResolver.resolveSecrets(
+          finalUrl,
+          savedObjectsClient,
+          namespace
+        );
+      }
+
+      // Resolve headers secrets
+      if (finalHeaders && typeof finalHeaders === 'object') {
+        const resolvedHeaders = await dependencies.secretResolver.resolveSecretsInObject(
+          finalHeaders as unknown as Record<string, unknown>,
+          savedObjectsClient,
+          namespace
+        );
+        finalHeaders = resolvedHeaders as unknown as HttpHeaders;
+      }
+
+      // Resolve body secrets
+      if (typeof finalBody === 'string') {
+        finalBody = await dependencies.secretResolver.resolveSecrets(
+          finalBody,
+          savedObjectsClient,
+          namespace
+        );
+      } else if (finalBody && typeof finalBody === 'object') {
+        finalBody = await dependencies.secretResolver.resolveSecretsInObject(
+          finalBody as Record<string, unknown>,
+          savedObjectsClient,
+          namespace
+        );
+      }
+    }
+
     // Validate that the URL is allowed based on the allowedHosts configuration
     try {
-      this.urlValidator.ensureUrlAllowed(url);
+      this.urlValidator.ensureUrlAllowed(finalUrl);
     } catch (error) {
       this.workflowLogger.logError(
         `HTTP request blocked: ${error.message}`,
@@ -105,6 +158,7 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
       throw error;
     }
 
+    // Log without exposing resolved secrets; use original URL with placeholders
     this.workflowLogger.logInfo(`Making HTTP ${method} request to ${url}`, {
       workflow: { step_id: this.step.name },
       event: { action: 'http_request', outcome: 'unknown' },
@@ -112,14 +166,14 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
     });
 
     const config: AxiosRequestConfig = {
-      url,
+      url: finalUrl,
       method,
-      headers,
+      headers: finalHeaders,
       signal: this.stepExecutionRuntime.abortController.signal,
     };
 
-    if (body && ['POST', 'PUT', 'PATCH'].includes(method)) {
-      config.data = body;
+    if (finalBody && ['POST', 'PUT', 'PATCH'].includes(method)) {
+      config.data = finalBody;
     }
 
     // Apply fetcher options if provided
