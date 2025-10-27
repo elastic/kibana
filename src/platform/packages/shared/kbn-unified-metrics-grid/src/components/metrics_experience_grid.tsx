@@ -243,6 +243,8 @@ export const MetricsExperienceGrid = ({
         <EuiFlexItem grow={false}>
           <Pagination
             totalPages={totalPages}
+            loaded={currentPageFields.length}
+            total={fields.length}
             currentPage={currentPage}
             onPageChange={onPageChange}
           />
