@@ -23,6 +23,7 @@ interface StreamFeaturesApi {
   ) => Promise<IdentifiedFeaturesEvent>;
   addFeaturesToStream: (features: Feature[]) => Promise<StorageClientBulkResponse>;
   removeFeaturesFromStream: (featureNames: string[]) => Promise<StorageClientBulkResponse>;
+  abort: () => void;
 }
 
 export function useStreamFeaturesApi(definition: Streams.all.Definition): StreamFeaturesApi {
@@ -34,7 +35,7 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
     },
   } = useKibana();
 
-  const { signal } = useAbortController();
+  const { signal, abort, refresh } = useAbortController();
 
   return {
     identifyFeatures: async (connectorId: string, to: string, from: string) => {
@@ -100,6 +101,10 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
           body: request,
         },
       });
+    },
+    abort: () => {
+      abort();
+      refresh();
     },
   };
 }

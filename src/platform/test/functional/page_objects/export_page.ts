@@ -64,16 +64,17 @@ export class ExportPageObject extends FtrService {
   }
 
   async closeExportFlyout() {
-    await this.retry.waitFor('close export flyout', async () => {
-      const isExportFlyoutOpen = await this.isExportFlyoutOpen();
+    const isExportFlyoutOpen = await this.isExportFlyoutOpen();
 
-      if (!isExportFlyoutOpen) {
-        return true; // It was already closed
-      } else {
-        await this.testSubjects.click('exportFlyoutCloseButton');
-        // Wait for the flyout to actually close
-        return !(await this.isExportFlyoutOpen());
-      }
+    if (!isExportFlyoutOpen) {
+      return; // It was already closed
+    }
+
+    await this.testSubjects.click('exportFlyoutCloseButton');
+
+    await this.retry.waitFor('close export flyout', async () => {
+      // Wait for the flyout to actually close
+      return !(await this.isExportFlyoutOpen());
     });
   }
 

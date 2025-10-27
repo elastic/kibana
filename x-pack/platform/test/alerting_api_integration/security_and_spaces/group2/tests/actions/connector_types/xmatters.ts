@@ -72,6 +72,7 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
           configUrl: null,
           usesBasic: false,
         },
+        is_connector_type_deprecated: false,
       });
 
       expect(typeof createdAction.id).to.be('string');
@@ -107,6 +108,7 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
           configUrl: xmattersSimulatorURL,
           usesBasic: true,
         },
+        is_connector_type_deprecated: false,
       });
 
       expect(typeof createdAction.id).to.be('string');

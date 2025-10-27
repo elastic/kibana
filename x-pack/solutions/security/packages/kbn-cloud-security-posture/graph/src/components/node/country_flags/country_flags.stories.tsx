@@ -8,7 +8,11 @@
 import React from 'react';
 import type { Meta, StoryFn, StoryObj } from '@storybook/react';
 import { ThemeProvider } from '@emotion/react';
-import { CountryFlags as CountryFlagsComponent, type CountryFlagsProps } from './country_flags';
+import {
+  CountryFlags as CountryFlagsComponent,
+  useCountryFlagsPopover,
+  type CountryFlagsProps,
+} from './country_flags';
 import { GlobalStylesStorybookDecorator } from '../../../../.storybook/decorators';
 
 import '@xyflow/react/dist/style.css';
@@ -41,12 +45,57 @@ const meta: Meta<CountryFlagsProps> = {
 
 export default meta;
 
-const Template: StoryFn<CountryFlagsProps> = (props: CountryFlagsProps) => (
+const CountryFlagsWithPopoverComponent: React.FC<CountryFlagsProps> = (props) => {
+  const countryFlagsPopover = useCountryFlagsPopover(props.countryCodes);
+
+  return (
+    <>
+      <CountryFlagsComponent {...props} onCountryClick={countryFlagsPopover.onCountryClick} />
+      <countryFlagsPopover.PopoverComponent />
+    </>
+  );
+};
+
+const SimpleTemplate: StoryFn<CountryFlagsProps> = (props: CountryFlagsProps) => (
   <ThemeProvider theme={{ darkMode: false }}>
     <CountryFlagsComponent {...props} />
   </ThemeProvider>
 );
 
+const PopoverTemplate: StoryFn<CountryFlagsProps> = (props: CountryFlagsProps) => (
+  <ThemeProvider theme={{ darkMode: false }}>
+    <CountryFlagsWithPopoverComponent {...props} />
+  </ThemeProvider>
+);
+
 export const CountryFlags: StoryObj<CountryFlagsProps> = {
-  render: Template,
+  render: SimpleTemplate,
+};
+
+export const CountryFlagsWithPopover: StoryObj<CountryFlagsProps> = {
+  render: PopoverTemplate,
+  args: {
+    countryCodes: [
+      'US',
+      'INVALID_CODE',
+      '',
+      null as unknown as string,
+      'RU',
+      'ES',
+      'US',
+      'US',
+      'IL',
+      'IT',
+      'DE',
+      'FR',
+      'GR',
+      'BR',
+      'AR',
+      'PT',
+      'NO',
+      'CA',
+      'AU',
+      'JP',
+    ],
+  },
 };

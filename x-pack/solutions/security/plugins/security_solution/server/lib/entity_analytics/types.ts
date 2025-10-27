@@ -16,7 +16,7 @@ import type {
 } from '../../../common/api/entity_analytics/common';
 import type { Range } from '../../../common/entity_analytics/risk_engine';
 import type { ConfigType } from '../../config';
-import type { StartPlugins } from '../../plugin';
+import type { SetupPlugins, StartPlugins } from '../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../types';
 export type EntityAnalyticsConfig = ConfigType['entityAnalytics'];
 export interface EntityAnalyticsRoutesDeps {
@@ -24,6 +24,7 @@ export interface EntityAnalyticsRoutesDeps {
   logger: Logger;
   config: ConfigType;
   getStartServices: StartServicesAccessor<StartPlugins>;
+  ml: SetupPlugins['ml'];
 }
 
 export interface CalculateRiskScoreAggregations {

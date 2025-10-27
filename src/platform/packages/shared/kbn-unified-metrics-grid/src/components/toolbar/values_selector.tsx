@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
 import { FIELD_VALUE_SEPARATOR } from '../../common/constants';
 import { useDimensionsQuery } from '../../hooks';
 import { ClearAllSection } from './clear_all_section';
@@ -178,11 +179,7 @@ export const ValuesSelector = ({
       data-selected-value={selectedDimensions}
       searchable
       buttonLabel={buttonLabel}
-      optionMatcher={({ option, normalizedSearchValue }) => {
-        return 'name' in option
-          ? String(option.name ?? '').includes(normalizedSearchValue)
-          : option.label.includes(normalizedSearchValue);
-      }}
+      optionMatcher={comboBoxFieldOptionMatcher}
       options={options}
       singleSelection={false}
       hasArrow={!isLoading}

@@ -8153,7 +8153,7 @@ paths:
           name: product_name
   /api/attack_discovery/_bulk:
     post:
-      description: Performs bulk updates on multiple Attack discovery alerts, including workflow status changes and visibility settings. This endpoint allows efficient batch processing of alert modifications without requiring individual API calls for each alert. `Technical preview`
+      description: Performs bulk updates on multiple Attack discoveries, including workflow status changes and visibility settings. This endpoint allows efficient batch processing of alert modifications without requiring individual API calls for each alert. `Technical preview`
       operationId: PostAttackDiscoveryBulk
       requestBody:
         content:
@@ -8202,7 +8202,7 @@ paths:
                     - ids
               required:
                 - update
-        description: Bulk update parameters for Attack discovery alerts
+        description: Bulk update parameters for Attack discoveries
         required: true
       responses:
         '200':
@@ -8242,7 +8242,7 @@ paths:
                   - error
                   - message
           description: Generic Error
-      summary: Bulk update Attack discovery alerts
+      summary: Bulk update Attack discoveries
       tags:
         - Security Attack discovery API
       x-code-samples:
@@ -8262,12 +8262,13 @@ paths:
                  "kibana_alert_workflow_status": "acknowledged"
                }
              }'
+      x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/attack_discovery/_find:
     get:
-      description: Finds Attack discoveries that match the search criteria. Supports free text search, filtering, pagination, and sorting. `Technical preview`
+      description: Find Attack discoveries that match the search criteria. Supports free text search, filtering, pagination, and sorting. `Technical preview`
       operationId: AttackDiscoveryFind
       parameters:
         - description: Filter results to Attack discoveries that include any of the provided alert IDs
@@ -8454,7 +8455,7 @@ paths:
                     example: 400
                     type: number
           description: Generic Error
-      summary: Finds Attack discoveries that match the search criteria
+      summary: Find Attack discoveries that match the search criteria
       tags:
         - Security Attack discovery API
       x-code-samples:
@@ -8465,6 +8466,7 @@ paths:
              --request GET 'http://localhost:5601/api/attack_discovery/_find?end=now&include_unique_alert_ids=false&page=1&per_page=10&search=&sort_field=%40timestamp&sort_order=desc&start=now-24h&status=open&status=acknowledged' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
+      x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -8526,7 +8528,6 @@ paths:
              --request POST 'http://localhost:5601/api/attack_discovery/_generate' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json" \
-             --header "elastic-api-version: 2023-10-31" \
              --data '{
                 "alertsIndexPattern": ".alerts-security.alerts-default",
                 "anonymizationFields": [
@@ -9460,12 +9461,13 @@ paths:
                 "end": "now",
                 "start": "now-24h"
               }'
+      x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/attack_discovery/generations:
     get:
-      description: Get the latest attack discovery generations (that are not dismissed) for the current user. This endpoint retrieves generation metadata including execution status and statistics for Attack discovery generations. `Technical preview`
+      description: Get the latest attack discovery generations metadata (that are not dismissed) for the current user. This endpoint retrieves generation metadata including execution status and statistics for Attack discovery generations. `Technical preview`
       operationId: GetAttackDiscoveryGenerations
       parameters:
         - description: End of the time range for filtering generations. Accepts absolute timestamps (ISO 8601) or relative date math (e.g. "now", "now-24h").
@@ -9479,8 +9481,9 @@ paths:
           example: 50
           in: query
           name: size
-          required: true
+          required: false
           schema:
+            default: 50
             minimum: 1
             type: number
         - description: Start of the time range for filtering generations. Accepts absolute timestamps (ISO 8601) or relative date math (e.g. "now-7d").
@@ -9524,7 +9527,7 @@ paths:
                     example: 400
                     type: number
           description: Bad request
-      summary: Get the latest attack discovery generations (that are not dismissed) for the current user
+      summary: Get the latest attack discovery generations metadata for the current user
       tags:
         - Security Attack discovery API
       x-code-samples:
@@ -9535,6 +9538,7 @@ paths:
              --request GET 'http://localhost:5601/api/attack_discovery/generations?size=50&start=now-24h&end=now' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
+      x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -9618,6 +9622,7 @@ paths:
              --request GET 'http://localhost:5601/api/attack_discovery/generations/2e13f386-46cf-4d65-9e2b-68609e132ba5' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
+      x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -9736,6 +9741,7 @@ paths:
              --request POST 'http://localhost:5601/api/attack_discovery/generations/46b218d5-535d-4329-be56-d0f6af6986b7/_dismiss' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
+      x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -9751,7 +9757,7 @@ paths:
               enabled: true
               name: Daily Security Analysis
               params:
-                alerts_index_pattern: .alerts-security.alerts-*
+                alerts_index_pattern: .alerts-security.alerts-default
                 api_config:
                   actionTypeId: bedrock
                   connectorId: my-bedrock-connector
@@ -9777,7 +9783,7 @@ paths:
                 id: 12345678-1234-1234-1234-123456789012
                 name: Daily Security Analysis
                 params:
-                  alerts_index_pattern: .alerts-security.alerts-*
+                  alerts_index_pattern: .alerts-security.alerts-default
                   api_config:
                     actionTypeId: bedrock
                     connectorId: my-bedrock-connector
@@ -9817,7 +9823,7 @@ paths:
                "name": "Daily Security Analysis",
                "enabled": true,
                "params": {
-                 "alerts_index_pattern": ".alerts-security.alerts-*",
+                 "alerts_index_pattern": ".alerts-security.alerts-default",
                  "api_config": {
                    "actionTypeId": "bedrock",
                    "connectorId": "my-bedrock-connector",
@@ -9830,8 +9836,24 @@ paths:
                "schedule": {
                  "interval": "24h"
                },
-               "actions": []
+               "actions": [
+                  {
+                     "action_type_id": ".cases",
+                     "id": "system-connector-.cases",
+                     "params": {
+                       "subAction": "run",
+                       "subActionParams": {
+                         "timeWindow": "7d",
+                         "reopenClosedCases": false,
+                         "groupingBy": [],
+                         "templateId": null
+                       }
+                     },
+                     "uuid": "12345678-1234-1234-1234-123456789012"
+                   }
+               ]
              }'
+      x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -9925,9 +9947,10 @@ paths:
           lang: curl
           source: |
             curl \
-             --request GET 'http://localhost:5601/api/attack_discovery/schedules/_find?page=1&per_page=10&sort_field=name&sort_direction=asc' \
+             --request GET 'http://localhost:5601/api/attack_discovery/schedules/_find' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
+      x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -9979,6 +10002,7 @@ paths:
              --request DELETE 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
+      x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -10009,7 +10033,7 @@ paths:
                   status: ok
                 name: Daily Security Analysis
                 params:
-                  alerts_index_pattern: .alerts-security.alerts-*
+                  alerts_index_pattern: .alerts-security.alerts-default
                   api_config:
                     actionTypeId: bedrock
                     connectorId: my-bedrock-connector
@@ -10045,6 +10069,7 @@ paths:
              --request GET 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
+      x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -10066,7 +10091,7 @@ paths:
               actions: []
               name: Updated Daily Security Analysis
               params:
-                alerts_index_pattern: .alerts-security.alerts-*
+                alerts_index_pattern: .alerts-security.alerts-default
                 api_config:
                   actionTypeId: bedrock
                   connectorId: my-bedrock-connector
@@ -10092,7 +10117,7 @@ paths:
                 id: 12345678-1234-1234-1234-123456789012
                 name: Updated Daily Security Analysis
                 params:
-                  alerts_index_pattern: .alerts-security.alerts-*
+                  alerts_index_pattern: .alerts-security.alerts-default
                   api_config:
                     actionTypeId: bedrock
                     connectorId: my-bedrock-connector
@@ -10131,7 +10156,7 @@ paths:
              --data '{
                "name": "Updated Daily Security Analysis",
                "params": {
-                 "alerts_index_pattern": ".alerts-security.alerts-*",
+                 "alerts_index_pattern": ".alerts-security.alerts-default",
                  "api_config": {
                    "actionTypeId": "bedrock",
                    "connectorId": "my-bedrock-connector",
@@ -10146,11 +10171,12 @@ paths:
                },
                "actions": []
              }'
+      x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/attack_discovery/schedules/{id}/_disable:
-    put:
+    post:
       description: Disables an Attack discovery schedule, preventing it from running according to its configured interval. The schedule configuration is preserved and can be re-enabled later. Any currently running executions will complete, but no new executions will be started. `Technical preview`
       operationId: DisableAttackDiscoverySchedules
       parameters:
@@ -10194,14 +10220,15 @@ paths:
           lang: curl
           source: |
             curl \
-             --request PUT 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012/_disable' \
+             --request POST 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012/_disable' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
+      x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/attack_discovery/schedules/{id}/_enable:
-    put:
+    post:
       description: Enables a previously disabled Attack discovery schedule, allowing it to run according to its configured interval. Once enabled, the schedule will begin executing at the next scheduled time based on its interval configuration. `Technical preview`
       operationId: EnableAttackDiscoverySchedules
       parameters:
@@ -10245,9 +10272,10 @@ paths:
           lang: curl
           source: |
             curl \
-             --request PUT 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012/_enable' \
+             --request POST 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012/_enable' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
+      x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -14713,7 +14741,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Security_Endpoint_Management_API_GetEndpointActionResponse'
+                $ref: '#/components/schemas/Security_Endpoint_Management_API_ActionDetailsResponse'
           description: OK
       summary: Get action details
       tags:
@@ -23263,6 +23291,10 @@ paths:
                       properties:
                         agents:
                           type: number
+                        failedUpgradeActionIds:
+                          items:
+                            type: string
+                          type: array
                         failedUpgradeAgents:
                           type: number
                         version:
@@ -24023,7 +24055,7 @@ paths:
           name: product_name
   /api/fleet/agent_policies/{agentPolicyId}/download:
     get:
-      description: 'Download an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read AND fleet-setup.'
+      description: 'Download an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-setup.'
       operationId: get-fleet-agent-policies-agentpolicyid-download
       parameters:
         - in: path
@@ -29678,6 +29710,8 @@ paths:
                               type: array
                             installed_kibana_space_id:
                               type: string
+                            is_rollback_ttl_expired:
+                              type: boolean
                             latest_executed_state:
                               additionalProperties: true
                               type: object
@@ -30911,6 +30945,8 @@ paths:
                             type: array
                           installed_kibana_space_id:
                             type: string
+                          is_rollback_ttl_expired:
+                            type: boolean
                           latest_executed_state:
                             additionalProperties: true
                             type: object
@@ -31573,6 +31609,8 @@ paths:
                             type: array
                           installed_kibana_space_id:
                             type: string
+                          is_rollback_ttl_expired:
+                            type: boolean
                           latest_executed_state:
                             additionalProperties: true
                             type: object
@@ -33537,7 +33575,7 @@ paths:
           name: product_name
   /api/fleet/kubernetes:
     get:
-      description: '[Required authorization] Route required privileges: fleet-agent-policies-read AND fleet-setup.'
+      description: '[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-setup.'
       operationId: get-fleet-kubernetes
       parameters:
         - in: query
@@ -33595,7 +33633,7 @@ paths:
           name: product_name
   /api/fleet/kubernetes/download:
     get:
-      description: '[Required authorization] Route required privileges: fleet-agent-policies-read AND fleet-setup.'
+      description: '[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-setup.'
       operationId: get-fleet-kubernetes-download
       parameters:
         - in: query
@@ -43486,6 +43524,7 @@ paths:
               type: object
               properties:
                 additional_yaml_config:
+                  deprecated: true
                   type: string
                 delete_unenrolled_agents:
                   additionalProperties: false
@@ -43499,10 +43538,13 @@ paths:
                     - enabled
                     - is_preconfigured
                 has_seen_add_data_notice:
+                  deprecated: true
                   type: boolean
                 kibana_ca_sha256:
+                  deprecated: true
                   type: string
                 kibana_urls:
+                  deprecated: true
                   items:
                     format: uri
                     type: string
@@ -52727,6 +52769,8 @@ paths:
                                                                     nullable: true
                                                                   - not: {}
                                                               type: array
+                                                            - items: {}
+                                                              type: array
                                                             - {}
                                                         type: object
                                                       - anyOf:
@@ -56270,6 +56314,8 @@ paths:
                                                                       - 'null'
                                                                     nullable: true
                                                                   - not: {}
+                                                              type: array
+                                                            - items: {}
                                                               type: array
                                                             - {}
                                                         type: object
@@ -59997,6 +60043,8 @@ paths:
                                                     nullable: true
                                                   - not: {}
                                               type: array
+                                            - items: {}
+                                              type: array
                                             - {}
                                         type: object
                                       - anyOf:
@@ -61642,6 +61690,8 @@ paths:
                                                       - 'null'
                                                     nullable: true
                                                   - not: {}
+                                              type: array
+                                            - items: {}
                                               type: array
                                             - {}
                                         type: object
@@ -67479,7 +67529,7 @@ components:
           example: 404
           type: integer
     Data_views_allownoindex:
-      description: Allows the data view saved object to exist before the data is available.
+      description: Allows the data view saved object to exist before the data is available. Defaults to `false`.
       type: boolean
     Data_views_create_data_view_request_object:
       title: Create data view request
@@ -68440,6 +68490,35 @@ components:
       required:
         - id
         - type
+    Security_AI_Assistant_API_BaseInterruptResumeValue:
+      description: The basis of an interrupt resume value
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_InterruptType'
+          description: Type of the resume value
+          example: SELECT_OPTION
+      required:
+        - type
+    Security_AI_Assistant_API_BaseInterruptValue:
+      description: The basis of an agent interrupt
+      type: object
+      properties:
+        expired:
+          description: Whether the interrupt has expired and can no longer be resumed.
+          example: false
+          type: boolean
+        threadId:
+          description: Thread ID of the graph execution that produced this message.
+          example: <UUID>
+          type: string
+        type:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_InterruptType'
+          description: Type of the interrupt
+          example: SELECT_OPTION
+      required:
+        - type
+        - threadId
     Security_AI_Assistant_API_BulkCrudActionSummary:
       type: object
       properties:
@@ -69059,6 +69138,65 @@ components:
           - fieldType
           - description
       type: array
+    Security_AI_Assistant_API_InputTextInterruptResumeValue:
+      allOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_BaseInterruptResumeValue'
+        - type: object
+          properties:
+            type:
+              enum:
+                - INPUT_TEXT
+              example: INPUT_TEXT
+              type: string
+            value:
+              description: Text value used to resume the graph execution with.
+              example: .logs*
+              type: string
+          required:
+            - value
+            - type
+      description: A resume value for input text
+    Security_AI_Assistant_API_InputTextInterruptValue:
+      allOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_BaseInterruptValue'
+        - type: object
+          properties:
+            description:
+              description: Description of action required
+              example: What is the index you would like to use for the query.
+              type: string
+            placeholder:
+              description: Placeholder text for the input field
+              example: Enter index pattern here...
+              type: string
+            type:
+              enum:
+                - INPUT_TEXT
+              example: INPUT_TEXT
+              type: string
+          required:
+            - type
+      description: Interrupt that requests user to provide text input
+    Security_AI_Assistant_API_InterruptResumeValue:
+      description: Union of the interrupt resume values
+      oneOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_SelectOptionInterruptResumeValue'
+          additionalProperties: false
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_InputTextInterruptResumeValue'
+          additionalProperties: false
+    Security_AI_Assistant_API_InterruptType:
+      description: The type of interrupt
+      enum:
+        - SELECT_OPTION
+        - INPUT_TEXT
+      type: string
+    Security_AI_Assistant_API_InterruptValue:
+      description: Union of the interrupt values
+      oneOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_SelectOptionInterruptValue'
+          additionalProperties: false
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_InputTextInterruptValue'
+          additionalProperties: false
     Security_AI_Assistant_API_KnowledgeBaseEntryBulkActionSkipReason:
       description: Reason why a Knowledge Base Entry was skipped during the bulk action.
       enum:
@@ -69338,6 +69476,12 @@ components:
         contentReferences:
           $ref: '#/components/schemas/Security_AI_Assistant_API_ContentReferences'
           description: Data referred to by the message content.
+        interruptResumeValue:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_InterruptResumeValue'
+          description: When the agent is resumed after an interrupt, this field is populated with the details of the resume value.
+        interruptValue:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_InterruptValue'
+          description: When the agent is interrupted (for example, when user input is required), this field is populated with the details of the interrupt. Messages containing interruptValues in the metadata are excluded from the LLM context.
     Security_AI_Assistant_API_MessageRole:
       description: Message role.
       enum:
@@ -69762,6 +69906,77 @@ components:
           required:
             - type
       description: References the security alerts page
+    Security_AI_Assistant_API_SelectOptionInterruptOption:
+      description: A request approval option
+      type: object
+      properties:
+        buttonColor:
+          enum:
+            - text
+            - accent
+            - accentSecondary
+            - primary
+            - success
+            - warning
+            - danger
+            - neutral
+            - risk
+          example: danger
+          type: string
+        label:
+          example: Option 1
+          type: string
+        value:
+          example: option_1
+          type: string
+      required:
+        - label
+        - value
+    Security_AI_Assistant_API_SelectOptionInterruptResumeValue:
+      allOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_BaseInterruptResumeValue'
+        - type: object
+          properties:
+            type:
+              enum:
+                - SELECT_OPTION
+              example: SELECT_OPTION
+              type: string
+            value:
+              description: The value of the selected option to resume the graph execution with
+              example: option_1
+              type: string
+          required:
+            - value
+            - type
+      description: A request approval resume schema
+    Security_AI_Assistant_API_SelectOptionInterruptValue:
+      allOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_BaseInterruptValue'
+        - type: object
+          properties:
+            description:
+              description: Description of action required
+              example: Select one of the options
+              type: string
+            options:
+              description: List of actions to choose from
+              example:
+                - label: Option 1
+                - label: Option 2
+              items:
+                $ref: '#/components/schemas/Security_AI_Assistant_API_SelectOptionInterruptOption'
+              type: array
+            type:
+              enum:
+                - SELECT_OPTION
+              example: SELECT_OPTION
+              type: string
+          required:
+            - type
+            - description
+            - options
+      description: Interrupt that requests user to select one of the provided options
     Security_AI_Assistant_API_SortOrder:
       description: The order in which results are sorted.
       enum:
@@ -70024,27 +70239,9 @@ components:
         - schedule
         - actions
     Security_Attack_discovery_API_AttackDiscoveryApiScheduleAction:
-      type: object
-      properties:
-        action_type_id:
-          description: The action type used for sending notifications.
-          type: string
-        alerts_filter:
-          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionAlertsFilter'
-        frequency:
-          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionFrequency'
-        group:
-          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionGroup'
-        id:
-          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionId'
-        params:
-          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionParams'
-        uuid:
-          $ref: '#/components/schemas/Security_Attack_discovery_API_NonEmptyString'
-      required:
-        - action_type_id
-        - id
-        - params
+      oneOf:
+        - $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleGeneralAction'
+        - $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleSystemAction'
     Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionAlertsFilter:
       additionalProperties: true
       type: object
@@ -70140,6 +70337,29 @@ components:
         - unknown
         - warning
       type: string
+    Security_Attack_discovery_API_AttackDiscoveryApiScheduleGeneralAction:
+      type: object
+      properties:
+        action_type_id:
+          description: The action type used for sending notifications.
+          type: string
+        alerts_filter:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionAlertsFilter'
+        frequency:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionFrequency'
+        group:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionGroup'
+        id:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionId'
+        params:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionParams'
+        uuid:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_NonEmptyString'
+      required:
+        - action_type_id
+        - group
+        - id
+        - params
     Security_Attack_discovery_API_AttackDiscoveryApiScheduleParams:
       description: An attack discovery schedule params
       type: object
@@ -70175,6 +70395,22 @@ components:
         - alerts_index_pattern
         - api_config
         - size
+    Security_Attack_discovery_API_AttackDiscoveryApiScheduleSystemAction:
+      type: object
+      properties:
+        action_type_id:
+          description: The action type used for sending notifications.
+          type: string
+        id:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionId'
+        params:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionParams'
+        uuid:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_NonEmptyString'
+      required:
+        - action_type_id
+        - id
+        - params
     Security_Attack_discovery_API_AttackDiscoveryApiScheduleUpdateProps:
       description: An attack discovery schedule update properties
       type: object
@@ -76840,6 +77076,33 @@ components:
       required:
         - status_code
         - message
+    Security_Endpoint_Management_API_ActionDetailsResponse:
+      discriminator:
+        mapping:
+          cancel: '#/components/schemas/Security_Endpoint_Management_API_Cancel'
+          execute: '#/components/schemas/Security_Endpoint_Management_API_Execute'
+          get-file: '#/components/schemas/Security_Endpoint_Management_API_GetFile'
+          isolate: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
+          kill-process: '#/components/schemas/Security_Endpoint_Management_API_KillProcess'
+          running-processes: '#/components/schemas/Security_Endpoint_Management_API_RunningProcesses'
+          runscript: '#/components/schemas/Security_Endpoint_Management_API_Runscript'
+          scan: '#/components/schemas/Security_Endpoint_Management_API_Scan'
+          suspend-process: '#/components/schemas/Security_Endpoint_Management_API_SuspendProcess'
+          unisolate: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
+          upload: '#/components/schemas/Security_Endpoint_Management_API_Upload'
+        propertyName: command
+      oneOf:
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_KillProcess'
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_GetFile'
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_Execute'
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_Runscript'
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_Upload'
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_Scan'
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_Cancel'
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_Isolate'
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_Unisolate'
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_SuspendProcess'
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_RunningProcesses'
     Security_Endpoint_Management_API_ActionStateSuccessResponse:
       type: object
       properties:
@@ -76902,6 +77165,27 @@ components:
         - microsoft_defender_endpoint
       example: endpoint
       type: string
+    Security_Endpoint_Management_API_Cancel:
+      allOf:
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
+        - type: object
+          properties:
+            outputs:
+              additionalProperties:
+                type: object
+                properties:
+                  content:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+              type: object
+            parameters:
+              type: object
+              properties:
+                id:
+                  format: uuid
+                  type: string
     Security_Endpoint_Management_API_CancelRouteRequestBody:
       allOf:
         - type: object
@@ -76968,7 +77252,7 @@ components:
       required:
         - cloudFile
     Security_Endpoint_Management_API_Command:
-      description: The command to be executed (cannot be an empty string)
+      description: The command for the response action
       enum:
         - isolate
         - unisolate
@@ -76979,6 +77263,8 @@ components:
         - execute
         - upload
         - scan
+        - runscript
+        - cancel
       minLength: 1
       type: string
     Security_Endpoint_Management_API_Commands:
@@ -76993,6 +77279,16 @@ components:
       description: Optional comment
       example: This is a comment
       type: string
+    Security_Endpoint_Management_API_DownloadUri:
+      type: object
+      properties:
+        downloadUri:
+          description: |
+            The server relative URI to download the file associated with the output of the response action.
+            URI does **not** include the space prefix
+          example: /api/endpoint/action/497f6eca-6276/file/35645-6276-4993/download
+          format: uri-reference
+          type: string
     Security_Endpoint_Management_API_EndDate:
       description: An end date in ISO format or Date Math format.
       example: '2023-10-31T23:59:59.999Z'
@@ -77093,6 +77389,48 @@ components:
               revision: 2
       type: object
       properties: {}
+    Security_Endpoint_Management_API_Execute:
+      allOf:
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
+        - type: object
+          properties:
+            outputs:
+              additionalProperties:
+                type: object
+                properties:
+                  content:
+                    allOf:
+                      - $ref: '#/components/schemas/Security_Endpoint_Management_API_DownloadUri'
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                          cwd:
+                            type: string
+                          output_file_id:
+                            type: string
+                          output_file_stderr_truncated:
+                            type: boolean
+                          output_file_stdout_truncated:
+                            type: boolean
+                          shell_code:
+                            type: number
+                          stderr:
+                            type: string
+                          stderr_truncated:
+                            type: boolean
+                          stdout:
+                            type: string
+                          stdout_truncated:
+                            type: boolean
+              type: object
+            parameters:
+              type: object
+              properties:
+                command:
+                  type: string
+                timeout:
+                  type: number
     Security_Endpoint_Management_API_ExecuteRouteRequestBody:
       allOf:
         - type: object
@@ -77233,35 +77571,45 @@ components:
         total: 4
       type: object
       properties: {}
-    Security_Endpoint_Management_API_GetEndpointActionResponse:
-      example:
-        data:
-          agents:
-            - afdc366c-e2e0-4cdb-ae1d-94575bd2d8e0
-          agentType: endpoint
-          command: running-processes
-          completedAt: '2022-08-08T09:50:47.672Z'
-          createdBy: elastic
-          id: b3d6de74-36b0-4fa8-be46-c375bf1771bf
-          isCompleted: true
-          isExpired: false
-          outputs:
-            afdc366c-e2e0-4cdb-ae1d-94575bd2d8e0:
-              content:
-                entries:
-                  - command: /opt/cmd1
-                    entity_id: fk2ym7bl3oiu3okjcik0xosc0i0m75x3eh49nu3uaqt4dqanjt
-                    pid: '822'
-                    user: Dexter
-                  - command: /opt/cmd3/opt/cmd3/opt/cmd3/opt/cmd3
-                    entity_id: pwvz91m48wpj9j7ov9gtw8fp7u2rat4eu5ipte37hnhdcbi2pt
-                    pid: '984'
-                    user: Jada
-              type: json
-          startedAt: '2022-08-08T15:24:57.402Z'
-          wasSuccessful: true
-      type: object
-      properties: {}
+    Security_Endpoint_Management_API_GetFile:
+      allOf:
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
+        - type: object
+          properties:
+            outputs:
+              additionalProperties:
+                type: object
+                properties:
+                  content:
+                    allOf:
+                      - $ref: '#/components/schemas/Security_Endpoint_Management_API_DownloadUri'
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                          contents:
+                            items:
+                              type: object
+                              properties:
+                                file_name:
+                                  type: string
+                                path:
+                                  type: string
+                                sha256:
+                                  type: string
+                                size:
+                                  type: number
+                                type:
+                                  type: string
+                            type: array
+                          zip_size:
+                            type: number
+              type: object
+            parameters:
+              type: object
+              properties:
+                path:
+                  type: string
     Security_Endpoint_Management_API_GetFileRouteRequestBody:
       allOf:
         - type: object
@@ -77430,6 +77778,8 @@ components:
           - unenrolled
         type: string
       type: array
+    Security_Endpoint_Management_API_Isolate:
+      $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
     Security_Endpoint_Management_API_IsolateRouteResponse:
       example:
         action: 233db9ea-6733-4849-9226-5a7039c7161d
@@ -77456,6 +77806,61 @@ components:
           wasSuccessful: true
       type: object
       properties: {}
+    Security_Endpoint_Management_API_KillProcess:
+      allOf:
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
+        - type: object
+          properties:
+            outputs:
+              additionalProperties:
+                type: object
+                properties:
+                  content:
+                    oneOf:
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                          command:
+                            type: string
+                          pid:
+                            type: number
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                          command:
+                            type: string
+                          entity_id:
+                            type: string
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                          command:
+                            type: string
+                          process_name:
+                            type: string
+              type: object
+            parameters:
+              oneOf:
+                - type: object
+                  properties:
+                    pid:
+                      description: The process ID (PID) of the process to terminate.
+                      minimum: 1
+                      type: number
+                - type: object
+                  properties:
+                    entity_id:
+                      description: The entity ID of the process to terminate.
+                      minLength: 1
+                      type: string
+                - type: object
+                  properties:
+                    process_name:
+                      description: The name of the process to terminate. Valid for SentinelOne agent type only.
+                      type: string
     Security_Endpoint_Management_API_KillProcessRouteRequestBody:
       allOf:
         - type: object
@@ -77838,85 +78243,196 @@ components:
       type: object
       properties:
         data:
-          description: The created response action details
+          $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
+    Security_Endpoint_Management_API_ResponseActionDetails:
+      type: object
+      properties:
+        agents:
+          description: The agent IDs for the hosts that the response action was sent to
+          items:
+            format: uuid
+            type: string
+          type: array
+        agentState:
+          additionalProperties:
+            format: uuid
+            type: object
+            properties:
+              completedAt:
+                description: The date and time the response action was completed for the agent ID
+                type: string
+              isCompleted:
+                description: Whether the response action is completed for the agent ID
+                type: boolean
+              wasSuccessful:
+                description: Whether the response action was successful for the agent ID
+                type: boolean
+          description: The state of the response action for each agent ID that it was sent to
           type: object
+        agentType:
+          $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
+        command:
+          $ref: '#/components/schemas/Security_Endpoint_Management_API_Command'
+        completedAt:
+          description: The response action completion time
+          format: date-time
+          type: string
+        createdBy:
+          description: The user who created the response action
+          type: string
+        hosts:
+          additionalProperties:
+            format: uuid
+            type: object
+            properties:
+              name:
+                description: The host name
+                type: string
+          description: An object containing the host names associated with the agent IDs the response action was sent to
+          type: object
+        id:
+          description: The response action ID
+          format: uuid
+          type: string
+        isComplete:
+          description: Whether the response action is complete
+          type: boolean
+        isExpired:
+          description: Whether the response action is expired
+          type: boolean
+        outputs:
+          additionalProperties:
+            description: The agent id
+            format: uuid
+            properties:
+              content:
+                description: The response action output content for the agent ID. Exact format depends on the response action command.
+                oneOf:
+                  - type: object
+                  - type: string
+              type:
+                enum:
+                  - json
+                  - text
+                type: string
+            required:
+              - type
+              - content
+            title: Agent ID
+            type: object
+          description: |
+            The outputs of the response action for each agent ID that it was sent to. Content different depending on the
+            response action command and will only be present for agents that have responded to the response action
+          type: object
+        parameters:
+          description: The parameters of the response action. Content different depending on the response action command
+          type: object
+        startedAt:
+          description: The response action start time
+          format: date-time
+          type: string
+        status:
+          description: The response action status
+          type: string
+        wasSuccessful:
+          description: Whether the response action was successful
+          type: boolean
+      required:
+        - command
+    Security_Endpoint_Management_API_RunningProcesses:
+      allOf:
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
+        - type: object
           properties:
-            agents:
-              description: The agent IDs for the hosts that the response action was sent to
-              type: object
-            agentState:
-              additionalProperties:
-                type: object
-                properties:
-                  completedAt:
-                    description: The date and time the response action was completed for the agent ID
-                    type: string
-                  isCompleted:
-                    description: Whether the response action is completed for the agent ID
-                    type: boolean
-                  wasSuccessful:
-                    description: Whether the response action was successful for the agent ID
-                    type: boolean
-              description: The state of the response action for each agent ID that it was sent to
-              type: object
-            agentType:
-              description: The response action agent type
-              type: string
-            command:
-              description: The response action command
-              type: string
-            createdBy:
-              description: The user who created the response action
-              type: string
-            hosts:
-              additionalProperties:
-                type: object
-                properties:
-                  name:
-                    description: The host name
-                    type: string
-              description: An object containing the host names associated with the agent IDs the response action was sent to
-              type: object
-            id:
-              description: The response action ID
-              type: string
-            isComplete:
-              description: Whether the response action is complete
-              type: boolean
-            isExpired:
-              description: Whether the response action is expired
-              type: boolean
             outputs:
               additionalProperties:
                 type: object
                 properties:
                   content:
-                    description: The response action output content for the agent ID. Exact format depends on the response action command.
                     oneOf:
+                      - $ref: '#/components/schemas/Security_Endpoint_Management_API_RunningProcessesOutputEndpoint'
+                      - $ref: '#/components/schemas/Security_Endpoint_Management_API_RunningProcessesOutputSentinelOne'
+              type: object
+    Security_Endpoint_Management_API_RunningProcessesOutputEndpoint:
+      description: Processes output for `agentType` of `endpoint`
+      type: object
+      properties:
+        code:
+          type: string
+        entries:
+          items:
+            type: object
+            properties:
+              command:
+                type: string
+              entity_id:
+                type: string
+              pid:
+                type: number
+              user:
+                type: string
+          type: array
+    Security_Endpoint_Management_API_RunningProcessesOutputSentinelOne:
+      allOf:
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_DownloadUri'
+        - description: Processes output for `agentType` of `sentinel_one`
+          type: object
+          properties:
+            code:
+              type: string
+    Security_Endpoint_Management_API_Runscript:
+      allOf:
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
+        - type: object
+          properties:
+            outputs:
+              additionalProperties:
+                type: object
+                properties:
+                  content:
+                    allOf:
+                      - $ref: '#/components/schemas/Security_Endpoint_Management_API_DownloadUri'
                       - type: object
-                      - type: string
-                  type:
-                    enum:
-                      - json
-                      - text
-                    type: string
-                required:
-                  - type
-                  - content
-              description: The outputs of the response action for each agent ID that it was sent to
+                        properties:
+                          code:
+                            type: string
+                          stderr:
+                            type: string
+                          stdout:
+                            type: string
               type: object
             parameters:
-              description: The parameters of the response action. Content different depending on the response action command
-              type: object
-            startedAt:
-              description: The response action start time
-              type: string
-            status:
-              description: The response action status
-              type: string
-            wasSuccessful:
-              description: Whether the response action was successful
-              type: boolean
+              oneOf:
+                - $ref: '#/components/schemas/Security_Endpoint_Management_API_RunscriptParamsCrowdStrike'
+                - $ref: '#/components/schemas/Security_Endpoint_Management_API_RunscriptParamsMicrosoft'
+                - $ref: '#/components/schemas/Security_Endpoint_Management_API_RunscriptParamsSentinelOne'
+    Security_Endpoint_Management_API_RunscriptParamsCrowdStrike:
+      type: object
+      properties:
+        cloudFile:
+          type: string
+        commandLine:
+          type: string
+        hostPath:
+          type: string
+        raw:
+          type: string
+        timeout:
+          type: number
+    Security_Endpoint_Management_API_RunscriptParamsMicrosoft:
+      type: object
+      properties:
+        args:
+          type: string
+        scriptName:
+          type: string
+    Security_Endpoint_Management_API_RunscriptParamsSentinelOne:
+      type: object
+      properties:
+        scriptId:
+          type: string
+        scriptInput:
+          type: string
     Security_Endpoint_Management_API_RunScriptRouteRequestBody:
       allOf:
         - type: object
@@ -77964,6 +78480,26 @@ components:
                 - $ref: '#/components/schemas/Security_Endpoint_Management_API_MDERunScriptParameters'
           required:
             - parameters
+    Security_Endpoint_Management_API_Scan:
+      allOf:
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
+        - type: object
+          properties:
+            outputs:
+              additionalProperties:
+                type: object
+                properties:
+                  content:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+              type: object
+            parameters:
+              type: object
+              properties:
+                path:
+                  type: string
     Security_Endpoint_Management_API_ScanRouteRequestBody:
       allOf:
         - type: object
@@ -78093,6 +78629,48 @@ components:
     Security_Endpoint_Management_API_SuccessResponse:
       type: object
       properties: {}
+    Security_Endpoint_Management_API_SuspendProcess:
+      allOf:
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
+        - type: object
+          properties:
+            outputs:
+              additionalProperties:
+                type: object
+                properties:
+                  content:
+                    oneOf:
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                          command:
+                            type: string
+                          pid:
+                            type: number
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                          command:
+                            type: string
+                          entity_id:
+                            type: string
+              type: object
+            parameters:
+              oneOf:
+                - type: object
+                  properties:
+                    pid:
+                      description: The process ID (PID) of the process to terminate.
+                      minimum: 1
+                      type: number
+                - type: object
+                  properties:
+                    entity_id:
+                      description: The entity ID of the process to terminate.
+                      minLength: 1
+                      type: string
     Security_Endpoint_Management_API_SuspendProcessRouteRequestBody:
       allOf:
         - type: object
@@ -78198,6 +78776,8 @@ components:
       maxLength: 2
       minLength: 1
       type: array
+    Security_Endpoint_Management_API_Unisolate:
+      $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
     Security_Endpoint_Management_API_UnisolateRouteResponse:
       example:
         action: 233db9ea-6733-4849-9226-5a7039c7161d
@@ -78224,6 +78804,39 @@ components:
           wasSuccessful: true
       type: object
       properties: {}
+    Security_Endpoint_Management_API_Upload:
+      allOf:
+        - $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
+        - type: object
+          properties:
+            outputs:
+              additionalProperties:
+                type: object
+                properties:
+                  content:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                      disk_free_space:
+                        type: number
+                      path:
+                        type: string
+              type: object
+            parameters:
+              description: |
+                The parameters for upload returned on the details are derived via the API from the file that
+                was uploaded at the time that the response action was submitted
+              type: object
+              properties:
+                file_id:
+                  type: string
+                file_name:
+                  type: string
+                file_sha256:
+                  type: string
+                file_size:
+                  type: number
     Security_Endpoint_Management_API_UploadRouteRequestBody:
       allOf:
         - type: object
@@ -83163,7 +83776,7 @@ components:
           type: string
           description: |
             The generative artificial intelligence model for Amazon Bedrock to use. Current support is for the Anthropic Claude models.
-          default: us.anthropic.claude-3-7-sonnet-20250219-v1:0
+          default: us.anthropic.claude-sonnet-4-5-20250929-v1:0
     crowdstrike_config:
       title: Connector request config properties for a Crowdstrike connector
       required:

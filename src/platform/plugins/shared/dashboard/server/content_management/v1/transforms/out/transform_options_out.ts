@@ -7,34 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { flow } from 'lodash';
-import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../../common/content_management';
-import type { DashboardAttributes } from '../../types';
+import type { DashboardState } from '../../types';
 
-export function transformOptionsOut(optionsJSON: string): DashboardAttributes['options'] {
-  return flow(JSON.parse, transformOptionsSetDefaults, transformOptionsProperties)(optionsJSON);
-}
+const OPTION_KEYS = ['hidePanelTitles', 'useMargins', 'syncColors', 'syncCursor', 'syncTooltips'];
 
-// TODO We may want to remove setting defaults in the future
-function transformOptionsSetDefaults(options: DashboardAttributes['options']) {
-  return {
-    ...DEFAULT_DASHBOARD_OPTIONS,
-    ...options,
-  };
-}
-
-function transformOptionsProperties({
-  hidePanelTitles,
-  useMargins,
-  syncColors,
-  syncCursor,
-  syncTooltips,
-}: DashboardAttributes['options']) {
-  return {
-    hidePanelTitles,
-    useMargins,
-    syncColors,
-    syncCursor,
-    syncTooltips,
-  };
+export function transformOptionsOut(optionsJSON: string): Required<DashboardState>['options'] {
+  const options = JSON.parse(optionsJSON);
+  const knownOptions: { [key: string]: unknown } = {};
+  Object.keys(options).forEach((key) => {
+    if (OPTION_KEYS.includes(key)) knownOptions[key] = options[key];
+  });
+  return knownOptions;
 }
