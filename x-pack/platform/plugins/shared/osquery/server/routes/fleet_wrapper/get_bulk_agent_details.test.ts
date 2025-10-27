@@ -182,7 +182,13 @@ describe('getBulkAgentDetailsRoute', () => {
 
       mockGetByIds.mockResolvedValue(mockAgents);
 
-      const mockRequest = createMockRequest(['agent-1', 'agent-2', 'agent-3', 'agent-4', 'agent-5']);
+      const mockRequest = createMockRequest([
+        'agent-1',
+        'agent-2',
+        'agent-3',
+        'agent-4',
+        'agent-5',
+      ]);
       const mockResponse = createMockResponse();
 
       await routeHandler(mockContext as never, mockRequest as never, mockResponse);
