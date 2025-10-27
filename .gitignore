@@ -86,6 +86,8 @@ selenium
 *.out
 package-lock.json
 !/.buildkite/package-lock.json
+# Buildkite type check cache payload
+/.buildkite/type-check-cache/archive/
 .yo-rc.json
 .vscode
 *.sublime-*

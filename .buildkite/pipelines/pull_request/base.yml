@@ -112,6 +112,12 @@ steps:
       automatic:
         - exit_status: '-1'
           limit: 3
+    plugins:
+      - cache#v1.7.0:
+          path: .buildkite/type-check-cache
+          restore: branch
+          save: branch
+          key-extra: ts-type-check
 
   - wait
 
