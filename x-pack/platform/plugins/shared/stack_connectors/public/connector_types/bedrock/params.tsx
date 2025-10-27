@@ -5,18 +5,35 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import type { MutableRefObject } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   ActionConnectorMode,
   JsonEditorWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { EuiFieldText, EuiFormRow, EuiLink } from '@elastic/eui';
+import {
+  EuiFieldText,
+  EuiFormRow,
+  EuiLink,
+  EuiSwitch,
+  EuiFieldNumber,
+  EuiIcon,
+  EuiTextColor,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { JsonEditorWithMessageVariablesRef } from '@kbn/triggers-actions-ui-plugin/public/application/components/json_editor_with_message_variables';
 import { DEFAULT_BODY } from './constants';
 import * as i18n from './translations';
-import { DEFAULT_BEDROCK_MODEL, SUB_ACTION } from '../../../common/bedrock/constants';
-import type { BedrockActionParams } from './types';
+import {
+  DEFAULT_BEDROCK_MODEL,
+  SUB_ACTION,
+  EXTENDED_THINKING_SUPPORTED_MODELS,
+  DEFAULT_EXTENDED_THINKING_BUDGET_TOKENS,
+  MIN_EXTENDED_THINKING_BUDGET_TOKENS,
+  MAX_EXTENDED_THINKING_BUDGET_TOKENS,
+} from '../../../common/bedrock/constants';
+import type { BedrockActionParams, Config } from './types';
 
 const BedrockParamsFields: React.FunctionComponent<ActionParamsProps<BedrockActionParams>> = ({
   actionParams,
@@ -25,10 +42,19 @@ const BedrockParamsFields: React.FunctionComponent<ActionParamsProps<BedrockActi
   messageVariables,
   executionMode,
   errors,
+  actionConnector,
 }) => {
   const { subAction, subActionParams } = actionParams;
+  const connectorConfig =
+    actionConnector && 'config' in actionConnector ? actionConnector.config : undefined;
 
-  const { body, model } = subActionParams ?? {};
+  const { body, model = connectorConfig?.defaultModel as string } = subActionParams ?? {};
+  const [extendedThinking, setExtendedThinking] = useState<boolean>(
+    (connectorConfig?.extendedThinking as Config['extendedThinking']) || false
+  );
+  const [budgetTokens, setBudgetTokens] = useState(
+    (connectorConfig?.budgetTokens as Config['budgetTokens']) || MIN_EXTENDED_THINKING_BUDGET_TOKENS
+  );
 
   const isTest = useMemo(() => executionMode === ActionConnectorMode.Test, [executionMode]);
 
@@ -43,12 +69,22 @@ const BedrockParamsFields: React.FunctionComponent<ActionParamsProps<BedrockActi
       editAction(
         'subActionParams',
         {
-          body: DEFAULT_BODY,
+          body: JSON.stringify({
+            ...JSON.parse(DEFAULT_BODY),
+            ...(connectorConfig?.extendedThinking
+              ? {
+                  thinking: {
+                    type: 'enabled',
+                    budget_tokens: connectorConfig?.budgetTokens || 1024,
+                  },
+                }
+              : {}),
+          }),
         },
         index
       );
     }
-  }, [editAction, index, subActionParams]);
+  }, [connectorConfig, editAction, index, subActionParams]);
 
   useEffect(() => {
     return () => {
@@ -66,9 +102,52 @@ const BedrockParamsFields: React.FunctionComponent<ActionParamsProps<BedrockActi
     [editAction, index, subActionParams]
   );
 
+  const editorRef = useRef<{ setValue: (newValue: string) => void } | null>();
+
+  // Check if the current model supports extended thinking
+  const isModelSupported = useMemo(() => {
+    const currentModel = model || DEFAULT_BEDROCK_MODEL;
+    return EXTENDED_THINKING_SUPPORTED_MODELS.some((supportedModel) =>
+      currentModel.includes(supportedModel)
+    );
+  }, [model]);
+
+  const handleBodyChange = useCallback(
+    (newValue: Record<string, any>) => {
+      editSubActionParams({
+        body: JSON.stringify(newValue),
+      });
+      editorRef.current?.setValue(JSON.stringify(newValue));
+    },
+    [editSubActionParams]
+  );
+
+  // Handle extended thinking toggle
+  const handleExtendedThinkingChange = useCallback(
+    (checked: boolean) => {
+      if (checked) {
+        // Set default budget tokens when enabling extended thinking
+        handleBodyChange({
+          ...JSON.parse(body || ''),
+          thinking: {
+            type: 'enabled',
+            budget_tokens: budgetTokens,
+          },
+        });
+      } else {
+        // Clear budget tokens when disabling extended thinking
+        const { thinking, ...bodyWithoutThinking } = JSON.parse(body || (DEFAULT_BODY as string));
+        handleBodyChange(bodyWithoutThinking);
+      }
+      setExtendedThinking(checked);
+    },
+    [body, budgetTokens, handleBodyChange]
+  );
+
   return (
     <>
       <JsonEditorWithMessageVariables
+        ref={editorRef as MutableRefObject<JsonEditorWithMessageVariablesRef>}
         messageVariables={messageVariables}
         paramsProperty={'body'}
         inputTargetValue={body}
@@ -90,21 +169,34 @@ const BedrockParamsFields: React.FunctionComponent<ActionParamsProps<BedrockActi
         fullWidth
         label={i18n.MODEL}
         helpText={
-          <FormattedMessage
-            defaultMessage="Optionally overwrite default model per request. Current support is for the Anthropic Claude models. For more information, refer to the {bedrockAPIModelDocs}."
-            id="xpack.stackConnectors.components.bedrock.modelHelpText"
-            values={{
-              bedrockAPIModelDocs: (
-                <EuiLink
-                  data-test-subj="bedrock-api-model-doc"
-                  href="https://aws.amazon.com/bedrock/claude/"
-                  target="_blank"
-                >
-                  {`${i18n.BEDROCK} ${i18n.DOCUMENTATION}`}
-                </EuiLink>
-              ),
-            }}
-          />
+          <>
+            {extendedThinking && !isModelSupported && (
+              <p>
+                <EuiTextColor color="warning">
+                  <EuiIcon type="warningFilled" size="s" />
+                  <FormattedMessage
+                    id="xpack.stackConnectors.components.bedrock.modelDoesNotSupportReasoning"
+                    defaultMessage="Make sure the model supports reasoning"
+                  />
+                </EuiTextColor>
+              </p>
+            )}
+            <FormattedMessage
+              defaultMessage="Optionally overwrite default model per request. Current support is for the Anthropic Claude models. For more information, refer to the {bedrockAPIModelDocs}."
+              id="xpack.stackConnectors.components.bedrock.modelHelpText"
+              values={{
+                bedrockAPIModelDocs: (
+                  <EuiLink
+                    data-test-subj="bedrock-api-model-doc"
+                    href="https://aws.amazon.com/bedrock/claude/"
+                    target="_blank"
+                  >
+                    {`${i18n.BEDROCK} ${i18n.DOCUMENTATION}`}
+                  </EuiLink>
+                ),
+              }}
+            />
+          </>
         }
       >
         <EuiFieldText
@@ -117,6 +209,53 @@ const BedrockParamsFields: React.FunctionComponent<ActionParamsProps<BedrockActi
           fullWidth
         />
       </EuiFormRow>
+      <>
+        <EuiFormRow
+          fullWidth
+          label={i18n.EXTENDED_THINKING_LABEL}
+          helpText={i18n.EXTENDED_THINKING_DESCRIPTION}
+        >
+          <EuiSwitch
+            data-test-subj="bedrock-extended-thinking"
+            label={i18n.EXTENDED_THINKING_LABEL}
+            checked={extendedThinking || false}
+            onChange={(e) => handleExtendedThinkingChange(e.target.checked)}
+          />
+        </EuiFormRow>
+
+        {extendedThinking && (
+          <EuiFormRow
+            fullWidth
+            label={i18n.EXTENDED_THINKING_BUDGET_TOKENS_LABEL}
+            helpText={i18n.EXTENDED_THINKING_BUDGET_TOKENS_DESCRIPTION}
+          >
+            <EuiFieldNumber
+              data-test-subj="bedrock-budget-tokens"
+              placeholder={DEFAULT_EXTENDED_THINKING_BUDGET_TOKENS.toString()}
+              value={budgetTokens || DEFAULT_EXTENDED_THINKING_BUDGET_TOKENS}
+              onChange={(e) => {
+                const value = e.target.value === '' ? undefined : Number(e.target.value);
+                setBudgetTokens(value || MIN_EXTENDED_THINKING_BUDGET_TOKENS);
+                if (extendedThinking) {
+                  const bodyObject = JSON.parse(body || '{}');
+                  editSubActionParams({
+                    body: JSON.stringify({
+                      ...bodyObject,
+                      thinking: {
+                        ...bodyObject.thinking,
+                        budget_tokens: value,
+                      },
+                    }),
+                  });
+                }
+              }}
+              min={MIN_EXTENDED_THINKING_BUDGET_TOKENS}
+              max={MAX_EXTENDED_THINKING_BUDGET_TOKENS}
+              fullWidth
+            />
+          </EuiFormRow>
+        )}
+      </>
     </>
   );
 };

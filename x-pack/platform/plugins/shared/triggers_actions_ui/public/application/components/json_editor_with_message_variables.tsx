@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react';
 import { EuiFormRow, EuiCallOut, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -58,162 +65,175 @@ const { useXJsonMode } = XJson;
 // Multiple editors can use the same ID without any issues.
 const EDITOR_SOURCE = 'json-editor-with-message-variables';
 
-export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
-  buttonTitle,
-  messageVariables,
-  paramsProperty,
-  inputTargetValue,
-  label,
-  errors,
-  ariaLabel,
-  onDocumentsChange,
-  helpText,
-  onBlur,
-  showButtonTitle,
-  dataTestSubj,
-  euiCodeEditorProps = {},
-  isOptionalField = false,
-  readOnly = false,
-}) => {
-  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
-  const editorDisposables = useRef<monaco.IDisposable[]>([]);
-  const [showErrorMessage, setShowErrorMessage] = useState(false);
+export interface JsonEditorWithMessageVariablesRef {
+  setValue: (newValue: string) => void;
+}
 
-  const { convertToJson, setXJson, xJson } = useXJsonMode(inputTargetValue ?? null);
+export const JsonEditorWithMessageVariables = forwardRef<JsonEditorWithMessageVariablesRef, Props>(
+  (
+    {
+      buttonTitle,
+      messageVariables,
+      paramsProperty,
+      inputTargetValue,
+      label,
+      errors,
+      ariaLabel,
+      onDocumentsChange,
+      helpText,
+      onBlur,
+      showButtonTitle,
+      dataTestSubj,
+      euiCodeEditorProps = {},
+      isOptionalField = false,
+      readOnly = false,
+    },
+    ref
+  ) => {
+    const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
+    const editorDisposables = useRef<monaco.IDisposable[]>([]);
+    const [showErrorMessage, setShowErrorMessage] = useState(false);
 
-  useEffect(() => {
-    if (!xJson && inputTargetValue) {
-      setXJson(inputTargetValue);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inputTargetValue]);
+    useImperativeHandle(ref, () => ({
+      setValue: (newValue) => setXJson(newValue),
+    }));
 
-  const onSelectMessageVariable = (variable: ActionVariable) => {
-    if (readOnly) {
-      return;
-    }
+    const { convertToJson, setXJson, xJson } = useXJsonMode(inputTargetValue ?? null);
 
-    const editor = editorRef.current;
-    if (!editor) {
-      setShowErrorMessage(true);
-      return;
-    }
-    const cursorPosition = editor.getSelection();
-    const templatedVar = templateActionVariable(variable);
-
-    let newValue = '';
-    if (cursorPosition) {
-      editor.executeEdits(EDITOR_SOURCE, [
-        {
-          range: cursorPosition,
-          text: templatedVar,
-        },
-      ]);
-      newValue = editor.getValue();
-    } else {
-      newValue = templatedVar;
-    }
-    setShowErrorMessage(false);
-    setXJson(newValue);
-    // Keep the documents in sync with the editor content
-    onDocumentsChange(convertToJson(newValue));
-  };
-
-  const registerEditorListeners = useCallback(() => {
-    const editor = editorRef.current;
-    if (!editor) {
-      return;
-    }
-    editorDisposables.current.push(
-      editor.onDidBlurEditorWidget(() => {
-        onBlur?.();
-      })
-    );
-  }, [onBlur]);
-
-  const unregisterEditorListeners = () => {
-    editorDisposables.current.forEach((d) => {
-      d.dispose();
-    });
-    editorDisposables.current = [];
-  };
-
-  const onEditorMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
-    editorRef.current = editor;
-    registerEditorListeners();
-  };
-
-  const renderErrorMessage = () => {
-    if (!showErrorMessage) {
-      return null;
-    }
-    return (
-      <>
-        <EuiSpacer size="s" />
-        <EuiCallOut size="s" color="danger" iconType="warning" title={NO_EDITOR_ERROR_TITLE}>
-          <p>{NO_EDITOR_ERROR_MESSAGE}</p>
-        </EuiCallOut>
-        <EuiSpacer size="s" />
-      </>
-    );
-  };
-
-  useEffect(() => {
-    registerEditorListeners();
-    return () => unregisterEditorListeners();
-  }, [registerEditorListeners]);
-
-  return (
-    <EuiFormRow
-      data-test-subj={dataTestSubj}
-      fullWidth
-      error={errors}
-      isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
-      label={label}
-      labelAppend={
-        <AddMessageVariablesOptional
-          isOptionalField={isOptionalField}
-          buttonTitle={buttonTitle}
-          messageVariables={messageVariables}
-          showButtonTitle={showButtonTitle}
-          onSelectEventHandler={onSelectMessageVariable}
-          paramsProperty={paramsProperty}
-        />
+    useEffect(() => {
+      if (!xJson && inputTargetValue) {
+        setXJson(inputTargetValue);
       }
-      helpText={helpText}
-    >
-      <>
-        {renderErrorMessage()}
-        <CodeEditor
-          languageId={XJsonLang.ID}
-          options={{
-            renderValidationDecorations: xJson ? 'on' : 'off', // Disable error underline when empty
-            lineNumbers: 'on',
-            fontSize: 14,
-            minimap: {
-              enabled: false,
-            },
-            scrollBeyondLastLine: false,
-            folding: true,
-            wordWrap: 'on',
-            wrappingIndent: 'indent',
-            automaticLayout: true,
-            readOnly,
-          }}
-          value={xJson}
-          width="100%"
-          height="200px"
-          data-test-subj={`${paramsProperty}JsonEditor${readOnly ? 'ReadOnly' : ''}`}
-          aria-label={ariaLabel}
-          {...euiCodeEditorProps}
-          editorDidMount={onEditorMount}
-          onChange={(xjson: string) => {
-            setXJson(xjson);
-            // Keep the documents in sync with the editor content
-            onDocumentsChange(convertToJson(xjson));
-          }}
-        />
-      </>
-    </EuiFormRow>
-  );
-};
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [inputTargetValue]);
+
+    const onSelectMessageVariable = (variable: ActionVariable) => {
+      if (readOnly) {
+        return;
+      }
+
+      const editor = editorRef.current;
+      if (!editor) {
+        setShowErrorMessage(true);
+        return;
+      }
+      const cursorPosition = editor.getSelection();
+      const templatedVar = templateActionVariable(variable);
+
+      let newValue = '';
+      if (cursorPosition) {
+        editor.executeEdits(EDITOR_SOURCE, [
+          {
+            range: cursorPosition,
+            text: templatedVar,
+          },
+        ]);
+        newValue = editor.getValue();
+      } else {
+        newValue = templatedVar;
+      }
+      setShowErrorMessage(false);
+      setXJson(newValue);
+      // Keep the documents in sync with the editor content
+      onDocumentsChange(convertToJson(newValue));
+    };
+
+    const registerEditorListeners = useCallback(() => {
+      const editor = editorRef.current;
+      if (!editor) {
+        return;
+      }
+      editorDisposables.current.push(
+        editor.onDidBlurEditorWidget(() => {
+          onBlur?.();
+        })
+      );
+    }, [onBlur]);
+
+    const unregisterEditorListeners = () => {
+      editorDisposables.current.forEach((d) => {
+        d.dispose();
+      });
+      editorDisposables.current = [];
+    };
+
+    const onEditorMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
+      editorRef.current = editor;
+      registerEditorListeners();
+    };
+
+    const renderErrorMessage = () => {
+      if (!showErrorMessage) {
+        return null;
+      }
+      return (
+        <>
+          <EuiSpacer size="s" />
+          <EuiCallOut size="s" color="danger" iconType="warning" title={NO_EDITOR_ERROR_TITLE}>
+            <p>{NO_EDITOR_ERROR_MESSAGE}</p>
+          </EuiCallOut>
+          <EuiSpacer size="s" />
+        </>
+      );
+    };
+
+    useEffect(() => {
+      registerEditorListeners();
+      return () => unregisterEditorListeners();
+    }, [registerEditorListeners]);
+
+    return (
+      <EuiFormRow
+        data-test-subj={dataTestSubj}
+        fullWidth
+        error={errors}
+        isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
+        label={label}
+        labelAppend={
+          <AddMessageVariablesOptional
+            isOptionalField={isOptionalField}
+            buttonTitle={buttonTitle}
+            messageVariables={messageVariables}
+            showButtonTitle={showButtonTitle}
+            onSelectEventHandler={onSelectMessageVariable}
+            paramsProperty={paramsProperty}
+          />
+        }
+        helpText={helpText}
+      >
+        <>
+          {renderErrorMessage()}
+          <CodeEditor
+            languageId={XJsonLang.ID}
+            options={{
+              renderValidationDecorations: xJson ? 'on' : 'off', // Disable error underline when empty
+              lineNumbers: 'on',
+              fontSize: 14,
+              minimap: {
+                enabled: false,
+              },
+              scrollBeyondLastLine: false,
+              folding: true,
+              wordWrap: 'on',
+              wrappingIndent: 'indent',
+              automaticLayout: true,
+              readOnly,
+            }}
+            value={xJson}
+            width="100%"
+            height="200px"
+            data-test-subj={`${paramsProperty}JsonEditor${readOnly ? 'ReadOnly' : ''}`}
+            aria-label={ariaLabel}
+            {...euiCodeEditorProps}
+            editorDidMount={onEditorMount}
+            onChange={(xjson: string) => {
+              setXJson(xjson);
+              // Keep the documents in sync with the editor content
+              onDocumentsChange(convertToJson(xjson));
+            }}
+          />
+        </>
+      </EuiFormRow>
+    );
+  }
+);

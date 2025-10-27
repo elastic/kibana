@@ -95,3 +95,41 @@ export const USAGE_DASHBOARD_LINK = (apiProvider: string, connectorName: string)
     values: { apiProvider, connectorName },
     defaultMessage: 'View {apiProvider} Usage Dashboard for "{ connectorName }" Connector',
   });
+
+export const EXTENDED_THINKING_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.bedrock.extendedThinkingLabel',
+  {
+    defaultMessage: 'Extended thinking (experimental)',
+  }
+);
+
+export const EXTENDED_THINKING_DESCRIPTION = i18n.translate(
+  'xpack.stackConnectors.components.bedrock.extendedThinkingDescription',
+  {
+    defaultMessage:
+      'Enable extended thinking for enhanced reasoning capabilities on complex tasks. Only available for Claude Sonnet 4+ and Opus 4+ models.',
+  }
+);
+
+export const EXTENDED_THINKING_BUDGET_TOKENS_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.bedrock.extendedThinkingBudgetTokensLabel',
+  {
+    defaultMessage: 'Budget tokens',
+  }
+);
+
+export const EXTENDED_THINKING_BUDGET_TOKENS_DESCRIPTION = i18n.translate(
+  'xpack.stackConnectors.components.bedrock.extendedThinkingBudgetTokensDescription',
+  {
+    defaultMessage:
+      'Maximum number of tokens Claude can use for internal reasoning. Higher values may improve response quality for complex problems.',
+  }
+);
+
+export const EXTENDED_THINKING_MODEL_NOT_SUPPORTED = i18n.translate(
+  'xpack.stackConnectors.components.bedrock.extendedThinkingModelNotSupported',
+  {
+    defaultMessage:
+      'Extended thinking is only available for Claude Sonnet 4+, Opus 4+, and Claude 3.7 Sonnet models.',
+  }
+);

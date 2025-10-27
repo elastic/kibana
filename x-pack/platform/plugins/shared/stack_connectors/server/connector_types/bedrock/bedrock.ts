@@ -62,6 +62,7 @@ import {
   extractRegionId,
   formatBedrockBody,
   parseContent,
+  parseThinking,
   tee,
   usesDeprecatedArguments,
 } from './utils';
@@ -75,6 +76,8 @@ interface SignedRequest {
 export class BedrockConnector extends SubActionConnector<Config, Secrets> {
   private url;
   private model;
+  private extendedThinking;
+  private budgetTokens;
   private bedrockClient;
 
   constructor(params: ServiceParams<Config, Secrets>) {
@@ -82,6 +85,8 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
 
     this.url = this.config.apiUrl;
     this.model = this.config.defaultModel;
+    this.extendedThinking = this.config.extendedThinking;
+    this.budgetTokens = this.config.budgetTokens || 4000;
     const { httpAgent, httpsAgent } = getCustomAgents(
       this.configurationUtilities,
       this.logger,
@@ -261,8 +266,11 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     const response = await this.request(params, connectorUsageCollector);
     // keeping the response the same as claude 2 for our APIs
     // adding the usage object for better token tracking
+    const thinking = parseThinking(response.data.content);
+
     return {
       completion: parseContent(response.data.content),
+      ...(thinking ? { thinking } : {}),
       stop_reason: response.data.stop_reason,
       usage: response.data.usage,
     };
@@ -380,7 +388,16 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     const res = (await this.streamApi(
       {
         body: JSON.stringify(
-          formatBedrockBody({ messages, stopSequences, system, temperature, tools, toolChoice })
+          formatBedrockBody({
+            messages,
+            stopSequences,
+            system,
+            temperature,
+            tools,
+            toolChoice,
+            extendedThinking: this.extendedThinking,
+            budgetTokens: this.budgetTokens,
+          })
         ),
         model,
         signal,
@@ -425,6 +442,8 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
             maxTokens,
             tools,
             toolChoice,
+            extendedThinking: this.extendedThinking,
+            budgetTokens: this.budgetTokens,
           })
         ),
         model,
@@ -488,6 +507,15 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
   ): Promise<ConverseActionResponse> {
     if (command.input.modelId === 'preconfigured') {
       command.input.modelId = this.model;
+    }
+    if (this.extendedThinking) {
+      command.input.additionalModelRequestFields = {
+        thinking: {
+          type: 'enabled',
+          budget_tokens: this.budgetTokens,
+        },
+      };
+      command.input.inferenceConfig.temperature = 1;
     }
     connectorUsageCollector.addRequestBodyBytes(undefined, command);
     const res = await this.bedrockClient.send(command, {
