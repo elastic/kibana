@@ -99,7 +99,15 @@ export const AzureReusableConnectorForm: React.FC<{
         />
       </EuiText>
       <EuiSpacer size="m" />
-      <EuiFormRow label="Azure Cloud Connector" fullWidth>
+      <EuiFormRow
+        label={
+          <FormattedMessage
+            id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.azure.cloudConnectorLabel"
+            defaultMessage="Azure Cloud Connector"
+          />
+        }
+        fullWidth
+      >
         <EuiComboBox
           aria-label="Select Azure Cloud Connector"
           placeholder="Select a cloud connector"
