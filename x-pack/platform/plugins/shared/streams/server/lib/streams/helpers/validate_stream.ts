@@ -133,12 +133,20 @@ const actionStepValidators: {
   manual_ingest_pipeline: () => {},
 };
 
-function validateSteps(steps: StreamlangStep[]) {
+function validateSteps(steps: StreamlangStep[], isWithinWhereBlock = false) {
   for (const step of steps) {
     if ('where' in step && step.where && 'steps' in step.where) {
       validateCondition(step.where as Condition);
-      validateSteps(step.where.steps);
+      // Nested steps are within a where block
+      validateSteps(step.where.steps, true);
     } else if (isActionBlock(step)) {
+      // Check if remove_by_prefix is being used within a where block
+      if (step.action === 'remove_by_prefix' && isWithinWhereBlock) {
+        throw new MalformedStreamError(
+          'remove_by_prefix processor cannot be used within a where block. Use it at the root level or use the remove processor with a condition instead.'
+        );
+      }
+
       if ('where' in step && step.where) {
         validateCondition(step.where);
       }

@@ -21,6 +21,7 @@ import { configDrivenProcessors } from './config_driven';
 import { useGetStreamEnrichmentState } from '../../../state_management/stream_enrichment_state_machine';
 import { selectPreviewRecords } from '../../../state_management/simulation_state_machine/selectors';
 import { useStreamEnrichmentSelector } from '../../../state_management/stream_enrichment_state_machine';
+import { isStepUnderEdit } from '../../../state_management/steps_state_machine';
 
 interface TAvailableProcessor {
   type: ProcessorType;
@@ -47,6 +48,13 @@ export const ProcessorTypeSelector = ({
     Streams.WiredStream.GetResponse.is(snapshot.context.definition)
   );
 
+  const isWithinWhereBlock = useStreamEnrichmentSelector((state) => {
+    const stepUnderEdit = state.context.stepRefs.find((stepRef) =>
+      isStepUnderEdit(stepRef.getSnapshot())
+    );
+    return stepUnderEdit ? stepUnderEdit.getSnapshot().context.step.parentId !== null : false;
+  });
+
   const grokCollection = useStreamEnrichmentSelector((state) => state.context.grokCollection);
 
   const handleChange = (type: ProcessorType) => {
@@ -58,7 +66,10 @@ export const ProcessorTypeSelector = ({
     reset(formState);
   };
 
-  const selectorOptions = React.useMemo(() => getProcessorTypeSelectorOptions(isWired), [isWired]);
+  const selectorOptions = React.useMemo(
+    () => getProcessorTypeSelectorOptions(isWired, isWithinWhereBlock),
+    [isWired, isWithinWhereBlock]
+  );
 
   return (
     <EuiFormRow
@@ -67,7 +78,7 @@ export const ProcessorTypeSelector = ({
         'xpack.streams.streamDetailView.managementTab.enrichment.processor.typeSelectorLabel',
         { defaultMessage: 'Processor' }
       )}
-      helpText={getProcessorDescription(core.docLinks, isWired)(processorType)}
+      helpText={getProcessorDescription(core.docLinks, isWired, isWithinWhereBlock)(processorType)}
     >
       <EuiSuperSelect
         data-test-subj="streamsAppProcessorTypeSelector"
@@ -86,7 +97,10 @@ export const ProcessorTypeSelector = ({
   );
 };
 
-const getAvailableProcessors: (isWired: boolean) => Partial<TAvailableProcessors> = (isWired) => ({
+const getAvailableProcessors: (
+  isWired: boolean,
+  isWithinWhereBlock?: boolean
+) => Partial<TAvailableProcessors> = (isWired, isWithinWhereBlock = false) => ({
   date: {
     type: 'date',
     inputDisplay: 'Date',
@@ -222,15 +236,24 @@ const getAvailableProcessors: (isWired: boolean) => Partial<TAvailableProcessors
           ),
         },
       }),
+  // Remove remove_by_prefix from available processors when inside a where block
+  ...(isWithinWhereBlock
+    ? {
+        remove_by_prefix: undefined,
+      }
+    : {}),
 });
 
 const getProcessorDescription =
-  (docLinks: DocLinksStart, isWired: boolean) => (type: ProcessorType) => {
-    return getAvailableProcessors(isWired)[type]?.getDocUrl(docLinks);
+  (docLinks: DocLinksStart, isWired: boolean, isWithinWhereBlock?: boolean) =>
+  (type: ProcessorType) => {
+    return getAvailableProcessors(isWired, isWithinWhereBlock)[type]?.getDocUrl(docLinks);
   };
 
-const getProcessorTypeSelectorOptions = (isWired: boolean) =>
-  Object.values(getAvailableProcessors(isWired)).map(({ type, inputDisplay }) => ({
-    value: type,
-    inputDisplay,
-  }));
+const getProcessorTypeSelectorOptions = (isWired: boolean, isWithinWhereBlock?: boolean) =>
+  Object.values(getAvailableProcessors(isWired, isWithinWhereBlock))
+    .filter((processor) => processor !== undefined)
+    .map(({ type, inputDisplay }) => ({
+      value: type,
+      inputDisplay,
+    }));

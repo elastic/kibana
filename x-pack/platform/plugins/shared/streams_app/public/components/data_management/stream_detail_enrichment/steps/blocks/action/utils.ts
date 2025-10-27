@@ -62,16 +62,31 @@ export const getStepDescription = (step: StreamlangProcessorDefinitionWithUIAttr
         }
       );
     } else if (step.action === 'convert') {
-      return i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.convertProcessorDescription',
-        {
-          defaultMessage: 'Converts {field} field value to "{type}" type',
-          values: {
-            field: step.from,
-            type: step.type,
-          },
-        }
-      );
+      if (step.to) {
+        return i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.convertProcessorDescriptionWithTo',
+          {
+            defaultMessage:
+              'Converts "{field}" field value to "{type}" type and stores it in "{to}" field',
+            values: {
+              field: step.from,
+              type: step.type,
+              to: step.to,
+            },
+          }
+        );
+      } else {
+        return i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.convertProcessorDescription',
+          {
+            defaultMessage: 'Converts "{field}" field value to "{type}" type',
+            values: {
+              field: step.from,
+              type: step.type,
+            },
+          }
+        );
+      }
     } else if (step.action === 'remove_by_prefix') {
       return i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.removeByPrefixProcessorDescription',
