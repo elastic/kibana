@@ -68,6 +68,10 @@ export const AsyncField = <T,>({
 };
 
 const IndexPattern = ({ patterns }: { patterns: string[] }) => {
+  if (patterns.length === 0) {
+    return <span>-</span>;
+  }
+
   return (
     <EuiFlexGroup
       responsive={false}
