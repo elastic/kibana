@@ -8,10 +8,10 @@
 import { RULE_PREBUILD_DESCRIPTION_FIELDS } from '@kbn/triggers-actions-ui-plugin/public';
 import type { Rule, PrebuildFieldsMap } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type { HttpSetup } from '@kbn/core/public';
-import { getDescriptionFields } from './index_threshold_description_fields';
-import type { IndexThresholdRuleParams } from './types';
+import { getDescriptionFields } from '.';
+import type { DegradedDocsRuleParams } from '@kbn/response-ops-rule-params/degraded_docs';
 
-describe('index_threshold getDescriptionFields', () => {
+describe('degraded_docs getDescriptionFields', () => {
   const mockPrebuildField = jest.fn();
   const mockPrebuildFields = {
     [RULE_PREBUILD_DESCRIPTION_FIELDS.INDEX_PATTERN]: mockPrebuildField,
@@ -23,7 +23,7 @@ describe('index_threshold getDescriptionFields', () => {
 
   it('should return empty array when rule is not provided', () => {
     const result = getDescriptionFields({
-      rule: undefined as unknown as Rule<IndexThresholdRuleParams>,
+      rule: undefined as unknown as Rule<DegradedDocsRuleParams>,
       prebuildFields: mockPrebuildFields,
       http: {} as HttpSetup,
     });
@@ -42,7 +42,7 @@ describe('index_threshold getDescriptionFields', () => {
         timeWindowUnit: 'm',
         comparator: '>',
       },
-    } as unknown as Rule<IndexThresholdRuleParams>;
+    } as unknown as Rule<DegradedDocsRuleParams>;
 
     const result = getDescriptionFields({
       rule: mockRule,
@@ -55,7 +55,7 @@ describe('index_threshold getDescriptionFields', () => {
 
   it('should return empty array when both rule and prebuildFields are not provided', () => {
     const result = getDescriptionFields({
-      rule: undefined as unknown as Rule<IndexThresholdRuleParams>,
+      rule: undefined as unknown as Rule<DegradedDocsRuleParams>,
       prebuildFields: undefined,
       http: {} as HttpSetup,
     });
@@ -74,7 +74,7 @@ describe('index_threshold getDescriptionFields', () => {
         timeWindowUnit: 'm',
         comparator: '>',
       },
-    } as unknown as Rule<IndexThresholdRuleParams>;
+    } as unknown as Rule<DegradedDocsRuleParams>;
 
     const mockReturnValue = { type: 'index_pattern', value: 'logs-*' };
     mockPrebuildField.mockReturnValue(mockReturnValue);
