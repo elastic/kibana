@@ -34,5 +34,6 @@ export function getConnectorType(): MCPConnector {
     actionConnectorFields: lazy(() => import('./connector')),
     actionParamsFields: lazy(() => import('./params')),
     isExperimental: true,
+    reenterSecretsOnEdit: true,
   };
 }

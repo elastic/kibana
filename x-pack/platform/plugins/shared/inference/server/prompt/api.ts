@@ -41,7 +41,6 @@ export function createPromptApi({
       maxRetries,
       ...rest
     } = options;
-
     return callbackApi(
       {
         connectorId,

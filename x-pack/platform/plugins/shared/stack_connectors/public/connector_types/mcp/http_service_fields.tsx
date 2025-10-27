@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,19 +15,16 @@ import {
   EuiSpacer,
   EuiCallOut,
   EuiBadge,
-  EuiFieldPassword,
-  EuiButtonEmpty,
-  EuiIcon,
 } from '@elastic/eui';
-import { useFormData, useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import React, { useState, useCallback, useMemo } from 'react';
+import {
+  useFormData,
+  useFormContext,
+  UseField,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { ConfigFieldSchema, SecretsFieldSchema } from '@kbn/triggers-actions-ui-plugin/public';
 import { SimpleConnectorForm } from '@kbn/triggers-actions-ui-plugin/public';
-import {
-  createBasicAuthHeader,
-  createBearerTokenHeader,
-  createApiKeyHeader,
-} from '@kbn/mcp-connector-common/src/auth';
+import type { MCPConnectorAuthType } from '@kbn/mcp-connector-common';
 import {
   AUTH_PRESET_LABEL,
   PRESET_NONE_LABEL,
@@ -42,10 +40,6 @@ import {
   BEARER_TOKEN_LABEL,
   USERNAME_LABEL,
   PASSWORD_LABEL,
-  HEADER_NAME_LABEL,
-  HEADER_VALUE_LABEL,
-  ADD_HEADER_BUTTON,
-  REMOVE_HEADER_BUTTON,
   TEST_CONNECTION_BUTTON,
   TEST_CONNECTION_SUCCESS,
   TEST_CONNECTION_FAILURE,
@@ -56,13 +50,9 @@ import {
   ONECHAT_INFO_TEXT,
 } from './translations';
 import type { ConnectorFormData } from './types';
+import { CustomHeadersFields } from './custom_headers_fields';
 
-type AuthPreset = 'none' | 'apiKey' | 'basic' | 'bearer' | 'custom' | 'oauth';
-
-interface CustomHeader {
-  name: string;
-  value: string;
-}
+type AuthPreset = MCPConnectorAuthType;
 
 const CONFIG_SCHEMA: ConfigFieldSchema[] = [
   {
@@ -87,37 +77,13 @@ const CONFIG_SCHEMA: ConfigFieldSchema[] = [
 ];
 
 export function HTTPServiceFields({ readOnly, isEdit }: { readOnly: boolean; isEdit: boolean }) {
-  const [{ config, secrets }] = useFormData<ConnectorFormData>();
+  const [{ config }] = useFormData<ConnectorFormData>();
   const formContext = useFormContext<ConnectorFormData>();
+  const hasInitializedRef = useRef(false);
 
-  // Auth preset state
+  // Initialize authPreset from config.service.authType
   const [authPreset, setAuthPreset] = useState<AuthPreset>(() => {
-    // Infer auth preset from existing config
-    if (config?.service?.auth) {
-      const auth = config.service.auth;
-      if (auth.type === 'none') return 'none';
-      if (auth.type === 'oauth') return 'oauth';
-      if (auth.type === 'header' && auth.headers) {
-        // Check if it matches known presets
-        if (auth.headers.length === 1) {
-          const header = auth.headers[0];
-          if (header.name === 'Authorization') {
-            if (header.value.startsWith('Bearer ')) return 'bearer';
-            if (header.value.startsWith('Basic ')) return 'basic';
-          }
-          if (header.name === 'X-API-Key') return 'apiKey';
-        }
-        return 'custom';
-      }
-    }
-    return 'none';
-  });
-
-  const [customHeaders, setCustomHeaders] = useState<CustomHeader[]>(() => {
-    if (config?.service?.auth?.type === 'header') {
-      return config.service.auth.headers?.map((h) => ({ name: h.name, value: h.value })) || [];
-    }
-    return [{ name: '', value: '' }];
+    return (config?.service?.authType as AuthPreset) || 'none';
   });
 
   const [testResult, setTestResult] = useState<{
@@ -126,101 +92,25 @@ export function HTTPServiceFields({ readOnly, isEdit }: { readOnly: boolean; isE
     toolCount?: number;
   }>({ status: null });
 
-  // Update auth config when preset or fields change
-  const updateAuthConfig = useCallback(
-    (preset: AuthPreset, headerData?: { token?: string; username?: string; password?: string }) => {
-      let auth;
+  // Update authPreset when config loads (for edit mode) - only once
+  useEffect(() => {
+    const loadedAuthType = config?.service?.authType as AuthPreset;
+    if (loadedAuthType && !hasInitializedRef.current) {
+      setAuthPreset(loadedAuthType);
+      hasInitializedRef.current = true;
+    }
+  }, [config?.service?.authType]);
 
-      switch (preset) {
-        case 'none':
-          auth = { type: 'none' as const };
-          break;
-        case 'apiKey':
-          if (headerData?.token) {
-            auth = {
-              type: 'header' as const,
-              headers: [createApiKeyHeader(headerData.token)],
-            };
-          }
-          break;
-        case 'bearer':
-          if (headerData?.token) {
-            auth = {
-              type: 'header' as const,
-              headers: [createBearerTokenHeader(headerData.token)],
-            };
-          }
-          break;
-        case 'basic':
-          if (headerData?.username && headerData?.password) {
-            auth = {
-              type: 'header' as const,
-              headers: [createBasicAuthHeader(headerData.username, headerData.password)],
-            };
-          }
-          break;
-        case 'custom':
-          const validHeaders = customHeaders.filter((h) => h.name && h.value);
-          if (validHeaders.length > 0) {
-            auth = {
-              type: 'header' as const,
-              headers: validHeaders,
-            };
-          }
-          break;
-        case 'oauth':
-          auth = { type: 'oauth' as const, oauthConfig: undefined };
-          break;
-      }
-
-      if (auth) {
-        formContext.setFieldValue('config.service.auth', auth);
-      }
-    },
-    [formContext, customHeaders]
-  );
-
+  // Handle preset change - set authType in both config and secrets
   const handlePresetChange = useCallback(
     (newPreset: AuthPreset) => {
       setAuthPreset(newPreset);
-      updateAuthConfig(newPreset);
+      // Set auth type in config (metadata)
+      formContext.setFieldValue('config.service.authType', newPreset);
+      // Set auth type in secrets (discriminator for union type validation)
+      formContext.setFieldValue('secrets.authType', newPreset);
     },
-    [updateAuthConfig]
-  );
-
-  const handleCustomHeaderChange = useCallback(
-    (index: number, field: 'name' | 'value', value: string) => {
-      const newHeaders = [...customHeaders];
-      newHeaders[index] = { ...newHeaders[index], [field]: value };
-      setCustomHeaders(newHeaders);
-
-      const validHeaders = newHeaders.filter((h) => h.name && h.value);
-      if (validHeaders.length > 0) {
-        formContext.setFieldValue('config.service.auth', {
-          type: 'header',
-          headers: validHeaders,
-        });
-      }
-    },
-    [customHeaders, formContext]
-  );
-
-  const handleAddHeader = useCallback(() => {
-    setCustomHeaders([...customHeaders, { name: '', value: '' }]);
-  }, [customHeaders]);
-
-  const handleRemoveHeader = useCallback(
-    (index: number) => {
-      const newHeaders = customHeaders.filter((_, i) => i !== index);
-      setCustomHeaders(newHeaders);
-
-      const validHeaders = newHeaders.filter((h) => h.name && h.value);
-      formContext.setFieldValue('config.service.auth', {
-        type: 'header',
-        headers: validHeaders.length > 0 ? validHeaders : [],
-      });
-    },
-    [customHeaders, formContext]
+    [formContext]
   );
 
   const handleTestConnection = useCallback(async () => {
@@ -248,13 +138,16 @@ export function HTTPServiceFields({ readOnly, isEdit }: { readOnly: boolean; isE
     switch (authPreset) {
       case 'basic':
         return [
-          { id: 'auth.username', label: USERNAME_LABEL, isPasswordField: false },
-          { id: 'auth.password', label: PASSWORD_LABEL, isPasswordField: true },
+          { id: 'username', label: USERNAME_LABEL, isPasswordField: false },
+          { id: 'password', label: PASSWORD_LABEL, isPasswordField: true },
         ];
       case 'apiKey':
-        return [{ id: 'auth.apiKey', label: TOKEN_LABEL, isPasswordField: true }];
+        return [{ id: 'apiKey', label: TOKEN_LABEL, isPasswordField: true }];
       case 'bearer':
-        return [{ id: 'auth.bearerToken', label: BEARER_TOKEN_LABEL, isPasswordField: true }];
+        return [{ id: 'token', label: BEARER_TOKEN_LABEL, isPasswordField: true }];
+      case 'customHeaders':
+        return [];
+      case 'none':
       default:
         return [];
     }
@@ -262,7 +155,6 @@ export function HTTPServiceFields({ readOnly, isEdit }: { readOnly: boolean; isE
 
   return (
     <>
-      {/* OneChat compatibility badge */}
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiBadge color="success" iconType="check">
@@ -273,12 +165,35 @@ export function HTTPServiceFields({ readOnly, isEdit }: { readOnly: boolean; isE
 
       <EuiSpacer size="m" />
 
-      {/* OneChat info callout */}
       <EuiCallOut title={ONECHAT_INFO_TITLE} color="primary" iconType="iInCircle" size="s">
         <p>{ONECHAT_INFO_TEXT}</p>
       </EuiCallOut>
 
       <EuiSpacer size="m" />
+
+      {authPreset !== 'none' && isEdit && (
+        <>
+          <EuiCallOut
+            announceOnMount
+            title="Security Notice"
+            color="warning"
+            iconType="alert"
+            size="s"
+          >
+            <p>
+              For security reasons, you must re-enter your credentials each time you edit this
+              connector.
+              {authPreset === 'apiKey' && ' Your API key is encrypted and not displayed.'}
+              {authPreset === 'bearer' && ' Your bearer token is encrypted and not displayed.'}
+              {authPreset === 'basic' &&
+                ' Your username and password are encrypted and not displayed.'}
+              {authPreset === 'customHeaders' &&
+                ' Your custom headers are encrypted and not displayed.'}
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      )}
 
       {/* Basic config fields */}
       <SimpleConnectorForm
@@ -287,6 +202,16 @@ export function HTTPServiceFields({ readOnly, isEdit }: { readOnly: boolean; isE
         isEdit={isEdit}
         readOnly={readOnly}
       />
+
+      {/* Hidden fields for authType (required for discriminated union validation) */}
+      <div style={{ display: 'none' }}>
+        <UseField
+          path="config.service.authType"
+          component={Field}
+          config={{ defaultValue: authPreset }}
+        />
+        <UseField path="secrets.authType" component={Field} config={{ defaultValue: authPreset }} />
+      </div>
 
       <EuiSpacer size="m" />
 
@@ -301,7 +226,7 @@ export function HTTPServiceFields({ readOnly, isEdit }: { readOnly: boolean; isE
             { value: 'apiKey', text: PRESET_API_KEY_LABEL },
             { value: 'bearer', text: PRESET_BEARER_TOKEN_LABEL },
             { value: 'basic', text: PRESET_BASIC_AUTH_LABEL },
-            { value: 'custom', text: PRESET_CUSTOM_HEADERS_LABEL },
+            { value: 'customHeaders', text: PRESET_CUSTOM_HEADERS_LABEL },
             { value: 'oauth', text: PRESET_OAUTH_LABEL, disabled: true },
           ]}
           disabled={readOnly}
@@ -310,8 +235,30 @@ export function HTTPServiceFields({ readOnly, isEdit }: { readOnly: boolean; isE
 
       <EuiSpacer size="m" />
 
-      {/* Auth-specific fields */}
-      {authPreset !== 'none' && authPreset !== 'custom' && authPreset !== 'oauth' && (
+      {/* API Key header name customization */}
+      {authPreset === 'apiKey' && (
+        <>
+          <EuiFormRow
+            label="API Key Header Name"
+            helpText="Custom header name for API key (default: X-API-Key)"
+            fullWidth
+          >
+            <EuiFieldText
+              value={config?.service?.apiKeyHeaderName || 'X-API-Key'}
+              onChange={(e) =>
+                formContext.setFieldValue('config.service.apiKeyHeaderName', e.target.value)
+              }
+              placeholder="X-API-Key"
+              fullWidth
+              disabled={readOnly}
+            />
+          </EuiFormRow>
+          <EuiSpacer size="m" />
+        </>
+      )}
+
+      {/* Auth-specific fields (standard presets) */}
+      {authPreset !== 'none' && authPreset !== 'customHeaders' && authPreset !== 'oauth' && (
         <SimpleConnectorForm
           configFormSchema={[]}
           secretsFormSchema={secretsSchema}
@@ -321,69 +268,26 @@ export function HTTPServiceFields({ readOnly, isEdit }: { readOnly: boolean; isE
       )}
 
       {/* Custom headers builder */}
-      {authPreset === 'custom' && (
-        <>
-          {customHeaders.map((header, index) => (
-            <React.Fragment key={index}>
-              <EuiFlexGroup gutterSize="s">
-                <EuiFlexItem>
-                  <EuiFormRow label={index === 0 ? HEADER_NAME_LABEL : ''} fullWidth>
-                    <EuiFieldText
-                      fullWidth
-                      value={header.name}
-                      onChange={(e) => handleCustomHeaderChange(index, 'name', e.target.value)}
-                      placeholder="Authorization"
-                      disabled={readOnly}
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiFormRow label={index === 0 ? HEADER_VALUE_LABEL : ''} fullWidth>
-                    <EuiFieldPassword
-                      fullWidth
-                      value={header.value}
-                      onChange={(e) => handleCustomHeaderChange(index, 'value', e.target.value)}
-                      placeholder="Bearer token_value"
-                      type="dual"
-                      disabled={readOnly}
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiFormRow label={index === 0 ? ' ' : ''} hasEmptyLabelSpace>
-                    <EuiButtonEmpty
-                      iconType="trash"
-                      color="danger"
-                      onClick={() => handleRemoveHeader(index)}
-                      disabled={readOnly || customHeaders.length === 1}
-                    >
-                      {REMOVE_HEADER_BUTTON}
-                    </EuiButtonEmpty>
-                  </EuiFormRow>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              {index < customHeaders.length - 1 && <EuiSpacer size="s" />}
-            </React.Fragment>
-          ))}
-          <EuiSpacer size="s" />
-          <EuiButton iconType="plus" size="s" onClick={handleAddHeader} disabled={readOnly}>
-            {ADD_HEADER_BUTTON}
-          </EuiButton>
-        </>
-      )}
+      {authPreset === 'customHeaders' && <CustomHeadersFields readOnly={readOnly} />}
 
       {/* OAuth placeholder */}
       {authPreset === 'oauth' && (
-        <EuiCallOut title="OAuth 2.0 authentication coming soon" color="warning" iconType="clock">
-          <p>
-            OAuth 2.0 authentication with PKCE support will be available in a future release (Plan
-            003). For now, please use API Key, Bearer Token, Basic Authentication, or Custom
-            Headers.
-          </p>
-        </EuiCallOut>
+        <>
+          <EuiCallOut
+            announceOnMount
+            title="OAuth 2.0 authentication coming soon"
+            color="warning"
+            iconType="clock"
+          >
+            <p>
+              OAuth 2.0 authentication with PKCE support will be available in a future release (Plan
+              003). For now, please use API Key, Bearer Token, Basic Authentication, or Custom
+              Headers.
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
       )}
-
-      <EuiSpacer size="m" />
 
       {/* Test connection */}
       <EuiFlexGroup gutterSize="s" direction="column">
@@ -400,12 +304,15 @@ export function HTTPServiceFields({ readOnly, isEdit }: { readOnly: boolean; isE
 
         {testResult.status === 'success' && (
           <EuiFlexItem>
-            <EuiCallOut title={testResult.message} color="success" iconType="check" size="s">
+            <EuiCallOut
+              announceOnMount
+              title={testResult.message}
+              color="success"
+              iconType="check"
+              size="s"
+            >
               {testResult.toolCount && (
-                <p>
-                  <EuiIcon type="wrench" size="s" />{' '}
-                  {TOOLS_FOUND_MESSAGE.replace('{count}', String(testResult.toolCount))}
-                </p>
+                <p>{TOOLS_FOUND_MESSAGE.replace('{count}', String(testResult.toolCount))}</p>
               )}
             </EuiCallOut>
           </EuiFlexItem>
@@ -413,7 +320,13 @@ export function HTTPServiceFields({ readOnly, isEdit }: { readOnly: boolean; isE
 
         {testResult.status === 'error' && (
           <EuiFlexItem>
-            <EuiCallOut title={TEST_CONNECTION_FAILURE} color="danger" iconType="alert" size="s">
+            <EuiCallOut
+              announceOnMount
+              title={TEST_CONNECTION_FAILURE}
+              color="danger"
+              iconType="alert"
+              size="s"
+            >
               {testResult.message && <p>{testResult.message}</p>}
             </EuiCallOut>
           </EuiFlexItem>

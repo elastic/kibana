@@ -27,7 +27,7 @@ import type {
  * Create an MCP tool provider factory function.
  *
  * This function returns a provider factory that creates request-scoped MCP tool providers.
- * The provider discovers tools from MCP connectors and makes them available to OneChat agents.
+ * The provider discovers tools from MCP connectors and makes them available to agents.
  *
  * @param deps Dependencies (logger)
  * @returns Provider factory function

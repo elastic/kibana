@@ -70,7 +70,6 @@ export async function validateToolSelection({
       }
     }
 
-    // Only add selection if it has valid tools
     if (validToolIds.length > 0) {
       filteredSelection.push({ tool_ids: validToolIds });
     }

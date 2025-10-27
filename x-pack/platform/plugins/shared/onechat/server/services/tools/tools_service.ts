@@ -82,8 +82,6 @@ export class ToolsService {
       const builtinProvider = await builtinProviderFn({ request, space });
       const persistedProvider = await persistedProviderFn({ request, space });
 
-      // Create MCP provider if actions plugin is available
-      // This provider discovers tools from MCP connectors
       const actionsClient = await actions.getActionsClientWithRequest(request);
       const mcpProvider = createMcpToolProvider({
         actionsClient,

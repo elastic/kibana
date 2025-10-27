@@ -1,7 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/mcp-connector-server",
-  "owner": "@elastic/appex-ai-infra",
-  "group": "platform",
-  "visibility": "shared"
-}

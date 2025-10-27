@@ -17,9 +17,8 @@ const MCPConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, is
   useEffect(() => {
     const data = formContext.getFormData();
 
-    // Initialize with new auth system (Epic 4) - default to 'none'
-    if (!data.config?.service?.auth && !data.config?.service?.authType) {
-      formContext.setFieldValue('config.service.auth', { type: 'none' });
+    if (!data.config?.service?.authType) {
+      formContext.setFieldValue('config.service.authType', 'none');
     }
   }, [formContext]);
 

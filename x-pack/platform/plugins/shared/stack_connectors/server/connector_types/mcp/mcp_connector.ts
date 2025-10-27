@@ -15,8 +15,6 @@ import type {
   Tool,
   CallToolRequest,
   MCPConnectorHTTPServiceConfig,
-  MCPConnectorSecretsAPIKey,
-  MCPConnectorSecretsBasicAuth,
   ContentPart,
 } from '@kbn/mcp-connector-common';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
@@ -49,34 +47,36 @@ export class MCPConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
 
   private async connectHttp(service: MCPConnectorHTTPServiceConfig) {
     const secrets = this.secrets;
-
     const headers = new Headers();
 
-    // New extensible auth system (Epic 4) - preferred over legacy
-    if (service.auth) {
-      // Use new auth system with buildAuthHeaders()
-      const { buildAuthHeaders } = await import('@kbn/mcp-connector-common/src/auth');
-      const authHeaders = buildAuthHeaders(service.auth);
+    switch (secrets.authType) {
+      case 'bearer':
+        headers.set('Authorization', `Bearer ${secrets.token}`);
+        break;
 
-      // Convert Record<string, string> to Headers
-      Object.entries(authHeaders).forEach(([name, value]) => {
-        headers.set(name, value);
-      });
-    } else if (service.authType) {
-      // Legacy auth system (backward compatibility)
-      if (service.authType === 'apiKey') {
-        const apiKeySecrets = secrets as MCPConnectorSecretsAPIKey;
-        headers.set('Authorization', `ApiKey ${apiKeySecrets.auth.apiKey}`);
-      } else if (service.authType === 'basic') {
-        const basicAuth = secrets as MCPConnectorSecretsBasicAuth;
-        headers.set(
-          'Authorization',
-          `Basic ${Buffer.from(`${basicAuth.auth.username}:${basicAuth.auth.password}`).toString(
-            'base64'
-          )}`
-        );
-      }
-      // 'none' - no headers added
+      case 'apiKey':
+        const headerName = service.apiKeyHeaderName || 'X-API-Key';
+        headers.set(headerName, secrets.apiKey);
+        break;
+
+      case 'basic':
+        const credentials = `${secrets.username}:${secrets.password}`;
+        const base64 = Buffer.from(credentials).toString('base64');
+        headers.set('Authorization', `Basic ${base64}`);
+        break;
+
+      case 'customHeaders':
+        secrets.headers.forEach((header) => {
+          headers.set(header.name, header.value);
+        });
+        break;
+
+      case 'none':
+        break;
+
+      default:
+        const _exhaustive: never = secrets;
+        throw new Error(`Unknown auth type: ${JSON.stringify(_exhaustive)}`);
     }
 
     const transport = new StreamableHTTPClientTransport(new URL(service.http.url), {
@@ -85,9 +85,6 @@ export class MCPConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
       },
     });
 
-    // "starts" the HTTP transport which is a no-op,
-    // it will also send an initialization request to
-    // the server
     await this.client.connect(transport);
   }
 

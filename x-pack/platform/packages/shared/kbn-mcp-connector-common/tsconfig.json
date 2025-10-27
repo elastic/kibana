@@ -15,5 +15,6 @@
   ],
   "kbn_references": [
     "@kbn/i18n",
+    "@kbn/config-schema",
   ]
 }

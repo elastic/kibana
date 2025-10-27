@@ -11,7 +11,7 @@ import {
   type MCPConnectorConfig,
   type MCPConnectorSecrets,
 } from '@kbn/mcp-connector-common';
-import { MCPConnectorConfigSchema, MCPConnectorSecretsSchema } from '@kbn/mcp-connector-server';
+import { MCPConnectorConfigSchema, MCPConnectorSecretsSchema } from '@kbn/mcp-connector-common';
 import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import {
   GenerativeAIForObservabilityConnectorFeatureId,

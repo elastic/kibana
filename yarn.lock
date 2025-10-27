@@ -7139,23 +7139,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/mcp-connector-server@link:x-pack/platform/packages/shared/kbn-mcp-connector-server":
-  version "0.0.0"
-  uid ""
-
 "@kbn/mcp-dev-server@link:src/platform/packages/shared/kbn-mcp-dev-server":
   version "0.0.0"
   uid ""
 
 "@kbn/metrics-config@link:src/platform/packages/private/opentelemetry/kbn-metrics-config":
-  version "0.0.0"
-  uid ""
-
-"@kbn/mcp-connector-common@link:x-pack/platform/packages/shared/kbn-mcp-connector-common":
-  version "0.0.0"
-  uid ""
-
-"@kbn/mcp-connector-server@link:x-pack/platform/packages/shared/kbn-mcp-connector-server":
   version "0.0.0"
   uid ""
 

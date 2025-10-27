@@ -5,30 +5,34 @@
  * 2.0.
  */
 
+// ============================================================================
+// CONNECTOR TYPES (Config & Secrets)
+// ============================================================================
+
 export type {
   MCPConnectorConfig,
   MCPConnectorHTTPServiceConfig,
+  MCPConnectorAuthType,
   MCPConnectorSecrets,
-  MCPConnectorSecretsAPIKey,
-  MCPConnectorSecretsBasicAuth,
+  MCPConnectorSecretsNone,
+  MCPConnectorSecretsBearer,
+  MCPConnectorSecretsApiKey,
+  MCPConnectorSecretsBasic,
+  MCPConnectorSecretsCustomHeaders,
   MCPConnectorSubActionType,
   MCPCallToolParams,
   MCPListToolsParams,
   MCPExecutorParams,
-  MCPConnectorAuthType,
-  MCPConnectorAuthTypeApiKey,
-  MCPConnectorAuthTypeBasic,
-  MCPConnectorSecretsNoAuth,
-  MCPConnectorAuthTypeNone,
 } from './src/connector';
 
 export {
-  MCP_CONNECTOR_AUTH_TYPE_API_KEY,
-  MCP_CONNECTOR_AUTH_TYPE_BASIC,
-  MCP_CONNECTOR_AUTH_TYPE_NONE,
   MCP_CONNECTOR_SUB_ACTION_TYPE_CALL_TOOL,
   MCP_CONNECTOR_SUB_ACTION_TYPE_LIST_TOOLS,
 } from './src/connector';
+
+// ============================================================================
+// MCP CLIENT TYPES
+// ============================================================================
 
 export type {
   CallToolRequest,
@@ -40,7 +44,15 @@ export type {
   TextPart,
 } from './src/client';
 
+// ============================================================================
+// CONSTANTS
+// ============================================================================
+
 export { MCP_CONNECTOR_TYPE_ID, MCP_CONNECTOR_TITLE } from './src/constants';
+
+// ============================================================================
+// NAMESPACE UTILITIES
+// ============================================================================
 
 export {
   protectedNamespaces,
@@ -51,20 +63,24 @@ export {
   validateToolNamespace,
 } from './src/namespaces';
 
+// ============================================================================
+// PROVIDER METADATA
+// ============================================================================
+
 export { createProviderMetadata } from './src/provider_metadata';
 
-export type {
-  MCPConnectorAuth,
-  MCPConnectorAuthNone,
-  MCPConnectorAuthHeader,
-  MCPConnectorAuthOAuth,
-  MCPConnectorAuthType as MCPConnectorAuthTypeNew,
-  Header,
-} from './src/auth';
+// ============================================================================
+// SCHEMAS (Config & Secrets Validation)
+// ============================================================================
 
 export {
-  createBasicAuthHeader,
-  createBearerTokenHeader,
-  createApiKeyHeader,
-  buildAuthHeaders,
-} from './src/auth';
+  MCPConnectorConfigSchema,
+  MCPConnectorHTTPServiceConfigSchema,
+  MCPConnectorSecretsSchema,
+  MCPConnectorSecretsNoneSchema,
+  MCPConnectorSecretsBearerSchema,
+  MCPConnectorSecretsApiKeySchema,
+  MCPConnectorSecretsBasicSchema,
+  MCPConnectorSecretsCustomHeadersSchema,
+  MCPExecutorParamsSchema,
+} from './src/schema';

@@ -14,8 +14,7 @@ import { getHandlerWrapper } from './wrap_handler';
 /**
  * Register MCP connector management routes.
  *
- * These routes provide discovery and inspection of MCP connectors
- * and their tools for use in OneChat agents.
+ * These routes provide discovery and inspection of MCP connectors and their tools.
  */
 export function registerMCPConnectorRoutes({ router, logger, coreSetup }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
@@ -25,7 +24,7 @@ export function registerMCPConnectorRoutes({ router, logger, coreSetup }: RouteD
    *
    * GET /internal/agent_builder/mcp/connectors
    *
-   * Returns MCP connectors that can be used with OneChat agents.
+   * Returns MCP connectors that can be used with agents.
    * Connectors are automatically space-isolated via the Actions framework.
    */
   router.versioned
@@ -37,7 +36,7 @@ export function registerMCPConnectorRoutes({ router, logger, coreSetup }: RouteD
       access: 'internal',
       summary: 'List MCP connectors',
       description:
-        'List all MCP (Model Context Protocol) connectors available in the current space. These connectors provide external tools that can be used by OneChat agents.',
+        'List all MCP (Model Context Protocol) connectors available in the current space. These connectors provide external tools that can be used by agents.',
       options: {
         tags: ['agent builder', 'mcp'],
       },
@@ -51,21 +50,17 @@ export function registerMCPConnectorRoutes({ router, logger, coreSetup }: RouteD
       },
       wrapHandler(async (ctx, request, response) => {
         try {
-          // Get actions client from start services
           const [, { actions }] = await coreSetup.getStartServices();
           const actionsClient = await actions.getActionsClientWithRequest(request);
 
-          // Get all connectors via Actions client (automatically space-filtered)
           const allConnectors = await actionsClient.getAll();
 
-          // Filter to MCP connectors only
           const mcpConnectors = allConnectors.filter(
             (connector: any) => connector.actionTypeId === MCP_CONNECTOR_TYPE_ID
           );
 
           logger.debug(`Found ${mcpConnectors.length} MCP connectors in current space`);
 
-          // Return connector metadata
           return response.ok({
             body: {
               connectors: mcpConnectors.map((connector: any) => ({
@@ -128,11 +123,9 @@ export function registerMCPConnectorRoutes({ router, logger, coreSetup }: RouteD
         const { id: connectorId } = request.params;
 
         try {
-          // Get actions client from start services
           const [, { actions }] = await coreSetup.getStartServices();
           const actionsClient = await actions.getActionsClientWithRequest(request);
 
-          // Verify connector exists and is MCP type
           const connector = await actionsClient.get({ id: connectorId });
 
           if (connector.actionTypeId !== MCP_CONNECTOR_TYPE_ID) {
@@ -143,7 +136,6 @@ export function registerMCPConnectorRoutes({ router, logger, coreSetup }: RouteD
             });
           }
 
-          // Call the connector's listTools action
           const result = await actionsClient.execute({
             actionId: connectorId,
             params: {
@@ -185,7 +177,6 @@ export function registerMCPConnectorRoutes({ router, logger, coreSetup }: RouteD
             `Discovered ${responseData.tools.length} tools from connector "${connector.name}"`
           );
 
-          // Return tools with connector metadata
           return response.ok({
             body: {
               connector: {
@@ -195,15 +186,12 @@ export function registerMCPConnectorRoutes({ router, logger, coreSetup }: RouteD
               tools: responseData.tools.map((tool) => ({
                 name: tool.name,
                 description: tool.description || '',
-                // Omit inputSchema from response to keep it lightweight
-                // Full schema will be available via the tool registry when needed
               })),
             },
           });
         } catch (error) {
           logger.error(`Failed to list tools from connector "${connectorId}": ${error.message}`);
 
-          // Handle specific error cases
           if (error.message?.includes('not found')) {
             return response.notFound({
               body: {
