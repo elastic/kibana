@@ -290,6 +290,12 @@ export const ChangePasswordModal: FunctionComponent<ChangePasswordModalProps> = 
       <EuiModalFooter>
         <EuiButtonEmpty
           data-test-subj="changePasswordFormCancelButton"
+          aria-label={i18n.translate(
+            'xpack.security.management.users.changePasswordForm.cancelButtonLabel',
+            {
+              defaultMessage: 'Cancel password change',
+            }
+          )}
           isDisabled={form.isSubmitting}
           onClick={onCancel}
         >
@@ -307,7 +313,7 @@ export const ChangePasswordModal: FunctionComponent<ChangePasswordModalProps> = 
           isDisabled={
             isLoading ||
             !form.values.password ||
-            form.values.password.length === 0 ||
+            form.values.password.length < MIN_PASSWORD_LENGTH ||
             (form.isSubmitted && form.isInvalid)
           }
           color={isSystemUser ? 'danger' : undefined}
