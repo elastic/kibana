@@ -276,6 +276,7 @@ describe('WorkflowTemplatingEngine', () => {
 
       it('should throw error for multi-node template', () => {
         const template = `{{ "foo" }} {{ "bar" }}`;
+
         expect(() => templatingEngine.evaluateExpression(template, {})).toThrowError(
           'The provided expression is invalid. Got: {{ "foo" }} {{ "bar" }}'
         );

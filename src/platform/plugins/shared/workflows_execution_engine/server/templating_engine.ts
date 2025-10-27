@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Liquid } from 'liquidjs';
+import { AssignTag, Liquid } from 'liquidjs';
 
 export class WorkflowTemplatingEngine {
   private readonly engine: Liquid;
@@ -50,7 +50,7 @@ export class WorkflowTemplatingEngine {
   }
 
   public evaluateExpression(template: string, context: Record<string, unknown>): unknown {
-    let resolvedExpression = template;
+    let resolvedExpression = template.trim();
     const openExpressionIndex = resolvedExpression.indexOf('{{');
     const closeExpressionIndex = resolvedExpression.lastIndexOf('}}');
     if (openExpressionIndex !== -1 && closeExpressionIndex !== -1) {
