@@ -9,20 +9,19 @@ import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { ThemeProvider } from '@emotion/react';
 import { EuiSpacer, EuiText } from '@elastic/eui';
-import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
-import { Ips as IpsComponent, useIpPopover } from './ips';
+import { Ips as IpsComponent, useIpPopover, type IpsProps } from './ips';
 import { GlobalStylesStorybookDecorator } from '../../../../.storybook/decorators';
 
 import '@xyflow/react/dist/style.css';
 
-const meta: Meta = {
+const meta: Meta<IpsProps> = {
   title: 'Components/Graph Components/Additional Components',
   decorators: [GlobalStylesStorybookDecorator],
 };
 
 export default meta;
 
-const IpsStoryComponent: React.FC = () => {
+const IpsStoryComponent: React.FC<IpsProps> = () => {
   const singleIp = ['10.200.0.202'];
   const singleIpClickable = ['192.168.1.100'];
   const multipleIps = [
@@ -39,40 +38,38 @@ const IpsStoryComponent: React.FC = () => {
   const singleIpPopover = useIpPopover(singleIpClickable);
 
   return (
-    <TestProvider>
-      <ThemeProvider theme={{ darkMode: false }}>
-        {/* Single IP without click handler - renders as text */}
-        <div>
-          <EuiText>{'Single IP (non-clickable):'}</EuiText>
-          <EuiSpacer size="s" />
-          <IpsComponent ips={singleIp} />
-        </div>
+    <ThemeProvider theme={{ darkMode: false }}>
+      {/* Single IP without click handler - renders as text */}
+      <div>
+        <EuiText>{'Single IP (non-clickable):'}</EuiText>
+        <EuiSpacer size="s" />
+        <IpsComponent ips={singleIp} />
+      </div>
 
-        <EuiSpacer size="l" />
+      <EuiSpacer size="l" />
 
-        {/* Single IP with click handler - opens popover */}
-        <div>
-          <EuiText>{'Single IP (clickable with popover):'}</EuiText>
-          <EuiSpacer size="s" />
-          <IpsComponent ips={singleIpClickable} onIpClick={singleIpPopover.onIpClick} />
-        </div>
+      {/* Single IP with click handler - opens popover */}
+      <div>
+        <EuiText>{'Single IP (clickable with popover):'}</EuiText>
+        <EuiSpacer size="s" />
+        <IpsComponent ips={singleIpClickable} onIpClick={singleIpPopover.onIpClick} />
+      </div>
 
-        <EuiSpacer size="l" />
+      <EuiSpacer size="l" />
 
-        {/* Multiple IPs with click handler */}
-        <div>
-          <EuiText>{'Multiple IPs (with popover):'}</EuiText>
-          <EuiSpacer size="s" />
-          <IpsComponent ips={multipleIps} onIpClick={multipleIpsPopover.onIpClick} />
-        </div>
+      {/* Multiple IPs with click handler */}
+      <div>
+        <EuiText>{'Multiple IPs (with popover):'}</EuiText>
+        <EuiSpacer size="s" />
+        <IpsComponent ips={multipleIps} onIpClick={multipleIpsPopover.onIpClick} />
+      </div>
 
-        <singleIpPopover.PopoverComponent />
-        <multipleIpsPopover.PopoverComponent />
-      </ThemeProvider>
-    </TestProvider>
+      <singleIpPopover.PopoverComponent />
+      <multipleIpsPopover.PopoverComponent />
+    </ThemeProvider>
   );
 };
 
-export const Ips: StoryObj = {
-  render: () => <IpsStoryComponent />,
+export const Ips: StoryObj<IpsProps> = {
+  render: (args) => <IpsStoryComponent {...args} />,
 };
