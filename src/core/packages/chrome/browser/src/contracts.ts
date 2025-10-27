@@ -82,7 +82,7 @@ export interface ChromeStart {
   setBadge(badge?: ChromeBadge): void;
 
   /**
-   * Set global footer
+   * Set global footer; Meant to be used by developer toolbar
    */
   setGlobalFooter(node: ReactNode): void;
 

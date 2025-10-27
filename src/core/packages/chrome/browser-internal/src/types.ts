@@ -111,6 +111,10 @@ export interface InternalChromeStart extends ChromeStart {
    */
   getBodyClasses$(): Observable<string[]>;
 
+  /**
+   * Used only by the rendering service to render the global footer UI (devbar)
+   * @internal
+   */
   getGlobalFooter$(): Observable<ReactNode>;
 
   /**

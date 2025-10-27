@@ -37,6 +37,9 @@ interface LayoutConfigContextValue {
 
 /**
  * Global registry for ensuring single context instance across bundles
+ *
+ * TODO: this pattern is used to share a single context provider across bundles loaded from different plugins to allow for smoother DX
+ * https://github.com/elastic/kibana/issues/240770
  * @internal
  */
 const REGISTRY_KEY = '__KIBANA_LAYOUT_CONFIG_CTX__';
