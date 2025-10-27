@@ -86,7 +86,7 @@ const createStartContractMock = () => {
     project: lazyObject({
       setHome: jest.fn(),
       setCloudUrls: jest.fn(),
-      setProjectName: jest.fn(),
+      setKibanaName: jest.fn(),
       setFeedbackUrlParams: jest.fn(),
       initNavigation: jest.fn(),
       setBreadcrumbs: jest.fn(),
