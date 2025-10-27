@@ -10,10 +10,16 @@
 import type { SearchSessionsMgmtTable } from '../components/table';
 import { columns } from '../components/table';
 import { ACTION } from '../types';
+import type { UISession } from '../types';
 
 type GetColumnsFn = React.ComponentProps<typeof SearchSessionsMgmtTable>['getColumns'];
 
-export const getColumns: GetColumnsFn = ({
+interface ExtendedGetColumnsProps {
+  onInspectSession?: (session: UISession) => void;
+}
+
+export const getColumns: GetColumnsFn &
+  ((props: Parameters<GetColumnsFn>[0] & ExtendedGetColumnsProps) => ReturnType<GetColumnsFn>) = ({
   core,
   kibanaVersion,
   searchUsageCollector,
@@ -21,6 +27,7 @@ export const getColumns: GetColumnsFn = ({
   timezone,
   onActionComplete,
   onBackgroundSearchOpened,
+  onInspectSession,
 }) => [
   columns.nameColumn({
     core,
@@ -33,6 +40,7 @@ export const getColumns: GetColumnsFn = ({
     core,
     api,
     onActionComplete,
+    onInspectSession,
     allowedActions: [ACTION.INSPECT, ACTION.EXTEND, ACTION.RENAME, ACTION.DELETE],
   }),
 ];

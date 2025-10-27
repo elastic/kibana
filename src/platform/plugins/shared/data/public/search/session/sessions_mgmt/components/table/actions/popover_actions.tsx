@@ -28,6 +28,7 @@ interface PopoverActionItemsProps {
   onActionComplete: OnActionComplete;
   core: CoreStart;
   allowedActions?: UISession['actions'];
+  onInspectSession?: (session: UISession) => void;
 }
 
 export const PopoverActionsMenu = ({
@@ -36,6 +37,7 @@ export const PopoverActionsMenu = ({
   session,
   core,
   allowedActions,
+  onInspectSession,
 }: PopoverActionItemsProps) => {
   const [isPopoverOpen, setPopover] = useState(false);
 
@@ -71,7 +73,7 @@ export const PopoverActionsMenu = ({
     }) || [];
   // Generic set of actions - up to the API to return what is available
   const items = actions.reduce((itemSet, actionType) => {
-    const actionDef = getAction(api, actionType, session, core);
+    const actionDef = getAction(api, actionType, session, core, onInspectSession);
     if (actionDef) {
       const { label, iconType, onClick } = actionDef;
 
