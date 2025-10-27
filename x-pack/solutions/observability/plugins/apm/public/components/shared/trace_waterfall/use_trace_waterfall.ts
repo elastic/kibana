@@ -152,7 +152,9 @@ export function getRootItemOrFallback(
   const parentIds = new Set(traceItems.map(({ id }) => id));
   // TODO: Reuse waterfall util methods where possible or if logic is the same
   const orphans = traceItems.filter(
-    (item) => item.parentId && !parentIds.has(item.parentId) && item.id !== rootItem?.id
+    (item) =>
+      // Root cannot be an orphan.
+      item.id !== rootItem?.id && item.parentId && !parentIds.has(item.parentId)
   );
 
   if (rootItem) {

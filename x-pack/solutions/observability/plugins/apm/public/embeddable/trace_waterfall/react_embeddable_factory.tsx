@@ -190,7 +190,14 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
             mode$
           );
           const content =
-            mode !== 'summary' ? (
+            mode === 'summary' ? (
+              <FocusedTraceWaterfallEmbeddable
+                traceId={traceId}
+                rangeFrom={rangeFrom}
+                rangeTo={rangeTo}
+                docId={docId}
+              />
+            ) : (
               <TraceWaterfallEmbeddable
                 serviceName={serviceName}
                 traceId={traceId}
@@ -202,13 +209,6 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
                 getRelatedErrorsHref={getRelatedErrorsHref}
                 onErrorClick={onErrorClick}
                 mode={mode}
-              />
-            ) : (
-              <FocusedTraceWaterfallEmbeddable
-                traceId={traceId}
-                rangeFrom={rangeFrom}
-                rangeTo={rangeTo}
-                docId={docId}
               />
             );
 

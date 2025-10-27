@@ -355,7 +355,7 @@ describe('createColorLookupMap', () => {
   });
 });
 
-describe('getTraceMap', () => {
+describe('getTraceParentChildrenMap', () => {
   afterAll(() => {
     jest.clearAllMocks();
   });
@@ -456,6 +456,35 @@ describe('getTraceMap', () => {
     const result = getTraceParentChildrenMap(items, false);
 
     expect(result.root).toEqual([expect.objectContaining({ id: '2' })]);
+  });
+
+  it("elects a root if there isn't one for a filtered trace", () => {
+    const items: TraceItem[] = [
+      {
+        id: '1',
+        timestampUs: 0,
+        name: 'span1',
+        parentId: '0',
+        traceId: 't1',
+        duration: 100,
+        serviceName: 'svcA',
+        errors: [],
+      },
+      {
+        id: '2',
+        timestampUs: 0,
+        name: 'span2',
+        parentId: '1',
+        traceId: 't1',
+        duration: 100,
+        serviceName: 'svcB',
+        errors: [],
+      },
+    ];
+
+    const result = getTraceParentChildrenMap(items, true);
+
+    expect(result.root).toEqual([expect.objectContaining({ id: '1' })]);
   });
 
   it('returns an empty object for empty input', () => {

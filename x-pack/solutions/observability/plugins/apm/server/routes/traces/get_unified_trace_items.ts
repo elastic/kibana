@@ -131,7 +131,7 @@ export async function getUnifiedTraceItems({
                 filter: [
                   ...termQuery(TRACE_ID, traceId),
                   ...rangeQuery(start, end),
-                  ...(serviceName ? termQuery(SERVICE_NAME, serviceName) : []),
+                  ...termQuery(SERVICE_NAME, serviceName),
                 ],
                 should: { exists: { field: PARENT_ID } },
               },
