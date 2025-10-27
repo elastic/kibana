@@ -84,3 +84,7 @@ export interface StreamlangDSL {
 export const streamlangDSLSchema = z.object({
   steps: z.array(streamlangStepSchema),
 });
+
+export const isStreamlangDSLSchema = (obj: any): obj is StreamlangDSL => {
+  return isSchema(streamlangDSLSchema, obj);
+};

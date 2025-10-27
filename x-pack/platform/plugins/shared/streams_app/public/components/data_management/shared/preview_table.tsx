@@ -10,13 +10,14 @@ import type {
   EuiDataGridProps,
   EuiDataGridRowHeightsOptions,
   EuiDataGridSorting,
+  EuiDataGridCellValueElementProps,
 } from '@elastic/eui';
 import { EuiButtonIcon, EuiDataGrid, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SampleDocument } from '@kbn/streams-schema';
 import ColumnHeaderTruncateContainer from '@kbn/unified-data-table/src/components/column_header_truncate_container';
 import { FieldIcon } from '@kbn/react-field';
-import React, { useMemo, useState, useCallback, createContext, useContext } from 'react';
+import React, { useMemo, useState, useCallback, createContext, useContext, useEffect } from 'react';
 import type {
   IgnoredField,
   DocumentWithIgnoredFields,
@@ -58,6 +59,94 @@ function RowSelectionButton({ rowIndex }: { rowIndex: number }) {
   );
 }
 
+interface RowSelectionCellProps extends EuiDataGridCellValueElementProps {
+  highlightColor: string;
+}
+
+const RowSelectionCell: React.FC<RowSelectionCellProps> = ({
+  rowIndex,
+  setCellProps,
+  highlightColor,
+}) => {
+  const { selectedRowIndex } = useRowSelection();
+
+  useEffect(() => {
+    if (selectedRowIndex === rowIndex) {
+      setCellProps({
+        style: {
+          backgroundColor: highlightColor,
+        },
+      });
+    } else {
+      setCellProps({ style: {} });
+    }
+  }, [highlightColor, rowIndex, selectedRowIndex, setCellProps]);
+
+  return <RowSelectionButton rowIndex={rowIndex} />;
+};
+
+interface PreviewCellValueProps extends EuiDataGridCellValueElementProps {
+  documents: (SampleDocument | DocumentWithIgnoredFields)[];
+  highlightColor: string;
+  renderCustomCellValue?: (
+    doc: SampleDocument,
+    columnId: string,
+    ignoredFields?: IgnoredField[]
+  ) => React.ReactNode | undefined;
+}
+
+const PreviewCellValue: React.FC<PreviewCellValueProps> = ({
+  rowIndex,
+  columnId,
+  setCellProps,
+  documents: docs,
+  highlightColor,
+  renderCustomCellValue,
+}) => {
+  const { selectedRowIndex } = useRowSelection();
+
+  useEffect(() => {
+    if (selectedRowIndex === rowIndex) {
+      setCellProps({
+        style: {
+          backgroundColor: highlightColor,
+        },
+      });
+    } else {
+      setCellProps({ style: {} });
+    }
+  }, [highlightColor, rowIndex, selectedRowIndex, setCellProps]);
+
+  const doc = docs[rowIndex];
+  const document = isDocumentWithIgnoredFields(doc) ? doc.values : doc;
+  const ignoredFields = isDocumentWithIgnoredFields(doc) ? doc.ignored_fields : [];
+
+  if (!document || typeof document !== 'object') {
+    return emptyCell;
+  }
+
+  if (renderCustomCellValue) {
+    const renderedValue = renderCustomCellValue(
+      document as SampleDocument,
+      columnId,
+      ignoredFields
+    );
+    if (renderedValue !== undefined) {
+      return <>{renderedValue}</>;
+    }
+  }
+
+  const value = (document as Record<string, unknown>)[columnId];
+  if (value === undefined || value === null) {
+    return emptyCell;
+  }
+  if (typeof value === 'object') {
+    return <>{JSON.stringify(value)}</>;
+  }
+  const stringValue = String(value);
+  return stringValue ? <>{stringValue}</> : emptyCell;
+};
+
 export const MemoPreviewTable = React.memo(PreviewTable);
 
 function isDocumentWithIgnoredFields(
@@ -70,7 +159,7 @@ export function PreviewTable({
   documents,
   displayColumns,
   height,
-  renderCellValue,
+  renderCellValue: customRenderCellValue,
   rowHeightsOptions,
   sorting,
   setSorting,
@@ -189,33 +278,26 @@ export function PreviewTable({
 
   const [columnWidths, setColumnWidths] = useState<Record<string, number | undefined>>({});
 
-  const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(
-    () => [
+  const highlightColor = theme.colors.highlight;
+
+  const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
+    if (!showLeadingControlColumns) {
+      return [];
+    }
+
+    const rowCellRender: EuiDataGridControlColumn['rowCellRender'] = (props) => (
+      <RowSelectionCell {...props} highlightColor={highlightColor} />
+    );
+
+    return [
       {
         id: 'selection',
         width: 36,
         headerCellRender: () => null,
-        rowCellRender: ({ rowIndex, setCellProps }) => {
-          // eslint-disable-next-line react-hooks/rules-of-hooks
-          const { selectedRowIndex } = useRowSelection();
-
-          if (selectedRowIndex === rowIndex) {
-            setCellProps({
-              style: {
-                backgroundColor: theme.colors.highlight,
-              },
-            });
-          } else {
-            setCellProps({
-              style: {},
-            });
-          }
-          return <RowSelectionButton rowIndex={rowIndex} />;
-        },
+        rowCellRender,
       },
-    ],
-    [theme.colors.highlight]
-  );
+    ];
+  }, [showLeadingControlColumns, highlightColor]);
 
   // Derive visibleColumns from canonical order
   const visibleColumns = useMemo(() => {
@@ -312,46 +394,14 @@ export function PreviewTable({
       rowCount={documents.length}
       rowHeightsOptions={rowHeightsOptions}
       onColumnResize={onColumnResize}
-      renderCellValue={({ rowIndex, columnId, setCellProps }) => {
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        const { selectedRowIndex } = useRowSelection();
-
-        if (selectedRowIndex === rowIndex) {
-          setCellProps({
-            style: {
-              backgroundColor: theme.colors.highlight,
-            },
-          });
-        } else {
-          setCellProps({
-            style: {},
-          });
-        }
-
-        const doc = documents[rowIndex];
-        const document = isDocumentWithIgnoredFields(doc) ? doc.values : doc;
-        const ignoredFields = isDocumentWithIgnoredFields(doc) ? doc.ignored_fields : [];
-
-        if (!document || typeof document !== 'object') {
-          return emptyCell;
-        }
-
-        if (renderCellValue) {
-          const renderedValue = renderCellValue(document, columnId, ignoredFields);
-          if (renderedValue !== undefined) {
-            return renderedValue;
-          }
-        }
-
-        const value = document[columnId];
-        if (value === undefined || value === null) {
-          return emptyCell;
-        }
-        if (typeof value === 'object') {
-          return JSON.stringify(value);
-        }
-        return String(value) || emptyCell;
-      }}
+      renderCellValue={(props) => (
+        <PreviewCellValue
+          {...props}
+          documents={documents}
+          highlightColor={highlightColor}
+          renderCustomCellValue={customRenderCellValue}
+        />
+      )}
     />
   );
 }

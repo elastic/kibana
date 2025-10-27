@@ -13,8 +13,8 @@ import type { errors as esErrors } from '@elastic/elasticsearch';
 import type { APIReturnType } from '@kbn/streams-plugin/public/api';
 import type { IToasts } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
-import { convertUIStepsToDSL, isActionBlock } from '@kbn/streamlang';
+import type { StreamlangDSL } from '@kbn/streamlang';
+import { getProcessorsCount } from '@kbn/streamlang';
 import { getStreamTypeFromDefinition } from '../../../../../util/get_stream_type_from_definition';
 import { getFormattedError } from '../../../../../util/errors';
 import type { StreamEnrichmentServiceDependencies } from './types';
@@ -23,7 +23,7 @@ export type UpsertStreamResponse = APIReturnType<'PUT /api/streams/{name}/_inges
 
 export interface UpsertStreamInput {
   definition: Streams.ingest.all.GetResponse;
-  steps: StreamlangStepWithUIAttributes[];
+  streamlangDSL: StreamlangDSL;
   fields?: FieldDefinition;
 }
 
@@ -44,7 +44,7 @@ export function createUpsertStreamActor({
             ? {
                 ingest: {
                   ...input.definition.stream.ingest,
-                  processing: convertUIStepsToDSL(input.steps),
+                  processing: input.streamlangDSL,
                   ...(input.fields && {
                     wired: { ...input.definition.stream.ingest.wired, fields: input.fields },
                   }),
@@ -53,7 +53,7 @@ export function createUpsertStreamActor({
             : {
                 ingest: {
                   ...input.definition.stream.ingest,
-                  processing: convertUIStepsToDSL(input.steps),
+                  processing: input.streamlangDSL,
                   ...(input.fields && {
                     classic: {
                       ...input.definition.stream.ingest.classic,
@@ -66,7 +66,7 @@ export function createUpsertStreamActor({
       }
     );
 
-    const processorsCount = input.steps.filter((step) => isActionBlock(step)).length;
+    const processorsCount = getProcessorsCount(input.streamlangDSL);
 
     telemetryClient.trackProcessingSaved({
       processors_count: processorsCount,

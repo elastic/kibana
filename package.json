@@ -1055,6 +1055,7 @@
     "@kbn/std": "link:src/platform/packages/shared/kbn-std",
     "@kbn/storage-adapter": "link:src/platform/packages/shared/kbn-storage-adapter",
     "@kbn/streamlang": "link:x-pack/platform/packages/shared/kbn-streamlang",
+    "@kbn/streamlang-yaml-editor": "link:x-pack/platform/packages/shared/kbn-streamlang-yaml-editor",
     "@kbn/streams-ai": "link:x-pack/platform/packages/shared/kbn-streams-ai",
     "@kbn/streams-app-plugin": "link:x-pack/platform/plugins/shared/streams_app",
     "@kbn/streams-plugin": "link:x-pack/platform/plugins/shared/streams",

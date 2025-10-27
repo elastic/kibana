@@ -2164,6 +2164,8 @@
       "@kbn/streamlang/*": ["x-pack/platform/packages/shared/kbn-streamlang/*"],
       "@kbn/streamlang-tests": ["x-pack/platform/packages/shared/kbn-streamlang-tests"],
       "@kbn/streamlang-tests/*": ["x-pack/platform/packages/shared/kbn-streamlang-tests/*"],
+      "@kbn/streamlang-yaml-editor": ["x-pack/platform/packages/shared/kbn-streamlang-yaml-editor"],
+      "@kbn/streamlang-yaml-editor/*": ["x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/*"],
       "@kbn/streams-ai": ["x-pack/platform/packages/shared/kbn-streams-ai"],
       "@kbn/streams-ai/*": ["x-pack/platform/packages/shared/kbn-streams-ai/*"],
       "@kbn/streams-app-plugin": ["x-pack/platform/plugins/shared/streams_app"],

@@ -19,8 +19,8 @@ import { useSelector } from '@xstate5/react';
 import { isWhereBlock } from '@kbn/streamlang';
 import { useDiscardConfirm } from '../../../../../hooks/use_discard_confirm';
 import {
+  useInteractiveModeSelector,
   useStreamEnrichmentEvents,
-  useStreamEnrichmentSelector,
 } from '../../state_management/stream_enrichment_state_machine';
 import { deleteProcessorPromptOptions } from './action/prompt_options';
 import { deleteConditionPromptOptions } from './where/prompt_options';
@@ -74,20 +74,20 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
   isLastStepInLevel,
 }) => {
   const { reorderStep, duplicateProcessor } = useStreamEnrichmentEvents();
-  const canEdit = useStreamEnrichmentSelector((snapshot) => snapshot.can({ type: 'step.edit' }));
-  const canDuplicate = useStreamEnrichmentSelector((snapshot) =>
+  const canEdit = useInteractiveModeSelector((snapshot) => snapshot.can({ type: 'step.edit' }));
+  const canDuplicate = useInteractiveModeSelector((snapshot) =>
     snapshot.can({ type: 'step.duplicateProcessor', processorStepId: stepRef.id })
   );
-  const canReorder = useStreamEnrichmentSelector(
+  const canReorder = useInteractiveModeSelector(
     (snapshot) =>
       snapshot.can({ type: 'step.reorder', stepId: stepRef.id, direction: 'up' }) ||
       snapshot.can({ type: 'step.reorder', stepId: stepRef.id, direction: 'down' })
   );
-  const canDelete = useStreamEnrichmentSelector((snapshot) =>
+  const canDelete = useInteractiveModeSelector((snapshot) =>
     snapshot.can({ type: 'step.delete', id: stepRef.id })
   );
 
-  const stepRefs = useStreamEnrichmentSelector((snapshot) => snapshot.context.stepRefs);
+  const stepRefs = useInteractiveModeSelector((snapshot) => snapshot.context.stepRefs);
 
   const step = useSelector(stepRef, (snapshot) => snapshot.context.step);
 
