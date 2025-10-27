@@ -236,11 +236,7 @@ export class UnifiedTabsPageObject extends FtrService {
   }
 
   public async isTabPreviewVisible() {
-    const tabPreviews = await this.find.allByCssSelector(
-      '[data-test-subj^="unifiedTabs_tabPreview_label_"]'
-    );
-
-    return tabPreviews.length === 1;
+    return await this.testSubjects.exists('unifiedTabs_tabPreview_contentPanel');
   }
 
   public async closeTabPreviewWithEsc() {
@@ -272,7 +268,7 @@ export class UnifiedTabsPageObject extends FtrService {
     await this.openTabPreview(index);
 
     const getVisibleText = async (selector: string): Promise<string> => {
-      const elements = await this.find.allByCssSelector(`[data-test-subj^="${selector}"]`);
+      const elements = await this.find.allByCssSelector(`[data-test-subj^="${selector}"]`, 0);
       if (elements?.length > 1) {
         throw new Error(
           `Expected exactly one element for selector ${selector}, but found ${elements.length}`
@@ -289,8 +285,6 @@ export class UnifiedTabsPageObject extends FtrService {
       query: await getVisibleText('unifiedTabs_tabPreviewCodeBlock_'),
       label: await getVisibleText('unifiedTabs_tabPreview_label_'),
     };
-
-    await this.closeTabPreviewWithEsc();
 
     return content;
   }

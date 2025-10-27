@@ -168,7 +168,11 @@ const TabPreviewInner: React.FC<{
 
   return (
     <>
-      <EuiSplitPanel.Inner paddingSize="none" css={getSplitPanelCss(euiTheme)}>
+      <EuiSplitPanel.Inner
+        paddingSize="none"
+        css={getSplitPanelCss(euiTheme)}
+        data-test-subj="unifiedTabs_tabPreview_contentPanel"
+      >
         {tabPreviewData.title ? (
           <EuiText
             size="s"
