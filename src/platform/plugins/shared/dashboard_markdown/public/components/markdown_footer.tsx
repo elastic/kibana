@@ -25,12 +25,11 @@ import { i18n } from '@kbn/i18n';
 export const FOOTER_HELP_TEXT = htmlIdGenerator()('markdownEditorFooterHelp');
 
 // Container query for when the height is too short and we need to switch to a more compact layout
-export const SHORT_CONTAINER_QUERY = `@container (max-height: 159px)`;
+export const SHORT_CONTAINER_QUERY = `@container (max-height: 119px)`;
 
 const footerStyles = {
   footer: ({ euiTheme }: UseEuiTheme) =>
     css({
-      padding: euiTheme.size.s,
       borderRadius: `0 0 ${euiTheme.size.s} ${euiTheme.size.s}`,
       width: '100%',
       borderTop: `1px solid ${euiTheme.colors.borderBasePlain}`,
@@ -53,9 +52,11 @@ const footerStyles = {
         },
       },
     }),
-  buttonsContainer: css({
-    position: 'relative',
-  }),
+  buttonsContainer: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      margin: euiTheme.size.s,
+      position: 'relative',
+    }),
   previewFooter: ({ euiTheme }: UseEuiTheme) =>
     css({
       opacity: 0,
