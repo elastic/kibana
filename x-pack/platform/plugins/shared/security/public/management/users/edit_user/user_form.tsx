@@ -435,6 +435,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
           <EuiFlexGroup responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="editUserFormSubmitButton"
                 type="submit"
                 isLoading={form.isSubmitting}
                 isDisabled={defaultValues === form.values || (form.isSubmitted && form.isInvalid)}
