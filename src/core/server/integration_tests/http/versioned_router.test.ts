@@ -277,7 +277,7 @@ describe('Routing versioned requests', () => {
         .expect(500)
         .then(({ body }) => body)
     ).resolves.toMatchObject({
-      message: expect.stringMatching(/Failed output validation/),
+      message: expect.stringMatching(/failed to validate response schema/),
     });
 
     await expect(
@@ -287,7 +287,7 @@ describe('Routing versioned requests', () => {
         .expect(500)
         .then(({ body }) => body)
     ).resolves.toMatchObject({
-      message: expect.stringMatching(/Failed output validation/),
+      message: expect.stringMatching(/failed to validate response schema/),
     });
 
     // This should pass response validation
