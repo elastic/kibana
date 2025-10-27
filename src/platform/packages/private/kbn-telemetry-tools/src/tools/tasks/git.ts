@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { promisify } from 'util';
+import { exec } from 'child_process';
 import { Octokit } from '@octokit/rest';
 import type { TelemetrySchemaObject } from '../../schema_ftr_validations/schema_to_config_schema';
 
+const execAsync = promisify(exec);
 let octokit: null | Octokit;
-
 let changedFilesCache: null | string[];
 
 function getOctokit() {
@@ -54,7 +56,31 @@ async function getPrChangedFiles(): Promise<string[]> {
   return changedFilesCache;
 }
 
+async function getUncommitedChanges(): Promise<string[]> {
+  const { stdout } = await execAsync(
+    `git status --porcelain -- . ':!:config/node.options' ':!config/kibana.yml'`,
+    { maxBuffer: 1024 * 1024 * 128 }
+  );
+
+  return stdout
+    .split('\n')
+    .map((line) =>
+      line
+        .replace('?? ', '')
+        .replace('A ', '')
+        .replace('M ', '')
+        .replace('D ', '')
+        .replace('R ', '')
+        .trim()
+    );
+}
+
 export async function isTelemetrySchemaModified({ path }: { path: string }): Promise<boolean> {
+  const modifiedFiles = await getUncommitedChanges();
+  if (modifiedFiles.includes(path)) {
+    return true;
+  }
+
   const prChanges = await getPrChangedFiles();
   return prChanges.length >= 3000 || prChanges.includes(path);
 }
