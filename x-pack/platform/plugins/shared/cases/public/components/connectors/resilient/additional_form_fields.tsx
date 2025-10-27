@@ -115,7 +115,11 @@ export const AdditionalFormFields = React.memo<{
     }, {} as Record<string, unknown>);
     const newValue = JSON.stringify(transformedFields);
     if (newValue !== additionalFieldsFormField.value) {
-      additionalFieldsFormField.setValue(JSON.stringify(transformedFields));
+      if (newValue === '{}') {
+        additionalFieldsFormField.setValue('');
+      } else {
+        additionalFieldsFormField.setValue(newValue);
+      }
     }
   }, [additionalFields, additionalFieldsFormField, fields, fieldsMetadataRecord]);
 
