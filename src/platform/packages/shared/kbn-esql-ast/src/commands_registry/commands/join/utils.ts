@@ -279,3 +279,12 @@ export const createEnrichedGetByType = async (
     return [...markedSourceSuggestions, ...uniqueLookupSuggestions];
   };
 };
+
+// Check if a field is common (exists in both source and lookup tables)
+export const isCommonField = (fieldName: string, context?: ICommandContext): boolean => {
+  if (!context?.columns) {
+    return false;
+  }
+
+  return context.columns.has(fieldName) && lookupIndexFieldSet.set.has(fieldName);
+};

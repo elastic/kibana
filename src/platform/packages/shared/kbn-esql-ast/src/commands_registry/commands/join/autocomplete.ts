@@ -21,6 +21,7 @@ import {
   createEnrichedGetByType,
   getFullCommandMnemonics,
   getPosition,
+  isCommonField,
 } from './utils';
 import { specialIndicesToSuggestions } from '../../../definitions/utils/sources';
 import { esqlCommandRegistry } from '../..';
@@ -175,8 +176,14 @@ export async function autocomplete(
 
       if (expressionRoot && !insideFunction) {
         const expressionType = getExpressionType(expressionRoot, enrichedContext?.columns);
+        const isBooleanComplete =
+          expressionType === 'boolean' && isExpressionComplete(expressionType, innerText);
 
-        if (expressionType === 'boolean' && isExpressionComplete(expressionType, innerText)) {
+        // Special case: single common field (exists in both source and lookup) is valid as shorthand for field = field
+        const fieldIsCommon =
+          expressionRoot.type === 'column' && isCommonField(expressionRoot.name, context);
+
+        if (isBooleanComplete || (!isBooleanComplete && fieldIsCommon)) {
           filteredSuggestions.push(withAutoSuggest({ ...commaCompleteItem, text: ', ' }));
           filteredSuggestions.push(pipeCompleteItem);
         }
