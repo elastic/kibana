@@ -46,7 +46,7 @@ check_for_changed_files() {
     git add -A -- . ':!config/node.options' ':!config/kibana.yml'
 
     git commit -m "$CUSTOM_FIX_MESSAGE"
-    exit 0
+    exit 1
   elif [ "$GIT_CHANGES" ]; then
     if ! is_auto_commit_disabled && [[ "$SHOULD_AUTO_COMMIT_CHANGES" == "true" && "${BUILDKITE_PULL_REQUEST:-false}" != "false" ]]; then
       echo "'$1' caused changes to the following files:"
