@@ -104,7 +104,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       await retry.tryForTime(300000, async () => {
         const caseAnalytics = await esClient.get({
-          index: '.internal.cases.default-securitysolution',
+          index: '.internal.cases.securitysolution-default',
           id: `cases:${caseToBackfill.id}`,
         });
 
@@ -193,14 +193,14 @@ export default ({ getService }: FtrProviderContext): void => {
 
       await retry.tryForTime(300000, async () => {
         const firstAttachmentAnalytics = await esClient.get({
-          index: '.internal.cases-attachments.space1-securitysolution',
+          index: '.internal.cases-attachments.securitysolution-space1',
           id: `cases-comments:${postedCaseWithAttachments.comments![0].id}`,
         });
 
         expect(firstAttachmentAnalytics.found).to.be(true);
 
         const secondAttachmentAnalytics = await esClient.get({
-          index: '.internal.cases-attachments.space1-securitysolution',
+          index: '.internal.cases-attachments.securitysolution-space1',
           id: `cases-comments:${postedCaseWithAttachments.comments![1].id}`,
         });
 
@@ -227,7 +227,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       await retry.try(async () => {
         const commentAnalytics = await esClient.get({
-          index: '.internal.cases-comments.default-securitysolution',
+          index: '.internal.cases-comments.securitysolution-default',
           id: `cases-comments:${patchedCase.comments![0].id}`,
         });
 
@@ -293,7 +293,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await retry.try(async () => {
         await runActivityBackfillTask(supertest);
         const activityAnalytics = await esClient.search({
-          index: '.internal.cases-activity.default-securitysolution',
+          index: '.internal.cases-activity.securitysolution-default',
         });
 
         // @ts-ignore

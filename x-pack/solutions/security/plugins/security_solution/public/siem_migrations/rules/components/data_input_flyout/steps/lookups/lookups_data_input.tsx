@@ -54,13 +54,14 @@ export const LookupsDataInput = React.memo<LookupsDataInputProps>(
             <EuiFlexGroup direction="row" justifyContent="center" gutterSize="m">
               <EuiFlexItem grow={false}>
                 <EuiStepNumber
+                  data-test-subj="lookupsUploadStepNumber"
                   titleSize="xs"
                   number={DataInputStep.Lookups}
                   status={dataInputStatus}
                 />
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiTitle size="xs">
+                <EuiTitle size="xs" data-test-subj="lookupsUploadTitle">
                   <b>{i18n.LOOKUPS_DATA_INPUT_TITLE}</b>
                 </EuiTitle>
               </EuiFlexItem>
@@ -69,7 +70,7 @@ export const LookupsDataInput = React.memo<LookupsDataInputProps>(
           {dataInputStatus === 'current' && migrationStats && missingLookups && (
             <>
               <EuiFlexItem>
-                <EuiText size="s" color="subdued">
+                <EuiText size="s" color="subdued" data-test-subj="lookupsUploadDescription">
                   {i18n.LOOKUPS_DATA_INPUT_DESCRIPTION}
                 </EuiText>
               </EuiFlexItem>

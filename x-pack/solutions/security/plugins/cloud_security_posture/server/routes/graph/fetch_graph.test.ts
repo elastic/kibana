@@ -264,9 +264,8 @@ describe('fetchGraph', () => {
     expect(query).toContain(`EVAL targetDocData = TO_STRING(null)`);
     expect(query).toContain(`EVAL targetHostIp = TO_STRING(null)`);
 
-    // Fallback eval clauses for non-enriched contextual data
-    expect(query).toContain(`EVAL sourceIps = TO_STRING(null)`);
-    expect(query).toContain(`EVAL sourceCountryCodes = TO_STRING(null)`);
+    expect(query).toContain('EVAL sourceIps = source.ip');
+    expect(query).toContain('EVAL sourceCountryCodes = source.geo.country_iso_code');
 
     expect(query).toContain(`actorsDocData = VALUES(actorDocData)`);
     expect(query).toContain(`targetsDocData = VALUES(targetDocData)`);

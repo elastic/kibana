@@ -14,7 +14,6 @@ import {
   EuiButton,
   EuiDescribedFormGroup,
   EuiSwitch,
-  EuiForm,
   EuiFormRow,
   EuiToolTip,
 } from '@elastic/eui';
@@ -29,6 +28,7 @@ import {
   useMigrateSpaceAwarenessMutation,
   usePutSettingsMutation,
   useStartServices,
+  useAgentlessResources,
 } from '../../../../hooks';
 
 export const AdvancedSection: React.FunctionComponent<{}> = ({}) => {
@@ -42,6 +42,9 @@ export const AdvancedSection: React.FunctionComponent<{}> = ({}) => {
   const [deleteUnenrolledAgentsChecked, setDeleteUnenrolledAgentsChecked] =
     React.useState<boolean>(deleteUnenrolledAgents);
   const { mutateAsync: mutateSettingsAsync } = usePutSettingsMutation();
+
+  // Agentless resources toggle state
+  const { showAgentless, setShowAgentless } = useAgentlessResources();
 
   const { mutateAsync: mutateSpaceAwarenessAsync, isLoading: mutateSpaceAwarenessIsLoading } =
     useMigrateSpaceAwarenessMutation();
@@ -134,95 +137,132 @@ export const AdvancedSection: React.FunctionComponent<{}> = ({}) => {
       {fleetStatus.isSpaceAwarenessEnabled ? null : (
         <>
           <EuiSpacer size="m" />
-          <EuiForm component="form">
-            <EuiDescribedFormGroup
-              title={
-                <h3>
-                  <FormattedMessage
-                    id="xpack.fleet.settings.migrateSpaceAwarenessLabel"
-                    defaultMessage="Migrate to Space-Aware agent policies"
-                  />
-                </h3>
-              }
-              description={
-                <p>
-                  <FormattedMessage
-                    id="xpack.fleet.settings.advancedSection.switchLabel"
-                    defaultMessage="Take advantage of improved isolation and management by enabling space-specific agent policies."
-                  />
-                </p>
-              }
-            >
-              <EuiFormRow label="">
-                <EuiButton
-                  onClick={onClickEnableSpaceAwareness}
-                  isLoading={mutateSpaceAwarenessIsLoading}
-                >
-                  <FormattedMessage
-                    id="xpack.fleet.settings.deleteUnenrolledAgentsLabel"
-                    defaultMessage="Start migration"
-                  />
-                </EuiButton>
-              </EuiFormRow>
-            </EuiDescribedFormGroup>
-          </EuiForm>
+
+          <EuiDescribedFormGroup
+            title={
+              <h3>
+                <FormattedMessage
+                  id="xpack.fleet.settings.migrateSpaceAwarenessLabel"
+                  defaultMessage="Migrate to space-aware agent policies"
+                />
+              </h3>
+            }
+            description={
+              <p>
+                <FormattedMessage
+                  id="xpack.fleet.settings.advancedSection.switchLabel"
+                  defaultMessage="Take advantage of improved isolation and management by enabling space-specific agent policies."
+                />
+              </p>
+            }
+          >
+            <EuiFormRow>
+              <EuiButton
+                onClick={onClickEnableSpaceAwareness}
+                isLoading={mutateSpaceAwarenessIsLoading}
+              >
+                <FormattedMessage
+                  id="xpack.fleet.settings.deleteUnenrolledAgentsLabel"
+                  defaultMessage="Start migration"
+                />
+              </EuiButton>
+            </EuiFormRow>
+          </EuiDescribedFormGroup>
         </>
       )}
+
       <EuiSpacer size="m" />
-      <EuiForm component="form">
-        <EuiDescribedFormGroup
-          title={
-            <h3>
-              <FormattedMessage
-                id="xpack.fleet.settings.deleteUnenrolledAgentsLabel"
-                defaultMessage="Delete unenrolled agents"
-              />
-            </h3>
-          }
-          description={
-            <p>
-              <FormattedMessage
-                id="xpack.fleet.settings.advancedSection.switchLabel"
-                defaultMessage="Switching on this setting will enable auto deletion of unenrolled agents. For more information see our {docLink}."
-                values={{
-                  docLink: (
-                    <EuiLink target="_blank" external href={docLinks.links.fleet.settings}>
-                      <FormattedMessage
-                        id="xpack.fleet.settings.advancedSection.link"
-                        defaultMessage="docs"
-                      />
-                    </EuiLink>
-                  ),
-                }}
-              />
-            </p>
-          }
-        >
-          <EuiFormRow label="">
-            <EuiToolTip
-              content={
-                isPreconfigured
-                  ? i18n.translate('xpack.fleet.settings.advancedSection.preconfiguredTitle', {
-                      defaultMessage: 'This setting is preconfigured and cannot be updated.',
-                    })
-                  : undefined
+
+      <EuiDescribedFormGroup
+        title={
+          <h3>
+            <FormattedMessage
+              id="xpack.fleet.settings.deleteUnenrolledAgentsLabel"
+              defaultMessage="Delete unenrolled agents"
+            />
+          </h3>
+        }
+        description={
+          <p>
+            <FormattedMessage
+              id="xpack.fleet.settings.advancedSection.switchLabel"
+              defaultMessage="Switching on this setting will enable auto-deletion of unenrolled agents. For more information, refer to the {docLink}."
+              values={{
+                docLink: (
+                  <EuiLink target="_blank" external href={docLinks.links.fleet.settings}>
+                    <FormattedMessage
+                      id="xpack.fleet.settings.advancedSection.link"
+                      defaultMessage="docs"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </p>
+        }
+      >
+        <EuiFormRow>
+          <EuiToolTip
+            content={
+              isPreconfigured
+                ? i18n.translate('xpack.fleet.settings.advancedSection.preconfiguredTitle', {
+                    defaultMessage: 'This setting is preconfigured and cannot be updated.',
+                  })
+                : undefined
+            }
+          >
+            <EuiSwitch
+              label={
+                <FormattedMessage
+                  id="xpack.fleet.settings.deleteUnenrolledAgentsLabel"
+                  defaultMessage="Delete unenrolled agents"
+                />
               }
-            >
-              <EuiSwitch
-                label={
-                  <FormattedMessage
-                    id="xpack.fleet.settings.deleteUnenrolledAgentsLabel"
-                    defaultMessage="Delete unenrolled agents"
-                  />
-                }
-                checked={deleteUnenrolledAgentsChecked}
-                onChange={(e) => updateSettings(e.target.checked)}
-                disabled={!authz.fleet.allSettings || isPreconfigured}
+              checked={deleteUnenrolledAgentsChecked}
+              onChange={(e) => updateSettings(e.target.checked)}
+              disabled={!authz.fleet.allSettings || isPreconfigured}
+            />
+          </EuiToolTip>
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+
+      <EuiSpacer size="m" />
+
+      <EuiDescribedFormGroup
+        title={
+          <h3>
+            <FormattedMessage
+              id="xpack.fleet.settings.showAgentlessResourcesLabel"
+              defaultMessage="Show agentless resources"
+            />
+          </h3>
+        }
+        description={
+          <p>
+            <FormattedMessage
+              id="xpack.fleet.settings.showAgentlessResourcesDescription"
+              defaultMessage="Enable this toggle to display agentless agents and policies in Fleet for debugging and diagnostics purposes. This setting is stored locally and is only visible to you."
+            />
+          </p>
+        }
+      >
+        <EuiFormRow>
+          <EuiSwitch
+            label={
+              <FormattedMessage
+                id="xpack.fleet.settings.showAgentlessResourcesLabel"
+                defaultMessage="Show agentless resources"
               />
-            </EuiToolTip>
-          </EuiFormRow>
-        </EuiDescribedFormGroup>
-      </EuiForm>
+            }
+            checked={showAgentless}
+            onChange={(e) => {
+              setShowAgentless(e.target.checked);
+              setShowAgentless(e.target.checked);
+            }}
+            data-test-subj="showAgentlessResourcesSwitch"
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
 
       <EuiSpacer size="m" />
     </>

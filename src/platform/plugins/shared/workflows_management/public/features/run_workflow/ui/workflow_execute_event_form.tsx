@@ -7,23 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
+// TODO: remove eslint exception and use i18n for strings
+/* eslint-disable @typescript-eslint/no-explicit-any, react/jsx-no-literals */
+
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
-  EuiButton,
+  EuiBasicTable,
   EuiCallOut,
-  EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
-import { CodeEditor } from '@kbn/code-editor';
-import type { SecurityServiceStart } from '@kbn/core-security-browser';
+import React, { useCallback, useEffect, useState } from 'react';
+import { take } from 'rxjs';
+import type { Query, TimeRange } from '@kbn/data-plugin/common';
+import { buildEsQuery } from '@kbn/es-query';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { useKibana } from '../../../hooks/use_kibana';
 
 interface Alert {
   _id: string;
@@ -35,14 +37,7 @@ interface Alert {
     'kibana.alert.severity': string;
     'kibana.alert.status': string;
     'kibana.alert.reason': string;
-    [key: string]: any;
-  };
-}
-
-interface AlertsResponse {
-  hits: {
-    hits: Alert[];
-    total: { value: number; relation: string };
+    [key: string]: unknown;
   };
 }
 
@@ -53,34 +48,32 @@ interface WorkflowExecuteEventFormProps {
   setErrors: (errors: string | null) => void;
 }
 
-const getDefaultWorkflowInput = (currentUser: any): string => {
-  const userEmail = currentUser?.email || 'workflow-user@gmail.com';
-  const userName = currentUser?.username || 'workflow-user';
-  return JSON.stringify(
-    {
-      event: {
-        ruleName: 'Detect vulnerabilities',
-        additionalData: {
-          user: userEmail,
-          userName,
-        },
-      },
-    },
-    null,
-    2
-  );
-};
+const unflattenObject = (flatObject: Record<string, any>): Record<string, any> => {
+  const result: Record<string, any> = {};
 
-const getCurrentUser = async (security: SecurityServiceStart) => {
-  try {
-    if (security) {
-      return await security.authc.getCurrentUser();
+  for (const key of Object.keys(flatObject)) {
+    const keys = key.split('.');
+    let current = result;
+    for (let i = 0; i < keys.length; i++) {
+      const currentKey = keys[i];
+      if (i === keys.length - 1) {
+        const v = flatObject[key];
+        current[currentKey] = v && typeof v === 'object' ? { ...v } : v;
+      } else {
+        if (
+          current[currentKey] === undefined ||
+          typeof current[currentKey] !== 'object' ||
+          Array.isArray(current[currentKey]) ||
+          !Object.isExtensible(current[currentKey]) // add this
+        ) {
+          current[currentKey] = {};
+        }
+        current = current[currentKey];
+      }
     }
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error(error);
   }
-  return null;
+
+  return result;
 };
 
 export const WorkflowExecuteEventForm = ({
@@ -90,14 +83,33 @@ export const WorkflowExecuteEventForm = ({
   setErrors,
 }: WorkflowExecuteEventFormProps): React.JSX.Element => {
   const { services } = useKibana();
-  const [currentUser, setCurrentUser] = useState<AuthenticatedUser | null>(null);
-  const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
+  const {
+    unifiedSearch: {
+      ui: { SearchBar },
+    },
+    spaces,
+  } = services;
+  const [spaceId, setSpaceId] = useState<string | null>(null);
   const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [timeRange, setTimeRange] = useState<TimeRange>({
+    from: 'now-15m',
+    to: 'now',
+  });
+
   const [alertsLoading, setAlertsLoading] = useState(false);
+  const [query, setQuery] = useState<Query>({ query: '', language: 'kuery' });
+
+  // Get space ID
+  useEffect(() => {
+    if (spaces) {
+      spaces.getActiveSpace().then((space) => {
+        setSpaceId(space.id);
+      });
+    }
+  }, [spaces]);
 
   const fetchAlerts = useCallback(async () => {
-    if (!services.http) {
-      setErrors('HTTP service not available');
+    if (!services.data || !spaceId) {
       return;
     }
 
@@ -105,54 +117,47 @@ export const WorkflowExecuteEventForm = ({
     setErrors(null);
 
     try {
-      // Query for recent alerts (last 24 hours)
-      const query = {
+      const esQuery = buildEsQuery(undefined, query ? [query] : [], []);
+      const searchQuery = {
         bool: {
+          must: esQuery.bool.must || [],
           filter: [
+            ...(esQuery.bool.filter || []),
             {
               range: {
                 '@timestamp': {
-                  gte: 'now-24h',
-                  lte: 'now',
+                  gte: timeRange.from,
+                  lte: timeRange.to,
                 },
               },
             },
           ],
+          should: esQuery.bool.should || [],
+          must_not: esQuery.bool.must_not || [],
         },
       };
 
-      const response = await services.http.post<AlertsResponse>(
-        '/api/detection_engine/signals/search',
-        {
-          body: JSON.stringify({
-            query,
-            size: 50, // Limit to 50 recent alerts
+      const request = {
+        params: {
+          index: `.alerts-*-${spaceId}`,
+          body: {
+            query: searchQuery,
+            size: 50,
             sort: [{ '@timestamp': { order: 'desc' } }],
-            _source: [
-              '@timestamp',
-              'kibana.alert.rule.name',
-              'kibana.alert.rule.uuid',
-              'kibana.alert.severity',
-              'kibana.alert.status',
-              'kibana.alert.reason',
-              'agent.name',
-              'host.name',
-              'user.name',
-              'process.name',
-              'file.name',
-              'source.ip',
-              'destination.ip',
-            ],
-          }),
-          headers: {
-            'Content-Type': 'application/json',
+            _source: [],
           },
-          version: '2023-10-31',
-        }
-      );
+        },
+      };
 
-      if (response && response.hits && response.hits.hits) {
-        setAlerts(response.hits.hits);
+      const response = await services.data.search.search(request).pipe(take(1)).toPromise();
+
+      if (
+        response &&
+        response.rawResponse &&
+        response.rawResponse.hits &&
+        response.rawResponse.hits.hits
+      ) {
+        setAlerts(response.rawResponse.hits.hits as Alert[]);
       } else {
         setAlerts([]);
       }
@@ -162,141 +167,119 @@ export const WorkflowExecuteEventForm = ({
     } finally {
       setAlertsLoading(false);
     }
-  }, [services.http, setErrors]);
+  }, [services.data, setErrors, query, timeRange.from, timeRange.to, spaceId]);
 
   useEffect(() => {
-    fetchAlerts();
-  }, [fetchAlerts]);
-
-  // Get current user
-  useEffect(() => {
-    if (!services.security) {
-      setErrors('Security service not available');
-      return;
+    if (spaceId) {
+      fetchAlerts();
     }
-    getCurrentUser(services.security).then((user: AuthenticatedUser | null): void => {
-      setCurrentUser(user);
-    });
-  }, [services.security, setErrors]);
+  }, [fetchAlerts, spaceId]);
 
-  const handleAlertSelection = (selectedOptions: EuiComboBoxOptionOption[]) => {
-    if (selectedOptions.length > 0) {
-      const selectedAlertId = selectedOptions[0].value;
-      const alert = alerts.find((a) => a._id === selectedAlertId);
-      if (!alert) return;
+  const updateEventData = (selectedAlerts: Alert[]) => {
+    if (selectedAlerts.length > 0) {
+      const alertEvents = selectedAlerts.map((alert: Alert) => {
+        const unflattenedAlert = unflattenObject(alert._source);
 
-      setSelectedAlert(alert);
+        return {
+          id: alert._id,
+          index: alert._index,
+          timestamp: alert._source['@timestamp'],
+          ...unflattenedAlert.kibana.alert,
+        };
+      });
 
-      // Create workflow event from alert data
-      const alertEvent = {
+      const workflowEvent = {
         event: {
-          alert: {
-            id: alert._id,
-            index: alert._index,
-            timestamp: alert._source['@timestamp'],
-            rule: {
-              name: alert._source['kibana.alert.rule.name'],
-              uuid: alert._source['kibana.alert.rule.uuid'],
-            },
-            severity: alert._source['kibana.alert.severity'],
-            status: alert._source['kibana.alert.status'],
-            reason: alert._source['kibana.alert.reason'],
-            ...(alert._source['agent.name'] && { agent: { name: alert._source['agent.name'] } }),
-            ...(alert._source['host.name'] && { host: { name: alert._source['host.name'] } }),
-            ...(alert._source['user.name'] && { user: { name: alert._source['user.name'] } }),
-            ...(alert._source['process.name'] && {
-              process: { name: alert._source['process.name'] },
-            }),
-            ...(alert._source['file.name'] && { file: { name: alert._source['file.name'] } }),
-            ...(alert._source['source.ip'] && { source: { ip: alert._source['source.ip'] } }),
-            ...(alert._source['destination.ip'] && {
-              destination: { ip: alert._source['destination.ip'] },
-            }),
-          },
-          additionalData: {
-            user: currentUser?.email || 'workflow-user@gmail.com',
-            userName: currentUser?.username || 'workflow-user',
-          },
+          alerts: alertEvents,
         },
       };
 
-      setValue(JSON.stringify(alertEvent, null, 2));
-    } else {
-      setSelectedAlert(null);
-      setValue(getDefaultWorkflowInput(currentUser));
+      setValue(JSON.stringify(workflowEvent, null, 2));
     }
   };
 
-  useEffect(() => {
-    if (!value && currentUser) {
-      setValue(getDefaultWorkflowInput(currentUser));
+  const handleQueryChange = ({
+    query: newQuery,
+    dateRange,
+  }: {
+    query?: Query;
+    dateRange: TimeRange;
+  }) => {
+    if (newQuery) {
+      setQuery(newQuery);
     }
-  }, [value, currentUser, setValue]);
+    setTimeRange(dateRange);
+  };
 
-  // Convert alerts to combobox options
-  const alertOptions: EuiComboBoxOptionOption[] = useMemo(() => {
-    return alerts.map((alert) => ({
-      label: `${alert._source['kibana.alert.rule.name']} - ${
-        alert._source['kibana.alert.severity']
-      } (${new Date(alert._source['@timestamp']).toLocaleString()})`,
-      value: alert._id,
-    }));
-  }, [alerts]);
+  const fmt = services.fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.DATE);
+
+  const columns: EuiBasicTableColumn<Alert>[] = [
+    {
+      field: '_source.@timestamp',
+      name: '@timestamp',
+      sortable: true,
+      width: '250px',
+      render: (timestamp: string) => fmt.convert(new Date(timestamp)),
+    },
+    {
+      field: '_source.kibana.alert.rule.name',
+      name: 'Rule',
+      sortable: true,
+      render: (name: string, item: Alert) => item._source['kibana.alert.rule.name'],
+    },
+  ];
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="l">
+    <EuiFlexGroup direction="column" gutterSize="s">
       <EuiSpacer size="s" />
-      {/* Alerts Dropdown Section */}
       <EuiFlexItem>
-        <EuiFormRow
-          label="Select Alert (Optional)"
-          helpText="Choose a recent security alert to populate the workflow event data"
-        >
+        <SearchBar
+          appName="workflow_management"
+          showDatePicker
+          onQuerySubmit={handleQueryChange}
+          query={query}
+          dateRangeFrom={timeRange.from}
+          dateRangeTo={timeRange.to}
+          showFilterBar={false}
+          showSubmitButton={true}
+          placeholder="Filter your data using KQL syntax"
+          data-test-subj="workflow-query-input"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        {alertsLoading ? (
           <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem>
-              {alertsLoading ? (
-                <EuiFlexGroup alignItems="center" gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    <EuiLoadingSpinner size="m" />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiText size="s">Loading alerts...</EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              ) : (
-                <EuiComboBox
-                  placeholder="Select an alert to populate event data"
-                  options={alertOptions}
-                  selectedOptions={
-                    selectedAlert
-                      ? alertOptions.filter((opt) => opt.value === selectedAlert._id)
-                      : []
-                  }
-                  onChange={handleAlertSelection}
-                  singleSelection={{ asPlainText: true }}
-                  isClearable={true}
-                  data-test-subj="workflow-alert-selector"
-                />
-              )}
-            </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton
-                size="s"
-                iconType="refresh"
-                onClick={fetchAlerts}
-                isLoading={alertsLoading}
-              >
-                Refresh
-              </EuiButton>
+              <EuiLoadingSpinner size="m" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText size="s">Loading alerts...</EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiFormRow>
+        ) : (
+          <EuiBasicTable
+            itemId="_id"
+            rowHeader="@timestamp"
+            tableLayout="fixed"
+            items={alerts}
+            columns={columns}
+            selection={{
+              onSelectionChange: updateEventData,
+            }}
+          />
+        )}
       </EuiFlexItem>
 
       {/* Error Display */}
       {errors && (
         <EuiFlexItem>
-          <EuiCallOut title="Failed to load alerts" color="warning" iconType="help" size="s">
+          <EuiCallOut
+            announceOnMount
+            title="Failed to load alerts"
+            color="warning"
+            iconType="help"
+            size="s"
+          >
             <p>{errors}</p>
             <EuiText size="s">
               Make sure you have the proper permissions to access security alerts, or manually enter
@@ -305,51 +288,6 @@ export const WorkflowExecuteEventForm = ({
           </EuiCallOut>
         </EuiFlexItem>
       )}
-
-      {/* Alert Info */}
-      {selectedAlert && (
-        <EuiFlexItem>
-          <EuiCallOut title="Alert Selected" color="success" iconType="check" size="s">
-            <EuiText size="s">
-              <strong>{selectedAlert._source['kibana.alert.rule.name']}</strong> - Severity:{' '}
-              {selectedAlert._source['kibana.alert.severity']} - Status:{' '}
-              {selectedAlert._source['kibana.alert.status']}
-            </EuiText>
-          </EuiCallOut>
-        </EuiFlexItem>
-      )}
-
-      <EuiSpacer size="m" />
-
-      {/* Event Data Editor */}
-      <EuiFlexItem>
-        <EuiFormRow
-          label="Event Data"
-          helpText="JSON payload that will be passed to the workflow"
-          fullWidth
-        >
-          <CodeEditor
-            languageId="json"
-            value={value}
-            fitToContent={{
-              minLines: 5,
-              maxLines: 10,
-            }}
-            width="100%"
-            editorDidMount={() => {}}
-            onChange={setValue}
-            suggestionProvider={undefined}
-            dataTestSubj={'workflow-event-json-editor'}
-            options={{
-              language: 'json',
-              minimap: { enabled: false },
-              scrollBeyondLastLine: false,
-              wordWrap: 'on',
-              automaticLayout: true,
-            }}
-          />
-        </EuiFormRow>
-      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

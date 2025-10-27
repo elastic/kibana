@@ -43,6 +43,7 @@ import { useProfileAccessor } from '../../../../context_awareness';
 import {
   internalStateActions,
   useCurrentDataView,
+  useCurrentTabSelector,
   useInternalStateDispatch,
 } from '../../state_management/redux';
 import type { DiscoverAppLocatorParams } from '../../../../../common';
@@ -80,6 +81,7 @@ export const useTopNavLinks = ({
   const dispatch = useInternalStateDispatch();
   const currentDataView = useCurrentDataView();
   const appId = useObservable(services.application.currentAppId$);
+  const currentTab = useCurrentTabSelector((tabState) => tabState);
   const { authorizedRuleTypes }: { authorizedRuleTypes: RuleTypeWithDescription[] } =
     useGetRuleTypesPermissions({
       http: services.http,
@@ -193,6 +195,7 @@ export const useTopNavLinks = ({
           stateContainer: state,
           hasIntegrations: hasShareIntegration,
           hasUnsavedChanges,
+          currentTab,
           persistedDiscoverSession,
         });
         items.push(...shareAppMenuItem);
@@ -209,6 +212,7 @@ export const useTopNavLinks = ({
       dispatch,
       isEsqlMode,
       currentDataView,
+      currentTab,
       persistedDiscoverSession,
       hasShareIntegration,
       hasUnsavedChanges,

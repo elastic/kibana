@@ -7,49 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
 import moment from 'moment-timezone';
+import { z } from '@kbn/zod';
 
 export const DurationSchema = z.string().regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format');
-
-// Timezone validation helper
-const validateTimezone = (timezone: string) => {
-  if (moment.tz.zone(timezone) != null) {
-    return null;
-  }
-  return `Invalid timezone: ${timezone}`;
-};
-
-// RRule validation helpers
-const validateRRuleFrequency = (freq: string, byweekday?: string[], bymonthday?: number[]) => {
-  if (freq === 'WEEKLY' && (!byweekday || byweekday.length === 0)) {
-    return 'WEEKLY frequency requires at least one byweekday value';
-  }
-  if (freq === 'MONTHLY' && (!bymonthday || bymonthday.length === 0)) {
-    return 'MONTHLY frequency requires at least one bymonthday value';
-  }
-  return null;
-};
-
-const validateRRuleTimeFields = (byhour?: number[], byminute?: number[]) => {
-  if (byhour && byhour.some((h) => h < 0 || h > 23)) {
-    return 'byhour values must be between 0 and 23';
-  }
-  if (byminute && byminute.some((m) => m < 0 || m > 59)) {
-    return 'byminute values must be between 0 and 59';
-  }
-  return null;
-};
-
-const validateRRuleDateStart = (dtstart?: string) => {
-  if (dtstart) {
-    const date = new Date(dtstart);
-    if (isNaN(date.getTime())) {
-      return 'dtstart must be a valid ISO date string';
-    }
-  }
-  return null;
-};
 
 /* -- Settings -- */
 export const RetryPolicySchema = z.object({
@@ -134,41 +95,16 @@ export const ScheduledTriggerSchema = z.object({
         .regex(/^\d+[smhd]$/, 'Invalid interval format. Use format like "5m", "2h", "1d", "30s"'),
     }),
     z.object({
-      rrule: z
-        .object({
-          freq: z.enum(['DAILY', 'WEEKLY', 'MONTHLY']),
-          interval: z.number().int().positive(),
-          tzid: z.string().min(1),
-          dtstart: z.string().optional(),
-          byhour: z.array(z.number().int().min(0).max(23)).optional(),
-          byminute: z.array(z.number().int().min(0).max(59)).optional(),
-          byweekday: z.array(z.enum(['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'])).optional(),
-          bymonthday: z.array(z.number().int().min(1).max(31)).optional(),
-        })
-        .refine(
-          (data) => {
-            const freqError = validateRRuleFrequency(data.freq, data.byweekday, data.bymonthday);
-            if (freqError) return false;
-            const timeError = validateRRuleTimeFields(data.byhour, data.byminute);
-            if (timeError) return false;
-            const dateError = validateRRuleDateStart(data.dtstart);
-            if (dateError) return false;
-            const timezoneError = validateTimezone(data.tzid);
-            if (timezoneError) return false;
-            return true;
-          },
-          (data) => {
-            const freqError = validateRRuleFrequency(data.freq, data.byweekday, data.bymonthday);
-            if (freqError) return { message: freqError };
-            const timeError = validateRRuleTimeFields(data.byhour, data.byminute);
-            if (timeError) return { message: timeError };
-            const dateError = validateRRuleDateStart(data.dtstart);
-            if (dateError) return { message: dateError };
-            const timezoneError = validateTimezone(data.tzid);
-            if (timezoneError) return { message: timezoneError };
-            return { message: 'Invalid RRule configuration' };
-          }
-        ),
+      rrule: z.object({
+        freq: z.enum(['DAILY', 'WEEKLY', 'MONTHLY']),
+        interval: z.number().int().positive(),
+        tzid: z.enum(moment.tz.names() as [string, ...string[]]).default('UTC'),
+        dtstart: z.string().optional(),
+        byhour: z.array(z.number().int().min(0).max(23)).optional(),
+        byminute: z.array(z.number().int().min(0).max(59)).optional(),
+        byweekday: z.array(z.enum(['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'])).optional(),
+        bymonthday: z.array(z.number().int().min(1).max(31)).optional(),
+      }),
     }),
   ]),
 });
@@ -425,7 +361,7 @@ export const getMergeStepSchema = (stepSchema: z.ZodType, loose: boolean = false
 };
 
 /* --- Inputs --- */
-export const WorkflowInputTypeEnum = z.enum(['string', 'number', 'boolean', 'choice']);
+export const WorkflowInputTypeEnum = z.enum(['string', 'number', 'boolean', 'choice', 'array']);
 
 const WorkflowInputBaseSchema = z.object({
   name: z.string(),
@@ -434,32 +370,40 @@ const WorkflowInputBaseSchema = z.object({
   required: z.boolean().optional(),
 });
 
-const WorkflowInputStringSchema = WorkflowInputBaseSchema.extend({
+export const WorkflowInputStringSchema = WorkflowInputBaseSchema.extend({
   type: z.literal('string'),
   default: z.string().optional(),
 });
 
-const WorkflowInputNumberSchema = WorkflowInputBaseSchema.extend({
+export const WorkflowInputNumberSchema = WorkflowInputBaseSchema.extend({
   type: z.literal('number'),
   default: z.number().optional(),
 });
 
-const WorkflowInputBooleanSchema = WorkflowInputBaseSchema.extend({
+export const WorkflowInputBooleanSchema = WorkflowInputBaseSchema.extend({
   type: z.literal('boolean'),
   default: z.boolean().optional(),
 });
 
-const WorkflowInputChoiceSchema = WorkflowInputBaseSchema.extend({
+export const WorkflowInputChoiceSchema = WorkflowInputBaseSchema.extend({
   type: z.literal('choice'),
   default: z.string().optional(),
   options: z.array(z.string()),
 });
 
-export const WorkflowInputSchema = z.discriminatedUnion('type', [
+export const WorkflowInputArraySchema = WorkflowInputBaseSchema.extend({
+  type: z.literal('array'),
+  minItems: z.number().int().nonnegative().optional(),
+  maxItems: z.number().int().nonnegative().optional(),
+  default: z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]).optional(),
+});
+
+export const WorkflowInputSchema = z.union([
   WorkflowInputStringSchema,
   WorkflowInputNumberSchema,
   WorkflowInputBooleanSchema,
   WorkflowInputChoiceSchema,
+  WorkflowInputArraySchema,
 ]);
 
 /* --- Consts --- */
@@ -571,7 +515,16 @@ export const WorkflowContextSchema = z.object({
   event: EventSchema.optional(),
   execution: WorkflowExecutionContextSchema,
   workflow: WorkflowDataContextSchema,
-  inputs: z.record(z.union([z.string(), z.number(), z.boolean()])).optional(),
+  inputs: z
+    .record(
+      z.union([
+        z.string(),
+        z.number(),
+        z.boolean(),
+        z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]),
+      ])
+    )
+    .optional(),
   consts: z.record(z.string(), z.any()).optional(),
   now: z.date().optional(),
 });

@@ -22,19 +22,21 @@ import type {
 } from '@kbn/expressions-plugin/public';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
-import { getESQLForLayer } from './to_esql';
-import { convertToAbsoluteDateRange } from '../../utils';
-import type { DateRange } from '../../../common/types';
-import type { GenericIndexPatternColumn } from './form_based';
-import { operationDefinitionMap } from './operations';
-import type { FormBasedPrivateState, FormBasedLayer } from './types';
 import type {
   DateHistogramIndexPatternColumn,
+  DateRange,
+  FormBasedLayer,
+  FormBasedPrivateState,
+  FormattedIndexPatternColumn,
+  GenericIndexPatternColumn,
+  IndexPattern,
+  IndexPatternMap,
   RangeIndexPatternColumn,
-} from './operations/definitions';
-import type { FormattedIndexPatternColumn } from './operations/definitions/column_types';
+} from '@kbn/lens-common';
+import { getESQLForLayer } from './to_esql';
+import { convertToAbsoluteDateRange } from '../../utils';
+import { operationDefinitionMap } from './operations';
 import { isColumnFormatted, isColumnOfType } from './operations/definitions/helpers';
-import type { IndexPattern, IndexPatternMap } from '../../types';
 import { dedupeAggs } from './dedupe_aggs';
 import { resolveTimeShift } from './time_shift_utils';
 import { getSamplingValue } from './utils';
@@ -489,7 +491,7 @@ function getExpressionForLayer(
           index: buildExpression([
             buildExpressionFunction<IndexPatternLoadExpressionFunctionDefinition>(
               'indexPatternLoad',
-              { id: indexPattern.id }
+              { id: indexPattern.id, includeFields: false }
             ),
           ]),
           aggs,

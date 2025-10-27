@@ -11,7 +11,7 @@ import React, { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { DefaultEditorSize } from '@kbn/vis-default-editor-plugin/public';
-import type { VisParams } from '@kbn/visualizations-plugin/public';
+import type { VisParams } from '@kbn/visualizations-common';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { TIMELION_VIS_NAME } from '../common/constants';
 import type { TimelionOptionsProps } from './timelion_options';

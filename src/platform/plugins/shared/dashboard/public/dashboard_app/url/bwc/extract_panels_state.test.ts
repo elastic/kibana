@@ -12,6 +12,66 @@ import { extractPanelsState } from './extract_panels_state';
 
 describe('extractPanelsState', () => {
   describe('< 9.3 panels state', () => {
+    test('should remove "i" from grid', () => {
+      const { panels } = extractPanelsState({
+        panels: [
+          {
+            grid: { x: 0, y: 0, w: 24, h: 15, i: 'panel1' },
+            type: 'lens',
+            config: {},
+          },
+          {
+            title: 'Section 1',
+            grid: { y: 1, i: 'section1' },
+            panels: [
+              {
+                grid: { x: 0, y: 2, w: 24, h: 15, i: 'panelInSection' },
+                type: 'lens',
+                config: {},
+              },
+            ],
+          },
+        ],
+      });
+      expect(panels).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "config": Object {},
+            "grid": Object {
+              "h": 15,
+              "w": 24,
+              "x": 0,
+              "y": 0,
+            },
+            "type": "lens",
+            "uid": "panel1",
+          },
+          Object {
+            "grid": Object {
+              "y": 1,
+            },
+            "panels": Array [
+              Object {
+                "config": Object {},
+                "grid": Object {
+                  "h": 15,
+                  "w": 24,
+                  "x": 0,
+                  "y": 2,
+                },
+                "type": "lens",
+                "uid": "panelInSection",
+              },
+            ],
+            "title": "Section 1",
+            "uid": "section1",
+          },
+        ]
+      `);
+    });
+  });
+
+  describe('< 9.2 panels state', () => {
     test('should move gridData to grid', () => {
       const { panels } = extractPanelsState({
         panels: [
@@ -30,6 +90,7 @@ describe('extractPanelsState', () => {
         },
       ]);
     });
+
     test('should move panelIndex to uid', () => {
       const { panels } = extractPanelsState({
         panels: [
@@ -50,6 +111,7 @@ describe('extractPanelsState', () => {
         },
       ]);
     });
+
     test('should move panelConfig to config', () => {
       const { panels } = extractPanelsState({
         panels: [
@@ -78,8 +140,7 @@ describe('extractPanelsState', () => {
         },
       ]);
     });
-  });
-  describe('< 9.2 panels state', () => {
+
     test('should create saved object reference', () => {
       const { savedObjectReferences } = extractPanelsState({
         panels: [

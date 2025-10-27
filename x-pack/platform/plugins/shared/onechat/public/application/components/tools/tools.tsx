@@ -26,7 +26,7 @@ export const OnechatTools = () => {
   const { createOnechatUrl } = useNavigation();
 
   return (
-    <KibanaPageTemplate>
+    <KibanaPageTemplate data-test-subj="agentBuilderToolsPage">
       <KibanaPageTemplate.Header
         pageTitle={<TechPreviewTitle title={labels.tools.title} />}
         description={
