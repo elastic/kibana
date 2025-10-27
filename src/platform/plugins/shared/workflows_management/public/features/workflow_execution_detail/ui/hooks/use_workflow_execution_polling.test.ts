@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UseQueryResult } from '@tanstack/react-query';
 import { renderHook } from '@testing-library/react';
+import type { UseQueryResult } from '@kbn/react-query';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import { PollingIntervalMs, useWorkflowExecutionPolling } from './use_workflow_execution_polling';
