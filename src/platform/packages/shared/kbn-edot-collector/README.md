@@ -17,7 +17,7 @@ This will:
 1. Read Elasticsearch connection details from `config/kibana.dev.yml`
 2. Generate an OpenTelemetry Collector configuration
 3. Start a Docker container named `kibana-edot-collector` with the EDOT Collector running in Gateway mode
-4. Expose OTLP endpoints (gRPC on 4317, HTTP on 4318) for application instrumentation
+4. Expose OTLP endpoints for application instrumentation
 5. Send telemetry data to your Elasticsearch cluster
 
 ### With custom config file
@@ -52,18 +52,6 @@ The command accepts the following CLI flags:
 - `--config`, `-c`: Path to Kibana config file (defaults to `config/kibana.dev.yml`)
 - `--grpc-port`: Host port for gRPC endpoint (defaults to `4317`)
 - `--http-port`: Host port for HTTP endpoint (defaults to `4318`)
-
-The command reads the following settings from your Kibana configuration:
-
-- `elasticsearch.hosts` - Elasticsearch endpoint URL
-- `elasticsearch.username` - Elasticsearch username
-- `elasticsearch.password` - Elasticsearch password
-
-Default values if not specified:
-
-- `elasticsearch.hosts`: `http://localhost:9200`
-- `elasticsearch.username`: `elastic`
-- `elasticsearch.password`: `changeme`
 
 ## What gets collected
 
@@ -149,27 +137,6 @@ Visit `http://localhost:3000` in your browser. You can now see the logs and trac
 2. Go to **Observability** → **Applications** to view traces and APM data
 3. Go to **Discover** to explore logs and raw telemetry data
 
-## Managing the container
-
-The EDOT Collector runs in a Docker container named `kibana-edot-collector`.
-
-```bash
-# Check container status
-docker ps | grep kibana-edot-collector
-
-# View logs
-docker logs kibana-edot-collector
-
-# Stop the container
-docker stop kibana-edot-collector
-
-# Remove the container
-docker rm kibana-edot-collector
-
-# Stop via docker-compose
-docker compose -f data/edot_collector/docker-compose.yaml down
-```
-
 ## Generated files
 
 The command generates the following files in `data/edot_collector/`:
@@ -189,14 +156,6 @@ If you see errors about ports already in use, you can specify alternative ports:
 
 ```bash
 node scripts/edot_collector.js --grpc-port 14317 --http-port 14318
-```
-
-### Container fails to start
-
-Check the logs:
-
-```bash
-docker logs kibana-edot-collector
 ```
 
 ### Can't see data in Kibana
