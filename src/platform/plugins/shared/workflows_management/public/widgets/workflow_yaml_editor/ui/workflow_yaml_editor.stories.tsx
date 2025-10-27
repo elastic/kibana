@@ -8,9 +8,9 @@
  */
 
 import type { Decorator, StoryObj } from '@storybook/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowYAMLEditor } from './workflow_yaml_editor';
 import { kibanaReactDecorator } from '../../../../.storybook/decorators';
