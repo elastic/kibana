@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ListrTask } from 'listr2';
 import { Listr } from 'listr2';
 import chalk from 'chalk';
 import { createFailError } from '@kbn/dev-cli-errors';
@@ -119,15 +118,18 @@ export function runTelemetryCheck() {
             title: 'Updating telemetry mapping files',
             task: (context, task) => task.newListr(writeToFileTask(context), { exitOnError: true }),
           },
-          ...(baselineSha && false // temporarily disable (see https://github.com/elastic/kibana/issues/240390)
-            ? [
-                {
-                  title: 'Automated PR review checks',
-                  task: (context, task) =>
-                    task.newListr(prAutomatedChecks(context), { exitOnError: true }),
-                } as ListrTask<TaskContext>,
-              ]
-            : []),
+          {
+            title: 'Automated PR review checks',
+            task: (context, task) =>
+              task.newListr(prAutomatedChecks(context), { exitOnError: true }),
+            enabled: (_) =>
+              // only run if on a PR branch
+              Boolean(baselineSha) &&
+              Boolean(process.env.GITHUB_AUTH_TOKEN) &&
+              Boolean(process.env.GITHUB_PR_BASE_OWNER) &&
+              Boolean(process.env.GITHUB_PR_BASE_REPO) &&
+              Boolean(process.env.GITHUB_PR_NUMBER),
+          },
         ],
         {
           renderer: process.env.CI ? 'verbose' : ('default' as any),
