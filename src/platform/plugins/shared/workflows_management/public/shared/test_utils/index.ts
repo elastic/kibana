@@ -8,4 +8,3 @@
  */
 
 export { TestWrapper } from './test_wrapper';
-
