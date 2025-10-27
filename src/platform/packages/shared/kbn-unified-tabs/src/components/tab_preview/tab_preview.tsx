@@ -173,7 +173,7 @@ const TabPreviewInner: React.FC<{
           <EuiText
             size="s"
             className="eui-textBreakWord"
-            css={previewQuery ? getPreviewtitleCss(euiTheme) : undefined}
+            css={previewQuery ? getPreviewTitleCss(euiTheme) : undefined}
             data-test-subj={`unifiedTabs_tabPreview_title_${tabItem.id}`}
           >
             {tabPreviewData.title}
@@ -185,7 +185,7 @@ const TabPreviewInner: React.FC<{
             transparentBackground
             paddingSize="none"
             css={codeBlockCss}
-            data-test-subj={`unifiedTabs_tabPreview_query_${tabItem.id}`}
+            data-test-subj={`unifiedTabs_tabPreviewCodeBlock_${tabItem.id}`}
           >
             {previewQuery}
           </EuiCodeBlock>
@@ -235,7 +235,7 @@ const getPreviewContainerCss = (
   `;
 };
 
-const getPreviewtitleCss = (euiTheme: EuiThemeComputed) => {
+const getPreviewTitleCss = (euiTheme: EuiThemeComputed) => {
   return css`
     margin-bottom: ${euiTheme.size.s};
   `;

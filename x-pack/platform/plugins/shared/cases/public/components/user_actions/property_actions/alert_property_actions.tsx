@@ -25,6 +25,7 @@ const AlertPropertyActionsComponent: React.FC<Props> = ({ isLoading, totalAlerts
   const { showDeletionModal, onModalOpen, onConfirm, onCancel } = useDeletePropertyAction({
     onDelete,
   });
+  const buttonRef = React.useRef<HTMLAnchorElement>(null);
 
   const propertyActions = useMemo(() => {
     const showRemoveAlertIcon = permissions.delete;
@@ -47,13 +48,18 @@ const AlertPropertyActionsComponent: React.FC<Props> = ({ isLoading, totalAlerts
 
   return (
     <>
-      <UserActionPropertyActions isLoading={isLoading} propertyActions={propertyActions} />
+      <UserActionPropertyActions
+        isLoading={isLoading}
+        propertyActions={propertyActions}
+        buttonRef={buttonRef}
+      />
       {showDeletionModal ? (
         <DeleteAttachmentConfirmationModal
           title={i18n.REMOVE_ALERTS(totalAlerts)}
           confirmButtonText={i18n.REMOVE}
           onCancel={onCancel}
           onConfirm={onConfirm}
+          focusButtonRef={buttonRef}
         />
       ) : null}
     </>

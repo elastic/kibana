@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { fireEvent, render, screen, waitForElementToBeRemoved } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { RuleTagFilter } from './rule_tag_filter';
 import { getRuleTags } from '@kbn/response-ops-rules-apis/apis/get_rule_tags';

@@ -9,9 +9,9 @@
 
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import type { WorkflowTrigger } from '../../../server/lib/schedule_utils';
 import { NextExecutionTime } from './next_execution_time';
 import { useGetFormattedDateTime } from './use_formatted_date';
+import type { WorkflowTrigger } from '../../../server/lib/schedule_utils';
 import { getWorkflowNextExecutionTime } from '../../lib/next_execution_time';
 
 // Mock the dependencies
@@ -39,7 +39,7 @@ describe('NextExecutionTime', () => {
     }));
   };
 
-  const TestChild = () => <div data-test-subj="test-child">Test Child</div>;
+  const TestChild = () => <div data-test-subj="test-child">{'Test Child'}</div>;
 
   describe('children rendering', () => {
     it('should always render children regardless of nextExecutionTime', () => {

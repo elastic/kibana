@@ -65,5 +65,6 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
     });
 
     loadTestFile(require.resolve('./_tab_preview'));
+    loadTestFile(require.resolve('./_time_range'));
   });
 }

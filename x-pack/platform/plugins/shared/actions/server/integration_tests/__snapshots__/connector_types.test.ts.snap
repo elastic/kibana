@@ -2386,7 +2386,7 @@ Object {
     },
     "defaultModel": Object {
       "flags": Object {
-        "default": "us.anthropic.claude-3-7-sonnet-20250219-v1:0",
+        "default": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
         "error": [Function],
         "presence": "optional",
       },
@@ -14093,6 +14093,57 @@ Object {
         },
       ],
       "type": "number",
+    },
+    "headers": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-get-additional-properties": [Function],
+        },
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "key": Object {
+              "flags": Object {
+                "error": [Function],
+              },
+              "rules": Array [
+                Object {
+                  "args": Object {
+                    "method": [Function],
+                  },
+                  "name": "custom",
+                },
+              ],
+              "type": "string",
+            },
+            "value": Object {
+              "flags": Object {
+                "error": [Function],
+              },
+              "rules": Array [
+                Object {
+                  "args": Object {
+                    "method": [Function],
+                  },
+                  "name": "custom",
+                },
+              ],
+              "type": "string",
+            },
+          },
+          "name": "entries",
+        },
+      ],
+      "type": "record",
     },
     "inferenceId": Object {
       "flags": Object {
@@ -44391,7 +44442,7 @@ Object {
       "rules": Array [
         Object {
           "args": Object {
-            "limit": 25,
+            "limit": 500,
           },
           "name": "max",
         },
@@ -46782,34 +46833,6 @@ Object {
           ],
           "type": "string",
         },
-        "path": Object {
-          "flags": Object {
-            "error": [Function],
-          },
-          "rules": Array [
-            Object {
-              "args": Object {
-                "method": [Function],
-              },
-              "name": "custom",
-            },
-          ],
-          "type": "string",
-        },
-        "secret": Object {
-          "flags": Object {
-            "error": [Function],
-          },
-          "rules": Array [
-            Object {
-              "args": Object {
-                "method": [Function],
-              },
-              "name": "custom",
-            },
-          ],
-          "type": "string",
-        },
         "storyId": Object {
           "flags": Object {
             "error": [Function],
@@ -46822,6 +46845,11 @@ Object {
           "x-oas-optional": true,
         },
       ],
+      "preferences": Object {
+        "stripUnknown": Object {
+          "objects": true,
+        },
+      },
       "type": "object",
     },
     "webhookUrl": Object {
@@ -46901,34 +46929,6 @@ Object {
           ],
           "type": "string",
         },
-        "path": Object {
-          "flags": Object {
-            "error": [Function],
-          },
-          "rules": Array [
-            Object {
-              "args": Object {
-                "method": [Function],
-              },
-              "name": "custom",
-            },
-          ],
-          "type": "string",
-        },
-        "secret": Object {
-          "flags": Object {
-            "error": [Function],
-          },
-          "rules": Array [
-            Object {
-              "args": Object {
-                "method": [Function],
-              },
-              "name": "custom",
-            },
-          ],
-          "type": "string",
-        },
         "storyId": Object {
           "flags": Object {
             "error": [Function],
@@ -46941,6 +46941,11 @@ Object {
           "x-oas-optional": true,
         },
       ],
+      "preferences": Object {
+        "stripUnknown": Object {
+          "objects": true,
+        },
+      },
       "type": "object",
     },
     "webhookUrl": Object {
