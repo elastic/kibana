@@ -9,9 +9,9 @@ import React from 'react';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { Alignment, MetricVisualizationState, PrimaryMetricPosition } from '../types';
-import { AppearanceSettingsPopover } from './appearance_settings_popover';
 import { EuiButtonGroupTestHarness } from '@kbn/test-eui-helpers';
 import { METRIC_LAYOUT_BY_POSITION } from '../constants';
+import { MetricAppearanceSettings } from './appearance_settings';
 
 const palette: PaletteOutput<CustomPaletteParams> = {
   type: 'palette',
@@ -67,23 +67,20 @@ const alignmentTransitions: [Alignment, string, Alignment, string][] = [
   ['right', 'Right', 'center', 'Center'],
 ];
 
-describe('AppearancePopover', () => {
-  const renderToolbarOptions = (stateOverrides: Partial<MetricVisualizationState> = {}) => {
+describe('appearance settings', () => {
+  const renderComponent = (stateOverrides: Partial<MetricVisualizationState> = {}) => {
     const state = { ...fullState, ...stateOverrides } as MetricVisualizationState;
     const { ...rtlRest } = render(
-      <AppearanceSettingsPopover state={state} setState={mockSetState} />,
+      <MetricAppearanceSettings state={state} setState={mockSetState} />,
       {
         // fails in concurrent mode
         legacyRoot: true,
       }
     );
 
-    const clickOnToolbarButton = () => {
-      const button = screen.getByTestId('lnsTextOptionsButton');
-      button.click();
+    return {
+      ...rtlRest,
     };
-
-    return { clickOnToolbarButton, ...rtlRest };
   };
 
   beforeAll(() => {
@@ -99,8 +96,7 @@ describe('AppearancePopover', () => {
   });
 
   it('should set a subtitle', async () => {
-    const { clickOnToolbarButton } = renderToolbarOptions({ breakdownByAccessor: undefined });
-    clickOnToolbarButton();
+    renderComponent({ breakdownByAccessor: undefined });
 
     const newSubtitle = 'new subtitle hey';
     const subtitleField = screen.getByDisplayValue('subtitle');
@@ -124,8 +120,7 @@ describe('AppearancePopover', () => {
   });
 
   it('should disable subtitle option when Metric has breakdown by', () => {
-    const { clickOnToolbarButton } = renderToolbarOptions({ breakdownByAccessor: 'some-accessor' });
-    clickOnToolbarButton();
+    renderComponent({ breakdownByAccessor: 'some-accessor' });
 
     const subtitleInput = screen.getByTestId('lens-metric-appearance-subtitle-field');
     expect(subtitleInput).toBeDisabled();
@@ -134,8 +129,7 @@ describe('AppearancePopover', () => {
   it.each<[Alignment, string, Alignment, string]>(alignmentTransitions)(
     'should set titlesTextAlign when changing from %j (%s) to %j (%s)',
     (newAlign, newLabel, prevAlign, prevLabel) => {
-      const { clickOnToolbarButton } = renderToolbarOptions({ titlesTextAlign: prevAlign });
-      clickOnToolbarButton();
+      renderComponent({ titlesTextAlign: prevAlign });
 
       const btnGroup = new EuiButtonGroupTestHarness(
         'lens-metric-appearance-title-and-subtitle-alignment-btn'
@@ -154,8 +148,7 @@ describe('AppearancePopover', () => {
   it.each<[Alignment, string, Alignment, string]>(alignmentTransitions)(
     'should set primaryAlign when changing from %j (%s) to %j (%s)',
     (newAlign, newLabel, prevAlign, prevLabel) => {
-      const { clickOnToolbarButton } = renderToolbarOptions({ primaryAlign: prevAlign });
-      clickOnToolbarButton();
+      renderComponent({ primaryAlign: prevAlign });
 
       const btnGroup = new EuiButtonGroupTestHarness(
         'lens-metric-appearance-primary-metric-alignment-btn'
@@ -174,8 +167,7 @@ describe('AppearancePopover', () => {
   it.each<[Alignment, string, Alignment, string]>(alignmentTransitions)(
     'should set secondaryAlign when changing from %j (%s) to %j (%s)',
     (newAlign, newLabel, prevAlign, prevLabel) => {
-      const { clickOnToolbarButton } = renderToolbarOptions({ secondaryAlign: prevAlign });
-      clickOnToolbarButton();
+      renderComponent({ secondaryAlign: prevAlign });
 
       const btnGroup = new EuiButtonGroupTestHarness(
         'lens-metric-appearance-secondary-metric-alignment-btn'
@@ -192,10 +184,7 @@ describe('AppearancePopover', () => {
   );
 
   it('should disable Secondary metric alignment setting when no secondary metric', async () => {
-    const { clickOnToolbarButton } = renderToolbarOptions({
-      secondaryMetricAccessor: undefined,
-    });
-    clickOnToolbarButton();
+    renderComponent({ secondaryMetricAccessor: undefined });
 
     expect(
       screen.getByTestId('lens-metric-appearance-secondary-metric-alignment-btn')
@@ -203,8 +192,7 @@ describe('AppearancePopover', () => {
   });
 
   it('should set valueFontMode to Fit', async () => {
-    const { clickOnToolbarButton } = renderToolbarOptions({ valueFontMode: 'default' });
-    clickOnToolbarButton();
+    renderComponent({ valueFontMode: 'default' });
 
     const btnGroup = new EuiButtonGroupTestHarness(
       'lens-metric-appearance-primary-metric-font-size-btn'
@@ -219,8 +207,7 @@ describe('AppearancePopover', () => {
   });
 
   it('should set valueFontMode to Default', async () => {
-    const { clickOnToolbarButton } = renderToolbarOptions({ valueFontMode: 'fit' });
-    clickOnToolbarButton();
+    renderComponent({ valueFontMode: 'fit' });
 
     const btnGroup = new EuiButtonGroupTestHarness(
       'lens-metric-appearance-primary-metric-font-size-btn'
@@ -235,11 +222,7 @@ describe('AppearancePopover', () => {
   });
 
   it('should set iconAlign when Left position option is selected', async () => {
-    const { clickOnToolbarButton } = renderToolbarOptions({
-      icon: 'sortUp',
-      iconAlign: 'left',
-    });
-    clickOnToolbarButton();
+    renderComponent({ icon: 'sortUp', iconAlign: 'left' });
 
     const btnGroup = new EuiButtonGroupTestHarness(
       'lens-metric-appearance-other-icon-position-btn'
@@ -254,11 +237,7 @@ describe('AppearancePopover', () => {
   });
 
   it('should set iconAlign when Right position option is selected', async () => {
-    const { clickOnToolbarButton } = renderToolbarOptions({
-      icon: 'sortUp',
-      iconAlign: 'right',
-    });
-    clickOnToolbarButton();
+    renderComponent({ icon: 'sortUp', iconAlign: 'right' });
 
     const iconPositionBtnGroup = new EuiButtonGroupTestHarness(
       'lens-metric-appearance-other-icon-position-btn'
@@ -273,11 +252,7 @@ describe('AppearancePopover', () => {
   });
 
   it('should select legacy default Icon position option when no iconAlign', async () => {
-    const { clickOnToolbarButton } = renderToolbarOptions({
-      icon: 'sortUp',
-      iconAlign: undefined,
-    });
-    clickOnToolbarButton();
+    renderComponent({ icon: 'sortUp', iconAlign: undefined });
 
     const iconPositionBtnGroup = new EuiButtonGroupTestHarness(
       'lens-metric-appearance-other-icon-position-btn'
@@ -287,15 +262,13 @@ describe('AppearancePopover', () => {
   });
 
   it.each([undefined, 'empty'])('should disable iconAlign option when icon is %j', async (icon) => {
-    const { clickOnToolbarButton } = renderToolbarOptions({ icon });
-    clickOnToolbarButton();
+    renderComponent({ icon });
 
     expect(screen.queryByTestId('lens-metric-appearance-other-icon-position-btn')).toBeDisabled();
   });
 
   it('should set Regular titleWeight', async () => {
-    const { clickOnToolbarButton } = renderToolbarOptions({ titleWeight: 'bold' });
-    clickOnToolbarButton();
+    renderComponent({ titleWeight: 'bold' });
 
     const fontWeightBtnGroup = new EuiButtonGroupTestHarness(
       'lens-metric-appearance-title-and-subtitle-font-weight-btn'
@@ -310,8 +283,7 @@ describe('AppearancePopover', () => {
   });
 
   it('should set Bold titleWeight', async () => {
-    const { clickOnToolbarButton } = renderToolbarOptions({ titleWeight: 'normal' });
-    clickOnToolbarButton();
+    renderComponent({ titleWeight: 'normal' });
 
     const fontWeightBtnGroup = new EuiButtonGroupTestHarness(
       'lens-metric-appearance-title-and-subtitle-font-weight-btn'
@@ -331,8 +303,7 @@ describe('AppearancePopover', () => {
   ])(
     'should set default config when changing from %j (%s) to %j (%s)',
     (newPosition, newLabel, prevPosition, prevLabel) => {
-      const { clickOnToolbarButton } = renderToolbarOptions({ primaryPosition: prevPosition });
-      clickOnToolbarButton();
+      renderComponent({ primaryPosition: prevPosition });
 
       const btnGroup = new EuiButtonGroupTestHarness(
         'lens-metric-appearance-primary-metric-position-btn'
