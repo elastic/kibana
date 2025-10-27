@@ -65,11 +65,13 @@ function normalizeElasticsearchHost(host: string): string {
 export async function ensureEdotCollector({
   log,
   signal,
+  configPath,
   grpcPort = 4317,
   httpPort = 4318,
 }: {
   log: ToolingLog;
   signal: AbortSignal;
+  configPath?: string | undefined;
   grpcPort?: number;
   httpPort?: number;
 }) {
@@ -78,16 +80,12 @@ export async function ensureEdotCollector({
   await assertDockerAvailable();
 
   // Read Kibana configuration to get Elasticsearch credentials
-  const kibanaConfig = readKibanaConfig();
+  const kibanaConfig = readKibanaConfig(configPath);
+  const elasticsearchConfig = kibanaConfig.elasticsearch;
 
-  const elasticsearchHost = normalizeElasticsearchHost(
-    kibanaConfig['elasticsearch.hosts'] || 'http://localhost:9200'
-  );
-  const elasticsearchUsername = kibanaConfig['elasticsearch.username'] || 'elastic';
-  const elasticsearchPassword = kibanaConfig['elasticsearch.password'] || 'changeme';
-
-  log.debug(`Elasticsearch endpoint: ${elasticsearchHost}`);
-  log.debug(`Using username: ${elasticsearchUsername}`);
+  const elasticsearchHost = normalizeElasticsearchHost(elasticsearchConfig.hosts);
+  const elasticsearchUsername = elasticsearchConfig.username;
+  const elasticsearchPassword = elasticsearchConfig.password;
 
   log.debug(`Stopping existing containers`);
   await down();

@@ -17,7 +17,7 @@ run(
     addCleanupTask(() => {
       controller.abort();
     });
-
+    const configPath = flags.config ? String(flags.config) : undefined;
     const grpcPort = flags['grpc-port'] ? Number(flags['grpc-port']) : undefined;
     const httpPort = flags['http-port'] ? Number(flags['http-port']) : undefined;
 
@@ -32,6 +32,7 @@ run(
     return ensureEdotCollector({
       log,
       signal: controller.signal,
+      configPath,
       grpcPort,
       httpPort,
     }).catch((error) => {
