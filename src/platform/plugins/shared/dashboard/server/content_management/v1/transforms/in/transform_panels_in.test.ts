@@ -55,7 +55,7 @@ describe('transformPanelsIn', () => {
       },
     ];
     const results = transformPanelsIn(panels);
-    expect(results.panelsJSON).not.toBeUndefined();
+    expect(results.panelsJSON).toBeDefined();
     expect(JSON.parse(results.panelsJSON!)).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -155,7 +155,7 @@ describe('transformPanelsIn', () => {
         },
       ];
       const results = transformPanelsIn(panels);
-      expect(results.panelsJSON).not.toBeUndefined();
+      expect(results.panelsJSON).toBeDefined();
       expect(JSON.parse(results.panelsJSON!)[0].embeddableConfig).toMatchInlineSnapshot(`
         Object {
           "lessThan10": 7,
