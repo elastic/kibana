@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-export function   escapeString(val: string): string {
+export function escapeString(val: string): string {
   return `"${val.replace(/["]/g, '\\"')}"`;
 }
 
-export function   replaceAll(str: string, search: string, replace: string): string {
+export function replaceAll(str: string, search: string, replace: string): string {
   return str.replaceAll(`/`, `\/`).replaceAll(`.`, `\.`);
 }
