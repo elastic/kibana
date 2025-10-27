@@ -8,7 +8,7 @@
  */
 
 import { fromCumulativeSumAPItoLensState, fromCumulativeSumLensStateToAPI } from './cumulative_sum';
-import type { CumulativeSumIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type { CumulativeSumIndexPatternColumn } from '@kbn/lens-common';
 import type {
   LensApiCumulativeSumOperation,
   LensApiSumMetricOperation,
