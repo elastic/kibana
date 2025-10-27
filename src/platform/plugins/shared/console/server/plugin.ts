@@ -88,6 +88,10 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
       autocompleteDefinitions: { endpointsAvailability: endpointsAvailability },
     } = this.ctx.config.get<ConsoleConfig>();
     this.specDefinitionsService.start({ endpointsAvailability });
+
+    return {
+      getSpecJson: () => this.specDefinitionsService.asJson(),
+    };
   }
 
   stop() {
