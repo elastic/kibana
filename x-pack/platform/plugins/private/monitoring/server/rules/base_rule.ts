@@ -72,7 +72,7 @@ const defaultRuleOptions = (): RuleOptions => {
 };
 
 type BaseAlert = DefaultAlert & {
-  [ALERT_STATE_NAMESPACE]: AlertState[];
+  [ALERT_STATE_NAMESPACE]: { alertStates: AlertState[] };
 };
 
 export class BaseRule {
@@ -358,7 +358,7 @@ export class BaseRule {
               actionGroup: 'default',
               state: alertInstanceState,
               payload: {
-                [ALERT_STATE_NAMESPACE]: newAlertStates,
+                [ALERT_STATE_NAMESPACE]: { alertStates: newAlertStates },
               },
             });
             this.executeActions(services, alertId, alertInstanceState, null, cluster);

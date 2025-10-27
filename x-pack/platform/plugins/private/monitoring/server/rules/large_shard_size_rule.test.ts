@@ -204,7 +204,7 @@ describe('LargeShardSizeRule', () => {
         state: {
           alertStates,
         },
-        payload: { [ALERT_STATE_NAMESPACE]: alertStates },
+        payload: { [ALERT_STATE_NAMESPACE]: { alertStates } },
       });
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'abc123:apm-8.0.0-onboarding-2021.06.30',
@@ -329,7 +329,7 @@ describe('LargeShardSizeRule', () => {
         state: {
           alertStates,
         },
-        payload: { [ALERT_STATE_NAMESPACE]: alertStates },
+        payload: { [ALERT_STATE_NAMESPACE]: { alertStates } },
       });
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'abc123:apm-8.0.0-onboarding-2021.06.30',

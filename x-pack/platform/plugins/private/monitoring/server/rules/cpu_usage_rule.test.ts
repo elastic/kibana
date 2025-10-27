@@ -183,7 +183,7 @@ describe('CpuUsageRule', () => {
         state: {
           alertStates,
         },
-        payload: { [ALERT_STATE_NAMESPACE]: alertStates },
+        payload: { [ALERT_STATE_NAMESPACE]: { alertStates } },
       });
       expect(services.alertsClient.setAlertData).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
@@ -317,7 +317,7 @@ describe('CpuUsageRule', () => {
         state: {
           alertStates,
         },
-        payload: { [ALERT_STATE_NAMESPACE]: alertStates },
+        payload: { [ALERT_STATE_NAMESPACE]: { alertStates } },
       });
       expect(services.alertsClient.setAlertData).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({

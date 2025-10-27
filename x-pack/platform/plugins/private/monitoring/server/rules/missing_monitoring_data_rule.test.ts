@@ -168,7 +168,7 @@ describe('MissingMonitoringDataRule', () => {
         state: {
           alertStates,
         },
-        payload: { [ALERT_STATE_NAMESPACE]: alertStates },
+        payload: { [ALERT_STATE_NAMESPACE]: { alertStates } },
       });
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'esNode1',
@@ -287,7 +287,7 @@ describe('MissingMonitoringDataRule', () => {
         state: {
           alertStates,
         },
-        payload: { [ALERT_STATE_NAMESPACE]: alertStates },
+        payload: { [ALERT_STATE_NAMESPACE]: { alertStates } },
       });
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'esNode1',

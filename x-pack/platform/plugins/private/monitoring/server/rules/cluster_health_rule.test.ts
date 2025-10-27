@@ -148,7 +148,7 @@ describe('ClusterHealthRule', () => {
         state: {
           alertStates,
         },
-        payload: { [ALERT_STATE_NAMESPACE]: alertStates },
+        payload: { [ALERT_STATE_NAMESPACE]: { alertStates } },
       });
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'abc123',

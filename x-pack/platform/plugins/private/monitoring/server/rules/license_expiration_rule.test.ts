@@ -163,7 +163,7 @@ describe('LicenseExpirationRule', () => {
         state: {
           alertStates,
         },
-        payload: { [ALERT_STATE_NAMESPACE]: alertStates },
+        payload: { [ALERT_STATE_NAMESPACE]: { alertStates } },
       });
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'abc123',
@@ -278,7 +278,7 @@ describe('LicenseExpirationRule', () => {
         state: {
           alertStates,
         },
-        payload: { [ALERT_STATE_NAMESPACE]: alertStates },
+        payload: { [ALERT_STATE_NAMESPACE]: { alertStates } },
       });
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'abc123',
@@ -370,7 +370,7 @@ describe('LicenseExpirationRule', () => {
         id: 'abc123',
         actionGroup: 'default',
         state: { alertStates },
-        payload: { [ALERT_STATE_NAMESPACE]: alertStates },
+        payload: { [ALERT_STATE_NAMESPACE]: { alertStates } },
       });
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'abc123',
