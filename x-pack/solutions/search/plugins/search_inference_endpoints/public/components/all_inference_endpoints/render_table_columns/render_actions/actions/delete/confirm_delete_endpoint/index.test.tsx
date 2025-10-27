@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { render, fireEvent, screen } from '@testing-library/react';
+import { render, fireEvent, screen, act } from '@testing-library/react';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import React from 'react';
+
 import { ConfirmDeleteEndpointModal } from '.';
-import * as i18n from './translations';
 import { useScanUsage } from '../../../../../../../hooks/use_scan_usage';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 
@@ -31,8 +31,9 @@ describe('ConfirmDeleteEndpointModal', () => {
     task_type: 'text_embedding',
   };
 
+  const queryClient = new QueryClient();
+
   const Wrapper = () => {
-    const queryClient = new QueryClient();
     return (
       <QueryClientProvider client={queryClient}>
         <ConfirmDeleteEndpointModal
@@ -44,38 +45,59 @@ describe('ConfirmDeleteEndpointModal', () => {
     );
   };
 
-  beforeEach(() => {
-    mockUseScanUsage.mockReturnValue({
-      data: {
-        indexes: ['index-1', 'index2'],
-        pipelines: ['pipeline-1'],
-      },
-    });
+  const mockUsageData = { indexes: ['index-1', 'index2'], pipelines: ['pipeline-1'] };
+  const mockEmptyData = { indexes: [], pipelines: [] };
+
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it('renders the modal with correct elements', () => {
+    mockUseScanUsage.mockReturnValue({ data: mockUsageData });
     render(<Wrapper />);
 
-    expect(screen.getByText(i18n.DELETE_TITLE)).toBeInTheDocument();
-    expect(screen.getByText(i18n.CONFIRM_DELETE_WARNING)).toBeInTheDocument();
-    expect(screen.getByText(i18n.CANCEL)).toBeInTheDocument();
-    expect(screen.getByText(i18n.DELETE_ACTION_LABEL)).toBeInTheDocument();
+    act(() => {
+      jest.runAllTimers();
+    });
+
+    expect(screen.getByText('Delete inference endpoint')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Deleting an inference endpoint currently in use will cause failures in ingest and query attempts.'
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByText('Cancel')).toBeInTheDocument();
+    expect(screen.getByText('Delete endpoint')).toBeInTheDocument();
     expect(screen.getByText('my-hugging-face')).toBeInTheDocument();
   });
 
   it('calls onCancel when the cancel button is clicked', () => {
+    mockUseScanUsage.mockReturnValue({ data: mockUsageData });
     render(<Wrapper />);
 
-    fireEvent.click(screen.getByText(i18n.CANCEL));
+    act(() => {
+      jest.runAllTimers();
+    });
+
+    fireEvent.click(screen.getByText('Cancel'));
     expect(mockOnCancel).toHaveBeenCalled();
   });
 
   it('useScanUsage gets called with correct params', () => {
+    mockUseScanUsage.mockReturnValue({ data: mockUsageData });
     render(<Wrapper />);
+
+    act(() => {
+      jest.runAllTimers();
+    });
 
     expect(mockUseScanUsage).toHaveBeenCalledWith({
       type: 'text_embedding',
@@ -84,18 +106,23 @@ describe('ConfirmDeleteEndpointModal', () => {
   });
 
   describe('endpoint with usage', () => {
+    beforeEach(() => {
+      mockUseScanUsage.mockReturnValue({ data: mockUsageData });
+    });
     it('disables delete endpoint button', () => {
       render(<Wrapper />);
+      act(() => {
+        jest.runAllTimers();
+      });
       expect(screen.getByTestId('confirmModalConfirmButton')).toBeDisabled();
-    });
-
-    it('renders warning message', () => {
-      render(<Wrapper />);
-      expect(screen.getByText(i18n.POTENTIAL_FAILURE_LABEL)).toBeInTheDocument();
+      expect(screen.getByText('Potential Failures')).toBeInTheDocument();
     });
 
     it('selecting checkbox enables Delete Endpoint button', () => {
       render(<Wrapper />);
+      act(() => {
+        jest.runAllTimers();
+      });
       fireEvent.click(screen.getByTestId('warningCheckbox'));
 
       expect(screen.getByTestId('confirmModalConfirmButton')).toBeEnabled();
@@ -104,25 +131,21 @@ describe('ConfirmDeleteEndpointModal', () => {
 
   describe('endpoint without usage', () => {
     beforeEach(() => {
-      mockUseScanUsage.mockReturnValue({
-        data: {
-          indexes: [],
-          pipelines: [],
-        },
-      });
+      mockUseScanUsage.mockReturnValue({ data: mockEmptyData });
 
       render(<Wrapper />);
-    });
-    it('renders no usage message', () => {
-      expect(screen.getByText(i18n.NO_USAGE_FOUND_LABEL)).toBeInTheDocument();
-    });
 
-    it('enables delete endpoint button', () => {
+      act(() => {
+        jest.runAllTimers();
+      });
+    });
+    it('renders no usage message and enables delete button', () => {
+      expect(screen.getByText('No Usage Found')).toBeInTheDocument();
       expect(screen.getByTestId('confirmModalConfirmButton')).toBeEnabled();
     });
 
     it('calls onConfirm when the delete button is clicked', () => {
-      fireEvent.click(screen.getByText(i18n.DELETE_ACTION_LABEL));
+      fireEvent.click(screen.getByText('Delete endpoint'));
       expect(mockOnConfirm).toHaveBeenCalled();
     });
   });

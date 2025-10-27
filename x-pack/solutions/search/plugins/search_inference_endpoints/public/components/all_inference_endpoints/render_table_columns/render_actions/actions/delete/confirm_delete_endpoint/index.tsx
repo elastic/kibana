@@ -110,6 +110,7 @@ export const ConfirmDeleteEndpointModal: React.FC<ConfirmDeleteEndpointModalProp
               size="xs"
               onClick={() => {}}
               isLoading
+              aria-label={i18n.SCANNING_USAGE_LABEL}
             >
               {i18n.SCANNING_USAGE_LABEL}&hellip;
             </EuiButtonEmpty>

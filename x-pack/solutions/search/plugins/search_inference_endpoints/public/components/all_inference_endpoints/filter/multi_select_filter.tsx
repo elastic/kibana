@@ -17,7 +17,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import _ from 'lodash';
 import * as i18n from './translations';
 
@@ -47,13 +47,17 @@ export const MultiSelectFilter: React.FC<UseFilterParams> = ({
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const toggleIsPopoverOpen = () => setIsPopoverOpen((prevValue) => !prevValue);
-  const options: MultiSelectFilterOption[] = _.uniqBy(
-    rawOptions.map(({ key, label }) => ({
-      label,
-      key,
-      checked: selectedOptionKeys.includes(key) ? 'on' : undefined,
-    })),
-    'label'
+  const options: MultiSelectFilterOption[] = useMemo(
+    () =>
+      _.uniqBy(
+        rawOptions.map(({ key, label }) => ({
+          label,
+          key,
+          checked: selectedOptionKeys.includes(key) ? 'on' : undefined,
+        })),
+        'label'
+      ),
+    [rawOptions, selectedOptionKeys]
   );
 
   return (
