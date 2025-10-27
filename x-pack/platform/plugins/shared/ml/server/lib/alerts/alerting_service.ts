@@ -845,6 +845,7 @@ export function alertingServiceProvider(
       resultType: params.resultType,
       indexPattern: datafeeds![0]!.indices[0],
       anomalyScoreThreshold: params.severity,
+      customFilter: params.customFilter ?? undefined,
     };
   };
 
@@ -866,7 +867,6 @@ export function alertingServiceProvider(
       anomalyScoreField,
       includeInterimResults,
       anomalyScoreThreshold,
-
       customFilter,
     } = params;
 
