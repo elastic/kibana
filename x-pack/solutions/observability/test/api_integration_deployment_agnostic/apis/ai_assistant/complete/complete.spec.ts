@@ -11,6 +11,7 @@ import {
   type Conversation,
   type ConversationCreateRequest,
 } from '@kbn/observability-ai-assistant-plugin/common';
+import type { Readable } from 'stream';
 import { omit, pick } from 'lodash';
 import { PassThrough } from 'stream';
 import expect from '@kbn/expect';
@@ -75,7 +76,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       await proxy.waitForAllInterceptorsToHaveBeenCalled();
 
-      return decodeEvents(response.body).slice(2); // ignore context request/response, we're testing this elsewhere
+      return decodeEvents(response.body as Readable).slice(2); // ignore context request/response, we're testing this elsewhere
     }
 
     before(async () => {
@@ -307,7 +308,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
-    describe('when sync query parameter is true', () => {
+    describe('when sync is true', () => {
       let syncResponse: ConversationCreateRequest;
       let persistedConversation: Conversation;
 
@@ -318,12 +319,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         void proxy.interceptWithResponse('Hello from sync flow');
 
         const response = await observabilityAIAssistantAPIClient.editor({
-          endpoint: 'POST /api/observability_ai_assistant/chat/complete 2023-10-31',
+          endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
           params: {
             body: {
               messages,
               connectorId,
               persist: true,
+              screenContexts: [],
+              scopes: ['observability'],
               sync: true,
             },
           },
@@ -376,12 +379,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         void proxy.interceptWithResponse('Hello from sync flow without persistence');
 
         const response = await observabilityAIAssistantAPIClient.editor({
-          endpoint: 'POST /api/observability_ai_assistant/chat/complete 2023-10-31',
+          endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
           params: {
             body: {
               messages,
               connectorId,
               persist: false,
+              screenContexts: [],
+              scopes: ['observability'],
               sync: true,
             },
           },
@@ -501,8 +506,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         await proxy.waitForAllInterceptorsToHaveBeenCalled();
 
-        conversationCreatedEvent = getConversationCreatedEvent(createResponse.body);
-
+        conversationCreatedEvent = getConversationCreatedEvent(createResponse.body as Readable);
         const conversationId = conversationCreatedEvent.conversation.id;
         const fullConversation = await observabilityAIAssistantAPIClient.editor({
           endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',

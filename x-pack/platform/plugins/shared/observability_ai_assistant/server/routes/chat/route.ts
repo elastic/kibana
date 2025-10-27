@@ -387,7 +387,7 @@ async function waitForBufferedResponse(
       throw new Error('Failed to generate conversation response');
     }
 
-    return { body: conversationPayload };
+    return conversationPayload;
   } finally {
     subscription.unsubscribe();
   }

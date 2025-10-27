@@ -5,7 +5,10 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import type { FunctionDefinition } from '@kbn/observability-ai-assistant-plugin/common';
+import type {
+  FunctionDefinition,
+  ConversationCreateRequest,
+} from '@kbn/observability-ai-assistant-plugin/common';
 import { MessageRole, type Message } from '@kbn/observability-ai-assistant-plugin/common';
 import { type Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
 import type { LlmProxy } from '../utils/create_llm_proxy';
@@ -36,10 +39,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       actions,
       instructions,
       persist = true,
+      sync,
     }: {
       actions?: Array<Pick<FunctionDefinition, 'name' | 'description' | 'parameters'>>;
       instructions?: Array<string | Instruction>;
       persist?: boolean;
+      sync?: boolean;
     }) {
       const response = await observabilityAIAssistantAPIClient.admin({
         endpoint: 'POST /api/observability_ai_assistant/chat/complete 2023-10-31',
@@ -50,6 +55,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             persist,
             actions,
             instructions,
+            sync,
           },
         },
       });
@@ -93,8 +99,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         void llmProxy.interceptWithFunctionRequest({
           name: 'my_action',
           arguments: () => JSON.stringify({ foo: 'bar' }),
-          when: (body) =>
-            Boolean(body.messages?.[0]?.content?.includes('This is a random instruction')),
+          when: (body) => {
+            const content = body.messages?.[0]?.content as string;
+            return Boolean(content.includes('This is a random instruction'));
+          },
         });
 
         await callPublicChatComplete({
@@ -177,6 +185,25 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           id: String(parsedChunk.id),
           created: Number(parsedChunk.created),
         });
+      });
+    });
+
+    describe('when sync is true', () => {
+      let responseBody: ConversationCreateRequest;
+
+      before(async () => {
+        void llmProxy.interceptWithResponse('Hello sync');
+
+        const response = await callPublicChatComplete({ sync: true, persist: false });
+
+        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+        responseBody = JSON.parse(response) as ConversationCreateRequest;
+      });
+
+      it('returns a single conversation payload', () => {
+        expect(responseBody.conversation.id).to.be.a('string');
+        expect(responseBody.messages).to.be.an('array');
       });
     });
   });
