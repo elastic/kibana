@@ -9,19 +9,17 @@ import React, { useCallback, useMemo } from 'react';
 
 import { EuiAccordion, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { AxesSettingsConfig, AxisExtentConfig } from '@kbn/visualizations-plugin/common';
 import { ScaleType } from '@elastic/charts';
-import type { YScaleType } from '@kbn/expression-xy-plugin/common';
+import type { AxisExtentConfig, YScaleType } from '@kbn/expression-xy-plugin/common';
 
 import { TooltipWrapper } from '@kbn/visualization-utils';
+import type { AxesSettingsConfig, VisualizationToolbarProps, XYState } from '@kbn/lens-common';
 import {
   hasNumericHistogramDimension,
   type AxesSettingsConfigKeys,
 } from '../../../shared_components';
 import type { ToolbarContentMap } from '../../../shared_components/flyout_toolbar';
 import { FlyoutToolbar } from '../../../shared_components/flyout_toolbar';
-import type { VisualizationToolbarProps } from '../../../types';
-import type { XYState } from '../types';
 import { XyAppearanceSettings, getValueLabelDisableReason } from './visual_options_popover';
 import { XyTitlesAndTextSettings } from './titles_and_text_popover';
 import { XyAxisSettings, popoverConfig } from './axis_settings_popover';
@@ -35,12 +33,14 @@ import {
 } from '../state_helpers';
 import { axisKeyToTitleMapping, getDataBounds, hasPercentageAxis } from '.';
 import { getScaleType } from '../to_expression';
+import { XyLegendSettings } from './legend_settings';
 
 type Props = VisualizationToolbarProps<XYState>;
 
 export const XyFlyoutToolbar: React.FC<Props> = (props) => {
   const xyToolbarContentMap: ToolbarContentMap<XYState> = {
     style: XyStyleSettings,
+    legend: XyLegendSettings,
   };
   return <FlyoutToolbar {...props} contentMap={xyToolbarContentMap} />;
 };
