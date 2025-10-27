@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import type { LegendSettingsPopoverProps } from './legend_settings_popover';
-import { LegendSettingsPopover } from './legend_settings_popover';
+import type { LegendSettingsProps } from './legend_settings';
+import { LegendSettingsPopover } from './legend_settings';
 import userEvent from '@testing-library/user-event';
 import type { RenderOptions } from '@testing-library/react';
 import { fireEvent, render, screen } from '@testing-library/react';
@@ -15,7 +15,7 @@ import { getSelectedButtonInGroup } from '@kbn/test-eui-helpers';
 import { LegendValue } from '@elastic/charts';
 
 describe('Legend Settings', () => {
-  let defaultProps: LegendSettingsPopoverProps;
+  let defaultProps: LegendSettingsProps;
   beforeEach(() => {
     defaultProps = {
       legendOptions: [
@@ -44,7 +44,7 @@ describe('Legend Settings', () => {
   });
 
   const renderLegendSettingsPopover = async (
-    overrideProps?: Partial<LegendSettingsPopoverProps>,
+    overrideProps?: Partial<LegendSettingsProps>,
     renderOptions?: RenderOptions
   ) => {
     const rtlRender = render(

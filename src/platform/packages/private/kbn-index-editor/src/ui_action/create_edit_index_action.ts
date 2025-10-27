@@ -68,14 +68,14 @@ export function createEditLookupIndexContentAction(
 
       const fileManager = new FileUploadManager(
         fileUpload,
-        coreStart.http,
+        coreStart,
         data,
-        coreStart.notifications,
         null,
         false,
         true,
         existingIndexName,
         { index: { mode: 'lookup' } },
+        'lookup-index-editor',
         // On index searchable
         undefined,
         // On all docs searchable
