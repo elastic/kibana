@@ -24,7 +24,6 @@ import type { Filter, Query } from '@kbn/es-query';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import { getEsQueryConfig } from '@kbn/data-service/src/es_query';
 import { getTime } from '@kbn/data-plugin/public';
-import type { DataView } from '@kbn/data-plugin/common';
 import type { GeoJsonProperties } from 'geojson';
 import { asyncMap } from '@kbn/std';
 import {
@@ -50,7 +49,6 @@ import { convertToGeoJson } from './convert_to_geojson';
 import { isGeometryColumn, ESQL_GEO_SHAPE_TYPE } from './esql_utils';
 import { UpdateSourceEditor } from './update_source_editor';
 import type { ITooltipProperty } from '../../tooltips/tooltip_property';
-import { ESDocField } from '../../fields/es_doc_field';
 import { ESQLField } from '../../fields/esql_field';
 
 type ESQLSourceSyncMeta = Pick<
@@ -134,36 +132,12 @@ export class ESQLSource
   getTooltipProperties = async (mbProperties: GeoJsonProperties): Promise<ITooltipProperty[]> => {
     if (!mbProperties) return [];
 
-    let adhocDataView: DataView | undefined;
-    try {
-      adhocDataView = await this.getIndexPattern();
-    } catch (e) {
-      // fall back to displaying raw feature properties in tooltip
-      // when unable to create adhoc data view
-    }
-
     const keys = Object.keys(mbProperties).filter(
       (key) => key !== GEOJSON_FEATURE_ID_PROPERTY_NAME
     );
 
     return asyncMap(keys, async (key) => {
-      if (adhocDataView?.getFieldByName(key) !== undefined) {
-        const esDocField = new ESDocField({
-          fieldName: key,
-          source: this,
-          origin: FIELD_ORIGIN.SOURCE,
-        });
-        return await esDocField.createTooltipProperty(mbProperties[key]);
-      }
-
-      return {
-        getPropertyKey: () => key,
-        getPropertyName: () => key,
-        getHtmlDisplayValue: () => mbProperties[key],
-        getRawValue: () => mbProperties[key],
-        isFilterable: () => false,
-        getESFilters: async () => [],
-      };
+      return await this.getFieldByName(key).createTooltipProperty(key);
     });
   };
 

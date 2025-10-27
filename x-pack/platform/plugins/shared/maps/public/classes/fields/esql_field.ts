@@ -13,9 +13,12 @@ import { AbstractField } from './field';
 import type { IVectorSource } from '../sources/vector_source';
 import type { ESQLSource } from '../sources/esql_source';
 import { getData } from '../../kibana_services';
+import type { ITooltipProperty } from '../tooltips/tooltip_property';
+import { TooltipProperty } from '../tooltips/tooltip_property';
+import { ESTooltipProperty } from '../tooltips/es_tooltip_property';
 
 export class ESQLField extends AbstractField implements IField {
-  private readonly _source: IVectorSource & Pick<ESQLSource, 'getESQL'>;
+  private readonly _source: IVectorSource & Pick<ESQLSource, 'getESQL' | 'getIndexPattern'>;
 
   constructor({
     fieldName,
@@ -23,7 +26,7 @@ export class ESQLField extends AbstractField implements IField {
     origin,
   }: {
     fieldName: string;
-    source: IVectorSource & Pick<ESQLSource, 'getESQL'>;
+    source: IVectorSource & Pick<ESQLSource, 'getESQL' | 'getIndexPattern'>;
     origin: FIELD_ORIGIN;
   }) {
     super({ fieldName, origin });
@@ -50,6 +53,19 @@ export class ESQLField extends AbstractField implements IField {
     });
     const column = columns.find(({ name }) => name === this.getName());
     return getFieldType(column) ?? 'string';
+  }
+
+  async createTooltipProperty(value: string | string[] | undefined): Promise<ITooltipProperty> {
+    const dataView = await this._source.getIndexPattern();
+    const tooltipProperty = new TooltipProperty(this.getName(), this.getName(), value);
+    return dataView?.getFieldByName(this.getName()) !== undefined
+      ? new ESTooltipProperty(
+          tooltipProperty,
+          dataView,
+          this as IField,
+          this._source.getApplyGlobalQuery()
+        )
+      : tooltipProperty;
   }
 }
 
