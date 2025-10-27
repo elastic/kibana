@@ -299,19 +299,15 @@ export const fetchFleetAgents = async (
  * @param hostname
  * @param timeoutMs
  * @param esClient
- * @param searchByTag Optional tag to search by instead of hostname (format: "key:value")
  */
 export const waitForHostToEnroll = async (
   kbnClient: KbnClient,
   log: ToolingLog,
   hostname: string,
   timeoutMs: number = 30000,
-  esClient: Client | undefined = undefined,
-  searchByTag?: string
+  esClient: Client | undefined = undefined
 ): Promise<Agent> => {
-  const searchIdentifier = searchByTag || hostname;
-  const searchType = searchByTag ? 'tag' : 'hostname';
-  log.info(`Waiting for agent with ${searchType} [${searchIdentifier}] to enroll with fleet`);
+  log.info(`Waiting for agent with hostname [${hostname}] to enroll with fleet`);
 
   const started = new Date();
   const hasTimedOut = (): boolean => {
@@ -323,9 +319,7 @@ export const waitForHostToEnroll = async (
 
   while (!found && !hasTimedOut()) {
     found = await retryOnError(async () => {
-      const kuery = searchByTag
-        ? `tags : "${searchByTag}"`
-        : `(local_metadata.host.hostname.keyword : "${hostname}")`;
+      const kuery = `(local_metadata.host.hostname.keyword : "${hostname}")`;
 
       return fetchFleetAgents(kbnClient, {
         perPage: 1,
@@ -346,15 +340,15 @@ export const waitForHostToEnroll = async (
   if (!found) {
     throw Object.assign(
       new Error(
-        `Timed out waiting for agent with ${searchType} [${searchIdentifier}] to show up in Fleet. Waited ${
+        `Timed out waiting for agent with hostname [${hostname}] to show up in Fleet. Waited ${
           timeoutMs / 1000
         } seconds`
       ),
-      { agentId, hostname, searchByTag }
+      { agentId, hostname }
     );
   }
 
-  log.debug(`Agent with ${searchType} [${searchIdentifier}] has been enrolled with fleet`);
+  log.debug(`Agent with hostname [${hostname}] has been enrolled with fleet`);
   log.verbose(found);
 
   // Workaround for united metadata sometimes being unable to find docs in .fleet-agents index. This
@@ -1078,14 +1072,14 @@ Expand-Archive -Path "${destPath}" -DestinationPath "C:\\Users\\Public" -Force
 
     // Build install command - cd into directory first, then run with relative path
     // Use --url= and --enrollment-token= with equals signs (Kibana style)
-    agentEnrollCommand = `cd "${agentDir}" ; .\\elastic-agent.exe install --url=${fleetServerUrl} --enrollment-token=${enrollmentToken} --insecure --force --non-interactive --tag vm-name:${hostVm.name}`;
+    agentEnrollCommand = `cd "${agentDir}" ; .\\elastic-agent.exe install --url=${fleetServerUrl} --enrollment-token=${enrollmentToken} --insecure --force --non-interactive`;
   } else {
     // Linux/macOS: Use bash, forward slashes, sudo
     const agentPath =
       hostVm.type === 'multipass'
         ? `./${agentUrlInfo.dirName}/elastic-agent`
         : `/tmp/${agentUrlInfo.dirName}/elastic-agent`;
-    agentEnrollCommand = `sudo ${agentPath} install --insecure --force --non-interactive --url ${fleetServerUrl} --enrollment-token ${enrollmentToken} --tag vm-name:${hostVm.name}`;
+    agentEnrollCommand = `sudo ${agentPath} install --insecure --force --non-interactive --url ${fleetServerUrl} --enrollment-token ${enrollmentToken}`;
   }
 
   // Get Elasticsearch output URL to check connectivity
@@ -1181,15 +1175,13 @@ Expand-Archive -Path "${destPath}" -DestinationPath "C:\\Users\\Public" -Force
       // cd elastic-agent-X.X.X-windows-arm64
       // .\elastic-agent.exe install --url=... --enrollment-token=...
       // IMPORTANT: Add --non-interactive to prevent "Do you want to continue? [Y/n]:" prompt
-      // IMPORTANT: Add --tag to identify the agent (--host-name is not supported)
       const installCommand = `
 cd "${agentDir}"
-.\\elastic-agent.exe install --url=${fleetServerUrl} --enrollment-token=${enrollmentToken} --insecure --force --non-interactive --tag vm-name:${hostVm.name}
+.\\elastic-agent.exe install --url=${fleetServerUrl} --enrollment-token=${enrollmentToken} --insecure --force --non-interactive
       `.trim();
 
       log.info(`Executing installation command...`);
       log.info(`Command: cd "${agentDir}" && .\\elastic-agent.exe install ...`);
-      log.info(`Agent will be tagged with vm-name: ${hostVm.name}`);
       log.info(`This may take 30-60 seconds...\n`);
 
       try {
@@ -1294,9 +1286,7 @@ cd "${agentDir}"
   }
 
   // Wait for Fleet to see the enrolled agent
-  // Search by tag since Windows hostname may not match VM name
-  const vmNameTag = `vm-name:${hostVm.name}`;
-  return waitForHostToEnroll(kbnClient, log, hostVm.name, timeoutMs, undefined, vmNameTag);
+  return waitForHostToEnroll(kbnClient, log, hostVm.name, timeoutMs);
 };
 
 interface CreateAgentPolicyOptions {

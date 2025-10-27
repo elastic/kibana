@@ -24,7 +24,6 @@ import {
   createAgentPolicy,
   enrollHostVmWithFleet,
   fetchAgentPolicyList,
-  fetchFleetAgents,
 } from '../common/fleet_services';
 import {
   isFleetServerRunning,
@@ -329,7 +328,7 @@ const runCli: RunFn = async ({ log, flags }) => {
             memory: '1G',
             disk: '8G',
             log,
-            os: vmOs,
+            os: vmOs as 'windows' | 'darwin',
             templateVm,
           };
         } else {
@@ -349,6 +348,71 @@ const runCli: RunFn = async ({ log, flags }) => {
         if (verbose) {
           log.info(`${EMOJIS.SUCCESS} VM ${vmIndex}/${vmCount} created successfully: ${vmName}`);
         }
+
+        // For Windows VMs, rename the computer to match the VM name
+        if (vmOs === 'windows') {
+          try {
+            if (verbose) {
+              log.info(`${EMOJIS.CLOCK} Setting Windows computer hostname to: ${vmName}`);
+            }
+
+            // Rename the computer using PowerShell
+            const renameCommand = `Rename-Computer -NewName "${vmName}" -Force`;
+            await vm.exec(renameCommand);
+
+            if (verbose) {
+              log.info(`${EMOJIS.SUCCESS} Rename command executed`);
+              log.info(`${EMOJIS.CLOCK} Restarting VM to apply new hostname...`);
+            }
+
+            // Restart the computer to apply the new name
+            await vm.exec('Restart-Computer -Force');
+
+            // Wait for the VM to shut down and restart
+            if (verbose) {
+              log.info(`${EMOJIS.CLOCK} Waiting for VM to restart (60 seconds)...`);
+            }
+            await new Promise((resolve) => setTimeout(resolve, 60000));
+
+            // Wait for the VM to be accessible again
+            const maxRetries = 12; // 2 minutes total (12 * 10 seconds)
+            let retries = 0;
+            let vmReady = false;
+
+            while (retries < maxRetries && !vmReady) {
+              try {
+                // Test if VM is accessible by running a simple command
+                const testResult = await vm.exec('echo "ready"', { silent: true });
+                if (testResult.exitCode === 0) {
+                  vmReady = true;
+                  if (verbose) {
+                    log.info(`${EMOJIS.SUCCESS} VM is back online with new hostname`);
+                  }
+                }
+              } catch (error) {
+                // VM not ready yet, will retry
+              }
+
+              if (!vmReady) {
+                retries++;
+                if (verbose && retries % 3 === 0) {
+                  log.info(`   Waiting for VM to be accessible... (${retries}/${maxRetries})`);
+                }
+                await new Promise((resolve) => setTimeout(resolve, 10000)); // Wait 10 seconds between retries
+              }
+            }
+
+            if (!vmReady) {
+              log.warning(
+                `${EMOJIS.WARNING} VM did not come back online within expected time, but continuing anyway...`
+              );
+            }
+          } catch (error) {
+            log.warning(`${EMOJIS.WARNING} Error renaming Windows computer: ${error.message}`);
+            log.warning(`   Continuing with original hostname...`);
+          }
+        }
+
         return { success: true as const, vm, policy, reused: false, vmIndex };
       } catch (error) {
         log.error(`${EMOJIS.ERROR} Failed to create VM ${vmIndex}: ${error.message}`);
@@ -421,33 +485,7 @@ const runCli: RunFn = async ({ log, flags }) => {
 
         const enrollmentPromise = (async () => {
           try {
-            // Check if agent is already enrolled by looking for the vm-name tag
-            const vmNameTag = `vm-name:${vm.name}`;
-            if (verbose) {
-              log.info(`${EMOJIS.CLOCK} Checking for existing agent with tag: ${vmNameTag}`);
-            }
-
-            const existingAgents = await fetchFleetAgents(kbnClient, {
-              perPage: 1,
-              kuery: `tags : "${vmNameTag}"`,
-              showInactive: false,
-            });
-
-            if (existingAgents.items && existingAgents.items.length > 0) {
-              const existingAgent = existingAgents.items[0];
-              if (verbose) {
-                log.info(
-                  `${EMOJIS.SUCCESS} Agent ${vmIndex} already enrolled: ${vm.name} (${existingAgent.id})`
-                );
-              }
-              return { success: true as const, vm, policy, vmIndex, alreadyEnrolled: true };
-            }
-
-            if (verbose) {
-              log.info(`  No existing agent found with tag ${vmNameTag}`);
-            }
-
-            // Agent not enrolled, proceed with enrollment
+            // Proceed with enrollment
             await enrollHostVmWithFleet({
               hostVm: vm,
               kbnClient,
