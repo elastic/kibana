@@ -200,6 +200,7 @@ export const AlertsPanel: FC = () => {
           options={toggleButtons}
           idSelected={toggleSelected}
           onChange={setToggleSelected}
+          data-test-subj="mlAlertsPanelToggle"
         />
         <EuiSpacer size="m" />
 

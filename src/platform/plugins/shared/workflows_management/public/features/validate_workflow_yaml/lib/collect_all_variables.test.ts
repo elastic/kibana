@@ -8,9 +8,9 @@
  */
 
 import { parseDocument } from 'yaml';
-import { WorkflowGraph } from '@kbn/workflows/graph';
-import type { WorkflowYaml } from '@kbn/workflows';
 import type { monaco } from '@kbn/monaco';
+import type { WorkflowYaml } from '@kbn/workflows';
+import { WorkflowGraph } from '@kbn/workflows/graph';
 import { collectAllVariables } from './collect_all_variables';
 
 // Mock Monaco model

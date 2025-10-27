@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { CoreStart } from '@kbn/core/public';
+import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
+import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { selectFocusedStepInfo } from '../../lib/store';
 
 export interface CopyWorkflowStepOption {

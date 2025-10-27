@@ -15,6 +15,7 @@ import { MaintenanceWindowStatus } from '../../../../../../common';
 import { transformUpdateBody } from './transforms';
 import { rewritePartialMaintenanceBodyRes } from '../../../../lib';
 import type { UpdateMaintenanceWindowRequestBody } from '../../../../../../common/routes/maintenance_window/internal/apis/update';
+import type { MaintenanceWindow } from '../../../../../application/maintenance_window/types';
 
 const maintenanceWindowClient = maintenanceWindowClientMock.create();
 
@@ -144,5 +145,60 @@ describe('updateMaintenanceWindowRoute', () => {
     const [, handler] = router.post.mock.calls[0];
     const [context, req, res] = mockHandlerArguments({ maintenanceWindowClient }, { body: {} });
     await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
+  });
+
+  test('should update the maintenance window with hourly frequency', async () => {
+    const updateParams2 = {
+      ...updateParams,
+      r_rule: { ...updateParams.r_rule, freq: 4 },
+    } as UpdateMaintenanceWindowRequestBody;
+
+    const mockMaintenanceWindow2 = {
+      ...mockMaintenanceWindow,
+      rRule: { ...mockMaintenanceWindow.rRule, freq: 4 },
+    };
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    updateMaintenanceWindowRoute(router, licenseState);
+
+    maintenanceWindowClient.update.mockResolvedValueOnce(
+      mockMaintenanceWindow2 as MaintenanceWindow
+    );
+    const [config, handler] = router.post.mock.calls[0];
+    const [context, req, res] = mockHandlerArguments(
+      { maintenanceWindowClient },
+      {
+        params: { id: 'test-id' },
+        body: updateParams2,
+      }
+    );
+
+    expect(config.path).toEqual('/internal/alerting/rules/maintenance_window/{id}');
+    expect(config.options).toMatchInlineSnapshot(`
+      Object {
+        "access": "internal",
+      }
+    `);
+
+    expect(config.security).toMatchInlineSnapshot(`
+      Object {
+        "authz": Object {
+          "requiredPrivileges": Array [
+            "write-maintenance-window",
+          ],
+        },
+      }
+    `);
+
+    await handler(context, req, res);
+
+    expect(maintenanceWindowClient.update).toHaveBeenLastCalledWith({
+      id: 'test-id',
+      data: transformUpdateBody(updateParams2),
+    });
+
+    expect(res.ok).toHaveBeenLastCalledWith({
+      body: rewritePartialMaintenanceBodyRes(mockMaintenanceWindow2),
+    });
   });
 });

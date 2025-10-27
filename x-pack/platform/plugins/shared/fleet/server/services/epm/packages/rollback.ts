@@ -6,6 +6,8 @@
  */
 
 import { uniq } from 'lodash';
+import type { unitOfTime } from 'moment';
+import moment from 'moment';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { PackageRollbackError } from '../../../errors';
@@ -16,6 +18,19 @@ import { UpdateEventType, sendTelemetryEvents } from '../../upgrade_sender';
 
 import { getPackageSavedObjects } from './get';
 import { installPackage } from './install';
+
+const DEFAULT_INTEGRATION_ROLLBACK_TTL = '7d';
+
+export const isIntegrationRollbackTTLExpired = (installStartedAt: string): boolean => {
+  let { integrationRollbackTTL } = appContextService.getConfig() ?? {};
+  if (!integrationRollbackTTL) {
+    integrationRollbackTTL = DEFAULT_INTEGRATION_ROLLBACK_TTL;
+  }
+  const numberPart = integrationRollbackTTL.slice(0, -1);
+  const unitPart = integrationRollbackTTL.slice(-1) as unitOfTime.DurationConstructor;
+  const ttlDuration = moment.duration(Number(numberPart), unitPart).asMilliseconds();
+  return Date.parse(installStartedAt) < Date.now() - ttlDuration;
+};
 
 export async function rollbackInstallation(options: {
   esClient: ElasticsearchClient;
@@ -47,6 +62,9 @@ export async function rollbackInstallation(options: {
   const packageSO = packageSORes.saved_objects[0];
   if (!packageSO.attributes.previous_version) {
     throw new PackageRollbackError(`No previous version found for package ${pkgName}`);
+  }
+  if (isIntegrationRollbackTTLExpired(packageSO.attributes.install_started_at)) {
+    throw new PackageRollbackError(`Rollback not allowed as TTL expired`);
   }
   const previousVersion = packageSO.attributes.previous_version;
   if (packageSO.attributes.install_source !== 'registry') {
