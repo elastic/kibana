@@ -3910,7 +3910,7 @@ describe('xy_visualization', () => {
                 "icon": "save",
                 "isCompatible": true,
                 "order": 100,
-                "showOutsideList": true,
+                "showOutsideList": false,
               },
               Object {
                 "data-test-subj": "lnsXY_annotationLayer_unlinkFromLibrary",
