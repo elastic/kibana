@@ -255,7 +255,6 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/elastic-assistant-shared-state",
     "@kbn/elastic-assistant-shared-state-plugin",
-    "@kbn/spaces-utils",
     "@kbn/core-lifecycle-server-mocks",
     "@kbn/licensing-types",
     "@kbn/core-metrics-server",
@@ -271,5 +270,6 @@
     "@kbn/onechat-common",
     "@kbn/onechat-server",
     "@kbn/core-ui-settings-common",
+    "@kbn/react-query"
   ]
 }
