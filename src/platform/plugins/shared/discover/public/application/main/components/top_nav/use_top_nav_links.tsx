@@ -259,7 +259,7 @@ export const useTopNavLinks = ({
           defaultMessage: 'Materialize in Streams',
         }),
         description: i18n.translate('discover.localMenu.materializeInStreams.description', {
-          defaultMessage: 'Translate ES|QL to processors and open Streams processing',
+          defaultMessage: 'Translate ES|QL to processors and conditions, then open Streams processing',
         }),
         testId: 'discoverMaterializeInStreamsButton',
         iconType: 'indexEdit',
@@ -296,7 +296,7 @@ export const useTopNavLinks = ({
         tooltip: !isEligible
           ? i18n.translate('discover.localMenu.materializeInStreams.disabled', {
               defaultMessage:
-                'Enabled when a single stream target is detected and GROK/DISSECT are present',
+                'Enabled when a single stream target is detected and the ES|QL query produces materializable steps',
             })
           : undefined,
       });

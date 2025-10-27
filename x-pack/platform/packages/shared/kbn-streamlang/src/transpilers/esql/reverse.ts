@@ -289,6 +289,10 @@ export function esqlToStreamlangSteps(
       continue;
     }
   }
+  // If only WHERE clauses were present, materialize as a top-level where block
+  if (steps.length === 0 && activeCondition) {
+    steps.push({ where: { ...activeCondition, steps: [] } });
+  }
   return steps;
 }
 

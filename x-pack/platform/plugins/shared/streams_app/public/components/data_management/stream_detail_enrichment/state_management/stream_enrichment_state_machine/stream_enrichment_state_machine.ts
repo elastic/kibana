@@ -23,7 +23,7 @@ import type { Streams } from '@kbn/streams-schema';
 import { GrokCollection } from '@kbn/grok-ui';
 import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
 import type { StreamlangStep } from '@kbn/streamlang';
-import { isActionBlock } from '@kbn/streamlang';
+import { isActionBlock, isWhereBlock } from '@kbn/streamlang';
 import {
   ALWAYS_CONDITION,
   convertStepsForUI,
@@ -711,6 +711,8 @@ export const createStreamEnrichmentMachineImplementations = ({
         const converted = stepConverter.toUIDefinition(step, { parentId: null });
         if (isActionBlock(converted) && converted.where) {
           converted.where = rewriteConditionFieldsToOtel(converted.where, isWired);
+        } else if (isWhereBlock(converted)) {
+          converted.where = rewriteConditionFieldsToOtel(converted.where, isWired) as typeof converted.where;
         }
         return spawnStep(converted, { spawn, self }, { isNew: true });
       });
