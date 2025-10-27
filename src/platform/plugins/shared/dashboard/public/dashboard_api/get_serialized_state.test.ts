@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { dataService, savedObjectsTaggingService } from '../services/kibana_services';
+import { dataService } from '../services/kibana_services';
 import { getSampleDashboardState } from '../mocks';
 import { getSerializedState } from './get_serialized_state';
 
@@ -23,14 +23,6 @@ dataService.query.timefilter.timefilter.getTime = jest
 dataService.query.timefilter.timefilter.getRefreshInterval = jest
   .fn()
   .mockReturnValue({ pause: true, value: 0 });
-
-if (savedObjectsTaggingService) {
-  savedObjectsTaggingService.getTaggingApi = jest.fn().mockReturnValue({
-    ui: {
-      updateTagsReferences: jest.fn((references, tags) => references),
-    },
-  });
-}
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('54321'),
@@ -67,6 +59,7 @@ describe('getSerializedState', () => {
           "query": "hi",
         },
         "refreshInterval": undefined,
+        "tags": Array [],
         "timeRange": undefined,
         "timeRestore": false,
         "title": "My Dashboard",

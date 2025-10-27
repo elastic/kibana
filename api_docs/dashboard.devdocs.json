@@ -21,13 +21,21 @@
           },
           "<Partial<",
           {
-            "pluginId": "dashboard",
+            "pluginId": "@kbn/utility-types",
             "scope": "common",
-            "docId": "kibDashboardPluginApi",
-            "section": "def-common.DashboardState",
-            "text": "DashboardState"
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Writable",
+            "text": "Writable"
           },
-          " & { controlGroupInput?: (Readonly<{ enhancements?: Record<string, any> | undefined; ignoreParentSettings?: Readonly<{ ignoreFilters?: boolean | undefined; ignoreQuery?: boolean | undefined; ignoreTimerange?: boolean | undefined; ignoreValidations?: boolean | undefined; } & {}> | undefined; } & { controls: Readonly<{ id?: string | undefined; grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; controlConfig?: Readonly<{} & {}> | undefined; } & { type: string; order: number; }>[]; labelPosition: \"oneLine\" | \"twoLine\"; chainingSystem: \"HIERARCHICAL\" | \"NONE\"; autoApplySelections: boolean; }> & ",
+          "<Readonly<{ options?: Readonly<{ hidePanelTitles?: boolean | undefined; useMargins?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; } & {}> | undefined; version?: number | undefined; namespaces?: string[] | undefined; tags?: string[] | undefined; description?: string | undefined; timeRange?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.FilterStateStore",
+            "text": "FilterStateStore"
+          },
+          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; spaces?: string[] | undefined; references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; controlGroupInput?: Readonly<{ enhancements?: Record<string, any> | undefined; ignoreParentSettings?: Readonly<{ ignoreFilters?: boolean | undefined; ignoreQuery?: boolean | undefined; ignoreTimerange?: boolean | undefined; ignoreValidations?: boolean | undefined; } & {}> | undefined; } & { controls: Readonly<{ id?: string | undefined; grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; controlConfig?: Readonly<{} & {}> | undefined; } & { type: string; order: number; }>[]; labelPosition: \"oneLine\" | \"twoLine\"; chainingSystem: \"HIERARCHICAL\" | \"NONE\"; autoApplySelections: boolean; }> | undefined; } & { title: string; timeRestore: boolean; panels: (Readonly<{ version?: string | undefined; uid?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }> | Readonly<{ uid?: string | undefined; collapsed?: boolean | undefined; } & { title: string; grid: Readonly<{} & { y: number; }>; panels: Readonly<{ version?: string | undefined; uid?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }>[]; }>)[]; }>> & { controlGroupInput?: (Readonly<{ enhancements?: Record<string, any> | undefined; ignoreParentSettings?: Readonly<{ ignoreFilters?: boolean | undefined; ignoreQuery?: boolean | undefined; ignoreTimerange?: boolean | undefined; ignoreValidations?: boolean | undefined; } & {}> | undefined; } & { controls: Readonly<{ id?: string | undefined; grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; controlConfig?: Readonly<{} & {}> | undefined; } & { type: string; order: number; }>[]; labelPosition: \"oneLine\" | \"twoLine\"; chainingSystem: \"HIERARCHICAL\" | \"NONE\"; autoApplySelections: boolean; }> & ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -35,15 +43,7 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          ") | undefined; references?: (",
-          {
-            "pluginId": "@kbn/content-management-utils",
-            "scope": "server",
-            "docId": "kibKbnContentManagementUtilsPluginApi",
-            "section": "def-server.Reference",
-            "text": "Reference"
-          },
-          "[] & ",
+          ") | undefined; references?: (Readonly<{} & { id: string; type: string; name: string; }>[] & ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -129,13 +129,21 @@
             "signature": [
               "(params: Partial<",
               {
-                "pluginId": "dashboard",
+                "pluginId": "@kbn/utility-types",
                 "scope": "common",
-                "docId": "kibDashboardPluginApi",
-                "section": "def-common.DashboardState",
-                "text": "DashboardState"
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.Writable",
+                "text": "Writable"
               },
-              " & { controlGroupInput?: (Readonly<{ enhancements?: Record<string, any> | undefined; ignoreParentSettings?: Readonly<{ ignoreFilters?: boolean | undefined; ignoreQuery?: boolean | undefined; ignoreTimerange?: boolean | undefined; ignoreValidations?: boolean | undefined; } & {}> | undefined; } & { controls: Readonly<{ id?: string | undefined; grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; controlConfig?: Readonly<{} & {}> | undefined; } & { type: string; order: number; }>[]; labelPosition: \"oneLine\" | \"twoLine\"; chainingSystem: \"HIERARCHICAL\" | \"NONE\"; autoApplySelections: boolean; }> & ",
+              "<Readonly<{ options?: Readonly<{ hidePanelTitles?: boolean | undefined; useMargins?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; } & {}> | undefined; version?: number | undefined; namespaces?: string[] | undefined; tags?: string[] | undefined; description?: string | undefined; timeRange?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.FilterStateStore",
+                "text": "FilterStateStore"
+              },
+              "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; spaces?: string[] | undefined; references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; controlGroupInput?: Readonly<{ enhancements?: Record<string, any> | undefined; ignoreParentSettings?: Readonly<{ ignoreFilters?: boolean | undefined; ignoreQuery?: boolean | undefined; ignoreTimerange?: boolean | undefined; ignoreValidations?: boolean | undefined; } & {}> | undefined; } & { controls: Readonly<{ id?: string | undefined; grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; controlConfig?: Readonly<{} & {}> | undefined; } & { type: string; order: number; }>[]; labelPosition: \"oneLine\" | \"twoLine\"; chainingSystem: \"HIERARCHICAL\" | \"NONE\"; autoApplySelections: boolean; }> | undefined; } & { title: string; timeRestore: boolean; panels: (Readonly<{ version?: string | undefined; uid?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }> | Readonly<{ uid?: string | undefined; collapsed?: boolean | undefined; } & { title: string; grid: Readonly<{} & { y: number; }>; panels: Readonly<{ version?: string | undefined; uid?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }>[]; }>)[]; }>> & { controlGroupInput?: (Readonly<{ enhancements?: Record<string, any> | undefined; ignoreParentSettings?: Readonly<{ ignoreFilters?: boolean | undefined; ignoreQuery?: boolean | undefined; ignoreTimerange?: boolean | undefined; ignoreValidations?: boolean | undefined; } & {}> | undefined; } & { controls: Readonly<{ id?: string | undefined; grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; controlConfig?: Readonly<{} & {}> | undefined; } & { type: string; order: number; }>[]; labelPosition: \"oneLine\" | \"twoLine\"; chainingSystem: \"HIERARCHICAL\" | \"NONE\"; autoApplySelections: boolean; }> & ",
               {
                 "pluginId": "@kbn/utility-types",
                 "scope": "common",
@@ -143,15 +151,7 @@
                 "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               },
-              ") | undefined; references?: (",
-              {
-                "pluginId": "@kbn/content-management-utils",
-                "scope": "server",
-                "docId": "kibKbnContentManagementUtilsPluginApi",
-                "section": "def-server.Reference",
-                "text": "Reference"
-              },
-              "[] & ",
+              ") | undefined; references?: (Readonly<{} & { id: string; type: string; name: string; }>[] & ",
               {
                 "pluginId": "@kbn/utility-types",
                 "scope": "common",
@@ -199,13 +199,21 @@
                 "signature": [
                   "Partial<",
                   {
-                    "pluginId": "dashboard",
+                    "pluginId": "@kbn/utility-types",
                     "scope": "common",
-                    "docId": "kibDashboardPluginApi",
-                    "section": "def-common.DashboardState",
-                    "text": "DashboardState"
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.Writable",
+                    "text": "Writable"
                   },
-                  " & { controlGroupInput?: (Readonly<{ enhancements?: Record<string, any> | undefined; ignoreParentSettings?: Readonly<{ ignoreFilters?: boolean | undefined; ignoreQuery?: boolean | undefined; ignoreTimerange?: boolean | undefined; ignoreValidations?: boolean | undefined; } & {}> | undefined; } & { controls: Readonly<{ id?: string | undefined; grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; controlConfig?: Readonly<{} & {}> | undefined; } & { type: string; order: number; }>[]; labelPosition: \"oneLine\" | \"twoLine\"; chainingSystem: \"HIERARCHICAL\" | \"NONE\"; autoApplySelections: boolean; }> & ",
+                  "<Readonly<{ options?: Readonly<{ hidePanelTitles?: boolean | undefined; useMargins?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; } & {}> | undefined; version?: number | undefined; namespaces?: string[] | undefined; tags?: string[] | undefined; description?: string | undefined; timeRange?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.FilterStateStore",
+                    "text": "FilterStateStore"
+                  },
+                  "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; spaces?: string[] | undefined; references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; controlGroupInput?: Readonly<{ enhancements?: Record<string, any> | undefined; ignoreParentSettings?: Readonly<{ ignoreFilters?: boolean | undefined; ignoreQuery?: boolean | undefined; ignoreTimerange?: boolean | undefined; ignoreValidations?: boolean | undefined; } & {}> | undefined; } & { controls: Readonly<{ id?: string | undefined; grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; controlConfig?: Readonly<{} & {}> | undefined; } & { type: string; order: number; }>[]; labelPosition: \"oneLine\" | \"twoLine\"; chainingSystem: \"HIERARCHICAL\" | \"NONE\"; autoApplySelections: boolean; }> | undefined; } & { title: string; timeRestore: boolean; panels: (Readonly<{ version?: string | undefined; uid?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }> | Readonly<{ uid?: string | undefined; collapsed?: boolean | undefined; } & { title: string; grid: Readonly<{} & { y: number; }>; panels: Readonly<{ version?: string | undefined; uid?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }>[]; }>)[]; }>> & { controlGroupInput?: (Readonly<{ enhancements?: Record<string, any> | undefined; ignoreParentSettings?: Readonly<{ ignoreFilters?: boolean | undefined; ignoreQuery?: boolean | undefined; ignoreTimerange?: boolean | undefined; ignoreValidations?: boolean | undefined; } & {}> | undefined; } & { controls: Readonly<{ id?: string | undefined; grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; controlConfig?: Readonly<{} & {}> | undefined; } & { type: string; order: number; }>[]; labelPosition: \"oneLine\" | \"twoLine\"; chainingSystem: \"HIERARCHICAL\" | \"NONE\"; autoApplySelections: boolean; }> & ",
                   {
                     "pluginId": "@kbn/utility-types",
                     "scope": "common",
@@ -213,15 +221,7 @@
                     "section": "def-common.SerializableRecord",
                     "text": "SerializableRecord"
                   },
-                  ") | undefined; references?: (",
-                  {
-                    "pluginId": "@kbn/content-management-utils",
-                    "scope": "server",
-                    "docId": "kibKbnContentManagementUtilsPluginApi",
-                    "section": "def-server.Reference",
-                    "text": "Reference"
-                  },
-                  "[] & ",
+                  ") | undefined; references?: (Readonly<{} & { id: string; type: string; name: string; }>[] & ",
                   {
                     "pluginId": "@kbn/utility-types",
                     "scope": "common",
@@ -437,13 +437,21 @@
           },
           ") => Partial<Partial<",
           {
-            "pluginId": "dashboard",
+            "pluginId": "@kbn/utility-types",
             "scope": "common",
-            "docId": "kibDashboardPluginApi",
-            "section": "def-common.DashboardState",
-            "text": "DashboardState"
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Writable",
+            "text": "Writable"
           },
-          " & { controlGroupInput?: (Readonly<{ enhancements?: Record<string, any> | undefined; ignoreParentSettings?: Readonly<{ ignoreFilters?: boolean | undefined; ignoreQuery?: boolean | undefined; ignoreTimerange?: boolean | undefined; ignoreValidations?: boolean | undefined; } & {}> | undefined; } & { controls: Readonly<{ id?: string | undefined; grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; controlConfig?: Readonly<{} & {}> | undefined; } & { type: string; order: number; }>[]; labelPosition: \"oneLine\" | \"twoLine\"; chainingSystem: \"HIERARCHICAL\" | \"NONE\"; autoApplySelections: boolean; }> & ",
+          "<Readonly<{ options?: Readonly<{ hidePanelTitles?: boolean | undefined; useMargins?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; } & {}> | undefined; version?: number | undefined; namespaces?: string[] | undefined; tags?: string[] | undefined; description?: string | undefined; timeRange?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.FilterStateStore",
+            "text": "FilterStateStore"
+          },
+          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; spaces?: string[] | undefined; references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; controlGroupInput?: Readonly<{ enhancements?: Record<string, any> | undefined; ignoreParentSettings?: Readonly<{ ignoreFilters?: boolean | undefined; ignoreQuery?: boolean | undefined; ignoreTimerange?: boolean | undefined; ignoreValidations?: boolean | undefined; } & {}> | undefined; } & { controls: Readonly<{ id?: string | undefined; grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; controlConfig?: Readonly<{} & {}> | undefined; } & { type: string; order: number; }>[]; labelPosition: \"oneLine\" | \"twoLine\"; chainingSystem: \"HIERARCHICAL\" | \"NONE\"; autoApplySelections: boolean; }> | undefined; } & { title: string; timeRestore: boolean; panels: (Readonly<{ version?: string | undefined; uid?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }> | Readonly<{ uid?: string | undefined; collapsed?: boolean | undefined; } & { title: string; grid: Readonly<{} & { y: number; }>; panels: Readonly<{ version?: string | undefined; uid?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }>[]; }>)[]; }>> & { controlGroupInput?: (Readonly<{ enhancements?: Record<string, any> | undefined; ignoreParentSettings?: Readonly<{ ignoreFilters?: boolean | undefined; ignoreQuery?: boolean | undefined; ignoreTimerange?: boolean | undefined; ignoreValidations?: boolean | undefined; } & {}> | undefined; } & { controls: Readonly<{ id?: string | undefined; grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; controlConfig?: Readonly<{} & {}> | undefined; } & { type: string; order: number; }>[]; labelPosition: \"oneLine\" | \"twoLine\"; chainingSystem: \"HIERARCHICAL\" | \"NONE\"; autoApplySelections: boolean; }> & ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -451,15 +459,7 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          ") | undefined; references?: (",
-          {
-            "pluginId": "@kbn/content-management-utils",
-            "scope": "server",
-            "docId": "kibKbnContentManagementUtilsPluginApi",
-            "section": "def-server.Reference",
-            "text": "Reference"
-          },
-          "[] & ",
+          ") | undefined; references?: (Readonly<{} & { id: string; type: string; name: string; }>[] & ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -655,13 +655,21 @@
             "signature": [
               "(() => Partial<",
               {
-                "pluginId": "dashboard",
+                "pluginId": "@kbn/utility-types",
                 "scope": "common",
-                "docId": "kibDashboardPluginApi",
-                "section": "def-common.DashboardState",
-                "text": "DashboardState"
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.Writable",
+                "text": "Writable"
               },
-              " & { viewMode?: ",
+              "<Readonly<{ options?: Readonly<{ hidePanelTitles?: boolean | undefined; useMargins?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; } & {}> | undefined; version?: number | undefined; namespaces?: string[] | undefined; tags?: string[] | undefined; description?: string | undefined; timeRange?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.FilterStateStore",
+                "text": "FilterStateStore"
+              },
+              "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; spaces?: string[] | undefined; references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; controlGroupInput?: Readonly<{ enhancements?: Record<string, any> | undefined; ignoreParentSettings?: Readonly<{ ignoreFilters?: boolean | undefined; ignoreQuery?: boolean | undefined; ignoreTimerange?: boolean | undefined; ignoreValidations?: boolean | undefined; } & {}> | undefined; } & { controls: Readonly<{ id?: string | undefined; grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; controlConfig?: Readonly<{} & {}> | undefined; } & { type: string; order: number; }>[]; labelPosition: \"oneLine\" | \"twoLine\"; chainingSystem: \"HIERARCHICAL\" | \"NONE\"; autoApplySelections: boolean; }> | undefined; } & { title: string; timeRestore: boolean; panels: (Readonly<{ version?: string | undefined; uid?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }> | Readonly<{ uid?: string | undefined; collapsed?: boolean | undefined; } & { title: string; grid: Readonly<{} & { y: number; }>; panels: Readonly<{ version?: string | undefined; uid?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }>[]; }>)[]; }>> & { viewMode?: ",
               {
                 "pluginId": "@kbn/presentation-publishing",
                 "scope": "public",
@@ -963,13 +971,21 @@
               },
               "<Partial<",
               {
-                "pluginId": "dashboard",
+                "pluginId": "@kbn/utility-types",
                 "scope": "common",
-                "docId": "kibDashboardPluginApi",
-                "section": "def-common.DashboardState",
-                "text": "DashboardState"
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.Writable",
+                "text": "Writable"
               },
-              " & { controlGroupInput?: (Readonly<{ enhancements?: Record<string, any> | undefined; ignoreParentSettings?: Readonly<{ ignoreFilters?: boolean | undefined; ignoreQuery?: boolean | undefined; ignoreTimerange?: boolean | undefined; ignoreValidations?: boolean | undefined; } & {}> | undefined; } & { controls: Readonly<{ id?: string | undefined; grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; controlConfig?: Readonly<{} & {}> | undefined; } & { type: string; order: number; }>[]; labelPosition: \"oneLine\" | \"twoLine\"; chainingSystem: \"HIERARCHICAL\" | \"NONE\"; autoApplySelections: boolean; }> & ",
+              "<Readonly<{ options?: Readonly<{ hidePanelTitles?: boolean | undefined; useMargins?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; } & {}> | undefined; version?: number | undefined; namespaces?: string[] | undefined; tags?: string[] | undefined; description?: string | undefined; timeRange?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.FilterStateStore",
+                "text": "FilterStateStore"
+              },
+              "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; spaces?: string[] | undefined; references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; controlGroupInput?: Readonly<{ enhancements?: Record<string, any> | undefined; ignoreParentSettings?: Readonly<{ ignoreFilters?: boolean | undefined; ignoreQuery?: boolean | undefined; ignoreTimerange?: boolean | undefined; ignoreValidations?: boolean | undefined; } & {}> | undefined; } & { controls: Readonly<{ id?: string | undefined; grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; controlConfig?: Readonly<{} & {}> | undefined; } & { type: string; order: number; }>[]; labelPosition: \"oneLine\" | \"twoLine\"; chainingSystem: \"HIERARCHICAL\" | \"NONE\"; autoApplySelections: boolean; }> | undefined; } & { title: string; timeRestore: boolean; panels: (Readonly<{ version?: string | undefined; uid?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }> | Readonly<{ uid?: string | undefined; collapsed?: boolean | undefined; } & { title: string; grid: Readonly<{} & { y: number; }>; panels: Readonly<{ version?: string | undefined; uid?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }>[]; }>)[]; }>> & { controlGroupInput?: (Readonly<{ enhancements?: Record<string, any> | undefined; ignoreParentSettings?: Readonly<{ ignoreFilters?: boolean | undefined; ignoreQuery?: boolean | undefined; ignoreTimerange?: boolean | undefined; ignoreValidations?: boolean | undefined; } & {}> | undefined; } & { controls: Readonly<{ id?: string | undefined; grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; controlConfig?: Readonly<{} & {}> | undefined; } & { type: string; order: number; }>[]; labelPosition: \"oneLine\" | \"twoLine\"; chainingSystem: \"HIERARCHICAL\" | \"NONE\"; autoApplySelections: boolean; }> & ",
               {
                 "pluginId": "@kbn/utility-types",
                 "scope": "common",
@@ -977,15 +993,7 @@
                 "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               },
-              ") | undefined; references?: (",
-              {
-                "pluginId": "@kbn/content-management-utils",
-                "scope": "server",
-                "docId": "kibKbnContentManagementUtilsPluginApi",
-                "section": "def-server.Reference",
-                "text": "Reference"
-              },
-              "[] & ",
+              ") | undefined; references?: (Readonly<{} & { id: string; type: string; name: string; }>[] & ",
               {
                 "pluginId": "@kbn/utility-types",
                 "scope": "common",
@@ -1161,7 +1169,7 @@
             "label": "hits",
             "description": [],
             "signature": [
-              "Readonly<{ error?: Readonly<{ metadata?: Readonly<{} & {}> | undefined; } & { error: string; message: string; statusCode: number; }> | undefined; version?: string | undefined; namespaces?: string[] | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; managed?: boolean | undefined; originId?: string | undefined; } & { id: string; type: string; attributes: Readonly<{ options?: Readonly<{ hidePanelTitles?: boolean | undefined; useMargins?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; } & {}> | undefined; version?: number | undefined; tags?: string[] | undefined; timeRange?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+              "Readonly<{ error?: Readonly<{ metadata?: Readonly<{} & {}> | undefined; } & { error: string; message: string; statusCode: number; }> | undefined; version?: string | undefined; namespaces?: string[] | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; managed?: boolean | undefined; originId?: string | undefined; } & { id: string; type: string; attributes: Readonly<{ options?: Readonly<{ hidePanelTitles?: boolean | undefined; useMargins?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; } & {}> | undefined; version?: number | undefined; tags?: string[] | undefined; description?: string | undefined; timeRange?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -1169,7 +1177,7 @@
                 "section": "def-common.FilterStateStore",
                 "text": "FilterStateStore"
               },
-              "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; controlGroupInput?: Readonly<{ enhancements?: Record<string, any> | undefined; ignoreParentSettings?: Readonly<{ ignoreFilters?: boolean | undefined; ignoreQuery?: boolean | undefined; ignoreTimerange?: boolean | undefined; ignoreValidations?: boolean | undefined; } & {}> | undefined; } & { controls: Readonly<{ id?: string | undefined; grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; controlConfig?: Readonly<{} & {}> | undefined; } & { type: string; order: number; }>[]; labelPosition: \"oneLine\" | \"twoLine\"; chainingSystem: \"HIERARCHICAL\" | \"NONE\"; autoApplySelections: boolean; }> | undefined; } & { title: string; description: string; timeRestore: boolean; panels: (Readonly<{ version?: string | undefined; uid?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }> | Readonly<{ uid?: string | undefined; collapsed?: boolean | undefined; } & { title: string; grid: Readonly<{} & { y: number; }>; panels: Readonly<{ version?: string | undefined; uid?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }>[]; }>)[]; }>; references: Readonly<{} & { id: string; type: string; name: string; }>[]; }>[]"
+              "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; controlGroupInput?: Readonly<{ enhancements?: Record<string, any> | undefined; ignoreParentSettings?: Readonly<{ ignoreFilters?: boolean | undefined; ignoreQuery?: boolean | undefined; ignoreTimerange?: boolean | undefined; ignoreValidations?: boolean | undefined; } & {}> | undefined; } & { controls: Readonly<{ id?: string | undefined; grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; controlConfig?: Readonly<{} & {}> | undefined; } & { type: string; order: number; }>[]; labelPosition: \"oneLine\" | \"twoLine\"; chainingSystem: \"HIERARCHICAL\" | \"NONE\"; autoApplySelections: boolean; }> | undefined; } & { title: string; timeRestore: boolean; panels: (Readonly<{ version?: string | undefined; uid?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }> | Readonly<{ uid?: string | undefined; collapsed?: boolean | undefined; } & { title: string; grid: Readonly<{} & { y: number; }>; panels: Readonly<{ version?: string | undefined; uid?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }>[]; }>)[]; }>; references: Readonly<{} & { id: string; type: string; name: string; }>[]; }>[]"
             ],
             "path": "src/platform/plugins/shared/dashboard/public/services/dashboard_content_management_service/lib/find_dashboards.ts",
             "deprecated": false,
@@ -1506,7 +1514,15 @@
           },
           "<string | undefined>; setFocusedPanelId: (id: string | undefined) => void; forceRefresh: () => void; getSettings: () => ",
           "DashboardSettings",
-          "; getSerializedState: () => { attributes: Readonly<{ options?: Readonly<{ hidePanelTitles?: boolean | undefined; useMargins?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; } & {}> | undefined; version?: number | undefined; namespaces?: string[] | undefined; tags?: string[] | undefined; timeRange?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "; getSerializedState: () => { attributes: ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Writable",
+            "text": "Writable"
+          },
+          "<Readonly<{ options?: Readonly<{ hidePanelTitles?: boolean | undefined; useMargins?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; } & {}> | undefined; version?: number | undefined; namespaces?: string[] | undefined; tags?: string[] | undefined; description?: string | undefined; timeRange?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1514,7 +1530,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; spaces?: string[] | undefined; references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; controlGroupInput?: Readonly<{ enhancements?: Record<string, any> | undefined; ignoreParentSettings?: Readonly<{ ignoreFilters?: boolean | undefined; ignoreQuery?: boolean | undefined; ignoreTimerange?: boolean | undefined; ignoreValidations?: boolean | undefined; } & {}> | undefined; } & { controls: Readonly<{ id?: string | undefined; grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; controlConfig?: Readonly<{} & {}> | undefined; } & { type: string; order: number; }>[]; labelPosition: \"oneLine\" | \"twoLine\"; chainingSystem: \"HIERARCHICAL\" | \"NONE\"; autoApplySelections: boolean; }> | undefined; } & { title: string; description: string; timeRestore: boolean; panels: (Readonly<{ version?: string | undefined; uid?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }> | Readonly<{ uid?: string | undefined; collapsed?: boolean | undefined; } & { title: string; grid: Readonly<{} & { y: number; }>; panels: Readonly<{ version?: string | undefined; uid?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }>[]; }>)[]; }>; references: ",
+          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; spaces?: string[] | undefined; references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; controlGroupInput?: Readonly<{ enhancements?: Record<string, any> | undefined; ignoreParentSettings?: Readonly<{ ignoreFilters?: boolean | undefined; ignoreQuery?: boolean | undefined; ignoreTimerange?: boolean | undefined; ignoreValidations?: boolean | undefined; } & {}> | undefined; } & { controls: Readonly<{ id?: string | undefined; grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; controlConfig?: Readonly<{} & {}> | undefined; } & { type: string; order: number; }>[]; labelPosition: \"oneLine\" | \"twoLine\"; chainingSystem: \"HIERARCHICAL\" | \"NONE\"; autoApplySelections: boolean; }> | undefined; } & { title: string; timeRestore: boolean; panels: (Readonly<{ version?: string | undefined; uid?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }> | Readonly<{ uid?: string | undefined; collapsed?: boolean | undefined; } & { title: string; grid: Readonly<{} & { y: number; }>; panels: Readonly<{ version?: string | undefined; uid?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }>[]; }>)[]; }>>; references: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -1564,13 +1580,21 @@
           },
           "<Partial<",
           {
-            "pluginId": "dashboard",
+            "pluginId": "@kbn/utility-types",
             "scope": "common",
-            "docId": "kibDashboardPluginApi",
-            "section": "def-common.DashboardState",
-            "text": "DashboardState"
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Writable",
+            "text": "Writable"
           },
-          " & { controlGroupInput?: (Readonly<{ enhancements?: Record<string, any> | undefined; ignoreParentSettings?: Readonly<{ ignoreFilters?: boolean | undefined; ignoreQuery?: boolean | undefined; ignoreTimerange?: boolean | undefined; ignoreValidations?: boolean | undefined; } & {}> | undefined; } & { controls: Readonly<{ id?: string | undefined; grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; controlConfig?: Readonly<{} & {}> | undefined; } & { type: string; order: number; }>[]; labelPosition: \"oneLine\" | \"twoLine\"; chainingSystem: \"HIERARCHICAL\" | \"NONE\"; autoApplySelections: boolean; }> & ",
+          "<Readonly<{ options?: Readonly<{ hidePanelTitles?: boolean | undefined; useMargins?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; } & {}> | undefined; version?: number | undefined; namespaces?: string[] | undefined; tags?: string[] | undefined; description?: string | undefined; timeRange?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.FilterStateStore",
+            "text": "FilterStateStore"
+          },
+          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; spaces?: string[] | undefined; references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; controlGroupInput?: Readonly<{ enhancements?: Record<string, any> | undefined; ignoreParentSettings?: Readonly<{ ignoreFilters?: boolean | undefined; ignoreQuery?: boolean | undefined; ignoreTimerange?: boolean | undefined; ignoreValidations?: boolean | undefined; } & {}> | undefined; } & { controls: Readonly<{ id?: string | undefined; grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; controlConfig?: Readonly<{} & {}> | undefined; } & { type: string; order: number; }>[]; labelPosition: \"oneLine\" | \"twoLine\"; chainingSystem: \"HIERARCHICAL\" | \"NONE\"; autoApplySelections: boolean; }> | undefined; } & { title: string; timeRestore: boolean; panels: (Readonly<{ version?: string | undefined; uid?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }> | Readonly<{ uid?: string | undefined; collapsed?: boolean | undefined; } & { title: string; grid: Readonly<{} & { y: number; }>; panels: Readonly<{ version?: string | undefined; uid?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }>[]; }>)[]; }>> & { controlGroupInput?: (Readonly<{ enhancements?: Record<string, any> | undefined; ignoreParentSettings?: Readonly<{ ignoreFilters?: boolean | undefined; ignoreQuery?: boolean | undefined; ignoreTimerange?: boolean | undefined; ignoreValidations?: boolean | undefined; } & {}> | undefined; } & { controls: Readonly<{ id?: string | undefined; grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; controlConfig?: Readonly<{} & {}> | undefined; } & { type: string; order: number; }>[]; labelPosition: \"oneLine\" | \"twoLine\"; chainingSystem: \"HIERARCHICAL\" | \"NONE\"; autoApplySelections: boolean; }> & ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -1578,15 +1602,7 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          ") | undefined; references?: (",
-          {
-            "pluginId": "@kbn/content-management-utils",
-            "scope": "server",
-            "docId": "kibKbnContentManagementUtilsPluginApi",
-            "section": "def-server.Reference",
-            "text": "Reference"
-          },
-          "[] & ",
+          ") | undefined; references?: (Readonly<{} & { id: string; type: string; name: string; }>[] & ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -1679,7 +1695,15 @@
         "label": "FindDashboardsByIdResponse",
         "description": [],
         "signature": [
-          "{ id: string; } & ({ status: \"success\"; attributes: Readonly<{ options?: Readonly<{ hidePanelTitles?: boolean | undefined; useMargins?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; } & {}> | undefined; version?: number | undefined; namespaces?: string[] | undefined; tags?: string[] | undefined; timeRange?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "{ id: string; } & ({ status: \"success\"; attributes: ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Writable",
+            "text": "Writable"
+          },
+          "<Readonly<{ options?: Readonly<{ hidePanelTitles?: boolean | undefined; useMargins?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; } & {}> | undefined; version?: number | undefined; namespaces?: string[] | undefined; tags?: string[] | undefined; description?: string | undefined; timeRange?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1687,7 +1711,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; spaces?: string[] | undefined; references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; controlGroupInput?: Readonly<{ enhancements?: Record<string, any> | undefined; ignoreParentSettings?: Readonly<{ ignoreFilters?: boolean | undefined; ignoreQuery?: boolean | undefined; ignoreTimerange?: boolean | undefined; ignoreValidations?: boolean | undefined; } & {}> | undefined; } & { controls: Readonly<{ id?: string | undefined; grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; controlConfig?: Readonly<{} & {}> | undefined; } & { type: string; order: number; }>[]; labelPosition: \"oneLine\" | \"twoLine\"; chainingSystem: \"HIERARCHICAL\" | \"NONE\"; autoApplySelections: boolean; }> | undefined; } & { title: string; description: string; timeRestore: boolean; panels: (Readonly<{ version?: string | undefined; uid?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }> | Readonly<{ uid?: string | undefined; collapsed?: boolean | undefined; } & { title: string; grid: Readonly<{} & { y: number; }>; panels: Readonly<{ version?: string | undefined; uid?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }>[]; }>)[]; }>; references: ",
+          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; spaces?: string[] | undefined; references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; controlGroupInput?: Readonly<{ enhancements?: Record<string, any> | undefined; ignoreParentSettings?: Readonly<{ ignoreFilters?: boolean | undefined; ignoreQuery?: boolean | undefined; ignoreTimerange?: boolean | undefined; ignoreValidations?: boolean | undefined; } & {}> | undefined; } & { controls: Readonly<{ id?: string | undefined; grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; controlConfig?: Readonly<{} & {}> | undefined; } & { type: string; order: number; }>[]; labelPosition: \"oneLine\" | \"twoLine\"; chainingSystem: \"HIERARCHICAL\" | \"NONE\"; autoApplySelections: boolean; }> | undefined; } & { title: string; timeRestore: boolean; panels: (Readonly<{ version?: string | undefined; uid?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }> | Readonly<{ uid?: string | undefined; collapsed?: boolean | undefined; } & { title: string; grid: Readonly<{} & { y: number; }>; panels: Readonly<{ version?: string | undefined; uid?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }>[]; }>)[]; }>>; references: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -1819,29 +1843,6 @@
         "label": "DashboardAttributes",
         "description": [],
         "signature": [
-          "{ readonly options?: Readonly<{ hidePanelTitles?: boolean | undefined; useMargins?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; } & {}> | undefined; readonly version?: number | undefined; readonly namespaces?: string[] | undefined; readonly tags?: string[] | undefined; readonly timeRange?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; readonly refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; readonly query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; readonly filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.FilterStateStore",
-            "text": "FilterStateStore"
-          },
-          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; readonly spaces?: string[] | undefined; readonly references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; readonly controlGroupInput?: Readonly<{ enhancements?: Record<string, any> | undefined; ignoreParentSettings?: Readonly<{ ignoreFilters?: boolean | undefined; ignoreQuery?: boolean | undefined; ignoreTimerange?: boolean | undefined; ignoreValidations?: boolean | undefined; } & {}> | undefined; } & { controls: Readonly<{ id?: string | undefined; grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; controlConfig?: Readonly<{} & {}> | undefined; } & { type: string; order: number; }>[]; labelPosition: \"oneLine\" | \"twoLine\"; chainingSystem: \"HIERARCHICAL\" | \"NONE\"; autoApplySelections: boolean; }> | undefined; readonly title: string; readonly description: string; readonly timeRestore: boolean; readonly panels: (Readonly<{ version?: string | undefined; uid?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }> | Readonly<{ uid?: string | undefined; collapsed?: boolean | undefined; } & { title: string; grid: Readonly<{} & { y: number; }>; panels: Readonly<{ version?: string | undefined; uid?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }>[]; }>)[]; }"
-        ],
-        "path": "src/platform/plugins/shared/dashboard/server/content_management/v1/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dashboard",
-        "id": "def-server.DashboardAttributes",
-        "type": "Type",
-        "tags": [],
-        "label": "DashboardAttributes",
-        "description": [],
-        "signature": [
           "{ readonly version?: number | undefined; readonly timeRestore?: boolean | undefined; readonly refreshInterval?: Readonly<{ section?: number | undefined; display?: string | undefined; } & { value: number; pause: boolean; }> | undefined; readonly sections?: Readonly<{ collapsed?: boolean | undefined; } & { title: string; gridData: Readonly<{} & { i: string; y: number; }>; }>[] | undefined; readonly hits?: number | undefined; readonly controlGroupInput?: Readonly<{ chainingSystem?: string | undefined; panelsJSON?: string | undefined; controlStyle?: string | undefined; ignoreParentSettingsJSON?: string | undefined; showApplySelections?: boolean | undefined; } & {}> | undefined; readonly timeFrom?: string | undefined; readonly timeTo?: string | undefined; readonly optionsJSON?: string | undefined; readonly title: string; readonly description: string; readonly kibanaSavedObjectMeta: Readonly<{ searchSourceJSON?: string | undefined; } & {}>; readonly panelsJSON: string; }"
         ],
         "path": "src/platform/plugins/shared/dashboard/server/dashboard_saved_object/schema/v3/types.ts",
@@ -1911,6 +1912,29 @@
         "description": [],
         "signature": [
           "{ readonly uid?: string | undefined; readonly collapsed?: boolean | undefined; readonly title: string; readonly grid: Readonly<{} & { y: number; }>; readonly panels: Readonly<{ version?: string | undefined; uid?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }>[]; }"
+        ],
+        "path": "src/platform/plugins/shared/dashboard/server/content_management/v1/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboard",
+        "id": "def-server.DashboardState",
+        "type": "Type",
+        "tags": [],
+        "label": "DashboardState",
+        "description": [],
+        "signature": [
+          "{ options?: Readonly<{ hidePanelTitles?: boolean | undefined; useMargins?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; } & {}> | undefined; version?: number | undefined; namespaces?: string[] | undefined; tags?: string[] | undefined; description?: string | undefined; timeRange?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.FilterStateStore",
+            "text": "FilterStateStore"
+          },
+          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; spaces?: string[] | undefined; references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; controlGroupInput?: Readonly<{ enhancements?: Record<string, any> | undefined; ignoreParentSettings?: Readonly<{ ignoreFilters?: boolean | undefined; ignoreQuery?: boolean | undefined; ignoreTimerange?: boolean | undefined; ignoreValidations?: boolean | undefined; } & {}> | undefined; } & { controls: Readonly<{ id?: string | undefined; grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; controlConfig?: Readonly<{} & {}> | undefined; } & { type: string; order: number; }>[]; labelPosition: \"oneLine\" | \"twoLine\"; chainingSystem: \"HIERARCHICAL\" | \"NONE\"; autoApplySelections: boolean; }> | undefined; title: string; timeRestore: boolean; panels: (Readonly<{ version?: string | undefined; uid?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }> | Readonly<{ uid?: string | undefined; collapsed?: boolean | undefined; } & { title: string; grid: Readonly<{} & { y: number; }>; panels: Readonly<{ version?: string | undefined; uid?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }>[]; }>)[]; }"
         ],
         "path": "src/platform/plugins/shared/dashboard/server/content_management/v1/types.ts",
         "deprecated": false,
@@ -2462,201 +2486,6 @@
           }
         ],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dashboard",
-        "id": "def-common.DashboardState",
-        "type": "Interface",
-        "tags": [],
-        "label": "DashboardState",
-        "description": [],
-        "path": "src/platform/plugins/shared/dashboard/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "dashboard",
-            "id": "def-common.DashboardState.options",
-            "type": "Object",
-            "tags": [],
-            "label": "options",
-            "description": [],
-            "signature": [
-              "Readonly<{ hidePanelTitles?: boolean | undefined; useMargins?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; } & {}> | undefined"
-            ],
-            "path": "src/platform/plugins/shared/dashboard/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "dashboard",
-            "id": "def-common.DashboardState.description",
-            "type": "string",
-            "tags": [],
-            "label": "description",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/plugins/shared/dashboard/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "dashboard",
-            "id": "def-common.DashboardState.tags",
-            "type": "Array",
-            "tags": [],
-            "label": "tags",
-            "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
-            "path": "src/platform/plugins/shared/dashboard/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "dashboard",
-            "id": "def-common.DashboardState.timeRestore",
-            "type": "boolean",
-            "tags": [],
-            "label": "timeRestore",
-            "description": [],
-            "path": "src/platform/plugins/shared/dashboard/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "dashboard",
-            "id": "def-common.DashboardState.title",
-            "type": "string",
-            "tags": [],
-            "label": "title",
-            "description": [],
-            "path": "src/platform/plugins/shared/dashboard/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "dashboard",
-            "id": "def-common.DashboardState.query",
-            "type": "Object",
-            "tags": [],
-            "label": "query",
-            "description": [],
-            "signature": [
-              "Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined"
-            ],
-            "path": "src/platform/plugins/shared/dashboard/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "dashboard",
-            "id": "def-common.DashboardState.filters",
-            "type": "Array",
-            "tags": [],
-            "label": "filters",
-            "description": [],
-            "signature": [
-              "Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.FilterStateStore",
-                "text": "FilterStateStore"
-              },
-              "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined"
-            ],
-            "path": "src/platform/plugins/shared/dashboard/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "dashboard",
-            "id": "def-common.DashboardState.timeRange",
-            "type": "Object",
-            "tags": [],
-            "label": "timeRange",
-            "description": [],
-            "signature": [
-              "Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined"
-            ],
-            "path": "src/platform/plugins/shared/dashboard/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "dashboard",
-            "id": "def-common.DashboardState.refreshInterval",
-            "type": "Object",
-            "tags": [],
-            "label": "refreshInterval",
-            "description": [],
-            "signature": [
-              "Readonly<{} & { value: number; pause: boolean; }> | undefined"
-            ],
-            "path": "src/platform/plugins/shared/dashboard/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "dashboard",
-            "id": "def-common.DashboardState.panels",
-            "type": "Array",
-            "tags": [],
-            "label": "panels",
-            "description": [],
-            "signature": [
-              "(Readonly<{ version?: string | undefined; uid?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }> | Readonly<{ uid?: string | undefined; collapsed?: boolean | undefined; } & { title: string; grid: Readonly<{} & { y: number; }>; panels: Readonly<{ version?: string | undefined; uid?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }>[]; }>)[]"
-            ],
-            "path": "src/platform/plugins/shared/dashboard/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "dashboard",
-            "id": "def-common.DashboardState.references",
-            "type": "Array",
-            "tags": [],
-            "label": "references",
-            "description": [
-              "\nTemporary. Currently Dashboards are in charge of providing references to all of their children.\nEventually this will be removed in favour of the Dashboard injecting references serverside."
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/content-management-utils",
-                "scope": "server",
-                "docId": "kibKbnContentManagementUtilsPluginApi",
-                "section": "def-server.Reference",
-                "text": "Reference"
-              },
-              "[] | undefined"
-            ],
-            "path": "src/platform/plugins/shared/dashboard/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "dashboard",
-            "id": "def-common.DashboardState.controlGroupInput",
-            "type": "Object",
-            "tags": [],
-            "label": "controlGroupInput",
-            "description": [
-              "\nSerialized control group state.\nContains state loaded from dashboard saved object"
-            ],
-            "signature": [
-              "Readonly<{ enhancements?: Record<string, any> | undefined; ignoreParentSettings?: Readonly<{ ignoreFilters?: boolean | undefined; ignoreQuery?: boolean | undefined; ignoreTimerange?: boolean | undefined; ignoreValidations?: boolean | undefined; } & {}> | undefined; } & { controls: Readonly<{ id?: string | undefined; grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; controlConfig?: Readonly<{} & {}> | undefined; } & { type: string; order: number; }>[]; labelPosition: \"oneLine\" | \"twoLine\"; chainingSystem: \"HIERARCHICAL\" | \"NONE\"; autoApplySelections: boolean; }> | undefined"
-            ],
-            "path": "src/platform/plugins/shared/dashboard/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
       }
     ],
     "enums": [],
@@ -2669,7 +2498,7 @@
         "label": "DashboardLocatorParams",
         "description": [],
         "signature": [
-          "{ options?: Readonly<{ hidePanelTitles?: boolean | undefined; useMargins?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; } & {}> | undefined; description?: string | undefined; tags?: string[] | undefined; timeRestore?: boolean | undefined; title?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "{ options?: Readonly<{ hidePanelTitles?: boolean | undefined; useMargins?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; } & {}> | undefined; version?: number | undefined; namespaces?: string[] | undefined; tags?: string[] | undefined; description?: string | undefined; timeRange?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -2677,15 +2506,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; timeRange?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; panels?: (Readonly<{ version?: string | undefined; uid?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }> | Readonly<{ uid?: string | undefined; collapsed?: boolean | undefined; } & { title: string; grid: Readonly<{} & { y: number; }>; panels: Readonly<{ version?: string | undefined; uid?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }>[]; }>)[] | undefined; references?: (",
-          {
-            "pluginId": "@kbn/content-management-utils",
-            "scope": "server",
-            "docId": "kibKbnContentManagementUtilsPluginApi",
-            "section": "def-server.Reference",
-            "text": "Reference"
-          },
-          "[] & ",
+          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; spaces?: string[] | undefined; references?: (Readonly<{} & { id: string; type: string; name: string; }>[] & ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -2701,7 +2522,7 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          ") | undefined; viewMode?: ",
+          ") | undefined; title?: string | undefined; timeRestore?: boolean | undefined; panels?: (Readonly<{ version?: string | undefined; uid?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }> | Readonly<{ uid?: string | undefined; collapsed?: boolean | undefined; } & { title: string; grid: Readonly<{} & { y: number; }>; panels: Readonly<{ version?: string | undefined; uid?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }>[]; }>)[] | undefined; viewMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -2720,6 +2541,29 @@
           " | undefined; }"
         ],
         "path": "src/platform/plugins/shared/dashboard/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboard",
+        "id": "def-common.DashboardState",
+        "type": "Type",
+        "tags": [],
+        "label": "DashboardState",
+        "description": [],
+        "signature": [
+          "{ options?: Readonly<{ hidePanelTitles?: boolean | undefined; useMargins?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; } & {}> | undefined; version?: number | undefined; namespaces?: string[] | undefined; tags?: string[] | undefined; description?: string | undefined; timeRange?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.FilterStateStore",
+            "text": "FilterStateStore"
+          },
+          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; spaces?: string[] | undefined; references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; controlGroupInput?: Readonly<{ enhancements?: Record<string, any> | undefined; ignoreParentSettings?: Readonly<{ ignoreFilters?: boolean | undefined; ignoreQuery?: boolean | undefined; ignoreTimerange?: boolean | undefined; ignoreValidations?: boolean | undefined; } & {}> | undefined; } & { controls: Readonly<{ id?: string | undefined; grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; controlConfig?: Readonly<{} & {}> | undefined; } & { type: string; order: number; }>[]; labelPosition: \"oneLine\" | \"twoLine\"; chainingSystem: \"HIERARCHICAL\" | \"NONE\"; autoApplySelections: boolean; }> | undefined; title: string; timeRestore: boolean; panels: (Readonly<{ version?: string | undefined; uid?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }> | Readonly<{ uid?: string | undefined; collapsed?: boolean | undefined; } & { title: string; grid: Readonly<{} & { y: number; }>; panels: Readonly<{ version?: string | undefined; uid?: string | undefined; } & { type: string; config: Readonly<{} & {}>; grid: Readonly<{} & { y: number; w: number; h: number; x: number; }>; }>[]; }>)[]; }"
+        ],
+        "path": "src/platform/plugins/shared/dashboard/server/content_management/v1/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
