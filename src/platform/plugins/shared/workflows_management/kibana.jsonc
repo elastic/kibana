@@ -10,7 +10,7 @@
     "configPath": ["workflowsManagement"],
     "browser": true,
     "server": true,
-    "requiredBundles": ["kibanaReact", "kibanaUtils", "data"],
+    "requiredBundles": ["kibanaReact", "kibanaUtils", "data", "workflowsUiComponents"],
     "requiredPlugins": [
       "navigation",
       "taskManager",
