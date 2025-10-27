@@ -15,6 +15,82 @@ import { MAX_MENU_ITEMS } from '../constants';
 import { getStyleProperty } from '../utils/get_style_property';
 import { useRafDebouncedCallback } from './use_raf_debounced';
 
+interface ResponsiveMenuState {
+  primaryMenuRef: MutableRefObject<HTMLElement | null>;
+  visibleMenuItems: MenuItem[];
+  overflowMenuItems: MenuItem[];
+}
+
+/**
+ * Custom hook for handling responsive menu behavior with dynamic height measurement
+ * @param isCollapsed - Whether the side nav is collapsed
+ * @param items - Navigation items
+ * @returns Object with menu ref and partitioned menu items
+ */
+export function useResponsiveMenu(isCollapsed: boolean, items: MenuItem[]): ResponsiveMenuState {
+  const primaryMenuRef = useRef<HTMLElement | null>(null);
+  const heightsCacheRef = useRef<number[]>([]);
+
+  const [visibleCount, setVisibleCount] = useState<number>(items.length);
+
+  const visibleMenuItems = useMemo(() => items.slice(0, visibleCount), [items, visibleCount]);
+  const overflowMenuItems = useMemo(() => items.slice(visibleCount), [items, visibleCount]);
+  const stableHeightItems = useStableHeightItems(items);
+
+  const recalculateMenuLayout = useCallback(() => {
+    if (!primaryMenuRef.current) return;
+
+    // Primary menu
+    const menu = primaryMenuRef.current;
+    const menuHeight = menu.clientHeight;
+
+    // 1. Cache the heights of all children
+    cacheHeights(heightsCacheRef, menu, stableHeightItems);
+
+    if (heightsCacheRef.current.length === 0) return;
+
+    // Primary menu items
+    const childrenHeights = heightsCacheRef.current;
+    const childrenGap = getStyleProperty(menu, 'gap');
+
+    // 2. Calculate the number of visible menu items
+    const nextVisibleCount = countVisibleItems(childrenHeights, childrenGap, menuHeight);
+
+    // 3. Update the visible count if needed
+    setVisibleCount(nextVisibleCount);
+  }, [stableHeightItems]);
+
+  const [scheduleRecalc, cancelRecalc] = useRafDebouncedCallback(recalculateMenuLayout);
+
+  useLayoutEffect(() => {
+    // Invalidate the cache when items change
+    setVisibleCount(stableHeightItems.length);
+    heightsCacheRef.current = [];
+
+    const observer = new ResizeObserver(() => {
+      scheduleRecalc();
+    });
+
+    if (primaryMenuRef.current) {
+      observer.observe(primaryMenuRef.current);
+    }
+
+    // Initial calculation
+    scheduleRecalc();
+
+    return () => {
+      observer.disconnect();
+      cancelRecalc();
+    };
+  }, [isCollapsed, stableHeightItems, scheduleRecalc, cancelRecalc]);
+
+  return {
+    primaryMenuRef,
+    visibleMenuItems,
+    overflowMenuItems,
+  };
+}
+
 /**
  * Utility function to cache the heights of the menu items in a ref.
  * It assumes one initial render where all items are in the DOM.
@@ -113,79 +189,3 @@ const isItemsHeightsEqual = (prev: MenuItem[], next: MenuItem[]): boolean => {
   }
   return true;
 };
-
-interface ResponsiveMenuState {
-  primaryMenuRef: MutableRefObject<HTMLElement | null>;
-  visibleMenuItems: MenuItem[];
-  overflowMenuItems: MenuItem[];
-}
-
-/**
- * Custom hook for handling responsive menu behavior with dynamic height measurement
- * @param isCollapsed - Whether the side nav is collapsed
- * @param items - Navigation items
- * @returns Object with menu ref and partitioned menu items
- */
-export function useResponsiveMenu(isCollapsed: boolean, items: MenuItem[]): ResponsiveMenuState {
-  const primaryMenuRef = useRef<HTMLElement | null>(null);
-  const heightsCacheRef = useRef<number[]>([]);
-
-  const [visibleCount, setVisibleCount] = useState<number>(items.length);
-
-  const visibleMenuItems = useMemo(() => items.slice(0, visibleCount), [items, visibleCount]);
-  const overflowMenuItems = useMemo(() => items.slice(visibleCount), [items, visibleCount]);
-  const stableHeightItems = useStableHeightItems(items);
-
-  const recalculateMenuLayout = useCallback(() => {
-    if (!primaryMenuRef.current) return;
-
-    // Primary menu
-    const menu = primaryMenuRef.current;
-    const menuHeight = menu.clientHeight;
-
-    // 1. Cache the heights of all children
-    cacheHeights(heightsCacheRef, menu, stableHeightItems);
-
-    if (heightsCacheRef.current.length === 0) return;
-
-    // Primary menu items
-    const childrenHeights = heightsCacheRef.current;
-    const childrenGap = getStyleProperty(menu, 'gap');
-
-    // 2. Calculate the number of visible menu items
-    const nextVisibleCount = countVisibleItems(childrenHeights, childrenGap, menuHeight);
-
-    // 3. Update the visible count if needed
-    setVisibleCount(nextVisibleCount);
-  }, [stableHeightItems]);
-
-  const [scheduleRecalc, cancelRecalc] = useRafDebouncedCallback(recalculateMenuLayout);
-
-  useLayoutEffect(() => {
-    // Invalidate the cache when items change
-    setVisibleCount(stableHeightItems.length);
-    heightsCacheRef.current = [];
-
-    const observer = new ResizeObserver(() => {
-      scheduleRecalc();
-    });
-
-    if (primaryMenuRef.current) {
-      observer.observe(primaryMenuRef.current);
-    }
-
-    // Initial calculation
-    scheduleRecalc();
-
-    return () => {
-      observer.disconnect();
-      cancelRecalc();
-    };
-  }, [isCollapsed, stableHeightItems, scheduleRecalc, cancelRecalc]);
-
-  return {
-    primaryMenuRef,
-    visibleMenuItems,
-    overflowMenuItems,
-  };
-}
