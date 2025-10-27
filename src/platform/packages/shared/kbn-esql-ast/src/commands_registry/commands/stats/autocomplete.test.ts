@@ -21,6 +21,7 @@ import {
 } from '../../../__tests__/autocomplete';
 import type { ICommandCallbacks } from '../../types';
 import type { FunctionReturnType, FieldType } from '../../../definitions/types';
+import { AUTO_INTERVAL_PARAM } from '../../../definitions/utils/literals';
 import {
   ESQL_NUMBER_TYPES,
   FunctionDefinitionTypes,
@@ -812,6 +813,7 @@ describe('STATS Autocomplete', () => {
           'from a | stats avg(b) by BUCKET(dateField, 50, ?_tstart, ?_tend)',
           [
             ...getLiteralsByType('time_duration'),
+            AUTO_INTERVAL_PARAM,
             ...getFunctionSignaturesByReturnType(
               Location.EVAL,
               ['integer', 'date_period', 'time_duration'],
