@@ -26,7 +26,7 @@ import { buildIgnoreMissingFilter } from './common';
  *      steps: [
  *        {
  *          action: 'remove_by_prefix',
- *          field: 'host',
+ *          from: 'host',
  *          ignore_missing: true,
  *        } as RemoveByPrefixProcessor,
  *      ],
@@ -43,7 +43,7 @@ export function convertRemoveByPrefixProcessorToESQL(
   processor: RemoveByPrefixProcessor
 ): ESQLAstCommand[] {
   const {
-    field,
+    from,
     // eslint-disable-next-line @typescript-eslint/naming-convention
     ignore_missing = false, // default: false (field must exist)
   } = processor;
@@ -51,7 +51,7 @@ export function convertRemoveByPrefixProcessorToESQL(
   const commands: ESQLAstCommand[] = [];
 
   // Add missing field filter if needed (ignore_missing = false)
-  const missingFieldFilter = buildIgnoreMissingFilter(field, ignore_missing);
+  const missingFieldFilter = buildIgnoreMissingFilter(from, ignore_missing);
   if (missingFieldFilter) {
     commands.push(missingFieldFilter);
   }
@@ -60,7 +60,7 @@ export function convertRemoveByPrefixProcessorToESQL(
   // This handles both subobjects and flattened fields
   const dropCommand = Builder.command({
     name: 'drop',
-    args: [Builder.expression.column(field), Builder.expression.column(`${field}.*`)],
+    args: [Builder.expression.column(from), Builder.expression.column(`${from}.*`)],
   });
 
   commands.push(dropCommand);

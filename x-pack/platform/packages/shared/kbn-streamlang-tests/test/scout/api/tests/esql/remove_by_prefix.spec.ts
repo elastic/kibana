@@ -21,7 +21,7 @@ apiTest.describe(
         steps: [
           {
             action: 'remove_by_prefix',
-            field: 'temp_field',
+            from: 'temp_field',
           } as RemoveByPrefixProcessor,
         ],
       };
@@ -48,7 +48,7 @@ apiTest.describe(
           steps: [
             {
               action: 'remove_by_prefix',
-              field: 'host',
+              from: 'host',
             } as RemoveByPrefixProcessor,
           ],
         };
@@ -90,7 +90,7 @@ apiTest.describe(
         steps: [
           {
             action: 'remove_by_prefix',
-            field: 'temp_field',
+            from: 'temp_field',
           } as RemoveByPrefixProcessor,
         ],
       };
@@ -116,7 +116,7 @@ apiTest.describe(
         steps: [
           {
             action: 'remove_by_prefix',
-            field: 'temp_field',
+            from: 'temp_field',
             ignore_missing: true,
           } as RemoveByPrefixProcessor,
         ],
@@ -145,7 +145,7 @@ apiTest.describe(
           steps: [
             {
               action: 'remove_by_prefix',
-              field: '{{field.name}}',
+              from: '{{field.name}}',
             } as RemoveByPrefixProcessor,
           ],
         };

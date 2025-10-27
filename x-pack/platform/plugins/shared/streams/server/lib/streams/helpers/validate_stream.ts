@@ -16,6 +16,8 @@ import type {
   DissectProcessor,
   GrokProcessor,
   ProcessorType,
+  RemoveByPrefixProcessor,
+  RemoveProcessor,
   RenameProcessor,
   SetProcessor,
   StreamlangProcessorDefinition,
@@ -124,6 +126,8 @@ const actionStepValidators: {
       checkFieldName(step.copy_from);
     }
   },
+  remove_by_prefix: (step: RemoveByPrefixProcessor) => checkFieldName(step.from),
+  remove: (step: RemoveProcessor) => checkFieldName(step.from),
   // fields referenced in manual ingest pipelines are not validated here because
   // the interface is Elasticsearch directly here, which has its own validation
   manual_ingest_pipeline: () => {},

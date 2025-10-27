@@ -5,40 +5,24 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under on    apiTest('should remove a field and all nested fields (flattened)', async ({ testBed }) => {
-      const indexName = 'streams-e2e-test-remove-by-prefix-flattened';
-
-      const streamlangDSL: StreamlangDSL = {
-        steps: [
-          {
-            action: 'remove_by_prefix',
-            from: 'labels',
-          } as RemoveByPrefixProcessor,
-        ],
-      };e contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
 import { expect } from '@kbn/scout';
-import type { RemoveByPrefixProcessor, StreamlangDSL } from '@kbn/streamlang';
+import type { RemoveProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
-  'Streamlang to Ingest Pipeline - RemoveByPrefix Processor',
+  'Streamlang to Ingest Pipeline - Remove Processor',
   { tag: ['@ess', '@svlOblt'] },
   () => {
     apiTest('should remove a field', async ({ testBed }) => {
-      const indexName = 'streams-e2e-test-remove-by-prefix-basic';
+      const indexName = 'streams-e2e-test-remove-basic';
 
       const streamlangDSL: StreamlangDSL = {
         steps: [
           {
-            action: 'remove_by_prefix',
+            action: 'remove',
             from: 'temp_field',
-          } as RemoveByPrefixProcessor,
+          } as RemoveProcessor,
         ],
       };
 
@@ -54,92 +38,16 @@ apiTest.describe(
       expect(source).toHaveProperty('message', 'keep-this');
     });
 
-    apiTest('should remove a field and all nested fields (subobjects)', async ({ testBed }) => {
-      const indexName = 'streams-e2e-test-remove-by-prefix-nested';
-
-      const streamlangDSL: StreamlangDSL = {
-        steps: [
-          {
-            action: 'remove_by_prefix',
-            from: 'host',
-          } as RemoveByPrefixProcessor,
-        ],
-      };
-
-      const { processors } = transpile(streamlangDSL);
-
-      const docs = [
-        {
-          host: {
-            name: 'server01',
-            ip: '192.168.1.1',
-            os: {
-              platform: 'linux',
-              version: '20.04',
-            },
-          },
-          message: 'keep-this',
-        },
-      ];
-      await testBed.ingest(indexName, docs, processors);
-
-      const ingestedDocs = await testBed.getDocs(indexName);
-      expect(ingestedDocs).toHaveLength(1);
-      const source = ingestedDocs[0];
-      expect(source).not.toHaveProperty('host');
-      expect(source).not.toHaveProperty('host.name');
-      expect(source).not.toHaveProperty('host.ip');
-      expect(source).not.toHaveProperty('host.os');
-      expect(source).not.toHaveProperty('host.os.platform');
-      expect(source).not.toHaveProperty('host.os.version');
-      expect(source).toHaveProperty('message', 'keep-this');
-    });
-
-    apiTest('should remove flattened fields with prefix', async ({ testBed }) => {
-      const indexName = 'streams-e2e-test-remove-by-prefix-flattened';
-
-      const streamlangDSL: StreamlangDSL = {
-        steps: [
-          {
-            action: 'remove_by_prefix',
-            from: 'labels',
-          } as RemoveByPrefixProcessor,
-        ],
-      };
-
-      const { processors } = transpile(streamlangDSL);
-
-      // Create docs with flattened field structure
-      const docs = [
-        {
-          'labels.env': 'production',
-          'labels.team': 'platform',
-          'labels.version': '1.0',
-          message: 'keep-this',
-        },
-      ];
-      await testBed.ingest(indexName, docs, processors);
-
-      const ingestedDocs = await testBed.getDocs(indexName);
-      expect(ingestedDocs).toHaveLength(1);
-      const source = ingestedDocs[0];
-      expect(source).not.toHaveProperty('labels');
-      expect(source).not.toHaveProperty('labels.env');
-      expect(source).not.toHaveProperty('labels.team');
-      expect(source).not.toHaveProperty('labels.version');
-      expect(source).toHaveProperty('message', 'keep-this');
-    });
-
     apiTest('should ignore missing field when ignore_missing is true', async ({ testBed }) => {
-      const indexName = 'streams-e2e-test-remove-by-prefix-ignore-missing';
+      const indexName = 'streams-e2e-test-remove-ignore-missing';
 
       const streamlangDSL: StreamlangDSL = {
         steps: [
           {
-            action: 'remove_by_prefix',
+            action: 'remove',
             from: 'nonexistent',
             ignore_missing: true,
-          } as RemoveByPrefixProcessor,
+          } as RemoveProcessor,
         ],
       };
 
@@ -155,15 +63,15 @@ apiTest.describe(
     });
 
     apiTest('should fail if field is missing and ignore_missing is false', async ({ testBed }) => {
-      const indexName = 'streams-e2e-test-remove-by-prefix-fail-missing';
+      const indexName = 'streams-e2e-test-remove-fail-missing';
 
       const streamlangDSL: StreamlangDSL = {
         steps: [
           {
-            action: 'remove_by_prefix',
+            action: 'remove',
             from: 'nonexistent',
             ignore_missing: false,
-          } as RemoveByPrefixProcessor,
+          } as RemoveProcessor,
         ],
       };
 
@@ -172,26 +80,22 @@ apiTest.describe(
       const docs = [{ message: 'some_value' }]; // Not including 'nonexistent' field
       const { errors } = await testBed.ingest(indexName, docs, processors);
       expect(errors).toHaveLength(1);
-      expect(errors[0].type).toBe('script_exception');
+      expect(errors[0].type).toBe('illegal_argument_exception');
     });
 
-    apiTest('should work with DSL where blocks for conditional removal', async ({ testBed }) => {
-      const indexName = 'streams-e2e-test-remove-by-prefix-where-block';
+    apiTest('should remove field conditionally with where condition', async ({ testBed }) => {
+      const indexName = 'streams-e2e-test-remove-conditional';
 
       const streamlangDSL: StreamlangDSL = {
         steps: [
           {
+            action: 'remove',
+            from: 'temp_data',
             where: {
               field: 'event.kind',
               eq: 'test',
-              steps: [
-                {
-                  action: 'remove_by_prefix',
-                  from: 'temp_data',
-                } as RemoveByPrefixProcessor,
-              ],
             },
-          },
+          } as RemoveProcessor,
         ],
       };
 
@@ -218,14 +122,14 @@ apiTest.describe(
     });
 
     apiTest('default value of ignore_missing (false)', async ({ testBed }) => {
-      const indexName = 'streams-e2e-test-remove-by-prefix-defaults';
+      const indexName = 'streams-e2e-test-remove-defaults';
 
       const streamlangDSL: StreamlangDSL = {
         steps: [
           {
-            action: 'remove_by_prefix',
+            action: 'remove',
             from: 'nonexistent',
-          } as RemoveByPrefixProcessor,
+          } as RemoveProcessor,
         ],
       };
 
@@ -235,7 +139,7 @@ apiTest.describe(
       const docs = [{ message: 'some_value' }];
       const { errors } = await testBed.ingest(indexName, docs, processors);
       expect(errors).toHaveLength(1);
-      expect(errors[0].type).toBe('script_exception');
+      expect(errors[0].type).toBe('illegal_argument_exception');
     });
 
     [
@@ -252,15 +156,15 @@ apiTest.describe(
         const streamlangDSL: StreamlangDSL = {
           steps: [
             {
-              action: 'remove_by_prefix',
+              action: 'remove',
               from: templateField,
-            } as RemoveByPrefixProcessor,
+            } as RemoveProcessor,
           ],
         };
 
-        expect(() => {
-          transpile(streamlangDSL);
-        }).toThrow('Mustache template syntax {{ }} or {{{ }}} is not allowed');
+        expect(() => transpile(streamlangDSL)).toThrow(
+          'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names'
+        );
       });
     });
   }

@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
 import type { DocLinksStart } from '@kbn/core/public';
-import type { RemoveByPrefixProcessor } from '@kbn/streamlang';
+import type { RemoveProcessor } from '@kbn/streamlang';
 import type {
   ConfigDrivenProcessorConfiguration,
   FieldConfiguration,
@@ -18,10 +18,10 @@ import type {
 } from '../types';
 import { getConvertFormStateToConfig, getConvertProcessorToFormState } from '../utils';
 
-export type RemoveByPrefixProcessorFormState = RemoveByPrefixProcessor;
+export type RemoveProcessorFormState = RemoveProcessor;
 
-const defaultFormState: RemoveByPrefixProcessorFormState = {
-  action: 'remove_by_prefix' as const,
+const defaultFormState: RemoveProcessorFormState = {
+  action: 'remove' as const,
   from: '',
   ignore_missing: false,
   ignore_failure: false,
@@ -30,44 +30,44 @@ const defaultFormState: RemoveByPrefixProcessorFormState = {
 const fieldOptions: FieldOptions = {
   fieldKey: 'from',
   fieldHelpText: i18n.translate(
-    'xpack.streams.streamDetailView.managementTab.enrichment.processor.removeByPrefixFieldHelpText',
+    'xpack.streams.streamDetailView.managementTab.enrichment.processor.removeFieldHelpText',
     {
-      defaultMessage: 'The field to be removed. All nested fields (field.*) will also be removed.',
+      defaultMessage: 'The field to be removed.',
     }
   ),
-  includeCondition: false,
+  includeCondition: true,
   includeIgnoreFailures: true,
   includeIgnoreMissing: true,
 };
 
 const fieldConfigurations: FieldConfiguration[] = [];
 
-export const removeByPrefixProcessorConfig: ConfigDrivenProcessorConfiguration<
-  RemoveByPrefixProcessorFormState,
-  RemoveByPrefixProcessor
+export const removeProcessorConfig: ConfigDrivenProcessorConfiguration<
+  RemoveProcessorFormState,
+  RemoveProcessor
 > = {
-  type: 'remove_by_prefix' as const,
+  type: 'remove' as const,
   inputDisplay: i18n.translate(
-    'xpack.streams.streamDetailView.managementTab.enrichment.processor.removeByPrefixInputDisplay',
+    'xpack.streams.streamDetailView.managementTab.enrichment.processor.removeInputDisplay',
     {
-      defaultMessage: 'Remove by prefix',
+      defaultMessage: 'Remove',
     }
   ),
   getDocUrl: (docLinks: DocLinksStart) => {
     return (
       <FormattedMessage
-        id="xpack.streams.streamDetailView.managementTab.enrichment.processor.removeByPrefixHelpText"
-        defaultMessage="{removeByPrefixLink} The processor removes the field and all its nested fields (field.*)."
+        id="xpack.streams.streamDetailView.managementTab.enrichment.processor.removeHelpText"
+        defaultMessage="{removeLink} The processor removes the specified field."
         values={{
-          removeByPrefixLink: (
+          removeLink: (
             <EuiLink
-              data-test-subj="streamsAppAvailableProcessorsRemoveByPrefixLink"
+              data-test-subj="streamsAppAvailableProcessorsRemoveLink"
               external
               target="_blank"
               href={docLinks.links.ingest.remove}
             >
-              {i18n.translate('xpack.streams.availableProcessors.removeByPrefixLinkLabel', {
-                defaultMessage: 'Removes a field and all nested fields.',
+              {i18n.translate('xpack.streams.availableProcessors.removeLinkLabel', {
+                defaultMessage: 'Removes a field.',
               })}
             </EuiLink>
           ),
@@ -76,14 +76,14 @@ export const removeByPrefixProcessorConfig: ConfigDrivenProcessorConfiguration<
     );
   },
   defaultFormState,
-  convertFormStateToConfig: getConvertFormStateToConfig<
-    RemoveByPrefixProcessorFormState,
-    RemoveByPrefixProcessor
-  >(fieldConfigurations, fieldOptions),
-  convertProcessorToFormState: getConvertProcessorToFormState<
-    RemoveByPrefixProcessor,
-    RemoveByPrefixProcessorFormState
-  >(defaultFormState),
   fieldConfigurations,
   fieldOptions,
+  convertFormStateToConfig: getConvertFormStateToConfig<
+    RemoveProcessorFormState,
+    RemoveProcessor
+  >(fieldConfigurations, fieldOptions),
+  convertProcessorToFormState: getConvertProcessorToFormState<
+    RemoveProcessor,
+    RemoveProcessorFormState
+  >(defaultFormState),
 };

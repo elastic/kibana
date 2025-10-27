@@ -237,15 +237,31 @@ export const convertProcessorSchema = processorBaseWithWhereSchema
 
 export interface RemoveByPrefixProcessor extends ProcessorBase {
   action: 'remove_by_prefix';
-  field: string;
+  from: string;
   ignore_missing?: boolean;
 }
 
 export const removeByPrefixProcessorSchema = processorBaseSchema.extend({
   action: z.literal('remove_by_prefix'),
-  field: StreamlangSourceField,
+  from: StreamlangSourceField,
   ignore_missing: z.optional(z.boolean()),
 }) satisfies z.Schema<RemoveByPrefixProcessor>;
+
+/**
+ * Remove processor
+ */
+
+export interface RemoveProcessor extends ProcessorBaseWithWhere {
+  action: 'remove';
+  from: string;
+  ignore_missing?: boolean;
+}
+
+export const removeProcessorSchema = processorBaseWithWhereSchema.extend({
+  action: z.literal('remove'),
+  from: StreamlangSourceField,
+  ignore_missing: z.optional(z.boolean()),
+}) satisfies z.Schema<RemoveProcessor>;
 
 export type StreamlangProcessorDefinition =
   | DateProcessor
@@ -256,6 +272,7 @@ export type StreamlangProcessorDefinition =
   | AppendProcessor
   | ConvertProcessor
   | RemoveByPrefixProcessor
+  | RemoveProcessor
   | ManualIngestPipelineProcessor;
 
 export const streamlangProcessorSchema = z.discriminatedUnion('action', [
@@ -267,6 +284,7 @@ export const streamlangProcessorSchema = z.discriminatedUnion('action', [
   appendProcessorSchema,
   convertProcessorSchema.innerType(),
   removeByPrefixProcessorSchema,
+  removeProcessorSchema,
   manualIngestPipelineProcessorSchema,
 ]);
 
