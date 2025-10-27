@@ -82,10 +82,12 @@ describe('ModalService', () => {
         modals.open(mountPoint);
         expect(mockReactDomRender.mock.calls[0][0].props.children.type.name).toEqual('EuiModal');
         expect(mockReactDomRender.mock.calls[1][0].props.children.type.name).toEqual('EuiModal');
-        expect(mockReactDomRender.mock.calls[1][0].props.children.props.children.props.mount).toEqual(mountPoint);
+        expect(
+          mockReactDomRender.mock.calls[1][0].props.children.props.children.props.mount
+        ).toEqual(mountPoint);
 
         const { container } = render(mockReactDomRender.mock.calls[1][0]);
-        
+
         // Verify the modal structure is correct since we can't test the mount point content
         expect(container.querySelector('.kbnOverlayMountWrapper')).toBeInTheDocument();
 
@@ -121,9 +123,7 @@ describe('ModalService', () => {
         );
 
         const { getByTestId } = render(mockReactDomRender.mock.calls[1][0]);
-        expect(getByTestId('confirmModalBodyText')?.textContent).toEqual(
-          SOME_CONFIRM
-        );
+        expect(getByTestId('confirmModalBodyText')?.textContent).toEqual(SOME_CONFIRM);
 
         expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
       });
@@ -148,9 +148,7 @@ describe('ModalService', () => {
         'EuiConfirmModal'
       );
       const { getByTestId } = render(mockReactDomRender.mock.calls[0][0]);
-      expect(getByTestId('confirmModalBodyText')?.textContent).toEqual(
-        MODAL_CONTENT
-      );
+      expect(getByTestId('confirmModalBodyText')?.textContent).toEqual(MODAL_CONTENT);
     });
 
     it('renders a string confirm message', () => {
@@ -160,9 +158,7 @@ describe('ModalService', () => {
         'EuiConfirmModal'
       );
       const { getByTestId } = render(mockReactDomRender.mock.calls[0][0]);
-      expect(getByTestId('confirmModalBodyText')?.textContent).toEqual(
-        SOME_CONFIRM
-      );
+      expect(getByTestId('confirmModalBodyText')?.textContent).toEqual(SOME_CONFIRM);
     });
 
     describe('with a currently active modal', () => {
@@ -179,9 +175,7 @@ describe('ModalService', () => {
           'EuiConfirmModal'
         );
         const { getByTestId } = render(mockReactDomRender.mock.calls[1][0]);
-        expect(getByTestId('confirmModalBodyText')?.textContent).toEqual(
-          SOME_CONFIRM
-        );
+        expect(getByTestId('confirmModalBodyText')?.textContent).toEqual(SOME_CONFIRM);
 
         expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
         expect(() => ref1.close()).not.toThrowError();
@@ -215,9 +209,7 @@ describe('ModalService', () => {
         );
 
         const { getByTestId } = render(mockReactDomRender.mock.calls[1][0]);
-        expect(getByTestId('confirmModalBodyText')?.textContent).toEqual(
-          SOME_CONFIRM
-        );
+        expect(getByTestId('confirmModalBodyText')?.textContent).toEqual(SOME_CONFIRM);
         expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
       });
 

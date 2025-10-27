@@ -17,7 +17,6 @@ import { FlyoutService } from './flyout_service';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import type { OverlayFlyoutStart } from '@kbn/core-overlays-browser';
 
-
 const analyticsMock = analyticsServiceMock.createAnalyticsServiceStart();
 const i18nMock = i18nServiceMock.createStartContract();
 const themeMock = themeServiceMock.createStartContract();
