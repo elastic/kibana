@@ -146,7 +146,8 @@ const externals = {
   '@kbn/react-kibana-context-theme': '__kbnSharedDeps__.KbnReactKibanaContextTheme',
   '@kbn/shared-ux-router': '__kbnSharedDeps__.KbnSharedUxRouter',
   '@kbn/react-kibana-mount': '__kbnSharedDeps__.KbnReactKibanaMount',
-  '@kbn/visualizations-common': '__kbnSharedDeps__.KbnVisualizationsCommon',
+  d3: '__kbnSharedDeps__.KbnD3',
+  joi: '__kbnSharedDeps__.kbnJoi',
 };
 
 module.exports = { distDir, jsFilename, cssDistFilename, externals };
