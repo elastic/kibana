@@ -193,7 +193,7 @@ evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
     });
 
     evaluate(
-      'returns ONLY internal KB for internal Lens usage questions',
+      'returns information ONLY from the internal knowledge base for internal Lens usage questions',
       async ({ evaluateDataset }) => {
         await evaluateDataset({
           dataset: {
@@ -213,7 +213,7 @@ evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
                     'Mentions naming format <team>::<service>::<purpose>, required tags (owner, env, data_domain, pii_level, retention_days).',
                     'Mentions allowed data views ("acme-*", "metrics-acme-*", "logs-acme-*"), default time 24h, and refresh ≥ 30s.',
                     'Does NOT include product usage instructions.',
-                    'Does not hallucinate details not present in the internal policy.',
+                    'Does not hallucinate details that are not present in the internal policy.',
                   ],
                 },
                 metadata: {},
@@ -247,7 +247,7 @@ evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
 
         const contextResponseMessage = conversation.messages.find((m) => m.name === 'context');
         if (!contextResponseMessage) {
-          throw new Error('No context function message returned');
+          throw new Error('Could not find the context function response');
         }
 
         const { learnings } = JSON.parse(contextResponseMessage.content!);
