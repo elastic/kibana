@@ -85,8 +85,6 @@ export const getEndpointSuggestionsRequestHandler = (
       const { savedObjects, elasticsearch } = await context.core;
       const securitySolutionContext = await context.securitySolution;
       const spaceId = securitySolutionContext.getSpaceId();
-      const isSpaceAwarenessEnabled =
-        endpointContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled;
       let fullFilters: QueryDslQueryContainer[] = filters
         ? [...(filters as QueryDslQueryContainer[])]
         : [];
@@ -97,38 +95,34 @@ export const getEndpointSuggestionsRequestHandler = (
         request.params.suggestion_type === 'eventFilters' ||
         (isTrustedAppsAdvancedModeFFEnabled && request.params.suggestion_type === 'trustedApps')
       ) {
-        if (!isSpaceAwarenessEnabled) {
-          index = eventsIndexPattern;
+        logger.debug('Using space-aware index pattern');
+
+        const integrationNamespaces = await endpointContext.service
+          .getInternalFleetServices(spaceId)
+          .getIntegrationNamespaces(['endpoint']);
+
+        const namespaces = integrationNamespaces.endpoint;
+        if (!namespaces || !namespaces.length) {
+          logger.error('Failed to retrieve current space index patterns');
+          return response.badRequest({
+            body: 'Failed to retrieve current space index patterns',
+          });
+        }
+
+        const indexPattern = namespaces
+          .map((namespace) =>
+            buildIndexNameWithNamespace(eventsIndexPattern, namespace, { preserveWildcard: true })
+          )
+          .join(',');
+
+        if (indexPattern) {
+          logger.debug(`Index pattern to be used: ${indexPattern}`);
+          index = indexPattern;
         } else {
-          logger.debug('Using space-aware index pattern');
-
-          const integrationNamespaces = await endpointContext.service
-            .getInternalFleetServices(spaceId)
-            .getIntegrationNamespaces(['endpoint']);
-
-          const namespaces = integrationNamespaces.endpoint;
-          if (!namespaces || !namespaces.length) {
-            logger.error('Failed to retrieve current space index patterns');
-            return response.badRequest({
-              body: 'Failed to retrieve current space index patterns',
-            });
-          }
-
-          const indexPattern = namespaces
-            .map((namespace) =>
-              buildIndexNameWithNamespace(eventsIndexPattern, namespace, { preserveWildcard: true })
-            )
-            .join(',');
-
-          if (indexPattern) {
-            logger.debug(`Index pattern to be used: ${indexPattern}`);
-            index = indexPattern;
-          } else {
-            logger.error('Failed to retrieve current space index patterns');
-            return response.badRequest({
-              body: 'Failed to retrieve current space index patterns',
-            });
-          }
+          logger.error('Failed to retrieve current space index patterns');
+          return response.badRequest({
+            body: 'Failed to retrieve current space index patterns',
+          });
         }
       } else if (request.params.suggestion_type === 'endpoints') {
         suggestionMethod = termsAggSuggestions;
@@ -140,7 +134,7 @@ export const getEndpointSuggestionsRequestHandler = (
           savedObjects.client,
           {
             kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:endpoint`,
-            spaceIds: isSpaceAwarenessEnabled ? [spaceId] : ['*'],
+            spaceIds: [spaceId],
           }
         );
         for await (const batch of endpointPackagePolicies) {

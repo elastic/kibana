@@ -104,7 +104,11 @@
         "label": "createIsNarrowSchema",
         "description": [],
         "signature": [
-          "(_base: TBaseSchema, narrow: TNarrowSchema) => <TValue extends Zod.input<TBaseSchema>>(value: TValue) => value is Extract<TValue, Zod.input<TNarrowSchema>>"
+          "(_base: TBaseSchema, narrow: TNarrowSchema) => <TValue extends ",
+          "input",
+          "<TBaseSchema>>(value: TValue) => value is Extract<TValue, ",
+          "input",
+          "<TNarrowSchema>>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/type_guards.ts",
         "deprecated": false,
@@ -2327,15 +2331,15 @@
         "label": "FlattenRecord",
         "description": [],
         "signature": [
-          "{ [x: string]: ",
+          "{ [x: string]: unknown[] | ",
           "Primitive",
           " | ",
           "Primitive",
-          "[]; [x: number]: ",
+          "[]; [x: number]: unknown[] | ",
           "Primitive",
           " | ",
           "Primitive",
-          "[]; [x: symbol]: ",
+          "[]; [x: symbol]: unknown[] | ",
           "Primitive",
           " | ",
           "Primitive",
@@ -2835,7 +2839,8 @@
         "label": "featureSchema",
         "description": [],
         "signature": [
-          "Zod.ZodType<",
+          "ZodType",
+          "<",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -2843,7 +2848,9 @@
             "section": "def-common.Feature",
             "text": "Feature"
           },
-          ", Zod.ZodTypeDef, ",
+          ", ",
+          "ZodTypeDef",
+          ", ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -2866,7 +2873,8 @@
         "label": "fieldDefinitionConfigSchema",
         "description": [],
         "signature": [
-          "Zod.ZodType<(",
+          "ZodType",
+          "<(",
           "MappingBooleanProperty",
           " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | (",
           "MappingKeywordProperty",
@@ -2880,7 +2888,9 @@
           "MappingDoubleNumberProperty",
           " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | (",
           "MappingLongNumberProperty",
-          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | { type: \"system\"; }, Zod.ZodTypeDef, (",
+          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | { type: \"system\"; }, ",
+          "ZodTypeDef",
+          ", (",
           "MappingBooleanProperty",
           " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | (",
           "MappingKeywordProperty",
@@ -2909,7 +2919,8 @@
         "label": "flattenRecord",
         "description": [],
         "signature": [
-          "Zod.ZodType<",
+          "ZodType",
+          "<",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -2917,7 +2928,9 @@
             "section": "def-common.FlattenRecord",
             "text": "FlattenRecord"
           },
-          ", Zod.ZodTypeDef, ",
+          ", ",
+          "ZodTypeDef",
+          ", ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -3020,7 +3033,8 @@
         "label": "namedFieldDefinitionConfigSchema",
         "description": [],
         "signature": [
-          "Zod.ZodType<(",
+          "ZodType",
+          "<(",
           "MappingBooleanProperty",
           " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { name: string; }) | (",
           "MappingKeywordProperty",
@@ -3034,7 +3048,9 @@
           "MappingDoubleNumberProperty",
           " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { name: string; }) | (",
           "MappingLongNumberProperty",
-          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { name: string; }) | ({ type: \"system\"; } & { name: string; }), Zod.ZodTypeDef, (",
+          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { name: string; }) | ({ type: \"system\"; } & { name: string; }), ",
+          "ZodTypeDef",
+          ", (",
           "MappingBooleanProperty",
           " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { name: string; }) | (",
           "MappingKeywordProperty",
@@ -3063,9 +3079,12 @@
         "label": "recursiveRecord",
         "description": [],
         "signature": [
-          "Zod.ZodType<",
+          "ZodType",
+          "<",
           "RecursiveRecord",
-          ", Zod.ZodTypeDef, ",
+          ", ",
+          "ZodTypeDef",
+          ", ",
           "RecursiveRecord",
           ">"
         ],
@@ -3082,7 +3101,8 @@
         "label": "routingDefinitionListSchema",
         "description": [],
         "signature": [
-          "Zod.ZodType<",
+          "ZodType",
+          "<",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -3090,7 +3110,9 @@
             "section": "def-common.RoutingDefinition",
             "text": "RoutingDefinition"
           },
-          "[], Zod.ZodTypeDef, ",
+          "[], ",
+          "ZodTypeDef",
+          ", ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -3113,7 +3135,8 @@
         "label": "routingStatus",
         "description": [],
         "signature": [
-          "Zod.ZodEnum<[\"enabled\", \"disabled\"]>"
+          "ZodEnum",
+          "<[\"enabled\", \"disabled\"]>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/routing/index.ts",
         "deprecated": false,
@@ -3128,7 +3151,12 @@
         "label": "streamObjectNameSchema",
         "description": [],
         "signature": [
-          "Zod.ZodEffects<Zod.ZodEffects<Zod.ZodString, string, string>, string, string>"
+          "ZodEffects",
+          "<",
+          "ZodEffects",
+          "<",
+          "ZodString",
+          ", string, string>, string, string>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/stream_object_name.ts",
         "deprecated": false,
@@ -3143,7 +3171,8 @@
         "label": "streamQueryKqlSchema",
         "description": [],
         "signature": [
-          "Zod.ZodType<",
+          "ZodType",
+          "<",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -3151,7 +3180,9 @@
             "section": "def-common.StreamQueryKql",
             "text": "StreamQueryKql"
           },
-          ", Zod.ZodTypeDef, ",
+          ", ",
+          "ZodTypeDef",
+          ", ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -3174,7 +3205,8 @@
         "label": "streamQuerySchema",
         "description": [],
         "signature": [
-          "Zod.ZodType<",
+          "ZodType",
+          "<",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -3182,7 +3214,9 @@
             "section": "def-common.StreamQueryKql",
             "text": "StreamQueryKql"
           },
-          ", Zod.ZodTypeDef, ",
+          ", ",
+          "ZodTypeDef",
+          ", ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -3227,7 +3261,22 @@
         "label": "upsertStreamQueryRequestSchema",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ title: Zod.ZodEffects<Zod.ZodString, string, string>; feature: Zod.ZodOptional<Zod.ZodObject<{ name: Zod.ZodEffects<Zod.ZodString, string, string>; filter: Zod.ZodType<",
+          "ZodObject",
+          "<{ title: ",
+          "ZodEffects",
+          "<",
+          "ZodString",
+          ", string, string>; feature: ",
+          "ZodOptional",
+          "<",
+          "ZodObject",
+          "<{ name: ",
+          "ZodEffects",
+          "<",
+          "ZodString",
+          ", string, string>; filter: ",
+          "ZodType",
+          "<",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3235,7 +3284,9 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          ", Zod.ZodTypeDef, ",
+          ", ",
+          "ZodTypeDef",
+          ", ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3243,7 +3294,9 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          ">; }, \"strip\", Zod.ZodTypeAny, { filter: ",
+          ">; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3259,7 +3312,15 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; name: string; }>>; kql: Zod.ZodObject<{ query: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { query: string; }, { query: string; }>; }, \"strip\", Zod.ZodTypeAny, { title: string; kql: { query: string; }; feature?: { filter: ",
+          "; name: string; }>>; kql: ",
+          "ZodObject",
+          "<{ query: ",
+          "ZodString",
+          "; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { query: string; }, { query: string; }>; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { title: string; kql: { query: string; }; feature?: { filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
