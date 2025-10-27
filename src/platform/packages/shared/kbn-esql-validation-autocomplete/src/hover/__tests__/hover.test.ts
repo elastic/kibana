@@ -77,6 +77,24 @@ round (
 ): double | integer | long | unsigned_long
 \`\`\``,
       ]);
+      await assertGetHoverItem(`from a | eval round(numberField,)`, 'round', [
+        getFunctionDefinition('round')!.description,
+        `\`\`\`none
+round (
+  number: double | integer | long | unsigned_long,  
+  decimals?: integer | long
+): double | integer | long | unsigned_long
+\`\`\``,
+      ]);
+      await assertGetHoverItem(`from a | eval round(numberField, )`, 'round', [
+        getFunctionDefinition('round')!.description,
+        `\`\`\`none
+round (
+  number: double | integer | long | unsigned_long,  
+  decimals?: integer | long
+): double | integer | long | unsigned_long
+\`\`\``,
+      ]);
       await assertGetHoverItem(`from a | eval nonExistentFn(numberField)`, 'nonExistentFn', []);
       await assertGetHoverItem(`from a | eval round(numberField)`, 'round', [
         getFunctionDefinition('round')!.description,
@@ -92,7 +110,6 @@ round (
 
     test('nested function name', async () => {
       await assertGetHoverItem(`from a | stats avg(round(numberField))`, 'round', [
-        '**Acceptable types**: **aggregate_metric_double** | **double** | **integer** | **long**',
         getFunctionDefinition('round')!.description,
         `\`\`\`none
 round (
@@ -101,9 +118,11 @@ round (
 ): double | integer | long | unsigned_long
 \`\`\``,
       ]);
-      await assertGetHoverItem(`from a | stats avg(nonExistentFn(numberField))`, 'nonExistentFn', [
-        '**Acceptable types**: **aggregate_metric_double** | **double** | **integer** | **long**',
-      ]);
+      await assertGetHoverItem(
+        `from a | stats avg(nonExistentFn(numberField))`,
+        'nonExistentFn',
+        []
+      );
     });
   });
 });
