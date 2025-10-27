@@ -58,6 +58,7 @@ import {
   ALERT_SCHEDULED_ACTION_DATE,
   ALERT_SCHEDULED_ACTION_THROTTLING,
   ALERT_STATE_NAMESPACE,
+  ALERT_ATTACK_IDS,
 } from '@kbn/rule-data-utils';
 import type { MultiField } from './types';
 
@@ -323,6 +324,11 @@ export const alertFieldMap = {
   [ALERT_STATE_NAMESPACE]: {
     type: 'unmapped',
     array: false,
+    required: false,
+  },
+  [ALERT_ATTACK_IDS]: {
+    type: 'keyword',
+    array: true,
     required: false,
   },
 } as const;

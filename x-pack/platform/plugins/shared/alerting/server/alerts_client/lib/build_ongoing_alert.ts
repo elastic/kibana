@@ -26,6 +26,7 @@ import {
   TIMESTAMP,
   VERSION,
   ALERT_STATE_NAMESPACE,
+  ALERT_ATTACK_IDS,
 } from '@kbn/rule-data-utils';
 import type { DeepPartial } from '@kbn/utility-types';
 import { get, omit } from 'lodash';
@@ -144,6 +145,7 @@ export const buildOngoingAlert = <
       ])
     ),
     ...(hasAlertState ? { [ALERT_STATE_NAMESPACE]: filteredAlertState } : {}),
+    [ALERT_ATTACK_IDS]: [],
   };
 
   // Clean the existing alert document so any nested fields that will be updated
