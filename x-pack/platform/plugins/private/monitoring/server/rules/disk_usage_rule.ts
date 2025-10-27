@@ -106,7 +106,7 @@ export class DiskUsageRule extends BaseRule {
           i18n.translate('xpack.monitoring.alerts.diskUsage.ui.nextSteps.tuneDisk', {
             defaultMessage: '#start_linkTune for disk usage#end_link',
           }),
-          `{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/tune-for-disk-usage.html`
+          `{elasticWebsiteUrl}docs/deploy-manage/production-guidance/optimize-performance/disk-usage`
         ),
         createLink(
           i18n.translate('xpack.monitoring.alerts.diskUsage.ui.nextSteps.identifyIndices', {
