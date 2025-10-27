@@ -26,6 +26,14 @@ This will:
 node scripts/edot_collector.js --config config/<custom-kibana-config>.yml
 ```
 
+### With custom OTLP ports
+
+If you need to use different ports (e.g., when running multiple collectors or when default ports are already in use):
+
+```bash
+node scripts/edot_collector.js --grpc-port 14317 --http-port 14318
+```
+
 ### Using environment variables
 
 You can override Elasticsearch connection settings using environment variables:
@@ -38,6 +46,12 @@ node scripts/edot_collector.js
 ```
 
 ## Configuration
+
+The command accepts the following CLI flags:
+
+- `--config`, `-c`: Path to Kibana config file (defaults to `config/kibana.dev.yml`)
+- `--grpc-port`: Host port for gRPC endpoint (defaults to `4317`)
+- `--http-port`: Host port for HTTP endpoint (defaults to `4318`)
 
 The command reads the following settings from your Kibana configuration:
 
@@ -64,8 +78,8 @@ The EDOT Collector is configured to collect:
 
 The collector exposes OTLP endpoints for application instrumentation:
 
-- **gRPC**: `http://localhost:4317`
-- **HTTP**: `http://localhost:4318`
+- **gRPC**: `http://localhost:4317` (default, customizable with `--grpc-port`)
+- **HTTP**: `http://localhost:4318` (default, customizable with `--http-port`)
 
 Configure your OpenTelemetry SDKs to send data to these endpoints.
 
@@ -169,16 +183,24 @@ The command generates the following files in `data/edot_collector/`:
 
 ## Troubleshooting
 
+### Port conflicts
+
+If you see errors about ports already in use, you can specify alternative ports:
+
+```bash
+node scripts/edot_collector.js --grpc-port 14317 --http-port 14318
+```
+
 ### Container fails to start
 
 Check the logs:
 
 ```bash
-docker logs kibana-dev-edot-collector
+docker logs kibana-edot-collector
 ```
 
 ### Can't see data in Kibana
 
-1. Verify the container is running: `docker ps | grep kibana-dev-edot-collector`
-2. Check Elasticsearch connection in the logs: `docker logs kibana-dev-edot-collector`
+1. Verify the container is running: `docker ps | grep kibana-edot-collector`
+2. Check Elasticsearch connection in the logs: `docker logs kibana-edot-collector`
 3. Check instrumented application logs for OTLP export errors.
