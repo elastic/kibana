@@ -158,7 +158,8 @@ run(
                 existingIssue,
                 githubApi,
                 branch,
-                pipeline
+                pipeline,
+                failure
               );
               const url = existingIssue.github.htmlUrl;
               existingIssue.github.body = newBody;
@@ -233,7 +234,8 @@ run(
                 existingIssue,
                 githubApi,
                 branch,
-                pipeline
+                pipeline,
+                failure
               );
               const url = existingIssue.github.htmlUrl;
               existingIssue.github.body = newBody;

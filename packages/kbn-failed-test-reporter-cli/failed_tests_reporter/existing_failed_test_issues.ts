@@ -9,12 +9,12 @@
 
 import { setTimeout } from 'timers/promises';
 
-import Axios from 'axios';
 import { isAxiosRequestError, isAxiosResponseError } from '@kbn/dev-utils';
 import type { ToolingLog } from '@kbn/tooling-log';
+import Axios from 'axios';
 
-import type { GithubIssueMini } from './github_api';
 import type { TestFailure } from './get_failures';
+import type { GithubIssueMini } from './github_api';
 
 export interface FailedTestIssue {
   classname: string;
@@ -85,9 +85,21 @@ export class ExistingFailedTestIssues {
   }
 
   getForFailure(failure: TestFailure) {
+    // Check if this is a Scout failure
+    const isScout = 'id' in failure && 'target' in failure && 'location' in failure;
+
     for (const [f, issue] of this.results) {
-      if (f.classname === failure.classname && f.name === failure.name) {
-        return issue;
+      if (isScout) {
+        // For Scout failures, match by test name only. We don't create a new issue for each target where the same test fails, but only one + adding comments for each target failure.
+        const isExistingScoutFailure = 'id' in f && 'target' in f && 'location' in f;
+        if (isExistingScoutFailure && f.name === failure.name) {
+          return issue;
+        }
+      } else {
+        // For FTR failures, use original matching logic
+        if (f.classname === failure.classname && f.name === failure.name) {
+          return issue;
+        }
       }
     }
   }
@@ -148,9 +160,21 @@ export class ExistingFailedTestIssues {
   }
 
   private isFailureSeen(failure: TestFailure) {
+    // Check if this is a Scout failure
+    const isScout = 'id' in failure && 'target' in failure && 'location' in failure;
+
     for (const seen of this.results.keys()) {
-      if (seen.classname === failure.classname && seen.name === failure.name) {
-        return true;
+      if (isScout) {
+        // For Scout failures, match by test name only (ignore target)
+        const isExistingScoutFailure = 'id' in seen && 'target' in seen && 'location' in seen;
+        if (isExistingScoutFailure && seen.name === failure.name) {
+          return true;
+        }
+      } else {
+        // For FTR failures, use original matching logic
+        if (seen.classname === failure.classname && seen.name === failure.name) {
+          return true;
+        }
       }
     }
 

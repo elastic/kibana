@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import fs from 'fs';
 import type { ExistingFailedTestIssue } from './existing_failed_test_issues';
 import type { TestFailure } from './get_failures';
 import type { ScoutTestFailureExtended } from './get_scout_failures';
@@ -15,52 +14,10 @@ import type { GithubApi } from './github_api';
 import { getIssueMetadata, updateIssueMetadata } from './issue_metadata';
 
 /**
- * Helper function to embed screenshots in GitHub issue body using base64
+ * Helper function to detect if a test failure is a Scout failure
  */
-function embedScreenshotsInIssueBody(
-  attachments: Array<{ name: string; path?: string; contentType: string }>,
-  maxFileSize: number = 1024 * 1024 // 1MB limit per file
-): string[] {
-  const embeddedImages: string[] = [];
-
-  if (!attachments || attachments.length === 0) {
-    return embeddedImages;
-  }
-
-  // Filter for image attachments
-  const imageAttachments = attachments.filter(
-    (attachment) =>
-      attachment.contentType.startsWith('image/') &&
-      attachment.path &&
-      fs.existsSync(attachment.path)
-  );
-
-  for (const attachment of imageAttachments) {
-    try {
-      const fileStats = fs.statSync(attachment.path!);
-
-      // Skip files that are too large
-      if (fileStats.size > maxFileSize) {
-        // eslint-disable-next-line no-console
-        console.warn(`Skipping large screenshot: ${attachment.name} (${fileStats.size} bytes)`);
-        continue;
-      }
-
-      // Read file and convert to base64
-      const fileBuffer = fs.readFileSync(attachment.path!);
-      const base64Data = fileBuffer.toString('base64');
-      const dataUrl = `data:${attachment.contentType};base64,${base64Data}`;
-
-      // Create markdown image with caption
-      const imageMarkdown = `![${attachment.name}](${dataUrl})`;
-      embeddedImages.push(imageMarkdown);
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(`Failed to embed screenshot ${attachment.name}:`, error);
-    }
-  }
-
-  return embeddedImages;
+function isScoutFailure(failure: TestFailure): failure is ScoutTestFailureExtended {
+  return 'id' in failure && 'target' in failure && 'location' in failure;
 }
 
 export async function createFailureIssue(
@@ -71,15 +28,15 @@ export async function createFailureIssue(
   pipeline: string,
   prependTitle: string = ''
 ) {
-  // Detect if this is a Scout failure by checking for Scout-specific fields
-  const isScoutFailure = 'id' in failure && 'target' in failure && 'location' in failure;
+  const isScout = isScoutFailure(failure);
 
-  // PrependTitle is introduced to provide some clarity by prepending the failing test title
-  // in order to give the whole info in the title according to each team's preference.
-  const title =
-    prependTitle && prependTitle.trim() !== ''
-      ? `Failing test: ${prependTitle} ${failure.classname} - ${failure.name}`
-      : `Failing test: ${failure.classname} - ${failure.name}`;
+  // For Scout tests, use suite name instead of classname for better clarity
+  // For FTR tests, use the existing logic with prependTitle
+  const title = isScout
+    ? `Failed Test: ${failure.classname} - ${failure.name}`
+    : prependTitle && prependTitle.trim() !== ''
+    ? `Failing test: ${prependTitle} ${failure.classname} - ${failure.name}`
+    : `Failing test: ${failure.classname} - ${failure.name}`;
 
   // Github API body length maximum is 65536 characters
   // Let's keep consistency with Mocha output that is truncated to 8192 characters
@@ -105,32 +62,34 @@ export async function createFailureIssue(
   ];
 
   // Add Scout-specific information
-  if (isScoutFailure) {
+  if (isScout) {
     const scoutFailure = failure as ScoutTestFailureExtended;
 
-    bodyContent.splice(
-      2,
-      0,
-      '',
-      '**Scout Test Details:**',
-      `- Test ID: ${scoutFailure.id}`,
-      `- Target: ${scoutFailure.target}`,
-      `- Location: ${scoutFailure.location}`,
+    // Create table format for Scout test details
+    const scoutDetailsTable = [
+      '| Field | Value |',
+      '|-------|-------|',
+      `| Test ID | ${scoutFailure.id} |`,
+      `| Target | ${scoutFailure.target} |`,
+      `| Location | ${scoutFailure.location} |`,
       scoutFailure.kibanaModule
-        ? `- Kibana Module: ${scoutFailure.kibanaModule.id} (${scoutFailure.kibanaModule.type})`
-        : '',
-      scoutFailure.attachments?.length
-        ? `- Attachments: ${scoutFailure.attachments.length} files`
-        : '',
-      ''
-    );
+        ? `| Kibana Module | ${scoutFailure.kibanaModule.id} (${scoutFailure.kibanaModule.type}) |`
+        : '| Kibana Module | N/A |',
+    ];
 
-    // Embed screenshots if available
+    bodyContent.splice(2, 0, '', '**Scout Test Details:**', '', ...scoutDetailsTable, '');
+
+    // Add screenshot information if available
     if (scoutFailure.attachments && scoutFailure.attachments.length > 0) {
-      const embeddedScreenshots = embedScreenshotsInIssueBody(scoutFailure.attachments);
-      if (embeddedScreenshots.length > 0) {
+      const hasScreenshots = scoutFailure.attachments.some((attachment) =>
+        attachment.contentType.startsWith('image/')
+      );
+
+      if (hasScreenshots) {
         bodyContent.push('**Screenshots:**', '');
-        bodyContent.push(...embeddedScreenshots);
+        bodyContent.push(
+          'Failure screenshots are available in the Buildkite HTML report and artifacts.'
+        );
         bodyContent.push('');
       }
     }
@@ -140,11 +99,11 @@ export async function createFailureIssue(
     'test.class': failure.classname,
     'test.name': failure.name,
     'test.failCount': 1,
-    ...(isScoutFailure && { 'test.type': 'scout' }),
+    ...(isScout && { 'test.type': 'scout' }),
   });
 
   // Use different labels for Scout vs FTR failures
-  const labels = isScoutFailure ? ['failed-test', 'scout-playwright'] : ['failed-test'];
+  const labels = isScout ? ['failed-test', 'scout-playwright'] : ['failed-test'];
 
   return await api.createIssue(title, body, labels);
 }
@@ -154,7 +113,8 @@ export async function updateFailureIssue(
   issue: ExistingFailedTestIssue,
   api: GithubApi,
   branch: string,
-  pipeline: string
+  pipeline: string,
+  failure?: TestFailure | ScoutTestFailureExtended
 ) {
   // Increment failCount
   const newCount = getIssueMetadata(issue.github.body, 'test.failCount', 0) + 1;
@@ -163,10 +123,16 @@ export async function updateFailureIssue(
   });
 
   await api.editIssueBodyAndEnsureOpen(issue.github.number, newBody);
-  await api.addIssueComment(
-    issue.github.number,
-    `New failure: [${pipeline || 'CI Build'} - ${branch}](${buildUrl})`
-  );
+
+  // Create comment with target information for Scout failures
+  const isScout = failure && isScoutFailure(failure);
+  const commentText = isScout
+    ? `**New Scout Test Failure**\n\n**Target:** ${
+        (failure as ScoutTestFailureExtended).target
+      }\n\nBuild: [${pipeline || 'CI Build'} - ${branch}](${buildUrl})`
+    : `New failure: [${pipeline || 'CI Build'} - ${branch}](${buildUrl})`;
+
+  await api.addIssueComment(issue.github.number, commentText);
 
   return { newBody, newCount };
 }
