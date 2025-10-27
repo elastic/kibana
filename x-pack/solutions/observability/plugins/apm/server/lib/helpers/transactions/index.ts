@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { environmentQuery } from '../../../../common/utils/environment_query';
@@ -17,6 +17,7 @@ import {
   PARENT_ID,
   TRANSACTION_DURATION_SUMMARY,
   SERVICE_NAME,
+  METRICSET_NAME,
 } from '../../../../common/es_fields/apm';
 import type { APMConfig } from '../../..';
 import type { APMEventClient } from '../create_es_client/create_apm_event_client';
@@ -79,7 +80,7 @@ export async function getServiceNamesFromAggregatedTransactions({
     query: {
       bool: {
         filter: [
-          { exists: { field: TRANSACTION_DURATION_HISTOGRAM } },
+          ...termQuery(METRICSET_NAME, 'service_transaction'),
           ...(start && end ? rangeQuery(start, end) : []),
           ...kqlQuery(kuery),
           ...environmentQuery(environment),
