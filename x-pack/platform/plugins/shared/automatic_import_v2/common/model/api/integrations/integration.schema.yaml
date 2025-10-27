@@ -1,0 +1,86 @@
+openapi: 3.0.3
+info:
+  title: Automatic Import Integrations API endpoint
+  version: "1"
+paths:
+  /internal/automatic_import/integrations:
+    put:
+      summary: Creates a new state entry for integration in SavedObject index.
+      operationId: CreateAutoImportIntegration
+      x-codegen-enabled: true
+      x-internal: true
+      description: >-
+        Creates a new state entry for integration in SavedObject and returns the corresponding integration_id
+      tags:
+        - Automatic Import Integrations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - title
+              properties:
+                title:
+                  description: The integration title
+                  $ref: '../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString'
+                description:
+                  description: The integration description
+                  type: string
+                logo:
+                  description: The integration logo
+                  type: string
+      responses:
+        200:
+          description: >-
+            The integration state is created successfully and integration_id is
+            returned.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - integration_id
+                properties:
+                  integration_id:
+                    description: The integration id created in state.
+                    $ref: '../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString'
+  /internal/automatic_import/integrations/{integration_id}:
+    patch:
+      summary: Updates an existing integration.
+      operationId: UpdateAutoImportIntegration
+      x-codegen-enabled: true
+      x-internal: true
+      description: >-
+        Updates integration information like description, logo, or other properties
+      tags:
+        - Automatic Import Integrations
+      parameters:
+        - name: integration_id
+          in: path
+          required: true
+          description: The integration identifier
+          schema:
+            $ref: '../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                description:
+                  description: Integration description
+                  type: string
+                logo:
+                  description: Integration logo image blob
+                  type: string
+                  format: binary
+      responses:
+        200:
+          description: Indicates integration has been updated correctly.
+        404:
+          description: Indicates the integration id was not found.

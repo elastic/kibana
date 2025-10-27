@@ -19,12 +19,18 @@ import {
 import { EuiButtonIcon, EuiScreenReaderOnly } from '@elastic/eui';
 import { type Streams, type Feature } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
+import {
+  OPEN_SIGNIFICANT_EVENTS_FLYOUT_URL_PARAM,
+  SELECTED_FEATURES_URL_PARAM,
+} from '../../../../constants';
 import { ConditionPanel } from '../../shared';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 import { useStreamFeaturesApi } from '../../../../hooks/use_stream_features_api';
 import { StreamFeatureDetailsFlyout } from './stream_feature_details_flyout';
 import { FeatureEventsSparkline } from './feature_events_sparkline';
 import { TableTitle } from './table_title';
+import { useAIFeatures } from '../../../stream_detail_significant_events_view/add_significant_event_flyout/generated_flow_form/use_ai_features';
+import { useStreamFeaturesTable } from './hooks/use_stream_features_table';
 
 export function StreamExistingFeaturesTable({
   isLoading,
@@ -39,12 +45,24 @@ export function StreamExistingFeaturesTable({
 }) {
   const router = useStreamsAppRouter();
 
-  const [isDetailFlyoutOpen, setIsDetailFlyoutOpen] = useState<Feature>();
+  const [selectedFeature, setSelectedFeature] = useState<Feature>();
   const [selectedFeatures, setSelectedFeatures] = useState<Feature[]>([]);
   const { removeFeaturesFromStream } = useStreamFeaturesApi(definition);
   const [isDeleting, setIsDeleting] = useState(false);
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(5);
+  const aiFeatures = useAIFeatures();
+  const { descriptionColumn } = useStreamFeaturesTable();
+
+  const goToGenerateSignificantEvents = (significantEventsFeatures: Feature[]) => {
+    router.push('/{key}/management/{tab}', {
+      path: { key: definition.name, tab: 'significantEvents' },
+      query: {
+        [OPEN_SIGNIFICANT_EVENTS_FLYOUT_URL_PARAM]: 'true',
+        [SELECTED_FEATURES_URL_PARAM]: significantEventsFeatures.map((f) => f.name).join(','),
+      },
+    });
+  };
 
   const columns: Array<EuiBasicTableColumn<Feature>> = [
     {
@@ -54,14 +72,7 @@ export function StreamExistingFeaturesTable({
       sortable: true,
       truncateText: true,
     },
-    {
-      field: 'description',
-      name: DESCRIPTION_LABEL,
-      width: '30%',
-      truncateText: {
-        lines: 4,
-      },
-    },
+    descriptionColumn,
     {
       field: 'filter',
       name: FILTER_LABEL,
@@ -86,7 +97,10 @@ export function StreamExistingFeaturesTable({
           description: GENERATE_SIGNIFICANT_EVENTS,
           type: 'icon',
           icon: 'crosshairs',
-          onClick: () => '',
+          enabled: () => (aiFeatures?.genAiConnectors.selectedConnector ? true : false),
+          onClick: (feature) => {
+            goToGenerateSignificantEvents([feature]);
+          },
         },
         {
           name: EDIT_ACTION_NAME_LABEL,
@@ -94,7 +108,7 @@ export function StreamExistingFeaturesTable({
           type: 'icon',
           icon: 'pencil',
           onClick: (feature) => {
-            setIsDetailFlyoutOpen(feature);
+            setSelectedFeature(feature);
           },
         },
         {
@@ -119,7 +133,7 @@ export function StreamExistingFeaturesTable({
   ];
 
   const toggleDetails = (feature: Feature) => {
-    setIsDetailFlyoutOpen(feature);
+    setSelectedFeature(feature);
   };
 
   const columnsWithExpandingRowToggle: Array<EuiBasicTableColumn<Feature>> = [
@@ -136,14 +150,17 @@ export function StreamExistingFeaturesTable({
         return (
           <EuiButtonIcon
             onClick={() => toggleDetails(feature)}
-            aria-label={isDetailFlyoutOpen ? COLLAPSE_DETAILS_LABEL : EXPAND_DETAILS_LABEL}
-            iconType={isDetailFlyoutOpen ? 'minimize' : 'expand'}
+            aria-label={selectedFeature ? COLLAPSE_DETAILS_LABEL : EXPAND_DETAILS_LABEL}
+            iconType={selectedFeature ? 'minimize' : 'expand'}
           />
         );
       },
     },
     ...columns,
   ];
+
+  const isGenerateSignificantEventsButtonDisabled =
+    selectedFeatures.length === 0 || !aiFeatures?.genAiConnectors.selectedConnector;
 
   return (
     <div css={{ padding: '16px' }}>
@@ -158,12 +175,12 @@ export function StreamExistingFeaturesTable({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiLink
-            href={router.link('/{key}/management/{tab}', {
-              path: { key: definition.name, tab: 'significantEvents' },
-            })}
+            onClick={() => {
+              goToGenerateSignificantEvents(selectedFeatures);
+            }}
           >
             <EuiButtonEmpty
-              disabled={features.length === 0}
+              disabled={isGenerateSignificantEventsButtonDisabled}
               iconType="crosshairs"
               size="xs"
               aria-label={GENERATE_SIGNIFICANT_EVENTS}
@@ -239,14 +256,14 @@ export function StreamExistingFeaturesTable({
           },
         }}
       />
-      {isDetailFlyoutOpen && (
+      {selectedFeature && (
         <StreamFeatureDetailsFlyout
           definition={definition}
-          feature={isDetailFlyoutOpen}
+          feature={selectedFeature}
           closeFlyout={() => {
-            setIsDetailFlyoutOpen(undefined);
-            refreshFeatures();
+            setSelectedFeature(undefined);
           }}
+          refreshFeatures={refreshFeatures}
         />
       )}
     </div>
@@ -273,10 +290,6 @@ const GENERATE_SIGNIFICANT_EVENTS = i18n.translate(
 // i18n labels moved to end of file
 const TITLE_LABEL = i18n.translate('xpack.streams.streamFeaturesTable.columns.title', {
   defaultMessage: 'Title',
-});
-
-const DESCRIPTION_LABEL = i18n.translate('xpack.streams.streamFeaturesTable.columns.description', {
-  defaultMessage: 'Description',
 });
 
 const FILTER_LABEL = i18n.translate('xpack.streams.streamFeaturesTable.columns.filter', {

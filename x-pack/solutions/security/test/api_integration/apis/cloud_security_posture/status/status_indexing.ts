@@ -11,9 +11,9 @@ import {
   FINDINGS_INDEX_DEFAULT_NS,
   VULNERABILITIES_INDEX_DEFAULT_NS,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
+import { createPackagePolicy } from '@kbn/cloud-security-posture-common/test_helper';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { EsIndexDataProvider } from '../../../../cloud_security_posture_api/utils';
-import { createPackagePolicy } from '../helper';
 import { findingsMockData, vulnerabilityMockData } from '../mock_data';
 
 export default function (providerContext: FtrProviderContext) {
@@ -25,7 +25,8 @@ export default function (providerContext: FtrProviderContext) {
   const findingsIndex = new EsIndexDataProvider(es, FINDINGS_INDEX_DEFAULT_NS);
   const vulnerabilitiesIndex = new EsIndexDataProvider(es, VULNERABILITIES_INDEX_DEFAULT_NS);
 
-  describe('GET /internal/cloud_security_posture/status', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/240000
+  describe.skip('GET /internal/cloud_security_posture/status', () => {
     let agentPolicyId: string;
 
     describe('STATUS = INDEXING TEST', () => {

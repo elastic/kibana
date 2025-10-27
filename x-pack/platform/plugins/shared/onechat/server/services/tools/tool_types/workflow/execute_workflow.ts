@@ -7,11 +7,11 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { ExecutionStatus as WorkflowExecutionStatus } from '@kbn/workflows/types/v1';
-import type { WorkflowsPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { ToolHandlerResult } from '@kbn/onechat-server/tools';
 import { ToolResultType } from '@kbn/onechat-common/tools';
 
-type WorkflowApi = WorkflowsPluginSetup['management'];
+type WorkflowApi = WorkflowsServerPluginSetup['management'];
 
 const WORKFLOW_MAX_WAIT = 60_000;
 const WORKFLOW_INITIAL_WAIT = 1000;

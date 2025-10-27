@@ -284,7 +284,7 @@
           "ExportShareDerivativesConfig",
           ", { shareType: T; }> | Extract<",
           "LegacyIntegrationConfig",
-          ", { shareType: T; }>; onClose: () => void; objectType: string; objectTypeAlias?: string | undefined; objectId?: string | undefined; shareableUrl?: string | undefined; shareableUrlForSavedObject?: string | undefined; shareableUrlLocatorParams?: { locator: ",
+          ", { shareType: T; }>; onClose: () => void; isSaving?: boolean | undefined; onSave?: (() => Promise<void | object>) | undefined; objectType: string; objectTypeAlias?: string | undefined; objectId?: string | undefined; shareableUrl?: string | undefined; shareableUrlForSavedObject?: string | undefined; shareableUrlLocatorParams?: { locator: ",
           {
             "pluginId": "share",
             "scope": "common",
@@ -1470,6 +1470,22 @@
             "path": "src/platform/plugins/shared/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-public.ShowShareMenuOptions.onSave",
+            "type": "Function",
+            "tags": [],
+            "label": "onSave",
+            "description": [],
+            "signature": [
+              "(() => Promise<void | object>) | undefined"
+            ],
+            "path": "src/platform/plugins/shared/share/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

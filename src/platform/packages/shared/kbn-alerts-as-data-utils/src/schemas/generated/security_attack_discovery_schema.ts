@@ -119,6 +119,7 @@ const SecurityAttackDiscoveryAlertOptional = rt.partial({
   'kibana.alert.end': schemaDate,
   'kibana.alert.flapping': schemaBoolean,
   'kibana.alert.flapping_history': schemaBooleanArray,
+  'kibana.alert.index_pattern': schemaString,
   'kibana.alert.intended_timestamp': schemaDate,
   'kibana.alert.last_detected': schemaDate,
   'kibana.alert.maintenance_window_ids': schemaStringArray,
