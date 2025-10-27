@@ -17,7 +17,7 @@ import type { State, XYState, XYDataLayerConfig } from '../types';
 import { Position } from '@elastic/charts';
 import { createMockFramePublicAPI, createMockDatasource } from '../../../mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { fireEvent, logRoles, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { getSelectedButtonInGroup } from '@kbn/test-eui-helpers';
 import { XyStyleSettings } from './style_settings';

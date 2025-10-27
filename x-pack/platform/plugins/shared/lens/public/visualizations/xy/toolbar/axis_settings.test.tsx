@@ -8,10 +8,10 @@
 import type { ComponentProps } from 'react';
 import React from 'react';
 import { EuiButtonGroupTestHarness } from '@kbn/test-eui-helpers';
-import { AxisSettingsPopover, XyAxisSettings } from './axis_settings';
+import type { AxisSettingsPopover } from './axis_settings';
+import { XyAxisSettings } from './axis_settings';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { fireEvent, render, screen, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 
 type Props = ComponentProps<typeof AxisSettingsPopover>;
 
