@@ -213,10 +213,17 @@ export class ObservabilityAIAssistantClient {
     userInstructions?: Instruction[];
     simulateFunctionCalling?: boolean;
     disableFunctions?: boolean;
-  }): Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>> => {
+  }): {
+    response$: Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>>;
+    conversationPromise: Promise<ConversationCreateRequest | undefined>;
+  } => {
     return withActiveInferenceSpan('RunTools', () => {
       const isConversationUpdate = persist && !!predefinedConversationId;
-      const conversationId = persist ? predefinedConversationId || v4() : '';
+      const conversationId = predefinedConversationId ?? v4();
+      let resolveConversation: (value: ConversationCreateRequest | undefined) => void;
+      const conversationPromise = new Promise<ConversationCreateRequest | undefined>((resolve) => {
+        resolveConversation = resolve;
+      });
 
       if (persist && !isConversationUpdate && kibanaPublicUrl) {
         const { namespace } = this.dependencies;
@@ -375,6 +382,21 @@ export class ObservabilityAIAssistantClient {
                     // on the function response to have a valid conversation
                     const isFunctionRequest = !!lastMessage?.message.function_call?.name;
 
+                    const conversationCreateRequest: ConversationCreateRequest = {
+                      '@timestamp': new Date().toISOString(),
+                      conversation: {
+                        title,
+                        id: conversationId,
+                      },
+                      public: !!isPublic,
+                      labels: {},
+                      numeric_labels: {},
+                      systemMessage,
+                      messages: deanonymizedMessages,
+                      archived: false,
+                    };
+
+                    resolveConversation(conversationCreateRequest);
                     if (!persist || isFunctionRequest) {
                       return of();
                     }
@@ -411,21 +433,7 @@ export class ObservabilityAIAssistantClient {
                       );
                     }
 
-                    return from(
-                      this.create({
-                        '@timestamp': new Date().toISOString(),
-                        conversation: {
-                          title,
-                          id: conversationId,
-                        },
-                        public: !!isPublic,
-                        labels: {},
-                        numeric_labels: {},
-                        systemMessage,
-                        messages: deanonymizedMessages,
-                        archived: false,
-                      })
-                    ).pipe(
+                    return from(this.create(conversationCreateRequest)).pipe(
                       map((conversationCreated): ConversationCreateEvent => {
                         return {
                           conversation: conversationCreated.conversation,
@@ -441,7 +449,7 @@ export class ObservabilityAIAssistantClient {
         })
       );
 
-      return output$.pipe(
+      const response$ = output$.pipe(
         catchError((error) => {
           this.dependencies.logger.error(error);
           return throwError(() => error);
@@ -467,6 +475,8 @@ export class ObservabilityAIAssistantClient {
         }),
         shareReplay()
       );
+
+      return { response$, conversationPromise };
     });
   };
 

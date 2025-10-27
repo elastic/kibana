@@ -93,6 +93,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         void llmProxy.interceptWithFunctionRequest({
           name: 'my_action',
           arguments: () => JSON.stringify({ foo: 'bar' }),
+          when: (body) =>
+            Boolean(body.messages?.[0]?.content?.includes('This is a random instruction')),
         });
 
         await callPublicChatComplete({

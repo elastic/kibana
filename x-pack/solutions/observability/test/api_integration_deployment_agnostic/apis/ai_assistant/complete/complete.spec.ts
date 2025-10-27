@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { MessageRole, type Message } from '@kbn/observability-ai-assistant-plugin/common';
+import {
+  MessageRole,
+  type Message,
+  type Conversation,
+  type ConversationCreateRequest,
+} from '@kbn/observability-ai-assistant-plugin/common';
 import { omit, pick } from 'lodash';
 import { PassThrough } from 'stream';
 import expect from '@kbn/expect';
@@ -299,6 +304,100 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       after(async () => {
         await clearConversations(es);
+      });
+    });
+
+    describe('when sync query parameter is true', () => {
+      let syncResponse: ConversationCreateRequest;
+      let persistedConversation: Conversation;
+
+      before(async () => {
+        await clearConversations(es);
+
+        void proxy.interceptTitle('Title for sync conversation');
+        void proxy.interceptWithResponse('Hello from sync flow');
+
+        const response = await observabilityAIAssistantAPIClient.editor({
+          endpoint: 'POST /api/observability_ai_assistant/chat/complete 2023-10-31',
+          params: {
+            body: {
+              messages,
+              connectorId,
+              persist: true,
+              sync: true,
+            },
+          },
+        });
+
+        expect(response.status).to.be(200);
+
+        await proxy.waitForAllInterceptorsToHaveBeenCalled();
+
+        syncResponse = response.body as unknown as ConversationCreateRequest;
+
+        const searchResponse = await es.search<Conversation>({
+          index: '.kibana-observability-ai-assistant-conversations-*',
+          query: {
+            term: { 'conversation.id': syncResponse.conversation.id },
+          },
+          size: 1,
+        });
+
+        const hit = searchResponse.hits.hits[0];
+        expect(hit).to.be.ok();
+
+        persistedConversation = hit!._source!;
+      });
+
+      after(async () => {
+        await clearConversations(es);
+      });
+
+      it('returns the persisted conversation payload', () => {
+        const storedConversationSubset = omit(persistedConversation, [
+          'conversation.last_updated',
+          'namespace',
+          'user',
+        ]);
+        expect(storedConversationSubset).to.eql(syncResponse);
+      });
+
+      it('includes the assistant response in the messages', () => {
+        const lastMessage = syncResponse.messages[syncResponse.messages.length - 1]?.message;
+        expect(lastMessage?.role).to.eql(MessageRole.Assistant);
+        expect(lastMessage?.content).to.contain('Hello');
+      });
+    });
+
+    describe('when sync is true without persisting', () => {
+      let syncResponse: ConversationCreateRequest;
+
+      before(async () => {
+        void proxy.interceptWithResponse('Hello from sync flow without persistence');
+
+        const response = await observabilityAIAssistantAPIClient.editor({
+          endpoint: 'POST /api/observability_ai_assistant/chat/complete 2023-10-31',
+          params: {
+            body: {
+              messages,
+              connectorId,
+              persist: false,
+              sync: true,
+            },
+          },
+        });
+
+        expect(response.status).to.be(200);
+
+        await proxy.waitForAllInterceptorsToHaveBeenCalled();
+
+        syncResponse = response.body as unknown as ConversationCreateRequest;
+      });
+
+      it('returns a conversation payload even though it was not persisted', () => {
+        expect(syncResponse.conversation.id).to.be.a('string');
+        expect(syncResponse.messages).to.be.an('array');
+        expect(syncResponse.archived).to.be(false);
       });
     });
 

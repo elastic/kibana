@@ -7,6 +7,7 @@
 import { notImplemented } from '@hapi/boom';
 import { toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
+import type { Observable } from 'rxjs';
 import { from, map } from 'rxjs';
 import { v4 } from 'uuid';
 import type { Readable } from 'stream';
@@ -28,6 +29,11 @@ import {
   screenContextRt,
 } from '../runtime_types';
 import type { ObservabilityAIAssistantRouteHandlerResources } from '../types';
+import type {
+  BufferFlushEvent,
+  StreamingChatResponseEventWithoutError,
+} from '../../../common/conversation_complete';
+import type { ConversationCreateRequest } from '../../../common/types';
 
 const chatCompleteBaseRt = (apiType: 'public' | 'internal') =>
   t.type({
@@ -38,6 +44,7 @@ const chatCompleteBaseRt = (apiType: 'public' | 'internal') =>
         persist: toBooleanRt,
       }),
       t.partial({
+        sync: toBooleanRt,
         conversationId: t.string,
         title: t.string,
         disableFunctions: toBooleanRt,
@@ -245,7 +252,10 @@ async function chatComplete(
   resources: ObservabilityAIAssistantRouteHandlerResources & {
     params: t.TypeOf<typeof chatCompleteInternalRt>;
   }
-) {
+): Promise<{
+  response$: Observable<StreamingChatResponseEventWithoutError | BufferFlushEvent>;
+  conversationPromise: Promise<ConversationCreateRequest | undefined>;
+}> {
   const { params, service } = resources;
 
   const {
@@ -286,7 +296,7 @@ async function chatComplete(
         : userInstructionOrString
   );
 
-  const response$ = client.complete({
+  const { response$, conversationPromise } = client.complete({
     messages,
     connectorId,
     conversationId,
@@ -299,7 +309,8 @@ async function chatComplete(
     disableFunctions,
   });
 
-  return response$.pipe(flushBuffer(isCloudEnabled));
+  const responseWithFlushBuffer$ = response$.pipe(flushBuffer(isCloudEnabled));
+  return { response$: responseWithFlushBuffer$, conversationPromise };
 }
 
 const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
@@ -310,8 +321,16 @@ const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
     },
   },
   params: chatCompleteInternalRt,
-  handler: async (resources): Promise<Readable> => {
-    return observableIntoStream(await chatComplete(resources));
+  handler: async (resources) => {
+    const { params } = resources;
+
+    const { response$: chatResponse$, conversationPromise } = await chatComplete(resources);
+
+    if (params.body.sync) {
+      return waitForBufferedResponse(chatResponse$, conversationPromise);
+    }
+
+    return observableIntoStream(chatResponse$);
   },
 });
 
@@ -326,14 +345,14 @@ const publicChatCompleteRoute = createObservabilityAIAssistantServerRoute({
   options: {
     tags: ['observability-ai-assistant'],
   },
-  handler: async (resources): Promise<Readable> => {
+  handler: async (resources) => {
     const { params, logger } = resources;
 
     const {
       body: { actions, ...restOfBody },
     } = params;
 
-    const response$ = await chatComplete({
+    const { response$: chatResponse$, conversationPromise } = await chatComplete({
       ...resources,
       params: {
         body: {
@@ -348,9 +367,31 @@ const publicChatCompleteRoute = createObservabilityAIAssistantServerRoute({
       },
     });
 
-    return observableIntoOpenAIStream(response$, logger);
+    if (restOfBody.sync) {
+      return waitForBufferedResponse(chatResponse$, conversationPromise);
+    }
+
+    return observableIntoOpenAIStream(chatResponse$, logger);
   },
 });
+
+async function waitForBufferedResponse(
+  chatResponse$: Observable<StreamingChatResponseEventWithoutError>,
+  conversationPromise: Promise<ConversationCreateRequest | undefined>
+) {
+  const subscription = chatResponse$.subscribe();
+
+  try {
+    const conversationPayload = await conversationPromise;
+    if (!conversationPayload) {
+      throw new Error('Failed to generate conversation response');
+    }
+
+    return { body: conversationPayload };
+  } finally {
+    subscription.unsubscribe();
+  }
+}
 
 export const chatRoutes = {
   ...chatRoute,
