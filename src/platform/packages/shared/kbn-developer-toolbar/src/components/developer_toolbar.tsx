@@ -17,6 +17,7 @@ import {
   EuiPanel,
   EuiThemeProvider,
   EuiToolTip,
+  EuiWindowEvent,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -76,6 +77,8 @@ const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({ envInfo, on
   const state = useToolbarState();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
+  const keyboardShortcutLabel = isMac() ? '⌘+\\' : 'Ctrl+\\';
+
   useEffect(() => {
     if (onHeightChange) {
       onHeightChange(
@@ -85,14 +88,34 @@ const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({ envInfo, on
     }
   }, [onHeightChange, isMinimized]);
 
-  if (isHidden) return null;
+  const handleShortcut = (
+    <EuiWindowEvent
+      event="keydown"
+      handler={(e) => {
+        if (isToggleShortcut(e)) {
+          e.preventDefault();
+          setIsHidden(false);
+          toggleMinimized();
+        }
+      }}
+    />
+  );
+
+  if (isHidden) return <>{handleShortcut}</>;
 
   if (isMinimized) {
     return ReactDOM.createPortal(
       <EuiThemeProvider colorMode={'dark'}>
+        <>{handleShortcut}</>
         <div css={getMinimizedToolbarStyles(euiTheme)}>
           <EuiToolTip
-            content="Expand developer toolbar. Right-click to hide."
+            content={
+              <>
+                Expand {keyboardShortcutLabel}
+                <br />
+                Right click to hide
+              </>
+            }
             disableScreenReaderOutput={true}
           >
             <EuiButtonIcon
@@ -115,6 +138,7 @@ const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({ envInfo, on
 
   return (
     <div css={getToolbarContainerStyles(euiTheme)}>
+      <>{handleShortcut}</>
       {state.isEnabled('errorsMonitor') && (
         <EuiThemeProvider colorMode={'light'}>
           <ConsoleErrorIndicator />
@@ -125,7 +149,7 @@ const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({ envInfo, on
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiToolTip content="Minimize">
+                <EuiToolTip content={`Minimize ${keyboardShortcutLabel}`}>
                   <EuiButtonIcon
                     iconType="minimize"
                     size="xs"
@@ -211,3 +235,12 @@ const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({ envInfo, on
     </div>
   );
 };
+
+// CMD + \ or CTRL + \ keyboard shortcut to toggle the developer toolbar
+const isToggleShortcut = (event: KeyboardEvent) =>
+  (event.metaKey || event.ctrlKey) && event.key === '\\';
+
+const isMac = (): boolean =>
+  ((navigator as any)?.userAgentData?.platform || navigator.userAgent)
+    .toLowerCase()
+    .includes('mac');
