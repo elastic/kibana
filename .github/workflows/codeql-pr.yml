@@ -9,10 +9,11 @@ jobs:
   request_analyze:
     name: Request CodeQL analyze
     runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.labels.*.name, 'ci:codeql')
     permissions:
       contents: read
     outputs:
-      granted: ${{ contains(github.event.pull_request.labels.*.name, 'ci:codeql') && contains(fromJSON('["MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.pull_request.author_association) && github.event.pull_request.user.type != 'Bot' && github.event.pull_request.draft == false }}
+      granted: ${{ contains(fromJSON('["MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.pull_request.author_association) && github.event.pull_request.user.type != 'Bot' && github.event.pull_request.draft == false }}
     steps:
       - name: Check if should analyze
         run: echo "Checking if should analyze"
