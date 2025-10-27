@@ -173,7 +173,8 @@
                 "docId": "kibKbnSecurityPluginTypesServerPluginApi",
                 "section": "def-server.SecurityPluginStart",
                 "text": "SecurityPluginStart"
-              }
+              },
+              " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
             "deprecated": false,
@@ -337,26 +338,6 @@
           "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
           "deprecated": false,
           "trackAdoption": false
-        },
-        {
-          "parentPluginId": "automaticImportVTwo",
-          "id": "def-server.AutomaticImportV2PluginStart.security",
-          "type": "Object",
-          "tags": [],
-          "label": "security",
-          "description": [],
-          "signature": [
-            {
-              "pluginId": "@kbn/security-plugin-types-server",
-              "scope": "server",
-              "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-              "section": "def-server.SecurityPluginStart",
-              "text": "SecurityPluginStart"
-            }
-          ],
-          "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
-          "deprecated": false,
-          "trackAdoption": false
         }
       ],
       "lifecycle": "start",
@@ -431,6 +412,23 @@
       },
       {
         "parentPluginId": "automaticImportVTwo",
+        "id": "def-common.DataStreamSamples",
+        "type": "Type",
+        "tags": [],
+        "label": "DataStreamSamples",
+        "description": [
+          "\nThe data stream samples object with its settings."
+        ],
+        "signature": [
+          "{ createdBy: string; createdAt: string; integrationId: string; dataStreamId: string; logData: string[]; originalFilename: string; projectId?: string | undefined; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/index_samples.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImportVTwo",
         "id": "def-common.UpdateAutoImportDataStreamRequestBody",
         "type": "Type",
         "tags": [],
@@ -469,7 +467,22 @@
         "label": "CreateAutoImportDataStreamRequestBody",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ title: Zod.ZodEffects<Zod.ZodString, string, string>; description: Zod.ZodOptional<Zod.ZodString>; samples: Zod.ZodArray<Zod.ZodString, \"many\">; }, \"strict\", Zod.ZodTypeAny, { title: string; samples: string[]; description?: string | undefined; }, { title: string; samples: string[]; description?: string | undefined; }>"
+          "ZodObject",
+          "<{ title: ",
+          "ZodEffects",
+          "<",
+          "ZodString",
+          ", string, string>; description: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; samples: ",
+          "ZodArray",
+          "<",
+          "ZodString",
+          ", \"many\">; }, \"strict\", ",
+          "ZodTypeAny",
+          ", { title: string; samples: string[]; description?: string | undefined; }, { title: string; samples: string[]; description?: string | undefined; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/data_streams/data_stream.gen.ts",
         "deprecated": false,
@@ -484,7 +497,14 @@
         "label": "CreateAutoImportDataStreamResponse",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ data_stream_id: Zod.ZodEffects<Zod.ZodString, string, string>; }, \"strip\", Zod.ZodTypeAny, { data_stream_id: string; }, { data_stream_id: string; }>"
+          "ZodObject",
+          "<{ data_stream_id: ",
+          "ZodEffects",
+          "<",
+          "ZodString",
+          ", string, string>; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { data_stream_id: string; }, { data_stream_id: string; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/data_streams/data_stream.gen.ts",
         "deprecated": false,
@@ -499,7 +519,22 @@
         "label": "CreateAutoImportIntegrationRequestBody",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ title: Zod.ZodEffects<Zod.ZodString, string, string>; description: Zod.ZodOptional<Zod.ZodString>; logo: Zod.ZodOptional<Zod.ZodString>; }, \"strict\", Zod.ZodTypeAny, { title: string; description?: string | undefined; logo?: string | undefined; }, { title: string; description?: string | undefined; logo?: string | undefined; }>"
+          "ZodObject",
+          "<{ title: ",
+          "ZodEffects",
+          "<",
+          "ZodString",
+          ", string, string>; description: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; logo: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; }, \"strict\", ",
+          "ZodTypeAny",
+          ", { title: string; description?: string | undefined; logo?: string | undefined; }, { title: string; description?: string | undefined; logo?: string | undefined; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
         "deprecated": false,
@@ -514,9 +549,64 @@
         "label": "CreateAutoImportIntegrationResponse",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ integration_id: Zod.ZodEffects<Zod.ZodString, string, string>; }, \"strip\", Zod.ZodTypeAny, { integration_id: string; }, { integration_id: string; }>"
+          "ZodObject",
+          "<{ integration_id: ",
+          "ZodEffects",
+          "<",
+          "ZodString",
+          ", string, string>; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { integration_id: string; }, { integration_id: string; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "automaticImportVTwo",
+        "id": "def-common.DataStreamSamples",
+        "type": "Object",
+        "tags": [],
+        "label": "DataStreamSamples",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ integrationId: ",
+          "ZodEffects",
+          "<",
+          "ZodString",
+          ", string, string>; dataStreamId: ",
+          "ZodEffects",
+          "<",
+          "ZodString",
+          ", string, string>; projectId: ",
+          "ZodOptional",
+          "<",
+          "ZodEffects",
+          "<",
+          "ZodString",
+          ", string, string>>; logData: ",
+          "ZodArray",
+          "<",
+          "ZodString",
+          ", \"many\">; } & { createdBy: ",
+          "ZodEffects",
+          "<",
+          "ZodString",
+          ", string, string>; createdAt: ",
+          "ZodEffects",
+          "<",
+          "ZodString",
+          ", string, string>; originalFilename: ",
+          "ZodEffects",
+          "<",
+          "ZodString",
+          ", string, string>; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { createdBy: string; createdAt: string; integrationId: string; dataStreamId: string; logData: string[]; originalFilename: string; projectId?: string | undefined; }, { createdBy: string; createdAt: string; integrationId: string; dataStreamId: string; logData: string[]; originalFilename: string; projectId?: string | undefined; }>"
+        ],
+        "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/index_samples.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -529,7 +619,20 @@
         "label": "UpdateAutoImportDataStreamRequestBody",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ description: Zod.ZodOptional<Zod.ZodString>; samples: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; }, \"strict\", Zod.ZodTypeAny, { description?: string | undefined; samples?: string[] | undefined; }, { description?: string | undefined; samples?: string[] | undefined; }>"
+          "ZodObject",
+          "<{ description: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; samples: ",
+          "ZodOptional",
+          "<",
+          "ZodArray",
+          "<",
+          "ZodString",
+          ", \"many\">>; }, \"strict\", ",
+          "ZodTypeAny",
+          ", { description?: string | undefined; samples?: string[] | undefined; }, { description?: string | undefined; samples?: string[] | undefined; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/data_streams/data_stream.gen.ts",
         "deprecated": false,
@@ -544,7 +647,18 @@
         "label": "UpdateAutoImportIntegrationRequestBody",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ description: Zod.ZodOptional<Zod.ZodString>; logo: Zod.ZodOptional<Zod.ZodString>; }, \"strict\", Zod.ZodTypeAny, { description?: string | undefined; logo?: string | undefined; }, { description?: string | undefined; logo?: string | undefined; }>"
+          "ZodObject",
+          "<{ description: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; logo: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; }, \"strict\", ",
+          "ZodTypeAny",
+          ", { description?: string | undefined; logo?: string | undefined; }, { description?: string | undefined; logo?: string | undefined; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import_v2/common/model/api/integrations/integration.gen.ts",
         "deprecated": false,
