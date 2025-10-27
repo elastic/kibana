@@ -15,7 +15,7 @@ const fetchCloudConnectors = async (
   http: HttpStart,
   options?: CloudConnectorListOptions & { cloudProvider?: string }
 ): Promise<CloudConnector[]> => {
-  const query: Record<'page' | 'perPage' | 'cloudProvider', string> = {};
+  const query: Record<string, string> = {};
 
   if (options?.page !== undefined) {
     query.page = options.page.toString();
