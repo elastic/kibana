@@ -10,11 +10,9 @@
     "browser": true,
     "server": true,
     "configPath": ["xpack", "dataConnectors"],
-    "requiredPlugins": [],
+    "requiredPlugins": ["encryptedSavedObjects", "workflowsManagement", "onechat"],
     "optionalPlugins": [],
     "requiredBundles": ["kibanaReact"],
-    "extraPublicDirs": [
-      "common"
-    ]
+    "extraPublicDirs": ["common"]
   }
 }

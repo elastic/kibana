@@ -7,3 +7,12 @@
 
 export { DATA_CONNECTORS_ROUTE } from './routes';
 export { DATA_CONNECTORS_FULL_TITLE, DATA_CONNECTORS_SHORT_TITLE } from './constants';
+export {
+  type WorkplaceConnectorAttributes,
+  type WorkplaceConnector,
+  type WorkplaceConnectorResponse,
+  type CreateWorkplaceConnectorRequest,
+  type UpdateWorkplaceConnectorRequest,
+  type WorkplaceConnectorType,
+  WORKPLACE_CONNECTOR_TYPES,
+} from './types';
