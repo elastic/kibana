@@ -67,9 +67,7 @@ export default function (providerContext: FtrProviderContext) {
     return req.send(body);
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/236975
-  // Failing: See https://github.com/elastic/kibana/issues/236975
-  describe.skip('POST /internal/cloud_security_posture/graph', () => {
+  describe('POST /internal/cloud_security_posture/graph', () => {
     describe('Authorization', () => {
       it('should return 403 for user without read access', async () => {
         await postGraph(
@@ -310,7 +308,6 @@ export default function (providerContext: FtrProviderContext) {
         expect(response.body).to.have.property('nodes').length(3);
         expect(response.body).to.have.property('edges').length(2);
         expect(response.body).not.to.have.property('messages');
-
         response.body.nodes.forEach((node: EntityNodeDataModel | LabelNodeDataModel) => {
           expect(node).to.have.property('color');
           expect(node.color).equal(
@@ -339,6 +336,84 @@ export default function (providerContext: FtrProviderContext) {
             `edge color mismatched [edge: ${edge.id}] [actual: ${edge.color}]`
           );
           expect(edge.type).equal('solid');
+        });
+      });
+
+      it('should return empty graph when eventTimeStart and eventTimeEnd are not provided and log is before alert', async () => {
+        const response = await postGraph(supertest, {
+          query: {
+            indexPatterns: ['.alerts-security.alerts-*', 'logs-*'],
+            originEventIds: [
+              {
+                id: 'test-event-id-time-range',
+                isAlert: true,
+                originalTime: '2024-10-01T10:15:00.000Z',
+              },
+            ],
+            start: '2024-10-15T14:00:00.000Z',
+            end: '2024-10-15T15:00:00.000Z',
+          },
+        }).expect(result(200));
+
+        // Without eventTimeStart/eventTimeEnd, only the alert is found
+        // but the related log event is not found
+        // The alert alone creates a graph with actor->action->target
+        expect(response.body).to.have.property('nodes');
+        expect(response.body).to.have.property('edges');
+
+        expect(response.body.nodes.length).to.be.greaterThan(0);
+        expect(response.body.edges.length).to.be.greaterThan(0);
+
+        response.body.nodes.forEach((node: EntityNodeDataModel | LabelNodeDataModel) => {
+          if (isLabelNode(node)) {
+            const hasEvent = node.documentsData?.some((doc) => doc.type === 'event');
+            expect(hasEvent).to.be(false);
+          }
+        });
+      });
+
+      it('should return graph with dual time range when eventTimeStart and eventTimeEnd are provided', async () => {
+        const response = await postGraph(supertest, {
+          query: {
+            indexPatterns: ['.alerts-security.alerts-*', 'logs-*'],
+            originEventIds: [
+              {
+                id: 'test-event-id-time-range',
+                isAlert: true,
+                originalTime: '2024-10-01T10:15:00.000Z',
+              },
+            ],
+            // Alert time range - covers alert creation (2024-10-15T14:30:00.000Z)
+            start: '2024-10-15T14:00:00.000Z',
+            end: '2024-10-15T15:00:00.000Z',
+            // Event time range - covers original log event (2024-10-01T10:15:00.000Z)
+            eventTimeStart: '2024-10-01T09:45:00.000Z',
+            eventTimeEnd: '2024-10-01T10:45:00.000Z',
+          },
+        }).expect(result(200));
+
+        // Should successfully return graph with BOTH alert and log event because:
+        // - Alert is found using alert time range (2024-10-15)
+        // - Log event is found using event time range (2024-10-01)
+        expect(response.body).to.have.property('nodes');
+        expect(response.body).to.have.property('edges');
+        expect(response.body.nodes.length).to.be.greaterThan(0);
+        expect(response.body.edges.length).to.be.greaterThan(0);
+
+        response.body.nodes.forEach((node: EntityNodeDataModel | LabelNodeDataModel) => {
+          expect(node).to.have.property('color');
+          if (isLabelNode(node)) {
+            expect(node).to.have.property('documentsData');
+            const hasAlert = node.documentsData?.some((doc) => doc.type === 'alert');
+            const hasEvent = node.documentsData?.some((doc) => doc.type === 'event');
+            expect(hasAlert).to.be(true);
+            expect(hasEvent).to.be(true);
+          }
+        });
+
+        response.body.edges.forEach((edge: EdgeDataModel) => {
+          expect(edge).to.have.property('color');
+          expect(edge).to.have.property('type');
         });
       });
 
