@@ -53,7 +53,7 @@ export class DatePicker {
 
   async clickSubmitButton() {
     await this.page.testSubj.click('querySubmitButton');
-    await this.page.testSubj.waitForSelector('unifiedHistogramProgressBar', { state: 'hidden' });
+    await this.page.waitForLoadingIndicatorHidden();
   }
 
   async setAbsoluteRange({ from, to }: { from: string; to: string }) {

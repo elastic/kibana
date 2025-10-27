@@ -8,6 +8,7 @@
  */
 
 import type { ScoutPage } from '..';
+import { expect } from '..';
 
 export class DiscoverApp {
   constructor(private readonly page: ScoutPage) {}
@@ -78,10 +79,11 @@ export class DiscoverApp {
   }
 
   async getChartTimespan(): Promise<string> {
-    await this.page.testSubj.waitForSelector('unifiedHistogramProgressBar', { state: 'hidden' });
-    return (
-      (await this.page.testSubj.getAttribute('unifiedHistogramChart', 'data-time-range')) || ''
-    );
+    // Wait until the attribute no longer contains "Loading"
+    const element = this.page.testSubj.locator('unifiedHistogramChart');
+    await expect(element).not.toHaveAttribute('data-time-range', /Loading/);
+
+    return (await element.getAttribute('data-time-range')) ?? '';
   }
 
   async clickHistogramBar() {
@@ -132,7 +134,6 @@ export class DiscoverApp {
     await button.waitFor({ state: 'visible' });
     await button.click();
     await this.waitUntilSearchingHasFinished();
-    await this.page.waitForLoadingIndicatorHidden();
   }
 
   async revertUnsavedChanges() {
@@ -140,7 +141,6 @@ export class DiscoverApp {
     await this.page.testSubj.click('unsavedChangesBadge');
     await this.page.testSubj.waitForSelector('unsavedChangesBadgeMenuPanel', { state: 'visible' });
     await this.page.testSubj.click('revertUnsavedChangesButton');
-    await this.page.waitForLoadingIndicatorHidden();
     await this.waitUntilSearchingHasFinished();
   }
 
