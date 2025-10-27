@@ -789,7 +789,7 @@ export class MonacoEditorActionsProvider {
   private async isPositionInsideTripleQuotesAndQuery(
     model: monaco.editor.ITextModel,
     position: monaco.Position
-  ): Promise<{ insideTripleQuotes: boolean; insideESQLQuery: boolean }> {
+  ): Promise<{ insideTripleQuotes: boolean; insideEsqlQuery: boolean }> {
     const selectedRequests = await this.getSelectedParsedRequests();
 
     for (const request of selectedRequests) {
@@ -804,21 +804,21 @@ export class MonacoEditorActionsProvider {
           endColumn: position.column,
         });
 
-        const { insideTripleQuotes, insideSingleQuotesEsqlQuery, insideTripleQuotesEsqlQuery } =
+        const { insideTripleQuotes, insideEsqlQuery } =
           checkForTripleQuotesAndEsqlQuery(requestContentBefore);
         return {
           insideTripleQuotes,
-          insideESQLQuery: insideSingleQuotesEsqlQuery || insideTripleQuotesEsqlQuery,
+          insideEsqlQuery,
         };
       }
       if (request.startLineNumber > position.lineNumber) {
         // Stop iteration once we pass the cursor position
-        return { insideTripleQuotes: false, insideESQLQuery: false };
+        return { insideTripleQuotes: false, insideEsqlQuery: false };
       }
     }
 
     // Return false if the position is not inside a request
-    return { insideTripleQuotes: false, insideESQLQuery: false };
+    return { insideTripleQuotes: false, insideEsqlQuery: false };
   }
 
   private triggerSuggestions() {
@@ -828,8 +828,8 @@ export class MonacoEditorActionsProvider {
       return;
     }
     this.isPositionInsideTripleQuotesAndQuery(model, position).then(
-      ({ insideTripleQuotes, insideESQLQuery }) => {
-        if (insideTripleQuotes && !insideESQLQuery) {
+      ({ insideTripleQuotes, insideEsqlQuery }) => {
+        if (insideTripleQuotes && !insideEsqlQuery) {
           // Don't trigger autocomplete suggestions inside scripts and strings
           return;
         }
@@ -847,7 +847,7 @@ export class MonacoEditorActionsProvider {
         if (
           !lineContentBefore.trim() ||
           shouldTriggerSuggestions(lineContentBefore) ||
-          insideESQLQuery
+          insideEsqlQuery
         ) {
           this.editor.trigger(TRIGGER_SUGGESTIONS_ACTION_LABEL, TRIGGER_SUGGESTIONS_HANDLER_ID, {});
         }

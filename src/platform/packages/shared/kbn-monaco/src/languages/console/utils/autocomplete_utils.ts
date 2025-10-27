@@ -17,8 +17,7 @@ export const checkForTripleQuotesAndEsqlQuery = (
   text: string
 ): {
   insideTripleQuotes: boolean;
-  insideSingleQuotesEsqlQuery: boolean;
-  insideTripleQuotesEsqlQuery: boolean;
+  insideEsqlQuery: boolean;
   esqlQueryIndex: number;
 } => {
   let insideSingleQuotes = false;
@@ -77,8 +76,7 @@ export const checkForTripleQuotesAndEsqlQuery = (
 
   return {
     insideTripleQuotes,
-    insideSingleQuotesEsqlQuery: insideSingleQuotesQuery && insideEsqlQueryRequest,
-    insideTripleQuotesEsqlQuery: insideTripleQuotesQuery && insideEsqlQueryRequest,
+    insideEsqlQuery: insideEsqlQueryRequest && (insideSingleQuotesQuery || insideTripleQuotesQuery),
     esqlQueryIndex: insideEsqlQueryRequest ? currentQueryStartIndex : -1,
   };
 };

@@ -60,9 +60,9 @@ export const ConsoleLang: LangModuleType = {
         const fullText = model.getValue();
         const cursorOffset = model.getOffsetAt(position);
         const textBeforeCursor = fullText.slice(0, cursorOffset);
-        const { insideSingleQuotesEsqlQuery, insideTripleQuotesEsqlQuery, esqlQueryIndex } =
+        const { insideTripleQuotes, insideEsqlQuery, esqlQueryIndex } =
           checkForTripleQuotesAndEsqlQuery(textBeforeCursor);
-        if (esqlCallbacks && (insideSingleQuotesEsqlQuery || insideTripleQuotesEsqlQuery)) {
+        if (esqlCallbacks && insideEsqlQuery) {
           const queryText = textBeforeCursor.slice(esqlQueryIndex, cursorOffset);
           const unescapedQuery = unescapeInvalidChars(queryText);
           const esqlSuggestions = await suggest(
@@ -74,7 +74,7 @@ export const ConsoleLang: LangModuleType = {
             esqlSuggestions,
             queryText,
             false,
-            insideSingleQuotesEsqlQuery
+            !insideTripleQuotes,
           );
         } else if (actionsProvider.current) {
           return actionsProvider.current?.provideCompletionItems(model, position, context);

@@ -14,8 +14,7 @@ describe('autocomplete_utils', () => {
     it('returns false for all flags for an empty string', () => {
       expect(checkForTripleQuotesAndEsqlQuery('')).toEqual({
         insideTripleQuotes: false,
-        insideSingleQuotesEsqlQuery: false,
-        insideTripleQuotesEsqlQuery: false,
+        insideEsqlQuery: false,
         esqlQueryIndex: -1,
       });
     });
@@ -24,8 +23,7 @@ describe('autocomplete_utils', () => {
       const request = `POST _search\n{\n  "query": {\n    "match": {\n      "message": "hello world"\n    }\n  }\n}`;
       expect(checkForTripleQuotesAndEsqlQuery(request)).toEqual({
         insideTripleQuotes: false,
-        insideSingleQuotesEsqlQuery: false,
-        insideTripleQuotesEsqlQuery: false,
+        insideEsqlQuery: false,
         esqlQueryIndex: -1,
       });
     });
@@ -34,8 +32,7 @@ describe('autocomplete_utils', () => {
       const request = `POST _ingest/pipeline/_simulate\n{\n  "pipeline": {\n    "processors": [\n      {\n        "script": {\n          "source":\n          """\n            for (field in params['fields']){\n                if (!$(field, '').isEmpty()){\n`;
       expect(checkForTripleQuotesAndEsqlQuery(request)).toEqual({
         insideTripleQuotes: true,
-        insideSingleQuotesEsqlQuery: false,
-        insideTripleQuotesEsqlQuery: false,
+        insideEsqlQuery: false,
         esqlQueryIndex: -1,
       });
     });
@@ -44,8 +41,7 @@ describe('autocomplete_utils', () => {
       const request = `POST _search\n{\n  "query": """FROM test `;
       expect(checkForTripleQuotesAndEsqlQuery(request)).toEqual({
         insideTripleQuotes: true,
-        insideSingleQuotesEsqlQuery: false,
-        insideTripleQuotesEsqlQuery: false,
+        insideEsqlQuery: false,
         esqlQueryIndex: -1,
       });
     });
@@ -55,8 +51,7 @@ describe('autocomplete_utils', () => {
       const result = checkForTripleQuotesAndEsqlQuery(request);
       expect(result).toEqual({
         insideTripleQuotes: false,
-        insideSingleQuotesEsqlQuery: false,
-        insideTripleQuotesEsqlQuery: false,
+        insideEsqlQuery: false,
         esqlQueryIndex: -1,
       });
     });
@@ -65,8 +60,7 @@ describe('autocomplete_utils', () => {
       const request = `POST _query\n{\n  "query": "SELECT * FROM logs" }`;
       expect(checkForTripleQuotesAndEsqlQuery(request)).toEqual({
         insideTripleQuotes: false,
-        insideSingleQuotesEsqlQuery: false,
-        insideTripleQuotesEsqlQuery: false,
+        insideEsqlQuery: false,
         esqlQueryIndex: -1,
       });
     });
@@ -75,30 +69,27 @@ describe('autocomplete_utils', () => {
       const request = `POST _query\n{\n  "query": """SELECT * FROM logs""" }`;
       expect(checkForTripleQuotesAndEsqlQuery(request)).toEqual({
         insideTripleQuotes: false,
-        insideSingleQuotesEsqlQuery: false,
-        insideTripleQuotesEsqlQuery: false,
+        insideEsqlQuery: false,
         esqlQueryIndex: -1,
       });
     });
   });
 
-  it('sets insideSingleQuotesEsqlQuery for single quoted query after POST _query', () => {
+  it('sets insideEsqlQuery for single quoted query after POST _query', () => {
     const request = `POST    _query\n{\n  "query": "FROM test `;
     expect(checkForTripleQuotesAndEsqlQuery(request)).toEqual({
       insideTripleQuotes: false,
-      insideSingleQuotesEsqlQuery: true,
-      insideTripleQuotesEsqlQuery: false,
+      insideEsqlQuery: true,
       esqlQueryIndex: request.indexOf('"FROM test ') + 1,
     });
   });
 
-  it('sets insideTripleQuotesEsqlQuery for triple quoted query after POST _query (case-insensitive)', () => {
+  it('sets insideEsqlQuery for triple quoted query after POST _query (case-insensitive)', () => {
     const request = `post _query\n{\n  "query": """FROM test `; // lowercase POST should also match
     const result = checkForTripleQuotesAndEsqlQuery(request);
     expect(result).toEqual({
       insideTripleQuotes: true,
-      insideSingleQuotesEsqlQuery: false,
-      insideTripleQuotesEsqlQuery: true,
+      insideEsqlQuery: true,
       esqlQueryIndex: request.indexOf('"""') + 3,
     });
   });
@@ -108,19 +99,17 @@ describe('autocomplete_utils', () => {
     const result = checkForTripleQuotesAndEsqlQuery(request);
     expect(result).toEqual({
       insideTripleQuotes: false,
-      insideSingleQuotesEsqlQuery: true,
-      insideTripleQuotesEsqlQuery: false,
+      insideEsqlQuery: true,
       esqlQueryIndex: request.indexOf('"FROM logs ') + 1,
     });
   });
 
-    it('detects query with /_query endpoint', () => {
+  it('detects query with /_query endpoint', () => {
     const request = `POST /_query\n{\n  "query": "FROM logs | STATS `;
     const result = checkForTripleQuotesAndEsqlQuery(request);
     expect(result).toEqual({
       insideTripleQuotes: false,
-      insideSingleQuotesEsqlQuery: true,
-      insideTripleQuotesEsqlQuery: false,
+      insideEsqlQuery: true,
       esqlQueryIndex: request.indexOf('"FROM logs ') + 1,
     });
   });
@@ -130,8 +119,7 @@ describe('autocomplete_utils', () => {
     const result = checkForTripleQuotesAndEsqlQuery(request);
     expect(result).toEqual({
       insideTripleQuotes: true,
-      insideSingleQuotesEsqlQuery: false,
-      insideTripleQuotesEsqlQuery: true,
+      insideEsqlQuery: true,
       esqlQueryIndex: request.indexOf('"""') + 3,
     });
   });
@@ -141,8 +129,7 @@ describe('autocomplete_utils', () => {
     const result = checkForTripleQuotesAndEsqlQuery(request);
     expect(result).toEqual({
       insideTripleQuotes: false,
-      insideSingleQuotesEsqlQuery: false,
-      insideTripleQuotesEsqlQuery: false,
+      insideEsqlQuery: false,
       esqlQueryIndex: -1, // single quotes closed in second request
     });
   });
@@ -152,8 +139,7 @@ describe('autocomplete_utils', () => {
     const result = checkForTripleQuotesAndEsqlQuery(partial);
     expect(result).toEqual({
       insideTripleQuotes: true,
-      insideSingleQuotesEsqlQuery: false,
-      insideTripleQuotesEsqlQuery: true,
+      insideEsqlQuery: true,
       esqlQueryIndex: partial.lastIndexOf('"""') + 3,
     });
   });
@@ -163,8 +149,7 @@ describe('autocomplete_utils', () => {
     const result = checkForTripleQuotesAndEsqlQuery(buffer);
     expect(result).toEqual({
       insideTripleQuotes: false,
-      insideSingleQuotesEsqlQuery: false,
-      insideTripleQuotesEsqlQuery: false,
+      insideEsqlQuery: false,
       esqlQueryIndex: -1,
     });
   });
