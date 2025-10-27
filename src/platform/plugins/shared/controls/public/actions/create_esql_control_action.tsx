@@ -14,7 +14,7 @@ import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import type { ESQLControlState } from '@kbn/esql-types';
 import { ESQLVariableType, EsqlControlType, apiPublishesESQLVariables } from '@kbn/esql-types';
-import { ACTION_CREATE_ESQL_CONTROL } from './constants';
+import { ACTION_CREATE_ESQL_CONTROL, ADD_PANEL_CONTROL_GROUP } from './constants';
 import { uiActionsService } from '../services/kibana_services';
 
 export const createESQLControlAction = (): ActionDefinition<
@@ -22,6 +22,7 @@ export const createESQLControlAction = (): ActionDefinition<
 > => ({
   id: ACTION_CREATE_ESQL_CONTROL,
   order: 1,
+  grouping: [ADD_PANEL_CONTROL_GROUP],
   getIconType: () => 'controlsHorizontal',
   isCompatible: async ({ embeddable }) => apiCanAddNewPanel(embeddable),
   execute: async ({ embeddable, isPinned }) => {

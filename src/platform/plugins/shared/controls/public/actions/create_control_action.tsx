@@ -19,7 +19,7 @@ import { apiPublishesDataViews, type EmbeddableApiContext } from '@kbn/presentat
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { openDataControlEditor } from '../controls/data_controls/open_data_control_editor';
-import { ACTION_CREATE_CONTROL } from './constants';
+import { ACTION_CREATE_CONTROL, ADD_PANEL_CONTROL_GROUP } from './constants';
 import type { CreateControlTypeContext } from './control_panel_actions';
 
 export const createControlAction = (): ActionDefinition<
@@ -27,6 +27,7 @@ export const createControlAction = (): ActionDefinition<
 > => ({
   id: ACTION_CREATE_CONTROL,
   order: 1,
+  grouping: [ADD_PANEL_CONTROL_GROUP],
   getIconType: () => 'controlsHorizontal',
   isCompatible: async ({ embeddable }) => apiCanAddNewPanel(embeddable),
   execute: async ({ embeddable, isPinned }) => {
