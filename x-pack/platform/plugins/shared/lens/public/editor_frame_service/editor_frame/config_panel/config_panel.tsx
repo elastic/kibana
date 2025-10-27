@@ -52,11 +52,11 @@ export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: Config
     : null;
 
   return activeVisualization && visualization.state ? (
-    <LayerPanels {...props} activeVisualization={activeVisualization} />
+    <ConfigPanel {...props} activeVisualization={activeVisualization} />
   ) : null;
 });
 
-export function LayerPanels(
+export function ConfigPanel(
   props: ConfigPanelWrapperProps & {
     activeVisualization: Visualization;
   }
