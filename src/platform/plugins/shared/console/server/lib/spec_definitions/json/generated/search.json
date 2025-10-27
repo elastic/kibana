@@ -36,7 +36,6 @@
       ],
       "preference": "",
       "pre_filter_shard_size": "",
-      "project_routing": "",
       "request_cache": "__flag__",
       "routing": "",
       "scroll": [
