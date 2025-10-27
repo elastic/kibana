@@ -51,8 +51,7 @@ interface Props {
 
 type Tab = 'jobs' | 'anomalies';
 
-export const INFRA_ML_FLYOUT_FEEDBACK_LINK =
-  'https://docs.google.com/forms/d/e/1FAIpQLSfBixH_1HTuqeMCy38iK9w1mB8vl_eVvcLUlSPAPiWKBHeHiQ/viewform';
+export const INFRA_ML_FLYOUT_FEEDBACK_LINK = 'https://ela.st/infra-anomaly-feedback';
 
 export const FlyoutHome = (props: Props) => {
   const [tab, setTab] = useState<Tab>('jobs');
@@ -149,6 +148,7 @@ export const FlyoutHome = (props: Props) => {
                     : 'infraMLFlyoutFeedbackLink'
                 }
                 formUrl={INFRA_ML_FLYOUT_FEEDBACK_LINK}
+                sanitizedPath={document.location.pathname}
                 kibanaVersion={kibanaVersion}
                 isCloudEnv={isCloudEnv}
                 isServerlessEnv={isServerlessEnv}
