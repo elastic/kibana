@@ -9,7 +9,7 @@
 
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import { tagSavedObjectTypeName } from '@kbn/saved-objects-tagging-plugin/common';
-import type { DashboardAttributes } from '../../types';
+import type { DashboardState } from '../../types';
 import type { DashboardSavedObjectAttributes } from '../../../../dashboard_saved_object';
 import { transformPanelsIn } from './transform_panels_in';
 import { transformControlGroupIn } from './transform_control_group_in';
@@ -20,7 +20,7 @@ export const transformDashboardIn = ({
   dashboardState,
   incomingReferences = [],
 }: {
-  dashboardState: DashboardAttributes;
+  dashboardState: DashboardState;
   incomingReferences?: SavedObjectReference[];
 }):
   | {
@@ -36,9 +36,10 @@ export const transformDashboardIn = ({
   try {
     const {
       controlGroupInput,
-      kibanaSavedObjectMeta,
       options,
+      filters,
       panels,
+      query,
       tags,
       timeRange,
       timeRestore,
@@ -57,26 +58,25 @@ export const transformDashboardIn = ({
 
     const { panelsJSON, sections, references: panelReferences } = transformPanelsIn(panels);
 
-    const { searchSourceJSON, references: searchSourceReferences } =
-      transformSearchSourceIn(kibanaSavedObjectMeta);
+    const { searchSourceJSON, references: searchSourceReferences } = transformSearchSourceIn(
+      filters,
+      query
+    );
 
     const attributes = {
+      description: '',
       ...rest,
       ...(controlGroupInput && {
         controlGroupInput: transformControlGroupIn(controlGroupInput),
       }),
-      ...(options && {
-        optionsJSON: JSON.stringify(options),
-      }),
+      optionsJSON: JSON.stringify(options ?? {}),
       ...(panels && {
         panelsJSON,
       }),
       ...(sections?.length && { sections }),
       timeRestore,
       ...(timeRange && timeRestore && { timeFrom: timeRange.from, timeTo: timeRange.to }),
-      ...(kibanaSavedObjectMeta && {
-        kibanaSavedObjectMeta: { searchSourceJSON },
-      }),
+      kibanaSavedObjectMeta: { searchSourceJSON },
     };
     return {
       attributes,

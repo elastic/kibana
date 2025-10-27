@@ -7,7 +7,6 @@
 
 import {
   ADD_NEW_CONNECTOR_DROPDOWN_BUTTON,
-  CONNECTOR,
   CONNECTOR_NAME,
   CONNECTORS_DROPDOWN,
   JIRA_API_TOKEN,
@@ -15,24 +14,12 @@ import {
   JIRA_EMAIL,
   JIRA_PROJECT_KEY,
   JIRA_URL,
-  PASSWORD,
   SAVE_BTN,
   SERVICE_NOW_CONNECTOR_CARD,
-  URL,
-  USERNAME,
 } from '../screens/configure_cases';
 import { MAIN_PAGE } from '../screens/security_main';
 
-import type { Connector, JiraConnector } from '../objects/case';
-
-export const addServiceNowConnector = (connector: Connector) => {
-  cy.get(SERVICE_NOW_CONNECTOR_CARD).click();
-  cy.get(CONNECTOR_NAME).type(connector.connectorName);
-  cy.get(URL).type(connector.URL);
-  cy.get(USERNAME).type(connector.username);
-  cy.get(PASSWORD).type(connector.password);
-  cy.get(SAVE_BTN).click({ force: true });
-};
+import type { JiraConnector } from '../objects/case';
 
 export const addJiraConnector = (connector: JiraConnector) => {
   cy.get(JIRA_CONNECTOR_CARD).click();
@@ -53,9 +40,4 @@ export const openAddNewConnectorOption = () => {
       cy.get(ADD_NEW_CONNECTOR_DROPDOWN_BUTTON).click();
     }
   });
-};
-
-export const selectLastConnectorCreated = (id: string) => {
-  cy.get(CONNECTORS_DROPDOWN).click({ force: true });
-  cy.get(CONNECTOR(id)).click();
 };

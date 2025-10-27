@@ -24,8 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
   const kbnServer = getService('kibanaServer');
   const log = getService('log');
 
-  // Failing: See https://github.com/elastic/kibana/issues/236086
-  describe.skip('@ess @serverless @skipInServerlessMKI Endpoint management space awareness support', function () {
+  describe('@ess @serverless @skipInServerlessMKI Endpoint management space awareness support', function () {
     let adminSupertest: TestAgent;
     let dataSpaceA: Awaited<ReturnType<typeof endpointTestresources.loadEndpointData>>;
     let dataSpaceB: Awaited<ReturnType<typeof endpointTestresources.loadEndpointData>>;
@@ -65,16 +64,22 @@ Loading endpoint data into space_b`);
       );
     });
 
-    // the endpoint uses data streams and es archiver does not support deleting them at the moment so we need
-    // to do it manually
     after(async () => {
+      // Delete data loaded and suppress any errors (no point in failing test suite on data
+      // cleanup, since all test already ran)
       if (dataSpaceA) {
-        await dataSpaceA.unloadEndpointData();
+        await dataSpaceA.unloadEndpointData().catch((error) => {
+          log.warning(`afterAll data clean up threw error: ${error.message}`);
+          log.debug(error);
+        });
         // @ts-expect-error
         dataSpaceA = undefined;
       }
       if (dataSpaceB) {
-        await dataSpaceB.unloadEndpointData();
+        await dataSpaceB.unloadEndpointData().catch((error) => {
+          log.warning(`afterAll data clean up threw error: ${error.message}`);
+          log.debug(error);
+        });
         // @ts-expect-error
         dataSpaceB = undefined;
       }

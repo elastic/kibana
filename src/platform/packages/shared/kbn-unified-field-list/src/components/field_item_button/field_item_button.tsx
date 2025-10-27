@@ -17,6 +17,7 @@ import {
   EuiButtonIcon,
   EuiHighlight,
   EuiIcon,
+  EuiIconTip,
   EuiToolTip,
   euiShadowXSmall,
   type UseEuiTheme,
@@ -264,7 +265,9 @@ function FieldConflictInfoIcon({
 }) {
   const types = conflictDescriptions ? Object.keys(conflictDescriptions) : [];
   return (
-    <EuiToolTip
+    <EuiIconTip
+      type="warning"
+      size="s"
       position="bottom"
       title={i18n.translate('unifiedFieldList.fieldItemButton.mappingConflictTitle', {
         defaultMessage: 'Mapping Conflict',
@@ -284,9 +287,7 @@ function FieldConflictInfoIcon({
                 'You may still be able to use this conflicting field, but it will be unavailable for functions that require Kibana to know their type. Correcting this issue will require reindexing your data.',
             })
       }
-    >
-      <EuiIcon tabIndex={0} type="warning" size="s" />
-    </EuiToolTip>
+    />
   );
 }
 
@@ -303,7 +304,7 @@ const componentStyles = {
   }),
   fieldItemButton: (themeContext: UseEuiTheme) => {
     const { euiTheme } = themeContext;
-    const boxShadow = euiShadowXSmall(themeContext);
+    const boxShadow = euiShadowXSmall(themeContext, { border: 'none' });
 
     return css({
       width: '100%',

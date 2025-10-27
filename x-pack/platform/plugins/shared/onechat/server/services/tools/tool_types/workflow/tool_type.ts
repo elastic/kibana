@@ -6,9 +6,10 @@
  */
 
 import { z } from '@kbn/zod';
-import type { WorkflowsPluginSetup } from '@kbn/workflows-management-plugin/server';
-import { ToolResultType, ToolType } from '@kbn/onechat-common';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import { ToolType } from '@kbn/onechat-common';
 import type { WorkflowToolConfig } from '@kbn/onechat-common/tools';
+import { createErrorResult } from '@kbn/onechat-server';
 import type { AnyToolTypeDefinition } from '../definitions';
 import { executeWorkflow } from './execute_workflow';
 import { generateSchema } from './generate_schema';
@@ -18,7 +19,7 @@ import { validateWorkflowId } from './validation';
 export const getWorkflowToolType = ({
   workflowsManagement,
 }: {
-  workflowsManagement?: WorkflowsPluginSetup;
+  workflowsManagement?: WorkflowsServerPluginSetup;
 }): AnyToolTypeDefinition<ToolType.workflow, WorkflowToolConfig, z.ZodObject<any>> => {
   // workflow plugin not present - we disable the workflow tool type
   if (!workflowsManagement) {
@@ -52,15 +53,12 @@ export const getWorkflowToolType = ({
             } catch (e) {
               return {
                 results: [
-                  {
-                    type: ToolResultType.error,
-                    data: {
-                      message: `Error executing workflow: ${e}`,
-                      metadata: {
-                        workflowId,
-                      },
+                  createErrorResult({
+                    message: `Error executing workflow: ${e}`,
+                    metadata: {
+                      workflowId,
                     },
-                  },
+                  }),
                 ],
               };
             }

@@ -32,6 +32,7 @@ import { getEntityAnalyticsRiskScorePageStyles } from '../components/risk_score_
 import { useConfigurableRiskEngineSettings } from '../components/risk_score_management/hooks/risk_score_configurable_risk_engine_settings_hooks';
 import { RiskScoreSaveBar } from '../components/risk_score_management/risk_score_save_bar';
 import { RiskScoreGeneralSection } from '../components/risk_score_management/risk_score_general_section';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 const TEN_SECONDS = 10000;
 
@@ -65,6 +66,9 @@ export const EntityAnalyticsManagementPage = () => {
         (!privileges.hasAllRequiredPrivileges &&
           privileges.missingPrivileges?.clusterPrivileges?.run?.length === 0))) ||
     false;
+  const riskScoreResetToZeroIsEnabled = useIsExperimentalFeatureEnabled(
+    'enableRiskScoreResetToZero'
+  );
 
   const handleRunEngineClick = async () => {
     setIsLoadingRunRiskEngine(true);
@@ -150,10 +154,12 @@ export const EntityAnalyticsManagementPage = () => {
         {selectedRiskEngineSettings && (
           <>
             <EuiFlexItem grow={2}>
-              <RiskScoreGeneralSection
-                riskEngineSettings={selectedRiskEngineSettings}
-                toggleScoreRetainment={toggleScoreRetainment}
-              />
+              {riskScoreResetToZeroIsEnabled && (
+                <RiskScoreGeneralSection
+                  riskEngineSettings={selectedRiskEngineSettings}
+                  toggleScoreRetainment={toggleScoreRetainment}
+                />
+              )}
               <RiskScoreConfigurationSection
                 selectedRiskEngineSettings={selectedRiskEngineSettings}
                 setSelectedDateSetting={setSelectedDateSetting}

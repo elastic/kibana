@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { TimelineFilter } from '../objects/timeline';
 import { getDataTestSubjectSelector, getDataTestSubjectSelectorStartWith } from '../helpers/common';
 
 export const ADD_NOTE_BUTTON = '[data-test-subj="securitySolutionNotesAddNotesButton"]';
@@ -47,22 +46,7 @@ export const DATAGRID_HEADER = (header: string) => {
 
 export const FIELD_BROWSER = '[data-test-subj="show-field-browser"]';
 
-export const ID_HEADER_FIELD = '[data-test-subj="timeline"] [data-test-subj="header-text-_id"]';
-
-export const ID_TOGGLE_FIELD =
-  '[data-test-subj="actionItem-security-detailsFlyout-cellActions-toggleColumn"]';
-
-export const ID_HOVER_ACTION_OVERFLOW_BTN =
-  '[data-test-subj="event-fields-table-row-_id"] [data-test-subj="showExtraActionsButton"]';
-
 export const LOCKED_ICON = '[data-test-subj="timeline-date-picker-lock-button"]';
-
-export const UNLOCKED_ICON = '[data-test-subj="timeline-date-picker-unlock-button"]';
-
-export const ROW_ADD_NOTES_BUTTON = '[data-test-subj="timeline-notes-button-small"]';
-
-export const NOTE_CARD_CONTENT = (index: number) =>
-  `[data-test-subj="securitySolutionNotesNotesComment-${index}"]`;
 
 export const NOTE_DESCRIPTION =
   '[data-test-subj="securitySolutionNotesTimelineDescriptionComment"]';
@@ -105,10 +89,6 @@ export const INDICATOR_MATCH_ROW_RENDER = '[data-test-subj="threat-match-row"]';
 
 export const QUERY_TAB_BUTTON = '[data-test-subj="timelineTabs-query"]';
 
-export const ANALYZER_GRAPH_TAB_BUTTON = getDataTestSubjectSelector('timelineTabs-graph');
-
-export const SERVER_SIDE_EVENT_COUNT = '[data-test-subj="server-side-event-count"]';
-
 export const EQL_EVENT_COUNT = '[data-test-subj="eql-events-count"]';
 
 export const QUERY_EVENT_COUNT = '[data-test-subj="query-events-count"]';
@@ -147,32 +127,8 @@ export const TIMELINE_DROPPED_DATA_PROVIDERS = '[data-test-subj="providerContain
 
 export const TIMELINE_EVENT = '[data-test-subj="event"]';
 
-export const TIMELINE_EVENTS_COUNT_PER_PAGE = '[data-test-subj="local-events-count"]';
-
-export const TIMELINE_EVENTS_COUNT_PER_PAGE_BTN = '[data-test-subj="local-events-count-button"]';
-
-export const TIMELINE_EVENTS_COUNT_PER_PAGE_OPTION = (itemsPerPage: number) =>
-  `[data-test-subj="items-per-page-option-${itemsPerPage}"]`;
-
-export const TIMELINE_EVENTS_COUNT_NEXT_PAGE =
-  '[data-test-subj="timeline"] [data-test-subj="pagination-button-next"]';
-
-export const TIMELINE_EVENTS_COUNT_PREV_PAGE =
-  '[data-test-subj="timeline"] [data-test-subj="pagination-button-previous"]';
-
-export const TIMELINE_FIELDS_BUTTON =
-  '[data-test-subj="timeline"] [data-test-subj="show-field-browser"]';
-
 export const TIMELINE_DISCOVER_FIELDS_BUTTON =
   '[data-test-subj="timeline"] [data-test-subj="dataView-add-field_btn"]';
-
-export const TIMELINE_FILTER = (filter: TimelineFilter) =>
-  `[data-test-subj~="filter"][data-test-subj~="filter-enabled"][data-test-subj~="filter-key-${
-    filter.field
-  }"][data-test-subj~="filter-value-${(filter.value ?? '').replace(
-    /\s/g,
-    ''
-  )}"][data-test-subj~="filter-unpinned"]`;
 
 export const TIMELINE_FILTER_FIELD = '[data-test-subj="filterFieldSuggestionList"]';
 
@@ -215,19 +171,12 @@ export const TIMELINE_TITLE = '[data-test-subj="timeline-modal-header-title"]';
 
 export const TIMELINE_TITLE_INPUT = '[data-test-subj="save-timeline-modal-title-input"]';
 
-export const TIMESTAMP_TOGGLE_FIELD =
-  '[data-test-subj="actionItem-security-detailsFlyout-cellActions-toggleColumn"]';
-
-export const TOGGLE_TIMELINE_EXPAND_EVENT = '[data-test-subj="expand-event"]';
-
 export const TIMELINE_SAVE_MODAL = '[data-test-subj="save-timeline-modal"]';
 
 export const TIMELINE_SAVE_MODAL_SAVE_BUTTON = '[data-test-subj="save-timeline-modal-save-button"]';
 
 export const TIMELINE_SAVE_MODAL_SAVE_AS_NEW_SWITCH =
   '[data-test-subj="save-timeline-modal-save-as-new-switch"]';
-
-export const TIMELINE_EXIT_FULL_SCREEN_BUTTON = '[data-test-subj="exit-full-screen"]';
 
 export const TIMELINE_FLYOUT_WRAPPER = '[data-test-subj="timeline-portal-ref"]';
 
@@ -262,9 +211,6 @@ export const TIMELINE_TABS = '[data-test-subj="timeline"] .euiTabs';
 
 export const TIMELINE_TAB_CONTENT_EQL = '[data-test-subj="timeline-tab-content-eql"]';
 
-export const TIMESTAMP_HOVER_ACTION_OVERFLOW_BTN =
-  '[data-test-subj="event-fields-table-row-@timestamp"] [data-test-subj="showExtraActionsButton"]';
-
 export const TIMELINE_STATUS = '[data-test-subj="timeline-save-status"]';
 
 export const ALERT_TABLE_SEVERITY_VALUES =
@@ -286,13 +232,9 @@ export const GET_TIMELINE_GRID_CELL = (fieldName: string) =>
 export const GET_TIMELINE_GRID_CELL_VALUE = (fieldName: string) =>
   `[data-test-subj="dataGridRowCell"][data-gridcell-column-id="${fieldName}"] .unifiedDataTable__cellValue`;
 
-export const EMPTY_DROPPABLE_DATA_PROVIDER_GROUP = `.empty-providers-group`;
-
 export const TIMELINE_DATA_PROVIDERS_CONTAINER = '[data-test-subj="dataProviders"]';
 
 export const TIMELINE_VIEW_IN_ANALYZER = '[data-test-subj="view-in-analyzer"]';
-
-export const EMPTY_DATA_PROVIDER_AREA = `.timeline-drop-area-empty`;
 
 export const HOVER_ACTIONS = {
   ADD_TO_TIMELINE:

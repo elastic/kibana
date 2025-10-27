@@ -37,11 +37,6 @@ export const i18nStrings = {
         'This functionality is experimental and not supported. It may change or be removed at any time.',
     }),
   },
-  launchpad: {
-    title: i18n.translate('securitySolutionPackages.navLinks.launchpad', {
-      defaultMessage: 'Security launchpad',
-    }),
-  },
   assets: {
     title: i18n.translate('securitySolutionPackages.navLinks.assets', {
       defaultMessage: 'Assets',
@@ -260,11 +255,11 @@ export const i18nStrings = {
         }
       ),
     },
-    indicesDsAndRollups: {
+    indicesAndDataStreams: {
       title: i18n.translate(
-        'securitySolutionPackages.navLinks.ingestAndManageData.indicesDsAndRollups',
+        'securitySolutionPackages.navLinks.ingestAndManageData.indicesAndDataStreams',
         {
-          defaultMessage: 'Indices, Data Streams, and roll ups',
+          defaultMessage: 'Indices and data streams',
         }
       ),
     },

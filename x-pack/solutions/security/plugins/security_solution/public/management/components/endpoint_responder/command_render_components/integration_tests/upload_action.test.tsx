@@ -68,7 +68,6 @@ describe.skip('When using `upload` response action', () => {
     user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     const mockedContext = createAppRootMockRenderer();
 
-    mockedContext.setExperimentalFlag({ responseActionUploadEnabled: true });
     apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
     endpointPrivileges = { ...getEndpointAuthzInitialStateMock(), loading: false };
     endpointCapabilities = [...ENDPOINT_CAPABILITIES];
@@ -220,7 +219,7 @@ describe.skip('When using `upload` response action', () => {
 
   it.each([
     'ra_upload_error_failure',
-    'ra_upload_already-exists',
+    'ra_upload_error_already-exists',
     'ra_upload_error_not-found',
     'ra_upload_error_not-permitted',
     'ra_upload_error_too-big',

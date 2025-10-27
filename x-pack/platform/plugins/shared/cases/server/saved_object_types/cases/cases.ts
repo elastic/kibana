@@ -23,6 +23,8 @@ import {
   modelVersion3,
   modelVersion4,
   modelVersion5,
+  modelVersion6,
+  modelVersion7,
 } from './model_versions';
 import { handleImport } from '../import_export/import';
 
@@ -199,6 +201,9 @@ export const createCaseSavedObjectType = (
       total_comments: {
         type: 'integer',
       },
+      total_events: {
+        type: 'integer',
+      },
       category: {
         type: 'keyword',
       },
@@ -246,6 +251,9 @@ export const createCaseSavedObjectType = (
           value: {
             type: 'keyword',
           },
+          description: {
+            type: 'keyword',
+          },
         },
       },
       incremental_id: {
@@ -268,6 +276,8 @@ export const createCaseSavedObjectType = (
     3: modelVersion3,
     4: modelVersion4,
     5: modelVersion5,
+    6: modelVersion6,
+    7: modelVersion7,
   },
   management: {
     importableAndExportable: true,

@@ -22,7 +22,11 @@ import type { CustomLangModuleType } from '../../types';
 import { ESQL_LANG_ID } from './lib/constants';
 import { wrapAsMonacoMessages } from './lib/converters/positions';
 import { wrapAsMonacoSuggestions } from './lib/converters/suggestions';
-import { getDecorationHoveredMessages, monacoPositionToOffset } from './lib/shared/utils';
+import {
+  getDecorationHoveredMessages,
+  filterSuggestionsWithCustomCommands,
+  monacoPositionToOffset,
+} from './lib/shared/utils';
 import { buildEsqlTheme } from './lib/theme';
 
 const removeKeywordSuffix = (name: string) => {
@@ -70,7 +74,7 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
   },
   validate: async (model: monaco.editor.ITextModel, code: string, callbacks?: ESQLCallbacks) => {
     const text = code ?? model.getValue();
-    const { errors, warnings } = await validateQuery(text, undefined, callbacks);
+    const { errors, warnings } = await validateQuery(text, callbacks);
     const monacoErrors = wrapAsMonacoMessages(text, errors);
     const monacoWarnings = wrapAsMonacoMessages(text, warnings);
     return { errors: monacoErrors, warnings: monacoWarnings };
@@ -107,7 +111,7 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
       },
     };
   },
-  getSuggestionProvider: (callbacks?: ESQLCallbacks): monaco.languages.CompletionItemProvider => {
+  getSuggestionProvider: (deps?: ESQLDependencies): monaco.languages.CompletionItemProvider => {
     return {
       triggerCharacters: ESQL_AUTOCOMPLETE_TRIGGER_CHARS,
       async provideCompletionItems(
@@ -116,12 +120,18 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
       ): Promise<monaco.languages.CompletionList> {
         const fullText = model.getValue();
         const offset = monacoPositionToOffset(fullText, position);
-        const suggestions = await suggest(fullText, offset, callbacks);
+        const suggestions = await suggest(fullText, offset, deps);
+
+        const suggestionsWithCustomCommands = filterSuggestionsWithCustomCommands(suggestions);
+        if (suggestionsWithCustomCommands.length) {
+          deps?.telemetry?.onSuggestionsWithCustomCommandShown?.(suggestionsWithCustomCommands);
+        }
+
         return wrapAsMonacoSuggestions(suggestions, fullText);
       },
       async resolveCompletionItem(item, token): Promise<monaco.languages.CompletionItem> {
-        if (!callbacks?.getFieldsMetadata) return item;
-        const fieldsMetadataClient = await callbacks?.getFieldsMetadata;
+        if (!deps?.getFieldsMetadata) return item;
+        const fieldsMetadataClient = await deps?.getFieldsMetadata;
 
         const fullEcsMetadataList = await fieldsMetadataClient?.find({
           attributes: ['type'],

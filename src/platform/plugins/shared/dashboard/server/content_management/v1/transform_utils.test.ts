@@ -13,7 +13,6 @@ import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_objec
 import type { DashboardItem } from './types';
 
 import { savedObjectToItem } from './transform_utils';
-import { DEFAULT_DASHBOARD_OPTIONS } from '../../../common/content_management';
 
 describe('savedObjectToItem', () => {
   const commonSavedObject: SavedObject = {
@@ -79,7 +78,7 @@ describe('savedObjectToItem', () => {
               savedObjectId: '1',
               title: 'title1',
             },
-            grid: { x: 0, y: 0, w: 10, h: 10, i: '1' },
+            grid: { x: 0, y: 0, w: 10, h: 10 },
             uid: '1',
             type: 'type1',
             version: '2',
@@ -92,20 +91,17 @@ describe('savedObjectToItem', () => {
           syncTooltips: false,
           syncCursor: false,
         },
-        kibanaSavedObjectMeta: {
-          searchSource: { query: { query: 'test', language: 'KQL' } },
-        },
+        query: { query: 'test', language: 'KQL' },
       },
     });
   });
 
-  it('should handle missing optional attributes', () => {
+  it('should not supply defaults for missing properties', () => {
     const input = getSavedObjectForAttributes({
       title: 'title',
       description: 'description',
       timeRestore: false,
       panelsJSON: '[]',
-      optionsJSON: '{}',
       kibanaSavedObjectMeta: {},
     });
 
@@ -118,33 +114,6 @@ describe('savedObjectToItem', () => {
         description: 'description',
         timeRestore: false,
         panels: [],
-        options: DEFAULT_DASHBOARD_OPTIONS,
-        kibanaSavedObjectMeta: {},
-      },
-    });
-  });
-
-  it('should handle partial saved object', () => {
-    const input = {
-      ...commonSavedObject,
-      references: undefined,
-      attributes: {
-        title: 'title',
-        description: 'my description',
-        timeRestore: false,
-      },
-    };
-
-    const { item, error } = savedObjectToItem(input, true, {
-      allowedAttributes: ['title', 'description'],
-    });
-    expect(error).toBeNull();
-    expect(item).toEqual({
-      ...commonSavedObject,
-      references: [],
-      attributes: {
-        title: 'title',
-        description: 'my description',
       },
     });
   });

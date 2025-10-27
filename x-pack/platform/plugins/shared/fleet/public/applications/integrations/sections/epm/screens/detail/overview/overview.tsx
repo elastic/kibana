@@ -15,7 +15,6 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiLink,
-  EuiButton,
   EuiSideNav,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -23,13 +22,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   isIntegrationPolicyTemplate,
-  isPackagePrerelease,
   isRootPrivilegesRequired,
 } from '../../../../../../../../common/services';
 
 import {
   useGetPackageVerificationKeyId,
-  useLink,
   useStartServices,
   sendGetFileByPath,
   useConfig,
@@ -47,6 +44,7 @@ import { Screenshots } from './screenshots';
 import { Readme } from './readme';
 import { Details } from './details';
 import { Requirements } from './requirements';
+import { PrereleaseCallout } from './prerelease_callout';
 
 interface Props {
   packageInfo: PackageInfo;
@@ -131,45 +129,6 @@ const LogsEssentialsCallout: React.FC = () => {
   );
 };
 
-export const PrereleaseCallout: React.FC<{
-  packageName: string;
-  latestGAVersion?: string;
-  packageTitle: string;
-}> = ({ packageName, packageTitle, latestGAVersion }) => {
-  const { getHref } = useLink();
-  const overviewPathLatestGA = getHref('integration_details_overview', {
-    pkgkey: `${packageName}-${latestGAVersion}`,
-  });
-
-  return (
-    <>
-      <EuiCallOut
-        data-test-subj="prereleaseCallout"
-        title={i18n.translate('xpack.fleet.epm.prereleaseWarningCalloutTitle', {
-          defaultMessage: 'This is a pre-release version of {packageTitle} integration.',
-          values: {
-            packageTitle,
-          },
-        })}
-        iconType="info"
-        color="warning"
-      >
-        {latestGAVersion && (
-          <p>
-            <EuiButton href={overviewPathLatestGA} color="warning" data-test-subj="switchToGABtn">
-              <FormattedMessage
-                id="xpack.fleet.epm.prereleaseWarningCalloutSwitchToGAButton"
-                defaultMessage="Switch to latest GA version"
-              />
-            </EuiButton>
-          </p>
-        )}
-      </EuiCallOut>
-      <EuiSpacer size="l" />
-    </>
-  );
-};
-
 // some names are too long so they're trimmed at 12 characters long
 export const getAnchorId = (name: string | undefined, index?: number) => {
   if (!name) return '';
@@ -186,7 +145,6 @@ export const OverviewPage: React.FC<Props> = memo(
     );
     const { packageVerificationKeyId } = useGetPackageVerificationKeyId();
     const isUnverified = isPackageUnverified(packageInfo, packageVerificationKeyId);
-    const isPrerelease = isPackagePrerelease(packageInfo.version);
     const [markdown, setMarkdown] = useState<string | undefined>(undefined);
     const [selectedItemId, setSelectedItem] = useState<string | undefined>(undefined);
     const [isSideNavOpenOnMobile, setIsSideNavOpenOnMobile] = useState(false);
@@ -331,13 +289,9 @@ export const OverviewPage: React.FC<Props> = memo(
 
           <BidirectionalIntegrationsBanner integrationPackageName={packageInfo.name} />
           <CloudPostureThirdPartySupportCallout packageInfo={packageInfo} />
-          {isPrerelease && (
-            <PrereleaseCallout
-              packageName={packageInfo.name}
-              packageTitle={packageInfo.title}
-              latestGAVersion={latestGAVersion}
-            />
-          )}
+          <PrereleaseCallout packageInfo={packageInfo} latestGAVersion={latestGAVersion} />
+          <EuiSpacer size="l" />
+
           {packageInfo.readme ? (
             <Readme
               markdown={markdown}

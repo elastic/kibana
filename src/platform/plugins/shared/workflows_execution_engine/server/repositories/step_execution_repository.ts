@@ -9,11 +9,27 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
-import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
+import {
+  WORKFLOWS_STEP_EXECUTIONS_INDEX,
+  WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
+} from '../../common';
+import { createIndexWithMappings } from '../../common/create_index';
 
 export class StepExecutionRepository {
   private indexName = WORKFLOWS_STEP_EXECUTIONS_INDEX;
+  private indexInitialized = false;
   constructor(private esClient: ElasticsearchClient) {}
+
+  private async ensureIndexExists() {
+    if (this.indexInitialized) return; // Only 1 boolean check after first time
+
+    await createIndexWithMappings({
+      esClient: this.esClient,
+      indexName: this.indexName,
+      mappings: WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
+    });
+    this.indexInitialized = true;
+  }
 
   /**
    * Searches for step executions by workflow execution ID.
@@ -24,6 +40,8 @@ export class StepExecutionRepository {
   public async searchStepExecutionsByExecutionId(
     executionId: string
   ): Promise<EsWorkflowStepExecution[]> {
+    await this.ensureIndexExists();
+
     const response = await this.esClient.search<EsWorkflowStepExecution>({
       index: this.indexName,
       query: {
@@ -42,6 +60,8 @@ export class StepExecutionRepository {
    * @returns A promise that resolves when the document has been successfully indexed.
    */
   public async createStepExecution(stepExecution: Partial<EsWorkflowStepExecution>): Promise<void> {
+    await this.ensureIndexExists();
+
     if (!stepExecution.id) {
       throw new Error('Step execution ID is required for creation');
     }
@@ -79,6 +99,8 @@ export class StepExecutionRepository {
   public async updateStepExecutions(
     stepExecutions: Array<Partial<EsWorkflowStepExecution>>
   ): Promise<void> {
+    await this.ensureIndexExists();
+
     stepExecutions.forEach((stepExecution) => {
       if (!stepExecution.id) {
         throw new Error('Step execution ID is required for update');

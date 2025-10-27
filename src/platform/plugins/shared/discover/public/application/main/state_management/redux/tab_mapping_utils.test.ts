@@ -58,12 +58,13 @@ describe('tab mapping utils', () => {
         Object {
           "controlGroupState": undefined,
           "dataRequestParams": Object {
+            "isSearchSessionRestored": false,
             "searchSessionId": undefined,
             "timeRangeAbsolute": undefined,
             "timeRangeRelative": undefined,
           },
           "duplicatedFromId": "0",
-          "esqlVariables": undefined,
+          "esqlVariables": Array [],
           "forceFetchOnSelect": false,
           "globalState": Object {
             "refreshInterval": Object {
@@ -128,12 +129,13 @@ describe('tab mapping utils', () => {
         Object {
           "controlGroupState": undefined,
           "dataRequestParams": Object {
+            "isSearchSessionRestored": false,
             "searchSessionId": undefined,
             "timeRangeAbsolute": undefined,
             "timeRangeRelative": undefined,
           },
           "duplicatedFromId": "0",
-          "esqlVariables": undefined,
+          "esqlVariables": Array [],
           "forceFetchOnSelect": false,
           "globalState": Object {
             "refreshInterval": Object {

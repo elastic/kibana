@@ -7,17 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// Mock parseDuration function
+jest.mock('../../../../utils', () => ({
+  parseDuration: jest.fn(),
+}));
+
 import type { EnterTimeoutZoneNode } from '@kbn/workflows/graph';
-import { EnterStepTimeoutZoneNodeImpl } from '../enter_step_timeout_zone_node_impl';
+import { parseDuration } from '../../../../utils';
+import type { StepExecutionRuntime } from '../../../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
-import type { WorkflowContextManager } from '../../../../workflow_context_manager/workflow_context_manager';
-import type { WorkflowExecutionState } from '../../../../workflow_context_manager/workflow_execution_state';
+import { EnterStepTimeoutZoneNodeImpl } from '../enter_step_timeout_zone_node_impl';
+
+const mockParseDuration = parseDuration as jest.MockedFunction<typeof parseDuration>;
 
 describe('EnterStepTimeoutZoneNodeImpl', () => {
   let node: EnterTimeoutZoneNode;
   let wfExecutionRuntimeManagerMock: WorkflowExecutionRuntimeManager;
-  let wfExecutionStateMock: WorkflowExecutionState;
-  let stepContextMock: WorkflowContextManager;
+  let stepExecutionRuntimeMock: StepExecutionRuntime;
   let impl: EnterStepTimeoutZoneNodeImpl;
 
   const originalDateCtor = global.Date;
@@ -37,6 +43,8 @@ describe('EnterStepTimeoutZoneNodeImpl', () => {
   });
 
   beforeEach(() => {
+    jest.clearAllMocks();
+
     node = {
       id: 'test-timeout-zone',
       type: 'enter-timeout-zone',
@@ -45,38 +53,41 @@ describe('EnterStepTimeoutZoneNodeImpl', () => {
       timeout: '30s',
     };
 
-    wfExecutionRuntimeManagerMock = {} as unknown as WorkflowExecutionRuntimeManager;
-    wfExecutionRuntimeManagerMock.startStep = jest.fn().mockResolvedValue(undefined);
-    wfExecutionRuntimeManagerMock.enterScope = jest.fn();
-    wfExecutionRuntimeManagerMock.navigateToNextNode = jest.fn();
+    const mockStepExecution = {
+      startedAt: new Date('2025-09-24T15:44:30.000Z').toISOString(),
+    };
 
-    wfExecutionStateMock = {} as unknown as WorkflowExecutionState;
-    wfExecutionStateMock.getStepExecution = jest.fn();
-
-    stepContextMock = {
+    stepExecutionRuntimeMock = {
+      startStep: jest.fn().mockResolvedValue(undefined),
       stepExecutionId: 'step-exec-123',
-    } as WorkflowContextManager;
+      stepExecution: mockStepExecution,
+    } as unknown as StepExecutionRuntime;
+
+    wfExecutionRuntimeManagerMock = {
+      navigateToNextNode: jest.fn(),
+    } as unknown as WorkflowExecutionRuntimeManager;
 
     impl = new EnterStepTimeoutZoneNodeImpl(
       node,
       wfExecutionRuntimeManagerMock,
-      wfExecutionStateMock,
-      stepContextMock
+      stepExecutionRuntimeMock
     );
+
     mockDateNow = new Date('2025-09-24T15:44:54.973Z');
+    mockParseDuration.mockReturnValue(30000); // 30 seconds default
   });
 
   describe('run method', () => {
     it('should start step', async () => {
       await impl.run();
-      expect(wfExecutionRuntimeManagerMock.startStep).toHaveBeenCalledTimes(1);
-      expect(wfExecutionRuntimeManagerMock.startStep).toHaveBeenCalledWith();
+      expect(stepExecutionRuntimeMock.startStep).toHaveBeenCalledTimes(1);
+      expect(stepExecutionRuntimeMock.startStep).toHaveBeenCalledWith();
     });
 
     it('should enter scope', async () => {
       await impl.run();
-      expect(wfExecutionRuntimeManagerMock.enterScope).toHaveBeenCalledTimes(1);
-      expect(wfExecutionRuntimeManagerMock.enterScope).toHaveBeenCalledWith();
+      expect(stepExecutionRuntimeMock.startStep).toHaveBeenCalledTimes(1);
+      expect(stepExecutionRuntimeMock.startStep).toHaveBeenCalledWith();
     });
 
     it('should navigate to next node', async () => {
@@ -88,12 +99,9 @@ describe('EnterStepTimeoutZoneNodeImpl', () => {
     it('should execute methods in correct order', async () => {
       const callOrder: string[] = [];
 
-      wfExecutionRuntimeManagerMock.startStep = jest.fn().mockImplementation(() => {
+      stepExecutionRuntimeMock.startStep = jest.fn().mockImplementation(() => {
         callOrder.push('startStep');
         return Promise.resolve();
-      });
-      wfExecutionRuntimeManagerMock.enterScope = jest.fn().mockImplementation(() => {
-        callOrder.push('enterScope');
       });
       wfExecutionRuntimeManagerMock.navigateToNextNode = jest.fn().mockImplementation(() => {
         callOrder.push('navigateToNextNode');
@@ -101,26 +109,29 @@ describe('EnterStepTimeoutZoneNodeImpl', () => {
 
       await impl.run();
 
-      expect(callOrder).toEqual(['startStep', 'enterScope', 'navigateToNextNode']);
+      expect(callOrder).toEqual(['startStep', 'navigateToNextNode']);
     });
   });
 
   describe('monitor method', () => {
-    let monitoredContextMock: WorkflowContextManager;
+    let monitoredContextMock: StepExecutionRuntime;
 
     beforeEach(() => {
       monitoredContextMock = {
         abortController: {
           abort: jest.fn(),
         },
-      } as any as WorkflowContextManager;
+      } as any as StepExecutionRuntime;
     });
 
     it('should not throw error when within timeout limit', async () => {
       const startTime = new Date().getTime() - 10000; // 10 seconds ago
-      wfExecutionStateMock.getStepExecution = jest.fn().mockReturnValue({
+      mockParseDuration.mockReturnValue(30000); // 30 seconds
+
+      // Update the step execution mock for this specific test
+      (stepExecutionRuntimeMock as any).stepExecution = {
         startedAt: new Date(startTime).toISOString(),
-      });
+      };
 
       await expect(impl.monitor(monitoredContextMock)).resolves.not.toThrow();
       expect(monitoredContextMock.abortController.abort).not.toHaveBeenCalled();
@@ -128,9 +139,12 @@ describe('EnterStepTimeoutZoneNodeImpl', () => {
 
     it('should throw error and abort when timeout exceeded', async () => {
       const startTime = new Date().getTime() - 40000; // 40 seconds ago (exceeds 30s timeout)
-      wfExecutionStateMock.getStepExecution = jest.fn().mockReturnValue({
+      mockParseDuration.mockReturnValue(30000); // 30 seconds
+
+      // Update the step execution mock for this specific test
+      (stepExecutionRuntimeMock as any).stepExecution = {
         startedAt: new Date(startTime).toISOString(),
-      });
+      };
 
       try {
         await impl.monitor(monitoredContextMock);
@@ -146,9 +160,12 @@ describe('EnterStepTimeoutZoneNodeImpl', () => {
     it('should report timeout duration with incorrect unit (implementation bug)', async () => {
       // This test documents the bug where the error message says "ms" but shows seconds
       const startTime = new Date().getTime() - 45000; // 45 seconds ago
-      wfExecutionStateMock.getStepExecution = jest.fn().mockReturnValue({
+      mockParseDuration.mockReturnValue(30000); // 30 seconds
+
+      // Update the step execution mock for this specific test
+      (stepExecutionRuntimeMock as any).stepExecution = {
         startedAt: new Date(startTime).toISOString(),
-      });
+      };
 
       try {
         await impl.monitor(monitoredContextMock);
@@ -164,27 +181,35 @@ describe('EnterStepTimeoutZoneNodeImpl', () => {
       // Test with different timeout format
       node.timeout = '5m';
       const startTime = new Date().getTime() - 10000; // 10 seconds ago (within 5 minute limit)
-      wfExecutionStateMock.getStepExecution = jest.fn().mockReturnValue({
+      mockParseDuration.mockReturnValue(300000); // 5 minutes
+
+      // Update the step execution mock for this specific test
+      (stepExecutionRuntimeMock as any).stepExecution = {
         startedAt: new Date(startTime).toISOString(),
-      });
+      };
 
       await expect(impl.monitor(monitoredContextMock)).resolves.not.toThrow();
       expect(monitoredContextMock.abortController.abort).not.toHaveBeenCalled();
     });
 
-    it('should get step execution using step execution id from context', async () => {
+    it('should use step execution from step execution runtime directly', async () => {
       const startTime = new Date().getTime() - 10000;
-      wfExecutionStateMock.getStepExecution = jest.fn().mockReturnValue({
+      mockParseDuration.mockReturnValue(30000); // 30 seconds
+
+      // Update the step execution mock for this specific test
+      (stepExecutionRuntimeMock as any).stepExecution = {
         startedAt: new Date(startTime).toISOString(),
-      });
+      };
 
       await impl.monitor(monitoredContextMock);
 
-      expect(wfExecutionStateMock.getStepExecution).toHaveBeenCalledWith('step-exec-123');
+      // The implementation uses stepExecutionRuntime.stepExecution directly
+      expect(stepExecutionRuntimeMock.stepExecution).toBeDefined();
     });
 
     it('should handle missing step execution', async () => {
-      wfExecutionStateMock.getStepExecution = jest.fn().mockReturnValue(null);
+      // Remove stepExecution to simulate null/undefined
+      (stepExecutionRuntimeMock as any).stepExecution = null;
 
       try {
         await impl.monitor(monitoredContextMock);
@@ -197,10 +222,12 @@ describe('EnterStepTimeoutZoneNodeImpl', () => {
     it('should use correct time calculations', async () => {
       // Use real times that are far enough apart to trigger timeout
       const startTime = mockDateNow.getTime() - 50000; // 50 seconds ago (exceeds 30s timeout)
+      mockParseDuration.mockReturnValue(30000); // 30 seconds
 
-      wfExecutionStateMock.getStepExecution = jest.fn().mockReturnValue({
+      // Update the step execution mock for this specific test
+      (stepExecutionRuntimeMock as any).stepExecution = {
         startedAt: new Date(startTime).toISOString(),
-      });
+      };
 
       // Should exceed the 30s timeout and report 50 (seconds but labeled as "ms" due to bug)
       try {

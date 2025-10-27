@@ -86,6 +86,10 @@ export const formDeserializer = (data: ConnectorFormSchema): InternalConnectorFo
 
   return {
     ...data,
+    config: {
+      ...data.config,
+      headers: isEmpty(configHeaders) ? undefined : configHeaders,
+    },
     __internal__: {
       headers: configHeaders,
     },
@@ -119,10 +123,28 @@ export const formSerializer = (formData: InternalConnectorForm): ConnectorFormSc
     return formData;
   }
 
-  const headers = formData?.__internal__?.headers ?? [];
+  let configHeaders: Record<string, string>;
+  let secretHeaders: Record<string, string>;
 
-  const configHeaders = buildHeaderRecords(headers, 'config');
-  const secretHeaders = buildHeaderRecords(headers, 'secret');
+  if (formData.actionTypeId === '.gen-ai') {
+    const webhookFormData = formData as {
+      config: { headers?: Array<{ key: string; value: string }> };
+    };
+
+    secretHeaders = {};
+    configHeaders = (webhookFormData?.config?.headers ?? []).reduce(
+      (acc, header) => ({
+        ...acc,
+        [header.key]: header.value,
+      }),
+      {}
+    );
+  } else {
+    const headers = formData?.__internal__?.headers ?? [];
+
+    configHeaders = buildHeaderRecords(headers, 'config');
+    secretHeaders = buildHeaderRecords(headers, 'secret');
+  }
 
   return {
     ...formData,
