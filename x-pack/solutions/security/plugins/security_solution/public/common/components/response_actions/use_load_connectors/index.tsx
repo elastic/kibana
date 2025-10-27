@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { UseQueryResult } from '@tanstack/react-query';
-import { useQuery } from '@tanstack/react-query';
+import type { UseQueryResult } from '@kbn/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { ServerError } from '@kbn/cases-plugin/public/types';
 import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
