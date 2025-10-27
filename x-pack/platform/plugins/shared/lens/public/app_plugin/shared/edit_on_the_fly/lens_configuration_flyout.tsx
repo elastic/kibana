@@ -16,6 +16,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   euiScrollBarStyles,
+  EuiSpacer,
   EuiWindowEvent,
   keys,
 } from '@elastic/eui';
@@ -348,14 +349,17 @@ export function LensEditConfigurationFlyout({
               border-bottom: ${euiTheme.euiTheme.border.thin};
             `}
           >
-            <LayerTabsWrapper
-              attributes={attributes}
-              coreStart={coreStart}
-              dataViews={startDependencies.dataViews}
-              uiActions={startDependencies.uiActions}
-              framePublicAPI={framePublicAPI}
-              setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
-            />
+            <>
+              <EuiSpacer size="s" />
+              <LayerTabsWrapper
+                attributes={attributes}
+                coreStart={coreStart}
+                dataViews={startDependencies.dataViews}
+                uiActions={startDependencies.uiActions}
+                framePublicAPI={framePublicAPI}
+                setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
+              />
+            </>
           </div>
           <EuiFlexGroup
             css={css`
