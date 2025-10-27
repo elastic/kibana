@@ -7,12 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { debounce } from 'lodash';
+import type { MonacoYaml, MonacoYamlOptions } from 'monaco-yaml';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { CodeEditorProps } from '@kbn/code-editor';
 import { CodeEditor } from '@kbn/code-editor';
 import { configureMonacoYamlSchema } from '@kbn/monaco';
-import type { MonacoYamlOptions } from 'monaco-yaml';
-import { debounce } from 'lodash';
+
+// Configure Monaco YAML with completions and hover disabled
+// while keeping validation and hover information enabled
+const defaultMonacoYamlOptions: MonacoYamlOptions = {
+  completion: false, // Disable schema-based completions
+  hover: false, // hover is handled by the custom providers
+  validate: true, // Keep validation
+};
 
 interface YamlEditorProps extends Omit<CodeEditorProps, 'languageId' | 'onChange'> {
   onChange: (value: string | undefined) => void;
@@ -20,6 +28,7 @@ interface YamlEditorProps extends Omit<CodeEditorProps, 'languageId' | 'onChange
 }
 
 export const YamlEditor = React.memo(({ value, onChange, ...props }: YamlEditorProps) => {
+  const monacoYamlRef = useRef<MonacoYaml | null>(null);
   const [internalValue, setInternalValue] = useState(value);
   const onChangeDebounced = useMemo(() => debounce(onChange, 200), [onChange]);
 
@@ -40,13 +49,16 @@ export const YamlEditor = React.memo(({ value, onChange, ...props }: YamlEditorP
   );
 
   useEffect(() => {
-    if (props.schemas) {
-      // Configure Monaco YAML with completions and hover disabled
-      // while keeping validation and hover information enabled
-      configureMonacoYamlSchema(props.schemas, {
-        completion: false, // Disable schema-based completions
-        hover: false, // hover is handled by the custom providers
-        validate: true, // Keep validation
+    async function configureMonacoYaml(schemas: MonacoYamlOptions['schemas']) {
+      monacoYamlRef.current = await configureMonacoYamlSchema(schemas, defaultMonacoYamlOptions);
+    }
+    // configure or update the monaco yaml schema and options when the schemas change
+    if (!monacoYamlRef.current) {
+      configureMonacoYaml(props.schemas ?? []);
+    } else {
+      monacoYamlRef.current.update({
+        ...defaultMonacoYamlOptions,
+        schemas: props.schemas ?? [],
       });
     }
   }, [props.schemas]);
@@ -55,3 +67,5 @@ export const YamlEditor = React.memo(({ value, onChange, ...props }: YamlEditorP
     <CodeEditor languageId="yaml" value={internalValue} onChange={onChangeInternal} {...props} />
   );
 });
+
+YamlEditor.displayName = 'YamlEditor';

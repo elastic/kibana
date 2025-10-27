@@ -14,7 +14,13 @@ import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
-import { disableStreams, enableStreams, getQueries, putStream } from './helpers/requests';
+import {
+  deleteStream,
+  disableStreams,
+  enableStreams,
+  getQueries,
+  putStream,
+} from './helpers/requests';
 import type { RoleCredentials } from '../../services';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -45,9 +51,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   };
 
   describe('Queries API', function () {
-    // failsOnMKI, see https://github.com/elastic/kibana/issues/237572
-    this.tags(['failsOnMKI']);
-
     before(async () => {
       roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
@@ -70,12 +73,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         stream,
         ...emptyAssets,
       });
+    });
 
-      /**
-       * Rule APIs forbid deleting internal rules types.
-       * So we delete the rules directly using ES.
-       */
-      await alertingApi.deleteAllRulesEs();
+    afterEach(async () => {
+      await deleteStream(apiClient, STREAM_NAME);
     });
 
     it('lists empty queries when none are defined on the stream', async () => {

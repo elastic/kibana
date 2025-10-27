@@ -3,12 +3,17 @@ name: "CodeQL PR"
 on:
   pull_request:
     branches: [ "main" ]
+    types: [ opened, synchronize, ready_for_review ]
 
 jobs:
   analyze:
     name: Analyze (${{ matrix.language }})
     runs-on: kibana
-    if: contains(github.event.pull_request.labels.*.name, 'ci:codeql')
+    if: |
+      contains(github.event.pull_request.labels.*.name, 'ci:codeql') &&
+      contains(fromJSON('["MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.pull_request.author_association) &&
+      github.event.pull_request.user.type != 'Bot' &&
+      github.event.pull_request.draft == false
     permissions:
       security-events: write
       packages: read
@@ -28,7 +33,6 @@ jobs:
       with:
         languages: ${{ matrix.language }}
         config-file: ./.github/codeql/codeql-config.yml
-        # build-mode: ${{ matrix.build-mode }}
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@f443b600d91635bebf5b0d9ebc620189c0d6fba5 # v4.30.8
       env:

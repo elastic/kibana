@@ -29,7 +29,7 @@ import {
 import { correctQuerySyntax, findAstPosition } from '../../../definitions/utils/ast';
 import { parse } from '../../../parser';
 import { setTestFunctions } from '../../../definitions/utils/test_functions';
-import { allStarConstant, getDateHistogramCompletionItem } from '../../../..';
+import { getDateHistogramCompletionItem } from '../../../..';
 
 const roundParameterTypes = ['double', 'integer', 'long', 'unsigned_long'] as const;
 const allAggFunctions = getFunctionSignaturesByReturnType(Location.STATS, 'any', {
@@ -579,7 +579,7 @@ describe('STATS Autocomplete', () => {
 
         await statsExpectSuggestions('from a | stats a=max(b) BY integerField, keywor', [
           ...expected,
-          ...getFieldNamesByType('any'),
+          ...getFieldNamesByType('any').filter((name) => name !== 'integerField'),
         ]);
       });
 
@@ -819,17 +819,11 @@ describe('STATS Autocomplete', () => {
                 scalar: true,
               }
             ),
-            ...['integerField', 'integerPrompt'],
           ],
           mockCallbacks,
           mockContext,
           43 // at the second argument of the bucket function
         );
-      });
-
-      test('count(/) to suggest * for all', async () => {
-        const suggestions = await suggest('from a | stats count(');
-        expect(suggestions).toContain(allStarConstant);
       });
 
       describe('date histogram snippet', () => {

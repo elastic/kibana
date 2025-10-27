@@ -57,10 +57,6 @@ export const useMetricsGridState = () => {
 
   const onPageChange = useCallback((page: number) => dispatch(setCurrentPage(page)), [dispatch]);
 
-  const onClearSearchTerm = useCallback(() => {
-    dispatch(setSearchTerm(''));
-  }, [dispatch]);
-
   const onSearchTermChange = useCallback(
     (term: string) => {
       dispatch(setSearchTerm(term));
@@ -78,7 +74,6 @@ export const useMetricsGridState = () => {
     valueFilters,
     isFullscreen,
     searchTerm,
-    onClearSearchTerm,
     onSearchTermChange,
     onDimensionsChange,
     onValuesChange,

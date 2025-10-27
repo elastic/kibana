@@ -1038,4 +1038,78 @@ export function defineRoutes(
       }
     }
   );
+
+  router.delete(
+    {
+      path: '/api/alerts_fixture/rule/internally_managed/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    async (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> => {
+      try {
+        const [_, { alerting }] = await core.getStartServices();
+        const rulesClient = await alerting.getRulesClientWithRequest(req);
+
+        return res.ok({
+          body: await rulesClient.delete({ id: req.params.id }),
+        });
+      } catch (err) {
+        throw err;
+      }
+    }
+  );
+
+  router.delete(
+    {
+      path: '/api/alerts_fixture/rule/internally_managed',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: {
+        body: schema.any(),
+      },
+    },
+    async (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> => {
+      try {
+        const [_, { alerting }] = await core.getStartServices();
+        const rulesClient = await alerting.getRulesClientWithRequest(req);
+        const ruleTypes = alerting.listTypes();
+        const internalRuleTypes = Array.from(ruleTypes.values())
+          .filter((ruleType) => Boolean(ruleType.internallyManaged))
+          .map((ruleType) => ruleType.id);
+
+        const internalRuleTypesFilter = internalRuleTypes
+          .map((id) => `alert.attributes.alertTypeId: ${id}`)
+          .join(' OR ');
+
+        return res.ok({
+          body: await rulesClient.bulkDeleteRules({
+            filter: internalRuleTypesFilter,
+          }),
+        });
+      } catch (err) {
+        throw err;
+      }
+    }
+  );
 }

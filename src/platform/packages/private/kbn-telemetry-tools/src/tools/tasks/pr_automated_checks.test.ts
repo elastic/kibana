@@ -128,7 +128,7 @@ describe('prAutomatedChecks', () => {
         ErrorReporter {
           "errors": Array [
             "[37m[41m TELEMETRY ERROR [49m[39m Error in test.json
-        The _meta.description of properties.myCollector.properties.some_field is missing. Please add it.",
+        The _meta.description of properties.myCollector.properties.some_field is missing. Please add it in the '.ts' file where you added the new field, and then run the 'scripts/telemetry_check --fix' to automatically update the JSON files.",
           ],
         }
       `);
@@ -388,11 +388,11 @@ describe('prAutomatedChecks', () => {
         ErrorReporter {
           "errors": Array [
             "[37m[41m TELEMETRY ERROR [49m[39m Error in test.json
-        The _meta.description of properties.myCollector.properties.compatible_modification_without_description is missing. Please add it.",
+        The _meta.description of properties.myCollector.properties.compatible_modification_without_description is missing. Please add it in the '.ts' file where you updated the field, and then run the 'scripts/telemetry_check --fix' to automatically update the JSON files.",
             "[37m[41m TELEMETRY ERROR [49m[39m Error in test.json
         Incompatible change in key \\"properties.myCollector.properties.string_to_number\\": it has been changed from a non-numeric type \\"text\\" to a numeric type \\"long\\".",
             "[37m[41m TELEMETRY ERROR [49m[39m Error in test.json
-        The _meta.description of properties.myCollector.properties.string_to_number is missing. Please add it.",
+        The _meta.description of properties.myCollector.properties.string_to_number is missing. Please add it in the '.ts' file where you updated the field, and then run the 'scripts/telemetry_check --fix' to automatically update the JSON files.",
             "[37m[41m TELEMETRY ERROR [49m[39m Error in test.json
         Incompatible change in key \\"properties.myCollector.properties.string_to_boolean\\": it has been changed from a non-boolean type \\"text\\" to a \\"boolean\\" type.",
             "[37m[41m TELEMETRY ERROR [49m[39m Error in test.json
