@@ -8,5 +8,3 @@
  */
 
 export { ensureEdotCollector } from './src/ensure_edot_collector';
-export { readKibanaConfig } from './src/read_kibana_config';
-export type { KibanaConfig } from './src/read_kibana_config';

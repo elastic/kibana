@@ -144,6 +144,8 @@ The command generates the following files in `data/edot_collector/`:
 - `docker-compose.yaml` - Docker Compose configuration
 - `otel-collector-config.yml` - OpenTelemetry Collector configuration
 
+**Security Note:** These generated configuration files may contain non-default Elasticsearch credentials. The `data/` directory is included in `.gitignore` to prevent accidental commits of sensitive information. As you're using this script, please ensure your credentials are not committed to version control.
+
 ## Requirements
 
 - Docker must be installed and running

@@ -36,7 +36,7 @@ async function down() {
  * Normalizes Elasticsearch host URL to ensure it's a valid endpoint.
  * Converts localhost references to host.docker.internal for Docker connectivity.
  *
- * @param host - The Elasticsearch host (can be string or array)
+ * @param host - The Elasticsearch host URL
  * @returns Normalized endpoint URL
  */
 function normalizeElasticsearchHost(host: string): string {
@@ -80,7 +80,7 @@ export async function ensureEdotCollector({
   await assertDockerAvailable();
 
   // Read Kibana configuration to get Elasticsearch credentials
-  const kibanaConfig = readKibanaConfig(configPath);
+  const kibanaConfig = readKibanaConfig(log, configPath);
   const elasticsearchConfig = kibanaConfig.elasticsearch;
 
   const elasticsearchHost = normalizeElasticsearchHost(elasticsearchConfig.hosts);

@@ -7,21 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ToolingLog } from '@kbn/tooling-log';
 import fs from 'fs';
 import yaml from 'js-yaml';
 import { pickBy, identity } from 'lodash';
 import { resolve } from 'path';
 
-export type KibanaConfig = ReturnType<typeof readKibanaConfig>;
+interface ElasticsearchConfig {
+  hosts: string;
+  username: string;
+  password: string;
+}
+
+interface KibanaConfig {
+  elasticsearch: ElasticsearchConfig;
+}
 
 /**
  * Reads Kibana configuration from a single config file.
  * Uses provided configPath or defaults to kibana.dev.yml.
  * Environment variables override config file values.
  */
-export const readKibanaConfig = (
-  configPath?: string
-): { elasticsearch: { hosts: string; username: string; password: string } } => {
+export const readKibanaConfig = (log: ToolingLog, configPath?: string): KibanaConfig => {
   const configPathToUse = resolve(process.cwd(), configPath || 'config/kibana.dev.yml');
 
   let configValues = {};
@@ -31,6 +38,11 @@ export const readKibanaConfig = (
       any
     >;
     configValues = config.elasticsearch || {};
+  } else {
+    log.warning(
+      `Config file not found at ${configPathToUse}. 
+      Using environment variables or defaults for Elasticsearch credentials.`
+    );
   }
 
   const envOverrides = pickBy(

@@ -35,7 +35,8 @@ export async function untilContainerReady({
     const { stdout } = await execa
       .command(`docker inspect --format='{{${field}}}' ${globalScopeContainerName}`)
       .catch((error) => {
-        log.debug(`Error retrieving container status: ${error.stderr.split('\n')[0]}`);
+        const errorMsg = error.stderr?.split('\n')[0] || error.message;
+        log.debug(`Error retrieving container status: ${errorMsg}`);
         throw error;
       });
 
