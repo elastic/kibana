@@ -117,110 +117,110 @@ describe('DiskUsageRule', () => {
         params: rule.ruleOptions.defaultParams,
       } as any);
       const count = 1;
-      const alertStates =  [
-          {
-            ccs: undefined,
-            cluster: {
-              clusterName: 'testCluster',
-              clusterUuid: 'abc123',
-            },
+      const alertStates = [
+        {
+          ccs: undefined,
+          cluster: {
+            clusterName: 'testCluster',
+            clusterUuid: 'abc123',
+          },
+          diskUsage: 91,
+          itemLabel: undefined,
+          meta: {
+            clusterUuid: 'abc123',
             diskUsage: 91,
-            itemLabel: undefined,
-            meta: {
-              clusterUuid: 'abc123',
-              diskUsage: 91,
-              nodeId: 'myNodeId',
-              nodeName: 'myNodeName',
-            },
             nodeId: 'myNodeId',
             nodeName: 'myNodeName',
-            ui: {
-              isFiring: true,
-              lastCheckedMS: 0,
-              message: {
-                nextSteps: [
-                  {
-                    text: '#start_linkTune for disk usage#end_link',
-                    tokens: [
-                      {
-                        endToken: '#end_link',
-                        partialUrl:
-                          '{elasticWebsiteUrl}docs/deploy-manage/production-guidance/optimize-performance/disk-usage',
-                        startToken: '#start_link',
-                        type: 'docLink',
-                      },
-                    ],
-                  },
-                  {
-                    text: '#start_linkIdentify large indices#end_link',
-                    tokens: [
-                      {
-                        endToken: '#end_link',
-                        startToken: '#start_link',
-                        type: 'link',
-                        url: 'elasticsearch/indices',
-                      },
-                    ],
-                  },
-                  {
-                    text: '#start_linkImplement ILM policies#end_link',
-                    tokens: [
-                      {
-                        endToken: '#end_link',
-                        partialUrl:
-                          '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/index-lifecycle-management.html',
-                        startToken: '#start_link',
-                        type: 'docLink',
-                      },
-                    ],
-                  },
-                  {
-                    text: '#start_linkAdd more data nodes#end_link',
-                    tokens: [
-                      {
-                        endToken: '#end_link',
-                        partialUrl:
-                          '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/add-elasticsearch-nodes.html',
-                        startToken: '#start_link',
-                        type: 'docLink',
-                      },
-                    ],
-                  },
-                  {
-                    text: '#start_linkResize your deployment (ECE)#end_link',
-                    tokens: [
-                      {
-                        endToken: '#end_link',
-                        partialUrl:
-                          '{elasticWebsiteUrl}guide/en/cloud-enterprise/current/ece-resize-deployment.html',
-                        startToken: '#start_link',
-                        type: 'docLink',
-                      },
-                    ],
-                  },
-                ],
-                text: 'Node #start_linkmyNodeName#end_link is reporting disk usage of 91% at #absolute',
-                tokens: [
-                  {
-                    isAbsolute: true,
-                    isRelative: false,
-                    startToken: '#absolute',
-                    timestamp: 1,
-                    type: 'time',
-                  },
-                  {
-                    endToken: '#end_link',
-                    startToken: '#start_link',
-                    type: 'link',
-                    url: 'elasticsearch/nodes/myNodeId',
-                  },
-                ],
-              },
-              severity: 'danger',
-              triggeredMS: 1,
-            },
           },
-        ]
+          nodeId: 'myNodeId',
+          nodeName: 'myNodeName',
+          ui: {
+            isFiring: true,
+            lastCheckedMS: 0,
+            message: {
+              nextSteps: [
+                {
+                  text: '#start_linkTune for disk usage#end_link',
+                  tokens: [
+                    {
+                      endToken: '#end_link',
+                      partialUrl:
+                        '{elasticWebsiteUrl}docs/deploy-manage/production-guidance/optimize-performance/disk-usage',
+                      startToken: '#start_link',
+                      type: 'docLink',
+                    },
+                  ],
+                },
+                {
+                  text: '#start_linkIdentify large indices#end_link',
+                  tokens: [
+                    {
+                      endToken: '#end_link',
+                      startToken: '#start_link',
+                      type: 'link',
+                      url: 'elasticsearch/indices',
+                    },
+                  ],
+                },
+                {
+                  text: '#start_linkImplement ILM policies#end_link',
+                  tokens: [
+                    {
+                      endToken: '#end_link',
+                      partialUrl:
+                        '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/index-lifecycle-management.html',
+                      startToken: '#start_link',
+                      type: 'docLink',
+                    },
+                  ],
+                },
+                {
+                  text: '#start_linkAdd more data nodes#end_link',
+                  tokens: [
+                    {
+                      endToken: '#end_link',
+                      partialUrl:
+                        '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/add-elasticsearch-nodes.html',
+                      startToken: '#start_link',
+                      type: 'docLink',
+                    },
+                  ],
+                },
+                {
+                  text: '#start_linkResize your deployment (ECE)#end_link',
+                  tokens: [
+                    {
+                      endToken: '#end_link',
+                      partialUrl:
+                        '{elasticWebsiteUrl}guide/en/cloud-enterprise/current/ece-resize-deployment.html',
+                      startToken: '#start_link',
+                      type: 'docLink',
+                    },
+                  ],
+                },
+              ],
+              text: 'Node #start_linkmyNodeName#end_link is reporting disk usage of 91% at #absolute',
+              tokens: [
+                {
+                  isAbsolute: true,
+                  isRelative: false,
+                  startToken: '#absolute',
+                  timestamp: 1,
+                  type: 'time',
+                },
+                {
+                  endToken: '#end_link',
+                  startToken: '#start_link',
+                  type: 'link',
+                  url: 'elasticsearch/nodes/myNodeId',
+                },
+              ],
+            },
+            severity: 'danger',
+            triggeredMS: 1,
+          },
+        },
+      ];
 
       expect(services.alertsClient.report).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.setAlertData).toHaveBeenCalledTimes(1);
@@ -370,7 +370,7 @@ describe('DiskUsageRule', () => {
             triggeredMS: 1,
           },
         },
-      ]
+      ];
       expect(services.alertsClient.report).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.setAlertData).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.report).toHaveBeenCalledWith({
