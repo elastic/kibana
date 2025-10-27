@@ -7,7 +7,6 @@
 
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiDescribedFormGroup,
   EuiFieldPassword,
   EuiFieldText,
@@ -67,18 +66,6 @@ const defaultDefaultValues: UserFormValues = {
   email: '',
   roles: [],
 };
-
-// I toyed with using this to compare against the original form values, but it behaves identically to ===
-// const haveUserValuesChanged = (original: UserFormValues, current: UserFormValues): boolean => {
-//   return (
-//     original.username !== current.username ||
-//     original.full_name !== current.full_name ||
-//     original.email !== current.email ||
-//     original.roles.length !== current.roles.length ||
-//     original.roles.some((role) => !current.roles.includes(role)) ||
-//     original.password !== current.password
-//   );
-// };
 
 export const UserForm: FunctionComponent<UserFormProps> = ({
   isNewUser = false,
@@ -443,19 +430,8 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
           />
         </EuiFormRow>
 
-        <EuiSpacer size="xxl" />
-        {disabled || isReservedUser ? (
-          <EuiFlexGroup responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiButton iconType="arrowLeft" onClick={onCancel}>
-                <FormattedMessage
-                  id="xpack.security.management.users.userForm.backToUsersButton"
-                  defaultMessage="Back to users"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ) : (
+        <EuiSpacer size="l" />
+        {disabled || isReservedUser ? undefined : (
           <EuiFlexGroup responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiButton
@@ -478,14 +454,6 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
                   />
                 )}
               </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty flush="left" isDisabled={form.isSubmitting} onClick={onCancel}>
-                <FormattedMessage
-                  id="xpack.security.management.users.userForm.cancelButton"
-                  defaultMessage="Cancel"
-                />
-              </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
         )}
