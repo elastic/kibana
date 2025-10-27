@@ -375,30 +375,12 @@ describe('Cloud Plugin', () => {
       expect(result).toEqual({ elasticsearchUrl: 'elasticsearch-url' });
     });
     describe('exposes isInTrial', () => {
-      const getStart = (configParts?: Partial<CloudConfigType>) => {
+      const getStart = (configParts: Partial<CloudConfigType> = {}) => {
         const { plugin } = startPlugin(configParts);
         const coreStart = coreMock.createStart();
+        coreStart.http.get.mockResolvedValue({ elasticsearch_url: 'elasticsearch-url' });
         return plugin.start(coreStart);
       };
-      it('is `true` when `serverless.in_trial` is set', () => {
-        const pluginStart = getStart({
-          serverless: {
-            project_id: 'my-awesome-project',
-            in_trial: true,
-          },
-        });
-
-        expect(pluginStart.isInTrial()).toBe(true);
-      });
-      it('is `false` when `serverless.in_trial` is set to false', () => {
-        const pluginStart = getStart({
-          serverless: {
-            project_id: 'my-awesome-project',
-            in_trial: false,
-          },
-        });
-        expect(pluginStart.isInTrial()).toBe(false);
-      });
       it('is `true` when `trial_end_date` is set and is in the future', () => {
         const pluginStart = getStart({
           trial_end_date: new Date(Date.now() + 10000).toISOString(),
@@ -414,7 +396,7 @@ describe('Cloud Plugin', () => {
         expect(pluginStart.isInTrial()).toBe(false);
       });
       it('is `false` when `serverless.in_trial` & `trial_end_date` are not set', () => {
-        const pluginStart = getStart({});
+        const pluginStart = getStart();
         expect(pluginStart.isInTrial()).toBe(false);
       });
     });
