@@ -71,7 +71,6 @@ export interface IElasticsearchConfig {
    */
   readonly requestHeadersWhitelist: string[];
 
-
   /**
    * Timeout after which HTTP request will be aborted and retried.
    */
