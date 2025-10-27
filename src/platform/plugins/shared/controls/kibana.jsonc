@@ -17,7 +17,8 @@
       "dataViews",
       "data",
       "unifiedSearch",
-      "uiActions"
+      "uiActions",
+      "kibanaReact"
     ]
   }
 }

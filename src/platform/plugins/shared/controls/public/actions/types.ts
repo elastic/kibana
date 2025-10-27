@@ -7,6 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ControlsRenderer } from './src/controls_renderer';
-export type { ControlsRendererParentApi, HasPrependWrapperRef } from './src/types';
-export { apiHasPrependWrapperRef } from './src/types';
+import type { StickyControlLayoutState } from '@kbn/controls-schemas';
+import type { BehaviorSubject } from 'rxjs';
+
+export interface PublishesControlsLayout {
+  layout$: BehaviorSubject<{
+    controls: {
+      [id: string]: StickyControlLayoutState;
+    };
+  }>;
+}
+export const apiPublishesControlsLayout = (api: unknown): api is PublishesControlsLayout =>
+  Boolean((api as PublishesControlsLayout).layout$);

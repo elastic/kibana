@@ -10,7 +10,7 @@
 import classNames from 'classnames';
 import deepEqual from 'fast-deep-equal';
 import { pick } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Subscription, distinctUntilChanged, map, of } from 'rxjs';
 
 import { useSortable } from '@dnd-kit/sortable';
@@ -74,6 +74,8 @@ export const ControlPanel = ({
   );
   const [panelTitle, setPanelTitle] = useState<string | undefined>();
   const [defaultPanelTitle, setDefaultPanelTitle] = useState<string | undefined>();
+
+  const prependWrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const stateSubscription = parentApi.layout$
@@ -156,6 +158,7 @@ export const ControlPanel = ({
         uuid={uuid}
         viewMode={viewMode}
         disabledActions={disabledActionIds}
+        prependWrapperRef={prependWrapperRef}
       >
         <EuiFormRow
           data-test-subj="control-frame-title"
@@ -181,6 +184,7 @@ export const ControlPanel = ({
                   {...attributes}
                   {...listeners}
                 />
+
                 {api?.CustomPrependComponent ? (
                   <api.CustomPrependComponent />
                 ) : (
@@ -189,7 +193,9 @@ export const ControlPanel = ({
                     anchorProps={{ className: 'eui-textTruncate', css: styles.tooltipStyles }}
                   >
                     <EuiFormLabel className="controlPanel--label">
-                      {panelTitle || defaultPanelTitle}
+                      <span css={styles.prependWrapperStyles} ref={prependWrapperRef}>
+                        {panelTitle || defaultPanelTitle}
+                      </span>
                     </EuiFormLabel>
                   </EuiToolTip>
                 )}
@@ -220,6 +226,12 @@ const controlPanelStyles = {
   controlWidthStyles,
   tooltipStyles: {
     height: '100%',
+  },
+  prependWrapperStyles: {
+    display: 'inline-block',
+    width: '100%',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   },
   formControl: ({ euiTheme }: UseEuiTheme) =>
     css({

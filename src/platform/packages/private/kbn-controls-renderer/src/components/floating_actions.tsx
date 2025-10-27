@@ -18,14 +18,18 @@ import { CONTROL_HOVER_TRIGGER_ID } from '@kbn/controls-constants';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { AnyApiAction } from '@kbn/presentation-panel-plugin/public/panel_actions/types';
-import type { EmbeddableApiContext, ViewMode } from '@kbn/presentation-publishing';
+import {
+  apiCanLockHoverActions,
+  type EmbeddableApiContext,
+  type ViewMode,
+} from '@kbn/presentation-publishing';
 import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 
 import type { ControlRendererServices } from '../types';
 
 export interface FloatingActionsProps {
   children: ReactElement;
-
+  prependWrapperRef: React.RefObject<HTMLDivElement>;
   api?: unknown;
   uuid: string;
   viewMode?: ViewMode;
@@ -70,19 +74,21 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
   api,
   uuid,
   disabledActions,
+  prependWrapperRef,
 }) => {
   const {
     services: { uiActions },
   } = useKibana<ControlRendererServices>();
 
   const [floatingActions, setFloatingActions] = useState<FloatingActionItem[]>([]);
+  const [hasLockedHoverActions, setHasLockedHoverActions] = useState(false);
 
   useEffect(() => {
     if (!api) return;
 
     let canceled = false;
     const context = {
-      embeddable: api,
+      embeddable: { ...api, prependWrapperRef },
       trigger: uiActions.getTrigger(CONTROL_HOVER_TRIGGER_ID),
     };
 
@@ -139,15 +145,24 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
       }
     })();
 
+    if (apiCanLockHoverActions(api)) {
+      subscriptions.add(
+        api.hasLockedHoverActions$.subscribe((nextLock) => setHasLockedHoverActions(nextLock))
+      );
+    }
+
     return () => {
       canceled = true;
       subscriptions.unsubscribe();
     };
-  }, [api, uuid, viewMode, disabledActions, uiActions]);
+  }, [api, uuid, viewMode, disabledActions, uiActions, prependWrapperRef]);
 
   const styles = useMemoCss(floatingActionsStyles);
   return (
-    <div css={styles.wrapper}>
+    <div
+      css={styles.wrapper}
+      className={classNames(hasLockedHoverActions ? 'lockHoverActions' : null)}
+    >
       {children}
       {floatingActions.length > 0 && (
         <div
@@ -170,7 +185,7 @@ const floatingActionsStyles = {
   wrapper: ({ euiTheme }: UseEuiTheme) =>
     css({
       position: 'relative',
-      '&:hover, &:focus-within': {
+      '&:hover, &:focus-within, &.lockHoverActions': {
         '.presentationUtil__floatingActions': {
           opacity: 1,
           visibility: 'visible',
