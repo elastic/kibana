@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { memoize } from 'lodash';
 import { monarch } from '@elastic/monaco-esql';
 import * as monarchDefinitions from '@elastic/monaco-esql/lib/definitions';
 import { esqlFunctionNames } from '@kbn/esql-ast/src/definitions/generated/function_names';
@@ -83,14 +82,6 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
   getHoverProvider: (deps?: ESQLDependencies): monaco.languages.HoverProvider => {
     let lastHoveredWord: string;
 
-    // Cache getHoverItem based on the full query text and the hovered word
-    const memoizedGetHoverItem = memoize(
-      (fullText: string, _hoveredWord: string, offset: number, dependencies?: ESQLDependencies) => {
-        return getHoverItem(fullText, offset, dependencies);
-      },
-      (fullText: string, hoveredWord: string) => `${fullText}::${hoveredWord}`
-    );
-
     return {
       async provideHover(
         model: monaco.editor.ITextModel,
@@ -116,8 +107,7 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
           }
         }
 
-        const wordToCache = hoveredWord?.word || '';
-        return memoizedGetHoverItem(fullText, wordToCache, offset, deps);
+        return getHoverItem(fullText, offset, deps);
       },
     };
   },
