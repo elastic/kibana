@@ -35,19 +35,7 @@ check_for_changed_files() {
   CUSTOM_FIX_MESSAGE="${3:-Changes from $1}"
   GIT_CHANGES="$(git status --porcelain -- . ':!:config/node.options' ':!config/kibana.yml')"
 
-  if [[  "$GIT_CHANGES" && "${COLLECT_QUICK_CHECK_CHANGES:-}" == "true" ]]; then
-    echo "'$1' caused changes to the following files:"
-    echo "$GIT_CHANGES"
-    echo ""
-    echo "Committing these changes (will be pushed after all checks complete)."
-
-    git config --global user.name kibanamachine
-    git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
-    git add -A -- . ':!config/node.options' ':!config/kibana.yml'
-
-    git commit -m "$CUSTOM_FIX_MESSAGE"
-    exit 1
-  elif [ "$GIT_CHANGES" ]; then
+  if [ "$GIT_CHANGES" ]; then
     if ! is_auto_commit_disabled && [[ "$SHOULD_AUTO_COMMIT_CHANGES" == "true" && "${BUILDKITE_PULL_REQUEST:-false}" != "false" ]]; then
       echo "'$1' caused changes to the following files:"
       echo "$GIT_CHANGES"
