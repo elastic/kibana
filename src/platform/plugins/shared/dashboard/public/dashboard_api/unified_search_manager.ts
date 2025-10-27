@@ -57,7 +57,6 @@ export function initializeUnifiedSearchManager(
     timefilter: { timefilter: timefilterService },
   } = dataService.query;
 
-  const controlGroupReload$ = new Subject<void>();
   const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
   const panelsReload$ = new Subject<void>();
   const query$ = new BehaviorSubject<Query | undefined>(initialState.query);
@@ -258,7 +257,6 @@ export function initializeUnifiedSearchManager(
         .getAutoRefreshFetch$()
         .pipe(
           tap(() => {
-            controlGroupReload$.next();
             panelsReload$.next();
           }),
           switchMap((done) => waitForPanelsToLoad$.pipe(finalize(done)))
@@ -309,7 +307,6 @@ export function initializeUnifiedSearchManager(
       filters$,
       esqlVariables$,
       forceRefresh: () => {
-        controlGroupReload$.next();
         panelsReload$.next();
       },
       query$,
@@ -322,7 +319,6 @@ export function initializeUnifiedSearchManager(
       unifiedSearchFilters$,
     },
     internalApi: {
-      controlGroupReload$,
       startComparing$: (lastSavedState$: BehaviorSubject<DashboardState>) => {
         return combineLatest([
           unifiedSearchFilters$,

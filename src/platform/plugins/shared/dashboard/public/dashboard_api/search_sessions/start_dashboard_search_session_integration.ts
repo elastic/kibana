@@ -59,7 +59,7 @@ export function startDashboardSearchSessionIntegration(
     dashboardApi.isFetchPaused$,
   ])
     .pipe(
-      filter(([, isFetchPaused]) => isFetchPaused), // don't generate new search session until fetch is unpaused
+      filter(([, isFetchPaused]) => !isFetchPaused), // don't generate new search session until fetch is unpaused
       skip(1) // ignore first emit since search session ID is initialized
     )
     .subscribe(() => {

@@ -164,10 +164,7 @@ export function getDashboardApi({
     },
     isEmbeddedExternally: Boolean(creationOptions?.isEmbeddedExternally),
     isManaged,
-    reload$: merge(
-      unifiedSearchManager.internalApi.controlGroupReload$,
-      unifiedSearchManager.internalApi.panelsReload$
-    ).pipe(debounceTime(0)),
+    reload$: unifiedSearchManager.internalApi.panelsReload$, // HERE
     getSerializedState: () => getSerializedState(getState()),
     runInteractiveSave: async () => {
       trackOverlayApi.clearOverlays();
