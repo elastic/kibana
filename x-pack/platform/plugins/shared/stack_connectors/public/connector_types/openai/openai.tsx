@@ -11,7 +11,6 @@ import type { GenericValidationResult } from '@kbn/triggers-actions-ui-plugin/pu
 import { SUB_ACTION } from '../../../common/openai/constants';
 import { OPENAI_CONNECTOR_ID, OPENAI_TITLE } from '../../../common/openai/constants';
 import type { ActionParams, OpenAIConnector } from './types';
-import { REPLACEMENT_LABEL, REPLACEMENT_DESCRIPTION } from '../../common/translations';
 
 interface ValidationErrors {
   subAction: string[];
@@ -21,11 +20,6 @@ export function getConnectorType(): OpenAIConnector {
   return {
     id: OPENAI_CONNECTOR_ID,
     iconClass: lazy(() => import('./logo')),
-    deprecationBadgeProps: {
-      label: REPLACEMENT_LABEL,
-      color: 'subdued',
-      tooltipContent: REPLACEMENT_DESCRIPTION,
-    },
     deprecationMessage: lazy(() => import('../../common/genai_connectors/deprecated_callout')),
     selectMessage: i18n.translate('xpack.stackConnectors.components.genAi.selectMessageText', {
       defaultMessage: 'Send a request to an OpenAI or Azure OpenAI service.',

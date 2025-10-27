@@ -19,8 +19,12 @@ import {
   EuiBetaBadge,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ActionTypeModel } from '../../../..';
-import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../../translations';
+import {
+  REPLACEMENT_LABEL,
+  REPLACEMENT_DESCRIPTION,
+  TECH_PREVIEW_DESCRIPTION,
+  TECH_PREVIEW_LABEL,
+} from '../../translations';
 
 interface Props {
   icon?: IconType | null;
@@ -28,7 +32,7 @@ interface Props {
   actionTypeMessage?: string | null;
   compatibility?: string[] | null;
   isExperimental?: boolean;
-  badgeProps?: ActionTypeModel['deprecationBadgeProps'];
+  showDeprecationBadge?: boolean;
 }
 
 const FlyoutHeaderComponent: React.FC<Props> = ({
@@ -37,7 +41,7 @@ const FlyoutHeaderComponent: React.FC<Props> = ({
   actionTypeMessage,
   compatibility,
   isExperimental,
-  badgeProps,
+  showDeprecationBadge,
 }) => {
   return (
     <EuiFlyoutHeader hasBorder data-test-subj="create-connector-flyout-header">
@@ -76,12 +80,12 @@ const FlyoutHeaderComponent: React.FC<Props> = ({
                     />
                   </EuiFlexItem>
                 ) : null}
-                {actionTypeName && badgeProps ? (
+                {actionTypeName && showDeprecationBadge ? (
                   <EuiFlexItem grow={false}>
                     <EuiBetaBadge
-                      color={badgeProps.color}
-                      label={badgeProps.label}
-                      tooltipContent={badgeProps.tooltipContent}
+                      color="subdued"
+                      label={REPLACEMENT_LABEL}
+                      tooltipContent={REPLACEMENT_DESCRIPTION}
                     />
                   </EuiFlexItem>
                 ) : null}

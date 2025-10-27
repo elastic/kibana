@@ -14,13 +14,17 @@ import { EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isEmpty } from 'lodash';
 import { checkActionTypeEnabled } from '@kbn/alerts-ui-shared/src/check_action_type_enabled';
-import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
+import {
+  REPLACEMENT_LABEL,
+  REPLACEMENT_DESCRIPTION,
+  TECH_PREVIEW_DESCRIPTION,
+  TECH_PREVIEW_LABEL,
+} from '../translations';
 import type { ActionType, ActionTypeIndex, ActionTypeRegistryContract } from '../../../types';
 import { loadActionTypes } from '../../lib/action_connector_api';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { useKibana } from '../../../common/lib/kibana';
 import { SectionLoading } from '../../components/section_loading';
-import type { ActionTypeModel } from '../../../types';
 
 interface Props {
   onActionTypeChange: (actionType: ActionType) => void;
@@ -38,7 +42,6 @@ interface RegisteredActionType {
   name: string;
   isExperimental: boolean | undefined;
   isDeprecated: boolean;
-  deprecationBadgeProps?: ActionTypeModel['deprecationBadgeProps'];
 }
 
 const filterActionTypes = (actionTypes: RegisteredActionType[], searchValue: string) => {
@@ -127,7 +130,6 @@ export const ActionTypeMenu = ({
         name: actionType.name,
         isExperimental: actionTypeModel.isExperimental,
         isDeprecated: actionType.isDeprecated,
-        deprecationBadgeProps: actionTypeModel?.deprecationBadgeProps,
       };
     });
 
@@ -140,15 +142,16 @@ export const ActionTypeMenu = ({
     .sort((a, b) => actionTypeCompare(a.actionType, b.actionType))
     .map((item, index) => {
       const checkEnabledResult = checkActionTypeEnabled(item.actionType);
-
-      let betaBadgeProps: EuiBetaBadgeProps | undefined = item.deprecationBadgeProps;
-
-      if (item.isExperimental) {
-        betaBadgeProps = {
-          label: TECH_PREVIEW_LABEL,
-          tooltipContent: TECH_PREVIEW_DESCRIPTION,
-        };
-      }
+      const betaBadgeProps =
+        item.isExperimental || item.isDeprecated
+          ? ({
+              label: item.isExperimental ? TECH_PREVIEW_LABEL : REPLACEMENT_LABEL,
+              tooltipContent: item.isExperimental
+                ? TECH_PREVIEW_DESCRIPTION
+                : REPLACEMENT_DESCRIPTION,
+              color: item.isDeprecated ? 'subdued' : undefined,
+            } as EuiBetaBadgeProps)
+          : undefined;
 
       const card = (
         <EuiCard

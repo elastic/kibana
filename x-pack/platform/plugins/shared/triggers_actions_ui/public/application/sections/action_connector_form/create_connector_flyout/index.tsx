@@ -277,7 +277,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
         actionTypeMessage={actionTypeModel?.selectMessage}
         compatibility={getConnectorCompatibility(actionType?.supportedFeatureIds)}
         isExperimental={actionTypeModel?.isExperimental}
-        badgeProps={actionTypeModel?.deprecationBadgeProps}
+        showDeprecationBadge={actionTypeModel?.deprecationMessage !== undefined}
       />
       <EuiFlyoutBody banner={banner}>
         {!hasConnectorTypeSelected && (
