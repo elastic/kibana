@@ -48,10 +48,8 @@ run(
 
     // Baseline file location
     function updateBaselineFile() {
-      if (updateBaseline) {
-        Fs.writeFileSync(baselineFile, JSON.stringify(errorCounts, null, 2));
-        log.success('Baseline file updated.');
-      }
+      Fs.writeFileSync(baselineFile, JSON.stringify(errorCounts, null, 2));
+      log.success('Baseline file updated.');
     }
 
     let invalidSpec = false;
@@ -136,12 +134,12 @@ run(
         process.exit(1);
       } else {
         log.success('No error increase detected.');
-        updateBaselineFile();
+        if (updateBaseline) updateBaselineFile();
         process.exit(0);
       }
     }
 
-    updateBaselineFile();
+    if (updateBaseline) updateBaselineFile();
 
     log.info('Validation complete');
     if (invalidSpec) {
