@@ -32,7 +32,7 @@ const COLUMN_INDEX_PROP = 'data-column-index';
 export const getColumnInputRenderer = (
   columnName: string,
   columnIndex: number,
-  editMode: boolean,
+  isColumnInEditMode: boolean,
   setEditingColumnIndex: (columnIndex: number | null) => void,
   indexUpdateService: IndexUpdateService,
   telemetryService: IndexEditorTelemetryService
@@ -41,7 +41,7 @@ export const getColumnInputRenderer = (
     ...column,
     display: (
       <AddColumnHeader
-        editMode={editMode}
+        isColumnInEditMode={isColumnInEditMode}
         setEditingColumnIndex={setEditingColumnIndex}
         initialColumnName={columnName}
         columnIndex={columnIndex}
@@ -90,7 +90,7 @@ export const getColumnInputRenderer = (
 };
 
 interface AddColumnHeaderProps {
-  editMode: boolean;
+  isColumnInEditMode: boolean;
   setEditingColumnIndex: (columnIndex: number | null) => void;
   initialColumnName: string;
   columnIndex: number;
@@ -98,7 +98,7 @@ interface AddColumnHeaderProps {
 }
 
 export const AddColumnHeader = ({
-  editMode,
+  isColumnInEditMode,
   setEditingColumnIndex,
   initialColumnName,
   columnIndex,
@@ -163,7 +163,7 @@ export const AddColumnHeader = ({
     return false;
   }, [columnIndex]);
 
-  if (editMode) {
+  if (isColumnInEditMode) {
     return (
       <EuiFocusTrap initialFocus="input" returnFocus={returnFocus}>
         <EuiForm component="form" onSubmit={onSubmit}>
