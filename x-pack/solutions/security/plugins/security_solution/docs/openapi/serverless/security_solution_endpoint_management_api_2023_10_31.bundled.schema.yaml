@@ -1736,7 +1736,8 @@ components:
                       enum:
                         - kernel
                       type: string
-                  required: type
+                  required:
+                    - type
                   title: Kernel memory dump
                   type: object
                 - properties:
@@ -1767,7 +1768,8 @@ components:
                     - entity_id
                   title: Process memory dump with entity id
                   type: object
-          required: parameters
+          required:
+            - parameters
     MemoryDumpRouteRequestBody:
       allOf:
         - type: object
