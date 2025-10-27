@@ -16,7 +16,6 @@ import { Subscription, distinctUntilChanged, map, of } from 'rxjs';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import {
-  EuiFlexGroup,
   EuiFlexItem,
   EuiFormControlLayout,
   EuiFormLabel,
@@ -179,27 +178,27 @@ export const ControlPanel = ({
             css={styles.formControl}
             prepend={
               <>
-                {' '}
                 <DragHandle
                   isEditable={isEditable}
                   controlTitle={panelTitle || defaultPanelTitle}
                   {...attributes}
                   {...listeners}
                 />
-                <EuiFlexGroup ref={prependWrapperRef} gutterSize="none">
-                  {api?.CustomPrependComponent ? (
-                    <api.CustomPrependComponent />
-                  ) : (
-                    <EuiToolTip
-                      content={panelTitle || defaultPanelTitle}
-                      anchorProps={{ className: 'eui-textTruncate', css: styles.tooltipStyles }}
-                    >
-                      <EuiFormLabel className="controlPanel--label">
+
+                {api?.CustomPrependComponent ? (
+                  <api.CustomPrependComponent />
+                ) : (
+                  <EuiToolTip
+                    content={panelTitle || defaultPanelTitle}
+                    anchorProps={{ className: 'eui-textTruncate', css: styles.tooltipStyles }}
+                  >
+                    <EuiFormLabel className="controlPanel--label">
+                      <span css={styles.prependWrapperStyles} ref={prependWrapperRef}>
                         {panelTitle || defaultPanelTitle}
-                      </EuiFormLabel>
-                    </EuiToolTip>
-                  )}
-                </EuiFlexGroup>
+                      </span>
+                    </EuiFormLabel>
+                  </EuiToolTip>
+                )}
               </>
             }
             compressed={parentApi.isCompressed ? parentApi.isCompressed() : true}
@@ -227,6 +226,12 @@ const controlPanelStyles = {
   controlWidthStyles,
   tooltipStyles: {
     height: '100%',
+  },
+  prependWrapperStyles: {
+    display: 'inline-block',
+    width: '100%',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   },
   formControl: ({ euiTheme }: UseEuiTheme) =>
     css({
