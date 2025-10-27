@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { getSelectedButtonInGroup } from '@kbn/test-eui-helpers';
-import { DataTableToolbar } from './toolbar';
 import type {
   DatatableVisualizationState,
   PagingState,
@@ -15,8 +14,8 @@ import type {
   VisualizationToolbarProps,
 } from '@kbn/lens-common';
 import { fireEvent, render, screen, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { DataGridDensity } from '@kbn/unified-data-table';
+import { DatatableAppearanceSettings } from './appearance_settings';
 
 // mocking random id generator function
 jest.mock('@elastic/eui', () => {
@@ -30,7 +29,7 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-describe('datatable toolbar', () => {
+describe('datatable appearance settings', () => {
   const defaultPagingState: PagingState = {
     size: 10,
     enabled: true,
@@ -46,17 +45,12 @@ describe('datatable toolbar', () => {
     };
   });
 
-  const renderAndOpenToolbar = async (overrides = {}) => {
+  const renderComponent = async (overrides = {}) => {
     const ROW_HEIGHT_SETTINGS_TEST_ID = 'lnsRowHeightSettings';
     const HEADER_HEIGHT_SETTINGS_TEST_ID = 'lnsHeaderHeightSettings';
     const DENSITY_SETTINGS_TEST_ID = 'lnsDensitySettings';
 
-    const rtlRender = render(<DataTableToolbar {...defaultProps} {...overrides} />);
-
-    const togglePopover = async () => {
-      await userEvent.click(screen.getByRole('button', { name: /visual options/i }));
-    };
-    await togglePopover();
+    const rtlRender = render(<DatatableAppearanceSettings {...defaultProps} {...overrides} />);
 
     const selectOptionFromButtonGroup = (testId: string) => (optionName: string | RegExp) => {
       const buttonGroup = screen.getByTestId(testId);
@@ -74,7 +68,6 @@ describe('datatable toolbar', () => {
 
     return {
       ...rtlRender,
-      togglePopover,
       getRowHeightValue: getSelectedButtonInGroup(ROW_HEIGHT_SETTINGS_TEST_ID),
       getRowHeightCustomValue: () => getNumberInput(ROW_HEIGHT_SETTINGS_TEST_ID),
       selectRowHeightOption: selectOptionFromButtonGroup(ROW_HEIGHT_SETTINGS_TEST_ID),
@@ -96,7 +89,7 @@ describe('datatable toolbar', () => {
       getHeaderHeightValue,
       getPaginationSwitch,
       getDensityValue,
-    } = await renderAndOpenToolbar();
+    } = await renderComponent();
 
     expect(getRowHeightValue()).toHaveTextContent(/custom/i);
     expect(getHeaderHeightValue()).toHaveTextContent(/custom/i);
@@ -113,7 +106,7 @@ describe('datatable toolbar', () => {
       getHeaderHeightCustomValue,
       getRowHeightCustomValue,
       getDensityValue,
-    } = await renderAndOpenToolbar({
+    } = await renderComponent({
       state: {
         ...defaultProps.state,
         rowHeight: 'custom',
@@ -134,7 +127,7 @@ describe('datatable toolbar', () => {
   });
 
   it('should change row height to "Auto" mode when selected', async () => {
-    const { selectRowHeightOption } = await renderAndOpenToolbar();
+    const { selectRowHeightOption } = await renderComponent();
 
     selectRowHeightOption(/auto/i);
     expect(defaultProps.setState).toHaveBeenCalledTimes(1);
@@ -144,7 +137,7 @@ describe('datatable toolbar', () => {
   });
 
   it('should toggle pagination on click', async () => {
-    const { clickPaginationSwitch } = await renderAndOpenToolbar();
+    const { clickPaginationSwitch } = await renderComponent();
 
     clickPaginationSwitch();
     expect(defaultProps.setState).toHaveBeenCalledTimes(1);
@@ -154,7 +147,7 @@ describe('datatable toolbar', () => {
   });
 
   it('should change row height to "Custom" mode when selected', async () => {
-    const { selectRowHeightOption } = await renderAndOpenToolbar();
+    const { selectRowHeightOption } = await renderComponent();
 
     selectRowHeightOption(/custom/i);
     expect(defaultProps.setState).toHaveBeenCalledTimes(1);
@@ -165,7 +158,7 @@ describe('datatable toolbar', () => {
   });
 
   it('should change header height to "Custom" mode', async () => {
-    const { selectHeaderHeightOption } = await renderAndOpenToolbar({
+    const { selectHeaderHeightOption } = await renderComponent({
       headerRowHeight: 'auto',
     });
 
@@ -178,7 +171,7 @@ describe('datatable toolbar', () => {
   });
 
   it('should toggle on table pagination', async () => {
-    const { clickPaginationSwitch } = await renderAndOpenToolbar();
+    const { clickPaginationSwitch } = await renderComponent();
 
     clickPaginationSwitch();
     expect(defaultProps.setState).toHaveBeenCalledTimes(1);
@@ -189,7 +182,7 @@ describe('datatable toolbar', () => {
     );
   });
   it('should toggle off table pagination', async () => {
-    const { clickPaginationSwitch } = await renderAndOpenToolbar({
+    const { clickPaginationSwitch } = await renderComponent({
       state: {
         ...defaultProps.state,
         paging: defaultPagingState,
@@ -205,7 +198,7 @@ describe('datatable toolbar', () => {
   });
 
   it('should change density to "Compact" when selected', async () => {
-    const { selectDensityOption } = await renderAndOpenToolbar();
+    const { selectDensityOption } = await renderComponent();
     selectDensityOption(/compact/i);
     expect(defaultProps.setState).toHaveBeenCalledTimes(1);
     expect(defaultProps.setState).toHaveBeenCalledWith({
@@ -214,7 +207,7 @@ describe('datatable toolbar', () => {
   });
 
   it('should change density to "Expanded" when selected', async () => {
-    const { selectDensityOption } = await renderAndOpenToolbar();
+    const { selectDensityOption } = await renderComponent();
     selectDensityOption(/expanded/i);
     expect(defaultProps.setState).toHaveBeenCalledTimes(1);
     expect(defaultProps.setState).toHaveBeenCalledWith({
