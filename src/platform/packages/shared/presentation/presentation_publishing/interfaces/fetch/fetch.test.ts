@@ -8,9 +8,9 @@
  */
 
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import { BehaviorSubject, skip, Subject } from 'rxjs';
-import { fetch$ } from './fetch';
 import { waitFor } from '@testing-library/react';
+import { BehaviorSubject, Subject, skip } from 'rxjs';
+import { fetch$ } from './fetch';
 
 const searchSessionRequestCompleteCallback = jest.fn();
 const waitForSearchSession = async () => {
@@ -159,7 +159,7 @@ describe('onFetchContextChanged', () => {
       parentApi.query$.next({ language: 'kquery', query: 'hello' });
       parentApi.reload$.next();
 
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100)); // search session ID is not requested so use generic timeout
       expect(onFetchMock).not.toHaveBeenCalled();
 
       subscription.unsubscribe();
@@ -207,7 +207,6 @@ describe('onFetchContextChanged', () => {
       parentApi.query$.next({ language: 'kquery', query: '' });
       parentApi.reload$.next();
 
-      await waitForSearchSession();
       await waitFor(() => {
         expect(onFetchMock).toHaveBeenCalledTimes(1);
       });
@@ -229,7 +228,6 @@ describe('onFetchContextChanged', () => {
       });
       parentApi.timeslice$.next([0, 1]);
 
-      await waitForSearchSession();
       await waitFor(() => {
         expect(onFetchMock).toHaveBeenCalledTimes(1);
       });
