@@ -11,12 +11,21 @@ import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { getBulkAgentDetailsRoute } from './get_bulk_agent_details';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 
+interface MockContext {
+  core: Promise<{
+    logger: {
+      get: jest.Mock;
+    };
+  }>;
+}
+
 describe('getBulkAgentDetailsRoute', () => {
   let mockOsqueryContext: OsqueryAppContext;
   let mockRouter: ReturnType<
     ReturnType<typeof httpServiceMock.createSetupContract>['createRouter']
   >;
   let routeHandler: RequestHandler<unknown, unknown, { agentIds: string[] }>;
+  let mockContext: MockContext;
 
   const mockAgentService = {
     asInternalScopedUser: jest.fn(),
@@ -30,15 +39,32 @@ describe('getBulkAgentDetailsRoute', () => {
     error: jest.fn(),
   };
 
+  const createMockContext = (): MockContext => ({
+    core: Promise.resolve({
+      logger: {
+        get: jest.fn().mockReturnValue({
+          debug: jest.fn(),
+          info: jest.fn(),
+          error: jest.fn(),
+        }),
+      },
+    }),
+  });
+
+  const createMockRequest = (agentIds: string[]) =>
+    httpServerMock.createKibanaRequest({
+      body: { agentIds },
+    });
+
+  const createMockResponse = () => httpServerMock.createResponseFactory();
+
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // Setup mock agent service
     mockAgentService.asInternalScopedUser.mockReturnValue({
       getByIds: mockGetByIds,
     });
 
-    // Create mock context
     mockOsqueryContext = {
       logFactory: {
         get: jest.fn().mockReturnValue(mockLogger),
@@ -49,14 +75,13 @@ describe('getBulkAgentDetailsRoute', () => {
       },
     } as unknown as OsqueryAppContext;
 
-    // Create mock router
+    mockContext = createMockContext();
+
     const httpService = httpServiceMock.createSetupContract();
     mockRouter = httpService.createRouter();
 
-    // Register the route
     getBulkAgentDetailsRoute(mockRouter, mockOsqueryContext);
 
-    // Extract the route handler
     const route = mockRouter.versioned.getRoute(
       'post',
       '/internal/osquery/fleet_wrapper/agents/_bulk'
@@ -88,25 +113,8 @@ describe('getBulkAgentDetailsRoute', () => {
 
       mockGetByIds.mockResolvedValue(mockAgents);
 
-      const mockContext = {
-        core: Promise.resolve({
-          logger: {
-            get: jest.fn().mockReturnValue({
-              debug: jest.fn(),
-              info: jest.fn(),
-              error: jest.fn(),
-            }),
-          },
-        }),
-      };
-
-      const mockRequest = httpServerMock.createKibanaRequest({
-        body: {
-          agentIds: ['agent-1', 'agent-2'],
-        },
-      });
-
-      const mockResponse = httpServerMock.createResponseFactory();
+      const mockRequest = createMockRequest(['agent-1', 'agent-2']);
+      const mockResponse = createMockResponse();
 
       await routeHandler(mockContext as never, mockRequest as never, mockResponse);
 
@@ -130,24 +138,8 @@ describe('getBulkAgentDetailsRoute', () => {
 
       mockGetByIds.mockResolvedValue(mockAgents);
 
-      const mockContext = {
-        core: Promise.resolve({
-          logger: {
-            get: jest.fn().mockReturnValue({
-              debug: jest.fn(),
-              error: jest.fn(),
-            }),
-          },
-        }),
-      };
-
-      const mockRequest = httpServerMock.createKibanaRequest({
-        body: {
-          agentIds: ['agent-1'],
-        },
-      });
-
-      const mockResponse = httpServerMock.createResponseFactory();
+      const mockRequest = createMockRequest(['agent-1']);
+      const mockResponse = createMockResponse();
 
       await routeHandler(mockContext as never, mockRequest as never, mockResponse);
 
@@ -168,24 +160,8 @@ describe('getBulkAgentDetailsRoute', () => {
 
       mockGetByIds.mockResolvedValue(mockAgents);
 
-      const mockContext = {
-        core: Promise.resolve({
-          logger: {
-            get: jest.fn().mockReturnValue({
-              debug: jest.fn(),
-              error: jest.fn(),
-            }),
-          },
-        }),
-      };
-
-      const mockRequest = httpServerMock.createKibanaRequest({
-        body: {
-          agentIds,
-        },
-      });
-
-      const mockResponse = httpServerMock.createResponseFactory();
+      const mockRequest = createMockRequest(agentIds);
+      const mockResponse = createMockResponse();
 
       await routeHandler(mockContext as never, mockRequest as never, mockResponse);
 
@@ -198,7 +174,6 @@ describe('getBulkAgentDetailsRoute', () => {
     });
 
     it('should handle missing/deleted agents with ignoreMissing=true', async () => {
-      // Request 5 agents, but only 3 exist (2 are deleted/missing)
       const mockAgents = [
         { id: 'agent-1', local_metadata: { host: { name: 'host-1' } } },
         { id: 'agent-2', local_metadata: { host: { name: 'host-2' } } },
@@ -207,34 +182,16 @@ describe('getBulkAgentDetailsRoute', () => {
 
       mockGetByIds.mockResolvedValue(mockAgents);
 
-      const mockContext = {
-        core: Promise.resolve({
-          logger: {
-            get: jest.fn().mockReturnValue({
-              debug: jest.fn(),
-              error: jest.fn(),
-            }),
-          },
-        }),
-      };
-
-      const mockRequest = httpServerMock.createKibanaRequest({
-        body: {
-          agentIds: ['agent-1', 'agent-2', 'agent-3', 'agent-4', 'agent-5'],
-        },
-      });
-
-      const mockResponse = httpServerMock.createResponseFactory();
+      const mockRequest = createMockRequest(['agent-1', 'agent-2', 'agent-3', 'agent-4', 'agent-5']);
+      const mockResponse = createMockResponse();
 
       await routeHandler(mockContext as never, mockRequest as never, mockResponse);
 
-      // Verify ignoreMissing flag is passed
       expect(mockGetByIds).toHaveBeenCalledWith(
         ['agent-1', 'agent-2', 'agent-3', 'agent-4', 'agent-5'],
         { ignoreMissing: true }
       );
 
-      // Should return only the 3 existing agents
       expect(mockResponse.ok).toHaveBeenCalledWith({
         body: {
           agents: mockAgents,
@@ -250,33 +207,15 @@ describe('getBulkAgentDetailsRoute', () => {
 
       mockGetByIds.mockResolvedValue(mockAgents);
 
-      // Mock service to return custom space
       mockOsqueryContext.service.getActiveSpace = jest
         .fn()
         .mockResolvedValue({ id: customSpaceId, name: 'Custom Space' });
 
-      const mockContext = {
-        core: Promise.resolve({
-          logger: {
-            get: jest.fn().mockReturnValue({
-              debug: jest.fn(),
-              error: jest.fn(),
-            }),
-          },
-        }),
-      };
-
-      const mockRequest = httpServerMock.createKibanaRequest({
-        body: {
-          agentIds: ['agent-1'],
-        },
-      });
-
-      const mockResponse = httpServerMock.createResponseFactory();
+      const mockRequest = createMockRequest(['agent-1']);
+      const mockResponse = createMockResponse();
 
       await routeHandler(mockContext as never, mockRequest as never, mockResponse);
 
-      // Verify space-scoped service was called with correct space ID
       expect(mockAgentService.asInternalScopedUser).toHaveBeenCalledWith(customSpaceId);
       expect(mockResponse.ok).toHaveBeenCalled();
     });
@@ -286,31 +225,13 @@ describe('getBulkAgentDetailsRoute', () => {
 
       mockGetByIds.mockResolvedValue(mockAgents);
 
-      // Mock service to return undefined space
       mockOsqueryContext.service.getActiveSpace = jest.fn().mockResolvedValue(undefined);
 
-      const mockContext = {
-        core: Promise.resolve({
-          logger: {
-            get: jest.fn().mockReturnValue({
-              debug: jest.fn(),
-              error: jest.fn(),
-            }),
-          },
-        }),
-      };
-
-      const mockRequest = httpServerMock.createKibanaRequest({
-        body: {
-          agentIds: ['agent-1'],
-        },
-      });
-
-      const mockResponse = httpServerMock.createResponseFactory();
+      const mockRequest = createMockRequest(['agent-1']);
+      const mockResponse = createMockResponse();
 
       await routeHandler(mockContext as never, mockRequest as never, mockResponse);
 
-      // Verify default space ID is used
       expect(mockAgentService.asInternalScopedUser).toHaveBeenCalledWith(DEFAULT_SPACE_ID);
       expect(mockResponse.ok).toHaveBeenCalled();
     });
@@ -318,38 +239,19 @@ describe('getBulkAgentDetailsRoute', () => {
 
   describe('Error handling', () => {
     it('should return empty array when agent service is unavailable', async () => {
-      // Mock service to return no agent service
       mockOsqueryContext.service.getAgentService = jest.fn().mockReturnValue(null);
 
-      const mockContext = {
-        core: Promise.resolve({
-          logger: {
-            get: jest.fn().mockReturnValue({
-              debug: jest.fn(),
-              error: jest.fn(),
-            }),
-          },
-        }),
-      };
-
-      const mockRequest = httpServerMock.createKibanaRequest({
-        body: {
-          agentIds: ['agent-1'],
-        },
-      });
-
-      const mockResponse = httpServerMock.createResponseFactory();
+      const mockRequest = createMockRequest(['agent-1']);
+      const mockResponse = createMockResponse();
 
       await routeHandler(mockContext as never, mockRequest as never, mockResponse);
 
-      // Should return empty agents array
       expect(mockResponse.ok).toHaveBeenCalledWith({
         body: {
           agents: [],
         },
       });
 
-      // getByIds should not be called
       expect(mockGetByIds).not.toHaveBeenCalled();
     });
 
@@ -357,33 +259,15 @@ describe('getBulkAgentDetailsRoute', () => {
       const errorMessage = 'Fleet service connection failed';
       mockGetByIds.mockRejectedValue(new Error(errorMessage));
 
-      const mockContext = {
-        core: Promise.resolve({
-          logger: {
-            get: jest.fn().mockReturnValue({
-              debug: jest.fn(),
-              error: jest.fn(),
-            }),
-          },
-        }),
-      };
-
-      const mockRequest = httpServerMock.createKibanaRequest({
-        body: {
-          agentIds: ['agent-1'],
-        },
-      });
-
-      const mockResponse = httpServerMock.createResponseFactory();
+      const mockRequest = createMockRequest(['agent-1']);
+      const mockResponse = createMockResponse();
 
       await routeHandler(mockContext as never, mockRequest as never, mockResponse);
 
-      // Verify error was logged using the module-level mockLogger
       expect(mockLogger.error).toHaveBeenCalledWith(
         expect.stringContaining('Failed to fetch bulk agent details')
       );
 
-      // Verify error response
       expect(mockResponse.customError).toHaveBeenCalledWith({
         statusCode: 500,
         body: {
@@ -395,27 +279,9 @@ describe('getBulkAgentDetailsRoute', () => {
     it('should handle empty agent IDs array', async () => {
       mockGetByIds.mockResolvedValue([]);
 
-      const mockContext = {
-        core: Promise.resolve({
-          logger: {
-            get: jest.fn().mockReturnValue({
-              debug: jest.fn(),
-              error: jest.fn(),
-            }),
-          },
-        }),
-      };
+      const mockRequest = createMockRequest([]);
+      const mockResponse = createMockResponse();
 
-      const mockRequest = httpServerMock.createKibanaRequest({
-        body: {
-          agentIds: [],
-        },
-      });
-
-      const mockResponse = httpServerMock.createResponseFactory();
-
-      // This should fail validation and not reach the handler
-      // But if it does (validation bypassed in tests), verify graceful handling
       await routeHandler(mockContext as never, mockRequest as never, mockResponse);
 
       expect(mockGetByIds).toHaveBeenCalledWith([], { ignoreMissing: true });
@@ -449,28 +315,11 @@ describe('getBulkAgentDetailsRoute', () => {
 
       mockGetByIds.mockResolvedValue(mockAgents);
 
-      const mockContext = {
-        core: Promise.resolve({
-          logger: {
-            get: jest.fn().mockReturnValue({
-              debug: jest.fn(),
-              error: jest.fn(),
-            }),
-          },
-        }),
-      };
-
-      const mockRequest = httpServerMock.createKibanaRequest({
-        body: {
-          agentIds: ['agent-1'],
-        },
-      });
-
-      const mockResponse = httpServerMock.createResponseFactory();
+      const mockRequest = createMockRequest(['agent-1']);
+      const mockResponse = createMockResponse();
 
       await routeHandler(mockContext as never, mockRequest as never, mockResponse);
 
-      // Verify full local_metadata structure is preserved
       expect(mockResponse.ok).toHaveBeenCalledWith({
         body: {
           agents: expect.arrayContaining([
@@ -492,34 +341,16 @@ describe('getBulkAgentDetailsRoute', () => {
       const mockAgents = [
         {
           id: 'agent-1',
-          // No local_metadata
         },
       ];
 
       mockGetByIds.mockResolvedValue(mockAgents);
 
-      const mockContext = {
-        core: Promise.resolve({
-          logger: {
-            get: jest.fn().mockReturnValue({
-              debug: jest.fn(),
-              error: jest.fn(),
-            }),
-          },
-        }),
-      };
-
-      const mockRequest = httpServerMock.createKibanaRequest({
-        body: {
-          agentIds: ['agent-1'],
-        },
-      });
-
-      const mockResponse = httpServerMock.createResponseFactory();
+      const mockRequest = createMockRequest(['agent-1']);
+      const mockResponse = createMockResponse();
 
       await routeHandler(mockContext as never, mockRequest as never, mockResponse);
 
-      // Should succeed even without local_metadata
       expect(mockResponse.ok).toHaveBeenCalledWith({
         body: {
           agents: [{ id: 'agent-1' }],
@@ -538,42 +369,23 @@ describe('getBulkAgentDetailsRoute', () => {
 
       mockGetByIds.mockResolvedValue(mockAgents);
 
-      const mockContext = {
-        core: Promise.resolve({
-          logger: {
-            get: jest.fn().mockReturnValue({
-              debug: jest.fn(),
-              error: jest.fn(),
-            }),
-          },
-        }),
-      };
-
-      const mockRequest = httpServerMock.createKibanaRequest({
-        body: {
-          agentIds,
-        },
-      });
-
-      const mockResponse = httpServerMock.createResponseFactory();
+      const mockRequest = createMockRequest(agentIds);
+      const mockResponse = createMockResponse();
 
       const startTime = Date.now();
       await routeHandler(mockContext as never, mockRequest as never, mockResponse);
       const duration = Date.now() - startTime;
 
-      // Verify successful response
       expect(mockResponse.ok).toHaveBeenCalledWith({
         body: {
           agents: mockAgents,
         },
       });
 
-      // Performance assertion - should complete quickly (< 100ms in tests)
       expect(duration).toBeLessThan(100);
     });
 
     it('should support pagination across 10 pages (1000 agents)', async () => {
-      // This simulates 10 separate calls for 10 pages of 100 agents each
       const pages = 10;
       const pageSize = 100;
 
@@ -587,24 +399,8 @@ describe('getBulkAgentDetailsRoute', () => {
 
         mockGetByIds.mockResolvedValue(mockAgents);
 
-        const mockContext = {
-          core: Promise.resolve({
-            logger: {
-              get: jest.fn().mockReturnValue({
-                debug: jest.fn(),
-                error: jest.fn(),
-              }),
-            },
-          }),
-        };
-
-        const mockRequest = httpServerMock.createKibanaRequest({
-          body: {
-            agentIds,
-          },
-        });
-
-        const mockResponse = httpServerMock.createResponseFactory();
+        const mockRequest = createMockRequest(agentIds);
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext as never, mockRequest as never, mockResponse);
 
@@ -615,7 +411,6 @@ describe('getBulkAgentDetailsRoute', () => {
         });
       }
 
-      // Verify getByIds was called 10 times (once per page)
       expect(mockGetByIds).toHaveBeenCalledTimes(pages);
     });
   });

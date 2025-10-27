@@ -100,19 +100,16 @@ export const getActionResultsRoute = (
             });
           }
 
+          const page = request.query.page ?? 0;
+          const pageSize = request.query.pageSize ?? 100;
+          const startIndex = page * pageSize;
+          const endIndex = startIndex + pageSize;
+
           let agentIds: string[];
           let agentIdsForCurrentPage: string[];
 
           if (requestedAgentIds) {
-            // Use provided agentIds for filtering (external API consumers)
             agentIds = requestedAgentIds;
-
-            // Apply server-side pagination for external API consumers too
-            // This ensures consistent behavior and proper memory management
-            const page = request.query.page ?? 0;
-            const pageSize = request.query.pageSize ?? 100;
-            const startIndex = page * pageSize;
-            const endIndex = startIndex + pageSize;
             agentIdsForCurrentPage = requestedAgentIds.slice(startIndex, endIndex);
           } else {
             // Fetch action details to get agent IDs (internal UI usage)
@@ -153,11 +150,6 @@ export const getActionResultsRoute = (
               });
             }
 
-            // Apply pagination to agent IDs for internal UI
-            const page = request.query.page ?? 0;
-            const pageSize = request.query.pageSize ?? 100;
-            const startIndex = page * pageSize;
-            const endIndex = startIndex + pageSize;
             agentIdsForCurrentPage = agentIds.slice(startIndex, endIndex);
           }
 
@@ -223,20 +215,17 @@ export const getActionResultsRoute = (
             processedEdges = [...res.edges, ...placeholderEdges] as typeof res.edges;
           }
 
-          // Calculate pagination metadata
-          const currentPage = request.query.page ?? 0;
-          const currentPageSize = request.query.pageSize ?? 100;
           const totalAgents = agentIds?.length ?? 0;
-          const totalPages = Math.ceil(totalAgents / currentPageSize);
+          const totalPages = Math.ceil(totalAgents / pageSize);
 
           return response.ok({
             body: {
               edges: processedEdges,
-              total: processedEdges.length, // Current page size
-              totalAgents, // Total agents across all pages
-              currentPage, // Current page number (0-indexed)
-              pageSize: currentPageSize, // Items per page
-              totalPages, // Total number of pages
+              total: processedEdges.length,
+              totalAgents,
+              currentPage: page,
+              pageSize,
+              totalPages,
               aggregations,
               inspect: res.inspect,
             },

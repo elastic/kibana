@@ -33,8 +33,9 @@ type ResultEdge = estypes.SearchHit<object>;
 
 const DEFAULT_PAGE_SIZE = 20;
 const DEFAULT_PAGE_INDEX = 0;
-const AGENT_DETAILS_CACHE_TIME_MS = 30000; // 30 seconds
+const AGENT_DETAILS_CACHE_TIME_MS = 30000;
 const TABLE_MAX_HEIGHT_PX = 500;
+const BULK_AGENT_DETAILS_ROUTE = '/internal/osquery/fleet_wrapper/agents/_bulk';
 
 const renderErrorMessage = (error: string) => (
   <EuiCodeBlock language="shell" fontSize="s" paddingSize="none" transparentBackground>
@@ -100,13 +101,13 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
 
   // Bulk fetch agent details for current page using POST (avoids URL length limits)
   const { data: agentsData } = useQuery(
-    ['bulkAgentDetails', currentPageAgentIds], // Use array directly for cache key
+    ['bulkAgentDetails', currentPageAgentIds],
     async () => {
       if (currentPageAgentIds.length === 0) return { agents: [] };
 
       return http.post<{
         agents: Array<{ id: string; local_metadata?: { host?: { name?: string } } }>;
-      }>('/internal/osquery/fleet_wrapper/agents/_bulk', {
+      }>(BULK_AGENT_DETAILS_ROUTE, {
         version: API_VERSIONS.internal.v1,
         body: JSON.stringify({
           agentIds: currentPageAgentIds,
