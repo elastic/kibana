@@ -33,6 +33,7 @@ describe('Header', () => {
   };
   const props = {
     activeTab: TimelineTabs.query,
+    currentIndices: ['index-1', 'index-2'],
     showEventsCountBadge: true,
     totalCount: 1,
     browserFields: {},

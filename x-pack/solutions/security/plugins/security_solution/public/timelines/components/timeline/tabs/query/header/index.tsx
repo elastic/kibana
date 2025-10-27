@@ -11,6 +11,7 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
@@ -33,7 +34,7 @@ import { StatefulSearchOrFilter } from '../../../search_or_filter';
 import { DataProviders } from '../../../data_providers';
 import { EventsCountBadge, StyledEuiFlyoutHeader, TabHeaderContainer } from '../../shared/layout';
 import {
-  useGetDuplicateDataViewWithAlertsOnly,
+  useAddAlertsOnlyFilter,
   useShouldShowAlertsOnlyMigrationMessage,
   useTimelineSelectAlertsOnlyDataView,
 } from './use_show_alerts_only_migration_helpers';
@@ -111,7 +112,7 @@ const QueryTabHeaderComponent: React.FC<Props> = ({
   });
 
   const selectAlertsDataView = useTimelineSelectAlertsOnlyDataView();
-  const openEditor = useGetDuplicateDataViewWithAlertsOnly({ dataViewId });
+  const addAlertsFilter = useAddAlertsOnlyFilter(timelineId);
 
   return (
     <StyledEuiFlyoutHeader data-test-subj={`${activeTab}-tab-flyout-header`} hasBorder={false}>
@@ -137,19 +138,34 @@ const QueryTabHeaderComponent: React.FC<Props> = ({
                     iconType="warning"
                     size="m"
                   >
-                    <EuiFlexGroup gutterSize="s" alignItems="flexStart">
-                      <EuiFlexItem grow={false}>
-                        <EuiButton color="warning" onClick={openEditor} fill>
-                          {'Duplicate data view'}
-                        </EuiButton>
+                    <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
+                      <EuiFlexItem>
+                        <EuiText size="s">{i18n.CALL_OUT_ALERTS_ONLY_MIGRATION_CONTENT}</EuiText>
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        <EuiButtonEmpty
-                          aria-label="Switch to alerts data view"
-                          onClick={selectAlertsDataView}
-                        >
-                          {'Switch to alerts data view'}
-                        </EuiButtonEmpty>
+                        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                          <EuiFlexItem grow={false}>
+                            <EuiButtonEmpty
+                              aria-label={i18n.CALL_OUT_ALERTS_ONLY_MIGRATION_SWITCH_BUTTON}
+                              color="text"
+                              onClick={selectAlertsDataView}
+                              size="s"
+                            >
+                              {i18n.CALL_OUT_ALERTS_ONLY_MIGRATION_SWITCH_BUTTON}
+                            </EuiButtonEmpty>
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiButton
+                              aria-label={i18n.CALL_OUT_FILTER_FOR_ALERTS_BUTTON}
+                              color="warning"
+                              onClick={addAlertsFilter}
+                              fill
+                              size="s"
+                            >
+                              {i18n.CALL_OUT_FILTER_FOR_ALERTS_BUTTON}
+                            </EuiButton>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiCallOut>
