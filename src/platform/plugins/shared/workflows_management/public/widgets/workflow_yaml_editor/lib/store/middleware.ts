@@ -8,7 +8,7 @@
  */
 
 import type { AnyAction, Dispatch, Middleware, MiddlewareAPI } from '@reduxjs/toolkit';
-import { setYamlString } from './slice';
+import { _setComputedDataInternal, clearComputedData, setYamlString } from './slice';
 import type { RootState } from './types';
 import { performComputation } from './utils/computation';
 
@@ -20,15 +20,19 @@ const debounceComputation = (
   store: MiddlewareAPI<Dispatch<AnyAction>, any>, // eslint-disable-line @typescript-eslint/no-explicit-any
   yamlString: string | undefined
 ) => {
-  // Clear any pending computation
-  if (computationTimeoutId) {
-    clearTimeout(computationTimeoutId);
-    computationTimeoutId = null;
-  }
+  // Note: timeout clearing is handled in the middleware before this function is called
 
-  // Debounce the computation
+  // Schedule the debounced computation
   computationTimeoutId = setTimeout(() => {
-    performComputation(store, yamlString);
+    // Get fresh state at execution time, not at scheduling time
+    const state = store.getState();
+    const computed = performComputation(yamlString, state.workflow.schemaLoose);
+
+    if (computed) {
+      store.dispatch(_setComputedDataInternal(computed));
+    } else {
+      store.dispatch(clearComputedData());
+    }
     computationTimeoutId = null;
   }, COMPUTATION_DEBOUNCE_MS);
 };
@@ -40,21 +44,35 @@ export const workflowComputationMiddleware: Middleware =
 
     // Only react to yamlString changes
     if (action.type === setYamlString.type) {
-      const state = store.getState();
-      const { yamlString } = state.workflow;
-
-      // Do computation immediately if yaml string is defined and no previous workflow graph exists
-      if (yamlString && !state.workflow.computed) {
-        performComputation(store, yamlString);
-        return result;
-      }
-
-      // Clear any pending computation
+      // Clear any pending computation first (before checking state)
       if (computationTimeoutId) {
         clearTimeout(computationTimeoutId);
         computationTimeoutId = null;
       }
 
+      const state = store.getState();
+      const { yamlString } = state.workflow;
+
+      // If yamlString is empty/undefined, clear computed data and return
+      if (!yamlString) {
+        store.dispatch(clearComputedData());
+        return result;
+      }
+
+      // Do computation immediately if not initialized yet
+      if (!state.workflow.isInitialized) {
+        const computed = performComputation(yamlString, state.workflow.schemaLoose);
+
+        if (computed) {
+          store.dispatch(_setComputedDataInternal(computed));
+        } else {
+          store.dispatch(clearComputedData());
+        }
+
+        return result;
+      }
+
+      // Otherwise, debounce subsequent changes
       debounceComputation(store, yamlString);
     }
 
