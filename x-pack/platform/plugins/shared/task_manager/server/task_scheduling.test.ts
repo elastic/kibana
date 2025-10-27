@@ -280,6 +280,9 @@ describe('TaskScheduling', () => {
           },
         ],
       });
+    mockTaskStore.schedule.mockRejectedValueOnce({
+      statusCode: 409,
+    });
 
     const result = await taskScheduling.ensureScheduled(task);
 
