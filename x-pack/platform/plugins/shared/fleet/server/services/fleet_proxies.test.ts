@@ -62,7 +62,7 @@ describe('Fleet proxies service', () => {
       items: [],
       total: 0,
     }));
-    mockedOutputService.listAllForProxyId.mockImplementation(async (_, proxyId) => {
+    mockedOutputService.listAllForProxyId.mockImplementation(async (proxyId) => {
       if (proxyId === PROXY_IDS.RELATED_PRECONFIGURED) {
         return {
           items: [
@@ -89,7 +89,7 @@ describe('Fleet proxies service', () => {
         perPage: 10,
       };
     });
-    mockedFleetServerHostService.listAllForProxyId.mockImplementation(async (_, proxyId) => {
+    mockedFleetServerHostService.listAllForProxyId.mockImplementation(async (proxyId) => {
       if (proxyId === PROXY_IDS.RELATED_PRECONFIGURED) {
         return {
           items: [

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any, complexity */
+
 import { Frequency } from '@kbn/rrule';
 
 // Define the trigger type based on the schema

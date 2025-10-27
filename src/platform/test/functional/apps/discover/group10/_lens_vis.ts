@@ -167,7 +167,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilSearchingHasFinished();
       await checkNoVis(defaultTotalCount);
 
-      await dataViews.editFromSearchBar({ newName: 'logs', newTimeField: '@timestamp' });
+      await dataViews.editFromSearchBar({ newIndexPattern: 'logs', newTimeField: '@timestamp' });
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
       await checkHistogramVis(defaultTimespan, defaultTotalCount);

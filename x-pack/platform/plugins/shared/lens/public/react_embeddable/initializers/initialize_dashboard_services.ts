@@ -17,19 +17,20 @@ import { titleComparators } from '@kbn/presentation-publishing';
 import { apiIsPresentationContainer, apiPublishesSettings } from '@kbn/presentation-containers';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, map, merge } from 'rxjs';
-import { isTextBasedLanguage } from '../helper';
 import type {
   LensComponentProps,
   LensPanelProps,
   LensRuntimeState,
-  LensEmbeddableStartServices,
   LensOverrides,
   LensSharedProps,
   IntegrationCallbacks,
   LensInternalApi,
   LensApi,
   LensSerializedState,
-} from '../types';
+} from '@kbn/lens-common';
+import { isTextBasedLanguage } from '../helper';
+
+import type { LensEmbeddableStartServices } from '../types';
 import { apiHasLensComponentProps } from '../type_guards';
 import type { StateManagementConfig } from './initialize_state_management';
 

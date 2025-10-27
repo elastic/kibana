@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { AtomicGraphNode } from '@kbn/workflows/graph';
-import type { NodeImplementation } from '../node_implementation';
-import { ConnectorStepImpl } from '../connector_step';
-import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { ConnectorExecutor } from '../../connector_executor';
+import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
+import { ConnectorStepImpl } from '../connector_step';
+import type { NodeImplementation } from '../node_implementation';
 
 /**
  * Implements the execution logic for an atomic workflow step.

@@ -244,6 +244,8 @@ components:
 
     ResponseActionDetails:
        type: object
+       required:
+         - command
        properties:
          id:
            type: string

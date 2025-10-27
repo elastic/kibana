@@ -13,7 +13,7 @@ import {
   UserProfilesProvider,
   useUserProfilesServices,
 } from '@kbn/content-management-user-profiles';
-import { QueryClientProvider, useQueryClient } from '@tanstack/react-query';
+import { QueryClientProvider, useQueryClient } from '@kbn/react-query';
 
 import type { EuiComboBoxProps } from '@elastic/eui';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';

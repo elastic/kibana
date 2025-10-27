@@ -206,7 +206,7 @@ describe('EnrollmentSettingsHandler utils', () => {
 
   describe('getDownloadSource', () => {
     it('returns the default download source when no id is specified', async () => {
-      const source = await getDownloadSource(mockSoClient);
+      const source = await getDownloadSource();
       expect(source).toEqual({
         id: 'source-1',
         name: 'Source 1',
@@ -216,7 +216,7 @@ describe('EnrollmentSettingsHandler utils', () => {
     });
 
     it('returns the default download source when the specified id is not found', async () => {
-      const source = await getDownloadSource(mockSoClient, 'some-id');
+      const source = await getDownloadSource('some-id');
       expect(source).toEqual({
         id: 'source-1',
         name: 'Source 1',
@@ -226,7 +226,7 @@ describe('EnrollmentSettingsHandler utils', () => {
     });
 
     it('returns the correct download source when an id is specified', async () => {
-      const source = await getDownloadSource(mockSoClient, 'source-2');
+      const source = await getDownloadSource('source-2');
       expect(source).toEqual({
         id: 'source-2',
         name: 'Source 2',

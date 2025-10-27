@@ -6,7 +6,7 @@
  */
 
 import type { CoreStart, ScopedHistory } from '@kbn/core/public';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';

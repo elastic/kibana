@@ -17,8 +17,7 @@ import { createGetDocViewer } from './accessors';
 const OBSERVABILITY_GENERIC_DOCUMENT_PROFILE_ID = 'observability-generic-document-profile';
 
 export const createObservabilityGenericDocumentProfileProvider = ({
-  tracesContextService,
-  apmErrorsContextService,
+  apmContextService,
   logsContextService,
 }: ProfileProviderServices): DocumentProfileProvider => ({
   profileId: OBSERVABILITY_GENERIC_DOCUMENT_PROFILE_ID,
@@ -26,8 +25,8 @@ export const createObservabilityGenericDocumentProfileProvider = ({
   profile: {
     getDocViewer: createGetDocViewer({
       apm: {
-        errors: apmErrorsContextService.getErrorsIndexPattern(),
-        traces: tracesContextService.getAllTracesIndexPattern(),
+        errors: apmContextService.errorsService.getErrorsIndexPattern(),
+        traces: apmContextService.tracesService.getAllTracesIndexPattern(),
       },
       logs: logsContextService.getAllLogsIndexPattern(),
     }),

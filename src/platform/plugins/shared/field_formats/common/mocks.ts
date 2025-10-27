@@ -18,6 +18,7 @@ export const fieldFormatsMock: IFieldFormatsRegistry = {
     type: { id: 'bytes' },
     convert: jest.fn().mockImplementation((t: string) => t),
     getConverterFor: jest.fn().mockImplementation(() => (t: string) => t),
+    toJSON: jest.fn(),
   })),
   getDefaultInstanceCacheResolver: jest.fn(),
   getDefaultInstancePlain: jest.fn(),

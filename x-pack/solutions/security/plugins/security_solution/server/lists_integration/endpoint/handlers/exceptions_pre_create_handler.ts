@@ -102,10 +102,7 @@ export const getExceptionsPreCreateItemHandler = (
       endpointExceptionValidator.notifyFeatureUsage(data, 'ENDPOINT_EXCEPTIONS');
     }
 
-    if (
-      isEndpointArtifact &&
-      endpointAppContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled
-    ) {
+    if (isEndpointArtifact) {
       if (!request) {
         throw new EndpointArtifactExceptionValidationError(`Missing HTTP Request object`);
       }

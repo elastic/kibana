@@ -385,7 +385,7 @@ export class SavedObjectsPageObject extends FtrService {
   async clickDelete({ confirmDelete = true }: { confirmDelete?: boolean } = {}) {
     await this.testSubjects.click('savedObjectsManagementDelete');
     if (confirmDelete) {
-      await this.testSubjects.click('confirmModalConfirmButton');
+      await this.testSubjects.click('confirmModalConfirmButton', undefined, undefined, 5);
       await this.testSubjects.waitForDeleted('confirmModalConfirmButton');
       await this.waitTableIsLoaded();
     }

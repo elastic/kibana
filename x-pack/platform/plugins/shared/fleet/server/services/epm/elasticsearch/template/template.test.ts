@@ -1950,6 +1950,26 @@ describe('EPM template', () => {
         generateMappings(processedFields);
       }).toThrow();
     });
+
+    it('tests processing flattened field with ignore_above 1024', () => {
+      const flattenedFieldYml = `
+- name: flattenedField
+  type: flattened
+  ignore_above: 1024
+`;
+      const flattenedFieldMapping = {
+        properties: {
+          flattenedField: {
+            type: 'flattened',
+            ignore_above: 1024,
+          },
+        },
+      };
+      const fields: Field[] = load(flattenedFieldYml);
+      const processedFields = processFields(fields);
+      const mappings = generateMappings(processedFields);
+      expect(mappings).toEqual(flattenedFieldMapping);
+    });
   });
 
   describe('generateTemplateIndexPattern and getTemplatePriority', () => {

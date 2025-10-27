@@ -12,6 +12,10 @@ xpack.cloud.serverless.project_type: workplace_ai
 ## Set the home route
 uiSettings.overrides.defaultRoute: /app/workplace_ai
 
+## Enable tech-preview pages
+uiSettings.overrides:
+  workflows:ui:enabled: true
+
 ## Enable workplace_ai plugins
 xpack.workplaceAIApp.enabled: true
 

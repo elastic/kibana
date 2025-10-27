@@ -227,7 +227,7 @@ export const ResponseActionDetails = z.object({
    * The response action ID
    */
   id: z.string().uuid().optional(),
-  command: Command.optional(),
+  command: Command,
   agentType: AgentTypes.optional(),
   /**
    * Whether the response action is expired

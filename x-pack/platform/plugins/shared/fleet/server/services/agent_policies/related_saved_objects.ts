@@ -32,8 +32,8 @@ export async function fetchRelatedSavedObjects(
   );
 
   const [defaultDataOutputId, defaultMonitoringOutputId] = await Promise.all([
-    outputService.getDefaultDataOutputId(soClient),
-    outputService.getDefaultMonitoringOutputId(soClient),
+    outputService.getDefaultDataOutputId(),
+    outputService.getDefaultMonitoringOutputId(),
   ]);
 
   if (!defaultDataOutputId) {
@@ -61,7 +61,7 @@ export async function fetchRelatedSavedObjects(
 
   const [outputs, downloadSource, fleetServerHosts] = await Promise.all([
     outputService.bulkGet(outputIds, { ignoreNotFound: true }),
-    getDownloadSourceForAgentPolicy(soClient, agentPolicy),
+    getDownloadSourceForAgentPolicy(agentPolicy),
     getFleetServerHostsForAgentPolicy(soClient, agentPolicy).catch((err) => {
       logger.warn(`Unable to get fleet server hosts for policy ${agentPolicy?.id}: ${err.message}`);
 

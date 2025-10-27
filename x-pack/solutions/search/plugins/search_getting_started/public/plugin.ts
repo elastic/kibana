@@ -7,7 +7,7 @@
 
 import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient } from '@kbn/react-query';
 import { PLUGIN_ID, PLUGIN_NAME, PLUGIN_PATH } from '../common';
 
 import type {

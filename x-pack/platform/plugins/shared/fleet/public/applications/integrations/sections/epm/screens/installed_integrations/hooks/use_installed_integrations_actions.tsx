@@ -7,7 +7,7 @@
 
 import React, { useCallback, useContext, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { QueryClientProvider, useQueryClient } from '@tanstack/react-query';
+import { QueryClientProvider, useQueryClient } from '@kbn/react-query';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import {

@@ -190,7 +190,6 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
     timeRange,
     table,
     externalVisContext,
-    esqlVariables,
     controlsState,
   } = props;
 
@@ -265,7 +264,6 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
       ? {
           ...props,
           ...stateProps,
-          esqlVariables,
           controlsState,
           input$,
           chart,
@@ -282,7 +280,6 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
     props,
     requestParams,
     stateProps,
-    esqlVariables,
     controlsState,
   ]);
   const layoutProps = useMemo<UnifiedHistogramPartialLayoutProps>(

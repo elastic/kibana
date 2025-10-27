@@ -16,10 +16,9 @@ import {
   CONTROLS_GROUP_TYPE,
 } from '@kbn/controls-constants';
 import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
-import type { LensAppServices } from './types';
+import type { LensAppServices, LensSerializedState } from '@kbn/lens-common';
 import { LENS_EMBEDDABLE_TYPE } from '../../common/constants';
 import { extract } from '../../common/embeddable_factory';
-import type { LensSerializedState } from '../react_embeddable/types';
 
 /**
  * Transforms control panels state into controls group state format.

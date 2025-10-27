@@ -13,12 +13,12 @@ import type { RootState } from './types';
 // Selectors
 
 // Base selectors - these are simple property accessors that don't need memoization
-const selectWorkflowState = (state: RootState) => state.workflow;
+export const selectWorkflowEditorState = (state: RootState) => state.workflow;
 const selectComputedState = (state: RootState) => state.workflow.computed;
 
 // Exported memoized selectors for final properties
 export const selectYamlString = createSelector(
-  selectWorkflowState,
+  selectWorkflowEditorState,
   (workflow) => workflow.yamlString
 );
 
@@ -47,18 +47,23 @@ export const selectWorkflowDefinition = createSelector(
   (computed) => computed?.workflowDefinition
 );
 
+// Only checks if the current workflow yaml can be parses, does check the schema, only the yaml syntax
+export const selectIsYamlSyntaxValid = createSelector(selectComputedState, (computed): boolean =>
+  Boolean(computed?.workflowDefinition)
+);
+
 export const selectFocusedStepId = createSelector(
-  selectWorkflowState,
+  selectWorkflowEditorState,
   (workflow) => workflow.focusedStepId
 );
 
 export const selectHighlightedStepId = createSelector(
-  selectWorkflowState,
+  selectWorkflowEditorState,
   (workflow) => workflow.highlightedStepId
 );
 
 export const selectStepExecutions = createSelector(
-  selectWorkflowState,
+  selectWorkflowEditorState,
   (workflow) => workflow.stepExecutions
 );
 
@@ -67,4 +72,14 @@ export const selectFocusedStepInfo = createSelector(
   selectWorkflowLookup,
   (focusedStepId, workflowLookup) =>
     focusedStepId && workflowLookup ? workflowLookup.steps[focusedStepId] : undefined
+);
+
+export const selectConnectorsData = createSelector(
+  selectWorkflowEditorState,
+  (workflow) => workflow.connectors
+);
+
+export const selectSchemaLoose = createSelector(
+  selectWorkflowEditorState,
+  (workflow) => workflow.schemaLoose
 );

@@ -22,14 +22,20 @@ import {
 } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import { pick } from 'lodash';
+import type {
+  GetStateType,
+  LensApi,
+  LensInternalApi,
+  LensPublicCallbacks,
+  SharingSavedObjectProps,
+  UserMessagesDisplayLocationId,
+} from '@kbn/lens-common';
 import { getEditPath } from '../../common/constants';
-import type { GetStateType, LensApi, LensInternalApi, LensPublicCallbacks } from './types';
 import { getExpressionRendererParams } from './expressions/expression_params';
 import type { LensEmbeddableStartServices } from './types';
 import { prepareCallbacks } from './expressions/callbacks';
 import { buildUserMessagesHelpers } from './user_messages/api';
 import { getLogError } from './expressions/telemetry';
-import type { SharingSavedObjectProps, UserMessagesDisplayLocationId } from '../types';
 import { apiHasLensComponentCallbacks } from './type_guards';
 import { getRenderMode, getParentContext } from './helper';
 import { addLog } from './logger';

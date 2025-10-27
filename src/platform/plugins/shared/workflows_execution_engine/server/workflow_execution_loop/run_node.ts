@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowExecutionLoopParams } from './types';
-import { runStackMonitor } from './run_stack_monitor';
 import { catchError } from './catch_error';
+import { runStackMonitor } from './run_stack_monitor';
+import type { WorkflowExecutionLoopParams } from './types';
 
 /**
  * Executes a single step in the workflow execution process.

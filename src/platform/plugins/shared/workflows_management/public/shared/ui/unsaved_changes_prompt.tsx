@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import React, { useEffect, useRef } from 'react';
 import { Prompt, useLocation } from 'react-router-dom';
 

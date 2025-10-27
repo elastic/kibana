@@ -59,7 +59,10 @@
     "@kbn/resizable-layout",
     "@kbn/es-types",
     "@kbn/search-types",
-    "@kbn/utility-types"
+    "@kbn/utility-types",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-http-router-server-mocks",
+    "@kbn/react-query"
   ],
   "exclude": ["target/**/*"]
 }

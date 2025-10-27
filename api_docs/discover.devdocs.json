@@ -3010,7 +3010,15 @@
                 "section": "def-public.SavedSearch",
                 "text": "SavedSearch"
               },
-              ">; updateAdHocDataViewId: () => Promise<",
+              ">; updateAdHocDataViewId: (editedDataView: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              ") => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",

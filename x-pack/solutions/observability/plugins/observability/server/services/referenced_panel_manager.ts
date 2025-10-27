@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DashboardAttributes, DashboardPanel } from '@kbn/dashboard-plugin/server';
+import type { DashboardState, DashboardPanel } from '@kbn/dashboard-plugin/server';
 import type { Logger, SavedObjectsClientContract, SavedObjectsFindResult } from '@kbn/core/server';
 import type { ReferencedPanelAttributes, ReferencedPanelAttributesWithReferences } from './helpers';
 
@@ -50,7 +50,7 @@ export class ReferencedPanelManager {
     dashboard,
     panel,
   }: {
-    dashboard: SavedObjectsFindResult<DashboardAttributes>;
+    dashboard: SavedObjectsFindResult<DashboardState>;
     panel: DashboardPanel;
   }) {
     const { uid, type } = panel;

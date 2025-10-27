@@ -31,5 +31,6 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
     });
 
     loadTestFile(require.resolve('./alert_flyout'));
+    loadTestFile(require.resolve('./alerts_table_in_explorer'));
   });
 };

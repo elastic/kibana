@@ -8,13 +8,11 @@
 import { flatten, minBy, pick, mapValues, partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type {
-  Layer,
   Column,
   AnyColumnWithReferences,
   AnyColumnWithSourceField,
   TermsColumn,
-} from '@kbn/visualizations-plugin/common/convert_to_lens';
-import { generateId } from '../../id_generator';
+} from '@kbn/visualizations-plugin/common';
 import type {
   DatasourceSuggestion,
   IndexPattern,
@@ -22,14 +20,15 @@ import type {
   IndexPatternMap,
   TableChangeType,
   VisualizationDimensionGroupConfig,
-} from '../../types';
-import { columnToOperation } from './form_based';
-import type {
+  NavigateToLensLayer,
   BaseIndexPatternColumn,
-  OperationType,
   FormulaIndexPatternColumn,
-  ColumnAdvancedParams,
-} from './operations';
+  FormBasedPrivateState,
+  FormBasedLayer,
+} from '@kbn/lens-common';
+import { generateId } from '../../id_generator';
+import { columnToOperation } from './form_based';
+import type { OperationType, ColumnAdvancedParams } from './operations';
 import {
   insertNewColumn,
   replaceColumn,
@@ -43,7 +42,6 @@ import {
   updateColumnLabel,
 } from './operations';
 import { hasField } from './pure_utils';
-import type { FormBasedPrivateState, FormBasedLayer } from './types';
 import { documentField } from './document_field';
 import type { OperationDefinition } from './operations/definitions';
 import { insertOrReplaceFormulaColumn } from './operations/definitions/formula';
@@ -179,7 +177,7 @@ export function getDatasourceSuggestionsForField(
 // Called when the user navigates from Visualize editor to Lens
 export function getDatasourceSuggestionsForVisualizeCharts(
   state: FormBasedPrivateState,
-  contextLayers: Layer[],
+  contextLayers: NavigateToLensLayer[],
   indexPatterns: IndexPatternMap
 ): IndexPatternSuggestion[] {
   return getEmptyLayersSuggestionsForVisualizeCharts(state, contextLayers, indexPatterns);
@@ -187,7 +185,7 @@ export function getDatasourceSuggestionsForVisualizeCharts(
 
 function getEmptyLayersSuggestionsForVisualizeCharts(
   state: FormBasedPrivateState,
-  contextLayers: Layer[],
+  contextLayers: NavigateToLensLayer[],
   indexPatterns: IndexPatternMap
 ): IndexPatternSuggestion[] {
   const suggestions: IndexPatternSuggestion[] = [];
@@ -266,7 +264,7 @@ function createColumnChange(column: Column, indexPattern: IndexPattern): ColumnC
   };
 }
 
-function convertToColumnChange(columns: Layer['columns'], indexPattern: IndexPattern) {
+function convertToColumnChange(columns: Column[], indexPattern: IndexPattern) {
   return columns.reduce<ColumnChange[]>((acc, column) => {
     if (!columns.some((c) => isReferenceColumn(c) && column.columnId === c.references[0])) {
       const newColumn: ColumnChange = createColumnChange(column, indexPattern);
@@ -310,9 +308,9 @@ function convertToColumnChange(columns: Layer['columns'], indexPattern: IndexPat
 
 function createNewLayerWithMetricAggregationFromVizEditor(
   indexPattern: IndexPattern,
-  layer: Layer
+  layer: NavigateToLensLayer
 ) {
-  const columns = convertToColumnChange(layer.columns, indexPattern);
+  const columns = convertToColumnChange(layer.columns as Column[], indexPattern);
   let newLayer: FormBasedLayer = {
     ignoreGlobalFilters: layer.ignoreGlobalFilters,
     indexPatternId: indexPattern.id,

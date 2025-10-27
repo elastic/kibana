@@ -9,57 +9,57 @@
 
 // Import SUB_ACTION enums from all stack connectors
 import {
-  SUB_ACTION as INFERENCE_SUB_ACTION,
-  INFERENCE_CONNECTOR_ID,
-} from '@kbn/stack-connectors-plugin/common/inference/constants';
-import {
-  SUB_ACTION as BEDROCK_SUB_ACTION,
   BEDROCK_CONNECTOR_ID,
+  SUB_ACTION as BEDROCK_SUB_ACTION,
 } from '@kbn/stack-connectors-plugin/common/bedrock/constants';
 import {
-  SUB_ACTION as OPENAI_SUB_ACTION,
-  OPENAI_CONNECTOR_ID,
-} from '@kbn/stack-connectors-plugin/common/openai/constants';
-import {
-  SUB_ACTION as GEMINI_SUB_ACTION,
-  GEMINI_CONNECTOR_ID,
-} from '@kbn/stack-connectors-plugin/common/gemini/constants';
-import {
-  SUB_ACTION as THEHIVE_SUB_ACTION,
-  THEHIVE_CONNECTOR_ID,
-} from '@kbn/stack-connectors-plugin/common/thehive/constants';
-import {
-  SUB_ACTION as TINES_SUB_ACTION,
-  TINES_CONNECTOR_ID,
-} from '@kbn/stack-connectors-plugin/common/tines/constants';
-import {
-  SUB_ACTION as XSOAR_SUB_ACTION,
-  XSOAR_CONNECTOR_ID,
-} from '@kbn/stack-connectors-plugin/common/xsoar/constants';
-import {
-  SUB_ACTION as SENTINELONE_SUB_ACTION,
-  SENTINELONE_CONNECTOR_ID,
-} from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
-import {
-  SUB_ACTION as D3SECURITY_SUB_ACTION,
-  D3_SECURITY_CONNECTOR_ID,
-} from '@kbn/stack-connectors-plugin/common/d3security/constants';
-import {
-  SUB_ACTION as CROWDSTRIKE_SUB_ACTION,
   CROWDSTRIKE_CONNECTOR_ID,
+  SUB_ACTION as CROWDSTRIKE_SUB_ACTION,
 } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
 import {
-  MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION,
-  MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID,
-} from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/constants';
+  D3_SECURITY_CONNECTOR_ID,
+  SUB_ACTION as D3SECURITY_SUB_ACTION,
+} from '@kbn/stack-connectors-plugin/common/d3security/constants';
 import {
-  JiraServiceManagementSubActions,
+  GEMINI_CONNECTOR_ID,
+  SUB_ACTION as GEMINI_SUB_ACTION,
+} from '@kbn/stack-connectors-plugin/common/gemini/constants';
+import {
+  INFERENCE_CONNECTOR_ID,
+  SUB_ACTION as INFERENCE_SUB_ACTION,
+} from '@kbn/stack-connectors-plugin/common/inference/constants';
+import {
   JIRA_SERVICE_MANAGEMENT_CONNECTOR_TYPE_ID,
+  JiraServiceManagementSubActions,
 } from '@kbn/stack-connectors-plugin/common/jira-service-management/constants';
 import {
-  OpsgenieSubActions,
+  MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID,
+  MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION,
+} from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/constants';
+import {
+  OPENAI_CONNECTOR_ID,
+  SUB_ACTION as OPENAI_SUB_ACTION,
+} from '@kbn/stack-connectors-plugin/common/openai/constants';
+import {
   OpsgenieConnectorTypeId,
+  OpsgenieSubActions,
 } from '@kbn/stack-connectors-plugin/common/opsgenie';
+import {
+  SENTINELONE_CONNECTOR_ID,
+  SUB_ACTION as SENTINELONE_SUB_ACTION,
+} from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
+import {
+  THEHIVE_CONNECTOR_ID,
+  SUB_ACTION as THEHIVE_SUB_ACTION,
+} from '@kbn/stack-connectors-plugin/common/thehive/constants';
+import {
+  TINES_CONNECTOR_ID,
+  SUB_ACTION as TINES_SUB_ACTION,
+} from '@kbn/stack-connectors-plugin/common/tines/constants';
+import {
+  XSOAR_CONNECTOR_ID,
+  SUB_ACTION as XSOAR_SUB_ACTION,
+} from '@kbn/stack-connectors-plugin/common/xsoar/constants';
 
 // Helper function to format sub-action names for display
 function formatSubActionName(action: string): string {

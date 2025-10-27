@@ -48,6 +48,12 @@ import type { ComponentProps } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
+import {
+  hasLimitBeforeAggregate,
+  missingSortBeforeLimit,
+} from '@kbn/esql-utils/src/utils/query_parsing_helpers';
+import type { TelemetryQuerySubmittedProps } from '@kbn/esql-types/src/esql_telemetry_types';
+import { QuerySource } from '@kbn/esql-types/src/esql_telemetry_types';
 import { useCanCreateLookupIndex, useLookupIndexCommand } from './custom_commands';
 import { EditorFooter } from './editor_footer';
 import {
@@ -194,22 +200,43 @@ const ESQLEditorInternal = function ESQLEditor({
     [onTextLangQueryChange]
   );
 
-  const onQuerySubmit = useCallback(() => {
-    if (isQueryLoading && isLoading && allowQueryCancellation) {
-      abortController?.abort();
-      setIsQueryLoading(false);
-    } else {
-      setIsQueryLoading(true);
-      const abc = new AbortController();
-      setAbortController(abc);
+  const onQuerySubmit = useCallback(
+    (source: TelemetryQuerySubmittedProps['query_source']) => {
+      if (isQueryLoading && isLoading && allowQueryCancellation) {
+        abortController?.abort();
+        setIsQueryLoading(false);
+      } else {
+        setIsQueryLoading(true);
+        const abc = new AbortController();
+        setAbortController(abc);
 
-      const currentValue = editor1.current?.getValue();
-      if (currentValue != null) {
-        setCodeStateOnSubmission(currentValue);
+        const currentValue = editor1.current?.getValue();
+        if (currentValue != null) {
+          setCodeStateOnSubmission(currentValue);
+        }
+
+        // TODO: add rest of options
+        if (currentValue) {
+          telemetryService.trackQuerySubmitted({
+            query_source: source,
+            query_length: editor1.current?.getModel()?.getValueLength().toString() ?? '0',
+            query_lines: editor1.current?.getModel()?.getLineCount().toString() ?? '0',
+            anti_limit_before_aggregate: hasLimitBeforeAggregate(currentValue),
+            anti_missing_sort_before_limit: missingSortBeforeLimit(currentValue),
+          });
+        }
+        onTextLangQuerySubmit({ esql: currentValue } as AggregateQuery, abc);
       }
-      onTextLangQuerySubmit({ esql: currentValue } as AggregateQuery, abc);
-    }
-  }, [isQueryLoading, isLoading, allowQueryCancellation, abortController, onTextLangQuerySubmit]);
+    },
+    [
+      isQueryLoading,
+      isLoading,
+      allowQueryCancellation,
+      abortController,
+      onTextLangQuerySubmit,
+      telemetryService,
+    ]
+  );
 
   const onCommentLine = useCallback(() => {
     const currentSelection = editor1?.current?.getSelection();
@@ -364,7 +391,7 @@ const ESQLEditorInternal = function ESQLEditor({
   editor1.current?.addCommand(
     // eslint-disable-next-line no-bitwise
     monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
-    onQuerySubmit
+    () => onQuerySubmit(QuerySource.MANUAL)
   );
 
   const styles = esqlEditorStyles(
@@ -502,6 +529,14 @@ const ESQLEditorInternal = function ESQLEditor({
     [telemetryService]
   );
 
+  const onClickQueryHistory = useCallback(
+    (isOpen: boolean) => {
+      telemetryService.trackQueryHistoryOpened(isOpen);
+      setIsHistoryOpen(isOpen);
+    },
+    [telemetryService, setIsHistoryOpen]
+  );
+
   const esqlCallbacks = useMemo<ESQLCallbacks>(() => {
     const callbacks: ESQLCallbacks = {
       getSources: async () => {
@@ -598,6 +633,7 @@ const ESQLEditorInternal = function ESQLEditor({
       },
       getActiveProduct: () => core.pricing.getActiveProduct(),
       canCreateLookupIndex,
+      isServerless: Boolean(kibana.services?.esql?.isServerless),
     };
     return callbacks;
   }, [
@@ -828,6 +864,7 @@ const ESQLEditorInternal = function ESQLEditor({
     return () => {
       model.current?.dispose();
       editor1ref.current?.dispose();
+      editorModel.current = undefined;
     };
   }, []);
 
@@ -936,7 +973,7 @@ const ESQLEditorInternal = function ESQLEditor({
               >
                 <EuiButton
                   color={queryRunButtonProperties.color as EuiButtonColor}
-                  onClick={onQuerySubmit}
+                  onClick={() => onQuerySubmit(QuerySource.MANUAL)}
                   iconType={queryRunButtonProperties.iconType}
                   size="s"
                   isLoading={isLoading && !allowQueryCancellation}
@@ -1103,7 +1140,7 @@ const ESQLEditorInternal = function ESQLEditor({
         hideTimeFilterInfo={hideTimeFilterInfo}
         {...editorMessages}
         isHistoryOpen={isHistoryOpen}
-        setIsHistoryOpen={setIsHistoryOpen}
+        setIsHistoryOpen={onClickQueryHistory}
         isLanguageComponentOpen={isLanguageComponentOpen}
         setIsLanguageComponentOpen={setIsLanguageComponentOpen}
         measuredContainerWidth={measuredEditorWidth}
@@ -1112,6 +1149,7 @@ const ESQLEditorInternal = function ESQLEditor({
         resizableContainerHeight={resizableContainerHeight}
         displayDocumentationAsFlyout={displayDocumentationAsFlyout}
         dataErrorsControl={dataErrorsControl}
+        telemetryService={telemetryService}
       />
       {createPortal(
         Object.keys(popoverPosition).length !== 0 && popoverPosition.constructor === Object && (

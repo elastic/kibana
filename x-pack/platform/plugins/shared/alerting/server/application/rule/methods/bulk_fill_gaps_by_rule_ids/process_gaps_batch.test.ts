@@ -9,6 +9,7 @@ import type { Gap } from '../../../../lib/rule_gaps/gap';
 import { scheduleBackfill } from '../../../backfill/methods/schedule';
 import { rulesClientContextMock } from '../../../../rules_client/rules_client.mock';
 import { processGapsBatch } from './process_gaps_batch';
+import { backfillInitiator } from '../../../../../common/constants';
 
 jest.mock('../../../backfill/methods/schedule', () => {
   return {
@@ -76,6 +77,7 @@ describe('processGapsBatch', () => {
         [
           {
             ruleId: rule.id,
+            initiator: backfillInitiator.USER,
             ranges: testBatch.flatMap(getGapScheduleRange),
           },
         ],
@@ -155,6 +157,7 @@ describe('processGapsBatch', () => {
         [
           {
             ruleId: rule.id,
+            initiator: backfillInitiator.USER,
             ranges: clampedGapsBatch.flatMap(getGapScheduleRange),
           },
         ],
@@ -211,6 +214,7 @@ describe('processGapsBatch', () => {
         [
           {
             ruleId: rule.id,
+            initiator: backfillInitiator.USER,
             ranges: processedGaps.flatMap(getGapScheduleRange),
           },
         ],

@@ -9,7 +9,7 @@ import React from 'react';
 
 import { renderHook, waitFor } from '@testing-library/react';
 import { useKibana } from './use_kibana';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useDeleteSynonymsSet } from './use_delete_synonyms_set';
 
 jest.mock('./use_kibana');

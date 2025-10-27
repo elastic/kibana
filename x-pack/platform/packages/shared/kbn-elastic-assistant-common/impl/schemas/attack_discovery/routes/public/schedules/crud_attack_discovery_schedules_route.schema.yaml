@@ -42,7 +42,7 @@ paths:
                "name": "Daily Security Analysis",
                "enabled": true,
                "params": {
-                 "alerts_index_pattern": ".alerts-security.alerts-*",
+                 "alerts_index_pattern": ".alerts-security.alerts-default",
                  "api_config": {
                    "actionTypeId": "bedrock",
                    "connectorId": "my-bedrock-connector",
@@ -55,7 +55,22 @@ paths:
                "schedule": {
                  "interval": "24h"
                },
-               "actions": []
+               "actions": [
+                  {
+                     "action_type_id": ".cases",
+                     "id": "system-connector-.cases",
+                     "params": {
+                       "subAction": "run",
+                       "subActionParams": {
+                         "timeWindow": "7d",
+                         "reopenClosedCases": false,
+                         "groupingBy": [],
+                         "templateId": null
+                       }
+                     },
+                     "uuid": "12345678-1234-1234-1234-123456789012"
+                   }
+               ]
              }'
       x-labels: [ess, serverless]
       operationId: CreateAttackDiscoverySchedules
@@ -73,7 +88,7 @@ paths:
               name: "Daily Security Analysis"
               enabled: true
               params:
-                alerts_index_pattern: ".alerts-security.alerts-*"
+                alerts_index_pattern: ".alerts-security.alerts-default"
                 api_config:
                   actionTypeId: "bedrock"
                   connectorId: "my-bedrock-connector"
@@ -100,7 +115,7 @@ paths:
                 updated_at: "2023-10-31T10:00:00.000Z"
                 enabled: true
                 params:
-                  alerts_index_pattern: ".alerts-security.alerts-*"
+                  alerts_index_pattern: ".alerts-security.alerts-default"
                   api_config:
                     actionTypeId: "bedrock"
                     connectorId: "my-bedrock-connector"
@@ -162,7 +177,7 @@ paths:
                 updated_at: "2023-10-31T10:00:00.000Z"
                 enabled: true
                 params:
-                  alerts_index_pattern: ".alerts-security.alerts-*"
+                  alerts_index_pattern: ".alerts-security.alerts-default"
                   api_config:
                     actionTypeId: "bedrock"
                     connectorId: "my-bedrock-connector"
@@ -200,7 +215,7 @@ paths:
              --data '{
                "name": "Updated Daily Security Analysis",
                "params": {
-                 "alerts_index_pattern": ".alerts-security.alerts-*",
+                 "alerts_index_pattern": ".alerts-security.alerts-default",
                  "api_config": {
                    "actionTypeId": "bedrock",
                    "connectorId": "my-bedrock-connector",
@@ -238,7 +253,7 @@ paths:
             example:
               name: "Updated Daily Security Analysis"
               params:
-                alerts_index_pattern: ".alerts-security.alerts-*"
+                alerts_index_pattern: ".alerts-security.alerts-default"
                 api_config:
                   actionTypeId: "bedrock"
                   connectorId: "my-bedrock-connector"
@@ -265,7 +280,7 @@ paths:
                 updated_at: "2023-10-31T12:00:00.000Z"
                 enabled: true
                 params:
-                  alerts_index_pattern: ".alerts-security.alerts-*"
+                  alerts_index_pattern: ".alerts-security.alerts-default"
                   api_config:
                     actionTypeId: "bedrock"
                     connectorId: "my-bedrock-connector"
@@ -336,14 +351,14 @@ paths:
                 message: "Invalid request parameters"
 
   /api/attack_discovery/schedules/{id}/_enable:
-    put:
+    post:
       x-codegen-enabled: true
       x-code-samples:
         - lang: curl
           label: Enable an Attack discovery schedule
           source: |
             curl \
-             --request PUT 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012/_enable' \
+             --request POST 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012/_enable' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
       x-labels: [ess, serverless]
@@ -386,14 +401,14 @@ paths:
                 message: "Invalid request parameters"
 
   /api/attack_discovery/schedules/{id}/_disable:
-    put:
+    post:
       x-codegen-enabled: true
       x-code-samples:
         - lang: curl
           label: Disable an Attack discovery schedule
           source: |
             curl \
-             --request PUT 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012/_disable' \
+             --request POST 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012/_disable' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
       x-labels: [ess, serverless]

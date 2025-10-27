@@ -24,10 +24,15 @@ import {
   renderWithReduxStore,
 } from '../../../mocks';
 import { createIndexPatternServiceMock } from '../../../mocks/data_views_service_mock';
-import type { LensAppState } from '../../../state_management';
-import type { FramePublicAPI, Visualization, VisualizationConfigProps } from '../../../types';
+import type {
+  LensAppState,
+  FramePublicAPI,
+  Visualization,
+  VisualizationConfigProps,
+} from '@kbn/lens-common';
 import { LayerPanel } from './layer_panel';
 import type { LayerPanelProps } from './types';
+import { EditorFrameServiceProvider } from '../../editor_frame_service_context';
 
 jest.mock('../../../id_generator');
 
@@ -88,14 +93,8 @@ describe('LayerPanel', () => {
   function getDefaultProps(): LayerPanelProps {
     return {
       layerId: 'first',
-      visualizationMap: {
-        testVis: mockVisualization,
-      },
       activeVisualization: mockVisualization,
       dimensionGroups: mockVisualization.getConfiguration({} as VisualizationConfigProps).groups,
-      datasourceMap: {
-        testDatasource: mockDatasource,
-      },
       visualizationState: 'state',
       updateVisualization: jest.fn(),
       updateDatasource: jest.fn(),
@@ -139,7 +138,18 @@ describe('LayerPanel', () => {
       <LayerPanel {...props} {...propsOverrides} />,
       {
         wrapper: ({ children }) => (
-          <ChildDragDropProvider value={dragDropValue}>{children}</ChildDragDropProvider>
+          <ChildDragDropProvider value={dragDropValue}>
+            <EditorFrameServiceProvider
+              visualizationMap={{
+                testVis: mockVisualization,
+              }}
+              datasourceMap={{
+                testDatasource: mockDatasource,
+              }}
+            >
+              {children}
+            </EditorFrameServiceProvider>
+          </ChildDragDropProvider>
         ),
       },
       { preloadedState }

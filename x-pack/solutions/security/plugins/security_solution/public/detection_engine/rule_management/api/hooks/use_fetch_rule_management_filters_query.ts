@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { useCallback } from 'react';
-import type { UseQueryOptions } from '@tanstack/react-query';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import type { UseQueryOptions } from '@kbn/react-query';
+import { useQuery, useQueryClient } from '@kbn/react-query';
 import type { GetRuleManagementFiltersResponse } from '../../../../../common/api/detection_engine/rule_management';
 import { RULE_MANAGEMENT_FILTERS_URL } from '../../../../../common/api/detection_engine/rule_management/urls';
 import { fetchRuleManagementFilters } from '../api';

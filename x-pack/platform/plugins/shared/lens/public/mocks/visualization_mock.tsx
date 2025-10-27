@@ -8,7 +8,7 @@ import React from 'react';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { toExpression } from '@kbn/interpreter';
 import { faker } from '@faker-js/faker';
-import type { Visualization, VisualizationMap } from '../types';
+import type { Visualization, VisualizationMap } from '@kbn/lens-common';
 
 export function createMockVisualization(
   id = 'testVis',

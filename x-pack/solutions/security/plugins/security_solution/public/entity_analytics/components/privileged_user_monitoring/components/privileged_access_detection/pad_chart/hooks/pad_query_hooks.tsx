@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { getESQLResults, prettifyQuery } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';

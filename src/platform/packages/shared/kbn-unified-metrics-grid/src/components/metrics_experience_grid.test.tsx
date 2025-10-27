@@ -80,6 +80,7 @@ describe('MetricsExperienceGrid', () => {
       getTimeRange: () => ({ from: 'now-15m', to: 'now' }),
       filters: [],
       query: { esql: 'FROM metrics-*' },
+      esqlVariables: [],
       relativeTimeRange: { from: 'now-15m', to: 'now' },
       updateTimeRange: () => {},
     },

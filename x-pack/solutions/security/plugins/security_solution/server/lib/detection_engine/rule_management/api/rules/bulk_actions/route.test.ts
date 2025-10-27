@@ -31,7 +31,8 @@ let bulkGetRulesMock: jest.Mock;
 
 describe('Perform bulk action route', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let { clients, context } = requestContextMock.createTools();
+  let clients: ReturnType<typeof requestContextMock.createTools>['clients'];
+  let context: ReturnType<typeof requestContextMock.createTools>['context'];
   let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
   const mockRule = getFindResultWithSingleHit().data[0];
   const experimentalFeatures = {
@@ -53,6 +54,11 @@ describe('Perform bulk action route', () => {
     performBulkActionRoute(server.router, ml, {
       experimentalFeatures,
     } as ConfigType);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   describe('status codes', () => {
@@ -788,11 +794,13 @@ describe('Perform bulk action route', () => {
 
 describe('Perform bulk action route, experimental feature bulkEditAlertSuppressionEnabled is disabled', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let { clients, context } = requestContextMock.createTools();
+  let clients: ReturnType<typeof requestContextMock.createTools>['clients'];
+  let context: ReturnType<typeof requestContextMock.createTools>['context'];
   let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
   const experimentalFeatures = {} as ConfigType['experimentalFeatures'];
 
   beforeEach(() => {
+    jest.clearAllMocks();
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
@@ -801,6 +809,11 @@ describe('Perform bulk action route, experimental feature bulkEditAlertSuppressi
     performBulkActionRoute(server.router, ml, {
       experimentalFeatures,
     } as ConfigType);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   it('returns error if experimental feature bulkEditAlertSuppressionEnabled is not enabled for alert suppression bulk action', async () => {

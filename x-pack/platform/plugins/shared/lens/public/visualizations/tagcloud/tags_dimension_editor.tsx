@@ -14,9 +14,9 @@ import { getColorCategories } from '@kbn/chart-expressions-common';
 import type { KbnPalettes } from '@kbn/palettes';
 import type { FormatFactory } from '@kbn/visualization-ui-components';
 
+import type { FramePublicAPI } from '@kbn/lens-common';
 import { getDatatableColumn } from '../../../common/expressions/impl/datatable/utils';
 import { ColorMappingByTerms } from '../../shared_components/coloring/color_mapping_by_terms';
-import type { FramePublicAPI } from '../../types';
 import type { TagcloudState } from './types';
 
 interface Props {

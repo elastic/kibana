@@ -177,6 +177,16 @@ describe('single line query', () => {
 
         expect(text).toBe('FROM search-movies | GROK Awards "text"');
       });
+
+      test('multiple patterns', () => {
+        const { text } = reprint(
+          'FROM logs | GROK message "%{IP:client}", "%{WORD:method}", "%{NUMBER:status}"'
+        );
+
+        expect(text).toBe(
+          'FROM logs | GROK message "%{IP:client}", "%{WORD:method}", "%{NUMBER:status}"'
+        );
+      });
     });
 
     describe('DISSECT', () => {
@@ -217,6 +227,10 @@ describe('single line query', () => {
           FROM employees | LEFT JOIN a ON b, c, d.e.f`);
 
         expect(text).toBe('FROM employees | LEFT JOIN a ON b, c, d.e.f');
+      });
+
+      test('supports binary expressions', () => {
+        reprint('FROM employees | LEFT JOIN a ON b, c > d, d.e.f == 42 AND NOT MATCH(g, "hallo")');
       });
     });
 

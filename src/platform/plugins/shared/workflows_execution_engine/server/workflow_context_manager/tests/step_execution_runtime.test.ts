@@ -7,14 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { StepExecutionRuntime } from '../step_execution_runtime';
-
 import type { EsWorkflowExecution, EsWorkflowStepExecution, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
-import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
-import type { WorkflowExecutionState } from '../workflow_execution_state';
-import type { WorkflowContextManager } from '../workflow_context_manager';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
+import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
+import { StepExecutionRuntime } from '../step_execution_runtime';
+import type { WorkflowContextManager } from '../workflow_context_manager';
+import type { WorkflowExecutionState } from '../workflow_execution_state';
 
 describe('StepExecutionRuntime', () => {
   let underTest: StepExecutionRuntime;

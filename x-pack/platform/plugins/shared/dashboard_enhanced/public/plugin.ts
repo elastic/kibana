@@ -16,7 +16,7 @@ import type {
   AdvancedUiActionsStart,
 } from '@kbn/ui-actions-enhanced-plugin/public';
 import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
-import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
+import { setKibanaServices } from './services/kibana_services';
 import { EmbeddableToDashboardDrilldown } from './services/drilldowns/embeddable_to_dashboard_drilldown';
 
 export interface SetupDependencies {
@@ -56,29 +56,27 @@ export class DashboardEnhancedPlugin
   public start(core: CoreStart, plugins: StartDependencies): StartContract {
     setKibanaServices(core, plugins);
 
-    untilPluginStartServicesReady().then(() => {
-      plugins.uiActionsEnhanced.addTriggerActionAsync(
-        CONTEXT_MENU_TRIGGER,
-        'OPEN_FLYOUT_ADD_DRILLDOWN',
-        async () => {
-          const { flyoutCreateDrilldownAction } = await import(
-            './services/drilldowns/actions/flyout_create_drilldown'
-          );
-          return flyoutCreateDrilldownAction;
-        }
-      );
+    plugins.uiActionsEnhanced.addTriggerActionAsync(
+      CONTEXT_MENU_TRIGGER,
+      'OPEN_FLYOUT_ADD_DRILLDOWN',
+      async () => {
+        const { flyoutCreateDrilldownAction } = await import(
+          './services/drilldowns/actions/context_menu_actions_module'
+        );
+        return flyoutCreateDrilldownAction;
+      }
+    );
 
-      plugins.uiActionsEnhanced.addTriggerActionAsync(
-        CONTEXT_MENU_TRIGGER,
-        'OPEN_FLYOUT_EDIT_DRILLDOWN',
-        async () => {
-          const { flyoutEditDrilldownAction } = await import(
-            './services/drilldowns/actions/flyout_edit_drilldown'
-          );
-          return flyoutEditDrilldownAction;
-        }
-      );
-    });
+    plugins.uiActionsEnhanced.addTriggerActionAsync(
+      CONTEXT_MENU_TRIGGER,
+      'OPEN_FLYOUT_EDIT_DRILLDOWN',
+      async () => {
+        const { flyoutEditDrilldownAction } = await import(
+          './services/drilldowns/actions/context_menu_actions_module'
+        );
+        return flyoutEditDrilldownAction;
+      }
+    );
 
     return {};
   }

@@ -10,15 +10,21 @@
 import type { Duration } from 'moment';
 import type { ConsoleServerPlugin } from './plugin';
 
+export interface SpecDefinitionsJson {
+  name: string;
+  globals: Record<string, unknown>;
+  endpoints: Record<string, unknown>;
+}
+
 /** @public */
 export type ConsoleSetup = ReturnType<ConsoleServerPlugin['setup']> extends Promise<infer U>
   ? U
   : ReturnType<ConsoleServerPlugin['setup']>;
 
 /** @public */
-export type ConsoleStart = ReturnType<ConsoleServerPlugin['start']> extends Promise<infer U>
-  ? U
-  : ReturnType<ConsoleServerPlugin['start']>;
+export interface ConsoleStart {
+  getSpecJson: () => SpecDefinitionsJson;
+}
 
 /** @internal */
 export interface ESConfigForProxy {

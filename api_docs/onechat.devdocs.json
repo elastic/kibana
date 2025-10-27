@@ -55,6 +55,47 @@
           "path": "x-pack/platform/plugins/shared/onechat/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "onechat",
+          "id": "def-public.OnechatPluginStart.openConversationFlyout",
+          "type": "Function",
+          "tags": [],
+          "label": "openConversationFlyout",
+          "description": [
+            "\nOpens a conversation flyout.\n"
+          ],
+          "signature": [
+            "(options: ",
+            "OpenConversationFlyoutOptions",
+            ") => ",
+            "OpenConversationFlyoutReturn"
+          ],
+          "path": "x-pack/platform/plugins/shared/onechat/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "onechat",
+              "id": "def-public.OnechatPluginStart.openConversationFlyout.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "options",
+              "description": [
+                "- Configuration options for the flyout"
+              ],
+              "signature": [
+                "OpenConversationFlyoutOptions"
+              ],
+              "path": "x-pack/platform/plugins/shared/onechat/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": [
+            "An object containing the flyout reference"
+          ]
         }
       ],
       "lifecycle": "start",
@@ -88,7 +129,13 @@
               "\nRegister a built-in tool to be available in onechat."
             ],
             "signature": [
-              "<RunInput extends Zod.ZodObject<any, Zod.UnknownKeysParam, Zod.ZodTypeAny, { [x: string]: any; }, { [x: string]: any; }>>(tool: ",
+              "<RunInput extends ",
+              "ZodObject",
+              "<any, ",
+              "UnknownKeysParam",
+              ", ",
+              "ZodTypeAny",
+              ", { [x: string]: any; }, { [x: string]: any; }>>(tool: ",
               {
                 "pluginId": "@kbn/onechat-server",
                 "scope": "common",

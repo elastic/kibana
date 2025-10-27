@@ -14094,6 +14094,57 @@ Object {
       ],
       "type": "number",
     },
+    "headers": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-get-additional-properties": [Function],
+        },
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "key": Object {
+              "flags": Object {
+                "error": [Function],
+              },
+              "rules": Array [
+                Object {
+                  "args": Object {
+                    "method": [Function],
+                  },
+                  "name": "custom",
+                },
+              ],
+              "type": "string",
+            },
+            "value": Object {
+              "flags": Object {
+                "error": [Function],
+              },
+              "rules": Array [
+                Object {
+                  "args": Object {
+                    "method": [Function],
+                  },
+                  "name": "custom",
+                },
+              ],
+              "type": "string",
+            },
+          },
+          "name": "entries",
+        },
+      ],
+      "type": "record",
+    },
     "inferenceId": Object {
       "flags": Object {
         "error": [Function],
@@ -44391,7 +44442,7 @@ Object {
       "rules": Array [
         Object {
           "args": Object {
-            "limit": 25,
+            "limit": 500,
           },
           "name": "max",
         },

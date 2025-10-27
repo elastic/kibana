@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { registerTestBed, findTestSubject } from '@kbn/test-jest-helpers';
+import { screen, within, act } from '@testing-library/react';
+import { renderWithRouter } from './render';
+import { EuiTableTestHarness } from '@kbn/test-eui-helpers';
 import { AutoFollowPatternList } from '../../../app/sections/home/auto_follow_pattern_list';
-import { ccrStore } from '../../../app/store';
+import { createCrossClusterReplicationStore } from '../../../app/store';
 import { routing } from '../../../app/services/routing';
 
-const testBedConfig = {
-  store: ccrStore,
-  memoryRouter: {
-    onRouter: (router) =>
-      (routing.reactRouter = {
+export const setup = (props = {}) => {
+  const result = renderWithRouter(AutoFollowPatternList, {
+    store: createCrossClusterReplicationStore(),
+    onRouter: (router) => {
+      routing.reactRouter = {
         ...router,
         history: {
           ...router.history,
@@ -24,93 +26,56 @@ const testBedConfig = {
           },
         },
         getUrlForApp: () => '',
-      }),
-  },
-};
-
-const initTestBed = registerTestBed(AutoFollowPatternList, testBedConfig);
-
-export const setup = (props) => {
-  const testBed = initTestBed(props);
-  const EUI_TABLE = 'autoFollowPatternListTable';
-
-  /**
-   * User Actions
-   */
-
-  const selectAutoFollowPatternAt = (index = 0) => {
-    const { rows } = testBed.table.getMetaData(EUI_TABLE);
-    const row = rows[index];
-    const checkBox = row.reactWrapper.find('input').hostNodes();
-    checkBox.simulate('change', { target: { checked: true } });
-  };
-
-  const getPatternsActionMenuItem = (index = 0) => {
-    testBed.find('autoFollowPatternActionMenuButton').simulate('click');
-    const contextMenu = testBed.find('autoFollowPatternActionContextMenu');
-    return contextMenu.find('button').at(index);
-  };
-
-  const clickPatternsActionMenuItem = (index = 0) => {
-    getPatternsActionMenuItem(index).simulate('click');
-  };
-
-  const getPatternsActionMenuItemText = (index = 0) => {
-    return getPatternsActionMenuItem(index).text();
-  };
-
-  const clickBulkDeleteButton = () => {
-    clickPatternsActionMenuItem(1);
-  };
-
-  const clickConfirmModalDeleteAutoFollowPattern = () => {
-    const modal = testBed.find('deleteAutoFollowPatternConfirmation');
-    findTestSubject(modal, 'confirmModalConfirmButton').simulate('click');
-  };
-
-  const clickRowActionButtonAt = (index = 0, action = 'delete') => {
-    const { rows } = testBed.table.getMetaData(EUI_TABLE);
-    const indexLastColumn = rows[index].columns.length - 1;
-    const tableCellActions = rows[index].columns[indexLastColumn].reactWrapper;
-
-    let button;
-    if (action === 'delete') {
-      button = findTestSubject(tableCellActions, 'deleteButton');
-    } else if (action === 'edit') {
-      button = findTestSubject(tableCellActions, 'editButton');
-    }
-
-    if (!button) {
-      throw new Error(`Button for action "${action}" not found.`);
-    }
-
-    button.simulate('click');
-  };
-
-  const clickAutoFollowPatternAt = (index = 0) => {
-    const { rows } = testBed.table.getMetaData(EUI_TABLE);
-    const autoFollowPatternLink = findTestSubject(
-      rows[index].reactWrapper,
-      'autoFollowPatternLink'
-    );
-    autoFollowPatternLink.simulate('click');
-  };
-
-  const clickPaginationNextButton = () => {
-    testBed.find('autoFollowPatternListTable.pagination-button-next').simulate('click');
-  };
+      };
+    },
+    defaultProps: props,
+  });
 
   return {
-    ...testBed,
+    ...result,
+    // Helper actions for this specific page
     actions: {
-      selectAutoFollowPatternAt,
-      clickBulkDeleteButton,
-      clickConfirmModalDeleteAutoFollowPattern,
-      clickRowActionButtonAt,
-      clickAutoFollowPatternAt,
-      getPatternsActionMenuItemText,
-      clickPatternsActionMenuItem,
-      clickPaginationNextButton,
+      async selectAutoFollowPatternAt(index) {
+        const table = new EuiTableTestHarness('autoFollowPatternListTable');
+        const checkbox = within(table.rows[index]).getByRole('checkbox');
+        await result.user.click(checkbox);
+      },
+
+      async clickBulkDeleteButton() {
+        const btn = screen.getByTestId('autoFollowPatternActionMenuButton');
+        await result.user.click(btn);
+
+        const contextMenu = screen.getByTestId('autoFollowPatternActionContextMenu');
+        const deleteBtn = within(contextMenu).getAllByRole('button')[1];
+        await result.user.click(deleteBtn);
+      },
+
+      async clickConfirmModalDeleteAutoFollowPattern() {
+        const confirmBtn = screen.getByTestId('confirmModalConfirmButton');
+        await result.user.click(confirmBtn);
+        // Wait for delete HTTP request and list reload
+        await act(async () => {
+          // eslint-disable-next-line no-undef
+          await jest.runOnlyPendingTimersAsync();
+        });
+      },
+
+      async clickAutoFollowPatternAt(index) {
+        const link = screen.getAllByTestId('autoFollowPatternLink')[index];
+        await result.user.click(link);
+      },
+
+      async clickPaginationNextButton() {
+        const table = screen.getByTestId('autoFollowPatternListTable');
+        const nextBtn = within(table).getByTestId('pagination-button-next');
+        await result.user.click(nextBtn);
+      },
+
+      async search(value) {
+        const input = screen.getByTestId('autoFollowPatternSearch');
+        await result.user.clear(input);
+        await result.user.type(input, value);
+      },
     },
   };
 };

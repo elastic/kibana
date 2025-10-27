@@ -7,18 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import type {
   CreateWorkflowCommand,
   EsWorkflow,
-  RunWorkflowCommand,
-  WorkflowDetailDto,
-  RunWorkflowResponseDto,
   RunStepCommand,
-  TestWorkflowResponseDto,
+  RunWorkflowCommand,
+  RunWorkflowResponseDto,
   TestWorkflowCommand,
+  TestWorkflowResponseDto,
+  WorkflowDetailDto,
 } from '@kbn/workflows';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { useKibana } from '../../../hooks/use_kibana';
 
 type HttpError = IHttpFetchError<ResponseErrorBody>;
@@ -95,7 +95,7 @@ export function useWorkflowActions() {
         body: JSON.stringify({ stepId, contextOverride, workflowYaml }),
       });
     },
-    onSuccess: ({ workflowExecutionId }, {}) => {
+    onSuccess: ({ workflowExecutionId }) => {
       queryClient.invalidateQueries({ queryKey: ['workflows', workflowExecutionId, 'executions'] });
     },
   });
@@ -117,7 +117,7 @@ export function useWorkflowActions() {
       inputs,
     }: {
       workflowYaml: string;
-      inputs: Record<string, any>;
+      inputs: Record<string, unknown>;
     }) => {
       return http.post(`/api/workflows/test`, {
         body: JSON.stringify({ workflowYaml, inputs }),

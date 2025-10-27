@@ -8,7 +8,7 @@ import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import { useHistory } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 import { agentStatusesToSummary } from '../../../../../../../common/services';
 

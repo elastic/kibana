@@ -218,11 +218,6 @@ describe('useAssistantAvailability', () => {
               save: false,
               delete: false,
             },
-            management: {
-              ai: {
-                aiAssistantManagementSelection: false,
-              },
-            },
           },
         },
         featureFlags: {
@@ -240,7 +235,7 @@ describe('useAssistantAvailability', () => {
       hasConnectorsReadPrivilege: true,
       isAssistantEnabled: true,
       isAssistantVisible: true,
-      isAssistantManagementEnabled: false,
+      isAssistantManagementEnabled: true,
       hasUpdateAIAssistantAnonymization: false,
       hasManageGlobalKnowledgeBase: false,
     });

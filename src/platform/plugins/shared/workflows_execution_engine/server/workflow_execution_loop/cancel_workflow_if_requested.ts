@@ -8,10 +8,10 @@
  */
 
 import { ExecutionStatus } from '@kbn/workflows';
-import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { buildStepExecutionId } from '../utils';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
+import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 
 /**
  * This function retrieves the current workflow execution and verifies if cancellation requested.
@@ -42,6 +42,7 @@ export async function cancelWorkflowIfRequested(
 
   // mark current step scopes as cancelled
   while (!nodeStack.isEmpty()) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const scopeData = nodeStack.getCurrentScope()!;
     nodeStack = nodeStack.exitScope();
     const stepExecutionId = buildStepExecutionId(

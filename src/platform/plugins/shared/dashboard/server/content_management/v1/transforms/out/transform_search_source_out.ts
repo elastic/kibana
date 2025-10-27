@@ -10,14 +10,14 @@
 import type { SavedObjectReference } from '@kbn/core/server';
 import { injectReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common';
 import type { DashboardSavedObjectAttributes } from '../../../../dashboard_saved_object';
-import type { DashboardAttributes } from '../../types';
+import type { DashboardState } from '../../types';
 import { migrateLegacyQuery, cleanFiltersForSerialize } from '../../../../../common';
 import { logger } from '../../../../kibana_services';
 
 export function transformSearchSourceOut(
   kibanaSavedObjectMeta: DashboardSavedObjectAttributes['kibanaSavedObjectMeta'] = {},
   references: SavedObjectReference[] = []
-): Pick<DashboardAttributes, 'filters' | 'query'> {
+): Pick<DashboardState, 'filters' | 'query'> {
   const { searchSourceJSON } = kibanaSavedObjectMeta;
   if (!searchSourceJSON) {
     return {};

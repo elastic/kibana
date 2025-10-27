@@ -326,7 +326,7 @@
               "\nOverwrite the opt-in status.\nIt will send a final request to the remote telemetry cluster to report about the opt-in/out change."
             ],
             "signature": [
-              "(optedIn: boolean) => Promise<boolean>"
+              "(optedIn: boolean, signal?: AbortSignal | undefined) => Promise<boolean>"
             ],
             "path": "src/platform/plugins/shared/telemetry/public/plugin.ts",
             "deprecated": false,
@@ -348,6 +348,23 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "telemetry",
+                "id": "def-public.TelemetryServicePublicApis.setOptIn.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "signal",
+                "description": [
+                  "An AbortSignal to cancel any ongoing requests if the caller decides to"
+                ],
+                "signature": [
+                  "AbortSignal | undefined"
+                ],
+                "path": "src/platform/plugins/shared/telemetry/public/plugin.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []

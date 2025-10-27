@@ -37,10 +37,6 @@ describe('Isolation Flyout PanelHeader', () => {
   beforeEach(() => {
     const appContextMock = createAppRootMockRenderer();
 
-    appContextMock.setExperimentalFlag({
-      responseActionsCrowdstrikeManualHostIsolationEnabled: true,
-    });
-
     renderComponent = () => appContextMock.render(<PanelHeader />);
 
     setUseIsolateHostPanelContext({

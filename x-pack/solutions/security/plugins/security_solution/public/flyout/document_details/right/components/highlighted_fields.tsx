@@ -127,7 +127,7 @@ export interface HighlightedFieldsProps {
    */
   showCellActions: boolean;
   /**
-   * If true, the edit button will be shown on hover (granted that the editHighlightedFieldsEnabled is also turned on).
+   * If true, the edit button will be shown on hover.
    * This is false by default (for EASE alert summary page) and will be true for the alerts page.
    */
   showEditButton?: boolean;

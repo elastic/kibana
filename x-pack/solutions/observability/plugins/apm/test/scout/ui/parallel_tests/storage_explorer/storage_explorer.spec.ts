@@ -31,42 +31,6 @@ test.describe('Storage Explorer - Viewer (No Permissions)', { tag: ['@ess', '@sv
   });
 });
 
-test.describe('Storage Explorer - Monitor User', { tag: ['@ess'] }, () => {
-  test.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsApmMonitor();
-  });
-
-  test('user navigates and explores storage explorer functionality', async ({
-    page,
-    pageObjects: { storageExplorerPage },
-  }) => {
-    await test.step('verify charts and data in the storageExplorerServicesTable', async () => {
-      await storageExplorerPage.gotoWithTimeRange(timeRange.rangeFrom, timeRange.rangeTo);
-      await expect(storageExplorerPage.pageTitle).toBeVisible();
-
-      // Verify the chart is present
-      await expect(await storageExplorerPage.storageChart).toBeVisible();
-
-      // Verify the summary title elements are present
-      const summaryStatTitleElements = await storageExplorerPage.getSummaryStatTitleElements();
-      for (const element of summaryStatTitleElements) {
-        await expect(element).toBeVisible();
-      }
-
-      // Wait for the services table to finish loading
-      await storageExplorerPage.waitForServicesTableLoaded();
-
-      // Verify the services table is present and contains data
-      await expect(storageExplorerPage.servicesTableLoadedIndicator).toBeVisible();
-
-      await page.getByTestId('serviceLink_nodejs').scrollIntoViewIfNeeded();
-      await expect(page.getByTestId('serviceLink_nodejs')).toBeVisible();
-      await expect(page.getByTestId('serviceLink_java')).toBeVisible();
-      await expect(page.getByTestId('serviceLink_rum-js')).toBeVisible();
-    });
-  });
-});
-
 test.describe('Storage Explorer - Admin User', { tag: ['@ess'] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     // Use privileged user (admin) to ensure we have all necessary permissions

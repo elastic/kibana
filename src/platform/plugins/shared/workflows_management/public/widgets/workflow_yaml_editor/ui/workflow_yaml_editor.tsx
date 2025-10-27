@@ -7,23 +7,42 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEuiTheme, EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty } from '@elastic/eui';
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
+import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { CoreStart } from '@kbn/core/public';
+import type { SchemasSettings } from 'monaco-yaml';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import type YAML from 'yaml';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { monaco } from '@kbn/monaco';
 import { isTriggerType } from '@kbn/workflows';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows/types/v1';
-import type { SchemasSettings } from 'monaco-yaml';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type YAML from 'yaml';
-import { useDispatch, useSelector } from 'react-redux';
-import { useMonacoMarkersChangedInterceptor } from '../../../features/validate_workflow_yaml/lib/use_monaco_markers_changed_interceptor';
-import { addDynamicConnectorsToCache, getWorkflowZodSchemaLoose } from '../../../../common/schema';
+import type { z } from '@kbn/zod';
+import {
+  useAlertTriggerDecorations,
+  useConnectorTypeDecorations,
+  useFocusedStepOutline,
+  useLineDifferencesDecorations,
+  useStepDecorationsInExecution,
+  useTriggerTypeDecorations,
+} from './decorations';
+import { useCompletionProvider } from './hooks/use_completion_provider';
+import { StepActions } from './step_actions';
+import { WorkflowYAMLEditorShortcuts } from './workflow_yaml_editor_shortcuts';
+import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors';
+import { addDynamicConnectorsToCache } from '../../../../common/schema';
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
+import { ActionsMenuPopover } from '../../../features/actions_menu_popover';
+import type { ActionOptionData } from '../../../features/actions_menu_popover/types';
+import { useMonacoMarkersChangedInterceptor } from '../../../features/validate_workflow_yaml/lib/use_monaco_markers_changed_interceptor';
+import { useYamlValidation } from '../../../features/validate_workflow_yaml/lib/use_yaml_validation';
+import type { YamlValidationResult } from '../../../features/validate_workflow_yaml/model/types';
+import { useWorkflowJsonSchema } from '../../../features/validate_workflow_yaml/model/use_workflow_json_schema';
+import { useKibana } from '../../../hooks/use_kibana';
 import { UnsavedChangesPrompt } from '../../../shared/ui/unsaved_changes_prompt';
 import { YamlEditor } from '../../../shared/ui/yaml_editor';
-import { getCompletionItemProvider } from '../lib/get_completion_item_provider';
 import {
   ElasticsearchMonacoConnectorHandler,
   GenericMonacoConnectorHandler,
@@ -33,38 +52,24 @@ import {
   registerMonacoConnectorHandler,
   registerUnifiedHoverProvider,
 } from '../lib/monaco_providers';
-import { useYamlValidation } from '../../../features/validate_workflow_yaml/lib/use_yaml_validation';
-import { navigateToErrorPosition } from '../lib/utils';
-import { StepActions } from './step_actions';
-import type { YamlValidationResult } from '../../../features/validate_workflow_yaml/model/types';
-import { ActionsMenuPopover } from '../../../features/actions_menu_popover';
-import type { ActionOptionData } from '../../../features/actions_menu_popover/types';
-import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors';
-import { WorkflowYAMLEditorShortcuts } from './workflow_yaml_editor_shortcuts';
-import { insertTriggerSnippet } from '../lib/snippets/insert_trigger_snippet';
 import { insertStepSnippet } from '../lib/snippets/insert_step_snippet';
-import { useRegisterKeyboardCommands } from '../lib/use_register_keyboard_commands';
+import { insertTriggerSnippet } from '../lib/snippets/insert_trigger_snippet';
 import type { StepInfo } from '../lib/store';
 import {
   selectFocusedStepInfo,
+  selectSchemaLoose,
   selectYamlDocument,
+  setConnectors,
   setCursorPosition,
   setStepExecutions,
   setYamlString,
 } from '../lib/store';
-import {
-  useFocusedStepOutline,
-  useStepDecorationsInExecution,
-  useTriggerTypeDecorations,
-  useConnectorTypeDecorations,
-  useLineDifferencesDecorations,
-  useAlertTriggerDecorations,
-} from './decorations';
-import { useWorkflowJsonSchema } from '../../../features/validate_workflow_yaml/model/use_workflow_json_schema';
-import { useWorkflowsMonacoTheme } from '../styles/use_workflows_monaco_theme';
-import { useWorkflowEditorStyles } from '../styles/use_workflow_editor_styles';
-import { useDynamicTypeIcons } from '../styles/use_dynamic_type_icons';
+import { useRegisterKeyboardCommands } from '../lib/use_register_keyboard_commands';
+import { navigateToErrorPosition } from '../lib/utils';
 import { GlobalWorkflowEditorStyles } from '../styles/global_workflow_editor_styles';
+import { useDynamicTypeIcons } from '../styles/use_dynamic_type_icons';
+import { useWorkflowEditorStyles } from '../styles/use_workflow_editor_styles';
+import { useWorkflowsMonacoTheme } from '../styles/use_workflows_monaco_theme';
 
 const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   minimap: { enabled: false },
@@ -104,6 +109,7 @@ const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
     above: false, // Force hover below cursor to avoid clipping
   },
   formatOnType: true,
+  suggestLineHeight: 25, // default 21 + 4px for padding
 };
 
 export interface WorkflowYAMLEditorProps {
@@ -153,7 +159,7 @@ export const WorkflowYAMLEditor = ({
   const { euiTheme } = useEuiTheme();
   const {
     services: { http, notifications },
-  } = useKibana<CoreStart>();
+  } = useKibana();
 
   // Refs
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -170,6 +176,7 @@ export const WorkflowYAMLEditor = ({
   const dispatch = useDispatch();
   const focusedStepInfo = useSelector(selectFocusedStepInfo);
   const yamlDocument = useSelector(selectYamlDocument);
+  const workflowYamlSchemaLoose = useSelector(selectSchemaLoose);
   const yamlDocumentRef = useRef<YAML.Document | null>(null);
   yamlDocumentRef.current = yamlDocument || null;
 
@@ -178,6 +185,10 @@ export const WorkflowYAMLEditor = ({
 
   // Data
   const { data: connectorsData } = useAvailableConnectors();
+
+  useEffect(() => {
+    dispatch(setConnectors(connectorsData));
+  }, [connectorsData, dispatch]);
 
   useEffect(() => {
     if (connectorsData?.connectorTypes) {
@@ -201,26 +212,18 @@ export const WorkflowYAMLEditor = ({
   const { jsonSchema: workflowJsonSchemaStrict, uri: workflowSchemaUriStrict } =
     useWorkflowJsonSchema({ loose: false });
   const schemas: SchemasSettings[] = useMemo(() => {
-    if (!workflowSchemaUriStrict) {
+    if (!workflowSchemaUriStrict || !workflowJsonSchemaStrict) {
       return [];
     }
     return [
       {
         fileMatch: ['*'],
         // casting here because zod-to-json-schema returns a more complex type than JSONSchema7 expected by monaco-yaml
-        schema: workflowJsonSchemaStrict as any,
+        schema: workflowJsonSchemaStrict as SchemasSettings['schema'],
         uri: workflowSchemaUriStrict,
       },
     ];
   }, [workflowJsonSchemaStrict, workflowSchemaUriStrict]);
-
-  // TODO: move the schema generation up to detail page or some wrapper component
-  const workflowYamlSchemaLoose = useMemo(() => {
-    if (!connectorsData?.connectorTypes) {
-      return getWorkflowZodSchemaLoose({});
-    }
-    return getWorkflowZodSchemaLoose(connectorsData.connectorTypes);
-  }, [connectorsData?.connectorTypes]);
 
   const { error: errorValidating, isLoading: isLoadingValidation } = useYamlValidation(
     editorRef.current
@@ -229,7 +232,7 @@ export const WorkflowYAMLEditor = ({
   const { validationErrors, transformMonacoMarkers, handleMarkersChanged } =
     useMonacoMarkersChangedInterceptor({
       yamlDocumentRef,
-      workflowYamlSchema: workflowYamlSchemaLoose,
+      workflowYamlSchema: workflowYamlSchemaLoose as z.ZodSchema,
     });
 
   const handleErrorClick = useCallback((error: YamlValidationResult) => {
@@ -311,16 +314,14 @@ export const WorkflowYAMLEditor = ({
         // Register Elasticsearch connector handler
         const elasticsearchHandler = new ElasticsearchMonacoConnectorHandler({
           http,
-          notifications: notifications as any, // Temporary type cast
-          // esHost,
-          // kibanaHost || window.location.origin,
+          notifications,
         });
         registerMonacoConnectorHandler(elasticsearchHandler);
 
         // Register Kibana connector handler
         const kibanaHandler = new KibanaMonacoConnectorHandler({
           http,
-          notifications: notifications as any, // Temporary type cast
+          notifications,
           kibanaHost: kibanaHost || window.location.origin,
         });
         registerMonacoConnectorHandler(kibanaHandler);
@@ -336,7 +337,7 @@ export const WorkflowYAMLEditor = ({
           getYamlDocument: () => yamlDocumentRef.current || null,
           options: {
             http,
-            notifications: notifications as any,
+            notifications,
             esHost,
             kibanaHost: kibanaHost || window.location.origin,
           },
@@ -532,9 +533,7 @@ export const WorkflowYAMLEditor = ({
     closeActionsPopover();
   };
 
-  const completionProvider = useMemo(() => {
-    return getCompletionItemProvider(workflowYamlSchemaLoose, connectorsData?.connectorTypes);
-  }, [workflowYamlSchemaLoose, connectorsData?.connectorTypes]);
+  const completionProvider = useCompletionProvider();
 
   useEffect(() => {
     // Monkey patching
@@ -618,7 +617,10 @@ export const WorkflowYAMLEditor = ({
                   }
                 }}
               >
-                Schema
+                <FormattedMessage
+                  id="workflows.yamlEditor.downloadSchemaButtonLabel"
+                  defaultMessage="JSON Schema"
+                />
               </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>

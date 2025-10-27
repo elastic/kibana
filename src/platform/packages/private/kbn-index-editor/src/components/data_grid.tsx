@@ -257,6 +257,9 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
               width: 100%;
               display: block;
             }
+            .unifiedDataTable__headerCell {
+              align-items: center !important;
+            }
             .euiDataGridHeaderCell {
               align-items: center;
               display: flex;

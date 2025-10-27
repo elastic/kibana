@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { makeDefaultServices } from '../mocks';
-import type { LensAppServices } from './types';
 import { redirectToDashboard } from './save_modal_container_helpers';
 import type { LensSerializedState } from '..';
+import type { LensAppServices } from '@kbn/lens-common';
 
 describe('redirectToDashboard', () => {
   const embeddableInput = {

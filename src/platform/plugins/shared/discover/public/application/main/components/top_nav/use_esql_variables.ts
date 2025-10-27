@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { isEqual } from 'lodash';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import type { ControlPanelsState, ControlGroupRendererApi } from '@kbn/controls-plugin/public';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
@@ -59,8 +59,8 @@ export const useESQLVariables = ({
   const setControlGroupState = useCurrentTabAction(internalStateActions.setControlGroupState);
   const setEsqlVariables = useCurrentTabAction(internalStateActions.setEsqlVariables);
   const currentControlGroupState = useCurrentTabSelector((tab) => tab.controlGroupState);
-
   const savedSearchState = useSavedSearch();
+  const pendingQueryUpdate = useRef<string>();
 
   useEffect(() => {
     // Only proceed if in ESQL mode and controlGroupApi is available
@@ -69,7 +69,7 @@ export const useESQLVariables = ({
     }
 
     // Handling the reset unsaved changes badge
-    const savedSearchResetSubsciption = stateContainer.savedSearchState
+    const savedSearchResetSubscription = stateContainer.savedSearchState
       .getInitial$()
       .pipe(skip(1)) // Skip the initial emission since it's a BehaviorSubject
       .subscribe((initialSavedSearch) => {
@@ -78,36 +78,37 @@ export const useESQLVariables = ({
       });
 
     const inputSubscription = controlGroupApi.getInput$().subscribe((input) => {
-      if (input && input.initialChildControlState) {
-        const currentTabControlState =
-          input.initialChildControlState as ControlPanelsState<ESQLControlState>;
+      const controlGroupState =
+        input.initialChildControlState as ControlPanelsState<ESQLControlState>;
 
-        stateContainer.savedSearchState.updateControlState({
-          nextControlState: currentTabControlState,
-        });
-        dispatch(
-          setControlGroupState({
-            controlGroupState: currentTabControlState,
-          })
-        );
-        const newVariables = extractEsqlVariables(currentTabControlState);
-        if (!isEqual(newVariables, currentEsqlVariables)) {
-          // Update the ESQL variables in the internal state
-          dispatch(setEsqlVariables({ esqlVariables: newVariables }));
-          stateContainer.dataState.fetch();
-        }
+      stateContainer.savedSearchState.updateControlState({
+        nextControlState: controlGroupState,
+      });
+      dispatch(setControlGroupState({ controlGroupState }));
+
+      if (pendingQueryUpdate.current) {
+        onUpdateESQLQuery(pendingQueryUpdate.current);
+        pendingQueryUpdate.current = undefined;
+      }
+
+      const newVariables = extractEsqlVariables(controlGroupState);
+      if (!isEqual(newVariables, currentEsqlVariables)) {
+        // Update the ESQL variables in the internal state
+        dispatch(setEsqlVariables({ esqlVariables: newVariables }));
+        stateContainer.dataState.fetch();
       }
     });
 
     return () => {
       inputSubscription.unsubscribe();
-      savedSearchResetSubsciption.unsubscribe();
+      savedSearchResetSubscription.unsubscribe();
     };
   }, [
     controlGroupApi,
     currentEsqlVariables,
     dispatch,
     isEsqlMode,
+    onUpdateESQLQuery,
     setControlGroupState,
     setEsqlVariables,
     stateContainer.dataState,
@@ -121,8 +122,12 @@ export const useESQLVariables = ({
         console.error('controlGroupApi is not available when attempting to save control.');
         return;
       }
+
+      // update the query
+      pendingQueryUpdate.current = updatedQuery;
+
       // add a new control
-      controlGroupApi.addNewPanel({
+      await controlGroupApi.addNewPanel({
         panelType: ESQL_CONTROL,
         serializedState: {
           rawState: {
@@ -130,13 +135,8 @@ export const useESQLVariables = ({
           },
         },
       });
-
-      // update the query
-      if (updatedQuery) {
-        onUpdateESQLQuery(updatedQuery);
-      }
     },
-    [controlGroupApi, onUpdateESQLQuery]
+    [controlGroupApi]
   );
 
   // Getter function to retrieve the currently active control panels state for the current tab

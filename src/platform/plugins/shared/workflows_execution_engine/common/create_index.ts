@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 interface CreateIndexOptions {
   esClient: ElasticsearchClient;

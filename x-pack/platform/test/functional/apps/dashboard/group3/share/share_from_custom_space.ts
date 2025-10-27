@@ -51,8 +51,7 @@ export default function sharingFromSpace({ getPageObjects, getService }: FtrProv
 
       await common.navigateToApp(dashboard.APP_ID, { basePath: `/s/${spaceId}` });
       await dashboard.preserveCrossAppState();
-      await dashboard.loadSavedDashboard('few panels');
-      await dashboard.switchToEditMode();
+      await dashboard.loadDashboardInEditMode('few panels');
       await dashboard.waitForRenderComplete();
     });
 

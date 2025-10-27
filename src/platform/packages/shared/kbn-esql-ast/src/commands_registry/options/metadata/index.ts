@@ -8,7 +8,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
-import type { ESQLCommandOption, ESQLCommand } from '../../../types';
+import type { ESQLCommandOption, ESQLAstAllCommands } from '../../../types';
 import type { ISuggestionItem } from '../../types';
 import { buildFieldsDefinitions } from '../../../definitions/utils/functions';
 import { handleFragment } from '../../../definitions/utils/autocomplete/helpers';
@@ -35,7 +35,7 @@ export const metadataSuggestion: ISuggestionItem = withAutoSuggest({
   sortText: '1',
 });
 
-export const getMetadataSuggestions = (command: ESQLCommand, queryText: string) => {
+export const getMetadataSuggestions = (command: ESQLAstAllCommands, queryText: string) => {
   const metadataNode = command.args.find((arg) => isOptionNode(arg) && arg.name === 'metadata') as
     | ESQLCommandOption
     | undefined;

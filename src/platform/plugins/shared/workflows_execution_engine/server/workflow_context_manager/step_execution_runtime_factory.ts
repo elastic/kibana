@@ -7,16 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowGraph } from '@kbn/workflows/graph';
-import type { CoreStart } from '@kbn/core/server';
-import type { KibanaRequest } from '@kbn/core/server';
+import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { StackFrame } from '@kbn/workflows';
-import { buildStepExecutionId } from '../utils';
+import type { WorkflowGraph } from '@kbn/workflows/graph';
 import { StepExecutionRuntime } from './step_execution_runtime';
-import type { WorkflowExecutionState } from './workflow_execution_state';
-import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
+import type { ContextDependencies } from './types';
 import { WorkflowContextManager } from './workflow_context_manager';
+import type { WorkflowExecutionState } from './workflow_execution_state';
+import { WorkflowTemplatingEngine } from '../templating_engine';
+import { buildStepExecutionId } from '../utils';
+import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 
 /**
  * Factory class responsible for creating StepExecutionRuntime instances.
@@ -51,7 +52,8 @@ export class StepExecutionRuntimeFactory {
       workflowLogger: IWorkflowEventLogger;
       esClient: ElasticsearchClient; // ES client (user-scoped if available, fallback otherwise)
       fakeRequest?: KibanaRequest;
-      coreStart?: CoreStart; // For using Kibana's internal HTTP client
+      coreStart?: CoreStart;
+      dependencies: ContextDependencies;
     }
   ) {}
 
@@ -73,6 +75,7 @@ export class StepExecutionRuntimeFactory {
       node.stepType
     );
     const contextManager = new WorkflowContextManager({
+      templateEngine: new WorkflowTemplatingEngine(),
       workflowExecutionGraph: this.params.workflowExecutionGraph,
       workflowExecutionState: this.params.workflowExecutionState,
       node,
@@ -80,6 +83,7 @@ export class StepExecutionRuntimeFactory {
       esClient: this.params.esClient,
       fakeRequest: this.params.fakeRequest,
       coreStart: this.params.coreStart,
+      dependencies: this.params.dependencies,
     });
     return new StepExecutionRuntime({
       stepExecutionId,

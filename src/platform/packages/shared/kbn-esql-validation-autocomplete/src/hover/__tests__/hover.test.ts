@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { getFunctionSignatures, getFunctionDefinition } from '@kbn/esql-ast/src/definitions/utils';
+import { getFunctionDefinition } from '@kbn/esql-ast/src/definitions/utils';
 import {
   modeDescription,
   ENRICH_MODES,
@@ -67,45 +67,60 @@ describe('getHoverItem()', () => {
   });
 
   describe('functions', () => {
-    function createFunctionContent(fn: string) {
-      const fnDefinition = getFunctionDefinition(fn);
-      if (!fnDefinition) {
-        return [];
-      }
-      return [getFunctionSignatures(fnDefinition)[0].declaration, fnDefinition.description];
-    }
-
     test('function name', async () => {
-      await assertGetHoverItem(
-        `from a | eval round(numberField)`,
-        'round',
-        createFunctionContent('round')
-      );
-      await assertGetHoverItem(
-        `from a | eval nonExistentFn(numberField)`,
-        'nonExistentFn',
-        createFunctionContent('nonExistentFn')
-      );
-      await assertGetHoverItem(
-        `from a | eval round(numberField)`,
-        'round',
-        createFunctionContent('round')
-      );
-      await assertGetHoverItem(
-        `from a | eval nonExistentFn(numberField)`,
-        'nonExistentFn',
-        createFunctionContent('nonExistentFn')
-      );
+      await assertGetHoverItem(`from a | eval round(numberField)`, 'round', [
+        getFunctionDefinition('round')!.description,
+        `\`\`\`none
+round (
+  number: double | integer | long | unsigned_long,  
+  decimals?: integer | long
+): double | integer | long | unsigned_long
+\`\`\``,
+      ]);
+      await assertGetHoverItem(`from a | eval round(numberField,)`, 'round', [
+        getFunctionDefinition('round')!.description,
+        `\`\`\`none
+round (
+  number: double | integer | long | unsigned_long,  
+  decimals?: integer | long
+): double | integer | long | unsigned_long
+\`\`\``,
+      ]);
+      await assertGetHoverItem(`from a | eval round(numberField, )`, 'round', [
+        getFunctionDefinition('round')!.description,
+        `\`\`\`none
+round (
+  number: double | integer | long | unsigned_long,  
+  decimals?: integer | long
+): double | integer | long | unsigned_long
+\`\`\``,
+      ]);
+      await assertGetHoverItem(`from a | eval nonExistentFn(numberField)`, 'nonExistentFn', []);
+      await assertGetHoverItem(`from a | eval round(numberField)`, 'round', [
+        getFunctionDefinition('round')!.description,
+        `\`\`\`none
+round (
+  number: double | integer | long | unsigned_long,  
+  decimals?: integer | long
+): double | integer | long | unsigned_long
+\`\`\``,
+      ]);
+      await assertGetHoverItem(`from a | eval nonExistentFn(numberField)`, 'nonExistentFn', []);
     });
 
     test('nested function name', async () => {
       await assertGetHoverItem(`from a | stats avg(round(numberField))`, 'round', [
         '**Acceptable types**: **aggregate_metric_double** | **double** | **integer** | **long**',
-        ...createFunctionContent('round'),
+        getFunctionDefinition('round')!.description,
+        `\`\`\`none
+round (
+  number: double | integer | long | unsigned_long,  
+  decimals?: integer | long
+): double | integer | long | unsigned_long
+\`\`\``,
       ]);
       await assertGetHoverItem(`from a | stats avg(nonExistentFn(numberField))`, 'nonExistentFn', [
         '**Acceptable types**: **aggregate_metric_double** | **double** | **integer** | **long**',
-        ...createFunctionContent('nonExistentFn'),
       ]);
     });
   });

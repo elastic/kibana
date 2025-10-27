@@ -20,6 +20,8 @@ export type ESQLAstCommand =
   | ESQLAstCompletionCommand
   | ESQLAstFuseCommand;
 
+export type ESQLAstAllCommands = ESQLAstCommand | ESQLAstHeaderCommand;
+
 export type ESQLAstNode = ESQLAstCommand | ESQLAstHeaderCommand | ESQLAstExpression | ESQLAstItem;
 
 /**
@@ -586,6 +588,8 @@ export interface ESQLMessage {
   text: string;
   location: ESQLLocation;
   code: string;
+  errorType?: 'semantic';
+  requiresCallback?: 'getColumnsFor' | 'getSources' | 'getPolicies' | 'getJoinIndices' | string;
 }
 
 export interface EditorError {

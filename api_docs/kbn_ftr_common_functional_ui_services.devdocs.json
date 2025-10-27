@@ -543,7 +543,7 @@
             "label": "click",
             "description": [],
             "signature": [
-              "(selector: string, timeout?: number, topOffsetOrOptions?: number | { topOffset?: number | undefined; bottomOffset?: number | undefined; } | undefined) => Promise<void>"
+              "(selector: string, timeout?: number, topOffsetOrOptions?: number | { topOffset?: number | undefined; bottomOffset?: number | undefined; } | undefined, preclickDelay?: number) => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
             "deprecated": false,
@@ -593,6 +593,21 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.click.$4",
+                "type": "number",
+                "tags": [],
+                "label": "preclickDelay",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "src/platform/packages/shared/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
