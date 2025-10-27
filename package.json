@@ -108,7 +108,7 @@
     "pkce-challenge": "3.1.0"
   },
   "dependencies": {
-    "@a2a-js/sdk": "^0.3.0",
+    "@a2a-js/sdk": "^0.3.4",
     "@apidevtools/json-schema-ref-parser": "^14.1.1",
     "@appland/sql-parser": "^1.5.1",
     "@arizeai/openinference-semantic-conventions": "^1.1.0",
@@ -826,6 +826,7 @@
     "@kbn/react-kibana-context-theme": "link:src/platform/packages/shared/react/kibana_context/theme",
     "@kbn/react-kibana-mount": "link:src/platform/packages/shared/react/kibana_mount",
     "@kbn/react-mute-legacy-root-warning": "link:src/platform/packages/private/kbn-react-mute-legacy-root-warning",
+    "@kbn/react-query": "link:src/platform/packages/shared/kbn-react-query",
     "@kbn/recently-accessed": "link:src/platform/packages/shared/kbn-recently-accessed",
     "@kbn/reindex-service-plugin": "link:x-pack/platform/plugins/private/reindex_service",
     "@kbn/remote-clusters-plugin": "link:x-pack/platform/plugins/private/remote_clusters",
