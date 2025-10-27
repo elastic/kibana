@@ -86,7 +86,7 @@ export const StreamFeaturesFlyout = ({
             setFeatures={setFeatures}
           />
         ) : (
-          <LoadingState />
+          <LoadingState closeFlyout={closeFlyout} />
         )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -134,7 +134,7 @@ export const StreamFeaturesFlyout = ({
   );
 };
 
-function LoadingState() {
+function LoadingState({ closeFlyout }: { closeFlyout: () => void }) {
   const label = useWaitingForAiMessage();
 
   return (
@@ -143,11 +143,25 @@ function LoadingState() {
       alignItems="center"
       justifyContent="center"
       css={{ height: '100%' }}
+      gutterSize="m"
     >
       <EuiFlexItem grow={false} css={{ textAlign: 'center' }}>
         <EuiLoadingElastic size="xxl" />
         <EuiSpacer size="m" />
         <EuiText>{label}</EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty
+          onClick={closeFlyout}
+          aria-label={i18n.translate('xpack.streams.streamFeaturesFlyout.stopButtonAriaLabel', {
+            defaultMessage: 'Stop feature identification',
+          })}
+        >
+          <FormattedMessage
+            id="xpack.streams.streamFeaturesFlyout.stopButton"
+            defaultMessage="Stop"
+          />
+        </EuiButtonEmpty>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

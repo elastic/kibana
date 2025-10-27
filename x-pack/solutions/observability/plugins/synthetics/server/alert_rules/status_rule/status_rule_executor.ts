@@ -244,28 +244,25 @@ export class StatusRuleExecutor {
   }
 
   getRange = (maxPeriod: number) => {
-    let from = this.previousStartedAt
-      ? moment(this.previousStartedAt).subtract(1, 'minute').toISOString()
-      : 'now-2m';
+    const { numberOfChecks, useLatestChecks, timeWindow } = getConditionType(this.params.condition);
 
-    const condition = this.params.condition;
-    if (condition && 'numberOfChecks' in condition?.window) {
-      const numberOfChecks = condition.window.numberOfChecks;
-      from = moment()
+    if (useLatestChecks) {
+      const from = moment()
         .subtract(maxPeriod * numberOfChecks, 'milliseconds')
         .subtract(5, 'minutes')
         .toISOString();
-    } else if (condition && 'time' in condition.window) {
-      const time = condition.window.time;
-      const { unit, size } = time;
-
-      from = moment().subtract(size, unit).toISOString();
+      this.debug(
+        `Using range from ${from} to now, diff of ${moment().diff(from, 'minutes')} minutes`
+      );
+      return { from, to: 'now' };
     }
 
+    // `timeWindow` is guaranteed to be defined here.
+    const { unit, size } = timeWindow;
+    const from = moment().subtract(size, unit).toISOString();
     this.debug(
       `Using range from ${from} to now, diff of ${moment().diff(from, 'minutes')} minutes`
     );
-
     return { from, to: 'now' };
   };
 

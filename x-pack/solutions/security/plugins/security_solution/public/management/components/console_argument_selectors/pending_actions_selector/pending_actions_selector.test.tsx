@@ -437,21 +437,19 @@ describe('PendingActionsSelector', () => {
         ],
       },
       {
-        enabled: true,
-        refetchInterval: false,
+        enabled: false,
       }
     );
   });
 
-  test('enables refetch interval when popover is open and disables when closed', async () => {
+  test('should fetch data when popover is opened', async () => {
     // Test with popover closed (default state)
     await renderAndWaitForComponent(<PendingActionsSelector {...defaultProps} />);
 
     expect(mockUseGetEndpointActionList).toHaveBeenCalledWith(
       expect.any(Object),
       expect.objectContaining({
-        refetchInterval: false, // Should be false when popover is closed
-        enabled: true,
+        enabled: false,
       })
     );
 
@@ -466,10 +464,39 @@ describe('PendingActionsSelector', () => {
     expect(mockUseGetEndpointActionList).toHaveBeenCalledWith(
       expect.any(Object),
       expect.objectContaining({
-        refetchInterval: 3000, // Should be 3000ms when popover is open
         enabled: true,
       })
     );
+  });
+
+  test('should not fetch data repeatedly when popover is open', async () => {
+    // Test with popover closed (default state)
+    await renderAndWaitForComponent(<PendingActionsSelector {...defaultProps} />);
+
+    expect(mockUseGetEndpointActionList).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.objectContaining({
+        enabled: false,
+      })
+    );
+
+    // Clear previous calls
+    mockUseGetEndpointActionList.mockClear();
+
+    // Test with popover open
+    await renderAndWaitForComponent(
+      <PendingActionsSelector {...defaultProps} store={{ isPopoverOpen: true }} />
+    );
+
+    expect(mockUseGetEndpointActionList).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.objectContaining({
+        enabled: true,
+      })
+    );
+
+    // expect only being called once
+    expect(mockUseGetEndpointActionList).toHaveBeenCalledTimes(1);
   });
 
   describe('Privilege validation', () => {

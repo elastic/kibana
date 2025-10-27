@@ -11,7 +11,8 @@ import type { ActionsClientMock } from '@kbn/actions-plugin/server/actions_clien
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 import type { DeepPartial } from 'utility-types';
-import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import { type ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import { createMockConnectorFindResult } from '@kbn/actions-plugin/server/application/connector/mocks';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { CasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 import { createCasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
@@ -383,17 +384,11 @@ const createConnectorMock = (
   overrides: DeepPartial<ConnectorWithExtraFindData> = {}
 ): ConnectorWithExtraFindData => {
   return merge(
-    {
+    createMockConnectorFindResult({
       id: 'connector-mock-id-1',
       actionTypeId: '.some-type',
       name: 'some mock name',
-      isMissingSecrets: false,
-      config: {},
-      isPreconfigured: false,
-      isDeprecated: false,
-      isSystemAction: false,
-      referencedByCount: 0,
-    },
+    }),
     overrides
   );
 };
