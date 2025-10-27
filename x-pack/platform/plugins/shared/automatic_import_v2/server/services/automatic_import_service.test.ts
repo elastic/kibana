@@ -6,7 +6,7 @@
  */
 
 import expect from 'expect';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AutomaticImportService } from './automatic_import_service';
 
@@ -23,13 +23,19 @@ describe('AutomaticImportSetupService', () => {
   let service: AutomaticImportService;
   let mockLoggerFactory: ReturnType<typeof loggerMock.create>;
   let mockEsClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  let mockSavedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockLoggerFactory = loggerMock.create();
     mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+    mockSavedObjectsClient = savedObjectsClientMock.create();
 
-    service = new AutomaticImportService(mockLoggerFactory, Promise.resolve(mockEsClient));
+    service = new AutomaticImportService(
+      mockLoggerFactory,
+      Promise.resolve(mockEsClient),
+      Promise.resolve(mockSavedObjectsClient)
+    );
   });
 
   describe('constructor', () => {
