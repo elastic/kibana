@@ -18,7 +18,7 @@ export const SlackApiConfigSchema = schema.object({
         id: schema.string({ minLength: 1 }),
         name: schema.string({ minLength: 1 }),
       }),
-      { maxSize: 25 }
+      { maxSize: 500 }
     )
   ),
 });

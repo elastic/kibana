@@ -7,7 +7,7 @@ id: kibDevDocsDeprecationsByApi
 slug: /kibana-dev-docs/api-meta/deprecated-api-list-by-api
 title: Deprecated API usage by API
 description: A list of deprecated APIs, which plugins are still referencing them, and when they need to be removed by.
-date: 2025-10-22
+date: 2025-10-27
 tags: ['contributor', 'dev', 'apidocs', 'kibana']
 ---
 
@@ -23,7 +23,7 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibSecurityPluginApi" section="def-server.SecurityPluginSetup.authz" text="authz"/> | ml, savedObjectsTagging, actions | - |
 | <DocLink id="kibKbnCoreHttpServerPluginApi" section="def-server.RouteConfigOptions.authRequired" text="authRequired"/> | @kbn/core, usageCollection, taskManager, security, telemetry, monitoringCollection, @kbn/test-suites-xpack-platform, banners, customBranding, securitySolution, enterpriseSearch, interactiveSetup, @kbn/test-suites-src, mockIdpPlugin, spaces, ml | - |
 | <DocLink id="kibKbnCoreSavedObjectsCommonPluginApi" section="def-common.SavedObjectAttributes" text="SavedObjectAttributes"/> | @kbn/core, savedObjects, visualizations, ml | - |
-| <DocLink id="kibKbnCoreSavedObjectsServerPluginApi" section="def-server.SavedObjectsType.migrations" text="migrations"/> | @kbn/core, taskManager, links, dataViews, ml, spaces, data, actions, share, alerting, fleet, apmSourcesAccess, savedSearch, lens, maps, dashboard, canvas, graph, cases, @kbn/test-suites-xpack-platform, uptime, apm, visualizations, infra, slo, synthetics, cloudSecurityPosture, lists, securitySolution, eventAnnotation, savedObjectsManagement | - |
+| <DocLink id="kibKbnCoreSavedObjectsServerPluginApi" section="def-server.SavedObjectsType.migrations" text="migrations"/> | @kbn/core, taskManager, links, dataViews, ml, spaces, data, actions, share, alerting, fleet, apmSourcesAccess, lens, savedSearch, maps, dashboard, canvas, graph, cases, @kbn/test-suites-xpack-platform, uptime, apm, visualizations, infra, slo, synthetics, cloudSecurityPosture, lists, securitySolution, eventAnnotation, savedObjectsManagement | - |
 | <DocLink id="kibKbnMlAnomalyUtilsPluginApi" section="def-common.ML_SEVERITY_COLORS" text="ML_SEVERITY_COLORS"/> | ml | - |
 | <DocLink id="kibKbnMlAnomalyUtilsPluginApi" section="def-common.getSeverityColor" text="getSeverityColor"/> | apm, ml, uptime | - |
 | <DocLink id="kibDataPluginApi" section="def-public.SearchSource.fetch" text="fetch"/> | stackAlerts, alerting, securitySolution, inputControlVis | - |
@@ -37,7 +37,7 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibTaskManagerPluginApi" section="def-server.ConcreteTaskInstance.interval" text="interval"/> | @kbn/test-suites-xpack-platform | - |
 | <DocLink id="kibKbnCoreApplicationBrowserPluginApi" section="def-public.AppMountParameters.appBasePath" text="appBasePath"/> | @kbn/core, management, fleet, @kbn/test-suites-xpack-platform, security, kibanaOverview, @kbn/test-suites-src | - |
 | <DocLink id="kibKbnCoreSavedObjectsCommonPluginApi" section="def-common.SavedObject" text="SavedObject"/> | @kbn/core, home, savedObjectsTagging, canvas, savedObjectsTaggingOss, reindexService, @kbn/test-suites-xpack-platform, lists, @kbn/test-suites-src, savedObjectsManagement | - |
-| <DocLink id="kibKbnCoreSavedObjectsServerPluginApi" section="def-server.SavedObjectsType.convertToMultiNamespaceTypeVersion" text="convertToMultiNamespaceTypeVersion"/> | @kbn/core, dataViews, data, savedObjectsTagging, actions, alerting, savedSearch, lens, maps, dashboard, canvas, graph, cases, @kbn/test-suites-xpack-platform, visualizations, lists, securitySolution | - |
+| <DocLink id="kibKbnCoreSavedObjectsServerPluginApi" section="def-server.SavedObjectsType.convertToMultiNamespaceTypeVersion" text="convertToMultiNamespaceTypeVersion"/> | @kbn/core, dataViews, data, savedObjectsTagging, actions, alerting, lens, savedSearch, maps, dashboard, canvas, graph, cases, @kbn/test-suites-xpack-platform, visualizations, lists, securitySolution | - |
 | <DocLink id="kibKbnSecurityPluginTypesPublicPluginApi" section="def-public.SecurityPluginStart.userProfiles" text="userProfiles"/> | security, cases, @kbn/test-suites-xpack-platform, searchPlayground, securitySolution | - |
 | <DocLink id="kibAlertingPluginApi" section="def-common.MaintenanceWindow" text="MaintenanceWindow"/> | @kbn/response-ops-alerts-table, triggersActionsUi | - |
 | <DocLink id="kibManagementPluginApi" section="def-public.ManagementAppMountParams.theme$" text="theme$"/> | triggersActionsUi | - |
@@ -51,7 +51,7 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibDiscoverPluginApi" section="def-public.DiscoverStart.DiscoverContainer" text="DiscoverContainer"/> | securitySolution | - |
 | <DocLink id="kibDiscoverPluginApi" section="def-public.DiscoverStateContainer.internalStateActions" text="internalStateActions"/> | securitySolution | - |
 | <DocLink id="kibKibanaReactPluginApi" section="def-public.useDarkMode" text="useDarkMode"/> | securitySolution | - |
-| <DocLink id="kibLensPluginApi" section="def-public.PieVisualizationState.palette" text="palette"/> | securitySolution, @kbn/lens-embeddable-utils | - |
+| <DocLink id="kibLensPluginApi" section="def-public.LensPartitionVisualizationState.palette" text="palette"/> | securitySolution, visTypePie, @kbn/lens-embeddable-utils | - |
 | <DocLink id="kibTelemetryPluginApi" section="def-server.TelemetryPluginStart.getIsOptedIn" text="getIsOptedIn"/> | fleet, datasetQuality, synthetics, securitySolution | - |
 | <DocLink id="kibTimelinesPluginApi" section="def-public.TimelinesUIStart.getHoverActions" text="getHoverActions"/> | osquery, securitySolution | - |
 | <DocLink id="kibTimelinesPluginApi" section="def-common.DeprecatedCellValueElementProps" text="DeprecatedCellValueElementProps"/> | @kbn/securitysolution-data-table, securitySolution | - |
@@ -62,6 +62,7 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibTimelinesPluginApi" section="def-common.IndexFieldsStrategyResponse" text="IndexFieldsStrategyResponse"/> | securitySolution | - |
 | <DocLink id="kibKbnCoreSavedObjectsApiServerPluginApi" section="def-server.SavedObject.migrationVersion" text="migrationVersion"/> | @kbn/core, fleet, graph, osquery, lists, searchPlayground, securitySolution | - |
 | <DocLink id="kibKbnCoreSavedObjectsApiServerPluginApi" section="def-server.SavedObjectAttributes" text="SavedObjectAttributes"/> | @kbn/core, @kbn/alerting-types, alerting, actions, savedSearch, canvas, taskManager, enterpriseSearch, securitySolution | - |
+| <DocLink id="kibKbnLensCommonPluginApi" section="def-common.LensPartitionVisualizationState.palette" text="palette"/> | lens, securitySolution, visTypePie, @kbn/lens-embeddable-utils | - |
 | <DocLink id="kibKbnSecurityPluginTypesPublicPluginApi" section="def-public.SecurityPluginStart.authc" text="authc"/> | security, cloudLinks, securitySolution, cases, securitySolutionServerless | - |
 | <DocLink id="kibKbnSecuritysolutionListConstantsPluginApi" section="def-common.ENDPOINT_LIST_ID" text="ENDPOINT_LIST_ID"/> | lists, securitySolution, @kbn/securitysolution-io-ts-list-types, @kbn/test-suites-xpack-security | - |
 | <DocLink id="kibKbnSecuritysolutionListConstantsPluginApi" section="def-common.ENDPOINT_TRUSTED_APPS_LIST_ID" text="ENDPOINT_TRUSTED_APPS_LIST_ID"/> | lists, securitySolution, @kbn/securitysolution-io-ts-list-types, @kbn/test-suites-xpack-security | - |
@@ -96,7 +97,7 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibKbnCoreSavedObjectsApiServerPluginApi" section="def-server.SavedObjectsCreateOptions.migrationVersion" text="migrationVersion"/> | @kbn/core, canvas | - |
 | <DocLink id="kibKbnCoreSavedObjectsCommonPluginApi" section="def-common.SavedObjectAttributeSingle" text="SavedObjectAttributeSingle"/> | @kbn/core | - |
 | <DocLink id="kibKbnCoreSavedObjectsCommonPluginApi" section="def-common.SavedObjectAttribute" text="SavedObjectAttribute"/> | @kbn/core, @kbn/response-ops-rule-form | - |
-| <DocLink id="kibKbnCoreSavedObjectsCommonPluginApi" section="def-common.SavedObjectReference" text="SavedObjectReference"/> | @kbn/core, savedObjectsManagement, savedObjects, savedObjectsTagging, maps, streamsApp, kibanaUtils, expressions, data, embeddable, savedObjectsTaggingOss, uiActionsEnhanced, controls, @kbn/lens-embeddable-utils, canvas, dashboardEnhanced, globalSearchProviders | - |
+| <DocLink id="kibKbnCoreSavedObjectsCommonPluginApi" section="def-common.SavedObjectReference" text="SavedObjectReference"/> | @kbn/core, savedObjectsManagement, savedObjectsTagging, savedObjects, maps, streamsApp, kibanaUtils, expressions, data, embeddable, savedObjectsTaggingOss, uiActionsEnhanced, controls, @kbn/lens-embeddable-utils, canvas, dashboardEnhanced, globalSearchProviders | - |
 | <DocLink id="kibDiscoverPluginApi" section="def-common.DiscoverAppLocatorParams.indexPatternId" text="indexPatternId"/> | fleet, osquery, exploratoryView, synthetics | - |
 | <DocLink id="kibDataPluginApi" section="def-common.DataView.getNonScriptedFields" text="getNonScriptedFields"/> | graph, visTypeTimeseries, dataViewManagement, dataViews | - |
 | <DocLink id="kibDataPluginApi" section="def-server.DataView.getNonScriptedFields" text="getNonScriptedFields"/> | graph, visTypeTimeseries, dataViewManagement, dataViews | - |
@@ -116,6 +117,8 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibDataViewsPluginApi" section="def-server.findIndexPatternById" text="findIndexPatternById"/> | unifiedSearch | - |
 | <DocLink id="kibKbnPresentationPublishingPluginApi" section="def-public.useBatchedOptionalPublishingSubjects" text="useBatchedOptionalPublishingSubjects"/> | presentationPanel, controls | - |
 | <DocLink id="kibSavedObjectsPluginApi" section="def-public.SavedObjectSaveModal" text="SavedObjectSaveModal"/> | presentationUtil, lens, discover | - |
+| <DocLink id="kibKbnLensCommonPluginApi" section="def-common.ColumnState.palette" text="palette"/> | lens | - |
+| <DocLink id="kibKbnLensCommonPluginApi" section="def-common.XYDataLayerConfig.palette" text="palette"/> | lens | - |
 | <DocLink id="kibExpressionsPluginApi" section="def-public.ExpressionFunctionDefinition.context" text="context"/> | canvas | - |
 | <DocLink id="kibExpressionsPluginApi" section="def-public.ExpressionsServiceSetup.getFunction" text="getFunction"/> | canvas | - |
 | <DocLink id="kibExpressionsPluginApi" section="def-public.ExpressionsServiceSetup.getFunctions" text="getFunctions"/> | canvas | - |
@@ -140,6 +143,8 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibInferencePluginApi" section="def-server.EsqlDocumentBase.getSystemMessage" text="getSystemMessage"/> | @kbn/ai-tools | - |
 | <DocLink id="kibKibanaReactPluginApi" section="def-public.wrapWithTheme" text="wrapWithTheme"/> | aiAssistantManagementSelection, observabilityAiAssistantManagement | - |
 | <DocLink id="kibKibanaReactPluginApi" section="def-common.KibanaStyledComponentsThemeProviderDecorator" text="KibanaStyledComponentsThemeProviderDecorator"/> | @kbn/react-kibana-context-styled, kibanaReact | - |
+| <DocLink id="kibLensPluginApi" section="def-public.LensTagCloudState.palette" text="palette"/> | visTypeTagcloud | - |
+| <DocLink id="kibKbnLensCommonPluginApi" section="def-common.LensTagCloudState.palette" text="palette"/> | visTypeTagcloud | - |
 | <DocLink id="kibKbnIndexLifecycleManagementCommonSharedPluginApi" section="def-common.RolloverAction.max_size" text="max_size"/> | indexLifecycleManagement | - |
 | <DocLink id="kibSharePluginApi" section="def-public.ShareContext.shareableUrlForSavedObject" text="shareableUrlForSavedObject"/> | discover, @kbn/reporting-public | - |
 | <DocLink id="kibKbnCoreUiSettingsCommonPluginApi" section="def-common.UiSettingsParams.metric" text="metric"/> | @kbn/management-settings-field-definition, discover | - |
@@ -204,7 +209,6 @@ Safe to remove.
 | <DocLink id="kibKibanaReactPluginApi" section="def-public.KibanaThemeProvider" text="KibanaThemeProvider"/> | kibanaReact | 
 | <DocLink id="kibKibanaReactPluginApi" section="def-public.KibanaThemeProviderProps" text="KibanaThemeProviderProps"/> | kibanaReact | 
 | <DocLink id="kibLensPluginApi" section="def-public.XYDataLayerConfig.palette" text="palette"/> | lens | 
-| <DocLink id="kibLensPluginApi" section="def-public.TagcloudState.palette" text="palette"/> | lens | 
 | <DocLink id="kibLicensingPluginApi" section="def-public.LicensingPluginSetup.refresh" text="refresh"/> | licensing | 
 | <DocLink id="kibLicensingPluginApi" section="def-server.LicensingPluginSetup.refresh" text="refresh"/> | licensing | 
 | <DocLink id="kibListsPluginApi" section="def-server.ListClient.createListBootStrapIndex" text="createListBootStrapIndex"/> | lists | 
@@ -274,7 +278,6 @@ Safe to remove.
 | <DocLink id="kibKbnUiThemePluginApi" section="def-common.darkMode" text="darkMode"/> | @kbn/ui-theme | 
 | <DocLink id="kibKbnUiThemePluginApi" section="def-common.tag" text="tag"/> | @kbn/ui-theme | 
 | <DocLink id="kibKbnUiThemePluginApi" section="def-common.version" text="version"/> | @kbn/ui-theme | 
-| <DocLink id="kibKbnZodPluginApi" section="def-common.ZodString.nonempty" text="nonempty"/> | @kbn/zod | 
 | <DocLink id="kibKbnZodPluginApi" section="def-common.ZodObject.nonstrict" text="nonstrict"/> | @kbn/zod | 
 | <DocLink id="kibKbnZodPluginApi" section="def-common.ZodObject.augment" text="augment"/> | @kbn/zod | 
 | <DocLink id="kibKbnZodPluginApi" section="def-common.ZodObject.deepPartial" text="deepPartial"/> | @kbn/zod |
