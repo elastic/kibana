@@ -18,6 +18,7 @@ export function getSearchEmbeddableTransforms(
   transformEnhancementsOut: EnhancementsRegistry['transformOut']
 ): EmbeddableTransforms<StoredSearchEmbeddableState, SearchEmbeddableState> {
   return {
+    transformOutInjectsReferences: true,
     transformIn: getTransformIn(transformEnhancementsIn),
     transformOut: getTransformOut(transformEnhancementsOut),
   };
