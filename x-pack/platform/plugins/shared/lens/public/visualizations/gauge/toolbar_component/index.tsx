@@ -89,5 +89,3 @@ const TitlesAndTextPopover = (props: VisualizationToolbarProps<GaugeVisualizatio
     </ToolbarPopover>
   );
 };
-
-export { GaugeFlyoutToolbar } from './flyout_toolbar';
