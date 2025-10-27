@@ -25,8 +25,6 @@ export interface GetGraphParams {
     spaceId?: string;
     start: string | number;
     end: string | number;
-    eventTimeStart?: string | number;
-    eventTimeEnd?: string | number;
     esQuery?: EsQuery;
   };
   showUnknownTarget: boolean;
@@ -35,21 +33,11 @@ export interface GetGraphParams {
 
 export const getGraph = async ({
   services: { esClient, logger },
-  query: {
-    originEventIds,
-    spaceId = 'default',
-    indexPatterns,
-    start,
-    end,
-    eventTimeStart,
-    eventTimeEnd,
-    esQuery,
-  },
+  query: { originEventIds, spaceId = 'default', indexPatterns, start, end, esQuery },
   showUnknownTarget,
   nodesLimit,
 }: GetGraphParams): Promise<Pick<GraphResponse, 'nodes' | 'edges' | 'messages'>> => {
   indexPatterns = indexPatterns ?? getDefaultIndexPatterns(spaceId);
-
   logger.trace(
     `Fetching graph for [originEventIds: ${originEventIds
       .map((e) => e.id)
@@ -62,8 +50,6 @@ export const getGraph = async ({
     logger,
     start,
     end,
-    eventTimeStart,
-    eventTimeEnd,
     originEventIds,
     indexPatterns,
     spaceId,

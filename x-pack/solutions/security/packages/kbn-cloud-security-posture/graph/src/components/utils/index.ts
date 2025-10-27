@@ -6,4 +6,4 @@
  */
 
 export * from './utils';
-export { getEventTimeRange, getEventTimeRangeForSingleAlert } from './get_event_time_range';
+export { getUnifiedTimeRange } from './get_event_time_range';

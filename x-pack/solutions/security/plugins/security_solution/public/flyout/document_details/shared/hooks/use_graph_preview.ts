@@ -33,32 +33,42 @@ export interface UseGraphPreviewParams {
  */
 export interface UseGraphPreviewResult {
   /**
-   * The timestamp of the event
+   * The document timestamp (@timestamp field).
+   * - For alerts: This is the alert creation/detection time
+   * - For events: This is the event occurrence time
    */
   timestamp: string | null;
 
   /**
-   * Array of event IDs associated with the alert
+   * The original event time (kibana.alert.original_time field).
+   * - For alerts: This is the timestamp of the underlying event that triggered the alert
+   * - For events: This will be null/undefined as events don't have this field
+   * Use this for accurate time-based filtering when querying logs related to alerts.
+   */
+  originalEventTime?: string | null;
+
+  /**
+   * Array of event IDs associated with the document
    */
   eventIds: string[];
 
   /**
-   * Array of actor entity IDs associated with the alert
+   * Array of actor entity IDs associated with the document
    */
   actorIds: string[];
 
   /**
-   * Array of target entity IDs associated with the alert
+   * Array of target entity IDs associated with the document
    */
   targetIds: string[];
 
   /**
-   * Action associated with the event
+   * Action associated with the document
    */
   action?: string[];
 
   /**
-   * Boolean indicating if the event is has a graph representation (contains event ids, actor ids and action)
+   * Boolean indicating if the document has a graph representation (contains event ids, actor ids and action)
    */
   hasGraphRepresentation: boolean;
 
@@ -66,11 +76,6 @@ export interface UseGraphPreviewResult {
    * Boolean indicating if the event is an alert or not
    */
   isAlert: boolean;
-
-  /**
-   * The original event time from kibana.alert.original_time (for alerts)
-   */
-  originalTime?: string | null;
 }
 
 /**
@@ -81,7 +86,16 @@ export const useGraphPreview = ({
   ecsData,
   dataFormattedForFieldBrowser,
 }: UseGraphPreviewParams): UseGraphPreviewResult => {
+  // Get the document's @timestamp
+  // For alerts: this is when the alert was created/detected
+  // For events: this is when the event occurred
   const timestamp = getField(getFieldsData('@timestamp'));
+
+  // Get the original event time (only present for alerts)
+  // This represents when the underlying event actually occurred, before it triggered the alert
+  const originalEventTime = getField(getFieldsData('kibana.alert.original_time'));
+
+  // Get event IDs - use alert's original event ID if present, otherwise use event.id
   const originalEventId = getFieldsData('kibana.alert.original_event.id');
   const eventId = getFieldsData('event.id');
   const eventIds = originalEventId ? getFieldArray(originalEventId) : getFieldArray(eventId);
@@ -89,23 +103,24 @@ export const useGraphPreview = ({
   const actorIds = getFieldArray(getFieldsData('actor.entity.id'));
   const targetIds = getFieldArray(getFieldsData('target.entity.id'));
   const action: string[] | undefined = get(['event', 'action'], ecsData);
+
   const hasGraphRepresentation =
     Boolean(timestamp) &&
     Boolean(action?.length) &&
     actorIds.length > 0 &&
     eventIds.length > 0 &&
     targetIds.length > 0;
+
   const { isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
-  const originalTime = getField(getFieldsData('kibana.alert.original_time'));
 
   return {
     timestamp,
+    originalEventTime,
     eventIds,
     actorIds,
     action,
     targetIds,
     hasGraphRepresentation,
     isAlert,
-    originalTime,
   };
 };

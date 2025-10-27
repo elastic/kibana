@@ -17,7 +17,6 @@ import {
 } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { getEnrichPolicyId } from '@kbn/cloud-security-posture-common/utils/helpers';
 import type { EsQuery, GraphEdge, OriginEventId } from './types';
-import { SECURITY_ALERTS_PARTIAL_IDENTIFIER, LOGS_INDEX_PATTERN } from './constants';
 
 interface BuildEsqlQueryParams {
   indexPatterns: string[];
@@ -38,8 +37,6 @@ export const fetchGraph = async ({
   indexPatterns,
   spaceId,
   esQuery,
-  eventTimeStart,
-  eventTimeEnd,
 }: {
   esClient: IScopedClusterClient;
   logger: Logger;
@@ -50,8 +47,6 @@ export const fetchGraph = async ({
   indexPatterns: string[];
   spaceId: string;
   esQuery?: EsQuery;
-  eventTimeStart?: string | number;
-  eventTimeEnd?: string | number;
 }): Promise<EsqlToRecords<GraphEdge>> => {
   const originAlertIds = originEventIds.filter((originEventId) => originEventId.isAlert);
 
@@ -67,6 +62,7 @@ export const fetchGraph = async ({
 
   const isEnrichPolicyExists = await checkEnrichPolicyExists(esClient, logger, spaceId);
 
+  const SECURITY_ALERTS_PARTIAL_IDENTIFIER = '.alerts-security.alerts-';
   const alertsMappingsIncluded = indexPatterns.some((indexPattern) =>
     indexPattern.includes(SECURITY_ALERTS_PARTIAL_IDENTIFIER)
   );
@@ -86,15 +82,7 @@ export const fetchGraph = async ({
   return await esClient.asCurrentUser.helpers
     .esql({
       columnar: false,
-      filter: buildDslFilter(
-        eventIds,
-        showUnknownTarget,
-        start,
-        end,
-        esQuery,
-        eventTimeStart,
-        eventTimeEnd
-      ),
+      filter: buildDslFilter(eventIds, showUnknownTarget, start, end, esQuery),
       query,
       // @ts-ignore - types are not up to date
       params: [
@@ -112,87 +100,48 @@ const buildDslFilter = (
   showUnknownTarget: boolean,
   start: string | number,
   end: string | number,
-  esQuery?: EsQuery,
-  eventTimeStart?: string | number,
-  eventTimeEnd?: string | number
-) => {
-  // Determine if we should use dual time ranges
-  const useDualTimeRange = eventTimeStart !== undefined && eventTimeEnd !== undefined;
-  return {
-    bool: {
-      filter: [
-        // Time range filter - now index-aware when dual time range is provided
-        ...(useDualTimeRange
-          ? [
-              // Dual time range: different filters for alerts vs logs
-              {
-                bool: {
-                  should: [
-                    // Alerts: use alert creation time
-                    {
-                      bool: {
-                        filter: [
-                          { wildcard: { _index: `*${SECURITY_ALERTS_PARTIAL_IDENTIFIER}*` } },
-                          { range: { '@timestamp': { gte: start, lte: end } } },
-                        ],
-                      },
-                    },
-                    // Logs: use original event time
-                    {
-                      bool: {
-                        filter: [
-                          { wildcard: { _index: LOGS_INDEX_PATTERN } },
-                          { range: { '@timestamp': { gte: eventTimeStart, lte: eventTimeEnd } } },
-                        ],
-                      },
-                    },
-                  ],
-                  minimum_should_match: 1,
-                },
-              },
-            ]
-          : [
-              // Single time range: fallback for backward compatibility
-              {
-                range: {
-                  '@timestamp': {
-                    gte: start,
-                    lte: end,
-                  },
-                },
-              },
-            ]),
-        ...(showUnknownTarget
-          ? []
-          : [
-              {
-                exists: {
-                  field: 'target.entity.id',
-                },
-              },
-            ]),
-        {
-          bool: {
-            should: [
-              ...(esQuery?.bool.filter?.length ||
-              esQuery?.bool.must?.length ||
-              esQuery?.bool.should?.length ||
-              esQuery?.bool.must_not?.length
-                ? [esQuery]
-                : []),
-              {
-                terms: {
-                  'event.id': eventIds,
-                },
-              },
-            ],
-            minimum_should_match: 1,
+  esQuery?: EsQuery
+) => ({
+  bool: {
+    filter: [
+      {
+        range: {
+          '@timestamp': {
+            gte: start,
+            lte: end,
           },
         },
-      ],
-    },
-  };
-};
+      },
+      ...(showUnknownTarget
+        ? []
+        : [
+            {
+              exists: {
+                field: 'target.entity.id',
+              },
+            },
+          ]),
+      {
+        bool: {
+          should: [
+            ...(esQuery?.bool.filter?.length ||
+            esQuery?.bool.must?.length ||
+            esQuery?.bool.should?.length ||
+            esQuery?.bool.must_not?.length
+              ? [esQuery]
+              : []),
+            {
+              terms: {
+                'event.id': eventIds,
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
+      },
+    ],
+  },
+});
 
 const checkEnrichPolicyExists = async (
   esClient: IScopedClusterClient,
@@ -220,6 +169,7 @@ const buildEsqlQuery = ({
   spaceId,
   alertsMappingsIncluded,
 }: BuildEsqlQueryParams): string => {
+  const SECURITY_ALERTS_PARTIAL_IDENTIFIER = '.alerts-security.alerts-';
   const enrichPolicyName = getEnrichPolicyId(spaceId);
 
   const query = `FROM ${indexPatterns

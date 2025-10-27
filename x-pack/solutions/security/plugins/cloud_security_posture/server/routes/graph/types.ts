@@ -12,7 +12,6 @@ export type EsQuery = GraphRequest['query']['esQuery'];
 export interface OriginEventId {
   id: string;
   isAlert: boolean;
-  originalTime?: string;
 }
 
 export interface GraphEdge {

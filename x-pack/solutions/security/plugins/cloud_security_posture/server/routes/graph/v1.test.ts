@@ -9,7 +9,6 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { getGraph, type GetGraphParams } from './v1';
 import { fetchGraph } from './fetch_graph';
 import { parseRecords } from './parse_records';
-import { getDefaultIndexPatterns } from './constants';
 
 jest.mock('./fetch_graph');
 jest.mock('./parse_records');
@@ -57,9 +56,10 @@ describe('getGraph', () => {
       logger: mockLogger,
       start: 0,
       end: 100,
-      eventTimeStart: undefined,
-      eventTimeEnd: undefined,
-      originEventIds: params.query.originEventIds,
+      originEventIds: [
+        { id: 'event1', isAlert: false },
+        { id: 'event2', isAlert: false },
+      ],
       indexPatterns: ['pattern1', 'pattern2'],
       spaceId: 'testSpace',
       esQuery: { bool: { must: [{ match_phrase: { field: 'value' } }] } },
@@ -92,79 +92,7 @@ describe('getGraph', () => {
 
     expect(fetchGraph).toHaveBeenCalledWith(
       expect.objectContaining({
-        indexPatterns: getDefaultIndexPatterns('defaultSpace'),
-      })
-    );
-  });
-
-  it('should pass originalTime and eventTime parameters when provided', async () => {
-    const fakeFetchResult = { records: ['record1', 'record2'] };
-    (fetchGraph as jest.Mock).mockResolvedValue(fakeFetchResult);
-
-    const parsedResult = { nodes: ['node1', 'node2'], edges: ['edge1'], messages: [] };
-    (parseRecords as jest.Mock).mockReturnValue(parsedResult);
-
-    const originEventIds = [
-      { id: 'alert1', isAlert: true, originalTime: '2025-01-15T10:00:00.000Z' },
-      { id: 'alert2', isAlert: true, originalTime: '2025-01-15T14:00:00.000Z' },
-      { id: 'event1', isAlert: false },
-    ];
-
-    const params = {
-      services: { esClient, logger: mockLogger },
-      query: {
-        originEventIds,
-        spaceId: 'production',
-        start: '2025-01-15T09:30:00.000Z',
-        end: '2025-01-15T14:30:00.000Z',
-        eventTimeStart: '2025-01-15T10:00:00.000Z||-30m',
-        eventTimeEnd: '2025-01-15T14:00:00.000Z||+30m',
-      },
-      showUnknownTarget: false,
-      nodesLimit: 100,
-    } satisfies GetGraphParams;
-
-    await getGraph(params);
-
-    expect(fetchGraph).toHaveBeenCalledWith({
-      esClient,
-      showUnknownTarget: false,
-      logger: mockLogger,
-      start: '2025-01-15T09:30:00.000Z',
-      end: '2025-01-15T14:30:00.000Z',
-      eventTimeStart: '2025-01-15T10:00:00.000Z||-30m',
-      eventTimeEnd: '2025-01-15T14:00:00.000Z||+30m',
-      originEventIds,
-      indexPatterns: getDefaultIndexPatterns('production'),
-      spaceId: 'production',
-      esQuery: undefined,
-    });
-    expect(parseRecords).toHaveBeenCalledWith(mockLogger, fakeFetchResult.records, 100);
-  });
-
-  it('should work without eventTime parameters for backward compatibility', async () => {
-    const fakeFetchResult = { records: ['record1'] };
-    (fetchGraph as jest.Mock).mockResolvedValue(fakeFetchResult);
-
-    const parsedResult = { nodes: ['node1'], edges: [], messages: [] };
-    (parseRecords as jest.Mock).mockReturnValue(parsedResult);
-
-    const params = {
-      services: { esClient, logger: mockLogger },
-      query: {
-        originEventIds: [{ id: 'event1', isAlert: false }],
-        start: '2025-01-15T09:00:00.000Z',
-        end: '2025-01-15T11:00:00.000Z',
-      },
-      showUnknownTarget: true,
-    } satisfies GetGraphParams;
-
-    await getGraph(params);
-
-    expect(fetchGraph).toHaveBeenCalledWith(
-      expect.objectContaining({
-        eventTimeStart: undefined,
-        eventTimeEnd: undefined,
+        indexPatterns: [`.alerts-security.alerts-defaultSpace`, 'logs-*'],
       })
     );
   });

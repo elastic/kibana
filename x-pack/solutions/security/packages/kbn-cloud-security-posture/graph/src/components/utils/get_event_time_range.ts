@@ -6,58 +6,42 @@
  */
 
 /**
- * Calculate event time range based on original event times from alerts.
- * For multiple events, uses earliest time - 30m as start and latest time + 30m as end.
+ * Calculate a unified time range that encompasses both alert and original event times.
+ * This ensures all related events are captured in a single query.
  *
- * @param originEventIds - Array of origin events with optional originalTime field
- * @returns Object with eventTimeStart and eventTimeEnd, or undefined if no valid times found
- */
-export const getEventTimeRange = (
-  originEventIds: Array<{ id: string; isAlert: boolean; originalTime?: string }>
-): { eventTimeStart?: string; eventTimeEnd?: string } => {
-  const originalTimes = originEventIds
-    .filter((event) => event.isAlert && event.originalTime)
-    .map((event) => event.originalTime as string);
-
-  if (originalTimes.length === 0) {
-    return { eventTimeStart: undefined, eventTimeEnd: undefined };
-  }
-
-  // Find the earliest and latest original times
-  const timestamps = originalTimes.map((time) => new Date(time).getTime());
-  const minTime = Math.min(...timestamps);
-  const maxTime = Math.max(...timestamps);
-
-  // Use earliest time - 30m as start and latest time + 30m as end
-  // This ensures we capture all events across the full time range
-  const startTime = new Date(minTime).toISOString();
-  const endTime = new Date(maxTime).toISOString();
-
-  return {
-    eventTimeStart: `${startTime}||-30m`,
-    eventTimeEnd: `${endTime}||+30m`,
-  };
-};
-
-/**
- * Calculate event time range for a single alert.
- * Applies ±30 minute window based on the original event time.
+ * For alerts with originalEventTime:
+ * - Uses the earlier of (alert time, original event time) minus 30m as start
+ * - Uses the later of (alert time, original event time) plus 30m as end
  *
- * @param isAlert - Whether the event is an alert
- * @param originalTime - The original event time from kibana.alert.original_time
- * @returns Object with eventTimeStart and eventTimeEnd, or undefined if not applicable
+ * For events or alerts without originalEventTime:
+ * - Uses the document timestamp with ±30m buffer
+ *
+ * @param timestamp - The document timestamp (@timestamp field)
+ * @param isAlert - Whether the document is an alert
+ * @param originalEventTime - The original event time (kibana.alert.original_time) for alerts
+ * @returns Object with start and end time range strings
  */
-export const getEventTimeRangeForSingleAlert = (
+export const getUnifiedTimeRange = (
+  timestamp: string,
   isAlert: boolean,
-  originalTime?: string | null
-): { eventTimeStart?: string; eventTimeEnd?: string } => {
-  if (!isAlert || !originalTime) {
-    return { eventTimeStart: undefined, eventTimeEnd: undefined };
+  originalEventTime?: string | null
+): { start: string; end: string } => {
+  if (isAlert && originalEventTime) {
+    // Compare timestamps and use the earlier one to ensure we capture all related events
+    const alertTime = new Date(timestamp).getTime();
+    const originalTime = new Date(originalEventTime).getTime();
+    const earliestTime = new Date(Math.min(alertTime, originalTime)).toISOString();
+    const latestTime = new Date(Math.max(alertTime, originalTime)).toISOString();
+
+    return {
+      start: `${earliestTime}||-30m`,
+      end: `${latestTime}||+30m`,
+    };
   }
 
-  // Apply ±30 minute window based on the original event time
+  // For events or alerts without originalEventTime, use the document timestamp
   return {
-    eventTimeStart: `${originalTime}||-30m`,
-    eventTimeEnd: `${originalTime}||+30m`,
+    start: `${timestamp}||-30m`,
+    end: `${timestamp}||+30m`,
   };
 };

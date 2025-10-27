@@ -15,18 +15,11 @@ export const graphRequestSchema = schema.object({
   showUnknownTarget: schema.maybe(schema.boolean()),
   query: schema.object({
     originEventIds: schema.arrayOf(
-      schema.object({
-        id: schema.string(),
-        isAlert: schema.boolean(),
-        originalTime: schema.maybe(schema.string()),
-      })
+      schema.object({ id: schema.string(), isAlert: schema.boolean() })
     ),
     // TODO: use zod for range validation instead of config schema
     start: schema.oneOf([schema.number(), schema.string()]),
     end: schema.oneOf([schema.number(), schema.string()]),
-    // Optional event time range for querying logs indices based on original event time
-    eventTimeStart: schema.maybe(schema.oneOf([schema.number(), schema.string()])),
-    eventTimeEnd: schema.maybe(schema.oneOf([schema.number(), schema.string()])),
     indexPatterns: schema.maybe(
       schema.arrayOf(
         schema.string({
