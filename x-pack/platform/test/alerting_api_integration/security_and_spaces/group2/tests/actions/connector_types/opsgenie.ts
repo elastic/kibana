@@ -87,7 +87,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating action type config: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"apiUrl\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
+              message: `error validating connector type config: Field \"apiUrl\": Required`,
             });
           });
       });
@@ -112,7 +112,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: error validating url: target url "http://opsgenie.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
+                'error validating connector type config: error validating url: target url "http://opsgenie.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
             });
           });
       });
@@ -133,7 +133,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating action type secrets: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"apiKey\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
+              message: `error validating connector type secrets: Field \"apiKey\": Required`,
             });
           });
       });
@@ -212,7 +212,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
             retry: true,
             message: 'an error occurred while running the action',
             errorSource: TaskErrorSource.USER,
-            service_message: `Request validation failed ([\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"message\"\n    ],\n    \"message\": \"Required\"\n  }\n])`,
+            service_message: `Request validation failed (Field \"message\": Required)`,
           });
         });
 
@@ -231,7 +231,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
             retry: true,
             message: 'an error occurred while running the action',
             errorSource: TaskErrorSource.USER,
-            service_message: `Request validation failed ([\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"alias\"\n    ],\n    \"message\": \"Required\"\n  }\n])`,
+            service_message: `Request validation failed (Field \"alias\": Required)`,
           });
         });
 
@@ -263,7 +263,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
                 retry: true,
                 message: 'an error occurred while running the action',
                 errorSource: TaskErrorSource.USER,
-                service_message: `Request validation failed ([\n  {\n    \"code\": \"invalid_union\",\n    \"unionErrors\": [\n      {\n        \"issues\": [\n          {\n            \"received\": \"invalidType\",\n            \"code\": \"invalid_enum_value\",\n            \"options\": [\n              \"team\",\n              \"user\",\n              \"escalation\",\n              \"schedule\"\n            ],\n            \"path\": [\n              \"responders\",\n              0,\n              \"type\"\n            ],\n            \"message\": \"Invalid enum value. Expected 'team' | 'user' | 'escalation' | 'schedule', received 'invalidType'\"\n          }\n        ],\n        \"name\": \"ZodError\"\n      },\n      {\n        \"issues\": [\n          {\n            \"code\": \"invalid_type\",\n            \"expected\": \"string\",\n            \"received\": \"undefined\",\n            \"path\": [\n              \"responders\",\n              0,\n              \"id\"\n            ],\n            \"message\": \"Required\"\n          },\n          {\n            \"received\": \"invalidType\",\n            \"code\": \"invalid_enum_value\",\n            \"options\": [\n              \"team\",\n              \"user\",\n              \"escalation\",\n              \"schedule\"\n            ],\n            \"path\": [\n              \"responders\",\n              0,\n              \"type\"\n            ],\n            \"message\": \"Invalid enum value. Expected 'team' | 'user' | 'escalation' | 'schedule', received 'invalidType'\"\n          },\n          {\n            \"code\": \"unrecognized_keys\",\n            \"keys\": [\n              \"name\"\n            ],\n            \"path\": [\n              \"responders\",\n              0\n            ],\n            \"message\": \"Unrecognized key(s) in object: 'name'\"\n          }\n        ],\n        \"name\": \"ZodError\"\n      },\n      {\n        \"issues\": [\n          {\n            \"code\": \"invalid_type\",\n            \"expected\": \"string\",\n            \"received\": \"undefined\",\n            \"path\": [\n              \"responders\",\n              0,\n              \"username\"\n            ],\n            \"message\": \"Required\"\n          },\n          {\n            \"received\": \"invalidType\",\n            \"code\": \"invalid_literal\",\n            \"expected\": \"user\",\n            \"path\": [\n              \"responders\",\n              0,\n              \"type\"\n            ],\n            \"message\": \"Invalid literal value, expected \\\"user\\\"\"\n          },\n          {\n            \"code\": \"unrecognized_keys\",\n            \"keys\": [\n              \"name\"\n            ],\n            \"path\": [\n              \"responders\",\n              0\n            ],\n            \"message\": \"Unrecognized key(s) in object: 'name'\"\n          }\n        ],\n        \"name\": \"ZodError\"\n      }\n    ],\n    \"path\": [\n      \"responders\",\n      0\n    ],\n    \"message\": \"Invalid input\"\n  }\n])`,
+                service_message: `Request validation failed (Field \"responders.0\": Unrecognized key(s) in object: 'name', Unrecognized key(s) in object: 'name')`,
               });
             });
 
@@ -292,7 +292,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
                 retry: true,
                 message: 'an error occurred while running the action',
                 errorSource: TaskErrorSource.USER,
-                service_message: `Request validation failed ([\n  {\n    \"code\": \"invalid_union\",\n    \"unionErrors\": [\n      {\n        \"issues\": [\n          {\n            \"code\": \"invalid_type\",\n            \"expected\": \"string\",\n            \"received\": \"undefined\",\n            \"path\": [\n              \"responders\",\n              0,\n              \"name\"\n            ],\n            \"message\": \"Required\"\n          }\n        ],\n        \"name\": \"ZodError\"\n      },\n      {\n        \"issues\": [\n          {\n            \"code\": \"invalid_type\",\n            \"expected\": \"string\",\n            \"received\": \"undefined\",\n            \"path\": [\n              \"responders\",\n              0,\n              \"id\"\n            ],\n            \"message\": \"Required\"\n          }\n        ],\n        \"name\": \"ZodError\"\n      },\n      {\n        \"issues\": [\n          {\n            \"code\": \"invalid_type\",\n            \"expected\": \"string\",\n            \"received\": \"undefined\",\n            \"path\": [\n              \"responders\",\n              0,\n              \"username\"\n            ],\n            \"message\": \"Required\"\n          },\n          {\n            \"received\": \"schedule\",\n            \"code\": \"invalid_literal\",\n            \"expected\": \"user\",\n            \"path\": [\n              \"responders\",\n              0,\n              \"type\"\n            ],\n            \"message\": \"Invalid literal value, expected \\\"user\\\"\"\n          }\n        ],\n        \"name\": \"ZodError\"\n      }\n    ],\n    \"path\": [\n      \"responders\",\n      0\n    ],\n    \"message\": \"Invalid input\"\n  }\n])`,
+                service_message: `Request validation failed (4 errors:\n [1]: Field \"responders.0.name\": Required;\n [2]: Field \"responders.0.id\": Required;\n [3]: Field \"responders.0.username\": Required;\n [4]: Field \"responders.0.type\": Invalid literal value, expected \"user\")`,
               });
             });
 
@@ -394,7 +394,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
                 retry: true,
                 message: 'an error occurred while running the action',
                 errorSource: TaskErrorSource.USER,
-                service_message: `Request validation failed ([\n  {\n    \"code\": \"invalid_union\",\n    \"unionErrors\": [\n      {\n        \"issues\": [\n          {\n            \"received\": \"user\",\n            \"code\": \"invalid_literal\",\n            \"expected\": \"team\",\n            \"path\": [\n              \"visibleTo\",\n              0,\n              \"type\"\n            ],\n            \"message\": \"Invalid literal value, expected \\\"team\\\"\"\n          }\n        ],\n        \"name\": \"ZodError\"\n      },\n      {\n        \"issues\": [\n          {\n            \"code\": \"invalid_type\",\n            \"expected\": \"string\",\n            \"received\": \"undefined\",\n            \"path\": [\n              \"visibleTo\",\n              0,\n              \"id\"\n            ],\n            \"message\": \"Required\"\n          },\n          {\n            \"received\": \"user\",\n            \"code\": \"invalid_literal\",\n            \"expected\": \"team\",\n            \"path\": [\n              \"visibleTo\",\n              0,\n              \"type\"\n            ],\n            \"message\": \"Invalid literal value, expected \\\"team\\\"\"\n          },\n          {\n            \"code\": \"unrecognized_keys\",\n            \"keys\": [\n              \"name\"\n            ],\n            \"path\": [\n              \"visibleTo\",\n              0\n            ],\n            \"message\": \"Unrecognized key(s) in object: 'name'\"\n          }\n        ],\n        \"name\": \"ZodError\"\n      },\n      {\n        \"issues\": [\n          {\n            \"code\": \"invalid_type\",\n            \"expected\": \"string\",\n            \"received\": \"undefined\",\n            \"path\": [\n              \"visibleTo\",\n              0,\n              \"id\"\n            ],\n            \"message\": \"Required\"\n          },\n          {\n            \"code\": \"unrecognized_keys\",\n            \"keys\": [\n              \"name\"\n            ],\n            \"path\": [\n              \"visibleTo\",\n              0\n            ],\n            \"message\": \"Unrecognized key(s) in object: 'name'\"\n          }\n        ],\n        \"name\": \"ZodError\"\n      },\n      {\n        \"issues\": [\n          {\n            \"code\": \"invalid_type\",\n            \"expected\": \"string\",\n            \"received\": \"undefined\",\n            \"path\": [\n              \"visibleTo\",\n              0,\n              \"username\"\n            ],\n            \"message\": \"Required\"\n          },\n          {\n            \"code\": \"unrecognized_keys\",\n            \"keys\": [\n              \"name\"\n            ],\n            \"path\": [\n              \"visibleTo\",\n              0\n            ],\n            \"message\": \"Unrecognized key(s) in object: 'name'\"\n          }\n        ],\n        \"name\": \"ZodError\"\n      }\n    ],\n    \"path\": [\n      \"visibleTo\",\n      0\n    ],\n    \"message\": \"Invalid input\"\n  }\n])`,
+                service_message: `Request validation failed (Field \"visibleTo.0\": Unrecognized key(s) in object: 'name', Unrecognized key(s) in object: 'name', Unrecognized key(s) in object: 'name')`,
               });
             });
 
@@ -458,7 +458,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
                 retry: true,
                 message: 'an error occurred while running the action',
                 errorSource: TaskErrorSource.USER,
-                service_message: `Request validation failed ([\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"number\",\n    \"path\": [\n      \"details\",\n      \"bananas\"\n    ],\n    \"message\": \"Expected string, received number\"\n  }\n])`,
+                service_message: `Request validation failed (Field \"details.bananas\": Expected string, received number)`,
               });
             });
 
