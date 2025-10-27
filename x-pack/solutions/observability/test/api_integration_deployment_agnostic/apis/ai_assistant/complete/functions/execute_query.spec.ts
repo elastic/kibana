@@ -117,15 +117,16 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       describe('First LLM request - Initial tool selection', () => {
         it('exposes the right tools', () => {
-          const toolNames = firstRequestBody.tools?.map((t) => t.function.name) ?? [];
-          expect(toolNames).to.contain('query');
-          expect(toolNames).to.contain('get_alerts_dataset_info');
-          expect(toolNames).to.contain('alerts');
-          expect(toolNames).to.contain('changes');
-          expect(toolNames).to.contain('elasticsearch');
-          expect(toolNames).to.contain('kibana');
-          expect(toolNames).to.contain('get_dataset_info');
-          expect(toolNames).to.contain('execute_connector');
+          expect(firstRequestBody.tools?.map((t) => t.function.name)).to.eql([
+            'query',
+            'get_alerts_dataset_info',
+            'alerts',
+            'changes',
+            'elasticsearch',
+            'kibana',
+            'get_dataset_info',
+            'execute_connector',
+          ]);
         });
       });
 
