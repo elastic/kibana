@@ -109,7 +109,7 @@ const COMMANDS_WITH_ACCESS_TO_FILES: CommandsWithFileAccess = deepFreeze<Command
     microsoft_defender_endpoint: false,
   },
   'memory-dump': {
-    endpoint: true,
+    endpoint: false,
     sentinel_one: false,
     crowdstrike: false,
     microsoft_defender_endpoint: false,
