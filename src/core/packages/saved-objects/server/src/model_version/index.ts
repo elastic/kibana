@@ -11,6 +11,7 @@ export type {
   SavedObjectsModelVersion,
   SavedObjectsModelVersionMap,
   SavedObjectsModelVersionMapProvider,
+  SavedObjectsFullModelVersion,
 } from './model_version';
 
 export type {
@@ -37,4 +38,5 @@ export type {
   SavedObjectModelVersionForwardCompatibilitySchema,
   SavedObjectModelVersionForwardCompatibilityObjectSchema,
   SavedObjectModelVersionForwardCompatibilityFn,
+  SavedObjectsFullModelVersionSchemaDefinitions,
 } from './schemas';
