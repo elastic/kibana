@@ -10,19 +10,33 @@ import type {
   ElasticsearchClient,
   KibanaRequest,
   LoggerFactory,
+  SavedObject,
+  SavedObjectsClientContract,
+  SavedObjectsCreateOptions,
+  SavedObjectsDeleteOptions,
+  SavedObjectsFindResponse,
+  SavedObjectsUpdateOptions,
+  SavedObjectsUpdateResponse,
   SecurityServiceStart,
 } from '@kbn/core/server';
 import type { DataStreamSamples } from '../../common';
+import type { IntegrationAttributes, DataStreamAttributes } from './saved_objects/schemas/types';
 import { AutomaticImportSamplesIndexService } from './samples_index/index_service';
 import { getAuthenticatedUser } from './lib/get_user';
+import { AutomaticImportSavedObjectService } from './saved_objects/saved_objects_service';
 
 export class AutomaticImportService {
   private pluginStop$: Subject<void>;
   private samplesIndexService: AutomaticImportSamplesIndexService;
-  private security?: SecurityServiceStart;
+  private security: SecurityServiceStart;
+  private savedObjectService: AutomaticImportSavedObjectService;
+  private logger: LoggerFactory;
+  private savedObjectsClientPromise: Promise<SavedObjectsClientContract>;
 
-  constructor(logger: LoggerFactory, esClientPromise: Promise<ElasticsearchClient>) {
+  constructor(logger: LoggerFactory, esClientPromise: Promise<ElasticsearchClient>, savedObjectsClientPromise: Promise<SavedObjectsClientContract>) {
     this.pluginStop$ = new ReplaySubject(1);
+    this.logger = logger;
+    this.savedObjectsClientPromise = savedObjectsClientPromise;
     this.samplesIndexService = new AutomaticImportSamplesIndexService(logger, esClientPromise);
   }
 
@@ -30,9 +44,94 @@ export class AutomaticImportService {
     this.security = security;
   }
 
+  public initializeSavedObjectService() {
+    if (!this.security) {
+      throw new Error('Security service must be set before initializing saved object service');
+    }
+    this.savedObjectService = new AutomaticImportSavedObjectService(
+      this.logger,
+      this.savedObjectsClientPromise,
+      this.security
+    );
+  }
+
   public async addSamplesToDataStream(dataStream: DataStreamSamples, request: KibanaRequest) {
     const currentAuthenticatedUser = getAuthenticatedUser(request, this.security);
     await this.samplesIndexService.addSamplesToDataStream(currentAuthenticatedUser, dataStream);
+  }
+
+  public async insertIntegration(
+    request: KibanaRequest,
+    data: IntegrationAttributes,
+    options?: SavedObjectsCreateOptions
+  ): Promise<SavedObject<IntegrationAttributes>> {
+    return this.savedObjectService.insertIntegration(request, data, options);
+  }
+
+  public async updateIntegration(
+    data: IntegrationAttributes,
+    expectedVersion: string,
+    versionUpdate?: 'major' | 'minor' | 'patch',
+    options?: SavedObjectsUpdateOptions<IntegrationAttributes>
+  ): Promise<SavedObjectsUpdateResponse<IntegrationAttributes>> {
+    return this.savedObjectService.updateIntegration(data, expectedVersion, versionUpdate, options);
+  }
+
+  public async getIntegration(integrationId: string): Promise<SavedObject<IntegrationAttributes>> {
+    return this.savedObjectService.getIntegration(integrationId);
+  }
+
+  public async getAllIntegrations(): Promise<SavedObjectsFindResponse<IntegrationAttributes>> {
+    return this.savedObjectService.getAllIntegrations();
+  }
+
+  public async deleteIntegration(
+    integrationId: string,
+    options?: SavedObjectsDeleteOptions
+  ): Promise<{
+    success: boolean;
+    dataStreamsDeleted: number;
+    errors: Array<{ id: string; error: string }>;
+  }> {
+    return this.savedObjectService.deleteIntegration(integrationId, options);
+  }
+
+  public async insertDataStream(
+    request: KibanaRequest,
+    data: DataStreamAttributes,
+    options?: SavedObjectsCreateOptions
+  ): Promise<SavedObject<DataStreamAttributes>> {
+    return this.savedObjectService.insertDataStream(request, data, options);
+  }
+
+  public async updateDataStream(
+    data: DataStreamAttributes,
+    expectedVersion: string,
+    versionUpdate?: 'major' | 'minor' | 'patch',
+    options?: SavedObjectsUpdateOptions<DataStreamAttributes>
+  ): Promise<SavedObjectsUpdateResponse<DataStreamAttributes>> {
+    return this.savedObjectService.updateDataStream(data, expectedVersion, versionUpdate, options);
+  }
+
+  public async getDataStream(dataStreamId: string): Promise<SavedObject<DataStreamAttributes>> {
+    return this.savedObjectService.getDataStream(dataStreamId);
+  }
+
+  public async getAllDataStreams(): Promise<SavedObjectsFindResponse<DataStreamAttributes>> {
+    return this.savedObjectService.getAllDataStreams();
+  }
+
+  public async findAllDataStreamsByIntegrationId(
+    integrationId: string
+  ): Promise<SavedObjectsFindResponse<DataStreamAttributes>> {
+    return this.savedObjectService.findAllDataStreamsByIntegrationId(integrationId);
+  }
+
+  public async deleteDataStream(
+    dataStreamId: string,
+    options?: SavedObjectsDeleteOptions
+  ): Promise<void> {
+    return this.savedObjectService.deleteDataStream(dataStreamId, options);
   }
 
   public stop() {

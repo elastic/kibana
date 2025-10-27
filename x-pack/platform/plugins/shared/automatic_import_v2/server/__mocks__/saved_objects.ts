@@ -6,12 +6,12 @@
  */
 
 import type { SavedObject } from '@kbn/core/server';
-import type { DataStreamAttributes, IntegrationAttributes } from '../saved_objects/schemas/types';
+import type { DataStreamAttributes, IntegrationAttributes } from '../services/saved_objects/schemas/types';
 import {
   DATA_STREAM_SAVED_OBJECT_TYPE,
   INTEGRATION_SAVED_OBJECT_TYPE,
   TASK_STATUSES,
-} from '../saved_objects/constants';
+} from '../services/saved_objects/constants';
 
 export const mockIntegrationData: IntegrationAttributes = {
   integration_id: 'test-integration-id',

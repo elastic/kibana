@@ -14,3 +14,20 @@ export const TASK_STATUSES = {
   completed: 'completed',
   failed: 'failed',
 };
+
+export const INPUT_TYPES = {
+  awsCloudwatch: 'aws-cloudwatch',
+  awsS3: 'aws-s3',
+  azureBlobStorage: 'azure-blob-storage',
+  azureEventhub: 'azure-eventhub',
+  cel: 'cel',
+  cloudfoundry: 'cloudfoundry',
+  filestream: 'filestream',
+  gcpPubsub: 'gcp-pubsub',
+  gcs: 'gcs',
+  httpEndpoint: 'http_endpoint',
+  journald: 'journald',
+  kafka: 'kafka',
+  tcp: 'tcp',
+  udp: 'udp',
+};

@@ -13,11 +13,12 @@ import {
   type SavedObject,
   type SavedObjectsFindResponse,
   type SavedObjectsUpdateResponse,
-  type Logger,
   type KibanaRequest,
+  type SecurityServiceStart,
   SavedObjectsErrorHelpers,
+  LoggerFactory,
+  Logger,
 } from '@kbn/core/server';
-import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { IntegrationAttributes, DataStreamAttributes } from './schemas/types';
 import {
   DATA_STREAM_SAVED_OBJECT_TYPE,
@@ -25,21 +26,20 @@ import {
   TASK_STATUSES,
 } from './constants';
 
-interface SavedObjectServiceOptions {
-  savedObjectsClient: SavedObjectsClientContract;
-  logger: Logger;
-  security: SecurityPluginStart;
-}
 
 export class AutomaticImportSavedObjectService {
   private savedObjectsClient: SavedObjectsClientContract;
   private logger: Logger;
-  private security: SecurityPluginStart;
+  private security: SecurityServiceStart | null = null;
 
-  constructor({ savedObjectsClient, logger, security }: SavedObjectServiceOptions) {
-    this.savedObjectsClient = savedObjectsClient;
-    this.logger = logger;
+  constructor(logger: LoggerFactory, savedObjectsClient: Promise<SavedObjectsClientContract>, security: SecurityServiceStart) {
     this.security = security;
+    this.logger = logger.get('savedObjectsService');
+    void this.initialize(savedObjectsClient);
+  }
+
+  private async initialize(savedObjectsClientPromise: Promise<SavedObjectsClientContract>) {
+    this.savedObjectsClient = await savedObjectsClientPromise;
   }
 
   /**
@@ -102,7 +102,7 @@ export class AutomaticImportSavedObjectService {
     data: IntegrationAttributes,
     options?: SavedObjectsCreateOptions
   ): Promise<SavedObject<IntegrationAttributes>> {
-    const authenticatedUser = this.security.authc.getCurrentUser(request);
+    const authenticatedUser = this.security?.authc.getCurrentUser(request);
     if (!authenticatedUser) {
       throw new Error('No user authenticated');
     }
@@ -365,9 +365,9 @@ export class AutomaticImportSavedObjectService {
       if (!allDataStreamsDeleted && !options?.force) {
         throw new Error(
           `Cannot delete integration ${integrationId}: Failed to delete ${deletionErrors.length} data streams. ` +
-            `Use force option to delete the integration anyway. Errors: ${JSON.stringify(
-              deletionErrors
-            )}`
+          `Use force option to delete the integration anyway. Errors: ${JSON.stringify(
+            deletionErrors
+          )}`
         );
       }
 
@@ -409,7 +409,7 @@ export class AutomaticImportSavedObjectService {
     data: DataStreamAttributes,
     options?: SavedObjectsCreateOptions
   ): Promise<SavedObject<DataStreamAttributes>> {
-    const authenticatedUser = this.security.authc.getCurrentUser(request);
+    const authenticatedUser = this.security?.authc.getCurrentUser(request);
     if (!authenticatedUser) {
       throw new Error('No user authenticated');
     }

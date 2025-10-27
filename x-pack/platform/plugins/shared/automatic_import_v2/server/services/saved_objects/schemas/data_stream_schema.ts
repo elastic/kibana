@@ -7,7 +7,7 @@
 
 import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { TASK_STATUSES } from '../constants';
+import { INPUT_TYPES, TASK_STATUSES } from '../constants';
 
 export const dataStreamSchemaV1 = schema.object({
   integration_id: schema.string({ maxLength: 50, minLength: 1 }),
@@ -34,6 +34,9 @@ export const dataStreamSchemaV1 = schema.object({
             }
           },
         })
+      ),
+      input_type: schema.maybe(schema.oneOf(
+        Object.values(INPUT_TYPES).map((status) => schema.literal(status)) as [Type<string>])
       ),
     },
     { unknowns: 'allow' }

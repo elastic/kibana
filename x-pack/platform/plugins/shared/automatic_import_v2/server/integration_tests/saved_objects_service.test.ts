@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract, Logger, KibanaRequest } from '@kbn/core/server';
+import type { SavedObjectsClientContract, Logger, KibanaRequest, SecurityServiceStart } from '@kbn/core/server';
 import { savedObjectsClientMock, httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
-import { AutomaticImportSavedObjectService } from '../saved_objects/saved_objects_service';
-import type { IntegrationAttributes, DataStreamAttributes } from '../saved_objects/schemas/types';
+import { AutomaticImportSavedObjectService } from '../services/saved_objects/saved_objects_service';
+import type { IntegrationAttributes, DataStreamAttributes } from '../services/saved_objects/schemas/types';
 import {
   DATA_STREAM_SAVED_OBJECT_TYPE,
+  INPUT_TYPES,
   INTEGRATION_SAVED_OBJECT_TYPE,
   TASK_STATUSES,
-} from '../saved_objects/constants';
+} from '../services/saved_objects/constants';
 import {
   createRootWithCorePlugins,
   createTestServers,
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
 import type { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
-import { integrationSavedObjectType } from '../saved_objects/integration';
-import { dataStreamSavedObjectType } from '../saved_objects/data_stream';
+import { integrationSavedObjectType } from '../services/saved_objects/integration';
+import { dataStreamSavedObjectType } from '../services/saved_objects/data_stream';
 import { createMockSecurity } from './__mocks__/security';
 
 describe('AutomaticImportSavedObjectService', () => {
   let mockLogger: jest.Mocked<Logger>;
-  let mockSecurity: jest.Mocked<SecurityPluginStart>;
+  let mockSecurity: jest.Mocked<SecurityServiceStart>;
   let mockRequest: KibanaRequest;
   let manageES: TestElasticsearchUtils;
   let coreStart: InternalCoreStart;
@@ -48,10 +48,10 @@ describe('AutomaticImportSavedObjectService', () => {
       coreStart = await kbnRoot.start();
     } catch (error) {
       if (kbnRoot) {
-        await kbnRoot.shutdown().catch(() => {});
+        await kbnRoot.shutdown().catch(() => { });
       }
       if (manageES) {
-        await manageES.stop().catch(() => {});
+        await manageES.stop().catch(() => { });
       }
       throw error;
     }
@@ -59,10 +59,10 @@ describe('AutomaticImportSavedObjectService', () => {
 
   afterAll(async () => {
     if (kbnRoot) {
-      await kbnRoot.shutdown().catch(() => {});
+      await kbnRoot.shutdown().catch(() => { });
     }
     if (manageES) {
-      await manageES.stop().catch(() => {});
+      await manageES.stop().catch(() => { });
     }
   });
 
@@ -75,11 +75,12 @@ describe('AutomaticImportSavedObjectService', () => {
   describe('Constructor', () => {
     it('should initialize AutomaticImportSavedObjectService with provided savedObjectsClient and logger', () => {
       const mockSavedObjectsClient = savedObjectsClientMock.create();
-      const newService = new AutomaticImportSavedObjectService({
-        savedObjectsClient: mockSavedObjectsClient,
-        logger: mockLogger,
-        security: mockSecurity,
-      });
+      const mockLoggerFactory = loggerMock.create();
+      const newService = new AutomaticImportSavedObjectService(
+        mockLoggerFactory,
+        Promise.resolve(mockSavedObjectsClient),
+        mockSecurity
+      );
 
       expect(newService).toBeInstanceOf(AutomaticImportSavedObjectService);
     });
@@ -94,11 +95,12 @@ describe('AutomaticImportSavedObjectService', () => {
       const internalRepo = coreStart.savedObjects.createInternalRepository();
       savedObjectsClient = internalRepo as SavedObjectsClientContract;
 
-      savedObjectService = new AutomaticImportSavedObjectService({
-        savedObjectsClient,
-        logger: mockLogger,
-        security: mockSecurity,
-      });
+      const mockLoggerFactory = loggerMock.create();
+      savedObjectService = new AutomaticImportSavedObjectService(
+        mockLoggerFactory,
+        Promise.resolve(savedObjectsClient),
+        mockSecurity
+      );
     });
 
     describe('insertIntegration', () => {
@@ -419,10 +421,10 @@ describe('AutomaticImportSavedObjectService', () => {
         } finally {
           await savedObjectsClient
             .delete(INTEGRATION_SAVED_OBJECT_TYPE, 'test-getall-1')
-            .catch(() => {});
+            .catch(() => { });
           await savedObjectsClient
             .delete(INTEGRATION_SAVED_OBJECT_TYPE, 'test-getall-2')
-            .catch(() => {});
+            .catch(() => { });
         }
       });
 
@@ -431,7 +433,7 @@ describe('AutomaticImportSavedObjectService', () => {
         for (const integration of existing.saved_objects) {
           await savedObjectsClient
             .delete(INTEGRATION_SAVED_OBJECT_TYPE, integration.id)
-            .catch(() => {});
+            .catch(() => { });
         }
 
         const result = await savedObjectService.getAllIntegrations();
@@ -524,11 +526,12 @@ describe('AutomaticImportSavedObjectService', () => {
       const internalRepo = coreStart.savedObjects.createInternalRepository();
       savedObjectsClient = internalRepo as SavedObjectsClientContract;
 
-      savedObjectService = new AutomaticImportSavedObjectService({
-        savedObjectsClient,
-        logger: mockLogger,
-        security: mockSecurity,
-      });
+      const mockLoggerFactory = loggerMock.create();
+      savedObjectService = new AutomaticImportSavedObjectService(
+        mockLoggerFactory,
+        Promise.resolve(savedObjectsClient),
+        mockSecurity
+      );
     });
 
     describe('insertDataStream', () => {
@@ -662,7 +665,7 @@ describe('AutomaticImportSavedObjectService', () => {
             job_type: 'import',
             status: TASK_STATUSES.completed,
           },
-          metadata: { sample_count: 200 },
+          metadata: { sample_count: 200, input_type: INPUT_TYPES.awsCloudwatch },
           result: { ingest_pipeline: 'test-pipeline' },
         });
 
@@ -693,7 +696,7 @@ describe('AutomaticImportSavedObjectService', () => {
             job_type: 'import',
             status: TASK_STATUSES.pending,
           },
-          metadata: { sample_count: 100 },
+          metadata: { sample_count: 100, input_type: INPUT_TYPES.awsCloudwatch },
           result: {},
         });
 
@@ -994,13 +997,13 @@ describe('AutomaticImportSavedObjectService', () => {
         } finally {
           await savedObjectsClient
             .delete(DATA_STREAM_SAVED_OBJECT_TYPE, 'test-getall-ds-1')
-            .catch(() => {});
+            .catch(() => { });
           await savedObjectsClient
             .delete(DATA_STREAM_SAVED_OBJECT_TYPE, 'test-getall-ds-2')
-            .catch(() => {});
+            .catch(() => { });
           await savedObjectsClient
             .delete(INTEGRATION_SAVED_OBJECT_TYPE, 'getall-ds-integration')
-            .catch(() => {});
+            .catch(() => { });
         }
       });
     });
@@ -1196,11 +1199,12 @@ describe('AutomaticImportSavedObjectService', () => {
       const internalRepo = coreStart.savedObjects.createInternalRepository();
       savedObjectsClient = internalRepo as unknown as SavedObjectsClientContract;
 
-      savedObjectService = new AutomaticImportSavedObjectService({
-        savedObjectsClient,
-        logger: mockLogger,
-        security: mockSecurity,
-      });
+      const mockLoggerFactory = loggerMock.create();
+      savedObjectService = new AutomaticImportSavedObjectService(
+        mockLoggerFactory,
+        Promise.resolve(savedObjectsClient),
+        mockSecurity
+      );
     });
 
     it('should handle complete workflow: create integration, add data streams, update, and query', async () => {

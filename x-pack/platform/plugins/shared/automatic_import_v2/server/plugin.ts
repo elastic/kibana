@@ -23,19 +23,18 @@ import type {
   AutomaticImportV2PluginRequestHandlerContext,
 } from './types';
 import { RequestContextFactory } from './request_context_factory';
-import { integrationSavedObjectType } from './saved_objects/integration';
-import { dataStreamSavedObjectType } from './saved_objects/data_stream';
+import { integrationSavedObjectType } from './services/saved_objects/integration';
+import { dataStreamSavedObjectType } from './services/saved_objects/data_stream';
 import { AutomaticImportService } from './services';
 
 export class AutomaticImportV2Plugin
   implements
-    Plugin<
-      AutomaticImportV2PluginSetup,
-      AutomaticImportV2PluginStart,
-      AutomaticImportV2PluginSetupDependencies,
-      AutomaticImportV2PluginStartDependencies
-    >
-{
+  Plugin<
+    AutomaticImportV2PluginSetup,
+    AutomaticImportV2PluginStart,
+    AutomaticImportV2PluginSetupDependencies,
+    AutomaticImportV2PluginStartDependencies
+  > {
   private readonly logger: Logger;
   private pluginStop$: Subject<void>;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
@@ -62,13 +61,18 @@ export class AutomaticImportV2Plugin
     core.savedObjects.registerType(integrationSavedObjectType);
     core.savedObjects.registerType(dataStreamSavedObjectType);
 
-    const coreStartServices = core.getStartServices().then(([coreStart, startPlugins]) => ({
+    const coreStartServices = core.getStartServices().then(([coreStart]) => ({
       esClient: coreStart.elasticsearch.client.asInternalUser as ElasticsearchClient,
       savedObjectsClient: coreStart.savedObjects.createInternalRepository(),
     }));
     const esClientPromise = coreStartServices.then(({ esClient }) => esClient);
+    const savedObjectsClientPromise = coreStartServices.then(({ savedObjectsClient }) => savedObjectsClient);
 
-    this.automaticImportService = new AutomaticImportService(this.logger, esClientPromise);
+    this.automaticImportService = new AutomaticImportService(
+      this.logger,
+      esClientPromise,
+      savedObjectsClientPromise
+    );
 
     const requestContextFactory = new RequestContextFactory({
       logger: this.logger,
@@ -101,6 +105,7 @@ export class AutomaticImportV2Plugin
 
     if (this.automaticImportService) {
       this.automaticImportService.setSecurityService(core.security);
+      this.automaticImportService.initializeSavedObjectService();
     }
 
     return {

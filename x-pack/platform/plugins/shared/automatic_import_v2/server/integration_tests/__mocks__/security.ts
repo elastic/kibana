@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import type { SecurityServiceStart } from '@kbn/core/server';
 
 export const createMockSecurity = (
   username = 'test-user',
   email = 'test@example.com',
   fullName = 'Test User',
   roles = ['admin']
-): jest.Mocked<SecurityPluginStart> => {
+): jest.Mocked<SecurityServiceStart> => {
   return {
     authc: {
       getCurrentUser: jest.fn().mockReturnValue({
@@ -21,6 +21,13 @@ export const createMockSecurity = (
         full_name: fullName,
         roles,
       }),
+    },
+    audit: {
+      asScoped: jest.fn(),
+      withoutRequest: {
+        enabled: false,
+        log: jest.fn(),
+      },
     },
   } as any;
 };
