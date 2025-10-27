@@ -6,7 +6,6 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
@@ -32,37 +31,42 @@ import {
 } from '@elastic/eui';
 
 import { getIndexListUri } from '@kbn/index-management-plugin/public';
+import type { ApiStatus, FollowerIndexWithPausedStatus } from '../../../../../../../common/types';
 import { routing } from '../../../../../services/routing';
 import { API_STATUS } from '../../../../../constants';
 import { ContextMenu } from '../context_menu';
 
-export class DetailPanel extends Component {
-  static propTypes = {
-    apiStatus: PropTypes.string,
-    followerIndexId: PropTypes.string,
-    followerIndex: PropTypes.object,
-    closeDetailPanel: PropTypes.func.isRequired,
-  };
+export interface DetailPanelProps {
+  apiStatus?: ApiStatus;
+  followerIndexId?: string;
+  followerIndex?: FollowerIndexWithPausedStatus;
+  closeDetailPanel: () => void;
+}
 
+export class DetailPanel extends Component<DetailPanelProps> {
   renderFollowerIndex() {
+    const { followerIndex } = this.props;
+
+    if (!followerIndex) {
+      return null;
+    }
+
     const {
-      followerIndex: {
-        remoteCluster,
-        leaderIndex,
-        isPaused,
-        shards,
-        maxReadRequestOperationCount,
-        maxOutstandingReadRequests,
-        maxReadRequestSize,
-        maxWriteRequestOperationCount,
-        maxWriteRequestSize,
-        maxOutstandingWriteRequests,
-        maxWriteBufferCount,
-        maxWriteBufferSize,
-        maxRetryDelay,
-        readPollTimeout,
-      },
-    } = this.props;
+      remoteCluster,
+      leaderIndex,
+      isPaused,
+      shards,
+      maxReadRequestOperationCount,
+      maxOutstandingReadRequests,
+      maxReadRequestSize,
+      maxWriteRequestOperationCount,
+      maxWriteRequestSize,
+      maxOutstandingWriteRequests,
+      maxWriteBufferCount,
+      maxWriteBufferSize,
+      maxRetryDelay,
+      readPollTimeout,
+    } = followerIndex;
 
     return (
       <Fragment>

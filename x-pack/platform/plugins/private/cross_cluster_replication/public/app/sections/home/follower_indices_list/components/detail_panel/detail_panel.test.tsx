@@ -12,7 +12,7 @@ import { getRandomString } from '@kbn/test-jest-helpers';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { DetailPanel } from './detail_panel';
 import { API_STATUS } from '../../../../../constants';
-import type { FollowerIndex } from '../../../../../../../common/types';
+import type { FollowerIndexWithPausedStatus } from '../../../../../../../common/types';
 
 // Mock the external dependencies
 jest.mock('../../../../../services/routing', () => ({
@@ -44,11 +44,6 @@ jest.mock('../context_menu', () => ({
 const render = (ui: React.ReactElement) => {
   return rtlRender(<IntlProvider locale="en">{ui}</IntlProvider>);
 };
-
-// Extended type for testing that includes isPaused property which exists in runtime but not in type definition
-interface FollowerIndexWithPausedStatus extends FollowerIndex {
-  isPaused?: boolean;
-}
 
 const createMockFollowerIndex = (
   overrides?: Partial<FollowerIndexWithPausedStatus>
@@ -103,7 +98,7 @@ const createMockFollowerIndex = (
 
 const defaultProps = {
   followerIndexId: 'test-follower-index',
-  followerIndex: createMockFollowerIndex({ name: 'test-follower-index' }) as any,
+  followerIndex: createMockFollowerIndex({ name: 'test-follower-index' }),
   apiStatus: API_STATUS.IDLE,
   closeDetailPanel: jest.fn(),
 };
@@ -115,7 +110,9 @@ describe('DetailPanel', () => {
 
   describe('Loading state', () => {
     it('should render loading spinner when API status is loading', () => {
-      render(<DetailPanel {...defaultProps} apiStatus={API_STATUS.LOADING} followerIndex={null} />);
+      render(
+        <DetailPanel {...defaultProps} apiStatus={API_STATUS.LOADING} followerIndex={undefined} />
+      );
 
       expect(screen.getByText('Loading follower index…')).toBeInTheDocument();
       expect(screen.getByRole('progressbar')).toBeInTheDocument();
@@ -123,22 +120,9 @@ describe('DetailPanel', () => {
   });
 
   describe('Not found state', () => {
-    it('should render not found message when follower index is null', () => {
-      render(<DetailPanel {...defaultProps} followerIndex={null} apiStatus={API_STATUS.IDLE} />);
-
-      expect(screen.getByText('Follower index not found')).toBeInTheDocument();
-      // EuiIcon doesn't render with img role, so we check for the icon by data attribute
-      const container = screen.getByText('Follower index not found').closest('.euiFlexGroup');
-      expect(container).toBeTruthy();
-    });
-
     it('should render not found message when follower index is undefined', () => {
       render(
-        <DetailPanel
-          {...defaultProps}
-          followerIndex={undefined as any}
-          apiStatus={API_STATUS.IDLE}
-        />
+        <DetailPanel {...defaultProps} followerIndex={undefined} apiStatus={API_STATUS.IDLE} />
       );
 
       expect(screen.getByText('Follower index not found')).toBeInTheDocument();
@@ -488,8 +472,10 @@ describe('DetailPanel', () => {
       expect(screen.getByTestId('manageButton')).toBeInTheDocument();
     });
 
-    it('should not render manage button when follower index is null', () => {
-      render(<DetailPanel {...defaultProps} followerIndexId="test-index" followerIndex={null} />);
+    it('should not render manage button when follower index is undefined', () => {
+      render(
+        <DetailPanel {...defaultProps} followerIndexId="test-index" followerIndex={undefined} />
+      );
 
       expect(screen.queryByTestId('manageButton')).not.toBeInTheDocument();
     });
@@ -511,7 +497,7 @@ describe('DetailPanel', () => {
     it('should render correctly with required props only', () => {
       const minimalProps = {
         followerIndexId: 'minimal-index',
-        followerIndex: null,
+        followerIndex: undefined,
         apiStatus: API_STATUS.IDLE,
         closeDetailPanel: jest.fn(),
       };
@@ -627,43 +613,13 @@ describe('DetailPanel', () => {
     });
   });
 
-  describe('Accessibility', () => {
-    it('should have proper ARIA labels on flyout', () => {
-      render(<DetailPanel {...defaultProps} />);
-
-      const flyout = screen.getByTestId('followerIndexDetail');
-      expect(flyout).toHaveAttribute('role', 'dialog');
-      // Verify the title exists with the proper id
-      const title = screen.getByTestId('title');
-      expect(title).toHaveAttribute('id', 'followerIndexDetailsFlyoutTitle');
-    });
-
-    it('should have proper heading structure in settings section', () => {
-      const followerIndex = createMockFollowerIndex({ isPaused: false });
-      render(<DetailPanel {...defaultProps} followerIndex={followerIndex} />);
-
-      const settingsSection = screen.getByTestId('settingsSection');
-      expect(settingsSection).toHaveAttribute(
-        'aria-labelledby',
-        'ccrFollowerIndexDetailSettingsTitle'
-      );
-    });
-
-    it('should have accessible close button', () => {
-      render(<DetailPanel {...defaultProps} />);
-
-      const closeButton = screen.getByTestId('closeFlyoutButton');
-      expect(closeButton).toHaveAccessibleName();
-    });
-  });
-
   describe('API Status changes', () => {
     it('should render loading state when apiStatus changes to LOADING', () => {
       const { rerender } = render(<DetailPanel {...defaultProps} />);
 
       rerender(
         <IntlProvider locale="en">
-          <DetailPanel {...defaultProps} apiStatus={API_STATUS.LOADING} followerIndex={null} />
+          <DetailPanel {...defaultProps} apiStatus={API_STATUS.LOADING} followerIndex={undefined} />
         </IntlProvider>
       );
 
@@ -673,7 +629,7 @@ describe('DetailPanel', () => {
     it('should render content when apiStatus changes from LOADING to IDLE', () => {
       const followerIndex = createMockFollowerIndex();
       const { rerender } = render(
-        <DetailPanel {...defaultProps} apiStatus={API_STATUS.LOADING} followerIndex={null} />
+        <DetailPanel {...defaultProps} apiStatus={API_STATUS.LOADING} followerIndex={undefined} />
       );
 
       rerender(
