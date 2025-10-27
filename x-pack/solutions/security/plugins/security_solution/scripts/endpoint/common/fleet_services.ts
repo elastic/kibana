@@ -223,7 +223,6 @@ const buildFleetAgentCheckInUpdate = (
   // Ensure any `undefined` value is set to `null` for the update
   Object.entries(update).forEach(([key, value]) => {
     if (value === undefined) {
-      // @ts-expect-error TS7053 Element implicitly has an 'any' type
       update[key] = null;
     }
   });
@@ -299,15 +298,19 @@ export const fetchFleetAgents = async (
  * @param hostname
  * @param timeoutMs
  * @param esClient
+ * @param searchByTag Optional tag to search by instead of hostname (format: "key:value")
  */
 export const waitForHostToEnroll = async (
   kbnClient: KbnClient,
   log: ToolingLog,
   hostname: string,
   timeoutMs: number = 30000,
-  esClient: Client | undefined = undefined
+  esClient: Client | undefined = undefined,
+  searchByTag?: string
 ): Promise<Agent> => {
-  log.info(`Waiting for host [${hostname}] to enroll with fleet`);
+  const searchIdentifier = searchByTag || hostname;
+  const searchType = searchByTag ? 'tag' : 'hostname';
+  log.info(`Waiting for agent with ${searchType} [${searchIdentifier}] to enroll with fleet`);
 
   const started = new Date();
   const hasTimedOut = (): boolean => {
@@ -319,15 +322,20 @@ export const waitForHostToEnroll = async (
 
   while (!found && !hasTimedOut()) {
     found = await retryOnError(
-      async () =>
-        fetchFleetAgents(kbnClient, {
+      async () => {
+        const kuery = searchByTag
+          ? `tags : "${searchByTag}"`
+          : `(local_metadata.host.hostname.keyword : "${hostname}")`;
+
+        return fetchFleetAgents(kbnClient, {
           perPage: 1,
-          kuery: `(local_metadata.host.hostname.keyword : "${hostname}")`,
+          kuery,
           showInactive: false,
         }).then((response) => {
           agentId = response.items[0]?.id;
           return response.items.filter((agent) => agent.status === 'online')[0];
-        }),
+        });
+      },
       RETRYABLE_TRANSIENT_ERRORS
     );
 
@@ -340,15 +348,15 @@ export const waitForHostToEnroll = async (
   if (!found) {
     throw Object.assign(
       new Error(
-        `Timed out waiting for host [${hostname}] to show up in Fleet. Waited ${
+        `Timed out waiting for agent with ${searchType} [${searchIdentifier}] to show up in Fleet. Waited ${
           timeoutMs / 1000
         } seconds`
       ),
-      { agentId, hostname }
+      { agentId, hostname, searchByTag }
     );
   }
 
-  log.debug(`Host [${hostname}] has been enrolled with fleet`);
+  log.debug(`Agent with ${searchType} [${searchIdentifier}] has been enrolled with fleet`);
   log.verbose(found);
 
   // Workaround for united metadata sometimes being unable to find docs in .fleet-agents index. This
@@ -564,11 +572,26 @@ export const getAgentVersionMatchingCurrentStack = async (
 };
 
 // Generates a file name using system arch and an agent version.
-export const getAgentFileName = (agentVersion: string): string => {
-  const downloadArch =
-    { arm64: 'arm64', x64: 'x86_64' }[process.arch as string] ??
-    `UNSUPPORTED_ARCHITECTURE_${process.arch}`;
-  return `elastic-agent-${agentVersion}-linux-${downloadArch}`;
+export const getAgentFileName = (
+  agentVersion: string,
+  os?: 'linux' | 'windows' | 'darwin',
+  arch?: 'auto' | 'x86_64' | 'arm64'
+): string => {
+  const targetOs = os || 'linux';
+
+  // Determine architecture
+  let downloadArch: string;
+  if (arch === 'auto' || !arch) {
+    // Use host machine architecture
+    downloadArch =
+      { arm64: 'arm64', x64: 'x86_64' }[process.arch as string] ??
+      `UNSUPPORTED_ARCHITECTURE_${process.arch}`;
+  } else {
+    // Use explicitly specified architecture
+    downloadArch = arch;
+  }
+
+  return `elastic-agent-${agentVersion}-${targetOs}-${downloadArch}`;
 };
 
 interface ElasticArtifactSearchResponse {
@@ -597,10 +620,13 @@ interface GetAgentDownloadUrlResponse {
 }
 
 /**
- * Retrieves the download URL to the Linux installation package for a given version of the Elastic Agent
+ * Retrieves the download URL to the installation package for a given version of the Elastic Agent
  * @param version
  * @param closestMatch
  * @param log
+ * @param os Target OS for the agent (linux, windows, darwin)
+ * @param arch Target architecture (auto, x86_64, arm64)
+ * @param staging Use staging builds instead of snapshot builds
  */
 export const getAgentDownloadUrl = async (
   version: string,
@@ -609,15 +635,43 @@ export const getAgentDownloadUrl = async (
    * is less than or equal to the `version` provided
    */
   closestMatch: boolean = false,
-  log?: ToolingLog
+  log?: ToolingLog,
+  os?: 'linux' | 'windows' | 'darwin',
+  arch?: 'auto' | 'x86_64' | 'arm64',
+  staging: boolean = false
 ): Promise<GetAgentDownloadUrlResponse> => {
-  const agentVersion = closestMatch ? await getLatestAgentDownloadVersion(version, log) : version;
+  let agentVersion = closestMatch ? await getLatestAgentDownloadVersion(version, log) : version;
+  const targetOs = os || 'linux';
+  const targetArch = arch || 'auto';
 
-  const fileNameWithoutExtension = getAgentFileName(agentVersion);
-  const agentFile = `${fileNameWithoutExtension}.tar.gz`;
+  // For staging builds, hardcode the URL (temporary solution)
+  if (staging) {
+    // Hardcoded staging build version and hash
+    const stagingVersion = '9.2.0';
+    const stagingBuildHash = '65fce82d';
+
+    const fileNameWithoutExtension = getAgentFileName(stagingVersion, targetOs, targetArch);
+    const fileExtension = targetOs === 'windows' ? '.zip' : '.tar.gz';
+    const agentFile = `${fileNameWithoutExtension}${fileExtension}`;
+
+    const stagingUrl = `https://staging.elastic.co/${stagingVersion}-${stagingBuildHash}/downloads/beats/elastic-agent/${agentFile}`;
+
+    log?.verbose(`Using hardcoded staging build URL for ${targetOs}:\n    ${stagingUrl}`);
+
+    return {
+      url: stagingUrl,
+      fileName: agentFile,
+      dirName: fileNameWithoutExtension,
+    };
+  }
+
+  const fileNameWithoutExtension = getAgentFileName(agentVersion, targetOs, targetArch);
+  // Use .zip for Windows, .tar.gz for Linux/macOS
+  const fileExtension = targetOs === 'windows' ? '.zip' : '.tar.gz';
+  const agentFile = `${fileNameWithoutExtension}${fileExtension}`;
   const artifactSearchUrl = `https://artifacts-api.elastic.co/v1/search/${agentVersion}/${agentFile}`;
 
-  log?.verbose(`Retrieving elastic agent download URL from:\n    ${artifactSearchUrl}`);
+  log?.verbose(`Retrieving elastic agent download URL for ${targetOs} from:\n    ${artifactSearchUrl}`);
 
   const searchResult: ElasticArtifactSearchResponse = await pRetry(
     async () => {
@@ -637,6 +691,7 @@ export const getAgentDownloadUrl = async (
     throw new Error(`Unable to find an Agent download URL for version [${agentVersion}]`);
   }
 
+  // The artifacts API returns the correct URL for snapshot builds
   return {
     url: searchResult.packages[agentFile].url,
     fileName: agentFile,
@@ -817,6 +872,12 @@ interface EnrollHostVmWithFleetOptions {
   closestVersionMatch?: boolean;
   useAgentCache?: boolean;
   timeoutMs?: number;
+  /** Target OS for agent download (defaults to linux) */
+  os?: 'linux' | 'windows' | 'darwin';
+  /** Target architecture for agent download (defaults to 'auto' which uses process.arch) */
+  arch?: 'auto' | 'x86_64' | 'arm64';
+  /** Use staging builds instead of snapshot builds (defaults to false) */
+  staging?: boolean;
 }
 
 /**
@@ -842,18 +903,21 @@ export const enrollHostVmWithFleet = async ({
   closestVersionMatch = true,
   useAgentCache = true,
   timeoutMs = 240000,
+  os = 'linux',
+  arch = 'auto',
+  staging = false,
 }: EnrollHostVmWithFleetOptions): Promise<Agent> => {
-  log.info(`Enrolling host VM [${hostVm.name}] with Fleet`);
+  log.info(`Enrolling host VM [${hostVm.name}] with Fleet (OS: ${os}, Arch: ${arch})`);
 
   if (!(await isFleetServerRunning(kbnClient))) {
     throw new Error(`Fleet server does not seem to be running on this instance of kibana!`);
   }
 
   const agentVersion = version || (await getAgentVersionMatchingCurrentStack(kbnClient));
-  const agentUrlInfo = await getAgentDownloadUrl(agentVersion, closestVersionMatch, log);
+  const agentUrlInfo = await getAgentDownloadUrl(agentVersion, closestVersionMatch, log, os, arch, staging);
 
   const agentDownload: DownloadAndStoreAgentResponse = useAgentCache
-    ? await downloadAndStoreAgent(agentUrlInfo.url)
+    ? await downloadAndStoreAgent(agentUrlInfo.url, agentUrlInfo.fileName)
     : { url: agentUrlInfo.url, directory: '', filename: agentUrlInfo.fileName, fullFilePath: '' };
 
   log.info(`Installing Elastic Agent`);
@@ -861,6 +925,7 @@ export const enrollHostVmWithFleet = async ({
   // For multipass, we need to place the Agent archive in the VM - either mounting local cache
   // directory or downloading it directly from inside of the VM.
   // For Vagrant, the archive is already in the VM - it was done during VM creation.
+  // For UTM with Windows/macOS, we need to upload and extract the agent.
   if (hostVm.type === 'multipass') {
     if (useAgentCache) {
       const hostVmDownloadsDir = '/home/ubuntu/_agent_downloads';
@@ -880,7 +945,115 @@ export const enrollHostVmWithFleet = async ({
 
       log.debug(`Extracting download archive on host VM`);
       await hostVm.exec(`tar -zxf ${agentDownload.filename}`);
-      await hostVm.exec(`rm -f ${agentDownload.filename}`);
+      // Keep ZIP file for debugging - don't delete
+      // await hostVm.exec(`rm -f ${agentDownload.filename}`);
+    }
+  } else if (hostVm.type === 'utm') {
+    // For UTM VMs, upload the agent from local cache
+    if (useAgentCache && agentDownload.fullFilePath) {
+      const destPath = os === 'windows'
+        ? `C:\\Users\\Public\\${agentDownload.filename}`
+        : `/tmp/${agentDownload.filename}`;
+
+      log.info(`Uploading agent ZIP: ${agentDownload.filename}`);
+      log.info(`  From: ${agentDownload.fullFilePath}`);
+      log.info(`  To:   ${destPath}`);
+
+      try {
+        await hostVm.upload(agentDownload.fullFilePath, destPath);
+        log.info(`✓ Upload completed`);
+
+        // Verify upload succeeded - use Get-Item with exit code check
+        const uploadCheck = await hostVm.exec(`Get-Item "${destPath}" -ErrorAction SilentlyContinue`);
+
+        log.verbose(`Upload check: exitCode=${uploadCheck.exitCode}`);
+
+        if (uploadCheck.exitCode === 0) {
+          log.info(`✓ Upload verified - file exists on VM`);
+        } else {
+          log.warning(`⚠️  Upload verification failed - file may not exist on VM`);
+        }
+
+        // Check file size on Windows
+        if (os === 'windows') {
+          const sizeCheck = await hostVm.exec(`(Get-Item "${destPath}").Length`);
+          const fileSize = parseInt(sizeCheck.stdout?.trim() || '0', 10);
+          log.info(`Uploaded file size: ${Math.round(fileSize / 1024 / 1024)}MB`);
+        }
+      } catch (uploadError) {
+        log.error(`Upload failed: ${uploadError.message}`);
+        throw uploadError;
+      }
+
+      if (os === 'windows') {
+        log.info(`Extracting agent in C:\\Users\\Public...`);
+        log.info(`Expected agent directory: ${agentUrlInfo.dirName}`);
+        log.info(`Expected exe: C:\\Users\\Public\\${agentUrlInfo.dirName}\\elastic-agent.exe`);
+
+        // Follow Elastic's official installation pattern
+        // Set ProgressPreference to avoid progress bar issues, then extract
+        const extractCommand = `
+$ProgressPreference = 'SilentlyContinue'
+Expand-Archive -Path "${destPath}" -DestinationPath "C:\\Users\\Public" -Force
+        `.trim();
+
+        log.info(`Sending extraction command...`);
+        await hostVm.exec(extractCommand);
+        log.info(`Extraction command sent.`);
+
+        // IMPORTANT: Expand-Archive on Windows returns immediately but extraction continues
+        // in the background. Wait 2 minutes for extraction to complete.
+        log.info(`Waiting 2 minutes for extraction to complete...`);
+        const extractionWaitTime = 120000; // 2 minutes
+        await new Promise(resolve => setTimeout(resolve, extractionWaitTime));
+
+        log.info(`Wait complete. Verifying elastic-agent.exe exists...`);
+
+        // Verify extraction completed
+        const exeCheck = await hostVm.exec(`Get-Item "C:\\Users\\Public\\${agentUrlInfo.dirName}\\elastic-agent.exe" -ErrorAction SilentlyContinue`);
+
+        if (exeCheck.exitCode === 0) {
+          log.info(`✓ Extraction verified - elastic-agent.exe exists`);
+        } else {
+          throw new Error(`Extraction failed - elastic-agent.exe not found after waiting 2 minutes`);
+        }
+
+        // Keep ZIP file for debugging - don't delete
+        // await hostVm.exec(`Remove-Item -Path "${destPath}" -Force -ErrorAction SilentlyContinue`);
+      } else {
+        // macOS/Linux: Use tar
+        await hostVm.exec(`cd /tmp && tar -zxf ${agentDownload.filename}`);
+        log.info(`✓ Extraction completed`);
+        // Keep archive for debugging - don't delete
+        // await hostVm.exec(`rm -f /tmp/${agentDownload.filename}`);
+      }
+    } else {
+      // Fallback: Download directly on the VM if cache is not used
+      log.info(`Cache not available, VM will download Elastic Agent directly from: ${agentDownload.url}`);
+
+      if (os === 'windows') {
+        const destPath = `C:\\Users\\Public\\${agentDownload.filename}`;
+
+        const downloadCommand = `
+$ProgressPreference = 'SilentlyContinue'
+Invoke-WebRequest -Uri "${agentDownload.url}" -OutFile "${destPath}"
+        `.trim();
+
+        await hostVm.exec(downloadCommand);
+        log.info(`✓ Download completed`);
+
+        const extractCommand = `
+$ProgressPreference = 'SilentlyContinue'
+Expand-Archive -Path "${destPath}" -DestinationPath "C:\\Users\\Public" -Force
+        `.trim();
+
+        await hostVm.exec(extractCommand);
+        log.info(`✓ Extraction completed`);
+      } else {
+        await hostVm.exec(`curl -L ${agentDownload.url} -o /tmp/${agentDownload.filename}`);
+        await hostVm.exec(`cd /tmp && tar -zxf ${agentDownload.filename}`);
+        log.info(`✓ Download and extraction completed`);
+      }
     }
   }
 
@@ -890,30 +1063,232 @@ export const enrollHostVmWithFleet = async ({
     fetchAgentPolicyEnrollmentKey(kbnClient, policyId),
   ]);
 
-  const agentEnrollCommand = [
-    'sudo',
+  // Build OS-specific enrollment command
+  let agentEnrollCommand: string;
+  let agentExePath: string;
 
-    `./${agentUrlInfo.dirName}/elastic-agent`,
+  if (os === 'windows') {
+    // Windows: cd into the extracted directory and run elastic-agent.exe
+    // This matches the Kibana Fleet UI installation instructions
+    const agentDir = `C:\\Users\\Public\\${agentUrlInfo.dirName}`;
+    agentExePath = `${agentDir}\\elastic-agent.exe`;
+    log.info(`Agent directory: ${agentDir}`);
+    log.info(`Agent executable: ${agentExePath}`);
 
-    'install',
+    // Build install command - cd into directory first, then run with relative path
+    // Use --url= and --enrollment-token= with equals signs (Kibana style)
+    agentEnrollCommand = `cd "${agentDir}" ; .\\elastic-agent.exe install --url=${fleetServerUrl} --enrollment-token=${enrollmentToken} --insecure --force --non-interactive`;
+  } else {
+    // Linux/macOS: Use bash, forward slashes, sudo
+    const agentPath = hostVm.type === 'multipass'
+      ? `./${agentUrlInfo.dirName}/elastic-agent`
+      : `/tmp/${agentUrlInfo.dirName}/elastic-agent`;
+    agentEnrollCommand = `sudo ${agentPath} install --insecure --force --non-interactive --url ${fleetServerUrl} --enrollment-token ${enrollmentToken} --tag vm-name:${hostVm.name}`;
+  }
 
-    '--insecure',
+  // Get Elasticsearch output URL to check connectivity
+  const esOutputHost = await getFleetElasticsearchOutputHost(kbnClient, log);
+  log.info(`\n${'='.repeat(70)}`);
+  log.info(`Network Configuration Check`);
+  log.info(`${'='.repeat(70)}`);
+  log.info(`Fleet Server URL: ${fleetServerUrl}`);
+  log.info(`Elasticsearch Output URL: ${esOutputHost}`);
 
-    '--force',
+  // Test network connectivity (especially important for VMs)
+  if (os === 'windows') {
+    log.info(`\nChecking Windows VM network configuration...`);
 
-    '--url',
-    fleetServerUrl,
+    // Note: PowerShell commands through utmctl don't return output, so these are best-effort
+    // The real test will be when we try to install the agent
 
-    '--enrollment-token',
-    enrollmentToken,
-  ].join(' ');
+    // Try to get VM IP address (likely won't work through utmctl but worth trying)
+    try {
+      const ipCheck = await hostVm.exec(`(Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.IPAddress -notlike '127.*' -and $_.IPAddress -notlike '169.*'} | Select-Object -First 1).IPAddress`);
+      if (ipCheck.stdout && ipCheck.stdout.trim()) {
+        log.info(`Windows VM IP: ${ipCheck.stdout.trim()}`);
+      }
+    } catch (e) {
+      log.verbose(`Could not get VM IP address: ${e.message}`);
+    }
 
-  log.info(`Enrolling Elastic Agent with Fleet`);
-  log.verbose('Enrollment command:', agentEnrollCommand);
+    log.warning(
+      `\n⚠️  IMPORTANT: If agent installation fails with "connection refused" errors:\n` +
+      `\n` +
+      `1. Verify Windows VM is on bridged network (en0) in UTM settings\n` +
+      `2. Check Windows VM has IP on 192.168.0.x network (not 192.168.64.x)\n` +
+      `3. From Windows VM, verify you can reach:\n` +
+      `   - Fleet Server: ${fleetServerUrl}\n` +
+      `   - Elasticsearch: ${esOutputHost}\n` +
+      `\n` +
+      `To test from Windows VM PowerShell:\n` +
+      `   Test-NetConnection -ComputerName 192.168.0.100 -Port 8220\n` +
+      `   Test-NetConnection -ComputerName 192.168.0.100 -Port 9200\n` +
+      `\n` +
+      `If these fail, the Windows VM cannot reach your Mac.\n` +
+      `Make sure UTM is configured for Bridged networking on en0.\n`
+    );
+  }
 
-  await hostVm.exec(agentEnrollCommand);
+  log.info(`\n${'='.repeat(70)}`);
+  log.info(`Installing and Enrolling Elastic Agent with Fleet`);
+  log.info(`${'='.repeat(70)}`);
+  log.info(`Agent path: ${os === 'windows' ? agentExePath : 'See command below'}`);
+  log.info(`Fleet Server URL: ${fleetServerUrl}`);
+  log.info(`Agent Policy ID: ${policyId}`);
+  log.info(`\n🔍 Full install command that will be executed:`);
+  log.info(`   ${agentEnrollCommand}\n`);
 
-  return waitForHostToEnroll(kbnClient, log, hostVm.name, timeoutMs);
+  // For Windows, verify directory exists first before running install
+  if (os === 'windows') {
+    const agentDir = `C:\\Users\\Public\\${agentUrlInfo.dirName}`;
+
+    log.info(`\nStep 1: Verifying agent directory exists...`);
+    log.info(`Checking: ${agentDir}`);
+
+    const dirCheck = await hostVm.exec(`Get-ChildItem "${agentDir}" -ErrorAction Stop`);
+    log.info(`Directory check exit code: ${dirCheck.exitCode}`);
+    if (dirCheck.stdout) {
+      log.info(`Directory contents:\n${dirCheck.stdout}`);
+    }
+
+    if (dirCheck.exitCode !== 0) {
+      log.error(`Agent directory not found: ${agentDir}`);
+      throw new Error(`Agent directory does not exist at ${agentDir}. Extraction may have failed.`);
+    }
+
+    log.info(`✓ Agent directory verified`);
+    log.info(`\nStep 2: Running agent install command...`);
+  } else {
+    log.info(`\nExecuting agent install command...`);
+  }
+
+  // Execute installation and capture output
+  try {
+    let installResult;
+
+    // For Windows, follow Elastic's official installation pattern
+    if (os === 'windows') {
+      const agentDir = `C:\\Users\\Public\\${agentUrlInfo.dirName}`;
+
+      log.info(`\nStep 3: Running Elastic Agent installation...`);
+      log.info(`Following Elastic's official installation pattern\n`);
+
+      // Follow the exact pattern from Elastic's documentation:
+      // cd elastic-agent-X.X.X-windows-arm64
+      // .\elastic-agent.exe install --url=... --enrollment-token=...
+      // IMPORTANT: Add --non-interactive to prevent "Do you want to continue? [Y/n]:" prompt
+      // IMPORTANT: Add --tag to identify the agent (--host-name is not supported)
+      const installCommand = `
+cd "${agentDir}"
+.\\elastic-agent.exe install --url=${fleetServerUrl} --enrollment-token=${enrollmentToken} --insecure --force --non-interactive --tag vm-name:${hostVm.name}
+      `.trim();
+
+      log.info(`Executing installation command...`);
+      log.info(`Command: cd "${agentDir}" && .\\elastic-agent.exe install ...`);
+      log.info(`Agent will be tagged with vm-name: ${hostVm.name}`);
+      log.info(`This may take 30-60 seconds...\n`);
+
+      try {
+        const startTime = Date.now();
+        installResult = await hostVm.exec(installCommand);
+        const elapsed = Math.round((Date.now() - startTime) / 1000);
+
+        log.info(`\n${'='.repeat(70)}`);
+        log.info(`Agent Installation Command Completed (took ${elapsed}s)`);
+        log.info(`${'='.repeat(70)}`);
+        log.info(`Exit code: ${installResult.exitCode}`);
+
+        if (installResult.stdout) {
+          log.info(`\nSTDOUT:`);
+          log.info(installResult.stdout);
+        }
+
+        if (installResult.stderr) {
+          log.info(`\nSTDERR:`);
+          log.info(installResult.stderr);
+        }
+
+        log.info(`${'='.repeat(70)}\n`);
+
+      } catch (e) {
+        log.error(`\nAgent installation command failed: ${e.message}`);
+        if (e.stdout) {
+          log.error(`\nSTDOUT:\n${e.stdout}`);
+        }
+        if (e.stderr) {
+          log.error(`\nSTDERR:\n${e.stderr}`);
+        }
+        throw e;
+      }
+
+      // NOTE: Service verification through UTM is unreliable (PowerShell output doesn't work well)
+      // Instead, we'll rely on the Fleet enrollment check below which is the real verification
+      log.info(`\nAgent installation command completed. Waiting for agent to enroll with Fleet...`);
+      log.info(`(Service checks are skipped for UTM VMs - Fleet enrollment is the real verification)`);
+
+      // Give the agent a moment to start enrolling
+      await new Promise(resolve => setTimeout(resolve, 10000));
+
+    } else {
+      installResult = await hostVm.exec(agentEnrollCommand);
+    }
+
+    log.info(`\n${'='.repeat(70)}`);
+    log.info(`Agent Installation Complete`);
+    log.info(`${'='.repeat(70)}`);
+    log.info(`Exit Code: ${installResult.exitCode}`);
+
+    // Note: PowerShell through utmctl doesn't return stdout reliably, so we can't show output
+    // The exit code is the main indicator of success/failure
+
+    if (installResult.exitCode !== 0) {
+      log.error(`Agent installation failed with exit code ${installResult.exitCode}`);
+      throw new Error(`Agent installation failed with exit code ${installResult.exitCode}`);
+    }
+
+    log.info(`✓ Agent install command completed successfully`);
+
+    // IMPORTANT: Give the agent service time to start and begin enrollment
+    // The install command returns immediately, but service startup and enrollment
+    // happen asynchronously. Wait a bit before checking Fleet.
+    log.info(`\nWaiting for agent service to start and begin enrollment...`);
+    await new Promise(resolve => setTimeout(resolve, 10000)); // Wait 10 seconds
+
+    // Verify the service was actually created on Windows
+    if (os === 'windows') {
+      log.info(`Verifying Elastic Agent service was created...`);
+      const serviceCheck = await hostVm.exec(`Get-Service -Name "Elastic Agent" -ErrorAction SilentlyContinue`);
+
+      if (serviceCheck.exitCode === 0) {
+        log.info(`✓ Elastic Agent service exists`);
+
+        // Check service status
+        const statusCheck = await hostVm.exec(`(Get-Service -Name "Elastic Agent").Status`);
+        if (statusCheck.stdout) {
+          log.info(`  Service status: ${statusCheck.stdout.trim()}`);
+        }
+      } else {
+        log.warning(`⚠️  WARNING: Elastic Agent service was not found!`);
+        log.warning(`   The install command may have failed silently.`);
+        log.warning(`   Try running the install command manually on the VM to see the actual error.`);
+      }
+    }
+
+    log.info(`\nChecking Fleet for agent enrollment...`);
+    log.info(`This may take up to ${timeoutMs / 1000} seconds\n`);
+  } catch (e) {
+    log.error(`\n${'='.repeat(70)}`);
+    log.error(`Agent Installation FAILED`);
+    log.error(`${'='.repeat(70)}`);
+    log.error(`Error: ${e.message}`);
+    log.error(`${'='.repeat(70)}\n`);
+    throw e;
+  }
+
+  // Wait for Fleet to see the enrolled agent
+  // Search by tag since Windows hostname may not match VM name
+  const vmNameTag = `vm-name:${hostVm.name}`;
+  return waitForHostToEnroll(kbnClient, log, hostVm.name, timeoutMs, undefined, vmNameTag);
 };
 
 interface CreateAgentPolicyOptions {
