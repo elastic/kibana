@@ -32,13 +32,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('with a data URI in the load_from query', () => {
       it('loads the data from the URI', async () => {
         await PageObjects.console.clearEditorText();
+        await PageObjects.console.enterText(`GET _search`);
         await PageObjects.common.navigateToApp('console', {
-          hash: '#/console/shell?load_from=data:text/plain,BYUwNmD2Q',
+          hash: '#/console/shell?load_from=data:text/plain,BYUwNmD2Q', // "hello" compressed
         });
 
         await retry.try(async () => {
           const actualRequest = await PageObjects.console.getEditorText();
-          expect(actualRequest.trim()).to.eql('hello');
+          // The data should be appended after the existing text
+          expect(actualRequest.trim()).to.eql('GET _search\n\nhello');
         });
       });
 
