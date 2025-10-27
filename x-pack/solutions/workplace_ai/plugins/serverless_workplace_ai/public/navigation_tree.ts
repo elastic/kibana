@@ -7,6 +7,7 @@
 
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
+import agentsIcon from './assets/robot.svg';
 
 export const createNavigationTree = (): NavigationTreeDefinition => {
   return {
@@ -25,6 +26,24 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
             title: 'Home',
           },
           {
+            link: 'workflows',
+            withBadge: true,
+            badgeTypeV2: 'techPreview' as const,
+            badgeOptions: {
+              icon: 'beaker',
+              tooltip: i18n.translate('xpack.serverlessWorkplaceAI.nav.workflowsBadgeTooltip', {
+                defaultMessage:
+                  'This functionality is experimental and not supported. It may change or be removed at any time.',
+              }),
+            },
+          },
+          {
+            iconV2: agentsIcon, // Temp svg until we have icon in EUI
+            link: 'agent_builder',
+            withBadge: true,
+            badgeTypeV2: 'techPreview',
+          },
+          {
             link: 'discover',
             spaceBefore: 'l',
           },
@@ -32,18 +51,6 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
             link: 'dashboards',
             getIsActive: ({ pathNameSerialized, prepend }) => {
               return pathNameSerialized.startsWith(prepend('/app/dashboards'));
-            },
-          },
-          {
-            link: 'workflows',
-            withBadge: true,
-            badgeTypeV2: 'techPreview' as const,
-            badgeOptions: {
-              icon: 'beaker',
-              tooltip: i18n.translate('xpack.serverlessObservability.nav.workflowsBadgeTooltip', {
-                defaultMessage:
-                  'This functionality is experimental and not supported. It may change or be removed at any time.',
-              }),
             },
           },
         ],
@@ -56,7 +63,7 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
         children: [
           {
             id: 'devTools',
-            title: i18n.translate('xpack.serverlessObservability.nav.devTools', {
+            title: i18n.translate('xpack.serverlessWorkplaceAI.nav.devTools', {
               defaultMessage: 'Developer tools',
             }),
             link: 'dev_tools',
@@ -64,7 +71,7 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
           },
           {
             id: 'project_settings_project_nav',
-            title: i18n.translate('xpack.serverlessObservability.nav.projectSettings', {
+            title: i18n.translate('xpack.serverlessWorkplaceAI.nav.projectSettings', {
               defaultMessage: 'Project settings',
             }),
             icon: 'gear',
@@ -74,13 +81,13 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
             children: [
               {
                 id: 'management',
-                title: i18n.translate('xpack.serverlessObservability.nav.mngt', {
+                title: i18n.translate('xpack.serverlessWorkplaceAI.nav.mngt', {
                   defaultMessage: 'Management',
                 }),
                 renderAs: 'panelOpener',
                 children: [
                   {
-                    title: i18n.translate('xpack.serverlessObservability.nav.mngt.data', {
+                    title: i18n.translate('xpack.serverlessWorkplaceAI.nav.mngt.data', {
                       defaultMessage: 'Data',
                     }),
                     breadcrumbStatus: 'hidden',
@@ -96,7 +103,7 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
                     ],
                   },
                   {
-                    title: i18n.translate('xpack.serverlessObservability.nav.mngt.access', {
+                    title: i18n.translate('xpack.serverlessWorkplaceAI.nav.mngt.access', {
                       defaultMessage: 'Access',
                     }),
                     breadcrumbStatus: 'hidden',
@@ -104,7 +111,7 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
                   },
                   {
                     title: i18n.translate(
-                      'xpack.serverlessObservability.nav.mngt.alertsAndInsights',
+                      'xpack.serverlessWorkplaceAI.nav.mngt.alertsAndInsights',
                       {
                         defaultMessage: 'Alerts and insights',
                       }
@@ -116,7 +123,20 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
                     ],
                   },
                   {
-                    title: i18n.translate('xpack.serverlessObservability.nav.mngt.content', {
+                    title: i18n.translate('xpack.serverlessWorkplaceAI.nav.mngt.ai', {
+                      defaultMessage: 'AI',
+                    }),
+                    children: [
+                      { link: 'management:genAiSettings', breadcrumbStatus: 'hidden' },
+                      { link: 'management:agentBuilder', breadcrumbStatus: 'hidden' },
+                      {
+                        link: 'management:observabilityAiAssistantManagement',
+                        breadcrumbStatus: 'hidden',
+                      },
+                    ],
+                  },
+                  {
+                    title: i18n.translate('xpack.serverlessWorkplaceAI.nav.mngt.content', {
                       defaultMessage: 'Content',
                     }),
                     breadcrumbStatus: 'hidden',
@@ -129,17 +149,11 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
                     ],
                   },
                   {
-                    title: i18n.translate('xpack.serverlessObservability.nav.mngt.other', {
+                    title: i18n.translate('xpack.serverlessWorkplaceAI.nav.mngt.other', {
                       defaultMessage: 'Other',
                     }),
                     breadcrumbStatus: 'hidden',
-                    children: [
-                      { link: 'management:settings', breadcrumbStatus: 'hidden' },
-                      {
-                        link: 'management:observabilityAiAssistantManagement',
-                        breadcrumbStatus: 'hidden',
-                      },
-                    ],
+                    children: [{ link: 'management:settings', breadcrumbStatus: 'hidden' }],
                   },
                 ],
               },
