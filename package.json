@@ -1675,7 +1675,7 @@
     "@kbn/test-suites-xpack-platform": "link:x-pack/platform/test",
     "@kbn/test-suites-xpack-search": "link:x-pack/solutions/search/test",
     "@kbn/test-suites-xpack-security": "link:x-pack/solutions/security/test",
-    "@kbn/test-suites-xpack-workplace-ai": "link:x-pack/solutions/workplace_ai/test",
+    "@kbn/test-suites-xpack-workplace-ai": "link:x-pack/solutions/workplaceai/test",
     "@kbn/tooling-log": "link:src/platform/packages/shared/kbn-tooling-log",
     "@kbn/ts-projects": "link:packages/kbn-ts-projects",
     "@kbn/ts-type-check-cli": "link:packages/kbn-ts-type-check-cli",
