@@ -64,7 +64,11 @@ export const GraphPreviewContainer: React.FC = () => {
   });
 
   // Calculate unified time range that covers both alert and original event times
-  const { start, end } = getUnifiedTimeRange(timestamp, isAlert, originalEventTime);
+  const { start, end } = getUnifiedTimeRange(
+    timestamp ?? new Date().toISOString(),
+    isAlert,
+    originalEventTime
+  );
 
   const { isLoading, isError, data } = useFetchGraphData({
     req: {

@@ -160,7 +160,11 @@ export const GraphVisualization: React.FC = memo(() => {
   }));
 
   // Calculate unified time range that covers both alert and original event times
-  const { start, end } = getUnifiedTimeRange(timestamp, isAlert, originalEventTime);
+  const { start, end } = getUnifiedTimeRange(
+    timestamp ?? new Date().toISOString(),
+    isAlert,
+    originalEventTime
+  );
   const initialTimeRange = { from: start, to: end };
 
   const { investigateInTimeline } = useInvestigateInTimeline();
