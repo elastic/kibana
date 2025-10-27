@@ -32,7 +32,6 @@
     "@kbn/search-api-keys-components",
     "@kbn/react-query",
     "@kbn/doc-links",
-    "@kbn/core-feature-flags-browser"
   ],
   "exclude": [
     "target/**/*"
