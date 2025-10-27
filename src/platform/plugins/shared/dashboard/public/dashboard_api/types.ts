@@ -162,7 +162,6 @@ export type DashboardApi = CanExpandPanels &
   };
 
 export interface DashboardInternalApi {
-  panelsReload$: Subject<void>;
   layout$: BehaviorSubject<DashboardLayout>;
   gridLayout$: BehaviorSubject<GridLayoutData>;
   registerChildApi: (api: DefaultEmbeddableApi) => void;
