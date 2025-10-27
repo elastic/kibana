@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { RollupInterval } from '@kbn/apm-data-access-plugin/common';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { SearchAggregatedTransactionSetting } from '../../../../common/aggregated_transactions';
 import {
@@ -17,7 +18,6 @@ import {
   PARENT_ID,
   TRANSACTION_DURATION_SUMMARY,
   SERVICE_NAME,
-  METRICSET_NAME,
 } from '../../../../common/es_fields/apm';
 import type { APMConfig } from '../../..';
 import type { APMEventClient } from '../create_es_client/create_apm_event_client';
@@ -72,15 +72,18 @@ export async function getServiceNamesFromAggregatedTransactions({
 }) {
   const response = await apmEventClient.search('get_service_names_from_aggregated_transactions', {
     apm: {
-      events: [ProcessorEvent.metric],
+      sources: [
+        {
+          documentType: ApmDocumentType.ServiceTransactionMetric,
+          rollupInterval: RollupInterval.OneMinute,
+        },
+      ],
     },
-    track_total_hits: 1,
-    terminate_after: 1,
+    track_total_hits: false,
     size: 0,
     query: {
       bool: {
         filter: [
-          ...termQuery(METRICSET_NAME, 'service_transaction'),
           ...(start && end ? rangeQuery(start, end) : []),
           ...kqlQuery(kuery),
           ...environmentQuery(environment),
