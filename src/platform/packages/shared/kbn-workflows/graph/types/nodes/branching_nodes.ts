@@ -8,17 +8,19 @@
  */
 
 import { z } from '@kbn/zod';
-import { IfStepSchema } from '../../../spec/schema';
 import { GraphNodeSchema } from './base';
+import { IfStepSchema } from '../../../spec/schema';
+
+export const EnterIfNodeConfigurationSchema = IfStepSchema.omit({
+  steps: true,
+  else: true,
+});
 
 export const EnterIfNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
   type: z.literal('enter-if'),
   exitNodeId: z.string(),
-  configuration: IfStepSchema.omit({
-    steps: true,
-    else: true,
-  }),
+  configuration: EnterIfNodeConfigurationSchema,
 });
 export type EnterIfNode = z.infer<typeof EnterIfNodeSchema>;
 

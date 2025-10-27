@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataType, TimeScaleUnit } from '@kbn/visualizations-plugin/common';
+import type { DataType, TimeScaleUnit } from '@kbn/lens-common';
 import type { Query } from '@kbn/es-query';
 import { fromFilterAPIToLensState, fromFilterLensStateToAPI } from './filter';
 import type {
@@ -68,8 +68,8 @@ export function getLensAPIMetricSharedProps(options: {
 export function getLensStateBucketSharedProps(options: { label?: string; field: string }) {
   return {
     sourceField: options.field,
-    customLabel: options.label != null,
     label: options.label ?? LENS_DEFAULT_LABEL,
+    customLabel: Boolean(options.label),
     isBucketed: true,
   };
 }

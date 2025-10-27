@@ -15,7 +15,6 @@ import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { AppClient } from '../../..';
 import type { EntityStoreConfig } from './types';
-import { mockGlobalState } from '../../../../public/common/mock';
 import { EntityStoreCapability, type EntityDefinition } from '@kbn/entities-schema';
 import { convertToEntityManagerDefinition } from './entity_definitions/entity_manager_conversion';
 import { EntityType } from '../../../../common/search_strategy';
@@ -29,6 +28,7 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { IUiSettingsClient, KibanaRequest } from '@kbn/core/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createStubDataView } from '@kbn/data-views-plugin/common/mocks';
+import { allowedExperimentalValues } from '../../../../common';
 
 const definition: EntityDefinition = convertToEntityManagerDefinition(
   {
@@ -72,12 +72,16 @@ const stubSecurityDataView = createStubDataView({
   },
 });
 
-const defaultIndexPatterns = [
-  stubSecurityDataView.getIndexPattern(),
-  '.asset-criticality.asset-criticality-default',
-  'risk-score.risk-score-latest-default',
-  '.entities.v1.reset.security_user_default',
-];
+const getDefaultIndexes = (type: string) => {
+  return [
+    stubSecurityDataView.getIndexPattern(),
+    ...(type === 'user' ? ['.entity_analytics.monitoring.users-default'] : []),
+    '.asset-criticality.asset-criticality-default',
+    'risk-score.risk-score-latest-default',
+    `.entities.v1.reset.security_${type}_default`,
+    `.entities.v1.updates.security_${type}_default*`,
+  ];
+};
 
 const dataviewService = {
   ...dataViewPluginMocks.createStartContract(),
@@ -136,7 +140,7 @@ describe('EntityStoreDataClient', () => {
       getAlertsIndex: jest.fn().mockReturnValue('alerts'),
     } as unknown as AppClient,
     config: {} as EntityStoreConfig,
-    experimentalFeatures: mockGlobalState.app.enableExperimental,
+    experimentalFeatures: allowedExperimentalValues,
     taskManager: {} as TaskManagerStartContract,
     security: {
       authz: {
@@ -519,12 +523,11 @@ describe('EntityStoreDataClient', () => {
       });
 
       const response = await dataClient.applyDataViewIndices();
-
       expect(mockUpdateEntityDefinition).toHaveBeenCalled();
       expect(response.errors.length).toBe(0);
       expect(response.successes.length).toBe(1);
       expect(response.successes[0].changes).toEqual({
-        indexPatterns: [...defaultIndexPatterns, 'testIndex'],
+        indexPatterns: [...getDefaultIndexes(response.successes[0].type), 'testIndex'],
       });
     });
 
@@ -565,7 +568,7 @@ describe('EntityStoreDataClient', () => {
       mockGetEntityDefinition.mockResolvedValueOnce({
         definitions: [
           {
-            indexPatterns: defaultIndexPatterns,
+            indexPatterns: getDefaultIndexes(engine.type),
           },
         ],
       });

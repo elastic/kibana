@@ -39,6 +39,7 @@
     "@kbn/logging-mocks",
     "@kbn/spaces-utils",
     "@kbn/licensing-types",
+    "@kbn/lazy-object",
   ],
   "exclude": ["target/**/*"]
 }

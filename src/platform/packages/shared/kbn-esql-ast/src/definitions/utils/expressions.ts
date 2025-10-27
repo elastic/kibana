@@ -23,7 +23,7 @@ import type {
   SupportedDataType,
 } from '../types';
 import { getFunctionDefinition } from './functions';
-import { isArrayType } from './operators';
+import { isArrayType } from '../types';
 import { getColumnForASTNode } from './shared';
 import type { ESQLColumnData } from '../../commands_registry/types';
 import { TIME_SYSTEM_PARAMS } from './literals';
@@ -65,8 +65,6 @@ export function getExpressionType(
       case 'bool':
         return 'boolean';
       case 'string':
-        return 'keyword';
-      case 'text':
         return 'keyword';
       case 'datetime':
         return 'date';
@@ -192,16 +190,21 @@ export function getMatchingSignatures(
   givenTypes: Array<SupportedDataType | 'unknown'>,
   // a boolean array indicating which args are literals
   literalMask: boolean[],
-  acceptUnknown: boolean
+  acceptUnknown: boolean,
+  acceptPartialMatches: boolean = false
 ): Signature[] {
   return signatures.filter((sig) => {
-    if (!matchesArity(sig, givenTypes.length)) {
+    if (!acceptPartialMatches && !matchesArity(sig, givenTypes.length)) {
       return false;
     }
 
     return givenTypes.every((givenType, index) => {
-      // safe to assume the param is there, because we checked the length above
-      const expectedType = unwrapArrayOneLevel(getParamAtPosition(sig, index)!.type);
+      const param = getParamAtPosition(sig, index);
+      if (!param) {
+        return false;
+      }
+
+      const expectedType = unwrapArrayOneLevel(param.type);
       return argMatchesParamType(givenType, expectedType, literalMask[index], acceptUnknown);
     });
   });
@@ -227,6 +230,8 @@ export function argMatchesParamType(
     // all ES|QL functions accept null, but this is not reflected
     // in our function definitions so we let it through here
     givenType === 'null' ||
+    // Check array types
+    givenType === unwrapArrayOneLevel(expectedType) ||
     // all functions accept keywords for text parameters
     bothStringTypes(givenType, expectedType)
   ) {
@@ -284,7 +289,7 @@ function matchesArity(signature: FunctionDefinition['signatures'][number], arity
  * @param position
  * @returns
  */
-function getParamAtPosition(
+export function getParamAtPosition(
   { params, minParams }: FunctionDefinition['signatures'][number],
   position: number
 ) {
@@ -330,8 +335,9 @@ export function buildPartialMatcher(str: string) {
   return pattern;
 }
 
-const isNullMatcher = new RegExp('is ' + buildPartialMatcher('nul') + '$', 'i');
-const isNotNullMatcher = new RegExp('is ' + buildPartialMatcher('not nul') + '$', 'i');
+// Handles: "IS ", "IS N", "IS NU", "IS NUL" with flexible whitespace
+const isNullMatcher = new RegExp('is\\s*(' + buildPartialMatcher('nul') + ')?$', 'i');
+const isNotNullMatcher = new RegExp('is\\s*(' + buildPartialMatcher('not nul') + ')?$', 'i');
 
 // --- Expression types helpers ---
 
@@ -348,12 +354,16 @@ export function isExpressionComplete(
   expressionType: SupportedDataType | 'unknown',
   innerText: string
 ) {
-  return (
-    expressionType !== 'unknown' &&
-    // see https://github.com/elastic/kibana/issues/199401
-    // for the reason we need this string check.
-    !(isNullMatcher.test(innerText) || isNotNullMatcher.test(innerText))
-  );
+  if (expressionType === 'unknown') {
+    return false;
+  }
+
+  // Check for incomplete IS NULL / IS NOT NULL
+  if (isNullMatcher.test(innerText) || isNotNullMatcher.test(innerText)) {
+    return false;
+  }
+
+  return true;
 }
 
 // #endregion expression completeness

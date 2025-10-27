@@ -6,13 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  toolIdRegexp,
-  toolIdMaxLength,
-  isReservedToolId,
-  isInProtectedNamespace,
-  hasProtectedNamespaceName,
-} from '@kbn/onechat-common/tools';
+import { toolIdRegexp, toolIdMaxLength, isReservedToolId } from '@kbn/onechat-common/tools';
+import { isInProtectedNamespace, hasNamespaceName } from '@kbn/onechat-common/base/namespaces';
 import { z } from '@kbn/zod';
 
 export const sharedI18nMessages = {
@@ -62,7 +57,7 @@ export const sharedValidationSchemas = {
       })
     )
     .refine(
-      (name) => !isInProtectedNamespace(name) && !hasProtectedNamespaceName(name),
+      (name) => !isInProtectedNamespace(name) && !hasNamespaceName(name),
       (name) => ({
         message: sharedI18nMessages.toolId.protectedNamespaceError(name),
       })

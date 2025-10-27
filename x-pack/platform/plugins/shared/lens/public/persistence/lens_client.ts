@@ -9,6 +9,7 @@ import type { HttpStart } from '@kbn/core/public';
 import type { Reference } from '@kbn/content-management-utils';
 
 import { omit } from 'lodash';
+import type { LensSavedObjectAttributes } from '@kbn/lens-common';
 import { LENS_API_VERSION, LENS_VIS_API_PATH } from '../../common/constants';
 import type { LensAttributes, LensItem } from '../../server/content_management';
 import { ConfigBuilderStub } from '../../common/transforms';
@@ -21,6 +22,14 @@ import {
   type LensSearchRequestQuery,
   type LensSearchResponseBody,
 } from '../../server';
+
+/**
+ * This type is to allow `visualizationType` to be `null` in the public context.
+ *
+ * The stored attributes must have a `visualizationType`.
+ */
+export type LooseLensAttributes = Omit<LensAttributes, 'visualizationType'> &
+  Pick<LensSavedObjectAttributes, 'visualizationType'>;
 
 export class LensClient {
   constructor(private http: HttpStart) {}
@@ -37,10 +46,14 @@ export class LensClient {
   }
 
   async create(
-    { description, visualizationType, state, title, version }: LensAttributes,
+    { description, visualizationType, state, title, version }: LooseLensAttributes,
     references: Reference[],
     options: LensCreateRequestBody['options'] = {}
   ) {
+    if (visualizationType === null) {
+      throw new Error('Missing visualization type');
+    }
+
     const body: LensCreateRequestBody = {
       // TODO: Find a better way to conditionally omit id
       data: omit(
@@ -71,10 +84,14 @@ export class LensClient {
 
   async update(
     id: string,
-    { description, visualizationType, state, title, version }: LensAttributes,
+    { description, visualizationType, state, title, version }: LooseLensAttributes,
     references: Reference[],
     options: LensUpdateRequestBody['options'] = {}
   ) {
+    if (visualizationType === null) {
+      throw new Error('Missing visualization type');
+    }
+
     const body: LensUpdateRequestBody = {
       // TODO: Find a better way to conditionally omit id
       data: omit(

@@ -95,11 +95,6 @@ export function getMockStreamsAppContext(): StreamsAppKibanaContext {
         indexManagement: {},
         ingestPipelines: {},
         discoverShared: {},
-        discover: {
-          locator: {
-            getRedirectUrl: () => '',
-          },
-        },
         observabilityAIAssistant: {
           service: {
             isEnabled: () => true,
@@ -139,8 +134,8 @@ export function getMockStreamsAppContext(): StreamsAppKibanaContext {
     } as { start: StreamsAppStartDependencies },
     services: {
       dataStreamsClient: Promise.resolve({} as unknown as DataStreamsStatsClient),
-      PageTemplate: () => null,
       telemetryClient: telemetryService.getClient(),
+      version: '1.0.0',
     },
     isServerless: false,
   };

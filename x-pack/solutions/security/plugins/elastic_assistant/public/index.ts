@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { PluginInitializerContext } from '@kbn/core/public';
+import type { ConfigSchema } from './plugin';
 import { ElasticAssistantPublicPlugin } from './plugin';
 
-export const plugin = () => new ElasticAssistantPublicPlugin();
+export const plugin = (context: PluginInitializerContext<ConfigSchema>) =>
+  new ElasticAssistantPublicPlugin(context);

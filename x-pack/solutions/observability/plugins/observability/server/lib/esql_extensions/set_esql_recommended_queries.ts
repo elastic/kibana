@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
+import { ALL_RECOMMENDED_FIELDS_FOR_ESQL } from '@kbn/discover-utils';
 import type { PluginSetup as ESQLSetup } from '@kbn/esql/server';
 
 const TRACES_INDEX_PATTERN = 'traces-*';
@@ -107,36 +108,15 @@ const LOGS_AND_METRICS_ESQL_RECOMMENDED_QUERIES = [
   },
 ];
 
-// Those are only Metrics Experience recommended queries that we can toggle on/off with a FF
-const METRICS_EXPERIENCE_ESQL_RECOMMENDED_QUERIES = [
-  {
-    name: i18n.translate('xpack.observability.esqlQueries.allMetrics.name', {
-      defaultMessage: 'All metrics',
-    }),
-    query: `FROM ${METRICS_INDEX_PATTERN}`,
-    description: i18n.translate('xpack.observability.esqlQueries.allMetrics.description', {
-      defaultMessage: 'Loads all available metrics',
-    }),
-  },
-];
-
 export function setEsqlRecommendedQueries(esqlPlugin: ESQLSetup) {
   const esqlExtensionsRegistry = esqlPlugin.getExtensionsRegistry();
+
+  // Register recommended queries
   esqlExtensionsRegistry.setRecommendedQueries(
-    [
-      ...TRACES_ESQL_RECOMMENDED_QUERIES,
-      ...METRICS_EXPERIENCE_ESQL_RECOMMENDED_QUERIES,
-      ...LOGS_AND_METRICS_ESQL_RECOMMENDED_QUERIES,
-    ],
+    [...TRACES_ESQL_RECOMMENDED_QUERIES, ...LOGS_AND_METRICS_ESQL_RECOMMENDED_QUERIES],
     'oblt'
   );
-}
 
-export function unsetMetricsExperienceEsqlRecommendedQueries(esqlPlugin: ESQLSetup) {
-  const esqlExtensionsRegistry = esqlPlugin.getExtensionsRegistry();
-
-  esqlExtensionsRegistry.unsetRecommendedQueries(
-    METRICS_EXPERIENCE_ESQL_RECOMMENDED_QUERIES,
-    'oblt'
-  );
+  // Register recommended fields
+  esqlExtensionsRegistry.setRecommendedFields(ALL_RECOMMENDED_FIELDS_FOR_ESQL, 'oblt');
 }

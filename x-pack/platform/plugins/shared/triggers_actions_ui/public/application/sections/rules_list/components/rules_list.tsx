@@ -67,7 +67,7 @@ import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 import { useBulkEditSelect } from '../../../hooks/use_bulk_edit_select';
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { runRule } from '../../../lib/run_rule';
-import { ALERT_STATUS_LICENSE_ERROR } from '../translations';
+import { ALERT_STATUS_LICENSE_ERROR, getConfirmDeletionModalWarningText } from '../translations';
 import { BulkSnoozeModalWithApi as BulkSnoozeModal } from './bulk_snooze_modal';
 import { BulkSnoozeScheduleModalWithApi as BulkSnoozeScheduleModal } from './bulk_snooze_schedule_modal';
 import { CreateRuleButton } from './create_rule_button';
@@ -789,6 +789,8 @@ export const RulesList = ({
               SINGLE_RULE_TITLE,
               MULTIPLE_RULE_TITLE
             )}
+            showWarningText={isAllSelected}
+            warningText={getConfirmDeletionModalWarningText()}
           />
         )}
         <BulkSnoozeModal

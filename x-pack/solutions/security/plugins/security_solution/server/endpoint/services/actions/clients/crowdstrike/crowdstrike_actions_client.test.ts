@@ -91,6 +91,7 @@ describe('CrowdstrikeActionsClient class', () => {
     'getFile',
     'execute',
     'upload',
+    'cancel',
   ] as Array<keyof ResponseActionsClient>)(
     'should throw an un-supported error for %s',
     async (methodName) => {
@@ -749,9 +750,6 @@ describe('CrowdstrikeActionsClient class', () => {
 
   describe('and space awareness is enabled', () => {
     beforeEach(() => {
-      // @ts-expect-error write to readonly property
-      classConstructorOptions.endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
-        true;
       getActionDetailsByIdMock.mockResolvedValue({});
     });
 

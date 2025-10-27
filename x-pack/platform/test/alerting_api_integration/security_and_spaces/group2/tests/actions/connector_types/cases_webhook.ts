@@ -119,6 +119,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
           connector_type_id: '.cases-webhook',
           is_missing_secrets: false,
           config: simulatorConfig,
+          is_connector_type_deprecated: false,
         });
 
         const { body: fetchedAction } = await supertest
@@ -134,6 +135,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
           connector_type_id: '.cases-webhook',
           is_missing_secrets: false,
           config: simulatorConfig,
+          is_connector_type_deprecated: false,
         });
       });
 
@@ -165,6 +167,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
           connector_type_id: '.cases-webhook',
           is_missing_secrets: false,
           config: newConfig,
+          is_connector_type_deprecated: false,
         });
 
         const { body: fetchedAction } = await supertest
@@ -180,6 +183,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
           connector_type_id: '.cases-webhook',
           is_missing_secrets: false,
           config: newConfig,
+          is_connector_type_deprecated: false,
         });
       });
 

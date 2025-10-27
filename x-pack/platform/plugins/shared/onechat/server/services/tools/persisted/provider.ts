@@ -5,71 +5,74 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import type { ToolType } from '@kbn/onechat-common';
 import { createBadRequestError, isToolNotFoundError } from '@kbn/onechat-common';
 import type { Logger } from '@kbn/logging';
-import type {
-  ElasticsearchClient,
-  ElasticsearchServiceStart,
-} from '@kbn/core-elasticsearch-server';
-import type { ToolTypeClient, ToolSource } from '../tool_provider';
-import type { ToolPersistedDefinition } from './client';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { WritableToolProvider, ToolProviderFn } from '../tool_provider';
+import type { AnyToolTypeDefinition, ToolTypeDefinition } from '../tool_types/definitions';
+import { isEnabledDefinition } from '../tool_types/definitions';
 import { createClient } from './client';
-import { createEsqlToolType, createIndexSearchToolType } from './tool_types';
-import type { PersistedToolTypeDefinition, ToolTypeValidatorContext } from './tool_types/types';
+import type {
+  ToolTypeValidatorContext,
+  ToolTypeConversionContext,
+} from '../tool_types/definitions';
+import { convertPersistedDefinition } from './converter';
 
-export const createPersistedToolSource = ({
-  logger,
-  elasticsearch,
-}: {
-  logger: Logger;
-  elasticsearch: ElasticsearchServiceStart;
-}): ToolSource => {
-  const toolDefinitions: PersistedToolTypeDefinition<any>[] = [
-    createEsqlToolType(),
-    createIndexSearchToolType(),
-  ];
-  const toolTypes = toolDefinitions.map((def) => def.toolType);
-
-  return {
-    id: 'persisted',
-    toolTypes,
-    readonly: false,
-    getClient: ({ request }) => {
-      const esClient = elasticsearch.client.asInternalUser;
-      return createPersistedToolClient({
-        definitions: toolDefinitions,
-        logger,
-        esClient,
-      });
-    },
+export const createPersistedProviderFn =
+  (opts: {
+    logger: Logger;
+    esClient: ElasticsearchClient;
+    toolTypes: AnyToolTypeDefinition[];
+  }): ToolProviderFn<false> =>
+  ({ request, space }) => {
+    return createPersistedToolClient({
+      ...opts,
+      request,
+      space,
+    });
   };
-};
-
-// persistence client
 
 export const createPersistedToolClient = ({
-  definitions,
+  request,
+  toolTypes,
   logger,
   esClient,
+  space,
 }: {
-  definitions: PersistedToolTypeDefinition[];
+  toolTypes: AnyToolTypeDefinition[];
   logger: Logger;
   esClient: ElasticsearchClient;
-}): ToolTypeClient<any> => {
-  const toolClient = createClient({ esClient, logger });
-  const definitionMap = definitions.reduce((map, def) => {
+  space: string;
+  request: KibanaRequest;
+}): WritableToolProvider => {
+  const toolClient = createClient({ space, esClient, logger });
+  const definitionMap = toolTypes.filter(isEnabledDefinition).reduce((map, def) => {
     map[def.toolType] = def;
     return map;
-  }, {} as Record<ToolType, PersistedToolTypeDefinition>);
+  }, {} as Record<ToolType, ToolTypeDefinition>);
 
-  const createContext = (): ToolTypeValidatorContext => {
+  const validationContext = (): ToolTypeValidatorContext => {
     return {
       esClient,
+      request,
+      spaceId: space,
+    };
+  };
+
+  const conversionContext = (): ToolTypeConversionContext => {
+    return {
+      esClient,
+      request,
+      spaceId: space,
     };
   };
 
   return {
+    id: 'persisted',
+    readonly: false,
+
     async has(toolId: string) {
       try {
         await toolClient.get(toolId);
@@ -88,18 +91,21 @@ export const createPersistedToolClient = ({
       if (!definition) {
         throw createBadRequestError(`Unknown type for tool '${toolId}': '${tool.type}'`);
       }
-      return definition.toToolDefinition(tool as ToolPersistedDefinition<any>);
+      return convertPersistedDefinition({ tool, definition, context: conversionContext() });
     },
 
     async list() {
       const tools = await toolClient.list();
-      return tools.map((tool) => {
-        const definition = definitionMap[tool.type];
-        if (!definition) {
-          throw createBadRequestError(`Unknown tool type: '${tool.type}'`);
-        }
-        return definition.toToolDefinition(tool as ToolPersistedDefinition<any>);
-      });
+      const context = conversionContext();
+      return tools
+        .filter((tool) => {
+          // evict unknown tools - atm it's used for workflow tools if the plugin is disabled.
+          return definitionMap[tool.type];
+        })
+        .map((tool) => {
+          const definition = definitionMap[tool.type]!;
+          return convertPersistedDefinition({ tool, definition, context });
+        });
     },
 
     async create(createRequest) {
@@ -118,10 +124,10 @@ export const createPersistedToolClient = ({
 
       let updatedConfig: Record<string, unknown>;
       try {
-        updatedConfig = await definition.validateForCreate(
-          createRequest.configuration,
-          createContext()
-        );
+        updatedConfig = await definition.validateForCreate({
+          config: createRequest.configuration,
+          context: validationContext(),
+        });
       } catch (e) {
         throw createBadRequestError(
           `Invalid configuration for tool type ${createRequest.type}: ${e.message}`
@@ -135,7 +141,7 @@ export const createPersistedToolClient = ({
 
       const tool = await toolClient.create(mergedRequest);
 
-      return definition.toToolDefinition(tool as ToolPersistedDefinition<any>);
+      return convertPersistedDefinition({ tool, definition, context: conversionContext() });
     },
 
     async update(toolId, updateRequest) {
@@ -155,11 +161,11 @@ export const createPersistedToolClient = ({
 
       let updatedConfig: Record<string, unknown>;
       try {
-        updatedConfig = await definition.validateForUpdate(
-          updateRequest.configuration ?? {},
-          existingTool.configuration,
-          createContext()
-        );
+        updatedConfig = await definition.validateForUpdate({
+          update: updateRequest.configuration ?? {},
+          current: existingTool.configuration,
+          context: validationContext(),
+        });
       } catch (e) {
         throw createBadRequestError(
           `Invalid configuration for tool type ${existingTool.type}: ${e.message}`
@@ -171,7 +177,7 @@ export const createPersistedToolClient = ({
         configuration: updatedConfig,
       };
       const tool = await toolClient.update(toolId, mergedConfig);
-      return definition.toToolDefinition(tool as ToolPersistedDefinition<any>);
+      return convertPersistedDefinition({ tool, definition, context: conversionContext() });
     },
 
     async delete(toolId: string) {

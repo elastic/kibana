@@ -71,6 +71,7 @@ describe('createAgentPolicyWithPackages', () => {
         id: options?.id || 'new_id',
       } as AgentPolicy)
     );
+    mockedAgentPolicyService.deployPolicy.mockReset();
     mockedAgentPolicyService.deployPolicy.mockResolvedValue();
 
     mockedPackagePolicyService.buildPackagePolicyFromPackage.mockImplementation(
@@ -84,6 +85,9 @@ describe('createAgentPolicyWithPackages', () => {
         ...newPolicy,
       } as PackagePolicy)
     );
+
+    jest.mocked(mockedBulkInstallPackages).mockReset();
+    jest.mocked(mockedPackagePolicyService.create).mockReset();
   });
 
   afterEach(() => {
@@ -200,6 +204,53 @@ describe('createAgentPolicyWithPackages', () => {
       expect.anything(),
       getPackagePolicy('system-1', 'new_id'),
       expect.anything()
+    );
+  });
+
+  it('should no create agentless policy with system package or monitoring', async () => {
+    const response = await createAgentPolicyWithPackages({
+      esClient: esClientMock,
+      soClient: soClientMock,
+      agentPolicyService: mockedAgentPolicyService,
+      newPolicy: {
+        name: 'Agent policy 1',
+        namespace: 'default',
+        supports_agentless: true,
+        monitoring_enabled: [],
+      },
+      withSysMonitoring: true,
+      monitoringEnabled: ['logs', 'metrics'],
+      spaceId: 'default',
+    });
+
+    expect(response.id).toEqual('new_id');
+    expect(mockedBulkInstallPackages).not.toHaveBeenCalled();
+    expect(mockedPackagePolicyService.create).not.toHaveBeenCalled();
+
+    expect(agentPolicyService.create).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      {
+        name: 'Agent policy 1',
+        namespace: 'default',
+        supports_agentless: true,
+        monitoring_enabled: [],
+      },
+      expect.objectContaining({ skipDeploy: true })
+    );
+
+    expect(appContextService.getLogger().info).toHaveBeenCalledWith(
+      'Disabling system monitoring for agentless policy [Agent policy 1]'
+    );
+    expect(appContextService.getLogger().info).toHaveBeenCalledWith(
+      'Disabling monitoring for agentless policy [Agent policy 1]'
+    );
+
+    expect(mockedAgentPolicyService.deployPolicy).toHaveBeenCalledWith(
+      expect.anything(),
+      'new_id',
+      undefined,
+      { throwOnAgentlessError: true }
     );
   });
 

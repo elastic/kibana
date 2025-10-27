@@ -26,9 +26,21 @@
             "text": "AbstractStorybookMock"
           },
           "<",
-          "NoDataViewsPromptProps",
+          {
+            "pluginId": "@kbn/shared-ux-prompt-no-data-views-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxPromptNoDataViewsTypesPluginApi",
+            "section": "def-public.NoDataViewsPromptProps",
+            "text": "NoDataViewsPromptProps"
+          },
           ", ",
-          "NoDataViewsPromptServices",
+          {
+            "pluginId": "@kbn/shared-ux-prompt-no-data-views-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxPromptNoDataViewsTypesPluginApi",
+            "section": "def-public.NoDataViewsPromptServices",
+            "text": "NoDataViewsPromptServices"
+          },
           ", {}, ServiceArguments>"
         ],
         "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
@@ -329,7 +341,13 @@
                 "text": "Params"
               },
               ") => ",
-              "NoDataViewsPromptServices"
+              {
+                "pluginId": "@kbn/shared-ux-prompt-no-data-views-types",
+                "scope": "public",
+                "docId": "kibKbnSharedUxPromptNoDataViewsTypesPluginApi",
+                "section": "def-public.NoDataViewsPromptServices",
+                "text": "NoDataViewsPromptServices"
+              }
             ],
             "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
             "deprecated": false,
@@ -375,9 +393,21 @@
         ],
         "signature": [
           "(params?: Partial<",
-          "NoDataViewsPromptServices",
+          {
+            "pluginId": "@kbn/shared-ux-prompt-no-data-views-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxPromptNoDataViewsTypesPluginApi",
+            "section": "def-public.NoDataViewsPromptServices",
+            "text": "NoDataViewsPromptServices"
+          },
           ">) => ",
-          "NoDataViewsPromptServices"
+          {
+            "pluginId": "@kbn/shared-ux-prompt-no-data-views-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxPromptNoDataViewsTypesPluginApi",
+            "section": "def-public.NoDataViewsPromptServices",
+            "text": "NoDataViewsPromptServices"
+          }
         ],
         "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/jest.ts",
         "deprecated": false,
@@ -392,7 +422,13 @@
             "description": [],
             "signature": [
               "Partial<",
-              "NoDataViewsPromptServices",
+              {
+                "pluginId": "@kbn/shared-ux-prompt-no-data-views-types",
+                "scope": "public",
+                "docId": "kibKbnSharedUxPromptNoDataViewsTypesPluginApi",
+                "section": "def-public.NoDataViewsPromptServices",
+                "text": "NoDataViewsPromptServices"
+              },
               ">"
             ],
             "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/jest.ts",

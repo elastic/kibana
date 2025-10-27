@@ -152,7 +152,6 @@
     "@kbn/controls-constants",
     "@kbn/palettes",
     "@kbn/field-formats-plugin",
-    "@kbn/visualizations-plugin",
     "@kbn/datemath",
     "@kbn/global-search-plugin",
     "@kbn/global-search-test-plugin",
@@ -170,5 +169,8 @@
     "@kbn/reindex-service-plugin",
     "@kbn/streamlang",
     "@kbn/onechat-plugin",
+    "@kbn/field-formats-common",
+    "@kbn/reporting-test-routes",
+    "@kbn/visualizations-common",
   ]
 }

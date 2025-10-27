@@ -24,10 +24,10 @@ export async function importRules({
   overwrite,
   spaceId,
 }: ImportRulesParams): Promise<ImportRulesResponse> {
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
   const buffer = Buffer.from(combineArrayToNdJson(rules));
 
-  const { body: importResponse } = await securitySolutionApi
+  const { body: importResponse } = await detectionsApi
     .importRules({ query: { overwrite, overwrite_action_connectors: overwrite } }, spaceId)
     .attach('file', buffer, 'rules.ndjson')
     .expect('Content-Type', 'application/json; charset=utf-8')
@@ -60,13 +60,13 @@ export async function assertImportedRule({
   getService,
   expectedRule,
 }: AssertImportedRuleParams): Promise<void> {
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
 
   const ruleId = expectedRule.rule_id;
   const expectedRuleSource = pick(expectedRule, ['immutable', 'rule_source']);
   const expectedRuleFields = omit(expectedRule, ['immutable', 'rule_source']);
 
-  const { body: rule } = await securitySolutionApi
+  const { body: rule } = await detectionsApi
     .readRule({
       query: { rule_id: ruleId },
     })

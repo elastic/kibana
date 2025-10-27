@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type YAML from 'yaml';
 import { monaco } from '@kbn/monaco';
 import { getCurrentPath } from '../../../../common/lib/yaml_utils';
@@ -66,6 +68,7 @@ export function findAllSteps(
 
             // Skip if we've already processed this step
             if (processedSteps.has(stepKey)) {
+              // eslint-disable-next-line no-continue
               continue;
             }
             processedSteps.add(stepKey);
@@ -94,6 +97,7 @@ export function findAllSteps(
         }
       } catch (error) {
         // Skip this position if there's an error
+        // eslint-disable-next-line no-continue
         continue;
       }
     }
@@ -116,16 +120,26 @@ export function getStepRange(stepNode: any, model: monaco.editor.ITextModel): mo
     const startPos = model.getPositionAt(startOffset);
     const endPos = model.getPositionAt(endOffset);
 
-    // Use the YAML node's actual range, only adjusting for trailing whitespace
+    // Use the YAML node's actual range, but stop before the next step
     let adjustedEndLine = endPos.lineNumber;
     let adjustedEndColumn = endPos.column;
 
-    // Walk backwards from endPos to find the last non-whitespace line
+    // Walk backwards from endPos to find the last line that belongs to this step
     while (adjustedEndLine > startPos.lineNumber) {
       const lineContent = model.getLineContent(adjustedEndLine);
       const trimmedContent = lineContent.trim();
 
-      // If this line has content, use it as the end
+      // If this line starts with '-', it's the beginning of the next step
+      if (trimmedContent.startsWith('-')) {
+        // Use the previous line as the end
+        adjustedEndLine--;
+        if (adjustedEndLine >= startPos.lineNumber) {
+          adjustedEndColumn = model.getLineMaxColumn(adjustedEndLine);
+        }
+        break;
+      }
+
+      // If this line has content and doesn't start with '-', use it as the end
       if (trimmedContent.length > 0) {
         adjustedEndColumn = model.getLineMaxColumn(adjustedEndLine);
         break;

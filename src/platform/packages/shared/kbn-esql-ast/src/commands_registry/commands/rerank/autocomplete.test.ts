@@ -252,8 +252,7 @@ describe('RERANK Autocomplete', () => {
     test.each([
       ...OPERATOR_SUGGESTIONS.COMPARISON.map((op) => [op, '"test_value"']),
       ...OPERATOR_SUGGESTIONS.PATTERN.map((op) => [op, '"pattern*"']),
-      // TODO: re-enable when IN list is supported in checkFunctionInvocationComplete
-      // ...OPERATOR_SUGGESTIONS.SET.map((op) => [op, '("option1", "option2", "option3")']),
+      ...OPERATOR_SUGGESTIONS.SET.map((op) => [op, '("option1", "option2", "option3")']),
       ...OPERATOR_SUGGESTIONS.EXISTENCE.map((op) => [op, '']),
     ])('Complete %s operator shows continuations', async (operator, value) => {
       const operatorClause = value ? `${operator} ${value}` : operator;

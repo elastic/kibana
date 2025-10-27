@@ -42,7 +42,7 @@ export function PercentOfParent({ duration, totalDuration, parentType }: Percent
             },
           })}
         >
-          <>{percentOfParentText}</>
+          <span tabIndex={0}>{percentOfParentText}</span>
         </EuiToolTip>
       ) : (
         percentOfParentText

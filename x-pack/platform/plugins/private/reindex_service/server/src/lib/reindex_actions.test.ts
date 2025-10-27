@@ -10,8 +10,9 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
 import type { ScopedClusterClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import moment from 'moment';
 
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 import type { ReindexSavedObject } from './types';
-import { ReindexStatus, ReindexStep } from '../../../common';
+import { ReindexStep } from '../../../common';
 import { REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-pkg-server';
 import type { ReindexActions } from './reindex_actions';
 import { LOCK_WINDOW, reindexActionsFactory } from './reindex_actions';
@@ -19,9 +20,7 @@ import { getMockVersionInfo } from '@kbn/upgrade-assistant-pkg-server/src/__fixt
 
 const { currentMajor } = getMockVersionInfo();
 
-jest.mock('@kbn/upgrade-assistant-pkg-server', () => ({
-  getRollupJobByIndexName: jest.fn(),
-}));
+const getRollupJobByIndexNameMock = jest.fn();
 
 describe('ReindexActions', () => {
   let client: jest.Mocked<any>;
@@ -47,7 +46,13 @@ describe('ReindexActions', () => {
       ) as any,
     };
     clusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    actions = reindexActionsFactory(client, clusterClient.asCurrentUser, log);
+    actions = reindexActionsFactory(
+      client,
+      clusterClient.asCurrentUser,
+      log,
+      getRollupJobByIndexNameMock,
+      true
+    );
   });
 
   describe('createReindexOp', () => {
@@ -72,6 +77,25 @@ describe('ReindexActions', () => {
         errorMessage: null,
         runningReindexCount: null,
       });
+      expect(getRollupJobByIndexNameMock).toHaveBeenCalled();
+    });
+
+    it("rollup apis aren't called when disabled", async () => {
+      const rollupJobsMock = jest.fn();
+
+      actions = reindexActionsFactory(
+        client,
+        clusterClient.asCurrentUser,
+        log,
+        rollupJobsMock,
+        false
+      );
+
+      await actions.createReindexOp({
+        indexName: 'myIndex',
+        newIndexName: `reindexed-v${currentMajor}-myIndex`,
+      });
+      expect(rollupJobsMock).not.toHaveBeenCalled();
     });
   });
 

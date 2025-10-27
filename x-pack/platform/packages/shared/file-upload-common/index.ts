@@ -40,3 +40,11 @@ export {
 } from './src/constants';
 
 export { FileReaderBase, MessageReader, NdjsonReader, TikaReader } from './src/file_reader';
+
+export { updatePipelineTimezone } from './src/utils';
+
+export {
+  registerFileUploadAnalyticsEvents,
+  FILE_UPLOAD_EVENT,
+  FileUploadTelemetryService,
+} from './src/telemetry';

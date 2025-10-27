@@ -115,6 +115,13 @@ const FETCH_GRAPH_FAILED_TEXT = i18n.translate(
   }
 );
 
+const FETCH_GROUP_DETAILS_FAILED_TEXT = i18n.translate(
+  'securitySolutionPackages.csp.graph.investigation.errorFetchingGroupDetails',
+  {
+    defaultMessage: 'Error fetching group details',
+  }
+);
+
 export const showErrorToast = (
   toasts: CoreStart['notifications']['toasts'],
   error: unknown
@@ -123,6 +130,17 @@ export const showErrorToast = (
     toasts.addError(error, { title: FETCH_GRAPH_FAILED_TEXT });
   } else {
     toasts.addDanger(extractErrorMessage(error, FETCH_GRAPH_FAILED_TEXT));
+  }
+};
+
+export const showDetailsErrorToast = (
+  toasts: CoreStart['notifications']['toasts'],
+  error: unknown
+): void => {
+  if (error instanceof Error) {
+    toasts.addError(error, { title: FETCH_GROUP_DETAILS_FAILED_TEXT });
+  } else {
+    toasts.addDanger(extractErrorMessage(error, FETCH_GROUP_DETAILS_FAILED_TEXT));
   }
 };
 

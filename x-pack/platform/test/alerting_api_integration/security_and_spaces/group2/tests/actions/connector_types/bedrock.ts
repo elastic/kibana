@@ -25,7 +25,7 @@ const secrets = {
 };
 
 const defaultConfig = {
-  defaultModel: 'us.anthropic.claude-3-7-sonnet-20250219-v1:0',
+  defaultModel: 'us.anthropic.claude-sonnet-4-5-20250929-v1:0',
 };
 
 export default function bedrockTest({ getService }: FtrProviderContext) {
@@ -94,6 +94,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
           connector_type_id: connectorTypeId,
           is_missing_secrets: false,
           config,
+          is_connector_type_deprecated: false,
         });
       });
 
@@ -117,6 +118,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
           is_deprecated: false,
           name,
           connector_type_id: connectorTypeId,
+          is_connector_type_deprecated: false,
           is_missing_secrets: false,
           config,
         });
@@ -656,7 +658,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             connector_id: bedrockActionId,
             message: 'an error occurred while running the action',
             retry: true,
-            errorSource: TaskErrorSource.FRAMEWORK,
+            errorSource: TaskErrorSource.USER,
             service_message:
               'Status code: 422. Message: API Error: Unprocessable Entity - Malformed input request: extraneous key [ooooo] is not permitted, please reformat your input and try again.',
           });

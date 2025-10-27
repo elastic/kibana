@@ -145,73 +145,9 @@ By following these steps, you can successfully add and register a new tool to th
 
 The following tools are available in the MCP Dev Server.
 
-## `code_search`
+# Semantic Code Search
 
-Performs a semantic search of the Kibana codebase using a unified Elasticsearch index. This tool is ideal for a "chain of investigation" approach to exploring the codebase.
+For semantic code search, please use the [semantic-code-search-mcp-server](https://github.com/elastic/semantic-code-search-mcp-server). This server provides a suite of tools for exploring and understanding the Kibana codebase.
 
-### Parameters
-- `query` (string, optional): The semantic query string to search for.
-- `kql` (string, optional): The KQL filter to apply to the search.
-- `size` (number, optional, default: 20): The number of results to return.
-- `page` (number, optional, default: 1): The page of results to return.
+Contact @simianhacker for details on how to get started.
 
-## `get_distinct_values`
-
-Retrieves all unique values for a specified field from the code search index. Can be filtered with an optional KQL query.
-
-### Parameters
-- `field` (enum): The field for which to retrieve distinct values. Can be 'type', 'language', 'kind', 'filePath', or 'imports'.
-- `kql` (string, optional): An optional KQL filter to apply before aggregating.
-
-## `find_usages`
-
-Analyzes a code symbol's usage across the entire codebase and generates a rich, categorized report. Use this tool to quickly understand a symbol's architectural role, differentiate between its definition, execution sites, and type declarations, and discover where it is referenced in tests and documentation. This is a primary tool for high-level code intelligence and analysis.
-
-### Parameters
-- `symbol` (string): The symbol to find usages for.
-
-## Index Setup
-
-Before using the search-related tools, you must set up the Elasticsearch index using the [semantic-code-search-indexer](https://github.com/elastic/semantic-code-search-indexer). Follow the instructions in the indexer's README to clone, configure, and build the tool.
-
-Once the indexer is set up, run the following command from the `semantic-code-search-indexer` directory to index the Kibana codebase:
-
-```bash
-npm run index -- --clean ../kibana
-```
-
-## Running the Server with Search Tools
-
-To use the search tools, you need to configure the MCP Dev Server to connect to your Elasticsearch instance. This is done by setting the following environment variables:
-
-| Variable | Description | Default |
-| --- | --- | --- |
-| `ELASTICSEARCH_ENDPOINT` | The URL of your Elasticsearch instance. | `http://localhost:9200` |
-| `ELASTICSEARCH_USERNAME` | The username for Elasticsearch authentication. | `elastic` |
-| `ELASTICSEARCH_PASSWORD` | The password for Elasticsearch authentication. | `changeme` |
-| `ELASTICSEARCH_CLOUD_ID` | The Cloud ID for the Elasticsearch instance. | |
-| `ELASTICSEARCH_API_KEY` | An API key for Elasticsearch authentication. | |
-| `ELASTICSEARCH_INDEX` | The name of the Elasticsearch index to use. | `kibana-code-search` |
-| `ELASTICSEARCH_INFERENCE_ID` | The ID of the ELSER model to use. | `.elser_model_2` |
-
-You can set these variables in your shell, or by creating a `.env` file in the root of the Kibana project.
-
-## MCP configuration example for code search
-
-The example below is shows how to set the ENV variables for connection to a Elasticseach cloud instance:
-
-```ts
-{
-  "mcpServers": {
-    "Kibana Dev": {
-      "command": "bash",
-      "args": [
-        "-lc",
-        "source \"$NVM_DIR/nvm.sh\" && cd ${KIBANA_WORKSPACE} && nvm use --silent && ELASTICSEARCH_API_KEY=\"<API_KEY_GOES_HERE>\" ELASTICSEARCH_CLOUD_ID=\"<CLOUD_ID_GOES_HERE>\" node --no-experimental-require-module ./scripts/mcp_dev.js"
-      ]
-    }
-  }
-}
-```
-
-Contact @simianhacker to get connection details for a cloud instance that already has the Kibana codebase indexed.

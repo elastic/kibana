@@ -210,7 +210,7 @@ describe('schedule_throttle_notification_actions', () => {
     });
 
     expect((scheduleNotificationActions as jest.Mock).mock.calls[0][0].resultsLink).toMatch(
-      'http://www.example.com/detections/rules/id/123'
+      'http://www.example.com/rules/id/123'
     );
     expect(scheduleNotificationActions).toHaveBeenCalledWith(
       expect.objectContaining({

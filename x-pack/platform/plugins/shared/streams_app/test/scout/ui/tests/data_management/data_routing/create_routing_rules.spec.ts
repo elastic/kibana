@@ -35,7 +35,7 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
     // Set up routing condition
     await pageObjects.streams.fillConditionEditor({
       field: 'service.name',
-      value: 'nginx',
+      value: 'nginxlogs',
       operator: 'equals',
     });
 
@@ -44,7 +44,9 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
 
     // Verify success
     await pageObjects.streams.expectRoutingRuleVisible('logs.nginx');
-    await expect(page.getByText('service.name eq nginx')).toBeVisible();
+    await expect(page.getByText('service.name')).toBeVisible();
+    await expect(page.getByText('equals')).toBeVisible();
+    await expect(page.getByText('nginxlogs')).toBeVisible();
   });
 
   test('should cancel creating new routing rule', async ({ page, pageObjects }) => {
@@ -86,7 +88,7 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
       await pageObjects.streams.saveRoutingRule();
 
       // Wait for the error toast to appear
-      await pageObjects.streams.expectToastVisible();
+      await pageObjects.toasts.waitFor();
 
       // Should stay in creating state due to validation error
       await expect(page.getByTestId('streamsAppRoutingStreamEntryNameField')).toBeVisible();

@@ -96,6 +96,7 @@ export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
     ProductDocumentationTool?: number;
     CustomTool?: number;
     EntityRiskScoreTool?: number;
+    IntegrationKnowledgeTool?: number;
   };
   model?: string;
   isOssModel?: boolean;
@@ -152,6 +153,7 @@ export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
         SecurityLabsKnowledgeBaseTool: toolCountSchema,
         CustomTool: toolCountSchema,
         EntityRiskScoreTool: toolCountSchema,
+        IntegrationKnowledgeTool: toolCountSchema,
       },
     },
   },

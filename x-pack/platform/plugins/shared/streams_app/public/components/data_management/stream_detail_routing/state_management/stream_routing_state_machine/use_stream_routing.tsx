@@ -9,6 +9,7 @@ import React, { useEffect, useMemo } from 'react';
 import { createActorContext, useSelector } from '@xstate5/react';
 import { createConsoleInspector } from '@kbn/xstate-utils';
 import { waitFor } from 'xstate5';
+import type { RoutingDefinition } from '@kbn/streams-schema';
 import {
   streamRoutingMachine,
   createStreamRoutingMachineImplementations,
@@ -26,6 +27,7 @@ const consoleInspector = createConsoleInspector();
 const StreamRoutingContext = createActorContext(streamRoutingMachine);
 
 export const useStreamsRoutingSelector = StreamRoutingContext.useSelector;
+export const useStreamsRoutingActorRef = StreamRoutingContext.useActorRef;
 
 export type StreamRoutingEvents = ReturnType<typeof useStreamRoutingEvents>;
 
@@ -53,14 +55,18 @@ export const useStreamRoutingEvents = () => {
       editRule: (id: string) => {
         service.send({ type: 'routingRule.edit', id });
       },
-      forkStream: () => {
-        service.send({ type: 'routingRule.fork' });
+      forkStream: async (routingRule?: RoutingDefinition) => {
+        service.send({ type: 'routingRule.fork', routingRule });
+        await waitFor(service, (snapshot) => snapshot.matches({ ready: 'idle' }));
       },
       saveChanges: () => {
         service.send({ type: 'routingRule.save' });
       },
       setDocumentMatchFilter: (filter: DocumentMatchFilterOptions) => {
         service.send({ type: 'routingSamples.setDocumentMatchFilter', filter });
+      },
+      reviewSuggestedRule: (id: string) => {
+        service.send({ type: 'routingRule.reviewSuggested', id });
       },
     }),
     [service]

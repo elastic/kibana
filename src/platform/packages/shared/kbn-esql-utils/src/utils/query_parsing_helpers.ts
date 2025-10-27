@@ -14,6 +14,7 @@ import {
   isFunctionExpression,
   isColumn,
   WrappingPrettyPrinter,
+  BasicPrettyPrinter,
   isStringLiteral,
 } from '@kbn/esql-ast';
 
@@ -24,6 +25,8 @@ import type {
   ESQLSingleAstItem,
   ESQLInlineCast,
   ESQLCommandOption,
+  ESQLCommand,
+  ESQLAstQueryExpression,
 } from '@kbn/esql-ast';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -78,15 +81,65 @@ export function getRemoteClustersFromESQLQuery(esql?: string): string[] | undefi
   return clustersSet.size > 0 ? [...clustersSet] : undefined;
 }
 
-// For ES|QL we consider stats and keep transformational command
-// The metrics command too but only if it aggregates
+/**
+ * Determines if an ES|QL query contains transformational commands.
+ *
+ * For ES|QL, we consider the following as transformational commands:
+ * - `stats`: Performs aggregations and transformations
+ * - `keep`: Filters and selects specific fields
+ * - `fork` commands where ALL branches contain only transformational commands
+ *
+ * @param esql - The ES|QL query string to analyze
+ * @returns true if the query contains transformational commands or fork commands with all transformational branches
+ *
+ * @example
+ * hasTransformationalCommand('from index | stats count() by field') // true
+ * hasTransformationalCommand('from index | keep field1, field2') // true
+ * hasTransformationalCommand('from index | fork (stats count()) (keep field)') // true
+ * hasTransformationalCommand('from index | fork (where x > 0) (eval y = x * 2)') // false
+ * hasTransformationalCommand('from index | where field > 0') // false
+ */
 export function hasTransformationalCommand(esql?: string) {
+  if (!esql) return false;
   const transformationalCommands = ['stats', 'keep'];
-  const { ast } = parse(esql);
+  const { root } = Parser.parse(esql);
+
+  // Check for direct transformational commands first
   const hasAtLeastOneTransformationalCommand = transformationalCommands.some((command) =>
-    ast.find(({ name }) => name === command)
+    root.commands.find(({ name }) => name === command)
   );
-  return hasAtLeastOneTransformationalCommand;
+
+  // Early return if we found direct transformational commands
+  if (hasAtLeastOneTransformationalCommand) {
+    return true;
+  }
+
+  // Check for fork commands with all transformational branches
+  const forkCommands = Walker.findAll(root, (node) => node.name === 'fork') as Array<ESQLCommand>;
+
+  const hasForkWithAllTransformationalBranches = forkCommands.some((forkCommand) => {
+    const forkArguments = forkCommand?.args as ESQLAstQueryExpression[];
+
+    if (!forkArguments || forkArguments.length === 0) {
+      return false;
+    }
+
+    return forkArguments.every((branch) => {
+      if (branch.type !== 'query') {
+        return false;
+      }
+
+      const branchCommands = branch.commands;
+
+      // Branch must have at least one command and all commands must be transformational
+      return (
+        branchCommands.length > 0 &&
+        branchCommands.every((cmd) => transformationalCommands.includes(cmd.name))
+      );
+    });
+  });
+
+  return hasForkWithAllTransformationalBranches;
 }
 
 export function getLimitFromESQLQuery(esql: string): number {
@@ -116,6 +169,34 @@ export function getLimitFromESQLQuery(esql: string): number {
 export function removeDropCommandsFromESQLQuery(esql?: string): string {
   const pipes = (esql || '').split('|');
   return pipes.filter((statement) => !/DROP\s/i.test(statement)).join('|');
+}
+
+/**
+ * Converts timeseries (TS) commands to FROM commands in an ES|QL query
+ * @param esql - The ES|QL query string
+ * @returns The modified query with TS commands converted to FROM commands
+ */
+export function convertTimeseriesCommandToFrom(esql?: string): string {
+  const { root } = Parser.parse(esql || '');
+  const timeseriesCommand = Walker.commands(root).find(({ name }) => name === 'ts');
+  if (!timeseriesCommand) return esql || '';
+
+  const fromCommand = {
+    ...timeseriesCommand,
+    name: 'from',
+  };
+
+  // Replace the ts command with the from command in the commands array
+  const newCommands = root.commands.map((command) =>
+    command === timeseriesCommand ? fromCommand : command
+  );
+
+  const newRoot = {
+    ...root,
+    commands: newCommands,
+  };
+
+  return BasicPrettyPrinter.print(newRoot);
 }
 
 /**
@@ -492,4 +573,34 @@ export const getCategorizeField = (esql: string): string[] => {
   }
 
   return columns;
+};
+
+export const hasLimitBeforeAggregate = (esql: string): boolean => {
+  const {
+    root: { commands },
+  } = Parser.parse(esql);
+  const statsCommand = commands.find(({ name }) => name === 'stats');
+  const limitCommand = commands.find(({ name }) => name === 'limit');
+
+  if (statsCommand && limitCommand) {
+    return commands.indexOf(limitCommand) < commands.indexOf(statsCommand);
+  }
+  return false;
+};
+
+export const missingSortBeforeLimit = (esql: string): boolean => {
+  const {
+    root: { commands },
+  } = Parser.parse(esql);
+  const sortCommand = commands.find(({ name }) => name === 'sort');
+  const limitCommand = commands.find(({ name }) => name === 'limit');
+
+  if (limitCommand) {
+    if (sortCommand) {
+      return commands.indexOf(sortCommand) > commands.indexOf(limitCommand);
+    } else {
+      return false;
+    }
+  }
+  return false;
 };

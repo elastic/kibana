@@ -10,6 +10,8 @@
     "apiKeyId",
     "createdAt",
     "end",
+    "initiator",
+    "initiatorId",
     "rule",
     "rule.alertTypeId",
     "rule.consumer",
@@ -181,10 +183,12 @@
     "external_service.pushed_by.username",
     "incremental_id",
     "observables",
+    "observables.description",
     "observables.typeKey",
     "observables.value",
     "owner",
     "settings",
+    "settings.extractObservables",
     "settings.syncAlerts",
     "severity",
     "status",
@@ -192,6 +196,7 @@
     "title",
     "total_alerts",
     "total_comments",
+    "total_events",
     "updated_at",
     "updated_by",
     "updated_by.email",
@@ -619,8 +624,6 @@
     "version",
     "wsState"
   ],
-  "guided-onboarding-guide-state": [],
-  "guided-onboarding-plugin-state": [],
   "index-pattern": [
     "name",
     "title",
@@ -818,6 +821,7 @@
     "title"
   ],
   "maintenance-window": [
+    "createdBy",
     "enabled",
     "events",
     "expirationDate",
@@ -940,6 +944,7 @@
   "risk-engine-configuration": [
     "alertSampleSizePerShard",
     "dataViewId",
+    "enableResetToZero",
     "enabled",
     "excludeAlertStatuses",
     "filter",

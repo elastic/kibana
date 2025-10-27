@@ -9,8 +9,7 @@ import { withActiveInferenceSpan, ElasticGenAIAttributes } from '@kbn/inference-
 import type { ScopedModel } from '@kbn/onechat-server';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { ToolEventEmitter } from '@kbn/onechat-server';
-import type { ToolResult } from '@kbn/onechat-common/tools';
+import type { ToolEventEmitter, ToolHandlerResult } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools';
 import { createSearchToolGraph } from './graph';
 
@@ -28,7 +27,7 @@ export const runSearchTool = async ({
   esClient: ElasticsearchClient;
   logger: Logger;
   events: ToolEventEmitter;
-}): Promise<ToolResult[]> => {
+}): Promise<ToolHandlerResult[]> => {
   const toolGraph = createSearchToolGraph({ model, esClient, logger, events });
 
   return withActiveInferenceSpan(

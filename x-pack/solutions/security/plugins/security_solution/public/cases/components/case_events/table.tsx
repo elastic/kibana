@@ -27,18 +27,21 @@ import React, { useMemo, useEffect, useContext, type FC, useState, useCallback }
 import { useDispatch, useSelector } from 'react-redux';
 
 import { ThemeContext } from 'styled-components';
+import { EuiEmptyPrompt, EuiProgress } from '@elastic/eui';
 import { SecurityCellActionsTrigger } from '../../../app/actions/constants';
 import { RowAction } from '../../../common/components/control_columns/row_action';
-import { buildBrowserFields } from '../../../data_view_manager/utils/security_browser_fields_manager';
+import { buildBrowserFields } from '../../../data_view_manager/utils/build_browser_fields';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import type { State } from '../../../common/store/types';
 import { useGetEvents } from './use_get_events';
 import { useCaseEventsDataView } from './use_events_data_view';
-import { TABLE_UNIT } from './translations';
+import { TABLE_UNIT, NO_EVENTS_TITLE } from './translations';
 
 export const EVENTS_TABLE_FOR_CASES_ID = 'EVENTS_TABLE_FOR_CASES_ID' as const;
+export const EMPTY_EVENTS_TABLE_FOR_CASES_ID = `EMPTY_${EVENTS_TABLE_FOR_CASES_ID}` as const;
+export const LOADING_EVENTS_TABLE_FOR_CASES_ID = `LOADING_${EVENTS_TABLE_FOR_CASES_ID}` as const;
 
 const noop = () => {};
 const emptyObject = {} as const;
@@ -59,9 +62,7 @@ const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEventsTablePr
 
   const dispatch = useDispatch();
 
-  const browserFields = useMemo(() => {
-    return buildBrowserFields(dataView.fields).browserFields;
-  }, [dataView.fields]);
+  const browserFields = useMemo(() => buildBrowserFields(dataView.fields), [dataView.fields]);
 
   const controlColumns = useMemo(() => getDefaultControlColumn(MAX_ACTION_BUTTON_COUNT), []);
 
@@ -83,7 +84,7 @@ const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEventsTablePr
 
   const pagination: EuiDataGridPaginationProps & { pageSize: number } = useMemo(
     () => ({
-      pageIndex: 0,
+      pageIndex: currentPageIndex,
       pageSize: itemsPerPage,
       pageSizeOptions: itemsPerPageOptions,
       onChangeItemsPerPage: (perPage) =>
@@ -95,7 +96,7 @@ const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEventsTablePr
         ),
       onChangePage: setCurrentPageIndex,
     }),
-    [dispatch, itemsPerPage, itemsPerPageOptions]
+    [currentPageIndex, dispatch, itemsPerPage, itemsPerPageOptions]
   );
 
   const eventIds = useMemo(() => {
@@ -104,12 +105,17 @@ const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEventsTablePr
     );
   }, [events]);
 
-  const { data = [] } = useGetEvents(dataView, {
+  const { data = [], isFetching: isFetchingEvents } = useGetEvents(dataView, {
     eventIds,
     sort,
     pageIndex: currentPageIndex,
     itemsPerPage,
   });
+
+  // NOTE: sorting change resets pagination
+  useEffect(() => {
+    setCurrentPageIndex(0);
+  }, [sort]);
 
   const leadingControlColumns = useMemo(
     () =>
@@ -136,6 +142,7 @@ const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEventsTablePr
 
           return (
             <RowAction
+              key={column.id}
               columnId={column.id ?? ''}
               columnHeaders={defaultHeaders}
               controlColumn={controlColumns[i]}
@@ -171,13 +178,28 @@ const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEventsTablePr
     [dataView.fields]
   );
 
+  if (isFetchingEvents) {
+    return (
+      <EuiProgress size="xs" color="accent" data-test-subj={LOADING_EVENTS_TABLE_FOR_CASES_ID} />
+    );
+  }
+
+  if (!data.length) {
+    return (
+      <EuiEmptyPrompt
+        data-test-subj={EMPTY_EVENTS_TABLE_FOR_CASES_ID}
+        title={<h2>{NO_EVENTS_TITLE}</h2>}
+      />
+    );
+  }
+
   return (
     <DataTableComponent
       browserFields={browserFields}
       data={data}
       getFieldSpec={getFieldSpec}
       id={EVENTS_TABLE_FOR_CASES_ID}
-      totalItems={data.length}
+      totalItems={eventIds.length}
       unitCountText={TABLE_UNIT}
       cellActionsTriggerId={SecurityCellActionsTrigger.CASE_EVENTS}
       leadingControlColumns={leadingControlColumns}

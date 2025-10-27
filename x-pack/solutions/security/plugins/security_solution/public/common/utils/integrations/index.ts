@@ -11,13 +11,18 @@ import { APP_UI_ID } from '../../../../common';
 export const RETURN_APP_ID = 'returnAppId';
 export const RETURN_PATH = 'returnPath';
 
-export const addPathParamToUrl = (url: string, onboardingLink: string): string => {
+export const addPathParamToUrl = (
+  url: string,
+  onboardingLink: string,
+  extraParams?: Record<string, string>
+): string => {
   return stringifyUrl(
     {
       url,
       query: {
         [RETURN_APP_ID]: APP_UI_ID,
         [RETURN_PATH]: onboardingLink,
+        ...extraParams,
       },
     },
     {

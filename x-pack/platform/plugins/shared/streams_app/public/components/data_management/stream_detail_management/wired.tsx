@@ -7,7 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
-import { EuiToolTip } from '@elastic/eui';
+import { EuiBadgeGroup, EuiCallOut, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { RedirectTo } from '../../redirect_to';
 import { StreamDetailRouting } from '../stream_detail_routing';
@@ -17,6 +17,8 @@ import { Wrapper } from './wrapper';
 import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
 import { WiredAdvancedView } from './wired_advanced_view';
 import { StreamDetailDataQuality } from '../../stream_data_quality';
+import { StreamsAppPageTemplate } from '../../streams_app_page_template';
+import { WiredStreamBadge } from '../../stream_badges';
 
 const wiredStreamManagementSubTabs = [
   'partitioning',
@@ -57,6 +59,41 @@ export function WiredStreamDetailManagement({
     refreshDefinition,
   });
 
+  if (!definition.privileges.view_index_metadata) {
+    return (
+      <>
+        <StreamsAppPageTemplate.Header
+          bottomBorder="extended"
+          pageTitle={
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              {key}
+              <EuiBadgeGroup gutterSize="s">
+                <WiredStreamBadge />
+              </EuiBadgeGroup>
+            </EuiFlexGroup>
+          }
+        />
+        <StreamsAppPageTemplate.Body>
+          <EuiCallOut
+            announceOnMount
+            title={i18n.translate('xpack.streams.wiredStreamOverview.noPrivileges.title', {
+              defaultMessage: "Data stream couldn't be loaded",
+            })}
+            color="danger"
+            iconType="error"
+          >
+            <p>
+              {i18n.translate('xpack.streams.wiredStreamOverview.noPrivileges.description', {
+                defaultMessage:
+                  "You don't have the required privileges to view this stream. Make sure you have sufficient view_index_metadata privileges.",
+              })}
+            </p>
+          </EuiCallOut>
+        </StreamsAppPageTemplate.Body>
+      </>
+    );
+  }
+
   const tabs = {
     retention: {
       content: (
@@ -70,7 +107,7 @@ export function WiredStreamDetailManagement({
               'Control how long data stays in this stream. Set a custom duration or apply a shared policy.',
           })}
         >
-          <span>
+          <span tabIndex={0}>
             {i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
               defaultMessage: 'Retention',
             })}
@@ -103,7 +140,7 @@ export function WiredStreamDetailManagement({
             defaultMessage: 'View details about this stream’s data quality',
           })}
         >
-          <span>
+          <span data-test-subj="dataQualityTab" tabIndex={0}>
             {i18n.translate('xpack.streams.streamDetailView.qualityTab', {
               defaultMessage: 'Data quality',
             })}
@@ -144,5 +181,7 @@ export function WiredStreamDetailManagement({
     return null;
   }
 
-  <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'partitioning' } }} />;
+  return (
+    <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'partitioning' } }} />
+  );
 }

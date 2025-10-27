@@ -841,6 +841,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
       class="euiFlexItem c5 emotion-euiFlexItem-growZero"
     >
       <nav
+        aria-label="Table pagination"
         class="euiPagination emotion-euiPagination"
         data-test-subj="numberedPagination"
       >

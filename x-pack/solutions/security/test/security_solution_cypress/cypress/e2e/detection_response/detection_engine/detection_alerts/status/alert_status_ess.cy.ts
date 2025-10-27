@@ -23,7 +23,8 @@ import { visit } from '../../../../../tasks/navigation';
 
 import { ALERTS_URL } from '../../../../../urls/navigation';
 
-describe('Changing alert status privileges - ESS', { tags: ['@ess'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/237208
+describe.skip('Changing alert status privileges - ESS', { tags: ['@ess'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
   });

@@ -5,10 +5,21 @@
  * 2.0.
  */
 
+import { lazy } from 'react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
-import type { GetIsActiveFn } from '@kbn/core-chrome-browser/src/project_navigation';
+import { DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { i18n } from '@kbn/i18n';
+
+const LazyIconAgents = lazy(() =>
+  import('@kbn/search-shared-ui/src/v2_icons/robot').then((m) => ({ default: m.iconRobot }))
+);
+
+const LazyIconPlayground = lazy(() =>
+  import('@kbn/search-shared-ui/src/v2_icons/playground').then((m) => ({
+    default: m.iconPlayground,
+  }))
+);
 
 const NAV_TITLE = i18n.translate('xpack.serverlessSearch.nav.title', {
   defaultMessage: 'Elasticsearch',
@@ -41,9 +52,6 @@ const CONTENT_TITLE = i18n.translate('xpack.serverlessSearch.nav.mngt.content', 
 const OTHER_TITLE = i18n.translate('xpack.serverlessSearch.nav.mngt.other', {
   defaultMessage: 'Other',
 });
-const AGENTS_TITLE = i18n.translate('xpack.serverlessSearch.nav.agents', {
-  defaultMessage: 'Agents',
-});
 const AI_TITLE = i18n.translate('xpack.serverlessSearch.nav.adminAndSettings.ai.title', {
   defaultMessage: 'AI',
 });
@@ -52,13 +60,6 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
   function isAvailable<T>(appId: string, content: T): T[] {
     return isAppRegistered(appId) ? [content] : [];
   }
-
-  const homeGetIsActive: GetIsActiveFn = ({ pathNameSerialized, prepend }) => {
-    return (
-      pathNameSerialized.startsWith(prepend('/app/elasticsearch/home')) ||
-      pathNameSerialized.startsWith(prepend('/app/elasticsearch/start'))
-    );
-  };
 
   return {
     body: [
@@ -72,12 +73,12 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
         breadcrumbStatus: 'hidden',
         children: [
           {
-            getIsActive: homeGetIsActive,
             icon: 'logoElasticsearch',
             link: 'searchHomepage',
             renderAs: 'home',
             sideNavVersion: 'v2',
             title: NAV_TITLE,
+            breadcrumbStatus: 'hidden',
           },
           {
             id: 'home',
@@ -86,7 +87,6 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
             }),
             link: 'searchHomepage',
             spaceBefore: 'm',
-            getIsActive: homeGetIsActive,
             sideNavVersion: 'v1',
           },
           {
@@ -99,6 +99,12 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
             },
           },
           {
+            iconV2: LazyIconAgents, // Temp svg until we have icon in EUI
+            link: 'agent_builder',
+            withBadge: true,
+            badgeTypeV2: 'techPreview',
+          },
+          {
             link: 'workflows',
             withBadge: true,
             badgeTypeV2: 'techPreview' as const,
@@ -109,17 +115,6 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                   'This functionality is experimental and not supported. It may change or be removed at any time.',
               }),
             },
-          },
-          {
-            title: AGENTS_TITLE,
-            link: 'agent_builder',
-            sideNavVersion: 'v1',
-          },
-          {
-            iconV2: 'comment',
-            link: 'agent_builder',
-            sideNavVersion: 'v2',
-            title: AGENTS_TITLE,
           },
           {
             id: 'build',
@@ -151,7 +146,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                 }),
                 link: 'searchPlayground' as AppDeepLinkId,
                 breadcrumbStatus: 'hidden' as 'hidden',
-                iconV2: 'broom' /* TODO: review icon */,
+                iconV2: LazyIconPlayground, // Temp svg until we have icon in EUI
               }),
             ],
           },
@@ -237,21 +232,6 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
             sideNavVersion: 'v2',
             title: MACHINE_LEARNING_TITLE,
           },
-          {
-            iconV2: 'globe' /* TODO: review icon */,
-            link: 'maps',
-            sideNavVersion: 'v2',
-          },
-          {
-            iconV2: 'graphApp',
-            link: 'graph',
-            sideNavVersion: 'v2',
-          },
-          {
-            iconV2: 'visualizeApp',
-            link: 'visualize',
-            sideNavVersion: 'v2',
-          },
         ],
       },
     ],
@@ -260,6 +240,11 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
         type: 'navGroup',
         id: 'search_project_nav_footer',
         children: [
+          {
+            id: 'getting_started',
+            icon: 'launch',
+            link: 'searchGettingStarted',
+          },
           {
             id: 'dev_tools',
             title: i18n.translate('xpack.serverlessSearch.nav.developerTools', {
@@ -288,41 +273,46 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                       );
                     },
                     link: 'management:index_management',
+                    breadcrumbStatus: 'hidden',
                   },
-                  { link: 'management:index_lifecycle_management' },
-                  { link: 'management:snapshot_restore' },
-                  { link: 'management:transform' },
-                  { link: 'management:rollup_jobs' },
+                  { link: 'management:index_lifecycle_management', breadcrumbStatus: 'hidden' },
+                  { link: 'management:snapshot_restore', breadcrumbStatus: 'hidden' },
+                  { link: 'management:transform', breadcrumbStatus: 'hidden' },
+                  { link: 'management:rollup_jobs', breadcrumbStatus: 'hidden' },
                   { link: 'management:data_quality', breadcrumbStatus: 'hidden' },
                   { link: 'management:data_usage', breadcrumbStatus: 'hidden' },
                 ],
                 title: i18n.translate('xpack.serverlessSearch.nav.ingest.indices.title', {
-                  defaultMessage: 'Indices, data streams and roll ups',
+                  defaultMessage: 'Indices and data streams',
                 }),
               },
               {
                 children: [
-                  { link: 'management:ingest_pipelines' },
-                  { link: 'management:pipelines' },
+                  { link: 'management:ingest_pipelines', breadcrumbStatus: 'hidden' },
+                  { link: 'management:pipelines', breadcrumbStatus: 'hidden' },
                 ],
                 title: i18n.translate('xpack.serverlessSearch.nav.ingest.pipelines.title', {
                   defaultMessage: 'Ingest',
                 }),
               },
               {
-                children: [{ link: 'searchSynonyms:synonyms' }, { link: 'searchQueryRules' }],
+                children: [
+                  { link: 'searchSynonyms:synonyms', breadcrumbStatus: 'hidden' },
+                  { link: 'searchQueryRules' },
+                ],
                 id: 'search_relevance',
+                breadcrumbStatus: 'hidden',
                 title: i18n.translate('xpack.serverlessSearch.nav.ingest.relevance.title', {
                   defaultMessage: 'Relevance',
                 }),
               },
             ],
             iconV2: 'database',
-            id: 'ingest_and_data',
+            id: DATA_MANAGEMENT_NAV_ID, // important for tour
             sideNavVersion: 'v2',
             renderAs: 'panelOpener',
-            title: i18n.translate('xpack.serverlessSearch.nav.ingestAndData', {
-              defaultMessage: 'Ingest and manage data',
+            title: i18n.translate('xpack.serverlessSearch.nav.dataManagement', {
+              defaultMessage: 'Data management',
             }),
           },
           {
@@ -518,6 +508,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                 children: [
                   { link: 'management:dataViews', breadcrumbStatus: 'hidden' },
                   { link: 'management:spaces', breadcrumbStatus: 'hidden' },
+                  { link: 'visualize' },
                   { link: 'management:objects', breadcrumbStatus: 'hidden' },
                   { link: 'management:filesManagement', breadcrumbStatus: 'hidden' },
                   { link: 'management:reporting', breadcrumbStatus: 'hidden' },

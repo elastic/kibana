@@ -422,17 +422,7 @@ export const recalcColumnWidths = ({
   return next;
 };
 
-// Valid step for simulation
-export const isValidStep = (step: StreamlangStepWithUIAttributes) => {
-  // Where
-  if (isWhereBlock(step)) {
-    return isSchema(conditionSchema, step.where);
-  } else {
-    // Action
-    return isSchema(streamlangProcessorSchema, step);
-  }
-};
-
+// Get valid steps for simulation
 // This will return valid action blocks, and valid where blocks, where
 // where blocks are invalid all their children are also skipped.
 export const getValidSteps = (
@@ -447,6 +437,14 @@ export const getValidSteps = (
       if (!isSchema(conditionSchema, step.where)) {
         return false;
       }
+
+      // Valid but has no children (compilation of this step would be pointless)
+      const hasChildren = steps.some((s) => s.parentId === step.customIdentifier);
+      if (!hasChildren) {
+        return false;
+      }
+
+      // Valid where block with children
       validSteps.push(step);
       return true;
     } else {

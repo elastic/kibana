@@ -203,6 +203,7 @@ export function SvlCasesApiServiceProvider({ getService }: FtrProviderContext) {
         },
         settings: {
           syncAlerts: true,
+          extractObservables: false,
         },
         owner,
         assignees: [],

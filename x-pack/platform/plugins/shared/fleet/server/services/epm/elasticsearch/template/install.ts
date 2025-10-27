@@ -40,6 +40,7 @@ import {
   USER_SETTINGS_TEMPLATE_SUFFIX,
   STACK_COMPONENT_TEMPLATES,
   MAX_CONCURRENT_COMPONENT_TEMPLATES,
+  OTEL_COMPONENT_TEMPLATES,
 } from '../../../../constants';
 import { getESAssetMetadata } from '../meta';
 import { retryTransientEsErrors } from '../retry';
@@ -49,6 +50,8 @@ import {
 } from '../../../experimental_datastream_features_helper';
 import { appContextService } from '../../../app_context';
 import type { AssetsMap, PackageInstallContext } from '../../../../../common/types';
+
+import { OTEL_COLLECTOR_INPUT_TYPE, OTEL_TEMPLATE_SUFFIX } from '../../../../../common/constants';
 
 import {
   generateMappings,
@@ -364,6 +367,7 @@ export function buildComponentTemplates(params: {
   lifecycle?: IndexTemplate['template']['lifecycle'];
   fieldCount?: number;
   type?: string;
+  isOtelInputType?: boolean;
 }) {
   const {
     templateName,
@@ -376,6 +380,7 @@ export function buildComponentTemplates(params: {
     lifecycle,
     fieldCount,
     type,
+    isOtelInputType,
   } = params;
   const packageTemplateName = `${templateName}${PACKAGE_TEMPLATE_SUFFIX}`;
   const userSettingsTemplateName = `${templateName}${USER_SETTINGS_TEMPLATE_SUFFIX}`;
@@ -410,9 +415,8 @@ export function buildComponentTemplates(params: {
 
   const mappingsDynamicTemplates = uniqBy(
     concat(mappings.dynamic_templates ?? [], indexTemplateMappings.dynamic_templates ?? []),
-    (dynampingTemplate) => Object.keys(dynampingTemplate)[0]
+    (dynamicTemplate) => Object.keys(dynamicTemplate)[0]
   );
-
   const mappingsRuntimeFields = merge(mappings.runtime, indexTemplateMappings.runtime ?? {});
 
   const isTimeSeriesEnabledByDefault = registryElasticsearch?.index_mode === 'time_series';
@@ -466,6 +470,15 @@ export function buildComponentTemplates(params: {
   // Stub custom template
   if (type) {
     const customTemplateName = `${type}${USER_SETTINGS_TEMPLATE_SUFFIX}`;
+    templatesMap[customTemplateName] = {
+      template: {
+        settings: {},
+      },
+      _meta,
+    };
+  }
+  if (type && isOtelInputType) {
+    const customTemplateName = `${type}-${OTEL_TEMPLATE_SUFFIX}${USER_SETTINGS_TEMPLATE_SUFFIX}`;
     templatesMap[customTemplateName] = {
       template: {
         settings: {},
@@ -626,7 +639,10 @@ export function prepareTemplate({
     fieldAssetsMap,
     dataStream.path
   );
-
+  const experimentalFeature = appContextService.getExperimentalFeatures();
+  const isOtelInputType =
+    experimentalFeature.enableOtelIntegrations &&
+    (dataStream?.streams || []).some((stream) => stream.input === OTEL_COLLECTOR_INPUT_TYPE);
   const isIndexModeTimeSeries =
     dataStream.elasticsearch?.index_mode === 'time_series' ||
     !!experimentalDataStreamFeature?.features.tsdb;
@@ -635,7 +651,7 @@ export function prepareTemplate({
 
   const mappings = generateMappings(validFields, isIndexModeTimeSeries);
   const templateName = generateTemplateName(dataStream);
-  const templateIndexPattern = generateTemplateIndexPattern(dataStream);
+  const templateIndexPattern = generateTemplateIndexPattern(dataStream, isOtelInputType);
   const templatePriority = getTemplatePriority(dataStream);
 
   const isILMPolicyDisabled = appContextService.getConfig()?.internal?.disableILMPolicies ?? false;
@@ -646,6 +662,7 @@ export function prepareTemplate({
   const defaultSettings = buildDefaultSettings({
     type: dataStream.type,
     ilmPolicy: dataStream.ilm_policy,
+    isOtelInputType,
   });
 
   const componentTemplates = buildComponentTemplates({
@@ -659,6 +676,7 @@ export function prepareTemplate({
     lifecycle: lifecyle,
     fieldCount: countFields(validFields),
     type: dataStream.type,
+    isOtelInputType,
   });
 
   const template = getTemplate({
@@ -668,9 +686,9 @@ export function prepareTemplate({
     templatePriority,
     hidden: dataStream.hidden,
     registryElasticsearch: dataStream.elasticsearch,
-    mappings,
     isIndexModeTimeSeries,
     type: dataStream.type,
+    isOtelInputType,
   });
 
   return {
@@ -717,6 +735,8 @@ export function getAllTemplateRefs(installedTemplates: IndexTemplateEntry[]) {
       )
       // Filter stack component templates shared between integrations
       .filter((componentTemplateId) => !STACK_COMPONENT_TEMPLATES.includes(componentTemplateId))
+      // Filter OTEL component templates shared between integrations
+      .filter((componentTemplateId) => !OTEL_COMPONENT_TEMPLATES.includes(componentTemplateId))
       .map((componentTemplateId) => ({
         id: componentTemplateId,
         type: ElasticsearchAssetType.componentTemplate,

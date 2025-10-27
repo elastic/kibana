@@ -44,7 +44,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dashboard.navigateToApp();
       await dashboard.clickNewDashboard();
-      await dashboard.ensureDashboardIsInEditMode();
       await timePicker.setDefaultDataRange();
       await header.waitUntilLoadingHasFinished();
 

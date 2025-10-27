@@ -5,44 +5,21 @@
  * 2.0.
  */
 
-import { EuiFormRow, EuiSelect } from '@elastic/eui';
-import type { ToolType } from '@kbn/onechat-common';
-import React, { useEffect, useMemo } from 'react';
-import { Controller, useFormContext, useWatch } from 'react-hook-form';
+import React, { useMemo } from 'react';
+import { useFormContext, useWatch } from 'react-hook-form';
 import { docLinks } from '../../../../../../common/doc_links';
 import { ToolFormSection } from '../components/tool_form_section';
 import { i18nMessages } from '../i18n';
 import type { ToolFormData } from '../types/tool_form_types';
-import { getToolTypeConfig, getEditableToolTypes } from '../registry/tools_form_registry';
-import { ToolFormMode } from '../tool_form';
+import { getToolTypeConfig } from '../registry/tools_form_registry';
 
-interface ConfigurationProps {
-  toolType: ToolType;
-  setToolType: (toolType: ToolType) => void;
-  mode: ToolFormMode;
-}
-
-export const Configuration = ({ toolType, setToolType, mode }: ConfigurationProps) => {
-  const {
-    formState: { errors },
-    control,
-  } = useFormContext<ToolFormData>();
+export const Configuration = () => {
+  const { control } = useFormContext<ToolFormData>();
   const type = useWatch({ control, name: 'type' });
-
-  useEffect(() => {
-    if (type && type !== toolType) {
-      setToolType(type);
-    }
-  }, [type, toolType, setToolType]);
-
   const toolConfig = getToolTypeConfig(type);
   const ConfigurationComponent = useMemo(() => {
     return toolConfig!.getConfigurationComponent();
   }, [toolConfig]);
-
-  const editableToolTypes = useMemo(() => {
-    return getEditableToolTypes();
-  }, []);
 
   return (
     <ToolFormSection
@@ -54,20 +31,6 @@ export const Configuration = ({ toolType, setToolType, mode }: ConfigurationProp
         href: docLinks.tools,
       }}
     >
-      <EuiFormRow label={i18nMessages.configuration.form.type.label} error={errors.type?.message}>
-        <Controller
-          control={control}
-          name="type"
-          render={({ field: { ref, ...field } }) => (
-            <EuiSelect
-              options={editableToolTypes}
-              {...field}
-              inputRef={ref}
-              disabled={mode === ToolFormMode.Edit}
-            />
-          )}
-        />
-      </EuiFormRow>
       <ConfigurationComponent />
     </ToolFormSection>
   );

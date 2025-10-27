@@ -71,7 +71,7 @@ interface CreateAgentFormProps {
 
 type AgentFormProps = EditingAgentFormProps | CreateAgentFormProps;
 
-export type AgentFormData = Omit<AgentDefinition, 'type'>;
+export type AgentFormData = Omit<AgentDefinition, 'type' | 'readonly'>;
 
 export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }) => {
   const { euiTheme } = useEuiTheme();

@@ -31,6 +31,8 @@ export const resizeWindow = (width: number, height: number) => {
   return () => {
     window.innerWidth = originalInnerWidth;
     window.innerHeight = originalInnerHeight;
-    window.dispatchEvent(new Event('resize'));
+    act(() => {
+      window.dispatchEvent(new Event('resize'));
+    });
   };
 };

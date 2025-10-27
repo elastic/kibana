@@ -7,27 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { QueryFunctionContext } from '@tanstack/react-query';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import type { QueryFunctionContext } from '@kbn/react-query';
+import { useInfiniteQuery } from '@kbn/react-query';
 import { useEffect, useMemo } from 'react';
-import type { TimeRange } from '@kbn/data-plugin/common';
+import type { TimeRange } from '@kbn/es-query';
 import { useMetricsExperience } from './use_metrics_experience';
 
 export const useMetricFieldsQuery = (params?: {
   fields?: string[];
   index: string;
-  timeRange: TimeRange;
+  timeRange: TimeRange | undefined;
 }) => {
   const { client } = useMetricsExperience();
 
-  const { hasNextPage, data, status, fetchNextPage, isLoading, isFetchingNextPage } =
+  const { hasNextPage, data, status, fetchNextPage, isFetchingNextPage, isFetching } =
     useInfiniteQuery({
       queryKey: [
         'metricFields',
         params?.fields,
         params?.index,
-        params?.timeRange.from,
-        params?.timeRange.to,
+        params?.timeRange?.from,
+        params?.timeRange?.to,
       ],
       queryFn: async ({
         queryKey,
@@ -80,6 +80,6 @@ export const useMetricFieldsQuery = (params?: {
   return {
     data: metricFieldsData,
     status,
-    isLoading,
+    isFetching,
   };
 };

@@ -141,7 +141,9 @@ export const getRecommendedQueriesTemplates = ({
                 defaultMessage: 'Use the CATEGORIZE function to identify patterns in your logs',
               }
             ),
-            queryString: `${fromCommand} | SAMPLE .001 | STATS Count=COUNT(*)/.001 BY Pattern=CATEGORIZE(${categorizationField})| SORT Count DESC`,
+            queryString: timeField
+              ? `${fromCommand} | WHERE ${timeField} <=?_tend and ${timeField} >?_tstart | SAMPLE .001 | STATS Count=COUNT(*)/.001 BY Pattern=CATEGORIZE(${categorizationField})| SORT Count DESC`
+              : `${fromCommand} | SAMPLE .001 | STATS Count=COUNT(*)/.001 BY Pattern=CATEGORIZE(${categorizationField})| SORT Count DESC`,
           },
         ]
       : []),
@@ -237,13 +239,20 @@ export const getRecommendedQueriesTemplatesFromExtensions = (
 // Function returning suggestions from static templates and editor extensions
 export const getRecommendedQueriesSuggestions = async (
   editorExtensions: EditorExtensions,
-  getColumnsByType: GetColumnsByTypeFn,
+  // Optional function to get fields by type, if not provided only the extensions will be used
+  getColumnsByType?: GetColumnsByTypeFn,
   prefix: string = ''
 ) => {
   const recommendedQueriesFromExtensions = getRecommendedQueriesTemplatesFromExtensions(
     editorExtensions.recommendedQueries
   );
 
+  // If getColumnsByType is not provided, we cannot get the static templates
+  // so we return only the extensions. For example in timeseries command the majority of
+  // the static templates are not relevant as the count() aggregation is not supported there.
+  if (!getColumnsByType) {
+    return recommendedQueriesFromExtensions;
+  }
   const recommendedQueriesFromTemplates = await getRecommendedQueriesSuggestionsFromStaticTemplates(
     getColumnsByType,
     prefix

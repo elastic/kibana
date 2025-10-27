@@ -8,54 +8,57 @@
  */
 
 import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
+import { schema } from '@kbn/config-schema';
 import {
-  dashboardGetResultSchema,
+  getDashboardGetResultSchema,
   dashboardCreateOptionsSchema,
-  dashboardCreateSchema,
   dashboardUpdateOptionsSchema,
-  dashboardUpdateRequestAttributesSchema,
+  getDashboardUpdateRequestAttributesSchema,
   dashboardSearchOptionsSchema,
-  dashboardItemSchema,
+  getDashboardItemSchema,
+  getDashboardStateSchema,
 } from './schema';
 
-export const serviceDefinition: ServicesDefinition = {
-  get: {
-    out: {
-      result: {
-        schema: dashboardGetResultSchema,
+export function getServiceDefinition(): ServicesDefinition {
+  return {
+    get: {
+      out: {
+        result: {
+          schema: getDashboardGetResultSchema(),
+        },
       },
     },
-  },
-  create: {
-    in: {
-      options: {
-        schema: dashboardCreateOptionsSchema,
+    create: {
+      in: {
+        options: {
+          schema: dashboardCreateOptionsSchema,
+        },
+        data: {
+          schema: schema.object(getDashboardStateSchema()),
+        },
       },
-      data: {
-        schema: dashboardCreateSchema,
-      },
-    },
-    out: {
-      result: {
-        schema: dashboardItemSchema,
-      },
-    },
-  },
-  update: {
-    in: {
-      options: {
-        schema: dashboardUpdateOptionsSchema,
-      },
-      data: {
-        schema: dashboardUpdateRequestAttributesSchema,
+      out: {
+        result: {
+          schema: getDashboardItemSchema(),
+        },
       },
     },
-  },
-  search: {
-    in: {
-      options: {
-        schema: dashboardSearchOptionsSchema,
+    update: {
+      in: {
+        options: {
+          schema: dashboardUpdateOptionsSchema,
+        },
+        data: {
+          schema: getDashboardUpdateRequestAttributesSchema(),
+        },
       },
     },
-  },
-};
+    search: {
+      in: {
+        options: {
+          schema: dashboardSearchOptionsSchema,
+        },
+      },
+    },
+  };
+}

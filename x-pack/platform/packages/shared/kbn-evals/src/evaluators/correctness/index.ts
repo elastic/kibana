@@ -112,7 +112,7 @@ export function createQuantitativeCorrectnessEvaluators(): Evaluator[] {
           score: null,
           label: 'unavailable',
           explanation: 'No correctness analysis available',
-          metadata,
+          metadata: metadata ?? undefined,
         };
       }
 
@@ -123,7 +123,7 @@ export function createQuantitativeCorrectnessEvaluators(): Evaluator[] {
         score,
         label: summaryText,
         explanation: summaryText,
-        metadata,
+        metadata: metadata ?? undefined,
       };
     },
     kind: 'LLM',

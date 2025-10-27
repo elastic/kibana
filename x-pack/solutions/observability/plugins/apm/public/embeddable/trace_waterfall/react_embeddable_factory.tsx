@@ -22,6 +22,7 @@ import type { EmbeddableDeps } from '../types';
 import { APM_TRACE_WATERFALL_EMBEDDABLE } from './constant';
 import { TraceWaterfallEmbeddable } from './trace_waterfall_embeddable';
 import { FocusedTraceWaterfallEmbeddable } from './focused_trace_waterfall_embeddable';
+import type { OnErrorClick } from '../../components/shared/trace_waterfall/trace_waterfall_context';
 
 interface BaseProps {
   traceId: string;
@@ -40,6 +41,7 @@ export interface ApmTraceWaterfallEmbeddableEntryProps extends BaseProps, Serial
   scrollElement?: Element;
   onNodeClick?: (nodeSpanId: string) => void;
   getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
+  onErrorClick?: OnErrorClick;
   mode: 'full';
 }
 
@@ -72,6 +74,9 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
       const getRelatedErrorsHref$ = new BehaviorSubject(
         'getRelatedErrorsHref' in state ? state.getRelatedErrorsHref : undefined
       );
+      const onErrorClick$ = new BehaviorSubject(
+        'onErrorClick' in state ? state.onErrorClick : undefined
+      );
 
       function serializeState() {
         return {
@@ -86,6 +91,7 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
             scrollElement: scrollElement$.getValue(),
             onNodeClick: onNodeClick$.getValue(),
             getRelatedErrorsHref: getRelatedErrorsHref$.getValue(),
+            onErrorClick: onErrorClick$.getValue(),
             mode: mode$.getValue(),
           },
         };
@@ -106,6 +112,7 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
           scrollElement$,
           onNodeClick$,
           getRelatedErrorsHref$,
+          onErrorClick$,
           mode$
         ).pipe(map(() => undefined)),
         getComparators: () => {
@@ -120,6 +127,7 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
             scrollElement: 'referenceEquality',
             onNodeClick: 'referenceEquality',
             getRelatedErrorsHref: 'referenceEquality',
+            onErrorClick: 'referenceEquality',
             mode: 'referenceEquality',
           };
         },
@@ -139,6 +147,7 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
           scrollElement$.next(entryState?.scrollElement ?? undefined);
           onNodeClick$.next(entryState?.onNodeClick ?? undefined);
           getRelatedErrorsHref$.next(entryState?.getRelatedErrorsHref ?? undefined);
+          onErrorClick$.next(entryState?.onErrorClick ?? undefined);
 
           // reset focused state
           const focusedState = lastSaved?.rawState as ApmTraceWaterfallEmbeddableFocusedProps;
@@ -165,6 +174,7 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
             scrollElement,
             onNodeClick,
             getRelatedErrorsHref,
+            onErrorClick,
             mode,
           ] = useBatchedPublishingSubjects(
             serviceName$,
@@ -176,6 +186,7 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
             scrollElement$,
             onNodeClick$,
             getRelatedErrorsHref$,
+            onErrorClick$,
             mode$
           );
           const content =
@@ -189,6 +200,7 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
                 onNodeClick={onNodeClick}
                 scrollElement={scrollElement}
                 getRelatedErrorsHref={getRelatedErrorsHref}
+                onErrorClick={onErrorClick}
               />
             ) : (
               <FocusedTraceWaterfallEmbeddable

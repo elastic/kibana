@@ -7,19 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
-import { StepExecutionRepository } from './step_execution_repository';
 import { ExecutionStatus } from '@kbn/workflows';
+import { StepExecutionRepository } from './step_execution_repository';
+import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 
 describe('StepExecutionRepository', () => {
   let repository: StepExecutionRepository;
-  let esClient: { index: jest.Mock; update: jest.Mock; bulk: jest.Mock };
+  let esClient: {
+    index: jest.Mock;
+    update: jest.Mock;
+    bulk: jest.Mock;
+    indices: { exists: jest.Mock; create: jest.Mock };
+  };
 
   beforeEach(() => {
     esClient = {
       index: jest.fn(),
       update: jest.fn(),
       bulk: jest.fn(),
+      indices: {
+        exists: jest.fn().mockResolvedValue(false),
+        create: jest.fn().mockResolvedValue({}),
+      },
     };
     repository = new StepExecutionRepository(esClient as any);
   });

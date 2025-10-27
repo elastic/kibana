@@ -28,7 +28,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
   const retryService = getService('retry');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
 
   describe('@ess @serverless @skipInServerlessMKI Install prebuilt rules from EPR', () => {
     beforeEach(async () => {
@@ -44,7 +44,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await deletePrebuiltRulesFleetPackage({ supertest, es, log, retryService });
           await deleteEndpointFleetPackage({ supertest, es, log, retryService });
 
-          const { body } = await securitySolutionApi.bootstrapPrebuiltRules().expect(200);
+          const { body } = await detectionsApi.bootstrapPrebuiltRules().expect(200);
 
           expect(body).toMatchObject({
             packages: expect.arrayContaining([

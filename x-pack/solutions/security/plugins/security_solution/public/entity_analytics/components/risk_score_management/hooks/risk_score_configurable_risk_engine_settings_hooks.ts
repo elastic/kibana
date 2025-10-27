@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import { useCallback, useEffect, useState } from 'react';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
@@ -18,6 +18,7 @@ export interface RiskScoreConfiguration {
     start: string;
     end: string;
   };
+  enableResetToZero: boolean;
 }
 
 const settingsAreEqual = (
@@ -27,7 +28,8 @@ const settingsAreEqual = (
   return (
     first?.includeClosedAlerts === second?.includeClosedAlerts &&
     first?.range?.start === second?.range?.start &&
-    first?.range?.end === second?.range?.end
+    first?.range?.end === second?.range?.end &&
+    first?.enableResetToZero === second?.enableResetToZero
   );
 };
 
@@ -37,6 +39,10 @@ const riskEngineSettingsWithDefaults = (riskEngineSettings?: Partial<RiskScoreCo
     start: riskEngineSettings?.range?.start ?? 'now-30d',
     end: riskEngineSettings?.range?.end ?? 'now',
   },
+  enableResetToZero:
+    riskEngineSettings?.enableResetToZero === undefined
+      ? true
+      : riskEngineSettings.enableResetToZero,
 });
 
 const FETCH_RISK_ENGINE_SETTINGS = ['GET', 'FETCH_RISK_ENGINE_SETTINGS'];
@@ -100,6 +106,7 @@ export const useConfigurableRiskEngineSettings = () => {
             start: selectedRiskEngineSettings.range.start,
             end: selectedRiskEngineSettings.range.end,
           },
+          enableResetToZero: selectedRiskEngineSettings.enableResetToZero,
         },
         {
           onSuccess: () => {
@@ -132,6 +139,13 @@ export const useConfigurableRiskEngineSettings = () => {
     riskEngineSettingsWithDefaults(savedRiskEngineSettings)
   );
 
+  const toggleScoreRetainment = () => {
+    setSelectedRiskEngineSettings((prevState) => {
+      if (!prevState) return undefined;
+      return { ...prevState, ...{ enableResetToZero: !prevState.enableResetToZero } };
+    });
+  };
+
   return {
     savedRiskEngineSettings,
     selectedRiskEngineSettings,
@@ -141,5 +155,6 @@ export const useConfigurableRiskEngineSettings = () => {
     toggleSelectedClosedAlertsSetting,
     saveSelectedSettingsMutation,
     isLoadingRiskEngineSettings,
+    toggleScoreRetainment,
   };
 };

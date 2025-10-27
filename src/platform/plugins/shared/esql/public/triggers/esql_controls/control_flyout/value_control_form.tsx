@@ -191,18 +191,18 @@ export function ValueControlForm({
   );
 
   useEffect(() => {
-    if (
-      !selectedValues?.length &&
-      controlFlyoutType === EsqlControlType.VALUES_FROM_QUERY &&
-      valuesRetrieval
-    ) {
-      const queryForValues =
-        variableName !== ''
-          ? `FROM ${getIndexPatternFromESQLQuery(queryString)} | STATS BY ${valuesRetrieval}`
-          : '';
-      onValuesQuerySubmit(queryForValues);
+    if (!selectedValues?.length && controlFlyoutType === EsqlControlType.VALUES_FROM_QUERY) {
+      if (initialState?.esqlQuery) {
+        onValuesQuerySubmit(initialState.esqlQuery);
+      } else if (valuesRetrieval) {
+        const queryForValues = `FROM ${getIndexPatternFromESQLQuery(
+          queryString
+        )} | STATS BY ${valuesRetrieval}`;
+        onValuesQuerySubmit(queryForValues);
+      }
     }
   }, [
+    initialState?.esqlQuery,
     controlFlyoutType,
     onValuesQuerySubmit,
     queryString,
@@ -299,6 +299,7 @@ export function ValueControlForm({
                 </EuiPanel>
               ) : (
                 <EuiCallOut
+                  announceOnMount
                   title={i18n.translate('esql.flyout.displayMultipleColsCallout.title', {
                     defaultMessage: 'Your query must return a single column',
                   })}

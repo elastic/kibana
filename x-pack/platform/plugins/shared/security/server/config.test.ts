@@ -256,6 +256,12 @@ describe('config schema', () => {
           "roleMappingManagementEnabled": true,
           "userManagementEnabled": true,
         },
+        "uiam": Object {
+          "enabled": false,
+          "ssl": Object {
+            "verificationMode": "full",
+          },
+        },
       }
     `);
   });
@@ -1609,6 +1615,99 @@ describe('config schema', () => {
           "lifespan": "P30D",
         }
       `);
+    });
+  });
+
+  describe('uiam', () => {
+    it('should throw error if UIAM is enabled, but UIAM URL is not specified', () => {
+      expect(() =>
+        ConfigSchema.validate({ uiam: { enabled: true } }, { serverless: true })
+      ).toThrow('[uiam.url]: expected value of type [string] but got [undefined].');
+
+      expect(() =>
+        ConfigSchema.validate(
+          { uiam: { enabled: true, sharedSecret: 'some-secret' } },
+          { serverless: true }
+        )
+      ).toThrow('[uiam.url]: expected value of type [string] but got [undefined].');
+    });
+
+    it('should throw error if UIAM is enabled, but UIAM shared secret is not specified', () => {
+      expect(() =>
+        ConfigSchema.validate(
+          { uiam: { enabled: true, url: 'https://uaim.service' } },
+          { serverless: true }
+        )
+      ).toThrow('[uiam.sharedSecret]: expected value of type [string] but got [undefined]');
+    });
+
+    it('does not require UIAM URL or shared secret if UIAM is disabled', () => {
+      expect(
+        ConfigSchema.validate({ uiam: { enabled: false } }, { serverless: true }).uiam
+      ).toEqual({ enabled: false, ssl: { verificationMode: 'full' } });
+    });
+
+    it('accepts both HTTP and HTTPS URLs for UIAM service', () => {
+      for (const url of ['http://uaim.service', 'https://uaim.service']) {
+        expect(
+          ConfigSchema.validate(
+            { uiam: { enabled: true, url, sharedSecret: 'some-secret' } },
+            { serverless: true }
+          ).uiam
+        ).toEqual({
+          enabled: true,
+          url,
+          sharedSecret: 'some-secret',
+          ssl: { verificationMode: 'full' },
+        });
+      }
+
+      expect(() =>
+        ConfigSchema.validate(
+          { uiam: { enabled: true, url: 'ftp://uaim.service', sharedSecret: 'some-secret' } },
+          { serverless: true }
+        )
+      ).toThrow('[uiam.url]: expected URI with scheme [https|http].');
+    });
+
+    it('accepts full UIAM config', () => {
+      expect(
+        ConfigSchema.validate(
+          { uiam: { enabled: true, url: 'https://uaim.service', sharedSecret: 'some-secret' } },
+          { serverless: true }
+        ).uiam
+      ).toEqual({
+        enabled: true,
+        url: 'https://uaim.service',
+        sharedSecret: 'some-secret',
+        ssl: { verificationMode: 'full' },
+      });
+
+      const validConfigs = [
+        {
+          enabled: true,
+          url: 'https://uaim.service',
+          sharedSecret: 'some-secret',
+          ssl: { verificationMode: 'certificate', certificateAuthorities: ['/path-1'] },
+        },
+        {
+          enabled: true,
+          url: 'https://uaim.service',
+          sharedSecret: 'some-secret',
+          ssl: { verificationMode: 'certificate', certificateAuthorities: '/path-1' },
+        },
+        {
+          enabled: true,
+          url: 'https://uaim.service',
+          sharedSecret: 'some-secret',
+          ssl: { verificationMode: 'none' },
+        },
+      ];
+      for (const uiamConfig of validConfigs) {
+        expect(ConfigSchema.validate({ uiam: uiamConfig }, { serverless: true }).uiam).toEqual(
+          uiamConfig
+        );
+      }
     });
   });
 });

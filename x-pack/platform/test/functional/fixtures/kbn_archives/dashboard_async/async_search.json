@@ -321,3 +321,42 @@
   "updated_at": "2022-08-23T13:30:58.587Z",
   "version": "WzE4NSwxXQ=="
 }
+
+{
+  "attributes": {
+    "description": "",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+    },
+    "optionsJSON": "{\"useMargins\":true,\"syncColors\":false,\"syncTooltips\":false,\"hidePanelTitles\":false}",
+    "panelsJSON": "[{\"version\":\"8.5.0\",\"type\":\"visualization\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":15,\"i\":\"342a4e6a-be32-4dc1-ad13-f9520388c904\"},\"panelIndex\":\"342a4e6a-be32-4dc1-ad13-f9520388c904\",\"embeddableConfig\":{\"savedVis\":{\"id\":\"\",\"title\":\"TSVB\",\"description\":\"\",\"type\":\"metrics\",\"params\":{\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"axis_scale\":\"normal\",\"drop_last_bucket\":0,\"id\":\"979d6cfd-06d2-473f-99f6-d2109c2b0d42\",\"interval\":\"\",\"max_lines_legend\":1,\"series\":[{\"axis_position\":\"right\",\"chart_type\":\"line\",\"color\":\"#68BC00\",\"fill\":0.5,\"formatter\":\"default\",\"id\":\"ec61d9bd-03d3-4c33-80cd-997a9a074f3f\",\"line_width\":1,\"metrics\":[{\"id\":\"e2b677b2-784c-4634-ad0c-1801a232627c\",\"type\":\"count\"}],\"override_index_pattern\":0,\"palette\":{\"name\":\"default\",\"type\":\"palette\"},\"point_size\":1,\"separate_axis\":0,\"series_drop_last_bucket\":0,\"split_mode\":\"terms\",\"stacked\":\"none\",\"terms_field\":\"extension.raw\",\"time_range_mode\":\"entire_time_range\"}],\"show_grid\":1,\"show_legend\":1,\"time_field\":\"\",\"time_range_mode\":\"entire_time_range\",\"tooltip_mode\":\"show_all\",\"truncate_legend\":1,\"type\":\"timeseries\",\"use_kibana_indexes\":true,\"index_pattern_ref_name\":\"metrics_342a4e6a-be32-4dc1-ad13-f9520388c904_0_index_pattern\"},\"uiState\":{},\"data\":{\"aggs\":[],\"searchSource\":{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}}},\"enhancements\":{}}},{\"version\":\"8.5.0\",\"type\":\"visualization\",\"gridData\":{\"x\":24,\"y\":0,\"w\":24,\"h\":15,\"i\":\"6eb73754-f243-4630-bf22-138083311015\"},\"panelIndex\":\"6eb73754-f243-4630-bf22-138083311015\",\"embeddableConfig\":{\"savedVis\":{\"id\":\"\",\"title\":\"\",\"description\":\"\",\"type\":\"timelion\",\"params\":{\"expression\":\".es(*)\",\"interval\":\"auto\"},\"uiState\":{},\"data\":{\"aggs\":[],\"searchSource\":{}}},\"enhancements\":{}}},{\"version\":\"7.10.0\",\"type\":\"visualization\",\"gridData\":{\"x\":0,\"y\":15,\"w\":48,\"h\":15,\"i\":\"f8f7f5b5-b840-443c-a766-d22a8a87c493\"},\"panelIndex\":\"f8f7f5b5-b840-443c-a766-d22a8a87c493\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_f8f7f5b5-b840-443c-a766-d22a8a87c493\"}]",
+    "timeRestore": true,
+    "timeTo": "2015-09-23T00:09:17.180Z",
+    "timeFrom": "2015-09-19T17:34:10.297Z",
+    "refreshInterval": {
+      "pause": true,
+      "value": 0
+    },
+    "title": "TSVBwithTimelion + Delay 5s",
+    "version": 1
+  },
+  "coreMigrationVersion": "8.5.0",
+  "id": "e3bf4190-22e7-11ed-af88-d5938945bd10",
+  "migrationVersion": { "dashboard": "8.4.0" },
+  "references": [
+    {
+      "id": "logstash-*",
+      "name": "342a4e6a-be32-4dc1-ad13-f9520388c904:metrics_342a4e6a-be32-4dc1-ad13-f9520388c904_0_index_pattern",
+      "type": "index-pattern"
+    },
+    {
+      "id": "6c9f3830-01e3-11eb-9b63-176d7b28a352",
+      "name": "f8f7f5b5-b840-443c-a766-d22a8a87c493:panel_f8f7f5b5-b840-443c-a766-d22a8a87c493",
+      "type": "visualization"
+    }
+  ],
+  "type": "dashboard",
+  "updated_at": "2022-08-23T13:30:58.587Z",
+  "version": "WzE4NSwxXQ=="
+}

@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './management_app.scss';
-
 import React, { useState, useEffect, useCallback } from 'react';
 import type { BehaviorSubject, Observable } from 'rxjs';
 
@@ -40,6 +38,8 @@ export interface ManagementAppDependencies {
   sections: SectionsServiceStart;
   kibanaVersion: string;
   coreStart: CoreStart;
+  cloud?: { isCloudEnabled: boolean; baseUrl?: string };
+  hasEnterpriseLicense: boolean;
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
   isSidebarEnabled$: BehaviorSubject<boolean>;
   cardsNavigationConfig$: BehaviorSubject<NavigationCardsSubject>;
@@ -111,6 +111,8 @@ export const ManagementApp = ({ dependencies, history, appBasePath }: Management
     kibanaVersion: dependencies.kibanaVersion,
     coreStart,
     chromeStyle,
+    cloud: dependencies.cloud,
+    hasEnterpriseLicense: dependencies.hasEnterpriseLicense,
   };
 
   return (

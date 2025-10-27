@@ -17,5 +17,6 @@
     "@kbn/utility-types",
     "@kbn/core-pricing-server",
     "@kbn/core-pricing-server-internal",
+    "@kbn/lazy-object",
   ]
 }

@@ -99,11 +99,27 @@ export async function ensurePreconfiguredPackagesAndPolicies(
       : pkg
   );
 
+  const rolledBackPackages: string[] = [];
+  const packagesToInstallNotRolledBack: typeof packagesToInstall = [];
+
+  for (const packageToInstall of packagesToInstall) {
+    const installation = await getInstallation({
+      savedObjectsClient: defaultSoClient,
+      pkgName: packageToInstall.name,
+    });
+    if (installation?.rolled_back) {
+      rolledBackPackages.push(packageToInstall.name);
+      logger.info(`Skip installing ${packageToInstall.name} because it was rolled back`);
+    } else {
+      packagesToInstallNotRolledBack.push(packageToInstall);
+    }
+  }
+
   // Preinstall packages specified in Kibana config
   const preconfiguredPackages = await bulkInstallPackages({
     savedObjectsClient: defaultSoClient,
     esClient,
-    packagesToInstall,
+    packagesToInstall: packagesToInstallNotRolledBack,
     force: true, // Always force outdated packages to be installed if a later version isn't installed
     skipIfInstalled: true, // force flag alone would reinstall packages that are already installed
     spaceId,

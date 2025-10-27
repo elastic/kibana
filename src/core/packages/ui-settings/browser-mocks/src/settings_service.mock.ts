@@ -9,15 +9,13 @@
 
 import { clientMock } from './client.mock';
 import { serviceContractMock } from './service_contract.mock';
+import { lazyObject } from '@kbn/lazy-object';
 
 const createSetupContractMock = () => {
-  const client = clientMock();
-  const globalClient = clientMock();
-
-  return {
-    client,
-    globalClient,
-  };
+  return lazyObject({
+    client: clientMock(),
+    globalClient: clientMock(),
+  });
 };
 
 const createMock = () => {

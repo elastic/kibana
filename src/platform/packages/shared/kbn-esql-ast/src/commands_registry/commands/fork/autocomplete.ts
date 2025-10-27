@@ -7,14 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import type { ESQLCommand } from '../../../types';
+import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
+import type { ESQLAstAllCommands, ESQLCommand } from '../../../types';
 import { pipeCompleteItem, getCommandAutocompleteDefinitions } from '../../complete_items';
 import { pipePrecedesCurrentWord } from '../../../definitions/utils/shared';
 import type { ICommandCallbacks } from '../../types';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
-import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { esqlCommandRegistry } from '../..';
-import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
 
 // ToDo: this is hardcoded, we should find a better way to take care of the fork commands
 const FORK_AVAILABLE_COMMANDS = [
@@ -38,10 +37,10 @@ const FORK_AVAILABLE_COMMANDS = [
 
 export async function autocomplete(
   query: string,
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
-  cursorPosition?: number
+  cursorPosition: number = query.length
 ): Promise<ISuggestionItem[]> {
   const innerText = query.substring(0, cursorPosition);
   if (/FORK\s+$/i.test(innerText)) {
@@ -73,23 +72,19 @@ export async function autocomplete(
     return [];
   }
 
-  const functionsSpecificSuggestions = await getInsideFunctionsSuggestions(
-    innerText,
-    cursorPosition,
-    callbacks,
-    context
-  );
-  if (functionsSpecificSuggestions) {
-    return functionsSpecificSuggestions;
-  }
-
   const subCommandMethods = esqlCommandRegistry.getCommandMethods(subCommand.name);
   return (
-    subCommandMethods?.autocomplete(innerText, subCommand as ESQLCommand, callbacks, context) || []
+    subCommandMethods?.autocomplete(
+      innerText,
+      subCommand as ESQLCommand,
+      callbacks,
+      context,
+      cursorPosition
+    ) || []
   );
 }
 
-const newBranchSuggestion: ISuggestionItem = {
+const newBranchSuggestion: ISuggestionItem = withAutoSuggest({
   kind: 'Issue',
   label: i18n.translate('kbn-esql-ast.esql.suggestions.newBranchLabel', {
     defaultMessage: 'New branch',
@@ -99,10 +94,9 @@ const newBranchSuggestion: ISuggestionItem = {
   }),
   text: '($0)',
   asSnippet: true,
-  command: TRIGGER_SUGGESTION_COMMAND,
-};
+});
 
-const getActiveBranch = (command: ESQLCommand) => {
+const getActiveBranch = (command: ESQLAstAllCommands) => {
   const finalBranch = command.args[command.args.length - 1];
 
   if (Array.isArray(finalBranch) || finalBranch.type !== 'query') {
