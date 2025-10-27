@@ -84,14 +84,14 @@ export class SearchSessionEBTManager {
 
   public trackBgsError({ session, error }: { session: SearchSessionSavedObject; error: Error }) {
     const errorType = 'attributes' in error ? (error as any).attributes.error?.type : '';
-    const httpStatus = 'attributes' in error ? (error as any).attributes.rawResponse?.status : -1;
+    const httpStatus = this.getHttpStatus(error) ?? -1;
 
     this.reportEvent(BG_SEARCH_ERROR, {
       query_lang: this.getQueryLanguage(
         session.attributes.restoreState?.query as Query | AggregateQuery | undefined
       ),
       session_id: session.id,
-      error_type: errorType,
+      error_type: errorType ?? '',
       http_status: httpStatus,
     });
   }
@@ -125,6 +125,16 @@ export class SearchSessionEBTManager {
     this.reportEvent(BG_SEARCH_LIST_VIEW, {
       entry_point: entryPoint,
     });
+  }
+
+  private getHttpStatus(error: Error) {
+    if ('statusCode' in error) {
+      return error.statusCode;
+    }
+    if ('attributes' in error) {
+      return (error as any).attributes.rawResponse?.status;
+    }
+    return -1;
   }
 
   private getResultsCount(
