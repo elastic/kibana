@@ -32,7 +32,7 @@ export interface BaseVmCreateOptions {
   memory?: string;
 }
 
-type CreateVmOptions =
+export type CreateVmOptions =
   | CreateMultipassVmOptions
   | CreateVagrantVmOptions
   | CreateUtmVmOptions;
@@ -256,8 +256,12 @@ const createUtmVm = async ({
     if (listTest.stderr && listTest.stderr.includes('does not work from SSH')) {
       throw new Error('SSH_DETECTED');
     }
-  } catch (e: any) {
-    if (e.message === 'SSH_DETECTED' || (e.stderr && e.stderr.includes('OSStatus error -1743'))) {
+  } catch (e: unknown) {
+    const error = e as Error & { stderr?: string };
+    if (
+      error.message === 'SSH_DETECTED' ||
+      (error.stderr && error.stderr.includes('OSStatus error -1743'))
+    ) {
       throw new Error(
         'UTM requires GUI access and does not work from SSH sessions or tmux/screen.\n\n' +
           'Please run this script from a local terminal (Terminal.app) on your Mac.'
@@ -398,9 +402,10 @@ export const createUtmHostVmClient = (
       execResponse = await execa(UTMCTL_PATH, execArgs, {
         maxBuffer: MAX_BUFFER,
       });
-    } catch (e: any) {
+    } catch (e: unknown) {
+      const error = e as Error & { stderr?: string };
       // Check for QEMU Guest Agent not installed/running error
-      if (e.stderr && e.stderr.includes('OSStatus error -2700')) {
+      if (error.stderr && error.stderr.includes('OSStatus error -2700')) {
         throw new Error(
           `QEMU Guest Agent is not installed or not running in VM '${name}'.\n\n` +
             `The guest agent is REQUIRED for UTM to execute commands and transfer files.\n\n` +
@@ -512,8 +517,9 @@ export const createUtmHostVmClient = (
           return exec(deleteCmd);
         },
       };
-    } catch (e: any) {
-      if (e.stderr && e.stderr.includes('OSStatus error -2700')) {
+    } catch (e: unknown) {
+      const error = e as Error & { stderr?: string };
+      if (error.stderr && error.stderr.includes('OSStatus error -2700')) {
         throw new Error(
           `QEMU Guest Agent is not running in VM '${name}'. ` +
             `Guest agent is required for file operations. ` +
@@ -551,8 +557,9 @@ export const createUtmHostVmClient = (
           });
         },
       };
-    } catch (e: any) {
-      if (e.stderr && e.stderr.includes('OSStatus error -2700')) {
+    } catch (e: unknown) {
+      const error = e as Error & { stderr?: string };
+      if (error.stderr && error.stderr.includes('OSStatus error -2700')) {
         throw new Error(
           `QEMU Guest Agent is not running in VM '${name}'. ` +
             `Guest agent is required for file operations. ` +
@@ -946,12 +953,13 @@ export const findVm = async (
               }
             }),
       };
-    } catch (e: any) {
-      if (e.stderr && e.stderr.includes('OSStatus error -1743')) {
+    } catch (e: unknown) {
+      const error = e as Error & { stderr?: string };
+      if (error.stderr && error.stderr.includes('OSStatus error -1743')) {
         log.warning('UTM requires GUI access. Returning empty VM list.');
         return { data: [] };
       }
-      log.error(`Error listing UTM VMs: ${e.message}`);
+      log.error(`Error listing UTM VMs: ${error.message}`);
       return { data: [] };
     }
   }
@@ -970,15 +978,14 @@ export const findVm = async (
       for (const line of lines) {
         if (line.includes('----')) {
           inDataSection = true;
-          continue;
-        }
-        if (!inDataSection || !line.trim()) continue;
-        if (line.includes('The above shows information about all known Vagrant')) break;
-
-        const parts = line.trim().split(/\s+/);
-        if (parts.length >= 4) {
-          const vmName = parts[1]; // Second column is name
-          vmNames.push(vmName);
+        } else if (line.includes('The above shows information about all known Vagrant')) {
+          break;
+        } else if (inDataSection && line.trim()) {
+          const parts = line.trim().split(/\s+/);
+          if (parts.length >= 4) {
+            const vmName = parts[1]; // Second column is name
+            vmNames.push(vmName);
+          }
         }
       }
 
@@ -995,8 +1002,9 @@ export const findVm = async (
               }
             }),
       };
-    } catch (e: any) {
-      log.error(`Error listing Vagrant VMs: ${e.message}`);
+    } catch (e: unknown) {
+      const error = e as Error;
+      log.error(`Error listing Vagrant VMs: ${error.message}`);
       return { data: [] };
     }
   }

@@ -18,6 +18,7 @@ import {
   generateVmName,
   findVm,
   getHostVmClient,
+  type CreateVmOptions,
 } from '../common/vm_services';
 import {
   createAgentPolicy,
@@ -64,7 +65,18 @@ To add more VMs, simply increase --vmCount (e.g., from 2 to 5 creates 3 more).
 Fleet Server starts automatically if not running.
 Use --verbose to see detailed logs for every operation.`,
     flags: {
-      string: ['kibanaUrl', 'username', 'password', 'version', 'vmName', 'apiKey', 'vmType', 'vmOs', 'vmArch', 'templateVm'],
+      string: [
+        'kibanaUrl',
+        'username',
+        'password',
+        'version',
+        'vmName',
+        'apiKey',
+        'vmType',
+        'vmOs',
+        'vmArch',
+        'templateVm',
+      ],
       number: ['vmCount'],
       boolean: ['verbose', 'staging'],
       default: {
@@ -195,7 +207,9 @@ const runCli: RunFn = async ({ log, flags }) => {
         }
       }
       for (const vmName of matchingVmNames) {
-        existingVms.push(getHostVmClient(vmName, vmType, undefined, log, vmOs as 'windows' | 'darwin'));
+        existingVms.push(
+          getHostVmClient(vmName, vmType, undefined, log, vmOs as 'windows' | 'darwin')
+        );
       }
       if (verbose) {
         log.info(`${EMOJIS.INFO} These VMs will be reused\n`);
@@ -304,19 +318,30 @@ const runCli: RunFn = async ({ log, flags }) => {
           log.info(`${EMOJIS.VM} VM ${vmIndex}/${vmCount}: Creating new VM: ${vmName}`);
         }
 
-        const vmOptions: any = {
-          type: vmType,
-          name: vmName,
-          cpus: 1,
-          memory: '1G',
-          disk: '8G',
-          log,
-        };
+        // Build VM options based on type
+        let vmOptions: CreateVmOptions;
 
-        // Add UTM-specific options
         if (vmType === 'utm') {
-          vmOptions.os = vmOs;
-          vmOptions.templateVm = templateVm;
+          vmOptions = {
+            type: vmType,
+            name: vmName,
+            cpus: 1,
+            memory: '1G',
+            disk: '8G',
+            log,
+            os: vmOs,
+            templateVm,
+          };
+        } else {
+          // For non-UTM types (multipass, vagrant), construct appropriate options
+          vmOptions = {
+            type: vmType as 'multipass',
+            name: vmName,
+            cpus: 1,
+            memory: '1G',
+            disk: '8G',
+            log,
+          };
         }
 
         const vm = await createVm(vmOptions);
