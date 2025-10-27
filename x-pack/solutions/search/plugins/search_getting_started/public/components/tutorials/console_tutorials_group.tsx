@@ -117,7 +117,7 @@ export const ConsoleTutorialsGroup = () => {
                 footer={
                   <TryInConsoleButton
                     type="button"
-                    iconType={`${assetBasePath}/command_line.svg`}
+                    iconType={`${assetBasePath}/command_line.svg`} // TODO: Replace with EUI icon when it's available
                     color="text"
                     request={tutorial.request}
                     application={application}
