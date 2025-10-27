@@ -7,6 +7,7 @@
 
 import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
 import type { ESQLColumn } from '@kbn/es-types';
+import type { DataView } from '@kbn/data-plugin/common';
 import type { FIELD_ORIGIN } from '../../../common/constants';
 import type { IField } from './field';
 import { AbstractField } from './field';
@@ -56,7 +57,13 @@ export class ESQLField extends AbstractField implements IField {
   }
 
   async createTooltipProperty(value: string | string[] | undefined): Promise<ITooltipProperty> {
-    const dataView = await this._source.getIndexPattern();
+    let dataView: DataView | undefined;
+    try {
+      dataView = await this._source.getIndexPattern();
+    } catch (e) {
+      // fall back to displaying raw feature properties in tooltip
+      // when unable to create adhoc data view
+    }
     const tooltipProperty = new TooltipProperty(this.getName(), this.getName(), value);
     return dataView?.getFieldByName(this.getName()) !== undefined
       ? new ESTooltipProperty(
