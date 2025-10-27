@@ -3465,6 +3465,18 @@
                 "path": "x-pack/platform/plugins/shared/global_search/server/routes/get_searchable_types.ts"
               },
               {
+                "plugin": "console",
+                "path": "src/platform/plugins/shared/console/server/routes/api/console/es_config/index.ts"
+              },
+              {
+                "plugin": "console",
+                "path": "src/platform/plugins/shared/console/server/routes/api/console/spec_definitions/index.ts"
+              },
+              {
+                "plugin": "console",
+                "path": "src/platform/plugins/shared/console/server/routes/api/console/autocomplete_entities/index.ts"
+              },
+              {
                 "plugin": "indexManagement",
                 "path": "x-pack/platform/plugins/shared/index_management/server/routes/api/component_templates/register_get_route.ts"
               },
@@ -3642,7 +3654,7 @@
               },
               {
                 "plugin": "reporting",
-                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/management/scheduled.ts"
+                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/scheduled_reports/list/index.ts"
               },
               {
                 "plugin": "reporting",
@@ -3886,7 +3898,11 @@
               },
               {
                 "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/get_workflow_stats.ts"
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/get_connectors.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/get_step_execution.ts"
               },
               {
                 "plugin": "workflowsManagement",
@@ -3898,14 +3914,6 @@
               },
               {
                 "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/get_connectors.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/get_workflow_executions.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
                 "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/get_workflow_execution_by_id.ts"
               },
               {
@@ -3914,11 +3922,15 @@
               },
               {
                 "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/get_step_execution.ts"
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/get_workflow_executions.ts"
               },
               {
                 "plugin": "workflowsManagement",
                 "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/get_workflow_json_schema.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/get_workflow_stats.ts"
               },
               {
                 "plugin": "onechat",
@@ -4487,18 +4499,6 @@
               {
                 "plugin": "interactiveSetup",
                 "path": "src/platform/plugins/private/interactive_setup/server/routes/status.ts"
-              },
-              {
-                "plugin": "console",
-                "path": "src/platform/plugins/shared/console/server/routes/api/console/es_config/index.ts"
-              },
-              {
-                "plugin": "console",
-                "path": "src/platform/plugins/shared/console/server/routes/api/console/spec_definitions/index.ts"
-              },
-              {
-                "plugin": "console",
-                "path": "src/platform/plugins/shared/console/server/routes/api/console/autocomplete_entities/index.ts"
               },
               {
                 "plugin": "cps",
@@ -5461,78 +5461,6 @@
                 "path": "src/platform/plugins/shared/saved_objects_management/server/routes/index.test.ts"
               },
               {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.test.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.test.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.test.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.test.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.test.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.test.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.test.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.test.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.test.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.test.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.test.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.test.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.test.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.test.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.test.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.test.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.test.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.test.ts"
-              },
-              {
                 "plugin": "console",
                 "path": "src/platform/plugins/shared/console/server/routes/api/console/es_config/index.test.ts"
               },
@@ -6421,6 +6349,14 @@
                 "path": "x-pack/platform/plugins/shared/global_search/server/routes/find.ts"
               },
               {
+                "plugin": "console",
+                "path": "src/platform/plugins/shared/console/server/routes/api/console/proxy/index.ts"
+              },
+              {
+                "plugin": "console",
+                "path": "src/platform/plugins/shared/console/server/routes/api/console/convert_request_to_language/index.ts"
+              },
+              {
                 "plugin": "indexManagement",
                 "path": "x-pack/platform/plugins/shared/index_management/server/routes/api/component_templates/register_create_route.ts"
               },
@@ -6598,7 +6534,7 @@
               },
               {
                 "plugin": "reporting",
-                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/schedule/schedule_from_jobparams.ts"
+                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/scheduled_reports/create/index.ts"
               },
               {
                 "plugin": "reporting",
@@ -6774,7 +6710,11 @@
               },
               {
                 "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/post_search_workflows.ts"
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/post_cancel_workflow_execution.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/post_clone_workflow.ts"
               },
               {
                 "plugin": "workflowsManagement",
@@ -6786,11 +6726,7 @@
               },
               {
                 "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/post_clone_workflow.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/post_test_workflow.ts"
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/post_search_workflows.ts"
               },
               {
                 "plugin": "workflowsManagement",
@@ -6798,7 +6734,7 @@
               },
               {
                 "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/post_cancel_workflow_execution.ts"
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/post_test_workflow.ts"
               },
               {
                 "plugin": "onechat",
@@ -7333,14 +7269,6 @@
                 "path": "src/platform/plugins/private/interactive_setup/server/routes/verify.ts"
               },
               {
-                "plugin": "console",
-                "path": "src/platform/plugins/shared/console/server/routes/api/console/proxy/index.ts"
-              },
-              {
-                "plugin": "console",
-                "path": "src/platform/plugins/shared/console/server/routes/api/console/convert_request_to_language/index.ts"
-              },
-              {
                 "plugin": "contentManagement",
                 "path": "src/platform/plugins/shared/content_management/server/plugin.test.ts"
               },
@@ -7854,14 +7782,6 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_edit/bulk_edit_rules_route.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_edit/bulk_edit_rules_route.test.ts"
-              },
-              {
-                "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_untrack/bulk_untrack_alerts_route.test.ts"
               },
               {
@@ -8118,7 +8038,7 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/internal/finish/finish_maintenance_window_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/internal/create/create_maintenance_window_route.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -8131,6 +8051,14 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/internal/finish/finish_maintenance_window_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/internal/finish/finish_maintenance_window_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/internal/update/update_maintenance_window_route.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -8259,62 +8187,6 @@
               {
                 "plugin": "share",
                 "path": "src/platform/plugins/shared/share/server/unused_urls_task/register_delete_unused_urls_route.test.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.test.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.test.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.test.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.test.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.test.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.test.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.test.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.test.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.test.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.test.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.test.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.test.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.test.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.test.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -8670,6 +8542,10 @@
               },
               {
                 "plugin": "reporting",
+                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/scheduled_reports/update/index.ts"
+              },
+              {
+                "plugin": "reporting",
                 "path": "x-pack/platform/plugins/private/reporting/server/test_helpers/create_mock_reportingplugin.ts"
               },
               {
@@ -8977,14 +8853,6 @@
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/update/update_rule_route.test.ts"
               },
               {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.test.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.test.ts"
-              },
-              {
                 "plugin": "indexManagement",
                 "path": "x-pack/platform/plugins/shared/index_management/server/test/helpers/router_mock.ts"
               },
@@ -9142,7 +9010,7 @@
               },
               {
                 "plugin": "reporting",
-                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/management/scheduled.ts"
+                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/scheduled_reports/bulk_disable/index.ts"
               },
               {
                 "plugin": "reporting",
@@ -9474,6 +9342,10 @@
               },
               {
                 "plugin": "reporting",
+                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/scheduled_reports/bulk_delete/index.ts"
+              },
+              {
+                "plugin": "reporting",
                 "path": "x-pack/platform/plugins/private/reporting/server/routes/public/jobs.ts"
               },
               {
@@ -9743,22 +9615,6 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/unsnooze/external/unsnooze_rule_route.test.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.test.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.test.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.test.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.test.ts"
               },
               {
                 "plugin": "indexManagement",
@@ -17004,6 +16860,10 @@
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/users/suggest.ts"
               },
               {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/test_internal/update_anonymization_fields_route.ts"
+              },
+              {
                 "plugin": "lists",
                 "path": "x-pack/solutions/security/plugins/lists/server/routes/create_endpoint_list_item_route.ts"
               },
@@ -17278,6 +17138,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/migrations/routes/run_migrations.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_details/routes/entity_details_highlight.ts"
               },
               {
                 "plugin": "securitySolution",

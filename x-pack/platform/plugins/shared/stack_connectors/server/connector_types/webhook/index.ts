@@ -88,8 +88,8 @@ function renderParameterTemplates(
   };
 }
 
-function methodExpectsBody({ method, data }: { method: WebhookMethods; data?: string }): Boolean {
-  return ![WebhookMethods.GET, WebhookMethods.DELETE].includes(method) && data !== undefined;
+function methodExpectsBody({ method }: { method: WebhookMethods }): Boolean {
+  return ![WebhookMethods.GET, WebhookMethods.DELETE].includes(method);
 }
 
 // action executor
@@ -138,7 +138,7 @@ export async function executor(
       url,
       logger,
       headers,
-      data: methodExpectsBody({ method, data }) ? data : undefined,
+      data: methodExpectsBody({ method }) ? data : undefined,
       configurationUtilities,
       sslOverrides,
       connectorUsageCollector,

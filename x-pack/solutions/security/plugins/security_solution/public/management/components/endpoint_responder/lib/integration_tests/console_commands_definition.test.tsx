@@ -88,7 +88,6 @@ describe('When displaying Endpoint Response Actions', () => {
   describe('for agent type sentinel_one', () => {
     beforeEach(() => {
       (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
-        responseActionsCrowdstrikeManualHostIsolationEnabled: true,
         responseActionsSentinelOneV1Enabled: true,
         responseActionsSentinelOneRunScriptEnabled: true,
       });
@@ -148,7 +147,6 @@ describe('When displaying Endpoint Response Actions', () => {
   describe('for agent type crowdstrike', () => {
     beforeEach(() => {
       (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
-        responseActionsCrowdstrikeManualHostIsolationEnabled: true,
         crowdstrikeRunScriptEnabled: true,
       });
       commands = getEndpointConsoleCommands({
@@ -183,10 +181,6 @@ describe('When displaying Endpoint Response Actions', () => {
 
   describe('for agent type microsoft defender for endpoint', () => {
     beforeEach(() => {
-      (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
-        responseActionsMSDefenderEndpointEnabled: true,
-      });
-
       commands = getEndpointConsoleCommands({
         agentType: 'microsoft_defender_endpoint',
         endpointAgentId: '123',
@@ -220,7 +214,6 @@ describe('When displaying Endpoint Response Actions', () => {
       describe('when microsoftDefenderEndpointCancelEnabled is true', () => {
         beforeEach(() => {
           (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
-            responseActionsMSDefenderEndpointEnabled: true,
             microsoftDefenderEndpointCancelEnabled: true,
           });
         });
@@ -229,7 +222,6 @@ describe('When displaying Endpoint Response Actions', () => {
           {
             agentType: 'microsoft_defender_endpoint' as const,
             flags: {
-              responseActionsMSDefenderEndpointEnabled: true,
               microsoftDefenderEndpointCancelEnabled: true,
             },
             hasAction: true,
@@ -310,7 +302,6 @@ describe('When displaying Endpoint Response Actions', () => {
       describe('when microsoftDefenderEndpointCancelEnabled is false', () => {
         beforeEach(() => {
           (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
-            responseActionsMSDefenderEndpointEnabled: true,
             microsoftDefenderEndpointCancelEnabled: false,
           });
         });
